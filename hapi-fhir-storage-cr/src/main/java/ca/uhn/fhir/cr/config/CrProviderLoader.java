@@ -39,7 +39,10 @@ public class CrProviderLoader {
 	private final ResourceProviderFactory myResourceProviderFactory;
 	private final CrProviderFactory myCqlProviderFactory;
 
-	public CrProviderLoader(FhirContext theFhirContext, ResourceProviderFactory theResourceProviderFactory, CrProviderFactory theCqlProviderFactory) {
+	public CrProviderLoader(
+			FhirContext theFhirContext,
+			ResourceProviderFactory theResourceProviderFactory,
+			CrProviderFactory theCqlProviderFactory) {
 		myFhirContext = theFhirContext;
 		myResourceProviderFactory = theResourceProviderFactory;
 		myCqlProviderFactory = theCqlProviderFactory;
@@ -54,7 +57,8 @@ public class CrProviderLoader {
 				myResourceProviderFactory.addSupplier(() -> myCqlProviderFactory.getMeasureOperationsProvider());
 				break;
 			default:
-				throw new ConfigurationException(Msg.code(1653) + "CQL not supported for FHIR version " + myFhirContext.getVersion().getVersion());
+				throw new ConfigurationException(Msg.code(1653) + "CQL not supported for FHIR version "
+						+ myFhirContext.getVersion().getVersion());
 		}
 	}
 }

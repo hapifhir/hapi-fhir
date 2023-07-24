@@ -29,12 +29,11 @@ public class FhirPathExecutionException extends InternalErrorException {
 
 	private static final long serialVersionUID = 1L;
 
-	public FhirPathExecutionException(Throwable theCause) {
-		super(theCause);
+	public FhirPathExecutionException(String theMessage, Throwable theCause) {
+		super(theMessage, theCause);
 	}
 
 	public FhirPathExecutionException(String theMessage) {
 		super(theMessage);
 	}
-
 }

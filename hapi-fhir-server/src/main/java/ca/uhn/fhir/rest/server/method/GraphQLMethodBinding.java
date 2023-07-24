@@ -36,14 +36,14 @@ import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
-import javax.annotation.Nonnull;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.Writer;
 import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.Set;
+import javax.annotation.Nonnull;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 public class GraphQLMethodBinding extends OperationMethodBinding {
 
@@ -52,8 +52,22 @@ public class GraphQLMethodBinding extends OperationMethodBinding {
 	private final Integer myQueryBodyParamIndex;
 	private final RequestTypeEnum myMethodRequestType;
 
-	public GraphQLMethodBinding(Method theMethod, RequestTypeEnum theMethodRequestType, FhirContext theContext, Object theProvider) {
-		super(null, null, theMethod, theContext, theProvider, true, false, Constants.OPERATION_NAME_GRAPHQL, null, null, null, null, true);
+	public GraphQLMethodBinding(
+			Method theMethod, RequestTypeEnum theMethodRequestType, FhirContext theContext, Object theProvider) {
+		super(
+				null,
+				null,
+				theMethod,
+				theContext,
+				theProvider,
+				true,
+				false,
+				Constants.OPERATION_NAME_GRAPHQL,
+				null,
+				null,
+				null,
+				null,
+				true);
 
 		myIdParamIndex = ParameterUtil.findIdParameterIndex(theMethod, theContext);
 		myQueryUrlParamIndex = ParameterUtil.findParamAnnotationIndex(theMethod, GraphQLQueryUrl.class);
@@ -99,7 +113,8 @@ public class GraphQLMethodBinding extends OperationMethodBinding {
 
 	@Override
 	public MethodMatchEnum incomingServerRequestMatchesMethod(RequestDetails theRequest) {
-		if (Constants.OPERATION_NAME_GRAPHQL.equals(theRequest.getOperation()) && myMethodRequestType.equals(theRequest.getRequestType())) {
+		if (Constants.OPERATION_NAME_GRAPHQL.equals(theRequest.getOperation())
+				&& myMethodRequestType.equals(theRequest.getRequestType())) {
 			return MethodMatchEnum.EXACT;
 		}
 
@@ -109,17 +124,22 @@ public class GraphQLMethodBinding extends OperationMethodBinding {
 	private String getQueryValue(Object[] methodParams) {
 		switch (myMethodRequestType) {
 			case POST:
-				Validate.notNull(myQueryBodyParamIndex, "GraphQL method does not have @" + GraphQLQueryBody.class.getSimpleName() + " parameter");
+				Validate.notNull(
+						myQueryBodyParamIndex,
+						"GraphQL method does not have @" + GraphQLQueryBody.class.getSimpleName() + " parameter");
 				return (String) methodParams[myQueryBodyParamIndex];
 			case GET:
-				Validate.notNull(myQueryUrlParamIndex, "GraphQL method does not have @" + GraphQLQueryUrl.class.getSimpleName() + " parameter");
+				Validate.notNull(
+						myQueryUrlParamIndex,
+						"GraphQL method does not have @" + GraphQLQueryUrl.class.getSimpleName() + " parameter");
 				return (String) methodParams[myQueryUrlParamIndex];
 		}
 		return null;
 	}
 
 	@Override
-	public Object invokeServer(IRestfulServer<?> theServer, RequestDetails theRequest) throws BaseServerResponseException, IOException {
+	public Object invokeServer(IRestfulServer<?> theServer, RequestDetails theRequest)
+			throws BaseServerResponseException, IOException {
 		Object[] methodParams = createMethodParams(theRequest);
 		if (myIdParamIndex != null) {
 			methodParams[myIdParamIndex] = theRequest.getId();
@@ -143,24 +163,24 @@ public class GraphQLMethodBinding extends OperationMethodBinding {
 		String graphQLQuery = getQueryValue(methodParams);
 		// Interceptor call: SERVER_OUTGOING_GRAPHQL_RESPONSE
 		HookParams params = new HookParams()
-			.add(RequestDetails.class, theRequest)
-			.addIfMatchesType(ServletRequestDetails.class, theRequest)
-			.add(String.class, graphQLQuery)
-			.add(String.class, responseString)
-			.add(HttpServletRequest.class, servletRequest)
-			.add(HttpServletResponse.class, servletResponse);
+				.add(RequestDetails.class, theRequest)
+				.addIfMatchesType(ServletRequestDetails.class, theRequest)
+				.add(String.class, graphQLQuery)
+				.add(String.class, responseString)
+				.add(HttpServletRequest.class, servletRequest)
+				.add(HttpServletResponse.class, servletResponse);
 		if (!theRequest.getInterceptorBroadcaster().callHooks(Pointcut.SERVER_OUTGOING_GRAPHQL_RESPONSE, params)) {
 			return null;
 		}
 
 		// Interceptor call: SERVER_OUTGOING_RESPONSE
 		params = new HookParams()
-			.add(RequestDetails.class, theRequest)
-			.addIfMatchesType(ServletRequestDetails.class, theRequest)
-			.add(IBaseResource.class, null)
-			.add(ResponseDetails.class, new ResponseDetails())
-			.add(HttpServletRequest.class, servletRequest)
-			.add(HttpServletResponse.class, servletResponse);
+				.add(RequestDetails.class, theRequest)
+				.addIfMatchesType(ServletRequestDetails.class, theRequest)
+				.add(IBaseResource.class, null)
+				.add(ResponseDetails.class, new ResponseDetails())
+				.add(HttpServletRequest.class, servletRequest)
+				.add(HttpServletResponse.class, servletResponse);
 		if (!theRequest.getInterceptorBroadcaster().callHooks(Pointcut.SERVER_OUTGOING_RESPONSE, params)) {
 			return null;
 		}

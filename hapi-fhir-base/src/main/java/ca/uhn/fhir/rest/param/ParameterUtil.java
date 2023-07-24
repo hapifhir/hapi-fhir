@@ -123,7 +123,9 @@ public class ParameterUtil {
 			boolean isRi = theContext.getVersion().getVersion().isRi();
 			boolean usesHapiId = IdDt.class.equals(paramType);
 			if (isRi == usesHapiId) {
-				throw new ConfigurationException(Msg.code(1936) + "Method uses the wrong Id datatype (IdDt / IdType) for the given context FHIR version: " + theMethod.toString());
+				throw new ConfigurationException(Msg.code(1936)
+						+ "Method uses the wrong Id datatype (IdDt / IdType) for the given context FHIR version: "
+						+ theMethod.toString());
 			}
 		}
 		return index;
@@ -160,15 +162,11 @@ public class ParameterUtil {
 	}
 
 	public static boolean isBindableIntegerType(Class<?> theClass) {
-		return Integer.class.isAssignableFrom(theClass)
-			|| IPrimitiveType.class.isAssignableFrom(theClass);
+		return Integer.class.isAssignableFrom(theClass) || IPrimitiveType.class.isAssignableFrom(theClass);
 	}
 
 	public static String escapeAndJoinOrList(Collection<String> theValues) {
-		return theValues
-			.stream()
-			.map(ParameterUtil::escape)
-			.collect(Collectors.joining(","));
+		return theValues.stream().map(ParameterUtil::escape).collect(Collectors.joining(","));
 	}
 
 	public static int nonEscapedIndexOf(String theString, char theCharacter) {
@@ -189,8 +187,10 @@ public class ParameterUtil {
 			if (value.charAt(value.length() - 1) == '"') {
 				if (value.charAt(0) == '"') {
 					eTagVersion = value.substring(1, value.length() - 1);
-				} else if (value.length() > 3 && value.charAt(0) == 'W' && value.charAt(1) == '/'
-					&& value.charAt(2) == '"') {
+				} else if (value.length() > 3
+						&& value.charAt(0) == 'W'
+						&& value.charAt(1) == '/'
+						&& value.charAt(2) == '"') {
 					eTagVersion = value.substring(3, value.length() - 1);
 				} else {
 					eTagVersion = value;
@@ -215,16 +215,17 @@ public class ParameterUtil {
 			}
 
 			@Override
-			public void setValuesAsQueryTokens(FhirContext theContext, String theParamName,
-														  QualifiedParamList theParameters) {
+			public void setValuesAsQueryTokens(
+					FhirContext theContext, String theParamName, QualifiedParamList theParameters) {
 				if (theParameters.isEmpty()) {
 					return;
 				}
 				if (theParameters.size() > 1) {
-					throw new IllegalArgumentException(Msg.code(1937) + "Type " + theParam.getClass().getCanonicalName() + " does not support multiple values");
+					throw new IllegalArgumentException(Msg.code(1937) + "Type "
+							+ theParam.getClass().getCanonicalName() + " does not support multiple values");
 				}
-				theParam.setValueAsQueryToken(theContext, theParamName, theParameters.getQualifier(),
-					theParameters.get(0));
+				theParam.setValueAsQueryToken(
+						theContext, theParamName, theParameters.getQualifier(), theParameters.get(0));
 			}
 		};
 	}
@@ -325,6 +326,7 @@ public class ParameterUtil {
 	 * Returns true if the value is :iterate or :recurse (the former name of :iterate) for an _include parameter
 	 */
 	public static boolean isIncludeIterate(String theQualifier) {
-		return Constants.PARAM_INCLUDE_QUALIFIER_RECURSE.equals(theQualifier) || Constants.PARAM_INCLUDE_QUALIFIER_ITERATE.equals(theQualifier);
+		return Constants.PARAM_INCLUDE_QUALIFIER_RECURSE.equals(theQualifier)
+				|| Constants.PARAM_INCLUDE_QUALIFIER_ITERATE.equals(theQualifier);
 	}
 }

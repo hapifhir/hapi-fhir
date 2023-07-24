@@ -20,14 +20,13 @@
 package ca.uhn.fhir.rest.server.exceptions;
 
 import ca.uhn.fhir.i18n.Msg;
-import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
-import org.hl7.fhir.instance.model.api.IIdType;
-
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.base.composite.BaseIdentifierDt;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.util.CoverageIgnore;
+import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
+import org.hl7.fhir.instance.model.api.IIdType;
 
 /**
  * Represents an <b>HTTP 404 Resource Not Found</b> response, which means that the request is pointing to a resource that does not exist.
@@ -43,7 +42,8 @@ public class ResourceNotFoundException extends BaseServerResponseException {
 		super(STATUS_CODE, createErrorMessage(theClass, theId));
 	}
 
-	public ResourceNotFoundException(Class<? extends IResource> theClass, IdDt theId, IBaseOperationOutcome theOperationOutcome) {
+	public ResourceNotFoundException(
+			Class<? extends IResource> theClass, IdDt theId, IBaseOperationOutcome theOperationOutcome) {
 		super(STATUS_CODE, createErrorMessage(theClass, theId), theOperationOutcome);
 	}
 
@@ -51,13 +51,14 @@ public class ResourceNotFoundException extends BaseServerResponseException {
 		super(STATUS_CODE, createErrorMessage(theClass, theId));
 	}
 
-	public ResourceNotFoundException(Class<? extends IResource> theClass, IIdType theId, IBaseOperationOutcome theOperationOutcome) {
+	public ResourceNotFoundException(
+			Class<? extends IResource> theClass, IIdType theId, IBaseOperationOutcome theOperationOutcome) {
 		super(STATUS_CODE, createErrorMessage(theClass, theId), theOperationOutcome);
 	}
 
 	/**
 	 * Constructor
-	 * 
+	 *
 	 * @param theMessage
 	 *            The message
 	 *  @param theOperationOutcome The OperationOutcome resource to return to the client
@@ -90,12 +91,11 @@ public class ResourceNotFoundException extends BaseServerResponseException {
 		super(STATUS_CODE, theMessage);
 	}
 
-  private static String createErrorMessage(Class<? extends IResource> theClass, IIdType theId) {
+	private static String createErrorMessage(Class<? extends IResource> theClass, IIdType theId) {
 		return Msg.code(970) + "Resource of type " + theClass.getSimpleName() + " with ID " + theId + " is not known";
 	}
 
 	private static String createErrorMessage(IIdType theId) {
 		return Msg.code(971) + "Resource " + (theId != null ? theId.getValue() : "") + " is not known";
 	}
-
 }

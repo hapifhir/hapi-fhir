@@ -32,5 +32,4 @@ public class CollectionUtil {
 		}
 		return retVal;
 	}
-
 }

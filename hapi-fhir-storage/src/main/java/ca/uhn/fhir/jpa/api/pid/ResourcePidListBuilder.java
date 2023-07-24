@@ -81,7 +81,7 @@ public class ResourcePidListBuilder {
 		if (theCurrentEndDate == null) {
 			endDate = theChunk.getLastDate();
 		} else if (theChunk.getLastDate().after(endDate)
-			&& theChunk.getLastDate().before(thePassedInEndDate)) {
+				&& theChunk.getLastDate().before(thePassedInEndDate)) {
 			endDate = theChunk.getLastDate();
 		}
 		return endDate;

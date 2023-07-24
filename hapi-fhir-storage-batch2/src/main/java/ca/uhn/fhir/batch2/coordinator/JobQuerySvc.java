@@ -22,8 +22,8 @@ package ca.uhn.fhir.batch2.coordinator;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.JobInstance;
-import ca.uhn.fhir.batch2.models.JobInstanceFetchRequest;
 import ca.uhn.fhir.batch2.model.StatusEnum;
+import ca.uhn.fhir.batch2.models.JobInstanceFetchRequest;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.model.api.annotation.PasswordField;
@@ -34,12 +34,12 @@ import ca.uhn.fhir.util.UrlUtil;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.springframework.data.domain.Page;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 /**
  * Job Query services intended for end-users querying the status of jobs
@@ -53,16 +53,19 @@ class JobQuerySvc {
 		myJobDefinitionRegistry = theJobDefinitionRegistry;
 	}
 
+	@Nonnull
 	JobInstance fetchInstance(String theInstanceId) {
-		return myJobPersistence.fetchInstance(theInstanceId)
-			.map(this::massageInstanceForUserAccess)
-			.orElseThrow(() -> new ResourceNotFoundException(Msg.code(2040) + "Unknown instance ID: " + UrlUtil.escapeUrlParam(theInstanceId) + ". Please check if the input job ID is valid."));
+		return myJobPersistence
+				.fetchInstance(theInstanceId)
+				.map(this::massageInstanceForUserAccess)
+				.orElseThrow(() -> new ResourceNotFoundException(Msg.code(2040) + "Unknown instance ID: "
+						+ UrlUtil.escapeUrlParam(theInstanceId) + ". Please check if the input job ID is valid."));
 	}
 
 	List<JobInstance> fetchInstances(int thePageSize, int thePageIndex) {
 		return myJobPersistence.fetchInstances(thePageSize, thePageIndex).stream()
-			.map(this::massageInstanceForUserAccess)
-			.collect(Collectors.toList());
+				.map(this::massageInstanceForUserAccess)
+				.collect(Collectors.toList());
 	}
 
 	public Page<JobInstance> fetchAllInstances(JobInstanceFetchRequest theFetchRequest) {
@@ -75,8 +78,8 @@ class JobQuerySvc {
 
 	private List<JobInstance> massageInstancesForUserAccess(List<JobInstance> theFetchRecentInstances) {
 		return theFetchRecentInstances.stream()
-			.map(this::massageInstanceForUserAccess)
-			.collect(Collectors.toList());
+				.map(this::massageInstanceForUserAccess)
+				.collect(Collectors.toList());
 	}
 
 	private JobInstance massageInstanceForUserAccess(JobInstance theInstance) {
@@ -120,21 +123,24 @@ class JobQuerySvc {
 		}
 	}
 
-    public List<JobInstance> getInstancesByJobDefinitionIdAndEndedStatus(String theJobDefinitionId, @Nullable Boolean theEnded, int theCount, int theStart) {
-		 if (theEnded == null) {
-			 return myJobPersistence.fetchInstancesByJobDefinitionId(theJobDefinitionId, theCount, theStart);
-		 }
+	public List<JobInstance> getInstancesByJobDefinitionIdAndEndedStatus(
+			String theJobDefinitionId, @Nullable Boolean theEnded, int theCount, int theStart) {
+		if (theEnded == null) {
+			return myJobPersistence.fetchInstancesByJobDefinitionId(theJobDefinitionId, theCount, theStart);
+		}
 
-		 Set<StatusEnum> requestedStatus;
-		 if (theEnded) {
-			 requestedStatus = StatusEnum.getEndedStatuses();
-		 } else {
-			 requestedStatus = StatusEnum.getNotEndedStatuses();
-		 }
+		Set<StatusEnum> requestedStatus;
+		if (theEnded) {
+			requestedStatus = StatusEnum.getEndedStatuses();
+		} else {
+			requestedStatus = StatusEnum.getNotEndedStatuses();
+		}
 		return getInstancesByJobDefinitionAndStatuses(theJobDefinitionId, requestedStatus, theCount, theStart);
-    }
+	}
 
-    public List<JobInstance> getInstancesByJobDefinitionAndStatuses(String theJobDefinitionId, Set<StatusEnum> theStatuses, int theCount, int theStart) {
-		 return myJobPersistence.fetchInstancesByJobDefinitionIdAndStatus(theJobDefinitionId, theStatuses, theCount, theStart);
-	 }
+	public List<JobInstance> getInstancesByJobDefinitionAndStatuses(
+			String theJobDefinitionId, Set<StatusEnum> theStatuses, int theCount, int theStart) {
+		return myJobPersistence.fetchInstancesByJobDefinitionIdAndStatus(
+				theJobDefinitionId, theStatuses, theCount, theStart);
+	}
 }

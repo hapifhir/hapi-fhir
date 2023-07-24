@@ -32,7 +32,8 @@ import java.util.List;
 import java.util.Map;
 
 public class ServletRequestUtil {
-	public static ServletSubRequestDetails getServletSubRequestDetails(ServletRequestDetails theRequestDetails, String url, ArrayListMultimap<String, String> theParamValues) {
+	public static ServletSubRequestDetails getServletSubRequestDetails(
+			ServletRequestDetails theRequestDetails, String url, ArrayListMultimap<String, String> theParamValues) {
 		ServletSubRequestDetails requestDetails = new ServletSubRequestDetails(theRequestDetails);
 		requestDetails.setServletRequest(theRequestDetails.getServletRequest());
 		requestDetails.setRequestType(RequestTypeEnum.GET);
@@ -46,8 +47,11 @@ public class ServletRequestUtil {
 			for (NameValuePair next : parameters) {
 				theParamValues.put(next.getName(), next.getValue());
 			}
-			for (Map.Entry<String, Collection<String>> nextParamEntry : theParamValues.asMap().entrySet()) {
-				String[] nextValue = nextParamEntry.getValue().toArray(new String[nextParamEntry.getValue().size()]);
+			for (Map.Entry<String, Collection<String>> nextParamEntry :
+					theParamValues.asMap().entrySet()) {
+				String[] nextValue = nextParamEntry
+						.getValue()
+						.toArray(new String[nextParamEntry.getValue().size()]);
 				requestDetails.addParameter(nextParamEntry.getKey(), nextValue);
 			}
 			url = url.substring(0, qIndex);
@@ -66,7 +70,8 @@ public class ServletRequestUtil {
 
 	public static String extractUrl(ServletRequestDetails theRequestDetails) {
 		StringBuilder b = new StringBuilder();
-		for (Map.Entry<String, String[]> next : theRequestDetails.getParameters().entrySet()) {
+		for (Map.Entry<String, String[]> next :
+				theRequestDetails.getParameters().entrySet()) {
 			for (String nextValue : next.getValue()) {
 				if (b.length() == 0) {
 					b.append('?');

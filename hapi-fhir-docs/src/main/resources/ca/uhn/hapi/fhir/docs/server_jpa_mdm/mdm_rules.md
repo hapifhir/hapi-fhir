@@ -616,6 +616,46 @@ The following algorithms are currently supported:
             </td>
             <td></td>
         </tr>
+        <tr>
+            <td>NUMERIC_JARO_WINKLER</td>
+            <td>similarity</td>
+            <td>
+              Removes all non-numeric characters before applying <a href="https://github.com/tdebatty/java-string-similarity#jaro-winkler">tdebatty Jaro Winkler</a>          
+            </td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>NUMERIC_COSINE</td>
+            <td>similarity</td>
+            <td>
+              Removes all non-numeric characters before applying <a href="https://github.com/tdebatty/java-string-similarity#cosine-similarity">tdebatty Cosine Similarity</a>          
+            </td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>NUMERIC_JACCARD</td>
+            <td>similarity</td>
+            <td>
+              Removes all non-numeric characters before applying <a href="https://github.com/tdebatty/java-string-similarity#jaccard-index">tdebatty Jaccard Index</a>          
+            </td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>NUMERIC_LEVENSCHTEIN</td>
+            <td>similarity</td>
+            <td>
+              Removes all non-numeric characters before applying <a href="https://github.com/tdebatty/java-string-similarity#normalized-levenshtein">tdebatty Normalized Levenshtein</a>          
+            </td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>NUMERIC_SORENSEN_DICE</td>
+            <td>similarity</td>
+            <td>
+              Removes all non-numeric characters before applying <a href="https://github.com/tdebatty/java-string-similarity#sorensen-dice-coefficient">tdebatty Sorensen-Dice coefficient</a>          
+            </td>
+            <td></td>
+        </tr>
      </tbody>
 </table>
 

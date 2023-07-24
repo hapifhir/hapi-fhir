@@ -29,12 +29,11 @@ import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
 import ca.uhn.fhir.rest.server.IPagingProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
-import ca.uhn.fhir.rest.server.interceptor.ResponseValidatingInterceptor;
-import ca.uhn.fhir.validation.FhirValidator;
-import ca.uhn.fhir.validation.ResultSeverityEnum;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.time.DateUtils;
 import org.junit.jupiter.api.extension.ExtensionContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.servlet.http.HttpServlet;
 import java.util.ArrayList;
@@ -45,6 +44,7 @@ import java.util.Map;
 import java.util.function.Consumer;
 
 public class RestfulServerExtension extends BaseJettyServerExtension<RestfulServerExtension> {
+	private static final Logger ourLog = LoggerFactory.getLogger(RestfulServerExtension.class);
 	private FhirContext myFhirContext;
 	private List<Object> myProviders = new ArrayList<>();
 	private FhirVersionEnum myFhirVersion;
@@ -86,6 +86,8 @@ public class RestfulServerExtension extends BaseJettyServerExtension<RestfulServ
 
 		myFhirContext.getRestfulClientFactory().setSocketTimeout((int) (500 * DateUtils.MILLIS_PER_SECOND));
 		myFhirContext.getRestfulClientFactory().setServerValidationMode(myServerValidationMode);
+
+		ourLog.info("FHIR server has been started with base URL: {}", getBaseUrl());
 	}
 
 	@Override

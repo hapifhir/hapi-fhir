@@ -63,6 +63,7 @@ import static ca.uhn.fhir.util.HapiExtensions.EX_SEND_DELETE_MESSAGES;
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -123,6 +124,8 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 		myInterceptorRegistry.registerInterceptor(ourSubscriptionDebugLogInterceptor);
 		ourLog.info("After re-registering interceptors");
 		DaoTestUtils.logAllInterceptors(myInterceptorRegistry);
+
+		myStorageSettings.setOnlyAllowInMemorySubscriptions(new JpaStorageSettings().isOnlyAllowInMemorySubscriptions());
 	}
 
 	@BeforeEach
@@ -212,6 +215,19 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 		assertEquals(HapiExtensions.EXT_SUBSCRIPTION_MATCHING_STRATEGY, tag.get(0).getSystem());
 		assertEquals(SubscriptionMatchingStrategy.IN_MEMORY.toString(), tag.get(0).getCode());
 	}
+	@Test
+	public void testForcedInMemoryPreventsDatabaseSubscriptions() throws InterruptedException {
+		myStorageSettings.setOnlyAllowInMemorySubscriptions(true);
+		String databaseCriteria = "Observation?code=17861-6&context.type=IHD";
+		try {
+			createSubscription(databaseCriteria, null, ourNotificationListenerServer);
+		} catch (UnprocessableEntityException e) {
+			assertThat(e.getMessage(), is(containsString("HAPI-2367: This server is configured to only allow in-memory subscriptions.")));
+		}
+		myStorageSettings.setOnlyAllowInMemorySubscriptions(false);
+	}
+
+
 	@ParameterizedTest
 	@ValueSource(strings = {"[*]", "[Observation]", "Observation?"})
 	public void RestHookSubscriptionWithPayloadSendsDeleteRequest(String theCriteria) throws Exception {

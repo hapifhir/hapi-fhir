@@ -63,12 +63,12 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -77,24 +77,33 @@ public class InMemoryResourceMatcher {
 
 	public static final Set<String> UNSUPPORTED_PARAMETER_NAMES = Sets.newHashSet(Constants.PARAM_HAS);
 	private static final org.slf4j.Logger ourLog = LoggerFactory.getLogger(InMemoryResourceMatcher.class);
+
 	@Autowired
 	ApplicationContext myApplicationContext;
+
 	@Autowired
 	ISearchParamRegistry mySearchParamRegistry;
+
 	@Autowired
 	StorageSettings myStorageSettings;
+
 	@Autowired
 	FhirContext myFhirContext;
+
 	@Autowired
 	SearchParamExtractorService mySearchParamExtractorService;
+
 	@Autowired
 	IndexedSearchParamExtractor myIndexedSearchParamExtractor;
+
 	@Autowired
 	private MatchUrlService myMatchUrlService;
-	private ValidationSupportInitializationState validationSupportState = ValidationSupportInitializationState.NOT_INITIALIZED;
+
+	private ValidationSupportInitializationState validationSupportState =
+			ValidationSupportInitializationState.NOT_INITIALIZED;
 	private IValidationSupport myValidationSupport = null;
-	public InMemoryResourceMatcher() {
-	}
+
+	public InMemoryResourceMatcher() {}
 
 	/**
 	 * Lazy loads a {@link IValidationSupport} implementation just-in-time.
@@ -110,7 +119,9 @@ public class InMemoryResourceMatcher {
 				validationSupportState = ValidationSupportInitializationState.INITIALIZED;
 			} catch (BeansException | ConfigurationException ignore) {
 				// We couldn't get a validation support bean, and we don't want to waste cycles trying again
-				ourLog.warn(Msg.code(2100) + "No bean satisfying IValidationSupport could be initialized. Qualifiers dependent on IValidationSupport will not be supported.");
+				ourLog.warn(
+						Msg.code(2100)
+								+ "No bean satisfying IValidationSupport could be initialized. Qualifiers dependent on IValidationSupport will not be supported.");
 				validationSupportState = ValidationSupportInitializationState.FAILED;
 			}
 		}
@@ -121,31 +132,39 @@ public class InMemoryResourceMatcher {
 	 * @deprecated Use {@link #match(String, IBaseResource, ResourceIndexedSearchParams, RequestDetails)}
 	 */
 	@Deprecated
-	public InMemoryMatchResult match(String theCriteria, IBaseResource theResource, @Nullable ResourceIndexedSearchParams theIndexedSearchParams) {
+	public InMemoryMatchResult match(
+			String theCriteria,
+			IBaseResource theResource,
+			@Nullable ResourceIndexedSearchParams theIndexedSearchParams) {
 		return match(theCriteria, theResource, theIndexedSearchParams, null);
 	}
 
-
 	/**
-		 * This method is called in two different scenarios.  With a null theResource, it determines whether database matching might be required.
-		 * Otherwise, it tries to perform the match in-memory, returning UNSUPPORTED if it's not possible.
-		 * <p>
-		 * Note that there will be cases where it returns UNSUPPORTED with a null resource, but when a non-null resource it returns supported and no match.
-		 * This is because an earlier parameter may be matchable in-memory in which case processing stops and we never get to the parameter
-		 * that would have required a database call.
-		 *
-		 * @param theIndexedSearchParams If the search params have already been calculated for the given resource,
-		 *                               they can be passed in. Passing in {@literal null} is also fine, in which
-		 *                               case they will be calculated for the resource. It can be preferable to
-		 *                               pass in {@literal null} unless you already actually had to calculate the
-		 *                               indexes for another reason, since we can be efficient here and only calculate
-		 *                               the params that are actually relevant for the given search expression.
-		 */
-	public InMemoryMatchResult match(String theCriteria, IBaseResource theResource, @Nullable ResourceIndexedSearchParams theIndexedSearchParams, RequestDetails theRequestDetails) {
+	 * This method is called in two different scenarios.  With a null theResource, it determines whether database matching might be required.
+	 * Otherwise, it tries to perform the match in-memory, returning UNSUPPORTED if it's not possible.
+	 * <p>
+	 * Note that there will be cases where it returns UNSUPPORTED with a null resource, but when a non-null resource it returns supported and no match.
+	 * This is because an earlier parameter may be matchable in-memory in which case processing stops and we never get to the parameter
+	 * that would have required a database call.
+	 *
+	 * @param theIndexedSearchParams If the search params have already been calculated for the given resource,
+	 *                               they can be passed in. Passing in {@literal null} is also fine, in which
+	 *                               case they will be calculated for the resource. It can be preferable to
+	 *                               pass in {@literal null} unless you already actually had to calculate the
+	 *                               indexes for another reason, since we can be efficient here and only calculate
+	 *                               the params that are actually relevant for the given search expression.
+	 */
+	public InMemoryMatchResult match(
+			String theCriteria,
+			IBaseResource theResource,
+			@Nullable ResourceIndexedSearchParams theIndexedSearchParams,
+			RequestDetails theRequestDetails) {
 		RuntimeResourceDefinition resourceDefinition;
 		if (theResource == null) {
-			Validate.isTrue(!theCriteria.startsWith("?"), "Invalid match URL format (must match \"[resourceType]?[params]\")");
-			Validate.isTrue(theCriteria.contains("?"), "Invalid match URL format (must match \"[resourceType]?[params]\")");
+			Validate.isTrue(
+					!theCriteria.startsWith("?"), "Invalid match URL format (must match \"[resourceType]?[params]\")");
+			Validate.isTrue(
+					theCriteria.contains("?"), "Invalid match URL format (must match \"[resourceType]?[params]\")");
 			resourceDefinition = UrlUtil.parseUrlResourceType(myFhirContext, theCriteria);
 		} else {
 			resourceDefinition = myFhirContext.getResourceDefinition(theResource);
@@ -163,11 +182,11 @@ public class InMemoryResourceMatcher {
 			relevantSearchParams = theIndexedSearchParams;
 		} else if (theResource != null) {
 			// Don't index search params we don't actully need for the given criteria
-			ISearchParamExtractor.ISearchParamFilter filter = theSearchParams -> theSearchParams
-				.stream()
-				.filter(t -> searchParameterMap.containsKey(t.getName()))
-				.collect(Collectors.toList());
-			relevantSearchParams = myIndexedSearchParamExtractor.extractIndexedSearchParams(theResource, theRequestDetails, filter);
+			ISearchParamExtractor.ISearchParamFilter filter = theSearchParams -> theSearchParams.stream()
+					.filter(t -> searchParameterMap.containsKey(t.getName()))
+					.collect(Collectors.toList());
+			relevantSearchParams =
+					myIndexedSearchParamExtractor.extractIndexedSearchParams(theResource, theRequestDetails, filter);
 		}
 
 		return match(searchParameterMap, theResource, resourceDefinition, relevantSearchParams);
@@ -186,14 +205,20 @@ public class InMemoryResourceMatcher {
 	 * @param theResourceDefinition
 	 * @return result.supported() will be true if theSearchParameterMap can be evaluated in-memory
 	 */
-	public InMemoryMatchResult canBeEvaluatedInMemory(SearchParameterMap theSearchParameterMap, RuntimeResourceDefinition theResourceDefinition) {
+	public InMemoryMatchResult canBeEvaluatedInMemory(
+			SearchParameterMap theSearchParameterMap, RuntimeResourceDefinition theResourceDefinition) {
 		return match(theSearchParameterMap, null, theResourceDefinition, null);
 	}
 
 	@Nonnull
-	public InMemoryMatchResult match(SearchParameterMap theSearchParameterMap, IBaseResource theResource, RuntimeResourceDefinition theResourceDefinition, ResourceIndexedSearchParams theSearchParams) {
+	public InMemoryMatchResult match(
+			SearchParameterMap theSearchParameterMap,
+			IBaseResource theResource,
+			RuntimeResourceDefinition theResourceDefinition,
+			ResourceIndexedSearchParams theSearchParams) {
 		if (theSearchParameterMap.getLastUpdated() != null) {
-			return InMemoryMatchResult.unsupportedFromParameterAndReason(Constants.PARAM_LASTUPDATED, InMemoryMatchResult.STANDARD_PARAMETER);
+			return InMemoryMatchResult.unsupportedFromParameterAndReason(
+					Constants.PARAM_LASTUPDATED, InMemoryMatchResult.STANDARD_PARAMETER);
 		}
 		if (theSearchParameterMap.containsKey(Location.SP_NEAR)) {
 			return InMemoryMatchResult.unsupportedFromReason(InMemoryMatchResult.LOCATION_NEAR);
@@ -202,7 +227,8 @@ public class InMemoryResourceMatcher {
 		for (Map.Entry<String, List<List<IQueryParameterType>>> entry : theSearchParameterMap.entrySet()) {
 			String theParamName = entry.getKey();
 			List<List<IQueryParameterType>> theAndOrParams = entry.getValue();
-			InMemoryMatchResult result = matchIdsWithAndOr(theParamName, theAndOrParams, theResourceDefinition, theResource, theSearchParams);
+			InMemoryMatchResult result = matchIdsWithAndOr(
+					theParamName, theAndOrParams, theResourceDefinition, theResource, theSearchParams);
 			if (!result.matched()) {
 				return result;
 			}
@@ -211,14 +237,20 @@ public class InMemoryResourceMatcher {
 	}
 
 	// This method is modelled from SearchBuilder.searchForIdsWithAndOr()
-	private InMemoryMatchResult matchIdsWithAndOr(String theParamName, List<List<IQueryParameterType>> theAndOrParams, RuntimeResourceDefinition theResourceDefinition, IBaseResource theResource, ResourceIndexedSearchParams theSearchParams) {
+	private InMemoryMatchResult matchIdsWithAndOr(
+			String theParamName,
+			List<List<IQueryParameterType>> theAndOrParams,
+			RuntimeResourceDefinition theResourceDefinition,
+			IBaseResource theResource,
+			ResourceIndexedSearchParams theSearchParams) {
 		if (theAndOrParams.isEmpty()) {
 			return InMemoryMatchResult.successfulMatch();
 		}
 
 		String resourceName = theResourceDefinition.getName();
 		RuntimeSearchParam paramDef = mySearchParamRegistry.getActiveSearchParam(resourceName, theParamName);
-		InMemoryMatchResult checkUnsupportedResult = checkForUnsupportedParameters(theParamName, paramDef, theAndOrParams);
+		InMemoryMatchResult checkUnsupportedResult =
+				checkForUnsupportedParameters(theParamName, paramDef, theAndOrParams);
 		if (!checkUnsupportedResult.supported()) {
 			return checkUnsupportedResult;
 		}
@@ -235,11 +267,13 @@ public class InMemoryResourceMatcher {
 			case Constants.PARAM_PROFILE:
 				return InMemoryMatchResult.fromBoolean(matchProfilesAndOr(theAndOrParams, theResource));
 			default:
-				return matchResourceParam(myStorageSettings, theParamName, theAndOrParams, theSearchParams, resourceName, paramDef);
+				return matchResourceParam(
+						myStorageSettings, theParamName, theAndOrParams, theSearchParams, resourceName, paramDef);
 		}
 	}
 
-	private InMemoryMatchResult checkForUnsupportedParameters(String theParamName, RuntimeSearchParam theParamDef, List<List<IQueryParameterType>> theAndOrParams) {
+	private InMemoryMatchResult checkForUnsupportedParameters(
+			String theParamName, RuntimeSearchParam theParamDef, List<List<IQueryParameterType>> theAndOrParams) {
 
 		if (UNSUPPORTED_PARAMETER_NAMES.contains(theParamName)) {
 			return InMemoryMatchResult.unsupportedFromParameterAndReason(theParamName, InMemoryMatchResult.PARAM);
@@ -248,8 +282,10 @@ public class InMemoryResourceMatcher {
 		for (List<IQueryParameterType> orParams : theAndOrParams) {
 			// The list should never be empty, but better safe than sorry
 			if (orParams.size() > 0) {
-				// The params in each OR list all share the same qualifier, prefix, etc., so we only need to check the first one
-				InMemoryMatchResult checkUnsupportedResult = checkOneParameterForUnsupportedModifiers(theParamName, theParamDef, orParams.get(0));
+				// The params in each OR list all share the same qualifier, prefix, etc., so we only need to check the
+				// first one
+				InMemoryMatchResult checkUnsupportedResult =
+						checkOneParameterForUnsupportedModifiers(theParamName, theParamDef, orParams.get(0));
 				if (!checkUnsupportedResult.supported()) {
 					return checkUnsupportedResult;
 				}
@@ -259,12 +295,14 @@ public class InMemoryResourceMatcher {
 		return InMemoryMatchResult.successfulMatch();
 	}
 
-	private InMemoryMatchResult checkOneParameterForUnsupportedModifiers(String theParamName, RuntimeSearchParam theParamDef, IQueryParameterType theParam) {
+	private InMemoryMatchResult checkOneParameterForUnsupportedModifiers(
+			String theParamName, RuntimeSearchParam theParamDef, IQueryParameterType theParam) {
 		// Assume we're ok until we find evidence we aren't
 		InMemoryMatchResult checkUnsupportedResult = InMemoryMatchResult.successfulMatch();
 
 		if (hasChain(theParam)) {
-			checkUnsupportedResult = InMemoryMatchResult.unsupportedFromParameterAndReason(theParamName + "." + ((ReferenceParam) theParam).getChain(), InMemoryMatchResult.CHAIN);
+			checkUnsupportedResult = InMemoryMatchResult.unsupportedFromParameterAndReason(
+					theParamName + "." + ((ReferenceParam) theParam).getChain(), InMemoryMatchResult.CHAIN);
 		}
 
 		if (checkUnsupportedResult.supported()) {
@@ -297,8 +335,8 @@ public class InMemoryResourceMatcher {
 			return false;
 		} else {
 			return theResource.getMeta().getProfile().stream()
-				.map(IPrimitiveType::getValueAsString)
-				.anyMatch(profileValue -> profileValue != null && profileValue.equals(paramProfileValue));
+					.map(IPrimitiveType::getValueAsString)
+					.anyMatch(profileValue -> profileValue != null && profileValue.equals(paramProfileValue));
 		}
 	}
 
@@ -326,14 +364,16 @@ public class InMemoryResourceMatcher {
 		return matches;
 	}
 
-	private boolean matchTagsOrSecurityAndOr(List<List<IQueryParameterType>> theAndOrParams, IBaseResource theResource, boolean theTag) {
+	private boolean matchTagsOrSecurityAndOr(
+			List<List<IQueryParameterType>> theAndOrParams, IBaseResource theResource, boolean theTag) {
 		if (theResource == null) {
 			return true;
 		}
 		return theAndOrParams.stream().allMatch(nextAnd -> matchTagsOrSecurityOr(nextAnd, theResource, theTag));
 	}
 
-	private boolean matchTagsOrSecurityOr(List<IQueryParameterType> theOrParams, IBaseResource theResource, boolean theTag) {
+	private boolean matchTagsOrSecurityOr(
+			List<IQueryParameterType> theOrParams, IBaseResource theResource, boolean theTag) {
 		return theOrParams.stream().anyMatch(param -> matchTagOrSecurity(param, theResource, theTag));
 	}
 
@@ -382,14 +422,22 @@ public class InMemoryResourceMatcher {
 	}
 
 	private boolean matchIdsOr(List<IQueryParameterType> theOrParams, IBaseResource theResource) {
-		return theOrParams.stream().anyMatch(param -> param instanceof StringParam && matchId(((StringParam) param).getValue(), theResource.getIdElement()));
+		return theOrParams.stream()
+				.anyMatch(param -> param instanceof StringParam
+						&& matchId(((StringParam) param).getValue(), theResource.getIdElement()));
 	}
 
 	private boolean matchId(String theValue, IIdType theId) {
 		return theValue.equals(theId.getValue()) || theValue.equals(theId.getIdPart());
 	}
 
-	private InMemoryMatchResult matchResourceParam(StorageSettings theStorageSettings, String theParamName, List<List<IQueryParameterType>> theAndOrParams, ResourceIndexedSearchParams theSearchParams, String theResourceName, RuntimeSearchParam theParamDef) {
+	private InMemoryMatchResult matchResourceParam(
+			StorageSettings theStorageSettings,
+			String theParamName,
+			List<List<IQueryParameterType>> theAndOrParams,
+			ResourceIndexedSearchParams theSearchParams,
+			String theResourceName,
+			RuntimeSearchParam theParamDef) {
 		if (theParamDef != null) {
 			switch (theParamDef.getParamType()) {
 				case QUANTITY:
@@ -402,31 +450,50 @@ public class InMemoryResourceMatcher {
 					if (theSearchParams == null) {
 						return InMemoryMatchResult.successfulMatch();
 					} else {
-						return InMemoryMatchResult.fromBoolean(theAndOrParams.stream().allMatch(nextAnd -> matchParams(theStorageSettings, theResourceName, theParamName, theParamDef, nextAnd, theSearchParams)));
+						return InMemoryMatchResult.fromBoolean(theAndOrParams.stream()
+								.allMatch(nextAnd -> matchParams(
+										theStorageSettings,
+										theResourceName,
+										theParamName,
+										theParamDef,
+										nextAnd,
+										theSearchParams)));
 					}
 				case COMPOSITE:
 				case HAS:
 				case SPECIAL:
 				default:
-					return InMemoryMatchResult.unsupportedFromParameterAndReason(theParamName, InMemoryMatchResult.PARAM);
+					return InMemoryMatchResult.unsupportedFromParameterAndReason(
+							theParamName, InMemoryMatchResult.PARAM);
 			}
 		} else {
 			if (Constants.PARAM_CONTENT.equals(theParamName) || Constants.PARAM_TEXT.equals(theParamName)) {
 				return InMemoryMatchResult.unsupportedFromParameterAndReason(theParamName, InMemoryMatchResult.PARAM);
 			} else {
-				throw new InvalidRequestException(Msg.code(509) + "Unknown search parameter " + theParamName + " for resource type " + theResourceName);
+				throw new InvalidRequestException(Msg.code(509) + "Unknown search parameter " + theParamName
+						+ " for resource type " + theResourceName);
 			}
 		}
 	}
 
-	private boolean matchParams(StorageSettings theStorageSettings, String theResourceName, String theParamName, RuntimeSearchParam theParamDef, List<? extends IQueryParameterType> theOrList, ResourceIndexedSearchParams theSearchParams) {
+	private boolean matchParams(
+			StorageSettings theStorageSettings,
+			String theResourceName,
+			String theParamName,
+			RuntimeSearchParam theParamDef,
+			List<? extends IQueryParameterType> theOrList,
+			ResourceIndexedSearchParams theSearchParams) {
 
 		boolean isNegativeTest = isNegative(theParamDef, theOrList);
 		// negative tests like :not and :not-in must not match any or-clause, so we invert the quantifier.
 		if (isNegativeTest) {
-			return theOrList.stream().allMatch(token -> matchParam(theStorageSettings, theResourceName, theParamName, theParamDef, theSearchParams, token));
+			return theOrList.stream()
+					.allMatch(token -> matchParam(
+							theStorageSettings, theResourceName, theParamName, theParamDef, theSearchParams, token));
 		} else {
-			return theOrList.stream().anyMatch(token -> matchParam(theStorageSettings, theResourceName, theParamName, theParamDef, theSearchParams, token));
+			return theOrList.stream()
+					.anyMatch(token -> matchParam(
+							theStorageSettings, theResourceName, theParamName, theParamDef, theSearchParams, token));
 		}
 	}
 
@@ -441,12 +508,19 @@ public class InMemoryResourceMatcher {
 		} else {
 			return false;
 		}
-
 	}
 
-	private boolean matchParam(StorageSettings theStorageSettings, String theResourceName, String theParamName, RuntimeSearchParam theParamDef, ResourceIndexedSearchParams theSearchParams, IQueryParameterType theToken) {
+	private boolean matchParam(
+			StorageSettings theStorageSettings,
+			String theResourceName,
+			String theParamName,
+			RuntimeSearchParam theParamDef,
+			ResourceIndexedSearchParams theSearchParams,
+			IQueryParameterType theToken) {
 		if (theParamDef.getParamType().equals(RestSearchParameterTypeEnum.TOKEN)) {
-			return matchTokenParam(theStorageSettings, theResourceName, theParamName, theParamDef, theSearchParams, (TokenParam) theToken);
+			return matchTokenParam(
+					theStorageSettings, theResourceName, theParamName, theParamDef, theSearchParams, (TokenParam)
+							theToken);
 		} else {
 			return theSearchParams.matchParam(theStorageSettings, theResourceName, theParamName, theParamDef, theToken);
 		}
@@ -466,24 +540,33 @@ public class InMemoryResourceMatcher {
 	 * @param theQueryParam      the query parameter to compare with theSearchParams
 	 * @return true if theQueryParam matches the collection of theSearchParams, otherwise false
 	 */
-	private boolean matchTokenParam(StorageSettings theStorageSettings, String theResourceName, String theParamName, RuntimeSearchParam theParamDef, ResourceIndexedSearchParams theSearchParams, TokenParam theQueryParam) {
+	private boolean matchTokenParam(
+			StorageSettings theStorageSettings,
+			String theResourceName,
+			String theParamName,
+			RuntimeSearchParam theParamDef,
+			ResourceIndexedSearchParams theSearchParams,
+			TokenParam theQueryParam) {
 		if (theQueryParam.getModifier() != null) {
 			switch (theQueryParam.getModifier()) {
 				case IN:
 					return theSearchParams.myTokenParams.stream()
-						.filter(t -> t.getParamName().equals(theParamName))
-						.anyMatch(t -> systemContainsCode(theQueryParam, t));
+							.filter(t -> t.getParamName().equals(theParamName))
+							.anyMatch(t -> systemContainsCode(theQueryParam, t));
 				case NOT_IN:
 					return theSearchParams.myTokenParams.stream()
-						.filter(t -> t.getParamName().equals(theParamName))
-						.noneMatch(t -> systemContainsCode(theQueryParam, t));
+							.filter(t -> t.getParamName().equals(theParamName))
+							.noneMatch(t -> systemContainsCode(theQueryParam, t));
 				case NOT:
-					return !theSearchParams.matchParam(theStorageSettings, theResourceName, theParamName, theParamDef, theQueryParam);
+					return !theSearchParams.matchParam(
+							theStorageSettings, theResourceName, theParamName, theParamDef, theQueryParam);
 				default:
-					return theSearchParams.matchParam(theStorageSettings, theResourceName, theParamName, theParamDef, theQueryParam);
+					return theSearchParams.matchParam(
+							theStorageSettings, theResourceName, theParamName, theParamDef, theQueryParam);
 			}
 		} else {
-			return theSearchParams.matchParam(theStorageSettings, theResourceName, theParamName, theParamDef, theQueryParam);
+			return theSearchParams.matchParam(
+					theStorageSettings, theResourceName, theParamName, theParamDef, theQueryParam);
 		}
 	}
 
@@ -494,7 +577,13 @@ public class InMemoryResourceMatcher {
 			return false;
 		}
 
-		IValidationSupport.CodeValidationResult codeValidationResult = validationSupport.validateCode(new ValidationSupportContext(validationSupport), new ConceptValidationOptions(), theSearchParamToken.getSystem(), theSearchParamToken.getValue(), null, theQueryParam.getValue());
+		IValidationSupport.CodeValidationResult codeValidationResult = validationSupport.validateCode(
+				new ValidationSupportContext(validationSupport),
+				new ConceptValidationOptions(),
+				theSearchParamToken.getSystem(),
+				theSearchParamToken.getValue(),
+				null,
+				theQueryParam.getValue());
 		if (codeValidationResult != null) {
 			return codeValidationResult.isOk();
 		} else {
@@ -510,12 +599,15 @@ public class InMemoryResourceMatcher {
 		return theParam.getQueryParameterQualifier() != null;
 	}
 
-	private InMemoryMatchResult checkUnsupportedPrefixes(String theParamName, RuntimeSearchParam theParamDef, IQueryParameterType theParam) {
+	private InMemoryMatchResult checkUnsupportedPrefixes(
+			String theParamName, RuntimeSearchParam theParamDef, IQueryParameterType theParam) {
 		if (theParamDef != null && theParam instanceof BaseParamWithPrefix) {
 			ParamPrefixEnum prefix = ((BaseParamWithPrefix<?>) theParam).getPrefix();
 			RestSearchParameterTypeEnum paramType = theParamDef.getParamType();
 			if (!supportedPrefix(prefix, paramType)) {
-				return InMemoryMatchResult.unsupportedFromParameterAndReason(theParamName, String.format("The prefix %s is not supported for param type %s", prefix, paramType));
+				return InMemoryMatchResult.unsupportedFromParameterAndReason(
+						theParamName,
+						String.format("The prefix %s is not supported for param type %s", prefix, paramType));
 			}
 		}
 		return InMemoryMatchResult.successfulMatch();
@@ -543,9 +635,11 @@ public class InMemoryResourceMatcher {
 		return false;
 	}
 
-	private InMemoryMatchResult checkUnsupportedQualifiers(String theParamName, RuntimeSearchParam theParamDef, IQueryParameterType theParam) {
+	private InMemoryMatchResult checkUnsupportedQualifiers(
+			String theParamName, RuntimeSearchParam theParamDef, IQueryParameterType theParam) {
 		if (hasQualifiers(theParam) && !supportedQualifier(theParamDef, theParam)) {
-			return InMemoryMatchResult.unsupportedFromParameterAndReason(theParamName + theParam.getQueryParameterQualifier(), InMemoryMatchResult.QUALIFIER);
+			return InMemoryMatchResult.unsupportedFromParameterAndReason(
+					theParamName + theParam.getQueryParameterQualifier(), InMemoryMatchResult.QUALIFIER);
 		}
 		return InMemoryMatchResult.successfulMatch();
 	}
@@ -560,7 +654,8 @@ public class InMemoryResourceMatcher {
 				switch (tokenParam.getModifier()) {
 					case IN:
 					case NOT_IN:
-						// Support for these qualifiers is dependent on an implementation of IValidationSupport being available to delegate the check to
+						// Support for these qualifiers is dependent on an implementation of IValidationSupport being
+						// available to delegate the check to
 						return getValidationSupportOrNull() != null;
 					case NOT:
 						return true;
@@ -572,6 +667,9 @@ public class InMemoryResourceMatcher {
 		}
 	}
 
-	private enum ValidationSupportInitializationState {NOT_INITIALIZED, INITIALIZED, FAILED}
-
+	private enum ValidationSupportInitializationState {
+		NOT_INITIALIZED,
+		INITIALIZED,
+		FAILED
+	}
 }

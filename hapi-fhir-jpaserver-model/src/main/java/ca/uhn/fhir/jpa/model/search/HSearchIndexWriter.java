@@ -61,12 +61,10 @@ public class HSearchIndexWriter {
 
 	public static final String NUMBER_VALUE = "number-value";
 
-
 	public static final String DATE_LOWER_ORD = "lower-ord";
 	public static final String DATE_LOWER = "lower";
 	public static final String DATE_UPPER_ORD = "upper-ord";
 	public static final String DATE_UPPER = "upper";
-
 
 	final HSearchElementCache myNodeCache;
 	final StorageSettings myStorageSettings;
@@ -87,7 +85,8 @@ public class HSearchIndexWriter {
 	public void writeStringIndex(String theSearchParam, String theValue) {
 		DocumentElement stringIndexNode = getSearchParamIndexNode(theSearchParam, INDEX_TYPE_STRING);
 
-		// we are assuming that our analyzer matches  StringUtil.normalizeStringForSearchIndexing(theValue).toLowerCase(Locale.ROOT))
+		// we are assuming that our analyzer matches
+		// StringUtil.normalizeStringForSearchIndexing(theValue).toLowerCase(Locale.ROOT))
 		writeBasicStringFields(stringIndexNode, theValue);
 		addDocumentValue(stringIndexNode, IDX_STRING_EXACT, theValue);
 		addDocumentValue(stringIndexNode, IDX_STRING_TEXT, theValue);
@@ -151,7 +150,6 @@ public class HSearchIndexWriter {
 		addDocumentValue(dateIndexNode, DATE_UPPER, theValue.getUpperBoundDate().toInstant());
 	}
 
-
 	public void writeQuantityIndex(String theSearchParam, QuantitySearchIndexData theValue) {
 		DocumentElement nestedRoot = myNodeCache.getObjectElement(NESTED_SEARCH_PARAM_ROOT);
 
@@ -160,7 +158,6 @@ public class HSearchIndexWriter {
 
 		ourLog.trace("Adding Search Param Quantity: {} -- {}", theSearchParam, theValue);
 		writeQuantityFields(nestedQtyNode, theValue);
-
 	}
 
 	public void writeQuantityFields(DocumentElement nestedQtyNode, QuantitySearchIndexData theValue) {
@@ -168,13 +165,13 @@ public class HSearchIndexWriter {
 		addDocumentValue(nestedQtyNode, QTY_SYSTEM, theValue.getSystem());
 		addDocumentValue(nestedQtyNode, QTY_VALUE, theValue.getValue());
 
-		if ( ! myStorageSettings.getNormalizedQuantitySearchLevel().storageOrSearchSupported()) {
+		if (!myStorageSettings.getNormalizedQuantitySearchLevel().storageOrSearchSupported()) {
 			return;
 		}
 
-		//-- convert the value/unit to the canonical form if any
-		Pair canonicalForm = UcumServiceUtil.getCanonicalForm(theValue.getSystem(),
-			BigDecimal.valueOf(theValue.getValue()), theValue.getCode());
+		// -- convert the value/unit to the canonical form if any
+		Pair canonicalForm = UcumServiceUtil.getCanonicalForm(
+				theValue.getSystem(), BigDecimal.valueOf(theValue.getValue()), theValue.getCode());
 		if (canonicalForm == null) {
 			return;
 		}
@@ -186,9 +183,9 @@ public class HSearchIndexWriter {
 		addDocumentValue(nestedQtyNode, QTY_VALUE_NORM, canonicalValue);
 	}
 
-
 	public void writeUriIndex(String theParamName, Collection<String> theUriValueCollection) {
-		DocumentElement uriNode = myNodeCache.getObjectElement(SEARCH_PARAM_ROOT).addObject(theParamName);
+		DocumentElement uriNode =
+				myNodeCache.getObjectElement(SEARCH_PARAM_ROOT).addObject(theParamName);
 		for (String uriSearchIndexValue : theUriValueCollection) {
 			ourLog.trace("Adding Search Param Uri: {} -- {}", theParamName, uriSearchIndexValue);
 			writeUriFields(uriNode, uriSearchIndexValue);
@@ -200,7 +197,8 @@ public class HSearchIndexWriter {
 	}
 
 	public void writeNumberIndex(String theParamName, Collection<BigDecimal> theNumberValueCollection) {
-		DocumentElement numberNode = myNodeCache.getObjectElement(SEARCH_PARAM_ROOT).addObject(theParamName);
+		DocumentElement numberNode =
+				myNodeCache.getObjectElement(SEARCH_PARAM_ROOT).addObject(theParamName);
 		for (BigDecimal numberSearchIndexValue : theNumberValueCollection) {
 			ourLog.trace("Adding Search Param Number: {} -- {}", theParamName, numberSearchIndexValue);
 			writeNumberFields(numberNode, numberSearchIndexValue);
@@ -215,11 +213,11 @@ public class HSearchIndexWriter {
 	 * @param ignoredParamName unused - for consistent api
 	 * @param theCompositeSearchIndexData extracted index data for this sp
 	 */
-	public void writeCompositeIndex(String ignoredParamName, Set<CompositeSearchIndexData> theCompositeSearchIndexData) {
+	public void writeCompositeIndex(
+			String ignoredParamName, Set<CompositeSearchIndexData> theCompositeSearchIndexData) {
 		// must be nested.
 		for (CompositeSearchIndexData compositeSearchIndexDatum : theCompositeSearchIndexData) {
 			compositeSearchIndexDatum.writeIndexEntry(this, myNodeCache);
 		}
-
 	}
 }

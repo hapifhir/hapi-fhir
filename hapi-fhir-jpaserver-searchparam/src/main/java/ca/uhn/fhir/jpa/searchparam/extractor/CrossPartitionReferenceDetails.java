@@ -29,19 +29,28 @@ public class CrossPartitionReferenceDetails {
 
 	@Nonnull
 	private final RequestPartitionId mySourceResourcePartitionId;
+
 	@Nonnull
 	private final PathAndRef myPathAndRef;
+
 	@Nonnull
 	private final RequestDetails myRequestDetails;
+
 	@Nonnull
 	private final TransactionDetails myTransactionDetails;
+
 	@Nonnull
 	private final String mySourceResourceName;
 
 	/**
 	 * Constructor
 	 */
-	public CrossPartitionReferenceDetails(@Nonnull RequestPartitionId theSourceResourcePartitionId, @Nonnull String theSourceResourceName, @Nonnull PathAndRef thePathAndRef, @Nonnull RequestDetails theRequestDetails, @Nonnull TransactionDetails theTransactionDetails) {
+	public CrossPartitionReferenceDetails(
+			@Nonnull RequestPartitionId theSourceResourcePartitionId,
+			@Nonnull String theSourceResourceName,
+			@Nonnull PathAndRef thePathAndRef,
+			@Nonnull RequestDetails theRequestDetails,
+			@Nonnull TransactionDetails theTransactionDetails) {
 		mySourceResourcePartitionId = theSourceResourcePartitionId;
 		mySourceResourceName = theSourceResourceName;
 		myPathAndRef = thePathAndRef;
@@ -73,5 +82,4 @@ public class CrossPartitionReferenceDetails {
 	public PathAndRef getPathAndRef() {
 		return myPathAndRef;
 	}
-
 }

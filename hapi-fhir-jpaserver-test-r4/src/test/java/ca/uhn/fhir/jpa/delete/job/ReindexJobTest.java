@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.delete.job;
 
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
+import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.jobs.reindex.ReindexAppCtx;
 import ca.uhn.fhir.batch2.jobs.reindex.ReindexJobParameters;
 import ca.uhn.fhir.batch2.model.JobInstance;
@@ -10,6 +11,7 @@ import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.ReindexParameters;
+import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
@@ -48,6 +50,9 @@ public class ReindexJobTest extends BaseJpaR4Test {
 
 	@Autowired
 	private IJobCoordinator myJobCoordinator;
+
+	@Autowired
+	private IJobPersistence myJobPersistence;
 
 	private ReindexTestHelper myReindexTestHelper;
 	private PatientReindexTestHelper myPatientReindexTestHelper;
@@ -367,6 +372,23 @@ public class ReindexJobTest extends BaseJpaR4Test {
 		assertThat(myReindexTestHelper.getAlleleObservationIds(), hasSize(50));
 	}
 
+	@Test
+	public void testReindex_DuplicateResourceBeforeEnforceUniqueShouldSaveWarning() {
+		myReindexTestHelper.createObservationWithCode();
+		myReindexTestHelper.createObservationWithCode();
+
+		DaoMethodOutcome searchParameter = myReindexTestHelper.createUniqueCodeSearchParameter();
+
+		JobInstanceStartRequest startRequest = new JobInstanceStartRequest();
+		startRequest.setJobDefinitionId(ReindexAppCtx.JOB_REINDEX);
+		startRequest.setParameters(new ReindexJobParameters());
+		Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(startRequest);
+		JobInstance myJob = myBatch2JobHelper.awaitJobCompletion(startResponse);
+
+		assertEquals(StatusEnum.COMPLETED, myJob.getStatus());
+		assertNotNull(myJob.getWarningMessages());
+		assertTrue(myJob.getWarningMessages().contains("Failed to reindex resource because unique search parameter " + searchParameter.getEntity().getIdDt().toVersionless().toString()));
+	}
 
 	@Test
 	public void testReindex_ExceptionThrownDuringWrite() {
@@ -422,6 +444,23 @@ public class ReindexJobTest extends BaseJpaR4Test {
 
 		assertEquals(StatusEnum.FAILED, outcome.getStatus());
 		assertEquals("java.lang.Error: foo message", outcome.getErrorMessage());
+	}
+
+	@Test
+	public void testReindex_withReindexingUponSearchParameterChangeEnabled_reindexJobCompleted() {
+		// make sure the resources auto-reindex after the search parameter update is enabled
+		myStorageSettings.setMarkResourcesForReindexingUponSearchParameterChange(true);
+
+		// create an Observation resource and SearchParameter for it to trigger re-indexing
+		myReindexTestHelper.createObservationWithCode();
+		myReindexTestHelper.createCodeSearchParameter();
+
+		// check that reindex job was created
+		List<JobInstance> jobInstances = myJobPersistence.fetchInstancesByJobDefinitionId(ReindexAppCtx.JOB_REINDEX, 10, 0);
+		assertEquals(1, jobInstances.size());
+
+		// check that the job is completed (not stuck in QUEUED status)
+		myBatch2JobHelper.awaitJobCompletion(jobInstances.get(0).getInstanceId());
 	}
 
 	private static Stream<Arguments> numResourcesParams(){

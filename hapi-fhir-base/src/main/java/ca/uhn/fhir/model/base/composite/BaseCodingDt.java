@@ -63,14 +63,14 @@ public abstract class BaseCodingDt extends BaseIdentifiableElement implements IC
 	 * creating it if it does
 	 * not exist. Will not return <code>null</code>.
 	 *
-     * <p>
-     * <b>Definition:</b>
-     * A representation of the meaning of the code in the system, following the rules of the system.
-     * </p> 
+	 * <p>
+	 * <b>Definition:</b>
+	 * A representation of the meaning of the code in the system, following the rules of the system.
+	 * </p>
 	 */
 	public abstract StringDt getDisplayElement();
 
-	public abstract BaseCodingDt setDisplay( String theString);
+	public abstract BaseCodingDt setDisplay(String theString);
 
 	/*
 	todo: handle version
@@ -85,8 +85,11 @@ public abstract class BaseCodingDt extends BaseIdentifiableElement implements IC
 	@Override
 	public String getValueAsQueryToken(FhirContext theContext) {
 		if (getSystemElement().getValueAsString() != null) {
-			return ParameterUtil.escape(StringUtils.defaultString(getSystemElement().getValueAsString())) + '|' + ParameterUtil.escape(getCodeElement().getValueAsString());
-		} 
+			return ParameterUtil.escape(
+							StringUtils.defaultString(getSystemElement().getValueAsString()))
+					+ '|'
+					+ ParameterUtil.escape(getCodeElement().getValueAsString());
+		}
 		return ParameterUtil.escape(getCodeElement().getValueAsString());
 	}
 
@@ -94,7 +97,8 @@ public abstract class BaseCodingDt extends BaseIdentifiableElement implements IC
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void setValueAsQueryToken(FhirContext theContext, String theParamName, String theQualifier, String theParameter) {
+	public void setValueAsQueryToken(
+			FhirContext theContext, String theParamName, String theQualifier, String theParameter) {
 		int barIndex = ParameterUtil.nonEscapedIndexOf(theParameter, '|');
 		if (barIndex != -1) {
 			setSystem(theParameter.substring(0, barIndex));
@@ -112,7 +116,8 @@ public abstract class BaseCodingDt extends BaseIdentifiableElement implements IC
 		if (theCoding == null) {
 			return false;
 		}
-		return getCodeElement().equals(theCoding.getCodeElement()) && getSystemElement().equals(theCoding.getSystemElement());
+		return getCodeElement().equals(theCoding.getCodeElement())
+				&& getSystemElement().equals(theCoding.getSystemElement());
 	}
 
 	/**
@@ -130,14 +135,11 @@ public abstract class BaseCodingDt extends BaseIdentifiableElement implements IC
 		if (theSearchParam.isSystemPresent()) {
 			if (theSearchParam.isSystemBlank()) {
 				//  [parameter]=|[code] matches a code/value that has no system namespace
-				if (isSystemPresent() && !isSystemBlank())
-					return false;
+				if (isSystemPresent() && !isSystemBlank()) return false;
 			} else {
 				//  [parameter]=[namespace]|[code] matches a code/value in the given system namespace
-				if (!isSystemPresent())
-					return false;
-				if (!getSystemElement().equals(theSearchParam.getSystemElement()))
-					return false;
+				if (!isSystemPresent()) return false;
+				if (!getSystemElement().equals(theSearchParam.getSystemElement())) return false;
 			}
 		} else {
 			//  [parameter]=[code] matches a code/value irrespective of it's system namespace
@@ -173,10 +175,9 @@ public abstract class BaseCodingDt extends BaseIdentifiableElement implements IC
 	 */
 	public abstract BaseCodingDt setSystem(String theUri);
 
-
 	/**
 	 * <b>Not supported!</b>
-	 * 
+	 *
 	 * @deprecated get/setMissing is not supported in StringDt. Use {@link TokenParam} instead if you
 	 * need this functionality
 	 */
@@ -188,14 +189,15 @@ public abstract class BaseCodingDt extends BaseIdentifiableElement implements IC
 
 	/**
 	 * <b>Not supported!</b>
-	 * 
+	 *
 	 * @deprecated get/setMissing is not supported in StringDt. Use {@link TokenParam} instead if you
 	 * need this functionality
 	 */
 	@Deprecated
 	@Override
 	public IQueryParameterType setMissing(Boolean theMissing) {
-		throw new UnsupportedOperationException(Msg.code(1903) + "get/setMissing is not supported in StringDt. Use {@link StringParam} instead if you need this functionality");
+		throw new UnsupportedOperationException(
+				Msg.code(1903)
+						+ "get/setMissing is not supported in StringDt. Use {@link StringParam} instead if you need this functionality");
 	}
-
 }

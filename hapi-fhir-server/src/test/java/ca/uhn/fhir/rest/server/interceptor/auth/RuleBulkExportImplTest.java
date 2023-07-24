@@ -1,10 +1,9 @@
 package ca.uhn.fhir.rest.server.interceptor.auth;
 
 import ca.uhn.fhir.interceptor.api.Pointcut;
-import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.api.server.bulk.BulkDataExportOptions;
+import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -13,9 +12,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.HashSet;
 import java.util.Set;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.nullValue;
-import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
@@ -44,7 +40,7 @@ public class RuleBulkExportImplTest {
 		Set<String> myWantTypes = new HashSet<>();
 		myWantTypes.add("Questionnaire");
 
-		BulkDataExportOptions options = new BulkDataExportOptions();
+		BulkExportJobParameters options = new BulkExportJobParameters();
 		options.setResourceTypes(myWantTypes);
 		
 		when(myRequestDetails.getAttribute(any())).thenReturn(options);
@@ -66,7 +62,7 @@ public class RuleBulkExportImplTest {
 		myWantTypes.add("Patient");
 		myWantTypes.add("Practitioner");
 
-		BulkDataExportOptions options = new BulkDataExportOptions();
+		BulkExportJobParameters options = new BulkExportJobParameters();
 		options.setResourceTypes(myWantTypes);
 		
 		when(myRequestDetails.getAttribute(any())).thenReturn(options);
@@ -81,9 +77,9 @@ public class RuleBulkExportImplTest {
 		myRule.setAppliesToGroupExportOnGroup("invalid group");
 		myRule.setMode(PolicyEnum.ALLOW);
 
-		BulkDataExportOptions options = new BulkDataExportOptions();
-		options.setExportStyle(BulkDataExportOptions.ExportStyle.GROUP);
-		options.setGroupId(new IdDt("Group/123"));
+		BulkExportJobParameters options = new BulkExportJobParameters();
+		options.setExportStyle(BulkExportJobParameters.ExportStyle.GROUP);
+		options.setGroupId("Group/123");
 
 		when(myRequestDetails.getAttribute(any())).thenReturn(options);
 
@@ -97,9 +93,9 @@ public class RuleBulkExportImplTest {
 		myRule.setAppliesToGroupExportOnGroup("Group/1");
 		myRule.setMode(PolicyEnum.ALLOW);
 
-		BulkDataExportOptions options = new BulkDataExportOptions();
-		options.setExportStyle(BulkDataExportOptions.ExportStyle.GROUP);
-		options.setGroupId(new IdDt("Group/1"));
+		BulkExportJobParameters options = new BulkExportJobParameters();
+		options.setExportStyle(BulkExportJobParameters.ExportStyle.GROUP);
+		options.setGroupId("Group/1");
 
 		when(myRequestDetails.getAttribute(any())).thenReturn(options);
 
@@ -113,9 +109,9 @@ public class RuleBulkExportImplTest {
 		RuleBulkExportImpl myRule = new RuleBulkExportImpl("b");
 		myRule.setAppliesToPatientExport("Patient/123");
 		myRule.setMode(PolicyEnum.ALLOW);
-		BulkDataExportOptions options = new BulkDataExportOptions();
-		options.setExportStyle(BulkDataExportOptions.ExportStyle.PATIENT);
-		options.setPatientIds(Set.of(new IdDt("Patient/123")));
+		BulkExportJobParameters options = new BulkExportJobParameters();
+		options.setExportStyle(BulkExportJobParameters.ExportStyle.PATIENT);
+		options.setPatientIds(Set.of("Patient/123"));
 		when(myRequestDetails.getAttribute(any())).thenReturn(options);
 
 		//When
@@ -131,9 +127,9 @@ public class RuleBulkExportImplTest {
 		RuleBulkExportImpl myRule = new RuleBulkExportImpl("b");
 		myRule.setAppliesToPatientExport("Patient/123");
 		myRule.setMode(PolicyEnum.ALLOW);
-		BulkDataExportOptions options = new BulkDataExportOptions();
-		options.setExportStyle(BulkDataExportOptions.ExportStyle.PATIENT);
-		options.setPatientIds(Set.of(new IdDt("Patient/456")));
+		BulkExportJobParameters options = new BulkExportJobParameters();
+		options.setExportStyle(BulkExportJobParameters.ExportStyle.PATIENT);
+		options.setPatientIds(Set.of("Patient/456"));
 		when(myRequestDetails.getAttribute(any())).thenReturn(options);
 
 		//When
@@ -149,8 +145,8 @@ public class RuleBulkExportImplTest {
 		RuleBulkExportImpl myRule = new RuleBulkExportImpl("b");
 		myRule.setAppliesToPatientExport("Patient/123");
 		myRule.setMode(PolicyEnum.ALLOW);
-		BulkDataExportOptions options = new BulkDataExportOptions();
-		options.setExportStyle(BulkDataExportOptions.ExportStyle.PATIENT);
+		BulkExportJobParameters options = new BulkExportJobParameters();
+		options.setExportStyle(BulkExportJobParameters.ExportStyle.PATIENT);
 		when(myRequestDetails.getAttribute(any())).thenReturn(options);
 
 		//When
@@ -158,5 +154,99 @@ public class RuleBulkExportImplTest {
 
 		//Then: We make no claims about type-level export on Patient.
 		assertEquals(null, verdict);
+	}
+
+	@Test
+	public void testPatientExportRulesOnTypeLevelExportWithTypeFilterResourceTypePatient() {
+		//Given
+		final RuleBulkExportImpl myRule = new RuleBulkExportImpl("b");
+		myRule.setAppliesToPatientExport("Patient/123");
+		myRule.setMode(PolicyEnum.ALLOW);
+		final BulkExportJobParameters options = new BulkExportJobParameters();
+		options.setExportStyle(BulkExportJobParameters.ExportStyle.PATIENT);
+		options.setFilters(Set.of("Patient?_id=123"));
+		options.setResourceTypes(Set.of("Patient"));
+		when(myRequestDetails.getAttribute(any())).thenReturn(options);
+
+		//When
+		final AuthorizationInterceptor.Verdict verdict = myRule.applyRule(myOperation, myRequestDetails, null, null, null, myRuleApplier, myFlags, myPointcut);
+
+		//Then: The patient IDs match so this is permitted
+		assertEquals(PolicyEnum.ALLOW, verdict.getDecision());
+	}
+
+	@Test
+	public void testPatientExportRulesOnTypeLevelExportWithTypeFilterResourceTypePatientAndFilterHasResources() {
+		//Given
+		final RuleBulkExportImpl myRule = new RuleBulkExportImpl("b");
+		myRule.setAppliesToPatientExport("Patient/123");
+		myRule.setMode(PolicyEnum.ALLOW);
+		final BulkExportJobParameters options = new BulkExportJobParameters();
+		options.setExportStyle(BulkExportJobParameters.ExportStyle.PATIENT);
+		options.setFilters(Set.of("Patient?_id=123"));
+		options.setResourceTypes(Set.of("Patient", "Condition", "Immunization"));
+		when(myRequestDetails.getAttribute(any())).thenReturn(options);
+
+		//When
+		final AuthorizationInterceptor.Verdict verdict = myRule.applyRule(myOperation, myRequestDetails, null, null, null, myRuleApplier, myFlags, myPointcut);
+
+		//Then: The patient IDs match so this is permitted
+		assertEquals(PolicyEnum.ALLOW, verdict.getDecision());
+	}
+
+	@Test
+	public void testPatientExportRulesOnTypeLevelExportWithTypeFilterResourceTypeObservation() {
+		//Given
+		final RuleBulkExportImpl myRule = new RuleBulkExportImpl("b");
+		myRule.setAppliesToPatientExport("Patient/123");
+		myRule.setMode(PolicyEnum.ALLOW);
+		final BulkExportJobParameters options = new BulkExportJobParameters();
+		options.setExportStyle(BulkExportJobParameters.ExportStyle.PATIENT);
+		options.setFilters(Set.of("Patient?_id=123"));
+		options.setResourceTypes(Set.of("Observation"));
+		when(myRequestDetails.getAttribute(any())).thenReturn(options);
+
+		//When
+		final AuthorizationInterceptor.Verdict verdict = myRule.applyRule(myOperation, myRequestDetails, null, null, null, myRuleApplier, myFlags, myPointcut);
+
+		//Then: The patient IDs match so this is permitted
+		assertEquals(PolicyEnum.ALLOW, verdict.getDecision());
+	}
+
+	@Test
+	public void testPatientExportRulesOnTypeLevelExportWithTypeFilterNoResourceType() {
+		//Given
+		final RuleBulkExportImpl myRule = new RuleBulkExportImpl("b");
+		myRule.setAppliesToPatientExport("Patient/123");
+		myRule.setMode(PolicyEnum.ALLOW);
+		final BulkExportJobParameters options = new BulkExportJobParameters();
+		options.setExportStyle(BulkExportJobParameters.ExportStyle.PATIENT);
+		options.setFilters(Set.of("Patient?_id=123"));
+		when(myRequestDetails.getAttribute(any())).thenReturn(options);
+
+		//When
+		final AuthorizationInterceptor.Verdict verdict = myRule.applyRule(myOperation, myRequestDetails, null, null, null, myRuleApplier, myFlags, myPointcut);
+
+		//Then: The patient IDs match so this is permitted
+		assertEquals(PolicyEnum.ALLOW, verdict.getDecision());
+	}
+
+	@Test
+	public void testPatientExportRulesOnTypeLevelExportWithTypeFilterMismatch() {
+		//Given
+		final RuleBulkExportImpl myRule = new RuleBulkExportImpl("b");
+		myRule.setAppliesToPatientExport("Patient/123");
+		myRule.setMode(PolicyEnum.ALLOW);
+		final BulkExportJobParameters options = new BulkExportJobParameters();
+		options.setExportStyle(BulkExportJobParameters.ExportStyle.PATIENT);
+		options.setFilters(Set.of("Patient?_id=456"));
+		options.setResourceTypes(Set.of("Patient"));
+		when(myRequestDetails.getAttribute(any())).thenReturn(options);
+
+		//When
+		final AuthorizationInterceptor.Verdict verdict = myRule.applyRule(myOperation, myRequestDetails, null, null, null, myRuleApplier, myFlags, myPointcut);
+
+		//Then: The patient IDs do NOT match so this is not permitted.
+		assertEquals(PolicyEnum.DENY, verdict.getDecision());
 	}
 }

@@ -25,6 +25,9 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 import javax.annotation.Nonnull;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -41,9 +44,6 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
 
 import static org.apache.commons.lang3.StringUtils.left;
 import static org.apache.commons.lang3.StringUtils.length;
@@ -52,10 +52,16 @@ import static org.apache.commons.lang3.StringUtils.length;
  * DM 2019-08-01 - Do not use IDX_VALUESET_CONCEPT_CS_CD or IDX_VALUESET_CONCEPT_CS_CODE; this was previously used as an index so reusing the name will
  * bork up migration tasks.
  */
-@Table(name = "TRM_VALUESET_CONCEPT", uniqueConstraints = {
-	@UniqueConstraint(name = "IDX_VS_CONCEPT_CSCD", columnNames = {"VALUESET_PID", "SYSTEM_URL", "CODEVAL"}),
-	@UniqueConstraint(name = "IDX_VS_CONCEPT_ORDER", columnNames = {"VALUESET_PID", "VALUESET_ORDER"})
-})
+@Table(
+		name = "TRM_VALUESET_CONCEPT",
+		uniqueConstraints = {
+			@UniqueConstraint(
+					name = "IDX_VS_CONCEPT_CSCD",
+					columnNames = {"VALUESET_PID", "SYSTEM_URL", "CODEVAL"}),
+			@UniqueConstraint(
+					name = "IDX_VS_CONCEPT_ORDER",
+					columnNames = {"VALUESET_PID", "VALUESET_ORDER"})
+		})
 @Entity()
 public class TermValueSetConcept implements Serializable {
 	private static final long serialVersionUID = 1L;
@@ -67,7 +73,11 @@ public class TermValueSetConcept implements Serializable {
 	private Long myId;
 
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "VALUESET_PID", referencedColumnName = "PID", nullable = false, foreignKey = @ForeignKey(name = "FK_TRM_VALUESET_PID"))
+	@JoinColumn(
+			name = "VALUESET_PID",
+			referencedColumnName = "PID",
+			nullable = false,
+			foreignKey = @ForeignKey(name = "FK_TRM_VALUESET_PID"))
 	private TermValueSet myValueSet;
 
 	@Column(name = "VALUESET_PID", insertable = false, updatable = false, nullable = false)
@@ -161,8 +171,10 @@ public class TermValueSetConcept implements Serializable {
 
 	public TermValueSetConcept setSystem(@Nonnull String theSystem) {
 		ValidateUtil.isNotBlankOrThrowIllegalArgument(theSystem, "theSystem must not be null or empty");
-		ValidateUtil.isNotTooLongOrThrowIllegalArgument(theSystem, TermCodeSystem.MAX_URL_LENGTH,
-			"System exceeds maximum length (" + TermCodeSystem.MAX_URL_LENGTH + "): " + length(theSystem));
+		ValidateUtil.isNotTooLongOrThrowIllegalArgument(
+				theSystem,
+				TermCodeSystem.MAX_URL_LENGTH,
+				"System exceeds maximum length (" + TermCodeSystem.MAX_URL_LENGTH + "): " + length(theSystem));
 		mySystem = theSystem;
 		return this;
 	}
@@ -172,8 +184,11 @@ public class TermValueSetConcept implements Serializable {
 	}
 
 	public TermValueSetConcept setSystemVersion(String theSystemVersion) {
-		ValidateUtil.isNotTooLongOrThrowIllegalArgument(theSystemVersion, TermCodeSystemVersion.MAX_VERSION_LENGTH,
-			"System version exceeds maximum length (" + TermCodeSystemVersion.MAX_VERSION_LENGTH + "): " + length(theSystemVersion));
+		ValidateUtil.isNotTooLongOrThrowIllegalArgument(
+				theSystemVersion,
+				TermCodeSystemVersion.MAX_VERSION_LENGTH,
+				"System version exceeds maximum length (" + TermCodeSystemVersion.MAX_VERSION_LENGTH + "): "
+						+ length(theSystemVersion));
 		mySystemVer = theSystemVersion;
 		return this;
 	}
@@ -184,8 +199,10 @@ public class TermValueSetConcept implements Serializable {
 
 	public TermValueSetConcept setCode(@Nonnull String theCode) {
 		ValidateUtil.isNotBlankOrThrowIllegalArgument(theCode, "theCode must not be null or empty");
-		ValidateUtil.isNotTooLongOrThrowIllegalArgument(theCode, TermConcept.MAX_CODE_LENGTH,
-			"Code exceeds maximum length (" + TermConcept.MAX_CODE_LENGTH + "): " + length(theCode));
+		ValidateUtil.isNotTooLongOrThrowIllegalArgument(
+				theCode,
+				TermConcept.MAX_CODE_LENGTH,
+				"Code exceeds maximum length (" + TermConcept.MAX_CODE_LENGTH + "): " + length(theCode));
 		myCode = theCode;
 		return this;
 	}
@@ -216,20 +233,20 @@ public class TermValueSetConcept implements Serializable {
 		TermValueSetConcept that = (TermValueSetConcept) theO;
 
 		return new EqualsBuilder()
-			.append(myValueSetPid, that.myValueSetPid)
-			.append(getSystem(), that.getSystem())
-			.append(getCode(), that.getCode())
-			.isEquals();
+				.append(myValueSetPid, that.myValueSetPid)
+				.append(getSystem(), that.getSystem())
+				.append(getCode(), that.getCode())
+				.isEquals();
 	}
 
 	@Override
 	public int hashCode() {
 		if (myHashCode == null) {
 			myHashCode = new HashCodeBuilder(17, 37)
-				.append(myValueSetPid)
-				.append(getSystem())
-				.append(getCode())
-				.toHashCode();
+					.append(myValueSetPid)
+					.append(getSystem())
+					.append(getCode())
+					.toHashCode();
 		}
 		return myHashCode;
 	}
@@ -237,18 +254,18 @@ public class TermValueSetConcept implements Serializable {
 	@Override
 	public String toString() {
 		return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
-			.append("id", myId)
-			.append("order", myOrder)
-			.append("system", mySystem)
-			.append("code", myCode)
-			.append("valueSet", myValueSet != null ? myValueSet.getId() : "(null)")
-			.append("valueSetPid", myValueSetPid)
-			.append("valueSetUrl", this.getValueSetUrl())
-			.append("valueSetName", this.getValueSetName())
-			.append("display", myDisplay)
-			.append("designationCount", myDesignations != null ? myDesignations.size() : "(null)")
-			.append("parentPids", mySourceConceptDirectParentPids)
-			.toString();
+				.append("id", myId)
+				.append("order", myOrder)
+				.append("system", mySystem)
+				.append("code", myCode)
+				.append("valueSet", myValueSet != null ? myValueSet.getId() : "(null)")
+				.append("valueSetPid", myValueSetPid)
+				.append("valueSetUrl", this.getValueSetUrl())
+				.append("valueSetName", this.getValueSetName())
+				.append("display", myDisplay)
+				.append("designationCount", myDesignations != null ? myDesignations.size() : "(null)")
+				.append("parentPids", mySourceConceptDirectParentPids)
+				.toString();
 	}
 
 	public Long getIndexStatus() {

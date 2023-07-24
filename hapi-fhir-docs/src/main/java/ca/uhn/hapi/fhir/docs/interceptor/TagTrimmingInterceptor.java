@@ -47,6 +47,5 @@ public class TagTrimmingInterceptor {
 		theResource.getMeta().getProfile().clear();
 		theResource.getMeta().getSecurity().clear();
 	}
-
 }
 // END SNIPPET: TagTrimmingInterceptor

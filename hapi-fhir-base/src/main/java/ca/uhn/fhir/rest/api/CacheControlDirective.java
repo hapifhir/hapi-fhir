@@ -116,7 +116,6 @@ public class CacheControlDirective {
 						} catch (NumberFormatException e) {
 							ourLog.warn("Invalid {} value: {}", Constants.CACHE_CONTROL_MAX_RESULTS, valueString);
 						}
-
 					}
 				}
 			}

@@ -19,15 +19,13 @@
  */
 package ca.uhn.fhir.jpa.dao.search;
 
-import org.apache.commons.lang3.Validate;
 import org.hibernate.search.engine.search.predicate.dsl.*;
 import org.hibernate.search.util.common.annotation.Incubating;
 
-import javax.annotation.Nonnull;
 import java.util.List;
-import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import javax.annotation.Nonnull;
 
 import static ca.uhn.fhir.jpa.dao.search.ExtendedHSearchClauseBuilder.PATH_JOINER;
 import static ca.uhn.fhir.jpa.model.search.HSearchIndexWriter.NESTED_SEARCH_PARAM_ROOT;
@@ -45,14 +43,16 @@ class PathContext implements SearchPredicateFactory {
 	private final BooleanPredicateClausesStep<?> myRootClause;
 	private final SearchPredicateFactory myPredicateFactory;
 
-	PathContext(String thePrefix, BooleanPredicateClausesStep<?> theClause, SearchPredicateFactory thePredicateFactory) {
+	PathContext(
+			String thePrefix, BooleanPredicateClausesStep<?> theClause, SearchPredicateFactory thePredicateFactory) {
 		myRootClause = theClause;
 		myPredicateFactory = thePredicateFactory;
 		myPathPrefix = thePrefix;
 	}
 
 	@Nonnull
-	static PathContext buildRootContext(BooleanPredicateClausesStep<?> theRootClause, SearchPredicateFactory thePredicateFactory) {
+	static PathContext buildRootContext(
+			BooleanPredicateClausesStep<?> theRootClause, SearchPredicateFactory thePredicateFactory) {
 		return new PathContext("", theRootClause, thePredicateFactory);
 	}
 
@@ -69,14 +69,17 @@ class PathContext implements SearchPredicateFactory {
 		return new PathContext(path, myRootClause, myPredicateFactory);
 	}
 
-	public PredicateFinalStep buildPredicateInNestedContext(String theSubPath, Function<PathContext, PredicateFinalStep> f) {
+	public PredicateFinalStep buildPredicateInNestedContext(
+			String theSubPath, Function<PathContext, PredicateFinalStep> f) {
 		String nestedRootPath = joinPath(NESTED_SEARCH_PARAM_ROOT, theSubPath);
 		NestedPredicateOptionsStep<?> orListPredicate = myPredicateFactory
-			.nested().objectField(nestedRootPath)
-			.nest(nestedRootPredicateFactory -> {
-				PathContext nestedCompositeSPContext = new PathContext(nestedRootPath, myRootClause, nestedRootPredicateFactory);
-				return f.apply(nestedCompositeSPContext);
-			});
+				.nested()
+				.objectField(nestedRootPath)
+				.nest(nestedRootPredicateFactory -> {
+					PathContext nestedCompositeSPContext =
+							new PathContext(nestedRootPath, myRootClause, nestedRootPredicateFactory);
+					return f.apply(nestedCompositeSPContext);
+				});
 		return orListPredicate;
 	}
 
@@ -102,7 +105,6 @@ class PathContext implements SearchPredicateFactory {
 		}
 		return finalClause;
 	}
-
 
 	// implement SearchPredicateFactory
 
@@ -184,7 +186,6 @@ class PathContext implements SearchPredicateFactory {
 	public String toAbsolutePath(String relativeFieldPath) {
 		return myPredicateFactory.toAbsolutePath(relativeFieldPath);
 	}
-
 
 	// HSearch uses a dotted path
 	// Some private static helpers that can be inlined.

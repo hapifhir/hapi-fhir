@@ -47,61 +47,74 @@ public class DatabaseSearchResultCacheSvcImpl implements ISearchResultCacheSvc {
 	private IHapiTransactionService myTransactionService;
 
 	@Override
-	public List<JpaPid> fetchResultPids(Search theSearch, int theFrom, int theTo, RequestDetails theRequestDetails, RequestPartitionId theRequestPartitionId) {
+	public List<JpaPid> fetchResultPids(
+			Search theSearch,
+			int theFrom,
+			int theTo,
+			RequestDetails theRequestDetails,
+			RequestPartitionId theRequestPartitionId) {
 		return myTransactionService
-			.withRequest(theRequestDetails)
-			.withRequestPartitionId(theRequestPartitionId)
-			.execute(() -> {
-				final Pageable page = toPage(theFrom, theTo);
-				if (page == null) {
-					return Collections.emptyList();
-				}
+				.withRequest(theRequestDetails)
+				.withRequestPartitionId(theRequestPartitionId)
+				.execute(() -> {
+					final Pageable page = toPage(theFrom, theTo);
+					if (page == null) {
+						return Collections.emptyList();
+					}
 
-				List<Long> retVal = mySearchResultDao
-					.findWithSearchPid(theSearch.getId(), page)
-					.getContent();
+					List<Long> retVal = mySearchResultDao
+							.findWithSearchPid(theSearch.getId(), page)
+							.getContent();
 
-				ourLog.debug("fetchResultPids for range {}-{} returned {} pids", theFrom, theTo, retVal.size());
+					ourLog.debug("fetchResultPids for range {}-{} returned {} pids", theFrom, theTo, retVal.size());
 
-				return JpaPid.fromLongList(retVal);
-			});
+					return JpaPid.fromLongList(retVal);
+				});
 	}
 
 	@Override
-	public List<JpaPid> fetchAllResultPids(Search theSearch, RequestDetails theRequestDetails, RequestPartitionId theRequestPartitionId) {
+	public List<JpaPid> fetchAllResultPids(
+			Search theSearch, RequestDetails theRequestDetails, RequestPartitionId theRequestPartitionId) {
 		return myTransactionService
-			.withRequest(theRequestDetails)
-			.withRequestPartitionId(theRequestPartitionId)
-			.execute(() -> {
-				List<Long> retVal = mySearchResultDao.findWithSearchPidOrderIndependent(theSearch.getId());
-				ourLog.trace("fetchAllResultPids returned {} pids", retVal.size());
-				return JpaPid.fromLongList(retVal);
-			});
+				.withRequest(theRequestDetails)
+				.withRequestPartitionId(theRequestPartitionId)
+				.execute(() -> {
+					List<Long> retVal = mySearchResultDao.findWithSearchPidOrderIndependent(theSearch.getId());
+					ourLog.trace("fetchAllResultPids returned {} pids", retVal.size());
+					return JpaPid.fromLongList(retVal);
+				});
 	}
 
 	@Override
-	public void storeResults(Search theSearch, List<JpaPid> thePreviouslyStoredResourcePids, List<JpaPid> theNewResourcePids, RequestDetails theRequestDetails, RequestPartitionId theRequestPartitionId) {
+	public void storeResults(
+			Search theSearch,
+			List<JpaPid> thePreviouslyStoredResourcePids,
+			List<JpaPid> theNewResourcePids,
+			RequestDetails theRequestDetails,
+			RequestPartitionId theRequestPartitionId) {
 		myTransactionService
-			.withRequest(theRequestDetails)
-			.withRequestPartitionId(theRequestPartitionId)
-			.execute(() -> {
-				List<SearchResult> resultsToSave = Lists.newArrayList();
+				.withRequest(theRequestDetails)
+				.withRequestPartitionId(theRequestPartitionId)
+				.execute(() -> {
+					List<SearchResult> resultsToSave = Lists.newArrayList();
 
-				ourLog.debug("Storing {} results with {} previous for search", theNewResourcePids.size(), thePreviouslyStoredResourcePids.size());
+					ourLog.debug(
+							"Storing {} results with {} previous for search",
+							theNewResourcePids.size(),
+							thePreviouslyStoredResourcePids.size());
 
-				int order = thePreviouslyStoredResourcePids.size();
-				for (JpaPid nextPid : theNewResourcePids) {
-					SearchResult nextResult = new SearchResult(theSearch);
-					nextResult.setResourcePid(nextPid.getId());
-					nextResult.setOrder(order);
-					resultsToSave.add(nextResult);
-					ourLog.trace("Saving ORDER[{}] Resource {}", order, nextResult.getResourcePid());
+					int order = thePreviouslyStoredResourcePids.size();
+					for (JpaPid nextPid : theNewResourcePids) {
+						SearchResult nextResult = new SearchResult(theSearch);
+						nextResult.setResourcePid(nextPid.getId());
+						nextResult.setOrder(order);
+						resultsToSave.add(nextResult);
+						ourLog.trace("Saving ORDER[{}] Resource {}", order, nextResult.getResourcePid());
 
-					order++;
-				}
+						order++;
+					}
 
-				mySearchResultDao.saveAll(resultsToSave);
-			});
+					mySearchResultDao.saveAll(resultsToSave);
+				});
 	}
-
 }

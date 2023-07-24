@@ -76,5 +76,4 @@ public class LastNameStandardizer extends FirstNameStandardizer {
 		}
 		return theToken;
 	}
-
 }

@@ -16,6 +16,8 @@ import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.ForcedId;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
+import ca.uhn.fhir.jpa.search.MockHapiTransactionService;
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
@@ -31,7 +33,11 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -39,12 +45,19 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationContext;
 
 import javax.persistence.EntityManager;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.isNotNull;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -73,6 +86,15 @@ class BaseHapiFhirResourceDaoTest {
 
 	@Mock
 	private ISearchParamRegistry mySearchParamRegistry;
+
+	@Mock
+	private SearchBuilderFactory mySearchBuilderFactory;
+
+	@Mock
+	private ISearchBuilder myISearchBuilder;
+
+	@Captor
+	private ArgumentCaptor<SearchParameterMap> mySearchParameterMapCaptor;
 
 	// we won't inject this
 	private FhirContext myFhirContext = FhirContext.forR4Cached();
@@ -167,17 +189,17 @@ class BaseHapiFhirResourceDaoTest {
 
 		// mock
 		when(myRequestPartitionHelperSvc.determineReadPartitionForRequestForRead(
-			Mockito.any(RequestDetails.class),
+			any(RequestDetails.class),
 			Mockito.anyString(),
-			Mockito.any(IIdType.class)
+			any(IIdType.class)
 		)).thenReturn(partitionId);
 		when(myIdHelperService.resolveResourcePersistentIds(
-			Mockito.any(RequestPartitionId.class),
+			any(RequestPartitionId.class),
 			Mockito.anyString(),
 			Mockito.anyString()
 		)).thenReturn(jpaPid);
 		when(myEntityManager.find(
-			Mockito.any(Class.class),
+			any(Class.class),
 			Mockito.anyLong()
 		)).thenReturn(entity);
 		// we don't stub myConfig.getResourceClientIdStrategy()
@@ -199,7 +221,7 @@ class BaseHapiFhirResourceDaoTest {
 
 		List<String> base = Lists.newArrayList("Patient", "Group");
 
-		when(myUrlPartitioner.partitionUrl(Mockito.any(), Mockito.any())).thenAnswer(i -> {
+		when(myUrlPartitioner.partitionUrl(any(), any())).thenAnswer(i -> {
 			PartitionedUrl partitionedUrl = new PartitionedUrl();
 			partitionedUrl.setUrl(i.getArgument(0));
 			return partitionedUrl;
@@ -237,6 +259,35 @@ class BaseHapiFhirResourceDaoTest {
 		ReindexJobParameters actualParameters = actualRequest.getParameters(ReindexJobParameters.class);
 
 		assertEquals(0, actualParameters.getPartitionedUrls().size());
+	}
+
+	@ParameterizedTest
+	@MethodSource("searchParameterMapProvider")
+	public void testMethodSearchForIds_withNullSPMapLoadSynchronousUpTo_defaultsToInternalSynchronousSearchSize(SearchParameterMap theSearchParameterMap, int expectedSearchSize) {
+		// setup
+		MockHapiTransactionService myTransactionService = new MockHapiTransactionService();
+		mySvc.setTransactionService(myTransactionService);
+
+		when(myRequestPartitionHelperSvc.determineReadPartitionForRequestForSearchType(any(), any(), any(), any())).thenReturn(mock(RequestPartitionId.class));
+		when(mySearchBuilderFactory.newSearchBuilder(any(), any(), any())).thenReturn(myISearchBuilder);
+		when(myISearchBuilder.createQuery(any(), any(), any(), any())).thenReturn(mock(IResultIterator.class));
+
+		lenient().when(myStorageSettings.getInternalSynchronousSearchSize()).thenReturn(5000);
+
+		// execute
+		mySvc.searchForIds(theSearchParameterMap, new SystemRequestDetails(), null);
+
+		// verify
+		verify(myISearchBuilder).createQuery(mySearchParameterMapCaptor.capture(), any(), any(), any());
+		SearchParameterMap capturedSP = mySearchParameterMapCaptor.getValue();
+		assertEquals(capturedSP.getLoadSynchronousUpTo(), expectedSearchSize);
+	}
+
+	static Stream<Arguments> searchParameterMapProvider() {
+		return Stream.of(
+			Arguments.of(new SearchParameterMap().setLoadSynchronousUpTo(1000), 1000),
+			Arguments.of(new SearchParameterMap(), 5000)
+		);
 	}
 
 	static class TestResourceDao extends BaseHapiFhirResourceDao<Patient> {

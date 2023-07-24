@@ -32,21 +32,25 @@ import java.util.Set;
  */
 public enum WorkChunkStatusEnum {
 	// wipmb For 6.8 Add WAITING for gated, and READY for in db, but not yet sent to channel.
-	QUEUED, IN_PROGRESS, ERRORED, FAILED, COMPLETED;
+	QUEUED,
+	IN_PROGRESS,
+	ERRORED,
+	FAILED,
+	COMPLETED;
 
 	private static final EnumMap<WorkChunkStatusEnum, Set<WorkChunkStatusEnum>> ourPriorStates;
+
 	static {
 		ourPriorStates = new EnumMap<>(WorkChunkStatusEnum.class);
-		for (WorkChunkStatusEnum nextEnum: WorkChunkStatusEnum.values()) {
+		for (WorkChunkStatusEnum nextEnum : WorkChunkStatusEnum.values()) {
 			ourPriorStates.put(nextEnum, EnumSet.noneOf(WorkChunkStatusEnum.class));
 		}
-		for (WorkChunkStatusEnum nextPriorEnum: WorkChunkStatusEnum.values()) {
-			for (WorkChunkStatusEnum nextEnum: nextPriorEnum.getNextStates()) {
+		for (WorkChunkStatusEnum nextPriorEnum : WorkChunkStatusEnum.values()) {
+			for (WorkChunkStatusEnum nextEnum : nextPriorEnum.getNextStates()) {
 				ourPriorStates.get(nextEnum).add(nextPriorEnum);
 			}
 		}
 	}
-
 
 	public boolean isIncomplete() {
 		return (this != WorkChunkStatusEnum.COMPLETED);
@@ -60,7 +64,7 @@ public enum WorkChunkStatusEnum {
 				return EnumSet.of(IN_PROGRESS, ERRORED, FAILED, COMPLETED);
 			case ERRORED:
 				return EnumSet.of(IN_PROGRESS, FAILED, COMPLETED);
-			// terminal states
+				// terminal states
 			case FAILED:
 			case COMPLETED:
 			default:
