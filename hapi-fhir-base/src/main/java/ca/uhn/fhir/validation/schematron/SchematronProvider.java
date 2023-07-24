@@ -29,10 +29,9 @@ import java.lang.reflect.Constructor;
 
 public class SchematronProvider {
 
-
 	private static final String I18N_KEY_NO_PH_WARNING = FhirValidator.class.getName() + ".noPhWarningOnStartup";
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirValidator.class);
-	
+
 	@CoverageIgnore
 	public static boolean isSchematronAvailable(FhirContext theFhirContext) {
 		try {
@@ -43,17 +42,18 @@ public class SchematronProvider {
 			return false;
 		}
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	@CoverageIgnore
 	public static Class<? extends IValidatorModule> getSchematronValidatorClass() {
 		try {
-			return (Class<? extends IValidatorModule>) Class.forName("ca.uhn.fhir.validation.schematron.SchematronBaseValidator");
+			return (Class<? extends IValidatorModule>)
+					Class.forName("ca.uhn.fhir.validation.schematron.SchematronBaseValidator");
 		} catch (ClassNotFoundException e) {
 			throw new IllegalStateException(Msg.code(1973) + "Cannot resolve schematron validator ", e);
 		}
 	}
-	
+
 	@CoverageIgnore
 	public static IValidatorModule getSchematronValidatorInstance(FhirContext myContext) {
 		try {

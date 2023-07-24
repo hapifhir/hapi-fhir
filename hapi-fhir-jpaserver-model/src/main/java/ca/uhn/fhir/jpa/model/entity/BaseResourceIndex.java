@@ -21,8 +21,8 @@ package ca.uhn.fhir.jpa.model.entity;
 
 import org.apache.commons.lang3.ObjectUtils;
 
-import javax.persistence.MappedSuperclass;
 import java.io.Serializable;
+import javax.persistence.MappedSuperclass;
 
 @MappedSuperclass
 public abstract class BaseResourceIndex extends BasePartitionable implements Serializable {
@@ -56,5 +56,4 @@ public abstract class BaseResourceIndex extends BasePartitionable implements Ser
 	public abstract boolean equals(Object obj);
 
 	public abstract <T extends BaseResourceIndex> void copyMutableValuesFrom(T theSource);
-
 }

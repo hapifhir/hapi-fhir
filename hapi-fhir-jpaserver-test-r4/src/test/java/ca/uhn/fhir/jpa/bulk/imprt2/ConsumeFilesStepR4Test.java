@@ -17,7 +17,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.servlet.ServletException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -39,7 +38,7 @@ public class ConsumeFilesStepR4Test extends BasePartitioningR4Test {
 
 	@BeforeEach
 	@Override
-	public void before() throws ServletException {
+	public void before() throws Exception {
 		super.before();
 		myPartitionSettings.setPartitioningEnabled(false);
 		myStorageSettings.setInlineResourceTextBelowSize(10000);

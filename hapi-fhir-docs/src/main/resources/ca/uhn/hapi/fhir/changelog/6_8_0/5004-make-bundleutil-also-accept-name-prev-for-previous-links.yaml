@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 5004
+title: "Previously when requesting `previous` or `prev` link using `BundleUtil.getLinkUrlOfType`, only the literal requested 
+   link was returned. Now  when requesting either `previous` or `prev` `previous` or `prev` link is returned.
+   If both exist, equality is validated and exception is thrown on failure."

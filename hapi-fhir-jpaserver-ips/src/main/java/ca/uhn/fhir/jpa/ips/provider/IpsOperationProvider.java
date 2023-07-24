@@ -42,20 +42,20 @@ public class IpsOperationProvider {
 		myIpsGeneratorSvc = theIpsGeneratorSvc;
 	}
 
-
 	/**
 	 * Patient/123/$summary
 	 * <p>
 	 * Note that not all parameters from the official specification are yet supported. See
 	 * <a href="http://build.fhir.org/ig/HL7/fhir-ips/OperationDefinition-summary.html>http://build.fhir.org/ig/HL7/fhir-ips/OperationDefinition-summary.html</a>
 	 */
-	@Operation(name = JpaConstants.OPERATION_SUMMARY, idempotent = true, bundleType = BundleTypeEnum.DOCUMENT, typeName = "Patient", canonicalUrl = JpaConstants.SUMMARY_OPERATION_URL)
-	public IBaseBundle patientInstanceSummary(
-		@IdParam
-		IIdType thePatientId,
+	@Operation(
+			name = JpaConstants.OPERATION_SUMMARY,
+			idempotent = true,
+			bundleType = BundleTypeEnum.DOCUMENT,
+			typeName = "Patient",
+			canonicalUrl = JpaConstants.SUMMARY_OPERATION_URL)
+	public IBaseBundle patientInstanceSummary(@IdParam IIdType thePatientId, RequestDetails theRequestDetails) {
 
-		RequestDetails theRequestDetails
-	) {
 		return myIpsGeneratorSvc.generateIps(theRequestDetails, thePatientId);
 	}
 
@@ -65,16 +65,19 @@ public class IpsOperationProvider {
 	 * Note that not all parameters from the official specification are yet supported. See
 	 * <a href="http://build.fhir.org/ig/HL7/fhir-ips/OperationDefinition-summary.html>http://build.fhir.org/ig/HL7/fhir-ips/OperationDefinition-summary.html</a>
 	 */
-	@Operation(name = JpaConstants.OPERATION_SUMMARY, idempotent = true, bundleType = BundleTypeEnum.DOCUMENT, typeName = "Patient", canonicalUrl = JpaConstants.SUMMARY_OPERATION_URL)
+	@Operation(
+			name = JpaConstants.OPERATION_SUMMARY,
+			idempotent = true,
+			bundleType = BundleTypeEnum.DOCUMENT,
+			typeName = "Patient",
+			canonicalUrl = JpaConstants.SUMMARY_OPERATION_URL)
 	public IBaseBundle patientTypeSummary(
-
-		@Description(shortDefinition = "When the logical id of the patient is not used, servers MAY choose to support patient selection based on provided identifier")
-		@OperationParam(name = "identifier", min = 0, max = 1)
-		TokenParam thePatientIdentifier,
-
-		RequestDetails theRequestDetails
-	) {
+			@Description(
+							shortDefinition =
+									"When the logical id of the patient is not used, servers MAY choose to support patient selection based on provided identifier")
+					@OperationParam(name = "identifier", min = 0, max = 1)
+					TokenParam thePatientIdentifier,
+			RequestDetails theRequestDetails) {
 		return myIpsGeneratorSvc.generateIps(theRequestDetails, thePatientIdentifier);
 	}
-
 }

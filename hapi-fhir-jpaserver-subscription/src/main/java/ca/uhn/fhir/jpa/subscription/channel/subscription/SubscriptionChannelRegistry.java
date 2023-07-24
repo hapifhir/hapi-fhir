@@ -28,6 +28,7 @@ import ca.uhn.fhir.jpa.subscription.channel.models.ReceivingChannelParameters;
 import ca.uhn.fhir.jpa.subscription.match.registry.ActiveSubscription;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionRegistry;
 import ca.uhn.fhir.jpa.subscription.model.ChannelRetryConfiguration;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.MultimapBuilder;
 import org.slf4j.Logger;
@@ -44,13 +45,16 @@ public class SubscriptionChannelRegistry {
 	private static final Logger ourLog = LoggerFactory.getLogger(SubscriptionRegistry.class);
 
 	private final SubscriptionChannelCache myDeliveryReceiverChannels = new SubscriptionChannelCache();
-	// This map is a reference count so we know to destroy the channel when there are no more active subscriptions using it
+	// This map is a reference count so we know to destroy the channel when there are no more active subscriptions using
+	// it
 	// Key Channel Name, Value Subscription Id
-	private final Multimap<String, String> myActiveSubscriptionByChannelName = MultimapBuilder.hashKeys().arrayListValues().build();
+	private final Multimap<String, String> myActiveSubscriptionByChannelName =
+			MultimapBuilder.hashKeys().arrayListValues().build();
 	private final Map<String, IChannelProducer> myChannelNameToSender = new ConcurrentHashMap<>();
 
 	@Autowired
 	private SubscriptionDeliveryHandlerFactory mySubscriptionDeliveryHandlerFactory;
+
 	@Autowired
 	private SubscriptionChannelFactory mySubscriptionDeliveryChannelFactory;
 
@@ -86,9 +90,11 @@ public class SubscriptionChannelRegistry {
 		receivingParameters.setRetryConfiguration(retryConfigParameters);
 
 		IChannelReceiver channelReceiver = newReceivingChannel(receivingParameters);
-		Optional<MessageHandler> deliveryHandler = mySubscriptionDeliveryHandlerFactory.createDeliveryHandler(theActiveSubscription.getChannelType());
+		Optional<MessageHandler> deliveryHandler =
+				mySubscriptionDeliveryHandlerFactory.createDeliveryHandler(theActiveSubscription.getChannelType());
 
-		SubscriptionChannelWithHandlers subscriptionChannelWithHandlers = new SubscriptionChannelWithHandlers(channelName, channelReceiver);
+		SubscriptionChannelWithHandlers subscriptionChannelWithHandlers =
+				new SubscriptionChannelWithHandlers(channelName, channelReceiver);
 		deliveryHandler.ifPresent(subscriptionChannelWithHandlers::addHandler);
 		myDeliveryReceiverChannels.put(channelName, subscriptionChannelWithHandlers);
 
@@ -104,15 +110,14 @@ public class SubscriptionChannelRegistry {
 	protected IChannelReceiver newReceivingChannel(ReceivingChannelParameters theParameters) {
 		ChannelConsumerSettings settings = new ChannelConsumerSettings();
 		settings.setRetryConfiguration(theParameters.getRetryConfiguration());
-		return mySubscriptionDeliveryChannelFactory.newDeliveryReceivingChannel(theParameters.getChannelName(),
-			settings);
+		return mySubscriptionDeliveryChannelFactory.newDeliveryReceivingChannel(
+				theParameters.getChannelName(), settings);
 	}
 
 	protected IChannelProducer newSendingChannel(ProducingChannelParameters theParameters) {
 		ChannelProducerSettings settings = new ChannelProducerSettings();
 		settings.setRetryConfiguration(theParameters.getRetryConfiguration());
-		return mySubscriptionDeliveryChannelFactory.newDeliverySendingChannel(theParameters.getChannelName(),
-			settings);
+		return mySubscriptionDeliveryChannelFactory.newDeliverySendingChannel(theParameters.getChannelName(), settings);
 	}
 
 	public synchronized void remove(ActiveSubscription theActiveSubscription) {
@@ -133,7 +138,6 @@ public class SubscriptionChannelRegistry {
 			myDeliveryReceiverChannels.closeAndRemove(channelName);
 			myChannelNameToSender.remove(channelName);
 		}
-
 	}
 
 	public synchronized SubscriptionChannelWithHandlers getDeliveryReceiverChannel(String theChannelName) {
@@ -146,5 +150,10 @@ public class SubscriptionChannelRegistry {
 
 	public synchronized int size() {
 		return myDeliveryReceiverChannels.size();
+	}
+
+	@VisibleForTesting
+	public void logForUnitTest() {
+		myDeliveryReceiverChannels.logForUnitTest();
 	}
 }

@@ -35,10 +35,10 @@ import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
-import javax.persistence.EntityManagerFactory;
-import javax.sql.DataSource;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
+import javax.persistence.EntityManagerFactory;
+import javax.sql.DataSource;
 
 @Configuration
 @Import({CommonConfig.class, JpaR5Config.class, HapiJpaConfig.class})
@@ -102,13 +102,12 @@ public class TestR5Config {
 		retVal.setPassword(myDbPassword);
 		applyCommonDatasourceParams(retVal);
 
-		DataSource dataSource = ProxyDataSourceBuilder
-			.create(retVal)
-//			.logQueryBySlf4j(SLF4JLogLevel.INFO, "SQL")
-			.logSlowQueryBySlf4j(10000, TimeUnit.MILLISECONDS)
-			.afterQuery(new CurrentThreadCaptureQueriesListener())
-			.countQuery()
-			.build();
+		DataSource dataSource = ProxyDataSourceBuilder.create(retVal)
+				//			.logQueryBySlf4j(SLF4JLogLevel.INFO, "SQL")
+				.logSlowQueryBySlf4j(10000, TimeUnit.MILLISECONDS)
+				.afterQuery(new CurrentThreadCaptureQueriesListener())
+				.countQuery()
+				.build();
 
 		return dataSource;
 	}
@@ -130,8 +129,10 @@ public class TestR5Config {
 	}
 
 	@Bean
-	public LocalContainerEntityManagerFactoryBean entityManagerFactory(ConfigurableListableBeanFactory theConfigurableListableBeanFactory, FhirContext theFhirContext) {
-		LocalContainerEntityManagerFactoryBean retVal = HapiEntityManagerFactoryUtil.newEntityManagerFactory(theConfigurableListableBeanFactory, theFhirContext);
+	public LocalContainerEntityManagerFactoryBean entityManagerFactory(
+			ConfigurableListableBeanFactory theConfigurableListableBeanFactory, FhirContext theFhirContext) {
+		LocalContainerEntityManagerFactoryBean retVal = HapiEntityManagerFactoryUtil.newEntityManagerFactory(
+				theConfigurableListableBeanFactory, theFhirContext);
 		retVal.setPersistenceUnitName("PU_HapiFhirJpaR5");
 		retVal.setDataSource(dataSource());
 		retVal.setJpaProperties(jpaProperties());
@@ -155,8 +156,9 @@ public class TestR5Config {
 		extraProperties.put("hibernate.cache.use_minimal_puts", "false");
 
 		extraProperties.put(BackendSettings.backendKey(BackendSettings.TYPE), "lucene");
-		extraProperties.put(BackendSettings.backendKey(LuceneBackendSettings.ANALYSIS_CONFIGURER),
-			HapiHSearchAnalysisConfigurers.HapiLuceneAnalysisConfigurer.class.getName());
+		extraProperties.put(
+				BackendSettings.backendKey(LuceneBackendSettings.ANALYSIS_CONFIGURER),
+				HapiHSearchAnalysisConfigurers.HapiLuceneAnalysisConfigurer.class.getName());
 		extraProperties.put(BackendSettings.backendKey(LuceneIndexSettings.DIRECTORY_TYPE), "local-filesystem");
 		extraProperties.put(BackendSettings.backendKey(LuceneIndexSettings.DIRECTORY_ROOT), myFhirLuceneLocation);
 		extraProperties.put(BackendSettings.backendKey(LuceneBackendSettings.LUCENE_VERSION), "LUCENE_CURRENT");
@@ -171,7 +173,8 @@ public class TestR5Config {
 	 */
 	@Bean
 	@Lazy
-	public RequestValidatingInterceptor requestValidatingInterceptor(IInstanceValidatorModule theFhirInstanceValidator) {
+	public RequestValidatingInterceptor requestValidatingInterceptor(
+			IInstanceValidatorModule theFhirInstanceValidator) {
 		RequestValidatingInterceptor requestValidator = new RequestValidatingInterceptor();
 		requestValidator.setFailOnSeverity(null);
 		requestValidator.setAddResponseHeaderOnSeverity(null);
@@ -202,6 +205,4 @@ public class TestR5Config {
 	public static PropertySourcesPlaceholderConfigurer propertySourcesPlaceholderConfigurer() {
 		return new PropertySourcesPlaceholderConfigurer();
 	}
-
-
 }

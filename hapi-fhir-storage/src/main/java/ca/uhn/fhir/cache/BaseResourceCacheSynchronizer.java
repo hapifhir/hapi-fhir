@@ -27,10 +27,10 @@ import ca.uhn.fhir.jpa.cache.IResourceChangeListenerCache;
 import ca.uhn.fhir.jpa.cache.IResourceChangeListenerRegistry;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.retry.Retrier;
-import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionConstants;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
+import ca.uhn.fhir.subscription.SubscriptionConstants;
 import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -42,13 +42,13 @@ import org.springframework.context.event.ContextClosedEvent;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
 
-import javax.annotation.Nonnull;
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.Semaphore;
 import java.util.stream.Collectors;
+import javax.annotation.Nonnull;
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 
 public abstract class BaseResourceCacheSynchronizer implements IResourceChangeListener {
 	private static final Logger ourLog = LoggerFactory.getLogger(BaseResourceCacheSynchronizer.class);
@@ -58,8 +58,10 @@ public abstract class BaseResourceCacheSynchronizer implements IResourceChangeLi
 
 	@Autowired
 	protected ISearchParamRegistry mySearchParamRegistry;
+
 	@Autowired
 	private IResourceChangeListenerRegistry myResourceChangeListenerRegistry;
+
 	@Autowired
 	DaoRegistry myDaoRegistry;
 
@@ -82,7 +84,9 @@ public abstract class BaseResourceCacheSynchronizer implements IResourceChangeLi
 		mySearchParameterMap = getSearchParameterMap();
 		mySystemRequestDetails = SystemRequestDetails.forAllPartitions();
 
-		IResourceChangeListenerCache resourceCache = myResourceChangeListenerRegistry.registerResourceResourceChangeListener(myResourceName, mySearchParameterMap, this, REFRESH_INTERVAL);
+		IResourceChangeListenerCache resourceCache =
+				myResourceChangeListenerRegistry.registerResourceResourceChangeListener(
+						myResourceName, mySearchParameterMap, this, REFRESH_INTERVAL);
 		resourceCache.forceRefresh();
 	}
 
@@ -145,7 +149,11 @@ public abstract class BaseResourceCacheSynchronizer implements IResourceChangeLi
 			Integer resourceCount = resourceBundleList.size();
 			assert resourceCount != null;
 			if (resourceCount >= SubscriptionConstants.MAX_SUBSCRIPTION_RESULTS) {
-				ourLog.error("Currently over {} {}s.  Some {}s have not been loaded.", SubscriptionConstants.MAX_SUBSCRIPTION_RESULTS, myResourceName, myResourceName);
+				ourLog.error(
+						"Currently over {} {}s.  Some {}s have not been loaded.",
+						SubscriptionConstants.MAX_SUBSCRIPTION_RESULTS,
+						myResourceName,
+						myResourceName);
 			}
 
 			List<IBaseResource> resourceList = resourceBundleList.getResources(0, resourceCount);
@@ -174,19 +182,20 @@ public abstract class BaseResourceCacheSynchronizer implements IResourceChangeLi
 		return myDaoRegistry.getResourceDao(myResourceName);
 	}
 
-
-
-
-
 	@Override
 	public void handleInit(Collection<IIdType> theResourceIds) {
 		if (!resourceDaoExists()) {
-			ourLog.warn("The resource type {} is enabled on this server, but there is no {} DAO configured.", myResourceName, myResourceName);
+			ourLog.warn(
+					"The resource type {} is enabled on this server, but there is no {} DAO configured.",
+					myResourceName,
+					myResourceName);
 			return;
 		}
 		IFhirResourceDao<?> resourceDao = getResourceDao();
 		SystemRequestDetails systemRequestDetails = SystemRequestDetails.forAllPartitions();
-		List<IBaseResource> resourceList = theResourceIds.stream().map(n -> resourceDao.read(n, systemRequestDetails)).collect(Collectors.toList());
+		List<IBaseResource> resourceList = theResourceIds.stream()
+				.map(n -> resourceDao.read(n, systemRequestDetails))
+				.collect(Collectors.toList());
 		handleInit(resourceList);
 	}
 
@@ -194,7 +203,8 @@ public abstract class BaseResourceCacheSynchronizer implements IResourceChangeLi
 
 	@Override
 	public void handleChange(IResourceChangeEvent theResourceChangeEvent) {
-		// For now ignore the contents of theResourceChangeEvent.  In the future, consider updating the registry based on
+		// For now ignore the contents of theResourceChangeEvent.  In the future, consider updating the registry based
+		// on
 		// known resources that have been created, updated & deleted
 		syncDatabaseToCache();
 	}

@@ -60,7 +60,6 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
 
-import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -69,6 +68,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
+import javax.annotation.Nonnull;
 
 import static ca.uhn.fhir.jpa.util.SearchParameterMapCalculator.isWantCount;
 import static ca.uhn.fhir.jpa.util.SearchParameterMapCalculator.isWantOnlyCount;
@@ -126,16 +126,15 @@ public class SearchTask implements Callable<Void> {
 	 * Constructor
 	 */
 	public SearchTask(
-		SearchTaskParameters theCreationParams,
-		HapiTransactionService theManagedTxManager,
-		FhirContext theContext,
-		IInterceptorBroadcaster theInterceptorBroadcaster,
-		SearchBuilderFactory theSearchBuilderFactory,
-		ISearchResultCacheSvc theSearchResultCacheSvc,
-		JpaStorageSettings theStorageSettings,
-		ISearchCacheSvc theSearchCacheSvc,
-		IPagingProvider thePagingProvider
-	) {
+			SearchTaskParameters theCreationParams,
+			HapiTransactionService theManagedTxManager,
+			FhirContext theContext,
+			IInterceptorBroadcaster theInterceptorBroadcaster,
+			SearchBuilderFactory theSearchBuilderFactory,
+			ISearchResultCacheSvc theSearchResultCacheSvc,
+			JpaStorageSettings theStorageSettings,
+			ISearchCacheSvc theSearchCacheSvc,
+			IPagingProvider thePagingProvider) {
 		// beans
 		myTxService = theManagedTxManager;
 		myContext = theContext;
@@ -176,7 +175,8 @@ public class SearchTask implements Callable<Void> {
 		ourLog.trace("Awaiting initial sync");
 		do {
 			ourLog.trace("Search {} aborted: {}", getSearch().getUuid(), !isNotAborted());
-			if (AsyncUtil.awaitLatchAndThrowInternalErrorExceptionOnInterrupt(getInitialCollectionLatch(), 250L, TimeUnit.MILLISECONDS)) {
+			if (AsyncUtil.awaitLatchAndThrowInternalErrorExceptionOnInterrupt(
+					getInitialCollectionLatch(), 250L, TimeUnit.MILLISECONDS)) {
 				break;
 			}
 		} while (getSearch().getStatus() == SearchStatusEnum.LOADING);
@@ -199,7 +199,8 @@ public class SearchTask implements Callable<Void> {
 	}
 
 	private ISearchBuilder newSearchBuilder() {
-		Class<? extends IBaseResource> resourceTypeClass = myContext.getResourceDefinition(myResourceType).getImplementingClass();
+		Class<? extends IBaseResource> resourceTypeClass =
+				myContext.getResourceDefinition(myResourceType).getImplementingClass();
 		return mySearchBuilderFactory.newSearchBuilder(myCallingDao, myResourceType, resourceTypeClass);
 	}
 
@@ -239,7 +240,10 @@ public class SearchTask implements Callable<Void> {
 			}
 
 			if (keepWaiting) {
-				ourLog.info("Waiting as we only have {} results - Search status: {}", mySyncedPids.size(), mySearch.getStatus());
+				ourLog.info(
+						"Waiting as we only have {} results - Search status: {}",
+						mySyncedPids.size(),
+						mySearch.getStatus());
 				AsyncUtil.sleep(500L);
 			}
 		} while (keepWaiting);
@@ -259,105 +263,123 @@ public class SearchTask implements Callable<Void> {
 			}
 		}
 
-		ourLog.trace("Done syncing results - Wanted {}-{} and returning {} of {}", theFromIndex, theToIndex, retVal.size(), mySyncedPids.size());
+		ourLog.trace(
+				"Done syncing results - Wanted {}-{} and returning {} of {}",
+				theFromIndex,
+				theToIndex,
+				retVal.size(),
+				mySyncedPids.size());
 
 		return retVal;
 	}
 
 	public void saveSearch() {
 		myTxService
-			.withRequest(myRequest)
-			.withRequestPartitionId(myRequestPartitionId)
-			.withPropagation(Propagation.REQUIRES_NEW)
-			.execute(() -> doSaveSearch());
+				.withRequest(myRequest)
+				.withRequestPartitionId(myRequestPartitionId)
+				.withPropagation(Propagation.REQUIRES_NEW)
+				.execute(() -> doSaveSearch());
 	}
 
 	private void saveUnsynced(final IResultIterator theResultIter) {
 		myTxService
-			.withRequest(myRequest)
-			.withRequestPartitionId(myRequestPartitionId)
-			.execute(() -> {
-				if (mySearch.getId() == null) {
+				.withRequest(myRequest)
+				.withRequestPartitionId(myRequestPartitionId)
+				.execute(() -> {
+					if (mySearch.getId() == null) {
+						doSaveSearch();
+					}
+
+					ArrayList<JpaPid> unsyncedPids = myUnsyncedPids;
+					int countBlocked = 0;
+
+					// Interceptor call: STORAGE_PREACCESS_RESOURCES
+					// This can be used to remove results from the search result details before
+					// the user has a chance to know that they were in the results
+					if (mySearchRuntimeDetails.getRequestDetails() != null && unsyncedPids.isEmpty() == false) {
+						JpaPreResourceAccessDetails accessDetails =
+								new JpaPreResourceAccessDetails(unsyncedPids, () -> newSearchBuilder());
+						HookParams params = new HookParams()
+								.add(IPreResourceAccessDetails.class, accessDetails)
+								.add(RequestDetails.class, mySearchRuntimeDetails.getRequestDetails())
+								.addIfMatchesType(
+										ServletRequestDetails.class, mySearchRuntimeDetails.getRequestDetails());
+						CompositeInterceptorBroadcaster.doCallHooks(
+								myInterceptorBroadcaster, myRequest, Pointcut.STORAGE_PREACCESS_RESOURCES, params);
+
+						for (int i = unsyncedPids.size() - 1; i >= 0; i--) {
+							if (accessDetails.isDontReturnResourceAtIndex(i)) {
+								unsyncedPids.remove(i);
+								myCountBlockedThisPass++;
+								myCountSavedTotal++;
+								countBlocked++;
+							}
+						}
+					}
+
+					// Actually store the results in the query cache storage
+					myCountSavedTotal += unsyncedPids.size();
+					myCountSavedThisPass += unsyncedPids.size();
+					mySearchResultCacheSvc.storeResults(
+							mySearch, mySyncedPids, unsyncedPids, myRequest, getRequestPartitionId());
+
+					synchronized (mySyncedPids) {
+						int numSyncedThisPass = unsyncedPids.size();
+						ourLog.trace(
+								"Syncing {} search results - Have more: {}",
+								numSyncedThisPass,
+								theResultIter.hasNext());
+						mySyncedPids.addAll(unsyncedPids);
+						unsyncedPids.clear();
+
+						if (theResultIter.hasNext() == false) {
+							int skippedCount = theResultIter.getSkippedCount();
+							int nonSkippedCount = theResultIter.getNonSkippedCount();
+							int totalFetched = skippedCount + myCountSavedThisPass + myCountBlockedThisPass;
+							ourLog.trace(
+									"MaxToFetch[{}] SkippedCount[{}] CountSavedThisPass[{}] CountSavedThisTotal[{}] AdditionalPrefetchRemaining[{}]",
+									myMaxResultsToFetch,
+									skippedCount,
+									myCountSavedThisPass,
+									myCountSavedTotal,
+									myAdditionalPrefetchThresholdsRemaining);
+
+							if (nonSkippedCount == 0
+									|| (myMaxResultsToFetch != null && totalFetched < myMaxResultsToFetch)) {
+								ourLog.trace("Setting search status to FINISHED");
+								mySearch.setStatus(SearchStatusEnum.FINISHED);
+								mySearch.setTotalCount(myCountSavedTotal - countBlocked);
+							} else if (myAdditionalPrefetchThresholdsRemaining) {
+								ourLog.trace("Setting search status to PASSCMPLET");
+								mySearch.setStatus(SearchStatusEnum.PASSCMPLET);
+								mySearch.setSearchParameterMap(myParams);
+							} else {
+								ourLog.trace("Setting search status to FINISHED");
+								mySearch.setStatus(SearchStatusEnum.FINISHED);
+								mySearch.setTotalCount(myCountSavedTotal - countBlocked);
+							}
+						}
+					}
+
+					mySearch.setNumFound(myCountSavedTotal);
+					mySearch.setNumBlocked(mySearch.getNumBlocked() + countBlocked);
+
+					int numSynced;
+					synchronized (mySyncedPids) {
+						numSynced = mySyncedPids.size();
+					}
+
+					if (myStorageSettings.getCountSearchResultsUpTo() == null
+							|| myStorageSettings.getCountSearchResultsUpTo() <= 0
+							|| myStorageSettings.getCountSearchResultsUpTo() <= numSynced) {
+						myInitialCollectionLatch.countDown();
+					}
+
 					doSaveSearch();
-				}
 
-				ArrayList<JpaPid> unsyncedPids = myUnsyncedPids;
-				int countBlocked = 0;
-
-				// Interceptor call: STORAGE_PREACCESS_RESOURCES
-				// This can be used to remove results from the search result details before
-				// the user has a chance to know that they were in the results
-				if (mySearchRuntimeDetails.getRequestDetails() != null && unsyncedPids.isEmpty() == false) {
-					JpaPreResourceAccessDetails accessDetails = new JpaPreResourceAccessDetails(unsyncedPids, () -> newSearchBuilder());
-					HookParams params = new HookParams()
-						.add(IPreResourceAccessDetails.class, accessDetails)
-						.add(RequestDetails.class, mySearchRuntimeDetails.getRequestDetails())
-						.addIfMatchesType(ServletRequestDetails.class, mySearchRuntimeDetails.getRequestDetails());
-					CompositeInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, myRequest, Pointcut.STORAGE_PREACCESS_RESOURCES, params);
-
-					for (int i = unsyncedPids.size() - 1; i >= 0; i--) {
-						if (accessDetails.isDontReturnResourceAtIndex(i)) {
-							unsyncedPids.remove(i);
-							myCountBlockedThisPass++;
-							myCountSavedTotal++;
-							countBlocked++;
-						}
-					}
-				}
-
-				// Actually store the results in the query cache storage
-				myCountSavedTotal += unsyncedPids.size();
-				myCountSavedThisPass += unsyncedPids.size();
-				mySearchResultCacheSvc.storeResults(mySearch, mySyncedPids, unsyncedPids, myRequest, getRequestPartitionId());
-
-				synchronized (mySyncedPids) {
-					int numSyncedThisPass = unsyncedPids.size();
-					ourLog.trace("Syncing {} search results - Have more: {}", numSyncedThisPass, theResultIter.hasNext());
-					mySyncedPids.addAll(unsyncedPids);
-					unsyncedPids.clear();
-
-					if (theResultIter.hasNext() == false) {
-						int skippedCount = theResultIter.getSkippedCount();
-						int nonSkippedCount = theResultIter.getNonSkippedCount();
-						int totalFetched = skippedCount + myCountSavedThisPass + myCountBlockedThisPass;
-						ourLog.trace("MaxToFetch[{}] SkippedCount[{}] CountSavedThisPass[{}] CountSavedThisTotal[{}] AdditionalPrefetchRemaining[{}]", myMaxResultsToFetch, skippedCount, myCountSavedThisPass, myCountSavedTotal, myAdditionalPrefetchThresholdsRemaining);
-
-						if (nonSkippedCount == 0 || (myMaxResultsToFetch != null && totalFetched < myMaxResultsToFetch)) {
-							ourLog.trace("Setting search status to FINISHED");
-							mySearch.setStatus(SearchStatusEnum.FINISHED);
-							mySearch.setTotalCount(myCountSavedTotal - countBlocked);
-						} else if (myAdditionalPrefetchThresholdsRemaining) {
-							ourLog.trace("Setting search status to PASSCMPLET");
-							mySearch.setStatus(SearchStatusEnum.PASSCMPLET);
-							mySearch.setSearchParameterMap(myParams);
-						} else {
-							ourLog.trace("Setting search status to FINISHED");
-							mySearch.setStatus(SearchStatusEnum.FINISHED);
-							mySearch.setTotalCount(myCountSavedTotal - countBlocked);
-						}
-					}
-				}
-
-				mySearch.setNumFound(myCountSavedTotal);
-				mySearch.setNumBlocked(mySearch.getNumBlocked() + countBlocked);
-
-				int numSynced;
-				synchronized (mySyncedPids) {
-					numSynced = mySyncedPids.size();
-				}
-
-				if (myStorageSettings.getCountSearchResultsUpTo() == null ||
-					myStorageSettings.getCountSearchResultsUpTo() <= 0 ||
-					myStorageSettings.getCountSearchResultsUpTo() <= numSynced) {
-					myInitialCollectionLatch.countDown();
-				}
-
-				doSaveSearch();
-
-				ourLog.trace("saveUnsynced() - pre-commit");
-			});
+					ourLog.trace("saveUnsynced() - pre-commit");
+				});
 		ourLog.trace("saveUnsynced() - post-commit");
-
 	}
 
 	public boolean isNotAborted() {
@@ -393,27 +415,35 @@ public class SearchTask implements Callable<Void> {
 			saveSearch();
 
 			myTxService
-				.withRequest(myRequest)
-				.withRequestPartitionId(myRequestPartitionId)
-				.withIsolation(Isolation.READ_COMMITTED)
-				.execute(() -> doSearch());
+					.withRequest(myRequest)
+					.withRequestPartitionId(myRequestPartitionId)
+					.withIsolation(Isolation.READ_COMMITTED)
+					.execute(() -> doSearch());
 
 			mySearchRuntimeDetails.setSearchStatus(mySearch.getStatus());
 			if (mySearch.getStatus() == SearchStatusEnum.FINISHED) {
 				HookParams params = new HookParams()
-					.add(RequestDetails.class, myRequest)
-					.addIfMatchesType(ServletRequestDetails.class, myRequest)
-					.add(SearchRuntimeDetails.class, mySearchRuntimeDetails);
-				CompositeInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, myRequest, Pointcut.JPA_PERFTRACE_SEARCH_COMPLETE, params);
+						.add(RequestDetails.class, myRequest)
+						.addIfMatchesType(ServletRequestDetails.class, myRequest)
+						.add(SearchRuntimeDetails.class, mySearchRuntimeDetails);
+				CompositeInterceptorBroadcaster.doCallHooks(
+						myInterceptorBroadcaster, myRequest, Pointcut.JPA_PERFTRACE_SEARCH_COMPLETE, params);
 			} else {
 				HookParams params = new HookParams()
-					.add(RequestDetails.class, myRequest)
-					.addIfMatchesType(ServletRequestDetails.class, myRequest)
-					.add(SearchRuntimeDetails.class, mySearchRuntimeDetails);
-				CompositeInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, myRequest, Pointcut.JPA_PERFTRACE_SEARCH_PASS_COMPLETE, params);
+						.add(RequestDetails.class, myRequest)
+						.addIfMatchesType(ServletRequestDetails.class, myRequest)
+						.add(SearchRuntimeDetails.class, mySearchRuntimeDetails);
+				CompositeInterceptorBroadcaster.doCallHooks(
+						myInterceptorBroadcaster, myRequest, Pointcut.JPA_PERFTRACE_SEARCH_PASS_COMPLETE, params);
 			}
 
-			ourLog.trace("Have completed search for [{}{}] and found {} resources in {}ms - Status is {}", mySearch.getResourceType(), mySearch.getSearchQueryString(), mySyncedPids.size(), sw.getMillis(), mySearch.getStatus());
+			ourLog.trace(
+					"Have completed search for [{}{}] and found {} resources in {}ms - Status is {}",
+					mySearch.getResourceType(),
+					mySearch.getSearchQueryString(),
+					mySyncedPids.size(),
+					sw.getMillis(),
+					mySearch.getStatus());
 
 		} catch (Throwable t) {
 
@@ -455,10 +485,11 @@ public class SearchTask implements Callable<Void> {
 
 			mySearchRuntimeDetails.setSearchStatus(mySearch.getStatus());
 			HookParams params = new HookParams()
-				.add(RequestDetails.class, myRequest)
-				.addIfMatchesType(ServletRequestDetails.class, myRequest)
-				.add(SearchRuntimeDetails.class, mySearchRuntimeDetails);
-			CompositeInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, myRequest, Pointcut.JPA_PERFTRACE_SEARCH_FAILED, params);
+					.add(RequestDetails.class, myRequest)
+					.addIfMatchesType(ServletRequestDetails.class, myRequest)
+					.add(SearchRuntimeDetails.class, mySearchRuntimeDetails);
+			CompositeInterceptorBroadcaster.doCallHooks(
+					myInterceptorBroadcaster, myRequest, Pointcut.JPA_PERFTRACE_SEARCH_FAILED, params);
 
 			saveSearch();
 			span.captureException(t);
@@ -468,7 +499,6 @@ public class SearchTask implements Callable<Void> {
 			myInitialCollectionLatch.countDown();
 			markComplete();
 			span.end();
-
 		}
 		return null;
 	}
@@ -496,7 +526,9 @@ public class SearchTask implements Callable<Void> {
 		 * before doing anything else.
 		 */
 		boolean myParamWantOnlyCount = isWantOnlyCount(myParams);
-		boolean myParamOrDefaultWantCount = nonNull(myParams.getSearchTotalMode()) ? isWantCount(myParams) : SearchParameterMapCalculator.isWantCount(myStorageSettings.getDefaultTotalMode());
+		boolean myParamOrDefaultWantCount = nonNull(myParams.getSearchTotalMode())
+				? isWantCount(myParams)
+				: SearchParameterMapCalculator.isWantCount(myStorageSettings.getDefaultTotalMode());
 
 		if (myParamWantOnlyCount || myParamOrDefaultWantCount) {
 			ourLog.trace("Performing count");
@@ -516,15 +548,15 @@ public class SearchTask implements Callable<Void> {
 			ourLog.trace("Got count {}", count);
 
 			myTxService
-				.withRequest(myRequest)
-				.withRequestPartitionId(myRequestPartitionId)
-				.execute(() -> {
-					mySearch.setTotalCount(count.intValue());
-					if (myParamWantOnlyCount) {
-						mySearch.setStatus(SearchStatusEnum.FINISHED);
-					}
-					doSaveSearch();
-				});
+					.withRequest(myRequest)
+					.withRequestPartitionId(myRequestPartitionId)
+					.execute(() -> {
+						mySearch.setTotalCount(count.intValue());
+						if (myParamWantOnlyCount) {
+							mySearch.setStatus(SearchStatusEnum.FINISHED);
+						}
+						doSaveSearch();
+					});
 			if (myParamWantOnlyCount) {
 				return;
 			}
@@ -547,7 +579,9 @@ public class SearchTask implements Callable<Void> {
 			minWanted += currentlyLoaded;
 		}
 
-		for (Iterator<Integer> iter = myStorageSettings.getSearchPreFetchThresholds().iterator(); iter.hasNext(); ) {
+		for (Iterator<Integer> iter =
+						myStorageSettings.getSearchPreFetchThresholds().iterator();
+				iter.hasNext(); ) {
 			int next = iter.next();
 			if (next != -1 && next <= currentlyLoaded) {
 				continue;
@@ -597,7 +631,8 @@ public class SearchTask implements Callable<Void> {
 		 * This is an odd implementation behaviour, but the change
 		 * for this will require a lot more handling at higher levels
 		 */
-		try (IResultIterator<JpaPid> resultIterator = sb.createQuery(myParams, mySearchRuntimeDetails, myRequest, myRequestPartitionId)) {
+		try (IResultIterator<JpaPid> resultIterator =
+				sb.createQuery(myParams, mySearchRuntimeDetails, myRequest, myRequestPartitionId)) {
 			assert (resultIterator != null);
 
 			/*
@@ -611,9 +646,9 @@ public class SearchTask implements Callable<Void> {
 
 				boolean shouldSync = myUnsyncedPids.size() >= syncSize;
 
-				if (myStorageSettings.getCountSearchResultsUpTo() != null &&
-					myStorageSettings.getCountSearchResultsUpTo() > 0 &&
-					myStorageSettings.getCountSearchResultsUpTo() < myUnsyncedPids.size()) {
+				if (myStorageSettings.getCountSearchResultsUpTo() != null
+						&& myStorageSettings.getCountSearchResultsUpTo() > 0
+						&& myStorageSettings.getCountSearchResultsUpTo() < myUnsyncedPids.size()) {
 					shouldSync = false;
 				}
 
@@ -631,7 +666,6 @@ public class SearchTask implements Callable<Void> {
 				if (myLoadingThrottleForUnitTests != null) {
 					AsyncUtil.sleep(myLoadingThrottleForUnitTests);
 				}
-
 			}
 
 			// If no abort was requested, bail out

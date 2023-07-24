@@ -58,9 +58,9 @@ public class MdmEventIT extends BaseMdmR4Test {
 		addExternalEID(patient2, "eid-11");
 		addExternalEID(patient2, "eid-22");
 
-		myMdmHelper.updateWithLatch(patient2);
+		MdmHelperR4.OutcomeAndLogMessageWrapper outcome = myMdmHelper.updateWithLatch(patient2);
 
-		MdmLinkEvent linkChangeEvent = myMdmHelper.getAfterMdmLatch().getLatchInvocationParameterOfType(MdmLinkEvent.class);
+		MdmLinkEvent linkChangeEvent = outcome.getMdmLinkEvent();
 		assertNotNull(linkChangeEvent);
 
 		ourLog.info("Got event: {}", linkChangeEvent);
@@ -84,15 +84,15 @@ public class MdmEventIT extends BaseMdmR4Test {
 	@Test
 	public void testCreateLinkChangeEvent() throws InterruptedException {
 		Practitioner pr = buildPractitionerWithNameAndId("Young", "AC-DC");
-		myMdmHelper.createWithLatch(pr);
+		MdmHelperR4.OutcomeAndLogMessageWrapper outcome = myMdmHelper.createWithLatch(pr);
 
-		ResourceOperationMessage resourceOperationMessage = myMdmHelper.getAfterMdmLatch().getLatchInvocationParameterOfType(ResourceOperationMessage.class);
+		ResourceOperationMessage resourceOperationMessage = outcome.getResourceOperationMessage();
 		assertNotNull(resourceOperationMessage);
 		assertEquals(pr.getIdElement().toUnqualifiedVersionless().getValue(), resourceOperationMessage.getId());
 
 		MdmLink link = getLinkByTargetId(pr);
 
-		MdmLinkEvent linkChangeEvent = myMdmHelper.getAfterMdmLatch().getLatchInvocationParameterOfType(MdmLinkEvent.class);
+		MdmLinkEvent linkChangeEvent = outcome.getMdmLinkEvent();
 		assertNotNull(linkChangeEvent);
 
 		assertEquals(1, linkChangeEvent.getMdmLinks().size());
@@ -110,9 +110,9 @@ public class MdmEventIT extends BaseMdmR4Test {
 	@Test
 	public void testUpdateLinkChangeEvent() throws InterruptedException {
 		Patient patient1 = addExternalEID(buildJanePatient(), "eid-1");
-		myMdmHelper.createWithLatch(patient1);
+		MdmHelperR4.OutcomeAndLogMessageWrapper outcome = myMdmHelper.createWithLatch(patient1);
 
-		MdmLinkEvent linkChangeEvent = myMdmHelper.getAfterMdmLatch().getLatchInvocationParameterOfType(MdmLinkEvent.class);
+		MdmLinkEvent linkChangeEvent = outcome.getMdmLinkEvent();
 		assertNotNull(linkChangeEvent);
 		assertEquals(1, linkChangeEvent.getMdmLinks().size());
 

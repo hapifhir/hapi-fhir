@@ -1,0 +1,8 @@
+---
+- item:
+    type: "add"
+    title: "The version of a few dependencies have been bumped to the latest versions
+    (dependent HAPI modules listed in brackets):
+    <ul>
+        <li>Hibernate ORM (JPA): 5.6.12.Final -&gt; 5.6.15.Final</li>
+    </ul>"

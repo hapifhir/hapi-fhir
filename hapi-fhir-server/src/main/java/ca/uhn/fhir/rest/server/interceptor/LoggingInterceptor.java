@@ -38,12 +38,12 @@ import org.apache.commons.text.lookup.StringLookup;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Date;
 import java.util.Map.Entry;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -139,7 +139,7 @@ public class LoggingInterceptor {
 	public LoggingInterceptor() {
 		super();
 	}
-	
+
 	/**
 	 * Get the log message format to be used when logging exceptions
 	 */
@@ -148,20 +148,23 @@ public class LoggingInterceptor {
 	}
 
 	@Hook(Pointcut.SERVER_HANDLE_EXCEPTION)
-	public boolean handleException(RequestDetails theRequestDetails, BaseServerResponseException theException, HttpServletRequest theServletRequest, HttpServletResponse theServletResponse) throws ServletException, IOException {
+	public boolean handleException(
+			RequestDetails theRequestDetails,
+			BaseServerResponseException theException,
+			HttpServletRequest theServletRequest,
+			HttpServletResponse theServletResponse)
+			throws ServletException, IOException {
 		if (myLogExceptions) {
 			// Perform any string substitutions from the message format
 			StringLookup lookup = new MyLookup(theServletRequest, theException, theRequestDetails);
 			StringSubstitutor subs = new StringSubstitutor(lookup, "${", "}", '\\');
 
-			// Actuall log the line
+			// Actually log the line
 			String line = subs.replace(myErrorMessageFormat);
 			myLogger.info(line);
-
 		}
 		return true;
 	}
-
 
 	@Hook(Pointcut.SERVER_PROCESSING_COMPLETED_NORMALLY)
 	public void processingCompletedNormally(ServletRequestDetails theRequestDetails) {
@@ -204,7 +207,6 @@ public class LoggingInterceptor {
 	public void setLoggerName(String theLoggerName) {
 		Validate.notBlank(theLoggerName, "Logger name can not be null/empty");
 		myLogger = LoggerFactory.getLogger(theLoggerName);
-
 	}
 
 	/**
@@ -227,7 +229,10 @@ public class LoggingInterceptor {
 			myException = null;
 		}
 
-		MyLookup(HttpServletRequest theServletRequest, BaseServerResponseException theException, RequestDetails theRequestDetails) {
+		MyLookup(
+				HttpServletRequest theServletRequest,
+				BaseServerResponseException theException,
+				RequestDetails theRequestDetails) {
 			myException = theException;
 			myRequestDetails = theRequestDetails;
 			myRequest = theServletRequest;
@@ -248,15 +253,15 @@ public class LoggingInterceptor {
 			} else if ("operationName".equals(theKey)) {
 				if (myRequestDetails.getRestOperationType() != null) {
 					switch (myRequestDetails.getRestOperationType()) {
-					case EXTENDED_OPERATION_INSTANCE:
-					case EXTENDED_OPERATION_SERVER:
-					case EXTENDED_OPERATION_TYPE:
-						return myRequestDetails.getOperation();
-					default:
-						return "";
+						case EXTENDED_OPERATION_INSTANCE:
+						case EXTENDED_OPERATION_SERVER:
+						case EXTENDED_OPERATION_TYPE:
+							return myRequestDetails.getOperation();
+						default:
+							return "";
 					}
 				}
-					return "";
+				return "";
 			} else if ("id".equals(theKey)) {
 				if (myRequestDetails.getId() != null) {
 					return myRequestDetails.getId().getValue();
@@ -274,7 +279,8 @@ public class LoggingInterceptor {
 				return "";
 			} else if (theKey.equals("requestParameters")) {
 				StringBuilder b = new StringBuilder();
-				for (Entry<String, String[]> next : myRequestDetails.getParameters().entrySet()) {
+				for (Entry<String, String[]> next :
+						myRequestDetails.getParameters().entrySet()) {
 					for (String nextValue : next.getValue()) {
 						if (b.length() == 0) {
 							b.append('?');
@@ -293,7 +299,8 @@ public class LoggingInterceptor {
 			} else if (theKey.startsWith("remoteAddr")) {
 				return StringUtils.defaultString(myRequest.getRemoteAddr());
 			} else if (theKey.equals("responseEncodingNoDefault")) {
-				ResponseEncoding encoding = RestfulServerUtils.determineResponseEncodingNoDefault(myRequestDetails, myRequestDetails.getServer().getDefaultResponseEncoding());
+				ResponseEncoding encoding = RestfulServerUtils.determineResponseEncodingNoDefault(
+						myRequestDetails, myRequestDetails.getServer().getDefaultResponseEncoding());
 				if (encoding != null) {
 					return encoding.getEncoding().name();
 				}
@@ -333,5 +340,4 @@ public class LoggingInterceptor {
 			return "!VAL!";
 		}
 	}
-
 }

@@ -24,13 +24,13 @@ import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionCanonicalizer;
-import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionConstants;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscriptionChannelType;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedJsonMessage;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import ca.uhn.fhir.subscription.SubscriptionConstants;
 import ca.uhn.fhir.util.SubscriptionUtil;
 import org.hl7.fhir.dstu2.model.Subscription;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -51,12 +51,16 @@ import javax.annotation.Nonnull;
  */
 public class SubscriptionActivatingSubscriber implements MessageHandler {
 	private final Logger ourLog = LoggerFactory.getLogger(SubscriptionActivatingSubscriber.class);
+
 	@Autowired
 	private FhirContext myFhirContext;
+
 	@Autowired
 	private DaoRegistry myDaoRegistry;
+
 	@Autowired
 	private SubscriptionCanonicalizer mySubscriptionCanonicalizer;
+
 	@Autowired
 	private StorageSettings myStorageSettings;
 
@@ -90,7 +94,6 @@ public class SubscriptionActivatingSubscriber implements MessageHandler {
 			default:
 				break;
 		}
-
 	}
 
 	/**
@@ -102,7 +105,8 @@ public class SubscriptionActivatingSubscriber implements MessageHandler {
 	public synchronized boolean activateSubscriptionIfRequired(final IBaseResource theSubscription) {
 		// Grab the value for "Subscription.channel.type" so we can see if this
 		// subscriber applies..
-		CanonicalSubscriptionChannelType subscriptionChannelType = mySubscriptionCanonicalizer.getChannelType(theSubscription);
+		CanonicalSubscriptionChannelType subscriptionChannelType =
+				mySubscriptionCanonicalizer.getChannelType(theSubscription);
 
 		// Only activate supported subscriptions
 		if (subscriptionChannelType == null
@@ -128,18 +132,21 @@ public class SubscriptionActivatingSubscriber implements MessageHandler {
 		try {
 			// read can throw ResourceGoneException
 			// if this happens, we will treat this as a failure to activate
-			subscription =  subscriptionDao.read(theSubscription.getIdElement(), SystemRequestDetails.forAllPartitions());
+			subscription =
+					subscriptionDao.read(theSubscription.getIdElement(), SystemRequestDetails.forAllPartitions());
 			subscription.setId(subscription.getIdElement().toVersionless());
 
-			ourLog.info("Activating subscription {} from status {} to {}", subscription.getIdElement().toUnqualified().getValue(), SubscriptionConstants.REQUESTED_STATUS, SubscriptionConstants.ACTIVE_STATUS);
+			ourLog.info(
+					"Activating subscription {} from status {} to {}",
+					subscription.getIdElement().toUnqualified().getValue(),
+					SubscriptionConstants.REQUESTED_STATUS,
+					SubscriptionConstants.ACTIVE_STATUS);
 			SubscriptionUtil.setStatus(myFhirContext, subscription, SubscriptionConstants.ACTIVE_STATUS);
 			subscriptionDao.update(subscription, srd);
 			return true;
 		} catch (final UnprocessableEntityException | ResourceGoneException e) {
 			subscription = subscription != null ? subscription : theSubscription;
-			ourLog.error("Failed to activate subscription "
-				+ subscription.getIdElement()
-				+ " : " + e.getMessage());
+			ourLog.error("Failed to activate subscription " + subscription.getIdElement() + " : " + e.getMessage());
 			ourLog.info("Changing status of {} to ERROR", subscription.getIdElement());
 			SubscriptionUtil.setStatus(myFhirContext, subscription, SubscriptionConstants.ERROR_STATUS);
 			SubscriptionUtil.setReason(myFhirContext, subscription, e.getMessage());
@@ -149,8 +156,8 @@ public class SubscriptionActivatingSubscriber implements MessageHandler {
 	}
 
 	public boolean isChannelTypeSupported(IBaseResource theSubscription) {
-		Subscription.SubscriptionChannelType channelType = mySubscriptionCanonicalizer.getChannelType(theSubscription).toCanonical();
+		Subscription.SubscriptionChannelType channelType =
+				mySubscriptionCanonicalizer.getChannelType(theSubscription).toCanonical();
 		return myStorageSettings.getSupportedSubscriptionTypes().contains(channelType);
 	}
-
 }

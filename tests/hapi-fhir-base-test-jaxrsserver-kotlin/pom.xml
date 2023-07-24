@@ -1,4 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+			xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<!-- Note: HAPI projects use the "hapi-fhir" POM as their base to provide easy management. You do not need to use this in your own projects, so the "parent" tag and it's contents below may be removed
@@ -6,13 +7,13 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-fhir</artifactId>
-		<version>6.7.0-SNAPSHOT</version>
+		<version>6.9.0-SNAPSHOT</version>
 
 		<relativePath>../../pom.xml</relativePath>
 	</parent>
 
 	<artifactId>hapi-fhir-base-test-jaxrsserver-kotlin</artifactId>
-	<packaging>war</packaging>
+	<packaging>jar</packaging>
 
 	<name>HAPI FHIR JAX-RS Server Kotlin test</name>
 
@@ -80,12 +81,12 @@
 			<groupId>ch.qos.logback</groupId>
 			<artifactId>logback-classic</artifactId>
 		</dependency>
-	  <dependency>
+		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-test-utilities</artifactId>
 			<version>${project.version}</version>
 			<scope>test</scope>
-	  </dependency>
+		</dependency>
 		<dependency>
 			<groupId>org.jetbrains.kotlin</groupId>
 			<artifactId>kotlin-maven-allopen</artifactId>
@@ -106,9 +107,6 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-failsafe-plugin</artifactId>
-				<configuration>
-					<redirectTestOutputToFile>true</redirectTestOutputToFile>
-				</configuration>
 				<executions>
 					<execution>
 						<goals>
@@ -132,7 +130,9 @@
 				<executions>
 					<execution>
 						<id>compile</id>
-						<goals> <goal>compile</goal> </goals>
+						<goals>
+							<goal>compile</goal>
+						</goals>
 						<configuration>
 							<sourceDirs>
 								<sourceDir>${project.basedir}/src/main/kotlin</sourceDir>
@@ -142,7 +142,9 @@
 					</execution>
 					<execution>
 						<id>test-compile</id>
-						<goals> <goal>test-compile</goal> </goals>
+						<goals>
+							<goal>test-compile</goal>
+						</goals>
 						<configuration>
 							<sourceDirs>
 								<sourceDir>${project.basedir}/src/test/kotlin</sourceDir>
@@ -154,6 +156,42 @@
 			</plugin>
 		</plugins>
 	</build>
+
+	<profiles>
+		<profile>
+			<id>DIST</id>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-war-plugin</artifactId>
+						<executions>
+							<execution>
+								<goals>
+									<goal>war</goal>
+								</goals>
+							</execution>
+						</executions>
+						<configuration>
+							<archive>
+								<manifestEntries>
+									<Build-Time>${maven.build.timestamp}</Build-Time>
+								</manifestEntries>
+							</archive>
+							<overlays>
+								<overlay>
+									<id>hapi-fhir-base-test-jaxrsserver-kotlin</id>
+									<excludes>
+										<exclude>WEB-INF/classes/**/*.class</exclude>
+									</excludes>
+								</overlay>
+							</overlays>
+						</configuration>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
 
 	<properties>
 		<!--<kotlin.compiler.incremental>true</kotlin.compiler.incremental>-->

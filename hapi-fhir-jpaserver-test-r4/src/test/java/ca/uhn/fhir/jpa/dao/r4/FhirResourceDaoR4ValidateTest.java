@@ -678,14 +678,14 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		obs.getCode().getCoding().clear();
 		obs.getCategory().clear();
 		obs.getCategoryFirstRep().addCoding().setSystem("http://terminology.hl7.org/CodeSystem/observation-category").setCode("vital-signs");
-		obs.getCode().getCodingFirstRep().setSystem("http://loinc.org").setCode("CODE4").setDisplay("Display 3");
+		obs.getCode().getCodingFirstRep().setSystem("http://loinc.org").setCode("CODE4").setDisplay("Display 4");
 		oo = validateAndReturnOutcome(obs);
 		assertEquals("No issues detected during validation", oo.getIssueFirstRep().getDiagnostics(), encode(oo));
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 
 		myCaptureQueriesListener.clear();
 		obs.getText().setStatus(Narrative.NarrativeStatus.GENERATED);
-		obs.getCode().getCodingFirstRep().setSystem("http://loinc.org").setCode("CODE4").setDisplay("Display 3");
+		obs.getCode().getCodingFirstRep().setSystem("http://loinc.org").setCode("CODE4").setDisplay("Display 4");
 		oo = validateAndReturnOutcome(obs);
 		assertEquals("No issues detected during validation", oo.getIssueFirstRep().getDiagnostics(), encode(oo));
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
@@ -737,7 +737,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		obs.setStatus(ObservationStatus.FINAL);
 		obs.setValue(new StringType("This is the value"));
 		obs.getText().setStatus(Narrative.NarrativeStatus.GENERATED);
-		obs.getCode().getCodingFirstRep().setSystem("http://loinc.org").setCode("123-4").setDisplay("Display 3");
+		obs.getCode().getCodingFirstRep().setSystem("http://loinc.org").setCode("123-4").setDisplay("Code 123 4");
 
 		OperationOutcome oo;
 
@@ -807,7 +807,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		obs.setStatus(ObservationStatus.FINAL);
 		obs.setValue(new StringType("This is the value"));
 		obs.getText().setStatus(Narrative.NarrativeStatus.GENERATED);
-		obs.getCode().getCodingFirstRep().setSystem("http://loinc.org").setCode("123-4").setDisplay("Display 3");
+		obs.getCode().getCodingFirstRep().setSystem("http://loinc.org").setCode("123-4").setDisplay("Code 123 4");
 
 		OperationOutcome oo;
 
@@ -878,7 +878,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		obs.setStatus(ObservationStatus.FINAL);
 		obs.setValue(new StringType("This is the value"));
 		obs.getText().setStatus(Narrative.NarrativeStatus.GENERATED);
-		obs.getCode().getCodingFirstRep().setSystem("http://loinc.org").setCode("123-4").setDisplay("Display 3");
+		obs.getCode().getCodingFirstRep().setSystem("http://loinc.org").setCode("123-4").setDisplay("Code 123 4");
 
 		// Non-existent target
 		obs.setSubject(new Reference("Group/123"));
@@ -953,7 +953,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		OperationOutcome oo = validateAndReturnOutcome(vs);
 		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
 
-		assertEquals("The code 123 is not valid in the system https://bb", oo.getIssue().get(0).getDiagnostics());
+		assertEquals("The code '123' is not valid in the system https://bb", oo.getIssue().get(0).getDiagnostics());
 	}
 
 	@Test
@@ -1379,6 +1379,43 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		assertThat(OperationOutcomeUtil.getFirstIssueDetails(myFhirContext, oo),
 			containsString("a coding should come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (codes = http://foo#bar)"));
 
+	}
+
+	@Test
+	public void testValidateUsingExternallyDefinedCodeMisMatchDisplay_ShouldError() {
+		CodeSystem codeSystem = new CodeSystem();
+		codeSystem.setUrl("http://foo");
+		codeSystem.setContent(CodeSystem.CodeSystemContentMode.NOTPRESENT);
+		IIdType csId = myCodeSystemDao.create(codeSystem).getId();
+
+		TermCodeSystemVersion csv = new TermCodeSystemVersion();
+		csv.addConcept().setCode("bar").setDisplay("Bar Code");
+		myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(codeSystem, csv, mySrd, Collections.emptyList(), Collections.emptyList());
+
+		// Validate a resource containing this codesystem in a field with an extendable binding
+		Patient patient = new Patient();
+		patient.getText().setStatus(Narrative.NarrativeStatus.GENERATED).setDivAsString("<div>hello</div>");
+		patient
+			.addIdentifier()
+			.setSystem("http://example.com")
+			.setValue("12345")
+			.getType()
+			.addCoding()
+			.setSystem("http://foo")
+			.setCode("bar")
+			.setDisplay("not bar code");
+		MethodOutcome outcome = myPatientDao.validate(patient, null, encode(patient), EncodingEnum.JSON, ValidationModeEnum.CREATE, null, mySrd);
+		OperationOutcome oo = (OperationOutcome) outcome.getOperationOutcome();
+		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
+
+		// It would be ok for this to produce 0 issues, or just an information message too
+		assertEquals(2, OperationOutcomeUtil.getIssueCount(myFhirContext, oo));
+		assertThat(OperationOutcomeUtil.getFirstIssueDetails(myFhirContext, oo),
+			containsString("None of the codings provided are in the value set 'IdentifierType'"));
+		assertThat(OperationOutcomeUtil.getFirstIssueDetails(myFhirContext, oo),
+			containsString("a coding should come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (codes = http://foo#bar)"));
+		assertEquals(OperationOutcome.IssueSeverity.ERROR, oo.getIssue().get(1).getSeverity());
+		assertThat(oo.getIssue().get(1).getDiagnostics(), containsString("Unable to validate code http://foo#bar - Concept Display "));
 	}
 
 	private OperationOutcome doTestValidateResourceContainingProfileDeclaration(String methodName, EncodingEnum enc) throws IOException {

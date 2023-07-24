@@ -1,0 +1,8 @@
+---
+type: fix
+issue: 5055
+title: "
+      Delete expunge (and possibly other batch 2 jobs) will fail when given more than
+      2100 resources with identical timestamps when using an mssql database.
+      This has been fixed.
+"

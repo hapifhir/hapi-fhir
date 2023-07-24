@@ -48,7 +48,8 @@ public class WebsocketSubscriptionClient implements AfterEachCallback {
 	/**
 	 * Constructor
 	 */
-	public WebsocketSubscriptionClient(Supplier<RestfulServerExtension> theServerSupplier, Supplier<StorageSettings> theStorageSettings) {
+	public WebsocketSubscriptionClient(
+			Supplier<RestfulServerExtension> theServerSupplier, Supplier<StorageSettings> theStorageSettings) {
 		assert theServerSupplier != null;
 		assert theStorageSettings != null;
 
@@ -68,7 +69,8 @@ public class WebsocketSubscriptionClient implements AfterEachCallback {
 
 		try {
 			myWebSocketClient.start();
-			URI echoUri = new URI("ws://localhost:" + server.getPort() + server.getWebsocketContextPath() + myStorageSettings.get().getWebsocketContextPath());
+			URI echoUri = new URI("ws://localhost:" + server.getPort() + server.getWebsocketContextPath()
+					+ myStorageSettings.get().getWebsocketContextPath());
 			ClientUpgradeRequest request = new ClientUpgradeRequest();
 			ourLog.info("Connecting to : {}", echoUri);
 

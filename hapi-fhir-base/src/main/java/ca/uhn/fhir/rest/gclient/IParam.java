@@ -32,5 +32,4 @@ public interface IParam {
 	 * <code>false</code> to indicate that the server should return resources with this value <b>missing</b>.
 	 */
 	ICriterion<?> isMissing(boolean theMissing);
-	
 }

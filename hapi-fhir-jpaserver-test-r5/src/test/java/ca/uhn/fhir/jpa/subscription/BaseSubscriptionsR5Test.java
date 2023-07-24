@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.subscription;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
@@ -9,6 +10,7 @@ import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.provider.r5.BaseResourceProviderR5Test;
 import ca.uhn.fhir.jpa.subscription.channel.impl.LinkedBlockingChannel;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscriptionChannelType;
+import ca.uhn.fhir.jpa.subscription.model.CanonicalTopicSubscriptionFilter;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 import ca.uhn.fhir.jpa.subscription.submit.interceptor.SubscriptionMatcherInterceptor;
 import ca.uhn.fhir.jpa.test.util.SubscriptionTestUtil;
@@ -52,6 +54,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -86,13 +89,13 @@ public abstract class BaseSubscriptionsR5Test extends BaseResourceProviderR5Test
 	protected final PointcutLatch mySubscriptionTopicsCheckedLatch = new PointcutLatch(Pointcut.SUBSCRIPTION_TOPIC_AFTER_PERSISTED_RESOURCE_CHECKED);
 	protected final PointcutLatch mySubscriptionDeliveredLatch = new PointcutLatch(Pointcut.SUBSCRIPTION_AFTER_REST_HOOK_DELIVERY);
 
-
 	@Override
 	@BeforeEach
 	protected void before() throws Exception {
 		super.before();
 		mySubscriptionTopicDao = myDaoRegistry.getResourceDao(SubscriptionTopic.class);
 		mySubscriptionTestUtil.registerRestHookInterceptor();
+		mySubscriptionTestUtil.registerSubscriptionLoggingInterceptor();
 		ourListenerRestServer.unregisterProvider(mySystemProvider);
 		ourListenerRestServer.registerProvider(ourTestSystemProvider);
 
@@ -138,6 +141,8 @@ public abstract class BaseSubscriptionsR5Test extends BaseResourceProviderR5Test
 		myStorageSettings.setAllowMultipleDelete(new JpaStorageSettings().isAllowMultipleDelete());
 
 		mySubscriptionTestUtil.unregisterSubscriptionInterceptor();
+		mySubscriptionTestUtil.unregisterSubscriptionLoggingInterceptor();
+
 		ourListenerRestServer.unregisterProvider(ourTestSystemProvider);
 		ourListenerRestServer.registerProvider(mySystemProvider);
 		mySubscriptionTopicsCheckedLatch.clear();
@@ -180,12 +185,16 @@ public abstract class BaseSubscriptionsR5Test extends BaseResourceProviderR5Test
 		return subscription;
 	}
 
-	protected Subscription newTopicSubscription(String theTopicUrl, String thePayload) {
+	protected Subscription newTopicSubscription(String theTopicUrl, String thePayload, String... theFilters) {
 
 		Subscription subscription = new Subscription();
 		subscription.setTopic(theTopicUrl);
 		subscription.setReason("Monitor new neonatal function (note, age will be determined by the monitor)");
 		subscription.setStatus(Enumerations.SubscriptionStatusCodes.ACTIVE);
+
+		for (String nextFilter : theFilters) {
+			filterComponentFromQueryString(nextFilter).forEach(subscription::addFilterBy);
+		}
 
 		subscription.getChannelType()
 			.setSystem(CanonicalSubscriptionChannelType.RESTHOOK.getSystem())
@@ -195,16 +204,24 @@ public abstract class BaseSubscriptionsR5Test extends BaseResourceProviderR5Test
 		return subscription;
 	}
 
+	private Stream<Subscription.SubscriptionFilterByComponent> filterComponentFromQueryString(String theNextFilter) {
+		return CanonicalTopicSubscriptionFilter.fromQueryUrl(theNextFilter).stream().map(CanonicalTopicSubscriptionFilter::toSubscriptionFilterByComponent);
+	}
+
 	@PostConstruct
 	public void initializeOurCountHolder() {
 		ourCountHolder = myCountHolder;
 	}
 
-	// WIP STR5 consolidate with lambda
 	protected IIdType createResource(IBaseResource theResource, boolean theExpectDelivery) throws InterruptedException {
+		return createResource(theResource, theExpectDelivery, 1);
+	}
+
+	// TODO KHS consolidate with lambda
+	protected IIdType createResource(IBaseResource theResource, boolean theExpectDelivery, int theCount) throws InterruptedException {
 		IFhirResourceDao dao = myDaoRegistry.getResourceDao(theResource.getClass());
 		if (theExpectDelivery) {
-			mySubscriptionDeliveredLatch.setExpectedCount(1);
+			mySubscriptionDeliveredLatch.setExpectedCount(theCount);
 		}
 		mySubscriptionTopicsCheckedLatch.setExpectedCount(1);
 		IIdType id = dao.create(theResource, mySrd).getId();
@@ -223,8 +240,8 @@ public abstract class BaseSubscriptionsR5Test extends BaseResourceProviderR5Test
 		mySubscriptionTopicsCheckedLatch.setExpectedCount(1);
 		DaoMethodOutcome retval = dao.update(theResource, mySrd);
 
-		mySubscriptionTopicsCheckedLatch.awaitExpected();
-		ResourceModifiedMessage lastMessage = mySubscriptionTopicsCheckedLatch.getLatchInvocationParameterOfType(ResourceModifiedMessage.class);
+		List<HookParams> hookParams = mySubscriptionTopicsCheckedLatch.awaitExpected();
+		ResourceModifiedMessage lastMessage = PointcutLatch.getInvocationParameterOfType(hookParams, ResourceModifiedMessage.class);
 		assertEquals(theResource.getIdElement().toVersionless().toString(), lastMessage.getPayloadId());
 
 		if (theExpectDelivery) {
@@ -277,15 +294,15 @@ public abstract class BaseSubscriptionsR5Test extends BaseResourceProviderR5Test
 		return retval;
 	}
 
-	protected static void validateSubscriptionStatus(Subscription subscription, IBaseResource sentResource, SubscriptionStatus ss) {
+	protected static void validateSubscriptionStatus(Subscription subscription, IBaseResource sentResource, SubscriptionStatus ss, Long theExpectedEventNumber) {
 		assertEquals(Enumerations.SubscriptionStatusCodes.ACTIVE, ss.getStatus());
 		assertEquals(SubscriptionStatus.SubscriptionNotificationType.EVENTNOTIFICATION, ss.getType());
-		assertEquals("1", ss.getEventsSinceSubscriptionStartElement().getValueAsString());
+		assertEquals(theExpectedEventNumber.toString(), ss.getEventsSinceSubscriptionStartElement().getValueAsString());
 
 		List<SubscriptionStatus.SubscriptionStatusNotificationEventComponent> notificationEvents = ss.getNotificationEvent();
 		assertEquals(1, notificationEvents.size());
 		SubscriptionStatus.SubscriptionStatusNotificationEventComponent notificationEvent = notificationEvents.get(0);
-		assertEquals(1, notificationEvent.getEventNumber());
+		assertEquals(theExpectedEventNumber, notificationEvent.getEventNumber());
 		assertEquals(sentResource.getIdElement().toUnqualifiedVersionless(), notificationEvent.getFocus().getReferenceElement());
 
 		assertEquals(subscription.getIdElement().toUnqualifiedVersionless(), ss.getSubscription().getReferenceElement());

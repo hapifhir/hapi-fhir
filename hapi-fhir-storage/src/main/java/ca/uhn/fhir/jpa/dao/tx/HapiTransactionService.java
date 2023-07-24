@@ -56,28 +56,35 @@ import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.Objects;
 import java.util.concurrent.Callable;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 /**
  * @see IHapiTransactionService for an explanation of this class
  */
 public class HapiTransactionService implements IHapiTransactionService {
 
-	public static final String XACT_USERDATA_KEY_RESOLVED_TAG_DEFINITIONS = HapiTransactionService.class.getName() + "_RESOLVED_TAG_DEFINITIONS";
-	public static final String XACT_USERDATA_KEY_EXISTING_SEARCH_PARAMS = HapiTransactionService.class.getName() + "_EXISTING_SEARCH_PARAMS";
+	public static final String XACT_USERDATA_KEY_RESOLVED_TAG_DEFINITIONS =
+			HapiTransactionService.class.getName() + "_RESOLVED_TAG_DEFINITIONS";
+	public static final String XACT_USERDATA_KEY_EXISTING_SEARCH_PARAMS =
+			HapiTransactionService.class.getName() + "_EXISTING_SEARCH_PARAMS";
 	private static final Logger ourLog = LoggerFactory.getLogger(HapiTransactionService.class);
 	private static final ThreadLocal<RequestPartitionId> ourRequestPartitionThreadLocal = new ThreadLocal<>();
+
 	@Autowired
 	protected IInterceptorBroadcaster myInterceptorBroadcaster;
+
 	@Autowired
 	protected PlatformTransactionManager myTransactionManager;
+
 	@Autowired
 	protected IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
+
 	@Autowired
 	protected PartitionSettings myPartitionSettings;
+
 	private Propagation myTransactionPropagationWhenChangingPartitions = Propagation.REQUIRED;
 
 	@VisibleForTesting
@@ -95,12 +102,14 @@ public class HapiTransactionService implements IHapiTransactionService {
 		return new ExecutionBuilder(null);
 	}
 
-
 	/**
 	 * @deprecated Use {@link #withRequest(RequestDetails)} with fluent call instead
 	 */
 	@Deprecated
-	public <T> T execute(@Nullable RequestDetails theRequestDetails, @Nullable TransactionDetails theTransactionDetails, @Nonnull TransactionCallback<T> theCallback) {
+	public <T> T execute(
+			@Nullable RequestDetails theRequestDetails,
+			@Nullable TransactionDetails theTransactionDetails,
+			@Nonnull TransactionCallback<T> theCallback) {
 		return execute(theRequestDetails, theTransactionDetails, theCallback, null);
 	}
 
@@ -108,7 +117,12 @@ public class HapiTransactionService implements IHapiTransactionService {
 	 * @deprecated Use {@link #withRequest(RequestDetails)} with fluent call instead
 	 */
 	@Deprecated
-	public void execute(@Nullable RequestDetails theRequestDetails, @Nullable TransactionDetails theTransactionDetails, @Nonnull Propagation thePropagation, @Nonnull Isolation theIsolation, @Nonnull Runnable theCallback) {
+	public void execute(
+			@Nullable RequestDetails theRequestDetails,
+			@Nullable TransactionDetails theTransactionDetails,
+			@Nonnull Propagation thePropagation,
+			@Nonnull Isolation theIsolation,
+			@Nonnull Runnable theCallback) {
 		TransactionCallbackWithoutResult callback = new TransactionCallbackWithoutResult() {
 			@Override
 			protected void doInTransactionWithoutResult(TransactionStatus status) {
@@ -123,7 +137,12 @@ public class HapiTransactionService implements IHapiTransactionService {
 	 */
 	@Deprecated
 	@Override
-	public <T> T withRequest(@Nullable RequestDetails theRequestDetails, @Nullable TransactionDetails theTransactionDetails, @Nonnull Propagation thePropagation, @Nonnull Isolation theIsolation, @Nonnull ICallable<T> theCallback) {
+	public <T> T withRequest(
+			@Nullable RequestDetails theRequestDetails,
+			@Nullable TransactionDetails theTransactionDetails,
+			@Nonnull Propagation thePropagation,
+			@Nonnull Isolation theIsolation,
+			@Nonnull ICallable<T> theCallback) {
 
 		TransactionCallback<T> callback = tx -> theCallback.call();
 		return execute(theRequestDetails, theTransactionDetails, callback, null, thePropagation, theIsolation);
@@ -133,7 +152,11 @@ public class HapiTransactionService implements IHapiTransactionService {
 	 * @deprecated Use {@link #withRequest(RequestDetails)} with fluent call instead
 	 */
 	@Deprecated
-	public <T> T execute(@Nullable RequestDetails theRequestDetails, @Nullable TransactionDetails theTransactionDetails, @Nonnull TransactionCallback<T> theCallback, @Nullable Runnable theOnRollback) {
+	public <T> T execute(
+			@Nullable RequestDetails theRequestDetails,
+			@Nullable TransactionDetails theTransactionDetails,
+			@Nonnull TransactionCallback<T> theCallback,
+			@Nullable Runnable theOnRollback) {
 		return execute(theRequestDetails, theTransactionDetails, theCallback, theOnRollback, null, null);
 	}
 
@@ -142,27 +165,40 @@ public class HapiTransactionService implements IHapiTransactionService {
 	 * @deprecated Use {@link #withRequest(RequestDetails)} with fluent call instead
 	 */
 	@Deprecated
-	public <T> T execute(@Nullable RequestDetails theRequestDetails, @Nullable TransactionDetails theTransactionDetails, @Nonnull TransactionCallback<T> theCallback, @Nullable Runnable theOnRollback, @Nullable Propagation thePropagation, @Nullable Isolation theIsolation) {
+	public <T> T execute(
+			@Nullable RequestDetails theRequestDetails,
+			@Nullable TransactionDetails theTransactionDetails,
+			@Nonnull TransactionCallback<T> theCallback,
+			@Nullable Runnable theOnRollback,
+			@Nullable Propagation thePropagation,
+			@Nullable Isolation theIsolation) {
 		return withRequest(theRequestDetails)
-			.withTransactionDetails(theTransactionDetails)
-			.withPropagation(thePropagation)
-			.withIsolation(theIsolation)
-			.onRollback(theOnRollback)
-			.execute(theCallback);
+				.withTransactionDetails(theTransactionDetails)
+				.withPropagation(thePropagation)
+				.withIsolation(theIsolation)
+				.onRollback(theOnRollback)
+				.execute(theCallback);
 	}
 
 	/**
 	 * @deprecated Use {@link #withRequest(RequestDetails)} with fluent call instead
 	 */
 	@Deprecated
-	public <T> T execute(@Nullable RequestDetails theRequestDetails, @Nullable TransactionDetails theTransactionDetails, @Nonnull TransactionCallback<T> theCallback, @Nullable Runnable theOnRollback, @Nonnull Propagation thePropagation, @Nonnull Isolation theIsolation, RequestPartitionId theRequestPartitionId) {
+	public <T> T execute(
+			@Nullable RequestDetails theRequestDetails,
+			@Nullable TransactionDetails theTransactionDetails,
+			@Nonnull TransactionCallback<T> theCallback,
+			@Nullable Runnable theOnRollback,
+			@Nonnull Propagation thePropagation,
+			@Nonnull Isolation theIsolation,
+			RequestPartitionId theRequestPartitionId) {
 		return withRequest(theRequestDetails)
-			.withTransactionDetails(theTransactionDetails)
-			.withPropagation(thePropagation)
-			.withIsolation(theIsolation)
-			.withRequestPartitionId(theRequestPartitionId)
-			.onRollback(theOnRollback)
-			.execute(theCallback);
+				.withTransactionDetails(theTransactionDetails)
+				.withPropagation(thePropagation)
+				.withIsolation(theIsolation)
+				.withRequestPartitionId(theRequestPartitionId)
+				.onRollback(theOnRollback)
+				.execute(theCallback);
 	}
 
 	public boolean isCustomIsolationSupported() {
@@ -189,7 +225,8 @@ public class HapiTransactionService implements IHapiTransactionService {
 		if (theExecutionBuilder.myRequestPartitionId != null) {
 			requestPartitionId = theExecutionBuilder.myRequestPartitionId;
 		} else if (theExecutionBuilder.myRequestDetails != null) {
-			requestPartitionId = myRequestPartitionHelperSvc.determineGenericPartitionForRequest(theExecutionBuilder.myRequestDetails);
+			requestPartitionId = myRequestPartitionHelperSvc.determineGenericPartitionForRequest(
+					theExecutionBuilder.myRequestDetails);
 		} else {
 			requestPartitionId = null;
 		}
@@ -209,20 +246,29 @@ public class HapiTransactionService implements IHapiTransactionService {
 				return executeInExistingTransaction(theCallback);
 			}
 		} else if (myTransactionPropagationWhenChangingPartitions == Propagation.REQUIRES_NEW) {
-			return executeInNewTransactionForPartitionChange(theExecutionBuilder, theCallback, requestPartitionId, previousRequestPartitionId);
+			return executeInNewTransactionForPartitionChange(
+					theExecutionBuilder, theCallback, requestPartitionId, previousRequestPartitionId);
 		}
 
 		return doExecuteInTransaction(theExecutionBuilder, theCallback, requestPartitionId, previousRequestPartitionId);
 	}
 
 	@Nullable
-	private <T> T executeInNewTransactionForPartitionChange(ExecutionBuilder theExecutionBuilder, TransactionCallback<T> theCallback, RequestPartitionId requestPartitionId, RequestPartitionId previousRequestPartitionId) {
+	private <T> T executeInNewTransactionForPartitionChange(
+			ExecutionBuilder theExecutionBuilder,
+			TransactionCallback<T> theCallback,
+			RequestPartitionId requestPartitionId,
+			RequestPartitionId previousRequestPartitionId) {
 		theExecutionBuilder.myPropagation = myTransactionPropagationWhenChangingPartitions;
 		return doExecuteInTransaction(theExecutionBuilder, theCallback, requestPartitionId, previousRequestPartitionId);
 	}
 
 	@Nullable
-	private <T> T doExecuteInTransaction(ExecutionBuilder theExecutionBuilder, TransactionCallback<T> theCallback, RequestPartitionId requestPartitionId, RequestPartitionId previousRequestPartitionId) {
+	private <T> T doExecuteInTransaction(
+			ExecutionBuilder theExecutionBuilder,
+			TransactionCallback<T> theCallback,
+			RequestPartitionId requestPartitionId,
+			RequestPartitionId previousRequestPartitionId) {
 		try {
 			for (int i = 0; ; i++) {
 				try {
@@ -230,11 +276,12 @@ public class HapiTransactionService implements IHapiTransactionService {
 					return doExecuteCallback(theExecutionBuilder, theCallback);
 
 				} catch (Exception e) {
-					if (!(ExceptionUtils.indexOfThrowable(e, ResourceVersionConflictException.class) != -1 ||
-						ExceptionUtils.indexOfThrowable(e, DataIntegrityViolationException.class) != -1 ||
-						ExceptionUtils.indexOfThrowable(e, ConstraintViolationException.class) != -1 ||
-						ExceptionUtils.indexOfThrowable(e, ObjectOptimisticLockingFailureException.class) != -1)) {
-						ourLog.error("Unexpected transaction exception. Will not be retried.", e);
+					if (!(ExceptionUtils.indexOfThrowable(e, ResourceVersionConflictException.class) != -1
+							|| ExceptionUtils.indexOfThrowable(e, DataIntegrityViolationException.class) != -1
+							|| ExceptionUtils.indexOfThrowable(e, ConstraintViolationException.class) != -1
+							|| ExceptionUtils.indexOfThrowable(e, ObjectOptimisticLockingFailureException.class)
+									!= -1)) {
+						ourLog.debug("Unexpected transaction exception. Will not be retried.", e);
 						throw e;
 					} else {
 
@@ -259,14 +306,16 @@ public class HapiTransactionService implements IHapiTransactionService {
 
 						if (maxRetries == 0) {
 							HookParams params = new HookParams()
-								.add(RequestDetails.class, theExecutionBuilder.myRequestDetails)
-								.addIfMatchesType(ServletRequestDetails.class, theExecutionBuilder.myRequestDetails);
-							ResourceVersionConflictResolutionStrategy conflictResolutionStrategy = (ResourceVersionConflictResolutionStrategy) CompositeInterceptorBroadcaster.doCallHooksAndReturnObject(
-								myInterceptorBroadcaster,
-								theExecutionBuilder.myRequestDetails,
-								Pointcut.STORAGE_VERSION_CONFLICT,
-								params
-							);
+									.add(RequestDetails.class, theExecutionBuilder.myRequestDetails)
+									.addIfMatchesType(
+											ServletRequestDetails.class, theExecutionBuilder.myRequestDetails);
+							ResourceVersionConflictResolutionStrategy conflictResolutionStrategy =
+									(ResourceVersionConflictResolutionStrategy)
+											CompositeInterceptorBroadcaster.doCallHooksAndReturnObject(
+													myInterceptorBroadcaster,
+													theExecutionBuilder.myRequestDetails,
+													Pointcut.STORAGE_VERSION_CONFLICT,
+													params);
 							if (conflictResolutionStrategy != null && conflictResolutionStrategy.isRetry()) {
 								maxRetries = conflictResolutionStrategy.getMaxRetries();
 							}
@@ -274,17 +323,24 @@ public class HapiTransactionService implements IHapiTransactionService {
 
 						if (i < maxRetries) {
 							if (theExecutionBuilder.myTransactionDetails != null) {
-								theExecutionBuilder.myTransactionDetails.getRollbackUndoActions().forEach(Runnable::run);
+								theExecutionBuilder
+										.myTransactionDetails
+										.getRollbackUndoActions()
+										.forEach(Runnable::run);
 								theExecutionBuilder.myTransactionDetails.clearRollbackUndoActions();
 								theExecutionBuilder.myTransactionDetails.clearResolvedItems();
-								theExecutionBuilder.myTransactionDetails.clearUserData(XACT_USERDATA_KEY_RESOLVED_TAG_DEFINITIONS);
-								theExecutionBuilder.myTransactionDetails.clearUserData(XACT_USERDATA_KEY_EXISTING_SEARCH_PARAMS);
+								theExecutionBuilder.myTransactionDetails.clearUserData(
+										XACT_USERDATA_KEY_RESOLVED_TAG_DEFINITIONS);
+								theExecutionBuilder.myTransactionDetails.clearUserData(
+										XACT_USERDATA_KEY_EXISTING_SEARCH_PARAMS);
 							}
 							double sleepAmount = (250.0d * i) * Math.random();
 							long sleepAmountLong = (long) sleepAmount;
 							TestUtil.sleepAtLeast(sleepAmountLong, false);
 
-							ourLog.info("About to start a transaction retry due to conflict or constraint error. Sleeping {}ms first.", sleepAmountLong);
+							ourLog.info(
+									"About to start a transaction retry due to conflict or constraint error. Sleeping {}ms first.",
+									sleepAmountLong);
 							continue;
 						}
 
@@ -294,7 +350,8 @@ public class HapiTransactionService implements IHapiTransactionService {
 						}
 
 						if (maxRetries > 0) {
-							String msg = "Max retries (" + maxRetries + ") exceeded for version conflict: " + e.getMessage();
+							String msg =
+									"Max retries (" + maxRetries + ") exceeded for version conflict: " + e.getMessage();
 							ourLog.info(msg, maxRetries);
 							throw new ResourceVersionConflictException(Msg.code(549) + msg);
 						}
@@ -310,7 +367,8 @@ public class HapiTransactionService implements IHapiTransactionService {
 		}
 	}
 
-	public void setTransactionPropagationWhenChangingPartitions(Propagation theTransactionPropagationWhenChangingPartitions) {
+	public void setTransactionPropagationWhenChangingPartitions(
+			Propagation theTransactionPropagationWhenChangingPartitions) {
 		Validate.notNull(theTransactionPropagationWhenChangingPartitions);
 		myTransactionPropagationWhenChangingPartitions = theTransactionPropagationWhenChangingPartitions;
 	}
@@ -324,7 +382,9 @@ public class HapiTransactionService implements IHapiTransactionService {
 				txTemplate.setPropagationBehavior(theExecutionBuilder.myPropagation.value());
 			}
 
-			if (isCustomIsolationSupported() && theExecutionBuilder.myIsolation != null && theExecutionBuilder.myIsolation != Isolation.DEFAULT) {
+			if (isCustomIsolationSupported()
+					&& theExecutionBuilder.myIsolation != null
+					&& theExecutionBuilder.myIsolation != Isolation.DEFAULT) {
 				txTemplate.setIsolationLevel(theExecutionBuilder.myIsolation.value());
 			}
 
@@ -418,7 +478,6 @@ public class HapiTransactionService implements IHapiTransactionService {
 
 			return doExecute(this, callback);
 		}
-
 	}
 
 	/**
@@ -439,8 +498,9 @@ public class HapiTransactionService implements IHapiTransactionService {
 	 */
 	private static boolean canReuseExistingTransaction(ExecutionBuilder theExecutionBuilder) {
 		return TransactionSynchronizationManager.isActualTransactionActive()
-			&& (!TransactionSynchronizationManager.isCurrentTransactionReadOnly() || theExecutionBuilder.myReadOnly)
-			&& (theExecutionBuilder.myPropagation == null || theExecutionBuilder.myPropagation == Propagation.REQUIRED);
+				&& (!TransactionSynchronizationManager.isCurrentTransactionReadOnly() || theExecutionBuilder.myReadOnly)
+				&& (theExecutionBuilder.myPropagation == null
+						|| theExecutionBuilder.myPropagation == Propagation.REQUIRED);
 	}
 
 	@Nullable
@@ -481,13 +541,17 @@ public class HapiTransactionService implements IHapiTransactionService {
 	 * Throws an {@link IllegalArgumentException} if a transaction is active
 	 */
 	public static void noTransactionAllowed() {
-		Validate.isTrue(!TransactionSynchronizationManager.isActualTransactionActive(), "Transaction must not be active but found an active transaction");
+		Validate.isTrue(
+				!TransactionSynchronizationManager.isActualTransactionActive(),
+				"Transaction must not be active but found an active transaction");
 	}
 
 	/**
 	 * Throws an {@link IllegalArgumentException} if no transaction is active
 	 */
 	public static void requireTransaction() {
-		Validate.isTrue(TransactionSynchronizationManager.isActualTransactionActive(), "Transaction required here but no active transaction found");
+		Validate.isTrue(
+				TransactionSynchronizationManager.isActualTransactionActive(),
+				"Transaction required here but no active transaction found");
 	}
 }

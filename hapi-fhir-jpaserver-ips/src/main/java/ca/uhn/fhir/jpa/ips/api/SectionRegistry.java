@@ -30,13 +30,13 @@ import org.hl7.fhir.r4.model.MedicationStatement;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.ResourceType;
 
-import javax.annotation.Nullable;
-import javax.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
+import javax.annotation.Nullable;
+import javax.annotation.PostConstruct;
 
 /**
  * This class is the registry for sections for the IPS document. It can be extended
@@ -265,9 +265,11 @@ public class SectionRegistry {
 	}
 
 	public Section getSection(IpsSectionEnum theSectionEnum) {
-		return getSections().stream().filter(t -> t.getSectionEnum() == theSectionEnum).findFirst().orElseThrow(() -> new IllegalArgumentException("No section for type: " + theSectionEnum));
+		return getSections().stream()
+				.filter(t -> t.getSectionEnum() == theSectionEnum)
+				.findFirst()
+				.orElseThrow(() -> new IllegalArgumentException("No section for type: " + theSectionEnum));
 	}
-
 
 	public interface INoInfoGenerator {
 
@@ -276,7 +278,6 @@ public class SectionRegistry {
 		 * although it can if it is a resource found in the repository.
 		 */
 		IBaseResource generate(IIdType theSubjectId);
-
 	}
 
 	public class SectionBuilder {
@@ -330,7 +331,14 @@ public class SectionRegistry {
 
 		public void build() {
 			myGlobalCustomizers.forEach(t -> t.accept(this));
-			mySections.add(new Section(mySectionEnum, myTitle, mySectionCode, mySectionDisplay, myResourceTypes, myProfile, myNoInfoGenerator));
+			mySections.add(new Section(
+					mySectionEnum,
+					myTitle,
+					mySectionCode,
+					mySectionDisplay,
+					myResourceTypes,
+					myProfile,
+					myNoInfoGenerator));
 		}
 	}
 
@@ -338,9 +346,16 @@ public class SectionRegistry {
 		@Override
 		public IBaseResource generate(IIdType theSubjectId) {
 			AllergyIntolerance allergy = new AllergyIntolerance();
-			allergy.setCode(new CodeableConcept().addCoding(new Coding().setCode("no-allergy-info").setSystem("http://hl7.org/fhir/uv/ips/CodeSystem/absent-unknown-uv-ips").setDisplay("No information about allergies")))
-				.setPatient(new Reference(theSubjectId))
-				.setClinicalStatus(new CodeableConcept().addCoding(new Coding().setCode("active").setSystem("http://terminology.hl7.org/CodeSystem/allergyintolerance-clinical")));
+			allergy.setCode(new CodeableConcept()
+							.addCoding(new Coding()
+									.setCode("no-allergy-info")
+									.setSystem("http://hl7.org/fhir/uv/ips/CodeSystem/absent-unknown-uv-ips")
+									.setDisplay("No information about allergies")))
+					.setPatient(new Reference(theSubjectId))
+					.setClinicalStatus(new CodeableConcept()
+							.addCoding(new Coding()
+									.setCode("active")
+									.setSystem("http://terminology.hl7.org/CodeSystem/allergyintolerance-clinical")));
 			return allergy;
 		}
 	}
@@ -350,10 +365,16 @@ public class SectionRegistry {
 		public IBaseResource generate(IIdType theSubjectId) {
 			MedicationStatement medication = new MedicationStatement();
 			// setMedicationCodeableConcept is not available
-			medication.setMedication(new CodeableConcept().addCoding(new Coding().setCode("no-medication-info").setSystem("http://hl7.org/fhir/uv/ips/CodeSystem/absent-unknown-uv-ips").setDisplay("No information about medications")))
-				.setSubject(new Reference(theSubjectId))
-				.setStatus(MedicationStatement.MedicationStatementStatus.UNKNOWN);
-			// .setEffective(new Period().addExtension().setUrl("http://hl7.org/fhir/StructureDefinition/data-absent-reason").setValue((new Coding().setCode("not-applicable"))))
+			medication
+					.setMedication(new CodeableConcept()
+							.addCoding(new Coding()
+									.setCode("no-medication-info")
+									.setSystem("http://hl7.org/fhir/uv/ips/CodeSystem/absent-unknown-uv-ips")
+									.setDisplay("No information about medications")))
+					.setSubject(new Reference(theSubjectId))
+					.setStatus(MedicationStatement.MedicationStatementStatus.UNKNOWN);
+			// .setEffective(new
+			// Period().addExtension().setUrl("http://hl7.org/fhir/StructureDefinition/data-absent-reason").setValue((new Coding().setCode("not-applicable"))))
 			return medication;
 		}
 	}
@@ -362,9 +383,17 @@ public class SectionRegistry {
 		@Override
 		public IBaseResource generate(IIdType theSubjectId) {
 			Condition condition = new Condition();
-			condition.setCode(new CodeableConcept().addCoding(new Coding().setCode("no-problem-info").setSystem("http://hl7.org/fhir/uv/ips/CodeSystem/absent-unknown-uv-ips").setDisplay("No information about problems")))
-				.setSubject(new Reference(theSubjectId))
-				.setClinicalStatus(new CodeableConcept().addCoding(new Coding().setCode("active").setSystem("http://terminology.hl7.org/CodeSystem/condition-clinical")));
+			condition
+					.setCode(new CodeableConcept()
+							.addCoding(new Coding()
+									.setCode("no-problem-info")
+									.setSystem("http://hl7.org/fhir/uv/ips/CodeSystem/absent-unknown-uv-ips")
+									.setDisplay("No information about problems")))
+					.setSubject(new Reference(theSubjectId))
+					.setClinicalStatus(new CodeableConcept()
+							.addCoding(new Coding()
+									.setCode("active")
+									.setSystem("http://terminology.hl7.org/CodeSystem/condition-clinical")));
 			return condition;
 		}
 	}
@@ -379,7 +408,14 @@ public class SectionRegistry {
 		private final String myProfile;
 		private final INoInfoGenerator myNoInfoGenerator;
 
-		public Section(IpsSectionEnum theSectionEnum, String theTitle, String theSectionCode, String theSectionDisplay, List<String> theResourceTypes, String theProfile, INoInfoGenerator theNoInfoGenerator) {
+		public Section(
+				IpsSectionEnum theSectionEnum,
+				String theTitle,
+				String theSectionCode,
+				String theSectionDisplay,
+				List<String> theResourceTypes,
+				String theProfile,
+				INoInfoGenerator theNoInfoGenerator) {
 			mySectionEnum = theSectionEnum;
 			myTitle = theTitle;
 			mySectionCode = theSectionCode;

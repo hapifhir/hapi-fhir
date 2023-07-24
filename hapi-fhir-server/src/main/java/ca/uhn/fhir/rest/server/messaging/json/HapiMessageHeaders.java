@@ -41,8 +41,10 @@ public class HapiMessageHeaders implements IModelJson {
 
 	@JsonProperty(RETRY_COUNT_KEY)
 	private Integer myRetryCount = 0;
+
 	@JsonProperty(FIRST_FAILURE_KEY)
 	private Long myFirstFailureTimestamp;
+
 	@JsonProperty(LAST_FAILURE_KEY)
 	private Long myLastFailureTimestamp;
 
@@ -80,11 +82,9 @@ public class HapiMessageHeaders implements IModelJson {
 		this.myLastFailureTimestamp = theLastFailureTimestamp;
 	}
 
-
 	public void setFirstFailureTimestamp(Long theFirstFailureTimestamp) {
 		this.myFirstFailureTimestamp = theFirstFailureTimestamp;
 	}
-
 
 	public Map<String, Object> getCustomHeaders() {
 		if (this.headers == null) {
@@ -100,5 +100,4 @@ public class HapiMessageHeaders implements IModelJson {
 		returnedHeaders.put(LAST_FAILURE_KEY, myLastFailureTimestamp);
 		return new MessageHeaders(returnedHeaders);
 	}
-
 }

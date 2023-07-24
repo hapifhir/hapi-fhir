@@ -23,6 +23,7 @@ import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.binary.api.StoredDetails;
 import ca.uhn.fhir.jpa.binary.svc.BaseBinaryStorageSvcImpl;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -38,8 +39,6 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -51,8 +50,8 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.Reader;
 import java.util.Date;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 public class FilesystemBinaryStorageSvcImpl extends BaseBinaryStorageSvcImpl {
 
@@ -84,11 +83,19 @@ public class FilesystemBinaryStorageSvcImpl extends BaseBinaryStorageSvcImpl {
 	@Override
 	public boolean isValidBlobId(String theNewBlobId) {
 		return !StringUtils.containsAny(theNewBlobId, '\\', '/', '|', '.');
-
 	}
+
+	@Nonnull
 	@Override
-	public StoredDetails storeBlob(IIdType theResourceId, String theBlobIdOrNull, String theContentType, InputStream theInputStream) throws IOException {
-		String id = super.provideIdForNewBlob(theBlobIdOrNull);
+	public StoredDetails storeBlob(
+			IIdType theResourceId,
+			String theBlobIdOrNull,
+			String theContentType,
+			InputStream theInputStream,
+			RequestDetails theRequestDetails)
+			throws IOException {
+
+		String id = super.provideIdForNewBlob(theBlobIdOrNull, null, theRequestDetails, theContentType);
 		File storagePath = getStoragePath(id, true);
 
 		// Write binary file
@@ -109,7 +116,11 @@ public class FilesystemBinaryStorageSvcImpl extends BaseBinaryStorageSvcImpl {
 			myJsonSerializer.writeValue(writer, details);
 		}
 
-		ourLog.info("Stored binary blob with {} bytes and ContentType {} for resource {}", count, theContentType, theResourceId);
+		ourLog.info(
+				"Stored binary blob with {} bytes and ContentType {} for resource {}",
+				count,
+				theContentType,
+				theResourceId);
 
 		return details;
 	}
@@ -138,11 +149,9 @@ public class FilesystemBinaryStorageSvcImpl extends BaseBinaryStorageSvcImpl {
 		InputStream inputStream = getInputStream(theResourceId, theBlobId);
 
 		if (inputStream != null) {
-			try {
+			try (inputStream) {
 				IOUtils.copy(inputStream, theOutputStream);
 				theOutputStream.close();
-			} finally {
-				inputStream.close();
 			}
 		}
 
@@ -185,10 +194,10 @@ public class FilesystemBinaryStorageSvcImpl extends BaseBinaryStorageSvcImpl {
 			if (inputStream != null) {
 				return IOUtils.toByteArray(inputStream, details.getBytes());
 			}
-
 		}
 
-		throw new ResourceNotFoundException(Msg.code(1327) + "Unknown blob ID: " + theBlobId + " for resource ID " + theResourceId);
+		throw new ResourceNotFoundException(
+				Msg.code(1327) + "Unknown blob ID: " + theBlobId + " for resource ID " + theResourceId);
 	}
 
 	private void delete(File theStorageFile, String theBlobId) {
@@ -232,7 +241,7 @@ public class FilesystemBinaryStorageSvcImpl extends BaseBinaryStorageSvcImpl {
 		try {
 			FileUtils.forceMkdir(theBasePath);
 		} catch (IOException e) {
-			throw new ConfigurationException(Msg.code(1328) + "Unable to create path " + myBasePath + ": " + e.toString());
+			throw new ConfigurationException(Msg.code(1328) + "Unable to create path " + myBasePath + ": " + e);
 		}
 	}
 }

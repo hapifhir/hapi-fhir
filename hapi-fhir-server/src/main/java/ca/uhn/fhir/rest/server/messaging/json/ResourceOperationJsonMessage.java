@@ -27,7 +27,6 @@ import javax.annotation.Nullable;
 
 public class ResourceOperationJsonMessage extends BaseJsonMessage<ResourceOperationMessage> {
 
-
 	@JsonProperty("payload")
 	private ResourceOperationMessage myPayload;
 
@@ -46,11 +45,11 @@ public class ResourceOperationJsonMessage extends BaseJsonMessage<ResourceOperat
 		setDefaultRetryHeaders();
 	}
 
-	public ResourceOperationJsonMessage(HapiMessageHeaders theRetryMessageHeaders, ResourceOperationMessage thePayload) {
+	public ResourceOperationJsonMessage(
+			HapiMessageHeaders theRetryMessageHeaders, ResourceOperationMessage thePayload) {
 		myPayload = thePayload;
 		setHeaders(theRetryMessageHeaders);
 	}
-
 
 	@Override
 	public ResourceOperationMessage getPayload() {
@@ -63,9 +62,7 @@ public class ResourceOperationJsonMessage extends BaseJsonMessage<ResourceOperat
 
 	@Override
 	public String toString() {
-		return new ToStringBuilder(this)
-			.append("myPayload", myPayload)
-			.toString();
+		return new ToStringBuilder(this).append("myPayload", myPayload).toString();
 	}
 
 	@Nullable

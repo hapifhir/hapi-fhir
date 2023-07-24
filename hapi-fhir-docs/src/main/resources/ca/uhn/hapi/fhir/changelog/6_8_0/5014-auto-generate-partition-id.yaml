@@ -1,0 +1,5 @@
+---
+type: add
+issue: 5014
+title: "It is no longer mandatory to provide a partition ID when executing the `$partition-management-create-partition` operation. If you omit the partition ID, one will be randomly selected 
+from the available pool of values. Note that this may incur a small performance cost when creating partitions."

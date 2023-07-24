@@ -30,7 +30,7 @@ import java.io.IOException;
  * <p>
  * See the <a href="https://hapifhir.io/hapi-fhir/docs/interceptors/client_interceptors.html">HAPI Documentation Client Interceptor</a>
  * page for more information on how to use this feature.
- * </p> 
+ * </p>
  */
 public interface IClientInterceptor {
 
@@ -39,11 +39,10 @@ public interface IClientInterceptor {
 	 */
 	@Hook(Pointcut.CLIENT_REQUEST)
 	void interceptRequest(IHttpRequest theRequest);
-	
+
 	/**
 	 * Fired by the client upon receiving an HTTP response, prior to processing that response
 	 */
 	@Hook(Pointcut.CLIENT_RESPONSE)
 	void interceptResponse(IHttpResponse theResponse) throws IOException;
-
 }

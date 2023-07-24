@@ -24,7 +24,6 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.dao.expunge.IExpungeEverythingService;
-import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.api.MdmConstants;
 import ca.uhn.fhir.mdm.model.CanonicalEID;
@@ -32,6 +31,7 @@ import ca.uhn.fhir.mdm.svc.MdmLinkDeleteSvc;
 import ca.uhn.fhir.mdm.util.EIDHelper;
 import ca.uhn.fhir.mdm.util.MdmResourceUtil;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -49,27 +49,41 @@ public class MdmStorageInterceptor implements IMdmStorageInterceptor {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(MdmStorageInterceptor.class);
 
+	// Used to bypass trying to remove mdm links associated to a resource when running mdm-clear batch job, which
+	// deletes all links beforehand, and impacts performance for no action
+	private static final ThreadLocal<Boolean> ourLinksDeletedBeforehand = ThreadLocal.withInitial(() -> Boolean.FALSE);
+
 	@Autowired
 	private IExpungeEverythingService myExpungeEverythingService;
+
 	@Autowired
 	private MdmLinkDeleteSvc myMdmLinkDeleteSvc;
+
 	@Autowired
 	private FhirContext myFhirContext;
+
 	@Autowired
 	private EIDHelper myEIDHelper;
+
 	@Autowired
 	private IMdmSettings myMdmSettings;
 
-
 	@Hook(Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED)
-	public void blockManualResourceManipulationOnCreate(IBaseResource theBaseResource, RequestDetails theRequestDetails, ServletRequestDetails theServletRequestDetails) {
-		ourLog.debug("Starting pre-storage resource created hook for {}, {}, {}", theBaseResource, theRequestDetails, theServletRequestDetails);
+	public void blockManualResourceManipulationOnCreate(
+			IBaseResource theBaseResource,
+			RequestDetails theRequestDetails,
+			ServletRequestDetails theServletRequestDetails) {
+		ourLog.debug(
+				"Starting pre-storage resource created hook for {}, {}, {}",
+				theBaseResource,
+				theRequestDetails,
+				theServletRequestDetails);
 		if (theBaseResource == null) {
 			ourLog.warn("Attempting to block golden resource manipulation on a null resource");
 			return;
 		}
 
-		//If running in single EID mode, forbid multiple eids.
+		// If running in single EID mode, forbid multiple eids.
 		if (myMdmSettings.isPreventMultipleEids()) {
 			ourLog.debug("Forbidding multiple EIDs on ", theBaseResource);
 			forbidIfHasMultipleEids(theBaseResource);
@@ -85,22 +99,33 @@ public class MdmStorageInterceptor implements IMdmStorageInterceptor {
 	}
 
 	@Hook(Pointcut.STORAGE_PRESTORAGE_RESOURCE_UPDATED)
-	public void blockManualGoldenResourceManipulationOnUpdate(IBaseResource theOldResource, IBaseResource theUpdatedResource, RequestDetails theRequestDetails, ServletRequestDetails theServletRequestDetails) {
-		ourLog.debug("Starting pre-storage resource updated hook for {}, {}, {}, {}", theOldResource, theUpdatedResource, theRequestDetails, theServletRequestDetails);
+	public void blockManualGoldenResourceManipulationOnUpdate(
+			IBaseResource theOldResource,
+			IBaseResource theUpdatedResource,
+			RequestDetails theRequestDetails,
+			ServletRequestDetails theServletRequestDetails) {
+		ourLog.debug(
+				"Starting pre-storage resource updated hook for {}, {}, {}, {}",
+				theOldResource,
+				theUpdatedResource,
+				theRequestDetails,
+				theServletRequestDetails);
 
 		if (theUpdatedResource == null) {
 			ourLog.warn("Attempting to block golden resource manipulation on a null resource");
 			return;
 		}
 
-		//If running in single EID mode, forbid multiple eids.
+		// If running in single EID mode, forbid multiple eids.
 		if (myMdmSettings.isPreventMultipleEids()) {
 			ourLog.debug("Forbidding multiple EIDs on ", theUpdatedResource);
 			forbidIfHasMultipleEids(theUpdatedResource);
 		}
 
 		if (MdmResourceUtil.isGoldenRecordRedirected(theUpdatedResource)) {
-			ourLog.debug("Deleting MDM links to deactivated Golden resource {}", theUpdatedResource.getIdElement().toUnqualifiedVersionless());
+			ourLog.debug(
+					"Deleting MDM links to deactivated Golden resource {}",
+					theUpdatedResource.getIdElement().toUnqualifiedVersionless());
 			int deleted = myMdmLinkDeleteSvc.deleteNonRedirectWithAnyReferenceTo(theUpdatedResource);
 			if (deleted > 0) {
 				ourLog.debug("Deleted {} MDM links", deleted);
@@ -124,10 +149,13 @@ public class MdmStorageInterceptor implements IMdmStorageInterceptor {
 
 	@Hook(Pointcut.STORAGE_PRESTORAGE_RESOURCE_DELETED)
 	public void deleteMdmLinks(RequestDetails theRequest, IBaseResource theResource) {
-		if (!myMdmSettings.isSupportedMdmType(myFhirContext.getResourceType(theResource))) {
+		if (ourLinksDeletedBeforehand.get()) {
 			return;
 		}
-		myMdmLinkDeleteSvc.deleteWithAnyReferenceTo(theResource);
+
+		if (myMdmSettings.isSupportedMdmType(myFhirContext.getResourceType(theResource))) {
+			myMdmLinkDeleteSvc.deleteWithAnyReferenceTo(theResource);
+		}
 	}
 
 	private void forbidIfModifyingExternalEidOnTarget(IBaseResource theNewResource, IBaseResource theOldResource) {
@@ -150,7 +178,8 @@ public class MdmStorageInterceptor implements IMdmStorageInterceptor {
 	}
 
 	private void throwBlockEidChange() {
-		throw new ForbiddenOperationException(Msg.code(763) + "While running with EID updates disabled, EIDs may not be updated on source resources");
+		throw new ForbiddenOperationException(
+				Msg.code(763) + "While running with EID updates disabled, EIDs may not be updated on source resources");
 	}
 
 	/*
@@ -193,15 +222,19 @@ public class MdmStorageInterceptor implements IMdmStorageInterceptor {
 	}
 
 	private void throwBlockMdmManagedTagChange() {
-		throw new ForbiddenOperationException(Msg.code(764) + "The " + MdmConstants.CODE_HAPI_MDM_MANAGED + " tag on a resource may not be changed once created.");
+		throw new ForbiddenOperationException(Msg.code(764) + "The " + MdmConstants.CODE_HAPI_MDM_MANAGED
+				+ " tag on a resource may not be changed once created.");
 	}
 
 	private void throwModificationBlockedByMdm() {
-		throw new ForbiddenOperationException(Msg.code(765) + "Cannot create or modify Resources that are managed by MDM. This resource contains a tag with one of these systems: " + MdmConstants.SYSTEM_GOLDEN_RECORD_STATUS + " or " + MdmConstants.SYSTEM_MDM_MANAGED);
+		throw new ForbiddenOperationException(Msg.code(765)
+				+ "Cannot create or modify Resources that are managed by MDM. This resource contains a tag with one of these systems: "
+				+ MdmConstants.SYSTEM_GOLDEN_RECORD_STATUS + " or " + MdmConstants.SYSTEM_MDM_MANAGED);
 	}
 
 	private void throwBlockMultipleEids() {
-		throw new ForbiddenOperationException(Msg.code(766) + "While running with multiple EIDs disabled, source resources may have at most one EID.");
+		throw new ForbiddenOperationException(Msg.code(766)
+				+ "While running with multiple EIDs disabled, source resources may have at most one EID.");
 	}
 
 	private String extractResourceType(IBaseResource theResource) {
@@ -218,5 +251,13 @@ public class MdmStorageInterceptor implements IMdmStorageInterceptor {
 	public void expungeAllMatchedMdmLinks(AtomicInteger theCounter, IBaseResource theResource) {
 		ourLog.debug("Expunging MdmLink records with reference to {}", theResource.getIdElement());
 		theCounter.addAndGet(myMdmLinkDeleteSvc.deleteWithAnyReferenceTo(theResource));
+	}
+
+	public static void setLinksDeletedBeforehand() {
+		ourLinksDeletedBeforehand.set(Boolean.TRUE);
+	}
+
+	public static void resetLinksDeletedBeforehand() {
+		ourLinksDeletedBeforehand.remove();
 	}
 }

@@ -24,7 +24,6 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.mdm.dao.MdmLinkDaoSvc;
-import ca.uhn.fhir.mdm.util.MdmPartitionHelper;
 import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
 import ca.uhn.fhir.mdm.api.IMdmLink;
 import ca.uhn.fhir.mdm.api.IMdmLinkUpdaterSvc;
@@ -34,6 +33,7 @@ import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.mdm.log.Logs;
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
+import ca.uhn.fhir.mdm.util.MdmPartitionHelper;
 import ca.uhn.fhir.mdm.util.MdmResourceUtil;
 import ca.uhn.fhir.mdm.util.MessageHelper;
 import ca.uhn.fhir.rest.api.Constants;
@@ -55,26 +55,38 @@ public class MdmLinkUpdaterSvcImpl implements IMdmLinkUpdaterSvc {
 
 	@Autowired
 	FhirContext myFhirContext;
+
 	@Autowired
 	IIdHelperService myIdHelperService;
+
 	@Autowired
 	MdmLinkDaoSvc myMdmLinkDaoSvc;
+
 	@Autowired
 	MdmResourceDaoSvc myMdmResourceDaoSvc;
+
 	@Autowired
 	MdmMatchLinkSvc myMdmMatchLinkSvc;
+
 	@Autowired
 	IMdmSettings myMdmSettings;
+
 	@Autowired
 	MessageHelper myMessageHelper;
+
 	@Autowired
 	IMdmSurvivorshipService myMdmSurvivorshipService;
+
 	@Autowired
 	MdmPartitionHelper myMdmPartitionHelper;
 
 	@Transactional
 	@Override
-	public IAnyResource updateLink(IAnyResource theGoldenResource, IAnyResource theSourceResource, MdmMatchResultEnum theMatchResult, MdmTransactionContext theMdmContext) {
+	public IAnyResource updateLink(
+			IAnyResource theGoldenResource,
+			IAnyResource theSourceResource,
+			MdmMatchResultEnum theMatchResult,
+			MdmTransactionContext theMdmContext) {
 		String sourceType = myFhirContext.getResourceType(theSourceResource);
 
 		validateUpdateLinkRequest(theGoldenResource, theSourceResource, theMatchResult, sourceType);
@@ -82,12 +94,15 @@ public class MdmLinkUpdaterSvcImpl implements IMdmLinkUpdaterSvc {
 		IResourcePersistentId goldenResourceId = myIdHelperService.getPidOrThrowException(theGoldenResource);
 		IResourcePersistentId sourceResourceId = myIdHelperService.getPidOrThrowException(theSourceResource);
 
-		// check if the golden resource and the source resource are in the same partition if cross partition mdm is not allowed, throw error if not
+		// check if the golden resource and the source resource are in the same partition if cross partition mdm is not
+		// allowed, throw error if not
 		myMdmPartitionHelper.validateMdmResourcesPartitionMatches(theGoldenResource, theSourceResource);
 
-		Optional<? extends IMdmLink> optionalMdmLink = myMdmLinkDaoSvc.getLinkByGoldenResourcePidAndSourceResourcePid(goldenResourceId, sourceResourceId);
+		Optional<? extends IMdmLink> optionalMdmLink =
+				myMdmLinkDaoSvc.getLinkByGoldenResourcePidAndSourceResourcePid(goldenResourceId, sourceResourceId);
 		if (optionalMdmLink.isEmpty()) {
-			throw new InvalidRequestException(Msg.code(738) + myMessageHelper.getMessageForNoLink(theGoldenResource, theSourceResource));
+			throw new InvalidRequestException(
+					Msg.code(738) + myMessageHelper.getMessageForNoLink(theGoldenResource, theSourceResource));
 		}
 
 		IMdmLink mdmLink = optionalMdmLink.get();
@@ -95,31 +110,44 @@ public class MdmLinkUpdaterSvcImpl implements IMdmLinkUpdaterSvc {
 		validateNoMatchPresentWhenAcceptingPossibleMatch(theSourceResource, goldenResourceId, theMatchResult);
 
 		if (mdmLink.getMatchResult() == theMatchResult) {
-			ourLog.warn("MDM Link for " + theGoldenResource.getIdElement().toVersionless() + ", " + theSourceResource.getIdElement().toVersionless() + " already has value " + theMatchResult + ".  Nothing to do.");
+			ourLog.warn("MDM Link for " + theGoldenResource.getIdElement().toVersionless() + ", "
+					+ theSourceResource.getIdElement().toVersionless() + " already has value " + theMatchResult
+					+ ".  Nothing to do.");
 			return theGoldenResource;
 		}
 
-		ourLog.info("Manually updating MDM Link for " + theGoldenResource.getIdElement().toVersionless() + ", " + theSourceResource.getIdElement().toVersionless() + " from " + mdmLink.getMatchResult() + " to " + theMatchResult + ".");
+		ourLog.info("Manually updating MDM Link for "
+				+ theGoldenResource.getIdElement().toVersionless() + ", "
+				+ theSourceResource.getIdElement().toVersionless() + " from " + mdmLink.getMatchResult() + " to "
+				+ theMatchResult + ".");
 		mdmLink.setMatchResult(theMatchResult);
 		mdmLink.setLinkSource(MdmLinkSourceEnum.MANUAL);
 
 		// Add partition for the mdm link if it doesn't exist
-		RequestPartitionId goldenResourcePartitionId = (RequestPartitionId) theGoldenResource.getUserData(Constants.RESOURCE_PARTITION_ID);
-		if (goldenResourcePartitionId != null && goldenResourcePartitionId.hasPartitionIds() && goldenResourcePartitionId.getFirstPartitionIdOrNull() != null &&
-			(mdmLink.getPartitionId() == null || mdmLink.getPartitionId().getPartitionId() == null)) {
-			mdmLink.setPartitionId(new PartitionablePartitionId(goldenResourcePartitionId.getFirstPartitionIdOrNull(), goldenResourcePartitionId.getPartitionDate()));
+		RequestPartitionId goldenResourcePartitionId =
+				(RequestPartitionId) theGoldenResource.getUserData(Constants.RESOURCE_PARTITION_ID);
+		if (goldenResourcePartitionId != null
+				&& goldenResourcePartitionId.hasPartitionIds()
+				&& goldenResourcePartitionId.getFirstPartitionIdOrNull() != null
+				&& (mdmLink.getPartitionId() == null || mdmLink.getPartitionId().getPartitionId() == null)) {
+			mdmLink.setPartitionId(new PartitionablePartitionId(
+					goldenResourcePartitionId.getFirstPartitionIdOrNull(),
+					goldenResourcePartitionId.getPartitionDate()));
 		}
 		myMdmLinkDaoSvc.save(mdmLink);
 
 		if (theMatchResult == MdmMatchResultEnum.MATCH) {
 			// only apply survivorship rules in case of a match
-			myMdmSurvivorshipService.applySurvivorshipRulesToGoldenResource(theSourceResource, theGoldenResource, theMdmContext);
+			myMdmSurvivorshipService.applySurvivorshipRulesToGoldenResource(
+					theSourceResource, theGoldenResource, theMdmContext);
 		}
 
 		myMdmResourceDaoSvc.upsertGoldenResource(theGoldenResource, theMdmContext.getResourceType());
 		if (theMatchResult == MdmMatchResultEnum.NO_MATCH) {
 			// We need to return no match for when a Golden Resource has already been found elsewhere
-			if (myMdmLinkDaoSvc.getMdmLinksBySourcePidAndMatchResult(sourceResourceId, MdmMatchResultEnum.MATCH).isEmpty()) {
+			if (myMdmLinkDaoSvc
+					.getMdmLinksBySourcePidAndMatchResult(sourceResourceId, MdmMatchResultEnum.MATCH)
+					.isEmpty()) {
 				// Need to find a new Golden Resource to link this target to
 				myMdmMatchLinkSvc.updateMdmLinksForMdmSource(theSourceResource, theMdmContext);
 			}
@@ -131,45 +159,55 @@ public class MdmLinkUpdaterSvcImpl implements IMdmLinkUpdaterSvc {
 	 * When updating POSSIBLE_MATCH link to a MATCH we need to validate that a MATCH to a different golden resource
 	 * doesn't exist, because a resource mustn't be a MATCH to more than one golden resource
 	 */
-	private void validateNoMatchPresentWhenAcceptingPossibleMatch(IAnyResource theSourceResource,
-					IResourcePersistentId theGoldenResourceId, MdmMatchResultEnum theMatchResult) {
+	private void validateNoMatchPresentWhenAcceptingPossibleMatch(
+			IAnyResource theSourceResource,
+			IResourcePersistentId theGoldenResourceId,
+			MdmMatchResultEnum theMatchResult) {
 
 		// if theMatchResult != MATCH, we are not accepting POSSIBLE_MATCH so there is nothing to validate
-		if (theMatchResult != MdmMatchResultEnum.MATCH) { return; }
+		if (theMatchResult != MdmMatchResultEnum.MATCH) {
+			return;
+		}
 
 		IResourcePersistentId sourceResourceId = myIdHelperService.getPidOrThrowException(theSourceResource);
-		List<? extends IMdmLink> mdmLinks = myMdmLinkDaoSvc
-			.getMdmLinksBySourcePidAndMatchResult(sourceResourceId, MdmMatchResultEnum.MATCH);
+		List<? extends IMdmLink> mdmLinks =
+				myMdmLinkDaoSvc.getMdmLinksBySourcePidAndMatchResult(sourceResourceId, MdmMatchResultEnum.MATCH);
 
 		// if a link for a different golden resource exists, throw an exception
 		for (IMdmLink mdmLink : mdmLinks) {
 			if (mdmLink.getGoldenResourcePersistenceId() != theGoldenResourceId) {
-				IAnyResource existingGolden = myMdmResourceDaoSvc.readGoldenResourceByPid(mdmLink.getGoldenResourcePersistenceId(), mdmLink.getMdmSourceType());
-				throw new InvalidRequestException(Msg.code(2218) +
-					myMessageHelper.getMessageForAlreadyAcceptedLink(existingGolden, theSourceResource));
+				IAnyResource existingGolden = myMdmResourceDaoSvc.readGoldenResourceByPid(
+						mdmLink.getGoldenResourcePersistenceId(), mdmLink.getMdmSourceType());
+				throw new InvalidRequestException(Msg.code(2218)
+						+ myMessageHelper.getMessageForAlreadyAcceptedLink(existingGolden, theSourceResource));
 			}
 		}
 	}
 
-
-	private void validateUpdateLinkRequest(IAnyResource theGoldenRecord, IAnyResource theSourceResource, MdmMatchResultEnum theMatchResult, String theSourceType) {
+	private void validateUpdateLinkRequest(
+			IAnyResource theGoldenRecord,
+			IAnyResource theSourceResource,
+			MdmMatchResultEnum theMatchResult,
+			String theSourceType) {
 		String goldenRecordType = myFhirContext.getResourceType(theGoldenRecord);
 
-		if (theMatchResult != MdmMatchResultEnum.NO_MATCH &&
-			theMatchResult != MdmMatchResultEnum.MATCH) {
+		if (theMatchResult != MdmMatchResultEnum.NO_MATCH && theMatchResult != MdmMatchResultEnum.MATCH) {
 			throw new InvalidRequestException(Msg.code(739) + myMessageHelper.getMessageForUnsupportedMatchResult());
 		}
 
 		if (!myMdmSettings.isSupportedMdmType(goldenRecordType)) {
-			throw new InvalidRequestException(Msg.code(740) + myMessageHelper.getMessageForUnsupportedFirstArgumentTypeInUpdate(goldenRecordType));
+			throw new InvalidRequestException(Msg.code(740)
+					+ myMessageHelper.getMessageForUnsupportedFirstArgumentTypeInUpdate(goldenRecordType));
 		}
 
 		if (!myMdmSettings.isSupportedMdmType(theSourceType)) {
-			throw new InvalidRequestException(Msg.code(741) + myMessageHelper.getMessageForUnsupportedSecondArgumentTypeInUpdate(theSourceType));
+			throw new InvalidRequestException(
+					Msg.code(741) + myMessageHelper.getMessageForUnsupportedSecondArgumentTypeInUpdate(theSourceType));
 		}
 
 		if (!Objects.equals(goldenRecordType, theSourceType)) {
-			throw new InvalidRequestException(Msg.code(742) + myMessageHelper.getMessageForArgumentTypeMismatchInUpdate(goldenRecordType, theSourceType));
+			throw new InvalidRequestException(Msg.code(742)
+					+ myMessageHelper.getMessageForArgumentTypeMismatchInUpdate(goldenRecordType, theSourceType));
 		}
 
 		if (!MdmResourceUtil.isMdmManaged(theGoldenRecord)) {
@@ -183,20 +221,27 @@ public class MdmLinkUpdaterSvcImpl implements IMdmLinkUpdaterSvc {
 
 	@Transactional
 	@Override
-	public void notDuplicateGoldenResource(IAnyResource theGoldenResource, IAnyResource theTargetGoldenResource, MdmTransactionContext theMdmContext) {
+	public void notDuplicateGoldenResource(
+			IAnyResource theGoldenResource, IAnyResource theTargetGoldenResource, MdmTransactionContext theMdmContext) {
 		validateNotDuplicateGoldenResourceRequest(theGoldenResource, theTargetGoldenResource);
 
 		IResourcePersistentId goldenResourceId = myIdHelperService.getPidOrThrowException(theGoldenResource);
 		IResourcePersistentId targetId = myIdHelperService.getPidOrThrowException(theTargetGoldenResource);
 
-		Optional<? extends IMdmLink> oMdmLink = myMdmLinkDaoSvc.getLinkByGoldenResourcePidAndSourceResourcePid(goldenResourceId, targetId);
+		Optional<? extends IMdmLink> oMdmLink =
+				myMdmLinkDaoSvc.getLinkByGoldenResourcePidAndSourceResourcePid(goldenResourceId, targetId);
 		if (oMdmLink.isEmpty()) {
-			throw new InvalidRequestException(Msg.code(745) + "No link exists between " + theGoldenResource.getIdElement().toVersionless() + " and " + theTargetGoldenResource.getIdElement().toVersionless());
+			throw new InvalidRequestException(Msg.code(745) + "No link exists between "
+					+ theGoldenResource.getIdElement().toVersionless() + " and "
+					+ theTargetGoldenResource.getIdElement().toVersionless());
 		}
 
 		IMdmLink mdmLink = oMdmLink.get();
 		if (!mdmLink.isPossibleDuplicate()) {
-			throw new InvalidRequestException(Msg.code(746) + theGoldenResource.getIdElement().toVersionless() + " and " + theTargetGoldenResource.getIdElement().toVersionless() + " are not linked as POSSIBLE_DUPLICATE.");
+			throw new InvalidRequestException(
+					Msg.code(746) + theGoldenResource.getIdElement().toVersionless() + " and "
+							+ theTargetGoldenResource.getIdElement().toVersionless()
+							+ " are not linked as POSSIBLE_DUPLICATE.");
 		}
 		mdmLink.setMatchResult(MdmMatchResultEnum.NO_MATCH);
 		mdmLink.setLinkSource(MdmLinkSourceEnum.MANUAL);
@@ -210,11 +255,15 @@ public class MdmLinkUpdaterSvcImpl implements IMdmLinkUpdaterSvc {
 		String goldenResourceType = myFhirContext.getResourceType(theGoldenResource);
 		String targetType = myFhirContext.getResourceType(theTarget);
 		if (!goldenResourceType.equalsIgnoreCase(targetType)) {
-			throw new InvalidRequestException(Msg.code(747) + "First argument to " + ProviderConstants.MDM_UPDATE_LINK + " must be the same resource type as the second argument.  Was " + goldenResourceType + "/" + targetType);
+			throw new InvalidRequestException(Msg.code(747) + "First argument to " + ProviderConstants.MDM_UPDATE_LINK
+					+ " must be the same resource type as the second argument.  Was " + goldenResourceType + "/"
+					+ targetType);
 		}
 
 		if (!MdmResourceUtil.isMdmManaged(theGoldenResource) || !MdmResourceUtil.isMdmManaged(theTarget)) {
-			throw new InvalidRequestException(Msg.code(748) + "Only MDM Managed Golden Resources may be updated via this operation.  The resource provided is not tagged as managed by HAPI-MDM");
+			throw new InvalidRequestException(
+					Msg.code(748)
+							+ "Only MDM Managed Golden Resources may be updated via this operation.  The resource provided is not tagged as managed by HAPI-MDM");
 		}
 	}
 }

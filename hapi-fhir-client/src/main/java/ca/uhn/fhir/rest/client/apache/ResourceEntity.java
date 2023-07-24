@@ -34,6 +34,8 @@ import java.nio.charset.UnsupportedCharsetException;
 public class ResourceEntity extends StringEntity {
 
 	public ResourceEntity(FhirContext theContext, IBaseResource theResource) throws UnsupportedCharsetException {
-		super(theContext.newJsonParser().encodeResourceToString(theResource), ContentType.parse(Constants.CT_FHIR_JSON_NEW));
+		super(
+				theContext.newJsonParser().encodeResourceToString(theResource),
+				ContentType.parse(Constants.CT_FHIR_JSON_NEW));
 	}
 }

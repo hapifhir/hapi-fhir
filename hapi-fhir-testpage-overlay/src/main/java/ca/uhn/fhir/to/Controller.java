@@ -1,9 +1,14 @@
 package ca.uhn.fhir.to;
 
-import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.jpa.fql.executor.HfqlDataTypeEnum;
+import ca.uhn.fhir.jpa.fql.executor.IHfqlExecutionResult;
+import ca.uhn.fhir.jpa.fql.jdbc.RemoteHfqlExecutionResult;
+import ca.uhn.fhir.jpa.fql.parser.HfqlStatement;
+import ca.uhn.fhir.jpa.fql.provider.HfqlRestProvider;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.dstu2.valueset.ResourceTypeEnum;
 import ca.uhn.fhir.model.primitive.BoundCodeDt;
@@ -14,21 +19,14 @@ import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.client.impl.GenericClient;
-import ca.uhn.fhir.rest.gclient.ICreateTyped;
-import ca.uhn.fhir.rest.gclient.IHistory;
-import ca.uhn.fhir.rest.gclient.IHistoryTyped;
-import ca.uhn.fhir.rest.gclient.IHistoryUntyped;
-import ca.uhn.fhir.rest.gclient.IQuery;
-import ca.uhn.fhir.rest.gclient.IUntypedQuery;
 import ca.uhn.fhir.rest.gclient.NumberClientParam.IMatches;
-import ca.uhn.fhir.rest.gclient.QuantityClientParam;
 import ca.uhn.fhir.rest.gclient.QuantityClientParam.IAndUnits;
-import ca.uhn.fhir.rest.gclient.StringClientParam;
-import ca.uhn.fhir.rest.gclient.TokenClientParam;
+import ca.uhn.fhir.rest.gclient.*;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.to.model.HomeRequest;
 import ca.uhn.fhir.to.model.ResourceRequest;
 import ca.uhn.fhir.to.model.TransactionRequest;
+import ca.uhn.fhir.to.util.HfqlRenderingUtil;
 import ca.uhn.fhir.util.StopWatch;
 import com.google.gson.stream.JsonWriter;
 import org.apache.commons.lang3.StringUtils;
@@ -41,34 +39,37 @@ import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseConformance;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.Parameters;
 import org.springframework.ui.ModelMap;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 
-import javax.annotation.Nullable;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 import java.util.TreeSet;
+import java.util.stream.Collectors;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
 
 import static ca.uhn.fhir.rest.server.provider.ProviderConstants.DIFF_OPERATION_NAME;
 import static ca.uhn.fhir.util.UrlUtil.sanitizeUrlPart;
-import static org.apache.commons.lang3.StringUtils.defaultIfEmpty;
-import static org.apache.commons.lang3.StringUtils.defaultString;
-import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.*;
 
 @org.springframework.stereotype.Controller()
 public class Controller extends BaseController {
 	static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(Controller.class);
+	public static final int ROW_LIMIT = 200;
 
-	@RequestMapping(value = { "/about" })
-	public String actionAbout(HttpServletRequest theServletRequest, final HomeRequest theRequest, final ModelMap theModel) {
+	@RequestMapping(value = {"/about"})
+	public String actionAbout(
+			HttpServletRequest theServletRequest, final HomeRequest theRequest, final ModelMap theModel) {
 		addCommonParams(theServletRequest, theRequest, theModel);
 
 		theModel.put("notHome", true);
@@ -79,8 +80,12 @@ public class Controller extends BaseController {
 		return "about";
 	}
 
-	@RequestMapping(value = { "/conformance" })
-	public String actionConformance(HttpServletRequest theServletRequest, final HomeRequest theRequest, final BindingResult theBindingResult, final ModelMap theModel) {
+	@RequestMapping(value = {"/conformance"})
+	public String actionConformance(
+			HttpServletRequest theServletRequest,
+			final HomeRequest theRequest,
+			final BindingResult theBindingResult,
+			final ModelMap theModel) {
 		addCommonParams(theServletRequest, theRequest, theModel);
 
 		CaptureInterceptor interceptor = new CaptureInterceptor();
@@ -95,28 +100,38 @@ public class Controller extends BaseController {
 				name = "Conformance";
 			}
 
-			Class<? extends IBaseConformance> type = (Class<? extends IBaseConformance>) context.getResourceDefinition(name).getImplementingClass();
+			Class<? extends IBaseConformance> type = (Class<? extends IBaseConformance>)
+					context.getResourceDefinition(name).getImplementingClass();
 			client.fetchConformance().ofType(type).execute();
 		} catch (Exception e) {
 			returnsResource = handleClientException(client, e, theModel);
 		}
 		long delay = System.currentTimeMillis() - start;
 
-		processAndAddLastClientInvocation(client, returnsResource, theModel, delay, "Loaded conformance", interceptor, theRequest);
+		processAndAddLastClientInvocation(
+				client, returnsResource, theModel, delay, "Loaded conformance", interceptor, theRequest);
 
 		ourLog.info(logPrefix(theModel) + "Displayed conformance profile");
 
 		return "result";
 	}
 
-	@RequestMapping(value = { "/create" })
-	public String actionCreate(final HttpServletRequest theReq, final HomeRequest theRequest, final BindingResult theBindingResult, final ModelMap theModel) {
+	@RequestMapping(value = {"/create"})
+	public String actionCreate(
+			final HttpServletRequest theReq,
+			final HomeRequest theRequest,
+			final BindingResult theBindingResult,
+			final ModelMap theModel) {
 		doActionCreateOrValidate(theReq, theRequest, theBindingResult, theModel, "create");
 		return "result";
 	}
 
-	@RequestMapping(value = { "/delete" })
-	public String actionDelete(HttpServletRequest theServletRequest, HomeRequest theRequest, BindingResult theBindingResult, ModelMap theModel) {
+	@RequestMapping(value = {"/delete"})
+	public String actionDelete(
+			HttpServletRequest theServletRequest,
+			HomeRequest theRequest,
+			BindingResult theBindingResult,
+			ModelMap theModel) {
 		addCommonParams(theServletRequest, theRequest, theModel);
 
 		CaptureInterceptor interceptor = new CaptureInterceptor();
@@ -153,34 +168,48 @@ public class Controller extends BaseController {
 			returnsResource = handleClientException(client, e, theModel);
 		}
 		long delay = System.currentTimeMillis() - start;
-		processAndAddLastClientInvocation(client, returnsResource, theModel, delay, outcomeDescription, interceptor, theRequest);
+		processAndAddLastClientInvocation(
+				client, returnsResource, theModel, delay, outcomeDescription, interceptor, theRequest);
 
 		ourLog.info(logPrefix(theModel) + "Deleted resource of type " + def.getName());
 
 		return "result";
 	}
 
-	@RequestMapping(value = { "/history-server" })
-	public String actionHistoryServer(final HttpServletRequest theReq, final HomeRequest theRequest, final BindingResult theBindingResult, final ModelMap theModel) {
+	@RequestMapping(value = {"/history-server"})
+	public String actionHistoryServer(
+			final HttpServletRequest theReq,
+			final HomeRequest theRequest,
+			final BindingResult theBindingResult,
+			final ModelMap theModel) {
 		doActionHistory(theReq, theRequest, theBindingResult, theModel, "history-server", "Server History");
 		return "result";
 	}
 
-	@RequestMapping(value = { "/history-type" })
-	public String actionHistoryType(final HttpServletRequest theReq, final HomeRequest theRequest, final BindingResult theBindingResult, final ModelMap theModel) {
+	@RequestMapping(value = {"/history-type"})
+	public String actionHistoryType(
+			final HttpServletRequest theReq,
+			final HomeRequest theRequest,
+			final BindingResult theBindingResult,
+			final ModelMap theModel) {
 		doActionHistory(theReq, theRequest, theBindingResult, theModel, "history-type", "History");
 		return "result";
 	}
 
-	@RequestMapping(value = { "/", "/home" })
-	public String actionHome(HttpServletRequest theServletRequest, final HomeRequest theRequest, final BindingResult theBindingResult, final ModelMap theModel) {
+	@RequestMapping(value = {"/", "/home"})
+	public String actionHome(
+			HttpServletRequest theServletRequest,
+			final HomeRequest theRequest,
+			final BindingResult theBindingResult,
+			final ModelMap theModel) {
 		addCommonParams(theServletRequest, theRequest, theModel);
-		ourLog.info(theServletRequest.toString());
+		theModel.put("page", "home");
 		return "home";
 	}
 
-	@RequestMapping(value = { "/page" })
-	public String actionPage(HttpServletRequest theReq, HomeRequest theRequest, BindingResult theBindingResult, ModelMap theModel) {
+	@RequestMapping(value = {"/page"})
+	public String actionPage(
+			HttpServletRequest theReq, HomeRequest theRequest, BindingResult theBindingResult, ModelMap theModel) {
 		addCommonParams(theReq, theRequest, theModel);
 
 		CaptureInterceptor interceptor = new CaptureInterceptor();
@@ -204,7 +233,8 @@ public class Controller extends BaseController {
 		try {
 			ourLog.info(logPrefix(theModel) + "Loading paging URL: {}", url);
 			@SuppressWarnings("unchecked")
-			Class<? extends IBaseBundle> bundleType = (Class<? extends IBaseBundle>) context.getResourceDefinition("Bundle").getImplementingClass();
+			Class<? extends IBaseBundle> bundleType = (Class<? extends IBaseBundle>)
+					context.getResourceDefinition("Bundle").getImplementingClass();
 			client.loadPage().byUrl(url).andReturnBundle(bundleType).execute();
 		} catch (Exception e) {
 			returnsResource = handleClientException(client, e, theModel);
@@ -213,13 +243,18 @@ public class Controller extends BaseController {
 
 		String outcomeDescription = "Bundle Page";
 
-		processAndAddLastClientInvocation(client, returnsResource, theModel, delay, outcomeDescription, interceptor, theRequest);
+		processAndAddLastClientInvocation(
+				client, returnsResource, theModel, delay, outcomeDescription, interceptor, theRequest);
 
 		return "result";
 	}
 
-	@RequestMapping(value = { "/read" })
-	public String actionRead(HttpServletRequest theServletRequest, HomeRequest theRequest, BindingResult theBindingResult, ModelMap theModel) {
+	@RequestMapping(value = {"/read"})
+	public String actionRead(
+			HttpServletRequest theServletRequest,
+			HomeRequest theRequest,
+			BindingResult theBindingResult,
+			ModelMap theModel) {
 		addCommonParams(theServletRequest, theRequest, theModel);
 
 		CaptureInterceptor interceptor = new CaptureInterceptor();
@@ -264,13 +299,18 @@ public class Controller extends BaseController {
 		}
 		long delay = System.currentTimeMillis() - start;
 
-		processAndAddLastClientInvocation(client, returnsResource, theModel, delay, outcomeDescription, interceptor, theRequest);
+		processAndAddLastClientInvocation(
+				client, returnsResource, theModel, delay, outcomeDescription, interceptor, theRequest);
 
 		return "result";
 	}
 
-	@RequestMapping({ "/resource" })
-	public String actionResource(HttpServletRequest theServletRequest, final ResourceRequest theRequest, final BindingResult theBindingResult, final ModelMap theModel) {
+	@RequestMapping({"/resource"})
+	public String actionResource(
+			HttpServletRequest theServletRequest,
+			final ResourceRequest theRequest,
+			final BindingResult theBindingResult,
+			final ModelMap theModel) {
 
 		String resourceName = theRequest.getResource();
 
@@ -280,10 +320,15 @@ public class Controller extends BaseController {
 			String updateId = theRequest.getUpdateId();
 			String updateVid = defaultIfEmpty(theRequest.getUpdateVid(), null);
 			CaptureInterceptor interceptor = new CaptureInterceptor();
-			GenericClient client = theRequest.newClient(theServletRequest, getContext(theRequest), myConfig, interceptor);
+			GenericClient client =
+					theRequest.newClient(theServletRequest, getContext(theRequest), myConfig, interceptor);
 			RuntimeResourceDefinition def = getContext(theRequest).getResourceDefinition(theRequest.getResource());
-			IBaseResource updateResource = client.read(def.getImplementingClass(), new IdDt(resourceName, updateId, updateVid));
-			String updateResourceString = theRequest.newParser(getContext(theRequest)).setPrettyPrint(true).encodeResourceToString(updateResource);
+			IBaseResource updateResource =
+					client.read(def.getImplementingClass(), new IdDt(resourceName, updateId, updateVid));
+			String updateResourceString = theRequest
+					.newParser(getContext(theRequest))
+					.setPrettyPrint(true)
+					.encodeResourceToString(updateResource);
 			theModel.put("updateResource", updateResourceString);
 			theModel.put("updateResourceId", updateId);
 		}
@@ -293,8 +338,102 @@ public class Controller extends BaseController {
 		return "resource";
 	}
 
-	private void populateModelForResource(HttpServletRequest theServletRequest, HomeRequest theRequest, ModelMap theModel) {
-		org.hl7.fhir.r5.model.CapabilityStatement conformance = addCommonParams(theServletRequest, theRequest, theModel);
+	@RequestMapping(
+			value = {"/hfql"},
+			method = RequestMethod.GET)
+	public String actionHfqlHome(
+			HttpServletRequest theServletRequest,
+			@RequestParam(value = "hfql-query", required = false) String theHfqlQuery,
+			final HomeRequest theRequest,
+			final BindingResult theBindingResult,
+			final ModelMap theModel) {
+		addCommonParamsForHfql(theServletRequest, theRequest, theModel);
+
+		String query = theHfqlQuery;
+		if (isBlank(query)) {
+			query = "SELECT\n" + "   id AS ID, meta.versionId AS Version,\n"
+					+ "   name[0].family AS FamilyName, name[0].given[0] AS GivenName,\n"
+					+ "   identifier AS Identifiers\n"
+					+ "FROM\n"
+					+ "   Patient";
+		}
+
+		theModel.put("query", query);
+		return "hfql";
+	}
+
+	@RequestMapping(
+			value = {"/hfql"},
+			method = RequestMethod.POST)
+	public String actionHfqlExecuteQuery(
+			HttpServletRequest theServletRequest,
+			@RequestParam("hfql-query") String theHfqlQuery,
+			final HomeRequest theRequest,
+			final BindingResult theBindingResult,
+			final ModelMap theModel) {
+		addCommonParamsForHfql(theServletRequest, theRequest, theModel);
+
+		ourLog.info("Executing HFQL query: {}", theHfqlQuery);
+		StopWatch sw = new StopWatch();
+
+		List<List<String>> rows = new ArrayList<>();
+		try {
+			IHfqlExecutionResult result = executeHfqlStatement(theServletRequest, theHfqlQuery, theRequest, ROW_LIMIT);
+			while (result.hasNext()) {
+				List<Object> nextRowValues = result.getNextRow().getRowValues();
+				if (nextRowValues.size() >= 1) {
+					List<String> nextRow = nextRowValues.stream()
+							.map(t -> t != null ? t.toString() : null)
+							.collect(Collectors.toList());
+					rows.add(nextRow);
+				}
+			}
+
+			List<String> columnNames = result.getStatement().getSelectClauses().stream()
+					.map(HfqlStatement.SelectClause::getAlias)
+					.collect(Collectors.toList());
+			theModel.put("columnNames", columnNames);
+			List<String> columnTypes = result.getStatement().getSelectClauses().stream()
+					.map(t -> t.getDataType().name())
+					.collect(Collectors.toList());
+			theModel.put("columnTypes", columnTypes);
+
+		} catch (IOException e) {
+			ourLog.warn("Failed to execute HFQL query: {}", e.toString());
+			theModel.put("columnNames", List.of("Error"));
+			theModel.put("columnTypes", List.of(HfqlDataTypeEnum.STRING));
+			rows = List.of(List.of(e.getMessage()));
+		}
+
+		theModel.put("HfqlRenderingUtil", new HfqlRenderingUtil());
+		theModel.put("query", theHfqlQuery);
+		theModel.put("resultRows", rows);
+		theModel.put("executionTime", sw.toString());
+
+		return "hfql";
+	}
+
+	@Nonnull
+	protected IHfqlExecutionResult executeHfqlStatement(
+			HttpServletRequest theServletRequest, String theHfqlQuery, HomeRequest theRequest, int theRowLimit)
+			throws IOException {
+		Parameters requestParameters =
+				HfqlRestProvider.newQueryRequestParameters(theHfqlQuery, theRowLimit, theRowLimit);
+		GenericClient client = theRequest.newClient(theServletRequest, getContext(theRequest), myConfig, null);
+		return new RemoteHfqlExecutionResult(requestParameters, client);
+	}
+
+	protected org.hl7.fhir.r5.model.CapabilityStatement addCommonParamsForHfql(
+			HttpServletRequest theServletRequest, HomeRequest theRequest, ModelMap theModel) {
+		theModel.put("page", "hfql");
+		theModel.put("rowLimit", ROW_LIMIT);
+		return super.addCommonParams(theServletRequest, theRequest, theModel);
+	}
+
+	private void populateModelForResource(
+			HttpServletRequest theServletRequest, HomeRequest theRequest, ModelMap theModel) {
+		org.hl7.fhir.r5.model.CapabilityStatement conformance =
+				addCommonParams(theServletRequest, theRequest, theModel);
 
 		String resourceName = theRequest.getResource();
 
@@ -304,7 +443,8 @@ public class Controller extends BaseController {
 		boolean haveSearchParams = false;
 		List<List<String>> queryIncludes = new ArrayList<>();
 
-		haveSearchParams = extractSearchParamsR5CapabilityStatement(conformance, resourceName, includes, revIncludes, sortParams, haveSearchParams, queryIncludes);
+		haveSearchParams = extractSearchParamsR5CapabilityStatement(
+				conformance, resourceName, includes, revIncludes, sortParams, haveSearchParams, queryIncludes);
 
 		theModel.put("includes", includes);
 		theModel.put("revincludes", revIncludes);
@@ -315,8 +455,13 @@ public class Controller extends BaseController {
 	}
 
 	@SuppressWarnings("unchecked")
-	@RequestMapping(value = { "/search" })
-	public String actionSearch(HttpServletRequest theServletRequest, HomeRequest theRequest, BindingResult theBindingResult, ModelMap theModel) throws IOException {
+	@RequestMapping(value = {"/search"})
+	public String actionSearch(
+			HttpServletRequest theServletRequest,
+			HomeRequest theRequest,
+			BindingResult theBindingResult,
+			ModelMap theModel)
+			throws IOException {
 		addCommonParams(theServletRequest, theRequest, theModel);
 
 		StringWriter clientCodeJsonStringWriter = new StringWriter();
@@ -334,7 +479,8 @@ public class Controller extends BaseController {
 		IQuery query;
 		if (isNotBlank(theServletRequest.getParameter("resource"))) {
 			try {
-				query = search.forResource(getResourceType(theRequest, theServletRequest).getImplementingClass());
+				query = search.forResource(
+						getResourceType(theRequest, theServletRequest).getImplementingClass());
 			} catch (ServletException e) {
 				populateModelForResource(theServletRequest, theRequest, theModel);
 				theModel.put("errorMsg", toDisplayError(e.toString(), e));
@@ -440,7 +586,8 @@ public class Controller extends BaseController {
 		}
 
 		Class<? extends IBaseBundle> bundleType;
-		bundleType = (Class<? extends IBaseBundle>) client.getFhirContext().getResourceDefinition("Bundle").getImplementingClass();
+		bundleType = (Class<? extends IBaseBundle>)
+				client.getFhirContext().getResourceDefinition("Bundle").getImplementingClass();
 		IQuery<?> queryTyped = query.returnBundle(bundleType);
 
 		long start = System.currentTimeMillis();
@@ -455,7 +602,8 @@ public class Controller extends BaseController {
 		}
 		long delay = System.currentTimeMillis() - start;
 
-		processAndAddLastClientInvocation(client, returnsResource, theModel, delay, outcomeDescription, interceptor, theRequest);
+		processAndAddLastClientInvocation(
+				client, returnsResource, theModel, delay, outcomeDescription, interceptor, theRequest);
 
 		clientCodeJsonWriter.endObject();
 		clientCodeJsonWriter.close();
@@ -465,8 +613,12 @@ public class Controller extends BaseController {
 		return "result";
 	}
 
-	@RequestMapping(value = { "/transaction" })
-	public String actionTransaction(HttpServletRequest theServletRequest, final TransactionRequest theRequest, final BindingResult theBindingResult, final ModelMap theModel) {
+	@RequestMapping(value = {"/transaction"})
+	public String actionTransaction(
+			HttpServletRequest theServletRequest,
+			final TransactionRequest theRequest,
+			final BindingResult theBindingResult,
+			final ModelMap theModel) {
 		addCommonParams(theServletRequest, theRequest, theModel);
 
 		CaptureInterceptor interceptor = new CaptureInterceptor();
@@ -481,13 +633,18 @@ public class Controller extends BaseController {
 			} else if (body.startsWith("<")) {
 				// XML content
 			} else {
-				theModel.put("errorMsg",
-						toDisplayError("Message body does not appear to be a valid FHIR resource instance document. Body should start with '<' (for XML encoding) or '{' (for JSON encoding).", null));
+				theModel.put(
+						"errorMsg",
+						toDisplayError(
+								"Message body does not appear to be a valid FHIR resource instance document. Body should start with '<' (for XML encoding) or '{' (for JSON encoding).",
+								null));
 				return "home";
 			}
 		} catch (DataFormatException e) {
 			ourLog.warn("Failed to parse bundle", e);
-			theModel.put("errorMsg", toDisplayError("Failed to parse transaction bundle body. Error was: " + e.getMessage(), e));
+			theModel.put(
+					"errorMsg",
+					toDisplayError("Failed to parse transaction bundle body. Error was: " + e.getMessage(), e));
 			return "home";
 		}
 
@@ -501,24 +658,38 @@ public class Controller extends BaseController {
 		}
 		long delay = System.currentTimeMillis() - start;
 
-		processAndAddLastClientInvocation(client, returnsResource, theModel, delay, "Transaction", interceptor, theRequest);
+		processAndAddLastClientInvocation(
+				client, returnsResource, theModel, delay, "Transaction", interceptor, theRequest);
 
 		return "result";
 	}
 
-	@RequestMapping(value = { "/update" })
-	public String actionUpdate(final HttpServletRequest theReq, final HomeRequest theRequest, final BindingResult theBindingResult, final ModelMap theModel) {
+	@RequestMapping(value = {"/update"})
+	public String actionUpdate(
+			final HttpServletRequest theReq,
+			final HomeRequest theRequest,
+			final BindingResult theBindingResult,
+			final ModelMap theModel) {
 		doActionCreateOrValidate(theReq, theRequest, theBindingResult, theModel, "update");
 		return "result";
 	}
 
-	@RequestMapping(value = { "/validate" })
-	public String actionValidate(final HttpServletRequest theReq, final HomeRequest theRequest, final BindingResult theBindingResult, final ModelMap theModel) {
+	@RequestMapping(value = {"/validate"})
+	public String actionValidate(
+			final HttpServletRequest theReq,
+			final HomeRequest theRequest,
+			final BindingResult theBindingResult,
+			final ModelMap theModel) {
 		doActionCreateOrValidate(theReq, theRequest, theBindingResult, theModel, "validate");
 		return "result";
 	}
 
-	private void doActionCreateOrValidate(HttpServletRequest theReq, HomeRequest theRequest, BindingResult theBindingResult, ModelMap theModel, String theMethod) {
+	private void doActionCreateOrValidate(
+			HttpServletRequest theReq,
+			HomeRequest theRequest,
+			BindingResult theBindingResult,
+			ModelMap theModel,
+			String theMethod) {
 		boolean validate = "validate".equals(theMethod);
 
 		addCommonParams(theReq, theRequest, theModel);
@@ -534,7 +705,8 @@ public class Controller extends BaseController {
 		}
 
 		// Don't sanitize this param, it's a raw resource body and may well be XML
-		String body = validate ? theReq.getParameter("resource-validate-body") : theReq.getParameter("resource-create-body");
+		String body =
+				validate ? theReq.getParameter("resource-validate-body") : theReq.getParameter("resource-create-body");
 		if (isBlank(body)) {
 			theModel.put("errorMsg", toDisplayError("No message body specified", null));
 			return;
@@ -551,8 +723,11 @@ public class Controller extends BaseController {
 				resource = getContext(theRequest).newXmlParser().parseResource(type, body);
 				client.setEncoding(EncodingEnum.XML);
 			} else {
-				theModel.put("errorMsg",
-						toDisplayError("Message body does not appear to be a valid FHIR resource instance document. Body should start with '<' (for XML encoding) or '{' (for JSON encoding).", null));
+				theModel.put(
+						"errorMsg",
+						toDisplayError(
+								"Message body does not appear to be a valid FHIR resource instance document. Body should start with '<' (for XML encoding) or '{' (for JSON encoding).",
+								null));
 				return;
 			}
 		} catch (DataFormatException e) {
@@ -588,26 +763,32 @@ public class Controller extends BaseController {
 		}
 		long delay = System.currentTimeMillis() - start;
 
-		processAndAddLastClientInvocation(client, returnsResource, theModel, delay, outcomeDescription, interceptor, theRequest);
+		processAndAddLastClientInvocation(
+				client, returnsResource, theModel, delay, outcomeDescription, interceptor, theRequest);
 
 		try {
 			if (validate) {
-				ourLog.info(logPrefix(theModel) + "Validated resource of type " + getResourceType(theRequest, theReq).getName());
+				ourLog.info(logPrefix(theModel) + "Validated resource of type "
+						+ getResourceType(theRequest, theReq).getName());
 			} else if (update) {
-				ourLog.info(logPrefix(theModel) + "Updated resource of type " + getResourceType(theRequest, theReq).getName());
+				ourLog.info(logPrefix(theModel) + "Updated resource of type "
+						+ getResourceType(theRequest, theReq).getName());
 			} else {
-				ourLog.info(logPrefix(theModel) + "Created resource of type " + getResourceType(theRequest, theReq).getName());
+				ourLog.info(logPrefix(theModel) + "Created resource of type "
+						+ getResourceType(theRequest, theReq).getName());
 			}
 		} catch (Exception e) {
 			ourLog.warn("Failed to determine resource type from request", e);
 		}
-
 	}
 
-
 	@SuppressWarnings("unchecked")
-	@RequestMapping(value = { "/operation" })
-	public String actionOperation(final HttpServletRequest theReq, final HomeRequest theRequest, final BindingResult theBindingResult, final ModelMap theModel) {
+	@RequestMapping(value = {"/operation"})
+	public String actionOperation(
+			final HttpServletRequest theReq,
+			final HomeRequest theRequest,
+			final BindingResult theBindingResult,
+			final ModelMap theModel) {
 
 		String instanceType = theReq.getParameter("instanceType");
 		String instanceId = theReq.getParameter("instanceId");
@@ -621,19 +802,20 @@ public class Controller extends BaseController {
 		GenericClient client = theRequest.newClient(theReq, getContext(theRequest), myConfig, interceptor);
 		client.setPrettyPrint(true);
 
-		Class<? extends IBaseResource> type = getContext(theRequest).getResourceDefinition(instanceType).getImplementingClass();
-		Class<? extends IBaseParameters> parametersType = (Class<? extends IBaseParameters>) getContext(theRequest).getResourceDefinition("Parameters").getImplementingClass();
+		Class<? extends IBaseResource> type =
+				getContext(theRequest).getResourceDefinition(instanceType).getImplementingClass();
+		Class<? extends IBaseParameters> parametersType = (Class<? extends IBaseParameters>)
+				getContext(theRequest).getResourceDefinition("Parameters").getImplementingClass();
 
 		StopWatch sw = new StopWatch();
 		ResultType returnsResource = getReturnedTypeBasedOnOperation(operationName);
 		try {
-			client
-				.operation()
-				.onInstance(instanceType + "/" + instanceId)
-				.named(operationName)
-				.withNoParameters(parametersType)
-				.useHttpGet()
-				.execute();
+			client.operation()
+					.onInstance(instanceType + "/" + instanceId)
+					.named(operationName)
+					.withNoParameters(parametersType)
+					.useHttpGet()
+					.execute();
 		} catch (DataFormatException e) {
 			ourLog.warn("Failed to parse resource", e);
 			theModel.put("errorMsg", toDisplayError("Failed to parse message body. Error was: " + e.getMessage(), e));
@@ -644,17 +826,19 @@ public class Controller extends BaseController {
 		}
 
 		String outcomeDescription = "Execute " + operationName + " Operation";
-		processAndAddLastClientInvocation(client, returnsResource, theModel, sw.getMillis(), outcomeDescription, interceptor, theRequest);
+		processAndAddLastClientInvocation(
+				client, returnsResource, theModel, sw.getMillis(), outcomeDescription, interceptor, theRequest);
 
 		return "result";
 	}
 
-	private static ResultType getReturnedTypeBasedOnOperation(@Nullable String operationName) {
-		return DIFF_OPERATION_NAME.equals(operationName) ? ResultType.PARAMETERS : ResultType.BUNDLE;
-	}
-
-
-	private void doActionHistory(HttpServletRequest theReq, HomeRequest theRequest, BindingResult theBindingResult, ModelMap theModel, String theMethod, String theMethodDescription) {
+	private void doActionHistory(
+			HttpServletRequest theReq,
+			HomeRequest theRequest,
+			BindingResult theBindingResult,
+			ModelMap theModel,
+			String theMethod,
+			String theMethodDescription) {
 		addCommonParams(theReq, theRequest, theModel);
 
 		CaptureInterceptor interceptor = new CaptureInterceptor();
@@ -684,7 +868,9 @@ public class Controller extends BaseController {
 
 		long start = System.currentTimeMillis();
 		try {
-			ourLog.info(logPrefix(theModel) + "Retrieving history for type {} ID {} since {}", new Object[] { type, id, since });
+			ourLog.info(
+					logPrefix(theModel) + "Retrieving history for type {} ID {} since {}",
+					new Object[] {type, id, since});
 
 			IHistory hist0 = client.history();
 			IHistoryUntyped hist1;
@@ -697,7 +883,8 @@ public class Controller extends BaseController {
 			}
 
 			IHistoryTyped<?> hist2;
-			hist2 = hist1.andReturnBundle(client.getFhirContext().getResourceDefinition("Bundle").getImplementingClass(IBaseBundle.class));
+			hist2 = hist1.andReturnBundle(
+					client.getFhirContext().getResourceDefinition("Bundle").getImplementingClass(IBaseBundle.class));
 
 			if (since != null) {
 				hist2.since(since);
@@ -712,13 +899,20 @@ public class Controller extends BaseController {
 		}
 		long delay = System.currentTimeMillis() - start;
 
-		processAndAddLastClientInvocation(client, returnsResource, theModel, delay, theMethodDescription, interceptor, theRequest);
-
+		processAndAddLastClientInvocation(
+				client, returnsResource, theModel, delay, theMethodDescription, interceptor, theRequest);
 	}
 
-	private boolean extractSearchParamsDstu2(IBaseResource theConformance, String resourceName, TreeSet<String> includes, TreeSet<String> theRevIncludes, TreeSet<String> sortParams,
-			boolean haveSearchParams, List<List<String>> queryIncludes) {
-		ca.uhn.fhir.model.dstu2.resource.Conformance conformance = (ca.uhn.fhir.model.dstu2.resource.Conformance) theConformance;
+	private boolean extractSearchParamsDstu2(
+			IBaseResource theConformance,
+			String resourceName,
+			TreeSet<String> includes,
+			TreeSet<String> theRevIncludes,
+			TreeSet<String> sortParams,
+			boolean haveSearchParams,
+			List<List<String>> queryIncludes) {
+		ca.uhn.fhir.model.dstu2.resource.Conformance conformance =
+				(ca.uhn.fhir.model.dstu2.resource.Conformance) theConformance;
 		for (ca.uhn.fhir.model.dstu2.resource.Conformance.Rest nextRest : conformance.getRest()) {
 			for (ca.uhn.fhir.model.dstu2.resource.Conformance.RestResource nextRes : nextRest.getResource()) {
 				if (nextRes.getTypeElement().getValue().equals(resourceName)) {
@@ -727,8 +921,10 @@ public class Controller extends BaseController {
 							includes.add(next.getValue());
 						}
 					}
-					for (ca.uhn.fhir.model.dstu2.resource.Conformance.RestResourceSearchParam next : nextRes.getSearchParam()) {
-						if (next.getTypeElement().getValueAsEnum() != ca.uhn.fhir.model.dstu2.valueset.SearchParamTypeEnum.COMPOSITE) {
+					for (ca.uhn.fhir.model.dstu2.resource.Conformance.RestResourceSearchParam next :
+							nextRes.getSearchParam()) {
+						if (next.getTypeElement().getValueAsEnum()
+								!= ca.uhn.fhir.model.dstu2.valueset.SearchParamTypeEnum.COMPOSITE) {
 							sortParams.add(next.getNameElement().getValue());
 						}
 					}
@@ -738,8 +934,10 @@ public class Controller extends BaseController {
 				} else {
 					// It's a different resource from the one we're searching, so
 					// scan for revinclude candidates
-					for (ca.uhn.fhir.model.dstu2.resource.Conformance.RestResourceSearchParam next : nextRes.getSearchParam()) {
-						if (next.getTypeElement().getValueAsEnum() == ca.uhn.fhir.model.dstu2.valueset.SearchParamTypeEnum.REFERENCE) {
+					for (ca.uhn.fhir.model.dstu2.resource.Conformance.RestResourceSearchParam next :
+							nextRes.getSearchParam()) {
+						if (next.getTypeElement().getValueAsEnum()
+								== ca.uhn.fhir.model.dstu2.valueset.SearchParamTypeEnum.REFERENCE) {
 							for (BoundCodeDt<ResourceTypeEnum> nextTargetType : next.getTarget()) {
 								if (nextTargetType.getValue().equals(resourceName)) {
 									theRevIncludes.add(nextRes.getTypeElement().getValue() + ":" + next.getName());
@@ -753,8 +951,14 @@ public class Controller extends BaseController {
 		return haveSearchParams;
 	}
 
-	private boolean extractSearchParamsDstu3CapabilityStatement(IBaseResource theConformance, String resourceName, TreeSet<String> includes, TreeSet<String> theRevIncludes, TreeSet<String> sortParams,
-			boolean haveSearchParams, List<List<String>> queryIncludes) {
+	private boolean extractSearchParamsDstu3CapabilityStatement(
+			IBaseResource theConformance,
+			String resourceName,
+			TreeSet<String> includes,
+			TreeSet<String> theRevIncludes,
+			TreeSet<String> sortParams,
+			boolean haveSearchParams,
+			List<List<String>> queryIncludes) {
 		CapabilityStatement conformance = (org.hl7.fhir.dstu3.model.CapabilityStatement) theConformance;
 		for (CapabilityStatementRestComponent nextRest : conformance.getRest()) {
 			for (CapabilityStatementRestResourceComponent nextRes : nextRest.getResource()) {
@@ -765,7 +969,8 @@ public class Controller extends BaseController {
 						}
 					}
 					for (CapabilityStatementRestResourceSearchParamComponent next : nextRes.getSearchParam()) {
-						if (next.getTypeElement().getValue() != org.hl7.fhir.dstu3.model.Enumerations.SearchParamType.COMPOSITE) {
+						if (next.getTypeElement().getValue()
+								!= org.hl7.fhir.dstu3.model.Enumerations.SearchParamType.COMPOSITE) {
 							sortParams.add(next.getNameElement().getValue());
 						}
 					}
@@ -776,8 +981,8 @@ public class Controller extends BaseController {
 					// It's a different resource from the one we're searching, so
 					// scan for revinclude candidates
 					for (CapabilityStatementRestResourceSearchParamComponent next : nextRes.getSearchParam()) {
-						if (next.getTypeElement().getValue() == org.hl7.fhir.dstu3.model.Enumerations.SearchParamType.REFERENCE) {
-						}
+						if (next.getTypeElement().getValue()
+								== org.hl7.fhir.dstu3.model.Enumerations.SearchParamType.REFERENCE) {}
 					}
 				}
 			}
@@ -785,19 +990,30 @@ public class Controller extends BaseController {
 		return haveSearchParams;
 	}
 
-	private boolean extractSearchParamsR4CapabilityStatement(IBaseResource theConformance, String resourceName, TreeSet<String> includes, TreeSet<String> theRevIncludes, TreeSet<String> sortParams,
-			boolean haveSearchParams, List<List<String>> queryIncludes) {
-		org.hl7.fhir.r4.model.CapabilityStatement conformance = (org.hl7.fhir.r4.model.CapabilityStatement) theConformance;
-		for (org.hl7.fhir.r4.model.CapabilityStatement.CapabilityStatementRestComponent nextRest : conformance.getRest()) {
-			for (org.hl7.fhir.r4.model.CapabilityStatement.CapabilityStatementRestResourceComponent nextRes : nextRest.getResource()) {
+	private boolean extractSearchParamsR4CapabilityStatement(
+			IBaseResource theConformance,
+			String resourceName,
+			TreeSet<String> includes,
+			TreeSet<String> theRevIncludes,
+			TreeSet<String> sortParams,
+			boolean haveSearchParams,
+			List<List<String>> queryIncludes) {
+		org.hl7.fhir.r4.model.CapabilityStatement conformance =
+				(org.hl7.fhir.r4.model.CapabilityStatement) theConformance;
+		for (org.hl7.fhir.r4.model.CapabilityStatement.CapabilityStatementRestComponent nextRest :
+				conformance.getRest()) {
+			for (org.hl7.fhir.r4.model.CapabilityStatement.CapabilityStatementRestResourceComponent nextRes :
+					nextRest.getResource()) {
 				if (nextRes.getTypeElement().getValue().equals(resourceName)) {
 					for (org.hl7.fhir.r4.model.StringType next : nextRes.getSearchInclude()) {
 						if (next.isEmpty() == false) {
 							includes.add(next.getValue());
 						}
 					}
-					for (org.hl7.fhir.r4.model.CapabilityStatement.CapabilityStatementRestResourceSearchParamComponent next : nextRes.getSearchParam()) {
-						if (next.getTypeElement().getValue() != org.hl7.fhir.r4.model.Enumerations.SearchParamType.COMPOSITE) {
+					for (org.hl7.fhir.r4.model.CapabilityStatement.CapabilityStatementRestResourceSearchParamComponent
+							next : nextRes.getSearchParam()) {
+						if (next.getTypeElement().getValue()
+								!= org.hl7.fhir.r4.model.Enumerations.SearchParamType.COMPOSITE) {
 							sortParams.add(next.getNameElement().getValue());
 						}
 					}
@@ -807,9 +1023,10 @@ public class Controller extends BaseController {
 				} else {
 					// It's a different resource from the one we're searching, so
 					// scan for revinclude candidates
-					for (org.hl7.fhir.r4.model.CapabilityStatement.CapabilityStatementRestResourceSearchParamComponent next : nextRes.getSearchParam()) {
-						if (next.getTypeElement().getValue() == org.hl7.fhir.r4.model.Enumerations.SearchParamType.REFERENCE) {
-						}
+					for (org.hl7.fhir.r4.model.CapabilityStatement.CapabilityStatementRestResourceSearchParamComponent
+							next : nextRes.getSearchParam()) {
+						if (next.getTypeElement().getValue()
+								== org.hl7.fhir.r4.model.Enumerations.SearchParamType.REFERENCE) {}
 					}
 				}
 			}
@@ -817,19 +1034,30 @@ public class Controller extends BaseController {
 		return haveSearchParams;
 	}
 
-	private boolean extractSearchParamsR5CapabilityStatement(IBaseResource theConformance, String resourceName, TreeSet<String> includes, TreeSet<String> theRevIncludes, TreeSet<String> sortParams,
-			boolean haveSearchParams, List<List<String>> queryIncludes) {
-		org.hl7.fhir.r5.model.CapabilityStatement conformance = (org.hl7.fhir.r5.model.CapabilityStatement) theConformance;
-		for (org.hl7.fhir.r5.model.CapabilityStatement.CapabilityStatementRestComponent nextRest : conformance.getRest()) {
-			for (org.hl7.fhir.r5.model.CapabilityStatement.CapabilityStatementRestResourceComponent nextRes : nextRest.getResource()) {
+	private boolean extractSearchParamsR5CapabilityStatement(
+			IBaseResource theConformance,
+			String resourceName,
+			TreeSet<String> includes,
+			TreeSet<String> theRevIncludes,
+			TreeSet<String> sortParams,
+			boolean haveSearchParams,
+			List<List<String>> queryIncludes) {
+		org.hl7.fhir.r5.model.CapabilityStatement conformance =
+				(org.hl7.fhir.r5.model.CapabilityStatement) theConformance;
+		for (org.hl7.fhir.r5.model.CapabilityStatement.CapabilityStatementRestComponent nextRest :
+				conformance.getRest()) {
+			for (org.hl7.fhir.r5.model.CapabilityStatement.CapabilityStatementRestResourceComponent nextRes :
+					nextRest.getResource()) {
 				if (nextRes.getTypeElement().getValue().equals(resourceName)) {
 					for (org.hl7.fhir.r5.model.StringType next : nextRes.getSearchInclude()) {
 						if (next.isEmpty() == false) {
 							includes.add(next.getValue());
 						}
 					}
-					for (org.hl7.fhir.r5.model.CapabilityStatement.CapabilityStatementRestResourceSearchParamComponent next : nextRes.getSearchParam()) {
-						if (next.getTypeElement().getValue() != org.hl7.fhir.r5.model.Enumerations.SearchParamType.COMPOSITE) {
+					for (org.hl7.fhir.r5.model.CapabilityStatement.CapabilityStatementRestResourceSearchParamComponent
+							next : nextRes.getSearchParam()) {
+						if (next.getTypeElement().getValue()
+								!= org.hl7.fhir.r5.model.Enumerations.SearchParamType.COMPOSITE) {
 							sortParams.add(next.getNameElement().getValue());
 						}
 					}
@@ -839,9 +1067,10 @@ public class Controller extends BaseController {
 				} else {
 					// It's a different resource from the one we're searching, so
 					// scan for revinclude candidates
-					for (org.hl7.fhir.r5.model.CapabilityStatement.CapabilityStatementRestResourceSearchParamComponent next : nextRes.getSearchParam()) {
-						if (next.getTypeElement().getValue() == org.hl7.fhir.r5.model.Enumerations.SearchParamType.REFERENCE) {
-						}
+					for (org.hl7.fhir.r5.model.CapabilityStatement.CapabilityStatementRestResourceSearchParamComponent
+							next : nextRes.getSearchParam()) {
+						if (next.getTypeElement().getValue()
+								== org.hl7.fhir.r5.model.Enumerations.SearchParamType.REFERENCE) {}
 					}
 				}
 			}
@@ -849,13 +1078,16 @@ public class Controller extends BaseController {
 		return haveSearchParams;
 	}
 
-	private boolean handleSearchParam(String paramIdxString, HttpServletRequest theReq, IQuery theQuery, JsonWriter theClientCodeJsonWriter) throws IOException {
+	private boolean handleSearchParam(
+			String paramIdxString, HttpServletRequest theReq, IQuery theQuery, JsonWriter theClientCodeJsonWriter)
+			throws IOException {
 		String nextName = sanitizeUrlPart(theReq.getParameter("param." + paramIdxString + ".name"));
 		if (isBlank(nextName)) {
 			return false;
 		}
 
-		String nextQualifier = sanitizeUrlPart(defaultString(theReq.getParameter("param." + paramIdxString + ".qualifier")));
+		String nextQualifier =
+				sanitizeUrlPart(defaultString(theReq.getParameter("param." + paramIdxString + ".qualifier")));
 		String nextType = sanitizeUrlPart(theReq.getParameter("param." + paramIdxString + ".type"));
 
 		List<String> parts = new ArrayList<String>();
@@ -872,10 +1104,13 @@ public class Controller extends BaseController {
 			addToWhere = false;
 			if (isBlank(parts.get(0))) {
 				values = Collections.singletonList(parts.get(1));
-				theQuery.where(new TokenClientParam(nextName + nextQualifier).exactly().code(parts.get(1)));
+				theQuery.where(
+						new TokenClientParam(nextName + nextQualifier).exactly().code(parts.get(1)));
 			} else {
 				values = Collections.singletonList(parts.get(0) + "|" + parts.get(1));
-				theQuery.where(new TokenClientParam(nextName + nextQualifier).exactly().systemAndCode(parts.get(0), parts.get(1)));
+				theQuery.where(new TokenClientParam(nextName + nextQualifier)
+						.exactly()
+						.systemAndCode(parts.get(0), parts.get(1)));
 			}
 		} else if ("date".equals(nextType)) {
 			values = new ArrayList<String>();
@@ -944,9 +1179,10 @@ public class Controller extends BaseController {
 			theClientCodeJsonWriter.value(nextValue);
 			theClientCodeJsonWriter.endObject();
 			if (addToWhere) {
-				theQuery.where(new StringClientParam(nextName + nextQualifier).matches().value(nextValue));
+				theQuery.where(new StringClientParam(nextName + nextQualifier)
+						.matches()
+						.value(nextValue));
 			}
-
 		}
 
 		if (StringUtils.isNotBlank(theReq.getParameter("param." + paramIdxString + ".0.name"))) {
@@ -956,4 +1192,7 @@ public class Controller extends BaseController {
 		return true;
 	}
 
+	private static ResultType getReturnedTypeBasedOnOperation(@Nullable String operationName) {
+		return DIFF_OPERATION_NAME.equals(operationName) ? ResultType.PARAMETERS : ResultType.BUNDLE;
+	}
 }

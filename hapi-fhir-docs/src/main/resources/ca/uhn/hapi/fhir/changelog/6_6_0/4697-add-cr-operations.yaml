@@ -1,4 +1,5 @@
 ---
 type: add
 issue: 4697
-title: "Add providers for the operations available in the Clinical Reasoning package."
+title: "Added DSTU3 and R4 support for the FHIR Clinical Reasoning module operations ActivityDefinition/$apply and PlanDefinition/$apply.
+$apply allows for general workflow processing and is used in clinical decision support, prior authorization, quality reporting, and disease surveillance use cases."

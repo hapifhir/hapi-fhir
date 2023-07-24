@@ -7,6 +7,7 @@ import ca.uhn.fhir.mdm.api.IMdmSubmitSvc;
 import ca.uhn.fhir.mdm.provider.MdmControllerHelper;
 import ca.uhn.fhir.mdm.provider.MdmProviderDstu3Plus;
 import ca.uhn.fhir.mdm.rules.config.MdmSettings;
+import ca.uhn.fhir.mdm.rules.svc.MdmResourceMatcherSvc;
 import ca.uhn.fhir.mdm.util.MessageHelper;
 import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
@@ -32,7 +33,9 @@ public abstract class BaseProviderR4Test extends BaseMdmR4Test {
 	@Autowired
 	private IMdmSubmitSvc myMdmSubmitSvc;
 	@Autowired
-	private MdmSettings myMdmSettings;
+	protected MdmSettings myMdmSettings;
+	@Autowired
+	protected MdmResourceMatcherSvc myMdmResourceMatcherSvc;
 	@Autowired
 	private MdmControllerHelper myMdmHelper;
 	@Autowired
@@ -48,7 +51,7 @@ public abstract class BaseProviderR4Test extends BaseMdmR4Test {
 		String json = IOUtils.toString(resource.getInputStream(), Charsets.UTF_8);
 		myMdmSettings.setEnabled(true);
 		myMdmSettings.setScriptText(json);
-		myMdmResourceMatcherSvc.setMdmSettings(myMdmSettings);
+		myMdmResourceMatcherSvc.setMdmRulesJson(myMdmSettings.getMdmRules());
 	}
 
 	@BeforeEach
@@ -62,7 +65,7 @@ public abstract class BaseProviderR4Test extends BaseMdmR4Test {
 	public void after() throws IOException {
 		super.after();
 		myMdmSettings.setScriptText(defaultScript);
-		myMdmResourceMatcherSvc.setMdmSettings(myMdmSettings);
+		myMdmResourceMatcherSvc.setMdmRulesJson(myMdmSettings.getMdmRules());
 	}
 
 	protected void clearMdmLinks() {

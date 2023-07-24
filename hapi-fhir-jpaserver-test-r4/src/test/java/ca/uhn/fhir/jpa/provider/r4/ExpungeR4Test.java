@@ -27,6 +27,7 @@ import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
@@ -68,6 +69,7 @@ import static org.awaitility.Awaitility.await;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.startsWith;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -119,7 +121,7 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 		}
 	}
 
-	private void assertGone(IIdType theId) {
+	private void assertNotExpunged(IIdType theId) {
 		try {
 			getDao(theId).read(theId);
 			fail();
@@ -378,6 +380,7 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testExpungeAllVersionsWithTagsDeletesRow() {
+		// Setup
 		// Create then delete
 		Patient p = new Patient();
 		p.setId("TEST");
@@ -395,9 +398,17 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 		runInTransaction(() -> assertThat(myResourceHistoryTableDao.findAll(), not(empty())));
 		runInTransaction(() -> assertThat(myForcedIdDao.findAll(), not(empty())));
 
+		// Test
+		myCaptureQueriesListener.clear();
 		myPatientDao.expunge(new ExpungeOptions()
 			.setExpungeDeletedResources(true)
 			.setExpungeOldVersions(true), null);
+
+		// Verify
+		assertEquals(8, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+		assertEquals(0, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
+		assertEquals(0, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
+		assertEquals(9, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
 
 		runInTransaction(() -> assertThat(myResourceTableDao.findAll(), empty()));
 		runInTransaction(() -> assertThat(myResourceHistoryTableDao.findAll(), empty()));
@@ -886,6 +897,28 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 		assertExpunged(myTwoVersionCodeSystemIdV1);
 		assertExpunged(myTwoVersionCodeSystemIdV2);
 		runInTransaction(this::verifyCodeSystemsAndChildrenExpunged);
+	}
+
+	@Test
+	public void testDeleteCodeSystemByUrlThenExpungeWithoutWaitingForBatch() {
+		//set up
+		createStandardCodeSystems();
+
+		myCodeSystemDao.deleteByUrl("CodeSystem?url=" + URL_MY_CODE_SYSTEM, null);
+		myTerminologyDeferredStorageSvc.saveDeferred();
+		try {
+			// execute
+			myCodeSystemDao.expunge(new ExpungeOptions()
+				.setExpungeDeletedResources(true)
+				.setExpungeOldVersions(true), null);
+			fail("expunge should not succeed since the delete batch job is not complete");
+		} catch (InternalErrorException e){
+			// verify
+			assertNotExpunged(myOneVersionCodeSystemId.withVersion("2"));
+			assertThat(e.getMessage(), startsWith(
+				"HAPI-1084: ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException: HAPI-2415: The resource could not be ex" +
+					"punged. It is likely due to unfinished asynchronous deletions, please try again later:"));
+		}
 	}
 
 	private List<Patient> createPatientsWithForcedIds(int theNumPatients) {

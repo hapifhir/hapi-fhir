@@ -37,16 +37,17 @@ import org.slf4j.Logger;
 import java.util.Date;
 
 public class ReductionStepDataSink<PT extends IModelJson, IT extends IModelJson, OT extends IModelJson>
-	extends BaseDataSink<PT, IT, OT> {
+		extends BaseDataSink<PT, IT, OT> {
 	private static final Logger ourLog = Logs.getBatchTroubleshootingLog();
 
 	private final IJobPersistence myJobPersistence;
 	private final JobDefinitionRegistry myJobDefinitionRegistry;
 
-	public ReductionStepDataSink(String theInstanceId,
-										  JobWorkCursor<PT, IT, OT> theJobWorkCursor,
-										  IJobPersistence thePersistence,
-										  JobDefinitionRegistry theJobDefinitionRegistry) {
+	public ReductionStepDataSink(
+			String theInstanceId,
+			JobWorkCursor<PT, IT, OT> theJobWorkCursor,
+			IJobPersistence thePersistence,
+			JobDefinitionRegistry theJobDefinitionRegistry) {
 		super(theInstanceId, theJobWorkCursor);
 		myJobPersistence = thePersistence;
 		myJobDefinitionRegistry = theJobDefinitionRegistry;
@@ -58,13 +59,16 @@ public class ReductionStepDataSink<PT extends IModelJson, IT extends IModelJson,
 		OT data = theData.getData();
 		String dataString = JsonUtil.serialize(data, false);
 		JobChunkProgressAccumulator progressAccumulator = new JobChunkProgressAccumulator();
-		JobInstanceProgressCalculator myJobInstanceProgressCalculator = new JobInstanceProgressCalculator(myJobPersistence, progressAccumulator, myJobDefinitionRegistry);
+		JobInstanceProgressCalculator myJobInstanceProgressCalculator =
+				new JobInstanceProgressCalculator(myJobPersistence, progressAccumulator, myJobDefinitionRegistry);
 
 		InstanceProgress progress = myJobInstanceProgressCalculator.calculateInstanceProgress(instanceId);
 		boolean changed = myJobPersistence.updateInstance(instanceId, instance -> {
 			Validate.validState(
-				StatusEnum.FINALIZE.equals(instance.getStatus()),
-				"Job %s must be in FINALIZE state.  In %s", instanceId, instance.getStatus());
+					StatusEnum.FINALIZE.equals(instance.getStatus()),
+					"Job %s must be in FINALIZE state.  In %s",
+					instanceId,
+					instance.getStatus());
 
 			if (instance.getReport() != null) {
 				// last in wins - so we won't throw
@@ -86,16 +90,17 @@ public class ReductionStepDataSink<PT extends IModelJson, IT extends IModelJson,
 			 * here. Until then though, this is safer.
 			 */
 
-			progress.updateInstance(instance);
+			progress.updateInstanceForReductionStep(instance);
 
 			instance.setReport(dataString);
 			instance.setStatus(StatusEnum.COMPLETED);
 			instance.setEndTime(new Date());
 
-			ourLog.info("Finalizing job instance {} with report length {} chars", instance.getInstanceId(), dataString.length());
-			ourLog.atTrace()
-				.addArgument(() -> JsonUtil.serialize(instance))
-				.log("New instance state: {}");
+			ourLog.info(
+					"Finalizing job instance {} with report length {} chars",
+					instance.getInstanceId(),
+					dataString.length());
+			ourLog.atTrace().addArgument(() -> JsonUtil.serialize(instance)).log("New instance state: {}");
 
 			return true;
 		});
