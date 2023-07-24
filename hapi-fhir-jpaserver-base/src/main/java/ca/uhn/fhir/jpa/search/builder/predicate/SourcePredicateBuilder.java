@@ -146,8 +146,7 @@ public class SourcePredicateBuilder extends BaseJoiningPredicateBuilder {
 	}
 
 	public void throwInvalidRequestExceptionForNotValidUri(String theUri, Exception theCause) {
-		String message = String.format(
-				Msg.code(2419) + String.format("%s is not valid URI: %s", Constants.PARAM_SOURCE, theUri));
-		throw new InvalidRequestException(message, theCause);
+		throw new InvalidRequestException(
+				Msg.code(2419) + String.format("%s is not valid URI: %s", Constants.PARAM_SOURCE, theUri), theCause);
 	}
 }
