@@ -20,10 +20,13 @@
 package ca.uhn.fhir.cr.config;
 
 import ca.uhn.fhir.cr.common.IRepositoryFactory;
+import ca.uhn.fhir.cr.r4.IMeasureServiceFactory;
+import ca.uhn.fhir.cr.r4.measure.MeasureService;
 import ca.uhn.fhir.cr.repo.HapiFhirRepository;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.rest.server.IRestfulServerDefaults;
 import ca.uhn.fhir.rest.server.RestfulServer;
+import org.opencds.cqf.cql.evaluator.measure.MeasureEvaluationOptions;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -33,5 +36,10 @@ public abstract class BaseRepositoryConfig {
 	IRepositoryFactory repositoryFactory(DaoRegistry theDaoRegistry) {
 		return rd ->
 				new HapiFhirRepository(theDaoRegistry, rd, (RestfulServer) ((IRestfulServerDefaults) rd.getServer()));
+	}
+
+	@Bean
+	IMeasureServiceFactory measureServiceFactory(IRepositoryFactory theRepositoryFactory, MeasureEvaluationOptions theEvaluationOptions) {
+		return rd -> new MeasureService(theRepositoryFactory.create(rd), theEvaluationOptions);
 	}
 }

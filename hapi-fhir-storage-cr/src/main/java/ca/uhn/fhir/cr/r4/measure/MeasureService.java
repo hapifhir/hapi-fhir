@@ -134,8 +134,7 @@ public class MeasureService {
 			String theLastReceivedOn,
 			String theProductLine,
 			Bundle theAdditionalData,
-			Endpoint theTerminologyEndpoint,
-			RequestDetails theRequestDetails) {
+			Endpoint theTerminologyEndpoint) {
 
 		ensureSupplementalDataElementSearchParameter();
 

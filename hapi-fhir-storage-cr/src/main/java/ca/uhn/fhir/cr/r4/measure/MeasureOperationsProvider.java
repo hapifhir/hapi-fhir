@@ -37,9 +37,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 public class MeasureOperationsProvider {
 	@Autowired
-	IRepositoryFactory myRepositoryFactory;
-
-	@Autowired
 	IMeasureServiceFactory myR4MeasureServiceFactory;
 
 	/**
@@ -80,7 +77,7 @@ public class MeasureOperationsProvider {
 			RequestDetails theRequestDetails)
 			throws InternalErrorException, FHIRException {
 		return myR4MeasureServiceFactory
-				.create(myRepositoryFactory.create(theRequestDetails))
+				.create(theRequestDetails)
 				.evaluateMeasure(
 						theId,
 						thePeriodStart,
@@ -91,7 +88,6 @@ public class MeasureOperationsProvider {
 						theLastReceivedOn,
 						theProductLine,
 						theAdditionalData,
-						theTerminologyEndpoint,
-						theRequestDetails);
+						theTerminologyEndpoint);
 	}
 }
