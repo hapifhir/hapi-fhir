@@ -28,7 +28,8 @@ public class CrSystemRequestDetails extends SystemRequestDetails {
 	private final FhirContext fhirContext;
 	private final IPagingProvider pagingProvider;
 
-	public CrSystemRequestDetails(IInterceptorBroadcaster iInterceptorBroadcaster, IPagingProvider pagingProvider, FhirContext fhirContext) {
+	public CrSystemRequestDetails(
+			IInterceptorBroadcaster iInterceptorBroadcaster, IPagingProvider pagingProvider, FhirContext fhirContext) {
 		super(iInterceptorBroadcaster);
 		this.pagingProvider = pagingProvider;
 		this.fhirContext = fhirContext;
