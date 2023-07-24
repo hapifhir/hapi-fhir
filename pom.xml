@@ -9,7 +9,7 @@
 	<groupId>ca.uhn.hapi.fhir</groupId>
 	<artifactId>hapi-fhir</artifactId>
 	<packaging>pom</packaging>
-	<version>6.7.14-SNAPSHOT</version>
+	<version>6.8.0-SNAPSHOT</version>
 
 	<name>HAPI-FHIR</name>
 	<description>An open-source implementation of the FHIR specification in Java.</description>
@@ -112,6 +112,7 @@
 		<module>hapi-fhir-jpaserver-base</module>
 		<module>hapi-fhir-sql-migrate</module>
 		<module>hapi-fhir-jpaserver-ips</module>
+		<module>hapi-fhir-jpaserver-hfql</module>
 		<module>hapi-fhir-jpaserver-mdm</module>
 		<module>hapi-fhir-testpage-overlay</module>
 		<module>hapi-fhir-jpaserver-uhnfhirtest</module>
@@ -896,7 +897,7 @@
 	</licenses>
 
 	<properties>
-		<fhir_core_version>6.0.15</fhir_core_version>
+		<fhir_core_version>6.0.22</fhir_core_version>
 		<spotless_version>2.37.0</spotless_version>
 		<ucum_version>1.0.3</ucum_version>
 		<surefire_jvm_args>-Dfile.encoding=UTF-8 -Xmx2048m</surefire_jvm_args>
@@ -929,7 +930,7 @@
 		<error_prone_core_version>2.10.0</error_prone_core_version>
 		<mockito_version>4.8.1</mockito_version>
 		<nullaway_version>0.7.9</nullaway_version>
-		<guava_version>31.0.1-jre</guava_version>
+		<guava_version>32.1.1-jre</guava_version>
 		<gson_version>2.8.9</gson_version>
 		<jaxb_bundle_version>2.2.11_1</jaxb_bundle_version>
 		<jaxb_api_version>2.3.1</jaxb_api_version>
@@ -951,8 +952,8 @@
 		<hibernate_validator_version>6.1.5.Final</hibernate_validator_version>
 		<httpcore_version>4.4.13</httpcore_version>
 		<httpclient_version>4.5.13</httpclient_version>
-		<jackson_version>2.15.0</jackson_version>
-		<jackson_databind_version>2.15.0</jackson_databind_version>
+		<jackson_version>2.15.2</jackson_version>
+		<jackson_databind_version>2.15.2</jackson_databind_version>
 		<maven_assembly_plugin_version>3.3.0</maven_assembly_plugin_version>
 		<maven_license_plugin_version>1.8</maven_license_plugin_version>
 		<okhttp_version>4.10.0</okhttp_version>
@@ -987,7 +988,7 @@
 
 		<elastic_apm_version>1.28.4</elastic_apm_version>
 		<!-- CQL Support -->
-		<clinical-reasoning.version>3.0.0-PRE4</clinical-reasoning.version>
+		<clinical-reasoning.version>3.0.0-PRE5</clinical-reasoning.version>
 
 		<!-- Site properties -->
 		<fontawesomeVersion>5.4.1</fontawesomeVersion>
@@ -1095,7 +1096,7 @@
 			<dependency>
 				<groupId>com.graphql-java</groupId>
 				<artifactId>graphql-java</artifactId>
-				<version>19.4</version>
+				<version>21.0</version>
 			</dependency>
 			<!-- mail start -->
 			<dependency>
@@ -2094,6 +2095,11 @@
 				<groupId>org.thymeleaf</groupId>
 				<artifactId>thymeleaf-spring5</artifactId>
 				<version>${thymeleaf-version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.webjars.npm</groupId>
+				<artifactId>ace-builds</artifactId>
+				<version>1.22.0</version>
 			</dependency>
 			<dependency>
 				<groupId>org.webjars.npm</groupId>

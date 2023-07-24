@@ -377,6 +377,11 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 	}
 
 	@Override
+	public <T extends Resource> T fetchResourceRaw(Class<T> class_, String uri) {
+		return fetchResource(class_, uri);
+	}
+
+	@Override
 	public <T extends Resource> T fetchResource(Class<T> class_, String uri) {
 
 		if (isBlank(uri)) {
@@ -443,8 +448,10 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 	}
 
 	@Override
-	public List<StructureDefinition> fetchTypeDefinitions(String n) {
-		throw new UnsupportedOperationException(Msg.code(2329));
+	public List<StructureDefinition> fetchTypeDefinitions(String typeName) {
+		List<StructureDefinition> allStructures = new ArrayList<>(allStructures());
+		allStructures.removeIf(sd -> !sd.hasType() || !sd.getType().equals(typeName));
+		return allStructures;
 	}
 
 	@Override

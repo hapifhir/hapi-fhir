@@ -93,7 +93,7 @@ public class FindCandidateByExampleSvc<P extends IResourcePersistentId> extends 
 
 		// we'll track the added ids so we don't add the same resources twice
 		// note, all these resources are the same type, so we only need the Long value
-		Set<Long> currentIds = new HashSet<>();
+		Set<String> currentIds = new HashSet<>();
 		for (MatchedTarget match : matchedCandidates) {
 			Optional<? extends IMdmLink> optionalMdmLink = myMdmLinkDaoSvc.getMatchedLinkForSourcePid(
 					myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), match.getTarget()));
@@ -125,7 +125,11 @@ public class FindCandidateByExampleSvc<P extends IResourcePersistentId> extends 
 			}
 
 			// only add if it's not already in the list
-			if (currentIds.add((Long) candidate.getCandidateGoldenResourcePid().getId())) {
+			// NB: we cannot use hash of IResourcePersistentId because
+			// BaseResourcePersistentId overrides this (and so is the same
+			// for any class with the same version) :(
+			if (currentIds.add(
+					String.valueOf(candidate.getCandidateGoldenResourcePid().getId()))) {
 				retval.add(candidate);
 			}
 		}

@@ -42,7 +42,7 @@ public class OpenApiInterceptorWithAuthorizationInterceptorTest {
 		.withServletPath("/fhir/*")
 		.withServer(t -> t.registerProvider(new HashMapResourceProvider<>(myFhirContext, Patient.class)))
 		.withServer(t -> t.registerProvider(new HashMapResourceProvider<>(myFhirContext, Observation.class)))
-		.withServer(t -> t.registerProvider(new OpenApiInterceptorTest.MyLastNProvider()))
+		.withServer(t -> t.registerProvider(new OpenApiInterceptorTest.MySystemLevelOperationProvider()))
 		.withServer(t -> t.registerInterceptor(new ResponseHighlighterInterceptor()));
 	private CloseableHttpClient myClient;
 	private AuthorizationInterceptor myAuthorizationInterceptor;
