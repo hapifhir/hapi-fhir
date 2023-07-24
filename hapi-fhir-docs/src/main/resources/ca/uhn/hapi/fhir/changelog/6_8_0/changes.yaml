@@ -5,8 +5,4 @@
     (dependent HAPI modules listed in brackets):
     <ul>
         <li>Hibernate ORM (JPA): 5.6.12.Final -&gt; 5.6.15.Final</li>
-        <li>MSSQL JDBC (JPA): 9.4.1.jre8 -&gt; 12.2.0.jre11</li>
-        <li>Flexmark (All): 0.50.40 -&gt; 0.64.8</li>
-        <li>Logback (All): 1.4.4 -&gt; 1.4.7</li>
-        <li>Jackson (All): 2.15.0 -&gt; 2.15.1</li>
     </ul>"
