@@ -1,0 +1,5 @@
+---
+type: add
+issue: 5115
+title: "The Generic/Fluent client can now handle arbitrary (ie. non-FHIR) responses from $operation
+   invocation by specifying a response resource type of Binary."
