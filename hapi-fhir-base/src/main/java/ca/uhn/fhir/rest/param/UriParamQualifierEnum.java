@@ -48,7 +48,16 @@ public enum UriParamQualifierEnum {
 	 * Value <code>:below</code>
 	 * </p>
 	 */
-	BELOW(":below");
+	BELOW(":below"),
+
+	/**
+	 * The contains modifier allows clients to indicate that a supplied URI input
+	 * should be matched as a combining-character insensitive match anywhere in the target URI.
+	 * <p>
+	 * Value <code>:contains</code>
+	 * </p>
+	 */
+	CONTAINS(":contains");
 
 	private static final Map<String, UriParamQualifierEnum> KEY_TO_VALUE;
 

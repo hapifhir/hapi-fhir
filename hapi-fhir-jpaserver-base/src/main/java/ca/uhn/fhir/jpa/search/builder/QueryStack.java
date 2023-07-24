@@ -1870,7 +1870,8 @@ public class QueryStack {
 				orPredicates.add(toAndPredicate(
 						join.createPredicateSourceUri(sourceUri), join.createPredicateRequestId(requestId)));
 			} else if (isNotBlank(sourceUri)) {
-				orPredicates.add(join.createPredicateSourceUriWithModifiers(nextParameter, sourceUri));
+				orPredicates.add(
+						join.createPredicateSourceUriWithModifiers(nextParameter, myStorageSettings, sourceUri));
 			} else if (isNotBlank(requestId)) {
 				orPredicates.add(join.createPredicateRequestId(requestId));
 			}
