@@ -48,13 +48,13 @@ public class AsyncResourceModifiedSubmitterSvc {
 
 	public void runDeliveryPass() {
 
-		List<IPersistedResourceModifiedMessage> AllPersistedResourceModifiedMessages =
+		List<IPersistedResourceModifiedMessage> allPersistedResourceModifiedMessages =
 				myResourceModifiedMessagePersistenceSvc.findAllOrderedByCreatedTime();
 		ourLog.info(
-				"Attempting to submit {} resources to consumer channel.", AllPersistedResourceModifiedMessages.size());
+				"Attempting to submit {} resources to consumer channel.", allPersistedResourceModifiedMessages.size());
 
 		for (IPersistedResourceModifiedMessage persistedResourceModifiedMessage :
-				AllPersistedResourceModifiedMessages) {
+				allPersistedResourceModifiedMessages) {
 
 			boolean wasProcessed =
 					myResourceModifiedConsumer.submitPersisedResourceModifiedMessage(persistedResourceModifiedMessage);

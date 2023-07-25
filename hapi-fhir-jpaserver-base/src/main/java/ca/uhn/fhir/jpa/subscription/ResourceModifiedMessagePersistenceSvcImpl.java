@@ -118,7 +118,7 @@ public class ResourceModifiedMessagePersistenceSvcImpl implements IResourceModif
 				theResourceModifiedEntity.getResourceModifiedEntityPK().getResourceVersion();
 		String resourceType = theResourceModifiedEntity.getResourceType();
 		ResourceModifiedMessage retVal =
-				getPayloadLessMessageFromString(theResourceModifiedEntity.getPartialResourceModifiedMessage());
+				getPayloadLessMessageFromString(theResourceModifiedEntity.getSummaryResourceModifiedMessage());
 		SystemRequestDetails systemRequestDetails =
 				new SystemRequestDetails().setRequestPartitionId(retVal.getPartitionId());
 
@@ -139,7 +139,7 @@ public class ResourceModifiedMessagePersistenceSvcImpl implements IResourceModif
 		resourceModifiedEntity.setResourceModifiedEntityPK(with(theMsgId.getIdPart(), theMsgId.getVersionIdPart()));
 
 		String partialModifiedMessage = getPayloadLessMessageAsString(theMsg);
-		resourceModifiedEntity.setPartialResourceModifiedMessage(partialModifiedMessage);
+		resourceModifiedEntity.setSummaryResourceModifiedMessage(partialModifiedMessage);
 		resourceModifiedEntity.setResourceType(theMsgId.getResourceType());
 		resourceModifiedEntity.setCreatedTime(new Date());
 

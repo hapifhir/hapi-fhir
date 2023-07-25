@@ -30,13 +30,12 @@ import ca.uhn.fhir.jpa.subscription.match.matcher.matching.IResourceModifiedCons
 public interface IResourceModifiedConsumerWithRetries {
 
 	/**
-	 * The implementer of this method should submit the ResourceModifiedMessage pointed to by the IPersistedResourceModifiedMessagePK
-	 * to a broker (see {@link IResourceModifiedConsumer}) and if submission succeeds, delete the IPersistedResourceModifiedMessage
-	 * referred to by the IPersistedResourceModifiedMessagePK.
+	 * The implementer of this method should submit the ResourceModifiedMessage represented the IPersistedResourceModifiedMessage
+	 * to a broker (see {@link IResourceModifiedConsumer}) and if submission succeeds, delete the IPersistedResourceModifiedMessage.
 	 *
-	 * @param thePersistedResourceModifiedMessagePK A primary key pointing to a IPersistedResourceModifiedMessage requiring submission.
-	 * @return Whether the message was successfully submitted to the broker
+	 * @param thePersistedResourceModifiedMessage A IPersistedResourceModifiedMessage requiring submission.
+	 * @return Whether the message was successfully submitted to the broker.
 	 */
 	boolean submitPersisedResourceModifiedMessage(
-			IPersistedResourceModifiedMessage thePersistedResourceModifiedMessagePK);
+			IPersistedResourceModifiedMessage thePersistedResourceModifiedMessage);
 }

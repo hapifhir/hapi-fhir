@@ -114,9 +114,14 @@ public class ResourceModifiedSubmitterSvc implements IResourceModifiedConsumer, 
 	}
 
 	/**
-	 * @inheritDoc
+	 * This method will inflate the ResourceModifiedMessage represented by the IPersistedResourceModifiedMessage and attempts
+	 * to submit it to the subscription processing pipeline.
 	 *
-	 * Implementation of {@link IResourceModifiedConsumerWithRetries}
+	 * If submission succeeds, the IPersistedResourceModifiedMessage is deleted and true is returned.  In the event where submission
+	 * fails, we return false and the IPersistedResourceModifiedMessage is rollback for later re-submission.
+	 *
+	 * @param thePersistedResourceModifiedMessage A ResourceModifiedMessage in it's IPersistedResourceModifiedMessage that requires submission.
+	 * @return Whether the message was successfully submitted to the broker.
 	 */
 	@Override
 	public boolean submitPersisedResourceModifiedMessage(

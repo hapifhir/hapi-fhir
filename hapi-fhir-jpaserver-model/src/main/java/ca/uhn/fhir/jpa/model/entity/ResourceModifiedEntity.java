@@ -45,8 +45,8 @@ public class ResourceModifiedEntity implements IPersistedResourceModifiedMessage
 	@EmbeddedId
 	private PersistedResourceModifiedMessageEntityPK myResourceModifiedEntityPK;
 
-	@Column(name = "PARTIAL_MESSAGE", length = MESSAGE_LENGTH, nullable = false)
-	private String myPartialResourceModifiedMessage;
+	@Column(name = "SUMMARY_MESSAGE", length = MESSAGE_LENGTH, nullable = false)
+	private String mySummaryResourceModifiedMessage;
 
 	@Column(name = "CREATED_TIME", nullable = false)
 	@Temporal(TemporalType.TIMESTAMP)
@@ -83,12 +83,12 @@ public class ResourceModifiedEntity implements IPersistedResourceModifiedMessage
 		myCreatedTime = theCreatedTime;
 	}
 
-	public String getPartialResourceModifiedMessage() {
-		return myPartialResourceModifiedMessage;
+	public String getSummaryResourceModifiedMessage() {
+		return mySummaryResourceModifiedMessage;
 	}
 
-	public ResourceModifiedEntity setPartialResourceModifiedMessage(String thePartialResourceModifiedMessage) {
-		myPartialResourceModifiedMessage = thePartialResourceModifiedMessage;
+	public ResourceModifiedEntity setSummaryResourceModifiedMessage(String theSummaryResourceModifiedMessage) {
+		mySummaryResourceModifiedMessage = theSummaryResourceModifiedMessage;
 		return this;
 	}
 
