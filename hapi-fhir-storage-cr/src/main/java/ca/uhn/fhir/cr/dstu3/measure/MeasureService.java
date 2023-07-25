@@ -49,7 +49,13 @@ import static org.opencds.cqf.cql.evaluator.measure.constant.MeasureReportConsta
 import static org.opencds.cqf.cql.evaluator.measure.constant.MeasureReportConstants.US_COUNTRY_DISPLAY;
 
 public class MeasureService {
+	private final Repository myRepository;
+	private final MeasureEvaluationOptions myMeasureEvaluationOptions;
 
+	public MeasureService(Repository theRepository, MeasureEvaluationOptions theMeasureEvaluationOptions) {
+		this.myRepository = theRepository;
+		this.myMeasureEvaluationOptions = theMeasureEvaluationOptions;
+	}
 	public static final List<ContactDetail> CQI_CONTACT_DETAIL = Collections.singletonList(new ContactDetail()
 			.addTelecom(new ContactPoint()
 					.setSystem(ContactPoint.ContactPointSystem.URL)
@@ -81,11 +87,6 @@ public class MeasureService {
 			.setTitle("Supplemental Data")
 			.setId("deqm-measurereport-supplemental-data");
 
-	@Autowired
-	protected MeasureEvaluationOptions myMeasureEvaluationOptions;
-
-	@Autowired
-	protected Repository myRepository;
 	/**
 	 * Get The details (such as tenant) of this request. Usually auto-populated HAPI.
 	 *

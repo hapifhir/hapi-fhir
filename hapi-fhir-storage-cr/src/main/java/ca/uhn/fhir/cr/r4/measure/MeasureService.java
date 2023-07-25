@@ -20,7 +20,6 @@
 package ca.uhn.fhir.cr.r4.measure;
 
 import ca.uhn.fhir.model.api.IQueryParameterType;
-import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.util.BundleBuilder;
 import org.apache.commons.lang3.StringUtils;

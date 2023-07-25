@@ -19,7 +19,6 @@
  */
 package ca.uhn.fhir.cr.dstu3.measure;
 
-import ca.uhn.fhir.cr.common.IRepositoryFactory;
 import ca.uhn.fhir.cr.dstu3.IMeasureServiceFactory;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
@@ -38,9 +37,6 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class MeasureOperationsProvider {
-	@Autowired
-	IRepositoryFactory myRepositoryFactory;
-
 	@Autowired
 	IMeasureServiceFactory myDstu3MeasureProcessorFactory;
 
@@ -83,7 +79,7 @@ public class MeasureOperationsProvider {
 			RequestDetails theRequestDetails)
 			throws InternalErrorException, FHIRException {
 		return myDstu3MeasureProcessorFactory
-				.create(myRepositoryFactory.create(theRequestDetails))
+				.create(theRequestDetails)
 				.evaluateMeasure(
 						theId,
 						thePeriodStart,

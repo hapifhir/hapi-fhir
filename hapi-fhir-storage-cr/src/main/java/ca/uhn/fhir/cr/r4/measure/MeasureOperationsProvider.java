@@ -19,7 +19,6 @@
  */
 package ca.uhn.fhir.cr.r4.measure;
 
-import ca.uhn.fhir.cr.common.IRepositoryFactory;
 import ca.uhn.fhir.cr.r4.IMeasureServiceFactory;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
