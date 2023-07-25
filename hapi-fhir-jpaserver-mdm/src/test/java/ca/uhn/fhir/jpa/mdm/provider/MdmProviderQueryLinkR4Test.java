@@ -392,6 +392,13 @@ public class MdmProviderQueryLinkR4Test extends BaseLinkR4Test {
 		assertThat(list, hasSize(1));
 		List<Parameters.ParametersParameterComponent> part = list.get(0).getPart();
 		assertMdmLink(2, part, myGoldenResource1Id.getValue(), myGoldenResource2Id.getValue(), MdmMatchResultEnum.POSSIBLE_DUPLICATE, "false", "false", null);
+		assertResponseDuplicateCount(list.size(), result);
+	}
+
+	private void assertResponseDuplicateCount(int expectedSize, Parameters result) {
+		List<Parameters.ParametersParameterComponent> count = getParametersByName(result, "total");
+		assertThat(count, hasSize(1));
+		assertEquals(String.valueOf(expectedSize), count.get(0).getValue().primitiveValue());
 	}
 
 	@Test
@@ -403,6 +410,7 @@ public class MdmProviderQueryLinkR4Test extends BaseLinkR4Test {
 		List<Parameters.ParametersParameterComponent> part = list.get(0).getPart();
 		assertMdmLink(2, part, myGoldenResource1Id.getValue(), myGoldenResource2Id.getValue(), MdmMatchResultEnum.POSSIBLE_DUPLICATE, "false", "false", null);
 		assertTrue(myGoldenResource1Id.toString().contains("Patient"));
+		assertResponseDuplicateCount(list.size(), result);
 	}
 
 	@Test
@@ -412,6 +420,7 @@ public class MdmProviderQueryLinkR4Test extends BaseLinkR4Test {
 		List<Parameters.ParametersParameterComponent> list = getParametersByName(result, "link");
 
 		assertThat(list, hasSize(0));
+		assertResponseDuplicateCount(list.size(), result);
 	}
 
 	@Test

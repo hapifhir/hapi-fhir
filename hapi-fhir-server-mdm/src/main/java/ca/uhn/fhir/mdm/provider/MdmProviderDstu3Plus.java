@@ -273,7 +273,7 @@ public class MdmProviderDstu3Plus extends BaseMdmProvider {
 
 		Page<MdmLinkJson> mdmLinkJson =
 				myMdmControllerSvc.queryLinks(mdmQuerySearchParameters, mdmContext, theRequestDetails);
-		return parametersFromMdmLinks(mdmLinkJson, true, theRequestDetails, mdmPageRequest);
+		return parametersFromMdmLinks(mdmLinkJson, true, false, theRequestDetails, mdmPageRequest);
 	}
 
 	@Operation(name = ProviderConstants.MDM_DUPLICATE_GOLDEN_RESOURCES, idempotent = true)
@@ -302,7 +302,7 @@ public class MdmProviderDstu3Plus extends BaseMdmProvider {
 				theRequestDetails,
 				extractStringOrNull(theResourceType));
 
-		return parametersFromMdmLinks(possibleDuplicates, false, theRequestDetails, mdmPageRequest);
+		return parametersFromMdmLinks(possibleDuplicates, false, true, theRequestDetails, mdmPageRequest);
 	}
 
 	@Operation(name = ProviderConstants.MDM_NOT_DUPLICATE)
