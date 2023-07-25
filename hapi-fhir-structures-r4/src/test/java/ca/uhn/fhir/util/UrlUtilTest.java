@@ -111,14 +111,20 @@ public class UrlUtilTest {
 
 	@Test
 	public void testTranslateMatchUrl_UrlWithSpaces() {
-		// Real space
+		// %20 is an encoded space character
 		assertThat(UrlUtil.translateMatchUrl("Observation?names=homer%20simpson"),
 			containsInAnyOrder(new BasicNameValuePair("names", "homer simpson")));
 
-		// Treat + as an actual + and not a space
+		// + is also an encoded space character
 		assertThat(UrlUtil.translateMatchUrl("Observation?names=homer+simpson"),
-			containsInAnyOrder(new BasicNameValuePair("names", "homer+simpson")));
+			containsInAnyOrder(new BasicNameValuePair("names", "homer simpson")));
+	}
 
+	@Test
+	public void testTranslateMatchUrl_UrlWithPlusSign() {
+		// %2B is an encoded plus sign
+		assertThat(UrlUtil.translateMatchUrl("Observation?names=homer%2Bsimpson"),
+			containsInAnyOrder(new BasicNameValuePair("names", "homer+simpson")));
 	}
 
 	@Test

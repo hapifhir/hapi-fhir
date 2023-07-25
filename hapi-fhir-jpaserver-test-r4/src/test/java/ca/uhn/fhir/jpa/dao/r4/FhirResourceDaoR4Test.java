@@ -316,7 +316,6 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 	public void testTermConceptReindexingDoesntDuplicateData() {
 		myStorageSettings.setSchedulingDisabled(true);
 
-
 		CodeSystem cs = new CodeSystem();
 		cs.setId("nhin-use");
 		cs.setUrl("http://zoop.com");
