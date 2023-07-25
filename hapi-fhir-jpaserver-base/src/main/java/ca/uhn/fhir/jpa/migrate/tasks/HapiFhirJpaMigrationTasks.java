@@ -128,7 +128,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 
 		// drop the index for any database that has RES_PID column already indexed from previous migrations
 		version.onTable("HFJ_RES_VER_PROV")
-				.dropIndex("20230510.1.1", "FK_RESVERPROV_RES_PID")
+				.dropIndex("20230510.3", "FK_RESVERPROV_RES_PID")
 				.failureAllowed();
 
 		version.onTable("HFJ_RES_VER_PROV")
