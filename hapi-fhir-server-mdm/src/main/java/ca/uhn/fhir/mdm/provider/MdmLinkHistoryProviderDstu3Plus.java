@@ -41,6 +41,7 @@ import org.slf4j.Logger;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 import static org.slf4j.LoggerFactory.getLogger;
 
 public class MdmLinkHistoryProviderDstu3Plus extends BaseMdmProvider {
@@ -95,12 +96,16 @@ public class MdmLinkHistoryProviderDstu3Plus extends BaseMdmProvider {
 			// MDM_POST_LINK_HISTORY hook
 			MdmHistoryEvent historyEvent = new MdmHistoryEvent();
 			historyEvent.setMdmLinkRevisions(mdmLinkRevisionsFromSvc);
-			historyEvent.setSourceIds(theResourceIds.stream()
+			if (isNotEmpty(theResourceIds)) {
+				historyEvent.setSourceIds(theResourceIds.stream()
 					.map(IPrimitiveType::getValueAsString)
 					.collect(Collectors.toList()));
-			historyEvent.setGoldenResourceIds(theMdmGoldenResourceIds.stream()
+			}
+			if (isNotEmpty(theMdmGoldenResourceIds)) {
+				historyEvent.setGoldenResourceIds(theMdmGoldenResourceIds.stream()
 					.map(IPrimitiveType::getValueAsString)
 					.collect(Collectors.toList()));
+			}
 
 			HookParams params = new HookParams();
 			params.add(RequestDetails.class, theRequestDetails);
