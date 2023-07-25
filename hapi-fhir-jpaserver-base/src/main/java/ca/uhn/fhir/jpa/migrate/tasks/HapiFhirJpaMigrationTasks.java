@@ -126,6 +126,11 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 				.withColumns("RES_VER_PID")
 				.failureAllowed();
 
+		// drop the index for any database that has RES_PID column already indexed from previous migrations
+		version.onTable("HFJ_RES_VER_PROV")
+				.dropIndex("20230510.1.1", "FK_RESVERPROV_RES_PID")
+				.failureAllowed();
+
 		version.onTable("HFJ_RES_VER_PROV")
 				.addIndex("20230510.2", "IDX_RESVERPROV_RES_PID")
 				.unique(false)
