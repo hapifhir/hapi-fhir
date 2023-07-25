@@ -189,19 +189,19 @@ public class SubscriptionDebugLogInterceptor {
 		if (logger != null) {
 			switch (myLevel) {
 				case ERROR:
-					logger.error(theMessage + " " + this, theArguments);
+					logger.error(theMessage, theArguments);
 					break;
 				case WARN:
-					logger.warn(theMessage + " " + this, theArguments);
+					logger.warn(theMessage, theArguments);
 					break;
 				case INFO:
-					logger.info(theMessage + " " + this, theArguments);
+					logger.info(theMessage, theArguments);
 					break;
 				case DEBUG:
-					logger.debug(theMessage + " " + this, theArguments);
+					logger.debug(theMessage, theArguments);
 					break;
 				case TRACE:
-					logger.trace(theMessage + " " + this, theArguments);
+					logger.trace(theMessage, theArguments);
 					break;
 			}
 		}
