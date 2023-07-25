@@ -22,7 +22,6 @@ package ca.uhn.fhir.jpa.mdm.interceptor;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
-import ca.uhn.fhir.jpa.subscription.submit.interceptor.SubscriptionSubmitInterceptorLoader;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.interceptor.IMdmStorageInterceptor;
 import ca.uhn.fhir.mdm.interceptor.MdmSearchExpandingInterceptor;
@@ -50,9 +49,6 @@ public class MdmSubmitterInterceptorLoader {
 
 	@Autowired
 	private IInterceptorService myInterceptorService;
-
-	@Autowired
-	private SubscriptionSubmitInterceptorLoader mySubscriptionSubmitInterceptorLoader;
 
 	@PostConstruct
 	public void loadInterceptors() {
