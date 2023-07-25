@@ -92,14 +92,19 @@ public class MdmStorageInterceptor implements IMdmStorageInterceptor {
 
 	@Autowired
 	private IMdmSettings myMdmSettings;
+
 	@Autowired
 	private IIdHelperService myIdHelperSvc;
+
 	@Autowired
 	private IMdmLinkDao myMdmLinkDao;
+
 	@Autowired
 	private IMdmSubmitSvc myMdmSubmitSvc;
+
 	@Autowired
 	private DaoRegistry myDaoRegistry;
+
 	@Autowired
 	private IMdmLinkUpdaterSvc mdmLinkUpdaterSvc;
 
@@ -194,13 +199,18 @@ public class MdmStorageInterceptor implements IMdmStorageInterceptor {
 		if (myMdmSettings.isSupportedMdmType(myFhirContext.getResourceType(theResource))) {
 
 			IIdType sourceId = theResource.getIdElement().toVersionless();
-			IResourcePersistentId sourcePid = myIdHelperSvc.getPidOrThrowException(RequestPartitionId.allPartitions(), sourceId);
-			List<IMdmLink> allLinks = myMdmLinkDao.findLinksAssociatedWithGoldenResourceOfSourceResourceExcludingNoMatch(sourcePid);
+			IResourcePersistentId sourcePid =
+					myIdHelperSvc.getPidOrThrowException(RequestPartitionId.allPartitions(), sourceId);
+			List<IMdmLink> allLinks =
+					myMdmLinkDao.findLinksAssociatedWithGoldenResourceOfSourceResourceExcludingNoMatch(sourcePid);
 
-			Map<MdmMatchResultEnum, List<IMdmLink>> linksByMatchResult = allLinks.stream()
-				.collect(Collectors.groupingBy(IMdmLink::getMatchResult));
-			List<IMdmLink> matches = linksByMatchResult.containsKey(MATCH) ? linksByMatchResult.get(MATCH) : new ArrayList<>();
-			List<IMdmLink> possibleMatches = linksByMatchResult.containsKey(POSSIBLE_MATCH) ? linksByMatchResult.get(POSSIBLE_MATCH) : new ArrayList<>();
+			Map<MdmMatchResultEnum, List<IMdmLink>> linksByMatchResult =
+					allLinks.stream().collect(Collectors.groupingBy(IMdmLink::getMatchResult));
+			List<IMdmLink> matches =
+					linksByMatchResult.containsKey(MATCH) ? linksByMatchResult.get(MATCH) : new ArrayList<>();
+			List<IMdmLink> possibleMatches = linksByMatchResult.containsKey(POSSIBLE_MATCH)
+					? linksByMatchResult.get(POSSIBLE_MATCH)
+					: new ArrayList<>();
 
 			if (isDeletingLastMatchedSourceResouce(sourcePid, matches)) {
 				// We are attempting to delete the only source resource left linked to the golden resource
@@ -219,7 +229,11 @@ public class MdmStorageInterceptor implements IMdmStorageInterceptor {
 		}
 	}
 
-	private void deleteGoldenResource(IResourcePersistentId goldenPid, IIdType theSourceId, IFhirResourceDao<?> theDao, RequestDetails theRequest) {
+	private void deleteGoldenResource(
+			IResourcePersistentId goldenPid,
+			IIdType theSourceId,
+			IFhirResourceDao<?> theDao,
+			RequestDetails theRequest) {
 		setLinksDeletedBeforehand();
 
 		if (myMdmSettings.isAutoExpungeGoldenResources()) {
@@ -229,7 +243,12 @@ public class MdmStorageInterceptor implements IMdmStorageInterceptor {
 			}
 		} else {
 			String url = theRequest == null ? "" : theRequest.getCompleteUrl();
-			theDao.deletePidList(url, Collections.singleton(goldenPid), new DeleteConflictList(), theRequest, new TransactionDetails());
+			theDao.deletePidList(
+					url,
+					Collections.singleton(goldenPid),
+					new DeleteConflictList(),
+					theRequest,
+					new TransactionDetails());
 		}
 
 		resetLinksDeletedBeforehand();
@@ -240,14 +259,18 @@ public class MdmStorageInterceptor implements IMdmStorageInterceptor {
 	 *  since they are no longer "real matches"
 	 *  Possible match resources are resubmitted for matching
 	 */
-	private void cleanUpPossibleMatches(List<IMdmLink> possibleMatches, IFhirResourceDao<?> theDao, IResourcePersistentId theGoldenPid) {
+	private void cleanUpPossibleMatches(
+			List<IMdmLink> possibleMatches, IFhirResourceDao<?> theDao, IResourcePersistentId theGoldenPid) {
 		IAnyResource goldenResource = (IAnyResource) theDao.readByPid(theGoldenPid);
 		for (IMdmLink possibleMatch : possibleMatches) {
 			if (possibleMatch.getGoldenResourcePersistenceId().equals(theGoldenPid)) {
 				IBaseResource sourceResource = theDao.readByPid(possibleMatch.getSourcePersistenceId());
 
-				mdmLinkUpdaterSvc.updateLink(goldenResource, (IAnyResource) sourceResource, NO_MATCH,
-					createMdmContext(MdmTransactionContext.OperationType.UPDATE_LINK, sourceResource.fhirType()));
+				mdmLinkUpdaterSvc.updateLink(
+						goldenResource,
+						(IAnyResource) sourceResource,
+						NO_MATCH,
+						createMdmContext(MdmTransactionContext.OperationType.UPDATE_LINK, sourceResource.fhirType()));
 			}
 		}
 	}
@@ -259,10 +282,12 @@ public class MdmStorageInterceptor implements IMdmStorageInterceptor {
 	}
 
 	private boolean isDeletingLastMatchedSourceResouce(IResourcePersistentId theSourcePid, List<IMdmLink> theMatches) {
-		return theMatches.size() == 1 && theMatches.get(0).getSourcePersistenceId().equals(theSourcePid);
+		return theMatches.size() == 1
+				&& theMatches.get(0).getSourcePersistenceId().equals(theSourcePid);
 	}
 
-	private MdmTransactionContext createMdmContext(MdmTransactionContext.OperationType theOperation, String theResourceType) {
+	private MdmTransactionContext createMdmContext(
+			MdmTransactionContext.OperationType theOperation, String theResourceType) {
 		TransactionLogMessages transactionLogMessages = TransactionLogMessages.createNew();
 		MdmTransactionContext retVal = new MdmTransactionContext(transactionLogMessages, theOperation);
 		retVal.setResourceType(theResourceType);
@@ -271,8 +296,7 @@ public class MdmStorageInterceptor implements IMdmStorageInterceptor {
 
 	private int deleteExpungeGoldenResource(IResourcePersistentId theGoldenPid) {
 		IDeleteExpungeSvc deleteExpungeSvc = myIMdmClearHelperSvc.getDeleteExpungeSvc();
-		return deleteExpungeSvc.deleteExpunge(new ArrayList<>(Collections.singleton(theGoldenPid)),
-			false,null);
+		return deleteExpungeSvc.deleteExpunge(new ArrayList<>(Collections.singleton(theGoldenPid)), false, null);
 	}
 
 	private void forbidIfModifyingExternalEidOnTarget(IBaseResource theNewResource, IBaseResource theOldResource) {

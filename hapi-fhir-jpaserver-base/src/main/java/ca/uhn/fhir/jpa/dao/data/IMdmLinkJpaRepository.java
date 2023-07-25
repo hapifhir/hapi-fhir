@@ -82,13 +82,14 @@ public interface IMdmLinkJpaRepository
 	List<MdmPidTuple> expandPidsBySourcePidAndMatchResult(
 			@Param("sourcePid") Long theSourcePid, @Param("matchResult") MdmMatchResultEnum theMdmMatchResultEnum);
 
-	@Query("SELECT ml " +
-		"FROM MdmLink ml " +
-		"INNER JOIN MdmLink ml2 " +
-		"on ml.myGoldenResourcePid=ml2.myGoldenResourcePid " +
-		"WHERE ml2.mySourcePid=:sourcePid " +
-		"AND ml2.myMatchResult!=:matchResult")
-	List<MdmLink> findLinksAssociatedWithGoldenResourceOfSourceResourceExcludingMatchResult(@Param("sourcePid") Long theSourcePid, @Param("matchResult") MdmMatchResultEnum theMdmMatchResultEnumToExclude);
+	@Query("SELECT ml " + "FROM MdmLink ml "
+			+ "INNER JOIN MdmLink ml2 "
+			+ "on ml.myGoldenResourcePid=ml2.myGoldenResourcePid "
+			+ "WHERE ml2.mySourcePid=:sourcePid "
+			+ "AND ml2.myMatchResult!=:matchResult")
+	List<MdmLink> findLinksAssociatedWithGoldenResourceOfSourceResourceExcludingMatchResult(
+			@Param("sourcePid") Long theSourcePid,
+			@Param("matchResult") MdmMatchResultEnum theMdmMatchResultEnumToExclude);
 
 	@Query(
 			"SELECT ml.myGoldenResourcePid as goldenPid, ml.mySourcePid as sourcePid FROM MdmLink ml WHERE ml.myGoldenResourcePid = :goldenPid and ml.myMatchResult = :matchResult")
