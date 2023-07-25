@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.jpa.mdm.interceptor;
 
+import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.subscription.submit.interceptor.SubscriptionSubmitInterceptorLoader;
@@ -59,12 +60,11 @@ public class MdmSubmitterInterceptorLoader {
 			return;
 		}
 
-		myStorageSettings.addSupportedSubscriptionType(Subscription.SubscriptionChannelType.MESSAGE);
+		if (!myStorageSettings.getSupportedSubscriptionTypes().contains(Subscription.SubscriptionChannelType.MESSAGE)) {
+			throw new ConfigurationException("The MDM module requires Message Subscription types to be enabled in the Persistence Module");
+		}
 		myInterceptorService.registerInterceptor(myIMdmStorageInterceptor);
 		myInterceptorService.registerInterceptor(myMdmSearchExpandingInterceptorInterceptor);
-		ourLog.info("MDM interceptor registered");
-		// We need to call SubscriptionSubmitInterceptorLoader.start() again in case there were no subscription types
-		// the first time it was called.
-		mySubscriptionSubmitInterceptorLoader.start();
+		ourLog.info("MDM interceptors registered");
 	}
 }
