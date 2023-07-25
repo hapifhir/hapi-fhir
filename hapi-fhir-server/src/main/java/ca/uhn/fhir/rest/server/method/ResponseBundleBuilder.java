@@ -274,13 +274,12 @@ public class ResponseBundleBuilder {
 			if (theResponsePage.numTotalResults == null || requestedToReturn < theResponsePage.numTotalResults) {
 
 				retval.setNext(RestfulServerUtils.createOffsetPagingLink(
-					retval,
-					theResponseBundleRequest.requestDetails.getRequestPath(),
-					theResponseBundleRequest.requestDetails.getTenantId(),
-					ObjectUtils.defaultIfNull(pageRequest.offset, 0) + theResponsePage.numToReturn,
-					theResponsePage.numToReturn,
-					theResponseBundleRequest.getRequestParameters()));
-
+						retval,
+						theResponseBundleRequest.requestDetails.getRequestPath(),
+						theResponseBundleRequest.requestDetails.getTenantId(),
+						ObjectUtils.defaultIfNull(pageRequest.offset, 0) + theResponsePage.numToReturn,
+						theResponsePage.numToReturn,
+						theResponseBundleRequest.getRequestParameters()));
 			}
 
 			if (pageRequest.offset != null && pageRequest.offset > 0) {
@@ -318,28 +317,27 @@ public class ResponseBundleBuilder {
 		} else if (theResponsePage.searchId != null) {
 
 			if (theResponsePage.numTotalResults == null
-				|| theResponseBundleRequest.offset + theResponsePage.numToReturn
-				< theResponsePage.numTotalResults) {
+					|| theResponseBundleRequest.offset + theResponsePage.numToReturn
+							< theResponsePage.numTotalResults) {
 				retval.setNext((RestfulServerUtils.createPagingLink(
-					retval,
-					theResponseBundleRequest.requestDetails,
-					theResponsePage.searchId,
-					theResponseBundleRequest.offset + theResponsePage.numToReturn,
-					theResponsePage.numToReturn,
-					theResponseBundleRequest.getRequestParameters())));
+						retval,
+						theResponseBundleRequest.requestDetails,
+						theResponsePage.searchId,
+						theResponseBundleRequest.offset + theResponsePage.numToReturn,
+						theResponsePage.numToReturn,
+						theResponseBundleRequest.getRequestParameters())));
 			}
 
 			if (theResponseBundleRequest.offset > 0) {
 				int start = Math.max(0, theResponseBundleRequest.offset - theResponsePage.pageSize);
 				retval.setPrev(RestfulServerUtils.createPagingLink(
-					retval,
-					theResponseBundleRequest.requestDetails,
-					theResponsePage.searchId,
-					start,
-					theResponsePage.pageSize,
-					theResponseBundleRequest.getRequestParameters()));
+						retval,
+						theResponseBundleRequest.requestDetails,
+						theResponsePage.searchId,
+						start,
+						theResponsePage.pageSize,
+						theResponseBundleRequest.getRequestParameters()));
 			}
-
 		}
 
 		return retval;
