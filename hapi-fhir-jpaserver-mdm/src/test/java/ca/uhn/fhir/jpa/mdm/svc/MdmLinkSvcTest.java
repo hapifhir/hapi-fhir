@@ -18,6 +18,7 @@ import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
@@ -31,8 +32,11 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.slf4j.LoggerFactory.getLogger;
 
 public class MdmLinkSvcTest extends BaseMdmR4Test {
+	private static final Logger ourLog = getLogger(MdmLinkSvcTest.class);
+
 	private static final MdmMatchOutcome POSSIBLE_MATCH = new MdmMatchOutcome(null, null).setMatchResultEnum(MdmMatchResultEnum.POSSIBLE_MATCH);
 	@Autowired
 	IMdmLinkSvc myMdmLinkSvc;
@@ -179,9 +183,6 @@ public class MdmLinkSvcTest extends BaseMdmR4Test {
 		List<String> expected = Arrays.asList(patient1, patient2)
 			.stream().map(p -> p.getIdElement().toVersionless().getIdPart())
 			.collect(Collectors.toList());
-
-		System.out.println(actual);
-		System.out.println(expected);
 
 		assertThat(actual, Matchers.containsInAnyOrder(expected.toArray()));
 	}

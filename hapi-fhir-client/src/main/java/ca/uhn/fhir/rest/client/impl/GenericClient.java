@@ -136,6 +136,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseBinary;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseConformance;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
@@ -1422,7 +1423,11 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 			if (myReturnResourceType != null) {
 				ResourceResponseHandler handler;
-				handler = new ResourceResponseHandler(myReturnResourceType);
+				if (IBaseBinary.class.isAssignableFrom(myReturnResourceType)) {
+					handler = new ResourceOrBinaryResponseHandler();
+				} else {
+					handler = new ResourceResponseHandler(myReturnResourceType);
+				}
 				Object retVal = invoke(null, handler, invocation);
 				return retVal;
 			}

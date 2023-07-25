@@ -9,7 +9,7 @@
 	<groupId>ca.uhn.hapi.fhir</groupId>
 	<artifactId>hapi-fhir</artifactId>
 	<packaging>pom</packaging>
-	<version>6.7.14-SNAPSHOT</version>
+	<version>6.8.0-SNAPSHOT</version>
 
 	<name>HAPI-FHIR</name>
 	<description>An open-source implementation of the FHIR specification in Java.</description>
@@ -112,6 +112,7 @@
 		<module>hapi-fhir-jpaserver-base</module>
 		<module>hapi-fhir-sql-migrate</module>
 		<module>hapi-fhir-jpaserver-ips</module>
+		<module>hapi-fhir-jpaserver-hfql</module>
 		<module>hapi-fhir-jpaserver-mdm</module>
 		<module>hapi-fhir-testpage-overlay</module>
 		<module>hapi-fhir-jpaserver-uhnfhirtest</module>
@@ -124,7 +125,8 @@
 		<module>tests/hapi-fhir-base-test-mindeps-server</module>
 		<module>hapi-fhir-spring-boot</module>
 		<module>hapi-fhir-jacoco</module>
-    </modules>
+		<module>hapi-fhir-server-cds-hooks</module>
+	</modules>
 
 	<dependencies>
 		<dependency>
@@ -835,7 +837,7 @@
 			<id>XcrigX</id>
 			<name>Craig McClendon</name>
 		</developer>
-    <developer>
+		<developer>
 			<id>dyoung-work</id>
 		</developer>
 		<developer>
@@ -895,7 +897,7 @@
 	</licenses>
 
 	<properties>
-		<fhir_core_version>6.0.15</fhir_core_version>
+		<fhir_core_version>6.0.22</fhir_core_version>
 		<spotless_version>2.37.0</spotless_version>
 		<ucum_version>1.0.3</ucum_version>
 		<surefire_jvm_args>-Dfile.encoding=UTF-8 -Xmx2048m</surefire_jvm_args>
@@ -928,7 +930,7 @@
 		<error_prone_core_version>2.10.0</error_prone_core_version>
 		<mockito_version>4.8.1</mockito_version>
 		<nullaway_version>0.7.9</nullaway_version>
-		<guava_version>31.0.1-jre</guava_version>
+		<guava_version>32.1.1-jre</guava_version>
 		<gson_version>2.8.9</gson_version>
 		<jaxb_bundle_version>2.2.11_1</jaxb_bundle_version>
 		<jaxb_api_version>2.3.1</jaxb_api_version>
@@ -944,14 +946,14 @@
 		<hibernate_version>5.6.15.Final</hibernate_version>
 		<hibernate_search_version>6.1.6.Final</hibernate_search_version>
 		<logback_version>1.4.4</logback_version>
-	 	<!-- Update lucene version when you update hibernate-search version -->
+		<!-- Update lucene version when you update hibernate-search version -->
 		<lucene_version>8.11.1</lucene_version>
 		<hamcrest_version>2.2</hamcrest_version>
 		<hibernate_validator_version>6.1.5.Final</hibernate_validator_version>
 		<httpcore_version>4.4.13</httpcore_version>
 		<httpclient_version>4.5.13</httpclient_version>
-		<jackson_version>2.15.0</jackson_version>
-		<jackson_databind_version>2.15.0</jackson_databind_version>
+		<jackson_version>2.15.2</jackson_version>
+		<jackson_databind_version>2.15.2</jackson_databind_version>
 		<maven_assembly_plugin_version>3.3.0</maven_assembly_plugin_version>
 		<maven_license_plugin_version>1.8</maven_license_plugin_version>
 		<okhttp_version>4.10.0</okhttp_version>
@@ -961,6 +963,7 @@
 		<ph_schematron_version>5.6.5</ph_schematron_version>
 		<ph_commons_version>9.5.4</ph_commons_version>
 		<plexus_compiler_api_version>2.9.0</plexus_compiler_api_version>
+		<reflections_version>0.9.11</reflections_version>
 		<servicemix_saxon_version>9.8.0-15</servicemix_saxon_version>
 		<servicemix_xmlresolver_version>1.2_5</servicemix_xmlresolver_version>
 		<swagger_version>2.1.12</swagger_version>
@@ -985,7 +988,7 @@
 
 		<elastic_apm_version>1.28.4</elastic_apm_version>
 		<!-- CQL Support -->
-		<clinical-reasoning.version>3.0.0-PRE4</clinical-reasoning.version>
+		<clinical-reasoning.version>3.0.0-PRE5</clinical-reasoning.version>
 
 		<!-- Site properties -->
 		<fontawesomeVersion>5.4.1</fontawesomeVersion>
@@ -998,7 +1001,7 @@
 
 		<!-- Jacoco -->
 		<argLine></argLine>
-	 </properties>
+	</properties>
 
 	<dependencyManagement>
 		<dependencies>
@@ -1093,7 +1096,7 @@
 			<dependency>
 				<groupId>com.graphql-java</groupId>
 				<artifactId>graphql-java</artifactId>
-				<version>19.4</version>
+				<version>21.0</version>
 			</dependency>
 			<!-- mail start -->
 			<dependency>
@@ -1186,21 +1189,21 @@
 				<artifactId>jakarta.activation</artifactId>
 				<version>2.0.0</version>
 			</dependency>
-            <dependency>
-                <groupId>com.vladsch.flexmark</groupId>
-                <artifactId>flexmark</artifactId>
-                <version>${flexmark_version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.vladsch.flexmark</groupId>
-                <artifactId>flexmark-ext-tables</artifactId>
-                <version>${flexmark_version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.vladsch.flexmark</groupId>
-                <artifactId>flexmark-profile-pegdown</artifactId>
-                <version>${flexmark_version}</version>
-            </dependency>
+			<dependency>
+				<groupId>com.vladsch.flexmark</groupId>
+				<artifactId>flexmark</artifactId>
+				<version>${flexmark_version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.vladsch.flexmark</groupId>
+				<artifactId>flexmark-ext-tables</artifactId>
+				<version>${flexmark_version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.vladsch.flexmark</groupId>
+				<artifactId>flexmark-profile-pegdown</artifactId>
+				<version>${flexmark_version}</version>
+			</dependency>
 			<dependency>
 				<groupId>commons-beanutils</groupId>
 				<artifactId>commons-beanutils</artifactId>
@@ -2095,6 +2098,11 @@
 			</dependency>
 			<dependency>
 				<groupId>org.webjars.npm</groupId>
+				<artifactId>ace-builds</artifactId>
+				<version>1.22.0</version>
+			</dependency>
+			<dependency>
+				<groupId>org.webjars.npm</groupId>
 				<artifactId>bootstrap</artifactId>
 				<version>4.5.2</version>
 			</dependency>
@@ -2628,9 +2636,9 @@
 								<copy todir="target/site/apidocs-server-mdm">
 									<fileset dir="hapi-fhir-server-mdm/target/site/apidocs"/>
 								</copy>
-                                <copy todir="target/site/apidocs-server-openapi">
-                                    <fileset dir="hapi-fhir-server-mdm/target/site/openapi"/>
-                                </copy>
+								<copy todir="target/site/apidocs-server-openapi">
+									<fileset dir="hapi-fhir-server-mdm/target/site/openapi"/>
+								</copy>
 								<copy todir="target/site/xref-jpaserver">
 									<fileset dir="hapi-fhir-jpaserver-base/target/site/xref"/>
 								</copy>
@@ -2982,7 +2990,10 @@
 		<profile>
 			<id>CI</id>
 			<properties>
-				<surefire_jvm_args>-Dspring.test.context.cache.maxSize=2 -Dfile.encoding=UTF-8 -Xmx2648m -XX:-TieredCompilation -Dfile.encoding=UTF-8 -Xss128M -XX:MetaspaceSize=512M -XX:MaxMetaspaceSize=2048M -XX:ReservedCodeCacheSize=220M</surefire_jvm_args>
+				<surefire_jvm_args>-Dspring.test.context.cache.maxSize=2 -Dfile.encoding=UTF-8 -Xmx2648m
+					-XX:-TieredCompilation -Dfile.encoding=UTF-8 -Xss128M -XX:MetaspaceSize=512M -XX:MaxMetaspaceSize=2048M
+					-XX:ReservedCodeCacheSize=220M
+				</surefire_jvm_args>
 			</properties>
 			<build>
 				<plugins>
@@ -3088,14 +3099,20 @@
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-failsafe-plugin</artifactId>
 						<executions>
-							<execution><id>integration-test</id><phase>none</phase></execution>
+							<execution>
+								<id>integration-test</id>
+								<phase>none</phase>
+							</execution>
 						</executions>
 					</plugin>
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-checkstyle-plugin</artifactId>
 						<executions>
-							<execution><id>validate</id><phase>none</phase></execution>
+							<execution>
+								<id>validate</id>
+								<phase>none</phase>
+							</execution>
 						</executions>
 					</plugin>
 				</plugins>
