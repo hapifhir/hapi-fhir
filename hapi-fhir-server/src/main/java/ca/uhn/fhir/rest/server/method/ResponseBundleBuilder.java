@@ -234,6 +234,7 @@ public class ResponseBundleBuilder {
 				theResponseBundleRequest.includes,
 				RestfulServerUtils.prettyPrintResponse(server, theResponseBundleRequest.requestDetails),
 				theResponseBundleRequest.bundleType);
+
 		retval.setSelf(theResponseBundleRequest.linkSelf);
 
 		if (bundleProvider.getCurrentPageOffset() != null) {
@@ -264,24 +265,24 @@ public class ResponseBundleBuilder {
 			// Paging without caching
 			// We're doing offset pages
 			int requestedToReturn = theResponsePage.numToReturn;
+
 			if (server.getPagingProvider() == null && pageRequest.offset != null) {
 				// There is no paging provider at all, so assume we're querying up to all the results we need every time
 				requestedToReturn += pageRequest.offset;
 			}
+
 			if (theResponsePage.numTotalResults == null || requestedToReturn < theResponsePage.numTotalResults) {
-				// FIXME The issue is that we have nulled out all the entries and then removed all the nulls, so our
-				//  theResponsePage.resourceList is now empty
-				//  thus we will suppress the next link even though there may be more results
-				if (!theResponsePage.resourceList.isEmpty()) {
-					retval.setNext(RestfulServerUtils.createOffsetPagingLink(
-							retval,
-							theResponseBundleRequest.requestDetails.getRequestPath(),
-							theResponseBundleRequest.requestDetails.getTenantId(),
-							ObjectUtils.defaultIfNull(pageRequest.offset, 0) + theResponsePage.numToReturn,
-							theResponsePage.numToReturn,
-							theResponseBundleRequest.getRequestParameters()));
-				}
+
+				retval.setNext(RestfulServerUtils.createOffsetPagingLink(
+					retval,
+					theResponseBundleRequest.requestDetails.getRequestPath(),
+					theResponseBundleRequest.requestDetails.getTenantId(),
+					ObjectUtils.defaultIfNull(pageRequest.offset, 0) + theResponsePage.numToReturn,
+					theResponsePage.numToReturn,
+					theResponseBundleRequest.getRequestParameters()));
+
 			}
+
 			if (pageRequest.offset != null && pageRequest.offset > 0) {
 				int start = Math.max(0, pageRequest.offset - theResponsePage.pageSize);
 				retval.setPrev(RestfulServerUtils.createOffsetPagingLink(
@@ -292,6 +293,7 @@ public class ResponseBundleBuilder {
 						theResponsePage.pageSize,
 						theResponseBundleRequest.getRequestParameters()));
 			}
+
 		} else if (StringUtils.isNotBlank(bundleProvider.getCurrentPageId())) {
 			// We're doing named pages
 			final String uuid = bundleProvider.getUuid();
@@ -303,6 +305,7 @@ public class ResponseBundleBuilder {
 						bundleProvider.getNextPageId(),
 						theResponseBundleRequest.getRequestParameters()));
 			}
+
 			if (StringUtils.isNotBlank(bundleProvider.getPreviousPageId())) {
 				retval.setPrev(RestfulServerUtils.createPagingLink(
 						retval,
@@ -311,40 +314,34 @@ public class ResponseBundleBuilder {
 						bundleProvider.getPreviousPageId(),
 						theResponseBundleRequest.getRequestParameters()));
 			}
+
 		} else if (theResponsePage.searchId != null) {
-			/*
-			 * We're doing offset pages - Note that we only return paging links if we actually
-			 * included some results in the response. We do this to avoid situations where
-			 * people have faked the offset number to some huge number to avoid them getting
-			 * back paging links that don't make sense.
-			 */
-			// FIXME The issue is that we have nulled out all the entries and then removed all the nulls, so our
-			//  theResponsePage.resourceList is now empty
-			//  thus we will suppress the next link even though there may be more results
-			if (theResponsePage.size() > 0) {
-				if (theResponsePage.numTotalResults == null
-						|| theResponseBundleRequest.offset + theResponsePage.numToReturn
-								< theResponsePage.numTotalResults) {
-					retval.setNext((RestfulServerUtils.createPagingLink(
-							retval,
-							theResponseBundleRequest.requestDetails,
-							theResponsePage.searchId,
-							theResponseBundleRequest.offset + theResponsePage.numToReturn,
-							theResponsePage.numToReturn,
-							theResponseBundleRequest.getRequestParameters())));
-				}
-				if (theResponseBundleRequest.offset > 0) {
-					int start = Math.max(0, theResponseBundleRequest.offset - theResponsePage.pageSize);
-					retval.setPrev(RestfulServerUtils.createPagingLink(
-							retval,
-							theResponseBundleRequest.requestDetails,
-							theResponsePage.searchId,
-							start,
-							theResponsePage.pageSize,
-							theResponseBundleRequest.getRequestParameters()));
-				}
+
+			if (theResponsePage.numTotalResults == null
+				|| theResponseBundleRequest.offset + theResponsePage.numToReturn
+				< theResponsePage.numTotalResults) {
+				retval.setNext((RestfulServerUtils.createPagingLink(
+					retval,
+					theResponseBundleRequest.requestDetails,
+					theResponsePage.searchId,
+					theResponseBundleRequest.offset + theResponsePage.numToReturn,
+					theResponsePage.numToReturn,
+					theResponseBundleRequest.getRequestParameters())));
 			}
+
+			if (theResponseBundleRequest.offset > 0) {
+				int start = Math.max(0, theResponseBundleRequest.offset - theResponsePage.pageSize);
+				retval.setPrev(RestfulServerUtils.createPagingLink(
+					retval,
+					theResponseBundleRequest.requestDetails,
+					theResponsePage.searchId,
+					start,
+					theResponsePage.pageSize,
+					theResponseBundleRequest.getRequestParameters()));
+			}
+
 		}
+
 		return retval;
 	}
 
