@@ -62,7 +62,8 @@ public class MdmProviderLoader {
 		switch (myFhirContext.getVersion().getVersion()) {
 			case DSTU3:
 			case R4:
-				myMdmProvider = new MdmProviderDstu3Plus(myFhirContext, myMdmControllerSvc, myMdmControllerHelper, myMdmSubmitSvc, myMdmSettings);
+				myMdmProvider = new MdmProviderDstu3Plus(
+						myFhirContext, myMdmControllerSvc, myMdmControllerHelper, myMdmSubmitSvc, myMdmSettings);
 				myResourceProviderFactory.addSupplier(() -> myMdmProvider);
 				if (myStorageSettings.isNonResourceDbHistoryEnabled()) {
 					myMdmHistoryProvider = new MdmLinkHistoryProviderDstu3Plus(myFhirContext, myMdmControllerSvc);

@@ -57,7 +57,8 @@ public class MdmSubmitterInterceptorLoader {
 		}
 
 		if (!myStorageSettings.getSupportedSubscriptionTypes().contains(Subscription.SubscriptionChannelType.MESSAGE)) {
-			throw new ConfigurationException("The MDM module requires Message Subscription types to be enabled in the Persistence Module");
+			throw new ConfigurationException(
+					"The MDM module requires Message Subscription types to be enabled in the Persistence Module");
 		}
 		myInterceptorService.registerInterceptor(myIMdmStorageInterceptor);
 		myInterceptorService.registerInterceptor(myMdmSearchExpandingInterceptorInterceptor);
