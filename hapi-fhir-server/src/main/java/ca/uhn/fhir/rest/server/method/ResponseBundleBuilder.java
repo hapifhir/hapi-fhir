@@ -266,8 +266,7 @@ public class ResponseBundleBuilder {
 			// We're doing offset pages
 			int requestedToReturn = theResponsePage.numToReturn;
 
-			if (server.getPagingProvider() == null && pageRequest.offset != null) {
-				// There is no paging provider at all, so assume we're querying up to all the results we need every time
+			if (pageRequest.offset != null) {
 				requestedToReturn += pageRequest.offset;
 			}
 
