@@ -1,7 +1,10 @@
 package ca.uhn.fhir.cr.config.r4;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.cr.common.IRepositoryFactory;
+import ca.uhn.fhir.cr.config.ProviderLoader;
+import ca.uhn.fhir.cr.config.ProviderSelector;
 import ca.uhn.fhir.cr.config.RepositoryConfig;
 import ca.uhn.fhir.cr.r4.IMeasureServiceFactory;
 import ca.uhn.fhir.cr.r4.ISubmitDataProcessorFactory;
@@ -12,50 +15,57 @@ import ca.uhn.fhir.cr.r4.measure.SubmitDataProvider;
 import ca.uhn.fhir.rest.server.provider.ResourceProviderFactory;
 import org.opencds.cqf.cql.evaluator.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.cql.evaluator.measure.r4.R4SubmitDataService;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
 import javax.inject.Named;
+import java.util.Map;
 
 @Configuration
-@Import({
-	RepositoryConfig.class
-})
+@Import({RepositoryConfig.class})
 public class R4MeasureConfig {
 	@Bean
-	@Named("r4MeasureServiceFactory")
-	IMeasureServiceFactory r4MeasureServiceFactory(IRepositoryFactory theRepositoryFactory, MeasureEvaluationOptions theEvaluationOptions) {
+	IMeasureServiceFactory r4MeasureServiceFactory(
+			IRepositoryFactory theRepositoryFactory, MeasureEvaluationOptions theEvaluationOptions) {
 		return rd -> new MeasureService(theRepositoryFactory.create(rd), theEvaluationOptions);
 	}
+
 	@Bean
 	CareGapsOperationProvider r4CareGapsOperationProvider() {
 		return new CareGapsOperationProvider();
 	}
 
 	@Bean
-	ISubmitDataProcessorFactory r4SubmitDataProcessorFactory(){
+	ISubmitDataProcessorFactory r4SubmitDataProcessorFactory() {
 		return r -> new R4SubmitDataService(r);
 	}
 
 	@Bean
-	SubmitDataProvider r4SubmitDataProvider(){
+	SubmitDataProvider r4SubmitDataProvider() {
 		return new SubmitDataProvider();
 	}
 
 	@Bean
-	MeasureOperationsProvider r4MeasureOperationsProvider(){return new MeasureOperationsProvider();}
-
-	@Bean
-	R4MeasureProviderFactory r4MeasureProviderFactory() {
-		return new R4MeasureProviderFactory();
+	MeasureOperationsProvider r4MeasureOperationsProvider() {
+		return new MeasureOperationsProvider();
 	}
 
 	@Bean
-	R4MeasureProviderLoader r4MeasureProviderLoader(
+	public ProviderLoader r4PdLoader(
+		ApplicationContext theApplicationContext,
 		FhirContext theFhirContext,
-		ResourceProviderFactory theResourceProviderFactory,
-		R4MeasureProviderFactory theR4MeasureProviderFactory) {
-		return new R4MeasureProviderLoader(theFhirContext, theResourceProviderFactory, theR4MeasureProviderFactory);
+		ResourceProviderFactory theResourceProviderFactory) {
+
+		var selector = new ProviderSelector(
+			theFhirContext,
+			Map.of(
+				MeasureOperationsProvider.class, FhirVersionEnum.R4,
+				SubmitDataProvider.class, FhirVersionEnum.R4,
+				CareGapsOperationProvider.class, FhirVersionEnum.R4
+				));
+
+		return new ProviderLoader(theApplicationContext, theResourceProviderFactory, selector);
 	}
 }

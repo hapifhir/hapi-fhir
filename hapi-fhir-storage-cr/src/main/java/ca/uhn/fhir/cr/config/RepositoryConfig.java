@@ -30,7 +30,6 @@ import org.springframework.context.annotation.Configuration;
 public class RepositoryConfig {
 	@Bean
 	IRepositoryFactory repositoryFactory(DaoRegistry theDaoRegistry, RestfulServer theRestfulServer) {
-		return rd ->
-				new HapiFhirRepository(theDaoRegistry, rd, theRestfulServer);
+		return rd -> new HapiFhirRepository(theDaoRegistry, rd, theRestfulServer);
 	}
 }

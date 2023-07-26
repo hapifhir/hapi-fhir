@@ -35,7 +35,6 @@ import org.hl7.fhir.dstu3.model.StringType;
 import org.opencds.cqf.cql.evaluator.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.cql.evaluator.measure.dstu3.Dstu3MeasureProcessor;
 import org.opencds.cqf.fhir.api.Repository;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Collections;
 import java.util.List;
@@ -56,6 +55,7 @@ public class MeasureService {
 		this.myRepository = theRepository;
 		this.myMeasureEvaluationOptions = theMeasureEvaluationOptions;
 	}
+
 	public static final List<ContactDetail> CQI_CONTACT_DETAIL = Collections.singletonList(new ContactDetail()
 			.addTelecom(new ContactPoint()
 					.setSystem(ContactPoint.ContactPointSystem.URL)
