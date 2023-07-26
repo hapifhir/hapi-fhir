@@ -10,22 +10,12 @@ import java.util.Map;
 
 public class ProviderSelector {
 	private final FhirContext myFhirContext;
-	private final Map<Class<?>, FhirVersionEnum> myProviderMap;
-	public ProviderSelector(FhirContext theFhirContext, Map<Class<?>, FhirVersionEnum> theProviderMap) {
+	private final Map<FhirVersionEnum, List<Class<?>>> myProviderMap;
+	public ProviderSelector(FhirContext theFhirContext, Map<FhirVersionEnum, List<Class<?>>> theProviderMap) {
 		myFhirContext = theFhirContext;
 		myProviderMap = theProviderMap;
 	}
 	public List<Class<?>> getProviderType() {
-		List<Class<?>> providerList = new ArrayList<>();
-		for (var entry: myProviderMap.entrySet()) {
-			var prov = entry.getKey();
-			var context = entry.getValue();
-			// only load matching context providers
-			if (context.isEquivalentTo(myFhirContext.getVersion().getVersion())){
-				providerList.add(prov);
-			}
-		}
-
-		return providerList;
+		return myProviderMap.get(myFhirContext.getVersion().getVersion());
 	}
 }

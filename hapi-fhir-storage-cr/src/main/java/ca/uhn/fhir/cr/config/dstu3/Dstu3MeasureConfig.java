@@ -19,6 +19,9 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
 import javax.inject.Named;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Map;
 
 @Configuration
@@ -43,9 +46,8 @@ public class Dstu3MeasureConfig {
 
 		var selector = new ProviderSelector(
 			theFhirContext,
-			Map.of(
-				 MeasureOperationsProvider.class, FhirVersionEnum.DSTU3
-			));
+			Map.of(FhirVersionEnum.DSTU3, Arrays.asList((MeasureOperationsProvider.class)))
+			);
 
 		return new ProviderLoader(theApplicationContext, theResourceProviderFactory, selector);
 	}

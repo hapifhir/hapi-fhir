@@ -21,6 +21,10 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
 import javax.inject.Named;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 @Configuration
@@ -60,11 +64,7 @@ public class R4MeasureConfig {
 
 		var selector = new ProviderSelector(
 			theFhirContext,
-			Map.of(
-				MeasureOperationsProvider.class, FhirVersionEnum.R4,
-				SubmitDataProvider.class, FhirVersionEnum.R4,
-				CareGapsOperationProvider.class, FhirVersionEnum.R4
-				));
+			Map.of(FhirVersionEnum.R4, Arrays.asList(MeasureOperationsProvider.class,SubmitDataProvider.class,CareGapsOperationProvider.class)));
 
 		return new ProviderLoader(theApplicationContext, theResourceProviderFactory, selector);
 	}
