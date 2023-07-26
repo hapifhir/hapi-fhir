@@ -98,13 +98,13 @@ public class MdmLinkHistoryProviderDstu3Plus extends BaseMdmProvider {
 			historyEvent.setMdmLinkRevisions(mdmLinkRevisionsFromSvc);
 			if (isNotEmpty(theResourceIds)) {
 				historyEvent.setSourceIds(theResourceIds.stream()
-					.map(IPrimitiveType::getValueAsString)
-					.collect(Collectors.toList()));
+						.map(IPrimitiveType::getValueAsString)
+						.collect(Collectors.toList()));
 			}
 			if (isNotEmpty(theMdmGoldenResourceIds)) {
 				historyEvent.setGoldenResourceIds(theMdmGoldenResourceIds.stream()
-					.map(IPrimitiveType::getValueAsString)
-					.collect(Collectors.toList()));
+						.map(IPrimitiveType::getValueAsString)
+						.collect(Collectors.toList()));
 			}
 
 			HookParams params = new HookParams();

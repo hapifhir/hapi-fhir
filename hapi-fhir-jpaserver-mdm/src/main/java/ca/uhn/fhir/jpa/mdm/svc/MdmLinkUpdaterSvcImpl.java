@@ -174,8 +174,7 @@ public class MdmLinkUpdaterSvcImpl implements IMdmLinkUpdaterSvc {
 			MdmLinkEvent event = new MdmLinkEvent();
 			event.addMdmLink(myModelConverter.toJson(mdmLink));
 			HookParams hookParams = new HookParams();
-			hookParams.add(RequestDetails.class, theParams.getRequestDetails())
-				.add(MdmLinkEvent.class, event);
+			hookParams.add(RequestDetails.class, theParams.getRequestDetails()).add(MdmLinkEvent.class, event);
 			myInterceptorBroadcaster.callHooks(Pointcut.MDM_POST_UPDATE_LINK, hookParams);
 		}
 
