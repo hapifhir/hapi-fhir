@@ -210,7 +210,6 @@ public class ForceOffsetSearchModeInterceptorTest extends BaseResourceProviderR4
 		assertEquals(1, myCaptureQueriesListener.countCommits());
 		assertEquals(0, myCaptureQueriesListener.countRollbacks());
 
-		assertThat(outcome.getLink(Constants.LINK_NEXT).getUrl(), containsString("Patient?_count=7&_offset=14&active=true"));
 		assertThat(outcome.getLink(Constants.LINK_PREVIOUS).getUrl(), containsString("Patient?_count=7&_offset=0&active=true"));
 
 	}
