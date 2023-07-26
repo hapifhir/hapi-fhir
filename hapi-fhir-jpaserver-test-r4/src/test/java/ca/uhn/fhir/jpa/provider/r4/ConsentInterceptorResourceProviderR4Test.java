@@ -745,6 +745,42 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 
 	}
 
+	@Test
+	public void testPaging_whenResourceViewingIsRejected_responseBundleWillHaveNextLink(){
+		// given
+		create50Observations();
+
+		myConsentInterceptor = new ConsentInterceptor(new ConsentSvcRejectWillSeeResource());
+		myServer.getRestfulServer().getInterceptorService().registerInterceptor(myConsentInterceptor);
+
+		// when
+		Bundle results = myClient.search().forResource(Observation.class).count(10).returnBundle(Bundle.class).execute();
+		assertThat(results.getEntry(), hasSize(0));
+
+		// then
+		String nextUrl = BundleUtil.getLinkUrlOfType(myFhirContext, results, "next");
+		assertThat(nextUrl, containsString("_getpagesoffset=10"));
+
+	}
+
+	@Test
+	public void testPaging_whenResourceViewingIsRejected_secondPageWillHavePreviousLink(){
+		// given
+		create50Observations();
+
+		myConsentInterceptor = new ConsentInterceptor(new ConsentSvcRejectWillSeeResource());
+		myServer.getRestfulServer().getInterceptorService().registerInterceptor(myConsentInterceptor);
+
+		// when
+		Bundle results = myClient.search().forResource(Observation.class).count(10).returnBundle(Bundle.class).execute();
+		Bundle nextResults = myClient.loadPage().next(results).execute();
+
+		// then
+		String previous = BundleUtil.getLinkUrlOfType(myFhirContext, nextResults, "previous");
+		assertThat(previous, containsString("_getpagesoffset=0"));
+
+	}
+
 	private void createPatientAndOrg() {
 		myPatientIds = new ArrayList<>();
 
@@ -1062,5 +1098,15 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 
 	}
 
+	private static class ConsentSvcRejectWillSeeResource implements IConsentService {
+		@Override
+		public ConsentOutcome willSeeResource(RequestDetails theRequestDetails, IBaseResource theResource, IConsentContextServices theContextServices) {
+			if("Bundle".equals(theResource.fhirType())){
+				return new ConsentOutcome(ConsentOperationStatusEnum.PROCEED);
+			}
+			return new ConsentOutcome(ConsentOperationStatusEnum.REJECT);
+		}
+
+	}
 
 }
