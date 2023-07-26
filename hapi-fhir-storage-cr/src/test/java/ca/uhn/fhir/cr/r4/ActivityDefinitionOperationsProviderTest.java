@@ -12,7 +12,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class ActivityDefinitionOperationsProviderTest extends BaseCrR4Test {
 	@Autowired
 	ActivityDefinitionOperationsProvider activityDefinitionOperationsProvider;
-
 	@Test
 	void testActivityDefinitionApply() {
 		loadBundle("ca/uhn/fhir/cr/r4/Bundle-ActivityDefinitionTest.json");
