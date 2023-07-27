@@ -93,7 +93,7 @@ class CdsPrefetchFhirClientSvcTest {
 			IBaseResource srq = myCdsPrefetchFhirClientSvc.resourceFromUrl(cdsServiceRequestJson, "1234");
 			fail("should throw, no resource present");
 		} catch (InvalidRequestException e) {
-			assertEquals("Unable to translate url 1234 into a resource or a bundle.", e.getMessage());
+			assertEquals("HAPI-2384: Unable to translate url 1234 into a resource or a bundle.", e.getMessage());
 		}
 	}
 
@@ -106,7 +106,7 @@ class CdsPrefetchFhirClientSvcTest {
 			IBaseResource srq = myCdsPrefetchFhirClientSvc.resourceFromUrl(cdsServiceRequestJson, "/1234");
 			fail("should throw, no resource present");
 		} catch (InvalidRequestException e) {
-			assertEquals("Failed to resolve /1234. Url does not start with a resource type.", e.getMessage());
+			assertEquals("HAPI-2383: Failed to resolve /1234. Url does not start with a resource type.", e.getMessage());
 		}
 	}
 }
