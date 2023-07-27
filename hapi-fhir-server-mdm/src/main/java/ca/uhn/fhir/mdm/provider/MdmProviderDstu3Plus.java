@@ -49,12 +49,12 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.slf4j.Logger;
 import org.springframework.data.domain.Page;
 
+import javax.annotation.Nonnull;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
-import javax.annotation.Nonnull;
 
 import static ca.uhn.fhir.rest.api.Constants.PARAM_OFFSET;
 import static org.slf4j.LoggerFactory.getLogger;
@@ -273,7 +273,7 @@ public class MdmProviderDstu3Plus extends BaseMdmProvider {
 
 		Page<MdmLinkJson> mdmLinkJson =
 				myMdmControllerSvc.queryLinks(mdmQuerySearchParameters, mdmContext, theRequestDetails);
-		return parametersFromMdmLinks(mdmLinkJson, true, false, theRequestDetails, mdmPageRequest);
+		return parametersFromMdmLinks(mdmLinkJson, true, theRequestDetails, mdmPageRequest);
 	}
 
 	@Operation(name = ProviderConstants.MDM_DUPLICATE_GOLDEN_RESOURCES, idempotent = true)
@@ -302,7 +302,7 @@ public class MdmProviderDstu3Plus extends BaseMdmProvider {
 				theRequestDetails,
 				extractStringOrNull(theResourceType));
 
-		return parametersFromMdmLinks(possibleDuplicates, false, true, theRequestDetails, mdmPageRequest);
+		return parametersFromMdmLinks(possibleDuplicates, false, theRequestDetails, mdmPageRequest);
 	}
 
 	@Operation(name = ProviderConstants.MDM_NOT_DUPLICATE)

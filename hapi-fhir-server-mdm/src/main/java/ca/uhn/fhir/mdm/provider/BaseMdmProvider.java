@@ -39,14 +39,14 @@ import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.springframework.data.domain.Page;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 public abstract class BaseMdmProvider {
 
@@ -176,16 +176,15 @@ public abstract class BaseMdmProvider {
 	protected IBaseParameters parametersFromMdmLinks(
 			Page<MdmLinkJson> theMdmLinkStream,
 			boolean theIncludeResultAndSource,
-			boolean theIncludeTotalCount,
 			ServletRequestDetails theServletRequestDetails,
 			MdmPageRequest thePageRequest) {
 		IBaseParameters retval = ParametersUtil.newInstance(myFhirContext);
 		addPagingParameters(retval, theMdmLinkStream, theServletRequestDetails, thePageRequest);
 
-		if (theIncludeTotalCount) {
-			long numDuplicates = theMdmLinkStream.stream().count();
-			ParametersUtil.addParameterToParametersLong(myFhirContext, retval, "total", numDuplicates);
-		}
+
+		long numDuplicates = theMdmLinkStream.getTotalElements();
+		ParametersUtil.addParameterToParametersLong(myFhirContext, retval, "total", numDuplicates);
+
 
 		theMdmLinkStream.getContent().forEach(mdmLink -> {
 			IBase resultPart = ParametersUtil.addParameterToParameters(myFhirContext, retval, "link");

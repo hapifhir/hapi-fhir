@@ -76,9 +76,13 @@ public class MdmProviderQueryLinkR4Test extends BaseLinkR4Test {
 		myGoldenResource2Id = new StringType(sourcePatient2.getIdElement().toVersionless().getValue());
 		JpaPid sourcePatient2Pid = runInTransaction(()->myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), sourcePatient2));
 
+		createPossibleDuplicateLinkByPid(sourcePatient2Pid, sourcePatient1Pid);
+	}
+
+	private void createPossibleDuplicateLinkByPid(JpaPid theSourcePid, JpaPid theGoldenPid) {
 		MdmLink possibleDuplicateMdmLink = (MdmLink) myMdmLinkDaoSvc.newMdmLink();
-		possibleDuplicateMdmLink.setGoldenResourcePersistenceId(sourcePatient1Pid)
-			.setSourcePersistenceId(sourcePatient2Pid)
+		possibleDuplicateMdmLink.setGoldenResourcePersistenceId(theGoldenPid)
+			.setSourcePersistenceId(theSourcePid)
 			.setMatchResult(MdmMatchResultEnum.POSSIBLE_DUPLICATE)
 			.setLinkSource(MdmLinkSourceEnum.AUTO)
 			.setScore(1.0)
@@ -393,6 +397,25 @@ public class MdmProviderQueryLinkR4Test extends BaseLinkR4Test {
 		List<Parameters.ParametersParameterComponent> part = list.get(0).getPart();
 		assertMdmLink(2, part, myGoldenResource1Id.getValue(), myGoldenResource2Id.getValue(), MdmMatchResultEnum.POSSIBLE_DUPLICATE, "false", "false", null);
 		assertResponseDuplicateCount(list.size(), result);
+	}
+
+	@Test
+	public void testQueryPossibleDuplicates_withCountLessThanTotal_returnsCorrectTotal() {
+		// Given: create second possible duplicate
+		JpaPid sourcePatient1Pid = runInTransaction(()->myIdHelperService.getPidOrThrowException(RequestPartitionId.allPartitions(), new IdType(myGoldenResource1Id.toString())));
+		Patient sourcePatient3 = createGoldenPatient();
+		JpaPid sourcePatient3Pid = runInTransaction(()->myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), sourcePatient3));
+
+		createPossibleDuplicateLinkByPid(sourcePatient1Pid, sourcePatient3Pid);
+
+		// When
+		Parameters result = (Parameters) myMdmProvider.getDuplicateGoldenResources(new UnsignedIntType(0), new UnsignedIntType(1), myRequestDetails, null);
+		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(result));
+
+		// Then: parameters should have 1 link (since count = 1), total should be 2
+		List<Parameters.ParametersParameterComponent> list = getParametersByName(result, "link");
+		assertThat(list, hasSize(1));
+		assertResponseDuplicateCount(2, result);
 	}
 
 	private void assertResponseDuplicateCount(int expectedSize, Parameters result) {
