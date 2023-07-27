@@ -435,8 +435,8 @@ class ResponseBundleBuilderTest {
 
 	private void setCanStoreSearchResults(boolean theCanStoreSearchResults) {
 		when(myServer.canStoreSearchResults()).thenReturn(theCanStoreSearchResults);
-		when(myServer.getPagingProvider()).thenReturn(myPagingProvider);
 		if (theCanStoreSearchResults) {
+			when(myServer.getPagingProvider()).thenReturn(myPagingProvider);
 			if (myLimit == null) {
 				when(myPagingProvider.getDefaultPageSize()).thenReturn(DEFAULT_PAGE_SIZE);
 			} else {

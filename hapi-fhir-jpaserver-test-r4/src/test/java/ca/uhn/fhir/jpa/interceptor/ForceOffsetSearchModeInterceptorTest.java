@@ -15,6 +15,7 @@ import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.emptyOrNullString;
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -125,6 +126,36 @@ public class ForceOffsetSearchModeInterceptorTest extends BaseResourceProviderR4
 
 	}
 
+	@Test
+	public void testPagingNextLink_whenAllResourcesHaveBeenReturned_willNotBePresent(){
+
+		myServer.setDefaultPageSize(5);
+
+		for (int i = 0; i < 10; i++) {
+			createPatient(withId("A" + i), withActiveTrue());
+		}
+
+		Bundle outcome = myClient
+			.search()
+			.forResource("Patient")
+			.where(Patient.ACTIVE.exactly().code("true"))
+			.returnBundle(Bundle.class)
+			.execute();
+
+		assertThat(outcome.getEntry(), hasSize(5));
+
+		Bundle secondPageBundle = myClient.loadPage().next(outcome).execute();
+
+		assertThat(secondPageBundle.getEntry(), hasSize(5));
+
+		Bundle thirdPageBundle = myClient.loadPage().next(secondPageBundle).execute();
+
+		assertThat(thirdPageBundle.getEntry(), hasSize(0));
+		assertNull(thirdPageBundle.getLink("next"), () -> thirdPageBundle.getLink("next").getUrl());
+
+	}
+
+
 
 	@Test
 	public void testSearch_WithExplicitCount() {
@@ -179,7 +210,6 @@ public class ForceOffsetSearchModeInterceptorTest extends BaseResourceProviderR4
 		assertEquals(1, myCaptureQueriesListener.countCommits());
 		assertEquals(0, myCaptureQueriesListener.countRollbacks());
 
-		assertThat(outcome.getLink(Constants.LINK_NEXT).getUrl(), containsString("Patient?_count=7&_offset=14&active=true"));
 		assertThat(outcome.getLink(Constants.LINK_PREVIOUS).getUrl(), containsString("Patient?_count=7&_offset=0&active=true"));
 
 	}
