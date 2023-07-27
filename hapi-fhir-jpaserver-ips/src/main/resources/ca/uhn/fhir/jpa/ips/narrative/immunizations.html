@@ -1,12 +1,12 @@
 <!--/* Immunizations -->
 <!--
-Immunization: Immunization.vaccineCode.text || Immunization.vaccineCode.coding[x].display
-Status: Immunization.status.code
-Dose Number: Immunization.doseNumberPositiveInt || Immunization.doseNumberString
+Immunization: Immunization.vaccineCode.text || Immunization.vaccineCode.coding[x].display (separated by <br />)
+Status: Immunization.status
+Dose Number: Immunization.protocolApplied[x]{doseNumberPositiveInt || doseNumberString} (concatenate with comma, e.g. x, y, z)
 Manufacturer: Organization.name
 Lot Number: Immunization.lotNumber
-Comments: Immunization.note[x].text (display all notes separated by <br /> )
-Date: Immunization.occurrenceDateTime
+Comments: Immunization.note[x].text (separated by <br />)
+Date: Immunization.occurrenceDateTime || Immunization.occurrenceString
 */-->
 <div xmlns:th="http://www.thymeleaf.org">
    <table class="hapiPropertyTable">

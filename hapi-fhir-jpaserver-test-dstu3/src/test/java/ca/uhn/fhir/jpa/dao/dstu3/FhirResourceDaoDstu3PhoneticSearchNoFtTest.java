@@ -8,6 +8,7 @@ import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.test.BaseJpaDstu3Test;
 import ca.uhn.fhir.jpa.test.config.TestHSearchAddInConfig;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.util.HapiExtensions;
@@ -73,7 +74,15 @@ public class FhirResourceDaoDstu3PhoneticSearchNoFtTest extends BaseJpaDstu3Test
 	@Test
 	public void testSoundex() {
 		Soundex soundex = new Soundex();
+
+		// The tests below depend on these assumptions:
 		assertEquals(soundex.encode(GALE), soundex.encode(GAIL));
+		assertNotEquals(soundex.encode(GALE), GALE);
+		assertNotEquals(soundex.encode(GAIL), GALE);
+		assertNotEquals(soundex.encode(GALE), GAIL);
+		assertNotEquals(soundex.encode(GAIL), GAIL);
+		ourLog.info("Encoded Gale: {}", soundex.encode(GALE));
+		ourLog.info("Encoded Gail: {}", soundex.encode(GAIL));
 		assertNotEquals(soundex.encode(GALE), soundex.encode(BOB));
 		assertEquals(soundex.encode(ADDRESS), soundex.encode(ADDRESS_CLOSE));
 		assertNotEquals(soundex.encode(ADDRESS), soundex.encode(ADDRESS_FAR));
@@ -91,9 +100,7 @@ public class FhirResourceDaoDstu3PhoneticSearchNoFtTest extends BaseJpaDstu3Test
 
 	@Test
 	public void phoneticMatch() {
-		Patient patient;
-
-		patient = new Patient();
+		Patient patient = new Patient();
 		patient.addName().addGiven(GALE);
 		patient.addAddress().addLine(ADDRESS);
 		patient.addTelecom().setValue(PHONE);
@@ -122,6 +129,30 @@ public class FhirResourceDaoDstu3PhoneticSearchNoFtTest extends BaseJpaDstu3Test
 		assertSearchMatch(pId, PHONE_NUMBER_SP, PHONE);
 		assertSearchMatch(pId, PHONE_NUMBER_SP, PHONE_CLOSE);
 		assertNoMatch(PHONE_NUMBER_SP, PHONE_FAR);
+	}
+
+	@Test
+	public void phoneticSearch() {
+		// setup
+		Patient patient = new Patient();
+		patient.addName().addGiven(GALE);
+		patient.addAddress().addLine(ADDRESS);
+		patient.addTelecom().setValue(PHONE);
+		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient));
+
+		IIdType patientId = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
+
+		SearchParameterMap map = SearchParameterMap.newSynchronous();
+		// Search for a different name from the original value that has the same soundex value
+		map.add(NAME_SOUNDEX_SP, new StringParam(GAIL));
+
+		// execute
+		IBundleProvider result = myPatientDao.search(map, mySrd);
+
+		// verify
+		List<String> resultIds = result.getAllResourceIds();
+		assertEquals(1, resultIds.size());
+		assertEquals(patientId.getIdPart(), resultIds.get(0));
 	}
 
 	private void assertSearchMatch(IIdType thePId1, String theSp, String theValue) {

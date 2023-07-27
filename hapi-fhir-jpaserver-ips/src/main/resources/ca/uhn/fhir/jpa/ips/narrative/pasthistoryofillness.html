@@ -1,9 +1,9 @@
 <!--/* PastHistoryOfIllnesses -->
 <!--
-Medical Problem: Condition.code.text || Condition.code.coding[x].display
-Status: Condition.clinicalStatus.coding[x].display
-Comments: Condition.note[x].text (display all notes separated by <br /> )
-Onset Date: Condition.onsetDateTime
+Medical Problems: Condition.code.text || Condition.code.coding[x].display (separated by <br />)
+Status: Condition.clinicalStatus.text || Condition.clinicalStatus.coding[x].display (separated by <br />)
+Comments: Condition.note[x].text (separated by <br />)
+Onset Date: Condition.onsetDateTime || Condition.onsetPeriod.start && “-“ && Condition.onsetPeriod.end || Condition.onsetAge || Condition.onsetRange.low && “-“ && Condition.onsetRange.high || Condition.onsetString
 */-->
 <div xmlns:th="http://www.thymeleaf.org">
    <table class="hapiPropertyTable">

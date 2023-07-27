@@ -44,6 +44,9 @@ public class IpsOperationProvider {
 
 	/**
 	 * Patient/123/$summary
+	 * <p>
+	 * Note that not all parameters from the official specification are yet supported. See
+	 * <a href="http://build.fhir.org/ig/HL7/fhir-ips/OperationDefinition-summary.html>http://build.fhir.org/ig/HL7/fhir-ips/OperationDefinition-summary.html</a>
 	 */
 	@Operation(
 			name = JpaConstants.OPERATION_SUMMARY,
@@ -58,6 +61,9 @@ public class IpsOperationProvider {
 
 	/**
 	 * /Patient/$summary?identifier=foo|bar
+	 * <p>
+	 * Note that not all parameters from the official specification are yet supported. See
+	 * <a href="http://build.fhir.org/ig/HL7/fhir-ips/OperationDefinition-summary.html>http://build.fhir.org/ig/HL7/fhir-ips/OperationDefinition-summary.html</a>
 	 */
 	@Operation(
 			name = JpaConstants.OPERATION_SUMMARY,
