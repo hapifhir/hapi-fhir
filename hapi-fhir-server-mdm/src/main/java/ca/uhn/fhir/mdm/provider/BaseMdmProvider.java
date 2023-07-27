@@ -181,10 +181,8 @@ public abstract class BaseMdmProvider {
 		IBaseParameters retval = ParametersUtil.newInstance(myFhirContext);
 		addPagingParameters(retval, theMdmLinkStream, theServletRequestDetails, thePageRequest);
 
-
 		long numDuplicates = theMdmLinkStream.getTotalElements();
 		ParametersUtil.addParameterToParametersLong(myFhirContext, retval, "total", numDuplicates);
-
 
 		theMdmLinkStream.getContent().forEach(mdmLink -> {
 			IBase resultPart = ParametersUtil.addParameterToParameters(myFhirContext, retval, "link");

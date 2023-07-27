@@ -49,12 +49,12 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.slf4j.Logger;
 import org.springframework.data.domain.Page;
 
-import javax.annotation.Nonnull;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
+import javax.annotation.Nonnull;
 
 import static ca.uhn.fhir.rest.api.Constants.PARAM_OFFSET;
 import static org.slf4j.LoggerFactory.getLogger;
