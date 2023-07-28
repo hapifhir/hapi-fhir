@@ -20,16 +20,10 @@ import org.hl7.fhir.r4.model.Immunization;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
-import org.springframework.mock.web.MockHttpServletRequest;
-
-import ca.uhn.fhir.cr.BaseCrR4Test;
 import ca.uhn.fhir.cr.repo.HapiFhirRepository;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.NumberParam;
-import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 
 public class HapiFhirRepositoryR4Test extends BaseR4TestServer {
 

@@ -45,7 +45,6 @@ import static io.specto.hoverfly.junit.dsl.ResponseCreators.success;
 @ContextConfiguration(classes = {TestCrR4Config.class})
 public abstract class BaseR4TestServer extends BaseJpaR4Test implements IResourceLoader {
 
-	//private static RestfulServer ourRestServer;
 	public static IGenericClient ourClient;
 	public static  FhirContext ourCtx;
 	public static CloseableHttpClient ourHttpClient;
@@ -95,7 +94,7 @@ public abstract class BaseR4TestServer extends BaseJpaR4Test implements IResourc
 		ourCtx.getRestfulClientFactory().setSocketTimeout(600 * 1000);
 		ourClient = ourCtx.newRestfulGenericClient(ourServerBase);
 		ourClient.setLogRequestAndResponse(true);
-		
+
 		ourParser = ourCtx.newJsonParser().setPrettyPrint(true);
 		//ourRestServer = ourRestfulServer;
 
