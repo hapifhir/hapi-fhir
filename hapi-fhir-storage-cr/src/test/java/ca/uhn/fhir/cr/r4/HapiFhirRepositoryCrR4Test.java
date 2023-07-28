@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import ca.uhn.fhir.cr.BaseR4TestServer;
+import ca.uhn.fhir.cr.BaseCrR4TestServer;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Encounter;
@@ -25,7 +25,7 @@ import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.param.NumberParam;
 
-public class HapiFhirRepositoryR4Test extends BaseR4TestServer {
+public class HapiFhirRepositoryCrR4Test extends BaseCrR4TestServer {
 
 	@Autowired
 	RestfulServer myRestfulServer;

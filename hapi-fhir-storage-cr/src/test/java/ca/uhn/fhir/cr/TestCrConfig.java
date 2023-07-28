@@ -85,55 +85,6 @@ public class TestCrConfig {
 	public TestCqlProperties testCqlProperties(){
 		return new TestCqlProperties();}
 	@Bean
-	public EvaluationSettings evaluationSettings(TestCqlProperties theCqlProperties) {
-		var evaluationSettings = EvaluationSettings.getDefault();
-		var cqlEngineOptions = evaluationSettings.getCqlOptions().getCqlEngineOptions();
-		Set<CqlEngine.Options> options = EnumSet.noneOf(CqlEngine.Options.class);
-		if (theCqlProperties.isCqlRuntimeEnableExpressionCaching()) {
-			options.add(CqlEngine.Options.EnableExpressionCaching);
-		}
-		if (theCqlProperties.isCqlRuntimeEnableValidation()) {
-			options.add(CqlEngine.Options.EnableValidation);
-		}
-		cqlEngineOptions.setOptions(options);
-		cqlEngineOptions.setPageSize(1000);
-		cqlEngineOptions.setMaxCodesPerQuery(10000);
-		cqlEngineOptions.setShouldExpandValueSets(true);
-		cqlEngineOptions.setQueryBatchThreshold(100000);
-
-		var cqlOptions = evaluationSettings.getCqlOptions();
-		cqlOptions.setCqlEngineOptions(cqlEngineOptions);
-
-		var cqlTranslatorOptions = new CqlTranslatorOptions(
-			theCqlProperties.getCqlTranslatorFormat(),
-			theCqlProperties.isEnableDateRangeOptimization(),
-			theCqlProperties.isEnableAnnotations(),
-			theCqlProperties.isEnableLocators(),
-			theCqlProperties.isEnableResultsType(),
-			theCqlProperties.isCqlCompilerVerifyOnly(),
-			theCqlProperties.isEnableDetailedErrors(),
-			theCqlProperties.getCqlCompilerErrorSeverityLevel(),
-			theCqlProperties.isDisableListTraversal(),
-			theCqlProperties.isDisableListDemotion(),
-			theCqlProperties.isDisableListPromotion(),
-			theCqlProperties.isEnableIntervalDemotion(),
-			theCqlProperties.isEnableIntervalPromotion(),
-			theCqlProperties.isDisableMethodInvocation(),
-			theCqlProperties.isRequireFromKeyword(),
-			theCqlProperties.isCqlCompilerValidateUnits(),
-			theCqlProperties.isDisableDefaultModelInfoLoad(),
-			theCqlProperties.getCqlCompilerSignatureLevel(),
-			theCqlProperties.getCqlCompilerCompatibilityLevel()
-		);
-		cqlTranslatorOptions.setCompatibilityLevel(theCqlProperties.getCqlCompilerCompatibilityLevel());
-		cqlTranslatorOptions.setAnalyzeDataRequirements(theCqlProperties.isCqlCompilerAnalyzeDataRequirements());
-		cqlTranslatorOptions.setCollapseDataRequirements(theCqlProperties.isCqlCompilerCollapseDataRequirements());
-		//cqlTranslatorOptions.set
-		cqlOptions.setCqlTranslatorOptions(cqlTranslatorOptions);
-
-		return evaluationSettings;
-	}
-	@Bean
 	public JpaStorageSettings storageSettings() {
 		JpaStorageSettings storageSettings = new JpaStorageSettings();
 		storageSettings.setAllowExternalReferences(true);

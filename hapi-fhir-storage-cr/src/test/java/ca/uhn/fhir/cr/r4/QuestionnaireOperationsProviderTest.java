@@ -1,7 +1,7 @@
 package ca.uhn.fhir.cr.r4;
 
 
-import ca.uhn.fhir.cr.BaseR4TestServer;
+import ca.uhn.fhir.cr.BaseCrR4TestServer;
 import ca.uhn.fhir.cr.r4.questionnaire.QuestionnaireOperationsProvider;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.IdType;
@@ -13,7 +13,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class QuestionnaireOperationsProviderTest extends BaseR4TestServer {
+public class QuestionnaireOperationsProviderTest extends BaseCrR4TestServer {
 	@Autowired
 	QuestionnaireOperationsProvider questionnaireOperationsProvider;
 

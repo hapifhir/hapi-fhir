@@ -1,13 +1,12 @@
 package ca.uhn.fhir.cr.r4;
 
-import ca.uhn.fhir.cr.BaseR4TestServer;
+import ca.uhn.fhir.cr.BaseCrR4TestServer;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Measure;
-import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.Parameters;
 import org.junit.jupiter.api.Test;
 
@@ -39,7 +38,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * 6. Provider submits additional Patient data
  * 7. Provider invokes care-gaps (and discovers issues are closed).
  */
-class CareGapsOperationProviderIT extends BaseR4TestServer
+class CareGapsOperationProviderIT extends BaseCrR4TestServer
 {
 
 
