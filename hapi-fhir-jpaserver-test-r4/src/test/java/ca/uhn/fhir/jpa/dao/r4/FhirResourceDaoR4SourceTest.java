@@ -198,7 +198,7 @@ public class FhirResourceDaoR4SourceTest extends BaseJpaR4Test {
 			myPatientDao.search(createSourceSearchParameterMap(uriParam));
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals(Msg.code(2419) + "Provided URI is not valid:: " + theUri, e.getMessage());
+			assertEquals(Msg.code(2419) + "Provided URI is not valid: " + theUri, e.getMessage());
 		}
 	}
 
