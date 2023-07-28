@@ -33,7 +33,6 @@ import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class LoadIdsStepTest {
@@ -93,9 +92,8 @@ public class LoadIdsStepTest {
 			String actual = allCapturedValues.get(i).toString();
 			assertEquals(expected, actual);
 		}
-		// TODO:  figure out what this test is about
-		assertEquals(createIdChunk(40000, 40040).toString(),
-			allCapturedValues.get(expectedLoops -1).toString());
+		final ResourceIdListWorkChunkJson expectedIdChunk = createIdChunk(19500, 20000);
+		assertEquals(expectedIdChunk.toString(), allCapturedValues.get(expectedLoops -1).toString());
 	}
 
 	@Nonnull

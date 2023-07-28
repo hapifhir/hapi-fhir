@@ -2,7 +2,7 @@ package ca.uhn.fhir.jpa.reindex;
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
-import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.pid.IResourcePidList;
 import ca.uhn.fhir.jpa.api.svc.IBatch2DaoSvc;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
@@ -10,12 +10,15 @@ import ca.uhn.fhir.jpa.dao.tx.NonTransactionalHapiTransactionService;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
+import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
-import org.hl7.fhir.r4.model.Enumerations;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.Nonnull;
@@ -23,91 +26,101 @@ import java.time.LocalDate;
 import java.time.Month;
 import java.time.ZoneId;
 import java.util.Date;
+import java.util.List;
 import java.util.stream.IntStream;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 class Batch2DaoSvcImplTest extends BaseJpaR4Test {
 
 	private static final Date PREVIOUS_MILLENNIUM = toDate(LocalDate.of(1999, Month.DECEMBER, 31));
 	private static final Date TOMORROW = toDate(LocalDate.now().plusDays(1));
 	private static final String URL_PATIENT_EXPUNGE_TRUE = "Patient?_expunge=true";
+	private static final String PATIENT = "Patient";
+	private static final int INTERNAL_SYNCHRONOUS_SEARCH_SIZE = 10;
 
-//	@Autowired
-	private IBatch2DaoSvc mySubject;
+	private final IHapiTransactionService myTransactionService = new NonTransactionalHapiTransactionService();
 
 	@Autowired
 	private JpaStorageSettings myJpaStorageSettings;
 	@Autowired
 	private MatchUrlService myMatchUrlService;
-	private final IHapiTransactionService myTransactionService = new NonTransactionalHapiTransactionService();
+
+	private DaoRegistry mySpiedDaoRegistry;
+
+	private IBatch2DaoSvc mySubject;
 
 	@BeforeEach
 	void beforeEach() {
-		myJpaStorageSettings.setInternalSynchronousSearchSize(10);
-		mySubject = new Batch2DaoSvcImpl(myResourceTableDao, myMatchUrlService, myDaoRegistry, myFhirContext, myTransactionService, myJpaStorageSettings);
+		myJpaStorageSettings.setInternalSynchronousSearchSize(INTERNAL_SYNCHRONOUS_SEARCH_SIZE);
+
+		mySpiedDaoRegistry = spy(myDaoRegistry);
+
+		mySubject = new Batch2DaoSvcImpl(myResourceTableDao, myMatchUrlService, mySpiedDaoRegistry, myFhirContext, myTransactionService, myJpaStorageSettings);
+	}
+
+	// TODO: LD this test won't work with the nonUrl variant yet:  error:   No existing transaction found for transaction marked with propagation 'mandatory'
+
+	@Test
+	void fetchResourcesByUrlEmptyUrl() {
+		try {
+			mySubject.fetchResourceIdsPage(PREVIOUS_MILLENNIUM, TOMORROW, 800, RequestPartitionId.defaultPartition(), "");
+		} catch (InternalErrorException exception) {
+			assertEquals("HAPI-99999:  this should never happen: URL is missing a '?'", exception.getMessage());
+		} catch (Exception exception) {
+			fail("caught wrong Exception");
+		}
 	}
 
 	@Test
-	void fetchResourcesByUrl_noResults() {
-		// TODO:  grab value from the functional test and use them here
-		// TODO:  try different variants of URLs and fail appropriately
-		final IResourcePidList resourcePidList = mySubject.fetchResourceIdsPage(PREVIOUS_MILLENNIUM, TOMORROW, 800, RequestPartitionId.defaultPartition(), URL_PATIENT_EXPUNGE_TRUE);
-
-		assertTrue(resourcePidList.isEmpty());
+	void fetchResourcesByUrlSingleQuestionMark() {
+		try {
+			mySubject.fetchResourceIdsPage(PREVIOUS_MILLENNIUM, TOMORROW, 800, RequestPartitionId.defaultPartition(), "?");
+		} catch (InternalErrorException exception) {
+			assertEquals("HAPI-2223: theResourceName must not be blank", exception.getMessage());
+		} catch (Exception exception) {
+			fail("caught wrong Exception");
+		}
 	}
 
-	@Test
-	void fetchResourcesByUrl_oneResultLessThanThreshold() {
-		final int expectedNumResults = 9;
+	@ParameterizedTest
+	@ValueSource(ints = {0, 9, 10, 11, 21, 22, 23, 45})
+	void fetchResourcesByUrl(int expectedNumResults) {
+		final List<IIdType> patientIds = IntStream.range(0, expectedNumResults)
+			.mapToObj(num -> createPatient())
+			.toList();
 
-		IntStream.range(0, expectedNumResults)
-			.forEach(num -> createPatient());
-
-		final IBundleProvider search = myPatientDao.search(SearchParameterMap.newSynchronous(), new SystemRequestDetails());
-		// TODO:  grab value from the functional test and use them here
-		// TODO:  try different variants of URLs and fail appropriately
-		// TODO:  today plus one day?
 		final IResourcePidList resourcePidList = mySubject.fetchResourceIdsPage(PREVIOUS_MILLENNIUM, TOMORROW, 800, RequestPartitionId.defaultPartition(), URL_PATIENT_EXPUNGE_TRUE);
 
-		// TODO:  figure out how to spy on results to figure out the number of dao calls
-		assertEquals(expectedNumResults, resourcePidList.size());
+		final List<? extends IIdType> actualPatientIds =
+			resourcePidList.getTypedResourcePids()
+				.stream()
+				.map(typePid -> new IdDt(typePid.resourceType, (Long) typePid.id.getId()))
+				.toList();
+		assertIdsEqual(patientIds, actualPatientIds);
+
+		verify(mySpiedDaoRegistry, times(getExpectedNumOfInvocations(expectedNumResults))).getResourceDao(PATIENT);
 	}
 
-	@Test
-	void fetchResourcesByUrl_resultsEqualToThreshold() {
-		final int expectedNumResults = 10;
-
-		IntStream.range(0, expectedNumResults)
-			.forEach(num -> createPatient(withId("patient"+num)));
-
-		final IBundleProvider search = myPatientDao.search(SearchParameterMap.newSynchronous(), new SystemRequestDetails());
-		// TODO:  grab value from the functional test and use them here
-		// TODO:  try different variants of URLs and fail appropriately
-		// TODO:  today plus one day?
-		final IResourcePidList resourcePidList = mySubject.fetchResourceIdsPage(PREVIOUS_MILLENNIUM, TOMORROW, 800, RequestPartitionId.defaultPartition(), URL_PATIENT_EXPUNGE_TRUE);
-
-		// TODO:  figure out how to spy on results to figure out the number of dao calls
-		assertEquals(expectedNumResults, resourcePidList.size());
+	private int getExpectedNumOfInvocations(int expectedNumResults) {
+		final int maxResultsPerQuery = INTERNAL_SYNCHRONOUS_SEARCH_SIZE + 1;
+		final int division = expectedNumResults / maxResultsPerQuery;
+		return division + 1;
 	}
 
-	// TODO:  parameterized
-	@Test
-	void fetchResourcesByUrl_resultsOverThreshold() {
-		final int expectedNumResults = 11;
+	private static void assertIdsEqual(List<IIdType> expectedResourceIds, List<? extends IIdType> actualResourceIds) {
+		assertEquals(expectedResourceIds.size(), actualResourceIds.size());
 
-		IntStream.range(0, expectedNumResults)
-			.forEach(num -> createPatient());
+		for (int index = 0; index < expectedResourceIds.size(); index++) {
+			final IIdType expectedIdType = expectedResourceIds.get(index);
+			final IIdType actualIdType = actualResourceIds.get(index);
 
-		final IBundleProvider search = myPatientDao.search(SearchParameterMap.newSynchronous(), new SystemRequestDetails());
-		// TODO:  grab value from the functional test and use them here
-		// TODO:  try different variants of URLs and fail appropriately
-		// TODO:  today plus one day?
-		final IResourcePidList resourcePidList = mySubject.fetchResourceIdsPage(PREVIOUS_MILLENNIUM, TOMORROW, 800, RequestPartitionId.defaultPartition(), URL_PATIENT_EXPUNGE_TRUE);
-
-		// TODO:  figure out how to spy on results to figure out the number of dao calls
-		assertEquals(expectedNumResults, resourcePidList.size());
+			assertEquals(expectedIdType.getResourceType(), actualIdType.getResourceType());
+			assertEquals(expectedIdType.getIdPartAsLong(), actualIdType.getIdPartAsLong());
+		}
 	}
 
 	@Nonnull

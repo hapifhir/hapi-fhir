@@ -40,8 +40,7 @@ import ca.uhn.fhir.rest.api.SortOrderEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
-import ca.uhn.fhir.rest.param.DateRangeParam;
-import ca.uhn.fhir.util.DateRangeUtil;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 
@@ -55,6 +54,7 @@ import javax.annotation.Nullable;
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 
 public class Batch2DaoSvcImpl implements IBatch2DaoSvc {
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(Batch2DaoSvcImpl.class);
 
 	private final IResourceTableDao myResourceTableDao;
 
@@ -96,65 +96,47 @@ public class Batch2DaoSvcImpl implements IBatch2DaoSvc {
 					if (theUrl == null) {
 						return fetchResourceIdsPageNoUrl(theStart, theEnd, thePageSize, theRequestPartitionId);
 					} else {
-						// TODO:  validation for garbage URL
+						if (!theUrl.contains("?")) {
+							throw new InternalErrorException("HAPI-99999:  this should never happen: URL is missing a '?'");
+						}
+
 						final Integer internalSynchronousSearchSize = myJpaStorageSettings.getInternalSynchronousSearchSize();
 
 						if (internalSynchronousSearchSize == null || internalSynchronousSearchSize <= 0)  {
 							// TODO:  new HAPI code
-							throw new IllegalStateException("HAPI-99999:  this should never happen: internalSynchronousSearchSize is null or less than or equal to 0");
+							throw new InternalErrorException("HAPI-99999:  this should never happen: internalSynchronousSearchSize is null or less than or equal to 0");
 						}
 
-						final int searchSizeThreshold = internalSynchronousSearchSize - 1;
-						final List<IResourcePersistentId> allIds = new ArrayList<>();
-						List<IResourcePersistentId> currentIds = new ArrayList<>();
-						boolean init = true;
-						Date lastDate = null;
-						// 10000 > 9999
-						while (init || searchSizeThreshold < currentIds.size() ) {
-							init = false;
-							// TODO:  why does this method get executed multiple times?
-							// TODO:  this is an infinite loop because I can't signal to this method that it should start at a new point
-							final HomogeneousResourcePidList resourcePidList = fetchResourceIdsPageWithUrl(theStart, theEnd, thePageSize, currentIds.size(), theUrl, theRequestPartitionId);
-							currentIds = resourcePidList.getIds();
-							lastDate = resourcePidList.getLastDate();
+						List<IResourcePersistentId> currentIds = fetchResourceIdsPageWithUrl(0, theUrl, theRequestPartitionId);
+						ourLog.info("FIRST currentIds: {}", currentIds.size());
+						final List<IResourcePersistentId> allIds = new ArrayList<>(currentIds);
+						while (internalSynchronousSearchSize < currentIds.size() ) {
+							currentIds = fetchResourceIdsPageWithUrl(allIds.size(), theUrl, theRequestPartitionId);
+							ourLog.info("NEXT currentIds: {}", currentIds.size());
 							allIds.addAll(currentIds);
 						}
 
 						final String resourceType = theUrl.substring(0, theUrl.indexOf('?'));
 
-						return new HomogeneousResourcePidList(resourceType, allIds, lastDate, theRequestPartitionId);
+						return new HomogeneousResourcePidList(resourceType, allIds, theEnd, theRequestPartitionId);
 					}
 				});
 	}
 
-	// TODO:  consider just returning the IDs
-	private HomogeneousResourcePidList fetchResourceIdsPageWithUrl(
-		Date theStart, Date theEnd, int thePageSize, int theOffset, String theUrl, RequestPartitionId theRequestPartitionId) {
+	private List<IResourcePersistentId> fetchResourceIdsPageWithUrl(int theOffset, String theUrl, RequestPartitionId theRequestPartitionId) {
 		String resourceType = theUrl.substring(0, theUrl.indexOf('?'));
 		RuntimeResourceDefinition def = myFhirContext.getResourceDefinition(resourceType);
-		// TODO: consider cleaning up date stuff that's no longer needed
 
 		SearchParameterMap searchParamMap = myMatchUrlService.translateMatchUrl(theUrl, def);
 		searchParamMap.setSort(new SortSpec(Constants.PARAM_ID, SortOrderEnum.ASC));
-		DateRangeParam chunkDateRange =
-			DateRangeUtil.narrowDateRange(searchParamMap.getLastUpdated(), theStart, theEnd);
-		searchParamMap.setLastUpdated(chunkDateRange);
-		searchParamMap.setCount(thePageSize);
-		// TODO:  try this:
 		searchParamMap.setOffset(theOffset);
+		searchParamMap.setLoadSynchronousUpTo(myJpaStorageSettings.getInternalSynchronousSearchSize() + 1);
 
 		IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(resourceType);
 		SystemRequestDetails request = new SystemRequestDetails();
 		request.setRequestPartitionId(theRequestPartitionId);
-		List<IResourcePersistentId> ids = dao.searchForIds(searchParamMap, request);
 
-		Date lastDate = null;
-		if (isNotEmpty(ids)) {
-			IResourcePersistentId lastResourcePersistentId = ids.get(ids.size() - 1);
-			lastDate = dao.readByPid(lastResourcePersistentId, true).getMeta().getLastUpdated();
-		}
-
-		return new HomogeneousResourcePidList(resourceType, ids, lastDate, theRequestPartitionId);
+		return dao.searchForIds(searchParamMap, request);
 	}
 
 	@Nonnull
