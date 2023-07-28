@@ -42,8 +42,20 @@ import javax.persistence.EntityManager;
 public class Batch2SupportConfig {
 
 	@Bean
-	public IBatch2DaoSvc batch2DaoSvc(IResourceTableDao theResourceTableDao, MatchUrlService theMatchUrlService, DaoRegistry theDaoRegistry, FhirContext theFhirContext, IHapiTransactionService theTransactionService, JpaStorageSettings theJpaStorageSettings) {
-		return new Batch2DaoSvcImpl(theResourceTableDao, theMatchUrlService, theDaoRegistry, theFhirContext, theTransactionService, theJpaStorageSettings);
+	public IBatch2DaoSvc batch2DaoSvc(
+			IResourceTableDao theResourceTableDao,
+			MatchUrlService theMatchUrlService,
+			DaoRegistry theDaoRegistry,
+			FhirContext theFhirContext,
+			IHapiTransactionService theTransactionService,
+			JpaStorageSettings theJpaStorageSettings) {
+		return new Batch2DaoSvcImpl(
+				theResourceTableDao,
+				theMatchUrlService,
+				theDaoRegistry,
+				theFhirContext,
+				theTransactionService,
+				theJpaStorageSettings);
 	}
 
 	@Bean

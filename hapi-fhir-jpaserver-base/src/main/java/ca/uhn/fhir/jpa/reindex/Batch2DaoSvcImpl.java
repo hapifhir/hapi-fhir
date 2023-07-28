@@ -51,8 +51,6 @@ import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
-
 public class Batch2DaoSvcImpl implements IBatch2DaoSvc {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(Batch2DaoSvcImpl.class);
 
@@ -73,7 +71,13 @@ public class Batch2DaoSvcImpl implements IBatch2DaoSvc {
 		return true;
 	}
 
-	public Batch2DaoSvcImpl(IResourceTableDao theResourceTableDao, MatchUrlService theMatchUrlService, DaoRegistry theDaoRegistry, FhirContext theFhirContext, IHapiTransactionService theTransactionService, JpaStorageSettings theJpaStorageSettings) {
+	public Batch2DaoSvcImpl(
+			IResourceTableDao theResourceTableDao,
+			MatchUrlService theMatchUrlService,
+			DaoRegistry theDaoRegistry,
+			FhirContext theFhirContext,
+			IHapiTransactionService theTransactionService,
+			JpaStorageSettings theJpaStorageSettings) {
 		myResourceTableDao = theResourceTableDao;
 		myMatchUrlService = theMatchUrlService;
 		myDaoRegistry = theDaoRegistry;
@@ -97,20 +101,24 @@ public class Batch2DaoSvcImpl implements IBatch2DaoSvc {
 						return fetchResourceIdsPageNoUrl(theStart, theEnd, thePageSize, theRequestPartitionId);
 					} else {
 						if (!theUrl.contains("?")) {
-							throw new InternalErrorException("HAPI-99999:  this should never happen: URL is missing a '?'");
+							throw new InternalErrorException(
+									"HAPI-99999:  this should never happen: URL is missing a '?'");
 						}
 
-						final Integer internalSynchronousSearchSize = myJpaStorageSettings.getInternalSynchronousSearchSize();
+						final Integer internalSynchronousSearchSize =
+								myJpaStorageSettings.getInternalSynchronousSearchSize();
 
-						if (internalSynchronousSearchSize == null || internalSynchronousSearchSize <= 0)  {
+						if (internalSynchronousSearchSize == null || internalSynchronousSearchSize <= 0) {
 							// TODO:  new HAPI code
-							throw new InternalErrorException("HAPI-99999:  this should never happen: internalSynchronousSearchSize is null or less than or equal to 0");
+							throw new InternalErrorException(
+									"HAPI-99999:  this should never happen: internalSynchronousSearchSize is null or less than or equal to 0");
 						}
 
-						List<IResourcePersistentId> currentIds = fetchResourceIdsPageWithUrl(0, theUrl, theRequestPartitionId);
+						List<IResourcePersistentId> currentIds =
+								fetchResourceIdsPageWithUrl(0, theUrl, theRequestPartitionId);
 						ourLog.info("FIRST currentIds: {}", currentIds.size());
 						final List<IResourcePersistentId> allIds = new ArrayList<>(currentIds);
-						while (internalSynchronousSearchSize < currentIds.size() ) {
+						while (internalSynchronousSearchSize < currentIds.size()) {
 							currentIds = fetchResourceIdsPageWithUrl(allIds.size(), theUrl, theRequestPartitionId);
 							ourLog.info("NEXT currentIds: {}", currentIds.size());
 							allIds.addAll(currentIds);
@@ -123,7 +131,8 @@ public class Batch2DaoSvcImpl implements IBatch2DaoSvc {
 				});
 	}
 
-	private List<IResourcePersistentId> fetchResourceIdsPageWithUrl(int theOffset, String theUrl, RequestPartitionId theRequestPartitionId) {
+	private List<IResourcePersistentId> fetchResourceIdsPageWithUrl(
+			int theOffset, String theUrl, RequestPartitionId theRequestPartitionId) {
 		String resourceType = theUrl.substring(0, theUrl.indexOf('?'));
 		RuntimeResourceDefinition def = myFhirContext.getResourceDefinition(resourceType);
 

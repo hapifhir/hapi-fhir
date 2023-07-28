@@ -75,8 +75,8 @@ public class ResourceIdListStep<PT extends PartitionedJobParameters, IT extends 
 
 		ourLog.info("Beginning scan for reindex IDs in range {} to {}", start, end);
 
-	  RequestPartitionId requestPartitionId =
-				 theStepExecutionDetails.getParameters().getRequestPartitionId();
+		RequestPartitionId requestPartitionId =
+				theStepExecutionDetails.getParameters().getRequestPartitionId();
 		Set<TypedPidJson> idBuffer = new LinkedHashSet<>();
 		int totalIdsFound = 0;
 		int chunkCount = 0;
@@ -87,38 +87,39 @@ public class ResourceIdListStep<PT extends PartitionedJobParameters, IT extends 
 			maxBatchId = Math.min(batchSize.intValue(), maxBatchId);
 		}
 
-		// TODO:  get rid of the page size semantics here and deal with one huge IResourcePidList, but break it up into multiple chunks
+		// TODO:  get rid of the page size semantics here and deal with one huge IResourcePidList, but break it up into
+		// multiple chunks
 		IResourcePidList nextChunk = myIdChunkProducer.fetchResourceIdsPage(
-                start, end, pageSize, requestPartitionId, theStepExecutionDetails.getData());
+				start, end, pageSize, requestPartitionId, theStepExecutionDetails.getData());
 
 		if (nextChunk.isEmpty()) {
-			  ourLog.info("No data returned");
+			ourLog.info("No data returned");
 		}
 
 		ourLog.debug("Found {} IDs from {} to {}", nextChunk.size(), start, nextChunk.getLastDate());
 		if (nextChunk.size() < 10 && HapiSystemProperties.isTestModeEnabled()) {
-			  // which is failing intermittently. If that stops, makes sense to remove this
-			  ourLog.debug(" * PIDS: {}", nextChunk);
+			// which is failing intermittently. If that stops, makes sense to remove this
+			ourLog.debug(" * PIDS: {}", nextChunk);
 		}
 
 		for (TypedResourcePid typedResourcePid : nextChunk.getTypedResourcePids()) {
-			  TypedPidJson nextId = new TypedPidJson(typedResourcePid);
-			  idBuffer.add(nextId);
+			TypedPidJson nextId = new TypedPidJson(typedResourcePid);
+			idBuffer.add(nextId);
 		}
 
 		while (idBuffer.size() > maxBatchId) {
-			  List<TypedPidJson> submissionIds = new ArrayList<>();
-			  for (Iterator<TypedPidJson> iter = idBuffer.iterator(); iter.hasNext(); ) {
-					 submissionIds.add(iter.next());
-					 iter.remove();
-					 if (submissionIds.size() == maxBatchId) {
-							 break;
-					 }
-			  }
+			List<TypedPidJson> submissionIds = new ArrayList<>();
+			for (Iterator<TypedPidJson> iter = idBuffer.iterator(); iter.hasNext(); ) {
+				submissionIds.add(iter.next());
+				iter.remove();
+				if (submissionIds.size() == maxBatchId) {
+					break;
+				}
+			}
 
-			  totalIdsFound += submissionIds.size();
-			  chunkCount++;
-			  submitWorkChunk(submissionIds, nextChunk.getRequestPartitionId(), theDataSink);
+			totalIdsFound += submissionIds.size();
+			chunkCount++;
+			submitWorkChunk(submissionIds, nextChunk.getRequestPartitionId(), theDataSink);
 		}
 
 		totalIdsFound += idBuffer.size();
