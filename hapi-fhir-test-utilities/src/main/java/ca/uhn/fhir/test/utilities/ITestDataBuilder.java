@@ -192,6 +192,10 @@ public interface ITestDataBuilder {
 		return t -> MetaUtil.setSource(theContext, ((IBaseResource)t).getMeta(), theSource);
 	}
 
+	default ICreationArgument withSource(String theSource) {
+		return t -> MetaUtil.setSource(getFhirContext(), ((IBaseResource)t).getMeta(), theSource);
+	}
+
 	default ICreationArgument withLastUpdated(Date theLastUpdated) {
 		return t -> ((IBaseResource)t).getMeta().setLastUpdated(theLastUpdated);
 	}

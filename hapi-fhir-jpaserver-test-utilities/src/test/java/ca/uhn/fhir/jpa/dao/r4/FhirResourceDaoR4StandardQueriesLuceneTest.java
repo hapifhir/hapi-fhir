@@ -6,7 +6,7 @@ import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.TestDaoSearch;
 import ca.uhn.fhir.jpa.search.CompositeSearchParameterTestCases;
 import ca.uhn.fhir.jpa.search.QuantitySearchParameterTestCases;
-import ca.uhn.fhir.jpa.search.SourceSearchParameterTestCases;
+import ca.uhn.fhir.jpa.search.BaseSourceSearchParameterTestCases;
 import ca.uhn.fhir.jpa.test.BaseJpaTest;
 import ca.uhn.fhir.jpa.test.config.TestR4Config;
 import ca.uhn.fhir.storage.test.BaseDateSearchDaoTests;
@@ -93,8 +93,8 @@ public class FhirResourceDaoR4StandardQueriesLuceneTest extends BaseJpaTest {
 	}
 
 	@Nested
-	class SourceSearch extends SourceSearchParameterTestCases {
-		SourceSearch() {
+	class SourceSearchParameterTestCases extends BaseSourceSearchParameterTestCases {
+		SourceSearchParameterTestCases() {
 			super(myDataBuilder, myTestDaoSearch, myStorageSettings);
 		}
 

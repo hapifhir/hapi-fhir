@@ -31,14 +31,14 @@ import org.junit.jupiter.api.condition.EnabledIf;
 /**
  * Test cases for _source search parameter.
  */
-public abstract class SourceSearchParameterTestCases implements ITestDataBuilder.WithSupport {
+public abstract class BaseSourceSearchParameterTestCases implements ITestDataBuilder.WithSupport {
 
 	final ITestDataBuilder.Support myTestDataBuilder;
 	final TestDaoSearch myTestDaoSearch;
 
 	final JpaStorageSettings myStorageSettings;
 
-	protected SourceSearchParameterTestCases(
+	protected BaseSourceSearchParameterTestCases(
 			ITestDataBuilder.Support theTestDataBuilder,
 			TestDaoSearch theTestDaoSearch,
 			JpaStorageSettings theStorageSettings) {
@@ -72,8 +72,8 @@ public abstract class SourceSearchParameterTestCases implements ITestDataBuilder
 
 	@Test
 	public void testSearch_withSource_returnsCorrectBundle() {
-		IIdType pt0id = createPatient(withSource(getFhirContext(), "http://host/0"), withActiveTrue());
-		IIdType pt1id = createPatient(withSource(getFhirContext(), "http://host/1"), withActiveTrue());
+		IIdType pt0id = createPatient(withSource("http://host/0"), withActiveTrue());
+		IIdType pt1id = createPatient(withSource("http://host/1"), withActiveTrue());
 
 		myTestDaoSearch.assertSearchFinds("search by source URI finds", "Patient?_source=http://host/0", pt0id);
 		myTestDaoSearch.assertSearchNotFound("search by source URI not found", "Patient?_source=http://host/0", pt1id);
@@ -83,12 +83,12 @@ public abstract class SourceSearchParameterTestCases implements ITestDataBuilder
 	@Test
 	public void testSearch_withRequestIdAndSource_returnsCorrectBundle() {
 		myTestDataBuilder.getSystemRequestDetails().setRequestId("a_request_id");
-		IIdType pt0id = createPatient(withSource(getFhirContext(), "http://host/0"), withActiveTrue());
+		IIdType pt0id = createPatient(withSource("http://host/0"), withActiveTrue());
 
-		IIdType pt1id = createPatient(withSource(getFhirContext(), "http://host/1"), withActiveTrue());
+		IIdType pt1id = createPatient(withSource("http://host/1"), withActiveTrue());
 
 		myTestDataBuilder.getSystemRequestDetails().setRequestId("b_request_id");
-		IIdType pt2id = createPatient(withSource(getFhirContext(), "http://host/1"), withActiveTrue());
+		IIdType pt2id = createPatient(withSource("http://host/1"), withActiveTrue());
 
 		myTestDaoSearch.assertSearchFinds("search by requestId finds", "Patient?_source=#a_request_id", pt0id, pt1id);
 		myTestDaoSearch.assertSearchNotFound("search by requestId not found", "Patient?_source=#a_request_id", pt2id);
@@ -107,8 +107,8 @@ public abstract class SourceSearchParameterTestCases implements ITestDataBuilder
 		String sourceUrn = "http://host/0";
 		myTestDataBuilder.getSystemRequestDetails().setRequestId("a_request_id");
 
-		IIdType pt0id = createPatient(withSource(getFhirContext(), sourceUrn), withActiveTrue());
-		IIdType ob0id = createObservation(withSource(getFhirContext(), sourceUrn), withStatus("final"));
+		IIdType pt0id = createPatient(withSource(sourceUrn), withActiveTrue());
+		IIdType ob0id = createObservation(withSource(sourceUrn), withStatus("final"));
 
 		myTestDaoSearch.assertSearchFinds(
 				"search source URI for Patient finds", "Patient?_source=http://host/0", pt0id);
@@ -120,9 +120,9 @@ public abstract class SourceSearchParameterTestCases implements ITestDataBuilder
 	public void testSearchSource_withOrJoinedParameter_returnsUnionResultBundle() {
 		myTestDataBuilder.getSystemRequestDetails().setRequestId("a_request_id");
 
-		IIdType pt0id = createPatient(withSource(getFhirContext(), "http://host/0"), withActiveTrue());
-		IIdType pt1id = createPatient(withSource(getFhirContext(), "http://host/1"), withActiveTrue());
-		createPatient(withSource(getFhirContext(), "http://host/2"), withActiveTrue());
+		IIdType pt0id = createPatient(withSource("http://host/0"), withActiveTrue());
+		IIdType pt1id = createPatient(withSource("http://host/1"), withActiveTrue());
+		createPatient(withSource("http://host/2"), withActiveTrue());
 
 		myTestDaoSearch.assertSearchFinds(
 				"search source URI with union", "Patient?_source=http://host/0,http://host/1", pt0id, pt1id);
@@ -132,11 +132,11 @@ public abstract class SourceSearchParameterTestCases implements ITestDataBuilder
 	@Test
 	public void testSearch_withSourceAndRequestId_returnsIntersectionResultBundle() {
 		myTestDataBuilder.getSystemRequestDetails().setRequestId("a_request_id");
-		IIdType pt0id = createPatient(withSource(getFhirContext(), "http://host/0"), withActiveTrue());
+		IIdType pt0id = createPatient(withSource("http://host/0"), withActiveTrue());
 
 		myTestDataBuilder.getSystemRequestDetails().setRequestId("b_request_id");
-		IIdType pt1id = createPatient(withSource(getFhirContext(), "http://host/0"), withActiveTrue());
-		IIdType pt2id = createPatient(withSource(getFhirContext(), "http://host/1"), withActiveTrue());
+		IIdType pt1id = createPatient(withSource("http://host/0"), withActiveTrue());
+		IIdType pt2id = createPatient(withSource("http://host/1"), withActiveTrue());
 
 		myTestDaoSearch.assertSearchFinds(
 				"search for source URI and requestId intersection finds",
@@ -153,11 +153,9 @@ public abstract class SourceSearchParameterTestCases implements ITestDataBuilder
 	public void testSearchSource_withContainsModifier_returnsCorrectBundle() {
 		myStorageSettings.setAllowContainsSearches(true);
 
-		IIdType p1Id = createPatient(
-				withSource(getFhirContext(), "http://some-source"), withActiveTrue(), withFamily("Family"));
-		IIdType p2Id = createPatient(withSource(getFhirContext(), "http://some-source/v1/321"), withActiveTrue());
-		IIdType p3Id = createPatient(
-				withSource(getFhirContext(), ("http://another-source/v1")), withActiveTrue(), withFamily("Family"));
+		IIdType p1Id = createPatient(withSource("http://some-source"), withActiveTrue(), withFamily("Family"));
+		IIdType p2Id = createPatient(withSource("http://some-source/v1/321"), withActiveTrue());
+		IIdType p3Id = createPatient(withSource(("http://another-source/v1")), withActiveTrue(), withFamily("Family"));
 
 		myTestDaoSearch.assertSearchFinds(
 				"search matches both sources (same case search)", "Patient?_source:contains=some-source", p1Id, p2Id);
@@ -190,7 +188,7 @@ public abstract class SourceSearchParameterTestCases implements ITestDataBuilder
 
 	@Test
 	public void testSearchSource_withMissingModifierFalse_returnsNonEmptySources() {
-		IIdType p1Id = createPatient(withSource(getFhirContext(), "http://some-source/v1"), withActiveTrue());
+		IIdType p1Id = createPatient(withSource("http://some-source/v1"), withActiveTrue());
 		createPatient(withActiveTrue());
 
 		myTestDaoSearch.assertSearchFinds("search matches non-empty source", "Patient?_source:missing=false", p1Id);
@@ -198,7 +196,7 @@ public abstract class SourceSearchParameterTestCases implements ITestDataBuilder
 
 	@Test
 	public void testSearchSource_withMissingModifierTrue_returnsEmptySources() {
-		createPatient(withSource(getFhirContext(), "http://some-source/v1"), withActiveTrue());
+		createPatient(withSource("http://some-source/v1"), withActiveTrue());
 		IIdType p1Id = createPatient(withActiveTrue());
 
 		myTestDaoSearch.assertSearchFinds("search matches empty sources", "Patient?_source:missing=true", p1Id);
@@ -206,10 +204,10 @@ public abstract class SourceSearchParameterTestCases implements ITestDataBuilder
 
 	@Test
 	public void testSearchSource_withAboveModifier_returnsSourcesAbove() {
-		IIdType p1Id = createPatient(withSource(getFhirContext(), "http://some-source/v1/123"), withActiveTrue());
-		IIdType p2Id = createPatient(withSource(getFhirContext(), "http://some-source/v1/321"), withActiveTrue());
-		IIdType p3Id = createPatient(withSource(getFhirContext(), "http://some-source/v1/321/v2"), withActiveTrue());
-		IIdType p4Id = createPatient(withSource(getFhirContext(), "http://another-source"), withActiveTrue());
+		IIdType p1Id = createPatient(withSource("http://some-source/v1/123"), withActiveTrue());
+		IIdType p2Id = createPatient(withSource("http://some-source/v1/321"), withActiveTrue());
+		IIdType p3Id = createPatient(withSource("http://some-source/v1/321/v2"), withActiveTrue());
+		IIdType p4Id = createPatient(withSource("http://another-source"), withActiveTrue());
 
 		myTestDaoSearch.assertSearchFinds(
 				"search matches all sources above",
@@ -249,10 +247,10 @@ public abstract class SourceSearchParameterTestCases implements ITestDataBuilder
 
 	@Test
 	public void testSearchSource_withBelowModifier_returnsSourcesBelow() {
-		IIdType p1Id = createPatient(withSource(getFhirContext(), "http://some-source/v1/123"), withActiveTrue());
-		IIdType p2Id = createPatient(withSource(getFhirContext(), "http://some-source/v1"), withActiveTrue());
-		IIdType p3Id = createPatient(withSource(getFhirContext(), "http://some-source"), withActiveTrue());
-		IIdType p4Id = createPatient(withSource(getFhirContext(), "http://another-source"), withActiveTrue());
+		IIdType p1Id = createPatient(withSource("http://some-source/v1/123"), withActiveTrue());
+		IIdType p2Id = createPatient(withSource("http://some-source/v1"), withActiveTrue());
+		IIdType p3Id = createPatient(withSource("http://some-source"), withActiveTrue());
+		IIdType p4Id = createPatient(withSource("http://another-source"), withActiveTrue());
 
 		myTestDaoSearch.assertSearchFinds(
 				"search matches all sources below", "Patient?_source:below=http://some-source", p1Id, p2Id, p3Id);

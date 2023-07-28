@@ -25,7 +25,7 @@ import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
 import ca.uhn.fhir.jpa.search.CompositeSearchParameterTestCases;
 import ca.uhn.fhir.jpa.search.QuantitySearchParameterTestCases;
-import ca.uhn.fhir.jpa.search.SourceSearchParameterTestCases;
+import ca.uhn.fhir.jpa.search.BaseSourceSearchParameterTestCases;
 import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.sp.ISearchParamPresenceSvc;
@@ -1560,7 +1560,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 		public void tagSourceSearch() {
 			String id = myTestDataBuilder.createObservation(List.of(
 				myTestDataBuilder.withObservationCode("http://example.com/", "theCode"),
-				myTestDataBuilder.withSource(myFhirContext, "http://example.com/theSource"))).getIdPart();
+				myTestDataBuilder.withSource("http://example.com/theSource"))).getIdPart();
 
 			myCaptureQueriesListener.clear();
 			List<String> allIds = myTestDaoSearch.searchForIds("/Observation?_source=http://example.com/theSource");
@@ -2361,8 +2361,8 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 	}
 
 	@Nested
-	class SourceSearch extends SourceSearchParameterTestCases {
-		SourceSearch() {
+	class SourceSearchParameterTestCases extends BaseSourceSearchParameterTestCases {
+		SourceSearchParameterTestCases() {
 			super(myTestDataBuilder.getTestDataBuilderSupport(), myTestDaoSearch, myStorageSettings);
 		}
 
