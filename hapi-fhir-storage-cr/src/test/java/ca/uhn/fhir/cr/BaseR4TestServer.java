@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.cr.r4.TestCrR4Config;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.EncodingEnum;
@@ -50,7 +51,7 @@ public abstract class BaseR4TestServer extends BaseJpaR4Test implements IResourc
 	public static CloseableHttpClient ourHttpClient;
 	public static Server ourServer;
 	public static String ourServerBase;
-
+	public static DatabaseBackedPagingProvider ourPagingProvider;
 	public static IParser ourParser;
 
 
@@ -96,10 +97,10 @@ public abstract class BaseR4TestServer extends BaseJpaR4Test implements IResourc
 		ourClient.setLogRequestAndResponse(true);
 
 		ourParser = ourCtx.newJsonParser().setPrettyPrint(true);
-		//ourRestServer = ourRestfulServer;
 
 		ourRestfulServer.setDefaultResponseEncoding(EncodingEnum.XML);
-		//ourRestfulServer.setPagingProvider(myPagingProvider);
+		ourPagingProvider = myAppCtx.getBean(DatabaseBackedPagingProvider.class);
+		ourRestfulServer.setPagingProvider(ourPagingProvider);
 
 		mySimpleHeaderInterceptor = new SimpleRequestHeaderInterceptor();
 		ourClient.registerInterceptor(mySimpleHeaderInterceptor);
@@ -126,48 +127,6 @@ public abstract class BaseR4TestServer extends BaseJpaR4Test implements IResourc
 		return loadBundle(Bundle.class, theLocation);
 	}
 
-	public StubServiceBuilder mockNotFound(String theResource) {
-		OperationOutcome outcome = new OperationOutcome();
-		outcome.getText().setStatusAsString("generated");
-		outcome.getIssueFirstRep().setSeverity(OperationOutcome.IssueSeverity.ERROR).setCode(OperationOutcome.IssueType.PROCESSING).setDiagnostics(theResource);
-
-		return mockFhirRead(theResource, outcome, 404);
-	}
-
-	public StubServiceBuilder mockFhirRead(Resource theResource) {
-		String resourcePath = "/" + theResource.fhirType() + "/" + theResource.getId();
-		return mockFhirRead(resourcePath, theResource);
-	}
-
-	public StubServiceBuilder mockFhirRead(String thePath, Resource theResource) {
-		return mockFhirRead(thePath, theResource, 200);
-	}
-
-	public StubServiceBuilder mockFhirRead(String thePath, Resource theResource, int theStatusCode) {
-		return service(ourServerBase).get(thePath)
-			.willReturn(HoverflyDsl.response()
-				.status(theStatusCode)
-				.body(ourParser.encodeResourceToString(theResource))
-				.header("Content-Type", "application/json"));
-	}
-
-	public StubServiceBuilder mockFhirSearch(String thePath, String theQuery, String theValue, Resource... theResources) {
-		return service(ourServerBase).get(thePath).queryParam(theQuery, theValue)
-			.willReturn(success(ourParser.encodeResourceToString(makeBundle(theResources)), "application/json"));
-	}
-
-	public List<StubServiceBuilder> mockValueSet(String theId, String theUrl) {
-		var valueSet = (ValueSet) read(new IdType("ValueSet", theId));
-		return Arrays.asList(
-			mockFhirSearch("/fhir/ValueSet", "url", String.format("%s/%s", theUrl, theId), valueSet),
-			mockFhirRead(String.format("/fhir/ValueSet/%s/$expand", theId), valueSet)
-		);
-	}
-
-	public StubServiceBuilder mockFhirPost(String thePath, Resource theResource) {
-		return service(ourServerBase).post(thePath).body(ourParser.encodeResourceToString(theResource))
-			.willReturn(success());
-	}
 
 	public Bundle makeBundle(List<? extends Resource> theResources) {
 		return makeBundle(theResources.toArray(new Resource[theResources.size()]));

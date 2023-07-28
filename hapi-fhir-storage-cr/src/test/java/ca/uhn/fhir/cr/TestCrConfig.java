@@ -61,9 +61,9 @@ public class TestCrConfig {
 		ourRestServer.registerProvider(myAppCtx.getBean(GraphQLProvider.class));
 		ourRestServer.registerProvider(myAppCtx.getBean(DiffProvider.class));
 		ourRestServer.registerProvider(myAppCtx.getBean(ValueSetOperationProvider.class));
-		databaseBackedPagingProvider.setDefaultPageSize(10);
-		databaseBackedPagingProvider.setMaximumPageSize(50);
-		ourRestServer.setPagingProvider(databaseBackedPagingProvider);
+		//databaseBackedPagingProvider.setDefaultPageSize(10);
+		//databaseBackedPagingProvider.setMaximumPageSize(50);
+		//ourRestServer.setPagingProvider(databaseBackedPagingProvider);
 
 		//to do
 		String serverAddress = null;

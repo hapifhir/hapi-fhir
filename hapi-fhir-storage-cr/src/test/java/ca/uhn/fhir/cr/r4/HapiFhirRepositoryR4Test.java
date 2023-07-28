@@ -59,7 +59,8 @@ public class HapiFhirRepositoryR4Test extends BaseR4TestServer {
 	void canSearchMoreThan50Patients() {
 		loadBundle(MY_TEST_DATA);
 		var expectedPatientCount = 63;
-		///ourPagingProvider.setMaximumPageSize(100);
+
+		ourPagingProvider.setMaximumPageSize(100);
 		var repository = new HapiFhirRepository(myDaoRegistry, setupRequestDetails(), myRestfulServer);
 		// get all patient resources posted
 		var result = repository.search(Bundle.class, Patient.class, withCountParam(100));
@@ -98,7 +99,7 @@ public class HapiFhirRepositoryR4Test extends BaseR4TestServer {
 	void transactionReadsPatientResources() {
 		var expectedPatientCount = 63;
 		var theBundle = readResource(Bundle.class, MY_TEST_DATA);
-		//ourPagingProvider.setMaximumPageSize(100);
+		ourPagingProvider.setMaximumPageSize(100);
 		var repository = new HapiFhirRepository(myDaoRegistry, setupRequestDetails(), myRestfulServer);
 		repository.transaction(theBundle);
 		var result = repository.search(Bundle.class, Patient.class, withCountParam(100));
@@ -116,7 +117,7 @@ public class HapiFhirRepositoryR4Test extends BaseR4TestServer {
 	void transactionReadsEncounterResources() {
 		var expectedEncounterCount = 652;
 		var theBundle = readResource(Bundle.class, MY_TEST_DATA);
-		//ourPagingProvider.setMaximumPageSize(1000);
+		ourPagingProvider.setMaximumPageSize(1000);
 		var repository = new HapiFhirRepository(myDaoRegistry, setupRequestDetails(), myRestfulServer);
 		repository.transaction(theBundle);
 		var result = repository.search(Bundle.class, Encounter.class, withCountParam(1000));
@@ -134,7 +135,7 @@ public class HapiFhirRepositoryR4Test extends BaseR4TestServer {
 	void transactionReadsImmunizationResources() {
 		var expectedEncounterCount = 638;
 		var theBundle = readResource(Bundle.class, MY_TEST_DATA);
-		//ourPagingProvider.setMaximumPageSize(1000);
+		ourPagingProvider.setMaximumPageSize(1000);
 		var repository = new HapiFhirRepository(myDaoRegistry, setupRequestDetails(), myRestfulServer);
 		repository.transaction(theBundle);
 		var result = repository.search(Bundle.class, Immunization.class, withCountParam(1000));
