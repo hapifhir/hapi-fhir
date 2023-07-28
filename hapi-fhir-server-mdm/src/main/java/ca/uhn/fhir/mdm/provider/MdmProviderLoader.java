@@ -55,17 +55,19 @@ public class MdmProviderLoader {
 	@Autowired
 	private JpaStorageSettings myStorageSettings;
 
-	private BaseMdmProvider myMdmProvider;
+	private MdmProviderDstu3Plus myMdmProvider;
+	private MdmLinkHistoryProviderDstu3Plus myMdmHistoryProvider;
 
 	public void loadProvider() {
 		switch (myFhirContext.getVersion().getVersion()) {
 			case DSTU3:
 			case R4:
-				myResourceProviderFactory.addSupplier(() -> new MdmProviderDstu3Plus(
-						myFhirContext, myMdmControllerSvc, myMdmControllerHelper, myMdmSubmitSvc, myMdmSettings));
+				myMdmProvider = new MdmProviderDstu3Plus(
+						myFhirContext, myMdmControllerSvc, myMdmControllerHelper, myMdmSubmitSvc, myMdmSettings);
+				myResourceProviderFactory.addSupplier(() -> myMdmProvider);
 				if (myStorageSettings.isNonResourceDbHistoryEnabled()) {
-					myResourceProviderFactory.addSupplier(
-							() -> new MdmLinkHistoryProviderDstu3Plus(myFhirContext, myMdmControllerSvc));
+					myMdmHistoryProvider = new MdmLinkHistoryProviderDstu3Plus(myFhirContext, myMdmControllerSvc);
+					myResourceProviderFactory.addSupplier(() -> myMdmHistoryProvider);
 				}
 				break;
 			default:
@@ -76,6 +78,11 @@ public class MdmProviderLoader {
 
 	@PreDestroy
 	public void unloadProvider() {
-		myResourceProviderFactory.removeSupplier(() -> myMdmProvider);
+		if (myMdmProvider != null) {
+			myResourceProviderFactory.removeSupplier(() -> myMdmProvider);
+		}
+		if (myMdmHistoryProvider != null) {
+			myResourceProviderFactory.removeSupplier(() -> myMdmHistoryProvider);
+		}
 	}
 }

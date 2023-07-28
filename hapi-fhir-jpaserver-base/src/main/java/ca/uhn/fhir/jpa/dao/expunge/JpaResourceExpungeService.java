@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.jpa.dao.expunge;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
@@ -51,6 +52,7 @@ import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
 import org.apache.commons.lang3.Validate;
@@ -59,6 +61,7 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -315,16 +318,22 @@ public class JpaResourceExpungeService implements IResourceExpungeService<JpaPid
 
 		deleteAllSearchParams(JpaPid.fromId(resource.getResourceId()));
 
-		if (resource.isHasTags()) {
-			myResourceTagDao.deleteByResourceId(resource.getId());
-		}
+		try {
+			if (resource.isHasTags()) {
+				myResourceTagDao.deleteByResourceId(resource.getId());
+			}
 
-		if (resource.getForcedId() != null) {
-			ForcedId forcedId = resource.getForcedId();
-			myForcedIdDao.deleteByPid(forcedId.getId());
-		}
+			if (resource.getForcedId() != null) {
+				ForcedId forcedId = resource.getForcedId();
+				myForcedIdDao.deleteByPid(forcedId.getId());
+			}
 
-		myResourceTableDao.deleteByPid(resource.getId());
+			myResourceTableDao.deleteByPid(resource.getId());
+		} catch (DataIntegrityViolationException e) {
+			throw new PreconditionFailedException(Msg.code(2415)
+					+ "The resource could not be expunged. It is likely due to unfinished asynchronous deletions, please try again later: "
+					+ e);
+		}
 	}
 
 	@Override

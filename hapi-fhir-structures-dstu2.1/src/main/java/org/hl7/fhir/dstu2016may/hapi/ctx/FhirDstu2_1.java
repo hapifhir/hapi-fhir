@@ -68,13 +68,13 @@ public class FhirDstu2_1 implements IFhirVersion {
 	@Override
 	public InputStream getFhirVersionPropertiesFile() {
 		InputStream str =
-				FhirDstu2_1.class.getResourceAsStream("/org/hl7/fhir/dstu2016may/model/fhirversion.properties");
+				FhirDstu2_1.class.getResourceAsStream("/org/hl7/fhir/dstu2016may/hapi/model/fhirversion.properties");
 		if (str == null) {
-			str = FhirDstu2_1.class.getResourceAsStream("/org/hl7/fhir/dstu2016may/model/fhirversion.properties");
+			str = FhirDstu2_1.class.getResourceAsStream("/org/hl7/fhir/dstu2016may/hapi/model/fhirversion.properties");
 		}
 		if (str == null) {
 			throw new ConfigurationException(Msg.code(467) + "Can not find model property file on classpath: "
-					+ "/ca/uhn/fhir/model/dstu2016may/fhirversion.properties");
+					+ "/org/hl7/fhir/dstu2016may/hapi/model/fhirversion.properties");
 		}
 		return str;
 	}

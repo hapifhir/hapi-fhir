@@ -1,19 +1,19 @@
 <!--/* MedicationSummary -->
 <!--
-Table 1 MedicationRequest
-Medication: MedicationRequest.medicationCodeableConcept.coding[x].display || Medication.code.coding.text || Medication.code.coding.code[x].display
+Table 1 Medication Requests
+Medication: MedicationRequest.medicationCodeableConcept.text || MedicationRequest.medicationCodeableConcept.coding[x].display (separated by <br />) || Medication.code.text || Medication.code.coding[x].display (separated by <br />)
 Status: MedicationRequest.status.display
-Route: MedicationRequest.dosageInstruction[x].route.coding[x].display
-Sig: MedicationRequest.dosageInstruction[x].text (display all sigs separated by <br /> )
-Comments: MedicationRequest.note[x].text (display all notes separated by <br /> )
-Authored Date: MedicationRequest.DateTime
+Route: MedicationRequest.dosageInstruction[x].{ route.text || route.coding[x].display (separated by <br />) } (concatenate with comma, e.g. x, y, z)
+Sig: MedicationRequest.dosageInstruction[x].text (display all sigs separated by <br />)
+Comments: MedicationRequest.note[x].text (separated by <br />)
+Authored Date: MedicationRequest.authoredOn
 
-Table 2 MedicationStatement
-Medication: MedicationStatement.medicationCodeableConcept.coding[x].display || Medication.code.coding.text || Medication.code.coding.code[x].display
+Table 2 Medication Statements
+Medication: MedicationStatement.medicationCodeableConcept.text || MedicationStatement.medicationCodeableConcept.coding[x].display (separated by <br />) || Medication.code.text || Medication.code.coding[x].display (separated by <br />)
 Status: MedicationStatement.status.display
-Route: MedicationStatement.dosage[x].route.coding[x].display
-Sig: MedicationStatement.dosage[x].text (display all sigs separated by <br /> )
-Date:  MedicationStatement.effectiveDateTime
+Route: MedicationStatement.dosage[x].{ route.text || route.coding[x].display (separated by <br />) } (concatenate with comma, e.g. x, y, z)
+Sig: MedicationStatement.dosage[x].text (display all sigs separated by <br />)
+Date: MedicationStatement.effectiveDateTime || MedicationStatement.effectivePeriod.start
 */-->
 <div xmlns:th="http://www.thymeleaf.org">
    <table class="hapiPropertyTable">

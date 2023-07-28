@@ -57,11 +57,9 @@
 						<!-- ** Server Actions (no resource selected)      ** -->
 						<!-- ************************************************ -->
 
-						<div class="panel panel-default" th:if="${resourceName.empty}">
-							<div class="panel-heading">
-								<h3 class="panel-title">Server Actions</h3>
-							</div>
-							<div class="panel-body">
+						<div class="card" th:if="${resourceName.empty}">
+							<h3 class="card-header">Server Actions</h3>
+							<div class="card-body">
 								<div class="container-fluid">
 							
 								<!-- Conformance -->

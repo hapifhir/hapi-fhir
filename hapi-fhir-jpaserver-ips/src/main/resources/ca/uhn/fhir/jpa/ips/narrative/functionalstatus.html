@@ -1,10 +1,10 @@
 <!--/* FunctionalStatus -->
 <!--
-Assessment: ClinicalImpression.code.text ||  ClinicalImpression.code[x].display
+Assessment: ClinicalImpression.code.text || ClinicalImpression.code[x].display (separated by <br />)
 Status: ClinicalImpression.status.code
-Finding:  ClinicalImpression.summary
-Comments: ClinicalImpression.note[x].text (display all notes separated by <br /> )
-Date: ClinicalImpression.effectiveDateTime
+Finding: ClinicalImpression.summary
+Comments: ClinicalImpression.note[x].text (separated by <br />)
+Date: ClinicalImpression.effectiveDateTime || ClinicalImpression.effectivePeriod.start
 */-->
 <div xmlns:th="http://www.thymeleaf.org">
    <table class="hapiPropertyTable">

@@ -220,7 +220,7 @@ body .syntaxhighlighter .line {
 
 @media (min-width: 768px) {
    .sidebar {
-      top: 51px;
+      top: 5px;
       bottom: 0;
       left: 0;
       z-index: 1000;
