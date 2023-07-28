@@ -637,7 +637,7 @@ public class UrlUtil {
 
 	private static void throwInvalidRequestExceptionForNotValidUri(String theUri, Exception theCause) {
 		throw new InvalidRequestException(
-				Msg.code(2419) + String.format("%s is not valid URI: %s", Constants.PARAM_SOURCE, theUri), theCause);
+				Msg.code(2419) + String.format("Provided URI is not valid: %s", theUri), theCause);
 	}
 
 	public static class UrlParts {

@@ -22,16 +22,11 @@ package ca.uhn.fhir.jpa.search;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.dao.TestDaoSearch;
 import ca.uhn.fhir.test.utilities.ITestDataBuilder;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIf;
-
-import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * Test cases for _source search parameter.
@@ -80,10 +75,8 @@ public abstract class SourceSearchParameterTestCases implements ITestDataBuilder
 		IIdType pt0id = createPatient(withSource(getFhirContext(), "http://host/0"), withActiveTrue());
 		IIdType pt1id = createPatient(withSource(getFhirContext(), "http://host/1"), withActiveTrue());
 
-		// Search by source URI
-		myTestDaoSearch.assertSearchFinds("search", "Patient?_source=http://host/0", pt0id);
-		List<IBaseResource> resourceList = myTestDaoSearch.searchForResources("Patient?_source=http://host/0");
-		assertEquals(1, resourceList.size());
+		myTestDaoSearch.assertSearchFinds("search by source URI finds", "Patient?_source=http://host/0", pt0id);
+		myTestDaoSearch.assertSearchNotFound("search by source URI not found", "Patient?_source=http://host/0", pt1id);
 	}
 
 	@EnabledIf("isRequestIdSupported")
@@ -97,13 +90,16 @@ public abstract class SourceSearchParameterTestCases implements ITestDataBuilder
 		myTestDataBuilder.getSystemRequestDetails().setRequestId("b_request_id");
 		IIdType pt2id = createPatient(withSource(getFhirContext(), "http://host/1"), withActiveTrue());
 
-		// Search by request ID
-		myTestDaoSearch.assertSearchFinds("search", "Patient?_source=#a_request_id", pt0id, pt1id);
-		myTestDaoSearch.assertSearchNotFound("search", "Patient?_source=#a_request_id", pt2id);
+		myTestDaoSearch.assertSearchFinds("search by requestId finds", "Patient?_source=#a_request_id", pt0id, pt1id);
+		myTestDaoSearch.assertSearchNotFound("search by requestId not found", "Patient?_source=#a_request_id", pt2id);
 
-		// Search by source URI and request ID
-		myTestDaoSearch.assertSearchFinds("search", "Patient?_source=http://host/0#a_request_id", pt0id);
-		myTestDaoSearch.assertSearchNotFound("search", "Patient?_source=http://host/0#a_request_id", pt1id, pt2id);
+		myTestDaoSearch.assertSearchFinds(
+				"search by source URI and requestId finds", "Patient?_source=http://host/0#a_request_id", pt0id);
+		myTestDaoSearch.assertSearchNotFound(
+				"search by source URI and requestId not found",
+				"Patient?_source=http://host/0#a_request_id",
+				pt1id,
+				pt2id);
 	}
 
 	@Test
@@ -114,8 +110,10 @@ public abstract class SourceSearchParameterTestCases implements ITestDataBuilder
 		IIdType pt0id = createPatient(withSource(getFhirContext(), sourceUrn), withActiveTrue());
 		IIdType ob0id = createObservation(withSource(getFhirContext(), sourceUrn), withStatus("final"));
 
-		myTestDaoSearch.assertSearchFinds("search", "Patient?_source=http://host/0", pt0id);
-		myTestDaoSearch.assertSearchNotFound("search", "Patient?_source=http://host/0", ob0id);
+		myTestDaoSearch.assertSearchFinds(
+				"search source URI for Patient finds", "Patient?_source=http://host/0", pt0id);
+		myTestDaoSearch.assertSearchNotFound(
+				"search source URI for Patient - Observation not found", "Patient?_source=http://host/0", ob0id);
 	}
 
 	@Test
@@ -126,7 +124,8 @@ public abstract class SourceSearchParameterTestCases implements ITestDataBuilder
 		IIdType pt1id = createPatient(withSource(getFhirContext(), "http://host/1"), withActiveTrue());
 		createPatient(withSource(getFhirContext(), "http://host/2"), withActiveTrue());
 
-		myTestDaoSearch.assertSearchFinds("search", "Patient?_source=http://host/0,http://host/1", pt0id, pt1id);
+		myTestDaoSearch.assertSearchFinds(
+				"search source URI with union", "Patient?_source=http://host/0,http://host/1", pt0id, pt1id);
 	}
 
 	@EnabledIf("isRequestIdSupported")
@@ -139,9 +138,15 @@ public abstract class SourceSearchParameterTestCases implements ITestDataBuilder
 		IIdType pt1id = createPatient(withSource(getFhirContext(), "http://host/0"), withActiveTrue());
 		IIdType pt2id = createPatient(withSource(getFhirContext(), "http://host/1"), withActiveTrue());
 
-		myTestDaoSearch.assertSearchFinds("search", "Patient?_source=http://host/0&_source=#a_request_id", pt0id);
+		myTestDaoSearch.assertSearchFinds(
+				"search for source URI and requestId intersection finds",
+				"Patient?_source=http://host/0&_source=#a_request_id",
+				pt0id);
 		myTestDaoSearch.assertSearchNotFound(
-				"search", "Patient?_source=http://host/0&_source=#a_request_id", pt1id, pt2id);
+				"search for source URI and requestId intersection not found",
+				"Patient?_source=http://host/0&_source=#a_request_id",
+				pt1id,
+				pt2id);
 	}
 
 	@Test

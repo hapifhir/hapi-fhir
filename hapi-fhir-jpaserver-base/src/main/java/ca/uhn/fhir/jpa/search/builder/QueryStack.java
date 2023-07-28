@@ -1857,10 +1857,8 @@ public class QueryStack {
 
 		List<Condition> orPredicates = new ArrayList<>();
 
-		// if both sourceUri and requestId are not populated for the resource there will be no records for it in
-		// HFJ_RES_VER_PROV table
-		// :missing=true modifier processing requires "LEFT JOIN" with HFJ_RESOURCE table to return correct results in
-		// this case
+		// :missing=true modifier processing requires "LEFT JOIN" with HFJ_RESOURCE table to return correct results
+		// if both sourceUri and requestId are not populated for the resource
 		Optional<? extends IQueryParameterType> isMissingSourceOptional = theList.stream()
 				.filter(nextParameter -> nextParameter.getMissing() != null && nextParameter.getMissing())
 				.findFirst();
