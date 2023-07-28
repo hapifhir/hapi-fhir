@@ -83,6 +83,11 @@ public class DaoTestDataBuilder implements ITestDataBuilder.WithSupport, ITestDa
 	}
 
 	@Override
+	public SystemRequestDetails getSystemRequestDetails() {
+		return mySrd;
+	}
+
+	@Override
 	public FhirContext getFhirContext() {
 		return myFhirCtx;
 	}

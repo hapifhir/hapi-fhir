@@ -72,9 +72,6 @@ public class TestDaoSearch {
 		}
 	}
 
-	@Autowired
-	private IFulltextSearchSvc myFulltextSearchSvc;
-
 	final FhirContext myFhirCtx;
 	final DaoRegistry myDaoRegistry;
 	final MatchUrlService myMatchUrlService;

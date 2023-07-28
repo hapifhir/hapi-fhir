@@ -41,6 +41,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -600,6 +601,43 @@ public class UrlUtil {
 		}
 
 		return parameters;
+	}
+
+	/**
+	 * Creates list of sub URIs candidates for search with :above modifier
+	 * Example input: http://[host]/[pathPart1]/[pathPart2]
+	 * Example output: http://[host], http://[host]/[pathPart1], http://[host]/[pathPart1]/[pathPart2]
+	 *
+	 * @param theUri String URI parameter
+	 * @return List of URI candidates
+	 */
+	public static List<String> getAboveUriCandidates(String theUri) {
+		List<String> candidates = new ArrayList<>();
+		try {
+			URI uri = new URI(theUri);
+
+			if (uri.getScheme() == null || uri.getHost() == null) {
+				throwInvalidRequestExceptionForNotValidUri(theUri, null);
+			}
+			StringBuilder sb =
+					new StringBuilder().append(uri.getScheme()).append("://").append(uri.getHost());
+
+			candidates.add(sb.toString());
+
+			String[] pathParts = uri.getPath().split("/");
+			Arrays.stream(pathParts)
+					.filter(part -> !part.isEmpty())
+					.forEach(part -> candidates.add(sb.append("/").append(part).toString()));
+
+		} catch (URISyntaxException e) {
+			throwInvalidRequestExceptionForNotValidUri(theUri, e);
+		}
+		return candidates;
+	}
+
+	private static void throwInvalidRequestExceptionForNotValidUri(String theUri, Exception theCause) {
+		throw new InvalidRequestException(
+				Msg.code(2419) + String.format("%s is not valid URI: %s", Constants.PARAM_SOURCE, theUri), theCause);
 	}
 
 	public static class UrlParts {

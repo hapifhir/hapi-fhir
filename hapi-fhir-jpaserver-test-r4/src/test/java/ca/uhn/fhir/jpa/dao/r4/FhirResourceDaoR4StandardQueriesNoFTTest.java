@@ -6,6 +6,7 @@ import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.TestDaoSearch;
 import ca.uhn.fhir.jpa.search.CompositeSearchParameterTestCases;
 import ca.uhn.fhir.jpa.search.QuantitySearchParameterTestCases;
+import ca.uhn.fhir.jpa.search.SourceSearchParameterTestCases;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.test.BaseJpaTest;
 import ca.uhn.fhir.jpa.test.config.TestHSearchAddInConfig;
@@ -515,6 +516,18 @@ public class FhirResourceDaoR4StandardQueriesNoFTTest extends BaseJpaTest {
 		@Override
 		protected boolean isCorrelatedSupported() {
 			return false;
+		}
+	}
+
+	@Nested
+	class SourceSearch extends SourceSearchParameterTestCases {
+		SourceSearch() {
+			super(myDataBuilder, myTestDaoSearch, myStorageSettings);
+		}
+
+		@Override
+		protected boolean isRequestIdSupported() {
+			return true;
 		}
 	}
 }

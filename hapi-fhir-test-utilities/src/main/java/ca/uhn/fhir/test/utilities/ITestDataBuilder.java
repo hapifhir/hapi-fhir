@@ -23,6 +23,7 @@ import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.MetaUtil;
 import org.apache.commons.lang3.Validate;
@@ -404,6 +405,8 @@ public interface ITestDataBuilder {
 	}
 
 	interface Support {
+		SystemRequestDetails getSystemRequestDetails();
+
 		FhirContext getFhirContext();
 
 		IIdType doCreateResource(IBaseResource theResource);
@@ -443,6 +446,11 @@ public interface ITestDataBuilder {
 
 		public SupportNoDao(FhirContext theFhirContext) {
 			myFhirContext = theFhirContext;
+		}
+
+		@Override
+		public SystemRequestDetails getSystemRequestDetails() {
+			return new SystemRequestDetails();
 		}
 
 		@Override
