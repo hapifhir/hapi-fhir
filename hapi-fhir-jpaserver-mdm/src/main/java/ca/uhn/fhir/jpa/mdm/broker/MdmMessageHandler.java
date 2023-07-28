@@ -81,10 +81,11 @@ public class MdmMessageHandler implements MessageHandler {
 
 		ResourceModifiedMessage msg = ((ResourceModifiedJsonMessage) theMessage).getPayload();
 		try {
-
 			IBaseResource sourceResource = msg.getNewPayload(myFhirContext);
 
-			if (myMdmResourceFilteringSvc.shouldBeProcessed((IAnyResource) sourceResource)) {
+			boolean toProcess = myMdmResourceFilteringSvc.shouldBeProcessed((IAnyResource) sourceResource);
+			ourLog.info("\n" + sourceResource.getIdElement().getValue() + " to process " + toProcess);
+			if (toProcess) {
 				matchMdmAndUpdateLinks(sourceResource, msg);
 			}
 		} catch (TooManyCandidatesException e) {

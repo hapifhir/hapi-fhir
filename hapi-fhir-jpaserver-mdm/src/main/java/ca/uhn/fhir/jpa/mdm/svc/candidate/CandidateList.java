@@ -19,14 +19,18 @@
  */
 package ca.uhn.fhir.jpa.mdm.svc.candidate;
 
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimap;
+
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Stream;
 
 public class CandidateList {
 	private final CandidateStrategyEnum myStrategy;
-	private final List<MatchedGoldenResourceCandidate> myList = new ArrayList<>();
+
+	private final Multimap<CandidateStrategyEnum, MatchedGoldenResourceCandidate> myStrategyToCandidateList = HashMultimap.create();
 
 	public CandidateList(CandidateStrategyEnum theStrategy) {
 		myStrategy = theStrategy;
@@ -37,32 +41,55 @@ public class CandidateList {
 	}
 
 	public boolean isEmpty() {
-		return myList.isEmpty();
+		return myStrategyToCandidateList.isEmpty();
 	}
 
-	public void addAll(List<MatchedGoldenResourceCandidate> theList) {
-		myList.addAll(theList);
+	public void addAll(CandidateStrategyEnum theStrategy, List<MatchedGoldenResourceCandidate> theList) {
+		switch (theStrategy) {
+			case EID:
+			case LINK:
+			case SCORE:
+				myStrategyToCandidateList.putAll(theStrategy, theList);
+				break;
+			default:
+				throw new InternalErrorException("Existing resources cannot be added for strategy " + theStrategy.name());
+		}
 	}
 
 	public MatchedGoldenResourceCandidate getOnlyMatch() {
-		assert myList.size() == 1;
-		return myList.get(0);
+		assert size() == 1;
+		return myStrategyToCandidateList.values()
+			.stream().findFirst().get();
 	}
 
 	public boolean exactlyOneMatch() {
-		return myList.size() == 1;
+		return size() == 1;
 	}
 
 	public Stream<MatchedGoldenResourceCandidate> stream() {
-		return myList.stream();
+		return myStrategyToCandidateList.values().stream();
+	}
+
+	public Stream<MatchedGoldenResourceCandidate> stream(CandidateStrategyEnum theStrategy) {
+		return myStrategyToCandidateList.get(theStrategy).stream();
 	}
 
 	public List<MatchedGoldenResourceCandidate> getCandidates() {
-		return Collections.unmodifiableList(myList);
+		switch (myStrategy) {
+			case LINK:
+			case EID:
+			case SCORE:
+				return new ArrayList<>(myStrategyToCandidateList.get(myStrategy));
+			default:
+				return new ArrayList<>(myStrategyToCandidateList.values());
+		}
 	}
 
 	public MatchedGoldenResourceCandidate getFirstMatch() {
-		return myList.get(0);
+		assert size() > 0;
+
+		return myStrategyToCandidateList.values()
+			.stream().findFirst().get();
 	}
 
 	public boolean isEidMatch() {
@@ -70,6 +97,6 @@ public class CandidateList {
 	}
 
 	public int size() {
-		return myList.size();
+		return myStrategyToCandidateList.size();
 	}
 }
