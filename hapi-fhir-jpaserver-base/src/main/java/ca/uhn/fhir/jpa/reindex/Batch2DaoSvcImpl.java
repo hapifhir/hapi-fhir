@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.reindex;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
@@ -102,16 +103,16 @@ public class Batch2DaoSvcImpl implements IBatch2DaoSvc {
 					} else {
 						if (!theUrl.contains("?")) {
 							throw new InternalErrorException(
-									"HAPI-99999:  this should never happen: URL is missing a '?'");
+									Msg.code(2422) + ":  this should never happen: URL is missing a '?'");
 						}
 
 						final Integer internalSynchronousSearchSize =
 								myJpaStorageSettings.getInternalSynchronousSearchSize();
 
 						if (internalSynchronousSearchSize == null || internalSynchronousSearchSize <= 0) {
-							// TODO:  new HAPI code
 							throw new InternalErrorException(
-									"HAPI-99999:  this should never happen: internalSynchronousSearchSize is null or less than or equal to 0");
+									Msg.code(2423)
+											+ ":  this should never happen: internalSynchronousSearchSize is null or less than or equal to 0");
 						}
 
 						List<IResourcePersistentId> currentIds =
