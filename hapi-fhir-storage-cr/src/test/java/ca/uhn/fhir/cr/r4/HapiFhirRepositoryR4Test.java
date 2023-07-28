@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import ca.uhn.fhir.cr.BaseR4TestServer;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Encounter;
@@ -30,8 +31,10 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.NumberParam;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 
-public class HapiFhirRepositoryR4Test extends BaseCrR4Test {
+public class HapiFhirRepositoryR4Test extends BaseR4TestServer {
 
+	@Autowired
+	RestfulServer myRestfulServer;
 	private static final String MY_TEST_DATA =
 		"ca/uhn/fhir/cr/r4/immunization/Patients_Encounters_Immunizations_Practitioners.json";
 
@@ -62,7 +65,7 @@ public class HapiFhirRepositoryR4Test extends BaseCrR4Test {
 	void canSearchMoreThan50Patients() {
 		loadBundle(MY_TEST_DATA);
 		var expectedPatientCount = 63;
-		ourPagingProvider.setMaximumPageSize(100);
+		///ourPagingProvider.setMaximumPageSize(100);
 		var repository = new HapiFhirRepository(myDaoRegistry, setupRequestDetails(), myRestfulServer);
 		// get all patient resources posted
 		var result = repository.search(Bundle.class, Patient.class, withCountParam(100));
@@ -101,7 +104,7 @@ public class HapiFhirRepositoryR4Test extends BaseCrR4Test {
 	void transactionReadsPatientResources() {
 		var expectedPatientCount = 63;
 		var theBundle = readResource(Bundle.class, MY_TEST_DATA);
-		ourPagingProvider.setMaximumPageSize(100);
+		//ourPagingProvider.setMaximumPageSize(100);
 		var repository = new HapiFhirRepository(myDaoRegistry, setupRequestDetails(), myRestfulServer);
 		repository.transaction(theBundle);
 		var result = repository.search(Bundle.class, Patient.class, withCountParam(100));
@@ -119,7 +122,7 @@ public class HapiFhirRepositoryR4Test extends BaseCrR4Test {
 	void transactionReadsEncounterResources() {
 		var expectedEncounterCount = 652;
 		var theBundle = readResource(Bundle.class, MY_TEST_DATA);
-		ourPagingProvider.setMaximumPageSize(1000);
+		//ourPagingProvider.setMaximumPageSize(1000);
 		var repository = new HapiFhirRepository(myDaoRegistry, setupRequestDetails(), myRestfulServer);
 		repository.transaction(theBundle);
 		var result = repository.search(Bundle.class, Encounter.class, withCountParam(1000));
@@ -137,7 +140,7 @@ public class HapiFhirRepositoryR4Test extends BaseCrR4Test {
 	void transactionReadsImmunizationResources() {
 		var expectedEncounterCount = 638;
 		var theBundle = readResource(Bundle.class, MY_TEST_DATA);
-		ourPagingProvider.setMaximumPageSize(1000);
+		//ourPagingProvider.setMaximumPageSize(1000);
 		var repository = new HapiFhirRepository(myDaoRegistry, setupRequestDetails(), myRestfulServer);
 		repository.transaction(theBundle);
 		var result = repository.search(Bundle.class, Immunization.class, withCountParam(1000));

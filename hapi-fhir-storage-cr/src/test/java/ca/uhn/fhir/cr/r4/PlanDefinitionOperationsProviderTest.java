@@ -1,6 +1,7 @@
 package ca.uhn.fhir.cr.r4;
 
 import ca.uhn.fhir.cr.BaseCrR4Test;
+import ca.uhn.fhir.cr.BaseR4TestServer;
 import ca.uhn.fhir.cr.r4.plandefinition.PlanDefinitionOperationsProvider;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CarePlan;
@@ -15,7 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-public class PlanDefinitionOperationsProviderTest extends BaseCrR4Test {
+public class PlanDefinitionOperationsProviderTest extends BaseR4TestServer {
 	@Autowired
 	PlanDefinitionOperationsProvider planDefinitionOperationsProvider;
 

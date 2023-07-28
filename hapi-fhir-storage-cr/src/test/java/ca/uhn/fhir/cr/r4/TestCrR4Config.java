@@ -69,7 +69,7 @@ public class TestCrR4Config {
 		}
 		return measureEvalOptions;
 	}
-	/*@Bean
+	@Bean
 	IActivityDefinitionProcessorFactory r4ActivityDefinitionProcessorFactory(EvaluationSettings theEvaluationSettings) {
 		return r -> new ActivityDefinitionProcessor(r, theEvaluationSettings);
 	}
@@ -107,5 +107,5 @@ public class TestCrR4Config {
 	@Bean
 	public QuestionnaireResponseOperationsProvider r4QuestionnaireResponseOperationsProvider() {
 		return new QuestionnaireResponseOperationsProvider();
-	}*/
+	}
 }
