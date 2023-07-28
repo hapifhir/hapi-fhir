@@ -60,6 +60,8 @@ public class MdmProviderLoader {
 	private IInterceptorBroadcaster myInterceptorBroadcaster;
 
 	private BaseMdmProvider myMdmProvider;
+	private MdmProviderDstu3Plus myMdmProvider;
+	private MdmLinkHistoryProviderDstu3Plus myMdmHistoryProvider;
 
 	public void loadProvider() {
 		switch (myFhirContext.getVersion().getVersion()) {
@@ -87,6 +89,11 @@ public class MdmProviderLoader {
 
 	@PreDestroy
 	public void unloadProvider() {
-		myResourceProviderFactory.removeSupplier(() -> myMdmProvider);
+		if (myMdmProvider != null) {
+			myResourceProviderFactory.removeSupplier(() -> myMdmProvider);
+		}
+		if (myMdmHistoryProvider != null) {
+			myResourceProviderFactory.removeSupplier(() -> myMdmHistoryProvider);
+		}
 	}
 }

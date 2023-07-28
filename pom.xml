@@ -9,7 +9,7 @@
 	<groupId>ca.uhn.hapi.fhir</groupId>
 	<artifactId>hapi-fhir</artifactId>
 	<packaging>pom</packaging>
-	<version>6.9.0-SNAPSHOT</version>
+	<version>6.9.1-SNAPSHOT</version>
 
 	<name>HAPI-FHIR</name>
 	<description>An open-source implementation of the FHIR specification in Java.</description>
@@ -941,12 +941,12 @@
 		<jetty_version>10.0.14</jetty_version>
 		<jsr305_version>3.0.2</jsr305_version>
 		<junit_version>5.9.1</junit_version>
-		<flexmark_version>0.50.40</flexmark_version>
+		<flexmark_version>0.64.8</flexmark_version>
 		<flyway_version>9.4.0</flyway_version>
 		<hibernate_version>5.6.15.Final</hibernate_version>
 		<hibernate_search_version>6.1.6.Final</hibernate_search_version>
-		<logback_version>1.4.4</logback_version>
-		<!-- Update lucene version when you update hibernate-search version -->
+		<logback_version>1.4.7</logback_version>
+	 	<!-- Update lucene version when you update hibernate-search version -->
 		<lucene_version>8.11.1</lucene_version>
 		<hamcrest_version>2.2</hamcrest_version>
 		<hibernate_validator_version>6.1.5.Final</hibernate_validator_version>
@@ -1145,7 +1145,7 @@
 			<dependency>
 				<groupId>com.h2database</groupId>
 				<artifactId>h2</artifactId>
-				<version>2.1.214</version>
+				<version>2.2.220</version>
 			</dependency>
 			<dependency>
 				<groupId>com.helger</groupId>
@@ -1344,7 +1344,7 @@
 			<dependency>
 				<groupId>com.microsoft.sqlserver</groupId>
 				<artifactId>mssql-jdbc</artifactId>
-				<version>9.4.1.jre8</version>
+				<version>12.2.0.jre11</version>
 			</dependency>
 			<dependency>
 				<groupId>javax.servlet</groupId>

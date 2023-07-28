@@ -107,7 +107,8 @@ public class SectionRegistry {
 				.withSectionCode("48765-2")
 				.withSectionDisplay("Allergies and Adverse Reactions")
 				.withResourceTypes(ResourceType.AllergyIntolerance.name())
-				.withProfile("http://hl7.org/fhir/uv/ips/StructureDefinition/AllergiesAndIntolerances-uv-ips")
+				.withProfile(
+						"https://hl7.org/fhir/uv/ips/StructureDefinition-Composition-uv-ips-definitions.html#Composition.section:sectionAllergies")
 				.withNoInfoGenerator(new AllergyIntoleranceNoInfoR4Generator())
 				.build();
 	}
@@ -122,7 +123,8 @@ public class SectionRegistry {
 						ResourceType.MedicationRequest.name(),
 						ResourceType.MedicationAdministration.name(),
 						ResourceType.MedicationDispense.name())
-				.withProfile("http://hl7.org/fhir/uv/ips/StructureDefinition/MedicationSummary-uv-ips")
+				.withProfile(
+						"https://hl7.org/fhir/uv/ips/StructureDefinition-Composition-uv-ips-definitions.html#Composition.section:sectionMedications")
 				.withNoInfoGenerator(new MedicationNoInfoR4Generator())
 				.build();
 	}
@@ -133,7 +135,8 @@ public class SectionRegistry {
 				.withSectionCode("11450-4")
 				.withSectionDisplay("Problem List")
 				.withResourceTypes(ResourceType.Condition.name())
-				.withProfile("http://hl7.org/fhir/uv/ips/StructureDefinition/ProblemList-uv-ips")
+				.withProfile(
+						"https://hl7.org/fhir/uv/ips/StructureDefinition-Composition-uv-ips-definitions.html#Composition.section:sectionProblems")
 				.withNoInfoGenerator(new ProblemNoInfoR4Generator())
 				.build();
 	}
@@ -144,7 +147,8 @@ public class SectionRegistry {
 				.withSectionCode("11369-6")
 				.withSectionDisplay("History of Immunizations")
 				.withResourceTypes(ResourceType.Immunization.name())
-				.withProfile("http://hl7.org/fhir/uv/ips/StructureDefinition/Immunizations-uv-ips")
+				.withProfile(
+						"https://hl7.org/fhir/uv/ips/StructureDefinition-Composition-uv-ips-definitions.html#Composition.section:sectionImmunizations")
 				.build();
 	}
 
@@ -154,7 +158,8 @@ public class SectionRegistry {
 				.withSectionCode("47519-4")
 				.withSectionDisplay("History of Procedures")
 				.withResourceTypes(ResourceType.Procedure.name())
-				.withProfile("http://hl7.org/fhir/uv/ips/StructureDefinition/HistoryOfProcedures-uv-ips")
+				.withProfile(
+						"https://hl7.org/fhir/uv/ips/StructureDefinition-Composition-uv-ips-definitions.html#Composition.section:sectionProceduresHx")
 				.build();
 	}
 
@@ -164,7 +169,8 @@ public class SectionRegistry {
 				.withSectionCode("46240-8")
 				.withSectionDisplay("Medical Devices")
 				.withResourceTypes(ResourceType.DeviceUseStatement.name())
-				.withProfile("http://hl7.org/fhir/uv/ips/StructureDefinition/MedicalDevices-uv-ips")
+				.withProfile(
+						"https://hl7.org/fhir/uv/ips/StructureDefinition-Composition-uv-ips-definitions.html#Composition.section:sectionMedicalDevices")
 				.build();
 	}
 
@@ -174,7 +180,8 @@ public class SectionRegistry {
 				.withSectionCode("30954-2")
 				.withSectionDisplay("Diagnostic Results")
 				.withResourceTypes(ResourceType.DiagnosticReport.name(), ResourceType.Observation.name())
-				.withProfile("http://hl7.org/fhir/uv/ips/StructureDefinition/DiagnosticResults-uv-ips")
+				.withProfile(
+						"https://hl7.org/fhir/uv/ips/StructureDefinition-Composition-uv-ips-definitions.html#Composition.section:sectionResults")
 				.build();
 	}
 
@@ -184,7 +191,8 @@ public class SectionRegistry {
 				.withSectionCode("8716-3")
 				.withSectionDisplay("Vital Signs")
 				.withResourceTypes(ResourceType.Observation.name())
-				.withProfile("http://hl7.org/fhir/uv/ips/StructureDefinition/VitalSigns-uv-ips")
+				.withProfile(
+						"https://hl7.org/fhir/uv/ips/StructureDefinition-Composition-uv-ips-definitions.html#Composition.section:sectionVitalSigns")
 				.build();
 	}
 
@@ -194,7 +202,8 @@ public class SectionRegistry {
 				.withSectionCode("10162-6")
 				.withSectionDisplay("Pregnancy Information")
 				.withResourceTypes(ResourceType.Observation.name())
-				.withProfile("http://hl7.org/fhir/uv/ips/StructureDefinition/Pregnancy-uv-ips")
+				.withProfile(
+						"https://hl7.org/fhir/uv/ips/StructureDefinition-Composition-uv-ips-definitions.html#Composition.section:sectionPregnancyHx")
 				.build();
 	}
 
@@ -204,7 +213,8 @@ public class SectionRegistry {
 				.withSectionCode("29762-2")
 				.withSectionDisplay("Social History")
 				.withResourceTypes(ResourceType.Observation.name())
-				.withProfile("http://hl7.org/fhir/uv/ips/StructureDefinition/SocialHistory-uv-ips")
+				.withProfile(
+						"https://hl7.org/fhir/uv/ips/StructureDefinition-Composition-uv-ips-definitions.html#Composition.section:sectionSocialHistory")
 				.build();
 	}
 
@@ -214,7 +224,8 @@ public class SectionRegistry {
 				.withSectionCode("11348-0")
 				.withSectionDisplay("History of Past Illness")
 				.withResourceTypes(ResourceType.Condition.name())
-				.withProfile("http://hl7.org/fhir/uv/ips/StructureDefinition/PastHistoryOfIllnesses-uv-ips")
+				.withProfile(
+						"https://hl7.org/fhir/uv/ips/StructureDefinition-Composition-uv-ips-definitions.html#Composition.section:sectionPastIllnessHx")
 				.build();
 	}
 
@@ -224,7 +235,8 @@ public class SectionRegistry {
 				.withSectionCode("47420-5")
 				.withSectionDisplay("Functional Status")
 				.withResourceTypes(ResourceType.ClinicalImpression.name())
-				.withProfile("http://hl7.org/fhir/uv/ips/StructureDefinition/FunctionalStatus-uv-ips")
+				.withProfile(
+						"https://hl7.org/fhir/uv/ips/StructureDefinition-Composition-uv-ips-definitions.html#Composition.section:sectionFunctionalStatus")
 				.build();
 	}
 
@@ -234,7 +246,8 @@ public class SectionRegistry {
 				.withSectionCode("18776-5")
 				.withSectionDisplay("Plan of Care")
 				.withResourceTypes(ResourceType.CarePlan.name())
-				.withProfile("http://hl7.org/fhir/uv/ips/StructureDefinition/PlanOfCare-uv-ips")
+				.withProfile(
+						"https://hl7.org/fhir/uv/ips/StructureDefinition-Composition-uv-ips-definitions.html#Composition.section:sectionPlanOfCare")
 				.build();
 	}
 
@@ -244,7 +257,8 @@ public class SectionRegistry {
 				.withSectionCode("42349-0")
 				.withSectionDisplay("Advance Directives")
 				.withResourceTypes(ResourceType.Consent.name())
-				.withProfile("http://hl7.org/fhir/uv/ips/StructureDefinition/AdvanceDirectives-uv-ips")
+				.withProfile(
+						"https://hl7.org/fhir/uv/ips/StructureDefinition-Composition-uv-ips-definitions.html#Composition.section:sectionAdvanceDirectives")
 				.build();
 	}
 
