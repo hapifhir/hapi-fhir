@@ -60,7 +60,6 @@ public class MdmProviderLoader {
 	private IInterceptorBroadcaster myInterceptorBroadcaster;
 
 	private BaseMdmProvider myMdmProvider;
-	private MdmProviderDstu3Plus myMdmProvider;
 	private MdmLinkHistoryProviderDstu3Plus myMdmHistoryProvider;
 
 	public void loadProvider() {
