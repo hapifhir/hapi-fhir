@@ -88,19 +88,22 @@ public class ResourceIdListStep<PT extends PartitionedJobParameters, IT extends 
 			// we won't go over MAX_BATCH_OF_IDS
 			maxBatchId = Math.min(batchSize.intValue(), maxBatchId);
 		}
-		while (true) {
+		// TODO: get rid of while(true)
+//		while (true) {
+			// TODO:  get rid of the page size semantics here and deal with one huge IResourcePidList, but break it up into multiple chunks
 			IResourcePidList nextChunk = myIdChunkProducer.fetchResourceIdsPage(
 					nextStart, end, pageSize, requestPartitionId, theStepExecutionDetails.getData());
 
 			if (nextChunk.isEmpty()) {
 				ourLog.info("No data returned");
-				break;
+//				break;
 			}
 
+			// TODO:  do we need this anymore?
 			// If we get the same last time twice in a row, we've clearly reached the end
 			if (nextChunk.getLastDate().getTime() == previousLastTime) {
 				ourLog.info("Matching final timestamp of {}, loading is completed", new Date(previousLastTime));
-				break;
+//				break;
 			}
 
 			ourLog.info("Found {} IDs from {} to {}", nextChunk.size(), nextStart, nextChunk.getLastDate());
@@ -115,8 +118,8 @@ public class ResourceIdListStep<PT extends PartitionedJobParameters, IT extends 
 				idBuffer.add(nextId);
 			}
 
-			previousLastTime = nextChunk.getLastDate().getTime();
-			nextStart = nextChunk.getLastDate();
+//			previousLastTime = nextChunk.getLastDate().getTime();
+//			nextStart = nextChunk.getLastDate();
 
 			while (idBuffer.size() > maxBatchId) {
 				List<TypedPidJson> submissionIds = new ArrayList<>();
@@ -132,7 +135,7 @@ public class ResourceIdListStep<PT extends PartitionedJobParameters, IT extends 
 				chunkCount++;
 				submitWorkChunk(submissionIds, nextChunk.getRequestPartitionId(), theDataSink);
 			}
-		}
+//		}
 
 		totalIdsFound += idBuffer.size();
 		chunkCount++;

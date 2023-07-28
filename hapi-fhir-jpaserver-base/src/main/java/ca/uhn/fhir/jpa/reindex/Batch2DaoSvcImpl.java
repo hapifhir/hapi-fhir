@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.reindex;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.pid.EmptyResourcePidList;
@@ -41,10 +42,10 @@ import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.util.DateRangeUtil;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -55,24 +56,30 @@ import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 
 public class Batch2DaoSvcImpl implements IBatch2DaoSvc {
 
-	@Autowired
-	private IResourceTableDao myResourceTableDao;
+	private final IResourceTableDao myResourceTableDao;
 
-	@Autowired
-	private MatchUrlService myMatchUrlService;
+	private final MatchUrlService myMatchUrlService;
 
-	@Autowired
-	private DaoRegistry myDaoRegistry;
+	private final DaoRegistry myDaoRegistry;
 
-	@Autowired
-	private FhirContext myFhirContext;
+	private final FhirContext myFhirContext;
 
-	@Autowired
-	private IHapiTransactionService myTransactionService;
+	private final IHapiTransactionService myTransactionService;
+
+	private final JpaStorageSettings myJpaStorageSettings;
 
 	@Override
 	public boolean isAllResourceTypeSupported() {
 		return true;
+	}
+
+	public Batch2DaoSvcImpl(IResourceTableDao theResourceTableDao, MatchUrlService theMatchUrlService, DaoRegistry theDaoRegistry, FhirContext theFhirContext, IHapiTransactionService theTransactionService, JpaStorageSettings theJpaStorageSettings) {
+		myResourceTableDao = theResourceTableDao;
+		myMatchUrlService = theMatchUrlService;
+		myDaoRegistry = theDaoRegistry;
+		myFhirContext = theFhirContext;
+		myTransactionService = theTransactionService;
+		myJpaStorageSettings = theJpaStorageSettings;
 	}
 
 	@Override
@@ -89,24 +96,52 @@ public class Batch2DaoSvcImpl implements IBatch2DaoSvc {
 					if (theUrl == null) {
 						return fetchResourceIdsPageNoUrl(theStart, theEnd, thePageSize, theRequestPartitionId);
 					} else {
-						return fetchResourceIdsPageWithUrl(
-								theStart, theEnd, thePageSize, theUrl, theRequestPartitionId);
+						// TODO:  validation for garbage URL
+						final Integer internalSynchronousSearchSize = myJpaStorageSettings.getInternalSynchronousSearchSize();
+
+						if (internalSynchronousSearchSize == null || internalSynchronousSearchSize <= 0)  {
+							// TODO:  new HAPI code
+							throw new IllegalStateException("HAPI-99999:  this should never happen: internalSynchronousSearchSize is null or less than or equal to 0");
+						}
+
+						final int searchSizeThreshold = internalSynchronousSearchSize - 1;
+						final List<IResourcePersistentId> allIds = new ArrayList<>();
+						List<IResourcePersistentId> currentIds = new ArrayList<>();
+						boolean init = true;
+						Date lastDate = null;
+						// 10000 > 9999
+						while (init || searchSizeThreshold < currentIds.size() ) {
+							init = false;
+							// TODO:  why does this method get executed multiple times?
+							// TODO:  this is an infinite loop because I can't signal to this method that it should start at a new point
+							final HomogeneousResourcePidList resourcePidList = fetchResourceIdsPageWithUrl(theStart, theEnd, thePageSize, currentIds.size(), theUrl, theRequestPartitionId);
+							currentIds = resourcePidList.getIds();
+							lastDate = resourcePidList.getLastDate();
+							allIds.addAll(currentIds);
+						}
+
+						final String resourceType = theUrl.substring(0, theUrl.indexOf('?'));
+
+						return new HomogeneousResourcePidList(resourceType, allIds, lastDate, theRequestPartitionId);
 					}
 				});
 	}
 
-	private IResourcePidList fetchResourceIdsPageWithUrl(
-			Date theStart, Date theEnd, int thePageSize, String theUrl, RequestPartitionId theRequestPartitionId) {
-
+	// TODO:  consider just returning the IDs
+	private HomogeneousResourcePidList fetchResourceIdsPageWithUrl(
+		Date theStart, Date theEnd, int thePageSize, int theOffset, String theUrl, RequestPartitionId theRequestPartitionId) {
 		String resourceType = theUrl.substring(0, theUrl.indexOf('?'));
 		RuntimeResourceDefinition def = myFhirContext.getResourceDefinition(resourceType);
+		// TODO: consider cleaning up date stuff that's no longer needed
 
 		SearchParameterMap searchParamMap = myMatchUrlService.translateMatchUrl(theUrl, def);
-		searchParamMap.setSort(new SortSpec(Constants.PARAM_LASTUPDATED, SortOrderEnum.ASC));
+		searchParamMap.setSort(new SortSpec(Constants.PARAM_ID, SortOrderEnum.ASC));
 		DateRangeParam chunkDateRange =
-				DateRangeUtil.narrowDateRange(searchParamMap.getLastUpdated(), theStart, theEnd);
+			DateRangeUtil.narrowDateRange(searchParamMap.getLastUpdated(), theStart, theEnd);
 		searchParamMap.setLastUpdated(chunkDateRange);
 		searchParamMap.setCount(thePageSize);
+		// TODO:  try this:
+		searchParamMap.setOffset(theOffset);
 
 		IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(resourceType);
 		SystemRequestDetails request = new SystemRequestDetails();
