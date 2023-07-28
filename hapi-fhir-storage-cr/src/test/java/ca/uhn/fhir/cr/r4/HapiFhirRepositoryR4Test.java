@@ -31,9 +31,7 @@ import ca.uhn.fhir.rest.param.NumberParam;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 
 public class HapiFhirRepositoryR4Test extends BaseCrR4Test {
-	
-	@Autowired
-	RestfulServer myRestfulServer;
+
 	private static final String MY_TEST_DATA =
 		"ca/uhn/fhir/cr/r4/immunization/Patients_Encounters_Immunizations_Practitioners.json";
 

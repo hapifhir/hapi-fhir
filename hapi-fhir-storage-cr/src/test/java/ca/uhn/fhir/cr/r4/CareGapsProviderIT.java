@@ -1,21 +1,6 @@
 package ca.uhn.fhir.cr.r4;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.cr.IResourceLoader;
-import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
-import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
-import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
-import ca.uhn.fhir.rest.api.EncodingEnum;
-import ca.uhn.fhir.rest.client.api.IGenericClient;
-import ca.uhn.fhir.rest.client.interceptor.SimpleRequestHeaderInterceptor;
-import ca.uhn.fhir.rest.server.RestfulServer;
-import ca.uhn.fhir.test.utilities.JettyUtil;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.servlet.ServletContextHandler;
-import org.eclipse.jetty.servlet.ServletHolder;
+import ca.uhn.fhir.cr.BaseR4TestServer;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
@@ -24,15 +9,9 @@ import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.Parameters;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
-import org.springframework.test.context.ContextConfiguration;
 
 import java.util.Optional;
-import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -60,68 +39,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * 6. Provider submits additional Patient data
  * 7. Provider invokes care-gaps (and discovers issues are closed).
  */
-@ContextConfiguration(classes = {TestCrR4Config.class})
-class CareGapsOperationProviderIT extends BaseJpaR4Test implements IResourceLoader
+class CareGapsOperationProviderIT extends BaseR4TestServer
 {
 
-	//private static RestfulServer ourRestServer;
-	private static IGenericClient ourClient;
-	private static FhirContext ourCtx;
-	private static CloseableHttpClient ourHttpClient;
-	private static Server ourServer;
-	private static String ourServerBase;
-
-
-	@Autowired
-	ApplicationContext myApplicationContext;
-	private SimpleRequestHeaderInterceptor mySimpleHeaderInterceptor;
-
-
-	@SuppressWarnings("deprecation")
-	@AfterEach
-	public void after() {
-		ourClient.unregisterInterceptor(mySimpleHeaderInterceptor);
-		myStorageSettings.setIndexMissingFields(new JpaStorageSettings().getIndexMissingFields());
-	}
-	@Autowired
-	RestfulServer ourRestfulServer;
-	@BeforeEach
-	public void beforeStartServer() throws Exception {
-
-			ourServer = new Server(0);
-
-			ServletContextHandler proxyHandler = new ServletContextHandler();
-			proxyHandler.setContextPath("/");
-
-			ServletHolder servletHolder = new ServletHolder();
-			servletHolder.setServlet(ourRestfulServer);
-			proxyHandler.addServlet(servletHolder, "/fhir/*");
-
-			ourCtx = ourRestfulServer.getFhirContext();
-
-			ourServer.setHandler(proxyHandler);
-			JettyUtil.startServer(ourServer);
-			int myPort = JettyUtil.getPortForStartedServer(ourServer);
-			ourServerBase = "http://localhost:" + myPort + "/fhir";
-
-			PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
-			HttpClientBuilder builder = HttpClientBuilder.create();
-			builder.setConnectionManager(connectionManager);
-			ourHttpClient = builder.build();
-
-			ourCtx.getRestfulClientFactory().setSocketTimeout(600 * 1000);
-			ourClient = ourCtx.newRestfulGenericClient(ourServerBase);
-			ourClient.setLogRequestAndResponse(true);
-			//ourRestServer = ourRestfulServer;
-
-		ourRestfulServer.setDefaultResponseEncoding(EncodingEnum.XML);
-		//ourRestfulServer.setPagingProvider(myPagingProvider);
-
-		mySimpleHeaderInterceptor = new SimpleRequestHeaderInterceptor();
-		ourClient.registerInterceptor(mySimpleHeaderInterceptor);
-		myStorageSettings.setIndexMissingFields(JpaStorageSettings.IndexEnabledEnum.DISABLED);
-
-	}
 
 	@Test
 	public void careGapsEndToEnd(){
@@ -140,16 +60,6 @@ class CareGapsOperationProviderIT extends BaseJpaR4Test implements IResourceLoad
 		var patientData = (Parameters) readResource("CaregapsPatientData.json");
 		ourClient.operation().onInstance("Measure/ColorectalCancerScreeningsFHIR").named("submit-data")
 			.withParameters(patientData).execute();
-
-		var parametersEval = new Parameters();
-		parametersEval.addParameter("periodStart", new DateType("2020-01-01"));
-		parametersEval.addParameter("periodEnd", new DateType("2020-12-31"));
-
-		var resultEval = ourClient.operation().onInstance("Measure/ColorectalCancerScreeningsFHIR")
-			.named("$evaluate-measure")
-			.withParameters(parametersEval)
-			.returnResourceType(MeasureReport.class)
-			.execute();
 
 		// 4. Provider runs $care-gaps
 		var parameters = new Parameters();
@@ -199,8 +109,4 @@ class CareGapsOperationProviderIT extends BaseJpaR4Test implements IResourceLoad
 		assertTrue(!coding.isEmpty());
 	}
 
-	@Override
-	public DaoRegistry getDaoRegistry() {
-		return myDaoRegistry;
-	}
 }
