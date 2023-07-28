@@ -1,9 +1,9 @@
 package ca.uhn.fhir.cr.r4;
 
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import org.opencds.cqf.cql.evaluator.measure.r4.R4CareGapsService;
-import org.opencds.cqf.fhir.api.Repository;
 
 @FunctionalInterface
 public interface ICareGapsServiceFactory {
-	R4CareGapsService create(Repository theRepository);
+	R4CareGapsService create(RequestDetails theRequestDetails);
 }

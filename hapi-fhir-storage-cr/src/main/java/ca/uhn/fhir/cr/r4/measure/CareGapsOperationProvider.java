@@ -113,7 +113,7 @@ public class CareGapsOperationProvider {
 			@OperationParam(name = "program") List<String> theProgram) {
 
 		return myR4CareGapsProcessorFactory
-				.create(myRepositoryFactory.create(theRequestDetails))
+				.create(theRequestDetails)
 				.getCareGapsReport(
 						thePeriodStart,
 						thePeriodEnd,

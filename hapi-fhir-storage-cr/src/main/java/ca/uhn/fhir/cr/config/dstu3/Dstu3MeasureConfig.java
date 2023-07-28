@@ -9,19 +9,14 @@ import ca.uhn.fhir.cr.config.RepositoryConfig;
 import ca.uhn.fhir.cr.dstu3.IMeasureServiceFactory;
 import ca.uhn.fhir.cr.dstu3.measure.MeasureOperationsProvider;
 import ca.uhn.fhir.cr.dstu3.measure.MeasureService;
-import ca.uhn.fhir.cr.r4.measure.CareGapsOperationProvider;
-import ca.uhn.fhir.cr.r4.measure.SubmitDataProvider;
-import ca.uhn.fhir.rest.server.provider.ResourceProviderFactory;
+import ca.uhn.fhir.rest.server.RestfulServer;
 import org.opencds.cqf.cql.evaluator.measure.MeasureEvaluationOptions;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
-import javax.inject.Named;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Map;
 
 @Configuration
@@ -40,15 +35,11 @@ public class Dstu3MeasureConfig {
 
 	@Bean
 	public ProviderLoader dstu3PdLoader(
-		ApplicationContext theApplicationContext,
-		FhirContext theFhirContext,
-		ResourceProviderFactory theResourceProviderFactory) {
+			ApplicationContext theApplicationContext, FhirContext theFhirContext, RestfulServer theRestfulServer) {
 
 		var selector = new ProviderSelector(
-			theFhirContext,
-			Map.of(FhirVersionEnum.DSTU3, Arrays.asList((MeasureOperationsProvider.class)))
-			);
+				theFhirContext, Map.of(FhirVersionEnum.DSTU3, Arrays.asList((MeasureOperationsProvider.class))));
 
-		return new ProviderLoader(theApplicationContext, theResourceProviderFactory, selector);
+		return new ProviderLoader(theRestfulServer, theApplicationContext, selector);
 	}
 }

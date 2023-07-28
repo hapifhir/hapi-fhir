@@ -7,6 +7,7 @@ import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.provider.r4.BaseResourceProviderR4Test;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import io.specto.hoverfly.junit.dsl.HoverflyDsl;
 import io.specto.hoverfly.junit.dsl.StubServiceBuilder;
@@ -19,6 +20,8 @@ import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.ClassRule;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Primary;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.test.context.ContextConfiguration;
 
@@ -30,7 +33,7 @@ import static io.specto.hoverfly.junit.dsl.HoverflyDsl.service;
 import static io.specto.hoverfly.junit.dsl.ResponseCreators.success;
 
 
-@ContextConfiguration(classes = {TestCrR4Config.class, R4MeasureConfig.class})
+@ContextConfiguration(classes = {TestCrR4Config.class})
 public abstract class BaseCrR4Test extends BaseResourceProviderR4Test implements IResourceLoader {
 	protected static final FhirContext ourFhirContext = FhirContext.forR4Cached();
 	protected static final IParser ourParser = ourFhirContext.newJsonParser().setPrettyPrint(true);
