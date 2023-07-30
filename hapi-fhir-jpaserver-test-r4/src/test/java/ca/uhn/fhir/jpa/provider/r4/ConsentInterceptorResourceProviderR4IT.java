@@ -84,9 +84,9 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProviderR4Test {
+public class ConsentInterceptorResourceProviderR4IT extends BaseResourceProviderR4Test {
 
-	private static final Logger ourLog = LoggerFactory.getLogger(ConsentInterceptorResourceProviderR4Test.class);
+	private static final Logger ourLog = LoggerFactory.getLogger(ConsentInterceptorResourceProviderR4IT.class);
 	private List<String> myObservationIds;
 	private List<String> myPatientIds;
 	private List<String> myObservationIdsOddOnly;
