@@ -99,7 +99,7 @@ class SearchConverterTest {
 		myFixture.setParameterTypeValue(theKey, theValue);
 		String result = myFixture.searchParameterMap.toNormalizedQueryString(withFhirContext());
 		String expected =
-				"?theAndKey=theSecondValue,theValue&theAndKey=theSecondValueAgain,theValueAgain";
+			"?theAndKey=theSecondValue,theValue&theAndKey=theSecondValueAgain,theValueAgain";
 		assertEquals(expected, result);
 	}
 
@@ -127,7 +127,7 @@ class SearchConverterTest {
 		Map<String, String[]> result = myFixture.resultParameters;
 		assertEquals(result.keySet(), expected.keySet());
 		assertTrue(result.entrySet().stream()
-				.allMatch(e -> Arrays.equals(e.getValue(), expected.get(e.getKey()))));
+			.allMatch(e -> Arrays.equals(e.getValue(), expected.get(e.getKey()))));
 	}
 
 	Map<String, List<IQueryParameterType>> withParamList() {
