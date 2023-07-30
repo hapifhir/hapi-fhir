@@ -22,10 +22,10 @@ package ca.uhn.fhir.rest.server.tenant;
 import ca.uhn.fhir.i18n.HapiLocalizer;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.UrlPathTokenizer;
-import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,12 +51,41 @@ public class UrlBaseTenantIdentificationStrategy implements ITenantIdentificatio
 	@Override
 	public void extractTenant(UrlPathTokenizer theUrlPathTokenizer, RequestDetails theRequestDetails) {
 		String tenantId = null;
-		if (theUrlPathTokenizer.hasMoreTokens()) {
-			tenantId = defaultIfBlank(theUrlPathTokenizer.nextTokenUnescapedAndSanitized(), null);
-			ourLog.trace("Found tenant ID {} in request string", tenantId);
-			theRequestDetails.setTenantId(tenantId);
+		boolean isSystemRequest = (theRequestDetails instanceof SystemRequestDetails);
+
+		// If we were given no partition for a system request, use DEFAULT:
+		if (!theUrlPathTokenizer.hasMoreTokens()) {
+			if (isSystemRequest) {
+				tenantId = "DEFAULT";
+				theRequestDetails.setTenantId(tenantId);
+				ourLog.trace("No tenant ID found for system request; using DEFAULT.");
+			}
 		}
 
+		// We were given at least one URL token:
+		else {
+
+			// peek() won't consume this token:
+			tenantId = defaultIfBlank(theUrlPathTokenizer.peek(), null);
+
+			// If it's "metadata" or starts with "$", use DEFAULT partition and don't consume this token:
+			if (tenantId != null && (tenantId.equals("metadata") || tenantId.startsWith("$"))) {
+				tenantId = "DEFAULT";
+				theRequestDetails.setTenantId(tenantId);
+				ourLog.trace("No tenant ID found for metadata or system request; using DEFAULT.");
+			}
+
+			// It isn't metadata or $, so assume that this first token is the partition name and consume it:
+			else {
+				tenantId = defaultIfBlank(theUrlPathTokenizer.nextTokenUnescapedAndSanitized(), null);
+				if (tenantId != null) {
+					theRequestDetails.setTenantId(tenantId);
+					ourLog.trace("Found tenant ID {} in request string", tenantId);
+				}
+			}
+		}
+
+		// If we get to this point without a tenant, it's an invalid request:
 		if (tenantId == null) {
 			HapiLocalizer localizer =
 					theRequestDetails.getServer().getFhirContext().getLocalizer();
@@ -67,7 +96,10 @@ public class UrlBaseTenantIdentificationStrategy implements ITenantIdentificatio
 
 	@Override
 	public String massageServerBaseUrl(String theFhirServerBase, RequestDetails theRequestDetails) {
-		Validate.notNull(theRequestDetails.getTenantId(), "theTenantId is not populated on this request");
-		return theFhirServerBase + '/' + theRequestDetails.getTenantId();
+		String result = theFhirServerBase;
+		if (theRequestDetails.getTenantId() != null) {
+			result += "/" + theRequestDetails.getTenantId();
+		}
+		return result;
 	}
 }
