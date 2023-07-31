@@ -107,29 +107,27 @@ public class Batch2DaoSvcImpl implements IBatch2DaoSvc {
 	}
 
 	@Nonnull
-	private HomogeneousResourcePidList fetchResourceIdsPageWithUrl(Date theEnd, @Nonnull String theUrl, @Nullable RequestPartitionId theRequestPartitionId) {
+	private HomogeneousResourcePidList fetchResourceIdsPageWithUrl(
+			Date theEnd, @Nonnull String theUrl, @Nullable RequestPartitionId theRequestPartitionId) {
 		if (!theUrl.contains("?")) {
-			throw new InternalErrorException(
-					Msg.code(2422) + "this should never happen: URL is missing a '?'");
+			throw new InternalErrorException(Msg.code(2422) + "this should never happen: URL is missing a '?'");
 		}
 
-		final Integer internalSynchronousSearchSize =
-				myJpaStorageSettings.getInternalSynchronousSearchSize();
+		final Integer internalSynchronousSearchSize = myJpaStorageSettings.getInternalSynchronousSearchSize();
 
 		if (internalSynchronousSearchSize == null || internalSynchronousSearchSize <= 0) {
-			throw new InternalErrorException(
-					Msg.code(2423)
-							+ "this should never happen: internalSynchronousSearchSize is null or less than or equal to 0");
+			throw new InternalErrorException(Msg.code(2423)
+					+ "this should never happen: internalSynchronousSearchSize is null or less than or equal to 0");
 		}
 
-		List<IResourcePersistentId> currentIds =
-				fetchResourceIdsPageWithUrl(0, theUrl, theRequestPartitionId);
+		List<IResourcePersistentId> currentIds = fetchResourceIdsPageWithUrl(0, theUrl, theRequestPartitionId);
 		ourLog.debug("FIRST currentIds: {}", currentIds.size());
 
 		final List<IResourcePersistentId> allIds = new ArrayList<>(currentIds);
 
 		while (internalSynchronousSearchSize < currentIds.size()) {
-			// Ensure the offset is set to the last ID in the cumulative List, otherwise, we'll be stuck in an infinite loop here:
+			// Ensure the offset is set to the last ID in the cumulative List, otherwise, we'll be stuck in an infinite
+			// loop here:
 			currentIds = fetchResourceIdsPageWithUrl(allIds.size(), theUrl, theRequestPartitionId);
 			ourLog.debug("NEXT currentIds: {}", currentIds.size());
 
