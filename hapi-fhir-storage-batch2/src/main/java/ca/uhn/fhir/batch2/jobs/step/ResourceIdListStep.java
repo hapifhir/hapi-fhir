@@ -31,7 +31,6 @@ import ca.uhn.fhir.batch2.jobs.parameters.PartitionedJobParameters;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.pid.IResourcePidList;
 import ca.uhn.fhir.jpa.api.pid.TypedResourcePid;
-import ca.uhn.fhir.system.HapiSystemProperties;
 import ca.uhn.fhir.util.Logs;
 import org.slf4j.Logger;
 
@@ -91,7 +90,7 @@ public class ResourceIdListStep<PT extends PartitionedJobParameters, IT extends 
 				start, end, pageSize, requestPartitionId, theStepExecutionDetails.getData());
 
 		if (nextChunk.isEmpty()) {
-			ourLog.info("No data returned"); //x
+			ourLog.info("No data returned");
 		}
 
 		ourLog.debug("Found {} IDs from {} to {}", nextChunk.size(), start, nextChunk.getLastDate());
