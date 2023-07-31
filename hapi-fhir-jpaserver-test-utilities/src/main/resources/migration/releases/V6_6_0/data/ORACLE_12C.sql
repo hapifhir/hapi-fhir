@@ -21,21 +21,21 @@ INSERT INTO HFJ_RESOURCE (
 ) VALUES (
    1678,
    'R4',
-   false,
-   '2023-06-15 09:58:42.92',
-   '2023-06-15 09:58:42.92',
-   'false',
+   0,
+   SYSDATE,
+   SYSDATE,
+   0,
    '6beed652b77f6c65d776e57341a0b5b0596ac9cfb0e8345a5a5cfbfaa59e2b62',
    1,
-   false,
-   false,
-   false,
-   false,
-   true,
-   false,
-   false,
-   true,
-   true,
+   0,
+   0,
+   0,
+   0,
+   1,
+   0,
+   0,
+   1,
+   1,
    'Observation',
    1
 );
@@ -47,7 +47,7 @@ INSERT INTO HFJ_RES_SEARCH_URL (
    RES_ID
 ) VALUES (
    'https://example.com',
-   '2023-06-29 10:14:39.69',
+   SYSDATE,
    1678
 );
 

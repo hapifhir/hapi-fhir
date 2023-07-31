@@ -19,11 +19,11 @@ INSERT INTO HFJ_RESOURCE (
    RES_TYPE,
    RES_VER
 ) VALUES (
-   1654,
+   1702,
    'R4',
    0,
-   '2023-06-15 09:58:42.92',
-   '2023-06-15 09:58:42.92',
+   SYSDATE,
+   SYSDATE,
    0,
    '6beed652b77f6c65d776e57341a0b5b0596ac9cfb0e8345a5a5cfbfaa59e2b62',
    1,
@@ -56,8 +56,9 @@ INSERT INTO HFJ_SPIDX_QUANTITY_NRML (
 ) VALUES (
    1702,
    'Observation',
-   '2023-04-05 15:16:26.43',
-   0, 'value-quantity',
+   SYSDATE,
+   0,
+   'value-quantity',
    2,
    'https://unitsofmeasure.org',
    'g',
