@@ -8,11 +8,8 @@ import ca.uhn.fhir.jpa.api.svc.IBatch2DaoSvc;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.dao.tx.NonTransactionalHapiTransactionService;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
-import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.model.primitive.IdDt;
-import ca.uhn.fhir.rest.api.server.IBundleProvider;
-import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.jupiter.api.BeforeEach;
@@ -69,7 +66,7 @@ class Batch2DaoSvcImplTest extends BaseJpaR4Test {
 		try {
 			mySubject.fetchResourceIdsPage(PREVIOUS_MILLENNIUM, TOMORROW, 800, RequestPartitionId.defaultPartition(), "");
 		} catch (InternalErrorException exception) {
-			assertEquals("HAPI-99999:  this should never happen: URL is missing a '?'", exception.getMessage());
+			assertEquals("HAPI-2422: this should never happen: URL is missing a '?'", exception.getMessage());
 		} catch (Exception exception) {
 			fail("caught wrong Exception");
 		}

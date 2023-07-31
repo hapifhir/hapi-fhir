@@ -103,7 +103,7 @@ public class Batch2DaoSvcImpl implements IBatch2DaoSvc {
 					} else {
 						if (!theUrl.contains("?")) {
 							throw new InternalErrorException(
-									Msg.code(2422) + ":  this should never happen: URL is missing a '?'");
+									Msg.code(2422) + "this should never happen: URL is missing a '?'");
 						}
 
 						final Integer internalSynchronousSearchSize =
