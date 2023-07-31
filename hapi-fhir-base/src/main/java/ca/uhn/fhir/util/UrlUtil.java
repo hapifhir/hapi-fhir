@@ -40,8 +40,8 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLDecoder;
+import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -612,25 +612,21 @@ public class UrlUtil {
 	 * @return List of URI candidates
 	 */
 	public static List<String> getAboveUriCandidates(String theUri) {
-		List<String> candidates = new ArrayList<>();
 		try {
 			URI uri = new URI(theUri);
-
 			if (uri.getScheme() == null || uri.getHost() == null) {
 				throwInvalidRequestExceptionForNotValidUri(theUri, null);
 			}
-			StringBuilder sb =
-					new StringBuilder().append(uri.getScheme()).append("://").append(uri.getHost());
+		} catch (URISyntaxException theCause) {
+			throwInvalidRequestExceptionForNotValidUri(theUri, theCause);
+		}
 
-			candidates.add(sb.toString());
-
-			String[] pathParts = uri.getPath().split("/");
-			Arrays.stream(pathParts)
-					.filter(part -> !part.isEmpty())
-					.forEach(part -> candidates.add(sb.append("/").append(part).toString()));
-
-		} catch (URISyntaxException e) {
-			throwInvalidRequestExceptionForNotValidUri(theUri, e);
+		List<String> candidates = new ArrayList<>();
+		Path path = Path.of(theUri);
+		candidates.add(path.toString().replace(":/", "://"));
+		while (path.getParent() != null && path.getParent().toString().contains("/")) {
+			candidates.add(path.getParent().toString().replace(":/", "://"));
+			path = path.getParent();
 		}
 		return candidates;
 	}

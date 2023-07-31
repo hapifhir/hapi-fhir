@@ -181,9 +181,9 @@ public abstract class BaseSourceSearchParameterTestCases implements ITestDataBui
 		myTestDaoSearch.assertSearchNotFound(
 				"search returns empty bundle (contains with missing=true)",
 				"Patient?_source:contains=Another-Source,some-source&_source:missing=true",
-				p3Id,
 				p1Id,
-				p2Id);
+				p2Id,
+				p3Id);
 	}
 
 	@Test

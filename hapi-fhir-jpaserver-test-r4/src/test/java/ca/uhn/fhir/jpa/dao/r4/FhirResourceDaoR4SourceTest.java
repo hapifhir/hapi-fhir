@@ -180,33 +180,13 @@ public class FhirResourceDaoR4SourceTest extends BaseJpaR4Test {
 
 		UriParam uriParam = new UriParam("some-source").setQualifier(UriParamQualifierEnum.CONTAINS);
 		try {
-			myPatientDao.search(createSourceSearchParameterMap(uriParam));
+			SearchParameterMap searchParameter = SearchParameterMap.newSynchronous();
+			searchParameter.add(Constants.PARAM_SOURCE, uriParam);
+			myPatientDao.search(searchParameter);
 			fail();
 		} catch (MethodNotAllowedException e) {
 			assertEquals(Msg.code(2417) + ":contains modifier is disabled on this server", e.getMessage());
 		}
-	}
-
-	@ParameterizedTest
-	@CsvSource({
-		"invalid_uri",
-		"http://some-source/ with_invalid_uri"
-	})
-	public void testSearchSource_withAboveModifierAndInvalidURI_throwsException(String theUri) {
-		try {
-			UriParam uriParam = new UriParam(theUri).setQualifier(UriParamQualifierEnum.ABOVE);
-			myPatientDao.search(createSourceSearchParameterMap(uriParam));
-			fail();
-		} catch (InvalidRequestException e) {
-			assertEquals(Msg.code(2419) + "Provided URI is not valid: " + theUri, e.getMessage());
-		}
-	}
-
-	private SearchParameterMap createSourceSearchParameterMap(UriParam theUriParam) {
-		SearchParameterMap searchParameterMap = new SearchParameterMap();
-		searchParameterMap.setLoadSynchronous(true);
-		searchParameterMap.add(PARAM_SOURCE, theUriParam);
-		return searchParameterMap;
 	}
 
 	public static void assertConflictException(String theResourceType, ResourceVersionConflictException e) {

@@ -81,23 +81,11 @@ public class SourcePredicateBuilder extends BaseJoiningPredicateBuilder {
 			UriParam uriParam = (UriParam) theQueryParameter;
 			switch (uriParam.getQualifier()) {
 				case ABOVE:
-					List<String> aboveUriCandidates = UrlUtil.getAboveUriCandidates(theSourceUri);
-					List<String> aboveUriPlaceholders = generatePlaceholders(aboveUriCandidates);
-					return QueryParameterUtils.toEqualToOrInPredicate(myColumnSourceUri, aboveUriPlaceholders);
+					return createPredicateSourceAbove(theSourceUri);
 				case BELOW:
-					String belowLikeExpression = createLeftMatchLikeExpression(theSourceUri);
-					return BinaryCondition.like(myColumnSourceUri, generatePlaceholder(belowLikeExpression));
+					return createPredicateSourceBelow(theSourceUri);
 				case CONTAINS:
-					if (theStorageSetting.isAllowContainsSearches()) {
-						FunctionCall upperFunction = new FunctionCall("UPPER");
-						upperFunction.addCustomParams(myColumnSourceUri);
-						String normalizedString = StringUtil.normalizeStringForSearchIndexing(theSourceUri);
-						String containsLikeExpression = createLeftAndRightMatchLikeExpression(normalizedString);
-						return BinaryCondition.like(upperFunction, generatePlaceholder(containsLikeExpression));
-					} else {
-						throw new MethodNotAllowedException(
-								Msg.code(2417) + ":contains modifier is disabled on this server");
-					}
+					return createPredicateSourceContains(theStorageSetting, theSourceUri);
 				default:
 					throw new InvalidRequestException(Msg.code(2418)
 							+ String.format(
@@ -106,6 +94,29 @@ public class SourcePredicateBuilder extends BaseJoiningPredicateBuilder {
 			}
 		} else {
 			return createPredicateSourceUri(theSourceUri);
+		}
+	}
+
+	private Condition createPredicateSourceAbove(String theSourceUri) {
+		List<String> aboveUriCandidates = UrlUtil.getAboveUriCandidates(theSourceUri);
+		List<String> aboveUriPlaceholders = generatePlaceholders(aboveUriCandidates);
+		return QueryParameterUtils.toEqualToOrInPredicate(myColumnSourceUri, aboveUriPlaceholders);
+	}
+
+	private Condition createPredicateSourceBelow(String theSourceUri) {
+		String belowLikeExpression = createLeftMatchLikeExpression(theSourceUri);
+		return BinaryCondition.like(myColumnSourceUri, generatePlaceholder(belowLikeExpression));
+	}
+
+	private Condition createPredicateSourceContains(JpaStorageSettings theStorageSetting, String theSourceUri) {
+		if (theStorageSetting.isAllowContainsSearches()) {
+			FunctionCall upperFunction = new FunctionCall("UPPER");
+			upperFunction.addCustomParams(myColumnSourceUri);
+			String normalizedString = StringUtil.normalizeStringForSearchIndexing(theSourceUri);
+			String containsLikeExpression = createLeftAndRightMatchLikeExpression(normalizedString);
+			return BinaryCondition.like(upperFunction, generatePlaceholder(containsLikeExpression));
+		} else {
+			throw new MethodNotAllowedException(Msg.code(2417) + ":contains modifier is disabled on this server");
 		}
 	}
 
