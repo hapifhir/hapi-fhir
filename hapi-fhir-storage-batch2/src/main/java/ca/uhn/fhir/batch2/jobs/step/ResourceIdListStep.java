@@ -91,7 +91,7 @@ public class ResourceIdListStep<PT extends PartitionedJobParameters, IT extends 
 				start, end, pageSize, requestPartitionId, theStepExecutionDetails.getData());
 
 		if (nextChunk.isEmpty()) {
-			ourLog.info("No data returned");
+			ourLog.info("No data returned"); //x
 		}
 
 		ourLog.debug("Found {} IDs from {} to {}", nextChunk.size(), start, nextChunk.getLastDate());
