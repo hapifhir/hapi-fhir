@@ -149,14 +149,6 @@ public class SystemRequestDetails extends RequestDetails {
 		return null;
 	}
 
-//	@Override
-//	public IRestfulResponse getResponse() {
-//		if (super.getResponse() == null) {
-//			setResponse(new SystemRestfulResponse(this));
-//		}
-//		return super.getResponse();
-//	}
-
 	@Override
 	public IRestfulServerDefaults getServer() {
 		return myServer;

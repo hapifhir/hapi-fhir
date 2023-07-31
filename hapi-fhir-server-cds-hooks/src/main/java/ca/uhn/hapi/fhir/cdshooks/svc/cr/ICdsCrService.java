@@ -44,7 +44,6 @@ public interface ICdsCrService {
 		IBaseResource response = invokeApply(theJson, params);
 		return encodeResponse(response);
 	}
-	;
 
 	default IBaseResource invokeApply(IModelJson theJson, IBaseParameters theParams) {
 		var operationName = getFhirVersion() == FhirVersionEnum.R4
