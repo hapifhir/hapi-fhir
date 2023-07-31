@@ -72,7 +72,7 @@ public class TestDaoSearch {
 		}
 	}
 
-	@Autowired
+	@Autowired(required = false)
 	private IFulltextSearchSvc myFulltextSearchSvc;
 
 	final FhirContext myFhirCtx;
