@@ -13,7 +13,7 @@ INSERT INTO HFJ_BLK_IMPORT_JOB (
    60,
    '87145395-f9be-4a7b-abb3-6d41b6caf185',
    'READY',
-   '2023-06-23 13:07:58.442',
+   SYSDATE,
    '',
    'ETL Import Job: (unnamed)',
    2,
@@ -31,7 +31,7 @@ INSERT INTO HFJ_BLK_IMPORT_JOBFILE (
 ) VALUES (
    64,
    60,
-   72995,
+   HEXTORAW('453d7a34'),
    0,
    ''
 );

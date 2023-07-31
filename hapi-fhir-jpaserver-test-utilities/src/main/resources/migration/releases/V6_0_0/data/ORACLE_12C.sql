@@ -20,16 +20,16 @@ INSERT INTO BT2_JOB_INSTANCE (
    0,
    0,
    0,
-   '2023-07-06 14:24:10.845',
+   SYSDATE,
    'WriteBundleForImportStep',
    'bulkImportJob',
    1,
-   '2023-07-06 14:25:11.098',
+   SYSDATE,
    0,
    '0ms',
    '{"jobId":"42bfa0dd-ab7b-4991-8284-e4b2902c696b","batchSize":100}',
    1,
-   '2023-07-06 14:24:10.875',
+   SYSDATE,
    'COMPLETED',
    1
 );
@@ -49,15 +49,15 @@ INSERT INTO BT2_WORK_CHUNK (
    TGT_STEP_ID
 ) VALUES (
    '01d26875-8d1a-4e37-b554-62a3219f009b',
-   '2023-07-06 15:20:20.797',
-   '2023-07-06 15:21:11.142',
+   SYSDATE,
+   SYSDATE,
    0,
    '00161699-bcfe-428e-9ca2-caceb9645f8a',
    'bulkImportJob',
    1,
    0,
    0,
-   '2023-07-06 15:21:11.14',
+   SYSDATE,
    'COMPLETED',
    'ReadInResourcesFromFileStep'
 );
