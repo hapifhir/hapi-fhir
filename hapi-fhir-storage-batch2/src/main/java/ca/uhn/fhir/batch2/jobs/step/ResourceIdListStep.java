@@ -87,8 +87,6 @@ public class ResourceIdListStep<PT extends PartitionedJobParameters, IT extends 
 			maxBatchId = Math.min(batchSize.intValue(), maxBatchId);
 		}
 
-		// TODO:  get rid of the page size semantics here and deal with one huge IResourcePidList, but break it up into
-		// multiple chunks
 		IResourcePidList nextChunk = myIdChunkProducer.fetchResourceIdsPage(
 				start, end, pageSize, requestPartitionId, theStepExecutionDetails.getData());
 

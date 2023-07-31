@@ -83,6 +83,17 @@ class Batch2DaoSvcImplTest extends BaseJpaR4Test {
 		}
 	}
 
+	@Test
+	void fetchResourcesByUrlNonsensicalResource() {
+		try {
+			mySubject.fetchResourceIdsPage(PREVIOUS_MILLENNIUM, TOMORROW, 800, RequestPartitionId.defaultPartition(), "Banana?_expunge=true");
+		} catch (InternalErrorException exception) {
+			assertEquals("HAPI-2223: HAPI-1684: Unknown resource name \"Banana\" (this name is not known in FHIR version \"R4\")", exception.getMessage());
+		} catch (Exception exception) {
+			fail("caught wrong Exception");
+		}
+	}
+
 	@ParameterizedTest
 	@ValueSource(ints = {0, 9, 10, 11, 21, 22, 23, 45})
 	void fetchResourcesByUrl(int expectedNumResults) {
