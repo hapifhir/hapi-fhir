@@ -1,62 +1,87 @@
+/*-
+ * #%L
+ * HAPI FHIR - CDS Hooks
+ * %%
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
 package ca.uhn.hapi.fhir.cdshooks.svc.cr.discovery;
+
+import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceJson;
+import ca.uhn.hapi.fhir.cdshooks.svc.cr.CdsCrUtils;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r5.model.CanonicalType;
+import org.hl7.fhir.r5.model.Coding;
+import org.hl7.fhir.r5.model.DataRequirement;
+import org.hl7.fhir.r5.model.IdType;
+import org.hl7.fhir.r5.model.Library;
+import org.hl7.fhir.r5.model.PlanDefinition;
+import org.hl7.fhir.r5.model.ValueSet;
+import org.opencds.cqf.cql.evaluator.fhir.util.r5.SearchHelper;
+import org.opencds.cqf.fhir.api.Repository;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import ca.uhn.fhir.cr.common.IDaoRegistryUser;
-import ca.uhn.fhir.cr.common.Searches;
-import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceJson;
-import org.hl7.fhir.dstu3.model.Bundle;
-import org.hl7.fhir.dstu3.model.Coding;
-import org.hl7.fhir.dstu3.model.DataRequirement;
-import org.hl7.fhir.dstu3.model.Library;
-import org.hl7.fhir.dstu3.model.PlanDefinition;
-import org.hl7.fhir.dstu3.model.ValueSet;
+import static ca.uhn.hapi.fhir.cdshooks.config.CdsHooksConfig.PLAN_DEFINITION_RESOURCE_NAME;
 
-import com.google.gson.JsonObject;
-
-import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
-
-public class DiscoveryResolutionStu3 implements IDaoRegistryUser {
+public class CrDiscoveryServiceR5 implements ICrDiscoveryService {
 
 	private final String PATIENT_ID_CONTEXT = "{{context.patientId}}";
 	private final int DEFAULT_MAX_URI_LENGTH = 8000;
-	private int maxUriLength;
+	private int myMaxUriLength;
 
-	private DaoRegistry daoRegistry;
+	private final Repository myRepository;
+	private final IIdType myPlanDefinitionId;
 
-	public DiscoveryResolutionStu3(DaoRegistry daoRegistry) {
-		this.daoRegistry = daoRegistry;
-		this.maxUriLength = DEFAULT_MAX_URI_LENGTH;
-	}
-
-	@Override
-	public DaoRegistry getDaoRegistry() {
-		return this.daoRegistry;
+	public CrDiscoveryServiceR5(IIdType thePlanDefinitionId, Repository theRepository) {
+		myPlanDefinitionId = thePlanDefinitionId;
+		myRepository = theRepository;
+		myMaxUriLength = DEFAULT_MAX_URI_LENGTH;
 	}
 
 	public int getMaxUriLength() {
-		return this.maxUriLength;
+		return myMaxUriLength;
 	}
 
-	public void setMaxUriLength(int maxUriLength) {
-		if (maxUriLength <= 0) {
-			throw new IllegalArgumentException("maxUriLength must be > 0");
+	public void setMaxUriLength(int theMaxUriLength) {
+		if (theMaxUriLength <= 0) {
+			throw new IllegalArgumentException("maxUriLength must be >0");
 		}
 
-		this.maxUriLength = maxUriLength;
+		myMaxUriLength = theMaxUriLength;
 	}
 
-	public PlanDefinition resolvePlanDefinition(Bundle.BundleEntryComponent component) {
-		if (component.hasResource() && (component.getResource() instanceof PlanDefinition)) {
-			return (PlanDefinition) component.getResource();
+	public CdsServiceJson resolveService() {
+		return resolveService(
+				CdsCrUtils.readPlanDefinitionFromRepository(FhirVersionEnum.R5, myRepository, myPlanDefinitionId));
+	}
+
+	private CdsServiceJson resolveService(IBaseResource thePlanDefinition) {
+		if (thePlanDefinition instanceof PlanDefinition) {
+			PlanDefinition planDef = (PlanDefinition) thePlanDefinition;
+			return new CrDiscoveryElementR5(planDef, getPrefetchUrlList(planDef)).getCdsServiceJson();
 		}
 		return null;
 	}
 
-	public boolean isEca(PlanDefinition planDefinition) {
-		if (planDefinition.hasType() && planDefinition.getType().hasCoding()) {
-			for (Coding coding : planDefinition.getType().getCoding()) {
+	public boolean isEca(PlanDefinition thePlanDefinition) {
+		if (thePlanDefinition.hasType() && thePlanDefinition.getType().hasCoding()) {
+			for (Coding coding : thePlanDefinition.getType().getCoding()) {
 				if (coding.getCode().equals("eca-rule")) {
 					return true;
 				}
@@ -65,22 +90,21 @@ public class DiscoveryResolutionStu3 implements IDaoRegistryUser {
 		return false;
 	}
 
-	public Library resolvePrimaryLibrary(PlanDefinition planDefinition) {
-		// Assuming 1 library
-		// TODO: enhance to handle multiple libraries - need a way to identify primary
-		// library
+	public Library resolvePrimaryLibrary(PlanDefinition thePlanDefinition) {
+		// The CPGComputablePlanDefinition profile limits the cardinality of library to 1
 		Library library = null;
-		if (planDefinition.hasLibrary() && planDefinition.getLibraryFirstRep().hasReference()) {
-			library = read(planDefinition.getLibraryFirstRep().getReferenceElement());
+		if (thePlanDefinition.hasLibrary() && !thePlanDefinition.getLibrary().isEmpty()) {
+			library = (Library) SearchHelper.searchRepositoryByCanonical(
+					myRepository, thePlanDefinition.getLibrary().get(0));
 		}
 		return library;
 	}
 
-	public List<String> resolveValueCodingCodes(List<Coding> valueCodings) {
+	public List<String> resolveValueCodingCodes(List<Coding> theValueCodings) {
 		List<String> result = new ArrayList<>();
 
 		StringBuilder codes = new StringBuilder();
-		for (Coding coding : valueCodings) {
+		for (Coding coding : theValueCodings) {
 			if (coding.hasCode()) {
 				String system = coding.getSystem();
 				String code = coding.getCode();
@@ -93,12 +117,13 @@ public class DiscoveryResolutionStu3 implements IDaoRegistryUser {
 		return result;
 	}
 
-	public List<String> resolveValueSetCodes(String valueSetId) {
-		ValueSet valueSet = (ValueSet) search(ValueSet.class, Searches.byCanonical(valueSetId)).iterator().next();
+	public List<String> resolveValueSetCodes(CanonicalType theValueSetId) {
+		ValueSet valueSet = (ValueSet) SearchHelper.searchRepositoryByCanonical(myRepository, theValueSetId);
 		List<String> result = new ArrayList<>();
 		StringBuilder codes = new StringBuilder();
 		if (valueSet.hasExpansion() && valueSet.getExpansion().hasContains()) {
-			for (ValueSet.ValueSetExpansionContainsComponent contains : valueSet.getExpansion().getContains()) {
+			for (ValueSet.ValueSetExpansionContainsComponent contains :
+					valueSet.getExpansion().getContains()) {
 				String system = contains.getSystem();
 				String code = contains.getCode();
 
@@ -120,41 +145,39 @@ public class DiscoveryResolutionStu3 implements IDaoRegistryUser {
 		return result;
 	}
 
-	private StringBuilder getCodesStringBuilder(List<String> ret, StringBuilder codes, String system, String code) {
-		String codeToken = system + "|" + code;
-		int postAppendLength = codes.length() + codeToken.length();
+	private StringBuilder getCodesStringBuilder(
+			List<String> theList, StringBuilder theCodes, String theSystem, String theCode) {
+		String codeToken = theSystem + "|" + theCode;
+		int postAppendLength = theCodes.length() + codeToken.length();
 
-		if (codes.length() > 0 && postAppendLength < this.maxUriLength) {
-			codes.append(",");
-		} else if (postAppendLength > this.maxUriLength) {
-			ret.add(codes.toString());
-			codes = new StringBuilder();
+		if (theCodes.length() > 0 && postAppendLength < myMaxUriLength) {
+			theCodes.append(",");
+		} else if (postAppendLength > myMaxUriLength) {
+			theList.add(theCodes.toString());
+			theCodes = new StringBuilder();
 		}
-		codes.append(codeToken);
-		return codes;
+		theCodes.append(codeToken);
+		return theCodes;
 	}
 
-	public List<String> createRequestUrl(DataRequirement dataRequirement) {
-		if (!isPatientCompartment(dataRequirement.getType()))
-			return null;
-		String patientRelatedResource = dataRequirement.getType() + "?"
-			+ getPatientSearchParam(dataRequirement.getType())
-			+ "=Patient/" + PATIENT_ID_CONTEXT;
+	public List<String> createRequestUrl(DataRequirement theDataRequirement) {
+		if (!isPatientCompartment(theDataRequirement.getType().toCode())) return null;
+		String patientRelatedResource = theDataRequirement.getType() + "?"
+				+ getPatientSearchParam(theDataRequirement.getType().toCode())
+				+ "=Patient/" + PATIENT_ID_CONTEXT;
 		List<String> ret = new ArrayList<>();
-		if (dataRequirement.hasCodeFilter()) {
-			for (DataRequirement.DataRequirementCodeFilterComponent codeFilterComponent : dataRequirement
-				.getCodeFilter()) {
-				if (!codeFilterComponent.hasPath())
-					continue;
-				String path = mapCodePathToSearchParam(dataRequirement.getType(), codeFilterComponent.getPath());
-
-				String codeFilterComponentString = null;
-				if (codeFilterComponent.hasValueSetStringType()) {
-					codeFilterComponentString = codeFilterComponent.getValueSetStringType().getValueNotNull();
-				} else if (codeFilterComponent.hasValueSetReference()) {
-					codeFilterComponentString = codeFilterComponent.getValueSetReference().getReference();
-				} else if (codeFilterComponent.hasValueCoding()) {
-					List<Coding> codeFilterValueCodings = codeFilterComponent.getValueCoding();
+		if (theDataRequirement.hasCodeFilter()) {
+			for (DataRequirement.DataRequirementCodeFilterComponent codeFilterComponent :
+					theDataRequirement.getCodeFilter()) {
+				if (!codeFilterComponent.hasPath()) continue;
+				String path =
+						mapCodePathToSearchParam(theDataRequirement.getType().toCode(), codeFilterComponent.getPath());
+				if (codeFilterComponent.hasValueSetElement()) {
+					for (String codes : resolveValueSetCodes(codeFilterComponent.getValueSetElement())) {
+						ret.add(patientRelatedResource + "&" + path + "=" + codes);
+					}
+				} else if (codeFilterComponent.hasCode()) {
+					List<Coding> codeFilterValueCodings = codeFilterComponent.getCode();
 					boolean isFirstCodingInFilter = true;
 					for (String code : resolveValueCodingCodes(codeFilterValueCodings)) {
 						if (isFirstCodingInFilter) {
@@ -166,12 +189,6 @@ public class DiscoveryResolutionStu3 implements IDaoRegistryUser {
 						isFirstCodingInFilter = false;
 					}
 				}
-
-				if (codeFilterComponentString != null) {
-					for (String codes : resolveValueSetCodes(codeFilterComponentString)) {
-						ret.add(patientRelatedResource + "&" + path + "=" + codes);
-					}
-				}
 			}
 			return ret;
 		} else {
@@ -180,62 +197,48 @@ public class DiscoveryResolutionStu3 implements IDaoRegistryUser {
 		}
 	}
 
-	public PrefetchUrlList getPrefetchUrlList(PlanDefinition planDefinition) {
+	public PrefetchUrlList getPrefetchUrlList(PlanDefinition thePlanDefinition) {
 		PrefetchUrlList prefetchList = new PrefetchUrlList();
-		if (planDefinition == null)
-			return null;
-		if (!isEca(planDefinition))
-			return null;
-		Library library = resolvePrimaryLibrary(planDefinition);
+		if (thePlanDefinition == null) return null;
+		if (!isEca(thePlanDefinition)) return null;
+		Library library = resolvePrimaryLibrary(thePlanDefinition);
 		// TODO: resolve data requirements
-		if (!library.hasDataRequirement())
-			return null;
+		if (library == null || !library.hasDataRequirement()) return null;
 		for (DataRequirement dataRequirement : library.getDataRequirement()) {
 			List<String> requestUrls = createRequestUrl(dataRequirement);
 			if (requestUrls != null) {
 				prefetchList.addAll(requestUrls);
 			}
 		}
-
 		return prefetchList;
 	}
 
-	public CdsServiceJson resolveService(PlanDefinition planDefinition) {
-		return new DiscoveryElementStu3(planDefinition, getPrefetchUrlList(planDefinition)).getCdsServiceJson();
-	}
-
-	private String mapCodePathToSearchParam(String dataType, String path) {
-		switch (dataType) {
+	private String mapCodePathToSearchParam(String theDataType, String thePath) {
+		switch (theDataType) {
 			case "MedicationAdministration":
-				if (path.equals("medication"))
-					return "code";
+				if (thePath.equals("medication")) return "code";
 				break;
 			case "MedicationDispense":
-				if (path.equals("medication"))
-					return "code";
+				if (thePath.equals("medication")) return "code";
 				break;
 			case "MedicationRequest":
-				if (path.equals("medication"))
-					return "code";
+				if (thePath.equals("medication")) return "code";
 				break;
 			case "MedicationStatement":
-				if (path.equals("medication"))
-					return "code";
-				break;
-			case "ProcedureRequest":
-				if (path.equals("bodySite"))
-					return "body-site";
+				if (thePath.equals("medication")) return "code";
 				break;
 			default:
-				if (path.equals("vaccineCode"))
-					return "vaccine-code";
+				if (thePath.equals("vaccineCode")) return "vaccine-code";
 				break;
 		}
-		return path.replace('.', '-').toLowerCase();
+		return thePath.replace('.', '-').toLowerCase();
 	}
 
-	public static boolean isPatientCompartment(String dataType) {
-		switch (dataType) {
+	public static boolean isPatientCompartment(String theDataType) {
+		if (theDataType == null) {
+			return false;
+		}
+		switch (theDataType) {
 			case "Account":
 			case "AdverseEvent":
 			case "AllergyIntolerance":
@@ -243,7 +246,7 @@ public class DiscoveryResolutionStu3 implements IDaoRegistryUser {
 			case "AppointmentResponse":
 			case "AuditEvent":
 			case "Basic":
-			case "BodySite":
+			case "BodyStructure":
 			case "CarePlan":
 			case "CareTeam":
 			case "ChargeItem":
@@ -256,12 +259,14 @@ public class DiscoveryResolutionStu3 implements IDaoRegistryUser {
 			case "Condition":
 			case "Consent":
 			case "Coverage":
+			case "CoverageEligibilityRequest":
+			case "CoverageEligibilityResponse":
 			case "DetectedIssue":
 			case "DeviceRequest":
 			case "DeviceUseStatement":
 			case "DiagnosticReport":
 			case "DocumentManifest":
-			case "EligibilityRequest":
+			case "DocumentReference":
 			case "Encounter":
 			case "EnrollmentRequest":
 			case "EpisodeOfCare":
@@ -270,10 +275,11 @@ public class DiscoveryResolutionStu3 implements IDaoRegistryUser {
 			case "Flag":
 			case "Goal":
 			case "Group":
-			case "ImagingManifest":
 			case "ImagingStudy":
 			case "Immunization":
+			case "ImmunizationEvaluation":
 			case "ImmunizationRecommendation":
+			case "Invoice":
 			case "List":
 			case "MeasureReport":
 			case "Media":
@@ -281,20 +287,20 @@ public class DiscoveryResolutionStu3 implements IDaoRegistryUser {
 			case "MedicationDispense":
 			case "MedicationRequest":
 			case "MedicationStatement":
+			case "MolecularSequence":
 			case "NutritionOrder":
 			case "Observation":
 			case "Patient":
 			case "Person":
 			case "Procedure":
-			case "ProcedureRequest":
 			case "Provenance":
 			case "QuestionnaireResponse":
-			case "ReferralRequest":
 			case "RelatedPerson":
 			case "RequestGroup":
 			case "ResearchSubject":
 			case "RiskAssessment":
 			case "Schedule":
+			case "ServiceRequest":
 			case "Specimen":
 			case "SupplyDelivery":
 			case "SupplyRequest":
@@ -305,8 +311,8 @@ public class DiscoveryResolutionStu3 implements IDaoRegistryUser {
 		}
 	}
 
-	public String getPatientSearchParam(String dataType) {
-		switch (dataType) {
+	public String getPatientSearchParam(String theDataType) {
+		switch (theDataType) {
 			case "Account":
 				return "subject";
 			case "AdverseEvent":
@@ -321,7 +327,7 @@ public class DiscoveryResolutionStu3 implements IDaoRegistryUser {
 				return "patient";
 			case "Basic":
 				return "patient";
-			case "BodySite":
+			case "BodyStructure":
 				return "patient";
 			case "CarePlan":
 				return "patient";
@@ -346,7 +352,7 @@ public class DiscoveryResolutionStu3 implements IDaoRegistryUser {
 			case "Consent":
 				return "patient";
 			case "Coverage":
-				return "patient";
+				return "policy-holder";
 			case "DetectedIssue":
 				return "patient";
 			case "DeviceRequest":
@@ -359,8 +365,6 @@ public class DiscoveryResolutionStu3 implements IDaoRegistryUser {
 				return "subject";
 			case "DocumentReference":
 				return "subject";
-			case "EligibilityRequest":
-				return "patient";
 			case "Encounter":
 				return "patient";
 			case "EnrollmentRequest":
@@ -377,14 +381,14 @@ public class DiscoveryResolutionStu3 implements IDaoRegistryUser {
 				return "patient";
 			case "Group":
 				return "member";
-			case "ImagingManifest":
-				return "patient";
 			case "ImagingStudy":
 				return "patient";
 			case "Immunization":
 				return "patient";
 			case "ImmunizationRecommendation":
 				return "patient";
+			case "Invoice":
+				return "subject";
 			case "List":
 				return "subject";
 			case "MeasureReport":
@@ -399,6 +403,8 @@ public class DiscoveryResolutionStu3 implements IDaoRegistryUser {
 				return "subject";
 			case "MedicationStatement":
 				return "subject";
+			case "MolecularSequence":
+				return "patient";
 			case "NutritionOrder":
 				return "patient";
 			case "Observation":
@@ -409,14 +415,10 @@ public class DiscoveryResolutionStu3 implements IDaoRegistryUser {
 				return "patient";
 			case "Procedure":
 				return "patient";
-			case "ProcedureRequest":
-				return "patient";
 			case "Provenance":
 				return "patient";
 			case "QuestionnaireResponse":
 				return "subject";
-			case "ReferralRequest":
-				return "patient";
 			case "RelatedPerson":
 				return "patient";
 			case "RequestGroup":
@@ -427,6 +429,8 @@ public class DiscoveryResolutionStu3 implements IDaoRegistryUser {
 				return "subject";
 			case "Schedule":
 				return "actor";
+			case "ServiceRequest":
+				return "patient";
 			case "Specimen":
 				return "subject";
 			case "SupplyDelivery":

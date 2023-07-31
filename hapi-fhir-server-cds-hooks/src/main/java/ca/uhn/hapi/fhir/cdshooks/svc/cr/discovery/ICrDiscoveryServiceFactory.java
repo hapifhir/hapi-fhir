@@ -19,8 +19,6 @@
  */
 package ca.uhn.hapi.fhir.cdshooks.svc.cr.discovery;
 
-import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceJson;
-
-public interface IDiscoveryElement {
-	CdsServiceJson getCdsServiceJson();
+public interface ICrDiscoveryServiceFactory {
+	ICrDiscoveryService create(String theServiceId);
 }

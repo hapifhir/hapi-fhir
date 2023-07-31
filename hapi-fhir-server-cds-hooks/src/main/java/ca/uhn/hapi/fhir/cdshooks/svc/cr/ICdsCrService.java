@@ -19,8 +19,64 @@
  */
 package ca.uhn.hapi.fhir.cdshooks.svc.cr;
 
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.model.api.IModelJson;
+import ca.uhn.fhir.rest.server.provider.ProviderConstants;
+import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceRequestJson;
+import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceResponseJson;
+import org.hl7.fhir.instance.model.api.IBaseParameters;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.opencds.cqf.fhir.api.Repository;
+
+import java.util.Collections;
 
 public interface ICdsCrService {
-	Object invoke(IModelJson theJson);
+	IBaseParameters encodeParams(CdsServiceRequestJson theJson);
+
+	CdsServiceResponseJson encodeResponse(Object theResponse);
+
+	FhirVersionEnum getFhirVersion();
+
+	Repository getRepository();
+
+	default Object invoke(IModelJson theJson) {
+		IBaseParameters params = encodeParams((CdsServiceRequestJson) theJson);
+		IBaseResource response = invokeApply(theJson, params);
+		return encodeResponse(response);
+	}
+	;
+
+	default IBaseResource invokeApply(IModelJson theJson, IBaseParameters theParams) {
+		var operationName = getFhirVersion() == FhirVersionEnum.R4
+				? ProviderConstants.CR_OPERATION_R5_APPLY
+				: ProviderConstants.CR_OPERATION_APPLY;
+		switch (getFhirVersion()) {
+			case DSTU3:
+				return getRepository()
+						.invoke(
+								org.hl7.fhir.dstu3.model.PlanDefinition.class,
+								operationName,
+								theParams,
+								org.hl7.fhir.dstu3.model.CarePlan.class,
+								Collections.emptyMap());
+			case R4:
+				return getRepository()
+						.invoke(
+								org.hl7.fhir.r4.model.PlanDefinition.class,
+								operationName,
+								theParams,
+								org.hl7.fhir.r4.model.Bundle.class,
+								Collections.emptyMap());
+			case R5:
+				return getRepository()
+						.invoke(
+								org.hl7.fhir.r5.model.PlanDefinition.class,
+								operationName,
+								theParams,
+								org.hl7.fhir.r5.model.Bundle.class,
+								Collections.emptyMap());
+			default:
+				return null;
+		}
+	}
 }

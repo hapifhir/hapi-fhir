@@ -19,17 +19,11 @@
  */
 package ca.uhn.hapi.fhir.cdshooks.svc.cr;
 
-import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.cache.IResourceChangeEvent;
 import ca.uhn.fhir.jpa.cache.IResourceChangeListener;
 import ca.uhn.fhir.jpa.cache.ResourceChangeEvent;
-import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceJson;
 import ca.uhn.hapi.fhir.cdshooks.svc.CdsServiceCache;
 import ca.uhn.hapi.fhir.cdshooks.svc.CdsServiceRegistryImpl;
-import ca.uhn.hapi.fhir.cdshooks.svc.cr.discovery.DiscoveryResolutionR4;
-import ca.uhn.hapi.fhir.cdshooks.svc.cr.discovery.DiscoveryResolutionR5;
-import ca.uhn.hapi.fhir.cdshooks.svc.cr.discovery.DiscoveryResolutionStu3;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,23 +34,15 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
+import static ca.uhn.hapi.fhir.cdshooks.svc.cr.CdsCrConstants.CDS_CR_MODULE_ID;
+
 public class CdsServiceInterceptor implements IResourceChangeListener {
-	static final Logger ourLog = LoggerFactory.getLogger(CdsServiceCache.class);
+	static final Logger ourLog = LoggerFactory.getLogger(CdsServiceInterceptor.class);
 
 	@Autowired
 	CdsServiceRegistryImpl myCdsServiceRegistry;
 
-	final DaoRegistry myDaoRegistry;
-	final DiscoveryResolutionStu3 myDiscoveryResolutionStu3;
-	final DiscoveryResolutionR4 myDiscoveryResolutionR4;
-	final DiscoveryResolutionR5 myDiscoveryResolutionR5;
-
-	public CdsServiceInterceptor(DaoRegistry theDaoRegistry) {
-		myDaoRegistry = theDaoRegistry;
-		myDiscoveryResolutionStu3 = new DiscoveryResolutionStu3(myDaoRegistry);
-		myDiscoveryResolutionR4 = new DiscoveryResolutionR4(myDaoRegistry);
-		myDiscoveryResolutionR5 = new DiscoveryResolutionR5(myDaoRegistry);
-	}
+	public CdsServiceInterceptor() {}
 
 	@Override
 	public void handleInit(Collection<IIdType> theResourceIds) {
@@ -81,25 +67,11 @@ public class CdsServiceInterceptor implements IResourceChangeListener {
 		}
 	}
 
-	private CdsServiceJson resolveService(IBaseResource thePlanDefinition) {
-		if (thePlanDefinition instanceof org.hl7.fhir.dstu3.model.PlanDefinition) {
-			return myDiscoveryResolutionStu3.resolveService((org.hl7.fhir.dstu3.model.PlanDefinition) thePlanDefinition);
-		}
-		if (thePlanDefinition instanceof org.hl7.fhir.r4.model.PlanDefinition) {
-			return myDiscoveryResolutionR4.resolveService((org.hl7.fhir.r4.model.PlanDefinition) thePlanDefinition);
-		}
-		if (thePlanDefinition instanceof org.hl7.fhir.r5.model.PlanDefinition) {
-			return myDiscoveryResolutionR5.resolveService((org.hl7.fhir.r5.model.PlanDefinition) thePlanDefinition);
-		}
-		return null;
-	}
-
 	private void insert(List<IIdType> theCreatedIds) {
 		for (IIdType id : theCreatedIds) {
 			try {
-				IBaseResource resource =
-						myDaoRegistry.getResourceDao("PlanDefinition").read(id);
-				myCdsServiceRegistry.registerCrService(id.getIdPart(), resolveService(resource));
+				myCdsServiceRegistry.registerCrService(id.getIdPart());
+				ourLog.info("Created service for {}", id.getIdPart());
 			} catch (Exception e) {
 				ourLog.info(String.format("Failed to create service for %s", id.getIdPart()));
 			}
@@ -117,7 +89,7 @@ public class CdsServiceInterceptor implements IResourceChangeListener {
 
 	private void delete(List<IIdType> deletedIds) {
 		for (IIdType id : deletedIds) {
-			myCdsServiceRegistry.unregisterService(id.getIdPart(), "CR");
+			myCdsServiceRegistry.unregisterService(id.getIdPart(), CDS_CR_MODULE_ID);
 		}
 	}
 }

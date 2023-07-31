@@ -20,23 +20,22 @@
 package ca.uhn.hapi.fhir.cdshooks.svc;
 
 import ca.uhn.fhir.context.ConfigurationException;
-import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.hapi.fhir.cdshooks.api.ICdsMethod;
 import ca.uhn.hapi.fhir.cdshooks.svc.cr.ICdsCrServiceFactory;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.springframework.beans.factory.annotation.Autowired;
 
-public class BaseCdsCrMethod implements ICdsMethod {
-	@Autowired
-	DaoRegistry myDaoRegistry;
-	@Autowired
-	ICdsCrServiceFactory myCdsCrServiceFactory;
+abstract class BaseCdsCrMethod implements ICdsMethod {
+	private ICdsCrServiceFactory myCdsCrServiceFactory;
+
+	public BaseCdsCrMethod(ICdsCrServiceFactory theCdsCrServiceFactory) {
+		myCdsCrServiceFactory = theCdsCrServiceFactory;
+	}
 
 	public Object invoke(ObjectMapper theObjectMapper, IModelJson theJson, String theServiceId) {
 		try {
-			return myCdsCrServiceFactory.create(myDaoRegistry, theServiceId).invoke(theJson);
+			return myCdsCrServiceFactory.create(theServiceId).invoke(theJson);
 		} catch (Exception e) {
 			if (e.getCause() != null && e.getCause() instanceof BaseServerResponseException) {
 				throw (BaseServerResponseException) e.getCause();

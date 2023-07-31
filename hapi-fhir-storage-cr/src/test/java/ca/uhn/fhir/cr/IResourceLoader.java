@@ -17,8 +17,9 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.cr.common;
+package ca.uhn.fhir.cr;
 
+import ca.uhn.fhir.cr.common.IDaoRegistryUser;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;

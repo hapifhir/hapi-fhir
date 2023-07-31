@@ -75,10 +75,10 @@ public interface ICdsServiceRegistry {
 	/**
 	 * Register a new Clinical Reasoning CDS Service with the endpoint.
 	 *
-	 * @param theServiceId      the id of the service
-	 * @param theCdsServiceJson the service descriptor
+	 * @param theServiceId the id of the service PlanDefinition
+	 * @return the service was registered
 	 */
-	void registerCrService(String theServiceId, CdsServiceJson theCdsServiceJson);
+	boolean registerCrService(String theServiceId);
 
 	/**
 	 * Remove registered CDS service with the service ID, only removes dynamically registered service

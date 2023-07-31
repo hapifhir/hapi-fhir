@@ -19,8 +19,6 @@
  */
 package ca.uhn.hapi.fhir.cdshooks.svc.cr;
 
-import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
-
 public interface ICdsCrServiceFactory {
-	ICdsCrService create(DaoRegistry theDaoRegistry, String theServiceId);
+	ICdsCrService create(String theServiceId);
 }

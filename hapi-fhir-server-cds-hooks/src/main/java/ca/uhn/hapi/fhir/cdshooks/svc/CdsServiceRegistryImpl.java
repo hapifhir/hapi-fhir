@@ -30,6 +30,8 @@ import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceJson;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceRequestJson;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceResponseJson;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServicesJson;
+import ca.uhn.hapi.fhir.cdshooks.svc.cr.ICdsCrServiceFactory;
+import ca.uhn.hapi.fhir.cdshooks.svc.cr.discovery.ICrDiscoveryServiceFactory;
 import ca.uhn.hapi.fhir.cdshooks.svc.prefetch.CdsPrefetchSvc;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -37,6 +39,8 @@ import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Function;
 import javax.annotation.Nonnull;
 import javax.annotation.PostConstruct;
@@ -49,14 +53,20 @@ public class CdsServiceRegistryImpl implements ICdsServiceRegistry {
 	private final CdsHooksContextBooter myCdsHooksContextBooter;
 	private final CdsPrefetchSvc myCdsPrefetchSvc;
 	private final ObjectMapper myObjectMapper;
+	private final ICdsCrServiceFactory myCdsCrServiceFactory;
+	private final ICrDiscoveryServiceFactory myCrDiscoveryServiceFactory;
 
 	public CdsServiceRegistryImpl(
 			CdsHooksContextBooter theCdsHooksContextBooter,
 			CdsPrefetchSvc theCdsPrefetchSvc,
-			ObjectMapper theObjectMapper) {
+			ObjectMapper theObjectMapper,
+			ICdsCrServiceFactory theCdsCrServiceFactory,
+			ICrDiscoveryServiceFactory theCrDiscoveryServiceFactory) {
 		myCdsHooksContextBooter = theCdsHooksContextBooter;
 		myCdsPrefetchSvc = theCdsPrefetchSvc;
 		myObjectMapper = theObjectMapper;
+		myCdsCrServiceFactory = theCdsCrServiceFactory;
+		myCrDiscoveryServiceFactory = theCrDiscoveryServiceFactory;
 	}
 
 	@PostConstruct
@@ -143,8 +153,14 @@ public class CdsServiceRegistryImpl implements ICdsServiceRegistry {
 	}
 
 	@Override
-	public void registerCrService(String theServiceId, CdsServiceJson theCdsServiceJson) {
-		myServiceCache.registerCrService(theServiceId, theCdsServiceJson);
+	public boolean registerCrService(String theServiceId) {
+		try {
+			myServiceCache.registerCrService(theServiceId, myCrDiscoveryServiceFactory, myCdsCrServiceFactory);
+		} catch (Exception e) {
+			ourLog.error("Error received during CR CDS Service registration: {}", e.getMessage());
+			return false;
+		}
+		return true;
 	}
 
 	@Override

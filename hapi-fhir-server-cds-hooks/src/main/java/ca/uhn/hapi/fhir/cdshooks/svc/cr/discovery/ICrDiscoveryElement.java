@@ -19,27 +19,8 @@
  */
 package ca.uhn.hapi.fhir.cdshooks.svc.cr.discovery;
 
-import java.util.Collection;
-import java.util.concurrent.CopyOnWriteArrayList;
+import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceJson;
 
-public class PrefetchUrlList extends CopyOnWriteArrayList<String> {
-
-	@Override
-	public boolean add(String theElement) {
-		for (String s : this) {
-			if (s.equals(theElement)) return false;
-			if (theElement.startsWith(s)) return false;
-		}
-		return super.add(theElement);
-	}
-
-	@Override
-	public boolean addAll(Collection<? extends String> theAdd) {
-		if (theAdd != null) {
-			for (String s : theAdd) {
-				add(s);
-			}
-		}
-		return true;
-	}
+public interface ICrDiscoveryElement {
+	CdsServiceJson getCdsServiceJson();
 }

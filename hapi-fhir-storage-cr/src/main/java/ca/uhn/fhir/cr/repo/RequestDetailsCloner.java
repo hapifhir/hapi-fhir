@@ -43,6 +43,7 @@ class RequestDetailsCloner {
 		newDetails.setParameters(new HashMap<>());
 		newDetails.setResourceName(null);
 		newDetails.setCompartmentName(null);
+		newDetails.setResponse(theDetails.getResponse());
 
 		return new DetailsBuilder(newDetails);
 	}

@@ -20,10 +20,15 @@
 package ca.uhn.hapi.fhir.cdshooks.config;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.cr.common.IRepositoryFactory;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.cache.IResourceChangeListenerRegistry;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
+import ca.uhn.fhir.rest.api.server.SystemRestfulResponse;
+import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.hapi.fhir.cdshooks.api.ICdsConfigService;
 import ca.uhn.hapi.fhir.cdshooks.api.ICdsHooksDaoAuthorizationSvc;
 import ca.uhn.hapi.fhir.cdshooks.api.ICdsServiceRegistry;
@@ -31,18 +36,25 @@ import ca.uhn.hapi.fhir.cdshooks.module.CdsHooksObjectMapperFactory;
 import ca.uhn.hapi.fhir.cdshooks.svc.CdsConfigServiceImpl;
 import ca.uhn.hapi.fhir.cdshooks.svc.CdsHooksContextBooter;
 import ca.uhn.hapi.fhir.cdshooks.svc.CdsServiceRegistryImpl;
+import ca.uhn.hapi.fhir.cdshooks.svc.cr.CdsCrServiceDstu3;
+import ca.uhn.hapi.fhir.cdshooks.svc.cr.CdsCrServiceR4;
+import ca.uhn.hapi.fhir.cdshooks.svc.cr.CdsCrServiceR5;
 import ca.uhn.hapi.fhir.cdshooks.svc.cr.CdsServiceInterceptor;
-import ca.uhn.hapi.fhir.cdshooks.svc.cr.discovery.DiscoveryResolutionR4;
+import ca.uhn.hapi.fhir.cdshooks.svc.cr.ICdsCrServiceFactory;
+import ca.uhn.hapi.fhir.cdshooks.svc.cr.discovery.CrDiscoveryServiceDstu3;
+import ca.uhn.hapi.fhir.cdshooks.svc.cr.discovery.CrDiscoveryServiceR4;
+import ca.uhn.hapi.fhir.cdshooks.svc.cr.discovery.CrDiscoveryServiceR5;
+import ca.uhn.hapi.fhir.cdshooks.svc.cr.discovery.ICrDiscoveryServiceFactory;
 import ca.uhn.hapi.fhir.cdshooks.svc.prefetch.CdsPrefetchDaoSvc;
 import ca.uhn.hapi.fhir.cdshooks.svc.prefetch.CdsPrefetchFhirClientSvc;
 import ca.uhn.hapi.fhir.cdshooks.svc.prefetch.CdsPrefetchSvc;
 import ca.uhn.hapi.fhir.cdshooks.svc.prefetch.CdsResolutionStrategySvc;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.opencds.cqf.cql.evaluator.fhir.util.Ids;
+import org.opencds.cqf.fhir.api.Repository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
@@ -50,8 +62,7 @@ public class CdsHooksConfig {
 
 	public static final String CDS_HOOKS_OBJECT_MAPPER_FACTORY = "cdsHooksObjectMapperFactory";
 
-	@Autowired
-	private ApplicationContext myAppCtx;
+	public static final String PLAN_DEFINITION_RESOURCE_NAME = "PlanDefinition";
 
 	@Autowired(required = false)
 	private DaoRegistry myDaoRegistry;
@@ -62,6 +73,12 @@ public class CdsHooksConfig {
 	@Autowired(required = false)
 	private IResourceChangeListenerRegistry myResourceChangeListenerRegistry;
 
+	@Autowired(required = false)
+	private IRepositoryFactory myRepositoryFactory;
+
+	@Autowired(required = false)
+	private RestfulServer myRestfulServer;
+
 	@Bean(name = CDS_HOOKS_OBJECT_MAPPER_FACTORY)
 	public ObjectMapper objectMapper(FhirContext theFhirContext) {
 		return new CdsHooksObjectMapperFactory(theFhirContext).newMapper();
@@ -71,16 +88,75 @@ public class CdsHooksConfig {
 	public ICdsServiceRegistry cdsServiceRegistry(
 			CdsHooksContextBooter theCdsHooksContextBooter,
 			CdsPrefetchSvc theCdsPrefetchSvc,
-			@Qualifier(CDS_HOOKS_OBJECT_MAPPER_FACTORY) ObjectMapper theObjectMapper) {
-		return new CdsServiceRegistryImpl(theCdsHooksContextBooter, theCdsPrefetchSvc, theObjectMapper);
+			@Qualifier(CDS_HOOKS_OBJECT_MAPPER_FACTORY) ObjectMapper theObjectMapper,
+			ICdsCrServiceFactory theCdsCrServiceFactory,
+			ICrDiscoveryServiceFactory theCrDiscoveryServiceFactory) {
+		return new CdsServiceRegistryImpl(
+				theCdsHooksContextBooter,
+				theCdsPrefetchSvc,
+				theObjectMapper,
+				theCdsCrServiceFactory,
+				theCrDiscoveryServiceFactory);
+	}
+
+	private RequestDetails createRequestDetails(FhirContext theFhirContext, String theId) {
+		SystemRequestDetails rd = new SystemRequestDetails();
+		rd.setServer(myRestfulServer);
+		rd.setResponse(new SystemRestfulResponse(rd));
+		rd.setId(Ids.newId(theFhirContext.getVersion().getVersion(), PLAN_DEFINITION_RESOURCE_NAME, theId));
+		return rd;
 	}
 
 	@Bean
-	@Conditional(ListenerRegistryCondition.class)
+	public ICdsCrServiceFactory cdsCrServiceFactory(FhirContext theFhirContext) {
+		return id -> {
+			if (myRepositoryFactory == null) {
+				return null;
+			}
+			RequestDetails rd = createRequestDetails(theFhirContext, id);
+			Repository repository = myRepositoryFactory.create(rd);
+			switch (theFhirContext.getVersion().getVersion()) {
+				case DSTU3:
+					return new CdsCrServiceDstu3(rd.getId(), repository);
+				case R4:
+					return new CdsCrServiceR4(rd.getId(), repository);
+				case R5:
+					return new CdsCrServiceR5(rd.getId(), repository);
+				default:
+					return null;
+			}
+		};
+	}
+
+	@Bean
+	public ICrDiscoveryServiceFactory crDiscoveryServiceFactory(FhirContext theFhirContext) {
+		return id -> {
+			if (myRepositoryFactory == null) {
+				return null;
+			}
+			RequestDetails rd = createRequestDetails(theFhirContext, id);
+			Repository repository = myRepositoryFactory.create(rd);
+			switch (theFhirContext.getVersion().getVersion()) {
+				case DSTU3:
+					return new CrDiscoveryServiceDstu3(rd.getId(), repository);
+				case R4:
+					return new CrDiscoveryServiceR4(rd.getId(), repository);
+				case R5:
+					return new CrDiscoveryServiceR5(rd.getId(), repository);
+				default:
+					return null;
+			}
+		};
+	}
+
+	@Bean
 	public CdsServiceInterceptor cdsServiceInterceptor() {
-		var listener = new CdsServiceInterceptor(myDaoRegistry);
+		if (myResourceChangeListenerRegistry == null) {
+			return null;
+		}
+		CdsServiceInterceptor listener = new CdsServiceInterceptor();
 		myResourceChangeListenerRegistry.registerResourceResourceChangeListener(
-			"PlanDefinition", SearchParameterMap.newSynchronous(), listener, 1000);
+				PLAN_DEFINITION_RESOURCE_NAME, SearchParameterMap.newSynchronous(), listener, 1000);
 		return listener;
 	}
 
