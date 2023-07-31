@@ -95,10 +95,6 @@ public class ResourceIdListStep<PT extends PartitionedJobParameters, IT extends 
 		}
 
 		ourLog.debug("Found {} IDs from {} to {}", nextChunk.size(), start, nextChunk.getLastDate());
-		if (nextChunk.size() < 10 && HapiSystemProperties.isTestModeEnabled()) {
-			// which is failing intermittently. If that stops, makes sense to remove this
-			ourLog.debug(" * PIDS: {}", nextChunk);
-		}
 
 		for (TypedResourcePid typedResourcePid : nextChunk.getTypedResourcePids()) {
 			TypedPidJson nextId = new TypedPidJson(typedResourcePid);
