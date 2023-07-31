@@ -6,7 +6,6 @@ import ca.uhn.fhir.batch2.jobs.chunk.PartitionedUrlChunkRangeJson;
 import ca.uhn.fhir.batch2.jobs.chunk.ResourceIdListWorkChunkJson;
 import ca.uhn.fhir.batch2.jobs.parameters.PartitionedUrlListJobParameters;
 import ca.uhn.fhir.batch2.model.JobInstance;
-import ca.uhn.fhir.jpa.api.pid.EmptyResourcePidList;
 import ca.uhn.fhir.jpa.api.pid.HomogeneousResourcePidList;
 import ca.uhn.fhir.jpa.api.pid.IResourcePidList;
 import ca.uhn.fhir.jpa.api.svc.IBatch2DaoSvc;
@@ -30,17 +29,15 @@ import static ca.uhn.fhir.batch2.jobs.step.ResourceIdListStep.DEFAULT_PAGE_SIZE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
-import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class LoadIdsStepTest {
 
 	public static final Date DATE_1 = new InstantType("2022-01-01T00:00:00Z").getValue();
 	public static final Date DATE_2 = new InstantType("2022-01-02T00:00:00Z").getValue();
-	public static final Date DATE_3 = new InstantType("2022-01-03T00:00:00Z").getValue();
-	public static final Date DATE_4 = new InstantType("2022-01-04T00:00:00Z").getValue();
 	public static final Date DATE_END = new InstantType("2022-02-01T00:00:00Z").getValue();
 
 	@Mock
@@ -71,18 +68,11 @@ public class LoadIdsStepTest {
 
 		// First Execution
 
-		lenient().when(myBatch2DaoSvc.fetchResourceIdsPage(eq(DATE_1), eq(DATE_END), eq(DEFAULT_PAGE_SIZE), isNull(), isNull()))
+		when(myBatch2DaoSvc.fetchResourceIdsPage(eq(DATE_1), eq(DATE_END), eq(DEFAULT_PAGE_SIZE), isNull(), isNull()))
 			.thenReturn(createIdChunk(0L, 20000L, DATE_2));
-		lenient().when(myBatch2DaoSvc.fetchResourceIdsPage(eq(DATE_2), eq(DATE_END), eq(DEFAULT_PAGE_SIZE), isNull(), isNull()))
-			.thenReturn(createIdChunk(20000L, 40000L, DATE_3));
-		lenient().when(myBatch2DaoSvc.fetchResourceIdsPage(eq(DATE_3), eq(DATE_END), eq(DEFAULT_PAGE_SIZE), isNull(), isNull()))
-			.thenReturn(createIdChunk(40000L, 40040L, DATE_4));
-		lenient().when(myBatch2DaoSvc.fetchResourceIdsPage(eq(DATE_4), eq(DATE_END), eq(DEFAULT_PAGE_SIZE), isNull(), isNull()))
-			.thenReturn(new EmptyResourcePidList());
 
 		mySvc.run(details, mySink);
 
-		// TODO:  figure out the semantics of the new behaviour to make this pass:
 		final int expectedLoops = 40;
 		verify(mySink, times(40)).accept(myChunkIdsCaptor.capture());
 
