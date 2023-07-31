@@ -41,6 +41,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -622,7 +623,7 @@ public class UrlUtil {
 		}
 
 		List<String> candidates = new ArrayList<>();
-		Path path = Path.of(theUri);
+		Path path = Paths.get(theUri);
 		candidates.add(path.toString().replace(":/", "://"));
 		while (path.getParent() != null && path.getParent().toString().contains("/")) {
 			candidates.add(path.getParent().toString().replace(":/", "://"));
