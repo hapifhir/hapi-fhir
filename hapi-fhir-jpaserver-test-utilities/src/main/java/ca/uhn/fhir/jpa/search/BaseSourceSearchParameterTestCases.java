@@ -60,7 +60,7 @@ public abstract class BaseSourceSearchParameterTestCases implements ITestDataBui
 
 	@AfterEach
 	public final void after() {
-		myTestDataBuilder.getSystemRequestDetails().setRequestId(null);
+		myTestDataBuilder.setRequestId(null);
 		myStorageSettings.setStoreMetaSourceInformation(new JpaStorageSettings().getStoreMetaSourceInformation());
 	}
 
@@ -82,12 +82,12 @@ public abstract class BaseSourceSearchParameterTestCases implements ITestDataBui
 	@EnabledIf("isRequestIdSupported")
 	@Test
 	public void testSearch_withRequestIdAndSource_returnsCorrectBundle() {
-		myTestDataBuilder.getSystemRequestDetails().setRequestId("a_request_id");
+		myTestDataBuilder.setRequestId("a_request_id");
 		IIdType pt0id = createPatient(withSource("http://host/0"), withActiveTrue());
 
 		IIdType pt1id = createPatient(withSource("http://host/1"), withActiveTrue());
 
-		myTestDataBuilder.getSystemRequestDetails().setRequestId("b_request_id");
+		myTestDataBuilder.setRequestId("b_request_id");
 		IIdType pt2id = createPatient(withSource("http://host/1"), withActiveTrue());
 
 		myTestDaoSearch.assertSearchFinds("search by requestId finds", "Patient?_source=#a_request_id", pt0id, pt1id);
@@ -105,7 +105,7 @@ public abstract class BaseSourceSearchParameterTestCases implements ITestDataBui
 	@Test
 	public void testSearchSource_whenSameSourceForMultipleResourceTypes_willMatchSearchResourceTypeOnly() {
 		String sourceUrn = "http://host/0";
-		myTestDataBuilder.getSystemRequestDetails().setRequestId("a_request_id");
+		myTestDataBuilder.setRequestId("a_request_id");
 
 		IIdType pt0id = createPatient(withSource(sourceUrn), withActiveTrue());
 		IIdType ob0id = createObservation(withSource(sourceUrn), withStatus("final"));
@@ -118,7 +118,7 @@ public abstract class BaseSourceSearchParameterTestCases implements ITestDataBui
 
 	@Test
 	public void testSearchSource_withOrJoinedParameter_returnsUnionResultBundle() {
-		myTestDataBuilder.getSystemRequestDetails().setRequestId("a_request_id");
+		myTestDataBuilder.setRequestId("a_request_id");
 
 		IIdType pt0id = createPatient(withSource("http://host/0"), withActiveTrue());
 		IIdType pt1id = createPatient(withSource("http://host/1"), withActiveTrue());
@@ -131,10 +131,10 @@ public abstract class BaseSourceSearchParameterTestCases implements ITestDataBui
 	@EnabledIf("isRequestIdSupported")
 	@Test
 	public void testSearch_withSourceAndRequestId_returnsIntersectionResultBundle() {
-		myTestDataBuilder.getSystemRequestDetails().setRequestId("a_request_id");
+		myTestDataBuilder.setRequestId("a_request_id");
 		IIdType pt0id = createPatient(withSource("http://host/0"), withActiveTrue());
 
-		myTestDataBuilder.getSystemRequestDetails().setRequestId("b_request_id");
+		myTestDataBuilder.setRequestId("b_request_id");
 		IIdType pt1id = createPatient(withSource("http://host/0"), withActiveTrue());
 		IIdType pt2id = createPatient(withSource("http://host/1"), withActiveTrue());
 
@@ -196,10 +196,14 @@ public abstract class BaseSourceSearchParameterTestCases implements ITestDataBui
 
 	@Test
 	public void testSearchSource_withMissingModifierTrue_returnsEmptySources() {
-		createPatient(withSource("http://some-source/v1"), withActiveTrue());
-		IIdType p1Id = createPatient(withActiveTrue());
+		createPatient(withSource("http://some-source/v1"), withActiveTrue(), withFamily("Family"));
+		IIdType p2Id = createPatient(withActiveTrue(), withFamily("Family"));
 
-		myTestDaoSearch.assertSearchFinds("search matches empty sources", "Patient?_source:missing=true", p1Id);
+		myTestDaoSearch.assertSearchFinds("search matches empty source", "Patient?_source:missing=true", p2Id);
+		myTestDaoSearch.assertSearchFinds(
+				"search matches empty source with family parameter intersection",
+				"Patient?_source:missing=true&family=Family",
+				p2Id);
 	}
 
 	@Test

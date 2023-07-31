@@ -83,8 +83,8 @@ public class DaoTestDataBuilder implements ITestDataBuilder.WithSupport, ITestDa
 	}
 
 	@Override
-	public SystemRequestDetails getSystemRequestDetails() {
-		return mySrd;
+	public void setRequestId(String theRequestId) {
+		mySrd.setRequestId(theRequestId);
 	}
 
 	@Override
