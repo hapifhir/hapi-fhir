@@ -28,7 +28,7 @@ class CdsHooksContextBooterTest {
 	@Test
 	void validateJsonThrowsExceptionWhenInputIsInvalid() {
 		// setup
-		final String expected = "Invalid JSON: Unrecognized token 'abc': was expecting (JSON String, Number, Array, Object or token 'null', 'true' or 'false')\n" +
+		final String expected = "HAPI-2378: Invalid JSON: Unrecognized token 'abc': was expecting (JSON String, Number, Array, Object or token 'null', 'true' or 'false')\n" +
 			" at [Source: (String)\"abc\"; line: 1, column: 4]";
 		// execute
 		final UnprocessableEntityException actual = assertThrows(UnprocessableEntityException.class, () -> myFixture.validateJson("abc"));
