@@ -20,7 +20,6 @@ package ca.uhn.fhir.cr.r4.questionnaire;
  * #L%
  */
 
-import ca.uhn.fhir.cr.common.IRepositoryFactory;
 import ca.uhn.fhir.cr.r4.IQuestionnaireProcessorFactory;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
@@ -38,10 +37,7 @@ import org.hl7.fhir.r4.model.Questionnaire;
 import org.hl7.fhir.r4.model.QuestionnaireResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 
-public class QuestionnaireOperationsProvider {
-	@Autowired
-	IRepositoryFactory myRepositoryFactory;
-
+public class QuestionnairePopulateProvider {
 	@Autowired
 	IQuestionnaireProcessorFactory myR4QuestionnaireProcessorFactory;
 
@@ -82,7 +78,7 @@ public class QuestionnaireOperationsProvider {
 			RequestDetails theRequestDetails)
 			throws InternalErrorException, FHIRException {
 		return myR4QuestionnaireProcessorFactory
-				.create(myRepositoryFactory.create(theRequestDetails))
+				.create(theRequestDetails)
 				.prePopulate(
 						theId,
 						new CanonicalType(theCanonical),
@@ -108,7 +104,7 @@ public class QuestionnaireOperationsProvider {
 			RequestDetails theRequestDetails)
 			throws InternalErrorException, FHIRException {
 		return myR4QuestionnaireProcessorFactory
-				.create(myRepositoryFactory.create(theRequestDetails))
+				.create(theRequestDetails)
 				.prePopulate(
 						null,
 						new CanonicalType(theCanonical),
@@ -156,7 +152,7 @@ public class QuestionnaireOperationsProvider {
 			RequestDetails theRequestDetails)
 			throws InternalErrorException, FHIRException {
 		return (QuestionnaireResponse) myR4QuestionnaireProcessorFactory
-				.create(myRepositoryFactory.create(theRequestDetails))
+				.create(theRequestDetails)
 				.populate(
 						theId,
 						new CanonicalType(theCanonical),
@@ -182,7 +178,7 @@ public class QuestionnaireOperationsProvider {
 			RequestDetails theRequestDetails)
 			throws InternalErrorException, FHIRException {
 		return (QuestionnaireResponse) myR4QuestionnaireProcessorFactory
-				.create(myRepositoryFactory.create(theRequestDetails))
+				.create(theRequestDetails)
 				.populate(
 						null,
 						new CanonicalType(theCanonical),
@@ -193,37 +189,5 @@ public class QuestionnaireOperationsProvider {
 						theDataEndpoint,
 						theContentEndpoint,
 						theTerminologyEndpoint);
-	}
-
-	/**
-	 * Implements a $package operation following the <a href=
-	 * "https://build.fhir.org/ig/HL7/crmi-ig/branches/master/packaging.html">CRMI IG</a>.
-	 *
-	 * @param theId             The id of the Questionnaire.
-	 * @param theCanonical      The canonical identifier for the questionnaire (optionally version-specific).
-	 * @Param theIsPut			 A boolean value to determine if the Bundle returned uses PUT or POST request methods.  Defaults to false.
-	 * @param theRequestDetails The details (such as tenant) of this request. Usually
-	 *                          autopopulated by HAPI.
-	 * @return A Bundle containing the Questionnaire and all related Library, CodeSystem and ValueSet resources
-	 */
-	@Operation(name = ProviderConstants.CR_OPERATION_PACKAGE, idempotent = true, type = Questionnaire.class)
-	public Bundle packageQuestionnaire(
-			@IdParam IdType theId,
-			@OperationParam(name = "canonical") String theCanonical,
-			@OperationParam(name = "usePut") String theIsPut,
-			RequestDetails theRequestDetails) {
-		return (Bundle) myR4QuestionnaireProcessorFactory
-				.create(myRepositoryFactory.create(theRequestDetails))
-				.packageQuestionnaire(theId, new CanonicalType(theCanonical), null, Boolean.parseBoolean(theIsPut));
-	}
-
-	@Operation(name = ProviderConstants.CR_OPERATION_PACKAGE, idempotent = true, type = Questionnaire.class)
-	public Bundle packageQuestionnaire(
-			@OperationParam(name = "canonical") String theCanonical,
-			@OperationParam(name = "usePut") String theIsPut,
-			RequestDetails theRequestDetails) {
-		return (Bundle) myR4QuestionnaireProcessorFactory
-				.create(myRepositoryFactory.create(theRequestDetails))
-				.packageQuestionnaire(null, new CanonicalType(theCanonical), null, Boolean.parseBoolean(theIsPut));
 	}
 }

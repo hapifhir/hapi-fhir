@@ -20,7 +20,6 @@ package ca.uhn.fhir.cr.r4.activitydefinition;
  * #L%
  */
 
-import ca.uhn.fhir.cr.common.IRepositoryFactory;
 import ca.uhn.fhir.cr.r4.IActivityDefinitionProcessorFactory;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
@@ -39,10 +38,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-public class ActivityDefinitionOperationsProvider {
-	@Autowired
-	IRepositoryFactory myRepositoryFactory;
-
+public class ActivityDefinitionApplyProvider {
 	@Autowired
 	IActivityDefinitionProcessorFactory myR4ActivityDefinitionProcessorFactory;
 
@@ -100,7 +96,7 @@ public class ActivityDefinitionOperationsProvider {
 			RequestDetails theRequestDetails)
 			throws InternalErrorException, FHIRException {
 		return myR4ActivityDefinitionProcessorFactory
-				.create(myRepositoryFactory.create(theRequestDetails))
+				.create(theRequestDetails)
 				.apply(
 						theId,
 						new CanonicalType(theCanonical),
@@ -140,7 +136,7 @@ public class ActivityDefinitionOperationsProvider {
 			RequestDetails theRequestDetails)
 			throws InternalErrorException, FHIRException {
 		return myR4ActivityDefinitionProcessorFactory
-				.create(myRepositoryFactory.create(theRequestDetails))
+				.create(theRequestDetails)
 				.apply(
 						null,
 						new CanonicalType(theCanonical),

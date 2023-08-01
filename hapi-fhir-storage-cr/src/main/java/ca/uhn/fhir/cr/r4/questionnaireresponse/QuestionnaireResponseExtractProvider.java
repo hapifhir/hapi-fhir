@@ -20,7 +20,6 @@ package ca.uhn.fhir.cr.r4.questionnaireresponse;
  * #L%
  */
 
-import ca.uhn.fhir.cr.common.IRepositoryFactory;
 import ca.uhn.fhir.cr.r4.IQuestionnaireResponseProcessorFactory;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
@@ -34,10 +33,7 @@ import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.QuestionnaireResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 
-public class QuestionnaireResponseOperationsProvider {
-	@Autowired
-	IRepositoryFactory myRepositoryFactory;
-
+public class QuestionnaireResponseExtractProvider {
 	@Autowired
 	IQuestionnaireResponseProcessorFactory myR4QuestionnaireResponseProcessorFactory;
 
@@ -60,7 +56,7 @@ public class QuestionnaireResponseOperationsProvider {
 			RequestDetails theRequestDetails)
 			throws InternalErrorException, FHIRException {
 		return myR4QuestionnaireResponseProcessorFactory
-				.create(myRepositoryFactory.create(theRequestDetails))
+				.create(theRequestDetails)
 				.extract(theId, theQuestionnaireResponse, null, null, null);
 	}
 
@@ -69,7 +65,7 @@ public class QuestionnaireResponseOperationsProvider {
 			@ResourceParam QuestionnaireResponse theQuestionnaireResponse, RequestDetails theRequestDetails)
 			throws InternalErrorException, FHIRException {
 		return myR4QuestionnaireResponseProcessorFactory
-				.create(myRepositoryFactory.create(theRequestDetails))
+				.create(theRequestDetails)
 				.extract(null, theQuestionnaireResponse, null, null, null);
 	}
 }
