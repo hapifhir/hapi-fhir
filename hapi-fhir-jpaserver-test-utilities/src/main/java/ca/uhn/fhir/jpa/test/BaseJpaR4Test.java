@@ -587,10 +587,23 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 
 	@AfterEach
 	public void afterPurgeDatabase() {
+//		if (ourDatabaseClearingLatch.isSet()) {
+//			try {
+//				ourDatabaseClearingLatch.awaitExpected();
+//			} catch (InterruptedException theE) {
+//				throw new RuntimeException(theE);
+//			}
+//		}
 		runInTransaction(() -> {
 			myMdmLinkDao.deleteAll();
 		});
 		purgeDatabase(myStorageSettings, mySystemDao, myResourceReindexingSvc, mySearchCoordinatorSvc, mySearchParamRegistry, myBulkDataScheduleHelper);
+
+//		try {
+//			ourDatabaseClearingLatch.awaitExpected();
+//		} catch (InterruptedException theE) {
+//			throw new RuntimeException(theE);
+//		}
 	}
 
 	@BeforeEach

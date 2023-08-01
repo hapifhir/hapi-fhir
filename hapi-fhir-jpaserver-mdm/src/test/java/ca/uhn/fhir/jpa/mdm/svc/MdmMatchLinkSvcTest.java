@@ -33,7 +33,9 @@ import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Practitioner;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -74,6 +76,7 @@ import static org.slf4j.LoggerFactory.getLogger;
  * See {@link BaseTestMdmConfig}
  */
 public class MdmMatchLinkSvcTest {
+
 	private static final Logger ourLog = getLogger(MdmMatchLinkSvcTest.class);
 
 
@@ -90,6 +93,13 @@ public class MdmMatchLinkSvcTest {
 
 		@Autowired
 		private MdmLinkHelper myLinkHelper;
+
+		@BeforeEach
+		public void before() throws Exception {
+			super.before();
+
+			assertFalse(ourDatabaseClearingLatch.isSet());
+		}
 
 		@Test
 		public void testAddPatientLinksToNewGoldenResourceIfNoneFound() {
@@ -116,6 +126,7 @@ public class MdmMatchLinkSvcTest {
 		}
 
 		@Test
+		@RepeatedTest(20)
 		public void testUpdatingAResourceToMatchACurrentlyUnmatchedResource_resultsInUpdatedLinksForBoth() {
 			// setup
 			MDMState<Patient, JpaPid> state = new MDMState<>();
@@ -164,12 +175,12 @@ public class MdmMatchLinkSvcTest {
    			GP1, AUTO, MATCH, P1
    			GP2, AUTO, POSSIBLE_MATCH, P2
    			GP1, AUTO, POSSIBLE_MATCH, P2
-   			GP1, AUTO, POSSIBLE_DUPLICATE, GP2
+   			GP2, AUTO, POSSIBLE_DUPLICATE, GP1
 			""";
 			state.setParameterToValue(idToResource);
 			state.setOutputState(endState);
-			myLinkHelper.logMdmLinks();
 			myLinkHelper.validateResults(state);
+			myLinkHelper.logMdmLinks();
 		}
 
 		@Test

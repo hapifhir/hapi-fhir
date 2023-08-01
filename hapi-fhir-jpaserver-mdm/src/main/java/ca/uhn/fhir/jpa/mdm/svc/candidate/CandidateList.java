@@ -19,21 +19,28 @@
  */
 package ca.uhn.fhir.jpa.mdm.svc.candidate;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
-import com.google.common.collect.HashMultimap;
-import com.google.common.collect.Multimap;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class CandidateList {
 	private final CandidateStrategyEnum myStrategy;
 
-	private final Multimap<CandidateStrategyEnum, MatchedGoldenResourceCandidate> myStrategyToCandidateList = HashMultimap.create();
+	// no multimap - ordering matters
+	private final Map<CandidateStrategyEnum, List<MatchedGoldenResourceCandidate>> myStrategyToCandidateList = new HashMap<>();
 
 	public CandidateList(CandidateStrategyEnum theStrategy) {
 		myStrategy = theStrategy;
+		myStrategyToCandidateList.put(CandidateStrategyEnum.EID, new ArrayList<>());
+		myStrategyToCandidateList.put(CandidateStrategyEnum.LINK, new ArrayList<>());
+		myStrategyToCandidateList.put(CandidateStrategyEnum.SCORE, new ArrayList<>());
 	}
 
 	public CandidateStrategyEnum getStrategy() {
@@ -41,7 +48,7 @@ public class CandidateList {
 	}
 
 	public boolean isEmpty() {
-		return myStrategyToCandidateList.isEmpty();
+		return size() == 0;
 	}
 
 	public void addAll(CandidateStrategyEnum theStrategy, List<MatchedGoldenResourceCandidate> theList) {
@@ -49,25 +56,36 @@ public class CandidateList {
 			case EID:
 			case LINK:
 			case SCORE:
-				myStrategyToCandidateList.putAll(theStrategy, theList);
+				myStrategyToCandidateList.get(theStrategy).addAll(theList);
 				break;
 			default:
-				throw new InternalErrorException("Existing resources cannot be added for strategy " + theStrategy.name());
+				throw new InternalErrorException(Msg.code(2424) + " Existing resources cannot be added for strategy " + theStrategy.name());
 		}
 	}
 
 	public MatchedGoldenResourceCandidate getOnlyMatch() {
 		assert size() == 1;
-		return myStrategyToCandidateList.values()
-			.stream().findFirst().get();
+		return getCandidates().get(0);
 	}
 
 	public boolean exactlyOneMatch() {
 		return size() == 1;
 	}
 
+	/**
+	 * Returns a stream of all types.
+	 * If multiple streams are present,
+	 * they wil lbe ordered by strategy type
+	 * @return
+	 */
 	public Stream<MatchedGoldenResourceCandidate> stream() {
-		return myStrategyToCandidateList.values().stream();
+		return Stream.concat(
+			myStrategyToCandidateList.get(CandidateStrategyEnum.EID).stream(),
+			Stream.concat(
+				myStrategyToCandidateList.get(CandidateStrategyEnum.LINK).stream(),
+				myStrategyToCandidateList.get(CandidateStrategyEnum.SCORE).stream()
+			)
+		);
 	}
 
 	public Stream<MatchedGoldenResourceCandidate> stream(CandidateStrategyEnum theStrategy) {
@@ -81,15 +99,25 @@ public class CandidateList {
 			case SCORE:
 				return new ArrayList<>(myStrategyToCandidateList.get(myStrategy));
 			default:
-				return new ArrayList<>(myStrategyToCandidateList.values());
+				return Stream.of(
+					myStrategyToCandidateList.get(CandidateStrategyEnum.EID),
+					myStrategyToCandidateList.get(CandidateStrategyEnum.LINK),
+					myStrategyToCandidateList.get(CandidateStrategyEnum.SCORE)
+				).flatMap(Collection::stream).collect(Collectors.toList());
 		}
 	}
 
 	public MatchedGoldenResourceCandidate getFirstMatch() {
 		assert size() > 0;
 
-		return myStrategyToCandidateList.values()
-			.stream().findFirst().get();
+		switch (myStrategy) {
+			case EID:
+			case LINK:
+			case SCORE:
+				return myStrategyToCandidateList.get(myStrategy).get(0);
+			default:
+				return getCandidates().get(0);
+		}
 	}
 
 	public boolean isEidMatch() {
@@ -97,6 +125,15 @@ public class CandidateList {
 	}
 
 	public int size() {
-		return myStrategyToCandidateList.size();
+		switch (myStrategy) {
+			case EID:
+			case LINK:
+			case SCORE:
+				return myStrategyToCandidateList.get(myStrategy).size();
+			default:
+				return myStrategyToCandidateList.get(CandidateStrategyEnum.EID).size()
+					+ myStrategyToCandidateList.get(CandidateStrategyEnum.LINK).size()
+					+ myStrategyToCandidateList.get(CandidateStrategyEnum.SCORE).size();
+		}
 	}
 }
