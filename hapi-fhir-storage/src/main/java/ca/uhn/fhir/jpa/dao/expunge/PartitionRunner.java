@@ -24,6 +24,7 @@ import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.util.StopWatch;
 import com.google.common.collect.Lists;
 import org.apache.commons.lang3.concurrent.BasicThreadFactory;
@@ -105,6 +106,8 @@ public class PartitionRunner {
 			try {
 				runnableTasks.get(0).call();
 				return;
+			} catch (PreconditionFailedException preconditionFailedException){
+				throw preconditionFailedException;
 			} catch (Exception e) {
 				ourLog.error("Error while " + myProcessName, e);
 				throw new InternalErrorException(Msg.code(1084) + e);
