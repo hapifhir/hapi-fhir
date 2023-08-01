@@ -1,0 +1,4 @@
+---
+type: add
+issue: 5095
+title: "Added support for :above, :below, :contains and :missing _source search parameter modifiers."
