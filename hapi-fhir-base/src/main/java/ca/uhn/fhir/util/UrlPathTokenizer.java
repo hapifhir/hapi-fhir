@@ -19,18 +19,45 @@
  */
 package ca.uhn.fhir.util;
 
-import java.util.StringTokenizer;
+import ca.uhn.fhir.i18n.Msg;
+import org.apache.commons.lang3.ArrayUtils;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.NoSuchElementException;
+
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class UrlPathTokenizer {
 
-	private final StringTokenizer myTok;
+	private String[] tokens;
+	private int curPos;
 
 	public UrlPathTokenizer(String theRequestPath) {
-		myTok = new StringTokenizer(theRequestPath, "/");
+		if (theRequestPath == null) {
+			theRequestPath = "";
+		}
+		tokens = removeBlanksAndSanitize(theRequestPath.split("/"));
+		curPos = 0;
 	}
 
 	public boolean hasMoreTokens() {
-		return myTok.hasMoreTokens();
+		return curPos < tokens.length;
+	}
+
+	public int countTokens() {
+		return tokens.length;
+	}
+
+	/**
+	 * Returns the next token without updating the current position.
+	 * Will throw NoSuchElementException if there are no more tokens.
+	 */
+	public String peek() {
+		if (!hasMoreTokens()) {
+			throw new NoSuchElementException(Msg.code(2420) + "Attempt to retrieve URL token out of bounds");
+		}
+		return tokens[curPos];
 	}
 
 	/**
@@ -43,6 +70,22 @@ public class UrlPathTokenizer {
 	 * @see UrlUtil#unescape(String)
 	 */
 	public String nextTokenUnescapedAndSanitized() {
-		return UrlUtil.sanitizeUrlPart(UrlUtil.unescape(myTok.nextToken()));
+		String token = peek();
+		curPos++;
+		return token;
+	}
+
+	/**
+	 * Given an array of Strings, this method will return all the non-blank entries in that
+	 * array, after running sanitizeUrlPart() and unescape() on them.
+	 */
+	private static String[] removeBlanksAndSanitize(String[] theInput) {
+		List<String> output = new ArrayList<>();
+		for (String s : theInput) {
+			if (!isBlank(s)) {
+				output.add(UrlUtil.sanitizeUrlPart(UrlUtil.unescape(s)));
+			}
+		}
+		return output.toArray(ArrayUtils.EMPTY_STRING_ARRAY);
 	}
 }

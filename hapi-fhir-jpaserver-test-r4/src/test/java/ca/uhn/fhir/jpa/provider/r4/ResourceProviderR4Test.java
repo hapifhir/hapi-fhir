@@ -2482,12 +2482,8 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			"Patient/A/_history/1"
 		));
 
-		history = myClient
-			.loadPage()
-			.next(history)
-			.execute();
-
-		assertEquals(0, history.getEntry().size());
+		// we got them all
+		assertNull(history.getLink("next"));
 
 		/*
 		 * Try with a date offset
