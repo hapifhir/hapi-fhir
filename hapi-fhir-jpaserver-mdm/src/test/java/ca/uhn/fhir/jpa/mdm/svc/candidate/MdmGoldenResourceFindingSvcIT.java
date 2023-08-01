@@ -161,9 +161,10 @@ class MdmGoldenResourceFindingSvcIT extends BaseMdmR4Test {
 	}
 
 	private FindGoldenResourceCandidatesParams createFindGoldenResourceCandidateParams(IAnyResource theResource) {
-		FindGoldenResourceCandidatesParams params = new FindGoldenResourceCandidatesParams();
-		params.setResource(theResource);
-		params.setContext(new MdmTransactionContext());
+		FindGoldenResourceCandidatesParams params = new FindGoldenResourceCandidatesParams(
+			theResource,
+			new MdmTransactionContext()
+		);
 		return params;
 	}
 }

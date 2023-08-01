@@ -8,26 +8,23 @@ public class FindGoldenResourceCandidatesParams {
 	/**
 	 * The resource to find matches for
 	 */
-	private IAnyResource myResource;
+	private final IAnyResource myResource;
 
 	/**
 	 * The mdm context
 	 */
-	private MdmTransactionContext myContext;
+	private final MdmTransactionContext myContext;
+
+	public FindGoldenResourceCandidatesParams(IAnyResource theResource, MdmTransactionContext theContext) {
+		myResource = theResource;
+		myContext = theContext;
+	}
 
 	public IAnyResource getResource() {
 		return myResource;
 	}
 
-	public void setResource(IAnyResource theResource) {
-		myResource = theResource;
-	}
-
 	public MdmTransactionContext getContext() {
 		return myContext;
-	}
-
-	public void setContext(MdmTransactionContext theContext) {
-		myContext = theContext;
 	}
 }

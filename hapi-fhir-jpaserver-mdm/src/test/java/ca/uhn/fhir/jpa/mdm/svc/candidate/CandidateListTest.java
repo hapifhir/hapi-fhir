@@ -67,7 +67,7 @@ public class CandidateListTest {
 		assertEquals(size, candidateList.stream().count());
 	}
 
-	private int populateCandidateList(CandidateStrategyEnum theStrategy, int size, CandidateList candidateList) {
+	private int populateCandidateList(CandidateStrategyEnum theStrategy, int theSize, CandidateList theCandidateList) {
 		if (theStrategy == CandidateStrategyEnum.ANY) {
 			int realTotal = 0;
 			for (CandidateStrategyEnum strat : CandidateStrategyEnum.values()) {
@@ -75,14 +75,14 @@ public class CandidateListTest {
 					continue;
 				}
 
-				candidateList.addAll(strat, getCandidatesList(size));
-				realTotal += size;
+				theCandidateList.addAll(strat, getCandidatesList(theSize));
+				realTotal += theSize;
 			}
-			size = realTotal;
+			theSize = realTotal;
 		} else {
-			candidateList.addAll(theStrategy, getCandidatesList(size));
+			theCandidateList.addAll(theStrategy, getCandidatesList(theSize));
 		}
-		return size;
+		return theSize;
 	}
 
 	@ParameterizedTest
