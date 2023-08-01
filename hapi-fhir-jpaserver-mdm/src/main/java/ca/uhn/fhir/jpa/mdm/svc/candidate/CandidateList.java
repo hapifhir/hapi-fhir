@@ -34,7 +34,8 @@ public class CandidateList {
 	private final CandidateStrategyEnum myStrategy;
 
 	// no multimap - ordering matters
-	private final Map<CandidateStrategyEnum, List<MatchedGoldenResourceCandidate>> myStrategyToCandidateList = new HashMap<>();
+	private final Map<CandidateStrategyEnum, List<MatchedGoldenResourceCandidate>> myStrategyToCandidateList =
+			new HashMap<>();
 
 	public CandidateList(CandidateStrategyEnum theStrategy) {
 		myStrategy = theStrategy;
@@ -59,7 +60,8 @@ public class CandidateList {
 				myStrategyToCandidateList.get(theStrategy).addAll(theList);
 				break;
 			default:
-				throw new InternalErrorException(Msg.code(2424) + " Existing resources cannot be added for strategy " + theStrategy.name());
+				throw new InternalErrorException(
+						Msg.code(2424) + " Existing resources cannot be added for strategy " + theStrategy.name());
 		}
 	}
 
@@ -79,12 +81,10 @@ public class CandidateList {
 	 */
 	public Stream<MatchedGoldenResourceCandidate> stream() {
 		return Stream.concat(
-			myStrategyToCandidateList.get(CandidateStrategyEnum.EID).stream(),
-			Stream.concat(
-				myStrategyToCandidateList.get(CandidateStrategyEnum.LINK).stream(),
-				myStrategyToCandidateList.get(CandidateStrategyEnum.SCORE).stream()
-			)
-		);
+				myStrategyToCandidateList.get(CandidateStrategyEnum.EID).stream(),
+				Stream.concat(
+						myStrategyToCandidateList.get(CandidateStrategyEnum.LINK).stream(),
+						myStrategyToCandidateList.get(CandidateStrategyEnum.SCORE).stream()));
 	}
 
 	public Stream<MatchedGoldenResourceCandidate> stream(CandidateStrategyEnum theStrategy) {
@@ -99,10 +99,11 @@ public class CandidateList {
 				return new ArrayList<>(myStrategyToCandidateList.get(myStrategy));
 			default:
 				return Stream.of(
-					myStrategyToCandidateList.get(CandidateStrategyEnum.EID),
-					myStrategyToCandidateList.get(CandidateStrategyEnum.LINK),
-					myStrategyToCandidateList.get(CandidateStrategyEnum.SCORE)
-				).flatMap(Collection::stream).collect(Collectors.toList());
+								myStrategyToCandidateList.get(CandidateStrategyEnum.EID),
+								myStrategyToCandidateList.get(CandidateStrategyEnum.LINK),
+								myStrategyToCandidateList.get(CandidateStrategyEnum.SCORE))
+						.flatMap(Collection::stream)
+						.collect(Collectors.toList());
 		}
 	}
 
@@ -131,8 +132,12 @@ public class CandidateList {
 				return myStrategyToCandidateList.get(myStrategy).size();
 			default:
 				return myStrategyToCandidateList.get(CandidateStrategyEnum.EID).size()
-					+ myStrategyToCandidateList.get(CandidateStrategyEnum.LINK).size()
-					+ myStrategyToCandidateList.get(CandidateStrategyEnum.SCORE).size();
+						+ myStrategyToCandidateList
+								.get(CandidateStrategyEnum.LINK)
+								.size()
+						+ myStrategyToCandidateList
+								.get(CandidateStrategyEnum.SCORE)
+								.size();
 		}
 	}
 }

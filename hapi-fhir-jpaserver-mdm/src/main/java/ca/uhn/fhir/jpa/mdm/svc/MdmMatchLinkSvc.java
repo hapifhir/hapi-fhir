@@ -104,9 +104,8 @@ public class MdmMatchLinkSvc {
 		boolean isResourceBlocked = myBlockRuleEvaluationSvc.isMdmMatchingBlocked(theResource);
 
 		if (!isResourceBlocked) {
-			FindGoldenResourceCandidatesParams params = new FindGoldenResourceCandidatesParams(
-				theResource, theMdmTransactionContext
-			);
+			FindGoldenResourceCandidatesParams params =
+					new FindGoldenResourceCandidatesParams(theResource, theMdmTransactionContext);
 			candidateList = myMdmGoldenResourceFindingSvc.findGoldenResourceCandidates(params);
 		}
 

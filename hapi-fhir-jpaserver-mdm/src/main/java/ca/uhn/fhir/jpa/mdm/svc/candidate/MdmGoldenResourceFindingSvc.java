@@ -72,7 +72,8 @@ public class MdmGoldenResourceFindingSvc {
 			return eidGoldenResources;
 		}
 
-		boolean isUpdate = theParams.getContext().getRestOperation() == MdmTransactionContext.OperationType.UPDATE_RESOURCE;
+		boolean isUpdate =
+				theParams.getContext().getRestOperation() == MdmTransactionContext.OperationType.UPDATE_RESOURCE;
 
 		// find MdmLinks that have theResource as the source
 		// (these are current golden resources matching this resource)
