@@ -75,8 +75,7 @@ public class CandidateList {
 	/**
 	 * Returns a stream of all types.
 	 * If multiple streams are present,
-	 * they wil lbe ordered by strategy type
-	 * @return
+	 * they will be ordered by strategy type
 	 */
 	public Stream<MatchedGoldenResourceCandidate> stream() {
 		return Stream.concat(

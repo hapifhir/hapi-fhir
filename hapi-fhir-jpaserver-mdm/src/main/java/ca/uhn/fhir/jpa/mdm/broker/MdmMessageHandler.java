@@ -84,7 +84,6 @@ public class MdmMessageHandler implements MessageHandler {
 			IBaseResource sourceResource = msg.getNewPayload(myFhirContext);
 
 			boolean toProcess = myMdmResourceFilteringSvc.shouldBeProcessed((IAnyResource) sourceResource);
-			ourLog.info("\n" + sourceResource.getIdElement().getValue() + " to process " + toProcess);
 			if (toProcess) {
 				matchMdmAndUpdateLinks(sourceResource, msg);
 			}
