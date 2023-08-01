@@ -33,7 +33,6 @@ import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Practitioner;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
@@ -93,13 +92,6 @@ public class MdmMatchLinkSvcTest {
 
 		@Autowired
 		private MdmLinkHelper myLinkHelper;
-
-		@BeforeEach
-		public void before() throws Exception {
-			super.before();
-
-			assertFalse(ourDatabaseClearingLatch.isSet());
-		}
 
 		@Test
 		public void testAddPatientLinksToNewGoldenResourceIfNoneFound() {

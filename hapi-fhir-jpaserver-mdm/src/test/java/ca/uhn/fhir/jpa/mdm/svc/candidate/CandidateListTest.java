@@ -3,7 +3,6 @@ package ca.uhn.fhir.jpa.mdm.svc.candidate;
 import ca.uhn.fhir.mdm.api.MdmMatchOutcome;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
@@ -62,6 +61,13 @@ public class CandidateListTest {
 		CandidateList candidateList = new CandidateList(theStrategy);
 
 		// we need some values first
+		size = populateCandidateList(theStrategy, size, candidateList);
+
+		// test
+		assertEquals(size, candidateList.stream().count());
+	}
+
+	private int populateCandidateList(CandidateStrategyEnum theStrategy, int size, CandidateList candidateList) {
 		if (theStrategy == CandidateStrategyEnum.ANY) {
 			int realTotal = 0;
 			for (CandidateStrategyEnum strat : CandidateStrategyEnum.values()) {
@@ -76,9 +82,7 @@ public class CandidateListTest {
 		} else {
 			candidateList.addAll(theStrategy, getCandidatesList(size));
 		}
-
-		// test
-		assertEquals(size, candidateList.stream().count());
+		return size;
 	}
 
 	@ParameterizedTest
@@ -103,9 +107,15 @@ public class CandidateListTest {
 
 	@ParameterizedTest
 	@EnumSource(CandidateStrategyEnum.class)
-	public void getCandidates_variousStrategies_returnsExpectedResults() {
+	public void getCandidates_variousStrategies_returnsExpectedResults(CandidateStrategyEnum theStrategy) {
 		// setup
+		CandidateList candidateList = new CandidateList(theStrategy);
 
+		int size = populateCandidateList(theStrategy, 10, candidateList);
 
+		// tests
+		assertEquals(size, candidateList.size());
+		List<MatchedGoldenResourceCandidate> candidates = candidateList.getCandidates();
+		assertEquals(size, candidates.size());
 	}
 }

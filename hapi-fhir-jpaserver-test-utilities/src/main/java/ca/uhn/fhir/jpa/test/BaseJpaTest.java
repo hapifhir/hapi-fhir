@@ -99,7 +99,6 @@ import ca.uhn.fhir.util.ClasspathUtil;
 import ca.uhn.fhir.util.FhirVersionIndependentConcept;
 import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.TestUtil;
-import ca.uhn.test.concurrency.PointcutLatch;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -263,8 +262,6 @@ public abstract class BaseJpaTest extends BaseTest {
 	private DaoRegistry myDaoRegistry;
 	private final List<Object> myRegisteredInterceptors = new ArrayList<>(1);
 
-	protected static final PointcutLatch ourDatabaseClearingLatch = new PointcutLatch("PurgeDBLatch");
-
 	@SuppressWarnings("BusyWait")
 	public static void waitForSize(int theTarget, List<?> theList) {
 		StopWatch sw = new StopWatch();
@@ -299,8 +296,6 @@ public abstract class BaseJpaTest extends BaseTest {
 
 	@SuppressWarnings("BusyWait")
 	protected static void purgeDatabase(JpaStorageSettings theStorageSettings, IFhirSystemDao<?, ?> theSystemDao, IResourceReindexingSvc theResourceReindexingSvc, ISearchCoordinatorSvc theSearchCoordinatorSvc, ISearchParamRegistry theSearchParamRegistry, IBulkDataExportJobSchedulingHelper theBulkDataJobActivator) {
-//		ourDatabaseClearingLatch.setExpectedCount(1);
-
 		theSearchCoordinatorSvc.cancelAllActiveSearches();
 		theResourceReindexingSvc.cancelAndPurgeAllJobs();
 		theBulkDataJobActivator.cancelAndPurgeAllJobs();
@@ -331,8 +326,6 @@ public abstract class BaseJpaTest extends BaseTest {
 		theStorageSettings.setAllowMultipleDelete(multiDeleteEnabled);
 
 		theSearchParamRegistry.forceRefresh();
-
-//		ourDatabaseClearingLatch.call(1);
 	}
 
 	protected static Set<String> toCodes(Set<TermConcept> theConcepts) {
