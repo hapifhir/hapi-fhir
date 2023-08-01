@@ -106,7 +106,7 @@ public class PartitionRunner {
 			try {
 				runnableTasks.get(0).call();
 				return;
-			} catch (PreconditionFailedException preconditionFailedException){
+			} catch (PreconditionFailedException preconditionFailedException) {
 				throw preconditionFailedException;
 			} catch (Exception e) {
 				ourLog.error("Error while " + myProcessName, e);
