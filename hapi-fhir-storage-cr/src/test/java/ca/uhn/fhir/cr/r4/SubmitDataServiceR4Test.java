@@ -14,9 +14,9 @@ import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.StringType;
 
 import org.junit.jupiter.api.Test;
+import org.opencds.cqf.fhir.utility.Searches;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 public class SubmitDataServiceR4Test extends BaseCrR4TestServer {
 	@Autowired
@@ -44,19 +44,36 @@ public class SubmitDataServiceR4Test extends BaseCrR4TestServer {
 				Lists.newArrayList(obs));
 
 		var repository = new HapiFhirRepository(myDaoRegistry, requestDetails, ourRestfulServer);
-		var result = repository.search(Bundle.class, MeasureReport.class, null);
-		var id1 = "MeasureReport/1";
-		var id2 = "Observation/2";
 
+		var resultMr = repository.search(Bundle.class, MeasureReport.class, Searches.ALL);
+		var mrSize = resultMr.getEntry().size();
+		MeasureReport report = null;
+		for (int i = 0; i < mrSize; i++){
+			var getEntry = resultMr.getEntry();
+			var mrResource = (MeasureReport) getEntry.get(i).getResource();
+			var measure = mrResource.getMeasure();
+			if (measure.equals("Measure/A123")){
+				report = mrResource;
+				break;
+			}
+		}
+		//found submitted MeasureReport!
+		assertNotNull(report);
 
-		//find submitted resources
-		var savedObs = ourClient.read().resource(Observation.class).withId("2").execute();
-		var savedMr = ourClient.read().resource(MeasureReport.class).withId("1").execute();
+		var resultOb = repository.search(Bundle.class, Observation.class, Searches.ALL);
+		var obSize = resultOb.getEntry().size();
+		Observation observation = null;
+		for (int i = 0; i < obSize; i++){
+			var getEntry = resultOb.getEntry();
+			var obResource = (Observation) getEntry.get(i).getResource();
+			var val = obResource.getValue().primitiveValue();
+			if (val.equals("ABC")){
+				observation = obResource;
+				break;
+			}
+		}
+		//found submitted Observation!
+		assertNotNull(observation);
 
-		//validate resources match
-		assertNotNull(savedObs);
-		assertEquals("ABC", savedObs.getValue().primitiveValue());
-		assertNotNull(savedMr);
-		assertEquals("Measure/A123", savedMr.getMeasure());
 	}
 }
