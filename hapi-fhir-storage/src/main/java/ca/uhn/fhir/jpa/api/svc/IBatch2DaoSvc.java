@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.jpa.api.svc;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.pid.IResourcePidList;
 
@@ -43,7 +44,7 @@ public interface IBatch2DaoSvc {
 	 */
 	default IResourcePidList fetchResourceIdsPage(
 			Date theStart, Date theEnd, @Nullable RequestPartitionId theRequestPartitionId, @Nullable String theUrl) {
-		throw new UnsupportedOperationException("Not implemented unless explicitly overridden");
+		throw new UnsupportedOperationException(Msg.code(2425) + "Not implemented unless explicitly overridden");
 	}
 
 	// TODO: LD:  eliminate this call in all other implementors
