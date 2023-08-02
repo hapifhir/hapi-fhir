@@ -1189,6 +1189,13 @@
 				<artifactId>jakarta.activation</artifactId>
 				<version>2.0.0</version>
 			</dependency>
+			<!-- Architecture Test -->
+			<dependency>
+				<groupId>com.tngtech.archunit</groupId>
+				<artifactId>archunit-junit5</artifactId>
+				<version>1.0.1</version>
+				<scope>test</scope>
+			</dependency>
 			<dependency>
 				<groupId>com.vladsch.flexmark</groupId>
 				<artifactId>flexmark</artifactId>
