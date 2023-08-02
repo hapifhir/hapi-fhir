@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.jpa.mdm.svc;
 
+import ca.uhn.fhir.jpa.mdm.models.FindGoldenResourceCandidatesParams;
 import ca.uhn.fhir.jpa.mdm.svc.candidate.CandidateList;
 import ca.uhn.fhir.jpa.mdm.svc.candidate.CandidateStrategyEnum;
 import ca.uhn.fhir.jpa.mdm.svc.candidate.MatchedGoldenResourceCandidate;
@@ -93,7 +94,7 @@ public class MdmMatchLinkSvc {
 		// we require a candidatestrategy, but it doesn't matter
 		// because empty lists are effectively no matches
 		// (and so the candidate strategy doesn't matter)
-		CandidateList candidateList = new CandidateList(CandidateStrategyEnum.LINK);
+		CandidateList candidateList = new CandidateList(CandidateStrategyEnum.ANY);
 
 		/*
 		 * If a resource is blocked, we will not conduct
@@ -103,7 +104,9 @@ public class MdmMatchLinkSvc {
 		boolean isResourceBlocked = myBlockRuleEvaluationSvc.isMdmMatchingBlocked(theResource);
 
 		if (!isResourceBlocked) {
-			candidateList = myMdmGoldenResourceFindingSvc.findGoldenResourceCandidates(theResource);
+			FindGoldenResourceCandidatesParams params =
+					new FindGoldenResourceCandidatesParams(theResource, theMdmTransactionContext);
+			candidateList = myMdmGoldenResourceFindingSvc.findGoldenResourceCandidates(params);
 		}
 
 		if (isResourceBlocked || candidateList.isEmpty()) {
