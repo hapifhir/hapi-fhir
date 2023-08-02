@@ -24,6 +24,7 @@ import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Resource;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.opencds.cqf.cql.evaluator.library.EvaluationSettings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.mock.web.MockHttpServletRequest;
@@ -49,12 +50,15 @@ public abstract class BaseCrR4TestServer extends BaseJpaR4Test implements IResou
 	//ApplicationContext myApplicationContext;
 	private SimpleRequestHeaderInterceptor mySimpleHeaderInterceptor;
 
+	@Autowired
+	EvaluationSettings myEvaluationSettings;
 
 	@SuppressWarnings("deprecation")
 	@AfterEach
 	public void after() {
 		ourClient.unregisterInterceptor(mySimpleHeaderInterceptor);
 		myStorageSettings.setIndexMissingFields(new JpaStorageSettings().getIndexMissingFields());
+		myEvaluationSettings.getLibraryCache().clear();
 	}
 	@Autowired
 	RestfulServer ourRestfulServer;
