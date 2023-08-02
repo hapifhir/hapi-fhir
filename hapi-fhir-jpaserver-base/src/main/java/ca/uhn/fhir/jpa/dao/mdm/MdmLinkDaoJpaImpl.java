@@ -133,8 +133,8 @@ public class MdmLinkDaoJpaImpl implements IMdmLinkDao<JpaPid, MdmLink> {
 
 	@Override
 	public List<MdmLink> findLinksAssociatedWithGoldenResourceOfSourceResourceExcludingNoMatch(JpaPid theSourcePid) {
-		return new ArrayList<>(myMdmLinkDao.findLinksAssociatedWithGoldenResourceOfSourceResourceExcludingMatchResult(
-				(theSourcePid).getId(), MdmMatchResultEnum.NO_MATCH));
+		return myMdmLinkDao.findLinksAssociatedWithGoldenResourceOfSourceResourceExcludingMatchResult(
+				(theSourcePid).getId(), MdmMatchResultEnum.NO_MATCH);
 	}
 
 	@Override
