@@ -134,7 +134,7 @@ class PrefetchTemplateUtilTest {
 			PrefetchTemplateUtil.substituteTemplate(template, context, FhirContext.forR4());
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("HAPI-2374: Request context did not provide valid " + fhirContextR4.getVersion().getVersion() + " Bundle resource for template key <draftOrders>" , e.getMessage());
+			assertEquals("HAPI-2374: Request context did not provide valid " + fhirContextR4.getVersion().getVersion() + " Bundle resource for template key <draftOrders>", e.getMessage());
 		}
 	}
 
