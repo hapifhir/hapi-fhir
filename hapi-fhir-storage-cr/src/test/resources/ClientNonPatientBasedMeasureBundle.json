@@ -1594,8 +1594,8 @@
 				]
 			},
 			"request": {
-				"method": "POST",
-				"url": "http://hl7.org/fhir/Library/FHIRHelpers"
+				"method": "PUT",
+				"url": "Library/FHIRHelpers"
 			}
 		},
 		{
