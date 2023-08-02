@@ -82,7 +82,8 @@ public class GoldenResourceSearchSvcImpl implements IGoldenResourceSearchSvc {
 		DateRangeParam chunkDateRange =
 				DateRangeUtil.narrowDateRange(searchParamMap.getLastUpdated(), theStart, theEnd);
 		searchParamMap.setLastUpdated(chunkDateRange);
-		searchParamMap.setCount(thePageSize); // request this many pids
+		// TODO:  test this
+//		searchParamMap.setCount(thePageSize); // request this many pids
 		searchParamMap.add(
 				"_tag", new TokenParam(MdmConstants.SYSTEM_GOLDEN_RECORD_STATUS, MdmConstants.CODE_GOLDEN_RECORD));
 
