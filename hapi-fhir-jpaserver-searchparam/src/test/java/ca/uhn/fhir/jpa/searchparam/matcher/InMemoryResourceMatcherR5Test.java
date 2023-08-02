@@ -6,6 +6,7 @@ import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamDate;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamUri;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
@@ -26,6 +27,8 @@ import org.hl7.fhir.r5.model.Observation;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
@@ -139,6 +142,24 @@ public class InMemoryResourceMatcherR5Test {
 			InMemoryMatchResult result = myInMemoryResourceMatcher.match(Constants.PARAM_SOURCE + "=#" + REQUEST_ID, myObservation, mySearchParams, newRequest());
 			assertFalse(result.matched());
 		}
+	}
+
+	@ParameterizedTest
+	@CsvSource({
+		"http://host.com/v1/v2, _source:contains=HOST.com/v1",
+		"http://host.com/v1/v2, _source:above=http://host.com/v1/v2/v3",
+		"http://host.com/v1/v2, _source:below=http://host.com/v1",
+		"                     , _source:missing=true",
+		"http://host.com/v1/v2, _source:missing=false",
+	})
+	public void testMatchSource_withModifiers_matchesSuccessfully(String theSourceValue, String theSearchCriteria) {
+		myObservation.getMeta().setSource(theSourceValue);
+
+		ResourceIndexedSearchParams searchParams = new ResourceIndexedSearchParams();
+		searchParams.myUriParams.add(extractSourceUriParam(myObservation));
+
+		InMemoryMatchResult resultInsidePeriod = myInMemoryResourceMatcher.match(theSearchCriteria, myObservation, searchParams, newRequest());
+		assertTrue(resultInsidePeriod.matched());
 	}
 
 	@Test
@@ -391,6 +412,11 @@ public class InMemoryResourceMatcherR5Test {
 	private ResourceIndexedSearchParamToken extractCodeTokenParam(Observation theObservation) {
 		Coding coding = theObservation.getCode().getCodingFirstRep();
 		return new ResourceIndexedSearchParamToken(new PartitionSettings(), "Observation", "code", coding.getSystem(), coding.getCode());
+	}
+
+	private ResourceIndexedSearchParamUri extractSourceUriParam(Observation theObservation) {
+		String source = theObservation.getMeta().getSource();
+		return new ResourceIndexedSearchParamUri(new PartitionSettings(), "Observation", "_source", source);
 	}
 
 	@Configuration
