@@ -30,17 +30,17 @@ import ca.uhn.fhir.batch2.jobs.chunk.TypedPidJson;
 import ca.uhn.fhir.batch2.jobs.parameters.PartitionedJobParameters;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.pid.IResourcePidList;
-import ca.uhn.fhir.jpa.api.pid.TypedResourcePid;
 import ca.uhn.fhir.util.Logs;
+import com.google.common.collect.Iterators;
+import com.google.common.collect.UnmodifiableIterator;
 import org.slf4j.Logger;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 
 public class ResourceIdListStep<PT extends PartitionedJobParameters, IT extends ChunkRangeJson>
@@ -76,7 +76,6 @@ public class ResourceIdListStep<PT extends PartitionedJobParameters, IT extends 
 
 		RequestPartitionId requestPartitionId =
 				theStepExecutionDetails.getParameters().getRequestPartitionId();
-		Set<TypedPidJson> idBuffer = new LinkedHashSet<>();
 		int totalIdsFound = 0;
 		int chunkCount = 0;
 
@@ -86,7 +85,7 @@ public class ResourceIdListStep<PT extends PartitionedJobParameters, IT extends 
 			maxBatchId = Math.min(batchSize.intValue(), maxBatchId);
 		}
 
-		IResourcePidList nextChunk = myIdChunkProducer.fetchResourceIdsPage(
+		final IResourcePidList nextChunk = myIdChunkProducer.fetchResourceIdsPage(
 				start, end, pageSize, requestPartitionId, theStepExecutionDetails.getData());
 
 		if (nextChunk.isEmpty()) {
@@ -95,29 +94,19 @@ public class ResourceIdListStep<PT extends PartitionedJobParameters, IT extends 
 
 		ourLog.debug("Found {} IDs from {} to {}", nextChunk.size(), start, nextChunk.getLastDate());
 
-		for (TypedResourcePid typedResourcePid : nextChunk.getTypedResourcePids()) {
-			TypedPidJson nextId = new TypedPidJson(typedResourcePid);
-			idBuffer.add(nextId);
-		}
+		final Set<TypedPidJson> idBuffer = nextChunk.getTypedResourcePids().stream()
+				.map(TypedPidJson::new)
+				.collect(Collectors.toCollection(LinkedHashSet::new));
 
-		while (idBuffer.size() > maxBatchId) {
-			List<TypedPidJson> submissionIds = new ArrayList<>();
-			for (Iterator<TypedPidJson> iter = idBuffer.iterator(); iter.hasNext(); ) {
-				submissionIds.add(iter.next());
-				iter.remove();
-				if (submissionIds.size() == maxBatchId) {
-					break;
-				}
-			}
+		final UnmodifiableIterator<List<TypedPidJson>> partition = Iterators.partition(idBuffer.iterator(), maxBatchId);
+
+		while (partition.hasNext()) {
+			final List<TypedPidJson> submissionIds = partition.next();
 
 			totalIdsFound += submissionIds.size();
 			chunkCount++;
 			submitWorkChunk(submissionIds, nextChunk.getRequestPartitionId(), theDataSink);
 		}
-
-		totalIdsFound += idBuffer.size();
-		chunkCount++;
-		submitWorkChunk(idBuffer, requestPartitionId, theDataSink);
 
 		ourLog.info("Submitted {} chunks with {} resource IDs", chunkCount, totalIdsFound);
 		return RunOutcome.SUCCESS;

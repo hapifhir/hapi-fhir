@@ -63,35 +63,23 @@ class Batch2DaoSvcImplTest extends BaseJpaR4Test {
 
 	@Test
 	void fetchResourcesByUrlEmptyUrl() {
-		try {
-			mySubject.fetchResourceIdsPage(PREVIOUS_MILLENNIUM, TOMORROW, 800, RequestPartitionId.defaultPartition(), "");
-		} catch (InternalErrorException exception) {
-			assertEquals("HAPI-2422: this should never happen: URL is missing a '?'", exception.getMessage());
-		} catch (Exception exception) {
-			fail("caught wrong Exception");
-		}
+		final InternalErrorException exception = assertThrows(InternalErrorException.class, () -> mySubject.fetchResourceIdsPage(PREVIOUS_MILLENNIUM, TOMORROW, 800, RequestPartitionId.defaultPartition(), ""));
+
+		assertEquals("HAPI-2422: this should never happen: URL is missing a '?'", exception.getMessage());
 	}
 
 	@Test
 	void fetchResourcesByUrlSingleQuestionMark() {
-		try {
-			mySubject.fetchResourceIdsPage(PREVIOUS_MILLENNIUM, TOMORROW, 800, RequestPartitionId.defaultPartition(), "?");
-		} catch (InternalErrorException exception) {
-			assertEquals("HAPI-2223: theResourceName must not be blank", exception.getMessage());
-		} catch (Exception exception) {
-			fail("caught wrong Exception");
-		}
+		final InternalErrorException exception = assertThrows(InternalErrorException.class, () -> mySubject.fetchResourceIdsPage(PREVIOUS_MILLENNIUM, TOMORROW, 800, RequestPartitionId.defaultPartition(), "?"));
+
+		assertEquals("HAPI-2223: theResourceName must not be blank", exception.getMessage());
 	}
 
 	@Test
 	void fetchResourcesByUrlNonsensicalResource() {
-		try {
-			mySubject.fetchResourceIdsPage(PREVIOUS_MILLENNIUM, TOMORROW, 800, RequestPartitionId.defaultPartition(), "Banana?_expunge=true");
-		} catch (InternalErrorException exception) {
-			assertEquals("HAPI-2223: HAPI-1684: Unknown resource name \"Banana\" (this name is not known in FHIR version \"R4\")", exception.getMessage());
-		} catch (Exception exception) {
-			fail("caught wrong Exception");
-		}
+		final InternalErrorException exception = assertThrows(InternalErrorException.class, () -> mySubject.fetchResourceIdsPage(PREVIOUS_MILLENNIUM, TOMORROW, 800, RequestPartitionId.defaultPartition(), "Banana?_expunge=true"));
+
+		assertEquals("HAPI-2223: HAPI-1684: Unknown resource name \"Banana\" (this name is not known in FHIR version \"R4\")", exception.getMessage());
 	}
 
 	@ParameterizedTest
