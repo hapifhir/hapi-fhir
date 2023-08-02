@@ -183,6 +183,14 @@ public class BulkDataExportProvider {
 			theOptions.setResourceTypes(resourceTypes);
 		}
 
+		String tester = theOptions.getOriginalRequestUrl();
+		Character displacer = '?';
+		int index = tester.indexOf(displacer);
+		if(index!=-1){
+			tester = tester.substring(0,index);
+			theOptions.setOriginalRequestUrl(tester);
+		}
+
 		// Determine and validate partition permissions (if needed).
 		RequestPartitionId partitionId =
 				myRequestPartitionHelperService.determineReadPartitionForRequest(theRequestDetails, null);
