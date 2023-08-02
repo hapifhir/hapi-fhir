@@ -159,8 +159,6 @@ public class Batch2DaoSvcImpl implements IBatch2DaoSvc {
 	@Nonnull
 	private IResourcePidList fetchResourceIdsPageNoUrl(
 			Date theStart, Date theEnd, int thePagesize, RequestPartitionId theRequestPartitionId) {
-//		Pageable page = Pageable.ofSize(thePagesize);
-		// TODO:  test this
 		Pageable page = Pageable.unpaged();
 		Slice<Object[]> slice;
 		if (theRequestPartitionId == null || theRequestPartitionId.isAllPartitions()) {
