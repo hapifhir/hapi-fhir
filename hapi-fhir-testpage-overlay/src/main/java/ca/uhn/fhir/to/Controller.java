@@ -54,10 +54,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.util.ArrayList;
@@ -65,6 +61,10 @@ import java.util.Collections;
 import java.util.List;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
 
 import static ca.uhn.fhir.rest.server.provider.ProviderConstants.DIFF_OPERATION_NAME;
 import static ca.uhn.fhir.util.UrlUtil.sanitizeUrlPart;
@@ -428,8 +428,7 @@ public class Controller extends BaseController {
 	protected IHfqlExecutionResult executeHfqlStatement(
 			HttpServletRequest theServletRequest, String theHfqlQuery, HomeRequest theRequest, int theRowLimit)
 			throws IOException {
-		Parameters requestParameters =
-				HfqlRestClient.newQueryRequestParameters(theHfqlQuery, theRowLimit, theRowLimit);
+		Parameters requestParameters = HfqlRestClient.newQueryRequestParameters(theHfqlQuery, theRowLimit, theRowLimit);
 		GenericClient client = theRequest.newClient(theServletRequest, getContext(theRequest), myConfig, null);
 		return new RemoteHfqlExecutionResult(requestParameters, client);
 	}

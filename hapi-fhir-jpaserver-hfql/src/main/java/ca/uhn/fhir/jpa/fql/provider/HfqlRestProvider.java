@@ -34,11 +34,11 @@ import org.apache.commons.csv.CSVPrinter;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.io.IOException;
+import java.io.OutputStreamWriter;
 import javax.annotation.Nullable;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
 
 import static ca.uhn.fhir.jpa.fql.jdbc.HfqlRestClient.CSV_FORMAT;
 import static ca.uhn.fhir.rest.api.Constants.CHARSET_UTF8_CTSUFFIX;
@@ -210,5 +210,4 @@ public class HfqlRestProvider {
 			}
 		}
 	}
-
 }

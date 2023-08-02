@@ -33,9 +33,9 @@ import org.hl7.fhir.r4.model.IntegerType;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.StringType;
 
-import javax.annotation.Nonnull;
 import java.sql.SQLException;
 import java.util.concurrent.TimeUnit;
+import javax.annotation.Nonnull;
 
 import static ca.uhn.fhir.jpa.fql.util.HfqlConstants.DEFAULT_FETCH_SIZE;
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
