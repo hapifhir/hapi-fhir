@@ -3,7 +3,10 @@ package ca.uhn.fhir.jpa.mdm.svc;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.mdm.BaseMdmR4Test;
+import ca.uhn.fhir.jpa.mdm.config.BaseTestMdmConfig;
 import ca.uhn.fhir.jpa.mdm.config.BlockListConfig;
+import ca.uhn.fhir.jpa.mdm.helper.MdmLinkHelper;
+import ca.uhn.fhir.jpa.mdm.helper.testmodels.MDMState;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.mdm.api.IMdmLink;
@@ -33,14 +36,18 @@ import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -63,8 +70,17 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
+import static org.slf4j.LoggerFactory.getLogger;
 
+/**
+ * These tests use the rules defined in mdm-rules.json
+ * See {@link BaseTestMdmConfig}
+ */
 public class MdmMatchLinkSvcTest {
+
+	private static final Logger ourLog = getLogger(MdmMatchLinkSvcTest.class);
+
+
 	@Nested
 	public class NoBlockLinkTest extends BaseMdmR4Test {
 		@Autowired
@@ -75,6 +91,9 @@ public class MdmMatchLinkSvcTest {
 		private GoldenResourceHelper myGoldenResourceHelper;
 		@Autowired
 		private IMdmLinkUpdaterSvc myMdmLinkUpdaterSvc;
+
+		@Autowired
+		private MdmLinkHelper myLinkHelper;
 
 		@Test
 		public void testAddPatientLinksToNewGoldenResourceIfNoneFound() {
@@ -98,6 +117,64 @@ public class MdmMatchLinkSvcTest {
 			assertLinksMatchedByEid(false);
 			assertLinksMatchScore(1.0);
 			assertLinksMatchVector((Long) null);
+		}
+
+		@Test
+		@RepeatedTest(20)
+		public void testUpdatingAResourceToMatchACurrentlyUnmatchedResource_resultsInUpdatedLinksForBoth() {
+			// setup
+			MDMState<Patient, JpaPid> state = new MDMState<>();
+			String startingState = """
+   			GP1, AUTO, MATCH, P1
+   			GP2, AUTO, MATCH, P2
+			""";
+
+			Map<String, Patient> idToResource = new HashMap<>();
+
+			// we're creating our patients manually,
+			// because we're testing mdm rules and how candidates are found
+			// so the patient info matters
+			Patient jane = buildJanePatient();
+			Long id;
+			{
+				Patient p = createPatient(jane);
+				idToResource.put("P1", p);
+				Long patientId = p.getIdElement().getIdPartAsLong();
+				state.addPID(patientId.toString(), JpaPid.fromIdAndResourceType(patientId, "Patient"));
+			}
+			{
+				Patient yui = buildJanePatient();
+				yui.setName(new ArrayList<>());
+				yui.addName()
+					.addGiven("Yui")
+					.setFamily("Hirasawa");
+				Patient retVal = createPatient(yui);
+				id = retVal.getIdElement().getIdPartAsLong();
+				idToResource.put("P2", retVal);
+				state.addPID(String.valueOf(id), JpaPid.fromIdAndResourceType(id, "Patient"));
+			}
+
+			// initialize our links
+			state.setInputState(startingState);
+			state.setParameterToValue(idToResource);
+			myLinkHelper.setup(state);
+
+			// test
+			Patient toUpdate = buildJanePatient();
+			toUpdate.setId("Patient/" + id.longValue());
+			updatePatientAndUpdateLinks(toUpdate);
+
+			// verify
+			String endState = """
+   			GP1, AUTO, MATCH, P1
+   			GP2, AUTO, POSSIBLE_MATCH, P2
+   			GP1, AUTO, POSSIBLE_MATCH, P2
+   			GP2, AUTO, POSSIBLE_DUPLICATE, GP1
+			""";
+			state.setParameterToValue(idToResource);
+			state.setOutputState(endState);
+			myLinkHelper.validateResults(state);
+			myLinkHelper.logMdmLinks();
 		}
 
 		@Test
