@@ -91,6 +91,9 @@ public class Batch2DaoSvcImpl implements IBatch2DaoSvc {
 	public IResourcePidList fetchResourceIdsPage(
 			Date theStart,
 			Date theEnd,
+			// TODO:  LD: We must keep thePageSize parameter here for the time being even if though it's no longer used
+			// in this class because
+			// otherwise we'll break other implementors of IBatch2DaoSvc
 			@Nonnull Integer thePageSize,
 			@Nullable RequestPartitionId theRequestPartitionId,
 			@Nullable String theUrl) {
@@ -99,7 +102,7 @@ public class Batch2DaoSvcImpl implements IBatch2DaoSvc {
 				.withRequestPartitionId(theRequestPartitionId)
 				.execute(() -> {
 					if (theUrl == null) {
-						return fetchResourceIdsPageNoUrl(theStart, theEnd, thePageSize, theRequestPartitionId);
+						return fetchResourceIdsPageNoUrl(theStart, theEnd, theRequestPartitionId);
 					} else {
 						return fetchResourceIdsPageWithUrl(theEnd, theUrl, theRequestPartitionId);
 					}
@@ -158,8 +161,8 @@ public class Batch2DaoSvcImpl implements IBatch2DaoSvc {
 
 	@Nonnull
 	private IResourcePidList fetchResourceIdsPageNoUrl(
-			Date theStart, Date theEnd, int thePagesize, RequestPartitionId theRequestPartitionId) {
-		Pageable page = Pageable.unpaged();
+			Date theStart, Date theEnd, RequestPartitionId theRequestPartitionId) {
+		final Pageable page = Pageable.unpaged();
 		Slice<Object[]> slice;
 		if (theRequestPartitionId == null || theRequestPartitionId.isAllPartitions()) {
 			slice = myResourceTableDao.findIdsTypesAndUpdateTimesOfResourcesWithinUpdatedRangeOrderedFromOldest(

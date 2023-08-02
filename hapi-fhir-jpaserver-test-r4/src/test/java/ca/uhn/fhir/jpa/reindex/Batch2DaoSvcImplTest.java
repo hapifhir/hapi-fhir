@@ -6,7 +6,6 @@ import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.pid.IResourcePidList;
 import ca.uhn.fhir.jpa.api.svc.IBatch2DaoSvc;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
-import ca.uhn.fhir.jpa.dao.tx.NonTransactionalHapiTransactionService;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -26,7 +25,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.stream.IntStream;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -39,12 +39,12 @@ class Batch2DaoSvcImplTest extends BaseJpaR4Test {
 	private static final String PATIENT = "Patient";
 	private static final int INTERNAL_SYNCHRONOUS_SEARCH_SIZE = 10;
 
-	private final IHapiTransactionService myTransactionService = new NonTransactionalHapiTransactionService();
-
 	@Autowired
 	private JpaStorageSettings myJpaStorageSettings;
 	@Autowired
 	private MatchUrlService myMatchUrlService;
+	@Autowired
+	private IHapiTransactionService myIHapiTransactionService ;
 
 	private DaoRegistry mySpiedDaoRegistry;
 
@@ -56,7 +56,7 @@ class Batch2DaoSvcImplTest extends BaseJpaR4Test {
 
 		mySpiedDaoRegistry = spy(myDaoRegistry);
 
-		mySubject = new Batch2DaoSvcImpl(myResourceTableDao, myMatchUrlService, mySpiedDaoRegistry, myFhirContext, myTransactionService, myJpaStorageSettings);
+		mySubject = new Batch2DaoSvcImpl(myResourceTableDao, myMatchUrlService, mySpiedDaoRegistry, myFhirContext, myIHapiTransactionService, myJpaStorageSettings);
 	}
 
 	// TODO: LD this test won't work with the nonUrl variant yet:  error:   No existing transaction found for transaction marked with propagation 'mandatory'
@@ -99,6 +99,24 @@ class Batch2DaoSvcImplTest extends BaseJpaR4Test {
 		assertIdsEqual(patientIds, actualPatientIds);
 
 		verify(mySpiedDaoRegistry, times(getExpectedNumOfInvocations(expectedNumResults))).getResourceDao(PATIENT);
+	}
+
+	@ParameterizedTest
+	@ValueSource(ints = {0, 9, 10, 11, 21, 22, 23, 45})
+	void fetchResourcesNoUrl(int expectedNumResults) {
+		final int pageSizeWellBelowThreshold = 2;
+		final List<IIdType> patientIds = IntStream.range(0, expectedNumResults)
+			.mapToObj(num -> createPatient())
+			.toList();
+
+		final IResourcePidList resourcePidList = mySubject.fetchResourceIdsPage(PREVIOUS_MILLENNIUM, TOMORROW, pageSizeWellBelowThreshold, RequestPartitionId.defaultPartition(), null);
+
+		final List<? extends IIdType> actualPatientIds =
+			resourcePidList.getTypedResourcePids()
+				.stream()
+				.map(typePid -> new IdDt(typePid.resourceType, (Long) typePid.id.getId()))
+				.toList();
+		assertIdsEqual(patientIds, actualPatientIds);
 	}
 
 	private int getExpectedNumOfInvocations(int expectedNumResults) {
