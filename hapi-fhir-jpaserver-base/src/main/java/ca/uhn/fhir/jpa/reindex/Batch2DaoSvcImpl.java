@@ -89,14 +89,7 @@ public class Batch2DaoSvcImpl implements IBatch2DaoSvc {
 
 	@Override
 	public IResourcePidList fetchResourceIdsPage(
-			Date theStart,
-			Date theEnd,
-			// TODO:  LD: We must keep thePageSize parameter here for the time being even if though it's no longer used
-			// in this class because
-			// otherwise we'll break other implementors of IBatch2DaoSvc
-			@Nonnull Integer thePageSize,
-			@Nullable RequestPartitionId theRequestPartitionId,
-			@Nullable String theUrl) {
+			Date theStart, Date theEnd, @Nullable RequestPartitionId theRequestPartitionId, @Nullable String theUrl) {
 		return myTransactionService
 				.withSystemRequest()
 				.withRequestPartitionId(theRequestPartitionId)
