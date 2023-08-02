@@ -20,7 +20,7 @@
 					{
 						"url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-softwaresystem",
 						"valueReference": {
-							"reference": "#cqf-tooling"
+							"reference": "Device/cqf-tooling"
 						}
 					}
 				],
@@ -140,7 +140,7 @@
 					}
 				],
 				"library": [
-					"http://localhost:8080/fhir/Library/library-EXM104-8.2.000"
+					"http://localhost:8080/fhir/Library/library-EXM104|8.2.000"
 				],
 				"disclaimer": "These performance measures are not clinical guidelines and do not establish a standard of medical care, and have not been tested for all potential applications. The measures and specifications are provided without warranty.",
 				"scoring": {
@@ -341,16 +341,16 @@
 		{
 			"resource": {
 				"resourceType": "Library",
-				"id": "library-EXM104-8.2.000",
+				"id": "library-EXM104",
 				"extension": [
 					{
 						"url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-softwaresystem",
 						"valueReference": {
-							"reference": "#cqf-tooling"
+							"reference": "Device/cqf-tooling"
 						}
 					}
 				],
-				"url": "http://localhost:8080/fhir/Library/library-EXM104-8.2.000",
+				"url": "http://localhost:8080/fhir/Library/library-EXM104",
 				"version": "8.2.000",
 				"name": "EXM104",
 				"status": "active",
@@ -600,7 +600,7 @@
 			},
 			"request": {
 				"method": "PUT",
-				"url": "Library/library-EXM104-8.2.000"
+				"url": "Library/library-EXM104"
 			}
 		},
 		{
@@ -611,7 +611,7 @@
 					{
 						"url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-softwaresystem",
 						"valueReference": {
-							"reference": "#cqf-tooling"
+							"reference": "Device/cqf-tooling"
 						}
 					}
 				],
@@ -818,7 +818,7 @@
 					{
 						"url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-softwaresystem",
 						"valueReference": {
-							"reference": "#cqf-tooling"
+							"reference": "Device/cqf-tooling"
 						}
 					}
 				],
@@ -1042,7 +1042,7 @@
 					{
 						"url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-softwaresystem",
 						"valueReference": {
-							"reference": "#cqf-tooling"
+							"reference": "Device/cqf-tooling"
 						}
 					}
 				],
@@ -1156,7 +1156,7 @@
 					{
 						"url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-softwaresystem",
 						"valueReference": {
-							"reference": "#cqf-tooling"
+							"reference": "Device/cqf-tooling"
 						}
 					}
 				],
@@ -1230,7 +1230,7 @@
 					{
 						"url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-softwaresystem",
 						"valueReference": {
-							"reference": "#cqf-tooling"
+							"reference": "Device/cqf-tooling"
 						}
 					}
 				],

@@ -89,11 +89,11 @@
         "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-populationBasis",
         "valueCode": "boolean"
       }, {
-        "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-softwaresystem",
-        "valueReference": {
-          "reference": "#cqf-tooling"
-        }
-      } ],
+						"url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-softwaresystem",
+						"valueReference": {
+							"reference": "Device/cqf-tooling"
+						}
+					} ],
       "url": "http://hl7.org/fhir/us/cqfmeasures/Measure/EXM104",
       "identifier": [ {
         "use": "official",
@@ -180,7 +180,7 @@
         "type": "depends-on",
         "resource": "Library/library-TJCOverall-5.0.000"
       } ],
-      "library": [ "Library/library-EXM104-8.2.000" ],
+      "library": [ "http://fhir.org/guides/dbcg/connectathon/Library/EXM104" ],
       "disclaimer": "These performance measures are not clinical guidelines and do not establish a standard of medical care, and have not been tested for all potential applications. The measures and specifications are provided without warranty.",
       "scoring": {
         "coding": [ {
@@ -426,11 +426,11 @@
       "resourceType": "Library",
       "id": "library-EXM104-8.2.000",
       "extension": [ {
-        "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-softwaresystem",
-        "valueReference": {
-          "reference": "#cqf-tooling"
-        }
-      } ],
+						"url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-softwaresystem",
+						"valueReference": {
+							"reference": "Device/cqf-tooling"
+						}
+					} ],
       "url": "http://fhir.org/guides/dbcg/connectathon/Library/EXM104",
       "version": "8.2.000",
       "name": "EXM104",
@@ -2182,11 +2182,11 @@
       "resourceType": "Library",
       "id": "library-SupplementalDataElements-2.0.0",
       "extension": [ {
-        "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-softwaresystem",
-        "valueReference": {
-          "reference": "#cqf-tooling"
-        }
-      } ],
+						"url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-softwaresystem",
+						"valueReference": {
+							"reference": "Device/cqf-tooling"
+						}
+					} ],
       "url": "http://fhir.org/guides/dbcg/connectathon/Library/SupplementalDataElements",
       "version": "2.0.0",
       "name": "SupplementalDataElements",
@@ -3386,11 +3386,11 @@
       "resourceType": "Library",
       "id": "library-MATGlobalCommonFunctions-5.0.000",
       "extension": [ {
-        "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-softwaresystem",
-        "valueReference": {
-          "reference": "#cqf-tooling"
-        }
-      } ],
+						"url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-softwaresystem",
+						"valueReference": {
+							"reference": "Device/cqf-tooling"
+						}
+					} ],
       "url": "http://fhir.org/guides/dbcg/connectathon/Library/MATGlobalCommonFunctions",
       "version": "5.0.000",
       "name": "MATGlobalCommonFunctions",
@@ -3534,11 +3534,11 @@
       "resourceType": "Library",
       "id": "library-TJCOverall-5.0.000",
       "extension": [ {
-        "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-softwaresystem",
-        "valueReference": {
-          "reference": "#cqf-tooling"
-        }
-      } ],
+						"url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-softwaresystem",
+						"valueReference": {
+							"reference": "Device/cqf-tooling"
+						}
+					} ],
       "url": "http://fhir.org/guides/dbcg/connectathon/Library/TJCOverall",
       "version": "5.0.000",
       "name": "TJCOverall",
@@ -3766,11 +3766,11 @@
       "resourceType": "Library",
       "id": "FHIR-ModelInfo",
       "extension": [ {
-        "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-softwaresystem",
-        "valueReference": {
-          "reference": "#cqf-tooling"
-        }
-      } ],
+						"url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-softwaresystem",
+						"valueReference": {
+							"reference": "Device/cqf-tooling"
+						}
+					} ],
       "url": "http://hl7.org/fhir/Library/FHIR-ModelInfo",
       "identifier": [ {
         "use": "official",
@@ -3908,11 +3908,11 @@
       "resourceType": "Library",
       "id": "library-FHIRHelpers-4.0.1",
       "extension": [ {
-        "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-softwaresystem",
-        "valueReference": {
-          "reference": "#cqf-tooling"
-        }
-      } ],
+						"url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-softwaresystem",
+						"valueReference": {
+							"reference": "Device/cqf-tooling"
+						}
+					} ],
       "url": "http://hl7.org/fhir/Library/FHIRHelpers",
       "version": "4.0.1",
       "name": "FHIRHelpers",
