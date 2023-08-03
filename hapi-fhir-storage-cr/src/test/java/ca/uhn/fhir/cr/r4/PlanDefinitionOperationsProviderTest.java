@@ -1,7 +1,7 @@
 package ca.uhn.fhir.cr.r4;
 
 import ca.uhn.fhir.cr.BaseCrR4TestServer;
-import ca.uhn.fhir.cr.r4.plandefinition.PlanDefinitionOperationsProvider;
+import ca.uhn.fhir.cr.r4.plandefinition.PlanDefinitionApplyProvider;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CarePlan;
 import org.hl7.fhir.r4.model.Enumerations;
@@ -16,7 +16,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class PlanDefinitionOperationsProviderTest extends BaseCrR4TestServer {
 	@Autowired
-	PlanDefinitionOperationsProvider planDefinitionOperationsProvider;
+	PlanDefinitionApplyProvider myPlanDefinitionApplyProvider;
 
 	@Test
 	void testGenerateQuestionnaire() {
@@ -28,7 +28,7 @@ public class PlanDefinitionOperationsProviderTest extends BaseCrR4TestServer {
 		var planDefinitionID = new IdType(Enumerations.FHIRAllTypes.PLANDEFINITION.toCode(), "ASLPA1");
 		var patientID = "positive";
 		var parameters = new Parameters().addParameter("Service Request Id", "SleepStudy").addParameter("Service Request Id", "SleepStudy2");
-		var result = (CarePlan) this.planDefinitionOperationsProvider.apply(planDefinitionID, null, null, patientID,
+		var result = (CarePlan) myPlanDefinitionApplyProvider.apply(planDefinitionID, null, null, patientID,
 			null, null, null, null, null,
 			null, null, null, parameters, null,
 			null, null, null,
@@ -41,7 +41,7 @@ public class PlanDefinitionOperationsProviderTest extends BaseCrR4TestServer {
 				.getItem().get(0)
 				.getText());
 
-		var resultR5 = (Bundle) this.planDefinitionOperationsProvider.applyR5(planDefinitionID, null, null, patientID,
+		var resultR5 = (Bundle) myPlanDefinitionApplyProvider.applyR5(planDefinitionID, null, null, patientID,
 			null, null, null, null, null,
 			null, null, null, parameters, null,
 			null, null, null,

@@ -1,7 +1,7 @@
 package ca.uhn.fhir.cr.r4;
 
 import ca.uhn.fhir.cr.BaseCrR4TestServer;
-import ca.uhn.fhir.cr.r4.activitydefinition.ActivityDefinitionOperationsProvider;
+import ca.uhn.fhir.cr.r4.activitydefinition.ActivityDefinitionApplyProvider;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.MedicationRequest;
 import org.junit.jupiter.api.Test;
@@ -13,12 +13,12 @@ public class ActivityDefinitionOperationsProviderTest extends BaseCrR4TestServer
 
 
 	@Autowired
-	ActivityDefinitionOperationsProvider activityDefinitionOperationsProvider;
+	ActivityDefinitionApplyProvider myActivityDefinitionApplyProvider;
 	@Test
 	void testActivityDefinitionApply() {
 		loadBundle("ca/uhn/fhir/cr/r4/Bundle-ActivityDefinitionTest.json");
 		var requestDetails = setupRequestDetails();
-		var result = this.activityDefinitionOperationsProvider.apply(
+		var result = myActivityDefinitionApplyProvider.apply(
 			new IdType("activityDefinition-test"),
 			null,
 			null,
