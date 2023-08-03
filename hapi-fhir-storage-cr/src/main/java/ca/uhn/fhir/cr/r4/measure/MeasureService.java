@@ -54,6 +54,7 @@ import org.opencds.cqf.cql.engine.terminology.TerminologyProvider;
 import org.opencds.cqf.cql.evaluator.CqlOptions;
 import org.opencds.cqf.cql.evaluator.fhir.dal.FhirDal;
 import org.opencds.cqf.cql.evaluator.fhir.util.Clients;
+import org.opencds.cqf.cql.evaluator.library.EvaluationSettings;
 import org.opencds.cqf.cql.evaluator.measure.MeasureEvaluationOptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -127,10 +128,10 @@ public class MeasureService implements IDaoRegistryUser {
 			myGlobalLibraryCache;
 
 	@Autowired
-	protected CqlOptions myCqlOptions;
+	protected MeasureEvaluationOptions myMeasureEvaluationOptions;
 
 	@Autowired
-	protected MeasureEvaluationOptions myMeasureEvaluationOptions;
+	protected EvaluationSettings myEvaluationSettings;
 
 	@Autowired
 	protected DaoRegistry myDaoRegistry;
@@ -212,7 +213,7 @@ public class MeasureService implements IDaoRegistryUser {
 						dataProvider,
 						fhirDal,
 						myMeasureEvaluationOptions,
-						myCqlOptions,
+						myEvaluationSettings.getCqlOptions(),
 						null);
 
 		MeasureReport measureReport = null;

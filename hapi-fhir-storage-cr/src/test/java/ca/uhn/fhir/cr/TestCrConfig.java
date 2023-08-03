@@ -6,6 +6,25 @@ import ca.uhn.fhir.jpa.subscription.submit.config.SubscriptionSubmitterConfig;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import ca.uhn.fhir.batch2.jobs.reindex.ReindexProvider;
+import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
+import ca.uhn.fhir.jpa.graphql.GraphQLProvider;
+import ca.uhn.fhir.jpa.provider.DiffProvider;
+import ca.uhn.fhir.jpa.provider.IJpaSystemProvider;
+import ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider;
+import ca.uhn.fhir.jpa.provider.ValueSetOperationProvider;
+import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
+import ca.uhn.fhir.rest.server.HardcodedServerAddressStrategy;
+import ca.uhn.fhir.rest.server.IncomingRequestAddressStrategy;
+import ca.uhn.fhir.rest.server.RestfulServer;
+import ca.uhn.fhir.rest.server.provider.ResourceProviderFactory;
+import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
+import com.google.common.base.Strings;
+
+import org.springframework.context.ApplicationContext;
+
 
 @Configuration
 @Import({SubscriptionSubmitterConfig.class, SubscriptionChannelConfig.class})
@@ -25,6 +44,39 @@ public class TestCrConfig {
 	@Bean
 	public PartitionHelper partitionHelper() {
 		return new PartitionHelper();
+	}
+
+	@Bean
+	public TestCqlProperties testCqlProperties(){
+		return new TestCqlProperties();}
+
+	@Bean
+	public RestfulServer restfulServer(IFhirSystemDao<?, ?> fhirSystemDao, DaoRegistry daoRegistry, IJpaSystemProvider jpaSystemProvider, ResourceProviderFactory resourceProviderFactory, JpaStorageSettings jpaStorageSettings, ISearchParamRegistry searchParamRegistry, IValidationSupport theValidationSupport, DatabaseBackedPagingProvider databaseBackedPagingProvider, ValueSetOperationProvider theValueSetOperationProvider,
+												  ReindexProvider myReindexProvider,
+												  ApplicationContext myAppCtx) {
+		RestfulServer ourRestServer = new RestfulServer(fhirSystemDao.getContext());
+
+		TerminologyUploaderProvider myTerminologyUploaderProvider = myAppCtx.getBean(TerminologyUploaderProvider.class);
+
+		ourRestServer.registerProviders(resourceProviderFactory.createProviders());
+		ourRestServer.registerProvider(jpaSystemProvider);
+		ourRestServer.registerProviders(myTerminologyUploaderProvider, myReindexProvider);
+		ourRestServer.registerProvider(myAppCtx.getBean(GraphQLProvider.class));
+		ourRestServer.registerProvider(myAppCtx.getBean(DiffProvider.class));
+		ourRestServer.registerProvider(myAppCtx.getBean(ValueSetOperationProvider.class));
+		//databaseBackedPagingProvider.setDefaultPageSize(10);
+		//databaseBackedPagingProvider.setMaximumPageSize(50);
+		//ourRestServer.setPagingProvider(databaseBackedPagingProvider);
+
+		//to do
+		String serverAddress = null;
+		if (!Strings.isNullOrEmpty(serverAddress)) {
+			ourRestServer.setServerAddressStrategy(new HardcodedServerAddressStrategy(serverAddress));
+		} else {
+			ourRestServer.setServerAddressStrategy(new IncomingRequestAddressStrategy());
+		}
+
+		return ourRestServer;
 	}
 
 }

@@ -1,11 +1,7 @@
 package ca.uhn.fhir.cr.dstu3;
 
 import ca.uhn.fhir.cr.BaseCrDstu3Test;
-import ca.uhn.fhir.cr.IResourceLoader;
-import ca.uhn.fhir.cr.TestCrConfig;
-import ca.uhn.fhir.cr.config.CrDstu3Config;
 import ca.uhn.fhir.cr.dstu3.measure.MeasureOperationsProvider;
-import ca.uhn.fhir.jpa.test.BaseJpaDstu3Test;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.util.BundleUtil;
 import org.hamcrest.Matchers;

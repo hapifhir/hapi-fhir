@@ -1,7 +1,7 @@
 package ca.uhn.fhir.cr;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.cr.config.CrDstu3Config;
+import ca.uhn.fhir.cr.config.dstu3.CrDstu3Config;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.test.BaseJpaDstu3Test;
 import ca.uhn.fhir.parser.IParser;

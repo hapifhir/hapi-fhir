@@ -1,7 +1,7 @@
 package ca.uhn.fhir.cr;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.cr.config.CrR4Config;
+import ca.uhn.fhir.cr.config.r4.CrR4Config;
 import ca.uhn.fhir.cr.r4.TestCrR4Config;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.provider.r4.BaseResourceProviderR4Test;

@@ -88,84 +88,8 @@ public abstract class BaseClinicalReasoningConfig {
 	private static final Logger ourLogger = LoggerFactory.getLogger(BaseClinicalReasoningConfig.class);
 
 	@Bean
-	EvaluationSettings evaluationSettings(
-			CqlOptions theCqlOptions,
-			Map<ModelIdentifier, Model> theGlobalModelCache,
-			Map<org.cqframework.cql.elm.execution.VersionedIdentifier, org.cqframework.cql.elm.execution.Library>
-					theGlobalLibraryCache) {
-		var evaluationSettings = new EvaluationSettings();
-		evaluationSettings.setCqlOptions(theCqlOptions);
-		evaluationSettings.setModelCache(theGlobalModelCache);
-		evaluationSettings.setLibraryCache(theGlobalLibraryCache);
-
-		return evaluationSettings;
-	}
-
-	@Bean
-	CrProviderFactory cqlProviderFactory() {
-		return new CrProviderFactory();
-	}
-
-	@Bean
-	CrProviderLoader cqlProviderLoader(
-			FhirContext theFhirContext,
-			ResourceProviderFactory theResourceProviderFactory,
-			CrProviderFactory theCqlProviderFactory) {
-		return new CrProviderLoader(theFhirContext, theResourceProviderFactory, theCqlProviderFactory);
-	}
-
-	@Bean
-	public CrProperties crProperties() {
-		return new CrProperties();
-	}
-
-	@Bean
-	public CrProperties.CqlProperties cqlProperties(CrProperties theCrProperties) {
-		return theCrProperties.getCqlProperties();
-	}
-
-	@Bean
-	public CrProperties.MeasureProperties measureProperties(CrProperties theCrProperties) {
-		return theCrProperties.getMeasureProperties();
-	}
-
-	@Bean
-	public MeasureEvaluationOptions measureEvaluationOptions(CrProperties theCrProperties) {
-		return theCrProperties.getMeasureProperties().getMeasureEvaluationOptions();
-	}
-
-	@Bean
-	public CqlOptions cqlOptions(CrProperties theCrProperties) {
-		return theCrProperties.getCqlProperties().getCqlOptions();
-	}
-
-	@Bean
 	public CqlExceptionHandlingInterceptor cqlExceptionHandlingInterceptor() {
 		return new CqlExceptionHandlingInterceptor();
-	}
-
-	@Bean
-	public CqlTranslatorOptions cqlTranslatorOptions(
-			FhirContext theFhirContext, CrProperties.CqlProperties theCqlProperties) {
-		CqlTranslatorOptions options = theCqlProperties.getCqlOptions().getCqlTranslatorOptions();
-
-		if (theFhirContext.getVersion().getVersion().isOlderThan(FhirVersionEnum.R4)
-				&& (options.getCompatibilityLevel().equals("1.5")
-						|| options.getCompatibilityLevel().equals("1.4"))) {
-			ourLogger.warn(
-					"{} {} {}",
-					"This server is configured to use CQL version > 1.4 and FHIR version <= DSTU3.",
-					"Most available CQL content for DSTU3 and below is for CQL versions 1.3.",
-					"If your CQL content causes translation errors, try setting the CQL compatibility level to 1.3");
-		}
-
-		return options;
-	}
-
-	@Bean
-	@Scope("prototype")
-	public ModelManager modelManager(Map<ModelIdentifier, Model> theGlobalModelCache) {
-		return new ModelManager(theGlobalModelCache);
 	}
 
 	@Bean
@@ -234,23 +158,6 @@ public abstract class BaseClinicalReasoningConfig {
 		return rd -> new HapiLibrarySourceProvider(theDaoRegistry, rd);
 	}
 
-	@Bean
-	@Scope("prototype")
-	ILibraryLoaderFactory libraryLoaderFactory(
-			Map<org.cqframework.cql.elm.execution.VersionedIdentifier, org.cqframework.cql.elm.execution.Library>
-					theGlobalLibraryCache,
-			ModelManager theModelManager,
-			CqlTranslatorOptions theCqlTranslatorOptions,
-			CrProperties.CqlProperties theCqlProperties) {
-		return lcp -> {
-			if (theCqlProperties.getCqlOptions().useEmbeddedLibraries()) {
-				lcp.add(new FhirLibrarySourceProvider());
-			}
-
-			return new TranslatingLibraryLoader(theModelManager, lcp, theCqlTranslatorOptions, theGlobalLibraryCache);
-		};
-	}
-
 	// TODO: Use something like caffeine caching for this so that growth is limited.
 	@Bean
 	public Map<org.cqframework.cql.elm.execution.VersionedIdentifier, org.cqframework.cql.elm.execution.Library>
@@ -312,15 +219,6 @@ public abstract class BaseClinicalReasoningConfig {
 	@Bean
 	public LibraryVersionSelector libraryVersionSelector(AdapterFactory theAdapterFactory) {
 		return new LibraryVersionSelector(theAdapterFactory);
-	}
-
-	@Bean
-	public Executor cqlExecutor() {
-		CqlForkJoinWorkerThreadFactory factory = new CqlForkJoinWorkerThreadFactory();
-		ForkJoinPool myCommonPool =
-				new ForkJoinPool(Math.min(32767, Runtime.getRuntime().availableProcessors()), factory, null, false);
-
-		return new DelegatingSecurityContextExecutor(myCommonPool, SecurityContextHolder.getContext());
 	}
 
 	@Bean
