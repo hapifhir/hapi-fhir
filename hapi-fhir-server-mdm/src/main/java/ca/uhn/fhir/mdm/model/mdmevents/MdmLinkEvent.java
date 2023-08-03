@@ -17,7 +17,7 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.mdm.api;
+package ca.uhn.fhir.mdm.model.mdmevents;
 
 import ca.uhn.fhir.model.api.IModelJson;
 

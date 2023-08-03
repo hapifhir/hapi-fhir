@@ -260,7 +260,7 @@ public abstract class BaseJpaTest extends BaseTest {
 	private IForcedIdDao myForcedIdDao;
 	@Autowired
 	private DaoRegistry myDaoRegistry;
-	private List<Object> myRegisteredInterceptors = new ArrayList<>(1);
+	private final List<Object> myRegisteredInterceptors = new ArrayList<>(1);
 
 	@SuppressWarnings("BusyWait")
 	public static void waitForSize(int theTarget, List<?> theList) {
