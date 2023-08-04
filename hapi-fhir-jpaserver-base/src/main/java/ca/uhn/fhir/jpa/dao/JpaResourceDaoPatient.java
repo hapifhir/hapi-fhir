@@ -45,9 +45,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.Arrays;
 import java.util.Collections;
+import javax.servlet.http.HttpServletRequest;
 
 public class JpaResourceDaoPatient<T extends IBaseResource> extends BaseHapiFhirResourceDao<T>
 		implements IFhirResourceDaoPatient<T> {
@@ -131,10 +131,10 @@ public class JpaResourceDaoPatient<T extends IBaseResource> extends BaseHapiFhir
 		Integer maxPageSize = theRequest.getServer().getMaximumPageSize();
 		if (maxPageSize != null && theParamMap.getCount() > maxPageSize) {
 			ourLog.info(
-				"Reducing {} from {} to {} which is the maximum allowable page size.",
-				Constants.PARAM_COUNT,
-				theParamMap.getCount(),
-				maxPageSize);
+					"Reducing {} from {} to {} which is the maximum allowable page size.",
+					Constants.PARAM_COUNT,
+					theParamMap.getCount(),
+					maxPageSize);
 			theParamMap.setCount(maxPageSize);
 		}
 	}

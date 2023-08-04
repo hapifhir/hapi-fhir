@@ -107,7 +107,6 @@ import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
-import ca.uhn.fhir.util.ObjectUtil;
 import ca.uhn.fhir.util.ReflectionUtil;
 import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.UrlUtil;
@@ -143,7 +142,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -1237,7 +1235,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				.withRequest(theRequestDetails)
 				.withRequestPartitionId(requestPartitionId)
 				.execute(() -> myPersistedJpaBundleProviderFactory.history(
-							theRequestDetails, myResourceName, null, theSince, theUntil, theOffset, requestPartitionId));
+						theRequestDetails, myResourceName, null, theSince, theUntil, theOffset, requestPartitionId));
 
 		ourLog.debug("Processed history on {} in {}ms", myResourceName, w.getMillisAndRestart());
 		return retVal;
@@ -1974,10 +1972,10 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 					List<IQueryParameterType> orList = new ArrayList<>();
 					for (IQueryParameterType value : orValues) {
 						orList.add(new HasParam(
-							"List",
-							ListResource.SP_ITEM,
-							BaseResource.SP_RES_ID,
-							value.getValueAsQueryToken(null)));
+								"List",
+								ListResource.SP_ITEM,
+								BaseResource.SP_RES_ID,
+								value.getValueAsQueryToken(null)));
 					}
 					hasParamValues.add(orList);
 				}
