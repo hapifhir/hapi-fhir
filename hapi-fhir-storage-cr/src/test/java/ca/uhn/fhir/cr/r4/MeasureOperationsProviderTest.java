@@ -48,29 +48,9 @@ class MeasureOperationsProviderTest extends BaseCrR4TestServer {
 
 		assertNotNull(returnMeasureReport);
 	}
-//http://localhost:8000/Measure/DM5Measure/$evaluate-measure?subject=Patient/patient-DM5-20&periodStart=2023-01-19&periodEnd=2023-07-19
+
 	@Test
 	void testMeasureEvaluateWithTerminologyEndpoint(Hoverfly hoverfly) throws IOException {
-		loadBundle("temp_measurebundle.json");
-
-		var returnMeasureReport = this.myMeasureOperationsProvider.evaluateMeasure(
-			new IdType("Measure", "DM5Measure"),
-			"2023-01-19",
-			"2023-07-19",
-			"subject",
-			"Patient/patient-DM5-20",
-			null,
-			null,
-			null,
-			null,
-			null,
-			new SystemRequestDetails()
-		);
-		System.out.println(FhirContext.forR4Cached().newJsonParser().setPrettyPrint(true).encodeResourceToString(returnMeasureReport));
-		assertNotNull(returnMeasureReport);
-	}
-	@Test
-	void testTEMP(Hoverfly hoverfly) throws IOException {
 		loadBundle("Exm104FhirR4MeasureBundle.json");
 
 		var returnMeasureReport = this.myMeasureOperationsProvider.evaluateMeasure(
