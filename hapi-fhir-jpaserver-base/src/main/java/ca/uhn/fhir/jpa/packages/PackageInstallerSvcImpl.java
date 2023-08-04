@@ -53,6 +53,8 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.Identifier;
+import org.hl7.fhir.r4.model.MetadataResource;
+import org.hl7.fhir.r4.model.ValueSet;
 import org.hl7.fhir.utilities.json.model.JsonObject;
 import org.hl7.fhir.utilities.npm.IPackageCacheManager;
 import org.hl7.fhir.utilities.npm.NpmPackage;
@@ -342,7 +344,8 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 	/**
 	 * ============================= Utility methods ===============================
 	 */
-	private void create(
+	@VisibleForTesting
+	void create(
 			IBaseResource theResource,
 			PackageInstallationSpec theInstallationSpec,
 			PackageInstallOutcomeJson theOutcome) {
@@ -361,9 +364,14 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 					createResource(dao, theResource);
 					ourLog.info("Created resource with new id");
 				} else {
+					// TODO:  in this case we skip the if block below and go straight to updateResource:  maybe we tweak the logic below from ValueSet to MetadataResource ?
 					if (id.isIdPartValidLong()) {
 						String newIdPart = "npm-" + id.getIdPart();
 						id.setParts(id.getBaseUrl(), id.getResourceType(), newIdPart, id.getVersionIdPart());
+//					} else if (theResource instanceof MetadataResource) {
+//						ourLog.info("4950:  new logic to set the ID if it's a metadata resource ");
+//						final MetadataResource metadataResource = (MetadataResource) theResource;
+//						id.setParts(metadataResource.getUrl(), id.getResourceType(), id.getIdPart(), id.getVersionIdPart());
 					}
 					updateResource(dao, theResource);
 					ourLog.info("Created resource with existing id");

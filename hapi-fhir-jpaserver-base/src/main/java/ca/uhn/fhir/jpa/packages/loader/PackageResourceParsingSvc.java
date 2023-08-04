@@ -21,8 +21,10 @@ package ca.uhn.fhir.jpa.packages.loader;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.jpa.term.TermReadSvcImpl;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.ValueSet;
 import org.hl7.fhir.utilities.npm.NpmPackage;
 
 import java.io.IOException;
@@ -31,6 +33,7 @@ import java.util.Collections;
 import java.util.List;
 
 public class PackageResourceParsingSvc {
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(PackageResourceParsingSvc.class);
 
 	private final FhirContext myFhirContext;
 
@@ -60,7 +63,13 @@ public class PackageResourceParsingSvc {
 			for (String file : filesForType) {
 				try {
 					byte[] content = thePkg.getFolders().get("package").fetchFile(file);
-					resources.add(myFhirContext.newJsonParser().parseResource(new String(content)));
+					// TODO: breakpoint here on value set ID see if version comes from here
+					final IBaseResource parsedResource = myFhirContext.newJsonParser().parseResource(new String(content));
+					if (parsedResource instanceof ValueSet) {
+						final ValueSet valueSet = (ValueSet) parsedResource;
+						ourLog.info("valueSet: {}", valueSet);
+					}
+					resources.add(parsedResource);
 				} catch (IOException e) {
 					throw new InternalErrorException(
 							Msg.code(1289) + "Cannot install resource of type " + theType + ": Could not fetch file "
