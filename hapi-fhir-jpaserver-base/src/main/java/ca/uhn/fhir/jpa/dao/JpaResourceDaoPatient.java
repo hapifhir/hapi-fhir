@@ -94,7 +94,7 @@ public class JpaResourceDaoPatient<T extends IBaseResource> extends BaseHapiFhir
 			if (theRequest.getParameters().containsKey("_mdm")) {
 				String[] paramVal = theRequest.getParameters().get("_mdm");
 				if (Arrays.asList(paramVal).contains("true")) {
-					theIds.getValuesAsQueryTokens().stream().forEach(param -> param.setMdmExpand(true));
+					theIds.getValuesAsQueryTokens().forEach(param -> param.setMdmExpand(true));
 				}
 			}
 			paramMap.add("_id", theIds);
@@ -106,6 +106,9 @@ public class JpaResourceDaoPatient<T extends IBaseResource> extends BaseHapiFhir
 
 		RequestPartitionId requestPartitionId = myPartitionHelperSvc.determineReadPartitionForRequestForSearchType(
 				theRequest, getResourceName(), paramMap, null);
+
+		setOffsetAndCount(paramMap, theRequest);
+
 		return mySearchCoordinatorSvc.registerSearch(
 				this,
 				paramMap,
