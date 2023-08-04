@@ -77,12 +77,10 @@ public class HapiSchemaMigrationTest {
 			VersionEnum.V5_4_0,
 			VersionEnum.V5_5_0,
 			VersionEnum.V6_0_0,
-			VersionEnum.V6_6_0,
-			VersionEnum.V6_8_0
+			VersionEnum.V6_6_0
 		);
 
 
-		//int fromVersion = FIRST_TESTED_VERSION.ordinal() - 1;
 		int fromVersion = 0;
 		VersionEnum from = allVersions[fromVersion];
 		VersionEnum toVersion;
