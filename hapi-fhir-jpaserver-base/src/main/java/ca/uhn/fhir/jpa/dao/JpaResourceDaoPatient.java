@@ -123,6 +123,10 @@ public class JpaResourceDaoPatient<T extends IBaseResource> extends BaseHapiFhir
 	}
 
 	private void adjustCount(RequestDetails theRequest, SearchParameterMap theParamMap) {
+		if (theRequest.getServer() == null) {
+			return;
+		}
+
 		if (theParamMap.getCount() == null && theRequest.getServer().getDefaultPageSize() != null) {
 			theParamMap.setCount(theRequest.getServer().getDefaultPageSize());
 			return;
