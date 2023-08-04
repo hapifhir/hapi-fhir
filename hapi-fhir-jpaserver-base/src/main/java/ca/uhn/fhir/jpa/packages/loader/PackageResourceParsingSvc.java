@@ -64,10 +64,11 @@ public class PackageResourceParsingSvc {
 				try {
 					byte[] content = thePkg.getFolders().get("package").fetchFile(file);
 					// TODO: breakpoint here on value set ID see if version comes from here
-					final IBaseResource parsedResource = myFhirContext.newJsonParser().parseResource(new String(content));
+					final String jsonString = new String(content);
+					final IBaseResource parsedResource = myFhirContext.newJsonParser().parseResource(jsonString);
 					if (parsedResource instanceof ValueSet) {
 						final ValueSet valueSet = (ValueSet) parsedResource;
-						ourLog.info("valueSet: {}", valueSet);
+						ourLog.info("filename:  {}, valueSet: {}", file, valueSet);
 					}
 					resources.add(parsedResource);
 				} catch (IOException e) {
