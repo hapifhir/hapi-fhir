@@ -22,6 +22,7 @@ package ca.uhn.fhir.mdm.provider;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.mdm.api.MdmLinkJson;
+import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
 import ca.uhn.fhir.mdm.api.MdmLinkWithRevisionJson;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.mdm.api.paging.MdmPageLinkBuilder;
@@ -42,8 +43,11 @@ import org.springframework.data.domain.Page;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -219,19 +223,38 @@ public abstract class BaseMdmProvider {
 					myFhirContext, resultPart, "theResults", "historical links not found for query parameters");
 		}
 
-		theMdmLinkRevisions.forEach(mdmLinkRevision -> parametersFromMdmLinkRevision(theRetVal, mdmLinkRevision));
+		theMdmLinkRevisions.forEach(mdmLinkRevision -> parametersFromMdmLinkRevision(theRetVal, mdmLinkRevision, findInitialAutoResult(theMdmLinkRevisions, mdmLinkRevision)));
 	}
 
-	private void parametersFromMdmLinkRevision(IBaseParameters retVal, MdmLinkWithRevisionJson mdmLinkRevision) {
-		final IBase resultPart = ParametersUtil.addParameterToParameters(myFhirContext, retVal, "historical link");
-		final MdmLinkJson mdmLink = mdmLinkRevision.getMdmLink();
+	private MdmMatchResultEnum findInitialAutoResult(List<MdmLinkWithRevisionJson> theRevisionList, MdmLinkWithRevisionJson theToMatch) {
+
+		String sourceId = theToMatch.getMdmLink().getSourceId();
+		String goldenId = theToMatch.getMdmLink().getGoldenResourceId();
+
+		// Get first AUTO source with given source and golden ID
+		Optional<MdmLinkWithRevisionJson> r = theRevisionList.stream()
+			.filter(revision -> revision.getMdmLink().getSourceId().equals(sourceId))
+			.filter(revision -> revision.getMdmLink().getGoldenResourceId().equals(goldenId))
+			.filter(revision -> revision.getMdmLink().getLinkSource().equals(MdmLinkSourceEnum.AUTO))
+			.min(Comparator.comparing(MdmLinkWithRevisionJson::getRevisionNumber));
+
+		if (r.isPresent()) {
+			return r.get().getMdmLink().getMatchResult();
+		} else {
+			return theToMatch.getMdmLink().getMatchResult();
+		}
+	}
+
+	private void parametersFromMdmLinkRevision(IBaseParameters theRetVal, MdmLinkWithRevisionJson theMdmLinkRevision, MdmMatchResultEnum theInitialAutoResult) {
+		final IBase resultPart = ParametersUtil.addParameterToParameters(myFhirContext, theRetVal, "historical link");
+		final MdmLinkJson mdmLink = theMdmLinkRevision.getMdmLink();
 
 		ParametersUtil.addPartString(myFhirContext, resultPart, "goldenResourceId", mdmLink.getGoldenResourceId());
 		ParametersUtil.addPartString(
 				myFhirContext,
 				resultPart,
 				"revisionTimestamp",
-				mdmLinkRevision.getRevisionTimestamp().toString());
+				theMdmLinkRevision.getRevisionTimestamp().toString());
 		ParametersUtil.addPartString(myFhirContext, resultPart, "sourceResourceId", mdmLink.getSourceId());
 		ParametersUtil.addPartString(
 				myFhirContext,
@@ -249,6 +272,28 @@ public abstract class BaseMdmProvider {
 				mdmLink.getCreated().getTime());
 		ParametersUtil.addPartDecimal(myFhirContext, resultPart, "linkUpdated", (double)
 				mdmLink.getUpdated().getTime());
+
+
+		// V1
+//		IBase subpart = ParametersUtil.createPart(myFhirContext, resultPart, "matchResultMap");
+//		int count = 1;
+//
+//		for (Map.Entry<String, MdmMatchResultEnum> entry : mdmLink.getMyRule()) {
+//			IBase subpart2 = ParametersUtil.createPart(myFhirContext, subpart, "rule" + count);
+//
+//			ParametersUtil.addPartString(myFhirContext, subpart2, "rule", entry.getKey());
+//			ParametersUtil.addPartString(myFhirContext, subpart2, "result", entry.getValue().name());
+//			count++;
+//		}
+
+		IBase subpart = ParametersUtil.createPart(myFhirContext, resultPart, "matchResultMap");
+
+		IBase subpart2 = ParametersUtil.createPart(myFhirContext, subpart, "matchedRules");
+		for (Map.Entry<String, MdmMatchResultEnum> entry : mdmLink.getMyRule()) {
+			ParametersUtil.addPartString(myFhirContext, subpart2, "rule", entry.getKey());
+		}
+
+		ParametersUtil.addPartString(myFhirContext, subpart, "autoMatchedResult", theInitialAutoResult.name());
 	}
 
 	protected void addPagingParameters(

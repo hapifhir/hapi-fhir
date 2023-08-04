@@ -19,11 +19,15 @@
  */
 package ca.uhn.fhir.mdm.api;
 
+import ca.uhn.fhir.mdm.rules.json.MdmRulesJson;
 import ca.uhn.fhir.model.api.IModelJson;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 
 public class MdmLinkJson implements IModelJson {
 
@@ -68,6 +72,9 @@ public class MdmLinkJson implements IModelJson {
 
 	@JsonProperty("ruleCount")
 	private Long myRuleCount;
+
+	@JsonProperty(value = "matchResultMap", required = false)
+	private Set<Map.Entry<String,MdmMatchResultEnum>> myRule = new HashSet<>();
 
 	public String getGoldenResourceId() {
 		return myGoldenResourceId;
@@ -174,6 +181,14 @@ public class MdmLinkJson implements IModelJson {
 
 	public void setRuleCount(Long theRuleCount) {
 		myRuleCount = theRuleCount;
+	}
+
+	public Set<Map.Entry<String, MdmMatchResultEnum>> getMyRule() {
+		return myRule;
+	}
+
+	public void translateAndStRule(MdmRulesJson theRule) {
+		myRule = theRule.getMatchedRulesFromVectorMap();
 	}
 
 	@Override

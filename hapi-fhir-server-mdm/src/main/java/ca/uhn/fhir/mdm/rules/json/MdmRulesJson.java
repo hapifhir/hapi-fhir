@@ -33,6 +33,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.mdm.api.MdmConstants.ALL_RESOURCE_SEARCH_PARAM_TYPE;
 
@@ -205,6 +207,14 @@ public class MdmRulesJson implements IModelJson {
 
 	public String getFieldMatchNamesForVector(long theVector) {
 		return myVectorMatchResultMap.getFieldMatchNames(theVector);
+	}
+
+	public Set<Map.Entry<String, MdmMatchResultEnum>> getMatchedRulesFromVectorMap() {
+		initialize();//todo jdjd do i need this??
+		Set<String> matchedRules = myVectorMatchResultMap.getAllFieldMatchNames();
+		return myMatchResultMap.entrySet().stream()
+				.filter(e -> matchedRules.contains(e.getKey()))
+				.collect(Collectors.toSet());
 	}
 
 	public String getDetailedFieldMatchResultWithSuccessInformation(long theVector) {

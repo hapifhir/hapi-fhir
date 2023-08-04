@@ -27,6 +27,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 
 public class VectorMatchResultMap {
@@ -103,5 +104,11 @@ public class VectorMatchResultMap {
 
 	public String getFieldMatchNames(long theVector) {
 		return myVectorToFieldMatchNamesMap.get(theVector);
+	}
+
+	public Set<String> getAllFieldMatchNames() {
+		return myVectorToFieldMatchNamesMap.keySet().stream()
+				.map(key -> myVectorToFieldMatchNamesMap.get(key))
+				.collect(Collectors.toSet());
 	}
 }

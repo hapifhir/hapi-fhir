@@ -209,7 +209,7 @@ public class ParametersUtil {
 	 *
 	 * @param theContext    The FhirContext
 	 * @param theParameters The Parameters resource
-	 * @param theName       The parametr name
+	 * @param theName       The parameter name
 	 * @param theValue      The parameter value (can be a {@link IBaseResource resource} or a {@link IBaseDatatype datatype})
 	 */
 	public static void addParameterToParameters(
@@ -248,7 +248,7 @@ public class ParametersUtil {
 
 	private static IBase createParameterRepetition(
 			FhirContext theContext,
-			IBaseResource theTargetResource,
+			IBase theTargetResource,
 			BaseRuntimeChildDefinition paramChild,
 			BaseRuntimeElementCompositeDefinition<?> paramChildElem,
 			String theName) {
@@ -446,6 +446,16 @@ public class ParametersUtil {
 		} else {
 			partChildElem.getChildByName("value[x]").getMutator().addValue(part, theValue);
 		}
+	}
+	public static IBase createPart(FhirContext theContext, IBase thePart, String theName) {
+		BaseRuntimeElementCompositeDefinition<?> def =
+			(BaseRuntimeElementCompositeDefinition<?>) theContext.getElementDefinition(thePart.getClass());
+		BaseRuntimeChildDefinition partChild = def.getChildByName("part");
+
+		BaseRuntimeElementCompositeDefinition<?> partChildElem =
+			(BaseRuntimeElementCompositeDefinition<?>) partChild.getChildByName("part");
+
+		return createParameterRepetition(theContext, thePart, partChild, partChildElem, theName);
 	}
 
 	public static void addPartResource(
