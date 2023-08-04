@@ -51,7 +51,6 @@ import org.hl7.fhir.r4.model.StringType;
 import org.opencds.cqf.cql.engine.data.DataProvider;
 import org.opencds.cqf.cql.engine.fhir.terminology.R4FhirTerminologyProvider;
 import org.opencds.cqf.cql.engine.terminology.TerminologyProvider;
-import org.opencds.cqf.cql.evaluator.CqlOptions;
 import org.opencds.cqf.cql.evaluator.fhir.dal.FhirDal;
 import org.opencds.cqf.cql.evaluator.fhir.util.Clients;
 import org.opencds.cqf.cql.evaluator.library.EvaluationSettings;
@@ -214,7 +213,7 @@ public class MeasureService implements IDaoRegistryUser {
 						fhirDal,
 						myMeasureEvaluationOptions,
 						myEvaluationSettings.getCqlOptions(),
-						null);
+						this.myGlobalLibraryCache);
 
 		MeasureReport measureReport = null;
 

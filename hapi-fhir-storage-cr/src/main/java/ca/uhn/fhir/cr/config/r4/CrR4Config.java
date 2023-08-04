@@ -22,7 +22,6 @@ package ca.uhn.fhir.cr.config.r4;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.cr.config.BaseClinicalReasoningConfig;
-import ca.uhn.fhir.cr.config.CareGapsProperties;
 import ca.uhn.fhir.cr.config.ProviderLoader;
 import ca.uhn.fhir.cr.config.ProviderSelector;
 import ca.uhn.fhir.cr.r4.measure.CareGapsOperationProvider;
@@ -34,7 +33,7 @@ import ca.uhn.fhir.cr.r4.measure.SubmitDataProvider;
 import ca.uhn.fhir.cr.r4.measure.SubmitDataService;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.server.RestfulServer;
+import ca.uhn.fhir.rest.server.provider.ResourceProviderFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -43,7 +42,6 @@ import org.springframework.context.annotation.Scope;
 
 import java.util.Arrays;
 import java.util.Map;
-import java.util.concurrent.Executor;
 import java.util.function.Function;
 
 @Configuration
@@ -71,7 +69,8 @@ public class CrR4Config {
 	}
 
 	@Bean
-	public Function<RequestDetails, CareGapsService> r4CareGapsServiceFactory(ApplicationContext theApplicationContext) {
+	public Function<RequestDetails, CareGapsService> r4CareGapsServiceFactory(
+			ApplicationContext theApplicationContext) {
 		return r -> {
 			var cs = theApplicationContext.getBean(CareGapsService.class);
 			cs.setRequestDetails(r);
@@ -84,6 +83,7 @@ public class CrR4Config {
 	public CareGapsService r4CareGapsService() {
 		return new CareGapsService();
 	}
+
 	@Bean
 	public CareGapsOperationProvider r4CareGapsProvider(
 			Function<RequestDetails, CareGapsService> theCareGapsServiceFunction) {
@@ -102,17 +102,19 @@ public class CrR4Config {
 
 	@Bean
 	public ProviderLoader r4PdLoader(
-		ApplicationContext theApplicationContext, FhirContext theFhirContext, RestfulServer theRestfulServer) {
+			ApplicationContext theApplicationContext,
+			FhirContext theFhirContext,
+			ResourceProviderFactory theResourceProviderFactory) {
 
 		var selector = new ProviderSelector(
-			theFhirContext,
-			Map.of(
-				FhirVersionEnum.R4,
-				Arrays.asList(
-					MeasureOperationsProvider.class,
-					SubmitDataProvider.class,
-					CareGapsOperationProvider.class)));
+				theFhirContext,
+				Map.of(
+						FhirVersionEnum.R4,
+						Arrays.asList(
+								MeasureOperationsProvider.class,
+								SubmitDataProvider.class,
+								CareGapsOperationProvider.class)));
 
-		return new ProviderLoader(theRestfulServer, theApplicationContext, selector);
+		return new ProviderLoader(theResourceProviderFactory, theApplicationContext, selector);
 	}
 }

@@ -23,13 +23,32 @@ public class CareGapsProperties {
 	private boolean myThreadedCareGapsEnabled = true;
 	private String myCareGapsReporter;
 	private String myCareGapsCompositionSectionAuthor;
-	public boolean getThreadedCareGapsEnabled() {return myThreadedCareGapsEnabled;}
-	public void setThreadedCareGapsEnabled(boolean theThreadedCareGapsEnabled) {myThreadedCareGapsEnabled = theThreadedCareGapsEnabled;}
-	public boolean isThreadedCareGapsEnabled() {return myThreadedCareGapsEnabled;}
-	public String getCareGapsReporter() {return myCareGapsReporter;}
+
+	public boolean getThreadedCareGapsEnabled() {
+		return myThreadedCareGapsEnabled;
+	}
+
+	public void setThreadedCareGapsEnabled(boolean theThreadedCareGapsEnabled) {
+		myThreadedCareGapsEnabled = theThreadedCareGapsEnabled;
+	}
+
+	public boolean isThreadedCareGapsEnabled() {
+		return myThreadedCareGapsEnabled;
+	}
+
+	public String getCareGapsReporter() {
+		return myCareGapsReporter;
+	}
+
 	public void setCareGapsReporter(String theCareGapsReporter) {
-				myCareGapsReporter = theCareGapsReporter;
-			}
-	public String getCareGapsCompositionSectionAuthor(){return myCareGapsCompositionSectionAuthor;}
-	public void setCareGapsCompositionSectionAuthor(String theCareGapsCompositionSectionAuthor) {myCareGapsCompositionSectionAuthor = theCareGapsCompositionSectionAuthor;}
+		myCareGapsReporter = theCareGapsReporter;
+	}
+
+	public String getCareGapsCompositionSectionAuthor() {
+		return myCareGapsCompositionSectionAuthor;
+	}
+
+	public void setCareGapsCompositionSectionAuthor(String theCareGapsCompositionSectionAuthor) {
+		myCareGapsCompositionSectionAuthor = theCareGapsCompositionSectionAuthor;
+	}
 }

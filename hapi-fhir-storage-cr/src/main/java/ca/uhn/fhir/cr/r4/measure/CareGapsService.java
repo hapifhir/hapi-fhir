@@ -119,6 +119,7 @@ public class CareGapsService implements IDaoRegistryUser {
 
 	@Autowired
 	protected CareGapsProperties myCareGapsProperties;
+
 	@Autowired
 	Function<RequestDetails, MeasureService> myR4MeasureServiceFactory;
 
@@ -208,37 +209,29 @@ public class CareGapsService implements IDaoRegistryUser {
 
 	public void validateConfiguration() {
 		checkArgument(
-				!Strings.isNullOrEmpty(myCareGapsProperties
-						.getCareGapsReporter()),
+				!Strings.isNullOrEmpty(myCareGapsProperties.getCareGapsReporter()),
 				"The measure_report.care_gaps_reporter setting is required for the $care-gaps operation.");
 		checkArgument(
-				!Strings.isNullOrEmpty(myCareGapsProperties
-						.getCareGapsCompositionSectionAuthor()),
+				!Strings.isNullOrEmpty(myCareGapsProperties.getCareGapsCompositionSectionAuthor()),
 				"The measure_report.care_gaps_composition_section_author setting is required for the $care-gaps operation.");
 
 		Resource configuredReporter = addConfiguredResource(
-				Organization.class,
-				myCareGapsProperties
-						.getCareGapsReporter(),
-				"care_gaps_reporter");
+				Organization.class, myCareGapsProperties.getCareGapsReporter(), "care_gaps_reporter");
 		Resource configuredAuthor = addConfiguredResource(
 				Organization.class,
-				myCareGapsProperties
-						.getCareGapsCompositionSectionAuthor(),
+				myCareGapsProperties.getCareGapsCompositionSectionAuthor(),
 				"care_gaps_composition_section_author");
 
 		checkNotNull(
 				configuredReporter,
 				String.format(
 						"The %s Resource is configured as the measure_report.care_gaps_reporter but the Resource could not be read.",
-						myCareGapsProperties
-								.getCareGapsReporter()));
+						myCareGapsProperties.getCareGapsReporter()));
 		checkNotNull(
 				configuredAuthor,
 				String.format(
 						"The %s Resource is configured as the measure_report.care_gaps_composition_section_author but the Resource could not be read.",
-						myCareGapsProperties
-								.getCareGapsCompositionSectionAuthor()));
+						myCareGapsProperties.getCareGapsCompositionSectionAuthor()));
 	}
 
 	List<Patient> getPatientListFromSubject(String theSubject) {
@@ -406,18 +399,19 @@ public class CareGapsService implements IDaoRegistryUser {
 		List<MeasureReport> reports = new ArrayList<>();
 		MeasureReport report;
 		for (Measure measure : theMeasures) {
-			report = myR4MeasureServiceFactory.apply(myRequestDetails).
-				evaluateMeasure(
-					measure.getIdElement(),
-					thePeriodStart,
-					thePeriodEnd,
-					"patient",
-					Ids.simple(thePatient),
-					null,
-					null,
-					null,
-					null,
-					null);
+			report = myR4MeasureServiceFactory
+					.apply(myRequestDetails)
+					.evaluateMeasure(
+							measure.getIdElement(),
+							thePeriodStart,
+							thePeriodEnd,
+							"patient",
+							Ids.simple(thePatient),
+							null,
+							null,
+							null,
+							null,
+							null);
 			if (!report.hasGroup()) {
 				ourLog.info(
 						"Report does not include a group so skipping.\nSubject: {}\nMeasure: {}",
@@ -449,9 +443,7 @@ public class CareGapsService implements IDaoRegistryUser {
 			IIdType id = Ids.newId(MeasureReport.class, UUID.randomUUID().toString());
 			theMeasureReport.setId(id);
 		}
-		Reference reporter = new Reference()
-				.setReference(myCareGapsProperties
-						.getCareGapsReporter());
+		Reference reporter = new Reference().setReference(myCareGapsProperties.getCareGapsReporter());
 		// TODO: figure out what this extension is for
 		// reporter.addExtension(new
 		// Extension().setUrl(CARE_GAPS_MEASUREREPORT_REPORTER_EXTENSION));

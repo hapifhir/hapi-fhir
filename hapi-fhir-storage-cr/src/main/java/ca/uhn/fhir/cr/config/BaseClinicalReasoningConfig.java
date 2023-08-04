@@ -20,7 +20,6 @@
 package ca.uhn.fhir.cr.config;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.cr.common.CodeCacheResourceChangeListener;
 import ca.uhn.fhir.cr.common.CqlExceptionHandlingInterceptor;
@@ -32,18 +31,14 @@ import ca.uhn.fhir.cr.common.HapiLibrarySourceProvider;
 import ca.uhn.fhir.cr.common.HapiTerminologyProvider;
 import ca.uhn.fhir.cr.common.IDataProviderFactory;
 import ca.uhn.fhir.cr.common.IFhirDalFactory;
-import ca.uhn.fhir.cr.common.ILibraryLoaderFactory;
 import ca.uhn.fhir.cr.common.ILibrarySourceProviderFactory;
 import ca.uhn.fhir.cr.common.ITerminologyProviderFactory;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.cache.IResourceChangeListenerRegistry;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
-import ca.uhn.fhir.rest.server.provider.ResourceProviderFactory;
-import org.cqframework.cql.cql2elm.CqlTranslatorOptions;
 import org.cqframework.cql.cql2elm.ModelManager;
 import org.cqframework.cql.cql2elm.model.Model;
-import org.cqframework.cql.cql2elm.quick.FhirLibrarySourceProvider;
 import org.hl7.cql.model.ModelIdentifier;
 import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
@@ -53,17 +48,13 @@ import org.opencds.cqf.cql.engine.fhir.model.R4FhirModelResolver;
 import org.opencds.cqf.cql.engine.fhir.searchparam.SearchParameterResolver;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.cql.engine.runtime.Code;
-import org.opencds.cqf.cql.evaluator.CqlOptions;
 import org.opencds.cqf.cql.evaluator.builder.DataProviderComponents;
 import org.opencds.cqf.cql.evaluator.builder.EndpointInfo;
 import org.opencds.cqf.cql.evaluator.cql2elm.util.LibraryVersionSelector;
-import org.opencds.cqf.cql.evaluator.engine.execution.TranslatingLibraryLoader;
 import org.opencds.cqf.cql.evaluator.engine.model.CachingModelResolverDecorator;
 import org.opencds.cqf.cql.evaluator.engine.retrieve.BundleRetrieveProvider;
 import org.opencds.cqf.cql.evaluator.fhir.Constants;
 import org.opencds.cqf.cql.evaluator.fhir.adapter.AdapterFactory;
-import org.opencds.cqf.cql.evaluator.library.EvaluationSettings;
-import org.opencds.cqf.cql.evaluator.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.cql.evaluator.spring.fhir.adapter.AdapterConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -86,6 +77,12 @@ import java.util.concurrent.ForkJoinPool;
 public abstract class BaseClinicalReasoningConfig {
 
 	private static final Logger ourLogger = LoggerFactory.getLogger(BaseClinicalReasoningConfig.class);
+
+	@Bean
+	@Scope("prototype")
+	public ModelManager modelManager(Map<ModelIdentifier, Model> theGlobalModelCache) {
+		return new ModelManager(theGlobalModelCache);
+	}
 
 	@Bean
 	public CqlExceptionHandlingInterceptor cqlExceptionHandlingInterceptor() {
@@ -219,6 +216,15 @@ public abstract class BaseClinicalReasoningConfig {
 	@Bean
 	public LibraryVersionSelector libraryVersionSelector(AdapterFactory theAdapterFactory) {
 		return new LibraryVersionSelector(theAdapterFactory);
+	}
+
+	@Bean
+	public Executor cqlExecutor() {
+		CqlForkJoinWorkerThreadFactory factory = new CqlForkJoinWorkerThreadFactory();
+		ForkJoinPool myCommonPool =
+				new ForkJoinPool(Math.min(32767, Runtime.getRuntime().availableProcessors()), factory, null, false);
+
+		return new DelegatingSecurityContextExecutor(myCommonPool, SecurityContextHolder.getContext());
 	}
 
 	@Bean
