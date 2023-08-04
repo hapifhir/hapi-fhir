@@ -33,7 +33,7 @@ import ca.uhn.fhir.cr.r4.measure.SubmitDataProvider;
 import ca.uhn.fhir.cr.r4.measure.SubmitDataService;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.server.provider.ResourceProviderFactory;
+import ca.uhn.fhir.rest.server.RestfulServer;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -102,19 +102,17 @@ public class CrR4Config {
 
 	@Bean
 	public ProviderLoader r4PdLoader(
-			ApplicationContext theApplicationContext,
-			FhirContext theFhirContext,
-			ResourceProviderFactory theResourceProviderFactory) {
+		ApplicationContext theApplicationContext, FhirContext theFhirContext, RestfulServer theRestfulServer) {
 
 		var selector = new ProviderSelector(
-				theFhirContext,
-				Map.of(
-						FhirVersionEnum.R4,
-						Arrays.asList(
-								MeasureOperationsProvider.class,
-								SubmitDataProvider.class,
-								CareGapsOperationProvider.class)));
+			theFhirContext,
+			Map.of(
+				FhirVersionEnum.R4,
+				Arrays.asList(
+					MeasureOperationsProvider.class,
+					SubmitDataProvider.class,
+					CareGapsOperationProvider.class)));
 
-		return new ProviderLoader(theResourceProviderFactory, theApplicationContext, selector);
+		return new ProviderLoader(theRestfulServer, theApplicationContext, selector);
 	}
 }

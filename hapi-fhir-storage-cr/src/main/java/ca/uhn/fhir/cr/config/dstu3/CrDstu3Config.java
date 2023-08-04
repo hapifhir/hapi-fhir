@@ -27,6 +27,7 @@ import ca.uhn.fhir.cr.config.ProviderSelector;
 import ca.uhn.fhir.cr.dstu3.measure.MeasureOperationsProvider;
 import ca.uhn.fhir.cr.dstu3.measure.MeasureService;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.provider.ResourceProviderFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -65,13 +66,11 @@ public class CrDstu3Config {
 
 	@Bean
 	public ProviderLoader dstu3PdLoader(
-			ApplicationContext theApplicationContext,
-			FhirContext theFhirContext,
-			ResourceProviderFactory theResourceProviderFactory) {
+		ApplicationContext theApplicationContext, FhirContext theFhirContext, RestfulServer theRestfulServer) {
 
 		var selector = new ProviderSelector(
-				theFhirContext, Map.of(FhirVersionEnum.DSTU3, Arrays.asList((MeasureOperationsProvider.class))));
+			theFhirContext, Map.of(FhirVersionEnum.DSTU3, Arrays.asList((MeasureOperationsProvider.class))));
 
-		return new ProviderLoader(theResourceProviderFactory, theApplicationContext, selector);
+		return new ProviderLoader(theRestfulServer, theApplicationContext, selector);
 	}
 }

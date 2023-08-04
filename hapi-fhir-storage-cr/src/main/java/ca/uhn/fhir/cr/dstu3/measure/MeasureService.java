@@ -48,6 +48,7 @@ import org.opencds.cqf.cql.engine.terminology.TerminologyProvider;
 import org.opencds.cqf.cql.evaluator.CqlOptions;
 import org.opencds.cqf.cql.evaluator.fhir.dal.FhirDal;
 import org.opencds.cqf.cql.evaluator.fhir.util.Clients;
+import org.opencds.cqf.cql.evaluator.library.EvaluationSettings;
 import org.opencds.cqf.cql.evaluator.measure.MeasureEvaluationOptions;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -116,7 +117,7 @@ public class MeasureService implements IDaoRegistryUser {
 			myGlobalLibraryCache;
 
 	@Autowired
-	protected CqlOptions myCqlOptions;
+	protected EvaluationSettings myEvaluationSettings;
 
 	@Autowired
 	protected MeasureEvaluationOptions myMeasureEvaluationOptions;
@@ -199,7 +200,7 @@ public class MeasureService implements IDaoRegistryUser {
 				dataProvider,
 				fhirDal,
 				myMeasureEvaluationOptions,
-				myCqlOptions,
+				myEvaluationSettings.getCqlOptions(),
 				null);
 
 		MeasureReport report = measureProcessor.evaluateMeasure(

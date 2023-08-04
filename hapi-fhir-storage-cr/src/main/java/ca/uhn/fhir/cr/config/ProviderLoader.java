@@ -2,7 +2,7 @@ package ca.uhn.fhir.cr.config;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.rest.server.provider.ResourceProviderFactory;
+import ca.uhn.fhir.rest.server.RestfulServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
@@ -13,16 +13,15 @@ public class ProviderLoader {
 	private static final Logger myLogger = LoggerFactory.getLogger(ProviderLoader.class);
 	private final ApplicationContext myApplicationContext;
 	private final ProviderSelector myProviderSelector;
-	private final ResourceProviderFactory myResourceProviderFactory;
+	private final RestfulServer myRestfulServer;
 
 	public ProviderLoader(
-			ResourceProviderFactory theResourceProviderFactory,
-			ApplicationContext theApplicationContext,
-			ProviderSelector theProviderSelector) {
+		RestfulServer theRestfulServer,
+		ApplicationContext theApplicationContext,
+		ProviderSelector theProviderSelector) {
 		myApplicationContext = theApplicationContext;
 		myProviderSelector = theProviderSelector;
-		myResourceProviderFactory = theResourceProviderFactory;
-		;
+		myRestfulServer = theRestfulServer;
 	}
 
 	@EventListener(ContextRefreshedEvent.class)
@@ -33,7 +32,7 @@ public class ProviderLoader {
 		}
 		for (Class<?> op : type) {
 			myLogger.info("loading provider: {}", op);
-			myResourceProviderFactory.addSupplier(() -> myApplicationContext.getBean(op));
+			myRestfulServer.registerProvider(myApplicationContext.getBean(op));
 		}
 	}
 }
