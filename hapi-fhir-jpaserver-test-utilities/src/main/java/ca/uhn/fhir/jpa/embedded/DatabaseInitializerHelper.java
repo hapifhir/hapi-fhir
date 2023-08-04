@@ -39,9 +39,8 @@ public class DatabaseInitializerHelper {
 	}
 
 	public void insertPersistenceTestData(JpaEmbeddedDatabase theDatabase, VersionEnum theVersionEnum) {
-		String fileName = String.format(
-				"migration/releases/%s/data/%s.sql",
-				theVersionEnum, theDatabase.getDriverType());
+		String fileName =
+				String.format("migration/releases/%s/data/%s.sql", theVersionEnum, theDatabase.getDriverType());
 		String sql = getSqlFromResourceFile(fileName);
 		theDatabase.insertTestData(sql);
 	}

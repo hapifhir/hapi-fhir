@@ -56,14 +56,14 @@ public class H2EmbeddedDatabase extends JpaEmbeddedDatabase {
 
 	private List<String> getAllTableNames() {
 		List<String> allTableNames = new ArrayList<>();
-		List<Map<String, Object>> queryResults = query("SELECT TABLE_NAME FROM information_schema.tables WHERE TABLE_SCHEMA = 'PUBLIC'");
+		List<Map<String, Object>> queryResults =
+				query("SELECT TABLE_NAME FROM information_schema.tables WHERE TABLE_SCHEMA = 'PUBLIC'");
 		for (Map<String, Object> row : queryResults) {
 			String tableName = row.get("TABLE_NAME").toString();
 			allTableNames.add(tableName);
 		}
 		return allTableNames;
 	}
-
 
 	@Override
 	public void disableConstraints() {
