@@ -2507,7 +2507,9 @@ public class QueryStack {
 			}
 		} else {
 			// These are handled later
-			if (!Constants.PARAM_CONTENT.equals(theParamName) && !Constants.PARAM_TEXT.equals(theParamName)) {
+			if (!Constants.PARAM_CONTENT.equals(theParamName)
+					&& !Constants.PARAM_TEXT.equals(theParamName)
+					&& !Constants.PARAM_LASTUPDATED.equals(theParamName)) {
 				if (Constants.PARAM_FILTER.equals(theParamName)) {
 
 					// Parse the predicates enumerated in the _filter separated by AND or OR...
