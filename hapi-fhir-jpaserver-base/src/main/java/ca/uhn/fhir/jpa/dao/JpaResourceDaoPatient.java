@@ -39,16 +39,20 @@ import ca.uhn.fhir.rest.param.TokenParam;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.Arrays;
 import java.util.Collections;
-import javax.servlet.http.HttpServletRequest;
 
 public class JpaResourceDaoPatient<T extends IBaseResource> extends BaseHapiFhirResourceDao<T>
 		implements IFhirResourceDaoPatient<T> {
+
+	private static final Logger ourLog = LoggerFactory.getLogger(JpaResourceDaoPatient.class);
 
 	@Autowired
 	private IRequestPartitionHelperSvc myPartitionHelperSvc;
@@ -107,7 +111,7 @@ public class JpaResourceDaoPatient<T extends IBaseResource> extends BaseHapiFhir
 		RequestPartitionId requestPartitionId = myPartitionHelperSvc.determineReadPartitionForRequestForSearchType(
 				theRequest, getResourceName(), paramMap, null);
 
-		setOffsetAndCount(paramMap, theRequest);
+		adjustCount(theRequest, paramMap);
 
 		return mySearchCoordinatorSvc.registerSearch(
 				this,
@@ -116,6 +120,23 @@ public class JpaResourceDaoPatient<T extends IBaseResource> extends BaseHapiFhir
 				new CacheControlDirective().parse(theRequest.getHeaders(Constants.HEADER_CACHE_CONTROL)),
 				theRequest,
 				requestPartitionId);
+	}
+
+	private void adjustCount(RequestDetails theRequest, SearchParameterMap theParamMap) {
+		if (theParamMap.getCount() == null && theRequest.getServer().getDefaultPageSize() != null) {
+			theParamMap.setCount(theRequest.getServer().getDefaultPageSize());
+			return;
+		}
+
+		Integer maxPageSize = theRequest.getServer().getMaximumPageSize();
+		if (maxPageSize != null && theParamMap.getCount() > maxPageSize) {
+			ourLog.info(
+				"Reducing {} from {} to {} which is the maximum allowable page size.",
+				Constants.PARAM_COUNT,
+				theParamMap.getCount(),
+				maxPageSize);
+			theParamMap.setCount(maxPageSize);
+		}
 	}
 
 	@Override
