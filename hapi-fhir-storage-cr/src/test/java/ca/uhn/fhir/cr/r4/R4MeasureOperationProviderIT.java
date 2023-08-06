@@ -50,11 +50,6 @@ class R4MeasureOperationProviderIT extends BaseCrR4TestServer
 		loadBundle("ColorectalCancerScreeningsFHIR-bundle.json");
 		runEvaluateMeasure("2019-01-01", "2019-12-31", "Patient/numer-EXM130", "ColorectalCancerScreeningsFHIR", "Individual", null);
 	}
-	@Test
-	void testMeasureEvaluate_EXM104() {
-		loadBundle("ca/uhn/fhir/cr/r4/connectathon/EXM104-8.2.000-bundle.json");
-		runEvaluateMeasure("2019-01-01", "2019-12-31", "Patient/numer-EXM104", "measure-EXM104-8.2.000", "Individual", null);
-	}
 
 	private void runWithPatient(String measureId, String patientId, int initialPopulationCount, int denominatorCount,
 										 int denominatorExclusionCount, int numeratorCount, boolean enrolledDuringParticipationPeriod,

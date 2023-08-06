@@ -94,7 +94,7 @@
 							"reference": "Device/cqf-tooling"
 						}
 					}
-      } ],
+      ],
       "url": "http://hl7.org/fhir/us/cqfmeasures/Measure/EXM104",
       "identifier": [ {
         "use": "official",
