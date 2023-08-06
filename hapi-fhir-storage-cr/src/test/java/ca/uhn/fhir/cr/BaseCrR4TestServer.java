@@ -17,6 +17,8 @@ import ca.uhn.fhir.test.utilities.JettyUtil;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
+import org.cqframework.cql.elm.execution.Library;
+import org.cqframework.cql.elm.execution.VersionedIdentifier;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
@@ -27,10 +29,13 @@ import org.junit.jupiter.api.BeforeEach;
 import org.opencds.cqf.cql.evaluator.library.EvaluationSettings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.Bean;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.test.context.ContextConfiguration;
 
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
 
@@ -53,12 +58,17 @@ public abstract class BaseCrR4TestServer extends BaseJpaR4Test implements IResou
 	@Autowired
 	EvaluationSettings myEvaluationSettings;
 
+	@Autowired
+	Map<VersionedIdentifier, Library> myGlobalLibraryCache;
+
 	@SuppressWarnings("deprecation")
 	@AfterEach
 	public void after() {
 		ourClient.unregisterInterceptor(mySimpleHeaderInterceptor);
 		myStorageSettings.setIndexMissingFields(new JpaStorageSettings().getIndexMissingFields());
 		myEvaluationSettings.getLibraryCache().clear();
+		myGlobalLibraryCache.clear();
+
 	}
 	@Autowired
 	RestfulServer ourRestfulServer;
