@@ -16,9 +16,9 @@ public class ProviderLoader {
 	private final RestfulServer myRestfulServer;
 
 	public ProviderLoader(
-		RestfulServer theRestfulServer,
-		ApplicationContext theApplicationContext,
-		ProviderSelector theProviderSelector) {
+			RestfulServer theRestfulServer,
+			ApplicationContext theApplicationContext,
+			ProviderSelector theProviderSelector) {
 		myApplicationContext = theApplicationContext;
 		myProviderSelector = theProviderSelector;
 		myRestfulServer = theRestfulServer;

@@ -102,16 +102,16 @@ public class CrR4Config {
 
 	@Bean
 	public ProviderLoader r4PdLoader(
-		ApplicationContext theApplicationContext, FhirContext theFhirContext, RestfulServer theRestfulServer) {
+			ApplicationContext theApplicationContext, FhirContext theFhirContext, RestfulServer theRestfulServer) {
 
 		var selector = new ProviderSelector(
-			theFhirContext,
-			Map.of(
-				FhirVersionEnum.R4,
-				Arrays.asList(
-					MeasureOperationsProvider.class,
-					SubmitDataProvider.class,
-					CareGapsOperationProvider.class)));
+				theFhirContext,
+				Map.of(
+						FhirVersionEnum.R4,
+						Arrays.asList(
+								MeasureOperationsProvider.class,
+								SubmitDataProvider.class,
+								CareGapsOperationProvider.class)));
 
 		return new ProviderLoader(theRestfulServer, theApplicationContext, selector);
 	}
