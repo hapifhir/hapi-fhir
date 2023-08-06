@@ -24,7 +24,7 @@ import static org.mockito.Mockito.when;
 public class AbstractJaxRsConformanceProviderR4Test {
 
 	private static final String BASEURI = "http://basiuri";
-	private static final String REQUESTURI = BASEURI + "/metadata";
+//	private static final String REQUESTURI = BASEURI + "/metadata";
 	AbstractJaxRsConformanceProvider provider;
 	private ConcurrentHashMap<Class<? extends IResourceProvider>, IResourceProvider> providers;
 	private ResteasyHttpHeaders headers;

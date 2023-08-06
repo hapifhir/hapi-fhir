@@ -48,9 +48,9 @@ import javax.ws.rs.core.UriInfo;
  */
 public abstract class AbstractJaxRsProvider implements IRestfulServerDefaults {
 
-	private static final String ERROR = "error";
+//	private static final String ERROR = "error";
 
-	private static final String PROCESSING = "processing";
+//	private static final String PROCESSING = "processing";
 
 	private final FhirContext CTX;
 	/** the http headers */

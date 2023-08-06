@@ -11,13 +11,15 @@ import java.util.Set;
 
 import javax.ws.rs.core.Response;
 
-import org.hl7.fhir.dstu3.model.*;
+import org.hl7.fhir.dstu3.model.Binary;
+import org.hl7.fhir.dstu3.model.Bundle;
+import org.hl7.fhir.dstu3.model.IdType;
+import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.instance.model.api.IBaseBinary;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.SummaryEnum;
 import ca.uhn.fhir.rest.server.RestfulServerUtils;
 
@@ -38,7 +40,7 @@ public class JaxRsResponseDstu3Test {
 	
 	@Test
 	public void testGetResponseWriterNoZipNoBrowser() throws IOException {
-		boolean theRequestIsBrowser = false;
+//		boolean theRequestIsBrowser = false;
 		boolean respondGzip = false;
 		Set<SummaryEnum> theSummaryMode = Collections.<SummaryEnum>emptySet();
         boolean theAddContentLocationHeader = false;
@@ -51,7 +53,7 @@ public class JaxRsResponseDstu3Test {
 
 	@Test
 	public void testSendAttachmentResponse() throws IOException {
-		boolean theRequestIsBrowser = true;
+//		boolean theRequestIsBrowser = true;
 		boolean respondGzip = true;
 		IBaseBinary binary = new Binary();
 		String contentType = "foo";
@@ -67,7 +69,7 @@ public class JaxRsResponseDstu3Test {
 	
 	@Test
 	public void testSendAttachmentResponseNoContent() throws IOException {
-		boolean theRequestIsBrowser = true;
+//		boolean theRequestIsBrowser = true;
 		boolean respondGzip = true;
 		IBaseBinary binary = new Binary();
 		binary.setContent(new byte[]{});
@@ -80,7 +82,7 @@ public class JaxRsResponseDstu3Test {
 	
 	@Test
 	public void testSendAttachmentResponseEmptyContent() throws IOException {
-		boolean theRequestIsBrowser = true;
+//		boolean theRequestIsBrowser = true;
 		boolean respondGzip = true;
 		IBaseBinary binary = new Binary();
 		boolean theAddContentLocationHeader = false;
@@ -93,11 +95,11 @@ public class JaxRsResponseDstu3Test {
 
 	@Test
 	public void testReturnResponse() throws IOException {
-		IdType theId = new IdType(15L);
-		int operationStatus = 200;
-		boolean allowPrefer = true;
-		String resourceName = "Patient";
-		MethodOutcome methodOutcome = new MethodOutcome(theId);
+//		IdType theId = new IdType(15L);
+//		int operationStatus = 200;
+//		boolean allowPrefer = true;
+//		String resourceName = "Patient";
+//		MethodOutcome methodOutcome = new MethodOutcome(theId);
 		boolean addContentLocationHeader = true;
 		boolean respondGzip = true;
 		Response result = (Response) RestfulServerUtils.streamResponseAsResource(request.getServer(), createPatient(), theSummaryMode, 200, addContentLocationHeader, respondGzip, this.request);
@@ -110,11 +112,11 @@ public class JaxRsResponseDstu3Test {
 	
 	@Test
 	public void testReturnResponseAsXml() throws IOException {
-		IdType theId = new IdType(15L);
-		int operationStatus = 200;
-		boolean allowPrefer = true;
-		String resourceName = "Patient";
-		MethodOutcome methodOutcome = new MethodOutcome(theId);
+//		IdType theId = new IdType(15L);
+//		int operationStatus = 200;
+//		boolean allowPrefer = true;
+//		String resourceName = "Patient";
+//		MethodOutcome methodOutcome = new MethodOutcome(theId);
 		response.getRequestDetails().addParameter(Constants.PARAM_FORMAT, new String[]{Constants.CT_XML});
 		boolean addContentLocationHeader = true;
 		boolean respondGzip = true;

@@ -19,21 +19,21 @@
  */
 package ca.uhn.fhir.jaxrs.client;
 
-import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.rest.api.RequestTypeEnum;
-import ca.uhn.fhir.rest.client.api.BaseHttpRequest;
-import ca.uhn.fhir.rest.client.api.IHttpRequest;
-import ca.uhn.fhir.rest.client.api.IHttpResponse;
-import ca.uhn.fhir.util.StopWatch;
-
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.Invocation;
 import javax.ws.rs.core.Response;
+
+import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.rest.api.RequestTypeEnum;
+import ca.uhn.fhir.rest.client.api.BaseHttpRequest;
+import ca.uhn.fhir.rest.client.api.IHttpResponse;
+import ca.uhn.fhir.util.StopWatch;
 
 /**
  * A Http Request based on JaxRs. This is an adapter around the class
@@ -41,7 +41,7 @@ import javax.ws.rs.core.Response;
  *
  * @author Peter Van Houte | peter.vanhoute@agfa.com | Agfa Healthcare
  */
-public class JaxRsHttpRequest extends BaseHttpRequest implements IHttpRequest {
+public class JaxRsHttpRequest extends BaseHttpRequest {
 
 	private final Map<String, List<String>> myHeaders = new HashMap<>();
 	private Invocation.Builder myRequest;

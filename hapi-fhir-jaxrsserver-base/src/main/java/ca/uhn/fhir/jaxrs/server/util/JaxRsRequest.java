@@ -300,6 +300,7 @@ public class JaxRsRequest extends RequestDetails {
 			result.setCompartmentName(myCompartment);
 			result.setCompleteUrl(myRequestUrl);
 			result.setResourceName(myResourceName);
+			result.setRequestPath(result.getResourceName());
 
 			return result;
 		}

@@ -73,6 +73,7 @@ public class AbstractJaxRsProviderTest {
 
 		final RuntimeException theException = new RuntimeException();
 		final UriInfo mockUriInfo = mock(UriInfo.class);
+		@SuppressWarnings("unchecked")
 		final MultivaluedMap<String, String> mockMap = mock(MultivaluedMap.class);
 		when(mockUriInfo.getBaseUri()).thenReturn(new URI("http://www.test.com"));
 		when(mockUriInfo.getRequestUri()).thenReturn(new URI("http://www.test.com/test"));

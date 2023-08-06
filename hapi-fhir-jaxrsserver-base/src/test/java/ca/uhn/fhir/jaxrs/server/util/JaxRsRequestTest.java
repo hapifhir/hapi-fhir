@@ -1,29 +1,35 @@
 package ca.uhn.fhir.jaxrs.server.util;
 
-import ca.uhn.fhir.jaxrs.server.test.TestJaxRsDummyPatientProvider;
-import ca.uhn.fhir.rest.api.RequestTypeEnum;
-import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
-import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.when;
+
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.util.Arrays;
+
+import javax.ws.rs.core.MultivaluedHashMap;
+import javax.ws.rs.core.MultivaluedMap;
+import javax.ws.rs.core.UriInfo;
+
 import org.apache.commons.lang3.StringUtils;
 import org.jboss.resteasy.specimpl.ResteasyHttpHeaders;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import javax.ws.rs.core.MultivaluedHashMap;
-import javax.ws.rs.core.MultivaluedMap;
-import javax.ws.rs.core.UriInfo;
-import java.io.IOException;
-import java.net.URISyntaxException;
-import java.util.Arrays;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import ca.uhn.fhir.jaxrs.server.test.TestJaxRsDummyPatientProvider;
+import ca.uhn.fhir.rest.api.RequestTypeEnum;
+import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 
 public class JaxRsRequestTest {
 	
 	private static final String RESOURCE_STRING = "</Patient>";
 	private static final String BASEURI = "http://baseuri";
-	private static final String REQUESTURI = "http://baseuri/test";
+//	private static final String REQUESTURI = "http://baseuri/test";
 	
 	private JaxRsRequest details;
 	private MultivaluedMap<String, String> queryParameters = new MultivaluedHashMap<String, String>();
