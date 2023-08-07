@@ -137,6 +137,18 @@ import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.IdentityHashMap;
+import java.util.List;
+import java.util.Set;
+import java.util.StringTokenizer;
+import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.PostConstruct;
@@ -151,18 +163,6 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.xml.stream.events.Characters;
 import javax.xml.stream.events.XMLEvent;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.IdentityHashMap;
-import java.util.List;
-import java.util.Set;
-import java.util.StringTokenizer;
-import java.util.stream.Collectors;
 
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
@@ -419,9 +419,9 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 
 	private void extractProfileTags(
 			TransactionDetails theTransactionDetails,
-									IBaseResource theResource,
-									ResourceTable theEntity,
-									Set<ResourceTag> theAllTags){
+			IBaseResource theResource,
+			ResourceTable theEntity,
+			Set<ResourceTag> theAllTags) {
 		RuntimeResourceDefinition def = myContext.getResourceDefinition(theResource);
 		if (!def.isStandardType()) {
 			String profile = def.getResourceProfile("");
@@ -860,8 +860,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		return sourceExtension;
 	}
 
-
-
 	private boolean updateTags(
 			TransactionDetails theTransactionDetails,
 			RequestDetails theRequest,
@@ -914,9 +912,10 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		// Since tags are merged on updates, we add tags from theEntity that theResource does not have
 		Set<ResourceTag> allUpdatedResourceTagsNewAndOldMinusRemovalsFromTheEntity = getAllTagDefinitions(theEntity);
 
-		allUpdatedResourceTagsNewAndOldMinusRemovalsFromTheEntity.forEach(aResourcetag ->{
-			if(!allResourceTagsFromTheResource.contains(aResourcetag)){
-				IBaseCoding iBaseCoding = theResource.getMeta()
+		allUpdatedResourceTagsNewAndOldMinusRemovalsFromTheEntity.forEach(aResourcetag -> {
+			if (!allResourceTagsFromTheResource.contains(aResourcetag)) {
+				IBaseCoding iBaseCoding = theResource
+						.getMeta()
 						.addTag()
 						.setCode(aResourcetag.getTag().getCode())
 						.setSystem(aResourcetag.getTag().getSystem())
@@ -929,7 +928,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 				}
 			}
 		});
-
 
 		theEntity.setHasTags(!allUpdatedResourceTagsNewAndOldMinusRemovalsFromTheEntity.isEmpty());
 		return !isEqualCollection(allOriginalResourceTagsFromTheEntity, allResourceTagsFromTheResource);
