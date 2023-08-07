@@ -293,9 +293,13 @@ public class DefaultIpsGenerationStrategy implements IIpsGenerationStrategy {
 					return Sets.newHashSet(DeviceUseStatement.INCLUDE_DEVICE);
 				}
 				break;
+			case IMMUNIZATIONS:
+				if (ResourceType.Immunization.name().equals(theIpsSectionContext.getResourceType())) {
+					return Sets.newHashSet(Immunization.INCLUDE_MANUFACTURER);
+				}
+				break;
 			case ALLERGY_INTOLERANCE:
 			case PROBLEM_LIST:
-			case IMMUNIZATIONS:
 			case PROCEDURES:
 			case DIAGNOSTIC_RESULTS:
 			case VITAL_SIGNS:

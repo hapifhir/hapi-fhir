@@ -1,6 +1,6 @@
 /*-
  * #%L
- * HAPI FHIR - Master Data Management
+ * HAPI FHIR JPA Server - HFQL Driver
  * %%
  * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
@@ -17,32 +17,26 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.mdm.api;
+package ca.uhn.fhir.jpa.fql.provider;
 
-import ca.uhn.fhir.model.api.IModelJson;
+import ca.uhn.fhir.jpa.fql.executor.HfqlExecutor;
+import ca.uhn.fhir.jpa.fql.executor.IHfqlExecutor;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
 
-import java.util.ArrayList;
-import java.util.List;
+@Configuration
+public class HfqlRestProviderCtxConfig {
 
-public class MdmLinkEvent implements IModelJson {
-
-	private List<MdmLinkJson> myMdmLinks = new ArrayList<>();
-
-	public List<MdmLinkJson> getMdmLinks() {
-		return myMdmLinks;
+	@Bean
+	@Lazy
+	public IHfqlExecutor fqlExecutor() {
+		return new HfqlExecutor();
 	}
 
-	public void setMdmLinks(List<MdmLinkJson> theMdmLinks) {
-		myMdmLinks = theMdmLinks;
-	}
-
-	public MdmLinkEvent addMdmLink(MdmLinkJson theMdmLink) {
-		getMdmLinks().add(theMdmLink);
-		return this;
-	}
-
-	@Override
-	public String toString() {
-		return "MdmLinkEvent{" + "myMdmLinks=" + myMdmLinks + '}';
+	@Bean
+	@Lazy
+	public HfqlRestProvider fqlRestProvider() {
+		return new HfqlRestProvider();
 	}
 }

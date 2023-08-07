@@ -692,7 +692,7 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder im
 			type.setValueAsQueryToken(getFhirContext(), theParamName, qualifier, resourceId);
 			chainValue = type;
 		} else {
-			chainValue = myQueryStack.toParameterType(param, qualifier, resourceId);
+			chainValue = myQueryStack.newParameterInstance(param, qualifier, resourceId);
 		}
 
 		return chainValue;

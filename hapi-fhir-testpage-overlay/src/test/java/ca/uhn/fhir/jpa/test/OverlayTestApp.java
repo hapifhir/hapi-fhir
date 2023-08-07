@@ -1,38 +1,58 @@
 package ca.uhn.fhir.jpa.test;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.jpa.fql.executor.HfqlDataTypeEnum;
+import ca.uhn.fhir.jpa.fql.executor.IHfqlExecutor;
+import ca.uhn.fhir.jpa.fql.executor.StaticHfqlExecutionResult;
+import ca.uhn.fhir.jpa.fql.provider.HfqlRestProvider;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.api.annotation.Description;
-import ca.uhn.fhir.model.dstu2.composite.IdentifierDt;
-import ca.uhn.fhir.model.dstu2.resource.DiagnosticReport;
-import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.rest.annotation.IncludeParam;
 import ca.uhn.fhir.rest.annotation.OptionalParam;
 import ca.uhn.fhir.rest.annotation.RequiredParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
+import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
+import ca.uhn.fhir.rest.server.provider.HashMapResourceProvider;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.HandlerCollection;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.webapp.WebAppContext;
+import org.hl7.fhir.r4.model.DiagnosticReport;
+import org.hl7.fhir.r4.model.Patient;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class OverlayTestApp {
 
 	private static AnnotationConfigApplicationContext ourAppCtx;
 
-	@SuppressWarnings({ "unchecked" })
+	@SuppressWarnings({"unchecked"})
 	public static void main(String[] args) throws Exception {
+		IHfqlExecutor hfqlExecutor = mock(IHfqlExecutor.class);
+		List<String> columnNames = List.of("family", "given");
+		List<HfqlDataTypeEnum> columnTypes = List.of(HfqlDataTypeEnum.STRING, HfqlDataTypeEnum.JSON);
+		List<List<Object>> rows = List.of(
+			List.of("Simpson", "[\"Homer\", \"Jay\"]"),
+			List.of("Simpson", "[\"Bart\", \"Barto\"]")
+		);
+		when(hfqlExecutor.executeInitialSearch(any(), any(), any())).thenAnswer(t-> {
+			Thread.sleep(1000);
+			return new StaticHfqlExecutionResult("the-search-id", columnNames, columnTypes, rows);
+		});
 
 		{
 			int myPort = 8888;
@@ -44,8 +64,12 @@ public class OverlayTestApp {
 			overlayHandler.setResourceBase("hapi-fhir-testpage-overlay/src/main/webapp");
 			overlayHandler.setParentLoaderPriority(true);
 
-			RestfulServer restfulServer = new RestfulServer(FhirContext.forDstu2());
+			FhirContext ctx = FhirContext.forR4Cached();
+			RestfulServer restfulServer = new RestfulServer(ctx);
 			restfulServer.registerProvider(new ProviderWithRequiredAndOptional());
+			restfulServer.registerProvider(new HashMapResourceProvider<>(ctx, Patient.class));
+			restfulServer.registerProvider(new HfqlRestProvider(hfqlExecutor));
+
 			ServletContextHandler proxyHandler = new ServletContextHandler();
 			proxyHandler.setContextPath("/");
 			ServletHolder servletHolder = new ServletHolder();
@@ -58,8 +82,10 @@ public class OverlayTestApp {
 
 		}
 
-		if (true) {return;}
-		
+		if (true) {
+			return;
+		}
+
 //		ourAppCtx = new AnnotationConfigApplicationContext(FhirServerConfig.class);
 //		ServletContextHandler proxyHandler = new ServletContextHandler();
 //		proxyHandler.setContextPath("/");
@@ -155,15 +181,15 @@ public class OverlayTestApp {
 
 		@Description(shortDefinition = "This is a query by date!")
 		@Search
-		public List<DiagnosticReport> findDiagnosticReportsByPatient(@RequiredParam(name = DiagnosticReport.SP_SUBJECT + '.' + Patient.SP_IDENTIFIER) IdentifierDt thePatientId, @OptionalParam(name = DiagnosticReport.SP_CODE) TokenOrListParam theNames,
-				@OptionalParam(name = DiagnosticReport.SP_DATE) DateRangeParam theDateRange, @IncludeParam(allow = { "DiagnosticReport.result" }) Set<Include> theIncludes) throws Exception {
+		public List<DiagnosticReport> findDiagnosticReportsByPatient(@RequiredParam(name = DiagnosticReport.SP_SUBJECT + '.' + Patient.SP_IDENTIFIER) TokenParam thePatientId, @OptionalParam(name = DiagnosticReport.SP_CODE) TokenOrListParam theNames,
+																						 @OptionalParam(name = DiagnosticReport.SP_DATE) DateRangeParam theDateRange, @IncludeParam(allow = {"DiagnosticReport.result"}) Set<Include> theIncludes) throws Exception {
 			return getDiagnosticReports();
 		}
 
 		@Description(shortDefinition = "This is a query by issued.. blah blah foo bar blah blah")
 		@Search
-		public List<DiagnosticReport> findDiagnosticReportsByPatientIssued(@RequiredParam(name = DiagnosticReport.SP_SUBJECT + '.' + Patient.SP_IDENTIFIER) IdentifierDt thePatientId, @OptionalParam(name = DiagnosticReport.SP_CODE) TokenOrListParam theNames,
-				@OptionalParam(name = DiagnosticReport.SP_ISSUED) DateRangeParam theDateRange, @IncludeParam(allow = { "DiagnosticReport.result" }) Set<Include> theIncludes) throws Exception {
+		public List<DiagnosticReport> findDiagnosticReportsByPatientIssued(@RequiredParam(name = DiagnosticReport.SP_SUBJECT + '.' + Patient.SP_IDENTIFIER) TokenParam thePatientId, @OptionalParam(name = DiagnosticReport.SP_CODE) TokenOrListParam theNames,
+																								 @OptionalParam(name = DiagnosticReport.SP_ISSUED) DateRangeParam theDateRange, @IncludeParam(allow = {"DiagnosticReport.result"}) Set<Include> theIncludes) throws Exception {
 			return getDiagnosticReports();
 		}
 
@@ -191,7 +217,7 @@ public class OverlayTestApp {
 		}
 
 		@Override
-		public Class<? extends IResource> getResourceType() {
+		public Class<DiagnosticReport> getResourceType() {
 			return DiagnosticReport.class;
 		}
 

@@ -47,6 +47,10 @@ public class WebUtil {
 				.addResourceLocations("classpath:/META-INF/resources/webjars/" + name + "/" + version + "/");
 	}
 
+	public static void webJarAddAceBuilds(ResourceHandlerRegistry theRegistry) {
+		WebUtil.addStaticResourceWebJar(theRegistry, "org.webjars.npm", "ace-builds");
+	}
+
 	public static void webJarAddAwesomeCheckbox(ResourceHandlerRegistry theRegistry) {
 		WebUtil.addStaticResourceWebJar(theRegistry, "org.webjars.bower", "awesome-bootstrap-checkbox");
 	}

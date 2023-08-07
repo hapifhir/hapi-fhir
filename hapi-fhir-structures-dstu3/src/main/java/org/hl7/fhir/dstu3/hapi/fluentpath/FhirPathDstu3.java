@@ -8,6 +8,7 @@ import ca.uhn.fhir.fhirpath.IFhirPathEvaluationContext;
 import ca.uhn.fhir.i18n.Msg;
 import org.hl7.fhir.dstu3.hapi.ctx.HapiWorkerContext;
 import org.hl7.fhir.dstu3.model.Base;
+import org.hl7.fhir.dstu3.model.ExpressionNode;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.TypeDetails;
 import org.hl7.fhir.dstu3.utils.FHIRPathEngine;
@@ -21,7 +22,7 @@ import javax.annotation.Nonnull;
 
 public class FhirPathDstu3 implements IFhirPath {
 
-	private FHIRPathEngine myEngine;
+	private final FHIRPathEngine myEngine;
 
 	public FhirPathDstu3(FhirContext theCtx) {
 		IValidationSupport validationSupport = theCtx.getValidationSupport();
@@ -31,22 +32,40 @@ public class FhirPathDstu3 implements IFhirPath {
 	@SuppressWarnings("unchecked")
 	@Override
 	public <T extends IBase> List<T> evaluate(IBase theInput, String thePath, Class<T> theReturnType) {
+		ExpressionNode parsed;
+		try {
+			parsed = myEngine.parse(thePath);
+		} catch (FHIRException e) {
+			throw new FhirPathExecutionException(Msg.code(2408) + e);
+		}
+		return (List<T>) evaluate(theInput, parsed, theReturnType);
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public <T extends IBase> List<T> evaluate(
+			IBase theInput, IParsedExpression theParsedExpression, Class<T> theReturnType) {
+		ExpressionNode expressionNode = ((ParsedExpression) theParsedExpression).myParsedExpression;
+		return (List<T>) evaluate(theInput, expressionNode, theReturnType);
+	}
+
+	@Nonnull
+	private <T extends IBase> List<Base> evaluate(
+			IBase theInput, ExpressionNode expressionNode, Class<T> theReturnType) {
 		List<Base> result;
 		try {
-			result = myEngine.evaluate((Base) theInput, thePath);
+			result = myEngine.evaluate((Base) theInput, expressionNode);
 		} catch (FHIRException e) {
 			throw new FhirPathExecutionException(Msg.code(607) + e);
 		}
 
-		for (Base next : result) {
+		for (IBase next : result) {
 			if (!theReturnType.isAssignableFrom(next.getClass())) {
-				throw new FhirPathExecutionException(
-						Msg.code(608) + "FluentPath expression \"" + thePath + "\" returned unexpected type "
-								+ next.getClass().getSimpleName() + " - Expected " + theReturnType.getName());
+				throw new FhirPathExecutionException(Msg.code(608) + "FhirPath expression returned unexpected type "
+						+ next.getClass().getSimpleName() + " - Expected " + theReturnType.getName());
 			}
 		}
-
-		return (List<T>) result;
+		return result;
 	}
 
 	@Override
@@ -55,8 +74,14 @@ public class FhirPathDstu3 implements IFhirPath {
 	}
 
 	@Override
-	public void parse(String theExpression) {
-		myEngine.parse(theExpression);
+	public <T extends IBase> Optional<T> evaluateFirst(
+			IBase theInput, IParsedExpression theParsedExpression, Class<T> theReturnType) {
+		return evaluate(theInput, theParsedExpression, theReturnType).stream().findFirst();
+	}
+
+	@Override
+	public IParsedExpression parse(String theExpression) {
+		return new ParsedExpression(myEngine.parse(theExpression));
 	}
 
 	@Override
@@ -99,5 +124,14 @@ public class FhirPathDstu3 implements IFhirPath {
 				return (Base) theEvaluationContext.resolveReference(new IdType(theUrl), null);
 			}
 		});
+	}
+
+	private static class ParsedExpression implements IParsedExpression {
+
+		private final ExpressionNode myParsedExpression;
+
+		public ParsedExpression(ExpressionNode theParsedExpression) {
+			myParsedExpression = theParsedExpression;
+		}
 	}
 }

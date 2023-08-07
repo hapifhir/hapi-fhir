@@ -107,9 +107,12 @@
 	<h4>Server</h4>
 
 	<ul class="nav nav-sidebar">
-		<li th:class="(${notHome} == null and ${resourceName} != null and ${resourceName.empty}) ? 'active' : ''">
+		<li th:class="${page} == 'home' ? 'active' : ''">
 			<a href="#" onclick="doAction(this, 'home', null);">Server Home/Actions</a>
 		</li>
+      <li th:if="${supportsHfql}" th:class="${page} == 'hfql' ? 'active' : ''">
+         <a href="#" id="leftHfql" onclick="doAction(this, 'hfql', null);">HFQL / SQL</a>
+      </li>
 	</ul>
 
 	<h4>Resources</h4>

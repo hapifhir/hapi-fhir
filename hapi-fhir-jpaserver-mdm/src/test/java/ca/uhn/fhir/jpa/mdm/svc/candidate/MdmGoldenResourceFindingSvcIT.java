@@ -4,9 +4,12 @@ import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.mdm.BaseMdmR4Test;
 import ca.uhn.fhir.jpa.mdm.dao.MdmLinkDaoSvc;
+import ca.uhn.fhir.jpa.mdm.models.FindGoldenResourceCandidatesParams;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
+import ca.uhn.fhir.mdm.model.MdmTransactionContext;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
+import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -49,7 +52,8 @@ class MdmGoldenResourceFindingSvcIT extends BaseMdmR4Test {
 		myMdmLinkDaoSvc.save(link);
 
 		// the NO_MATCH golden resource should not be a candidate
-		CandidateList candidateList = myMdmGoldenResourceFindingSvc.findGoldenResourceCandidates(jane);
+		CandidateList candidateList = myMdmGoldenResourceFindingSvc.findGoldenResourceCandidates(
+			createFindGoldenResourceCandidateParams(jane));
 		assertEquals(0, candidateList.size());
 	}
 
@@ -131,7 +135,8 @@ class MdmGoldenResourceFindingSvcIT extends BaseMdmR4Test {
 		}
 
 		// test
-		CandidateList candidateList = myMdmGoldenResourceFindingSvc.findGoldenResourceCandidates(candidate);
+		CandidateList candidateList = myMdmGoldenResourceFindingSvc.findGoldenResourceCandidates(
+			createFindGoldenResourceCandidateParams(candidate));
 
 		// verify
 		assertNotNull(candidateList);
@@ -153,5 +158,13 @@ class MdmGoldenResourceFindingSvcIT extends BaseMdmR4Test {
 		}
 
 		return (Patient) daoOutcome.getResource();
+	}
+
+	private FindGoldenResourceCandidatesParams createFindGoldenResourceCandidateParams(IAnyResource theResource) {
+		FindGoldenResourceCandidatesParams params = new FindGoldenResourceCandidatesParams(
+			theResource,
+			new MdmTransactionContext()
+		);
+		return params;
 	}
 }

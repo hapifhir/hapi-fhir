@@ -159,7 +159,7 @@ public class LoggingInterceptor {
 			StringLookup lookup = new MyLookup(theServletRequest, theException, theRequestDetails);
 			StringSubstitutor subs = new StringSubstitutor(lookup, "${", "}", '\\');
 
-			// Actuall log the line
+			// Actually log the line
 			String line = subs.replace(myErrorMessageFormat);
 			myLogger.info(line);
 		}

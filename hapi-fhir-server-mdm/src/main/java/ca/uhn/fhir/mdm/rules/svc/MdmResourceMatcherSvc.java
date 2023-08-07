@@ -151,13 +151,13 @@ public class MdmResourceMatcherSvc {
 						fieldComparator.getName(),
 						matchEvaluation.score,
 						vector);
+				score += matchEvaluation.score;
 			} else {
 				ourLog.trace(
 						"No match: Matcher {} did not match (score: {}).",
 						fieldComparator.getName(),
 						matchEvaluation.score);
 			}
-			score += matchEvaluation.score;
 			appliedRuleCount += 1;
 		}
 
