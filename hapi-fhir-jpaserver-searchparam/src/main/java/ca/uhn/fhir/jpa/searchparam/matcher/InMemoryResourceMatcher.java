@@ -51,6 +51,7 @@ import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.util.MetaUtil;
 import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.collect.Sets;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.dstu3.model.Location;
 import org.hl7.fhir.instance.model.api.IAnyResource;
@@ -356,12 +357,39 @@ public class InMemoryResourceMatcher {
 		SourceParam resourceSource = new SourceParam(MetaUtil.getSource(myFhirContext, theResource.getMeta()));
 		boolean matches = true;
 		if (paramSource.getSourceUri() != null) {
-			matches = paramSource.getSourceUri().equals(resourceSource.getSourceUri());
+			matches = matchSourceWithModifiers(theSourceParam, paramSource, resourceSource.getSourceUri());
 		}
 		if (paramSource.getRequestId() != null) {
 			matches &= paramSource.getRequestId().equals(resourceSource.getRequestId());
 		}
 		return matches;
+	}
+
+	private boolean matchSourceWithModifiers(
+			IQueryParameterType parameterType, SourceParam paramSource, String theSourceUri) {
+		// process :missing modifier
+		if (parameterType.getMissing() != null) {
+			return parameterType.getMissing() == StringUtils.isBlank(theSourceUri);
+		}
+		// process :above, :below, :contains modifiers
+		if (parameterType instanceof UriParam && ((UriParam) parameterType).getQualifier() != null) {
+			UriParam uriParam = ((UriParam) parameterType);
+			switch (uriParam.getQualifier()) {
+				case ABOVE:
+					return UrlUtil.getAboveUriCandidates(paramSource.getSourceUri()).stream()
+							.anyMatch(candidate -> candidate.equals(theSourceUri));
+				case BELOW:
+					return theSourceUri.startsWith(paramSource.getSourceUri());
+				case CONTAINS:
+					return StringUtils.containsIgnoreCase(theSourceUri, paramSource.getSourceUri());
+				default:
+					// Unsupported modifier specified - no match
+					return false;
+			}
+		} else {
+			// no modifiers specified - use equals operator
+			return paramSource.getSourceUri().equals(theSourceUri);
+		}
 	}
 
 	private boolean matchTagsOrSecurityAndOr(
