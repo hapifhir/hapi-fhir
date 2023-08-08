@@ -31,7 +31,6 @@ import java.util.Collections;
 import java.util.List;
 
 public class PackageResourceParsingSvc {
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(PackageResourceParsingSvc.class);
 
 	private final FhirContext myFhirContext;
 
@@ -60,15 +59,8 @@ public class PackageResourceParsingSvc {
 		if (filesForType != null) {
 			for (String file : filesForType) {
 				try {
-					ourLog.debug("Processing filename: {}", file);
 					byte[] content = thePkg.getFolders().get("package").fetchFile(file);
-					final String jsonString = new String(content);
-					final IBaseResource parsedResource =
-							myFhirContext.newJsonParser().parseResource(jsonString);
-					ourLog.debug(
-							"Processing resource type: {}",
-							parsedResource.getIdElement().getResourceType());
-					resources.add(parsedResource);
+					resources.add(myFhirContext.newJsonParser().parseResource(new String(content)));
 				} catch (IOException e) {
 					throw new InternalErrorException(
 							Msg.code(1289) + "Cannot install resource of type " + theType + ": Could not fetch file "
