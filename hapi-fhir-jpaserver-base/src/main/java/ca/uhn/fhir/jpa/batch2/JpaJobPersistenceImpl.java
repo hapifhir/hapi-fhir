@@ -220,13 +220,15 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 		List<Batch2JobInstanceEntity> instanceEntities;
 
 		if (statuses != null && !statuses.isEmpty()) {
-			String[] arrOfParam = params.split(",");
-			Character displacer = '?';
-			int index = arrOfParam[6].indexOf(displacer);
-			if (index != -1) {
-				params = "";
-				arrOfParam[6] = arrOfParam[6].substring(0, index) + "\"";
-				params = String.join(",", arrOfParam);
+			if(definitionId.equals("BULK_EXPORT")) {
+				String[] arrOfParam = params.split(",");
+				Character displacer = '?';
+				int index = arrOfParam[6].indexOf(displacer);
+				if (index != -1) {
+					params = "";
+					arrOfParam[6] = arrOfParam[6].substring(0, index) + "\"";
+					params = String.join(",", arrOfParam);
+				}
 			}
 			instanceEntities = myJobInstanceRepository.findInstancesByJobIdParamsAndStatus(
 					definitionId, params, statuses, pageable);
