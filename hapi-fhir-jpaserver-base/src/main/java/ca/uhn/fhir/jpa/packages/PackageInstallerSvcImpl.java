@@ -376,17 +376,21 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 					} catch (ResourceVersionConflictException exception) {
 						final Optional<IBaseResource> optResource = readResourceById(dao, id);
 
-						final String existingResourceUrlOrNull =
-							optResource.filter(MetadataResource.class::isInstance)
+						final String existingResourceUrlOrNull = optResource
+								.filter(MetadataResource.class::isInstance)
 								.map(MetadataResource.class::cast)
 								.map(MetadataResource::getUrl)
 								.orElse(null);
-						final String newResourceUrlOrNull =
-							(theResource instanceof MetadataResource)
-								? ((MetadataResource)theResource).getUrl()
+						final String newResourceUrlOrNull = (theResource instanceof MetadataResource)
+								? ((MetadataResource) theResource).getUrl()
 								: null;
 
-						ourLog.error("Version conflict error:  This is possibly due to a collision between ValueSets from different IGs that are coincidentally using the same resource ID: [{}] and new resource URL: [{}], with the exisitng resource having URL: [{}].  Ignoring this update and continuing:  The first IG wins.  ", id.getIdPart(), newResourceUrlOrNull, existingResourceUrlOrNull, exception);
+						ourLog.error(
+								"Version conflict error:  This is possibly due to a collision between ValueSets from different IGs that are coincidentally using the same resource ID: [{}] and new resource URL: [{}], with the exisitng resource having URL: [{}].  Ignoring this update and continuing:  The first IG wins.  ",
+								id.getIdPart(),
+								newResourceUrlOrNull,
+								existingResourceUrlOrNull,
+								exception);
 					}
 				}
 			} else {

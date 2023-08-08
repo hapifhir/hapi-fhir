@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 5183
+title: "Ingesting the latest US core failed with a 500 due to conflicting ValueSet oids for different dependent IG ValueSets.
+        This has been resolved by logging the error and allowing the rest of the ingestion to proceed."

@@ -21,10 +21,8 @@ package ca.uhn.fhir.jpa.packages.loader;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.jpa.term.TermReadSvcImpl;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r4.model.ValueSet;
 import org.hl7.fhir.utilities.npm.NpmPackage;
 
 import java.io.IOException;
@@ -62,14 +60,14 @@ public class PackageResourceParsingSvc {
 		if (filesForType != null) {
 			for (String file : filesForType) {
 				try {
+					ourLog.debug("Processing filename: {}", file);
 					byte[] content = thePkg.getFolders().get("package").fetchFile(file);
-					// TODO: breakpoint here on value set ID see if version comes from here
 					final String jsonString = new String(content);
-					final IBaseResource parsedResource = myFhirContext.newJsonParser().parseResource(jsonString);
-					if (parsedResource instanceof ValueSet) {
-						final ValueSet valueSet = (ValueSet) parsedResource;
-						ourLog.info("filename:  {}, valueSet: {}", file, valueSet);
-					}
+					final IBaseResource parsedResource =
+							myFhirContext.newJsonParser().parseResource(jsonString);
+					ourLog.debug(
+							"Processing resource type: {}",
+							parsedResource.getIdElement().getResourceType());
 					resources.add(parsedResource);
 				} catch (IOException e) {
 					throw new InternalErrorException(

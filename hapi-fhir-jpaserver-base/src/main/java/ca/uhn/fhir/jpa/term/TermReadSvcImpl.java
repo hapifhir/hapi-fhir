@@ -919,7 +919,7 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 		for (ValueSet.ConceptSetComponent include :
 				theValueSetToExpand.getCompose().getInclude()) {
 			myTxTemplate.executeWithoutResult(tx -> expandValueSetHandleIncludeOrExclude(
-					theExpansionOptions, theValueSetCodeAccumulator, addedCodes, include, true, theExpansionFilter, theValueSetToExpand));
+					theExpansionOptions, theValueSetCodeAccumulator, addedCodes, include, true, theExpansionFilter));
 		}
 
 		// Handle excludes
@@ -932,7 +932,7 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 					addedCodes,
 					exclude,
 					false,
-					ExpansionFilter.NO_FILTER, theValueSetToExpand));
+					ExpansionFilter.NO_FILTER));
 		}
 
 		if (theValueSetCodeAccumulator instanceof ValueSetConceptAccumulator) {
@@ -965,12 +965,12 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 	 * Returns true if there are potentially more results to process.
 	 */
 	private void expandValueSetHandleIncludeOrExclude(
-		@Nullable ValueSetExpansionOptions theExpansionOptions,
-		IValueSetConceptAccumulator theValueSetCodeAccumulator,
-		Set<String> theAddedCodes,
-		ValueSet.ConceptSetComponent theIncludeOrExclude,
-		boolean theAdd,
-		@Nonnull ExpansionFilter theExpansionFilter, ValueSet theValueSetToExpand) {
+			@Nullable ValueSetExpansionOptions theExpansionOptions,
+			IValueSetConceptAccumulator theValueSetCodeAccumulator,
+			Set<String> theAddedCodes,
+			ValueSet.ConceptSetComponent theIncludeOrExclude,
+			boolean theAdd,
+			@Nonnull ExpansionFilter theExpansionFilter) {
 
 		String system = theIncludeOrExclude.getSystem();
 		boolean hasSystem = isNotBlank(system);
@@ -987,7 +987,7 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 			ourLog.debug("Starting {} expansion around CodeSystem: {}", (theAdd ? "inclusion" : "exclusion"), system);
 
 			Optional<TermCodeSystemVersion> termCodeSystemVersion =
-					optionalFindTermCodeSystemVersion(theIncludeOrExclude, theValueSetToExpand);
+					optionalFindTermCodeSystemVersion(theIncludeOrExclude);
 			if (termCodeSystemVersion.isPresent()) {
 
 				expandValueSetHandleIncludeOrExcludeUsingDatabase(
@@ -1076,19 +1076,13 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 	}
 
 	private Optional<TermCodeSystemVersion> optionalFindTermCodeSystemVersion(
-		ValueSet.ConceptSetComponent theIncludeOrExclude, ValueSet theValueSetToExpand) {
-		// TODO: should we be using the ValueSet  version here as opposed to the includeOrExclude in the if(isEmpty() call) where do we get theValueSet
-		// TODO:  try this again:
-		final String includeOrExcludeVersion = theIncludeOrExclude.getVersion();
-		final String valueSetToExpandVersion = theValueSetToExpand.getVersion();
-		ourLog.info("4950: includeOrExcludeVersion: {}, valueSetToExpandVersion: {}", includeOrExcludeVersion, valueSetToExpandVersion);
-//		if (isEmpty(theIncludeOrExclude.getVersion())) {
-		if (isEmpty(valueSetToExpandVersion)) {
+			ValueSet.ConceptSetComponent theIncludeOrExclude) {
+		if (isEmpty(theIncludeOrExclude.getVersion())) {
 			return Optional.ofNullable(myCodeSystemDao.findByCodeSystemUri(theIncludeOrExclude.getSystem()))
-				.map(TermCodeSystem::getCurrentVersion);
+					.map(TermCodeSystem::getCurrentVersion);
 		} else {
 			return Optional.ofNullable(myCodeSystemVersionDao.findByCodeSystemUriAndVersion(
-						theIncludeOrExclude.getSystem(), theIncludeOrExclude.getVersion()));
+					theIncludeOrExclude.getSystem(), theIncludeOrExclude.getVersion()));
 		}
 	}
 
