@@ -213,7 +213,7 @@ public class MeasureService implements IDaoRegistryUser {
 						fhirDal,
 						myMeasureEvaluationOptions,
 						myEvaluationSettings.getCqlOptions(),
-						this.myGlobalLibraryCache);
+						myEvaluationSettings.getLibraryCache());
 
 		MeasureReport measureReport = null;
 
