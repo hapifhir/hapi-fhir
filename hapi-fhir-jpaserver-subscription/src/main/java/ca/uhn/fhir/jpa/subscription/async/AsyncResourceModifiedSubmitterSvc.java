@@ -50,7 +50,7 @@ public class AsyncResourceModifiedSubmitterSvc {
 
 		List<IPersistedResourceModifiedMessage> allPersistedResourceModifiedMessages =
 				myResourceModifiedMessagePersistenceSvc.findAllOrderedByCreatedTime();
-		ourLog.info(
+		ourLog.debug(
 				"Attempting to submit {} resources to consumer channel.", allPersistedResourceModifiedMessages.size());
 
 		for (IPersistedResourceModifiedMessage persistedResourceModifiedMessage :
