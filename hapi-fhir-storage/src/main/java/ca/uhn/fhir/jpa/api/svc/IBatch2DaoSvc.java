@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.jpa.api.svc;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.pid.IResourcePidList;
 
@@ -38,14 +39,33 @@ public interface IBatch2DaoSvc {
 	 *
 	 * @param theStart The start of the date range, must be inclusive.
 	 * @param theEnd   The end of the date range, should be exclusive.
-	 * @param thePageSize  The number of records to query in each pass.
-	 * @param theRequestPartitionId The request partition ID (may be <code>null</code> on nonpartitioned systems)
+	 * @param theRequestPartitionId The request partition ID (may be <code>null</code> on non-partitioned systems)
 	 * @param theUrl   The search URL, or <code>null</code> to return IDs for all resources across all resource types. Null will only be supplied if {@link #isAllResourceTypeSupported()} returns <code>true</code>.
 	 */
-	IResourcePidList fetchResourceIdsPage(
+	default IResourcePidList fetchResourceIdsPage(
+			Date theStart, Date theEnd, @Nullable RequestPartitionId theRequestPartitionId, @Nullable String theUrl) {
+		throw new UnsupportedOperationException(Msg.code(2425) + "Not implemented unless explicitly overridden");
+	}
+
+	// TODO: LD:  eliminate this call in all other implementors
+	/**
+	 * @deprecated Please call (@link {@link #fetchResourceIdsPage(Date, Date, RequestPartitionId, String)} instead.
+	 * <p/>
+	 * Fetches a page of resource IDs for all resource types. The page size is up to the discretion of the implementation.
+	 *
+	 * @param theStart The start of the date range, must be inclusive.
+	 * @param theEnd   The end of the date range, should be exclusive.
+	 * @param thePageSize  The number of records to query in each pass.
+	 * @param theRequestPartitionId The request partition ID (may be <code>null</code> on non-partitioned systems)
+	 * @param theUrl   The search URL, or <code>null</code> to return IDs for all resources across all resource types. Null will only be supplied if {@link #isAllResourceTypeSupported()} returns <code>true</code>.
+	 */
+	@Deprecated
+	default IResourcePidList fetchResourceIdsPage(
 			Date theStart,
 			Date theEnd,
 			@Nonnull Integer thePageSize,
 			@Nullable RequestPartitionId theRequestPartitionId,
-			@Nullable String theUrl);
+			@Nullable String theUrl) {
+		return fetchResourceIdsPage(theStart, theEnd, theRequestPartitionId, theUrl);
+	}
 }

@@ -56,7 +56,7 @@ class ResourceIdListStepTest {
 	}
 
 	@ParameterizedTest
-	@ValueSource(ints = {1, 100, 500, 501, 2345})
+	@ValueSource(ints = {1, 100, 500, 501, 2345, 10500})
 	void testResourceIdListBatchSizeLimit(int theListSize) {
 		List<TypedResourcePid> idList = generateIdList(theListSize);
 		when(myStepExecutionDetails.getData()).thenReturn(myData);
