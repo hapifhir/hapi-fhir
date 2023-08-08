@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 5182
+jira: SMILE-6857
+title: "Previously, removing tags in a resource update with proper headers and versioning flag would not trigger a 
+new subscription.  This has been fixed."
