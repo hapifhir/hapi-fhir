@@ -186,8 +186,8 @@ public class BulkDataExportProvider {
 		String tester = theOptions.getOriginalRequestUrl();
 		Character displacer = '?';
 		int index = tester.indexOf(displacer);
-		if(index!=-1){
-			tester = tester.substring(0,index);
+		if (index != -1) {
+			tester = tester.substring(0, index);
 			theOptions.setOriginalRequestUrl(tester);
 		}
 
