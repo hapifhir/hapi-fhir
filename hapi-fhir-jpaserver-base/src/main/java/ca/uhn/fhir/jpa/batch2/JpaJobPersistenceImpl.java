@@ -226,13 +226,7 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 			if (index != -1) {
 				params = "";
 				arrOfParam[6] = arrOfParam[6].substring(0, index) + "\"";
-				for (int i = 0; i < arrOfParam.length; i++) {
-					if (i == arrOfParam.length - 1) {
-						params = params + arrOfParam[i];
-					} else {
-						params = params + arrOfParam[i] + ",";
-					}
-				}
+				params = String.join(",", arrOfParam);
 			}
 			instanceEntities = myJobInstanceRepository.findInstancesByJobIdParamsAndStatus(
 					definitionId, params, statuses, pageable);
