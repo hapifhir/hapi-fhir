@@ -74,9 +74,9 @@ public class CdsServiceCache {
 		if (!isCdsServiceAlreadyRegistered(theServiceId, CDS_CR_MODULE_ID)) {
 			CdsServiceJson cdsServiceJson =
 				theDiscoveryServiceFactory.create(theServiceId).resolveService();
-			final CdsCrPrefetchableServiceMethod cdsCrPrefetchableServiceMethod =
-					new CdsCrPrefetchableServiceMethod(cdsServiceJson, theCrServiceFactory);
-			myServiceMap.put(theServiceId, cdsCrPrefetchableServiceMethod);
+			final CdsCrServiceMethod cdsCrServiceMethod =
+					new CdsCrServiceMethod(cdsServiceJson, theCrServiceFactory);
+			myServiceMap.put(theServiceId, cdsCrServiceMethod);
 			myCdsServiceJson.addService(cdsServiceJson);
 		}
 	}

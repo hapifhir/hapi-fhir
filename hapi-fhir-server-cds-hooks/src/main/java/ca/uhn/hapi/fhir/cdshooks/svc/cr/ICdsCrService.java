@@ -20,6 +20,7 @@
 package ca.uhn.hapi.fhir.cdshooks.svc.cr;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceRequestJson;
@@ -77,5 +78,9 @@ public interface ICdsCrService {
 			default:
 				return null;
 		}
+	}
+
+	default void throwInvalidPriority(String theCode) {
+		throw new IllegalArgumentException(Msg.code(2425) + "Invalid priority code: " + theCode);
 	}
 }

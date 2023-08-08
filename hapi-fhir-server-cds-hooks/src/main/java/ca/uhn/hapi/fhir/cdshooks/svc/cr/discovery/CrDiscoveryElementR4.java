@@ -79,8 +79,4 @@ public class CrDiscoveryElementR4 implements ICrDiscoveryElement {
 
 		return null;
 	}
-
-	private String getKey(int itemNo) {
-		return "item" + Integer.toString(itemNo);
-	}
 }

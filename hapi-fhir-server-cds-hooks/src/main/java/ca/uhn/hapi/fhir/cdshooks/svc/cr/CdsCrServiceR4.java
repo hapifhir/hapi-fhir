@@ -20,6 +20,7 @@
 package ca.uhn.hapi.fhir.cdshooks.svc.cr;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceIndicatorEnum;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceRequestAuthorizationJson;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceRequestJson;
@@ -231,8 +232,10 @@ public class CdsCrServiceR4 implements ICdsCrService {
 				case "routine": indicator = CdsServiceIndicatorEnum.INFO; break;
 				case "urgent": indicator = CdsServiceIndicatorEnum.WARNING; break;
 				case "stat": indicator = CdsServiceIndicatorEnum.CRITICAL; break;
-				default: throw new IllegalArgumentException(
-					"Invalid priority code: " + theAction.getPriority().toCode());
+				default: indicator = null; break;
+			}
+			if (indicator == null) {
+				throwInvalidPriority(theAction.getPriority().toCode());
 			}
 			card.setIndicator(indicator);
 		}

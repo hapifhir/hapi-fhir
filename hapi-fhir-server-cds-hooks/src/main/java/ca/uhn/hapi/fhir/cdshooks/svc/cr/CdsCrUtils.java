@@ -27,12 +27,6 @@ import org.opencds.cqf.fhir.api.Repository;
 
 public class CdsCrUtils {
 	public static IBaseResource readPlanDefinitionFromRepository(
-			FhirVersionEnum theFhirVersion, Repository theRepository, String theId) {
-		IIdType id = Ids.newId(theFhirVersion, "PlanDefinition", theId);
-		return readPlanDefinitionFromRepository(theFhirVersion, theRepository, id);
-	}
-
-	public static IBaseResource readPlanDefinitionFromRepository(
 			FhirVersionEnum theFhirVersion, Repository theRepository, IIdType theId) {
 		switch (theFhirVersion) {
 			case DSTU3:
