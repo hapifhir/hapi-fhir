@@ -49,6 +49,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
+import java.util.Arrays;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -220,6 +221,21 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 		List<Batch2JobInstanceEntity> instanceEntities;
 
 		if (statuses != null && !statuses.isEmpty()) {
+			String[] arrOfParam = params.split(",");
+			Character displacer = '?';
+			int index = arrOfParam[6].indexOf(displacer);
+			if (index != -1) {
+				params="";
+				arrOfParam[6] = arrOfParam[6].substring(0, index)+"\"";
+				for(int i =0 ; i< arrOfParam.length;i++){
+					if(i==arrOfParam.length-1){
+						params=params+arrOfParam[i];
+					}
+					else {
+						params = params + arrOfParam[i] + ",";
+					}
+				}
+			}
 			instanceEntities = myJobInstanceRepository.findInstancesByJobIdParamsAndStatus(
 					definitionId, params, statuses, pageable);
 		} else {
