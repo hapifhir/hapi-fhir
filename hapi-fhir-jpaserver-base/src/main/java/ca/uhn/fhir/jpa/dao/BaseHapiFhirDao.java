@@ -166,6 +166,7 @@ import javax.xml.stream.events.XMLEvent;
 
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
+import static org.apache.commons.collections4.CollectionUtils.isEqualCollection;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.left;
@@ -302,7 +303,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		}
 	}
 
-	private void extractTagsHapi(
+	private void extractHapiTags(
 			TransactionDetails theTransactionDetails,
 			IResource theResource,
 			ResourceTable theEntity,
@@ -359,7 +360,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		}
 	}
 
-	private void extractTagsRi(
+	private void extractRiTags(
 			TransactionDetails theTransactionDetails,
 			IAnyResource theResource,
 			ResourceTable theEntity,
@@ -412,6 +413,25 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 					theAllTags.add(tag);
 					theEntity.setHasTags(true);
 				}
+			}
+		}
+	}
+
+	private void extractProfileTags(
+			TransactionDetails theTransactionDetails,
+			IBaseResource theResource,
+			ResourceTable theEntity,
+			Set<ResourceTag> theAllTags) {
+		RuntimeResourceDefinition def = myContext.getResourceDefinition(theResource);
+		if (!def.isStandardType()) {
+			String profile = def.getResourceProfile("");
+			if (isNotBlank(profile)) {
+				TagDefinition profileDef = getTagOrNull(
+						theTransactionDetails, TagTypeEnum.PROFILE, NS_JPA_PROFILE, profile, null, null, null);
+
+				ResourceTag tag = theEntity.addTag(profileDef);
+				theAllTags.add(tag);
+				theEntity.setHasTags(true);
 			}
 		}
 	}
@@ -845,39 +865,36 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 			RequestDetails theRequest,
 			IBaseResource theResource,
 			ResourceTable theEntity) {
-		Set<ResourceTag> allDefs = new HashSet<>();
-		Set<ResourceTag> allTagsOld = getAllTagDefinitions(theEntity);
+		Set<ResourceTag> allResourceTagsFromTheResource = new HashSet<>();
+		Set<ResourceTag> allOriginalResourceTagsFromTheEntity = getAllTagDefinitions(theEntity);
 
 		if (theResource instanceof IResource) {
-			extractTagsHapi(theTransactionDetails, (IResource) theResource, theEntity, allDefs);
+			extractHapiTags(theTransactionDetails, (IResource) theResource, theEntity, allResourceTagsFromTheResource);
 		} else {
-			extractTagsRi(theTransactionDetails, (IAnyResource) theResource, theEntity, allDefs);
+			extractRiTags(theTransactionDetails, (IAnyResource) theResource, theEntity, allResourceTagsFromTheResource);
 		}
 
-		RuntimeResourceDefinition def = myContext.getResourceDefinition(theResource);
-		if (!def.isStandardType()) {
-			String profile = def.getResourceProfile("");
-			if (isNotBlank(profile)) {
-				TagDefinition profileDef = getTagOrNull(
-						theTransactionDetails, TagTypeEnum.PROFILE, NS_JPA_PROFILE, profile, null, null, null);
+		extractProfileTags(theTransactionDetails, theResource, theEntity, allResourceTagsFromTheResource);
 
-				ResourceTag tag = theEntity.addTag(profileDef);
-				allDefs.add(tag);
-				theEntity.setHasTags(true);
-			}
-		}
+		// the extract[Hapi|Ri|Profile]Tags methods above will have populated the allResourceTagsFromTheResource Set
+		// AND
+		// added all tags from theResource.meta.tags to theEntity.meta.tags.  the next steps are to:
+		// 1- remove duplicates;
+		// 2- remove tags from theEntity that are not present in theResource if header HEADER_META_SNAPSHOT_MODE
+		// is present in the request;
+		//
+		Set<ResourceTag> allResourceTagsNewAndOldFromTheEntity = getAllTagDefinitions(theEntity);
+		Set<TagDefinition> allTagDefinitionsPresent = new HashSet<>();
 
-		Set<ResourceTag> allTagsNew = getAllTagDefinitions(theEntity);
-		Set<TagDefinition> allDefsPresent = new HashSet<>();
-		allTagsNew.forEach(tag -> {
+		allResourceTagsNewAndOldFromTheEntity.forEach(tag -> {
 
 			// Don't keep duplicate tags
-			if (!allDefsPresent.add(tag.getTag())) {
+			if (!allTagDefinitionsPresent.add(tag.getTag())) {
 				theEntity.getTags().remove(tag);
 			}
 
 			// Drop any tags that have been removed
-			if (!allDefs.contains(tag)) {
+			if (!allResourceTagsFromTheResource.contains(tag)) {
 				if (shouldDroppedTagBeRemovedOnUpdate(theRequest, tag)) {
 					theEntity.getTags().remove(tag);
 				} else if (HapiExtensions.EXT_SUBSCRIPTION_MATCHING_STRATEGY.equals(
@@ -887,21 +904,33 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 			}
 		});
 
-		// Update the resource to contain the old tags
-		allTagsOld.forEach(tag -> {
-			IBaseCoding iBaseCoding = theResource
-					.getMeta()
-					.addTag()
-					.setCode(tag.getTag().getCode())
-					.setSystem(tag.getTag().getSystem())
-					.setVersion(tag.getTag().getVersion());
-			if (tag.getTag().getUserSelected() != null) {
-				iBaseCoding.setUserSelected(tag.getTag().getUserSelected());
+		// at this point, theEntity.meta.tags will be up to date:
+		// 1- it was stripped from tags that needed removing;
+		// 2- it has new tags from a resource update through theResource;
+		// 3- it has tags from the previous version;
+		//
+		// Since tags are merged on updates, we add tags from theEntity that theResource does not have
+		Set<ResourceTag> allUpdatedResourceTagsNewAndOldMinusRemovalsFromTheEntity = getAllTagDefinitions(theEntity);
+
+		allUpdatedResourceTagsNewAndOldMinusRemovalsFromTheEntity.forEach(aResourcetag -> {
+			if (!allResourceTagsFromTheResource.contains(aResourcetag)) {
+				IBaseCoding iBaseCoding = theResource
+						.getMeta()
+						.addTag()
+						.setCode(aResourcetag.getTag().getCode())
+						.setSystem(aResourcetag.getTag().getSystem())
+						.setVersion(aResourcetag.getTag().getVersion());
+
+				allResourceTagsFromTheResource.add(aResourcetag);
+
+				if (aResourcetag.getTag().getUserSelected() != null) {
+					iBaseCoding.setUserSelected(aResourcetag.getTag().getUserSelected());
+				}
 			}
 		});
 
-		theEntity.setHasTags(!allTagsNew.isEmpty());
-		return !allTagsOld.equals(allTagsNew);
+		theEntity.setHasTags(!allUpdatedResourceTagsNewAndOldMinusRemovalsFromTheEntity.isEmpty());
+		return !isEqualCollection(allOriginalResourceTagsFromTheEntity, allResourceTagsFromTheResource);
 	}
 
 	/**
@@ -947,7 +976,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 	 * The default implementation removes any profile declarations, but leaves tags and security labels in place. Subclasses may choose to override and change this behaviour.
 	 * </p>
 	 * <p>
-	 * See <a href="http://hl7.org/fhir/resource.html#tag-updates">Updates to Tags, Profiles, and Security Labels</a> for a description of the logic that the default behaviour folows.
+	 * See <a href="http://hl7.org/fhir/resource.html#tag-updates">Updates to Tags, Profiles, and Security Labels</a> for a description of the logic that the default behaviour follows.
 	 * </p>
 	 *
 	 * @param theTag The tag
