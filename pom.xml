@@ -979,14 +979,10 @@
 		<testcontainers_version>1.17.1</testcontainers_version>
 		<thymeleaf-version>3.0.14.RELEASE</thymeleaf-version>
 		<woodstox_core_asl_version>4.4.1</woodstox_core_asl_version>
-
-		<!-- We are aiming to still work on a very old version of SLF4j even though we depend on the newest, just to be nice to users of the API. This version is tested in the hapi-fhir-cobertura. -->
-		<slf4j_target_version>1.6.0</slf4j_target_version>
-
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 		<ebay_cors_filter_version>1.0.1</ebay_cors_filter_version>
-
 		<elastic_apm_version>1.28.4</elastic_apm_version>
+
 		<!-- CQL Support -->
 		<clinical-reasoning.version>3.0.0-PRE5</clinical-reasoning.version>
 
