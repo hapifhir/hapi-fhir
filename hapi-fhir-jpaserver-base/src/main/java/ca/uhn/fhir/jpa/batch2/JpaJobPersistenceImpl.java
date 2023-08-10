@@ -257,7 +257,7 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 				return mapper.writeValueAsString(objectNode);
 			}
 		} catch (Exception e) {
-			ourLog.info("Error Truncating Original Request Url",e);
+			ourLog.info("Error Truncating Original Request Url", e);
 		}
 		return null; // Return null in case of an error
 	}
