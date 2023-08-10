@@ -259,7 +259,7 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 		} catch (Exception e) {
 			ourLog.info("Error Truncating Original Request Url", e);
 		}
-		return null; // Return null in case of an error
+		return null;
 	}
 
 	@Override
