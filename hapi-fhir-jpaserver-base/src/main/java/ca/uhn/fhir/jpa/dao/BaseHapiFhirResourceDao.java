@@ -2087,6 +2087,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 					break;
 			}
 		}
+		myMetaTagSorter.sort(retVal);
 		return retVal;
 	}
 
