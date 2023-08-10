@@ -22,10 +22,7 @@ Below are some simplifying principles HAPI MDM follows to reduce complexity and 
 
 1. The only source resources in the system that do not have a MATCH link are those that have the 'NO-MDM' tag or those that have POSSIBLE_MATCH links pending review.
 
-1. The HAPI MDM rules define a single identifier system that holds the external enterprise id ("EID"). If a source resource has an external EID, then the Golden Resource it links to always has the same EID. If a source resource has no EID when it arrives, a unique UUID will be assigned as that source resource's EID.
-
-1. A Golden Resource can have both an internal EID (auto-created by HAPI), and an external EID (provided by an 
-external system).
+1. The HAPI MDM rules define a single identifier system that holds the external enterprise id ("EID"). If a source resource has an external EID, then the Golden Resource it links to always has the same EID.
 
 1. Two different Golden Resources cannot have the same EID.
 
@@ -85,7 +82,7 @@ possible that hundreds of John Doe's could be linked to the same Golden Resource
 
 When a new source resource is compared with all other resources of the same type in the repository, there are four possible outcomes:
 
-* CASE 1: No MATCH and no POSSIBLE_MATCH outcomes -> a new Golden Resource is created and linked to that source resource as MATCH. If the incoming resource has an EID, it is copied to the Golden Resource. Otherwise a new UUID is generated and used as the internal EID.
+* CASE 1: No MATCH and no POSSIBLE_MATCH outcomes -> a new Golden Resource is created and linked to that source resource as MATCH. If the incoming resource has an EID, it is copied to the Golden Resource.
 
 * CASE 2: All of the MATCH source resources are already linked to the same Golden Resource -> a new Link is created between the new source resource and that Golden Resource and is set to MATCH.
 
