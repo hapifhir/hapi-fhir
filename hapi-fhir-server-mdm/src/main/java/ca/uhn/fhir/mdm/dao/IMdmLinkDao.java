@@ -53,7 +53,10 @@ public interface IMdmLinkDao<P extends IResourcePersistentId, M extends IMdmLink
 	List<MdmPidTuple<P>> expandPidsByGoldenResourcePidAndMatchResult(
 			P theSourcePid, MdmMatchResultEnum theMdmMatchResultEnum);
 
-	List<M> findLinksAssociatedWithGoldenResourceOfSourceResourceExcludingNoMatch(P theSourcePid);
+	//TODO: on next bump, make this method non-default
+	default List<M> findLinksAssociatedWithGoldenResourceOfSourceResourceExcludingNoMatch(P theSourcePid) {
+		throw new UnsupportedOperationException(Msg.code(2426));
+	}
 
 	List<P> findPidByResourceNameAndThreshold(String theResourceName, Date theHighThreshold, Pageable thePageable);
 
