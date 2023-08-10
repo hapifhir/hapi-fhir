@@ -238,20 +238,21 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 		return toInstanceList(instanceEntities);
 	}
 
-	public String originalRequestUrlTruncation(String theParams) {
+	private String originalRequestUrlTruncation(String theParams) {
 		try {
 			ObjectMapper mapper = new ObjectMapper();
 			mapper.configure(JsonParser.Feature.ALLOW_UNQUOTED_FIELD_NAMES, true);
 			mapper.configure(JsonParser.Feature.ALLOW_SINGLE_QUOTES, true);
 			JsonNode rootNode = mapper.readTree(theParams);
+			String originalUrl = "originalRequestUrl";
 
 			if (rootNode instanceof ObjectNode) {
 				ObjectNode objectNode = (ObjectNode) rootNode;
 
-				if (objectNode.has("originalRequestUrl")) {
-					String url = objectNode.get("originalRequestUrl").asText();
+				if (objectNode.has(originalUrl)) {
+					String url = objectNode.get(originalUrl).asText();
 					if (url.contains("?")) {
-						objectNode.put("originalRequestUrl", url.split("\\?")[0]);
+						objectNode.put(originalUrl, url.split("\\?")[0]);
 					}
 				}
 				return mapper.writeValueAsString(objectNode);
