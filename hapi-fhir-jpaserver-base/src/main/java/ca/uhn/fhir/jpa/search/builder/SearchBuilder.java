@@ -694,6 +694,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			sqlBuilder.addResourceIdsPredicate(thePidList);
 		}
 
+		// TODO: move this into searchForIdsWithAndOr
 		// Last updated
 		DateRangeParam lu = myParams.getLastUpdated();
 		if (lu != null && !lu.isEmpty()) {

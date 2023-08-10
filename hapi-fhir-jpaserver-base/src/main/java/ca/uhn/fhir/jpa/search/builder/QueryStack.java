@@ -71,17 +71,7 @@ import ca.uhn.fhir.rest.api.QualifiedParamList;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.api.SearchContainedModeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.param.CompositeParam;
-import ca.uhn.fhir.rest.param.DateParam;
-import ca.uhn.fhir.rest.param.HasParam;
-import ca.uhn.fhir.rest.param.NumberParam;
-import ca.uhn.fhir.rest.param.QuantityParam;
-import ca.uhn.fhir.rest.param.ReferenceParam;
-import ca.uhn.fhir.rest.param.SpecialParam;
-import ca.uhn.fhir.rest.param.StringParam;
-import ca.uhn.fhir.rest.param.TokenParam;
-import ca.uhn.fhir.rest.param.TokenParamModifier;
-import ca.uhn.fhir.rest.param.UriParam;
+import ca.uhn.fhir.rest.param.*;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
@@ -130,11 +120,8 @@ import static ca.uhn.fhir.jpa.util.QueryParameterUtils.toAndPredicate;
 import static ca.uhn.fhir.jpa.util.QueryParameterUtils.toEqualToOrInPredicate;
 import static ca.uhn.fhir.jpa.util.QueryParameterUtils.toOperation;
 import static ca.uhn.fhir.jpa.util.QueryParameterUtils.toOrPredicate;
-import static ca.uhn.fhir.rest.api.Constants.PARAM_HAS;
-import static ca.uhn.fhir.rest.api.Constants.PARAM_ID;
-import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-import static org.apache.commons.lang3.StringUtils.split;
+import static ca.uhn.fhir.rest.api.Constants.*;
+import static org.apache.commons.lang3.StringUtils.*;
 
 public class QueryStack {
 
@@ -1890,6 +1877,30 @@ public class QueryStack {
 		return toOrPredicate(orPredicates);
 	}
 
+	// TODO: Preliminary method for handling _lastUpdated
+	private Condition createPredicateLastUpdated(
+			@Nullable DbColumn theSourceJoinColumn,
+			List<List<IQueryParameterType>> theAndOrParams,
+			String theResourceName,
+			String theParamName,
+			RequestPartitionId theRequestPartitionId) {
+		List<Condition> andPredicates = new ArrayList<>();
+
+		// this adds -> INNER JOIN hfj_resource t2 ON t2.RES_ID = t0.SRC_RESOURCE_ID
+		mySqlBuilder.addReferencePredicateBuilder(this, null);
+
+		// TODO: should figure out how to add -> AND (t2.res_updated >= '2023-08-08 10:45:54.175')) to the WHERE clause
+		for (List<? extends IQueryParameterType> nextAnd : theAndOrParams) {
+			SearchFilterParser.CompareOperation operation = null;
+			if (nextAnd.size() > 0) {
+				DateParam param = (DateParam) nextAnd.get(0);
+				operation = toOperation(param.getPrefix());
+			}
+		}
+
+		return toAndPredicate(andPredicates);
+	}
+
 	private SourcePredicateBuilder getSourcePredicateBuilder(
 			@Nullable DbColumn theSourceJoinColumn, SelectQuery.JoinType theJoinType) {
 		return createOrReusePredicateBuilder(
@@ -2310,6 +2321,15 @@ public class QueryStack {
 			case Constants.PARAM_SOURCE:
 				return createPredicateSourceForAndList(theSourceJoinColumn, theAndOrParams);
 
+			// TODO: handle lastUpdated here:
+//			case Constants.PARAM_LASTUPDATED:
+//				return createPredicateLastUpdated(
+//						theSourceJoinColumn,
+//						theAndOrParams,
+//						theResourceName,
+//						theParamName,
+//						theRequestPartitionId);
+
 			default:
 				return createPredicateSearchParameter(
 						theSourceJoinColumn,
@@ -2507,9 +2527,7 @@ public class QueryStack {
 			}
 		} else {
 			// These are handled later
-			if (!Constants.PARAM_CONTENT.equals(theParamName)
-					&& !Constants.PARAM_TEXT.equals(theParamName)
-					&& !Constants.PARAM_LASTUPDATED.equals(theParamName)) {
+			if (!Constants.PARAM_CONTENT.equals(theParamName) && !Constants.PARAM_TEXT.equals(theParamName)) {
 				if (Constants.PARAM_FILTER.equals(theParamName)) {
 
 					// Parse the predicates enumerated in the _filter separated by AND or OR...
