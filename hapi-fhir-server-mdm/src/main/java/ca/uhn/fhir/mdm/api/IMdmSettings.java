@@ -63,12 +63,12 @@ public interface IMdmSettings {
 
 	void setSearchAllPartitionForMatch(boolean theSearchAllPartitionForMatch);
 
-	//TODO: on next bump, make this method non-default
+	// TODO: on next bump, make this method non-default
 	default boolean isAutoExpungeGoldenResources() {
 		return false;
 	}
 
-	//TODO: on next bump, make this method non-default
+	// TODO: on next bump, make this method non-default
 	default void setAutoExpungeGoldenResources(boolean theShouldAutoExpunge) {
 		throw new UnsupportedOperationException(Msg.code(2425));
 	}
