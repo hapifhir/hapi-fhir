@@ -1156,17 +1156,25 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		myInterceptorBroadcaster.callHooks(Pointcut.STORAGE_PRECOMMIT_RESOURCE_UPDATED, preCommitParams);
 	}
 
-	private void validateExpungeEnabled() {
-		if (!getStorageSettings().isExpungeEnabled()) {
-			throw new MethodNotAllowedException(Msg.code(968) + "$expunge is not enabled on this server");
-		}
-	}
-
 	@Override
 	@Transactional(propagation = Propagation.NEVER)
 	public ExpungeOutcome expunge(IIdType theId, ExpungeOptions theExpungeOptions, RequestDetails theRequest) {
 		validateExpungeEnabled();
 		return forceExpungeInExistingTransaction(theId, theExpungeOptions, theRequest);
+	}
+
+	@Override
+	@Transactional(propagation = Propagation.NEVER)
+	public ExpungeOutcome expunge(ExpungeOptions theExpungeOptions, RequestDetails theRequestDetails) {
+		ourLog.info("Beginning TYPE[{}] expunge operation", getResourceName());
+		validateExpungeEnabled();
+		return myExpungeService.expunge(getResourceName(), null, theExpungeOptions, theRequestDetails);
+	}
+
+	private void validateExpungeEnabled() {
+		if (!getStorageSettings().isExpungeEnabled()) {
+			throw new MethodNotAllowedException(Msg.code(968) + "$expunge is not enabled on this server");
+		}
 	}
 
 	@Override
@@ -1200,14 +1208,6 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		return myExpungeService.expunge(
 				getResourceName(), JpaPid.fromId(entity.getResourceId()), theExpungeOptions, theRequest);
-	}
-
-	@Override
-	@Transactional(propagation = Propagation.NEVER)
-	public ExpungeOutcome expunge(ExpungeOptions theExpungeOptions, RequestDetails theRequestDetails) {
-		ourLog.info("Beginning TYPE[{}] expunge operation", getResourceName());
-
-		return myExpungeService.expunge(getResourceName(), null, theExpungeOptions, theRequestDetails);
 	}
 
 	@Override
