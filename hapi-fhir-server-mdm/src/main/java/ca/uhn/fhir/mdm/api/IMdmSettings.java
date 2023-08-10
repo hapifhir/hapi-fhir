@@ -70,6 +70,6 @@ public interface IMdmSettings {
 
 	// TODO: on next bump, make this method non-default
 	default void setAutoExpungeGoldenResources(boolean theShouldAutoExpunge) {
-		throw new UnsupportedOperationException(Msg.code(2425));
+		throw new UnsupportedOperationException(Msg.code(2427));
 	}
 }
