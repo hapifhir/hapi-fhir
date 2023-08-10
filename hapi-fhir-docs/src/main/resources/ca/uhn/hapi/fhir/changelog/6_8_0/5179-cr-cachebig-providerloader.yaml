@@ -1,0 +1,3 @@
+type: fix
+issue: 5179
+title: "Added evaluation setting for hapi-fhir storage-cr module operations from outside. Updated provider loading from hapi-fhir instead of external server for caregaps and submitdata providers. Updated testing suite to depend on restful server for new provider loader"

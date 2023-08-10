@@ -1,6 +1,6 @@
 package ca.uhn.fhir.cr.r4;
 
-import ca.uhn.fhir.cr.BaseCrR4Test;
+import ca.uhn.fhir.cr.BaseCrR4TestServer;
 import ca.uhn.fhir.cr.r4.questionnaireresponse.QuestionnaireResponseOperationsProvider;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Questionnaire;
@@ -13,7 +13,7 @@ import java.io.IOException;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-public class QuestionnaireResponseOperationsProviderTest extends BaseCrR4Test {
+public class QuestionnaireResponseOperationsProviderTest extends BaseCrR4TestServer {
 	@Autowired
 	QuestionnaireResponseOperationsProvider questionnaireResponseOperationsProvider;
 

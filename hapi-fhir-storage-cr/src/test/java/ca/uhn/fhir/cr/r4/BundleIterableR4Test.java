@@ -1,6 +1,6 @@
 package ca.uhn.fhir.cr.r4;
 
-import ca.uhn.fhir.cr.BaseCrR4Test;
+import ca.uhn.fhir.cr.BaseCrR4TestServer;
 import ca.uhn.fhir.cr.common.BundleIterable;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -13,7 +13,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @ExtendWith(SpringExtension.class)
-public class BundleIterableR4Test extends BaseCrR4Test {
+public class BundleIterableR4Test extends BaseCrR4TestServer {
 	private static final RequestDetails theRequestDetails = null;
 	private static final String MY_TEST_DATA = "ca/uhn/fhir/cr/r4/immunization/Patients_Encounters_Immunizations_Practitioners.json";
 

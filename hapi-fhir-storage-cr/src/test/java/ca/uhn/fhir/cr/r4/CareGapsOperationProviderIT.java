@@ -1,26 +1,9 @@
 package ca.uhn.fhir.cr.r4;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.cr.IResourceLoader;
-import ca.uhn.fhir.cr.config.CrProperties;
-import ca.uhn.fhir.cr.config.CrR4Config;
-import ca.uhn.fhir.cr.r4.measure.CareGapsOperationProvider;
-import ca.uhn.fhir.cr.r4.measure.SubmitDataProvider;
-import ca.uhn.fhir.cr.r4.measure.SubmitDataService;
-import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
+import ca.uhn.fhir.cr.BaseCrR4TestServer;
+import ca.uhn.fhir.cr.config.r4.CrR4Config;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
-import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
-import ca.uhn.fhir.rest.api.EncodingEnum;
-import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.interceptor.SimpleRequestHeaderInterceptor;
-import ca.uhn.fhir.rest.server.RestfulServer;
-import ca.uhn.fhir.test.utilities.JettyUtil;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.servlet.ServletContextHandler;
-import org.eclipse.jetty.servlet.ServletHolder;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
@@ -28,14 +11,10 @@ import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.Parameters;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 
 import java.util.Optional;
-import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -64,83 +43,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * 7. Provider invokes care-gaps (and discovers issues are closed).
  */
 @ContextConfiguration(classes = CrR4Config.class)
-class CareGapsOperationProviderIT extends BaseJpaR4Test implements IResourceLoader {
+class CareGapsOperationProviderIT extends BaseCrR4TestServer{
 
-	private static RestfulServer ourRestServer;
-	private static IGenericClient ourClient;
-	private static FhirContext ourCtx;
-	private static CloseableHttpClient ourHttpClient;
-	private static Server ourServer;
-	private static String ourServerBase;
-	@Autowired
-	CareGapsOperationProvider myCareGapsOperationProvider;
-
-	@Autowired
-	CrProperties myCrProperties;
-
-	SubmitDataProvider mySubmitDataProvider;
 	private SimpleRequestHeaderInterceptor mySimpleHeaderInterceptor;
-
-	@SuppressWarnings("deprecation")
-	@AfterEach
-	public void after() {
-		ourClient.unregisterInterceptor(mySimpleHeaderInterceptor);
-		myStorageSettings.setIndexMissingFields(new JpaStorageSettings().getIndexMissingFields());
-	}
-
-	@BeforeEach
-	public void beforeStartServer() throws Exception {
-		if (ourRestServer == null) {
-			RestfulServer restServer = new RestfulServer(ourCtx);
-
-			mySubmitDataProvider = new SubmitDataProvider(requestDetails -> {
-				return new SubmitDataService(getDaoRegistry(), requestDetails);
-			});
-			restServer.setPlainProviders(mySystemProvider, myCareGapsOperationProvider, mySubmitDataProvider);
-
-			ourServer = new Server(0);
-
-			ServletContextHandler proxyHandler = new ServletContextHandler();
-			proxyHandler.setContextPath("/");
-
-			ServletHolder servletHolder = new ServletHolder();
-			servletHolder.setServlet(restServer);
-			proxyHandler.addServlet(servletHolder, "/fhir/*");
-
-			ourCtx = FhirContext.forR4Cached();
-			restServer.setFhirContext(ourCtx);
-
-			ourServer.setHandler(proxyHandler);
-			JettyUtil.startServer(ourServer);
-			int myPort = JettyUtil.getPortForStartedServer(ourServer);
-			ourServerBase = "http://localhost:" + myPort + "/fhir";
-
-			PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
-			HttpClientBuilder builder = HttpClientBuilder.create();
-			builder.setConnectionManager(connectionManager);
-			ourHttpClient = builder.build();
-
-			ourCtx.getRestfulClientFactory().setSocketTimeout(600 * 1000);
-			ourClient = ourCtx.newRestfulGenericClient(ourServerBase);
-			ourClient.setLogRequestAndResponse(true);
-			ourRestServer = restServer;
-		}
-
-		ourRestServer.setDefaultResponseEncoding(EncodingEnum.XML);
-		ourRestServer.setPagingProvider(myPagingProvider);
-
-		mySimpleHeaderInterceptor = new SimpleRequestHeaderInterceptor();
-		ourClient.registerInterceptor(mySimpleHeaderInterceptor);
-		myStorageSettings.setIndexMissingFields(JpaStorageSettings.IndexEnabledEnum.DISABLED);
-
-		// Set properties
-		CrProperties.MeasureProperties measureProperties = new CrProperties.MeasureProperties();
-		CrProperties.MeasureProperties.MeasureReportConfiguration measureReportConfiguration = new CrProperties.MeasureProperties.MeasureReportConfiguration();
-		measureReportConfiguration.setCareGapsReporter("Organization/alphora");
-		measureReportConfiguration.setCareGapsCompositionSectionAuthor("Organization/alphora-author");
-		measureProperties.setMeasureReportConfiguration(measureReportConfiguration);
-		myCrProperties.setMeasureProperties(measureProperties);
-	}
 
 	@Test
 	public void careGapsEndToEnd(){
