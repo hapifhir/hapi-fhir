@@ -11,6 +11,7 @@ import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.mdm.interceptor.IMdmStorageInterceptor;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -62,7 +63,7 @@ public class MdmExpungeTest extends BaseMdmR4Test {
 		try {
 			myPatientDao.expunge(myTargetId.toVersionless(), expungeOptions, null);
 			fail();
-		} catch (InternalErrorException e) {
+		} catch (PreconditionFailedException e) {
 			assertThat(e.getMessage(), containsString("ViolationException"));
 			assertThat(e.getMessage(), containsString("FK_EMPI_LINK_TARGET"));
 		}

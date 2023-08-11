@@ -4,20 +4,29 @@ import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.batch2.model.StatusEnum;
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.model.BulkExportJobResults;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
+import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.RequestTypeEnum;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
+import ca.uhn.fhir.rest.client.apache.ResourceEntity;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.test.utilities.HttpClientExtension;
 import ca.uhn.fhir.util.Batch2JobDefinitionConstants;
 import ca.uhn.fhir.util.JsonUtil;
 import com.google.common.collect.Sets;
 import org.apache.commons.io.LineIterator;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Basic;
@@ -34,19 +43,23 @@ import org.hl7.fhir.r4.model.Location;
 import org.hl7.fhir.r4.model.MedicationAdministration;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Organization;
+import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.Provenance;
 import org.hl7.fhir.r4.model.QuestionnaireResponse;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.ServiceRequest;
+import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.mockito.Spy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -63,7 +76,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static ca.uhn.fhir.jpa.dao.r4.FhirResourceDaoR4TagsInlineTest.createSearchParameterForInlineSecurity;
@@ -97,6 +109,12 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 	public void beforeEach() {
 		myStorageSettings.setJobFastTrackingEnabled(false);
 	}
+
+	@Spy
+	private final FhirContext myCtx = FhirContext.forR4Cached();
+
+	@RegisterExtension
+	private final HttpClientExtension mySender = new HttpClientExtension();
 
 	@Test
 	public void testGroupBulkExportWithTypeFilter() {
@@ -571,6 +589,54 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 		options.setOutputFormat(Constants.CT_FHIR_NDJSON);
 		// Should get the sub-resource (Observation) even the patient hasn't been updated after the _since param
 		verifyBulkExportResults(options, List.of("Observation/C", "Group/B"), List.of("Patient/A"));
+	}
+
+	/**
+	* This interceptor was needed so that similar GET and POST export requests return the same jobID
+	* The test testBulkExportReuse_withGetAndPost_expectSameJobIds() tests this functionality
+	*/
+	private class BulkExportReuseInterceptor{
+		@Hook(Pointcut.STORAGE_INITIATE_BULK_EXPORT)
+		public void initiateBulkExport(RequestDetails theRequestDetails, BulkExportJobParameters theBulkExportOptions){
+				if(theRequestDetails.getRequestType().equals(RequestTypeEnum.GET)) {
+					theBulkExportOptions.getPatientIds();
+				}
+		}
+	}
+
+	@Test
+	public void testBulkExportReuse_withGetAndPost_expectSameJobIds() throws IOException {
+		Patient patient = new Patient();
+		patient.setId("P1");
+		patient.setActive(true);
+		myClient.update().resource(patient).execute();
+
+		BulkExportReuseInterceptor newInterceptor = new  BulkExportReuseInterceptor();
+		myInterceptorRegistry.registerInterceptor(newInterceptor);
+
+		Parameters input = new Parameters();
+		input.addParameter(JpaConstants.PARAM_EXPORT_OUTPUT_FORMAT, new StringType(Constants.CT_FHIR_NDJSON));
+		input.addParameter(JpaConstants.PARAM_EXPORT_TYPE, new StringType("Patient"));
+
+		HttpPost post = new HttpPost(myServer.getBaseUrl() + "/" + JpaConstants.OPERATION_EXPORT);
+		post.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
+		post.setEntity(new ResourceEntity(myCtx, input));
+
+		HttpGet get = new HttpGet(myServer.getBaseUrl() + "/" + JpaConstants.OPERATION_EXPORT + "?_outputFormat=application%2Ffhir%2Bndjson&_type=Patient");
+		get.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
+		try(CloseableHttpResponse postResponse = mySender.execute(post)){
+			ourLog.info("Response: {}",postResponse);
+			assertEquals(202, postResponse.getStatusLine().getStatusCode());
+			assertEquals("Accepted", postResponse.getStatusLine().getReasonPhrase());
+
+			try(CloseableHttpResponse getResponse = mySender.execute(get)){
+				ourLog.info("Get Response: {}", getResponse);
+				assertEquals(202, getResponse.getStatusLine().getStatusCode());
+				assertEquals("Accepted", getResponse.getStatusLine().getReasonPhrase());
+				assertEquals(postResponse.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue(), getResponse.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue());
+			}
+		}
+		myInterceptorRegistry.unregisterInterceptor(newInterceptor);
 	}
 
 	@Test

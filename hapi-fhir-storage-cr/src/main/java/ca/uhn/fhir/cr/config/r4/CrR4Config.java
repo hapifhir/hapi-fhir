@@ -17,8 +17,13 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.cr.config;
+package ca.uhn.fhir.cr.config.r4;
 
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.cr.config.BaseClinicalReasoningConfig;
+import ca.uhn.fhir.cr.config.ProviderLoader;
+import ca.uhn.fhir.cr.config.ProviderSelector;
 import ca.uhn.fhir.cr.r4.measure.CareGapsOperationProvider;
 import ca.uhn.fhir.cr.r4.measure.CareGapsService;
 import ca.uhn.fhir.cr.r4.measure.ISubmitDataService;
@@ -28,13 +33,15 @@ import ca.uhn.fhir.cr.r4.measure.SubmitDataProvider;
 import ca.uhn.fhir.cr.r4.measure.SubmitDataService;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.server.RestfulServer;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
 
-import java.util.concurrent.Executor;
+import java.util.Arrays;
+import java.util.Map;
 import java.util.function.Function;
 
 @Configuration
@@ -63,21 +70,24 @@ public class CrR4Config {
 
 	@Bean
 	public Function<RequestDetails, CareGapsService> r4CareGapsServiceFactory(
-			Function<RequestDetails, MeasureService> theR4MeasureServiceFactory,
-			CrProperties theCrProperties,
-			DaoRegistry theDaoRegistry,
-			Executor cqlExecutor) {
+			ApplicationContext theApplicationContext) {
 		return r -> {
-			var ms = theR4MeasureServiceFactory.apply(r);
-			var cs = new CareGapsService(theCrProperties, ms, theDaoRegistry, cqlExecutor, r);
+			var cs = theApplicationContext.getBean(CareGapsService.class);
+			cs.setRequestDetails(r);
 			return cs;
 		};
 	}
 
 	@Bean
+	@Scope("prototype")
+	public CareGapsService r4CareGapsService() {
+		return new CareGapsService();
+	}
+
+	@Bean
 	public CareGapsOperationProvider r4CareGapsProvider(
 			Function<RequestDetails, CareGapsService> theCareGapsServiceFunction) {
-		return new CareGapsOperationProvider(theCareGapsServiceFunction);
+		return new CareGapsOperationProvider();
 	}
 
 	@Bean
@@ -88,5 +98,21 @@ public class CrR4Config {
 	@Bean
 	public SubmitDataProvider r4SubmitDataProvider(ISubmitDataService theSubmitDataService) {
 		return new SubmitDataProvider(theSubmitDataService);
+	}
+
+	@Bean
+	public ProviderLoader r4PdLoader(
+			ApplicationContext theApplicationContext, FhirContext theFhirContext, RestfulServer theRestfulServer) {
+
+		var selector = new ProviderSelector(
+				theFhirContext,
+				Map.of(
+						FhirVersionEnum.R4,
+						Arrays.asList(
+								MeasureOperationsProvider.class,
+								SubmitDataProvider.class,
+								CareGapsOperationProvider.class)));
+
+		return new ProviderLoader(theRestfulServer, theApplicationContext, selector);
 	}
 }

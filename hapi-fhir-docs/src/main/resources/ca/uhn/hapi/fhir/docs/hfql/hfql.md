@@ -14,8 +14,8 @@ A simple example query is shown below:
 
 ```sql
 SELECT
-    name.family as family, 
-    name.given as given, 
+    name[0].family as family, 
+    name[0].given[0] as given, 
     birthDate,
     identifier.where(system='http://hl7.org/fhir/sid/us-ssn').value as SSN
 FROM

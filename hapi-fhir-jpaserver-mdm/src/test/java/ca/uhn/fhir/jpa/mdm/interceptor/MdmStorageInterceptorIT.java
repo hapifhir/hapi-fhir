@@ -9,12 +9,20 @@ import ca.uhn.fhir.jpa.mdm.helper.MdmHelperConfig;
 import ca.uhn.fhir.jpa.mdm.helper.MdmHelperR4;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.mdm.api.IMdmLinkCreateSvc;
+import ca.uhn.fhir.mdm.api.IMdmLinkUpdaterSvc;
+import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.mdm.model.CanonicalEID;
+import ca.uhn.fhir.mdm.model.MdmTransactionContext;
 import ca.uhn.fhir.mdm.rules.config.MdmSettings;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.server.TransactionLogMessages;
 import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -46,6 +54,7 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -59,6 +68,10 @@ public class MdmStorageInterceptorIT extends BaseMdmR4Test {
 	public MdmHelperR4 myMdmHelper;
 	@Autowired
 	private IIdHelperService<JpaPid> myIdHelperService;
+	@Autowired
+	private IMdmLinkUpdaterSvc myMdmLinkUpdaterSvc;
+	@Autowired
+	private IMdmLinkCreateSvc myMdmCreateSvc;
 
 
 	@Override
@@ -91,6 +104,185 @@ public class MdmStorageInterceptorIT extends BaseMdmR4Test {
 		Patient sourcePatient = getOnlyGoldenPatient();
 		myPatientDao.delete(sourcePatient.getIdElement());
 		assertLinkCount(0);
+	}
+
+	@Test
+	public void testGoldenResourceDeleted_whenOnlyMatchedResourceDeleted() throws InterruptedException {
+		// Given
+		Patient paulPatient = buildPaulPatient();
+		myMdmHelper.createWithLatch(paulPatient);
+		assertLinkCount(1);
+		Patient goldenPatient = getOnlyGoldenPatient();
+
+		// When
+		myPatientDao.delete(paulPatient.getIdElement());
+
+		// Then
+		List<IBaseResource> resources = myPatientDao.search(new SearchParameterMap(), SystemRequestDetails.forAllPartitions()).getAllResources();
+		assertTrue(resources.isEmpty());
+		assertLinkCount(0);
+
+		try {
+			myPatientDao.read(goldenPatient.getIdElement().toVersionless());
+			fail();
+		} catch (ResourceNotFoundException e) {
+			assertEquals(Constants.STATUS_HTTP_404_NOT_FOUND, e.getStatusCode());
+		}
+	}
+
+	@Test
+	public void testGoldenResourceDeleted_andNewGoldenCreated_whenOnlyMatchDeletedButPossibleMatchExists() throws InterruptedException {
+		// Given
+		Patient paulPatient = buildPaulPatient();
+		paulPatient.setActive(true);
+		myMdmHelper.createWithLatch(paulPatient);
+
+		Patient paulPatientPossibleMatch = buildPaulPatient();
+		paulPatientPossibleMatch.getNameFirstRep().setFamily("DifferentName");
+		myMdmHelper.createWithLatch(paulPatientPossibleMatch);
+		assertLinksMatchResult(MdmMatchResultEnum.MATCH, MdmMatchResultEnum.POSSIBLE_MATCH);
+
+		// When
+		myPatientDao.delete(paulPatient.getIdElement());
+
+		// Then
+		List<IBaseResource> resources = myPatientDao.search(new SearchParameterMap(), SystemRequestDetails.forAllPartitions()).getAllResources();
+		assertEquals(2, resources.size());
+
+		assertLinksMatchResult(MdmMatchResultEnum.MATCH);
+	}
+
+	@Test
+	public void testGoldenResourceDeleted_andNewGoldenCreated_whenOnlyMatchDeletedButMultiplePossibleMatchesExist() throws InterruptedException {
+		// Given
+		Patient paulPatient = buildPaulPatient();
+		paulPatient.setActive(true);
+		myMdmHelper.createWithLatch(paulPatient);
+
+		Patient paulPatientPossibleMatch = buildPaulPatient();
+		paulPatientPossibleMatch.setActive(true);
+		paulPatientPossibleMatch.getNameFirstRep().setFamily("DifferentName");
+		myMdmHelper.createWithLatch(paulPatientPossibleMatch);
+
+		Patient paulPatientPossibleMatch2 = buildPaulPatient();
+		paulPatientPossibleMatch2.setActive(true);
+		paulPatientPossibleMatch2.getNameFirstRep().setFamily("AnotherPerson");
+		myMdmHelper.createWithLatch(paulPatientPossibleMatch2);
+
+		assertLinksMatchResult(MdmMatchResultEnum.MATCH, MdmMatchResultEnum.POSSIBLE_MATCH, MdmMatchResultEnum.POSSIBLE_MATCH);
+
+		// When
+		myPatientDao.delete(paulPatient.getIdElement());
+
+		// Then
+		List<IBaseResource> resources = myPatientDao.search(new SearchParameterMap(), SystemRequestDetails.forAllPartitions()).getAllResources();
+		assertEquals(3, resources.size());
+
+		assertLinksMatchResult(MdmMatchResultEnum.MATCH, MdmMatchResultEnum.POSSIBLE_MATCH);
+	}
+
+	@Test
+	public void testDeleteSourceResource_whereGoldenResourceIsPossibleDuplicate() throws InterruptedException {
+		// Given
+		Patient paulPatient = buildPaulPatient();
+		paulPatient.setActive(true);
+		myMdmHelper.createWithLatch(paulPatient);
+
+		Patient paulPatientPossibleMatch = buildPaulPatient();
+		paulPatientPossibleMatch.setActive(true);
+		paulPatientPossibleMatch.getNameFirstRep().setFamily("DifferentName");
+		myMdmHelper.createWithLatch(paulPatientPossibleMatch);
+
+		myMdmLinkUpdaterSvc.updateLink(getOnlyGoldenPatient(), paulPatientPossibleMatch, MdmMatchResultEnum.NO_MATCH, getPatientUpdateLinkContext());
+
+		Patient paulPatientPossibleMatch2 = buildPaulPatient();
+		paulPatientPossibleMatch2.setActive(true);
+		paulPatientPossibleMatch2.getNameFirstRep().setFamily("AnotherPerson");
+		myMdmHelper.createWithLatch(paulPatientPossibleMatch2);
+
+		assertLinkCount(6);
+
+		// When
+		myPatientDao.delete(paulPatient.getIdElement());
+
+		// Then
+		/* Paul 1 MATCH to GR1 --> DELETED
+		   Paul 2 NO_MATCH to GR1 --> DELETED
+		   Paul 2 MATCH to GR2 --> KEPT
+		   Paul 3 POSSIBLE_MATCH to GR1 --> DELETED
+		   Paul 3 POSSIBLE_MATCH to GR2 --> KEPT
+		   GR1 POSSIBLE_DUPLICATE GR2 --> DELETED */
+		List<IBaseResource> resources = myPatientDao.search(new SearchParameterMap(), SystemRequestDetails.forAllPartitions()).getAllResources();
+		assertEquals(3, resources.size());
+
+		assertLinksMatchResult(MdmMatchResultEnum.MATCH, MdmMatchResultEnum.POSSIBLE_MATCH);
+	}
+
+	@Test
+	public void testDeleteSourceResource_withNoMatchLink_whereGoldenResourceIsPossibleDuplicate() throws InterruptedException {
+		// Given
+		Patient paulPatient = buildPaulPatient();
+		paulPatient.setActive(true);
+		myMdmHelper.createWithLatch(paulPatient);
+
+		Patient paulPatientPossibleMatch = buildPaulPatient();
+		paulPatientPossibleMatch.setActive(true);
+		paulPatientPossibleMatch.getNameFirstRep().setFamily("DifferentName");
+		myMdmHelper.createWithLatch(paulPatientPossibleMatch);
+
+		myMdmLinkUpdaterSvc.updateLink(getOnlyGoldenPatient(), paulPatientPossibleMatch, MdmMatchResultEnum.NO_MATCH, getPatientUpdateLinkContext());
+
+		Patient paulPatientPossibleMatch2 = buildPaulPatient();
+		paulPatientPossibleMatch2.setActive(true);
+		paulPatientPossibleMatch2.getNameFirstRep().setFamily("AnotherPerson");
+		myMdmHelper.createWithLatch(paulPatientPossibleMatch2);
+
+		assertLinkCount(6);
+
+		// When
+		myPatientDao.delete(paulPatientPossibleMatch.getIdElement());
+
+		// Then
+		/* Paul 1 MATCH to GR1 --> DELETED
+		   Paul 2 NO_MATCH to GR1 --> DELETED
+		   Paul 2 MATCH to GR2 --> KEPT
+		   Paul 3 POSSIBLE_MATCH to GR1 --> DELETED
+		   Paul 3 POSSIBLE_MATCH to GR2 --> KEPT
+		   GR1 POSSIBLE_DUPLICATE GR2 --> DELETED */
+		List<IBaseResource> resources = myPatientDao.search(new SearchParameterMap(), SystemRequestDetails.forAllPartitions()).getAllResources();
+		assertEquals(3, resources.size());
+
+		assertLinksMatchResult(MdmMatchResultEnum.MATCH, MdmMatchResultEnum.POSSIBLE_MATCH);
+	}
+
+	@Test
+	public void testGoldenResourceKept_whenAutoDeleteDisabled() throws InterruptedException {
+		// Given
+		myMdmSettings.setAutoExpungeGoldenResources(false);
+		Patient paulPatient = buildPaulPatient();
+		myMdmHelper.createWithLatch(paulPatient);
+		assertLinkCount(1);
+		Patient goldenPatient = getOnlyGoldenPatient();
+
+		// When
+		myPatientDao.delete(paulPatient.getIdElement());
+
+		// Then
+		try {
+			myPatientDao.read(goldenPatient.getIdElement().toVersionless());
+			fail();
+		} catch (ResourceGoneException e) {
+			assertLinkCount(0);
+		} finally {
+			myMdmSettings.setAutoExpungeGoldenResources(true);
+		}
+	}
+
+	private MdmTransactionContext getPatientUpdateLinkContext() {
+		MdmTransactionContext ctx = new MdmTransactionContext();
+		ctx.setRestOperation(MdmTransactionContext.OperationType.UPDATE_LINK);
+		ctx.setResourceType("Patient");
+		return ctx;
 	}
 
 	@Test
