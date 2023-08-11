@@ -55,6 +55,8 @@ import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -918,6 +920,63 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 			assertThat(e.getMessage(), startsWith(
 				"HAPI-1084: ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException: HAPI-2415: The resource could not be ex" +
 					"punged. It is likely due to unfinished asynchronous deletions, please try again later:"));
+		}
+	}
+
+	@ParameterizedTest
+	@ValueSource(strings = {"instance", "type", "system"})
+	public void testExpungeNotAllowedWhenNotEnabled(String level) {
+		// setup
+		myStorageSettings.setExpungeEnabled(false);
+
+		Patient p = new Patient();
+		p.setActive(true);
+		p.addName().setFamily("FOO");
+		IIdType patientId = myPatientDao.create(p).getId();
+
+		myPatientDao.delete(patientId);
+
+		runInTransaction(() -> assertThat(myResourceTableDao.findAll(), not(empty())));
+		runInTransaction(() -> assertThat(myResourceHistoryTableDao.findAll(), not(empty())));
+
+		// execute & verify
+		switch (level){
+			case "instance":
+				try {
+					myPatientDao.expunge(patientId, new ExpungeOptions()
+						.setExpungeDeletedResources(true)
+						.setExpungeOldVersions(true), null);
+
+					fail("expunge should not succeed when expunge operation is disabled");
+				} catch (MethodNotAllowedException e){
+					// ok
+					assertStillThere(patientId);
+				}
+				break;
+
+			case "type":
+				try {
+					myPatientDao.expunge(new ExpungeOptions()
+						.setExpungeDeletedResources(true)
+						.setExpungeOldVersions(true), null);
+
+					fail("expunge should not succeed when expunge operation is disabled");
+				} catch (MethodNotAllowedException e){
+					// ok
+					assertStillThere(patientId);
+				}
+				break;
+
+			case "system":
+				// instance level
+				try {
+					mySystemDao.expunge(new ExpungeOptions()
+						.setExpungeEverything(true), null);
+					fail("expunge should not succeed when expunge operation is disabled");
+				} catch (MethodNotAllowedException e){
+					// ok
+					assertStillThere(patientId);
+				}
 		}
 	}
 

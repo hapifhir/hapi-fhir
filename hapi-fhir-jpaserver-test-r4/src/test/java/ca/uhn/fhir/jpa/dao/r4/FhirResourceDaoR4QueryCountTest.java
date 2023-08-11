@@ -162,6 +162,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		myStorageSettings.setResourceMetaCountHardLimit(new JpaStorageSettings().getResourceMetaCountHardLimit());
 		myStorageSettings.setRespectVersionsForSearchIncludes(new JpaStorageSettings().isRespectVersionsForSearchIncludes());
 		myStorageSettings.setTagStorageMode(new JpaStorageSettings().getTagStorageMode());
+		myStorageSettings.setExpungeEnabled(false);
 
 		myFhirContext.getParserOptions().setStripVersionsFromReferences(true);
 		TermReadSvcImpl.setForceDisableHibernateSearchForUnitTest(false);
@@ -200,6 +201,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 			myPatientDao.delete(new IdType("Patient/TEST" + i));
 		}
 
+		myStorageSettings.setExpungeEnabled(true);
 
 		runInTransaction(() -> assertThat(myResourceTableDao.findAll(), not(empty())));
 		runInTransaction(() -> assertThat(myResourceHistoryTableDao.findAll(), not(empty())));
