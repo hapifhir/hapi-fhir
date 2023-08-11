@@ -39,6 +39,7 @@ import ca.uhn.fhir.mdm.api.MdmConstants;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.mdm.dao.IMdmLinkDao;
 import ca.uhn.fhir.mdm.model.CanonicalEID;
+import ca.uhn.fhir.mdm.model.MdmCreateOrUpdateParams;
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
 import ca.uhn.fhir.mdm.svc.MdmLinkDeleteSvc;
 import ca.uhn.fhir.mdm.util.EIDHelper;
@@ -50,6 +51,7 @@ import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.server.TransactionLogMessages;
 import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import net.sf.saxon.expr.Component;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -265,12 +267,14 @@ public class MdmStorageInterceptor implements IMdmStorageInterceptor {
 		for (IMdmLink possibleMatch : possibleMatches) {
 			if (possibleMatch.getGoldenResourcePersistenceId().equals(theGoldenPid)) {
 				IBaseResource sourceResource = theDao.readByPid(possibleMatch.getSourcePersistenceId());
+				MdmCreateOrUpdateParams params = new MdmCreateOrUpdateParams();
+				params.setGoldenResource(goldenResource);
+				params.setSourceResource((IAnyResource) sourceResource);
+				params.setMatchResult(NO_MATCH);
+				MdmTransactionContext mdmContext = createMdmContext(MdmTransactionContext.OperationType.UPDATE_LINK, sourceResource.fhirType());
+				params.setMdmContext(mdmContext);
 
-				mdmLinkUpdaterSvc.updateLink(
-						goldenResource,
-						(IAnyResource) sourceResource,
-						NO_MATCH,
-						createMdmContext(MdmTransactionContext.OperationType.UPDATE_LINK, sourceResource.fhirType()));
+				mdmLinkUpdaterSvc.updateLink(params);
 			}
 		}
 	}
