@@ -178,6 +178,15 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 	@PersistenceContext(type = PersistenceContextType.TRANSACTION)
 	protected EntityManager myEntityManager;
 
+	/**
+	 * Contains lists of ids of resources that should be fetched,
+	 * along with those that will be fetched from the search.
+	 *
+	 * This includes:
+	 * * Resource ids specified explicitly by _id parameter
+	 * * Ids of patients that are not referenced by any other resource. Specifically
+	 * 	when invoking an $everything operation
+	 */
 	private List<JpaPid> myAlsoIncludePids;
 	private CriteriaBuilder myCriteriaBuilder;
 	private SearchParameterMap myParams;
@@ -1925,10 +1934,25 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		private final Integer myOffset;
 		private boolean myFirst = true;
 		private IncludesIterator myIncludesIterator;
+		/**
+		 * The next JpaPid value of the next result in this query.
+		 * Will not be null if fetched using getNext()
+		 */
 		private JpaPid myNext;
+		/**
+		 * ResultsIterator is the QueryExecutor that runs the sql
+		 * and fetches data from the db.
+		 */
 		private ISearchQueryExecutor myResultsIterator;
 		private boolean myFetchIncludesForEverythingOperation;
+		/**
+		 * The count of resources found in the cached search
+		 */
 		private int mySkipCount = 0;
+		/**
+		 * The count of resources that are new in this search
+		 * (ie, not cached in previous searches)
+		 */
 		private int myNonSkipCount = 0;
 		private List<ISearchQueryExecutor> myQueryList = new ArrayList<>();
 
@@ -1967,26 +1991,35 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 						}
 					}
 
-					// assigns the results iterator
+					/*
+					 * assigns the results iterator.
+					 * Can also assign and populate myAlsoIncludePids.
+					 * Specifically in type/$everything mode
+					 * (ie, /Patient/$everything)
+					 */
 					initializeIteratorQuery(myOffset, myMaxResultsToFetch);
 
+					// but if it doesn't, we'll set an empty list here
 					if (myAlsoIncludePids == null) {
 						myAlsoIncludePids = new ArrayList<>();
 					}
 				}
 
 				if (myNext == null) {
-					for (Iterator<JpaPid> myPreResultsIterator = myAlsoIncludePids.iterator();
-							myPreResultsIterator.hasNext(); ) {
-						JpaPid next = myPreResultsIterator.next();
+					// we first consume any alsoIncludePids
+					for (JpaPid next : myAlsoIncludePids) {
 						if (next != null)
 							if (myPidSet.add(next)) {
+//								mySkipCount++;
 								myNext = next;
 								break;
+							} else {
+//								myNonSkipCount++;
 							}
 					}
 
 					if (myNext == null) {
+						// no next means we need a new query (if one is available)
 						while (myResultsIterator.hasNext() || !myQueryList.isEmpty()) {
 							// Update iterator with next chunk if necessary.
 							if (!myResultsIterator.hasNext()) {
