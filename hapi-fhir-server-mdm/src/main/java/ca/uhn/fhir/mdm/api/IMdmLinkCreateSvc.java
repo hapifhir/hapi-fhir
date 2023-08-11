@@ -19,13 +19,9 @@
  */
 package ca.uhn.fhir.mdm.api;
 
-import ca.uhn.fhir.mdm.model.MdmTransactionContext;
+import ca.uhn.fhir.mdm.model.MdmCreateOrUpdateParams;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 
 public interface IMdmLinkCreateSvc {
-	IAnyResource createLink(
-			IAnyResource theGoldenResource,
-			IAnyResource theSourceResource,
-			MdmMatchResultEnum theMatchResult,
-			MdmTransactionContext theMdmContext);
+	IAnyResource createLink(MdmCreateOrUpdateParams theParams);
 }

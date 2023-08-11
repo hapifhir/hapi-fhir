@@ -208,7 +208,7 @@ public class MdmLinkHelper {
 				}
 			}
 
-			assertTrue(foundLink, String.format("State: %s - not found", stateExpression));
+			assertTrue(foundLink, String.format("State: %s - not found", stateExpression.getLinkExpression()));
 		}
 	}
 
