@@ -395,7 +395,9 @@ public class JacksonStructure implements JsonLikeStructure {
 		return retVal;
 	}
 
-	private static StreamReadConstraints createStreamReadConstraints(){
-		return StreamReadConstraints.builder().maxStringLength(Integer.MAX_VALUE).build();
+	private static StreamReadConstraints createStreamReadConstraints() {
+		return StreamReadConstraints.builder()
+				.maxStringLength(Integer.MAX_VALUE)
+				.build();
 	}
 }
