@@ -633,6 +633,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 				// is basically a reverse-include search. For type/Everything (as opposed to instance/Everything)
 				// the one problem with this approach is that it doesn't catch Patients that have absolutely
 				// nothing linked to them. So we do one additional query to make sure we catch those too.
+				jdbcTemplate.setMaxRows(-1);
 				SearchQueryBuilder fetchPidsSqlBuilder = new SearchQueryBuilder(
 						myContext,
 						myStorageSettings,
@@ -642,7 +643,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 						mySqlBuilderFactory,
 						myDialectProvider,
 						theCountOnlyFlag);
-				GeneratedSql allTargetsSql = fetchPidsSqlBuilder.generate(theOffset, myMaxResultsToFetch);
+				GeneratedSql allTargetsSql = fetchPidsSqlBuilder.generate(theOffset, null);
 				String sql = allTargetsSql.getSql();
 				Object[] args = allTargetsSql.getBindVariables().toArray(new Object[0]);
 				List<Long> output = jdbcTemplate.query(sql, args, new SingleColumnRowMapper<>(Long.class));
@@ -650,6 +651,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 					myAlsoIncludePids = new ArrayList<>(output.size());
 				}
 				myAlsoIncludePids.addAll(JpaPid.fromLongList(output));
+				jdbcTemplate.setMaxRows(theMaximumResults);
 			}
 
 			List<String> typeSourceResources = new ArrayList<>();
