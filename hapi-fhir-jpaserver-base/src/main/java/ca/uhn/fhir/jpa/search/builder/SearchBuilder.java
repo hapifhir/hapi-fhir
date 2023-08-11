@@ -188,6 +188,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 	 * 	when invoking an $everything operation
 	 */
 	private List<JpaPid> myAlsoIncludePids;
+
 	private CriteriaBuilder myCriteriaBuilder;
 	private SearchParameterMap myParams;
 	private String mySearchUuid;
@@ -1944,6 +1945,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		 * and fetches data from the db.
 		 */
 		private ISearchQueryExecutor myResultsIterator;
+
 		private boolean myFetchIncludesForEverythingOperation;
 		/**
 		 * The count of resources found in the cached search
@@ -1954,6 +1956,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		 * (ie, not cached in previous searches)
 		 */
 		private int myNonSkipCount = 0;
+
 		private List<ISearchQueryExecutor> myQueryList = new ArrayList<>();
 
 		private QueryIterator(SearchRuntimeDetails theSearchRuntimeDetails, RequestDetails theRequest) {
@@ -2010,11 +2013,8 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 					for (JpaPid next : myAlsoIncludePids) {
 						if (next != null)
 							if (myPidSet.add(next)) {
-//								mySkipCount++;
 								myNext = next;
 								break;
-							} else {
-//								myNonSkipCount++;
 							}
 					}
 
