@@ -6,6 +6,7 @@ import ca.uhn.fhir.parser.StrictErrorHandler;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
+import ca.uhn.fhir.rest.server.BasePagingProvider;
 import ca.uhn.fhir.util.BundleUtil;
 import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
@@ -15,7 +16,6 @@ import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -62,7 +62,7 @@ public class PatientEverythingPaginationR4Test extends BaseResourceProviderR4Tes
 	 * Notice that the issue is not gateway related. Is a plain server issue.
 	 */
 	@Test
-	public void testEverythingPaginatesThroughAllPatients() throws IOException {
+	public void testEverythingPaginatesThroughAllPatients_whenCountIsEqualToMaxPageSize() throws IOException {
 		// setup
 		int totalPatients = 54;
 		for (int i = 0; i < totalPatients; i++) {
@@ -72,7 +72,7 @@ public class PatientEverythingPaginationR4Test extends BaseResourceProviderR4Tes
 		}
 
 		// test
-		Bundle bundle = fetchBundle(myServerBase + "/Patient/$everything?_format=json");
+		Bundle bundle = fetchBundle(myServerBase + "/Patient/$everything?_format=json&_count=" + BasePagingProvider.DEFAULT_MAX_PAGE_SIZE);
 
 		// verify
 		List<Patient> patientsFirstPage = BundleUtil.toListOfResourcesOfType(myFhirContext, bundle, Patient.class);

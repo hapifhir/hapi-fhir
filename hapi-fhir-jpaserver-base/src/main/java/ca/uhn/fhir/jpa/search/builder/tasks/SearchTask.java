@@ -393,14 +393,13 @@ public class SearchTask implements Callable<Void> {
 		} else {
 			if (nonSkippedCount == 0) {
 				// no skipped resources in this query
-				if (myParams.getCount() == null) {
-					// no supplied count, either
-					// if there's no additional thresholds remaining, we're done
-					return !myAdditionalPrefetchThresholdsRemaining;
-				} else {
+				if (myParams.getCount() != null) {
 					// count supplied
 					// if the count is > what we've fetched -> we've exhausted the query
 					return myParams.getCount() > totalFetched;
+				} else {
+					// legacy - we have no skipped resources - we are done
+					return true;
 				}
 			}
 			// skipped resources means we have more to fetch
