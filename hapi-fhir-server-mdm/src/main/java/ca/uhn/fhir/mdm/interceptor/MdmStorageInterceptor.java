@@ -51,7 +51,6 @@ import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.server.TransactionLogMessages;
 import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
-import net.sf.saxon.expr.Component;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -271,7 +270,8 @@ public class MdmStorageInterceptor implements IMdmStorageInterceptor {
 				params.setGoldenResource(goldenResource);
 				params.setSourceResource((IAnyResource) sourceResource);
 				params.setMatchResult(NO_MATCH);
-				MdmTransactionContext mdmContext = createMdmContext(MdmTransactionContext.OperationType.UPDATE_LINK, sourceResource.fhirType());
+				MdmTransactionContext mdmContext =
+						createMdmContext(MdmTransactionContext.OperationType.UPDATE_LINK, sourceResource.fhirType());
 				params.setMdmContext(mdmContext);
 
 				mdmLinkUpdaterSvc.updateLink(params);
