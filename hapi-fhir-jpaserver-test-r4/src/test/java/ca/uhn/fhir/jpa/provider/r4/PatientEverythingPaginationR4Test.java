@@ -62,38 +62,6 @@ public class PatientEverythingPaginationR4Test extends BaseResourceProviderR4Tes
 	 * Notice that the issue is not gateway related. Is a plain server issue.
 	 */
 	@Test
-	@Disabled // not a valid test
-	public void testEverythingRespectsServerDefaultPageSize() throws IOException {
-		// setup
-		for (int i = 0; i < 25; i++) {
-			Patient patient = new Patient();
-			patient.addName().setFamily("lastn").addGiven("name");
-			myPatientDao.create(patient, new SystemRequestDetails()).getId().toUnqualifiedVersionless();
-		}
-
-		// must be larger than myStorageSettings.getSearchPreFetchThresholds()[0] for issue to show up
-		int originalPagingProviderPageSize = myPagingProvider.getDefaultPageSize();
-		myPagingProvider.setDefaultPageSize(50);
-
-		// execute
-		Bundle bundle;
-		try {
-			bundle = fetchBundle(myServerBase + "/Patient/$everything?_format=json");
-		} finally {
-			// restore
-			myPagingProvider.setDefaultPageSize(originalPagingProviderPageSize);
-		}
-
-		// validate
-		List<Patient> bundlePatients = BundleUtil.toListOfResourcesOfType(myFhirContext, bundle, Patient.class);
-		assertEquals(myServer.getDefaultPageSize(), bundlePatients.size());
-	}
-
-	/**
-	 * Built to reproduce <a href="https://gitlab.com/simpatico.ai/cdr/-/issues/4940">this issue</a>
-	 * Notice that the issue is not gateway related. Is a plain server issue.
-	 */
-	@Test
 	public void testEverythingPaginatesThroughAllPatients() throws IOException {
 		// setup
 		int totalPatients = 54;
