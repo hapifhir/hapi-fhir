@@ -69,6 +69,7 @@ import java.util.List;
 import static ca.uhn.fhir.batch2.jobs.termcodesystem.TermCodeSystemJobConfig.TERM_CODE_SYSTEM_DELETE_JOB_NAME;
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.startsWith;
@@ -76,6 +77,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -940,44 +942,33 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 		runInTransaction(() -> assertThat(myResourceHistoryTableDao.findAll(), not(empty())));
 
 		// execute & verify
-		switch (level){
+		MethodNotAllowedException exception = null;
+		switch (level) {
 			case "instance":
-				try {
+				exception = assertThrows(MethodNotAllowedException.class, () -> {
 					myPatientDao.expunge(patientId, new ExpungeOptions()
 						.setExpungeDeletedResources(true)
 						.setExpungeOldVersions(true), null);
-
-					fail("expunge should not succeed when expunge operation is disabled");
-				} catch (MethodNotAllowedException e){
-					// ok
-					assertStillThere(patientId);
-				}
+				});
 				break;
 
 			case "type":
-				try {
+				exception = assertThrows(MethodNotAllowedException.class, () -> {
 					myPatientDao.expunge(new ExpungeOptions()
 						.setExpungeDeletedResources(true)
 						.setExpungeOldVersions(true), null);
-
-					fail("expunge should not succeed when expunge operation is disabled");
-				} catch (MethodNotAllowedException e){
-					// ok
-					assertStillThere(patientId);
-				}
+				});
 				break;
 
 			case "system":
-				// instance level
-				try {
+				exception = assertThrows(MethodNotAllowedException.class, () -> {
 					mySystemDao.expunge(new ExpungeOptions()
 						.setExpungeEverything(true), null);
-					fail("expunge should not succeed when expunge operation is disabled");
-				} catch (MethodNotAllowedException e){
-					// ok
-					assertStillThere(patientId);
-				}
+				});
 		}
+
+		assertStillThere(patientId);
+		assertThat(exception.getMessage(), containsString("$expunge is not enabled on this server"));
 	}
 
 	private List<Patient> createPatientsWithForcedIds(int theNumPatients) {
