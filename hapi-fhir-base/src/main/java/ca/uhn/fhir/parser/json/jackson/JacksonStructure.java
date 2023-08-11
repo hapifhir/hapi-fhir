@@ -28,6 +28,7 @@ import ca.uhn.fhir.parser.json.BaseJsonLikeWriter;
 import ca.uhn.fhir.parser.json.JsonLikeStructure;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.StreamReadConstraints;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -388,6 +389,13 @@ public class JacksonStructure implements JsonLikeStructure {
 		retVal = retVal.disable(JsonGenerator.Feature.AUTO_CLOSE_TARGET);
 		retVal = retVal.disable(JsonParser.Feature.AUTO_CLOSE_SOURCE);
 		retVal = retVal.configure(JsonParser.Feature.ALLOW_SINGLE_QUOTES, true);
+
+		retVal.getFactory().setStreamReadConstraints(createStreamReadConstraints());
+
 		return retVal;
+	}
+
+	private static StreamReadConstraints createStreamReadConstraints(){
+		return StreamReadConstraints.builder().maxStringLength(Integer.MAX_VALUE).build();
 	}
 }
