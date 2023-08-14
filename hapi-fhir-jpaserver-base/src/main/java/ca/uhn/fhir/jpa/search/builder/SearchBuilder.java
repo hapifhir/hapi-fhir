@@ -633,9 +633,6 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 				// is basically a reverse-include search. For type/Everything (as opposed to instance/Everything)
 				// the one problem with this approach is that it doesn't catch Patients that have absolutely
 				// nothing linked to them. So we do one additional query to make sure we catch those too.
-
-				// we need to bring all patients without page limit, or the remaining will not considered
-				jdbcTemplate.setMaxRows(-1);
 				SearchQueryBuilder fetchPidsSqlBuilder = new SearchQueryBuilder(
 						myContext,
 						myStorageSettings,
@@ -645,7 +642,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 						mySqlBuilderFactory,
 						myDialectProvider,
 						theCountOnlyFlag);
-				GeneratedSql allTargetsSql = fetchPidsSqlBuilder.generate(theOffset, null);
+				GeneratedSql allTargetsSql = fetchPidsSqlBuilder.generate(theOffset, myMaxResultsToFetch);
 				String sql = allTargetsSql.getSql();
 				Object[] args = allTargetsSql.getBindVariables().toArray(new Object[0]);
 				List<Long> output = jdbcTemplate.query(sql, args, new SingleColumnRowMapper<>(Long.class));
@@ -653,9 +650,6 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 					myAlsoIncludePids = new ArrayList<>(output.size());
 				}
 				myAlsoIncludePids.addAll(JpaPid.fromLongList(output));
-
-				// restore
-				jdbcTemplate.setMaxRows(theMaximumResults);
 			}
 
 			List<String> typeSourceResources = new ArrayList<>();
@@ -1957,127 +1951,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 
 		private void fetchNext() {
 			try {
-				if (myHaveRawSqlHooks) {
-					CurrentThreadCaptureQueriesListener.startCapturing();
-				}
-
-				// If we don't have a query yet, create one
-				if (myResultsIterator == null) {
-					if (myMaxResultsToFetch == null) {
-						if (myParams.getLoadSynchronousUpTo() != null) {
-							myMaxResultsToFetch = myParams.getLoadSynchronousUpTo();
-						} else if (myParams.getOffset() != null && myParams.getCount() != null) {
-							myMaxResultsToFetch = myParams.getCount();
-						} else {
-							myMaxResultsToFetch = myStorageSettings.getFetchSizeDefaultMaximum();
-						}
-					}
-
-					// assigns the results iterator
-					initializeIteratorQuery(myOffset, myMaxResultsToFetch);
-
-					if (myAlsoIncludePids == null) {
-						myAlsoIncludePids = new ArrayList<>();
-					}
-				}
-
-				if (myNext == null) {
-					for (Iterator<JpaPid> myPreResultsIterator = myAlsoIncludePids.iterator();
-							myPreResultsIterator.hasNext(); ) {
-						JpaPid next = myPreResultsIterator.next();
-						if (next != null)
-							if (myPidSet.add(next)) {
-								myNext = next;
-								break;
-							}
-					}
-
-					if (myNext == null) {
-						while (myResultsIterator.hasNext() || !myQueryList.isEmpty()) {
-							// Update iterator with next chunk if necessary.
-							if (!myResultsIterator.hasNext()) {
-								retrieveNextIteratorQuery();
-							}
-
-							Long nextLong = myResultsIterator.next();
-							if (myHavePerfTraceFoundIdHook) {
-								HookParams params = new HookParams()
-										.add(Integer.class, System.identityHashCode(this))
-										.add(Object.class, nextLong);
-								CompositeInterceptorBroadcaster.doCallHooks(
-										myInterceptorBroadcaster,
-										myRequest,
-										Pointcut.JPA_PERFTRACE_SEARCH_FOUND_ID,
-										params);
-							}
-
-							if (nextLong != null) {
-								JpaPid next = JpaPid.fromId(nextLong);
-								if (myPidSet.add(next)) {
-									myNext = next;
-									myNonSkipCount++;
-									break;
-								} else {
-									mySkipCount++;
-								}
-							}
-
-							if (!myResultsIterator.hasNext()) {
-								if (myMaxResultsToFetch != null
-										&& (mySkipCount + myNonSkipCount == myMaxResultsToFetch)) {
-									if (mySkipCount > 0 && myNonSkipCount == 0) {
-
-										StorageProcessingMessage message = new StorageProcessingMessage();
-										String msg = "Pass completed with no matching results seeking rows "
-												+ myPidSet.size() + "-" + mySkipCount
-												+ ". This indicates an inefficient query! Retrying with new max count of "
-												+ myMaxResultsToFetch;
-										ourLog.warn(msg);
-										message.setMessage(msg);
-										HookParams params = new HookParams()
-												.add(RequestDetails.class, myRequest)
-												.addIfMatchesType(ServletRequestDetails.class, myRequest)
-												.add(StorageProcessingMessage.class, message);
-										CompositeInterceptorBroadcaster.doCallHooks(
-												myInterceptorBroadcaster,
-												myRequest,
-												Pointcut.JPA_PERFTRACE_WARNING,
-												params);
-
-										myMaxResultsToFetch += 1000;
-										initializeIteratorQuery(myOffset, myMaxResultsToFetch);
-									}
-								}
-							}
-						}
-					}
-
-					if (myNext == null) {
-						// if we got here, it means the current PjaPid has already been processed
-						// and we will decide (here) if we need to fetch related resources recursively
-						if (myFetchIncludesForEverythingOperation) {
-							myIncludesIterator = new IncludesIterator(myPidSet, myRequest);
-							myFetchIncludesForEverythingOperation = false;
-						}
-						if (myIncludesIterator != null) {
-							while (myIncludesIterator.hasNext()) {
-								JpaPid next = myIncludesIterator.next();
-								if (next != null)
-									if (myPidSet.add(next)) {
-										myNext = next;
-										break;
-									}
-							}
-							if (myNext == null) {
-								myNext = NO_MORE;
-							}
-						} else {
-							myNext = NO_MORE;
-						}
-					}
-				} // if we need to fetch the next result
-
-				mySearchRuntimeDetails.setFoundMatchesCount(myPidSet.size());
+				doSearch();
 
 			} finally {
 				// search finished - fire hooks
@@ -2103,6 +1977,148 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 						.add(SearchRuntimeDetails.class, mySearchRuntimeDetails);
 				CompositeInterceptorBroadcaster.doCallHooks(
 						myInterceptorBroadcaster, myRequest, Pointcut.JPA_PERFTRACE_SEARCH_SELECT_COMPLETE, params);
+			}
+		}
+
+		private void doSearch() {
+			if (myHaveRawSqlHooks) {
+				CurrentThreadCaptureQueriesListener.startCapturing();
+			}
+
+			// If we don't have a query yet, create one
+			if (myResultsIterator == null) {
+				createFirstQuery();
+			}
+
+			if (myNext == null) {
+
+				myNext = addFirstNotExistingElementToCollection(myAlsoIncludePids, myPidSet);
+
+				if (myNext == null) {
+					while (myResultsIterator.hasNext() || !myQueryList.isEmpty()) {
+						doIfMyResultsIteratorOrMyQueryListHaveElements();
+					}
+				}
+
+				if (myNext == null) {
+					// if we got here, it means the current PjaPid has already been processed
+					// and we will decide (here) if we need to fetch related resources recursively
+					if (myFetchIncludesForEverythingOperation) {
+						myIncludesIterator = new IncludesIterator(myPidSet, myRequest);
+						myFetchIncludesForEverythingOperation = false;
+					}
+					if (myIncludesIterator == null) {
+						myNext = NO_MORE;
+					} else {
+						myNext = addFirstNotExistingElementToCollection(myIncludesIterator, myPidSet);
+						if (myNext == null) {
+							myNext = NO_MORE;
+						}
+					}
+				}
+			} // if we need to fetch the next result
+
+			mySearchRuntimeDetails.setFoundMatchesCount(myPidSet.size());
+		}
+
+		private JpaPid addFirstNotExistingElementToCollection(IncludesIterator theIncludesIterator, Set<JpaPid> thePidSet) {
+			while (myIncludesIterator.hasNext()) {
+				JpaPid next = myIncludesIterator.next();
+				if (next != null)
+					if (myPidSet.add(next)) {
+						return next;
+					}
+			}
+			return null;
+		}
+
+		private JpaPid addFirstNotExistingElementToCollection(List<JpaPid> thePidList, Set<JpaPid> theCollection) {
+			for (JpaPid jpaPid : thePidList) {
+				if (jpaPid != null && theCollection.add(jpaPid)) {
+					return jpaPid;
+				}
+			}
+			return null;
+		}
+
+		private void doIfMyResultsIteratorOrMyQueryListHaveElements() {
+			// Update iterator with next chunk if necessary.
+			if ( ! myResultsIterator.hasNext()) {
+				retrieveNextIteratorQuery();
+			}
+
+			Long nextLong = myResultsIterator.next();
+			if (myHavePerfTraceFoundIdHook) {
+				HookParams params = new HookParams()
+					.add(Integer.class, System.identityHashCode(this))
+					.add(Object.class, nextLong);
+				CompositeInterceptorBroadcaster.doCallHooks(
+					myInterceptorBroadcaster,
+					myRequest,
+					Pointcut.JPA_PERFTRACE_SEARCH_FOUND_ID,
+					params);
+			}
+
+			if (nextLong != null) {
+				JpaPid next = JpaPid.fromId(nextLong);
+				if (myPidSet.add(next)) {
+					myNext = next;
+					myNonSkipCount++;
+					return;
+				} else {
+					mySkipCount++;
+				}
+			}
+
+			if ( ! myResultsIterator.hasNext()) {
+				doWhenNoMoreResultsIterator();
+			}
+		}
+
+		private void doWhenNoMoreResultsIterator() {
+			if (myMaxResultsToFetch != null
+					&& (mySkipCount + myNonSkipCount == myMaxResultsToFetch)) {
+				if (mySkipCount > 0 && myNonSkipCount == 0) {
+
+					StorageProcessingMessage message = new StorageProcessingMessage();
+					String msg = "Pass completed with no matching results seeking rows "
+							+ myPidSet.size() + "-" + mySkipCount
+							+ ". This indicates an inefficient query! Retrying with new max count of "
+							+ myMaxResultsToFetch;
+					ourLog.warn(msg);
+					message.setMessage(msg);
+					HookParams params = new HookParams()
+							.add(RequestDetails.class, myRequest)
+							.addIfMatchesType(ServletRequestDetails.class, myRequest)
+							.add(StorageProcessingMessage.class, message);
+					CompositeInterceptorBroadcaster.doCallHooks(
+							myInterceptorBroadcaster,
+							myRequest,
+							Pointcut.JPA_PERFTRACE_WARNING,
+							params);
+
+					myMaxResultsToFetch += 1000;
+					initializeIteratorQuery(myOffset, myMaxResultsToFetch);
+				}
+			}
+		}
+
+		private void createFirstQuery() {
+			if (myMaxResultsToFetch == null) {
+				if (myParams.getLoadSynchronousUpTo() != null) {
+					myMaxResultsToFetch = myParams.getLoadSynchronousUpTo();
+				} else if (myParams.getOffset() != null && myParams.getCount() != null) {
+					myMaxResultsToFetch = myParams.getCount();
+				} else {
+					myMaxResultsToFetch = myStorageSettings.getFetchSizeDefaultMaximum();
+				}
+			}
+
+			// assigns the results iterator
+			initializeIteratorQuery(myOffset, myMaxResultsToFetch);
+
+			if (myAlsoIncludePids == null) {
+				myAlsoIncludePids = new ArrayList<>();
 			}
 		}
 
