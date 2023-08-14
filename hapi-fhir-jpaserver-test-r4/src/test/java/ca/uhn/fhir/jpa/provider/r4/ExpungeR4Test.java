@@ -55,6 +55,8 @@ import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -67,6 +69,7 @@ import java.util.List;
 import static ca.uhn.fhir.batch2.jobs.termcodesystem.TermCodeSystemJobConfig.TERM_CODE_SYSTEM_DELETE_JOB_NAME;
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.startsWith;
@@ -74,6 +77,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -919,6 +923,52 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 				"HAPI-1084: ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException: HAPI-2415: The resource could not be ex" +
 					"punged. It is likely due to unfinished asynchronous deletions, please try again later:"));
 		}
+	}
+
+	@ParameterizedTest
+	@ValueSource(strings = {"instance", "type", "system"})
+	public void testExpungeNotAllowedWhenNotEnabled(String level) {
+		// setup
+		myStorageSettings.setExpungeEnabled(false);
+
+		Patient p = new Patient();
+		p.setActive(true);
+		p.addName().setFamily("FOO");
+		IIdType patientId = myPatientDao.create(p).getId();
+
+		myPatientDao.delete(patientId);
+
+		runInTransaction(() -> assertThat(myResourceTableDao.findAll(), not(empty())));
+		runInTransaction(() -> assertThat(myResourceHistoryTableDao.findAll(), not(empty())));
+
+		// execute & verify
+		MethodNotAllowedException exception = null;
+		switch (level) {
+			case "instance":
+				exception = assertThrows(MethodNotAllowedException.class, () -> {
+					myPatientDao.expunge(patientId, new ExpungeOptions()
+						.setExpungeDeletedResources(true)
+						.setExpungeOldVersions(true), null);
+				});
+				break;
+
+			case "type":
+				exception = assertThrows(MethodNotAllowedException.class, () -> {
+					myPatientDao.expunge(new ExpungeOptions()
+						.setExpungeDeletedResources(true)
+						.setExpungeOldVersions(true), null);
+				});
+				break;
+
+			case "system":
+				exception = assertThrows(MethodNotAllowedException.class, () -> {
+					mySystemDao.expunge(new ExpungeOptions()
+						.setExpungeEverything(true), null);
+				});
+		}
+
+		assertStillThere(patientId);
+		assertThat(exception.getMessage(), containsString("$expunge is not enabled on this server"));
 	}
 
 	private List<Patient> createPatientsWithForcedIds(int theNumPatients) {
