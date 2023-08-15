@@ -29,6 +29,7 @@ import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.Parameters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Date;
 import java.util.List;
@@ -37,11 +38,8 @@ import java.util.function.Function;
 public class CareGapsOperationProvider {
 	private static final Logger ourLog = LoggerFactory.getLogger(CareGapsOperationProvider.class);
 
-	Function<RequestDetails, CareGapsService> myCareGapsServiceFunction;
-
-	public CareGapsOperationProvider(Function<RequestDetails, CareGapsService> theCareGapsServiceFunction) {
-		this.myCareGapsServiceFunction = theCareGapsServiceFunction;
-	}
+	@Autowired
+	Function<RequestDetails, CareGapsService> myCareGapsServiceFactory;
 
 	/**
 	 * Implements the <a href=
@@ -110,7 +108,7 @@ public class CareGapsOperationProvider {
 			@OperationParam(name = "measureUrl") List<CanonicalType> theMeasureUrl,
 			@OperationParam(name = "program") List<String> theProgram) {
 
-		return myCareGapsServiceFunction
+		return myCareGapsServiceFactory
 				.apply(theRequestDetails)
 				.getCareGapsReport(
 						thePeriodStart,
