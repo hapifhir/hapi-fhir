@@ -334,7 +334,7 @@ public class SearchTask implements Callable<Void> {
 
 						if (theResultIter.hasNext() == false) {
 							int skippedCount = theResultIter.getSkippedCount();
-							ourLog.trace(
+							ourLog.info(
 									"MaxToFetch[{}] SkippedCount[{}] CountSavedThisPass[{}] CountSavedThisTotal[{}] AdditionalPrefetchRemaining[{}]",
 									myMaxResultsToFetch,
 									skippedCount,
@@ -578,13 +578,7 @@ public class SearchTask implements Callable<Void> {
 		// we only use the values in SearchPreFetchThresholds
 		// but if there is a count...
 		if (myParams.getCount() != null) {
-			// we want either the max page size or the requested count size
-			// (+1 iff count == max page size)
 			minWanted = Math.min(myParams.getCount(), myPagingProvider.getMaximumPageSize());
-			// Always fetch one past this page size, so we know if there is a next page.
-			if (minWanted == myParams.getCount()) {
-				minWanted += 1;
-			}
 			minWanted += currentlyLoaded;
 		}
 
@@ -600,8 +594,11 @@ public class SearchTask implements Callable<Void> {
 			if (next == -1) {
 				sb.setMaxResultsToFetch(null);
 			} else {
+				// we want at least 1 more than our requested amount
+				// so we know that there are other results
+				// (in case we get the exact amount back)
 				myMaxResultsToFetch = Math.max(next, minWanted);
-				sb.setMaxResultsToFetch(myMaxResultsToFetch);
+				sb.setMaxResultsToFetch(myMaxResultsToFetch + 1);
 			}
 
 			if (iter.hasNext()) {
@@ -692,9 +689,9 @@ public class SearchTask implements Callable<Void> {
 
 	/**
 	 * Does the query but only for the count.
-	 * @param myParamWantOnlyCount - if count query is wanted only
+	 * @param theParamWantOnlyCount - if count query is wanted only
 	 */
-	private void doCountOnlyQuery(boolean myParamWantOnlyCount) {
+	private void doCountOnlyQuery(boolean theParamWantOnlyCount) {
 		ourLog.trace("Performing count");
 		ISearchBuilder sb = newSearchBuilder();
 
@@ -716,7 +713,7 @@ public class SearchTask implements Callable<Void> {
 				.withRequestPartitionId(myRequestPartitionId)
 				.execute(() -> {
 					mySearch.setTotalCount(count.intValue());
-					if (myParamWantOnlyCount) {
+					if (theParamWantOnlyCount) {
 						mySearch.setStatus(SearchStatusEnum.FINISHED);
 					}
 					doSaveSearch();

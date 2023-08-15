@@ -17,18 +17,29 @@ import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import static org.hl7.fhir.instance.model.api.IBaseBundle.LINK_NEXT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SuppressWarnings("Duplicates")
 public class PatientEverythingPaginationR4Test extends BaseResourceProviderR4Test {
 
 	private int myOriginalServerDefaultPageSize;
+
+	@Autowired
+	JpaStorageSettings myStorageSettings;
 
 	@BeforeEach
 	public void beforeDisableResultReuse() {
@@ -65,21 +76,19 @@ public class PatientEverythingPaginationR4Test extends BaseResourceProviderR4Tes
 	public void testEverythingPaginatesThroughAllPatients_whenCountIsEqualToMaxPageSize() throws IOException {
 		// setup
 		int totalPatients = 54;
-		for (int i = 0; i < totalPatients; i++) {
-			Patient patient = new Patient();
-			patient.addName().setFamily("lastn").addGiven("name");
-			myPatientDao.create(patient, new SystemRequestDetails()).getId().toUnqualifiedVersionless();
-		}
+		createPatients(totalPatients);
+
+		String url = myServerBase + "/Patient/$everything?_format=json&_count=" + BasePagingProvider.DEFAULT_MAX_PAGE_SIZE;
 
 		// test
-		Bundle bundle = fetchBundle(myServerBase + "/Patient/$everything?_format=json&_count=" + BasePagingProvider.DEFAULT_MAX_PAGE_SIZE);
+		Bundle bundle = fetchBundle(url);
 
 		// verify
 		List<Patient> patientsFirstPage = BundleUtil.toListOfResourcesOfType(myFhirContext, bundle, Patient.class);
 		assertEquals(50, patientsFirstPage.size());
 
 		String nextUrl = BundleUtil.getLinkUrlOfType(myFhirContext, bundle, LINK_NEXT);
-		System.out.println(nextUrl);
+
 		assertNotNull(nextUrl);
 		Bundle page2 = fetchBundle(nextUrl);
 		assertNotNull(page2);
@@ -88,6 +97,72 @@ public class PatientEverythingPaginationR4Test extends BaseResourceProviderR4Tes
 		assertEquals(4, patientsPage2.size());
 	}
 
+	@ParameterizedTest
+	@ValueSource(booleans = { true, false })
+	public void testEverythingPagination_LastPage(boolean theProvideCountBool) throws IOException {
+		// setup
+		myStorageSettings.setSearchPreFetchThresholds(Arrays.asList(10, 50,-1));
+		// 3 pages
+		int total = 154;
+		createPatients(total);
+		Set<String> ids = new HashSet<>();
+
+		String url = myServerBase + "/Patient/$everything?_format=json";
+		if (theProvideCountBool) {
+			url += "&_count=" + BasePagingProvider.DEFAULT_MAX_PAGE_SIZE;
+		}
+
+		String nextUrl;
+
+		// test
+		Bundle bundle = fetchBundle(url);
+
+		// first page
+		List<Patient> patientsPage = BundleUtil.toListOfResourcesOfType(myFhirContext, bundle, Patient.class);
+//		assertEquals(50, patientsPage.size());
+		for (Patient p : patientsPage) {
+			assertTrue(ids.add(p.getId()));
+		}
+		nextUrl = BundleUtil.getLinkUrlOfType(myFhirContext, bundle, LINK_NEXT);
+		assertNotNull(nextUrl);
+
+		// all future pages
+		do {
+			bundle = fetchBundle(nextUrl);
+			assertNotNull(bundle);
+			patientsPage = BundleUtil.toListOfResourcesOfType(myFhirContext, bundle, Patient.class);
+			for (Patient p : patientsPage) {
+				assertTrue(ids.add(p.getId()));
+			}
+//			assertEquals(50, patientsPage.size());
+			nextUrl = BundleUtil.getLinkUrlOfType(myFhirContext, bundle, LINK_NEXT);
+		} while (nextUrl != null);
+		assertNull(nextUrl);
+
+		// last page
+//		nextUrl = BundleUtil.getLinkUrlOfType(myFhirContext, bundle, LINK_NEXT);
+//		assertNotNull(nextUrl);
+//		bundle = fetchBundle(nextUrl);
+//		nextUrl = BundleUtil.getLinkUrlOfType(myFhirContext, bundle, LINK_NEXT);
+//		assertNull(nextUrl);
+//		patientsPage = BundleUtil.toListOfResourcesOfType(myFhirContext, bundle, Patient.class);
+//
+//		assertEquals(4, patientsPage.size());
+//		for (Patient p : patientsPage) {
+//			assertTrue(ids.add(p.getId()));
+//		}
+
+		assertEquals(total, ids.size());
+	}
+
+
+	private void createPatients(int theCount) {
+		for (int i = 0; i < theCount; i++) {
+			Patient patient = new Patient();
+			patient.addName().setFamily("lastn").addGiven("name");
+			myPatientDao.create(patient, new SystemRequestDetails()).getId().toUnqualifiedVersionless();
+		}
+	}
 
 	private Bundle fetchBundle(String theUrl) throws IOException {
 		Bundle bundle;

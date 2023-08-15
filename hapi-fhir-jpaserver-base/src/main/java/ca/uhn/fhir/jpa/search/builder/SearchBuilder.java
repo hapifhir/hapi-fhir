@@ -107,18 +107,6 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.SingleColumnRowMapper;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.persistence.EntityManager;
@@ -128,6 +116,17 @@ import javax.persistence.Query;
 import javax.persistence.Tuple;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.jpa.search.builder.QueryStack.LOCATION_POSITION;
 import static org.apache.commons.lang3.StringUtils.defaultString;
@@ -459,9 +458,11 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			}
 		} else {
 			// do everything in the database.
-			Optional<SearchQueryExecutor> query = createChunkedQuery(
-					theParams, sort, theOffset, theMaximumResults, theCountOnlyFlag, theRequest, null);
-			query.ifPresent(queries::add);
+			createChunkedQuery(
+					theParams, sort, theOffset, theMaximumResults, theCountOnlyFlag, theRequest, null,
+				queries
+			);
+//			query.ifPresent(queries::add);
 		}
 
 		return queries;
@@ -551,9 +552,10 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		if (thePids.size() < getMaximumPageSize()) {
 			normalizeIdListForLastNInClause(thePids);
 		}
-		Optional<SearchQueryExecutor> query =
-				createChunkedQuery(theParams, sort, theOffset, thePids.size(), theCount, theRequest, thePids);
-		query.ifPresent(t -> theQueries.add(t));
+//		Optional<SearchQueryExecutor> query =
+				createChunkedQuery(theParams, sort, theOffset, thePids.size(), theCount, theRequest, thePids,
+					theQueries);
+//		query.ifPresent(t -> theQueries.add(t));
 	}
 
 	/**
@@ -596,14 +598,16 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		}
 	}
 
-	private Optional<SearchQueryExecutor> createChunkedQuery(
+	private void createChunkedQuery(
 			SearchParameterMap theParams,
 			SortSpec sort,
 			Integer theOffset,
 			Integer theMaximumResults,
 			boolean theCountOnlyFlag,
 			RequestDetails theRequest,
-			List<Long> thePidList) {
+			List<Long> thePidList,
+			List<ISearchQueryExecutor> theSearchQueryExecutors
+	) {
 		String sqlBuilderResourceName = myParams.getEverythingMode() == null ? myResourceName : null;
 		SearchQueryBuilder sqlBuilder = new SearchQueryBuilder(
 				myContext,
@@ -655,11 +659,35 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 				GeneratedSql allTargetsSql = fetchPidsSqlBuilder.generate(theOffset, myMaxResultsToFetch);
 				String sql = allTargetsSql.getSql();
 				Object[] args = allTargetsSql.getBindVariables().toArray(new Object[0]);
+
 				List<Long> output = jdbcTemplate.query(sql, args, new SingleColumnRowMapper<>(Long.class));
-				if (myAlsoIncludePids == null) {
-					myAlsoIncludePids = new ArrayList<>(output.size());
-				}
-				myAlsoIncludePids.addAll(JpaPid.fromLongList(output));
+//				if (myAlsoIncludePids == null) {
+//					myAlsoIncludePids = new ArrayList<>(output.size());
+//				}
+//				myAlsoIncludePids.addAll(JpaPid.fromLongList(output));
+
+				theSearchQueryExecutors.add(new ISearchQueryExecutor() {
+					private final Iterator<Long> myIterator = output.iterator();
+
+					@Override
+					public void close() {
+
+					}
+
+					@Override
+					public boolean hasNext() {
+						return myIterator.hasNext();
+					}
+
+					@Override
+					public Long next() {
+						return myIterator.next();
+					}
+				});
+
+//				theSearchQueryExecutors.add(
+//					mySqlBuilderFactory.newSearchQueryExecutor(allTargetsSql, myMaxResultsToFetch)
+//				);
 			}
 
 			List<String> typeSourceResources = new ArrayList<>();
@@ -758,11 +786,13 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		 */
 		GeneratedSql generatedSql = sqlBuilder.generate(theOffset, myMaxResultsToFetch);
 		if (generatedSql.isMatchNothing()) {
-			return Optional.empty();
+//			return Optional.empty();
+			return;
 		}
 
 		SearchQueryExecutor executor = mySqlBuilderFactory.newSearchQueryExecutor(generatedSql, myMaxResultsToFetch);
-		return Optional.of(executor);
+		theSearchQueryExecutors.add(executor);
+//		return Optional.of(executor);
 	}
 
 	private Collection<String> extractTypeSourceResourcesFromParams() {
@@ -2024,6 +2054,12 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 							// Update iterator with next chunk if necessary.
 							if (!myResultsIterator.hasNext()) {
 								retrieveNextIteratorQuery();
+
+								// if our new results iterator is also empty
+								// we're done here
+								if (!myResultsIterator.hasNext()) {
+									break;
+								}
 							}
 
 							Long nextLong = myResultsIterator.next();

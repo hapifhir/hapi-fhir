@@ -421,7 +421,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 
 		runInTransaction(() -> {
 			Search search = mySearchEntityDao.findByUuidAndFetchIncludes(uuid).orElseThrow(() -> new InternalErrorException(""));
-			assertEquals(20, search.getNumFound());
+			assertEquals(21, search.getNumFound());
 			assertEquals(search.getNumFound(), mySearchResultDao.count());
 			assertNull(search.getTotalCount());
 			assertEquals(1, search.getVersion().intValue());
@@ -462,7 +462,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		runInTransaction(() -> {
 			Search search = mySearchEntityDao.findByUuidAndFetchIncludes(uuid).orElseThrow(() -> new InternalErrorException(""));
 			assertEquals(SearchStatusEnum.PASSCMPLET, search.getStatus());
-			assertEquals(50, search.getNumFound());
+			assertEquals(51, search.getNumFound());
 			assertEquals(search.getNumFound(), mySearchResultDao.count());
 			assertNull(search.getTotalCount());
 			assertEquals(3, search.getVersion().intValue());
@@ -501,9 +501,9 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		 */
 		runInTransaction(() -> {
 			Search search = mySearchEntityDao.findByUuidAndFetchIncludes(uuid).orElseThrow(() -> new InternalErrorException(""));
-			assertEquals(190, search.getNumFound());
+			assertEquals(191, search.getNumFound());
 			assertEquals(search.getNumFound(), mySearchResultDao.count());
-			assertEquals(190, search.getTotalCount().intValue());
+			assertEquals(191, search.getTotalCount().intValue());
 			assertEquals(5, search.getVersion().intValue());
 			assertEquals(SearchStatusEnum.FINISHED, search.getStatus());
 		});
@@ -513,10 +513,10 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		 */
 
 		ids = toUnqualifiedVersionlessIdValues(results, 180, 200, false);
-		assertEquals(10, ids.size());
+		assertEquals(11, ids.size());
 		assertEquals("Patient/PT00180", ids.get(0));
 		assertEquals("Patient/PT00189", ids.get(9));
-		assertEquals(190, myDatabaseBackedPagingProvider.retrieveResultList(null, uuid).size().intValue());
+		assertEquals(191, myDatabaseBackedPagingProvider.retrieveResultList(null, uuid).size().intValue());
 
 
 	}
@@ -589,10 +589,10 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		await().until(() -> runInTransaction(() -> {
 			Search search = mySearchEntityDao.findByUuidAndFetchIncludes(uuid).orElseThrow(() -> new InternalErrorException(""));
 			return search.getNumFound();
-		}), equalTo(20));
+		}), equalTo(21));
 		runInTransaction(() -> {
 			Search search = mySearchEntityDao.findByUuidAndFetchIncludes(uuid).orElseThrow(() -> new InternalErrorException(""));
-			assertEquals(20, search.getNumFound());
+			assertEquals(21, search.getNumFound());
 			assertEquals(search.getNumFound(), mySearchResultDao.count());
 			assertNull(search.getTotalCount());
 			assertEquals(1, search.getVersion().intValue());
@@ -649,14 +649,14 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		 */
 
 		waitForSize(
-			20,
+			21,
 			10000,
 			() -> runInTransaction(() -> mySearchEntityDao.findByUuidAndFetchIncludes(uuid).orElseThrow(() -> new InternalErrorException("")).getNumFound()),
 			() -> "Wanted 20: " + runInTransaction(() -> mySearchEntityDao.findByUuidAndFetchIncludes(uuid).orElseThrow(() -> new InternalErrorException("")).toString()));
 
 		runInTransaction(() -> {
 			Search search = mySearchEntityDao.findByUuidAndFetchIncludes(uuid).orElseThrow(() -> new InternalErrorException(""));
-			assertEquals(20, search.getNumFound());
+			assertEquals(21, search.getNumFound());
 			assertEquals(search.getNumFound(), mySearchResultDao.count());
 			assertNull(search.getTotalCount());
 			assertEquals(1, search.getVersion().intValue());
