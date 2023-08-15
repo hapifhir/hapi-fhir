@@ -122,9 +122,11 @@ public class SearchTask implements Callable<Void> {
 	private boolean myAdditionalPrefetchThresholdsRemaining;
 	private List<JpaPid> myPreviouslyAddedResourcePids;
 	private Integer myMaxResultsToFetch;
+
 	/**
 	 * Constructor
 	 */
+	@SuppressWarnings({"unchecked", "rawtypes"})
 	public SearchTask(
 			SearchTaskParameters theCreationParams,
 			HapiTransactionService theManagedTxManager,
@@ -198,6 +200,7 @@ public class SearchTask implements Callable<Void> {
 		myCountSavedTotal = myPreviouslyAddedResourcePids.size();
 	}
 
+	@SuppressWarnings("rawtypes")
 	private ISearchBuilder newSearchBuilder() {
 		Class<? extends IBaseResource> resourceTypeClass =
 				myContext.getResourceDefinition(myResourceType).getImplementingClass();
@@ -281,6 +284,7 @@ public class SearchTask implements Callable<Void> {
 				.execute(() -> doSaveSearch());
 	}
 
+	@SuppressWarnings("rawtypes")
 	private void saveUnsynced(final IResultIterator theResultIter) {
 		myTxService
 				.withRequest(myRequest)
@@ -296,7 +300,7 @@ public class SearchTask implements Callable<Void> {
 					// Interceptor call: STORAGE_PREACCESS_RESOURCES
 					// This can be used to remove results from the search result details before
 					// the user has a chance to know that they were in the results
-					if (mySearchRuntimeDetails.getRequestDetails() != null && unsyncedPids.isEmpty() == false) {
+					if (mySearchRuntimeDetails.getRequestDetails() != null && !unsyncedPids.isEmpty()) {
 						JpaPreResourceAccessDetails accessDetails =
 								new JpaPreResourceAccessDetails(unsyncedPids, () -> newSearchBuilder());
 						HookParams params = new HookParams()
@@ -332,7 +336,7 @@ public class SearchTask implements Callable<Void> {
 						mySyncedPids.addAll(unsyncedPids);
 						unsyncedPids.clear();
 
-						if (theResultIter.hasNext() == false) {
+						if (!theResultIter.hasNext()) {
 							int skippedCount = theResultIter.getSkippedCount();
 							ourLog.trace(
 									"MaxToFetch[{}] SkippedCount[{}] CountSavedThisPass[{}] CountSavedThisTotal[{}] AdditionalPrefetchRemaining[{}]",
@@ -382,6 +386,7 @@ public class SearchTask implements Callable<Void> {
 		ourLog.trace("saveUnsynced() - post-commit");
 	}
 
+	@SuppressWarnings("rawtypes")
 	private boolean isFinished(final IResultIterator theResultIter) {
 		int skippedCount = theResultIter.getSkippedCount();
 		int nonSkippedCount = theResultIter.getNonSkippedCount();
@@ -408,7 +413,7 @@ public class SearchTask implements Callable<Void> {
 	}
 
 	public boolean isNotAborted() {
-		return myAbortRequested == false;
+		return !myAbortRequested;
 	}
 
 	public void markComplete() {
@@ -542,6 +547,7 @@ public class SearchTask implements Callable<Void> {
 	 * This method actually creates the database query to perform the
 	 * search, and starts it.
 	 */
+	@SuppressWarnings({"rawtypes", "unchecked"})
 	private void doSearch() {
 		/*
 		 * If the user has explicitly requested a _count, perform a
@@ -693,6 +699,7 @@ public class SearchTask implements Callable<Void> {
 	 */
 	private void doCountOnlyQuery(boolean theParamWantOnlyCount) {
 		ourLog.trace("Performing count");
+		@SuppressWarnings("rawtypes")
 		ISearchBuilder sb = newSearchBuilder();
 
 		/*

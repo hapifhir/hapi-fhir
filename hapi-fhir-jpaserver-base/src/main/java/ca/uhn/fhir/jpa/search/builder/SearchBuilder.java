@@ -655,6 +655,8 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		if (myParams.getEverythingMode() != null) {
 			HashSet<Long> targetPids = new HashSet<>();
 			if (myParams.get(IAnyResource.SP_RES_ID) != null) {
+				// will add an initial search executor for
+				// _id params
 				extractTargetPidsFromIdParams(targetPids, theSearchQueryExecutors);
 			} else {
 				// For Everything queries, we make the query root by the ResourceLink table, since this query
@@ -676,8 +678,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 
 				List<Long> output = jdbcTemplate.query(sql, args, new SingleColumnRowMapper<>(Long.class));
 
-				// we add the search to the list of search executors as the first
-				// search executor/resultsiterator
+				// we add a search executor to fetch unlinked patients first
 				theSearchQueryExecutors.add(new ListWrappingSearchQueryExecutor(output));
 			}
 
