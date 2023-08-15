@@ -55,7 +55,7 @@ import ca.uhn.fhir.jpa.model.search.SearchBuilderLoadIncludesParameters;
 import ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails;
 import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
 import ca.uhn.fhir.jpa.search.SearchConstants;
-import ca.uhn.fhir.jpa.search.builder.models.ListWrappingSearchQueryExecutor;
+import ca.uhn.fhir.jpa.search.builder.models.ResolvedSearchQueryExecutor;
 import ca.uhn.fhir.jpa.search.builder.sql.GeneratedSql;
 import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
 import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryExecutor;
@@ -607,7 +607,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 
 		// add the target pids to our executors as the first
 		// results iterator to go through
-		theSearchQueryExecutors.add(new ListWrappingSearchQueryExecutor(
+		theSearchQueryExecutors.add(new ResolvedSearchQueryExecutor(
 			new ArrayList<>(theTargetPids)
 		));
 	}
@@ -679,7 +679,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 				List<Long> output = jdbcTemplate.query(sql, args, new SingleColumnRowMapper<>(Long.class));
 
 				// we add a search executor to fetch unlinked patients first
-				theSearchQueryExecutors.add(new ListWrappingSearchQueryExecutor(output));
+				theSearchQueryExecutors.add(new ResolvedSearchQueryExecutor(output));
 			}
 
 			List<String> typeSourceResources = new ArrayList<>();
