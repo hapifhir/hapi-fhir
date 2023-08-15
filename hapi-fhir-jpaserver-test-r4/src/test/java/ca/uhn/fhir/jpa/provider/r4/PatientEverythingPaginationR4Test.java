@@ -101,8 +101,10 @@ public class PatientEverythingPaginationR4Test extends BaseResourceProviderR4Tes
 	@ValueSource(booleans = { true, false })
 	public void testEverythingPagination_LastPage(boolean theProvideCountBool) throws IOException {
 		// setup
-		myStorageSettings.setSearchPreFetchThresholds(Arrays.asList(10, 50,-1));
-		// 3 pages
+		List<Integer> prefetchThreshold = Arrays.asList(10, 50,-1);
+		myStorageSettings.setSearchPreFetchThresholds(prefetchThreshold);
+
+		// 3 pages @ 50
 		int total = 154;
 		createPatients(total);
 		Set<String> ids = new HashSet<>();
@@ -119,7 +121,11 @@ public class PatientEverythingPaginationR4Test extends BaseResourceProviderR4Tes
 
 		// first page
 		List<Patient> patientsPage = BundleUtil.toListOfResourcesOfType(myFhirContext, bundle, Patient.class);
-//		assertEquals(50, patientsPage.size());
+		if (theProvideCountBool) {
+			assertEquals(50, patientsPage.size());
+		} else {
+			assertEquals(10, patientsPage.size());
+		}
 		for (Patient p : patientsPage) {
 			assertTrue(ids.add(p.getId()));
 		}
@@ -134,23 +140,18 @@ public class PatientEverythingPaginationR4Test extends BaseResourceProviderR4Tes
 			for (Patient p : patientsPage) {
 				assertTrue(ids.add(p.getId()));
 			}
-//			assertEquals(50, patientsPage.size());
 			nextUrl = BundleUtil.getLinkUrlOfType(myFhirContext, bundle, LINK_NEXT);
+			if (nextUrl != null) {
+				if (theProvideCountBool) {
+					assertEquals(50, patientsPage.size());
+				} else {
+					assertEquals(10, patientsPage.size());
+				}
+			} else {
+				assertEquals(4, patientsPage.size());
+			}
 		} while (nextUrl != null);
 		assertNull(nextUrl);
-
-		// last page
-//		nextUrl = BundleUtil.getLinkUrlOfType(myFhirContext, bundle, LINK_NEXT);
-//		assertNotNull(nextUrl);
-//		bundle = fetchBundle(nextUrl);
-//		nextUrl = BundleUtil.getLinkUrlOfType(myFhirContext, bundle, LINK_NEXT);
-//		assertNull(nextUrl);
-//		patientsPage = BundleUtil.toListOfResourcesOfType(myFhirContext, bundle, Patient.class);
-//
-//		assertEquals(4, patientsPage.size());
-//		for (Patient p : patientsPage) {
-//			assertTrue(ids.add(p.getId()));
-//		}
 
 		assertEquals(total, ids.size());
 	}
