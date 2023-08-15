@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 5196
+title: "Previously, type-level expunge was allowed even if expunge operation was turned off. This is now fixed."
