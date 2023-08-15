@@ -30,7 +30,6 @@ import java.util.Set;
 import static org.hl7.fhir.instance.model.api.IBaseBundle.LINK_NEXT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SuppressWarnings("Duplicates")
@@ -101,59 +100,64 @@ public class PatientEverythingPaginationR4Test extends BaseResourceProviderR4Tes
 	@ValueSource(booleans = { true, false })
 	public void testEverythingPagination_LastPage(boolean theProvideCountBool) throws IOException {
 		// setup
-		List<Integer> prefetchThreshold = Arrays.asList(10, 50,-1);
-		myStorageSettings.setSearchPreFetchThresholds(prefetchThreshold);
+		List<Integer> previousPrefetchThreshold = myStorageSettings.getSearchPreFetchThresholds();
+		try {
+			List<Integer> prefetchThreshold = Arrays.asList(10, 50, -1);
+			myStorageSettings.setSearchPreFetchThresholds(prefetchThreshold);
 
-		// 3 pages @ 50
-		int total = 154;
-		createPatients(total);
-		Set<String> ids = new HashSet<>();
+			// 3 pages @ 50
+			int total = 154;
+			createPatients(total);
+			Set<String> ids = new HashSet<>();
 
-		String url = myServerBase + "/Patient/$everything?_format=json";
-		if (theProvideCountBool) {
-			url += "&_count=" + BasePagingProvider.DEFAULT_MAX_PAGE_SIZE;
-		}
+			String url = myServerBase + "/Patient/$everything?_format=json";
+			if (theProvideCountBool) {
+				url += "&_count=" + BasePagingProvider.DEFAULT_MAX_PAGE_SIZE;
+			}
 
-		String nextUrl;
+			String nextUrl;
 
-		// test
-		Bundle bundle = fetchBundle(url);
+			// test
+			Bundle bundle = fetchBundle(url);
 
-		// first page
-		List<Patient> patientsPage = BundleUtil.toListOfResourcesOfType(myFhirContext, bundle, Patient.class);
-		if (theProvideCountBool) {
-			assertEquals(50, patientsPage.size());
-		} else {
-			assertEquals(10, patientsPage.size());
-		}
-		for (Patient p : patientsPage) {
-			assertTrue(ids.add(p.getId()));
-		}
-		nextUrl = BundleUtil.getLinkUrlOfType(myFhirContext, bundle, LINK_NEXT);
-		assertNotNull(nextUrl);
-
-		// all future pages
-		do {
-			bundle = fetchBundle(nextUrl);
-			assertNotNull(bundle);
-			patientsPage = BundleUtil.toListOfResourcesOfType(myFhirContext, bundle, Patient.class);
+			// first page
+			List<Patient> patientsPage = BundleUtil.toListOfResourcesOfType(myFhirContext, bundle, Patient.class);
+			if (theProvideCountBool) {
+				assertEquals(50, patientsPage.size());
+			} else {
+				assertEquals(10, patientsPage.size());
+			}
 			for (Patient p : patientsPage) {
 				assertTrue(ids.add(p.getId()));
 			}
 			nextUrl = BundleUtil.getLinkUrlOfType(myFhirContext, bundle, LINK_NEXT);
-			if (nextUrl != null) {
-				if (theProvideCountBool) {
-					assertEquals(50, patientsPage.size());
-				} else {
-					assertEquals(10, patientsPage.size());
-				}
-			} else {
-				assertEquals(4, patientsPage.size());
-			}
-		} while (nextUrl != null);
-		assertNull(nextUrl);
+			assertNotNull(nextUrl);
 
-		assertEquals(total, ids.size());
+			// all future pages
+			do {
+				bundle = fetchBundle(nextUrl);
+				assertNotNull(bundle);
+				patientsPage = BundleUtil.toListOfResourcesOfType(myFhirContext, bundle, Patient.class);
+				for (Patient p : patientsPage) {
+					assertTrue(ids.add(p.getId()));
+				}
+				nextUrl = BundleUtil.getLinkUrlOfType(myFhirContext, bundle, LINK_NEXT);
+				if (nextUrl != null) {
+					if (theProvideCountBool) {
+						assertEquals(50, patientsPage.size());
+					} else {
+						assertEquals(10, patientsPage.size());
+					}
+				} else {
+					assertEquals(4, patientsPage.size());
+				}
+			} while (nextUrl != null);
+
+			assertEquals(total, ids.size());
+		} finally {
+			// set it back, just in case
+			myStorageSettings.setSearchPreFetchThresholds(previousPrefetchThreshold);
+		}
 	}
 
 
