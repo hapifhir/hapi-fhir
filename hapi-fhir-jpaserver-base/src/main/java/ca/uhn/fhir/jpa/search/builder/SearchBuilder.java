@@ -178,17 +178,6 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 	@PersistenceContext(type = PersistenceContextType.TRANSACTION)
 	protected EntityManager myEntityManager;
 
-	/**
-	 * Contains lists of ids of resources that should be fetched,
-	 * along with those that will be fetched from the search.
-	 *
-	 * This includes:
-	 * * Resource ids specified explicitly by _id parameter
-	 * * Ids of patients that are not referenced by any other resource. Specifically
-	 * 	when invoking an $everything operation
-	 */
-	private List<JpaPid> myAlsoIncludePids;
-
 	private CriteriaBuilder myCriteriaBuilder;
 	private SearchParameterMap myParams;
 	private String mySearchUuid;
@@ -2017,11 +2006,6 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 					 * and populates the myQueryList.
 					 */
 					initializeIteratorQuery(myOffset, myMaxResultsToFetch);
-
-					// if it's null, we'll set an empty list here
-					if (myAlsoIncludePids == null) {
-						myAlsoIncludePids = new ArrayList<>();
-					}
 				}
 
 				if (myNext == null) {

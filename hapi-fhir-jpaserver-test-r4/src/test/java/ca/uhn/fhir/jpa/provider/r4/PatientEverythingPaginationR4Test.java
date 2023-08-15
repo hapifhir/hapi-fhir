@@ -82,12 +82,13 @@ public class PatientEverythingPaginationR4Test extends BaseResourceProviderR4Tes
 		// test
 		Bundle bundle = fetchBundle(url);
 
-		// verify
+		// first page
 		List<Patient> patientsFirstPage = BundleUtil.toListOfResourcesOfType(myFhirContext, bundle, Patient.class);
 		assertEquals(50, patientsFirstPage.size());
 
 		String nextUrl = BundleUtil.getLinkUrlOfType(myFhirContext, bundle, LINK_NEXT);
 
+		// 2nd/last page
 		assertNotNull(nextUrl);
 		Bundle page2 = fetchBundle(nextUrl);
 		assertNotNull(page2);
@@ -98,15 +99,17 @@ public class PatientEverythingPaginationR4Test extends BaseResourceProviderR4Tes
 
 	@ParameterizedTest
 	@ValueSource(booleans = { true, false })
-	public void testEverythingPagination_LastPage(boolean theProvideCountBool) throws IOException {
+	public void testEverythingTypeOperationPagination_withDifferentPrefetchThresholds_coverageTest(boolean theProvideCountBool) throws IOException {
 		// setup
 		List<Integer> previousPrefetchThreshold = myStorageSettings.getSearchPreFetchThresholds();
 		try {
+			// set our prefetch thresholds to ensure we run out of them
 			List<Integer> prefetchThreshold = Arrays.asList(10, 50, -1);
 			myStorageSettings.setSearchPreFetchThresholds(prefetchThreshold);
 
-			// 3 pages @ 50
+			// the number of patients to create
 			int total = 154;
+			String nextUrl;
 			createPatients(total);
 			Set<String> ids = new HashSet<>();
 
@@ -114,8 +117,6 @@ public class PatientEverythingPaginationR4Test extends BaseResourceProviderR4Tes
 			if (theProvideCountBool) {
 				url += "&_count=" + BasePagingProvider.DEFAULT_MAX_PAGE_SIZE;
 			}
-
-			String nextUrl;
 
 			// test
 			Bundle bundle = fetchBundle(url);
@@ -153,6 +154,7 @@ public class PatientEverythingPaginationR4Test extends BaseResourceProviderR4Tes
 				}
 			} while (nextUrl != null);
 
+			// ensure we found everything
 			assertEquals(total, ids.size());
 		} finally {
 			// set it back, just in case
