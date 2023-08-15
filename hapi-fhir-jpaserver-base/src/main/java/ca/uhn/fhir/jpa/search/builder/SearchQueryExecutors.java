@@ -58,7 +58,6 @@ public class SearchQueryExecutors {
 		return new ResolvedSearchQueryExecutor(rawPids);
 	}
 
-
 	public static ISearchQueryExecutor from(Iterator<JpaPid> theIterator) {
 		return new JpaPidQueryAdaptor(theIterator);
 	}

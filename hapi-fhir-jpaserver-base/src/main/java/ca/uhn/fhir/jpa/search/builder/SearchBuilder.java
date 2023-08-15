@@ -108,15 +108,6 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.SingleColumnRowMapper;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import javax.persistence.PersistenceContextType;
-import javax.persistence.Query;
-import javax.persistence.Tuple;
-import javax.persistence.TypedQuery;
-import javax.persistence.criteria.CriteriaBuilder;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -128,6 +119,15 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.persistence.PersistenceContextType;
+import javax.persistence.Query;
+import javax.persistence.Tuple;
+import javax.persistence.TypedQuery;
+import javax.persistence.criteria.CriteriaBuilder;
 
 import static ca.uhn.fhir.jpa.search.builder.QueryStack.LOCATION_POSITION;
 import static org.apache.commons.lang3.StringUtils.defaultString;
@@ -449,15 +449,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		} else {
 			// do everything in the database.
 			createChunkedQuery(
-				theParams,
-				sort,
-				theOffset,
-				theMaximumResults,
-				theCountOnlyFlag,
-				theRequest,
-				null,
-				queries
-			);
+					theParams, sort, theOffset, theMaximumResults, theCountOnlyFlag, theRequest, null, queries);
 		}
 
 		return queries;
@@ -547,16 +539,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		if (thePids.size() < getMaximumPageSize()) {
 			normalizeIdListForLastNInClause(thePids);
 		}
-		createChunkedQuery(
-			theParams,
-			sort,
-			theOffset,
-			thePids.size(),
-			theCount,
-			theRequest,
-			thePids,
-			theQueries
-		);
+		createChunkedQuery(theParams, sort, theOffset, thePids.size(), theCount, theRequest, thePids, theQueries);
 	}
 
 	/**
@@ -564,7 +547,8 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 	 *
 	 * @param theTargetPids
 	 */
-	private void extractTargetPidsFromIdParams(HashSet<Long> theTargetPids, List<ISearchQueryExecutor> theSearchQueryExecutors) {
+	private void extractTargetPidsFromIdParams(
+			HashSet<Long> theTargetPids, List<ISearchQueryExecutor> theSearchQueryExecutors) {
 		// get all the IQueryParameterType objects
 		// for _id -> these should all be StringParam values
 		HashSet<String> ids = new HashSet<>();
@@ -596,9 +580,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 
 		// add the target pids to our executors as the first
 		// results iterator to go through
-		theSearchQueryExecutors.add(new ResolvedSearchQueryExecutor(
-			new ArrayList<>(theTargetPids)
-		));
+		theSearchQueryExecutors.add(new ResolvedSearchQueryExecutor(new ArrayList<>(theTargetPids)));
 	}
 
 	private void createChunkedQuery(
@@ -609,8 +591,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			boolean theCountOnlyFlag,
 			RequestDetails theRequest,
 			List<Long> thePidList,
-			List<ISearchQueryExecutor> theSearchQueryExecutors
-	) {
+			List<ISearchQueryExecutor> theSearchQueryExecutors) {
 		String sqlBuilderResourceName = myParams.getEverythingMode() == null ? myResourceName : null;
 		SearchQueryBuilder sqlBuilder = new SearchQueryBuilder(
 				myContext,
@@ -767,7 +748,8 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		 */
 		GeneratedSql generatedSql = sqlBuilder.generate(theOffset, myMaxResultsToFetch);
 		if (!generatedSql.isMatchNothing()) {
-			SearchQueryExecutor executor = mySqlBuilderFactory.newSearchQueryExecutor(generatedSql, myMaxResultsToFetch);
+			SearchQueryExecutor executor =
+					mySqlBuilderFactory.newSearchQueryExecutor(generatedSql, myMaxResultsToFetch);
 			theSearchQueryExecutors.add(executor);
 		}
 	}
@@ -2025,13 +2007,13 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 						Long nextLong = myResultsIterator.next();
 						if (myHavePerfTraceFoundIdHook) {
 							HookParams params = new HookParams()
-								.add(Integer.class, System.identityHashCode(this))
-								.add(Object.class, nextLong);
+									.add(Integer.class, System.identityHashCode(this))
+									.add(Object.class, nextLong);
 							CompositeInterceptorBroadcaster.doCallHooks(
-								myInterceptorBroadcaster,
-								myRequest,
-								Pointcut.JPA_PERFTRACE_SEARCH_FOUND_ID,
-								params);
+									myInterceptorBroadcaster,
+									myRequest,
+									Pointcut.JPA_PERFTRACE_SEARCH_FOUND_ID,
+									params);
 						}
 
 						if (nextLong != null) {
@@ -2046,26 +2028,25 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 						}
 
 						if (!myResultsIterator.hasNext()) {
-							if (myMaxResultsToFetch != null
-								&& (mySkipCount + myNonSkipCount == myMaxResultsToFetch)) {
+							if (myMaxResultsToFetch != null && (mySkipCount + myNonSkipCount == myMaxResultsToFetch)) {
 								if (mySkipCount > 0 && myNonSkipCount == 0) {
 
 									StorageProcessingMessage message = new StorageProcessingMessage();
 									String msg = "Pass completed with no matching results seeking rows "
-										+ myPidSet.size() + "-" + mySkipCount
-										+ ". This indicates an inefficient query! Retrying with new max count of "
-										+ myMaxResultsToFetch;
+											+ myPidSet.size() + "-" + mySkipCount
+											+ ". This indicates an inefficient query! Retrying with new max count of "
+											+ myMaxResultsToFetch;
 									ourLog.warn(msg);
 									message.setMessage(msg);
 									HookParams params = new HookParams()
-										.add(RequestDetails.class, myRequest)
-										.addIfMatchesType(ServletRequestDetails.class, myRequest)
-										.add(StorageProcessingMessage.class, message);
+											.add(RequestDetails.class, myRequest)
+											.addIfMatchesType(ServletRequestDetails.class, myRequest)
+											.add(StorageProcessingMessage.class, message);
 									CompositeInterceptorBroadcaster.doCallHooks(
-										myInterceptorBroadcaster,
-										myRequest,
-										Pointcut.JPA_PERFTRACE_WARNING,
-										params);
+											myInterceptorBroadcaster,
+											myRequest,
+											Pointcut.JPA_PERFTRACE_WARNING,
+											params);
 
 									myMaxResultsToFetch += 1000;
 									initializeIteratorQuery(myOffset, myMaxResultsToFetch);
@@ -2099,7 +2080,6 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 					}
 				}
 
-
 				mySearchRuntimeDetails.setFoundMatchesCount(myPidSet.size());
 
 			} finally {
@@ -2111,21 +2091,21 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 
 			if (myFirst) {
 				HookParams params = new HookParams()
-					.add(RequestDetails.class, myRequest)
-					.addIfMatchesType(ServletRequestDetails.class, myRequest)
-					.add(SearchRuntimeDetails.class, mySearchRuntimeDetails);
+						.add(RequestDetails.class, myRequest)
+						.addIfMatchesType(ServletRequestDetails.class, myRequest)
+						.add(SearchRuntimeDetails.class, mySearchRuntimeDetails);
 				CompositeInterceptorBroadcaster.doCallHooks(
-					myInterceptorBroadcaster, myRequest, Pointcut.JPA_PERFTRACE_SEARCH_FIRST_RESULT_LOADED, params);
+						myInterceptorBroadcaster, myRequest, Pointcut.JPA_PERFTRACE_SEARCH_FIRST_RESULT_LOADED, params);
 				myFirst = false;
 			}
 
 			if (NO_MORE.equals(myNext)) {
 				HookParams params = new HookParams()
-					.add(RequestDetails.class, myRequest)
-					.addIfMatchesType(ServletRequestDetails.class, myRequest)
-					.add(SearchRuntimeDetails.class, mySearchRuntimeDetails);
+						.add(RequestDetails.class, myRequest)
+						.addIfMatchesType(ServletRequestDetails.class, myRequest)
+						.add(SearchRuntimeDetails.class, mySearchRuntimeDetails);
 				CompositeInterceptorBroadcaster.doCallHooks(
-					myInterceptorBroadcaster, myRequest, Pointcut.JPA_PERFTRACE_SEARCH_SELECT_COMPLETE, params);
+						myInterceptorBroadcaster, myRequest, Pointcut.JPA_PERFTRACE_SEARCH_SELECT_COMPLETE, params);
 			}
 		}
 

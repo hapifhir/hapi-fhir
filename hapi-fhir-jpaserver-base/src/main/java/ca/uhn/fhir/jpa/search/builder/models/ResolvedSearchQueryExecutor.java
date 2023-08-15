@@ -2,9 +2,9 @@ package ca.uhn.fhir.jpa.search.builder.models;
 
 import ca.uhn.fhir.jpa.search.builder.ISearchQueryExecutor;
 
-import javax.annotation.Nonnull;
 import java.util.Iterator;
 import java.util.List;
+import javax.annotation.Nonnull;
 
 public class ResolvedSearchQueryExecutor implements ISearchQueryExecutor {
 	private final Iterator<Long> myIterator;
