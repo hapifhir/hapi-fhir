@@ -52,6 +52,14 @@
 					<resultFile>${project.build.directory}/duplicate-finder-result.xml</resultFile>
 					<ignoredDependencies>
 						<dependency>
+							<groupId>javax.servlet</groupId>
+							<artifactId>javax.servlet-api</artifactId>
+						</dependency>
+						<dependency>
+							<groupId>org.glassfish</groupId>
+							<artifactId>javax.json</artifactId>
+						</dependency>
+						<dependency>
 							<groupId>javax.el</groupId>
 							<artifactId>javax.el-api</artifactId>
 						</dependency>
