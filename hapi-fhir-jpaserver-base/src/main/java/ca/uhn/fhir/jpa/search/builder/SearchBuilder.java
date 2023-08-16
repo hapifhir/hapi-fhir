@@ -1930,14 +1930,14 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		 */
 		private JpaPid myNext;
 		/**
-		 * ResultsIterator is the QueryExecutor that runs the sql
-		 * and fetches data from the db.
+		 * The current query result iterator running sql and supplying PIDs
+		 * @see #myQueryList
 		 */
 		private ISearchQueryExecutor myResultsIterator;
 
 		private boolean myFetchIncludesForEverythingOperation;
 		/**
-		 * The count of resources found in the cached search
+		 * The count of resources skipped because they were seen in earlier results
 		 */
 		private int mySkipCount = 0;
 		/**
@@ -1946,6 +1946,13 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		 */
 		private int myNonSkipCount = 0;
 
+		/**
+		 * The list of queries to use to find all results.
+		 * Normal JPA queries will normally have a single entry.
+		 * Queries that involve Hibernate Search/Elastisearch may have
+		 * multiple queries because of chunking.
+		 * The $everything operation also jams some extra results in.
+		 */
 		private List<ISearchQueryExecutor> myQueryList = new ArrayList<>();
 
 		private QueryIterator(SearchRuntimeDetails theSearchRuntimeDetails, RequestDetails theRequest) {
@@ -2031,22 +2038,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 							if (myMaxResultsToFetch != null && (mySkipCount + myNonSkipCount == myMaxResultsToFetch)) {
 								if (mySkipCount > 0 && myNonSkipCount == 0) {
 
-									StorageProcessingMessage message = new StorageProcessingMessage();
-									String msg = "Pass completed with no matching results seeking rows "
-											+ myPidSet.size() + "-" + mySkipCount
-											+ ". This indicates an inefficient query! Retrying with new max count of "
-											+ myMaxResultsToFetch;
-									ourLog.warn(msg);
-									message.setMessage(msg);
-									HookParams params = new HookParams()
-											.add(RequestDetails.class, myRequest)
-											.addIfMatchesType(ServletRequestDetails.class, myRequest)
-											.add(StorageProcessingMessage.class, message);
-									CompositeInterceptorBroadcaster.doCallHooks(
-											myInterceptorBroadcaster,
-											myRequest,
-											Pointcut.JPA_PERFTRACE_WARNING,
-											params);
+									sendProcessingMsgAndFirePerformanceHook();
 
 									myMaxResultsToFetch += 1000;
 									initializeIteratorQuery(myOffset, myMaxResultsToFetch);
@@ -2107,6 +2099,25 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 				CompositeInterceptorBroadcaster.doCallHooks(
 						myInterceptorBroadcaster, myRequest, Pointcut.JPA_PERFTRACE_SEARCH_SELECT_COMPLETE, params);
 			}
+		}
+
+		private void sendProcessingMsgAndFirePerformanceHook() {
+			StorageProcessingMessage message = new StorageProcessingMessage();
+			String msg = "Pass completed with no matching results seeking rows "
+					+ myPidSet.size() + "-" + mySkipCount
+					+ ". This indicates an inefficient query! Retrying with new max count of "
+					+ myMaxResultsToFetch;
+			ourLog.warn(msg);
+			message.setMessage(msg);
+			HookParams params = new HookParams()
+					.add(RequestDetails.class, myRequest)
+					.addIfMatchesType(ServletRequestDetails.class, myRequest)
+					.add(StorageProcessingMessage.class, message);
+			CompositeInterceptorBroadcaster.doCallHooks(
+					myInterceptorBroadcaster,
+					myRequest,
+					Pointcut.JPA_PERFTRACE_WARNING,
+					params);
 		}
 
 		private void initializeIteratorQuery(Integer theOffset, Integer theMaxResultsToFetch) {
