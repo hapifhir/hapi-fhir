@@ -2114,10 +2114,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 					.addIfMatchesType(ServletRequestDetails.class, myRequest)
 					.add(StorageProcessingMessage.class, message);
 			CompositeInterceptorBroadcaster.doCallHooks(
-					myInterceptorBroadcaster,
-					myRequest,
-					Pointcut.JPA_PERFTRACE_WARNING,
-					params);
+					myInterceptorBroadcaster, myRequest, Pointcut.JPA_PERFTRACE_WARNING, params);
 		}
 
 		private void initializeIteratorQuery(Integer theOffset, Integer theMaxResultsToFetch) {
