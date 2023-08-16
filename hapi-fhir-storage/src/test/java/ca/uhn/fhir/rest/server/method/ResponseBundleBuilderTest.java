@@ -13,6 +13,7 @@ import ca.uhn.fhir.rest.server.SimpleBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -148,6 +149,55 @@ class ResponseBundleBuilderTest {
 		assertThat(bundle.getLink(), hasSize(2));
 		assertSelfLink(bundle);
 		assertNextLink(bundle, DEFAULT_PAGE_SIZE);
+	}
+
+	@Test
+	public void buildResponseBundle_withIncludeFilterAndFewerResultsThanPageSize_doesNotReturnNextLink() {
+		// setup
+		int includeResources = 4;
+		// we want the number of resources returned to be equal to the pagesize
+		List<IBaseResource> list = buildXPatientList(DEFAULT_PAGE_SIZE + 1 - includeResources);
+
+		ResponsePage.ResponsePageBuilder builder = new ResponsePage.ResponsePageBuilder();
+		builder.setIncludedResourceCount(includeResources);
+
+		ResponseBundleBuilder svc = new ResponseBundleBuilder(true);
+
+		SimpleBundleProvider provider = new SimpleBundleProvider() {
+
+			@Override
+			public ResponsePage.ResponsePageBuilder getResponsePageBuilder() {
+				return builder;
+			}
+
+			@Nonnull
+			@Override
+			public List<IBaseResource> getResources(int theFrom, int theTo, @Nonnull ResponsePage.ResponsePageBuilder theResponsePageBuilder) {
+				List<IBaseResource> retList = list.subList(theFrom, Math.min(theTo, list.size()-1));
+				// our fake includes
+				for (int i = 0; i < includeResources; i++) {
+					retList.add(new Organization().setId("Organization/" + i));
+				}
+				return retList;
+			}
+		};
+
+		// TODO - if null, it adds a next link
+		provider.setSize(DEFAULT_PAGE_SIZE);
+
+		// mocking
+		when(myServer.canStoreSearchResults()).thenReturn(true);
+		when(myServer.getPagingProvider()).thenReturn(myPagingProvider);
+		when(myPagingProvider.getDefaultPageSize()).thenReturn(DEFAULT_PAGE_SIZE);
+
+		ResponseBundleRequest req = buildResponseBundleRequest(provider);
+
+		// test
+		Bundle bundle = (Bundle) svc.buildResponseBundle(req);
+
+		// verify
+		assertEquals(1, bundle.getLink().size());
+		verifyBundle(bundle, RESOURCE_COUNT, DEFAULT_PAGE_SIZE -1, "A0", "A14");
 	}
 
 	@ParameterizedTest
@@ -423,8 +473,12 @@ class ResponseBundleBuilderTest {
 	}
 
 	private List<IBaseResource> buildPatientList() {
+		return buildXPatientList(ResponseBundleBuilderTest.RESOURCE_COUNT);
+	}
+
+	private List<IBaseResource> buildXPatientList(int theCount) {
 		List<IBaseResource> retval = new ArrayList<>();
-		for (int i = 0; i < ResponseBundleBuilderTest.RESOURCE_COUNT; ++i) {
+		for (int i = 0; i < theCount; ++i) {
 			Patient p = new Patient();
 			p.setId("A" + i);
 			p.setActive(true);
@@ -499,10 +553,9 @@ class ResponseBundleBuilderTest {
 		}
 
 		@Nonnull
-		@Override
-		public List<IBaseResource> getResources(int theFromIndex, int theToIndex) {
+		public List<IBaseResource> getResources(int theFromIndex, int theToIndex, @Nonnull ResponsePage.ResponsePageBuilder theResponseBundleBuilder) {
 			getResourcesCalled = true;
-			return super.getResources(theFromIndex, theToIndex);
+			return super.getResources(theFromIndex, theToIndex, theResponseBundleBuilder);
 		}
 
 		// Emulate the behaviour of PersistedJpaBundleProvider where size() is only set after getResources() has been called

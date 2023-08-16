@@ -91,6 +91,8 @@ public class ResponseBundleBuilder {
 		final List<IBaseResource> resourceList;
 		final int pageSize;
 
+		ResponsePage.ResponsePageBuilder responsePageBuilder = bundleProvider.getResponsePageBuilder();
+
 		int numToReturn;
 		String searchId = null;
 
@@ -98,24 +100,35 @@ public class ResponseBundleBuilder {
 			pageSize = offsetCalculatePageSize(server, requestedPage, bundleProvider.size());
 			numToReturn = pageSize;
 
-			resourceList = offsetBuildResourceList(bundleProvider, requestedPage, numToReturn);
+			resourceList = offsetBuildResourceList(bundleProvider, requestedPage, numToReturn, responsePageBuilder);
 			RestfulServerUtils.validateResourceListNotNull(resourceList);
 		} else {
 			pageSize = pagingCalculatePageSize(requestedPage, server.getPagingProvider());
 
-			if (bundleProvider.size() == null) {
+			Integer size = bundleProvider.size();
+			if (size == null) {
 				numToReturn = pageSize;
 			} else {
-				numToReturn = Math.min(pageSize, bundleProvider.size() - theResponseBundleRequest.offset);
+				numToReturn = Math.min(pageSize, size.intValue() - theResponseBundleRequest.offset);
 			}
 
-			resourceList = pagingBuildResourceList(theResponseBundleRequest, bundleProvider, numToReturn);
+			resourceList = pagingBuildResourceList(theResponseBundleRequest, bundleProvider, numToReturn, responsePageBuilder);
 			RestfulServerUtils.validateResourceListNotNull(resourceList);
 
 			searchId = pagingBuildSearchId(theResponseBundleRequest, numToReturn, bundleProvider.size());
 		}
 
-		return new ResponsePage(searchId, resourceList, pageSize, numToReturn, bundleProvider.size());
+		// We should leave the IBundleProvider to populate these values (specifically resourceList).
+		// But since we haven't updated all such providers, we will
+		// build it here (this is at best 'duplicating' work).
+		responsePageBuilder
+			.setSearchId(searchId)
+			.setPageSize(pageSize)
+			.setNumToReturn(numToReturn)
+			.setNumTotalResults(bundleProvider.size())
+			.setResources(resourceList);
+
+		return responsePageBuilder.build();
 	}
 
 	private static String pagingBuildSearchId(
@@ -141,11 +154,18 @@ public class ResponseBundleBuilder {
 	}
 
 	private static List<IBaseResource> pagingBuildResourceList(
-			ResponseBundleRequest theResponseBundleRequest, IBundleProvider theBundleProvider, int theNumToReturn) {
+			ResponseBundleRequest theResponseBundleRequest,
+			IBundleProvider theBundleProvider,
+			int theNumToReturn,
+			ResponsePage.ResponsePageBuilder theResponsePageBuilder
+	) {
 		final List<IBaseResource> retval;
 		if (theNumToReturn > 0 || theBundleProvider.getCurrentPageId() != null) {
 			retval = theBundleProvider.getResources(
-					theResponseBundleRequest.offset, theNumToReturn + theResponseBundleRequest.offset);
+				theResponseBundleRequest.offset,
+				theNumToReturn + theResponseBundleRequest.offset,
+				theResponsePageBuilder
+			);
 		} else {
 			retval = Collections.emptyList();
 		}
@@ -161,15 +181,19 @@ public class ResponseBundleBuilder {
 	}
 
 	private List<IBaseResource> offsetBuildResourceList(
-			IBundleProvider theBundleProvider, RequestedPage theRequestedPage, int theNumToReturn) {
+		IBundleProvider theBundleProvider,
+		RequestedPage theRequestedPage,
+		int theNumToReturn,
+		ResponsePage.ResponsePageBuilder theResponsePageBuilder
+	) {
 		final List<IBaseResource> retval;
 		if ((theRequestedPage.offset != null && !myIsOffsetModeHistory)
 				|| theBundleProvider.getCurrentPageOffset() != null) {
 			// When offset query is done theResult already contains correct amount (+ their includes etc.) so return
 			// everything
-			retval = theBundleProvider.getResources(0, Integer.MAX_VALUE);
+			retval = theBundleProvider.getResources(0, Integer.MAX_VALUE, theResponsePageBuilder);
 		} else if (theNumToReturn > 0) {
-			retval = theBundleProvider.getResources(0, theNumToReturn);
+			retval = theBundleProvider.getResources(0, theNumToReturn, theResponsePageBuilder);
 		} else {
 			retval = Collections.emptyList();
 		}
@@ -177,7 +201,10 @@ public class ResponseBundleBuilder {
 	}
 
 	private static int offsetCalculatePageSize(
-			IRestfulServer<?> server, RequestedPage theRequestedPage, Integer theNumTotalResults) {
+		IRestfulServer<?> server,
+		RequestedPage theRequestedPage,
+		Integer theNumTotalResults
+	) {
 		final int retval;
 		if (theRequestedPage.limit != null) {
 			retval = theRequestedPage.limit;
@@ -271,7 +298,6 @@ public class ResponseBundleBuilder {
 			}
 
 			if (theResponsePage.numTotalResults == null || requestedToReturn < theResponsePage.numTotalResults) {
-
 				retval.setNext(RestfulServerUtils.createOffsetPagingLink(
 						retval,
 						theResponseBundleRequest.requestDetails.getRequestPath(),

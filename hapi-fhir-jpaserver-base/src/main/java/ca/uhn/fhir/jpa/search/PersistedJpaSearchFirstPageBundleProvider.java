@@ -30,23 +30,26 @@ import ca.uhn.fhir.jpa.util.QueryParameterUtils;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.valueset.BundleEntrySearchModeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.server.method.ResponsePage;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nonnull;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
-import javax.annotation.Nonnull;
 
 public class PersistedJpaSearchFirstPageBundleProvider extends PersistedJpaBundleProvider {
 	private static final Logger ourLog = LoggerFactory.getLogger(PersistedJpaSearchFirstPageBundleProvider.class);
 	private final SearchTask mySearchTask;
+	@SuppressWarnings("rawtypes")
 	private final ISearchBuilder mySearchBuilder;
 
 	/**
 	 * Constructor
 	 */
+	@SuppressWarnings("rawtypes")
 	public PersistedJpaSearchFirstPageBundleProvider(
 			Search theSearch,
 			SearchTask theSearchTask,
@@ -65,7 +68,7 @@ public class PersistedJpaSearchFirstPageBundleProvider extends PersistedJpaBundl
 
 	@Nonnull
 	@Override
-	public List<IBaseResource> getResources(int theFromIndex, int theToIndex) {
+	public List<IBaseResource> getResources(int theFromIndex, int theToIndex, @Nonnull ResponsePage.ResponsePageBuilder thePageBuilder) {
 		ensureSearchEntityLoaded();
 		QueryParameterUtils.verifySearchHasntFailedOrThrowInternalErrorException(getSearchEntity());
 
@@ -80,7 +83,7 @@ public class PersistedJpaSearchFirstPageBundleProvider extends PersistedJpaBundl
 		List<IBaseResource> retVal = myTxService
 				.withRequest(myRequest)
 				.withRequestPartitionId(requestPartitionId)
-				.execute(() -> toResourceList(mySearchBuilder, pids));
+				.execute(() -> toResourceList(mySearchBuilder, pids, thePageBuilder));
 
 		long totalCountWanted = theToIndex - theFromIndex;
 		long totalCountMatch = (int) retVal.stream().filter(t -> !isInclude(t)).count();
@@ -101,7 +104,7 @@ public class PersistedJpaSearchFirstPageBundleProvider extends PersistedJpaBundl
 
 				long remainingWanted = totalCountWanted - totalCountMatch;
 				long fromIndex = theToIndex - remainingWanted;
-				List<IBaseResource> remaining = super.getResources((int) fromIndex, theToIndex);
+				List<IBaseResource> remaining = super.getResources((int) fromIndex, theToIndex, thePageBuilder);
 				remaining.forEach(t -> {
 					if (!existingIds.contains(t.getIdElement().getValue())) {
 						retVal.add(t);

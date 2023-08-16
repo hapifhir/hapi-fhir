@@ -21,6 +21,7 @@ package ca.uhn.fhir.rest.api.server;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.rest.server.method.ResponsePage;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
@@ -33,6 +34,14 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 public interface IBundleProvider {
+
+	/**
+	 * Returns a ResponsePageBuilder for constructing
+	 * pages that return results.
+	 */
+	default ResponsePage.ResponsePageBuilder getResponsePageBuilder() {
+		return new ResponsePage.ResponsePageBuilder();
+	}
 
 	/**
 	 * If this method is implemented, provides an ID for the current
@@ -114,6 +123,32 @@ public interface IBundleProvider {
 	IPrimitiveType<Date> getPublished();
 
 	/**
+	 * Deprecated: Use the getResources(int from, int to, ResourcePageBuilder builder) instead.
+	 * <p>
+	 * Load the given collection of resources by index, plus any additional resources per the
+	 * server's processing rules (e.g. _include'd resources, OperationOutcome, etc.). For example,
+	 * if the method is invoked with index 0,10 the method might return 10 search results, plus an
+	 * additional 20 resources which matched a client's _include specification.
+	 * </p>
+	 * <p>
+	 * Note that if this bundle provider was loaded using a
+	 * page ID (i.e. via {@link ca.uhn.fhir.rest.server.IPagingProvider#retrieveResultList(RequestDetails, String, String)}
+	 * because {@link #getNextPageId()} provided a value on the
+	 * previous page, then the indexes should be ignored and the
+	 * whole page returned.
+	 * </p>
+	 *
+	 * @param theFromIndex The low index (inclusive) to return
+	 * @param theToIndex   The high index (exclusive) to return
+	 * @return A list of resources. The size of this list must be at least <code>theToIndex - theFromIndex</code>.
+	 */
+	@Nonnull
+	@Deprecated(forRemoval = true, since = "7.0.0")
+	default List<IBaseResource> getResources(int theFromIndex, int theToIndex) {
+		return getResources(theFromIndex, theToIndex, getResponsePageBuilder());
+	}
+
+	/**
 	 * Load the given collection of resources by index, plus any additional resources per the
 	 * server's processing rules (e.g. _include'd resources, OperationOutcome, etc.). For example,
 	 * if the method is invoked with index 0,10 the method might return 10 search results, plus an
@@ -128,10 +163,13 @@ public interface IBundleProvider {
 	 *
 	 * @param theFromIndex The low index (inclusive) to return
 	 * @param theToIndex   The high index (exclusive) to return
+	 * @param theResponsePageBuilder The ResponsePageBuilder. The builder will add values needed for the response page.
 	 * @return A list of resources. The size of this list must be at least <code>theToIndex - theFromIndex</code>.
 	 */
-	@Nonnull
-	List<IBaseResource> getResources(int theFromIndex, int theToIndex);
+	default List<IBaseResource> getResources(int theFromIndex, int theToIndex, @Nonnull ResponsePage.ResponsePageBuilder theResponsePageBuilder) {
+		// TODO - override and implement
+		return getResources(theFromIndex, theToIndex);
+	}
 
 	/**
 	 * Get all resources

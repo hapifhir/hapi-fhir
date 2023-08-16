@@ -24,6 +24,7 @@ import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
+import ca.uhn.fhir.rest.server.method.ResponsePage;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.InstantType;
 import org.hl7.fhir.r4.model.Patient;
@@ -63,7 +64,7 @@ public class PagingPatientProvider implements IResourceProvider {
 
 			@Nonnull
 			@Override
-			public List<IBaseResource> getResources(int theFromIndex, int theToIndex) {
+			public List<IBaseResource> getResources(int theFromIndex, int theToIndex, @Nonnull ResponsePage.ResponsePageBuilder theResponsePageBuilder) {
 				int end = Math.max(theToIndex, matchingResourceIds.size() - 1);
 				List<Long> idsToReturn = matchingResourceIds.subList(theFromIndex, end);
 				return loadResourcesByIds(idsToReturn);

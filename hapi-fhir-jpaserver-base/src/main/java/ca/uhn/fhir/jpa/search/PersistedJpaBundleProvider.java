@@ -55,23 +55,25 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SimplePreResourceAccessDetails;
 import ca.uhn.fhir.rest.api.server.SimplePreResourceShowDetails;
 import ca.uhn.fhir.rest.server.interceptor.ServerInterceptorUtil;
+import ca.uhn.fhir.rest.server.method.ResponsePage;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
 import com.google.common.annotations.VisibleForTesting;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import javax.annotation.Nonnull;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
-import javax.annotation.Nonnull;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 
 public class PersistedJpaBundleProvider implements IBundleProvider {
 
@@ -128,6 +130,7 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 	private String myUuid;
 	private SearchCacheStatusEnum myCacheStatus;
 	private RequestPartitionId myRequestPartitionId;
+
 	/**
 	 * Constructor
 	 */
@@ -150,6 +153,13 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 		myRequestPartitionHelperSvc = theRequestPartitionHelperSvc;
 	}
 
+	@Override
+	public ResponsePage.ResponsePageBuilder getResponsePageBuilder() {
+		ResponsePage.ResponsePageBuilder builder = new ResponsePage.ResponsePageBuilder();
+
+		return builder;
+	}
+
 	protected Search getSearchEntity() {
 		return mySearchEntity;
 	}
@@ -163,7 +173,9 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 	/**
 	 * Perform a history search
 	 */
-	private List<IBaseResource> doHistoryInTransaction(Integer theOffset, int theFromIndex, int theToIndex) {
+	private List<IBaseResource> doHistoryInTransaction(
+		Integer theOffset, int theFromIndex, int theToIndex
+	) {
 
 		HistoryBuilder historyBuilder = myHistoryBuilderFactory.newHistoryBuilder(
 				mySearchEntity.getResourceType(),
@@ -180,7 +192,6 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 			BaseHasResource resource;
 			resource = next;
 
-			IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(next.getResourceType());
 			retVal.add(myJpaStorageResourceParser.toResource(resource, true));
 		}
 
@@ -238,7 +249,9 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 		myRequestPartitionId = theRequestPartitionId;
 	}
 
-	protected List<IBaseResource> doSearchOrEverything(final int theFromIndex, final int theToIndex) {
+	protected List<IBaseResource> doSearchOrEverything(
+		final int theFromIndex, final int theToIndex, ResponsePage.ResponsePageBuilder theResponsePageBuilder
+	) {
 		if (mySearchEntity.getTotalCount() != null && mySearchEntity.getNumFound() <= 0) {
 			// No resources to fetch (e.g. we did a _summary=count search)
 			return Collections.emptyList();
@@ -253,12 +266,14 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 		RequestPartitionId requestPartitionId = getRequestPartitionId();
 		final List<JpaPid> pidsSubList =
 				mySearchCoordinatorSvc.getResources(myUuid, theFromIndex, theToIndex, myRequest, requestPartitionId);
-		return myTxService
+		List<IBaseResource> resources = myTxService
 				.withRequest(myRequest)
 				.withRequestPartitionId(requestPartitionId)
 				.execute(() -> {
-					return toResourceList(sb, pidsSubList);
+					return toResourceList(sb, pidsSubList, theResponsePageBuilder);
 				});
+
+		return resources;
 	}
 
 	/**
@@ -349,9 +364,16 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 		return new InstantDt(mySearchEntity.getCreated());
 	}
 
-	@Nonnull
+	@NotNull
 	@Override
-	public List<IBaseResource> getResources(final int theFromIndex, final int theToIndex) {
+	public List<IBaseResource> getResources(int theFromIndex, int theToIndex) {
+		return getResources(theFromIndex, theToIndex, getResponsePageBuilder());
+	}
+
+	@Override
+	public List<IBaseResource> getResources(
+		int theFromIndex, int theToIndex, @Nonnull ResponsePage.ResponsePageBuilder theResponsePageBuilder
+	) {
 		boolean entityLoaded = ensureSearchEntityLoaded();
 		assert entityLoaded;
 		assert mySearchEntity != null;
@@ -360,13 +382,13 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 		switch (mySearchEntity.getSearchType()) {
 			case HISTORY:
 				return myTxService
-						.withRequest(myRequest)
-						.withRequestPartitionId(getRequestPartitionId())
-						.execute(() -> doHistoryInTransaction(mySearchEntity.getOffset(), theFromIndex, theToIndex));
+					.withRequest(myRequest)
+					.withRequestPartitionId(getRequestPartitionId())
+					.execute(() -> doHistoryInTransaction(mySearchEntity.getOffset(), theFromIndex, theToIndex));
 			case SEARCH:
 			case EVERYTHING:
 			default:
-				List<IBaseResource> retVal = doSearchOrEverything(theFromIndex, theToIndex);
+				List<IBaseResource> retVal = doSearchOrEverything(theFromIndex, theToIndex, theResponsePageBuilder);
 				/*
 				 * If we got fewer resources back than we asked for, it's possible that the search
 				 * completed. If that's the case, the cached version of the search entity is probably
@@ -443,8 +465,11 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 
 	// Note: Leave as protected, HSPC depends on this
 	@SuppressWarnings("WeakerAccess")
-	protected List<IBaseResource> toResourceList(ISearchBuilder theSearchBuilder, List<JpaPid> thePids) {
-
+	protected List<IBaseResource> toResourceList(
+		ISearchBuilder theSearchBuilder,
+		List<JpaPid> thePids,
+		ResponsePage.ResponsePageBuilder theResponsePageBuilder
+	) {
 		List<JpaPid> includedPidList = new ArrayList<>();
 		if (mySearchEntity.getSearchType() == SearchTypeEnum.SEARCH) {
 			Integer maxIncludes = myStorageSettings.getMaximumIncludesToLoadPerPage();
@@ -522,6 +547,8 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 		theSearchBuilder.loadResourcesByPid(thePids, includedPidList, resources, false, myRequest);
 
 		resources = ServerInterceptorUtil.fireStoragePreshowResource(resources, myRequest, myInterceptorBroadcaster);
+		theResponsePageBuilder.setResources(resources);
+		theResponsePageBuilder.setIncludedResourceCount(includedPidList.size());
 
 		return resources;
 	}

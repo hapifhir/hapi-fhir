@@ -49,20 +49,83 @@ public class ResponsePage {
 	 */
 	public final int numToReturn;
 
-	public ResponsePage(
-			String theSearchId,
-			List<IBaseResource> theResourceList,
-			int thePageSize,
-			int theNumToReturn,
-			Integer theNumTotalResults) {
+	/**
+	 * The count of resources included from the _include filter.
+	 * These _include resources are otherwise included in the resourceList.
+	 */
+	private final int includedResourceCount;
+
+	ResponsePage(
+		String theSearchId,
+		List<IBaseResource> theResourceList,
+		int thePageSize,
+		int theNumToReturn,
+		Integer theNumTotalResults,
+		int theIncludedResourceCount
+	) {
 		searchId = theSearchId;
 		resourceList = theResourceList;
 		pageSize = thePageSize;
 		numToReturn = theNumToReturn;
 		numTotalResults = theNumTotalResults;
+		includedResourceCount = theIncludedResourceCount;
 	}
 
 	public int size() {
 		return resourceList.size();
+	}
+
+	/**
+	 * A builder for constructing ResponsePage objects.
+	 */
+	public static class ResponsePageBuilder {
+
+		private String mySearchId;
+		private List<IBaseResource> myResources;
+		private Integer myNumTotalResults;
+		private int myPageSize;
+		private int myNumToReturn;
+		private int myIncludedResourceCount;
+
+		public ResponsePageBuilder setIncludedResourceCount(int theIncludedResourceCount) {
+			myIncludedResourceCount = theIncludedResourceCount;
+			return this;
+		}
+
+		public ResponsePageBuilder setNumToReturn(int theNumToReturn) {
+			myNumToReturn = theNumToReturn;
+			return this;
+		}
+
+		public ResponsePageBuilder setPageSize(int thePageSize) {
+			myPageSize = thePageSize;
+			return this;
+		}
+
+		public ResponsePageBuilder setNumTotalResults(Integer theNumTotalResults) {
+			myNumTotalResults = theNumTotalResults;
+			return this;
+		}
+
+		public ResponsePageBuilder setResources(List<IBaseResource> theResources) {
+			myResources = theResources;
+			return this;
+		}
+
+		public ResponsePageBuilder setSearchId(String theSearchId) {
+			mySearchId = theSearchId;
+			return this;
+		}
+
+		public ResponsePage build() {
+			return new ResponsePage(
+				mySearchId, // search id
+				myResources, // resource list
+				myPageSize, // page size
+				myNumToReturn, // num to return
+				myNumTotalResults, // total results
+				myIncludedResourceCount // included count
+			);
+		}
 	}
 }

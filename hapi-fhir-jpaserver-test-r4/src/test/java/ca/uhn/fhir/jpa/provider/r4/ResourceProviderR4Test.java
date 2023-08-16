@@ -146,6 +146,7 @@ import org.hl7.fhir.r4.model.StructureDefinition;
 import org.hl7.fhir.r4.model.Subscription;
 import org.hl7.fhir.r4.model.Subscription.SubscriptionChannelType;
 import org.hl7.fhir.r4.model.Subscription.SubscriptionStatus;
+import org.hl7.fhir.r4.model.Task;
 import org.hl7.fhir.r4.model.UriType;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.hl7.fhir.utilities.xhtml.NodeType;
@@ -2653,6 +2654,92 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		assertEquals(1, newSize - initialSize);
 
 	}
+
+
+
+	private void printResources(Bundle theBundle) {
+		IParser parser = myFhirContext.newJsonParser();
+		for (BundleEntryComponent entry : theBundle.getEntry()) {
+			ourLog.info(entry.getResource().getId());
+//			ourLog.info(
+//				parser.encodeResourceToString(entry.getResource())
+//			);
+		}
+	}
+
+	// TODO - we should not be including the
+	// _include count in the _count
+	// so current behaviour is correct
+	// but we should also not be including a next
+	// list if there are no more resources
+	@Test
+	public void testPagingWithIncludesReturnsConsistentValues() {
+		// setup
+		int total = 19;
+		int orgs = 10;
+		// create resources
+		{
+			Coding tagCode = new Coding();
+			tagCode.setCode("test");
+			tagCode.setSystem("http://example.com");
+			int orgCount = orgs;
+			for (int i = 0; i < total; i++) {
+				Task t = new Task();
+				t.getMeta()
+					.addTag(tagCode);
+				t.setStatus(Task.TaskStatus.REQUESTED);
+				if (orgCount > 0) {
+					Organization org = new Organization();
+					org.setName("ORG");
+					IIdType orgId = myOrganizationDao.create(org).getId().toUnqualifiedVersionless();
+
+					orgCount--;
+					t.getOwner().setReference(orgId.getValue());
+				}
+				myTaskDao.create(t);
+			}
+		}
+
+		int requestedAmount = 10;
+		Bundle bundle = myClient
+			.search()
+			.byUrl("Task?_count=10&_tag=test&status=requested&_include=Task%3Aowner&_sort=status")
+			.returnBundle(Bundle.class)
+			.execute();
+		int count = bundle.getEntry().size();
+		assertTrue(bundle.getEntry().size() > 0);
+		System.out.println("Received " + bundle.getEntry().size());
+//		assertEquals(requestedAmount, count);
+		printResources(bundle);
+		String nextUrl = null;
+		do {
+			Bundle.BundleLinkComponent nextLink = bundle.getLink("next");
+			if (nextLink != null) {
+				nextUrl = nextLink.getUrl();
+
+				// make sure we're always requesting 10
+				assertTrue(nextUrl.contains(String.format("_count=%d", requestedAmount)));
+
+				// get next batch
+				bundle = myClient.fetchResourceFromUrl(Bundle.class, nextUrl);
+				int received = bundle.getEntry().size();
+
+				// verify it's the same amount as we requested
+				System.out.println("Recieved " + received);
+				printResources(bundle);
+
+				assertTrue(bundle.getEntry().size() > 0);
+//				assertEquals(requestedAmount, received);
+				count += received;
+			} else {
+				nextUrl = null;
+			}
+		} while (nextUrl != null);
+
+		// verify
+		assertEquals(total + orgs, count);
+	}
+
 
 	/**
 	 * See #793
