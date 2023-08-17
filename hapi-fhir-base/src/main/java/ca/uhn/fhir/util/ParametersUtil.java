@@ -447,13 +447,14 @@ public class ParametersUtil {
 			partChildElem.getChildByName("value[x]").getMutator().addValue(part, theValue);
 		}
 	}
+
 	public static IBase createPart(FhirContext theContext, IBase thePart, String theName) {
 		BaseRuntimeElementCompositeDefinition<?> def =
-			(BaseRuntimeElementCompositeDefinition<?>) theContext.getElementDefinition(thePart.getClass());
+				(BaseRuntimeElementCompositeDefinition<?>) theContext.getElementDefinition(thePart.getClass());
 		BaseRuntimeChildDefinition partChild = def.getChildByName("part");
 
 		BaseRuntimeElementCompositeDefinition<?> partChildElem =
-			(BaseRuntimeElementCompositeDefinition<?>) partChild.getChildByName("part");
+				(BaseRuntimeElementCompositeDefinition<?>) partChild.getChildByName("part");
 
 		return createParameterRepetition(theContext, thePart, partChild, partChildElem, theName);
 	}

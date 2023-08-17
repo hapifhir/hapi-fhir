@@ -226,10 +226,12 @@ public abstract class BaseMdmProvider {
 					myFhirContext, resultPart, "theResults", "historical links not found for query parameters");
 		}
 
-		theMdmLinkRevisions.forEach(mdmLinkRevision -> parametersFromMdmLinkRevision(theRetVal, mdmLinkRevision, findInitialMatchResult(theMdmLinkRevisions, mdmLinkRevision)));
+		theMdmLinkRevisions.forEach(mdmLinkRevision -> parametersFromMdmLinkRevision(
+				theRetVal, mdmLinkRevision, findInitialMatchResult(theMdmLinkRevisions, mdmLinkRevision)));
 	}
 
-	private MdmMatchResultEnum findInitialMatchResult(List<MdmLinkWithRevisionJson> theRevisionList, MdmLinkWithRevisionJson theToMatch) {
+	private MdmMatchResultEnum findInitialMatchResult(
+			List<MdmLinkWithRevisionJson> theRevisionList, MdmLinkWithRevisionJson theToMatch) {
 
 		if (theToMatch.getMdmLink().getMatchResult().equals(MdmMatchResultEnum.REDIRECT)) {
 			return MdmMatchResultEnum.POSSIBLE_DUPLICATE;
@@ -240,14 +242,19 @@ public abstract class BaseMdmProvider {
 
 		// Get first match result with given source and golden ID
 		Optional<MdmLinkWithRevisionJson> r = theRevisionList.stream()
-			.filter(revision -> revision.getMdmLink().getSourceId().equals(sourceId))
-			.filter(revision -> revision.getMdmLink().getGoldenResourceId().equals(goldenId))
-			.min(Comparator.comparing(MdmLinkWithRevisionJson::getRevisionNumber));
+				.filter(revision -> revision.getMdmLink().getSourceId().equals(sourceId))
+				.filter(revision -> revision.getMdmLink().getGoldenResourceId().equals(goldenId))
+				.min(Comparator.comparing(MdmLinkWithRevisionJson::getRevisionNumber));
 
-		return r.isPresent() ? r.get().getMdmLink().getMatchResult() : theToMatch.getMdmLink().getMatchResult();
+		return r.isPresent()
+				? r.get().getMdmLink().getMatchResult()
+				: theToMatch.getMdmLink().getMatchResult();
 	}
 
-	private void parametersFromMdmLinkRevision(IBaseParameters theRetVal, MdmLinkWithRevisionJson theMdmLinkRevision, MdmMatchResultEnum theInitialAutoResult) {
+	private void parametersFromMdmLinkRevision(
+			IBaseParameters theRetVal,
+			MdmLinkWithRevisionJson theMdmLinkRevision,
+			MdmMatchResultEnum theInitialAutoResult) {
 		final IBase resultPart = ParametersUtil.addParameterToParameters(myFhirContext, theRetVal, "historical link");
 		final MdmLinkJson mdmLink = theMdmLinkRevision.getMdmLink();
 
