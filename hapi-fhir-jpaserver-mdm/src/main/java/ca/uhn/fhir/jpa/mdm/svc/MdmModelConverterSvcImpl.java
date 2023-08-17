@@ -57,8 +57,8 @@ public class MdmModelConverterSvcImpl implements IMdmModelConverterSvc {
 		retVal.setUpdated(theLink.getUpdated());
 		retVal.setVector(theLink.getVector());
 		retVal.setVersion(theLink.getVersion());
-		retVal.setRuleCount(theLink.getRuleCount()); //todo jdjd call set here?
-		retVal.translateAndStRule(myMdmSettings.getMdmRules());
+		retVal.setRuleCount(theLink.getRuleCount());
+		retVal.translateAndSetRule(myMdmSettings.getMdmRules(), theLink.getVector());
 		return retVal;
 	}
 

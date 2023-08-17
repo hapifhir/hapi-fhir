@@ -209,9 +209,8 @@ public class MdmRulesJson implements IModelJson {
 		return myVectorMatchResultMap.getFieldMatchNames(theVector);
 	}
 
-	public Set<Map.Entry<String, MdmMatchResultEnum>> getMatchedRulesFromVectorMap() {
-		initialize();//todo jdjd do i need this??
-		Set<String> matchedRules = myVectorMatchResultMap.getAllFieldMatchNames();
+	public Set<Map.Entry<String, MdmMatchResultEnum>> getMatchedRulesFromVectorMap(Long theLong) {
+		Set<String> matchedRules = myVectorMatchResultMap.getMatchedRules(theLong);
 		return myMatchResultMap.entrySet().stream()
 				.filter(e -> matchedRules.contains(e.getKey()))
 				.collect(Collectors.toSet());

@@ -65,6 +65,16 @@ public class VectorMatchResultMap {
 		return MdmMatchResultEnum.NO_MATCH;
 	}
 
+	public Set<String> getMatchedRules(Long theVector) {
+		if (theVector == null) {
+			return new HashSet<>();
+		}
+		return myVectorToFieldMatchNamesMap.entrySet().stream()
+			.filter(e -> ((e.getKey() & theVector) == e.getKey()))
+			.map(Map.Entry::getValue)
+			.collect(Collectors.toSet());
+	}
+
 	private void put(String theFieldMatchNames, MdmMatchResultEnum theMatchResult) {
 		long vector = getVector(theFieldMatchNames);
 		myVectorToFieldMatchNamesMap.put(vector, theFieldMatchNames);

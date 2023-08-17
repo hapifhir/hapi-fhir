@@ -73,8 +73,8 @@ public class MdmLinkJson implements IModelJson {
 	@JsonProperty("ruleCount")
 	private Long myRuleCount;
 
-	@JsonProperty(value = "matchResultMap", required = false)
-	private Set<Map.Entry<String,MdmMatchResultEnum>> myRule = new HashSet<>();
+	@JsonProperty(value = "matchedRules")
+	private Set<Map.Entry<String, MdmMatchResultEnum>> myRule = new HashSet<>();
 
 	public String getGoldenResourceId() {
 		return myGoldenResourceId;
@@ -183,12 +183,12 @@ public class MdmLinkJson implements IModelJson {
 		myRuleCount = theRuleCount;
 	}
 
-	public Set<Map.Entry<String, MdmMatchResultEnum>> getMyRule() {
+	public Set<Map.Entry<String, MdmMatchResultEnum>> getRule() {
 		return myRule;
 	}
 
-	public void translateAndStRule(MdmRulesJson theRule) {
-		myRule = theRule.getMatchedRulesFromVectorMap();
+	public void translateAndSetRule(MdmRulesJson theRule, Long theVector) {
+		myRule = theRule.getMatchedRulesFromVectorMap(theVector);
 	}
 
 	@Override
