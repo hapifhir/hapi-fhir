@@ -44,13 +44,13 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import javax.annotation.Nonnull;
-import javax.annotation.PostConstruct;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import javax.annotation.Nonnull;
+import javax.annotation.PostConstruct;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
@@ -67,6 +67,7 @@ public class PartitionLookupSvcImpl implements IPartitionLookupSvc {
 
 	@Autowired
 	private IPartitionDao myPartitionDao;
+
 	@Autowired
 	private MemoryCacheService myMemoryCacheService;
 
@@ -98,7 +99,8 @@ public class PartitionLookupSvcImpl implements IPartitionLookupSvc {
 		if (JpaConstants.DEFAULT_PARTITION_NAME.equals(theName)) {
 			return null;
 		}
-		return myMemoryCacheService.get(MemoryCacheService.CacheEnum.NAME_TO_PARTITION, theName, this::lookupPartitionByName);
+		return myMemoryCacheService.get(
+				MemoryCacheService.CacheEnum.NAME_TO_PARTITION, theName, this::lookupPartitionByName);
 	}
 
 	@Override
@@ -111,13 +113,14 @@ public class PartitionLookupSvcImpl implements IPartitionLookupSvc {
 				&& myPartitionSettings.getDefaultPartitionId().equals(thePartitionId)) {
 			return new PartitionEntity().setId(thePartitionId).setName(JpaConstants.DEFAULT_PARTITION_NAME);
 		}
-		return myMemoryCacheService.get(MemoryCacheService.CacheEnum.ID_TO_PARTITION, thePartitionId, this::lookupPartitionById);
+		return myMemoryCacheService.get(
+				MemoryCacheService.CacheEnum.ID_TO_PARTITION, thePartitionId, this::lookupPartitionById);
 	}
 
 	@Override
 	public void invalidateCaches() {
-		myMemoryCacheService.invalidateCaches(MemoryCacheService.CacheEnum.NAME_TO_PARTITION,
-				MemoryCacheService.CacheEnum.ID_TO_PARTITION);
+		myMemoryCacheService.invalidateCaches(
+				MemoryCacheService.CacheEnum.NAME_TO_PARTITION, MemoryCacheService.CacheEnum.ID_TO_PARTITION);
 	}
 
 	/**
