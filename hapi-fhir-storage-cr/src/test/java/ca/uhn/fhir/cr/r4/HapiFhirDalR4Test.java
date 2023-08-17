@@ -1,6 +1,6 @@
 package ca.uhn.fhir.cr.r4;
 
-import ca.uhn.fhir.cr.BaseCrR4Test;
+import ca.uhn.fhir.cr.BaseCrR4TestServer;
 import ca.uhn.fhir.cr.common.HapiFhirDal;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -19,7 +19,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * This class tests the functionality of HapiFhirDal operations inside the cr module
  */
 @ExtendWith(SpringExtension.class)
-public class HapiFhirDalR4Test extends BaseCrR4Test {
+public class HapiFhirDalR4Test extends BaseCrR4TestServer {
 	private static final String MY_TEST_DATA = "ca/uhn/fhir/cr/r4/immunization/Patients_Encounters_Immunizations_Practitioners.json";
 
 	@Autowired

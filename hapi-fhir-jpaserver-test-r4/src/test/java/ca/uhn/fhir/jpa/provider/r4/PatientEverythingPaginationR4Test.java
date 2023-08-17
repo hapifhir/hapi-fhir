@@ -98,11 +98,16 @@ public class PatientEverythingPaginationR4Test extends BaseResourceProviderR4Tes
 	}
 
 	@ParameterizedTest
-	@ValueSource(booleans = { true, false })
+	@ValueSource(booleans = {true, false})
 	public void testEverythingTypeOperationPagination_withDifferentPrefetchThresholds_coverageTest(boolean theProvideCountBool) throws IOException {
 		// setup
 		List<Integer> previousPrefetchThreshold = myStorageSettings.getSearchPreFetchThresholds();
+		// other tests may be resetting this
+		// so we'll set it
+		int pageSize = myPagingProvider.getDefaultPageSize();
+		int serverPageSize = myServer.getDefaultPageSize();
 		try {
+			int defaultPageSize = theProvideCountBool ? 50 : 10;
 			// set our prefetch thresholds to ensure we run out of them
 			List<Integer> prefetchThreshold = Arrays.asList(10, 50, -1);
 			myStorageSettings.setSearchPreFetchThresholds(prefetchThreshold);
@@ -117,17 +122,16 @@ public class PatientEverythingPaginationR4Test extends BaseResourceProviderR4Tes
 			if (theProvideCountBool) {
 				url += "&_count=" + BasePagingProvider.DEFAULT_MAX_PAGE_SIZE;
 			}
+			myPagingProvider.setDefaultPageSize(defaultPageSize);
+			myServer.setDefaultPageSize(defaultPageSize);
 
 			// test
 			Bundle bundle = fetchBundle(url);
 
 			// first page
 			List<Patient> patientsPage = BundleUtil.toListOfResourcesOfType(myFhirContext, bundle, Patient.class);
-			if (theProvideCountBool) {
-				assertEquals(50, patientsPage.size());
-			} else {
-				assertEquals(10, patientsPage.size());
-			}
+			assertEquals(defaultPageSize, patientsPage.size());
+
 			for (Patient p : patientsPage) {
 				assertTrue(ids.add(p.getId()));
 			}
@@ -144,11 +148,7 @@ public class PatientEverythingPaginationR4Test extends BaseResourceProviderR4Tes
 				}
 				nextUrl = BundleUtil.getLinkUrlOfType(myFhirContext, bundle, LINK_NEXT);
 				if (nextUrl != null) {
-					if (theProvideCountBool) {
-						assertEquals(50, patientsPage.size());
-					} else {
-						assertEquals(10, patientsPage.size());
-					}
+					assertEquals(defaultPageSize, patientsPage.size());
 				} else {
 					assertEquals(4, patientsPage.size());
 				}
@@ -159,9 +159,10 @@ public class PatientEverythingPaginationR4Test extends BaseResourceProviderR4Tes
 		} finally {
 			// set it back, just in case
 			myStorageSettings.setSearchPreFetchThresholds(previousPrefetchThreshold);
+			myPagingProvider.setDefaultPageSize(pageSize);
+			myServer.setDefaultPageSize(serverPageSize);
 		}
 	}
-
 
 	private void createPatients(int theCount) {
 		for (int i = 0; i < theCount; i++) {
@@ -184,6 +185,5 @@ public class PatientEverythingPaginationR4Test extends BaseResourceProviderR4Tes
 
 		return bundle;
 	}
-
 
 }

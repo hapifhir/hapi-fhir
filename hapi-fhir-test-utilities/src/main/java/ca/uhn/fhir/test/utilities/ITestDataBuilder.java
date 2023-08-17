@@ -191,6 +191,10 @@ public interface ITestDataBuilder {
 		return t -> MetaUtil.setSource(theContext, ((IBaseResource)t).getMeta(), theSource);
 	}
 
+	default ICreationArgument withSource(String theSource) {
+		return t -> MetaUtil.setSource(getFhirContext(), ((IBaseResource)t).getMeta(), theSource);
+	}
+
 	default ICreationArgument withLastUpdated(Date theLastUpdated) {
 		return t -> ((IBaseResource)t).getMeta().setLastUpdated(theLastUpdated);
 	}
@@ -404,6 +408,8 @@ public interface ITestDataBuilder {
 	}
 
 	interface Support {
+		void setRequestId(String theRequestId);
+
 		FhirContext getFhirContext();
 
 		IIdType doCreateResource(IBaseResource theResource);
@@ -443,6 +449,11 @@ public interface ITestDataBuilder {
 
 		public SupportNoDao(FhirContext theFhirContext) {
 			myFhirContext = theFhirContext;
+		}
+
+		@Override
+		public void setRequestId(String theRequestId) {
+			// do nothing
 		}
 
 		@Override
