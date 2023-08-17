@@ -19,6 +19,11 @@
  */
 package ca.uhn.fhir.rest.server.method;
 
+import ca.uhn.fhir.rest.api.BundleLinks;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.server.RestfulServerUtils;
+import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import java.util.List;
@@ -30,30 +35,60 @@ public class ResponsePage {
 	/**
 	 * The id of the search used to page through search results
 	 */
-	public final String searchId;
+	private final String mySearchId;
 	/**
 	 * The list of resources that will be used to create the bundle
 	 */
-	public final List<IBaseResource> resourceList;
+	private final List<IBaseResource> myResourceList;
 	/**
 	 * The total number of results that matched the search
 	 */
-	public final Integer numTotalResults;
+	private final Integer myNumTotalResults;
 	/**
 	 * The number of resources that should be returned in each page
 	 */
-	public final int pageSize;
+	private final int myPageSize;
 	/**
 	 * The number of resources that should be returned in the bundle.  Can be smaller than pageSize when the bundleProvider
 	 * has fewer results than the page size.
 	 */
-	public final int numToReturn;
+	private final int myNumToReturn;
 
 	/**
 	 * The count of resources included from the _include filter.
 	 * These _include resources are otherwise included in the resourceList.
 	 */
-	private final int includedResourceCount;
+	private final int myIncludedResourceCount;
+
+	// Properties below here are set for calculation of pages;
+	// not part of the response pages in and of themselves
+
+	/**
+	 * The response bundle request object
+	 */
+	private ResponseBundleRequest myResponseBundleRequest;
+
+	/**
+	 * Whether or not this page uses (non-cached) offset paging
+	 */
+	private boolean myIsUsingOffsetPages = false;
+
+	/**
+	 * The requested page object (should not be null for proper calculations)
+	 */
+	private RequestedPage myRequestedPage;
+
+	/**
+	 * The bundle provider.
+	 */
+	private IBundleProvider myBundleProvider;
+
+	/**
+	 * The paging style being used.
+	 * This is determined by a number of conditions,
+	 * including what the bundleprovider provides.
+	 */
+	private PagingStyle myPagingStyle;
 
 	ResponsePage(
 		String theSearchId,
@@ -63,16 +98,231 @@ public class ResponsePage {
 		Integer theNumTotalResults,
 		int theIncludedResourceCount
 	) {
-		searchId = theSearchId;
-		resourceList = theResourceList;
-		pageSize = thePageSize;
-		numToReturn = theNumToReturn;
-		numTotalResults = theNumTotalResults;
-		includedResourceCount = theIncludedResourceCount;
+		mySearchId = theSearchId;
+		myResourceList = theResourceList;
+		myPageSize = thePageSize;
+		myNumToReturn = theNumToReturn;
+		myNumTotalResults = theNumTotalResults;
+		myIncludedResourceCount = theIncludedResourceCount;
 	}
 
 	public int size() {
-		return resourceList.size();
+		return myResourceList.size();
+	}
+
+	public List<IBaseResource> getResourceList() {
+		return myResourceList;
+	}
+
+	private void determinePagingStyle() {
+		if (myPagingStyle != null) {
+			// already assigned
+			return;
+		}
+
+		if (myBundleProvider != null && myBundleProvider.getCurrentPageOffset() != null) {
+			myPagingStyle = PagingStyle.BUNDLE_PROVIDER_OFFSETS;
+		} else if (myIsUsingOffsetPages) {
+			myPagingStyle = PagingStyle.NONCACHED_OFFSET;
+		} else if (myBundleProvider != null && StringUtils.isNotBlank(myBundleProvider.getCurrentPageId())) {
+			myPagingStyle = PagingStyle.BUNDLE_PROVIDER_PAGE_IDS;
+		} else if (StringUtils.isNotBlank(mySearchId)) {
+			myPagingStyle = PagingStyle.SAVED_SEARCH;
+		}
+
+		assert myPagingStyle != null : "Response page requires more information to determine paging style";
+	}
+
+	public void setRequestedPage(RequestedPage theRequestedPage) {
+		myRequestedPage = theRequestedPage;
+	}
+
+	public IBundleProvider getBundleProvider() {
+		return myBundleProvider;
+	}
+
+	public void setBundleProvider(IBundleProvider theBundleProvider) {
+		myBundleProvider = theBundleProvider;
+	}
+
+	public void setUseOffsetPaging(boolean theIsUsingOffsetPaging) {
+		myIsUsingOffsetPages = theIsUsingOffsetPaging;
+	}
+
+	public void setResponseBundleRequest(ResponseBundleRequest theRequest) {
+		myResponseBundleRequest = theRequest;
+	}
+
+	private boolean hasNextPage() {
+		determinePagingStyle();
+		switch (myPagingStyle) {
+			case BUNDLE_PROVIDER_OFFSETS:
+			case BUNDLE_PROVIDER_PAGE_IDS:
+				return StringUtils.isNotBlank(myBundleProvider.getNextPageId());
+			case NONCACHED_OFFSET:
+				if (myNumTotalResults == null) {
+					/*
+					 * Having a null total results is synonymous with
+					 * having a next link. Once our results are exhausted,
+					 * we will always have a myNumTotalResults value.
+					 *
+					 * Alternatively, if _total=accurate is provided,
+					 * we'll also have a myNumTotalResults value.
+					 */
+					return true;
+				} else if (myNumTotalResults > myNumToReturn + myRequestedPage.offset) {
+					return true;
+				}
+				break;
+			case SAVED_SEARCH:
+				if (myNumTotalResults == null) {
+					if (myPageSize == myResourceList.size() - myIncludedResourceCount) {
+						// if the size of the resource list - included resources == pagesize
+						// we have more pages
+						return true;
+					}
+				} else if (myResponseBundleRequest.offset + myNumToReturn - myIncludedResourceCount < myNumTotalResults) {
+					/*
+					 * if we have an accurate total (myNumTotalResults),
+					 * this value is supposed to exclude _include's resource count
+					 */
+					return true;
+				}
+				break;
+		}
+
+		// fallthrough
+		return false;
+	}
+
+	public void setNextPageIfNecessary(BundleLinks theLinks) {
+		if (hasNextPage()) {
+			String next;
+			switch (myPagingStyle) {
+				case BUNDLE_PROVIDER_OFFSETS:
+					next = RestfulServerUtils.createOffsetPagingLink(
+						theLinks,
+						myResponseBundleRequest.requestDetails.getRequestPath(),
+						myResponseBundleRequest.requestDetails.getTenantId(),
+						myRequestedPage.offset + myRequestedPage.limit,
+						myRequestedPage.limit,
+						myResponseBundleRequest.getRequestParameters()
+					);
+					break;
+				case NONCACHED_OFFSET:
+					next = RestfulServerUtils.createOffsetPagingLink(
+						theLinks,
+						myResponseBundleRequest.requestDetails.getRequestPath(),
+						myResponseBundleRequest.requestDetails.getTenantId(),
+						ObjectUtils.defaultIfNull(myRequestedPage.offset, 0) + myNumToReturn,
+						myNumToReturn,
+						myResponseBundleRequest.getRequestParameters()
+					);
+					break;
+				case BUNDLE_PROVIDER_PAGE_IDS:
+					next = RestfulServerUtils.createPagingLink(
+						theLinks,
+						myResponseBundleRequest.requestDetails,
+						myBundleProvider.getUuid(),
+						myBundleProvider.getNextPageId(),
+						myResponseBundleRequest.getRequestParameters()
+					);
+					break;
+				case SAVED_SEARCH:
+					next = RestfulServerUtils.createPagingLink(
+						theLinks,
+						myResponseBundleRequest.requestDetails,
+						mySearchId,
+						myResponseBundleRequest.offset + myNumToReturn,
+						myNumToReturn,
+						myResponseBundleRequest.getRequestParameters()
+					);
+					break;
+				default:
+					next = null;
+					break;
+			}
+
+			if (StringUtils.isNotBlank(next)) {
+				theLinks.setNext(next);
+			}
+		}
+	}
+
+	private boolean hasPreviousPage() {
+		determinePagingStyle();
+		switch (myPagingStyle) {
+			case BUNDLE_PROVIDER_OFFSETS:
+			case BUNDLE_PROVIDER_PAGE_IDS:
+				return StringUtils.isNotBlank(myBundleProvider.getPreviousPageId());
+			case NONCACHED_OFFSET:
+				if (myRequestedPage != null && myRequestedPage.offset != null && myRequestedPage.offset > 0) {
+					return true;
+				}
+				break;
+			case SAVED_SEARCH:
+				return myResponseBundleRequest.offset > 0;
+		}
+
+		// fallthrough
+		return false;
+	}
+
+	public void setPreviousPageIfNecessary(BundleLinks theLinks) {
+		if (hasPreviousPage()) {
+			String prev;
+			switch (myPagingStyle) {
+				case BUNDLE_PROVIDER_OFFSETS:
+					prev = RestfulServerUtils.createOffsetPagingLink(
+						theLinks,
+						myResponseBundleRequest.requestDetails.getRequestPath(),
+						myResponseBundleRequest.requestDetails.getTenantId(),
+						Math.max(ObjectUtils.defaultIfNull(myRequestedPage.offset, 0) - myRequestedPage.limit, 0),
+						myRequestedPage.limit,
+						myResponseBundleRequest.getRequestParameters()
+					);
+					break;
+				case NONCACHED_OFFSET: {
+					int start = Math.max(0, ObjectUtils.defaultIfNull(myRequestedPage.offset, 0) - myPageSize);
+					prev = RestfulServerUtils.createOffsetPagingLink(
+						theLinks,
+						myResponseBundleRequest.requestDetails.getRequestPath(),
+						myResponseBundleRequest.requestDetails.getTenantId(),
+						start,
+						myPageSize,
+						myResponseBundleRequest.getRequestParameters()
+					);
+				}
+				break;
+				case BUNDLE_PROVIDER_PAGE_IDS:
+					prev = RestfulServerUtils.createPagingLink(
+						theLinks,
+						myResponseBundleRequest.requestDetails,
+						myBundleProvider.getUuid(),
+						myBundleProvider.getPreviousPageId(),
+						myResponseBundleRequest.getRequestParameters()
+					);
+					break;
+				case SAVED_SEARCH: {
+					int start = Math.max(0, myResponseBundleRequest.offset - myPageSize);
+					prev = RestfulServerUtils.createPagingLink(
+						theLinks,
+						myResponseBundleRequest.requestDetails,
+						mySearchId,
+						start,
+						myPageSize,
+						myResponseBundleRequest.getRequestParameters()
+					);
+				}
+				break;
+				default:
+					prev = null;
+			}
+
+			if (StringUtils.isNotBlank(prev)) {
+				theLinks.setPrev(prev);
+			}
+		}
 	}
 
 	/**
@@ -127,5 +377,25 @@ public class ResponsePage {
 				myIncludedResourceCount // included count
 			);
 		}
+	}
+
+	private enum PagingStyle {
+		/**
+		 * Paging is done by offsets; pages are not cached
+		 */
+		NONCACHED_OFFSET,
+		/**
+		 * The bundle provider provides the offsets
+		 */
+		BUNDLE_PROVIDER_OFFSETS,
+		/**
+		 * Paging by page ids, but provided by the bundle provider
+		 */
+		BUNDLE_PROVIDER_PAGE_IDS,
+
+		/**
+		 * A saved search (search exists in the database).
+		 */
+		SAVED_SEARCH
 	}
 }

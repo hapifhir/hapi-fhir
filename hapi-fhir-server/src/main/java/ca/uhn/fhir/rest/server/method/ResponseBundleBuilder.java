@@ -29,7 +29,6 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.IPagingProvider;
 import ca.uhn.fhir.rest.server.RestfulServerUtils;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
-import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
@@ -57,8 +56,8 @@ public class ResponseBundleBuilder {
 	IBaseBundle buildResponseBundle(ResponseBundleRequest theResponseBundleRequest) {
 		final ResponsePage responsePage = buildResponsePage(theResponseBundleRequest);
 
-		removeNulls(responsePage.resourceList);
-		validateIds(responsePage.resourceList);
+		removeNulls(responsePage.getResourceList());
+		validateIds(responsePage.getResourceList());
 
 		BundleLinks links = buildLinks(theResponseBundleRequest, responsePage);
 
@@ -75,7 +74,7 @@ public class ResponseBundleBuilder {
 		bundleFactory.addRootPropertiesToBundle(
 				bundleProvider.getUuid(), links, bundleProvider.size(), bundleProvider.getPublished());
 		bundleFactory.addResourcesToBundle(
-				new ArrayList<>(pageResponse.resourceList),
+				new ArrayList<>(pageResponse.getResourceList()),
 				theResponseBundleRequest.bundleType,
 				links.serverBase,
 				server.getBundleInclusionRule(),
@@ -262,108 +261,20 @@ public class ResponseBundleBuilder {
 				RestfulServerUtils.prettyPrintResponse(server, theResponseBundleRequest.requestDetails),
 				theResponseBundleRequest.bundleType);
 
+		// set self link
 		retval.setSelf(theResponseBundleRequest.linkSelf);
 
-		if (bundleProvider.getCurrentPageOffset() != null) {
+		// determine if we are using offset / uncached pages
+		theResponsePage.setUseOffsetPaging(pageRequest.offset != null
+			|| (!server.canStoreSearchResults() && !isEverythingOperation(theResponseBundleRequest.requestDetails))
+			|| myIsOffsetModeHistory);
+		theResponsePage.setResponseBundleRequest(theResponseBundleRequest);
+		theResponsePage.setRequestedPage(pageRequest);
+		theResponsePage.setBundleProvider(bundleProvider);
 
-			if (StringUtils.isNotBlank(bundleProvider.getNextPageId())) {
-				retval.setNext(RestfulServerUtils.createOffsetPagingLink(
-						retval,
-						theResponseBundleRequest.requestDetails.getRequestPath(),
-						theResponseBundleRequest.requestDetails.getTenantId(),
-						pageRequest.offset + pageRequest.limit,
-						pageRequest.limit,
-						theResponseBundleRequest.getRequestParameters()));
-			}
-			if (StringUtils.isNotBlank(bundleProvider.getPreviousPageId())) {
-				retval.setNext(RestfulServerUtils.createOffsetPagingLink(
-						retval,
-						theResponseBundleRequest.requestDetails.getRequestPath(),
-						theResponseBundleRequest.requestDetails.getTenantId(),
-						Math.max(pageRequest.offset - pageRequest.limit, 0),
-						pageRequest.limit,
-						theResponseBundleRequest.getRequestParameters()));
-			}
-		}
-
-		if (pageRequest.offset != null
-				|| (!server.canStoreSearchResults() && !isEverythingOperation(theResponseBundleRequest.requestDetails))
-				|| myIsOffsetModeHistory) {
-			// Paging without caching
-			// We're doing offset pages
-			int requestedToReturn = theResponsePage.numToReturn;
-
-			if (pageRequest.offset != null) {
-				requestedToReturn += pageRequest.offset;
-			}
-
-			if (theResponsePage.numTotalResults == null || requestedToReturn < theResponsePage.numTotalResults) {
-				retval.setNext(RestfulServerUtils.createOffsetPagingLink(
-						retval,
-						theResponseBundleRequest.requestDetails.getRequestPath(),
-						theResponseBundleRequest.requestDetails.getTenantId(),
-						ObjectUtils.defaultIfNull(pageRequest.offset, 0) + theResponsePage.numToReturn,
-						theResponsePage.numToReturn,
-						theResponseBundleRequest.getRequestParameters()));
-			}
-
-			if (pageRequest.offset != null && pageRequest.offset > 0) {
-				int start = Math.max(0, pageRequest.offset - theResponsePage.pageSize);
-				retval.setPrev(RestfulServerUtils.createOffsetPagingLink(
-						retval,
-						theResponseBundleRequest.requestDetails.getRequestPath(),
-						theResponseBundleRequest.requestDetails.getTenantId(),
-						start,
-						theResponsePage.pageSize,
-						theResponseBundleRequest.getRequestParameters()));
-			}
-
-		} else if (StringUtils.isNotBlank(bundleProvider.getCurrentPageId())) {
-			// We're doing named pages
-			final String uuid = bundleProvider.getUuid();
-			if (StringUtils.isNotBlank(bundleProvider.getNextPageId())) {
-				retval.setNext(RestfulServerUtils.createPagingLink(
-						retval,
-						theResponseBundleRequest.requestDetails,
-						uuid,
-						bundleProvider.getNextPageId(),
-						theResponseBundleRequest.getRequestParameters()));
-			}
-
-			if (StringUtils.isNotBlank(bundleProvider.getPreviousPageId())) {
-				retval.setPrev(RestfulServerUtils.createPagingLink(
-						retval,
-						theResponseBundleRequest.requestDetails,
-						uuid,
-						bundleProvider.getPreviousPageId(),
-						theResponseBundleRequest.getRequestParameters()));
-			}
-
-		} else if (theResponsePage.searchId != null) {
-
-			if (theResponsePage.numTotalResults == null
-					|| theResponseBundleRequest.offset + theResponsePage.numToReturn
-							< theResponsePage.numTotalResults) {
-				retval.setNext((RestfulServerUtils.createPagingLink(
-						retval,
-						theResponseBundleRequest.requestDetails,
-						theResponsePage.searchId,
-						theResponseBundleRequest.offset + theResponsePage.numToReturn,
-						theResponsePage.numToReturn,
-						theResponseBundleRequest.getRequestParameters())));
-			}
-
-			if (theResponseBundleRequest.offset > 0) {
-				int start = Math.max(0, theResponseBundleRequest.offset - theResponsePage.pageSize);
-				retval.setPrev(RestfulServerUtils.createPagingLink(
-						retval,
-						theResponseBundleRequest.requestDetails,
-						theResponsePage.searchId,
-						start,
-						theResponsePage.pageSize,
-						theResponseBundleRequest.getRequestParameters()));
-			}
-		}
+		// generate our links
+		theResponsePage.setNextPageIfNecessary(retval);
+		theResponsePage.setPreviousPageIfNecessary(retval);
 
 		return retval;
 	}

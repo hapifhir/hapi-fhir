@@ -250,7 +250,7 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 	}
 
 	protected List<IBaseResource> doSearchOrEverything(
-		final int theFromIndex, final int theToIndex, ResponsePage.ResponsePageBuilder theResponsePageBuilder
+		final int theFromIndex, final int theToIndex, @Nonnull ResponsePage.ResponsePageBuilder theResponsePageBuilder
 	) {
 		if (mySearchEntity.getTotalCount() != null && mySearchEntity.getNumFound() <= 0) {
 			// No resources to fetch (e.g. we did a _summary=count search)

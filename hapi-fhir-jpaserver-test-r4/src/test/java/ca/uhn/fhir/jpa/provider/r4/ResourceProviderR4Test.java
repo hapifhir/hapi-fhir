@@ -2652,26 +2652,8 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		int newSize = client.search().forResource(ImagingStudy.class).returnBundle(Bundle.class).execute().getEntry().size();
 
 		assertEquals(1, newSize - initialSize);
-
 	}
 
-
-
-	private void printResources(Bundle theBundle) {
-		IParser parser = myFhirContext.newJsonParser();
-		for (BundleEntryComponent entry : theBundle.getEntry()) {
-			ourLog.info(entry.getResource().getId());
-//			ourLog.info(
-//				parser.encodeResourceToString(entry.getResource())
-//			);
-		}
-	}
-
-	// TODO - we should not be including the
-	// _include count in the _count
-	// so current behaviour is correct
-	// but we should also not be including a next
-	// list if there are no more resources
 	@Test
 	public void testPagingWithIncludesReturnsConsistentValues() {
 		// setup
@@ -2707,10 +2689,8 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			.returnBundle(Bundle.class)
 			.execute();
 		int count = bundle.getEntry().size();
-		assertTrue(bundle.getEntry().size() > 0);
-		System.out.println("Received " + bundle.getEntry().size());
-//		assertEquals(requestedAmount, count);
-		printResources(bundle);
+		assertFalse(bundle.getEntry().isEmpty());
+
 		String nextUrl = null;
 		do {
 			Bundle.BundleLinkComponent nextLink = bundle.getLink("next");
@@ -2724,12 +2704,8 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 				bundle = myClient.fetchResourceFromUrl(Bundle.class, nextUrl);
 				int received = bundle.getEntry().size();
 
-				// verify it's the same amount as we requested
-				System.out.println("Recieved " + received);
-				printResources(bundle);
-
-				assertTrue(bundle.getEntry().size() > 0);
-//				assertEquals(requestedAmount, received);
+				// every next result should produce results
+				assertFalse(bundle.getEntry().isEmpty());
 				count += received;
 			} else {
 				nextUrl = null;
@@ -2737,6 +2713,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		} while (nextUrl != null);
 
 		// verify
+		// we should receive all resources and linked resources
 		assertEquals(total + orgs, count);
 	}
 

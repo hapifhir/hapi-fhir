@@ -32,7 +32,7 @@ public class PersistedJpaBundleProviderTest {
 		Search searchEntity = new Search();
 		searchEntity.setTotalCount(1);
 		myPersistedJpaBundleProvider.setSearchEntity(searchEntity);
-		myPersistedJpaBundleProvider.doSearchOrEverything(0, 1);
+		myPersistedJpaBundleProvider.doSearchOrEverything(0, 1, myPersistedJpaBundleProvider.getResponsePageBuilder());
 		verifyNoInteractions(myDao);
 		verifyNoInteractions(mySearchBuilderFactory);
 	}

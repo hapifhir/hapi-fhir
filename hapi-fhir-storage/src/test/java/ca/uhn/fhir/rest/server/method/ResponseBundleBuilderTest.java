@@ -156,12 +156,12 @@ class ResponseBundleBuilderTest {
 		// setup
 		int includeResources = 4;
 		// we want the number of resources returned to be equal to the pagesize
-		List<IBaseResource> list = buildXPatientList(DEFAULT_PAGE_SIZE + 1 - includeResources);
+		List<IBaseResource> list = buildXPatientList(DEFAULT_PAGE_SIZE - includeResources);
 
 		ResponsePage.ResponsePageBuilder builder = new ResponsePage.ResponsePageBuilder();
 		builder.setIncludedResourceCount(includeResources);
 
-		ResponseBundleBuilder svc = new ResponseBundleBuilder(true);
+		ResponseBundleBuilder svc = new ResponseBundleBuilder(false);
 
 		SimpleBundleProvider provider = new SimpleBundleProvider() {
 
@@ -173,7 +173,7 @@ class ResponseBundleBuilderTest {
 			@Nonnull
 			@Override
 			public List<IBaseResource> getResources(int theFrom, int theTo, @Nonnull ResponsePage.ResponsePageBuilder theResponsePageBuilder) {
-				List<IBaseResource> retList = list.subList(theFrom, Math.min(theTo, list.size()-1));
+				List<IBaseResource> retList = new ArrayList<>(list);
 				// our fake includes
 				for (int i = 0; i < includeResources; i++) {
 					retList.add(new Organization().setId("Organization/" + i));
@@ -182,22 +182,22 @@ class ResponseBundleBuilderTest {
 			}
 		};
 
-		// TODO - if null, it adds a next link
-		provider.setSize(DEFAULT_PAGE_SIZE);
+		provider.setSize(null);
 
 		// mocking
 		when(myServer.canStoreSearchResults()).thenReturn(true);
 		when(myServer.getPagingProvider()).thenReturn(myPagingProvider);
 		when(myPagingProvider.getDefaultPageSize()).thenReturn(DEFAULT_PAGE_SIZE);
 
-		ResponseBundleRequest req = buildResponseBundleRequest(provider);
+		ResponseBundleRequest req = buildResponseBundleRequest(provider, "search-id");
 
 		// test
 		Bundle bundle = (Bundle) svc.buildResponseBundle(req);
 
 		// verify
+		// no next link
 		assertEquals(1, bundle.getLink().size());
-		verifyBundle(bundle, RESOURCE_COUNT, DEFAULT_PAGE_SIZE -1, "A0", "A14");
+		assertEquals(DEFAULT_PAGE_SIZE, bundle.getEntry().size());
 	}
 
 	@ParameterizedTest
