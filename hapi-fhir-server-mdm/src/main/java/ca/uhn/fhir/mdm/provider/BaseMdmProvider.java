@@ -282,14 +282,15 @@ public abstract class BaseMdmProvider {
 		ParametersUtil.addPartDecimal(myFhirContext, resultPart, "linkUpdated", (double)
 				mdmLink.getUpdated().getTime());
 
-		IBase subpart = ParametersUtil.createPart(myFhirContext, resultPart, "matchResultMap");
+		IBase matchResultMapSubpart = ParametersUtil.createPart(myFhirContext, resultPart, "matchResultMap");
 
-		IBase subpart2 = ParametersUtil.createPart(myFhirContext, subpart, "matchedRules");
+		IBase matchedRulesSubpart = ParametersUtil.createPart(myFhirContext, matchResultMapSubpart, "matchedRules");
 		for (Map.Entry<String, MdmMatchResultEnum> entry : mdmLink.getRule()) {
-			ParametersUtil.addPartString(myFhirContext, subpart2, "rule", entry.getKey());
+			ParametersUtil.addPartString(myFhirContext, matchedRulesSubpart, "rule", entry.getKey());
 		}
 
-		ParametersUtil.addPartString(myFhirContext, subpart, "initialMatchResult", theInitialAutoResult.name());
+		ParametersUtil.addPartString(
+				myFhirContext, matchResultMapSubpart, "initialMatchResult", theInitialAutoResult.name());
 	}
 
 	protected void addPagingParameters(
