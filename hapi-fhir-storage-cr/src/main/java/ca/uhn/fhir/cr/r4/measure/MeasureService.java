@@ -137,8 +137,8 @@ public class MeasureService {
 
 		ensureSupplementalDataElementSearchParameter();
 
-		var r4MeasureProcessor = new R4MeasureProcessor(
-				myRepository, myMeasureEvaluationOptions, new R4RepositorySubjectProvider());
+		var r4MeasureProcessor =
+				new R4MeasureProcessor(myRepository, myMeasureEvaluationOptions, new R4RepositorySubjectProvider());
 
 		MeasureReport measureReport = null;
 

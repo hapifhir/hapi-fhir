@@ -22,7 +22,6 @@ package ca.uhn.hapi.fhir.cdshooks.svc.cr;
 import ca.uhn.fhir.jpa.cache.IResourceChangeEvent;
 import ca.uhn.fhir.jpa.cache.IResourceChangeListener;
 import ca.uhn.fhir.jpa.cache.ResourceChangeEvent;
-import ca.uhn.hapi.fhir.cdshooks.svc.CdsServiceCache;
 import ca.uhn.hapi.fhir.cdshooks.svc.CdsServiceRegistryImpl;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.slf4j.Logger;

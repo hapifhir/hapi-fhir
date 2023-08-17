@@ -35,6 +35,7 @@ import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.Bundle;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -70,6 +71,7 @@ public class ActivityDefinitionOperationsProvider {
 	 * @param theSetting             The current setting of the request (inpatient, outpatient, etc.)
 	 * @param theSettingContext      Additional detail about the setting of the request, if any
 	 * @param theParameters          Any input parameters defined in libraries referenced by the ActivityDefinition.
+	 * @param theData                Data to be made available to the ActivityDefinition evaluation.
 	 * @param theDataEndpoint        An endpoint to use to access data referenced by retrieve operations in libraries
 	 *                               referenced by the ActivityDefinition.
 	 * @param theContentEndpoint     An endpoint to use to access content (i.e. libraries) referenced by the ActivityDefinition.
@@ -94,6 +96,7 @@ public class ActivityDefinitionOperationsProvider {
 			@OperationParam(name = "setting") String theSetting,
 			@OperationParam(name = "settingContext") String theSettingContext,
 			@OperationParam(name = "parameters") Parameters theParameters,
+			@OperationParam(name = "data") Bundle theData,
 			@OperationParam(name = "dataEndpoint") Endpoint theDataEndpoint,
 			@OperationParam(name = "contentEndpoint") Endpoint theContentEndpoint,
 			@OperationParam(name = "terminologyEndpoint") Endpoint theTerminologyEndpoint,
@@ -115,6 +118,7 @@ public class ActivityDefinitionOperationsProvider {
 						theSetting,
 						theSettingContext,
 						theParameters,
+						theData,
 						theDataEndpoint,
 						theContentEndpoint,
 						theTerminologyEndpoint);

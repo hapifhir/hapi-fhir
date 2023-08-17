@@ -20,7 +20,6 @@
 package ca.uhn.hapi.fhir.cdshooks.svc.cr;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceIndicatorEnum;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceRequestAuthorizationJson;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceRequestJson;
@@ -53,8 +52,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static ca.uhn.hapi.fhir.cdshooks.config.CdsHooksConfig.PLAN_DEFINITION_RESOURCE_NAME;
-import static ca.uhn.hapi.fhir.cdshooks.svc.cr.CdsCrConstants.APPLY_PARAMETER_CANONICAL;
 import static ca.uhn.hapi.fhir.cdshooks.svc.cr.CdsCrConstants.APPLY_PARAMETER_DATA;
 import static ca.uhn.hapi.fhir.cdshooks.svc.cr.CdsCrConstants.APPLY_PARAMETER_DATA_ENDPOINT;
 import static ca.uhn.hapi.fhir.cdshooks.svc.cr.CdsCrConstants.APPLY_PARAMETER_ENCOUNTER;
@@ -89,7 +86,7 @@ public class CdsCrServiceR4 implements ICdsCrService {
 	public Parameters encodeParams(CdsServiceRequestJson theJson) {
 		// CanonicalType canonical = ;
 		Parameters parameters = parameters()
-				//.addParameter(part(APPLY_PARAMETER_CANONICAL, canonical))
+				// .addParameter(part(APPLY_PARAMETER_CANONICAL, canonical))
 				.addParameter(part(APPLY_PARAMETER_SUBJECT, theJson.getContext().getString(CDS_PARAMETER_PATIENT_ID)));
 		if (theJson.getContext().containsKey(CDS_PARAMETER_USER_ID)) {
 			parameters.addParameter(
@@ -186,7 +183,8 @@ public class CdsCrServiceR4 implements ICdsCrService {
 		assert theResponse instanceof Bundle;
 		myResponseBundle = (Bundle) theResponse;
 		CdsServiceResponseJson serviceResponse = new CdsServiceResponseJson();
-		RequestGroup mainRequest = (RequestGroup) myResponseBundle.getEntry().get(0).getResource();
+		RequestGroup mainRequest =
+				(RequestGroup) myResponseBundle.getEntry().get(0).getResource();
 		CanonicalType canonical = mainRequest.getInstantiatesCanonical().get(0);
 		PlanDefinition planDef = myRepository.read(
 				PlanDefinition.class,
@@ -219,20 +217,27 @@ public class CdsCrServiceR4 implements ICdsCrService {
 	}
 
 	private CdsServiceResponseCardJson resolveAction(
-		RequestGroup.RequestGroupActionComponent theAction,
-		List<CdsServiceResponseLinkJson> theLinks) {
+			RequestGroup.RequestGroupActionComponent theAction, List<CdsServiceResponseLinkJson> theLinks) {
 		CdsServiceResponseCardJson card = new CdsServiceResponseCardJson()
-			.setSummary(theAction.getTitle())
-			.setDetail(theAction.getDescription())
-			.setLinks(theLinks);
+				.setSummary(theAction.getTitle())
+				.setDetail(theAction.getDescription())
+				.setLinks(theLinks);
 
 		if (theAction.hasPriority()) {
 			CdsServiceIndicatorEnum indicator;
 			switch (theAction.getPriority().toCode()) {
-				case "routine": indicator = CdsServiceIndicatorEnum.INFO; break;
-				case "urgent": indicator = CdsServiceIndicatorEnum.WARNING; break;
-				case "stat": indicator = CdsServiceIndicatorEnum.CRITICAL; break;
-				default: indicator = null; break;
+				case "routine":
+					indicator = CdsServiceIndicatorEnum.INFO;
+					break;
+				case "urgent":
+					indicator = CdsServiceIndicatorEnum.WARNING;
+					break;
+				case "stat":
+					indicator = CdsServiceIndicatorEnum.CRITICAL;
+					break;
+				default:
+					indicator = null;
+					break;
 			}
 			if (indicator == null) {
 				throwInvalidPriority(theAction.getPriority().toCode());
@@ -255,8 +260,8 @@ public class CdsCrServiceR4 implements ICdsCrService {
 	private CdsServiceResponseCardSourceJson resolveSource(RequestGroup.RequestGroupActionComponent theAction) {
 		RelatedArtifact documentation = theAction.getDocumentationFirstRep();
 		CdsServiceResponseCardSourceJson source = new CdsServiceResponseCardSourceJson()
-			.setLabel(documentation.getDisplay())
-			.setUrl(documentation.getUrl());
+				.setLabel(documentation.getDisplay())
+				.setUrl(documentation.getUrl());
 
 		if (documentation.hasDocument() && documentation.getDocument().hasUrl()) {
 			source.setIcon(documentation.getDocument().getUrl());
@@ -267,20 +272,21 @@ public class CdsCrServiceR4 implements ICdsCrService {
 
 	private CdsServiceResponseSuggestionJson resolveSuggestion(RequestGroup.RequestGroupActionComponent theAction) {
 		CdsServiceResponseSuggestionJson suggestion = new CdsServiceResponseSuggestionJson()
-			.setLabel(theAction.getTitle())
-			.setUuid(theAction.getId());
+				.setLabel(theAction.getTitle())
+				.setUuid(theAction.getId());
 		theAction.getAction().forEach(action -> suggestion.addAction(resolveSuggestionAction(action)));
 
 		return suggestion;
 	}
 
 	private CdsServiceResponseSuggestionActionJson resolveSuggestionAction(
-		RequestGroup.RequestGroupActionComponent theAction) {
-		CdsServiceResponseSuggestionActionJson suggestionAction = new CdsServiceResponseSuggestionActionJson()
-			.setDescription(theAction.getDescription());
-		if (theAction.hasType() && theAction.getType().hasCoding()
-			&& theAction.getType().getCodingFirstRep().hasCode()
-			&& !theAction.getType().getCodingFirstRep().getCode().equals("fire-event")) {
+			RequestGroup.RequestGroupActionComponent theAction) {
+		CdsServiceResponseSuggestionActionJson suggestionAction =
+				new CdsServiceResponseSuggestionActionJson().setDescription(theAction.getDescription());
+		if (theAction.hasType()
+				&& theAction.getType().hasCoding()
+				&& theAction.getType().getCodingFirstRep().hasCode()
+				&& !theAction.getType().getCodingFirstRep().getCode().equals("fire-event")) {
 			String actionCode = theAction.getType().getCodingFirstRep().getCode();
 			suggestionAction.setType(actionCode);
 		}
@@ -292,11 +298,11 @@ public class CdsCrServiceR4 implements ICdsCrService {
 	}
 
 	private IBaseResource resolveResource(Reference theReference) {
-		return myResponseBundle.getEntry()
-			.stream()
-			.filter(entry -> entry.hasResource() && entry.getResource().getId().equals(theReference.getReference()))
-			.map(entry -> entry.getResource())
-			.collect(Collectors.toList())
-			.get(0);
+		return myResponseBundle.getEntry().stream()
+				.filter(entry ->
+						entry.hasResource() && entry.getResource().getId().equals(theReference.getReference()))
+				.map(entry -> entry.getResource())
+				.collect(Collectors.toList())
+				.get(0);
 	}
 }

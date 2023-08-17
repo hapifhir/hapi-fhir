@@ -70,12 +70,14 @@ public class CdsServiceCache {
 		}
 	}
 
-	public void registerCrService(String theServiceId, ICrDiscoveryServiceFactory theDiscoveryServiceFactory, ICdsCrServiceFactory theCrServiceFactory) {
+	public void registerCrService(
+			String theServiceId,
+			ICrDiscoveryServiceFactory theDiscoveryServiceFactory,
+			ICdsCrServiceFactory theCrServiceFactory) {
 		if (!isCdsServiceAlreadyRegistered(theServiceId, CDS_CR_MODULE_ID)) {
 			CdsServiceJson cdsServiceJson =
-				theDiscoveryServiceFactory.create(theServiceId).resolveService();
-			final CdsCrServiceMethod cdsCrServiceMethod =
-					new CdsCrServiceMethod(cdsServiceJson, theCrServiceFactory);
+					theDiscoveryServiceFactory.create(theServiceId).resolveService();
+			final CdsCrServiceMethod cdsCrServiceMethod = new CdsCrServiceMethod(cdsServiceJson, theCrServiceFactory);
 			myServiceMap.put(theServiceId, cdsCrServiceMethod);
 			myCdsServiceJson.addService(cdsServiceJson);
 		}

@@ -35,6 +35,7 @@ public class ActivityDefinitionOperationsProviderTest extends BaseCrR4TestServer
 			null,
 			null,
 			null,
+			null,
 			requestDetails);
 		assertTrue(result instanceof MedicationRequest);
 		MedicationRequest request = (MedicationRequest) result;

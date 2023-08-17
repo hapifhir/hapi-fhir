@@ -24,7 +24,6 @@ import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceJson;
 import ca.uhn.hapi.fhir.cdshooks.svc.cr.CdsCrUtils;
 import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.DataRequirement;
-import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Library;
 import org.hl7.fhir.dstu3.model.PlanDefinition;
 import org.hl7.fhir.dstu3.model.StringType;
@@ -36,8 +35,6 @@ import org.opencds.cqf.fhir.api.Repository;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import static ca.uhn.hapi.fhir.cdshooks.config.CdsHooksConfig.PLAN_DEFINITION_RESOURCE_NAME;
 
 public class CrDiscoveryServiceDstu3 implements ICrDiscoveryService {
 

@@ -26,8 +26,7 @@ import ca.uhn.hapi.fhir.cdshooks.svc.cr.ICdsCrServiceFactory;
 public class CdsCrServiceMethod extends BaseCdsCrMethod implements ICdsServiceMethod {
 	private final CdsServiceJson myCdsServiceJson;
 
-	public CdsCrServiceMethod(
-			CdsServiceJson theCdsServiceJson, ICdsCrServiceFactory theCdsCrServiceFactory) {
+	public CdsCrServiceMethod(CdsServiceJson theCdsServiceJson, ICdsCrServiceFactory theCdsCrServiceFactory) {
 		super(theCdsCrServiceFactory);
 		myCdsServiceJson = theCdsServiceJson;
 	}

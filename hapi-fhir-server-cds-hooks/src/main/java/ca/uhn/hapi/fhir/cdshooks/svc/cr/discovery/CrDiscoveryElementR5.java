@@ -35,21 +35,21 @@ public class CrDiscoveryElementR5 implements ICrDiscoveryElement {
 	public CdsServiceJson getCdsServiceJson() {
 		if (myPlanDefinition != null) {
 			var service = new CdsServiceJson()
-				.setId(myPlanDefinition.getIdElement().getIdPart())
-				.setTitle(myPlanDefinition.getTitle())
-				.setDescription(myPlanDefinition.getDescription());
+					.setId(myPlanDefinition.getIdElement().getIdPart())
+					.setTitle(myPlanDefinition.getTitle())
+					.setDescription(myPlanDefinition.getDescription());
 
 			if (myPlanDefinition.hasAction()) {
 				// TODO - this needs some work - too naive
 				if (myPlanDefinition.getActionFirstRep().hasTrigger()) {
 					if (myPlanDefinition
-						.getActionFirstRep()
-						.getTriggerFirstRep()
-						.hasName()) {
-						service.setHook(myPlanDefinition
 							.getActionFirstRep()
 							.getTriggerFirstRep()
-							.getName());
+							.hasName()) {
+						service.setHook(myPlanDefinition
+								.getActionFirstRep()
+								.getTriggerFirstRep()
+								.getName());
 					}
 				}
 			}
@@ -60,9 +60,9 @@ public class CrDiscoveryElementR5 implements ICrDiscoveryElement {
 
 			int itemNo = 0;
 			if (!myPrefetchUrlList.stream()
-				.anyMatch(p -> p.equals("Patient/{{context.patientId}}")
-					|| p.equals("Patient?_id={{context.patientId}}")
-					|| p.equals("Patient?_id=Patient/{{context.patientId}}"))) {
+					.anyMatch(p -> p.equals("Patient/{{context.patientId}}")
+							|| p.equals("Patient?_id={{context.patientId}}")
+							|| p.equals("Patient?_id=Patient/{{context.patientId}}"))) {
 				String key = getKey(++itemNo);
 				service.addPrefetch(key, "Patient?_id={{context.patientId}}");
 				service.addSource(key, CdsResolutionStrategyEnum.SERVICE);

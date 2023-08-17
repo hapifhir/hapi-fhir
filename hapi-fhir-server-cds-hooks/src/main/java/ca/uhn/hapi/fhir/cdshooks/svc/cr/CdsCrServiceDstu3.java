@@ -85,22 +85,22 @@ public class CdsCrServiceDstu3 implements ICdsCrService {
 	public Parameters encodeParams(CdsServiceRequestJson theJson) {
 		// CanonicalType canonical = ;
 		Parameters parameters = parameters()
-			//.addParameter(part(APPLY_PARAMETER_CANONICAL, canonical))
-			.addParameter(part(APPLY_PARAMETER_SUBJECT, theJson.getContext().getString(CDS_PARAMETER_PATIENT_ID)));
+				// .addParameter(part(APPLY_PARAMETER_CANONICAL, canonical))
+				.addParameter(part(APPLY_PARAMETER_SUBJECT, theJson.getContext().getString(CDS_PARAMETER_PATIENT_ID)));
 		if (theJson.getContext().containsKey(CDS_PARAMETER_USER_ID)) {
 			parameters.addParameter(
-				part(APPLY_PARAMETER_PRACTITIONER, theJson.getContext().getString(CDS_PARAMETER_USER_ID)));
+					part(APPLY_PARAMETER_PRACTITIONER, theJson.getContext().getString(CDS_PARAMETER_USER_ID)));
 		}
 		if (theJson.getContext().containsKey(CDS_PARAMETER_ENCOUNTER_ID)) {
 			parameters.addParameter(
-				part(APPLY_PARAMETER_ENCOUNTER, theJson.getContext().getString(CDS_PARAMETER_ENCOUNTER_ID)));
+					part(APPLY_PARAMETER_ENCOUNTER, theJson.getContext().getString(CDS_PARAMETER_ENCOUNTER_ID)));
 		}
 		var cqlParameters = parameters();
 		if (theJson.getContext().containsKey(CDS_PARAMETER_DRAFT_ORDERS)) {
 			addCqlParameters(
-				cqlParameters,
-				theJson.getContext().getResource(CDS_PARAMETER_DRAFT_ORDERS),
-				CDS_PARAMETER_DRAFT_ORDERS);
+					cqlParameters,
+					theJson.getContext().getResource(CDS_PARAMETER_DRAFT_ORDERS),
+					CDS_PARAMETER_DRAFT_ORDERS);
 		}
 		if (cqlParameters.hasParameter()) {
 			parameters.addParameter(part(APPLY_PARAMETER_PARAMETER, cqlParameters));
@@ -114,8 +114,8 @@ public class CdsCrServiceDstu3 implements ICdsCrService {
 			if (theJson.getServiceRequestAuthorizationJson().getAccessToken() != null) {
 				String tokenType = getTokenType(theJson.getServiceRequestAuthorizationJson());
 				endpoint.addHeader(String.format(
-					"Authorization: %s %s",
-					tokenType, theJson.getServiceRequestAuthorizationJson().getAccessToken()));
+						"Authorization: %s %s",
+						tokenType, theJson.getServiceRequestAuthorizationJson().getAccessToken()));
 			}
 			parameters.addParameter(part(APPLY_PARAMETER_DATA_ENDPOINT, endpoint));
 		}
@@ -128,22 +128,22 @@ public class CdsCrServiceDstu3 implements ICdsCrService {
 	}
 
 	private Parameters addCqlParameters(
-		Parameters theParameters, IBaseResource theContextResource, String theParamName) {
+			Parameters theParameters, IBaseResource theContextResource, String theParamName) {
 		// We are making the assumption that a Library created for a hook will provide parameters for the fields
 		// specified for the hook
 		if (theContextResource instanceof Bundle) {
 			((Bundle) theContextResource)
-				.getEntry()
-				.forEach(x -> theParameters.addParameter(part(theParamName, x.getResource())));
+					.getEntry()
+					.forEach(x -> theParameters.addParameter(part(theParamName, x.getResource())));
 		} else {
 			theParameters.addParameter(part(theParamName, (Resource) theContextResource));
 		}
 		if (theParameters.getParameter().size() == 1) {
 			Extension listExtension = new Extension(
-				"http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-parameterDefinition",
-				new ParameterDefinition()
-					.setMax("*")
-					.setName(theParameters.getParameterFirstRep().getName()));
+					"http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-parameterDefinition",
+					new ParameterDefinition()
+							.setMax("*")
+							.setName(theParameters.getParameterFirstRep().getName()));
 			theParameters.getParameterFirstRep().addExtension(listExtension);
 		}
 		return theParameters;
@@ -153,8 +153,8 @@ public class CdsCrServiceDstu3 implements ICdsCrService {
 		// using HashMap to avoid duplicates
 		Map<String, Resource> resourceMap = new HashMap<>();
 		theBundle
-			.getEntry()
-			.forEach(x -> resourceMap.put(x.fhirType() + x.getResource().getId(), x.getResource()));
+				.getEntry()
+				.forEach(x -> resourceMap.put(x.fhirType() + x.getResource().getId(), x.getResource()));
 		return resourceMap;
 	}
 
@@ -182,11 +182,12 @@ public class CdsCrServiceDstu3 implements ICdsCrService {
 		assert theResponse instanceof Bundle;
 		myResponseBundle = (Bundle) theResponse;
 		CdsServiceResponseJson serviceResponse = new CdsServiceResponseJson();
-		RequestGroup mainRequest = (RequestGroup) myResponseBundle.getEntry().get(0).getResource();
+		RequestGroup mainRequest =
+				(RequestGroup) myResponseBundle.getEntry().get(0).getResource();
 		StringType canonical = mainRequest.getDefinition().get(0).getReferenceElement_();
 		PlanDefinition planDef = myRepository.read(
-			PlanDefinition.class,
-			new IdType(Canonicals.getResourceType(canonical), Canonicals.getIdPart(canonical)));
+				PlanDefinition.class,
+				new IdType(Canonicals.getResourceType(canonical), Canonicals.getIdPart(canonical)));
 		List<CdsServiceResponseLinkJson> links = resolvePlanLinks(planDef);
 		mainRequest.getAction().forEach(action -> serviceResponse.addCard(resolveAction(action, links)));
 
@@ -215,12 +216,11 @@ public class CdsCrServiceDstu3 implements ICdsCrService {
 	}
 
 	private CdsServiceResponseCardJson resolveAction(
-		RequestGroup.RequestGroupActionComponent theAction,
-		List<CdsServiceResponseLinkJson> theLinks) {
+			RequestGroup.RequestGroupActionComponent theAction, List<CdsServiceResponseLinkJson> theLinks) {
 		CdsServiceResponseCardJson card = new CdsServiceResponseCardJson()
-			.setSummary(theAction.getTitle())
-			.setDetail(theAction.getDescription())
-			.setLinks(theLinks);
+				.setSummary(theAction.getTitle())
+				.setDetail(theAction.getDescription())
+				.setLinks(theLinks);
 
 		if (theAction.hasDocumentation()) {
 			card.setSource(resolveSource(theAction));
@@ -237,8 +237,8 @@ public class CdsCrServiceDstu3 implements ICdsCrService {
 	private CdsServiceResponseCardSourceJson resolveSource(RequestGroup.RequestGroupActionComponent theAction) {
 		RelatedArtifact documentation = theAction.getDocumentationFirstRep();
 		CdsServiceResponseCardSourceJson source = new CdsServiceResponseCardSourceJson()
-			.setLabel(documentation.getDisplay())
-			.setUrl(documentation.getUrl());
+				.setLabel(documentation.getDisplay())
+				.setUrl(documentation.getUrl());
 
 		if (documentation.hasDocument() && documentation.getDocument().hasUrl()) {
 			source.setIcon(documentation.getDocument().getUrl());
@@ -249,19 +249,20 @@ public class CdsCrServiceDstu3 implements ICdsCrService {
 
 	private CdsServiceResponseSuggestionJson resolveSuggestion(RequestGroup.RequestGroupActionComponent theAction) {
 		CdsServiceResponseSuggestionJson suggestion = new CdsServiceResponseSuggestionJson()
-			.setLabel(theAction.getTitle())
-			.setUuid(theAction.getId());
+				.setLabel(theAction.getTitle())
+				.setUuid(theAction.getId());
 		theAction.getAction().forEach(action -> suggestion.addAction(resolveSuggestionAction(action)));
 
 		return suggestion;
 	}
 
 	private CdsServiceResponseSuggestionActionJson resolveSuggestionAction(
-		RequestGroup.RequestGroupActionComponent theAction) {
-		CdsServiceResponseSuggestionActionJson suggestionAction = new CdsServiceResponseSuggestionActionJson()
-			.setDescription(theAction.getDescription());
-		if (theAction.hasType() && theAction.getType().hasCode()
-			&& !theAction.getType().getCode().equals("fire-event")) {
+			RequestGroup.RequestGroupActionComponent theAction) {
+		CdsServiceResponseSuggestionActionJson suggestionAction =
+				new CdsServiceResponseSuggestionActionJson().setDescription(theAction.getDescription());
+		if (theAction.hasType()
+				&& theAction.getType().hasCode()
+				&& !theAction.getType().getCode().equals("fire-event")) {
 			String actionCode = theAction.getType().getCode();
 			suggestionAction.setType(actionCode);
 		}
@@ -273,11 +274,11 @@ public class CdsCrServiceDstu3 implements ICdsCrService {
 	}
 
 	private IBaseResource resolveResource(Reference theReference) {
-		return myResponseBundle.getEntry()
-			.stream()
-			.filter(entry -> entry.hasResource() && entry.getResource().getId().equals(theReference.getReference()))
-			.map(entry -> entry.getResource())
-			.collect(Collectors.toList())
-			.get(0);
+		return myResponseBundle.getEntry().stream()
+				.filter(entry ->
+						entry.hasResource() && entry.getResource().getId().equals(theReference.getReference()))
+				.map(entry -> entry.getResource())
+				.collect(Collectors.toList())
+				.get(0);
 	}
 }

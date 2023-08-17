@@ -27,7 +27,6 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r5.model.CanonicalType;
 import org.hl7.fhir.r5.model.Coding;
 import org.hl7.fhir.r5.model.DataRequirement;
-import org.hl7.fhir.r5.model.IdType;
 import org.hl7.fhir.r5.model.Library;
 import org.hl7.fhir.r5.model.PlanDefinition;
 import org.hl7.fhir.r5.model.ValueSet;
@@ -36,8 +35,6 @@ import org.opencds.cqf.fhir.api.Repository;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import static ca.uhn.hapi.fhir.cdshooks.config.CdsHooksConfig.PLAN_DEFINITION_RESOURCE_NAME;
 
 public class CrDiscoveryServiceR5 implements ICrDiscoveryService {
 

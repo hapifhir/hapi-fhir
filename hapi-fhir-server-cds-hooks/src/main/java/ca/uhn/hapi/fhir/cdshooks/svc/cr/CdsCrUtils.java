@@ -22,7 +22,6 @@ package ca.uhn.hapi.fhir.cdshooks.svc.cr;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.opencds.cqf.cql.evaluator.fhir.util.Ids;
 import org.opencds.cqf.fhir.api.Repository;
 
 public class CdsCrUtils {

@@ -85,31 +85,31 @@ public class TestCrR4Config {
 		cqlOptions.setCqlEngineOptions(cqlEngineOptions);
 
 		var cqlTranslatorOptions = new CqlTranslatorOptions(
-			theCqlProperties.getCqlTranslatorFormat(),
-			theCqlProperties.isEnableDateRangeOptimization(),
-			theCqlProperties.isEnableAnnotations(),
-			theCqlProperties.isEnableLocators(),
-			theCqlProperties.isEnableResultsType(),
-			theCqlProperties.isCqlCompilerVerifyOnly(),
-			theCqlProperties.isEnableDetailedErrors(),
-			theCqlProperties.getCqlCompilerErrorSeverityLevel(),
-			theCqlProperties.isDisableListTraversal(),
-			theCqlProperties.isDisableListDemotion(),
-			theCqlProperties.isDisableListPromotion(),
-			theCqlProperties.isEnableIntervalDemotion(),
-			theCqlProperties.isEnableIntervalPromotion(),
-			theCqlProperties.isDisableMethodInvocation(),
-			theCqlProperties.isRequireFromKeyword(),
-			theCqlProperties.isCqlCompilerValidateUnits(),
-			theCqlProperties.isDisableDefaultModelInfoLoad(),
-			theCqlProperties.getCqlCompilerSignatureLevel(),
-			theCqlProperties.getCqlCompilerCompatibilityLevel()
+//			theCqlProperties.getCqlTranslatorFormat(),
+//			theCqlProperties.isEnableDateRangeOptimization(),
+//			theCqlProperties.isEnableAnnotations(),
+//			theCqlProperties.isEnableLocators(),
+//			theCqlProperties.isEnableResultsType(),
+//			theCqlProperties.isCqlCompilerVerifyOnly(),
+//			theCqlProperties.isEnableDetailedErrors(),
+//			theCqlProperties.getCqlCompilerErrorSeverityLevel(),
+//			theCqlProperties.isDisableListTraversal(),
+//			theCqlProperties.isDisableListDemotion(),
+//			theCqlProperties.isDisableListPromotion(),
+//			theCqlProperties.isEnableIntervalDemotion(),
+//			theCqlProperties.isEnableIntervalPromotion(),
+//			theCqlProperties.isDisableMethodInvocation(),
+//			theCqlProperties.isRequireFromKeyword(),
+//			theCqlProperties.isCqlCompilerValidateUnits(),
+//			theCqlProperties.isDisableDefaultModelInfoLoad(),
+//			theCqlProperties.getCqlCompilerSignatureLevel(),
+//			theCqlProperties.getCqlCompilerCompatibilityLevel()
 		);
-		cqlTranslatorOptions.setCompatibilityLevel(theCqlProperties.getCqlCompilerCompatibilityLevel());
-		cqlTranslatorOptions.setAnalyzeDataRequirements(theCqlProperties.isCqlCompilerAnalyzeDataRequirements());
-		cqlTranslatorOptions.setCollapseDataRequirements(theCqlProperties.isCqlCompilerCollapseDataRequirements());
+//		cqlTranslatorOptions.setCompatibilityLevel(theCqlProperties.getCqlCompilerCompatibilityLevel());
+//		cqlTranslatorOptions.setAnalyzeDataRequirements(theCqlProperties.isCqlCompilerAnalyzeDataRequirements());
+//		cqlTranslatorOptions.setCollapseDataRequirements(theCqlProperties.isCqlCompilerCollapseDataRequirements());
 		//cqlTranslatorOptions.set
-		cqlOptions.setCqlTranslatorOptions(cqlTranslatorOptions);
+		cqlOptions.setCqlCompilerOptions(cqlTranslatorOptions.getCqlCompilerOptions());
 
 		return evaluationSettings;
 	}
