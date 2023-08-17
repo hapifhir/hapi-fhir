@@ -26,12 +26,12 @@ import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 public interface IBundleProvider {
 
@@ -161,14 +161,13 @@ public interface IBundleProvider {
 	 * whole page returned.
 	 * </p>
 	 *
-	 * @param theFromIndex The low index (inclusive) to return
-	 * @param theToIndex   The high index (exclusive) to return
+	 * @param theFromIndex           The low index (inclusive) to return
+	 * @param theToIndex             The high index (exclusive) to return
 	 * @param theResponsePageBuilder The ResponsePageBuilder. The builder will add values needed for the response page.
 	 * @return A list of resources. The size of this list must be at least <code>theToIndex - theFromIndex</code>.
 	 */
 	default List<IBaseResource> getResources(
-			int theFromIndex, int theToIndex, @Nonnull ResponsePage.ResponsePageBuilder theResponsePageBuilder) {
-		// TODO - override and implement
+		int theFromIndex, int theToIndex, @Nonnull ResponsePage.ResponsePageBuilder theResponsePageBuilder) {
 		return getResources(theFromIndex, theToIndex);
 	}
 
@@ -185,8 +184,8 @@ public interface IBundleProvider {
 		Integer size = size();
 		if (size == null) {
 			throw new ConfigurationException(
-					Msg.code(464)
-							+ "Attempt to request all resources from an asynchronous search result.  The SearchParameterMap for this search probably should have been synchronous.");
+				Msg.code(464)
+					+ "Attempt to request all resources from an asynchronous search result.  The SearchParameterMap for this search probably should have been synchronous.");
 		}
 		if (size > 0) {
 			retval.addAll(getResources(0, size));
@@ -259,7 +258,7 @@ public interface IBundleProvider {
 	 */
 	default List<String> getAllResourceIds() {
 		return getAllResources().stream()
-				.map(resource -> resource.getIdElement().getIdPart())
-				.collect(Collectors.toList());
+			.map(resource -> resource.getIdElement().getIdPart())
+			.collect(Collectors.toList());
 	}
 }
