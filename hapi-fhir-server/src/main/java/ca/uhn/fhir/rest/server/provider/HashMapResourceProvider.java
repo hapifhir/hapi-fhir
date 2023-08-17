@@ -65,7 +65,6 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -78,6 +77,7 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
+import javax.annotation.Nonnull;
 
 import static java.lang.Math.max;
 import static java.lang.Math.min;
@@ -320,7 +320,10 @@ public class HashMapResourceProvider<T extends IBaseResource> implements IResour
 			@SuppressWarnings("unchecked")
 			@Nonnull
 			@Override
-			public List<IBaseResource> getResources(int theFromIndex, int theToIndex, @Nonnull ResponsePage.ResponsePageBuilder theResponsePageBuilder) {
+			public List<IBaseResource> getResources(
+					int theFromIndex,
+					int theToIndex,
+					@Nonnull ResponsePage.ResponsePageBuilder theResponsePageBuilder) {
 
 				// Make sure that "from" isn't less than 0, "to" isn't more than the number available,
 				// and "from" <= "to"

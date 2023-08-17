@@ -595,7 +595,6 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	@Test
 	public void testSearchLinksWorkWithIncludes() {
 		for (int i = 0; i < 5; i++) {
-
 			Organization o = new Organization();
 			o.setId("O" + i);
 			o.setName("O" + i);
@@ -605,7 +604,6 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			p.setId("P" + i);
 			p.getManagingOrganization().setReference(oid.getValue());
 			myClient.update().resource(p).execute();
-
 		}
 
 		Bundle output = myClient

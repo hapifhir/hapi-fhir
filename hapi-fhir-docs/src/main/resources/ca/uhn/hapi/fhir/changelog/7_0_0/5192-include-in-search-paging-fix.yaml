@@ -1,0 +1,7 @@
+---
+type: fix
+issue: 5192
+title: "Fixed a bug where searches with an _include filter would
+      break paging resulting in 'next' links to blank pages when
+      no more results are available.
+"

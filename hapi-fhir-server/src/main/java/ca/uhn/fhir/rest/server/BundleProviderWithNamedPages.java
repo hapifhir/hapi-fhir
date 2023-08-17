@@ -89,7 +89,8 @@ public class BundleProviderWithNamedPages extends SimpleBundleProvider {
 	@SuppressWarnings("unchecked")
 	@Nonnull
 	@Override
-	public List<IBaseResource> getResources(int theFromIndex, int theToIndex, @Nonnull ResponsePage.ResponsePageBuilder theResponsePageBuilder) {
+	public List<IBaseResource> getResources(
+			int theFromIndex, int theToIndex, @Nonnull ResponsePage.ResponsePageBuilder theResponsePageBuilder) {
 		return (List<IBaseResource>) getList(); // indexes are ignored for this provider type
 	}
 

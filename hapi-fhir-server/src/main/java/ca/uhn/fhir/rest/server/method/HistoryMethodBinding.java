@@ -181,7 +181,8 @@ public class HistoryMethodBinding extends BaseResourceReturningMethodBinding {
 
 			@Nonnull
 			@Override
-			public List<IBaseResource> getResources(int theFromIndex, int theToIndex, ResponsePage.ResponsePageBuilder theResponsePageBuilder) {
+			public List<IBaseResource> getResources(
+					int theFromIndex, int theToIndex, ResponsePage.ResponsePageBuilder theResponsePageBuilder) {
 				List<IBaseResource> retVal = resources.getResources(theFromIndex, theToIndex, theResponsePageBuilder);
 				int index = theFromIndex;
 				for (IBaseResource nextResource : retVal) {

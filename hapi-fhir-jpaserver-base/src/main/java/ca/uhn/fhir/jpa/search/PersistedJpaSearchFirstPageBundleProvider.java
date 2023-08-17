@@ -35,14 +35,15 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nonnull;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+import javax.annotation.Nonnull;
 
 public class PersistedJpaSearchFirstPageBundleProvider extends PersistedJpaBundleProvider {
 	private static final Logger ourLog = LoggerFactory.getLogger(PersistedJpaSearchFirstPageBundleProvider.class);
 	private final SearchTask mySearchTask;
+
 	@SuppressWarnings("rawtypes")
 	private final ISearchBuilder mySearchBuilder;
 
@@ -68,7 +69,8 @@ public class PersistedJpaSearchFirstPageBundleProvider extends PersistedJpaBundl
 
 	@Nonnull
 	@Override
-	public List<IBaseResource> getResources(int theFromIndex, int theToIndex, @Nonnull ResponsePage.ResponsePageBuilder thePageBuilder) {
+	public List<IBaseResource> getResources(
+			int theFromIndex, int theToIndex, @Nonnull ResponsePage.ResponsePageBuilder thePageBuilder) {
 		ensureSearchEntityLoaded();
 		QueryParameterUtils.verifySearchHasntFailedOrThrowInternalErrorException(getSearchEntity());
 

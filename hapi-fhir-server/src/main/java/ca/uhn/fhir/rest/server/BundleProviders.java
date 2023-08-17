@@ -48,7 +48,8 @@ public class BundleProviders {
 		return new IBundleProvider() {
 			@Nonnull
 			@Override
-			public List<IBaseResource> getResources(int theFromIndex, int theToIndex, ResponsePage.ResponsePageBuilder theResponsePageBuilder) {
+			public List<IBaseResource> getResources(
+					int theFromIndex, int theToIndex, ResponsePage.ResponsePageBuilder theResponsePageBuilder) {
 				return Collections.emptyList();
 			}
 

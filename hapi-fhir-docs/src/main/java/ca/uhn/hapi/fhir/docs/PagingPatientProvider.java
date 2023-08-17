@@ -64,7 +64,10 @@ public class PagingPatientProvider implements IResourceProvider {
 
 			@Nonnull
 			@Override
-			public List<IBaseResource> getResources(int theFromIndex, int theToIndex, @Nonnull ResponsePage.ResponsePageBuilder theResponsePageBuilder) {
+			public List<IBaseResource> getResources(
+					int theFromIndex,
+					int theToIndex,
+					@Nonnull ResponsePage.ResponsePageBuilder theResponsePageBuilder) {
 				int end = Math.max(theToIndex, matchingResourceIds.size() - 1);
 				List<Long> idsToReturn = matchingResourceIds.subList(theFromIndex, end);
 				return loadResourcesByIds(idsToReturn);

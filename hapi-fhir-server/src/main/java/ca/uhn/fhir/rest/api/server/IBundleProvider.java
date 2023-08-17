@@ -166,7 +166,8 @@ public interface IBundleProvider {
 	 * @param theResponsePageBuilder The ResponsePageBuilder. The builder will add values needed for the response page.
 	 * @return A list of resources. The size of this list must be at least <code>theToIndex - theFromIndex</code>.
 	 */
-	default List<IBaseResource> getResources(int theFromIndex, int theToIndex, @Nonnull ResponsePage.ResponsePageBuilder theResponsePageBuilder) {
+	default List<IBaseResource> getResources(
+			int theFromIndex, int theToIndex, @Nonnull ResponsePage.ResponsePageBuilder theResponsePageBuilder) {
 		// TODO - override and implement
 		return getResources(theFromIndex, theToIndex);
 	}
