@@ -8,6 +8,7 @@ import ca.uhn.fhir.cr.config.ExtractOperationConfig;
 import ca.uhn.fhir.cr.config.PackageOperationConfig;
 import ca.uhn.fhir.cr.config.PopulateOperationConfig;
 import ca.uhn.fhir.cr.config.r4.R4MeasureConfig;
+import org.cqframework.cql.cql2elm.CqlCompilerOptions;
 import org.cqframework.cql.cql2elm.CqlTranslatorOptions;
 import org.opencds.cqf.cql.engine.execution.CqlEngine;
 import org.opencds.cqf.cql.evaluator.fhir.util.ValidationProfile;
@@ -84,7 +85,7 @@ public class TestCrR4Config {
 		var cqlOptions = evaluationSettings.getCqlOptions();
 		cqlOptions.setCqlEngineOptions(cqlEngineOptions);
 
-		var cqlTranslatorOptions = new CqlTranslatorOptions(
+		var cqlCompilerOptions = new CqlCompilerOptions();
 //			theCqlProperties.getCqlTranslatorFormat(),
 //			theCqlProperties.isEnableDateRangeOptimization(),
 //			theCqlProperties.isEnableAnnotations(),
@@ -104,12 +105,12 @@ public class TestCrR4Config {
 //			theCqlProperties.isDisableDefaultModelInfoLoad(),
 //			theCqlProperties.getCqlCompilerSignatureLevel(),
 //			theCqlProperties.getCqlCompilerCompatibilityLevel()
-		);
-//		cqlTranslatorOptions.setCompatibilityLevel(theCqlProperties.getCqlCompilerCompatibilityLevel());
-//		cqlTranslatorOptions.setAnalyzeDataRequirements(theCqlProperties.isCqlCompilerAnalyzeDataRequirements());
-//		cqlTranslatorOptions.setCollapseDataRequirements(theCqlProperties.isCqlCompilerCollapseDataRequirements());
-		//cqlTranslatorOptions.set
-		cqlOptions.setCqlCompilerOptions(cqlTranslatorOptions.getCqlCompilerOptions());
+//		);
+		cqlCompilerOptions.setCompatibilityLevel(theCqlProperties.getCqlCompilerCompatibilityLevel());
+		cqlCompilerOptions.setAnalyzeDataRequirements(theCqlProperties.isCqlCompilerAnalyzeDataRequirements());
+		cqlCompilerOptions.setCollapseDataRequirements(theCqlProperties.isCqlCompilerCollapseDataRequirements());
+
+		cqlOptions.setCqlCompilerOptions(cqlCompilerOptions);
 
 		return evaluationSettings;
 	}
