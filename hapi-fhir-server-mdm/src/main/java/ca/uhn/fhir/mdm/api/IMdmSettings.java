@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.mdm.api;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.mdm.rules.json.MdmRulesJson;
 
 import java.util.stream.Collectors;
@@ -61,4 +62,14 @@ public interface IMdmSettings {
 	boolean getSearchAllPartitionForMatch();
 
 	void setSearchAllPartitionForMatch(boolean theSearchAllPartitionForMatch);
+
+	// TODO: on next bump, make this method non-default
+	default boolean isAutoExpungeGoldenResources() {
+		return false;
+	}
+
+	// TODO: on next bump, make this method non-default
+	default void setAutoExpungeGoldenResources(boolean theShouldAutoExpunge) {
+		throw new UnsupportedOperationException(Msg.code(2427));
+	}
 }

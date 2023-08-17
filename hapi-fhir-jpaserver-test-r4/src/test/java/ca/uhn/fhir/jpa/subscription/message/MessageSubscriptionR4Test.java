@@ -13,6 +13,9 @@ import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelFact
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedJsonMessage;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 import ca.uhn.fhir.jpa.test.util.StoppableSubscriptionDeliveringRestHookSubscriber;
+import ca.uhn.fhir.rest.client.api.Header;
+import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.rest.client.interceptor.AdditionalRequestHeadersInterceptor;
 import ca.uhn.fhir.rest.server.messaging.BaseResourceMessage;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -40,12 +43,15 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static ca.uhn.fhir.jpa.model.util.JpaConstants.HEADER_META_SNAPSHOT_MODE;
+import static java.util.Arrays.asList;
+import static java.util.Collections.emptyList;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.hamcrest.core.IsEqual.equalTo;
 
 /**
  * Test the rest-hook subscriptions
@@ -134,48 +140,59 @@ public class MessageSubscriptionR4Test extends BaseSubscriptionsR4Test {
 		assertThat(receivedObs.getMeta().getSource(), is(equalTo(theExpectedSourceValue)));
 	}
 
-	@Test
-	public void testUpdateResourceRetainCorrectMetaTagsThroughDelivery() throws Exception {
+
+	private static Stream<Arguments> metaTagsSource(){
+		List<Header> snapshotModeHeader = asList(new Header(HEADER_META_SNAPSHOT_MODE, "TAG"));
+
+		return Stream.of(
+				Arguments.of(asList("tag-1","tag-2"), asList("tag-3"), asList("tag-1","tag-2","tag-3"), emptyList()),
+				Arguments.of(asList("tag-1","tag-2"), asList("tag-1","tag-2","tag-3"), asList("tag-1","tag-2","tag-3"), emptyList()),
+				Arguments.of(emptyList(), asList("tag-1","tag-2"), asList("tag-1","tag-2"), emptyList()),
+//				Arguments.of(asList("tag-1","tag-2"), emptyList(), asList("tag-1","tag-2"), emptyList()), // will not trigger an update since tags are merged
+				Arguments.of(asList("tag-1","tag-2"), emptyList(), emptyList(), snapshotModeHeader),
+				Arguments.of(asList("tag-1","tag-2"), asList("tag-3"), asList("tag-3"), snapshotModeHeader),
+				Arguments.of(asList("tag-1","tag-2","tag-3"), asList("tag-1","tag-2"), asList("tag-1","tag-2"), snapshotModeHeader),
+				Arguments.of(asList("tag-1","tag-2","tag-3"), asList("tag-2","tag-3"), asList("tag-2","tag-3"), snapshotModeHeader),
+				Arguments.of(asList("tag-1","tag-2","tag-3"), asList("tag-1","tag-3"), asList("tag-1","tag-3"), snapshotModeHeader)
+				);
+	}
+	@ParameterizedTest
+	@MethodSource("metaTagsSource")
+	public void testUpdateResource_withHeaderSnapshotMode_willRetainCorrectMetaTagsThroughDelivery(List<String> theTagsForCreate, List<String> theTagsForUpdate, List<String> theExpectedTags, List<Header> theHeaders) throws Exception {
 		myStorageSettings.setTagStorageMode(JpaStorageSettings.TagStorageModeEnum.NON_VERSIONED);
 		createSubscriptionWithCriteria("[Patient]");
 
 		waitForActivatedSubscriptionCount(1);
 
-		// Create Patient with two meta tags
 		Patient patient = new Patient();
 		patient.setActive(true);
-		patient.getMeta().addTag().setSystem("http://www.example.com/tags").setCode("tag-1");
-		patient.getMeta().addTag().setSystem("http://www.example.com/tags").setCode("tag-2");
+		patient.getMeta().setTag(toSimpleCodingList(theTagsForCreate));
 
 		IIdType id = myClient.create().resource(patient).execute().getId();
 
-		// Should see 1 subscription notification for CREATE
 		waitForQueueToDrain();
 
-		// Should receive two meta tags
-		IBaseResource resource = fetchSingleResourceFromSubscriptionTerminalEndpoint();
-		assertThat(resource, instanceOf(Patient.class));
-		Patient receivedPatient = (Patient) resource;
-		assertThat(receivedPatient.getMeta().getTag().size(), is(equalTo(2)));
+		Patient receivedPatient = fetchSingleResourceFromSubscriptionTerminalEndpoint();
+		assertThat(receivedPatient.getMeta().getTag(), hasSize(theTagsForCreate.size()));
 
-		// Update the previous Patient and add one more tag
 		patient = new Patient();
 		patient.setId(id);
 		patient.setActive(true);
-		patient.getMeta().getTag().add(new Coding().setSystem("http://www.example.com/tags").setCode("tag-3"));
+		patient.getMeta().setTag(toSimpleCodingList(theTagsForUpdate));
+
+		maybeAddHeaderInterceptor(myClient, theHeaders);
+
 		myClient.update().resource(patient).execute();
 
 		waitForQueueToDrain();
 
-		// Should receive all three meta tags
-		List<String> expected = List.of("tag-1", "tag-2", "tag-3");
-		resource = fetchSingleResourceFromSubscriptionTerminalEndpoint();
-		receivedPatient = (Patient) resource;
-		List<Coding> receivedTagList = receivedPatient.getMeta().getTag();
+		receivedPatient = fetchSingleResourceFromSubscriptionTerminalEndpoint();;
+
 		ourLog.info(getFhirContext().newJsonParser().setPrettyPrint(true).encodeResourceToString(receivedPatient));
-		assertThat(receivedTagList.size(), is(equalTo(3)));
-		List<String> actual = receivedTagList.stream().map(t -> t.getCode()).sorted().collect(Collectors.toList());
-		assertTrue(expected.equals(actual));
+
+		List<String> receivedTagList = toSimpleTagList(receivedPatient.getMeta().getTag());
+		assertThat(receivedTagList, containsInAnyOrder(theExpectedTags.toArray()));
+
 	}
 
 	@Test
@@ -220,7 +237,6 @@ public class MessageSubscriptionR4Test extends BaseSubscriptionsR4Test {
 	}
 
 	@Test
-
 	public void testMethodDeleteByPK_whenEntityDoesNotExist_willReturnFalse(){
 		mySubscriptionTestUtil.unregisterSubscriptionInterceptor();
 
@@ -282,14 +298,43 @@ public class MessageSubscriptionR4Test extends BaseSubscriptionsR4Test {
 		assertThat(theMsg.getAttributes(), equalTo(theComparedTo.getAttributes()));
 	}
 
-	private IBaseResource fetchSingleResourceFromSubscriptionTerminalEndpoint() {
+	private void maybeAddHeaderInterceptor(IGenericClient theClient, List<Header> theHeaders) {
+		if(theHeaders.isEmpty()){
+			return;
+		}
+
+		AdditionalRequestHeadersInterceptor additionalRequestHeadersInterceptor = new AdditionalRequestHeadersInterceptor();
+
+		theHeaders.forEach(aHeader ->
+			additionalRequestHeadersInterceptor
+				.addHeaderValue(
+					aHeader.getName(),
+					aHeader.getValue()
+				)
+		);
+		theClient.registerInterceptor(additionalRequestHeadersInterceptor);
+	}
+
+	private List<Coding> toSimpleCodingList(List<String> theTags) {
+		return theTags.stream().map(theString -> new Coding().setCode(theString)).collect(Collectors.toList());
+	}
+
+	private List<String> toSimpleTagList(List<Coding> theTags) {
+		return theTags.stream().map(t -> t.getCode()).collect(Collectors.toList());
+	}
+
+	private static Coding toSimpleCode(String theCode){
+		return new Coding().setCode(theCode);
+	}
+
+	private <T> T fetchSingleResourceFromSubscriptionTerminalEndpoint() {
 		assertThat(handler.getMessages().size(), is(equalTo(1)));
 		ResourceModifiedJsonMessage resourceModifiedJsonMessage = handler.getMessages().get(0);
 		ResourceModifiedMessage payload = resourceModifiedJsonMessage.getPayload();
 		String payloadString = payload.getPayloadString();
 		IBaseResource resource = myFhirContext.newJsonParser().parseResource(payloadString);
 		handler.clearMessages();
-		return resource;
+		return (T) resource;
 	}
 
 	private static void assertEquals(String theMsg, String theComparedTo){
