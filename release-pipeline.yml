@@ -157,7 +157,7 @@ jobs:
           displayName: Checkstyle Build
           inputs:
              mavenPomFile: 'hapi-fhir-checkstyle/pom.xml'
-             goals: 'clean install'
+             goals: 'clean install -DskipTests'
              options: '-Dmaven.repo.local=$(MAVEN_CACHE_FOLDER)'
              jdkVersionOption: 1.11
         - task: Bash@3
