@@ -124,9 +124,8 @@ public class PatientEverythingPaginationR4Test extends BaseResourceProviderR4Tes
 			String url = myServerBase + "/Patient/$everything?_format=json";
 			if (theProvideCountBool) {
 				url += "&_count=" + BasePagingProvider.DEFAULT_MAX_PAGE_SIZE;
-			} else {
-				myPagingProvider.setDefaultPageSize(defaultPageSize);
 			}
+			myPagingProvider.setDefaultPageSize(defaultPageSize);
 
 			// test
 			Bundle bundle = fetchBundle(url);
@@ -165,7 +164,6 @@ public class PatientEverythingPaginationR4Test extends BaseResourceProviderR4Tes
 			myPagingProvider.setDefaultPageSize(pageSize);
 		}
 	}
-
 
 	private void createPatients(int theCount) {
 		for (int i = 0; i < theCount; i++) {
