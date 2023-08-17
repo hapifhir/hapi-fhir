@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 5212
+title: "Previously, when a CDS hook was registered and called with a empty context, the server returned a 500. This behaviour has been fixed."
