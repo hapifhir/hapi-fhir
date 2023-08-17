@@ -8,6 +8,7 @@ import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.BasePagingProvider;
 import ca.uhn.fhir.rest.server.IPagingProvider;
+import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.util.BundleUtil;
 import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
@@ -40,9 +41,6 @@ public class PatientEverythingPaginationR4Test extends BaseResourceProviderR4Tes
 
 	@Autowired
 	JpaStorageSettings myStorageSettings;
-
-	@Autowired
-	private BasePagingProvider myPagingProvider;
 
 	@BeforeEach
 	public void beforeDisableResultReuse() {
@@ -109,6 +107,7 @@ public class PatientEverythingPaginationR4Test extends BaseResourceProviderR4Tes
 		// other tests may be resetting this
 		// so we'll set it
 		int pageSize = myPagingProvider.getDefaultPageSize();
+		int serverPageSize = myServer.getDefaultPageSize();
 		try {
 			int defaultPageSize = theProvideCountBool ? 50 : 10;
 			// set our prefetch thresholds to ensure we run out of them
@@ -126,6 +125,7 @@ public class PatientEverythingPaginationR4Test extends BaseResourceProviderR4Tes
 				url += "&_count=" + BasePagingProvider.DEFAULT_MAX_PAGE_SIZE;
 			}
 			myPagingProvider.setDefaultPageSize(defaultPageSize);
+			myServer.setDefaultPageSize(defaultPageSize);
 
 			// test
 			Bundle bundle = fetchBundle(url);
@@ -162,6 +162,7 @@ public class PatientEverythingPaginationR4Test extends BaseResourceProviderR4Tes
 			// set it back, just in case
 			myStorageSettings.setSearchPreFetchThresholds(previousPrefetchThreshold);
 			myPagingProvider.setDefaultPageSize(pageSize);
+			myServer.setDefaultPageSize(serverPageSize);
 		}
 	}
 
