@@ -25,11 +25,12 @@ import ca.uhn.fhir.util.ValidateUtil;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * This class represents a parsed HFQL expression tree. It is useful for
@@ -147,7 +148,7 @@ public class HfqlStatement implements IModelJson {
 	public int findSelectClauseIndex(String theClause) {
 		for (int i = 0; i < getSelectClauses().size(); i++) {
 			if (theClause.equals(getSelectClauses().get(i).getClause())
-					|| theClause.equals(getSelectClauses().get(i).getAlias())) {
+				|| theClause.equals(getSelectClauses().get(i).getAlias())) {
 				return i;
 			}
 		}
@@ -301,6 +302,11 @@ public class HfqlStatement implements IModelJson {
 
 		public List<String> getRight() {
 			return myRight;
+		}
+
+		public void setRight(String... theValues) {
+			myRight.clear();
+			myRight.addAll(Arrays.asList(theValues));
 		}
 
 		public void addRight(String theRight) {

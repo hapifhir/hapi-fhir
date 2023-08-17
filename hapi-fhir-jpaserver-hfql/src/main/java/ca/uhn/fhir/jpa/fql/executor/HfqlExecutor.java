@@ -42,11 +42,13 @@ import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.DateOrListParam;
 import ca.uhn.fhir.rest.param.DateParam;
+import ca.uhn.fhir.rest.param.ParameterUtil;
 import ca.uhn.fhir.rest.param.QualifierDetails;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.server.IPagingProvider;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
+import ca.uhn.fhir.rest.server.util.ResourceSearchParams;
 import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.collect.Lists;
 import org.apache.commons.collections4.ListUtils;
@@ -142,6 +144,8 @@ public class HfqlExecutor implements IHfqlExecutor {
 
 		massageSelectColumnNames(statement);
 		populateSelectColumnDataTypes(statement);
+		validateWhereClauses(statement);
+		massageWhereClauses(statement);
 
 		SearchParameterMap map = new SearchParameterMap();
 		addHfqlWhereClausesToSearchParameterMap(statement, map);
@@ -177,6 +181,43 @@ public class HfqlExecutor implements IHfqlExecutor {
 		}
 
 		return executionResult;
+	}
+
+	private void validateWhereClauses(HfqlStatement theStatement) {
+		for (HfqlStatement.WhereClause next : theStatement.getWhereClauses()) {
+			if (next.getOperator() == HfqlStatement.WhereClauseOperatorEnum.EQUALS || next.getOperator() == HfqlStatement.WhereClauseOperatorEnum.IN) {
+				if (next.getLeft().matches("^[a-zA-Z]+$")) {
+					RuntimeResourceDefinition resDef = myFhirContext.getResourceDefinition(theStatement.getFromResourceName());
+					if (resDef.getChildByName(next.getLeft()) == null) {
+						throw new InvalidRequestException(
+							Msg.code(2429) + "Resource type " + theStatement.getFromResourceName() + " does not have a root element named '" + next.getLeft() + "'");
+					}
+				}
+			}
+		}
+	}
+
+	private void massageWhereClauses(HfqlStatement theStatement) {
+		ResourceSearchParams activeSearchParams = mySearchParamRegistry.getActiveSearchParams(theStatement.getFromResourceName());
+
+		for (HfqlStatement.WhereClause nextWhereClause : theStatement.getWhereClauses()) {
+			if (nextWhereClause.getOperator() == HfqlStatement.WhereClauseOperatorEnum.EQUALS || nextWhereClause.getOperator() == HfqlStatement.WhereClauseOperatorEnum.IN) {
+				if ("id".equals(nextWhereClause.getLeft())) {
+					nextWhereClause.setOperator(HfqlStatement.WhereClauseOperatorEnum.SEARCH_MATCH);
+					String joinedParamValues = nextWhereClause
+						.getRightAsStrings()
+						.stream()
+						.map(ParameterUtil::escape)
+						.collect(Collectors.joining(","));
+					nextWhereClause.setRight("_id", joinedParamValues);
+				}
+
+//				for (RuntimeSearchParam nextSp : activeSearchParams.values()) {
+//					ourLog.info(nextSp.getPath());
+//				}
+//
+			}
+		}
 	}
 
 	private void addHfqlWhereClausesToSearchParameterMap(HfqlStatement statement, SearchParameterMap map) {
