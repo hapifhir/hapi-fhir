@@ -21,13 +21,13 @@ package ca.uhn.fhir.mdm.provider;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.mdm.api.MdmLinkJson;
-import ca.uhn.fhir.mdm.api.MdmLinkWithRevisionJson;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.mdm.api.paging.MdmPageLinkBuilder;
 import ca.uhn.fhir.mdm.api.paging.MdmPageLinkTuple;
 import ca.uhn.fhir.mdm.api.paging.MdmPageRequest;
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
+import ca.uhn.fhir.mdm.model.mdmevents.MdmLinkJson;
+import ca.uhn.fhir.mdm.model.mdmevents.MdmLinkWithRevisionJson;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.TransactionLogMessages;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -178,17 +178,21 @@ public abstract class BaseMdmProvider {
 
 	protected IBaseParameters parametersFromMdmLinks(
 			Page<MdmLinkJson> theMdmLinkStream,
-			boolean includeResultAndSource,
+			boolean theIncludeResultAndSource,
 			ServletRequestDetails theServletRequestDetails,
 			MdmPageRequest thePageRequest) {
 		IBaseParameters retval = ParametersUtil.newInstance(myFhirContext);
 		addPagingParameters(retval, theMdmLinkStream, theServletRequestDetails, thePageRequest);
+
+		long numDuplicates = theMdmLinkStream.getTotalElements();
+		ParametersUtil.addParameterToParametersLong(myFhirContext, retval, "total", numDuplicates);
+
 		theMdmLinkStream.getContent().forEach(mdmLink -> {
 			IBase resultPart = ParametersUtil.addParameterToParameters(myFhirContext, retval, "link");
 			ParametersUtil.addPartString(myFhirContext, resultPart, "goldenResourceId", mdmLink.getGoldenResourceId());
 			ParametersUtil.addPartString(myFhirContext, resultPart, "sourceResourceId", mdmLink.getSourceId());
 
-			if (includeResultAndSource) {
+			if (theIncludeResultAndSource) {
 				ParametersUtil.addPartString(
 						myFhirContext,
 						resultPart,

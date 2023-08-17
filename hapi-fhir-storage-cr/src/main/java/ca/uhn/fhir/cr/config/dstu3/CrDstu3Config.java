@@ -17,17 +17,25 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.cr.config;
+package ca.uhn.fhir.cr.config.dstu3;
 
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.cr.config.BaseClinicalReasoningConfig;
+import ca.uhn.fhir.cr.config.ProviderLoader;
+import ca.uhn.fhir.cr.config.ProviderSelector;
 import ca.uhn.fhir.cr.dstu3.measure.MeasureOperationsProvider;
 import ca.uhn.fhir.cr.dstu3.measure.MeasureService;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.server.RestfulServer;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
 
+import java.util.Arrays;
+import java.util.Map;
 import java.util.function.Function;
 
 @Configuration
@@ -53,5 +61,15 @@ public class CrDstu3Config {
 	@Bean
 	public MeasureOperationsProvider dstu3measureOperationsProvider() {
 		return new MeasureOperationsProvider();
+	}
+
+	@Bean
+	public ProviderLoader dstu3PdLoader(
+			ApplicationContext theApplicationContext, FhirContext theFhirContext, RestfulServer theRestfulServer) {
+
+		var selector = new ProviderSelector(
+				theFhirContext, Map.of(FhirVersionEnum.DSTU3, Arrays.asList((MeasureOperationsProvider.class))));
+
+		return new ProviderLoader(theRestfulServer, theApplicationContext, selector);
 	}
 }

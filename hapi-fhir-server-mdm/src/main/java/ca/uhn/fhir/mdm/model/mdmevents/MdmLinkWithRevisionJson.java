@@ -1,4 +1,4 @@
-package ca.uhn.fhir.mdm.api;
+package ca.uhn.fhir.mdm.model.mdmevents;
 
 /*-
  * #%L

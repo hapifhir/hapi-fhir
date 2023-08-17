@@ -1,6 +1,6 @@
 package ca.uhn.fhir.cr.r4;
 
-import ca.uhn.fhir.cr.BaseCrR4Test;
+import ca.uhn.fhir.cr.BaseCrR4TestServer;
 import ca.uhn.fhir.cr.common.Searches;
 import ca.uhn.fhir.cr.r4.measure.SubmitDataService;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -23,7 +23,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @ExtendWith(SpringExtension.class)
-public class SubmitDataServiceR4Test extends BaseCrR4Test {
+public class SubmitDataServiceR4Test extends BaseCrR4TestServer {
 
 	Function<RequestDetails, SubmitDataService> mySubmitDataServiceFunction;
 

@@ -22,6 +22,7 @@ package ca.uhn.fhir.mdm.provider;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.mdm.api.IMdmControllerSvc;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
@@ -55,19 +56,28 @@ public class MdmProviderLoader {
 	@Autowired
 	private JpaStorageSettings myStorageSettings;
 
-	private MdmProviderDstu3Plus myMdmProvider;
+	@Autowired
+	private IInterceptorBroadcaster myInterceptorBroadcaster;
+
+	private BaseMdmProvider myMdmProvider;
 	private MdmLinkHistoryProviderDstu3Plus myMdmHistoryProvider;
 
 	public void loadProvider() {
 		switch (myFhirContext.getVersion().getVersion()) {
 			case DSTU3:
 			case R4:
-				myMdmProvider = new MdmProviderDstu3Plus(
-						myFhirContext, myMdmControllerSvc, myMdmControllerHelper, myMdmSubmitSvc, myMdmSettings);
-				myResourceProviderFactory.addSupplier(() -> myMdmProvider);
+				myResourceProviderFactory.addSupplier(() -> new MdmProviderDstu3Plus(
+						myFhirContext,
+						myMdmControllerSvc,
+						myMdmControllerHelper,
+						myMdmSubmitSvc,
+						myInterceptorBroadcaster,
+						myMdmSettings));
 				if (myStorageSettings.isNonResourceDbHistoryEnabled()) {
-					myMdmHistoryProvider = new MdmLinkHistoryProviderDstu3Plus(myFhirContext, myMdmControllerSvc);
-					myResourceProviderFactory.addSupplier(() -> myMdmHistoryProvider);
+					myResourceProviderFactory.addSupplier(() -> {
+						return new MdmLinkHistoryProviderDstu3Plus(
+								myFhirContext, myMdmControllerSvc, myInterceptorBroadcaster);
+					});
 				}
 				break;
 			default:
