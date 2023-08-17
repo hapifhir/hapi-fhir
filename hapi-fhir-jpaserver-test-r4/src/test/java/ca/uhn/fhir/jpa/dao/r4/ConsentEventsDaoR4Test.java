@@ -93,7 +93,7 @@ public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 		List<String> returnedIdValues = toUnqualifiedVersionlessIdValues(resources);
 		assertEquals(myObservationIds.subList(0, 10), returnedIdValues);
 		assertEquals(1, hitCount.get());
-		assertEquals(myObservationIds.subList(0, 20), interceptedResourceIds);
+		assertEquals(myObservationIds.subList(0, 21), interceptedResourceIds);
 
 		// Fetch the next 30 (do cross a fetch boundary)
 		outcome = myPagingProvider.retrieveResultList(mySrd, outcome.getUuid());
@@ -125,7 +125,7 @@ public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 		List<String> returnedIdValues = toUnqualifiedVersionlessIdValues(resources);
 		assertEquals(myObservationIdsEvenOnly.subList(0, 10), returnedIdValues);
 		assertEquals(1, hitCount.get());
-		assertEquals(myObservationIds.subList(0, 20), interceptedResourceIds, "Wrong response from " + outcome.getClass());
+		assertEquals(myObservationIds.subList(0, 21), interceptedResourceIds, "Wrong response from " + outcome.getClass());
 
 		// Fetch the next 30 (do cross a fetch boundary)
 		String searchId = outcome.getUuid();
