@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
+import ca.uhn.fhir.rest.server.method.ResponsePage;
 import ca.uhn.fhir.test.utilities.JettyUtil;
 import ca.uhn.fhir.util.TestUtil;
 import com.google.common.collect.Lists;
@@ -60,28 +61,32 @@ public class SearchBundleProviderWithNoSizeR4Test {
 	@Test
 	public void testBundleProviderReturnsNoSize() throws Exception {
 		Bundle respBundle;
-		
+
 		ourLastBundleProvider = mock(IBundleProvider.class);
 		when(ourLastBundleProvider.getCurrentPageOffset()).thenReturn(null);
 		when(ourLastBundleProvider.size()).thenReturn(null);
-		when(ourLastBundleProvider.getResources(any(int.class), any(int.class))).then(new Answer<List<IBaseResource>>() {
-			@Override
-			public List<IBaseResource> answer(InvocationOnMock theInvocation) {
-				int from =(Integer)theInvocation.getArguments()[0]; 
-				int to =(Integer)theInvocation.getArguments()[1];
-				ArrayList<IBaseResource> retVal = Lists.newArrayList();
-				for (int i = from; i < to; i++) {
-					Patient p = new Patient();
-					p.setId(Integer.toString(i));
-					retVal.add(p);
+		when(ourLastBundleProvider.getResponsePageBuilder())
+			.thenReturn(new ResponsePage.ResponsePageBuilder());
+		when(ourLastBundleProvider.getResources(any(int.class), any(int.class), any(ResponsePage.ResponsePageBuilder.class)))
+			.then(new Answer<List<IBaseResource>>() {
+				@Override
+				public List<IBaseResource> answer(InvocationOnMock theInvocation) {
+					int from = (Integer) theInvocation.getArguments()[0];
+					int to = (Integer) theInvocation.getArguments()[1];
+					ArrayList<IBaseResource> retVal = Lists.newArrayList();
+					for (int i = from; i < to; i++) {
+						Patient p = new Patient();
+						p.setId(Integer.toString(i));
+						retVal.add(p);
+					}
+					return retVal;
 				}
-				return retVal;
-			}});
-		
+			});
+
 		HttpGet httpGet;
 		CloseableHttpResponse status = null;
 		BundleLinkComponent linkNext;
-		
+
 		try {
 			httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_format=json");
 			status = ourClient.execute(httpGet);
@@ -90,17 +95,17 @@ public class SearchBundleProviderWithNoSizeR4Test {
 			assertEquals(200, status.getStatusLine().getStatusCode());
 			assertEquals("searchAll", ourLastMethod);
 			respBundle = ourCtx.newJsonParser().parseResource(Bundle.class, responseContent);
-			
+
 			assertEquals(10, respBundle.getEntry().size());
 			assertEquals("Patient/0", respBundle.getEntry().get(0).getResource().getIdElement().toUnqualifiedVersionless().getValue());
 			linkNext = respBundle.getLink("next");
 			assertNotNull(linkNext);
-			
+
 		} finally {
 			IOUtils.closeQuietly(status.getEntity().getContent());
 		}
 
-		
+
 		when(ourLastBundleProvider.size()).thenReturn(25);
 
 		try {
@@ -111,7 +116,7 @@ public class SearchBundleProviderWithNoSizeR4Test {
 			assertEquals(200, status.getStatusLine().getStatusCode());
 			assertEquals("searchAll", ourLastMethod);
 			respBundle = ourCtx.newJsonParser().parseResource(Bundle.class, responseContent);
-			
+
 			assertEquals(10, respBundle.getEntry().size());
 			assertEquals("Patient/10", respBundle.getEntry().get(0).getResource().getIdElement().toUnqualifiedVersionless().getValue());
 			linkNext = respBundle.getLink("next");
@@ -129,7 +134,7 @@ public class SearchBundleProviderWithNoSizeR4Test {
 			assertEquals(200, status.getStatusLine().getStatusCode());
 			assertEquals("searchAll", ourLastMethod);
 			respBundle = ourCtx.newJsonParser().parseResource(Bundle.class, responseContent);
-			
+
 			assertEquals(5, respBundle.getEntry().size());
 			assertEquals("Patient/20", respBundle.getEntry().get(0).getResource().getIdElement().toUnqualifiedVersionless().getValue());
 			linkNext = respBundle.getLink("next");

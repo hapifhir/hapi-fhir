@@ -36,7 +36,6 @@ import java.util.List;
 public class ResponsePage {
 	private static final Logger ourLog = LoggerFactory.getLogger(ResponsePage.class);
 
-
 	/**
 	 * The id of the search used to page through search results
 	 */
@@ -127,15 +126,27 @@ public class ResponsePage {
 		return myResourceList;
 	}
 
+	private boolean isBundleProviderOffsetPaging() {
+		if (myBundleProvider != null) {
+			if (myBundleProvider.getCurrentPageOffset() != null) {
+				// it's not enough that currentpageoffset is not null
+				// (sometimes it's 0, even if it's not a currentpageoffset search)
+				// so we have to make sure either next or prev links are not null
+				return (StringUtils.isNotBlank(myBundleProvider.getNextPageId())
+					|| StringUtils.isNotBlank(myBundleProvider.getPreviousPageId()));
+			}
+		}
+
+		return false;
+	}
+
 	private void determinePagingStyle() {
 		if (myPagingStyle != null) {
 			// already assigned
 			return;
 		}
 
-		if (myBundleProvider != null && (myBundleProvider.getCurrentPageOffset() != null
-			|| (StringUtils.isNotBlank(myBundleProvider.getNextPageId()) || StringUtils.isNotBlank(myBundleProvider.getPreviousPageId())))
-		) {
+		if (isBundleProviderOffsetPaging()) {
 			myPagingStyle = PagingStyle.BUNDLE_PROVIDER_OFFSETS;
 		} else if (myIsUsingOffsetPages) {
 			myPagingStyle = PagingStyle.NONCACHED_OFFSET;
@@ -146,8 +157,8 @@ public class ResponsePage {
 		} else {
 			myPagingStyle = PagingStyle.UNKNOWN;
 			// only our unit tests end up here
-			ourLog.warn("Response page requires more information to determine paging style. " +
-				"Did you remember to mock out all proper values?");
+			ourLog.warn("Response page requires more information to determine paging style. "
+					+ "Did you remember to mock out all proper values?");
 		}
 	}
 
@@ -390,7 +401,7 @@ public class ResponsePage {
 					myNumTotalResults, // total results
 					myIncludedResourceCount, // included count
 					myOmittedResourceCount // omitted resources
-			);
+					);
 		}
 	}
 
