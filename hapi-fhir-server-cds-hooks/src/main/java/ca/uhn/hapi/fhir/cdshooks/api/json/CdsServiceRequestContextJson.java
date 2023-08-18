@@ -22,6 +22,7 @@ package ca.uhn.hapi.fhir.cdshooks.api.json;
 import ca.uhn.fhir.model.api.IModelJson;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -39,7 +40,7 @@ public class CdsServiceRequestContextJson extends BaseCdsServiceJson implements 
 
 	public List<String> getArray(String theKey) {
 		if (myMap == null) {
-			return null;
+			return Collections.emptyList();
 		}
 		return (List<String>) myMap.get(theKey);
 	}
@@ -59,14 +60,23 @@ public class CdsServiceRequestContextJson extends BaseCdsServiceJson implements 
 	}
 
 	public Set<String> getKeys() {
+		if (myMap == null) {
+			return Collections.emptySet();
+		}
 		return myMap.keySet();
 	}
 
 	public Object get(String theKey) {
+		if (myMap == null) {
+			return null;
+		}
 		return myMap.get(theKey);
 	}
 
 	public boolean containsKey(String theKey) {
+		if (myMap == null) {
+			return false;
+		}
 		return myMap.containsKey(theKey);
 	}
 }
