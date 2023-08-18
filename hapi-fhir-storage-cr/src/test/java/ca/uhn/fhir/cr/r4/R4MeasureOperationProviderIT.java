@@ -1,20 +1,18 @@
 package ca.uhn.fhir.cr.r4;
 
-import ca.uhn.fhir.cr.BaseCrR4Test;
+import ca.uhn.fhir.cr.BaseCrR4TestServer;
 import ca.uhn.fhir.cr.r4.measure.MeasureOperationsProvider;
-import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
-import io.specto.hoverfly.junit.core.Hoverfly;
-import io.specto.hoverfly.junit5.HoverflyExtension;
+import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.Observation;
+import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Resource;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import java.io.IOException;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -22,69 +20,43 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(SpringExtension.class)
-@ExtendWith(HoverflyExtension.class)
-class MeasureOperationsProviderTest extends BaseCrR4Test {
+class R4MeasureOperationProviderIT extends BaseCrR4TestServer
+{
 	@Autowired
-    MeasureOperationsProvider myMeasureOperationsProvider;
+	MeasureOperationsProvider myMeasureOperationsProvider;
 
-	@Test
-	void testMeasureEvaluate() throws IOException {
-		loadBundle("Exm104FhirR4MeasureBundle.json");
+	public MeasureReport runEvaluateMeasure(String periodStart, String periodEnd, String subject, String measureId, String reportType, String practitioner){
 
-		var returnMeasureReport = this.myMeasureOperationsProvider.evaluateMeasure(
-			new IdType("Measure", "measure-EXM104-8.2.000"),
-			"2019-01-01",
-			"2020-01-01",
-			"subject",
-			"Patient/numer-EXM104",
-			null,
-			"2019-12-12",
-			null,
-			null,
-			null,
-			new SystemRequestDetails()
-		);
+		var parametersEval = new Parameters();
+		parametersEval.addParameter("periodStart", new DateType(periodStart));
+		parametersEval.addParameter("periodEnd", new DateType(periodEnd));
+		parametersEval.addParameter("practitioner", practitioner);
+		parametersEval.addParameter("reportType", reportType);
+		parametersEval.addParameter("subject", subject);
 
-		assertNotNull(returnMeasureReport);
+		var report = ourClient.operation().onInstance("Measure/" + measureId)
+			.named("$evaluate-measure")
+			.withParameters(parametersEval)
+			.returnResourceType(MeasureReport.class)
+			.execute();
+
+		assertNotNull(report);
+
+		return report;
 	}
 
 	@Test
-	void testMeasureEvaluateWithTerminologyEndpoint(Hoverfly hoverfly) throws IOException {
-		loadBundle("Exm104FhirR4MeasureBundle.json");
-
-		var returnMeasureReport = this.myMeasureOperationsProvider.evaluateMeasure(
-			new IdType("Measure", "measure-EXM104-8.2.000"),
-			"2019-01-01",
-			"2020-01-01",
-			"subject",
-			"Patient/numer-EXM104",
-			null,
-			"2019-12-12",
-			null,
-			null,
-			null,
-			new SystemRequestDetails()
-		);
-
-		assertNotNull(returnMeasureReport);
+	void testMeasureEvaluate_EXM130()  {
+		loadBundle("ColorectalCancerScreeningsFHIR-bundle.json");
+		runEvaluateMeasure("2019-01-01", "2019-12-31", "Patient/numer-EXM130", "ColorectalCancerScreeningsFHIR", "Individual", null);
 	}
 
 	private void runWithPatient(String measureId, String patientId, int initialPopulationCount, int denominatorCount,
 										 int denominatorExclusionCount, int numeratorCount, boolean enrolledDuringParticipationPeriod,
 										 String participationPeriod) {
-		var returnMeasureReport = this.myMeasureOperationsProvider.evaluateMeasure(
-			new IdType("Measure", measureId),
-			"2022-01-01",
-			"2022-12-31",
-			"subject",
-			patientId,
-			null,
-			"2019-12-12",
-			null, null, null,
-			new SystemRequestDetails()
-		);
 
-		assertNotNull(returnMeasureReport);
+
+		var returnMeasureReport = runEvaluateMeasure("2022-01-01", "2022-12-31", patientId, measureId, "Individual", null);
 
 		for (MeasureReport.MeasureReportGroupPopulationComponent population : returnMeasureReport.getGroupFirstRep()
 			.getPopulation()) {
@@ -126,7 +98,8 @@ class MeasureOperationsProviderTest extends BaseCrR4Test {
 
 	@Test
 	void testBCSEHEDISMY2022() {
-		this.loadBundle("BCSEHEDISMY2022-bundle.json");
+		loadBundle("BCSEHEDISMY2022-bundle.json");
+
 		runWithPatient("BCSEHEDISMY2022", "Patient/Patient-5", 0, 0, 0, 0, false,
 			"Interval[2020-10-01T00:00:00.000, 2022-12-31T23:59:59.999]");
 		runWithPatient("BCSEHEDISMY2022", "Patient/Patient-7", 1, 1, 0, 0, true,
@@ -148,19 +121,8 @@ class MeasureOperationsProviderTest extends BaseCrR4Test {
 		var measure = read(new IdType("Measure", "InitialInpatientPopulation"));
 		assertNotNull(measure);
 
-		MeasureReport returnMeasureReport = this.myMeasureOperationsProvider.evaluateMeasure(
-			new IdType("Measure", "InitialInpatientPopulation"),
-			"2019-01-01",
-			"2020-01-01",
-			"subject",
-			"Patient/97f27374-8a5c-4aa1-a26f-5a1ab03caa47",
-			null,
-			null,
-			null, null, null,
-			new SystemRequestDetails()
-		);
+		var returnMeasureReport = runEvaluateMeasure("2019-01-01", "2020-01-01", "Patient/97f27374-8a5c-4aa1-a26f-5a1ab03caa47", "InitialInpatientPopulation", "Individual", null);
 
-		assertNotNull(returnMeasureReport);
 
 		String populationName = "initial-population";
 		int expectedCount = 2;
@@ -180,33 +142,10 @@ class MeasureOperationsProviderTest extends BaseCrR4Test {
 		this.loadBundle("multiversion/EXM124-7.0.000-bundle.json");
 		this.loadBundle("multiversion/EXM124-9.0.000-bundle.json");
 
-		MeasureReport returnMeasureReportVersion7 = this.myMeasureOperationsProvider.evaluateMeasure(
-			new IdType("Measure", "measure-EXM124-7.0.000"),
-			"2019-01-01",
-			"2020-01-01",
-			"subject",
-			"Patient/numer-EXM124",
-			null,
-			"2019-12-12",
-			null, null, null,
-			new SystemRequestDetails()
-		);
+		runEvaluateMeasure("2019-01-01", "2020-01-01", "Patient/numer-EXM124", "measure-EXM124-7.0.000", "Individual", null);
+		runEvaluateMeasure("2019-01-01", "2020-01-01", "Patient/numer-EXM124", "measure-EXM124-9.0.000", "Individual", null);
 
-		assertNotNull(returnMeasureReportVersion7);
-
-		MeasureReport returnMeasureReportVersion9 = this.myMeasureOperationsProvider.evaluateMeasure(
-			new IdType("Measure", "measure-EXM124-9.0.000"),
-			"2019-01-01",
-			"2020-01-01",
-			"subject",
-			"Patient/numer-EXM124",
-			null,
-			"2019-12-12",
-			null, null, null,
-			new SystemRequestDetails()
-		);
-
-		assertNotNull(returnMeasureReportVersion9);
 	}
+
 
 }

@@ -115,7 +115,7 @@ These define one or more fields which must have a match before two resources are
 This is like a list of "pre-searches" that find potential candidates for matches,
 to avoid the expensive operation of running a match score calculation on all resources in the system.
 `candidateSearchParameters` are capable of making exact searches and phonetic searches
-(see the list of [phonetic search parameters](/hapi-fhir/docs/fhir_repository/search_parameter_phonetic.html))
+(see the list of [phonetic search parameters](https://smilecdr.com/docs/fhir_repository/search_parameter_phonetic.html))
 E.g. you may only wish to consider matching two Patients if they either share at least one identifier in
 common or have the same birthday or the same phone number. The HAPI FHIR server executes each of these searches
 separately and then takes the union of the results, so you can think of these as `OR` criteria that
