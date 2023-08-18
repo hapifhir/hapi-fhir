@@ -384,7 +384,7 @@ public class Controller extends BaseController {
 			final ModelMap theModel) {
 		addCommonParamsForHfql(theServletRequest, theRequest, theModel);
 
-		ourLog.info("Executing HFQL query: {}", theHfqlQuery);
+		ourLog.info("Executing HFQL query: {}", theHfqlQuery.replaceAll("\\s+", " "));
 		StopWatch sw = new StopWatch();
 
 		List<List<String>> rows = new ArrayList<>();
