@@ -72,6 +72,7 @@ public class ResponsePageTest {
 	) {
 		// setup
 		myBundleBuilder
+			.setBundleProvider(myBundleProvider)
 			.setResources(myList);
 		RequestedPage requestedPage = new RequestedPage(
 			0, // offset
@@ -81,7 +82,6 @@ public class ResponsePageTest {
 
 		page.setResponseBundleRequest(myRequest);
 		page.setRequestedPage(requestedPage);
-		page.setBundleProvider(myBundleProvider);
 
 		// when
 		if (theHasNextBoolean) {
@@ -117,6 +117,7 @@ public class ResponsePageTest {
 		// setup
 		// setup
 		myBundleBuilder
+			.setBundleProvider(myBundleProvider)
 			.setResources(myList)
 		;
 		RequestedPage requestedPage = new RequestedPage(
@@ -127,7 +128,6 @@ public class ResponsePageTest {
 
 		page.setResponseBundleRequest(myRequest);
 		page.setRequestedPage(requestedPage);
-		page.setBundleProvider(myBundleProvider);
 
 		// when
 		if (theHasNextBoolean) {
@@ -175,15 +175,24 @@ public class ResponsePageTest {
 	) {
 		// setup
 		myBundleBuilder
+			.setBundleProvider(myBundleProvider)
 			.setResources(myList);
 
 		int offset = theHasPreviousBoolean ? 10 : 0;
-		if (!theNumTotalResultsIsNull) {
-			myBundleBuilder.setNumTotalResults(10 + offset);
-		}
 
 		if (!theHasNextBoolean) {
 			myBundleBuilder.setNumToReturn(10);
+		}
+
+		// when
+		when(myBundleProvider.getCurrentPageOffset())
+			.thenReturn(null);
+		if (!theNumTotalResultsIsNull) {
+			when(myBundleProvider.size())
+				.thenReturn(10 + offset);
+		} else {
+			when(myBundleProvider.size())
+				.thenReturn(null);
 		}
 
 		RequestedPage requestedPage = new RequestedPage(
@@ -194,12 +203,7 @@ public class ResponsePageTest {
 
 		page.setResponseBundleRequest(myRequest);
 		page.setRequestedPage(requestedPage);
-		page.setBundleProvider(myBundleProvider);
 		page.setUseOffsetPaging(true);
-
-		// when
-		when(myBundleProvider.getCurrentPageOffset())
-			.thenReturn(null);
 
 		// test
 		page.setNextPageIfNecessary(myLinks);
@@ -230,6 +234,7 @@ public class ResponsePageTest {
 		myBundleBuilder
 			.setResources(myList)
 			.setSearchId("search-id")
+			.setBundleProvider(myBundleProvider)
 			.setPageSize(pageSize);
 
 		int offset = 0;
@@ -247,12 +252,21 @@ public class ResponsePageTest {
 		myBundleBuilder.setIncludedResourceCount(includeResourceCount);
 
 		if (!theNumTotalResultsIsNull) {
-			// accurate total (myNumTotalResults has a value)
-			myBundleBuilder.setNumTotalResults(offset + pageSize);
-
 			if (!theHasNextBoolean) {
 				myBundleBuilder.setNumToReturn(pageSize + offset + includeResourceCount);
 			}
+		}
+
+		// when
+		when(myBundleProvider.getCurrentPageOffset())
+			.thenReturn(null);
+		if (!theNumTotalResultsIsNull) {
+			// accurate total (myNumTotalResults has a value)
+			when(myBundleProvider.size())
+				.thenReturn(offset + pageSize);
+		} else {
+			when(myBundleProvider.size())
+				.thenReturn(null);
 		}
 
 		RequestedPage requestedPage = new RequestedPage(
@@ -263,11 +277,6 @@ public class ResponsePageTest {
 
 		page.setResponseBundleRequest(myRequest);
 		page.setRequestedPage(requestedPage);
-		page.setBundleProvider(myBundleProvider);
-
-		// when
-		when(myBundleProvider.getCurrentPageOffset())
-			.thenReturn(null);
 
 		// test
 		page.setNextPageIfNecessary(myLinks);

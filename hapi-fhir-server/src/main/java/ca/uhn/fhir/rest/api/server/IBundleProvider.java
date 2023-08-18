@@ -26,22 +26,14 @@ import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 public interface IBundleProvider {
-
-	/**
-	 * Returns a ResponsePageBuilder for constructing
-	 * pages that return results.
-	 */
-	default ResponsePage.ResponsePageBuilder getResponsePageBuilder() {
-		return new ResponsePage.ResponsePageBuilder();
-	}
 
 	/**
 	 * If this method is implemented, provides an ID for the current
@@ -123,8 +115,6 @@ public interface IBundleProvider {
 	IPrimitiveType<Date> getPublished();
 
 	/**
-	 * Deprecated: Use the getResources(int from, int to, ResourcePageBuilder builder) instead.
-	 * <p>
 	 * Load the given collection of resources by index, plus any additional resources per the
 	 * server's processing rules (e.g. _include'd resources, OperationOutcome, etc.). For example,
 	 * if the method is invoked with index 0,10 the method might return 10 search results, plus an
@@ -137,15 +127,17 @@ public interface IBundleProvider {
 	 * previous page, then the indexes should be ignored and the
 	 * whole page returned.
 	 * </p>
+	 * Note that this implementation should not be used if accurate paging is required,
+	 * as page calculation depends on _include'd resource counts.
+	 * For accurate paging, use {@link IBundleProvider#getResources(int, int, ResponsePage.ResponsePageBuilder)}
 	 *
 	 * @param theFromIndex The low index (inclusive) to return
 	 * @param theToIndex   The high index (exclusive) to return
 	 * @return A list of resources. The size of this list must be at least <code>theToIndex - theFromIndex</code>.
 	 */
 	@Nonnull
-	@Deprecated(forRemoval = true, since = "7.0.0")
 	default List<IBaseResource> getResources(int theFromIndex, int theToIndex) {
-		return getResources(theFromIndex, theToIndex, getResponsePageBuilder());
+		return getResources(theFromIndex, theToIndex, new ResponsePage.ResponsePageBuilder());
 	}
 
 	/**

@@ -152,24 +152,15 @@ class ResponseBundleBuilderTest {
 	}
 
 	@Test
-	public void buildResponseBundle_withIncludeFilterAndFewerResultsThanPageSize_doesNotReturnNextLink() {
+	public void buildResponseBundle_withIncludeParamAndFewerResultsThanPageSize_doesNotReturnNextLink() {
 		// setup
 		int includeResources = 4;
 		// we want the number of resources returned to be equal to the pagesize
 		List<IBaseResource> list = buildXPatientList(DEFAULT_PAGE_SIZE - includeResources);
 
-		ResponsePage.ResponsePageBuilder builder = new ResponsePage.ResponsePageBuilder();
-		builder.setIncludedResourceCount(includeResources);
-
 		ResponseBundleBuilder svc = new ResponseBundleBuilder(false);
 
 		SimpleBundleProvider provider = new SimpleBundleProvider() {
-
-			@Override
-			public ResponsePage.ResponsePageBuilder getResponsePageBuilder() {
-				return builder;
-			}
-
 			@Nonnull
 			@Override
 			public List<IBaseResource> getResources(int theFrom, int theTo, @Nonnull ResponsePage.ResponsePageBuilder theResponsePageBuilder) {
@@ -178,6 +169,7 @@ class ResponseBundleBuilderTest {
 				for (int i = 0; i < includeResources; i++) {
 					retList.add(new Organization().setId("Organization/" + i));
 				}
+				theResponsePageBuilder.setIncludedResourceCount(includeResources);
 				return retList;
 			}
 		};

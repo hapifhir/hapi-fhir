@@ -90,7 +90,7 @@ public class ResponseBundleBuilder {
 		final List<IBaseResource> resourceList;
 		final int pageSize;
 
-		ResponsePage.ResponsePageBuilder responsePageBuilder = bundleProvider.getResponsePageBuilder();
+		ResponsePage.ResponsePageBuilder responsePageBuilder = new ResponsePage.ResponsePageBuilder();
 
 		int numToReturn;
 		String searchId = null;
@@ -125,7 +125,7 @@ public class ResponseBundleBuilder {
 				.setSearchId(searchId)
 				.setPageSize(pageSize)
 				.setNumToReturn(numToReturn)
-				.setNumTotalResults(bundleProvider.size())
+				.setBundleProvider(bundleProvider)
 				.setResources(resourceList);
 
 		return responsePageBuilder.build();
@@ -265,7 +265,6 @@ public class ResponseBundleBuilder {
 				|| myIsOffsetModeHistory);
 		theResponsePage.setResponseBundleRequest(theResponseBundleRequest);
 		theResponsePage.setRequestedPage(pageRequest);
-		theResponsePage.setBundleProvider(bundleProvider);
 
 		// generate our links
 		theResponsePage.setNextPageIfNecessary(retval);

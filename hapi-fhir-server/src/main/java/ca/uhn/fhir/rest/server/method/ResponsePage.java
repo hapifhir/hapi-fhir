@@ -53,7 +53,8 @@ public class ResponsePage {
 	 */
 	private final int myPageSize;
 	/**
-	 * The number of resources that should be returned in the bundle.  Can be smaller than pageSize when the bundleProvider
+	 * The number of resources that should be returned in the bundle.
+	 * Can be smaller than pageSize when the bundleProvider
 	 * has fewer results than the page size.
 	 */
 	private final int myNumToReturn;
@@ -70,6 +71,11 @@ public class ResponsePage {
 	 * even though it will change number of resources returned.
 	 */
 	private final int myOmittedResourceCount;
+
+	/**
+	 * The bundle provider.
+	 */
+	private final IBundleProvider myBundleProvider;
 
 	// Properties below here are set for calculation of pages;
 	// not part of the response pages in and of themselves
@@ -90,11 +96,6 @@ public class ResponsePage {
 	private RequestedPage myRequestedPage;
 
 	/**
-	 * The bundle provider.
-	 */
-	private IBundleProvider myBundleProvider;
-
-	/**
 	 * The paging style being used.
 	 * This is determined by a number of conditions,
 	 * including what the bundleprovider provides.
@@ -106,16 +107,18 @@ public class ResponsePage {
 			List<IBaseResource> theResourceList,
 			int thePageSize,
 			int theNumToReturn,
-			Integer theNumTotalResults,
 			int theIncludedResourceCount,
-			int theOmittedResourceCount) {
+			int theOmittedResourceCount,
+			IBundleProvider theBundleProvider) {
 		mySearchId = theSearchId;
 		myResourceList = theResourceList;
 		myPageSize = thePageSize;
 		myNumToReturn = theNumToReturn;
-		myNumTotalResults = theNumTotalResults;
 		myIncludedResourceCount = theIncludedResourceCount;
 		myOmittedResourceCount = theOmittedResourceCount;
+		myBundleProvider = theBundleProvider;
+
+		myNumTotalResults = myBundleProvider.size();
 	}
 
 	public int size() {
@@ -155,10 +158,10 @@ public class ResponsePage {
 		} else if (StringUtils.isNotBlank(mySearchId)) {
 			myPagingStyle = PagingStyle.SAVED_SEARCH;
 		} else {
-			myPagingStyle = PagingStyle.UNKNOWN;
-			// only our unit tests end up here
-			ourLog.warn("Response page requires more information to determine paging style. "
-					+ "Did you remember to mock out all proper values?");
+			myPagingStyle = PagingStyle.NONE;
+			// only end up here if no paging is desired
+			ourLog.debug("No accurate paging will be generated." +
+				" If accurate paging is desired, ResponsePageBuilder must be provided with additioanl information.");
 		}
 	}
 
@@ -168,10 +171,6 @@ public class ResponsePage {
 
 	public IBundleProvider getBundleProvider() {
 		return myBundleProvider;
-	}
-
-	public void setBundleProvider(IBundleProvider theBundleProvider) {
-		myBundleProvider = theBundleProvider;
 	}
 
 	public void setUseOffsetPaging(boolean theIsUsingOffsetPaging) {
@@ -351,11 +350,11 @@ public class ResponsePage {
 
 		private String mySearchId;
 		private List<IBaseResource> myResources;
-		private Integer myNumTotalResults;
 		private int myPageSize;
 		private int myNumToReturn;
 		private int myIncludedResourceCount;
 		private int myOmittedResourceCount;
+		private IBundleProvider myBundleProvider;
 
 		public ResponsePageBuilder setOmittedResourceCount(int theOmittedResourceCount) {
 			myOmittedResourceCount = theOmittedResourceCount;
@@ -377,8 +376,8 @@ public class ResponsePage {
 			return this;
 		}
 
-		public ResponsePageBuilder setNumTotalResults(Integer theNumTotalResults) {
-			myNumTotalResults = theNumTotalResults;
+		public ResponsePageBuilder setBundleProvider(IBundleProvider theBundleProvider) {
+			myBundleProvider = theBundleProvider;
 			return this;
 		}
 
@@ -398,10 +397,10 @@ public class ResponsePage {
 					myResources, // resource list
 					myPageSize, // page size
 					myNumToReturn, // num to return
-					myNumTotalResults, // total results
 					myIncludedResourceCount, // included count
-					myOmittedResourceCount // omitted resources
-					);
+					myOmittedResourceCount, // omitted resources
+					myBundleProvider // the bundle provider
+			);
 		}
 	}
 
@@ -442,12 +441,11 @@ public class ResponsePage {
 		 */
 		SAVED_SEARCH,
 		/**
-		 * Our unit tests have a tendency to not include all the mocked out
-		 * values, resulting in invalid search pages being returned.
-		 *
-		 * These tests also do not check links, so correctness was never verified.
-		 * This search status should never appear in production.
+		 * No paging is done at all.
+		 * No previous nor next links will be available, even if previous or next
+		 * links exist.
+		 * If paging is required, a different paging method must be specified.
 		 */
-		UNKNOWN;
+		NONE;
 	}
 }
