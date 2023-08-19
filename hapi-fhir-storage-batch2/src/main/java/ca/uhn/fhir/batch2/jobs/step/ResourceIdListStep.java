@@ -94,10 +94,11 @@ public class ResourceIdListStep<PT extends PartitionedJobParameters, IT extends 
 			ourLog.debug("Found {} IDs from {} to {}", nextChunk.size(), start, nextChunk.getLastDate());
 
 			final Set<TypedPidJson> idBuffer = nextChunk.getTypedResourcePids().stream()
-				.map(TypedPidJson::new)
-				.collect(Collectors.toCollection(LinkedHashSet::new));
+					.map(TypedPidJson::new)
+					.collect(Collectors.toCollection(LinkedHashSet::new));
 
-			final UnmodifiableIterator<List<TypedPidJson>> partition = Iterators.partition(idBuffer.iterator(), maxBatchId);
+			final UnmodifiableIterator<List<TypedPidJson>> partition =
+					Iterators.partition(idBuffer.iterator(), maxBatchId);
 
 			while (partition.hasNext()) {
 				final List<TypedPidJson> submissionIds = partition.next();
