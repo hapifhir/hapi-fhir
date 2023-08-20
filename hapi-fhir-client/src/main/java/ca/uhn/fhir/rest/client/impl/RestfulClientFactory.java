@@ -59,7 +59,7 @@ public abstract class RestfulClientFactory implements IRestfulClientFactory {
 	private int myConnectTimeout = DEFAULT_CONNECT_TIMEOUT;
 	private FhirContext myContext;
 	private final Map<Class<? extends IRestfulClient>, ClientInvocationHandlerFactory> myInvocationHandlers =
-		new HashMap<>();
+			new HashMap<>();
 	private ServerValidationModeEnum myServerValidationMode = DEFAULT_SERVER_VALIDATION_MODE;
 	private int mySocketTimeout = DEFAULT_SOCKET_TIMEOUT;
 	private String myProxyUsername;
@@ -70,8 +70,7 @@ public abstract class RestfulClientFactory implements IRestfulClientFactory {
 	/**
 	 * Constructor
 	 */
-	public RestfulClientFactory() {
-	}
+	public RestfulClientFactory() {}
 
 	/**
 	 * Constructor
@@ -134,9 +133,9 @@ public abstract class RestfulClientFactory implements IRestfulClientFactory {
 
 	@SuppressWarnings("unchecked")
 	private <T extends IRestfulClient> T instantiateProxy(
-		Class<T> theClientType, InvocationHandler theInvocationHandler) {
+			Class<T> theClientType, InvocationHandler theInvocationHandler) {
 		return (T) Proxy.newProxyInstance(
-			theClientType.getClassLoader(), new Class[]{theClientType}, theInvocationHandler);
+				theClientType.getClassLoader(), new Class[] {theClientType}, theInvocationHandler);
 	}
 
 	/**
@@ -153,7 +152,7 @@ public abstract class RestfulClientFactory implements IRestfulClientFactory {
 
 		if (!theClientType.isInterface()) {
 			throw new ConfigurationException(
-				Msg.code(1354) + theClientType.getCanonicalName() + " is not an interface");
+					Msg.code(1354) + theClientType.getCanonicalName() + " is not an interface");
 		}
 
 		ClientInvocationHandlerFactory invocationHandler = myInvocationHandlers.get(theClientType);
@@ -178,8 +177,8 @@ public abstract class RestfulClientFactory implements IRestfulClientFactory {
 	protected void validateConfigured() {
 		if (getFhirContext() == null) {
 			throw new IllegalStateException(Msg.code(1355) + getClass().getSimpleName()
-				+ " does not have FhirContext defined. This must be set via "
-				+ getClass().getSimpleName() + "#setFhirContext(FhirContext)");
+					+ " does not have FhirContext defined. This must be set via "
+					+ getClass().getSimpleName() + "#setFhirContext(FhirContext)");
 		}
 	}
 
@@ -217,8 +216,8 @@ public abstract class RestfulClientFactory implements IRestfulClientFactory {
 	public void setFhirContext(FhirContext theContext) {
 		if (myContext != null && myContext != theContext) {
 			throw new IllegalStateException(
-				Msg.code(1356)
-					+ "RestfulClientFactory instance is already associated with one FhirContext. RestfulClientFactory instances can not be shared.");
+					Msg.code(1356)
+							+ "RestfulClientFactory instance is already associated with one FhirContext. RestfulClientFactory instances can not be shared.");
 		}
 		myContext = theContext;
 	}
@@ -270,7 +269,7 @@ public abstract class RestfulClientFactory implements IRestfulClientFactory {
 
 	@Override
 	public void validateServerBaseIfConfiguredToDoSo(
-		String theServerBase, IHttpClient theHttpClient, IRestfulClient theClient) {
+			String theServerBase, IHttpClient theHttpClient, IRestfulClient theClient) {
 		String serverBase = normalizeBaseUrlForMap(theServerBase);
 
 		switch (getServerValidationMode()) {
@@ -305,41 +304,41 @@ public abstract class RestfulClientFactory implements IRestfulClientFactory {
 			Class implementingClass;
 			try {
 				implementingClass = myContext
-					.getResourceDefinition(capabilityStatementResourceName)
-					.getImplementingClass();
+						.getResourceDefinition(capabilityStatementResourceName)
+						.getImplementingClass();
 			} catch (DataFormatException e) {
 				if (!myContext.getVersion().getVersion().isOlderThan(FhirVersionEnum.DSTU3)) {
 					capabilityStatementResourceName = "Conformance";
 					implementingClass = myContext
-						.getResourceDefinition(capabilityStatementResourceName)
-						.getImplementingClass();
+							.getResourceDefinition(capabilityStatementResourceName)
+							.getImplementingClass();
 				} else {
 					throw e;
 				}
 			}
 			try {
 				conformance = (IBaseResource)
-					client.fetchConformance().ofType(implementingClass).execute();
+						client.fetchConformance().ofType(implementingClass).execute();
 			} catch (FhirClientConnectionException e) {
 				if (!myContext.getVersion().getVersion().isOlderThan(FhirVersionEnum.DSTU3)
-					&& e.getCause() instanceof DataFormatException) {
+						&& e.getCause() instanceof DataFormatException) {
 					capabilityStatementResourceName = "CapabilityStatement";
 					implementingClass = myContext
-						.getResourceDefinition(capabilityStatementResourceName)
-						.getImplementingClass();
+							.getResourceDefinition(capabilityStatementResourceName)
+							.getImplementingClass();
 					conformance = (IBaseResource)
-						client.fetchConformance().ofType(implementingClass).execute();
+							client.fetchConformance().ofType(implementingClass).execute();
 				} else {
 					throw e;
 				}
 			}
 		} catch (FhirClientConnectionException e) {
 			String msg = myContext
-				.getLocalizer()
-				.getMessage(
-					RestfulClientFactory.class,
-					"failedToRetrieveConformance",
-					theServerBase + Constants.URL_TOKEN_METADATA);
+					.getLocalizer()
+					.getMessage(
+							RestfulClientFactory.class,
+							"failedToRetrieveConformance",
+							theServerBase + Constants.URL_TOKEN_METADATA);
 			throw new FhirClientConnectionException(Msg.code(1357) + msg, e);
 		}
 
@@ -365,7 +364,7 @@ public abstract class RestfulClientFactory implements IRestfulClientFactory {
 			} else {
 				// we'll be lenient and accept this
 				ourLog.debug(
-					"Server conformance statement indicates unknown FHIR version: {}", serverFhirVersionString);
+						"Server conformance statement indicates unknown FHIR version: {}", serverFhirVersionString);
 			}
 		}
 
@@ -373,15 +372,15 @@ public abstract class RestfulClientFactory implements IRestfulClientFactory {
 			FhirVersionEnum contextFhirVersion = myContext.getVersion().getVersion();
 			if (!contextFhirVersion.isEquivalentTo(serverFhirVersionEnum)) {
 				throw new FhirClientInappropriateForServerException(Msg.code(1358)
-					+ myContext
-					.getLocalizer()
-					.getMessage(
-						RestfulClientFactory.class,
-						"wrongVersionInConformance",
-						theServerBase + Constants.URL_TOKEN_METADATA,
-						serverFhirVersionString,
-						serverFhirVersionEnum,
-						contextFhirVersion));
+						+ myContext
+								.getLocalizer()
+								.getMessage(
+										RestfulClientFactory.class,
+										"wrongVersionInConformance",
+										theServerBase + Constants.URL_TOKEN_METADATA,
+										serverFhirVersionString,
+										serverFhirVersionEnum,
+										contextFhirVersion));
 			}
 		}
 
