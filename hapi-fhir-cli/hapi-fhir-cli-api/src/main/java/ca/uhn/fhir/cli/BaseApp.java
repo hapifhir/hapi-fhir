@@ -270,14 +270,6 @@ public abstract class BaseApp {
 
 			// Actually execute the command
 			command.run(parsedOptions);
-
-			myShutdownHookHasNotRun = true;
-			runCleanupHookAndUnregister();
-
-			if (!HapiSystemProperties.isTestModeEnabled()) {
-				System.exit(0);
-			}
-
 		} catch (ParseException e) {
 			if (!HapiSystemProperties.isTestModeEnabled()) {
 				LogbackUtil.loggingConfigOff();
@@ -296,6 +288,13 @@ public abstract class BaseApp {
 			ourLog.error("Error during execution: ", t);
 			runCleanupHookAndUnregister();
 			exitDueToException(new CommandFailureException("Error: " + t, t));
+		} finally {
+			myShutdownHookHasNotRun = true;
+			runCleanupHookAndUnregister();
+
+			if (!HapiSystemProperties.isTestModeEnabled()) {
+				System.exit(0);
+			}
 		}
 	}
 
