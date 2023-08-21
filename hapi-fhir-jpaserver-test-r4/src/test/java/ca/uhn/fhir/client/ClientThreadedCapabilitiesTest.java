@@ -113,7 +113,7 @@ public class ClientThreadedCapabilitiesTest {
 			} else {
 				// metadata request must always be first
 				if (counter.get() == 0) {
-					fail("A non-metadata request was executed before metadata request");
+					fail("A non-metadata request was executed before metadata request: " + theRequest.getUri() + " counter: " + counter.get());
 				}
 			}
 		}
