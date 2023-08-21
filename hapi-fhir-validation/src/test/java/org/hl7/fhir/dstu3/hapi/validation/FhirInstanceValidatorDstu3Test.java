@@ -90,6 +90,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.mock;
@@ -1332,7 +1333,7 @@ public class FhirInstanceValidatorDstu3Test {
 		myInstanceVal.setValidatorPolicyAdvisor(policyAdvisor);
 		myVal.validateWithResult(input);
 
-		verify(fetcher, times(3)).resolveURL(any(), any(), anyString(), anyString(), anyString());
+		verify(fetcher, times(3)).resolveURL(any(), any(), anyString(), anyString(), anyString(), anyBoolean());
 		verify(policyAdvisor, times(4)).policyForReference(any(), any(), anyString(), anyString());
 		verify(fetcher, times(4)).fetch(any(), any(), anyString());
 	}

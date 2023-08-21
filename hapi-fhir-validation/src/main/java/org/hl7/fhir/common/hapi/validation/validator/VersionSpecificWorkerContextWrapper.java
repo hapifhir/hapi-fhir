@@ -613,6 +613,13 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 		}
 	}
 
+	@Override
+	public void validateCodeBatchByRef(
+			ValidationOptions validationOptions, List<? extends CodingValidationRequest> list, String s) {
+		ValueSet valueSet = fetchResource(ValueSet.class, s);
+		validateCodeBatch(validationOptions, list, valueSet);
+	}
+
 	@Nonnull
 	private ValidationResult doValidation(
 			IBaseResource theValueSet,
