@@ -65,8 +65,6 @@ public class SearchBundleProviderWithNoSizeR4Test {
 		ourLastBundleProvider = mock(IBundleProvider.class);
 		when(ourLastBundleProvider.getCurrentPageOffset()).thenReturn(null);
 		when(ourLastBundleProvider.size()).thenReturn(null);
-		when(ourLastBundleProvider.getResponsePageBuilder())
-			.thenReturn(new ResponsePage.ResponsePageBuilder());
 		when(ourLastBundleProvider.getResources(any(int.class), any(int.class), any(ResponsePage.ResponsePageBuilder.class)))
 			.then(new Answer<List<IBaseResource>>() {
 				@Override

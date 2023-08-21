@@ -25,11 +25,13 @@ import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.primitive.UriDt;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.parser.StrictErrorHandler;
+import ca.uhn.fhir.rest.api.CacheControlDirective;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.PreferReturnEnum;
 import ca.uhn.fhir.rest.api.SearchTotalModeEnum;
 import ca.uhn.fhir.rest.api.SummaryEnum;
+import ca.uhn.fhir.rest.api.server.IRestfulServer;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.client.apache.ResourceEntity;
 import ca.uhn.fhir.rest.client.api.IClientInterceptor;
@@ -42,6 +44,7 @@ import ca.uhn.fhir.rest.gclient.NumberClientParam;
 import ca.uhn.fhir.rest.gclient.StringClientParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ParamPrefixEnum;
+import ca.uhn.fhir.rest.server.IPagingProvider;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
@@ -159,8 +162,10 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.mockito.Spy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.util.AopTestUtils;
 import org.springframework.transaction.TransactionStatus;
@@ -220,6 +225,9 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.when;
 
 @SuppressWarnings("Duplicates")
 public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
@@ -2652,18 +2660,27 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		assertEquals(1, newSize - initialSize);
 	}
 
-	@Test
-	public void testPagingWithIncludesReturnsConsistentValues() {
+	@ParameterizedTest
+	@CsvSource({
+		"true,19,10",
+		"false,19,10",
+		"true,20,0",
+		"false,20,0"
+	})
+	public void testPagingWithIncludesReturnsConsistentValues(
+		boolean theAllowStoringSearchResults,
+		int theResourceCount,
+		int theOrgCount
+	) {
 		// setup
-		int total = 19;
-		int orgs = 10;
+
 		// create resources
 		{
 			Coding tagCode = new Coding();
 			tagCode.setCode("test");
 			tagCode.setSystem("http://example.com");
-			int orgCount = orgs;
-			for (int i = 0; i < total; i++) {
+			int orgCount = theOrgCount;
+			for (int i = 0; i < theResourceCount; i++) {
 				Task t = new Task();
 				t.getMeta()
 					.addTag(tagCode);
@@ -2678,6 +2695,16 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 				}
 				myTaskDao.create(t);
 			}
+		}
+
+		// when
+		if (!theAllowStoringSearchResults) {
+			// we don't actually allow this in our current
+			// pagingProvider implementations (except for history).
+			// But we will test with it because our ResponsePage
+			// is what's under test here
+			when(myPagingProvider.canStoreSearchResults())
+				.thenReturn(false);
 		}
 
 		int requestedAmount = 10;
@@ -2712,7 +2739,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 		// verify
 		// we should receive all resources and linked resources
-		assertEquals(total + orgs, count);
+		assertEquals(theResourceCount + theOrgCount, count);
 	}
 
 

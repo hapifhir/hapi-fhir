@@ -76,16 +76,20 @@ public class PersistedJpaSearchFirstPageBundleProvider extends PersistedJpaBundl
 
 		mySearchTask.awaitInitialSync();
 
+		// request 1 more than we need to, in order to know if there are extra values
 		ourLog.trace("Fetching search resource PIDs from task: {}", mySearchTask.getClass());
-		final List<JpaPid> pids = mySearchTask.getResourcePids(theFromIndex, theToIndex);
+		final List<JpaPid> pids = mySearchTask.getResourcePids(theFromIndex, theToIndex + 1);
 		ourLog.trace("Done fetching search resource PIDs");
+
+		int maxSize = Math.min(theToIndex, pids.size());
+		thePageBuilder.setTotalRequestedResourcesFetched(pids.size());
 
 		RequestPartitionId requestPartitionId = getRequestPartitionId();
 
 		List<IBaseResource> retVal = myTxService
 				.withRequest(myRequest)
 				.withRequestPartitionId(requestPartitionId)
-				.execute(() -> toResourceList(mySearchBuilder, pids, thePageBuilder));
+				.execute(() -> toResourceList(mySearchBuilder, pids.subList(0, maxSize), thePageBuilder));
 
 		long totalCountWanted = theToIndex - theFromIndex;
 		long totalCountMatch = (int) retVal.stream().filter(t -> !isInclude(t)).count();
