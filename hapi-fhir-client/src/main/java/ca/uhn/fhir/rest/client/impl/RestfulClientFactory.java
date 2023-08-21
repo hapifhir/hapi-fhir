@@ -277,8 +277,10 @@ public abstract class RestfulClientFactory implements IRestfulClientFactory {
 				break;
 
 			case ONCE:
-				if (myValidatedServerBaseUrls.add(serverBase)) {
-					validateServerBase(serverBase, theHttpClient, theClient);
+				synchronized (myValidatedServerBaseUrls) {
+					if (myValidatedServerBaseUrls.add(serverBase)) {
+						validateServerBase(serverBase, theHttpClient, theClient);
+					}
 				}
 				break;
 		}
