@@ -1,5 +1,4 @@
 package ca.uhn.fhir.cr;
-
 import ca.uhn.fhir.context.FhirContext;
 
 import ca.uhn.fhir.cr.dstu3.TestCrDstu3Config;

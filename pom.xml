@@ -9,7 +9,7 @@
 	<groupId>ca.uhn.hapi.fhir</groupId>
 	<artifactId>hapi-fhir</artifactId>
 	<packaging>pom</packaging>
-	<version>6.9.2-SNAPSHOT</version>
+	<version>6.9.3-SNAPSHOT</version>
 
 	<name>HAPI-FHIR</name>
 	<description>An open-source implementation of the FHIR specification in Java.</description>
@@ -979,14 +979,10 @@
 		<testcontainers_version>1.17.1</testcontainers_version>
 		<thymeleaf-version>3.0.14.RELEASE</thymeleaf-version>
 		<woodstox_core_asl_version>4.4.1</woodstox_core_asl_version>
-
-		<!-- We are aiming to still work on a very old version of SLF4j even though we depend on the newest, just to be nice to users of the API. This version is tested in the hapi-fhir-cobertura. -->
-		<slf4j_target_version>1.6.0</slf4j_target_version>
-
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 		<ebay_cors_filter_version>1.0.1</ebay_cors_filter_version>
-
 		<elastic_apm_version>1.28.4</elastic_apm_version>
+
 		<!-- CQL Support -->
 		<cql.version>3.0.0-SNAPSHOT</cql.version>
 		<clinical-reasoning.version>3.0.0-PRE6-SNAPSHOT</clinical-reasoning.version>
@@ -1189,6 +1185,13 @@
 				<groupId>com.sun.activation</groupId>
 				<artifactId>jakarta.activation</artifactId>
 				<version>2.0.0</version>
+			</dependency>
+			<!-- Architecture Test -->
+			<dependency>
+				<groupId>com.tngtech.archunit</groupId>
+				<artifactId>archunit-junit5</artifactId>
+				<version>1.0.1</version>
+				<scope>test</scope>
 			</dependency>
 			<dependency>
 				<groupId>com.vladsch.flexmark</groupId>

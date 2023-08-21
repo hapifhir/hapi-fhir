@@ -17,21 +17,25 @@ import ca.uhn.fhir.test.utilities.JettyUtil;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
+import org.cqframework.cql.elm.execution.Library;
+import org.cqframework.cql.elm.execution.VersionedIdentifier;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.CapabilityStatement;
-import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.Resource;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.opencds.cqf.cql.evaluator.library.EvaluationSettings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.Bean;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.test.context.ContextConfiguration;
 
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
 
@@ -47,16 +51,24 @@ public abstract class BaseCrR4TestServer extends BaseJpaR4Test implements IResou
 	public static IParser ourParser;
 
 
-	@Autowired
-	ApplicationContext myApplicationContext;
+	//@Autowired
+	//ApplicationContext myApplicationContext;
 	private SimpleRequestHeaderInterceptor mySimpleHeaderInterceptor;
 
+	@Autowired
+	EvaluationSettings myEvaluationSettings;
+
+	@Autowired
+	Map<VersionedIdentifier, Library> myGlobalLibraryCache;
 
 	@SuppressWarnings("deprecation")
 	@AfterEach
 	public void after() {
 		ourClient.unregisterInterceptor(mySimpleHeaderInterceptor);
 		myStorageSettings.setIndexMissingFields(new JpaStorageSettings().getIndexMissingFields());
+		myEvaluationSettings.getLibraryCache().clear();
+		myGlobalLibraryCache.clear();
+
 	}
 	@Autowired
 	RestfulServer ourRestfulServer;
@@ -99,11 +111,6 @@ public abstract class BaseCrR4TestServer extends BaseJpaR4Test implements IResou
 		myStorageSettings.setIndexMissingFields(JpaStorageSettings.IndexEnabledEnum.DISABLED);
 
 	}
-	public static CapabilityStatement getCapabilityStatement() {
-		CapabilityStatement metadata = new CapabilityStatement();
-		metadata.setFhirVersion(Enumerations.FHIRVersion._4_0_1);
-		return metadata;
-	}
 
 	@Override
 	public DaoRegistry getDaoRegistry() {
@@ -115,8 +122,9 @@ public abstract class BaseCrR4TestServer extends BaseJpaR4Test implements IResou
 		return ourCtx;
 	}
 
-	public Bundle loadBundle(String theLocation) {
-		return loadBundle(Bundle.class, theLocation);
+	public void loadBundle(String theLocation) {
+		var bundy = (Bundle) readResource(theLocation);
+		ourClient.transaction().withBundle(bundy).execute();
 	}
 
 

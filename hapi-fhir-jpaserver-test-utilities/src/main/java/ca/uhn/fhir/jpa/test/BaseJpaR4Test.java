@@ -520,6 +520,8 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 	@Autowired
 	protected IMdmLinkJpaRepository myMdmLinkDao;
 	@Autowired
+	protected IMdmLinkJpaRepository myMdmLinkHistoryDao;
+	@Autowired
 	private IValidationSupport myJpaValidationSupportChainR4;
 	private PerformanceTracingLoggingInterceptor myPerformanceTracingLoggingInterceptor;
 	@Autowired
@@ -588,6 +590,7 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 	@AfterEach
 	public void afterPurgeDatabase() {
 		runInTransaction(() -> {
+			myMdmLinkHistoryDao.deleteAll();
 			myMdmLinkDao.deleteAll();
 		});
 		purgeDatabase(myStorageSettings, mySystemDao, myResourceReindexingSvc, mySearchCoordinatorSvc, mySearchParamRegistry, myBulkDataScheduleHelper);
