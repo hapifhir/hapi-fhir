@@ -1,9 +1,6 @@
 package ca.uhn.fhir.cr.r4;
 
 import ca.uhn.fhir.cr.BaseCrR4TestServer;
-import ca.uhn.fhir.cr.config.r4.CrR4Config;
-import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
-import ca.uhn.fhir.rest.client.interceptor.SimpleRequestHeaderInterceptor;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
@@ -12,7 +9,6 @@ import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.Parameters;
 import org.junit.jupiter.api.Test;
-import org.springframework.test.context.ContextConfiguration;
 
 import java.util.Optional;
 
@@ -42,10 +38,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * 6. Provider submits additional Patient data
  * 7. Provider invokes care-gaps (and discovers issues are closed).
  */
-@ContextConfiguration(classes = CrR4Config.class)
-class CareGapsOperationProviderIT extends BaseCrR4TestServer{
+class CareGapsOperationProviderIT extends BaseCrR4TestServer
+{
 
-	private SimpleRequestHeaderInterceptor mySimpleHeaderInterceptor;
 
 	@Test
 	public void careGapsEndToEnd(){
@@ -53,6 +48,8 @@ class CareGapsOperationProviderIT extends BaseCrR4TestServer{
 		// 1. Initialize Payer content
 		var measureBundle = (Bundle) readResource("CaregapsColorectalCancerScreeningsFHIR-bundle.json");
 		ourClient.transaction().withBundle(measureBundle).execute();
+
+		ourClient.read().resource(Measure.class).withId("ColorectalCancerScreeningsFHIR").execute();
 
 		// 2. Initialize Payer org data
 		var orgData = (Bundle) readResource("CaregapsAuthorAndReporter.json");
@@ -100,19 +97,15 @@ class CareGapsOperationProviderIT extends BaseCrR4TestServer{
 		assertNotNull(theResult);
 		var dataBundle = (Bundle) theResult.getParameter().get(0).getResource();
 		var detectedIssue = dataBundle.getEntry()
-																.stream()
-											.filter(bundleEntryComponent -> "DetectedIssue".equalsIgnoreCase(bundleEntryComponent.getResource().getResourceType().name())).findFirst().get();
+			.stream()
+			.filter(bundleEntryComponent -> "DetectedIssue".equalsIgnoreCase(bundleEntryComponent.getResource().getResourceType().name())).findFirst().get();
 		var extension = (Extension) detectedIssue.getResource().getChildByName("modifierExtension").getValues().get(0);
 
 		var codeableConcept = (CodeableConcept) extension.getValue();
 		Optional<Coding> coding = codeableConcept.getCoding()
-																.stream()
-											.filter(code -> "open-gap".equalsIgnoreCase(code.getCode()) || "closed-gap".equalsIgnoreCase(code.getCode())).findFirst();
+			.stream()
+			.filter(code -> "open-gap".equalsIgnoreCase(code.getCode()) || "closed-gap".equalsIgnoreCase(code.getCode())).findFirst();
 		assertTrue(!coding.isEmpty());
 	}
 
-	@Override
-	public DaoRegistry getDaoRegistry() {
-		return myDaoRegistry;
-	}
 }

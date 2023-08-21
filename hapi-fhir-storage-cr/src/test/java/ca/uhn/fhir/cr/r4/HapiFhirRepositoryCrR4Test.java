@@ -25,7 +25,7 @@ import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.param.NumberParam;
 
-public class HapiFhirRepositoryR4Test extends BaseCrR4TestServer {
+public class HapiFhirRepositoryCrR4Test extends BaseCrR4TestServer {
 
 	@Autowired
 	RestfulServer myRestfulServer;
