@@ -454,7 +454,11 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 				extractParameterCombinationsForComboParam(theParams, theResourceType, theRuntimeParam);
 
 		for (String nextQueryString : queryStringsToPopulate) {
-			ourLog.trace("Adding composite unique SP: {} on {} for {}", nextQueryString, theResourceType, theRuntimeParam.getId());
+			ourLog.trace(
+					"Adding composite unique SP: {} on {} for {}",
+					nextQueryString,
+					theResourceType,
+					theRuntimeParam.getId());
 			ResourceIndexedComboStringUnique uniqueParam = new ResourceIndexedComboStringUnique();
 			uniqueParam.setIndexString(nextQueryString);
 			uniqueParam.setSearchParameterId(theRuntimeParam.getId());
