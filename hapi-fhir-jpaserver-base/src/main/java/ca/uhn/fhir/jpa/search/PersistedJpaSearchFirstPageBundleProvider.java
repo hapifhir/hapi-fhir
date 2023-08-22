@@ -81,7 +81,7 @@ public class PersistedJpaSearchFirstPageBundleProvider extends PersistedJpaBundl
 		final List<JpaPid> pids = mySearchTask.getResourcePids(theFromIndex, theToIndex + 1);
 		ourLog.trace("Done fetching search resource PIDs");
 
-		int maxSize = Math.min(theToIndex, pids.size());
+		int maxSize = Math.min(theToIndex - theFromIndex, pids.size());
 		thePageBuilder.setTotalRequestedResourcesFetched(pids.size());
 
 		RequestPartitionId requestPartitionId = getRequestPartitionId();

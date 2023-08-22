@@ -260,7 +260,8 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 		// (when doing offset searches)
 		final List<JpaPid> pidsSubList = mySearchCoordinatorSvc.getResources(
 				myUuid, theFromIndex, theToIndex + 1, myRequest, requestPartitionId);
-		int maxSize = Math.min(theToIndex, pidsSubList.size());
+		// max list size should be either the entire list, or from - to length
+		int maxSize = Math.min(theToIndex - theFromIndex, pidsSubList.size());
 		theResponsePageBuilder.setTotalRequestedResourcesFetched(pidsSubList.size());
 		List<IBaseResource> resources = myTxService
 				.withRequest(myRequest)
