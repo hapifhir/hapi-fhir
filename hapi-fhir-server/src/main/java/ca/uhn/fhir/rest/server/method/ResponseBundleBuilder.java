@@ -247,7 +247,6 @@ public class ResponseBundleBuilder {
 
 	private BundleLinks buildLinks(ResponseBundleRequest theResponseBundleRequest, ResponsePage theResponsePage) {
 		final IRestfulServer<?> server = theResponseBundleRequest.server;
-		final IBundleProvider bundleProvider = theResponseBundleRequest.bundleProvider;
 		final RequestedPage pageRequest = theResponseBundleRequest.requestedPage;
 
 		BundleLinks retval = new BundleLinks(

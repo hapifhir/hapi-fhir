@@ -263,6 +263,7 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 		// max list size should be either the entire list, or from - to length
 		int maxSize = Math.min(theToIndex - theFromIndex, pidsSubList.size());
 		theResponsePageBuilder.setTotalRequestedResourcesFetched(pidsSubList.size());
+
 		List<IBaseResource> resources = myTxService
 				.withRequest(myRequest)
 				.withRequestPartitionId(requestPartitionId)
