@@ -110,12 +110,15 @@ public class PersistedJpaSearchFirstPageBundleProvider extends PersistedJpaBundl
 
 				long remainingWanted = totalCountWanted - totalCountMatch;
 				long fromIndex = theToIndex - remainingWanted;
-				List<IBaseResource> remaining = super.getResources((int) fromIndex, theToIndex, thePageBuilder);
+				ResponsePage.ResponsePageBuilder pageBuilder = new ResponsePage.ResponsePageBuilder();
+				pageBuilder.setBundleProvider(this);
+				List<IBaseResource> remaining = super.getResources((int) fromIndex, theToIndex, pageBuilder);
 				remaining.forEach(t -> {
 					if (!existingIds.contains(t.getIdElement().getValue())) {
 						retVal.add(t);
 					}
 				});
+				thePageBuilder.combineWith(pageBuilder);
 			}
 		}
 		ourLog.trace("Loaded resources to return");

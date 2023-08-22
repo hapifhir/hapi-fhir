@@ -449,6 +449,35 @@ public class ResponsePage {
 			return this;
 		}
 
+		/**
+		 * Combine this builder with a second buider.
+		 * Useful if a second page is requested, but you do not wish to
+		 * overwrite the current values.
+		 *
+		 * Will not replace searchId, nor IBundleProvider (which should be
+		 * the exact same for any subsequent searches anyways).
+		 *
+		 * Will also not copy pageSize nor numToReturn, as these should be
+		 * the same for any single search result set.
+		 *
+		 * @param theSecondBuilder - a second builder (cannot be this one)
+		 */
+		public void combineWith(ResponsePageBuilder theSecondBuilder) {
+			assert theSecondBuilder != this; // don't want to combine with itself
+
+			if (myResources != null && theSecondBuilder.myResources != null) {
+				myResources.addAll(theSecondBuilder.myResources);
+			}
+
+			if (myTotalRequestedResourcesFetched != -1 && theSecondBuilder.myTotalRequestedResourcesFetched != -1) {
+				myTotalRequestedResourcesFetched += theSecondBuilder.myTotalRequestedResourcesFetched;
+			}
+
+			// primitives can always be added
+			myIncludedResourceCount += theSecondBuilder.myIncludedResourceCount;
+			myOmittedResourceCount += theSecondBuilder.myOmittedResourceCount;
+		}
+
 		public ResponsePage build() {
 			return new ResponsePage(
 					mySearchId, // search id
