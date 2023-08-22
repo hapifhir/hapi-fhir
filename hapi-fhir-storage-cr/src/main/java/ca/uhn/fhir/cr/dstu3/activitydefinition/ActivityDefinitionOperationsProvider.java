@@ -116,7 +116,7 @@ public class ActivityDefinitionOperationsProvider {
 						theSetting,
 						theSettingContext,
 						theParameters,
-						theUseServerData.booleanValue(),
+						theUseServerData == null ? true : theUseServerData.booleanValue(),
 						theData,
 						theDataEndpoint,
 						theContentEndpoint,

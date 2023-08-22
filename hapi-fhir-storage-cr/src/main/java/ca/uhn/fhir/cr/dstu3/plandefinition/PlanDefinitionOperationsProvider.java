@@ -123,7 +123,7 @@ public class PlanDefinitionOperationsProvider {
 						theSetting,
 						theSettingContext,
 						theParameters,
-						theUseServerData.booleanValue(),
+						theUseServerData == null ? true : theUseServerData.booleanValue(),
 						theData,
 						null,
 						theDataEndpoint,

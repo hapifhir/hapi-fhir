@@ -63,6 +63,7 @@ public class PlanDefinitionApplyProvider {
 	 * @param theSetting             The current setting of the request (inpatient, outpatient, etc.)
 	 * @param theSettingContext      Additional detail about the setting of the request, if any
 	 * @param theParameters          Any input parameters defined in libraries referenced by the PlanDefinition.
+	 * @param theUseServerData       Whether to use data from the server performing the evaluation.
 	 * @param theData                Data to be made available to the PlanDefinition evaluation.
 	 * @param theDataEndpoint        An endpoint to use to access data referenced by retrieve operations in libraries
 	 *                               referenced by the PlanDefinition.
@@ -111,7 +112,7 @@ public class PlanDefinitionApplyProvider {
 						theSetting,
 						theSettingContext,
 						theParameters,
-						theUseServerData.booleanValue(),
+						theUseServerData == null ? true : theUseServerData.booleanValue(),
 						theData,
 						null,
 						theDataEndpoint,
@@ -156,7 +157,7 @@ public class PlanDefinitionApplyProvider {
 						theSetting,
 						theSettingContext,
 						theParameters,
-						theUseServerData.booleanValue(),
+						theUseServerData == null ? true : theUseServerData.booleanValue(),
 						theData,
 						null,
 						theDataEndpoint,
@@ -238,7 +239,7 @@ public class PlanDefinitionApplyProvider {
 						theSetting,
 						theSettingContext,
 						theParameters,
-						theUseServerData.booleanValue(),
+						theUseServerData == null ? true : theUseServerData.booleanValue(),
 						theData,
 						null,
 						theDataEndpoint,
@@ -283,7 +284,7 @@ public class PlanDefinitionApplyProvider {
 						theSetting,
 						theSettingContext,
 						theParameters,
-						theUseServerData.booleanValue(),
+						theUseServerData == null ? true : theUseServerData.booleanValue(),
 						theData,
 						null,
 						theDataEndpoint,
