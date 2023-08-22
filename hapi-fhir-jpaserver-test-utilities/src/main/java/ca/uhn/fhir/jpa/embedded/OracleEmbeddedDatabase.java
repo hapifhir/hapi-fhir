@@ -55,6 +55,7 @@ public class OracleEmbeddedDatabase extends JpaEmbeddedDatabase {
 
 	@Override
 	public void disableConstraints() {
+		purgeRecycleBin();
 		List<String> sql = new ArrayList<>();
 		List<Map<String, Object>> queryResults =
 				query("SELECT CONSTRAINT_NAME, TABLE_NAME FROM USER_CONSTRAINTS WHERE CONSTRAINT_TYPE != 'P'");
@@ -68,6 +69,7 @@ public class OracleEmbeddedDatabase extends JpaEmbeddedDatabase {
 
 	@Override
 	public void enableConstraints() {
+		purgeRecycleBin();
 		List<String> sql = new ArrayList<>();
 		List<Map<String, Object>> queryResults =
 				query("SELECT CONSTRAINT_NAME, TABLE_NAME FROM USER_CONSTRAINTS WHERE CONSTRAINT_TYPE != 'P'");
