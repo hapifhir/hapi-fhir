@@ -92,10 +92,6 @@ public class HapiSchemaMigrationTest {
 			}
 		}
 
-//		int lastVersion = allVersions.length - 1;
-//		toVersion = allVersions[lastVersion];
-//		migrate(theDriverType, dataSource, hapiMigrationStorageSvc, from, toVersion);
-
 		if (theDriverType == DriverTypeEnum.POSTGRES_9_4) {
 			// we only run this for postgres because:
 			// 1 we only really need to check one db
