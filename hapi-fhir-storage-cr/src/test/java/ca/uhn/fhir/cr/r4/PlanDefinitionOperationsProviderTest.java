@@ -2,12 +2,7 @@ package ca.uhn.fhir.cr.r4;
 
 import ca.uhn.fhir.cr.BaseCrR4TestServer;
 import ca.uhn.fhir.cr.r4.plandefinition.PlanDefinitionApplyProvider;
-import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.CarePlan;
-import org.hl7.fhir.r4.model.Enumerations;
-import org.hl7.fhir.r4.model.IdType;
-import org.hl7.fhir.r4.model.Parameters;
-import org.hl7.fhir.r4.model.Questionnaire;
+import org.hl7.fhir.r4.model.*;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -30,7 +25,7 @@ public class PlanDefinitionOperationsProviderTest extends BaseCrR4TestServer {
 		var parameters = new Parameters().addParameter("Service Request Id", "SleepStudy").addParameter("Service Request Id", "SleepStudy2");
 		var result = (CarePlan) myPlanDefinitionApplyProvider.apply(planDefinitionID, null, null, patientID,
 			null, null, null, null, null,
-			null, null, null, parameters, null,
+			null, null, null, parameters, new BooleanType(true), null,
 			null, null, null,
 			requestDetails);
 
@@ -43,7 +38,7 @@ public class PlanDefinitionOperationsProviderTest extends BaseCrR4TestServer {
 
 		var resultR5 = (Bundle) myPlanDefinitionApplyProvider.applyR5(planDefinitionID, null, null, patientID,
 			null, null, null, null, null,
-			null, null, null, parameters, null,
+			null, null, null, parameters, new BooleanType(true), null,
 			null, null, null,
 			requestDetails);
 

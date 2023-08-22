@@ -36,6 +36,8 @@ import org.hl7.fhir.dstu3.model.PlanDefinition;
 import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.BooleanType;
+import org.hl7.fhir.r4.model.CodeableConcept;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -72,6 +74,7 @@ public class PlanDefinitionOperationsProvider {
 	 * @param theSetting             The current setting of the request (inpatient, outpatient, etc.)
 	 * @param theSettingContext      Additional detail about the setting of the request, if any
 	 * @param theParameters          Any input parameters defined in libraries referenced by the PlanDefinition.
+	 * @param theUseServerData       Whether to use data from the server performing the evaluation.
 	 * @param theData                Data to be made available to the PlanDefinition evaluation.
 	 * @param theDataEndpoint        An endpoint to use to access data referenced by retrieve operations in libraries
 	 *                               referenced by the PlanDefinition.
@@ -91,12 +94,13 @@ public class PlanDefinitionOperationsProvider {
 			@OperationParam(name = "encounter") String theEncounter,
 			@OperationParam(name = "practitioner") String thePractitioner,
 			@OperationParam(name = "organization") String theOrganization,
-			@OperationParam(name = "userType") String theUserType,
-			@OperationParam(name = "userLanguage") String theUserLanguage,
-			@OperationParam(name = "userTaskContext") String theUserTaskContext,
-			@OperationParam(name = "setting") String theSetting,
-			@OperationParam(name = "settingContext") String theSettingContext,
+			@OperationParam(name = "userType") CodeableConcept theUserType,
+			@OperationParam(name = "userLanguage") CodeableConcept theUserLanguage,
+			@OperationParam(name = "userTaskContext") CodeableConcept theUserTaskContext,
+			@OperationParam(name = "setting") CodeableConcept theSetting,
+			@OperationParam(name = "settingContext") CodeableConcept theSettingContext,
 			@OperationParam(name = "parameters") Parameters theParameters,
+			@OperationParam(name = "useServerData") BooleanType theUseServerData,
 			@OperationParam(name = "data") Bundle theData,
 			@OperationParam(name = "dataEndpoint") Endpoint theDataEndpoint,
 			@OperationParam(name = "contentEndpoint") Endpoint theContentEndpoint,
@@ -119,7 +123,7 @@ public class PlanDefinitionOperationsProvider {
 						theSetting,
 						theSettingContext,
 						theParameters,
-						true,
+						theUseServerData.booleanValue(),
 						theData,
 						null,
 						theDataEndpoint,
