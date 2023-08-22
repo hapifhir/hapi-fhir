@@ -64,15 +64,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.annotation.Nonnull;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
+import javax.annotation.Nonnull;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 
 public class PersistedJpaBundleProvider implements IBundleProvider {
 
@@ -258,8 +258,8 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 		// we request 1 more resource than we need
 		// this is so we can be sure of when we hit the last page
 		// (when doing offset searches)
-		final List<JpaPid> pidsSubList =
-				mySearchCoordinatorSvc.getResources(myUuid, theFromIndex, theToIndex + 1, myRequest, requestPartitionId);
+		final List<JpaPid> pidsSubList = mySearchCoordinatorSvc.getResources(
+				myUuid, theFromIndex, theToIndex + 1, myRequest, requestPartitionId);
 		int maxSize = Math.min(theToIndex, pidsSubList.size());
 		theResponsePageBuilder.setTotalRequestedResourcesFetched(pidsSubList.size());
 		List<IBaseResource> resources = myTxService

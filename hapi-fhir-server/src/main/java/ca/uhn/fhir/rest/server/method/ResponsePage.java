@@ -148,7 +148,7 @@ public class ResponsePage {
 				// (sometimes it's 0, even if it's not a currentpageoffset search)
 				// so we have to make sure either next or prev links are not null
 				return (StringUtils.isNotBlank(myBundleProvider.getNextPageId())
-					|| StringUtils.isNotBlank(myBundleProvider.getPreviousPageId()));
+						|| StringUtils.isNotBlank(myBundleProvider.getPreviousPageId()));
 			}
 		}
 
@@ -172,8 +172,9 @@ public class ResponsePage {
 		} else {
 			myPagingStyle = PagingStyle.NONE;
 			// only end up here if no paging is desired
-			ourLog.debug("No accurate paging will be generated." +
-				" If accurate paging is desired, ResponsePageBuilder must be provided with additioanl information.");
+			ourLog.debug(
+					"No accurate paging will be generated."
+							+ " If accurate paging is desired, ResponsePageBuilder must be provided with additioanl information.");
 		}
 	}
 
@@ -260,9 +261,10 @@ public class ResponsePage {
 			// resourceList.size - included resources + omitted resources == pagesize
 			// -> we (most likely) have more resources
 			if (myPageSize == myResourceList.size() - myIncludedResourceCount + myOmittedResourceCount) {
-				ourLog.warn("Returning a next page based on calculated resource count."
-					+ " This could be inaccurate if the exact number of resources were fetched is equal to the pagesize requested. "
-					+ " Consider setting ResponseBundleBuilder.setTotalResourcesFetchedRequest after fetching resources.");
+				ourLog.warn(
+						"Returning a next page based on calculated resource count."
+								+ " This could be inaccurate if the exact number of resources were fetched is equal to the pagesize requested. "
+								+ " Consider setting ResponseBundleBuilder.setTotalResourcesFetchedRequest after fetching resources.");
 				return true;
 			}
 		}
@@ -457,7 +459,7 @@ public class ResponsePage {
 					myOmittedResourceCount, // omitted resources
 					myTotalRequestedResourcesFetched, // total count of requested resources
 					myBundleProvider // the bundle provider
-			);
+					);
 		}
 	}
 
