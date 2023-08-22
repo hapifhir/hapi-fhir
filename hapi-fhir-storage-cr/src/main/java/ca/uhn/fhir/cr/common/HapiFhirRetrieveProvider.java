@@ -101,11 +101,12 @@ public class HapiFhirRetrieveProvider extends SearchParamFhirRetrieveProvider im
 			@Override
 			public boolean hasNext() {
 				// initial load of first query results
-				if (currentResult == null && index < queries.size()) {
+				if (currentResult == null) {
 					currentResult = loadNext();
 				}
+				// loop through all batches of results
 				// when query results exhaust load next query
-				else if (!currentResult.hasNext()) {
+				while (currentResult != null && !currentResult.hasNext()) {
 					currentResult = loadNext();
 				}
 				// hasNext on current query result
