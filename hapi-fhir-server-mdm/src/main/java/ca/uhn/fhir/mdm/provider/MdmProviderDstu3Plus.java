@@ -74,7 +74,6 @@ public class MdmProviderDstu3Plus extends BaseMdmProvider {
 	private static final String PATIENT_RESOURCE = "Patient";
 	private static final String PRACTITIONER_RESOURCE = "Practitioner";
 
-	private final IMdmControllerSvc myMdmControllerSvc;
 	private final IMdmSubmitSvc myMdmSubmitSvc;
 	private final IMdmSettings myMdmSettings;
 	private final MdmControllerHelper myMdmControllerHelper;
@@ -97,8 +96,7 @@ public class MdmProviderDstu3Plus extends BaseMdmProvider {
 			IMdmSubmitSvc theMdmSubmitSvc,
 			IInterceptorBroadcaster theIInterceptorBroadcaster,
 			IMdmSettings theIMdmSettings) {
-		super(theFhirContext);
-		myMdmControllerSvc = theMdmControllerSvc;
+		super(theFhirContext, theMdmControllerSvc);
 		myMdmControllerHelper = theMdmHelper;
 		myMdmSubmitSvc = theMdmSubmitSvc;
 		myInterceptorBroadcaster = theIInterceptorBroadcaster;

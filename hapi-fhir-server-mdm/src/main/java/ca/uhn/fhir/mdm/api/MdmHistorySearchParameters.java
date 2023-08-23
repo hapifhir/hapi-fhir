@@ -35,6 +35,7 @@ import javax.annotation.Nullable;
 public class MdmHistorySearchParameters {
 	private List<IIdType> myGoldenResourceIds = new ArrayList<>();
 	private List<IIdType> mySourceIds = new ArrayList<>();
+	private boolean myShouldFindLinksMatchingAllGoldenAndSourceIds = false;
 
 	public MdmHistorySearchParameters() {}
 
@@ -56,18 +57,28 @@ public class MdmHistorySearchParameters {
 		return this;
 	}
 
+	public boolean shouldFindLinksMatchingAllGoldenAndSourceIds() {
+		return myShouldFindLinksMatchingAllGoldenAndSourceIds;
+	}
+
+	public MdmHistorySearchParameters setShouldFindLinksMatchingAllGoldenAndSourceIds(boolean myShouldFindLinksMatchingAllGoldenAndSourceIds) {
+		this.myShouldFindLinksMatchingAllGoldenAndSourceIds = myShouldFindLinksMatchingAllGoldenAndSourceIds;
+		return this;
+	}
+
 	@Override
 	public boolean equals(Object theO) {
 		if (this == theO) return true;
 		if (theO == null || getClass() != theO.getClass()) return false;
 		final MdmHistorySearchParameters that = (MdmHistorySearchParameters) theO;
 		return Objects.equals(myGoldenResourceIds, that.myGoldenResourceIds)
-				&& Objects.equals(mySourceIds, that.mySourceIds);
+				&& Objects.equals(mySourceIds, that.mySourceIds)
+			   && Objects.equals(myShouldFindLinksMatchingAllGoldenAndSourceIds, that.myShouldFindLinksMatchingAllGoldenAndSourceIds);
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(myGoldenResourceIds, mySourceIds);
+		return Objects.hash(myGoldenResourceIds, mySourceIds, myShouldFindLinksMatchingAllGoldenAndSourceIds);
 	}
 
 	@Override
@@ -75,6 +86,7 @@ public class MdmHistorySearchParameters {
 		return new ToStringBuilder(this)
 				.append("myMdmGoldenResourceIds", myGoldenResourceIds)
 				.append("myMdmTargetResourceIds", mySourceIds)
+				.append("myShouldFindLinksMatchingAllGoldenAndSourceIds", myShouldFindLinksMatchingAllGoldenAndSourceIds)
 				.toString();
 	}
 

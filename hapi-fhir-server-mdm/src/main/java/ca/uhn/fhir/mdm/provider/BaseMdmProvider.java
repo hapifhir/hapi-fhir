@@ -21,6 +21,8 @@ package ca.uhn.fhir.mdm.provider;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.mdm.api.IMdmControllerSvc;
+import ca.uhn.fhir.mdm.api.MdmHistorySearchParameters;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.mdm.api.paging.MdmPageLinkBuilder;
 import ca.uhn.fhir.mdm.api.paging.MdmPageLinkTuple;
@@ -54,9 +56,11 @@ import javax.annotation.Nullable;
 public abstract class BaseMdmProvider {
 
 	protected final FhirContext myFhirContext;
+	protected final IMdmControllerSvc myMdmControllerSvc;
 
-	public BaseMdmProvider(FhirContext theFhirContext) {
+	public BaseMdmProvider(FhirContext theFhirContext, IMdmControllerSvc theMdmControllerSvc) {
 		myFhirContext = theFhirContext;
+		myMdmControllerSvc = theMdmControllerSvc;
 	}
 
 	protected void validateMergeParameters(
@@ -217,7 +221,7 @@ public abstract class BaseMdmProvider {
 	}
 
 	protected void parametersFromMdmLinkRevisions(
-			IBaseParameters theRetVal, List<MdmLinkWithRevisionJson> theMdmLinkRevisions) {
+		IBaseParameters theRetVal, List<MdmLinkWithRevisionJson> theMdmLinkRevisions, ServletRequestDetails theRequestDetails) {
 		if (theMdmLinkRevisions.isEmpty()) {
 			final IBase resultPart = ParametersUtil.addParameterToParameters(
 					myFhirContext, theRetVal, "historical links not found for query parameters");
@@ -227,18 +231,30 @@ public abstract class BaseMdmProvider {
 		}
 
 		theMdmLinkRevisions.forEach(mdmLinkRevision -> parametersFromMdmLinkRevision(
-				theRetVal, mdmLinkRevision, findInitialMatchResult(theMdmLinkRevisions, mdmLinkRevision)));
+				theRetVal, mdmLinkRevision, findInitialMatchResult(theMdmLinkRevisions, mdmLinkRevision, theRequestDetails)));
 	}
 
 	private MdmMatchResultEnum findInitialMatchResult(
-			List<MdmLinkWithRevisionJson> theRevisionList, MdmLinkWithRevisionJson theToMatch) {
-
-		if (theToMatch.getMdmLink().getMatchResult().equals(MdmMatchResultEnum.REDIRECT)) {
-			return MdmMatchResultEnum.POSSIBLE_DUPLICATE;
-		}
-
+		List<MdmLinkWithRevisionJson> theRevisionList, MdmLinkWithRevisionJson theToMatch, ServletRequestDetails theRequestDetails) {
 		String sourceId = theToMatch.getMdmLink().getSourceId();
 		String goldenId = theToMatch.getMdmLink().getGoldenResourceId();
+
+		// In the REDIRECT case, both the goldenResourceId and sourceResourceId fields are actually both
+		// golden resources. Because of this, based on our history query, it's possible not all links
+		// involving that golden resource will show up in the results (eg. query for goldenResourceId = GR/1
+		// but sourceResourceId = GR/1 in the link history). Hence, we should re-query to find the initial
+		// match result.
+		if (theToMatch.getMdmLink().getMatchResult().equals(MdmMatchResultEnum.REDIRECT)) {
+			MdmHistorySearchParameters params = new MdmHistorySearchParameters()
+				.setSourceIds(List.of(sourceId, goldenId))
+				.setGoldenResourceIds(List.of(sourceId, goldenId))
+				.setShouldFindLinksMatchingAllGoldenAndSourceIds(true);
+
+			List<MdmLinkWithRevisionJson> result = myMdmControllerSvc.queryLinkHistory(params, theRequestDetails);
+			return containsPossibleDuplicate(result)
+				? MdmMatchResultEnum.POSSIBLE_DUPLICATE
+				: MdmMatchResultEnum.REDIRECT;
+		}
 
 		// Get first match result with given source and golden ID
 		Optional<MdmLinkWithRevisionJson> r = theRevisionList.stream()
@@ -249,6 +265,10 @@ public abstract class BaseMdmProvider {
 		return r.isPresent()
 				? r.get().getMdmLink().getMatchResult()
 				: theToMatch.getMdmLink().getMatchResult();
+	}
+
+	private static boolean containsPossibleDuplicate(List<MdmLinkWithRevisionJson> result) {
+		return result.stream().anyMatch(t -> t.getMdmLink().getMatchResult().equals(MdmMatchResultEnum.POSSIBLE_DUPLICATE));
 	}
 
 	private void parametersFromMdmLinkRevision(
