@@ -1,6 +1,5 @@
 ---
 type: fix
 issue: 5231
-title: "Previously, when the `$mdm-link-history` operation was executed after a `$mdm-clear`, the links in the history 
-response would refer to golden resources that have already been deleted and expunged by running `$mdm-clear`, resulting 
-in a 404 response. This has now been fixed."
+title: "Previously, the `$mdm-link-history` operation would result in a 404 response when it was executed after a 
+`$mdm-clear`. This has now been fixed by removing link history on `$mdm-clear`."
