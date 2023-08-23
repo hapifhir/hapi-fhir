@@ -300,7 +300,7 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 		Validate.isTrue(changeCount > 0, "changed chunk matching %s", chunkId);
 
 		Query query = myEntityManager.createQuery("update Batch2WorkChunkEntity " + "set myStatus = :failed "
-				+ ",myErrorMessage = CONCAT('Too many errors: ',  myErrorCount, '. Last error msg was ', myErrorMessage) "
+				+ ",myErrorMessage = CONCAT('Too many errors: ', CAST(myErrorCount as string), '. Last error msg was ', myErrorMessage) "
 				+ "where myId = :chunkId and myErrorCount > :maxCount");
 		query.setParameter("chunkId", chunkId);
 		query.setParameter("failed", WorkChunkStatusEnum.FAILED);
