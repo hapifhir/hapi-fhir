@@ -51,7 +51,10 @@ public interface IMdmLinkJpaRepository
 	void deleteLinksWithAnyReferenceToPids(@Param("goldenPids") List<Long> theResourcePids);
 
 	@Modifying
-	@Query(value = "DELETE FROM MPI_LINK_AUD f WHERE GOLDEN_RESOURCE_PID IN (:goldenPids) OR TARGET_PID IN (:goldenPids)", nativeQuery = true)
+	@Query(
+			value =
+					"DELETE FROM MPI_LINK_AUD f WHERE GOLDEN_RESOURCE_PID IN (:goldenPids) OR TARGET_PID IN (:goldenPids)",
+			nativeQuery = true)
 	void deleteLinksHistoryWithAnyReferenceToPids(@Param("goldenPids") List<Long> theResourcePids);
 
 	@Query("SELECT ml2.myGoldenResourcePid as goldenPid, ml2.mySourcePid as sourcePid FROM MdmLink ml2 "
