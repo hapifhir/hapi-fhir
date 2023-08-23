@@ -22,6 +22,9 @@ package ca.uhn.hapi.fhir.cdshooks.svc.cr.discovery;
 import ca.uhn.hapi.fhir.cdshooks.api.CdsResolutionStrategyEnum;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceJson;
 import org.hl7.fhir.dstu3.model.PlanDefinition;
+import org.hl7.fhir.r4.model.TriggerDefinition;
+
+import java.util.stream.Collectors;
 
 public class CrDiscoveryElementDstu3 implements ICrDiscoveryElement {
 	private PlanDefinition myPlanDefinition;
@@ -33,50 +36,43 @@ public class CrDiscoveryElementDstu3 implements ICrDiscoveryElement {
 	}
 
 	public CdsServiceJson getCdsServiceJson() {
-		if (myPlanDefinition != null) {
-			var service = new CdsServiceJson()
-					.setId(myPlanDefinition.getIdElement().getIdPart())
-					.setTitle(myPlanDefinition.getTitle())
-					.setDescription(myPlanDefinition.getDescription());
-
-			if (myPlanDefinition.hasAction()) {
-				// TODO - this needs some work - too naive
-				if (myPlanDefinition.getActionFirstRep().hasTriggerDefinition()) {
-					if (myPlanDefinition
-							.getActionFirstRep()
-							.getTriggerDefinitionFirstRep()
-							.hasEventName()) {
-						service.setHook(myPlanDefinition
-								.getActionFirstRep()
-								.getTriggerDefinitionFirstRep()
-								.getEventName());
-					}
-				}
-			}
-
-			if (myPrefetchUrlList == null) {
-				myPrefetchUrlList = new PrefetchUrlList();
-			}
-
-			int itemNo = 0;
-			if (!myPrefetchUrlList.stream()
-					.anyMatch(p -> p.equals("Patient/{{context.patientId}}")
-							|| p.equals("Patient?_id={{context.patientId}}")
-							|| p.equals("Patient?_id=Patient/{{context.patientId}}"))) {
-				String key = getKey(++itemNo);
-				service.addPrefetch(key, "Patient?_id={{context.patientId}}");
-				service.addSource(key, CdsResolutionStrategyEnum.SERVICE);
-			}
-
-			for (String item : myPrefetchUrlList) {
-				String key = getKey(++itemNo);
-				service.addPrefetch(key, item);
-				service.addSource(key, CdsResolutionStrategyEnum.SERVICE);
-			}
-
-			return service;
+		if (myPlanDefinition == null && myPlanDefinition.getAction().stream().noneMatch(a -> a.hasTriggerDefinition())) {
+			return null;
 		}
 
-		return null;
+		var triggerDefs = myPlanDefinition.getAction().stream()
+				.filter(a -> a.hasTriggerDefinition()).flatMap(a -> a.getTriggerDefinition().stream())
+				.filter(t -> t.getType().equals(TriggerDefinition.TriggerType.NAMEDEVENT)).collect(Collectors.toList());
+		if (triggerDefs == null || triggerDefs.isEmpty()) {
+			return null;
+		}
+
+		var service = new CdsServiceJson()
+				.setId(myPlanDefinition.getIdElement().getIdPart())
+				.setTitle(myPlanDefinition.getTitle())
+				.setDescription(myPlanDefinition.getDescription())
+				.setHook(triggerDefs.get(0).getEventName());
+
+		if (myPrefetchUrlList == null) {
+			myPrefetchUrlList = new PrefetchUrlList();
+		}
+
+		int itemNo = 0;
+		if (!myPrefetchUrlList.stream()
+				.anyMatch(p -> p.equals("Patient/{{context.patientId}}")
+						|| p.equals("Patient?_id={{context.patientId}}")
+						|| p.equals("Patient?_id=Patient/{{context.patientId}}"))) {
+			String key = getKey(++itemNo);
+			service.addPrefetch(key, "Patient?_id={{context.patientId}}");
+			service.addSource(key, CdsResolutionStrategyEnum.SERVICE);
+		}
+
+		for (String item : myPrefetchUrlList) {
+			String key = getKey(++itemNo);
+			service.addPrefetch(key, item);
+			service.addSource(key, CdsResolutionStrategyEnum.SERVICE);
+		}
+
+		return service;
 	}
 }

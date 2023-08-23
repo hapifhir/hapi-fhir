@@ -70,7 +70,6 @@ public class CdsServiceInterceptor implements IResourceChangeListener {
 		for (IIdType id : theCreatedIds) {
 			try {
 				myCdsServiceRegistry.registerCrService(id.getIdPart());
-				ourLog.info("Created service for {}", id.getIdPart());
 			} catch (Exception e) {
 				ourLog.info(String.format("Failed to create service for %s", id.getIdPart()));
 			}
