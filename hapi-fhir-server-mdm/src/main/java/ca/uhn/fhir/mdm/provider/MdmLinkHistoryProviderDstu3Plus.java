@@ -99,13 +99,11 @@ public class MdmLinkHistoryProviderDstu3Plus extends BaseMdmProvider {
 			if (isNotEmpty(theResourceIds)) {
 				historyEvent.setSourceIds(theResourceIds.stream()
 						.map(IPrimitiveType::getValueAsString)
-//						.map(t->"Patient/" + t)
 						.collect(Collectors.toList()));
 			}
 			if (isNotEmpty(theMdmGoldenResourceIds)) {
 				historyEvent.setGoldenResourceIds(theMdmGoldenResourceIds.stream()
 						.map(IPrimitiveType::getValueAsString)
-//						.map(t->"Patient/" + t)
 						.collect(Collectors.toList()));
 			}
 
