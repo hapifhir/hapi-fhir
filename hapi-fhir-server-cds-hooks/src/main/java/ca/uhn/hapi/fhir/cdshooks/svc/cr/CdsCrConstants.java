@@ -42,7 +42,7 @@ public class CdsCrConstants {
 	public static final String APPLY_PARAMETER_SUBJECT = "subject";
 	public static final String APPLY_PARAMETER_PRACTITIONER = "practitioner";
 	public static final String APPLY_PARAMETER_ENCOUNTER = "encounter";
-	public static final String APPLY_PARAMETER_PARAMETER = "parameter";
+	public static final String APPLY_PARAMETER_PARAMETERS = "parameters";
 	public static final String APPLY_PARAMETER_DATA = "data";
 	public static final String APPLY_PARAMETER_DATA_ENDPOINT = "dataEndpoint";
 }

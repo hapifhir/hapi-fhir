@@ -22,6 +22,7 @@ package ca.uhn.hapi.fhir.cdshooks.svc.cr;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.IModelJson;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceRequestJson;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceResponseJson;
@@ -42,11 +43,11 @@ public interface ICdsCrService {
 
 	default Object invoke(IModelJson theJson) {
 		IBaseParameters params = encodeParams((CdsServiceRequestJson) theJson);
-		IBaseResource response = invokeApply(theJson, params);
+		IBaseResource response = invokeApply(params);
 		return encodeResponse(response);
 	}
 
-	default IBaseResource invokeApply(IModelJson theJson, IBaseParameters theParams) {
+	default IBaseResource invokeApply(IBaseParameters theParams) {
 		var operationName = getFhirVersion() == FhirVersionEnum.R4
 				? ProviderConstants.CR_OPERATION_R5_APPLY
 				: ProviderConstants.CR_OPERATION_APPLY;
@@ -58,7 +59,7 @@ public interface ICdsCrService {
 								operationName,
 								theParams,
 								org.hl7.fhir.dstu3.model.CarePlan.class,
-								Collections.emptyMap());
+								Collections.singletonMap(Constants.HEADER_CONTENT_TYPE, Constants.CT_FHIR_JSON));
 			case R4:
 				return getRepository()
 						.invoke(
@@ -66,7 +67,7 @@ public interface ICdsCrService {
 								operationName,
 								theParams,
 								org.hl7.fhir.r4.model.Bundle.class,
-								Collections.emptyMap());
+								Collections.singletonMap(Constants.HEADER_CONTENT_TYPE, Constants.CT_FHIR_JSON));
 			case R5:
 				return getRepository()
 						.invoke(
@@ -74,7 +75,7 @@ public interface ICdsCrService {
 								operationName,
 								theParams,
 								org.hl7.fhir.r5.model.Bundle.class,
-								Collections.emptyMap());
+								Collections.singletonMap(Constants.HEADER_CONTENT_TYPE, Constants.CT_FHIR_JSON));
 			default:
 				return null;
 		}

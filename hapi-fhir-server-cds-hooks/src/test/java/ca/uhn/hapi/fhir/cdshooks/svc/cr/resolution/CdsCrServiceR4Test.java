@@ -1,5 +1,7 @@
 package ca.uhn.hapi.fhir.cdshooks.svc.cr.resolution;
 
+import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.util.ClasspathUtil;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceJson;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceRequestJson;
@@ -33,27 +35,31 @@ public class CdsCrServiceR4Test extends BaseCrTest {
 
 	@Test
 	public void testR4Params() throws IOException {
-		String rawRequest = ClasspathUtil.loadResource("ASLPCrdServiceRequest.json");
-		CdsServiceRequestJson cdsServiceRequestJson = myObjectMapper.readValue(rawRequest, CdsServiceRequestJson.class);
-
-		Bundle bundle = ClasspathUtil.loadResource(myFhirContext, Bundle.class, "Bundle-ASLPCrd-Content.json");
-		Repository repository = new InMemoryFhirRepository(myFhirContext, bundle);
-
+		final String rawRequest = ClasspathUtil.loadResource("ASLPCrdServiceRequest.json");
+		final CdsServiceRequestJson cdsServiceRequestJson = myObjectMapper.readValue(rawRequest, CdsServiceRequestJson.class);
+		final Bundle bundle = ClasspathUtil.loadResource(myFhirContext, Bundle.class, "Bundle-ASLPCrd-Content.json");
+		final Repository repository = new InMemoryFhirRepository(myFhirContext, bundle);
+		final RequestDetails requestDetails = new SystemRequestDetails();
 		final IdType planDefinitionId = new IdType(PLAN_DEFINITION_RESOURCE_NAME, "ASLPCrd");
-		final Parameters params = new CdsCrServiceR4(planDefinitionId, repository).encodeParams(cdsServiceRequestJson);
+		requestDetails.setId(planDefinitionId);
+		final Parameters params = new CdsCrServiceR4(requestDetails, repository).encodeParams(cdsServiceRequestJson);
 
-		assertTrue(params != null);
+		assertTrue(params.getParameter().size() == 3);
+		assertTrue(params.getParameter("parameters").hasResource());
 	}
 
 	@Test
 	public void testR4Response() {
-		Bundle bundle = ClasspathUtil.loadResource(myFhirContext, Bundle.class, "Bundle-ASLPCrd-Content.json");
-		Repository repository = new InMemoryFhirRepository(myFhirContext, bundle);
-
-		Bundle responseBundle = ClasspathUtil.loadResource(myFhirContext, Bundle.class, "Bundle-ASLPCrd-Response.json");
+		final Bundle bundle = ClasspathUtil.loadResource(myFhirContext, Bundle.class, "Bundle-ASLPCrd-Content.json");
+		final Repository repository = new InMemoryFhirRepository(myFhirContext, bundle);
+		final Bundle responseBundle = ClasspathUtil.loadResource(myFhirContext, Bundle.class, "Bundle-ASLPCrd-Response.json");
+		final RequestDetails requestDetails = new SystemRequestDetails();
 		final IdType planDefinitionId = new IdType(PLAN_DEFINITION_RESOURCE_NAME, "ASLPCrd");
-		final CdsServiceResponseJson cdsServiceResponseJson = new CdsCrServiceR4(planDefinitionId, repository).encodeResponse(responseBundle);
+		requestDetails.setId(planDefinitionId);
+		final CdsServiceResponseJson cdsServiceResponseJson = new CdsCrServiceR4(requestDetails, repository).encodeResponse(responseBundle);
 
-		assertTrue(!cdsServiceResponseJson.getCards().isEmpty());
+		assertTrue(cdsServiceResponseJson.getCards().size() == 1);
+		assertTrue(!cdsServiceResponseJson.getCards().get(0).getSummary().isEmpty());
+		assertTrue(!cdsServiceResponseJson.getCards().get(0).getDetail().isEmpty());
 	}
 }

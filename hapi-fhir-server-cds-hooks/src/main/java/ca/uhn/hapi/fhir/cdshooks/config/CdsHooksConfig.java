@@ -117,11 +117,11 @@ public class CdsHooksConfig {
 			Repository repository = myRepositoryFactory.create(rd);
 			switch (theFhirContext.getVersion().getVersion()) {
 				case DSTU3:
-					return new CdsCrServiceDstu3(rd.getId(), repository);
+					return new CdsCrServiceDstu3(rd, repository);
 				case R4:
-					return new CdsCrServiceR4(rd.getId(), repository);
+					return new CdsCrServiceR4(rd, repository);
 				case R5:
-					return new CdsCrServiceR5(rd.getId(), repository);
+					return new CdsCrServiceR5(rd, repository);
 				default:
 					return null;
 			}

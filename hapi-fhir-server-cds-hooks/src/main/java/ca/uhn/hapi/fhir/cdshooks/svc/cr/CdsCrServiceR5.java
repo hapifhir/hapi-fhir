@@ -20,6 +20,7 @@
 package ca.uhn.hapi.fhir.cdshooks.svc.cr;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceIndicatorEnum;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceRequestAuthorizationJson;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceRequestJson;
@@ -30,7 +31,6 @@ import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceResponseLinkJson;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceResponseSuggestionActionJson;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceResponseSuggestionJson;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r5.model.Bundle;
 import org.hl7.fhir.r5.model.CanonicalType;
 import org.hl7.fhir.r5.model.Endpoint;
@@ -55,7 +55,7 @@ import java.util.stream.Collectors;
 import static ca.uhn.hapi.fhir.cdshooks.svc.cr.CdsCrConstants.APPLY_PARAMETER_DATA;
 import static ca.uhn.hapi.fhir.cdshooks.svc.cr.CdsCrConstants.APPLY_PARAMETER_DATA_ENDPOINT;
 import static ca.uhn.hapi.fhir.cdshooks.svc.cr.CdsCrConstants.APPLY_PARAMETER_ENCOUNTER;
-import static ca.uhn.hapi.fhir.cdshooks.svc.cr.CdsCrConstants.APPLY_PARAMETER_PARAMETER;
+import static ca.uhn.hapi.fhir.cdshooks.svc.cr.CdsCrConstants.APPLY_PARAMETER_PARAMETERS;
 import static ca.uhn.hapi.fhir.cdshooks.svc.cr.CdsCrConstants.APPLY_PARAMETER_PRACTITIONER;
 import static ca.uhn.hapi.fhir.cdshooks.svc.cr.CdsCrConstants.APPLY_PARAMETER_SUBJECT;
 import static ca.uhn.hapi.fhir.cdshooks.svc.cr.CdsCrConstants.CDS_PARAMETER_DRAFT_ORDERS;
@@ -66,12 +66,12 @@ import static org.opencds.cqf.cql.evaluator.fhir.util.r5.Parameters.parameters;
 import static org.opencds.cqf.cql.evaluator.fhir.util.r5.Parameters.part;
 
 public class CdsCrServiceR5 implements ICdsCrService {
+	private final RequestDetails myRequestDetails;
 	private final Repository myRepository;
-	private final IIdType myPlanDefinitionId;
 	private Bundle myResponseBundle;
 
-	public CdsCrServiceR5(IIdType thePlanDefinitionId, Repository theRepository) {
-		myPlanDefinitionId = thePlanDefinitionId;
+	public CdsCrServiceR5(RequestDetails theRequestDetails, Repository theRepository) {
+		myRequestDetails = theRequestDetails;
 		myRepository = theRepository;
 	}
 
@@ -104,7 +104,7 @@ public class CdsCrServiceR5 implements ICdsCrService {
 					CDS_PARAMETER_DRAFT_ORDERS);
 		}
 		if (cqlParameters.hasParameter()) {
-			parameters.addParameter(part(APPLY_PARAMETER_PARAMETER, cqlParameters));
+			parameters.addParameter(part(APPLY_PARAMETER_PARAMETERS, cqlParameters));
 		}
 		Bundle data = getPrefetchResources(theJson);
 		if (data.hasEntry()) {

@@ -20,6 +20,7 @@
 package ca.uhn.hapi.fhir.cdshooks.svc.cr;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceRequestAuthorizationJson;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceRequestJson;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceResponseCardJson;
@@ -29,6 +30,7 @@ import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceResponseLinkJson;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceResponseSuggestionActionJson;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceResponseSuggestionJson;
 import org.hl7.fhir.dstu3.model.Bundle;
+import org.hl7.fhir.dstu3.model.CarePlan;
 import org.hl7.fhir.dstu3.model.Endpoint;
 import org.hl7.fhir.dstu3.model.Extension;
 import org.hl7.fhir.dstu3.model.IdType;
@@ -41,7 +43,6 @@ import org.hl7.fhir.dstu3.model.RequestGroup;
 import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IIdType;
 import org.opencds.cqf.cql.evaluator.fhir.util.Canonicals;
 import org.opencds.cqf.fhir.api.Repository;
 
@@ -49,12 +50,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import static ca.uhn.hapi.fhir.cdshooks.svc.cr.CdsCrConstants.APPLY_PARAMETER_DATA;
 import static ca.uhn.hapi.fhir.cdshooks.svc.cr.CdsCrConstants.APPLY_PARAMETER_DATA_ENDPOINT;
 import static ca.uhn.hapi.fhir.cdshooks.svc.cr.CdsCrConstants.APPLY_PARAMETER_ENCOUNTER;
-import static ca.uhn.hapi.fhir.cdshooks.svc.cr.CdsCrConstants.APPLY_PARAMETER_PARAMETER;
+import static ca.uhn.hapi.fhir.cdshooks.svc.cr.CdsCrConstants.APPLY_PARAMETER_PARAMETERS;
 import static ca.uhn.hapi.fhir.cdshooks.svc.cr.CdsCrConstants.APPLY_PARAMETER_PRACTITIONER;
 import static ca.uhn.hapi.fhir.cdshooks.svc.cr.CdsCrConstants.APPLY_PARAMETER_SUBJECT;
 import static ca.uhn.hapi.fhir.cdshooks.svc.cr.CdsCrConstants.CDS_PARAMETER_DRAFT_ORDERS;
@@ -65,12 +65,12 @@ import static org.opencds.cqf.cql.evaluator.fhir.util.dstu3.Parameters.parameter
 import static org.opencds.cqf.cql.evaluator.fhir.util.dstu3.Parameters.part;
 
 public class CdsCrServiceDstu3 implements ICdsCrService {
+	private final RequestDetails myRequestDetails;
 	private final Repository myRepository;
-	private final IIdType myPlanDefinitionId;
-	private Bundle myResponseBundle;
+	private CarePlan myResponse;
 
-	public CdsCrServiceDstu3(IIdType thePlanDefinitionId, Repository theRepository) {
-		myPlanDefinitionId = thePlanDefinitionId;
+	public CdsCrServiceDstu3(RequestDetails theRequestDetails, Repository theRepository) {
+		myRequestDetails = theRequestDetails;
 		myRepository = theRepository;
 	}
 
@@ -103,7 +103,7 @@ public class CdsCrServiceDstu3 implements ICdsCrService {
 					CDS_PARAMETER_DRAFT_ORDERS);
 		}
 		if (cqlParameters.hasParameter()) {
-			parameters.addParameter(part(APPLY_PARAMETER_PARAMETER, cqlParameters));
+			parameters.addParameter(part(APPLY_PARAMETER_PARAMETERS, cqlParameters));
 		}
 		Bundle data = getPrefetchResources(theJson);
 		if (data.hasEntry()) {
@@ -179,11 +179,11 @@ public class CdsCrServiceDstu3 implements ICdsCrService {
 	}
 
 	public CdsServiceResponseJson encodeResponse(Object theResponse) {
-		assert theResponse instanceof Bundle;
-		myResponseBundle = (Bundle) theResponse;
+		assert theResponse instanceof CarePlan;
+		myResponse = (CarePlan) theResponse;
 		CdsServiceResponseJson serviceResponse = new CdsServiceResponseJson();
-		RequestGroup mainRequest =
-				(RequestGroup) myResponseBundle.getEntry().get(0).getResource();
+		Reference requestGroupRef = myResponse.getActivity().get(0).getReference();
+		RequestGroup mainRequest = (RequestGroup) resolveResource(requestGroupRef);
 		StringType canonical = mainRequest.getDefinition().get(0).getReferenceElement_();
 		PlanDefinition planDef = myRepository.read(
 				PlanDefinition.class,
@@ -274,11 +274,8 @@ public class CdsCrServiceDstu3 implements ICdsCrService {
 	}
 
 	private IBaseResource resolveResource(Reference theReference) {
-		return myResponseBundle.getEntry().stream()
-				.filter(entry ->
-						entry.hasResource() && entry.getResource().getId().equals(theReference.getReference()))
-				.map(entry -> entry.getResource())
-				.collect(Collectors.toList())
-				.get(0);
+		return myResponse.getContained().stream()
+				.filter(resource ->
+						resource.getId().equals(theReference.getReference())).findFirst().orElse(null);
 	}
 }

@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.cr.repo;
 
+import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
@@ -66,7 +67,9 @@ class RequestDetailsCloner {
 		}
 
 		DetailsBuilder setParameters(IBaseParameters theParameters) {
-			myDetails.setResource(theParameters);
+			// myDetails.setResource(theParameters);
+			IParser parser = myDetails.getServer().getFhirContext().newJsonParser();
+			myDetails.setRequestContents(parser.encodeResourceToString(theParameters).getBytes());
 
 			return this;
 		}
