@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.jpa.embedded;
 
+import ca.uhn.fhir.util.VersionEnum;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,10 +38,9 @@ public class DatabaseInitializerHelper {
 		theDatabase.executeSqlAsBatch(sql);
 	}
 
-	public void insertPersistenceTestData(JpaEmbeddedDatabase theDatabase) {
-		String fileName = String.format(
-				"migration/releases/%s/data/%s.sql",
-				HapiEmbeddedDatabasesExtension.FIRST_TESTED_VERSION, theDatabase.getDriverType());
+	public void insertPersistenceTestData(JpaEmbeddedDatabase theDatabase, VersionEnum theVersionEnum) {
+		String fileName =
+				String.format("migration/releases/%s/data/%s.sql", theVersionEnum, theDatabase.getDriverType());
 		String sql = getSqlFromResourceFile(fileName);
 		theDatabase.insertTestData(sql);
 	}

@@ -147,5 +147,23 @@ class R4MeasureOperationProviderIT extends BaseCrR4TestServer
 
 	}
 
+	@Test
+	void testLargeValuesetMeasure() {
+		this.loadBundle("largeValueSetMeasureTest-Bundle.json");
+
+		var returnMeasureReport = runEvaluateMeasure("2023-01-01", "2024-01-01", null, "CMSTest", "population", null);
+
+		String populationName = "numerator";
+		int expectedCount = 1;
+
+		Optional<MeasureReport.MeasureReportGroupPopulationComponent> population = returnMeasureReport.getGroup().get(0)
+			.getPopulation().stream().filter(x -> x.hasCode() && x.getCode().hasCoding()
+				&& x.getCode().getCoding().get(0).getCode().equals(populationName))
+			.findFirst();
+
+		assertEquals(population.get().getCount(), expectedCount,
+			String.format("expected count for population \"%s\" did not match", populationName));
+
+	}
 
 }

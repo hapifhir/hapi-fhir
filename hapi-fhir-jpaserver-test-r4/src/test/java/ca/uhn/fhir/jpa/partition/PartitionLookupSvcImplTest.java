@@ -5,6 +5,7 @@ import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.jpa.cache.ResourceChangeListenerRegistryInterceptor;
 import ca.uhn.fhir.jpa.dao.data.IPartitionDao;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
+import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -36,6 +37,8 @@ class PartitionLookupSvcImplTest {
 	private FhirContext myFhirCtx;
 	@MockBean
 	private PlatformTransactionManager myTxManager;
+	@MockBean
+	private MemoryCacheService myMemoryCacheService;
 
 	@Configuration
 	static class SpringContext {
