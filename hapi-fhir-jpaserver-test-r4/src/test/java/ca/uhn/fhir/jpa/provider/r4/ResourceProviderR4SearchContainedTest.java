@@ -41,7 +41,12 @@ import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.emptyIterable;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.nullValue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 
@@ -186,7 +191,40 @@ public class ResourceProviderR4SearchContainedTest extends BaseResourceProviderR
 
 		assertEquals(1L, oids.size());
 		assertThat(oids, contains(oid1.getValue()));
+	}
 
+	@Test
+	public void testDirectSearchOnContainedResourceReturnsContainedResourceWithWrappedFullUrl() throws IOException {
+		IIdType oid1;
+		String containedId = "patient1";
+		{
+			Patient p = new Patient();
+			p.setId(containedId);
+			p.addName().setFamily("Smith").addGiven("John");
+
+			Observation obs = new Observation();
+			obs.getCode().setText("Observation 1");
+			obs.getContained().add(p);
+			obs.getSubject().setReference("#" + containedId);
+
+			oid1 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
+
+			ourLog.debug("Input: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+		}
+
+		//-- Simple search on a contained resource directly, not via chain
+		String uri = myServerBase + "/Patient?family=Smith&given=John&_contained=true";
+		HttpGet get = new HttpGet(uri);
+
+		try (CloseableHttpResponse response = ourHttpClient.execute(get)) {
+			String resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
+			ourLog.info(resp);
+			Bundle bundle = myFhirContext.newXmlParser().parseResource(Bundle.class, resp);
+			assertThat(bundle.getEntry(), hasSize(1));
+			assertThat(bundle.getEntryFirstRep().getId(), is(equalTo(containedId)));
+			assertThat(bundle.getEntryFirstRep().getResource().getResourceType(), is(equalTo("Patient")));
+			assertThat(bundle.getEntryFirstRep().getFullUrl(), is(containsString(oid1 + "#" + containedId)));
+		}
 	}
 
 	@Test
