@@ -2653,6 +2653,72 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	}
 
 	@Test
+	public void testPagingWithIncludesOnEachResource() {
+		// setup
+		int total = 20;
+		Organization org = new Organization();
+		org.setName("ORG");
+		IIdType orgId = myOrganizationDao.create(org).getId().toUnqualifiedVersionless();
+
+		Coding tagCode = new Coding();
+		tagCode.setCode("test");
+		tagCode.setSystem("http://example.com");
+		for (int i = 0; i < total; i++) {
+			Task t = new Task();
+			t.getMeta()
+				.addTag(tagCode);
+			t.setStatus(Task.TaskStatus.REQUESTED);
+			t.getOwner().setReference(orgId.getValue());
+			myTaskDao.create(t);
+		}
+		HashSet<String> ids = new HashSet<>();
+
+		// test
+		int requestedAmount = 10;
+		Bundle bundle = myClient
+			.search()
+			.byUrl("Task?_count=10&_tag=test&status=requested&_include=Task%3Aowner&_sort=status")
+			.returnBundle(Bundle.class)
+			.execute();
+		assertFalse(bundle.getEntry().isEmpty());
+		assertEquals(11, bundle.getEntry().size());
+		for (BundleEntryComponent resource : bundle.getEntry()) {
+			ids.add(resource.getResource().getId());
+		}
+
+		String nextUrl = null;
+		do {
+			Bundle.BundleLinkComponent nextLink = bundle.getLink("next");
+			if (nextLink != null) {
+				nextUrl = nextLink.getUrl();
+
+				// make sure we're always requesting 10
+				assertTrue(nextUrl.contains(String.format("_count=%d", requestedAmount)));
+
+				// get next batch
+				bundle = myClient.fetchResourceFromUrl(Bundle.class, nextUrl);
+				int received = bundle.getEntry().size();
+
+				// currently, last page could be empty... so we'll
+				// short circuit out here
+				if (received != 0) {
+					// every batch should include the 10 tasks + 1 orgranization
+					assertEquals(11, received);
+					for (BundleEntryComponent resource : bundle.getEntry()) {
+						ids.add(resource.getResource().getId());
+					}
+				}
+			} else {
+				nextUrl = null;
+			}
+		} while (nextUrl != null);
+
+		// verify
+		// we should receive all resources and the single organization (repeatedly)
+		assertEquals(total + 1, ids.size());
+	}
+
+	@Test
 	public void testPagingWithIncludesReturnsConsistentValues() {
 		// setup
 		int total = 19;

@@ -539,7 +539,7 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 		// this can (potentially) change the results being returned.
 		int precount = resources.size();
 		resources = ServerInterceptorUtil.fireStoragePreshowResource(resources, myRequest, myInterceptorBroadcaster);
-		theResponsePageBuilder.setOmittedResourceCount(precount - resources.size());
+		theResponsePageBuilder.addToOmittedResourceCount(precount - resources.size());
 		theResponsePageBuilder.setResources(resources);
 		theResponsePageBuilder.setIncludedResourceCount(includedPidList.size());
 
