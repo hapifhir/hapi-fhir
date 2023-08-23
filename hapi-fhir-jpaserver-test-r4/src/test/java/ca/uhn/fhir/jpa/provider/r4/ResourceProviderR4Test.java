@@ -263,6 +263,8 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		myStorageSettings.setUpdateWithHistoryRewriteEnabled(false);
 		myStorageSettings.setPreserveRequestIdInResourceBody(false);
 
+		when(myPagingProvider.canStoreSearchResults())
+			.thenCallRealMethod();
 	}
 
 	@BeforeEach
@@ -3165,10 +3167,14 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		});
 		myCaptureQueriesListener.logAllQueriesForCurrentThread();
 
-		Bundle bundle = myClient.search().forResource("Patient").returnBundle(Bundle.class).execute();
+		Bundle bundle = myClient
+			.search()
+			.forResource("Patient")
+			.returnBundle(Bundle.class)
+			.execute();
 		ourLog.debug("Result: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
 		assertEquals(2, bundle.getTotal());
-		assertEquals(1, bundle.getEntry().size());
+		assertEquals(2, bundle.getEntry().size());
 		assertEquals(id2.getIdPart(), bundle.getEntry().get(0).getResource().getIdElement().getIdPart());
 	}
 
