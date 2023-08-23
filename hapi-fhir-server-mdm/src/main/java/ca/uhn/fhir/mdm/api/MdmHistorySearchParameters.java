@@ -61,7 +61,8 @@ public class MdmHistorySearchParameters {
 		return myShouldFindLinksMatchingAllGoldenAndSourceIds;
 	}
 
-	public MdmHistorySearchParameters setShouldFindLinksMatchingAllGoldenAndSourceIds(boolean myShouldFindLinksMatchingAllGoldenAndSourceIds) {
+	public MdmHistorySearchParameters setShouldFindLinksMatchingAllGoldenAndSourceIds(
+			boolean myShouldFindLinksMatchingAllGoldenAndSourceIds) {
 		this.myShouldFindLinksMatchingAllGoldenAndSourceIds = myShouldFindLinksMatchingAllGoldenAndSourceIds;
 		return this;
 	}
@@ -73,7 +74,9 @@ public class MdmHistorySearchParameters {
 		final MdmHistorySearchParameters that = (MdmHistorySearchParameters) theO;
 		return Objects.equals(myGoldenResourceIds, that.myGoldenResourceIds)
 				&& Objects.equals(mySourceIds, that.mySourceIds)
-			   && Objects.equals(myShouldFindLinksMatchingAllGoldenAndSourceIds, that.myShouldFindLinksMatchingAllGoldenAndSourceIds);
+				&& Objects.equals(
+						myShouldFindLinksMatchingAllGoldenAndSourceIds,
+						that.myShouldFindLinksMatchingAllGoldenAndSourceIds);
 	}
 
 	@Override
@@ -86,7 +89,9 @@ public class MdmHistorySearchParameters {
 		return new ToStringBuilder(this)
 				.append("myMdmGoldenResourceIds", myGoldenResourceIds)
 				.append("myMdmTargetResourceIds", mySourceIds)
-				.append("myShouldFindLinksMatchingAllGoldenAndSourceIds", myShouldFindLinksMatchingAllGoldenAndSourceIds)
+				.append(
+						"myShouldFindLinksMatchingAllGoldenAndSourceIds",
+						myShouldFindLinksMatchingAllGoldenAndSourceIds)
 				.toString();
 	}
 

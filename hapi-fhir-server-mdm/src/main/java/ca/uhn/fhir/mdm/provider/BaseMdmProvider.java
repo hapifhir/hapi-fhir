@@ -221,7 +221,9 @@ public abstract class BaseMdmProvider {
 	}
 
 	protected void parametersFromMdmLinkRevisions(
-		IBaseParameters theRetVal, List<MdmLinkWithRevisionJson> theMdmLinkRevisions, ServletRequestDetails theRequestDetails) {
+			IBaseParameters theRetVal,
+			List<MdmLinkWithRevisionJson> theMdmLinkRevisions,
+			ServletRequestDetails theRequestDetails) {
 		if (theMdmLinkRevisions.isEmpty()) {
 			final IBase resultPart = ParametersUtil.addParameterToParameters(
 					myFhirContext, theRetVal, "historical links not found for query parameters");
@@ -231,11 +233,15 @@ public abstract class BaseMdmProvider {
 		}
 
 		theMdmLinkRevisions.forEach(mdmLinkRevision -> parametersFromMdmLinkRevision(
-				theRetVal, mdmLinkRevision, findInitialMatchResult(theMdmLinkRevisions, mdmLinkRevision, theRequestDetails)));
+				theRetVal,
+				mdmLinkRevision,
+				findInitialMatchResult(theMdmLinkRevisions, mdmLinkRevision, theRequestDetails)));
 	}
 
 	private MdmMatchResultEnum findInitialMatchResult(
-		List<MdmLinkWithRevisionJson> theRevisionList, MdmLinkWithRevisionJson theToMatch, ServletRequestDetails theRequestDetails) {
+			List<MdmLinkWithRevisionJson> theRevisionList,
+			MdmLinkWithRevisionJson theToMatch,
+			ServletRequestDetails theRequestDetails) {
 		String sourceId = theToMatch.getMdmLink().getSourceId();
 		String goldenId = theToMatch.getMdmLink().getGoldenResourceId();
 
@@ -246,14 +252,14 @@ public abstract class BaseMdmProvider {
 		// match result.
 		if (theToMatch.getMdmLink().getMatchResult().equals(MdmMatchResultEnum.REDIRECT)) {
 			MdmHistorySearchParameters params = new MdmHistorySearchParameters()
-				.setSourceIds(List.of(sourceId, goldenId))
-				.setGoldenResourceIds(List.of(sourceId, goldenId))
-				.setShouldFindLinksMatchingAllGoldenAndSourceIds(true);
+					.setSourceIds(List.of(sourceId, goldenId))
+					.setGoldenResourceIds(List.of(sourceId, goldenId))
+					.setShouldFindLinksMatchingAllGoldenAndSourceIds(true);
 
 			List<MdmLinkWithRevisionJson> result = myMdmControllerSvc.queryLinkHistory(params, theRequestDetails);
 			return containsPossibleDuplicate(result)
-				? MdmMatchResultEnum.POSSIBLE_DUPLICATE
-				: MdmMatchResultEnum.REDIRECT;
+					? MdmMatchResultEnum.POSSIBLE_DUPLICATE
+					: MdmMatchResultEnum.REDIRECT;
 		}
 
 		// Get first match result with given source and golden ID
@@ -268,7 +274,8 @@ public abstract class BaseMdmProvider {
 	}
 
 	private static boolean containsPossibleDuplicate(List<MdmLinkWithRevisionJson> result) {
-		return result.stream().anyMatch(t -> t.getMdmLink().getMatchResult().equals(MdmMatchResultEnum.POSSIBLE_DUPLICATE));
+		return result.stream()
+				.anyMatch(t -> t.getMdmLink().getMatchResult().equals(MdmMatchResultEnum.POSSIBLE_DUPLICATE));
 	}
 
 	private void parametersFromMdmLinkRevision(
