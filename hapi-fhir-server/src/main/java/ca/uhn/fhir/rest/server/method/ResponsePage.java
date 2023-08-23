@@ -136,7 +136,7 @@ public class ResponsePage {
 				// (sometimes it's 0, even if it's not a currentpageoffset search)
 				// so we have to make sure either next or prev links are not null
 				return (StringUtils.isNotBlank(myBundleProvider.getNextPageId())
-					|| StringUtils.isNotBlank(myBundleProvider.getPreviousPageId()));
+						|| StringUtils.isNotBlank(myBundleProvider.getPreviousPageId()));
 			}
 		}
 
@@ -160,8 +160,9 @@ public class ResponsePage {
 		} else {
 			myPagingStyle = PagingStyle.NONE;
 			// only end up here if no paging is desired
-			ourLog.debug("No accurate paging will be generated." +
-				" If accurate paging is desired, ResponsePageBuilder must be provided with additioanl information.");
+			ourLog.debug(
+					"No accurate paging will be generated."
+							+ " If accurate paging is desired, ResponsePageBuilder must be provided with additioanl information.");
 		}
 	}
 
@@ -400,7 +401,7 @@ public class ResponsePage {
 					myIncludedResourceCount, // included count
 					myOmittedResourceCount, // omitted resources
 					myBundleProvider // the bundle provider
-			);
+					);
 		}
 	}
 
