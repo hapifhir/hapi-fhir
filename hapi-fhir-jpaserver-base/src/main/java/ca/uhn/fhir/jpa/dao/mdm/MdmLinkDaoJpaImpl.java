@@ -350,6 +350,7 @@ public class MdmLinkDaoJpaImpl implements IMdmLinkDao<JpaPid, MdmLink> {
 		List<List<Long>> chunks = ListUtils.partition(goldenResourcePids, 500);
 		for (List<Long> chunk : chunks) {
 			myMdmLinkDao.deleteLinksWithAnyReferenceToPids(chunk);
+			myMdmLinkDao.deleteLinksHistoryWithAnyReferenceToPids(chunk);
 		}
 	}
 
