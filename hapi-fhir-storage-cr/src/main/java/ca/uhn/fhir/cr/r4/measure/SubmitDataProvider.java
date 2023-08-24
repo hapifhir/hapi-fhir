@@ -71,17 +71,17 @@ public class SubmitDataProvider {
 	 * @return Bundle the transaction result
 	 */
 	@Description(
-		shortDefinition = "$submit-data",
-		value =
-			"Implements the <a href=\"http://hl7.org/fhir/R4/measure-operation-submit-data.html\">$submit-data</a> operation found in the <a href=\"http://hl7.org/fhir/R4/clinicalreasoning-module.html\">FHIR Clinical Reasoning Module</a> per the <a href=\"http://build.fhir.org/ig/HL7/davinci-deqm/datax.html#submit-data\">Da Vinci DEQM FHIR Implementation Guide</a>.")
+			shortDefinition = "$submit-data",
+			value =
+					"Implements the <a href=\"http://hl7.org/fhir/R4/measure-operation-submit-data.html\">$submit-data</a> operation found in the <a href=\"http://hl7.org/fhir/R4/clinicalreasoning-module.html\">FHIR Clinical Reasoning Module</a> per the <a href=\"http://build.fhir.org/ig/HL7/davinci-deqm/datax.html#submit-data\">Da Vinci DEQM FHIR Implementation Guide</a>.")
 	@Operation(name = "$submit-data", type = Measure.class)
 	public Bundle submitData(
-		RequestDetails theRequestDetails,
-		@IdParam IdType theId,
-		@OperationParam(name = "measureReport", min = 1, max = 1) MeasureReport theReport,
-		@OperationParam(name = "resource") List<IBaseResource> theResources) {
+			RequestDetails theRequestDetails,
+			@IdParam IdType theId,
+			@OperationParam(name = "measureReport", min = 1, max = 1) MeasureReport theReport,
+			@OperationParam(name = "resource") List<IBaseResource> theResources) {
 		return myR4SubmitDataProcessorFactory
-			.create(myRepositoryFactory.create(theRequestDetails))
-			.submitData(theId, theReport, theResources);
+				.create(myRepositoryFactory.create(theRequestDetails))
+				.submitData(theId, theReport, theResources);
 	}
 }

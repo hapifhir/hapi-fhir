@@ -78,7 +78,8 @@ public class CdsServiceCache {
 			CdsServiceJson cdsServiceJson =
 					theDiscoveryServiceFactory.create(theServiceId).resolveService();
 			if (cdsServiceJson != null) {
-				final CdsCrServiceMethod cdsCrServiceMethod = new CdsCrServiceMethod(cdsServiceJson, theCrServiceFactory);
+				final CdsCrServiceMethod cdsCrServiceMethod =
+						new CdsCrServiceMethod(cdsServiceJson, theCrServiceFactory);
 				myServiceMap.put(theServiceId, cdsCrServiceMethod);
 				myCdsServiceJson.addService(cdsServiceJson);
 				ourLog.info("Created service for {}", theServiceId);

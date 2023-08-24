@@ -283,7 +283,8 @@ public class CdsCrServiceDstu3 implements ICdsCrService {
 
 	private IBaseResource resolveResource(Reference theReference) {
 		return myResponse.getContained().stream()
-				.filter(resource ->
-						resource.getId().equals(theReference.getReference())).findFirst().orElse(null);
+				.filter(resource -> resource.getId().equals(theReference.getReference()))
+				.findFirst()
+				.orElse(null);
 	}
 }

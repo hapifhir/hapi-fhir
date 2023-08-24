@@ -259,8 +259,8 @@ public class CdsCrServiceR4 implements ICdsCrService {
 				&& theAction.getType().getCodingFirstRep().hasCode()
 				&& !theAction.getType().getCodingFirstRep().getCode().equals("fire-event")) {
 			myServiceResponse.addServiceAction(new CdsServiceResponseSystemActionJson()
-				.setResource(resolveResource(theAction.getResource()))
-				.setType(theAction.getType().getCodingFirstRep().getCode()));
+					.setResource(resolveResource(theAction.getResource()))
+					.setType(theAction.getType().getCodingFirstRep().getCode()));
 		}
 	}
 

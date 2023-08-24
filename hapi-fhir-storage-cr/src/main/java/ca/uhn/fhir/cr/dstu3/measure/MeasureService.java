@@ -57,35 +57,35 @@ public class MeasureService {
 	}
 
 	public static final List<ContactDetail> CQI_CONTACT_DETAIL = Collections.singletonList(new ContactDetail()
-		.addTelecom(new ContactPoint()
-			.setSystem(ContactPoint.ContactPointSystem.URL)
-			.setValue("http://www.hl7.org/Special/committees/cqi/index.cfm")));
+			.addTelecom(new ContactPoint()
+					.setSystem(ContactPoint.ContactPointSystem.URL)
+					.setValue("http://www.hl7.org/Special/committees/cqi/index.cfm")));
 
 	public static final List<CodeableConcept> US_JURISDICTION_CODING = Collections.singletonList(new CodeableConcept()
-		.addCoding(new Coding(COUNTRY_CODING_SYSTEM_CODE, US_COUNTRY_CODE, US_COUNTRY_DISPLAY)));
+			.addCoding(new Coding(COUNTRY_CODING_SYSTEM_CODE, US_COUNTRY_CODE, US_COUNTRY_DISPLAY)));
 
 	public static final SearchParameter SUPPLEMENTAL_DATA_SEARCHPARAMETER = (SearchParameter) new SearchParameter()
-		.setUrl(MEASUREREPORT_SUPPLEMENTALDATA_SEARCHPARAMETER_URL)
-		.setVersion(MEASUREREPORT_SUPPLEMENTALDATA_SEARCHPARAMETER_VERSION)
-		.setName("DEQMMeasureReportSupplementalData")
-		.setStatus(Enumerations.PublicationStatus.ACTIVE)
-		.setDate(MEASUREREPORT_SUPPLEMENTALDATA_SEARCHPARAMETER_DEFINITION_DATE)
-		.setPublisher("HL7 International - Clinical Quality Information Work Group")
-		.setContact(CQI_CONTACT_DETAIL)
-		.setDescription(String.format(
-			"Returns resources (supplemental data) from references on extensions on the MeasureReport with urls matching %s.",
-			MEASUREREPORT_MEASURE_SUPPLEMENTALDATA_EXTENSION))
-		.setJurisdiction(US_JURISDICTION_CODING)
-		.addBase("MeasureReport")
-		.setCode("supplemental-data")
-		.setType(Enumerations.SearchParamType.REFERENCE)
-		.setExpression(String.format(
-			"MeasureReport.extension('%s').value", MEASUREREPORT_MEASURE_SUPPLEMENTALDATA_EXTENSION))
-		.setXpath(String.format(
-			"f:MeasureReport/f:extension[@url='%s'].value", MEASUREREPORT_MEASURE_SUPPLEMENTALDATA_EXTENSION))
-		.setXpathUsage(SearchParameter.XPathUsageType.NORMAL)
-		.setTitle("Supplemental Data")
-		.setId("deqm-measurereport-supplemental-data");
+			.setUrl(MEASUREREPORT_SUPPLEMENTALDATA_SEARCHPARAMETER_URL)
+			.setVersion(MEASUREREPORT_SUPPLEMENTALDATA_SEARCHPARAMETER_VERSION)
+			.setName("DEQMMeasureReportSupplementalData")
+			.setStatus(Enumerations.PublicationStatus.ACTIVE)
+			.setDate(MEASUREREPORT_SUPPLEMENTALDATA_SEARCHPARAMETER_DEFINITION_DATE)
+			.setPublisher("HL7 International - Clinical Quality Information Work Group")
+			.setContact(CQI_CONTACT_DETAIL)
+			.setDescription(String.format(
+					"Returns resources (supplemental data) from references on extensions on the MeasureReport with urls matching %s.",
+					MEASUREREPORT_MEASURE_SUPPLEMENTALDATA_EXTENSION))
+			.setJurisdiction(US_JURISDICTION_CODING)
+			.addBase("MeasureReport")
+			.setCode("supplemental-data")
+			.setType(Enumerations.SearchParamType.REFERENCE)
+			.setExpression(String.format(
+					"MeasureReport.extension('%s').value", MEASUREREPORT_MEASURE_SUPPLEMENTALDATA_EXTENSION))
+			.setXpath(String.format(
+					"f:MeasureReport/f:extension[@url='%s'].value", MEASUREREPORT_MEASURE_SUPPLEMENTALDATA_EXTENSION))
+			.setXpathUsage(SearchParameter.XPathUsageType.NORMAL)
+			.setTitle("Supplemental Data")
+			.setId("deqm-measurereport-supplemental-data");
 
 	/**
 	 * Get The details (such as tenant) of this request. Usually auto-populated HAPI.
@@ -114,28 +114,28 @@ public class MeasureService {
 	 * @return the calculated MeasureReport
 	 */
 	public MeasureReport evaluateMeasure(
-		IdType theId,
-		String thePeriodStart,
-		String thePeriodEnd,
-		String theReportType,
-		String theSubject,
-		String thePractitioner,
-		String theLastReceivedOn,
-		String theProductLine,
-		Bundle theAdditionalData,
-		Endpoint theTerminologyEndpoint) {
+			IdType theId,
+			String thePeriodStart,
+			String thePeriodEnd,
+			String theReportType,
+			String theSubject,
+			String thePractitioner,
+			String theLastReceivedOn,
+			String theProductLine,
+			Bundle theAdditionalData,
+			Endpoint theTerminologyEndpoint) {
 
 		ensureSupplementalDataElementSearchParameter();
 
 		var dstu3MeasureProcessor = new Dstu3MeasureProcessor(myRepository, myMeasureEvaluationOptions);
 
 		MeasureReport report = dstu3MeasureProcessor.evaluateMeasure(
-			theId,
-			thePeriodStart,
-			thePeriodEnd,
-			theReportType,
-			Collections.singletonList(theSubject),
-			theAdditionalData);
+				theId,
+				thePeriodStart,
+				thePeriodEnd,
+				theReportType,
+				Collections.singletonList(theSubject),
+				theAdditionalData);
 
 		if (theProductLine != null) {
 			Extension ext = new Extension();

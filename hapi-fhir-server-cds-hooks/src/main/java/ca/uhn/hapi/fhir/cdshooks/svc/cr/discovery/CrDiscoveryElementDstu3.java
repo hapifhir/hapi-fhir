@@ -36,13 +36,16 @@ public class CrDiscoveryElementDstu3 implements ICrDiscoveryElement {
 	}
 
 	public CdsServiceJson getCdsServiceJson() {
-		if (myPlanDefinition == null && myPlanDefinition.getAction().stream().noneMatch(a -> a.hasTriggerDefinition())) {
+		if (myPlanDefinition == null
+				&& myPlanDefinition.getAction().stream().noneMatch(a -> a.hasTriggerDefinition())) {
 			return null;
 		}
 
 		var triggerDefs = myPlanDefinition.getAction().stream()
-				.filter(a -> a.hasTriggerDefinition()).flatMap(a -> a.getTriggerDefinition().stream())
-				.filter(t -> t.getType().equals(TriggerDefinition.TriggerType.NAMEDEVENT)).collect(Collectors.toList());
+				.filter(a -> a.hasTriggerDefinition())
+				.flatMap(a -> a.getTriggerDefinition().stream())
+				.filter(t -> t.getType().equals(TriggerDefinition.TriggerType.NAMEDEVENT))
+				.collect(Collectors.toList());
 		if (triggerDefs == null || triggerDefs.isEmpty()) {
 			return null;
 		}

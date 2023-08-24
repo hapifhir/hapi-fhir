@@ -41,8 +41,10 @@ public class CrDiscoveryElementR4 implements ICrDiscoveryElement {
 		}
 
 		var triggerDefs = myPlanDefinition.getAction().stream()
-				.filter(a -> a.hasTrigger()).flatMap(a -> a.getTrigger().stream())
-				.filter(t -> t.getType().equals(TriggerDefinition.TriggerType.NAMEDEVENT)).collect(Collectors.toList());
+				.filter(a -> a.hasTrigger())
+				.flatMap(a -> a.getTrigger().stream())
+				.filter(t -> t.getType().equals(TriggerDefinition.TriggerType.NAMEDEVENT))
+				.collect(Collectors.toList());
 		if (triggerDefs == null || triggerDefs.isEmpty()) {
 			return null;
 		}
