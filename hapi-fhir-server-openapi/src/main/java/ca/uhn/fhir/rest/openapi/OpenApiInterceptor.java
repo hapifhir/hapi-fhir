@@ -91,6 +91,9 @@ import org.thymeleaf.templatemode.TemplateMode;
 import org.thymeleaf.templateresolver.ITemplateResolver;
 import org.thymeleaf.templateresolver.TemplateResolution;
 import org.thymeleaf.templateresource.ClassLoaderTemplateResource;
+import org.thymeleaf.web.IWebExchange;
+import org.thymeleaf.web.servlet.IServletWebExchange;
+import org.thymeleaf.web.servlet.JavaxServletWebApplication;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -336,7 +339,9 @@ public class OpenApiInterceptor {
 		HttpServletRequest servletRequest = theRequestDetails.getServletRequest();
 		ServletContext servletContext = servletRequest.getServletContext();
 
-		WebContext context = new WebContext(servletRequest, theResponse, servletContext);
+		JavaxServletWebApplication application = JavaxServletWebApplication.buildApplication(servletContext);
+		IServletWebExchange exchange = application.buildExchange(servletRequest, theResponse);
+		WebContext context = new WebContext(exchange);
 		context.setVariable(REQUEST_DETAILS, theRequestDetails);
 		context.setVariable("DESCRIPTION", cs.getImplementation().getDescription());
 		context.setVariable("SERVER_NAME", cs.getSoftware().getName());
@@ -773,7 +778,7 @@ public class OpenApiInterceptor {
 		}
 	}
 
-	private static List<String> primitiveTypes = Arrays.asList(
+	private static final List<String> primitiveTypes = List.of(
 			DataTypes.BOOLEAN.toCode(),
 			DataTypes.INTEGER.toCode(),
 			DataTypes.STRING.toCode(),
