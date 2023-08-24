@@ -84,8 +84,8 @@ public class GoldenResourceSearchSvcImpl implements IGoldenResourceSearchSvc {
 		searchParamMap.setLastUpdated(chunkDateRange);
 
 		TokenOrListParam goldenRecordStatusToken = new TokenOrListParam()
-			.add(MdmConstants.SYSTEM_GOLDEN_RECORD_STATUS, MdmConstants.CODE_GOLDEN_RECORD_REDIRECTED)
-			.add(MdmConstants.SYSTEM_GOLDEN_RECORD_STATUS, MdmConstants.CODE_GOLDEN_RECORD);
+				.add(MdmConstants.SYSTEM_GOLDEN_RECORD_STATUS, MdmConstants.CODE_GOLDEN_RECORD_REDIRECTED)
+				.add(MdmConstants.SYSTEM_GOLDEN_RECORD_STATUS, MdmConstants.CODE_GOLDEN_RECORD);
 		searchParamMap.add(Constants.PARAM_TAG, goldenRecordStatusToken);
 
 		IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(theResourceType);
