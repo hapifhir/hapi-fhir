@@ -105,8 +105,8 @@ public class ResponseBundleBuilder {
 			pageSize = pagingCalculatePageSize(requestedPage, server.getPagingProvider());
 
 			Integer size = bundleProvider.size();
-			numToReturn = (size == null) ? pageSize
-				: Math.min(pageSize, size.intValue() - theResponseBundleRequest.offset);
+			numToReturn =
+					(size == null) ? pageSize : Math.min(pageSize, size.intValue() - theResponseBundleRequest.offset);
 
 			resourceList =
 					pagingBuildResourceList(theResponseBundleRequest, bundleProvider, numToReturn, responsePageBuilder);
