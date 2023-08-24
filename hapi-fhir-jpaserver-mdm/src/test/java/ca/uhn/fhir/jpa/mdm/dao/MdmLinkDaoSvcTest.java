@@ -14,7 +14,9 @@ import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.mdm.model.MdmPidTuple;
 import ca.uhn.fhir.mdm.rules.json.MdmRulesJson;
 import org.hibernate.envers.RevisionType;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Practitioner;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -214,6 +216,31 @@ public class MdmLinkDaoSvcTest extends BaseMdmR4Test {
 		assertThrows(IllegalArgumentException.class, () -> myMdmLinkDaoSvc.findMdmLinkHistory(new MdmHistorySearchParameters()));
 	}
 
+	@Test
+	public void testHistoryForIdWithMultipleMatches(){
+		// setup
+		String commonId = "p123";
+
+		// Patient/p123 and its golden resource
+		Patient goldenPatient = createPatient();
+		Patient sourcePatient = createPatientWithId(new Patient(), commonId);
+
+		MdmLink mdmPatientLink = linkGoldenAndSourceResource(MdmMatchResultEnum.MATCH, goldenPatient, sourcePatient);
+		JpaPid goldenPatientId = mdmPatientLink.getGoldenResourcePersistenceId();
+		// Practitioner/p123 and its golden resource
+		Practitioner goldenPractitioner = createPractitioner(new Practitioner());
+		Practitioner sourcePractitioner = createPractitionerWithId(new Practitioner(), commonId);
+
+		linkGoldenAndSourceResource(MdmMatchResultEnum.MATCH, goldenPractitioner, sourcePractitioner);
+
+		// execute
+		MdmHistorySearchParameters mdmHistorySearchParameters = new MdmHistorySearchParameters().setSourceIds(List.of(commonId));
+		List<MdmLinkWithRevision<MdmLink>> actualMdmLinkRevisions = myMdmLinkDaoSvc.findMdmLinkHistory(mdmHistorySearchParameters);
+
+		// verify
+		assertEquals(2, actualMdmLinkRevisions.size(), "Both Patient/p123 and Practitioner/p123 should be returned");
+	}
+
 	@Nonnull
 	private static List<String> getIdsFromMdmLinks(Function<MdmLink, JpaPid> getIdFunction, MdmLink... mdmLinks) {
 		return Arrays.stream(mdmLinks)
@@ -271,16 +298,18 @@ public class MdmLinkDaoSvcTest extends BaseMdmR4Test {
 
 		return IntStream.range(0, numTargetPatients).mapToObj(myInt -> {
 			final Patient targetPatient = createPatient();
-
-			MdmLink mdmLink = (MdmLink) myMdmLinkDaoSvc.newMdmLink();
-			mdmLink.setLinkSource(MdmLinkSourceEnum.MANUAL);
-			mdmLink.setMatchResult(theFirstMdmMatchResultEnum);
-			mdmLink.setCreated(new Date());
-			mdmLink.setUpdated(new Date());
-			mdmLink.setGoldenResourcePersistenceId(runInTransaction(() -> myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), goldenPatient)));
-			mdmLink.setSourcePersistenceId(runInTransaction(() -> myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), targetPatient)));
-			return myMdmLinkDao.save(mdmLink);
-
+			return linkGoldenAndSourceResource(theFirstMdmMatchResultEnum, goldenPatient, targetPatient);
 		}).toList();
+	}
+
+	private MdmLink linkGoldenAndSourceResource(MdmMatchResultEnum theFirstMdmMatchResultEnum, IBaseResource theGoldenResource, IBaseResource theTargetResource) {
+		MdmLink mdmLink = (MdmLink) myMdmLinkDaoSvc.newMdmLink();
+		mdmLink.setLinkSource(MdmLinkSourceEnum.MANUAL);
+		mdmLink.setMatchResult(theFirstMdmMatchResultEnum);
+		mdmLink.setCreated(new Date());
+		mdmLink.setUpdated(new Date());
+		mdmLink.setGoldenResourcePersistenceId(runInTransaction(() -> myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), theGoldenResource)));
+		mdmLink.setSourcePersistenceId(runInTransaction(() -> myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), theTargetResource)));
+		return myMdmLinkDao.save(mdmLink);
 	}
 }

@@ -411,8 +411,9 @@ public class MdmLinkDaoJpaImpl implements IMdmLinkDao<JpaPid, MdmLink> {
 
 	@Nonnull
 	private List<Long> convertToLongIds(List<IIdType> theMdmHistorySearchParameters) {
-		return theMdmHistorySearchParameters.stream()
-				.map(id -> myIdHelperService.getPidOrThrowException(RequestPartitionId.allPartitions(), id))
+		return myIdHelperService
+				.getPidsOrThrowException(RequestPartitionId.allPartitions(), theMdmHistorySearchParameters)
+				.stream()
 				.map(JpaPid::getId)
 				.collect(Collectors.toUnmodifiableList());
 	}
