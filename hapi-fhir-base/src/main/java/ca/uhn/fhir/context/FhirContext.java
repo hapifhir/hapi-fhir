@@ -1177,7 +1177,14 @@ public class FhirContext {
 			synchronized (this) {
 				if (!myInitialized && !myInitializing) {
 					myInitializing = true;
-					scanResourceTypes(toElementList(myResourceTypesToScan));
+					try {
+						scanResourceTypes(toElementList(myResourceTypesToScan));
+					} catch (Exception e) {
+						ourLog.error("Failed to initialize FhirContext", e);
+						throw e;
+					} finally {
+						myInitializing = false;
+					}
 				}
 			}
 		}

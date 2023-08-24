@@ -39,7 +39,7 @@ public class FhirResourceDaoR4UpdateTagSnapshotTest extends BaseJpaR4Test {
 		myPatientDao.update(p, mySrd);
 
 		p = myPatientDao.read(new IdType("A"), mySrd);
-		assertEquals("1", p.getIdElement().getVersionIdPart());
+		assertEquals("2", p.getIdElement().getVersionIdPart());
 		assertEquals(true, p.getActive());
 		assertEquals(1, p.getMeta().getTag().size());
 	}
@@ -84,7 +84,7 @@ public class FhirResourceDaoR4UpdateTagSnapshotTest extends BaseJpaR4Test {
 		myPatientDao.update(p, mySrd);
 
 		p = myPatientDao.read(new IdType("A"), mySrd);
-		assertEquals("1", p.getIdElement().getVersionIdPart());
+		assertEquals("2", p.getIdElement().getVersionIdPart());
 		assertEquals(true, p.getActive());
 		assertEquals(1, p.getMeta().getTag().size());
 		assertEquals("urn:foo", p.getMeta().getTag().get(0).getSystem());
@@ -132,7 +132,27 @@ public class FhirResourceDaoR4UpdateTagSnapshotTest extends BaseJpaR4Test {
 		p = myPatientDao.read(new IdType("A"), mySrd);
 		assertEquals(true, p.getActive());
 		assertEquals(0, p.getMeta().getTag().size());
-		assertEquals("1", p.getIdElement().getVersionIdPart());
+		assertEquals("2", p.getIdElement().getVersionIdPart());
+	}
+
+	@Test
+	public void testUpdateResource_withNewTags_willCreateNewResourceVersion() {
+
+		Patient p = new Patient();
+		p.setId("A");
+		p.setActive(true);
+		myPatientDao.update(p, mySrd);
+
+		p = new Patient();
+		p.setId("A");
+		p.getMeta().addTag("urn:foo", "bar", "baz");
+		p.setActive(true);
+		myPatientDao.update(p, mySrd);
+
+		p = myPatientDao.read(new IdType("A"), mySrd);
+		assertEquals(true, p.getActive());
+		assertEquals(1, p.getMeta().getTag().size());
+		assertEquals("2", p.getIdElement().getVersionIdPart());
 	}
 
 

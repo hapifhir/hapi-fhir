@@ -1,8 +1,6 @@
 package ca.uhn.fhir.cr.dstu3;
 
 
-import ca.uhn.fhir.cr.BaseCrDstu3TestServer;
-
 import ca.uhn.fhir.cr.dstu3.measure.MeasureOperationsProvider;
 import org.hamcrest.Matchers;
 import org.hl7.fhir.dstu3.model.Bundle;

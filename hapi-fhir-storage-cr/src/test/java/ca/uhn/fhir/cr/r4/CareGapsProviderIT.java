@@ -1,6 +1,5 @@
 package ca.uhn.fhir.cr.r4;
 
-import ca.uhn.fhir.cr.BaseCrR4TestServer;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
@@ -16,7 +15,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
- * End to end test for care gaps functionality
+ * End-to-end test for care gaps functionality
  * Scenario is that we have a Provider that is transmitting data to a Payer to validate that
  * no gaps in care exist (a "gap in care" means that a Patient is not conformant with best practices for a given pathology).
  * Specifically, for this test, we're checking to ensure that a Patient has had the appropriate colorectal cancer screenings.

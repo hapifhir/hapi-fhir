@@ -17,32 +17,43 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.mdm.api;
+package ca.uhn.fhir.mdm.model.mdmevents;
 
 import ca.uhn.fhir.model.api.IModelJson;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class MdmLinkEvent implements IModelJson {
+public class MdmClearEvent implements IModelJson {
 
-	private List<MdmLinkJson> myMdmLinks = new ArrayList<>();
+	@JsonProperty("resourceTypes")
+	private List<String> myResourceTypes;
 
-	public List<MdmLinkJson> getMdmLinks() {
-		return myMdmLinks;
+	/**
+	 * True if this submit was done asynchronously
+	 * (ie, was submitted as a batch job).
+	 * False if submitted directly to mdm.
+	 */
+	@JsonProperty("batchSize")
+	private Long myBatchSize;
+
+	public Long getBatchSize() {
+		return myBatchSize;
 	}
 
-	public void setMdmLinks(List<MdmLinkJson> theMdmLinks) {
-		myMdmLinks = theMdmLinks;
+	public void setBatchSize(Long theBatchSize) {
+		myBatchSize = theBatchSize;
 	}
 
-	public MdmLinkEvent addMdmLink(MdmLinkJson theMdmLink) {
-		getMdmLinks().add(theMdmLink);
-		return this;
+	public List<String> getResourceTypes() {
+		if (myResourceTypes == null) {
+			myResourceTypes = new ArrayList<>();
+		}
+		return myResourceTypes;
 	}
 
-	@Override
-	public String toString() {
-		return "MdmLinkEvent{" + "myMdmLinks=" + myMdmLinks + '}';
+	public void setResourceTypes(List<String> theResourceTypes) {
+		myResourceTypes = theResourceTypes;
 	}
 }

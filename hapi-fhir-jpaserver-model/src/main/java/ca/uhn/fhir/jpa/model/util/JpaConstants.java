@@ -83,7 +83,7 @@ public class JpaConstants {
 	 * Header name for the "X-Meta-Snapshot-Mode" header, which
 	 * specifies that properties in meta (tags, profiles, security labels)
 	 * should be treated as a snapshot, meaning that these things will
-	 * be removed if they are nt explicitly included in updates
+	 * be removed if they are not explicitly included in updates
 	 */
 	public static final String HEADER_META_SNAPSHOT_MODE = "X-Meta-Snapshot-Mode";
 	/**

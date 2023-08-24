@@ -1,11 +1,11 @@
 package ca.uhn.fhir.cr.r4;
 
-import ca.uhn.fhir.cr.BaseCrR4TestServer;
 
 import ca.uhn.fhir.cr.common.IRepositoryFactory;
 import ca.uhn.fhir.cr.repo.HapiFhirRepository;
+
+
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
-import ca.uhn.fhir.rest.server.RestfulServer;
 import com.google.common.collect.Lists;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.IdType;
@@ -24,9 +24,6 @@ public class SubmitDataServiceR4Test extends BaseCrR4TestServer {
 
 	@Autowired
 	ISubmitDataProcessorFactory myR4SubmitDataProcessorFactory;
-
-	@Autowired
-	RestfulServer ourRestfulServer;
 
 	@Test
 	public void submitDataTest(){

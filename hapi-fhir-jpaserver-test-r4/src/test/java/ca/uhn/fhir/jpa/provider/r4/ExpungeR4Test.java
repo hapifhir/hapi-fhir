@@ -55,6 +55,8 @@ import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -67,6 +69,7 @@ import java.util.List;
 import static ca.uhn.fhir.batch2.jobs.termcodesystem.TermCodeSystemJobConfig.TERM_CODE_SYSTEM_DELETE_JOB_NAME;
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.startsWith;
@@ -74,6 +77,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -95,6 +99,8 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 	private ISearchResultDao mySearchResultDao;
 	@Autowired
 	private ThreadSafeResourceDeleterSvc myThreadSafeResourceDeleterSvc;
+	@Autowired
+	private ExpungeService myExpungeService;
 
 	@AfterEach
 	public void afterDisableExpunge() {
@@ -212,25 +218,27 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 
 	}
 
-	public void createStandardCodeSystems() {
+	public void createStandardCodeSystemWithOneVersion(){
 		CodeSystem codeSystem1 = new CodeSystem();
 		codeSystem1.setUrl(URL_MY_CODE_SYSTEM);
 		codeSystem1.setName("CS1-V1");
 		codeSystem1.setVersion("1");
 		codeSystem1.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
 		codeSystem1
-			.addConcept().setCode("C").setDisplay("Code C").addDesignation(
-				new CodeSystem.ConceptDefinitionDesignationComponent().setLanguage("en").setValue("CodeCDesignation")).addProperty(
-				new CodeSystem.ConceptPropertyComponent().setCode("CodeCProperty").setValue(new StringType("CodeCPropertyValue"))
-			)
-			.addConcept(new CodeSystem.ConceptDefinitionComponent().setCode("CA").setDisplay("Code CA")
-				.addConcept(new CodeSystem.ConceptDefinitionComponent().setCode("CAA").setDisplay("Code CAA"))
-			)
-			.addConcept(new CodeSystem.ConceptDefinitionComponent().setCode("CB").setDisplay("Code CB"));
+				.addConcept().setCode("C").setDisplay("Code C").addDesignation(
+						new CodeSystem.ConceptDefinitionDesignationComponent().setLanguage("en").setValue("CodeCDesignation")).addProperty(
+						new CodeSystem.ConceptPropertyComponent().setCode("CodeCProperty").setValue(new StringType("CodeCPropertyValue"))
+				)
+				.addConcept(new CodeSystem.ConceptDefinitionComponent().setCode("CA").setDisplay("Code CA")
+						.addConcept(new CodeSystem.ConceptDefinitionComponent().setCode("CAA").setDisplay("Code CAA"))
+				)
+				.addConcept(new CodeSystem.ConceptDefinitionComponent().setCode("CB").setDisplay("Code CB"));
 		codeSystem1
-			.addConcept().setCode("D").setDisplay("Code D");
+				.addConcept().setCode("D").setDisplay("Code D");
 		myOneVersionCodeSystemId = myCodeSystemDao.create(codeSystem1).getId();
+	}
 
+	public void createStandardCodeSystemWithTwoVersions(){
 		CodeSystem cs2v1 = new CodeSystem();
 		cs2v1.setUrl(URL_MY_CODE_SYSTEM_2);
 		cs2v1.setVersion("1");
@@ -244,6 +252,11 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 		cs2v2.setName("CS2-V2");
 		cs2v2.addConcept().setCode("F").setDisplay("Code F");
 		myTwoVersionCodeSystemIdV2 = myCodeSystemDao.create(cs2v2).getId();
+	}
+
+	public void createStandardCodeSystems() {
+		createStandardCodeSystemWithOneVersion();
+		createStandardCodeSystemWithTwoVersions();
 	}
 
 	private IFhirResourceDao<?> getDao(IIdType theId) {
@@ -670,10 +683,6 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 		assertExpunged(myDeletedPatientId.withVersion("2"));
 	}
 
-
-	@Autowired
-	private ExpungeService myExpungeService;
-
 	@Test
 	public void testExpungeDeletedWhereResourceInSearchResults() {
 		createStandardPatients();
@@ -900,25 +909,72 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 	}
 
 	@Test
-	public void testDeleteCodeSystemByUrlThenExpungeWithoutWaitingForBatch() {
+	public void testExpungeCodeSystem_whenCsIsBeingBatchDeleted_willGracefullyHandleConstraintViolationException(){
 		//set up
-		createStandardCodeSystems();
+		createStandardCodeSystemWithOneVersion();
 
 		myCodeSystemDao.deleteByUrl("CodeSystem?url=" + URL_MY_CODE_SYSTEM, null);
 		myTerminologyDeferredStorageSvc.saveDeferred();
+
 		try {
 			// execute
 			myCodeSystemDao.expunge(new ExpungeOptions()
 				.setExpungeDeletedResources(true)
 				.setExpungeOldVersions(true), null);
-			fail("expunge should not succeed since the delete batch job is not complete");
-		} catch (InternalErrorException e){
+			fail();
+		} catch (PreconditionFailedException preconditionFailedException){
 			// verify
-			assertNotExpunged(myOneVersionCodeSystemId.withVersion("2"));
-			assertThat(e.getMessage(), startsWith(
-				"HAPI-1084: ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException: HAPI-2415: The resource could not be ex" +
-					"punged. It is likely due to unfinished asynchronous deletions, please try again later:"));
+			assertThat(preconditionFailedException.getMessage(), startsWith(
+				"HAPI-2415: The resource could not be expunged. It is likely due to unfinished asynchronous deletions, please try again later"));
 		}
+
+		myBatch2JobHelper.awaitAllJobsOfJobDefinitionIdToComplete(TERM_CODE_SYSTEM_DELETE_JOB_NAME);
+	}
+
+	@ParameterizedTest
+	@ValueSource(strings = {"instance", "type", "system"})
+	public void testExpungeNotAllowedWhenNotEnabled(String level) {
+		// setup
+		myStorageSettings.setExpungeEnabled(false);
+
+		Patient p = new Patient();
+		p.setActive(true);
+		p.addName().setFamily("FOO");
+		IIdType patientId = myPatientDao.create(p).getId();
+
+		myPatientDao.delete(patientId);
+
+		runInTransaction(() -> assertThat(myResourceTableDao.findAll(), not(empty())));
+		runInTransaction(() -> assertThat(myResourceHistoryTableDao.findAll(), not(empty())));
+
+		// execute & verify
+		MethodNotAllowedException exception = null;
+		switch (level) {
+			case "instance":
+				exception = assertThrows(MethodNotAllowedException.class, () -> {
+					myPatientDao.expunge(patientId, new ExpungeOptions()
+						.setExpungeDeletedResources(true)
+						.setExpungeOldVersions(true), null);
+				});
+				break;
+
+			case "type":
+				exception = assertThrows(MethodNotAllowedException.class, () -> {
+					myPatientDao.expunge(new ExpungeOptions()
+						.setExpungeDeletedResources(true)
+						.setExpungeOldVersions(true), null);
+				});
+				break;
+
+			case "system":
+				exception = assertThrows(MethodNotAllowedException.class, () -> {
+					mySystemDao.expunge(new ExpungeOptions()
+						.setExpungeEverything(true), null);
+				});
+		}
+
+		assertStillThere(patientId);
+		assertThat(exception.getMessage(), containsString("$expunge is not enabled on this server"));
 	}
 
 	private List<Patient> createPatientsWithForcedIds(int theNumPatients) {

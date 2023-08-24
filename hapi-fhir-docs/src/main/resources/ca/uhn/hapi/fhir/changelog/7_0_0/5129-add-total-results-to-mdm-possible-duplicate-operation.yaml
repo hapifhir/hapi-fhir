@@ -1,0 +1,4 @@
+---
+type: add
+issue: 5129
+title: "Added a field that shows the total number of `POSSIBLE_DUPLICATE` links has been added to the `$mdm-duplicate-golden-resources` operation response."

@@ -2,7 +2,7 @@ package ca.uhn.fhir.cr;
 
 import org.cqframework.cql.cql2elm.CqlCompilerException;
 import org.cqframework.cql.cql2elm.CqlTranslator;
-import org.cqframework.cql.cql2elm.CqlTranslatorOptions;
+import org.cqframework.cql.cql2elm.CqlCompilerOptions;
 import org.cqframework.cql.cql2elm.LibraryBuilder;
 import org.opencds.cqf.cql.evaluator.CqlOptions;
 import org.opencds.cqf.cql.evaluator.engine.CqlEngineOptions;
@@ -241,33 +241,14 @@ public class TestCqlProperties {
 		this.cql_compiler_translator_format = cqlTranslatorFormat;
 	}
 
-	private CqlTranslatorOptions cqlTranslatorOptions = new CqlTranslatorOptions(
-		getCqlTranslatorFormat(),
-		cql_compiler_enable_date_range_optimization,
-		cql_compiler_enable_annotations,
-		cql_compiler_enable_locators,
-		cql_compiler_enable_results_type,
-		isCqlCompilerVerifyOnly(),
-		cql_compiler_enable_detailed_errors,
-		getCqlCompilerErrorSeverityLevel(),
-		cql_compiler_disable_list_traversal,
-		cql_compiler_disable_list_demotion,
-		cql_compiler_disable_list_promotion,
-		cql_compiler_enable_interval_demotion,
-		cql_compiler_enable_interval_promotion,
-		cql_compiler_disable_method_invocation,
-		cql_compiler_require_from_keyword,
-		isCqlCompilerValidateUnits(),
-		cql_compiler_disable_default_model_info_load,
-		getCqlCompilerSignatureLevel(),
-		getCqlCompilerCompatibilityLevel());
+	private CqlCompilerOptions cqlCompilerOptions = new CqlCompilerOptions();
 
-	public CqlTranslatorOptions getCqlTranslatorOptions() {
-		return this.cqlTranslatorOptions;
+	public CqlCompilerOptions getCqlCompilerOptions() {
+		return this.cqlCompilerOptions;
 	}
 
-	public void setCqlTranslator(CqlTranslatorOptions translator) {
-		this.cqlTranslatorOptions = translator;
+	public void setCqlCompilerOptions(CqlCompilerOptions compilerOptions) {
+		this.cqlCompilerOptions = compilerOptions;
 	}
 
 	public CqlEngineOptions getCqlEngineOptions() {
@@ -282,7 +263,8 @@ public class TestCqlProperties {
 		CqlOptions cqlOptions = new CqlOptions();
 		cqlOptions.setUseEmbeddedLibraries(this.cql_use_embedded_libraries);
 		cqlOptions.setCqlEngineOptions(this.getCqlEngineOptions());
-		cqlOptions.setCqlTranslatorOptions(this.getCqlTranslatorOptions());
+		cqlOptions.setCqlCompilerOptions(this.getCqlCompilerOptions());
+		//cqlOptions.setCqlCompilerOptions(this.getCqlCompilerOptions());
 		return cqlOptions;
 	}
 

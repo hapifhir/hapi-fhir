@@ -56,25 +56,30 @@ class ResourceIdListStepTest {
 	}
 
 	@ParameterizedTest
-	@ValueSource(ints = {1, 100, 500, 501, 2345})
+	@ValueSource(ints = {0, 1, 100, 500, 501, 2345, 10500})
 	void testResourceIdListBatchSizeLimit(int theListSize) {
 		List<TypedResourcePid> idList = generateIdList(theListSize);
 		when(myStepExecutionDetails.getData()).thenReturn(myData);
 		when(myParameters.getBatchSize()).thenReturn(theListSize);
 		when(myStepExecutionDetails.getParameters()).thenReturn(myParameters);
 		HomogeneousResourcePidList homogeneousResourcePidList = mock(HomogeneousResourcePidList.class);
-		when(homogeneousResourcePidList.getTypedResourcePids()).thenReturn(idList);
-		when(homogeneousResourcePidList.getLastDate()).thenReturn(new Date());
+		if (theListSize > 0) {
+			when(homogeneousResourcePidList.getTypedResourcePids()).thenReturn(idList);
+			when(homogeneousResourcePidList.getLastDate()).thenReturn(new Date());
+			when(homogeneousResourcePidList.isEmpty()).thenReturn(false);
+			// Ensure none of the work chunks exceed MAX_BATCH_OF_IDS in size:
+			doAnswer(i -> {
+				ResourceIdListWorkChunkJson list = i.getArgument(0);
+				Assertions.assertTrue(list.size() <= ResourceIdListStep.MAX_BATCH_OF_IDS,
+					"Id batch size should never exceed " + ResourceIdListStep.MAX_BATCH_OF_IDS);
+				return null;
+			}).when(myDataSink).accept(any(ResourceIdListWorkChunkJson.class));
+		} else {
+			when(homogeneousResourcePidList.isEmpty()).thenReturn(true);
+		}
 		when(myIdChunkProducer.fetchResourceIdsPage(any(), any(), any(), any(), any()))
 			.thenReturn(homogeneousResourcePidList);
 
-		// Ensure none of the work chunks exceed MAX_BATCH_OF_IDS in size:
-		doAnswer(i -> {
-			ResourceIdListWorkChunkJson list = i.getArgument(0);
-			Assertions.assertTrue(list.size() <= ResourceIdListStep.MAX_BATCH_OF_IDS,
-				"Id batch size should never exceed " + ResourceIdListStep.MAX_BATCH_OF_IDS);
-			return null;
-		}).when(myDataSink).accept(any(ResourceIdListWorkChunkJson.class));
 
 		final RunOutcome run = myResourceIdListStep.run(myStepExecutionDetails, myDataSink);
 		assertNotEquals(null, run);
@@ -93,7 +98,9 @@ class ResourceIdListStepTest {
 		// The very last chunk should be whatever is left over (if there is a remainder):
 		int expectedLastBatchSize = theListSize % ResourceIdListStep.MAX_BATCH_OF_IDS;
 		expectedLastBatchSize = (expectedLastBatchSize == 0) ? ResourceIdListStep.MAX_BATCH_OF_IDS : expectedLastBatchSize;
-		assertEquals(expectedLastBatchSize, allDataChunks.get(allDataChunks.size() - 1).size());
+		if (!allDataChunks.isEmpty()) {
+			assertEquals(expectedLastBatchSize, allDataChunks.get(allDataChunks.size() - 1).size());
+		}
 	}
 
 	private List<TypedResourcePid> generateIdList(int theListSize) {

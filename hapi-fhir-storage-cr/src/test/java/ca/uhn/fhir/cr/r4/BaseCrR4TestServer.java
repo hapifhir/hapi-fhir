@@ -1,12 +1,12 @@
-package ca.uhn.fhir.cr;
+package ca.uhn.fhir.cr.r4;
 
 import ca.uhn.fhir.context.FhirContext;
-
-import ca.uhn.fhir.cr.dstu3.TestCrDstu3Config;
+import ca.uhn.fhir.cr.IResourceLoader;
+import ca.uhn.fhir.cr.r4.TestCrR4Config;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
-import ca.uhn.fhir.jpa.test.BaseJpaDstu3Test;
+import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -18,23 +18,26 @@ import ca.uhn.fhir.test.utilities.JettyUtil;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
+
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
-import org.hl7.fhir.dstu3.model.Bundle;
-import org.hl7.fhir.dstu3.model.Resource;
+import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.Resource;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.opencds.cqf.cql.evaluator.library.EvaluationSettings;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
+
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.test.context.ContextConfiguration;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-@ContextConfiguration(classes = {TestCrDstu3Config.class})
-public abstract class BaseCrDstu3TestServer extends BaseJpaDstu3Test implements IResourceLoader {
+
+@ContextConfiguration(classes = {TestCrR4Config.class})
+public abstract class BaseCrR4TestServer extends BaseJpaR4Test implements IResourceLoader {
 
 	public static IGenericClient ourClient;
 	public static  FhirContext ourCtx;
@@ -44,18 +47,20 @@ public abstract class BaseCrDstu3TestServer extends BaseJpaDstu3Test implements 
 	public static DatabaseBackedPagingProvider ourPagingProvider;
 	public static IParser ourParser;
 
-	@Autowired
-	protected DaoRegistry myDaoRegistry;
-	@Autowired
-	ApplicationContext myApplicationContext;
+
+	//@Autowired
+	//ApplicationContext myApplicationContext;
 	private SimpleRequestHeaderInterceptor mySimpleHeaderInterceptor;
 
+	@Autowired
+	EvaluationSettings myEvaluationSettings;
 
 	@SuppressWarnings("deprecation")
 	@AfterEach
 	public void after() {
 		ourClient.unregisterInterceptor(mySimpleHeaderInterceptor);
 		myStorageSettings.setIndexMissingFields(new JpaStorageSettings().getIndexMissingFields());
+		myEvaluationSettings.getLibraryCache().clear();
 	}
 	@Autowired
 	RestfulServer ourRestfulServer;
@@ -93,7 +98,6 @@ public abstract class BaseCrDstu3TestServer extends BaseJpaDstu3Test implements 
 		ourPagingProvider = myAppCtx.getBean(DatabaseBackedPagingProvider.class);
 		ourRestfulServer.setPagingProvider(ourPagingProvider);
 
-
 		mySimpleHeaderInterceptor = new SimpleRequestHeaderInterceptor();
 		ourClient.registerInterceptor(mySimpleHeaderInterceptor);
 		myStorageSettings.setIndexMissingFields(JpaStorageSettings.IndexEnabledEnum.DISABLED);
@@ -110,8 +114,9 @@ public abstract class BaseCrDstu3TestServer extends BaseJpaDstu3Test implements 
 		return ourCtx;
 	}
 
-	public Bundle loadBundle(String theLocation) {
-		return loadBundle(Bundle.class, theLocation);
+	public void loadBundle(String theLocation) {
+		var bundy = (Bundle) readResource(theLocation);
+		ourClient.transaction().withBundle(bundy).execute();
 	}
 
 

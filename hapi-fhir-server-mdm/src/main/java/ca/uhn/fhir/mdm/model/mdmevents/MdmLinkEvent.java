@@ -1,6 +1,6 @@
 /*-
  * #%L
- * HAPI FHIR - Clinical Reasoning
+ * HAPI FHIR - Master Data Management
  * %%
  * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
@@ -17,13 +17,32 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.cr.common;
+package ca.uhn.fhir.mdm.model.mdmevents;
 
-import org.cqframework.cql.cql2elm.LibrarySourceProvider;
-import org.opencds.cqf.cql.engine.execution.LibraryLoader;
+import ca.uhn.fhir.model.api.IModelJson;
 
+import java.util.ArrayList;
 import java.util.List;
 
-public interface ILibraryLoaderFactory {
-	LibraryLoader create(List<LibrarySourceProvider> theLibraryContentProviders);
+public class MdmLinkEvent implements IModelJson {
+
+	private List<MdmLinkJson> myMdmLinks = new ArrayList<>();
+
+	public List<MdmLinkJson> getMdmLinks() {
+		return myMdmLinks;
+	}
+
+	public void setMdmLinks(List<MdmLinkJson> theMdmLinks) {
+		myMdmLinks = theMdmLinks;
+	}
+
+	public MdmLinkEvent addMdmLink(MdmLinkJson theMdmLink) {
+		getMdmLinks().add(theMdmLink);
+		return this;
+	}
+
+	@Override
+	public String toString() {
+		return "MdmLinkEvent{" + "myMdmLinks=" + myMdmLinks + '}';
+	}
 }
