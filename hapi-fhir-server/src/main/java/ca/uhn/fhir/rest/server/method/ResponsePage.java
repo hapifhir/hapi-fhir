@@ -357,8 +357,8 @@ public class ResponsePage {
 		private int myOmittedResourceCount;
 		private IBundleProvider myBundleProvider;
 
-		public ResponsePageBuilder addToOmittedResourceCount(int theOmittedResourcesCountToAdd) {
-			myOmittedResourceCount += theOmittedResourcesCountToAdd;
+		public ResponsePageBuilder setToOmittedResourceCount(int theOmittedResourcesCountToAdd) {
+			myOmittedResourceCount = theOmittedResourcesCountToAdd;
 			return this;
 		}
 
