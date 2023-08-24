@@ -21,15 +21,7 @@ package ca.uhn.hapi.fhir.cdshooks.svc.cr;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceIndicatorEnum;
-import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceRequestAuthorizationJson;
-import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceRequestJson;
-import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceResponseCardJson;
-import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceResponseCardSourceJson;
-import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceResponseJson;
-import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceResponseLinkJson;
-import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceResponseSuggestionActionJson;
-import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceResponseSuggestionJson;
+import ca.uhn.hapi.fhir.cdshooks.api.json.*;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r5.model.Bundle;
 import org.hl7.fhir.r5.model.CanonicalType;
@@ -69,6 +61,7 @@ public class CdsCrServiceR5 implements ICdsCrService {
 	private final RequestDetails myRequestDetails;
 	private final Repository myRepository;
 	private Bundle myResponseBundle;
+	private CdsServiceResponseJson myServiceResponse;
 
 	public CdsCrServiceR5(RequestDetails theRequestDetails, Repository theRepository) {
 		myRequestDetails = theRequestDetails;
@@ -255,7 +248,22 @@ public class CdsCrServiceR5 implements ICdsCrService {
 			theAction.getAction().forEach(action -> resolveSuggestion(action));
 		}
 
+		if (theAction.hasType() && theAction.hasResource()) {
+			resolveSystemAction(theAction);
+		}
+
 		return card;
+	}
+
+	private void resolveSystemAction(RequestOrchestration.RequestOrchestrationActionComponent theAction) {
+		if (theAction.hasType()
+				&& theAction.getType().hasCoding()
+				&& theAction.getType().getCodingFirstRep().hasCode()
+				&& !theAction.getType().getCodingFirstRep().getCode().equals("fire-event")) {
+			myServiceResponse.addServiceAction(new CdsServiceResponseSystemActionJson()
+					.setResource(resolveResource(theAction.getResource()))
+					.setType(theAction.getType().getCodingFirstRep().getCode()));
+		}
 	}
 
 	private CdsServiceResponseCardSourceJson resolveSource(
@@ -296,15 +304,20 @@ public class CdsCrServiceR5 implements ICdsCrService {
 		}
 		if (theAction.hasResource()) {
 			suggestionAction.setResource(resolveResource(theAction.getResource()));
+			if (!suggestionAction.getType().isEmpty()) {
+				resolveSystemAction(theAction);
+			}
 		}
 
 		return suggestionAction;
 	}
 
 	private IBaseResource resolveResource(Reference theReference) {
+		String reference = theReference.getReference();
+		String id = reference.contains("/") ? reference.split("/")[1] : reference;
 		return myResponseBundle.getEntry().stream()
 				.filter(entry ->
-						entry.hasResource() && entry.getResource().getId().equals(theReference.getReference()))
+						entry.hasResource() && entry.getResource().getId().equals(id))
 				.map(entry -> entry.getResource())
 				.collect(Collectors.toList())
 				.get(0);

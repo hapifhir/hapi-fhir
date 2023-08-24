@@ -58,6 +58,8 @@ public class CdsPrefetchSvc {
 	public void augmentRequest(CdsServiceRequestJson theCdsServiceRequestJson, ICdsServiceMethod theServiceMethod) {
 		CdsServiceJson serviceSpec = theServiceMethod.getCdsServiceJson();
 		if (theServiceMethod instanceof CdsCrServiceMethod) {
+			// CdsCrServices will retrieve data from the dao or fhir server passed in as needed,
+			// checking for missing prefetch is not necessary.
 			return;
 		}
 		Set<String> missingPrefetch = findMissingPrefetch(serviceSpec, theCdsServiceRequestJson);

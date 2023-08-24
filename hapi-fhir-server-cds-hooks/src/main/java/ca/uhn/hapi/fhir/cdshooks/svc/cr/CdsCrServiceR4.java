@@ -21,15 +21,7 @@ package ca.uhn.hapi.fhir.cdshooks.svc.cr;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceIndicatorEnum;
-import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceRequestAuthorizationJson;
-import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceRequestJson;
-import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceResponseCardJson;
-import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceResponseCardSourceJson;
-import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceResponseJson;
-import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceResponseLinkJson;
-import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceResponseSuggestionActionJson;
-import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceResponseSuggestionJson;
+import ca.uhn.hapi.fhir.cdshooks.api.json.*;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CanonicalType;
@@ -69,6 +61,7 @@ public class CdsCrServiceR4 implements ICdsCrService {
 	private final RequestDetails myRequestDetails;
 	private final Repository myRepository;
 	private Bundle myResponseBundle;
+	private CdsServiceResponseJson myServiceResponse;
 
 	public CdsCrServiceR4(RequestDetails theRequestDetails, Repository theRepository) {
 		myRequestDetails = theRequestDetails;
@@ -181,7 +174,7 @@ public class CdsCrServiceR4 implements ICdsCrService {
 	public CdsServiceResponseJson encodeResponse(Object theResponse) {
 		assert theResponse instanceof Bundle;
 		myResponseBundle = (Bundle) theResponse;
-		CdsServiceResponseJson serviceResponse = new CdsServiceResponseJson();
+		myServiceResponse = new CdsServiceResponseJson();
 		RequestGroup mainRequest =
 				(RequestGroup) myResponseBundle.getEntry().get(0).getResource();
 		CanonicalType canonical = mainRequest.getInstantiatesCanonical().get(0);
@@ -189,9 +182,9 @@ public class CdsCrServiceR4 implements ICdsCrService {
 				PlanDefinition.class,
 				new IdType(Canonicals.getResourceType(canonical), Canonicals.getIdPart(canonical)));
 		List<CdsServiceResponseLinkJson> links = resolvePlanLinks(planDef);
-		mainRequest.getAction().forEach(action -> serviceResponse.addCard(resolveAction(action, links)));
+		mainRequest.getAction().forEach(action -> myServiceResponse.addCard(resolveAction(action, links)));
 
-		return serviceResponse;
+		return myServiceResponse;
 	}
 
 	private List<CdsServiceResponseLinkJson> resolvePlanLinks(PlanDefinition thePlanDefinition) {
@@ -253,7 +246,22 @@ public class CdsCrServiceR4 implements ICdsCrService {
 			theAction.getAction().forEach(action -> resolveSuggestion(action));
 		}
 
+		if (theAction.hasType() && theAction.hasResource()) {
+			resolveSystemAction(theAction);
+		}
+
 		return card;
+	}
+
+	private void resolveSystemAction(RequestGroup.RequestGroupActionComponent theAction) {
+		if (theAction.hasType()
+				&& theAction.getType().hasCoding()
+				&& theAction.getType().getCodingFirstRep().hasCode()
+				&& !theAction.getType().getCodingFirstRep().getCode().equals("fire-event")) {
+			myServiceResponse.addServiceAction(new CdsServiceResponseSystemActionJson()
+				.setResource(resolveResource(theAction.getResource()))
+				.setType(theAction.getType().getCodingFirstRep().getCode()));
+		}
 	}
 
 	private CdsServiceResponseCardSourceJson resolveSource(RequestGroup.RequestGroupActionComponent theAction) {
@@ -291,15 +299,20 @@ public class CdsCrServiceR4 implements ICdsCrService {
 		}
 		if (theAction.hasResource()) {
 			suggestionAction.setResource(resolveResource(theAction.getResource()));
+			if (!suggestionAction.getType().isEmpty()) {
+				resolveSystemAction(theAction);
+			}
 		}
 
 		return suggestionAction;
 	}
 
 	private IBaseResource resolveResource(Reference theReference) {
+		String reference = theReference.getReference();
+		String id = reference.contains("/") ? reference.split("/")[1] : reference;
 		return myResponseBundle.getEntry().stream()
 				.filter(entry ->
-						entry.hasResource() && entry.getResource().getId().equals(theReference.getReference()))
+						entry.hasResource() && entry.getResource().getIdPart().equals(id))
 				.map(entry -> entry.getResource())
 				.collect(Collectors.toList())
 				.get(0);

@@ -21,14 +21,7 @@ package ca.uhn.hapi.fhir.cdshooks.svc.cr;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceRequestAuthorizationJson;
-import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceRequestJson;
-import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceResponseCardJson;
-import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceResponseCardSourceJson;
-import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceResponseJson;
-import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceResponseLinkJson;
-import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceResponseSuggestionActionJson;
-import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceResponseSuggestionJson;
+import ca.uhn.hapi.fhir.cdshooks.api.json.*;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.CarePlan;
 import org.hl7.fhir.dstu3.model.Endpoint;
@@ -68,6 +61,7 @@ public class CdsCrServiceDstu3 implements ICdsCrService {
 	private final RequestDetails myRequestDetails;
 	private final Repository myRepository;
 	private CarePlan myResponse;
+	private CdsServiceResponseJson myServiceResponse;
 
 	public CdsCrServiceDstu3(RequestDetails theRequestDetails, Repository theRepository) {
 		myRequestDetails = theRequestDetails;
@@ -231,7 +225,21 @@ public class CdsCrServiceDstu3 implements ICdsCrService {
 			theAction.getAction().forEach(action -> resolveSuggestion(action));
 		}
 
+		if (theAction.hasType() && theAction.hasResource()) {
+			resolveSystemAction(theAction);
+		}
+
 		return card;
+	}
+
+	private void resolveSystemAction(RequestGroup.RequestGroupActionComponent theAction) {
+		if (theAction.hasType()
+				&& theAction.getType().hasCode()
+				&& !theAction.getType().getCode().equals("fire-event")) {
+			myServiceResponse.addServiceAction(new CdsServiceResponseSystemActionJson()
+					.setResource(resolveResource(theAction.getResource()))
+					.setType(theAction.getType().getCode()));
+		}
 	}
 
 	private CdsServiceResponseCardSourceJson resolveSource(RequestGroup.RequestGroupActionComponent theAction) {
