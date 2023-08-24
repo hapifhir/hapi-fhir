@@ -141,16 +141,7 @@ public class MdmLinkUpdaterSvcImpl implements IMdmLinkUpdaterSvc {
 		mdmLink.setLinkSource(MdmLinkSourceEnum.MANUAL);
 
 		// Add partition for the mdm link if it doesn't exist
-		RequestPartitionId goldenResourcePartitionId =
-				(RequestPartitionId) goldenResource.getUserData(Constants.RESOURCE_PARTITION_ID);
-		if (goldenResourcePartitionId != null
-				&& goldenResourcePartitionId.hasPartitionIds()
-				&& goldenResourcePartitionId.getFirstPartitionIdOrNull() != null
-				&& (mdmLink.getPartitionId() == null || mdmLink.getPartitionId().getPartitionId() == null)) {
-			mdmLink.setPartitionId(new PartitionablePartitionId(
-					goldenResourcePartitionId.getFirstPartitionIdOrNull(),
-					goldenResourcePartitionId.getPartitionDate()));
-		}
+		addPartitioninfoForLinkIfNecessary(goldenResource, mdmLink);
 		myMdmLinkDaoSvc.save(mdmLink);
 
 		if (matchResult == MdmMatchResultEnum.MATCH) {
@@ -160,13 +151,23 @@ public class MdmLinkUpdaterSvcImpl implements IMdmLinkUpdaterSvc {
 
 		myMdmResourceDaoSvc.upsertGoldenResource(goldenResource, mdmContext.getResourceType());
 		if (matchResult == MdmMatchResultEnum.NO_MATCH) {
-			// We need to return no match for when a Golden Resource has already been found elsewhere
-			if (myMdmLinkDaoSvc
-					.getMdmLinksBySourcePidAndMatchResult(sourceResourceId, MdmMatchResultEnum.MATCH)
-					.isEmpty()) {
-				// Need to find a new Golden Resource to link this target to
+			/*
+			 * link is broken. We need to do 2 things:
+			 * * update links for the source resource (if no other golden resources exist, for instance)
+			 * * rebuild the golden resource from scratch, using current survivorship rules
+			 * 	and the current set of links
+			 */
+			List<?> links = myMdmLinkDaoSvc
+				.getMdmLinksBySourcePidAndMatchResult(sourceResourceId, MdmMatchResultEnum.MATCH);
+			if (links.isEmpty()) {
+				// No more links to source; Find a new Golden Resource to link this target to
 				myMdmMatchLinkSvc.updateMdmLinksForMdmSource(sourceResource, mdmContext);
 			}
+
+			// with the link broken, the golden resource has delta info from a resource
+			// that is no longer matched to it; we need to remove this delta. But it's
+			// easier to just rebuild the resource from scratch using survivorship rules/current links
+			goldenResource = myMdmSurvivorshipService.rebuildGoldenResourceCurrentLinksUsingSurvivorshipRules(goldenResource, mdmContext);
 		}
 
 		if (myInterceptorBroadcaster.hasHooks(Pointcut.MDM_POST_UPDATE_LINK)) {
@@ -179,6 +180,19 @@ public class MdmLinkUpdaterSvcImpl implements IMdmLinkUpdaterSvc {
 		}
 
 		return goldenResource;
+	}
+
+	private static void addPartitioninfoForLinkIfNecessary(IAnyResource goldenResource, IMdmLink mdmLink) {
+		RequestPartitionId goldenResourcePartitionId =
+				(RequestPartitionId) goldenResource.getUserData(Constants.RESOURCE_PARTITION_ID);
+		if (goldenResourcePartitionId != null
+				&& goldenResourcePartitionId.hasPartitionIds()
+				&& goldenResourcePartitionId.getFirstPartitionIdOrNull() != null
+				&& (mdmLink.getPartitionId() == null || mdmLink.getPartitionId().getPartitionId() == null)) {
+			mdmLink.setPartitionId(new PartitionablePartitionId(
+					goldenResourcePartitionId.getFirstPartitionIdOrNull(),
+					goldenResourcePartitionId.getPartitionDate()));
+		}
 	}
 
 	/**

@@ -282,6 +282,7 @@ public class MdmLinkDaoSvc<P extends IResourcePersistentId, M extends IMdmLink<P
 		Example<M> example = Example.of(exampleLink);
 		return myMdmLinkDao.findOne(example);
 	}
+
 	/**
 	 * Delete a given {@link IMdmLink}. Note that this does not clear out the Golden resource.
 	 * It is a simple entity delete.

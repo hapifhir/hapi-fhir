@@ -53,6 +53,7 @@ import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelFactory;
 import ca.uhn.fhir.mdm.api.IGoldenResourceMergerSvc;
 import ca.uhn.fhir.mdm.api.IMdmControllerSvc;
+import ca.uhn.fhir.mdm.api.IMdmLink;
 import ca.uhn.fhir.mdm.api.IMdmLinkCreateSvc;
 import ca.uhn.fhir.mdm.api.IMdmLinkQuerySvc;
 import ca.uhn.fhir.mdm.api.IMdmLinkSvc;
@@ -75,6 +76,7 @@ import ca.uhn.fhir.mdm.util.EIDHelper;
 import ca.uhn.fhir.mdm.util.GoldenResourceHelper;
 import ca.uhn.fhir.mdm.util.MdmPartitionHelper;
 import ca.uhn.fhir.mdm.util.MessageHelper;
+import ca.uhn.fhir.rest.api.server.storage.BaseResourcePersistentId;
 import ca.uhn.fhir.validation.IResourceLoader;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -93,8 +95,18 @@ public class MdmConsumerConfig {
 	}
 
 	@Bean
-	IMdmSurvivorshipService mdmSurvivorshipService() {
-		return new MdmSurvivorshipSvcImpl();
+	IMdmSurvivorshipService mdmSurvivorshipService(
+		FhirContext theFhirContext,
+		DaoRegistry theDaoRegistry,
+		GoldenResourceHelper theResourceHelper,
+		MdmLinkDaoSvc<? extends BaseResourcePersistentId<?>, IMdmLink<? extends BaseResourcePersistentId<?>>> theLinkDaoSvc
+	) {
+		return new MdmSurvivorshipSvcImpl(
+			theFhirContext,
+			theDaoRegistry,
+			theResourceHelper,
+			theLinkDaoSvc
+		);
 	}
 
 	@Bean
@@ -140,8 +152,19 @@ public class MdmConsumerConfig {
 	}
 
 	@Bean
-	GoldenResourceHelper goldenResourceHelper(FhirContext theFhirContext) {
-		return new GoldenResourceHelper(theFhirContext);
+	GoldenResourceHelper goldenResourceHelper(
+		FhirContext theFhirContext,
+		IMdmSettings theMdmSettings,
+		EIDHelper theEIDHelper,
+		MdmPartitionHelper theMdmPartitionHelper
+	) {
+		// do not make this depend on IMdmSurvivorshipSvcImpl
+		return new GoldenResourceHelper(
+			theFhirContext,
+			theMdmSettings,
+			theEIDHelper,
+			theMdmPartitionHelper
+		);
 	}
 
 	@Bean

@@ -60,4 +60,18 @@ public interface IMdmSurvivorshipService {
 	 */
 	<T extends IBase> void applySurvivorshipRulesToGoldenResource(
 			T theTargetResource, T theGoldenResource, MdmTransactionContext theMdmTransactionContext);
+
+	/**
+	 * GoldenResources can have non-empty field data created from changes to the various
+	 * resources that are matched to it (using some pre-defined survivorship rules).
+	 *
+	 * If a match link between a source and golden resource is broken, this method
+	 * will rebuild/repopulate the GoldenResource based on the current links
+	 * and current survivorship rules.
+	 *
+	 * @param theGoldenResource - the golden resource to rebuild
+	 * @param theMdmTransactionContext - the transaction context
+	 * @param <T> - Resource type to apply the survivorship rules to
+	 */
+	<T extends IBase> T rebuildGoldenResourceCurrentLinksUsingSurvivorshipRules(T theGoldenResource, MdmTransactionContext theMdmTransactionContext);
 }

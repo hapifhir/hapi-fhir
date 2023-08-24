@@ -20,17 +20,46 @@
 package ca.uhn.fhir.jpa.mdm.svc;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.mdm.dao.MdmLinkDaoSvc;
+import ca.uhn.fhir.mdm.api.IMdmLink;
 import ca.uhn.fhir.mdm.api.IMdmSurvivorshipService;
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
+import ca.uhn.fhir.mdm.util.GoldenResourceHelper;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
+import ca.uhn.fhir.rest.api.server.storage.BaseResourcePersistentId;
+import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.util.TerserUtil;
+import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.springframework.beans.factory.annotation.Autowired;
+
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
 
 public class MdmSurvivorshipSvcImpl implements IMdmSurvivorshipService {
 
-	@Autowired
-	private FhirContext myFhirContext;
+	protected final FhirContext myFhirContext;
+
+	private final DaoRegistry myDaoRegistry;
+
+	private final MdmLinkDaoSvc<? extends BaseResourcePersistentId<?>, IMdmLink<? extends BaseResourcePersistentId<?>>> myMdmLinkDaoSvc;
+
+	private final GoldenResourceHelper myGoldenResourceHelper;
+
+	public MdmSurvivorshipSvcImpl(
+		FhirContext theFhirContext,
+		DaoRegistry theDaoRegistry,
+		GoldenResourceHelper theResourceHelper,
+		MdmLinkDaoSvc<? extends BaseResourcePersistentId<?>, IMdmLink<? extends BaseResourcePersistentId<?>>> theLinkDaoSvc
+	) {
+		myFhirContext = theFhirContext;
+		myDaoRegistry = theDaoRegistry;
+		myGoldenResourceHelper = theResourceHelper;
+		myMdmLinkDaoSvc = theLinkDaoSvc;
+	}
 
 	/**
 	 * Merges two golden resources by overwriting all field values on theGoldenResource param for CREATE_RESOURCE,
@@ -61,5 +90,39 @@ public class MdmSurvivorshipSvcImpl implements IMdmSurvivorshipService {
 						TerserUtil.EXCLUDE_IDS_AND_META);
 				break;
 		}
+	}
+
+	@SuppressWarnings({"rawtypes", "unchecked"})
+	@Override
+	public <T extends IBase> T rebuildGoldenResourceCurrentLinksUsingSurvivorshipRules(T theGoldenResourceBase, MdmTransactionContext theMdmTransactionContext) {
+		IBaseResource goldenResource = (IBaseResource) theGoldenResourceBase;
+
+		// get a list of links sorted by updated date
+		List<? extends IMdmLink<? extends IResourcePersistentId<?>>> links = myMdmLinkDaoSvc.findMdmLinksByGoldenResource(goldenResource);
+		links.sort(Comparator.comparing((IMdmLink<? extends IResourcePersistentId<?>> theLink) -> theLink.getUpdated()));
+
+		IFhirResourceDao dao = myDaoRegistry.getResourceDao(goldenResource.fhirType());
+		List<IBaseResource> sourceResources = new ArrayList<>();
+		for (IMdmLink<? extends IResourcePersistentId<?>> link : links) {
+			IResourcePersistentId<?> sourcePid = link.getSourcePersistenceId();
+
+			IBaseResource resource = dao.readByPid(sourcePid);
+			sourceResources.add(resource);
+		}
+
+		IBaseResource toSave = myGoldenResourceHelper.createGoldenResourceFromMdmSourceResource(
+			(IAnyResource) goldenResource,
+			theMdmTransactionContext,
+			null // we don't want to apply survivorship
+		);
+
+		for (IBaseResource source : sourceResources) {
+			applySurvivorshipRulesToGoldenResource(source, toSave, theMdmTransactionContext);
+		}
+
+		// save it
+		dao.update(toSave, new SystemRequestDetails());
+
+		return (T) toSave;
 	}
 }
