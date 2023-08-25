@@ -15,6 +15,7 @@ import ca.uhn.fhir.mdm.model.MdmPidTuple;
 import ca.uhn.fhir.mdm.rules.json.MdmRulesJson;
 import org.hibernate.envers.RevisionType;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.junit.jupiter.api.Test;
@@ -223,13 +224,13 @@ public class MdmLinkDaoSvcTest extends BaseMdmR4Test {
 
 		// Patient/p123 and its golden resource
 		Patient goldenPatient = createPatient();
-		Patient sourcePatient = createPatientWithId(new Patient(), commonId);
+		Patient sourcePatient = (Patient) createResourceWithId(new Patient(), commonId, Enumerations.ResourceType.PATIENT);
 
 		MdmLink mdmPatientLink = linkGoldenAndSourceResource(MdmMatchResultEnum.MATCH, goldenPatient, sourcePatient);
 		JpaPid goldenPatientId = mdmPatientLink.getGoldenResourcePersistenceId();
 		// Practitioner/p123 and its golden resource
 		Practitioner goldenPractitioner = createPractitioner(new Practitioner());
-		Practitioner sourcePractitioner = createPractitionerWithId(new Practitioner(), commonId);
+		Practitioner sourcePractitioner = (Practitioner) createResourceWithId(new Practitioner(), commonId, Enumerations.ResourceType.PRACTITIONER);
 
 		linkGoldenAndSourceResource(MdmMatchResultEnum.MATCH, goldenPractitioner, sourcePractitioner);
 
