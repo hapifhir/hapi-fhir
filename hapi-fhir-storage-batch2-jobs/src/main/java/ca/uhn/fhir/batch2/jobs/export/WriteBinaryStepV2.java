@@ -165,7 +165,7 @@ public class WriteBinaryStepV2
 						expandedResources.getResourceType(), ex.getMessage());
 				ourLog.error(errorMsg);
 
-				throw new JobExecutionFailedException(Msg.code(2238) + errorMsg);
+				throw new JobExecutionFailedException(Msg.code(2431) + errorMsg);
 			}
 
 			SystemRequestDetails srd = new SystemRequestDetails();
