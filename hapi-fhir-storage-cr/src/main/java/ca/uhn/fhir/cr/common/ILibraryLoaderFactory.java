@@ -24,6 +24,6 @@ import org.cqframework.cql.cql2elm.LibrarySourceProvider;
 
 import java.util.List;
 
-public interface ILibraryManagerFactory {
+public interface ILibraryLoaderFactory {
 	LibraryManager create(List<LibrarySourceProvider> theLibraryContentProviders);
 }

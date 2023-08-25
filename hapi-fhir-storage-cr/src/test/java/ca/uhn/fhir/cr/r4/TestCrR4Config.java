@@ -3,7 +3,7 @@ package ca.uhn.fhir.cr.r4;
 import ca.uhn.fhir.cr.TestCqlProperties;
 import ca.uhn.fhir.cr.TestCrConfig;
 import ca.uhn.fhir.cr.common.CqlThreadFactory;
-import ca.uhn.fhir.cr.config.r4.R4MeasureConfig;
+import ca.uhn.fhir.cr.config.r4.CrR4Config;
 import ca.uhn.fhir.cr.r4.activitydefinition.ActivityDefinitionOperationsProvider;
 import ca.uhn.fhir.cr.r4.plandefinition.PlanDefinitionOperationsProvider;
 import ca.uhn.fhir.cr.r4.questionnaire.QuestionnaireOperationsProvider;
@@ -32,7 +32,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 @Configuration
-@Import({TestCrConfig.class, R4MeasureConfig.class
+@Import({TestCrConfig.class, CrR4Config.class
 })
 public class TestCrR4Config {
 	@Primary
@@ -104,8 +104,6 @@ public class TestCrR4Config {
 		return new QuestionnaireResponseOperationsProvider();
 	}
 
-	@Bean
-	TestCqlProperties cqlProperties() { return new TestCqlProperties(); }
 	@Bean
 	public EvaluationSettings evaluationSettings(TestCqlProperties theCqlProperties) {
 		var evaluationSettings = EvaluationSettings.getDefault();
