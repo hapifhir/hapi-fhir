@@ -82,6 +82,11 @@ public class BulkExportAppCtx {
 	}
 
 	@Bean
+	public ExpandResourcesStep expandResourcesStep() {
+		return new ExpandResourcesStep();
+	}
+
+	@Bean
 	public WriteBinaryStepV2 writeBinaryStep() {
 		return new WriteBinaryStepV2();
 	}
