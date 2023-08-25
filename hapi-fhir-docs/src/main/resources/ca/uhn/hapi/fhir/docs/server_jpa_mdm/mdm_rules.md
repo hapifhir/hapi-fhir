@@ -114,17 +114,18 @@ Here is a description of how each section of this document is configured.
 These define one or more fields which must have a match before two resources are considered for matching.
 This is like a list of "pre-searches" that find potential candidates for matches,
 to avoid the expensive operation of running a match score calculation on all resources in the system.
-`candidateSearchParameters` are capable of making exact searches and phonetic searches
-(see the list of [phonetic search parameters](https://smilecdr.com/docs/fhir_repository/search_parameter_phonetic.html))
+`candidateSearchParams` are capable of making searches using any SearchParameter defined in the system. 
+For example, [phonetic SearchParameters](https://smilecdr.com/docs/fhir_repository/search_parameter_phonetic.html) 
+can be useful here when matchFields include phonetic matchers.
 E.g. you may only wish to consider matching two Patients if they either share at least one identifier in
 common or have the same birthday or the same phone number. The HAPI FHIR server executes each of these searches
 separately and then takes the union of the results, so you can think of these as `OR` criteria that
 cast a wide net for potential candidates. In some MDM systems, these "pre-searches" are called "blocking"
 searches (since they identify "blocks" of candidates that will be searched for matches).
 
-If a list of searchParams is specified in a given candidateSearchParams item,
+If a list of searchParams is specified in a given `candidateSearchParams` item,
 then these search parameters are treated as `AND` parameters.
-In the following candidateSearchParams definition, hapi-fhir will extract given name,
+In the following `candidateSearchParams` definition, hapi-fhir will extract given name,
 family name and identifiers from the incoming Patient and perform two separate searches,
 first for all Patient resources that have the same given `AND` the same family name as
 the incoming Patient, and second for all Patient resources that share at least one
