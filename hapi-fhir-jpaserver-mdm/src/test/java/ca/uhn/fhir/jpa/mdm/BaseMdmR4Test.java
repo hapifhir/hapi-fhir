@@ -236,17 +236,6 @@ abstract public class BaseMdmR4Test extends BaseJpaR4Test {
 	}
 
 	@Nonnull
-	protected Patient createPatientWithId(Patient thePatient, String theId) {
-		thePatient.setId(theId);
-		thePatient.setActive(true);
-
-		DaoMethodOutcome outcome = myPatientDao.update(thePatient, new SystemRequestDetails());
-		Patient patient = (Patient) outcome.getResource();
-		patient.setId(outcome.getId());
-		return patient;
-	}
-
-	@Nonnull
 	protected Medication createMedication(Medication theMedication) {
 		DaoMethodOutcome outcome = myMedicationDao.create(theMedication);
 		Medication medication = (Medication) outcome.getResource();
@@ -259,15 +248,6 @@ abstract public class BaseMdmR4Test extends BaseJpaR4Test {
 		//Note that since our mdm-rules block on active=true, all patients must be active.
 		thePractitioner.setActive(true);
 		DaoMethodOutcome daoMethodOutcome = myPractitionerDao.create(thePractitioner);
-		thePractitioner.setId(daoMethodOutcome.getId());
-		return thePractitioner;
-	}
-
-	@Nonnull
-	protected Practitioner createPractitionerWithId(Practitioner thePractitioner, String theId) {
-		thePractitioner.setId(theId);
-		thePractitioner.setActive(true);
-		DaoMethodOutcome daoMethodOutcome = myPractitionerDao.update(thePractitioner, new SystemRequestDetails());
 		thePractitioner.setId(daoMethodOutcome.getId());
 		return thePractitioner;
 	}
