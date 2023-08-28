@@ -24,7 +24,7 @@ import ca.uhn.fhir.cr.common.IRepositoryFactory;
 import ca.uhn.fhir.cr.dstu3.IQuestionnaireResponseProcessorFactory;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
-import ca.uhn.fhir.rest.annotation.ResourceParam;
+import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
@@ -56,7 +56,7 @@ public class QuestionnaireResponseOperationsProvider {
 	@Operation(name = ProviderConstants.CR_OPERATION_EXTRACT, idempotent = true, type = QuestionnaireResponse.class)
 	public IBaseBundle extract(
 			@IdParam IdType theId,
-			@ResourceParam QuestionnaireResponse theQuestionnaireResponse,
+			@OperationParam(name = "questionnaire-response") QuestionnaireResponse theQuestionnaireResponse,
 			RequestDetails theRequestDetails)
 			throws InternalErrorException, FHIRException {
 		return this.myDstu3QuestionnaireResponseServiceFactory

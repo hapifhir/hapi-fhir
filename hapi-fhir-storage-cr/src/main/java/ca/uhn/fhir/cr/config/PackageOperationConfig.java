@@ -23,7 +23,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.cr.common.IRepositoryFactory;
 import ca.uhn.fhir.rest.server.RestfulServer;
-import org.opencds.cqf.cql.evaluator.library.EvaluationSettings;
+import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 

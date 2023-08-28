@@ -96,6 +96,11 @@
 			<version>${cql.version}</version>
 		</dependency>
 		<dependency>
+			<groupId>info.cqframework</groupId>
+			<artifactId>cqf-fhir-cql</artifactId>
+			<version>${clinical-reasoning.version}</version>
+		</dependency>
+		<dependency>
 			<groupId>org.opencds.cqf.fhir</groupId>
 			<artifactId>cqf-fhir-api</artifactId>
 			<version>${clinical-reasoning.version}</version>
