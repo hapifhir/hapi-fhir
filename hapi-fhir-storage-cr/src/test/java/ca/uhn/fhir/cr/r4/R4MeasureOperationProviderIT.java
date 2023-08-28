@@ -50,7 +50,7 @@ class CrR4MeasureOperationProviderIT extends BaseCrR4TestServer {
 	}
 	@Test
 	void testMeasureEvaluate_EXM104() {
-		loadBundle("ca/uhn/fhir/cr/r4/connectathon/EXM104-8.2.000-bundle.json");
+		loadBundle("Exm104FhirR4MeasureBundle.json");
 		runEvaluateMeasure("2019-01-01", "2019-12-31", "Patient/numer-EXM104", "measure-EXM104-8.2.000", "Individual", null);
 	}
 

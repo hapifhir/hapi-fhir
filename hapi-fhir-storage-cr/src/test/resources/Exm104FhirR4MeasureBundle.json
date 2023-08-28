@@ -352,7 +352,7 @@
 				],
 				"url": "http://localhost:8080/fhir/Library/library-EXM104",
 				"version": "8.2.000",
-				"name": "EXM104",
+				"name": "library-EXM104",
 				"status": "active",
 				"experimental": true,
 				"type": {

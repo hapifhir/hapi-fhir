@@ -39,8 +39,6 @@ public class TestCrDstu3Config {
 	}
 
 	@Bean
-	TestCqlProperties cqlProperties() { return new TestCqlProperties(); }
-	@Bean
 	public EvaluationSettings evaluationSettings(TestCqlProperties theCqlProperties) {
 		var evaluationSettings = EvaluationSettings.getDefault();
 		var cqlEngineOptions = evaluationSettings.getEngineOptions();
