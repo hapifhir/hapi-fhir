@@ -437,6 +437,18 @@
 			"lat": 18.483402,
 			"lon": -69.929611,
 			"added": "2022-08-15"
+		},
+		{
+			"title": "Wiredkode",
+			"description": "Portuguese Startup focused on Healthcare integration",
+			"company": "Wiredkode, lda",
+			"contactName": "Pedro Rocha",
+			"contactEmail": "pedro.rocha@wiredkode.com",
+			"link": "http://www.wiredkode.com",
+			"city": "Porto, Portugal",
+			"lat": 41.15,
+			"lon": -8.61024,
+			"added": "2023-08-28"
 		}
 	]
 }
