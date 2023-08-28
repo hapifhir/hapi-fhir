@@ -99,7 +99,7 @@ public class MdmConsumerConfig {
 		FhirContext theFhirContext,
 		DaoRegistry theDaoRegistry,
 		GoldenResourceHelper theResourceHelper,
-		MdmLinkDaoSvc<? extends BaseResourcePersistentId<?>, IMdmLink<? extends BaseResourcePersistentId<?>>> theLinkDaoSvc
+		IMdmLinkQuerySvc theLinkDaoSvc
 	) {
 		return new MdmSurvivorshipSvcImpl(
 			theFhirContext,

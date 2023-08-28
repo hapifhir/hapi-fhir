@@ -22,22 +22,33 @@ package ca.uhn.fhir.jpa.mdm.svc;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
-import ca.uhn.fhir.jpa.mdm.dao.MdmLinkDaoSvc;
-import ca.uhn.fhir.mdm.api.IMdmLink;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
+import ca.uhn.fhir.mdm.api.IMdmLinkQuerySvc;
 import ca.uhn.fhir.mdm.api.IMdmSurvivorshipService;
+import ca.uhn.fhir.mdm.api.MdmHistorySearchParameters;
+import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
+import ca.uhn.fhir.mdm.api.MdmQuerySearchParameters;
+import ca.uhn.fhir.mdm.api.paging.MdmPageRequest;
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
+import ca.uhn.fhir.mdm.model.mdmevents.MdmLinkJson;
+import ca.uhn.fhir.mdm.model.mdmevents.MdmLinkWithRevisionJson;
 import ca.uhn.fhir.mdm.util.GoldenResourceHelper;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
-import ca.uhn.fhir.rest.api.server.storage.BaseResourcePersistentId;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.util.TerserUtil;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r4.model.IdType;
+import org.springframework.data.domain.Page;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class MdmSurvivorshipSvcImpl implements IMdmSurvivorshipService {
 
@@ -45,20 +56,23 @@ public class MdmSurvivorshipSvcImpl implements IMdmSurvivorshipService {
 
 	private final DaoRegistry myDaoRegistry;
 
-	private final MdmLinkDaoSvc<? extends BaseResourcePersistentId<?>, IMdmLink<? extends BaseResourcePersistentId<?>>> myMdmLinkDaoSvc;
+	private final IMdmLinkQuerySvc myMdmLinkQuerySvc;
 
 	private final GoldenResourceHelper myGoldenResourceHelper;
+
+//	@Autowired
+//	private MdmLinkDaoSvc myMdmLinkDaoSvc;
 
 	public MdmSurvivorshipSvcImpl(
 		FhirContext theFhirContext,
 		DaoRegistry theDaoRegistry,
 		GoldenResourceHelper theResourceHelper,
-		MdmLinkDaoSvc<? extends BaseResourcePersistentId<?>, IMdmLink<? extends BaseResourcePersistentId<?>>> theLinkDaoSvc
+		IMdmLinkQuerySvc theLinkDaoSvc
 	) {
 		myFhirContext = theFhirContext;
 		myDaoRegistry = theDaoRegistry;
 		myGoldenResourceHelper = theResourceHelper;
-		myMdmLinkDaoSvc = theLinkDaoSvc;
+		myMdmLinkQuerySvc = theLinkDaoSvc;
 	}
 
 	/**
@@ -94,19 +108,34 @@ public class MdmSurvivorshipSvcImpl implements IMdmSurvivorshipService {
 
 	@SuppressWarnings({"rawtypes", "unchecked"})
 	@Override
-	public <T extends IBase> T rebuildGoldenResourceCurrentLinksUsingSurvivorshipRules(T theGoldenResourceBase, MdmTransactionContext theMdmTransactionContext) {
+	public <T extends IBase> T rebuildGoldenResourceCurrentLinksUsingSurvivorshipRules(
+		T theGoldenResourceBase,
+		MdmTransactionContext theMdmTransactionContext
+	) {
 		IBaseResource goldenResource = (IBaseResource) theGoldenResourceBase;
+		Set<String> sourceIds = getAllValidLinkedSourceResourceIds((IAnyResource) goldenResource, theMdmTransactionContext);
 
 		// get a list of links sorted by updated date
-		List<? extends IMdmLink<? extends IResourcePersistentId<?>>> links = myMdmLinkDaoSvc.findMdmLinksByGoldenResource(goldenResource);
-		links.sort(Comparator.comparing((IMdmLink<? extends IResourcePersistentId<?>> theLink) -> theLink.getUpdated()));
+		MdmHistorySearchParameters parameters = new MdmHistorySearchParameters();
+		parameters.setSourceIds(new ArrayList<>(sourceIds));
+		parameters.setGoldenResourceIds(Collections.singletonList(goldenResource.getIdElement().getValueAsString()));
+		List<MdmLinkWithRevisionJson> historyLinks = myMdmLinkQuerySvc.queryLinkHistory(parameters);
+
+		// the result is immutable, but we need it non-immutable to sort
+		historyLinks = new ArrayList<>(historyLinks);
+		historyLinks.sort(Comparator.comparing(MdmLinkWithRevisionJson::getRevisionTimestamp));
 
 		IFhirResourceDao dao = myDaoRegistry.getResourceDao(goldenResource.fhirType());
 		List<IBaseResource> sourceResources = new ArrayList<>();
-		for (IMdmLink<? extends IResourcePersistentId<?>> link : links) {
-			IResourcePersistentId<?> sourcePid = link.getSourcePersistenceId();
-
-			IBaseResource resource = dao.readByPid(sourcePid);
+		for (MdmLinkWithRevisionJson revisionLink : historyLinks) {
+			MdmLinkJson link = revisionLink.getMdmLink();
+			if (link.getMatchResult() != MdmMatchResultEnum.MATCH
+					|| !sourceIds.contains(link.getSourceId())) {
+				continue;
+			}
+			String sourceId = link.getSourceId();
+			IResourcePersistentId pid = getSourcePersistenceId(sourceId);
+			IBaseResource resource = dao.readByPid(pid);
 			sourceResources.add(resource);
 		}
 
@@ -115,6 +144,7 @@ public class MdmSurvivorshipSvcImpl implements IMdmSurvivorshipService {
 			theMdmTransactionContext,
 			null // we don't want to apply survivorship
 		);
+		toSave.setId(((IAnyResource) goldenResource).getId());
 
 		for (IBaseResource source : sourceResources) {
 			applySurvivorshipRulesToGoldenResource(source, toSave, theMdmTransactionContext);
@@ -124,5 +154,34 @@ public class MdmSurvivorshipSvcImpl implements IMdmSurvivorshipService {
 		dao.update(toSave, new SystemRequestDetails());
 
 		return (T) toSave;
+	}
+
+	private Set<String> getAllValidLinkedSourceResourceIds(
+		IAnyResource theGoldenResource,
+		MdmTransactionContext theTransactionContext
+	) {
+		Set<String> sourceIds = new HashSet<>();
+		MdmQuerySearchParameters searchParameters = new MdmQuerySearchParameters(
+			new MdmPageRequest(
+				0,
+				50,
+				50,
+				50
+			));
+		searchParameters.setGoldenResourceId(theGoldenResource.getIdElement());
+		Page<MdmLinkJson> linksQuery = myMdmLinkQuerySvc.queryLinks(searchParameters, theTransactionContext);
+		linksQuery.get().forEach(linkJson -> {
+			if (linkJson.getMatchResult() == MdmMatchResultEnum.MATCH) {
+				sourceIds.add(linkJson.getSourceId());
+			}
+		});
+
+		return sourceIds;
+	}
+
+	protected IResourcePersistentId getSourcePersistenceId(String theIdStr) {
+		IIdType idType = new IdType(theIdStr);
+		JpaPid pid = JpaPid.fromIdAndResourceType(idType.getIdPartAsLong(), idType.getResourceType());
+		return pid;
 	}
 }

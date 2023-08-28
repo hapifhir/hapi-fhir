@@ -4,21 +4,22 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.entity.MdmLink;
-import ca.uhn.fhir.jpa.mdm.dao.MdmLinkDaoSvc;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
-import ca.uhn.fhir.mdm.api.IMdmLink;
+import ca.uhn.fhir.mdm.api.IMdmLinkQuerySvc;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
+import ca.uhn.fhir.mdm.api.MdmHistorySearchParameters;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.mdm.model.CanonicalEID;
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
+import ca.uhn.fhir.mdm.model.mdmevents.MdmLinkJson;
+import ca.uhn.fhir.mdm.model.mdmevents.MdmLinkWithRevisionJson;
 import ca.uhn.fhir.mdm.rules.json.MdmRulesJson;
 import ca.uhn.fhir.mdm.util.EIDHelper;
 import ca.uhn.fhir.mdm.util.GoldenResourceHelper;
 import ca.uhn.fhir.mdm.util.MdmPartitionHelper;
 import ca.uhn.fhir.mdm.util.MdmResourceUtil;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.api.server.storage.BaseResourcePersistentId;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Patient;
@@ -29,11 +30,11 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.sql.Date;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -54,8 +55,7 @@ public class MdmSurvivorshipSvcImplTest {
 	private FhirContext myFhirContext = FhirContext.forR4Cached();
 
 	@Mock
-	private MdmLinkDaoSvc<? extends BaseResourcePersistentId<?>, IMdmLink<? extends BaseResourcePersistentId<?>>> myMdmLinkDaoSvc;
-
+	private IMdmLinkQuerySvc myMdmLinkQuerySvc;
 	@Mock
 	private DaoRegistry myDaoRegistry;
 
@@ -84,7 +84,7 @@ public class MdmSurvivorshipSvcImplTest {
 			myFhirContext,
 			myDaoRegistry,
 			myGoldenResourceHelper,
-			myMdmLinkDaoSvc
+			myMdmLinkQuerySvc
 		);
 	}
 
@@ -105,7 +105,7 @@ public class MdmSurvivorshipSvcImplTest {
 		MdmResourceUtil.setGoldenResource(goldenPatient);
 
 		List<IBaseResource> resources = new ArrayList<>();
-		List<MdmLink> links = new ArrayList<>();
+		List<MdmLinkWithRevisionJson> links = new ArrayList<>();
 		for (int i = 0; i < 10; i++) {
 			// we want our resources to be slightly different
 			Patient patient = new Patient();
@@ -122,10 +122,11 @@ public class MdmSurvivorshipSvcImplTest {
 			resources.add(patient);
 
 			MdmLink link = createLinkWithoutUpdateDate(patient, goldenPatient);
-			link.setUpdated(Date.from(
-				Instant.now().minus(i, ChronoUnit.HOURS)
-			));
-			links.add(link);
+
+			links.add(createMdmLinkWithRevisionJsonFromMdmLink(
+				link,
+				Date.from(Instant.now().minus(i, ChronoUnit.HOURS)))
+			);
 		}
 
 		IFhirResourceDao resourceDao = mock(IFhirResourceDao.class);
@@ -138,8 +139,8 @@ public class MdmSurvivorshipSvcImplTest {
 			.thenAnswer(t -> {
 				return resources.get(getCall.getAndIncrement());
 			});
-		when(myMdmLinkDaoSvc.findMdmLinksByGoldenResource(eq(goldenPatient)))
-			.thenReturn(new ArrayList<>(links));
+		when(myMdmLinkQuerySvc.queryLinkHistory(any(MdmHistorySearchParameters.class)))
+			.thenReturn(links);
 		when(myMdmSettings.getMdmRules())
 			.thenReturn(new MdmRulesJson());
 		// we will return a non-empty list to reduce mocking
@@ -183,5 +184,19 @@ public class MdmSurvivorshipSvcImplTest {
 		context.setRestOperation(MdmTransactionContext.OperationType.UPDATE_LINK);
 		context.setResourceType("Patient");
 		return context;
+	}
+
+	private MdmLinkWithRevisionJson createMdmLinkWithRevisionJsonFromMdmLink(MdmLink theLink, Date theTimestamp) {
+		MdmLinkJson linkJson = new MdmLinkJson();
+		linkJson.setSourceId(theLink.getSourcePersistenceId().toString());
+		linkJson.setGoldenResourceId(theLink.getGoldenResourcePersistenceId().toString());
+		linkJson.setMatchResult(theLink.getMatchResult());
+		linkJson.setLinkSource(theLink.getLinkSource());
+
+		return new MdmLinkWithRevisionJson(
+			linkJson,
+			1L,
+			theTimestamp
+		);
 	}
 }

@@ -5,7 +5,6 @@ import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.mdm.BaseMdmR4Test;
 import ca.uhn.fhir.jpa.mdm.config.BaseTestMdmConfig;
 import ca.uhn.fhir.jpa.mdm.config.BlockListConfig;
-import ca.uhn.fhir.jpa.mdm.helper.MdmLinkHelper;
 import ca.uhn.fhir.jpa.mdm.helper.testmodels.MDMState;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -94,9 +93,6 @@ public class MdmMatchLinkSvcTest {
 		private IMdmSurvivorshipService myMdmSurvivorshipService;
 		@Autowired
 		private IMdmLinkUpdaterSvc myMdmLinkUpdaterSvc;
-
-		@Autowired
-		private MdmLinkHelper myLinkHelper;
 
 		@Test
 		public void testAddPatientLinksToNewGoldenResourceIfNoneFound() {
