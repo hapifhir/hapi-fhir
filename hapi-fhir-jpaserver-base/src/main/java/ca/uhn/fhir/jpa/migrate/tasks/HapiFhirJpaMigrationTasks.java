@@ -438,6 +438,16 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		}
 
 		{
+			Builder.BuilderAddTableByColumns resourceModifiedTable =
+					version.addTableByColumns("20230315.1", "HFJ_RESOURCE_MODIFIED", "RES_ID", "RES_VER");
+			resourceModifiedTable.addColumn("RES_ID").nonNullable().type(ColumnTypeEnum.STRING, 256);
+			resourceModifiedTable.addColumn("RES_VER").nonNullable().type(ColumnTypeEnum.STRING, 8);
+			resourceModifiedTable.addColumn("CREATED_TIME").nonNullable().type(ColumnTypeEnum.DATE_TIMESTAMP);
+			resourceModifiedTable.addColumn("SUMMARY_MESSAGE").nonNullable().type(ColumnTypeEnum.STRING, 4000);
+			resourceModifiedTable.addColumn("RESOURCE_TYPE").nonNullable().type(ColumnTypeEnum.STRING, 40);
+		}
+
+		{
 			// The pre-release already contains the long version of this column
 			// We do this becausea doing a modifyColumn on Postgres (and possibly other RDBMS's) will fail with a nasty
 			// error:
