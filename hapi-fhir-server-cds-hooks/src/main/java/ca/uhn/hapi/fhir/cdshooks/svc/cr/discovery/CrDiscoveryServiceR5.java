@@ -30,8 +30,8 @@ import org.hl7.fhir.r5.model.DataRequirement;
 import org.hl7.fhir.r5.model.Library;
 import org.hl7.fhir.r5.model.PlanDefinition;
 import org.hl7.fhir.r5.model.ValueSet;
-import org.opencds.cqf.cql.evaluator.fhir.util.r5.SearchHelper;
 import org.opencds.cqf.fhir.api.Repository;
+import org.opencds.cqf.fhir.utility.r5.SearchHelper;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -30,8 +30,8 @@ import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.dstu3.model.ValueSet;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.opencds.cqf.cql.evaluator.fhir.util.dstu3.SearchHelper;
 import org.opencds.cqf.fhir.api.Repository;
+import org.opencds.cqf.fhir.utility.dstu3.SearchHelper;
 
 import java.util.ArrayList;
 import java.util.List;

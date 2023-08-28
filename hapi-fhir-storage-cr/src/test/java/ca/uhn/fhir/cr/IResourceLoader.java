@@ -31,7 +31,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Resource;
-import org.opencds.cqf.cql.evaluator.fhir.util.Ids;
+import org.opencds.cqf.fhir.utility.Ids;
 import org.springframework.core.io.DefaultResourceLoader;
 
 import java.io.File;

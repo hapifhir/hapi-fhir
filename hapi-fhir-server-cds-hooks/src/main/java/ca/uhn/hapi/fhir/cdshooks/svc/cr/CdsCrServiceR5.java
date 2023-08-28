@@ -35,8 +35,8 @@ import org.hl7.fhir.r5.model.Reference;
 import org.hl7.fhir.r5.model.RelatedArtifact;
 import org.hl7.fhir.r5.model.RequestOrchestration;
 import org.hl7.fhir.r5.model.Resource;
-import org.opencds.cqf.cql.evaluator.fhir.util.Canonicals;
 import org.opencds.cqf.fhir.api.Repository;
+import org.opencds.cqf.fhir.utility.Canonicals;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -54,8 +54,8 @@ import static ca.uhn.hapi.fhir.cdshooks.svc.cr.CdsCrConstants.CDS_PARAMETER_DRAF
 import static ca.uhn.hapi.fhir.cdshooks.svc.cr.CdsCrConstants.CDS_PARAMETER_ENCOUNTER_ID;
 import static ca.uhn.hapi.fhir.cdshooks.svc.cr.CdsCrConstants.CDS_PARAMETER_PATIENT_ID;
 import static ca.uhn.hapi.fhir.cdshooks.svc.cr.CdsCrConstants.CDS_PARAMETER_USER_ID;
-import static org.opencds.cqf.cql.evaluator.fhir.util.r5.Parameters.parameters;
-import static org.opencds.cqf.cql.evaluator.fhir.util.r5.Parameters.part;
+import static org.opencds.cqf.fhir.utility.r5.Parameters.parameters;
+import static org.opencds.cqf.fhir.utility.r5.Parameters.part;
 
 public class CdsCrServiceR5 implements ICdsCrService {
 	private final RequestDetails myRequestDetails;
