@@ -26,6 +26,7 @@ import ca.uhn.fhir.rest.server.RestfulServer;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
+
 import java.util.Arrays;
 import java.util.Map;
 
