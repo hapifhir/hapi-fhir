@@ -219,7 +219,7 @@ public class MdmStorageInterceptor implements IMdmStorageInterceptor {
 				IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(theResource);
 				IResourcePersistentId goldenPid = extractGoldenPid(theResource, matches.get(0));
 
-				cleanUpPossibleMatches(possibleMatches, dao, goldenPid);
+				cleanUpPossibleMatches(possibleMatches, dao, goldenPid, theRequest);
 
 				IAnyResource goldenResource = (IAnyResource) dao.readByPid(goldenPid);
 				myMdmLinkDeleteSvc.deleteWithAnyReferenceTo(goldenResource);
@@ -261,7 +261,10 @@ public class MdmStorageInterceptor implements IMdmStorageInterceptor {
 	 *  Possible match resources are resubmitted for matching
 	 */
 	private void cleanUpPossibleMatches(
-			List<IMdmLink> possibleMatches, IFhirResourceDao<?> theDao, IResourcePersistentId theGoldenPid) {
+			List<IMdmLink> possibleMatches,
+			IFhirResourceDao<?> theDao,
+			IResourcePersistentId theGoldenPid,
+			RequestDetails theRequestDetails) {
 		IAnyResource goldenResource = (IAnyResource) theDao.readByPid(theGoldenPid);
 		for (IMdmLink possibleMatch : possibleMatches) {
 			if (possibleMatch.getGoldenResourcePersistenceId().equals(theGoldenPid)) {
@@ -273,6 +276,7 @@ public class MdmStorageInterceptor implements IMdmStorageInterceptor {
 				MdmTransactionContext mdmContext =
 						createMdmContext(MdmTransactionContext.OperationType.UPDATE_LINK, sourceResource.fhirType());
 				params.setMdmContext(mdmContext);
+				params.setRequestDetails(theRequestDetails);
 
 				mdmLinkUpdaterSvc.updateLink(params);
 			}
