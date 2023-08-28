@@ -60,9 +60,6 @@ public class MdmSurvivorshipSvcImpl implements IMdmSurvivorshipService {
 
 	private final GoldenResourceHelper myGoldenResourceHelper;
 
-//	@Autowired
-//	private MdmLinkDaoSvc myMdmLinkDaoSvc;
-
 	public MdmSurvivorshipSvcImpl(
 		FhirContext theFhirContext,
 		DaoRegistry theDaoRegistry,
