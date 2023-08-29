@@ -201,10 +201,10 @@ public class BulkDataExportProvider {
 		JobInstanceStartRequest startRequest = new JobInstanceStartRequest();
 		startRequest.setParameters(theOptions);
 		startRequest.setUseCache(useCache);
+		startRequest.setJobDefinitionId(Batch2JobDefinitionConstants.BULK_EXPORT);
 		if (theOptions.getJobVersion().equals("2")) {
 			startRequest.setJobDefinitionId(Batch2JobDefinitionConstants.BULK_EXPORT_V2);
 		}
-		startRequest.setJobDefinitionId(Batch2JobDefinitionConstants.BULK_EXPORT);
 		Batch2JobStartResponse response = myJobCoordinator.startInstance(theRequestDetails, startRequest);
 
 		writePollingLocationToResponseHeaders(theRequestDetails, response.getInstanceId());
