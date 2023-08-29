@@ -85,9 +85,9 @@ import static ca.uhn.fhir.rest.api.Constants.PARAM_ID;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.slf4j.LoggerFactory.getLogger;
 
-public class WriteBinaryStepV2
+public class ExpandResourceAndWriteBinaryStep
 		implements IJobStepWorker<BulkExportJobParameters, ResourceIdList, BulkExportBinaryFileId> {
-	private static final Logger ourLog = getLogger(WriteBinaryStepV2.class);
+	private static final Logger ourLog = getLogger(ExpandResourceAndWriteBinaryStep.class);
 
 	@Autowired
 	private FhirContext myFhirContext;

@@ -73,11 +73,11 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class WriteBinaryStepV2Test {
-	private static final Logger ourLog = (Logger) LoggerFactory.getLogger(WriteBinaryStepV2.class);
+public class ExpandResourceAndWriteBinaryStepTest {
+	private static final Logger ourLog = (Logger) LoggerFactory.getLogger(ExpandResourceAndWriteBinaryStep.class);
 
 	// inner test class
-	private static class TestWriteBinaryStep extends WriteBinaryStepV2 {
+	private static class TestExpandResourceAndWriteBinaryStep extends ExpandResourceAndWriteBinaryStep {
 
 		private OutputStreamWriter myWriter;
 
@@ -118,7 +118,7 @@ public class WriteBinaryStepV2Test {
 	private IHapiTransactionService myTransactionService = new NonTransactionalHapiTransactionService();
 
 	@InjectMocks
-	private TestWriteBinaryStep myFinalStep;
+	private TestExpandResourceAndWriteBinaryStep myFinalStep;
 
 	@BeforeEach
 	public void init() {

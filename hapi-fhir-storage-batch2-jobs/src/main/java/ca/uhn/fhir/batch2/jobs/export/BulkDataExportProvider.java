@@ -150,12 +150,20 @@ public class BulkDataExportProvider {
 					List<IPrimitiveType<String>> theTypePostFetchFilterUrl,
 			@OperationParam(name = JpaConstants.PARAM_EXPORT_IDENTIFIER, min = 0, max = 1, typeName = "string")
 					IPrimitiveType<String> theExportId,
+			@OperationParam(name = JpaConstants.PARAM_EXPORT_VERSION, min = 0, max = 1, typeName = "string")
+					IPrimitiveType<String> theJobVersion,
 			ServletRequestDetails theRequestDetails) {
 		// JPA export provider
 		validatePreferAsyncHeader(theRequestDetails, JpaConstants.OPERATION_EXPORT);
 
 		BulkExportJobParameters BulkExportJobParameters = buildSystemBulkExportOptions(
-				theOutputFormat, theType, theSince, theTypeFilter, theExportId, theTypePostFetchFilterUrl);
+				theOutputFormat,
+				theType,
+				theSince,
+				theTypeFilter,
+				theExportId,
+				theTypePostFetchFilterUrl,
+				theJobVersion);
 
 		startJob(theRequestDetails, BulkExportJobParameters);
 	}
@@ -193,6 +201,9 @@ public class BulkDataExportProvider {
 		JobInstanceStartRequest startRequest = new JobInstanceStartRequest();
 		startRequest.setParameters(theOptions);
 		startRequest.setUseCache(useCache);
+		if (theOptions.getJobVersion().equals("2")) {
+			startRequest.setJobDefinitionId(Batch2JobDefinitionConstants.BULK_EXPORT_V2);
+		}
 		startRequest.setJobDefinitionId(Batch2JobDefinitionConstants.BULK_EXPORT);
 		Batch2JobStartResponse response = myJobCoordinator.startInstance(theRequestDetails, startRequest);
 
@@ -237,6 +248,8 @@ public class BulkDataExportProvider {
 					IPrimitiveType<Boolean> theMdm,
 			@OperationParam(name = JpaConstants.PARAM_EXPORT_IDENTIFIER, min = 0, max = 1, typeName = "string")
 					IPrimitiveType<String> theExportIdentifier,
+			@OperationParam(name = JpaConstants.PARAM_EXPORT_VERSION, min = 0, max = 1, typeName = "string")
+					IPrimitiveType<String> theJobVersion,
 			ServletRequestDetails theRequestDetails) {
 		ourLog.debug("Received Group Bulk Export Request for Group {}", theIdParam);
 		ourLog.debug("_type={}", theType);
@@ -257,7 +270,8 @@ public class BulkDataExportProvider {
 				theIdParam,
 				theMdm,
 				theExportIdentifier,
-				theTypePostFetchFilterUrl);
+				theTypePostFetchFilterUrl,
+				theJobVersion);
 
 		if (isNotEmpty(BulkExportJobParameters.getResourceTypes())) {
 			validateResourceTypesAllContainPatientSearchParams(BulkExportJobParameters.getResourceTypes());
@@ -346,6 +360,8 @@ public class BulkDataExportProvider {
 					List<IPrimitiveType<String>> thePatient,
 			@OperationParam(name = JpaConstants.PARAM_EXPORT_IDENTIFIER, min = 0, max = 1, typeName = "string")
 					IPrimitiveType<String> theExportIdentifier,
+			@OperationParam(name = JpaConstants.PARAM_EXPORT_VERSION, min = 0, max = 1, typeName = "string")
+					IPrimitiveType<String> theJobVersion,
 			ServletRequestDetails theRequestDetails) {
 		validatePreferAsyncHeader(theRequestDetails, JpaConstants.OPERATION_EXPORT);
 
@@ -363,7 +379,8 @@ public class BulkDataExportProvider {
 				theTypeFilter,
 				theExportIdentifier,
 				thePatient,
-				theTypePostFetchFilterUrl);
+				theTypePostFetchFilterUrl,
+				theJobVersion);
 		validateResourceTypesAllContainPatientSearchParams(BulkExportJobParameters.getResourceTypes());
 
 		startJob(theRequestDetails, BulkExportJobParameters);
@@ -395,6 +412,8 @@ public class BulkDataExportProvider {
 					List<IPrimitiveType<String>> theTypePostFetchFilterUrl,
 			@OperationParam(name = JpaConstants.PARAM_EXPORT_IDENTIFIER, min = 0, max = 1, typeName = "string")
 					IPrimitiveType<String> theExportIdentifier,
+			@OperationParam(name = JpaConstants.PARAM_EXPORT_VERSION, min = 0, max = 1, typeName = "string")
+					IPrimitiveType<String> theJobVersion,
 			ServletRequestDetails theRequestDetails) {
 		validatePreferAsyncHeader(theRequestDetails, JpaConstants.OPERATION_EXPORT);
 
@@ -407,7 +426,8 @@ public class BulkDataExportProvider {
 				theTypeFilter,
 				theExportIdentifier,
 				theIdParam,
-				theTypePostFetchFilterUrl);
+				theTypePostFetchFilterUrl,
+				theJobVersion);
 		validateResourceTypesAllContainPatientSearchParams(BulkExportJobParameters.getResourceTypes());
 
 		startJob(theRequestDetails, BulkExportJobParameters);
@@ -578,7 +598,8 @@ public class BulkDataExportProvider {
 			IPrimitiveType<Date> theSince,
 			List<IPrimitiveType<String>> theTypeFilter,
 			IPrimitiveType<String> theExportId,
-			List<IPrimitiveType<String>> theTypePostFetchFilterUrl) {
+			List<IPrimitiveType<String>> theTypePostFetchFilterUrl,
+			IPrimitiveType<String> theJobVersion) {
 		return buildBulkExportJobParameters(
 				theOutputFormat,
 				theType,
@@ -586,7 +607,8 @@ public class BulkDataExportProvider {
 				theTypeFilter,
 				theExportId,
 				BulkExportJobParameters.ExportStyle.SYSTEM,
-				theTypePostFetchFilterUrl);
+				theTypePostFetchFilterUrl,
+				theJobVersion);
 	}
 
 	private BulkExportJobParameters buildGroupBulkExportOptions(
@@ -597,7 +619,8 @@ public class BulkDataExportProvider {
 			IIdType theGroupId,
 			IPrimitiveType<Boolean> theExpandMdm,
 			IPrimitiveType<String> theExportId,
-			List<IPrimitiveType<String>> theTypePostFetchFilterUrl) {
+			List<IPrimitiveType<String>> theTypePostFetchFilterUrl,
+			IPrimitiveType<String> theJobVersion) {
 		BulkExportJobParameters BulkExportJobParameters = buildBulkExportJobParameters(
 				theOutputFormat,
 				theType,
@@ -605,7 +628,8 @@ public class BulkDataExportProvider {
 				theTypeFilter,
 				theExportId,
 				ExportStyle.GROUP,
-				theTypePostFetchFilterUrl);
+				theTypePostFetchFilterUrl,
+				theJobVersion);
 		BulkExportJobParameters.setGroupId(toStringValue(theGroupId));
 
 		boolean mdm = false;
@@ -624,7 +648,8 @@ public class BulkDataExportProvider {
 			List<IPrimitiveType<String>> theTypeFilter,
 			IPrimitiveType<String> theExportIdentifier,
 			List<IPrimitiveType<String>> thePatientIds,
-			List<IPrimitiveType<String>> theTypePostFetchFilterUrl) {
+			List<IPrimitiveType<String>> theTypePostFetchFilterUrl,
+			IPrimitiveType<String> theJobVersion) {
 		IPrimitiveType<String> type = theType;
 		if (type == null) {
 			// Type is optional, but the job requires it
@@ -637,7 +662,8 @@ public class BulkDataExportProvider {
 				theTypeFilter,
 				theExportIdentifier,
 				ExportStyle.PATIENT,
-				theTypePostFetchFilterUrl);
+				theTypePostFetchFilterUrl,
+				theJobVersion);
 		if (thePatientIds != null) {
 			BulkExportJobParameters.setPatientIds(
 					thePatientIds.stream().map(IPrimitiveType::getValueAsString).collect(Collectors.toSet()));
@@ -652,7 +678,8 @@ public class BulkDataExportProvider {
 			List<IPrimitiveType<String>> theTypeFilter,
 			IPrimitiveType<String> theExportIdentifier,
 			IIdType thePatientId,
-			List<IPrimitiveType<String>> theTypePostFetchFilterUrl) {
+			List<IPrimitiveType<String>> theTypePostFetchFilterUrl,
+			IPrimitiveType<String> theJobVersion) {
 		BulkExportJobParameters BulkExportJobParameters = buildBulkExportJobParameters(
 				theOutputFormat,
 				theType,
@@ -660,7 +687,8 @@ public class BulkDataExportProvider {
 				theTypeFilter,
 				theExportIdentifier,
 				ExportStyle.PATIENT,
-				theTypePostFetchFilterUrl);
+				theTypePostFetchFilterUrl,
+				theJobVersion);
 		BulkExportJobParameters.setPatientIds(Collections.singleton(thePatientId.getValue()));
 		return BulkExportJobParameters;
 	}
@@ -671,10 +699,12 @@ public class BulkDataExportProvider {
 			IPrimitiveType<Date> theSince,
 			List<IPrimitiveType<String>> theTypeFilter,
 			IPrimitiveType<String> theExportIdentifier,
-			BulkExportJobParameters.ExportStyle theExportStyle,
-			List<IPrimitiveType<String>> theTypePostFetchFilterUrl) {
+			ExportStyle theExportStyle,
+			List<IPrimitiveType<String>> theTypePostFetchFilterUrl,
+			IPrimitiveType<String> theJobVersion) {
 		String outputFormat = theOutputFormat != null ? theOutputFormat.getValueAsString() : Constants.CT_FHIR_NDJSON;
 
+		String jobVersion = theJobVersion != null ? theJobVersion.getValueAsString() : "1";
 		Set<String> resourceTypes = null;
 		if (theType != null) {
 			resourceTypes = ArrayUtil.commaSeparatedListToCleanSet(theType.getValueAsString());
@@ -700,6 +730,7 @@ public class BulkDataExportProvider {
 		BulkExportJobParameters.setSince(since);
 		BulkExportJobParameters.setResourceTypes(resourceTypes);
 		BulkExportJobParameters.setOutputFormat(outputFormat);
+		BulkExportJobParameters.setJobVersion(jobVersion);
 		return BulkExportJobParameters;
 	}
 

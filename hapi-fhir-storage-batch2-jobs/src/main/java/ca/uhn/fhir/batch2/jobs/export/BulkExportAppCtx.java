@@ -21,6 +21,7 @@ package ca.uhn.fhir.batch2.jobs.export;
 
 import ca.uhn.fhir.batch2.api.VoidModel;
 import ca.uhn.fhir.batch2.jobs.export.models.BulkExportBinaryFileId;
+import ca.uhn.fhir.batch2.jobs.export.models.ExpandedResourcesList;
 import ca.uhn.fhir.batch2.jobs.export.models.ResourceIdList;
 import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.jpa.api.model.BulkExportJobResults;
@@ -54,12 +55,49 @@ public class BulkExportAppCtx {
 						ResourceIdList.class,
 						fetchResourceIdsStep())
 				// expand out - fetch resources
-				// and write binaries and save to db
+				.addIntermediateStep(
+						"expand-resources", "Expand out resources", ExpandedResourcesList.class, expandResourcesStep())
+				// write binaries and save to db
 				.addIntermediateStep(
 						WRITE_TO_BINARIES,
 						"Writes the expanded resources to the binaries and saves",
 						BulkExportBinaryFileId.class,
 						writeBinaryStep())
+				// finalize the job (set to complete)
+				.addFinalReducerStep(
+						"create-report-step",
+						"Creates the output report from a bulk export job",
+						BulkExportJobResults.class,
+						createReportStep())
+				.build();
+
+		return def;
+	}
+
+	@Bean
+	public JobDefinition bulkExportJobV2Definition() {
+		JobDefinition.Builder<IModelJson, VoidModel> builder = JobDefinition.newBuilder();
+		builder.setJobDefinitionId(Batch2JobDefinitionConstants.BULK_EXPORT_V2);
+		builder.setJobDescription("FHIR Bulk Export v2");
+		builder.setJobDefinitionVersion(1);
+
+		JobDefinition def = builder.setParametersType(BulkExportJobParameters.class)
+				// validator
+				.setParametersValidator(bulkExportJobParametersValidator())
+				.gatedExecution()
+				// first step - load in (all) ids and create id chunks of 1000 each
+				.addFirstStep(
+						"fetch-resources",
+						"Fetches resource PIDs for exporting",
+						ResourceIdList.class,
+						fetchResourceIdsStep())
+				// expand out - fetch resources
+				// and write binaries and save to db
+				.addIntermediateStep(
+						WRITE_TO_BINARIES,
+						"Writes the expanded resources to the binaries and saves",
+						BulkExportBinaryFileId.class,
+						expandResourceAndWriteBinaryStep())
 				// finalize the job (set to complete)
 				.addFinalReducerStep(
 						"create-report-step",
@@ -87,8 +125,13 @@ public class BulkExportAppCtx {
 	}
 
 	@Bean
-	public WriteBinaryStepV2 writeBinaryStep() {
-		return new WriteBinaryStepV2();
+	public WriteBinaryStep writeBinaryStep() {
+		return new WriteBinaryStep();
+	}
+
+	@Bean
+	public ExpandResourceAndWriteBinaryStep expandResourceAndWriteBinaryStep() {
+		return new ExpandResourceAndWriteBinaryStep();
 	}
 
 	@Bean
