@@ -30,6 +30,7 @@ import org.mockito.ArgumentCaptor;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -171,6 +172,7 @@ public class MdmProviderClearLinkR4Test extends BaseLinkR4Test {
 		assertLinkCount(2);
 		clearMdmLinks();
 		assertNoLinksExist();
+		assertNoHistoricalLinksExist(List.of(myPractitionerGoldenResourceId.getValueAsString(), mySourcePatientId.getValueAsString()), new ArrayList<>());
 	}
 
 	private void assertNoLinksExist() {
@@ -180,6 +182,10 @@ public class MdmProviderClearLinkR4Test extends BaseLinkR4Test {
 
 	private void assertNoPatientLinksExist() {
 		assertThat(getPatientLinks(), hasSize(0));
+	}
+
+	private void assertNoHistoricalLinksExist(List<String> theGoldenResourceIds, List<String> theResourceIds) {
+		assertThat(getHistoricalLinks(theGoldenResourceIds, theResourceIds), hasSize(0));
 	}
 
 	private void assertNoPractitionerLinksExist() {
