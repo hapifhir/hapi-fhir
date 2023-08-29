@@ -1003,7 +1003,7 @@ public class FhirContext {
 		Validate.notNull(theType, "theType must not be null");
 		ensureCustomTypeList();
 		myCustomTypes.add(theType);
-		//		myResourceNames = null;
+		myResourceNames = null;
 	}
 
 	/**
