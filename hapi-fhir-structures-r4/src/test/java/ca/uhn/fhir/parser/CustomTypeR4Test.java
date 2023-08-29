@@ -30,6 +30,7 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
@@ -397,7 +398,6 @@ public class CustomTypeR4Test {
 
 	@Test
 	public void testRegisterCustomResource_whenResourceListIsAlreadyGenerated() {
-		ourCtx.getResourceTypes();
 		Set<String> resourceSet = ourCtx.getResourceTypes();
 		assertEquals(false,resourceSet.contains("CustomResource"));
 		ourCtx.registerCustomType(CustomResource364R4.class);
@@ -406,6 +406,16 @@ public class CustomTypeR4Test {
 		assertEquals(true,resourceSet.contains("CustomResource"));
 	}
 
+	@Test
+	public void testRegisterCustomTypes_whenResourceListIsAlreadyGenerated(){
+
+		Set<String> resourceSet = ourCtx.getResourceTypes();
+		assertEquals(false,resourceSet.contains("CustomResource"));
+		ourCtx.registerCustomTypes(Collections.singleton(CustomResource364R4.class));
+		ourCtx.getElementDefinition(CustomResource364R4.class);
+		resourceSet = ourCtx.getResourceTypes();
+		assertEquals(true,resourceSet.contains("CustomResource"));
+	}
 	public static String createBundle(String... theResources) {
 		StringBuilder b = new StringBuilder();
 		b.append("<Bundle xmlns=\"http://hl7.org/fhir\">\n");

@@ -1025,6 +1025,7 @@ public class FhirContext {
 		ensureCustomTypeList();
 
 		myCustomTypes.addAll(theTypes);
+		myResourceNames = null;
 	}
 
 	private BaseRuntimeElementDefinition<?> scanDatatype(final Class<? extends IElement> theResourceType) {
