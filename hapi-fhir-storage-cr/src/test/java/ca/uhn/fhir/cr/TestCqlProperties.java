@@ -4,8 +4,9 @@ import org.cqframework.cql.cql2elm.CqlCompilerException;
 import org.cqframework.cql.cql2elm.CqlTranslator;
 import org.cqframework.cql.cql2elm.CqlCompilerOptions;
 import org.cqframework.cql.cql2elm.LibraryBuilder;
-import org.opencds.cqf.cql.evaluator.CqlOptions;
-import org.opencds.cqf.cql.evaluator.engine.CqlEngineOptions;
+import org.opencds.cqf.fhir.cql.CqlEngineOptions;
+import org.opencds.cqf.fhir.cql.CqlOptions;
+
 
 public class TestCqlProperties {
 

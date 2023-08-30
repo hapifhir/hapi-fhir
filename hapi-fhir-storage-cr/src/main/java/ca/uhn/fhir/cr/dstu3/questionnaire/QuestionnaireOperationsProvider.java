@@ -20,7 +20,6 @@ package ca.uhn.fhir.cr.dstu3.questionnaire;
  * #L%
  */
 
-import ca.uhn.fhir.cr.common.IRepositoryFactory;
 import ca.uhn.fhir.cr.dstu3.IQuestionnaireProcessorFactory;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
@@ -39,8 +38,6 @@ import org.hl7.fhir.exceptions.FHIRException;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public class QuestionnaireOperationsProvider {
-	@Autowired
-	IRepositoryFactory myRepositoryFactory;
 
 	@Autowired
 	IQuestionnaireProcessorFactory myDstu3QuestionnaireServiceFactory;
@@ -82,7 +79,7 @@ public class QuestionnaireOperationsProvider {
 			RequestDetails theRequestDetails)
 			throws InternalErrorException, FHIRException {
 		return this.myDstu3QuestionnaireServiceFactory
-				.create(myRepositoryFactory.create(theRequestDetails))
+				.create(theRequestDetails)
 				.prePopulate(
 						theId,
 						new StringType(theCanonical),
@@ -130,7 +127,7 @@ public class QuestionnaireOperationsProvider {
 			RequestDetails theRequestDetails)
 			throws InternalErrorException, FHIRException {
 		return (QuestionnaireResponse) this.myDstu3QuestionnaireServiceFactory
-				.create(myRepositoryFactory.create(theRequestDetails))
+				.create(theRequestDetails)
 				.populate(
 						theId,
 						new StringType(theCanonical),
@@ -160,7 +157,7 @@ public class QuestionnaireOperationsProvider {
 			RequestDetails theRequestDetails) {
 
 		return (Bundle) this.myDstu3QuestionnaireServiceFactory
-				.create(myRepositoryFactory.create(theRequestDetails))
+				.create(theRequestDetails)
 				.packageQuestionnaire(theId, new StringType(theCanonical), null, false);
 	}
 }

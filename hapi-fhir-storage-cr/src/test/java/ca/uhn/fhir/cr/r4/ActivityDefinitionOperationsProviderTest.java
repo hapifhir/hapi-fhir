@@ -1,6 +1,8 @@
 package ca.uhn.fhir.cr.r4;
 
-import ca.uhn.fhir.cr.r4.activitydefinition.ActivityDefinitionOperationsProvider;
+
+import ca.uhn.fhir.cr.r4.activitydefinition.ActivityDefinitionApplyProvider;
+import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.MedicationRequest;
 import org.junit.jupiter.api.Test;
@@ -9,14 +11,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class ActivityDefinitionOperationsProviderTest extends BaseCrR4TestServer {
-	@Autowired
-	ActivityDefinitionOperationsProvider activityDefinitionOperationsProvider;
 
+
+	@Autowired
+	ActivityDefinitionApplyProvider myActivityDefinitionApplyProvider;
 	@Test
 	void testActivityDefinitionApply() {
 		loadBundle("ca/uhn/fhir/cr/r4/Bundle-ActivityDefinitionTest.json");
 		var requestDetails = setupRequestDetails();
-		var result = this.activityDefinitionOperationsProvider.apply(
+		var result = myActivityDefinitionApplyProvider.apply(
 			new IdType("activityDefinition-test"),
 			null,
 			null,
@@ -29,6 +32,8 @@ public class ActivityDefinitionOperationsProviderTest extends BaseCrR4TestServer
 			null,
 			null,
 			null,
+			null,
+			new BooleanType(true),
 			null,
 			null,
 			null,

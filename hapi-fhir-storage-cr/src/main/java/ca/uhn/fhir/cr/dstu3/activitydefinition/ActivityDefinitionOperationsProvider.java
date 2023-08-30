@@ -20,7 +20,6 @@ package ca.uhn.fhir.cr.dstu3.activitydefinition;
  * #L%
  */
 
-import ca.uhn.fhir.cr.common.IRepositoryFactory;
 import ca.uhn.fhir.cr.dstu3.IActivityDefinitionProcessorFactory;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
@@ -29,6 +28,9 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import org.hl7.fhir.dstu3.model.ActivityDefinition;
+import org.hl7.fhir.dstu3.model.BooleanType;
+import org.hl7.fhir.dstu3.model.Bundle;
+import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Endpoint;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Parameters;
@@ -40,8 +42,6 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class ActivityDefinitionOperationsProvider {
-	@Autowired
-	IRepositoryFactory myRepositoryFactory;
 
 	@Autowired
 	IActivityDefinitionProcessorFactory myDstu3ActivityDefinitionServiceFactory;
@@ -88,19 +88,21 @@ public class ActivityDefinitionOperationsProvider {
 			@OperationParam(name = "encounter") String theEncounter,
 			@OperationParam(name = "practitioner") String thePractitioner,
 			@OperationParam(name = "organization") String theOrganization,
-			@OperationParam(name = "userType") String theUserType,
-			@OperationParam(name = "userLanguage") String theUserLanguage,
-			@OperationParam(name = "userTaskContext") String theUserTaskContext,
-			@OperationParam(name = "setting") String theSetting,
-			@OperationParam(name = "settingContext") String theSettingContext,
+			@OperationParam(name = "userType") CodeableConcept theUserType,
+			@OperationParam(name = "userLanguage") CodeableConcept theUserLanguage,
+			@OperationParam(name = "userTaskContext") CodeableConcept theUserTaskContext,
+			@OperationParam(name = "setting") CodeableConcept theSetting,
+			@OperationParam(name = "settingContext") CodeableConcept theSettingContext,
 			@OperationParam(name = "parameters") Parameters theParameters,
+			@OperationParam(name = "useServerData") BooleanType theUseServerData,
+			@OperationParam(name = "data") Bundle theData,
 			@OperationParam(name = "dataEndpoint") Endpoint theDataEndpoint,
 			@OperationParam(name = "contentEndpoint") Endpoint theContentEndpoint,
 			@OperationParam(name = "terminologyEndpoint") Endpoint theTerminologyEndpoint,
 			RequestDetails theRequestDetails)
 			throws InternalErrorException, FHIRException {
 		return this.myDstu3ActivityDefinitionServiceFactory
-				.create(myRepositoryFactory.create(theRequestDetails))
+				.create(theRequestDetails)
 				.apply(
 						theId,
 						new StringType(theCanonical),
@@ -115,6 +117,8 @@ public class ActivityDefinitionOperationsProvider {
 						theSetting,
 						theSettingContext,
 						theParameters,
+						theUseServerData == null ? true : theUseServerData.booleanValue(),
+						theData,
 						theDataEndpoint,
 						theContentEndpoint,
 						theTerminologyEndpoint);

@@ -27,17 +27,13 @@ import org.cqframework.cql.cql2elm.model.Model;
 
 import org.cqframework.cql.cql2elm.quick.FhirLibrarySourceProvider;
 import org.hl7.cql.model.ModelIdentifier;
-import org.hl7.elm.r1.Library;
-import org.hl7.elm.r1.VersionedIdentifier;
-import org.opencds.cqf.cql.evaluator.cql2elm.content.InMemoryLibrarySourceProvider;
-import org.opencds.cqf.cql.evaluator.library.EvaluationSettings;
+import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
 
-import java.util.Collections;
 import java.util.Map;
 
 

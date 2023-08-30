@@ -20,7 +20,6 @@ package ca.uhn.fhir.cr.dstu3.questionnaireresponse;
  * #L%
  */
 
-import ca.uhn.fhir.cr.common.IRepositoryFactory;
 import ca.uhn.fhir.cr.dstu3.IQuestionnaireResponseProcessorFactory;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
@@ -35,8 +34,6 @@ import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public class QuestionnaireResponseOperationsProvider {
-	@Autowired
-	IRepositoryFactory myRepositoryFactory;
 
 	@Autowired
 	IQuestionnaireResponseProcessorFactory myDstu3QuestionnaireResponseServiceFactory;
@@ -60,7 +57,7 @@ public class QuestionnaireResponseOperationsProvider {
 			RequestDetails theRequestDetails)
 			throws InternalErrorException, FHIRException {
 		return this.myDstu3QuestionnaireResponseServiceFactory
-				.create(myRepositoryFactory.create(theRequestDetails))
+				.create(theRequestDetails)
 				.extract(theId, theQuestionnaireResponse, null, null, null);
 	}
 }

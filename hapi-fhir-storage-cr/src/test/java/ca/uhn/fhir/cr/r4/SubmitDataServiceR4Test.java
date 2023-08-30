@@ -12,9 +12,9 @@ import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.StringType;
+import org.opencds.cqf.fhir.utility.search.Searches;
 
 import org.junit.jupiter.api.Test;
-import org.opencds.cqf.fhir.utility.Searches;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
