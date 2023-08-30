@@ -97,32 +97,37 @@ public class CqlExecutionOperationProvider {
 	 *         as a {@link Parameters} Parameters resource
 	 */
 	@Operation(name = "$cql")
-	@Description(shortDefinition = "$cql", value = "Evaluates a CQL expression and returns the results as a Parameters resource. Defined: http://build.fhir.org/ig/HL7/cqf-recommendations/OperationDefinition-cpg-cql.html", example = "$cql?expression=5*5")
+	@Description(
+			shortDefinition = "$cql",
+			value =
+					"Evaluates a CQL expression and returns the results as a Parameters resource. Defined: http://build.fhir.org/ig/HL7/cqf-recommendations/OperationDefinition-cpg-cql.html",
+			example = "$cql?expression=5*5")
 	public Parameters evaluate(
-		RequestDetails theRequestDetails,
-		@OperationParam(name = "subject", max = 1) String theSubject,
-		@OperationParam(name = "expression", max = 1) String theExpression,
-		@OperationParam(name = "parameters", max = 1) Parameters theParameters,
-		@OperationParam(name = "library") List<Parameters> theLibrary,
-		@OperationParam(name = "useServerData", max = 1) BooleanType theUseServerData,
-		@OperationParam(name = "data", max = 1) Bundle theData,
-		@OperationParam(name = "prefetchData") List<Parameters> thePrefetchData,
-		@OperationParam(name = "dataEndpoint", max = 1) Endpoint theDataEndpoint,
-		@OperationParam(name = "contentEndpoint", max = 1) Endpoint theContentEndpoint,
-		@OperationParam(name = "terminologyEndpoint", max = 1) Endpoint theTerminologyEndpoint,
-		@OperationParam(name = "content", max = 1) String theContent) {
+			RequestDetails theRequestDetails,
+			@OperationParam(name = "subject", max = 1) String theSubject,
+			@OperationParam(name = "expression", max = 1) String theExpression,
+			@OperationParam(name = "parameters", max = 1) Parameters theParameters,
+			@OperationParam(name = "library") List<Parameters> theLibrary,
+			@OperationParam(name = "useServerData", max = 1) BooleanType theUseServerData,
+			@OperationParam(name = "data", max = 1) Bundle theData,
+			@OperationParam(name = "prefetchData") List<Parameters> thePrefetchData,
+			@OperationParam(name = "dataEndpoint", max = 1) Endpoint theDataEndpoint,
+			@OperationParam(name = "contentEndpoint", max = 1) Endpoint theContentEndpoint,
+			@OperationParam(name = "terminologyEndpoint", max = 1) Endpoint theTerminologyEndpoint,
+			@OperationParam(name = "content", max = 1) String theContent) {
 		return myCqlExecutionServiceFactory
-			.create(theRequestDetails)
-			.evaluate(theSubject,
-				theExpression,
-				theParameters,
-				theLibrary,
-				theUseServerData,
-				theData,
-				thePrefetchData,
-				theDataEndpoint,
-				theContentEndpoint,
-				theTerminologyEndpoint,
-				theContent);
+				.create(theRequestDetails)
+				.evaluate(
+						theSubject,
+						theExpression,
+						theParameters,
+						theLibrary,
+						theUseServerData,
+						theData,
+						thePrefetchData,
+						theDataEndpoint,
+						theContentEndpoint,
+						theTerminologyEndpoint,
+						theContent);
 	}
-	}
+}

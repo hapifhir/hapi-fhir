@@ -62,13 +62,19 @@ public class CrR4Config {
 	}
 
 	@Bean
+	ISubmitDataProcessorFactory r4SubmitDataProcessorFactory(IRepositoryFactory theRepositoryFactory) {
+		return rd -> new R4SubmitDataService(theRepositoryFactory.create(rd));
+	}
+
+	@Bean
 	ICqlExecutionServiceFactory r4CqlExecutionServiceFactory(
-		IRepositoryFactory theRepositoryFactory, EvaluationSettings theEvaluationSettings) {
+			IRepositoryFactory theRepositoryFactory, EvaluationSettings theEvaluationSettings) {
 		return rd -> new R4CqlExecutionService(theRepositoryFactory.create(rd), theEvaluationSettings);
 	}
 
 	@Bean
-	CqlExecutionOperationProvider r4CqlExecutionOperationProvider(){return new CqlExecutionOperationProvider();
+	CqlExecutionOperationProvider r4CqlExecutionOperationProvider() {
+		return new CqlExecutionOperationProvider();
 	}
 
 	@Bean
@@ -88,11 +94,6 @@ public class CrR4Config {
 	@Bean
 	CareGapsOperationProvider r4CareGapsOperationProvider() {
 		return new CareGapsOperationProvider();
-	}
-
-	@Bean
-	ISubmitDataProcessorFactory r4SubmitDataProcessorFactory() {
-		return r -> new R4SubmitDataService(r);
 	}
 
 	@Bean

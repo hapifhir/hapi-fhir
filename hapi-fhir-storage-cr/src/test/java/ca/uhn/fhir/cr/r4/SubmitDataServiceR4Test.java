@@ -36,7 +36,7 @@ public class SubmitDataServiceR4Test extends BaseCrR4TestServer {
 
 		//submit-data operation
 		var res = myR4SubmitDataProcessorFactory
-			.create(myRepositoryFactory.create(requestDetails))
+			.create(requestDetails)
 			.submitData(new IdType("Measure", "A123"), mr,
 				Lists.newArrayList(obs));
 
