@@ -6,6 +6,7 @@ import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import ca.uhn.fhir.test.utilities.LoggingExtension;
+import ca.uhn.fhir.util.ClasspathUtil;
 import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
@@ -630,7 +631,7 @@ public class FhirInstanceValidatorDstu3Test {
 		String name = "profiles-resources";
 		ourLog.info("Uploading " + name);
 		String vsContents;
-		vsContents = IOUtils.toString(FhirInstanceValidatorDstu3Test.class.getResourceAsStream("/org/hl7/fhir/dstu3/model/profile/" + name + ".xml"), StandardCharsets.UTF_8);
+		vsContents = ClasspathUtil.loadResource("/org/hl7/fhir/dstu3/model/profile/" + name + ".xml");
 
 		TreeSet<String> ids = new TreeSet<String>();
 
@@ -700,7 +701,7 @@ public class FhirInstanceValidatorDstu3Test {
 
 	@Test
 	public void testValidateBundleWithNoType() throws Exception {
-		String vsContents = IOUtils.toString(FhirInstanceValidatorDstu3Test.class.getResourceAsStream("/dstu3/bundle-with-no-type.json"), StandardCharsets.UTF_8);
+		String vsContents = ClasspathUtil.loadResource("/dstu3/bundle-with-no-type.json");
 
 		ValidationResult output = myVal.validateWithResult(vsContents);
 		logResultsAndReturnNonInformationalOnes(output);
@@ -713,7 +714,7 @@ public class FhirInstanceValidatorDstu3Test {
 		String name = "profiles-resources";
 		ourLog.info("Uploading " + name);
 		String inputString;
-		inputString = IOUtils.toString(FhirInstanceValidatorDstu3Test.class.getResourceAsStream("/brian_reinhold_bundle.json"), StandardCharsets.UTF_8);
+		inputString = ClasspathUtil.loadResource("/brian_reinhold_bundle.json");
 		Bundle bundle = ourCtx.newJsonParser().parseResource(Bundle.class, inputString);
 
 		FHIRPathEngine fp = new FHIRPathEngine(new HapiWorkerContext(ourCtx, myDefaultValidationSupport));
@@ -766,7 +767,7 @@ public class FhirInstanceValidatorDstu3Test {
 		String name = "profiles-resources";
 		ourLog.info("Uploading " + name);
 		String vsContents;
-		vsContents = IOUtils.toString(FhirInstanceValidatorDstu3Test.class.getResourceAsStream("/crucible-condition.xml"), StandardCharsets.UTF_8);
+		vsContents = ClasspathUtil.loadResource("/crucible-condition.xml");
 
 		ValidationResult output = myVal.validateWithResult(vsContents);
 		List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
@@ -774,7 +775,7 @@ public class FhirInstanceValidatorDstu3Test {
 
 	@Test
 	public void testValidateDocument() throws Exception {
-		String vsContents = IOUtils.toString(FhirInstanceValidatorDstu3Test.class.getResourceAsStream("/sample-document.xml"), StandardCharsets.UTF_8);
+		String vsContents = ClasspathUtil.loadResource("/sample-document.xml");
 
 		ValidationResult output = myVal.validateWithResult(vsContents);
 		logResultsAndReturnNonInformationalOnes(output);
