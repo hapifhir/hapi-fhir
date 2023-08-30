@@ -77,9 +77,9 @@ public class BulkExportAppCtx {
 	@Bean
 	public JobDefinition bulkExportJobV2Definition() {
 		JobDefinition.Builder<IModelJson, VoidModel> builder = JobDefinition.newBuilder();
-		builder.setJobDefinitionId(Batch2JobDefinitionConstants.BULK_EXPORT_V2);
-		builder.setJobDescription("FHIR Bulk Export v2");
-		builder.setJobDefinitionVersion(1);
+		builder.setJobDefinitionId(Batch2JobDefinitionConstants.BULK_EXPORT);
+		builder.setJobDescription("FHIR Bulk Export");
+		builder.setJobDefinitionVersion(2);
 
 		JobDefinition def = builder.setParametersType(BulkExportJobParameters.class)
 				// validator

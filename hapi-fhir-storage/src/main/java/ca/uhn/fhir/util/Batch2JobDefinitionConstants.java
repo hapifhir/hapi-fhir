@@ -24,8 +24,5 @@ public class Batch2JobDefinitionConstants {
 	// Bulk Export job
 	public static final String BULK_EXPORT = "BULK_EXPORT";
 
-	// Bulk Export job v2 that combines write binary and write resource step
-	public static final String BULK_EXPORT_V2 = "BULK_EXPORT_V2";
-
 	private Batch2JobDefinitionConstants() {}
 }

@@ -58,7 +58,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Spy;
 import org.slf4j.Logger;
@@ -117,9 +116,8 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 	@RegisterExtension
 	private final HttpClientExtension mySender = new HttpClientExtension();
 
-	@ParameterizedTest
-	@CsvSource({"1", "2"})
-	public void testGroupBulkExportWithTypeFilter(String theJobVersion) {
+	@Test
+	public void testGroupBulkExportWithTypeFilter() {
 		// Create some resources
 		Patient patient = new Patient();
 		patient.setId("PF");
@@ -147,7 +145,6 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 		options.setFilters(Sets.newHashSet("Patient?gender=female"));
 		options.setExportStyle(BulkExportJobParameters.ExportStyle.GROUP);
 		options.setOutputFormat(Constants.CT_FHIR_NDJSON);
-		options.setJobVersion(theJobVersion);
 		verifyBulkExportResults(options, Collections.singletonList("Patient/PF"), Collections.singletonList("Patient/PM"));
 	}
 
@@ -263,9 +260,8 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 		}
 	}
 
-	@ParameterizedTest
-	@CsvSource({"1", "2"})
-	public void testPatientBulkExportWithSingleId(String theJobVersion) {
+	@Test
+	public void testPatientBulkExportWithSingleId() {
 		myStorageSettings.setIndexMissingFields(JpaStorageSettings.IndexEnabledEnum.ENABLED);
 		// create some resources
 		Patient patient = new Patient();
@@ -310,14 +306,12 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 		options.setFilters(new HashSet<>());
 		options.setExportStyle(BulkExportJobParameters.ExportStyle.PATIENT);
 		options.setOutputFormat(Constants.CT_FHIR_NDJSON);
-		options.setJobVersion(theJobVersion);
 
 		verifyBulkExportResults(options, List.of("Patient/P1", obsId, encId), List.of("Patient/P2", obsId2, encId2, obsId3));
 	}
 
-	@ParameterizedTest
-	@CsvSource({"1", "2"})
-	public void testPatientBulkExportWithMultiIds(String theJobVersion) {
+	@Test
+	public void testPatientBulkExportWithMultiIds() {
 		myStorageSettings.setIndexMissingFields(JpaStorageSettings.IndexEnabledEnum.ENABLED);
 		// create some resources
 		Patient patient = new Patient();
@@ -374,7 +368,6 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 		options.setFilters(new HashSet<>());
 		options.setExportStyle(BulkExportJobParameters.ExportStyle.PATIENT);
 		options.setOutputFormat(Constants.CT_FHIR_NDJSON);
-		options.setJobVersion(theJobVersion);
 
 		verifyBulkExportResults(options, List.of("Patient/P1", obsId, encId, "Patient/P2", obsId2, encId2), List.of("Patient/P3", obsId3, encId3));
 	}
@@ -792,8 +785,7 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 		verifyBulkExportResults(options, expectedContainedIds, Collections.emptyList());
 	}
 
-	@ParameterizedTest
-	@CsvSource({"1", "2"})
+	@Test
 	public void testSystemBulkExport() {
 		List<String> expectedIds = new ArrayList<>();
 		for (int i = 0; i < 20; i++) {
@@ -1064,9 +1056,6 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 	private Batch2JobStartResponse startNewJob(BulkExportJobParameters theParameters) {
 		JobInstanceStartRequest startRequest = new JobInstanceStartRequest();
 		startRequest.setJobDefinitionId(Batch2JobDefinitionConstants.BULK_EXPORT);
-		if (theParameters.getJobVersion() != null && theParameters.getJobVersion().equals("2")) {
-			startRequest.setJobDefinitionId(Batch2JobDefinitionConstants.BULK_EXPORT_V2);
-		}
 		startRequest.setUseCache(false);
 		startRequest.setParameters(theParameters);
 		return myJobCoordinator.startInstance(mySrd, startRequest);

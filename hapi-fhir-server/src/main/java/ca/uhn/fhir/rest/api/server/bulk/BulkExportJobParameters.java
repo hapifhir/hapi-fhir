@@ -111,12 +111,6 @@ public class BulkExportJobParameters implements IModelJson {
 	@JsonProperty("partitionId")
 	private RequestPartitionId myPartitionId;
 
-	/**
-	 * The version of the export job to run.
-	 */
-	@JsonProperty("jobVersion")
-	private String myJobVersion;
-
 	@JsonProperty("binarySecurityContextIdentifierSystem")
 	private String myBinarySecurityContextIdentifierSystem;
 
@@ -273,14 +267,6 @@ public class BulkExportJobParameters implements IModelJson {
 	 */
 	public String getBinarySecurityContextIdentifierValue() {
 		return myBinarySecurityContextIdentifierValue;
-	}
-
-	public String getJobVersion() {
-		return myJobVersion;
-	}
-
-	public void setJobVersion(String myJobVersion) {
-		this.myJobVersion = myJobVersion;
 	}
 
 	public enum ExportStyle {
