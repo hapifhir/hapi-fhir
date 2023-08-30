@@ -71,7 +71,6 @@ import org.hl7.fhir.r4.model.Parameters;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -83,6 +82,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import javax.servlet.http.HttpServletResponse;
 
 import static ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters.ExportStyle;
 import static ca.uhn.fhir.util.DatatypeUtil.toStringValue;
