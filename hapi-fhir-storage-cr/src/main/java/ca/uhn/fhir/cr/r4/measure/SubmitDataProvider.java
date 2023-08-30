@@ -41,9 +41,6 @@ public class SubmitDataProvider {
 	private static final Logger ourLog = LoggerFactory.getLogger(SubmitDataProvider.class);
 
 	@Autowired
-	IRepositoryFactory myRepositoryFactory;
-
-	@Autowired
 	ISubmitDataProcessorFactory myR4SubmitDataProcessorFactory;
 
 	/**
@@ -81,7 +78,7 @@ public class SubmitDataProvider {
 			@OperationParam(name = "measureReport", min = 1, max = 1) MeasureReport theReport,
 			@OperationParam(name = "resource") List<IBaseResource> theResources) {
 		return myR4SubmitDataProcessorFactory
-				.create(myRepositoryFactory.create(theRequestDetails))
+			.create(theRequestDetails)
 				.submitData(theId, theReport, theResources);
 	}
 }

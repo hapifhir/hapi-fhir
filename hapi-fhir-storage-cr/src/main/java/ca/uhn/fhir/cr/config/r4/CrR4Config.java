@@ -26,8 +26,10 @@ import ca.uhn.fhir.cr.config.ProviderLoader;
 import ca.uhn.fhir.cr.config.ProviderSelector;
 import ca.uhn.fhir.cr.config.RepositoryConfig;
 import ca.uhn.fhir.cr.r4.ICareGapsServiceFactory;
+import ca.uhn.fhir.cr.r4.ICqlExecutionServiceFactory;
 import ca.uhn.fhir.cr.r4.IMeasureServiceFactory;
 import ca.uhn.fhir.cr.r4.ISubmitDataProcessorFactory;
+import ca.uhn.fhir.cr.r4.cqlexecution.CqlExecutionOperationProvider;
 import ca.uhn.fhir.cr.r4.measure.CareGapsOperationProvider;
 import ca.uhn.fhir.cr.r4.measure.MeasureOperationsProvider;
 import ca.uhn.fhir.cr.r4.measure.MeasureService;
@@ -37,6 +39,8 @@ import org.opencds.cqf.cql.evaluator.measure.CareGapsProperties;
 import org.opencds.cqf.cql.evaluator.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.cql.evaluator.measure.r4.R4CareGapsService;
 import org.opencds.cqf.cql.evaluator.measure.r4.R4SubmitDataService;
+import org.opencds.cqf.evaluator.cql.r4.R4CqlExecutionService;
+import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -55,6 +59,16 @@ public class CrR4Config {
 	IMeasureServiceFactory r4MeasureServiceFactory(
 			IRepositoryFactory theRepositoryFactory, MeasureEvaluationOptions theEvaluationOptions) {
 		return rd -> new MeasureService(theRepositoryFactory.create(rd), theEvaluationOptions);
+	}
+
+	@Bean
+	ICqlExecutionServiceFactory r4CqlExecutionServiceFactory(
+		IRepositoryFactory theRepositoryFactory, EvaluationSettings theEvaluationSettings) {
+		return rd -> new R4CqlExecutionService(theRepositoryFactory.create(rd), theEvaluationSettings);
+	}
+
+	@Bean
+	CqlExecutionOperationProvider r4CqlExecutionOperationProvider(){return new CqlExecutionOperationProvider();
 	}
 
 	@Bean
@@ -102,7 +116,8 @@ public class CrR4Config {
 						Arrays.asList(
 								MeasureOperationsProvider.class,
 								SubmitDataProvider.class,
-								CareGapsOperationProvider.class)));
+								CareGapsOperationProvider.class,
+								CqlExecutionOperationProvider.class)));
 
 		return new ProviderLoader(theRestfulServer, theApplicationContext, selector);
 	}
