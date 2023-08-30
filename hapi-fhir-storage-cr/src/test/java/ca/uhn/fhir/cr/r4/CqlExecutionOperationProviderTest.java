@@ -42,7 +42,6 @@ public class CqlExecutionOperationProviderTest extends BaseCrR4TestServer{
 		var results = ourClient.operation().onServer()
 			.named("$cql")
 			.withParameters(parameters)
-			.returnResourceType(Parameters.class)
 			.execute();
 		return results;
 	}
