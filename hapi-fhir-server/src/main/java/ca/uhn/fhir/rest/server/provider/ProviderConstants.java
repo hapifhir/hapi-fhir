@@ -90,6 +90,7 @@ public class ProviderConstants {
 	public static final String MDM_LINK_HISTORY = "$mdm-link-history";
 	public static final String MDM_QUERY_LINKS_GOLDEN_RESOURCE_ID = "goldenResourceId";
 	public static final String MDM_QUERY_LINKS_RESOURCE_ID = "resourceId";
+	public static final String MDM_QUERY_LINKS_STRICT_MATCH = "strictMatch";
 	public static final String MDM_QUERY_PARTITION_IDS = "partitionIds";
 	public static final String MDM_QUERY_LINKS_MATCH_RESULT = "matchResult";
 	public static final String MDM_QUERY_LINKS_LINK_SOURCE = "linkSource";
