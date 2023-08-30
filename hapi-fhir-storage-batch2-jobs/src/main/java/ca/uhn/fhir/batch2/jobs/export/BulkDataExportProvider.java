@@ -202,7 +202,7 @@ public class BulkDataExportProvider {
 		startRequest.setParameters(theOptions);
 		startRequest.setUseCache(useCache);
 		startRequest.setJobDefinitionId(Batch2JobDefinitionConstants.BULK_EXPORT);
-		if (theOptions.getJobVersion().equals("2")) {
+		if (theOptions.getJobVersion() != null && theOptions.getJobVersion().equals("2")) {
 			startRequest.setJobDefinitionId(Batch2JobDefinitionConstants.BULK_EXPORT_V2);
 		}
 		Batch2JobStartResponse response = myJobCoordinator.startInstance(theRequestDetails, startRequest);

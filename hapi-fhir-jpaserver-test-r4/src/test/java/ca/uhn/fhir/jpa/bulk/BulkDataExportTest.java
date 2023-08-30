@@ -1064,7 +1064,7 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 	private Batch2JobStartResponse startNewJob(BulkExportJobParameters theParameters) {
 		JobInstanceStartRequest startRequest = new JobInstanceStartRequest();
 		startRequest.setJobDefinitionId(Batch2JobDefinitionConstants.BULK_EXPORT);
-		if (theParameters.getJobVersion().equals("2")) {
+		if (theParameters.getJobVersion() != null && theParameters.getJobVersion().equals("2")) {
 			startRequest.setJobDefinitionId(Batch2JobDefinitionConstants.BULK_EXPORT_V2);
 		}
 		startRequest.setUseCache(false);
