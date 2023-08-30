@@ -380,7 +380,13 @@ public class MdmLinkDaoJpaImpl implements IMdmLinkDao<JpaPid, MdmLink> {
 
 			if (!theMdmHistorySearchParameters.getGoldenResourceIds().isEmpty()
 					&& !theMdmHistorySearchParameters.getSourceIds().isEmpty()) {
-				goldenResourceAndOrResourceIdCriterion = AuditEntity.or(goldenResourceIdCriterion, resourceIdCriterion);
+				if (theMdmHistorySearchParameters.isStrictMatch()) {
+					goldenResourceAndOrResourceIdCriterion =
+							AuditEntity.and(goldenResourceIdCriterion, resourceIdCriterion);
+				} else {
+					goldenResourceAndOrResourceIdCriterion =
+							AuditEntity.or(goldenResourceIdCriterion, resourceIdCriterion);
+				}
 			} else if (!theMdmHistorySearchParameters.getGoldenResourceIds().isEmpty()) {
 				goldenResourceAndOrResourceIdCriterion = goldenResourceIdCriterion;
 			} else if (!theMdmHistorySearchParameters.getSourceIds().isEmpty()) {

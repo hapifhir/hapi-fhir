@@ -24,6 +24,7 @@ import ca.uhn.fhir.mdm.provider.MdmControllerUtil;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,6 +36,7 @@ import javax.annotation.Nullable;
 public class MdmHistorySearchParameters {
 	private List<IIdType> myGoldenResourceIds = new ArrayList<>();
 	private List<IIdType> mySourceIds = new ArrayList<>();
+	private boolean myStrictMatch = false;
 
 	public MdmHistorySearchParameters() {}
 
@@ -54,6 +56,17 @@ public class MdmHistorySearchParameters {
 	public MdmHistorySearchParameters setSourceIds(List<String> theSourceIds) {
 		mySourceIds = extractId(theSourceIds);
 		return this;
+	}
+
+	public MdmHistorySearchParameters setStrictMatch(IPrimitiveType<Boolean> theStrictMatch) {
+		if (theStrictMatch != null) {
+			myStrictMatch = theStrictMatch.getValue();
+		}
+		return this;
+	}
+
+	public boolean isStrictMatch() {
+		return myStrictMatch;
 	}
 
 	@Override
