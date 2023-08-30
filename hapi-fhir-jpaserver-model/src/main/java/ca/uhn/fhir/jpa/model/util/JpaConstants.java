@@ -215,10 +215,6 @@ public class JpaConstants {
 	 * Parameter for the $export operation
 	 */
 	public static final String PARAM_EXPORT_PATIENT = "patient";
-	/**
-	 * Parameter for the $export operation
-	 */
-	public static final String PARAM_EXPORT_VERSION = "_jobVersion";
 
 	/**
 	 * Parameter for the $import operation

@@ -671,7 +671,7 @@ public class BulkDataExportProvider {
 			IPrimitiveType<Date> theSince,
 			List<IPrimitiveType<String>> theTypeFilter,
 			IPrimitiveType<String> theExportIdentifier,
-			ExportStyle theExportStyle,
+			BulkExportJobParameters.ExportStyle theExportStyle,
 			List<IPrimitiveType<String>> theTypePostFetchFilterUrl) {
 		String outputFormat = theOutputFormat != null ? theOutputFormat.getValueAsString() : Constants.CT_FHIR_NDJSON;
 
