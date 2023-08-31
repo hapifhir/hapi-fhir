@@ -212,7 +212,7 @@ This operation returns a `Parameters` resource that looks like the following:
 
 ## Link History
 
-Use the `$mdm-link-history` operation to request a list of historical entries for a given set of `goldenResourceId`s or `sourceResourceId`s.  Either parameter is optional but **at least one** must be provided.
+Use the `$mdm-link-history` operation to request a list of historical entries for a given set of `goldenResourceId`s or `sourceResourceId`s.  Either parameter is optional but **at least one** must be provided. The default behaviour is to return history links that matches at least one id from the provided `goldenResourceId` or `sourceResourceId` sets. The parameter `strictMatch` can be set to true to filter the history links so that only those that match **both** the `goldenResourceId` and the `sourceResourceId` sets are returned.
 
 MDM link history is made possible by a back-end configuration that enables saving the historical entries to a new audit table in the database.  This feature is enabled by default.  Some clients may wish to leave this feature disabled in order to save disk space.
 
@@ -246,6 +246,14 @@ This operation takes the following parameters:
                 The id of the source resource (e.g. Patient resource).
             </td>
         </tr>
+        <tr>
+            <td>strictMatch</td>
+            <td>Boolean</td>
+            <td>0..1</td>
+            <td>
+                Specifies whether the returned history links need to match **both** the `goldenResourceId` and the `sourceResourceId` at the same time. This parameter will only take effect when both `goldenResourceId` and `sourceResourceId` are provided.
+            </td>
+        </tr>
     </tbody>
 </table>
 
@@ -261,6 +269,165 @@ If there are any duplication between results returned by a combination of golden
 
 ```url
 http://example.com/$mdm-link-history?goldenResourceId=1553&resourceId=1552
+```
+
+```json
+{
+    "resourceType": "Parameters",
+    "parameter": [
+        {
+            "name": "historical link",
+            "part": [
+                {
+                    "name": "goldenResourceId",
+                    "valueString": "Patient/1553"
+                },
+                {
+                    "name": "revisionTimestamp",
+                    "valueString": "2023-03-16 15:14:39.17"
+                },
+                {
+                    "name": "sourceResourceId",
+                    "valueString": "Patient/1552"
+                },
+                {
+                    "name": "matchResult",
+                    "valueString": "NO_MATCH"
+                },
+                {
+                    "name": "score",
+                    "valueDecimal": 1
+                },
+                {
+                    "name": "linkSource",
+                    "valueString": "MANUAL"
+                },
+                {
+                    "name": "eidMatch",
+                    "valueBoolean": false
+                },
+                {
+                    "name": "hadToCreateNewResource",
+                    "valueBoolean": true
+                },
+                {
+                    "name": "score",
+                    "valueDecimal": 1
+                },
+                {
+                    "name": "linkCreated",
+                    "valueDecimal": 1678994017461
+                },
+                {
+                    "name": "linkUpdated",
+                    "valueDecimal": 1678994079155
+                }
+            ]
+        },
+        {
+            "name": "historical link",
+            "part": [
+                {
+                    "name": "goldenResourceId",
+                    "valueString": "Patient/1553"
+                },
+                {
+                    "name": "revisionTimestamp",
+                    "valueString": "2023-03-16 15:13:37.469"
+                },
+                {
+                    "name": "sourceResourceId",
+                    "valueString": "Patient/1552"
+                },
+                {
+                    "name": "matchResult",
+                    "valueString": "MATCH"
+                },
+                {
+                    "name": "score",
+                    "valueDecimal": 1
+                },
+                {
+                    "name": "linkSource",
+                    "valueString": "AUTO"
+                },
+                {
+                    "name": "eidMatch",
+                    "valueBoolean": false
+                },
+                {
+                    "name": "hadToCreateNewResource",
+                    "valueBoolean": true
+                },
+                {
+                    "name": "score",
+                    "valueDecimal": 1
+                },
+                {
+                    "name": "linkCreated",
+                    "valueDecimal": 1678994017461
+                },
+                {
+                    "name": "linkUpdated",
+                    "valueDecimal": 1678994017461
+                }
+            ]
+        },
+        {
+            "name": "historical link",
+            "part": [
+                {
+                    "name": "goldenResourceId",
+                    "valueString": "Patient/1553"
+                },
+                {
+                    "name": "revisionTimestamp",
+                    "valueString": "2023-03-16 15:14:39.17"
+                },
+                {
+                    "name": "sourceResourceId",
+                    "valueString": "Patient/1554"
+                },
+                {
+                    "name": "matchResult",
+                    "valueString": "NO_MATCH"
+                },
+                {
+                    "name": "score",
+                    "valueDecimal": 1
+                },
+                {
+                    "name": "linkSource",
+                    "valueString": "MANUAL"
+                },
+                {
+                    "name": "eidMatch",
+                    "valueBoolean": false
+                },
+                {
+                    "name": "hadToCreateNewResource",
+                    "valueBoolean": true
+                },
+                {
+                    "name": "score",
+                    "valueDecimal": 1
+                },
+                {
+                    "name": "linkCreated",
+                    "valueDecimal": 1678994086214
+                },
+                {
+                    "name": "linkUpdated",
+                    "valueDecimal": 1678994089650
+                }
+            ]
+        }
+    ]
+}
+```
+
+```url
+http://example.com/$mdm-link-history?goldenResourceId=1553&resourceId=1552&strictMatch=true
 ```
 
 ```json

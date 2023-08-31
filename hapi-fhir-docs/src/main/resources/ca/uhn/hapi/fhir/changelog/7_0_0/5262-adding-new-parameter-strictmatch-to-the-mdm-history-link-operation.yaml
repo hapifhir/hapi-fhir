@@ -1,0 +1,5 @@
+---
+type: add
+issue: 5262
+title: "Added a new parameter `strictMatch` to $mdm-link-history operation to allow filtering the history links so that 
+only those that match **both** the `goldenResourceId` and the `sourceResourceId` sets are returned."
