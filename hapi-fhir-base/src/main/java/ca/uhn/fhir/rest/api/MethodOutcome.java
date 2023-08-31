@@ -258,10 +258,10 @@ public class MethodOutcome {
 	}
 
 	public int getResponseStatusCode() {
-		return isResponseCodeSet() ? myResponseStatusCode : 0;
+		return isResponseStatusCodeSet() ? myResponseStatusCode : 0;
 	}
 
-	public boolean isResponseCodeSet() {
+	public boolean isResponseStatusCodeSet() {
 		return myResponseStatusCode != null;
 	}
 }
