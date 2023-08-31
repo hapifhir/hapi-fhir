@@ -80,6 +80,10 @@ abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding {
 	protected abstract String getMatchingOperation();
 
 	private int getOperationStatus(MethodOutcome response) {
+		if (response.isResponseCodeSet()) {
+			return response.getResponseStatusCode();
+		}
+
 		switch (getRestOperationType()) {
 			case CREATE:
 				validateResponseNotNullIfItShouldntBe(response);
