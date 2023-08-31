@@ -92,6 +92,8 @@ public class TestCrR4Config {
 //			theCqlProperties.getCqlCompilerSignatureLevel(), theCqlProperties.getCqlCompilerCompatibilityLevel()
 //		);
 		cqlCompilerOptions.setCompatibilityLevel("1.5");
+		cqlOptions.setUseEmbeddedLibraries(true);
+
 		cqlCompilerOptions.setAnalyzeDataRequirements(theCqlProperties.isCqlCompilerAnalyzeDataRequirements());
 		cqlCompilerOptions.setCollapseDataRequirements(theCqlProperties.isCqlCompilerCollapseDataRequirements());
 

@@ -47,6 +47,7 @@ public class CqlExecutionOperationProviderTest extends BaseCrR4TestServer{
 	}
 	@Test
 	void testSimpleArithmeticCqlExecutionProvider() {
+		loadBundle("Exm104FhirR4MeasureBundle.json");
 		Parameters params = parameters(stringPart("expression", "5 * 5"));
 		Parameters results = runCqlExecution(params);
 		assertTrue(results.getParameter("return").getValue() instanceof IntegerType);
@@ -56,7 +57,7 @@ public class CqlExecutionOperationProviderTest extends BaseCrR4TestServer{
 	@Test
 	void testReferencedLibraryCqlExecutionProvider() {
 		Parameters libraryParameter = parameters(
-			canonicalPart("url", ourClient.getServerBase() + "Library/SimpleR4Library"),
+			canonicalPart("url", ourClient.getServerBase() + "/Library/SimpleR4Library"),
 			stringPart("name", "SimpleR4Library"));
 		Parameters params = parameters(
 			stringPart("subject", "SimplePatient"),

@@ -84,7 +84,7 @@ public class TestCrConfig {
 		return new PartitionHelper();
 	}
 
-	@Bean
+	/*@Bean
 	@Scope("prototype")
 	ILibraryLoaderFactory libraryLoaderFactory(ModelManager theModelManager, EvaluationSettings theEvaluationSettings) {
 		return lcp -> {
@@ -103,7 +103,7 @@ public class TestCrConfig {
 
 			return libraryManager;
 		};
-	}
+	}*/
 
 	@Bean
 	@Scope("prototype")
