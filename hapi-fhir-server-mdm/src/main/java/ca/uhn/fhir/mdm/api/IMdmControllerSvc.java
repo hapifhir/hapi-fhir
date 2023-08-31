@@ -20,6 +20,8 @@
 package ca.uhn.fhir.mdm.api;
 
 import ca.uhn.fhir.mdm.api.paging.MdmPageRequest;
+import ca.uhn.fhir.mdm.api.params.MdmHistorySearchParameters;
+import ca.uhn.fhir.mdm.api.params.MdmQuerySearchParameters;
 import ca.uhn.fhir.mdm.model.MdmCreateOrUpdateParams;
 import ca.uhn.fhir.mdm.model.MdmMergeGoldenResourcesParams;
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
@@ -76,7 +78,7 @@ public interface IMdmControllerSvc {
 			MdmQuerySearchParameters theMdmQuerySearchParameters, MdmTransactionContext theMdmTransactionContext);
 
 	List<MdmLinkWithRevisionJson> queryLinkHistory(
-			MdmHistorySearchParameters theMdmHistorySearchParameters, RequestDetails theRequestDetails);
+            MdmHistorySearchParameters theMdmHistorySearchParameters, RequestDetails theRequestDetails);
 
 	Page<MdmLinkJson> getDuplicateGoldenResources(
 			MdmTransactionContext theMdmTransactionContext, MdmPageRequest thePageRequest);

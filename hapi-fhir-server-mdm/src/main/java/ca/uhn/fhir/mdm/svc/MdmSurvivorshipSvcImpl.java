@@ -25,10 +25,10 @@ import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.mdm.api.IMdmLinkQuerySvc;
 import ca.uhn.fhir.mdm.api.IMdmSurvivorshipService;
-import ca.uhn.fhir.mdm.api.MdmHistorySearchParameters;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
-import ca.uhn.fhir.mdm.api.MdmQuerySearchParameters;
 import ca.uhn.fhir.mdm.api.paging.MdmPageRequest;
+import ca.uhn.fhir.mdm.api.params.MdmHistorySearchParameters;
+import ca.uhn.fhir.mdm.api.params.MdmQuerySearchParameters;
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
 import ca.uhn.fhir.mdm.model.mdmevents.MdmLinkJson;
 import ca.uhn.fhir.mdm.model.mdmevents.MdmLinkWithRevisionJson;
@@ -47,6 +47,7 @@ import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Stream;
 
 public class MdmSurvivorshipSvcImpl implements IMdmSurvivorshipService {
 
@@ -104,7 +105,7 @@ public class MdmSurvivorshipSvcImpl implements IMdmSurvivorshipService {
 
 		// we want a list of source ids linked to this
 		// golden resource id; sorted and filtered for only MATCH results
-		List<IBaseResource> sourceResources = getMatchedSourceIdsSortedByUpdateDate(
+		Stream<IBaseResource> sourceResources = getMatchedSourceIdsByLinkUpdateDate(
 			goldenResource,
 			theMdmTransactionContext
 		);
@@ -112,13 +113,13 @@ public class MdmSurvivorshipSvcImpl implements IMdmSurvivorshipService {
 		IBaseResource toSave = myGoldenResourceHelper.createGoldenResourceFromMdmSourceResource(
 			(IAnyResource) goldenResource,
 			theMdmTransactionContext,
-			null // we don't want to apply survivorship
+			null // we don't want to apply survivorship - just create a new GoldenResource
 		);
 		toSave.setId(((IAnyResource) goldenResource).getId());
 
-		for (IBaseResource source : sourceResources) {
+		sourceResources.forEach(source -> {
 			applySurvivorshipRulesToGoldenResource(source, toSave, theMdmTransactionContext);
-		}
+		});
 
 		// save it
 		IFhirResourceDao dao = myDaoRegistry.getResourceDao(goldenResource.fhirType());
@@ -127,63 +128,34 @@ public class MdmSurvivorshipSvcImpl implements IMdmSurvivorshipService {
 		return (T) toSave;
 	}
 
-	private List<IBaseResource> getMatchedSourceIdsSortedByUpdateDate(
+	private Stream<IBaseResource> getMatchedSourceIdsByLinkUpdateDate(
 		IBaseResource theGoldenResource,
-		MdmTransactionContext theTransactionContext
+		MdmTransactionContext theMdmTransactionContext
 	) {
-		// first we fetch all related source ids;
-		// this includes all source ids (even NO_MATCH or POSSIBLE_MATCH)
-		// and is not sorted
-		Set<String> sourceIds = getAllValidLinkedSourceResourceIds((IAnyResource) theGoldenResource, theTransactionContext);
-
-		// we'll sort and pare them down here
-		return getMatchedSourceIdsSortedByUpdateDate(theGoldenResource,
-			sourceIds);
-	}
-
-	protected List<IBaseResource> getMatchedSourceIdsSortedByUpdateDate(
-		IBaseResource theGoldenResource, Set<String> theSourceIds) {
 		String resourceType = theGoldenResource.fhirType();
-
-		MdmHistorySearchParameters parameters = new MdmHistorySearchParameters();
-		parameters.setSourceIds(new ArrayList<>(theSourceIds));
-		parameters.setGoldenResourceIds(
-			Collections.singletonList(theGoldenResource.getIdElement().getValueAsString()));
-		List<MdmLinkWithRevisionJson> historyLinks = myMdmLinkQuerySvc.queryLinkHistory(parameters);
-
-		// the result is immutable, but we need it non-immutable to sort
-		historyLinks = new ArrayList<>(historyLinks);
-		historyLinks.sort(Comparator.comparing(MdmLinkWithRevisionJson::getRevisionTimestamp));
-
 		IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(resourceType);
-		List<IBaseResource> sourceResources = new ArrayList<>();
-		for (MdmLinkWithRevisionJson revisionLink : historyLinks) {
-			MdmLinkJson link = revisionLink.getMdmLink();
-			if (link.getMatchResult() != MdmMatchResultEnum.MATCH || !theSourceIds.contains(link.getSourceId())) {
-				continue;
-			}
-			String sourceId = link.getSourceId();
-			// +1 because of "/" in id: "ResourceType/Id"
-			IResourcePersistentId<?> pid = getResourcePID(sourceId.substring(resourceType.length() + 1), resourceType);
-			IBaseResource resource = dao.readByPid(pid);
-			sourceResources.add(resource);
-		}
-		return sourceResources;
-	}
 
-	private Set<String> getAllValidLinkedSourceResourceIds(
-		IAnyResource theGoldenResource, MdmTransactionContext theTransactionContext) {
-		Set<String> sourceIds = new HashSet<>();
 		MdmQuerySearchParameters searchParameters = new MdmQuerySearchParameters(new MdmPageRequest(0, 50, 50, 50));
 		searchParameters.setGoldenResourceId(theGoldenResource.getIdElement());
-		Page<MdmLinkJson> linksQuery = myMdmLinkQuerySvc.queryLinks(searchParameters, theTransactionContext);
-		linksQuery.get().forEach(linkJson -> {
-			if (linkJson.getMatchResult() == MdmMatchResultEnum.MATCH) {
-				sourceIds.add(linkJson.getSourceId());
-			}
-		});
+		searchParameters.setSort("myUpdated");
+		searchParameters.setMatchResult(MdmMatchResultEnum.MATCH);
+		Page<MdmLinkJson> linksQuery = myMdmLinkQuerySvc.queryLinks(searchParameters, theMdmTransactionContext);
 
-		return sourceIds;
+		return linksQuery.get()
+			.map(link -> {
+				String sourceId = link.getSourceId();
+
+				// +1 because of "/" in id: "ResourceType/Id"
+				IResourcePersistentId<?> pid = getResourcePID(
+					sourceId.substring(resourceType.length() + 1),
+					resourceType
+				);
+
+				// this might be a bit unperformant
+				// but it depends how many links there are
+				// per golden resource (unlikely to be thousands)
+				return dao.readByPid(pid);
+			});
 	}
 
 	private IResourcePersistentId<?> getResourcePID(String theId, String theResourceType) {
