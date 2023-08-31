@@ -21,7 +21,6 @@ package ca.uhn.fhir.mdm.api;
  */
 
 import ca.uhn.fhir.mdm.provider.MdmControllerUtil;
-import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.hl7.fhir.instance.model.api.IIdType;

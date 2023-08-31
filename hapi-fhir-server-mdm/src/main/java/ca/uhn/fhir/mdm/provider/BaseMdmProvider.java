@@ -274,8 +274,7 @@ public abstract class BaseMdmProvider {
 	}
 
 	private static boolean containsPossibleDuplicate(List<MdmLinkWithRevisionJson> result) {
-		return result.stream()
-				.anyMatch(t -> t.getMdmLink().getMatchResult() == MdmMatchResultEnum.POSSIBLE_DUPLICATE);
+		return result.stream().anyMatch(t -> t.getMdmLink().getMatchResult() == MdmMatchResultEnum.POSSIBLE_DUPLICATE);
 	}
 
 	private void parametersFromMdmLinkRevision(
