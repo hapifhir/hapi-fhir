@@ -73,9 +73,11 @@ class MetaTagSorterAlphabeticalTest {
 				//the description of the test case
 				named("works if both system and code are null",
 					// the Input
-					List.of(createCoding(null, null).setDisplay("display"))),
+					List.of(createCoding(null, null).setDisplay("display1"),
+					createCoding(null, null).setDisplay("display2"))),
 				// the expected result
-				List.of(createCoding(null, null).setDisplay("display"))
+				List.of(createCoding(null, null).setDisplay("display1"),
+					createCoding(null, null).setDisplay("display2"))
 			),
 			Arguments.of(
 				//the description of the test case

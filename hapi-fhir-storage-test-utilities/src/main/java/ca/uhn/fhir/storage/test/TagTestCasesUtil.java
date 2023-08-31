@@ -139,12 +139,13 @@ public class TagTestCasesUtil {
 	}
 
 	/**
-	 * Verifies that tag order doesn't a version change for non-inline modes, for which the update behavior is to
+	 * Verifies that tag order doesn't cause a version change for non-inline modes, for which the update behavior is to
 	 * take the union of existing and new tags.
 	 * The verification consists of 3 parts:
-	 * - Part 1: Create resource with tags and update the resource with same tags in different order, expect version to remain at 1.
-	 * - Part 2: Update resource with a different set of tags, which would add the new set to the existing set and
-	 * increment version to 2. Then update the resource again with the all the tags the resource current has but in
+	 * - Part 1: Create a resource with tags and update the resource with same tags in different order, expect version
+	 * to remain at 1.
+	 * - Part 2: Update the resource with a different set of tags, which would add the new set to the existing set and
+	 * increment the version to 2. Then update the resource again with the all the tags the resource current has but in
 	 * different order, and expect the version to remain at 2. This part ensures that the storage is able to determine
 	 * whether the version should be incremented or not after new tags are added to a resource with
 	 * subsequent updates (as opposed to adding tags during resource creation which Part 1 verifies).
@@ -208,7 +209,7 @@ public class TagTestCasesUtil {
 	}
 
 	/**
-	 * Verifies that tag order doesn't cause version to increase for non-inline modes where the update behavior is to
+	 * Verifies that tag order doesn't cause version to increase for inline mode where the update behavior is to
 	 * replace the tags completely. This only executes Part 1 of the nonInlineMode test above
 	 */
 	public void updateResourceWithExistingTagsButInDifferentOrderAndExpectVersionToRemainTheSame_InlineMode(){

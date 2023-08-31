@@ -29,7 +29,7 @@ public class FhirResourceDaoR4TagsOrderTest extends BaseJpaR4Test {
 	@EnumSource(JpaStorageSettings.TagStorageModeEnum.class)
 	public void testCreateResource_ExpectToRetrieveTagsSorted(JpaStorageSettings.TagStorageModeEnum theTagStorageMode) {
 		myStorageSettings.setTagStorageMode(theTagStorageMode);
-		// TODO: In inline mode $meta enpoint doesn't return tags, see https://github.com/hapifhir/hapi-fhir/issues/5206
+		// TODO: In inline mode, $meta endpoint doesn't return tags, see https://github.com/hapifhir/hapi-fhir/issues/5206
 		// When this issue is fixed, the following line could be removed so that we check $meta for Inline mode as well
 		myTagTestCasesUtil.setMetaOperationSupported(theTagStorageMode != JpaStorageSettings.TagStorageModeEnum.INLINE);
 		myTagTestCasesUtil.createResourceWithTagsAndExpectToRetrieveThemSorted();
@@ -69,8 +69,8 @@ public class FhirResourceDaoR4TagsOrderTest extends BaseJpaR4Test {
 	@Test
 	public void testUpdateResource_ExpectToRetrieveTagsSorted_InlineMode() {
 		myStorageSettings.setTagStorageMode(JpaStorageSettings.TagStorageModeEnum.INLINE);
-		// TODO: In inline mode $meta enpoint doesn't return tags, see https://github.com/hapifhir/hapi-fhir/issues/5206
-		// When this issue is fixed, the following line could be removed so that we check $meta  for Inline mode as well
+		// TODO: In inline mode, $meta endpoint doesn't return tags, see https://github.com/hapifhir/hapi-fhir/issues/5206
+		// When this issue is fixed, the following line could be removed so that we check $meta for Inline mode as well
 		myTagTestCasesUtil.setMetaOperationSupported(false);
 		Meta metaInputOnCreate = createMeta(
 			// generateAllCodingPairs creates a list that has 6 codings in this case in this order:
