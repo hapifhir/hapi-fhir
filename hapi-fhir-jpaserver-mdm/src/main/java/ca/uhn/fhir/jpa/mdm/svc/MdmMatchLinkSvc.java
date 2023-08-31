@@ -191,12 +191,8 @@ public class MdmMatchLinkSvc {
 				String.format(
 						"There were no matched candidates for MDM, creating a new %s Golden Resource.",
 						theResource.getIdElement().getResourceType()));
-		IAnyResource newGoldenResource =
-				myGoldenResourceHelper.createGoldenResourceFromMdmSourceResource(
-					theResource,
-					theMdmTransactionContext,
-					myMdmSurvivorshipService
-				);
+		IAnyResource newGoldenResource = myGoldenResourceHelper.createGoldenResourceFromMdmSourceResource(
+				theResource, theMdmTransactionContext, myMdmSurvivorshipService);
 		// TODO GGG :)
 		// 1. Get the right helper
 		// 2. Create source resource for the MDM source
@@ -222,10 +218,7 @@ public class MdmMatchLinkSvc {
 					theMdmTransactionContext,
 					"Duplicate detected based on the fact that both resources have different external EIDs.");
 			IAnyResource newGoldenResource = myGoldenResourceHelper.createGoldenResourceFromMdmSourceResource(
-				theTargetResource,
-				theMdmTransactionContext,
-				myMdmSurvivorshipService
-			);
+					theTargetResource, theMdmTransactionContext, myMdmSurvivorshipService);
 
 			myMdmLinkSvc.updateLink(
 					newGoldenResource,

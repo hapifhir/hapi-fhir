@@ -17,12 +17,12 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.jpa.mdm.svc;
+package ca.uhn.fhir.mdm.svc;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
-import ca.uhn.fhir.jpa.model.dao.JpaPid;
+import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.mdm.api.IMdmLinkQuerySvc;
 import ca.uhn.fhir.mdm.api.IMdmSurvivorshipService;
 import ca.uhn.fhir.mdm.api.MdmHistorySearchParameters;
@@ -39,8 +39,6 @@ import ca.uhn.fhir.util.TerserUtil;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.r4.model.IdType;
 import org.springframework.data.domain.Page;
 
 import java.util.ArrayList;
@@ -54,34 +52,28 @@ public class MdmSurvivorshipSvcImpl implements IMdmSurvivorshipService {
 
 	protected final FhirContext myFhirContext;
 
-	private final DaoRegistry myDaoRegistry;
-
-	private final IMdmLinkQuerySvc myMdmLinkQuerySvc;
-
 	private final GoldenResourceHelper myGoldenResourceHelper;
 
+	private final DaoRegistry myDaoRegistry;
+	private final IMdmLinkQuerySvc myMdmLinkQuerySvc;
+
+	private final IIdHelperService<?> myIIdHelperService;
+
 	public MdmSurvivorshipSvcImpl(
-		FhirContext theFhirContext,
-		DaoRegistry theDaoRegistry,
-		GoldenResourceHelper theResourceHelper,
-		IMdmLinkQuerySvc theLinkDaoSvc
+			FhirContext theFhirContext,
+			GoldenResourceHelper theResourceHelper,
+			DaoRegistry theDaoRegistry,
+			IMdmLinkQuerySvc theLinkQuerySvc,
+			IIdHelperService<?> theIIdHelperService
 	) {
 		myFhirContext = theFhirContext;
-		myDaoRegistry = theDaoRegistry;
 		myGoldenResourceHelper = theResourceHelper;
-		myMdmLinkQuerySvc = theLinkDaoSvc;
+		myDaoRegistry = theDaoRegistry;
+		myMdmLinkQuerySvc = theLinkQuerySvc;
+		myIIdHelperService = theIIdHelperService;
 	}
 
-	/**
-	 * Merges two golden resources by overwriting all field values on theGoldenResource param for CREATE_RESOURCE,
-	 * UPDATE_RESOURCE, SUBMIT_RESOURCE_TO_MDM, UPDATE_LINK (when setting to MATCH) and MANUAL_MERGE_GOLDEN_RESOURCES.
-	 * PID, identifiers and meta values are not affected by this operation.
-	 *
-	 * @param theTargetResource        Target resource to retrieve fields from
-	 * @param theGoldenResource        Golden resource to merge fields into
-	 * @param theMdmTransactionContext Current transaction context
-	 * @param <T>
-	 */
+	// this logic is custom in smile vs hapi
 	@Override
 	public <T extends IBase> void applySurvivorshipRulesToGoldenResource(
 			T theTargetResource, T theGoldenResource, MdmTransactionContext theMdmTransactionContext) {
@@ -103,38 +95,19 @@ public class MdmSurvivorshipSvcImpl implements IMdmSurvivorshipService {
 		}
 	}
 
+	// This logic is the same for all implementations (including jpa or mongo)
 	@SuppressWarnings({"rawtypes", "unchecked"})
 	@Override
-	public <T extends IBase> T rebuildGoldenResourceCurrentLinksUsingSurvivorshipRules(
-		T theGoldenResourceBase,
-		MdmTransactionContext theMdmTransactionContext
-	) {
+	public <T extends IBase> T rebuildGoldenResourceWithSurvivorshipRules(
+			T theGoldenResourceBase, MdmTransactionContext theMdmTransactionContext) {
 		IBaseResource goldenResource = (IBaseResource) theGoldenResourceBase;
-		Set<String> sourceIds = getAllValidLinkedSourceResourceIds((IAnyResource) goldenResource, theMdmTransactionContext);
 
-		// get a list of links sorted by updated date
-		MdmHistorySearchParameters parameters = new MdmHistorySearchParameters();
-		parameters.setSourceIds(new ArrayList<>(sourceIds));
-		parameters.setGoldenResourceIds(Collections.singletonList(goldenResource.getIdElement().getValueAsString()));
-		List<MdmLinkWithRevisionJson> historyLinks = myMdmLinkQuerySvc.queryLinkHistory(parameters);
-
-		// the result is immutable, but we need it non-immutable to sort
-		historyLinks = new ArrayList<>(historyLinks);
-		historyLinks.sort(Comparator.comparing(MdmLinkWithRevisionJson::getRevisionTimestamp));
-
-		IFhirResourceDao dao = myDaoRegistry.getResourceDao(goldenResource.fhirType());
-		List<IBaseResource> sourceResources = new ArrayList<>();
-		for (MdmLinkWithRevisionJson revisionLink : historyLinks) {
-			MdmLinkJson link = revisionLink.getMdmLink();
-			if (link.getMatchResult() != MdmMatchResultEnum.MATCH
-					|| !sourceIds.contains(link.getSourceId())) {
-				continue;
-			}
-			String sourceId = link.getSourceId();
-			IResourcePersistentId pid = getSourcePersistenceId(sourceId);
-			IBaseResource resource = dao.readByPid(pid);
-			sourceResources.add(resource);
-		}
+		// we want a list of source ids linked to this
+		// golden resource id; sorted and filtered for only MATCH results
+		List<IBaseResource> sourceResources = getMatchedSourceIdsSortedByUpdateDate(
+			goldenResource,
+			theMdmTransactionContext
+		);
 
 		IBaseResource toSave = myGoldenResourceHelper.createGoldenResourceFromMdmSourceResource(
 			(IAnyResource) goldenResource,
@@ -148,23 +121,60 @@ public class MdmSurvivorshipSvcImpl implements IMdmSurvivorshipService {
 		}
 
 		// save it
+		IFhirResourceDao dao = myDaoRegistry.getResourceDao(goldenResource.fhirType());
 		dao.update(toSave, new SystemRequestDetails());
 
 		return (T) toSave;
 	}
 
-	private Set<String> getAllValidLinkedSourceResourceIds(
-		IAnyResource theGoldenResource,
+	private List<IBaseResource> getMatchedSourceIdsSortedByUpdateDate(
+		IBaseResource theGoldenResource,
 		MdmTransactionContext theTransactionContext
 	) {
+		// first we fetch all related source ids;
+		// this includes all source ids (even NO_MATCH or POSSIBLE_MATCH)
+		// and is not sorted
+		Set<String> sourceIds = getAllValidLinkedSourceResourceIds((IAnyResource) theGoldenResource, theTransactionContext);
+
+		// we'll sort and pare them down here
+		return getMatchedSourceIdsSortedByUpdateDate(theGoldenResource,
+			sourceIds);
+	}
+
+	protected List<IBaseResource> getMatchedSourceIdsSortedByUpdateDate(
+		IBaseResource theGoldenResource, Set<String> theSourceIds) {
+		String resourceType = theGoldenResource.fhirType();
+
+		MdmHistorySearchParameters parameters = new MdmHistorySearchParameters();
+		parameters.setSourceIds(new ArrayList<>(theSourceIds));
+		parameters.setGoldenResourceIds(
+			Collections.singletonList(theGoldenResource.getIdElement().getValueAsString()));
+		List<MdmLinkWithRevisionJson> historyLinks = myMdmLinkQuerySvc.queryLinkHistory(parameters);
+
+		// the result is immutable, but we need it non-immutable to sort
+		historyLinks = new ArrayList<>(historyLinks);
+		historyLinks.sort(Comparator.comparing(MdmLinkWithRevisionJson::getRevisionTimestamp));
+
+		IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(resourceType);
+		List<IBaseResource> sourceResources = new ArrayList<>();
+		for (MdmLinkWithRevisionJson revisionLink : historyLinks) {
+			MdmLinkJson link = revisionLink.getMdmLink();
+			if (link.getMatchResult() != MdmMatchResultEnum.MATCH || !theSourceIds.contains(link.getSourceId())) {
+				continue;
+			}
+			String sourceId = link.getSourceId();
+			// +1 because of "/" in id: "ResourceType/Id"
+			IResourcePersistentId<?> pid = getResourcePID(sourceId.substring(resourceType.length() + 1), resourceType);
+			IBaseResource resource = dao.readByPid(pid);
+			sourceResources.add(resource);
+		}
+		return sourceResources;
+	}
+
+	private Set<String> getAllValidLinkedSourceResourceIds(
+		IAnyResource theGoldenResource, MdmTransactionContext theTransactionContext) {
 		Set<String> sourceIds = new HashSet<>();
-		MdmQuerySearchParameters searchParameters = new MdmQuerySearchParameters(
-			new MdmPageRequest(
-				0,
-				50,
-				50,
-				50
-			));
+		MdmQuerySearchParameters searchParameters = new MdmQuerySearchParameters(new MdmPageRequest(0, 50, 50, 50));
 		searchParameters.setGoldenResourceId(theGoldenResource.getIdElement());
 		Page<MdmLinkJson> linksQuery = myMdmLinkQuerySvc.queryLinks(searchParameters, theTransactionContext);
 		linksQuery.get().forEach(linkJson -> {
@@ -176,9 +186,7 @@ public class MdmSurvivorshipSvcImpl implements IMdmSurvivorshipService {
 		return sourceIds;
 	}
 
-	protected IResourcePersistentId getSourcePersistenceId(String theIdStr) {
-		IIdType idType = new IdType(theIdStr);
-		JpaPid pid = JpaPid.fromIdAndResourceType(idType.getIdPartAsLong(), idType.getResourceType());
-		return pid;
+	private IResourcePersistentId<?> getResourcePID(String theId, String theResourceType) {
+		return myIIdHelperService.newPidFromStringIdAndResourceName(theId, theResourceType);
 	}
 }

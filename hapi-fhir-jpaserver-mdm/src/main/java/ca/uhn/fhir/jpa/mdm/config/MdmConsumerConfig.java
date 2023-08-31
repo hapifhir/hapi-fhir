@@ -41,7 +41,6 @@ import ca.uhn.fhir.jpa.mdm.svc.MdmMatchLinkSvc;
 import ca.uhn.fhir.jpa.mdm.svc.MdmModelConverterSvcImpl;
 import ca.uhn.fhir.jpa.mdm.svc.MdmResourceDaoSvc;
 import ca.uhn.fhir.jpa.mdm.svc.MdmResourceFilteringSvc;
-import ca.uhn.fhir.jpa.mdm.svc.MdmSurvivorshipSvcImpl;
 import ca.uhn.fhir.jpa.mdm.svc.candidate.CandidateSearcher;
 import ca.uhn.fhir.jpa.mdm.svc.candidate.FindCandidateByEidSvc;
 import ca.uhn.fhir.jpa.mdm.svc.candidate.FindCandidateByExampleSvc;
@@ -53,14 +52,12 @@ import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelFactory;
 import ca.uhn.fhir.mdm.api.IGoldenResourceMergerSvc;
 import ca.uhn.fhir.mdm.api.IMdmControllerSvc;
-import ca.uhn.fhir.mdm.api.IMdmLink;
 import ca.uhn.fhir.mdm.api.IMdmLinkCreateSvc;
 import ca.uhn.fhir.mdm.api.IMdmLinkQuerySvc;
 import ca.uhn.fhir.mdm.api.IMdmLinkSvc;
 import ca.uhn.fhir.mdm.api.IMdmLinkUpdaterSvc;
 import ca.uhn.fhir.mdm.api.IMdmMatchFinderSvc;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
-import ca.uhn.fhir.mdm.api.IMdmSurvivorshipService;
 import ca.uhn.fhir.mdm.batch2.MdmBatch2Config;
 import ca.uhn.fhir.mdm.blocklist.svc.IBlockListRuleProvider;
 import ca.uhn.fhir.mdm.blocklist.svc.IBlockRuleEvaluationSvc;
@@ -73,40 +70,29 @@ import ca.uhn.fhir.mdm.provider.MdmControllerHelper;
 import ca.uhn.fhir.mdm.provider.MdmProviderLoader;
 import ca.uhn.fhir.mdm.svc.MdmSearchParamSvc;
 import ca.uhn.fhir.mdm.util.EIDHelper;
-import ca.uhn.fhir.mdm.util.GoldenResourceHelper;
 import ca.uhn.fhir.mdm.util.MdmPartitionHelper;
 import ca.uhn.fhir.mdm.util.MessageHelper;
-import ca.uhn.fhir.rest.api.server.storage.BaseResourcePersistentId;
 import ca.uhn.fhir.validation.IResourceLoader;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Lazy;
 
 @Configuration
-@Import({MdmCommonConfig.class, MdmBatch2Config.class})
+@Import({
+	MdmCommonConfig.class,
+	MdmSurvivorshipConfig.class,
+	MdmBatch2Config.class
+})
 public class MdmConsumerConfig {
+
 	private static final Logger ourLog = Logs.getMdmTroubleshootingLog();
 
 	@Bean
 	IMdmStorageInterceptor mdmStorageInterceptor() {
 		return new MdmStorageInterceptor();
-	}
-
-	@Bean
-	IMdmSurvivorshipService mdmSurvivorshipService(
-		FhirContext theFhirContext,
-		DaoRegistry theDaoRegistry,
-		GoldenResourceHelper theResourceHelper,
-		IMdmLinkQuerySvc theLinkDaoSvc
-	) {
-		return new MdmSurvivorshipSvcImpl(
-			theFhirContext,
-			theDaoRegistry,
-			theResourceHelper,
-			theLinkDaoSvc
-		);
 	}
 
 	@Bean
@@ -137,6 +123,7 @@ public class MdmConsumerConfig {
 	}
 
 	@Bean
+	@Lazy
 	MdmEidUpdateService eidUpdateService() {
 		return new MdmEidUpdateService();
 	}
@@ -149,22 +136,6 @@ public class MdmConsumerConfig {
 	@Bean
 	IMdmLinkSvc mdmLinkSvc() {
 		return new MdmLinkSvcImpl();
-	}
-
-	@Bean
-	GoldenResourceHelper goldenResourceHelper(
-		FhirContext theFhirContext,
-		IMdmSettings theMdmSettings,
-		EIDHelper theEIDHelper,
-		MdmPartitionHelper theMdmPartitionHelper
-	) {
-		// do not make this depend on IMdmSurvivorshipSvcImpl
-		return new GoldenResourceHelper(
-			theFhirContext,
-			theMdmSettings,
-			theEIDHelper,
-			theMdmPartitionHelper
-		);
 	}
 
 	@Bean

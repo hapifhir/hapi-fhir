@@ -3,11 +3,12 @@ package ca.uhn.fhir.jpa.mdm.svc;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
+import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.mdm.api.IMdmLinkQuerySvc;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
-import ca.uhn.fhir.mdm.api.MdmHistorySearchParameters;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.mdm.model.CanonicalEID;
@@ -15,12 +16,12 @@ import ca.uhn.fhir.mdm.model.MdmTransactionContext;
 import ca.uhn.fhir.mdm.model.mdmevents.MdmLinkJson;
 import ca.uhn.fhir.mdm.model.mdmevents.MdmLinkWithRevisionJson;
 import ca.uhn.fhir.mdm.rules.json.MdmRulesJson;
+import ca.uhn.fhir.mdm.svc.MdmSurvivorshipSvcImpl;
 import ca.uhn.fhir.mdm.util.EIDHelper;
 import ca.uhn.fhir.mdm.util.GoldenResourceHelper;
 import ca.uhn.fhir.mdm.util.MdmPartitionHelper;
 import ca.uhn.fhir.mdm.util.MdmResourceUtil;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.BeforeEach;
@@ -29,6 +30,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -55,8 +57,6 @@ public class MdmSurvivorshipSvcImplTest {
 	private FhirContext myFhirContext = FhirContext.forR4Cached();
 
 	@Mock
-	private IMdmLinkQuerySvc myMdmLinkQuerySvc;
-	@Mock
 	private DaoRegistry myDaoRegistry;
 
 	private GoldenResourceHelper myGoldenResourceHelper;
@@ -68,6 +68,12 @@ public class MdmSurvivorshipSvcImplTest {
 	private EIDHelper myEIDHelper;
 	@Mock
 	private MdmPartitionHelper myMdmPartitionHelper;
+
+	@Spy
+	private IIdHelperService<?> myIIdHelperService = new IdHelperService();
+
+	@Mock
+	private IMdmLinkQuerySvc myMdmLinkQuerySvc;
 
 	private MdmSurvivorshipSvcImpl mySvc;
 
@@ -82,9 +88,10 @@ public class MdmSurvivorshipSvcImplTest {
 
 		mySvc = new MdmSurvivorshipSvcImpl(
 			myFhirContext,
-			myDaoRegistry,
 			myGoldenResourceHelper,
-			myMdmLinkQuerySvc
+			myDaoRegistry,
+			myMdmLinkQuerySvc,
+			myIIdHelperService
 		);
 	}
 
@@ -105,7 +112,8 @@ public class MdmSurvivorshipSvcImplTest {
 		MdmResourceUtil.setGoldenResource(goldenPatient);
 
 		List<IBaseResource> resources = new ArrayList<>();
-		List<MdmLinkWithRevisionJson> links = new ArrayList<>();
+		List<MdmLinkJson> links = new ArrayList<>();
+		List<MdmLinkWithRevisionJson> linksWithRevisions = new ArrayList<>();
 		for (int i = 0; i < 10; i++) {
 			// we want our resources to be slightly different
 			Patient patient = new Patient();
@@ -121,12 +129,18 @@ public class MdmSurvivorshipSvcImplTest {
 			patient.setId("Patient/" + i);
 			resources.add(patient);
 
-			MdmLink link = createLinkWithoutUpdateDate(patient, goldenPatient);
-
-			links.add(createMdmLinkWithRevisionJsonFromMdmLink(
-				link,
-				Date.from(Instant.now().minus(i, ChronoUnit.HOURS)))
+			MdmLinkJson link = createLinkJson(
+				patient,
+				goldenPatient
 			);
+			links.add(link);
+			linksWithRevisions.add(new MdmLinkWithRevisionJson(
+				link,
+				1L,
+				Date.from(
+					Instant.now().minus(i, ChronoUnit.HOURS)
+				)
+			));
 		}
 
 		IFhirResourceDao resourceDao = mock(IFhirResourceDao.class);
@@ -134,13 +148,16 @@ public class MdmSurvivorshipSvcImplTest {
 		// when
 		when(myDaoRegistry.getResourceDao(eq("Patient")))
 			.thenReturn(resourceDao);
-		AtomicInteger getCall = new AtomicInteger();
-		when(resourceDao.readByPid(any(IResourcePersistentId.class)))
-			.thenAnswer(t -> {
-				return resources.get(getCall.getAndIncrement());
-			});
-		when(myMdmLinkQuerySvc.queryLinkHistory(any(MdmHistorySearchParameters.class)))
-			.thenReturn(links);
+		AtomicInteger counter = new AtomicInteger();
+		when(resourceDao.readByPid(any()))
+			.thenAnswer(params -> resources.get(counter.getAndIncrement()));
+		when(myMdmLinkQuerySvc.queryLinkHistory(any()))
+			.thenReturn(linksWithRevisions);
+		Page<MdmLinkJson> linkPage = mock(Page.class);
+		when(myMdmLinkQuerySvc.queryLinks(any(), any()))
+			.thenReturn(linkPage);
+		when(linkPage.get())
+			.thenReturn(links.stream());
 		when(myMdmSettings.getMdmRules())
 			.thenReturn(new MdmRulesJson());
 		// we will return a non-empty list to reduce mocking
@@ -148,7 +165,7 @@ public class MdmSurvivorshipSvcImplTest {
 			.thenReturn(Collections.singletonList(new CanonicalEID("example", "value", "use")));
 
 		// test
-		Patient goldenPatientRebuilt = mySvc.rebuildGoldenResourceCurrentLinksUsingSurvivorshipRules(
+		Patient goldenPatientRebuilt = mySvc.rebuildGoldenResourceWithSurvivorshipRules(
 			goldenPatient,
 			createTransactionContext()
 		);
@@ -186,17 +203,16 @@ public class MdmSurvivorshipSvcImplTest {
 		return context;
 	}
 
-	private MdmLinkWithRevisionJson createMdmLinkWithRevisionJsonFromMdmLink(MdmLink theLink, Date theTimestamp) {
+	private MdmLinkJson createLinkJson(
+		IBaseResource theSource,
+		IBaseResource theGolden
+	) {
 		MdmLinkJson linkJson = new MdmLinkJson();
-		linkJson.setSourceId(theLink.getSourcePersistenceId().toString());
-		linkJson.setGoldenResourceId(theLink.getGoldenResourcePersistenceId().toString());
-		linkJson.setMatchResult(theLink.getMatchResult());
-		linkJson.setLinkSource(theLink.getLinkSource());
+		linkJson.setLinkSource(MdmLinkSourceEnum.AUTO);
+		linkJson.setGoldenResourceId(theGolden.getIdElement().getValueAsString());
+		linkJson.setSourceId(theSource.getIdElement().getValueAsString());
+		linkJson.setMatchResult(MdmMatchResultEnum.MATCH);
 
-		return new MdmLinkWithRevisionJson(
-			linkJson,
-			1L,
-			theTimestamp
-		);
+		return linkJson;
 	}
 }

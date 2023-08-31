@@ -157,8 +157,8 @@ public class MdmLinkUpdaterSvcImpl implements IMdmLinkUpdaterSvc {
 			 * * rebuild the golden resource from scratch, using current survivorship rules
 			 * 	and the current set of links
 			 */
-			List<?> links = myMdmLinkDaoSvc
-				.getMdmLinksBySourcePidAndMatchResult(sourceResourceId, MdmMatchResultEnum.MATCH);
+			List<?> links =
+					myMdmLinkDaoSvc.getMdmLinksBySourcePidAndMatchResult(sourceResourceId, MdmMatchResultEnum.MATCH);
 			if (links.isEmpty()) {
 				// No more links to source; Find a new Golden Resource to link this target to
 				myMdmMatchLinkSvc.updateMdmLinksForMdmSource(sourceResource, mdmContext);
@@ -167,7 +167,8 @@ public class MdmLinkUpdaterSvcImpl implements IMdmLinkUpdaterSvc {
 			// with the link broken, the golden resource has delta info from a resource
 			// that is no longer matched to it; we need to remove this delta. But it's
 			// easier to just rebuild the resource from scratch using survivorship rules/current links
-			goldenResource = myMdmSurvivorshipService.rebuildGoldenResourceCurrentLinksUsingSurvivorshipRules(goldenResource, mdmContext);
+			goldenResource = myMdmSurvivorshipService.rebuildGoldenResourceWithSurvivorshipRules(
+					goldenResource, mdmContext);
 		}
 
 		if (myInterceptorBroadcaster.hasHooks(Pointcut.MDM_POST_UPDATE_LINK)) {

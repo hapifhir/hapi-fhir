@@ -109,7 +109,8 @@ public class GoldenResourceMergerSvcImpl implements IGoldenResourceMergerSvc {
 					.getResource();
 		} else {
 			myGoldenResourceHelper.mergeIndentifierFields(fromGoldenResource, toGoldenResource, mdmTransactionContext);
-			myMdmSurvivorshipService.applySurvivorshipRulesToGoldenResource(fromGoldenResource, toGoldenResource, mdmTransactionContext);
+			myMdmSurvivorshipService.applySurvivorshipRulesToGoldenResource(
+					fromGoldenResource, toGoldenResource, mdmTransactionContext);
 			// Save changes to the golden resource
 			myMdmResourceDaoSvc.upsertGoldenResource(toGoldenResource, resourceType);
 		}

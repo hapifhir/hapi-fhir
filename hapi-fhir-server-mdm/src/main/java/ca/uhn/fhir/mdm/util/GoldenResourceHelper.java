@@ -41,12 +41,12 @@ import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import javax.annotation.Nonnull;
 
 import static ca.uhn.fhir.context.FhirVersionEnum.DSTU3;
 import static ca.uhn.fhir.context.FhirVersionEnum.R4;
@@ -68,11 +68,10 @@ public class GoldenResourceHelper {
 
 	@Autowired
 	public GoldenResourceHelper(
-		FhirContext theFhirContext,
-		IMdmSettings theMdmSettings,
-		EIDHelper theEIDHelper,
-		MdmPartitionHelper theMdmPartitionHelper
-	) {
+			FhirContext theFhirContext,
+			IMdmSettings theMdmSettings,
+			EIDHelper theEIDHelper,
+			MdmPartitionHelper theMdmPartitionHelper) {
 		myFhirContext = theFhirContext;
 		myMdmSettings = theMdmSettings;
 		myEIDHelper = theEIDHelper;
@@ -95,8 +94,7 @@ public class GoldenResourceHelper {
 	public <T extends IAnyResource> T createGoldenResourceFromMdmSourceResource(
 			T theIncomingResource,
 			MdmTransactionContext theMdmTransactionContext,
-			IMdmSurvivorshipService theMdmSurvivorshipService
-	) {
+			IMdmSurvivorshipService theMdmSurvivorshipService) {
 		validateContextSupported();
 
 		// get a ref to the actual ID Field
@@ -105,10 +103,7 @@ public class GoldenResourceHelper {
 
 		if (theMdmSurvivorshipService != null) {
 			theMdmSurvivorshipService.applySurvivorshipRulesToGoldenResource(
-				theIncomingResource,
-				newGoldenResource,
-				theMdmTransactionContext
-			);
+					theIncomingResource, newGoldenResource, theMdmTransactionContext);
 		}
 
 		// hapi has 2 metamodels: for children and types
@@ -123,8 +118,8 @@ public class GoldenResourceHelper {
 
 		// add the partition id to the new resource
 		newGoldenResource.setUserData(
-			Constants.RESOURCE_PARTITION_ID,
-			myMdmPartitionHelper.getRequestPartitionIdForNewGoldenResources(theIncomingResource));
+				Constants.RESOURCE_PARTITION_ID,
+				myMdmPartitionHelper.getRequestPartitionIdForNewGoldenResources(theIncomingResource));
 
 		return (T) newGoldenResource;
 	}

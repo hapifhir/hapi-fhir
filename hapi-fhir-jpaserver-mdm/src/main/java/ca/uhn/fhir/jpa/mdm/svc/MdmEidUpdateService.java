@@ -41,9 +41,9 @@ import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Optional;
+import javax.annotation.Nullable;
 
 @Service
 public class MdmEidUpdateService {
@@ -175,12 +175,8 @@ public class MdmEidUpdateService {
 		log(
 				theMdmTransactionContext,
 				"Duplicate detected based on the fact that both resources have different external EIDs.");
-		IAnyResource newGoldenResource =
-				myGoldenResourceHelper.createGoldenResourceFromMdmSourceResource(
-					theResource,
-					theMdmTransactionContext,
-					myMdmSurvivorshipService
-				);
+		IAnyResource newGoldenResource = myGoldenResourceHelper.createGoldenResourceFromMdmSourceResource(
+				theResource, theMdmTransactionContext, myMdmSurvivorshipService);
 
 		myMdmLinkSvc.updateLink(
 				newGoldenResource,
