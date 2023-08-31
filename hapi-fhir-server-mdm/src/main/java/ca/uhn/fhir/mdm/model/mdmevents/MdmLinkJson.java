@@ -75,6 +75,11 @@ public class MdmLinkJson implements IModelJson {
 	@JsonProperty("ruleCount")
 	private Long myRuleCount;
 
+	/**
+	 * Matched rules are the rules, as defined in the matchResultMap, that evaluated true
+	 * for this link. This property stores the name of the rule, represented by a String,
+	 * and the corresponding MatchResultEnum for that rule.
+	 */
 	@JsonProperty(value = "matchedRules")
 	private Set<Map.Entry<String, MdmMatchResultEnum>> myRule = new HashSet<>();
 

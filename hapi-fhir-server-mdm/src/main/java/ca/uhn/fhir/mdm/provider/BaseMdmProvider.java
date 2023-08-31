@@ -250,11 +250,11 @@ public abstract class BaseMdmProvider {
 		// involving that golden resource will show up in the results (eg. query for goldenResourceId = GR/1
 		// but sourceResourceId = GR/1 in the link history). Hence, we should re-query to find the initial
 		// match result.
-		if (theToMatch.getMdmLink().getMatchResult().equals(MdmMatchResultEnum.REDIRECT)) {
+		if (theToMatch.getMdmLink().getMatchResult() == MdmMatchResultEnum.REDIRECT) {
 			MdmHistorySearchParameters params = new MdmHistorySearchParameters()
 					.setSourceIds(List.of(sourceId, goldenId))
 					.setGoldenResourceIds(List.of(sourceId, goldenId))
-					.setShouldFindLinksMatchingAllGoldenAndSourceIds(true);
+					.performAndSearch();
 
 			List<MdmLinkWithRevisionJson> result = myMdmControllerSvc.queryLinkHistory(params, theRequestDetails);
 			return containsPossibleDuplicate(result)
@@ -275,7 +275,7 @@ public abstract class BaseMdmProvider {
 
 	private static boolean containsPossibleDuplicate(List<MdmLinkWithRevisionJson> result) {
 		return result.stream()
-				.anyMatch(t -> t.getMdmLink().getMatchResult().equals(MdmMatchResultEnum.POSSIBLE_DUPLICATE));
+				.anyMatch(t -> t.getMdmLink().getMatchResult() == MdmMatchResultEnum.POSSIBLE_DUPLICATE);
 	}
 
 	private void parametersFromMdmLinkRevision(

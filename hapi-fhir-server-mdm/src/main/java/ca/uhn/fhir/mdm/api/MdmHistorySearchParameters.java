@@ -21,6 +21,7 @@ package ca.uhn.fhir.mdm.api;
  */
 
 import ca.uhn.fhir.mdm.provider.MdmControllerUtil;
+import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -35,7 +36,7 @@ import javax.annotation.Nullable;
 public class MdmHistorySearchParameters {
 	private List<IIdType> myGoldenResourceIds = new ArrayList<>();
 	private List<IIdType> mySourceIds = new ArrayList<>();
-	private boolean myShouldFindLinksMatchingAllGoldenAndSourceIds = false;
+	private SearchOperatorEnum mySearchOperator = SearchOperatorEnum.OR;
 
 	public MdmHistorySearchParameters() {}
 
@@ -57,13 +58,17 @@ public class MdmHistorySearchParameters {
 		return this;
 	}
 
-	public boolean shouldFindLinksMatchingAllGoldenAndSourceIds() {
-		return myShouldFindLinksMatchingAllGoldenAndSourceIds;
+	public SearchOperatorEnum getSearchOperator() {
+		return mySearchOperator;
 	}
 
-	public MdmHistorySearchParameters setShouldFindLinksMatchingAllGoldenAndSourceIds(
-			boolean myShouldFindLinksMatchingAllGoldenAndSourceIds) {
-		this.myShouldFindLinksMatchingAllGoldenAndSourceIds = myShouldFindLinksMatchingAllGoldenAndSourceIds;
+	public MdmHistorySearchParameters performOrSearch() {
+		this.mySearchOperator = SearchOperatorEnum.OR;
+		return this;
+	}
+
+	public MdmHistorySearchParameters performAndSearch() {
+		this.mySearchOperator = SearchOperatorEnum.AND;
 		return this;
 	}
 
@@ -74,14 +79,12 @@ public class MdmHistorySearchParameters {
 		final MdmHistorySearchParameters that = (MdmHistorySearchParameters) theO;
 		return Objects.equals(myGoldenResourceIds, that.myGoldenResourceIds)
 				&& Objects.equals(mySourceIds, that.mySourceIds)
-				&& Objects.equals(
-						myShouldFindLinksMatchingAllGoldenAndSourceIds,
-						that.myShouldFindLinksMatchingAllGoldenAndSourceIds);
+				&& Objects.equals(mySearchOperator, that.mySearchOperator);
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(myGoldenResourceIds, mySourceIds, myShouldFindLinksMatchingAllGoldenAndSourceIds);
+		return Objects.hash(myGoldenResourceIds, mySourceIds, mySearchOperator);
 	}
 
 	@Override
@@ -89,9 +92,7 @@ public class MdmHistorySearchParameters {
 		return new ToStringBuilder(this)
 				.append("myMdmGoldenResourceIds", myGoldenResourceIds)
 				.append("myMdmTargetResourceIds", mySourceIds)
-				.append(
-						"myShouldFindLinksMatchingAllGoldenAndSourceIds",
-						myShouldFindLinksMatchingAllGoldenAndSourceIds)
+				.append("mySearchOperator", mySearchOperator)
 				.toString();
 	}
 
@@ -106,5 +107,18 @@ public class MdmHistorySearchParameters {
 	private static IIdType extractId(String theTheGoldenResourceId) {
 		return MdmControllerUtil.extractGoldenResourceIdDtOrNull(
 				ProviderConstants.MDM_QUERY_LINKS_GOLDEN_RESOURCE_ID, theTheGoldenResourceId);
+	}
+
+	public enum SearchOperatorEnum {
+		/**
+		 * Used to indicate we should perform an OR search between all IDs provided
+		 * ie. links only need at least 1 of the IDs provided in the search parameters
+		 */
+		OR,
+		/**
+		 * Used to indicate we should perform an AND search between all IDs provided
+		 * ie. links must contain all IDs provided in the search parameters
+		 */
+		AND
 	}
 }
