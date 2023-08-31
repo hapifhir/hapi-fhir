@@ -75,6 +75,41 @@ public class BulkExportAppCtx {
 	}
 
 	@Bean
+	public JobDefinition bulkExportJobV2Definition() {
+		JobDefinition.Builder<IModelJson, VoidModel> builder = JobDefinition.newBuilder();
+		builder.setJobDefinitionId(Batch2JobDefinitionConstants.BULK_EXPORT);
+		builder.setJobDescription("FHIR Bulk Export");
+		builder.setJobDefinitionVersion(2);
+
+		JobDefinition def = builder.setParametersType(BulkExportJobParameters.class)
+				// validator
+				.setParametersValidator(bulkExportJobParametersValidator())
+				.gatedExecution()
+				// first step - load in (all) ids and create id chunks of 1000 each
+				.addFirstStep(
+						"fetch-resources",
+						"Fetches resource PIDs for exporting",
+						ResourceIdList.class,
+						fetchResourceIdsStep())
+				// expand out - fetch resources
+				// and write binaries and save to db
+				.addIntermediateStep(
+						WRITE_TO_BINARIES,
+						"Writes the expanded resources to the binaries and saves",
+						BulkExportBinaryFileId.class,
+						expandResourceAndWriteBinaryStep())
+				// finalize the job (set to complete)
+				.addFinalReducerStep(
+						"create-report-step",
+						"Creates the output report from a bulk export job",
+						BulkExportJobResults.class,
+						createReportStep())
+				.build();
+
+		return def;
+	}
+
+	@Bean
 	public BulkExportJobParametersValidator bulkExportJobParametersValidator() {
 		return new BulkExportJobParametersValidator();
 	}
@@ -92,6 +127,11 @@ public class BulkExportAppCtx {
 	@Bean
 	public WriteBinaryStep writeBinaryStep() {
 		return new WriteBinaryStep();
+	}
+
+	@Bean
+	public ExpandResourceAndWriteBinaryStep expandResourceAndWriteBinaryStep() {
+		return new ExpandResourceAndWriteBinaryStep();
 	}
 
 	@Bean
