@@ -9,7 +9,7 @@
 	<groupId>ca.uhn.hapi.fhir</groupId>
 	<artifactId>hapi-fhir</artifactId>
 	<packaging>pom</packaging>
-	<version>6.8.1</version>
+	<version>6.8.1-SNAPSHOT</version>
 
 	<name>HAPI-FHIR</name>
 	<description>An open-source implementation of the FHIR specification in Java.</description>
@@ -897,7 +897,7 @@
 	</licenses>
 
 	<properties>
-		<fhir_core_version>6.0.22</fhir_core_version>
+		<fhir_core_version>6.0.22.2</fhir_core_version>
 		<spotless_version>2.37.0</spotless_version>
 		<ucum_version>1.0.3</ucum_version>
 		<surefire_jvm_args>-Dfile.encoding=UTF-8 -Xmx2048m</surefire_jvm_args>
