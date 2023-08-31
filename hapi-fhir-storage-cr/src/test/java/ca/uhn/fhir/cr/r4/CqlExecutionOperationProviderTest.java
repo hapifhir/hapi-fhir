@@ -2,14 +2,7 @@ package ca.uhn.fhir.cr.r4;
 
 
 import ca.uhn.fhir.cr.r4.cqlexecution.CqlExecutionOperationProvider;
-import org.hl7.fhir.r4.model.BooleanType;
-import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.Parameters;
-import org.hl7.fhir.r4.model.Condition;
-import org.hl7.fhir.r4.model.IntegerType;
-import org.hl7.fhir.r4.model.Observation;
-import org.hl7.fhir.r4.model.OperationOutcome;
-import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,13 +49,16 @@ public class CqlExecutionOperationProviderTest extends BaseCrR4TestServer{
 
 	@Test
 	void testReferencedLibraryCqlExecutionProvider() {
+		loadBundle("Exm104FhirR4MeasureBundle.json");
+		var test1 = ourClient.read().resource(Library.class).withId("library-EXM104");
+		var test = ourClient.read().resource(Library.class).withId("SimpleR4Library");
 		Parameters libraryParameter = parameters(
-			canonicalPart("url", ourClient.getServerBase() + "/Library/SimpleR4Library"),
+			canonicalPart("url", ourClient.getServerBase() + "/Library/SimpleR4Library|0.0.1"),
 			stringPart("name", "SimpleR4Library"));
 		Parameters params = parameters(
 			stringPart("subject", "SimplePatient"),
 			part("library", libraryParameter),
-			stringPart("expression", "SimpleR4Library.\"simpleBooleanExpression\""));
+			stringPart("expression", "SimpleR4Library.simpleBooleanExpression"));
 
 		Parameters results = runCqlExecution(params);
 		assertTrue(results.getParameter("return").getValue() instanceof BooleanType);

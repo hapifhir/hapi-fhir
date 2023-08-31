@@ -154,11 +154,6 @@
 		</dependency>
 		<dependency>
 			<groupId>org.opencds.cqf.cql</groupId>
-			<artifactId>evaluator.library</artifactId>
-			<version>${clinical-reasoning.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.opencds.cqf.cql</groupId>
 			<artifactId>evaluator.plandefinition</artifactId>
 			<version>${clinical-reasoning.version}</version>
 			<exclusions>
