@@ -19,7 +19,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(SpringExtension.class)
-class CrR4MeasureOperationProviderIT extends BaseCrR4TestServer {
+class R4MeasureOperationProviderIT extends BaseCrR4TestServer {
 	@Autowired
 	MeasureOperationsProvider myMeasureOperationsProvider;
 

@@ -11,7 +11,7 @@
 			}
 		]
 	},
-	"value": {
+	"valueCodeableConcept": {
 		"coding": [
 			{
 				"system": "http://loinc.org",

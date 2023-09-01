@@ -3,7 +3,6 @@ package ca.uhn.fhir.cr;
 import ca.uhn.fhir.batch2.jobs.reindex.ReindexProvider;
 import ca.uhn.fhir.context.support.IValidationSupport;
 
-import ca.uhn.fhir.cr.common.ILibraryLoaderFactory;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
@@ -23,10 +22,12 @@ import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import com.google.common.base.Strings;
 import org.cqframework.cql.cql2elm.LibraryManager;
 import org.cqframework.cql.cql2elm.ModelManager;
+import org.cqframework.cql.cql2elm.model.CompiledLibrary;
 import org.cqframework.cql.cql2elm.model.Model;
 
 import org.cqframework.cql.cql2elm.quick.FhirLibrarySourceProvider;
 import org.hl7.cql.model.ModelIdentifier;
+import org.hl7.elm.r1.VersionedIdentifier;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -35,6 +36,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
 
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 
 @Configuration
@@ -84,32 +86,20 @@ public class TestCrConfig {
 		return new PartitionHelper();
 	}
 
-	/*@Bean
-	@Scope("prototype")
-	ILibraryLoaderFactory libraryLoaderFactory(ModelManager theModelManager, EvaluationSettings theEvaluationSettings) {
-		return lcp -> {
-
-			if (theEvaluationSettings.getCqlOptions().useEmbeddedLibraries()) {
-				lcp.add(new FhirLibrarySourceProvider());
-			}
-
-			var libraryManager =
-				new LibraryManager(theModelManager, theEvaluationSettings.getCqlOptions().getCqlCompilerOptions(),  theEvaluationSettings.getLibraryCache());
-
-			var sourceLoader = libraryManager.getLibrarySourceLoader();
-			for (var p : lcp) {
-				sourceLoader.registerProvider(p);
-			}
-
-			return libraryManager;
-		};
-	}*/
-
 	@Bean
 	@Scope("prototype")
 	public ModelManager modelManager(Map<ModelIdentifier, Model> theGlobalModelCache) {
 		return new ModelManager(theGlobalModelCache);
 	}
 
+	@Bean
+	public Map<VersionedIdentifier, CompiledLibrary> globalLibraryCache() {
+		return new ConcurrentHashMap<>();
+	}
+
+	@Bean
+	public Map<ModelIdentifier, Model> globalModelCache() {
+		return new ConcurrentHashMap<>();
+	}
 
 }

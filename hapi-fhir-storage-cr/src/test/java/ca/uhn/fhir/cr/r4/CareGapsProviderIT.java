@@ -37,7 +37,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * 6. Provider submits additional Patient data
  * 7. Provider invokes care-gaps (and discovers issues are closed).
  */
-class CareGapsOperationProviderIT extends BaseCrR4TestServer
+class CareGapsProviderIT extends BaseCrR4TestServer
 {
 
 

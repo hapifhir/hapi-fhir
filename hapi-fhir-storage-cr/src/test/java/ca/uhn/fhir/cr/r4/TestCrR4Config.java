@@ -9,6 +9,11 @@ import ca.uhn.fhir.cr.config.PackageOperationConfig;
 import ca.uhn.fhir.cr.config.PopulateOperationConfig;
 import ca.uhn.fhir.cr.config.r4.CrR4Config;
 import org.cqframework.cql.cql2elm.CqlCompilerOptions;
+import org.cqframework.cql.cql2elm.ModelManager;
+import org.cqframework.cql.cql2elm.model.CompiledLibrary;
+import org.cqframework.cql.cql2elm.model.Model;
+import org.hl7.cql.model.ModelIdentifier;
+import org.hl7.elm.r1.VersionedIdentifier;
 import org.opencds.cqf.cql.engine.execution.CqlEngine;
 import org.opencds.cqf.cql.evaluator.measure.CareGapsProperties;
 import org.opencds.cqf.cql.evaluator.measure.MeasureEvaluationOptions;
@@ -23,6 +28,7 @@ import org.springframework.security.concurrent.DelegatingSecurityContextExecutor
 import java.util.EnumSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -63,10 +69,10 @@ public class TestCrR4Config {
 		}
 		return measureEvalOptions;
 	}
-
 	@Bean
-	public EvaluationSettings evaluationSettings(TestCqlProperties theCqlProperties) {
+	public EvaluationSettings evaluationSettings(TestCqlProperties theCqlProperties, Map<VersionedIdentifier, CompiledLibrary> theGlobalLibraryCache, Map<ModelIdentifier, Model> theGlobalModelCache) {
 		var evaluationSettings = EvaluationSettings.getDefault();
+
 		var cqlEngineOptions = evaluationSettings.getEngineOptions();
 		Set<CqlEngine.Options> options = EnumSet.noneOf(CqlEngine.Options.class);
 		if (theCqlProperties.isCqlRuntimeEnableExpressionCaching()) {
@@ -80,17 +86,7 @@ public class TestCrR4Config {
 		cqlOptions.setCqlEngineOptions(cqlEngineOptions);
 
 		var cqlCompilerOptions = new CqlCompilerOptions();
-//				theCqlProperties.getCqlTranslatorFormat(),
-//			theCqlProperties.isEnableDateRangeOptimization(), theCqlProperties.isEnableAnnotations(),
-//			theCqlProperties.isEnableLocators(), theCqlProperties.isEnableResultsType(),
-//			theCqlProperties.isCqlCompilerVerifyOnly(), theCqlProperties.isEnableDetailedErrors(),
-//			theCqlProperties.getCqlCompilerErrorSeverityLevel(), theCqlProperties.isDisableListTraversal(),
-//			theCqlProperties.isDisableListDemotion(), theCqlProperties.isDisableListPromotion(),
-//			theCqlProperties.isEnableIntervalDemotion(), theCqlProperties.isEnableIntervalPromotion(),
-//			theCqlProperties.isDisableMethodInvocation(), theCqlProperties.isRequireFromKeyword(),
-//			theCqlProperties.isCqlCompilerValidateUnits(), theCqlProperties.isDisableDefaultModelInfoLoad(),
-//			theCqlProperties.getCqlCompilerSignatureLevel(), theCqlProperties.getCqlCompilerCompatibilityLevel()
-//		);
+
 		cqlCompilerOptions.setCompatibilityLevel("1.5");
 		cqlOptions.setUseEmbeddedLibraries(true);
 
@@ -98,7 +94,8 @@ public class TestCrR4Config {
 		cqlCompilerOptions.setCollapseDataRequirements(theCqlProperties.isCqlCompilerCollapseDataRequirements());
 
 		cqlOptions.setCqlCompilerOptions(cqlCompilerOptions);
-
+		evaluationSettings.setLibraryCache(theGlobalLibraryCache);
+		evaluationSettings.setModelCache(theGlobalModelCache);
 		return evaluationSettings;
 	}
 

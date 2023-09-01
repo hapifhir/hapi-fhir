@@ -83,10 +83,7 @@ public class CqlExecutionOperationProvider {
 	 *                            evaluation will attempt to use the server on which
 	 *                            the operation is being performed as the
 	 *                            terminology server.
-	 * @param theContent             The CQL library content. If this and the
-	 *                            expression
-	 *                            parameter are set, only the expression specified
-	 *                            will be evaluated.
+	 * @param theContent           non-spec parameter that will be excluded from this scope.
 	 * @return The result of evaluating the given expression, returned as a FHIR
 	 *         type, either a {@link org.hl7.fhir.r4.model.Resource} resource, or a
 	 *         FHIR-defined type
@@ -128,6 +125,6 @@ public class CqlExecutionOperationProvider {
 						theDataEndpoint,
 						theContentEndpoint,
 						theTerminologyEndpoint,
-						theContent);
+						null);
 	}
 }
