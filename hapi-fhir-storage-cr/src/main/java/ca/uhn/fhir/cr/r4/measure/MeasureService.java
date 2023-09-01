@@ -60,7 +60,6 @@ import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.ME
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.US_COUNTRY_CODE;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.US_COUNTRY_DISPLAY;
 
-
 public class MeasureService {
 
 	private final Repository myRepository;

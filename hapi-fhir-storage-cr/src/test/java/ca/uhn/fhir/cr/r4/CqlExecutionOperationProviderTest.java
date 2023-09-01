@@ -116,17 +116,21 @@ public class CqlExecutionOperationProviderTest extends BaseCrR4TestServer{
 
 	@Test
 	void testCqlExecutionProviderExpression() {
+		Parameters libraryParameter = parameters(
+			canonicalPart("url", ourClient.getServerBase() + "/Library/SimpleR4Library"),
+			stringPart("name", "SimpleR4Library"));
 		Parameters params = parameters(
 			stringPart("subject", "SimplePatient"),
-			stringPart("expression", "Numerator")
+			part("library", libraryParameter),
+			stringPart("expression", "SimpleR4Library.\"Numerator\"")
 			);
 
 		Parameters results = runCqlExecution(params);
 
 		assertFalse(results.isEmpty());
 		assertEquals(1, results.getParameter().size());
-		assertTrue(results.getParameter("Numerator").getValue() instanceof BooleanType);
-		assertTrue(((BooleanType) results.getParameter("Numerator").getValue()).booleanValue());
+		assertTrue(results.getParameter("return").getValue() instanceof BooleanType);
+		assertTrue(((BooleanType) results.getParameter("returnf").getValue()).booleanValue());
 	}
 
 	@Test

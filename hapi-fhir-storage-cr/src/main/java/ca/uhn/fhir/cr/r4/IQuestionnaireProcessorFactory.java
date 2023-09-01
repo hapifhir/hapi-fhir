@@ -22,7 +22,6 @@ package ca.uhn.fhir.cr.r4;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import org.opencds.cqf.fhir.cr.questionnaire.r4.QuestionnaireProcessor;
 
-
 @FunctionalInterface
 public interface IQuestionnaireProcessorFactory {
 	QuestionnaireProcessor create(RequestDetails theRequestDetails);

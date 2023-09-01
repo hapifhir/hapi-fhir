@@ -22,7 +22,6 @@ package ca.uhn.fhir.cr.dstu3;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import org.opencds.cqf.fhir.cr.activitydefinition.dstu3.ActivityDefinitionProcessor;
 
-
 @FunctionalInterface
 public interface IActivityDefinitionProcessorFactory {
 	ActivityDefinitionProcessor create(RequestDetails theRequestDetails);
