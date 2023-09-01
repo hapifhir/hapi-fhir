@@ -25,10 +25,8 @@ import org.cqframework.cql.cql2elm.ModelManager;
 import org.cqframework.cql.cql2elm.model.CompiledLibrary;
 import org.cqframework.cql.cql2elm.model.Model;
 
-import org.cqframework.cql.cql2elm.quick.FhirLibrarySourceProvider;
 import org.hl7.cql.model.ModelIdentifier;
 import org.hl7.elm.r1.VersionedIdentifier;
-import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -77,7 +75,6 @@ public class TestCrConfig {
 		storageSettings.setEnforceReferentialIntegrityOnWrite(false);
 		storageSettings.setEnforceReferenceTargetTypes(false);
 		storageSettings.setResourceClientIdStrategy(JpaStorageSettings.ClientIdStrategyEnum.ANY);
-		//storageSettings.setResourceServerIdStrategy(Id);
 		return storageSettings;
 	}
 

@@ -21,7 +21,6 @@
 		<org.antlr-version>4.10.1</org.antlr-version>
 		<org.codelibs.xpp3-version>1.1.4c.0</org.codelibs.xpp3-version>
 		<spring-security-core.version>5.7.8</spring-security-core.version>
-		<cql.version>3.0.0</cql.version>
 	</properties>
 
 
@@ -88,18 +87,14 @@
 		</dependency>
 		<dependency>
 			<groupId>org.opencds.cqf.fhir</groupId>
-			<artifactId>cqf-fhir-api</artifactId>
-			<version>${clinical-reasoning.version}</version>
+			<artifactId>cqf-fhir-cr</artifactId>
+			<version>3.0.0-PRE6-SNAPSHOT</version>
 		</dependency>
 		<dependency>
-			<groupId>info.cqframework</groupId>
-			<artifactId>elm-jackson</artifactId>
-			<version>${cql.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>info.cqframework</groupId>
-			<artifactId>model-jackson</artifactId>
-			<version>${cql.version}</version>
+			<groupId>org.opencds.cqf.fhir</groupId>
+			<artifactId>cqf-fhir-jackson</artifactId>
+			<version>3.0.0-PRE6-SNAPSHOT</version>
+			<type>pom</type>
 		</dependency>
 		<dependency>
 			<groupId>org.opencds.cqf.fhir</groupId>
@@ -132,58 +127,6 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
-		<dependency>
-			<groupId>org.opencds.cqf.cql</groupId>
-			<artifactId>evaluator.spring</artifactId>
-			<version>${clinical-reasoning.version}</version>
-			<exclusions>
-				<exclusion>
-					<groupId>xpp3</groupId>
-					<artifactId>xpp3_min</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>xmlpull</groupId>
-					<artifactId>xmlpull</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-		<dependency>
-			<groupId>org.opencds.cqf.cql</groupId>
-			<artifactId>evaluator.cql</artifactId>
-			<version>${clinical-reasoning.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.opencds.cqf.cql</groupId>
-			<artifactId>evaluator.plandefinition</artifactId>
-			<version>${clinical-reasoning.version}</version>
-			<exclusions>
-				<exclusion>
-					<groupId>xpp3</groupId>
-					<artifactId>xpp3_min</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>xmlpull</groupId>
-					<artifactId>xmlpull</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-		<dependency>
-			<groupId>org.opencds.cqf.cql</groupId>
-			<artifactId>evaluator.jackson-deps</artifactId>
-			<version>${clinical-reasoning.version}</version>
-			<type>pom</type>
-			<exclusions>
-				<exclusion>
-					<groupId>xpp3</groupId>
-					<artifactId>xpp3_min</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>xmlpull</groupId>
-					<artifactId>xmlpull</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-
 		<dependency>
 			<groupId>org.codelibs</groupId>
 			<artifactId>xpp3</artifactId>

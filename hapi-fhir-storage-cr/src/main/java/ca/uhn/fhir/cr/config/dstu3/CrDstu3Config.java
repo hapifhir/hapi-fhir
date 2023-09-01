@@ -29,7 +29,7 @@ import ca.uhn.fhir.cr.dstu3.IMeasureServiceFactory;
 import ca.uhn.fhir.cr.dstu3.measure.MeasureOperationsProvider;
 import ca.uhn.fhir.cr.dstu3.measure.MeasureService;
 import ca.uhn.fhir.rest.server.RestfulServer;
-import org.opencds.cqf.cql.evaluator.measure.MeasureEvaluationOptions;
+import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

@@ -20,7 +20,7 @@
 package ca.uhn.fhir.cr.dstu3;
 
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import org.opencds.cqf.cql.evaluator.questionnaireresponse.dstu3.QuestionnaireResponseProcessor;
+import org.opencds.cqf.fhir.cr.questionnaireresponse.dstu3.QuestionnaireResponseProcessor;
 
 @FunctionalInterface
 public interface IQuestionnaireResponseProcessorFactory {

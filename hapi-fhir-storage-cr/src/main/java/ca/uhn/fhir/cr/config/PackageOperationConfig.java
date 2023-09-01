@@ -34,7 +34,7 @@ public class PackageOperationConfig {
 	@Bean
 	ca.uhn.fhir.cr.r4.IPlanDefinitionProcessorFactory r4PlanDefinitionProcessorFactory(
 			IRepositoryFactory theRepositoryFactory, EvaluationSettings theEvaluationSettings) {
-		return rd -> new org.opencds.cqf.cql.evaluator.plandefinition.r4.PlanDefinitionProcessor(
+		return rd -> new org.opencds.cqf.fhir.cr.plandefinition.r4.PlanDefinitionProcessor(
 				theRepositoryFactory.create(rd), theEvaluationSettings);
 	}
 
@@ -46,7 +46,7 @@ public class PackageOperationConfig {
 	@Bean
 	ca.uhn.fhir.cr.r4.IQuestionnaireProcessorFactory r4QuestionnaireProcessorFactory(
 			IRepositoryFactory theRepositoryFactory, EvaluationSettings theEvaluationSettings) {
-		return rd -> new org.opencds.cqf.cql.evaluator.questionnaire.r4.QuestionnaireProcessor(
+		return rd -> new org.opencds.cqf.fhir.cr.questionnaire.r4.QuestionnaireProcessor(
 				theRepositoryFactory.create(rd), theEvaluationSettings);
 	}
 

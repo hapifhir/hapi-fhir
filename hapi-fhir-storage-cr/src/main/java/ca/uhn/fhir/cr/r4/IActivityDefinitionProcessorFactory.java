@@ -20,7 +20,7 @@
 package ca.uhn.fhir.cr.r4;
 
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import org.opencds.cqf.cql.evaluator.activitydefinition.r4.ActivityDefinitionProcessor;
+import org.opencds.cqf.fhir.cr.activitydefinition.r4.ActivityDefinitionProcessor;
 
 @FunctionalInterface
 public interface IActivityDefinitionProcessorFactory {
