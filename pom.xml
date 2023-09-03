@@ -972,7 +972,7 @@
 		<spring_version>5.3.27</spring_version>
 		<spring_data_bom_version>2021.2.2</spring_data_bom_version>
 		<spring_batch_version>4.3.3</spring_batch_version>
-		<spring_boot_version>2.7.12</spring_boot_version>
+		<spring_boot_version>2.7.15</spring_boot_version>
 		<spring_retry_version>1.2.2.RELEASE</spring_retry_version>
 
 		<stax2_api_version>3.1.4</stax2_api_version>
@@ -1012,6 +1012,7 @@
 					</exclusion>
 				</exclusions>
 			</dependency>
+
 			<dependency>
 				<groupId>org.springframework.data</groupId>
 				<artifactId>spring-data-bom</artifactId>
@@ -2217,7 +2218,17 @@
 				<scope>provided</scope>
 				<optional>true</optional>
 			</dependency>
+			<!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-dependencies -->
+			<!-- Note that this is at the bottom so that we can override any dependencies in it by declaring them above this BOM -->
+			<dependency>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-dependencies</artifactId>
+				<version>${spring_boot_version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
 		</dependencies>
+
 	</dependencyManagement>
 
 	<build>
