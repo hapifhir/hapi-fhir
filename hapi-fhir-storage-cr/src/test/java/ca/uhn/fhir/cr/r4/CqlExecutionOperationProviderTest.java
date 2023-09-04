@@ -130,7 +130,7 @@ public class CqlExecutionOperationProviderTest extends BaseCrR4TestServer{
 		assertFalse(results.isEmpty());
 		assertEquals(1, results.getParameter().size());
 		assertTrue(results.getParameter("return").getValue() instanceof BooleanType);
-		assertTrue(((BooleanType) results.getParameter("returnf").getValue()).booleanValue());
+		assertTrue(((BooleanType) results.getParameter("return").getValue()).booleanValue());
 	}
 
 	@Test
