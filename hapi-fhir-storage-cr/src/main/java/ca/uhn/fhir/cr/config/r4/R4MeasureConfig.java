@@ -26,17 +26,21 @@ import ca.uhn.fhir.cr.config.ProviderLoader;
 import ca.uhn.fhir.cr.config.ProviderSelector;
 import ca.uhn.fhir.cr.config.RepositoryConfig;
 import ca.uhn.fhir.cr.r4.ICareGapsServiceFactory;
+import ca.uhn.fhir.cr.r4.ICqlExecutionServiceFactory;
 import ca.uhn.fhir.cr.r4.IMeasureServiceFactory;
 import ca.uhn.fhir.cr.r4.ISubmitDataProcessorFactory;
+import ca.uhn.fhir.cr.r4.cqlexecution.CqlExecutionOperationProvider;
 import ca.uhn.fhir.cr.r4.measure.CareGapsOperationProvider;
 import ca.uhn.fhir.cr.r4.measure.MeasureOperationsProvider;
 import ca.uhn.fhir.cr.r4.measure.MeasureService;
 import ca.uhn.fhir.cr.r4.measure.SubmitDataProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
-import org.opencds.cqf.cql.evaluator.measure.CareGapsProperties;
-import org.opencds.cqf.cql.evaluator.measure.MeasureEvaluationOptions;
-import org.opencds.cqf.cql.evaluator.measure.r4.R4CareGapsService;
-import org.opencds.cqf.cql.evaluator.measure.r4.R4SubmitDataService;
+import org.opencds.cqf.fhir.cql.EvaluationSettings;
+import org.opencds.cqf.fhir.cr.cql.r4.R4CqlExecutionService;
+import org.opencds.cqf.fhir.cr.measure.CareGapsProperties;
+import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
+import org.opencds.cqf.fhir.cr.measure.r4.R4CareGapsService;
+import org.opencds.cqf.fhir.cr.measure.r4.R4SubmitDataService;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -48,12 +52,29 @@ import java.util.Map;
 import java.util.concurrent.Executor;
 
 @Configuration
-@Import({RepositoryConfig.class})
-public class R4MeasureConfig {
+@Import(RepositoryConfig.class)
+public class CrR4Config {
+
 	@Bean
 	IMeasureServiceFactory r4MeasureServiceFactory(
 			IRepositoryFactory theRepositoryFactory, MeasureEvaluationOptions theEvaluationOptions) {
 		return rd -> new MeasureService(theRepositoryFactory.create(rd), theEvaluationOptions);
+	}
+
+	@Bean
+	ISubmitDataProcessorFactory r4SubmitDataProcessorFactory(IRepositoryFactory theRepositoryFactory) {
+		return rd -> new R4SubmitDataService(theRepositoryFactory.create(rd));
+	}
+
+	@Bean
+	ICqlExecutionServiceFactory r4CqlExecutionServiceFactory(
+			IRepositoryFactory theRepositoryFactory, EvaluationSettings theEvaluationSettings) {
+		return rd -> new R4CqlExecutionService(theRepositoryFactory.create(rd), theEvaluationSettings);
+	}
+
+	@Bean
+	CqlExecutionOperationProvider r4CqlExecutionOperationProvider() {
+		return new CqlExecutionOperationProvider();
 	}
 
 	@Bean
@@ -73,11 +94,6 @@ public class R4MeasureConfig {
 	@Bean
 	CareGapsOperationProvider r4CareGapsOperationProvider() {
 		return new CareGapsOperationProvider();
-	}
-
-	@Bean
-	ISubmitDataProcessorFactory r4SubmitDataProcessorFactory() {
-		return r -> new R4SubmitDataService(r);
 	}
 
 	@Bean
@@ -101,7 +117,8 @@ public class R4MeasureConfig {
 						Arrays.asList(
 								MeasureOperationsProvider.class,
 								SubmitDataProvider.class,
-								CareGapsOperationProvider.class)));
+								CareGapsOperationProvider.class,
+								CqlExecutionOperationProvider.class)));
 
 		return new ProviderLoader(theRestfulServer, theApplicationContext, selector);
 	}

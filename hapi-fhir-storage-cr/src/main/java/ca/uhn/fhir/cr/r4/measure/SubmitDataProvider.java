@@ -19,7 +19,6 @@
  */
 package ca.uhn.fhir.cr.r4.measure;
 
-import ca.uhn.fhir.cr.common.IRepositoryFactory;
 import ca.uhn.fhir.cr.r4.ISubmitDataProcessorFactory;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.rest.annotation.IdParam;
@@ -39,9 +38,6 @@ import java.util.List;
 
 public class SubmitDataProvider {
 	private static final Logger ourLog = LoggerFactory.getLogger(SubmitDataProvider.class);
-
-	@Autowired
-	IRepositoryFactory myRepositoryFactory;
 
 	@Autowired
 	ISubmitDataProcessorFactory myR4SubmitDataProcessorFactory;
@@ -80,8 +76,6 @@ public class SubmitDataProvider {
 			@IdParam IdType theId,
 			@OperationParam(name = "measureReport", min = 1, max = 1) MeasureReport theReport,
 			@OperationParam(name = "resource") List<IBaseResource> theResources) {
-		return myR4SubmitDataProcessorFactory
-				.create(myRepositoryFactory.create(theRequestDetails))
-				.submitData(theId, theReport, theResources);
+		return myR4SubmitDataProcessorFactory.create(theRequestDetails).submitData(theId, theReport, theResources);
 	}
 }

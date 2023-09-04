@@ -215,42 +215,4 @@ public interface IDaoRegistryUser {
 
 		return (T) getDaoRegistry().getSystemDao().transaction(theRequestDetails, theTransaction);
 	}
-
-	/**
-	 * Searches for a Resource on the local server using the Search Parameters
-	 * specified
-	 *
-	 * @param <T>              the type of Resource to return
-	 * @param theResourceClass the class of the Resource
-	 * @param theSearchMap     the Search Parameters
-	 * @return Bundle provider
-	 */
-	/*
-	default <T extends IBaseResource> Iterable<IBaseResource> search(
-		Class<T> theResourceClass, SearchParameterMap theSearchMap) {
-		checkNotNull(theResourceClass);
-		checkNotNull(theSearchMap);
-
-		return search(theResourceClass, theSearchMap, new SystemRequestDetails());
-	}
-
-	/**
-	 * Searches for a Resource on the local server using the Search Parameters
-	 * specified
-	 *
-	 * @param <T>               the type of Resource to return
-	 * @param theResourceClass  the class of the Resource
-	 * @param theSearchMap      the Search Parameters
-	 * @param theRequestDetails multi-tenancy information
-	 * @return Bundle provider
-	 */
-	/*default <T extends IBaseResource> Iterable<IBaseResource> search(
-		Class<T> theResourceClass, SearchParameterMap theSearchMap, RequestDetails theRequestDetails) {
-		checkNotNull(theResourceClass);
-		checkNotNull(theSearchMap);
-
-		var provider = getDaoRegistry().getResourceDao(theResourceClass).search(theSearchMap, theRequestDetails);
-		return new BundleIterable(theRequestDetails, provider);
-	}
-	*/
 }

@@ -2,10 +2,11 @@ package ca.uhn.fhir.cr;
 
 import org.cqframework.cql.cql2elm.CqlCompilerException;
 import org.cqframework.cql.cql2elm.CqlTranslator;
-import org.cqframework.cql.cql2elm.CqlTranslatorOptions;
+import org.cqframework.cql.cql2elm.CqlCompilerOptions;
 import org.cqframework.cql.cql2elm.LibraryBuilder;
-import org.opencds.cqf.cql.evaluator.CqlOptions;
-import org.opencds.cqf.cql.evaluator.engine.CqlEngineOptions;
+import org.opencds.cqf.fhir.cql.CqlEngineOptions;
+import org.opencds.cqf.fhir.cql.CqlOptions;
+
 
 public class TestCqlProperties {
 
@@ -17,7 +18,7 @@ public class TestCqlProperties {
 	private Boolean cql_runtime_enable_expression_caching = true;
 	private Boolean cql_compiler_validate_units = true;
 	private Boolean cql_compiler_verify_only = false;
-	private String cql_compiler_compatibility_level = "1.5";
+	private String cql_compiler_compatibility_level = "1.3";
 	private CqlCompilerException.ErrorSeverity cql_compiler_error_level = CqlCompilerException.ErrorSeverity.Info;
 	private LibraryBuilder.SignatureLevel cql_compiler_signature_level = LibraryBuilder.SignatureLevel.All;
 	private Boolean cql_compiler_analyze_data_requirements = false;
@@ -241,33 +242,14 @@ public class TestCqlProperties {
 		this.cql_compiler_translator_format = cqlTranslatorFormat;
 	}
 
-	private CqlTranslatorOptions cqlTranslatorOptions = new CqlTranslatorOptions();
-//		getCqlTranslatorFormat(),
-//		cql_compiler_enable_date_range_optimization,
-//		cql_compiler_enable_annotations,
-//		cql_compiler_enable_locators,
-//		cql_compiler_enable_results_type,
-//		isCqlCompilerVerifyOnly(),
-//		cql_compiler_enable_detailed_errors,
-//		getCqlCompilerErrorSeverityLevel(),
-//		cql_compiler_disable_list_traversal,
-//		cql_compiler_disable_list_demotion,
-//		cql_compiler_disable_list_promotion,
-//		cql_compiler_enable_interval_demotion,
-//		cql_compiler_enable_interval_promotion,
-//		cql_compiler_disable_method_invocation,
-//		cql_compiler_require_from_keyword,
-//		isCqlCompilerValidateUnits(),
-//		cql_compiler_disable_default_model_info_load,
-//		getCqlCompilerSignatureLevel(),
-//		getCqlCompilerCompatibilityLevel());
+	private CqlCompilerOptions cqlCompilerOptions = new CqlCompilerOptions();
 
-	public CqlTranslatorOptions getCqlTranslatorOptions() {
-		return this.cqlTranslatorOptions;
+	public CqlCompilerOptions getCqlCompilerOptions() {
+		return this.cqlCompilerOptions;
 	}
 
-	public void setCqlTranslator(CqlTranslatorOptions translator) {
-		this.cqlTranslatorOptions = translator;
+	public void setCqlCompilerOptions(CqlCompilerOptions compilerOptions) {
+		this.cqlCompilerOptions = compilerOptions;
 	}
 
 	public CqlEngineOptions getCqlEngineOptions() {
@@ -282,7 +264,8 @@ public class TestCqlProperties {
 		CqlOptions cqlOptions = new CqlOptions();
 		cqlOptions.setUseEmbeddedLibraries(this.cql_use_embedded_libraries);
 		cqlOptions.setCqlEngineOptions(this.getCqlEngineOptions());
-		cqlOptions.setCqlCompilerOptions(this.getCqlTranslatorOptions().getCqlCompilerOptions());
+		cqlOptions.setCqlCompilerOptions(this.getCqlCompilerOptions());
+		//cqlOptions.setCqlCompilerOptions(this.getCqlCompilerOptions());
 		return cqlOptions;
 	}
 

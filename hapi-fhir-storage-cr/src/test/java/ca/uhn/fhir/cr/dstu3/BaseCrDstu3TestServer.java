@@ -1,7 +1,7 @@
-package ca.uhn.fhir.cr;
+package ca.uhn.fhir.cr.dstu3;
 
 import ca.uhn.fhir.context.FhirContext;
-
+import ca.uhn.fhir.cr.IResourceLoader;
 import ca.uhn.fhir.cr.dstu3.TestCrDstu3Config;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;

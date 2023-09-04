@@ -35,14 +35,14 @@ public class ApplyOperationConfig {
 	@Bean
 	ca.uhn.fhir.cr.r4.IActivityDefinitionProcessorFactory r4ActivityDefinitionProcessorFactory(
 			IRepositoryFactory theRepositoryFactory, EvaluationSettings theEvaluationSettings) {
-		return rd -> new org.opencds.cqf.cql.evaluator.activitydefinition.r4.ActivityDefinitionProcessor(
+		return rd -> new org.opencds.cqf.fhir.cr.activitydefinition.r4.ActivityDefinitionProcessor(
 				theRepositoryFactory.create(rd), theEvaluationSettings);
 	}
 
 	@Bean
 	ca.uhn.fhir.cr.r4.IPlanDefinitionProcessorFactory r4PlanDefinitionProcessorFactory(
 			IRepositoryFactory theRepositoryFactory, EvaluationSettings theEvaluationSettings) {
-		return rd -> new org.opencds.cqf.cql.evaluator.plandefinition.r4.PlanDefinitionProcessor(
+		return rd -> new org.opencds.cqf.fhir.cr.plandefinition.r4.PlanDefinitionProcessor(
 				theRepositoryFactory.create(rd), theEvaluationSettings);
 	}
 

@@ -80,7 +80,7 @@ public interface IResourceLoader extends IDaoRegistryUser {
 	 * @param <T>
 	 */
 	default <T extends IBaseResource> T loadResource(
-			Class<T> theType, String theLocation, RequestDetails theRequestDetails) {
+		Class<T> theType, String theLocation, RequestDetails theRequestDetails) {
 		var resource = readResource(theType, theLocation);
 		getDaoRegistry().getResourceDao(theType).update(resource, theRequestDetails);
 
@@ -90,8 +90,8 @@ public interface IResourceLoader extends IDaoRegistryUser {
 	public default IBaseResource readResource(String theLocation) {
 		String resourceString = stringFromResource(theLocation);
 		return EncodingEnum.detectEncoding(resourceString)
-				.newParser(getFhirContext())
-				.parseResource(resourceString);
+			.newParser(getFhirContext())
+			.parseResource(resourceString);
 	}
 
 	public default IBaseResource readAndLoadResource(String theLocation) {
@@ -123,7 +123,7 @@ public interface IResourceLoader extends IDaoRegistryUser {
 				break;
 			default:
 				throw new IllegalArgumentException(
-						String.format("Expected encoding xml, or json.  %s is not a valid encoding", theEncoding));
+					String.format("Expected encoding xml, or json.  %s is not a valid encoding", theEncoding));
 		}
 
 		return parser.parseResource(theResourceString);
@@ -152,15 +152,15 @@ public interface IResourceLoader extends IDaoRegistryUser {
 
 	private Bundle.BundleEntryComponent createEntry(IBaseResource theResource) {
 		return new Bundle.BundleEntryComponent()
-				.setResource((Resource) theResource)
-				.setRequest(createRequest(theResource));
+			.setResource((Resource) theResource)
+			.setRequest(createRequest(theResource));
 	}
 
 	private Bundle.BundleEntryRequestComponent createRequest(IBaseResource theResource) {
 		Bundle.BundleEntryRequestComponent request = new Bundle.BundleEntryRequestComponent();
 		if (theResource.getIdElement().hasValue()) {
 			request.setMethod(Bundle.HTTPVerb.PUT)
-					.setUrl(theResource.getIdElement().getValue());
+				.setUrl(theResource.getIdElement().getValue());
 		} else {
 			request.setMethod(Bundle.HTTPVerb.POST).setUrl(theResource.fhirType());
 		}

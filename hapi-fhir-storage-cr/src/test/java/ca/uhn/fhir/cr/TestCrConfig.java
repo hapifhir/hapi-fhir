@@ -2,6 +2,7 @@ package ca.uhn.fhir.cr;
 
 import ca.uhn.fhir.batch2.jobs.reindex.ReindexProvider;
 import ca.uhn.fhir.context.support.IValidationSupport;
+
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
@@ -19,9 +20,13 @@ import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.provider.ResourceProviderFactory;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import com.google.common.base.Strings;
+import org.cqframework.cql.cql2elm.LibraryManager;
 import org.cqframework.cql.cql2elm.ModelManager;
+import org.cqframework.cql.cql2elm.model.CompiledLibrary;
 import org.cqframework.cql.cql2elm.model.Model;
+
 import org.hl7.cql.model.ModelIdentifier;
+import org.hl7.elm.r1.VersionedIdentifier;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -29,14 +34,16 @@ import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
 
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
 
 @Configuration
 @Import({SubscriptionSubmitterConfig.class, SubscriptionChannelConfig.class})
 public class TestCrConfig {
 	@Bean
 	public RestfulServer restfulServer(IFhirSystemDao<?, ?> fhirSystemDao, DaoRegistry daoRegistry, IJpaSystemProvider jpaSystemProvider, ResourceProviderFactory resourceProviderFactory, JpaStorageSettings jpaStorageSettings, ISearchParamRegistry searchParamRegistry, IValidationSupport theValidationSupport, DatabaseBackedPagingProvider databaseBackedPagingProvider, ValueSetOperationProvider theValueSetOperationProvider,
-									   ReindexProvider myReindexProvider,
-									   ApplicationContext myAppCtx) {
+												  ReindexProvider myReindexProvider,
+												  ApplicationContext myAppCtx) {
 		RestfulServer ourRestServer = new RestfulServer(fhirSystemDao.getContext());
 
 		TerminologyUploaderProvider myTerminologyUploaderProvider = myAppCtx.getBean(TerminologyUploaderProvider.class);
@@ -47,9 +54,6 @@ public class TestCrConfig {
 		ourRestServer.registerProvider(myAppCtx.getBean(GraphQLProvider.class));
 		ourRestServer.registerProvider(myAppCtx.getBean(DiffProvider.class));
 		ourRestServer.registerProvider(myAppCtx.getBean(ValueSetOperationProvider.class));
-		//databaseBackedPagingProvider.setDefaultPageSize(10);
-		//databaseBackedPagingProvider.setMaximumPageSize(50);
-		//ourRestServer.setPagingProvider(databaseBackedPagingProvider);
 
 		//to do
 		String serverAddress = null;
@@ -58,6 +62,7 @@ public class TestCrConfig {
 		} else {
 			ourRestServer.setServerAddressStrategy(new IncomingRequestAddressStrategy());
 		}
+
 		return ourRestServer;
 	}
 	@Bean
@@ -70,7 +75,6 @@ public class TestCrConfig {
 		storageSettings.setEnforceReferentialIntegrityOnWrite(false);
 		storageSettings.setEnforceReferenceTargetTypes(false);
 		storageSettings.setResourceClientIdStrategy(JpaStorageSettings.ClientIdStrategyEnum.ANY);
-		//storageSettings.setResourceServerIdStrategy(Id);
 		return storageSettings;
 	}
 
@@ -79,24 +83,20 @@ public class TestCrConfig {
 		return new PartitionHelper();
 	}
 
-//	@Bean
-//	@Scope("prototype")
-//	ILibraryLoaderFactory libraryLoaderFactory(Map<VersionedIdentifier, Library> theGlobalLibraryCache,
-//															 ModelManager theModelManager, EvaluationSettings theEvaluationSettings) {
-//		return lcp -> {
-//
-//			if (theEvaluationSettings.getCqlOptions().useEmbeddedLibraries()) {
-//				lcp.add(new FhirLibrarySourceProvider());
-//			}
-//
-//			return new TranslatingLibraryLoader(theModelManager, lcp, theEvaluationSettings.getCqlOptions().getCqlTranslatorOptions(), theGlobalLibraryCache);
-//		};
-//	}
-
 	@Bean
 	@Scope("prototype")
 	public ModelManager modelManager(Map<ModelIdentifier, Model> theGlobalModelCache) {
 		return new ModelManager(theGlobalModelCache);
+	}
+
+	@Bean
+	public Map<VersionedIdentifier, CompiledLibrary> globalLibraryCache() {
+		return new ConcurrentHashMap<>();
+	}
+
+	@Bean
+	public Map<ModelIdentifier, Model> globalModelCache() {
+		return new ConcurrentHashMap<>();
 	}
 
 }

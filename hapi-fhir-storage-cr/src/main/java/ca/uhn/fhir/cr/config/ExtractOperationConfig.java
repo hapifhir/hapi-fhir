@@ -34,7 +34,7 @@ public class ExtractOperationConfig {
 	@Bean
 	ca.uhn.fhir.cr.r4.IQuestionnaireResponseProcessorFactory r4QuestionnaireResponseProcessorFactory(
 			IRepositoryFactory theRepositoryFactory, EvaluationSettings theEvaluationSettings) {
-		return rd -> new org.opencds.cqf.cql.evaluator.questionnaireresponse.r4.QuestionnaireResponseProcessor(
+		return rd -> new org.opencds.cqf.fhir.cr.questionnaireresponse.r4.QuestionnaireResponseProcessor(
 				theRepositoryFactory.create(rd), theEvaluationSettings);
 	}
 

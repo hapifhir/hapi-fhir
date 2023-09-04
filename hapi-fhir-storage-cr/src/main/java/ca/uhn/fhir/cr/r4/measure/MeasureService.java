@@ -36,10 +36,10 @@ import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.SearchParameter;
 import org.hl7.fhir.r4.model.StringType;
-import org.opencds.cqf.cql.evaluator.measure.MeasureEvaluationOptions;
-import org.opencds.cqf.cql.evaluator.measure.r4.R4MeasureProcessor;
-import org.opencds.cqf.cql.evaluator.measure.r4.R4RepositorySubjectProvider;
 import org.opencds.cqf.fhir.api.Repository;
+import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
+import org.opencds.cqf.fhir.cr.measure.r4.R4MeasureProcessor;
+import org.opencds.cqf.fhir.cr.measure.r4.R4RepositorySubjectProvider;
 import org.opencds.cqf.fhir.utility.iterable.BundleIterator;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
 import org.slf4j.Logger;
@@ -51,14 +51,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.opencds.cqf.cql.evaluator.measure.constant.MeasureReportConstants.COUNTRY_CODING_SYSTEM_CODE;
-import static org.opencds.cqf.cql.evaluator.measure.constant.MeasureReportConstants.MEASUREREPORT_MEASURE_SUPPLEMENTALDATA_EXTENSION;
-import static org.opencds.cqf.cql.evaluator.measure.constant.MeasureReportConstants.MEASUREREPORT_PRODUCT_LINE_EXT_URL;
-import static org.opencds.cqf.cql.evaluator.measure.constant.MeasureReportConstants.MEASUREREPORT_SUPPLEMENTALDATA_SEARCHPARAMETER_DEFINITION_DATE;
-import static org.opencds.cqf.cql.evaluator.measure.constant.MeasureReportConstants.MEASUREREPORT_SUPPLEMENTALDATA_SEARCHPARAMETER_URL;
-import static org.opencds.cqf.cql.evaluator.measure.constant.MeasureReportConstants.MEASUREREPORT_SUPPLEMENTALDATA_SEARCHPARAMETER_VERSION;
-import static org.opencds.cqf.cql.evaluator.measure.constant.MeasureReportConstants.US_COUNTRY_CODE;
-import static org.opencds.cqf.cql.evaluator.measure.constant.MeasureReportConstants.US_COUNTRY_DISPLAY;
+import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.COUNTRY_CODING_SYSTEM_CODE;
+import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.MEASUREREPORT_MEASURE_SUPPLEMENTALDATA_EXTENSION;
+import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.MEASUREREPORT_PRODUCT_LINE_EXT_URL;
+import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.MEASUREREPORT_SUPPLEMENTALDATA_SEARCHPARAMETER_DEFINITION_DATE;
+import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.MEASUREREPORT_SUPPLEMENTALDATA_SEARCHPARAMETER_URL;
+import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.MEASUREREPORT_SUPPLEMENTALDATA_SEARCHPARAMETER_VERSION;
+import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.US_COUNTRY_CODE;
+import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.US_COUNTRY_DISPLAY;
 
 public class MeasureService {
 

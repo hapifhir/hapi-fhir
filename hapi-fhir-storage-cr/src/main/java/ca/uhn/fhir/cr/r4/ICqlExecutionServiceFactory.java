@@ -17,12 +17,12 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.cr.dstu3;
+package ca.uhn.fhir.cr.r4;
 
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import org.opencds.cqf.fhir.cr.questionnaire.dstu3.QuestionnaireProcessor;
+import org.opencds.cqf.fhir.cr.cql.r4.R4CqlExecutionService;
 
 @FunctionalInterface
-public interface IQuestionnaireProcessorFactory {
-	QuestionnaireProcessor create(RequestDetails theRequestDetails);
+public interface ICqlExecutionServiceFactory {
+	R4CqlExecutionService create(RequestDetails theRequestDetails);
 }
