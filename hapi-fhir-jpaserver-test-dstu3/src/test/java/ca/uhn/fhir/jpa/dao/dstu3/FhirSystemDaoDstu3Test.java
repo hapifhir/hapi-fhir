@@ -242,7 +242,7 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 	}
 
 	private Bundle loadBundle(String theFileName) throws IOException {
-		String req = IOUtils.toString(FhirSystemDaoDstu3Test.class.getResourceAsStream(theFileName), StandardCharsets.UTF_8);
+		String req = ClasspathUtil.loadResource(theFileName);
 		return myFhirContext.newXmlParser().parseResource(Bundle.class, req);
 	}
 

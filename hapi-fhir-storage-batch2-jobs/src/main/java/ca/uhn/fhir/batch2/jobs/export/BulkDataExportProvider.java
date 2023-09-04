@@ -264,6 +264,10 @@ public class BulkDataExportProvider {
 		} else {
 			// all patient resource types
 			Set<String> groupTypes = new HashSet<>(getPatientCompartmentResources());
+
+			// Add the forward reference resource types from the patients, e.g. Practitioner, Organization
+			groupTypes.addAll(PATIENT_BULK_EXPORT_FORWARD_REFERENCE_RESOURCE_TYPES);
+
 			groupTypes.removeIf(t -> !myDaoRegistry.isResourceTypeSupported(t));
 			BulkExportJobParameters.setResourceTypes(groupTypes);
 		}

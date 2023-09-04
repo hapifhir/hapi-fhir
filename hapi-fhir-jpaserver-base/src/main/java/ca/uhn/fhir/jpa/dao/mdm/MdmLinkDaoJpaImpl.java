@@ -350,6 +350,7 @@ public class MdmLinkDaoJpaImpl implements IMdmLinkDao<JpaPid, MdmLink> {
 		List<List<Long>> chunks = ListUtils.partition(goldenResourcePids, 500);
 		for (List<Long> chunk : chunks) {
 			myMdmLinkDao.deleteLinksWithAnyReferenceToPids(chunk);
+			myMdmLinkDao.deleteLinksHistoryWithAnyReferenceToPids(chunk);
 		}
 	}
 
@@ -411,8 +412,9 @@ public class MdmLinkDaoJpaImpl implements IMdmLinkDao<JpaPid, MdmLink> {
 
 	@Nonnull
 	private List<Long> convertToLongIds(List<IIdType> theMdmHistorySearchParameters) {
-		return theMdmHistorySearchParameters.stream()
-				.map(id -> myIdHelperService.getPidOrThrowException(RequestPartitionId.allPartitions(), id))
+		return myIdHelperService
+				.getPidsOrThrowException(RequestPartitionId.allPartitions(), theMdmHistorySearchParameters)
+				.stream()
 				.map(JpaPid::getId)
 				.collect(Collectors.toUnmodifiableList());
 	}
