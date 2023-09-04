@@ -2,18 +2,15 @@ package ca.uhn.hapi.fhir.cdshooks.svc.cr.discovery;
 
 import ca.uhn.fhir.util.ClasspathUtil;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceJson;
-import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceRequestJson;
 import ca.uhn.hapi.fhir.cdshooks.module.CdsHooksObjectMapperFactory;
 import ca.uhn.hapi.fhir.cdshooks.svc.cr.BaseCrTest;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.h2.table.Plan;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.IdType;
-import org.hl7.fhir.r4.model.PlanDefinition;
 import org.junit.jupiter.api.Test;
-import org.opencds.cqf.cql.evaluator.fhir.repository.InMemoryFhirRepository;
 import org.opencds.cqf.fhir.api.Repository;
+import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 

@@ -1,6 +1,5 @@
 package ca.uhn.fhir.cr.r4;
 
-import ca.uhn.fhir.cr.BaseCrR4TestServer;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.cr.r4.measure.MeasureOperationsProvider;
 import io.specto.hoverfly.junit.core.Hoverfly;
