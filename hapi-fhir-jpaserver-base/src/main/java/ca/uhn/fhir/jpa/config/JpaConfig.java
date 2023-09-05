@@ -198,8 +198,8 @@ import org.springframework.scheduling.concurrent.ConcurrentTaskScheduler;
 import org.springframework.scheduling.concurrent.ScheduledExecutorFactoryBean;
 import org.springframework.transaction.PlatformTransactionManager;
 
-import javax.annotation.Nullable;
 import java.util.Date;
+import javax.annotation.Nullable;
 
 @Configuration
 // repositoryFactoryBeanClass: EnversRevisionRepositoryFactoryBean is needed primarily for unit testing
