@@ -77,15 +77,6 @@ public class MdmLinkHistoryProviderDstu3Plus extends BaseMdmProvider {
 							max = OperationParam.MAX_UNLIMITED,
 							typeName = "string")
 					List<IPrimitiveType<String>> theResourceIds,
-			@Description(
-							value =
-									"If set to true, the returned history links will satisfy both the resourceId and the goldenResourceId at the same time.")
-					@OperationParam(
-							name = ProviderConstants.MDM_QUERY_LINKS_STRICT_MATCH,
-							min = 0,
-							max = 1,
-							typeName = "boolean")
-					IPrimitiveType<Boolean> theStrictMatch,
 			ServletRequestDetails theRequestDetails) {
 		validateMdmLinkHistoryParameters(theMdmGoldenResourceIds, theResourceIds);
 
@@ -97,8 +88,7 @@ public class MdmLinkHistoryProviderDstu3Plus extends BaseMdmProvider {
 
 		final MdmHistorySearchParameters mdmHistorySearchParameters = new MdmHistorySearchParameters()
 				.setGoldenResourceIds(goldenResourceIdsToUse)
-				.setSourceIds(resourceIdsToUse)
-				.setStrictMatch(theStrictMatch);
+				.setSourceIds(resourceIdsToUse);
 
 		final List<MdmLinkWithRevisionJson> mdmLinkRevisionsFromSvc =
 				myMdmControllerSvc.queryLinkHistory(mdmHistorySearchParameters, theRequestDetails);

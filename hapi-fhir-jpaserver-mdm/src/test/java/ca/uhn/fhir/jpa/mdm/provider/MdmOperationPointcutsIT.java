@@ -591,7 +591,6 @@ public class MdmOperationPointcutsIT extends BaseProviderR4Test {
 			IBaseParameters retval = myLinkHistoryProvider.historyLinks(
 				goldenIdsToSend,
 				sourceIdsToSend,
-				new BooleanDt(false),
 				new ServletRequestDetails()
 			);
 

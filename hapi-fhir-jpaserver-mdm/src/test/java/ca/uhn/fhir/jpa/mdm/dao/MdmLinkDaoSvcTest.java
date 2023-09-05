@@ -214,6 +214,29 @@ public class MdmLinkDaoSvcTest extends BaseMdmR4Test {
 	}
 
 	@Test
+	public void testHistoryForBothSourceAndGoldenResourceIds(){
+		// setup
+		MdmLink targetMdmLink = createMdmLinksWithLinkedPatients(MdmMatchResultEnum.MATCH, 2).get(0);
+
+		// link both patient to the GR
+		String goldenPatientId = targetMdmLink.getGoldenResourcePersistenceId().getId().toString();
+		String sourcePatientId = targetMdmLink.getSourcePersistenceId().getId().toString();
+
+		// execute
+		MdmHistorySearchParameters mdmHistorySearchParameters = new MdmHistorySearchParameters()
+			.setSourceIds(List.of(sourcePatientId))
+			.setGoldenResourceIds(List.of(goldenPatientId));
+
+		List<MdmLinkWithRevision<MdmLink>> actualMdmLinkRevisions = myMdmLinkDaoSvc.findMdmLinkHistory(mdmHistorySearchParameters);
+
+		// verify
+		assertEquals(1, actualMdmLinkRevisions.size());
+		MdmLink actualMdmLink = actualMdmLinkRevisions.get(0).getMdmLink();
+		assertEquals(goldenPatientId, actualMdmLink.getGoldenResourcePersistenceId().getId().toString());
+		assertEquals(sourcePatientId, actualMdmLink.getSourcePersistenceId().getId().toString());
+	}
+
+	@Test
 	public void testHistoryForNoIdsOnly() {
 		assertThrows(IllegalArgumentException.class, () -> myMdmLinkDaoSvc.findMdmLinkHistory(new MdmHistorySearchParameters()));
 	}
@@ -241,30 +264,6 @@ public class MdmLinkDaoSvcTest extends BaseMdmR4Test {
 
 		// verify
 		assertEquals(2, actualMdmLinkRevisions.size(), "Both Patient/p123 and Practitioner/p123 should be returned");
-	}
-
-	@Test
-	public void testHistoryForStrictMatch(){
-		// setup
-		MdmLink targetMdmLink = createMdmLinksWithLinkedPatients(MdmMatchResultEnum.MATCH, 2).get(0);
-
-		// link both patient to the GR
-		String goldenPatientId = targetMdmLink.getGoldenResourcePersistenceId().getId().toString();
-		String sourcePatientId = targetMdmLink.getSourcePersistenceId().getId().toString();
-
-		// execute
-		MdmHistorySearchParameters mdmHistorySearchParameters = new MdmHistorySearchParameters()
-			.setSourceIds(List.of(sourcePatientId))
-			.setGoldenResourceIds(List.of(goldenPatientId))
-			.setStrictMatch(new BooleanDt(true));
-
-		List<MdmLinkWithRevision<MdmLink>> actualMdmLinkRevisions = myMdmLinkDaoSvc.findMdmLinkHistory(mdmHistorySearchParameters);
-
-		// verify
-		assertEquals(1, actualMdmLinkRevisions.size());
-		MdmLink actualMdmLink = actualMdmLinkRevisions.get(0).getMdmLink();
-		assertEquals(goldenPatientId, actualMdmLink.getGoldenResourcePersistenceId().getId().toString());
-		assertEquals(sourcePatientId, actualMdmLink.getSourcePersistenceId().getId().toString());
 	}
 
 	@Nonnull
