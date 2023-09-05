@@ -22,7 +22,6 @@ import ca.uhn.fhir.mdm.model.mdmevents.MdmLinkWithRevisionJson;
 import ca.uhn.fhir.mdm.model.mdmevents.MdmMergeEvent;
 import ca.uhn.fhir.mdm.model.mdmevents.MdmSubmitEvent;
 import ca.uhn.fhir.mdm.provider.MdmLinkHistoryProviderDstu3Plus;
-import ca.uhn.fhir.model.primitive.BooleanDt;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
