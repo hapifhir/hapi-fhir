@@ -151,8 +151,6 @@ public class MdmSurvivorshipSvcImplTest {
 		AtomicInteger counter = new AtomicInteger();
 		when(resourceDao.readByPid(any()))
 			.thenAnswer(params -> resources.get(counter.getAndIncrement()));
-		when(myMdmLinkQuerySvc.queryLinkHistory(any()))
-			.thenReturn(linksWithRevisions);
 		Page<MdmLinkJson> linkPage = mock(Page.class);
 		when(myMdmLinkQuerySvc.queryLinks(any(), any()))
 			.thenReturn(linkPage);
