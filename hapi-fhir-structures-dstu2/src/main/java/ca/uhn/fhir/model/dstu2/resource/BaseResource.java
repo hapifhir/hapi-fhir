@@ -193,7 +193,7 @@ public abstract class BaseResource extends BaseElement implements IResource {
 				for (IdDt next : profilesList) {
 					retVal.add(next);
 				}
-				return Collections.unmodifiableList(retVal);
+				return retVal;
 			}
 
 			@Override
@@ -209,7 +209,7 @@ public abstract class BaseResource extends BaseElement implements IResource {
 									next.getCodeElement().getValue())
 							.setDisplay(next.getDisplayElement().getValue()));
 				}
-				return Collections.unmodifiableList(retVal);
+				return retVal;
 			}
 
 			@Override
@@ -232,7 +232,7 @@ public abstract class BaseResource extends BaseElement implements IResource {
 				for (Tag next : tagList) {
 					retVal.add(next);
 				}
-				return Collections.unmodifiableList(retVal);
+				return retVal;
 			}
 
 			@Override

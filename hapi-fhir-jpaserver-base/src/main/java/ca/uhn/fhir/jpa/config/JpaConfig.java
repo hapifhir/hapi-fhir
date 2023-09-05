@@ -184,6 +184,8 @@ import ca.uhn.fhir.rest.server.interceptor.consent.IConsentContextServices;
 import ca.uhn.fhir.rest.server.interceptor.partition.RequestTenantPartitionInterceptor;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.subscription.api.IResourceModifiedMessagePersistenceSvc;
+import ca.uhn.fhir.util.IMetaTagSorter;
+import ca.uhn.fhir.util.MetaTagSorterAlphabetical;
 import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
 import org.hl7.fhir.common.hapi.validation.support.UnknownCodeSystemWarningValidationSupport;
 import org.hl7.fhir.utilities.graphql.IGraphQLStorageServices;
@@ -903,5 +905,10 @@ public class JpaConfig {
 			HapiTransactionService theHapiTransactionService) {
 		return new ResourceModifiedMessagePersistenceSvcImpl(
 				theFhirContext, theIResourceModifiedDao, theDaoRegistry, theHapiTransactionService);
+	}
+
+	@Bean
+	public IMetaTagSorter metaTagSorter() {
+		return new MetaTagSorterAlphabetical();
 	}
 }
