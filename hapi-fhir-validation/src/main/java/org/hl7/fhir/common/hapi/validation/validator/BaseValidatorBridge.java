@@ -38,6 +38,9 @@ abstract class BaseValidatorBridge implements IValidatorModule {
 			if (riMessage.getMessageId() != null) {
 				hapiMessage.setMessageId(riMessage.getMessageId());
 			}
+			if (riMessage.sliceText != null && riMessage.sliceText.length > 0) {
+				hapiMessage.setSliceMessages(List.of(riMessage.sliceText));
+			}
 			theCtx.addValidationMessage(hapiMessage);
 		}
 	}

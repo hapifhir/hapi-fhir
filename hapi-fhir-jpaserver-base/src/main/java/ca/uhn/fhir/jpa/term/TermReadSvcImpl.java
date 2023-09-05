@@ -2093,7 +2093,10 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 		if (outcome.size() == 0) {
 			append = " - No codes in ValueSet belong to CodeSystem with URL " + theSystem;
 		} else {
-			append = " - Unknown code " + theSystem + "#" + theCode + ". " + msg;
+			String unknownCodeMessage = myContext
+					.getLocalizer()
+					.getMessage(TermReadSvcImpl.class, "unknownCodeInSystem", theSystem, theCode);
+			append = " - " + unknownCodeMessage + ". " + msg;
 		}
 
 		return createFailureCodeValidationResult(theSystem, theCode, null, append);

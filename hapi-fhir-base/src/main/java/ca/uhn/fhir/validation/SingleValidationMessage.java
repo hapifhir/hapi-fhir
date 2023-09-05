@@ -24,6 +24,8 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
+import java.util.List;
+
 public class SingleValidationMessage {
 
 	private Integer myLocationCol;
@@ -32,6 +34,7 @@ public class SingleValidationMessage {
 	private String myMessage;
 	private String myMessageId;
 	private ResultSeverityEnum mySeverity;
+	private List<String> mySliceMessages;
 
 	/**
 	 * Constructor
@@ -138,5 +141,13 @@ public class SingleValidationMessage {
 			b.append("severity", mySeverity.getCode());
 		}
 		return b.toString();
+	}
+
+	public void setSliceMessages(List<String> theSliceMessages) {
+		mySliceMessages = theSliceMessages;
+	}
+
+	public List<String> getSliceMessages() {
+		return mySliceMessages;
 	}
 }

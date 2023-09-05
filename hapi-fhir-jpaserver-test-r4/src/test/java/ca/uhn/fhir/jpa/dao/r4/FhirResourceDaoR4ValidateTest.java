@@ -23,6 +23,7 @@ import ca.uhn.fhir.parser.StrictErrorHandler;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.ValidationModeEnum;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
@@ -30,48 +31,21 @@ import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.OperationOutcomeUtil;
 import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.validation.IValidatorModule;
+import ca.uhn.fhir.validation.ResultSeverityEnum;
+import ca.uhn.fhir.validation.ValidationResult;
 import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.common.hapi.validation.support.UnknownCodeSystemWarningValidationSupport;
 import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.r4.model.AllergyIntolerance;
-import org.hl7.fhir.r4.model.Binary;
-import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.*;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
-import org.hl7.fhir.r4.model.CanonicalType;
-import org.hl7.fhir.r4.model.CapabilityStatement;
-import org.hl7.fhir.r4.model.CodeSystem;
-import org.hl7.fhir.r4.model.CodeType;
-import org.hl7.fhir.r4.model.Coding;
-import org.hl7.fhir.r4.model.Condition;
-import org.hl7.fhir.r4.model.DateTimeType;
-import org.hl7.fhir.r4.model.ElementDefinition;
-import org.hl7.fhir.r4.model.Enumerations;
-import org.hl7.fhir.r4.model.Group;
-import org.hl7.fhir.r4.model.IdType;
-import org.hl7.fhir.r4.model.Location;
-import org.hl7.fhir.r4.model.Narrative;
-import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Observation.ObservationStatus;
-import org.hl7.fhir.r4.model.OperationOutcome;
-import org.hl7.fhir.r4.model.Organization;
-import org.hl7.fhir.r4.model.Parameters;
-import org.hl7.fhir.r4.model.Patient;
-import org.hl7.fhir.r4.model.Practitioner;
-import org.hl7.fhir.r4.model.Quantity;
-import org.hl7.fhir.r4.model.Questionnaire;
-import org.hl7.fhir.r4.model.QuestionnaireResponse;
-import org.hl7.fhir.r4.model.Reference;
-import org.hl7.fhir.r4.model.SearchParameter;
-import org.hl7.fhir.r4.model.StringType;
-import org.hl7.fhir.r4.model.StructureDefinition;
-import org.hl7.fhir.r4.model.UriType;
-import org.hl7.fhir.r4.model.ValueSet;
 import org.hl7.fhir.r5.utils.validation.constants.BestPracticeWarningLevel;
 import org.hl7.fhir.r5.utils.validation.constants.ReferenceValidationPolicy;
 import org.hl7.fhir.utilities.i18n.I18nConstants;
+import org.hl7.fhir.utilities.xhtml.XhtmlNode;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -86,9 +60,8 @@ import java.util.stream.Collectors;
 import static ca.uhn.fhir.rest.api.Constants.JAVA_VALIDATOR_DETAILS_SYSTEM;
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.*;
+import static org.hl7.fhir.common.hapi.validation.support.CommonCodeSystemsTerminologyService.CURRENCIES_CODESYSTEM_URL;
 import static org.hl7.fhir.common.hapi.validation.support.ValidationConstants.LOINC_LOW;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -336,6 +309,59 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 	}
 
 	@Test
+	public void testValidateInPlace() {
+		String input = """
+				{
+				  "resourceType": "Observation",
+					"text": {
+						"status": "generated",
+						"div": "<div xmlns=\\"http://www.w3.org/1999/xhtml\\">hello</div>"
+					},
+				  "status": "final",
+				  "category": [ {
+				    "coding": [ {
+				      "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+				      "code": "laboratory",
+				      "display": "Laboratory"
+				    } ]
+				  } ],
+				  "code": {
+				    "coding": [ {
+				      "system": "http://loinc.org222",
+				      "code": "2085-9",
+				      "display": "High Density Lipoprotein Cholesterol"
+				    } ],
+				    "text": "High Density Lipoprotein Cholesterol"
+				  },
+				  "subject": {
+				    "reference": "Patient/A9656908"
+				  },
+				  "performer": [{
+				    "reference": "Patient/A9656908"
+				  }],
+				  "encounter": {
+				    "reference": "Encounter/A9657805"
+				  },
+				  "effectiveDateTime": "2017-09-23T04:10:00-04:00",
+				  "issued": "2017-09-23T04:10:00.841-04:00",
+				  "valueQuantity": {
+				    "value": 65.17891630401957,
+				    "unit": "MG/DL",
+				    "system": "http://unitsofmeasure.org",
+				    "code": "MG/DL"
+				  }
+				}""";
+		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(true);
+		Observation inputObs = myFhirContext.newJsonParser().parseResource(Observation.class, input);
+		IIdType id = myObservationDao.create(inputObs, mySrd).getId();
+
+		MethodOutcome validateOutcome = myObservationDao.validate(null, id, null, null, null, null, mySrd);
+		ourLog.info("Validation outcome:\n{}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(validateOutcome.getOperationOutcome()));
+
+	}
+
+
+	@Test
 	public void testValidateCodeInNonEnumeratedValueSetWithUnknownCodeSystem_Error() {
 		myUnknownCodeSystemWarningValidationSupport.setNonExistentCodeSystemSeverity(IValidationSupport.IssueSeverity.ERROR);
 
@@ -368,6 +394,14 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		assertThat(oo.getIssue().get(0).getDiagnostics(),
 			containsString("HAPI-0702: Unable to expand ValueSet because CodeSystem could not be found: http://cs"));
 		assertEquals(OperationOutcome.IssueSeverity.ERROR, oo.getIssueFirstRep().getSeverity());
+		assertEquals(27, ((IntegerType)oo.getIssue().get(0).getExtensionByUrl("http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line").getValue()).getValue());
+		assertEquals(4, ((IntegerType)oo.getIssue().get(0).getExtensionByUrl("http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col").getValue()).getValue());
+		assertEquals("Terminology_TX_Confirm_4a", ((StringType)oo.getIssue().get(0).getExtensionByUrl("http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id").getValue()).getValue());
+		assertEquals(OperationOutcome.IssueType.PROCESSING, oo.getIssue().get(0).getCode());
+		assertEquals(OperationOutcome.IssueSeverity.ERROR, oo.getIssue().get(0).getSeverity());
+		assertEquals(2, oo.getIssue().get(0).getLocation().size());
+		assertEquals("Observation.value.ofType(Quantity)", oo.getIssue().get(0).getLocation().get(0).getValue());
+		assertEquals("Line 27, Col 4", oo.getIssue().get(0).getLocation().get(1).getValue());
 
 	}
 
@@ -1272,7 +1306,8 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 
 	private <T extends IBaseResource> OperationOutcome validateAndReturnOutcome(T theObs, Boolean theWantError) {
 		IFhirResourceDao<T> dao = (IFhirResourceDao<T>) myDaoRegistry.getResourceDao(theObs.getClass());
-		MethodOutcome outcome = dao.validate(theObs, null, null, null, ValidationModeEnum.CREATE, null, mySrd);
+		String encoded = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(theObs);
+		MethodOutcome outcome = dao.validate(theObs, null, encoded, EncodingEnum.JSON, ValidationModeEnum.CREATE, null, mySrd);
 		OperationOutcome oo = (OperationOutcome) outcome.getOperationOutcome();
 		if (theWantError) {
 			assertHasErrors(oo);
@@ -1595,6 +1630,66 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		assertThat(ooString, ooString, containsString("Type mismatch - SearchParameter 'http://example.com/name' type is string, but type here is date"));
 	}
 
+
+	@Test
+	void testValidateCommonCodes_Ucum_ErrorMessageIsPreserved() {
+		Observation input = new Observation();
+		input.getText().setDiv(new XhtmlNode().setValue("<div>AA</div>")).setStatus(Narrative.NarrativeStatus.GENERATED);
+		input.setStatus(ObservationStatus.AMENDED);
+		input.getCode().addCoding().setSystem("http://loinc.org").setCode("1234").setDisplay("FOO");
+		input.setValue(new Quantity(
+				null,
+				123,
+				"http://unitsofmeasure.org",
+				"MG/DL",
+				"MG/DL"
+		));
+
+		String inputString = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(input);
+		MethodOutcome result = myObservationDao.validate(input, null, inputString, EncodingEnum.JSON, ValidationModeEnum.CREATE, null, mySrd);
+		OperationOutcome oo = (OperationOutcome) result.getOperationOutcome();
+		assertHasErrors(oo);
+
+		assertEquals(15, ((IntegerType)oo.getIssue().get(0).getExtensionByUrl("http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line").getValue()).getValue());
+		assertEquals(4, ((IntegerType)oo.getIssue().get(0).getExtensionByUrl("http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col").getValue()).getValue());
+		assertEquals("Terminology_PassThrough_TX_Message", ((StringType)oo.getIssue().get(0).getExtensionByUrl("http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id").getValue()).getValue());
+		assertEquals("Error processing unit 'MG/DL': The unit 'DL' is unknown' at position 3 for 'http://unitsofmeasure.org#MG/DL'", oo.getIssue().get(0).getDiagnostics());
+		assertEquals(OperationOutcome.IssueType.PROCESSING, oo.getIssue().get(0).getCode());
+		assertEquals(OperationOutcome.IssueSeverity.ERROR, oo.getIssue().get(0).getSeverity());
+		assertEquals(2, oo.getIssue().get(0).getLocation().size());
+		assertEquals("Observation.value.ofType(Quantity)", oo.getIssue().get(0).getLocation().get(0).getValue());
+		assertEquals("Line 15, Col 4", oo.getIssue().get(0).getLocation().get(1).getValue());
+	}
+
+	@Test
+	void testValidateCommonCodes_Currency_ErrorMessageIsPreserved() {
+		Observation input = new Observation();
+		input.getText().setDiv(new XhtmlNode().setValue("<div>AA</div>")).setStatus(Narrative.NarrativeStatus.GENERATED);
+		input.setStatus(ObservationStatus.AMENDED);
+		input.getCode().addCoding().setSystem("http://loinc.org").setCode("1234").setDisplay("FOO");
+		input.setValue(new Quantity(
+				null,
+				123,
+				CURRENCIES_CODESYSTEM_URL,
+				"blah",
+				"blah"
+		));
+
+		String inputString = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(input);
+		MethodOutcome result = myObservationDao.validate(input, null, inputString, EncodingEnum.JSON, ValidationModeEnum.CREATE, null, mySrd);
+		OperationOutcome oo = (OperationOutcome) result.getOperationOutcome();
+		assertHasErrors(oo);
+
+		assertEquals(15, ((IntegerType)oo.getIssue().get(0).getExtensionByUrl("http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line").getValue()).getValue());
+		assertEquals(4, ((IntegerType)oo.getIssue().get(0).getExtensionByUrl("http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col").getValue()).getValue());
+		assertEquals("Terminology_PassThrough_TX_Message", ((StringType)oo.getIssue().get(0).getExtensionByUrl("http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id").getValue()).getValue());
+		assertEquals("Unknown code 'urn:iso:std:iso:4217#blah' for 'urn:iso:std:iso:4217#blah'", oo.getIssue().get(0).getDiagnostics());
+		assertEquals(OperationOutcome.IssueType.PROCESSING, oo.getIssue().get(0).getCode());
+		assertEquals(OperationOutcome.IssueSeverity.ERROR, oo.getIssue().get(0).getSeverity());
+		assertEquals(2, oo.getIssue().get(0).getLocation().size());
+		assertEquals("Observation.value.ofType(Quantity)", oo.getIssue().get(0).getLocation().get(0).getValue());
+		assertEquals("Line 15, Col 4", oo.getIssue().get(0).getLocation().get(1).getValue());
+	}
 
 	@Test
 	public void testValidateForCreate() {
