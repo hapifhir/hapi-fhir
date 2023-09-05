@@ -1,5 +1,5 @@
 ---
-type: add
+type: change
 issue: 5262
-title: "Added a new parameter `strictMatch` to $mdm-link-history operation to allow filtering the history links so that 
-only those that match **both** the `goldenResourceId` and the `sourceResourceId` sets are returned."
+title: "Previously, when both resourceId and goldenResourceId are provided to the mdm link history operation, they will
+be treated as an OR. This is now changed to AND in order to comply with REST conventions."
