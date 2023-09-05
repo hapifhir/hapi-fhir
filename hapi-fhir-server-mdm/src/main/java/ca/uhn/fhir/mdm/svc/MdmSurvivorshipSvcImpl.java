@@ -104,7 +104,8 @@ public class MdmSurvivorshipSvcImpl implements IMdmSurvivorshipService {
 				theMdmTransactionContext,
 				null // we don't want to apply survivorship - just create a new GoldenResource
 				);
-		toSave.setId(((IAnyResource) goldenResource).getId());
+
+		toSave.setId(goldenResource.getIdElement().toUnqualifiedVersionless());
 
 		sourceResources.forEach(source -> {
 			applySurvivorshipRulesToGoldenResource(source, toSave, theMdmTransactionContext);

@@ -149,6 +149,18 @@ public class MdmLinkUpdaterSvcImpl implements IMdmLinkUpdaterSvc {
 			myMdmSurvivorshipService.applySurvivorshipRulesToGoldenResource(sourceResource, goldenResource, mdmContext);
 		}
 
+		/**
+		 * We use the versionless id
+		 * because we call update on the goldenResource in 2 places:
+		 * here and below where we rebuild goldenresources if we have set
+		 * a link to NO_MATCH.
+		 *
+		 * This can be a problem when a source resource is deleted.
+		 * then {@link MdmStorageInterceptor} will update all links
+		 * connecting to any golden resource that was connected to the now deleted
+		 * source resource to NO_MATCH before deleting orphaned golden resources.
+		 */
+		goldenResource.setId(goldenResource.getIdElement().toVersionless());
 		myMdmResourceDaoSvc.upsertGoldenResource(goldenResource, mdmContext.getResourceType());
 		if (matchResult == MdmMatchResultEnum.NO_MATCH) {
 			/*
