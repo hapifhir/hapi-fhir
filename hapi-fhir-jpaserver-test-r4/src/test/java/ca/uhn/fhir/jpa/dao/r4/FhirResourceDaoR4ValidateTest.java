@@ -401,7 +401,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		assertEquals(OperationOutcome.IssueSeverity.ERROR, oo.getIssue().get(0).getSeverity());
 		assertEquals(2, oo.getIssue().get(0).getLocation().size());
 		assertEquals("Observation.value.ofType(Quantity)", oo.getIssue().get(0).getLocation().get(0).getValue());
-		assertEquals("Line 27, Col 4", oo.getIssue().get(0).getLocation().get(1).getValue());
+		assertEquals("Line[27] Col[4]", oo.getIssue().get(0).getLocation().get(1).getValue());
 
 	}
 
@@ -1658,7 +1658,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		assertEquals(OperationOutcome.IssueSeverity.ERROR, oo.getIssue().get(0).getSeverity());
 		assertEquals(2, oo.getIssue().get(0).getLocation().size());
 		assertEquals("Observation.value.ofType(Quantity)", oo.getIssue().get(0).getLocation().get(0).getValue());
-		assertEquals("Line 15, Col 4", oo.getIssue().get(0).getLocation().get(1).getValue());
+		assertEquals("Line[15] Col[4]", oo.getIssue().get(0).getLocation().get(1).getValue());
 	}
 
 	@Test
@@ -1688,7 +1688,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		assertEquals(OperationOutcome.IssueSeverity.ERROR, oo.getIssue().get(0).getSeverity());
 		assertEquals(2, oo.getIssue().get(0).getLocation().size());
 		assertEquals("Observation.value.ofType(Quantity)", oo.getIssue().get(0).getLocation().get(0).getValue());
-		assertEquals("Line 15, Col 4", oo.getIssue().get(0).getLocation().get(1).getValue());
+		assertEquals("Line[15] Col[4]", oo.getIssue().get(0).getLocation().get(1).getValue());
 	}
 
 	@Test
