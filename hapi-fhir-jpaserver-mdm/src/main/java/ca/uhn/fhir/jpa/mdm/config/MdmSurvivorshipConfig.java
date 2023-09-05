@@ -41,22 +41,12 @@ public class MdmSurvivorshipConfig {
 	@Bean
 	public IMdmSurvivorshipService mdmSurvivorshipService() {
 		return new MdmSurvivorshipSvcImpl(
-			myFhirContext,
-			goldenResourceHelper(),
-			myDaoRegistry,
-			myMdmLinkQuerySvc,
-			myIIdHelperService
-		);
+				myFhirContext, goldenResourceHelper(), myDaoRegistry, myMdmLinkQuerySvc, myIIdHelperService);
 	}
 
 	@Bean
 	public GoldenResourceHelper goldenResourceHelper() {
 		// do not make this depend on IMdmSurvivorshipService
-		return new GoldenResourceHelper(
-			myFhirContext,
-			myMdmSettings,
-			myEIDHelper,
-			myMdmPartitionHelper
-		);
+		return new GoldenResourceHelper(myFhirContext, myMdmSettings, myEIDHelper, myMdmPartitionHelper);
 	}
 }

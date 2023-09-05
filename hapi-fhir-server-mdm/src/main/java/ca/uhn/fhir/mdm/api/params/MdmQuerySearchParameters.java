@@ -31,10 +31,10 @@ import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.hl7.fhir.instance.model.api.IIdType;
 
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import javax.annotation.Nullable;
 
 import static org.hibernate.internal.util.StringHelper.isBlank;
 

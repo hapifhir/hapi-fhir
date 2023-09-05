@@ -27,11 +27,9 @@ import ca.uhn.fhir.mdm.api.IMdmLinkQuerySvc;
 import ca.uhn.fhir.mdm.api.IMdmSurvivorshipService;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.mdm.api.paging.MdmPageRequest;
-import ca.uhn.fhir.mdm.api.params.MdmHistorySearchParameters;
 import ca.uhn.fhir.mdm.api.params.MdmQuerySearchParameters;
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
 import ca.uhn.fhir.mdm.model.mdmevents.MdmLinkJson;
-import ca.uhn.fhir.mdm.model.mdmevents.MdmLinkWithRevisionJson;
 import ca.uhn.fhir.mdm.util.GoldenResourceHelper;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
@@ -41,12 +39,6 @@ import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.data.domain.Page;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 import java.util.stream.Stream;
 
 public class MdmSurvivorshipSvcImpl implements IMdmSurvivorshipService {
@@ -65,8 +57,7 @@ public class MdmSurvivorshipSvcImpl implements IMdmSurvivorshipService {
 			GoldenResourceHelper theResourceHelper,
 			DaoRegistry theDaoRegistry,
 			IMdmLinkQuerySvc theLinkQuerySvc,
-			IIdHelperService<?> theIIdHelperService
-	) {
+			IIdHelperService<?> theIIdHelperService) {
 		myFhirContext = theFhirContext;
 		myGoldenResourceHelper = theResourceHelper;
 		myDaoRegistry = theDaoRegistry;
@@ -105,16 +96,14 @@ public class MdmSurvivorshipSvcImpl implements IMdmSurvivorshipService {
 
 		// we want a list of source ids linked to this
 		// golden resource id; sorted and filtered for only MATCH results
-		Stream<IBaseResource> sourceResources = getMatchedSourceIdsByLinkUpdateDate(
-			goldenResource,
-			theMdmTransactionContext
-		);
+		Stream<IBaseResource> sourceResources =
+				getMatchedSourceIdsByLinkUpdateDate(goldenResource, theMdmTransactionContext);
 
 		IBaseResource toSave = myGoldenResourceHelper.createGoldenResourceFromMdmSourceResource(
-			(IAnyResource) goldenResource,
-			theMdmTransactionContext,
-			null // we don't want to apply survivorship - just create a new GoldenResource
-		);
+				(IAnyResource) goldenResource,
+				theMdmTransactionContext,
+				null // we don't want to apply survivorship - just create a new GoldenResource
+				);
 		toSave.setId(((IAnyResource) goldenResource).getId());
 
 		sourceResources.forEach(source -> {
@@ -129,9 +118,7 @@ public class MdmSurvivorshipSvcImpl implements IMdmSurvivorshipService {
 	}
 
 	private Stream<IBaseResource> getMatchedSourceIdsByLinkUpdateDate(
-		IBaseResource theGoldenResource,
-		MdmTransactionContext theMdmTransactionContext
-	) {
+			IBaseResource theGoldenResource, MdmTransactionContext theMdmTransactionContext) {
 		String resourceType = theGoldenResource.fhirType();
 		IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(resourceType);
 
@@ -141,21 +128,17 @@ public class MdmSurvivorshipSvcImpl implements IMdmSurvivorshipService {
 		searchParameters.setMatchResult(MdmMatchResultEnum.MATCH);
 		Page<MdmLinkJson> linksQuery = myMdmLinkQuerySvc.queryLinks(searchParameters, theMdmTransactionContext);
 
-		return linksQuery.get()
-			.map(link -> {
-				String sourceId = link.getSourceId();
+		return linksQuery.get().map(link -> {
+			String sourceId = link.getSourceId();
 
-				// +1 because of "/" in id: "ResourceType/Id"
-				IResourcePersistentId<?> pid = getResourcePID(
-					sourceId.substring(resourceType.length() + 1),
-					resourceType
-				);
+			// +1 because of "/" in id: "ResourceType/Id"
+			IResourcePersistentId<?> pid = getResourcePID(sourceId.substring(resourceType.length() + 1), resourceType);
 
-				// this might be a bit unperformant
-				// but it depends how many links there are
-				// per golden resource (unlikely to be thousands)
-				return dao.readByPid(pid);
-			});
+			// this might be a bit unperformant
+			// but it depends how many links there are
+			// per golden resource (unlikely to be thousands)
+			return dao.readByPid(pid);
+		});
 	}
 
 	private IResourcePersistentId<?> getResourcePID(String theId, String theResourceType) {
