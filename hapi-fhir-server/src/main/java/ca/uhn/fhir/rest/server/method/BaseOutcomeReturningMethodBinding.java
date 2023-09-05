@@ -80,6 +80,12 @@ abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding {
 	protected abstract String getMatchingOperation();
 
 	private int getOperationStatus(MethodOutcome response) {
+
+		// if the response status code is set (i.e. from a custom Resource provider) it should be respected
+		if (response.isResponseStatusCodeSet()) {
+			return response.getResponseStatusCode();
+		}
+
 		switch (getRestOperationType()) {
 			case CREATE:
 				validateResponseNotNullIfItShouldntBe(response);

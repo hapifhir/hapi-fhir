@@ -210,7 +210,6 @@ public class RestHookTestWithInterceptorRegisteredToStorageSettingsDstu2Test ext
 		Subscription subscription1 = createSubscription(criteria1, payload, ourListenerServerBase);
 		Subscription subscription2 = createSubscription(criteria2, payload, ourListenerServerBase);
 
-
 		runInTransaction(() -> {
 			ourLog.info("All token indexes:\n * {}", myResourceIndexedSearchParamTokenDao.findAll().stream().map(t -> t.toString()).collect(Collectors.joining("\n * ")));
 		});

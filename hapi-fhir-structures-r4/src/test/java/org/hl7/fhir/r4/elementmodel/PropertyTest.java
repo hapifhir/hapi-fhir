@@ -2,6 +2,7 @@ package org.hl7.fhir.r4.elementmodel;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
+import ca.uhn.fhir.util.ClasspathUtil;
 import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r4.hapi.ctx.HapiWorkerContext;
@@ -60,7 +61,7 @@ public class PropertyTest {
 
     @BeforeEach
     public void setUp() throws IOException {
-        final String sdString = IOUtils.toString(PropertyTest.class.getResourceAsStream("/customPatientSd.xml"), StandardCharsets.UTF_8);
+        final String sdString = ClasspathUtil.loadResource("/customPatientSd.xml");
         final IParser parser = ourCtx.newXmlParser();
         sd = parser.parseResource(StructureDefinition.class, sdString);
         workerContext = new HapiWorkerContext(ourCtx, ourCtx.getValidationSupport());
