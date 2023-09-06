@@ -79,7 +79,6 @@ public class HapiFhirRepositoryR4Test extends BaseCrR4TestServer {
 		loadBundle(MY_TEST_DATA);
 
 		var requestDetails = setupRequestDetails();
-		requestDetails.setCompleteUrl("http://localhost:44465/fhir/context/Patient?_count=20");
 		var repository = new HapiFhirRepository(myDaoRegistry, requestDetails, myRestfulServer);
 		var result = repository.search(Bundle.class, Patient.class, withCountParam(20));
 		assertEquals(20, result.getEntry().size());
