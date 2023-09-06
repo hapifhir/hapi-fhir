@@ -800,7 +800,7 @@ public class OpenApiInterceptor {
 			DataTypes.UUID.toCode());
 
 	private static boolean isPrimitive(OperationDefinitionParameterComponent parameter) {
-		return primitiveTypes.contains(parameter.getType());
+		return parameter.getType() != null && primitiveTypes.contains(parameter.getType());
 	}
 
 	private void populateOperation(
