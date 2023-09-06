@@ -8,4 +8,5 @@
         <li>Flexmark (All): 0.50.40 -&gt; 0.64.8</li>
         <li>Logback (All): 1.4.4 -&gt; 1.4.7</li>
         <li>H2 Database (JPA): 2.1.214 -&gt; 2.2.220</li>
+        <li>Spring Boot Dependencies(hapi-fhir-spring-boot): 2.7.12 -&gt; 2.7.15</li>
    </ul>"
