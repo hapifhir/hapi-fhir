@@ -39,6 +39,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  */
 public class ValidationResult {
 	public static final int ERROR_DISPLAY_LIMIT_DEFAULT = 1;
+	public static final String UNKNOWN = "(unknown)";
 	private static final String ourNewLine = System.getProperty("line.separator");
 	private final FhirContext myCtx;
 	private final boolean myIsSuccessful;
@@ -84,11 +85,11 @@ public class ValidationResult {
 
 		if (shownMsgQty < myMessages.size()) {
 			b.append("(showing first ")
-					.append(shownMsgQty)
-					.append(" messages out of ")
-					.append(myMessages.size())
-					.append(" total)")
-					.append(ourNewLine);
+				.append(shownMsgQty)
+				.append(" messages out of ")
+				.append(myMessages.size())
+				.append(" total)")
+				.append(ourNewLine);
 		}
 
 		for (int i = 0; i < shownMsgQty; i++) {
@@ -121,7 +122,7 @@ public class ValidationResult {
 	 */
 	public IBaseOperationOutcome toOperationOutcome() {
 		IBaseOperationOutcome oo = (IBaseOperationOutcome)
-				myCtx.getResourceDefinition("OperationOutcome").newInstance();
+			myCtx.getResourceDefinition("OperationOutcome").newInstance();
 		populateOperationOutcome(oo);
 		return oo;
 	}
@@ -138,28 +139,29 @@ public class ValidationResult {
 			String message = next.getMessage();
 			String messageId = next.getMessageId();
 
-			if (next.getSliceMessages() != null) {
-				/*
-				 * Occasionally the validator will return these lists of "slice messages"
-				 * which happen when validating rules associated with a specific slice in
-				 * a profile.
-				 */
-				for (String nextSliceMessage : next.getSliceMessages()) {
-					String combinedMessage = message + " - " + nextSliceMessage;
-					addIssueToOperationOutcome(
-							theOperationOutcome,
-							location,
-							locationLine,
-							locationCol,
-							issueSeverity,
-							combinedMessage,
-							messageId);
-				}
-			} else {
+			if (next.getSliceMessages() == null) {
 				addIssueToOperationOutcome(
-						theOperationOutcome, location, locationLine, locationCol, issueSeverity, message, messageId);
+					theOperationOutcome, location, locationLine, locationCol, issueSeverity, message, messageId);
+				continue;
 			}
-		}
+
+			/*
+			 * Occasionally the validator will return these lists of "slice messages"
+			 * which happen when validating rules associated with a specific slice in
+			 * a profile.
+			 */
+			for (String nextSliceMessage : next.getSliceMessages()) {
+				String combinedMessage = message + " - " + nextSliceMessage;
+				addIssueToOperationOutcome(
+					theOperationOutcome,
+					location,
+					locationLine,
+					locationCol,
+					issueSeverity,
+					combinedMessage,
+					messageId);
+			}
+		} // for
 
 		if (myMessages.isEmpty()) {
 			String message = myCtx.getLocalizer().getMessage(ValidationResult.class, "noIssuesDetected");
@@ -168,22 +170,22 @@ public class ValidationResult {
 	}
 
 	private void addIssueToOperationOutcome(
-			IBaseOperationOutcome theOperationOutcome,
-			String location,
-			Integer locationLine,
-			Integer locationCol,
-			ResultSeverityEnum issueSeverity,
-			String message,
-			String messageId) {
+		IBaseOperationOutcome theOperationOutcome,
+		String location,
+		Integer locationLine,
+		Integer locationCol,
+		ResultSeverityEnum issueSeverity,
+		String message,
+		String messageId) {
 		if (isBlank(location) && locationLine != null && locationCol != null) {
 			location = "Line[" + locationLine + "] Col[" + locationCol + "]";
 		}
 		String severity = issueSeverity != null ? issueSeverity.getCode() : null;
 		IBase issue = OperationOutcomeUtil.addIssueWithMessageId(
-				myCtx, theOperationOutcome, severity, message, messageId, location, Constants.OO_INFOSTATUS_PROCESSING);
+			myCtx, theOperationOutcome, severity, message, messageId, location, Constants.OO_INFOSTATUS_PROCESSING);
 
 		if (locationLine != null || locationCol != null) {
-			String unknown = "(unknown)";
+			String unknown = UNKNOWN;
 			String line = unknown;
 			if (locationLine != null && locationLine != -1) {
 				line = locationLine.toString();
@@ -208,7 +210,7 @@ public class ValidationResult {
 	@Override
 	public String toString() {
 		return "ValidationResult{" + "messageCount=" + myMessages.size() + ", isSuccessful=" + myIsSuccessful
-				+ ", description='" + toDescription() + '\'' + '}';
+			+ ", description='" + toDescription() + '\'' + '}';
 	}
 
 	/**

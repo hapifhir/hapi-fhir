@@ -303,14 +303,14 @@ public class OperationOutcomeUtil {
 		}
 	}
 
-	public static void addIssueColExtensionToIssue(FhirContext theCtx, IBase theIssue, String theLine) {
+	public static void addIssueColExtensionToIssue(FhirContext theCtx, IBase theIssue, String theColumn) {
 		if (theCtx.getVersion().getVersion() != FhirVersionEnum.DSTU2) {
 			ExtensionUtil.setExtension(
 					theCtx,
 					theIssue,
 					"http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col",
 					"integer",
-					theLine);
+					theColumn);
 		}
 	}
 
