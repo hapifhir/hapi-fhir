@@ -7,8 +7,6 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.BasePagingProvider;
-import ca.uhn.fhir.rest.server.IPagingProvider;
-import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.util.BundleUtil;
 import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;

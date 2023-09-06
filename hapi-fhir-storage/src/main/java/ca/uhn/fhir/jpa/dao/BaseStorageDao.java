@@ -59,6 +59,7 @@ import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.rest.server.util.ResourceSearchParams;
 import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.FhirTerser;
+import ca.uhn.fhir.util.IMetaTagSorter;
 import ca.uhn.fhir.util.OperationOutcomeUtil;
 import ca.uhn.fhir.util.ResourceReferenceInfo;
 import ca.uhn.fhir.util.StopWatch;
@@ -115,9 +116,17 @@ public abstract class BaseStorageDao {
 	@Autowired
 	protected JpaStorageSettings myStorageSettings;
 
+	@Autowired
+	protected IMetaTagSorter myMetaTagSorter;
+
 	@VisibleForTesting
 	public void setSearchParamRegistry(ISearchParamRegistry theSearchParamRegistry) {
 		mySearchParamRegistry = theSearchParamRegistry;
+	}
+
+	@VisibleForTesting
+	public void setMyMetaTagSorter(IMetaTagSorter theMetaTagSorter) {
+		myMetaTagSorter = theMetaTagSorter;
 	}
 
 	/**
@@ -153,6 +162,8 @@ public abstract class BaseStorageDao {
 		}
 
 		performAutoVersioning(theResource, thePerformIndexing);
+
+		myMetaTagSorter.sort(theResource.getMeta());
 	}
 
 	/**

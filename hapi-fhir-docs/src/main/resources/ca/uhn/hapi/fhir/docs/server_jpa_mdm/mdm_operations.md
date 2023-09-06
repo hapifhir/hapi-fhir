@@ -839,7 +839,8 @@ your ruleset. It permits the user to reset the state of their MDM system without
 and Golden Resources.
 
 After the operation is complete, all targeted MDM links are removed from the system, and their related Golden Resources
-are deleted and expunged from the server.
+are deleted and expunged from the server. Additionally, the link history for targeted links and their related golden 
+resources will also be expunged.
 
 This operation takes two optional Parameters.
 
