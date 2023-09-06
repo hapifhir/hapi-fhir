@@ -309,10 +309,13 @@ public class CdsCrServiceR4 implements ICdsCrService {
 
 	private IBaseResource resolveResource(Reference theReference) {
 		String reference = theReference.getReference();
-		String id = reference.contains("/") ? reference.split("/")[1] : reference;
+		String[] split = reference.split("/");
+		String id = reference.contains("/") ? split[1] : reference;
+		String resourceType = reference.contains("/") ? split[0] : theReference.getType();
 		return myResponseBundle.getEntry().stream()
 				.filter(entry ->
-						entry.hasResource() && entry.getResource().getIdPart().equals(id))
+						entry.hasResource() && entry.getResource().getResourceType().toString().equals(resourceType)
+							&& entry.getResource().getIdPart().equals(id))
 				.map(entry -> entry.getResource())
 				.collect(Collectors.toList())
 				.get(0);
