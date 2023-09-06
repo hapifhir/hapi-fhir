@@ -85,11 +85,11 @@ public class ValidationResult {
 
 		if (shownMsgQty < myMessages.size()) {
 			b.append("(showing first ")
-				.append(shownMsgQty)
-				.append(" messages out of ")
-				.append(myMessages.size())
-				.append(" total)")
-				.append(ourNewLine);
+					.append(shownMsgQty)
+					.append(" messages out of ")
+					.append(myMessages.size())
+					.append(" total)")
+					.append(ourNewLine);
 		}
 
 		for (int i = 0; i < shownMsgQty; i++) {
@@ -122,7 +122,7 @@ public class ValidationResult {
 	 */
 	public IBaseOperationOutcome toOperationOutcome() {
 		IBaseOperationOutcome oo = (IBaseOperationOutcome)
-			myCtx.getResourceDefinition("OperationOutcome").newInstance();
+				myCtx.getResourceDefinition("OperationOutcome").newInstance();
 		populateOperationOutcome(oo);
 		return oo;
 	}
@@ -141,7 +141,7 @@ public class ValidationResult {
 
 			if (next.getSliceMessages() == null) {
 				addIssueToOperationOutcome(
-					theOperationOutcome, location, locationLine, locationCol, issueSeverity, message, messageId);
+						theOperationOutcome, location, locationLine, locationCol, issueSeverity, message, messageId);
 				continue;
 			}
 
@@ -153,13 +153,13 @@ public class ValidationResult {
 			for (String nextSliceMessage : next.getSliceMessages()) {
 				String combinedMessage = message + " - " + nextSliceMessage;
 				addIssueToOperationOutcome(
-					theOperationOutcome,
-					location,
-					locationLine,
-					locationCol,
-					issueSeverity,
-					combinedMessage,
-					messageId);
+						theOperationOutcome,
+						location,
+						locationLine,
+						locationCol,
+						issueSeverity,
+						combinedMessage,
+						messageId);
 			}
 		} // for
 
@@ -170,19 +170,19 @@ public class ValidationResult {
 	}
 
 	private void addIssueToOperationOutcome(
-		IBaseOperationOutcome theOperationOutcome,
-		String location,
-		Integer locationLine,
-		Integer locationCol,
-		ResultSeverityEnum issueSeverity,
-		String message,
-		String messageId) {
+			IBaseOperationOutcome theOperationOutcome,
+			String location,
+			Integer locationLine,
+			Integer locationCol,
+			ResultSeverityEnum issueSeverity,
+			String message,
+			String messageId) {
 		if (isBlank(location) && locationLine != null && locationCol != null) {
 			location = "Line[" + locationLine + "] Col[" + locationCol + "]";
 		}
 		String severity = issueSeverity != null ? issueSeverity.getCode() : null;
 		IBase issue = OperationOutcomeUtil.addIssueWithMessageId(
-			myCtx, theOperationOutcome, severity, message, messageId, location, Constants.OO_INFOSTATUS_PROCESSING);
+				myCtx, theOperationOutcome, severity, message, messageId, location, Constants.OO_INFOSTATUS_PROCESSING);
 
 		if (locationLine != null || locationCol != null) {
 			String unknown = UNKNOWN;
@@ -210,7 +210,7 @@ public class ValidationResult {
 	@Override
 	public String toString() {
 		return "ValidationResult{" + "messageCount=" + myMessages.size() + ", isSuccessful=" + myIsSuccessful
-			+ ", description='" + toDescription() + '\'' + '}';
+				+ ", description='" + toDescription() + '\'' + '}';
 	}
 
 	/**

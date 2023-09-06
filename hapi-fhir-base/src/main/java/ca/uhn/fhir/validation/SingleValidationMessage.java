@@ -61,6 +61,7 @@ public class SingleValidationMessage {
 		b.append(myLocationString, other.myLocationString);
 		b.append(myMessage, other.myMessage);
 		b.append(mySeverity, other.mySeverity);
+		b.append(mySliceMessages, other.mySliceMessages);
 		return b.isEquals();
 	}
 
@@ -96,6 +97,7 @@ public class SingleValidationMessage {
 		b.append(myLocationString);
 		b.append(myMessage);
 		b.append(mySeverity);
+		b.append(mySliceMessages);
 		return b.toHashCode();
 	}
 
@@ -139,6 +141,9 @@ public class SingleValidationMessage {
 		}
 		if (mySeverity != null) {
 			b.append("severity", mySeverity.getCode());
+		}
+		if (mySliceMessages != null) {
+			b.append("sliceMessages", mySliceMessages);
 		}
 		return b.toString();
 	}
