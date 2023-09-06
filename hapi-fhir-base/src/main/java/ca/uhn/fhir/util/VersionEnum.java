@@ -128,3 +128,4 @@ public enum VersionEnum {
 		return values[values.length - 1];
 	}
 }
+	V6_8_3,
