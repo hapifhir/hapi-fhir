@@ -309,59 +309,6 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testValidateInPlace() {
-		String input = """
-				{
-				  "resourceType": "Observation",
-					"text": {
-						"status": "generated",
-						"div": "<div xmlns=\\"http://www.w3.org/1999/xhtml\\">hello</div>"
-					},
-				  "status": "final",
-				  "category": [ {
-				    "coding": [ {
-				      "system": "http://terminology.hl7.org/CodeSystem/observation-category",
-				      "code": "laboratory",
-				      "display": "Laboratory"
-				    } ]
-				  } ],
-				  "code": {
-				    "coding": [ {
-				      "system": "http://loinc.org222",
-				      "code": "2085-9",
-				      "display": "High Density Lipoprotein Cholesterol"
-				    } ],
-				    "text": "High Density Lipoprotein Cholesterol"
-				  },
-				  "subject": {
-				    "reference": "Patient/A9656908"
-				  },
-				  "performer": [{
-				    "reference": "Patient/A9656908"
-				  }],
-				  "encounter": {
-				    "reference": "Encounter/A9657805"
-				  },
-				  "effectiveDateTime": "2017-09-23T04:10:00-04:00",
-				  "issued": "2017-09-23T04:10:00.841-04:00",
-				  "valueQuantity": {
-				    "value": 65.17891630401957,
-				    "unit": "MG/DL",
-				    "system": "http://unitsofmeasure.org",
-				    "code": "MG/DL"
-				  }
-				}""";
-		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(true);
-		Observation inputObs = myFhirContext.newJsonParser().parseResource(Observation.class, input);
-		IIdType id = myObservationDao.create(inputObs, mySrd).getId();
-
-		MethodOutcome validateOutcome = myObservationDao.validate(null, id, null, null, null, null, mySrd);
-		ourLog.info("Validation outcome:\n{}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(validateOutcome.getOperationOutcome()));
-
-	}
-
-
-	@Test
 	public void testValidateCodeInNonEnumeratedValueSetWithUnknownCodeSystem_Error() {
 		myUnknownCodeSystemWarningValidationSupport.setNonExistentCodeSystemSeverity(IValidationSupport.IssueSeverity.ERROR);
 
