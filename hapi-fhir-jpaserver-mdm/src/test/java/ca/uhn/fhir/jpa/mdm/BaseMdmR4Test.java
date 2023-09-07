@@ -674,4 +674,12 @@ abstract public class BaseMdmR4Test extends BaseJpaR4Test {
 		theResource.setId(daoMethodOutcome.getId());
 		return theResource;
 	}
+
+	@Nonnull
+	protected MdmTransactionContext buildUpdateResourceMdmTransactionContext() {
+		MdmTransactionContext retval = new MdmTransactionContext();
+		retval.setResourceType("Patient");
+		retval.setRestOperation(MdmTransactionContext.OperationType.UPDATE_RESOURCE);
+		return retval;
+	}
 }
