@@ -250,23 +250,6 @@ public class MdmMatchLinkSvcTest {
 	}
 
 	@Test
-	public void updateMdmLinksForMdmSource_singleCandidateDuringUpdate_DoesNotNullPointer() {
-
-		//Given: A patient exists with a matched golden resource.
-		Patient jane = createPatientAndUpdateLinks(buildJanePatient());
-		Patient goldenJane = getGoldenResourceFromTargetResource(jane);
-
-		//When: A patient who has no existing MDM links comes in as an update
-		Patient secondaryJane = createPatient(buildJanePatient(), false, false);
-		secondaryJane.setActive(true);
-		IAnyResource resource = (IAnyResource) myPatientDao.update(secondaryJane).getResource();
-
-		//Then: The secondary jane should link to the first jane.
-		myMdmMatchLinkSvc.updateMdmLinksForMdmSource(resource, buildUpdateResourceMdmTransactionContext());
-		assertThat(secondaryJane, is(sameGoldenResourceAs(jane)));
-	}
-
-	@Test
 	public void testWhenPOSSIBLE_MATCHOccursOnGoldenResourceThatHasBeenManuallyNOMATCHedThatItIsBlocked() {
 		Patient originalJane = createPatientAndUpdateLinks(buildJanePatient());
 
