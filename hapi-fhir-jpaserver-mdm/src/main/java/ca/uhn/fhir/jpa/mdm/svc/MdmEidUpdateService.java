@@ -82,6 +82,7 @@ public class MdmEidUpdateService {
 		myMdmSurvivorshipService.applySurvivorshipRulesToGoldenResource(
 				theTargetResource, updateContext.getMatchedGoldenResource(), theMdmTransactionContext);
 
+		IAnyResource theOldGoldenResource = updateContext.getExistingGoldenResource();
 		if (updateContext.isRemainsMatchedToSameGoldenResource()) {
 			// Copy over any new external EIDs which don't already exist.
 			if (!updateContext.isIncomingResourceHasAnEid() || updateContext.isHasEidsInCommon()) {
@@ -96,29 +97,27 @@ public class MdmEidUpdateService {
 				handleNoEidsInCommon(
 						theTargetResource, theMatchedGoldenResourceCandidate, theMdmTransactionContext, updateContext);
 			}
+		} else 	if (theOldGoldenResource == null) {
+			//If we are in an update, and there is no existing golden resource, it is likely due to a clear operation, and we need to start from scratch.
+			myMdmSurvivorshipService.applySurvivorshipRulesToGoldenResource(theTargetResource, updateContext.getMatchedGoldenResource(), theMdmTransactionContext);
+			myMdmResourceDaoSvc.upsertGoldenResource(updateContext.getMatchedGoldenResource(), theMdmTransactionContext.getResourceType());
+			myMdmLinkSvc.updateLink(updateContext.getMatchedGoldenResource(), theTargetResource, theMatchedGoldenResourceCandidate.getMatchResult(), MdmLinkSourceEnum.AUTO, theMdmTransactionContext);
 		} else {
 			// This is a new linking scenario. we have to break the existing link and link to the new Golden Resource.
 			// For now, we create duplicate.
 			// updated patient has an EID that matches to a new candidate. Link them, and set the Golden Resources
 			// possible duplicates
-			IAnyResource theOldGoldenResource = updateContext.getExistingGoldenResource();
-			if (theOldGoldenResource == null) {
-				throw new InternalErrorException(
-						Msg.code(2362)
-								+ "Old golden resource was null while updating MDM links with new golden resource. It is likely that a $mdm-clear was performed without a $mdm-submit. Link will not be updated.");
-			} else {
-				linkToNewGoldenResourceAndFlagAsDuplicate(
-						theTargetResource,
-						theMatchedGoldenResourceCandidate.getMatchResult(),
-						theOldGoldenResource,
-						updateContext.getMatchedGoldenResource(),
-						theMdmTransactionContext);
+			linkToNewGoldenResourceAndFlagAsDuplicate(
+					theTargetResource,
+					theMatchedGoldenResourceCandidate.getMatchResult(),
+					theOldGoldenResource,
+					updateContext.getMatchedGoldenResource(),
+					theMdmTransactionContext);
 
-				myMdmSurvivorshipService.applySurvivorshipRulesToGoldenResource(
-						theTargetResource, updateContext.getMatchedGoldenResource(), theMdmTransactionContext);
-				myMdmResourceDaoSvc.upsertGoldenResource(
-						updateContext.getMatchedGoldenResource(), theMdmTransactionContext.getResourceType());
-			}
+			myMdmSurvivorshipService.applySurvivorshipRulesToGoldenResource(
+					theTargetResource, updateContext.getMatchedGoldenResource(), theMdmTransactionContext);
+			myMdmResourceDaoSvc.upsertGoldenResource(
+					updateContext.getMatchedGoldenResource(), theMdmTransactionContext.getResourceType());
 		}
 	}
 
