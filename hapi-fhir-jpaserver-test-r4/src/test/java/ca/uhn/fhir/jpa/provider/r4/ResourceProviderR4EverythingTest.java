@@ -15,26 +15,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.Composition;
-import org.hl7.fhir.r4.model.Condition;
-import org.hl7.fhir.r4.model.Device;
-import org.hl7.fhir.r4.model.Encounter;
-import org.hl7.fhir.r4.model.IdType;
-import org.hl7.fhir.r4.model.InstantType;
-import org.hl7.fhir.r4.model.IntegerType;
-import org.hl7.fhir.r4.model.Location;
-import org.hl7.fhir.r4.model.Medication;
-import org.hl7.fhir.r4.model.MedicationRequest;
-import org.hl7.fhir.r4.model.Observation;
-import org.hl7.fhir.r4.model.Organization;
-import org.hl7.fhir.r4.model.Parameters;
-import org.hl7.fhir.r4.model.Patient;
-import org.hl7.fhir.r4.model.Practitioner;
-import org.hl7.fhir.r4.model.Provenance;
-import org.hl7.fhir.r4.model.Reference;
-import org.hl7.fhir.r4.model.StringType;
-import org.hl7.fhir.r4.model.UnsignedIntType;
+import org.hl7.fhir.r4.model.*;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
@@ -977,13 +958,7 @@ public class ResourceProviderR4EverythingTest extends BaseResourceProviderR4Test
 
 		myFhirContext.getRestfulClientFactory().setSocketTimeout(300 * 1000);
 
-		Bundle response = myClient
-			.operation()
-			.onInstance(id)
-			.named("everything")
-			.withNoParameters(Parameters.class)
-			.returnResourceType(Bundle.class)
-			.execute();
+		Bundle response = executeEverythingOperationOnInstance(id);
 
 		assertEquals(1, response.getEntry().size());
 	}
@@ -1126,13 +1101,7 @@ public class ResourceProviderR4EverythingTest extends BaseResourceProviderR4Test
 		prov.addTarget().setReference(badPid);
 		String provid = myProvenanceDao.create(prov, mySrd).getId().toUnqualifiedVersionless().getValue();
 
-		Bundle response = myClient
-			.operation()
-			.onInstance(new IdType(goodPid))
-			.named("everything")
-			.withNoParameters(Parameters.class)
-			.returnResourceType(Bundle.class)
-			.execute();
+		Bundle response = executeEverythingOperationOnInstance(new IdType(goodPid));
 
 		List<String> ids = toUnqualifiedVersionlessIdValues(response);
 		// We should not pick up other resources via the provenance
@@ -1208,17 +1177,67 @@ public class ResourceProviderR4EverythingTest extends BaseResourceProviderR4Test
 		notDesiredProvenance.addTarget().setReference(compositionId);
 		final String notDesiredProvenanceId = myProvenanceDao.create(notDesiredProvenance, mySrd).getId().toUnqualifiedVersionless().getValue();
 
-		final Bundle response = myClient
-			.operation()
-			.onInstance(new IdType(desiredPid))
-			.named("everything")
-			.withNoParameters(Parameters.class)
-			.returnResourceType(Bundle.class)
-			.execute();
+		final Bundle response = executeEverythingOperationOnInstance(new IdType(desiredPid));
 
 		final List<String> actualResourceIds = toUnqualifiedVersionlessIdValues(response);
 		// We should not pick up other resources via the notDesiredProvenance
 		assertThat(actualResourceIds, containsInAnyOrder(desiredPid, desiredObservationId, desiredProvenanceId));
+	}
+
+	@Test
+	public void testEverything_withPatientLinkedByList_returnOnlyDesiredResources() {
+		// setup
+		IIdType desiredPid = createPatient(withActiveTrue());
+		IIdType desiredObservationId = createObservationForPatient(desiredPid, "1");
+
+		IIdType notDesiredPid = createPatient(withActiveTrue());
+		IIdType notDesiredObservationId = createObservationForPatient(notDesiredPid, "1");
+
+		ListResource list = new ListResource();
+		Arrays.asList(desiredPid, desiredObservationId, notDesiredPid, notDesiredObservationId)
+			.forEach(resourceIdType -> list.addEntry().getItem().setReferenceElement(resourceIdType));
+
+		IIdType listId = myListDao.create(list).getId().toUnqualifiedVersionless();
+
+		// execute
+		Bundle response = executeEverythingOperationOnInstance(desiredPid);
+
+		List<IIdType> actualResourceIds = toUnqualifiedVersionlessIds(response);
+		// verify - we should not pick up other resources linked by List
+		assertThat(actualResourceIds, containsInAnyOrder(desiredPid, desiredObservationId, listId));
+	}
+
+	@Test
+	public void testEverything_withPatientLinkedByGroup_returnOnlyDesiredResources() {
+		// setup
+		IIdType desiredPractitionerId = createPractitioner(withActiveTrue());
+		IIdType desiredPid = createPatient(withActiveTrue(), withReference("generalPractitioner", desiredPractitionerId));
+
+		IIdType notDesiredPractitionerId = createPractitioner(withActiveTrue());
+		IIdType notDesiredPid = createPatient(withActiveTrue(), withReference("generalPractitioner", notDesiredPractitionerId));
+
+		Group group = new Group();
+		Arrays.asList(desiredPid, desiredPractitionerId, notDesiredPid, notDesiredPractitionerId)
+			.forEach(resourceIdType -> group.addMember().getEntity().setReferenceElement(resourceIdType));
+
+		IIdType groupId = myGroupDao.create(group).getId().toUnqualifiedVersionless();
+
+		// execute
+		Bundle response = executeEverythingOperationOnInstance(desiredPid);
+
+		List<IIdType> actualResourceIds = toUnqualifiedVersionlessIds(response);
+		// verify - we should not pick up other resources linked by Group
+		assertThat(actualResourceIds, containsInAnyOrder(desiredPid, desiredPractitionerId, groupId));
+	}
+
+	private Bundle executeEverythingOperationOnInstance(IIdType theInstanceIdType) {
+		return myClient
+			.operation()
+			.onInstance(theInstanceIdType)
+			.named("everything")
+			.withNoParameters(Parameters.class)
+			.returnResourceType(Bundle.class)
+			.execute();
 	}
 
 	private IIdType createOrganization(String methodName, String s) {

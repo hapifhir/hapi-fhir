@@ -144,6 +144,7 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.Group;
 import org.hl7.fhir.r4.model.Immunization;
 import org.hl7.fhir.r4.model.ImmunizationRecommendation;
+import org.hl7.fhir.r4.model.ListResource;
 import org.hl7.fhir.r4.model.Location;
 import org.hl7.fhir.r4.model.Media;
 import org.hl7.fhir.r4.model.Medication;
@@ -338,6 +339,9 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 	@Autowired
 	@Qualifier("myGroupDaoR4")
 	protected IFhirResourceDao<Group> myGroupDao;
+	@Autowired
+	@Qualifier("myListDaoR4")
+	protected IFhirResourceDao<ListResource> myListDao;
 	@Autowired
 	@Qualifier("myMolecularSequenceDaoR4")
 	protected IFhirResourceDao<MolecularSequence> myMolecularSequenceDao;
