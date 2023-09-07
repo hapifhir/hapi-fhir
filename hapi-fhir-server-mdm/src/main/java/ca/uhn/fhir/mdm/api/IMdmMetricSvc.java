@@ -2,9 +2,7 @@ package ca.uhn.fhir.mdm.api;
 
 import ca.uhn.fhir.mdm.api.parameters.MdmGenerateMetricParameters;
 import ca.uhn.fhir.mdm.model.MdmMetrics;
-import org.springframework.transaction.annotation.Transactional;
 
-@Transactional
 public interface IMdmMetricSvc {
 
 	/**
@@ -12,4 +10,6 @@ public interface IMdmMetricSvc {
 	 * This implementation is persistence dependent.
 	 */
 	MdmMetrics generateMetrics(MdmGenerateMetricParameters theParameters);
+
+	void metrics2();
 }

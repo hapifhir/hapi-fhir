@@ -44,7 +44,7 @@ public class MdmGenerateMetricParameters {
 	}
 
 	public List<MdmLinkSourceEnum> getLinkSourceFilters() {
-		if (myMatchResultFilters == null) {
+		if (myLinkSourceFilters == null) {
 			myLinkSourceFilters = new ArrayList<>();
 		}
 		return myLinkSourceFilters;
