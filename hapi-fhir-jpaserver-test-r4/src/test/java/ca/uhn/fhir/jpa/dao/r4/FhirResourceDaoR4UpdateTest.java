@@ -51,6 +51,7 @@ import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.endsWith;
 import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.matchesPattern;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -168,6 +169,28 @@ public class FhirResourceDaoR4UpdateTest extends BaseJpaR4Test {
 	}
 
 	@Test
+	public void testUpdateConditionalResourceMustMatchCondition() {
+		myStorageSettings.setPreventInvalidatingConditionalMatchCriteria(true); //Note this should always default to false to preserve existing behaviour
+
+		myCaptureQueriesListener.clear();
+		Patient p = new Patient();
+		p.setId("existing-patient");
+		p.addIdentifier().setSystem("http://kookaburra.text/id").setValue("kookaburra1");
+		myPatientDao.update(p);
+
+
+		Patient p2 = new Patient();
+		p2.addIdentifier().setSystem("http://kookaburra.text/id").setValue("kookaburra2");
+		try {
+			myPatientDao.update(p2, "Patient?identifier=http://kookaburra.text/id|kookaburra1");
+		} catch (InvalidRequestException e) {
+			assertThat(e.getMessage(), is(containsString("TODO IMPLEMENTER")));
+		}
+
+		myStorageSettings.setPreventInvalidatingConditionalMatchCriteria(false);
+	}
+
+	@Test
 	public void testUpdateConditionalOnEmailParameterWithPlusSymbol() {
 		IBundleProvider outcome;
 
@@ -190,7 +213,6 @@ public class FhirResourceDaoR4UpdateTest extends BaseJpaR4Test {
 
 		outcome = myPatientDao.search(SearchParameterMap.newSynchronous());
 		assertEquals(1, outcome.sizeOrThrowNpe());
-
 	}
 
 	@Test

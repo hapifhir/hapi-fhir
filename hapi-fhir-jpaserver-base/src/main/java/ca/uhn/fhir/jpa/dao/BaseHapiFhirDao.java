@@ -1049,6 +1049,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		// Make sure that the match URL was actually appropriate for the supplied resource
 		InMemoryMatchResult outcome =
 				myInMemoryResourceMatcher.match(theIfNoneExist, theResource, theParams, theRequestDetails);
+
 		if (outcome.supported() && !outcome.matched()) {
 			throw new InvalidRequestException(
 					Msg.code(929)
@@ -1185,6 +1186,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 					// to match a resource and then update it in a way that it no longer
 					// matches. We could certainly make this configurable though in the
 					// future.
+					//TODO Implementer: read the above comment, and implement the toggle.
 					if (entity.getVersion() <= 1L && entity.getCreatedByMatchUrl() != null && thePerformIndexing) {
 						verifyMatchUrlForConditionalCreate(
 								theResource, entity.getCreatedByMatchUrl(), newParams, theRequest);

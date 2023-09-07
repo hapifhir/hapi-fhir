@@ -2212,6 +2212,8 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		IIdType resourceId;
 		RestOperationTypeEnum update = RestOperationTypeEnum.UPDATE;
 		if (isNotBlank(theMatchUrl)) {
+			//Validate that the supplied resource matches the conditional. If so: blah blah, otherwise: BAD REQUEST
+			//TODO Implementer (TODO GGG)
 			Set<JpaPid> match = myMatchResourceUrlService.processMatchUrl(
 					theMatchUrl, myResourceType, theTransactionDetails, theRequest, theResource);
 			if (match.size() > 1) {
