@@ -192,10 +192,26 @@ public class ResourceProviderR4SearchContainedTest extends BaseResourceProviderR
 	}
 
 	/**
-	 * Unit test with multiple cases to illustrate expected behaviour of `_contained` and `_containedType` without chaining
+	 * Unit test with multiple cases to illustrate expected behaviour of <code>_contained</code> and <code>_containedType</code> without chaining
 	 * <p>
-	 * Although this test is in R4, the R5 specification for these parameters are much clearer:
+	 * Although this test is in R4, the R5 specification for these parameters is much clearer:
 	 * 	-	<a href="https://www.hl7.org/fhir/search.html#contained">_contained & _containedType</a>
+	 * <p>
+	 * It seems as though the initial implementation conflated the use of searching contained resources via chaining with
+	 * the use of the <code>_contained</code> search parameter. All the existing tests use <code>_contained</code> with chaining but neglect to
+	 * search by the contained resource type (i.e. they search by the container resource type). This test corrects that
+	 * with several cases.
+	 * <p>
+	 * <ol>
+	 *     <li>Case 1	-	Passes	-	Search for discrete Patient with <code>_contained=false</code></li>
+	 *     <li>Case 2	-	Passes	-	Search for discrete Patient with <code>_contained</code> default behaviour (<code>false</code>)</li>
+	 *     <li>Case 3	-	Fails	-	Search for contained Patient with <code>_contained=true</code></li>
+	 *     <li>Case 4	-	Fails	-	Search for contained Patient with <code>_contained=true</code> and <code>_containedType</code> default behaviour (<code>container</code>)</li>
+	 *     <li>Case 5	-	Fails	-	Search for contained Patient with <code>_contained=true</code> and <code>_containedType=contained</code></li>
+	 * </ol>
+	 * <p>
+	 * Note that Case 5 is expected to fail since <code>_containedType</code> is not yet implemented; this is guidance for future
+	 * implementation.
 	 *
 	 * @throws IOException
 	 */
@@ -345,10 +361,26 @@ public class ResourceProviderR4SearchContainedTest extends BaseResourceProviderR
 	}
 
 	/**
-	 * Unit test with multiple cases to illustrate expected behaviour of `_contained` and `_containedType` with chaining
+	 * Unit test with multiple cases to illustrate expected behaviour of <code>_contained</code> and <code>_containedType</code> with chaining
 	 * <p>
-	 * Although this test is in R4, the R5 specification for these parameters are much clearer:
+	 * Although this test is in R4, the R5 specification for these parameters is much clearer:
 	 * 	-	<a href="https://www.hl7.org/fhir/search.html#contained">_contained & _containedType</a>
+	 * <p>
+	 * It seems as though the initial implementation conflated the use of searching contained resources via chaining with
+	 * the use of the <code>_contained</code> search parameter. All the existing tests use <code>_contained</code> with chaining but neglect to
+	 * search by the contained resource type (i.e. they search by the container resource type). This test corrects that
+	 * with several cases.
+	 * <p>
+	 * <ol>
+	 *     <li>Case 1	-	Passes	-	Search for discrete Observation with chain and <code>_contained=false</code></li>
+	 *     <li>Case 2	-	Passes	-	Search for discrete Observation with chain and <code>_contained</code> default behaviour (<code>false</code>)</li>
+	 *     <li>Case 3	-	Fails	-	Search for contained Observation with chain and <code>_contained=true</code></li>
+	 *     <li>Case 4	-	Fails	-	Search for contained Observation with chain, <code>_contained=true</code>, and <code>_containedType</code> default behaviour (<code>container</code>)</li>
+	 *     <li>Case 5	-	Fails	-	Search for contained Observation with chain, <code>_contained=true</code>, and <code>_containedType=contained</code></li>
+	 * </ol>
+	 * <p>
+	 * Note that Case 5 is expected to fail since <code>_containedType</code> is not yet implemented; this is guidance for future
+	 * implementation.
 	 *
 	 * @throws IOException
 	 */
