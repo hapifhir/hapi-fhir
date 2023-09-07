@@ -19,7 +19,6 @@
  */
 package ca.uhn.fhir.jpa.mdm.svc;
 
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.mdm.dao.MdmLinkDaoSvc;
 import ca.uhn.fhir.jpa.mdm.svc.candidate.MatchedGoldenResourceCandidate;
 import ca.uhn.fhir.jpa.mdm.svc.candidate.MdmGoldenResourceFindingSvc;
@@ -35,7 +34,6 @@ import ca.uhn.fhir.mdm.model.MdmTransactionContext;
 import ca.uhn.fhir.mdm.util.EIDHelper;
 import ca.uhn.fhir.mdm.util.GoldenResourceHelper;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -97,11 +95,19 @@ public class MdmEidUpdateService {
 				handleNoEidsInCommon(
 						theTargetResource, theMatchedGoldenResourceCandidate, theMdmTransactionContext, updateContext);
 			}
-		} else 	if (theOldGoldenResource == null) {
-			//If we are in an update, and there is no existing golden resource, it is likely due to a clear operation, and we need to start from scratch.
-			myMdmSurvivorshipService.applySurvivorshipRulesToGoldenResource(theTargetResource, updateContext.getMatchedGoldenResource(), theMdmTransactionContext);
-			myMdmResourceDaoSvc.upsertGoldenResource(updateContext.getMatchedGoldenResource(), theMdmTransactionContext.getResourceType());
-			myMdmLinkSvc.updateLink(updateContext.getMatchedGoldenResource(), theTargetResource, theMatchedGoldenResourceCandidate.getMatchResult(), MdmLinkSourceEnum.AUTO, theMdmTransactionContext);
+		} else if (theOldGoldenResource == null) {
+			// If we are in an update, and there is no existing golden resource, it is likely due to a clear operation,
+			// and we need to start from scratch.
+			myMdmSurvivorshipService.applySurvivorshipRulesToGoldenResource(
+					theTargetResource, updateContext.getMatchedGoldenResource(), theMdmTransactionContext);
+			myMdmResourceDaoSvc.upsertGoldenResource(
+					updateContext.getMatchedGoldenResource(), theMdmTransactionContext.getResourceType());
+			myMdmLinkSvc.updateLink(
+					updateContext.getMatchedGoldenResource(),
+					theTargetResource,
+					theMatchedGoldenResourceCandidate.getMatchResult(),
+					MdmLinkSourceEnum.AUTO,
+					theMdmTransactionContext);
 		} else {
 			// This is a new linking scenario. we have to break the existing link and link to the new Golden Resource.
 			// For now, we create duplicate.
