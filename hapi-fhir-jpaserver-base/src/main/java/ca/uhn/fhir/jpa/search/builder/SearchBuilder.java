@@ -1381,6 +1381,8 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 							&& myParams.getEverythingMode() == SearchParameterMap.EverythingModeEnum.PATIENT_INSTANCE) {
 						sqlBuilder.append(" AND r.myTargetResourceType != 'Patient'");
 						sqlBuilder.append(" AND r.mySourceResourceType != 'Provenance'");
+						sqlBuilder.append(" AND r.mySourceResourceType != 'List'");
+						sqlBuilder.append(" AND r.mySourceResourceType != 'Group'");
 					}
 					if (hasDesiredResourceTypes) {
 						sqlBuilder.append(" AND r.myTargetResourceType IN (:desired_target_resource_types)");

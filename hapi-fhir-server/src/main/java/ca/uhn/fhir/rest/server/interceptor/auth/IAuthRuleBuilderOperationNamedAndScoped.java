@@ -27,6 +27,11 @@ public interface IAuthRuleBuilderOperationNamedAndScoped {
 	IAuthRuleBuilderRuleOpClassifierFinished andAllowAllResponses();
 
 	/**
+	 * Responses for this operation will not be checked and access to all resources is allowed
+	 */
+	IAuthRuleBuilderRuleOpClassifierFinished andAllowAllResponsesWithAllResourcesAccess();
+
+	/**
 	 * Responses for this operation must be authorized by other rules. For example, if this
 	 * rule is authorizing the Patient $everything operation, there must be a separate
 	 * rule (or rules) that actually authorize the user to read the

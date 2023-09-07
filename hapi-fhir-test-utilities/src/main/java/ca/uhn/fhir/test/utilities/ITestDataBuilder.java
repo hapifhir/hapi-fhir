@@ -231,6 +231,10 @@ public interface ITestDataBuilder {
 		return createResource("Organization", theModifiers);
 	}
 
+	default IIdType createPractitioner(ICreationArgument... theModifiers) {
+		return createResource("Practitioner", theModifiers);
+	}
+
 	default IIdType createResource(String theResourceType, ICreationArgument... theModifiers) {
 		IBaseResource resource = buildResource(theResourceType, theModifiers);
 
