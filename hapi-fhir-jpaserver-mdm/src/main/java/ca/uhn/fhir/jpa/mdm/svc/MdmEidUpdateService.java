@@ -288,5 +288,8 @@ public class MdmEidUpdateService {
 		public boolean isRemainsMatchedToSameGoldenResource() {
 			return myRemainsMatchedToSameGoldenResource;
 		}
+		public boolean hasExistingGoldenResource() {
+				return myExistingGoldenResource != null;
+		}
 	}
 }

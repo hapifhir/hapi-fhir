@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.mdm.svc;
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
+import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.mdm.BaseMdmR4Test;
 import ca.uhn.fhir.jpa.mdm.config.BaseTestMdmConfig;
@@ -230,6 +231,23 @@ public class MdmMatchLinkSvcTest {
 			assertLinksMatchScore(1.0, null, 1.0);
 			assertLinksMatchVector(null, null, null);
 		}
+
+	@Test
+	public void updateMdmLinksForMdmSource_singleCandidateDuringUpdate_DoesNotNullPointer() {
+
+		//Given: A patient exists with a matched golden resource.
+		Patient jane = createPatientAndUpdateLinks(buildJanePatient());
+		Patient goldenJane = getGoldenResourceFromTargetResource(jane);
+
+		//When: A patient who has no existing MDM links comes in as an update
+		Patient secondaryJane = createPatient(buildJanePatient(), false, false);
+		secondaryJane.setActive(true);
+		IAnyResource resource = (IAnyResource) myPatientDao.update(secondaryJane).getResource();
+
+		//Then: The secondary jane should link to the first jane.
+		myMdmMatchLinkSvc.updateMdmLinksForMdmSource(resource, buildUpdateResourceMdmTransactionContext());
+		assertThat(secondaryJane, is(sameGoldenResourceAs(jane)));
+	}
 
 	@Test
 	public void updateMdmLinksForMdmSource_singleCandidateDuringUpdate_DoesNotNullPointer() {
