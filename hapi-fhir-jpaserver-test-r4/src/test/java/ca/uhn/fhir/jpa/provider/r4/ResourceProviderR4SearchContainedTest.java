@@ -20,6 +20,7 @@ import org.hl7.fhir.r4.model.ClinicalImpression;
 import org.hl7.fhir.r4.model.ClinicalImpression.ClinicalImpressionStatus;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.DecimalType;
+import org.hl7.fhir.r4.model.DiagnosticReport;
 import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.Encounter.EncounterStatus;
 import org.hl7.fhir.r4.model.HumanName;
@@ -41,6 +42,7 @@ import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -187,6 +189,361 @@ public class ResourceProviderR4SearchContainedTest extends BaseResourceProviderR
 		assertEquals(1L, oids.size());
 		assertThat(oids, contains(oid1.getValue()));
 
+	}
+
+	/**
+	 * Unit test with multiple cases to illustrate expected behaviour of `_contained` and `_containedType` without chaining
+	 * <p>
+	 * Although this test is in R4, the R5 specification for these parameters are much clearer:
+	 * 	-	<a href="https://www.hl7.org/fhir/search.html#contained">_contained & _containedType</a>
+	 *
+	 * @throws IOException
+	 */
+	@Test
+	public void testContainedParameterBehaviourWithoutChain() throws IOException {
+		// Some useful values
+		final String patientFamily = "VanHouten";
+		final String patientGiven = "Milhouse";
+
+		// Create a discrete Patient
+		final IIdType discretePatientId;
+		{
+			Patient discretePatient = new Patient();
+			discretePatient.addName().setFamily(patientFamily).addGiven(patientGiven);
+			discretePatientId = myPatientDao.create(discretePatient, mySrd).getId().toUnqualifiedVersionless();
+
+			ourLog.debug("\nInput - Discrete Patient:\n{}",
+				myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(discretePatient));
+		}
+
+		/*
+		 * Create a discrete Observation, which includes a contained Patient
+		 *	- 	The contained Patient is otherwise identical to the discrete Patient above
+		 */
+		final IIdType discreteObservationId;
+		final String containedPatientId = "contained-patient-1";
+		{
+			Patient containedPatient = new Patient();
+			containedPatient.setId(containedPatientId);
+			containedPatient.addName().setFamily(patientFamily).addGiven(patientGiven);
+
+			Observation discreteObservation = new Observation();
+			discreteObservation.getContained().add(containedPatient);
+			discreteObservation.getSubject().setReference("#" + containedPatientId);
+			discreteObservationId = myObservationDao.create(discreteObservation, mySrd).getId().toUnqualifiedVersionless();
+
+			ourLog.debug("\nInput - Discrete Observation with contained Patient:\n{}",
+				myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(discreteObservation));
+		}
+
+		{
+			/*
+			 * Case 1
+			 * When: we search for Patient with `_contained=false`
+			 * 	-	`_contained=false` means we should search and return only discrete resources; not contained resources
+			 * 		-	Note that we are searching by `/Patient?`, not `/Observation?`
+			 * 	-	`_contained=false` is the default value; same as if `_contained` were absent
+			 * 	-	When `_containedType` is absent, the default value of `_containedType=container` should be used
+			 * 		-	We should return the container resources
+			 */
+			String queryUrl = myServerBase + "/Patient?family=" + patientFamily + "&given=" + patientGiven + "&_contained=false";
+
+			// Then: we should get the discrete Patient
+			List<String> resourceIds = searchAndReturnUnqualifiedVersionlessIdValues(queryUrl);
+			assertEquals(1L, resourceIds.size());
+			assertThat(resourceIds, contains(discretePatientId.getValue()));
+		}
+
+		{
+			/*
+			 * Case 2
+			 * When: we search for Patient without `_contained`
+			 * 	-	When `_contained` is absent, the default value of `_contained=false` should be used
+			 * 		-	We should search and return only discrete resources; not contained resources
+			 * 		-	Note that we are searching by `/Patient?`, not `/Observation?`
+			 * 	-	When `_containedType` is absent, the default value of `_containedType=container` should be used
+			 * 		-	We should return the container resources
+			 * 	-	Case 2 is equivalent to Case 1; included to highlight default behaviour of `_contained`
+			 */
+			String queryUrl = myServerBase + "/Patient?family=" + patientFamily + "&given=" + patientGiven;
+
+			// Then: we should get the discrete Patient
+			List<String> resourceIds = searchAndReturnUnqualifiedVersionlessIdValues(queryUrl);
+			assertEquals(1L, resourceIds.size());
+			assertThat(resourceIds, contains(discretePatientId.getValue()));
+		}
+
+		{
+			/*
+			 * Case 3
+			 * When: we search for Patient with `_contained=true`
+			 * 	-	`_contained=true` means we should search and return only contained resources; not discrete resources
+			 * 		-	Note that we are searching by `/Patient?`, not `/Observation?`
+			 * 	-	When `_containedType` is absent, the default value of `_containedType=container` should be used
+			 * 		-	We should return the container resources
+			 */
+			String queryUrl = myServerBase + "/Patient?family=" + patientFamily + "&given=" + patientGiven + "&_contained=true";
+
+			// Then: we should get the Observation that is containing that Patient
+			List<String> resourceIds = searchAndReturnUnqualifiedVersionlessIdValues(queryUrl);
+			assertEquals(1L, resourceIds.size());
+			// TODO Fails: we are incorrectly searching and returning the discrete Patient; should be discrete Observation with contained Patient
+			assertThat(resourceIds, contains(discreteObservationId.getValue()));
+		}
+
+		{
+			/*
+			 * Case 4
+			 * When: we search for Patient with `_contained=true` and `_containedType=container`
+			 *
+			 * 	-	`_contained=true` means we should search and return only contained resources; not discrete resources
+			 * 		-	Note that we are searching by `/Patient?`, not `/Observation?`
+			 * 	-	`_containedType=container` is the default value; same as if `_containedType` were absent
+			 * 	-	`_containedType=container` means we should return the container resources
+			 * 	-	Case 4 is equivalent to Case 3; included to highlight default behaviour of `_containedType`
+			 */
+			String queryUrl = myServerBase + "/Patient?family=" + patientFamily + "&given=" + patientGiven + "&_contained=true&_containedType=container";
+
+			// Then: we should get the Observation that is containing that Patient
+			List<String> resourceIds = searchAndReturnUnqualifiedVersionlessIdValues(queryUrl);
+			assertEquals(1L, resourceIds.size());
+			// TODO Fails: we are incorrectly searching and returning the discrete Patient; should be discrete Observation with contained Patient
+			assertThat(resourceIds, contains(discreteObservationId.getValue()));
+		}
+
+		// TODO Implementer: Note that we don't support `_containedType` at all yet. This case shows how it would look; however, implementing this behaviour is not the focus of this ticket. This is to guide your implementation for the rest of the ticket because `_contained` and `_containedType` are so closely related. We can create a new ticket for implementing `_containedType`.
+		{
+			/*
+			 * Case 5
+			 * When: we search for Patient with `_contained=true` and `_containedType=contained`
+			 * 	-	`_contained=true` means we should search and return only contained resources; not discrete resources
+			 *		-	Note that we are searching by `/Patient?`, not `/Observation?`
+			 * 	-	`_containedType=contained` means we should return the contained resources; not the container resources
+			 * 	-	`Bundle.entry.fullUrl` points to the container resource first, and includes the required resolution for the contained resource
+			 * 		-	e.g. "http://localhost/fhir/context/Observation/2#contained-patient-1"
+			 * 	-	`Bundle.entry.resource.id` includes only the required resolution for the contained resource
+			 * 		-	e.g. "contained-patient-1"
+			 */
+/*
+			String queryUrl = myServerBase + "/Patient?family=" + patientFamily + "&given=" + patientGiven + "&_contained=true&_containedType=contained";
+
+			// Then: we should get just the contained Patient without the container Observation
+			HttpGet get = new HttpGet(queryUrl);
+			try (CloseableHttpResponse response = ourHttpClient.execute(get)) {
+				String resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
+				Bundle bundle = myFhirContext.newXmlParser().parseResource(Bundle.class, resp);
+				ourLog.debug("\nOutput - Contained Patient as discrete result:\n{}",
+					myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
+				assertThat(bundle.getEntry(), hasSize(1));
+				// TODO Fails: we are incorrectly searching and returning the discrete Patient; should be contained Patient
+				assertThat(bundle.getEntryFirstRep().getResource().getIdElement().getIdPart(), is(equalTo(containedPatientId)));
+				// TODO Fails: we are incorrectly searching and returning the discrete Patient; should be contained Patient
+				assertThat(bundle.getEntryFirstRep().getFullUrl(), is(containsString(discreteObservationId.getValueAsString() + "#" + containedPatientId)));
+			}
+*/
+		}
+	}
+
+	/**
+	 * Unit test with multiple cases to illustrate expected behaviour of `_contained` and `_containedType` with chaining
+	 * <p>
+	 * Although this test is in R4, the R5 specification for these parameters are much clearer:
+	 * 	-	<a href="https://www.hl7.org/fhir/search.html#contained">_contained & _containedType</a>
+	 *
+	 * @throws IOException
+	 */
+	@Test
+	public void testContainedParameterBehaviourWithChain() throws IOException {
+		// Some useful values
+		final String patientFamily = "VanHouten";
+		final String patientGiven = "Milhouse";
+
+		// Create a discrete Patient
+		final IIdType discretePatientId;
+		{
+			Patient discretePatient = new Patient();
+			discretePatient.addName().setFamily(patientFamily).addGiven(patientGiven);
+			discretePatientId = myPatientDao.create(discretePatient, mySrd).getId().toUnqualifiedVersionless();
+
+			ourLog.info("\nInput - Discrete Patient:\n{}",
+				myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(discretePatient));
+		}
+
+		// Create a discrete Observation, which references the discrete Patient
+		final IIdType discreteObservationId1;
+		{
+			Observation discreteObservation = new Observation();
+			discreteObservation.getSubject().setReference(discretePatientId.getValue());
+			discreteObservationId1 = myObservationDao.create(discreteObservation, mySrd).getId().toUnqualifiedVersionless();
+
+			ourLog.info("\nInput - Discrete Observation with reference to discrete Patient:\n{}",
+				myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(discreteObservation));
+		}
+
+		// Create a discrete Observation, which includes a contained Patient
+		final IIdType discreteObservationId2;
+		final String containedPatientId1 = "contained-patient-1";
+		{
+			Patient containedPatient = new Patient();
+			containedPatient.setId(containedPatientId1);
+			containedPatient.addName().setFamily(patientFamily).addGiven(patientGiven);
+
+			Observation discreteObservation = new Observation();
+			discreteObservation.getContained().add(containedPatient);
+			discreteObservation.getSubject().setReference("#" + containedPatientId1);
+			discreteObservationId2 = myObservationDao.create(discreteObservation, mySrd).getId().toUnqualifiedVersionless();
+
+			ourLog.debug("\nInput - Discrete Observation with contained Patient:\n{}",
+				myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(discreteObservation));
+		}
+
+		/*
+		 * Create a discrete DiagnosticReport, which includes a contained Observation
+		 * 	-	The contained Observation itself references a contained Patient
+		 */
+		final IIdType discreteDiagnosticReportId;
+		final String containedObservationId = "contained-observation";
+		final String containedPatientId2 = "contained-patient-2";
+		{
+			Patient containedPatient = new Patient();
+			containedPatient.setId(containedPatientId2);
+			containedPatient.addName().setFamily(patientFamily).addGiven(patientGiven);
+
+			Observation containedObservation = new Observation();
+			containedObservation.setId(containedObservationId);
+			containedObservation.getContained().add(containedPatient);
+			containedObservation.getSubject().setReference("#" + containedPatientId2);
+
+			DiagnosticReport discreteDiagnosticReport = new DiagnosticReport();
+			discreteDiagnosticReport.getContained().add(containedPatient);
+			discreteDiagnosticReport.getContained().add(containedObservation);
+			discreteDiagnosticReport.addResult().setReference("#" + containedObservationId);
+
+			discreteDiagnosticReportId = myDiagnosticReportDao.create(discreteDiagnosticReport, mySrd).getId().toUnqualifiedVersionless();
+
+			ourLog.debug("\nInput - Discrete DiagnosticReport with contained Observation, which references a contained Patient:\n{}",
+				myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(discreteDiagnosticReport));
+		}
+
+		{
+			/*
+			 * Case 1
+			 * When: we search for Observation with chain and `_contained=false`
+			 * 	-	`_contained=false` means we should search and return only discrete resources; not contained resources
+			 * 		-	Note that we are searching by `/Observation?`, not `/Patient?`
+			 * 	-	`_contained=false` is the default value; same as if `_contained` were absent
+			 * 	-	When `_containedType` is absent, the default value of `_containedType=container` should be used
+			 * 		-	We should return the container resources
+			 */
+			String queryUrl = myServerBase + "/Observation?subject.family=" + patientFamily + "&subject.given=" + patientGiven + "&_contained=false";
+
+			/*
+			 * Then: we should get the discrete Observation that is referencing that discrete Patient and
+			 * 		 the discrete Observation that is containing that Patient
+			 */
+			List<String> resourceIds = searchAndReturnUnqualifiedVersionlessIdValues(queryUrl);
+			assertEquals(2L, resourceIds.size());
+			assertThat(resourceIds, containsInAnyOrder(discreteObservationId1.getValue(), discreteObservationId2.getValue()));
+		}
+
+		{
+			/*
+			 * Case 2
+			 * When: we search for Observation with chain, and without `_contained`
+			 * 	-	When `_contained` is absent, the default value of `_contained=false` should be used
+			 * 		-	We should search and return only discrete resources; not contained resources
+			 * 		-	Note that we are searching by `/Observation?`, not `/Patient?`
+			 * 	-	When `_containedType` is absent, the default value of `_containedType=container` should be used
+			 * 		-	We should return the container resources
+			 * 	-	Case 2 is equivalent to Case 1; included to highlight chained searches do not require `_contained`
+			 */
+			String queryUrl = myServerBase + "/Observation?subject.family=" + patientFamily + "&subject.given=" + patientGiven;
+
+			/*
+			 * Then: we should get the discrete Observation that is referencing that discrete Patient and
+			 * 		 the discrete Observation that is containing that Patient
+			 */
+			List<String> resourceIds = searchAndReturnUnqualifiedVersionlessIdValues(queryUrl);
+			assertEquals(2L, resourceIds.size());
+			assertThat(resourceIds, containsInAnyOrder(discreteObservationId1.getValue(), discreteObservationId2.getValue()));
+		}
+
+		{
+			/*
+			 * Case 3
+			 * When: we search for Observation with chain and `_contained=true`
+			 * 	-	`_contained=true` means we should search and return only contained resources; not discrete resources
+			 * 		-	Note that we are searching by `/Observation?`, not `/Patient?`
+			 * 	-	When `_containedType` is absent, the default value of `_containedType=container` should be used
+			 * 		-	We should return the container resources
+			 */
+			String queryUrl = myServerBase + "/Observation?subject.family=" + patientFamily + "&subject.given=" + patientGiven + "&_contained=true";
+
+			// Then: we should get the discrete DiagnosticReport that is containing that Observation
+			List<String> resourceIds = searchAndReturnUnqualifiedVersionlessIdValues(queryUrl);
+			// TODO Fails: we are incorrectly searching and returning the discrete Observations; should be discrete DiagnosticReport with contained Observation
+			assertEquals(1L, resourceIds.size());
+			// TODO Fails: we are incorrectly searching and returning the discrete Observations; should be discrete DiagnosticReport with contained Observation
+			assertThat(resourceIds, contains(discreteDiagnosticReportId.getValue()));
+		}
+
+		{
+			/*
+			 * Case 4
+			 * When: we search for Observation with chain, `_contained=true`, and `_containedType=container`
+			 * 	-	`_contained=true` means we should search and return only contained resources; not discrete resources
+			 * 		-	Note that we are searching by `/Observation?`, not `/Patient?`
+			 * 	-	`_containedType=container` is the default value; same as if `_containedType` were absent
+			 * 	-	`_containedType=container` means we should return the container resources
+			 * 	-	Case 4 is equivalent to Case 3; included to highlight default behaviour of `_containedType`
+			 */
+			String queryUrl = myServerBase + "/Observation?subject.family=" + patientFamily + "&subject.given=" + patientGiven + "&_contained=true&_containedType=container";
+
+			// Then: we should get the discrete DiagnosticReport that is containing that Observation
+			List<String> resourceIds = searchAndReturnUnqualifiedVersionlessIdValues(queryUrl);
+			// TODO Fails: we are incorrectly searching and returning the discrete Observations; should be discrete DiagnosticReport with contained Observation
+			assertEquals(1L, resourceIds.size());
+			// TODO Fails: we are incorrectly searching and returning the discrete Observations; should be discrete DiagnosticReport with contained Observation
+			assertThat(resourceIds, contains(discreteDiagnosticReportId.getValue()));
+		}
+
+		// TODO Implementer: Note that we don't support `_containedType` at all yet. This case shows how it would look; however, implementing this behaviour is not the focus of this ticket. This is to guide your implementation for the rest of the ticket because `_contained` and `_containedType` are so closely related. We can create a new ticket for implementing `_containedType`.
+		{
+			/*
+			 * Case 5
+			 * When: we search for Observation with chain, `_contained=true`, and `_containedType=contained`
+			 * 	-	`_contained=true` means we should search and return only contained resources; not discrete resources
+			 *		-	Note that we are searching by `/Observation?`, not `/Patient?`
+			 * 	-	`_containedType=contained` means we should return the contained resources; not the container resources
+			 * 	-	`Bundle.entry.fullUrl` points to the container resource first, and includes the required resolution for the contained resource
+			 * 		-	e.g. "http://localhost/fhir/context/DiagnosticReport/4#contained-observation"
+			 * 	-	`Bundle.entry.resource.id` includes only the required resolution for the contained resource
+			 * 		-	e.g. "contained-observation"
+			 */
+/*
+			String queryUrl = myServerBase + "/Observation?subject.family=" + patientFamily + "&subject.given=" + patientGiven + "&_contained=true&_containedType=contained";
+
+			// Then: we should get just the contained Observation without the container DiagnosticReport
+			// 	-	Note this case only makes assertions w.r.t. to contained Observation; the specification isn't clear
+			// 		about what to do about references to other contained resources. For example, if we were to add
+			// 		`&_include=Patient:patient` to the above query, what should the results be?
+			// 		-	Presumably, two entries modelled similarly. The question is whether the reference from
+			// 			`Observation.subject` will still make sense within the searchset Bundle.
+			HttpGet get = new HttpGet(queryUrl);
+			try (CloseableHttpResponse response = ourHttpClient.execute(get)) {
+				String resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
+				Bundle bundle = myFhirContext.newXmlParser().parseResource(Bundle.class, resp);
+				ourLog.debug("\nOutput - Contained Observation as discrete result:\n{}",
+					myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
+				// TODO Fails: we are incorrectly searching and returning the discrete Observations; should be contained Observation
+				assertThat(bundle.getEntry(), hasSize(1));
+				// TODO Fails: we are incorrectly searching and returning the discrete Observations; should be contained Observation
+				assertThat(bundle.getEntryFirstRep().getResource().getIdElement().getIdPart(), is(equalTo(containedObservationId)));
+				// TODO Fails: we are incorrectly searching and returning the discrete Observations; should be contained Observation
+				assertThat(bundle.getEntryFirstRep().getFullUrl(), is(containsString(discreteDiagnosticReportId.getValueAsString() + "#" + containedObservationId)));
+			}
+			*/
+		}
 	}
 
 	@Test
