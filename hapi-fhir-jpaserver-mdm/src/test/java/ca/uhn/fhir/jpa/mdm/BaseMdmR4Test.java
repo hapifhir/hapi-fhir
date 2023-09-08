@@ -633,6 +633,14 @@ abstract public class BaseMdmR4Test extends BaseJpaR4Test {
 		return retval;
 	}
 
+	@Nonnull
+	protected MdmTransactionContext buildUpdateResourceMdmTransactionContext() {
+		MdmTransactionContext retval = new MdmTransactionContext();
+		retval.setResourceType("Patient");
+		retval.setRestOperation(MdmTransactionContext.OperationType.UPDATE_RESOURCE);
+		return retval;
+	}
+
 	protected MdmLink createGoldenPatientAndLinkToSourcePatient(Long thePatientPid, MdmMatchResultEnum theMdmMatchResultEnum) {
 		Patient patient = createPatient();
 
