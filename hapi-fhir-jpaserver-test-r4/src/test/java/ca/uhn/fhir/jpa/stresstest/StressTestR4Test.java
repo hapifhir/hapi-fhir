@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.stresstest;
 
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
+import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
@@ -11,12 +12,14 @@ import ca.uhn.fhir.jpa.test.config.TestR4Config;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.util.StopWatch;
+import ca.uhn.fhir.util.ThreadPoolUtil;
 import com.google.common.base.Charsets;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
@@ -48,6 +51,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.util.AopTestUtils;
@@ -58,6 +62,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -654,6 +659,37 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 		myCaptureQueriesListener.logDeleteQueries();
 		assertThat(deleteCount, is(equalTo(30)));
 	}
+	
+	
+	@Test
+	public void testHighConcurrencyUpdatesToSameResource() throws InterruptedException {
+		createPatient(withId("A"), withActiveFalse());
+
+		ThreadPoolTaskExecutor threadPool = ThreadPoolUtil.newThreadPool(10, 10, "hcu-", 0);
+		List<Future<DaoMethodOutcome>> futures = new ArrayList<>(1000);
+		for (int i = 0; i < 1000; i++) {
+			Patient p = new Patient();
+			p.setId("Patient/A");
+			p.addIdentifier().setValue(Integer.toString(i));
+			futures.add(threadPool.submit(() -> myPatientDao.update(p, new SystemRequestDetails())));
+		}
+
+		for (var next : futures) {
+			try {
+				DaoMethodOutcome daoMethodOutcome = next.get();
+				ourLog.info("Got ID: {}", daoMethodOutcome.getId());
+			} catch (ExecutionException e) {
+				assertEquals(ResourceVersionConflictException.class, e.getCause().getClass());
+				ourLog.info("Got conflict: {}", e.getCause().getMessage());
+			}
+		}
+
+		Patient p = new Patient();
+		p.setId("Patient/A");
+		p.addIdentifier().setValue("0");
+		myPatientDao.update(p, new SystemRequestDetails());
+	}
+	
 
 	private void validateNoErrors(List<BaseTask> tasks) {
 		int total = 0;
