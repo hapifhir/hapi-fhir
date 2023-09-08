@@ -32,7 +32,10 @@ public class CdsConfigServiceImpl implements ICdsConfigService {
 	private final ObjectMapper myObjectMapper;
 	private final DaoRegistry myDaoRegistry;
 
-	public CdsConfigServiceImpl(@Nonnull FhirContext theFhirContext, @Nonnull ObjectMapper theObjectMapper, @Nullable DaoRegistry theDaoRegistry) {
+	public CdsConfigServiceImpl(
+			@Nonnull FhirContext theFhirContext,
+			@Nonnull ObjectMapper theObjectMapper,
+			@Nullable DaoRegistry theDaoRegistry) {
 		myFhirContext = theFhirContext;
 		myObjectMapper = theObjectMapper;
 		myDaoRegistry = theDaoRegistry;
