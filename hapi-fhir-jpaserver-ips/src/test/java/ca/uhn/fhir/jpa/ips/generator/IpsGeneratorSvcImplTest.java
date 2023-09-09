@@ -15,10 +15,40 @@ import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.SimpleBundleProvider;
 import ca.uhn.fhir.test.utilities.HtmlUtil;
 import ca.uhn.fhir.util.ClasspathUtil;
-import com.gargoylesoftware.htmlunit.html.*;
+import com.gargoylesoftware.htmlunit.html.DomElement;
+import com.gargoylesoftware.htmlunit.html.DomNodeList;
+import com.gargoylesoftware.htmlunit.html.HtmlPage;
+import com.gargoylesoftware.htmlunit.html.HtmlTable;
+import com.gargoylesoftware.htmlunit.html.HtmlTableRow;
 import com.google.common.collect.Lists;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r4.model.*;
+import org.hl7.fhir.r4.model.AllergyIntolerance;
+import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.CarePlan;
+import org.hl7.fhir.r4.model.ClinicalImpression;
+import org.hl7.fhir.r4.model.Composition;
+import org.hl7.fhir.r4.model.Condition;
+import org.hl7.fhir.r4.model.Consent;
+import org.hl7.fhir.r4.model.DateTimeType;
+import org.hl7.fhir.r4.model.Device;
+import org.hl7.fhir.r4.model.DeviceUseStatement;
+import org.hl7.fhir.r4.model.DiagnosticReport;
+import org.hl7.fhir.r4.model.Encounter;
+import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Immunization;
+import org.hl7.fhir.r4.model.Medication;
+import org.hl7.fhir.r4.model.MedicationAdministration;
+import org.hl7.fhir.r4.model.MedicationDispense;
+import org.hl7.fhir.r4.model.MedicationRequest;
+import org.hl7.fhir.r4.model.MedicationStatement;
+import org.hl7.fhir.r4.model.Observation;
+import org.hl7.fhir.r4.model.Organization;
+import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.PositiveIntType;
+import org.hl7.fhir.r4.model.Procedure;
+import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.Resource;
+import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -36,11 +66,15 @@ import java.util.stream.Collectors;
 import static ca.uhn.fhir.jpa.ips.generator.IpsGenerationR4Test.findEntryResource;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.startsWith;
-import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
  * This test verifies various IPS generation logic without using a full
@@ -76,37 +110,6 @@ public class IpsGeneratorSvcImplTest {
 	private final DaoRegistry myDaoRegistry = new DaoRegistry(myFhirContext);
 	private IIpsGeneratorSvc mySvc;
 	private DefaultIpsGenerationStrategy myStrategy;
-
-	@Nonnull
-	private static List<String> toEntryResourceTypeStrings(Bundle outcome) {
-		return outcome
-			.getEntry()
-			.stream()
-			.map(t -> t.getResource().getResourceType().name())
-			.collect(Collectors.toList());
-	}
-
-	@Nonnull
-	private static Medication createSecondaryMedication(String medicationId) {
-		Medication medication = new Medication();
-		medication.setId(new IdType(medicationId));
-		medication.getCode().addCoding().setDisplay("Tylenol");
-		ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.put(medication, BundleEntrySearchModeEnum.INCLUDE);
-		return medication;
-	}
-
-	@Nonnull
-	private static MedicationStatement createPrimaryMedicationStatement(String medicationId, String medicationStatementId) {
-		MedicationStatement medicationStatement = new MedicationStatement();
-		medicationStatement.setId(medicationStatementId);
-		medicationStatement.setMedication(new Reference(medicationId));
-		medicationStatement.setStatus(MedicationStatement.MedicationStatementStatus.ACTIVE);
-		medicationStatement.getDosageFirstRep().getRoute().addCoding().setDisplay("Oral");
-		medicationStatement.getDosageFirstRep().setText("DAW");
-		medicationStatement.setEffective(new DateTimeType("2023-01-01T11:22:33Z"));
-		ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.put(medicationStatement, BundleEntrySearchModeEnum.MATCH);
-		return medicationStatement;
-	}
 
 	@BeforeEach
 	public void beforeEach() {
@@ -152,6 +155,54 @@ public class IpsGeneratorSvcImplTest {
 		assertThat(compositionNarrative, containsString("Allergies and Intolerances"));
 		assertThat(compositionNarrative, not(containsString("Pregnancy")));
 
+	}
+
+	@Test
+	public void testAllergyIntolerance_OnsetTypes() throws IOException {
+		// Setup Patient
+		registerPatientDaoWithRead();
+
+		AllergyIntolerance allergy1 = new AllergyIntolerance();
+		ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.put(allergy1, BundleEntrySearchModeEnum.MATCH);
+		allergy1.setId("AllergyIntolerance/1");
+		allergy1.getCode().addCoding().setCode("123").setDisplay("Some Code");
+		allergy1.addReaction().addNote().setTime(new Date());
+		allergy1.setOnset(new DateTimeType("2020-02-03T11:22:33Z"));
+		AllergyIntolerance allergy2 = new AllergyIntolerance();
+		ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.put(allergy2, BundleEntrySearchModeEnum.MATCH);
+		allergy2.setId("AllergyIntolerance/2");
+		allergy2.getCode().addCoding().setCode("123").setDisplay("Some Code");
+		allergy2.addReaction().addNote().setTime(new Date());
+		allergy2.setOnset(new StringType("Some Onset"));
+		AllergyIntolerance allergy3 = new AllergyIntolerance();
+		ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.put(allergy3, BundleEntrySearchModeEnum.MATCH);
+		allergy3.setId("AllergyIntolerance/3");
+		allergy3.getCode().addCoding().setCode("123").setDisplay("Some Code");
+		allergy3.addReaction().addNote().setTime(new Date());
+		allergy3.setOnset(null);
+		IFhirResourceDao<AllergyIntolerance> allergyDao = registerResourceDaoWithNoData(AllergyIntolerance.class);
+		when(allergyDao.search(any(), any())).thenReturn(new SimpleBundleProvider(Lists.newArrayList(allergy1, allergy2, allergy3)));
+
+		registerRemainingResourceDaos();
+
+		// Test
+		Bundle outcome = (Bundle) mySvc.generateIps(new SystemRequestDetails(), new IdType(PATIENT_ID));
+
+		// Verify
+		Composition compositions = (Composition) outcome.getEntry().get(0).getResource();
+		Composition.SectionComponent section = findSection(compositions, IpsSectionEnum.ALLERGY_INTOLERANCE);
+
+		HtmlPage narrativeHtml = HtmlUtil.parseAsHtml(section.getText().getDivAsString());
+		ourLog.info("Narrative:\n{}", narrativeHtml.asXml());
+
+		DomNodeList<DomElement> tables = narrativeHtml.getElementsByTagName("table");
+		assertEquals(1, tables.size());
+		HtmlTable table = (HtmlTable) tables.get(0);
+		int onsetIndex = 6;
+		assertEquals("Onset", table.getHeader().getRows().get(0).getCell(onsetIndex).asNormalizedText());
+		assertEquals(new DateTimeType("2020-02-03T11:22:33Z").getValue().toString(), table.getBodies().get(0).getRows().get(0).getCell(onsetIndex).asNormalizedText());
+		assertEquals("Some Onset", table.getBodies().get(0).getRows().get(1).getCell(onsetIndex).asNormalizedText());
+		assertEquals("", table.getBodies().get(0).getRows().get(2).getCell(onsetIndex).asNormalizedText());
 	}
 
 	@Test
@@ -571,6 +622,37 @@ public class IpsGeneratorSvcImplTest {
 			when(dao.search(any(), any())).thenReturn(bundleProviderWithAllOfType(sourceData, nextType));
 		}
 
+	}
+
+	@Nonnull
+	private static List<String> toEntryResourceTypeStrings(Bundle outcome) {
+		return outcome
+			.getEntry()
+			.stream()
+			.map(t -> t.getResource().getResourceType().name())
+			.collect(Collectors.toList());
+	}
+
+	@Nonnull
+	private static Medication createSecondaryMedication(String medicationId) {
+		Medication medication = new Medication();
+		medication.setId(new IdType(medicationId));
+		medication.getCode().addCoding().setDisplay("Tylenol");
+		ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.put(medication, BundleEntrySearchModeEnum.INCLUDE);
+		return medication;
+	}
+
+	@Nonnull
+	private static MedicationStatement createPrimaryMedicationStatement(String medicationId, String medicationStatementId) {
+		MedicationStatement medicationStatement = new MedicationStatement();
+		medicationStatement.setId(medicationStatementId);
+		medicationStatement.setMedication(new Reference(medicationId));
+		medicationStatement.setStatus(MedicationStatement.MedicationStatementStatus.ACTIVE);
+		medicationStatement.getDosageFirstRep().getRoute().addCoding().setDisplay("Oral");
+		medicationStatement.getDosageFirstRep().setText("DAW");
+		medicationStatement.setEffective(new DateTimeType("2023-01-01T11:22:33Z"));
+		ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.put(medicationStatement, BundleEntrySearchModeEnum.MATCH);
+		return medicationStatement;
 	}
 
 }

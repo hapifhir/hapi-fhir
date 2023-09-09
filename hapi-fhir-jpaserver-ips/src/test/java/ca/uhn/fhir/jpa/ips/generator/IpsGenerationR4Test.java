@@ -18,6 +18,7 @@ import ca.uhn.fhir.validation.ValidationResult;
 import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
 import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.AllergyIntolerance;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.CodeableConcept;
@@ -25,6 +26,7 @@ import org.hl7.fhir.r4.model.Composition;
 import org.hl7.fhir.r4.model.Condition;
 import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.Immunization;
+import org.hl7.fhir.r4.model.Medication;
 import org.hl7.fhir.r4.model.MedicationStatement;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
@@ -247,6 +249,7 @@ public class IpsGenerationR4Test extends BaseResourceProviderR4Test {
 			.collect(Collectors.toList());
 		assertThat(resourceDates, contains("2015", "2010", "2005"));
 	}
+
 
 	@Nonnull
 	private static Composition findCompositionSectionByTitle(Bundle output, String title) {
