@@ -208,21 +208,21 @@
       <th:block th:if="${!item.hasDescription()}">
          <th:block th:replace=":: concatCodeableConcept (list=${item.getManifestation()})">Reaction</th:block>
       </th:block>
-      <th:block th:if="${!iter.last}" th:text=", "/>
+      <th:block th:if="${!iter.last}" th:text="', '"/>
    </th:block>
 </th:block>
 
 <th:block th:if="${list}" th:fragment="concatCodeableConcept (list)">
    <th:block th:each="item,iter : ${list}" th:if="${!list.empty}" with="attr=${attr} ?: 'display'">
       <th:block th:replace=":: codeableConcept (cc=${item},attr=${attr})"/>
-      <th:block th:if="${!iter.last}" th:text=", "/>
+      <th:block th:if="${!iter.last}" th:text="', '"/>
    </th:block>
 </th:block>
 
 <th:block th:if="${list}" th:fragment="concatDosageRoute (list)">
    <th:block th:each="item,iter : ${list}" th:if="${!list.empty}" with="attr=${attr} ?: 'display'">
       <th:block th:replace=":: codeableConcept (cc=${item.getRoute()},attr=${attr})"/>
-      <th:block th:if="${!iter.last}" th:text=", "/>
+      <th:block th:if="${!iter.last}" th:text="', '"/>
    </th:block>
 </th:block>
 
@@ -240,6 +240,6 @@
                 th:text="${#strings.concatReplaceNulls('', item.getLow().getValue(), '-', item.getHigh().getValue() )}">
          Reference Range
       </th:block>
-      <th:block th:if="${!iter.last}" th:text=", "/>
+      <th:block th:if="${!iter.last}" th:text="', '"/>
    </th:block>
 </th:block>
