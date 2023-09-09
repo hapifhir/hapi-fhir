@@ -18,7 +18,6 @@ import ca.uhn.fhir.validation.ValidationResult;
 import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
 import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r4.model.AllergyIntolerance;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.CodeableConcept;
@@ -26,7 +25,6 @@ import org.hl7.fhir.r4.model.Composition;
 import org.hl7.fhir.r4.model.Condition;
 import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.Immunization;
-import org.hl7.fhir.r4.model.Medication;
 import org.hl7.fhir.r4.model.MedicationStatement;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
@@ -234,7 +232,7 @@ public class IpsGenerationR4Test extends BaseResourceProviderR4Test {
 			.execute();
 		ourLog.info("Output: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
 
-		Composition composition = findCompositionSectionByTitle(output, "History of Immunizations");
+		Composition composition = findCompositionSectionByDisplay(output, "History of Immunization Narrative");
 		// Should be newest first
 		assertThat(composition.getText().getDivAsString(), stringContainsInOrder(
 			"Vax 2015", "Vax 2010", "Vax 2005"
@@ -252,12 +250,12 @@ public class IpsGenerationR4Test extends BaseResourceProviderR4Test {
 
 
 	@Nonnull
-	private static Composition findCompositionSectionByTitle(Bundle output, String title) {
+	private static Composition findCompositionSectionByDisplay(Bundle output, String theDisplay) {
 		Composition composition = (Composition) output.getEntry().get(0).getResource();
 		Composition.SectionComponent section = composition
 			.getSection()
 			.stream()
-			.filter(t -> t.getCode().getCoding().get(0).getDisplay().equals(title))
+			.filter(t -> t.getCode().getCoding().get(0).getDisplay().equals(theDisplay))
 			.findFirst()
 			.orElseThrow();
 		return composition;

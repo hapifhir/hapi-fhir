@@ -26,7 +26,7 @@ Comments: AllergyIntolerance.note[x].text (separated by <br />)
          <th:block th:with="extension=${entry.getResource().getExtensionByUrl('http://hl7.org/fhir/StructureDefinition/narrativeLink').getValue().getValue()}">
             <tr th:id="${#strings.arraySplit(extension, '#')[1]}">
                <td th:insert="IpsUtilityFragments :: codeableConcept (cc=*{getCode()},attr='display')">Allergen</td>
-               <td th:insert="IpsUtilityFragments :: codeableConcept (cc=*{getClinicalStatus()},attr='code')">Status</td>
+               <td th:insert="~{IpsUtilityFragments :: codeableConcept (cc=*{getClinicalStatus()},attr='code')}">Status</td>
                <td th:insert="IpsUtilityFragments :: concat (list=*{getCategory()},attr='value')">Category</td>
                <td th:insert="IpsUtilityFragments :: concatReactionManifestation (list=*{getReaction()})">Reaction</td>
                <td th:insert="IpsUtilityFragments :: concat (list=*{getReaction()},attr='severity')">Severity</td>
