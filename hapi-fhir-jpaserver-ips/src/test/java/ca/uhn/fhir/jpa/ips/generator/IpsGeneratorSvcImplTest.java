@@ -277,6 +277,41 @@ public class IpsGeneratorSvcImplTest {
 		assertThat(row.getCell(4).asNormalizedText(), containsString("2023"));
 	}
 
+	@Test
+	public void testMedicationSummary_MedicationRequestWithNoMedication() throws IOException {
+		// Setup Patient
+		registerPatientDaoWithRead();
+
+		// Setup Medication + MedicationStatement
+		MedicationRequest medicationRequest = new MedicationRequest();
+		ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.put(medicationRequest, BundleEntrySearchModeEnum.MATCH);
+		medicationRequest.setId(MEDICATION_STATEMENT_ID);
+		medicationRequest.setStatus(MedicationRequest.MedicationRequestStatus.ACTIVE);
+		IFhirResourceDao<MedicationRequest> medicationRequestDao = registerResourceDaoWithNoData(MedicationRequest.class);
+		when(medicationRequestDao.search(any(), any())).thenReturn(new SimpleBundleProvider(Lists.newArrayList(medicationRequest)));
+
+		registerRemainingResourceDaos();
+
+		// Test
+		Bundle outcome = (Bundle) mySvc.generateIps(new SystemRequestDetails(), new IdType(PATIENT_ID));
+
+		// Verify
+		Composition compositions = (Composition) outcome.getEntry().get(0).getResource();
+		Composition.SectionComponent section = findSection(compositions, IpsSectionEnum.MEDICATION_SUMMARY);
+
+		HtmlPage narrativeHtml = HtmlUtil.parseAsHtml(section.getText().getDivAsString());
+		ourLog.info("Narrative:\n{}", narrativeHtml.asXml());
+
+		DomNodeList<DomElement> tables = narrativeHtml.getElementsByTagName("table");
+		assertEquals(2, tables.size());
+		HtmlTable table = (HtmlTable) tables.get(0);
+		HtmlTableRow row = table.getBodies().get(0).getRows().get(0);
+		assertEquals("", row.getCell(0).asNormalizedText());
+		assertEquals("Active", row.getCell(1).asNormalizedText());
+		assertEquals("", row.getCell(2).asNormalizedText());
+		assertEquals("", row.getCell(3).asNormalizedText());
+	}
+
 	@Nonnull
 	private Composition.SectionComponent findSection(Composition compositions, IpsSectionEnum sectionEnum) {
 		Composition.SectionComponent section = compositions

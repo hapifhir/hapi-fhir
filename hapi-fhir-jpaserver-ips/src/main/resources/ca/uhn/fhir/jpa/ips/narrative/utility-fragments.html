@@ -23,7 +23,7 @@
 </th:block>
 
 <th:block th:fragment="renderMedication (medicationType)">
-   <th:block th:object="${medicationType}">
+   <th:block th:if="${medicationType} != null" th:object="${medicationType}">
       <th:block th:switch="*{getClass().getSimpleName()}">
          <th:block th:case="'CodeableConcept'">
             <th:block th:replace=":: codeableConcept (cc=${medicationType}, attr='display')">Medication</th:block>

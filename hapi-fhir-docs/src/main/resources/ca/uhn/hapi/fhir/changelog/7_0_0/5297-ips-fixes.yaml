@@ -8,4 +8,6 @@ title: "Several fixes have been made to the IPS generator:
 <li>IPS documents containing Consent resources for Advanced Directives could result in a crash</li>
 <li>IPS documents containing Procedure resources for History of Procedures with a performed date could result in a crash</li>
 <li>IPS documents containing AllergyIntolerance resources containing an occurrence but not a reaction date could result in a crash</li>
+<li>IPS documents containing AllergyIntolerance resources containing an onset value in string format could result in a crash</li>
+<li>IPS documents containing MedicationRequest resources with no associated Medication could result in a crash</li>
 </ul>"
