@@ -168,7 +168,7 @@ public class SectionRegistry {
 				.withTitle("Medical Devices")
 				.withSectionCode("46264-8")
 				.withSectionDisplay("History of medical device use")
-			.withResourceTypes(ResourceType.DeviceUseStatement.name())
+				.withResourceTypes(ResourceType.DeviceUseStatement.name())
 				.withProfile(
 						"https://hl7.org/fhir/uv/ips/StructureDefinition-Composition-uv-ips-definitions.html#Composition.section:sectionMedicalDevices")
 				.build();
