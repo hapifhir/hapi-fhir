@@ -29,6 +29,7 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -151,6 +152,35 @@ public class IpsGeneratorSvcImplTest {
 		assertThat(compositionNarrative, containsString("Allergies and Intolerances"));
 		assertThat(compositionNarrative, not(containsString("Pregnancy")));
 
+	}
+
+	@Test
+	public void testAllergyIntolerance_MissingElements() throws IOException {
+		// Setup Patient
+		registerPatientDaoWithRead();
+
+		AllergyIntolerance allergy = new AllergyIntolerance();
+		ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.put(allergy, BundleEntrySearchModeEnum.MATCH);
+		allergy.setId("AllergyIntolerance/1");
+		allergy.getCode().addCoding().setCode("123").setDisplay("Some Code");
+		allergy.addReaction().addNote().setTime(new Date());
+		IFhirResourceDao<AllergyIntolerance> allergyDao = registerResourceDaoWithNoData(AllergyIntolerance.class);
+		when(allergyDao.search(any(), any())).thenReturn(new SimpleBundleProvider(Lists.newArrayList(allergy)));
+
+		registerRemainingResourceDaos();
+
+		// Test
+		Bundle outcome = (Bundle) mySvc.generateIps(new SystemRequestDetails(), new IdType(PATIENT_ID));
+
+		// Verify
+		Composition compositions = (Composition) outcome.getEntry().get(0).getResource();
+		Composition.SectionComponent section = findSection(compositions, IpsSectionEnum.ALLERGY_INTOLERANCE);
+
+		HtmlPage narrativeHtml = HtmlUtil.parseAsHtml(section.getText().getDivAsString());
+		ourLog.info("Narrative:\n{}", narrativeHtml.asXml());
+
+		DomNodeList<DomElement> tables = narrativeHtml.getElementsByTagName("table");
+		assertEquals(1, tables.size());
 	}
 
 	@Test

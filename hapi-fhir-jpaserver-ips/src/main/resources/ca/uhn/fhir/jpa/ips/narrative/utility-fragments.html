@@ -181,7 +181,9 @@
             <th:block th:replace=":: concatItem (listItem=${item}, iter=${iter}, separator='')"/>
          </th:block>
          <th:block th:case="'severity'">
-            <th:block th:replace=":: concatItem (listItem=${item.getSeverity().toCode()}, iter=${iter}, separator='')"/>
+            <th:block th:if="${item.getSeverity() != null}">
+               <th:block th:replace=":: concatItem (listItem=${item.getSeverity().toCode()}, iter=${iter}, separator='')"/>
+            </th:block>
          </th:block>
       </th:block>
    </th:block>

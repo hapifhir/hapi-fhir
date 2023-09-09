@@ -20,11 +20,15 @@ import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CodeSystem;
+import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Composition;
 import org.hl7.fhir.r4.model.Condition;
+import org.hl7.fhir.r4.model.DateTimeType;
+import org.hl7.fhir.r4.model.Immunization;
 import org.hl7.fhir.r4.model.MedicationStatement;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -37,10 +41,12 @@ import org.springframework.test.context.ContextConfiguration;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.matchesPattern;
+import static org.hamcrest.Matchers.stringContainsInOrder;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -103,6 +109,58 @@ public class IpsGenerationR4Test extends BaseResourceProviderR4Test {
 	}
 
 	@Test
+	public void testGenerateLargePatientSummary2() {
+		myStorageSettings.setResourceClientIdStrategy(JpaStorageSettings.ClientIdStrategyEnum.ANY);
+
+		Bundle sourceData = ClasspathUtil.loadCompressedResource(myFhirContext, Bundle.class, "/large-patient-everything-2.json.gz");
+		sourceData.setType(Bundle.BundleType.TRANSACTION);
+		for (Bundle.BundleEntryComponent nextEntry : sourceData.getEntry()) {
+			nextEntry.getRequest().setMethod(Bundle.HTTPVerb.PUT);
+			nextEntry.getRequest().setUrl(nextEntry.getResource().getIdElement().toUnqualifiedVersionless().getValue());
+		}
+		Bundle outcome = mySystemDao.transaction(mySrd, sourceData);
+		ourLog.info("Created {} resources", outcome.getEntry().size());
+
+		Bundle output = myClient
+			.operation()
+			.onInstance("Patient/11439250")
+			.named(JpaConstants.OPERATION_SUMMARY)
+			.withNoParameters(Parameters.class)
+			.returnResourceType(Bundle.class)
+			.execute();
+		ourLog.info("Output: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
+
+		// Verify
+		assertEquals(74, output.getEntry().size());
+	}
+
+	@Test
+	public void testGenerateLargePatientSummary3() {
+		myStorageSettings.setResourceClientIdStrategy(JpaStorageSettings.ClientIdStrategyEnum.ANY);
+
+		Bundle sourceData = ClasspathUtil.loadCompressedResource(myFhirContext, Bundle.class, "/large-patient-everything-3.json.gz");
+		sourceData.setType(Bundle.BundleType.TRANSACTION);
+		for (Bundle.BundleEntryComponent nextEntry : sourceData.getEntry()) {
+			nextEntry.getRequest().setMethod(Bundle.HTTPVerb.PUT);
+			nextEntry.getRequest().setUrl(nextEntry.getResource().getIdElement().toUnqualifiedVersionless().getValue());
+		}
+		Bundle outcome = mySystemDao.transaction(mySrd, sourceData);
+		ourLog.info("Created {} resources", outcome.getEntry().size());
+
+		Bundle output = myClient
+			.operation()
+			.onInstance("Patient/nl-core-Patient-01")
+			.named(JpaConstants.OPERATION_SUMMARY)
+			.withNoParameters(Parameters.class)
+			.returnResourceType(Bundle.class)
+			.execute();
+		ourLog.info("Output: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
+
+		// Verify
+		assertEquals(80, output.getEntry().size());
+	}
+
+	@Test
 	public void testGenerateTinyPatientSummary() {
 		myStorageSettings.setResourceClientIdStrategy(JpaStorageSettings.ClientIdStrategyEnum.ANY);
 
@@ -135,6 +193,73 @@ public class IpsGenerationR4Test extends BaseResourceProviderR4Test {
 		List<String> sectionTitles = extractSectionTitles(output);
 		assertThat(sectionTitles.toString(), sectionTitles, contains("Allergies and Intolerances", "Medication List", "Problem List"));
 	}
+
+	/**
+	 * Default strategy should order immunizations alphabetically
+	 */
+	@Test
+	public void testImmunizationOrder() {
+		// Setup
+
+		createPatient(withId("PT1"), withFamily("Simpson"), withGiven("Homer"));
+
+		// Create some immunizations out of order
+		Immunization i;
+		i = new Immunization();
+		i.setPatient(new Reference("Patient/PT1"));
+		i.setOccurrence(new DateTimeType("2010-01-01T00:00:00Z"));
+		i.setVaccineCode(new CodeableConcept().setText("Vax 2010"));
+		myImmunizationDao.create(i, mySrd);
+		i = new Immunization();
+		i.setPatient(new Reference("Patient/PT1"));
+		i.setOccurrence(new DateTimeType("2005-01-01T00:00:00Z"));
+		i.setVaccineCode(new CodeableConcept().setText("Vax 2005"));
+		myImmunizationDao.create(i, mySrd);
+		i = new Immunization();
+		i.setPatient(new Reference("Patient/PT1"));
+		i.setOccurrence(new DateTimeType("2015-01-01T00:00:00Z"));
+		i.setVaccineCode(new CodeableConcept().setText("Vax 2015"));
+		myImmunizationDao.create(i, mySrd);
+
+		// Test
+
+		Bundle output = myClient
+			.operation()
+			.onInstance("Patient/PT1")
+			.named(JpaConstants.OPERATION_SUMMARY)
+			.withNoParameters(Parameters.class)
+			.returnResourceType(Bundle.class)
+			.execute();
+		ourLog.info("Output: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
+
+		Composition composition = findCompositionSectionByTitle(output, "History of Immunizations");
+		// Should be newest first
+		assertThat(composition.getText().getDivAsString(), stringContainsInOrder(
+			"Vax 2015", "Vax 2010", "Vax 2005"
+		));
+
+		List<String> resourceDates = output
+			.getEntry()
+			.stream()
+			.filter(t -> t.getResource() instanceof Immunization)
+			.map(t -> (Immunization) t.getResource())
+			.map(t -> t.getOccurrenceDateTimeType().getValueAsString().substring(0, 4))
+			.collect(Collectors.toList());
+		assertThat(resourceDates, contains("2015", "2010", "2005"));
+	}
+
+	@Nonnull
+	private static Composition findCompositionSectionByTitle(Bundle output, String title) {
+		Composition composition = (Composition) output.getEntry().get(0).getResource();
+		Composition.SectionComponent section = composition
+			.getSection()
+			.stream()
+			.filter(t -> t.getCode().getCoding().get(0).getDisplay().equals(title))
+			.findFirst()
+			.orElseThrow();
+		return composition;
+	}
+
 
 	@Nonnull
 	private static List<String> extractSectionTitles(Bundle outcome) {
