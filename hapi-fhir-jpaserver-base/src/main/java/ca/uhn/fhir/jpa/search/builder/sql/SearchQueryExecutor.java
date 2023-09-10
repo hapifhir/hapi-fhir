@@ -48,6 +48,7 @@ public class SearchQueryExecutor implements ISearchQueryExecutor {
 	private static final Object[] EMPTY_OBJECT_ARRAY = new Object[0];
 	private static final Logger ourLog = LoggerFactory.getLogger(SearchQueryExecutor.class);
 	private final GeneratedSql myGeneratedSql;
+	// FIXME: remove unused variables
 	private final Integer myMaxResultsToFetch;
 
 	@PersistenceContext(type = PersistenceContextType.TRANSACTION)
@@ -108,6 +109,9 @@ public class SearchQueryExecutor implements ISearchQueryExecutor {
 			try {
 				if (!myQueryInitialized) {
 
+					// FIXME: remove
+					ourLog.info("Executing SQL {} [{}]", sql, Arrays.asList(args));
+
 					/*
 					 * Note that we use the spring managed connection, and the expectation is that a transaction that
 					 * is managed by Spring has been started before this method is called.
@@ -154,6 +158,9 @@ public class SearchQueryExecutor implements ISearchQueryExecutor {
 					Number next = myResultSet.next();
 					myNext = next.longValue();
 				}
+
+				// FIXME: remove
+				ourLog.info("Search {} returned PID {}", this, myNext);
 
 			} catch (Exception e) {
 				ourLog.error("Failed to create or execute SQL query", e);

@@ -1939,7 +1939,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		/**
 		 * The count of resources skipped because they were seen in earlier results
 		 */
-		private int mySkipCount = 0;
+		private Set<Long> mySkippedPids = new HashSet<>();
 		/**
 		 * The count of resources that are new in this search
 		 * (ie, not cached in previous searches)
@@ -2027,16 +2027,23 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 							JpaPid next = JpaPid.fromId(nextLong);
 							if (myPidSet.add(next)) {
 								myNext = next;
-								myNonSkipCount++;
+								myNonSkipCount++; // FIXME: remove next line
+								ourLog.info("*** Have Stored {} with {} PIDs total", nextLong, myPidSet.size());
 								break;
 							} else {
-								mySkipCount++;
+								mySkippedPids.add(nextLong);
+								// FIXME: remove
+								ourLog.info("*** Updated SkipCount[{}] because {} is already present", mySkippedPids.size(), nextLong);
+								if (mySkippedPids.size() > 260) {
+									next.toString();
+								}
 							}
 						}
 
 						if (!myResultsIterator.hasNext()) {
-							if (myMaxResultsToFetch != null && (mySkipCount + myNonSkipCount == myMaxResultsToFetch)) {
-								if (mySkipCount > 0 && myNonSkipCount == 0) {
+							int skipCount = mySkippedPids.size();
+							if (myMaxResultsToFetch != null && (skipCount + myNonSkipCount == myMaxResultsToFetch)) {
+								if (skipCount > 0 && myNonSkipCount == 0) {
 
 									sendProcessingMsgAndFirePerformanceHook();
 
@@ -2049,9 +2056,10 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 				}
 
 				if (myNext == null) {
-					// if we got here, it means the current PjaPid has already been processed
+					// if we got here, it means the current JpaPid has already been processed
 					// and we will decide (here) if we need to fetch related resources recursively
-					if (myFetchIncludesForEverythingOperation) {
+					// FIXME: restore
+					if (true || myFetchIncludesForEverythingOperation) {
 						myIncludesIterator = new IncludesIterator(myPidSet, myRequest);
 						myFetchIncludesForEverythingOperation = false;
 					}
@@ -2104,7 +2112,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		private void sendProcessingMsgAndFirePerformanceHook() {
 			StorageProcessingMessage message = new StorageProcessingMessage();
 			String msg = "Pass completed with no matching results seeking rows "
-					+ myPidSet.size() + "-" + mySkipCount
+					+ myPidSet.size() + "-" + mySkippedPids.size()
 					+ ". This indicates an inefficient query! Retrying with new max count of "
 					+ myMaxResultsToFetch;
 			ourLog.warn(msg);
@@ -2121,6 +2129,9 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			if (myQueryList.isEmpty()) {
 				// Capture times for Lucene/Elasticsearch queries as well
 				mySearchRuntimeDetails.setQueryStopwatch(new StopWatch());
+				// FIXME: remove
+				ourLog.info("*** Creating new query with Offset[{}] and MaxResults[{}]", theOffset, theMaxResultsToFetch);
+
 				myQueryList = createQuery(
 						myParams, mySort, theOffset, theMaxResultsToFetch, false, myRequest, mySearchRuntimeDetails);
 			}
@@ -2129,13 +2140,16 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 
 			retrieveNextIteratorQuery();
 
-			mySkipCount = 0;
+			// FIXME: is this needed?
+//			mySkippedPids.clear();
 			myNonSkipCount = 0;
 		}
 
 		private void retrieveNextIteratorQuery() {
 			close();
 			if (myQueryList != null && myQueryList.size() > 0) {
+				// FIXME: remove
+				ourLog.info("*** Moving on to next query executor");
 				myResultsIterator = myQueryList.remove(0);
 				myHasNextIteratorQuery = true;
 			} else {
@@ -2163,7 +2177,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 
 		@Override
 		public int getSkippedCount() {
-			return mySkipCount;
+			return mySkippedPids.size();
 		}
 
 		@Override
