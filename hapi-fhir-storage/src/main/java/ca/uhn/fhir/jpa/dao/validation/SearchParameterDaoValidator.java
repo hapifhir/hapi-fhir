@@ -108,7 +108,8 @@ public class SearchParameterDaoValidator {
 		if (Constants.PARAM_LANGUAGE.equals(searchParameter.getCode())) {
 			if (!myStorageSettings.isLanguageSearchParameterEnabled()) {
 				// FIXME: assign a new code here
-				throw new UnprocessableEntityException(Msg.code(1113) + "This server is not configured to allow the " + Constants.PARAM_LANGUAGE + " SearchParameter");
+				throw new UnprocessableEntityException(Msg.code(1113) + "This server is not configured to allow the "
+						+ Constants.PARAM_LANGUAGE + " SearchParameter");
 			}
 		}
 
