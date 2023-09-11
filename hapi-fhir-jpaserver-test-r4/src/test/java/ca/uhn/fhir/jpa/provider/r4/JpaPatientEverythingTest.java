@@ -53,7 +53,7 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
     public void testLargeEverythingFetchReturnsAllPossibleResources() throws IOException {
         myStorageSettings.setResourceClientIdStrategy(JpaStorageSettings.ClientIdStrategyEnum.ANY);
 
-        Bundle input = loadResourceFromClasspath(Bundle.class, "large-bundle-for-everything.json");
+        Bundle input = myFhirContext.newJsonParser().parseResource(Bundle.class, loadCompressedResource("large-bundle-for-everything.json.gz"));
 
         mySystemDao.transaction(mySrd, input);
 
