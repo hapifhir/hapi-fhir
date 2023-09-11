@@ -182,6 +182,10 @@ public class Constants {
 	public static final String PARAM_HAS = "_has";
 	public static final String PARAM_HISTORY = "_history";
 	public static final String PARAM_INCLUDE = "_include";
+	/**
+	 * @since 7.0.0
+	 */
+	public static final String PARAM_LANGUAGE = "_language";
 	public static final String PARAM_INCLUDE_QUALIFIER_RECURSE = ":recurse";
 	public static final String PARAM_INCLUDE_RECURSE = "_include" + PARAM_INCLUDE_QUALIFIER_RECURSE;
 	public static final String PARAM_INCLUDE_QUALIFIER_ITERATE = ":iterate";
