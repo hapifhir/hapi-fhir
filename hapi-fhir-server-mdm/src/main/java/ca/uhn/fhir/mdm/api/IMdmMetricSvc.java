@@ -11,13 +11,24 @@ public interface IMdmMetricSvc {
 
 	/**
 	 * Generates the metrics for the provided parameters.
-	 * This implementation is persistence dependent.
+	 *
 	 * MdmLinkMetrics are metrics related to the links themselves
-	 * (counts of links and the like)
+	 * (Counts of links by match_type (match, no_match, etc) and link_source (auto, manual))
 	 */
 	MdmLinkMetrics generateLinkMetrics(GenerateMdmLinkMetricParameters theParameters);
 
+	/**
+	 * Generates the metrics for the provided parameters.
+	 *
+	 * MdmResourceMetrics are metrics related to resource counts
+	 * (counts of GoldenResources, SourceResources, BlockedResources)
+	 */
 	MdmResourceMetrics generateResourceMetrics(GenerateMdmResourceMetricsParameters theParameters);
 
+	/**
+	 * Generates the metrics for the provided parameters.
+	 *
+	 * These metrics are unique value counts of MdmLink score.
+	 */
 	MdmLinkDataMetrics generateLinkScoreMetrics(GenerateScoreMetricsParameters theParameters);
 }
