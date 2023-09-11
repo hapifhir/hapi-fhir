@@ -4,7 +4,11 @@ import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.config.HapiFhirLocalContainerEntityManagerFactoryBean;
 import ca.uhn.fhir.jpa.dao.data.IMdmLinkJpaMetricsRepository;
 import ca.uhn.fhir.jpa.dao.mdm.MdmMetricSvcJpaImpl;
+import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.mdm.BaseMdmR4Test;
+import ca.uhn.fhir.jpa.mdm.dao.testmodels.LinkMetricTestParameters;
+import ca.uhn.fhir.jpa.mdm.dao.testmodels.LinkScoreMetricTestParams;
+import ca.uhn.fhir.jpa.mdm.dao.testmodels.ResourceMetricTestParams;
 import ca.uhn.fhir.jpa.mdm.helper.MdmLinkHelper;
 import ca.uhn.fhir.jpa.mdm.helper.testmodels.MDMState;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
@@ -14,6 +18,8 @@ import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.mdm.api.parameters.GenerateMdmLinkMetricParameters;
 import ca.uhn.fhir.mdm.api.parameters.GenerateMdmResourceMetricsParameters;
+import ca.uhn.fhir.mdm.api.parameters.GenerateScoreMetricsParameters;
+import ca.uhn.fhir.mdm.model.MdmLinkDataMetrics;
 import ca.uhn.fhir.mdm.model.MdmLinkMetrics;
 import ca.uhn.fhir.mdm.model.MdmResourceMetrics;
 import ca.uhn.fhir.mdm.util.MdmResourceUtil;
@@ -40,12 +46,23 @@ import java.util.function.Supplier;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 @ContextConfiguration(classes = {
 	MdmMetricSvcJpaIT.TestConfig.class
 })
 public class MdmMetricSvcJpaIT extends BaseMdmR4Test {
+
+	private static final String ourBasicState = """
+					G1, AUTO, MATCH, P1
+					G2, AUTO, MATCH, P2,
+					G3, AUTO, POSSIBLE_MATCH, P3,
+					G4, MANUAL, MATCH, P4
+					G2, AUTO, NO_MATCH, P1
+					G1, MANUAL, NO_MATCH, P2
+					G1, MANUAL, POSSIBLE_MATCH, P3
+				""";
 
 	private static final Logger ourLog = LoggerFactory.getLogger(MdmMetricSvcJpaIT.class);
 
@@ -72,135 +89,10 @@ public class MdmMetricSvcJpaIT extends BaseMdmR4Test {
 			return new MdmMetricSvcJpaImpl(
 				myJpaRepository,
 				myIMdmResourceDaoSvc,
-				myDaoRegistry,
-				myEntityFactory
+				myDaoRegistry
 			);
 		}
 	}
-
-	private static final String ourBasicState = """
-					G1, AUTO, MATCH, P1
-					G2, AUTO, MATCH, P2,
-					G3, AUTO, POSSIBLE_MATCH, P3,
-					G4, MANUAL, MATCH, P4
-					G2, AUTO, NO_MATCH, P1
-					G1, MANUAL, NO_MATCH, P2
-					G1, MANUAL, POSSIBLE_MATCH, P3
-				""";
-
-	/**
-	 * Just a test parameters class for feeding into the tests.
-	 */
-	public static class LinkMetricTestParameters {
-		/**
-		 * The initial state (as to be fed into MdmLinkHelper)
-		 */
-		private String myInitialState;
-
-		/**
-		 * The filters for MatchResult
-		 */
-		private List<MdmMatchResultEnum> myMatchFilters;
-
-		/**
-		 * The filters for LinkSource
-		 */
-		private List<MdmLinkSourceEnum> myLinkSourceEnums;
-
-		/**
-		 * The expected metrics to be returned
-		 */
-		private MdmLinkMetrics myExpectedMetrics;
-
-		public String getInitialState() {
-			return myInitialState;
-		}
-
-		public void setInitialState(String theInitialState) {
-			myInitialState = theInitialState;
-		}
-
-		public List<MdmMatchResultEnum> getMatchFilters() {
-			if (myMatchFilters == null) {
-				myMatchFilters = new ArrayList<>();
-			}
-			return myMatchFilters;
-		}
-
-		public void setMatchFilters(List<MdmMatchResultEnum> theMatchFilters) {
-			myMatchFilters = theMatchFilters;
-		}
-
-		public List<MdmLinkSourceEnum> getLinkSourceFilters() {
-			if (myLinkSourceEnums == null) {
-				myLinkSourceEnums = new ArrayList<>();
-			}
-			return myLinkSourceEnums;
-		}
-
-		public void setLinkSourceFilters(List<MdmLinkSourceEnum> theLinkSourceEnums) {
-			myLinkSourceEnums = theLinkSourceEnums;
-		}
-
-		public MdmLinkMetrics getExpectedMetrics() {
-			return myExpectedMetrics;
-		}
-
-		public void setExpectedMetrics(MdmLinkMetrics theExpectedMetrics) {
-			myExpectedMetrics = theExpectedMetrics;
-		}
-	}
-
-	public static class ResourceMetricTestParams {
-		private String myInitialState;
-
-		private List<String> myBlockedResourceGoldenResourceIds;
-
-		private long myExpectedResourceCount;
-
-		private long myExpectedGoldenResourceCount;
-
-		public String getInitialState() {
-			return myInitialState;
-		}
-
-		public void setInitialState(String theInitialState) {
-			myInitialState = theInitialState;
-		}
-
-		public List<String> getBlockedResourceGoldenResourceIds() {
-			if (myBlockedResourceGoldenResourceIds == null) {
-				myBlockedResourceGoldenResourceIds = new ArrayList<>();
-			}
-			return myBlockedResourceGoldenResourceIds;
-		}
-
-		public void addBlockedResourceGoldenResources(String theBlockedResourceId) {
-			getBlockedResourceGoldenResourceIds().add(theBlockedResourceId);
-		}
-
-		public long getExpectedResourceCount() {
-			return myExpectedResourceCount;
-		}
-
-		public void setExpectedResourceCount(long theExpectedResourceCount) {
-			myExpectedResourceCount = theExpectedResourceCount;
-		}
-
-		public long getExpectedGoldenResourceCount() {
-			return myExpectedGoldenResourceCount;
-		}
-
-		public void setExpectedGoldenResourceCount(long theExpectedGoldenResourceCount) {
-			myExpectedGoldenResourceCount = theExpectedGoldenResourceCount;
-		}
-
-		public long getExpectedBlockedResourceCount() {
-			return getBlockedResourceGoldenResourceIds().size();
-		}
-	}
-
-	//////
 
 	private final ObjectMapper myObjectMapper = new ObjectMapper();
 
@@ -347,6 +239,7 @@ public class MdmMetricSvcJpaIT extends BaseMdmR4Test {
 
 		// verify
 		assertNotNull(metrics);
+		assertEquals(metrics.getResourceType(), "Patient");
 
 		MdmLinkMetrics expectedMetrics = theParameters.getExpectedMetrics();
 
@@ -474,6 +367,122 @@ public class MdmMetricSvcJpaIT extends BaseMdmR4Test {
 		assertEquals(theParams.getExpectedResourceCount(), results.getSourceResourcesCount() + results.getGoldenResourcesCount());
 		assertEquals(theParams.getExpectedBlockedResourceCount(), results.getExcludedResources());
 		assertEquals(theParams.getExpectedGoldenResourceCount(), results.getGoldenResourcesCount());
+	}
+
+	private static List<LinkScoreMetricTestParams> linkScoreParameters() {
+		List<LinkScoreMetricTestParams> parameters = new ArrayList<>();
+
+		// 1
+		{
+			// score counts
+			LinkScoreMetricTestParams p = new LinkScoreMetricTestParams();
+			p.setInitialState("""
+   				G1, AUTO, MATCH, P1
+   				G2, AUTO, POSSIBLE_MATCH, P2,
+   				G3, AUTO, POSSIBLE_MATCH, P1
+			""");
+			p.setScores(Arrays.asList(2D, 2D, 1D));
+			MdmLinkDataMetrics metrics = new MdmLinkDataMetrics();
+			metrics.setResourceType("Patient");
+			metrics.addScore("2.0", 2L);
+			metrics.addScore("1.0", 1L);
+			p.setExpectedLinkDataMetrics(metrics);
+			parameters.add(p);
+		}
+
+		// 2
+		{
+			// a null score
+			LinkScoreMetricTestParams p = new LinkScoreMetricTestParams();
+			p.setInitialState("""
+   				G1, AUTO, POSSIBLE_MATCH, P1,
+   				G2, AUTO, POSSIBLE_MATCH, P2
+			""");
+			p.setScores(Arrays.asList(null, 1D));
+			MdmLinkDataMetrics metrics = new MdmLinkDataMetrics();
+			metrics.setResourceType("Patient");
+			metrics.addScore("NULL", 1L);
+			metrics.addScore("1.0", 1L);
+			p.setExpectedLinkDataMetrics(metrics);
+			parameters.add(p);
+		}
+
+		// 3
+		{
+			// match type filtering
+			LinkScoreMetricTestParams p = new LinkScoreMetricTestParams();
+			p.setInitialState("""
+   				G1, AUTO, POSSIBLE_MATCH, P1
+   				G2, AUTO, MATCH, P2
+   				G3, AUTO, POSSIBLE_MATCH, P3
+   				G4, AUTO, MATCH, P4
+			""");
+			p.setScores(Arrays.asList(2D, 2D, 1D, 3D));
+			p.addMatchType(MdmMatchResultEnum.POSSIBLE_MATCH);
+			MdmLinkDataMetrics metrics = new MdmLinkDataMetrics();
+			metrics.setResourceType("Patient");
+			metrics.addScore("2.0", 1L);
+			metrics.addScore("1.0", 1L);
+			p.setExpectedLinkDataMetrics(metrics);
+			parameters.add(p);
+		}
+
+		// 4
+		{
+			// no links
+			LinkScoreMetricTestParams p = new LinkScoreMetricTestParams();
+			p.setInitialState("");
+			MdmLinkDataMetrics metrics = new MdmLinkDataMetrics();
+			metrics.setResourceType("Patient");
+			p.setExpectedLinkDataMetrics(metrics);
+			parameters.add(p);
+		}
+
+		return parameters;
+	}
+
+	@ParameterizedTest
+	@MethodSource("linkScoreParameters")
+	public void testLinkScoreMetrics(LinkScoreMetricTestParams theParams) {
+		// setup
+		MDMState<Patient, JpaPid> state = new MDMState<>();
+		String initialState = theParams.getInitialState();
+
+		if (StringUtils.isNotBlank(initialState)) {
+			state.setInputState(initialState);
+
+			myLinkHelper.setup(state);
+
+			// update scores if needed
+			List<MdmLink> links = myMdmLinkDao.findAll();
+			for (int i = 0; i < theParams.getScores().size() && i < links.size(); i++) {
+				Double score = theParams.getScores().get(i);
+				MdmLink link = links.get(i);
+				link.setScore(score);
+				myMdmLinkDao.save(link);
+			}
+		}
+
+		GenerateScoreMetricsParameters scoreMetricsParameters = new GenerateScoreMetricsParameters("Patient");
+		for (MdmMatchResultEnum matchType : theParams.getMatchFilter()) {
+			scoreMetricsParameters.addMatchType(matchType);
+		}
+		// test
+		MdmLinkDataMetrics actualMetrics = mySvc.generateLinkScoreMetrics(scoreMetricsParameters);
+
+		// verify
+		assertNotNull(actualMetrics);
+		assertEquals("Patient", actualMetrics.getResourceType());
+
+		MdmLinkDataMetrics expectedMetrics = theParams.getExpectedLinkDataMetrics();
+
+		Map<String, Long> actual = actualMetrics.getScoreCounts();
+		Map<String, Long> expected = expectedMetrics.getScoreCounts();
+		assertEquals(expected.size(), actual.size());
+		for (String score : expected.keySet()) {
+			assertTrue(actual.containsKey(score), String.format("Score of %s is not in results", score));
+			assertEquals(expected.get(score), actual.get(score));
+		}
 	}
 
 	private String getComparingMetrics(MdmLinkMetrics theActual, MdmLinkMetrics theExpected) {

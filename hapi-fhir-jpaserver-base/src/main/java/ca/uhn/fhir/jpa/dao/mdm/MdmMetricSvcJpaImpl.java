@@ -2,7 +2,6 @@ package ca.uhn.fhir.jpa.dao.mdm;
 
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
-import ca.uhn.fhir.jpa.config.HapiFhirLocalContainerEntityManagerFactoryBean;
 import ca.uhn.fhir.jpa.dao.data.IMdmLinkJpaMetricsRepository;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.mdm.api.IMdmMetricSvc;
@@ -11,8 +10,10 @@ import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.mdm.api.parameters.GenerateMdmLinkMetricParameters;
 import ca.uhn.fhir.mdm.api.parameters.GenerateMdmResourceMetricsParameters;
+import ca.uhn.fhir.mdm.api.parameters.GenerateScoreMetricsParameters;
 import ca.uhn.fhir.mdm.api.parameters.GetGoldenResourceCountParameters;
 import ca.uhn.fhir.mdm.model.MdmGoldenResourceCount;
+import ca.uhn.fhir.mdm.model.MdmLinkDataMetrics;
 import ca.uhn.fhir.mdm.model.MdmLinkMetrics;
 import ca.uhn.fhir.mdm.model.MdmResourceMetrics;
 import ca.uhn.fhir.rest.api.SearchTotalModeEnum;
@@ -27,8 +28,6 @@ public class MdmMetricSvcJpaImpl implements IMdmMetricSvc {
 
 	private final IMdmLinkJpaMetricsRepository myJpaRepository;
 
-	private final HapiFhirLocalContainerEntityManagerFactoryBean myEntityFactory;
-
 	private final IMdmResourceDaoSvc myResourceDaoSvc;
 	
 	private final DaoRegistry myDaoRegistry;
@@ -36,11 +35,9 @@ public class MdmMetricSvcJpaImpl implements IMdmMetricSvc {
 	public MdmMetricSvcJpaImpl(
 		IMdmLinkJpaMetricsRepository theRepository,
 		IMdmResourceDaoSvc theResourceDaoSvc,
-		DaoRegistry theDaoRegistry,
-		HapiFhirLocalContainerEntityManagerFactoryBean theEntityFactory
+		DaoRegistry theDaoRegistry
 	) {
 		myJpaRepository = theRepository;
-		myEntityFactory = theEntityFactory;
 		myDaoRegistry = theDaoRegistry;
 		myResourceDaoSvc = theResourceDaoSvc;
 	}
@@ -68,12 +65,13 @@ public class MdmMetricSvcJpaImpl implements IMdmMetricSvc {
 		for (Object[] row : data) {
 			MdmMatchResultEnum matchResult = (MdmMatchResultEnum) row[0];
 			MdmLinkSourceEnum source = (MdmLinkSourceEnum) row[1];
-			long count = (Long)row[2];
+			long count = (Long) row[2];
 			metrics.addMetric(matchResult, source, count);
 		}
 		return metrics;
 	}
 
+	@SuppressWarnings("rawtypes")
 	@Override
 	public MdmResourceMetrics generateResourceMetrics(GenerateMdmResourceMetricsParameters theParameters) {
 		String resourceType = theParameters.getResourceType();
@@ -94,6 +92,32 @@ public class MdmMetricSvcJpaImpl implements IMdmMetricSvc {
 		metrics.setGoldenResourcesCount(grCountResult.getGoldenResourceCount());
 		metrics.setExcludedResources(grCountResult.getBlockListedGoldenResourceCount());
 		metrics.setSourceResourcesCount(result.size() - metrics.getGoldenResourcesCount());
+
+		return metrics;
+	}
+
+	@Transactional
+	@Override
+	public MdmLinkDataMetrics generateLinkScoreMetrics(GenerateScoreMetricsParameters theParameters) {
+		String resourceType = theParameters.getResourceType();
+
+		List<MdmMatchResultEnum> matchResultTypes = theParameters.getMatchTypes();
+
+		// if no result type filter, add all result types
+		if (matchResultTypes.isEmpty()) {
+			matchResultTypes = Arrays.asList(MdmMatchResultEnum.values());
+		}
+
+		Object[][] data = myJpaRepository.generateScoreMetrics(resourceType, matchResultTypes);
+
+		MdmLinkDataMetrics metrics = new MdmLinkDataMetrics();
+		metrics.setResourceType(resourceType);
+		for (Object[] row : data) {
+			Double scoreValue = (Double) row[0];
+			Long scoreCount = (Long) row[1];
+			String scoreStr = scoreValue == null ? "NULL" : Double.toString(scoreValue);
+			metrics.addScore(scoreStr, scoreCount);
+		}
 
 		return metrics;
 	}

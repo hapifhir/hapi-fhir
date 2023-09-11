@@ -13,10 +13,6 @@ import java.util.List;
 @Repository("metricsRepository")
 public interface IMdmLinkJpaMetricsRepository extends JpaRepository<MdmLink, Long>, IHapiFhirJpaRepository {
 
-
-	// TODO - this works best with the following index on MdmLink
-	// create index ls_2_mt_index on a_test_link
-	// (target_type, link_source, match_result)
 	@Query(
 		"SELECT ml.myMatchResult AS match_result, ml.myLinkSource AS link_source, count(*) AS c "
 			+ "FROM MdmLink ml "
@@ -29,6 +25,19 @@ public interface IMdmLinkJpaMetricsRepository extends JpaRepository<MdmLink, Lon
 	Object[][] generateMetrics(
 		@Param("resourceName") String theResourceType,
 		@Param("linkSources") List<MdmLinkSourceEnum> theLinkSources,
+		@Param("matchTypes") List<MdmMatchResultEnum> theMatchTypes
+	);
+
+	@Query(
+		"SElECT DISTINCT ml.myScore AS score, count(*) "
+		+ "FROM MdmLink ml "
+		+ "WHERE ml.myMdmSourceType = :resourceName "
+		+ "AND ml.myMatchResult in (:matchTypes) "
+		+ "GROUP BY score "
+		+ "ORDER BY score"
+	)
+	Object[][] generateScoreMetrics(
+		@Param("resourceName") String theResourceType,
 		@Param("matchTypes") List<MdmMatchResultEnum> theMatchTypes
 	);
 }
