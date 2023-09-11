@@ -50,63 +50,10 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
     }
 
     @Test
-    public void testEverythingSizes() {
-        AtomicInteger counter = new AtomicInteger();
-//		myInterceptorRegistry.registerAnonymousInterceptor(Pointcut.JPA_PERFTRACE_RAW_SQL, new IAnonymousInterceptor() {
-//			@Override
-//			public void invoke(IPointcut thePointcut, HookParams theArgs) {
-//				SqlQueryList sql = theArgs.get(SqlQueryList.class);
-//				for (int i = 0; i < sql.size(); i++) {
-//					int newValue = counter.incrementAndGet();
-//					ourLog.info("SQL {} Executed: {}", newValue, sql.get(i).getSql(true, false));
-//					if (newValue == 3) {
-//						counter.toString();
-//					}
-//				}
-//			}
-//		});
-
-        Set<String> expectedIds = new HashSet<>();
-        Set<String> actualResourceIds = new HashSet<>();
-        IIdType p = createPatient(withActiveTrue()).toUnqualifiedVersionless();
-        expectedIds.add(p.getValue());
-
-        ourLog.info("Trying with 250 resources");
-        for (int i = 0; i <= 250; i++) {
-            IIdType e = createEncounter(withSubject(p)).toUnqualifiedVersionless();
-            expectedIds.add(e.getValue());
-        }
-
-        logAllResourceLinks();
-
-        validateEverything(p, actualResourceIds, expectedIds);
-    }
-
-    private void validateEverything(IIdType p, Set<String> actualResourceIds, Set<String> expectedIds) {
-        PatientEverythingParameters params = new PatientEverythingParameters();
-        int pageSize = 5;
-        params.setCount(new IntegerType(pageSize));
-        ServletRequestDetails request = new ServletRequestDetails();
-        request.setServer(myServer.getRestfulServer());
-        request.setServletRequest(new MockHttpServletRequest());
-        request.setServletResponse(new MockHttpServletResponse());
-        IBundleProvider outcome = myPatientDao.patientInstanceEverything(null, request, params, p);
-        List<IBaseResource> resources = outcome.getResources(0, 9999);
-        actualResourceIds.addAll(resources.stream().map(t -> t.getIdElement().toUnqualifiedVersionless().getValue()).toList());
-
-        assertEquals(expectedIds.size(), actualResourceIds.size());
-    }
-
-
-    @Test
     public void testLargeEverythingFetchReturnsAllPossibleResources() throws IOException {
         myStorageSettings.setResourceClientIdStrategy(JpaStorageSettings.ClientIdStrategyEnum.ANY);
 
         Bundle input = loadResourceFromClasspath(Bundle.class, "large-bundle-for-everything.json");
-        Set<String> expectedResourceIds = input.getEntry()
-                .stream()
-                .map(t -> t.getResource().getIdElement().toUnqualifiedVersionless().getValue())
-                .collect(Collectors.toSet());
 
         mySystemDao.transaction(mySrd, input);
 

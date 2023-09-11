@@ -281,8 +281,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc<JpaPid> {
 						search.getResourceType(),
 						search.getSearchQueryString(),
 						sw.getMillis());
-				// FIXME: restore
-				//throw new InternalErrorException(Msg.code(1163) + "Request timed out after " + sw.getMillis() + "ms");
+				throw new InternalErrorException(Msg.code(1163) + "Request timed out after " + sw.getMillis() + "ms");
 			}
 
 			// If the search was saved in "pass complete mode" it's probably time to

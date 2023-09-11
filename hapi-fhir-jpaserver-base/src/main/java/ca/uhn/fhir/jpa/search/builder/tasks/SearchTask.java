@@ -338,8 +338,7 @@ public class SearchTask implements Callable<Void> {
 
 						if (!theResultIter.hasNext()) {
 							int skippedCount = theResultIter.getSkippedCount();
-							// FIXME: make trace
-							ourLog.info(
+							ourLog.trace(
 									"MaxToFetch[{}] SkippedCount[{}] CountSavedThisPass[{}] CountSavedThisTotal[{}] AdditionalPrefetchRemaining[{}]",
 									myMaxResultsToFetch,
 									skippedCount,
@@ -649,9 +648,6 @@ public class SearchTask implements Callable<Void> {
 				sb.createQuery(myParams, mySearchRuntimeDetails, myRequest, myRequestPartitionId)) {
 			// resultIterator is SearchBuilder.QueryIterator
 			assert (resultIterator != null);
-
-			// FIXME: remove
-			ourLog.info("*** Starting a new search");
 
 			/*
 			 * The following loop actually loads the PIDs of the resources
