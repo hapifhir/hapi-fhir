@@ -27,7 +27,10 @@ public interface IAuthRuleBuilderOperationNamedAndScoped {
 	IAuthRuleBuilderRuleOpClassifierFinished andAllowAllResponses();
 
 	/**
-	 * Responses for this operation will not be checked and access to all resources is allowed
+	 * Responses for this operation will not be checked and access to all resources is allowed. This
+	 * is intended for operations which are known to fetch a graph of resources that is known to be
+	 * safe, such as `$everything` which may access and fetch resources outside the patient's compartment
+	 * but enforces safety in what it fetches via strict SQL queries.
 	 */
 	IAuthRuleBuilderRuleOpClassifierFinished andAllowAllResponsesWithAllResourcesAccess();
 
