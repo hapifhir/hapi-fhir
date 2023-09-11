@@ -32,8 +32,8 @@ import org.hibernate.ScrollableResults;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.persistence.*;
 import java.util.Arrays;
+import javax.persistence.*;
 
 public class SearchQueryExecutor implements ISearchQueryExecutor {
 
