@@ -111,6 +111,7 @@ public abstract class BaseClinicalReasoningConfig {
 				provider.setTerminologyProvider(t);
 				provider.setExpandValueSets(true);
 				provider.setMaxCodesPerQuery(500);
+				provider.setQueryBatchThreshold(500);
 				provider.setModelResolver(theModelResolver);
 			}
 			return new CompositeDataProvider(theModelResolver, provider);

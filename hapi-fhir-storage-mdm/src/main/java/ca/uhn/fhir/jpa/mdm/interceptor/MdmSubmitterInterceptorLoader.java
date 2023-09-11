@@ -19,9 +19,10 @@
  */
 package ca.uhn.fhir.jpa.mdm.interceptor;
 
+import ca.uhn.fhir.context.ConfigurationException;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
-import ca.uhn.fhir.jpa.subscription.submit.interceptor.SubscriptionSubmitInterceptorLoader;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.interceptor.IMdmStorageInterceptor;
 import ca.uhn.fhir.mdm.interceptor.MdmSearchExpandingInterceptor;
@@ -50,21 +51,18 @@ public class MdmSubmitterInterceptorLoader {
 	@Autowired
 	private IInterceptorService myInterceptorService;
 
-	@Autowired
-	private SubscriptionSubmitInterceptorLoader mySubscriptionSubmitInterceptorLoader;
-
 	@PostConstruct
 	public void loadInterceptors() {
 		if (!myMdmSettings.isEnabled()) {
 			return;
 		}
 
-		myStorageSettings.addSupportedSubscriptionType(Subscription.SubscriptionChannelType.MESSAGE);
+		if (!myStorageSettings.getSupportedSubscriptionTypes().contains(Subscription.SubscriptionChannelType.MESSAGE)) {
+			throw new ConfigurationException(
+					Msg.code(2421) + "MDM requires Message Subscriptions to be enabled in the Storage Settings");
+		}
 		myInterceptorService.registerInterceptor(myIMdmStorageInterceptor);
 		myInterceptorService.registerInterceptor(myMdmSearchExpandingInterceptorInterceptor);
-		ourLog.info("MDM interceptor registered");
-		// We need to call SubscriptionSubmitInterceptorLoader.start() again in case there were no subscription types
-		// the first time it was called.
-		mySubscriptionSubmitInterceptorLoader.start();
+		ourLog.info("MDM interceptors registered");
 	}
 }

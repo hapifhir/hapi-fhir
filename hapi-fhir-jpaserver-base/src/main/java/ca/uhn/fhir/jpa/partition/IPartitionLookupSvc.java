@@ -44,7 +44,7 @@ public interface IPartitionLookupSvc {
 	 */
 	PartitionEntity getPartitionById(Integer theId) throws ResourceNotFoundException;
 
-	void clearCaches();
+	void invalidateCaches();
 
 	/**
 	 * Will generate a random unused partition ID. Validates that no partition with that ID exists before returning.

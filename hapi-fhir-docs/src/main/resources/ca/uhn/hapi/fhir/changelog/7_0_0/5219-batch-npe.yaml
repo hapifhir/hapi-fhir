@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 5219
+title: "Reindex batch job threw an exception when no results matched the reindex request.  This has been corrected."

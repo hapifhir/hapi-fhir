@@ -1,0 +1,8 @@
+---
+type: add
+issue: 5090
+jira: SMILE-5987
+title: "Adding pointcuts for the following MDM Operations:
+      MDM_CREATE_LINK, MDM_UPDATE_LINK, MDM_MERGE_GOLDEN_RESOURCES,
+      MDM_LINK_HISTORY, MDM_NOT_DUPLICATE, MDM_CLEAR, MDM_SUBMIT.
+"

@@ -53,6 +53,7 @@ import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.SimpleBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import ca.uhn.fhir.rest.server.method.ResponsePage;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.ValidateUtil;
 import com.google.common.collect.Lists;
@@ -319,7 +320,10 @@ public class HashMapResourceProvider<T extends IBaseResource> implements IResour
 			@SuppressWarnings("unchecked")
 			@Nonnull
 			@Override
-			public List<IBaseResource> getResources(int theFromIndex, int theToIndex) {
+			public List<IBaseResource> getResources(
+					int theFromIndex,
+					int theToIndex,
+					@Nonnull ResponsePage.ResponsePageBuilder theResponsePageBuilder) {
 
 				// Make sure that "from" isn't less than 0, "to" isn't more than the number available,
 				// and "from" <= "to"

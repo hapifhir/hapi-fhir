@@ -218,16 +218,16 @@ public class IpsGeneratorSvcImpl implements IIpsGeneratorSvc {
 
 				for (IBaseResource nextCandidate : resources) {
 
-					boolean include;
-
-					if (ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.get(nextCandidate)
-							== BundleEntrySearchModeEnum.INCLUDE) {
-						include = true;
+					boolean candidateIsSearchInclude = ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.get(nextCandidate)
+							== BundleEntrySearchModeEnum.INCLUDE;
+					boolean addResourceToBundle;
+					if (candidateIsSearchInclude) {
+						addResourceToBundle = true;
 					} else {
-						include = myGenerationStrategy.shouldInclude(ipsSectionContext, nextCandidate);
+						addResourceToBundle = myGenerationStrategy.shouldInclude(ipsSectionContext, nextCandidate);
 					}
 
-					if (include) {
+					if (addResourceToBundle) {
 
 						String originalResourceId = nextCandidate
 								.getIdElement()
@@ -249,13 +249,19 @@ public class IpsGeneratorSvcImpl implements IIpsGeneratorSvc {
 							nextCandidate = previouslyExistingResource;
 							sectionResourcesToInclude.addResourceIfNotAlreadyPresent(nextCandidate, originalResourceId);
 						} else if (theGlobalResourcesToInclude.hasResourceWithReplacementId(originalResourceId)) {
-							sectionResourcesToInclude.addResourceIfNotAlreadyPresent(nextCandidate, originalResourceId);
+							if (!candidateIsSearchInclude) {
+								sectionResourcesToInclude.addResourceIfNotAlreadyPresent(
+										nextCandidate, originalResourceId);
+							}
 						} else {
 							IIdType id = myGenerationStrategy.massageResourceId(theIpsContext, nextCandidate);
 							nextCandidate.setId(id);
 							theGlobalResourcesToInclude.addResourceIfNotAlreadyPresent(
 									nextCandidate, originalResourceId);
-							sectionResourcesToInclude.addResourceIfNotAlreadyPresent(nextCandidate, originalResourceId);
+							if (!candidateIsSearchInclude) {
+								sectionResourcesToInclude.addResourceIfNotAlreadyPresent(
+										nextCandidate, originalResourceId);
+							}
 						}
 					}
 				}
@@ -281,7 +287,7 @@ public class IpsGeneratorSvcImpl implements IIpsGeneratorSvc {
 		 * the summary, so we need to also update the references to those
 		 * resources.
 		 */
-		for (IBaseResource nextResource : sectionResourcesToInclude.getResources()) {
+		for (IBaseResource nextResource : theGlobalResourcesToInclude.getResources()) {
 			List<ResourceReferenceInfo> references = myFhirContext.newTerser().getAllResourceReferences(nextResource);
 			for (ResourceReferenceInfo nextReference : references) {
 				String existingReference = nextReference
@@ -305,6 +311,10 @@ public class IpsGeneratorSvcImpl implements IIpsGeneratorSvc {
 					}
 				}
 			}
+		}
+
+		if (sectionResourcesToInclude.isEmpty()) {
+			return;
 		}
 
 		addSection(theSection, theCompositionBuilder, sectionResourcesToInclude, theGlobalResourcesToInclude);
@@ -336,7 +346,7 @@ public class IpsGeneratorSvcImpl implements IIpsGeneratorSvc {
 							+ "-"
 							+ next.getIdElement().getValue();
 			IPrimitiveType<String> narrativeLinkUri = (IPrimitiveType<String>)
-					myFhirContext.getElementDefinition("uri").newInstance();
+					myFhirContext.getElementDefinition("url").newInstance();
 			narrativeLinkUri.setValueAsString(narrativeLinkValue);
 			narrativeLink.setValue(narrativeLinkUri);
 
@@ -416,152 +426,6 @@ public class IpsGeneratorSvcImpl implements IIpsGeneratorSvc {
 		});
 		return generator;
 	}
-
-	/*
-
-
-
-
-
-
-		private static HashMap<PatientSummary.IPSSection, List<Resource>> hashPrimaries(List<Resource> resourceList) {
-			HashMap<PatientSummary.IPSSection, List<Resource>> iPSResourceMap = new HashMap<PatientSummary.IPSSection, List<Resource>>();
-
-			for (Resource resource : resourceList) {
-				for (PatientSummary.IPSSection iPSSection : PatientSummary.IPSSection.values()) {
-					if ( SectionTypes.get(iPSSection).contains(resource.getResourceType()) ) {
-						if ( !(resource.getResourceType() == ResourceType.Observation) || isObservationinSection(iPSSection, (Observation) resource)) {
-							if (iPSResourceMap.get(iPSSection) == null) {
-								iPSResourceMap.put(iPSSection, new ArrayList<Resource>());
-							}
-							iPSResourceMap.get(iPSSection).add(resource);
-						}
-					}
-				}
-			}
-
-			return iPSResourceMap;
-		}
-
-
-
-		private static HashMap<PatientSummary.IPSSection, List<Resource>> filterPrimaries(HashMap<PatientSummary.IPSSection, List<Resource>> sectionPrimaries) {
-			HashMap<PatientSummary.IPSSection, List<Resource>> filteredPrimaries = new HashMap<PatientSummary.IPSSection, List<Resource>>();
-			for ( PatientSummary.IPSSection section : sectionPrimaries.keySet() ) {
-				List<Resource> filteredList = new ArrayList<Resource>();
-				for (Resource resource : sectionPrimaries.get(section)) {
-					if (passesFilter(section, resource)) {
-						filteredList.add(resource);
-					}
-				}
-				if (filteredList.size() > 0) {
-					filteredPrimaries.put(section, filteredList);
-				}
-			}
-			return filteredPrimaries;
-		}
-
-		private static List<Resource> pruneResources(Patient patient, List<Resource> resources, HashMap<PatientSummary.IPSSection, List<Resource>> sectionPrimaries, FhirContext ctx) {
-			List<String> resourceIds = new ArrayList<String>();
-			List<String> followedIds = new ArrayList<String>();
-
-			HashMap<String, Resource> resourcesById = new HashMap<String, Resource>();
-			for (Resource resource : resources) {
-				resourcesById.put(resource.getIdElement().getIdPart(), resource);
-			}
-			String patientId = patient.getIdElement().getIdPart();
-			resourcesById.put(patientId, patient);
-
-			recursivePrune(patientId, resourceIds, followedIds, resourcesById, ctx);
-
-			for (PatientSummary.IPSSection section : sectionPrimaries.keySet()) {
-				for (Resource resource : sectionPrimaries.get(section)) {
-					String resourceId = resource.getIdElement().getIdPart();
-					recursivePrune(resourceId, resourceIds, followedIds, resourcesById, ctx);
-				}
-			}
-
-			List<Resource> prunedResources = new ArrayList<Resource>();
-
-			for (Resource resource : resources) {
-				if (resourceIds.contains(resource.getIdElement().getIdPart())) {
-					prunedResources.add(resource);
-				}
-			}
-
-			return prunedResources;
-		}
-
-		private static Void recursivePrune(String resourceId, List<String> resourceIds,  List<String> followedIds, HashMap<String, Resource> resourcesById, FhirContext ctx) {
-			if (!resourceIds.contains(resourceId)) {
-				resourceIds.add(resourceId);
-			}
-
-			Resource resource = resourcesById.get(resourceId);
-			if (resource != null) {
-				ctx.newTerser().getAllResourceReferences(resource).stream()
-					.map( r -> r.getResourceReference().getReferenceElement().getIdPart() )
-					.forEach( id ->  {
-						if (!followedIds.contains(id)) {
-							followedIds.add(id);
-							recursivePrune(id, resourceIds, followedIds, resourcesById, ctx);
-						}
-					});
-			}
-
-			return null;
-		}
-
-		private static List<Resource> addLinkToResources(List<Resource> resources, HashMap<PatientSummary.IPSSection, List<Resource>> sectionPrimaries, Composition composition) {
-			List<Resource> linkedResources = new ArrayList<Resource>();
-			HashMap<String, String> valueUrls = new HashMap<String, String>();
-
-			String url = "http://hl7.org/fhir/StructureDefinition/narrativeLink";
-			String valueUrlBase = composition.getId() + "#";
-
-			for (PatientSummary.IPSSection section : sectionPrimaries.keySet()) {
-				String profile = SectionProfiles.get(section);
-				String[] arr = profile.split("/");
-				String profileName = arr[arr.length - 1];
-				String sectionValueUrlBase = valueUrlBase + profileName.split("-uv-")[0];
-
-				for (Resource resource : sectionPrimaries.get(section)) {
-					String valueUrl = sectionValueUrlBase + "-" + resource.getIdElement().getIdPart();
-					valueUrls.put(resource.getIdElement().getIdPart(), valueUrl);
-				}
-			}
-
-			for (Resource resource : resources) {
-				if (valueUrls.containsKey(resource.getIdElement().getIdPart())) {
-					String valueUrl = valueUrls.get(resource.getIdElement().getIdPart());
-					Extension extension = new Extension();
-					extension.setUrl(url);
-					extension.setValue(new UriType(valueUrl));
-					DomainResource domainResource = (DomainResource) resource;
-					domainResource.addExtension(extension);
-					resource = (Resource) domainResource;
-				}
-				linkedResources.add(resource);
-			}
-
-			return linkedResources;
-		}
-
-		private static HashMap<PatientSummary.IPSSection, String> createNarratives(HashMap<PatientSummary.IPSSection, List<Resource>> sectionPrimaries, List<Resource> resources, FhirContext ctx) {
-			HashMap<PatientSummary.IPSSection, String> hashedNarratives = new HashMap<PatientSummary.IPSSection, String>();
-
-			for (PatientSummary.IPSSection section : sectionPrimaries.keySet()) {
-				String narrative = createSectionNarrative(section, resources, ctx);
-				hashedNarratives.put(section, narrative);
-			}
-
-			return hashedNarratives;
-		}
-
-
-
-
-	*/
 
 	private static class ResourceInclusionCollection {
 
