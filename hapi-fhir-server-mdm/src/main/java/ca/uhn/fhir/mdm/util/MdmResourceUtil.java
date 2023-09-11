@@ -126,6 +126,15 @@ public final class MdmResourceUtil {
 				MdmConstants.DISPLAY_GOLDEN_REDIRECT);
 	}
 
+	public static IBaseResource setGoldenResourceAsBlockedResourceGoldenResource(IBaseResource theBaseResource) {
+		return setTagOnResource(
+			theBaseResource,
+			MdmConstants.SYSTEM_BLOCKED_RESOURCE,
+			MdmConstants.CODE_BLOCKED,
+			MdmConstants.CODE_BLOCKED_DISPLAY
+		);
+	}
+
 	/**
 	 * WARNING: This code may _look_ like it replaces in place a code of a tag, but this DOES NOT ACTUALLY WORK!. In reality what will
 	 * happen is a secondary tag will be created with the same system. the only way to actually remove a tag from a resource

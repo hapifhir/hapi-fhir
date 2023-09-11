@@ -41,12 +41,12 @@ import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import javax.annotation.Nonnull;
 
 import static ca.uhn.fhir.context.FhirVersionEnum.DSTU3;
 import static ca.uhn.fhir.context.FhirVersionEnum.R4;
@@ -87,7 +87,8 @@ public class GoldenResourceHelper {
 	 */
 	@Nonnull
 	public <T extends IAnyResource> T createGoldenResourceFromMdmSourceResource(
-			T theIncomingResource, MdmTransactionContext theMdmTransactionContext) {
+			T theIncomingResource, MdmTransactionContext theMdmTransactionContext
+	) {
 		validateContextSupported();
 
 		// get a ref to the actual ID Field
@@ -106,6 +107,14 @@ public class GoldenResourceHelper {
 
 		MdmResourceUtil.setMdmManaged(newGoldenResource);
 		MdmResourceUtil.setGoldenResource(newGoldenResource);
+
+		// TODO - on updating links, if resolving a link, this should go away?
+		// blocked resource's golden resource will be marked special
+		// they are not part of MDM matching algorithm (will not link to other resources)
+		// but other resources can link to them
+		if (theMdmTransactionContext.getIsBlocked()) {
+			MdmResourceUtil.setGoldenResourceAsBlockedResourceGoldenResource(newGoldenResource);
+		}
 
 		// add the partition id to the new resource
 		newGoldenResource.setUserData(

@@ -51,7 +51,7 @@ public class MdmLinkSvcImpl implements IMdmLinkSvc {
 	private static final Logger ourLog = Logs.getMdmTroubleshootingLog();
 
 	@Autowired
-	private MdmResourceDaoSvc myMdmResourceDaoSvc;
+	private MdmResourceDaoSvcImpl myMdmResourceDaoSvc;
 
 	@Autowired
 	private MdmLinkDaoSvc myMdmLinkDaoSvc;

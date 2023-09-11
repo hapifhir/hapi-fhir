@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.jpa.mdm.svc;
 
+import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.mdm.models.FindGoldenResourceCandidatesParams;
 import ca.uhn.fhir.jpa.mdm.svc.candidate.CandidateList;
 import ca.uhn.fhir.jpa.mdm.svc.candidate.CandidateStrategyEnum;
@@ -69,6 +70,9 @@ public class MdmMatchLinkSvc {
 	@Autowired
 	private IBlockRuleEvaluationSvc myBlockRuleEvaluationSvc;
 
+	@Autowired
+	private DaoRegistry myDaoRegistry;
+
 	/**
 	 * Given an MDM source (consisting of any supported MDM type), find a suitable Golden Resource candidate for them,
 	 * or create one if one does not exist. Performs matching based on rules defined in mdm-rules.json.
@@ -102,6 +106,8 @@ public class MdmMatchLinkSvc {
 		 * (so that future resources may match to it).
 		 */
 		boolean isResourceBlocked = myBlockRuleEvaluationSvc.isMdmMatchingBlocked(theResource);
+		// we will mark the golden resource special for this
+		theMdmTransactionContext.setIsBlocked(isResourceBlocked);
 
 		if (!isResourceBlocked) {
 			FindGoldenResourceCandidatesParams params =
@@ -181,7 +187,10 @@ public class MdmMatchLinkSvc {
 		return goldenResources;
 	}
 
-	private void handleMdmWithNoCandidates(IAnyResource theResource, MdmTransactionContext theMdmTransactionContext) {
+	private void handleMdmWithNoCandidates(
+		IAnyResource theResource,
+		MdmTransactionContext theMdmTransactionContext
+	) {
 		log(
 				theMdmTransactionContext,
 				String.format(
@@ -189,6 +198,7 @@ public class MdmMatchLinkSvc {
 						theResource.getIdElement().getResourceType()));
 		IAnyResource newGoldenResource =
 				myGoldenResourceHelper.createGoldenResourceFromMdmSourceResource(theResource, theMdmTransactionContext);
+		
 		// TODO GGG :)
 		// 1. Get the right helper
 		// 2. Create source resource for the MDM source

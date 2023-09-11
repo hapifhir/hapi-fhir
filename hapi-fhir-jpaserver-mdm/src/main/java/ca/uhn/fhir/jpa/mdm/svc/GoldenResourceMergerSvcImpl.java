@@ -73,7 +73,7 @@ public class GoldenResourceMergerSvcImpl implements IGoldenResourceMergerSvc {
 	IIdHelperService myIdHelperService;
 
 	@Autowired
-	MdmResourceDaoSvc myMdmResourceDaoSvc;
+    MdmResourceDaoSvcImpl myMdmResourceDaoSvc;
 
 	@Autowired
 	MdmPartitionHelper myMdmPartitionHelper;

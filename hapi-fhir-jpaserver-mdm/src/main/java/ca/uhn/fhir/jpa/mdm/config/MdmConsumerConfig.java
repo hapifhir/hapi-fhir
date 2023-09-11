@@ -39,7 +39,7 @@ import ca.uhn.fhir.jpa.mdm.svc.MdmLinkUpdaterSvcImpl;
 import ca.uhn.fhir.jpa.mdm.svc.MdmMatchFinderSvcImpl;
 import ca.uhn.fhir.jpa.mdm.svc.MdmMatchLinkSvc;
 import ca.uhn.fhir.jpa.mdm.svc.MdmModelConverterSvcImpl;
-import ca.uhn.fhir.jpa.mdm.svc.MdmResourceDaoSvc;
+import ca.uhn.fhir.jpa.mdm.svc.MdmResourceDaoSvcImpl;
 import ca.uhn.fhir.jpa.mdm.svc.MdmResourceFilteringSvc;
 import ca.uhn.fhir.jpa.mdm.svc.MdmSurvivorshipSvcImpl;
 import ca.uhn.fhir.jpa.mdm.svc.candidate.CandidateSearcher;
@@ -58,6 +58,7 @@ import ca.uhn.fhir.mdm.api.IMdmLinkQuerySvc;
 import ca.uhn.fhir.mdm.api.IMdmLinkSvc;
 import ca.uhn.fhir.mdm.api.IMdmLinkUpdaterSvc;
 import ca.uhn.fhir.mdm.api.IMdmMatchFinderSvc;
+import ca.uhn.fhir.mdm.api.IMdmResourceDaoSvc;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.api.IMdmSurvivorshipService;
 import ca.uhn.fhir.mdm.batch2.MdmBatch2Config;
@@ -130,8 +131,8 @@ public class MdmConsumerConfig {
 	}
 
 	@Bean
-	MdmResourceDaoSvc mdmResourceDaoSvc() {
-		return new MdmResourceDaoSvc();
+	IMdmResourceDaoSvc mdmResourceDaoSvc() {
+		return new MdmResourceDaoSvcImpl();
 	}
 
 	@Bean

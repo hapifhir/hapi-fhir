@@ -20,7 +20,7 @@
 package ca.uhn.fhir.jpa.mdm.svc.candidate;
 
 import ca.uhn.fhir.jpa.mdm.models.FindGoldenResourceCandidatesParams;
-import ca.uhn.fhir.jpa.mdm.svc.MdmResourceDaoSvc;
+import ca.uhn.fhir.jpa.mdm.svc.MdmResourceDaoSvcImpl;
 import ca.uhn.fhir.mdm.log.Logs;
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
@@ -36,7 +36,7 @@ public class MdmGoldenResourceFindingSvc {
 	private static final Logger ourLog = Logs.getMdmTroubleshootingLog();
 
 	@Autowired
-	private MdmResourceDaoSvc myMdmResourceDaoSvc;
+	private MdmResourceDaoSvcImpl myMdmResourceDaoSvc;
 
 	@Autowired
 	private FindCandidateByEidSvc myFindCandidateByEidSvc;

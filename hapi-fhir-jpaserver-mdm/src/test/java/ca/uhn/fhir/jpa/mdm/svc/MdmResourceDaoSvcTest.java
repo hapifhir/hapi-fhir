@@ -23,7 +23,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class MdmResourceDaoSvcTest extends BaseMdmR4Test {
 	private static final String TEST_EID = "TEST_EID";
 	@Autowired
-	MdmResourceDaoSvc myResourceDaoSvc;
+	MdmResourceDaoSvcImpl myResourceDaoSvc;
 
 	@Override
 	@AfterEach

@@ -1,7 +1,9 @@
 package ca.uhn.fhir.mdm.api;
 
-import ca.uhn.fhir.mdm.api.parameters.MdmGenerateMetricParameters;
-import ca.uhn.fhir.mdm.model.MdmMetrics;
+import ca.uhn.fhir.mdm.api.parameters.GenerateMdmLinkMetricParameters;
+import ca.uhn.fhir.mdm.api.parameters.GenerateMdmResourceMetricsParameters;
+import ca.uhn.fhir.mdm.model.MdmLinkMetrics;
+import ca.uhn.fhir.mdm.model.MdmResourceMetrics;
 
 public interface IMdmMetricSvc {
 
@@ -9,7 +11,7 @@ public interface IMdmMetricSvc {
 	 * Generates the metrics for the provided parameters.
 	 * This implementation is persistence dependent.
 	 */
-	MdmMetrics generateMetrics(MdmGenerateMetricParameters theParameters);
+	MdmLinkMetrics generateLinkMetrics(GenerateMdmLinkMetricParameters theParameters);
 
-	void metrics2();
+	MdmResourceMetrics generateResourceMetrics(GenerateMdmResourceMetricsParameters theParameters);
 }

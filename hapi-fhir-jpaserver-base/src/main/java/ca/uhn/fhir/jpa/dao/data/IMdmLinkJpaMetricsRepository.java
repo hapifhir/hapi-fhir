@@ -13,6 +13,7 @@ import java.util.List;
 @Repository("metricsRepository")
 public interface IMdmLinkJpaMetricsRepository extends JpaRepository<MdmLink, Long>, IHapiFhirJpaRepository {
 
+
 	// TODO - this works best with the following index on MdmLink
 	// create index ls_2_mt_index on a_test_link
 	// (target_type, link_source, match_result)

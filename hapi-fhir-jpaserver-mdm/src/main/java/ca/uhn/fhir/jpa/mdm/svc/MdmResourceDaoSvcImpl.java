@@ -26,9 +26,13 @@ import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.model.entity.TagTypeEnum;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.mdm.api.IMdmResourceDaoSvc;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.api.MdmConstants;
+import ca.uhn.fhir.mdm.api.parameters.GetGoldenResourceCountParameters;
+import ca.uhn.fhir.mdm.model.MdmGoldenResourceCount;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.SearchTotalModeEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
@@ -45,7 +49,7 @@ import java.util.Optional;
 import javax.annotation.Nonnull;
 
 @Service
-public class MdmResourceDaoSvc {
+public class MdmResourceDaoSvcImpl implements IMdmResourceDaoSvc {
 
 	private static final int MAX_MATCHING_GOLDEN_RESOURCES = 1000;
 
@@ -55,6 +59,7 @@ public class MdmResourceDaoSvc {
 	@Autowired
 	IMdmSettings myMdmSettings;
 
+	@Override
 	public DaoMethodOutcome upsertGoldenResource(IAnyResource theGoldenResource, String theResourceType) {
 		IFhirResourceDao resourceDao = myDaoRegistry.getResourceDao(theResourceType);
 		RequestDetails requestDetails = new SystemRequestDetails().setRequestPartitionId((RequestPartitionId)
@@ -66,12 +71,7 @@ public class MdmResourceDaoSvc {
 		}
 	}
 
-	/**
-	 * Given a resource, remove its Golden Resource tag.
-	 *
-	 * @param theGoldenResource the {@link IAnyResource} to remove the tag from.
-	 * @param theResourcetype   the type of that resource
-	 */
+	@Override
 	public void removeGoldenResourceTag(IAnyResource theGoldenResource, String theResourcetype) {
 		IFhirResourceDao resourceDao = myDaoRegistry.getResourceDao(theResourcetype);
 		RequestDetails requestDetails = new SystemRequestDetails().setRequestPartitionId((RequestPartitionId)
@@ -84,15 +84,18 @@ public class MdmResourceDaoSvc {
 				requestDetails);
 	}
 
+	@Override
 	public IAnyResource readGoldenResourceByPid(IResourcePersistentId theGoldenResourcePid, String theResourceType) {
 		IFhirResourceDao resourceDao = myDaoRegistry.getResourceDao(theResourceType);
 		return (IAnyResource) resourceDao.readByPid(theGoldenResourcePid);
 	}
 
+	@Override
 	public Optional<IAnyResource> searchGoldenResourceByEID(String theEid, String theResourceType) {
 		return this.searchGoldenResourceByEID(theEid, theResourceType, null);
 	}
 
+	@Override
 	public Optional<IAnyResource> searchGoldenResourceByEID(
 			String theEid, String theResourceType, RequestPartitionId thePartitionId) {
 		SearchParameterMap map = buildEidSearchParameterMap(theEid, theResourceType);
@@ -119,14 +122,47 @@ public class MdmResourceDaoSvc {
 		}
 	}
 
+	@Override
+	public MdmGoldenResourceCount getGoldenResourceCounts(GetGoldenResourceCountParameters theParameters) {
+		String resourceType = theParameters.getResourceType();
+
+		MdmGoldenResourceCount retVal = new MdmGoldenResourceCount();
+		retVal.setResourceType(resourceType);
+
+		/*
+		 * This could be inefficient
+		 */
+		SearchParameterMap map = buildBasicGoldenResourceSearchParameterMap(resourceType);
+		map.setSearchTotalMode(SearchTotalModeEnum.ACCURATE);
+		map.setCount(0);
+
+		IFhirResourceDao dao = myDaoRegistry.getResourceDao(resourceType);
+
+		// find all goldenresources
+		IBundleProvider outcome = dao.search(map, new SystemRequestDetails());
+		retVal.setGoldenResourceCount(outcome.size());
+
+		// find only block listed ones
+		map.add("_tag", new TokenParam(MdmConstants.SYSTEM_BLOCKED_RESOURCE, MdmConstants.CODE_BLOCKED));
+		outcome = dao.search(map, new SystemRequestDetails());
+		retVal.setBlockListedGoldenResourceCount(outcome.size());
+
+		return retVal;
+	}
+
 	@Nonnull
 	private SearchParameterMap buildEidSearchParameterMap(String theEid, String theResourceType) {
+		SearchParameterMap map = buildBasicGoldenResourceSearchParameterMap(theEid);
+		map.add(
+			"identifier",
+			new TokenParam(
+				myMdmSettings.getMdmRules().getEnterpriseEIDSystemForResourceType(theResourceType), theEid));
+		return map;
+	}
+
+	private SearchParameterMap buildBasicGoldenResourceSearchParameterMap(String theResourceType) {
 		SearchParameterMap map = new SearchParameterMap();
 		map.setLoadSynchronous(true);
-		map.add(
-				"identifier",
-				new TokenParam(
-						myMdmSettings.getMdmRules().getEnterpriseEIDSystemForResourceType(theResourceType), theEid));
 		map.add("_tag", new TokenParam(MdmConstants.SYSTEM_GOLDEN_RECORD_STATUS, MdmConstants.CODE_GOLDEN_RECORD));
 		return map;
 	}

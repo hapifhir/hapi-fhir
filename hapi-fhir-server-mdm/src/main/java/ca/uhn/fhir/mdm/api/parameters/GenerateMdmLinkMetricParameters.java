@@ -6,7 +6,7 @@ import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MdmGenerateMetricParameters {
+public class GenerateMdmLinkMetricParameters {
 
 	/**
 	 * The resource type of interest.
@@ -24,7 +24,7 @@ public class MdmGenerateMetricParameters {
 	 */
 	private List<MdmLinkSourceEnum> myLinkSourceFilters;
 
-	public MdmGenerateMetricParameters(String theResourceType) {
+	public GenerateMdmLinkMetricParameters(String theResourceType) {
 		myResourceType = theResourceType;
 	}
 

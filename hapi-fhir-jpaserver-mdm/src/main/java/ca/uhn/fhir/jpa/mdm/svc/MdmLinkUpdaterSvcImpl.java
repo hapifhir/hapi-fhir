@@ -72,7 +72,7 @@ public class MdmLinkUpdaterSvcImpl implements IMdmLinkUpdaterSvc {
 	MdmLinkDaoSvc myMdmLinkDaoSvc;
 
 	@Autowired
-	MdmResourceDaoSvc myMdmResourceDaoSvc;
+	MdmResourceDaoSvcImpl myMdmResourceDaoSvc;
 
 	@Autowired
 	MdmMatchLinkSvc myMdmMatchLinkSvc;

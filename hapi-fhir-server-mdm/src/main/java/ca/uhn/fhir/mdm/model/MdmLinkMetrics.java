@@ -8,7 +8,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.HashMap;
 import java.util.Map;
 
-public class MdmMetrics implements IModelJson {
+public class MdmLinkMetrics implements IModelJson {
 
 	@JsonProperty("resourceType")
 	private String myResourceType;

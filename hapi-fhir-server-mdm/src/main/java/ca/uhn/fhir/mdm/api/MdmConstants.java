@@ -34,6 +34,13 @@ public class MdmConstants {
 			"http://hapifhir.io/fhir/NamingSystem/mdm-golden-resource-enterprise-id";
 	public static final String ALL_RESOURCE_SEARCH_PARAM_TYPE = "*";
 
+	/**
+	 * Blocked resource tag info
+	 */
+	public static final String SYSTEM_BLOCKED_RESOURCE = "http://hapifhir.io/fhir/NamingSystem/mdm-blocked-record";
+	public static final String CODE_BLOCKED = "BLOCKED_RESOURCE";
+	public static final String CODE_BLOCKED_DISPLAY = "Source Resource is omitted from MDM matching.";
+
 	public static final String FIHR_STRUCTURE_DEF_MATCH_GRADE_URL_NAMESPACE =
 			"http://hl7.org/fhir/StructureDefinition/match-grade";
 
