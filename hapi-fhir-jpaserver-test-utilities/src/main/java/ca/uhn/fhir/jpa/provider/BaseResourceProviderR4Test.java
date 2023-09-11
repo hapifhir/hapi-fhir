@@ -121,9 +121,6 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 				s.registerInterceptor(corsInterceptor);
 			})
 			.withServerBeforeEach(s -> {
-				// FIXME: remove
-				myFhirContext.getRestfulClientFactory().setSocketTimeout(999999999);
-
 				myPort = myServer.getPort();
 				myServerBase = myServer.getBaseUrl();
 				myClient = myServer.getFhirClient();
