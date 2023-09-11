@@ -186,6 +186,7 @@ public class Constants {
 	 * @since 7.0.0
 	 */
 	public static final String PARAM_LANGUAGE = "_language";
+
 	public static final String PARAM_INCLUDE_QUALIFIER_RECURSE = ":recurse";
 	public static final String PARAM_INCLUDE_RECURSE = "_include" + PARAM_INCLUDE_QUALIFIER_RECURSE;
 	public static final String PARAM_INCLUDE_QUALIFIER_ITERATE = ":iterate";

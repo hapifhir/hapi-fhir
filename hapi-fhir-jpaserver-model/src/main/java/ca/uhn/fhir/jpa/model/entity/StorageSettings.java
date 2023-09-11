@@ -1302,7 +1302,6 @@ public class StorageSettings {
 		return myQualifySubscriptionMatchingChannelName;
 	}
 
-
 	/**
 	 * @return Should the {@literal _lamguage} SearchParameter be supported on this server? Defaults to {@literal false}.
 	 * @since 7.0.0

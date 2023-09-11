@@ -53,7 +53,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
@@ -215,8 +214,7 @@ public class SearchParamRegistryImpl
 					Collections.emptySet(),
 					Collections.emptySet(),
 					RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE,
-					myFhirContext.getResourceTypes()
-			);
+					myFhirContext.getResourceTypes());
 			for (String baseResourceType : sp.getBase()) {
 				searchParams.add(baseResourceType, sp.getName(), sp);
 			}
