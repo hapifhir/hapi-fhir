@@ -185,7 +185,7 @@ public class MeasureService {
 								: "Practitioner/" + thePractitioner)));
 
 		var bundle = theRepository.search(Bundle.class, Patient.class, map);
-		var iterator = new BundleIterator<>(theRepository, Bundle.class, bundle);
+		var iterator = new BundleIterator<>(theRepository, bundle);
 
 		while (iterator.hasNext()) {
 			var patient = iterator.next().getResource();

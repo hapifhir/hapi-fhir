@@ -110,6 +110,7 @@ public class CdsCrServiceR4 implements ICdsCrService {
 						"Authorization: %s %s",
 						tokenType, theJson.getServiceRequestAuthorizationJson().getAccessToken()));
 			}
+			endpoint.addHeader("Epic-Client-ID: 2cb5af9f-f483-4e2a-aedc-54c3a31cb153");
 			parameters.addParameter(part(APPLY_PARAMETER_DATA_ENDPOINT, endpoint));
 		}
 		return parameters;
