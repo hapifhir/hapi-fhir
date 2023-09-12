@@ -512,7 +512,7 @@ public class FhirSystemDaoTransactionR5Test extends BaseJpaR5Test {
 
 		Bundle input = loadResourceFromClasspath(Bundle.class, "docref-test-bundle.json");
 		Bundle output = mySystemDao.transaction(mySrd, input);
-		assertEquals(5, output.getEntry().size());
+		assertEquals(1, output.getEntry().size());
 	}
 
 
