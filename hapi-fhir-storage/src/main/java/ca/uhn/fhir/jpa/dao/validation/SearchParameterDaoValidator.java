@@ -24,7 +24,6 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
-import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
@@ -102,14 +101,6 @@ public class SearchParameterDaoValidator {
 		// Search parameters must have a base
 		if (isCompositeWithoutBase(searchParameter)) {
 			throw new UnprocessableEntityException(Msg.code(1113) + "SearchParameter.base is missing");
-		}
-
-		// Ban _language unless it's enabled on the server
-		if (Constants.PARAM_LANGUAGE.equals(searchParameter.getCode())) {
-			if (!myStorageSettings.isLanguageSearchParameterEnabled()) {
-				throw new UnprocessableEntityException(Msg.code(2432) + "This server is not configured to allow the "
-						+ Constants.PARAM_LANGUAGE + " SearchParameter");
-			}
 		}
 
 		// Do we have a valid expression

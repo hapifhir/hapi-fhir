@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 5300
+title: "A bug in DefaultProfileValidationSupport in R5 mode caused it to return duplicates
+   in the lists returned by `fetchAllStructureDefinitions()`, `fetchAllSearchParameters()`, etc.
+   This has been corrected."

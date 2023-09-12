@@ -4,7 +4,6 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.searchparam.registry.SearchParameterCanonicalizer;
-import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.util.HapiExtensions;
@@ -15,7 +14,6 @@ import org.hl7.fhir.r5.model.Extension;
 import org.hl7.fhir.r5.model.SearchParameter;
 import org.hl7.fhir.r5.model.SearchParameter.SearchParameterComponentComponent;
 import org.hl7.fhir.r5.model.StringType;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -40,8 +38,6 @@ import static org.hl7.fhir.r5.model.Enumerations.SearchParamType.TOKEN;
 import static org.hl7.fhir.r5.model.Enumerations.SearchParamType.URI;
 import static org.hl7.fhir.r5.model.Enumerations.VersionIndependentResourceTypesAll.OBSERVATION;
 import static org.hl7.fhir.r5.model.Enumerations.VersionIndependentResourceTypesAll.PATIENT;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.eq;
@@ -84,29 +80,7 @@ public class SearchParameterDaoValidatorTest {
         RuntimeSearchParam observationCodeRuntimeSearchParam = mySearchParameterCanonicalizer.canonicalizeSearchParameter(observationCodeSp);
         lenient().when(mySearchParamRegistry.getActiveSearchParamByUrl(eq(theDefinition))).thenReturn(observationCodeRuntimeSearchParam);
     }
-
-    @Test
-    public void testValidateLanguageSearchParameter() {
-        SearchParameter sp = new SearchParameter();
-        sp.setId("SearchParameter/patient-language");
-        sp.setUrl("http://example.org/SearchParameter/patient-language");
-        sp.addBase(PATIENT);
-        sp.setCode(Constants.PARAM_LANGUAGE);
-        sp.setType(TOKEN);
-        sp.setStatus(ACTIVE);
-        sp.setExpression("language");
-        sp.addTarget(PATIENT);
-
-        SearchParameter canonicalSp = myVersionCanonicalizer.searchParameterToCanonical(sp);
-
-        // Test and Verify
-		myStorageSettings.setLanguageSearchParameterEnabled(false);
-        assertThrows(UnprocessableEntityException.class, () -> mySvc.validate(canonicalSp));
-        myStorageSettings.setLanguageSearchParameterEnabled(true);
-        assertDoesNotThrow(() -> mySvc.validate(canonicalSp));
-    }
-
-
+    
     @Test
     public void testValidateSubscription() {
         SearchParameter sp = new SearchParameter();
