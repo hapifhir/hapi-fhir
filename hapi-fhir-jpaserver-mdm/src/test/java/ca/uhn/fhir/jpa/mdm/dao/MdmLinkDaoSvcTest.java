@@ -7,7 +7,7 @@ import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.EnversRevision;
 import ca.uhn.fhir.jpa.util.TestUtil;
 import ca.uhn.fhir.mdm.api.IMdmLink;
-import ca.uhn.fhir.mdm.api.MdmHistorySearchParameters;
+import ca.uhn.fhir.mdm.api.params.MdmHistorySearchParameters;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
 import ca.uhn.fhir.mdm.api.MdmLinkWithRevision;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
