@@ -406,8 +406,6 @@ public class JpaStorageResourceParser implements IJpaStorageResourceParser {
 							if (userSelected != null) {
 								secLabel.setUserSelected(userSelected);
 							}
-
-							// wipmb these technically support userSelected and version
 							securityLabels.add(secLabel);
 							break;
 						case TAG:
