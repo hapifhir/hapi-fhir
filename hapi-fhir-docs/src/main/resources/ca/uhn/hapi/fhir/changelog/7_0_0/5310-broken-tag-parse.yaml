@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 5310
+title: "Add support for userSelected and version to DSTU2. Also fix them on security labels in JPA."
