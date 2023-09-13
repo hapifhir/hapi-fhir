@@ -70,14 +70,11 @@ import ca.uhn.fhir.jpa.dao.index.DaoResourceLinkResolver;
 import ca.uhn.fhir.jpa.dao.index.DaoSearchParamSynchronizer;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.dao.index.SearchParamWithInlineReferencesExtractor;
-import ca.uhn.fhir.jpa.dao.mdm.JpaMdmLinkImplFactory;
-import ca.uhn.fhir.jpa.dao.mdm.MdmLinkDaoJpaImpl;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.dao.validation.SearchParameterDaoValidator;
 import ca.uhn.fhir.jpa.delete.DeleteConflictFinderService;
 import ca.uhn.fhir.jpa.delete.DeleteConflictService;
 import ca.uhn.fhir.jpa.delete.ThreadSafeResourceDeleterSvc;
-import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.esr.ExternallyStoredResourceServiceRegistry;
 import ca.uhn.fhir.jpa.graphql.DaoRegistryGraphQLStorageServices;
@@ -171,9 +168,6 @@ import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.jpa.util.PersistenceContextProvider;
 import ca.uhn.fhir.jpa.validation.ResourceLoaderImpl;
 import ca.uhn.fhir.jpa.validation.ValidationSettings;
-import ca.uhn.fhir.mdm.dao.IMdmLinkDao;
-import ca.uhn.fhir.mdm.dao.IMdmLinkImplFactory;
-import ca.uhn.fhir.mdm.svc.MdmLinkExpandSvc;
 import ca.uhn.fhir.model.api.IPrimitiveDatatype;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.IDeleteExpungeJobSubmitter;
@@ -221,7 +215,8 @@ import javax.annotation.Nullable;
 	JpaBulkExportConfig.class,
 	SearchConfig.class,
 	PackageLoaderConfig.class,
-	EnversAuditConfig.class
+	EnversAuditConfig.class,
+	MdmJpaConfig.class
 })
 public class JpaConfig {
 	public static final String JPA_VALIDATION_SUPPORT_CHAIN = "myJpaValidationSupportChain";
@@ -478,11 +473,6 @@ public class JpaConfig {
 	@Lazy
 	public RequestTenantPartitionInterceptor requestTenantPartitionInterceptor() {
 		return new RequestTenantPartitionInterceptor();
-	}
-
-	@Bean
-	public MdmLinkExpandSvc mdmLinkExpandSvc() {
-		return new MdmLinkExpandSvc();
 	}
 
 	@Bean
@@ -856,16 +846,6 @@ public class JpaConfig {
 	@Bean
 	public ObservationLastNIndexPersistSvc baseObservationLastNIndexpersistSvc() {
 		return new ObservationLastNIndexPersistSvc();
-	}
-
-	@Bean
-	public IMdmLinkDao<JpaPid, MdmLink> mdmLinkDao() {
-		return new MdmLinkDaoJpaImpl();
-	}
-
-	@Bean
-	IMdmLinkImplFactory<MdmLink> mdmLinkImplFactory() {
-		return new JpaMdmLinkImplFactory();
 	}
 
 	@Bean

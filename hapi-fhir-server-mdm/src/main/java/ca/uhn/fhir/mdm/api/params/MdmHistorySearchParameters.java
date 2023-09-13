@@ -1,4 +1,4 @@
-package ca.uhn.fhir.mdm.api;
+package ca.uhn.fhir.mdm.api.params;
 
 /*-
  * #%L
@@ -33,8 +33,23 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 public class MdmHistorySearchParameters {
+
+	public enum JoinType {
+		AND,
+		OR
+	}
+
 	private List<IIdType> myGoldenResourceIds = new ArrayList<>();
 	private List<IIdType> mySourceIds = new ArrayList<>();
+
+	/**
+	 * When both myGoldenResourceIds and mySourceIds are provided,
+	 * this parameter determines whether to 'and' or 'or' the query
+	 * that fetches links by these values.
+	 *
+	 * Default (legacy) functionality is 'or'.
+	 */
+	private JoinType myParameterJoinType = JoinType.OR;
 
 	public MdmHistorySearchParameters() {}
 
@@ -46,6 +61,10 @@ public class MdmHistorySearchParameters {
 		return mySourceIds;
 	}
 
+	public JoinType getParameterJoinType() {
+		return myParameterJoinType;
+	}
+
 	public MdmHistorySearchParameters setGoldenResourceIds(List<String> theGoldenResourceIds) {
 		myGoldenResourceIds = extractId(theGoldenResourceIds);
 		return this;
@@ -53,6 +72,11 @@ public class MdmHistorySearchParameters {
 
 	public MdmHistorySearchParameters setSourceIds(List<String> theSourceIds) {
 		mySourceIds = extractId(theSourceIds);
+		return this;
+	}
+
+	public MdmHistorySearchParameters setJoinType(JoinType theJoinType) {
+		myParameterJoinType = theJoinType;
 		return this;
 	}
 

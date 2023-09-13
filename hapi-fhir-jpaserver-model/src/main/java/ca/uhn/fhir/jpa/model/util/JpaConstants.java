@@ -23,6 +23,8 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.util.HapiExtensions;
 
+import java.util.Set;
+
 public class JpaConstants {
 
 	/**
@@ -306,7 +308,8 @@ public class JpaConstants {
 	public static final String BULK_META_EXTENSION_JOB_ID = "https://hapifhir.org/NamingSystem/bulk-export-job-id";
 	public static final String BULK_META_EXTENSION_RESOURCE_TYPE =
 			"https://hapifhir.org/NamingSystem/bulk-export-binary-resource-type";
-
+	public static final Set<String> UNDESIRED_RESOURCE_LINKAGES_FOR_EVERYTHING_ON_PATIENT_INSTANCE =
+			Set.of("Provenance", "List", "Group");
 	/**
 	 * Non-instantiable
 	 */

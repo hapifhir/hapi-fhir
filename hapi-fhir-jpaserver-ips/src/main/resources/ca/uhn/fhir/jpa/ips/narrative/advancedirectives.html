@@ -22,7 +22,7 @@ Date: Consent.dateTime
             <th:block th:with="extension=${entry.getResource().getExtensionByUrl('http://hl7.org/fhir/StructureDefinition/narrativeLink').getValue().getValue()}">
                <tr th:id="${#strings.arraySplit(extension, '#')[1]}">
                   <td th:insert="IpsUtilityFragments :: codeableConcept (cc=*{getScope()},attr='display')">Scope</td>
-                  <td th:text="*{getStatus().getCode()}">Status</td>
+                  <td th:text="*{getStatus().getDisplay()}">Status</td>
                   <td th:insert="IpsUtilityFragments :: concatCodeableConcept (list=*{getProvision().getAction()})">Action Controlled</td>
                   <td th:text="*{getDateTimeElement().getValue()}">Date</td>
                </tr>

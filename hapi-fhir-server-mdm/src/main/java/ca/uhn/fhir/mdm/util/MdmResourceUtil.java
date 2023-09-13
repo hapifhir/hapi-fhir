@@ -118,6 +118,12 @@ public final class MdmResourceUtil {
 				MdmConstants.DISPLAY_GOLDEN_RECORD);
 	}
 
+	/**
+	 * Sets the provided resource as 'redirected' golden resource.
+	 * This is done when a Golden Resource has been deprecated
+	 * and is no longer the primary golden resource (for example,
+	 * after a merge of 2 golden resources).
+	 */
 	public static IBaseResource setGoldenResourceRedirected(IBaseResource theBaseResource) {
 		return setTagOnResource(
 				theBaseResource,
