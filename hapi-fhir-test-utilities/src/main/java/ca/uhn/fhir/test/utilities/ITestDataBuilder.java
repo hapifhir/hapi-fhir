@@ -81,6 +81,13 @@ public interface ITestDataBuilder {
 	}
 
 	/**
+	 * Set Resource.language
+	 */
+	default ICreationArgument withLanguage(String theLanguage) {
+		return t -> __setPrimitiveChild(getFhirContext(), t, "language", "string", theLanguage);
+	}
+
+	/**
 	 * Set Patient.gender
 	 */
 	default ICreationArgument withGender(String theGender) {
