@@ -4,6 +4,7 @@ import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.data.IMdmLinkJpaMetricsRepository;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.mdm.api.BaseMdmMetricSvc;
 import ca.uhn.fhir.mdm.api.IMdmMetricSvc;
 import ca.uhn.fhir.mdm.api.IMdmResourceDaoSvc;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
@@ -24,22 +25,17 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Arrays;
 import java.util.List;
 
-public class MdmMetricSvcJpaImpl implements IMdmMetricSvc {
+public class MdmMetricSvcJpaImpl extends BaseMdmMetricSvc {
 
 	private final IMdmLinkJpaMetricsRepository myJpaRepository;
-
-	private final IMdmResourceDaoSvc myResourceDaoSvc;
-	
-	private final DaoRegistry myDaoRegistry;
 
 	public MdmMetricSvcJpaImpl(
 		IMdmLinkJpaMetricsRepository theRepository,
 		IMdmResourceDaoSvc theResourceDaoSvc,
 		DaoRegistry theDaoRegistry
 	) {
+		super(theResourceDaoSvc, theDaoRegistry);
 		myJpaRepository = theRepository;
-		myDaoRegistry = theDaoRegistry;
-		myResourceDaoSvc = theResourceDaoSvc;
 	}
 
 	@Transactional
@@ -71,30 +67,6 @@ public class MdmMetricSvcJpaImpl implements IMdmMetricSvc {
 		return metrics;
 	}
 
-	@SuppressWarnings("rawtypes")
-	@Override
-	public MdmResourceMetrics generateResourceMetrics(GenerateMdmResourceMetricsParameters theParameters) {
-		String resourceType = theParameters.getResourceType();
-
-		GetGoldenResourceCountParameters resourceCountParameters = new GetGoldenResourceCountParameters();
-		resourceCountParameters.setResourceType(resourceType);
-		MdmGoldenResourceCount grCountResult = myResourceDaoSvc.getGoldenResourceCounts(resourceCountParameters);
-
-		SearchParameterMap searchParameterMap = new SearchParameterMap();
-		searchParameterMap.setLoadSynchronous(true);
-		searchParameterMap.setCount(0);
-		searchParameterMap.setSearchTotalMode(SearchTotalModeEnum.ACCURATE);
-		IFhirResourceDao dao = myDaoRegistry.getResourceDao(resourceType);
-		IBundleProvider result = dao.search(searchParameterMap, new SystemRequestDetails());
-
-		MdmResourceMetrics metrics = new MdmResourceMetrics();
-		metrics.setResourceType(resourceType);
-		metrics.setGoldenResourcesCount(grCountResult.getGoldenResourceCount());
-		metrics.setExcludedResources(grCountResult.getBlockListedGoldenResourceCount());
-		metrics.setSourceResourcesCount(result.size() - metrics.getGoldenResourcesCount());
-
-		return metrics;
-	}
 
 	@Transactional
 	@Override

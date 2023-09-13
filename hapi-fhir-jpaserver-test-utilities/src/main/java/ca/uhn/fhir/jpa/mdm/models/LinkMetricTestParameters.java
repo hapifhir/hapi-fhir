@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.mdm.dao.testmodels;
+package ca.uhn.fhir.jpa.mdm.models;
 
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;

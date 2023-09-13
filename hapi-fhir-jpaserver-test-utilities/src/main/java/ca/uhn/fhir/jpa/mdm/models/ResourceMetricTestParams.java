@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.mdm.dao.testmodels;
+package ca.uhn.fhir.jpa.mdm.models;
 
 import java.util.ArrayList;
 import java.util.List;
