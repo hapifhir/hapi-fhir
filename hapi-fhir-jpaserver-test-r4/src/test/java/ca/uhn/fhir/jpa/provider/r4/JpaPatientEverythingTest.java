@@ -124,16 +124,20 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
     public void testLargeEverythingFetchReturnsAllPossibleResources() throws IOException {
         myStorageSettings.setResourceClientIdStrategy(JpaStorageSettings.ClientIdStrategyEnum.ANY);
 
+        // This bundle has a bunch of resources all in the compartment of the
+        // patient below
         Bundle input = myFhirContext.newJsonParser().parseResource(Bundle.class, loadCompressedResource("large-bundle-for-everything.json.gz"));
+        String patientId = "Patient/9656908";
 
         mySystemDao.transaction(mySrd, input);
 
+        int expectedEverythingSize = 652;
         runInTransaction(() -> {
-            assertEquals(652, myResourceTableDao.count());
+            assertEquals(expectedEverythingSize, myResourceTableDao.count());
         });
 
 		// Try with a direct API call
-		{
+        {
 			Set<String> actualResourceIds = new HashSet<>();
 			PatientEverythingParameters params = new PatientEverythingParameters();
 			int pageSize = 10000;
@@ -142,10 +146,10 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
 			request.setServer(myServer.getRestfulServer());
 			request.setServletRequest(new MockHttpServletRequest());
 			request.setServletResponse(new MockHttpServletResponse());
-			IBundleProvider outcome = myPatientDao.patientInstanceEverything(null, request, params, new IdType("Patient/9656908"));
+			IBundleProvider outcome = myPatientDao.patientInstanceEverything(null, request, params, new IdType(patientId));
 			List<IBaseResource> resources = outcome.getResources(0, pageSize);
 			actualResourceIds.addAll(resources.stream().map(t -> t.getIdElement().toUnqualifiedVersionless().getValue()).toList());
-			assertEquals(652, actualResourceIds.size());
+			assertEquals(expectedEverythingSize, actualResourceIds.size());
 		}
 
         // Try with an HTTP call
@@ -153,7 +157,7 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
             Set<String> actualResourceIds = new HashSet<>();
             Bundle outcome = myClient
                     .operation()
-                    .onInstance(new IdType("Patient/9656908"))
+                    .onInstance(new IdType(patientId))
                     .named("$everything")
                     .withNoParameters(Parameters.class)
                     .useHttpGet()
@@ -172,7 +176,7 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
                 }
             }
 
-            assertEquals(652, actualResourceIds.size());
+            assertEquals(expectedEverythingSize, actualResourceIds.size());
         }
     }
 
