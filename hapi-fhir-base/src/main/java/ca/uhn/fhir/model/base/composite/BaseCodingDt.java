@@ -63,17 +63,16 @@ public abstract class BaseCodingDt extends BaseIdentifiableElement implements IC
 
 	public abstract BooleanDt getUserSelectedElement();
 
-
-		/**
-		 * Gets the value(s) for <b>display</b> (Representation defined by the system).
-		 * creating it if it does
-		 * not exist. Will not return <code>null</code>.
-		 *
-		 * <p>
-		 * <b>Definition:</b>
-		 * A representation of the meaning of the code in the system, following the rules of the system.
-		 * </p>
-		 */
+	/**
+	 * Gets the value(s) for <b>display</b> (Representation defined by the system).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+	 * <p>
+	 * <b>Definition:</b>
+	 * A representation of the meaning of the code in the system, following the rules of the system.
+	 * </p>
+	 */
 	public abstract StringDt getDisplayElement();
 
 	public abstract BaseCodingDt setDisplay(String theString);
@@ -174,15 +173,12 @@ public abstract class BaseCodingDt extends BaseIdentifiableElement implements IC
 	 */
 	public abstract BaseCodingDt setSystem(String theUri);
 
-
-
-
-		/**
-		 * <b>Not supported!</b>
-		 *
-		 * @deprecated get/setMissing is not supported in StringDt. Use {@link TokenParam} instead if you
-		 * need this functionality
-		 */
+	/**
+	 * <b>Not supported!</b>
+	 *
+	 * @deprecated get/setMissing is not supported in StringDt. Use {@link TokenParam} instead if you
+	 * need this functionality
+	 */
 	@Deprecated(since = "6.0.0")
 	@Override
 	public Boolean getMissing() {

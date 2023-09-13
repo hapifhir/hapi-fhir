@@ -205,14 +205,11 @@ public abstract class BaseResource extends BaseElement implements IResource {
 				}
 				for (BaseCodingDt next : labelsList) {
 					CodingDt c = new CodingDt(
-						next.getSystemElement().getValue(),
-						next.getCodeElement().getValue())
-						.setDisplay(next.getDisplayElement().getValue());
-					if (next instanceof CodingDt) {
-						CodingDt nextCodingDt = (CodingDt) next;
-						c.setUserSelected(nextCodingDt.getUserSelectedElement());
-						c.setVersion(nextCodingDt.getVersion());
-					}
+							next.getSystemElement().getValue(),
+							next.getCodeElement().getValue());
+					c.setDisplay(next.getDisplayElement().getValue());
+					c.setUserSelected(next.getUserSelectedElement());
+					c.setVersion(next.getVersionElement());
 					retVal.add(c);
 				}
 				return retVal;

@@ -136,6 +136,19 @@ import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.IdentityHashMap;
+import java.util.List;
+import java.util.Set;
+import java.util.StringTokenizer;
+import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.PostConstruct;
@@ -150,19 +163,6 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.xml.stream.events.Characters;
 import javax.xml.stream.events.XMLEvent;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.IdentityHashMap;
-import java.util.List;
-import java.util.Set;
-import java.util.StringTokenizer;
-import java.util.stream.Collectors;
 
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
@@ -333,8 +333,8 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 						next.getSystemElement().getValue(),
 						next.getCodeElement().getValue(),
 						next.getDisplayElement().getValue(),
-					    next.getVersionElement().getValue(),
-					    next.getUserSelectedElement().getValue());
+						next.getVersionElement().getValue(),
+						next.getUserSelectedElement().getValue());
 				if (def != null) {
 					ResourceTag tag = theEntity.addTag(def);
 					allDefs.add(tag);
@@ -563,9 +563,9 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 					}
 				});
 			} catch (Exception ex) {
-				// transaction template can fail if connections to db are exhausted
-				// and/or timeout
-				ourLog.warn("Transaction failed with: {}. Transaction will rollback and be reattempted.", ex.getMessage());
+				// transaction template can fail if connections to db are exhausted and/or timeout
+				ourLog.warn(
+						"Transaction failed with: {}. Transaction will rollback and be reattempted.", ex.getMessage());
 				retVal = null;
 			}
 			count++;

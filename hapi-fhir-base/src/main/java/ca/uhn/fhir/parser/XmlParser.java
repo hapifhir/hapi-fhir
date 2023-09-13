@@ -769,8 +769,9 @@ public class XmlParser extends BaseParser {
 						writeOptionalTagWithValue(theEventWriter, "code", tag.getTerm());
 						writeOptionalTagWithValue(theEventWriter, "display", tag.getLabel());
 						writeOptionalTagWithValue(theEventWriter, "version", tag.getVersion());
-						if (tag.getUserSelectedBoolean() != null) {
-							writeOptionalTagWithValue(theEventWriter, "userSelected", tag.getUserSelectedBoolean().toString());
+						Boolean userSelected = tag.getUserSelectedBoolean();
+						if (userSelected != null) {
+							writeOptionalTagWithValue(theEventWriter, "userSelected", userSelected.toString());
 						}
 						theEventWriter.writeEndElement();
 					}
