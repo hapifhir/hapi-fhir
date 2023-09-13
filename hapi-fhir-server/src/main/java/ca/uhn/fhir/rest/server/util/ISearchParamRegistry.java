@@ -131,4 +131,21 @@ public interface ISearchParamRegistry {
 		}
 		return availableSearchParamDef;
 	}
+
+	/**
+	 * Get all the search params for a resource. First, check the resource itself, then check the top-level `Resource` resource and combine the two.
+	 *
+	 * @param theResourceType the resource type.
+	 *
+	 * @return the {@link ResourceSearchParams} that has all the search params.
+	 */
+	default ResourceSearchParams getRuntimeSearchParams(String theResourceType) {
+		ResourceSearchParams availableSearchParams =
+				getActiveSearchParams(theResourceType).makeCopy();
+		ResourceSearchParams resourceSearchParams = getActiveSearchParams("Resource");
+		resourceSearchParams
+				.getSearchParamNames()
+				.forEach(param -> availableSearchParams.addSearchParamIfAbsent(param, resourceSearchParams.get(param)));
+		return availableSearchParams;
+	}
 }

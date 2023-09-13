@@ -9,7 +9,7 @@
 	<groupId>ca.uhn.hapi.fhir</groupId>
 	<artifactId>hapi-fhir</artifactId>
 	<packaging>pom</packaging>
-	<version>6.9.4-SNAPSHOT</version>
+	<version>6.9.6-SNAPSHOT</version>
 
 	<name>HAPI-FHIR</name>
 	<description>An open-source implementation of the FHIR specification in Java.</description>
@@ -977,7 +977,7 @@
 
 		<stax2_api_version>3.1.4</stax2_api_version>
 		<testcontainers_version>1.17.1</testcontainers_version>
-		<thymeleaf-version>3.0.14.RELEASE</thymeleaf-version>
+		<thymeleaf-version>3.1.2.RELEASE</thymeleaf-version>
 		<woodstox_core_asl_version>4.4.1</woodstox_core_asl_version>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 		<ebay_cors_filter_version>1.0.1</ebay_cors_filter_version>

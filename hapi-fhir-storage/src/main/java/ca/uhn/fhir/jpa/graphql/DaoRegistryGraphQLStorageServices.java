@@ -130,7 +130,7 @@ public class DaoRegistryGraphQLStorageServices implements IGraphQLStorageService
 		RuntimeResourceDefinition typeDef = fhirContext.getResourceDefinition(theType);
 
 		SearchParameterMap params = new SearchParameterMap();
-		ResourceSearchParams searchParams = mySearchParamRegistry.getActiveSearchParams(typeDef.getName());
+		ResourceSearchParams searchParams = mySearchParamRegistry.getRuntimeSearchParams(typeDef.getName());
 
 		for (Argument nextArgument : resourceSearchParam) {
 

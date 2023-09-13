@@ -58,23 +58,24 @@ public class GoldenResourceHelper {
 
 	static final String FIELD_NAME_IDENTIFIER = "identifier";
 
-	@Autowired
-	private IMdmSettings myMdmSettings;
+	private final IMdmSettings myMdmSettings;
 
-	@Autowired
-	private EIDHelper myEIDHelper;
+	private final EIDHelper myEIDHelper;
 
-	@Autowired
-	private IMdmSurvivorshipService myMdmSurvivorshipService;
-
-	@Autowired
-	private MdmPartitionHelper myMdmPartitionHelper;
+	private final MdmPartitionHelper myMdmPartitionHelper;
 
 	private final FhirContext myFhirContext;
 
 	@Autowired
-	public GoldenResourceHelper(FhirContext theFhirContext) {
+	public GoldenResourceHelper(
+			FhirContext theFhirContext,
+			IMdmSettings theMdmSettings,
+			EIDHelper theEIDHelper,
+			MdmPartitionHelper theMdmPartitionHelper) {
 		myFhirContext = theFhirContext;
+		myMdmSettings = theMdmSettings;
+		myEIDHelper = theEIDHelper;
+		myMdmPartitionHelper = theMdmPartitionHelper;
 	}
 
 	/**
@@ -82,12 +83,18 @@ public class GoldenResourceHelper {
 	 * a randomly generated UUID EID will be created.
 	 *
 	 * @param <T>                      Supported MDM resource type (e.g. Patient, Practitioner)
-	 * @param theIncomingResource      The resource that will be used as the starting point for the MDM linking.
-	 * @param theMdmTransactionContext
+	 * @param theIncomingResource 	  The resource to build the golden resource off of.
+	 *                                 Could be the source resource or another golden resource.
+	 *                                 If a golden resource, do not provide an IMdmSurvivorshipService
+	 * @param theMdmTransactionContext The mdm transaction context
+	 * @param theMdmSurvivorshipService IMdmSurvivorshipSvc. Provide only if survivorshipskills are desired
+	 *                                  to be applied. Provide null otherwise.
 	 */
 	@Nonnull
 	public <T extends IAnyResource> T createGoldenResourceFromMdmSourceResource(
-			T theIncomingResource, MdmTransactionContext theMdmTransactionContext
+		T theIncomingResource,
+		MdmTransactionContext theMdmTransactionContext,
+			IMdmSurvivorshipService theMdmSurvivorshipService
 	) {
 		validateContextSupported();
 
@@ -95,8 +102,10 @@ public class GoldenResourceHelper {
 		RuntimeResourceDefinition resourceDefinition = myFhirContext.getResourceDefinition(theIncomingResource);
 		IBaseResource newGoldenResource = resourceDefinition.newInstance();
 
-		myMdmSurvivorshipService.applySurvivorshipRulesToGoldenResource(
-				theIncomingResource, newGoldenResource, theMdmTransactionContext);
+		if (theMdmSurvivorshipService != null) {
+			theMdmSurvivorshipService.applySurvivorshipRulesToGoldenResource(
+					theIncomingResource, newGoldenResource, theMdmTransactionContext);
+		}
 
 		// hapi has 2 metamodels: for children and types
 		BaseRuntimeChildDefinition goldenResourceIdentifier = resourceDefinition.getChildByName(FIELD_NAME_IDENTIFIER);
@@ -329,14 +338,6 @@ public class GoldenResourceHelper {
 			MdmTransactionContext theMdmTransactionContext) {
 		ca.uhn.fhir.util.TerserUtil.cloneCompositeField(
 				myFhirContext, theFromGoldenResource, theToGoldenResource, FIELD_NAME_IDENTIFIER);
-	}
-
-	public void mergeNonIdentiferFields(
-			IBaseResource theFromGoldenResource,
-			IBaseResource theToGoldenResource,
-			MdmTransactionContext theMdmTransactionContext) {
-		myMdmSurvivorshipService.applySurvivorshipRulesToGoldenResource(
-				theFromGoldenResource, theToGoldenResource, theMdmTransactionContext);
 	}
 
 	/**
