@@ -1492,6 +1492,12 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 				}
 			}
 		}
+
+		/*
+		 * This should basically always be null unless resource history
+		 * is disabled on this server. In that case, we'll just be reusing
+		 * the previous version entity.
+		 */
 		if (historyEntry == null) {
 			historyEntry = theEntity.toHistory(versionedTags);
 		}
@@ -1500,7 +1506,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		historyEntry.setResource(theChanged.getResourceBinary());
 		historyEntry.setResourceTextVc(theChanged.getResourceText());
 
-		ourLog.debug("Saving history entry {}", historyEntry.getIdDt());
+		ourLog.debug("Saving history entry ID[{}] for RES_ID[{}]", historyEntry.getId(), historyEntry.getResourceId());
 		myResourceHistoryTableDao.save(historyEntry);
 		theEntity.setCurrentVersionEntity(historyEntry);
 
@@ -1535,8 +1541,14 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		if (haveSource || haveRequestId) {
 			ResourceHistoryProvenanceEntity provenance = null;
 			if (reusingHistoryEntity) {
+				/*
+				 * If version history is disabled, then we may be reusing
+				 * a previous history entity. If that's the case, let's try
+				 * to reuse the previous provenance entity too.
+				 */
 				provenance = historyEntry.getProvenance();
-			} else {
+			}
+			if (provenance == null) {
 				provenance = new ResourceHistoryProvenanceEntity();
 			}
 			provenance.setResourceHistoryTable(historyEntry);
