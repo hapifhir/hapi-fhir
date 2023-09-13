@@ -24,6 +24,7 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.BaseIdentifiableElement;
 import ca.uhn.fhir.model.api.ICompositeDatatype;
 import ca.uhn.fhir.model.api.IQueryParameterType;
+import ca.uhn.fhir.model.primitive.BooleanDt;
 import ca.uhn.fhir.model.primitive.CodeDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.model.primitive.UriDt;
@@ -58,26 +59,24 @@ public abstract class BaseCodingDt extends BaseIdentifiableElement implements IC
 	 */
 	public abstract UriDt getSystemElement();
 
-	/**
-	 * Gets the value(s) for <b>display</b> (Representation defined by the system).
-	 * creating it if it does
-	 * not exist. Will not return <code>null</code>.
-	 *
-	 * <p>
-	 * <b>Definition:</b>
-	 * A representation of the meaning of the code in the system, following the rules of the system.
-	 * </p>
-	 */
+	public abstract StringDt getVersionElement();
+
+	public abstract BooleanDt getUserSelectedElement();
+
+
+		/**
+		 * Gets the value(s) for <b>display</b> (Representation defined by the system).
+		 * creating it if it does
+		 * not exist. Will not return <code>null</code>.
+		 *
+		 * <p>
+		 * <b>Definition:</b>
+		 * A representation of the meaning of the code in the system, following the rules of the system.
+		 * </p>
+		 */
 	public abstract StringDt getDisplayElement();
 
 	public abstract BaseCodingDt setDisplay(String theString);
-
-	/*
-	todo: handle version
-	public abstract StringDt getVersion();
-
-	public abstract BaseCodingDt setVersion ( String theString);
-	*/
 
 	/**
 	 * {@inheritDoc}
@@ -175,13 +174,16 @@ public abstract class BaseCodingDt extends BaseIdentifiableElement implements IC
 	 */
 	public abstract BaseCodingDt setSystem(String theUri);
 
-	/**
-	 * <b>Not supported!</b>
-	 *
-	 * @deprecated get/setMissing is not supported in StringDt. Use {@link TokenParam} instead if you
-	 * need this functionality
-	 */
-	@Deprecated
+
+
+
+		/**
+		 * <b>Not supported!</b>
+		 *
+		 * @deprecated get/setMissing is not supported in StringDt. Use {@link TokenParam} instead if you
+		 * need this functionality
+		 */
+	@Deprecated(since = "6.0.0")
 	@Override
 	public Boolean getMissing() {
 		return null;
@@ -193,7 +195,7 @@ public abstract class BaseCodingDt extends BaseIdentifiableElement implements IC
 	 * @deprecated get/setMissing is not supported in StringDt. Use {@link TokenParam} instead if you
 	 * need this functionality
 	 */
-	@Deprecated
+	@Deprecated(since = "6.0.0")
 	@Override
 	public IQueryParameterType setMissing(Boolean theMissing) {
 		throw new UnsupportedOperationException(

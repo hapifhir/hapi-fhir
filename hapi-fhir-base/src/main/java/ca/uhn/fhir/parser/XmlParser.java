@@ -187,7 +187,8 @@ public class XmlParser extends BaseParser {
 
 							String namespaceURI = elem.getName().getNamespaceURI();
 
-							if ("extension".equals(elem.getName().getLocalPart())) {
+							String localPart = elem.getName().getLocalPart();
+							if ("extension".equals(localPart)) {
 								Attribute urlAttr = elem.getAttributeByName(new QName("url"));
 								String url;
 								if (urlAttr == null || isBlank(urlAttr.getValue())) {
@@ -199,7 +200,7 @@ public class XmlParser extends BaseParser {
 									url = urlAttr.getValue();
 								}
 								parserState.enteringNewElementExtension(elem, url, false, getServerBaseUrl());
-							} else if ("modifierExtension".equals(elem.getName().getLocalPart())) {
+							} else if ("modifierExtension".equals(localPart)) {
 								Attribute urlAttr = elem.getAttributeByName(new QName("url"));
 								String url;
 								if (urlAttr == null || isBlank(urlAttr.getValue())) {
@@ -213,8 +214,7 @@ public class XmlParser extends BaseParser {
 								}
 								parserState.enteringNewElementExtension(elem, url, true, getServerBaseUrl());
 							} else {
-								String elementName = elem.getName().getLocalPart();
-								parserState.enteringNewElement(namespaceURI, elementName);
+								parserState.enteringNewElement(namespaceURI, localPart);
 							}
 
 							if (!heldComments.isEmpty()) {
@@ -768,6 +768,10 @@ public class XmlParser extends BaseParser {
 						writeOptionalTagWithValue(theEventWriter, "system", tag.getScheme());
 						writeOptionalTagWithValue(theEventWriter, "code", tag.getTerm());
 						writeOptionalTagWithValue(theEventWriter, "display", tag.getLabel());
+						writeOptionalTagWithValue(theEventWriter, "version", tag.getVersion());
+						if (tag.getUserSelectedBoolean() != null) {
+							writeOptionalTagWithValue(theEventWriter, "userSelected", tag.getUserSelectedBoolean().toString());
+						}
 						theEventWriter.writeEndElement();
 					}
 				}
