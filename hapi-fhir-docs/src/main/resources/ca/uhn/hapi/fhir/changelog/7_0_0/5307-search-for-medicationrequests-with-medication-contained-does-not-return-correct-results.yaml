@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 5307
+title: "Previously, searching by medication in a chained search will not return the correct MedicationRequests if the
+medication is a contained resource. This is now fixed."
