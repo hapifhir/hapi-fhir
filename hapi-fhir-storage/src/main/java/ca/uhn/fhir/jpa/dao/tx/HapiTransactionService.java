@@ -480,7 +480,7 @@ public class HapiTransactionService implements IHapiTransactionService {
 		}
 
 		@VisibleForTesting
-		public RequestPartitionId getRequestPartitionIdForTesting(){
+		public RequestPartitionId getRequestPartitionIdForTesting() {
 			return myRequestPartitionId;
 		}
 	}
