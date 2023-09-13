@@ -17,9 +17,11 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.mdm.api;
+package ca.uhn.fhir.mdm.api.params;
 
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
+import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.mdm.api.paging.MdmPageRequest;
 import ca.uhn.fhir.mdm.provider.MdmControllerUtil;
 import ca.uhn.fhir.rest.api.SortOrderEnum;

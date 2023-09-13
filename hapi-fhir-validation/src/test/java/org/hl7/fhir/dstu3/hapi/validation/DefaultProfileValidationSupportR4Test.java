@@ -2,7 +2,6 @@ package org.hl7.fhir.dstu3.hapi.validation;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.junit.jupiter.api.Test;
 
@@ -10,7 +9,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
-public class DefaultProfileValidationSupportTest {
+public class DefaultProfileValidationSupportR4Test {
 
 	private static FhirContext ourCtx = FhirContext.forR4Cached();
 	private DefaultProfileValidationSupport mySvc = new DefaultProfileValidationSupport(ourCtx);

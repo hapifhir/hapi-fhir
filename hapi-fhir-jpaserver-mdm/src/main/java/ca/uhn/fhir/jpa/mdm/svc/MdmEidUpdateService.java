@@ -180,8 +180,8 @@ public class MdmEidUpdateService {
 		log(
 				theMdmTransactionContext,
 				"Duplicate detected based on the fact that both resources have different external EIDs.");
-		IAnyResource newGoldenResource =
-				myGoldenResourceHelper.createGoldenResourceFromMdmSourceResource(theResource, theMdmTransactionContext);
+		IAnyResource newGoldenResource = myGoldenResourceHelper.createGoldenResourceFromMdmSourceResource(
+				theResource, theMdmTransactionContext, myMdmSurvivorshipService);
 
 		myMdmLinkSvc.updateLink(
 				newGoldenResource,

@@ -11,6 +11,7 @@ import ca.uhn.fhir.jpa.mdm.config.MdmConsumerConfig;
 import ca.uhn.fhir.jpa.mdm.config.MdmSubmitterConfig;
 import ca.uhn.fhir.jpa.mdm.config.TestMdmConfigR4;
 import ca.uhn.fhir.jpa.mdm.dao.MdmLinkDaoSvc;
+import ca.uhn.fhir.jpa.mdm.helper.MdmLinkHelper;
 import ca.uhn.fhir.jpa.mdm.matcher.IsLinkedTo;
 import ca.uhn.fhir.jpa.mdm.matcher.IsMatchedToAGoldenResource;
 import ca.uhn.fhir.jpa.mdm.matcher.IsPossibleDuplicateOf;
@@ -26,6 +27,7 @@ import ca.uhn.fhir.jpa.searchparam.registry.SearchParamRegistryImpl;
 import ca.uhn.fhir.jpa.subscription.match.config.SubscriptionProcessorConfig;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.mdm.api.IMdmLink;
+import ca.uhn.fhir.mdm.api.IMdmLinkUpdaterSvc;
 import ca.uhn.fhir.mdm.api.MdmConstants;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
@@ -133,6 +135,11 @@ abstract public class BaseMdmR4Test extends BaseJpaR4Test {
 	protected PartitionSettings myPartitionSettings;
 	@Autowired
 	protected IPartitionLookupSvc myPartitionLookupSvc;
+
+	@Autowired
+	protected IMdmLinkUpdaterSvc myMdmLinkUpdaterSvc;
+	@Autowired
+	protected MdmLinkHelper myLinkHelper;
 
 	@BeforeEach
 	public void beforeSetRequestDetails() {

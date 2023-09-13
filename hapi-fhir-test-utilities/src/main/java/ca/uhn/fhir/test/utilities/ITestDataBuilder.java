@@ -81,6 +81,13 @@ public interface ITestDataBuilder {
 	}
 
 	/**
+	 * Set Resource.language
+	 */
+	default ICreationArgument withLanguage(String theLanguage) {
+		return t -> __setPrimitiveChild(getFhirContext(), t, "language", "string", theLanguage);
+	}
+
+	/**
 	 * Set Patient.gender
 	 */
 	default ICreationArgument withGender(String theGender) {
@@ -229,6 +236,10 @@ public interface ITestDataBuilder {
 
 	default IIdType createOrganization(ICreationArgument... theModifiers) {
 		return createResource("Organization", theModifiers);
+	}
+
+	default IIdType createPractitioner(ICreationArgument... theModifiers) {
+		return createResource("Practitioner", theModifiers);
 	}
 
 	default IIdType createResource(String theResourceType, ICreationArgument... theModifiers) {

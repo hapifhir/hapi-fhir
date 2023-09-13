@@ -34,7 +34,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
-public final class EIDHelper {
+public class EIDHelper {
 
 	private final FhirContext myFhirContext;
 	private final IMdmSettings myMdmSettings;
