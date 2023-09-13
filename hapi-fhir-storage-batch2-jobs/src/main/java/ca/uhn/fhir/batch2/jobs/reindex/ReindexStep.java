@@ -46,9 +46,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallback;
 
+import javax.annotation.Nonnull;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-import javax.annotation.Nonnull;
 
 public class ReindexStep implements IJobStepWorker<ReindexJobParameters, ResourceIdListWorkChunkJson, VoidModel> {
 
@@ -103,6 +103,7 @@ public class ReindexStep implements IJobStepWorker<ReindexJobParameters, Resourc
 		myHapiTransactionService
 				.withRequest(requestDetails)
 				.withTransactionDetails(transactionDetails)
+				.withRequestPartitionId(theJobParameters.getRequestPartitionId())
 				.execute(reindexJob);
 
 		return new RunOutcome(data.size());
