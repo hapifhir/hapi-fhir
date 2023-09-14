@@ -874,13 +874,8 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 
 		retVal.setResourceId(myId);
 		retVal.setResourceType(myResourceType);
-		retVal.setVersion(getVersion());
 		retVal.setTransientForcedId(getTransientForcedId());
-
-		retVal.setPublished(getPublishedDate());
-		retVal.setUpdated(getUpdatedDate());
 		retVal.setFhirVersion(getFhirVersion());
-		retVal.setDeleted(getDeleted());
 		retVal.setResourceTable(this);
 		retVal.setForcedId(getForcedId());
 		retVal.setPartitionId(getPartitionId());
@@ -892,7 +887,21 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 			}
 		}
 
+		populateHistoryEntityVersionAndDates(retVal);
+
 		return retVal;
+	}
+
+	/**
+	 * Updates several temporal values in a {@link ResourceHistoryTable} entity which
+	 * are pulled from this entity, including the resource version, and the
+	 * creation, update, and deletion dates.
+	 */
+	public void populateHistoryEntityVersionAndDates(ResourceHistoryTable theResourceHistoryTable) {
+		theResourceHistoryTable.setVersion(getVersion());
+		theResourceHistoryTable.setPublished(getPublishedDate());
+		theResourceHistoryTable.setUpdated(getUpdatedDate());
+		theResourceHistoryTable.setDeleted(getDeleted());
 	}
 
 	@Override

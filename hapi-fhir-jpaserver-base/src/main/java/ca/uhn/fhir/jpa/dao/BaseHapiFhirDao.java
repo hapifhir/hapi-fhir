@@ -1465,12 +1465,43 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		boolean versionedTags =
 				getStorageSettings().getTagStorageMode() == JpaStorageSettings.TagStorageModeEnum.VERSIONED;
 
-		final ResourceHistoryTable historyEntry = theEntity.toHistory(versionedTags);
+		ResourceHistoryTable historyEntry = null;
+		long resourceVersion = theEntity.getVersion();
+		boolean reusingHistoryEntity = false;
+		if (!myStorageSettings.isResourceDbHistoryEnabled() && resourceVersion > 1L) {
+			/*
+			 * If we're not storing history, then just pull the current history
+			 * table row and update it. Note that there is always a chance that
+			 * this could return null if the current resourceVersion has been expunged
+			 * in which case we'll still create a new one
+			 */
+			historyEntry = myResourceHistoryTableDao.findForIdAndVersionAndFetchProvenance(
+					theEntity.getResourceId(), resourceVersion - 1);
+			if (historyEntry != null) {
+				reusingHistoryEntity = true;
+				theEntity.populateHistoryEntityVersionAndDates(historyEntry);
+				if (versionedTags && theEntity.isHasTags()) {
+					for (ResourceTag next : theEntity.getTags()) {
+						historyEntry.addTag(next.getTag());
+					}
+				}
+			}
+		}
+
+		/*
+		 * This should basically always be null unless resource history
+		 * is disabled on this server. In that case, we'll just be reusing
+		 * the previous version entity.
+		 */
+		if (historyEntry == null) {
+			historyEntry = theEntity.toHistory(versionedTags);
+		}
+
 		historyEntry.setEncoding(theChanged.getEncoding());
 		historyEntry.setResource(theChanged.getResourceBinary());
 		historyEntry.setResourceTextVc(theChanged.getResourceText());
 
-		ourLog.debug("Saving history entry {}", historyEntry.getIdDt());
+		ourLog.debug("Saving history entry ID[{}] for RES_ID[{}]", historyEntry.getId(), historyEntry.getResourceId());
 		myResourceHistoryTableDao.save(historyEntry);
 		theEntity.setCurrentVersionEntity(historyEntry);
 
@@ -1503,7 +1534,18 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		boolean haveSource = isNotBlank(source) && shouldStoreSource;
 		boolean haveRequestId = isNotBlank(requestId) && shouldStoreRequestId;
 		if (haveSource || haveRequestId) {
-			ResourceHistoryProvenanceEntity provenance = new ResourceHistoryProvenanceEntity();
+			ResourceHistoryProvenanceEntity provenance = null;
+			if (reusingHistoryEntity) {
+				/*
+				 * If version history is disabled, then we may be reusing
+				 * a previous history entity. If that's the case, let's try
+				 * to reuse the previous provenance entity too.
+				 */
+				provenance = historyEntry.getProvenance();
+			}
+			if (provenance == null) {
+				provenance = new ResourceHistoryProvenanceEntity();
+			}
 			provenance.setResourceHistoryTable(historyEntry);
 			provenance.setResourceTable(theEntity);
 			provenance.setPartitionId(theEntity.getPartitionId());
