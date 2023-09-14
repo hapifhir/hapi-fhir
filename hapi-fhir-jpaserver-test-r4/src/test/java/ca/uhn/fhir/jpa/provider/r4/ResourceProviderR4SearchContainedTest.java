@@ -998,8 +998,11 @@ public class ResourceProviderR4SearchContainedTest extends BaseResourceProviderR
 
 	}
 
+	/**
+	 * See #5307
+	 */
 	@Test
-	public void testBundleReferenceSearchParam()  throws IOException {
+	public void testContainedSearchByTokenWithParentheticalExpression()  throws IOException {
 
 		IIdType mid1;
 		{
@@ -1032,7 +1035,7 @@ public class ResourceProviderR4SearchContainedTest extends BaseResourceProviderR
 			ourLog.debug("Output: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(medReqCreated));
 		}
 
-		String uri = myServerBase + "/MedicationRequest?medication.code=http://" + UrlUtil.escapeUrlParam("snomed.info/sct|324689003") + "&_contained=true";
+		String uri = myServerBase + "/MedicationRequest?medication.code=http://" + UrlUtil.escapeUrlParam("snomed.info/sct|324689003");
 		List<String> mids = searchAndReturnUnqualifiedVersionlessIdValues(uri);
 
 		assertEquals(1L, mids.size());
