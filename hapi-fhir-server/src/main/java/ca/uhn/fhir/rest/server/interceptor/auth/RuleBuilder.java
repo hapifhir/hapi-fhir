@@ -870,16 +870,6 @@ public class RuleBuilder implements IAuthRuleBuilder {
 				return new RuleBuilderBulkExportWithTarget(rule);
 			}
 
-
-			@Override
-			public IAuthRuleBuilderRuleBulkExportWithTarget patientExportOnPatient(@Nonnull String theFocusResourceId) {
-				RuleBulkExportImpl rule = new RuleBulkExportImpl(myRuleName);
-				rule.setAppliesToPatientExport(theFocusResourceId);
-				rule.setMode(myRuleMode);
-				myRules.add(rule);
-
-				return new RuleBuilderBulkExportWithTarget(rule);
-			}
 			@Override
 			public IAuthRuleBuilderRuleBulkExportWithTarget patientExportOnPatient(@Nonnull String theFocusResourceId) {
 				RuleBulkExportImpl rule = new RuleBulkExportImpl(myRuleName);
