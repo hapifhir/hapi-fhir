@@ -19,16 +19,14 @@
  */
 package org.hl7.fhir.instance.model.api;
 
-
-
 /**
- * Base interface for ID datatype. 
- * 
+ * Base interface for ID datatype.
+ *
  * <p>
  * <b>Concrete Implementations:</b> This interface is often returned and/or accepted by methods in HAPI's API
- * where either {@link ca.uhn.fhir.model.primitive.IdDt} (the HAPI structure ID type) or 
- * <code>org.hl7.fhir.instance.model.IdType</code> (the RI structure ID type) will be used, depending on 
- * which version of the strctures your application is using.   
+ * where either {@link ca.uhn.fhir.model.primitive.IdDt} (the HAPI structure ID type) or
+ * <code>org.hl7.fhir.instance.model.IdType</code> (the RI structure ID type) will be used, depending on
+ * which version of the strctures your application is using.
  * </p>
  */
 public interface IIdType extends IPrimitiveType<String> {
@@ -51,17 +49,16 @@ public interface IIdType extends IPrimitiveType<String> {
 	/**
 	 * Returns the ID part of this ID (e.g. in the ID http://example.com/Patient/123/_history/456 this would be the
 	 * part "123") parsed as a {@link Long}.
-	 * 
+	 *
 	 * @throws NumberFormatException If the value can't be parsed as a long
 	 */
 	Long getIdPartAsLong();
 
 	String getResourceType();
 
-
 	/**
 	 * Returns the value of this ID. Note that this value may be a fully qualified URL, a relative/partial URL, or a simple ID. Use {@link #getIdPart()} to get just the ID portion.
-	 * 
+	 *
 	 * @see #getIdPart()
 	 */
 	@Override
@@ -72,7 +69,7 @@ public interface IIdType extends IPrimitiveType<String> {
 	/**
 	 * Returns the version ID part of this ID (e.g. in the ID http://example.com/Patient/123/_history/456 this would be the
 	 * part "456") parsed as a {@link Long}.
-	 * 
+	 *
 	 * @throws NumberFormatException If the value can't be parsed as a long
 	 */
 	Long getVersionIdPartAsLong();
@@ -98,7 +95,7 @@ public interface IIdType extends IPrimitiveType<String> {
 	boolean isEmpty();
 
 	/**
-	 * Returns <code>true</code> if the {@link #getIdPart() ID part of this object} is valid according to the FHIR rules for valid IDs. 
+	 * Returns <code>true</code> if the {@link #getIdPart() ID part of this object} is valid according to the FHIR rules for valid IDs.
 	 * <p>
 	 * The FHIR specification states:
 	 * <code>Any combination of upper or lower case ASCII letters ('A'..'Z', and 'a'..'z', numerals ('0'..'9'), '-' and '.', with a length limit of 64 characters. (This might be an integer, an un-prefixed OID, UUID or any other identifier pattern that meets these constraints.) regex: [A-Za-z0-9\-\.]{1,64}</code>
@@ -108,7 +105,7 @@ public interface IIdType extends IPrimitiveType<String> {
 
 	/**
 	 * Returns <code>true</code> if the {@link #getIdPart() ID part of this object} contains
-	 * only numbers 
+	 * only numbers
 	 */
 	boolean isIdPartValidLong();
 
@@ -119,7 +116,7 @@ public interface IIdType extends IPrimitiveType<String> {
 
 	/**
 	 * Returns <code>true</code> if the {@link #getVersionIdPart() version ID part of this object} contains
-	 * only numbers 
+	 * only numbers
 	 */
 	boolean isVersionIdPartValidLong();
 
@@ -133,7 +130,7 @@ public interface IIdType extends IPrimitiveType<String> {
 	IIdType toVersionless();
 
 	/**
-	 * Returns a copy of this object, but with a different {@link #getResourceType() resource type} 
+	 * Returns a copy of this object, but with a different {@link #getResourceType() resource type}
 	 * (or if this object does not have a resource type currently, returns a copy of this object with
 	 * the given resource type).
 	 * <p>
@@ -143,9 +140,9 @@ public interface IIdType extends IPrimitiveType<String> {
 	 * </p>
 	 */
 	IIdType withResourceType(String theResName);
-	
+
 	/**
-	 * Returns a copy of this object, but with a different {@link #getResourceType() resource type} 
+	 * Returns a copy of this object, but with a different {@link #getResourceType() resource type}
 	 * and {@link #getBaseUrl() base URL}
 	 * (or if this object does not have a resource type currently, returns a copy of this object with
 	 * the given server base and resource type).
@@ -158,7 +155,7 @@ public interface IIdType extends IPrimitiveType<String> {
 	IIdType withServerBase(String theServerBase, String theResourceName);
 
 	/**
-	 * Returns a copy of this object, but with a different {@link #getVersionIdPart() version ID} 
+	 * Returns a copy of this object, but with a different {@link #getVersionIdPart() version ID}
 	 * (or if this object does not have a resource type currently, returns a copy of this object with
 	 * the given version).
 	 * <p>
@@ -180,9 +177,8 @@ public interface IIdType extends IPrimitiveType<String> {
 	 * <li>If <b>theVersionIdPart</b> is populated, <b>theResourceType</b> and <b>theIdPart</b> must be populated</li>
 	 * <li>If <b>theBaseUrl</b> is populated and <b>theIdPart</b> is populated, <b>theResourceType</b> must be populated</li>
 	 * </ul>
-	 * 
+	 *
 	 * @return Returns a reference to <code>this</code> for easy method chaining
 	 */
 	IIdType setParts(String theBaseUrl, String theResourceType, String theIdPart, String theVersionIdPart);
-
 }

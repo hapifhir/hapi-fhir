@@ -43,5 +43,4 @@ public class TermVersionAdapterSvcDstu2 implements ITermVersionAdapterSvc {
 	public void createOrUpdateValueSet(ValueSet theValueSet) {
 		throw new UnsupportedOperationException(Msg.code(884));
 	}
-
 }

@@ -43,5 +43,4 @@ public class FhirClientInappropriateForServerException extends BaseServerRespons
 	public FhirClientInappropriateForServerException(String theMessage) {
 		super(0, theMessage);
 	}
-
 }

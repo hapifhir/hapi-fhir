@@ -151,6 +151,7 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 		request.setPageStart(index);
 		request.setBatchSize(size);
 		request.setSort(Sort.unsorted());
+		request.setJobStatus("");
 
 		Page<JobInstance> page;
 		Iterator<JobInstance> iterator;

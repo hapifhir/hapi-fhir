@@ -31,5 +31,4 @@ public interface ICachedSearchDetails {
 	 * won't be reused in the future)
 	 */
 	void setCannotBeReused();
-
 }

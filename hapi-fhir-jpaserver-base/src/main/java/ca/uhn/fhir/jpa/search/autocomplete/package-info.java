@@ -29,4 +29,3 @@
  *
  */
 package ca.uhn.fhir.jpa.search.autocomplete;
-

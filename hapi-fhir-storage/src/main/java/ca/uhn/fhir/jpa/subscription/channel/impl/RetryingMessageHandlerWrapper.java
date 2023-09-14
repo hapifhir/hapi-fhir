@@ -62,8 +62,13 @@ class RetryingMessageHandlerWrapper implements MessageHandler {
 		retryTemplate.setThrowLastExceptionOnExhausted(true);
 		RetryListener retryListener = new RetryListenerSupport() {
 			@Override
-			public <T, E extends Throwable> void onError(RetryContext theContext, RetryCallback<T, E> theCallback, Throwable theThrowable) {
-				ourLog.error("Failure {} processing message in channel[{}]: {}", theContext.getRetryCount(), myChannelName, theThrowable.toString());
+			public <T, E extends Throwable> void onError(
+					RetryContext theContext, RetryCallback<T, E> theCallback, Throwable theThrowable) {
+				ourLog.error(
+						"Failure {} processing message in channel[{}]: {}",
+						theContext.getRetryCount(),
+						myChannelName,
+						theThrowable.toString());
 				ourLog.error("Failure", theThrowable);
 				if (theThrowable instanceof BaseUnrecoverableRuntimeException) {
 					theContext.setExhaustedOnly();
@@ -79,7 +84,7 @@ class RetryingMessageHandlerWrapper implements MessageHandler {
 				}
 			}
 		};
-		retryTemplate.setListeners(new RetryListener[]{retryListener});
+		retryTemplate.setListeners(new RetryListener[] {retryListener});
 		retryTemplate.execute(context -> {
 			myWrap.handleMessage(theMessage);
 			return null;

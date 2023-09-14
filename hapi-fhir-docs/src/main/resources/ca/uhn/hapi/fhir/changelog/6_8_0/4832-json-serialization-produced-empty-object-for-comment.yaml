@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 4832
+title: "When serializing resources in JSON, if resource came from an XML-parsed resource that
+   contained comments, the JSON serializer incorrectly created an empty object. This has
+   been corrected."

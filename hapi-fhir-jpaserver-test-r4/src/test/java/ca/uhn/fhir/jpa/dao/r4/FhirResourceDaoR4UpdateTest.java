@@ -1,6 +1,10 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.interceptor.api.HookParams;
+import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
+import ca.uhn.fhir.interceptor.api.IPointcut;
+import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
@@ -16,11 +20,13 @@ import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.param.StringParam;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import ca.uhn.fhir.util.BundleBuilder;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.CanonicalType;
@@ -37,6 +43,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
+import javax.persistence.Id;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
@@ -52,7 +59,6 @@ import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.endsWith;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.matchesPattern;
-import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -71,6 +77,8 @@ public class FhirResourceDaoR4UpdateTest extends BaseJpaR4Test {
 		myStorageSettings.setIndexMissingFields(new JpaStorageSettings().getIndexMissingFields());
 		myStorageSettings.setResourceServerIdStrategy(new JpaStorageSettings().getResourceServerIdStrategy());
 		myStorageSettings.setResourceClientIdStrategy(new JpaStorageSettings().getResourceClientIdStrategy());
+		myStorageSettings.setResourceServerIdStrategy(JpaStorageSettings.IdStrategyEnum.SEQUENTIAL_NUMERIC);
+		myInterceptorRegistry.unregisterAllAnonymousInterceptors();
 	}
 
 
@@ -657,7 +665,7 @@ public class FhirResourceDaoR4UpdateTest extends BaseJpaR4Test {
 	@Test
 	public void testUpdateResourceCreatedWithConditionalUrl_willRemoveEntryInSearchUrlTable(){
 		String identifierCode = "20210427133226.4440+800";
-		String matchUrl = "identifier=20210427133226.4440+800";
+		String matchUrl = "identifier=20210427133226.4440%2B800";
 		Observation obs = new Observation();
 		obs.addIdentifier().setValue(identifierCode);
 		myObservationDao.create(obs, matchUrl, new SystemRequestDetails());
@@ -1152,6 +1160,108 @@ public class FhirResourceDaoR4UpdateTest extends BaseJpaR4Test {
 
 	}
 
+	@Test
+	void testCreateWithConditionalUpdate_withUuidAsServerResourceStrategyAndNoIdProvided_uuidAssignedAsResourceId() {
+		// setup
+		myStorageSettings.setResourceServerIdStrategy(JpaStorageSettings.IdStrategyEnum.UUID);
+		Patient p = new Patient();
+		p.addIdentifier().setSystem("http://my-lab-system").setValue("123");
+		p.addName().setFamily("FAM");
+		String theMatchUrl = "Patient?identifier=http://my-lab-system|123";
 
+		// execute
+		String result = myPatientDao.update(p, theMatchUrl, mySrd).getId().getIdPart();
 
+		// verify
+		try {
+			UUID.fromString(result);
+		} catch (IllegalArgumentException exception){
+			fail("Result id is not a UUID. Instead, it was: " + result);
+		}
+	}
+
+	@Test
+	public void testUpdateNoChange_ChangeForcedInPreStorageInterceptor() {
+		// Add interceptor which forces a change
+		myInterceptorRegistry.registerAnonymousInterceptor(Pointcut.STORAGE_PRESTORAGE_RESOURCE_UPDATED, new IAnonymousInterceptor() {
+			@Override
+			public void invoke(IPointcut thePointcut, HookParams theArgs) {
+				Patient newResource = (Patient) theArgs.get(IBaseResource.class, 1);
+				newResource.addIdentifier().setValue("foo");
+			}
+		});
+
+		Patient p = new Patient();
+		p.setId("Patient/A");
+		p.setActive(true);
+		assertEquals("1", myPatientDao.update(p, mySrd).getId().getVersionIdPart());
+
+		p = new Patient();
+		p.setId("Patient/A");
+		p.setActive(true);
+		assertEquals("2", myPatientDao.update(p, mySrd).getId().getVersionIdPart());
+
+		p = myPatientDao.read(new IdType("Patient/A"), mySrd);
+		assertTrue(p.getActive());
+		assertEquals("foo", p.getIdentifierFirstRep().getValue());
+	}
+
+	/**
+	 * The precommit interceptor should not actually be invoked since this is a NO-OP
+	 * (only prestorage is)
+	 */
+	@Test
+	public void testUpdateNoChange_ChangeForcedInPreCommitInterceptor() {
+		// Add interceptor which forces a change
+		myInterceptorRegistry.registerAnonymousInterceptor(Pointcut.STORAGE_PRECOMMIT_RESOURCE_UPDATED, new IAnonymousInterceptor() {
+			@Override
+			public void invoke(IPointcut thePointcut, HookParams theArgs) {
+				throw new InternalErrorException("failed intentionally");
+			}
+		});
+
+		Patient p = new Patient();
+		p.setId("Patient/A");
+		p.setActive(true);
+		assertEquals("1", myPatientDao.update(p, mySrd).getId().getVersionIdPart());
+
+		p = new Patient();
+		p.setId("Patient/A");
+		p.setActive(true);
+		assertEquals("1", myPatientDao.update(p, mySrd).getId().getVersionIdPart());
+
+		p = myPatientDao.read(new IdType("Patient/A"), mySrd);
+		assertTrue(p.getActive());
+		assertEquals(0, p.getIdentifier().size());
+	}
+
+	@Test
+	public void testUpdateNoChange_ChangeForcedInPreStorageInterceptor_InTransaction() {
+		// Add interceptor which forces a change
+		myInterceptorRegistry.registerAnonymousInterceptor(Pointcut.STORAGE_PRESTORAGE_RESOURCE_UPDATED, new IAnonymousInterceptor() {
+			@Override
+			public void invoke(IPointcut thePointcut, HookParams theArgs) {
+				Patient newResource = (Patient) theArgs.get(IBaseResource.class, 1);
+				newResource.addIdentifier().setValue("foo");
+			}
+		});
+
+		Patient p = new Patient();
+		p.setId("Patient/A");
+		p.setActive(true);
+		BundleBuilder bb = new BundleBuilder(myFhirContext);
+		bb.addTransactionUpdateEntry(p);
+		assertThat(mySystemDao.transaction(mySrd, bb.getBundleTyped()).getEntryFirstRep().getResponse().getLocation(), endsWith("/_history/1"));
+
+		p = new Patient();
+		p.setId("Patient/A");
+		p.setActive(true);
+		bb = new BundleBuilder(myFhirContext);
+		bb.addTransactionUpdateEntry(p);
+		assertThat(mySystemDao.transaction(mySrd, bb.getBundleTyped()).getEntryFirstRep().getResponse().getLocation(), endsWith("/_history/2"));
+
+		p = myPatientDao.read(new IdType("Patient/A"), mySrd);
+		assertTrue(p.getActive());
+		assertEquals("foo", p.getIdentifierFirstRep().getValue());
+	}
 }

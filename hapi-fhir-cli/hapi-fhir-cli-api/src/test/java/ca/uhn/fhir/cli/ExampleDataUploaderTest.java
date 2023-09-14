@@ -2,8 +2,8 @@ package ca.uhn.fhir.cli;
 
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.interceptor.CapturingInterceptor;
-import ca.uhn.fhir.test.utilities.TlsAuthenticationTestHelper;
 import ca.uhn.fhir.test.utilities.RestServerR4Helper;
+import ca.uhn.fhir.test.utilities.TlsAuthenticationTestHelper;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.ParseException;
@@ -29,7 +29,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class ExampleDataUploaderTest {
 
 	@RegisterExtension
-	public final RestServerR4Helper myRestServerR4Helper = new RestServerR4Helper();
+	public final RestServerR4Helper myRestServerR4Helper = RestServerR4Helper.newWithTransactionLatch();
 	@RegisterExtension
 	public TlsAuthenticationTestHelper myTlsAuthenticationTestHelper = new TlsAuthenticationTestHelper();
 
@@ -46,7 +46,8 @@ class ExampleDataUploaderTest {
 
 	@ParameterizedTest
 	@ValueSource(booleans = {true, false})
-	public void testHeaderPassthrough(boolean theIncludeTls) throws ParseException {
+	public void testHeaderPassthrough(boolean theIncludeTls) throws ParseException, InterruptedException {
+		// setup
 		String headerKey = "test-header-key";
 		String headerValue = "test header value";
 
@@ -60,8 +61,11 @@ class ExampleDataUploaderTest {
 		);
 
 		final CommandLine commandLine = new DefaultParser().parse(testedCommand.getOptions(), args, true);
-		testedCommand.run(commandLine);
 
+		// execute
+		myRestServerR4Helper.executeWithLatch(() -> runCommand(commandLine));
+
+		// validate
 		assertNotNull(myCapturingInterceptor.getLastRequest());
 		Map<String, List<String>> allHeaders = myCapturingInterceptor.getLastRequest().getAllHeaders();
 		assertFalse(allHeaders.isEmpty());
@@ -76,6 +80,14 @@ class ExampleDataUploaderTest {
 		Resource resource = bundle.getEntry().get(0).getResource();
 		assertEquals(Patient.class, resource.getClass());
 		assertEquals("EX3152", resource.getIdElement().getIdPart());
+	}
+
+	private void runCommand(CommandLine commandLine) {
+		try {
+			testedCommand.run(commandLine);
+		} catch (ParseException e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 	private static class RequestCapturingExampleDataUploader extends ExampleDataUploader {

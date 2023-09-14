@@ -59,7 +59,6 @@ abstract class BaseHttpClientInvocationWithContents extends BaseHttpClientInvoca
 	private final String myUrlPath;
 	private IIdType myForceResourceId;
 
-
 	public BaseHttpClientInvocationWithContents(FhirContext theContext, IBaseResource theResource, String theUrlPath) {
 		super(theContext);
 		myResource = theResource;
@@ -69,7 +68,8 @@ abstract class BaseHttpClientInvocationWithContents extends BaseHttpClientInvoca
 		myBundleType = null;
 	}
 
-	public BaseHttpClientInvocationWithContents(FhirContext theContext, List<? extends IBaseResource> theResources, BundleTypeEnum theBundleType) {
+	public BaseHttpClientInvocationWithContents(
+			FhirContext theContext, List<? extends IBaseResource> theResources, BundleTypeEnum theBundleType) {
 		super(theContext);
 		myResource = null;
 		myUrlPath = null;
@@ -78,7 +78,8 @@ abstract class BaseHttpClientInvocationWithContents extends BaseHttpClientInvoca
 		myBundleType = theBundleType;
 	}
 
-	public BaseHttpClientInvocationWithContents(FhirContext theContext, Map<String, List<String>> theParams, String... theUrlPath) {
+	public BaseHttpClientInvocationWithContents(
+			FhirContext theContext, Map<String, List<String>> theParams, String... theUrlPath) {
 		super(theContext);
 		myResource = null;
 		myUrlPath = StringUtils.join(theUrlPath, '/');
@@ -88,7 +89,8 @@ abstract class BaseHttpClientInvocationWithContents extends BaseHttpClientInvoca
 		myBundleType = null;
 	}
 
-	public BaseHttpClientInvocationWithContents(FhirContext theContext, String theContents, boolean theIsBundle, String theUrlPath) {
+	public BaseHttpClientInvocationWithContents(
+			FhirContext theContext, String theContents, boolean theIsBundle, String theUrlPath) {
 		super(theContext);
 		myResource = null;
 		myUrlPath = theUrlPath;
@@ -98,7 +100,12 @@ abstract class BaseHttpClientInvocationWithContents extends BaseHttpClientInvoca
 	}
 
 	@Override
-	public IHttpRequest asHttpRequest(String theUrlBase, Map<String, List<String>> theExtraParams, EncodingEnum theEncoding, Boolean thePrettyPrint) throws DataFormatException {
+	public IHttpRequest asHttpRequest(
+			String theUrlBase,
+			Map<String, List<String>> theExtraParams,
+			EncodingEnum theEncoding,
+			Boolean thePrettyPrint)
+			throws DataFormatException {
 		StringBuilder url = new StringBuilder();
 
 		if (myUrlPath == null) {
@@ -114,11 +121,13 @@ abstract class BaseHttpClientInvocationWithContents extends BaseHttpClientInvoca
 		}
 
 		appendExtraParamsWithQuestionMark(theExtraParams, url, url.indexOf("?") == -1);
-		IHttpClient httpClient = getRestfulClientFactory().getHttpClient(url, myIfNoneExistParams, myIfNoneExistString, getRequestType(), getHeaders());
+		IHttpClient httpClient = getRestfulClientFactory()
+				.getHttpClient(url, myIfNoneExistParams, myIfNoneExistString, getRequestType(), getHeaders());
 
 		if (myResource != null && IBaseBinary.class.isAssignableFrom(myResource.getClass())) {
 			IBaseBinary binary = (IBaseBinary) myResource;
-			if (isNotBlank(binary.getContentType()) && EncodingEnum.forContentTypeStrict(binary.getContentType()) == null) {
+			if (isNotBlank(binary.getContentType())
+					&& EncodingEnum.forContentTypeStrict(binary.getContentType()) == null) {
 				if (binary.hasData()) {
 					return httpClient.createBinaryRequest(getContext(), binary);
 				}
@@ -130,11 +139,10 @@ abstract class BaseHttpClientInvocationWithContents extends BaseHttpClientInvoca
 			encoding = EncodingEnum.detectEncoding(myContents);
 		}
 
-
 		if (myParams != null) {
 			return httpClient.createParamRequest(getContext(), myParams, encoding);
 		}
-		encoding = ObjectUtils.defaultIfNull(encoding,  EncodingEnum.JSON);
+		encoding = ObjectUtils.defaultIfNull(encoding, EncodingEnum.JSON);
 		String contents = encodeContents(thePrettyPrint, encoding);
 		String contentType = getContentType(encoding);
 		return httpClient.createByteRequest(getContext(), contents, contentType, encoding);
@@ -171,7 +179,7 @@ abstract class BaseHttpClientInvocationWithContents extends BaseHttpClientInvoca
 		if (myForceResourceId != null) {
 			parser.setEncodeForceResourceId(myForceResourceId);
 		}
-		
+
 		parser.setOmitResourceId(myOmitResourceId);
 		if (myResources != null) {
 			IVersionSpecificBundleFactory bundleFactory = getContext().newBundleFactory();
@@ -201,5 +209,4 @@ abstract class BaseHttpClientInvocationWithContents extends BaseHttpClientInvoca
 	public void setOmitResourceId(boolean theOmitResourceId) {
 		myOmitResourceId = theOmitResourceId;
 	}
-
 }

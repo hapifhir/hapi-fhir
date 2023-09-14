@@ -30,5 +30,4 @@ public interface INpmPackageDao extends JpaRepository<NpmPackageEntity, Long>, I
 
 	@Query("SELECT p FROM NpmPackageEntity p WHERE p.myPackageId = :id")
 	Optional<NpmPackageEntity> findByPackageId(@Param("id") String thePackageId);
-
 }

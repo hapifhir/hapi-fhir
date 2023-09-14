@@ -26,8 +26,10 @@ public class BulkImportJobFileJson implements IModelJson {
 
 	@JsonProperty("tenantName")
 	private String myTenantName;
+
 	@JsonProperty("contents")
 	private String myContents;
+
 	@JsonProperty("description")
 	private String myDescription;
 
@@ -56,5 +58,4 @@ public class BulkImportJobFileJson implements IModelJson {
 		myContents = theContents;
 		return this;
 	}
-
 }

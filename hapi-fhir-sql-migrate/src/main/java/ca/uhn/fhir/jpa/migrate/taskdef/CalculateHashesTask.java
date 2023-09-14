@@ -41,7 +41,8 @@ public class CalculateHashesTask extends BaseColumnCalculatorTask {
 		try {
 			Set<String> tableNames = JdbcUtils.getTableNames(getConnectionProperties());
 			boolean shouldSkip = tableNames.contains("HFJ_RES_REINDEX_JOB");
-			// This table was added shortly after hash indexes were added, so it is a reasonable indicator for whether this
+			// This table was added shortly after hash indexes were added, so it is a reasonable indicator for whether
+			// this
 			// migration has already been run
 			if (shouldSkip) {
 				logInfo(ourLog, "The table HFJ_RES_REINDEX_JOB already exists.  Skipping calculate hashes task.");

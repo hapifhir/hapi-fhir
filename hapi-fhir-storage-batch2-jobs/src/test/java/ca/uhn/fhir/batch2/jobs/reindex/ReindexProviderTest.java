@@ -38,6 +38,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.isNotNull;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -71,7 +72,7 @@ public class ReindexProviderTest {
 	public void beforeEach() {
 		myServerExtension.registerProvider(mySvc);
 
-		when(myJobCoordinator.startInstance(any()))
+		when(myJobCoordinator.startInstance(isNotNull(), any()))
 			.thenReturn(createJobStartResponse());
 		when(myRequestPartitionHelperSvc.determineReadPartitionForRequest(any(), any())).thenReturn(RequestPartitionId.allPartitions());
 	}
@@ -119,7 +120,7 @@ public class ReindexProviderTest {
 		StringType jobId = (StringType) response.getParameterValue(ProviderConstants.OPERATION_REINDEX_RESPONSE_JOB_ID);
 		assertEquals(TEST_JOB_ID, jobId.getValue());
 
-		verify(myJobCoordinator, times(1)).startInstance(myStartRequestCaptor.capture());
+		verify(myJobCoordinator, times(1)).startInstance(isNotNull(), myStartRequestCaptor.capture());
 		ReindexJobParameters params = myStartRequestCaptor.getValue().getParameters(ReindexJobParameters.class);
 		assertThat(params.getPartitionedUrls(), hasSize(1));
 		assertEquals(url, params.getPartitionedUrls().get(0).getUrl());
@@ -155,7 +156,7 @@ public class ReindexProviderTest {
 		StringType jobId = (StringType) response.getParameterValue(ProviderConstants.OPERATION_REINDEX_RESPONSE_JOB_ID);
 		assertEquals(TEST_JOB_ID, jobId.getValue());
 
-		verify(myJobCoordinator, times(1)).startInstance(myStartRequestCaptor.capture());
+		verify(myJobCoordinator, times(1)).startInstance(isNotNull(), myStartRequestCaptor.capture());
 		ReindexJobParameters params = myStartRequestCaptor.getValue().getParameters(ReindexJobParameters.class);
 		assertThat(params.getPartitionedUrls(), empty());
 		// Non-default values

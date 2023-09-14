@@ -19,8 +19,6 @@
  */
 package ca.uhn.fhir.rest.server;
 
-import java.util.Optional;
-
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,13 +27,11 @@ import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import java.util.Optional;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 
-
-
 import static java.util.Optional.ofNullable;
-
 
 /**
  * Works like the normal
@@ -78,9 +74,7 @@ public class ApacheProxyAddressStrategy extends IncomingRequestAddressStrategy {
 	private static final String X_FORWARDED_PROTO = "x-forwarded-proto";
 	private static final String X_FORWARDED_HOST = "x-forwarded-host";
 
-
-	private static final Logger LOG = LoggerFactory
-			.getLogger(ApacheProxyAddressStrategy.class);
+	private static final Logger LOG = LoggerFactory.getLogger(ApacheProxyAddressStrategy.class);
 
 	private final boolean useHttps;
 
@@ -94,11 +88,9 @@ public class ApacheProxyAddressStrategy extends IncomingRequestAddressStrategy {
 	}
 
 	@Override
-	public String determineServerBase(ServletContext servletContext,
-			HttpServletRequest request) {
+	public String determineServerBase(ServletContext servletContext, HttpServletRequest request) {
 		String serverBase = super.determineServerBase(servletContext, request);
-		ServletServerHttpRequest requestWrapper = new ServletServerHttpRequest(
-				request);
+		ServletServerHttpRequest requestWrapper = new ServletServerHttpRequest(request);
 		UriComponentsBuilder uriBuilder = UriComponentsBuilder.fromHttpRequest(requestWrapper);
 		uriBuilder.replaceQuery(null);
 		HttpHeaders headers = requestWrapper.getHeaders();
@@ -108,26 +100,23 @@ public class ApacheProxyAddressStrategy extends IncomingRequestAddressStrategy {
 
 	/**
 	 * If forward host ist defined, but no forward protocol, use the configured default.
-	 * 
+	 *
 	 * @param uriBuilder
 	 * @param headers
 	 */
-	private void adjustSchemeWithDefault(UriComponentsBuilder uriBuilder,
-			HttpHeaders headers) {
-		if (headers.getFirst(X_FORWARDED_HOST) != null
-				&& headers.getFirst(X_FORWARDED_PROTO) == null) {
+	private void adjustSchemeWithDefault(UriComponentsBuilder uriBuilder, HttpHeaders headers) {
+		if (headers.getFirst(X_FORWARDED_HOST) != null && headers.getFirst(X_FORWARDED_PROTO) == null) {
 			uriBuilder.scheme(useHttps ? "https" : "http");
 		}
 	}
 
-	private String forwardedServerBase(String originalServerBase,
-			HttpHeaders headers, UriComponentsBuilder uriBuilder) {
+	private String forwardedServerBase(
+			String originalServerBase, HttpHeaders headers, UriComponentsBuilder uriBuilder) {
 		Optional<String> forwardedPrefix = getForwardedPrefix(headers);
 		LOG.debug("serverBase: {}, forwardedPrefix: {}", originalServerBase, forwardedPrefix);
 		LOG.debug("request header: {}", headers);
 
-		String path = forwardedPrefix
-				.orElseGet(() -> pathFrom(originalServerBase));
+		String path = forwardedPrefix.orElseGet(() -> pathFrom(originalServerBase));
 		uriBuilder.replacePath(path);
 		return uriBuilder.build().toUriString();
 	}

@@ -25,10 +25,10 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-public interface IResourceHistoryProvenanceDao extends JpaRepository<ResourceHistoryProvenanceEntity, Long>, IHapiFhirJpaRepository {
+public interface IResourceHistoryProvenanceDao
+		extends JpaRepository<ResourceHistoryProvenanceEntity, Long>, IHapiFhirJpaRepository {
 
 	@Modifying
 	@Query("DELETE FROM ResourceHistoryProvenanceEntity t WHERE t.myId = :pid")
 	void deleteByPid(@Param("pid") Long theId);
-
 }

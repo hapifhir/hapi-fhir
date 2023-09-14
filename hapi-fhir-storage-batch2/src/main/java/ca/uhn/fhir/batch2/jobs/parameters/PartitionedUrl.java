@@ -37,8 +37,11 @@ public class PartitionedUrl implements IModelJson {
 	}
 
 	@JsonProperty("url")
-	@Pattern(regexp = "^[A-Z][A-Za-z0-9]+\\?.*", message = "If populated, URL must be a search URL in the form '{resourceType}?[params]'")
+	@Pattern(
+			regexp = "^[A-Z][A-Za-z0-9]+\\?.*",
+			message = "If populated, URL must be a search URL in the form '{resourceType}?[params]'")
 	String myUrl;
+
 	@JsonProperty("requestPartitionId")
 	RequestPartitionId myRequestPartitionId;
 

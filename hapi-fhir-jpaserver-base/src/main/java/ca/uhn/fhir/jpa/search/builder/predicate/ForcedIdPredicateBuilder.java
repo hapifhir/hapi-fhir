@@ -45,11 +45,7 @@ public class ForcedIdPredicateBuilder extends BaseJoiningPredicateBuilder {
 		return myColumnResourceId;
 	}
 
-
 	public DbColumn getColumnForcedId() {
 		return myColumnForcedId;
 	}
-
-
 }
-

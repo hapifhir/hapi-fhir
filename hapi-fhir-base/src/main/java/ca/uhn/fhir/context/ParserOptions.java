@@ -200,9 +200,9 @@ public class ParserOptions {
 	 *                                                    Bundle.entry.fullUrl
 	 * @return Returns a reference to <code>this</code> parser so that method calls can be chained together
 	 */
-	public ParserOptions setOverrideResourceIdWithBundleEntryFullUrl(boolean theOverrideResourceIdWithBundleEntryFullUrl) {
+	public ParserOptions setOverrideResourceIdWithBundleEntryFullUrl(
+			boolean theOverrideResourceIdWithBundleEntryFullUrl) {
 		myOverrideResourceIdWithBundleEntryFullUrl = theOverrideResourceIdWithBundleEntryFullUrl;
 		return this;
 	}
-
 }

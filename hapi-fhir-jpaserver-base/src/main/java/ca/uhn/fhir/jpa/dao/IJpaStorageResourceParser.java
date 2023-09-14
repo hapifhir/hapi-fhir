@@ -24,8 +24,8 @@ import ca.uhn.fhir.jpa.model.entity.IBaseResourceEntity;
 import ca.uhn.fhir.jpa.model.entity.ResourceTag;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
-import javax.annotation.Nullable;
 import java.util.Collection;
+import javax.annotation.Nullable;
 
 public interface IJpaStorageResourceParser extends IStorageResourceParser {
 
@@ -33,13 +33,22 @@ public interface IJpaStorageResourceParser extends IStorageResourceParser {
 	 * Convert a storage entity into a FHIR resource model instance. This method may return null if the entity is not
 	 * completely flushed, including the entities history entries.
 	 */
-	<R extends IBaseResource> R toResource(Class<R> theResourceType, IBaseResourceEntity theEntity, Collection<ResourceTag> theTagList, boolean theForHistoryOperation);
+	<R extends IBaseResource> R toResource(
+			Class<R> theResourceType,
+			IBaseResourceEntity theEntity,
+			Collection<ResourceTag> theTagList,
+			boolean theForHistoryOperation);
 
 	/**
 	 * Populate the metadata (Resource.meta.*) from a storage entity and other related
 	 * objects pulled from the database
 	 */
-	<R extends IBaseResource> R populateResourceMetadata(IBaseResourceEntity theEntitySource, boolean theForHistoryOperation, @Nullable Collection<? extends BaseTag> tagList, long theVersion, R theResourceTarget);
+	<R extends IBaseResource> R populateResourceMetadata(
+			IBaseResourceEntity theEntitySource,
+			boolean theForHistoryOperation,
+			@Nullable Collection<? extends BaseTag> tagList,
+			long theVersion,
+			R theResourceTarget);
 
 	/**
 	 * Populates a resource model object's metadata (Resource.meta.*) based on the

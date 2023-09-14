@@ -22,8 +22,6 @@ package ca.uhn.fhir.model.primitive;
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import ca.uhn.fhir.util.CoverageIgnore;
 
-@DatatypeDef(name = "markdown", profileOf=StringDt.class)
+@DatatypeDef(name = "markdown", profileOf = StringDt.class)
 @CoverageIgnore
-public class MarkdownDt extends StringDt {
-
-}
+public class MarkdownDt extends StringDt {}

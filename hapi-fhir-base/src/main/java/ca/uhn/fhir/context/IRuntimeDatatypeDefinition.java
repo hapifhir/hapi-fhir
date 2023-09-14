@@ -25,11 +25,10 @@ import org.hl7.fhir.instance.model.api.IBaseDatatype;
 public interface IRuntimeDatatypeDefinition {
 
 	boolean isSpecialization();
-	
+
 	public Class<? extends IBaseDatatype> getProfileOf();
 
 	boolean isProfileOf(Class<? extends IBaseDatatype> theType);
-	
-	public Class<? extends IBase> getImplementingClass();
 
+	public Class<? extends IBase> getImplementingClass();
 }

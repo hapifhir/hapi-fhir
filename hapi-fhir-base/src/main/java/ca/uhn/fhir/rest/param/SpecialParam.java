@@ -61,7 +61,7 @@ public class SpecialParam extends BaseParam /*implements IQueryParameterType*/ {
 
 	/**
 	 * Returns the value for the token (generally the value to the right of the
-	 * vertical bar on the URL) 
+	 * vertical bar on the URL)
 	 */
 	public String getValue() {
 		return myValue;
@@ -74,7 +74,6 @@ public class SpecialParam extends BaseParam /*implements IQueryParameterType*/ {
 	public boolean isEmpty() {
 		return StringUtils.isEmpty(myValue);
 	}
-
 
 	public SpecialParam setValue(String theValue) {
 		myValue = theValue;
@@ -94,5 +93,4 @@ public class SpecialParam extends BaseParam /*implements IQueryParameterType*/ {
 	private static String toSystemValue(UriDt theSystem) {
 		return theSystem.getValueAsString();
 	}
-
 }

@@ -24,13 +24,13 @@ import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.util.StopWatch;
 import com.google.common.collect.Lists;
 import org.apache.commons.lang3.concurrent.BasicThreadFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -44,6 +44,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
+import javax.annotation.Nullable;
 
 public class PartitionRunner {
 	private static final Logger ourLog = LoggerFactory.getLogger(PartitionRunner.class);
@@ -67,7 +68,13 @@ public class PartitionRunner {
 	 * Constructor - Use this constructor and provide a {@link RequestDetails} and {@link HapiTransactionService} if
 	 * you want each individual callable task to be performed in a managed transaction.
 	 */
-	public PartitionRunner(String theProcessName, String theThreadPrefix, int theBatchSize, int theThreadCount, @Nullable HapiTransactionService theTransactionService, @Nullable RequestDetails theRequestDetails) {
+	public PartitionRunner(
+			String theProcessName,
+			String theThreadPrefix,
+			int theBatchSize,
+			int theThreadCount,
+			@Nullable HapiTransactionService theTransactionService,
+			@Nullable RequestDetails theRequestDetails) {
 		myProcessName = theProcessName;
 		myThreadPrefix = theThreadPrefix;
 		myBatchSize = theBatchSize;
@@ -76,7 +83,8 @@ public class PartitionRunner {
 		myRequestDetails = theRequestDetails;
 	}
 
-	public void runInPartitionedThreads(List<IResourcePersistentId> theResourceIds, Consumer<List<IResourcePersistentId>> partitionConsumer) {
+	public void runInPartitionedThreads(
+			List<IResourcePersistentId> theResourceIds, Consumer<List<IResourcePersistentId>> partitionConsumer) {
 
 		List<Callable<Void>> runnableTasks = buildCallableTasks(theResourceIds, partitionConsumer);
 		if (runnableTasks.size() == 0) {
@@ -85,20 +93,21 @@ public class PartitionRunner {
 
 		if (myTransactionService != null) {
 			// Wrap each Callable task in an invocation to HapiTransactionService#execute
-			runnableTasks = runnableTasks
-				.stream()
-				.map(t -> (Callable<Void>) () -> {
-					return myTransactionService
-						.withRequest(myRequestDetails)
-						.execute(t);
-				})
-				.collect(Collectors.toList());
+			runnableTasks = runnableTasks.stream()
+					.map(t -> (Callable<Void>) () -> {
+						return myTransactionService
+								.withRequest(myRequestDetails)
+								.execute(t);
+					})
+					.collect(Collectors.toList());
 		}
 
 		if (runnableTasks.size() == 1) {
 			try {
 				runnableTasks.get(0).call();
 				return;
+			} catch (PreconditionFailedException preconditionFailedException) {
+				throw preconditionFailedException;
 			} catch (Exception e) {
 				ourLog.error("Error while " + myProcessName, e);
 				throw new InternalErrorException(Msg.code(1084) + e);
@@ -107,10 +116,9 @@ public class PartitionRunner {
 
 		ExecutorService executorService = buildExecutor(runnableTasks.size());
 		try {
-			List<Future<?>> futures = runnableTasks
-				.stream()
-				.map(t -> executorService.submit(() -> t.call()))
-				.collect(Collectors.toList());
+			List<Future<?>> futures = runnableTasks.stream()
+					.map(t -> executorService.submit(() -> t.call()))
+					.collect(Collectors.toList());
 			// wait for all the threads to finish
 			for (Future<?> future : futures) {
 				future.get();
@@ -126,7 +134,8 @@ public class PartitionRunner {
 		}
 	}
 
-	private List<Callable<Void>> buildCallableTasks(List<IResourcePersistentId> theResourceIds, Consumer<List<IResourcePersistentId>> partitionConsumer) {
+	private List<Callable<Void>> buildCallableTasks(
+			List<IResourcePersistentId> theResourceIds, Consumer<List<IResourcePersistentId>> partitionConsumer) {
 		List<Callable<Void>> retval = new ArrayList<>();
 
 		if (myBatchSize > theResourceIds.size()) {
@@ -157,28 +166,31 @@ public class PartitionRunner {
 		ourLog.info(myProcessName + " with {} threads", threadCount);
 		LinkedBlockingQueue<Runnable> executorQueue = new LinkedBlockingQueue<>(MAX_POOL_SIZE);
 		BasicThreadFactory threadFactory = new BasicThreadFactory.Builder()
-			.namingPattern(myThreadPrefix + "-%d")
-			.daemon(false)
-			.priority(Thread.NORM_PRIORITY)
-			.build();
+				.namingPattern(myThreadPrefix + "-%d")
+				.daemon(false)
+				.priority(Thread.NORM_PRIORITY)
+				.build();
 		RejectedExecutionHandler rejectedExecutionHandler = (theRunnable, theExecutor) -> {
-			ourLog.info("Note: " + myThreadPrefix + " executor queue is full ({} elements), waiting for a slot to become available!", executorQueue.size());
+			ourLog.info(
+					"Note: " + myThreadPrefix
+							+ " executor queue is full ({} elements), waiting for a slot to become available!",
+					executorQueue.size());
 			StopWatch sw = new StopWatch();
 			try {
 				executorQueue.put(theRunnable);
 			} catch (InterruptedException e) {
-				throw new RejectedExecutionException(Msg.code(1086) + "Task " + theRunnable.toString() +
-					" rejected from " + e);
+				throw new RejectedExecutionException(
+						Msg.code(1086) + "Task " + theRunnable.toString() + " rejected from " + e);
 			}
 			ourLog.info("Slot become available after {}ms", sw.getMillis());
 		};
 		return new ThreadPoolExecutor(
-			threadCount,
-			MAX_POOL_SIZE,
-			0L,
-			TimeUnit.MILLISECONDS,
-			executorQueue,
-			threadFactory,
-			rejectedExecutionHandler);
+				threadCount,
+				MAX_POOL_SIZE,
+				0L,
+				TimeUnit.MILLISECONDS,
+				executorQueue,
+				threadFactory,
+				rejectedExecutionHandler);
 	}
 }

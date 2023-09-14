@@ -24,7 +24,6 @@ import ca.uhn.fhir.jpa.dao.predicate.SearchFilterParser;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.entity.SearchInclude;
 import ca.uhn.fhir.jpa.entity.SearchTypeEnum;
-import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -46,23 +45,17 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import javax.persistence.EntityManager;
-import javax.persistence.TypedQuery;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.From;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.From;
+import javax.persistence.criteria.Predicate;
 
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 
@@ -74,11 +67,13 @@ public class QueryParameterUtils {
 	public static final Condition[] EMPTY_CONDITION_ARRAY = new Condition[0];
 
 	static {
-		DualHashBidiMap<SearchFilterParser.CompareOperation, ParamPrefixEnum> compareOperationToParamPrefix = new DualHashBidiMap<>();
+		DualHashBidiMap<SearchFilterParser.CompareOperation, ParamPrefixEnum> compareOperationToParamPrefix =
+				new DualHashBidiMap<>();
 		compareOperationToParamPrefix.put(SearchFilterParser.CompareOperation.ap, ParamPrefixEnum.APPROXIMATE);
 		compareOperationToParamPrefix.put(SearchFilterParser.CompareOperation.eq, ParamPrefixEnum.EQUAL);
 		compareOperationToParamPrefix.put(SearchFilterParser.CompareOperation.gt, ParamPrefixEnum.GREATERTHAN);
-		compareOperationToParamPrefix.put(SearchFilterParser.CompareOperation.ge, ParamPrefixEnum.GREATERTHAN_OR_EQUALS);
+		compareOperationToParamPrefix.put(
+				SearchFilterParser.CompareOperation.ge, ParamPrefixEnum.GREATERTHAN_OR_EQUALS);
 		compareOperationToParamPrefix.put(SearchFilterParser.CompareOperation.lt, ParamPrefixEnum.LESSTHAN);
 		compareOperationToParamPrefix.put(SearchFilterParser.CompareOperation.le, ParamPrefixEnum.LESSTHAN_OR_EQUALS);
 		compareOperationToParamPrefix.put(SearchFilterParser.CompareOperation.ne, ParamPrefixEnum.NOT_EQUAL);
@@ -87,111 +82,112 @@ public class QueryParameterUtils {
 		ourCompareOperationToParamPrefix = UnmodifiableBidiMap.unmodifiableBidiMap(compareOperationToParamPrefix);
 	}
 
+	@Nullable
+	public static Condition toAndPredicate(List<Condition> theAndPredicates) {
+		List<Condition> andPredicates =
+				theAndPredicates.stream().filter(Objects::nonNull).collect(Collectors.toList());
+		if (andPredicates.size() == 0) {
+			return null;
+		} else if (andPredicates.size() == 1) {
+			return andPredicates.get(0);
+		} else {
+			return ComboCondition.and(andPredicates.toArray(EMPTY_CONDITION_ARRAY));
+		}
+	}
 
 	@Nullable
-    public static Condition toAndPredicate(List<Condition> theAndPredicates) {
-        List<Condition> andPredicates = theAndPredicates
-			  .stream()
-			  .filter(Objects::nonNull)
-			  .collect(Collectors.toList());
-        if (andPredicates.size() == 0) {
-            return null;
-        } else if (andPredicates.size() == 1) {
-            return andPredicates.get(0);
-        } else {
-            return ComboCondition.and(andPredicates.toArray(EMPTY_CONDITION_ARRAY));
-        }
-    }
+	public static Condition toOrPredicate(List<Condition> theOrPredicates) {
+		List<Condition> orPredicates =
+				theOrPredicates.stream().filter(t -> t != null).collect(Collectors.toList());
+		if (orPredicates.size() == 0) {
+			return null;
+		} else if (orPredicates.size() == 1) {
+			return orPredicates.get(0);
+		} else {
+			return ComboCondition.or(orPredicates.toArray(EMPTY_CONDITION_ARRAY));
+		}
+	}
 
-    @Nullable
-    public static Condition toOrPredicate(List<Condition> theOrPredicates) {
-        List<Condition> orPredicates = theOrPredicates.stream().filter(t -> t != null).collect(Collectors.toList());
-        if (orPredicates.size() == 0) {
-            return null;
-        } else if (orPredicates.size() == 1) {
-            return orPredicates.get(0);
-        } else {
-            return ComboCondition.or(orPredicates.toArray(EMPTY_CONDITION_ARRAY));
-        }
-    }
+	@Nullable
+	public static Condition toOrPredicate(Condition... theOrPredicates) {
+		return toOrPredicate(Arrays.asList(theOrPredicates));
+	}
 
-    @Nullable
-    public static Condition toOrPredicate(Condition... theOrPredicates) {
-        return toOrPredicate(Arrays.asList(theOrPredicates));
-    }
+	@Nullable
+	public static Condition toAndPredicate(Condition... theAndPredicates) {
+		return toAndPredicate(Arrays.asList(theAndPredicates));
+	}
 
-    @Nullable
-    public static Condition toAndPredicate(Condition... theAndPredicates) {
-        return toAndPredicate(Arrays.asList(theAndPredicates));
-    }
+	@Nonnull
+	public static Condition toEqualToOrInPredicate(
+			DbColumn theColumn, List<String> theValuePlaceholders, boolean theInverse) {
+		if (theInverse) {
+			return toNotEqualToOrNotInPredicate(theColumn, theValuePlaceholders);
+		} else {
+			return toEqualToOrInPredicate(theColumn, theValuePlaceholders);
+		}
+	}
 
-    @Nonnull
-    public static Condition toEqualToOrInPredicate(DbColumn theColumn, List<String> theValuePlaceholders, boolean theInverse) {
-        if (theInverse) {
-            return toNotEqualToOrNotInPredicate(theColumn, theValuePlaceholders);
-        } else {
-            return toEqualToOrInPredicate(theColumn, theValuePlaceholders);
-        }
-    }
+	@Nonnull
+	public static Condition toEqualToOrInPredicate(DbColumn theColumn, List<String> theValuePlaceholders) {
+		if (theValuePlaceholders.size() == 1) {
+			return BinaryCondition.equalTo(theColumn, theValuePlaceholders.get(0));
+		}
+		return new InCondition(theColumn, theValuePlaceholders);
+	}
 
-    @Nonnull
-    public static Condition toEqualToOrInPredicate(DbColumn theColumn, List<String> theValuePlaceholders) {
-        if (theValuePlaceholders.size() == 1) {
-            return BinaryCondition.equalTo(theColumn, theValuePlaceholders.get(0));
-        }
-        return new InCondition(theColumn, theValuePlaceholders);
-    }
+	@Nonnull
+	public static Condition toNotEqualToOrNotInPredicate(DbColumn theColumn, List<String> theValuePlaceholders) {
+		if (theValuePlaceholders.size() == 1) {
+			return BinaryCondition.notEqualTo(theColumn, theValuePlaceholders.get(0));
+		}
+		return new InCondition(theColumn, theValuePlaceholders).setNegate(true);
+	}
 
-    @Nonnull
-    public static Condition toNotEqualToOrNotInPredicate(DbColumn theColumn, List<String> theValuePlaceholders) {
-        if (theValuePlaceholders.size() == 1) {
-            return BinaryCondition.notEqualTo(theColumn, theValuePlaceholders.get(0));
-        }
-        return new InCondition(theColumn, theValuePlaceholders).setNegate(true);
-    }
+	public static SearchFilterParser.CompareOperation toOperation(ParamPrefixEnum thePrefix) {
+		SearchFilterParser.CompareOperation retVal = null;
+		if (thePrefix != null && ourCompareOperationToParamPrefix.containsValue(thePrefix)) {
+			retVal = ourCompareOperationToParamPrefix.getKey(thePrefix);
+		}
+		return ObjectUtils.defaultIfNull(retVal, SearchFilterParser.CompareOperation.eq);
+	}
 
-    public static SearchFilterParser.CompareOperation toOperation(ParamPrefixEnum thePrefix) {
-        SearchFilterParser.CompareOperation retVal = null;
-        if (thePrefix != null && ourCompareOperationToParamPrefix.containsValue(thePrefix)) {
-            retVal = ourCompareOperationToParamPrefix.getKey(thePrefix);
-        }
-        return ObjectUtils.defaultIfNull(retVal, SearchFilterParser.CompareOperation.eq);
-    }
+	public static ParamPrefixEnum fromOperation(SearchFilterParser.CompareOperation thePrefix) {
+		ParamPrefixEnum retVal = null;
+		if (thePrefix != null && ourCompareOperationToParamPrefix.containsKey(thePrefix)) {
+			retVal = ourCompareOperationToParamPrefix.get(thePrefix);
+		}
+		return ObjectUtils.defaultIfNull(retVal, ParamPrefixEnum.EQUAL);
+	}
 
-    public static ParamPrefixEnum fromOperation(SearchFilterParser.CompareOperation thePrefix) {
-        ParamPrefixEnum retVal = null;
-        if (thePrefix != null && ourCompareOperationToParamPrefix.containsKey(thePrefix)) {
-            retVal = ourCompareOperationToParamPrefix.get(thePrefix);
-        }
-        return ObjectUtils.defaultIfNull(retVal, ParamPrefixEnum.EQUAL);
-    }
+	public static String getChainedPart(String parameter) {
+		return parameter.substring(parameter.indexOf(".") + 1);
+	}
 
-    public static String getChainedPart(String parameter) {
-        return parameter.substring(parameter.indexOf(".") + 1);
-    }
+	public static String getParamNameWithPrefix(String theSpnamePrefix, String theParamName) {
 
-    public static String getParamNameWithPrefix(String theSpnamePrefix, String theParamName) {
+		if (StringUtils.isBlank(theSpnamePrefix)) return theParamName;
 
-        if (StringUtils.isBlank(theSpnamePrefix))
-            return theParamName;
+		return theSpnamePrefix + "." + theParamName;
+	}
 
-        return theSpnamePrefix + "." + theParamName;
-    }
+	public static Predicate[] toPredicateArray(List<Predicate> thePredicates) {
+		return thePredicates.toArray(new Predicate[0]);
+	}
 
-    public static Predicate[] toPredicateArray(List<Predicate> thePredicates) {
-        return thePredicates.toArray(new Predicate[0]);
-    }
-
-	private static List<Predicate> createLastUpdatedPredicates(final DateRangeParam theLastUpdated, CriteriaBuilder builder, From<?, ResourceTable> from) {
+	private static List<Predicate> createLastUpdatedPredicates(
+			final DateRangeParam theLastUpdated, CriteriaBuilder builder, From<?, ResourceTable> from) {
 		List<Predicate> lastUpdatedPredicates = new ArrayList<>();
 		if (theLastUpdated != null) {
 			if (theLastUpdated.getLowerBoundAsInstant() != null) {
 				ourLog.debug("LastUpdated lower bound: {}", new InstantDt(theLastUpdated.getLowerBoundAsInstant()));
-				Predicate predicateLower = builder.greaterThanOrEqualTo(from.get("myUpdated"), theLastUpdated.getLowerBoundAsInstant());
+				Predicate predicateLower =
+						builder.greaterThanOrEqualTo(from.get("myUpdated"), theLastUpdated.getLowerBoundAsInstant());
 				lastUpdatedPredicates.add(predicateLower);
 			}
 			if (theLastUpdated.getUpperBoundAsInstant() != null) {
-				Predicate predicateUpper = builder.lessThanOrEqualTo(from.get("myUpdated"), theLastUpdated.getUpperBoundAsInstant());
+				Predicate predicateUpper =
+						builder.lessThanOrEqualTo(from.get("myUpdated"), theLastUpdated.getUpperBoundAsInstant());
 				lastUpdatedPredicates.add(predicateUpper);
 			}
 		}
@@ -208,14 +204,21 @@ public class QueryParameterUtils {
 		}
 	}
 
-	public static void populateSearchEntity(SearchParameterMap theParams, String theResourceType, String theSearchUuid, String theQueryString, Search theSearch, RequestPartitionId theRequestPartitionId) {
+	public static void populateSearchEntity(
+			SearchParameterMap theParams,
+			String theResourceType,
+			String theSearchUuid,
+			String theQueryString,
+			Search theSearch,
+			RequestPartitionId theRequestPartitionId) {
 		theSearch.setDeleted(false);
 		theSearch.setUuid(theSearchUuid);
 		theSearch.setCreated(new Date());
 		theSearch.setTotalCount(null);
 		theSearch.setNumFound(0);
 		theSearch.setPreferredPageSize(theParams.getCount());
-		theSearch.setSearchType(theParams.getEverythingMode() != null ? SearchTypeEnum.EVERYTHING : SearchTypeEnum.SEARCH);
+		theSearch.setSearchType(
+				theParams.getEverythingMode() != null ? SearchTypeEnum.EVERYTHING : SearchTypeEnum.SEARCH);
 		theSearch.setLastUpdated(theParams.getLastUpdated());
 		theSearch.setResourceType(theResourceType);
 		theSearch.setStatus(SearchStatusEnum.LOADING);

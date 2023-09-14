@@ -29,6 +29,7 @@ public class PartitionedJobParameters implements IModelJson {
 	@JsonProperty(value = "partitionId")
 	@Nullable
 	private RequestPartitionId myRequestPartitionId;
+
 	@JsonProperty("batchSize")
 	@Nullable
 	private Integer myBatchSize;

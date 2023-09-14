@@ -30,42 +30,62 @@ import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
-import javax.annotation.Nonnull;
-import javax.persistence.EntityManager;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
+import javax.annotation.Nonnull;
+import javax.persistence.EntityManager;
 
 public interface ISearchBuilder<T extends IResourcePersistentId> {
 	String SEARCH_BUILDER_BEAN_NAME = "SearchBuilder";
 
-	IResultIterator createQuery(SearchParameterMap theParams, SearchRuntimeDetails theSearchRuntime, RequestDetails theRequest, @Nonnull RequestPartitionId theRequestPartitionId);
+	IResultIterator createQuery(
+			SearchParameterMap theParams,
+			SearchRuntimeDetails theSearchRuntime,
+			RequestDetails theRequest,
+			@Nonnull RequestPartitionId theRequestPartitionId);
 
-	Long createCountQuery(SearchParameterMap theParams, String theSearchUuid, RequestDetails theRequest, RequestPartitionId theRequestPartitionId);
+	Long createCountQuery(
+			SearchParameterMap theParams,
+			String theSearchUuid,
+			RequestDetails theRequest,
+			RequestPartitionId theRequestPartitionId);
 
 	void setMaxResultsToFetch(Integer theMaxResultsToFetch);
 
-	void loadResourcesByPid(Collection<T> thePids, Collection<T> theIncludedPids, List<IBaseResource> theResourceListToPopulate, boolean theForHistoryOperation, RequestDetails theDetails);
+	void loadResourcesByPid(
+			Collection<T> thePids,
+			Collection<T> theIncludedPids,
+			List<IBaseResource> theResourceListToPopulate,
+			boolean theForHistoryOperation,
+			RequestDetails theDetails);
 
 	/**
 	 * Use the loadIncludes that takes a parameters object instead.
 	 */
 	@Deprecated
-	Set<T> loadIncludes(FhirContext theContext, EntityManager theEntityManager, Collection<T> theMatches, Collection<Include> theRevIncludes, boolean theReverseMode,
-														DateRangeParam theLastUpdated, String theSearchIdOrDescription, RequestDetails theRequest, Integer theMaxCount);
+	Set<T> loadIncludes(
+			FhirContext theContext,
+			EntityManager theEntityManager,
+			Collection<T> theMatches,
+			Collection<Include> theRevIncludes,
+			boolean theReverseMode,
+			DateRangeParam theLastUpdated,
+			String theSearchIdOrDescription,
+			RequestDetails theRequest,
+			Integer theMaxCount);
 
 	default Set<T> loadIncludes(SearchBuilderLoadIncludesParameters<T> theParameters) {
 		return this.loadIncludes(
-			theParameters.getFhirContext(),
-			theParameters.getEntityManager(),
-			theParameters.getMatches(),
-			theParameters.getIncludeFilters(),
-			theParameters.isReverseMode(),
-			theParameters.getLastUpdated(),
-			theParameters.getSearchIdOrDescription(),
-			theParameters.getRequestDetails(),
-			theParameters.getMaxCount()
-		);
+				theParameters.getFhirContext(),
+				theParameters.getEntityManager(),
+				theParameters.getMatches(),
+				theParameters.getIncludeFilters(),
+				theParameters.isReverseMode(),
+				theParameters.getLastUpdated(),
+				theParameters.getSearchIdOrDescription(),
+				theParameters.getRequestDetails(),
+				theParameters.getMaxCount());
 	}
 
 	/**
@@ -74,5 +94,4 @@ public interface ISearchBuilder<T extends IResourcePersistentId> {
 	void setFetchSize(int theFetchSize);
 
 	void setPreviouslyAddedResourcePids(List<T> thePreviouslyAddedResourcePids);
-
 }

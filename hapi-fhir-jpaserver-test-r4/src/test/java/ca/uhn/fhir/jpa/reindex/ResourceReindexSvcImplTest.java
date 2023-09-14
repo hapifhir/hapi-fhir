@@ -4,6 +4,7 @@ import ca.uhn.fhir.jpa.api.pid.IResourcePidList;
 import ca.uhn.fhir.jpa.api.pid.TypedResourcePid;
 import ca.uhn.fhir.jpa.api.svc.IBatch2DaoSvc;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
@@ -107,26 +108,26 @@ public class ResourceReindexSvcImplTest extends BaseJpaR4Test {
 
 		// Setup
 
-		createPatient(withActiveFalse());
+		final Long patientId0 = createPatient(withActiveFalse()).getIdPartAsLong();
 		sleepUntilTimeChanges();
 
 		// Start of resources within range
 		Date start = new Date();
 		sleepUntilTimeChanges();
-		Long id0 = createPatient(withActiveFalse()).getIdPartAsLong();
+		Long patientId1 = createPatient(withActiveFalse()).getIdPartAsLong();
 		createObservation(withObservationCode("http://foo", "bar"));
 		createObservation(withObservationCode("http://foo", "bar"));
 		sleepUntilTimeChanges();
 		Date beforeLastInRange = new Date();
 		sleepUntilTimeChanges();
-		Long id1 = createPatient(withActiveFalse()).getIdPartAsLong();
+		Long patientId2 = createPatient(withActiveFalse()).getIdPartAsLong();
 		sleepUntilTimeChanges();
 		Date end = new Date();
 		sleepUntilTimeChanges();
 		// End of resources within range
 
 		createObservation(withObservationCode("http://foo", "bar"));
-		createPatient(withActiveFalse());
+		final Long patientId3 = createPatient(withActiveFalse()).getIdPartAsLong();
 		sleepUntilTimeChanges();
 
 		// Execute
@@ -136,13 +137,17 @@ public class ResourceReindexSvcImplTest extends BaseJpaR4Test {
 
 		// Verify
 
-		assertEquals(2, page.size());
+		assertEquals(4, page.size());
 		List<TypedResourcePid> typedResourcePids = page.getTypedResourcePids();
-		assertThat(page.getTypedResourcePids(), contains(new TypedResourcePid("Patient", id0), new TypedResourcePid("Patient", id1)));
+		assertThat(page.getTypedResourcePids(),
+			contains(new TypedResourcePid("Patient", patientId0),
+				new TypedResourcePid("Patient", patientId1),
+				new TypedResourcePid("Patient", patientId2),
+				new TypedResourcePid("Patient", patientId3)));
 		assertTrue(page.getLastDate().after(beforeLastInRange));
-		assertTrue(page.getLastDate().before(end));
+		assertTrue(page.getLastDate().before(end) || page.getLastDate().equals(end));
 
-		assertEquals(3, myCaptureQueriesListener.logSelectQueries().size());
+		assertEquals(1, myCaptureQueriesListener.logSelectQueries().size());
 		assertEquals(0, myCaptureQueriesListener.countInsertQueries());
 		assertEquals(0, myCaptureQueriesListener.countUpdateQueries());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
@@ -150,6 +155,5 @@ public class ResourceReindexSvcImplTest extends BaseJpaR4Test {
 		assertEquals(0, myCaptureQueriesListener.getRollbackCount());
 
 	}
-
 
 }

@@ -32,5 +32,4 @@ public interface IResourceLookup<T extends IResourcePersistentId<?>> {
 	Date getDeleted();
 
 	T getPersistentId();
-
 }

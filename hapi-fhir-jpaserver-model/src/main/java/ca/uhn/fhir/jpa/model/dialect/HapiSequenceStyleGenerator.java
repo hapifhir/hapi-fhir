@@ -44,10 +44,13 @@ import java.util.Properties;
  * and by default will therefore work exactly as the default would, but allows for customization.
  */
 @SuppressWarnings("unused")
-public class HapiSequenceStyleGenerator implements IdentifierGenerator, PersistentIdentifierGenerator, BulkInsertionCapableIdentifierGenerator {
+public class HapiSequenceStyleGenerator
+		implements IdentifierGenerator, PersistentIdentifierGenerator, BulkInsertionCapableIdentifierGenerator {
 	private final SequenceStyleGenerator myGen = new SequenceStyleGenerator();
+
 	@Autowired
 	private StorageSettings myStorageSettings;
+
 	private ISequenceValueMassager myIdMassager;
 	private boolean myConfigured;
 	private String myGeneratorName;
@@ -63,7 +66,8 @@ public class HapiSequenceStyleGenerator implements IdentifierGenerator, Persiste
 	}
 
 	@Override
-	public Serializable generate(SharedSessionContractImplementor theSession, Object theObject) throws HibernateException {
+	public Serializable generate(SharedSessionContractImplementor theSession, Object theObject)
+			throws HibernateException {
 		Long retVal = myIdMassager.generate(myGeneratorName);
 		if (retVal == null) {
 			Long next = (Long) myGen.generate(theSession, theObject);
@@ -73,7 +77,8 @@ public class HapiSequenceStyleGenerator implements IdentifierGenerator, Persiste
 	}
 
 	@Override
-	public void configure(Type theType, Properties theParams, ServiceRegistry theServiceRegistry) throws MappingException {
+	public void configure(Type theType, Properties theParams, ServiceRegistry theServiceRegistry)
+			throws MappingException {
 
 		// Instantiate the ID massager
 		// StorageSettings should only be null when running in the DDL generation maven plugin
@@ -109,5 +114,4 @@ public class HapiSequenceStyleGenerator implements IdentifierGenerator, Persiste
 	public boolean supportsJdbcBatchInserts() {
 		return myGen.supportsJdbcBatchInserts();
 	}
-
 }

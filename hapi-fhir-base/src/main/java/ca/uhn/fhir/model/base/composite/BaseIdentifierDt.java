@@ -30,7 +30,8 @@ import ca.uhn.fhir.rest.param.ParameterUtil;
 import ca.uhn.fhir.rest.param.StringParam;
 import org.apache.commons.lang3.StringUtils;
 
-public abstract class BaseIdentifierDt extends BaseIdentifiableElement implements ICompositeDatatype, IQueryParameterType {
+public abstract class BaseIdentifierDt extends BaseIdentifiableElement
+		implements ICompositeDatatype, IQueryParameterType {
 
 	private static final long serialVersionUID = 4400972469749953077L;
 
@@ -65,7 +66,9 @@ public abstract class BaseIdentifierDt extends BaseIdentifiableElement implement
 		UriDt system = getSystemElement();
 		StringDt value = getValueElement();
 		if (system.getValueAsString() != null) {
-			return ParameterUtil.escape(StringUtils.defaultString(system.getValueAsString())) + '|' + ParameterUtil.escape(value.getValueAsString());
+			return ParameterUtil.escape(StringUtils.defaultString(system.getValueAsString()))
+					+ '|'
+					+ ParameterUtil.escape(value.getValueAsString());
 		}
 		return ParameterUtil.escape(value.getValueAsString());
 	}
@@ -79,7 +82,8 @@ public abstract class BaseIdentifierDt extends BaseIdentifiableElement implement
 		if (theIdentifier == null) {
 			return false;
 		}
-		return getValueElement().equals(theIdentifier.getValueElement()) && getSystemElement().equals(theIdentifier.getSystemElement());
+		return getValueElement().equals(theIdentifier.getValueElement())
+				&& getSystemElement().equals(theIdentifier.getSystemElement());
 	}
 
 	/**
@@ -104,7 +108,8 @@ public abstract class BaseIdentifierDt extends BaseIdentifiableElement implement
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void setValueAsQueryToken(FhirContext theContext, String theParamName, String theQualifier, String theParameter) {
+	public void setValueAsQueryToken(
+			FhirContext theContext, String theParamName, String theQualifier, String theParameter) {
 		int barIndex = ParameterUtil.nonEscapedIndexOf(theParameter, '|');
 		if (barIndex != -1) {
 			setSystem(theParameter.substring(0, barIndex));
@@ -114,10 +119,9 @@ public abstract class BaseIdentifierDt extends BaseIdentifiableElement implement
 		}
 	}
 
-	
 	/**
 	 * <b>Not supported!</b>
-	 * 
+	 *
 	 * @deprecated get/setMissing is not supported in StringDt. Use {@link StringParam} instead if you
 	 * need this functionality
 	 */
@@ -129,14 +133,15 @@ public abstract class BaseIdentifierDt extends BaseIdentifiableElement implement
 
 	/**
 	 * <b>Not supported!</b>
-	 * 
+	 *
 	 * @deprecated get/setMissing is not supported in StringDt. Use {@link StringParam} instead if you
 	 * need this functionality
 	 */
 	@Deprecated
 	@Override
 	public IQueryParameterType setMissing(Boolean theMissing) {
-		throw new UnsupportedOperationException(Msg.code(1907) + "get/setMissing is not supported in StringDt. Use {@link StringParam} instead if you need this functionality");
+		throw new UnsupportedOperationException(
+				Msg.code(1907)
+						+ "get/setMissing is not supported in StringDt. Use {@link StringParam} instead if you need this functionality");
 	}
-
 }

@@ -34,9 +34,29 @@ public interface IFhirResourceDaoValueSet<T extends IBaseResource> extends IFhir
 
 	T expand(T theSource, ValueSetExpansionOptions theOptions);
 
-	T expand(IIdType theId, T theValueSet, IPrimitiveType<String> theUrl, IPrimitiveType<String> theValueSetVersion, IPrimitiveType<String> theFilter, IPrimitiveType<String> theContext, IPrimitiveType<String> theContextDirection, IPrimitiveType<Integer> theOffset, IPrimitiveType<Integer> theCount, IPrimitiveType<String> theDisplayLanguage, IPrimitiveType<Boolean> theIncludeHierarchy, RequestDetails theRequestDetails);
+	T expand(
+			IIdType theId,
+			T theValueSet,
+			IPrimitiveType<String> theUrl,
+			IPrimitiveType<String> theValueSetVersion,
+			IPrimitiveType<String> theFilter,
+			IPrimitiveType<String> theContext,
+			IPrimitiveType<String> theContextDirection,
+			IPrimitiveType<Integer> theOffset,
+			IPrimitiveType<Integer> theCount,
+			IPrimitiveType<String> theDisplayLanguage,
+			IPrimitiveType<Boolean> theIncludeHierarchy,
+			RequestDetails theRequestDetails);
 
 	T expandByIdentifier(String theUri, ValueSetExpansionOptions theOptions);
 
-	IValidationSupport.CodeValidationResult validateCode(IPrimitiveType<String> theValueSetIdentifier, IIdType theId, IPrimitiveType<String> theCode, IPrimitiveType<String> theSystem, IPrimitiveType<String> theDisplay, IBaseCoding theCoding, IBaseDatatype theCodeableConcept, RequestDetails theRequestDetails);
+	IValidationSupport.CodeValidationResult validateCode(
+			IPrimitiveType<String> theValueSetIdentifier,
+			IIdType theId,
+			IPrimitiveType<String> theCode,
+			IPrimitiveType<String> theSystem,
+			IPrimitiveType<String> theDisplay,
+			IBaseCoding theCoding,
+			IBaseDatatype theCodeableConcept,
+			RequestDetails theRequestDetails);
 }

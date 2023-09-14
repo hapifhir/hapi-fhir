@@ -25,13 +25,13 @@ import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.model.entity.TagTypeEnum;
-import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.api.MdmConstants;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -40,9 +40,9 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Nonnull;
 import java.util.List;
 import java.util.Optional;
+import javax.annotation.Nonnull;
 
 @Service
 public class MdmResourceDaoSvc {
@@ -51,12 +51,14 @@ public class MdmResourceDaoSvc {
 
 	@Autowired
 	DaoRegistry myDaoRegistry;
+
 	@Autowired
 	IMdmSettings myMdmSettings;
 
 	public DaoMethodOutcome upsertGoldenResource(IAnyResource theGoldenResource, String theResourceType) {
 		IFhirResourceDao resourceDao = myDaoRegistry.getResourceDao(theResourceType);
-		RequestDetails requestDetails = new SystemRequestDetails().setRequestPartitionId((RequestPartitionId) theGoldenResource.getUserData(Constants.RESOURCE_PARTITION_ID));
+		RequestDetails requestDetails = new SystemRequestDetails().setRequestPartitionId((RequestPartitionId)
+				theGoldenResource.getUserData(Constants.RESOURCE_PARTITION_ID));
 		if (theGoldenResource.getIdElement().hasIdPart()) {
 			return resourceDao.update(theGoldenResource, requestDetails);
 		} else {
@@ -72,8 +74,14 @@ public class MdmResourceDaoSvc {
 	 */
 	public void removeGoldenResourceTag(IAnyResource theGoldenResource, String theResourcetype) {
 		IFhirResourceDao resourceDao = myDaoRegistry.getResourceDao(theResourcetype);
-		RequestDetails requestDetails = new SystemRequestDetails().setRequestPartitionId((RequestPartitionId) theGoldenResource.getUserData(Constants.RESOURCE_PARTITION_ID));
-		resourceDao.removeTag(theGoldenResource.getIdElement(), TagTypeEnum.TAG, MdmConstants.SYSTEM_GOLDEN_RECORD_STATUS, MdmConstants.CODE_GOLDEN_RECORD, requestDetails);
+		RequestDetails requestDetails = new SystemRequestDetails().setRequestPartitionId((RequestPartitionId)
+				theGoldenResource.getUserData(Constants.RESOURCE_PARTITION_ID));
+		resourceDao.removeTag(
+				theGoldenResource.getIdElement(),
+				TagTypeEnum.TAG,
+				MdmConstants.SYSTEM_GOLDEN_RECORD_STATUS,
+				MdmConstants.CODE_GOLDEN_RECORD,
+				requestDetails);
 	}
 
 	public IAnyResource readGoldenResourceByPid(IResourcePersistentId theGoldenResourcePid, String theResourceType) {
@@ -85,7 +93,8 @@ public class MdmResourceDaoSvc {
 		return this.searchGoldenResourceByEID(theEid, theResourceType, null);
 	}
 
-	public Optional<IAnyResource> searchGoldenResourceByEID(String theEid, String theResourceType, RequestPartitionId thePartitionId) {
+	public Optional<IAnyResource> searchGoldenResourceByEID(
+			String theEid, String theResourceType, RequestPartitionId thePartitionId) {
 		SearchParameterMap map = buildEidSearchParameterMap(theEid, theResourceType);
 
 		IFhirResourceDao resourceDao = myDaoRegistry.getResourceDao(theResourceType);
@@ -97,15 +106,14 @@ public class MdmResourceDaoSvc {
 		if (resources.isEmpty()) {
 			return Optional.empty();
 		} else if (resources.size() > 1) {
-			throw new InternalErrorException(Msg.code(737) + "Found more than one active " +
-				MdmConstants.CODE_HAPI_MDM_MANAGED +
-				" Golden Resource with EID " +
-				theEid +
-				": " +
-				resources.get(0).getIdElement().getValue() +
-				", " +
-				resources.get(1).getIdElement().getValue()
-			);
+			throw new InternalErrorException(
+					Msg.code(737) + "Found more than one active " + MdmConstants.CODE_HAPI_MDM_MANAGED
+							+ " Golden Resource with EID "
+							+ theEid
+							+ ": "
+							+ resources.get(0).getIdElement().getValue()
+							+ ", "
+							+ resources.get(1).getIdElement().getValue());
 		} else {
 			return Optional.of((IAnyResource) resources.get(0));
 		}
@@ -115,7 +123,10 @@ public class MdmResourceDaoSvc {
 	private SearchParameterMap buildEidSearchParameterMap(String theEid, String theResourceType) {
 		SearchParameterMap map = new SearchParameterMap();
 		map.setLoadSynchronous(true);
-		map.add("identifier", new TokenParam(myMdmSettings.getMdmRules().getEnterpriseEIDSystemForResourceType(theResourceType), theEid));
+		map.add(
+				"identifier",
+				new TokenParam(
+						myMdmSettings.getMdmRules().getEnterpriseEIDSystemForResourceType(theResourceType), theEid));
 		map.add("_tag", new TokenParam(MdmConstants.SYSTEM_GOLDEN_RECORD_STATUS, MdmConstants.CODE_GOLDEN_RECORD));
 		return map;
 	}

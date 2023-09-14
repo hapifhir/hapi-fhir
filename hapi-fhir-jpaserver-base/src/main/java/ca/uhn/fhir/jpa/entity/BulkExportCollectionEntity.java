@@ -21,6 +21,9 @@ package ca.uhn.fhir.jpa.entity;
 
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collection;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -34,9 +37,6 @@ import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.Version;
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collection;
 
 /*
  * These classes are no longer needed.
@@ -55,16 +55,25 @@ public class BulkExportCollectionEntity implements Serializable {
 	@SequenceGenerator(name = "SEQ_BLKEXCOL_PID", sequenceName = "SEQ_BLKEXCOL_PID")
 	@Column(name = "PID")
 	private Long myId;
+
 	@ManyToOne()
-	@JoinColumn(name = "JOB_PID", referencedColumnName = "PID", nullable = false, foreignKey = @ForeignKey(name = "FK_BLKEXCOL_JOB"))
+	@JoinColumn(
+			name = "JOB_PID",
+			referencedColumnName = "PID",
+			nullable = false,
+			foreignKey = @ForeignKey(name = "FK_BLKEXCOL_JOB"))
 	private BulkExportJobEntity myJob;
+
 	@Column(name = "RES_TYPE", length = ResourceTable.RESTYPE_LEN, nullable = false)
 	private String myResourceType;
+
 	@Column(name = "TYPE_FILTER", length = 1000, nullable = true)
 	private String myFilter;
+
 	@Version
 	@Column(name = "OPTLOCK", nullable = false)
 	private int myVersion;
+
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "myCollection")
 	private Collection<BulkExportCollectionFileEntity> myFiles;
 

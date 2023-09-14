@@ -1,11 +1,11 @@
 <!--/* VitalSigns -->
 <!--
-Code: Observation.code.text || Observation.code.coding[x].display
-Result: Observation.valueQuantity.value || Observation.valueCodeableConcept.coding[x].display || Observation.valueString
+Code: Observation.code.text || Observation.code.coding[x].display (separated by <br />)
+Result: Observation.valueQuantity || Observation.valueDateTime || Observation.valueCodeableConcept.text || Observation.valueCodeableConcept.coding[x].display (separated by <br />) || Observation.valueString
 Unit: Observation.valueQuantity.unit
-Interpretation: Observation.interpretation.text || Observation. interpretation.coding[x].display
-Comments: Observation.note[x].text (display all notes separated by <br /> )
-Date: Observation.effectiveDateTime
+Interpretation: Observation.interpretation[0].text || Observation.interpretation[0].coding[x].display (separated by <br />)
+Comments: Observation.note[x].text (separated by <br />)
+Date: Observation.effectiveDateTime || Observation.effectivePeriod.start
 */-->
 <div xmlns:th="http://www.thymeleaf.org">
    <table class="hapiPropertyTable">

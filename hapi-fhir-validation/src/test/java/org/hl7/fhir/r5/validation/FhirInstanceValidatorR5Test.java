@@ -42,8 +42,8 @@ import org.hl7.fhir.r5.model.StringType;
 import org.hl7.fhir.r5.model.StructureDefinition;
 import org.hl7.fhir.r5.model.ValueSet;
 import org.hl7.fhir.r5.model.ValueSet.ValueSetExpansionComponent;
-import org.hl7.fhir.r5.terminologies.ValueSetExpander;
-import org.hl7.fhir.r5.utils.validation.IResourceValidator;
+import org.hl7.fhir.r5.terminologies.expansion.ValueSetExpander;;
+import org.hl7.fhir.r5.terminologies.expansion.ValueSetExpansionOutcome;
 import org.hl7.fhir.r5.utils.validation.IValidationPolicyAdvisor;
 import org.hl7.fhir.r5.utils.validation.IValidatorResourceFetcher;
 import org.hl7.fhir.r5.utils.validation.constants.BestPracticeWarningLevel;
@@ -150,7 +150,7 @@ public class FhirInstanceValidatorR5Test {
 
 			ValueSet valueset = new ValueSet();
 			valueset.setExpansion(retVal);
-			return new ValueSetExpander.ValueSetExpansionOutcome(valueset);
+			return new ValueSetExpansionOutcome(valueset);
 		});
 		when(myMockSupport.isCodeSystemSupported(any(), nullable(String.class))).thenAnswer(new Answer<Boolean>() {
 			@Override
@@ -624,7 +624,7 @@ public class FhirInstanceValidatorR5Test {
 		ourLog.info(output.getMessages().get(0).getLocationString());
 		ourLog.info(output.getMessages().get(0).getMessage());
 		assertEquals("/f:Patient", output.getMessages().get(0).getLocationString());
-		assertEquals("Undefined element 'foo'", output.getMessages().get(0).getMessage());
+		assertEquals("Undefined element 'foo' at /f:Patient", output.getMessages().get(0).getMessage());
 	}
 
 	@Test

@@ -19,18 +19,17 @@
  */
 package ca.uhn.fhir.model.api;
 
-import org.hl7.fhir.instance.model.api.IBaseMetaType;
-
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.base.composite.BaseContainedDt;
 import ca.uhn.fhir.model.base.composite.BaseNarrativeDt;
 import ca.uhn.fhir.model.base.resource.ResourceMetadataMap;
 import ca.uhn.fhir.model.primitive.CodeDt;
 import ca.uhn.fhir.model.primitive.IdDt;
+import org.hl7.fhir.instance.model.api.IBaseMetaType;
 
 /**
  * This interface is the parent interface for all FHIR Resource definition classes. Classes implementing this interface should be annotated with the {@link ResourceDef @ResourceDef} annotation.
- * 
+ *
  * <p>
  * Note that this class is a part of HAPI's model API, used to define structure classes. Users will often interact with this interface, but should not need to implement it directly.
  * </p>
@@ -66,8 +65,8 @@ public interface IResource extends ICompositeElement, org.hl7.fhir.instance.mode
 	/**
 	 * Returns a view of the {@link #getResourceMetadata() resource metadata} map.
 	 * Note that getters from this map return immutable objects, but the <code>addFoo()</code>
-	 * and <code>setFoo()</code> methods may be used to modify metadata. 
-	 * 
+	 * and <code>setFoo()</code> methods may be used to modify metadata.
+	 *
 	 * @since 1.5
 	 */
 	@Override
@@ -78,14 +77,14 @@ public interface IResource extends ICompositeElement, org.hl7.fhir.instance.mode
 	 * <p>
 	 * Keys in this map are enumerated in the {@link ResourceMetadataKeyEnum}, and each key has a specific value type that it must use.
 	 * </p>
-	 * 
+	 *
 	 * @see ResourceMetadataKeyEnum for a list of allowable keys and the object types that values of a given key must use.
 	 */
 	ResourceMetadataMap getResourceMetadata();
 
 	/**
 	 * Returns a String representing the name of this Resource. This return value is not used for anything by HAPI itself, but is provided as a convenience to developers using the API.
-	 * 
+	 *
 	 * @return the name of this resource, e.g. "Patient", or "Observation"
 	 */
 	String getResourceName();
@@ -117,10 +116,9 @@ public interface IResource extends ICompositeElement, org.hl7.fhir.instance.mode
 
 	/**
 	 * Sets the metadata map for this object. Metadata entries are used to get/set feed bundle entries, such as the resource version, or the last updated timestamp.
-	 * 
+	 *
 	 * @throws NullPointerException
 	 *            The map must not be null
 	 */
 	void setResourceMetadata(ResourceMetadataMap theMap);
-
 }

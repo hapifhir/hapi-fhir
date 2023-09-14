@@ -29,12 +29,13 @@ import java.util.List;
 public abstract class BaseCandidateFinder {
 	@Autowired
 	IIdHelperService myIdHelperService;
+
 	@Autowired
 	MdmLinkDaoSvc myMdmLinkDaoSvc;
 
 	CandidateList findCandidates(IAnyResource theTarget) {
 		CandidateList candidateList = new CandidateList(getStrategy());
-		candidateList.addAll(findMatchGoldenResourceCandidates(theTarget));
+		candidateList.addAll(getStrategy(), findMatchGoldenResourceCandidates(theTarget));
 		return candidateList;
 	}
 

@@ -45,6 +45,7 @@ public abstract class BaseLoincHandler implements IZipContentsHandlerCsv {
 	 * the website URL to LOINC.
 	 */
 	public static final String LOINC_WEBSITE_URL = "https://loinc.org";
+
 	public static final String REGENSTRIEF_INSTITUTE_INC = "Regenstrief Institute, Inc.";
 	private final List<ConceptMap> myConceptMaps;
 	private final Map<String, ConceptMap> myIdToConceptMaps = new HashMap<>();
@@ -54,13 +55,20 @@ public abstract class BaseLoincHandler implements IZipContentsHandlerCsv {
 	protected final Properties myUploadProperties;
 	protected String myLoincCopyrightStatement;
 
-	BaseLoincHandler(Map<String, TermConcept> theCode2Concept, List<ValueSet> theValueSets,
-			List<ConceptMap> theConceptMaps, Properties theUploadProperties) {
+	BaseLoincHandler(
+			Map<String, TermConcept> theCode2Concept,
+			List<ValueSet> theValueSets,
+			List<ConceptMap> theConceptMaps,
+			Properties theUploadProperties) {
 		this(theCode2Concept, theValueSets, theConceptMaps, theUploadProperties, null);
 	}
 
-	BaseLoincHandler(Map<String, TermConcept> theCode2Concept, List<ValueSet> theValueSets,
-			List<ConceptMap> theConceptMaps, Properties theUploadProperties, String theCopyrightStatement) {
+	BaseLoincHandler(
+			Map<String, TermConcept> theCode2Concept,
+			List<ValueSet> theValueSets,
+			List<ConceptMap> theConceptMaps,
+			Properties theUploadProperties,
+			String theCopyrightStatement) {
 		myValueSets = theValueSets;
 		myValueSets.forEach(t -> myIdToValueSet.put(t.getId(), t));
 		myCode2Concept = theCode2Concept;
@@ -102,14 +110,9 @@ public abstract class BaseLoincHandler implements IZipContentsHandlerCsv {
 				}
 			}
 
-			include
-				.addConcept()
-				.setCode(theCode)
-				.setDisplay(displayName);
-
+			include.addConcept().setCode(theCode).setDisplay(displayName);
 		}
 	}
-
 
 	void addConceptMapEntry(ConceptMapping theMapping, String theExternalCopyright) {
 		if (isBlank(theMapping.getSourceCode())) {
@@ -127,16 +130,17 @@ public abstract class BaseLoincHandler implements IZipContentsHandlerCsv {
 			conceptMap.setName(theMapping.getConceptMapName());
 			conceptMap.setVersion(theMapping.getConceptMapVersion());
 			conceptMap.setPublisher(REGENSTRIEF_INSTITUTE_INC);
-			conceptMap.addContact()
-				.setName(REGENSTRIEF_INSTITUTE_INC)
-				.addTelecom()
-				.setSystem(ContactPoint.ContactPointSystem.URL)
-				.setValue(LOINC_WEBSITE_URL);
+			conceptMap
+					.addContact()
+					.setName(REGENSTRIEF_INSTITUTE_INC)
+					.addTelecom()
+					.setSystem(ContactPoint.ContactPointSystem.URL)
+					.setValue(LOINC_WEBSITE_URL);
 
 			String copyright = theExternalCopyright;
 			if (!copyright.contains("LOINC")) {
-				copyright = myLoincCopyrightStatement +
-					(myLoincCopyrightStatement.endsWith(".") ? " " : ". ") + copyright;
+				copyright =
+						myLoincCopyrightStatement + (myLoincCopyrightStatement.endsWith(".") ? " " : ". ") + copyright;
 			}
 			conceptMap.setCopyright(copyright);
 
@@ -156,7 +160,8 @@ public abstract class BaseLoincHandler implements IZipContentsHandlerCsv {
 		for (ConceptMap.ConceptMapGroupComponent next : conceptMap.getGroup()) {
 			if (next.getSource().equals(theMapping.getSourceCodeSystem())) {
 				if (next.getTarget().equals(theMapping.getTargetCodeSystem())) {
-					if (!defaultString(theMapping.getTargetCodeSystemVersion()).equals(defaultString(next.getTargetVersion()))) {
+					if (!defaultString(theMapping.getTargetCodeSystemVersion())
+							.equals(defaultString(next.getTargetVersion()))) {
 						continue;
 					}
 					group = next;
@@ -190,17 +195,22 @@ public abstract class BaseLoincHandler implements IZipContentsHandlerCsv {
 			}
 		}
 		if (!found) {
-			source
-				.addTarget()
-				.setCode(theMapping.getTargetCode())
-				.setDisplay(theMapping.getTargetDisplay())
-				.setEquivalence(theMapping.getEquivalence());
+			source.addTarget()
+					.setCode(theMapping.getTargetCode())
+					.setDisplay(theMapping.getTargetDisplay())
+					.setEquivalence(theMapping.getEquivalence());
 		} else {
-			ourLog.info("Not going to add a mapping from [{}/{}] to [{}/{}] because one already exists", theMapping.getSourceCodeSystem(), theMapping.getSourceCode(), theMapping.getTargetCodeSystem(), theMapping.getTargetCode());
+			ourLog.info(
+					"Not going to add a mapping from [{}/{}] to [{}/{}] because one already exists",
+					theMapping.getSourceCodeSystem(),
+					theMapping.getSourceCode(),
+					theMapping.getTargetCodeSystem(),
+					theMapping.getTargetCode());
 		}
 	}
 
-	ValueSet getValueSet(String theValueSetId, String theValueSetUri, String theValueSetName, String theVersionPropertyName) {
+	ValueSet getValueSet(
+			String theValueSetId, String theValueSetUri, String theValueSetName, String theVersionPropertyName) {
 
 		String version;
 		String codeSystemVersion = myUploadProperties.getProperty(LOINC_CODESYSTEM_VERSION.getCode());
@@ -223,10 +233,10 @@ public abstract class BaseLoincHandler implements IZipContentsHandlerCsv {
 			vs.setStatus(Enumerations.PublicationStatus.ACTIVE);
 			vs.setPublisher(REGENSTRIEF_INSTITUTE_INC);
 			vs.addContact()
-				.setName(REGENSTRIEF_INSTITUTE_INC)
-				.addTelecom()
-				.setSystem(ContactPoint.ContactPointSystem.URL)
-				.setValue(LOINC_WEBSITE_URL);
+					.setName(REGENSTRIEF_INSTITUTE_INC)
+					.addTelecom()
+					.setSystem(ContactPoint.ContactPointSystem.URL)
+					.setValue(LOINC_WEBSITE_URL);
 			vs.setCopyright(myLoincCopyrightStatement);
 			myIdToValueSet.put(theValueSetId, vs);
 			myValueSets.add(vs);
@@ -240,7 +250,6 @@ public abstract class BaseLoincHandler implements IZipContentsHandlerCsv {
 
 		return vs;
 	}
-
 
 	static class ConceptMapping {
 
@@ -384,6 +393,5 @@ public abstract class BaseLoincHandler implements IZipContentsHandlerCsv {
 			myTargetDisplay = theTargetDisplay;
 			return this;
 		}
-
 	}
 }

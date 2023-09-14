@@ -29,21 +29,21 @@ import ca.uhn.fhir.batch2.jobs.chunk.ResourceIdListWorkChunkJson;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
-import ca.uhn.fhir.util.Logs;
 import ca.uhn.fhir.mdm.api.IMdmChannelSubmitterSvc;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.interceptor.ResponseTerminologyTranslationSvc;
+import ca.uhn.fhir.util.Logs;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
+import javax.annotation.Nonnull;
 
-
-public class MdmInflateAndSubmitResourcesStep implements IJobStepWorker<MdmSubmitJobParameters, ResourceIdListWorkChunkJson, VoidModel> {
+public class MdmInflateAndSubmitResourcesStep
+		implements IJobStepWorker<MdmSubmitJobParameters, ResourceIdListWorkChunkJson, VoidModel> {
 	private static final Logger ourLog = Logs.getBatchTroubleshootingLog();
 
 	@Autowired
@@ -51,29 +51,35 @@ public class MdmInflateAndSubmitResourcesStep implements IJobStepWorker<MdmSubmi
 
 	@Autowired(required = false)
 	private ResponseTerminologyTranslationSvc myResponseTerminologyTranslationSvc;
+
 	@Autowired
 	private IMdmChannelSubmitterSvc myMdmChannelSubmitterSvc;
+
 	@Autowired
 	private IIdHelperService<? extends IResourcePersistentId> myIdHelperService;
 
 	@Nonnull
 	@Override
-	public RunOutcome run(@Nonnull StepExecutionDetails<MdmSubmitJobParameters, ResourceIdListWorkChunkJson> theStepExecutionDetails,
-								 @Nonnull IJobDataSink<VoidModel> theDataSink) throws JobExecutionFailedException {
+	public RunOutcome run(
+			@Nonnull StepExecutionDetails<MdmSubmitJobParameters, ResourceIdListWorkChunkJson> theStepExecutionDetails,
+			@Nonnull IJobDataSink<VoidModel> theDataSink)
+			throws JobExecutionFailedException {
 		ResourceIdListWorkChunkJson idList = theStepExecutionDetails.getData();
 
 		ourLog.info("Final Step  for $mdm-submit - Expand and submit resources");
-		ourLog.info("About to expand {} resource IDs into their full resource bodies.", idList.getResourcePersistentIds(myIdHelperService).size());
+		ourLog.info(
+				"About to expand {} resource IDs into their full resource bodies.",
+				idList.getResourcePersistentIds(myIdHelperService).size());
 
-		//Inflate the resources by PID
+		// Inflate the resources by PID
 		List<IBaseResource> allResources = fetchAllResources(idList.getResourcePersistentIds(myIdHelperService));
 
-		//Replace the terminology
+		// Replace the terminology
 		if (myResponseTerminologyTranslationSvc != null) {
 			myResponseTerminologyTranslationSvc.processResourcesForTerminologyTranslation(allResources);
 		}
 
-		//Submit
+		// Submit
 		for (IBaseResource nextResource : allResources) {
 			myMdmChannelSubmitterSvc.submitResourceToMdmChannel(nextResource);
 		}
@@ -87,7 +93,8 @@ public class MdmInflateAndSubmitResourcesStep implements IJobStepWorker<MdmSubmi
 		for (IResourcePersistentId id : theIds) {
 			assert id.getResourceType() != null;
 			IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(id.getResourceType());
-			// This should be a query, but we have PIDs, and we don't have a _pid search param. TODO GGG, figure out how to make this search by pid.
+			// This should be a query, but we have PIDs, and we don't have a _pid search param. TODO GGG, figure out how
+			// to make this search by pid.
 			try {
 				resources.add(dao.readByPid(id));
 			} catch (ResourceNotFoundException e) {

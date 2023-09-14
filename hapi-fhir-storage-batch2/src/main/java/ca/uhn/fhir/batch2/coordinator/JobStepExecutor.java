@@ -31,8 +31,8 @@ import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.util.Logs;
 import org.slf4j.Logger;
 
-import javax.annotation.Nonnull;
 import java.util.Date;
+import javax.annotation.Nonnull;
 
 public class JobStepExecutor<PT extends IModelJson, IT extends IModelJson, OT extends IModelJson> {
 	private static final Logger ourLog = Logs.getBatchTroubleshootingLog();
@@ -48,13 +48,14 @@ public class JobStepExecutor<PT extends IModelJson, IT extends IModelJson, OT ex
 	private final WorkChunk myWorkChunk;
 	private final JobWorkCursor<PT, IT, OT> myCursor;
 
-	JobStepExecutor(@Nonnull IJobPersistence theJobPersistence,
-						 @Nonnull JobInstance theInstance,
-						 WorkChunk theWorkChunk,
-						 @Nonnull JobWorkCursor<PT, IT, OT> theCursor,
-						 @Nonnull WorkChunkProcessor theExecutor,
-						 @Nonnull IJobMaintenanceService theJobMaintenanceService,
-						 @Nonnull JobDefinitionRegistry theJobDefinitionRegistry) {
+	JobStepExecutor(
+			@Nonnull IJobPersistence theJobPersistence,
+			@Nonnull JobInstance theInstance,
+			WorkChunk theWorkChunk,
+			@Nonnull JobWorkCursor<PT, IT, OT> theCursor,
+			@Nonnull WorkChunkProcessor theExecutor,
+			@Nonnull IJobMaintenanceService theJobMaintenanceService,
+			@Nonnull JobDefinitionRegistry theJobDefinitionRegistry) {
 		myJobPersistence = theJobPersistence;
 		myDefinition = theCursor.jobDefinition;
 		myInstance = theInstance;
@@ -67,19 +68,18 @@ public class JobStepExecutor<PT extends IModelJson, IT extends IModelJson, OT ex
 	}
 
 	public void executeStep() {
-		JobStepExecutorOutput<PT, IT, OT> stepExecutorOutput = myJobExecutorSvc.doExecution(
-			myCursor,
-			myInstance,
-			myWorkChunk
-		);
+		JobStepExecutorOutput<PT, IT, OT> stepExecutorOutput =
+				myJobExecutorSvc.doExecution(myCursor, myInstance, myWorkChunk);
 
 		if (!stepExecutorOutput.isSuccessful()) {
 			return;
 		}
 
 		if (stepExecutorOutput.getDataSink().firstStepProducedNothing()) {
-			ourLog.info("First step of job myInstance {} produced no work chunks, marking as completed and setting end date", myInstanceId);
-			myJobPersistence.updateInstance(myInstance.getInstanceId(), instance->{
+			ourLog.info(
+					"First step of job myInstance {} produced no work chunks, marking as completed and setting end date",
+					myInstanceId);
+			myJobPersistence.updateInstance(myInstance.getInstanceId(), instance -> {
 				instance.setEndTime(new Date());
 				myJobInstanceStatusUpdater.updateInstanceStatus(instance, StatusEnum.COMPLETED);
 				return true;
@@ -94,19 +94,27 @@ public class JobStepExecutor<PT extends IModelJson, IT extends IModelJson, OT ex
 
 	private void handleFastTracking(BaseDataSink<PT, IT, OT> theDataSink) {
 		if (theDataSink.getWorkChunkCount() <= 1) {
-			ourLog.debug("Gated job {} step {} produced exactly one chunk:  Triggering a maintenance pass.", myDefinition.getJobDefinitionId(), myCursor.currentStep.getStepId());
+			ourLog.debug(
+					"Gated job {} step {} produced exactly one chunk:  Triggering a maintenance pass.",
+					myDefinition.getJobDefinitionId(),
+					myCursor.currentStep.getStepId());
 			// wipmb 6.8 either delete fast-tracking, or narrow this call to just this instance and step
-			// This runs full maintenance for EVERY job as each chunk completes in a fast tracked job.  That's a LOT of work.
+			// This runs full maintenance for EVERY job as each chunk completes in a fast tracked job.  That's a LOT of
+			// work.
 			boolean success = myJobMaintenanceService.triggerMaintenancePass();
 			if (!success) {
-				myJobPersistence.updateInstance(myInstance.getInstanceId(), instance-> {
+				myJobPersistence.updateInstance(myInstance.getInstanceId(), instance -> {
 					instance.setFastTracking(false);
 					return true;
 				});
 			}
 		} else {
-			ourLog.debug("Gated job {} step {} produced {} chunks:  Disabling fast tracking.", myDefinition.getJobDefinitionId(), myCursor.currentStep.getStepId(), theDataSink.getWorkChunkCount());
-			myJobPersistence.updateInstance(myInstance.getInstanceId(), instance-> {
+			ourLog.debug(
+					"Gated job {} step {} produced {} chunks:  Disabling fast tracking.",
+					myDefinition.getJobDefinitionId(),
+					myCursor.currentStep.getStepId(),
+					theDataSink.getWorkChunkCount());
+			myJobPersistence.updateInstance(myInstance.getInstanceId(), instance -> {
 				instance.setFastTracking(false);
 				return true;
 			});

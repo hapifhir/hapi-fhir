@@ -868,7 +868,7 @@ public class FhirInstanceValidatorR4BTest extends BaseTest {
 		ourLog.debug(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(operationOutcome));
 		assertEquals("Unrecognized property 'foo'", operationOutcome.getIssue().get(0).getDiagnostics());
 		assertEquals("Patient", operationOutcome.getIssue().get(0).getLocation().get(0).getValue());
-		assertEquals("Line 5, Col 23", operationOutcome.getIssue().get(0).getLocation().get(1).getValue());
+		assertEquals("Line[5] Col[23]", operationOutcome.getIssue().get(0).getLocation().get(1).getValue());
 	}
 
 	@Test
@@ -985,7 +985,7 @@ public class FhirInstanceValidatorR4BTest extends BaseTest {
 		ourLog.info(output.getMessages().get(0).getLocationString());
 		ourLog.info(output.getMessages().get(0).getMessage());
 		assertEquals("/f:Patient", output.getMessages().get(0).getLocationString());
-		assertEquals("Undefined element 'foo'", output.getMessages().get(0).getMessage());
+		assertEquals("Undefined element 'foo' at /f:Patient", output.getMessages().get(0).getMessage());
 		assertEquals(28, output.getMessages().get(0).getLocationCol().intValue());
 		assertEquals(4, output.getMessages().get(0).getLocationLine().intValue());
 	}
@@ -1329,7 +1329,7 @@ public class FhirInstanceValidatorR4BTest extends BaseTest {
 		output = myFhirValidator.validateWithResult(input);
 		all = logResultsAndReturnNonInformationalOnes(output);
 		assertEquals(2, all.size());
-		assertThat(all.get(0).getMessage(), containsString("Validation failed for 'http://unitsofmeasure.org#Heck'"));
+		assertThat(all.get(0).getMessage(), containsString("The unit 'Heck' is unknown' at position 0 for 'http://unitsofmeasure.org#Heck'"));
 		assertThat(all.get(1).getMessage(), containsString("The value provided ('Heck') is not in the value set 'Body Temperature Units'"));
 
 	}

@@ -28,5 +28,4 @@ public interface IBaseHasExtensions extends IBase {
 	List<? extends IBaseExtension<?, ?>> getExtension();
 
 	boolean hasExtension();
-
 }

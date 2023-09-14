@@ -41,16 +41,16 @@ import java.util.function.Function;
  **/
 public class ElmCacheResourceChangeListener implements IResourceChangeListener {
 
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory
-		.getLogger(ElmCacheResourceChangeListener.class);
+	private static final org.slf4j.Logger ourLog =
+			org.slf4j.LoggerFactory.getLogger(ElmCacheResourceChangeListener.class);
 
 	private final IFhirResourceDao<?> myLibraryDao;
 	private final Map<VersionedIdentifier, Library> myGlobalLibraryCache;
 	private final Function<IBaseResource, String> myNameFunction;
 	private final Function<IBaseResource, String> myVersionFunction;
 
-	public ElmCacheResourceChangeListener(DaoRegistry theDaoRegistry,
-													  Map<VersionedIdentifier, Library> theGlobalLibraryCache) {
+	public ElmCacheResourceChangeListener(
+			DaoRegistry theDaoRegistry, Map<VersionedIdentifier, Library> theGlobalLibraryCache) {
 		this.myLibraryDao = theDaoRegistry.getResourceDao("Library");
 		this.myGlobalLibraryCache = theGlobalLibraryCache;
 		this.myNameFunction = Reflections.getNameFunction(myLibraryDao.getResourceType());
@@ -90,8 +90,7 @@ public class ElmCacheResourceChangeListener implements IResourceChangeListener {
 		IBaseResource library;
 		try {
 			library = this.myLibraryDao.read(theId);
-		}
-		catch (ResourceGoneException | ResourceNotFoundException e) {
+		} catch (ResourceGoneException | ResourceNotFoundException e) {
 			// TODO: This needs to be smarter... the issue is that ELM is cached with
 			// library name and version as the key since
 			// that's the access path the CQL engine uses, but change notifications occur
@@ -99,8 +98,9 @@ public class ElmCacheResourceChangeListener implements IResourceChangeListener {
 			// necessarily tied to the resource name. In any event, if a unknown resource is
 			// deleted, clear all libraries as a workaround.
 			// One option is to maintain a cache with multiple indices.
-			ourLog.debug("Failed to locate resource {} to look up name and version. Clearing all libraries from cache.",
-				theId.getValueAsString());
+			ourLog.debug(
+					"Failed to locate resource {} to look up name and version. Clearing all libraries from cache.",
+					theId.getValueAsString());
 			this.myGlobalLibraryCache.clear();
 			return;
 		}
@@ -108,7 +108,6 @@ public class ElmCacheResourceChangeListener implements IResourceChangeListener {
 		String name = this.myNameFunction.apply(library);
 		String version = this.myVersionFunction.apply(library);
 
-		this.myGlobalLibraryCache.remove(new VersionedIdentifier().withId(name)
-			.withVersion(version));
+		this.myGlobalLibraryCache.remove(new VersionedIdentifier().withId(name).withVersion(version));
 	}
 }

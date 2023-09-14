@@ -4,6 +4,7 @@ import ca.uhn.fhir.jpa.api.dao.IDao;
 import ca.uhn.fhir.jpa.dao.SearchBuilderFactory;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.server.method.ResponsePage;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -32,7 +33,7 @@ public class PersistedJpaBundleProviderTest {
 		Search searchEntity = new Search();
 		searchEntity.setTotalCount(1);
 		myPersistedJpaBundleProvider.setSearchEntity(searchEntity);
-		myPersistedJpaBundleProvider.doSearchOrEverything(0, 1);
+		myPersistedJpaBundleProvider.doSearchOrEverything(0, 1, new ResponsePage.ResponsePageBuilder());
 		verifyNoInteractions(myDao);
 		verifyNoInteractions(mySearchBuilderFactory);
 	}

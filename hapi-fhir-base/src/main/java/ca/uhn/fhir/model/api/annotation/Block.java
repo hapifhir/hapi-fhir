@@ -33,7 +33,7 @@ import java.lang.annotation.Target;
  * </p>
  */
 @Retention(RetentionPolicy.RUNTIME)
-@Target(value= {ElementType.TYPE})
+@Target(value = {ElementType.TYPE})
 public @interface Block {
 
 	/**
@@ -41,5 +41,4 @@ public @interface Block {
 	 */
 	@Deprecated
 	String name() default "";
-	
 }

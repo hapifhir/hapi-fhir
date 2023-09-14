@@ -46,7 +46,8 @@ public class ApacheEncoder implements IPhoneticEncoder {
 	@Override
 	public String encode(String theString) {
 		try {
-			// If the string contains a space, encode alpha parts separately so, for example, numbers are preserved in address lines.
+			// If the string contains a space, encode alpha parts separately so, for example, numbers are preserved in
+			// address lines.
 			if (theString.contains(" ")) {
 				return encodeStringWithSpaces(theString);
 			}

@@ -24,39 +24,48 @@ import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryMatchResult;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.messaging.BaseResourceMessage;
+import ca.uhn.fhir.storage.PreviousVersionReader;
+import ca.uhn.fhir.util.Logs;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r5.model.Enumeration;
 import org.hl7.fhir.r5.model.SubscriptionTopic;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.List;
+import java.util.Optional;
 
 public class SubscriptionTriggerMatcher {
-	private static final Logger ourLog = LoggerFactory.getLogger(SubscriptionTriggerMatcher.class);
+	private static final Logger ourLog = Logs.getSubscriptionTopicLog();
+
 	private final SubscriptionTopicSupport mySubscriptionTopicSupport;
 	private final BaseResourceMessage.OperationTypeEnum myOperation;
 	private final SubscriptionTopic.SubscriptionTopicResourceTriggerComponent myTrigger;
 	private final String myResourceName;
 	private final IBaseResource myResource;
 	private final IFhirResourceDao myDao;
+	private final PreviousVersionReader myPreviousVersionReader;
 	private final SystemRequestDetails mySrd;
 
-	public SubscriptionTriggerMatcher(SubscriptionTopicSupport theSubscriptionTopicSupport, ResourceModifiedMessage theMsg, SubscriptionTopic.SubscriptionTopicResourceTriggerComponent theTrigger) {
+	public SubscriptionTriggerMatcher(
+			SubscriptionTopicSupport theSubscriptionTopicSupport,
+			ResourceModifiedMessage theMsg,
+			SubscriptionTopic.SubscriptionTopicResourceTriggerComponent theTrigger) {
 		mySubscriptionTopicSupport = theSubscriptionTopicSupport;
 		myOperation = theMsg.getOperationType();
 		myResource = theMsg.getPayload(theSubscriptionTopicSupport.getFhirContext());
 		myResourceName = myResource.fhirType();
 		myDao = mySubscriptionTopicSupport.getDaoRegistry().getResourceDao(myResourceName);
 		myTrigger = theTrigger;
+		myPreviousVersionReader = new PreviousVersionReader(myDao);
 		mySrd = new SystemRequestDetails();
 	}
 
 	public InMemoryMatchResult match() {
-		List<Enumeration<SubscriptionTopic.InteractionTrigger>> supportedInteractions = myTrigger.getSupportedInteraction();
+		List<Enumeration<SubscriptionTopic.InteractionTrigger>> supportedInteractions =
+				myTrigger.getSupportedInteraction();
 		if (SubscriptionTopicUtil.matches(myOperation, supportedInteractions)) {
-			SubscriptionTopic.SubscriptionTopicResourceTriggerQueryCriteriaComponent queryCriteria = myTrigger.getQueryCriteria();
+			SubscriptionTopic.SubscriptionTopicResourceTriggerQueryCriteriaComponent queryCriteria =
+					myTrigger.getQueryCriteria();
 			InMemoryMatchResult result = match(queryCriteria);
 			if (result.matched()) {
 				return result;
@@ -65,7 +74,8 @@ public class SubscriptionTriggerMatcher {
 		return InMemoryMatchResult.noMatch();
 	}
 
-	private InMemoryMatchResult match(SubscriptionTopic.SubscriptionTopicResourceTriggerQueryCriteriaComponent theQueryCriteria) {
+	private InMemoryMatchResult match(
+			SubscriptionTopic.SubscriptionTopicResourceTriggerQueryCriteriaComponent theQueryCriteria) {
 		String previousCriteria = theQueryCriteria.getPrevious();
 		String currentCriteria = theQueryCriteria.getCurrent();
 		InMemoryMatchResult previousMatches = InMemoryMatchResult.fromBoolean(previousCriteria == null);
@@ -80,16 +90,16 @@ public class SubscriptionTriggerMatcher {
 		}
 
 		if (previousCriteria != null) {
-			if (myOperation == ResourceModifiedMessage.OperationTypeEnum.UPDATE ||
-				myOperation == ResourceModifiedMessage.OperationTypeEnum.DELETE) {
-				Long currentVersion = myResource.getIdElement().getVersionIdPartAsLong();
-				if (currentVersion > 1) {
-					IIdType previousVersionId = myResource.getIdElement().withVersion("" + (currentVersion - 1));
-					// WIP STR5 should we use the partition id from the resource?  Ideally we should have a "previous version" service we can use for this
-					IBaseResource previousVersion = myDao.read(previousVersionId, new SystemRequestDetails());
-					previousMatches = matchResource(previousVersion, previousCriteria);
+			if (myOperation == ResourceModifiedMessage.OperationTypeEnum.UPDATE
+					|| myOperation == ResourceModifiedMessage.OperationTypeEnum.DELETE) {
+
+				Optional<IBaseResource> oPreviousVersion = myPreviousVersionReader.readPreviousVersion(myResource);
+				if (oPreviousVersion.isPresent()) {
+					previousMatches = matchResource(oPreviousVersion.get(), previousCriteria);
 				} else {
-					ourLog.warn("Resource {} has a version of 1, which should not be the case for a create or delete operation", myResource.getIdElement().toUnqualifiedVersionless());
+					ourLog.warn(
+							"Resource {} has a version of 1, which should not be the case for a create or delete operation",
+							myResource.getIdElement().toUnqualifiedVersionless());
 				}
 			}
 		}
@@ -102,9 +112,13 @@ public class SubscriptionTriggerMatcher {
 	}
 
 	private InMemoryMatchResult matchResource(IBaseResource theResource, String theCriteria) {
-		InMemoryMatchResult result = mySubscriptionTopicSupport.getSearchParamMatcher().match(theCriteria, theResource, mySrd);
+		InMemoryMatchResult result =
+				mySubscriptionTopicSupport.getSearchParamMatcher().match(theCriteria, theResource, mySrd);
 		if (!result.supported()) {
-			ourLog.warn("Subscription topic {} has a query criteria that is not supported in-memory: {}", myTrigger.getId(), theCriteria);
+			ourLog.warn(
+					"Subscription topic {} has a query criteria that is not supported in-memory: {}",
+					myTrigger.getId(),
+					theCriteria);
 		}
 		return result;
 	}

@@ -70,7 +70,9 @@ public class SystemRequestDetails extends RequestDetails {
 
 	public SystemRequestDetails(RequestDetails theDetails) {
 		super(theDetails);
-		if (nonNull(theDetails.getServer())) { myServer = theDetails.getServer(); }
+		if (nonNull(theDetails.getServer())) {
+			myServer = theDetails.getServer();
+		}
 	}
 
 	public RequestPartitionId getRequestPartitionId() {
@@ -133,9 +135,7 @@ public class SystemRequestDetails extends RequestDetails {
 	}
 
 	@Override
-	public void setAttribute(String theAttributeName, Object theAttributeValue) {
-
-	}
+	public void setAttribute(String theAttributeName, Object theAttributeValue) {}
 
 	@Override
 	public InputStream getInputStream() throws IOException {
@@ -232,5 +232,4 @@ public class SystemRequestDetails extends RequestDetails {
 		systemRequestDetails.setRequestPartitionId(RequestPartitionId.allPartitions());
 		return systemRequestDetails;
 	}
-
 }

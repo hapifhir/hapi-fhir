@@ -20,8 +20,8 @@
 package ca.uhn.fhir.jpa.term.loinc;
 
 import ca.uhn.fhir.jpa.entity.TermConcept;
-import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
 import ca.uhn.fhir.jpa.term.IZipContentsHandlerCsv;
+import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
 import org.apache.commons.csv.CSVRecord;
 import org.hl7.fhir.r4.model.ConceptMap;
 import org.hl7.fhir.r4.model.ValueSet;
@@ -39,9 +39,15 @@ public class BaseLoincTop2000LabResultsHandler extends BaseLoincHandler implemen
 	private String myValueSetUri;
 	private String myValueSetName;
 
-	public BaseLoincTop2000LabResultsHandler(Map<String, TermConcept> theCode2concept, List<ValueSet> theValueSets,
-			String theValueSetId, String theValueSetUri, String theValueSetName, List<ConceptMap> theConceptMaps,
-			Properties theUploadProperties, String theCopyrightStatement) {
+	public BaseLoincTop2000LabResultsHandler(
+			Map<String, TermConcept> theCode2concept,
+			List<ValueSet> theValueSets,
+			String theValueSetId,
+			String theValueSetUri,
+			String theValueSetName,
+			List<ConceptMap> theConceptMaps,
+			Properties theUploadProperties,
+			String theCopyrightStatement) {
 		super(theCode2concept, theValueSets, theConceptMaps, theUploadProperties, theCopyrightStatement);
 		String versionId = myUploadProperties.getProperty(LOINC_CODESYSTEM_VERSION.getCode());
 		if (versionId != null) {
@@ -61,5 +67,4 @@ public class BaseLoincTop2000LabResultsHandler extends BaseLoincHandler implemen
 		ValueSet valueSet = getValueSet(myValueSetId, myValueSetUri, myValueSetName, null);
 		addCodeAsIncludeToValueSet(valueSet, ITermLoaderSvc.LOINC_URI, loincNumber, displayName);
 	}
-
 }

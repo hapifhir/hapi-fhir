@@ -46,5 +46,4 @@ public class LogicUtil {
 		}
 		return foundOne;
 	}
-
 }

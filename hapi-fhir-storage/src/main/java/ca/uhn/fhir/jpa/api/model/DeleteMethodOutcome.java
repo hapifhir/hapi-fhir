@@ -32,13 +32,14 @@ import java.util.List;
 public class DeleteMethodOutcome extends MethodOutcome {
 
 	private List<? extends IBasePersistedResource> myDeletedEntities;
+
 	@Deprecated
 	private long myExpungedResourcesCount;
+
 	@Deprecated
 	private long myExpungedEntitiesCount;
 
-	public DeleteMethodOutcome() {
-	}
+	public DeleteMethodOutcome() {}
 
 	public DeleteMethodOutcome(IBaseOperationOutcome theBaseOperationOutcome) {
 		super(theBaseOperationOutcome);

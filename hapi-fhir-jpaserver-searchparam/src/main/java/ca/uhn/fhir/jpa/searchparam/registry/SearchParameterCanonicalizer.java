@@ -65,6 +65,7 @@ public class SearchParameterCanonicalizer {
 
 	private final FhirContext myFhirContext;
 	private final FhirTerser myTerser;
+
 	@Autowired
 	public SearchParameterCanonicalizer(FhirContext theFhirContext) {
 		myFhirContext = theFhirContext;
@@ -85,10 +86,12 @@ public class SearchParameterCanonicalizer {
 		RuntimeSearchParam retVal;
 		switch (myFhirContext.getVersion().getVersion()) {
 			case DSTU2:
-				retVal = canonicalizeSearchParameterDstu2((ca.uhn.fhir.model.dstu2.resource.SearchParameter) theSearchParameter);
+				retVal = canonicalizeSearchParameterDstu2(
+						(ca.uhn.fhir.model.dstu2.resource.SearchParameter) theSearchParameter);
 				break;
 			case DSTU3:
-				retVal = canonicalizeSearchParameterDstu3((org.hl7.fhir.dstu3.model.SearchParameter) theSearchParameter);
+				retVal =
+						canonicalizeSearchParameterDstu3((org.hl7.fhir.dstu3.model.SearchParameter) theSearchParameter);
 				break;
 			case R4:
 			case R4B:
@@ -99,7 +102,9 @@ public class SearchParameterCanonicalizer {
 			case DSTU2_1:
 				// Non-supported - these won't happen so just fall through
 			default:
-				throw new InternalErrorException(Msg.code(510) + "SearchParameter canonicalization not supported for FHIR version" + myFhirContext.getVersion().getVersion());
+				throw new InternalErrorException(
+						Msg.code(510) + "SearchParameter canonicalization not supported for FHIR version"
+								+ myFhirContext.getVersion().getVersion());
 		}
 
 		if (retVal != null) {
@@ -109,15 +114,17 @@ public class SearchParameterCanonicalizer {
 		return retVal;
 	}
 
-	private RuntimeSearchParam canonicalizeSearchParameterDstu2(ca.uhn.fhir.model.dstu2.resource.SearchParameter theNextSp) {
+	private RuntimeSearchParam canonicalizeSearchParameterDstu2(
+			ca.uhn.fhir.model.dstu2.resource.SearchParameter theNextSp) {
 		String name = theNextSp.getCode();
 		String description = theNextSp.getDescription();
 		String path = theNextSp.getXpath();
 
 		Collection<String> baseResource = toStrings(Collections.singletonList(theNextSp.getBaseElement()));
-		List<String> baseCustomResources = extractDstu2CustomResourcesFromExtensions(theNextSp, HapiExtensions.EXTENSION_SEARCHPARAM_CUSTOM_BASE_RESOURCE);
+		List<String> baseCustomResources = extractDstu2CustomResourcesFromExtensions(
+				theNextSp, HapiExtensions.EXTENSION_SEARCHPARAM_CUSTOM_BASE_RESOURCE);
 
-		if(!baseCustomResources.isEmpty()){
+		if (!baseCustomResources.isEmpty()) {
 			baseResource = Collections.singleton(baseCustomResources.get(0));
 		}
 
@@ -166,7 +173,8 @@ public class SearchParameterCanonicalizer {
 		}
 
 		Set<String> targetResources = DatatypeUtil.toStringSet(theNextSp.getTarget());
-		List<String> targetCustomResources = extractDstu2CustomResourcesFromExtensions(theNextSp, HapiExtensions.EXTENSION_SEARCHPARAM_CUSTOM_TARGET_RESOURCE);
+		List<String> targetCustomResources = extractDstu2CustomResourcesFromExtensions(
+				theNextSp, HapiExtensions.EXTENSION_SEARCHPARAM_CUSTOM_TARGET_RESOURCE);
 
 		maybeAddCustomResourcesToResources(targetResources, targetCustomResources);
 
@@ -193,7 +201,19 @@ public class SearchParameterCanonicalizer {
 		}
 
 		List<RuntimeSearchParam.Component> components = Collections.emptyList();
-		return new RuntimeSearchParam(id, uri, name, description, path, paramType, Collections.emptySet(), targetResources, status, unique, components, baseResource);
+		return new RuntimeSearchParam(
+				id,
+				uri,
+				name,
+				description,
+				path,
+				paramType,
+				Collections.emptySet(),
+				targetResources,
+				status,
+				unique,
+				components,
+				baseResource);
 	}
 
 	private RuntimeSearchParam canonicalizeSearchParameterDstu3(org.hl7.fhir.dstu3.model.SearchParameter theNextSp) {
@@ -202,7 +222,8 @@ public class SearchParameterCanonicalizer {
 		String path = theNextSp.getExpression();
 
 		List<String> baseResources = new ArrayList<>(toStrings(theNextSp.getBase()));
-		List<String> baseCustomResources = extractDstu3CustomResourcesFromExtensions(theNextSp, HapiExtensions.EXTENSION_SEARCHPARAM_CUSTOM_BASE_RESOURCE);
+		List<String> baseCustomResources = extractDstu3CustomResourcesFromExtensions(
+				theNextSp, HapiExtensions.EXTENSION_SEARCHPARAM_CUSTOM_BASE_RESOURCE);
 
 		maybeAddCustomResourcesToResources(baseResources, baseCustomResources);
 
@@ -258,7 +279,8 @@ public class SearchParameterCanonicalizer {
 		}
 
 		Set<String> targetResources = DatatypeUtil.toStringSet(theNextSp.getTarget());
-		List<String> targetCustomResources = extractDstu3CustomResourcesFromExtensions(theNextSp, HapiExtensions.EXTENSION_SEARCHPARAM_CUSTOM_TARGET_RESOURCE);
+		List<String> targetCustomResources = extractDstu3CustomResourcesFromExtensions(
+				theNextSp, HapiExtensions.EXTENSION_SEARCHPARAM_CUSTOM_TARGET_RESOURCE);
 
 		maybeAddCustomResourcesToResources(targetResources, targetCustomResources);
 
@@ -286,10 +308,27 @@ public class SearchParameterCanonicalizer {
 
 		List<RuntimeSearchParam.Component> components = new ArrayList<>();
 		for (SearchParameter.SearchParameterComponentComponent next : theNextSp.getComponent()) {
-			components.add(new RuntimeSearchParam.Component(next.getExpression(), next.getDefinition().getReferenceElement().toUnqualifiedVersionless().getValue()));
+			components.add(new RuntimeSearchParam.Component(
+					next.getExpression(),
+					next.getDefinition()
+							.getReferenceElement()
+							.toUnqualifiedVersionless()
+							.getValue()));
 		}
 
-		return new RuntimeSearchParam(id, uri, name, description, path, paramType, Collections.emptySet(), targetResources, status, unique, components, baseResources);
+		return new RuntimeSearchParam(
+				id,
+				uri,
+				name,
+				description,
+				path,
+				paramType,
+				Collections.emptySet(),
+				targetResources,
+				status,
+				unique,
+				components,
+				baseResources);
 	}
 
 	private RuntimeSearchParam canonicalizeSearchParameterR4Plus(IBaseResource theNextSp) {
@@ -299,7 +338,8 @@ public class SearchParameterCanonicalizer {
 		String path = myTerser.getSinglePrimitiveValueOrNull(theNextSp, "expression");
 
 		Set<String> baseResources = extractR4PlusResources("base", theNextSp);
-		List<String> baseCustomResources = extractR4PlusCustomResourcesFromExtensions(theNextSp, HapiExtensions.EXTENSION_SEARCHPARAM_CUSTOM_BASE_RESOURCE);
+		List<String> baseCustomResources = extractR4PlusCustomResourcesFromExtensions(
+				theNextSp, HapiExtensions.EXTENSION_SEARCHPARAM_CUSTOM_BASE_RESOURCE);
 
 		maybeAddCustomResourcesToResources(baseResources, baseCustomResources);
 
@@ -350,7 +390,8 @@ public class SearchParameterCanonicalizer {
 		}
 
 		Set<String> targetResources = extractR4PlusResources("target", theNextSp);
-		List<String> targetCustomResources = extractR4PlusCustomResourcesFromExtensions(theNextSp, HapiExtensions.EXTENSION_SEARCHPARAM_CUSTOM_TARGET_RESOURCE);
+		List<String> targetCustomResources = extractR4PlusCustomResourcesFromExtensions(
+				theNextSp, HapiExtensions.EXTENSION_SEARCHPARAM_CUSTOM_TARGET_RESOURCE);
 
 		maybeAddCustomResourcesToResources(targetResources, targetCustomResources);
 
@@ -366,14 +407,14 @@ public class SearchParameterCanonicalizer {
 		String uri = myTerser.getSinglePrimitiveValueOrNull(theNextSp, "url");
 		ComboSearchParamType unique = null;
 
-		String value = ((IBaseHasExtensions) theNextSp).getExtension()
-			.stream()
-			.filter(e -> HapiExtensions.EXT_SP_UNIQUE.equals(e.getUrl()))
-			.filter(t -> t.getValue() instanceof IPrimitiveType)
-			.map(t -> (IPrimitiveType<?>) t.getValue())
-			.map(t -> t.getValueAsString())
-			.findFirst()
-			.orElse("");
+		String value = ((IBaseHasExtensions) theNextSp)
+				.getExtension().stream()
+						.filter(e -> HapiExtensions.EXT_SP_UNIQUE.equals(e.getUrl()))
+						.filter(t -> t.getValue() instanceof IPrimitiveType)
+						.map(t -> (IPrimitiveType<?>) t.getValue())
+						.map(t -> t.getValueAsString())
+						.findFirst()
+						.orElse("");
 		if ("true".equalsIgnoreCase(value)) {
 			unique = ComboSearchParamType.UNIQUE;
 		} else if ("false".equalsIgnoreCase(value)) {
@@ -391,15 +432,25 @@ public class SearchParameterCanonicalizer {
 			components.add(new RuntimeSearchParam.Component(expression, definition));
 		}
 
-		return new RuntimeSearchParam(id, uri, name, description, path, paramType, Collections.emptySet(), targetResources, status, unique, components, baseResources);
+		return new RuntimeSearchParam(
+				id,
+				uri,
+				name,
+				description,
+				path,
+				paramType,
+				Collections.emptySet(),
+				targetResources,
+				status,
+				unique,
+				components,
+				baseResources);
 	}
 
 	private Set<String> extractR4PlusResources(String thePath, IBaseResource theNextSp) {
-		return myTerser
-			.getValues(theNextSp, thePath, IPrimitiveType.class)
-			.stream()
-			.map(IPrimitiveType::getValueAsString)
-			.collect(Collectors.toSet());
+		return myTerser.getValues(theNextSp, thePath, IPrimitiveType.class).stream()
+				.map(IPrimitiveType::getValueAsString)
+				.collect(Collectors.toSet());
 	}
 
 	/**
@@ -407,7 +458,9 @@ public class SearchParameterCanonicalizer {
 	 */
 	protected void extractExtensions(IBaseResource theSearchParamResource, RuntimeSearchParam theRuntimeSearchParam) {
 		if (theSearchParamResource instanceof IBaseHasExtensions) {
-			List<? extends IBaseExtension<? extends IBaseExtension, ?>> extensions = (List<? extends IBaseExtension<? extends IBaseExtension, ?>>) ((IBaseHasExtensions) theSearchParamResource).getExtension();
+			List<? extends IBaseExtension<? extends IBaseExtension, ?>> extensions =
+					(List<? extends IBaseExtension<? extends IBaseExtension, ?>>)
+							((IBaseHasExtensions) theSearchParamResource).getExtension();
 			for (IBaseExtension<? extends IBaseExtension, ?> next : extensions) {
 				String nextUrl = next.getUrl();
 				if (isNotBlank(nextUrl)) {
@@ -423,9 +476,12 @@ public class SearchParameterCanonicalizer {
 	}
 
 	@SuppressWarnings("unchecked")
-	private void addUpliftRefchain(RuntimeSearchParam theRuntimeSearchParam, IBaseExtension<? extends IBaseExtension, ?> theExtension) {
-		String code = ExtensionUtil.extractChildPrimitiveExtensionValue(theExtension, HapiExtensions.EXTENSION_SEARCHPARAM_UPLIFT_REFCHAIN_PARAM_CODE);
-		String elementName = ExtensionUtil.extractChildPrimitiveExtensionValue(theExtension, HapiExtensions.EXTENSION_SEARCHPARAM_UPLIFT_REFCHAIN_ELEMENT_NAME);
+	private void addUpliftRefchain(
+			RuntimeSearchParam theRuntimeSearchParam, IBaseExtension<? extends IBaseExtension, ?> theExtension) {
+		String code = ExtensionUtil.extractChildPrimitiveExtensionValue(
+				theExtension, HapiExtensions.EXTENSION_SEARCHPARAM_UPLIFT_REFCHAIN_PARAM_CODE);
+		String elementName = ExtensionUtil.extractChildPrimitiveExtensionValue(
+				theExtension, HapiExtensions.EXTENSION_SEARCHPARAM_UPLIFT_REFCHAIN_ELEMENT_NAME);
 		if (isNotBlank(code)) {
 			theRuntimeSearchParam.addUpliftRefchain(code, elementName);
 		}
@@ -447,62 +503,65 @@ public class SearchParameterCanonicalizer {
 		}
 	}
 
-	private List<String> extractDstu2CustomResourcesFromExtensions(ca.uhn.fhir.model.dstu2.resource.SearchParameter theSearchParameter, String theExtensionUrl) {
+	private List<String> extractDstu2CustomResourcesFromExtensions(
+			ca.uhn.fhir.model.dstu2.resource.SearchParameter theSearchParameter, String theExtensionUrl) {
 
 		List<ExtensionDt> customSpExtensionDt = theSearchParameter.getUndeclaredExtensionsByUrl(theExtensionUrl);
 
 		return customSpExtensionDt.stream()
-			.map(theExtensionDt -> theExtensionDt.getValueAsPrimitive().getValueAsString())
-			.filter(StringUtils::isNotBlank)
-			.collect(Collectors.toList());
+				.map(theExtensionDt -> theExtensionDt.getValueAsPrimitive().getValueAsString())
+				.filter(StringUtils::isNotBlank)
+				.collect(Collectors.toList());
 	}
 
-	private List<String> extractDstu3CustomResourcesFromExtensions(org.hl7.fhir.dstu3.model.SearchParameter theSearchParameter, String theExtensionUrl) {
+	private List<String> extractDstu3CustomResourcesFromExtensions(
+			org.hl7.fhir.dstu3.model.SearchParameter theSearchParameter, String theExtensionUrl) {
 
 		List<Extension> customSpExtensions = theSearchParameter.getExtensionsByUrl(theExtensionUrl);
 
 		return customSpExtensions.stream()
-			.map(theExtension -> theExtension.getValueAsPrimitive().getValueAsString())
-			.filter(StringUtils::isNotBlank)
-			.collect(Collectors.toList());
-
+				.map(theExtension -> theExtension.getValueAsPrimitive().getValueAsString())
+				.filter(StringUtils::isNotBlank)
+				.collect(Collectors.toList());
 	}
 
-	private List<String> extractR4PlusCustomResourcesFromExtensions(IBaseResource theSearchParameter, String theExtensionUrl) {
+	private List<String> extractR4PlusCustomResourcesFromExtensions(
+			IBaseResource theSearchParameter, String theExtensionUrl) {
 
 		List<String> retVal = new ArrayList<>();
 
 		if (theSearchParameter instanceof IBaseHasExtensions) {
 			((IBaseHasExtensions) theSearchParameter)
-				.getExtension()
-				.stream()
-				.filter(t -> theExtensionUrl.equals(t.getUrl()))
-				.filter(t -> t.getValue() instanceof IPrimitiveType)
-				.map(t -> ((IPrimitiveType<?>) t.getValue()))
-				.map(IPrimitiveType::getValueAsString)
-				.filter(StringUtils::isNotBlank)
-				.forEach(retVal::add);
+					.getExtension().stream()
+							.filter(t -> theExtensionUrl.equals(t.getUrl()))
+							.filter(t -> t.getValue() instanceof IPrimitiveType)
+							.map(t -> ((IPrimitiveType<?>) t.getValue()))
+							.map(IPrimitiveType::getValueAsString)
+							.filter(StringUtils::isNotBlank)
+							.forEach(retVal::add);
 		}
 
 		return retVal;
 	}
 
-	private <T extends Collection<String>> void maybeAddCustomResourcesToResources(T theResources, List<String> theCustomResources) {
+	private <T extends Collection<String>> void maybeAddCustomResourcesToResources(
+			T theResources, List<String> theCustomResources) {
 		// SearchParameter base and target components require strict binding to ResourceType for dstu[2|3], R4, R4B
 		// and to Version Independent Resource Types for R5.
 		//
-		// To handle custom resources, we set a placeholder of type 'Resource' in the base or target component and define
-		// the custom resource by adding a corresponding extension with url HapiExtensions.EXTENSION_SEARCHPARAM_CUSTOM_BASE_RESOURCE
+		// To handle custom resources, we set a placeholder of type 'Resource' in the base or target component and
+		// define
+		// the custom resource by adding a corresponding extension with url
+		// HapiExtensions.EXTENSION_SEARCHPARAM_CUSTOM_BASE_RESOURCE
 		// or HapiExtensions.EXTENSION_SEARCHPARAM_CUSTOM_TARGET_RESOURCE with the name of the custom resource.
 		//
-		// To provide a base/target list that contains both the resources and customResources, we need to remove the placeholders
+		// To provide a base/target list that contains both the resources and customResources, we need to remove the
+		// placeholders
 		// from the theResources and add theCustomResources.
 
-		if (!theCustomResources.isEmpty()){
+		if (!theCustomResources.isEmpty()) {
 			theResources.removeAll(Collections.singleton("Resource"));
 			theResources.addAll(theCustomResources);
 		}
-
 	}
-
 }

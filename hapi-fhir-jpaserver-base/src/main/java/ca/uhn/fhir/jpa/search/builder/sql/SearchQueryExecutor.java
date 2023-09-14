@@ -31,16 +31,13 @@ import org.hibernate.ScrollMode;
 import org.hibernate.ScrollableResults;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.transaction.support.TransactionSynchronizationManager;
 
+import java.util.Arrays;
 import javax.persistence.EntityManager;
 import javax.persistence.FlushModeType;
 import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceContextType;
 import javax.persistence.Query;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.util.Arrays;
 
 public class SearchQueryExecutor implements ISearchQueryExecutor {
 
@@ -49,13 +46,11 @@ public class SearchQueryExecutor implements ISearchQueryExecutor {
 	private static final Object[] EMPTY_OBJECT_ARRAY = new Object[0];
 	private static final Logger ourLog = LoggerFactory.getLogger(SearchQueryExecutor.class);
 	private final GeneratedSql myGeneratedSql;
-	private final Integer myMaxResultsToFetch;
 
 	@PersistenceContext(type = PersistenceContextType.TRANSACTION)
 	private EntityManager myEntityManager;
+
 	private boolean myQueryInitialized;
-	private Connection myConnection;
-	private PreparedStatement myStatement;
 	private ScrollableResultsIterator<Number> myResultSet;
 	private Long myNext;
 
@@ -66,7 +61,6 @@ public class SearchQueryExecutor implements ISearchQueryExecutor {
 		Validate.notNull(theGeneratedSql, "theGeneratedSql must not be null");
 		myGeneratedSql = theGeneratedSql;
 		myQueryInitialized = false;
-		myMaxResultsToFetch = theMaxResultsToFetch;
 	}
 
 	/**
@@ -76,7 +70,6 @@ public class SearchQueryExecutor implements ISearchQueryExecutor {
 		assert NO_MORE != null;
 
 		myGeneratedSql = null;
-		myMaxResultsToFetch = null;
 		myNext = NO_MORE;
 	}
 
@@ -131,12 +124,17 @@ public class SearchQueryExecutor implements ISearchQueryExecutor {
 					hibernateQuery.setCacheMode(CacheMode.IGNORE);
 					hibernateQuery.setReadOnly(true);
 
-					// This tells hibernate not to flush when we call scroll(), but rather to wait until the transaction commits and
-					// only flush then.  We need to do this so that any exceptions that happen in the transaction happen when
+					// This tells hibernate not to flush when we call scroll(), but rather to wait until the transaction
+					// commits and
+					// only flush then.  We need to do this so that any exceptions that happen in the transaction happen
+					// when
 					// we try to commit the transaction, and not here.
-					// See the test called testTransaction_multiThreaded (in FhirResourceDaoR4ConcurrentWriteTest) which triggers
+					// See the test called testTransaction_multiThreaded (in FhirResourceDaoR4ConcurrentWriteTest) which
+					// triggers
 					// the following exception if we don't set this flush mode:
-					// java.util.concurrent.ExecutionException: org.springframework.transaction.UnexpectedRollbackException: Transaction silently rolled back because it has been marked as rollback-only
+					// java.util.concurrent.ExecutionException:
+					// org.springframework.transaction.UnexpectedRollbackException: Transaction silently rolled back
+					// because it has been marked as rollback-only
 					hibernateQuery.setFlushMode(FlushModeType.COMMIT);
 					ScrollableResults scrollableResults = hibernateQuery.scroll(ScrollMode.FORWARD_ONLY);
 					myResultSet = new ScrollableResultsIterator<>(scrollableResults);
@@ -162,4 +160,3 @@ public class SearchQueryExecutor implements ISearchQueryExecutor {
 		return NO_VALUE_EXECUTOR;
 	}
 }
-

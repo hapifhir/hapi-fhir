@@ -33,7 +33,6 @@ public abstract class BaseTableColumnTypeTask extends BaseTableColumnTask {
 	/**
 	 * Constructor
 	 */
-
 	public BaseTableColumnTypeTask(String theProductVersion, String theSchemaVersion) {
 		super(theProductVersion, theSchemaVersion);
 	}
@@ -54,7 +53,8 @@ public abstract class BaseTableColumnTypeTask extends BaseTableColumnTask {
 		Validate.notNull(myNullable);
 
 		if (myColumnType == ColumnTypeEnum.STRING) {
-			Validate.notNull(myColumnLength, "No length specified for " + ColumnTypeEnum.STRING + " column " + getColumnName());
+			Validate.notNull(
+					myColumnLength, "No length specified for " + ColumnTypeEnum.STRING + " column " + getColumnName());
 		} else {
 			Validate.isTrue(myColumnLength == null);
 		}

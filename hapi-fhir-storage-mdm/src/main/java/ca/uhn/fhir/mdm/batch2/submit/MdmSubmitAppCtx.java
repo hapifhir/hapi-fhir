@@ -35,41 +35,43 @@ import org.springframework.context.annotation.Configuration;
 public class MdmSubmitAppCtx {
 
 	public static final String MDM_SUBMIT_JOB_BEAN_NAME = "mdmSubmitJobDefinition";
-	public static String MDM_SUBMIT_JOB= "MDM_SUBMIT";
+	public static String MDM_SUBMIT_JOB = "MDM_SUBMIT";
 
 	@Bean
 	public GenerateRangeChunksStep submitGenerateRangeChunksStep() {
 		return new GenerateRangeChunksStep();
 	}
 
-
 	@Bean(name = MDM_SUBMIT_JOB_BEAN_NAME)
-	public JobDefinition mdmSubmitJobDefinition(IBatch2DaoSvc theBatch2DaoSvc, MatchUrlService theMatchUrlService, FhirContext theFhirContext, IMdmSettings theMdmSettings) {
+	public JobDefinition mdmSubmitJobDefinition(
+			IBatch2DaoSvc theBatch2DaoSvc,
+			MatchUrlService theMatchUrlService,
+			FhirContext theFhirContext,
+			IMdmSettings theMdmSettings) {
 		return JobDefinition.newBuilder()
-		.setJobDefinitionId(MDM_SUBMIT_JOB)
-		.setJobDescription("MDM Batch Submission")
-		.setJobDefinitionVersion(1)
-		.setParametersType(MdmSubmitJobParameters.class)
-		.setParametersValidator(mdmSubmitJobParametersValidator(theMatchUrlService, theFhirContext, theMdmSettings))
-		.addFirstStep(
-			"generate-ranges",
-			"generate data ranges to submit to mdm",
-			PartitionedUrlChunkRangeJson.class,
-			submitGenerateRangeChunksStep())
-		.addIntermediateStep(
-			"load-ids",
-			"Load the IDs",
-			ResourceIdListWorkChunkJson.class,
-			new LoadIdsStep(theBatch2DaoSvc))
-		.addLastStep(
-			"inflate-and-submit-resources",
-			"Inflate and Submit resources",
-			mdmInflateAndSubmitResourcesStep())
-		.build();
+				.setJobDefinitionId(MDM_SUBMIT_JOB)
+				.setJobDescription("MDM Batch Submission")
+				.setJobDefinitionVersion(1)
+				.setParametersType(MdmSubmitJobParameters.class)
+				.setParametersValidator(
+						mdmSubmitJobParametersValidator(theMatchUrlService, theFhirContext, theMdmSettings))
+				.addFirstStep(
+						"generate-ranges",
+						"generate data ranges to submit to mdm",
+						PartitionedUrlChunkRangeJson.class,
+						submitGenerateRangeChunksStep())
+				.addIntermediateStep(
+						"load-ids", "Load the IDs", ResourceIdListWorkChunkJson.class, new LoadIdsStep(theBatch2DaoSvc))
+				.addLastStep(
+						"inflate-and-submit-resources",
+						"Inflate and Submit resources",
+						mdmInflateAndSubmitResourcesStep())
+				.build();
 	}
 
 	@Bean
-	public MdmSubmitJobParametersValidator mdmSubmitJobParametersValidator(MatchUrlService theMatchUrlService, FhirContext theFhirContext, IMdmSettings theMdmSettings) {
+	public MdmSubmitJobParametersValidator mdmSubmitJobParametersValidator(
+			MatchUrlService theMatchUrlService, FhirContext theFhirContext, IMdmSettings theMdmSettings) {
 		return new MdmSubmitJobParametersValidator(theMdmSettings, theMatchUrlService, theFhirContext);
 	}
 
@@ -77,5 +79,4 @@ public class MdmSubmitAppCtx {
 	public MdmInflateAndSubmitResourcesStep mdmInflateAndSubmitResourcesStep() {
 		return new MdmInflateAndSubmitResourcesStep();
 	}
-
 }

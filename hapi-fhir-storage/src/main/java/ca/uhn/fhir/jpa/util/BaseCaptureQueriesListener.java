@@ -27,16 +27,17 @@ import net.ttddyy.dsproxy.listener.MethodExecutionContext;
 import net.ttddyy.dsproxy.proxy.ParameterSetOperation;
 import net.ttddyy.dsproxy.support.ProxyDataSourceBuilder;
 
-import javax.annotation.Nullable;
 import java.util.Collections;
 import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
+import javax.annotation.Nullable;
 
 import static org.apache.commons.lang3.StringUtils.trim;
 
-public abstract class BaseCaptureQueriesListener implements ProxyDataSourceBuilder.SingleQueryExecution, ProxyDataSourceBuilder.SingleMethodExecution {
+public abstract class BaseCaptureQueriesListener
+		implements ProxyDataSourceBuilder.SingleQueryExecution, ProxyDataSourceBuilder.SingleMethodExecution {
 
 	private boolean myCaptureQueryStackTrace = false;
 
@@ -80,15 +81,14 @@ public abstract class BaseCaptureQueriesListener implements ProxyDataSourceBuild
 			String sql = trim(next.getQuery());
 			List<String> params;
 			int size;
-			if (next.getParametersList().size() > 0 && next.getParametersList().get(0).size() > 0) {
+			if (next.getParametersList().size() > 0
+					&& next.getParametersList().get(0).size() > 0) {
 				size = next.getParametersList().size();
-				List<ParameterSetOperation> values = next
-					.getParametersList()
-					.get(0);
+				List<ParameterSetOperation> values = next.getParametersList().get(0);
 				params = values.stream()
-					.map(t -> t.getArgs()[1])
-					.map(t -> t != null ? t.toString() : "NULL")
-					.collect(Collectors.toList());
+						.map(t -> t.getArgs()[1])
+						.map(t -> t != null ? t.toString() : "NULL")
+						.collect(Collectors.toList());
 			} else {
 				params = Collections.emptyList();
 				size = next.getParametersList().size();
@@ -101,7 +101,8 @@ public abstract class BaseCaptureQueriesListener implements ProxyDataSourceBuild
 
 			long elapsedTime = theExecutionInfo.getElapsedTime();
 			long startTime = System.currentTimeMillis() - elapsedTime;
-			SqlQuery sqlQuery = new SqlQuery(sql, params, startTime, elapsedTime, stackTraceElements, size, requestPartitionId);
+			SqlQuery sqlQuery =
+					new SqlQuery(sql, params, startTime, elapsedTime, stackTraceElements, size, requestPartitionId);
 			queryList.add(sqlQuery);
 		}
 	}
@@ -116,7 +117,7 @@ public abstract class BaseCaptureQueriesListener implements ProxyDataSourceBuild
 
 	@Override
 	public void execute(MethodExecutionContext executionContext) {
-				AtomicInteger counter = null;
+		AtomicInteger counter = null;
 		switch (executionContext.getMethod().getName()) {
 			case "commit":
 				counter = provideCommitCounter();

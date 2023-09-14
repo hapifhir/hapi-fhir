@@ -19,16 +19,13 @@
  */
 package ca.uhn.fhir.rest.client.interceptor;
 
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-
-import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.lang3.StringUtils;
-
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.client.api.*;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
+
+import java.io.IOException;
 
 /**
  * HTTP interceptor to be used for adding HTTP basic auth username/password tokens
@@ -57,7 +54,8 @@ public class BasicAuthInterceptor implements IClientInterceptor {
 	 */
 	public BasicAuthInterceptor(String theCredentialString) {
 		Validate.notBlank(theCredentialString, "theCredentialString must not be null or blank");
-		Validate.isTrue(theCredentialString.contains(":"), "theCredentialString must be in the format 'username:password'");
+		Validate.isTrue(
+				theCredentialString.contains(":"), "theCredentialString must be in the format 'username:password'");
 		String encoded = Base64.encodeBase64String(theCredentialString.getBytes(Constants.CHARSET_US_ASCII));
 		myHeaderValue = "Basic " + encoded;
 	}
@@ -71,5 +69,4 @@ public class BasicAuthInterceptor implements IClientInterceptor {
 	public void interceptResponse(IHttpResponse theResponse) throws IOException {
 		// nothing
 	}
-
 }

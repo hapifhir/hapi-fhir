@@ -523,7 +523,7 @@ public class SearchNarrowingWithConsentAndAuthInterceptorTest {
 
 		@Search(allowUnknownParams = true)
 		@Override
-		public synchronized List<IBaseResource> searchAll(RequestDetails theRequestDetails) {
+		public synchronized IBundleProvider searchAll(RequestDetails theRequestDetails) {
 			myRequestParams.add(theRequestDetails.getParameters());
 			return super.searchAll(theRequestDetails);
 		}

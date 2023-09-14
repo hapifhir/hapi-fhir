@@ -19,9 +19,8 @@
  */
 package ca.uhn.fhir.rest.server.interceptor;
 
-import org.hl7.fhir.instance.model.api.IBaseResource;
-
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 
 /**
  * NOP implementation of {@link IServerOperationInterceptor}
@@ -44,7 +43,8 @@ public class ServerOperationInterceptorAdapter extends InterceptorAdapter implem
 	}
 
 	@Override
-	public void resourcePreUpdate(RequestDetails theRequest, IBaseResource theOldResource, IBaseResource theNewResource) {
+	public void resourcePreUpdate(
+			RequestDetails theRequest, IBaseResource theOldResource, IBaseResource theNewResource) {
 		// nothing
 	}
 
@@ -66,5 +66,4 @@ public class ServerOperationInterceptorAdapter extends InterceptorAdapter implem
 	public void resourceUpdated(RequestDetails theRequest, IBaseResource theOldResource, IBaseResource theNewResource) {
 		// nothing
 	}
-
 }

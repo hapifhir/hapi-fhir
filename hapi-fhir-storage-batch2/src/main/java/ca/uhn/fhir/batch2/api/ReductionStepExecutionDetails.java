@@ -33,11 +33,10 @@ import javax.annotation.Nullable;
  * @param <OT> - Output data type. Output will actually be a ListResult of these objects.
  */
 public class ReductionStepExecutionDetails<PT extends IModelJson, IT extends IModelJson, OT extends IModelJson>
-	extends StepExecutionDetails<PT, IT> {
+		extends StepExecutionDetails<PT, IT> {
 
-	public ReductionStepExecutionDetails(@Nonnull PT theParameters,
-													 @Nullable IT theData,
-													 @Nonnull JobInstance theInstance) {
+	public ReductionStepExecutionDetails(
+			@Nonnull PT theParameters, @Nullable IT theData, @Nonnull JobInstance theInstance) {
 		// TODO KHS shouldn't the chunkId be null?
 		super(theParameters, theData, theInstance, "VOID");
 	}
@@ -49,7 +48,8 @@ public class ReductionStepExecutionDetails<PT extends IModelJson, IT extends IMo
 	@Override
 	@Nonnull
 	public final IT getData() {
-		throw new UnsupportedOperationException(Msg.code(2099) + " Reduction steps should have all data by the time execution is called.");
+		throw new UnsupportedOperationException(
+				Msg.code(2099) + " Reduction steps should have all data by the time execution is called.");
 	}
 
 	@Override

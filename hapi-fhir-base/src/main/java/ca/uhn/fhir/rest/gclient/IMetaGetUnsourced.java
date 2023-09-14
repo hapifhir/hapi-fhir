@@ -30,10 +30,9 @@ public interface IMetaGetUnsourced<T extends IBaseMetaType> {
 
 	/**
 	 * Get the meta from a resource instance by ID.
-	 * 
+	 *
 	 * @param theId
 	 *           The ID. Must contain both a resource type and an ID part
 	 */
 	IClientExecutable<IClientExecutable<?, T>, T> fromResource(IIdType theId);
-
 }

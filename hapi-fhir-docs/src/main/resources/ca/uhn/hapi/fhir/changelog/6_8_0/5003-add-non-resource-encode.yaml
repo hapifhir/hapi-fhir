@@ -1,0 +1,5 @@
+---
+type: add
+issue: 5003
+title: "The IParser interface now has an additional pair of methods called `encodeToString(IBase)` and `encodeToWriter(IBase, Writer)` that
+  can be used to encode fragments of resources, such as datatypes or infrastructure elements."

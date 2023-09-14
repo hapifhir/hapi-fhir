@@ -1,7 +1,7 @@
 package ca.uhn.fhir.jpa.mdm.provider;
 
-import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.entity.PartitionEntity;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
@@ -11,6 +11,7 @@ import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.mdm.util.MessageHelper;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.AfterEach;
@@ -147,10 +148,16 @@ public class MdmProviderUpdateLinkR4Test extends BaseLinkR4Test {
 	}
 
 	@Test
-	public void testUnlinkLink() {
-		myMdmProvider.updateLink(mySourcePatientId, myPatientId, NO_MATCH_RESULT, myRequestDetails);
+	public void testUnlinkLink_usingOutOfDateResourceId_throwsResourceVersionConflict() {
+		IBaseResource resultantPatient = myMdmProvider.updateLink(mySourcePatientId, myPatientId, NO_MATCH_RESULT, myRequestDetails);
 
-		materiallyChangeGoldenPatient();
+		/*
+		 * updatating a link to NO_MATCH reruns survivorship rules
+		 * (thus rebuilding the golden resource;
+		 * which in this case is mySourcePatient).
+		 * Thus we don't have to update the patient again to get the
+		 * version out of sync
+		 */
 
 		try {
 			myMdmProvider.updateLink(mySourcePatientId, myPatientId, MATCH_RESULT, myRequestDetails);

@@ -51,6 +51,7 @@ import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.hl7.fhir.r4.model.AuditEvent;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
@@ -64,11 +65,11 @@ import org.hl7.fhir.r5.model.PackageInformation;
 import org.hl7.fhir.r5.model.SearchParameter;
 import org.hl7.fhir.r5.model.StructureDefinition;
 
-import javax.annotation.Nonnull;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
+import javax.annotation.Nonnull;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
@@ -131,7 +132,6 @@ public class VersionCanonicalizer {
 	}
 
 	@SuppressWarnings({"EnhancedSwitchMigration"})
-
 
 	/**
 	 * Canonical version: R5
@@ -223,13 +223,17 @@ public class VersionCanonicalizer {
 		 */
 		T input = myContext.newTerser().clone(theSearchParameter);
 
-		List<String> baseExtensionValues = extractNonStandardSearchParameterListAndClearSourceIfAnyArePresent(input, "base");
-		List<String> targetExtensionValues = extractNonStandardSearchParameterListAndClearSourceIfAnyArePresent(input, "target");
+		List<String> baseExtensionValues =
+				extractNonStandardSearchParameterListAndClearSourceIfAnyArePresent(input, "base");
+		List<String> targetExtensionValues =
+				extractNonStandardSearchParameterListAndClearSourceIfAnyArePresent(input, "target");
 
 		SearchParameter retVal = myStrategy.searchParameterToCanonical(input);
 
-		baseExtensionValues.forEach(t -> retVal.addExtension(HapiExtensions.EXTENSION_SEARCHPARAM_CUSTOM_BASE_RESOURCE, new CodeType(t)));
-		targetExtensionValues.forEach(t -> retVal.addExtension(HapiExtensions.EXTENSION_SEARCHPARAM_CUSTOM_TARGET_RESOURCE, new CodeType(t)));
+		baseExtensionValues.forEach(
+				t -> retVal.addExtension(HapiExtensions.EXTENSION_SEARCHPARAM_CUSTOM_BASE_RESOURCE, new CodeType(t)));
+		targetExtensionValues.forEach(
+				t -> retVal.addExtension(HapiExtensions.EXTENSION_SEARCHPARAM_CUSTOM_TARGET_RESOURCE, new CodeType(t)));
 		return retVal;
 	}
 
@@ -271,20 +275,25 @@ public class VersionCanonicalizer {
 		return myStrategy.codeSystemToValidatorCanonical(theResource);
 	}
 
-	@Nonnull
-	private List<String> extractNonStandardSearchParameterListAndClearSourceIfAnyArePresent(IBaseResource theSearchParameter, String theChildName) {
+	public IBaseResource auditEventFromCanonical(AuditEvent theResource) {
+		return myStrategy.auditEventFromCanonical(theResource);
+	}
 
-		BaseRuntimeChildDefinition child = myContext.getResourceDefinition(theSearchParameter).getChildByName(theChildName);
+	@Nonnull
+	private List<String> extractNonStandardSearchParameterListAndClearSourceIfAnyArePresent(
+			IBaseResource theSearchParameter, String theChildName) {
+
+		BaseRuntimeChildDefinition child =
+				myContext.getResourceDefinition(theSearchParameter).getChildByName(theChildName);
 		List<IBase> baseList = child.getAccessor().getValues(theSearchParameter);
 
-		List<String> baseExtensionValues = baseList
-			.stream()
-			.filter(Objects::nonNull)
-			.filter(t -> t instanceof IPrimitiveType)
-			.map(t -> (IPrimitiveType<?>) t)
-			.map(IPrimitiveType::getValueAsString)
-			.filter(StringUtils::isNotBlank)
-			.collect(Collectors.toList());
+		List<String> baseExtensionValues = baseList.stream()
+				.filter(Objects::nonNull)
+				.filter(t -> t instanceof IPrimitiveType)
+				.map(t -> (IPrimitiveType<?>) t)
+				.map(IPrimitiveType::getValueAsString)
+				.filter(StringUtils::isNotBlank)
+				.collect(Collectors.toList());
 		if (baseExtensionValues.stream().allMatch(Enumerations.VersionIndependentResourceTypesAll::isValidCode)) {
 			baseExtensionValues.clear();
 		} else {
@@ -327,6 +336,8 @@ public class VersionCanonicalizer {
 
 		IBaseResource searchParameterFromCanonical(SearchParameter theResource);
 
+		IBaseResource auditEventFromCanonical(AuditEvent theResource);
+
 		IBaseConformance capabilityStatementFromCanonical(CapabilityStatement theResource);
 	}
 
@@ -356,7 +367,7 @@ public class VersionCanonicalizer {
 			retVal.setDisplay(coding.getDisplay());
 			retVal.setVersion(coding.getVersion());
 			if (!coding.getUserSelectedElement().isEmpty()) {
-				retVal.setUserSelected( coding.getUserSelected() );
+				retVal.setUserSelected(coding.getUserSelected());
 			}
 
 			return retVal;
@@ -388,19 +399,23 @@ public class VersionCanonicalizer {
 			ca.uhn.fhir.model.dstu2.resource.ValueSet input = (ca.uhn.fhir.model.dstu2.resource.ValueSet) theCodeSystem;
 			retVal.setUrl(input.getUrl());
 
-			for (ca.uhn.fhir.model.dstu2.resource.ValueSet.CodeSystemConcept next : input.getCodeSystem().getConcept()) {
+			for (ca.uhn.fhir.model.dstu2.resource.ValueSet.CodeSystemConcept next :
+					input.getCodeSystem().getConcept()) {
 				translateAndAddConcept(next, retVal.getConcept());
 			}
 
 			return retVal;
 		}
 
-		private void translateAndAddConcept(ca.uhn.fhir.model.dstu2.resource.ValueSet.CodeSystemConcept theSource, List<CodeSystem.ConceptDefinitionComponent> theTarget) {
+		private void translateAndAddConcept(
+				ca.uhn.fhir.model.dstu2.resource.ValueSet.CodeSystemConcept theSource,
+				List<CodeSystem.ConceptDefinitionComponent> theTarget) {
 			CodeSystem.ConceptDefinitionComponent targetConcept = new CodeSystem.ConceptDefinitionComponent();
 			targetConcept.setCode(theSource.getCode());
 			targetConcept.setDisplay(theSource.getDisplay());
 
-			for (ca.uhn.fhir.model.dstu2.resource.ValueSet.CodeSystemConceptDesignation next : theSource.getDesignation()) {
+			for (ca.uhn.fhir.model.dstu2.resource.ValueSet.CodeSystemConceptDesignation next :
+					theSource.getDesignation()) {
 				CodeSystem.ConceptDefinitionDesignationComponent targetDesignation = targetConcept.addDesignation();
 				targetDesignation.setLanguage(next.getLanguage());
 				targetDesignation.setValue(next.getValue());
@@ -430,8 +445,10 @@ public class VersionCanonicalizer {
 
 		@Override
 		public SearchParameter searchParameterToCanonical(IBaseResource theSearchParameter) {
-			org.hl7.fhir.dstu2.model.SearchParameter reencoded = (org.hl7.fhir.dstu2.model.SearchParameter) reencodeToHl7Org(theSearchParameter);
-			SearchParameter retVal = (SearchParameter) VersionConvertorFactory_10_50.convertResource(reencoded, ADVISOR_10_50);
+			org.hl7.fhir.dstu2.model.SearchParameter reencoded =
+					(org.hl7.fhir.dstu2.model.SearchParameter) reencodeToHl7Org(theSearchParameter);
+			SearchParameter retVal =
+					(SearchParameter) VersionConvertorFactory_10_50.convertResource(reencoded, ADVISOR_10_50);
 			if (isBlank(retVal.getExpression())) {
 				retVal.setExpression(reencoded.getXpath());
 			}
@@ -471,13 +488,21 @@ public class VersionCanonicalizer {
 		@Override
 		public org.hl7.fhir.r5.model.ValueSet valueSetToValidatorCanonical(IBaseResource theResource) {
 			org.hl7.fhir.dstu2.model.Resource reencoded = reencodeToHl7Org(theResource);
-			return (org.hl7.fhir.r5.model.ValueSet) VersionConvertorFactory_10_50.convertResource(reencoded, ADVISOR_10_50);
+			return (org.hl7.fhir.r5.model.ValueSet)
+					VersionConvertorFactory_10_50.convertResource(reencoded, ADVISOR_10_50);
 		}
 
 		@Override
 		public org.hl7.fhir.r5.model.CodeSystem codeSystemToValidatorCanonical(IBaseResource theResource) {
 			org.hl7.fhir.dstu2.model.Resource reencoded = reencodeToHl7Org(theResource);
-			return (org.hl7.fhir.r5.model.CodeSystem) VersionConvertorFactory_10_50.convertResource(reencoded, ADVISOR_10_50);
+			return (org.hl7.fhir.r5.model.CodeSystem)
+					VersionConvertorFactory_10_50.convertResource(reencoded, ADVISOR_10_50);
+		}
+
+		@Override
+		public IBaseResource auditEventFromCanonical(AuditEvent theResource) {
+			Resource hl7Org = VersionConvertorFactory_10_40.convertResource(theResource, ADVISOR_10_40);
+			return reencodeFromHl7Org(hl7Org);
 		}
 
 		@Override
@@ -496,43 +521,51 @@ public class VersionCanonicalizer {
 			if (myHl7OrgStructures) {
 				return (Resource) theInput;
 			}
-			return (Resource) myDstu2Hl7OrgContext.newJsonParser().parseResource(myDstu2Context.newJsonParser().encodeResourceToString(theInput));
+			return (Resource) myDstu2Hl7OrgContext
+					.newJsonParser()
+					.parseResource(myDstu2Context.newJsonParser().encodeResourceToString(theInput));
 		}
 
 		private IBaseResource reencodeFromHl7Org(Resource theInput) {
 			if (myHl7OrgStructures) {
 				return theInput;
 			}
-			return myDstu2Context.newJsonParser().parseResource(myDstu2Hl7OrgContext.newJsonParser().encodeResourceToString(theInput));
+			return myDstu2Context
+					.newJsonParser()
+					.parseResource(myDstu2Hl7OrgContext.newJsonParser().encodeResourceToString(theInput));
 		}
-
 	}
 
 	private static class Dstu21Strategy implements IStrategy {
 
 		@Override
 		public CapabilityStatement capabilityStatementToCanonical(IBaseResource theCapabilityStatement) {
-			return (CapabilityStatement) VersionConvertorFactory_14_50.convertResource((org.hl7.fhir.dstu2016may.model.Resource) theCapabilityStatement, ADVISOR_14_50);
+			return (CapabilityStatement) VersionConvertorFactory_14_50.convertResource(
+					(org.hl7.fhir.dstu2016may.model.Resource) theCapabilityStatement, ADVISOR_14_50);
 		}
 
 		@Override
 		public Coding codingToCanonical(IBaseCoding theCoding) {
-			return (org.hl7.fhir.r4.model.Coding) VersionConvertorFactory_14_40.convertType((org.hl7.fhir.dstu2016may.model.Coding) theCoding, ADVISOR_14_40);
+			return (org.hl7.fhir.r4.model.Coding) VersionConvertorFactory_14_40.convertType(
+					(org.hl7.fhir.dstu2016may.model.Coding) theCoding, ADVISOR_14_40);
 		}
 
 		@Override
 		public CodeableConcept codeableConceptToCanonical(IBaseDatatype theCodeableConcept) {
-			return (org.hl7.fhir.r4.model.CodeableConcept) VersionConvertorFactory_14_40.convertType((org.hl7.fhir.dstu2016may.model.CodeableConcept) theCodeableConcept, ADVISOR_14_40);
+			return (org.hl7.fhir.r4.model.CodeableConcept) VersionConvertorFactory_14_40.convertType(
+					(org.hl7.fhir.dstu2016may.model.CodeableConcept) theCodeableConcept, ADVISOR_14_40);
 		}
 
 		@Override
 		public ValueSet valueSetToCanonical(IBaseResource theValueSet) {
-			return (ValueSet) VersionConvertorFactory_14_40.convertResource((org.hl7.fhir.dstu2016may.model.Resource) theValueSet, ADVISOR_14_40);
+			return (ValueSet) VersionConvertorFactory_14_40.convertResource(
+					(org.hl7.fhir.dstu2016may.model.Resource) theValueSet, ADVISOR_14_40);
 		}
 
 		@Override
 		public CodeSystem codeSystemToCanonical(IBaseResource theCodeSystem) {
-			return (CodeSystem) VersionConvertorFactory_14_40.convertResource((org.hl7.fhir.dstu2016may.model.Resource) theCodeSystem, ADVISOR_14_40);
+			return (CodeSystem) VersionConvertorFactory_14_40.convertResource(
+					(org.hl7.fhir.dstu2016may.model.Resource) theCodeSystem, ADVISOR_14_40);
 		}
 
 		@Override
@@ -542,12 +575,14 @@ public class VersionCanonicalizer {
 
 		@Override
 		public ConceptMap conceptMapToCanonical(IBaseResource theConceptMap) {
-			return (ConceptMap) VersionConvertorFactory_14_40.convertResource((org.hl7.fhir.dstu2016may.model.Resource) theConceptMap, ADVISOR_14_40);
+			return (ConceptMap) VersionConvertorFactory_14_40.convertResource(
+					(org.hl7.fhir.dstu2016may.model.Resource) theConceptMap, ADVISOR_14_40);
 		}
 
 		@Override
 		public SearchParameter searchParameterToCanonical(IBaseResource theSearchParameter) {
-			return (SearchParameter) VersionConvertorFactory_14_50.convertResource((org.hl7.fhir.dstu2016may.model.Resource) theSearchParameter, ADVISOR_14_50);
+			return (SearchParameter) VersionConvertorFactory_14_50.convertResource(
+					(org.hl7.fhir.dstu2016may.model.Resource) theSearchParameter, ADVISOR_14_50);
 		}
 
 		@Override
@@ -557,7 +592,8 @@ public class VersionCanonicalizer {
 
 		@Override
 		public StructureDefinition structureDefinitionToCanonical(IBaseResource theResource) {
-			return (StructureDefinition) VersionConvertorFactory_14_50.convertResource((org.hl7.fhir.dstu2016may.model.Resource) theResource, ADVISOR_14_50);
+			return (StructureDefinition) VersionConvertorFactory_14_50.convertResource(
+					(org.hl7.fhir.dstu2016may.model.Resource) theResource, ADVISOR_14_50);
 		}
 
 		@Override
@@ -572,22 +608,30 @@ public class VersionCanonicalizer {
 
 		@Override
 		public org.hl7.fhir.r5.model.Resource resourceToValidatorCanonical(IBaseResource theResource) {
-			return VersionConvertorFactory_14_50.convertResource((org.hl7.fhir.dstu2016may.model.Resource) theResource, ADVISOR_14_50);
+			return VersionConvertorFactory_14_50.convertResource(
+					(org.hl7.fhir.dstu2016may.model.Resource) theResource, ADVISOR_14_50);
 		}
 
 		@Override
 		public org.hl7.fhir.r5.model.ValueSet valueSetToValidatorCanonical(IBaseResource theResource) {
-			return (org.hl7.fhir.r5.model.ValueSet) VersionConvertorFactory_14_50.convertResource((org.hl7.fhir.dstu2016may.model.Resource) theResource, ADVISOR_14_50);
+			return (org.hl7.fhir.r5.model.ValueSet) VersionConvertorFactory_14_50.convertResource(
+					(org.hl7.fhir.dstu2016may.model.Resource) theResource, ADVISOR_14_50);
 		}
 
 		@Override
 		public org.hl7.fhir.r5.model.CodeSystem codeSystemToValidatorCanonical(IBaseResource theResource) {
-			return (org.hl7.fhir.r5.model.CodeSystem) VersionConvertorFactory_14_50.convertResource((org.hl7.fhir.dstu2016may.model.Resource) theResource, ADVISOR_14_50);
+			return (org.hl7.fhir.r5.model.CodeSystem) VersionConvertorFactory_14_50.convertResource(
+					(org.hl7.fhir.dstu2016may.model.Resource) theResource, ADVISOR_14_50);
 		}
 
 		@Override
 		public IBaseResource searchParameterFromCanonical(SearchParameter theResource) {
 			return VersionConvertorFactory_14_50.convertResource(theResource, ADVISOR_14_50);
+		}
+
+		@Override
+		public IBaseResource auditEventFromCanonical(AuditEvent theResource) {
+			return VersionConvertorFactory_14_40.convertResource(theResource, ADVISOR_14_40);
 		}
 
 		@Override
@@ -600,27 +644,32 @@ public class VersionCanonicalizer {
 
 		@Override
 		public CapabilityStatement capabilityStatementToCanonical(IBaseResource theCapabilityStatement) {
-			return (CapabilityStatement) VersionConvertorFactory_30_50.convertResource((org.hl7.fhir.dstu3.model.Resource) theCapabilityStatement, ADVISOR_30_50);
+			return (CapabilityStatement) VersionConvertorFactory_30_50.convertResource(
+					(org.hl7.fhir.dstu3.model.Resource) theCapabilityStatement, ADVISOR_30_50);
 		}
 
 		@Override
 		public Coding codingToCanonical(IBaseCoding theCoding) {
-			return (org.hl7.fhir.r4.model.Coding) VersionConvertorFactory_30_40.convertType((org.hl7.fhir.dstu3.model.Coding) theCoding, ADVISOR_30_40);
+			return (org.hl7.fhir.r4.model.Coding) VersionConvertorFactory_30_40.convertType(
+					(org.hl7.fhir.dstu3.model.Coding) theCoding, ADVISOR_30_40);
 		}
 
 		@Override
 		public CodeableConcept codeableConceptToCanonical(IBaseDatatype theCodeableConcept) {
-			return (org.hl7.fhir.r4.model.CodeableConcept) VersionConvertorFactory_30_40.convertType((org.hl7.fhir.dstu3.model.CodeableConcept) theCodeableConcept, ADVISOR_30_40);
+			return (org.hl7.fhir.r4.model.CodeableConcept) VersionConvertorFactory_30_40.convertType(
+					(org.hl7.fhir.dstu3.model.CodeableConcept) theCodeableConcept, ADVISOR_30_40);
 		}
 
 		@Override
 		public ValueSet valueSetToCanonical(IBaseResource theValueSet) {
-			return (ValueSet) VersionConvertorFactory_30_40.convertResource((org.hl7.fhir.dstu3.model.Resource) theValueSet, ADVISOR_30_40);
+			return (ValueSet) VersionConvertorFactory_30_40.convertResource(
+					(org.hl7.fhir.dstu3.model.Resource) theValueSet, ADVISOR_30_40);
 		}
 
 		@Override
 		public CodeSystem codeSystemToCanonical(IBaseResource theCodeSystem) {
-			return (CodeSystem) VersionConvertorFactory_30_40.convertResource((org.hl7.fhir.dstu3.model.Resource) theCodeSystem, ADVISOR_30_40);
+			return (CodeSystem) VersionConvertorFactory_30_40.convertResource(
+					(org.hl7.fhir.dstu3.model.Resource) theCodeSystem, ADVISOR_30_40);
 		}
 
 		@Override
@@ -630,12 +679,14 @@ public class VersionCanonicalizer {
 
 		@Override
 		public ConceptMap conceptMapToCanonical(IBaseResource theConceptMap) {
-			return (ConceptMap) VersionConvertorFactory_30_40.convertResource((org.hl7.fhir.dstu3.model.Resource) theConceptMap, ADVISOR_30_40);
+			return (ConceptMap) VersionConvertorFactory_30_40.convertResource(
+					(org.hl7.fhir.dstu3.model.Resource) theConceptMap, ADVISOR_30_40);
 		}
 
 		@Override
 		public SearchParameter searchParameterToCanonical(IBaseResource theSearchParameter) {
-			return (SearchParameter) VersionConvertorFactory_30_50.convertResource((org.hl7.fhir.dstu3.model.Resource) theSearchParameter, ADVISOR_30_50);
+			return (SearchParameter) VersionConvertorFactory_30_50.convertResource(
+					(org.hl7.fhir.dstu3.model.Resource) theSearchParameter, ADVISOR_30_50);
 		}
 
 		@Override
@@ -645,7 +696,8 @@ public class VersionCanonicalizer {
 
 		@Override
 		public StructureDefinition structureDefinitionToCanonical(IBaseResource theResource) {
-			return (StructureDefinition) VersionConvertorFactory_30_50.convertResource((org.hl7.fhir.dstu3.model.Resource) theResource, ADVISOR_30_50);
+			return (StructureDefinition) VersionConvertorFactory_30_50.convertResource(
+					(org.hl7.fhir.dstu3.model.Resource) theResource, ADVISOR_30_50);
 		}
 
 		@Override
@@ -660,22 +712,30 @@ public class VersionCanonicalizer {
 
 		@Override
 		public org.hl7.fhir.r5.model.Resource resourceToValidatorCanonical(IBaseResource theResource) {
-			return VersionConvertorFactory_30_50.convertResource((org.hl7.fhir.dstu3.model.Resource) theResource, ADVISOR_30_50);
+			return VersionConvertorFactory_30_50.convertResource(
+					(org.hl7.fhir.dstu3.model.Resource) theResource, ADVISOR_30_50);
 		}
 
 		@Override
 		public org.hl7.fhir.r5.model.ValueSet valueSetToValidatorCanonical(IBaseResource theResource) {
-			return (org.hl7.fhir.r5.model.ValueSet) VersionConvertorFactory_30_50.convertResource((org.hl7.fhir.dstu3.model.Resource) theResource, ADVISOR_30_50);
+			return (org.hl7.fhir.r5.model.ValueSet) VersionConvertorFactory_30_50.convertResource(
+					(org.hl7.fhir.dstu3.model.Resource) theResource, ADVISOR_30_50);
 		}
 
 		@Override
 		public org.hl7.fhir.r5.model.CodeSystem codeSystemToValidatorCanonical(IBaseResource theResource) {
-			return (org.hl7.fhir.r5.model.CodeSystem) VersionConvertorFactory_30_50.convertResource((org.hl7.fhir.dstu3.model.Resource) theResource, ADVISOR_30_50);
+			return (org.hl7.fhir.r5.model.CodeSystem) VersionConvertorFactory_30_50.convertResource(
+					(org.hl7.fhir.dstu3.model.Resource) theResource, ADVISOR_30_50);
 		}
 
 		@Override
 		public IBaseResource searchParameterFromCanonical(SearchParameter theResource) {
 			return VersionConvertorFactory_30_50.convertResource(theResource, ADVISOR_30_50);
+		}
+
+		@Override
+		public IBaseResource auditEventFromCanonical(AuditEvent theResource) {
+			return VersionConvertorFactory_30_40.convertResource(theResource, ADVISOR_30_40);
 		}
 
 		@Override
@@ -687,7 +747,8 @@ public class VersionCanonicalizer {
 	private static class R4Strategy implements IStrategy {
 		@Override
 		public CapabilityStatement capabilityStatementToCanonical(IBaseResource theCapabilityStatement) {
-			return (CapabilityStatement) VersionConvertorFactory_40_50.convertResource((org.hl7.fhir.r4.model.Resource) theCapabilityStatement, ADVISOR_40_50);
+			return (CapabilityStatement) VersionConvertorFactory_40_50.convertResource(
+					(org.hl7.fhir.r4.model.Resource) theCapabilityStatement, ADVISOR_40_50);
 		}
 
 		@Override
@@ -722,7 +783,8 @@ public class VersionCanonicalizer {
 
 		@Override
 		public SearchParameter searchParameterToCanonical(IBaseResource theSearchParameter) {
-			return (SearchParameter) VersionConvertorFactory_40_50.convertResource((org.hl7.fhir.r4.model.Resource) theSearchParameter, ADVISOR_40_50);
+			return (SearchParameter) VersionConvertorFactory_40_50.convertResource(
+					(org.hl7.fhir.r4.model.Resource) theSearchParameter, ADVISOR_40_50);
 		}
 
 		@Override
@@ -732,7 +794,8 @@ public class VersionCanonicalizer {
 
 		@Override
 		public StructureDefinition structureDefinitionToCanonical(IBaseResource theResource) {
-			return (StructureDefinition) VersionConvertorFactory_40_50.convertResource((org.hl7.fhir.r4.model.Resource) theResource, ADVISOR_40_50);
+			return (StructureDefinition) VersionConvertorFactory_40_50.convertResource(
+					(org.hl7.fhir.r4.model.Resource) theResource, ADVISOR_40_50);
 		}
 
 		@Override
@@ -747,88 +810,112 @@ public class VersionCanonicalizer {
 
 		@Override
 		public org.hl7.fhir.r5.model.Resource resourceToValidatorCanonical(IBaseResource theResource) {
-			return VersionConvertorFactory_40_50.convertResource((org.hl7.fhir.r4.model.Resource) theResource, ADVISOR_40_50);
+			return VersionConvertorFactory_40_50.convertResource(
+					(org.hl7.fhir.r4.model.Resource) theResource, ADVISOR_40_50);
 		}
 
 		@Override
 		public org.hl7.fhir.r5.model.ValueSet valueSetToValidatorCanonical(IBaseResource theResource) {
-			return (org.hl7.fhir.r5.model.ValueSet) VersionConvertorFactory_40_50.convertResource((org.hl7.fhir.r4.model.Resource) theResource, ADVISOR_40_50);
+			return (org.hl7.fhir.r5.model.ValueSet) VersionConvertorFactory_40_50.convertResource(
+					(org.hl7.fhir.r4.model.Resource) theResource, ADVISOR_40_50);
 		}
 
 		@Override
 		public org.hl7.fhir.r5.model.CodeSystem codeSystemToValidatorCanonical(IBaseResource theResource) {
-			return (org.hl7.fhir.r5.model.CodeSystem) VersionConvertorFactory_40_50.convertResource((org.hl7.fhir.r4.model.Resource) theResource, ADVISOR_40_50);
+			return (org.hl7.fhir.r5.model.CodeSystem) VersionConvertorFactory_40_50.convertResource(
+					(org.hl7.fhir.r4.model.Resource) theResource, ADVISOR_40_50);
 		}
 
 		@Override
 		public IBaseResource searchParameterFromCanonical(SearchParameter theResource) {
 			return VersionConvertorFactory_40_50.convertResource(theResource, ADVISOR_40_50);
+		}
+
+		@Override
+		public IBaseResource auditEventFromCanonical(AuditEvent theResource) {
+			return theResource;
 		}
 
 		@Override
 		public IBaseConformance capabilityStatementFromCanonical(CapabilityStatement theResource) {
 			return (IBaseConformance) VersionConvertorFactory_40_50.convertResource(theResource, ADVISOR_40_50);
 		}
-
 	}
 
 	private static class R4BStrategy implements IStrategy {
 
 		@Override
 		public CapabilityStatement capabilityStatementToCanonical(IBaseResource theCapabilityStatement) {
-			return (CapabilityStatement) VersionConvertorFactory_43_50.convertResource((org.hl7.fhir.r4b.model.Resource) theCapabilityStatement, ADVISOR_43_50);
+			return (CapabilityStatement) VersionConvertorFactory_43_50.convertResource(
+					(org.hl7.fhir.r4b.model.Resource) theCapabilityStatement, ADVISOR_43_50);
 		}
 
 		@Override
 		public Coding codingToCanonical(IBaseCoding theCoding) {
-			org.hl7.fhir.r5.model.Coding r5coding = (org.hl7.fhir.r5.model.Coding) VersionConvertorFactory_43_50.convertType((org.hl7.fhir.r4b.model.Coding) theCoding, ADVISOR_43_50);
+			org.hl7.fhir.r5.model.Coding r5coding = (org.hl7.fhir.r5.model.Coding)
+					VersionConvertorFactory_43_50.convertType((org.hl7.fhir.r4b.model.Coding) theCoding, ADVISOR_43_50);
 			return (org.hl7.fhir.r4.model.Coding) VersionConvertorFactory_40_50.convertType(r5coding, ADVISOR_40_50);
 		}
 
 		@Override
 		public CodeableConcept codeableConceptToCanonical(IBaseDatatype theCodeableConcept) {
-			org.hl7.fhir.r5.model.CodeableConcept r5coding = (org.hl7.fhir.r5.model.CodeableConcept) VersionConvertorFactory_43_50.convertType((org.hl7.fhir.r4b.model.CodeableConcept) theCodeableConcept, ADVISOR_43_50);
-			return (org.hl7.fhir.r4.model.CodeableConcept) VersionConvertorFactory_40_50.convertType(r5coding, ADVISOR_40_50);
+			org.hl7.fhir.r5.model.CodeableConcept r5coding =
+					(org.hl7.fhir.r5.model.CodeableConcept) VersionConvertorFactory_43_50.convertType(
+							(org.hl7.fhir.r4b.model.CodeableConcept) theCodeableConcept, ADVISOR_43_50);
+			return (org.hl7.fhir.r4.model.CodeableConcept)
+					VersionConvertorFactory_40_50.convertType(r5coding, ADVISOR_40_50);
 		}
 
 		@Override
 		public ValueSet valueSetToCanonical(IBaseResource theValueSet) {
-			org.hl7.fhir.r5.model.ValueSet valueSetR5 = (org.hl7.fhir.r5.model.ValueSet) VersionConvertorFactory_43_50.convertResource((org.hl7.fhir.r4b.model.Resource) theValueSet, ADVISOR_43_50);
-			return (org.hl7.fhir.r4.model.ValueSet) VersionConvertorFactory_40_50.convertResource(valueSetR5, ADVISOR_40_50);
+			org.hl7.fhir.r5.model.ValueSet valueSetR5 =
+					(org.hl7.fhir.r5.model.ValueSet) VersionConvertorFactory_43_50.convertResource(
+							(org.hl7.fhir.r4b.model.Resource) theValueSet, ADVISOR_43_50);
+			return (org.hl7.fhir.r4.model.ValueSet)
+					VersionConvertorFactory_40_50.convertResource(valueSetR5, ADVISOR_40_50);
 		}
 
 		@Override
 		public CodeSystem codeSystemToCanonical(IBaseResource theCodeSystem) {
-			org.hl7.fhir.r5.model.CodeSystem codeSystemR5 = (org.hl7.fhir.r5.model.CodeSystem) VersionConvertorFactory_43_50.convertResource((org.hl7.fhir.r4b.model.Resource) theCodeSystem, ADVISOR_43_50);
-			return (org.hl7.fhir.r4.model.CodeSystem) VersionConvertorFactory_40_50.convertResource(codeSystemR5, ADVISOR_40_50);
+			org.hl7.fhir.r5.model.CodeSystem codeSystemR5 =
+					(org.hl7.fhir.r5.model.CodeSystem) VersionConvertorFactory_43_50.convertResource(
+							(org.hl7.fhir.r4b.model.Resource) theCodeSystem, ADVISOR_43_50);
+			return (org.hl7.fhir.r4.model.CodeSystem)
+					VersionConvertorFactory_40_50.convertResource(codeSystemR5, ADVISOR_40_50);
 		}
 
 		@Override
 		public IBaseResource valueSetFromCanonical(ValueSet theValueSet) {
-			org.hl7.fhir.r5.model.ValueSet valueSetR5 = (org.hl7.fhir.r5.model.ValueSet) VersionConvertorFactory_40_50.convertResource(theValueSet, ADVISOR_40_50);
+			org.hl7.fhir.r5.model.ValueSet valueSetR5 = (org.hl7.fhir.r5.model.ValueSet)
+					VersionConvertorFactory_40_50.convertResource(theValueSet, ADVISOR_40_50);
 			return VersionConvertorFactory_43_50.convertResource(valueSetR5, ADVISOR_43_50);
 		}
 
 		@Override
 		public ConceptMap conceptMapToCanonical(IBaseResource theConceptMap) {
-			org.hl7.fhir.r5.model.ConceptMap conceptMapR5 = (org.hl7.fhir.r5.model.ConceptMap) VersionConvertorFactory_43_50.convertResource((org.hl7.fhir.r4b.model.Resource) theConceptMap, ADVISOR_43_50);
+			org.hl7.fhir.r5.model.ConceptMap conceptMapR5 =
+					(org.hl7.fhir.r5.model.ConceptMap) VersionConvertorFactory_43_50.convertResource(
+							(org.hl7.fhir.r4b.model.Resource) theConceptMap, ADVISOR_43_50);
 			return (ConceptMap) VersionConvertorFactory_40_50.convertResource(conceptMapR5, ADVISOR_40_50);
 		}
 
 		@Override
 		public SearchParameter searchParameterToCanonical(IBaseResource theSearchParameter) {
-			return (SearchParameter) VersionConvertorFactory_43_50.convertResource((org.hl7.fhir.r4b.model.Resource) theSearchParameter, ADVISOR_43_50);
+			return (SearchParameter) VersionConvertorFactory_43_50.convertResource(
+					(org.hl7.fhir.r4b.model.Resource) theSearchParameter, ADVISOR_43_50);
 		}
 
 		@Override
 		public IBaseParameters parametersFromCanonical(Parameters theParameters) {
-			org.hl7.fhir.r5.model.Parameters parametersR5 = (org.hl7.fhir.r5.model.Parameters) VersionConvertorFactory_40_50.convertResource(theParameters, ADVISOR_40_50);
+			org.hl7.fhir.r5.model.Parameters parametersR5 = (org.hl7.fhir.r5.model.Parameters)
+					VersionConvertorFactory_40_50.convertResource(theParameters, ADVISOR_40_50);
 			return (IBaseParameters) VersionConvertorFactory_43_50.convertResource(parametersR5, ADVISOR_43_50);
 		}
 
 		@Override
 		public StructureDefinition structureDefinitionToCanonical(IBaseResource theResource) {
-			return (StructureDefinition) VersionConvertorFactory_43_50.convertResource((org.hl7.fhir.r4b.model.Resource) theResource, ADVISOR_43_50);
+			return (StructureDefinition) VersionConvertorFactory_43_50.convertResource(
+					(org.hl7.fhir.r4b.model.Resource) theResource, ADVISOR_43_50);
 		}
 
 		@Override
@@ -843,17 +930,20 @@ public class VersionCanonicalizer {
 
 		@Override
 		public org.hl7.fhir.r5.model.Resource resourceToValidatorCanonical(IBaseResource theResource) {
-			return VersionConvertorFactory_43_50.convertResource((org.hl7.fhir.r4b.model.Resource) theResource, ADVISOR_43_50);
+			return VersionConvertorFactory_43_50.convertResource(
+					(org.hl7.fhir.r4b.model.Resource) theResource, ADVISOR_43_50);
 		}
 
 		@Override
 		public org.hl7.fhir.r5.model.ValueSet valueSetToValidatorCanonical(IBaseResource theResource) {
-			return (org.hl7.fhir.r5.model.ValueSet) VersionConvertorFactory_43_50.convertResource((org.hl7.fhir.r4b.model.Resource) theResource, ADVISOR_43_50);
+			return (org.hl7.fhir.r5.model.ValueSet) VersionConvertorFactory_43_50.convertResource(
+					(org.hl7.fhir.r4b.model.Resource) theResource, ADVISOR_43_50);
 		}
 
 		@Override
 		public org.hl7.fhir.r5.model.CodeSystem codeSystemToValidatorCanonical(IBaseResource theResource) {
-			return (org.hl7.fhir.r5.model.CodeSystem) VersionConvertorFactory_43_50.convertResource((org.hl7.fhir.r4b.model.Resource) theResource, ADVISOR_43_50);
+			return (org.hl7.fhir.r5.model.CodeSystem) VersionConvertorFactory_43_50.convertResource(
+					(org.hl7.fhir.r4b.model.Resource) theResource, ADVISOR_43_50);
 		}
 
 		@Override
@@ -862,10 +952,16 @@ public class VersionCanonicalizer {
 		}
 
 		@Override
+		public IBaseResource auditEventFromCanonical(AuditEvent theResource) {
+			org.hl7.fhir.r5.model.AuditEvent r5 = (org.hl7.fhir.r5.model.AuditEvent)
+					VersionConvertorFactory_40_50.convertResource(theResource, ADVISOR_40_50);
+			return VersionConvertorFactory_43_50.convertResource(r5, ADVISOR_43_50);
+		}
+
+		@Override
 		public IBaseConformance capabilityStatementFromCanonical(CapabilityStatement theResource) {
 			return (IBaseConformance) VersionConvertorFactory_43_50.convertResource(theResource, ADVISOR_43_50);
 		}
-
 	}
 
 	private static class R5Strategy implements IStrategy {
@@ -877,22 +973,26 @@ public class VersionCanonicalizer {
 
 		@Override
 		public Coding codingToCanonical(IBaseCoding theCoding) {
-			return (org.hl7.fhir.r4.model.Coding) VersionConvertorFactory_40_50.convertType((org.hl7.fhir.r5.model.Coding) theCoding, ADVISOR_40_50);
+			return (org.hl7.fhir.r4.model.Coding)
+					VersionConvertorFactory_40_50.convertType((org.hl7.fhir.r5.model.Coding) theCoding, ADVISOR_40_50);
 		}
 
 		@Override
 		public CodeableConcept codeableConceptToCanonical(IBaseDatatype theCodeableConcept) {
-			return (org.hl7.fhir.r4.model.CodeableConcept) VersionConvertorFactory_40_50.convertType((org.hl7.fhir.r5.model.CodeableConcept) theCodeableConcept, ADVISOR_40_50);
+			return (org.hl7.fhir.r4.model.CodeableConcept) VersionConvertorFactory_40_50.convertType(
+					(org.hl7.fhir.r5.model.CodeableConcept) theCodeableConcept, ADVISOR_40_50);
 		}
 
 		@Override
 		public ValueSet valueSetToCanonical(IBaseResource theValueSet) {
-			return (ValueSet) VersionConvertorFactory_40_50.convertResource((org.hl7.fhir.r5.model.ValueSet) theValueSet, ADVISOR_40_50);
+			return (ValueSet) VersionConvertorFactory_40_50.convertResource(
+					(org.hl7.fhir.r5.model.ValueSet) theValueSet, ADVISOR_40_50);
 		}
 
 		@Override
 		public CodeSystem codeSystemToCanonical(IBaseResource theCodeSystem) {
-			return (CodeSystem) VersionConvertorFactory_40_50.convertResource((org.hl7.fhir.r5.model.CodeSystem) theCodeSystem, ADVISOR_40_50);
+			return (CodeSystem) VersionConvertorFactory_40_50.convertResource(
+					(org.hl7.fhir.r5.model.CodeSystem) theCodeSystem, ADVISOR_40_50);
 		}
 
 		@Override
@@ -902,7 +1002,8 @@ public class VersionCanonicalizer {
 
 		@Override
 		public ConceptMap conceptMapToCanonical(IBaseResource theConceptMap) {
-			return (ConceptMap) VersionConvertorFactory_40_50.convertResource((org.hl7.fhir.r5.model.ConceptMap) theConceptMap, ADVISOR_40_50);
+			return (ConceptMap) VersionConvertorFactory_40_50.convertResource(
+					(org.hl7.fhir.r5.model.ConceptMap) theConceptMap, ADVISOR_40_50);
 		}
 
 		@Override
@@ -951,17 +1052,13 @@ public class VersionCanonicalizer {
 		}
 
 		@Override
+		public IBaseResource auditEventFromCanonical(AuditEvent theResource) {
+			return VersionConvertorFactory_40_50.convertResource(theResource, ADVISOR_40_50);
+		}
+
+		@Override
 		public IBaseConformance capabilityStatementFromCanonical(CapabilityStatement theResource) {
 			return theResource;
 		}
-
 	}
-
-
 }
-
-
-
-
-
-

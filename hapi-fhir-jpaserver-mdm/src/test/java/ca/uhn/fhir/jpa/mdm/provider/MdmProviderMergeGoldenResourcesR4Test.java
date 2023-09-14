@@ -148,6 +148,7 @@ public class MdmProviderMergeGoldenResourcesR4Test extends BaseProviderR4Test {
 	@Test
 	public void testMergeOnDifferentPartitions() {
 		myPartitionSettings.setPartitioningEnabled(true);
+		myMdmSettings.setSearchAllPartitionForMatch(false);
 		myPartitionLookupSvc.createPartition(new PartitionEntity().setId(1).setName(PARTITION_1), null);
 		RequestPartitionId requestPartitionId1 = RequestPartitionId.fromPartitionId(1);
 		myPartitionLookupSvc.createPartition(new PartitionEntity().setId(2).setName(PARTITION_2), null);

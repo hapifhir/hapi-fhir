@@ -54,7 +54,8 @@ public abstract class QuantitySearchParameterTestCases implements ITestDataBuild
 
 	private IIdType myResourceId;
 
-	protected QuantitySearchParameterTestCases(Support theTestDataBuilder, TestDaoSearch theTestDaoSearch, JpaStorageSettings theStorageSettings) {
+	protected QuantitySearchParameterTestCases(
+			Support theTestDataBuilder, TestDaoSearch theTestDaoSearch, JpaStorageSettings theStorageSettings) {
 		myTestDataBuilder = theTestDataBuilder;
 		myTestDaoSearch = theTestDaoSearch;
 		myStorageSettings = theStorageSettings;
@@ -77,8 +78,9 @@ public abstract class QuantitySearchParameterTestCases implements ITestDataBuild
 			@Test
 			public void noQuantityThrows() {
 				String invalidQtyParam = "|http://another.org";
-				DataFormatException thrown = assertThrows(DataFormatException.class,
-					() -> myTestDaoSearch.searchForIds("/Observation?value-quantity=" + invalidQtyParam));
+				DataFormatException thrown = assertThrows(
+						DataFormatException.class,
+						() -> myTestDaoSearch.searchForIds("/Observation?value-quantity=" + invalidQtyParam));
 
 				assertTrue(thrown.getMessage().startsWith("HAPI-1940: Invalid"));
 				assertTrue(thrown.getMessage().contains(invalidQtyParam));
@@ -86,8 +88,9 @@ public abstract class QuantitySearchParameterTestCases implements ITestDataBuild
 
 			@Test
 			public void invalidPrefixThrows() {
-				DataFormatException thrown = assertThrows(DataFormatException.class,
-					() -> myTestDaoSearch.searchForIds("/Observation?value-quantity=st5.35"));
+				DataFormatException thrown = assertThrows(
+						DataFormatException.class,
+						() -> myTestDaoSearch.searchForIds("/Observation?value-quantity=st5.35"));
 
 				assertEquals("HAPI-1941: Invalid prefix: \"st\"", thrown.getMessage());
 			}
@@ -133,7 +136,6 @@ public abstract class QuantitySearchParameterTestCases implements ITestDataBuild
 				assertFind("when gt", "/Observation?value-quantity=gt0.5");
 				assertNotFind("when eq", "/Observation?value-quantity=gt0.6");
 				assertNotFind("when lt", "/Observation?value-quantity=gt0.7");
-
 			}
 
 			@Test
@@ -193,22 +195,33 @@ public abstract class QuantitySearchParameterTestCases implements ITestDataBuild
 				void ltAndOrClauses() {
 					withObservationWithValueQuantity(0.6);
 
-					assertFind("when lt0.7 and eq (0.5 or 0.6)", "/Observation?value-quantity=lt0.7&value-quantity=0.5,0.6");
+					assertFind(
+							"when lt0.7 and eq (0.5 or 0.6)",
+							"/Observation?value-quantity=lt0.7&value-quantity=0.5,0.6");
 					// make sure it doesn't find everything when using or clauses
-					assertNotFind("when lt0.4 and eq (0.5 or 0.6)", "/Observation?value-quantity=lt0.4&value-quantity=0.5,0.6");
-					assertNotFind("when lt0.7 and eq (0.4 or 0.5)", "/Observation?value-quantity=lt0.7&value-quantity=0.4,0.5");
+					assertNotFind(
+							"when lt0.4 and eq (0.5 or 0.6)",
+							"/Observation?value-quantity=lt0.4&value-quantity=0.5,0.6");
+					assertNotFind(
+							"when lt0.7 and eq (0.4 or 0.5)",
+							"/Observation?value-quantity=lt0.7&value-quantity=0.4,0.5");
 				}
 
 				@Test
 				void gtAndOrClauses() {
 					withObservationWithValueQuantity(0.6);
 
-					assertFind("when gt0.4 and eq (0.5 or 0.6)", "/Observation?value-quantity=gt0.4&value-quantity=0.5,0.6");
-					assertNotFind("when gt0.7 and eq (0.5 or 0.7)", "/Observation?value-quantity=gt0.7&value-quantity=0.5,0.7");
-					assertNotFind("when gt0.3 and eq (0.4 or 0.5)", "/Observation?value-quantity=gt0.3&value-quantity=0.4,0.5");
+					assertFind(
+							"when gt0.4 and eq (0.5 or 0.6)",
+							"/Observation?value-quantity=gt0.4&value-quantity=0.5,0.6");
+					assertNotFind(
+							"when gt0.7 and eq (0.5 or 0.7)",
+							"/Observation?value-quantity=gt0.7&value-quantity=0.5,0.7");
+					assertNotFind(
+							"when gt0.3 and eq (0.4 or 0.5)",
+							"/Observation?value-quantity=gt0.3&value-quantity=0.4,0.5");
 				}
 			}
-
 
 			@Nested
 			public class QualifiedOrClauses {
@@ -277,36 +290,34 @@ public abstract class QuantitySearchParameterTestCases implements ITestDataBuild
 					assertFind("when le0.5 or le0.6", "/Observation?value-quantity=le0.5,le0.6");
 					assertNotFind("when le0.5 or le0.59", "/Observation?value-quantity=le0.5,le0.59");
 				}
-
 			}
 
 			@Test
 			void testMultipleComponentsHandlesAndOr() {
 				IIdType obs1Id = createObservation(
-					withObservationComponent(
-						withCodingAt("code.coding", "http://loinc.org", "8480-6"),
-						withQuantityAtPath("valueQuantity", 107, "http://unitsofmeasure.org", "mm[Hg]")),
-					withObservationComponent(
-						withCodingAt("code.coding", "http://loinc.org", "8462-4"),
-						withQuantityAtPath("valueQuantity", 60, "http://unitsofmeasure.org", "mm[Hg]"))
-				);
-
+						withObservationComponent(
+								withCodingAt("code.coding", "http://loinc.org", "8480-6"),
+								withQuantityAtPath("valueQuantity", 107, "http://unitsofmeasure.org", "mm[Hg]")),
+						withObservationComponent(
+								withCodingAt("code.coding", "http://loinc.org", "8462-4"),
+								withQuantityAtPath("valueQuantity", 60, "http://unitsofmeasure.org", "mm[Hg]")));
 
 				IIdType obs2Id = createObservation(
-					withObservationComponent(
-						withCodingAt("code.coding", "http://loinc.org", "8480-6"),
-						withQuantityAtPath("valueQuantity", 307, "http://unitsofmeasure.org", "mm[Hg]")),
-					withObservationComponent(
-						withCodingAt("code.coding", "http://loinc.org", "8462-4"),
-						withQuantityAtPath("valueQuantity", 260, "http://unitsofmeasure.org", "mm[Hg]"))
-				);
-
+						withObservationComponent(
+								withCodingAt("code.coding", "http://loinc.org", "8480-6"),
+								withQuantityAtPath("valueQuantity", 307, "http://unitsofmeasure.org", "mm[Hg]")),
+						withObservationComponent(
+								withCodingAt("code.coding", "http://loinc.org", "8462-4"),
+								withQuantityAtPath("valueQuantity", 260, "http://unitsofmeasure.org", "mm[Hg]")));
 
 				// andClauses
 				{
 					String theUrl = "/Observation?component-value-quantity=107&component-value-quantity=60";
 					List<String> resourceIds = myTestDaoSearch.searchForIds(theUrl);
-					assertThat("when same component with qtys 107 and 60", resourceIds, hasItem(equalTo(obs1Id.getIdPart())));
+					assertThat(
+							"when same component with qtys 107 and 60",
+							resourceIds,
+							hasItem(equalTo(obs1Id.getIdPart())));
 				}
 				{
 					String theUrl = "/Observation?component-value-quantity=107&component-value-quantity=260";
@@ -314,11 +325,14 @@ public abstract class QuantitySearchParameterTestCases implements ITestDataBuild
 					assertThat("when same component with qtys 107 and 260", resourceIds, empty());
 				}
 
-				//andAndOrClauses
+				// andAndOrClauses
 				{
 					String theUrl = "/Observation?component-value-quantity=107&component-value-quantity=gt50,lt70";
 					List<String> resourceIds = myTestDaoSearch.searchForIds(theUrl);
-					assertThat("when same component with qtys 107 and lt70,gt80", resourceIds, hasItem(equalTo(obs1Id.getIdPart())));
+					assertThat(
+							"when same component with qtys 107 and lt70,gt80",
+							resourceIds,
+							hasItem(equalTo(obs1Id.getIdPart())));
 				}
 				{
 					String theUrl = "/Observation?component-value-quantity=50,70&component-value-quantity=260";
@@ -330,7 +344,10 @@ public abstract class QuantitySearchParameterTestCases implements ITestDataBuild
 				{
 					String theUrl = "/Observation?component-value-quantity=50,60&component-value-quantity=105,107";
 					List<String> resourceIds = myTestDaoSearch.searchForIds(theUrl);
-					assertThat("when same component with qtys 50,60 and 105,107", resourceIds, hasItem(equalTo(obs1Id.getIdPart())));
+					assertThat(
+							"when same component with qtys 50,60 and 105,107",
+							resourceIds,
+							hasItem(equalTo(obs1Id.getIdPart())));
 				}
 				{
 					String theUrl = "/Observation?component-value-quantity=50,60&component-value-quantity=250,260";
@@ -359,14 +376,14 @@ public abstract class QuantitySearchParameterTestCases implements ITestDataBuild
 			@Test
 			public void unitsMustMatch() {
 				myResourceId = createObservation(
-					withObservationComponent(
-						withQuantityAtPath("valueQuantity", 42, null, "cats")),
-					withObservationComponent(
-						withQuantityAtPath("valueQuantity", 18, null, "dogs")));
+						withObservationComponent(withQuantityAtPath("valueQuantity", 42, null, "cats")),
+						withObservationComponent(withQuantityAtPath("valueQuantity", 18, null, "dogs")));
 
 				assertFind("no units matches value", "/Observation?component-value-quantity=42");
 				assertFind("correct units matches value", "/Observation?component-value-quantity=42||cats");
-				assertNotFind("mixed unit from other element in same resource", "/Observation?component-value-quantity=42||dogs");
+				assertNotFind(
+						"mixed unit from other element in same resource",
+						"/Observation?component-value-quantity=42||dogs");
 			}
 		}
 
@@ -403,7 +420,6 @@ public abstract class QuantitySearchParameterTestCases implements ITestDataBuild
 				// GET [base]/Observation?value-quantity=ap5.4 :: 5.4(+/- 10%) :: [4.86 ... 5.94]
 				assertFindIds("when le", Set.of(id2, id3), "/Observation?value-quantity=ap5.4");
 			}
-
 		}
 	}
 
@@ -416,7 +432,7 @@ public abstract class QuantitySearchParameterTestCases implements ITestDataBuild
 		void setUp() {
 			mySavedNomalizedSetting = myStorageSettings.getNormalizedQuantitySearchLevel();
 			myStorageSettings.setNormalizedQuantitySearchLevel(
-				NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_SUPPORTED);
+					NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_SUPPORTED);
 		}
 
 		@AfterEach
@@ -429,7 +445,7 @@ public abstract class QuantitySearchParameterTestCases implements ITestDataBuild
 
 			@Test
 			public void ne() {
-				withObservationWithQuantity(0.06, UCUM_CODESYSTEM_URL, "10*6/L" );
+				withObservationWithQuantity(0.06, UCUM_CODESYSTEM_URL, "10*6/L");
 
 				assertFind("when lt UCUM", "/Observation?value-quantity=ne70|" + UCUM_CODESYSTEM_URL + "|10*3/L");
 				assertFind("when gt UCUM", "/Observation?value-quantity=ne50|" + UCUM_CODESYSTEM_URL + "|10*3/L");
@@ -438,34 +454,45 @@ public abstract class QuantitySearchParameterTestCases implements ITestDataBuild
 
 			@Test
 			public void eq() {
-				withObservationWithQuantity(0.06, UCUM_CODESYSTEM_URL, "10*6/L" );
+				withObservationWithQuantity(0.06, UCUM_CODESYSTEM_URL, "10*6/L");
 
 				assertFind("when eq UCUM 10*3/L ", "/Observation?value-quantity=60|" + UCUM_CODESYSTEM_URL + "|10*3/L");
-				assertFind("when eq UCUM 10*9/L", "/Observation?value-quantity=0.000060|" + UCUM_CODESYSTEM_URL + "|10*9/L");
+				assertFind(
+						"when eq UCUM 10*9/L",
+						"/Observation?value-quantity=0.000060|" + UCUM_CODESYSTEM_URL + "|10*9/L");
 
-				assertNotFind("when ne UCUM 10*3/L", "/Observation?value-quantity=80|" + UCUM_CODESYSTEM_URL + "|10*3/L");
-				assertNotFind("when gt UCUM 10*3/L", "/Observation?value-quantity=50|" + UCUM_CODESYSTEM_URL + "|10*3/L");
-				assertNotFind("when lt UCUM 10*3/L", "/Observation?value-quantity=70|" + UCUM_CODESYSTEM_URL + "|10*3/L");
+				assertNotFind(
+						"when ne UCUM 10*3/L", "/Observation?value-quantity=80|" + UCUM_CODESYSTEM_URL + "|10*3/L");
+				assertNotFind(
+						"when gt UCUM 10*3/L", "/Observation?value-quantity=50|" + UCUM_CODESYSTEM_URL + "|10*3/L");
+				assertNotFind(
+						"when lt UCUM 10*3/L", "/Observation?value-quantity=70|" + UCUM_CODESYSTEM_URL + "|10*3/L");
 
-				assertFind("Units required to match and do", "/Observation?value-quantity=60000|" + UCUM_CODESYSTEM_URL + "|/L");
+				assertFind(
+						"Units required to match and do",
+						"/Observation?value-quantity=60000|" + UCUM_CODESYSTEM_URL + "|/L");
 				// request generates a quantity which value matches the "value-norm", but not the "code-norm"
-				assertNotFind("Units required to match and don't",  "/Observation?value-quantity=6000000000|" + UCUM_CODESYSTEM_URL + "|cm");
+				assertNotFind(
+						"Units required to match and don't",
+						"/Observation?value-quantity=6000000000|" + UCUM_CODESYSTEM_URL + "|cm");
 			}
 
 			@Test
 			public void ap() {
-				withObservationWithQuantity(0.06, UCUM_CODESYSTEM_URL, "10*6/L" );
+				withObservationWithQuantity(0.06, UCUM_CODESYSTEM_URL, "10*6/L");
 
 				assertNotFind("when gt UCUM", "/Observation?value-quantity=ap50|" + UCUM_CODESYSTEM_URL + "|10*3/L");
-				assertFind("when little gt UCUM", "/Observation?value-quantity=ap58|" + UCUM_CODESYSTEM_URL + "|10*3/L");
+				assertFind(
+						"when little gt UCUM", "/Observation?value-quantity=ap58|" + UCUM_CODESYSTEM_URL + "|10*3/L");
 				assertFind("when eq UCUM", "/Observation?value-quantity=ap60|" + UCUM_CODESYSTEM_URL + "|10*3/L");
-				assertFind("when a little lt UCUM", "/Observation?value-quantity=ap63|" + UCUM_CODESYSTEM_URL + "|10*3/L");
+				assertFind(
+						"when a little lt UCUM", "/Observation?value-quantity=ap63|" + UCUM_CODESYSTEM_URL + "|10*3/L");
 				assertNotFind("when lt UCUM", "/Observation?value-quantity=ap71|" + UCUM_CODESYSTEM_URL + "|10*3/L");
 			}
 
 			@Test
 			public void gt() {
-				withObservationWithQuantity(0.06, UCUM_CODESYSTEM_URL, "10*6/L" );
+				withObservationWithQuantity(0.06, UCUM_CODESYSTEM_URL, "10*6/L");
 
 				assertFind("when gt UCUM", "/Observation?value-quantity=gt50|" + UCUM_CODESYSTEM_URL + "|10*3/L");
 				assertNotFind("when eq UCUM", "/Observation?value-quantity=gt60|" + UCUM_CODESYSTEM_URL + "|10*3/L");
@@ -474,7 +501,7 @@ public abstract class QuantitySearchParameterTestCases implements ITestDataBuild
 
 			@Test
 			public void ge() {
-				withObservationWithQuantity(0.06, UCUM_CODESYSTEM_URL, "10*6/L" );
+				withObservationWithQuantity(0.06, UCUM_CODESYSTEM_URL, "10*6/L");
 
 				assertFind("when gt UCUM", "/Observation?value-quantity=ge50|" + UCUM_CODESYSTEM_URL + "|10*3/L");
 				assertFind("when eq UCUM", "/Observation?value-quantity=ge60|" + UCUM_CODESYSTEM_URL + "|10*3/L");
@@ -483,7 +510,7 @@ public abstract class QuantitySearchParameterTestCases implements ITestDataBuild
 
 			@Test
 			public void lt() {
-				withObservationWithQuantity(0.06, UCUM_CODESYSTEM_URL, "10*6/L" );
+				withObservationWithQuantity(0.06, UCUM_CODESYSTEM_URL, "10*6/L");
 
 				assertNotFind("when gt", "/Observation?value-quantity=lt50|" + UCUM_CODESYSTEM_URL + "|10*3/L");
 				assertNotFind("when eq", "/Observation?value-quantity=lt60|" + UCUM_CODESYSTEM_URL + "|10*3/L");
@@ -492,13 +519,12 @@ public abstract class QuantitySearchParameterTestCases implements ITestDataBuild
 
 			@Test
 			public void le() {
-				withObservationWithQuantity(0.06, UCUM_CODESYSTEM_URL, "10*6/L" );
+				withObservationWithQuantity(0.06, UCUM_CODESYSTEM_URL, "10*6/L");
 
 				assertNotFind("when gt", "/Observation?value-quantity=le50|" + UCUM_CODESYSTEM_URL + "|10*3/L");
 				assertFind("when eq", "/Observation?value-quantity=le60|" + UCUM_CODESYSTEM_URL + "|10*3/L");
 				assertFind("when lt", "/Observation?value-quantity=le70|" + UCUM_CODESYSTEM_URL + "|10*3/L");
 			}
-
 
 			/**
 			 * "value-quantity" data is stored in a nested object, so if not queried  properly
@@ -511,11 +537,12 @@ public abstract class QuantitySearchParameterTestCases implements ITestDataBuild
 			 * */
 			@Test
 			void nestedMustCorrelate() {
-				withObservationWithQuantity(0.06, UCUM_CODESYSTEM_URL, "10*6/L" );
-				withObservationWithQuantity(0.02, UCUM_CODESYSTEM_URL, "10*3/L" );
+				withObservationWithQuantity(0.06, UCUM_CODESYSTEM_URL, "10*6/L");
+				withObservationWithQuantity(0.02, UCUM_CODESYSTEM_URL, "10*3/L");
 
-				assertNotFind("when one predicate matches each object", "/Observation" +
-					"?value-quantity=0.06|" + UCUM_CODESYSTEM_URL + "|10*3/L");
+				assertNotFind(
+						"when one predicate matches each object",
+						"/Observation" + "?value-quantity=0.06|" + UCUM_CODESYSTEM_URL + "|10*3/L");
 			}
 
 			@Nested
@@ -523,57 +550,77 @@ public abstract class QuantitySearchParameterTestCases implements ITestDataBuild
 
 				@Test
 				public void storeCelsiusSearchFahrenheit() {
-					withObservationWithQuantity(37.5, UCUM_CODESYSTEM_URL, "Cel" );
+					withObservationWithQuantity(37.5, UCUM_CODESYSTEM_URL, "Cel");
 
-					assertFind(		"when eq UCUM  99.5 degF", "/Observation?value-quantity=99.5|" + UCUM_CODESYSTEM_URL + "|[degF]");
-					assertNotFind(	"when eq UCUM 101.1 degF", "/Observation?value-quantity=101.1|" + UCUM_CODESYSTEM_URL + "|[degF]");
-					assertNotFind(	"when eq UCUM  97.8 degF", "/Observation?value-quantity=97.8|" + UCUM_CODESYSTEM_URL + "|[degF]");
+					assertFind(
+							"when eq UCUM  99.5 degF",
+							"/Observation?value-quantity=99.5|" + UCUM_CODESYSTEM_URL + "|[degF]");
+					assertNotFind(
+							"when eq UCUM 101.1 degF",
+							"/Observation?value-quantity=101.1|" + UCUM_CODESYSTEM_URL + "|[degF]");
+					assertNotFind(
+							"when eq UCUM  97.8 degF",
+							"/Observation?value-quantity=97.8|" + UCUM_CODESYSTEM_URL + "|[degF]");
 				}
 
 				@Test
 				public void storeFahrenheitSearchCelsius() {
-					withObservationWithQuantity(99.5, UCUM_CODESYSTEM_URL, "[degF]" );
+					withObservationWithQuantity(99.5, UCUM_CODESYSTEM_URL, "[degF]");
 
-					assertFind(		"when eq UCUM 37.5 Cel", "/Observation?value-quantity=37.5|" + UCUM_CODESYSTEM_URL + "|Cel");
-					assertNotFind(	"when eq UCUM 37.3 Cel", "/Observation?value-quantity=37.3|" + UCUM_CODESYSTEM_URL + "|Cel");
-					assertNotFind(	"when eq UCUM 37.7 Cel", "/Observation?value-quantity=37.7|" + UCUM_CODESYSTEM_URL + "|Cel");
+					assertFind(
+							"when eq UCUM 37.5 Cel",
+							"/Observation?value-quantity=37.5|" + UCUM_CODESYSTEM_URL + "|Cel");
+					assertNotFind(
+							"when eq UCUM 37.3 Cel",
+							"/Observation?value-quantity=37.3|" + UCUM_CODESYSTEM_URL + "|Cel");
+					assertNotFind(
+							"when eq UCUM 37.7 Cel",
+							"/Observation?value-quantity=37.7|" + UCUM_CODESYSTEM_URL + "|Cel");
 				}
 			}
-
 		}
-
 
 		@Nested
 		public class CombinedQueries {
 
 			@Test
 			void gtAndLt() {
-				withObservationWithQuantity(0.06, UCUM_CODESYSTEM_URL, "10*6/L" );
+				withObservationWithQuantity(0.06, UCUM_CODESYSTEM_URL, "10*6/L");
 
-				assertFind("when gt 50 and lt 70", "/Observation" +
-					"?value-quantity=gt50|" + UCUM_CODESYSTEM_URL + "|10*3/L" +
-					"&value-quantity=lt70|" + UCUM_CODESYSTEM_URL + "|10*3/L");
+				assertFind(
+						"when gt 50 and lt 70",
+						"/Observation" + "?value-quantity=gt50|"
+								+ UCUM_CODESYSTEM_URL + "|10*3/L" + "&value-quantity=lt70|"
+								+ UCUM_CODESYSTEM_URL + "|10*3/L");
 
-				assertNotFind("when gt50 and lt60", "/Observation" +
-					"?value-quantity=gt50|" + UCUM_CODESYSTEM_URL + "|10*3/L" +
-					"&value-quantity=lt60|" + UCUM_CODESYSTEM_URL + "|10*3/L");
+				assertNotFind(
+						"when gt50 and lt60",
+						"/Observation" + "?value-quantity=gt50|"
+								+ UCUM_CODESYSTEM_URL + "|10*3/L" + "&value-quantity=lt60|"
+								+ UCUM_CODESYSTEM_URL + "|10*3/L");
 
-				assertNotFind("when gt65 and lt70", "/Observation" +
-					"?value-quantity=gt65|" + UCUM_CODESYSTEM_URL + "|10*3/L" +
-					"&value-quantity=lt70|" + UCUM_CODESYSTEM_URL + "|10*3/L");
+				assertNotFind(
+						"when gt65 and lt70",
+						"/Observation" + "?value-quantity=gt65|"
+								+ UCUM_CODESYSTEM_URL + "|10*3/L" + "&value-quantity=lt70|"
+								+ UCUM_CODESYSTEM_URL + "|10*3/L");
 
-				assertNotFind("when gt 70 and lt 50", "/Observation" +
-					"?value-quantity=gt70|" + UCUM_CODESYSTEM_URL + "|10*3/L" +
-					"&value-quantity=lt50|" + UCUM_CODESYSTEM_URL + "|10*3/L");
+				assertNotFind(
+						"when gt 70 and lt 50",
+						"/Observation" + "?value-quantity=gt70|"
+								+ UCUM_CODESYSTEM_URL + "|10*3/L" + "&value-quantity=lt50|"
+								+ UCUM_CODESYSTEM_URL + "|10*3/L");
 			}
 
 			@Test
 			void gtAndLtWithMixedUnits() {
-				withObservationWithQuantity(0.06, UCUM_CODESYSTEM_URL, "10*6/L" );
+				withObservationWithQuantity(0.06, UCUM_CODESYSTEM_URL, "10*6/L");
 
-				assertFind("when gt 50|10*3/L and lt 70|10*9/L", "/Observation" +
-					"?value-quantity=gt50|" + UCUM_CODESYSTEM_URL + "|10*3/L" +
-					"&value-quantity=lt0.000070|" + UCUM_CODESYSTEM_URL + "|10*9/L");
+				assertFind(
+						"when gt 50|10*3/L and lt 70|10*9/L",
+						"/Observation" + "?value-quantity=gt50|"
+								+ UCUM_CODESYSTEM_URL + "|10*3/L" + "&value-quantity=lt0.000070|"
+								+ UCUM_CODESYSTEM_URL + "|10*9/L");
 			}
 
 			@Test
@@ -583,17 +630,20 @@ public abstract class QuantitySearchParameterTestCases implements ITestDataBuild
 
 				// this configuration must generate a combo-value-quantity entry with both quantity objects
 				myResourceId = createObservation(List.of(
-					withQuantityAtPath("valueQuantity", 0.02, UCUM_CODESYSTEM_URL, "10*6/L"),
-					withQuantityAtPath("component.valueQuantity", 0.06, UCUM_CODESYSTEM_URL, "10*6/L")
-				));
+						withQuantityAtPath("valueQuantity", 0.02, UCUM_CODESYSTEM_URL, "10*6/L"),
+						withQuantityAtPath("component.valueQuantity", 0.06, UCUM_CODESYSTEM_URL, "10*6/L")));
 
 				//	myLogbackLevelOverrideExtension.resetLevel(DaoTestDataBuilder.class);
 
 				assertFind("by value", "Observation?value-quantity=0.02|" + UCUM_CODESYSTEM_URL + "|10*6/L");
-				assertFind("by component value", "Observation?component-value-quantity=0.06|" + UCUM_CODESYSTEM_URL + "|10*6/L");
+				assertFind(
+						"by component value",
+						"Observation?component-value-quantity=0.06|" + UCUM_CODESYSTEM_URL + "|10*6/L");
 
 				assertNotFind("by value", "Observation?value-quantity=0.06|" + UCUM_CODESYSTEM_URL + "|10*6/L");
-				assertNotFind("by component value", "Observation?component-value-quantity=0.02|" + UCUM_CODESYSTEM_URL + "|10*6/L");
+				assertNotFind(
+						"by component value",
+						"Observation?component-value-quantity=0.02|" + UCUM_CODESYSTEM_URL + "|10*6/L");
 			}
 		}
 
@@ -605,16 +655,18 @@ public abstract class QuantitySearchParameterTestCases implements ITestDataBuild
 
 			@Test
 			public void sortByNumeric() {
-				String idAlpha1 = withObservationWithQuantity(0.06, UCUM_CODESYSTEM_URL, "10*6/L" ).getIdPart();   		// 60,000
-				String idAlpha2 = withObservationWithQuantity(50, UCUM_CODESYSTEM_URL, "10*3/L" ).getIdPart();			// 50,000
-				String idAlpha3 = withObservationWithQuantity(0.000070, UCUM_CODESYSTEM_URL, "10*9/L" ).getIdPart();	// 70_000
+				String idAlpha1 = withObservationWithQuantity(0.06, UCUM_CODESYSTEM_URL, "10*6/L")
+						.getIdPart(); // 60,000
+				String idAlpha2 = withObservationWithQuantity(50, UCUM_CODESYSTEM_URL, "10*3/L")
+						.getIdPart(); // 50,000
+				String idAlpha3 = withObservationWithQuantity(0.000070, UCUM_CODESYSTEM_URL, "10*9/L")
+						.getIdPart(); // 70_000
 
 				// this search is not freetext because there is no freetext-known parameter name
 				List<String> allIds = myTestDaoSearch.searchForIds("/Observation?_sort=value-quantity");
 				assertThat(allIds, contains(idAlpha2, idAlpha1, idAlpha3));
 			}
 		}
-
 	}
 
 	private void assertFind(String theMessage, String theUrl) {
@@ -628,18 +680,16 @@ public abstract class QuantitySearchParameterTestCases implements ITestDataBuild
 	}
 
 	private IIdType withObservationWithQuantity(double theValue, String theSystem, String theCode) {
-		myResourceId = createObservation(
-			withQuantityAtPath("valueQuantity", theValue, theSystem, theCode)
-		);
+		myResourceId = createObservation(withQuantityAtPath("valueQuantity", theValue, theSystem, theCode));
 		return myResourceId;
 	}
 
 	private IIdType withObservationWithValueQuantity(double theValue) {
-		myResourceId = createObservation(List.of(withElementAt("valueQuantity",
-			withPrimitiveAttribute("value", theValue),
-			withPrimitiveAttribute("system", UCUM_CODESYSTEM_URL),
-			withPrimitiveAttribute("code", "mm[Hg]")
-		)));
+		myResourceId = createObservation(List.of(withElementAt(
+				"valueQuantity",
+				withPrimitiveAttribute("value", theValue),
+				withPrimitiveAttribute("system", UCUM_CODESYSTEM_URL),
+				withPrimitiveAttribute("code", "mm[Hg]"))));
 		return myResourceId;
 	}
 
@@ -647,5 +697,4 @@ public abstract class QuantitySearchParameterTestCases implements ITestDataBuild
 		List<String> resourceIds = myTestDaoSearch.searchForIds(theUrl);
 		assertEquals(theResourceIds, new HashSet<>(resourceIds), theMessage);
 	}
-
 }

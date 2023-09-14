@@ -40,7 +40,7 @@ class Batch2JobHelperTest {
 
 	@Test
 	void awaitJobCompletion_inProgress_callsMaintenance() {
-		when(myJobCoordinator.getInstance(JOB_ID)).thenReturn(ourIncompleteInstance, ourCompleteInstance);
+		when(myJobCoordinator.getInstance(JOB_ID)).thenReturn(ourIncompleteInstance, ourIncompleteInstance, ourIncompleteInstance, ourCompleteInstance);
 
 		myBatch2JobHelper.awaitJobCompletion(JOB_ID);
 		verify(myJobMaintenanceService, times(1)).runMaintenancePass();

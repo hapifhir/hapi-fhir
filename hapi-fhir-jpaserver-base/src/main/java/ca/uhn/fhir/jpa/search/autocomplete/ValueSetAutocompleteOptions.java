@@ -67,36 +67,41 @@ public class ValueSetAutocompleteOptions {
 	}
 
 	public static ValueSetAutocompleteOptions validateAndParseOptions(
-		JpaStorageSettings theStorageSettings,
-		IPrimitiveType<String> theContext,
-		IPrimitiveType<String> theFilter,
-		IPrimitiveType<Integer> theCount,
-		IIdType theId,
-		IPrimitiveType<String> theUrl,
-		IBaseResource theValueSet)
-	{
+			JpaStorageSettings theStorageSettings,
+			IPrimitiveType<String> theContext,
+			IPrimitiveType<String> theFilter,
+			IPrimitiveType<Integer> theCount,
+			IIdType theId,
+			IPrimitiveType<String> theUrl,
+			IBaseResource theValueSet) {
 		boolean haveId = theId != null && theId.hasIdPart();
 		boolean haveIdentifier = theUrl != null && isNotBlank(theUrl.getValue());
 		boolean haveValueSet = theValueSet != null && !theValueSet.isEmpty();
 		if (haveId || haveIdentifier || haveValueSet) {
-			throw new InvalidRequestException(Msg.code(2020) + "$expand with contexDirection='existing' is only supported at the type leve. It is not supported at instance level, with a url specified, or with a ValueSet .");
+			throw new InvalidRequestException(
+					Msg.code(2020)
+							+ "$expand with contexDirection='existing' is only supported at the type leve. It is not supported at instance level, with a url specified, or with a ValueSet .");
 		}
 		if (!theStorageSettings.isAdvancedHSearchIndexing()) {
-			throw new InvalidRequestException(Msg.code(2022) + "$expand with contexDirection='existing' requires Extended Lucene Indexing.");
+			throw new InvalidRequestException(
+					Msg.code(2022) + "$expand with contexDirection='existing' requires Extended Lucene Indexing.");
 		}
 		if (theContext == null || theContext.isEmpty()) {
-			throw new InvalidRequestException(Msg.code(2021) + "$expand with contexDirection='existing' requires a context");
+			throw new InvalidRequestException(
+					Msg.code(2021) + "$expand with contexDirection='existing' requires a context");
 		}
 		String filter = theFilter == null ? null : theFilter.getValue();
-		ValueSetAutocompleteOptions result = new ValueSetAutocompleteOptions(theContext.getValue(), filter, IPrimitiveType.toValueOrNull(theCount));
+		ValueSetAutocompleteOptions result =
+				new ValueSetAutocompleteOptions(theContext.getValue(), filter, IPrimitiveType.toValueOrNull(theCount));
 
 		if (!ourSupportedModifiers.contains(defaultString(result.getSearchParamModifier()))) {
-			throw new InvalidRequestException(Msg.code(2069) + "$expand with contexDirection='existing' only supports plain token search, or the :text modifier.  Received " + result.getSearchParamModifier());
+			throw new InvalidRequestException(Msg.code(2069)
+					+ "$expand with contexDirection='existing' only supports plain token search, or the :text modifier.  Received "
+					+ result.getSearchParamModifier());
 		}
 
 		return result;
 	}
-
 
 	public String getResourceType() {
 		return myResourceType;

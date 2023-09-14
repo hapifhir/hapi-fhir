@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 5112
+title: "Returns better diagnostics message to expunge requests that failed due to unfinished batch deletion"

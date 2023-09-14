@@ -54,20 +54,24 @@ public class ImportCsvToConceptMapCommand extends AbstractImportExportCsvConcept
 	public static final String COMMAND = "import-csv-to-conceptmap";
 
 	// TODO: Don't use qualified names for loggers in HAPI CLI.
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ImportCsvToConceptMapCommand.class);
+	private static final org.slf4j.Logger ourLog =
+			org.slf4j.LoggerFactory.getLogger(ImportCsvToConceptMapCommand.class);
 
 	protected static final String SOURCE_VALUE_SET_PARAM = "i";
 	protected static final String SOURCE_VALUE_SET_PARAM_LONGOPT = "input";
 	protected static final String SOURCE_VALUE_SET_PARAM_NAME = "input";
-	protected static final String SOURCE_VALUE_SET_PARAM_DESC = "The source value set of the ConceptMap to be imported (i.e. ConceptMap.sourceUri).";
+	protected static final String SOURCE_VALUE_SET_PARAM_DESC =
+			"The source value set of the ConceptMap to be imported (i.e. ConceptMap.sourceUri).";
 	protected static final String TARGET_VALUE_SET_PARAM = "o";
 	protected static final String TARGET_VALUE_SET_PARAM_LONGOPT = "output";
 	protected static final String TARGET_VALUE_SET_PARAM_NAME = "output";
-	protected static final String TARGET_VALUE_SET_PARAM_DESC = "The target value set of the ConceptMap to be imported (i.e. ConceptMap.targetUri).";
+	protected static final String TARGET_VALUE_SET_PARAM_DESC =
+			"The target value set of the ConceptMap to be imported (i.e. ConceptMap.targetUri).";
 	protected static final String CONCEPTMAP_STATUS_PARAM = "s";
 	protected static final String CONCEPTMAP_STATUS_PARAM_LONGOPT = "status";
 	protected static final String CONCEPTMAP_STATUS_PARAM_NAME = "status";
-	protected static final String CONCEPTMAP_STATUS_PARAM_DESC = "The status of the ConceptMap resource to be imported/exported (i.e. ConceptMap.status).";
+	protected static final String CONCEPTMAP_STATUS_PARAM_DESC =
+			"The status of the ConceptMap resource to be imported/exported (i.e. ConceptMap.status).";
 
 	protected String sourceValueSet;
 	protected String targetValueSet;
@@ -90,11 +94,31 @@ public class ImportCsvToConceptMapCommand extends AbstractImportExportCsvConcept
 	public Options getOptions() {
 		Options options = super.getOptions();
 
-		addRequiredOption(options, CONCEPTMAP_URL_PARAM, CONCEPTMAP_URL_PARAM_LONGOPT, CONCEPTMAP_URL_PARAM_NAME, CONCEPTMAP_URL_PARAM_DESC);
-		addRequiredOption(options, CONCEPTMAP_STATUS_PARAM, CONCEPTMAP_STATUS_PARAM_LONGOPT, CONCEPTMAP_STATUS_PARAM_NAME, CONCEPTMAP_STATUS_PARAM_DESC);
+		addRequiredOption(
+				options,
+				CONCEPTMAP_URL_PARAM,
+				CONCEPTMAP_URL_PARAM_LONGOPT,
+				CONCEPTMAP_URL_PARAM_NAME,
+				CONCEPTMAP_URL_PARAM_DESC);
+		addRequiredOption(
+				options,
+				CONCEPTMAP_STATUS_PARAM,
+				CONCEPTMAP_STATUS_PARAM_LONGOPT,
+				CONCEPTMAP_STATUS_PARAM_NAME,
+				CONCEPTMAP_STATUS_PARAM_DESC);
 		// </editor-fold desc="Additional parameters.">
-		addOptionalOption(options, SOURCE_VALUE_SET_PARAM, SOURCE_VALUE_SET_PARAM_LONGOPT, SOURCE_VALUE_SET_PARAM_NAME, SOURCE_VALUE_SET_PARAM_DESC);
-		addOptionalOption(options, TARGET_VALUE_SET_PARAM, TARGET_VALUE_SET_PARAM_LONGOPT, TARGET_VALUE_SET_PARAM_NAME, TARGET_VALUE_SET_PARAM_DESC);
+		addOptionalOption(
+				options,
+				SOURCE_VALUE_SET_PARAM,
+				SOURCE_VALUE_SET_PARAM_LONGOPT,
+				SOURCE_VALUE_SET_PARAM_NAME,
+				SOURCE_VALUE_SET_PARAM_DESC);
+		addOptionalOption(
+				options,
+				TARGET_VALUE_SET_PARAM,
+				TARGET_VALUE_SET_PARAM_LONGOPT,
+				TARGET_VALUE_SET_PARAM_NAME,
+				TARGET_VALUE_SET_PARAM_DESC);
 		// </editor-fold>
 		addRequiredOption(options, FILE_PARAM, FILE_PARAM_LONGOPT, FILE_PARAM_NAME, FILE_PARAM_DESC);
 
@@ -132,41 +156,44 @@ public class ImportCsvToConceptMapCommand extends AbstractImportExportCsvConcept
 		if (fhirVersion == FhirVersionEnum.DSTU3) {
 			org.hl7.fhir.dstu3.model.ConceptMap conceptMap = convertCsvToConceptMapDstu3();
 
-			ourLog.info("Searching for existing ConceptMap with specified URL (i.e. ConceptMap.url): {}", conceptMapUrl);
-			MethodOutcome methodOutcome = client
-				.update()
-				.resource(conceptMap)
-				.conditional()
-				.where(org.hl7.fhir.dstu3.model.ConceptMap.URL.matches().value(conceptMapUrl))
-				.execute();
+			ourLog.info(
+					"Searching for existing ConceptMap with specified URL (i.e. ConceptMap.url): {}", conceptMapUrl);
+			MethodOutcome methodOutcome = client.update()
+					.resource(conceptMap)
+					.conditional()
+					.where(org.hl7.fhir.dstu3.model.ConceptMap.URL.matches().value(conceptMapUrl))
+					.execute();
 
 			if (Boolean.TRUE.equals(methodOutcome.getCreated())) {
 				ourLog.info("Created new ConceptMap: {}", methodOutcome.getId().getValue());
 			} else {
-				ourLog.info("Updated existing ConceptMap: {}", methodOutcome.getId().getValue());
+				ourLog.info(
+						"Updated existing ConceptMap: {}", methodOutcome.getId().getValue());
 			}
 		} else if (fhirVersion == FhirVersionEnum.R4) {
 			ConceptMap conceptMap = convertCsvToConceptMapR4();
 
-			ourLog.info("Searching for existing ConceptMap with specified URL (i.e. ConceptMap.url): {}", conceptMapUrl);
-			MethodOutcome methodOutcome = client
-				.update()
-				.resource(conceptMap)
-				.conditional()
-				.where(ConceptMap.URL.matches().value(conceptMapUrl))
-				.execute();
+			ourLog.info(
+					"Searching for existing ConceptMap with specified URL (i.e. ConceptMap.url): {}", conceptMapUrl);
+			MethodOutcome methodOutcome = client.update()
+					.resource(conceptMap)
+					.conditional()
+					.where(ConceptMap.URL.matches().value(conceptMapUrl))
+					.execute();
 
 			if (Boolean.TRUE.equals(methodOutcome.getCreated())) {
 				ourLog.info("Created new ConceptMap: {}", methodOutcome.getId().getValue());
 			} else {
-				ourLog.info("Updated existing ConceptMap: {}", methodOutcome.getId().getValue());
+				ourLog.info(
+						"Updated existing ConceptMap: {}", methodOutcome.getId().getValue());
 			}
 		}
 	}
 
 	private org.hl7.fhir.dstu3.model.ConceptMap convertCsvToConceptMapDstu3() throws ExecutionException {
 		try {
-			return (org.hl7.fhir.dstu3.model.ConceptMap) VersionConvertorFactory_30_40.convertResource(convertCsvToConceptMapR4());
+			return (org.hl7.fhir.dstu3.model.ConceptMap)
+					VersionConvertorFactory_30_40.convertResource(convertCsvToConceptMapR4());
 		} catch (FHIRException fe) {
 			throw new ExecutionException(Msg.code(1604), fe);
 		}
@@ -175,19 +202,16 @@ public class ImportCsvToConceptMapCommand extends AbstractImportExportCsvConcept
 	private ConceptMap convertCsvToConceptMapR4() throws ExecutionException {
 		ourLog.info("Converting CSV to ConceptMap...");
 		ConceptMap retVal = new ConceptMap();
-		try (
-			Reader reader = getBufferedReader();
-			CSVParser csvParser = new CSVParser(
-				reader,
-				CSVFormat
-					.DEFAULT
-					.withRecordSeparator("\n")
-					.withHeader(Header.class)
-					.withFirstRecordAsHeader()
-					.withIgnoreHeaderCase()
-					.withIgnoreEmptyLines()
-					.withTrim())
-		) {
+		try (Reader reader = getBufferedReader();
+				CSVParser csvParser = new CSVParser(
+						reader,
+						CSVFormat.DEFAULT
+								.withRecordSeparator("\n")
+								.withHeader(Header.class)
+								.withFirstRecordAsHeader()
+								.withIgnoreHeaderCase()
+								.withIgnoreEmptyLines()
+								.withTrim())) {
 			retVal.setUrl(conceptMapUrl);
 			retVal.setStatus(Enumerations.PublicationStatus.fromCode(status));
 
@@ -201,13 +225,19 @@ public class ImportCsvToConceptMapCommand extends AbstractImportExportCsvConcept
 
 			TemporaryConceptMapGroup temporaryConceptMapGroup;
 			TemporaryConceptMapGroupElement temporaryConceptMapGroupElement;
-			Map<TemporaryConceptMapGroup, Map<TemporaryConceptMapGroupElement, Set<TemporaryConceptMapGroupElementTarget>>> groupMap = parseCsvRecords(csvParser);
+			Map<
+							TemporaryConceptMapGroup,
+							Map<TemporaryConceptMapGroupElement, Set<TemporaryConceptMapGroupElementTarget>>>
+					groupMap = parseCsvRecords(csvParser);
 			Map<TemporaryConceptMapGroupElement, Set<TemporaryConceptMapGroupElementTarget>> elementMap;
 			Set<TemporaryConceptMapGroupElementTarget> targetSet;
 			ConceptMapGroupComponent conceptMapGroupComponent;
 			SourceElementComponent sourceElementComponent;
 			TargetElementComponent targetElementComponent;
-			for (Map.Entry<TemporaryConceptMapGroup, Map<TemporaryConceptMapGroupElement, Set<TemporaryConceptMapGroupElementTarget>>> groupEntry : groupMap.entrySet()) {
+			for (Map.Entry<
+							TemporaryConceptMapGroup,
+							Map<TemporaryConceptMapGroupElement, Set<TemporaryConceptMapGroupElementTarget>>>
+					groupEntry : groupMap.entrySet()) {
 
 				hasElements = false;
 				hasTargets = false;
@@ -232,7 +262,8 @@ public class ImportCsvToConceptMapCommand extends AbstractImportExportCsvConcept
 				}
 
 				elementMap = groupEntry.getValue();
-				for (Map.Entry<TemporaryConceptMapGroupElement, Set<TemporaryConceptMapGroupElementTarget>> elementEntry : elementMap.entrySet()) {
+				for (Map.Entry<TemporaryConceptMapGroupElement, Set<TemporaryConceptMapGroupElementTarget>>
+						elementEntry : elementMap.entrySet()) {
 
 					temporaryConceptMapGroupElement = elementEntry.getKey();
 					sourceElementComponent = new SourceElementComponent();
@@ -260,7 +291,8 @@ public class ImportCsvToConceptMapCommand extends AbstractImportExportCsvConcept
 
 						if (temporaryConceptMapGroupElementTarget.hasEquivalence()) {
 							try {
-								targetElementComponent.setEquivalence(Enumerations.ConceptMapEquivalence.fromCode(temporaryConceptMapGroupElementTarget.getEquivalence()));
+								targetElementComponent.setEquivalence(Enumerations.ConceptMapEquivalence.fromCode(
+										temporaryConceptMapGroupElementTarget.getEquivalence()));
 							} catch (FHIRException fe) {
 								throw new ExecutionException(Msg.code(1605), fe);
 							}
@@ -294,8 +326,12 @@ public class ImportCsvToConceptMapCommand extends AbstractImportExportCsvConcept
 		return retVal;
 	}
 
-	private Map<TemporaryConceptMapGroup, Map<TemporaryConceptMapGroupElement, Set<TemporaryConceptMapGroupElementTarget>>> parseCsvRecords(CSVParser theCsvParser) {
-		Map<TemporaryConceptMapGroup, Map<TemporaryConceptMapGroupElement, Set<TemporaryConceptMapGroupElementTarget>>> retVal = new LinkedHashMap<>();
+	private Map<
+					TemporaryConceptMapGroup,
+					Map<TemporaryConceptMapGroupElement, Set<TemporaryConceptMapGroupElementTarget>>>
+			parseCsvRecords(CSVParser theCsvParser) {
+		Map<TemporaryConceptMapGroup, Map<TemporaryConceptMapGroupElement, Set<TemporaryConceptMapGroupElementTarget>>>
+				retVal = new LinkedHashMap<>();
 
 		TemporaryConceptMapGroup group;
 		TemporaryConceptMapGroupElement element;
@@ -306,20 +342,20 @@ public class ImportCsvToConceptMapCommand extends AbstractImportExportCsvConcept
 		for (CSVRecord csvRecord : theCsvParser) {
 
 			group = new TemporaryConceptMapGroup(
-				defaultString(csvRecord.get(Header.SOURCE_CODE_SYSTEM)),
-				defaultString(csvRecord.get(Header.SOURCE_CODE_SYSTEM_VERSION)),
-				defaultString(csvRecord.get(Header.TARGET_CODE_SYSTEM)),
-				defaultString(csvRecord.get(Header.TARGET_CODE_SYSTEM_VERSION)));
+					defaultString(csvRecord.get(Header.SOURCE_CODE_SYSTEM)),
+					defaultString(csvRecord.get(Header.SOURCE_CODE_SYSTEM_VERSION)),
+					defaultString(csvRecord.get(Header.TARGET_CODE_SYSTEM)),
+					defaultString(csvRecord.get(Header.TARGET_CODE_SYSTEM_VERSION)));
 
 			element = new TemporaryConceptMapGroupElement(
-				defaultString(csvRecord.get(Header.SOURCE_CODE)),
-				defaultString(csvRecord.get(Header.SOURCE_DISPLAY)));
+					defaultString(csvRecord.get(Header.SOURCE_CODE)),
+					defaultString(csvRecord.get(Header.SOURCE_DISPLAY)));
 
 			target = new TemporaryConceptMapGroupElementTarget(
-				defaultString(csvRecord.get(Header.TARGET_CODE)),
-				defaultString(csvRecord.get(Header.TARGET_DISPLAY)),
-				defaultString(csvRecord.get(Header.EQUIVALENCE)),
-				defaultString(csvRecord.get(Header.COMMENT)));
+					defaultString(csvRecord.get(Header.TARGET_CODE)),
+					defaultString(csvRecord.get(Header.TARGET_DISPLAY)),
+					defaultString(csvRecord.get(Header.EQUIVALENCE)),
+					defaultString(csvRecord.get(Header.COMMENT)));
 
 			if (!retVal.containsKey(group)) {
 				targetSet = new LinkedHashSet<>();

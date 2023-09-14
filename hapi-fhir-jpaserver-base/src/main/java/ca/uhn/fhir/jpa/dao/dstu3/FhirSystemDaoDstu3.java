@@ -27,9 +27,9 @@ import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Meta;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 
-import javax.persistence.TypedQuery;
 import java.util.Collection;
 import java.util.List;
+import javax.persistence.TypedQuery;
 
 public class FhirSystemDaoDstu3 extends BaseHapiFhirSystemDao<Bundle, Meta> {
 
@@ -50,10 +50,16 @@ public class FhirSystemDaoDstu3 extends BaseHapiFhirSystemDao<Bundle, Meta> {
 					retVal.addProfile(next.getCode());
 					break;
 				case SECURITY_LABEL:
-					retVal.addSecurity().setSystem(next.getSystem()).setCode(next.getCode()).setDisplay(next.getDisplay());
+					retVal.addSecurity()
+							.setSystem(next.getSystem())
+							.setCode(next.getCode())
+							.setDisplay(next.getDisplay());
 					break;
 				case TAG:
-					retVal.addTag().setSystem(next.getSystem()).setCode(next.getCode()).setDisplay(next.getDisplay());
+					retVal.addTag()
+							.setSystem(next.getSystem())
+							.setCode(next.getCode())
+							.setDisplay(next.getDisplay());
 					break;
 			}
 		}
@@ -64,6 +70,4 @@ public class FhirSystemDaoDstu3 extends BaseHapiFhirSystemDao<Bundle, Meta> {
 	public IBaseBundle processMessage(RequestDetails theRequestDetails, IBaseBundle theMessage) {
 		return JpaResourceDao.throwProcessMessageNotImplemented();
 	}
-
-
 }

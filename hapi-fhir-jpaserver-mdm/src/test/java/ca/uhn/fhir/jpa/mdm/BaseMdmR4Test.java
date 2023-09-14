@@ -11,6 +11,7 @@ import ca.uhn.fhir.jpa.mdm.config.MdmConsumerConfig;
 import ca.uhn.fhir.jpa.mdm.config.MdmSubmitterConfig;
 import ca.uhn.fhir.jpa.mdm.config.TestMdmConfigR4;
 import ca.uhn.fhir.jpa.mdm.dao.MdmLinkDaoSvc;
+import ca.uhn.fhir.jpa.mdm.helper.MdmLinkHelper;
 import ca.uhn.fhir.jpa.mdm.matcher.IsLinkedTo;
 import ca.uhn.fhir.jpa.mdm.matcher.IsMatchedToAGoldenResource;
 import ca.uhn.fhir.jpa.mdm.matcher.IsPossibleDuplicateOf;
@@ -21,12 +22,12 @@ import ca.uhn.fhir.jpa.mdm.svc.MdmMatchLinkSvc;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.partition.IPartitionLookupSvc;
-import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.registry.SearchParamRegistryImpl;
 import ca.uhn.fhir.jpa.subscription.match.config.SubscriptionProcessorConfig;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.mdm.api.IMdmLink;
+import ca.uhn.fhir.mdm.api.IMdmLinkUpdaterSvc;
 import ca.uhn.fhir.mdm.api.MdmConstants;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
@@ -39,22 +40,16 @@ import ca.uhn.fhir.mdm.util.MdmResourceUtil;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.StringUtils;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r4.model.CodeableConcept;
-import org.hl7.fhir.r4.model.ContactPoint;
-import org.hl7.fhir.r4.model.DateType;
-import org.hl7.fhir.r4.model.Medication;
-import org.hl7.fhir.r4.model.Observation;
-import org.hl7.fhir.r4.model.Organization;
-import org.hl7.fhir.r4.model.Patient;
-import org.hl7.fhir.r4.model.Practitioner;
-import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.*;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -76,7 +71,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.slf4j.LoggerFactory.getLogger;
 
 @ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = {MdmSubmitterConfig.class, MdmConsumerConfig.class, TestMdmConfigR4.class, SubscriptionProcessorConfig.class})
+@ContextConfiguration(classes = {
+	MdmSubmitterConfig.class,
+	MdmConsumerConfig.class,
+	TestMdmConfigR4.class,
+	SubscriptionProcessorConfig.class
+})
 abstract public class BaseMdmR4Test extends BaseJpaR4Test {
 
 	protected static final String PARTITION_1 = "PART-1";
@@ -128,13 +128,18 @@ abstract public class BaseMdmR4Test extends BaseJpaR4Test {
 	@Autowired
 	SearchParamRegistryImpl mySearchParamRegistry;
 	@Autowired
-	private IInterceptorBroadcaster myInterceptorBroadcaster;
+	protected IInterceptorBroadcaster myInterceptorBroadcaster;
 	@Autowired
 	private DaoRegistry myDaoRegistry;
 	@Autowired
 	protected PartitionSettings myPartitionSettings;
 	@Autowired
 	protected IPartitionLookupSvc myPartitionLookupSvc;
+
+	@Autowired
+	protected IMdmLinkUpdaterSvc myMdmLinkUpdaterSvc;
+	@Autowired
+	protected MdmLinkHelper myLinkHelper;
 
 	@BeforeEach
 	public void beforeSetRequestDetails() {
@@ -628,6 +633,14 @@ abstract public class BaseMdmR4Test extends BaseJpaR4Test {
 		return retval;
 	}
 
+	@Nonnull
+	protected MdmTransactionContext buildUpdateResourceMdmTransactionContext() {
+		MdmTransactionContext retval = new MdmTransactionContext();
+		retval.setResourceType("Patient");
+		retval.setRestOperation(MdmTransactionContext.OperationType.UPDATE_RESOURCE);
+		return retval;
+	}
+
 	protected MdmLink createGoldenPatientAndLinkToSourcePatient(Long thePatientPid, MdmMatchResultEnum theMdmMatchResultEnum) {
 		Patient patient = createPatient();
 
@@ -656,5 +669,24 @@ abstract public class BaseMdmR4Test extends BaseJpaR4Test {
 		mdmLink.setHadToCreateNewGoldenResource(theLinkCreatedNewResource);
 
 		return myMdmLinkDao.save(mdmLink);
+	}
+
+	protected IBaseResource createResourceWithId(IBaseResource theResource, String theId, Enumerations.ResourceType theResourceType){
+		theResource.setId(theId);
+		DaoMethodOutcome daoMethodOutcome = null;
+		switch (theResourceType){
+			case PATIENT:
+				((Patient) theResource).setActive(true);
+				daoMethodOutcome = myPatientDao.update((Patient) theResource, new SystemRequestDetails());
+				break;
+			case PRACTITIONER:
+				((Practitioner) theResource).setActive(true);
+				daoMethodOutcome = myPractitionerDao.update((Practitioner) theResource, new SystemRequestDetails());
+				break;
+			default:
+				throw new NotImplementedException("This method haven't been setup for: " + theResourceType);
+		}
+		theResource.setId(daoMethodOutcome.getId());
+		return theResource;
 	}
 }

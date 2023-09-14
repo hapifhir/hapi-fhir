@@ -43,6 +43,8 @@ import ca.uhn.fhir.jpa.sp.SearchParamPresenceSvcImpl;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.ClasspathUtil;
+import ca.uhn.fhir.util.IMetaTagSorter;
+import ca.uhn.fhir.util.MetaTagSorterAlphabetical;
 import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.validation.IInstanceValidatorModule;
 import com.google.common.collect.Lists;
@@ -149,6 +151,7 @@ public class GiantTransactionPerfTest {
 	private IIdHelperService myIdHelperService;
 	@Mock
 	private IJpaStorageResourceParser myJpaStorageResourceParser;
+	private IMetaTagSorter myMetaTagSorter;
 
 	@AfterEach
 	public void afterEach() {
@@ -174,6 +177,8 @@ public class GiantTransactionPerfTest {
 		myDaoRegistry = new DaoRegistry(ourFhirContext);
 
 		myPartitionSettings = new PartitionSettings();
+
+		myMetaTagSorter = new MetaTagSorterAlphabetical();
 
 		myHapiTransactionService = new HapiTransactionService();
 		myHapiTransactionService.setTransactionManager(myTransactionManager);
@@ -267,6 +272,7 @@ public class GiantTransactionPerfTest {
 		myEobDao.setPartitionSettingsForUnitTest(myPartitionSettings);
 		myEobDao.setJpaStorageResourceParserForUnitTest(myJpaStorageResourceParser);
 		myEobDao.setExternallyStoredResourceServiceRegistryForUnitTest(new ExternallyStoredResourceServiceRegistry());
+		myEobDao.setMyMetaTagSorter(myMetaTagSorter);
 		myEobDao.start();
 
 		myDaoRegistry.setResourceDaos(Lists.newArrayList(myEobDao));
@@ -364,7 +370,7 @@ public class GiantTransactionPerfTest {
 		}
 
 		@Override
-		public Slice<ResourceHistoryTable> findForResourceIdAndReturnEntities(Pageable thePage, Long theId, Long theDontWantVersion) {
+		public Slice<ResourceHistoryTable> findForResourceIdAndReturnEntitiesAndFetchProvenance(Pageable thePage, Long theId, Long theDontWantVersion) {
 			throw new UnsupportedOperationException();
 		}
 
@@ -380,11 +386,6 @@ public class GiantTransactionPerfTest {
 
 		@Override
 		public Slice<Long> findIdsOfPreviousVersionsOfResources(Pageable thePage) {
-			throw new UnsupportedOperationException();
-		}
-
-		@Override
-		public void setResourceTextVcForVersion(Long id, String resourceText) {
 			throw new UnsupportedOperationException();
 		}
 

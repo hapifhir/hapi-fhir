@@ -19,11 +19,28 @@
  */
 package ca.uhn.fhir.rest.server.interceptor;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-import static org.apache.http.HttpHeaders.CONTENT_ENCODING;
+import ca.uhn.fhir.interceptor.api.Hook;
+import ca.uhn.fhir.interceptor.api.Interceptor;
+import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.parser.DataFormatException;
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.SummaryEnum;
+import ca.uhn.fhir.rest.api.server.IRestfulResponse;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.server.RestfulServerUtils;
+import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.UnclassifiedServerFailureException;
+import ca.uhn.fhir.rest.server.method.BaseResourceReturningMethodBinding;
+import ca.uhn.fhir.rest.server.servlet.ServletRestfulResponse;
+import ca.uhn.fhir.util.OperationOutcomeUtil;
+import org.apache.commons.collections4.map.HashedMap;
+import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 
-import java.io.Closeable;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
@@ -31,48 +48,35 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import ca.uhn.fhir.interceptor.api.Hook;
-import ca.uhn.fhir.interceptor.api.Interceptor;
-import ca.uhn.fhir.interceptor.api.Pointcut;
-import ca.uhn.fhir.parser.DataFormatException;
-import ca.uhn.fhir.rest.server.RestfulServerUtils;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import ca.uhn.fhir.rest.server.method.BaseResourceReturningMethodBinding;
-import ca.uhn.fhir.rest.server.servlet.ServletRestfulResponse;
-import org.apache.commons.collections4.map.HashedMap;
-import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
-
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.api.SummaryEnum;
-import ca.uhn.fhir.rest.api.server.IRestfulResponse;
-import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
-import ca.uhn.fhir.rest.server.exceptions.UnclassifiedServerFailureException;
-import ca.uhn.fhir.util.OperationOutcomeUtil;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.http.HttpHeaders.CONTENT_ENCODING;
 
 @Interceptor
 public class ExceptionHandlingInterceptor {
 
 	public static final String PROCESSING = Constants.OO_INFOSTATUS_PROCESSING;
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ExceptionHandlingInterceptor.class);
+	private static final org.slf4j.Logger ourLog =
+			org.slf4j.LoggerFactory.getLogger(ExceptionHandlingInterceptor.class);
 	public static final Set<SummaryEnum> SUMMARY_MODE = Collections.singleton(SummaryEnum.FALSE);
 	private Class<?>[] myReturnStackTracesForExceptionTypes;
 
 	@Hook(Pointcut.SERVER_HANDLE_EXCEPTION)
-	public boolean handleException(RequestDetails theRequestDetails, BaseServerResponseException theException, HttpServletRequest theRequest, HttpServletResponse theResponse) throws ServletException, IOException {
+	public boolean handleException(
+			RequestDetails theRequestDetails,
+			BaseServerResponseException theException,
+			HttpServletRequest theRequest,
+			HttpServletResponse theResponse)
+			throws ServletException, IOException {
 		handleException(theRequestDetails, theException);
 		return false;
 	}
 
-	public Object handleException(RequestDetails theRequestDetails, BaseServerResponseException theException) throws ServletException, IOException {
+	public Object handleException(RequestDetails theRequestDetails, BaseServerResponseException theException)
+			throws ServletException, IOException {
 		IRestfulResponse response = theRequestDetails.getResponse();
 
 		FhirContext ctx = theRequestDetails.getServer().getFhirContext();
@@ -96,7 +100,7 @@ public class ExceptionHandlingInterceptor {
 				}
 			}
 		}
-		
+
 		String statusMessage = null;
 		if (theException instanceof UnclassifiedServerFailureException) {
 			String sm = theException.getMessage();
@@ -109,10 +113,21 @@ public class ExceptionHandlingInterceptor {
 		try {
 			resetOutputStreamIfPossible(response);
 		} catch (Throwable t) {
-			ourLog.error("HAPI-FHIR was unable to reset the output stream during exception handling. The root causes follows:", t);
+			ourLog.error(
+					"HAPI-FHIR was unable to reset the output stream during exception handling. The root causes follows:",
+					t);
 		}
 
-		return RestfulServerUtils.streamResponseAsResource(theRequestDetails.getServer(), oo, SUMMARY_MODE, statusCode, false, false, theRequestDetails, null, null);
+		return RestfulServerUtils.streamResponseAsResource(
+				theRequestDetails.getServer(),
+				oo,
+				SUMMARY_MODE,
+				statusCode,
+				false,
+				false,
+				theRequestDetails,
+				null,
+				null);
 	}
 
 	/**
@@ -123,7 +138,8 @@ public class ExceptionHandlingInterceptor {
 	private void resetOutputStreamIfPossible(IRestfulResponse response) {
 		if (response.getClass().isAssignableFrom(ServletRestfulResponse.class)) {
 			ServletRestfulResponse servletRestfulResponse = (ServletRestfulResponse) response;
-			HttpServletResponse servletResponse = servletRestfulResponse.getRequestDetails().getServletResponse();
+			HttpServletResponse servletResponse =
+					servletRestfulResponse.getRequestDetails().getServletResponse();
 			Collection<String> headerNames = servletResponse.getHeaderNames();
 			Map<String, Collection<String>> oldHeaders = new HashedMap<>();
 			for (String headerName : headerNames) {
@@ -131,19 +147,24 @@ public class ExceptionHandlingInterceptor {
 			}
 
 			servletResponse.reset();
-			oldHeaders.entrySet().stream().filter(entry -> !entry.getKey().equals(CONTENT_ENCODING)).forEach(entry -> {
-				entry.getValue().stream().forEach(value -> {
-					servletResponse.addHeader(entry.getKey(), value);
-				});
-			});
+			oldHeaders.entrySet().stream()
+					.filter(entry -> !entry.getKey().equals(CONTENT_ENCODING))
+					.forEach(entry -> {
+						entry.getValue().stream().forEach(value -> {
+							servletResponse.addHeader(entry.getKey(), value);
+						});
+					});
 		}
 	}
 
 	@Hook(Pointcut.SERVER_PRE_PROCESS_OUTGOING_EXCEPTION)
-	public BaseServerResponseException preProcessOutgoingException(RequestDetails theRequestDetails, Throwable theException, HttpServletRequest theServletRequest) throws ServletException {
+	public BaseServerResponseException preProcessOutgoingException(
+			RequestDetails theRequestDetails, Throwable theException, HttpServletRequest theServletRequest)
+			throws ServletException {
 		BaseServerResponseException retVal;
 		if (theException instanceof DataFormatException) {
-			// Wrapping the DataFormatException as an InvalidRequestException so that it gets sent back to the client as a 400 response.
+			// Wrapping the DataFormatException as an InvalidRequestException so that it gets sent back to the client as
+			// a 400 response.
 			retVal = new InvalidRequestException(theException);
 		} else if (!(theException instanceof BaseServerResponseException)) {
 			retVal = new InternalErrorException(theException);
@@ -152,13 +173,15 @@ public class ExceptionHandlingInterceptor {
 		}
 
 		if (retVal.getOperationOutcome() == null) {
-			retVal.setOperationOutcome(createOperationOutcome(theException, theRequestDetails.getServer().getFhirContext()));
+			retVal.setOperationOutcome(createOperationOutcome(
+					theException, theRequestDetails.getServer().getFhirContext()));
 		}
 
 		return retVal;
 	}
 
-	private IBaseOperationOutcome createOperationOutcome(Throwable theException, FhirContext ctx) throws ServletException {
+	private IBaseOperationOutcome createOperationOutcome(Throwable theException, FhirContext ctx)
+			throws ServletException {
 		IBaseOperationOutcome oo = null;
 		if (theException instanceof BaseServerResponseException) {
 			oo = ((BaseServerResponseException) theException).getOperationOutcome();
@@ -183,8 +206,9 @@ public class ExceptionHandlingInterceptor {
 					} else {
 						ourLog.warn("Failure during REST processing", theException);
 					}
-					
-					BaseServerResponseException baseServerResponseException = (BaseServerResponseException) theException;
+
+					BaseServerResponseException baseServerResponseException =
+							(BaseServerResponseException) theException;
 					populateDetails(ctx, theException, oo);
 					if (baseServerResponseException.getAdditionalMessages() != null) {
 						for (String next : baseServerResponseException.getAdditionalMessages()) {
@@ -197,7 +221,8 @@ public class ExceptionHandlingInterceptor {
 				}
 			} catch (Exception e1) {
 				ourLog.error("Failed to instantiate OperationOutcome resource instance", e1);
-				throw new ServletException(Msg.code(328) + "Failed to instantiate OperationOutcome resource instance", e1);
+				throw new ServletException(
+						Msg.code(328) + "Failed to instantiate OperationOutcome resource instance", e1);
 			}
 		} else {
 			ourLog.error("Unknown error during processing", theException);
@@ -209,7 +234,8 @@ public class ExceptionHandlingInterceptor {
 		if (myReturnStackTracesForExceptionTypes != null) {
 			for (Class<?> next : myReturnStackTracesForExceptionTypes) {
 				if (next.isAssignableFrom(theException.getClass())) {
-					String detailsValue = theException.getMessage() + "\n\n" + ExceptionUtils.getStackTrace(theException);
+					String detailsValue =
+							theException.getMessage() + "\n\n" + ExceptionUtils.getStackTrace(theException);
 					OperationOutcomeUtil.addIssue(theCtx, theOo, "error", detailsValue, null, PROCESSING);
 					return;
 				}
@@ -222,7 +248,7 @@ public class ExceptionHandlingInterceptor {
 	/**
 	 * If any server methods throw an exception which extends any of the given exception types, the exception stack trace will be returned to the user. This can be useful for helping to diagnose
 	 * issues, but may not be desirable for production situations.
-	 * 
+	 *
 	 * @param theExceptionTypes
 	 *           The exception types for which to return the stack trace to the user.
 	 * @return Returns an instance of this interceptor, to allow for easy method chaining.
@@ -231,5 +257,4 @@ public class ExceptionHandlingInterceptor {
 		myReturnStackTracesForExceptionTypes = theExceptionTypes;
 		return this;
 	}
-
 }

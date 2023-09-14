@@ -30,25 +30,25 @@ import ca.uhn.fhir.batch2.jobs.chunk.TypedPidJson;
 import ca.uhn.fhir.batch2.jobs.parameters.PartitionedJobParameters;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.pid.IResourcePidList;
-import ca.uhn.fhir.jpa.api.pid.TypedResourcePid;
-import ca.uhn.fhir.system.HapiSystemProperties;
 import ca.uhn.fhir.util.Logs;
+import com.google.common.collect.Iterators;
+import com.google.common.collect.UnmodifiableIterator;
 import org.slf4j.Logger;
 
-import javax.annotation.Nonnull;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
+import javax.annotation.Nonnull;
 
-public class ResourceIdListStep<PT extends PartitionedJobParameters, IT extends ChunkRangeJson> implements IJobStepWorker<PT, IT, ResourceIdListWorkChunkJson> {
+public class ResourceIdListStep<PT extends PartitionedJobParameters, IT extends ChunkRangeJson>
+		implements IJobStepWorker<PT, IT, ResourceIdListWorkChunkJson> {
 	private static final Logger ourLog = Logs.getBatchTroubleshootingLog();
 	public static final int DEFAULT_PAGE_SIZE = 20000;
 
-	private static final int MAX_BATCH_OF_IDS = 500;
+	protected static final int MAX_BATCH_OF_IDS = 500;
 
 	private final IIdChunkProducer<IT> myIdChunkProducer;
 
@@ -58,83 +58,70 @@ public class ResourceIdListStep<PT extends PartitionedJobParameters, IT extends 
 
 	@Nonnull
 	@Override
-	public RunOutcome run(@Nonnull StepExecutionDetails<PT, IT> theStepExecutionDetails, @Nonnull IJobDataSink<ResourceIdListWorkChunkJson> theDataSink) throws JobExecutionFailedException {
+	public RunOutcome run(
+			@Nonnull StepExecutionDetails<PT, IT> theStepExecutionDetails,
+			@Nonnull IJobDataSink<ResourceIdListWorkChunkJson> theDataSink)
+			throws JobExecutionFailedException {
 		IT data = theStepExecutionDetails.getData();
 
 		Date start = data.getStart();
 		Date end = data.getEnd();
-		Integer pageSize = theStepExecutionDetails.getParameters().getBatchSize();
-		if (pageSize == null) {
-			pageSize = DEFAULT_PAGE_SIZE;
+		Integer batchSize = theStepExecutionDetails.getParameters().getBatchSize();
+		int pageSize = DEFAULT_PAGE_SIZE;
+		if (batchSize != null) {
+			pageSize = batchSize.intValue();
 		}
 
 		ourLog.info("Beginning scan for reindex IDs in range {} to {}", start, end);
 
-		Date nextStart = start;
-		RequestPartitionId requestPartitionId = theStepExecutionDetails.getParameters().getRequestPartitionId();
-		Set<TypedPidJson> idBuffer = new LinkedHashSet<>();
-		long previousLastTime = 0L;
+		RequestPartitionId requestPartitionId =
+				theStepExecutionDetails.getParameters().getRequestPartitionId();
 		int totalIdsFound = 0;
 		int chunkCount = 0;
-		while (true) {
-			IResourcePidList nextChunk = myIdChunkProducer.fetchResourceIdsPage(nextStart, end, pageSize, requestPartitionId, theStepExecutionDetails.getData());
 
-			if (nextChunk.isEmpty()) {
-				ourLog.info("No data returned");
-				break;
-			}
+		int maxBatchId = MAX_BATCH_OF_IDS;
+		if (batchSize != null) {
+			// we won't go over MAX_BATCH_OF_IDS
+			maxBatchId = Math.min(batchSize.intValue(), maxBatchId);
+		}
 
-			ourLog.info("Found {} IDs from {} to {}", nextChunk.size(), nextStart, nextChunk.getLastDate());
-			if (nextChunk.size() < 10 && HapiSystemProperties.isTestModeEnabled()) {
-				// TODO: I've added this in order to troubleshoot MultitenantBatchOperationR4Test
-				// which is failing intermittently. If that stops, makes sense to remove this
-				ourLog.info(" * PIDS: {}", nextChunk);
-			}
+		final IResourcePidList nextChunk = myIdChunkProducer.fetchResourceIdsPage(
+				start, end, pageSize, requestPartitionId, theStepExecutionDetails.getData());
 
-			for (TypedResourcePid typedResourcePid : nextChunk.getTypedResourcePids()) {
-				TypedPidJson nextId = new TypedPidJson(typedResourcePid);
-				idBuffer.add(nextId);
-			}
+		if (nextChunk.isEmpty()) {
+			ourLog.info("No data returned");
+		} else {
+			ourLog.debug("Found {} IDs from {} to {}", nextChunk.size(), start, nextChunk.getLastDate());
 
-			// If we get the same last time twice in a row, we've clearly reached the end
-			if (nextChunk.getLastDate().getTime() == previousLastTime) {
-				ourLog.info("Matching final timestamp of {}, loading is completed", new Date(previousLastTime));
-				break;
-			}
+			final Set<TypedPidJson> idBuffer = nextChunk.getTypedResourcePids().stream()
+					.map(TypedPidJson::new)
+					.collect(Collectors.toCollection(LinkedHashSet::new));
 
-			previousLastTime = nextChunk.getLastDate().getTime();
-			nextStart = nextChunk.getLastDate();
+			final UnmodifiableIterator<List<TypedPidJson>> partition =
+					Iterators.partition(idBuffer.iterator(), maxBatchId);
 
-			while (idBuffer.size() > MAX_BATCH_OF_IDS) {
-				List<TypedPidJson> submissionIds = new ArrayList<>();
-				for (Iterator<TypedPidJson> iter = idBuffer.iterator(); iter.hasNext(); ) {
-					submissionIds.add(iter.next());
-					iter.remove();
-					if (submissionIds.size() == MAX_BATCH_OF_IDS) {
-						break;
-					}
-				}
+			while (partition.hasNext()) {
+				final List<TypedPidJson> submissionIds = partition.next();
 
 				totalIdsFound += submissionIds.size();
 				chunkCount++;
-				submitWorkChunk(submissionIds, theDataSink);
+				submitWorkChunk(submissionIds, nextChunk.getRequestPartitionId(), theDataSink);
 			}
+
+			ourLog.info("Submitted {} chunks with {} resource IDs", chunkCount, totalIdsFound);
 		}
-
-		totalIdsFound += idBuffer.size();
-		chunkCount++;
-		submitWorkChunk(idBuffer, theDataSink);
-
-		ourLog.info("Submitted {} chunks with {} resource IDs", chunkCount, totalIdsFound);
 		return RunOutcome.SUCCESS;
 	}
 
-	private void submitWorkChunk(Collection<TypedPidJson> theTypedPids, IJobDataSink<ResourceIdListWorkChunkJson> theDataSink) {
+	private void submitWorkChunk(
+			Collection<TypedPidJson> theTypedPids,
+			RequestPartitionId theRequestPartitionId,
+			IJobDataSink<ResourceIdListWorkChunkJson> theDataSink) {
 		if (theTypedPids.isEmpty()) {
 			return;
 		}
 		ourLog.info("Submitting work chunk with {} IDs", theTypedPids.size());
-		ResourceIdListWorkChunkJson data = new ResourceIdListWorkChunkJson(theTypedPids);
+		ResourceIdListWorkChunkJson data = new ResourceIdListWorkChunkJson(theTypedPids, theRequestPartitionId);
 		ourLog.debug("IDs are: {}", data);
 		theDataSink.accept(data);
 	}

@@ -33,7 +33,6 @@ public class TestUtil {
 		super();
 	}
 
-
 	public static InstantType getTimestamp(IBaseResource resource) {
 		return new InstantType(new Date(resource.getMeta().getLastUpdated().getTime()));
 	}
@@ -41,6 +40,4 @@ public class TestUtil {
 	public static void sleepOneClick() {
 		ca.uhn.fhir.util.TestUtil.sleepAtLeast(1, false);
 	}
-
-
 }

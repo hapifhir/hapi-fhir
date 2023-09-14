@@ -21,7 +21,6 @@ package ca.uhn.fhir.narrative2;
 
 import org.hl7.fhir.instance.model.api.IBase;
 
-import java.io.IOException;
 import java.util.Set;
 
 public interface INarrativeTemplate {

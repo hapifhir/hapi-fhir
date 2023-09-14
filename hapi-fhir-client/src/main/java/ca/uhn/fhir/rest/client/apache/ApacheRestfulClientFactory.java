@@ -44,7 +44,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /**
  * A Restful Factory to create clients, requests and responses based on the Apache httpclient library.
- * 
+ *
  * @author Peter Van Houte | peter.vanhoute@agfa.com | Agfa Healthcare
  */
 public class ApacheRestfulClientFactory extends RestfulClientFactory {
@@ -61,7 +61,7 @@ public class ApacheRestfulClientFactory extends RestfulClientFactory {
 
 	/**
 	 * Constructor
-	 * 
+	 *
 	 * @param theContext
 	 *            The context
 	 */
@@ -75,17 +75,21 @@ public class ApacheRestfulClientFactory extends RestfulClientFactory {
 	}
 
 	@Override
-	public synchronized IHttpClient getHttpClient(StringBuilder theUrl, Map<String, List<String>> theIfNoneExistParams,
-																 String theIfNoneExistString, RequestTypeEnum theRequestType, List<Header> theHeaders) {
-		return new ApacheHttpClient(getNativeHttpClient(), theUrl, theIfNoneExistParams, theIfNoneExistString, theRequestType, theHeaders);
+	public synchronized IHttpClient getHttpClient(
+			StringBuilder theUrl,
+			Map<String, List<String>> theIfNoneExistParams,
+			String theIfNoneExistString,
+			RequestTypeEnum theRequestType,
+			List<Header> theHeaders) {
+		return new ApacheHttpClient(
+				getNativeHttpClient(), theUrl, theIfNoneExistParams, theIfNoneExistString, theRequestType, theHeaders);
 	}
 
 	public HttpClient getNativeHttpClient() {
 		if (myHttpClient == null) {
 
-			//TODO: Use of a deprecated method should be resolved.
-			RequestConfig defaultRequestConfig =
-				RequestConfig.custom()
+			// TODO: Use of a deprecated method should be resolved.
+			RequestConfig defaultRequestConfig = RequestConfig.custom()
 					.setSocketTimeout(getSocketTimeout())
 					.setConnectTimeout(getConnectTimeout())
 					.setConnectionRequestTimeout(getConnectionRequestTimeout())
@@ -94,25 +98,26 @@ public class ApacheRestfulClientFactory extends RestfulClientFactory {
 					.build();
 
 			HttpClientBuilder builder = getHttpClientBuilder()
-				.useSystemProperties()
-				.setDefaultRequestConfig(defaultRequestConfig)
-				.disableCookieManagement();
+					.useSystemProperties()
+					.setDefaultRequestConfig(defaultRequestConfig)
+					.disableCookieManagement();
 
-			PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
+			PoolingHttpClientConnectionManager connectionManager =
+					new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
 			connectionManager.setMaxTotal(getPoolMaxTotal());
 			connectionManager.setDefaultMaxPerRoute(getPoolMaxPerRoute());
 			builder.setConnectionManager(connectionManager);
 
 			if (myProxy != null && isNotBlank(getProxyUsername()) && isNotBlank(getProxyPassword())) {
 				CredentialsProvider credsProvider = new BasicCredentialsProvider();
-				credsProvider.setCredentials(new AuthScope(myProxy.getHostName(), myProxy.getPort()),
+				credsProvider.setCredentials(
+						new AuthScope(myProxy.getHostName(), myProxy.getPort()),
 						new UsernamePasswordCredentials(getProxyUsername(), getProxyPassword()));
 				builder.setProxyAuthenticationStrategy(new ProxyAuthenticationStrategy());
 				builder.setDefaultCredentialsProvider(credsProvider);
 			}
 
 			myHttpClient = builder.build();
-
 		}
 
 		return myHttpClient;
@@ -144,5 +149,4 @@ public class ApacheRestfulClientFactory extends RestfulClientFactory {
 			myProxy = null;
 		}
 	}
-
 }

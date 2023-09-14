@@ -30,8 +30,6 @@ import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -39,6 +37,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 
@@ -84,11 +84,15 @@ public class ReadOnlySearchParamCache {
 		return myUrlToParam.get(theUrl);
 	}
 
-	public static ReadOnlySearchParamCache fromFhirContext(@Nonnull FhirContext theFhirContext, @Nonnull SearchParameterCanonicalizer theCanonicalizer) {
+	public static ReadOnlySearchParamCache fromFhirContext(
+			@Nonnull FhirContext theFhirContext, @Nonnull SearchParameterCanonicalizer theCanonicalizer) {
 		return fromFhirContext(theFhirContext, theCanonicalizer, null);
 	}
 
-	public static ReadOnlySearchParamCache fromFhirContext(@Nonnull FhirContext theFhirContext, @Nonnull SearchParameterCanonicalizer theCanonicalizer, @Nullable Set<String> theSearchParamPatternsToInclude) {
+	public static ReadOnlySearchParamCache fromFhirContext(
+			@Nonnull FhirContext theFhirContext,
+			@Nonnull SearchParameterCanonicalizer theCanonicalizer,
+			@Nullable Set<String> theSearchParamPatternsToInclude) {
 		assert theCanonicalizer != null;
 
 		ReadOnlySearchParamCache retVal = new ReadOnlySearchParamCache();
@@ -104,10 +108,16 @@ public class ReadOnlySearchParamCache {
 		 */
 		List<IBaseResource> searchParams = null;
 		if (theFhirContext.getVersion().getVersion() == FhirVersionEnum.R4) {
-			IBaseBundle allSearchParameterBundle = (IBaseBundle) theFhirContext.newJsonParser().parseResource(ClasspathUtil.loadResourceAsStream("org/hl7/fhir/r4/model/sp/search-parameters.json"));
+			IBaseBundle allSearchParameterBundle = (IBaseBundle) theFhirContext
+					.newJsonParser()
+					.parseResource(
+							ClasspathUtil.loadResourceAsStream("org/hl7/fhir/r4/model/sp/search-parameters.json"));
 			searchParams = BundleUtil.toListOfResources(theFhirContext, allSearchParameterBundle);
 		} else if (theFhirContext.getVersion().getVersion() == FhirVersionEnum.R4B) {
-			IBaseBundle allSearchParameterBundle = (IBaseBundle) theFhirContext.newXmlParser().parseResource(ClasspathUtil.loadResourceAsStream("org/hl7/fhir/r4b/model/sp/search-parameters.xml"));
+			IBaseBundle allSearchParameterBundle = (IBaseBundle) theFhirContext
+					.newXmlParser()
+					.parseResource(
+							ClasspathUtil.loadResourceAsStream("org/hl7/fhir/r4b/model/sp/search-parameters.xml"));
 			searchParams = BundleUtil.toListOfResources(theFhirContext, allSearchParameterBundle);
 		} else if (theFhirContext.getVersion().getVersion() == FhirVersionEnum.R5) {
 			searchParams = FhirContext.forR5Cached().getValidationSupport().fetchAllSearchParameters();
@@ -123,18 +133,18 @@ public class ReadOnlySearchParamCache {
 				// a status of DRAFT which means the server doesn't actually apply them.
 				// At least this was the case as of 2021-12-24 - JA
 				nextCanonical = new RuntimeSearchParam(
-					nextCanonical.getId(),
-					nextCanonical.getUri(),
-					nextCanonical.getName(),
-					nextCanonical.getDescription(),
-					nextCanonical.getPath(),
-					nextCanonical.getParamType(),
-					nextCanonical.getProvidesMembershipInCompartments(),
-					nextCanonical.getTargets(),
-					RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE,
-					nextCanonical.getComboSearchParamType(),
-					nextCanonical.getComponents(),
-					nextCanonical.getBase());
+						nextCanonical.getId(),
+						nextCanonical.getUri(),
+						nextCanonical.getName(),
+						nextCanonical.getDescription(),
+						nextCanonical.getPath(),
+						nextCanonical.getParamType(),
+						nextCanonical.getProvidesMembershipInCompartments(),
+						nextCanonical.getTargets(),
+						RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE,
+						nextCanonical.getComboSearchParamType(),
+						nextCanonical.getComponents(),
+						nextCanonical.getBase());
 
 				Collection<String> base = nextCanonical.getBase();
 				if (base.contains("Resource") || base.contains("DomainResource")) {
@@ -143,9 +153,12 @@ public class ReadOnlySearchParamCache {
 
 				// Add it to our return value if permitted by the pattern parameters
 				for (String nextResourceName : base) {
-					ResourceSearchParams resourceSearchParams = retVal.myResourceNameToSpNameToSp.computeIfAbsent(nextResourceName, t -> new ResourceSearchParams(nextResourceName));
+					ResourceSearchParams resourceSearchParams = retVal.myResourceNameToSpNameToSp.computeIfAbsent(
+							nextResourceName, t -> new ResourceSearchParams(nextResourceName));
 					String nextParamName = nextCanonical.getName();
-					if (theSearchParamPatternsToInclude == null || searchParamMatchesAtLeastOnePattern(theSearchParamPatternsToInclude, nextResourceName, nextParamName)) {
+					if (theSearchParamPatternsToInclude == null
+							|| searchParamMatchesAtLeastOnePattern(
+									theSearchParamPatternsToInclude, nextResourceName, nextParamName)) {
 						resourceSearchParams.addSearchParamIfAbsent(nextParamName, nextCanonical);
 					}
 				}
@@ -157,11 +170,14 @@ public class ReadOnlySearchParamCache {
 			RuntimeResourceDefinition nextResDef = theFhirContext.getResourceDefinition(resourceName);
 			String nextResourceName = nextResDef.getName();
 
-			ResourceSearchParams resourceSearchParams = retVal.myResourceNameToSpNameToSp.computeIfAbsent(nextResourceName, t -> new ResourceSearchParams(nextResourceName));
+			ResourceSearchParams resourceSearchParams = retVal.myResourceNameToSpNameToSp.computeIfAbsent(
+					nextResourceName, t -> new ResourceSearchParams(nextResourceName));
 			for (RuntimeSearchParam nextSp : nextResDef.getSearchParams()) {
 				String nextParamName = nextSp.getName();
 				// Add it to our return value if permitted by the pattern parameters
-				if (theSearchParamPatternsToInclude == null || searchParamMatchesAtLeastOnePattern(theSearchParamPatternsToInclude, nextResourceName, nextParamName)) {
+				if (theSearchParamPatternsToInclude == null
+						|| searchParamMatchesAtLeastOnePattern(
+								theSearchParamPatternsToInclude, nextResourceName, nextParamName)) {
 					resourceSearchParams.addSearchParamIfAbsent(nextParamName, nextSp);
 				}
 			}
@@ -169,7 +185,8 @@ public class ReadOnlySearchParamCache {
 		return retVal;
 	}
 
-	public static boolean searchParamMatchesAtLeastOnePattern(Set<String> theSearchParamPatterns, String theResourceType, String theSearchParamName) {
+	public static boolean searchParamMatchesAtLeastOnePattern(
+			Set<String> theSearchParamPatterns, String theResourceType, String theSearchParamName) {
 		for (String nextPattern : theSearchParamPatterns) {
 			if ("*".equals(nextPattern)) {
 				return true;
@@ -192,8 +209,8 @@ public class ReadOnlySearchParamCache {
 		return false;
 	}
 
-	public static ReadOnlySearchParamCache fromRuntimeSearchParamCache(RuntimeSearchParamCache theRuntimeSearchParamCache) {
+	public static ReadOnlySearchParamCache fromRuntimeSearchParamCache(
+			RuntimeSearchParamCache theRuntimeSearchParamCache) {
 		return new ReadOnlySearchParamCache(theRuntimeSearchParamCache);
 	}
-
 }

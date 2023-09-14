@@ -74,11 +74,10 @@ public class AddressValidationResult {
 
 	@Override
 	public String toString() {
-		return
-			"  isValid=" + myIsValid +
-			", validatedAddressString='" + myValidatedAddressString + '\'' +
-			", validationResults=" + myValidationResults + '\'' +
-			", rawResponse='" + myRawResponse + '\'' +
-			", myValidatedAddress='" + myValidatedAddress + '\'';
+		return "  isValid=" + myIsValid + ", validatedAddressString='"
+				+ myValidatedAddressString + '\'' + ", validationResults="
+				+ myValidationResults + '\'' + ", rawResponse='"
+				+ myRawResponse + '\'' + ", myValidatedAddress='"
+				+ myValidatedAddress + '\'';
 	}
 }

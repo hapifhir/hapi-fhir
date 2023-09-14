@@ -50,9 +50,11 @@ public interface IAuthorizationSearchParamMatcher {
 	class MatchResult {
 		// fake record pattern
 		/** match result */
-		@Nonnull public final Match match;
+		@Nonnull
+		public final Match match;
 		/** the reason for the UNSUPPORTED result */
-		@Nullable public final String unsupportedReason;
+		@Nullable
+		public final String unsupportedReason;
 
 		public static MatchResult buildMatched() {
 			return new MatchResult(Match.MATCH, null);
@@ -70,6 +72,5 @@ public interface IAuthorizationSearchParamMatcher {
 			this.match = myMatch;
 			this.unsupportedReason = myUnsupportedReason;
 		}
-
 	}
 }

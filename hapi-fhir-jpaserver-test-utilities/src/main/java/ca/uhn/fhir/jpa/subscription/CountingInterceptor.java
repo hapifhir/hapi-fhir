@@ -34,12 +34,14 @@ public class CountingInterceptor implements ChannelInterceptor {
 	private List<String> mySent = new ArrayList<>();
 
 	public int getSentCount(String theContainingKeyword) {
-		return (int) mySent.stream().filter(t -> t.contains(theContainingKeyword)).count();
+		return (int)
+				mySent.stream().filter(t -> t.contains(theContainingKeyword)).count();
 	}
 
 	@Override
-	public void afterSendCompletion(Message<?> theMessage, MessageChannel theChannel, boolean theSent, Exception theException) {
-		ourLog.info("Counting another instance: {}", theMessage);
+	public void afterSendCompletion(
+			Message<?> theMessage, MessageChannel theChannel, boolean theSent, Exception theException) {
+		ourLog.info("Send complete for message: {}", theMessage);
 		if (theSent) {
 			mySent.add(theMessage.toString());
 		}

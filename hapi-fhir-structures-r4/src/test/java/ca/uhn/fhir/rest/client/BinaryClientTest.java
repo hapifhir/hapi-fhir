@@ -29,6 +29,8 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.internal.stubbing.defaultanswers.ReturnsDeepStubs;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -121,6 +123,7 @@ public class BinaryClientTest {
 		assertEquals("{\"resourceType\":\"Binary\",\"contentType\":\"image/png\"}", IOUtils.toString(post.getEntity().getContent(), Charsets.UTF_8));
 
 	}
+
 
 	private interface IClient extends IBasicClient {
 

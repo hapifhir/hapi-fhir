@@ -29,8 +29,7 @@ public class BulkExportBinaryFileId extends BulkExportJobBase {
 	@JsonProperty("resourceType")
 	private String myResourceType;
 
-	public BulkExportBinaryFileId() {
-	}
+	public BulkExportBinaryFileId() {}
 
 	public String getBinaryId() {
 		return myBinaryId;

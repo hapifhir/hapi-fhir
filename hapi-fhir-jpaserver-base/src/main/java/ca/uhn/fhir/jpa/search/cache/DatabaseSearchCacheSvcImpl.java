@@ -70,14 +70,19 @@ public class DatabaseSearchCacheSvcImpl implements ISearchCacheSvc {
 	 * the result is to be deleted
 	 */
 	private long myCutoffSlack = SEARCH_CLEANUP_JOB_INTERVAL_MILLIS;
+
 	@Autowired
 	private ISearchDao mySearchDao;
+
 	@Autowired
 	private ISearchResultDao mySearchResultDao;
+
 	@Autowired
 	private ISearchIncludeDao mySearchIncludeDao;
+
 	@Autowired
 	private IHapiTransactionService myTransactionService;
+
 	@Autowired
 	private JpaStorageSettings myStorageSettings;
 
@@ -89,8 +94,8 @@ public class DatabaseSearchCacheSvcImpl implements ISearchCacheSvc {
 	@Override
 	public Search save(Search theSearch, RequestPartitionId theRequestPartitionId) {
 		return myTransactionService
-			.withSystemRequestOnPartition(theRequestPartitionId)
-			.execute(() -> mySearchDao.save(theSearch));
+				.withSystemRequestOnPartition(theRequestPartitionId)
+				.execute(() -> mySearchDao.save(theSearch));
 	}
 
 	@Override
@@ -98,8 +103,8 @@ public class DatabaseSearchCacheSvcImpl implements ISearchCacheSvc {
 	public Optional<Search> fetchByUuid(String theUuid, RequestPartitionId theRequestPartitionId) {
 		Validate.notBlank(theUuid);
 		return myTransactionService
-			.withSystemRequestOnPartition(theRequestPartitionId)
-			.execute(() -> mySearchDao.findByUuidAndFetchIncludes(theUuid));
+				.withSystemRequestOnPartition(theRequestPartitionId)
+				.execute(() -> mySearchDao.findByUuidAndFetchIncludes(theUuid));
 	}
 
 	void setSearchDaoForUnitTest(ISearchDao theSearchDao) {
@@ -112,23 +117,25 @@ public class DatabaseSearchCacheSvcImpl implements ISearchCacheSvc {
 
 	@Override
 	public Optional<Search> tryToMarkSearchAsInProgress(Search theSearch, RequestPartitionId theRequestPartitionId) {
-		ourLog.trace("Going to try to change search status from {} to {}", theSearch.getStatus(), SearchStatusEnum.LOADING);
+		ourLog.trace(
+				"Going to try to change search status from {} to {}", theSearch.getStatus(), SearchStatusEnum.LOADING);
 		try {
 
 			return myTransactionService
-				.withSystemRequest()
-				.withRequestPartitionId(theRequestPartitionId)
-				.withPropagation(Propagation.REQUIRES_NEW)
-				.execute(t -> {
-					Search search = mySearchDao.findById(theSearch.getId()).orElse(theSearch);
+					.withSystemRequest()
+					.withRequestPartitionId(theRequestPartitionId)
+					.withPropagation(Propagation.REQUIRES_NEW)
+					.execute(t -> {
+						Search search = mySearchDao.findById(theSearch.getId()).orElse(theSearch);
 
-					if (search.getStatus() != SearchStatusEnum.PASSCMPLET) {
-						throw new IllegalStateException(Msg.code(1167) + "Can't change to LOADING because state is " + search.getStatus());
-					}
-					search.setStatus(SearchStatusEnum.LOADING);
-					Search newSearch = mySearchDao.save(search);
-					return Optional.of(newSearch);
-				});
+						if (search.getStatus() != SearchStatusEnum.PASSCMPLET) {
+							throw new IllegalStateException(
+									Msg.code(1167) + "Can't change to LOADING because state is " + search.getStatus());
+						}
+						search.setStatus(SearchStatusEnum.LOADING);
+						Search newSearch = mySearchDao.save(search);
+						return Optional.of(newSearch);
+					});
 		} catch (Exception e) {
 			ourLog.warn("Failed to activate search: {}", e.toString());
 			ourLog.trace("Failed to activate search", e);
@@ -137,18 +144,24 @@ public class DatabaseSearchCacheSvcImpl implements ISearchCacheSvc {
 	}
 
 	@Override
-	public Optional<Search> findCandidatesForReuse(String theResourceType, String theQueryString, Instant theCreatedAfter, RequestPartitionId theRequestPartitionId) {
+	public Optional<Search> findCandidatesForReuse(
+			String theResourceType,
+			String theQueryString,
+			Instant theCreatedAfter,
+			RequestPartitionId theRequestPartitionId) {
 		HapiTransactionService.requireTransaction();
 
 		String queryString = Search.createSearchQueryStringForStorage(theQueryString, theRequestPartitionId);
 
 		int hashCode = queryString.hashCode();
-		Collection<Search> candidates = mySearchDao.findWithCutoffOrExpiry(theResourceType, hashCode, Date.from(theCreatedAfter));
+		Collection<Search> candidates =
+				mySearchDao.findWithCutoffOrExpiry(theResourceType, hashCode, Date.from(theCreatedAfter));
 
 		for (Search nextCandidateSearch : candidates) {
 			// We should only reuse our search if it was created within the permitted window
 			// Date.after() is unreliable.  Instant.isAfter() always works.
-			if (queryString.equals(nextCandidateSearch.getSearchQueryString()) && nextCandidateSearch.getCreated().toInstant().isAfter(theCreatedAfter)) {
+			if (queryString.equals(nextCandidateSearch.getSearchQueryString())
+					&& nextCandidateSearch.getCreated().toInstant().isAfter(theCreatedAfter)) {
 				return Optional.of(nextCandidateSearch);
 			}
 		}
@@ -171,54 +184,55 @@ public class DatabaseSearchCacheSvcImpl implements ISearchCacheSvc {
 		final Date cutoff = new Date((now() - cutoffMillis) - myCutoffSlack);
 
 		if (ourNowForUnitTests != null) {
-			ourLog.info("Searching for searches which are before {} - now is {}", new InstantType(cutoff), new InstantType(new Date(now())));
+			ourLog.info(
+					"Searching for searches which are before {} - now is {}",
+					new InstantType(cutoff),
+					new InstantType(new Date(now())));
 		}
 
 		ourLog.debug("Searching for searches which are before {}", cutoff);
 
 		// Mark searches as deleted if they should be
 		final Slice<Long> toMarkDeleted = myTransactionService
-			.withSystemRequestOnPartition(theRequestPartitionId)
-			.execute(theStatus ->
-				mySearchDao.findWhereCreatedBefore(cutoff, new Date(), PageRequest.of(0, ourMaximumSearchesToCheckForDeletionCandidacy))
-			);
+				.withSystemRequestOnPartition(theRequestPartitionId)
+				.execute(theStatus -> mySearchDao.findWhereCreatedBefore(
+						cutoff, new Date(), PageRequest.of(0, ourMaximumSearchesToCheckForDeletionCandidacy)));
 		assert toMarkDeleted != null;
 		for (final Long nextSearchToDelete : toMarkDeleted) {
 			ourLog.debug("Deleting search with PID {}", nextSearchToDelete);
 			myTransactionService
-				.withSystemRequest()
-				.withRequestPartitionId(theRequestPartitionId)
-				.execute(t -> {
-					mySearchDao.updateDeleted(nextSearchToDelete, true);
-					return null;
-				});
+					.withSystemRequest()
+					.withRequestPartitionId(theRequestPartitionId)
+					.execute(t -> {
+						mySearchDao.updateDeleted(nextSearchToDelete, true);
+						return null;
+					});
 		}
 
 		// Delete searches that are marked as deleted
 		final Slice<Long> toDelete = myTransactionService
-			.withSystemRequestOnPartition(theRequestPartitionId)
-			.execute(theStatus ->
-				mySearchDao.findDeleted(PageRequest.of(0, ourMaximumSearchesToCheckForDeletionCandidacy))
-			);
+				.withSystemRequestOnPartition(theRequestPartitionId)
+				.execute(theStatus ->
+						mySearchDao.findDeleted(PageRequest.of(0, ourMaximumSearchesToCheckForDeletionCandidacy)));
 		assert toDelete != null;
 		for (final Long nextSearchToDelete : toDelete) {
 			ourLog.debug("Deleting search with PID {}", nextSearchToDelete);
 			myTransactionService
-				.withSystemRequest()
-				.withRequestPartitionId(theRequestPartitionId)
-				.execute(t -> {
-					deleteSearch(nextSearchToDelete);
-					return null;
-				});
+					.withSystemRequest()
+					.withRequestPartitionId(theRequestPartitionId)
+					.execute(t -> {
+						deleteSearch(nextSearchToDelete);
+						return null;
+					});
 		}
 
 		int count = toDelete.getContent().size();
 		if (count > 0) {
 			if (ourLog.isDebugEnabled() || HapiSystemProperties.isTestModeEnabled()) {
 				Long total = myTransactionService
-					.withSystemRequest()
-					.withRequestPartitionId(theRequestPartitionId)
-					.execute(t -> mySearchDao.count());
+						.withSystemRequest()
+						.withRequestPartitionId(theRequestPartitionId)
+						.execute(t -> mySearchDao.count());
 				ourLog.debug("Deleted {} searches, {} remaining", count, total);
 			}
 		}
@@ -239,25 +253,34 @@ public class DatabaseSearchCacheSvcImpl implements ISearchCacheSvc {
 			int max = ourMaximumResultsToDeleteInOnePass;
 			Slice<Long> resultPids = mySearchResultDao.findForSearch(PageRequest.of(0, max), searchToDelete.getId());
 			if (resultPids.hasContent()) {
-				List<List<Long>> partitions = Lists.partition(resultPids.getContent(), ourMaximumResultsToDeleteInOneStatement);
+				List<List<Long>> partitions =
+						Lists.partition(resultPids.getContent(), ourMaximumResultsToDeleteInOneStatement);
 				for (List<Long> nextPartition : partitions) {
 					mySearchResultDao.deleteByIds(nextPartition);
 				}
-
 			}
 
 			// Only delete if we don't have results left in this search
 			if (resultPids.getNumberOfElements() < max) {
-				ourLog.debug("Deleting search {}/{} - Created[{}]", searchToDelete.getId(), searchToDelete.getUuid(), new InstantType(searchToDelete.getCreated()));
+				ourLog.debug(
+						"Deleting search {}/{} - Created[{}]",
+						searchToDelete.getId(),
+						searchToDelete.getUuid(),
+						new InstantType(searchToDelete.getCreated()));
 				mySearchDao.deleteByPid(searchToDelete.getId());
 			} else {
-				ourLog.debug("Purged {} search results for deleted search {}/{}", resultPids.getSize(), searchToDelete.getId(), searchToDelete.getUuid());
+				ourLog.debug(
+						"Purged {} search results for deleted search {}/{}",
+						resultPids.getSize(),
+						searchToDelete.getId(),
+						searchToDelete.getUuid());
 			}
 		});
 	}
 
 	@VisibleForTesting
-	public static void setMaximumSearchesToCheckForDeletionCandidacyForUnitTest(int theMaximumSearchesToCheckForDeletionCandidacy) {
+	public static void setMaximumSearchesToCheckForDeletionCandidacyForUnitTest(
+			int theMaximumSearchesToCheckForDeletionCandidacy) {
 		ourMaximumSearchesToCheckForDeletionCandidacy = theMaximumSearchesToCheckForDeletionCandidacy;
 	}
 
@@ -285,5 +308,4 @@ public class DatabaseSearchCacheSvcImpl implements ISearchCacheSvc {
 		}
 		return System.currentTimeMillis();
 	}
-
 }

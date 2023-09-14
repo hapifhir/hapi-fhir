@@ -34,5 +34,4 @@ interface IRuleRoot {
 	 * Create the repository validation rules
 	 */
 	List<IRepositoryValidatingRule> build();
-
 }

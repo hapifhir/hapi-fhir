@@ -68,4 +68,10 @@ public interface IJobDataSink<OT extends IModelJson> {
 	 */
 	void recoveredError(String theMessage);
 
+	/**
+	 * Step workers may invoke this method to indicate that a warning message processor
+	 *
+	 * @param theWarningProcessor The processor for the warning.
+	 */
+	void setWarningProcessor(IWarningProcessor theWarningProcessor);
 }

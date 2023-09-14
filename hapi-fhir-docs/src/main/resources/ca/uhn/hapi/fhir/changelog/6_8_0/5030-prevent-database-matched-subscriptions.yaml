@@ -1,0 +1,5 @@
+---
+type: add
+title: "A new configuration option, `JpaStorageSettings#setOnlyAllowInMemorySubscriptions(boolean)` can now prevent the creation of Subscriptions 
+that would need to be matched in the database. If enabled, only Subscriptions which can be evaluated IN-MEMORY are permitted to be created."
+

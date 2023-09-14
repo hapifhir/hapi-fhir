@@ -45,5 +45,4 @@ public class UploadStatistics {
 	public IIdType getTarget() {
 		return myTarget;
 	}
-
 }

@@ -1,13 +1,12 @@
 package ca.uhn.fhir.cr.r4;
 
-import ca.uhn.fhir.cr.BaseCrR4Test;
+import ca.uhn.fhir.cr.BaseCrR4TestServer;
 import ca.uhn.fhir.cr.r4.plandefinition.PlanDefinitionOperationsProvider;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CarePlan;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Parameters;
-import org.hl7.fhir.r4.model.PlanDefinition;
 import org.hl7.fhir.r4.model.Questionnaire;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,38 +14,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-public class PlanDefinitionOperationsProviderTest extends BaseCrR4Test {
+public class PlanDefinitionOperationsProviderTest extends BaseCrR4TestServer {
 	@Autowired
 	PlanDefinitionOperationsProvider planDefinitionOperationsProvider;
-
-	@Test
-	void testCdsHooksMultiAction() {
-		loadBundle("ca/uhn/fhir/cr/r4/cds-hooks-multi-action/cds_hooks_multiple_actions_patient_data.json");
-		loadBundle("ca/uhn/fhir/cr/r4/cds-hooks-multi-action/cds_hooks_multiple_actions_plan_definition.json");
-
-		var requestDetails = setupRequestDetails();
-		var planDefinitionID = new IdType("PlanDefinition","CdsHooksMultipleActions-PlanDefinition-1.0.0");
-		var patientID = "patient-CdsHooksMultipleActions";
-		var result = this.planDefinitionOperationsProvider.apply(planDefinitionID, null, null, patientID,
-			null, null, null, null, null,
-			null, null, null, null, null,
-			null, null, null,
-			requestDetails);
-
-		assertNotNull(result);
-		var carePlan = readResource(CarePlan.class, "ca/uhn/fhir/cr/r4/cds-hooks-multi-action/cds_hooks_multiple_actions_careplan.json");
-		assertEquals(ourParser.encodeResourceToString(carePlan), ourParser.encodeResourceToString(result));
-
-
-		var resultR5 = this.planDefinitionOperationsProvider.applyR5(planDefinitionID, null, null, patientID,
-			null, null, null, null, null,
-			null, null, null, null, null,
-			null, null, null,
-			requestDetails);
-
-		var bundle = readResource(Bundle.class, "ca/uhn/fhir/cr/r4/cds-hooks-multi-action/cds_hooks_multiple_actions_bundle.json");
-		assertEquals(ourParser.encodeResourceToString(bundle), ourParser.encodeResourceToString(resultR5));
-	}
 
 	@Test
 	void testGenerateQuestionnaire() {

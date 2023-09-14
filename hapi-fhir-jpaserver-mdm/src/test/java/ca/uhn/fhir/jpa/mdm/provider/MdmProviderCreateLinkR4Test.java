@@ -1,7 +1,7 @@
 package ca.uhn.fhir.jpa.mdm.provider;
 
-import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.entity.PartitionEntity;
 import ca.uhn.fhir.mdm.api.MdmConstants;
@@ -75,6 +75,7 @@ public class MdmProviderCreateLinkR4Test extends BaseLinkR4Test {
 	@Disabled
 	public void testCreateLinkWithMatchResultOnDifferentPartitions() {
 		myPartitionSettings.setPartitioningEnabled(true);
+		myMdmSettings.setSearchAllPartitionForMatch(false);
 		myPartitionLookupSvc.createPartition(new PartitionEntity().setId(1).setName(PARTITION_1), null);
 		myPartitionLookupSvc.createPartition(new PartitionEntity().setId(2).setName(PARTITION_2), null);
 		assertLinkCount(1);

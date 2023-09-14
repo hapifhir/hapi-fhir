@@ -30,7 +30,7 @@ public interface IAnyResource extends IBaseResource {
 	/**
 	 * Search parameter constant for <b>_id</b>
 	 */
-	@SearchParamDefinition(name="_id", path="", description="The ID of the resource", type="token")
+	@SearchParamDefinition(name = "_id", path = "", description = "The ID of the resource", type = "token")
 	String SP_RES_ID = "_id";
 
 	/**
@@ -54,5 +54,4 @@ public interface IAnyResource extends IBaseResource {
 	IAnyResource setId(String theId);
 
 	void setUserData(String name, Object value);
-
 }

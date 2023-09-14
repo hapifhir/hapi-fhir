@@ -64,32 +64,56 @@ public class PerformanceTracingLoggingInterceptor {
 
 	@Hook(value = Pointcut.JPA_PERFTRACE_SEARCH_FIRST_RESULT_LOADED)
 	public void searchFirstResultLoaded(SearchRuntimeDetails theOutcome) {
-		log("Initial query result returned in {} for query {}", theOutcome.getQueryStopwatch(), theOutcome.getSearchUuid());
+		log(
+				"Initial query result returned in {} for query {}",
+				theOutcome.getQueryStopwatch(),
+				theOutcome.getSearchUuid());
 	}
 
 	@Hook(value = Pointcut.JPA_PERFTRACE_SEARCH_SELECT_COMPLETE)
 	public void searchSelectComplete(SearchRuntimeDetails theOutcome) {
-		log("SqlQuery found {} matches in {} for query {}", theOutcome.getFoundMatchesCount(), theOutcome.getQueryStopwatch(), theOutcome.getSearchUuid());
+		log(
+				"SqlQuery found {} matches in {} for query {}",
+				theOutcome.getFoundMatchesCount(),
+				theOutcome.getQueryStopwatch(),
+				theOutcome.getSearchUuid());
 	}
 
 	@Hook(value = Pointcut.JPA_PERFTRACE_SEARCH_COMPLETE)
 	public void searchComplete(SearchRuntimeDetails theOutcome) {
-		log("SqlQuery {} is complete in {} - Found {} matches", theOutcome.getSearchUuid(), theOutcome.getQueryStopwatch(), theOutcome.getFoundMatchesCount());
+		log(
+				"SqlQuery {} is complete in {} - Found {} matches",
+				theOutcome.getSearchUuid(),
+				theOutcome.getQueryStopwatch(),
+				theOutcome.getFoundMatchesCount());
 	}
 
 	@Hook(value = Pointcut.JPA_PERFTRACE_SEARCH_PASS_COMPLETE)
 	public void searchPassComplete(SearchRuntimeDetails theOutcome) {
-		log("SqlQuery {} pass complete and set to status {} in {} - Found {} matches", theOutcome.getSearchUuid(), theOutcome.getSearchStatus(), theOutcome.getQueryStopwatch(), theOutcome.getFoundMatchesCount());
+		log(
+				"SqlQuery {} pass complete and set to status {} in {} - Found {} matches",
+				theOutcome.getSearchUuid(),
+				theOutcome.getSearchStatus(),
+				theOutcome.getQueryStopwatch(),
+				theOutcome.getFoundMatchesCount());
 	}
 
 	@Hook(value = Pointcut.JPA_PERFTRACE_SEARCH_FAILED)
 	public void searchFailed(SearchRuntimeDetails theOutcome) {
-		log("SqlQuery {} failed in {} - Found {} matches", theOutcome.getSearchUuid(), theOutcome.getQueryStopwatch(), theOutcome.getFoundMatchesCount());
+		log(
+				"SqlQuery {} failed in {} - Found {} matches",
+				theOutcome.getSearchUuid(),
+				theOutcome.getQueryStopwatch(),
+				theOutcome.getFoundMatchesCount());
 	}
 
 	@Hook(value = Pointcut.JPA_PERFTRACE_INDEXSEARCH_QUERY_COMPLETE)
 	public void indexSearchQueryComplete(SearchRuntimeDetails theOutcome) {
-		log("Index query for {} completed in {} - Found {} matches", theOutcome.getSearchUuid(), theOutcome.getQueryStopwatch(), theOutcome.getFoundIndexMatchesCount());
+		log(
+				"Index query for {} completed in {} - Found {} matches",
+				theOutcome.getSearchUuid(),
+				theOutcome.getQueryStopwatch(),
+				theOutcome.getFoundIndexMatchesCount());
 	}
 
 	@Hook(value = Pointcut.JPA_PERFTRACE_INFO)
@@ -105,5 +129,4 @@ public class PerformanceTracingLoggingInterceptor {
 	private void log(String theMessage, Object... theArgs) {
 		LogUtil.log(myLog, myLevel, theMessage, theArgs);
 	}
-
 }

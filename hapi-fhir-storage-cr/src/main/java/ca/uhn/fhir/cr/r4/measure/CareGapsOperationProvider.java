@@ -29,7 +29,7 @@ import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.Parameters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Date;
 import java.util.List;
@@ -38,11 +38,8 @@ import java.util.function.Function;
 public class CareGapsOperationProvider {
 	private static final Logger ourLog = LoggerFactory.getLogger(CareGapsOperationProvider.class);
 
-	Function<RequestDetails, CareGapsService> myCareGapsServiceFunction;
-
-	public CareGapsOperationProvider(Function<RequestDetails, CareGapsService> theCareGapsServiceFunction) {
-		this.myCareGapsServiceFunction = theCareGapsServiceFunction;
-	}
+	@Autowired
+	Function<RequestDetails, CareGapsService> myCareGapsServiceFactory;
 
 	/**
 	 * Implements the <a href=
@@ -92,25 +89,28 @@ public class CareGapsOperationProvider {
 	 *                          clinical organization) participates in
 	 * @return Parameters of bundles of Care Gap Measure Reports
 	 */
-	@Description(shortDefinition = "$care-gaps operation", value = "Implements the <a href=\"http://build.fhir.org/ig/HL7/davinci-deqm/OperationDefinition-care-gaps.html\">$care-gaps</a> operation found in the <a href=\"http://build.fhir.org/ig/HL7/davinci-deqm/index.html\">Da Vinci DEQM FHIR Implementation Guide</a> which is an extension of the <a href=\"http://build.fhir.org/operation-measure-care-gaps.html\">$care-gaps</a> operation found in the <a href=\"http://hl7.org/fhir/R4/clinicalreasoning-module.html\">FHIR Clinical Reasoning Module</a>.")
+	@Description(
+			shortDefinition = "$care-gaps operation",
+			value =
+					"Implements the <a href=\"http://build.fhir.org/ig/HL7/davinci-deqm/OperationDefinition-care-gaps.html\">$care-gaps</a> operation found in the <a href=\"http://build.fhir.org/ig/HL7/davinci-deqm/index.html\">Da Vinci DEQM FHIR Implementation Guide</a> which is an extension of the <a href=\"http://build.fhir.org/operation-measure-care-gaps.html\">$care-gaps</a> operation found in the <a href=\"http://hl7.org/fhir/R4/clinicalreasoning-module.html\">FHIR Clinical Reasoning Module</a>.")
 	@Operation(name = "$care-gaps", idempotent = true, type = Measure.class)
 	public Parameters careGapsReport(
-		RequestDetails theRequestDetails,
-		@OperationParam(name = "periodStart", typeName = "date") IPrimitiveType<Date> thePeriodStart,
-		@OperationParam(name = "periodEnd", typeName = "date") IPrimitiveType<Date> thePeriodEnd,
-		@OperationParam(name = "topic") List<String> theTopic,
-		@OperationParam(name = "subject") String theSubject,
-		@OperationParam(name = "practitioner") String thePractitioner,
-		@OperationParam(name = "organization") String theOrganization,
-		@OperationParam(name = "status") List<String> theStatus,
-		@OperationParam(name = "measureId") List<String> theMeasureId,
-		@OperationParam(name = "measureIdentifier") List<String> theMeasureIdentifier,
-		@OperationParam(name = "measureUrl") List<CanonicalType> theMeasureUrl,
-		@OperationParam(name = "program") List<String> theProgram) {
+			RequestDetails theRequestDetails,
+			@OperationParam(name = "periodStart", typeName = "date") IPrimitiveType<Date> thePeriodStart,
+			@OperationParam(name = "periodEnd", typeName = "date") IPrimitiveType<Date> thePeriodEnd,
+			@OperationParam(name = "topic") List<String> theTopic,
+			@OperationParam(name = "subject") String theSubject,
+			@OperationParam(name = "practitioner") String thePractitioner,
+			@OperationParam(name = "organization") String theOrganization,
+			@OperationParam(name = "status") List<String> theStatus,
+			@OperationParam(name = "measureId") List<String> theMeasureId,
+			@OperationParam(name = "measureIdentifier") List<String> theMeasureIdentifier,
+			@OperationParam(name = "measureUrl") List<CanonicalType> theMeasureUrl,
+			@OperationParam(name = "program") List<String> theProgram) {
 
-		return myCareGapsServiceFunction
-			.apply(theRequestDetails)
-					.getCareGapsReport(
+		return myCareGapsServiceFactory
+				.apply(theRequestDetails)
+				.getCareGapsReport(
 						thePeriodStart,
 						thePeriodEnd,
 						theTopic,
@@ -121,7 +121,6 @@ public class CareGapsOperationProvider {
 						theMeasureId,
 						theMeasureIdentifier,
 						theMeasureUrl,
-						theProgram
-					);
+						theProgram);
 	}
 }

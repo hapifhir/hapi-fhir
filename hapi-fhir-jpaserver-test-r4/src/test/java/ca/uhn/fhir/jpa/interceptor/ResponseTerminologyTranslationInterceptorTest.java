@@ -1,14 +1,15 @@
 package ca.uhn.fhir.jpa.interceptor;
 
+import ca.uhn.fhir.batch2.api.IJobCoordinator;
+import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.jpa.api.model.BulkExportJobResults;
-import ca.uhn.fhir.jpa.api.svc.IBatch2JobRunner;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
-import ca.uhn.fhir.jpa.util.BulkExportUtils;
 import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.api.server.bulk.BulkDataExportOptions;
+import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
 import ca.uhn.fhir.rest.server.interceptor.ResponseTerminologyTranslationInterceptor;
+import ca.uhn.fhir.util.Batch2JobDefinitionConstants;
 import ca.uhn.fhir.util.JsonUtil;
 import com.google.common.collect.Sets;
 import org.hamcrest.Matchers;
@@ -43,7 +44,7 @@ public class ResponseTerminologyTranslationInterceptorTest extends BaseResourceP
 	private ResponseTerminologyTranslationInterceptor myResponseTerminologyTranslationInterceptor;
 
 	@Autowired
-	private IBatch2JobRunner myJobRunner;
+	private IJobCoordinator myJobCoordinator;
 
 	@BeforeEach
 	public void beforeEach() {
@@ -198,23 +199,26 @@ public class ResponseTerminologyTranslationInterceptorTest extends BaseResourceP
 
 	private void createBulkJobAndCheckCodingList(List<String> codingList) {
 		// Create a bulk job
-		BulkDataExportOptions options = new BulkDataExportOptions();
+		BulkExportJobParameters options = new BulkExportJobParameters();
 		options.setResourceTypes(Sets.newHashSet("Observation"));
 		options.setFilters(Sets.newHashSet(TEST_OBV_FILTER));
-		options.setExportStyle(BulkDataExportOptions.ExportStyle.SYSTEM);
+		options.setExportStyle(BulkExportJobParameters.ExportStyle.SYSTEM);
 		options.setOutputFormat(Constants.CT_FHIR_NDJSON);
 
-		Batch2JobStartResponse startResponse = myJobRunner.startNewJob(BulkExportUtils.createBulkExportJobParametersFromExportOptions(options));
+		JobInstanceStartRequest startRequest = new JobInstanceStartRequest();
+		startRequest.setJobDefinitionId(Batch2JobDefinitionConstants.BULK_EXPORT);
+		startRequest.setParameters(options);
+		Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(mySrd, startRequest);
 
 		assertNotNull(startResponse);
 
 		// Run a scheduled pass to build the export
 		myBatch2JobHelper.awaitJobCompletion(startResponse.getInstanceId());
 
-		await().until(() -> myJobRunner.getJobInfo(startResponse.getInstanceId()).getReport() != null);
+		await().until(() -> myJobCoordinator.getInstance(startResponse.getInstanceId()).getReport() != null);
 
 		// Iterate over the files
-		String report = myJobRunner.getJobInfo(startResponse.getInstanceId()).getReport();
+		String report = myJobCoordinator.getInstance(startResponse.getInstanceId()).getReport();
 		BulkExportJobResults results = JsonUtil.deserialize(report, BulkExportJobResults.class);
 		for (Map.Entry<String, List<String>> file : results.getResourceTypeToBinaryIds().entrySet()) {
 			String resourceTypeInFile = file.getKey();

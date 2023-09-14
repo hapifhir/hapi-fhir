@@ -23,13 +23,11 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.servlet.ServletException;
 import java.time.LocalDate;
 import java.time.Month;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.function.Consumer;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -75,8 +73,10 @@ public abstract class BasePartitioningR4Test extends BaseJpaR4SystemTest {
 		myStorageSettings.setMatchUrlCacheEnabled(new JpaStorageSettings().getMatchUrlCache());
 	}
 
+	@Override
 	@BeforeEach
-	public void before() throws ServletException {
+	public void before() throws Exception {
+		super.before();
 		myPartitionSettings.setPartitioningEnabled(true);
 		myPartitionSettings.setIncludePartitionInSearchHashes(new PartitionSettings().isIncludePartitionInSearchHashes());
 
@@ -183,7 +183,7 @@ public abstract class BasePartitioningR4Test extends BaseJpaR4SystemTest {
 		when(mySrd.getRequestId()).thenReturn("REQUEST_ID");
 	}
 
-	protected Consumer<IBaseResource> withPartition(Integer thePartitionId) {
+	protected ICreationArgument withPartition(Integer thePartitionId) {
 		return t -> {
 			if (thePartitionId != null) {
 				addCreatePartition(thePartitionId, null);

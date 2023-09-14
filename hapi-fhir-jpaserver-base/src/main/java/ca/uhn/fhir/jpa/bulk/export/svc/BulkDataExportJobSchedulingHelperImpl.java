@@ -34,7 +34,6 @@ import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.util.Batch2JobDefinitionConstants;
 import ca.uhn.fhir.util.JsonUtil;
-import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.instance.model.api.IBaseBinary;
@@ -49,15 +48,14 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import javax.annotation.Nonnull;
-import javax.annotation.PostConstruct;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import javax.annotation.Nonnull;
+import javax.annotation.PostConstruct;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -72,7 +70,13 @@ public class BulkDataExportJobSchedulingHelperImpl implements IBulkDataExportJob
 	private final IJobPersistence myJpaJobPersistence;
 	private TransactionTemplate myTxTemplate;
 
-	public BulkDataExportJobSchedulingHelperImpl(DaoRegistry theDaoRegistry, PlatformTransactionManager theTxManager, JpaStorageSettings theDaoConfig, BulkExportHelperService theBulkExportHelperSvc, IJobPersistence theJpaJobPersistence, TransactionTemplate theTxTemplate) {
+	public BulkDataExportJobSchedulingHelperImpl(
+			DaoRegistry theDaoRegistry,
+			PlatformTransactionManager theTxManager,
+			JpaStorageSettings theDaoConfig,
+			BulkExportHelperService theBulkExportHelperSvc,
+			IJobPersistence theJpaJobPersistence,
+			TransactionTemplate theTxTemplate) {
 		myDaoRegistry = theDaoRegistry;
 		myTxManager = theTxManager;
 		myDaoConfig = theDaoConfig;
@@ -116,12 +120,11 @@ public class BulkDataExportJobSchedulingHelperImpl implements IBulkDataExportJob
 			return;
 		}
 
-		final List<JobInstance> jobInstancesToDelete = myTxTemplate.execute(t ->
-			myJpaJobPersistence.fetchInstances(Batch2JobDefinitionConstants.BULK_EXPORT,
+		final List<JobInstance> jobInstancesToDelete = myTxTemplate.execute(t -> myJpaJobPersistence.fetchInstances(
+				Batch2JobDefinitionConstants.BULK_EXPORT,
 				StatusEnum.getEndedStatuses(),
 				computeCutoffFromConfig(),
-				PageRequest.of(0, 50))
-		);
+				PageRequest.of(0, 50)));
 
 		if (jobInstancesToDelete == null || jobInstancesToDelete.isEmpty()) {
 			ourLog.debug("No batch 2 bulk export jobs found!  Nothing to do!");
@@ -133,19 +136,24 @@ public class BulkDataExportJobSchedulingHelperImpl implements IBulkDataExportJob
 			ourLog.info("Deleting batch 2 bulk export job: {}", jobInstance);
 
 			myTxTemplate.execute(t -> {
-				final Optional<JobInstance> optJobInstanceForInstanceId = myJpaJobPersistence.fetchInstance(jobInstance.getInstanceId());
+				final Optional<JobInstance> optJobInstanceForInstanceId =
+						myJpaJobPersistence.fetchInstance(jobInstance.getInstanceId());
 
 				if (optJobInstanceForInstanceId.isEmpty()) {
-					ourLog.error("Can't find job instance for ID: {} despite having retrieved it in the first step", jobInstance.getInstanceId());
+					ourLog.error(
+							"Can't find job instance for ID: {} despite having retrieved it in the first step",
+							jobInstance.getInstanceId());
 					return null;
 				}
 
 				final JobInstance jobInstanceForInstanceId = optJobInstanceForInstanceId.get();
 				ourLog.info("Deleting bulk export job: {}", jobInstanceForInstanceId);
 
-				// We need to keep these for investigation but we also need a process to manually delete these jobs once we're done investigating
+				// We need to keep these for investigation but we also need a process to manually delete these jobs once
+				// we're done investigating
 				if (StatusEnum.FAILED == jobInstanceForInstanceId.getStatus()) {
-					ourLog.info("skipping because the status is FAILED for ID: {}" + jobInstanceForInstanceId.getInstanceId());
+					ourLog.info("skipping because the status is FAILED for ID: {}"
+							+ jobInstanceForInstanceId.getInstanceId());
 					return null;
 				}
 
@@ -166,11 +174,15 @@ public class BulkDataExportJobSchedulingHelperImpl implements IBulkDataExportJob
 	}
 
 	private void purgeBinariesIfNeeded(JobInstance theJobInstanceForInstanceId, String theJobInstanceReportString) {
-		final Optional<BulkExportJobResults> optBulkExportJobResults = getBulkExportJobResults(theJobInstanceReportString);
+		final Optional<BulkExportJobResults> optBulkExportJobResults =
+				getBulkExportJobResults(theJobInstanceReportString);
 
 		if (optBulkExportJobResults.isPresent()) {
 			final BulkExportJobResults bulkExportJobResults = optBulkExportJobResults.get();
-			ourLog.debug("job: {} resource type to binary ID: {}", theJobInstanceForInstanceId.getInstanceId(), bulkExportJobResults.getResourceTypeToBinaryIds());
+			ourLog.debug(
+					"job: {} resource type to binary ID: {}",
+					theJobInstanceForInstanceId.getInstanceId(),
+					bulkExportJobResults.getResourceTypeToBinaryIds());
 
 			final Map<String, List<String>> resourceTypeToBinaryIds = bulkExportJobResults.getResourceTypeToBinaryIds();
 			for (String resourceType : resourceTypeToBinaryIds.keySet()) {
@@ -192,7 +204,8 @@ public class BulkDataExportJobSchedulingHelperImpl implements IBulkDataExportJob
 	@Nonnull
 	private Optional<BulkExportJobResults> getBulkExportJobResults(String theJobInstanceReportString) {
 		if (StringUtils.isBlank(theJobInstanceReportString)) {
-			ourLog.error(String.format("Cannot parse job report string because it's null or blank: %s", theJobInstanceReportString));
+			ourLog.error(String.format(
+					"Cannot parse job report string because it's null or blank: %s", theJobInstanceReportString));
 			return Optional.empty();
 		}
 
@@ -208,14 +221,10 @@ public class BulkDataExportJobSchedulingHelperImpl implements IBulkDataExportJob
 	private Date computeCutoffFromConfig() {
 		final int bulkExportFileRetentionPeriodHours = myDaoConfig.getBulkExportFileRetentionPeriodHours();
 
-		final LocalDateTime cutoffLocalDateTime = LocalDateTime.now()
-			.minusHours(bulkExportFileRetentionPeriodHours);
+		final LocalDateTime cutoffLocalDateTime = LocalDateTime.now().minusHours(bulkExportFileRetentionPeriodHours);
 
-		return Date.from(cutoffLocalDateTime
-			.atZone(ZoneId.systemDefault())
-			.toInstant());
+		return Date.from(cutoffLocalDateTime.atZone(ZoneId.systemDefault()).toInstant());
 	}
-
 
 	public static class PurgeExpiredFilesJob implements HapiJob {
 		@Autowired
@@ -227,4 +236,3 @@ public class BulkDataExportJobSchedulingHelperImpl implements IBulkDataExportJob
 		}
 	}
 }
-

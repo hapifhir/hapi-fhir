@@ -1,0 +1,8 @@
+---
+type: fix
+issue: 4982
+title: "
+      $mdm-clear has been fixed to respect batch-size parameter
+      (unless it exceeds 500).
+      It has also been made slightly more efficient.
+"

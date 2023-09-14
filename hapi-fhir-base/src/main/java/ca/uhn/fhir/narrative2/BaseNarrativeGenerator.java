@@ -28,19 +28,16 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.narrative.INarrativeGenerator;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.Logs;
-import ch.qos.logback.classic.spi.LogbackServiceProvider;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.INarrative;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nullable;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+import javax.annotation.Nullable;
 
 import static org.apache.commons.lang3.StringUtils.defaultIfEmpty;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -63,10 +60,15 @@ public abstract class BaseNarrativeGenerator implements INarrativeGenerator {
 		List<INarrativeTemplate> templates = getTemplateForElement(theFhirContext, theResource);
 		INarrativeTemplate template = null;
 		if (templates.isEmpty()) {
-			Logs.getNarrativeGenerationTroubleshootingLog().debug("No templates match for resource of type {}", theResource.getClass());
+			Logs.getNarrativeGenerationTroubleshootingLog()
+					.debug("No templates match for resource of type {}", theResource.getClass());
 		} else {
 			if (templates.size() > 1) {
-				Logs.getNarrativeGenerationTroubleshootingLog().debug("Multiple templates match for resource of type {} - Picking first from: {}", theResource.getClass(), templates);
+				Logs.getNarrativeGenerationTroubleshootingLog()
+						.debug(
+								"Multiple templates match for resource of type {} - Picking first from: {}",
+								theResource.getClass(),
+								templates);
 			}
 			template = templates.get(0);
 			Logs.getNarrativeGenerationTroubleshootingLog().debug("Selected template: {}", template);
@@ -78,7 +80,7 @@ public abstract class BaseNarrativeGenerator implements INarrativeGenerator {
 	public String generateResourceNarrative(FhirContext theFhirContext, IBaseResource theResource) {
 		INarrativeTemplate template = selectTemplate(theFhirContext, theResource);
 		if (template != null) {
-			String narrative = applyTemplate(theFhirContext, template, (IBase)theResource);
+			String narrative = applyTemplate(theFhirContext, template, (IBase) theResource);
 			return cleanWhitespace(narrative);
 		}
 
@@ -89,7 +91,8 @@ public abstract class BaseNarrativeGenerator implements INarrativeGenerator {
 		return getManifest().getTemplateByElement(theFhirContext, getStyle(), theElement);
 	}
 
-	private boolean applyTemplate(FhirContext theFhirContext, INarrativeTemplate theTemplate, IBaseResource theResource) {
+	private boolean applyTemplate(
+			FhirContext theFhirContext, INarrativeTemplate theTemplate, IBaseResource theResource) {
 		if (templateDoesntApplyToResource(theTemplate, theResource)) {
 			return false;
 		}
@@ -119,18 +122,19 @@ public abstract class BaseNarrativeGenerator implements INarrativeGenerator {
 					throw new InternalErrorException(Msg.code(1865) + e);
 				}
 			}
-
 		}
 		return retVal;
 	}
 
 	private INarrative getOrCreateNarrativeChildElement(FhirContext theFhirContext, IBase nextTargetContext) {
-		BaseRuntimeElementCompositeDefinition<?> targetElementDef = (BaseRuntimeElementCompositeDefinition<?>) theFhirContext.getElementDefinition(nextTargetContext.getClass());
+		BaseRuntimeElementCompositeDefinition<?> targetElementDef = (BaseRuntimeElementCompositeDefinition<?>)
+				theFhirContext.getElementDefinition(nextTargetContext.getClass());
 		BaseRuntimeChildDefinition targetTextChild = targetElementDef.getChildByName("text");
 		List<IBase> existing = targetTextChild.getAccessor().getValues(nextTargetContext);
 		INarrative nextTargetNarrative;
 		if (existing.isEmpty()) {
-			nextTargetNarrative = (INarrative) theFhirContext.getElementDefinition("narrative").newInstance();
+			nextTargetNarrative = (INarrative)
+					theFhirContext.getElementDefinition("narrative").newInstance();
 			targetTextChild.getMutator().addValue(nextTargetContext, nextTargetNarrative);
 		} else {
 			nextTargetNarrative = (INarrative) existing.get(0);
@@ -138,7 +142,8 @@ public abstract class BaseNarrativeGenerator implements INarrativeGenerator {
 		return nextTargetNarrative;
 	}
 
-	private List<IBase> findElementsInResourceRequiringNarratives(FhirContext theFhirContext, IBaseResource theResource, String theContextPath) {
+	private List<IBase> findElementsInResourceRequiringNarratives(
+			FhirContext theFhirContext, IBaseResource theResource, String theContextPath) {
 		if (theFhirContext.getVersion().getVersion().isOlderThan(FhirVersionEnum.DSTU3)) {
 			return Collections.singletonList(theResource);
 		}
@@ -146,17 +151,16 @@ public abstract class BaseNarrativeGenerator implements INarrativeGenerator {
 		return fhirPath.evaluate(theResource, theContextPath, IBase.class);
 	}
 
-	protected abstract String applyTemplate(FhirContext theFhirContext, INarrativeTemplate theTemplate, IBase theTargetContext);
+	protected abstract String applyTemplate(
+			FhirContext theFhirContext, INarrativeTemplate theTemplate, IBase theTargetContext);
 
 	private boolean templateDoesntApplyToResource(INarrativeTemplate theTemplate, IBaseResource theResource) {
 		boolean retVal = false;
-		if (theTemplate.getAppliesToProfiles() != null && !theTemplate.getAppliesToProfiles().isEmpty()) {
-			Set<String> resourceProfiles = theResource
-				.getMeta()
-				.getProfile()
-				.stream()
-				.map(t -> t.getValueAsString())
-				.collect(Collectors.toSet());
+		if (theTemplate.getAppliesToProfiles() != null
+				&& !theTemplate.getAppliesToProfiles().isEmpty()) {
+			Set<String> resourceProfiles = theResource.getMeta().getProfile().stream()
+					.map(t -> t.getValueAsString())
+					.collect(Collectors.toSet());
 			retVal = true;
 			for (String next : theTemplate.getAppliesToProfiles()) {
 				if (resourceProfiles.contains(next)) {
@@ -208,7 +212,8 @@ public abstract class BaseNarrativeGenerator implements INarrativeGenerator {
 						char char1 = Character.toLowerCase(theResult.charAt(i + 1));
 						char char2 = Character.toLowerCase(theResult.charAt(i + 2));
 						char char3 = Character.toLowerCase(theResult.charAt(i + 3));
-						char char4 = Character.toLowerCase((i + 4 < theResult.length()) ? theResult.charAt(i + 4) : ' ');
+						char char4 =
+								Character.toLowerCase((i + 4 < theResult.length()) ? theResult.charAt(i + 4) : ' ');
 						if (char1 == 'p' && char2 == 'r' && char3 == 'e') {
 							inPre = true;
 						} else if (char1 == '/' && char2 == 'p' && char3 == 'r' && char4 == 'e') {
@@ -231,5 +236,4 @@ public abstract class BaseNarrativeGenerator implements INarrativeGenerator {
 	}
 
 	protected abstract NarrativeTemplateManifest getManifest();
-
 }

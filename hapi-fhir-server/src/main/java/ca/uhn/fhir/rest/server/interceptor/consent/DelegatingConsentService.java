@@ -38,13 +38,15 @@ public class DelegatingConsentService implements IConsentService {
 	}
 
 	@Override
-	public ConsentOutcome canSeeResource(RequestDetails theRequestDetails, IBaseResource theResource, IConsentContextServices theContextServices) {
+	public ConsentOutcome canSeeResource(
+			RequestDetails theRequestDetails, IBaseResource theResource, IConsentContextServices theContextServices) {
 		return myTarget.canSeeResource(theRequestDetails, theResource, theContextServices);
 	}
 
 	@Override
-	public ConsentOutcome willSeeResource(RequestDetails theRequestDetails, IBaseResource theResource, IConsentContextServices theContextServices) {
-		return myTarget.willSeeResource(theRequestDetails, theResource ,theContextServices);
+	public ConsentOutcome willSeeResource(
+			RequestDetails theRequestDetails, IBaseResource theResource, IConsentContextServices theContextServices) {
+		return myTarget.willSeeResource(theRequestDetails, theResource, theContextServices);
 	}
 
 	@Override
@@ -53,7 +55,10 @@ public class DelegatingConsentService implements IConsentService {
 	}
 
 	@Override
-	public void completeOperationFailure(RequestDetails theRequestDetails, BaseServerResponseException theException, IConsentContextServices theContextServices) {
+	public void completeOperationFailure(
+			RequestDetails theRequestDetails,
+			BaseServerResponseException theException,
+			IConsentContextServices theContextServices) {
 		myTarget.completeOperationFailure(theRequestDetails, theException, theContextServices);
 	}
 

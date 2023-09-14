@@ -34,7 +34,8 @@ import org.springframework.transaction.PlatformTransactionManager;
 
 import java.util.Date;
 
-public class FhirResourceDaoSubscriptionDstu2 extends BaseHapiFhirResourceDao<Subscription> implements IFhirResourceDaoSubscription<Subscription> {
+public class FhirResourceDaoSubscriptionDstu2 extends BaseHapiFhirResourceDao<Subscription>
+		implements IFhirResourceDaoSubscription<Subscription> {
 
 	@Autowired
 	private ISubscriptionTableDao mySubscriptionTableDao;
@@ -50,7 +51,8 @@ public class FhirResourceDaoSubscriptionDstu2 extends BaseHapiFhirResourceDao<Su
 	}
 
 	@Override
-	public Long getSubscriptionTablePidForSubscriptionResource(IIdType theId, RequestDetails theRequest, TransactionDetails theTransactionDetails) {
+	public Long getSubscriptionTablePidForSubscriptionResource(
+			IIdType theId, RequestDetails theRequest, TransactionDetails theTransactionDetails) {
 		ResourceTable entity = readEntityLatestVersion(theId, theRequest, theTransactionDetails);
 		SubscriptionTable table = mySubscriptionTableDao.findOneByResourcePid(entity.getId());
 		if (table == null) {
@@ -59,25 +61,39 @@ public class FhirResourceDaoSubscriptionDstu2 extends BaseHapiFhirResourceDao<Su
 		return table.getId();
 	}
 
-
 	@Override
-	protected void postPersist(ResourceTable theEntity, Subscription theSubscription, RequestDetails theRequestDetails) {
+	protected void postPersist(
+			ResourceTable theEntity, Subscription theSubscription, RequestDetails theRequestDetails) {
 		super.postPersist(theEntity, theSubscription, theRequestDetails);
 
 		createSubscriptionTable(theEntity, theSubscription);
 	}
 
-
 	@Override
-	public ResourceTable updateEntity(RequestDetails theRequest, IBaseResource theResource, IBasePersistedResource theEntity, Date theDeletedTimestampOrNull, boolean thePerformIndexing, boolean theUpdateVersion,
-												 TransactionDetails theTransactionDetails, boolean theForceUpdate, boolean theCreateNewHistoryEntry) {
-		ResourceTable retVal = super.updateEntity(theRequest, theResource, theEntity, theDeletedTimestampOrNull, thePerformIndexing, theUpdateVersion, theTransactionDetails, theForceUpdate, theCreateNewHistoryEntry);
+	public ResourceTable updateEntity(
+			RequestDetails theRequest,
+			IBaseResource theResource,
+			IBasePersistedResource theEntity,
+			Date theDeletedTimestampOrNull,
+			boolean thePerformIndexing,
+			boolean theUpdateVersion,
+			TransactionDetails theTransactionDetails,
+			boolean theForceUpdate,
+			boolean theCreateNewHistoryEntry) {
+		ResourceTable retVal = super.updateEntity(
+				theRequest,
+				theResource,
+				theEntity,
+				theDeletedTimestampOrNull,
+				thePerformIndexing,
+				theUpdateVersion,
+				theTransactionDetails,
+				theForceUpdate,
+				theCreateNewHistoryEntry);
 
 		if (theDeletedTimestampOrNull != null) {
 			mySubscriptionTableDao.deleteAllForSubscription((ResourceTable) theEntity);
 		}
 		return retVal;
 	}
-
-
 }

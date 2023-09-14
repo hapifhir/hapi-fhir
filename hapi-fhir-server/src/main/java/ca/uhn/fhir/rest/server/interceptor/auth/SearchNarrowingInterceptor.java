@@ -51,9 +51,6 @@ import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 
-import javax.annotation.Nullable;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -64,6 +61,9 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
+import javax.annotation.Nullable;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 /**
  * This interceptor can be used to automatically narrow the scope of searches in order to
@@ -90,7 +90,8 @@ import java.util.stream.Collectors;
  */
 public class SearchNarrowingInterceptor {
 
-	public static final String POST_FILTERING_LIST_ATTRIBUTE_NAME = SearchNarrowingInterceptor.class.getName() + "_POST_FILTERING_LIST";
+	public static final String POST_FILTERING_LIST_ATTRIBUTE_NAME =
+			SearchNarrowingInterceptor.class.getName() + "_POST_FILTERING_LIST";
 	private IValidationSupport myValidationSupport;
 	private int myPostFilterLargeValueSetThreshold = 500;
 
@@ -108,7 +109,9 @@ public class SearchNarrowingInterceptor {
 	 * @see #setValidationSupport(IValidationSupport)
 	 */
 	public void setPostFilterLargeValueSetThreshold(int thePostFilterLargeValueSetThreshold) {
-		Validate.isTrue(thePostFilterLargeValueSetThreshold > 0, "thePostFilterLargeValueSetThreshold must be a positive integer");
+		Validate.isTrue(
+				thePostFilterLargeValueSetThreshold > 0,
+				"thePostFilterLargeValueSetThreshold must be a positive integer");
 		myPostFilterLargeValueSetThreshold = thePostFilterLargeValueSetThreshold;
 	}
 
@@ -141,11 +144,13 @@ public class SearchNarrowingInterceptor {
 	}
 
 	@Hook(Pointcut.SERVER_INCOMING_REQUEST_POST_PROCESSED)
-	public boolean hookIncomingRequestPostProcessed(RequestDetails theRequestDetails, HttpServletRequest theRequest, HttpServletResponse theResponse) throws AuthenticationException {
+	public boolean hookIncomingRequestPostProcessed(
+			RequestDetails theRequestDetails, HttpServletRequest theRequest, HttpServletResponse theResponse)
+			throws AuthenticationException {
 		// We don't support this operation type yet
 		Validate.isTrue(theRequestDetails.getRestOperationType() != RestOperationTypeEnum.SEARCH_SYSTEM);
 
-		//N.B do not add code above this for filtering, this should only ever occur on search.
+		// N.B do not add code above this for filtering, this should only ever occur on search.
 		if (shouldSkipNarrowing(theRequestDetails)) {
 			return true;
 		}
@@ -161,7 +166,6 @@ public class SearchNarrowingInterceptor {
 			postFilteringList.addAll(authorizedList.getAllowedCodeInValueSets());
 		}
 
-
 		FhirContext ctx = theRequestDetails.getServer().getFhirContext();
 		RuntimeResourceDefinition resDef = ctx.getResourceDefinition(theRequestDetails.getResourceName());
 		/*
@@ -170,12 +174,14 @@ public class SearchNarrowingInterceptor {
 		 */
 		Collection<String> compartments = authorizedList.getAllowedCompartments();
 		if (compartments != null) {
-			Map<String, List<String>> parameterToOrValues = processResourcesOrCompartments(theRequestDetails, resDef, compartments, true);
+			Map<String, List<String>> parameterToOrValues =
+					processResourcesOrCompartments(theRequestDetails, resDef, compartments, true);
 			applyParametersToRequestDetails(theRequestDetails, parameterToOrValues, true);
 		}
 		Collection<String> resources = authorizedList.getAllowedInstances();
 		if (resources != null) {
-			Map<String, List<String>> parameterToOrValues = processResourcesOrCompartments(theRequestDetails, resDef, resources, false);
+			Map<String, List<String>> parameterToOrValues =
+					processResourcesOrCompartments(theRequestDetails, resDef, resources, false);
 			applyParametersToRequestDetails(theRequestDetails, parameterToOrValues, true);
 		}
 		List<AllowedCodeInValueSet> allowedCodeInValueSet = authorizedList.getAllowedCodeInValueSets();
@@ -187,28 +193,33 @@ public class SearchNarrowingInterceptor {
 		return true;
 	}
 
-
 	/**
 	 * Skip unless it is a search request or an $everything operation
 	 */
 	private boolean shouldSkipNarrowing(RequestDetails theRequestDetails) {
 		return theRequestDetails.getRestOperationType() != RestOperationTypeEnum.SEARCH_TYPE
-			&& !"$everything".equalsIgnoreCase(theRequestDetails.getOperation());
+				&& !"$everything".equalsIgnoreCase(theRequestDetails.getOperation());
 	}
 
 	@Hook(Pointcut.SERVER_INCOMING_REQUEST_PRE_HANDLED)
-	public void hookIncomingRequestPreHandled(ServletRequestDetails theRequestDetails, HttpServletRequest theRequest, HttpServletResponse theResponse) throws AuthenticationException {
+	public void hookIncomingRequestPreHandled(
+			ServletRequestDetails theRequestDetails, HttpServletRequest theRequest, HttpServletResponse theResponse)
+			throws AuthenticationException {
 		if (theRequestDetails.getRestOperationType() != RestOperationTypeEnum.TRANSACTION) {
 			return;
 		}
 
 		IBaseBundle bundle = (IBaseBundle) theRequestDetails.getResource();
 		FhirContext ctx = theRequestDetails.getFhirContext();
-		BundleEntryUrlProcessor processor = new BundleEntryUrlProcessor(ctx, theRequestDetails, theRequest, theResponse);
+		BundleEntryUrlProcessor processor =
+				new BundleEntryUrlProcessor(ctx, theRequestDetails, theRequest, theResponse);
 		BundleUtil.processEntries(ctx, bundle, processor);
 	}
 
-	private void applyParametersToRequestDetails(RequestDetails theRequestDetails, @Nullable Map<String, List<String>> theParameterToOrValues, boolean thePatientIdMode) {
+	private void applyParametersToRequestDetails(
+			RequestDetails theRequestDetails,
+			@Nullable Map<String, List<String>> theParameterToOrValues,
+			boolean thePatientIdMode) {
 		if (theParameterToOrValues != null) {
 			Map<String, String[]> newParameters = new HashMap<>(theRequestDetails.getParameters());
 			for (Map.Entry<String, List<String>> nextEntry : theParameterToOrValues.entrySet()) {
@@ -234,24 +245,22 @@ public class SearchNarrowingInterceptor {
 					String[] existingValues = newParameters.get(nextParamName);
 
 					if (thePatientIdMode) {
-						List<String> nextAllowedValueIds = nextAllowedValues
-							.stream()
-							.map(t -> t.lastIndexOf("/") > -1 ? t.substring(t.lastIndexOf("/") + 1) : t)
-							.collect(Collectors.toList());
+						List<String> nextAllowedValueIds = nextAllowedValues.stream()
+								.map(t -> t.lastIndexOf("/") > -1 ? t.substring(t.lastIndexOf("/") + 1) : t)
+								.collect(Collectors.toList());
 						boolean restrictedExistingList = false;
 						for (int i = 0; i < existingValues.length; i++) {
 
 							String nextExistingValue = existingValues[i];
-							List<String> nextRequestedValues = QualifiedParamList.splitQueryStringByCommasIgnoreEscape(null, nextExistingValue);
+							List<String> nextRequestedValues =
+									QualifiedParamList.splitQueryStringByCommasIgnoreEscape(null, nextExistingValue);
 							List<String> nextPermittedValues = ListUtils.union(
-								ListUtils.intersection(nextRequestedValues, nextAllowedValues),
-								ListUtils.intersection(nextRequestedValues, nextAllowedValueIds)
-							);
+									ListUtils.intersection(nextRequestedValues, nextAllowedValues),
+									ListUtils.intersection(nextRequestedValues, nextAllowedValueIds));
 							if (nextPermittedValues.size() > 0) {
 								restrictedExistingList = true;
 								existingValues[i] = ParameterUtil.escapeAndJoinOrList(nextPermittedValues);
 							}
-
 						}
 
 						/*
@@ -261,35 +270,41 @@ public class SearchNarrowingInterceptor {
 						 * caller is forbidden from accessing the resources they requested.
 						 */
 						if (!restrictedExistingList) {
-							throw new ForbiddenOperationException(Msg.code(2026) + "Value not permitted for parameter " + UrlUtil.escapeUrlParam(nextParamName));
+							throw new ForbiddenOperationException(Msg.code(2026) + "Value not permitted for parameter "
+									+ UrlUtil.escapeUrlParam(nextParamName));
 						}
 
 					} else {
 
 						int existingValuesCount = existingValues.length;
-						String[] newValues = Arrays.copyOf(existingValues, existingValuesCount + nextAllowedValues.size());
+						String[] newValues =
+								Arrays.copyOf(existingValues, existingValuesCount + nextAllowedValues.size());
 						for (int i = 0; i < nextAllowedValues.size(); i++) {
 							newValues[existingValuesCount + i] = nextAllowedValues.get(i);
 						}
 						newParameters.put(nextParamName, newValues);
-
 					}
-
 				}
-
 			}
 			theRequestDetails.setParameters(newParameters);
 		}
 	}
 
 	@Nullable
-	private Map<String, List<String>> processResourcesOrCompartments(RequestDetails theRequestDetails, RuntimeResourceDefinition theResDef, Collection<String> theResourcesOrCompartments, boolean theAreCompartments) {
+	private Map<String, List<String>> processResourcesOrCompartments(
+			RequestDetails theRequestDetails,
+			RuntimeResourceDefinition theResDef,
+			Collection<String> theResourcesOrCompartments,
+			boolean theAreCompartments) {
 		Map<String, List<String>> retVal = null;
 
 		String lastCompartmentName = null;
 		String lastSearchParamName = null;
 		for (String nextCompartment : theResourcesOrCompartments) {
-			Validate.isTrue(StringUtils.countMatches(nextCompartment, '/') == 1, "Invalid compartment name (must be in form \"ResourceType/xxx\": %s", nextCompartment);
+			Validate.isTrue(
+					StringUtils.countMatches(nextCompartment, '/') == 1,
+					"Invalid compartment name (must be in form \"ResourceType/xxx\": %s",
+					nextCompartment);
 			String compartmentName = nextCompartment.substring(0, nextCompartment.indexOf('/'));
 
 			String searchParamName = null;
@@ -306,12 +321,12 @@ public class SearchNarrowingInterceptor {
 
 				} else if (theAreCompartments) {
 
-					searchParamName = selectBestSearchParameterForCompartment(theRequestDetails, theResDef, compartmentName);
+					searchParamName =
+							selectBestSearchParameterForCompartment(theRequestDetails, theResDef, compartmentName);
 				}
 
 				lastCompartmentName = compartmentName;
 				lastSearchParamName = searchParamName;
-
 			}
 
 			if (searchParamName != null) {
@@ -327,15 +342,18 @@ public class SearchNarrowingInterceptor {
 	}
 
 	@Nullable
-	private Map<String, List<String>> processAllowedCodes(RuntimeResourceDefinition theResDef, List<AllowedCodeInValueSet> theAllowedCodeInValueSet) {
+	private Map<String, List<String>> processAllowedCodes(
+			RuntimeResourceDefinition theResDef, List<AllowedCodeInValueSet> theAllowedCodeInValueSet) {
 		Map<String, List<String>> retVal = null;
 
 		for (AllowedCodeInValueSet next : theAllowedCodeInValueSet) {
 			String resourceName = next.getResourceName();
 			String valueSetUrl = next.getValueSetUrl();
 
-			ValidateUtil.isNotBlankOrThrowIllegalArgument(resourceName, "Resource name supplied by SearchNarrowingInterceptor must not be null");
-			ValidateUtil.isNotBlankOrThrowIllegalArgument(valueSetUrl, "ValueSet URL supplied by SearchNarrowingInterceptor must not be null");
+			ValidateUtil.isNotBlankOrThrowIllegalArgument(
+					resourceName, "Resource name supplied by SearchNarrowingInterceptor must not be null");
+			ValidateUtil.isNotBlankOrThrowIllegalArgument(
+					valueSetUrl, "ValueSet URL supplied by SearchNarrowingInterceptor must not be null");
 
 			if (!resourceName.equals(theResDef.getName())) {
 				continue;
@@ -371,7 +389,8 @@ public class SearchNarrowingInterceptor {
 			ValueSetExpansionOptions options = new ValueSetExpansionOptions();
 			options.setCount(myPostFilterLargeValueSetThreshold);
 			options.setIncludeHierarchy(false);
-			IValidationSupport.ValueSetExpansionOutcome outcome = myValidationSupport.expandValueSet(ctx, options, theValueSetUrl);
+			IValidationSupport.ValueSetExpansionOutcome outcome =
+					myValidationSupport.expandValueSet(ctx, options, theValueSetUrl);
 			if (outcome != null && outcome.getValueSet() != null) {
 				FhirTerser terser = myValidationSupport.getFhirContext().newTerser();
 				List<IBase> contains = terser.getValues(outcome.getValueSet(), "ValueSet.expansion.contains");
@@ -382,8 +401,8 @@ public class SearchNarrowingInterceptor {
 		return false;
 	}
 
-
-	private String selectBestSearchParameterForCompartment(RequestDetails theRequestDetails, RuntimeResourceDefinition theResDef, String compartmentName) {
+	private String selectBestSearchParameterForCompartment(
+			RequestDetails theRequestDetails, RuntimeResourceDefinition theResDef, String compartmentName) {
 		String searchParamName = null;
 
 		Set<String> queryParameters = theRequestDetails.getParameters().keySet();
@@ -394,9 +413,7 @@ public class SearchNarrowingInterceptor {
 			// Resources like Observation have several fields that add the resource to
 			// the compartment. In the case of Observation, it's subject, patient and performer.
 			// For this kind of thing, we'll prefer the one that matches the compartment name.
-			Optional<RuntimeSearchParam> primarySearchParam =
-				searchParams
-					.stream()
+			Optional<RuntimeSearchParam> primarySearchParam = searchParams.stream()
 					.filter(t -> t.getName().equalsIgnoreCase(compartmentName))
 					.findFirst();
 
@@ -406,16 +423,18 @@ public class SearchNarrowingInterceptor {
 				if (queryParameters.contains(primarySearchParamName)) {
 					searchParamName = primarySearchParamName;
 				} else {
-					// If the primary search parameter itself isn't in use, check to see whether any of its synonyms are.
-					Optional<RuntimeSearchParam> synonymInUse = findSynonyms(searchParams, primarySearchParam.get())
-						.stream()
-						.filter(t -> queryParameters.contains(t.getName()))
-						.findFirst();
+					// If the primary search parameter itself isn't in use, check to see whether any of its synonyms
+					// are.
+					Optional<RuntimeSearchParam> synonymInUse =
+							findSynonyms(searchParams, primarySearchParam.get()).stream()
+									.filter(t -> queryParameters.contains(t.getName()))
+									.findFirst();
 					if (synonymInUse.isPresent()) {
 						// if a synonym is in use, use it
 						searchParamName = synonymInUse.get().getName();
 					} else {
-						// if not, i.e., the original query is not filtering on this field at all, use the primary search param
+						// if not, i.e., the original query is not filtering on this field at all, use the primary
+						// search param
 						searchParamName = primarySearchParamName;
 					}
 				}
@@ -423,20 +442,20 @@ public class SearchNarrowingInterceptor {
 				// Otherwise, fall back to whatever search parameter is available
 				searchParamName = searchParams.get(0).getName();
 			}
-
 		}
 		return searchParamName;
 	}
 
-	private List<RuntimeSearchParam> findSynonyms(List<RuntimeSearchParam> searchParams, RuntimeSearchParam primarySearchParam) {
-		// We define two search parameters in a compartment as synonyms if they refer to the same field in the model, ignoring any qualifiers
+	private List<RuntimeSearchParam> findSynonyms(
+			List<RuntimeSearchParam> searchParams, RuntimeSearchParam primarySearchParam) {
+		// We define two search parameters in a compartment as synonyms if they refer to the same field in the model,
+		// ignoring any qualifiers
 
 		String primaryBasePath = getBasePath(primarySearchParam);
 
-		return searchParams
-			.stream()
-			.filter(t -> primaryBasePath.equals(getBasePath(t)))
-			.collect(Collectors.toList());
+		return searchParams.stream()
+				.filter(t -> primaryBasePath.equals(getBasePath(t)))
+				.collect(Collectors.toList());
 	}
 
 	private String getBasePath(RuntimeSearchParam searchParam) {
@@ -454,7 +473,11 @@ public class SearchNarrowingInterceptor {
 		private final HttpServletRequest myRequest;
 		private final HttpServletResponse myResponse;
 
-		public BundleEntryUrlProcessor(FhirContext theFhirContext, ServletRequestDetails theRequestDetails, HttpServletRequest theRequest, HttpServletResponse theResponse) {
+		public BundleEntryUrlProcessor(
+				FhirContext theFhirContext,
+				ServletRequestDetails theRequestDetails,
+				HttpServletRequest theRequest,
+				HttpServletResponse theResponse) {
 			myFhirContext = theFhirContext;
 			myRequestDetails = theRequestDetails;
 			myRequest = theRequest;
@@ -467,17 +490,19 @@ public class SearchNarrowingInterceptor {
 
 			String url = theModifiableBundleEntry.getRequestUrl();
 
-			ServletSubRequestDetails subServletRequestDetails = ServletRequestUtil.getServletSubRequestDetails(myRequestDetails, url, paramValues);
-			BaseMethodBinding method = subServletRequestDetails.getServer().determineResourceMethod(subServletRequestDetails, url);
+			ServletSubRequestDetails subServletRequestDetails =
+					ServletRequestUtil.getServletSubRequestDetails(myRequestDetails, url, paramValues);
+			BaseMethodBinding method =
+					subServletRequestDetails.getServer().determineResourceMethod(subServletRequestDetails, url);
 			RestOperationTypeEnum restOperationType = method.getRestOperationType();
 			subServletRequestDetails.setRestOperationType(restOperationType);
 
 			hookIncomingRequestPostProcessed(subServletRequestDetails, myRequest, myResponse);
 
-			theModifiableBundleEntry.setRequestUrl(myFhirContext, ServletRequestUtil.extractUrl(subServletRequestDetails));
+			theModifiableBundleEntry.setRequestUrl(
+					myFhirContext, ServletRequestUtil.extractUrl(subServletRequestDetails));
 		}
 	}
-
 
 	static List<AllowedCodeInValueSet> getPostFilteringList(RequestDetails theRequestDetails) {
 		List<AllowedCodeInValueSet> retVal = getPostFilteringListOrNull(theRequestDetails);
@@ -492,6 +517,4 @@ public class SearchNarrowingInterceptor {
 	static List<AllowedCodeInValueSet> getPostFilteringListOrNull(RequestDetails theRequestDetails) {
 		return (List<AllowedCodeInValueSet>) theRequestDetails.getAttribute(POST_FILTERING_LIST_ATTRIBUTE_NAME);
 	}
-
-
 }

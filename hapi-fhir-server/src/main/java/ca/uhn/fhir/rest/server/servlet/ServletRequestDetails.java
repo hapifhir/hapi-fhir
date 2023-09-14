@@ -31,9 +31,6 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.Validate;
 
-import javax.annotation.Nonnull;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -48,6 +45,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.zip.GZIPInputStream;
+import javax.annotation.Nonnull;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.trim;
@@ -105,7 +105,8 @@ public class ServletRequestDetails extends RequestDetails {
 			return requestContents;
 		} catch (IOException e) {
 			ourLog.error("Could not load request resource", e);
-			throw new InvalidRequestException(Msg.code(308) + String.format("Could not load request resource: %s", e.getMessage()));
+			throw new InvalidRequestException(
+					Msg.code(308) + String.format("Could not load request resource: %s", e.getMessage()));
 		}
 	}
 
@@ -134,7 +135,9 @@ public class ServletRequestDetails extends RequestDetails {
 	@Override
 	public List<String> getHeaders(String name) {
 		Enumeration<String> headers = getServletRequest().getHeaders(name);
-		return headers == null ? Collections.emptyList() : Collections.list(getServletRequest().getHeaders(name));
+		return headers == null
+				? Collections.emptyList()
+				: Collections.list(getServletRequest().getHeaders(name));
 	}
 
 	@Override
@@ -192,14 +195,14 @@ public class ServletRequestDetails extends RequestDetails {
 		return this;
 	}
 
-	private void setRetryFields(HttpServletRequest theRequest){
-		if (theRequest == null){
+	private void setRetryFields(HttpServletRequest theRequest) {
+		if (theRequest == null) {
 			return;
 		}
 		Enumeration<String> headers = theRequest.getHeaders(Constants.HEADER_RETRY_ON_VERSION_CONFLICT);
 		if (headers != null) {
 			Iterator<String> headerIterator = headers.asIterator();
-			while(headerIterator.hasNext()){
+			while (headerIterator.hasNext()) {
 				String headerValue = headerIterator.next();
 				if (isNotBlank(headerValue)) {
 					StringTokenizer tok = new StringTokenizer(headerValue, ";");
@@ -245,5 +248,4 @@ public class ServletRequestDetails extends RequestDetails {
 		PreferHeader prefer = RestfulServerUtils.parsePreferHeader(null, preferHeader);
 		return prefer.getRespondAsync();
 	}
-
 }

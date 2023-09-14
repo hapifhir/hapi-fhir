@@ -26,20 +26,23 @@ import ca.uhn.fhir.jpa.util.AddRemoveCount;
 import com.google.common.annotations.VisibleForTesting;
 import org.springframework.stereotype.Service;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import javax.persistence.PersistenceContextType;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.persistence.PersistenceContextType;
 
 @Service
 public class DaoSearchParamSynchronizer {
 	@PersistenceContext(type = PersistenceContextType.TRANSACTION)
 	protected EntityManager myEntityManager;
 
-	public AddRemoveCount synchronizeSearchParamsToDatabase(ResourceIndexedSearchParams theParams, ResourceTable theEntity, ResourceIndexedSearchParams existingParams) {
+	public AddRemoveCount synchronizeSearchParamsToDatabase(
+			ResourceIndexedSearchParams theParams,
+			ResourceTable theEntity,
+			ResourceIndexedSearchParams existingParams) {
 		AddRemoveCount retVal = new AddRemoveCount();
 
 		synchronize(theEntity, retVal, theParams.myStringParams, existingParams.myStringParams);
@@ -64,7 +67,11 @@ public class DaoSearchParamSynchronizer {
 		myEntityManager = theEntityManager;
 	}
 
-	private <T extends BaseResourceIndex> void synchronize(ResourceTable theEntity, AddRemoveCount theAddRemoveCount, Collection<T> theNewParams, Collection<T> theExistingParams) {
+	private <T extends BaseResourceIndex> void synchronize(
+			ResourceTable theEntity,
+			AddRemoveCount theAddRemoveCount,
+			Collection<T> theNewParams,
+			Collection<T> theExistingParams) {
 		Collection<T> newParams = theNewParams;
 		for (T next : newParams) {
 			next.setPartitionId(theEntity.getPartitionId());
@@ -105,7 +112,8 @@ public class DaoSearchParamSynchronizer {
 	 * @param theIndexesToRemove The rows that would be removed
 	 * @param theIndexesToAdd    The rows that would be added
 	 */
-	private <T extends BaseResourceIndex> void tryToReuseIndexEntities(List<T> theIndexesToRemove, List<T> theIndexesToAdd) {
+	private <T extends BaseResourceIndex> void tryToReuseIndexEntities(
+			List<T> theIndexesToRemove, List<T> theIndexesToAdd) {
 		for (int addIndex = 0; addIndex < theIndexesToAdd.size(); addIndex++) {
 
 			// If there are no more rows to remove, there's nothing we can reuse
@@ -124,7 +132,6 @@ public class DaoSearchParamSynchronizer {
 			theIndexesToAdd.set(addIndex, entityToReuse);
 		}
 	}
-
 
 	public static <T> List<T> subtract(Collection<T> theSubtractFrom, Collection<T> theToSubtract) {
 		assert theSubtractFrom != theToSubtract || (theSubtractFrom.isEmpty());

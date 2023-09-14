@@ -54,6 +54,8 @@ public interface IJobInstance {
 
 	String getErrorMessage();
 
+	String getWarningMessages();
+
 	boolean isCancelled();
 
 	String getReport();

@@ -118,6 +118,4 @@ public class ResourceCountCache implements IHasScheduledJobs {
 	static void setNowForUnitTest(Long theNowForUnitTest) {
 		ourNowForUnitTest = theNowForUnitTest;
 	}
-
-
 }

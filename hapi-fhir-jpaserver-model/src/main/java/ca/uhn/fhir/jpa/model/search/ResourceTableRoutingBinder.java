@@ -36,8 +36,12 @@ public class ResourceTableRoutingBinder implements RoutingBinder {
 	private static class ResourceTableBridge implements RoutingBridge<ResourceTable> {
 
 		@Override
-		public void route(DocumentRoutes theDocumentRoutes, Object theO, ResourceTable theResourceTable, RoutingBridgeRouteContext theRoutingBridgeRouteContext) {
-			if (theResourceTable.getDeleted() == null && theResourceTable.getIndexStatus() != null ) {
+		public void route(
+				DocumentRoutes theDocumentRoutes,
+				Object theO,
+				ResourceTable theResourceTable,
+				RoutingBridgeRouteContext theRoutingBridgeRouteContext) {
+			if (theResourceTable.getDeleted() == null && theResourceTable.getIndexStatus() != null) {
 				theDocumentRoutes.addRoute();
 			} else {
 				theDocumentRoutes.notIndexed();
@@ -45,7 +49,11 @@ public class ResourceTableRoutingBinder implements RoutingBinder {
 		}
 
 		@Override
-		public void previousRoutes(DocumentRoutes theDocumentRoutes, Object theO, ResourceTable theResourceTable, RoutingBridgeRouteContext theRoutingBridgeRouteContext) {
+		public void previousRoutes(
+				DocumentRoutes theDocumentRoutes,
+				Object theO,
+				ResourceTable theResourceTable,
+				RoutingBridgeRouteContext theRoutingBridgeRouteContext) {
 			theDocumentRoutes.addRoute();
 		}
 	}

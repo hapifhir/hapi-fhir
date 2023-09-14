@@ -36,5 +36,4 @@ public interface ISearchParamPresentDao extends JpaRepository<SearchParamPresent
 	@Modifying
 	@Query("delete from SearchParamPresentEntity t WHERE t.myResourcePid = :resid")
 	void deleteByResourceId(@Param("resid") Long theResourcePid);
-
 }

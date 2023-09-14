@@ -19,13 +19,8 @@
  */
 package ca.uhn.fhir.rest.server.method;
 
-import ca.uhn.fhir.i18n.Msg;
-import static org.apache.commons.lang3.StringUtils.isBlank;
-
-import java.lang.reflect.Method;
-import java.util.*;
-
 import ca.uhn.fhir.context.ConfigurationException;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.SummaryEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -33,24 +28,30 @@ import ca.uhn.fhir.rest.param.binder.CollectionBinder;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
+import java.lang.reflect.Method;
+import java.util.*;
+
+import static org.apache.commons.lang3.StringUtils.isBlank;
+
 public class SummaryEnumParameter implements IParameter {
 
 	@SuppressWarnings("rawtypes")
 	private Class<? extends Collection> myInnerCollectionType;
 
-
 	@Override
-	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public Object translateQueryParametersIntoServerArgument(RequestDetails theRequest, BaseMethodBinding theMethodBinding) throws InternalErrorException, InvalidRequestException {
+	@SuppressWarnings({"rawtypes", "unchecked"})
+	public Object translateQueryParametersIntoServerArgument(
+			RequestDetails theRequest, BaseMethodBinding theMethodBinding)
+			throws InternalErrorException, InvalidRequestException {
 		Set<SummaryEnum> value = getSummaryValueOrNull(theRequest);
 		if (value == null || value.isEmpty()) {
 			return null;
 		}
-		
+
 		if (myInnerCollectionType == null) {
 			return value.iterator().next();
 		}
-		
+
 		try {
 			Collection retVal = myInnerCollectionType.newInstance();
 			retVal.addAll(value);
@@ -89,16 +90,20 @@ public class SummaryEnumParameter implements IParameter {
 				}
 			}
 		}
-		
+
 		if (retVal != null) {
 			if (retVal.contains(SummaryEnum.TEXT)) {
 				if (retVal.size() > 1) {
-					String msg = theRequest.getServer().getFhirContext().getLocalizer().getMessage(SummaryEnumParameter.class, "cantCombineText");
+					String msg = theRequest
+							.getServer()
+							.getFhirContext()
+							.getLocalizer()
+							.getMessage(SummaryEnumParameter.class, "cantCombineText");
 					throw new InvalidRequestException(Msg.code(380) + msg);
 				}
 			}
 		}
-		
+
 		return retVal;
 	}
 
@@ -110,13 +115,19 @@ public class SummaryEnumParameter implements IParameter {
 	}
 
 	@Override
-	public void initializeTypes(Method theMethod, Class<? extends Collection<?>> theOuterCollectionType, Class<? extends Collection<?>> theInnerCollectionType, Class<?> theParameterType) {
+	public void initializeTypes(
+			Method theMethod,
+			Class<? extends Collection<?>> theOuterCollectionType,
+			Class<? extends Collection<?>> theInnerCollectionType,
+			Class<?> theParameterType) {
 		if (theOuterCollectionType != null) {
-			throw new ConfigurationException(Msg.code(381) + "Method '" + theMethod.getName() + "' in type '" + theMethod.getDeclaringClass().getCanonicalName() + "' is of type " + SummaryEnum.class + " but can not be a collection of collections");
+			throw new ConfigurationException(Msg.code(381) + "Method '" + theMethod.getName() + "' in type '"
+					+ theMethod.getDeclaringClass().getCanonicalName() + "' is of type " + SummaryEnum.class
+					+ " but can not be a collection of collections");
 		}
 		if (theInnerCollectionType != null) {
-			myInnerCollectionType = CollectionBinder.getInstantiableCollectionType(theInnerCollectionType, SummaryEnum.class.getSimpleName());
+			myInnerCollectionType = CollectionBinder.getInstantiableCollectionType(
+					theInnerCollectionType, SummaryEnum.class.getSimpleName());
 		}
 	}
-
 }

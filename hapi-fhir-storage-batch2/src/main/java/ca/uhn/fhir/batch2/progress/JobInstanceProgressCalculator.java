@@ -22,14 +22,13 @@ package ca.uhn.fhir.batch2.progress;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.coordinator.JobDefinitionRegistry;
 import ca.uhn.fhir.batch2.maintenance.JobChunkProgressAccumulator;
-import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.util.Logs;
 import ca.uhn.fhir.util.StopWatch;
 import org.slf4j.Logger;
 
-import javax.annotation.Nonnull;
 import java.util.Iterator;
+import javax.annotation.Nonnull;
 
 public class JobInstanceProgressCalculator {
 	private static final Logger ourLog = Logs.getBatchTroubleshootingLog();
@@ -37,7 +36,10 @@ public class JobInstanceProgressCalculator {
 	private final JobChunkProgressAccumulator myProgressAccumulator;
 	private final JobInstanceStatusUpdater myJobInstanceStatusUpdater;
 
-	public JobInstanceProgressCalculator(IJobPersistence theJobPersistence, JobChunkProgressAccumulator theProgressAccumulator, JobDefinitionRegistry theJobDefinitionRegistry) {
+	public JobInstanceProgressCalculator(
+			IJobPersistence theJobPersistence,
+			JobChunkProgressAccumulator theProgressAccumulator,
+			JobDefinitionRegistry theJobDefinitionRegistry) {
 		myJobPersistence = theJobPersistence;
 		myProgressAccumulator = theProgressAccumulator;
 		myJobInstanceStatusUpdater = new JobInstanceStatusUpdater(theJobDefinitionRegistry);
@@ -49,13 +51,25 @@ public class JobInstanceProgressCalculator {
 
 		InstanceProgress instanceProgress = calculateInstanceProgress(theInstanceId);
 
-		myJobPersistence.updateInstance(theInstanceId, currentInstance->{
+		myJobPersistence.updateInstance(theInstanceId, currentInstance -> {
 			instanceProgress.updateInstance(currentInstance);
 
 			if (currentInstance.getCombinedRecordsProcessed() > 0) {
-				ourLog.info("Job {} of type {} has status {} - {} records processed ({}/sec) - ETA: {}", currentInstance.getInstanceId(), currentInstance.getJobDefinitionId(), currentInstance.getStatus(), currentInstance.getCombinedRecordsProcessed(), currentInstance.getCombinedRecordsProcessedPerSecond(), currentInstance.getEstimatedTimeRemaining());
+				ourLog.info(
+						"Job {} of type {} has status {} - {} records processed ({}/sec) - ETA: {}",
+						currentInstance.getInstanceId(),
+						currentInstance.getJobDefinitionId(),
+						currentInstance.getStatus(),
+						currentInstance.getCombinedRecordsProcessed(),
+						currentInstance.getCombinedRecordsProcessedPerSecond(),
+						currentInstance.getEstimatedTimeRemaining());
 			} else {
-				ourLog.info("Job {} of type {} has status {} - {} records processed", currentInstance.getInstanceId(), currentInstance.getJobDefinitionId(), currentInstance.getStatus(), currentInstance.getCombinedRecordsProcessed());
+				ourLog.info(
+						"Job {} of type {} has status {} - {} records processed",
+						currentInstance.getInstanceId(),
+						currentInstance.getJobDefinitionId(),
+						currentInstance.getStatus(),
+						currentInstance.getCombinedRecordsProcessed());
 			}
 			ourLog.debug(instanceProgress.toString());
 
@@ -86,5 +100,4 @@ public class JobInstanceProgressCalculator {
 
 		return instanceProgress;
 	}
-
 }

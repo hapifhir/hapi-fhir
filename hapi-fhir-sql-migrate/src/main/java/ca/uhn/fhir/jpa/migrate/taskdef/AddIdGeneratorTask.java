@@ -65,7 +65,6 @@ public class AddIdGeneratorTask extends BaseTask {
 
 					String initSql = "insert into " + myGeneratorName + " values ( 1 )";
 					executeSql(myGeneratorName, initSql);
-
 				}
 				break;
 			case DERBY_EMBEDDED:
@@ -87,9 +86,7 @@ public class AddIdGeneratorTask extends BaseTask {
 		}
 
 		if (isNotBlank(sql)) {
-			Set<String> sequenceNames =
-				JdbcUtils.getSequenceNames(getConnectionProperties())
-					.stream()
+			Set<String> sequenceNames = JdbcUtils.getSequenceNames(getConnectionProperties()).stream()
 					.map(String::toLowerCase)
 					.collect(Collectors.toSet());
 			ourLog.debug("Currently have sequences: {}", sequenceNames);
@@ -100,7 +97,6 @@ public class AddIdGeneratorTask extends BaseTask {
 
 			executeSql(myGeneratorName, sql);
 		}
-
 	}
 
 	@Override

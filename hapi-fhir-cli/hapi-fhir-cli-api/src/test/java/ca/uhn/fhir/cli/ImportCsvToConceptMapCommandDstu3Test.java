@@ -45,7 +45,7 @@ public class ImportCsvToConceptMapCommandDstu3Test {
 	}
 
 	@RegisterExtension
-	public final RestServerDstu3Helper myRestServerDstu3Helper = new RestServerDstu3Helper(true);
+	public final RestServerDstu3Helper myRestServerDstu3Helper = RestServerDstu3Helper.newInitialized();
 	@RegisterExtension
 	public TlsAuthenticationTestHelper myTlsAuthenticationTestHelper = new TlsAuthenticationTestHelper();
 

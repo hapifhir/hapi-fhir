@@ -21,6 +21,7 @@ import org.hl7.fhir.r4.model.Binary;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Composition;
 import org.hl7.fhir.r4.model.DateTimeType;
+import org.hl7.fhir.r4.model.DecimalType;
 import org.hl7.fhir.r4.model.Device;
 import org.hl7.fhir.r4.model.DocumentReference;
 import org.hl7.fhir.r4.model.Encounter;
@@ -42,6 +43,7 @@ import org.hl7.fhir.r4.model.PrimitiveType;
 import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.QuestionnaireResponse;
 import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.Type;
 import org.hl7.fhir.utilities.xhtml.XhtmlNode;
@@ -173,6 +175,36 @@ public class JsonParserR4Test extends BaseTest {
 		String encoded = ourCtx.newXmlParser().encodeResourceToString(parsed);
 		assertEquals("<Patient xmlns=\"http://hl7.org/fhir\"><text><div xmlns=\"http://www.w3.org/1999/xhtml\"><img src=\"foo\"/>@fhirabend</div></text></Patient>", encoded);
 	}
+
+
+	@Test
+	public void testDontEncodeEmptyExtensionList() {
+		String asXml = """
+			<Bundle xmlns="http://hl7.org/fhir">
+			     <entry>
+			        <resource>
+			            <Composition>
+			                <section>
+			                    <entry>
+			                        <!--  Referenz auf PractitionerRole  -->
+			                        <reference value="PractitionerRole/8f1ba38d-c4c1-4c49-ac2a-7ff0e56bc150" />
+			                    </entry>
+			                </section>
+			            </Composition>
+			        </resource>
+			    </entry>
+			</Bundle>
+			""";
+
+		ourLog.info(asXml);
+
+		Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, asXml);
+
+		String asString = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle);
+		ourLog.info(asString);
+		assertThat(asString, not(containsString("{ }")));
+	}
+
 
 
 	@Test
@@ -1126,6 +1158,48 @@ public class JsonParserR4Test extends BaseTest {
 		assertEquals(auditEvent, serialized);
 
 	}
+
+
+	@Test
+	public void testEncodeToString_PrimitiveDataType() {
+		DecimalType object = new DecimalType("123.456000");
+		String expected = "123.456000";
+		String actual = ourCtx.newJsonParser().encodeToString(object);
+		assertEquals(expected, actual);
+	}
+
+	@Test
+	public void testEncodeToString_Resource() {
+		Patient p = new Patient();
+		p.setId("Patient/123");
+		p.setActive(true);
+		String expected = "{\"resourceType\":\"Patient\",\"id\":\"123\",\"active\":true}";
+		String actual = ourCtx.newJsonParser().encodeToString(p);
+		assertEquals(expected, actual);
+	}
+
+	@Test
+	public void testEncodeToString_GeneralPurposeDataType() {
+		HumanName name = new HumanName();
+		name.setFamily("Simpson").addGiven("Homer").addGiven("Jay");
+		name.addExtension("http://foo", new StringType("bar"));
+
+		String expected = "{\"extension\":[{\"url\":\"http://foo\",\"valueString\":\"bar\"}],\"family\":\"Simpson\",\"given\":[\"Homer\",\"Jay\"]}";
+		String actual = ourCtx.newJsonParser().encodeToString(name);
+		assertEquals(expected, actual);
+	}
+
+	@Test
+	public void testEncodeToString_BackboneElement() {
+		Patient.PatientCommunicationComponent communication = new Patient().addCommunication();
+		communication.setPreferred(true);
+		communication.getLanguage().setText("English");
+
+		String expected = "{\"language\":{\"text\":\"English\"},\"preferred\":true}";
+		String actual = ourCtx.newJsonParser().encodeToString(communication);
+		assertEquals(expected, actual);
+	}
+
 
 	@Test
 	public void testPreCommentsToFhirComments() {

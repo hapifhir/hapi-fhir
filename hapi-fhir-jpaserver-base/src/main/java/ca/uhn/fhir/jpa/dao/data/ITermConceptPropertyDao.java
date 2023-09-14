@@ -33,5 +33,4 @@ public interface ITermConceptPropertyDao extends JpaRepository<TermConceptProper
 
 	@Query("SELECT COUNT(t) FROM TermConceptProperty t WHERE t.myCodeSystemVersion.myId = :cs_pid")
 	Integer countByCodeSystemVersion(@Param("cs_pid") Long thePid);
-
 }

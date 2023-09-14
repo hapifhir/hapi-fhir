@@ -57,7 +57,11 @@ public enum FhirVersionEnum {
 	private volatile IFhirVersion myVersionImplementation;
 	private String myFhirVersionString;
 
-	FhirVersionEnum(String theVersionClass, FhirVersionEnum theEquivalent, boolean theIsRi, IVersionProvider theVersionExtractor) {
+	FhirVersionEnum(
+			String theVersionClass,
+			FhirVersionEnum theEquivalent,
+			boolean theIsRi,
+			IVersionProvider theVersionExtractor) {
 		myVersionClass = theVersionClass;
 		myEquivalent = theEquivalent;
 		myFhirVersionString = theVersionExtractor.provideVersion();
@@ -74,7 +78,8 @@ public enum FhirVersionEnum {
 		}
 		if (myVersionImplementation == null) {
 			try {
-				myVersionImplementation = (IFhirVersion) Class.forName(myVersionClass).newInstance();
+				myVersionImplementation =
+						(IFhirVersion) Class.forName(myVersionClass).newInstance();
 			} catch (Exception e) {
 				throw new InternalErrorException(Msg.code(1710) + "Failed to instantiate FHIR version " + name(), e);
 			}
@@ -143,7 +148,6 @@ public enum FhirVersionEnum {
 		return FhirContext.forCached(this);
 	}
 
-
 	private interface IVersionProvider {
 		String provideVersion();
 	}
@@ -168,7 +172,6 @@ public enum FhirVersionEnum {
 			default:
 				return determineVersionForType(theFhirType.getSuperclass());
 		}
-
 	}
 
 	private static class Version implements IVersionProvider {
@@ -184,7 +187,6 @@ public enum FhirVersionEnum {
 		public String provideVersion() {
 			return myVersion;
 		}
-
 	}
 
 	/**
@@ -208,7 +210,6 @@ public enum FhirVersionEnum {
 		public String provideVersion() {
 			return myVersion;
 		}
-
 	}
 
 	private static class R4Version implements IVersionProvider {
@@ -228,7 +229,6 @@ public enum FhirVersionEnum {
 		public String provideVersion() {
 			return myVersion;
 		}
-
 	}
 
 	private static class R4BVersion implements IVersionProvider {
@@ -248,7 +248,6 @@ public enum FhirVersionEnum {
 		public String provideVersion() {
 			return myVersion;
 		}
-
 	}
 
 	private static class R5Version implements IVersionProvider {
@@ -268,7 +267,6 @@ public enum FhirVersionEnum {
 		public String provideVersion() {
 			return myVersion;
 		}
-
 	}
 
 	/**
@@ -312,5 +310,4 @@ public enum FhirVersionEnum {
 
 		return null;
 	}
-
 }

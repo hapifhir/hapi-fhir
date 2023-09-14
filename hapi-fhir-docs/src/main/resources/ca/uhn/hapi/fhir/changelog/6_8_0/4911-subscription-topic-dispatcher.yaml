@@ -1,0 +1,4 @@
+---
+type: add
+issue: 4911
+title: "Added a new SubscriptionTopicDispatcher service for use by java extensions that need to dispatch their own subscription topic notifications"

@@ -21,25 +21,26 @@ package ca.uhn.fhir.jpa.topic;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
+import org.hl7.fhir.convertors.factory.VersionConvertorFactory_43_50;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r5.model.SubscriptionTopic;
 
 public final class SubscriptionTopicCanonicalizer {
 	private static final FhirContext ourFhirContextR5 = FhirContext.forR5();
 
-	private SubscriptionTopicCanonicalizer() {
-	}
+	private SubscriptionTopicCanonicalizer() {}
 
-	// WIP STR5 use elsewhere
-	public static SubscriptionTopic canonicalize(FhirContext theFhirContext, IBaseResource theSubscriptionTopic) {
+	public static SubscriptionTopic canonicalizeTopic(FhirContext theFhirContext, IBaseResource theSubscriptionTopic) {
 		switch (theFhirContext.getVersion().getVersion()) {
 			case R4B:
-				String encoded = theFhirContext.newJsonParser().encodeResourceToString(theSubscriptionTopic);
-				return ourFhirContextR5.newJsonParser().parseResource(SubscriptionTopic.class, encoded);
+				return (SubscriptionTopic) VersionConvertorFactory_43_50.convertResource(
+						(org.hl7.fhir.r4b.model.SubscriptionTopic) theSubscriptionTopic);
 			case R5:
 				return (SubscriptionTopic) theSubscriptionTopic;
 			default:
-				throw new UnsupportedOperationException(Msg.code(2337) + "Subscription topics are not supported in FHIR version " + theFhirContext.getVersion().getVersion());
+				throw new UnsupportedOperationException(
+						Msg.code(2337) + "Subscription topics are not supported in FHIR version "
+								+ theFhirContext.getVersion().getVersion());
 		}
 	}
 }

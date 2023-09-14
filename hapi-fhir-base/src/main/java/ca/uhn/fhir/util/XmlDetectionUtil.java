@@ -51,6 +51,4 @@ public class XmlDetectionUtil {
 		}
 		return retVal;
 	}
-
-	
 }

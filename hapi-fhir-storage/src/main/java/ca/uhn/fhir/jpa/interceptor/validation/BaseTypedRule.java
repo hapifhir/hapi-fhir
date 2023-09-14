@@ -45,5 +45,4 @@ abstract class BaseTypedRule implements IRepositoryValidatingRule {
 	protected FhirContext getFhirContext() {
 		return myFhirContext;
 	}
-
 }

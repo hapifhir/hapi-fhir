@@ -28,15 +28,14 @@ import ca.uhn.fhir.i18n.Msg;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IIdType;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 public class FhirContextSearchParamRegistry implements ISearchParamRegistry {
-
 
 	private final List<RuntimeSearchParam> myExtraSearchParams = new ArrayList<>();
 	private final FhirContext myCtx;
@@ -88,10 +87,10 @@ public class FhirContextSearchParamRegistry implements ISearchParamRegistry {
 	public RuntimeSearchParam getActiveSearchParamByUrl(String theUrl) {
 		// simple implementation for test support
 		return myCtx.getResourceTypes().stream()
-			.flatMap(type->getActiveSearchParams(type).values().stream())
-			.filter(rsp->theUrl.equals(rsp.getUri()))
-			.findFirst()
-			.orElse(null);
+				.flatMap(type -> getActiveSearchParams(type).values().stream())
+				.filter(rsp -> theUrl.equals(rsp.getUri()))
+				.findFirst()
+				.orElse(null);
 	}
 
 	@Override
@@ -100,7 +99,8 @@ public class FhirContextSearchParamRegistry implements ISearchParamRegistry {
 	}
 
 	@Override
-	public List<RuntimeSearchParam> getActiveComboSearchParams(String theResourceName, ComboSearchParamType theParamType) {
+	public List<RuntimeSearchParam> getActiveComboSearchParams(
+			String theResourceName, ComboSearchParamType theParamType) {
 		throw new UnsupportedOperationException(Msg.code(2209));
 	}
 

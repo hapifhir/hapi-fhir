@@ -1,5 +1,15 @@
 <div xmlns:th="http://www.thymeleaf.org">
 
+   <!--/* Messages */-->
+   <div th:if="${resource.hasParameter('Message')}" id="Messages">
+      <h1>Outcome</h1>
+      <ul>
+         <li th:each="part : ${resource.getParameters('Message')}">
+            [[${part.getValue().getValue()}]]
+         </li>
+      </ul>
+   </div>
+
    <!--/* Number Indexes */-->
    <div th:if="${resource.hasParameter('NumberIndexes')}" id="NumberIndexes">
       <h1>Number Indexes</h1>

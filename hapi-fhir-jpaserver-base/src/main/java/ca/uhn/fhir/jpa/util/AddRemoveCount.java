@@ -24,7 +24,6 @@ public class AddRemoveCount {
 	private int myAddCount;
 	private int myRemoveCount;
 
-
 	public void addToAddCount(int theCount) {
 		myAddCount += theCount;
 	}

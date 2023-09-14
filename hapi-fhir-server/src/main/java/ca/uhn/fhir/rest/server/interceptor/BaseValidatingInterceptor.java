@@ -19,8 +19,8 @@
  */
 package ca.uhn.fhir.rest.server.interceptor;
 
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
@@ -96,7 +96,9 @@ public abstract class BaseValidatingInterceptor<T> extends ValidationResultEnric
 	 */
 	public BaseValidatingInterceptor<T> addValidatorModule(IValidatorModule theModule) {
 		Validate.notNull(theModule, "theModule must not be null");
-		Validate.isTrue(myValidator == null, "Can not specify both a validator and validator modules. Only one needs to be supplied.");
+		Validate.isTrue(
+				myValidator == null,
+				"Can not specify both a validator and validator modules. Only one needs to be supplied.");
 		if (getValidatorModules() == null) {
 			setValidatorModules(new ArrayList<>());
 		}
@@ -111,10 +113,13 @@ public abstract class BaseValidatingInterceptor<T> extends ValidationResultEnric
 	 * @see #setValidatorModules(List)
 	 */
 	public void setValidator(FhirValidator theValidator) {
-		Validate.isTrue(theValidator == null || getValidatorModules() == null || getValidatorModules().isEmpty(), "Can not specify both a validator and validator modules. Only one needs to be supplied.");
+		Validate.isTrue(
+				theValidator == null
+						|| getValidatorModules() == null
+						|| getValidatorModules().isEmpty(),
+				"Can not specify both a validator and validator modules. Only one needs to be supplied.");
 		myValidator = theValidator;
 	}
-
 
 	abstract ValidationResult doValidate(FhirValidator theValidator, T theRequest);
 
@@ -123,7 +128,9 @@ public abstract class BaseValidatingInterceptor<T> extends ValidationResultEnric
 	 * Subclasses may change this behaviour by providing alternate behaviour.
 	 */
 	protected void fail(RequestDetails theRequestDetails, ValidationResult theValidationResult) {
-		throw new UnprocessableEntityException(Msg.code(330) + theValidationResult.getMessages().get(0).getMessage(), theValidationResult.toOperationOutcome());
+		throw new UnprocessableEntityException(
+				Msg.code(330) + theValidationResult.getMessages().get(0).getMessage(),
+				theValidationResult.toOperationOutcome());
 	}
 
 	/**
@@ -132,7 +139,9 @@ public abstract class BaseValidatingInterceptor<T> extends ValidationResultEnric
 	 * OperationOutcome resource containing the validation results.
 	 */
 	public ResultSeverityEnum getAddResponseOutcomeHeaderOnSeverity() {
-		return myAddResponseOutcomeHeaderOnSeverity != null ? ResultSeverityEnum.values()[myAddResponseOutcomeHeaderOnSeverity] : null;
+		return myAddResponseOutcomeHeaderOnSeverity != null
+				? ResultSeverityEnum.values()[myAddResponseOutcomeHeaderOnSeverity]
+				: null;
 	}
 
 	/**
@@ -141,7 +150,8 @@ public abstract class BaseValidatingInterceptor<T> extends ValidationResultEnric
 	 * OperationOutcome resource containing the validation results.
 	 */
 	public void setAddResponseOutcomeHeaderOnSeverity(ResultSeverityEnum theAddResponseOutcomeHeaderOnSeverity) {
-		myAddResponseOutcomeHeaderOnSeverity = theAddResponseOutcomeHeaderOnSeverity != null ? theAddResponseOutcomeHeaderOnSeverity.ordinal() : null;
+		myAddResponseOutcomeHeaderOnSeverity =
+				theAddResponseOutcomeHeaderOnSeverity != null ? theAddResponseOutcomeHeaderOnSeverity.ordinal() : null;
 	}
 
 	/**
@@ -181,7 +191,9 @@ public abstract class BaseValidatingInterceptor<T> extends ValidationResultEnric
 	}
 
 	public void setValidatorModules(List<IValidatorModule> theValidatorModules) {
-		Validate.isTrue(myValidator == null || theValidatorModules == null || theValidatorModules.isEmpty(), "Can not specify both a validator and validator modules. Only one needs to be supplied.");
+		Validate.isTrue(
+				myValidator == null || theValidatorModules == null || theValidatorModules.isEmpty(),
+				"Can not specify both a validator and validator modules. Only one needs to be supplied.");
 		myValidatorModules = theValidatorModules;
 	}
 
@@ -294,14 +306,12 @@ public abstract class BaseValidatingInterceptor<T> extends ValidationResultEnric
 	 * Hook for subclasses (e.g. add a tag (coding) to an incoming resource when a given severity appears in the
 	 * ValidationResult).
 	 */
-	protected void postProcessResult(RequestDetails theRequestDetails, ValidationResult theValidationResult) {
-	}
+	protected void postProcessResult(RequestDetails theRequestDetails, ValidationResult theValidationResult) {}
 
 	/**
 	 * Hook for subclasses on failure (e.g. add a response header to an incoming resource upon rejection).
 	 */
-	protected void postProcessResultOnFailure(RequestDetails theRequestDetails, ValidationResult theValidationResult) {
-	}
+	protected void postProcessResultOnFailure(RequestDetails theRequestDetails, ValidationResult theValidationResult) {}
 
 	/**
 	 * Note: May return null
@@ -357,7 +367,9 @@ public abstract class BaseValidatingInterceptor<T> extends ValidationResultEnric
 			}
 			if (!found) {
 				if (isNotBlank(myResponseIssueHeaderValueNoIssues)) {
-					theRequestDetails.getResponse().addHeader(myResponseIssueHeaderName, myResponseIssueHeaderValueNoIssues);
+					theRequestDetails
+							.getResponse()
+							.addHeader(myResponseIssueHeaderName, myResponseIssueHeaderValueNoIssues);
 				}
 			}
 		}
@@ -380,14 +392,20 @@ public abstract class BaseValidatingInterceptor<T> extends ValidationResultEnric
 					break;
 				}
 			}
-			if (outcome == null && myAddResponseOutcomeHeaderOnSeverity != null && myAddResponseOutcomeHeaderOnSeverity == ResultSeverityEnum.INFORMATION.ordinal()) {
+			if (outcome == null
+					&& myAddResponseOutcomeHeaderOnSeverity != null
+					&& myAddResponseOutcomeHeaderOnSeverity == ResultSeverityEnum.INFORMATION.ordinal()) {
 				FhirContext ctx = theRequestDetails.getServer().getFhirContext();
 				outcome = OperationOutcomeUtil.newInstance(ctx);
 				OperationOutcomeUtil.addIssue(ctx, outcome, "information", "No issues detected", "", "informational");
 			}
 
 			if (outcome != null) {
-				IParser parser = theRequestDetails.getServer().getFhirContext().newJsonParser().setPrettyPrint(false);
+				IParser parser = theRequestDetails
+						.getServer()
+						.getFhirContext()
+						.newJsonParser()
+						.setPrettyPrint(false);
 				String encoded = parser.encodeResourceToString(outcome);
 				if (encoded.length() > getMaximumHeaderLength()) {
 					encoded = encoded.substring(0, getMaximumHeaderLength() - 3) + "...";
@@ -433,7 +451,5 @@ public abstract class BaseValidatingInterceptor<T> extends ValidationResultEnric
 		private static String toString(Object theInt) {
 			return theInt != null ? theInt.toString() : "";
 		}
-
 	}
-
 }

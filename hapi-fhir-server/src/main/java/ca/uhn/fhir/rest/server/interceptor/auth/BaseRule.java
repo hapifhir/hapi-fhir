@@ -54,13 +54,19 @@ abstract class BaseRule implements IAuthRule {
 		theTesters.forEach(this::addTester);
 	}
 
-	private boolean applyTesters(RestOperationTypeEnum theOperation, RequestDetails theRequestDetails, IIdType theInputResourceId, IBaseResource theInputResource, IBaseResource theOutputResource, IRuleApplier theRuleApplier) {
+	private boolean applyTesters(
+			RestOperationTypeEnum theOperation,
+			RequestDetails theRequestDetails,
+			IIdType theInputResourceId,
+			IBaseResource theInputResource,
+			IBaseResource theOutputResource,
+			IRuleApplier theRuleApplier) {
 		assert !(theInputResource != null && theOutputResource != null);
 
 		boolean retVal = true;
 		if (theOutputResource == null) {
-			IAuthRuleTester.RuleTestRequest inputRequest = new IAuthRuleTester.RuleTestRequest(myMode, theOperation, theRequestDetails, theInputResourceId, theInputResource, theRuleApplier);
-
+			IAuthRuleTester.RuleTestRequest inputRequest = new IAuthRuleTester.RuleTestRequest(
+					myMode, theOperation, theRequestDetails, theInputResourceId, theInputResource, theRuleApplier);
 
 			for (IAuthRuleTester next : getTesters()) {
 				if (!next.matches(inputRequest)) {
@@ -69,7 +75,13 @@ abstract class BaseRule implements IAuthRule {
 				}
 			}
 		} else {
-			IAuthRuleTester.RuleTestRequest outputRequest = new IAuthRuleTester.RuleTestRequest(myMode, theOperation, theRequestDetails, theOutputResource.getIdElement(), theOutputResource, theRuleApplier);
+			IAuthRuleTester.RuleTestRequest outputRequest = new IAuthRuleTester.RuleTestRequest(
+					myMode,
+					theOperation,
+					theRequestDetails,
+					theOutputResource.getIdElement(),
+					theOutputResource,
+					theRuleApplier);
 			for (IAuthRuleTester next : getTesters()) {
 				if (!next.matchesOutput(outputRequest)) {
 					retVal = false;
@@ -102,15 +114,28 @@ abstract class BaseRule implements IAuthRule {
 		return Collections.unmodifiableList(myTesters);
 	}
 
-	Verdict newVerdict(RestOperationTypeEnum theOperation, RequestDetails theRequestDetails, IBaseResource theInputResource, IIdType theInputResourceId, IBaseResource theOutputResource, IRuleApplier theRuleApplier) {
-		if (!applyTesters(theOperation, theRequestDetails, theInputResourceId, theInputResource, theOutputResource, theRuleApplier)) {
+	Verdict newVerdict(
+			RestOperationTypeEnum theOperation,
+			RequestDetails theRequestDetails,
+			IBaseResource theInputResource,
+			IIdType theInputResourceId,
+			IBaseResource theOutputResource,
+			IRuleApplier theRuleApplier) {
+		if (!applyTesters(
+				theOperation,
+				theRequestDetails,
+				theInputResourceId,
+				theInputResource,
+				theOutputResource,
+				theRuleApplier)) {
 			return null;
 		}
 		return new Verdict(myMode, this);
 	}
 
 	protected boolean isResourceAccess(Pointcut thePointcut) {
-		return thePointcut.equals(Pointcut.STORAGE_PREACCESS_RESOURCES) || thePointcut.equals(Pointcut.STORAGE_PRESHOW_RESOURCES);
+		return thePointcut.equals(Pointcut.STORAGE_PREACCESS_RESOURCES)
+				|| thePointcut.equals(Pointcut.STORAGE_PRESHOW_RESOURCES);
 	}
 
 	@Override
@@ -124,5 +149,4 @@ abstract class BaseRule implements IAuthRule {
 		builder.append("testers", myTesters);
 		return builder;
 	}
-
 }

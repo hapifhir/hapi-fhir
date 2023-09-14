@@ -20,10 +20,11 @@
 package ca.uhn.fhir.batch2.api;
 
 import ca.uhn.fhir.model.api.IModelJson;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 
+import java.util.List;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.List;
 
 /**
  * This interface can be used to validate the parameters
@@ -44,10 +45,10 @@ public interface IJobParametersValidator<T extends IModelJson> {
 	/**
 	 * Validate the given job parameters.
 	 *
-	 * @param theParameters The parameters object to validate
+	 * @param theRequestDetails The request details associated with the start request
+	 * @param theParameters     The parameters object to validate
 	 * @return Any strings returned by this method are treated as validation failures and returned to the client initiating the job. Return <code>null</code> or an empty list to indicate that no validation failures occurred.
 	 */
 	@Nullable
-	List<String> validate(@Nonnull T theParameters);
-
+	List<String> validate(RequestDetails theRequestDetails, @Nonnull T theParameters);
 }

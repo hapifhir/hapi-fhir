@@ -29,7 +29,6 @@ import ca.uhn.fhir.rest.client.api.*;
  * &nbsp;&nbsp;&nbsp;<code>Cookie: [key]=[value]</code><br>
  * </p>
  */
-
 public class CookieInterceptor implements IClientInterceptor {
 	private final String sessionCookie;
 
@@ -39,7 +38,7 @@ public class CookieInterceptor implements IClientInterceptor {
 
 	@Override
 	public void interceptRequest(IHttpRequest theRequest) {
-		theRequest.addHeader(Constants.HEADER_COOKIE, sessionCookie); //$NON-NLS-1$
+		theRequest.addHeader(Constants.HEADER_COOKIE, sessionCookie); // $NON-NLS-1$
 	}
 
 	@Override

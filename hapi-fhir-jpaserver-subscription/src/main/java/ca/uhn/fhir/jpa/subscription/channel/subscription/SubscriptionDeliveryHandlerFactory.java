@@ -40,7 +40,8 @@ public class SubscriptionDeliveryHandlerFactory {
 		myEmailSender = theEmailSender;
 	}
 
-	protected SubscriptionDeliveringEmailSubscriber newSubscriptionDeliveringEmailSubscriber(IEmailSender theEmailSender) {
+	protected SubscriptionDeliveringEmailSubscriber newSubscriptionDeliveringEmailSubscriber(
+			IEmailSender theEmailSender) {
 		return myApplicationContext.getBean(SubscriptionDeliveringEmailSubscriber.class, theEmailSender);
 	}
 
@@ -63,5 +64,4 @@ public class SubscriptionDeliveryHandlerFactory {
 			return Optional.empty();
 		}
 	}
-
 }

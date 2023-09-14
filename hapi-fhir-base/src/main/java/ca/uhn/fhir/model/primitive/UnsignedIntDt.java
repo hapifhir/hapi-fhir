@@ -24,7 +24,7 @@ import ca.uhn.fhir.model.api.annotation.SimpleSetter;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.util.CoverageIgnore;
 
-@DatatypeDef(name = "unsignedInt", profileOf=IntegerDt.class)
+@DatatypeDef(name = "unsignedInt", profileOf = IntegerDt.class)
 @CoverageIgnore
 public class UnsignedIntDt extends IntegerDt {
 
@@ -45,7 +45,7 @@ public class UnsignedIntDt extends IntegerDt {
 
 	/**
 	 * Constructor
-	 * 
+	 *
 	 * @param theIntegerAsString
 	 *            A string representation of an integer
 	 * @throws DataFormatException
@@ -54,5 +54,4 @@ public class UnsignedIntDt extends IntegerDt {
 	public UnsignedIntDt(String theIntegerAsString) {
 		setValueAsString(theIntegerAsString);
 	}
-
 }

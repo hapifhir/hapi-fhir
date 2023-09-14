@@ -19,25 +19,25 @@
  */
 package ca.uhn.fhir.model.api;
 
+import ca.uhn.fhir.parser.DataFormatException;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+
 import java.io.Externalizable;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
 
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
-
-import ca.uhn.fhir.parser.DataFormatException;
-
-public abstract class BasePrimitive<T> extends BaseIdentifiableElement implements IPrimitiveDatatype<T>, Externalizable {
+public abstract class BasePrimitive<T> extends BaseIdentifiableElement
+		implements IPrimitiveDatatype<T>, Externalizable {
 
 	private T myCoercedValue;
 	private String myStringValue;
 
 	/**
 	 * Subclasses must override to convert a "coerced" value into an encoded one.
-	 * 
+	 *
 	 * @param theValue
 	 *           Will not be null
 	 * @return May return null if the value does not correspond to anything
@@ -82,7 +82,7 @@ public abstract class BasePrimitive<T> extends BaseIdentifiableElement implement
 
 	/**
 	 * Subclasses must override to convert an encoded representation of this datatype into a "coerced" one
-	 * 
+	 *
 	 * @param theValue
 	 *           Will not be null
 	 * @return May return null if the value does not correspond to anything
@@ -136,5 +136,4 @@ public abstract class BasePrimitive<T> extends BaseIdentifiableElement implement
 	public boolean hasValue() {
 		return !StringUtils.isBlank(getValueAsString());
 	}
-
 }

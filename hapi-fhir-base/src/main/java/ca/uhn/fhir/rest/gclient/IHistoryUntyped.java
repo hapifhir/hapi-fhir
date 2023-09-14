@@ -37,5 +37,4 @@ public interface IHistoryUntyped {
 	 * @since 4.0.0
 	 */
 	<T extends IBaseBundle> IHistoryTyped<T> returnBundle(Class<T> theType);
-
 }

@@ -19,27 +19,26 @@
  */
 package ca.uhn.fhir.rest.client.method;
 
-import ca.uhn.fhir.i18n.Msg;
-import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.util.Date;
-
-import ca.uhn.fhir.rest.param.DateParam;
-import ca.uhn.fhir.rest.param.DateRangeParam;
-import org.hl7.fhir.instance.model.api.*;
-
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.rest.annotation.History;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.client.impl.BaseHttpClientInvocation;
+import ca.uhn.fhir.rest.param.DateParam;
+import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ParameterUtil;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import org.hl7.fhir.instance.model.api.*;
+
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.util.Date;
+
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class HistoryMethodBinding extends BaseResourceReturningMethodBinding {
 
@@ -69,7 +68,6 @@ public class HistoryMethodBinding extends BaseResourceReturningMethodBinding {
 		} else {
 			myResourceName = null;
 		}
-
 	}
 
 	@Override
@@ -99,19 +97,27 @@ public class HistoryMethodBinding extends BaseResourceReturningMethodBinding {
 		}
 
 		String historyId = id != null ? id.getIdPart() : null;
-		HttpGetClientInvocation retVal = createHistoryInvocation(getContext(), resourceName, historyId, null, null, null);
+		HttpGetClientInvocation retVal =
+				createHistoryInvocation(getContext(), resourceName, historyId, null, null, null);
 
 		if (theArgs != null) {
 			for (int idx = 0; idx < theArgs.length; idx++) {
 				IParameter nextParam = getParameters().get(idx);
-				nextParam.translateClientArgumentIntoQueryArgument(getContext(), theArgs[idx], retVal.getParameters(), null);
+				nextParam.translateClientArgumentIntoQueryArgument(
+						getContext(), theArgs[idx], retVal.getParameters(), null);
 			}
 		}
 
 		return retVal;
 	}
 
-	public static HttpGetClientInvocation createHistoryInvocation(FhirContext theContext, String theResourceName, String theId, IPrimitiveType<Date> theSince, Integer theLimit, DateRangeParam theAt) {
+	public static HttpGetClientInvocation createHistoryInvocation(
+			FhirContext theContext,
+			String theResourceName,
+			String theId,
+			IPrimitiveType<Date> theSince,
+			Integer theLimit,
+			DateRangeParam theAt) {
 		StringBuilder b = new StringBuilder();
 		if (theResourceName != null) {
 			b.append(theResourceName);
@@ -157,5 +163,4 @@ public class HistoryMethodBinding extends BaseResourceReturningMethodBinding {
 		}
 		return null;
 	}
-
 }
