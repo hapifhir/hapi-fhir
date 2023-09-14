@@ -401,11 +401,14 @@ public class JpaStorageResourceParser implements IJpaStorageResourceParser {
 							secLabel.setSystem(nextTag.getSystem());
 							secLabel.setCode(nextTag.getCode());
 							secLabel.setDisplay(nextTag.getDisplay());
-							// wipmb these technically support userSelected and version
+							secLabel.setVersion(nextTag.getVersion());
+							Boolean userSelected = nextTag.getUserSelected();
+							if (userSelected != null) {
+								secLabel.setUserSelected(userSelected);
+							}
 							securityLabels.add(secLabel);
 							break;
 						case TAG:
-							// wipmb check xml, etc.
 							Tag e = new Tag(nextTag.getSystem(), nextTag.getCode(), nextTag.getDisplay());
 							e.setVersion(nextTag.getVersion());
 							// careful! These are Boolean, not boolean.

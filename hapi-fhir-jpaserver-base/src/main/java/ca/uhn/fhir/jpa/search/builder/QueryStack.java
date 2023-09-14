@@ -2679,6 +2679,7 @@ public class QueryStack {
 		Condition predicate =
 				table.createEverythingPredicate(theResourceName, theTypeSourceResourceNames, theTargetPids);
 		mySqlBuilder.addPredicate(predicate);
+		mySqlBuilder.getSelect().setIsDistinct(true);
 	}
 
 	public IQueryParameterType newParameterInstance(
