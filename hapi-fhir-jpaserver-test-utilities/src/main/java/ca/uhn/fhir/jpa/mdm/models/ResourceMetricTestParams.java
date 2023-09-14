@@ -4,8 +4,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ResourceMetricTestParams {
+	/**
+	 * The initial state, as consumable by
+	 * MdmLinkHelper.
+	 */
 	private String myInitialState;
 
+	/**
+	 * The list of Golden Resource Ids (in initial state) that should be
+	 * saved as BlockedResources
+	 */
 	private List<String> myBlockedResourceGoldenResourceIds;
 
 	private long myExpectedResourceCount;
@@ -50,5 +58,4 @@ public class ResourceMetricTestParams {
 	public long getExpectedBlockedResourceCount() {
 		return getBlockedResourceGoldenResourceIds().size();
 	}
-
 }

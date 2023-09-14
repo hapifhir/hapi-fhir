@@ -2,8 +2,6 @@ package ca.uhn.fhir.mdm.api;
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
-import ca.uhn.fhir.mdm.api.parameters.GetGoldenResourceCountParameters;
-import ca.uhn.fhir.mdm.model.MdmGoldenResourceCount;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 
@@ -25,8 +23,5 @@ public interface IMdmResourceDaoSvc {
 	Optional<IAnyResource> searchGoldenResourceByEID(String theEid, String theResourceType);
 
 	Optional<IAnyResource> searchGoldenResourceByEID(
-		String theEid, String theResourceType, RequestPartitionId thePartitionId);
-
-	MdmGoldenResourceCount getGoldenResourceCounts(GetGoldenResourceCountParameters theParameters);
-
+			String theEid, String theResourceType, RequestPartitionId thePartitionId);
 }

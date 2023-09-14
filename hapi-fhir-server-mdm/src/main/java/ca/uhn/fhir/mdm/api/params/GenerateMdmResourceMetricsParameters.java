@@ -1,4 +1,4 @@
-package ca.uhn.fhir.mdm.api.parameters;
+package ca.uhn.fhir.mdm.api.params;
 
 public class GenerateMdmResourceMetricsParameters {
 

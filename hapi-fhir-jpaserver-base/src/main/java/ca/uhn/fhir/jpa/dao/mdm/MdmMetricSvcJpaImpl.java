@@ -1,25 +1,14 @@
 package ca.uhn.fhir.jpa.dao.mdm;
 
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
-import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.data.IMdmLinkJpaMetricsRepository;
-import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.mdm.api.BaseMdmMetricSvc;
-import ca.uhn.fhir.mdm.api.IMdmMetricSvc;
-import ca.uhn.fhir.mdm.api.IMdmResourceDaoSvc;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
-import ca.uhn.fhir.mdm.api.parameters.GenerateMdmLinkMetricParameters;
-import ca.uhn.fhir.mdm.api.parameters.GenerateMdmResourceMetricsParameters;
-import ca.uhn.fhir.mdm.api.parameters.GenerateScoreMetricsParameters;
-import ca.uhn.fhir.mdm.api.parameters.GetGoldenResourceCountParameters;
-import ca.uhn.fhir.mdm.model.MdmGoldenResourceCount;
+import ca.uhn.fhir.mdm.api.params.GenerateMdmLinkMetricParameters;
+import ca.uhn.fhir.mdm.api.params.GenerateScoreMetricsParameters;
 import ca.uhn.fhir.mdm.model.MdmLinkDataMetrics;
 import ca.uhn.fhir.mdm.model.MdmLinkMetrics;
-import ca.uhn.fhir.mdm.model.MdmResourceMetrics;
-import ca.uhn.fhir.rest.api.SearchTotalModeEnum;
-import ca.uhn.fhir.rest.api.server.IBundleProvider;
-import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Arrays;
@@ -29,12 +18,8 @@ public class MdmMetricSvcJpaImpl extends BaseMdmMetricSvc {
 
 	private final IMdmLinkJpaMetricsRepository myJpaRepository;
 
-	public MdmMetricSvcJpaImpl(
-		IMdmLinkJpaMetricsRepository theRepository,
-		IMdmResourceDaoSvc theResourceDaoSvc,
-		DaoRegistry theDaoRegistry
-	) {
-		super(theResourceDaoSvc, theDaoRegistry);
+	public MdmMetricSvcJpaImpl(IMdmLinkJpaMetricsRepository theRepository, DaoRegistry theDaoRegistry) {
+		super(theDaoRegistry);
 		myJpaRepository = theRepository;
 	}
 
@@ -51,11 +36,7 @@ public class MdmMetricSvcJpaImpl extends BaseMdmMetricSvc {
 			matchResults = Arrays.asList(MdmMatchResultEnum.values());
 		}
 
-		Object[][] data = myJpaRepository.generateMetrics(
-			theParameters.getResourceType(),
-			linkSources,
-			matchResults
-		);
+		Object[][] data = myJpaRepository.generateMetrics(theParameters.getResourceType(), linkSources, matchResults);
 		MdmLinkMetrics metrics = new MdmLinkMetrics();
 		metrics.setResourceType(theParameters.getResourceType());
 		for (Object[] row : data) {
@@ -66,7 +47,6 @@ public class MdmMetricSvcJpaImpl extends BaseMdmMetricSvc {
 		}
 		return metrics;
 	}
-
 
 	@Transactional
 	@Override
@@ -87,7 +67,7 @@ public class MdmMetricSvcJpaImpl extends BaseMdmMetricSvc {
 		for (Object[] row : data) {
 			Double scoreValue = (Double) row[0];
 			Long scoreCount = (Long) row[1];
-			String scoreStr = scoreValue == null ? "NULL" : Double.toString(scoreValue);
+			String scoreStr = scoreValue == null ? NULL_VALUE : Double.toString(scoreValue);
 			metrics.addScore(scoreStr, scoreCount);
 		}
 

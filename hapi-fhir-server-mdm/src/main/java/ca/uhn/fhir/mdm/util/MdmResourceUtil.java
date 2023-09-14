@@ -134,11 +134,10 @@ public final class MdmResourceUtil {
 
 	public static IBaseResource setGoldenResourceAsBlockedResourceGoldenResource(IBaseResource theBaseResource) {
 		return setTagOnResource(
-			theBaseResource,
-			MdmConstants.SYSTEM_BLOCKED_RESOURCE,
-			MdmConstants.CODE_BLOCKED,
-			MdmConstants.CODE_BLOCKED_DISPLAY
-		);
+				theBaseResource,
+				MdmConstants.SYSTEM_BLOCKED_RESOURCE,
+				MdmConstants.CODE_BLOCKED,
+				MdmConstants.CODE_BLOCKED_DISPLAY);
 	}
 
 	/**

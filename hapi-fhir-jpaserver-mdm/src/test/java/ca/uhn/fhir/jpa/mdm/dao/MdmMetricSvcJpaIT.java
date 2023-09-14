@@ -14,7 +14,6 @@ import ca.uhn.fhir.jpa.mdm.models.LinkScoreMetricTestParams;
 import ca.uhn.fhir.jpa.mdm.models.ResourceMetricTestParams;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.mdm.api.IMdmMetricSvc;
-import ca.uhn.fhir.mdm.api.IMdmResourceDaoSvc;
 import ca.uhn.fhir.mdm.model.MdmLinkMetrics;
 import ca.uhn.fhir.mdm.util.MdmResourceUtil;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -49,9 +48,6 @@ public class MdmMetricSvcJpaIT extends BaseMdmR4Test implements IMdmMetricSvcTes
 		private IMdmLinkJpaMetricsRepository myJpaRepository;
 
 		@Autowired
-		private IMdmResourceDaoSvc myIMdmResourceDaoSvc;
-
-		@Autowired
 		private DaoRegistry myDaoRegistry;
 
 		@Autowired
@@ -63,7 +59,6 @@ public class MdmMetricSvcJpaIT extends BaseMdmR4Test implements IMdmMetricSvcTes
 		IMdmMetricSvc mdmMetricSvc() {
 			return new MdmMetricSvcJpaImpl(
 				myJpaRepository,
-				myIMdmResourceDaoSvc,
 				myDaoRegistry
 			);
 		}

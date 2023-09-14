@@ -41,12 +41,12 @@ import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import javax.annotation.Nonnull;
 
 import static ca.uhn.fhir.context.FhirVersionEnum.DSTU3;
 import static ca.uhn.fhir.context.FhirVersionEnum.R4;
@@ -92,10 +92,9 @@ public class GoldenResourceHelper {
 	 */
 	@Nonnull
 	public <T extends IAnyResource> T createGoldenResourceFromMdmSourceResource(
-		T theIncomingResource,
-		MdmTransactionContext theMdmTransactionContext,
-			IMdmSurvivorshipService theMdmSurvivorshipService
-	) {
+			T theIncomingResource,
+			MdmTransactionContext theMdmTransactionContext,
+			IMdmSurvivorshipService theMdmSurvivorshipService) {
 		validateContextSupported();
 
 		// get a ref to the actual ID Field

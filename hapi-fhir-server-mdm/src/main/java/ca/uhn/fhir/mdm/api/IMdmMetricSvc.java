@@ -1,8 +1,8 @@
 package ca.uhn.fhir.mdm.api;
 
-import ca.uhn.fhir.mdm.api.parameters.GenerateMdmLinkMetricParameters;
-import ca.uhn.fhir.mdm.api.parameters.GenerateMdmResourceMetricsParameters;
-import ca.uhn.fhir.mdm.api.parameters.GenerateScoreMetricsParameters;
+import ca.uhn.fhir.mdm.api.params.GenerateMdmLinkMetricParameters;
+import ca.uhn.fhir.mdm.api.params.GenerateMdmResourceMetricsParameters;
+import ca.uhn.fhir.mdm.api.params.GenerateScoreMetricsParameters;
 import ca.uhn.fhir.mdm.model.MdmLinkDataMetrics;
 import ca.uhn.fhir.mdm.model.MdmLinkMetrics;
 import ca.uhn.fhir.mdm.model.MdmResourceMetrics;

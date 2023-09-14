@@ -57,5 +57,4 @@ public class LinkScoreMetricTestParams {
 	public void setScores(List<Double> theScores) {
 		myScores = theScores;
 	}
-
 }

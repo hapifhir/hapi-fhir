@@ -31,7 +31,8 @@ public class MdmLinkMetrics implements IModelJson {
 		return myMatchTypeToLinkToCountMap;
 	}
 
-	public void addMetric(MdmMatchResultEnum theMdmMatchResultEnum, MdmLinkSourceEnum theLinkSourceEnum, long theCount) {
+	public void addMetric(
+			MdmMatchResultEnum theMdmMatchResultEnum, MdmLinkSourceEnum theLinkSourceEnum, long theCount) {
 		Map<MdmMatchResultEnum, Map<MdmLinkSourceEnum, Long>> map = getMatchTypeToLinkToCountMap();
 
 		if (!map.containsKey(theMdmMatchResultEnum)) {

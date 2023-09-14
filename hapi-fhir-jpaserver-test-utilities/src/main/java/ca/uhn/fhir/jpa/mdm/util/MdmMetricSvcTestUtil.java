@@ -14,7 +14,8 @@ import java.util.List;
 
 public class MdmMetricSvcTestUtil {
 
-	public static final String OUR_BASIC_STATE = """
+	public static final String OUR_BASIC_STATE =
+			"""
 					G1, AUTO, MATCH, P1
 					G2, AUTO, MATCH, P2,
 					G3, AUTO, POSSIBLE_MATCH, P3,
@@ -102,8 +103,8 @@ public class MdmMetricSvcTestUtil {
 			// initial state with filters to omit all values
 			LinkMetricTestParameters testParameters = new LinkMetricTestParameters();
 			testParameters.setInitialState("""
-    				G1, AUTO, NO_MATCH, P1
-    				G2, MANUAL, MATCH, P2
+					G1, AUTO, NO_MATCH, P1
+					G2, MANUAL, MATCH, P2
 				""");
 			testParameters.setMatchFilters(Arrays.asList(MdmMatchResultEnum.MATCH));
 			testParameters.setLinkSourceFilters(Arrays.asList(MdmLinkSourceEnum.AUTO));
@@ -116,8 +117,8 @@ public class MdmMetricSvcTestUtil {
 			// initial state with filters to omit some values
 			LinkMetricTestParameters testParameters = new LinkMetricTestParameters();
 			testParameters.setInitialState("""
-    				G1, AUTO, NO_MATCH, P1
-    				G2, MANUAL, MATCH, P2
+					G1, AUTO, NO_MATCH, P1
+					G2, MANUAL, MATCH, P2
 				""");
 			testParameters.setMatchFilters(Arrays.asList(MdmMatchResultEnum.NO_MATCH));
 			testParameters.setLinkSourceFilters(Arrays.asList(MdmLinkSourceEnum.AUTO));
@@ -140,11 +141,12 @@ public class MdmMetricSvcTestUtil {
 		{
 			// a mix of golden, regular, and blocked resources
 			ResourceMetricTestParams p = new ResourceMetricTestParams();
-			p.setInitialState("""
-   				G1, AUTO, MATCH, P1
-   				G2, AUTO, MATCH, P2
-   				G2, AUTO, MATCH, P1,
-   				G3, AUTO, MATCH, P3
+			p.setInitialState(
+					"""
+				G1, AUTO, MATCH, P1
+				G2, AUTO, MATCH, P2
+				G2, AUTO, MATCH, P1,
+				G3, AUTO, MATCH, P3
 			""");
 			p.addBlockedResourceGoldenResources("G2");
 			p.addBlockedResourceGoldenResources("G3");
@@ -158,8 +160,8 @@ public class MdmMetricSvcTestUtil {
 			// 2 non-golden, 1 golden
 			ResourceMetricTestParams p = new ResourceMetricTestParams();
 			p.setInitialState("""
-   				G1, AUTO, MATCH, P1,
-   				G1, MANUAL, MATCH, P2
+				G1, AUTO, MATCH, P1,
+				G1, MANUAL, MATCH, P2
 			""");
 			p.setExpectedResourceCount(3);
 			p.setExpectedGoldenResourceCount(1);
@@ -171,8 +173,8 @@ public class MdmMetricSvcTestUtil {
 			// 2 golden, 1 non-golden
 			ResourceMetricTestParams p = new ResourceMetricTestParams();
 			p.setInitialState("""
-   				G1, AUTO, MATCH, P1
-   				G2, AUTO, POSSIBLE_DUPLICATE, G1
+				G1, AUTO, MATCH, P1
+				G2, AUTO, POSSIBLE_DUPLICATE, G1
 			""");
 			p.setExpectedGoldenResourceCount(2);
 			p.setExpectedResourceCount(3);
@@ -184,7 +186,7 @@ public class MdmMetricSvcTestUtil {
 			// 2 golden, 1 blocked, 0 non-golden
 			ResourceMetricTestParams p = new ResourceMetricTestParams();
 			p.setInitialState("""
-   				G1, AUTO, POSSIBLE_DUPLICATE, G2
+				G1, AUTO, POSSIBLE_DUPLICATE, G2
 			""");
 			p.addBlockedResourceGoldenResources("G1");
 			p.setExpectedResourceCount(2);
@@ -213,10 +215,11 @@ public class MdmMetricSvcTestUtil {
 		{
 			// score counts
 			LinkScoreMetricTestParams p = new LinkScoreMetricTestParams();
-			p.setInitialState("""
-   				G1, AUTO, MATCH, P1
-   				G2, AUTO, POSSIBLE_MATCH, P2,
-   				G3, AUTO, POSSIBLE_MATCH, P1
+			p.setInitialState(
+					"""
+				G1, AUTO, MATCH, P1
+				G2, AUTO, POSSIBLE_MATCH, P2,
+				G3, AUTO, POSSIBLE_MATCH, P1
 			""");
 			p.setScores(Arrays.asList(2D, 2D, 1D));
 			MdmLinkDataMetrics metrics = new MdmLinkDataMetrics();
@@ -232,8 +235,8 @@ public class MdmMetricSvcTestUtil {
 			// a null score
 			LinkScoreMetricTestParams p = new LinkScoreMetricTestParams();
 			p.setInitialState("""
-   				G1, AUTO, POSSIBLE_MATCH, P1,
-   				G2, AUTO, POSSIBLE_MATCH, P2
+				G1, AUTO, POSSIBLE_MATCH, P1,
+				G2, AUTO, POSSIBLE_MATCH, P2
 			""");
 			p.setScores(Arrays.asList(null, 1D));
 			MdmLinkDataMetrics metrics = new MdmLinkDataMetrics();
@@ -248,11 +251,12 @@ public class MdmMetricSvcTestUtil {
 		{
 			// match type filtering
 			LinkScoreMetricTestParams p = new LinkScoreMetricTestParams();
-			p.setInitialState("""
-   				G1, AUTO, POSSIBLE_MATCH, P1
-   				G2, AUTO, MATCH, P2
-   				G3, AUTO, POSSIBLE_MATCH, P3
-   				G4, AUTO, MATCH, P4
+			p.setInitialState(
+					"""
+				G1, AUTO, POSSIBLE_MATCH, P1
+				G2, AUTO, MATCH, P2
+				G3, AUTO, POSSIBLE_MATCH, P3
+				G4, AUTO, MATCH, P4
 			""");
 			p.setScores(Arrays.asList(2D, 2D, 1D, 3D));
 			p.addMatchType(MdmMatchResultEnum.POSSIBLE_MATCH);
@@ -277,5 +281,4 @@ public class MdmMetricSvcTestUtil {
 
 		return parameters;
 	}
-
 }

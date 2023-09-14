@@ -191,10 +191,7 @@ public class MdmMatchLinkSvc {
 		return goldenResources;
 	}
 
-	private void handleMdmWithNoCandidates(
-		IAnyResource theResource,
-		MdmTransactionContext theMdmTransactionContext
-	) {
+	private void handleMdmWithNoCandidates(IAnyResource theResource, MdmTransactionContext theMdmTransactionContext) {
 		log(
 				theMdmTransactionContext,
 				String.format(

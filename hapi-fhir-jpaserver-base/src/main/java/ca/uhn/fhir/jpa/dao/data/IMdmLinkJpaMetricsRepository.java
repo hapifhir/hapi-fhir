@@ -13,31 +13,24 @@ import java.util.List;
 @Repository("metricsRepository")
 public interface IMdmLinkJpaMetricsRepository extends JpaRepository<MdmLink, Long>, IHapiFhirJpaRepository {
 
-	@Query(
-		"SELECT ml.myMatchResult AS match_result, ml.myLinkSource AS link_source, count(*) AS c "
+	@Query("SELECT ml.myMatchResult AS match_result, ml.myLinkSource AS link_source, count(*) AS c "
 			+ "FROM MdmLink ml "
 			+ "WHERE ml.myMdmSourceType = :resourceName "
 			+ "AND ml.myLinkSource in (:linkSources) "
 			+ "AND ml.myMatchResult in (:matchTypes) "
 			+ "GROUP BY match_result, link_source "
-			+ "ORDER BY match_result"
-	)
+			+ "ORDER BY match_result")
 	Object[][] generateMetrics(
-		@Param("resourceName") String theResourceType,
-		@Param("linkSources") List<MdmLinkSourceEnum> theLinkSources,
-		@Param("matchTypes") List<MdmMatchResultEnum> theMatchTypes
-	);
+			@Param("resourceName") String theResourceType,
+			@Param("linkSources") List<MdmLinkSourceEnum> theLinkSources,
+			@Param("matchTypes") List<MdmMatchResultEnum> theMatchTypes);
 
-	@Query(
-		"SElECT DISTINCT ml.myScore AS score, count(*) "
-		+ "FROM MdmLink ml "
-		+ "WHERE ml.myMdmSourceType = :resourceName "
-		+ "AND ml.myMatchResult in (:matchTypes) "
-		+ "GROUP BY score "
-		+ "ORDER BY score"
-	)
+	@Query("SElECT DISTINCT ml.myScore AS score, count(*) "
+			+ "FROM MdmLink ml "
+			+ "WHERE ml.myMdmSourceType = :resourceName "
+			+ "AND ml.myMatchResult in (:matchTypes) "
+			+ "GROUP BY score "
+			+ "ORDER BY score")
 	Object[][] generateScoreMetrics(
-		@Param("resourceName") String theResourceType,
-		@Param("matchTypes") List<MdmMatchResultEnum> theMatchTypes
-	);
+			@Param("resourceName") String theResourceType, @Param("matchTypes") List<MdmMatchResultEnum> theMatchTypes);
 }

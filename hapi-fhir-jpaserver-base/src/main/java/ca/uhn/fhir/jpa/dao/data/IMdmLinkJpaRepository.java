@@ -117,5 +117,4 @@ public interface IMdmLinkJpaRepository
 			@Param("highThreshold") Date theHighThreshold,
 			@Param("partitionId") List<Integer> thePartitionIds,
 			Pageable thePageable);
-
 }

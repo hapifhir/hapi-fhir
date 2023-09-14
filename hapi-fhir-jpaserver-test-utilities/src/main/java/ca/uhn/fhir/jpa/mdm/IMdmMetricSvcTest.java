@@ -6,9 +6,9 @@ import ca.uhn.fhir.jpa.mdm.models.ResourceMetricTestParams;
 import ca.uhn.fhir.mdm.api.IMdmMetricSvc;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
-import ca.uhn.fhir.mdm.api.parameters.GenerateMdmLinkMetricParameters;
-import ca.uhn.fhir.mdm.api.parameters.GenerateMdmResourceMetricsParameters;
-import ca.uhn.fhir.mdm.api.parameters.GenerateScoreMetricsParameters;
+import ca.uhn.fhir.mdm.api.params.GenerateMdmLinkMetricParameters;
+import ca.uhn.fhir.mdm.api.params.GenerateMdmResourceMetricsParameters;
+import ca.uhn.fhir.mdm.api.params.GenerateScoreMetricsParameters;
 import ca.uhn.fhir.mdm.model.MdmLinkDataMetrics;
 import ca.uhn.fhir.mdm.model.MdmLinkMetrics;
 import ca.uhn.fhir.mdm.model.MdmResourceMetrics;
@@ -79,7 +79,8 @@ public interface IMdmMetricSvcTest {
 		// setup
 		generateResourceMetricsSetup(theParams);
 
-		GenerateMdmResourceMetricsParameters resourceMetricsParameters = new GenerateMdmResourceMetricsParameters("Patient");
+		GenerateMdmResourceMetricsParameters resourceMetricsParameters =
+				new GenerateMdmResourceMetricsParameters("Patient");
 
 		// test
 		MdmResourceMetrics results = getMetricsSvc().generateResourceMetrics(resourceMetricsParameters);
@@ -87,7 +88,9 @@ public interface IMdmMetricSvcTest {
 		// verify
 		assertNotNull(results);
 		assertEquals("Patient", results.getResourceType());
-		assertEquals(theParams.getExpectedResourceCount(), results.getSourceResourcesCount() + results.getGoldenResourcesCount());
+		assertEquals(
+				theParams.getExpectedResourceCount(),
+				results.getSourceResourcesCount() + results.getGoldenResourcesCount());
 		assertEquals(theParams.getExpectedBlockedResourceCount(), results.getExcludedResources());
 		assertEquals(theParams.getExpectedGoldenResourceCount(), results.getGoldenResourcesCount());
 	}
@@ -123,7 +126,8 @@ public interface IMdmMetricSvcTest {
 	}
 
 	private String getComparingMetrics(MdmLinkMetrics theActual, MdmLinkMetrics theExpected) {
-		return String.format("\nExpected: \n%s - \nActual: \n%s", getStringMetrics(theExpected), getStringMetrics(theActual));
+		return String.format(
+				"\nExpected: \n%s - \nActual: \n%s", getStringMetrics(theExpected), getStringMetrics(theActual));
 	}
 
 	String getStringMetrics(MdmLinkMetrics theMetrics);

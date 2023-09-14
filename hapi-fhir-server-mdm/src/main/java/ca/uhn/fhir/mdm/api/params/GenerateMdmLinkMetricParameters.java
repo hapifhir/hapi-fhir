@@ -1,4 +1,4 @@
-package ca.uhn.fhir.mdm.api.parameters;
+package ca.uhn.fhir.mdm.api.params;
 
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;

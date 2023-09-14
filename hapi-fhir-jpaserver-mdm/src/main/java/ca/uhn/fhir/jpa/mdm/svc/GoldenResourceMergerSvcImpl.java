@@ -29,6 +29,7 @@ import ca.uhn.fhir.jpa.mdm.dao.MdmLinkDaoSvc;
 import ca.uhn.fhir.mdm.api.IGoldenResourceMergerSvc;
 import ca.uhn.fhir.mdm.api.IMdmLink;
 import ca.uhn.fhir.mdm.api.IMdmLinkSvc;
+import ca.uhn.fhir.mdm.api.IMdmResourceDaoSvc;
 import ca.uhn.fhir.mdm.api.IMdmSurvivorshipService;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
 import ca.uhn.fhir.mdm.api.MdmMatchOutcome;
@@ -74,7 +75,7 @@ public class GoldenResourceMergerSvcImpl implements IGoldenResourceMergerSvc {
 	IIdHelperService myIdHelperService;
 
 	@Autowired
-    MdmResourceDaoSvcImpl myMdmResourceDaoSvc;
+	IMdmResourceDaoSvc myMdmResourceDaoSvc;
 
 	@Autowired
 	MdmPartitionHelper myMdmPartitionHelper;
