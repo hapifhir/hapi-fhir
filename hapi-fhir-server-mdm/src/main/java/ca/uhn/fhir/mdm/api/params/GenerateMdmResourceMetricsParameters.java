@@ -5,7 +5,7 @@ public class GenerateMdmResourceMetricsParameters {
 	/**
 	 * We only allow finding metrics by resource type
 	 */
-	private String myResourceType;
+	private final String myResourceType;
 
 	public GenerateMdmResourceMetricsParameters(String theResourceType) {
 		myResourceType = theResourceType;

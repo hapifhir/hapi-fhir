@@ -16,11 +16,15 @@ public class GenerateMdmLinkMetricParameters {
 
 	/**
 	 * The MDM MatchResult types of interest.
+	 * Specified MatchResults will be included.
+	 * If none are specified, all will be included.
 	 */
 	private List<MdmMatchResultEnum> myMatchResultFilters;
 
 	/**
 	 * The MDM Link values of interest.
+	 * Specified LinkSources will be included.
+	 * If none are specified, all are included.
 	 */
 	private List<MdmLinkSourceEnum> myLinkSourceFilters;
 

@@ -5,15 +5,31 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class MdmResourceMetrics implements IModelJson {
 
+	/**
+	 * The resource type to which these metrics apply.
+	 */
 	@JsonProperty("resourceType")
 	private String myResourceType;
 
+	/**
+	 * The number of golden resources.
+	 */
 	@JsonProperty("goldenResources")
 	private long myGoldenResourcesCount;
 
+	/**
+	 * The number of source resources.
+	 */
 	@JsonProperty("sourceResources")
 	private long mySourceResourcesCount;
 
+	/**
+	 * The number of excluded resources.
+	 * These are necessarily a subset of both
+	 * GoldenResources and SourceResources
+	 * (as each Blocked resource will still generate
+	 * a GoldenResource)
+	 */
 	@JsonProperty("excludedResources")
 	private long myExcludedResources;
 

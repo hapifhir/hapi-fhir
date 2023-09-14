@@ -10,9 +10,22 @@ import java.util.Map;
 
 public class MdmLinkMetrics implements IModelJson {
 
+	/**
+	 * The resource type to which these metrics apply.
+	 */
 	@JsonProperty("resourceType")
 	private String myResourceType;
 
+	/**
+	 * A mapping of MatchType -> LinkSource -> count.
+	 * Eg:
+	 * MATCH
+	 * 		AUTO    - 2
+	 * 	 	MANUAL  - 1
+	 * NO_MATCH
+	 *      AUTO    - 1
+	 *      MANUAL  - 3
+	 */
 	@JsonProperty("matchResult2linkSource2count")
 	private Map<MdmMatchResultEnum, Map<MdmLinkSourceEnum, Long>> myMatchTypeToLinkToCountMap;
 

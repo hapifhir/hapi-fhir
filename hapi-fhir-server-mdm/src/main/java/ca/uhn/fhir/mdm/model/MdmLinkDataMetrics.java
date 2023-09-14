@@ -14,7 +14,7 @@ public class MdmLinkDataMetrics implements IModelJson {
 	/**
 	 * Map of Score:Count
 	 * Scores are typically Doubles. But we cast to string because
-	 * Score is not a non-null field, and so "null" is a value.
+	 * Score is not a non-null field, and so "NULL" is a value.
 	 */
 	@JsonProperty("scoreCounts")
 	private Map<String, Long> myScoreCounts;

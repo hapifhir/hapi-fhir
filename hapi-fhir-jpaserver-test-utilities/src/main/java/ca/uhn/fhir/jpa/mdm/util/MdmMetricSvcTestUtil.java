@@ -12,6 +12,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+/**
+ * This provides parameter methods for the {@link ca.uhn.fhir.jpa.mdm.IMdmMetricSvcTest}.
+ */
 public class MdmMetricSvcTestUtil {
 
 	public static final String OUR_BASIC_STATE =

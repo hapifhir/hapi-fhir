@@ -11,6 +11,11 @@ public class GenerateScoreMetricsParameters {
 	 */
 	private final String myResourceType;
 
+	/**
+	 * MatchResult types to filter for.
+	 * Specified MatchResults will be included.
+	 * If none specified, all will be included.
+	 */
 	private List<MdmMatchResultEnum> myMatchTypeFilters;
 
 	public GenerateScoreMetricsParameters(String theResourceType) {
