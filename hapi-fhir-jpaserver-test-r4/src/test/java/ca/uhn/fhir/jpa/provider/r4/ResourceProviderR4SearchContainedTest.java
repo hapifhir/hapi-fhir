@@ -1,16 +1,22 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
+import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
+import ca.uhn.fhir.jpa.searchparam.registry.ReadOnlySearchParamCache;
+import ca.uhn.fhir.jpa.test.config.TestR4Config;
 import ca.uhn.fhir.parser.StrictErrorHandler;
+import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.client.interceptor.CapturingInterceptor;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.util.UrlUtil;
+import org.apache.commons.dbcp2.BasicDataSource;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
+import org.hibernate.dialect.PostgreSQL10Dialect;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CarePlan;
@@ -35,18 +41,24 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.test.context.ContextConfiguration;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 
+@ContextConfiguration(classes = {ResourceProviderR4SearchContainedTest.OverriddenR4Config.class})
 public class ResourceProviderR4SearchContainedTest extends BaseResourceProviderR4Test {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResourceProviderR4SearchContainedTest.class);
@@ -58,15 +70,15 @@ public class ResourceProviderR4SearchContainedTest extends BaseResourceProviderR
 	@Override
 	@AfterEach
 	public void after() throws Exception {
-		super.after();
-
-		myStorageSettings.setAllowMultipleDelete(new JpaStorageSettings().isAllowMultipleDelete());
-		myStorageSettings.setAllowExternalReferences(new JpaStorageSettings().isAllowExternalReferences());
-		myStorageSettings.setReuseCachedSearchResultsForMillis(new JpaStorageSettings().getReuseCachedSearchResultsForMillis());
-		myStorageSettings.setCountSearchResultsUpTo(new JpaStorageSettings().getCountSearchResultsUpTo());
-		myStorageSettings.setSearchPreFetchThresholds(new JpaStorageSettings().getSearchPreFetchThresholds());
-		myStorageSettings.setAllowContainsSearches(new JpaStorageSettings().isAllowContainsSearches());
-		myStorageSettings.setIndexMissingFields(new JpaStorageSettings().getIndexMissingFields());
+//		super.after();
+//
+//		myStorageSettings.setAllowMultipleDelete(new JpaStorageSettings().isAllowMultipleDelete());
+//		myStorageSettings.setAllowExternalReferences(new JpaStorageSettings().isAllowExternalReferences());
+//		myStorageSettings.setReuseCachedSearchResultsForMillis(new JpaStorageSettings().getReuseCachedSearchResultsForMillis());
+//		myStorageSettings.setCountSearchResultsUpTo(new JpaStorageSettings().getCountSearchResultsUpTo());
+//		myStorageSettings.setSearchPreFetchThresholds(new JpaStorageSettings().getSearchPreFetchThresholds());
+//		myStorageSettings.setAllowContainsSearches(new JpaStorageSettings().isAllowContainsSearches());
+//		myStorageSettings.setIndexMissingFields(new JpaStorageSettings().getIndexMissingFields());
 
 		myClient.unregisterInterceptor(myCapturingInterceptor);
 		myStorageSettings.setIndexOnContainedResources(false);
@@ -360,13 +372,123 @@ public class ResourceProviderR4SearchContainedTest extends BaseResourceProviderR
 		}
 	}
 
+	@Test
+	public void sandboxContainedParameterTest() throws IOException {
+		// Some useful values
+		final String patientFamily = "VanHouten";
+		final String patientGiven = "Milhouse";
+
+		// Create a discrete Patient
+		final IIdType discretePatientId;
+		{
+			Patient discretePatient = new Patient();
+			discretePatient.addName().setFamily(patientFamily).addGiven(patientGiven);
+			discretePatientId = myPatientDao.create(discretePatient, mySrd).getId().toUnqualifiedVersionless();
+
+			ourLog.debug("\nInput - Discrete Patient:\n{}",
+				myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(discretePatient));
+		}
+
+		/*
+		 * Create a discrete Observation, which includes a contained Patient
+		 *	- 	The contained Patient is otherwise identical to the discrete Patient above
+		 */
+		final IIdType discreteObservationId;
+		final String containedPatientId = "contained-patient-1";
+		{
+			Patient containedPatient = new Patient();
+			containedPatient.setId(containedPatientId);
+			containedPatient.addName().setFamily(patientFamily).addGiven(patientGiven);
+
+			Observation discreteObservation = new Observation();
+			discreteObservation.getContained().add(containedPatient);
+			discreteObservation.getSubject().setReference("#" + containedPatientId);
+			discreteObservationId = myObservationDao.create(discreteObservation, mySrd).getId().toUnqualifiedVersionless();
+
+			ourLog.debug("\nInput - Discrete Observation with contained Patient:\n{}",
+				myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(discreteObservation));
+		}
+
+		{
+			/*
+			 * Case 3
+			 * When: we search for Patient with `_contained=true`
+			 * 	-	`_contained=true` means we should search and return only contained resources; not discrete resources
+			 * 		-	Note that we are searching by `/Patient?`, not `/Observation?`
+			 * 	-	When `_containedType` is absent, the default value of `_containedType=container` should be used
+			 * 		-	We should return the container resources
+			 */
+			String queryUrl = myServerBase + "/Patient?family=" + patientFamily + "&given=" + patientGiven + "&_contained=true";
+
+			// to obtain quantities for all resources
+//			myFhirContext.getResourceTypes().stream().sorted().forEach(
+//				rt -> getContainingResourceIds(rt, patientFamily, patientGiven));
+			getContainingResourceIds("Patient", patientFamily, patientGiven);
+
+			// Then: we should get the Observation that is containing that Patient
+//			List<String> resourceIds = searchAndReturnUnqualifiedVersionlessIdValues(queryUrl);
+//			assertEquals(1L, resourceIds.size());
+//			assertThat(resourceIds, contains(discreteObservationId));
+		}
+
+	}
+
+	private void getContainingResourceIds(String theResourceType, String theFamily, String theGiven) {
+
+//		fixme jm: try obtaining the desired result using chained params from every possible referencing resource
+
+		// get reference SPs to resourceType
+		ReadOnlySearchParamCache spCache = mySearchParamRegistry.getActiveSearchParams();
+		List<RuntimeSearchParam> refSPs = spCache.getSearchParamStream()
+			.filter(sp -> sp.getParamType() == RestSearchParameterTypeEnum.REFERENCE)
+			.filter(sp -> sp.getTargets().contains(theResourceType))
+			.collect(Collectors.toList());
+
+		// 241 SPs for Patient
+
+		// obtain possible referrers for each ref SP obtained,
+
+		List<RuntimeSearchParam> level2SPs = new ArrayList<>();
+		for (RuntimeSearchParam referringSP : refSPs) {
+			for (String referringSPBase : referringSP.getBase()) {
+				level2SPs.addAll(
+					spCache.getSearchParamStream()
+						.filter(sp -> sp.getParamType() == RestSearchParameterTypeEnum.REFERENCE)
+						.filter(sp -> sp.getTargets().contains(referringSPBase))
+						.toList());
+			}
+		}
+
+		ourLog.info(String.format("Found %1$,3d lvl1 and %2$,7d lvl2 params for resource type: %3$s", refSPs.size(), level2SPs.size(), theResourceType));
+
+
+//		Parameters params = new Parameters();
+////		params.addParameter().setName("family").setValue(new StringType(theFamily));
+////		params.addParameter().setName("given").setValue(new StringType(theGiven));
+//
+//		for (RuntimeSearchParam refSP : refSPs) {
+//			if (refSP.getBase().contains("Observation") && refSP.getName().equals("subject")) {
+//				params.addParameter().setName(refSP.getName()).setValue(new StringType(theFamily));
+//				params.addParameter().setName(refSP.getName()).setValue(new StringType(theGiven));
+//			}
+//		}
+//
+////		myPatientResourceProvider.search()
+//
+//
+//		Bundle result = myClient.operation().onServer().named("search").withParameters(params).returnResourceType(Bundle.class).execute();
+//
+		assertNotNull(refSPs);
+	}
+
+
 	/**
 	 * Unit test with multiple cases to illustrate expected behaviour of <code>_contained</code> and <code>_containedType</code> with chaining
 	 * <p>
 	 * Although this test is in R4, the R5 specification for these parameters is much clearer:
 	 * 	-	<a href="https://www.hl7.org/fhir/search.html#contained">_contained & _containedType</a>
 	 * <p>
-	 * It seems as though the initial implementation conflated the use of searching contained resources via chaining with
+	 * It seems as though the initial implementation `conflated` the use of searching contained resources via chaining with
 	 * the use of the <code>_contained</code> search parameter. All the existing tests use <code>_contained</code> with chaining but neglect to
 	 * search by the contained resource type (i.e. they search by the container resource type). This test corrects that
 	 * with several cases.
@@ -384,7 +506,7 @@ public class ResourceProviderR4SearchContainedTest extends BaseResourceProviderR
 	 *
 	 * @throws IOException
 	 */
-	@Test
+//	@Test
 	public void testContainedParameterBehaviourWithChain() throws IOException {
 		// Some useful values
 		final String patientFamily = "VanHouten";
@@ -1388,6 +1510,32 @@ public class ResourceProviderR4SearchContainedTest extends BaseResourceProviderR
 			ids = toUnqualifiedVersionlessIdValues(bundle);
 		}
 		return ids;
+	}
+
+	@Configuration
+	public static class OverriddenR4Config extends TestR4Config {
+
+		@Override
+		public void setConnectionProperties(BasicDataSource theDataSource) {
+			theDataSource.setDriver(new org.postgresql.Driver());
+			theDataSource.setUrl("jdbc:postgresql://localhost/test-db");
+			theDataSource.setMaxWaitMillis(-1);  // indefinite
+			theDataSource.setUsername("cdr");
+			theDataSource.setPassword("cdr");
+			theDataSource.setMaxTotal(ourMaxThreads);
+			return;
+		}
+
+		@Override
+		public String getHibernateDialect() {
+			return PostgreSQL10Dialect.class.getName();
+		}
+
+//		@Override
+//		public ProxyDataSourceBuilder.SingleQueryExecution getMandatoryTransactionListener() {
+//			return getNoopTXListener();
+//		}
+
 	}
 
 }

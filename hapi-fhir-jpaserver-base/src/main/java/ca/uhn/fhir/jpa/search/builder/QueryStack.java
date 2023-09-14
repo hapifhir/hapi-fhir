@@ -108,6 +108,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.CollectionUtils;
 
+import javax.annotation.Nullable;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -121,7 +122,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
-import javax.annotation.Nullable;
 
 import static ca.uhn.fhir.jpa.util.QueryParameterUtils.fromOperation;
 import static ca.uhn.fhir.jpa.util.QueryParameterUtils.getChainedPart;
@@ -2283,6 +2283,17 @@ public class QueryStack {
 			return null;
 		}
 
+//		fixme jm: handle following switch params
+		if ( theSearchContainedMode != SearchContainedModeEnum.FALSE) {
+			return createContainedModePredicateSearchParameter(
+				theSourceJoinColumn,
+				theResourceName,
+				theParamName,
+				theAndOrParams,
+				theRequest,
+				theRequestPartitionId);
+		}
+
 		switch (theParamName) {
 			case IAnyResource.SP_RES_ID:
 				return createPredicateResourceId(
@@ -2319,6 +2330,50 @@ public class QueryStack {
 						theRequest,
 						theRequestPartitionId);
 		}
+	}
+
+	private Condition createContainedModePredicateSearchParameter(
+		DbColumn theSourceJoinColumn, String theResourceName, String theParamName,
+		List<List<IQueryParameterType>> theAndOrParams, RequestDetails theRequest, RequestPartitionId theRequestPartitionId) {
+
+		// extract reference params which target is theResourceName
+		List<RuntimeSearchParam> resourceTypeReferencingParams = getResourceTypeReferencingParams(theResourceName);
+
+		List<Condition> conditionList = new ArrayList<>();
+		for (RuntimeSearchParam param : resourceTypeReferencingParams) {
+			for (String paramBaseResource : param.getBase()) {
+				Condition paramCondition = createPredicateSearchParameter(
+					theSourceJoinColumn,
+					paramBaseResource,
+					param.getName(),
+					theAndOrParams,
+					theRequest,
+					theRequestPartitionId);
+				conditionList.add(paramCondition);
+			}
+		}
+		return toAndPredicate(conditionList);
+	}
+
+//	fixme jm: improve and move to util
+	private List<RuntimeSearchParam> getResourceTypeReferencingParams(String theResourceName) {
+		Map<String, String> referenceParameterNamesByResourceType = new HashMap<>();
+		myFhirContext.getResourceTypes().forEach( resType -> {
+			mySearchParamRegistry.getActiveSearchParams(resType).getReferenceSearchParamNames().forEach(
+				paramName -> referenceParameterNamesByResourceType.put(resType, paramName));
+		});
+
+		List<RuntimeSearchParam> allReferenceParameters = new ArrayList<>();
+		referenceParameterNamesByResourceType.forEach((resType, paramName) -> {
+			RuntimeSearchParam param = mySearchParamRegistry.getActiveSearchParam(resType, paramName);
+			if (param.getTargets().contains(theResourceName)) {
+				allReferenceParameters.add(param);
+			}
+		});
+
+//		fixme jm: convert to original parameter types???
+
+		return allReferenceParameters;
 	}
 
 	@Nullable
