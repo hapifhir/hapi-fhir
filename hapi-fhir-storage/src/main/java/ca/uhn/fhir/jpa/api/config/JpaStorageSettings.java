@@ -2350,7 +2350,6 @@ public class JpaStorageSettings extends StorageSettings {
 
 	/**
 	 * This setting controls whether MdmLink and other non-resource DB history is enabled.
-	 * This setting controls whether non-resource DB history is enabled
 	 * <p/>
 	 * By default, this is enabled unless explicitly disabled.
 	 *
@@ -2363,7 +2362,6 @@ public class JpaStorageSettings extends StorageSettings {
 
 	/**
 	 * This setting controls whether MdmLink and other non-resource DB history is enabled.
-	 * This setting controls whether non-resource DB history is enabled
 	 * <p/>
 	 * By default, this is enabled unless explicitly disabled.
 	 *
