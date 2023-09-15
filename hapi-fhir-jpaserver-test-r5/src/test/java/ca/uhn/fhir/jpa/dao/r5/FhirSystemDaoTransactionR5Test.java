@@ -27,11 +27,11 @@ import static org.apache.commons.lang3.StringUtils.countMatches;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.endsWith;
-import static org.hamcrest.Matchers.in;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.mockito.Mockito.when;
 
 public class FhirSystemDaoTransactionR5Test extends BaseJpaR5Test {
 
@@ -451,11 +451,21 @@ public class FhirSystemDaoTransactionR5Test extends BaseJpaR5Test {
 	/**
 	 * If a conditional delete and conditional update are both used on the same condition,
 	 * the update should win.
+	 * We need to test this scenario with both empty and non-empty RequestDetails.requestId parameter,
+	 * as providing RequestDetails.requestId previously caused javax.persistence.EntityExistsException
+	 * during persistence of ResourceHistoryProvenanceEntity.
+	 *
+	 * @param theReturnRequestId if RequestDetails.requestId should return non-null value
 	 */
-	@Test
-	public void testConditionalDeleteAndConditionalUpdateOnSameResource() {
+	@ParameterizedTest
+	@ValueSource(booleans = {true, false})
+	public void createBundle_withConditionalDeleteAndConditionalUpdateOnSameResource_updatesResource(boolean theReturnRequestId) {
 		Bundle outcome;
 		Patient actual;
+
+		if (theReturnRequestId) {
+			when(mySrd.getRequestId()).thenReturn("requestId");
+		}
 
 		// First pass (resource doesn't already exist)
 
