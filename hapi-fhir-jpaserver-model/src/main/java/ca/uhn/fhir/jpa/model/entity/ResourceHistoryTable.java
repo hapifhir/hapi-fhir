@@ -313,11 +313,9 @@ public class ResourceHistoryTable extends BaseHasResource implements Serializabl
 	 * multiple {@link ResourceHistoryProvenanceEntity} entities will result in a constraint error.
 	 */
 	public ResourceHistoryProvenanceEntity toProvenance() {
-		ResourceHistoryProvenanceEntity resourceHistoryProvenance = myNewHistoryProvenanceEntity;
-		if (resourceHistoryProvenance == null) {
-			resourceHistoryProvenance = new ResourceHistoryProvenanceEntity();
-			myNewHistoryProvenanceEntity = resourceHistoryProvenance;
+		if (myNewHistoryProvenanceEntity == null) {
+			myNewHistoryProvenanceEntity = new ResourceHistoryProvenanceEntity();
 		}
-		return resourceHistoryProvenance;
+		return myNewHistoryProvenanceEntity;
 	}
 }
