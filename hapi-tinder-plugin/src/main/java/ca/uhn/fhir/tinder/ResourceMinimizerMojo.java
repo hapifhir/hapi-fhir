@@ -189,14 +189,15 @@ public class ResourceMinimizerMojo extends AbstractMojo {
 		//		byteCount += m.getByteCount();
 		//		fileCount += m.getFileCount();
 
-				m = new ResourceMinimizerMojo();
-				m.myCtx = ctxDstu3;
-				m.targetDirectory = new
-		 File("./hapi-fhir-validation-resources-dstu3/src/main/resources/org/hl7/fhir/dstu3/model/profile");
-				m.fhirVersion = "DSTU3";
-				m.execute();
-				byteCount += m.getByteCount();
-				fileCount += m.getFileCount();
+		//		m = new ResourceMinimizerMojo();
+		//		m.myCtx = ctxDstu3;
+		//		m.targetDirectory = new
+		// File("./hapi-fhir-validation-resources-dstu3/src/main/resources/org/hl7/fhir/dstu3/model/profile");
+		//		m.fhirVersion = "DSTU3";
+		//		m.execute();
+		//		byteCount += m.getByteCount();
+		//		fileCount += m.getFileCount();
+		//
 
 		//		m = new ResourceMinimizerMojo();
 		//		m.myCtx = ctxDstu3;
