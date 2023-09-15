@@ -679,7 +679,14 @@ public class FhirInstanceValidatorDstu3Test {
 					} else if (t.getMessage().startsWith("value should not start or finish with whitespace") && t.getMessage().endsWith("\\u00a0'")) {
 						// Some DSTU3 messages end with a unicode Non-breaking space character
 						return false;
-					} else {
+					} else if (t.getMessage().contains("side is inherently a collection") && t.getMessage().endsWith("may fail or return false if there is more than one item in the content being evaluated")) {
+						// Some DSTU3 FHIRPath expressions now produce warnings if a singleton is compared to a collection that potentially has > 1 elements
+						return false;
+					} else if (t.getMessage().contains("children().element.first().label.empty() and children().element.first().code.empty() and children().element.first().requirements.empty()") && t.getMessage().contains("The function first can only be used on ordered collections")){
+						// This FHIRPath expression is present in FHIR 3.0.1 definitions, and would not be thrown for the 3.0.2 equivalent
+						return false;
+					}
+					else {
 						return true;
 					}
 				})
