@@ -419,6 +419,8 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 
 	@Transient
 	private volatile String myCreatedByMatchUrl;
+	@Transient
+	private volatile String myUpdatedByMatchUrl;
 
 	/**
 	 * Constructor
@@ -996,6 +998,18 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 
 	public void setCreatedByMatchUrl(String theCreatedByMatchUrl) {
 		myCreatedByMatchUrl = theCreatedByMatchUrl;
+	}
+
+	public String getUpdatedByMatchUrl() {
+		return myUpdatedByMatchUrl;
+	}
+
+	public void setUpdatedByMatchUrl(String theUpdatedByMatchUrl) {
+		myUpdatedByMatchUrl = theUpdatedByMatchUrl;
+	}
+
+	public boolean isVersionUpdatedInCurrentTransaction() {
+		return myVersionUpdatedInCurrentTransaction;
 	}
 
 	public void setLuceneIndexData(ExtendedHSearchIndexData theLuceneIndexData) {

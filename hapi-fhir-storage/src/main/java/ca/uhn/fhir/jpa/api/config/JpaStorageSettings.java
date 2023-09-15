@@ -328,6 +328,15 @@ public class JpaStorageSettings extends StorageSettings {
 	private boolean myNonResourceDbHistoryEnabled = true;
 
 	/**
+	 * This setting allows preventing a conditional update to invalidate the match criteria.
+	 * <p/>
+	 * By default, this is disabled unless explicitly enabled.
+	 *
+	 * @since 6.8.2
+	 */
+	private boolean myPreventInvalidatingConditionalMatchCriteria = false;
+
+	/**
 	 * Constructor
 	 */
 	public JpaStorageSettings() {
@@ -2317,6 +2326,14 @@ public class JpaStorageSettings extends StorageSettings {
 
 	public void setNonResourceDbHistoryEnabled(boolean theNonResourceDbHistoryEnabled) {
 		myNonResourceDbHistoryEnabled = theNonResourceDbHistoryEnabled;
+	}
+
+	public void setPreventInvalidatingConditionalMatchCriteria(boolean theCriteria) {
+		myPreventInvalidatingConditionalMatchCriteria = theCriteria;
+	}
+
+	public boolean isPreventInvalidatingConditionalMatchCriteria() {
+		return myPreventInvalidatingConditionalMatchCriteria;
 	}
 
 	public enum StoreMetaSourceInformationEnum {
