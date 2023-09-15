@@ -1058,9 +1058,9 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 	}
 
 	private String getConditionalCreateOrUpdateErrorMsg(CreateOrUpdateByMatch theCreateOrUpdate) {
-		return String.format("Failed to process conditional %s. " +
-				"The supplied resource did not satisfy the conditional URL.",
-			theCreateOrUpdate);
+		return String.format(
+				"Failed to process conditional %s. " + "The supplied resource did not satisfy the conditional URL.",
+				theCreateOrUpdate);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -1185,7 +1185,8 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 				}
 
 				if (changed.isChanged()) {
-					checkConditionalMatch(entity, theUpdateVersion, theResource, thePerformIndexing, newParams, theRequest);
+					checkConditionalMatch(
+							entity, theUpdateVersion, theResource, thePerformIndexing, newParams, theRequest);
 
 					if (CURRENTLY_REINDEXING.get(theResource) != Boolean.TRUE) {
 						entity.setUpdated(theTransactionDetails.getTransactionDate());
@@ -1342,10 +1343,15 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 	 * to match a resource and then update it in a way that it no longer
 	 * matches.
 	 */
-	private void checkConditionalMatch(ResourceTable theEntity, boolean theUpdateVersion, IBaseResource theResource, boolean thePerformIndexing,
-									   ResourceIndexedSearchParams theNewParams, RequestDetails theRequest) {
+	private void checkConditionalMatch(
+			ResourceTable theEntity,
+			boolean theUpdateVersion,
+			IBaseResource theResource,
+			boolean thePerformIndexing,
+			ResourceIndexedSearchParams theNewParams,
+			RequestDetails theRequest) {
 
-		if ( ! thePerformIndexing) {
+		if (!thePerformIndexing) {
 			return;
 		}
 
@@ -1355,7 +1361,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 
 		// version is not updated at this point, but could be pending for update, which we consider here
 		long pendingVersion = theEntity.getVersion();
-		if (theUpdateVersion && ! theEntity.isVersionUpdatedInCurrentTransaction()) {
+		if (theUpdateVersion && !theEntity.isVersionUpdatedInCurrentTransaction()) {
 			pendingVersion++;
 		}
 
@@ -1372,7 +1378,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 			}
 
 			verifyMatchUrlForConditionalCreateOrUpdate(
-				createOrUpdate, theResource, createOrUpdateUrl, theNewParams, theRequest);
+					createOrUpdate, theResource, createOrUpdateUrl, theNewParams, theRequest);
 		}
 	}
 

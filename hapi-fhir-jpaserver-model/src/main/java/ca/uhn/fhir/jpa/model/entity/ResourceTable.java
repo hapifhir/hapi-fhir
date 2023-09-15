@@ -419,6 +419,7 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 
 	@Transient
 	private volatile String myCreatedByMatchUrl;
+
 	@Transient
 	private volatile String myUpdatedByMatchUrl;
 
