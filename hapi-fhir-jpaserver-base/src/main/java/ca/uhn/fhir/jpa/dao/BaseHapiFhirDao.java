@@ -1544,7 +1544,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 				provenance = historyEntry.getProvenance();
 			}
 			if (provenance == null) {
-				provenance = new ResourceHistoryProvenanceEntity();
+				provenance = historyEntry.toProvenance();
 			}
 			provenance.setResourceHistoryTable(historyEntry);
 			provenance.setResourceTable(theEntity);

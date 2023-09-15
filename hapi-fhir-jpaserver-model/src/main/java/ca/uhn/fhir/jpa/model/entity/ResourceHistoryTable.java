@@ -111,6 +111,9 @@ public class ResourceHistoryTable extends BaseHasResource implements Serializabl
 	@Column(name = "REQUEST_ID", length = Constants.REQUEST_ID_LENGTH, nullable = true)
 	private String myRequestId;
 
+	@Transient
+	private transient ResourceHistoryProvenanceEntity myNewHistoryProvenanceEntity;
+
 	/**
 	 * Constructor
 	 */
@@ -301,5 +304,20 @@ public class ResourceHistoryTable extends BaseHasResource implements Serializabl
 	 */
 	public boolean hasResource() {
 		return myResource != null || myResourceTextVc != null;
+	}
+
+	/**
+	 * This method creates a new HistoryProvenance entity, or might reuse the current one if we've
+	 * already created one in the current transaction. This is because we can only increment
+	 * the version once in a DB transaction (since hibernate manages that number) so creating
+	 * multiple {@link ResourceHistoryProvenanceEntity} entities will result in a constraint error.
+	 */
+	public ResourceHistoryProvenanceEntity toProvenance() {
+		ResourceHistoryProvenanceEntity resourceHistoryProvenance = myNewHistoryProvenanceEntity;
+		if (resourceHistoryProvenance == null) {
+			resourceHistoryProvenance = new ResourceHistoryProvenanceEntity();
+			myNewHistoryProvenanceEntity = resourceHistoryProvenance;
+		}
+		return resourceHistoryProvenance;
 	}
 }
