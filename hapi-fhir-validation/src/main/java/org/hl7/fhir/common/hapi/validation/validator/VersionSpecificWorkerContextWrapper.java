@@ -623,26 +623,6 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
         }
     }
 
-    @Override
-    public void validateCodeBatchByRef(ValidationOptions options, List<? extends CodingValidationRequest> codes, String vsUrl) {
-
-        ConceptValidationOptions validationOptions =
-                convertConceptValidationOptions(options);
-
-        for (CodingValidationRequest next : codes) {
-            IValidationSupport.CodeValidationResult result = myValidationSupportContext
-                    .getRootValidationSupport()
-                    .validateCode(
-                            myValidationSupportContext,
-                            validationOptions,
-                            next.getCoding().getSystem(),
-                            next.getCoding().getCode(),
-                            next.getCoding().getDisplay(),
-                            vsUrl);
-            ValidationResult outcome = convertValidationResult(next.getCoding().getSystem(), result);
-            next.setResult(outcome);
-        }
-    }
 
     @Nonnull
     private ValidationResult doValidation(

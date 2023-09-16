@@ -39,14 +39,13 @@ import org.hl7.fhir.r4.model.ResourceType;
 import org.hl7.fhir.r4.model.TypeDetails;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.hl7.fhir.r4.utils.FHIRPathEngine;
-import org.hl7.fhir.r4.utils.FHIRPathUtilityClasses;
 
+import javax.annotation.PostConstruct;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
-import javax.annotation.PostConstruct;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -121,7 +120,7 @@ public class SearchParamExtractorR4 extends BaseSearchParamExtractor implements 
 		}
 
 		@Override
-		public FHIRPathUtilityClasses.FunctionDetails resolveFunction(String functionName) {
+		public FunctionDetails resolveFunction(String functionName) {
 			return null;
 		}
 

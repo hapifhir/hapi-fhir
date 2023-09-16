@@ -13,7 +13,6 @@ import org.hl7.fhir.r5.model.Base;
 import org.hl7.fhir.r5.model.TypeDetails;
 import org.hl7.fhir.r5.model.ValueSet;
 import org.hl7.fhir.r5.utils.FHIRPathEngine;
-import org.hl7.fhir.r5.utils.FHIRPathUtilityClasses;
 import org.hl7.fhir.r5.utils.validation.IValidationPolicyAdvisor;
 import org.hl7.fhir.r5.utils.validation.IValidatorResourceFetcher;
 import org.hl7.fhir.r5.utils.validation.constants.BestPracticeWarningLevel;
@@ -304,7 +303,7 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 		}
 
 		@Override
-		public FHIRPathUtilityClasses.FunctionDetails resolveFunction(String functionName) {
+		public FunctionDetails resolveFunction(String functionName) {
 			return null;
 		}
 
