@@ -125,7 +125,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		ourLog.info(encoded);
 		assertEquals(1, oo.getIssue().size(), encoded);
 		assertThat(oo.getIssue().get(0).getDiagnostics(),
-			containsString("The code provided (http://cs#code99) is not in the value set"));
+			containsString("provided (http://cs#code99) is not in the value set"));
 		assertThat(oo.getIssue().get(0).getDiagnostics(),
 			containsString("Unknown code 'http://cs#code99' for in-memory expansion of ValueSet 'http://vs'"));
 		assertEquals(OperationOutcome.IssueSeverity.ERROR, oo.getIssueFirstRep().getSeverity(), encoded);
@@ -159,7 +159,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		ourLog.info(encoded);
 		assertEquals(1, oo.getIssue().size());
 		assertThat(oo.getIssueFirstRep().getDiagnostics(),
-			containsString("The code provided (http://cs#code99) is not in the value set"));
+			containsString("provided (http://cs#code99) is not in the value set"));
 		assertThat(oo.getIssueFirstRep().getDiagnostics(),
 			containsString("Unknown code 'http://cs#code99' for in-memory expansion of ValueSet 'http://vs'"));
 		assertEquals(OperationOutcome.IssueSeverity.ERROR, oo.getIssueFirstRep().getSeverity());
@@ -199,7 +199,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 			containsString("CodeSystem is unknown and can't be validated: http://cs for 'http://cs#code99'"));
 		assertEquals(OperationOutcome.IssueSeverity.WARNING, oo.getIssue().get(0).getSeverity());
 		assertThat(oo.getIssue().get(1).getDiagnostics(),
-			containsString("The code provided (http://cs#code99) is not in the value set 'ValueSet[http://vs]'"));
+			containsString("provided (http://cs#code99) is not in the value set 'ValueSet[http://vs]'"));
 		assertEquals(OperationOutcome.IssueSeverity.ERROR, oo.getIssue().get(1).getSeverity());
 	}
 
@@ -239,7 +239,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		ourLog.info(encoded);
 		assertEquals(1, oo.getIssue().size());
 		assertThat(oo.getIssue().get(0).getDiagnostics(),
-			containsString("The code provided (http://cs#code99) is not in the value set"));
+			containsString("provided (http://cs#code99) is not in the value set"));
 		assertEquals(OperationOutcome.IssueSeverity.ERROR, oo.getIssueFirstRep().getSeverity());
 	}
 
@@ -335,7 +335,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		ourLog.info(encoded);
 		assertEquals(1, oo.getIssue().size());
 		assertThat(oo.getIssue().get(0).getDiagnostics(),
-			containsString("The code provided (http://cs#code1) is not in the value set"));
+			containsString("provided (http://cs#code1) is not in the value set"));
 		assertThat(oo.getIssue().get(0).getDiagnostics(),
 			containsString("Failed to expand ValueSet 'http://vs' (in-memory). Could not validate code http://cs#code1"));
 		assertThat(oo.getIssue().get(0).getDiagnostics(),
@@ -343,7 +343,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		assertEquals(OperationOutcome.IssueSeverity.ERROR, oo.getIssueFirstRep().getSeverity());
 		assertEquals(27, ((IntegerType)oo.getIssue().get(0).getExtensionByUrl("http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line").getValue()).getValue());
 		assertEquals(4, ((IntegerType)oo.getIssue().get(0).getExtensionByUrl("http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col").getValue()).getValue());
-		assertEquals("Terminology_TX_Confirm_4a", ((StringType)oo.getIssue().get(0).getExtensionByUrl("http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id").getValue()).getValue());
+		assertEquals("Terminology_TX_NoValid_12", ((StringType)oo.getIssue().get(0).getExtensionByUrl("http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id").getValue()).getValue());
 		assertEquals(OperationOutcome.IssueType.PROCESSING, oo.getIssue().get(0).getCode());
 		assertEquals(OperationOutcome.IssueSeverity.ERROR, oo.getIssue().get(0).getSeverity());
 		assertEquals(2, oo.getIssue().get(0).getLocation().size());
@@ -509,7 +509,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		String outcomeStr = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome);
 		ourLog.info("Validation outcome: {}", outcomeStr);
 		assertThat(outcomeStr,
-			containsString("The code provided (http://unitsofmeasure.org#cm) is not in the value set"));
+			containsString("provided (http://unitsofmeasure.org#cm) is not in the value set"));
 
 		// Before, the VS wasn't pre-expanded. Try again with it pre-expanded
 		runInTransaction(() -> {
@@ -538,7 +538,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		outcomeStr = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome);
 		ourLog.info("Validation outcome: {}", outcomeStr);
 		assertThat(outcomeStr,
-			containsString("The code provided (http://unitsofmeasure.org#cm) is not in the value set"));
+			containsString("provided (http://unitsofmeasure.org#cm) is not in the value set"));
 
 	}
 

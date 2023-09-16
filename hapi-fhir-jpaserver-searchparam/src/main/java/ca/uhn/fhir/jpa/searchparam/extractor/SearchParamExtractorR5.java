@@ -38,6 +38,7 @@ import org.hl7.fhir.r5.model.ResourceType;
 import org.hl7.fhir.r5.model.TypeDetails;
 import org.hl7.fhir.r5.model.ValueSet;
 import org.hl7.fhir.r5.utils.FHIRPathEngine;
+import org.hl7.fhir.r5.utils.FHIRPathUtilityClasses;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -117,7 +118,7 @@ public class SearchParamExtractorR5 extends BaseSearchParamExtractor implements 
 		}
 
 		@Override
-		public FunctionDetails resolveFunction(String functionName) {
+		public FHIRPathUtilityClasses.FunctionDetails resolveFunction(String functionName) {
 			return null;
 		}
 
