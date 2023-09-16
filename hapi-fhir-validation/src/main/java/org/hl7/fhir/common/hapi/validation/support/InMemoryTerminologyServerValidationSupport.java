@@ -527,7 +527,8 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 						}
 						CodeValidationResult codeValidationResult = createWarningForDisplayMismatch(
 								myCtx,
-								theCodeToValidate, theDisplayToValidate,
+								theCodeToValidate,
+								theDisplayToValidate,
 								nextExpansionCode.getDisplay(),
 								codeSystemResourceVersion,
 								messageAppend);
@@ -1204,27 +1205,30 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 
 	public static CodeValidationResult createWarningForDisplayMismatch(
 			FhirContext theFhirContext,
-			String theCode, String theDisplay,
+			String theCode,
+			String theDisplay,
 			String theExpectedDisplay,
 			String theCodeSystemVersion) {
-		return createWarningForDisplayMismatch(theFhirContext,
-				theCode, theDisplay, theExpectedDisplay, theCodeSystemVersion, "");
+		return createWarningForDisplayMismatch(
+				theFhirContext, theCode, theDisplay, theExpectedDisplay, theCodeSystemVersion, "");
 	}
 
 	private static CodeValidationResult createWarningForDisplayMismatch(
 			FhirContext theFhirContext,
-			String theCode, String theDisplay,
+			String theCode,
+			String theDisplay,
 			String theExpectedDisplay,
 			String theCodeSystemVersion,
 			String theMessageAppend) {
 
 		String message = theFhirContext
-				.getLocalizer()
-				.getMessage(InMemoryTerminologyServerValidationSupport.class,
-						"displayMismatch",
-						theDisplay,
-						theExpectedDisplay) +
-						 theMessageAppend;
+						.getLocalizer()
+						.getMessage(
+								InMemoryTerminologyServerValidationSupport.class,
+								"displayMismatch",
+								theDisplay,
+								theExpectedDisplay)
+				+ theMessageAppend;
 		return new CodeValidationResult()
 				.setSeverity(IssueSeverity.WARNING)
 				.setMessage(message)

@@ -49,6 +49,8 @@ import org.hl7.fhir.utilities.xhtml.XhtmlNode;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.util.AopTestUtils;
 
@@ -1364,7 +1366,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testValidateUsingExternallyDefinedCodeMisMatchDisplay_ShouldError() {
+	public void testValidateUsingExternallyDefinedCodeMisMatchDisplay_InMemory_ShouldLogWarning() {
 		CodeSystem codeSystem = new CodeSystem();
 		codeSystem.setUrl("http://foo");
 		codeSystem.setContent(CodeSystem.CodeSystemContentMode.NOTPRESENT);
@@ -1992,6 +1994,81 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		String encoded = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome.getOperationOutcome());
 		ourLog.info("OO: {}", encoded);
 		assertThat(encoded, containsString("No issues detected"));
+	}
+
+	@ParameterizedTest
+	@ValueSource(booleans = {false, true})
+	public void testValidateWrongDisplayOnRequiredBinding(boolean thePreCalculateExpansion) {
+		StructureDefinition sd = new StructureDefinition();
+		sd.setUrl("http://profile");
+		sd.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		sd.setType("Observation");
+		sd.setAbstract(false);
+		sd.setDerivation(StructureDefinition.TypeDerivationRule.CONSTRAINT);
+		sd.setBaseDefinition("http://hl7.org/fhir/StructureDefinition/Observation");
+		ElementDefinition codeElement = sd.getDifferential().addElement();
+		codeElement.setId("Observation.code");
+		codeElement.setPath("Observation.code");
+		codeElement.addType().setCode("CodeableConcept");
+		codeElement.getBinding().setStrength(Enumerations.BindingStrength.REQUIRED);
+		codeElement.getBinding().setValueSet("http://vs");
+		myStructureDefinitionDao.create(sd, new SystemRequestDetails());
+
+		CodeSystem cs = new CodeSystem();
+		cs.setUrl("http://cs");
+		cs.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		cs.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+		cs.addConcept()
+			.setCode("8302-2")
+			.setDisplay("Body Height");
+		myCodeSystemDao.create(cs, new SystemRequestDetails());
+
+		ValueSet vs = new ValueSet();
+		vs.setUrl("http://vs");
+		vs.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		vs.getCompose().addInclude().setSystem("http://cs");
+		myValueSetDao.create(vs, new SystemRequestDetails());
+
+		if (thePreCalculateExpansion) {
+			myTermReadSvc.preExpandDeferredValueSetsToTerminologyTables();
+		}
+
+		Observation obs = new Observation();
+		obs.getText().setStatus(Narrative.NarrativeStatus.GENERATED);
+		obs.getText().setDivAsString("<div>hello</div>");
+		obs.getMeta().addProfile("http://profile");
+		obs.setStatus(Observation.ObservationStatus.FINAL);
+		obs.getCode().addCoding()
+			.setSystem("http://cs")
+			.setCode("8302-2")
+			.setDisplay("Body height2");
+		obs.setEffective(DateTimeType.now());
+		obs.addPerformer(new Reference("Practitioner/123"));
+		obs.setSubject(new Reference("Patient/123"));
+		obs.setValue(new Quantity(null, 123, "http://unitsofmeasure.org", "[in_i]", "in"));
+
+		String encoded = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs);
+		MethodOutcome outcome = myObservationDao.validate(obs, null, encoded, EncodingEnum.JSON, ValidationModeEnum.CREATE, null, new SystemRequestDetails());
+
+		OperationOutcome oo = (OperationOutcome) outcome.getOperationOutcome();
+		ourLog.info("Outcome: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo).replace("\"resourceType\"", "\"resType\""));
+
+		assertEquals(1, oo.getIssue().size());
+		assertThat(oo.getIssue().get(0).getDiagnostics(),
+				containsString("Concept Display \"Body height2\" does not match expected \"Body Height\""));
+		if (!thePreCalculateExpansion) {
+			assertThat(oo.getIssue().get(0).getDiagnostics(),
+					containsString("for in-memory expansion of ValueSet: http://vs"));
+		}
+		assertEquals(11, ((IntegerType)oo.getIssue().get(0).getExtensionByUrl("http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line").getValue()).getValue());
+		assertEquals(4, ((IntegerType)oo.getIssue().get(0).getExtensionByUrl("http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col").getValue()).getValue());
+		assertEquals(0, oo.getIssue().get(0).getExtensionsByUrl("http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id").size());
+		assertEquals(OperationOutcome.IssueType.PROCESSING, oo.getIssue().get(0).getCode());
+		assertEquals(OperationOutcome.IssueSeverity.WARNING, oo.getIssue().get(0).getSeverity());
+		assertEquals(2, oo.getIssue().get(0).getLocation().size());
+		assertEquals("Observation.code", oo.getIssue().get(0).getLocation().get(0).getValue());
+		assertEquals("Line[11] Col[4]", oo.getIssue().get(0).getLocation().get(1).getValue());
+
 	}
 
 	/**
