@@ -295,6 +295,9 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 	@Autowired
 	private IJpaStorageResourceParser myJpaStorageResourceParser;
 
+	@Autowired
+	private InMemoryTerminologyServerValidationSupport myInMemoryTerminologyServerValidationSupport;
+
 	@Override
 	public boolean isCodeSystemSupported(ValidationSupportContext theValidationSupportContext, String theSystem) {
 		TermCodeSystemVersionDetails cs = getCurrentCodeSystemVersion(theSystem);
@@ -1025,7 +1028,7 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 							new VersionConvertor_40_50(new BaseAdvisor_40_50()), "ValueSet");
 					org.hl7.fhir.r5.model.ValueSet.ConceptSetComponent includeOrExclude =
 							ValueSet40_50.convertConceptSetComponent(theIncludeOrExclude);
-					new InMemoryTerminologyServerValidationSupport(myContext)
+					myInMemoryTerminologyServerValidationSupport
 							.expandValueSetIncludeOrExclude(
 									new ValidationSupportContext(provideValidationSupport()),
 									consumer,
@@ -2073,8 +2076,8 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 			}
 
 			String expectedDisplay = concepts.get(0).getDisplay();
-			return InMemoryTerminologyServerValidationSupport.createWarningForDisplayMismatch(
-					myContext, theCode, theDisplay, expectedDisplay, systemVersion);
+			return InMemoryTerminologyServerValidationSupport.createResultForDisplayMismatch(
+					myContext, theCode, theDisplay, expectedDisplay, systemVersion, myStorageSettings.getIssueSeverityForCodeDisplayMismatch());
 		}
 
 		if (!concepts.isEmpty()) {
@@ -2709,8 +2712,8 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 					|| code.getDisplay().equals(theDisplay)) {
 				return new CodeValidationResult().setCode(code.getCode()).setDisplay(code.getDisplay());
 			} else {
-				return InMemoryTerminologyServerValidationSupport.createWarningForDisplayMismatch(
-						myContext, theCode, theDisplay, code.getDisplay(), code.getSystemVersion());
+				return InMemoryTerminologyServerValidationSupport.createResultForDisplayMismatch(
+						myContext, theCode, theDisplay, code.getDisplay(), code.getSystemVersion(), myStorageSettings.getIssueSeverityForCodeDisplayMismatch());
 			}
 		}
 
@@ -2748,7 +2751,7 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 
 		if (retVal == null) {
 			if (valueSet != null) {
-				retVal = new InMemoryTerminologyServerValidationSupport(myContext)
+				retVal = myInMemoryTerminologyServerValidationSupport
 						.validateCodeInValueSet(
 								theValidationSupportContext,
 								theValidationOptions,

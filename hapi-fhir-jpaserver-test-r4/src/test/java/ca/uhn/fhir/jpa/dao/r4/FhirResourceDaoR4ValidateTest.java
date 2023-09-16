@@ -34,6 +34,7 @@ import ca.uhn.fhir.validation.IValidatorModule;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
 import ca.uhn.fhir.validation.ValidationResult;
 import org.apache.commons.io.IOUtils;
+import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.UnknownCodeSystemWarningValidationSupport;
 import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
@@ -50,6 +51,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.util.AopTestUtils;
@@ -87,15 +89,21 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 	private ValidationSettings myValidationSettings;
 	@Autowired
 	private UnknownCodeSystemWarningValidationSupport myUnknownCodeSystemWarningValidationSupport;
+	@Autowired
+	private InMemoryTerminologyServerValidationSupport myInMemoryTerminologyServerValidationSupport;
 
 	@AfterEach
 	public void after() {
 		FhirInstanceValidator val = AopTestUtils.getTargetObject(myValidatorModule);
 		val.setBestPracticeWarningLevel(BestPracticeWarningLevel.Warning);
 
-		myStorageSettings.setAllowExternalReferences(new JpaStorageSettings().isAllowExternalReferences());
-		myStorageSettings.setMaximumExpansionSize(JpaStorageSettings.DEFAULT_MAX_EXPANSION_SIZE);
-		myStorageSettings.setPreExpandValueSets(new JpaStorageSettings().isPreExpandValueSets());
+		JpaStorageSettings defaults = new JpaStorageSettings();
+		myStorageSettings.setAllowExternalReferences(defaults.isAllowExternalReferences());
+		myStorageSettings.setMaximumExpansionSize(defaults.getMaximumExpansionSize());
+		myStorageSettings.setPreExpandValueSets(defaults.isPreExpandValueSets());
+		myStorageSettings.setIssueSeverityForCodeDisplayMismatch(defaults.getIssueSeverityForCodeDisplayMismatch());
+
+		myInMemoryTerminologyServerValidationSupport.setIssueSeverityForCodeDisplayMismatch(defaults.getIssueSeverityForCodeDisplayMismatch());
 
 		TermReadSvcImpl.setInvokeOnNextCallForUnitTest(null);
 
@@ -1997,8 +2005,18 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 	}
 
 	@ParameterizedTest
-	@ValueSource(booleans = {false, true})
-	public void testValidateWrongDisplayOnRequiredBinding(boolean thePreCalculateExpansion) {
+	@CsvSource(value = {
+			"INFORMATION, false",
+			"INFORMATION, true",
+			"WARNING,     false",
+			"WARNING,     true",
+			"ERROR,       false",
+			"ERROR,       true",
+	})
+	public void testValidateWrongDisplayOnRequiredBinding(IValidationSupport.IssueSeverity theDisplayCodeMismatchIssueSeverity, boolean thePreCalculateExpansion) {
+		myStorageSettings.setIssueSeverityForCodeDisplayMismatch(theDisplayCodeMismatchIssueSeverity);
+		myInMemoryTerminologyServerValidationSupport.setIssueSeverityForCodeDisplayMismatch(theDisplayCodeMismatchIssueSeverity);
+
 		StructureDefinition sd = new StructureDefinition();
 		sd.setUrl("http://profile");
 		sd.setStatus(Enumerations.PublicationStatus.ACTIVE);
@@ -2053,21 +2071,35 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		OperationOutcome oo = (OperationOutcome) outcome.getOperationOutcome();
 		ourLog.info("Outcome: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo).replace("\"resourceType\"", "\"resType\""));
 
-		assertEquals(1, oo.getIssue().size());
-		assertThat(oo.getIssue().get(0).getDiagnostics(),
-				containsString("Concept Display \"Body height2\" does not match expected \"Body Height\""));
-		if (!thePreCalculateExpansion) {
-			assertThat(oo.getIssue().get(0).getDiagnostics(),
-					containsString("for in-memory expansion of ValueSet: http://vs"));
+		OperationOutcome.OperationOutcomeIssueComponent badDisplayIssue;
+		if (theDisplayCodeMismatchIssueSeverity == IValidationSupport.IssueSeverity.ERROR) {
+
+			assertEquals(2, oo.getIssue().size());
+			badDisplayIssue = oo.getIssue().get(1);
+
+			OperationOutcome.OperationOutcomeIssueComponent noGoodCodings = oo.getIssue().get(0);
+			assertEquals("error", noGoodCodings.getSeverity().toCode());
+			assertEquals("None of the codings provided are in the value set 'ValueSet[http://vs]' (http://vs), and a coding from this value set is required) (codes = http://cs#8302-2)", noGoodCodings.getDiagnostics());
+
+		} else if (theDisplayCodeMismatchIssueSeverity == IValidationSupport.IssueSeverity.WARNING) {
+
+			assertEquals(1, oo.getIssue().size());
+			badDisplayIssue = oo.getIssue().get(0);
+			assertThat(badDisplayIssue.getDiagnostics(),
+					containsString("Concept Display \"Body height2\" does not match expected \"Body Height\""));
+			assertEquals(OperationOutcome.IssueType.PROCESSING, badDisplayIssue.getCode());
+			assertEquals(theDisplayCodeMismatchIssueSeverity.name().toLowerCase(), badDisplayIssue.getSeverity().toCode());
+
+		} else {
+
+			assertEquals(1, oo.getIssue().size());
+			badDisplayIssue = oo.getIssue().get(0);
+			assertThat(badDisplayIssue.getDiagnostics(),
+					containsString("No issues detected during validation"));
+			assertEquals(OperationOutcome.IssueType.INFORMATIONAL, badDisplayIssue.getCode());
+			assertEquals(theDisplayCodeMismatchIssueSeverity.name().toLowerCase(), badDisplayIssue.getSeverity().toCode());
+
 		}
-		assertEquals(11, ((IntegerType)oo.getIssue().get(0).getExtensionByUrl("http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line").getValue()).getValue());
-		assertEquals(4, ((IntegerType)oo.getIssue().get(0).getExtensionByUrl("http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col").getValue()).getValue());
-		assertEquals(0, oo.getIssue().get(0).getExtensionsByUrl("http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id").size());
-		assertEquals(OperationOutcome.IssueType.PROCESSING, oo.getIssue().get(0).getCode());
-		assertEquals(OperationOutcome.IssueSeverity.WARNING, oo.getIssue().get(0).getSeverity());
-		assertEquals(2, oo.getIssue().get(0).getLocation().size());
-		assertEquals("Observation.code", oo.getIssue().get(0).getLocation().get(0).getValue());
-		assertEquals("Line[11] Col[4]", oo.getIssue().get(0).getLocation().get(1).getValue());
 
 	}
 

@@ -20,6 +20,7 @@
 package ca.uhn.fhir.jpa.searchparam.extractor;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
