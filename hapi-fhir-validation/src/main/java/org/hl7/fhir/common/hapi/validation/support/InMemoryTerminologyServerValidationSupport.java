@@ -530,7 +530,7 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 								theCodeToValidate,
 								theDisplayToValidate,
 								nextExpansionCode.getDisplay(),
-								codeSystemResourceVersion,
+								csVersion,
 								messageAppend);
 						if (isNotBlank(theValueSetUrl)) {
 							populateSourceDetailsForInMemoryExpansion(theValueSetUrl, codeValidationResult);

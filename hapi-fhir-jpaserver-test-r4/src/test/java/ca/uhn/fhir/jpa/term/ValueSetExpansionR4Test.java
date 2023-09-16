@@ -466,7 +466,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 		String code = "male";
 		IValidationSupport.CodeValidationResult outcome = myValueSetDao.validateCode(new CodeType(valueSetUrl), null, new CodeType(code), new CodeType(codeSystemUrl), null, null, null, mySrd);
 		assertTrue(outcome.isOk());
-		assertEquals("Code was validated against in-memory expansion of ValueSet: http://hl7.org/fhir/ValueSet/administrative-gender", outcome.getMessage());
+		assertEquals("Code was validated against in-memory expansion of ValueSet: http://hl7.org/fhir/ValueSet/administrative-gender", outcome.getSourceDetails());
 
 		// Validate Code - Bad
 		code = "AAA";
@@ -1635,10 +1635,11 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 		code = "28571000087109";
 		display = "BLAH";
 		outcome = myValueSetDao.validateCode(null, vsId, new CodeType(code), new UriType(codeSystemUrl), new StringType(display), null, null, mySrd);
-		assertFalse(outcome.isOk());
-		assertEquals(null, outcome.getCode());
+		assertTrue(outcome.isOk());
+		assertEquals("28571000087109", outcome.getCode());
 		assertEquals("MODERNA COVID-19 mRNA-1273", outcome.getDisplay());
 		assertEquals("Concept Display \"BLAH\" does not match expected \"MODERNA COVID-19 mRNA-1273\" for in-memory expansion of ValueSet: http://ehealthontario.ca/fhir/ValueSet/vaccinecode", outcome.getMessage());
+		assertEquals("Code was validated against in-memory expansion of ValueSet: http://ehealthontario.ca/fhir/ValueSet/vaccinecode", outcome.getSourceDetails());
 		assertEquals("0.17", outcome.getCodeSystemVersion());
 
 		// Validate code - good code, good display
@@ -1680,11 +1681,11 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 		code = "28571000087109";
 		display = "BLAH";
 		outcome = myValueSetDao.validateCode(null, vsId, new CodeType(code), new UriType(codeSystemUrl), new StringType(display), null, null, mySrd);
-		assertFalse(outcome.isOk());
-		assertEquals(null, outcome.getCode());
+		assertTrue(outcome.isOk());
+		assertEquals("28571000087109", outcome.getCode());
 		assertEquals("MODERNA COVID-19 mRNA-1273", outcome.getDisplay());
 		assertEquals("0.17", outcome.getCodeSystemVersion());
-		assertThat(outcome.getMessage(), containsString("Unable to validate code http://snomed.info/sct#28571000087109 - Concept Display \"BLAH\" does not match expected \"MODERNA COVID-19 mRNA-1273\" for CodeSystem: http://snomed.info/sct - Code validation occurred using a ValueSet expansion that was pre-calculated at"));
+		assertEquals("Concept Display \"BLAH\" does not match expected \"MODERNA COVID-19 mRNA-1273\"", outcome.getMessage());
 
 		// Validate code - good code, good display
 		codeSystemUrl = "http://snomed.info/sct";

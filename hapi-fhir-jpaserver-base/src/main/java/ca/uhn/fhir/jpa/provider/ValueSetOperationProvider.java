@@ -61,6 +61,10 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 public class ValueSetOperationProvider extends BaseJpaProvider {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(ValueSetOperationProvider.class);
+	public static final String SOURCE_DETAILS = "sourceDetails";
+	public static final String RESULT = "result";
+	public static final String MESSAGE = "message";
+	public static final String DISPLAY = "display";
 
 	@Autowired
 	protected IValidationSupport myValidationSupport;
@@ -145,9 +149,10 @@ public class ValueSetOperationProvider extends BaseJpaProvider {
 			idempotent = true,
 			typeName = "ValueSet",
 			returnParameters = {
-				@OperationParam(name = "result", typeName = "boolean", min = 1),
-				@OperationParam(name = "message", typeName = "string"),
-				@OperationParam(name = "display", typeName = "string")
+				@OperationParam(name = RESULT, typeName = "boolean", min = 1),
+				@OperationParam(name = MESSAGE, typeName = "string"),
+				@OperationParam(name = DISPLAY, typeName = "string"),
+					@OperationParam(name = SOURCE_DETAILS, typeName = "string")
 			})
 	public IBaseParameters validateCode(
 			HttpServletRequest theServletRequest,
@@ -159,7 +164,7 @@ public class ValueSetOperationProvider extends BaseJpaProvider {
 			@OperationParam(name = "system", min = 0, max = 1, typeName = "uri") IPrimitiveType<String> theSystem,
 			@OperationParam(name = "systemVersion", min = 0, max = 1, typeName = "string")
 					IPrimitiveType<String> theSystemVersion,
-			@OperationParam(name = "display", min = 0, max = 1, typeName = "string") IPrimitiveType<String> theDisplay,
+			@OperationParam(name = DISPLAY, min = 0, max = 1, typeName = "string") IPrimitiveType<String> theDisplay,
 			@OperationParam(name = "coding", min = 0, max = 1, typeName = "Coding") IBaseCoding theCoding,
 			@OperationParam(name = "codeableConcept", min = 0, max = 1, typeName = "CodeableConcept")
 					ICompositeType theCodeableConcept,
@@ -251,7 +256,7 @@ public class ValueSetOperationProvider extends BaseJpaProvider {
 			name = ProviderConstants.OPERATION_INVALIDATE_EXPANSION,
 			idempotent = false,
 			typeName = "ValueSet",
-			returnParameters = {@OperationParam(name = "message", typeName = "string", min = 1, max = 1)})
+			returnParameters = {@OperationParam(name = MESSAGE, typeName = "string", min = 1, max = 1)})
 	public IBaseParameters invalidateValueSetExpansion(
 			@IdParam IIdType theValueSetId, RequestDetails theRequestDetails, HttpServletRequest theServletRequest) {
 		startRequest(theServletRequest);
@@ -260,7 +265,7 @@ public class ValueSetOperationProvider extends BaseJpaProvider {
 			String outcome = myTermReadSvc.invalidatePreCalculatedExpansion(theValueSetId, theRequestDetails);
 
 			IBaseParameters retVal = ParametersUtil.newInstance(getContext());
-			ParametersUtil.addParameterToParametersString(getContext(), retVal, "message", outcome);
+			ParametersUtil.addParameterToParametersString(getContext(), retVal, MESSAGE, outcome);
 			return retVal;
 
 		} finally {
@@ -325,12 +330,15 @@ public class ValueSetOperationProvider extends BaseJpaProvider {
 	public static IBaseParameters toValidateCodeResult(FhirContext theContext, CodeValidationResult theResult) {
 		IBaseParameters retVal = ParametersUtil.newInstance(theContext);
 
-		ParametersUtil.addParameterToParametersBoolean(theContext, retVal, "result", theResult.isOk());
+		ParametersUtil.addParameterToParametersBoolean(theContext, retVal, RESULT, theResult.isOk());
 		if (isNotBlank(theResult.getMessage())) {
-			ParametersUtil.addParameterToParametersString(theContext, retVal, "message", theResult.getMessage());
+			ParametersUtil.addParameterToParametersString(theContext, retVal, MESSAGE, theResult.getMessage());
 		}
 		if (isNotBlank(theResult.getDisplay())) {
-			ParametersUtil.addParameterToParametersString(theContext, retVal, "display", theResult.getDisplay());
+			ParametersUtil.addParameterToParametersString(theContext, retVal, DISPLAY, theResult.getDisplay());
+		}
+		if (isNotBlank(theResult.getSourceDetails())) {
+			ParametersUtil.addParameterToParametersString(theContext, retVal, SOURCE_DETAILS, theResult.getSourceDetails());
 		}
 
 		return retVal;
