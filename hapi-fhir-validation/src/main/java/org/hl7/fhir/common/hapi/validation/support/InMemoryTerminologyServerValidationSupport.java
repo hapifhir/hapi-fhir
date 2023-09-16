@@ -517,22 +517,24 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 								.setCodeSystemName(codeSystemResourceName)
 								.setCodeSystemVersion(csVersion);
 						if (isNotBlank(theValueSetUrl)) {
-							codeValidationResult.setMessage(
-									"Code was validated against in-memory expansion of ValueSet: " + theValueSetUrl);
+							populateSourceDetailsForInMemoryExpansion(theValueSetUrl, codeValidationResult);
 						}
 						return codeValidationResult;
 					} else {
-						String message = "Concept Display \"" + theDisplayToValidate + "\" does not match expected \""
-								+ nextExpansionCode.getDisplay() + "\"";
+						String messageAppend = "";
 						if (isNotBlank(theValueSetUrl)) {
-							message += " for in-memory expansion of ValueSet: " + theValueSetUrl;
+							messageAppend = " for in-memory expansion of ValueSet: " + theValueSetUrl;
 						}
-						return new CodeValidationResult()
-								.setSeverity(IssueSeverity.ERROR)
-								.setDisplay(nextExpansionCode.getDisplay())
-								.setMessage(message)
-								.setCodeSystemName(codeSystemResourceName)
-								.setCodeSystemVersion(csVersion);
+						CodeValidationResult codeValidationResult = createWarningForDisplayMismatch(
+								myCtx,
+								theCodeToValidate, theDisplayToValidate,
+								nextExpansionCode.getDisplay(),
+								codeSystemResourceVersion,
+								messageAppend);
+						if (isNotBlank(theValueSetUrl)) {
+							populateSourceDetailsForInMemoryExpansion(theValueSetUrl, codeValidationResult);
+						}
+						return codeValidationResult;
 					}
 				}
 			}
@@ -560,6 +562,12 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 		}
 
 		return new CodeValidationResult().setSeverityCode(severity.toCode()).setMessage(message);
+	}
+
+	private static void populateSourceDetailsForInMemoryExpansion(
+			String theValueSetUrl, CodeValidationResult codeValidationResult) {
+		codeValidationResult.setSourceDetails(
+				"Code was validated against in-memory expansion of ValueSet: " + theValueSetUrl);
 	}
 
 	@Override
@@ -1192,6 +1200,37 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 			theVersion = substringAfter(theSystemUrl, OUR_PIPE_CHARACTER);
 		}
 		return theVersion;
+	}
+
+	public static CodeValidationResult createWarningForDisplayMismatch(
+			FhirContext theFhirContext,
+			String theCode, String theDisplay,
+			String theExpectedDisplay,
+			String theCodeSystemVersion) {
+		return createWarningForDisplayMismatch(theFhirContext,
+				theCode, theDisplay, theExpectedDisplay, theCodeSystemVersion, "");
+	}
+
+	private static CodeValidationResult createWarningForDisplayMismatch(
+			FhirContext theFhirContext,
+			String theCode, String theDisplay,
+			String theExpectedDisplay,
+			String theCodeSystemVersion,
+			String theMessageAppend) {
+
+		String message = theFhirContext
+				.getLocalizer()
+				.getMessage(InMemoryTerminologyServerValidationSupport.class,
+						"displayMismatch",
+						theDisplay,
+						theExpectedDisplay) +
+						 theMessageAppend;
+		return new CodeValidationResult()
+				.setSeverity(IssueSeverity.WARNING)
+				.setMessage(message)
+				.setCode(theCode)
+				.setCodeSystemVersion(theCodeSystemVersion)
+				.setDisplay(theExpectedDisplay);
 	}
 
 	public enum FailureType {

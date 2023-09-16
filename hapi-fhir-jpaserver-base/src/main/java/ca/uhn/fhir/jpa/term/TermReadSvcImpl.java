@@ -2055,7 +2055,7 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 				.findByResourcePid(valueSetResourcePid.getId())
 				.orElseThrow(IllegalStateException::new);
 		String timingDescription = toHumanReadableExpansionTimestamp(valueSetEntity);
-		String msg = myContext
+		String preExpansionMessage = myContext
 				.getLocalizer()
 				.getMessage(TermReadSvcImpl.class, "validationPerformedAgainstPreExpansion", timingDescription);
 
@@ -2068,14 +2068,13 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 							.setCode(concept.getCode())
 							.setDisplay(concept.getDisplay())
 							.setCodeSystemVersion(concept.getSystemVersion())
-							.setMessage(msg);
+							.setSourceDetails(preExpansionMessage);
 				}
 			}
 
 			String expectedDisplay = concepts.get(0).getDisplay();
-			String append = createMessageAppendForDisplayMismatch(theSystem, theDisplay, expectedDisplay) + " - " + msg;
-			return createFailureCodeValidationResult(theSystem, theCode, systemVersion, append)
-					.setDisplay(expectedDisplay);
+			return InMemoryTerminologyServerValidationSupport.createWarningForDisplayMismatch(
+					myContext, theCode, theDisplay, expectedDisplay, systemVersion);
 		}
 
 		if (!concepts.isEmpty()) {
@@ -2083,7 +2082,7 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 					.setCode(concepts.get(0).getCode())
 					.setDisplay(concepts.get(0).getDisplay())
 					.setCodeSystemVersion(concepts.get(0).getSystemVersion())
-					.setMessage(msg);
+					.setMessage(preExpansionMessage);
 		}
 
 		// Ok, we failed
@@ -2096,7 +2095,7 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 			String unknownCodeMessage = myContext
 					.getLocalizer()
 					.getMessage(TermReadSvcImpl.class, "unknownCodeInSystem", theSystem, theCode);
-			append = " - " + unknownCodeMessage + ". " + msg;
+			append = " - " + unknownCodeMessage + ". " + preExpansionMessage;
 		}
 
 		return createFailureCodeValidationResult(theSystem, theCode, null, append);
@@ -2710,11 +2709,8 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 					|| code.getDisplay().equals(theDisplay)) {
 				return new CodeValidationResult().setCode(code.getCode()).setDisplay(code.getDisplay());
 			} else {
-				String messageAppend =
-						createMessageAppendForDisplayMismatch(theCodeSystemUrl, theDisplay, code.getDisplay());
-				return createFailureCodeValidationResult(
-								theCodeSystemUrl, theCode, code.getSystemVersion(), messageAppend)
-						.setDisplay(code.getDisplay());
+				return InMemoryTerminologyServerValidationSupport.createWarningForDisplayMismatch(
+						myContext, theCode, theDisplay, code.getDisplay(), code.getSystemVersion());
 			}
 		}
 
@@ -3180,13 +3176,6 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 		}
 
 		return theExpansionOptions.getTheDisplayLanguage().equalsIgnoreCase(theStoredLang);
-	}
-
-	@Nonnull
-	private static String createMessageAppendForDisplayMismatch(
-			String theCodeSystemUrl, String theDisplay, String theExpectedDisplay) {
-		return " - Concept Display \"" + theDisplay + "\" does not match expected \"" + theExpectedDisplay
-				+ "\" for CodeSystem: " + theCodeSystemUrl;
 	}
 
 	@Nonnull

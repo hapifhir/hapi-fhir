@@ -1396,8 +1396,8 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 			containsString("None of the codings provided are in the value set 'IdentifierType'"));
 		assertThat(OperationOutcomeUtil.getFirstIssueDetails(myFhirContext, oo),
 			containsString("a coding should come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (codes = http://foo#bar)"));
-		assertEquals(OperationOutcome.IssueSeverity.ERROR, oo.getIssue().get(1).getSeverity());
-		assertThat(oo.getIssue().get(1).getDiagnostics(), containsString("Unable to validate code http://foo#bar - Concept Display "));
+		assertEquals(OperationOutcome.IssueSeverity.WARNING, oo.getIssue().get(1).getSeverity());
+		assertEquals("Concept Display \"not bar code\" does not match expected \"Bar Code\" for 'http://foo#bar'", oo.getIssue().get(1).getDiagnostics());
 	}
 
 	private OperationOutcome doTestValidateResourceContainingProfileDeclaration(String methodName, EncodingEnum enc) throws IOException {
