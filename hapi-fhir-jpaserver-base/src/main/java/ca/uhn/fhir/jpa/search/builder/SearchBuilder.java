@@ -2051,7 +2051,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 				}
 
 				if (myNext == null) {
-					// if we got here, it means the current PjaPid has already been processed
+					// if we got here, it means the current JpaPid has already been processed,
 					// and we will decide (here) if we need to fetch related resources recursively
 					if (myFetchIncludesForEverythingOperation) {
 						myIncludesIterator = new IncludesIterator(myPidSet, myRequest);

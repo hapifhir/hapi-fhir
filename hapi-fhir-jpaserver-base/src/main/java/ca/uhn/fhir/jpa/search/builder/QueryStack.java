@@ -2679,6 +2679,7 @@ public class QueryStack {
 		Condition predicate =
 				table.createEverythingPredicate(theResourceName, theTypeSourceResourceNames, theTargetPids);
 		mySqlBuilder.addPredicate(predicate);
+		mySqlBuilder.getSelect().setIsDistinct(true);
 	}
 
 	public IQueryParameterType newParameterInstance(
@@ -2808,7 +2809,7 @@ public class QueryStack {
 		private List<String> extractPaths(String theResourceType, RuntimeSearchParam theSearchParam) {
 			List<String> pathsForType = theSearchParam.getPathsSplit().stream()
 					.map(String::trim)
-					.filter(t -> t.startsWith(theResourceType))
+					.filter(t -> (t.startsWith(theResourceType) || t.startsWith("(" + theResourceType)))
 					.collect(Collectors.toList());
 			if (pathsForType.isEmpty()) {
 				ourLog.warn(
