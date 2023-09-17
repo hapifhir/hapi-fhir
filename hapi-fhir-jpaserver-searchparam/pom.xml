@@ -13,7 +13,7 @@
 	<artifactId>hapi-fhir-jpaserver-searchparam</artifactId>
 	<packaging>jar</packaging>
 
-	<name>HAPI FHIR Search Parameters</name>
+	<name>HAPI FHIR JPA - Search Parameters</name>
 
 	<dependencies>
 		<!-- HAPI -->

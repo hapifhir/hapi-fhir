@@ -59,7 +59,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.util.List;
 import javax.annotation.Nonnull;
-import javax.servlet.ServletException;
+import jakarta.servlet.ServletException;
 
 @SuppressWarnings({"serial", "unused"})
 public class ValidatorExamples {

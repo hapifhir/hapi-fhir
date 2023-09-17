@@ -26,7 +26,7 @@ import org.apache.commons.lang3.Validate;
 import java.util.ArrayList;
 import java.util.List;
 import javax.annotation.Nonnull;
-import javax.validation.constraints.Pattern;
+import jakarta.validation.constraints.Pattern;
 
 public class MdmClearJobParameters extends PartitionedJobParameters {
 	@JsonProperty("resourceType")

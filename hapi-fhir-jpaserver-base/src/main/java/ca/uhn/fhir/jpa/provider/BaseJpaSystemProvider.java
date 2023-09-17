@@ -42,7 +42,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Date;
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 public abstract class BaseJpaSystemProvider<T, MT> extends BaseStorageSystemProvider<T, MT>
 		implements IJpaSystemProvider {

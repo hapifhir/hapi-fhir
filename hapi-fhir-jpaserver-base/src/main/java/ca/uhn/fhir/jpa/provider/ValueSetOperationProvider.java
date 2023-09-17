@@ -54,7 +54,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 
 import java.util.Optional;
 import java.util.function.Supplier;
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 

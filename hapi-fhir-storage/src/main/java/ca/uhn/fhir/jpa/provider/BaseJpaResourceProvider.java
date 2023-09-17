@@ -60,7 +60,6 @@ import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.springframework.beans.factory.annotation.Required;
 
 import java.util.Date;
 
@@ -107,7 +106,6 @@ public abstract class BaseJpaResourceProvider<T extends IBaseResource> extends B
 		return myDao;
 	}
 
-	@Required
 	public void setDao(IFhirResourceDao<T> theDao) {
 		myDao = theDao;
 	}

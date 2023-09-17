@@ -28,7 +28,7 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 import static ca.uhn.fhir.jpa.provider.BaseJpaProvider.endRequest;
 import static ca.uhn.fhir.jpa.provider.BaseJpaProvider.startRequest;

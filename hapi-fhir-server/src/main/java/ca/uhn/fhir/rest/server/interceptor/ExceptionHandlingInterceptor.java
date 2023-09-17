@@ -40,6 +40,9 @@ import ca.uhn.fhir.util.OperationOutcomeUtil;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.apache.commons.collections4.map.HashedMap;
+import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 
 import java.io.IOException;
 import java.util.Collection;

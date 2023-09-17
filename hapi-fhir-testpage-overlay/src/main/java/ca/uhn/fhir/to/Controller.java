@@ -63,8 +63,8 @@ import java.util.TreeSet;
 import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
 
 import static ca.uhn.fhir.rest.server.provider.ProviderConstants.DIFF_OPERATION_NAME;
 import static ca.uhn.fhir.util.UrlUtil.sanitizeUrlPart;

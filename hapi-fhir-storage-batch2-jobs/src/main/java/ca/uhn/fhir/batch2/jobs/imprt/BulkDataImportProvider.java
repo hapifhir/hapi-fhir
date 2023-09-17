@@ -57,7 +57,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import javax.annotation.Nonnull;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletResponse;
 
 import static ca.uhn.fhir.batch2.jobs.export.BulkDataExportProvider.validatePreferAsyncHeader;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;

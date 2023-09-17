@@ -55,9 +55,9 @@ import org.springframework.web.context.support.AnnotationConfigWebApplicationCon
 
 import java.util.ArrayList;
 import java.util.List;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
 
 public class TestRestfulServer extends RestfulServer {
 

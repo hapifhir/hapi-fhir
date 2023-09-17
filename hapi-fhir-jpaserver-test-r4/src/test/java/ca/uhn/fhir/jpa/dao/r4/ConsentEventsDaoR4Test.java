@@ -29,7 +29,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import javax.servlet.ServletException;
+import jakarta.servlet.ServletException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;

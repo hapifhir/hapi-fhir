@@ -39,6 +39,7 @@ import org.hibernate.engine.jdbc.env.spi.NameQualifierSupport;
 import org.hibernate.engine.jdbc.env.spi.QualifiedObjectNameFormatter;
 import org.hibernate.engine.jdbc.spi.SqlExceptionHelper;
 import org.hibernate.service.ServiceRegistry;
+import org.hibernate.sql.ast.SqlAstTranslatorFactory;
 import org.hibernate.tool.schema.extract.spi.ExtractionContext;
 import org.hibernate.tool.schema.extract.spi.SequenceInformation;
 import org.hibernate.tool.schema.extract.spi.SequenceInformationExtractor;
@@ -388,7 +389,7 @@ public class JdbcUtils {
 							new DatabaseMetaDataDialectResolutionInfoAdapter(connection.getMetaData()));
 
 					Set<String> sequenceNames = new HashSet<>();
-					if (dialect.supportsSequences()) {
+					if (dialect.getSequenceSupport().supportsSequences()) {
 
 						// Use Hibernate to get a list of current sequences
 						SequenceInformationExtractor sequenceInformationExtractor =
@@ -410,6 +411,11 @@ public class JdbcUtils {
 									@Override
 									public Dialect getDialect() {
 										return dialect;
+									}
+
+									@Override
+									public SqlAstTranslatorFactory getSqlAstTranslatorFactory() {
+										return null;
 									}
 
 									@Override
@@ -435,7 +441,7 @@ public class JdbcUtils {
 									@Override
 									public IdentifierHelper getIdentifierHelper() {
 										return new NormalizingIdentifierHelperImpl(
-												this, null, true, true, true, null, null, null);
+												this, null, true, true, true, true, null, null, null);
 									}
 
 									@Override

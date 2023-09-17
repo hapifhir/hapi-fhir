@@ -24,11 +24,11 @@ import ca.uhn.fhir.jaxrs.server.util.JaxRsRequest;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.interceptor.ExceptionHandlingInterceptor;
+import jakarta.servlet.ServletException;
 
 import java.io.IOException;
 import javax.interceptor.AroundInvoke;
 import javax.interceptor.InvocationContext;
-import javax.servlet.ServletException;
 import javax.ws.rs.core.Response;
 
 /**

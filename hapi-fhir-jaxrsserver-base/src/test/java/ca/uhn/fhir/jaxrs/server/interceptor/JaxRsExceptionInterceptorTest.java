@@ -9,7 +9,7 @@ import java.net.URI;
 import java.util.HashMap;
 
 import javax.interceptor.InvocationContext;
-import javax.servlet.ServletException;
+import jakarta.servlet.ServletException;
 import javax.ws.rs.core.*;
 
 import org.junit.jupiter.api.BeforeEach;

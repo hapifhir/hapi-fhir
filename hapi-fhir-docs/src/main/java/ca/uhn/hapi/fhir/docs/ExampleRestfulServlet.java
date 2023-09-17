@@ -24,8 +24,8 @@ import ca.uhn.fhir.rest.server.RestfulServer;
 
 import java.util.ArrayList;
 import java.util.List;
-import javax.servlet.ServletException;
-import javax.servlet.annotation.WebServlet;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
 
 // START SNIPPET: servlet
 

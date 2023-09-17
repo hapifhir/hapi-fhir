@@ -30,7 +30,7 @@ import org.hl7.fhir.r4.model.Reference;
 
 import java.util.List;
 import javax.annotation.Nonnull;
-import javax.servlet.ServletException;
+import jakarta.servlet.ServletException;
 
 public class BalpExample {
 

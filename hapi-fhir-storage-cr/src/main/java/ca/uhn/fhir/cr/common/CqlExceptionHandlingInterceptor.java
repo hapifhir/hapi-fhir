@@ -29,8 +29,8 @@ import org.opencds.cqf.cql.engine.exception.CqlException;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 /**
  * This class represents clinical reasoning interceptor used for cql exception handling and logging

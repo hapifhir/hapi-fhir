@@ -35,6 +35,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.PrePersist;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import org.apache.commons.lang3.StringUtils;
@@ -422,11 +423,11 @@ public class ResourceIndexedSearchParamToken extends BaseResourceIndexedSearchPa
 		return this;
 	}
 
-	@PrePersist
 	/**
 	 * We truncate the fields at the last moment because the tables have limited size.
 	 * We don't truncate earlier in the flow because the index hashes MUST be calculated on the full string.
 	 */
+	@PrePersist
 	public void truncateFieldsForDB() {
 		mySystem = StringUtils.truncate(mySystem, MAX_LENGTH);
 		myValue = StringUtils.truncate(myValue, MAX_LENGTH);

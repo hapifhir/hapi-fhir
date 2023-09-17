@@ -35,7 +35,7 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 import static ca.uhn.fhir.jpa.provider.BaseJpaResourceProviderCodeSystem.applyVersionToSystem;
 

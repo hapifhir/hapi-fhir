@@ -38,9 +38,9 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 import static ca.uhn.fhir.rest.api.Constants.CHARSET_UTF8_CTSUFFIX;
 import static ca.uhn.fhir.rest.api.Constants.CT_FHIR_NDJSON;

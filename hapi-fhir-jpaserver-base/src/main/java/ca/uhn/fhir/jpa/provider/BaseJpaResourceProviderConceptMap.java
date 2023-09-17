@@ -43,7 +43,7 @@ import org.hl7.fhir.r4.model.ConceptMap;
 import org.hl7.fhir.r4.model.Parameters;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 import static ca.uhn.fhir.util.DatatypeUtil.toBooleanValue;
 import static ca.uhn.fhir.util.DatatypeUtil.toStringValue;

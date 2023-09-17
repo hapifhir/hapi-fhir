@@ -73,7 +73,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
 
 import static ca.uhn.fhir.mdm.api.params.MdmQuerySearchParameters.GOLDEN_RESOURCE_NAME;
 import static ca.uhn.fhir.mdm.api.params.MdmQuerySearchParameters.GOLDEN_RESOURCE_PID_NAME;

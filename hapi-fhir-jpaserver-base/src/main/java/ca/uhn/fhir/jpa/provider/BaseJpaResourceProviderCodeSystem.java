@@ -43,7 +43,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 import static ca.uhn.fhir.jpa.provider.ValueSetOperationProvider.toValidateCodeResult;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;

@@ -58,7 +58,7 @@ public class MemberMatchR4ResourceProvider {
 			idempotent = false,
 			returnParameters = {@OperationParam(name = "MemberIdentifier", typeName = "string")})
 	public Parameters patientMemberMatch(
-			javax.servlet.http.HttpServletRequest theServletRequest,
+			jakarta.servlet.http.HttpServletRequest theServletRequest,
 			@Description(
 							shortDefinition =
 									"The target of the operation. Will be returned with Identifier for matched coverage added.")
