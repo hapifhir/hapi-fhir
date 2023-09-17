@@ -43,6 +43,8 @@ import ca.uhn.fhir.rest.server.method.OperationParameter;
 import ca.uhn.fhir.rest.server.method.SearchMethodBinding;
 import ca.uhn.fhir.rest.server.method.SearchParameter;
 import ca.uhn.fhir.rest.server.util.BaseServerCapabilityStatementProvider;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.http.HttpServletRequest;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.dstu2.model.Conformance;
 import org.hl7.fhir.dstu2.model.Conformance.*;
@@ -56,10 +58,8 @@ import org.hl7.fhir.dstu2.model.OperationDefinition.OperationParameterUse;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
-import jakarta.servlet.ServletContext;
-import jakarta.servlet.http.HttpServletRequest;
-import java.util.*;
 import java.util.Map.Entry;
+import java.util.*;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 

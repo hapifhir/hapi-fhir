@@ -12,6 +12,7 @@ import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.util.CurrentThreadCaptureQueriesListener;
 import ca.uhn.fhir.jpa.validation.ValidationSettings;
 import ca.uhn.fhirtest.interceptor.PublicSecurityInterceptor;
+import jakarta.persistence.EntityManagerFactory;
 import net.ttddyy.dsproxy.support.ProxyDataSourceBuilder;
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.hl7.fhir.r5.utils.validation.constants.ReferenceValidationPolicy;
@@ -29,7 +30,6 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 import javax.annotation.PostConstruct;
-import jakarta.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
 
 @Configuration

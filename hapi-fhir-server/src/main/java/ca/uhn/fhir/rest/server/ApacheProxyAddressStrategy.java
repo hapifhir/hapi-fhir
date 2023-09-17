@@ -19,8 +19,8 @@
  */
 package ca.uhn.fhir.rest.server;
 
-import java.util.Optional;
-
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.http.HttpServletRequest;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,10 +29,7 @@ import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import jakarta.servlet.ServletContext;
-import jakarta.servlet.http.HttpServletRequest;
-
-
+import java.util.Optional;
 
 import static java.util.Optional.ofNullable;
 

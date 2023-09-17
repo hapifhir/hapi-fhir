@@ -19,11 +19,12 @@
  */
 package ca.uhn.fhir.jpa.model.entity;
 
-import javax.annotation.Nullable;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.MappedSuperclass;
+
 import java.io.Serializable;
+import javax.annotation.Nullable;
 
 /**
  * This is the base class for entities with partitioning that does NOT include Hibernate Envers logging.

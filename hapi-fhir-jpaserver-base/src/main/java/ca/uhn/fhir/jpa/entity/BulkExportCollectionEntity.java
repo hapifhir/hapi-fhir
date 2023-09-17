@@ -20,7 +20,6 @@
 package ca.uhn.fhir.jpa.entity;
 
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -34,6 +33,7 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import jakarta.persistence.Version;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;

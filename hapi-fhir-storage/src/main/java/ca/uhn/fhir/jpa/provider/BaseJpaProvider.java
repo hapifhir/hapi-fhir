@@ -29,13 +29,13 @@ import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.ParametersUtil;
+import jakarta.servlet.http.HttpServletRequest;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.jboss.logging.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import jakarta.servlet.http.HttpServletRequest;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.Set;

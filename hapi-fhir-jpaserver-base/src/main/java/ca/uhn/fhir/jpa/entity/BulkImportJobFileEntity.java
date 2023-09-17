@@ -20,7 +20,6 @@
 package ca.uhn.fhir.jpa.entity;
 
 import ca.uhn.fhir.jpa.bulk.imprt.model.BulkImportJobFileJson;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.ForeignKey;
@@ -33,6 +32,7 @@ import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
+
 import java.io.Serializable;
 import java.nio.charset.StandardCharsets;
 

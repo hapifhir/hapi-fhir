@@ -30,9 +30,9 @@ import ca.uhn.fhir.rest.server.method.ResourceParameter;
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
 import ca.uhn.fhir.validation.ValidationResult;
-
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+
 import java.nio.charset.Charset;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;

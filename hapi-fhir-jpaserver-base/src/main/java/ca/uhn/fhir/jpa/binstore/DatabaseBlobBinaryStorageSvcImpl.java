@@ -28,6 +28,9 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import com.google.common.hash.HashingInputStream;
 import com.google.common.io.ByteStreams;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.PersistenceContextType;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.input.CountingInputStream;
 import org.hibernate.LobHelper;
@@ -37,10 +40,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.annotation.Nonnull;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
-import jakarta.persistence.PersistenceContextType;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -48,6 +47,7 @@ import java.sql.Blob;
 import java.sql.SQLException;
 import java.util.Date;
 import java.util.Optional;
+import javax.annotation.Nonnull;
 
 @Transactional
 public class DatabaseBlobBinaryStorageSvcImpl extends BaseBinaryStorageSvcImpl {

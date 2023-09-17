@@ -20,21 +20,18 @@
 package ca.uhn.fhir.rest.server.interceptor;
 
 import ca.uhn.fhir.i18n.Msg;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-
-import ca.uhn.fhir.rest.api.Constants;
 import org.apache.commons.lang3.Validate;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsProcessor;
 import org.springframework.web.cors.CorsUtils;
 import org.springframework.web.cors.DefaultCorsProcessor;
 
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import java.io.IOException;
+import java.util.ArrayList;
 
 public class CorsInterceptor extends InterceptorAdapter {
 

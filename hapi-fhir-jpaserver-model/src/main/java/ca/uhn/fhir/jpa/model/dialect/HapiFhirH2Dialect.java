@@ -39,8 +39,7 @@ public class HapiFhirH2Dialect extends H2Dialect {
 		 * means that the Maven plugin that does schema generation doesn't add it.
 		 * So this dialect forces the use of the right defs.
 		 */
-//		registerColumnType(Types.LONGVARCHAR, "character varying");
-//		registerColumnType(Types.BINARY, "binary($l)");
+		//		registerColumnType(Types.LONGVARCHAR, "character varying");
+		//		registerColumnType(Types.BINARY, "binary($l)");
 	}
-
 }

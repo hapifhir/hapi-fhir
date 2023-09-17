@@ -19,9 +19,9 @@
  */
 package ca.uhn.fhir.jpa.model.entity;
 
+import jakarta.persistence.MappedSuperclass;
 import org.apache.commons.lang3.ObjectUtils;
 
-import jakarta.persistence.MappedSuperclass;
 import java.io.Serializable;
 
 @MappedSuperclass

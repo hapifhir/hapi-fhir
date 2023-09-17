@@ -31,16 +31,12 @@ import ca.uhn.fhir.rest.api.server.ResponseDetails;
 import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.util.Collections;
-import java.util.Map;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 
-import static org.apache.commons.lang3.StringUtils.isBlank;
+import java.io.IOException;
 
 /**
  * Provides methods to intercept requests and responses. Note that implementations of this interface may wish to use

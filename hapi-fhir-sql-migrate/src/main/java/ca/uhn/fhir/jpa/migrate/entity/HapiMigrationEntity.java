@@ -21,15 +21,15 @@ package ca.uhn.fhir.jpa.migrate.entity;
 
 import ca.uhn.fhir.jpa.migrate.taskdef.BaseTask;
 import ca.uhn.fhir.util.VersionEnum;
-import org.hibernate.annotations.GenericGenerator;
-import org.springframework.jdbc.core.PreparedStatementSetter;
-import org.springframework.jdbc.core.RowMapper;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import org.hibernate.annotations.GenericGenerator;
+import org.springframework.jdbc.core.PreparedStatementSetter;
+import org.springframework.jdbc.core.RowMapper;
+
 import java.util.Date;
 
 // Note even though we are using javax.persistence annotations here, we are managing these records outside of jpa

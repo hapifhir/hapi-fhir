@@ -26,6 +26,7 @@ import jakarta.persistence.Lob;
 import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
+
 import java.sql.Blob;
 import java.util.Date;
 

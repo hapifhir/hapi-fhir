@@ -23,11 +23,11 @@ import ca.uhn.fhir.jpa.dao.BaseHapiFhirSystemDao;
 import ca.uhn.fhir.jpa.dao.JpaResourceDao;
 import ca.uhn.fhir.jpa.model.entity.TagDefinition;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import jakarta.persistence.TypedQuery;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.r5.model.Bundle;
 import org.hl7.fhir.r5.model.Meta;
 
-import jakarta.persistence.TypedQuery;
 import java.util.Collection;
 import java.util.List;
 

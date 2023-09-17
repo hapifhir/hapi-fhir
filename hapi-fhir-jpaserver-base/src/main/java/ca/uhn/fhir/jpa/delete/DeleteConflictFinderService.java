@@ -21,12 +21,12 @@ package ca.uhn.fhir.jpa.delete;
 
 import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
-import org.springframework.stereotype.Service;
-
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.PersistenceContextType;
 import jakarta.persistence.TypedQuery;
+import org.springframework.stereotype.Service;
+
 import java.util.List;
 
 @Service

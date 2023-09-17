@@ -39,12 +39,12 @@ public class DerbyTenSevenHapiFhirDialect extends DerbyDialect {
 		Function<SQLException, String> extractor = e -> {
 			switch (e.getSQLState()) {
 				case "23505":
-					return extractUsingTemplate("unique or primary key constraint or unique index identified by '", "'", e.getMessage());
+					return extractUsingTemplate(
+							"unique or primary key constraint or unique index identified by '", "'", e.getMessage());
 				default:
 					return null;
 			}
 		};
 		return new TemplatedViolatedConstraintNameExtractor(extractor);
 	}
-
 }

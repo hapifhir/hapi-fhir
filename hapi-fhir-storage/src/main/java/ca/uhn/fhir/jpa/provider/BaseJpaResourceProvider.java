@@ -54,6 +54,7 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.util.CoverageIgnore;
 import ca.uhn.fhir.util.ParametersUtil;
+import jakarta.servlet.http.HttpServletRequest;
 import org.hl7.fhir.instance.model.api.IBaseMetaType;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -61,7 +62,6 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.springframework.beans.factory.annotation.Required;
 
-import jakarta.servlet.http.HttpServletRequest;
 import java.util.Date;
 
 import static ca.uhn.fhir.jpa.model.util.JpaConstants.OPERATION_META_ADD;

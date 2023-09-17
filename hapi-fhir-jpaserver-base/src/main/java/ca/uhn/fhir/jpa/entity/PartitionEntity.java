@@ -20,7 +20,6 @@
 package ca.uhn.fhir.jpa.entity;
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;

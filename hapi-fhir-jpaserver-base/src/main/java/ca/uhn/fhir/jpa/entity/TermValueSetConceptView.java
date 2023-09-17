@@ -21,14 +21,14 @@ package ca.uhn.fhir.jpa.entity;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
-import org.apache.commons.io.IOUtils;
-import org.hibernate.annotations.Immutable;
-import org.hibernate.annotations.Subselect;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Lob;
+import org.apache.commons.io.IOUtils;
+import org.hibernate.annotations.Immutable;
+import org.hibernate.annotations.Subselect;
+
 import java.io.IOException;
 import java.io.Reader;
 import java.io.Serializable;

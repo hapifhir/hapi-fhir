@@ -19,13 +19,6 @@
  */
 package ca.uhn.fhir.jpa.model.entity;
 
-import org.apache.commons.lang3.Validate;
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextField;
-import org.hl7.fhir.instance.model.api.IIdType;
-
-import javax.annotation.Nullable;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -41,7 +34,14 @@ import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
 import jakarta.persistence.Transient;
+import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextField;
+import org.hl7.fhir.instance.model.api.IIdType;
+
 import java.util.Date;
+import javax.annotation.Nullable;
 
 @Entity
 @Table(

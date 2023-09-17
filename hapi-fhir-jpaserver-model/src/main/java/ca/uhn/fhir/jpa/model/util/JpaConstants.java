@@ -301,7 +301,9 @@ public class JpaConstants {
 	 * IPS Generation operation URL
 	 */
 	public static final String SUMMARY_OPERATION_URL = "http://hl7.org/fhir/uv/ips/OperationDefinition/summary";
-	public static final String BULK_META_EXTENSION_EXPORT_IDENTIFIER = "https://hapifhir.org/NamingSystem/bulk-export-identifier";
+
+	public static final String BULK_META_EXTENSION_EXPORT_IDENTIFIER =
+			"https://hapifhir.org/NamingSystem/bulk-export-identifier";
 	public static final String BULK_META_EXTENSION_JOB_ID = "https://hapifhir.org/NamingSystem/bulk-export-job-id";
 	public static final String BULK_META_EXTENSION_RESOURCE_TYPE =
 			"https://hapifhir.org/NamingSystem/bulk-export-binary-resource-type";

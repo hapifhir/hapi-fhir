@@ -15,6 +15,7 @@ import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
 import ca.uhn.fhir.validation.IInstanceValidatorModule;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
 import ca.uhn.fhirtest.interceptor.PublicSecurityInterceptor;
+import jakarta.persistence.EntityManagerFactory;
 import net.ttddyy.dsproxy.support.ProxyDataSourceBuilder;
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.hibernate.search.backend.lucene.cfg.LuceneBackendSettings;
@@ -34,10 +35,9 @@ import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
-import jakarta.persistence.EntityManagerFactory;
-import javax.sql.DataSource;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
+import javax.sql.DataSource;
 
 @Configuration
 @Import({CommonConfig.class, JpaR4BConfig.class, HapiJpaConfig.class})

@@ -19,8 +19,6 @@
  */
 package ca.uhn.fhir.jpa.entity;
 
-import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextField;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -35,6 +33,8 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextField;
+
 import java.io.Serializable;
 
 @Entity

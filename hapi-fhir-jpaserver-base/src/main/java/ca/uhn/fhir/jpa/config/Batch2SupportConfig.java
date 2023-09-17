@@ -34,10 +34,9 @@ import ca.uhn.fhir.jpa.delete.batch2.DeleteExpungeSqlBuilder;
 import ca.uhn.fhir.jpa.delete.batch2.DeleteExpungeSvcImpl;
 import ca.uhn.fhir.jpa.reindex.Batch2DaoSvcImpl;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
+import jakarta.persistence.EntityManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
-
-import jakarta.persistence.EntityManager;
 
 public class Batch2SupportConfig {
 
