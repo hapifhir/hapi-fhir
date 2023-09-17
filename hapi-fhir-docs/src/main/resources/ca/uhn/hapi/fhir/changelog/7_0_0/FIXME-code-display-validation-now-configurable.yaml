@@ -1,0 +1,6 @@
+---
+type: add
+issue: FIXME
+title: "It is now possible to configure the strictness of concept display name validation
+   using a new flag on the InMemoryTerminologyServerValidationSupport (for non-JPA validation)
+   and JpaStorageSettings (for JPA validation)."

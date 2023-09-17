@@ -48,8 +48,10 @@ public class ValidationSupportConfig {
 	}
 
 	@Bean
-	public InMemoryTerminologyServerValidationSupport inMemoryTerminologyServerValidationSupport(FhirContext theFhirContext, JpaStorageSettings theStorageSettings) {
-		InMemoryTerminologyServerValidationSupport retVal = new InMemoryTerminologyServerValidationSupport(theFhirContext);
+	public InMemoryTerminologyServerValidationSupport inMemoryTerminologyServerValidationSupport(
+			FhirContext theFhirContext, JpaStorageSettings theStorageSettings) {
+		InMemoryTerminologyServerValidationSupport retVal =
+				new InMemoryTerminologyServerValidationSupport(theFhirContext);
 		retVal.setIssueSeverityForCodeDisplayMismatch(theStorageSettings.getIssueSeverityForCodeDisplayMismatch());
 		return retVal;
 	}

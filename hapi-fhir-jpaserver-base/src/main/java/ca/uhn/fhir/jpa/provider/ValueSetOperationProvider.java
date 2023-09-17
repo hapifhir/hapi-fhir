@@ -152,7 +152,7 @@ public class ValueSetOperationProvider extends BaseJpaProvider {
 				@OperationParam(name = RESULT, typeName = "boolean", min = 1),
 				@OperationParam(name = MESSAGE, typeName = "string"),
 				@OperationParam(name = DISPLAY, typeName = "string"),
-					@OperationParam(name = SOURCE_DETAILS, typeName = "string")
+				@OperationParam(name = SOURCE_DETAILS, typeName = "string")
 			})
 	public IBaseParameters validateCode(
 			HttpServletRequest theServletRequest,
@@ -338,7 +338,8 @@ public class ValueSetOperationProvider extends BaseJpaProvider {
 			ParametersUtil.addParameterToParametersString(theContext, retVal, DISPLAY, theResult.getDisplay());
 		}
 		if (isNotBlank(theResult.getSourceDetails())) {
-			ParametersUtil.addParameterToParametersString(theContext, retVal, SOURCE_DETAILS, theResult.getSourceDetails());
+			ParametersUtil.addParameterToParametersString(
+					theContext, retVal, SOURCE_DETAILS, theResult.getSourceDetails());
 		}
 
 		return retVal;

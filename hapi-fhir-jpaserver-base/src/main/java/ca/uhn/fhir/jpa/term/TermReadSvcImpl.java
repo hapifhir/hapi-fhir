@@ -1028,11 +1028,8 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 							new VersionConvertor_40_50(new BaseAdvisor_40_50()), "ValueSet");
 					org.hl7.fhir.r5.model.ValueSet.ConceptSetComponent includeOrExclude =
 							ValueSet40_50.convertConceptSetComponent(theIncludeOrExclude);
-					myInMemoryTerminologyServerValidationSupport
-							.expandValueSetIncludeOrExclude(
-									new ValidationSupportContext(provideValidationSupport()),
-									consumer,
-									includeOrExclude);
+					myInMemoryTerminologyServerValidationSupport.expandValueSetIncludeOrExclude(
+							new ValidationSupportContext(provideValidationSupport()), consumer, includeOrExclude);
 				} catch (InMemoryTerminologyServerValidationSupport.ExpansionCouldNotBeCompletedInternallyException e) {
 					if (theExpansionOptions != null
 							&& !theExpansionOptions.isFailOnMissingCodeSystem()
@@ -2077,7 +2074,12 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 
 			String expectedDisplay = concepts.get(0).getDisplay();
 			return InMemoryTerminologyServerValidationSupport.createResultForDisplayMismatch(
-					myContext, theCode, theDisplay, expectedDisplay, systemVersion, myStorageSettings.getIssueSeverityForCodeDisplayMismatch());
+					myContext,
+					theCode,
+					theDisplay,
+					expectedDisplay,
+					systemVersion,
+					myStorageSettings.getIssueSeverityForCodeDisplayMismatch());
 		}
 
 		if (!concepts.isEmpty()) {
@@ -2713,7 +2715,12 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 				return new CodeValidationResult().setCode(code.getCode()).setDisplay(code.getDisplay());
 			} else {
 				return InMemoryTerminologyServerValidationSupport.createResultForDisplayMismatch(
-						myContext, theCode, theDisplay, code.getDisplay(), code.getSystemVersion(), myStorageSettings.getIssueSeverityForCodeDisplayMismatch());
+						myContext,
+						theCode,
+						theDisplay,
+						code.getDisplay(),
+						code.getSystemVersion(),
+						myStorageSettings.getIssueSeverityForCodeDisplayMismatch());
 			}
 		}
 
@@ -2751,14 +2758,13 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 
 		if (retVal == null) {
 			if (valueSet != null) {
-				retVal = myInMemoryTerminologyServerValidationSupport
-						.validateCodeInValueSet(
-								theValidationSupportContext,
-								theValidationOptions,
-								theCodeSystem,
-								theCode,
-								theDisplay,
-								valueSet);
+				retVal = myInMemoryTerminologyServerValidationSupport.validateCodeInValueSet(
+						theValidationSupportContext,
+						theValidationOptions,
+						theCodeSystem,
+						theCode,
+						theDisplay,
+						valueSet);
 			} else {
 				String append = " - Unable to locate ValueSet[" + theValueSetUrl + "]";
 				retVal = createFailureCodeValidationResult(theCodeSystem, theCode, null, append);

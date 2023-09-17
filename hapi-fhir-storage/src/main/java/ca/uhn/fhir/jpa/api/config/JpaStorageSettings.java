@@ -332,8 +332,8 @@ public class JpaStorageSettings extends StorageSettings {
 	 * @since 7.0.0
 	 */
 	@Nonnull
-	private IValidationSupport.IssueSeverity myIssueSeverityForCodeDisplayMismatch = IValidationSupport.IssueSeverity.WARNING;
-
+	private IValidationSupport.IssueSeverity myIssueSeverityForCodeDisplayMismatch =
+			IValidationSupport.IssueSeverity.WARNING;
 
 	/**
 	 * Constructor
@@ -2351,8 +2351,10 @@ public class JpaStorageSettings extends StorageSettings {
 	 * @param theIssueSeverityForCodeDisplayMismatch The severity. Must not be {@literal null}.
 	 * @since 7.0.0
 	 */
-	public void setIssueSeverityForCodeDisplayMismatch(@Nonnull IValidationSupport.IssueSeverity theIssueSeverityForCodeDisplayMismatch) {
-		Validate.notNull(theIssueSeverityForCodeDisplayMismatch, "theIssueSeverityForCodeDisplayMismatch must not be null");
+	public void setIssueSeverityForCodeDisplayMismatch(
+			@Nonnull IValidationSupport.IssueSeverity theIssueSeverityForCodeDisplayMismatch) {
+		Validate.notNull(
+				theIssueSeverityForCodeDisplayMismatch, "theIssueSeverityForCodeDisplayMismatch must not be null");
 		myIssueSeverityForCodeDisplayMismatch = theIssueSeverityForCodeDisplayMismatch;
 	}
 
