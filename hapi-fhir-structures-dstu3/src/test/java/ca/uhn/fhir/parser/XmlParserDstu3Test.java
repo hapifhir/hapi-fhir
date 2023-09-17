@@ -8,6 +8,7 @@ import ca.uhn.fhir.narrative.DefaultThymeleafNarrativeGenerator;
 import ca.uhn.fhir.parser.FooMessageHeaderWithExplicitField.FooMessageSourceComponent;
 import ca.uhn.fhir.parser.IParserErrorHandler.IParseLocation;
 import ca.uhn.fhir.parser.PatientWithCustomCompositeExtension.FooParentExtension;
+import ca.uhn.fhir.util.ClasspathUtil;
 import ca.uhn.fhir.util.TestUtil;
 import com.google.common.collect.Sets;
 import org.apache.commons.io.FileUtils;
@@ -2387,7 +2388,7 @@ public class XmlParserDstu3Test {
 	@Test
 	@Disabled
 	public void testParseAndEncodeBundle() throws Exception {
-		String content = IOUtils.toString(XmlParserDstu3Test.class.getResourceAsStream("/bundle-example.xml"), StandardCharsets.UTF_8);
+		String content = ClasspathUtil.loadResource("/bundle-example.xml");
 
 		Bundle parsed = ourCtx.newXmlParser().parseResource(Bundle.class, content);
 		assertEquals("Bundle/example/_history/1", parsed.getIdElement().getValue());
@@ -2422,7 +2423,7 @@ public class XmlParserDstu3Test {
 	@Test
 	@Disabled
 	public void testParseAndEncodeBundleNewStyle() throws Exception {
-		String content = IOUtils.toString(XmlParserDstu3Test.class.getResourceAsStream("/bundle-example.xml"), StandardCharsets.UTF_8);
+		String content = ClasspathUtil.loadResource("/bundle-example.xml");
 
 		IParser newXmlParser = ourCtx.newXmlParser();
 		Bundle parsed = newXmlParser.parseResource(Bundle.class, content);
@@ -3004,7 +3005,7 @@ public class XmlParserDstu3Test {
 	 */
 	@Test
 	public void testParseBundleWithLinksOfUnknownRelation() throws Exception {
-		String input = IOUtils.toString(XmlParserDstu3Test.class.getResourceAsStream("/bundle_orion.xml"), StandardCharsets.UTF_8);
+		String input = ClasspathUtil.loadResource("/bundle_orion.xml");
 		Bundle parsed = ourCtx.newXmlParser().parseResource(Bundle.class, input);
 
 		BundleLinkComponent link = parsed.getLink().get(0);

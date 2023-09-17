@@ -35,5 +35,4 @@ public class FhirContextDstu3Config {
 
 		return retVal;
 	}
-
 }

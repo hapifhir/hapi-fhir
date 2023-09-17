@@ -19,12 +19,12 @@
  */
 package ca.uhn.fhir.jpa.graphql;
 
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.rest.annotation.GraphQL;
 import ca.uhn.fhir.rest.annotation.GraphQLQueryBody;
@@ -50,9 +50,9 @@ import org.hl7.fhir.utilities.graphql.Parser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.function.Supplier;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.function.Supplier;
 
 public class GraphQLProvider {
 	private static final Logger ourLog = LoggerFactory.getLogger(GraphQLProvider.class);
@@ -76,36 +76,47 @@ public class GraphQLProvider {
 	 * @param theValidationSupport The HAPI Validation Support object, or null
 	 * @param theStorageServices   The storage services (this object will be used to retrieve various resources as required by the GraphQL engine)
 	 */
-	public GraphQLProvider(@Nonnull FhirContext theFhirContext, @Nullable IValidationSupport theValidationSupport, @Nonnull IGraphQLStorageServices theStorageServices) {
+	public GraphQLProvider(
+			@Nonnull FhirContext theFhirContext,
+			@Nullable IValidationSupport theValidationSupport,
+			@Nonnull IGraphQLStorageServices theStorageServices) {
 		Validate.notNull(theFhirContext, "theFhirContext must not be null");
 		Validate.notNull(theStorageServices, "theStorageServices must not be null");
 
 		switch (theFhirContext.getVersion().getVersion()) {
 			case DSTU3: {
 				IValidationSupport validationSupport = theValidationSupport;
-				validationSupport = ObjectUtils.defaultIfNull(validationSupport, new DefaultProfileValidationSupport(theFhirContext));
-				org.hl7.fhir.dstu3.hapi.ctx.HapiWorkerContext workerContext = new org.hl7.fhir.dstu3.hapi.ctx.HapiWorkerContext(theFhirContext, validationSupport);
+				validationSupport = ObjectUtils.defaultIfNull(
+						validationSupport, new DefaultProfileValidationSupport(theFhirContext));
+				org.hl7.fhir.dstu3.hapi.ctx.HapiWorkerContext workerContext =
+						new org.hl7.fhir.dstu3.hapi.ctx.HapiWorkerContext(theFhirContext, validationSupport);
 				myEngineFactory = () -> new org.hl7.fhir.dstu3.utils.GraphQLEngine(workerContext);
 				break;
 			}
 			case R4: {
 				IValidationSupport validationSupport = theValidationSupport;
-				validationSupport = ObjectUtils.defaultIfNull(validationSupport, new DefaultProfileValidationSupport(theFhirContext));
-				org.hl7.fhir.r4.hapi.ctx.HapiWorkerContext workerContext = new org.hl7.fhir.r4.hapi.ctx.HapiWorkerContext(theFhirContext, validationSupport);
+				validationSupport = ObjectUtils.defaultIfNull(
+						validationSupport, new DefaultProfileValidationSupport(theFhirContext));
+				org.hl7.fhir.r4.hapi.ctx.HapiWorkerContext workerContext =
+						new org.hl7.fhir.r4.hapi.ctx.HapiWorkerContext(theFhirContext, validationSupport);
 				myEngineFactory = () -> new org.hl7.fhir.r4.utils.GraphQLEngine(workerContext);
 				break;
 			}
 			case R4B: {
 				IValidationSupport validationSupport = theValidationSupport;
-				validationSupport = ObjectUtils.defaultIfNull(validationSupport, new DefaultProfileValidationSupport(theFhirContext));
-				org.hl7.fhir.r4b.hapi.ctx.HapiWorkerContext workerContext = new org.hl7.fhir.r4b.hapi.ctx.HapiWorkerContext(theFhirContext, validationSupport);
+				validationSupport = ObjectUtils.defaultIfNull(
+						validationSupport, new DefaultProfileValidationSupport(theFhirContext));
+				org.hl7.fhir.r4b.hapi.ctx.HapiWorkerContext workerContext =
+						new org.hl7.fhir.r4b.hapi.ctx.HapiWorkerContext(theFhirContext, validationSupport);
 				myEngineFactory = () -> new org.hl7.fhir.r4b.utils.GraphQLEngine(workerContext);
 				break;
 			}
 			case R5: {
 				IValidationSupport validationSupport = theValidationSupport;
-				validationSupport = ObjectUtils.defaultIfNull(validationSupport, new DefaultProfileValidationSupport(theFhirContext));
-				org.hl7.fhir.r5.hapi.ctx.HapiWorkerContext workerContext = new org.hl7.fhir.r5.hapi.ctx.HapiWorkerContext(theFhirContext, validationSupport);
+				validationSupport = ObjectUtils.defaultIfNull(
+						validationSupport, new DefaultProfileValidationSupport(theFhirContext));
+				org.hl7.fhir.r5.hapi.ctx.HapiWorkerContext workerContext =
+						new org.hl7.fhir.r5.hapi.ctx.HapiWorkerContext(theFhirContext, validationSupport);
 				myEngineFactory = () -> new org.hl7.fhir.r5.utils.GraphQLEngine(workerContext);
 				break;
 			}
@@ -113,25 +124,35 @@ public class GraphQLProvider {
 			case DSTU2_HL7ORG:
 			case DSTU2_1:
 			default: {
-				throw new UnsupportedOperationException(Msg.code(1143) + "GraphQL not supported for version: " + theFhirContext.getVersion().getVersion());
+				throw new UnsupportedOperationException(Msg.code(1143) + "GraphQL not supported for version: "
+						+ theFhirContext.getVersion().getVersion());
 			}
 		}
 
 		myStorageServices = theStorageServices;
 	}
 
-	@Description(value = "This operation invokes a GraphQL expression for fetching an joining a graph of resources, returning them in a custom format.")
+	@Description(
+			value =
+					"This operation invokes a GraphQL expression for fetching an joining a graph of resources, returning them in a custom format.")
 	@GraphQL(type = RequestTypeEnum.GET)
-	public String processGraphQlGetRequest(ServletRequestDetails theRequestDetails, @IdParam IIdType theId, @GraphQLQueryUrl String theQueryUrl) {
+	public String processGraphQlGetRequest(
+			ServletRequestDetails theRequestDetails, @IdParam IIdType theId, @GraphQLQueryUrl String theQueryUrl) {
 		if (theQueryUrl != null) {
 			return processGraphQLRequest(theRequestDetails, theId, theQueryUrl);
 		}
 		throw new InvalidRequestException(Msg.code(1144) + "Unable to parse empty GraphQL expression");
 	}
 
-	@Description(value = "This operation invokes a GraphQL expression for fetching an joining a graph of resources, returning them in a custom format.")
+	@Description(
+			value =
+					"This operation invokes a GraphQL expression for fetching an joining a graph of resources, returning them in a custom format.")
 	@GraphQL(type = RequestTypeEnum.POST)
-	public String processGraphQlPostRequest(ServletRequestDetails theServletRequestDetails, RequestDetails theRequestDetails, @IdParam IIdType theId, @GraphQLQueryBody String theQueryBody) {
+	public String processGraphQlPostRequest(
+			ServletRequestDetails theServletRequestDetails,
+			RequestDetails theRequestDetails,
+			@IdParam IIdType theId,
+			@GraphQLQueryBody String theQueryBody) {
 		if (theQueryBody != null) {
 			return processGraphQLRequest(theServletRequestDetails, theId, theQueryBody);
 		}
@@ -149,7 +170,8 @@ public class GraphQLProvider {
 		return processGraphQLRequest(theRequestDetails, theId, parsedGraphQLRequest);
 	}
 
-	protected String processGraphQLRequest(ServletRequestDetails theRequestDetails, IIdType theId, Package parsedGraphQLRequest) {
+	protected String processGraphQLRequest(
+			ServletRequestDetails theRequestDetails, IIdType theId, Package parsedGraphQLRequest) {
 		IGraphQLEngine engine = myEngineFactory.get();
 		engine.setAppInfo(theRequestDetails);
 		engine.setServices(myStorageServices);
@@ -158,7 +180,8 @@ public class GraphQLProvider {
 		try {
 
 			if (theId != null) {
-				IBaseResource focus = myStorageServices.lookup(theRequestDetails, theId.getResourceType(), theId.getIdPart());
+				IBaseResource focus =
+						myStorageServices.lookup(theRequestDetails, theId.getResourceType(), theId.getIdPart());
 				engine.setFocus(focus);
 			}
 			engine.execute();
@@ -191,10 +214,9 @@ public class GraphQLProvider {
 	public void initialize(RestfulServer theServer) {
 		ourLog.trace("Initializing GraphQL provider");
 		if (!theServer.getFhirContext().getVersion().getVersion().isEqualOrNewerThan(FhirVersionEnum.DSTU3)) {
-			throw new ConfigurationException(Msg.code(1148) + "Can not use " + getClass().getName() + " provider on server with FHIR " + theServer.getFhirContext().getVersion().getVersion().name() + " context");
+			throw new ConfigurationException(Msg.code(1148) + "Can not use "
+					+ getClass().getName() + " provider on server with FHIR "
+					+ theServer.getFhirContext().getVersion().getVersion().name() + " context");
 		}
 	}
-
-
 }
-

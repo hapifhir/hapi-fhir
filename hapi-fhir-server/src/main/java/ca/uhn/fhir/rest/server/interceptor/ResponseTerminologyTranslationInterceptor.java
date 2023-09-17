@@ -50,7 +50,9 @@ public class ResponseTerminologyTranslationInterceptor extends BaseResponseTermi
 	 *
 	 * @param theValidationSupport The validation support module
 	 */
-	public ResponseTerminologyTranslationInterceptor(IValidationSupport theValidationSupport, ResponseTerminologyTranslationSvc theResponseTerminologyTranslationSvc) {
+	public ResponseTerminologyTranslationInterceptor(
+			IValidationSupport theValidationSupport,
+			ResponseTerminologyTranslationSvc theResponseTerminologyTranslationSvc) {
 		super(theValidationSupport);
 		myResponseTerminologyTranslationSvc = theResponseTerminologyTranslationSvc;
 	}

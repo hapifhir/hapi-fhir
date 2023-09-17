@@ -69,7 +69,8 @@ class JobInstanceUtil {
 	 * @param theJobInstance the job
 	 * @param theJobInstanceEntity the target entity
 	 */
-	public static void fromInstanceToEntity(@Nonnull JobInstance theJobInstance, @Nonnull Batch2JobInstanceEntity theJobInstanceEntity) {
+	public static void fromInstanceToEntity(
+			@Nonnull JobInstance theJobInstance, @Nonnull Batch2JobInstanceEntity theJobInstanceEntity) {
 		theJobInstanceEntity.setId(theJobInstance.getInstanceId());
 		theJobInstanceEntity.setDefinitionId(theJobInstance.getJobDefinitionId());
 		theJobInstanceEntity.setDefinitionVersion(theJobInstance.getJobDefinitionVersion());
@@ -81,7 +82,8 @@ class JobInstanceUtil {
 		theJobInstanceEntity.setEndTime(theJobInstance.getEndTime());
 		theJobInstanceEntity.setUpdateTime(theJobInstance.getUpdateTime());
 		theJobInstanceEntity.setCombinedRecordsProcessed(theJobInstance.getCombinedRecordsProcessed());
-		theJobInstanceEntity.setCombinedRecordsProcessedPerSecond(theJobInstance.getCombinedRecordsProcessedPerSecond());
+		theJobInstanceEntity.setCombinedRecordsProcessedPerSecond(
+				theJobInstance.getCombinedRecordsProcessedPerSecond());
 		theJobInstanceEntity.setTotalElapsedMillis(theJobInstance.getTotalElapsedMillis());
 		theJobInstanceEntity.setWorkChunksPurged(theJobInstance.isWorkChunksPurged());
 		theJobInstanceEntity.setProgress(theJobInstance.getProgress());

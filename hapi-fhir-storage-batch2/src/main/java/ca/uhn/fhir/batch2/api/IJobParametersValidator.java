@@ -22,9 +22,9 @@ package ca.uhn.fhir.batch2.api;
 import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 
+import java.util.List;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.List;
 
 /**
  * This interface can be used to validate the parameters
@@ -51,5 +51,4 @@ public interface IJobParametersValidator<T extends IModelJson> {
 	 */
 	@Nullable
 	List<String> validate(RequestDetails theRequestDetails, @Nonnull T theParameters);
-
 }

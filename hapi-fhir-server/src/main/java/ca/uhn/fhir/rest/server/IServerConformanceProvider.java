@@ -31,7 +31,7 @@ public interface IServerConformanceProvider<T extends IBaseResource> {
 
 	/**
 	 * Actually create and return the conformance statement
-	 * 
+	 *
 	 * See the class documentation for an important note if you are extending this class
 	 */
 	T getServerConformance(HttpServletRequest theRequest, RequestDetails theRequestDetails);
@@ -45,7 +45,7 @@ public interface IServerConformanceProvider<T extends IBaseResource> {
 	 * This setter is needed in implementation classes (along with
 	 * a no-arg constructor) to avoid reference cycles in the
 	 * Spring wiring of a RestfulServer instance.
-	 * 
+	 *
 	 * @param theRestfulServer
 	 */
 	void setRestfulServer(RestfulServer theRestfulServer);

@@ -19,8 +19,8 @@
  */
 package ca.uhn.fhir.cli;
 
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.apache.commons.cli.Options;
 import org.apache.commons.csv.CSVFormat;
@@ -47,7 +47,8 @@ import static org.apache.commons.lang3.StringUtils.defaultString;
 public class ExportConceptMapToCsvCommand extends AbstractImportExportCsvConceptMapCommand {
 	public static final String COMMAND = "export-conceptmap-to-csv";
 	// TODO: Don't use qualified names for loggers in HAPI CLI.
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ExportConceptMapToCsvCommand.class);
+	private static final org.slf4j.Logger ourLog =
+			org.slf4j.LoggerFactory.getLogger(ExportConceptMapToCsvCommand.class);
 
 	@Override
 	public String getCommandDescription() {
@@ -63,7 +64,12 @@ public class ExportConceptMapToCsvCommand extends AbstractImportExportCsvConcept
 	public Options getOptions() {
 		Options options = super.getOptions();
 
-		addRequiredOption(options, CONCEPTMAP_URL_PARAM, CONCEPTMAP_URL_PARAM_LONGOPT, CONCEPTMAP_URL_PARAM_NAME, CONCEPTMAP_URL_PARAM_DESC);
+		addRequiredOption(
+				options,
+				CONCEPTMAP_URL_PARAM,
+				CONCEPTMAP_URL_PARAM_LONGOPT,
+				CONCEPTMAP_URL_PARAM_NAME,
+				CONCEPTMAP_URL_PARAM_DESC);
 		addRequiredOption(options, FILE_PARAM, FILE_PARAM_LONGOPT, FILE_PARAM_NAME, FILE_PARAM_DESC);
 
 		return options;
@@ -77,27 +83,26 @@ public class ExportConceptMapToCsvCommand extends AbstractImportExportCsvConcept
 	private void searchForConceptMapByUrl() throws ExecutionException {
 		ourLog.info("Searching for ConceptMap with specified URL (i.e. ConceptMap.url): {}", conceptMapUrl);
 		if (fhirVersion == FhirVersionEnum.DSTU3) {
-			org.hl7.fhir.dstu3.model.Bundle response = client
-				.search()
-				.forResource(org.hl7.fhir.dstu3.model.ConceptMap.class)
-				.where(org.hl7.fhir.dstu3.model.ConceptMap.URL.matches().value(conceptMapUrl))
-				.returnBundle(org.hl7.fhir.dstu3.model.Bundle.class)
-				.execute();
+			org.hl7.fhir.dstu3.model.Bundle response = client.search()
+					.forResource(org.hl7.fhir.dstu3.model.ConceptMap.class)
+					.where(org.hl7.fhir.dstu3.model.ConceptMap.URL.matches().value(conceptMapUrl))
+					.returnBundle(org.hl7.fhir.dstu3.model.Bundle.class)
+					.execute();
 
 			if (response.hasEntry()) {
 				ourLog.info("Found ConceptMap with specified URL (i.e. ConceptMap.url): {}", conceptMapUrl);
-				org.hl7.fhir.dstu3.model.ConceptMap conceptMap = (org.hl7.fhir.dstu3.model.ConceptMap) response.getEntryFirstRep().getResource();
+				org.hl7.fhir.dstu3.model.ConceptMap conceptMap = (org.hl7.fhir.dstu3.model.ConceptMap)
+						response.getEntryFirstRep().getResource();
 				convertConceptMapToCsv(conceptMap);
 			} else {
 				ourLog.info("No ConceptMap exists with specified URL (i.e. ConceptMap.url): {}", conceptMapUrl);
 			}
 		} else if (fhirVersion == FhirVersionEnum.R4) {
-			Bundle response = client
-				.search()
-				.forResource(ConceptMap.class)
-				.where(ConceptMap.URL.matches().value(conceptMapUrl))
-				.returnBundle(Bundle.class)
-				.execute();
+			Bundle response = client.search()
+					.forResource(ConceptMap.class)
+					.where(ConceptMap.URL.matches().value(conceptMapUrl))
+					.returnBundle(Bundle.class)
+					.execute();
 
 			if (response.hasEntry()) {
 				ourLog.info("Found ConceptMap with specified URL (i.e. ConceptMap.url): {}", conceptMapUrl);
@@ -123,9 +128,9 @@ public class ExportConceptMapToCsvCommand extends AbstractImportExportCsvConcept
 		try (Writer writer = Files.newBufferedWriter(path)) {
 
 			CSVFormat format = CSVFormat.DEFAULT
-				.withRecordSeparator("\n")
-				.withHeader(Header.class)
-				.withQuoteMode(QuoteMode.ALL);
+					.withRecordSeparator("\n")
+					.withHeader(Header.class)
+					.withQuoteMode(QuoteMode.ALL);
 			try (CSVPrinter csvPrinter = new CSVPrinter(writer, format)) {
 				for (ConceptMapGroupComponent group : theConceptMap.getGroup()) {
 					for (SourceElementComponent element : group.getElement()) {

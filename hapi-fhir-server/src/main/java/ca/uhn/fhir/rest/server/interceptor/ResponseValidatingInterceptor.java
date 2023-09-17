@@ -44,7 +44,8 @@ public class ResponseValidatingInterceptor extends BaseValidatingInterceptor<IBa
 	 */
 	public static final String DEFAULT_RESPONSE_HEADER_NAME = "X-FHIR-Response-Validation";
 
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResponseValidatingInterceptor.class);
+	private static final org.slf4j.Logger ourLog =
+			org.slf4j.LoggerFactory.getLogger(ResponseValidatingInterceptor.class);
 
 	private Set<RestOperationTypeEnum> myExcludeOperationTypes;
 
@@ -67,7 +68,9 @@ public class ResponseValidatingInterceptor extends BaseValidatingInterceptor<IBa
 	@Hook(Pointcut.SERVER_OUTGOING_RESPONSE)
 	public boolean outgoingResponse(RequestDetails theRequestDetails, IBaseResource theResponseObject) {
 		RestOperationTypeEnum operationType = theRequestDetails.getRestOperationType();
-		if (operationType != null && myExcludeOperationTypes != null && myExcludeOperationTypes.contains(operationType)) {
+		if (operationType != null
+				&& myExcludeOperationTypes != null
+				&& myExcludeOperationTypes.contains(operationType)) {
 			ourLog.trace("Operation type {} is excluded from validation", operationType);
 			return true;
 		}
@@ -84,7 +87,7 @@ public class ResponseValidatingInterceptor extends BaseValidatingInterceptor<IBa
 
 	/**
 	 * Sets the name of the response header to add validation failures to
-	 * 
+	 *
 	 * @see #DEFAULT_RESPONSE_HEADER_NAME
 	 * @see #setAddResponseHeaderOnSeverity(ResultSeverityEnum)
 	 */
@@ -92,5 +95,4 @@ public class ResponseValidatingInterceptor extends BaseValidatingInterceptor<IBa
 	public void setResponseHeaderName(String theResponseHeaderName) {
 		super.setResponseHeaderName(theResponseHeaderName);
 	}
-
 }

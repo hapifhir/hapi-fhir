@@ -14,6 +14,7 @@ import ca.uhn.fhir.jpa.model.entity.NormalizedQuantitySearchLevel;
 import ca.uhn.fhir.jpa.model.entity.ResourceEncodingEnum;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.entity.TagTypeEnum;
 import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
@@ -49,6 +50,7 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import ca.uhn.fhir.util.ClasspathUtil;
 import com.google.common.base.Charsets;
 import com.google.common.collect.Lists;
 import org.apache.commons.io.IOUtils;
@@ -314,7 +316,6 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 	//	@Test
 	public void testTermConceptReindexingDoesntDuplicateData() {
 		myStorageSettings.setSchedulingDisabled(true);
-
 
 		CodeSystem cs = new CodeSystem();
 		cs.setId("nhin-use");
@@ -814,7 +815,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 		String name = "profiles-resources";
 		ourLog.info("Uploading " + name);
 		String vsContents;
-		vsContents = IOUtils.toString(FhirResourceDaoR4Test.class.getResourceAsStream("/org/hl7/fhir/r4/model/profile/" + name + ".xml"), StandardCharsets.UTF_8);
+		vsContents = ClasspathUtil.loadResource("/org/hl7/fhir/r4/model/profile/" + name + ".xml");
 
 		bundle = myFhirContext.newXmlParser().parseResource(org.hl7.fhir.r4.model.Bundle.class, vsContents);
 		for (BundleEntryComponent i : bundle.getEntry()) {
@@ -4154,8 +4155,8 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 	@Test
 	public void testTokenParamWhichIsTooLong() {
 
-		String longStr1 = RandomStringUtils.randomAlphanumeric(ResourceIndexedSearchParamString.MAX_LENGTH + 100);
-		String longStr2 = RandomStringUtils.randomAlphanumeric(ResourceIndexedSearchParamString.MAX_LENGTH + 100);
+		String longStr1 = RandomStringUtils.randomAlphanumeric(ResourceIndexedSearchParamToken.MAX_LENGTH + 100);
+		String longStr2 = RandomStringUtils.randomAlphanumeric(ResourceIndexedSearchParamToken.MAX_LENGTH + 100);
 
 		Organization org = new Organization();
 		org.getNameElement().setValue("testTokenParamWhichIsTooLong");
@@ -4168,22 +4169,13 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 
 		myOrganizationDao.create(org, mySrd);
 
+		// search should have 0 result since it is hashed before truncation
 		val = myOrganizationDao.searchForIds(new SearchParameterMap("type", new TokenParam(subStr1, subStr2)), null);
+		assertEquals(initial, val.size());
+
+		// search using the original string should success
+		val = myOrganizationDao.searchForIds(new SearchParameterMap("type", new TokenParam(longStr1, longStr2)), null);
 		assertEquals(initial + 1, val.size());
-
-		try {
-			myOrganizationDao.searchForIds(new SearchParameterMap("type", new TokenParam(longStr1, subStr2)), null);
-			fail();
-		} catch (InvalidRequestException e) {
-			// ok
-		}
-
-		try {
-			myOrganizationDao.searchForIds(new SearchParameterMap("type", new TokenParam(subStr1, longStr2)), null);
-			fail();
-		} catch (InvalidRequestException e) {
-			// ok
-		}
 	}
 
 	@Test

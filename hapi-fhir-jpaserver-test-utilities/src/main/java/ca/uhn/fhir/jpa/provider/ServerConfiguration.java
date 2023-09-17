@@ -35,11 +35,10 @@ public class ServerConfiguration {
 	@Bean
 	public RestfulServerExtension restfulServerExtension(FhirContext theFhirContext) {
 		return new RestfulServerExtension(configureFhirContext(theFhirContext))
-			.keepAliveBetweenTests()
-			.withValidationMode(ServerValidationModeEnum.NEVER)
-			.withContextPath("/fhir")
-			.withServletPath("/context/*")
-			.withSpringWebsocketSupport(BaseJpaTest.WEBSOCKET_CONTEXT, WebsocketDispatcherConfig.class);
+				.keepAliveBetweenTests()
+				.withValidationMode(ServerValidationModeEnum.NEVER)
+				.withContextPath("/fhir")
+				.withServletPath("/context/*")
+				.withSpringWebsocketSupport(BaseJpaTest.WEBSOCKET_CONTEXT, WebsocketDispatcherConfig.class);
 	}
-
 }

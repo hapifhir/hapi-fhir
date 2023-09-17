@@ -21,12 +21,14 @@ package ca.uhn.fhir.jpa.esr;
 
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 
-public class ExternallyStoredResourceAddressMetadataKey extends ResourceMetadataKeyEnum<ExternallyStoredResourceAddress> {
+public class ExternallyStoredResourceAddressMetadataKey
+		extends ResourceMetadataKeyEnum<ExternallyStoredResourceAddress> {
 
 	/**
 	 * Singleton instance
 	 */
-	public static final ExternallyStoredResourceAddressMetadataKey INSTANCE = new ExternallyStoredResourceAddressMetadataKey();
+	public static final ExternallyStoredResourceAddressMetadataKey INSTANCE =
+			new ExternallyStoredResourceAddressMetadataKey();
 
 	/**
 	 * Constructor
@@ -34,5 +36,4 @@ public class ExternallyStoredResourceAddressMetadataKey extends ResourceMetadata
 	private ExternallyStoredResourceAddressMetadataKey() {
 		super("ExternallyStoredResourceAddress", ExternallyStoredResourceAddress.class);
 	}
-
 }

@@ -51,48 +51,63 @@ import static ca.uhn.fhir.batch2.jobs.expunge.DeleteExpungeAppCtx.JOB_DELETE_EXP
 public class DeleteExpungeJobSubmitterImpl implements IDeleteExpungeJobSubmitter {
 	@Autowired
 	IJobCoordinator myJobCoordinator;
+
 	@Autowired
 	FhirContext myFhirContext;
+
 	@Autowired
 	MatchUrlService myMatchUrlService;
+
 	@Autowired
 	IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
+
 	@Autowired
 	JpaStorageSettings myStorageSettings;
+
 	@Autowired
 	IInterceptorBroadcaster myInterceptorBroadcaster;
+
 	@Autowired
 	UrlPartitioner myUrlPartitioner;
 
 	@Override
 	@Transactional(propagation = Propagation.NEVER)
-	public String submitJob(Integer theBatchSize, List<String> theUrlsToDeleteExpunge, boolean theCascade, Integer theCascadeMaxRounds, RequestDetails theRequestDetails) {
+	public String submitJob(
+			Integer theBatchSize,
+			List<String> theUrlsToDeleteExpunge,
+			boolean theCascade,
+			Integer theCascadeMaxRounds,
+			RequestDetails theRequestDetails) {
 		if (theBatchSize == null) {
 			theBatchSize = myStorageSettings.getExpungeBatchSize();
 		}
 		if (!myStorageSettings.canDeleteExpunge()) {
-			throw new ForbiddenOperationException(Msg.code(820) + "Delete Expunge not allowed:  " + myStorageSettings.cannotDeleteExpungeReason());
+			throw new ForbiddenOperationException(
+					Msg.code(820) + "Delete Expunge not allowed:  " + myStorageSettings.cannotDeleteExpungeReason());
 		}
 
 		for (String url : theUrlsToDeleteExpunge) {
 			HookParams params = new HookParams()
-				.add(RequestDetails.class, theRequestDetails)
-				.addIfMatchesType(ServletRequestDetails.class, theRequestDetails)
-				.add(String.class, url);
-			CompositeInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequestDetails, Pointcut.STORAGE_PRE_DELETE_EXPUNGE, params);
+					.add(RequestDetails.class, theRequestDetails)
+					.addIfMatchesType(ServletRequestDetails.class, theRequestDetails)
+					.add(String.class, url);
+			CompositeInterceptorBroadcaster.doCallHooks(
+					myInterceptorBroadcaster, theRequestDetails, Pointcut.STORAGE_PRE_DELETE_EXPUNGE, params);
 		}
 
 		DeleteExpungeJobParameters deleteExpungeJobParameters = new DeleteExpungeJobParameters();
 		// Set partition for each url since resource type can determine partition
 		theUrlsToDeleteExpunge.stream()
-			.filter(StringUtils::isNotBlank)
-			.map(url -> myUrlPartitioner.partitionUrl(url, theRequestDetails))
-			.forEach(deleteExpungeJobParameters::addPartitionedUrl);
+				.filter(StringUtils::isNotBlank)
+				.map(url -> myUrlPartitioner.partitionUrl(url, theRequestDetails))
+				.forEach(deleteExpungeJobParameters::addPartitionedUrl);
 		deleteExpungeJobParameters.setBatchSize(theBatchSize);
 
-		ReadPartitionIdRequestDetails details = ReadPartitionIdRequestDetails.forOperation(null, null, ProviderConstants.OPERATION_DELETE_EXPUNGE);
+		ReadPartitionIdRequestDetails details =
+				ReadPartitionIdRequestDetails.forOperation(null, null, ProviderConstants.OPERATION_DELETE_EXPUNGE);
 		// Also set toplevel partition in case there are no urls
-		RequestPartitionId requestPartition = myRequestPartitionHelperSvc.determineReadPartitionForRequest(theRequestDetails, details);
+		RequestPartitionId requestPartition =
+				myRequestPartitionHelperSvc.determineReadPartitionForRequest(theRequestDetails, details);
 		deleteExpungeJobParameters.setRequestPartitionId(requestPartition);
 		deleteExpungeJobParameters.setCascade(theCascade);
 		deleteExpungeJobParameters.setCascadeMaxRounds(theCascadeMaxRounds);

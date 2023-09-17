@@ -1,10 +1,9 @@
 package ca.uhn.fhir.batch2.jobs.export;
 
-import ca.uhn.fhir.batch2.jobs.export.models.BulkExportJobParameters;
+import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.binary.api.IBinaryStorageSvc;
 import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.api.server.bulk.BulkDataExportOptions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -39,7 +38,7 @@ public class BulkExportJobParametersValidatorTest {
 		BulkExportJobParameters parameters = new BulkExportJobParameters();
 		parameters.setResourceTypes(Arrays.asList("Patient", "Observation"));
 		parameters.setOutputFormat(Constants.CT_FHIR_NDJSON);
-		parameters.setExportStyle(BulkDataExportOptions.ExportStyle.SYSTEM);
+		parameters.setExportStyle(BulkExportJobParameters.ExportStyle.SYSTEM);
 		return parameters;
 	}
 
@@ -96,7 +95,7 @@ public class BulkExportJobParametersValidatorTest {
 	public void validate_validParametersForPatient_returnsEmptyList() {
 		// setup
 		BulkExportJobParameters parameters = createSystemExportParameters();
-		parameters.setExportStyle(BulkDataExportOptions.ExportStyle.PATIENT);
+		parameters.setExportStyle(BulkExportJobParameters.ExportStyle.PATIENT);
 
 		// when
 		when(myDaoRegistry.isResourceTypeSupported(anyString()))
@@ -115,7 +114,7 @@ public class BulkExportJobParametersValidatorTest {
 		// setup
 		String resourceType = "notValid";
 		BulkExportJobParameters parameters = createSystemExportParameters();
-		parameters.setExportStyle(BulkDataExportOptions.ExportStyle.SYSTEM);
+		parameters.setExportStyle(BulkExportJobParameters.ExportStyle.SYSTEM);
 		parameters.setResourceTypes(Collections.singletonList(resourceType));
 
 		// test
@@ -131,7 +130,7 @@ public class BulkExportJobParametersValidatorTest {
 	public void validate_validateParametersForGroup_returnsEmptyList() {
 		// setup
 		BulkExportJobParameters parameters = createSystemExportParameters();
-		parameters.setExportStyle(BulkDataExportOptions.ExportStyle.GROUP);
+		parameters.setExportStyle(BulkExportJobParameters.ExportStyle.GROUP);
 		parameters.setGroupId("groupId");
 		parameters.setExpandMdm(true);
 
@@ -151,7 +150,7 @@ public class BulkExportJobParametersValidatorTest {
 	public void validate_groupParametersWithoutGroupId_returnsError() {
 		// setup
 		BulkExportJobParameters parameters = createSystemExportParameters();
-		parameters.setExportStyle(BulkDataExportOptions.ExportStyle.GROUP);
+		parameters.setExportStyle(BulkExportJobParameters.ExportStyle.GROUP);
 
 		// test
 		List<String> result = myValidator.validate(null, parameters);

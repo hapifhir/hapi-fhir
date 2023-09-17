@@ -53,5 +53,4 @@ public class HardcodedServerAddressStrategy implements IServerAddressStrategy {
 	public String determineServerBase(ServletContext theServletContext, HttpServletRequest theRequest) {
 		return myValue;
 	}
-
 }

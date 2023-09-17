@@ -27,18 +27,27 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 
 public class ResourceOperationMessage extends BaseResourceModifiedMessage {
 
-	public ResourceOperationMessage() {
-	}
+	public ResourceOperationMessage() {}
 
-	public ResourceOperationMessage(FhirContext theFhirContext, IBaseResource theResource, OperationTypeEnum theOperationType) {
+	public ResourceOperationMessage(
+			FhirContext theFhirContext, IBaseResource theResource, OperationTypeEnum theOperationType) {
 		super(theFhirContext, theResource, theOperationType);
 	}
 
-	public ResourceOperationMessage(FhirContext theFhirContext, IBaseResource theNewResource, OperationTypeEnum theOperationType, RequestDetails theRequest) {
+	public ResourceOperationMessage(
+			FhirContext theFhirContext,
+			IBaseResource theNewResource,
+			OperationTypeEnum theOperationType,
+			RequestDetails theRequest) {
 		super(theFhirContext, theNewResource, theOperationType, theRequest);
 	}
 
-	public ResourceOperationMessage(FhirContext theFhirContext, IBaseResource theNewResource, OperationTypeEnum theOperationType, RequestDetails theRequest, RequestPartitionId theRequestPartitionId) {
+	public ResourceOperationMessage(
+			FhirContext theFhirContext,
+			IBaseResource theNewResource,
+			OperationTypeEnum theOperationType,
+			RequestDetails theRequest,
+			RequestPartitionId theRequestPartitionId) {
 		super(theFhirContext, theNewResource, theOperationType, theRequest, theRequestPartitionId);
 	}
 
@@ -53,9 +62,9 @@ public class ResourceOperationMessage extends BaseResourceModifiedMessage {
 	@Override
 	public String toString() {
 		return new ToStringBuilder(this)
-			.append("operationType", myOperationType)
-			.append("payloadId", myPayloadId)
-			.append("partitionId", myPartitionId)
-			.toString();
+				.append("operationType", myOperationType)
+				.append("payloadId", myPayloadId)
+				.append("partitionId", myPartitionId)
+				.toString();
 	}
 }

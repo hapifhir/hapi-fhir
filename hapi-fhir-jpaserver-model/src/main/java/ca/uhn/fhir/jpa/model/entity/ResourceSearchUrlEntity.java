@@ -29,11 +29,12 @@ import jakarta.persistence.TemporalType;
 import java.util.Date;
 
 @Entity
-@Table(name = "HFJ_RES_SEARCH_URL",
-   indexes = {
-		@Index(name = "IDX_RESSEARCHURL_RES", columnList = "RES_ID"),
-		@Index(name = "IDX_RESSEARCHURL_TIME", columnList = "CREATED_TIME")
-})
+@Table(
+		name = "HFJ_RES_SEARCH_URL",
+		indexes = {
+			@Index(name = "IDX_RESSEARCHURL_RES", columnList = "RES_ID"),
+			@Index(name = "IDX_RESSEARCHURL_TIME", columnList = "CREATED_TIME")
+		})
 public class ResourceSearchUrlEntity {
 
 	public static final String RES_SEARCH_URL_COLUMN_NAME = "RES_SEARCH_URL";
@@ -53,9 +54,9 @@ public class ResourceSearchUrlEntity {
 
 	public static ResourceSearchUrlEntity from(String theUrl, Long theId) {
 		return new ResourceSearchUrlEntity()
-			.setResourcePid(theId)
-			.setSearchUrl(theUrl)
-			.setCreatedTime(new Date());
+				.setResourcePid(theId)
+				.setSearchUrl(theUrl)
+				.setCreatedTime(new Date());
 	}
 
 	public Long getResourcePid() {
@@ -85,5 +86,3 @@ public class ResourceSearchUrlEntity {
 		return this;
 	}
 }
-
-

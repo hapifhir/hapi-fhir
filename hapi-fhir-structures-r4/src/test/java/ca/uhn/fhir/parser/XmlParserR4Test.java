@@ -14,8 +14,10 @@ import org.hl7.fhir.r4.model.Appointment;
 import org.hl7.fhir.r4.model.AuditEvent;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Composition;
+import org.hl7.fhir.r4.model.DecimalType;
 import org.hl7.fhir.r4.model.DocumentReference;
 import org.hl7.fhir.r4.model.Extension;
+import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.MessageHeader;
 import org.hl7.fhir.r4.model.Meta;
 import org.hl7.fhir.r4.model.Narrative;
@@ -24,6 +26,7 @@ import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -196,6 +199,47 @@ public class XmlParserR4Test extends BaseTest {
 		assertThat(encoded, containsString("lang=\"en-US\""));
 		ourLog.info(encoded);
 	}
+
+	@Test
+	public void testEncodeToString_PrimitiveDataType() {
+		DecimalType object = new DecimalType("123.456000");
+		String expected = "123.456000";
+		String actual = ourCtx.newXmlParser().encodeToString(object);
+		assertEquals(expected, actual);
+	}
+
+	@Test
+	public void testEncodeToString_Resource() {
+		Patient p = new Patient();
+		p.setId("Patient/123");
+		p.setActive(true);
+		String expected = "<Patient xmlns=\"http://hl7.org/fhir\"><id value=\"123\"/><active value=\"true\"/></Patient>";
+		String actual = ourCtx.newXmlParser().encodeToString(p);
+		assertEquals(expected, actual);
+	}
+
+	@Test
+	public void testEncodeToString_GeneralPurposeDataType() {
+		HumanName name = new HumanName();
+		name.setFamily("Simpson").addGiven("Homer").addGiven("Jay");
+		name.addExtension("http://foo", new StringType("bar"));
+
+		String expected = "<element><extension url=\"http://foo\"><valueString value=\"bar\"/></extension><family value=\"Simpson\"/><given value=\"Homer\"/><given value=\"Jay\"/></element>";
+		String actual = ourCtx.newXmlParser().encodeToString(name);
+		assertEquals(expected, actual);
+	}
+
+	@Test
+	public void testEncodeToString_BackboneElement() {
+		Patient.PatientCommunicationComponent communication = new Patient().addCommunication();
+		communication.setPreferred(true);
+		communication.getLanguage().setText("English");
+
+		String expected = "<element><language><text value=\"English\"/></language><preferred value=\"true\"/></element>";
+		String actual = ourCtx.newXmlParser().encodeToString(communication);
+		assertEquals(expected, actual);
+	}
+
 
 	/**
 	 * Ensure that a contained bundle doesn't cause a crash

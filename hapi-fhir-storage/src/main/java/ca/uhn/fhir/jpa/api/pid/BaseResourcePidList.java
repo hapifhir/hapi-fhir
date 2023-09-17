@@ -22,19 +22,21 @@ package ca.uhn.fhir.jpa.api.pid;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 
+import java.util.*;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.*;
 
-abstract public class BaseResourcePidList implements IResourcePidList {
+public abstract class BaseResourcePidList implements IResourcePidList {
 
 	final List<IResourcePersistentId> myIds = new ArrayList<>();
 
 	@Nullable
 	final Date myLastDate;
+
 	private final RequestPartitionId myRequestPartitionId;
 
-	BaseResourcePidList(Collection<IResourcePersistentId> theIds, Date theLastDate, RequestPartitionId theRequestPartitionId) {
+	BaseResourcePidList(
+			Collection<IResourcePersistentId> theIds, Date theLastDate, RequestPartitionId theRequestPartitionId) {
 		myIds.addAll(theIds);
 		myLastDate = theLastDate;
 		myRequestPartitionId = theRequestPartitionId;
@@ -84,4 +86,3 @@ abstract public class BaseResourcePidList implements IResourcePidList {
 		return myIds.toString();
 	}
 }
-

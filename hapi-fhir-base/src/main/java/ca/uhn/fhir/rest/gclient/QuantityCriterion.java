@@ -19,11 +19,11 @@
  */
 package ca.uhn.fhir.rest.gclient;
 
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 import ca.uhn.fhir.rest.param.ParameterUtil;
+
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 class QuantityCriterion implements ICriterion<QuantityClientParam>, ICriterionInternal {
 
@@ -33,7 +33,8 @@ class QuantityCriterion implements ICriterion<QuantityClientParam>, ICriterionIn
 	private String myUnits;
 	private ParamPrefixEnum myPrefix;
 
-	public QuantityCriterion(String theParamName, ParamPrefixEnum thePrefix, String theValue, String theSystem, String theUnits) {
+	public QuantityCriterion(
+			String theParamName, ParamPrefixEnum thePrefix, String theValue, String theSystem, String theUnits) {
 		myValue = theValue;
 		myPrefix = thePrefix;
 		myName = theParamName;
@@ -61,5 +62,4 @@ class QuantityCriterion implements ICriterion<QuantityClientParam>, ICriterionIn
 		}
 		return b.toString();
 	}
-
 }

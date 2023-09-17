@@ -38,10 +38,12 @@ import java.util.Date;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 
 @MappedSuperclass
-public abstract class BaseHasResource extends BasePartitionable implements IBaseResourceEntity, IBasePersistedResource<JpaPid> {
+public abstract class BaseHasResource extends BasePartitionable
+		implements IBaseResourceEntity, IBasePersistedResource<JpaPid> {
 
 	public static final String RES_PUBLISHED = "RES_PUBLISHED";
 	public static final String RES_UPDATED = "RES_UPDATED";
+
 	@Column(name = "RES_DELETED_AT", nullable = true)
 	@Temporal(TemporalType.TIMESTAMP)
 	private Date myDeleted;
@@ -80,7 +82,6 @@ public abstract class BaseHasResource extends BasePartitionable implements IBase
 		myTransientForcedId = theTransientForcedId;
 	}
 
-
 	public abstract BaseTag addTag(TagDefinition theDef);
 
 	@Override
@@ -97,14 +98,12 @@ public abstract class BaseHasResource extends BasePartitionable implements IBase
 		myFhirVersion = theFhirVersion;
 	}
 
-	abstract public ForcedId getForcedId();
+	public abstract ForcedId getForcedId();
 
-	abstract public void setForcedId(ForcedId theForcedId);
+	public abstract void setForcedId(ForcedId theForcedId);
 
 	@Override
 	public abstract Long getId();
-
-
 
 	public void setDeleted(Date theDate) {
 		myDeleted = theDate;
@@ -172,5 +171,4 @@ public abstract class BaseHasResource extends BasePartitionable implements IBase
 		}
 		return retVal;
 	}
-
 }

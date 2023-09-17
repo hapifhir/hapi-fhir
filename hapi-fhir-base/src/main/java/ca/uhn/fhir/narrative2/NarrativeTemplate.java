@@ -42,9 +42,9 @@ public class NarrativeTemplate implements INarrativeTemplate {
 	@Override
 	public String toString() {
 		return new ToStringBuilder(this, ToStringStyle.SIMPLE_STYLE)
-			.append("name", myTemplateName)
-			.append("fileName", myTemplateFileName)
-			.toString();
+				.append("name", myTemplateName)
+				.append("fileName", myTemplateFileName)
+				.toString();
 	}
 
 	public Set<String> getAppliesToDataTypes() {
@@ -130,5 +130,4 @@ public class NarrativeTemplate implements INarrativeTemplate {
 	void addAppliesToDatatype(String theDataType) {
 		myAppliesToDataTypes.add(theDataType);
 	}
-
 }

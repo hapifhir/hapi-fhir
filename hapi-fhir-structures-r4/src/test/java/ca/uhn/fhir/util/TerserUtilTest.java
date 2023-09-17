@@ -2,6 +2,7 @@ package ca.uhn.fhir.util;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.r4.model.Address;
 import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.DateType;
@@ -577,6 +578,14 @@ class TerserUtilTest {
 	public void testNewResource() {
 		assertNotNull(TerserUtil.newResource(ourFhirContext, "Patient"));
 		assertNotNull(TerserUtil.newResource(ourFhirContext, "Patient", null));
+	}
+
+	@Test
+	public void testInstantiateBackboneElement() {
+		IBaseBackboneElement patientContact = TerserUtil.instantiateBackboneElement(ourFhirContext, "Patient", "contact");
+		assertNotNull(patientContact);
+		assertEquals(Patient.ContactComponent.class, patientContact.getClass());
+		assertTrue(patientContact.isEmpty());
 	}
 
 }

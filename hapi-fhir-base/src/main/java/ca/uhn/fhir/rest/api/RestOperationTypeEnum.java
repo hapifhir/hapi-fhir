@@ -22,13 +22,12 @@ package ca.uhn.fhir.rest.api;
 import ca.uhn.fhir.util.CoverageIgnore;
 import org.apache.commons.lang3.Validate;
 
-import javax.annotation.Nonnull;
 import java.util.HashMap;
 import java.util.Map;
+import javax.annotation.Nonnull;
 
 @CoverageIgnore
 public enum RestOperationTypeEnum {
-
 	BATCH("batch", true, false, false),
 
 	ADD_TAGS("add-tags", false, false, true),
@@ -126,7 +125,7 @@ public enum RestOperationTypeEnum {
 	 * Load the server's metadata
 	 */
 	METADATA("metadata", false, false, false),
-	
+
 	/**
 	 * $meta-add extended operation
 	 */
@@ -179,7 +178,8 @@ public enum RestOperationTypeEnum {
 	/**
 	 * Constructor
 	 */
-	RestOperationTypeEnum(@Nonnull String theCode, boolean theSystemLevel, boolean theTypeLevel, boolean theInstanceLevel) {
+	RestOperationTypeEnum(
+			@Nonnull String theCode, boolean theSystemLevel, boolean theTypeLevel, boolean theInstanceLevel) {
 		myCode = theCode;
 		mySystemLevel = theSystemLevel;
 		myTypeLevel = theTypeLevel;

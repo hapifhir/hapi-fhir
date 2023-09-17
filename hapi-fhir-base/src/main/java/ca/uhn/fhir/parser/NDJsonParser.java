@@ -33,7 +33,6 @@ import java.io.Reader;
 import java.io.Writer;
 import java.util.List;
 
-
 /**
  * This class is the FHIR NDJSON parser/encoder. Users should not interact with this class directly, but should use
  * {@link FhirContext#newNDJsonParser()} to get an instance.
@@ -42,8 +41,8 @@ public class NDJsonParser extends BaseParser {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(NDJsonParser.class);
 
-        private IParser myJsonParser;
-        private FhirContext myFhirContext;
+	private IParser myJsonParser;
+	private FhirContext myFhirContext;
 
 	/**
 	 * Do not use this constructor, the recommended way to obtain a new instance of the NDJSON parser is to invoke
@@ -53,69 +52,73 @@ public class NDJsonParser extends BaseParser {
 	 */
 	public NDJsonParser(FhirContext theContext, IParserErrorHandler theParserErrorHandler) {
 		super(theContext, theParserErrorHandler);
-                myFhirContext = theContext;
+		myFhirContext = theContext;
 
-                myJsonParser = theContext.newJsonParser();
-	}
-
-        @Override
-        public IParser setPrettyPrint(boolean thePrettyPrint) {
-                myJsonParser.setPrettyPrint(thePrettyPrint);
-                return this;
-        }
-
-        @Override
-        public EncodingEnum getEncoding() {
-                return EncodingEnum.NDJSON;
-        }
-
-	@Override
-	protected void doEncodeResourceToWriter(IBaseResource theResource, Writer theWriter, EncodeContext theEncodeContext) throws IOException {
-                // We only encode bundles to NDJSON.
-                if (!(IBaseBundle.class.isAssignableFrom(theResource.getClass()))) {
-                        throw new IllegalArgumentException(Msg.code(1833) + "NDJsonParser can only encode Bundle types.  Received " + theResource.getClass().getName());
-                }
-
-                // Ok, convert the bundle to a list of resources.
-                List<IBaseResource> theBundleResources = BundleUtil.toListOfResources(myFhirContext, (IBaseBundle) theResource);
-
-                // Now we write each one in turn.
-                // Use newline only as a line separator, not at the end of the file.
-                boolean isFirstResource = true;
-                for (IBaseResource theBundleEntryResource : theBundleResources) {
-                        if (!(isFirstResource)) {
-                                theWriter.write("\n");
-                        }
-                        isFirstResource = false;
-
-                        myJsonParser.encodeResourceToWriter(theBundleEntryResource, theWriter);
-                }
+		myJsonParser = theContext.newJsonParser();
 	}
 
 	@Override
-	public <T extends IBaseResource> T doParseResource(Class<T> theResourceType, Reader theReader) throws DataFormatException {
-                // We can only parse to bundles.
-                if ((theResourceType != null) && (!(IBaseBundle.class.isAssignableFrom(theResourceType)))) {
-                        throw new DataFormatException(Msg.code(1834) + "NDJsonParser can only parse to Bundle types.  Received " + theResourceType.getName());
-                }
+	public IParser setPrettyPrint(boolean thePrettyPrint) {
+		myJsonParser.setPrettyPrint(thePrettyPrint);
+		return this;
+	}
 
-                try {
-                        // Now we go through line-by-line parsing the JSON and then stuffing it into a bundle.
-                        BundleBuilder myBuilder = new BundleBuilder(myFhirContext);
-                        myBuilder.setType("collection");
-                        BufferedReader myBufferedReader = new BufferedReader(theReader);
-                        String jsonString = myBufferedReader.readLine();
-                        while (jsonString != null) {
-                                // And add it to a collection in a Bundle.
-                                // The string must be trimmed, as per the NDJson spec 3.2
-                                myBuilder.addCollectionEntry(myJsonParser.parseResource(jsonString.trim()));
-                                // Try to read another line.
-                                jsonString = myBufferedReader.readLine();
-                        }
+	@Override
+	public EncodingEnum getEncoding() {
+		return EncodingEnum.NDJSON;
+	}
 
-                        return (T) myBuilder.getBundle();
-                } catch (IOException err) {
-                        throw new DataFormatException(Msg.code(1835) + err.getMessage());
-                }
+	@Override
+	protected void doEncodeResourceToWriter(IBaseResource theResource, Writer theWriter, EncodeContext theEncodeContext)
+			throws IOException {
+		// We only encode bundles to NDJSON.
+		if (!(IBaseBundle.class.isAssignableFrom(theResource.getClass()))) {
+			throw new IllegalArgumentException(Msg.code(1833) + "NDJsonParser can only encode Bundle types.  Received "
+					+ theResource.getClass().getName());
+		}
+
+		// Ok, convert the bundle to a list of resources.
+		List<IBaseResource> theBundleResources = BundleUtil.toListOfResources(myFhirContext, (IBaseBundle) theResource);
+
+		// Now we write each one in turn.
+		// Use newline only as a line separator, not at the end of the file.
+		boolean isFirstResource = true;
+		for (IBaseResource theBundleEntryResource : theBundleResources) {
+			if (!(isFirstResource)) {
+				theWriter.write("\n");
+			}
+			isFirstResource = false;
+
+			myJsonParser.encodeResourceToWriter(theBundleEntryResource, theWriter);
+		}
+	}
+
+	@Override
+	public <T extends IBaseResource> T doParseResource(Class<T> theResourceType, Reader theReader)
+			throws DataFormatException {
+		// We can only parse to bundles.
+		if ((theResourceType != null) && (!(IBaseBundle.class.isAssignableFrom(theResourceType)))) {
+			throw new DataFormatException(Msg.code(1834) + "NDJsonParser can only parse to Bundle types.  Received "
+					+ theResourceType.getName());
+		}
+
+		try {
+			// Now we go through line-by-line parsing the JSON and then stuffing it into a bundle.
+			BundleBuilder myBuilder = new BundleBuilder(myFhirContext);
+			myBuilder.setType("collection");
+			BufferedReader myBufferedReader = new BufferedReader(theReader);
+			String jsonString = myBufferedReader.readLine();
+			while (jsonString != null) {
+				// And add it to a collection in a Bundle.
+				// The string must be trimmed, as per the NDJson spec 3.2
+				myBuilder.addCollectionEntry(myJsonParser.parseResource(jsonString.trim()));
+				// Try to read another line.
+				jsonString = myBufferedReader.readLine();
+			}
+
+			return (T) myBuilder.getBundle();
+		} catch (IOException err) {
+			throw new DataFormatException(Msg.code(1835) + err.getMessage());
+		}
 	}
 }

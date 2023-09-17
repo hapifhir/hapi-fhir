@@ -30,5 +30,4 @@ public interface IPartitionDao extends JpaRepository<PartitionEntity, Integer>, 
 
 	@Query("SELECT p FROM PartitionEntity p WHERE p.myName = :name")
 	Optional<PartitionEntity> findForName(@Param("name") String theName);
-
 }

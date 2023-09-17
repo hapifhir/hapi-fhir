@@ -19,7 +19,6 @@
  */
 package ca.uhn.fhir.jpa.term.icd10;
 
-
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink;
@@ -30,9 +29,7 @@ import org.xml.sax.SAXException;
 
 import java.io.IOException;
 import java.io.Reader;
-import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -87,11 +84,13 @@ public class Icd10Loader {
 			// Preferred label and other properties
 			for (Element rubric : getChildrenByTagName(aClass, "Rubric")) {
 				String kind = rubric.getAttribute("kind");
-				Optional<Element> firstLabel = getChildrenByTagName(rubric, "Label").stream().findFirst();
+				Optional<Element> firstLabel =
+						getChildrenByTagName(rubric, "Label").stream().findFirst();
 				if (firstLabel.isPresent()) {
 					String textContent = firstLabel.get().getTextContent();
 					if (textContent != null && !textContent.isEmpty()) {
-						textContent = textContent.replace("\n", "").replace("\r", "").replace("\t", "");
+						textContent =
+								textContent.replace("\n", "").replace("\r", "").replace("\t", "");
 						if (kind.equals("preferred")) {
 							termConcept.setDisplay(textContent);
 						} else {

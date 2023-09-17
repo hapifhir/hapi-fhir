@@ -80,6 +80,20 @@ public interface ITestDataBuilder {
 		return t -> __setPrimitiveChild(getFhirContext(), t, "active", "boolean", "false");
 	}
 
+	/**
+	 * Set Resource.language
+	 */
+	default ICreationArgument withLanguage(String theLanguage) {
+		return t -> __setPrimitiveChild(getFhirContext(), t, "language", "string", theLanguage);
+	}
+
+	/**
+	 * Set Patient.gender
+	 */
+	default ICreationArgument withGender(String theGender) {
+		return t -> __setPrimitiveChild(getFhirContext(), t, "gender", "code", theGender);
+	}
+
 	default ICreationArgument withFamily(String theFamily) {
 		return t -> {
 			IPrimitiveType<?> family = (IPrimitiveType<?>) getFhirContext().getElementDefinition("string").newInstance();
@@ -184,6 +198,10 @@ public interface ITestDataBuilder {
 		return t -> MetaUtil.setSource(theContext, ((IBaseResource)t).getMeta(), theSource);
 	}
 
+	default ICreationArgument withSource(String theSource) {
+		return t -> MetaUtil.setSource(getFhirContext(), ((IBaseResource)t).getMeta(), theSource);
+	}
+
 	default ICreationArgument withLastUpdated(Date theLastUpdated) {
 		return t -> ((IBaseResource)t).getMeta().setLastUpdated(theLastUpdated);
 	}
@@ -218,6 +236,10 @@ public interface ITestDataBuilder {
 
 	default IIdType createOrganization(ICreationArgument... theModifiers) {
 		return createResource("Organization", theModifiers);
+	}
+
+	default IIdType createPractitioner(ICreationArgument... theModifiers) {
+		return createResource("Practitioner", theModifiers);
 	}
 
 	default IIdType createResource(String theResourceType, ICreationArgument... theModifiers) {
@@ -397,6 +419,8 @@ public interface ITestDataBuilder {
 	}
 
 	interface Support {
+		void setRequestId(String theRequestId);
+
 		FhirContext getFhirContext();
 
 		IIdType doCreateResource(IBaseResource theResource);
@@ -436,6 +460,11 @@ public interface ITestDataBuilder {
 
 		public SupportNoDao(FhirContext theFhirContext) {
 			myFhirContext = theFhirContext;
+		}
+
+		@Override
+		public void setRequestId(String theRequestId) {
+			// do nothing
 		}
 
 		@Override

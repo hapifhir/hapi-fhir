@@ -35,5 +35,4 @@ public class WorkChunkData<OT extends IModelJson> {
 	public OT getData() {
 		return myData;
 	}
-
 }

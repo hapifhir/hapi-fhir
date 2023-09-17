@@ -48,5 +48,4 @@ public abstract class BaseTag extends BasePartitionable implements Serializable 
 	public void setTag(TagDefinition theTag) {
 		myTag = theTag;
 	}
-
 }

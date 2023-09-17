@@ -1,0 +1,5 @@
+---
+type: change
+issue: 5029
+title: "Searching for token parameters has been extended to systems and values of any length.  Sorting by tokens is still limited to the first 200 characters each of the system and value.
+valid request."

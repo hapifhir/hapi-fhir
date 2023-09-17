@@ -98,9 +98,13 @@ public class JacksonStructure implements JsonLikeStructure {
 						pbr.unread(nextInt);
 						break;
 					}
-					throw new DataFormatException(Msg.code(1858) + "Content does not appear to be FHIR JSON, first non-whitespace character was: '" + (char) nextInt + "' (must be '{' or '[')");
+					throw new DataFormatException(Msg.code(1858)
+							+ "Content does not appear to be FHIR JSON, first non-whitespace character was: '"
+							+ (char) nextInt + "' (must be '{' or '[')");
 				}
-				throw new DataFormatException(Msg.code(1859) + "Content does not appear to be FHIR JSON, first non-whitespace character was: '" + (char) nextInt + "' (must be '{')");
+				throw new DataFormatException(Msg.code(1859)
+						+ "Content does not appear to be FHIR JSON, first non-whitespace character was: '"
+						+ (char) nextInt + "' (must be '{')");
 			}
 
 			if (nextInt == '{') {
@@ -110,10 +114,13 @@ public class JacksonStructure implements JsonLikeStructure {
 			}
 		} catch (Exception e) {
 			if (e.getMessage().startsWith("Unexpected char 39")) {
-				throw new DataFormatException(Msg.code(1860) + "Failed to parse JSON encoded FHIR content: " + e.getMessage() + " - " +
-					"This may indicate that single quotes are being used as JSON escapes where double quotes are required", e);
+				throw new DataFormatException(
+						Msg.code(1860) + "Failed to parse JSON encoded FHIR content: " + e.getMessage() + " - "
+								+ "This may indicate that single quotes are being used as JSON escapes where double quotes are required",
+						e);
 			}
-			throw new DataFormatException(Msg.code(1861) + "Failed to parse JSON encoded FHIR content: " + e.getMessage(), e);
+			throw new DataFormatException(
+					Msg.code(1861) + "Failed to parse JSON encoded FHIR content: " + e.getMessage(), e);
 		}
 	}
 
@@ -147,7 +154,10 @@ public class JacksonStructure implements JsonLikeStructure {
 		throw new DataFormatException(Msg.code(1862) + "Content must be a valid JSON Object. It must start with '{'.");
 	}
 
-	private enum ROOT_TYPE {OBJECT, ARRAY}
+	private enum ROOT_TYPE {
+		OBJECT,
+		ARRAY
+	}
 
 	private static class JacksonJsonObject extends BaseJsonLikeObject {
 		private final ObjectNode nativeObject;
@@ -370,10 +380,7 @@ public class JacksonStructure implements JsonLikeStructure {
 	}
 
 	private static ObjectMapper createObjectMapper() {
-		ObjectMapper retVal =
-			JsonMapper
-				.builder()
-				.build();
+		ObjectMapper retVal = JsonMapper.builder().build();
 		retVal = retVal.setNodeFactory(new JsonNodeFactory(true));
 		retVal = retVal.enable(DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS);
 		retVal = retVal.enable(DeserializationFeature.FAIL_ON_TRAILING_TOKENS);

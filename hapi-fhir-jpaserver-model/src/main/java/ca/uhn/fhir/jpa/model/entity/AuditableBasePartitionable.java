@@ -57,5 +57,4 @@ public class AuditableBasePartitionable implements Serializable {
 	public void setPartitionId(PartitionablePartitionId thePartitionId) {
 		myPartitionId = thePartitionId;
 	}
-
 }

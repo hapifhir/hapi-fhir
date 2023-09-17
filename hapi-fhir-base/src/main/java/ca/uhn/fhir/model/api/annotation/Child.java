@@ -19,19 +19,19 @@
  */
 package ca.uhn.fhir.model.api.annotation;
 
+import ca.uhn.fhir.model.api.IElement;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import ca.uhn.fhir.model.api.IElement;
-
 /**
- * Field annotation for fields within resource and datatype definitions, indicating 
+ * Field annotation for fields within resource and datatype definitions, indicating
  * a child of that type.
  */
 @Retention(RetentionPolicy.RUNTIME)
-@Target(value= {ElementType.FIELD})
+@Target(value = {ElementType.FIELD})
 public @interface Child {
 
 	/**
@@ -39,7 +39,7 @@ public @interface Child {
 	 * elsewhere
 	 */
 	int ORDER_UNKNOWN = -1;
-	
+
 	/**
 	 * Constant value to supply for {@link #max()} to indicate '*' (no maximum)
 	 */
@@ -47,7 +47,7 @@ public @interface Child {
 
 	/**
 	 * Constant value to supply for {@link #order()} to indicate that this child should replace the
-	 * entry in the superclass with the same name (and take its {@link Child#order() order} value 
+	 * entry in the superclass with the same name (and take its {@link Child#order() order} value
 	 * in the process). This is useful if you wish to redefine an existing field in a resource/type
 	 * definition in order to constrain/extend it.
 	 */
@@ -57,9 +57,9 @@ public @interface Child {
 	 * The name of this field, as it will appear in serialized versions of the message
 	 */
 	String name();
-	
+
 	/**
-	 * The order in which this field comes within its parent. The first field should have a 
+	 * The order in which this field comes within its parent. The first field should have a
 	 * value of 0, the second a value of 1, etc.
 	 */
 	int order() default ORDER_UNKNOWN;
@@ -87,23 +87,22 @@ public @interface Child {
 	Class<? extends IElement>[] type() default {};
 
 	// Not implemented
-//	/**
-//	 * This value is used when extending a built-in model class and defining a
-//	 * field to replace a field within the built-in class. For example, the {@link Patient} 
-//	 * resource has a {@link Patient#getName() name} field, but if you wanted to extend Patient and
-//	 * provide your own implementation of {@link HumanNameDt} (most likely your own subclass of 
-//	 * HumanNameDt which adds extensions of your choosing) you could do that using a replacement field. 
-//	 */
-//	String replaces() default "";
+	//	/**
+	//	 * This value is used when extending a built-in model class and defining a
+	//	 * field to replace a field within the built-in class. For example, the {@link Patient}
+	//	 * resource has a {@link Patient#getName() name} field, but if you wanted to extend Patient and
+	//	 * provide your own implementation of {@link HumanNameDt} (most likely your own subclass of
+	//	 * HumanNameDt which adds extensions of your choosing) you could do that using a replacement field.
+	//	 */
+	//	String replaces() default "";
 
 	/**
 	 * Is this element a modifier?
 	 */
-	boolean modifier() default false;	
+	boolean modifier() default false;
 
 	/**
 	 * Should this element be included in the summary view
 	 */
 	boolean summary() default false;
-	
 }

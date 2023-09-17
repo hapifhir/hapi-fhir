@@ -61,7 +61,9 @@ public abstract class BaseRuntimeChildDefinition {
 
 	public abstract boolean isSummary();
 
-	abstract void sealAndInitialize(FhirContext theContext, Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions);
+	abstract void sealAndInitialize(
+			FhirContext theContext,
+			Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions);
 
 	@Override
 	public String toString() {
@@ -99,13 +101,15 @@ public abstract class BaseRuntimeChildDefinition {
 		}
 	}
 
-	BaseRuntimeElementDefinition<?> findResourceReferenceDefinition(Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions) {
-		for (Entry<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> next : theClassToElementDefinitions.entrySet()) {
+	BaseRuntimeElementDefinition<?> findResourceReferenceDefinition(
+			Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions) {
+		for (Entry<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> next :
+				theClassToElementDefinitions.entrySet()) {
 			if (IBaseReference.class.isAssignableFrom(next.getKey())) {
 				return next.getValue();
 			}
 		}
-		
+
 		// Shouldn't happen
 		throw new IllegalStateException(Msg.code(1692) + "Unable to find reference type");
 	}

@@ -25,7 +25,8 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-public interface ITermValueSetConceptDesignationDao extends JpaRepository<TermValueSetConceptDesignation, Long>, IHapiFhirJpaRepository {
+public interface ITermValueSetConceptDesignationDao
+		extends JpaRepository<TermValueSetConceptDesignation, Long>, IHapiFhirJpaRepository {
 
 	@Query("SELECT COUNT(vscd) FROM TermValueSetConceptDesignation vscd WHERE vscd.myValueSetPid = :pid")
 	Integer countByTermValueSetId(@Param("pid") Long theValueSetId);
@@ -33,5 +34,4 @@ public interface ITermValueSetConceptDesignationDao extends JpaRepository<TermVa
 	@Query("DELETE FROM TermValueSetConceptDesignation vscd WHERE vscd.myValueSetPid = :pid")
 	@Modifying
 	void deleteByTermValueSetId(@Param("pid") Long theValueSetId);
-
 }

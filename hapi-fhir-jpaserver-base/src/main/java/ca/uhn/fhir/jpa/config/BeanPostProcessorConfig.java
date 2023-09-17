@@ -35,5 +35,4 @@ public class BeanPostProcessorConfig {
 	public PersistenceExceptionTranslationPostProcessor persistenceExceptionTranslationPostProcessor() {
 		return new PersistenceExceptionTranslationPostProcessor();
 	}
-
 }

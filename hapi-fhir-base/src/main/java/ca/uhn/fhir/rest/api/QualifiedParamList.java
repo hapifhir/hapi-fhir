@@ -104,7 +104,6 @@ public class QualifiedParamList extends ArrayList<String> {
 				retVal.add(str);
 				prev = str;
 			}
-
 		}
 
 		// If no value was found, at least add that empty string as a value. It should get ignored later, but at
@@ -131,5 +130,4 @@ public class QualifiedParamList extends ArrayList<String> {
 		}
 		return retVal;
 	}
-
 }

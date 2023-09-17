@@ -27,7 +27,8 @@ import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.util.Logs;
 import org.slf4j.Logger;
 
-abstract class BaseDataSink<PT extends IModelJson, IT extends IModelJson, OT extends IModelJson> implements IJobDataSink<OT> {
+abstract class BaseDataSink<PT extends IModelJson, IT extends IModelJson, OT extends IModelJson>
+		implements IJobDataSink<OT> {
 	private static final Logger ourLog = Logs.getBatchTroubleshootingLog();
 
 	private final String myInstanceId;
@@ -36,8 +37,7 @@ abstract class BaseDataSink<PT extends IModelJson, IT extends IModelJson, OT ext
 	protected final String myJobDefinitionId;
 	private IWarningProcessor myWarningProcessor;
 
-	protected BaseDataSink(String theInstanceId,
-								  JobWorkCursor<PT, IT, OT> theJobWorkCursor) {
+	protected BaseDataSink(String theInstanceId, JobWorkCursor<PT, IT, OT> theJobWorkCursor) {
 		myInstanceId = theInstanceId;
 		myJobWorkCursor = theJobWorkCursor;
 		myJobDefinitionId = theJobWorkCursor.getJobDefinition().getJobDefinitionId();

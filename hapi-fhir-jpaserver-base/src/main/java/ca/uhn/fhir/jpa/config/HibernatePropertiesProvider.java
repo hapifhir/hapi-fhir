@@ -35,6 +35,7 @@ public class HibernatePropertiesProvider {
 
 	@Autowired
 	private LocalContainerEntityManagerFactoryBean myEntityManagerFactory;
+
 	private Dialect myDialect;
 	private String myHibernateSearchBackend;
 
@@ -49,7 +50,8 @@ public class HibernatePropertiesProvider {
 	public Dialect getDialect() {
 		Dialect dialect = myDialect;
 		if (dialect == null) {
-			String dialectClass = (String) myEntityManagerFactory.getJpaPropertyMap().get("hibernate.dialect");
+			String dialectClass =
+					(String) myEntityManagerFactory.getJpaPropertyMap().get("hibernate.dialect");
 			dialect = ReflectionUtil.newInstanceOrReturnNull(dialectClass, Dialect.class);
 			Validate.notNull(dialect, "Unable to create instance of class: %s", dialectClass);
 			myDialect = dialect;
@@ -58,16 +60,17 @@ public class HibernatePropertiesProvider {
 		return dialect;
 	}
 
-	public String getHibernateSearchBackend(){
+	public String getHibernateSearchBackend() {
 		String hibernateSearchBackend = myHibernateSearchBackend;
 		if (StringUtils.isBlank(hibernateSearchBackend)) {
-			hibernateSearchBackend = (String) myEntityManagerFactory.getJpaPropertyMap().get(BackendSettings.backendKey(BackendSettings.TYPE));
-			Validate.notNull(hibernateSearchBackend, BackendSettings.backendKey(BackendSettings.TYPE) + " property is unset!");
+			hibernateSearchBackend = (String)
+					myEntityManagerFactory.getJpaPropertyMap().get(BackendSettings.backendKey(BackendSettings.TYPE));
+			Validate.notNull(
+					hibernateSearchBackend, BackendSettings.backendKey(BackendSettings.TYPE) + " property is unset!");
 			myHibernateSearchBackend = hibernateSearchBackend;
 		}
 		return myHibernateSearchBackend;
 	}
-
 
 	public DataSource getDataSource() {
 		return myEntityManagerFactory.getDataSource();

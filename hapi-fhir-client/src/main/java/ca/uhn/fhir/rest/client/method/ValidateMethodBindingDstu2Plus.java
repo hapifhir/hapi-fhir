@@ -19,13 +19,6 @@
  */
 package ca.uhn.fhir.rest.client.method;
 
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.List;
-
-import org.hl7.fhir.instance.model.api.IBaseParameters;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.rest.annotation.Validate;
@@ -33,12 +26,32 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.client.impl.BaseHttpClientInvocation;
 import ca.uhn.fhir.util.ParametersUtil;
+import org.hl7.fhir.instance.model.api.IBaseParameters;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ValidateMethodBindingDstu2Plus extends OperationMethodBinding {
 
-	public ValidateMethodBindingDstu2Plus(Class<?> theReturnResourceType, Class<? extends IBaseResource> theReturnTypeFromRp, Method theMethod, FhirContext theContext, Object theProvider,
+	public ValidateMethodBindingDstu2Plus(
+			Class<?> theReturnResourceType,
+			Class<? extends IBaseResource> theReturnTypeFromRp,
+			Method theMethod,
+			FhirContext theContext,
+			Object theProvider,
 			Validate theAnnotation) {
-		super(null, theReturnTypeFromRp, theMethod, theContext, theProvider, true, Constants.EXTOP_VALIDATE, theAnnotation.type(), BundleTypeEnum.COLLECTION);
+		super(
+				null,
+				theReturnTypeFromRp,
+				theMethod,
+				theContext,
+				theProvider,
+				true,
+				Constants.EXTOP_VALIDATE,
+				theAnnotation.type(),
+				BundleTypeEnum.COLLECTION);
 
 		List<IParameter> newParams = new ArrayList<IParameter>();
 		int idx = 0;
@@ -49,7 +62,8 @@ public class ValidateMethodBindingDstu2Plus extends OperationMethodBinding {
 					if (String.class.equals(parameterType) || EncodingEnum.class.equals(parameterType)) {
 						newParams.add(next);
 					} else {
-						OperationParameter parameter = new OperationParameter(theContext, Constants.EXTOP_VALIDATE, Constants.EXTOP_VALIDATE_RESOURCE, 0, 1);
+						OperationParameter parameter = new OperationParameter(
+								theContext, Constants.EXTOP_VALIDATE, Constants.EXTOP_VALIDATE_RESOURCE, 0, 1);
 						parameter.initializeTypes(theMethod, null, null, parameterType);
 						newParams.add(parameter);
 					}
@@ -62,20 +76,18 @@ public class ValidateMethodBindingDstu2Plus extends OperationMethodBinding {
 			idx++;
 		}
 		setParameters(newParams);
-
 	}
-	
-	
+
 	public static BaseHttpClientInvocation createValidateInvocation(FhirContext theContext, IBaseResource theResource) {
-		IBaseParameters parameters = (IBaseParameters) theContext.getResourceDefinition("Parameters").newInstance();
+		IBaseParameters parameters =
+				(IBaseParameters) theContext.getResourceDefinition("Parameters").newInstance();
 		ParametersUtil.addParameterToParameters(theContext, parameters, "resource", theResource);
-		
+
 		String resourceName = theContext.getResourceType(theResource);
 		String resourceId = theResource.getIdElement().getIdPart();
-		
-		BaseHttpClientInvocation retVal = createOperationInvocation(theContext, resourceName, resourceId, null,Constants.EXTOP_VALIDATE, parameters, false);
+
+		BaseHttpClientInvocation retVal = createOperationInvocation(
+				theContext, resourceName, resourceId, null, Constants.EXTOP_VALIDATE, parameters, false);
 		return retVal;
 	}
-
-
 }

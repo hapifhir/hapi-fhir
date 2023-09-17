@@ -38,7 +38,6 @@ public class ComboNonUniqueSearchParameterPredicateBuilder extends BaseSearchPar
 		myColumnIndexString = getTable().addColumn("IDX_STRING");
 	}
 
-
 	public Condition createPredicateHashComplete(RequestPartitionId theRequestPartitionId, String theIndexString) {
 		BinaryCondition predicate = BinaryCondition.equalTo(myColumnIndexString, generatePlaceholder(theIndexString));
 		return combineWithRequestPartitionIdPredicate(theRequestPartitionId, predicate);

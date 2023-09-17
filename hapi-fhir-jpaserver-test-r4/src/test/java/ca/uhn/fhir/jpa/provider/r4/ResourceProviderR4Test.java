@@ -8,7 +8,6 @@ import ca.uhn.fhir.jpa.dao.data.ISearchDao;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.model.entity.NormalizedQuantitySearchLevel;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
-import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamUri;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
@@ -147,6 +146,7 @@ import org.hl7.fhir.r4.model.StructureDefinition;
 import org.hl7.fhir.r4.model.Subscription;
 import org.hl7.fhir.r4.model.Subscription.SubscriptionChannelType;
 import org.hl7.fhir.r4.model.Subscription.SubscriptionStatus;
+import org.hl7.fhir.r4.model.Task;
 import org.hl7.fhir.r4.model.UriType;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.hl7.fhir.utilities.xhtml.NodeType;
@@ -279,7 +279,6 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		searchParameter.setXpathUsage(SearchParameter.XPathUsageType.NORMAL);
 		searchParameter.setStatus(Enumerations.PublicationStatus.ACTIVE);
 		myClient.create().resource(searchParameter).execute();
-
 		mySearchParamRegistry.forceRefresh();
 
 		HttpGet get = new HttpGet(myServerBase + "/Procedure?focalAccess.a%20ne%20e");
@@ -596,7 +595,6 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	@Test
 	public void testSearchLinksWorkWithIncludes() {
 		for (int i = 0; i < 5; i++) {
-
 			Organization o = new Organization();
 			o.setId("O" + i);
 			o.setName("O" + i);
@@ -606,7 +604,6 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			p.setId("P" + i);
 			p.getManagingOrganization().setReference(oid.getValue());
 			myClient.update().resource(p).execute();
-
 		}
 
 		Bundle output = myClient
@@ -2484,12 +2481,8 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			"Patient/A/_history/1"
 		));
 
-		history = myClient
-			.loadPage()
-			.next(history)
-			.execute();
-
-		assertEquals(0, history.getEntry().size());
+		// we got them all
+		assertNull(history.getLink("next"));
 
 		/*
 		 * Try with a date offset
@@ -2657,8 +2650,137 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		int newSize = client.search().forResource(ImagingStudy.class).returnBundle(Bundle.class).execute().getEntry().size();
 
 		assertEquals(1, newSize - initialSize);
-
 	}
+
+	@Test
+	public void testPagingWithIncludesOnEachResource() {
+		// setup
+		int total = 20;
+		Organization org = new Organization();
+		org.setName("ORG");
+		IIdType orgId = myOrganizationDao.create(org).getId().toUnqualifiedVersionless();
+
+		Coding tagCode = new Coding();
+		tagCode.setCode("test");
+		tagCode.setSystem("http://example.com");
+		for (int i = 0; i < total; i++) {
+			Task t = new Task();
+			t.getMeta()
+				.addTag(tagCode);
+			t.setStatus(Task.TaskStatus.REQUESTED);
+			t.getOwner().setReference(orgId.getValue());
+			myTaskDao.create(t);
+		}
+		HashSet<String> ids = new HashSet<>();
+
+		// test
+		int requestedAmount = 10;
+		Bundle bundle = myClient
+			.search()
+			.byUrl("Task?_count=10&_tag=test&status=requested&_include=Task%3Aowner&_sort=status")
+			.returnBundle(Bundle.class)
+			.execute();
+		assertFalse(bundle.getEntry().isEmpty());
+		assertEquals(11, bundle.getEntry().size());
+		for (BundleEntryComponent resource : bundle.getEntry()) {
+			ids.add(resource.getResource().getId());
+		}
+
+		String nextUrl = null;
+		do {
+			Bundle.BundleLinkComponent nextLink = bundle.getLink("next");
+			if (nextLink != null) {
+				nextUrl = nextLink.getUrl();
+
+				// make sure we're always requesting 10
+				assertTrue(nextUrl.contains(String.format("_count=%d", requestedAmount)));
+
+				// get next batch
+				bundle = myClient.fetchResourceFromUrl(Bundle.class, nextUrl);
+				int received = bundle.getEntry().size();
+
+				// currently, last page could be empty... so we'll
+				// short circuit out here
+				if (received != 0) {
+					// every batch should include the 10 tasks + 1 orgranization
+					assertEquals(11, received);
+					for (BundleEntryComponent resource : bundle.getEntry()) {
+						ids.add(resource.getResource().getId());
+					}
+				}
+			} else {
+				nextUrl = null;
+			}
+		} while (nextUrl != null);
+
+		// verify
+		// we should receive all resources and the single organization (repeatedly)
+		assertEquals(total + 1, ids.size());
+	}
+
+	@Test
+	public void testPagingWithIncludesReturnsConsistentValues() {
+		// setup
+		int total = 19;
+		int orgs = 10;
+		// create resources
+		{
+			Coding tagCode = new Coding();
+			tagCode.setCode("test");
+			tagCode.setSystem("http://example.com");
+			int orgCount = orgs;
+			for (int i = 0; i < total; i++) {
+				Task t = new Task();
+				t.getMeta()
+					.addTag(tagCode);
+				t.setStatus(Task.TaskStatus.REQUESTED);
+				if (orgCount > 0) {
+					Organization org = new Organization();
+					org.setName("ORG");
+					IIdType orgId = myOrganizationDao.create(org).getId().toUnqualifiedVersionless();
+
+					orgCount--;
+					t.getOwner().setReference(orgId.getValue());
+				}
+				myTaskDao.create(t);
+			}
+		}
+
+		int requestedAmount = 10;
+		Bundle bundle = myClient
+			.search()
+			.byUrl("Task?_count=10&_tag=test&status=requested&_include=Task%3Aowner&_sort=status")
+			.returnBundle(Bundle.class)
+			.execute();
+		int count = bundle.getEntry().size();
+		assertFalse(bundle.getEntry().isEmpty());
+
+		String nextUrl = null;
+		do {
+			Bundle.BundleLinkComponent nextLink = bundle.getLink("next");
+			if (nextLink != null) {
+				nextUrl = nextLink.getUrl();
+
+				// make sure we're always requesting 10
+				assertTrue(nextUrl.contains(String.format("_count=%d", requestedAmount)));
+
+				// get next batch
+				bundle = myClient.fetchResourceFromUrl(Bundle.class, nextUrl);
+				int received = bundle.getEntry().size();
+
+				// every next result should produce results
+				assertFalse(bundle.getEntry().isEmpty());
+				count += received;
+			} else {
+				nextUrl = null;
+			}
+		} while (nextUrl != null);
+
+		// verify
+		// we should receive all resources and linked resources
+		assertEquals(total + orgs, count);
+	}
+
 
 	/**
 	 * See #793

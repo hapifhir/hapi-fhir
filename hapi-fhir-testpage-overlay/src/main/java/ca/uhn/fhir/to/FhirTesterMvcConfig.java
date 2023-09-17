@@ -24,6 +24,7 @@ public class FhirTesterMvcConfig implements WebMvcConfigurer {
 
 	@Override
 	public void addResourceHandlers(@Nonnull ResourceHandlerRegistry theRegistry) {
+		WebUtil.webJarAddAceBuilds(theRegistry);
 		WebUtil.webJarAddBoostrap(theRegistry);
 		WebUtil.webJarAddJQuery(theRegistry);
 		WebUtil.webJarAddFontAwesome(theRegistry);
@@ -57,7 +58,8 @@ public class FhirTesterMvcConfig implements WebMvcConfigurer {
 	}
 
 	@Bean
-	public AnnotationMethodHandlerAdapterConfigurer annotationMethodHandlerAdapterConfigurer(@Qualifier("requestMappingHandlerAdapter") RequestMappingHandlerAdapter theAdapter) {
+	public AnnotationMethodHandlerAdapterConfigurer annotationMethodHandlerAdapterConfigurer(
+			@Qualifier("requestMappingHandlerAdapter") RequestMappingHandlerAdapter theAdapter) {
 		return new AnnotationMethodHandlerAdapterConfigurer(theAdapter);
 	}
 
@@ -76,5 +78,4 @@ public class FhirTesterMvcConfig implements WebMvcConfigurer {
 
 		return templateEngine;
 	}
-
 }

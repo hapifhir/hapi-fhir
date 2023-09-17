@@ -29,7 +29,6 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.Endpoint;
@@ -42,6 +41,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 public class QuestionnaireOperationsProvider {
 	@Autowired
 	IRepositoryFactory myRepositoryFactory;
+
 	@Autowired
 	IQuestionnaireProcessorFactory myR4QuestionnaireProcessorFactory;
 
@@ -69,50 +69,56 @@ public class QuestionnaireOperationsProvider {
 	 * @return The partially (or fully)-populated set of answers for the specified Questionnaire.
 	 */
 	@Operation(name = ProviderConstants.CR_OPERATION_PREPOPULATE, idempotent = true, type = Questionnaire.class)
-	public Questionnaire prepopulate(@IdParam IdType theId,
-												@OperationParam(name = "canonical") String theCanonical,
-												@OperationParam(name = "questionnaire") Questionnaire theQuestionnaire,
-												@OperationParam(name = "subject") String theSubject,
-												@OperationParam(name = "parameters") Parameters theParameters,
-												@OperationParam(name = "bundle") Bundle theBundle,
-												@OperationParam(name = "dataEndpoint") Endpoint theDataEndpoint,
-												@OperationParam(name = "contentEndpoint") Endpoint theContentEndpoint,
-												@OperationParam(name = "terminologyEndpoint") Endpoint theTerminologyEndpoint,
-												RequestDetails theRequestDetails) throws InternalErrorException, FHIRException {
+	public Questionnaire prepopulate(
+			@IdParam IdType theId,
+			@OperationParam(name = "canonical") String theCanonical,
+			@OperationParam(name = "questionnaire") Questionnaire theQuestionnaire,
+			@OperationParam(name = "subject") String theSubject,
+			@OperationParam(name = "parameters") Parameters theParameters,
+			@OperationParam(name = "bundle") Bundle theBundle,
+			@OperationParam(name = "dataEndpoint") Endpoint theDataEndpoint,
+			@OperationParam(name = "contentEndpoint") Endpoint theContentEndpoint,
+			@OperationParam(name = "terminologyEndpoint") Endpoint theTerminologyEndpoint,
+			RequestDetails theRequestDetails)
+			throws InternalErrorException, FHIRException {
 		return myR4QuestionnaireProcessorFactory
-			.create(myRepositoryFactory.create(theRequestDetails))
-			.prePopulate(theId,
-				new CanonicalType(theCanonical),
-				theQuestionnaire,
-				theSubject,
-				theParameters,
-				theBundle,
-				theDataEndpoint,
-				theContentEndpoint,
-				theTerminologyEndpoint);
+				.create(myRepositoryFactory.create(theRequestDetails))
+				.prePopulate(
+						theId,
+						new CanonicalType(theCanonical),
+						theQuestionnaire,
+						theSubject,
+						theParameters,
+						theBundle,
+						theDataEndpoint,
+						theContentEndpoint,
+						theTerminologyEndpoint);
 	}
 
 	@Operation(name = ProviderConstants.CR_OPERATION_PREPOPULATE, idempotent = true, type = Questionnaire.class)
-	public Questionnaire prepopulate(@OperationParam(name = "canonical") String theCanonical,
-												@OperationParam(name = "questionnaire") Questionnaire theQuestionnaire,
-												@OperationParam(name = "subject") String theSubject,
-												@OperationParam(name = "parameters") Parameters theParameters,
-												@OperationParam(name = "bundle") Bundle theBundle,
-												@OperationParam(name = "dataEndpoint") Endpoint theDataEndpoint,
-												@OperationParam(name = "contentEndpoint") Endpoint theContentEndpoint,
-												@OperationParam(name = "terminologyEndpoint") Endpoint theTerminologyEndpoint,
-												RequestDetails theRequestDetails) throws InternalErrorException, FHIRException {
+	public Questionnaire prepopulate(
+			@OperationParam(name = "canonical") String theCanonical,
+			@OperationParam(name = "questionnaire") Questionnaire theQuestionnaire,
+			@OperationParam(name = "subject") String theSubject,
+			@OperationParam(name = "parameters") Parameters theParameters,
+			@OperationParam(name = "bundle") Bundle theBundle,
+			@OperationParam(name = "dataEndpoint") Endpoint theDataEndpoint,
+			@OperationParam(name = "contentEndpoint") Endpoint theContentEndpoint,
+			@OperationParam(name = "terminologyEndpoint") Endpoint theTerminologyEndpoint,
+			RequestDetails theRequestDetails)
+			throws InternalErrorException, FHIRException {
 		return myR4QuestionnaireProcessorFactory
-			.create(myRepositoryFactory.create(theRequestDetails))
-			.prePopulate(null,
-				new CanonicalType(theCanonical),
-				theQuestionnaire,
-				theSubject,
-				theParameters,
-				theBundle,
-				theDataEndpoint,
-				theContentEndpoint,
-				theTerminologyEndpoint);
+				.create(myRepositoryFactory.create(theRequestDetails))
+				.prePopulate(
+						null,
+						new CanonicalType(theCanonical),
+						theQuestionnaire,
+						theSubject,
+						theParameters,
+						theBundle,
+						theDataEndpoint,
+						theContentEndpoint,
+						theTerminologyEndpoint);
 	}
 
 	/**
@@ -137,50 +143,56 @@ public class QuestionnaireOperationsProvider {
 	 * @return The partially (or fully)-populated set of answers for the specified Questionnaire.
 	 */
 	@Operation(name = ProviderConstants.CR_OPERATION_POPULATE, idempotent = true, type = Questionnaire.class)
-	public QuestionnaireResponse populate(@IdParam IdType theId,
-													  @OperationParam(name = "canonical") String theCanonical,
-													  @OperationParam(name = "questionnaire") Questionnaire theQuestionnaire,
-													  @OperationParam(name = "subject") String theSubject,
-													  @OperationParam(name = "parameters") Parameters theParameters,
-													  @OperationParam(name = "bundle") Bundle theBundle,
-													  @OperationParam(name = "dataEndpoint") Endpoint theDataEndpoint,
-													  @OperationParam(name = "contentEndpoint") Endpoint theContentEndpoint,
-													  @OperationParam(name = "terminologyEndpoint") Endpoint theTerminologyEndpoint,
-													  RequestDetails theRequestDetails) throws InternalErrorException, FHIRException {
+	public QuestionnaireResponse populate(
+			@IdParam IdType theId,
+			@OperationParam(name = "canonical") String theCanonical,
+			@OperationParam(name = "questionnaire") Questionnaire theQuestionnaire,
+			@OperationParam(name = "subject") String theSubject,
+			@OperationParam(name = "parameters") Parameters theParameters,
+			@OperationParam(name = "bundle") Bundle theBundle,
+			@OperationParam(name = "dataEndpoint") Endpoint theDataEndpoint,
+			@OperationParam(name = "contentEndpoint") Endpoint theContentEndpoint,
+			@OperationParam(name = "terminologyEndpoint") Endpoint theTerminologyEndpoint,
+			RequestDetails theRequestDetails)
+			throws InternalErrorException, FHIRException {
 		return (QuestionnaireResponse) myR4QuestionnaireProcessorFactory
-			.create(myRepositoryFactory.create(theRequestDetails))
-			.populate(theId,
-				new CanonicalType(theCanonical),
-				theQuestionnaire,
-				theSubject,
-				theParameters,
-				theBundle,
-				theDataEndpoint,
-				theContentEndpoint,
-				theTerminologyEndpoint);
+				.create(myRepositoryFactory.create(theRequestDetails))
+				.populate(
+						theId,
+						new CanonicalType(theCanonical),
+						theQuestionnaire,
+						theSubject,
+						theParameters,
+						theBundle,
+						theDataEndpoint,
+						theContentEndpoint,
+						theTerminologyEndpoint);
 	}
 
 	@Operation(name = ProviderConstants.CR_OPERATION_POPULATE, idempotent = true, type = Questionnaire.class)
-	public QuestionnaireResponse populate(@OperationParam(name = "canonical") String theCanonical,
-													  @OperationParam(name = "questionnaire") Questionnaire theQuestionnaire,
-													  @OperationParam(name = "subject") String theSubject,
-													  @OperationParam(name = "parameters") Parameters theParameters,
-													  @OperationParam(name = "bundle") Bundle theBundle,
-													  @OperationParam(name = "dataEndpoint") Endpoint theDataEndpoint,
-													  @OperationParam(name = "contentEndpoint") Endpoint theContentEndpoint,
-													  @OperationParam(name = "terminologyEndpoint") Endpoint theTerminologyEndpoint,
-													  RequestDetails theRequestDetails) throws InternalErrorException, FHIRException {
+	public QuestionnaireResponse populate(
+			@OperationParam(name = "canonical") String theCanonical,
+			@OperationParam(name = "questionnaire") Questionnaire theQuestionnaire,
+			@OperationParam(name = "subject") String theSubject,
+			@OperationParam(name = "parameters") Parameters theParameters,
+			@OperationParam(name = "bundle") Bundle theBundle,
+			@OperationParam(name = "dataEndpoint") Endpoint theDataEndpoint,
+			@OperationParam(name = "contentEndpoint") Endpoint theContentEndpoint,
+			@OperationParam(name = "terminologyEndpoint") Endpoint theTerminologyEndpoint,
+			RequestDetails theRequestDetails)
+			throws InternalErrorException, FHIRException {
 		return (QuestionnaireResponse) myR4QuestionnaireProcessorFactory
-			.create(myRepositoryFactory.create(theRequestDetails))
-			.populate(null,
-				new CanonicalType(theCanonical),
-				theQuestionnaire,
-				theSubject,
-				theParameters,
-				theBundle,
-				theDataEndpoint,
-				theContentEndpoint,
-				theTerminologyEndpoint);
+				.create(myRepositoryFactory.create(theRequestDetails))
+				.populate(
+						null,
+						new CanonicalType(theCanonical),
+						theQuestionnaire,
+						theSubject,
+						theParameters,
+						theBundle,
+						theDataEndpoint,
+						theContentEndpoint,
+						theTerminologyEndpoint);
 	}
 
 	/**
@@ -195,21 +207,23 @@ public class QuestionnaireOperationsProvider {
 	 * @return A Bundle containing the Questionnaire and all related Library, CodeSystem and ValueSet resources
 	 */
 	@Operation(name = ProviderConstants.CR_OPERATION_PACKAGE, idempotent = true, type = Questionnaire.class)
-	public Bundle packageQuestionnaire(@IdParam IdType theId,
-												  @OperationParam(name = "canonical") String theCanonical,
-												  @OperationParam(name = "usePut") String theIsPut,
-												  RequestDetails theRequestDetails) {
+	public Bundle packageQuestionnaire(
+			@IdParam IdType theId,
+			@OperationParam(name = "canonical") String theCanonical,
+			@OperationParam(name = "usePut") String theIsPut,
+			RequestDetails theRequestDetails) {
 		return (Bundle) myR4QuestionnaireProcessorFactory
-			.create(myRepositoryFactory.create(theRequestDetails))
-			.packageQuestionnaire(theId, new CanonicalType(theCanonical), null, Boolean.parseBoolean(theIsPut));
+				.create(myRepositoryFactory.create(theRequestDetails))
+				.packageQuestionnaire(theId, new CanonicalType(theCanonical), null, Boolean.parseBoolean(theIsPut));
 	}
 
 	@Operation(name = ProviderConstants.CR_OPERATION_PACKAGE, idempotent = true, type = Questionnaire.class)
-	public Bundle packageQuestionnaire(@OperationParam(name = "canonical") String theCanonical,
-												  @OperationParam(name = "usePut") String theIsPut,
-												  RequestDetails theRequestDetails) {
+	public Bundle packageQuestionnaire(
+			@OperationParam(name = "canonical") String theCanonical,
+			@OperationParam(name = "usePut") String theIsPut,
+			RequestDetails theRequestDetails) {
 		return (Bundle) myR4QuestionnaireProcessorFactory
-			.create(myRepositoryFactory.create(theRequestDetails))
-			.packageQuestionnaire(null, new CanonicalType(theCanonical), null, Boolean.parseBoolean(theIsPut));
+				.create(myRepositoryFactory.create(theRequestDetails))
+				.packageQuestionnaire(null, new CanonicalType(theCanonical), null, Boolean.parseBoolean(theIsPut));
 	}
 }

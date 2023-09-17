@@ -32,7 +32,8 @@ import org.apache.commons.lang3.Validate;
 import java.lang.reflect.Method;
 import java.util.Optional;
 
-public class InterceptorService extends BaseInterceptorService<Pointcut> implements IInterceptorService, IInterceptorBroadcaster {
+public class InterceptorService extends BaseInterceptorService<Pointcut>
+		implements IInterceptorService, IInterceptorBroadcaster {
 
 	/**
 	 * Constructor which uses a default name of "default"
@@ -55,7 +56,6 @@ public class InterceptorService extends BaseInterceptorService<Pointcut> impleme
 		return findAnnotation(nextMethod, Hook.class).map(t -> new HookDescriptor(t.value(), t.order()));
 	}
 
-
 	@Override
 	@VisibleForTesting
 	public void registerAnonymousInterceptor(Pointcut thePointcut, IAnonymousInterceptor theInterceptor) {
@@ -69,7 +69,6 @@ public class InterceptorService extends BaseInterceptorService<Pointcut> impleme
 		BaseInvoker invoker = new AnonymousLambdaInvoker(thePointcut, theInterceptor, theOrder);
 		registerAnonymousInterceptor(thePointcut, theInterceptor, invoker);
 	}
-
 
 	private static class AnonymousLambdaInvoker extends BaseInvoker {
 		private final IAnonymousInterceptor myHook;
@@ -87,6 +86,4 @@ public class InterceptorService extends BaseInterceptorService<Pointcut> impleme
 			return true;
 		}
 	}
-
-
 }

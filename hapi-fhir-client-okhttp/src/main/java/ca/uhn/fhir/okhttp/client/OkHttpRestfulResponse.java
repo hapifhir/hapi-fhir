@@ -20,20 +20,18 @@
 package ca.uhn.fhir.okhttp.client;
 
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.client.api.IHttpResponse;
+import ca.uhn.fhir.rest.client.impl.BaseHttpResponse;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.util.StopWatch;
+import okhttp3.MediaType;
+import okhttp3.Response;
+import org.apache.commons.io.IOUtils;
+
 import java.io.*;
 import java.util.List;
 import java.util.Map;
-
-import ca.uhn.fhir.rest.client.impl.BaseHttpResponse;
-import ca.uhn.fhir.util.StopWatch;
-import org.apache.commons.io.IOUtils;
-
-import ca.uhn.fhir.rest.api.Constants;
-
-import ca.uhn.fhir.rest.client.api.IHttpResponse;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
-import okhttp3.MediaType;
-import okhttp3.Response;
 
 /**
  * Wraps an OkHttp {@link Response}
@@ -140,5 +138,4 @@ public class OkHttpRestfulResponse extends BaseHttpResponse implements IHttpResp
 	private MediaType typeAndSubtypeOnly(MediaType input) {
 		return MediaType.parse(input.type() + "/" + input.subtype());
 	}
-
 }

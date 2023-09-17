@@ -49,6 +49,7 @@ public abstract class BaseBatch2Config {
 
 	@Autowired
 	private IJobPersistence myPersistence;
+
 	@Autowired
 	private IChannelFactory myChannelFactory;
 
@@ -68,56 +69,59 @@ public abstract class BaseBatch2Config {
 	}
 
 	@Bean
-	public IJobCoordinator batch2JobCoordinator(JobDefinitionRegistry theJobDefinitionRegistry,
-															  BatchJobSender theBatchJobSender,
-															  WorkChunkProcessor theExecutor,
-															  IJobMaintenanceService theJobMaintenanceService,
-															  IHapiTransactionService theTransactionService) {
+	public IJobCoordinator batch2JobCoordinator(
+			JobDefinitionRegistry theJobDefinitionRegistry,
+			BatchJobSender theBatchJobSender,
+			WorkChunkProcessor theExecutor,
+			IJobMaintenanceService theJobMaintenanceService,
+			IHapiTransactionService theTransactionService) {
 		return new JobCoordinatorImpl(
-			theBatchJobSender,
-			batch2ProcessingChannelReceiver(myChannelFactory),
-			myPersistence,
-			theJobDefinitionRegistry,
-			theExecutor,
-			theJobMaintenanceService,
-			theTransactionService);
+				theBatchJobSender,
+				batch2ProcessingChannelReceiver(myChannelFactory),
+				myPersistence,
+				theJobDefinitionRegistry,
+				theExecutor,
+				theJobMaintenanceService,
+				theTransactionService);
 	}
 
 	@Bean
-	public IReductionStepExecutorService reductionStepExecutorService(IJobPersistence theJobPersistence,
-																							IHapiTransactionService theTransactionService,
-																							JobDefinitionRegistry theJobDefinitionRegistry) {
+	public IReductionStepExecutorService reductionStepExecutorService(
+			IJobPersistence theJobPersistence,
+			IHapiTransactionService theTransactionService,
+			JobDefinitionRegistry theJobDefinitionRegistry) {
 		return new ReductionStepExecutorServiceImpl(theJobPersistence, theTransactionService, theJobDefinitionRegistry);
 	}
 
 	@Bean
-	public IJobMaintenanceService batch2JobMaintenanceService(ISchedulerService theSchedulerService,
-																				 JobDefinitionRegistry theJobDefinitionRegistry,
-																				 JpaStorageSettings theStorageSettings,
-																				 BatchJobSender theBatchJobSender,
-																				 WorkChunkProcessor theExecutor,
-																				 IReductionStepExecutorService theReductionStepExecutorService
-	) {
-		return new JobMaintenanceServiceImpl(theSchedulerService,
-			myPersistence,
-			theStorageSettings,
-			theJobDefinitionRegistry,
-			theBatchJobSender,
-			theExecutor,
-			theReductionStepExecutorService);
+	public IJobMaintenanceService batch2JobMaintenanceService(
+			ISchedulerService theSchedulerService,
+			JobDefinitionRegistry theJobDefinitionRegistry,
+			JpaStorageSettings theStorageSettings,
+			BatchJobSender theBatchJobSender,
+			WorkChunkProcessor theExecutor,
+			IReductionStepExecutorService theReductionStepExecutorService) {
+		return new JobMaintenanceServiceImpl(
+				theSchedulerService,
+				myPersistence,
+				theStorageSettings,
+				theJobDefinitionRegistry,
+				theBatchJobSender,
+				theExecutor,
+				theReductionStepExecutorService);
 	}
 
 	@Bean
 	public IChannelProducer batch2ProcessingChannelProducer(IChannelFactory theChannelFactory) {
-		ChannelProducerSettings settings = new ChannelProducerSettings()
-			.setConcurrentConsumers(getConcurrentConsumers());
+		ChannelProducerSettings settings =
+				new ChannelProducerSettings().setConcurrentConsumers(getConcurrentConsumers());
 		return theChannelFactory.getOrCreateProducer(CHANNEL_NAME, JobWorkNotificationJsonMessage.class, settings);
 	}
 
 	@Bean
 	public IChannelReceiver batch2ProcessingChannelReceiver(IChannelFactory theChannelFactory) {
-		ChannelConsumerSettings settings = new ChannelConsumerSettings()
-			.setConcurrentConsumers(getConcurrentConsumers());
+		ChannelConsumerSettings settings =
+				new ChannelConsumerSettings().setConcurrentConsumers(getConcurrentConsumers());
 		return theChannelFactory.getOrCreateReceiver(CHANNEL_NAME, JobWorkNotificationJsonMessage.class, settings);
 	}
 
@@ -132,5 +136,4 @@ public abstract class BaseBatch2Config {
 	protected int getConcurrentConsumers() {
 		return 4;
 	}
-
 }

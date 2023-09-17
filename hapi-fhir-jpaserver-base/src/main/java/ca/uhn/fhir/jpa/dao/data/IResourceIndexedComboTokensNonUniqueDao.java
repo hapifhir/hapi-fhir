@@ -25,7 +25,8 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-public interface IResourceIndexedComboTokensNonUniqueDao extends JpaRepository<ResourceIndexedComboTokenNonUnique, Long> {
+public interface IResourceIndexedComboTokensNonUniqueDao
+		extends JpaRepository<ResourceIndexedComboTokenNonUnique, Long> {
 
 	@Modifying
 	@Query("DELETE FROM ResourceIndexedComboTokenNonUnique t WHERE t.myResourceId = :res_id")

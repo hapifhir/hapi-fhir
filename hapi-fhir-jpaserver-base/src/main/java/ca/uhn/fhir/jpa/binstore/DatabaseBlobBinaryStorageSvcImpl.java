@@ -54,14 +54,20 @@ public class DatabaseBlobBinaryStorageSvcImpl extends BaseBinaryStorageSvcImpl {
 
 	@PersistenceContext(type = PersistenceContextType.TRANSACTION)
 	private EntityManager myEntityManager;
+
 	@Autowired
 	private IBinaryStorageEntityDao myBinaryStorageEntityDao;
 
 	@Nonnull
 	@Override
 	@Transactional(propagation = Propagation.REQUIRED)
-	public StoredDetails storeBlob(IIdType theResourceId, String theBlobIdOrNull, String theContentType,
-											 InputStream theInputStream, RequestDetails theRequestDetails) throws IOException {
+	public StoredDetails storeBlob(
+			IIdType theResourceId,
+			String theBlobIdOrNull,
+			String theContentType,
+			InputStream theInputStream,
+			RequestDetails theRequestDetails)
+			throws IOException {
 
 		/*
 		 * Note on transactionality: This method used to have a propagation value of SUPPORTS and then do the actual
@@ -97,33 +103,35 @@ public class DatabaseBlobBinaryStorageSvcImpl extends BaseBinaryStorageSvcImpl {
 		myEntityManager.persist(entity);
 
 		return new StoredDetails()
-			.setBlobId(id)
-			.setBytes(bytes)
-			.setPublished(publishedDate)
-			.setHash(hash)
-			.setContentType(theContentType);
+				.setBlobId(id)
+				.setBytes(bytes)
+				.setPublished(publishedDate)
+				.setHash(hash)
+				.setContentType(theContentType);
 	}
 
 	@Override
 	public StoredDetails fetchBlobDetails(IIdType theResourceId, String theBlobId) {
 
-		Optional<BinaryStorageEntity> entityOpt = myBinaryStorageEntityDao.findByIdAndResourceId(theBlobId, theResourceId.toUnqualifiedVersionless().getValue());
+		Optional<BinaryStorageEntity> entityOpt = myBinaryStorageEntityDao.findByIdAndResourceId(
+				theBlobId, theResourceId.toUnqualifiedVersionless().getValue());
 		if (entityOpt.isEmpty()) {
 			return null;
 		}
 
 		BinaryStorageEntity entity = entityOpt.get();
 		return new StoredDetails()
-			.setBlobId(theBlobId)
-			.setContentType(entity.getBlobContentType())
-			.setHash(entity.getHash())
-			.setPublished(entity.getPublished())
-			.setBytes(entity.getSize());
+				.setBlobId(theBlobId)
+				.setContentType(entity.getBlobContentType())
+				.setHash(entity.getHash())
+				.setPublished(entity.getPublished())
+				.setBytes(entity.getSize());
 	}
 
 	@Override
 	public boolean writeBlob(IIdType theResourceId, String theBlobId, OutputStream theOutputStream) throws IOException {
-		Optional<BinaryStorageEntity> entityOpt = myBinaryStorageEntityDao.findByIdAndResourceId(theBlobId, theResourceId.toUnqualifiedVersionless().getValue());
+		Optional<BinaryStorageEntity> entityOpt = myBinaryStorageEntityDao.findByIdAndResourceId(
+				theBlobId, theResourceId.toUnqualifiedVersionless().getValue());
 		if (entityOpt.isEmpty()) {
 			return false;
 		}
@@ -135,15 +143,19 @@ public class DatabaseBlobBinaryStorageSvcImpl extends BaseBinaryStorageSvcImpl {
 
 	@Override
 	public void expungeBlob(IIdType theResourceId, String theBlobId) {
-		Optional<BinaryStorageEntity> entityOpt = myBinaryStorageEntityDao.findByIdAndResourceId(theBlobId, theResourceId.toUnqualifiedVersionless().getValue());
-		entityOpt.ifPresent(theBinaryStorageEntity -> myBinaryStorageEntityDao.deleteByPid(theBinaryStorageEntity.getBlobId()));
+		Optional<BinaryStorageEntity> entityOpt = myBinaryStorageEntityDao.findByIdAndResourceId(
+				theBlobId, theResourceId.toUnqualifiedVersionless().getValue());
+		entityOpt.ifPresent(
+				theBinaryStorageEntity -> myBinaryStorageEntityDao.deleteByPid(theBinaryStorageEntity.getBlobId()));
 	}
 
 	@Override
 	public byte[] fetchBlob(IIdType theResourceId, String theBlobId) throws IOException {
 		BinaryStorageEntity entityOpt = myBinaryStorageEntityDao
-			.findByIdAndResourceId(theBlobId, theResourceId.toUnqualifiedVersionless().getValue())
-			.orElseThrow(() -> new ResourceNotFoundException("Unknown blob ID: " + theBlobId + " for resource ID " + theResourceId));
+				.findByIdAndResourceId(
+						theBlobId, theResourceId.toUnqualifiedVersionless().getValue())
+				.orElseThrow(() -> new ResourceNotFoundException(
+						"Unknown blob ID: " + theBlobId + " for resource ID " + theResourceId));
 
 		return copyBlobToByteArray(entityOpt);
 	}

@@ -37,14 +37,10 @@ public class HapiNullScheduler implements IHapiScheduler {
 	}
 
 	@Override
-	public void start() {
-
-	}
+	public void start() {}
 
 	@Override
-	public void shutdown() {
-
-	}
+	public void shutdown() {}
 
 	@Override
 	public boolean isStarted() {
@@ -52,14 +48,10 @@ public class HapiNullScheduler implements IHapiScheduler {
 	}
 
 	@Override
-	public void clear() throws SchedulerException {
-
-	}
+	public void clear() throws SchedulerException {}
 
 	@Override
-	public void logStatusForUnitTest() {
-
-	}
+	public void logStatusForUnitTest() {}
 
 	@Override
 	public void scheduleJob(long theIntervalMillis, ScheduledJobDefinition theJobDefinition) {

@@ -25,7 +25,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 
 /**
- * This interface isn't used by hapi-fhir-base, but is used by the 
+ * This interface isn't used by hapi-fhir-base, but is used by the
  * <a href="https://hapifhir.io/hapi-fhir/docs/server_plain/web_testpage_overlay.html">Web Testing UI</a>
  */
 public interface ITestingUiClientFactory {
@@ -34,5 +34,4 @@ public interface ITestingUiClientFactory {
 	 * Instantiate a new client
 	 */
 	IGenericClient newClient(FhirContext theFhirContext, HttpServletRequest theRequest, String theServerBaseUrl);
-	
 }

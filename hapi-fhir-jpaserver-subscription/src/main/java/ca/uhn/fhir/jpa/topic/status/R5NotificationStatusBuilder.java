@@ -1,3 +1,22 @@
+/*-
+ * #%L
+ * HAPI FHIR Subscription Server
+ * %%
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
 package ca.uhn.fhir.jpa.topic.status;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -18,7 +37,8 @@ public class R5NotificationStatusBuilder implements INotificationStatusBuilder<S
 	}
 
 	@Override
-	public SubscriptionStatus buildNotificationStatus(List<IBaseResource> theResources, ActiveSubscription theActiveSubscription, String theTopicUrl) {
+	public SubscriptionStatus buildNotificationStatus(
+			List<IBaseResource> theResources, ActiveSubscription theActiveSubscription, String theTopicUrl) {
 		long eventNumber = theActiveSubscription.getDeliveriesCount();
 
 		SubscriptionStatus subscriptionStatus = new SubscriptionStatus();
@@ -27,12 +47,14 @@ public class R5NotificationStatusBuilder implements INotificationStatusBuilder<S
 		subscriptionStatus.setType(SubscriptionStatus.SubscriptionNotificationType.EVENTNOTIFICATION);
 		// WIP STR5 events-since-subscription-start should be read from the database
 		subscriptionStatus.setEventsSinceSubscriptionStart(eventNumber);
-		SubscriptionStatus.SubscriptionStatusNotificationEventComponent event = subscriptionStatus.addNotificationEvent();
+		SubscriptionStatus.SubscriptionStatusNotificationEventComponent event =
+				subscriptionStatus.addNotificationEvent();
 		event.setEventNumber(eventNumber);
 		if (theResources.size() > 0) {
 			event.setFocus(new Reference(theResources.get(0).getIdElement()));
 		}
-		subscriptionStatus.setSubscription(new Reference(theActiveSubscription.getSubscription().getIdElement(myFhirContext)));
+		subscriptionStatus.setSubscription(
+				new Reference(theActiveSubscription.getSubscription().getIdElement(myFhirContext)));
 		subscriptionStatus.setTopic(theTopicUrl);
 		return subscriptionStatus;
 	}

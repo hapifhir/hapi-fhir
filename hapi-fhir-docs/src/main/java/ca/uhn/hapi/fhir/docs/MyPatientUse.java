@@ -37,69 +37,67 @@ import java.util.List;
 
 public class MyPatientUse {
 
-   @ResourceDef()
-   public static class MyPatient extends Patient {
+	@ResourceDef()
+	public static class MyPatient extends Patient {
 
-      @Child(name="petName")  
-      @Extension(url="http://example.com/dontuse#petname", definedLocally=false, isModifier=false)
-      @Description(shortDefinition="The name of the patient's favourite pet")
-      private StringType myPetName;
-      
-      public StringType getPetName() {
-         if(myPetName==null) {
-            myPetName = new StringType();
-         }
-         return myPetName;
-      }
+		@Child(name = "petName")
+		@Extension(url = "http://example.com/dontuse#petname", definedLocally = false, isModifier = false)
+		@Description(shortDefinition = "The name of the patient's favourite pet")
+		private StringType myPetName;
 
-      public void setPetName(StringType thePetName) {
-         myPetName = thePetName;
-      }
+		public StringType getPetName() {
+			if (myPetName == null) {
+				myPetName = new StringType();
+			}
+			return myPetName;
+		}
 
-      public List<DateTimeType> getImportantDates() {
-         if (myImportantDates==null) {
-            myImportantDates= new ArrayList<>();
-         }
-         return myImportantDates;
-      }
+		public void setPetName(StringType thePetName) {
+			myPetName = thePetName;
+		}
 
-      public void setImportantDates(List<DateTimeType> theImportantDates) {
-         myImportantDates = theImportantDates;
-      }
+		public List<DateTimeType> getImportantDates() {
+			if (myImportantDates == null) {
+				myImportantDates = new ArrayList<>();
+			}
+			return myImportantDates;
+		}
 
-      @Child(name="importantDates", max=Child.MAX_UNLIMITED)   
-      @Extension(url="http://example.com/dontuse#importantDates", definedLocally=false, isModifier=true)
-      @Description(shortDefinition="Some dates of note for the patient")
-      private List<DateTimeType> myImportantDates;
+		public void setImportantDates(List<DateTimeType> theImportantDates) {
+			myImportantDates = theImportantDates;
+		}
 
-   }
-   
-@SuppressWarnings("unused")
-public static void main(String[] args) throws DataFormatException, IOException {
-//START SNIPPET: patientUse
-MyPatient patient = new MyPatient();
-patient.setPetName(new StringType("Fido"));
-patient.getImportantDates().add(new DateTimeType("2010-01-02"));
-patient.getImportantDates().add(new DateTimeType("2014-01-26T11:11:11"));
+		@Child(name = "importantDates", max = Child.MAX_UNLIMITED)
+		@Extension(url = "http://example.com/dontuse#importantDates", definedLocally = false, isModifier = true)
+		@Description(shortDefinition = "Some dates of note for the patient")
+		private List<DateTimeType> myImportantDates;
+	}
 
-patient.addName().setFamily("Smith").addGiven("John").addGiven("Quincy").addSuffix("Jr");
+	@SuppressWarnings("unused")
+	public static void main(String[] args) throws DataFormatException, IOException {
+		// START SNIPPET: patientUse
+		MyPatient patient = new MyPatient();
+		patient.setPetName(new StringType("Fido"));
+		patient.getImportantDates().add(new DateTimeType("2010-01-02"));
+		patient.getImportantDates().add(new DateTimeType("2014-01-26T11:11:11"));
 
-IParser p = FhirContext.forDstu2().newXmlParser().setPrettyPrint(true);
-String messageString = p.encodeResourceToString(patient);
+		patient.addName().setFamily("Smith").addGiven("John").addGiven("Quincy").addSuffix("Jr");
 
-System.out.println(messageString);
-//END SNIPPET: patientUse
-	
-//START SNIPPET: patientParse
-IParser parser = FhirContext.forDstu2().newXmlParser();
-MyPatient newPatient = parser.parseResource(MyPatient.class, messageString);
-//END SNIPPET: patientParse
+		IParser p = FhirContext.forDstu2().newXmlParser().setPrettyPrint(true);
+		String messageString = p.encodeResourceToString(patient);
 
-{
-	FhirContext ctx2 = FhirContext.forDstu2();
-	RuntimeResourceDefinition def = ctx2.getResourceDefinition(patient);
-	System.out.println(ctx2.newXmlParser().setPrettyPrint(true).encodeResourceToString(def.toProfile()));
-}
-}
-	
+		System.out.println(messageString);
+		// END SNIPPET: patientUse
+
+		// START SNIPPET: patientParse
+		IParser parser = FhirContext.forDstu2().newXmlParser();
+		MyPatient newPatient = parser.parseResource(MyPatient.class, messageString);
+		// END SNIPPET: patientParse
+
+		{
+			FhirContext ctx2 = FhirContext.forDstu2();
+			RuntimeResourceDefinition def = ctx2.getResourceDefinition(patient);
+			System.out.println(ctx2.newXmlParser().setPrettyPrint(true).encodeResourceToString(def.toProfile()));
+		}
+	}
 }

@@ -26,9 +26,7 @@ package ca.uhn.fhir.rest.api;
  * </p>
  */
 public enum DeleteCascadeModeEnum {
-
 	NONE,
 
 	DELETE
-
 }

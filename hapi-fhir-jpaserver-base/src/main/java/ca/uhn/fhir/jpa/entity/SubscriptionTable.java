@@ -25,9 +25,13 @@ import jakarta.persistence.*;
 import java.util.Date;
 
 @Entity
-@Table(name = "HFJ_SUBSCRIPTION_STATS", uniqueConstraints = {
-	@UniqueConstraint(name = "IDX_SUBSC_RESID", columnNames = {"RES_ID"}),
-})
+@Table(
+		name = "HFJ_SUBSCRIPTION_STATS",
+		uniqueConstraints = {
+			@UniqueConstraint(
+					name = "IDX_SUBSC_RESID",
+					columnNames = {"RES_ID"}),
+		})
 public class SubscriptionTable {
 
 	@Temporal(TemporalType.TIMESTAMP)
@@ -44,9 +48,12 @@ public class SubscriptionTable {
 	private Long myResId;
 
 	@OneToOne()
-	@JoinColumn(name = "RES_ID", insertable = true, updatable = false, referencedColumnName = "RES_ID",
-		foreignKey = @ForeignKey(name = "FK_SUBSC_RESOURCE_ID")
-	)
+	@JoinColumn(
+			name = "RES_ID",
+			insertable = true,
+			updatable = false,
+			referencedColumnName = "RES_ID",
+			foreignKey = @ForeignKey(name = "FK_SUBSC_RESOURCE_ID"))
 	private ResourceTable mySubscriptionResource;
 
 	/**
@@ -55,7 +62,6 @@ public class SubscriptionTable {
 	public SubscriptionTable() {
 		super();
 	}
-
 
 	public Date getCreated() {
 		return myCreated;
@@ -76,5 +82,4 @@ public class SubscriptionTable {
 	public void setSubscriptionResource(ResourceTable theSubscriptionResource) {
 		mySubscriptionResource = theSubscriptionResource;
 	}
-
 }

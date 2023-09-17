@@ -20,11 +20,11 @@ package ca.uhn.fhir.sl.cache.caffeine;
  * #L%
  */
 
-import java.util.Map;
-
 import ca.uhn.fhir.sl.cache.LoadingCache;
 
-public class LoadingCacheDelegator<K, V> extends CacheDelegator<K, V> implements LoadingCache<K,V> {
+import java.util.Map;
+
+public class LoadingCacheDelegator<K, V> extends CacheDelegator<K, V> implements LoadingCache<K, V> {
 
 	public LoadingCacheDelegator(com.github.benmanes.caffeine.cache.LoadingCache<K, V> impl) {
 		super(impl);
@@ -45,5 +45,7 @@ public class LoadingCacheDelegator<K, V> extends CacheDelegator<K, V> implements
 	}
 
 	@Override
-	public void refresh(K key) { getCache().refresh(key); }
+	public void refresh(K key) {
+		getCache().refresh(key);
+	}
 }

@@ -53,7 +53,9 @@ public class ResourceGoneException extends BaseServerResponseException {
 	 */
 	@Deprecated
 	public ResourceGoneException(Class<? extends IBaseResource> theClass, BaseIdentifierDt thePatientId) {
-		super(STATUS_CODE, "Resource of type " + theClass.getSimpleName() + " with ID " + thePatientId + " is gone/deleted");
+		super(
+				STATUS_CODE,
+				"Resource of type " + theClass.getSimpleName() + " with ID " + thePatientId + " is gone/deleted");
 		myResourceId = null;
 	}
 
@@ -64,7 +66,9 @@ public class ResourceGoneException extends BaseServerResponseException {
 	 * @param theResourceId The ID of the resource that could not be found
 	 */
 	public ResourceGoneException(Class<? extends IBaseResource> theClass, IIdType theResourceId) {
-		super(STATUS_CODE, "Resource of type " + theClass.getSimpleName() + " with ID " + theResourceId + " is gone/deleted");
+		super(
+				STATUS_CODE,
+				"Resource of type " + theClass.getSimpleName() + " with ID " + theResourceId + " is gone/deleted");
 		myResourceId = theResourceId;
 	}
 
@@ -94,5 +98,4 @@ public class ResourceGoneException extends BaseServerResponseException {
 	public void setResourceId(IIdType theResourceId) {
 		myResourceId = theResourceId;
 	}
-
 }

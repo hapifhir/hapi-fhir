@@ -74,7 +74,8 @@ public class MigrationQueryBuilder {
 
 		myVersionCol = myTable.addColumn("\"version\"", Types.VARCHAR, HapiMigrationEntity.VERSION_MAX_SIZE);
 
-		myDescriptionCol = myTable.addColumn("\"description\"", Types.VARCHAR, HapiMigrationEntity.DESCRIPTION_MAX_SIZE);
+		myDescriptionCol =
+				myTable.addColumn("\"description\"", Types.VARCHAR, HapiMigrationEntity.DESCRIPTION_MAX_SIZE);
 		myDescriptionCol.notNull();
 
 		myTypeCol = myTable.addColumn("\"type\"", Types.VARCHAR, HapiMigrationEntity.TYPE_MAX_SIZE);
@@ -85,7 +86,8 @@ public class MigrationQueryBuilder {
 
 		myChecksumCol = myTable.addColumn("\"checksum\"", Types.INTEGER, null);
 
-		myInstalledByCol = myTable.addColumn("\"installed_by\"", Types.VARCHAR, HapiMigrationEntity.INSTALLED_BY_MAX_SIZE);
+		myInstalledByCol =
+				myTable.addColumn("\"installed_by\"", Types.VARCHAR, HapiMigrationEntity.INSTALLED_BY_MAX_SIZE);
 		myInstalledByCol.notNull();
 
 		myInstalledOnCol = myTable.addColumn("\"installed_on\"", Types.DATE, null);
@@ -94,7 +96,9 @@ public class MigrationQueryBuilder {
 		myExecutionTimeCol = myTable.addColumn("\"execution_time\"", Types.INTEGER, null);
 		myExecutionTimeCol.notNull();
 
-		myBooleanType = ColumnTypeToDriverTypeToSqlType.getColumnTypeToDriverTypeToSqlType().get(ColumnTypeEnum.BOOLEAN).get(theDriverType);
+		myBooleanType = ColumnTypeToDriverTypeToSqlType.getColumnTypeToDriverTypeToSqlType()
+				.get(ColumnTypeEnum.BOOLEAN)
+				.get(theDriverType);
 		mySuccessCol = myTable.addColumn("\"success\"", myBooleanType, null);
 		mySuccessCol.notNull();
 
@@ -112,65 +116,64 @@ public class MigrationQueryBuilder {
 
 	private String buildHighestKeyQuery() {
 		return new SelectQuery()
-			.addCustomColumns(FunctionCall.max().addColumnParams(myInstalledRankCol))
-			.validate()
-			.toString();
+				.addCustomColumns(FunctionCall.max().addColumnParams(myInstalledRankCol))
+				.validate()
+				.toString();
 	}
 
 	public String insertPreparedStatement() {
 		return new InsertQuery(myTable)
-			.addPreparedColumns(myInstalledRankCol,
-				myVersionCol,
-				myDescriptionCol,
-				myTypeCol,
-				myScriptCol,
-				myChecksumCol,
-				myInstalledByCol,
-				myInstalledOnCol,
-				myExecutionTimeCol,
-				mySuccessCol)
-			.validate()
-			.toString();
+				.addPreparedColumns(
+						myInstalledRankCol,
+						myVersionCol,
+						myDescriptionCol,
+						myTypeCol,
+						myScriptCol,
+						myChecksumCol,
+						myInstalledByCol,
+						myInstalledOnCol,
+						myExecutionTimeCol,
+						mySuccessCol)
+				.validate()
+				.toString();
 	}
 
 	public String createTableStatement() {
-		return new CreateTableQuery(myTable, true)
-			.validate()
-			.toString();
+		return new CreateTableQuery(myTable, true).validate().toString();
 	}
 
 	public String createIndexStatement() {
 		return new CreateIndexQuery(myTable, myMigrationTablename.toUpperCase() + "_PK_INDEX")
-			.setIndexType(CreateIndexQuery.IndexType.UNIQUE)
-			.addColumns(myInstalledRankCol)
-			.validate()
-			.toString();
+				.setIndexType(CreateIndexQuery.IndexType.UNIQUE)
+				.addColumns(myInstalledRankCol)
+				.validate()
+				.toString();
 	}
 
 	public String findAllQuery() {
 		return new SelectQuery()
-			.addFromTable(myTable)
-			.addCondition(BinaryCondition.notEqualTo(myInstalledRankCol, HapiMigrationEntity.CREATE_TABLE_PID))
-			.addAllColumns()
-			.validate()
-			.toString();
+				.addFromTable(myTable)
+				.addCondition(BinaryCondition.notEqualTo(myInstalledRankCol, HapiMigrationEntity.CREATE_TABLE_PID))
+				.addAllColumns()
+				.validate()
+				.toString();
 	}
 
-    public String deleteLockRecordStatement(Integer theLockPid, String theLockDescription) {
-		 return new DeleteQuery(myTable)
-			.addCondition(BinaryCondition.equalTo(myInstalledRankCol, theLockPid))
+	public String deleteLockRecordStatement(Integer theLockPid, String theLockDescription) {
+		return new DeleteQuery(myTable)
+				.addCondition(BinaryCondition.equalTo(myInstalledRankCol, theLockPid))
 				.addCondition(BinaryCondition.equalTo(myDescriptionCol, theLockDescription))
 				.validate()
 				.toString();
-    }
+	}
 
 	public String findByPidAndNotDescriptionQuery(Integer theLockPid, String theLockDescription) {
 		return new SelectQuery()
-			.addFromTable(myTable)
-			.addCondition(BinaryCondition.equalTo(myInstalledRankCol, theLockPid))
-			.addCondition(BinaryCondition.notEqualTo(myDescriptionCol, theLockDescription))
-			.addAllColumns()
-			.validate()
-			.toString();
+				.addFromTable(myTable)
+				.addCondition(BinaryCondition.equalTo(myInstalledRankCol, theLockPid))
+				.addCondition(BinaryCondition.notEqualTo(myDescriptionCol, theLockDescription))
+				.addAllColumns()
+				.validate()
+				.toString();
 	}
 }

@@ -4,7 +4,7 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.mdm.BaseMdmR4Test;
 import ca.uhn.fhir.jpa.mdm.svc.candidate.MdmCandidateSearchSvc;
 import ca.uhn.fhir.jpa.mdm.svc.candidate.TooManyCandidatesException;
-import ca.uhn.fhir.jpa.nickname.NicknameSvc;
+import ca.uhn.fhir.jpa.nickname.INicknameSvc;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.nickname.NicknameInterceptor;
@@ -38,7 +38,7 @@ public class MdmCandidateSearchSvcIT extends BaseMdmR4Test {
 	MatchUrlService myMatchUrlService;
 
 	@Autowired
-	NicknameSvc myNicknameSvc;
+	INicknameSvc myNicknameSvc;
 
 	private NicknameInterceptor myNicknameInterceptor;
 

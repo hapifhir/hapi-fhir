@@ -26,7 +26,6 @@ public abstract class BaseChannelSettings implements IChannelSettings {
 
 	private ChannelRetryConfiguration myRetryConfigurationParameters;
 
-
 	/**
 	 * Default true.  Used by IChannelNamer to decide how to qualify the channel name.
 	 */

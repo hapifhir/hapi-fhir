@@ -56,12 +56,16 @@ public abstract class BaseSubscriptionDeliverySubscriber implements MessageHandl
 
 	@Autowired
 	protected FhirContext myFhirContext;
+
 	@Autowired
 	protected SubscriptionRegistry mySubscriptionRegistry;
+
 	@Autowired
 	private IInterceptorBroadcaster myInterceptorBroadcaster;
+
 	@Autowired
 	private DaoRegistry myDaoRegistry;
+
 	@Autowired
 	private MatchUrlService myMatchUrlService;
 
@@ -79,7 +83,8 @@ public abstract class BaseSubscriptionDeliverySubscriber implements MessageHandl
 			return;
 		}
 
-		ActiveSubscription updatedSubscription = mySubscriptionRegistry.get(msg.getSubscription().getIdElement(myFhirContext).getIdPart());
+		ActiveSubscription updatedSubscription = mySubscriptionRegistry.get(
+				msg.getSubscription().getIdElement(myFhirContext).getIdPart());
 		if (updatedSubscription != null) {
 			msg.setSubscription(updatedSubscription.getSubscription());
 		}
@@ -88,8 +93,8 @@ public abstract class BaseSubscriptionDeliverySubscriber implements MessageHandl
 
 			// Interceptor call: SUBSCRIPTION_BEFORE_DELIVERY
 			HookParams params = new HookParams()
-				.add(ResourceDeliveryMessage.class, msg)
-				.add(CanonicalSubscription.class, msg.getSubscription());
+					.add(ResourceDeliveryMessage.class, msg)
+					.add(CanonicalSubscription.class, msg.getSubscription());
 			if (!myInterceptorBroadcaster.callHooks(Pointcut.SUBSCRIPTION_BEFORE_DELIVERY, params)) {
 				return;
 			}
@@ -105,9 +110,8 @@ public abstract class BaseSubscriptionDeliverySubscriber implements MessageHandl
 			ourLog.error(errorMsg, e);
 
 			// Interceptor call: SUBSCRIPTION_AFTER_DELIVERY
-			HookParams hookParams = new HookParams()
-				.add(ResourceDeliveryMessage.class, msg)
-				.add(Exception.class, e);
+			HookParams hookParams =
+					new HookParams().add(ResourceDeliveryMessage.class, msg).add(Exception.class, e);
 			if (!myInterceptorBroadcaster.callHooks(Pointcut.SUBSCRIPTION_AFTER_DELIVERY_FAILED, hookParams)) {
 				return;
 			}
@@ -118,19 +122,26 @@ public abstract class BaseSubscriptionDeliverySubscriber implements MessageHandl
 
 	public abstract void handleMessage(ResourceDeliveryMessage theMessage) throws Exception;
 
-	protected IBaseBundle createDeliveryBundleForPayloadSearchCriteria(CanonicalSubscription theSubscription, IBaseResource thePayloadResource) {
-		String resType = theSubscription.getPayloadSearchCriteria().substring(0, theSubscription.getPayloadSearchCriteria().indexOf('?'));
+	protected IBaseBundle createDeliveryBundleForPayloadSearchCriteria(
+			CanonicalSubscription theSubscription, IBaseResource thePayloadResource) {
+		String resType = theSubscription
+				.getPayloadSearchCriteria()
+				.substring(0, theSubscription.getPayloadSearchCriteria().indexOf('?'));
 		IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(resType);
 		RuntimeResourceDefinition resourceDefinition = myFhirContext.getResourceDefinition(resType);
 
 		String payloadUrl = theSubscription.getPayloadSearchCriteria();
 		Map<String, String> valueMap = new HashMap<>(1);
-		valueMap.put("matched_resource_id", thePayloadResource.getIdElement().toUnqualifiedVersionless().getValue());
+		valueMap.put(
+				"matched_resource_id",
+				thePayloadResource.getIdElement().toUnqualifiedVersionless().getValue());
 		payloadUrl = new StringSubstitutor(valueMap).replace(payloadUrl);
-		SearchParameterMap payloadSearchMap = myMatchUrlService.translateMatchUrl(payloadUrl, resourceDefinition, MatchUrlService.processIncludes());
+		SearchParameterMap payloadSearchMap =
+				myMatchUrlService.translateMatchUrl(payloadUrl, resourceDefinition, MatchUrlService.processIncludes());
 		payloadSearchMap.setLoadSynchronous(true);
 
-		IBundleProvider searchResults = dao.search(payloadSearchMap, createRequestDetailForPartitionedRequest(theSubscription));
+		IBundleProvider searchResults =
+				dao.search(payloadSearchMap, createRequestDetailForPartitionedRequest(theSubscription));
 		BundleBuilder builder = new BundleBuilder(myFhirContext);
 		for (IBaseResource next : searchResults.getAllResources()) {
 			builder.addTransactionUpdateEntry(next);

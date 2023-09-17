@@ -39,7 +39,7 @@ public class ProxyUtil {
 	public static <T> T synchronizedProxy(Class<T> theClass, T theInstance) {
 		Validate.isTrue(theClass.isInterface(), "%s is not an interface", theClass);
 		InvocationHandler handler = new SynchronizedHandler(theInstance);
-		Object object = Proxy.newProxyInstance(theClass.getClassLoader(), new Class<?>[] { theClass }, handler);
+		Object object = Proxy.newProxyInstance(theClass.getClassLoader(), new Class<?>[] {theClass}, handler);
 		return theClass.cast(object);
 	}
 

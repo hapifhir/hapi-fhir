@@ -6,10 +6,7 @@ import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.config.ThreadPoolFactoryConfig;
 import ca.uhn.fhir.jpa.batch2.JpaBatch2Config;
-import ca.uhn.fhir.storage.interceptor.balp.AsyncMemoryQueueBackedFhirClientBalpSink;
-import ca.uhn.fhir.storage.interceptor.balp.BalpAuditCaptureInterceptor;
-import ca.uhn.fhir.storage.interceptor.balp.IBalpAuditContextServices;
-import ca.uhn.fhir.storage.interceptor.balp.IBalpAuditEventSink;
+import ca.uhn.fhir.jpa.fql.provider.HfqlRestProviderCtxConfig;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.subscription.channel.config.SubscriptionChannelConfig;
 import ca.uhn.fhir.jpa.subscription.match.config.SubscriptionProcessorConfig;
@@ -19,6 +16,10 @@ import ca.uhn.fhir.jpa.subscription.submit.config.SubscriptionSubmitterConfig;
 import ca.uhn.fhir.jpa.util.LoggingEmailSender;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.LoggingInterceptor;
+import ca.uhn.fhir.storage.interceptor.balp.AsyncMemoryQueueBackedFhirClientBalpSink;
+import ca.uhn.fhir.storage.interceptor.balp.BalpAuditCaptureInterceptor;
+import ca.uhn.fhir.storage.interceptor.balp.IBalpAuditContextServices;
+import ca.uhn.fhir.storage.interceptor.balp.IBalpAuditEventSink;
 import ca.uhn.fhirtest.ScheduledSubscriptionDeleter;
 import ca.uhn.fhirtest.interceptor.AnalyticsInterceptor;
 import ca.uhn.fhirtest.joke.HolyFooCowInterceptor;
@@ -34,21 +35,20 @@ import org.springframework.context.annotation.Import;
 	SubscriptionSubmitterConfig.class,
 	JpaBatch2Config.class,
 	Batch2JobsConfig.class,
-	ThreadPoolFactoryConfig.class
+	ThreadPoolFactoryConfig.class,
+	HfqlRestProviderCtxConfig.class
 })
 public class CommonConfig {
 
 	/**
 	 * Do some fancy logging to create a nice access log that has details about each incoming request.
-	 *
-	 * @return
 	 */
 	@Bean
 	public LoggingInterceptor accessLoggingInterceptor() {
 		LoggingInterceptor retVal = new LoggingInterceptor();
 		retVal.setLoggerName("fhirtest.access");
 		retVal.setMessageFormat(
-			"Path[${servletPath}] Source[${requestHeader.x-forwarded-for}] Operation[${operationType} ${operationName} ${idOrResourceName}] UA[${requestHeader.user-agent}] Params[${requestParameters}] ResponseEncoding[${responseEncodingNoDefault}]");
+				"Path[${servletPath}] Source[${requestHeader.x-forwarded-for}] Operation[${operationType} ${operationName} ${idOrResourceName}] UA[${requestHeader.user-agent}] Params[${requestParameters}] ResponseEncoding[${responseEncodingNoDefault}]");
 		retVal.setLogExceptions(true);
 		retVal.setErrorMessageFormat("ERROR - ${requestVerb} ${requestUrl}");
 		return retVal;
@@ -109,17 +109,20 @@ public class CommonConfig {
 	}
 
 	@Bean
-	public CommonJpaStorageSettingsConfigurer commonJpaStorageSettingsConfigurer(JpaStorageSettings theStorageSettings) {
+	public CommonJpaStorageSettingsConfigurer commonJpaStorageSettingsConfigurer(
+			JpaStorageSettings theStorageSettings) {
 		return new CommonJpaStorageSettingsConfigurer(theStorageSettings);
 	}
 
 	@Bean
 	public IBalpAuditEventSink balpAuditEventSink() {
-		return new AsyncMemoryQueueBackedFhirClientBalpSink(FhirContext.forR4Cached(), "http://localhost:8000/baseAudit");
+		return new AsyncMemoryQueueBackedFhirClientBalpSink(
+				FhirContext.forR4Cached(), "http://localhost:8000/baseAudit");
 	}
 
 	@Bean
-	public BalpAuditCaptureInterceptor balpAuditCaptureInterceptor(IBalpAuditEventSink theAuditSink, IBalpAuditContextServices theAuditContextServices) {
+	public BalpAuditCaptureInterceptor balpAuditCaptureInterceptor(
+			IBalpAuditEventSink theAuditSink, IBalpAuditContextServices theAuditContextServices) {
 		return new BalpAuditCaptureInterceptor(theAuditSink, theAuditContextServices);
 	}
 
@@ -131,6 +134,4 @@ public class CommonConfig {
 	public static boolean isLocalTestMode() {
 		return "true".equalsIgnoreCase(System.getProperty("testmode.local"));
 	}
-
-
 }

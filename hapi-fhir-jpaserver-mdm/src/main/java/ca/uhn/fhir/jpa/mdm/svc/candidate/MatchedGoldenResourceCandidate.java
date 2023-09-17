@@ -35,7 +35,8 @@ public class MatchedGoldenResourceCandidate {
 
 	public MatchedGoldenResourceCandidate(IResourcePersistentId theGoldenResourcePid, IMdmLink theMdmLink) {
 		myCandidateGoldenResourcePid = theGoldenResourcePid;
-		myMdmMatchOutcome = new MdmMatchOutcome(theMdmLink.getVector(), theMdmLink.getScore()).setMatchResultEnum(theMdmLink.getMatchResult());
+		myMdmMatchOutcome = new MdmMatchOutcome(theMdmLink.getVector(), theMdmLink.getScore())
+				.setMatchResultEnum(theMdmLink.getMatchResult());
 	}
 
 	public IResourcePersistentId getCandidateGoldenResourcePid() {

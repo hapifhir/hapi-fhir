@@ -29,7 +29,8 @@ import java.util.Map;
 public class ResourcePersistentIdMap {
 	private final Map<IIdType, IResourcePersistentId> myMap = new HashMap<>();
 
-	public static ResourcePersistentIdMap fromResourcePersistentIds(List<IResourcePersistentId> theResourcePersistentIds) {
+	public static ResourcePersistentIdMap fromResourcePersistentIds(
+			List<IResourcePersistentId> theResourcePersistentIds) {
 		ResourcePersistentIdMap retval = new ResourcePersistentIdMap();
 		theResourcePersistentIds.forEach(retval::add);
 		return retval;

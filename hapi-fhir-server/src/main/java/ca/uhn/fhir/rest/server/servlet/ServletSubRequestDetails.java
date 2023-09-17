@@ -92,5 +92,4 @@ public class ServletSubRequestDetails extends ServletRequestDetails {
 	public boolean isSubRequest() {
 		return true;
 	}
-
 }

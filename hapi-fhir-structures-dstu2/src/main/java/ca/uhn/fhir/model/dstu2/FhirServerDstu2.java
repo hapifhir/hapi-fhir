@@ -29,5 +29,4 @@ public class FhirServerDstu2 implements IFhirVersionServer {
 	public ServerConformanceProvider createServerConformanceProvider(RestfulServer theServer) {
 		return new ServerConformanceProvider(theServer);
 	}
-
 }

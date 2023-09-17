@@ -33,7 +33,6 @@ import java.io.Serializable;
 @MappedSuperclass
 public abstract class BasePartitionable implements Serializable {
 
-
 	@Embedded
 	private PartitionablePartitionId myPartitionId;
 
@@ -55,9 +54,8 @@ public abstract class BasePartitionable implements Serializable {
 
 	@Override
 	public String toString() {
-		return "BasePartitionable{" +
-			"myPartitionId=" + myPartitionId +
-			", myPartitionIdValue=" + myPartitionIdValue +
-			'}';
+		return "BasePartitionable{" + "myPartitionId="
+				+ myPartitionId + ", myPartitionIdValue="
+				+ myPartitionIdValue + '}';
 	}
 }

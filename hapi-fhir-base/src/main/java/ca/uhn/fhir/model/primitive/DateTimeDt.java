@@ -19,13 +19,13 @@
  */
 package ca.uhn.fhir.model.primitive;
 
-import java.util.Date;
-import java.util.TimeZone;
-
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import ca.uhn.fhir.model.api.annotation.SimpleSetter;
 import ca.uhn.fhir.parser.DataFormatException;
+
+import java.util.Date;
+import java.util.TimeZone;
 
 /**
  * Represents a FHIR dateTime datatype. Valid precisions values for this type are:
@@ -69,18 +69,20 @@ public class DateTimeDt extends BaseDateTimeDt {
 	 * <li>{@link TemporalPrecisionEnum#SECOND}
 	 * <li>{@link TemporalPrecisionEnum#MILLI}
 	 * </ul>
-	 * 
+	 *
 	 * @throws DataFormatException
 	 *             If the specified precision is not allowed for this type
 	 */
 	@SimpleSetter
-	public DateTimeDt(@SimpleSetter.Parameter(name = "theDate") Date theDate, @SimpleSetter.Parameter(name = "thePrecision") TemporalPrecisionEnum thePrecision) {
+	public DateTimeDt(
+			@SimpleSetter.Parameter(name = "theDate") Date theDate,
+			@SimpleSetter.Parameter(name = "thePrecision") TemporalPrecisionEnum thePrecision) {
 		super(theDate, thePrecision, TimeZone.getDefault());
 	}
 
 	/**
 	 * Create a new instance using a string date/time
-	 * 
+	 *
 	 * @throws DataFormatException
 	 *             If the specified precision is not allowed for this type
 	 */
@@ -106,14 +108,14 @@ public class DateTimeDt extends BaseDateTimeDt {
 	@Override
 	protected boolean isPrecisionAllowed(TemporalPrecisionEnum thePrecision) {
 		switch (thePrecision) {
-		case YEAR:
-		case MONTH:
-		case DAY:
-		case SECOND:
-		case MILLI:
-			return true;
-		default:
-			return false;
+			case YEAR:
+			case MONTH:
+			case DAY:
+			case SECOND:
+			case MILLI:
+				return true;
+			default:
+				return false;
 		}
 	}
 
@@ -127,12 +129,11 @@ public class DateTimeDt extends BaseDateTimeDt {
 
 	/**
 	 * Returns the default precision for this datatype
-	 * 
+	 *
 	 * @see #DEFAULT_PRECISION
 	 */
 	@Override
 	protected TemporalPrecisionEnum getDefaultPrecisionForDatatype() {
 		return DEFAULT_PRECISION;
 	}
-
 }

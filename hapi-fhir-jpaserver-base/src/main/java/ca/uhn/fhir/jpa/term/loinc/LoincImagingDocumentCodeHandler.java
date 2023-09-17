@@ -20,8 +20,8 @@
 package ca.uhn.fhir.jpa.term.loinc;
 
 import ca.uhn.fhir.jpa.entity.TermConcept;
-import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
 import ca.uhn.fhir.jpa.term.IZipContentsHandlerCsv;
+import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
 import org.apache.commons.csv.CSVRecord;
 import org.hl7.fhir.r4.model.ConceptMap;
 import org.hl7.fhir.r4.model.ValueSet;
@@ -39,7 +39,11 @@ public class LoincImagingDocumentCodeHandler extends BaseLoincHandler implements
 	public static final String VS_URI = "http://loinc.org/vs/loinc-imaging-document-codes";
 	public static final String VS_NAME = "LOINC Imaging Document Codes";
 
-	public LoincImagingDocumentCodeHandler(Map<String, TermConcept> theCode2concept, List<ValueSet> theValueSets, List<ConceptMap> theConceptMaps, Properties theUploadProperties) {
+	public LoincImagingDocumentCodeHandler(
+			Map<String, TermConcept> theCode2concept,
+			List<ValueSet> theValueSets,
+			List<ConceptMap> theConceptMaps,
+			Properties theUploadProperties) {
 		super(theCode2concept, theValueSets, theConceptMaps, theUploadProperties);
 	}
 
@@ -56,9 +60,7 @@ public class LoincImagingDocumentCodeHandler extends BaseLoincHandler implements
 			valueSetId = VS_ID_BASE;
 		}
 
-		ValueSet valueSet = getValueSet(valueSetId, VS_URI, VS_NAME,null);
+		ValueSet valueSet = getValueSet(valueSetId, VS_URI, VS_NAME, null);
 		addCodeAsIncludeToValueSet(valueSet, ITermLoaderSvc.LOINC_URI, loincNumber, displayName);
 	}
-
-
 }

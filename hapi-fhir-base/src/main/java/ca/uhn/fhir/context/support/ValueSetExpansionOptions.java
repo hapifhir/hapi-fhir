@@ -115,9 +115,7 @@ public class ValueSetExpansionOptions {
 	}
 
 	public static ValueSetExpansionOptions forOffsetAndCount(int theOffset, int theCount) {
-		return new ValueSetExpansionOptions()
-			.setOffset(theOffset)
-			.setCount(theCount);
+		return new ValueSetExpansionOptions().setOffset(theOffset).setCount(theCount);
 	}
 
 	public String getTheDisplayLanguage() {

@@ -84,8 +84,8 @@ public class HapiFhirEnversRevision implements Serializable {
 	@Override
 	public String toString() {
 		return new ToStringBuilder(this)
-			.append("myRev", myRev)
-			.append("myRevtstmp", myRevtstmp)
-			.toString();
+				.append("myRev", myRev)
+				.append("myRevtstmp", myRevtstmp)
+				.toString();
 	}
 }

@@ -58,14 +58,26 @@ import ca.uhn.fhir.util.DateUtils;
 
 @Embeddable
 @Entity
-@Table(name = "HFJ_SPIDX_DATE", indexes = {
-	// We previously had an index called IDX_SP_DATE - Dont reuse
-	@Index(name = "IDX_SP_DATE_HASH_V2", columnList = "HASH_IDENTITY,SP_VALUE_LOW,SP_VALUE_HIGH,RES_ID,PARTITION_ID"),
-	@Index(name = "IDX_SP_DATE_HASH_HIGH_V2", columnList = "HASH_IDENTITY,SP_VALUE_HIGH,RES_ID,PARTITION_ID"),
-	@Index(name = "IDX_SP_DATE_ORD_HASH_V2", columnList = "HASH_IDENTITY,SP_VALUE_LOW_DATE_ORDINAL,SP_VALUE_HIGH_DATE_ORDINAL,RES_ID,PARTITION_ID"),
-	@Index(name = "IDX_SP_DATE_ORD_HASH_HIGH_V2", columnList = "HASH_IDENTITY,SP_VALUE_HIGH_DATE_ORDINAL,RES_ID,PARTITION_ID"),
-	@Index(name = "IDX_SP_DATE_RESID_V2", columnList = "RES_ID,HASH_IDENTITY,SP_VALUE_LOW,SP_VALUE_HIGH,SP_VALUE_LOW_DATE_ORDINAL,SP_VALUE_HIGH_DATE_ORDINAL,PARTITION_ID"),
-})
+@Table(
+		name = "HFJ_SPIDX_DATE",
+		indexes = {
+			// We previously had an index called IDX_SP_DATE - Dont reuse
+			@Index(
+					name = "IDX_SP_DATE_HASH_V2",
+					columnList = "HASH_IDENTITY,SP_VALUE_LOW,SP_VALUE_HIGH,RES_ID,PARTITION_ID"),
+			@Index(name = "IDX_SP_DATE_HASH_HIGH_V2", columnList = "HASH_IDENTITY,SP_VALUE_HIGH,RES_ID,PARTITION_ID"),
+			@Index(
+					name = "IDX_SP_DATE_ORD_HASH_V2",
+					columnList =
+							"HASH_IDENTITY,SP_VALUE_LOW_DATE_ORDINAL,SP_VALUE_HIGH_DATE_ORDINAL,RES_ID,PARTITION_ID"),
+			@Index(
+					name = "IDX_SP_DATE_ORD_HASH_HIGH_V2",
+					columnList = "HASH_IDENTITY,SP_VALUE_HIGH_DATE_ORDINAL,RES_ID,PARTITION_ID"),
+			@Index(
+					name = "IDX_SP_DATE_RESID_V2",
+					columnList =
+							"RES_ID,HASH_IDENTITY,SP_VALUE_LOW,SP_VALUE_HIGH,SP_VALUE_LOW_DATE_ORDINAL,SP_VALUE_HIGH_DATE_ORDINAL,PARTITION_ID"),
+		})
 public class ResourceIndexedSearchParamDate extends BaseResourceIndexedSearchParam {
 
 	private static final long serialVersionUID = 1L;
@@ -86,11 +98,13 @@ public class ResourceIndexedSearchParamDate extends BaseResourceIndexedSearchPar
 	 */
 	@Column(name = "SP_VALUE_LOW_DATE_ORDINAL")
 	public Integer myValueLowDateOrdinal;
+
 	@Column(name = "SP_VALUE_HIGH_DATE_ORDINAL")
 	public Integer myValueHighDateOrdinal;
 
 	@Transient
 	private transient String myOriginalValue;
+
 	@Id
 	@SequenceGenerator(name = "SEQ_SPIDX_DATE", sequenceName = "SEQ_SPIDX_DATE")
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_SPIDX_DATE")
@@ -105,10 +119,15 @@ public class ResourceIndexedSearchParamDate extends BaseResourceIndexedSearchPar
 	@Column(name = "HASH_IDENTITY", nullable = true)
 	private Long myHashIdentity;
 
-	@ManyToOne(optional = false, fetch = FetchType.LAZY, cascade = {})
-	@JoinColumn( nullable = false,
-		name = "RES_ID", referencedColumnName = "RES_ID",
-		foreignKey = @ForeignKey(name="FK_SP_DATE_RES"))
+	@ManyToOne(
+			optional = false,
+			fetch = FetchType.LAZY,
+			cascade = {})
+	@JoinColumn(
+			nullable = false,
+			name = "RES_ID",
+			referencedColumnName = "RES_ID",
+			foreignKey = @ForeignKey(name = "FK_SP_DATE_RES"))
 	private ResourceTable myResource;
 
 	/**
@@ -121,7 +140,15 @@ public class ResourceIndexedSearchParamDate extends BaseResourceIndexedSearchPar
 	/**
 	 * Constructor
 	 */
-	public ResourceIndexedSearchParamDate(PartitionSettings thePartitionSettings, String theResourceType, String theParamName, Date theLow, String theLowString, Date theHigh, String theHighString, String theOriginalValue) {
+	public ResourceIndexedSearchParamDate(
+			PartitionSettings thePartitionSettings,
+			String theResourceType,
+			String theParamName,
+			Date theLow,
+			String theLowString,
+			Date theHigh,
+			String theHighString,
+			String theOriginalValue) {
 		setPartitionSettings(thePartitionSettings);
 		setResourceType(theResourceType);
 		setParamName(theParamName);
@@ -147,44 +174,44 @@ public class ResourceIndexedSearchParamDate extends BaseResourceIndexedSearchPar
 	}
 
 	private void reComputeValueHighDate(Date theHigh, String theHighString) {
-		if (StringUtils.isBlank(theHighString) || theHigh == null)
-			return;
+		if (StringUtils.isBlank(theHighString) || theHigh == null) return;
 		// FT : 2021-09-10 not very comfortable to set the high value to the last second
 		// Timezone? existing data?
 		// if YYYY or YYYY-MM or YYYY-MM-DD add the last second
 		if (theHighString.length() == 4 || theHighString.length() == 7 || theHighString.length() == 10) {
-			
-			String theCompleteDateStr =  DateUtils.getCompletedDate(theHighString).getRight();
+
+			String theCompleteDateStr =
+					DateUtils.getCompletedDate(theHighString).getRight();
 			try {
-				Date complateDate = new SimpleDateFormat("yyyy-MM-dd").parse(theCompleteDateStr);  
-			    this.myValueHigh = DateUtils.getEndOfDay(complateDate);
+				Date complateDate = new SimpleDateFormat("yyyy-MM-dd").parse(theCompleteDateStr);
+				this.myValueHigh = DateUtils.getEndOfDay(complateDate);
 			} catch (ParseException e) {
-				// do nothing; 
+				// do nothing;
 			}
 		}
-		
 	}
+
 	private int generateLowOrdinalDateInteger(String theDateString) {
 		if (theDateString.contains("T")) {
 			theDateString = theDateString.substring(0, theDateString.indexOf("T"));
 		}
-		
+
 		theDateString = DateUtils.getCompletedDate(theDateString).getLeft();
 		theDateString = theDateString.replace("-", "");
 		return Integer.valueOf(theDateString);
 	}
 
 	private int generateHighOrdinalDateInteger(String theDateString) {
-		
+
 		if (theDateString.contains("T")) {
 			theDateString = theDateString.substring(0, theDateString.indexOf("T"));
 		}
-		
+
 		theDateString = DateUtils.getCompletedDate(theDateString).getRight();
 		theDateString = theDateString.replace("-", "");
 		return Integer.valueOf(theDateString);
 	}
-	
+
 	private void computeValueLowDateOrdinal(String theLow) {
 		if (StringUtils.isNotBlank(theLow)) {
 			this.myValueLowDateOrdinal = generateLowOrdinalDateInteger(theLow);
@@ -331,7 +358,6 @@ public class ResourceIndexedSearchParamDate extends BaseResourceIndexedSearchPar
 		DateParam dateParam = (DateParam) theParam;
 		DateRangeParam range = new DateRangeParam(dateParam);
 
-
 		boolean result;
 		if (dateParam.getPrecision().ordinal() <= TemporalPrecisionEnum.DAY.ordinal()) {
 			result = matchesOrdinalDateBounds(range);
@@ -369,17 +395,20 @@ public class ResourceIndexedSearchParamDate extends BaseResourceIndexedSearchPar
 			return false;
 		}
 		if (lowerBoundAsDateInteger != null) {
-			//TODO as we run into equality issues
-			result &= (myValueLowDateOrdinal.equals(lowerBoundAsDateInteger) || myValueLowDateOrdinal > lowerBoundAsDateInteger);
-			result &= (myValueHighDateOrdinal.equals(lowerBoundAsDateInteger) || myValueHighDateOrdinal > lowerBoundAsDateInteger);
+			// TODO as we run into equality issues
+			result &= (myValueLowDateOrdinal.equals(lowerBoundAsDateInteger)
+					|| myValueLowDateOrdinal > lowerBoundAsDateInteger);
+			result &= (myValueHighDateOrdinal.equals(lowerBoundAsDateInteger)
+					|| myValueHighDateOrdinal > lowerBoundAsDateInteger);
 		}
 		if (upperBoundAsDateInteger != null) {
-			result &= (myValueHighDateOrdinal.equals(upperBoundAsDateInteger) || myValueHighDateOrdinal < upperBoundAsDateInteger);
-			result &= (myValueLowDateOrdinal.equals(upperBoundAsDateInteger) || myValueLowDateOrdinal < upperBoundAsDateInteger);
+			result &= (myValueHighDateOrdinal.equals(upperBoundAsDateInteger)
+					|| myValueHighDateOrdinal < upperBoundAsDateInteger);
+			result &= (myValueLowDateOrdinal.equals(upperBoundAsDateInteger)
+					|| myValueLowDateOrdinal < upperBoundAsDateInteger);
 		}
 		return result;
 	}
-
 
 	public static Long calculateOrdinalValue(Date theDate) {
 		if (theDate == null) {

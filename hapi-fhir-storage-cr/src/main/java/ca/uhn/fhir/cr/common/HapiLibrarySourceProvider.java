@@ -37,8 +37,7 @@ import java.util.ArrayList;
  * interface which is used for loading
  * library resources during CQL evaluation.
  */
-public class HapiLibrarySourceProvider
-	implements LibrarySourceProvider, IDaoRegistryUser {
+public class HapiLibrarySourceProvider implements LibrarySourceProvider, IDaoRegistryUser {
 	protected final DaoRegistry myDaoRegistry;
 	protected final RequestDetails myRequestDetails;
 
@@ -56,19 +55,17 @@ public class HapiLibrarySourceProvider
 		return this.myDaoRegistry;
 	}
 
-
 	@Override
-	public InputStream getLibraryContent(VersionedIdentifier theLibraryIdentifier,
-													 LibraryContentType theLibraryContentType) {
+	public InputStream getLibraryContent(
+			VersionedIdentifier theLibraryIdentifier, LibraryContentType theLibraryContentType) {
 		String name = theLibraryIdentifier.getId();
 		String version = theLibraryIdentifier.getVersion();
 		var libraries = search(getClass("Library"), Searches.byName(name), myRequestDetails);
 		var libraryList = new ArrayList<IBaseResource>();
-		for(var l:libraries){
+		for (var l : libraries) {
 			libraryList.add(l);
 		}
-		IBaseResource library = Versions.selectByVersion(libraryList, version,
-			Libraries::getVersion);
+		IBaseResource library = Versions.selectByVersion(libraryList, version, Libraries::getVersion);
 
 		if (library == null) {
 			return null;

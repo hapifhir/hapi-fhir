@@ -196,7 +196,7 @@ public class FhirResourceDaoR4ConcurrentCreateTest extends BaseJpaR4Test {
 
 			try {
 				ourLog.info("Creating resource");
-				DaoMethodOutcome outcome = myObservationDao.create(obs, "identifier=20210427133226.444+0800", requestDetails);
+				DaoMethodOutcome outcome = myObservationDao.create(obs, "identifier=20210427133226.444%2B0800", requestDetails);
 			} catch (Throwable t) {
 				ourLog.info("create threw an exception {}", t.getMessage());
 				fail();

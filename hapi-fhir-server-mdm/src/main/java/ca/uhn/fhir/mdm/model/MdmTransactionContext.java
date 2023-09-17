@@ -20,7 +20,6 @@
 package ca.uhn.fhir.mdm.model;
 
 import ca.uhn.fhir.mdm.api.IMdmLink;
-import ca.uhn.fhir.mdm.api.MdmLinkEvent;
 import ca.uhn.fhir.rest.server.TransactionLogMessages;
 
 import java.util.ArrayList;
@@ -56,8 +55,7 @@ public class MdmTransactionContext {
 		return myTransactionLogMessages;
 	}
 
-	public MdmTransactionContext() {
-	}
+	public MdmTransactionContext() {}
 
 	public MdmTransactionContext(OperationType theRestOperation) {
 		myRestOperation = theRestOperation;
@@ -68,7 +66,8 @@ public class MdmTransactionContext {
 		myTransactionLogMessages = theTransactionLogMessages;
 	}
 
-	public MdmTransactionContext(TransactionLogMessages theTransactionLogMessages, OperationType theRestOperation, String theResourceType) {
+	public MdmTransactionContext(
+			TransactionLogMessages theTransactionLogMessages, OperationType theRestOperation, String theResourceType) {
 		this(theTransactionLogMessages, theRestOperation);
 		setResourceType(theResourceType);
 	}

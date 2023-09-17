@@ -32,8 +32,7 @@ public class ValidationOptions {
 	private static ValidationOptions ourEmpty;
 	private Set<String> myProfiles;
 
-	public ValidationOptions() {
-	}
+	public ValidationOptions() {}
 
 	public Set<String> getProfiles() {
 		return myProfiles != null ? Collections.unmodifiableSet(myProfiles) : Collections.emptySet();
@@ -65,5 +64,4 @@ public class ValidationOptions {
 		}
 		return retVal;
 	}
-
 }

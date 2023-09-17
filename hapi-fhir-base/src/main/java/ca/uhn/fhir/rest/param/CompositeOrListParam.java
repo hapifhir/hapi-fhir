@@ -22,8 +22,8 @@ package ca.uhn.fhir.rest.param;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.util.CoverageIgnore;
 
-
-public class CompositeOrListParam<A extends IQueryParameterType, B extends IQueryParameterType>  extends BaseOrListParam<CompositeOrListParam<?,?>, CompositeParam<A,B>> {
+public class CompositeOrListParam<A extends IQueryParameterType, B extends IQueryParameterType>
+		extends BaseOrListParam<CompositeOrListParam<?, ?>, CompositeParam<A, B>> {
 
 	private Class<A> myLeftType;
 	private Class<B> myRightType;
@@ -44,8 +44,8 @@ public class CompositeOrListParam<A extends IQueryParameterType, B extends IQuer
 
 	@CoverageIgnore
 	@Override
-	CompositeParam<A,B> newInstance() {
-		return new CompositeParam<A,B>(myLeftType, myRightType);
+	CompositeParam<A, B> newInstance() {
+		return new CompositeParam<A, B>(myLeftType, myRightType);
 	}
 
 	@CoverageIgnore
@@ -54,6 +54,4 @@ public class CompositeOrListParam<A extends IQueryParameterType, B extends IQuer
 		add(theParameter);
 		return this;
 	}
-	
-
 }

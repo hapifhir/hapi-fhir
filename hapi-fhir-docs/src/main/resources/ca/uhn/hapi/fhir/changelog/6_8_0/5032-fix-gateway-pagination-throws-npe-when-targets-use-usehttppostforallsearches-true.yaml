@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 5032
+title: "Fixed a condition by which a NPE was sometimes thrown when performing gateway pagination with targets with 
+   property `useHttpPostForAllSearches` configured to `true`."

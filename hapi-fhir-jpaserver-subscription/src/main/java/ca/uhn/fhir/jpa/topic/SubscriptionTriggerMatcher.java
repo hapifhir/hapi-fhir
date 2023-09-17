@@ -46,7 +46,10 @@ public class SubscriptionTriggerMatcher {
 	private final PreviousVersionReader myPreviousVersionReader;
 	private final SystemRequestDetails mySrd;
 
-	public SubscriptionTriggerMatcher(SubscriptionTopicSupport theSubscriptionTopicSupport, ResourceModifiedMessage theMsg, SubscriptionTopic.SubscriptionTopicResourceTriggerComponent theTrigger) {
+	public SubscriptionTriggerMatcher(
+			SubscriptionTopicSupport theSubscriptionTopicSupport,
+			ResourceModifiedMessage theMsg,
+			SubscriptionTopic.SubscriptionTopicResourceTriggerComponent theTrigger) {
 		mySubscriptionTopicSupport = theSubscriptionTopicSupport;
 		myOperation = theMsg.getOperationType();
 		myResource = theMsg.getPayload(theSubscriptionTopicSupport.getFhirContext());
@@ -58,9 +61,11 @@ public class SubscriptionTriggerMatcher {
 	}
 
 	public InMemoryMatchResult match() {
-		List<Enumeration<SubscriptionTopic.InteractionTrigger>> supportedInteractions = myTrigger.getSupportedInteraction();
+		List<Enumeration<SubscriptionTopic.InteractionTrigger>> supportedInteractions =
+				myTrigger.getSupportedInteraction();
 		if (SubscriptionTopicUtil.matches(myOperation, supportedInteractions)) {
-			SubscriptionTopic.SubscriptionTopicResourceTriggerQueryCriteriaComponent queryCriteria = myTrigger.getQueryCriteria();
+			SubscriptionTopic.SubscriptionTopicResourceTriggerQueryCriteriaComponent queryCriteria =
+					myTrigger.getQueryCriteria();
 			InMemoryMatchResult result = match(queryCriteria);
 			if (result.matched()) {
 				return result;
@@ -69,7 +74,8 @@ public class SubscriptionTriggerMatcher {
 		return InMemoryMatchResult.noMatch();
 	}
 
-	private InMemoryMatchResult match(SubscriptionTopic.SubscriptionTopicResourceTriggerQueryCriteriaComponent theQueryCriteria) {
+	private InMemoryMatchResult match(
+			SubscriptionTopic.SubscriptionTopicResourceTriggerQueryCriteriaComponent theQueryCriteria) {
 		String previousCriteria = theQueryCriteria.getPrevious();
 		String currentCriteria = theQueryCriteria.getCurrent();
 		InMemoryMatchResult previousMatches = InMemoryMatchResult.fromBoolean(previousCriteria == null);
@@ -84,14 +90,16 @@ public class SubscriptionTriggerMatcher {
 		}
 
 		if (previousCriteria != null) {
-			if (myOperation == ResourceModifiedMessage.OperationTypeEnum.UPDATE ||
-				myOperation == ResourceModifiedMessage.OperationTypeEnum.DELETE) {
+			if (myOperation == ResourceModifiedMessage.OperationTypeEnum.UPDATE
+					|| myOperation == ResourceModifiedMessage.OperationTypeEnum.DELETE) {
 
 				Optional<IBaseResource> oPreviousVersion = myPreviousVersionReader.readPreviousVersion(myResource);
 				if (oPreviousVersion.isPresent()) {
 					previousMatches = matchResource(oPreviousVersion.get(), previousCriteria);
 				} else {
-					ourLog.warn("Resource {} has a version of 1, which should not be the case for a create or delete operation", myResource.getIdElement().toUnqualifiedVersionless());
+					ourLog.warn(
+							"Resource {} has a version of 1, which should not be the case for a create or delete operation",
+							myResource.getIdElement().toUnqualifiedVersionless());
 				}
 			}
 		}
@@ -104,9 +112,13 @@ public class SubscriptionTriggerMatcher {
 	}
 
 	private InMemoryMatchResult matchResource(IBaseResource theResource, String theCriteria) {
-		InMemoryMatchResult result = mySubscriptionTopicSupport.getSearchParamMatcher().match(theCriteria, theResource, mySrd);
+		InMemoryMatchResult result =
+				mySubscriptionTopicSupport.getSearchParamMatcher().match(theCriteria, theResource, mySrd);
 		if (!result.supported()) {
-			ourLog.warn("Subscription topic {} has a query criteria that is not supported in-memory: {}", myTrigger.getId(), theCriteria);
+			ourLog.warn(
+					"Subscription topic {} has a query criteria that is not supported in-memory: {}",
+					myTrigger.getId(),
+					theCriteria);
 		}
 		return result;
 	}

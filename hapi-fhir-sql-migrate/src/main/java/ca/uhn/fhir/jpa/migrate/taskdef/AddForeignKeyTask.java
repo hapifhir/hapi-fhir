@@ -62,7 +62,8 @@ public class AddForeignKeyTask extends BaseTableColumnTask {
 		Validate.isTrue(isNotBlank(myConstraintName));
 		Validate.isTrue(isNotBlank(myForeignTableName));
 		Validate.isTrue(isNotBlank(myForeignColumnName));
-		setDescription("Add foreign key " + myConstraintName + " from column " + getColumnName() + " of table " + getTableName() + " to column " + myForeignColumnName + " of table " + myForeignTableName);
+		setDescription("Add foreign key " + myConstraintName + " from column " + getColumnName() + " of table "
+				+ getTableName() + " to column " + myForeignColumnName + " of table " + myForeignTableName);
 	}
 
 	@Override
@@ -79,7 +80,8 @@ public class AddForeignKeyTask extends BaseTableColumnTask {
 			case MARIADB_10_1:
 			case MYSQL_5_7:
 				// Quote the column names as "SYSTEM" is a reserved word in MySQL
-				sql = "alter table " + getTableName() + " add constraint " + myConstraintName + " foreign key (`" + getColumnName() + "`) references " + myForeignTableName + " (`" + myForeignColumnName + "`)";
+				sql = "alter table " + getTableName() + " add constraint " + myConstraintName + " foreign key (`"
+						+ getColumnName() + "`) references " + myForeignTableName + " (`" + myForeignColumnName + "`)";
 				break;
 			case COCKROACHDB_21_1:
 			case POSTGRES_9_4:
@@ -87,12 +89,12 @@ public class AddForeignKeyTask extends BaseTableColumnTask {
 			case H2_EMBEDDED:
 			case ORACLE_12C:
 			case MSSQL_2012:
-				sql = "alter table " + getTableName() + " add constraint " + myConstraintName + " foreign key (" + getColumnName() + ") references " + myForeignTableName;
+				sql = "alter table " + getTableName() + " add constraint " + myConstraintName + " foreign key ("
+						+ getColumnName() + ") references " + myForeignTableName;
 				break;
 			default:
 				throw new IllegalStateException(Msg.code(68));
 		}
-
 
 		try {
 			executeSql(getTableName(), sql);
@@ -121,5 +123,4 @@ public class AddForeignKeyTask extends BaseTableColumnTask {
 		theBuilder.append(myForeignTableName, otherObject.myForeignTableName);
 		theBuilder.append(myForeignColumnName, otherObject.myForeignColumnName);
 	}
-
 }

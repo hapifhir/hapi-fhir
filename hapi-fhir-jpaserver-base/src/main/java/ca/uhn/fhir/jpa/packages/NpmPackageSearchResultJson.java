@@ -29,11 +29,17 @@ import java.util.List;
 
 @Schema(description = "Represents an NPM package search response")
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@JsonAutoDetect(creatorVisibility = JsonAutoDetect.Visibility.NONE, fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE, isGetterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE)
+@JsonAutoDetect(
+		creatorVisibility = JsonAutoDetect.Visibility.NONE,
+		fieldVisibility = JsonAutoDetect.Visibility.NONE,
+		getterVisibility = JsonAutoDetect.Visibility.NONE,
+		isGetterVisibility = JsonAutoDetect.Visibility.NONE,
+		setterVisibility = JsonAutoDetect.Visibility.NONE)
 public class NpmPackageSearchResultJson {
 
 	@JsonProperty("objects")
 	private List<ObjectElement> myObjects;
+
 	@JsonProperty("total")
 	private int myTotal;
 
@@ -63,11 +69,20 @@ public class NpmPackageSearchResultJson {
 	}
 
 	public Package getPackageWithId(String thePackageId) {
-		return getObjects().stream().map(t -> t.getPackage()).filter(t -> t.getName().equals(thePackageId)).findFirst().orElseThrow(() -> new IllegalArgumentException());
+		return getObjects().stream()
+				.map(t -> t.getPackage())
+				.filter(t -> t.getName().equals(thePackageId))
+				.findFirst()
+				.orElseThrow(() -> new IllegalArgumentException());
 	}
 
 	@JsonInclude(JsonInclude.Include.NON_NULL)
-	@JsonAutoDetect(creatorVisibility = JsonAutoDetect.Visibility.NONE, fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE, isGetterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE)
+	@JsonAutoDetect(
+			creatorVisibility = JsonAutoDetect.Visibility.NONE,
+			fieldVisibility = JsonAutoDetect.Visibility.NONE,
+			getterVisibility = JsonAutoDetect.Visibility.NONE,
+			isGetterVisibility = JsonAutoDetect.Visibility.NONE,
+			setterVisibility = JsonAutoDetect.Visibility.NONE)
 	public static class ObjectElement {
 
 		@JsonProperty("package")
@@ -82,17 +97,26 @@ public class NpmPackageSearchResultJson {
 	}
 
 	@JsonInclude(JsonInclude.Include.NON_NULL)
-	@JsonAutoDetect(creatorVisibility = JsonAutoDetect.Visibility.NONE, fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE, isGetterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE)
+	@JsonAutoDetect(
+			creatorVisibility = JsonAutoDetect.Visibility.NONE,
+			fieldVisibility = JsonAutoDetect.Visibility.NONE,
+			getterVisibility = JsonAutoDetect.Visibility.NONE,
+			isGetterVisibility = JsonAutoDetect.Visibility.NONE,
+			setterVisibility = JsonAutoDetect.Visibility.NONE)
 	public static class Package {
 
 		@JsonProperty("name")
 		private String myName;
+
 		@JsonProperty("version")
 		private String myVersion;
+
 		@JsonProperty("description")
 		private String myDescription;
+
 		@JsonProperty("fhirVersion")
 		private List<String> myFhirVersion;
+
 		@Schema(description = "The size of this package in bytes", example = "1000")
 		@JsonProperty("_bytes")
 		private long myBytes;

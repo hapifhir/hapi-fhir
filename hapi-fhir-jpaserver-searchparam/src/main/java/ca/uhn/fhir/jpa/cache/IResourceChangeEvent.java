@@ -29,7 +29,9 @@ import java.util.List;
  */
 public interface IResourceChangeEvent {
 	List<IIdType> getCreatedResourceIds();
+
 	List<IIdType> getUpdatedResourceIds();
+
 	List<IIdType> getDeletedResourceIds();
 
 	/**

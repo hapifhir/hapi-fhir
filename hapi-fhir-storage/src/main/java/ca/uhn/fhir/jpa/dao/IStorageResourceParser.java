@@ -36,5 +36,4 @@ public interface IStorageResourceParser {
 	// metadata but there's no reason to not always just add that, and this would
 	// simplify this interface
 	IBaseResource toResource(IBasePersistedResource theEntity, boolean theForHistoryOperation);
-
 }

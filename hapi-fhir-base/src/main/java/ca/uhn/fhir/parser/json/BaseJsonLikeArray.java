@@ -25,7 +25,7 @@ public abstract class BaseJsonLikeArray extends BaseJsonLikeValue {
 	public ValueType getJsonType() {
 		return ValueType.ARRAY;
 	}
-	
+
 	@Override
 	public ScalarType getDataType() {
 		return null;
@@ -46,7 +46,7 @@ public abstract class BaseJsonLikeArray extends BaseJsonLikeValue {
 		return null;
 	}
 
-	public abstract int size ();
-	
-	public abstract BaseJsonLikeValue get (int index);
+	public abstract int size();
+
+	public abstract BaseJsonLikeValue get(int index);
 }

@@ -43,13 +43,14 @@ import static ca.uhn.fhir.rest.api.Constants.UUID_LENGTH;
 import static org.apache.commons.lang3.StringUtils.left;
 
 @Entity
-@Table(name = BulkImportJobEntity.HFJ_BLK_IMPORT_JOB, uniqueConstraints = {
-	@UniqueConstraint(name = "IDX_BLKIM_JOB_ID", columnNames = "JOB_ID")
-})
+@Table(
+		name = BulkImportJobEntity.HFJ_BLK_IMPORT_JOB,
+		uniqueConstraints = {@UniqueConstraint(name = "IDX_BLKIM_JOB_ID", columnNames = "JOB_ID")})
 public class BulkImportJobEntity implements Serializable {
 
 	public static final String HFJ_BLK_IMPORT_JOB = "HFJ_BLK_IMPORT_JOB";
 	public static final String JOB_ID = "JOB_ID";
+
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_BLKIMJOB_PID")
 	@SequenceGenerator(name = "SEQ_BLKIMJOB_PID", sequenceName = "SEQ_BLKIMJOB_PID")
@@ -58,24 +59,32 @@ public class BulkImportJobEntity implements Serializable {
 
 	@Column(name = JOB_ID, length = UUID_LENGTH, nullable = false, updatable = false)
 	private String myJobId;
+
 	@Column(name = "JOB_DESC", nullable = true, length = BulkExportJobEntity.STATUS_MESSAGE_LEN)
 	private String myJobDescription;
+
 	@Enumerated(EnumType.STRING)
 	@Column(name = "JOB_STATUS", length = 10, nullable = false)
 	private BulkImportJobStatusEnum myStatus;
+
 	@Version
 	@Column(name = "OPTLOCK", nullable = false)
 	private int myVersion;
+
 	@Column(name = "FILE_COUNT", nullable = false)
 	private int myFileCount;
+
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "STATUS_TIME", nullable = false)
 	private Date myStatusTime;
+
 	@Column(name = "STATUS_MESSAGE", nullable = true, length = BulkExportJobEntity.STATUS_MESSAGE_LEN)
 	private String myStatusMessage;
+
 	@Column(name = "ROW_PROCESSING_MODE", length = 20, nullable = false, updatable = false)
 	@Enumerated(EnumType.STRING)
 	private JobFileRowProcessingModeEnum myRowProcessingMode;
+
 	@Column(name = "BATCH_SIZE", nullable = false, updatable = false)
 	private int myBatchSize;
 
@@ -144,9 +153,9 @@ public class BulkImportJobEntity implements Serializable {
 
 	public BulkImportJobJson toJson() {
 		return new BulkImportJobJson()
-			.setProcessingMode(getRowProcessingMode())
-			.setFileCount(getFileCount())
-			.setJobDescription(getJobDescription());
+				.setProcessingMode(getRowProcessingMode())
+				.setFileCount(getFileCount())
+				.setJobDescription(getJobDescription());
 	}
 
 	public int getBatchSize() {

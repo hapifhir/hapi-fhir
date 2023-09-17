@@ -65,7 +65,6 @@ public class DropIdGeneratorTask extends BaseTask {
 
 					String creationSql = "drop table " + myGeneratorName;
 					executeSql(myGeneratorName, creationSql);
-
 				}
 				break;
 			case DERBY_EMBEDDED:
@@ -89,9 +88,7 @@ public class DropIdGeneratorTask extends BaseTask {
 		}
 
 		if (isNotBlank(sql)) {
-			Set<String> sequenceNames =
-				JdbcUtils.getSequenceNames(getConnectionProperties())
-					.stream()
+			Set<String> sequenceNames = JdbcUtils.getSequenceNames(getConnectionProperties()).stream()
 					.map(String::toLowerCase)
 					.collect(Collectors.toSet());
 			ourLog.debug("Currently have sequences: {}", sequenceNames);
@@ -102,7 +99,6 @@ public class DropIdGeneratorTask extends BaseTask {
 
 			executeSql(myGeneratorName, sql);
 		}
-
 	}
 
 	@Override

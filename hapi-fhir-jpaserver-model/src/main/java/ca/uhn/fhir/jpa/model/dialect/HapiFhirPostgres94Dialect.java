@@ -30,5 +30,4 @@ public class HapiFhirPostgres94Dialect extends PostgreSQLDialect {
 		super();
 		// No changes currently needed
 	}
-
 }

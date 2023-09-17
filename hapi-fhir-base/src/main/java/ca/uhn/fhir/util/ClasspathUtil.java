@@ -30,7 +30,6 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -38,6 +37,7 @@ import java.io.Reader;
 import java.nio.charset.StandardCharsets;
 import java.util.function.Function;
 import java.util.zip.GZIPInputStream;
+import javax.annotation.Nonnull;
 
 /**
  * Use this API with caution, it may change!
@@ -123,7 +123,8 @@ public class ClasspathUtil {
 	 * @since 6.4.0
 	 */
 	@Nonnull
-	public static <T extends IBaseResource> T loadCompressedResource(FhirContext theCtx, Class<T> theType, String theClasspath) {
+	public static <T extends IBaseResource> T loadCompressedResource(
+			FhirContext theCtx, Class<T> theType, String theClasspath) {
 		String resource = loadCompressedResource(theClasspath);
 		return parseResource(theCtx, theType, resource);
 	}

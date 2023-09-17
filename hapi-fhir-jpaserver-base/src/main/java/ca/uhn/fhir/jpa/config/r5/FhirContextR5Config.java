@@ -35,5 +35,4 @@ public class FhirContextR5Config {
 
 		return retVal;
 	}
-
 }

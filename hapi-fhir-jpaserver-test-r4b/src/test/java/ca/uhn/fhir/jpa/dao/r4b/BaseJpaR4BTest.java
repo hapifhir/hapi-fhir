@@ -372,7 +372,7 @@ public abstract class BaseJpaR4BTest extends BaseJpaTest implements ITestDataBui
 	protected ITermDeferredStorageSvc myTermDeferredStorageSvc;
 	@Autowired
 	private IValidationSupport myJpaValidationSupportChain;
-	private PerformanceTracingLoggingInterceptor myPerformanceTracingLoggingInterceptor;
+	protected PerformanceTracingLoggingInterceptor myPerformanceTracingLoggingInterceptor;
 	private List<Object> mySystemInterceptors;
 	@Autowired
 	private DaoRegistry myDaoRegistry;

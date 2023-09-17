@@ -69,7 +69,8 @@ public class WebsocketSubscribeCommand extends BaseCommand {
 	public void run(CommandLine theCommandLine) throws ParseException {
 		String target = theCommandLine.getOptionValue("t");
 		if (isBlank(target) || (!target.startsWith("ws://") && !target.startsWith("wss://"))) {
-			throw new ParseException(Msg.code(1536) + "Target (-t) needs to be in the form \"ws://foo\" or \"wss://foo\"");
+			throw new ParseException(
+					Msg.code(1536) + "Target (-t) needs to be in the form \"ws://foo\" or \"wss://foo\"");
 		}
 
 		IdDt subsId = new IdDt(theCommandLine.getOptionValue("i"));
@@ -110,7 +111,6 @@ public class WebsocketSubscribeCommand extends BaseCommand {
 		@SuppressWarnings("unused")
 		private Session session;
 
-
 		public SimpleEchoSocket(String theSubsId) {
 			mySubsId = theSubsId;
 		}
@@ -150,5 +150,4 @@ public class WebsocketSubscribeCommand extends BaseCommand {
 			LOG_RECV.info("{}", theMsg);
 		}
 	}
-
 }

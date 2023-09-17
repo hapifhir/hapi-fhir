@@ -21,7 +21,7 @@ package ca.uhn.fhir.cr.r4.measure;
 
 import ca.uhn.fhir.cr.common.IDaoRegistryUser;
 import ca.uhn.fhir.cr.common.Searches;
-import ca.uhn.fhir.cr.config.CrProperties;
+import ca.uhn.fhir.cr.config.CareGapsProperties;
 import ca.uhn.fhir.cr.enumeration.CareGapsStatusCode;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
@@ -59,6 +59,7 @@ import org.opencds.cqf.cql.evaluator.fhir.util.Ids;
 import org.opencds.cqf.cql.evaluator.fhir.util.Resources;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.AbstractMap;
 import java.util.ArrayList;
@@ -71,6 +72,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
+import java.util.function.Function;
 
 import static ca.uhn.fhir.cr.constant.CareCapsConstants.CARE_GAPS_BUNDLE_PROFILE;
 import static ca.uhn.fhir.cr.constant.CareCapsConstants.CARE_GAPS_COMPOSITION_PROFILE;
@@ -92,36 +94,42 @@ public class CareGapsService implements IDaoRegistryUser {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(CareGapsService.class);
 	public static final Map<String, CodeableConceptSettings> CARE_GAPS_CODES = ofEntries(
-		new AbstractMap.SimpleEntry<>("http://loinc.org/96315-7",
-			new CodeableConceptSettings().add(
-				"http://loinc.org", "96315-7", "Gaps in care report")),
-		new AbstractMap.SimpleEntry<>("http://terminology.hl7.org/CodeSystem/v3-ActCode/CAREGAP",
-			new CodeableConceptSettings().add(
-				"http://terminology.hl7.org/CodeSystem/v3-ActCode", "CAREGAP", "Care Gaps")));
+			new AbstractMap.SimpleEntry<>(
+					"http://loinc.org/96315-7",
+					new CodeableConceptSettings().add("http://loinc.org", "96315-7", "Gaps in care report")),
+			new AbstractMap.SimpleEntry<>(
+					"http://terminology.hl7.org/CodeSystem/v3-ActCode/CAREGAP",
+					new CodeableConceptSettings()
+							.add("http://terminology.hl7.org/CodeSystem/v3-ActCode", "CAREGAP", "Care Gaps")));
 
-	private RequestDetails myRequestDetails;
+	protected RequestDetails myRequestDetails;
 
-	private CrProperties myCrProperties;
+	public RequestDetails getRequestDetails() {
+		return this.myRequestDetails;
+	}
 
-	private MeasureService myR4MeasureService;
-
-	private Executor myCqlExecutor;
-
-	private DaoRegistry myDaoRegistry;
-
-	private final Map<String, Resource> myConfiguredResources = new HashMap<>();
-
-	public CareGapsService(CrProperties theCrProperties,
-								  MeasureService theMeasureService,
-								  DaoRegistry theDaoRegistry,
-								  Executor theExecutor,
-								  RequestDetails theRequestDetails){
-		this.myDaoRegistry = theDaoRegistry;
-		this.myCrProperties = theCrProperties;
-		this.myR4MeasureService = theMeasureService;
-		this.myCqlExecutor = theExecutor;
+	/**
+	 * Get The details (such as tenant) of this request. Usually auto-populated HAPI.
+	 *
+	 * @return RequestDetails
+	 */
+	public void setRequestDetails(RequestDetails theRequestDetails) {
 		this.myRequestDetails = theRequestDetails;
 	}
+
+	@Autowired
+	protected CareGapsProperties myCareGapsProperties;
+
+	@Autowired
+	Function<RequestDetails, MeasureService> myR4MeasureServiceFactory;
+
+	@Autowired
+	protected Executor myCqlExecutor;
+
+	@Autowired
+	protected DaoRegistry myDaoRegistry;
+
+	private final Map<String, Resource> myConfiguredResources = new HashMap<>();
 
 	/**
 	 * Calculate measures describing gaps in care
@@ -139,79 +147,93 @@ public class CareGapsService implements IDaoRegistryUser {
 	 * @return Parameters that includes zero to many document bundles that
 	 * include Care Gap Measure Reports will be returned.
 	 */
-	public Parameters getCareGapsReport(IPrimitiveType<Date> thePeriodStart,
-													IPrimitiveType<Date> thePeriodEnd,
-													List<String> theTopic,
-													String theSubject,
-													String thePractitioner,
-													String theOrganization,
-													List<String> theStatuses,
-													List<String> theMeasureIds,
-													List<String> theMeasureIdentifiers,
-													List<CanonicalType> theMeasureUrls,
-													List<String> thePrograms) {
+	public Parameters getCareGapsReport(
+			IPrimitiveType<Date> thePeriodStart,
+			IPrimitiveType<Date> thePeriodEnd,
+			List<String> theTopic,
+			String theSubject,
+			String thePractitioner,
+			String theOrganization,
+			List<String> theStatuses,
+			List<String> theMeasureIds,
+			List<String> theMeasureIdentifiers,
+			List<CanonicalType> theMeasureUrls,
+			List<String> thePrograms) {
 
 		validateConfiguration();
 
-		List<Measure> measures = ensureMeasures(getMeasures(theMeasureIds, theMeasureIdentifiers, theMeasureUrls, myRequestDetails));
+		List<Measure> measures =
+				ensureMeasures(getMeasures(theMeasureIds, theMeasureIdentifiers, theMeasureUrls, myRequestDetails));
 
 		List<Patient> patients;
 		if (!Strings.isNullOrEmpty(theSubject)) {
 			patients = getPatientListFromSubject(theSubject);
 		} else {
-			throw new NotImplementedOperationException(Msg.code(2275) + "Only the subject parameter has been implemented.");
+			throw new NotImplementedOperationException(
+					Msg.code(2275) + "Only the subject parameter has been implemented.");
 		}
 
 		List<CompletableFuture<Parameters.ParametersParameterComponent>> futures = new ArrayList<>();
 		Parameters result = initializeResult();
-		if (myCrProperties.getMeasureProperties().getThreadedCareGapsEnabled()) {
-			patients
-				.forEach(
-					patient -> {
-						Parameters.ParametersParameterComponent patientReports = patientReports(myRequestDetails,
-							thePeriodStart.getValueAsString(), thePeriodEnd.getValueAsString(), patient, theStatuses, measures,
-							theOrganization);
-						futures.add(CompletableFuture.supplyAsync(() -> patientReports, myCqlExecutor));
-					});
+		if (myCareGapsProperties.getThreadedCareGapsEnabled()) {
+			patients.forEach(patient -> {
+				Parameters.ParametersParameterComponent patientReports = patientReports(
+						myRequestDetails,
+						thePeriodStart.getValueAsString(),
+						thePeriodEnd.getValueAsString(),
+						patient,
+						theStatuses,
+						measures,
+						theOrganization);
+				futures.add(CompletableFuture.supplyAsync(() -> patientReports, myCqlExecutor));
+			});
 
 			futures.forEach(x -> result.addParameter(x.join()));
 		} else {
-			patients.forEach(
-				patient -> {
-					Parameters.ParametersParameterComponent patientReports = patientReports(myRequestDetails,
-						thePeriodStart.getValueAsString(), thePeriodEnd.getValueAsString(), patient, theStatuses, measures,
+			patients.forEach(patient -> {
+				Parameters.ParametersParameterComponent patientReports = patientReports(
+						myRequestDetails,
+						thePeriodStart.getValueAsString(),
+						thePeriodEnd.getValueAsString(),
+						patient,
+						theStatuses,
+						measures,
 						theOrganization);
-					if (patientReports != null) {
-						result.addParameter(patientReports);
-					}
-				});
+				if (patientReports != null) {
+					result.addParameter(patientReports);
+				}
+			});
 		}
 		return result;
 	}
 
 	public void validateConfiguration() {
-		checkNotNull(myCrProperties.getMeasureProperties(),
-			"The measure_report setting properties are required for the $care-gaps operation.");
-		checkNotNull(myCrProperties.getMeasureProperties().getMeasureReportConfiguration(),
-			"The measure_report setting is required for the $care-gaps operation.");
-		checkArgument(!Strings.isNullOrEmpty(myCrProperties.getMeasureProperties().getMeasureReportConfiguration().getCareGapsReporter()),
-			"The measure_report.care_gaps_reporter setting is required for the $care-gaps operation.");
-		checkArgument(!Strings.isNullOrEmpty(myCrProperties.getMeasureProperties().getMeasureReportConfiguration().getCareGapsCompositionSectionAuthor()),
-			"The measure_report.care_gaps_composition_section_author setting is required for the $care-gaps operation.");
+		checkArgument(
+				!Strings.isNullOrEmpty(myCareGapsProperties.getCareGapsReporter()),
+				"The measure_report.care_gaps_reporter setting is required for the $care-gaps operation.");
+		checkArgument(
+				!Strings.isNullOrEmpty(myCareGapsProperties.getCareGapsCompositionSectionAuthor()),
+				"The measure_report.care_gaps_composition_section_author setting is required for the $care-gaps operation.");
 
-		Resource configuredReporter = addConfiguredResource(Organization.class,
-			myCrProperties.getMeasureProperties().getMeasureReportConfiguration().getCareGapsReporter(), "care_gaps_reporter");
-		Resource configuredAuthor = addConfiguredResource(Organization.class,
-			myCrProperties.getMeasureProperties().getMeasureReportConfiguration().getCareGapsCompositionSectionAuthor(),
-								"care_gaps_composition_section_author");
+		Resource configuredReporter = addConfiguredResource(
+				Organization.class, myCareGapsProperties.getCareGapsReporter(), "care_gaps_reporter");
+		Resource configuredAuthor = addConfiguredResource(
+				Organization.class,
+				myCareGapsProperties.getCareGapsCompositionSectionAuthor(),
+				"care_gaps_composition_section_author");
 
-		checkNotNull(configuredReporter, String.format(
-			"The %s Resource is configured as the measure_report.care_gaps_reporter but the Resource could not be read.",
-			myCrProperties.getMeasureProperties().getMeasureReportConfiguration().getCareGapsReporter()));
-		checkNotNull(configuredAuthor, String.format(
-			"The %s Resource is configured as the measure_report.care_gaps_composition_section_author but the Resource could not be read.",
-			myCrProperties.getMeasureProperties().getMeasureReportConfiguration().getCareGapsCompositionSectionAuthor()));
+		checkNotNull(
+				configuredReporter,
+				String.format(
+						"The %s Resource is configured as the measure_report.care_gaps_reporter but the Resource could not be read.",
+						myCareGapsProperties.getCareGapsReporter()));
+		checkNotNull(
+				configuredAuthor,
+				String.format(
+						"The %s Resource is configured as the measure_report.care_gaps_composition_section_author but the Resource could not be read.",
+						myCareGapsProperties.getCareGapsCompositionSectionAuthor()));
 	}
+
 	List<Patient> getPatientListFromSubject(String theSubject) {
 		if (theSubject.startsWith("Patient/")) {
 			return Collections.singletonList(validatePatientExists(theSubject));
@@ -255,8 +277,11 @@ public class CareGapsService implements IDaoRegistryUser {
 		return patient;
 	}
 
-	List<Measure> getMeasures(List<String> theMeasureIds, List<String> theMeasureIdentifiers,
-									  List<CanonicalType> theMeasureCanonicals, RequestDetails theRequestDetails) {
+	List<Measure> getMeasures(
+			List<String> theMeasureIds,
+			List<String> theMeasureIdentifiers,
+			List<CanonicalType> theMeasureCanonicals,
+			RequestDetails theRequestDetails) {
 		boolean hasMeasureIds = theMeasureIds != null && !theMeasureIds.isEmpty();
 		boolean hasMeasureIdentifiers = theMeasureIdentifiers != null && !theMeasureIdentifiers.isEmpty();
 		boolean hasMeasureUrls = theMeasureCanonicals != null && !theMeasureCanonicals.isEmpty();
@@ -271,14 +296,16 @@ public class CareGapsService implements IDaoRegistryUser {
 			populateMeasures(measureList, measureSearchResults);
 		}
 
-		if(hasMeasureUrls) {
-			measureSearchResults = search(Measure.class, Searches.byCanonicals(theMeasureCanonicals), theRequestDetails);
+		if (hasMeasureUrls) {
+			measureSearchResults =
+					search(Measure.class, Searches.byCanonicals(theMeasureCanonicals), theRequestDetails);
 			populateMeasures(measureList, measureSearchResults);
 		}
 
 		// TODO: implement searching by measure identifiers
 		if (hasMeasureIdentifiers) {
-			throw new NotImplementedOperationException(Msg.code(2278) + "Measure identifiers have not yet been implemented.");
+			throw new NotImplementedOperationException(
+					Msg.code(2278) + "Measure identifiers have not yet been implemented.");
 		}
 
 		Map<String, Measure> result = new HashMap<>();
@@ -288,21 +315,21 @@ public class CareGapsService implements IDaoRegistryUser {
 	}
 
 	private void populateMeasures(List<Measure> measureList, Iterable<IBaseResource> measureSearchResults) {
-		if(measureSearchResults != null){
+		if (measureSearchResults != null) {
 			Iterator<IBaseResource> measures = measureSearchResults.iterator();
-			while(measures.hasNext()){
-				measureList.add((Measure)measures.next());
+			while (measures.hasNext()) {
+				measureList.add((Measure) measures.next());
 			}
 		}
 	}
 
 	private <T extends Resource> T addConfiguredResource(Class<T> theResourceClass, String theId, String theKey) {
-		//T resource = repo.search(theResourceClass, Searches.byId(theId)).firstOrNull();
+		// T resource = repo.search(theResourceClass, Searches.byId(theId)).firstOrNull();
 		Iterable<IBaseResource> resourceResult = search(theResourceClass, Searches.byId(theId), myRequestDetails);
 		T resource = null;
-		if(resourceResult != null){
+		if (resourceResult != null) {
 			Iterator<IBaseResource> resources = resourceResult.iterator();
-			while(resources.hasNext()){
+			while (resources.hasNext()) {
 				resource = (T) resources.next();
 				break;
 			}
@@ -327,35 +354,69 @@ public class CareGapsService implements IDaoRegistryUser {
 		return theMeasures;
 	}
 
-	private Parameters.ParametersParameterComponent patientReports(RequestDetails theRequestDetails, String thePeriodStart,
-																						String thePeriodEnd, Patient thePatient, List<String> theStatuses, List<Measure> theMeasures, String theOrganization) {
+	private Parameters.ParametersParameterComponent patientReports(
+			RequestDetails theRequestDetails,
+			String thePeriodStart,
+			String thePeriodEnd,
+			Patient thePatient,
+			List<String> theStatuses,
+			List<Measure> theMeasures,
+			String theOrganization) {
 		// TODO: add organization to report, if it exists.
 		Composition composition = getComposition(thePatient);
 		List<DetectedIssue> detectedIssues = new ArrayList<>();
 		Map<String, Resource> evalPlusSDE = new HashMap<>();
-		List<MeasureReport> reports = getReports(theRequestDetails, thePeriodStart, thePeriodEnd, thePatient, theStatuses, theMeasures,
-			composition, detectedIssues, evalPlusSDE);
+		List<MeasureReport> reports = getReports(
+				theRequestDetails,
+				thePeriodStart,
+				thePeriodEnd,
+				thePatient,
+				theStatuses,
+				theMeasures,
+				composition,
+				detectedIssues,
+				evalPlusSDE);
 
 		if (reports.isEmpty()) {
 			return null;
 		}
 
-		return initializePatientParameter(thePatient).setResource(
-			addBundleEntries(theRequestDetails.getFhirServerBase(), composition, detectedIssues, reports, evalPlusSDE));
+		return initializePatientParameter(thePatient)
+				.setResource(addBundleEntries(
+						theRequestDetails.getFhirServerBase(), composition, detectedIssues, reports, evalPlusSDE));
 	}
 
-	private List<MeasureReport> getReports(RequestDetails theRequestDetails, String thePeriodStart, String thePeriodEnd,
-														Patient thePatient, List<String> theStatuses, List<Measure> theMeasures, Composition theComposition,
-														List<DetectedIssue> theDetectedIssues, Map<String, Resource> theEvalPlusSDEs) {
+	private List<MeasureReport> getReports(
+			RequestDetails theRequestDetails,
+			String thePeriodStart,
+			String thePeriodEnd,
+			Patient thePatient,
+			List<String> theStatuses,
+			List<Measure> theMeasures,
+			Composition theComposition,
+			List<DetectedIssue> theDetectedIssues,
+			Map<String, Resource> theEvalPlusSDEs) {
 		List<MeasureReport> reports = new ArrayList<>();
 		MeasureReport report;
 		for (Measure measure : theMeasures) {
-			report = myR4MeasureService.evaluateMeasure(measure.getIdElement(), thePeriodStart,
-				thePeriodEnd, "patient", Ids.simple(thePatient), null, null, null, null, null);
+			report = myR4MeasureServiceFactory
+					.apply(myRequestDetails)
+					.evaluateMeasure(
+							measure.getIdElement(),
+							thePeriodStart,
+							thePeriodEnd,
+							"patient",
+							Ids.simple(thePatient),
+							null,
+							null,
+							null,
+							null,
+							null);
 			if (!report.hasGroup()) {
-				ourLog.info("Report does not include a group so skipping.\nSubject: {}\nMeasure: {}",
-					Ids.simple(thePatient),
-					Ids.simplePart(measure));
+				ourLog.info(
+						"Report does not include a group so skipping.\nSubject: {}\nMeasure: {}",
+						Ids.simple(thePatient),
+						Ids.simplePart(measure));
 				continue;
 			}
 
@@ -382,7 +443,7 @@ public class CareGapsService implements IDaoRegistryUser {
 			IIdType id = Ids.newId(MeasureReport.class, UUID.randomUUID().toString());
 			theMeasureReport.setId(id);
 		}
-		Reference reporter = new Reference().setReference(myCrProperties.getMeasureProperties().getMeasureReportConfiguration().getCareGapsReporter());
+		Reference reporter = new Reference().setReference(myCareGapsProperties.getCareGapsReporter());
 		// TODO: figure out what this extension is for
 		// reporter.addExtension(new
 		// Extension().setUrl(CARE_GAPS_MEASUREREPORT_REPORTER_EXTENSION));
@@ -395,20 +456,26 @@ public class CareGapsService implements IDaoRegistryUser {
 	}
 
 	private Parameters.ParametersParameterComponent initializePatientParameter(Patient thePatient) {
-		Parameters.ParametersParameterComponent patientParameter = Resources
-			.newBackboneElement(Parameters.ParametersParameterComponent.class)
-			.setName("return");
+		Parameters.ParametersParameterComponent patientParameter = Resources.newBackboneElement(
+						Parameters.ParametersParameterComponent.class)
+				.setName("return");
 		patientParameter.setId("subject-" + Ids.simplePart(thePatient));
 		return patientParameter;
 	}
 
-	private Bundle addBundleEntries(String theServerBase, Composition theComposition, List<DetectedIssue> theDetectedIssues,
-											  List<MeasureReport> theMeasureReports, Map<String, Resource> theEvalPlusSDEs) {
+	private Bundle addBundleEntries(
+			String theServerBase,
+			Composition theComposition,
+			List<DetectedIssue> theDetectedIssues,
+			List<MeasureReport> theMeasureReports,
+			Map<String, Resource> theEvalPlusSDEs) {
 		Bundle reportBundle = getBundle();
 		reportBundle.addEntry(getBundleEntry(theServerBase, theComposition));
 		theMeasureReports.forEach(report -> reportBundle.addEntry(getBundleEntry(theServerBase, report)));
 		theDetectedIssues.forEach(detectedIssue -> reportBundle.addEntry(getBundleEntry(theServerBase, detectedIssue)));
-		myConfiguredResources.values().forEach(resource -> reportBundle.addEntry(getBundleEntry(theServerBase, resource)));
+		myConfiguredResources
+				.values()
+				.forEach(resource -> reportBundle.addEntry(getBundleEntry(theServerBase, resource)));
 		theEvalPlusSDEs.values().forEach(resource -> reportBundle.addEntry(getBundleEntry(theServerBase, resource)));
 		return reportBundle;
 	}
@@ -417,14 +484,14 @@ public class CareGapsService implements IDaoRegistryUser {
 		Pair<String, Boolean> inNumerator = new MutablePair<>("numerator", false);
 		theMeasureReport.getGroup().forEach(group -> group.getPopulation().forEach(population -> {
 			if (population.hasCode()
-				&& population.getCode().hasCoding(MEASUREREPORT_MEASURE_POPULATION_SYSTEM, inNumerator.getKey())
-				&& population.getCount() == 1) {
+					&& population.getCode().hasCoding(MEASUREREPORT_MEASURE_POPULATION_SYSTEM, inNumerator.getKey())
+					&& population.getCount() == 1) {
 				inNumerator.setValue(true);
 			}
 		}));
 
-		boolean isPositive = theMeasure.getImprovementNotation().hasCoding(MEASUREREPORT_IMPROVEMENT_NOTATION_SYSTEM,
-			"increase");
+		boolean isPositive =
+				theMeasure.getImprovementNotation().hasCoding(MEASUREREPORT_IMPROVEMENT_NOTATION_SYSTEM, "increase");
 
 		if ((isPositive && !inNumerator.getValue()) || (!isPositive && inNumerator.getValue())) {
 			return CareGapsStatusCode.OPEN_GAP;
@@ -434,56 +501,66 @@ public class CareGapsService implements IDaoRegistryUser {
 	}
 
 	private Bundle.BundleEntryComponent getBundleEntry(String theServerBase, Resource theResource) {
-		return new Bundle.BundleEntryComponent().setResource(theResource)
-			.setFullUrl(getFullUrl(theServerBase, theResource));
+		return new Bundle.BundleEntryComponent()
+				.setResource(theResource)
+				.setFullUrl(getFullUrl(theServerBase, theResource));
 	}
 
-	private Composition.SectionComponent getSection(Measure theMeasure, MeasureReport theMeasureReport, DetectedIssue theDetectedIssue,
-																	CareGapsStatusCode theGapStatus) {
-		String narrative = String.format(HTML_DIV_PARAGRAPH_CONTENT,
-			theGapStatus == CareGapsStatusCode.CLOSED_GAP ? "No detected issues."
-				: String.format("Issues detected.  See %s for details.", Ids.simple(theDetectedIssue)));
+	private Composition.SectionComponent getSection(
+			Measure theMeasure,
+			MeasureReport theMeasureReport,
+			DetectedIssue theDetectedIssue,
+			CareGapsStatusCode theGapStatus) {
+		String narrative = String.format(
+				HTML_DIV_PARAGRAPH_CONTENT,
+				theGapStatus == CareGapsStatusCode.CLOSED_GAP
+						? "No detected issues."
+						: String.format("Issues detected.  See %s for details.", Ids.simple(theDetectedIssue)));
 		return new CompositionSectionComponentBuilder<>(Composition.SectionComponent.class)
-			.withTitle(theMeasure.hasTitle() ? theMeasure.getTitle() : theMeasure.getUrl())
-			.withFocus(Ids.simple(theMeasureReport))
-			.withText(new NarrativeSettings(narrative))
-			.withEntry(Ids.simple(theDetectedIssue))
-			.build();
+				.withTitle(theMeasure.hasTitle() ? theMeasure.getTitle() : theMeasure.getUrl())
+				.withFocus(Ids.simple(theMeasureReport))
+				.withText(new NarrativeSettings(narrative))
+				.withEntry(Ids.simple(theDetectedIssue))
+				.build();
 	}
 
 	private Bundle getBundle() {
 		return new BundleBuilder<>(Bundle.class)
-			.withProfile(CARE_GAPS_BUNDLE_PROFILE)
-			.withType(Bundle.BundleType.DOCUMENT.toString())
-			.build();
+				.withProfile(CARE_GAPS_BUNDLE_PROFILE)
+				.withType(Bundle.BundleType.DOCUMENT.toString())
+				.build();
 	}
 
 	private Composition getComposition(Patient thePatient) {
 		return new CompositionBuilder<>(Composition.class)
-			.withProfile(CARE_GAPS_COMPOSITION_PROFILE)
-			.withType(CARE_GAPS_CODES.get("http://loinc.org/96315-7"))
-			.withStatus(Composition.CompositionStatus.FINAL.toString())
-			.withTitle("Care Gap Report for " + Ids.simplePart(thePatient))
-			.withSubject(Ids.simple(thePatient))
-			.withAuthor(Ids.simple(myConfiguredResources.get("care_gaps_composition_section_author")))
-			// .withCustodian(organization) // TODO: Optional: identifies the organization
-			// who is responsible for ongoing maintenance of and accessing to this gaps in
-			// care report. Add as a setting and optionally read if it's there.
-			.build();
+				.withProfile(CARE_GAPS_COMPOSITION_PROFILE)
+				.withType(CARE_GAPS_CODES.get("http://loinc.org/96315-7"))
+				.withStatus(Composition.CompositionStatus.FINAL.toString())
+				.withTitle("Care Gap Report for " + Ids.simplePart(thePatient))
+				.withSubject(Ids.simple(thePatient))
+				.withAuthor(Ids.simple(myConfiguredResources.get("care_gaps_composition_section_author")))
+				// .withCustodian(organization) // TODO: Optional: identifies the organization
+				// who is responsible for ongoing maintenance of and accessing to this gaps in
+				// care report. Add as a setting and optionally read if it's there.
+				.build();
 	}
 
-	private DetectedIssue getDetectedIssue(Patient thePatient, MeasureReport theMeasureReport, CareGapsStatusCode theCareGapStatusCode) {
+	private DetectedIssue getDetectedIssue(
+			Patient thePatient, MeasureReport theMeasureReport, CareGapsStatusCode theCareGapStatusCode) {
 		return new DetectedIssueBuilder<>(DetectedIssue.class)
-			.withProfile(CARE_GAPS_DETECTED_ISSUE_PROFILE)
-			.withStatus(DetectedIssue.DetectedIssueStatus.FINAL.toString())
-			.withCode(CARE_GAPS_CODES.get("http://terminology.hl7.org/CodeSystem/v3-ActCode/CAREGAP"))
-			.withPatient(Ids.simple(thePatient))
-			.withEvidenceDetail(Ids.simple(theMeasureReport))
-			.withModifierExtension(new ImmutablePair<>(
-				CARE_GAPS_GAP_STATUS_EXTENSION,
-				new CodeableConceptSettings().add(CARE_GAPS_GAP_STATUS_SYSTEM, theCareGapStatusCode.toString(),
-					theCareGapStatusCode.toDisplayString())))
-			.build();
+				.withProfile(CARE_GAPS_DETECTED_ISSUE_PROFILE)
+				.withStatus(DetectedIssue.DetectedIssueStatus.FINAL.toString())
+				.withCode(CARE_GAPS_CODES.get("http://terminology.hl7.org/CodeSystem/v3-ActCode/CAREGAP"))
+				.withPatient(Ids.simple(thePatient))
+				.withEvidenceDetail(Ids.simple(theMeasureReport))
+				.withModifierExtension(new ImmutablePair<>(
+						CARE_GAPS_GAP_STATUS_EXTENSION,
+						new CodeableConceptSettings()
+								.add(
+										CARE_GAPS_GAP_STATUS_SYSTEM,
+										theCareGapStatusCode.toString(),
+										theCareGapStatusCode.toDisplayString())))
+				.build();
 	}
 
 	protected void populateEvaluatedResources(MeasureReport theMeasureReport, Map<String, Resource> theResources) {
@@ -505,9 +582,11 @@ public class CareGapsService implements IDaoRegistryUser {
 			for (Extension extension : theMeasureReport.getExtension()) {
 				if (extension.hasUrl() && extension.getUrl().equals(MEASUREREPORT_MEASURE_SUPPLEMENTALDATA_EXTENSION)) {
 					Reference sdeRef = extension.hasValue() && extension.getValue() instanceof Reference
-						? (Reference) extension.getValue()
-						: null;
-					if (sdeRef != null && sdeRef.hasReference() && !sdeRef.getReference().startsWith("#")) {
+							? (Reference) extension.getValue()
+							: null;
+					if (sdeRef != null
+							&& sdeRef.hasReference()
+							&& !sdeRef.getReference().startsWith("#")) {
 						IdType sdeId = new IdType(sdeRef.getReference());
 						if (!theResources.containsKey(Ids.simple(sdeId))) {
 							theResources.put(Ids.simple(sdeId), read(sdeId));
@@ -517,19 +596,21 @@ public class CareGapsService implements IDaoRegistryUser {
 			}
 		}
 	}
+
 	private Parameters initializeResult() {
 		return newResource(Parameters.class, "care-gaps-report-" + UUID.randomUUID());
 	}
 
 	public static String getFullUrl(String theServerAddress, IBaseResource theResource) {
-		checkArgument(theResource.getIdElement().hasIdPart(),
-			"Cannot generate a fullUrl because the resource does not have an id.");
+		checkArgument(
+				theResource.getIdElement().hasIdPart(),
+				"Cannot generate a fullUrl because the resource does not have an id.");
 		return getFullUrl(theServerAddress, theResource.fhirType(), Ids.simplePart(theResource));
 	}
 
 	public static String getFullUrl(String theServerAddress, String theFhirType, String theElementId) {
-		return String.format("%s%s/%s", theServerAddress + (theServerAddress.endsWith("/") ? "" : "/"), theFhirType,
-			theElementId);
+		return String.format(
+				"%s%s/%s", theServerAddress + (theServerAddress.endsWith("/") ? "" : "/"), theFhirType, theElementId);
 	}
 
 	@Override
@@ -537,8 +618,7 @@ public class CareGapsService implements IDaoRegistryUser {
 		return myDaoRegistry;
 	}
 
-	public CrProperties getCrProperties() {
-		return myCrProperties;
+	public CareGapsProperties getCrProperties() {
+		return myCareGapsProperties;
 	}
-
 }

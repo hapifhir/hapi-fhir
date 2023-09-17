@@ -31,7 +31,6 @@ import org.hl7.fhir.exceptions.PathEngineException;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.r4.context.IWorkerContext;
 import org.hl7.fhir.r4.hapi.ctx.HapiWorkerContext;
-import org.hl7.fhir.r4.utils.FHIRPathEngine;
 import org.hl7.fhir.r4.model.Base;
 import org.hl7.fhir.r4.model.ExpressionNode;
 import org.hl7.fhir.r4.model.IdType;
@@ -41,12 +40,12 @@ import org.hl7.fhir.r4.model.TypeDetails;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.hl7.fhir.r4.utils.FHIRPathEngine;
 
-import javax.annotation.PostConstruct;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import javax.annotation.PostConstruct;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -64,7 +63,11 @@ public class SearchParamExtractorR4 extends BaseSearchParamExtractor implements 
 
 	// This constructor is used by tests
 	@VisibleForTesting
-	public SearchParamExtractorR4(StorageSettings theStorageSettings, PartitionSettings thePartitionSettings, FhirContext theCtx, ISearchParamRegistry theSearchParamRegistry) {
+	public SearchParamExtractorR4(
+			StorageSettings theStorageSettings,
+			PartitionSettings thePartitionSettings,
+			FhirContext theCtx,
+			ISearchParamRegistry theSearchParamRegistry) {
 		super(theStorageSettings, thePartitionSettings, theCtx, theSearchParamRegistry);
 		initFhirPath();
 		start();
@@ -74,10 +77,10 @@ public class SearchParamExtractorR4 extends BaseSearchParamExtractor implements 
 	public IValueExtractor getPathValueExtractor(IBase theResource, String theSinglePath) {
 		return () -> {
 			ExpressionNode parsed = myParsedFhirPathCache.get(theSinglePath, path -> myFhirPathEngine.parse(path));
-			return myFhirPathEngine.evaluate(theResource, (Base) theResource, (Base) theResource, (Base) theResource, parsed);
+			return myFhirPathEngine.evaluate(
+					theResource, (Base) theResource, (Base) theResource, (Base) theResource, parsed);
 		};
 	}
-
 
 	@Override
 	@PostConstruct
@@ -96,13 +99,13 @@ public class SearchParamExtractorR4 extends BaseSearchParamExtractor implements 
 		myParsedFhirPathCache = CacheFactory.build(TimeUnit.MINUTES.toMillis(10));
 	}
 
-
 	private class SearchParamExtractorR4HostServices implements FHIRPathEngine.IEvaluationContext {
 
 		private final Map<String, Base> myResourceTypeToStub = Collections.synchronizedMap(new HashMap<>());
 
 		@Override
-		public List<Base> resolveConstant(Object appContext, String name, boolean beforeContext) throws PathEngineException {
+		public List<Base> resolveConstant(Object appContext, String name, boolean beforeContext)
+				throws PathEngineException {
 			return Collections.emptyList();
 		}
 
@@ -122,15 +125,16 @@ public class SearchParamExtractorR4 extends BaseSearchParamExtractor implements 
 		}
 
 		@Override
-		public TypeDetails checkFunction(Object appContext, String functionName, List<TypeDetails> parameters) throws PathEngineException {
+		public TypeDetails checkFunction(Object appContext, String functionName, List<TypeDetails> parameters)
+				throws PathEngineException {
 			return null;
 		}
 
 		@Override
-		public List<Base> executeFunction(Object appContext, List<Base> focus, String functionName, List<List<Base>> parameters) {
+		public List<Base> executeFunction(
+				Object appContext, List<Base> focus, String functionName, List<List<Base>> parameters) {
 			return null;
 		}
-
 
 		@Override
 		public Base resolveReference(Object theAppContext, String theUrl, Base theRefContext) throws FHIRException {
@@ -173,7 +177,6 @@ public class SearchParamExtractorR4 extends BaseSearchParamExtractor implements 
 						public String fhirType() {
 							return url.getResourceType();
 						}
-
 					};
 					myResourceTypeToStub.put(url.getResourceType(), retVal);
 				}
@@ -191,5 +194,4 @@ public class SearchParamExtractorR4 extends BaseSearchParamExtractor implements 
 			return null;
 		}
 	}
-
 }

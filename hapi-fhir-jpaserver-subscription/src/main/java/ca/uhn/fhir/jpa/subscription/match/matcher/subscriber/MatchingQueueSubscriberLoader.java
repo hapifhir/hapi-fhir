@@ -41,20 +41,28 @@ import static ca.uhn.fhir.jpa.subscription.match.matcher.subscriber.Subscription
 public class MatchingQueueSubscriberLoader {
 	protected IChannelReceiver myMatchingChannel;
 	private static final Logger ourLog = LoggerFactory.getLogger(MatchingQueueSubscriberLoader.class);
+
 	@Autowired
 	FhirContext myFhirContext;
+
 	@Autowired
 	private SubscriptionMatchingSubscriber mySubscriptionMatchingSubscriber;
+
 	@Autowired(required = false)
 	private SubscriptionTopicMatchingSubscriber mySubscriptionTopicMatchingSubscriber;
+
 	@Autowired
 	private SubscriptionChannelFactory mySubscriptionChannelFactory;
+
 	@Autowired
 	private SubscriptionRegisteringSubscriber mySubscriptionRegisteringSubscriber;
+
 	@Autowired(required = false)
 	private SubscriptionTopicRegisteringSubscriber mySubscriptionTopicRegisteringSubscriber;
+
 	@Autowired
 	private SubscriptionActivatingSubscriber mySubscriptionActivatingSubscriber;
+
 	@Autowired
 	private StorageSettings myStorageSettings;
 
@@ -62,13 +70,17 @@ public class MatchingQueueSubscriberLoader {
 	@Order(IHapiBootOrder.SUBSCRIPTION_MATCHING_CHANNEL_HANDLER)
 	public void subscribeToMatchingChannel() {
 		if (myMatchingChannel == null) {
-			myMatchingChannel = mySubscriptionChannelFactory.newMatchingReceivingChannel(SUBSCRIPTION_MATCHING_CHANNEL_NAME, getChannelConsumerSettings());
+			myMatchingChannel = mySubscriptionChannelFactory.newMatchingReceivingChannel(
+					SUBSCRIPTION_MATCHING_CHANNEL_NAME, getChannelConsumerSettings());
 		}
 		if (myMatchingChannel != null) {
 			myMatchingChannel.subscribe(mySubscriptionMatchingSubscriber);
 			myMatchingChannel.subscribe(mySubscriptionActivatingSubscriber);
 			myMatchingChannel.subscribe(mySubscriptionRegisteringSubscriber);
-			ourLog.info("Subscription Matching Subscriber subscribed to Matching Channel {} with name {}", myMatchingChannel.getClass().getName(), SUBSCRIPTION_MATCHING_CHANNEL_NAME);
+			ourLog.info(
+					"Subscription Matching Subscriber subscribed to Matching Channel {} with name {}",
+					myMatchingChannel.getClass().getName(),
+					SUBSCRIPTION_MATCHING_CHANNEL_NAME);
 			if (mySubscriptionTopicMatchingSubscriber != null) {
 				ourLog.info("Starting SubscriptionTopic Matching Subscriber");
 				myMatchingChannel.subscribe(mySubscriptionTopicMatchingSubscriber);
@@ -89,12 +101,14 @@ public class MatchingQueueSubscriberLoader {
 	@PreDestroy
 	public void stop() throws Exception {
 		if (myMatchingChannel != null) {
-			ourLog.info("Destroying matching Channel {} with name {}", myMatchingChannel.getClass().getName(), SUBSCRIPTION_MATCHING_CHANNEL_NAME);
+			ourLog.info(
+					"Destroying matching Channel {} with name {}",
+					myMatchingChannel.getClass().getName(),
+					SUBSCRIPTION_MATCHING_CHANNEL_NAME);
 			myMatchingChannel.destroy();
 			myMatchingChannel.unsubscribe(mySubscriptionMatchingSubscriber);
 			myMatchingChannel.unsubscribe(mySubscriptionActivatingSubscriber);
 			myMatchingChannel.unsubscribe(mySubscriptionRegisteringSubscriber);
 		}
 	}
-
 }

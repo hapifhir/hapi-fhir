@@ -22,12 +22,11 @@ package ca.uhn.fhir.jpa.api.pid;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
-import org.apache.commons.lang3.builder.ToStringBuilder;
 
-import javax.annotation.Nonnull;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import javax.annotation.Nonnull;
 
 /**
  * An empty resource pid list
@@ -56,7 +55,8 @@ public class EmptyResourcePidList implements IResourcePidList {
 
 	@Override
 	public String getResourceType(int i) {
-		throw new ArrayIndexOutOfBoundsException(Msg.code(2095) + "Attempting to get resource type from an empty resource pid list");
+		throw new ArrayIndexOutOfBoundsException(
+				Msg.code(2095) + "Attempting to get resource type from an empty resource pid list");
 	}
 
 	@Override

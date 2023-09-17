@@ -120,8 +120,6 @@ public class CorsInterceptor extends InterceptorAdapter {
 
 		retVal.addAllowedOrigin("*");
 
-
 		return retVal;
 	}
-
 }

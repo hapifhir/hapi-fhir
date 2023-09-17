@@ -1,3 +1,22 @@
+/*-
+ * #%L
+ * HAPI FHIR Subscription Server
+ * %%
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
 package ca.uhn.fhir.jpa.topic.status;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -24,18 +43,23 @@ public class R4NotificationStatusBuilder implements INotificationStatusBuilder<P
 		myFhirContext = theFhirContext;
 	}
 
-	public Parameters buildNotificationStatus(List<IBaseResource> theResources, ActiveSubscription theActiveSubscription, String theTopicUrl) {
+	public Parameters buildNotificationStatus(
+			List<IBaseResource> theResources, ActiveSubscription theActiveSubscription, String theTopicUrl) {
 		Long eventNumber = theActiveSubscription.getDeliveriesCount();
 
 		// See http://build.fhir.org/ig/HL7/fhir-subscription-backport-ig/Parameters-r4-notification-status.json.html
-		// and http://build.fhir.org/ig/HL7/fhir-subscription-backport-ig/StructureDefinition-backport-subscription-status-r4.html
+		// and
+		// http://build.fhir.org/ig/HL7/fhir-subscription-backport-ig/StructureDefinition-backport-subscription-status-r4.html
 		Parameters parameters = new Parameters();
 		parameters.getMeta().addProfile(SubscriptionConstants.SUBSCRIPTION_TOPIC_STATUS);
 		parameters.setId(UUID.randomUUID().toString());
-		parameters.addParameter("subscription", new Reference(theActiveSubscription.getSubscription().getIdElement(myFhirContext)));
+		parameters.addParameter(
+				"subscription",
+				new Reference(theActiveSubscription.getSubscription().getIdElement(myFhirContext)));
 		parameters.addParameter("topic", new CanonicalType(theTopicUrl));
 		parameters.addParameter("status", new CodeType(Subscription.SubscriptionStatus.ACTIVE.toCode()));
-		parameters.addParameter("type", new CodeType(SubscriptionStatus.SubscriptionNotificationType.EVENTNOTIFICATION.toCode()));
+		parameters.addParameter(
+				"type", new CodeType(SubscriptionStatus.SubscriptionNotificationType.EVENTNOTIFICATION.toCode()));
 		// WIP STR5 events-since-subscription-start should be read from the database
 		parameters.addParameter("events-since-subscription-start", eventNumber.toString());
 		Parameters.ParametersParameterComponent notificationEvent = parameters.addParameter();
@@ -44,7 +68,10 @@ public class R4NotificationStatusBuilder implements INotificationStatusBuilder<P
 		notificationEvent.addPart().setName("timestamp").setValue(new DateType(new Date()));
 		if (theResources.size() > 0) {
 			IBaseResource firstResource = theResources.get(0);
-			notificationEvent.addPart().setName("focus").setValue(new Reference(firstResource.getIdElement().toUnqualifiedVersionless()));
+			notificationEvent
+					.addPart()
+					.setName("focus")
+					.setValue(new Reference(firstResource.getIdElement().toUnqualifiedVersionless()));
 		}
 
 		return parameters;

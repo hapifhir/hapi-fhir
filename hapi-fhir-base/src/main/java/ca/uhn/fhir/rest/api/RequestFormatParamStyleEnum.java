@@ -29,5 +29,4 @@ public enum RequestFormatParamStyleEnum {
 	 * "xml" or "json"
 	 */
 	SHORT
-
 }

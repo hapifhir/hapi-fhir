@@ -33,7 +33,7 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
  * can lead to data loss (since invalid values are silently ignored). See
  * {@link #setErrorOnInvalidValue(boolean)} for information on this.
  * </p>
- * 
+ *
  * @see IParser#setParserErrorHandler(IParserErrorHandler)
  * @see FhirContext#setParserErrorHandler(IParserErrorHandler)
  *
@@ -61,7 +61,7 @@ public class LenientErrorHandler extends ParseErrorHandler implements IParserErr
 
 	/**
 	 * Constructor
-	 * 
+	 *
 	 * @param theLogErrors
 	 *           Should errors be logged?
 	 * @since 1.2
@@ -78,10 +78,17 @@ public class LenientErrorHandler extends ParseErrorHandler implements IParserErr
 	}
 
 	@Override
-	public void incorrectJsonType(IParseLocation theLocation, String theElementName, ValueType theExpected, ScalarType theExpectedScalarType, ValueType theFound, ScalarType theFoundScalarType) {
+	public void incorrectJsonType(
+			IParseLocation theLocation,
+			String theElementName,
+			ValueType theExpected,
+			ScalarType theExpectedScalarType,
+			ValueType theFound,
+			ScalarType theFoundScalarType) {
 		if (myLogErrors) {
 			if (ourLog.isWarnEnabled()) {
-				String message = createIncorrectJsonTypeMessage(theElementName, theExpected, theExpectedScalarType, theFound, theFoundScalarType);
+				String message = createIncorrectJsonTypeMessage(
+						theElementName, theExpected, theExpectedScalarType, theFound, theFoundScalarType);
 				ourLog.warn(message);
 			}
 		}
@@ -106,7 +113,7 @@ public class LenientErrorHandler extends ParseErrorHandler implements IParserErr
 	 * Note that empty values (e.g. <code>""</code>) will not lead to an error when this is set to
 	 * <code>true</code>, only invalid values (e.g. a gender code of <code>foo</code>)
 	 * </p>
-	 * 
+	 *
 	 * @see #setErrorOnInvalidValue(boolean)
 	 */
 	public boolean isErrorOnInvalidValue() {
@@ -139,7 +146,7 @@ public class LenientErrorHandler extends ParseErrorHandler implements IParserErr
 	 * Note that empty values (e.g. <code>""</code>) will not lead to an error when this is set to
 	 * <code>true</code>, only invalid values (e.g. a gender code of <code>foo</code>)
 	 * </p>
-	 * 
+	 *
 	 * @return Returns a reference to <code>this</code> for easy method chaining
 	 * @see #isErrorOnInvalidValue()
 	 */
@@ -173,14 +180,17 @@ public class LenientErrorHandler extends ParseErrorHandler implements IParserErr
 	@Override
 	public void unexpectedRepeatingElement(IParseLocation theLocation, String theElementName) {
 		if (myLogErrors) {
-			ourLog.warn("{}Multiple repetitions of non-repeatable element '{}' found while parsing", describeLocation(theLocation), theElementName);
+			ourLog.warn(
+					"{}Multiple repetitions of non-repeatable element '{}' found while parsing",
+					describeLocation(theLocation),
+					theElementName);
 		}
 	}
 
 	@Override
 	public void unknownAttribute(IParseLocation theLocation, String theElementName) {
 		if (myLogErrors) {
-			ourLog.warn("{}Unknown attribute '{}' found while parsing",describeLocation(theLocation),  theElementName);
+			ourLog.warn("{}Unknown attribute '{}' found while parsing", describeLocation(theLocation), theElementName);
 		}
 	}
 
@@ -199,7 +209,7 @@ public class LenientErrorHandler extends ParseErrorHandler implements IParserErr
 	}
 
 	@Override
-	public void extensionContainsValueAndNestedExtensions(IParseLocation theLocation){
+	public void extensionContainsValueAndNestedExtensions(IParseLocation theLocation) {
 		if (myErrorOnInvalidExtension) {
 			STRICT_ERROR_HANDLER.extensionContainsValueAndNestedExtensions(theLocation);
 		} else if (myLogErrors) {
@@ -207,7 +217,12 @@ public class LenientErrorHandler extends ParseErrorHandler implements IParserErr
 		}
 	}
 
-	public static String createIncorrectJsonTypeMessage(String theElementName, ValueType theExpected, ScalarType theExpectedScalarType, ValueType theFound, ScalarType theFoundScalarType) {
+	public static String createIncorrectJsonTypeMessage(
+			String theElementName,
+			ValueType theExpected,
+			ScalarType theExpectedScalarType,
+			ValueType theFound,
+			ScalarType theFoundScalarType) {
 		StringBuilder b = new StringBuilder();
 		b.append("Found incorrect type for element ");
 		b.append(theElementName);
@@ -228,5 +243,4 @@ public class LenientErrorHandler extends ParseErrorHandler implements IParserErr
 		String message = b.toString();
 		return message;
 	}
-
 }

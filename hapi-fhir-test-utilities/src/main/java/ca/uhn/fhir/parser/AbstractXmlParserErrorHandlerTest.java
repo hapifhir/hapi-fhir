@@ -23,7 +23,7 @@ import ca.uhn.fhir.context.FhirContext;
 
 public abstract non-sealed class AbstractXmlParserErrorHandlerTest extends AbstractParserErrorHandlerTest {
 
-	private static String PATIENT_DUPLICATE_CHOICE = 
+	private static String PATIENT_DUPLICATE_CHOICE =
 			"""
 			<Patient xmlns="http://hl7.org/fhir">
 					<deceasedBoolean value="true"></deceasedBoolean>
@@ -41,5 +41,4 @@ public abstract non-sealed class AbstractXmlParserErrorHandlerTest extends Abstr
 	protected String createResourceWithRepeatingChoice() {
 		return PATIENT_DUPLICATE_CHOICE;
 	}
-
 }

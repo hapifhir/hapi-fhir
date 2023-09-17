@@ -39,5 +39,4 @@ public class EnversAuditConfig {
 	AuditReader auditReader() {
 		return AuditReaderFactory.get(myEntityManagerFactory.createEntityManager());
 	}
-
 }

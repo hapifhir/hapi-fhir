@@ -71,21 +71,19 @@ public class MissingParameterQueryParams {
 	private final RequestPartitionId myRequestPartitionId;
 
 	public MissingParameterQueryParams(
-		SearchQueryBuilder theSqlBuilder,
-		RestSearchParameterTypeEnum theParamType,
-		List<? extends IQueryParameterType> theList,
-		String theParamName,
-		String theResourceType,
-		DbColumn theSourceJoinColumn,
-		RequestPartitionId theRequestPartitionId
-	) {
+			SearchQueryBuilder theSqlBuilder,
+			RestSearchParameterTypeEnum theParamType,
+			List<? extends IQueryParameterType> theList,
+			String theParamName,
+			String theResourceType,
+			DbColumn theSourceJoinColumn,
+			RequestPartitionId theRequestPartitionId) {
 		mySqlBuilder = theSqlBuilder;
 		myParamType = theParamType;
 		myQueryParameterTypes = theList;
 		if (theList.isEmpty()) {
 			// this will never happen
-			throw new InvalidParameterException(Msg.code(2140)
-				+ " Invalid search parameter list. Cannot be empty!");
+			throw new InvalidParameterException(Msg.code(2140) + " Invalid search parameter list. Cannot be empty!");
 		}
 		myIsMissing = theList.get(0).getMissing();
 		myParamName = theParamName;

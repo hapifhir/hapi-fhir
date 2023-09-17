@@ -19,18 +19,8 @@
  */
 package ca.uhn.fhir.rest.server.method;
 
-import ca.uhn.fhir.i18n.Msg;
-import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-
-import java.lang.reflect.Method;
-import java.util.Collections;
-import java.util.Set;
-
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IIdType;
-
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.annotation.Update;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
@@ -38,9 +28,16 @@ import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.ParameterUtil;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 
+import java.lang.reflect.Method;
+import java.util.Collections;
+import java.util.Set;
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class UpdateMethodBinding extends BaseOutcomeReturningMethodBindingWithResourceParam {
 
@@ -99,23 +96,33 @@ public class UpdateMethodBinding extends BaseOutcomeReturningMethodBindingWithRe
 	}
 
 	@Override
-	protected void validateResourceIdAndUrlIdForNonConditionalOperation(IBaseResource theResource, String theResourceId, String theUrlId, String theMatchUrl) {
+	protected void validateResourceIdAndUrlIdForNonConditionalOperation(
+			IBaseResource theResource, String theResourceId, String theUrlId, String theMatchUrl) {
 		if (isBlank(theMatchUrl)) {
 			if (isBlank(theUrlId)) {
-				String msg = getContext().getLocalizer().getMessage(BaseOutcomeReturningMethodBindingWithResourceParam.class, "noIdInUrlForUpdate");
+				String msg = getContext()
+						.getLocalizer()
+						.getMessage(BaseOutcomeReturningMethodBindingWithResourceParam.class, "noIdInUrlForUpdate");
 				throw new InvalidRequestException(Msg.code(418) + msg);
 			}
 			if (isBlank(theResourceId)) {
-				String msg = getContext().getLocalizer().getMessage(BaseOutcomeReturningMethodBindingWithResourceParam.class, "noIdInBodyForUpdate");
+				String msg = getContext()
+						.getLocalizer()
+						.getMessage(BaseOutcomeReturningMethodBindingWithResourceParam.class, "noIdInBodyForUpdate");
 				throw new InvalidRequestException(Msg.code(419) + msg);
 			}
 			if (!theResourceId.equals(theUrlId)) {
-				String msg = getContext().getLocalizer().getMessage(BaseOutcomeReturningMethodBindingWithResourceParam.class, "incorrectIdForUpdate", theResourceId, theUrlId);
+				String msg = getContext()
+						.getLocalizer()
+						.getMessage(
+								BaseOutcomeReturningMethodBindingWithResourceParam.class,
+								"incorrectIdForUpdate",
+								theResourceId,
+								theUrlId);
 				throw new InvalidRequestException(Msg.code(420) + msg);
 			}
 		} else {
 			theResource.setId((IIdType) null);
 		}
-
 	}
 }

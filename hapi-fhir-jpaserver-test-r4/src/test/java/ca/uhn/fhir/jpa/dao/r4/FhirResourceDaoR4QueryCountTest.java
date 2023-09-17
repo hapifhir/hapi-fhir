@@ -25,7 +25,7 @@ import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.search.PersistedJpaSearchFirstPageBundleProvider;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
-import ca.uhn.fhir.jpa.subscription.submit.interceptor.SubscriptionMatcherInterceptor;
+import ca.uhn.fhir.jpa.subscription.submit.svc.ResourceModifiedSubmitterSvc;
 import ca.uhn.fhir.jpa.subscription.triggering.ISubscriptionTriggeringSvc;
 import ca.uhn.fhir.jpa.term.TermReadSvcImpl;
 import ca.uhn.fhir.jpa.util.SqlQuery;
@@ -126,6 +126,7 @@ import static org.mockito.Mockito.when;
 @SuppressWarnings("JavadocBlankLines")
 @TestMethodOrder(MethodOrderer.MethodName.class)
 public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test {
+
 	@RegisterExtension
 	@Order(0)
 	public static final RestfulServerExtension ourServer = new RestfulServerExtension(FhirContext.forR4Cached())
@@ -139,7 +140,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 	@Autowired
 	private ISubscriptionTriggeringSvc mySubscriptionTriggeringSvc;
 	@Autowired
-	private SubscriptionMatcherInterceptor mySubscriptionMatcherInterceptor;
+	private ResourceModifiedSubmitterSvc myResourceModifiedSubmitterSvc;;
 	@Autowired
 	private ReindexStep myReindexStep;
 	@Autowired
@@ -162,6 +163,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		myStorageSettings.setResourceMetaCountHardLimit(new JpaStorageSettings().getResourceMetaCountHardLimit());
 		myStorageSettings.setRespectVersionsForSearchIncludes(new JpaStorageSettings().isRespectVersionsForSearchIncludes());
 		myStorageSettings.setTagStorageMode(new JpaStorageSettings().getTagStorageMode());
+		myStorageSettings.setExpungeEnabled(false);
 
 		myFhirContext.getParserOptions().setStripVersionsFromReferences(true);
 		TermReadSvcImpl.setForceDisableHibernateSearchForUnitTest(false);
@@ -200,6 +202,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 			myPatientDao.delete(new IdType("Patient/TEST" + i));
 		}
 
+		myStorageSettings.setExpungeEnabled(true);
 
 		runInTransaction(() -> assertThat(myResourceTableDao.findAll(), not(empty())));
 		runInTransaction(() -> assertThat(myResourceHistoryTableDao.findAll(), not(empty())));
@@ -257,6 +260,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		assertThat(myCaptureQueriesListener.getInsertQueriesForCurrentThread(), empty());
 		assertEquals(0, myCaptureQueriesListener.getDeleteQueriesForCurrentThread().size());
 	}
+
 
 	/**
 	 * See the class javadoc before changing the counts in this test!
@@ -3087,7 +3091,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		// Setup
 
 		myStorageSettings.addSupportedSubscriptionType(org.hl7.fhir.dstu2.model.Subscription.SubscriptionChannelType.RESTHOOK);
-		mySubscriptionMatcherInterceptor.startIfNeeded();
+		myResourceModifiedSubmitterSvc.startIfNeeded();
 
 		for (int i = 0; i < 10; i++) {
 			createPatient(withActiveTrue());

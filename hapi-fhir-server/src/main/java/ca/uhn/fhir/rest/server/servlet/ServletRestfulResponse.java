@@ -52,9 +52,10 @@ public class ServletRestfulResponse extends BaseRestfulResponse<ServletRequestDe
 
 	@Nonnull
 	@Override
-	public OutputStream getResponseOutputStream(int theStatusCode, String theContentType, Integer theContentLength) throws IOException {
-		Validate.isTrue(myWriter == null, "getResponseOutputStream() called multiple times" );
-		Validate.isTrue(myOutputStream == null, "getResponseOutputStream() called after getResponseWriter()" );
+	public OutputStream getResponseOutputStream(int theStatusCode, String theContentType, Integer theContentLength)
+			throws IOException {
+		Validate.isTrue(myWriter == null, "getResponseOutputStream() called multiple times");
+		Validate.isTrue(myOutputStream == null, "getResponseOutputStream() called after getResponseWriter()");
 
 		addHeaders();
 		HttpServletResponse httpResponse = getRequestDetails().getServletResponse();
@@ -70,8 +71,9 @@ public class ServletRestfulResponse extends BaseRestfulResponse<ServletRequestDe
 
 	@Nonnull
 	@Override
-	public Writer getResponseWriter(int theStatusCode, String theContentType, String theCharset, boolean theRespondGzip) throws IOException {
-		Validate.isTrue(myOutputStream == null, "getResponseWriter() called after getResponseOutputStream()" );
+	public Writer getResponseWriter(int theStatusCode, String theContentType, String theCharset, boolean theRespondGzip)
+			throws IOException {
+		Validate.isTrue(myOutputStream == null, "getResponseWriter() called after getResponseOutputStream()");
 
 		addHeaders();
 		HttpServletResponse theHttpResponse = getRequestDetails().getServletResponse();
@@ -119,5 +121,4 @@ public class ServletRestfulResponse extends BaseRestfulResponse<ServletRequestDe
 	static String sanitizeHeaderField(String theKey) {
 		return StringUtils.replaceChars(theKey, "\r\n", null);
 	}
-
 }

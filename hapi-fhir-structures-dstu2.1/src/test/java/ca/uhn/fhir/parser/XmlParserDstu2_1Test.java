@@ -9,6 +9,7 @@ import ca.uhn.fhir.parser.FooMessageHeaderWithExplicitField.FooMessageSourceComp
 import ca.uhn.fhir.parser.IParserErrorHandler.IParseLocation;
 import ca.uhn.fhir.parser.PatientWithCustomCompositeExtension.FooParentExtension;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.util.ClasspathUtil;
 import ca.uhn.fhir.util.TestUtil;
 import com.google.common.collect.Sets;
 import org.apache.commons.io.IOUtils;
@@ -1707,7 +1708,7 @@ public class XmlParserDstu2_1Test {
 	@Test
 	@Disabled
 	public void testParseAndEncodeBundle() throws Exception {
-		String content = IOUtils.toString(XmlParserDstu2_1Test.class.getResourceAsStream("/bundle-example.xml"), StandardCharsets.UTF_8);
+		String content = ClasspathUtil.loadResource("/bundle-example.xml");
 
 		Bundle parsed = ourCtx.newXmlParser().parseResource(Bundle.class, content);
 		assertEquals("Bundle/example/_history/1", parsed.getIdElement().getValue());
@@ -1742,7 +1743,7 @@ public class XmlParserDstu2_1Test {
 	@Test
 	@Disabled
 	public void testParseAndEncodeBundleNewStyle() throws Exception {
-		String content = IOUtils.toString(XmlParserDstu2_1Test.class.getResourceAsStream("/bundle-example.xml"), StandardCharsets.UTF_8);
+		String content = ClasspathUtil.loadResource("/bundle-example.xml");
 
 		IParser newXmlParser = ourCtx.newXmlParser();
 		Bundle parsed = newXmlParser.parseResource(Bundle.class, content);

@@ -51,5 +51,4 @@ public class CompartmentDef {
 			myResourceName = theResourceName;
 		}
 	}
-
 }

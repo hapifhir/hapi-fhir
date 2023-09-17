@@ -19,15 +19,15 @@
  */
 package ca.uhn.fhir.mdm.rules.json;
 
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.ConfigurationException;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 
-import javax.annotation.Nonnull;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import javax.annotation.Nonnull;
 
 public class VectorMatchResultMap {
 	private final MdmRulesJson myMdmRulesJson;
@@ -43,7 +43,8 @@ public class VectorMatchResultMap {
 	}
 
 	private void initMap() {
-		for (Map.Entry<String, MdmMatchResultEnum> entry : myMdmRulesJson.getMatchResultMap().entrySet()) {
+		for (Map.Entry<String, MdmMatchResultEnum> entry :
+				myMdmRulesJson.getMatchResultMap().entrySet()) {
 			put(entry.getKey(), entry.getValue());
 		}
 	}
@@ -100,7 +101,7 @@ public class VectorMatchResultMap {
 		return -1;
 	}
 
-    public String getFieldMatchNames(long theVector) {
+	public String getFieldMatchNames(long theVector) {
 		return myVectorToFieldMatchNamesMap.get(theVector);
-    }
+	}
 }

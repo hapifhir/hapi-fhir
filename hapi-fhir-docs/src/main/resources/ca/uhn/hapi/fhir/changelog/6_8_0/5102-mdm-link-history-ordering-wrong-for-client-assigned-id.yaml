@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 5102
+title: "Consider user-assigned IDs, instead of system assigned IDs, when sorting MDM links history."

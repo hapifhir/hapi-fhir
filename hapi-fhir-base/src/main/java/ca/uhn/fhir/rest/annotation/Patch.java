@@ -19,25 +19,24 @@
  */
 package ca.uhn.fhir.rest.annotation;
 
-import java.lang.annotation.ElementType;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 
+import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import org.hl7.fhir.instance.model.api.IBaseResource;
-
 /**
  * RESTful method annotation to be used for the proposed FHIR
  * PATCH method
- * 
+ *
  * <p>
  * Patch is used to apply a differential to a resource in either
  * XML or JSON format
  * </p>
  */
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ ElementType.METHOD })
+@Target({ElementType.METHOD})
 public @interface Patch {
 
 	/**

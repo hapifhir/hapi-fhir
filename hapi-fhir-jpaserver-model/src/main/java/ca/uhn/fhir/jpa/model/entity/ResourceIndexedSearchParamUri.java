@@ -47,14 +47,19 @@ import static org.apache.commons.lang3.StringUtils.defaultString;
 
 @Embeddable
 @Entity
-@Table(name = "HFJ_SPIDX_URI", indexes = {
-	// for queries
-	@Index(name = "IDX_SP_URI_HASH_URI_V2", columnList = "HASH_URI,RES_ID,PARTITION_ID", unique = true),
-	// for sorting
-	@Index(name = "IDX_SP_URI_HASH_IDENTITY_V2", columnList = "HASH_IDENTITY,SP_URI,RES_ID,PARTITION_ID", unique = true),
-	// for index create/delete
-	@Index(name = "IDX_SP_URI_COORDS", columnList = "RES_ID")
-})
+@Table(
+		name = "HFJ_SPIDX_URI",
+		indexes = {
+			// for queries
+			@Index(name = "IDX_SP_URI_HASH_URI_V2", columnList = "HASH_URI,RES_ID,PARTITION_ID", unique = true),
+			// for sorting
+			@Index(
+					name = "IDX_SP_URI_HASH_IDENTITY_V2",
+					columnList = "HASH_IDENTITY,SP_URI,RES_ID,PARTITION_ID",
+					unique = true),
+			// for index create/delete
+			@Index(name = "IDX_SP_URI_COORDS", columnList = "RES_ID")
+		})
 public class ResourceIndexedSearchParamUri extends BaseResourceIndexedSearchParam {
 
 	/*
@@ -65,11 +70,10 @@ public class ResourceIndexedSearchParamUri extends BaseResourceIndexedSearchPara
 	public static final int MAX_LENGTH = 500;
 
 	private static final long serialVersionUID = 1L;
+
 	@Column(name = "SP_URI", nullable = true, length = MAX_LENGTH)
 	@FullTextField
 	public String myUri;
-
-
 
 	@Id
 	@SequenceGenerator(name = "SEQ_SPIDX_URI", sequenceName = "SEQ_SPIDX_URI")
@@ -87,9 +91,15 @@ public class ResourceIndexedSearchParamUri extends BaseResourceIndexedSearchPara
 	@Column(name = "HASH_IDENTITY", nullable = true)
 	private Long myHashIdentity;
 
-	@ManyToOne(optional = false, fetch = FetchType.LAZY, cascade = {})
-	@JoinColumn(foreignKey = @ForeignKey(name = "FKGXSREUTYMMFJUWDSWV3Y887DO"),
-		name = "RES_ID", referencedColumnName = "RES_ID", nullable = false)
+	@ManyToOne(
+			optional = false,
+			fetch = FetchType.LAZY,
+			cascade = {})
+	@JoinColumn(
+			foreignKey = @ForeignKey(name = "FKGXSREUTYMMFJUWDSWV3Y887DO"),
+			name = "RES_ID",
+			referencedColumnName = "RES_ID",
+			nullable = false)
 	private ResourceTable myResource;
 
 	/**
@@ -102,7 +112,8 @@ public class ResourceIndexedSearchParamUri extends BaseResourceIndexedSearchPara
 	/**
 	 * Constructor
 	 */
-	public ResourceIndexedSearchParamUri(PartitionSettings thePartitionSettings, String theResourceType, String theParamName, String theUri) {
+	public ResourceIndexedSearchParamUri(
+			PartitionSettings thePartitionSettings, String theResourceType, String theParamName, String theUri) {
 		setPartitionSettings(thePartitionSettings);
 		setResourceType(theResourceType);
 		setParamName(theParamName);
@@ -124,7 +135,6 @@ public class ResourceIndexedSearchParamUri extends BaseResourceIndexedSearchPara
 		myHashIdentity = null;
 		myHashUri = null;
 	}
-
 
 	@Override
 	public void calculateHashes() {
@@ -186,7 +196,6 @@ public class ResourceIndexedSearchParamUri extends BaseResourceIndexedSearchPara
 		myId = theId;
 	}
 
-
 	public String getUri() {
 		return myUri;
 	}
@@ -232,15 +241,24 @@ public class ResourceIndexedSearchParamUri extends BaseResourceIndexedSearchPara
 		return defaultString(getUri()).equalsIgnoreCase(uri.getValueNotNull());
 	}
 
-	public static long calculateHashUri(PartitionSettings thePartitionSettings, PartitionablePartitionId theRequestPartitionId, String theResourceType, String theParamName, String theUri) {
+	public static long calculateHashUri(
+			PartitionSettings thePartitionSettings,
+			PartitionablePartitionId theRequestPartitionId,
+			String theResourceType,
+			String theParamName,
+			String theUri) {
 		RequestPartitionId requestPartitionId = PartitionablePartitionId.toRequestPartitionId(theRequestPartitionId);
 		return calculateHashUri(thePartitionSettings, requestPartitionId, theResourceType, theParamName, theUri);
 	}
 
-	public static long calculateHashUri(PartitionSettings thePartitionSettings, RequestPartitionId theRequestPartitionId, String theResourceType, String theParamName, String theUri) {
+	public static long calculateHashUri(
+			PartitionSettings thePartitionSettings,
+			RequestPartitionId theRequestPartitionId,
+			String theResourceType,
+			String theParamName,
+			String theUri) {
 		return hash(thePartitionSettings, theRequestPartitionId, theResourceType, theParamName, theUri);
 	}
-
 
 	@Override
 	public ResourceTable getResource() {

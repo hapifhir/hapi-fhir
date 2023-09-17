@@ -24,6 +24,7 @@ public class SearchWithInterceptorR4Test extends BaseJpaR4Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SearchWithInterceptorR4Test.class);
 
 
+
 	@Test
 	public void testRawSql_Search() {
 		myStorageSettings.setAdvancedHSearchIndexing(false);

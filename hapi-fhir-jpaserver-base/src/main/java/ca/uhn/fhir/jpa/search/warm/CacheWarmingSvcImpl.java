@@ -41,25 +41,30 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import javax.annotation.PostConstruct;
 
 @Component
 public class CacheWarmingSvcImpl implements ICacheWarmingSvc, IHasScheduledJobs {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(CacheWarmingSvcImpl.class);
+
 	@Autowired
 	private JpaStorageSettings myStorageSettings;
+
 	private Map<WarmCacheEntry, Long> myCacheEntryToNextRefresh = new LinkedHashMap<>();
+
 	@Autowired
 	private FhirContext myCtx;
+
 	@Autowired
 	private DaoRegistry myDaoRegistry;
+
 	@Autowired
 	private MatchUrlService myMatchUrlService;
 
@@ -78,11 +83,8 @@ public class CacheWarmingSvcImpl implements ICacheWarmingSvc, IHasScheduledJobs 
 				// Set the next time to warm this search
 				nextRefresh = nextCacheEntry.getPeriodMillis() + System.currentTimeMillis();
 				myCacheEntryToNextRefresh.put(nextCacheEntry, nextRefresh);
-
 			}
-
 		}
-
 	}
 
 	private void refreshNow(WarmCacheEntry theCacheEntry) {

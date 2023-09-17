@@ -59,14 +59,14 @@ public interface IGenericClient extends IRestfulClient {
 
 	/**
 	 * Retrieves the server's conformance statement
-	 * 
+	 *
 	 * @deprecated As of HAPI 3.0.0 this method has been deprecated, as the operation is now called "capabilities". Use {@link #capabilities()} instead
 	 */
 	IFetchConformanceUntyped fetchConformance();
 
 	/**
 	 * Force the client to fetch the server's conformance statement and validate that it is appropriate for this client.
-	 * 
+	 *
 	 * @throws FhirClientConnectionException
 	 *            if the conformance statement cannot be read, or if the client
 	 * @throws FhirClientInappropriateForServerException
@@ -87,7 +87,7 @@ public interface IGenericClient extends IRestfulClient {
 	/**
 	 * Fluent method for the "meta" operations, which can be used to get, add and remove tags and other
 	 * Meta elements from a resource or across the server.
-	 * 
+	 *
 	 * @since 1.1
 	 */
 	IMeta meta();
@@ -109,13 +109,13 @@ public interface IGenericClient extends IRestfulClient {
 
 	/**
 	 * Implementation of the "instance read" method.
-	 * 
+	 *
 	 * @param theType
 	 *           The type of resource to load
 	 * @param theId
 	 *           The ID to load
 	 * @return The resource
-	 * 
+	 *
 	 * @deprecated Use {@link #read() read() fluent method} instead (deprecated in HAPI FHIR 3.0.0)
 	 */
 	@Deprecated
@@ -123,7 +123,7 @@ public interface IGenericClient extends IRestfulClient {
 
 	/**
 	 * Perform the "read" operation (retrieve the latest version of a resource instance by ID) using an absolute URL.
-	 * 
+	 *
 	 * @param theType
 	 *           The resource type that is being retrieved
 	 * @param theUrl
@@ -136,7 +136,7 @@ public interface IGenericClient extends IRestfulClient {
 
 	/**
 	 * Perform the "read" operation (retrieve the latest version of a resource instance by ID) using an absolute URL.
-	 * 
+	 *
 	 * @param theUrl
 	 *           The absolute URL, e.g. "http://example.com/fhir/Patient/123"
 	 * @return The returned resource from the server
@@ -162,7 +162,7 @@ public interface IGenericClient extends IRestfulClient {
 	/**
 	 * If set to <code>true</code>, the client will log all requests and all responses. This is probably not a good production setting since it will result in a lot of extra logging, but it can be
 	 * useful for troubleshooting.
-	 * 
+	 *
 	 * @param theLogRequestAndResponse
 	 *           Should requests and responses be logged
 	 * @deprecated Use LoggingInterceptor as a client interceptor registered to your
@@ -190,7 +190,7 @@ public interface IGenericClient extends IRestfulClient {
 
 	/**
 	 * Implementation of the "instance update" method.
-	 * 
+	 *
 	 * @param theId
 	 *           The ID to update
 	 * @param theResource
@@ -236,7 +236,7 @@ public interface IGenericClient extends IRestfulClient {
 	 * Note that if an absolute resource ID is passed in (i.e. a URL containing a protocol and host as well as the resource type and ID) the server base for the client will be ignored, and the URL
 	 * passed in will be queried.
 	 * </p>
-	 * 
+	 *
 	 * @param theType
 	 *           The type of resource to load
 	 * @param theId
@@ -249,7 +249,7 @@ public interface IGenericClient extends IRestfulClient {
 
 	/**
 	 * Implementation of the "instance vread" method.
-	 * 
+	 *
 	 * @param theType
 	 *           The type of resource to load
 	 * @param theId
@@ -261,5 +261,4 @@ public interface IGenericClient extends IRestfulClient {
 	 */
 	@Deprecated
 	<T extends IBaseResource> T vread(Class<T> theType, String theId, String theVersionId);
-
 }

@@ -24,10 +24,10 @@ import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import org.hl7.fhir.instance.model.api.IBaseBinary;
 import org.hl7.fhir.instance.model.api.IIdType;
 
-import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import javax.annotation.Nonnull;
 
 public interface IBinaryStorageSvc {
 
@@ -43,11 +43,11 @@ public interface IBinaryStorageSvc {
 	 * @param theNewBlobId the blob ID to validate
 	 * @return true if the blob ID is valid, false otherwise.
 	 */
-   default boolean isValidBlobId(String theNewBlobId) {
-		return true;//default method here as we don't want to break existing implementations
+	default boolean isValidBlobId(String theNewBlobId) {
+		return true; // default method here as we don't want to break existing implementations
 	}
 
-   /**
+	/**
 	 * Sets the maximum number of bytes that can be stored in a single binary
 	 * file by this service. The default is {@link Long#MAX_VALUE}
 	 *
@@ -98,8 +98,9 @@ public interface IBinaryStorageSvc {
 	 */
 	@Deprecated(since = "6.6.0", forRemoval = true)
 	@Nonnull
-	default StoredDetails storeBlob(IIdType theResourceId, String theBlobIdOrNull, String theContentType,
-											  InputStream theInputStream) throws IOException {
+	default StoredDetails storeBlob(
+			IIdType theResourceId, String theBlobIdOrNull, String theContentType, InputStream theInputStream)
+			throws IOException {
 		return storeBlob(theResourceId, theBlobIdOrNull, theContentType, theInputStream, new ServletRequestDetails());
 	}
 
@@ -114,8 +115,13 @@ public interface IBinaryStorageSvc {
 	 * @return Returns details about the stored data
 	 */
 	@Nonnull
-	StoredDetails storeBlob(IIdType theResourceId, String theBlobIdOrNull, String theContentType,
-									InputStream theInputStream, RequestDetails theRequestDetails) throws IOException;
+	StoredDetails storeBlob(
+			IIdType theResourceId,
+			String theBlobIdOrNull,
+			String theContentType,
+			InputStream theInputStream,
+			RequestDetails theRequestDetails)
+			throws IOException;
 
 	StoredDetails fetchBlobDetails(IIdType theResourceId, String theBlobId) throws IOException;
 

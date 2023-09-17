@@ -31,5 +31,4 @@ public interface IStandardizer {
 	 * @return Returns a standardized string.
 	 */
 	public String standardize(String theString);
-
 }

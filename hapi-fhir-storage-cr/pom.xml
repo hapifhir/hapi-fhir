@@ -7,7 +7,7 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-deployable-pom</artifactId>
-		<version>6.7.6-SNAPSHOT</version>
+		<version>6.9.6-SNAPSHOT</version>
 
 		<relativePath>../hapi-deployable-pom/pom.xml</relativePath>
 	</parent>
@@ -212,7 +212,7 @@
 		<dependency>
 			<groupId>io.specto</groupId>
 			<artifactId>hoverfly-java-junit5</artifactId>
-			<version>0.14.3</version>
+			<version>0.14.4</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>

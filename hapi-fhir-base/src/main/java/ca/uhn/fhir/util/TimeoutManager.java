@@ -57,7 +57,8 @@ public class TimeoutManager {
 		}
 		if (myStopWatch.getMillis() > myErrorTimeout.toMillis() && !errored) {
 			if (HapiSystemProperties.isUnitTestModeEnabled()) {
-				throw new TimeoutException(Msg.code(2133) + myServiceName + " timed out after running for " + myStopWatch);
+				throw new TimeoutException(
+						Msg.code(2133) + myServiceName + " timed out after running for " + myStopWatch);
 			} else {
 				ourLog.error(myServiceName + " has run for {}", myStopWatch);
 				errored = true;

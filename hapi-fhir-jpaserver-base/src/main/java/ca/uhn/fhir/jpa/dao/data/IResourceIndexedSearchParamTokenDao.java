@@ -25,7 +25,8 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-public interface IResourceIndexedSearchParamTokenDao extends JpaRepository<ResourceIndexedSearchParamToken, Long>, IHapiFhirJpaRepository {
+public interface IResourceIndexedSearchParamTokenDao
+		extends JpaRepository<ResourceIndexedSearchParamToken, Long>, IHapiFhirJpaRepository {
 
 	@Query("select count(*) from ResourceIndexedSearchParamToken t WHERE t.myResourcePid = :resid")
 	int countForResourceId(@Param("resid") Long theResourcePid);

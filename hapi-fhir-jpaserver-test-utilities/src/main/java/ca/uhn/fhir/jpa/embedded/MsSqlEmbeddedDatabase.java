@@ -20,6 +20,8 @@
 package ca.uhn.fhir.jpa.embedded;
 
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.MSSQLServerContainer;
 import org.testcontainers.utility.DockerImageName;
 
@@ -36,14 +38,20 @@ import java.util.Map;
  * @see <a href="https://www.testcontainers.org/modules/databases/mssqlserver/">MS SQL Server TestContainer</a>
  */
 public class MsSqlEmbeddedDatabase extends JpaEmbeddedDatabase {
+	private static final Logger ourLog = LoggerFactory.getLogger(MsSqlEmbeddedDatabase.class);
 
 	private final MSSQLServerContainer myContainer;
 
 	public MsSqlEmbeddedDatabase() {
-		DockerImageName msSqlImage = DockerImageName.parse("mcr.microsoft.com/azure-sql-edge:latest").asCompatibleSubstituteFor("mcr.microsoft.com/mssql/server");
+		DockerImageName msSqlImage = DockerImageName.parse("mcr.microsoft.com/azure-sql-edge:latest")
+				.asCompatibleSubstituteFor("mcr.microsoft.com/mssql/server");
 		myContainer = new MSSQLServerContainer(msSqlImage).acceptLicense();
 		myContainer.start();
-		super.initialize(DriverTypeEnum.MSSQL_2012, myContainer.getJdbcUrl(), myContainer.getUsername(), myContainer.getPassword());
+		super.initialize(
+				DriverTypeEnum.MSSQL_2012,
+				myContainer.getJdbcUrl(),
+				myContainer.getUsername(),
+				myContainer.getPassword());
 	}
 
 	@Override
@@ -79,7 +87,8 @@ public class MsSqlEmbeddedDatabase extends JpaEmbeddedDatabase {
 
 	private void dropForeignKeys() {
 		List<String> sql = new ArrayList<>();
-		List<Map<String, Object>> queryResults = query("SELECT * FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS WHERE CONSTRAINT_TYPE = 'FOREIGN KEY'");
+		List<Map<String, Object>> queryResults =
+				query("SELECT * FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS WHERE CONSTRAINT_TYPE = 'FOREIGN KEY'");
 		for (Map<String, Object> row : queryResults) {
 			String tableName = row.get("TABLE_NAME").toString();
 			String constraintName = row.get("CONSTRAINT_NAME").toString();
@@ -92,8 +101,18 @@ public class MsSqlEmbeddedDatabase extends JpaEmbeddedDatabase {
 		List<String> sql = new ArrayList<>();
 		List<Map<String, Object>> queryResults = query("SELECT * FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS");
 		for (Map<String, Object> row : queryResults) {
-			String tableName = row.get("TABLE_NAME").toString();
-			String constraintName = row.get("CONSTRAINT_NAME").toString();
+			Object tableNameEntry = row.get("TABLE_NAME");
+			if (tableNameEntry == null) {
+				ourLog.warn("Found a constraint with no table name: {}", row);
+				continue;
+			}
+			String tableName = tableNameEntry.toString();
+			Object constraintNameEntry = row.get("CONSTRAINT_NAME");
+			if (constraintNameEntry == null) {
+				ourLog.warn("Found a constraint with no constraint name: {}", row);
+				continue;
+			}
+			String constraintName = constraintNameEntry.toString();
 			sql.add(String.format("ALTER TABLE \"%s\" DROP CONSTRAINT \"%s\"", tableName, constraintName));
 		}
 		executeSqlAsBatch(sql);

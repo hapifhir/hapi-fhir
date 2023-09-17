@@ -1,6 +1,6 @@
 /*-
  * #%L
- * HAPI FHIR Search Parameters
+ * hapi-fhir-jpa
  * %%
  * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
@@ -26,7 +26,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 
-import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -35,6 +34,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import javax.annotation.Nonnull;
 
 /**
  * Nickname service is used to load nicknames
@@ -45,16 +45,13 @@ import java.util.Set;
  * -
  * If one is to be provided, it must be provided before nickname svc is invoked
  */
-public class NicknameSvc {
+public class NicknameSvc implements INicknameSvc {
 	private static final Logger ourLog = LoggerFactory.getLogger(NicknameSvc.class);
-
 	private NicknameMap myNicknameMap;
 
 	private Resource myNicknameResource;
 
-	public NicknameSvc() {
-
-	}
+	public NicknameSvc() {}
 
 	public void setNicknameResource(Resource theNicknameResource) {
 		myNicknameResource = theNicknameResource;
@@ -98,6 +95,7 @@ public class NicknameSvc {
 
 	private void ensureMapInitialized() {
 		if (myNicknameResource == null) {
+			ourLog.debug("Loading defaults");
 			myNicknameResource = new ClassPathResource("/nickname/names.csv");
 		}
 

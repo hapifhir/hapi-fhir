@@ -42,11 +42,13 @@ public class ValidatorPolicyAdvisor implements IValidationPolicyAdvisor {
 
 	@Autowired
 	private ValidationSettings myValidationSettings;
+
 	@Autowired
 	private FhirContext myFhirContext;
 
 	@Override
-	public ReferenceValidationPolicy policyForReference(IResourceValidator validator, Object appContext, String path, String url) {
+	public ReferenceValidationPolicy policyForReference(
+			IResourceValidator validator, Object appContext, String path, String url) {
 		int slashIdx = url.indexOf("/");
 		if (slashIdx > 0 && myFhirContext.getResourceTypes().contains(url.substring(0, slashIdx))) {
 			return myValidationSettings.getLocalReferenceValidationDefaultPolicy();
@@ -56,12 +58,27 @@ public class ValidatorPolicyAdvisor implements IValidationPolicyAdvisor {
 	}
 
 	@Override
-	public CodedContentValidationPolicy policyForCodedContent(IResourceValidator iResourceValidator, Object o, String s, ElementDefinition elementDefinition, StructureDefinition structureDefinition, BindingKind bindingKind, ValueSet valueSet, List<String> list) {
+	public CodedContentValidationPolicy policyForCodedContent(
+			IResourceValidator iResourceValidator,
+			Object o,
+			String s,
+			ElementDefinition elementDefinition,
+			StructureDefinition structureDefinition,
+			BindingKind bindingKind,
+			ValueSet valueSet,
+			List<String> list) {
 		return CodedContentValidationPolicy.CODE;
 	}
 
 	@Override
-	public ContainedReferenceValidationPolicy policyForContained(IResourceValidator validator, Object appContext, String containerType, String containerId, Element.SpecialElement containingResourceType, String path, String url) {
+	public ContainedReferenceValidationPolicy policyForContained(
+			IResourceValidator validator,
+			Object appContext,
+			String containerType,
+			String containerId,
+			Element.SpecialElement containingResourceType,
+			String path,
+			String url) {
 		return ContainedReferenceValidationPolicy.CHECK_VALID;
 	}
 }

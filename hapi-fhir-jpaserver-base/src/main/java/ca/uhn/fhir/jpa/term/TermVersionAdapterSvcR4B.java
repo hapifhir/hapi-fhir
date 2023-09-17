@@ -63,24 +63,33 @@ public class TermVersionAdapterSvcR4B extends BaseTermVersionAdapterSvcImpl impl
 	}
 
 	@Override
-	public IIdType createOrUpdateCodeSystem(org.hl7.fhir.r4.model.CodeSystem theCodeSystemResource, RequestDetails theRequestDetails) {
+	public IIdType createOrUpdateCodeSystem(
+			org.hl7.fhir.r4.model.CodeSystem theCodeSystemResource, RequestDetails theRequestDetails) {
 		validateCodeSystemForStorage(theCodeSystemResource);
 
-		org.hl7.fhir.r5.model.CodeSystem codeSystemR5 = (org.hl7.fhir.r5.model.CodeSystem) VersionConvertorFactory_40_50.convertResource(theCodeSystemResource, new BaseAdvisor_40_50(false));
-		CodeSystem codeSystemR4 = (CodeSystem) VersionConvertorFactory_43_50.convertResource(codeSystemR5, new BaseAdvisor_43_50(false));
+		org.hl7.fhir.r5.model.CodeSystem codeSystemR5 = (org.hl7.fhir.r5.model.CodeSystem)
+				VersionConvertorFactory_40_50.convertResource(theCodeSystemResource, new BaseAdvisor_40_50(false));
+		CodeSystem codeSystemR4 =
+				(CodeSystem) VersionConvertorFactory_43_50.convertResource(codeSystemR5, new BaseAdvisor_43_50(false));
 		if (isBlank(theCodeSystemResource.getIdElement().getIdPart())) {
 			String matchUrl = "CodeSystem?url=" + UrlUtil.escapeUrlParam(theCodeSystemResource.getUrl());
-			return myCodeSystemResourceDao.update(codeSystemR4, matchUrl, theRequestDetails).getId();
+			return myCodeSystemResourceDao
+					.update(codeSystemR4, matchUrl, theRequestDetails)
+					.getId();
 		} else {
-			return myCodeSystemResourceDao.update(codeSystemR4, theRequestDetails).getId();
+			return myCodeSystemResourceDao
+					.update(codeSystemR4, theRequestDetails)
+					.getId();
 		}
 	}
 
 	@Override
 	public void createOrUpdateConceptMap(org.hl7.fhir.r4.model.ConceptMap theConceptMap) {
 
-		org.hl7.fhir.r5.model.ConceptMap conceptMapR5 = (org.hl7.fhir.r5.model.ConceptMap) VersionConvertorFactory_40_50.convertResource(theConceptMap, new BaseAdvisor_40_50(false));
-		ConceptMap conceptMapR4 = (ConceptMap) VersionConvertorFactory_43_50.convertResource(conceptMapR5, new BaseAdvisor_43_50(false));
+		org.hl7.fhir.r5.model.ConceptMap conceptMapR5 = (org.hl7.fhir.r5.model.ConceptMap)
+				VersionConvertorFactory_40_50.convertResource(theConceptMap, new BaseAdvisor_40_50(false));
+		ConceptMap conceptMapR4 =
+				(ConceptMap) VersionConvertorFactory_43_50.convertResource(conceptMapR5, new BaseAdvisor_43_50(false));
 
 		if (isBlank(theConceptMap.getIdElement().getIdPart())) {
 			String matchUrl = "ConceptMap?url=" + UrlUtil.escapeUrlParam(theConceptMap.getUrl());
@@ -93,8 +102,10 @@ public class TermVersionAdapterSvcR4B extends BaseTermVersionAdapterSvcImpl impl
 	@Override
 	public void createOrUpdateValueSet(org.hl7.fhir.r4.model.ValueSet theValueSet) {
 
-		org.hl7.fhir.r5.model.ValueSet valueSetR5 = (org.hl7.fhir.r5.model.ValueSet) VersionConvertorFactory_40_50.convertResource(theValueSet, new BaseAdvisor_40_50(false));
-		ValueSet valueSetR4 = (ValueSet) VersionConvertorFactory_43_50.convertResource(valueSetR5, new BaseAdvisor_43_50(false));
+		org.hl7.fhir.r5.model.ValueSet valueSetR5 = (org.hl7.fhir.r5.model.ValueSet)
+				VersionConvertorFactory_40_50.convertResource(theValueSet, new BaseAdvisor_40_50(false));
+		ValueSet valueSetR4 =
+				(ValueSet) VersionConvertorFactory_43_50.convertResource(valueSetR5, new BaseAdvisor_43_50(false));
 
 		if (isBlank(theValueSet.getIdElement().getIdPart())) {
 			String matchUrl = "ValueSet?url=" + UrlUtil.escapeUrlParam(theValueSet.getUrl());
@@ -103,5 +114,4 @@ public class TermVersionAdapterSvcR4B extends BaseTermVersionAdapterSvcImpl impl
 			myValueSetResourceDao.update(valueSetR4);
 		}
 	}
-
 }
