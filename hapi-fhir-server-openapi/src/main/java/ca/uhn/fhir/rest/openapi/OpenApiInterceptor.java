@@ -91,13 +91,14 @@ import org.thymeleaf.templatemode.TemplateMode;
 import org.thymeleaf.templateresolver.ITemplateResolver;
 import org.thymeleaf.templateresolver.TemplateResolution;
 import org.thymeleaf.templateresource.ClassLoaderTemplateResource;
+import org.thymeleaf.web.servlet.IServletWebExchange;
+import org.thymeleaf.web.servlet.JavaxServletWebApplication;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -336,7 +337,9 @@ public class OpenApiInterceptor {
 		HttpServletRequest servletRequest = theRequestDetails.getServletRequest();
 		ServletContext servletContext = servletRequest.getServletContext();
 
-		WebContext context = new WebContext(servletRequest, theResponse, servletContext);
+		JavaxServletWebApplication application = JavaxServletWebApplication.buildApplication(servletContext);
+		IServletWebExchange exchange = application.buildExchange(servletRequest, theResponse);
+		WebContext context = new WebContext(exchange);
 		context.setVariable(REQUEST_DETAILS, theRequestDetails);
 		context.setVariable("DESCRIPTION", cs.getImplementation().getDescription());
 		context.setVariable("SERVER_NAME", cs.getSoftware().getName());
@@ -773,7 +776,7 @@ public class OpenApiInterceptor {
 		}
 	}
 
-	private static List<String> primitiveTypes = Arrays.asList(
+	private static final List<String> primitiveTypes = List.of(
 			DataTypes.BOOLEAN.toCode(),
 			DataTypes.INTEGER.toCode(),
 			DataTypes.STRING.toCode(),
@@ -797,7 +800,7 @@ public class OpenApiInterceptor {
 			DataTypes.UUID.toCode());
 
 	private static boolean isPrimitive(OperationDefinitionParameterComponent parameter) {
-		return primitiveTypes.contains(parameter.getType());
+		return parameter.getType() != null && primitiveTypes.contains(parameter.getType());
 	}
 
 	private void populateOperation(

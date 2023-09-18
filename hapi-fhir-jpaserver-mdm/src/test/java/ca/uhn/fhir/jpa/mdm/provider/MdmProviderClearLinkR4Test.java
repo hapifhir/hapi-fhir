@@ -8,6 +8,7 @@ import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
 import ca.uhn.fhir.mdm.batch2.clear.MdmClearStep;
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
 import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -17,7 +18,10 @@ import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender;
 import org.hl7.fhir.instance.model.api.IAnyResource;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.hapi.rest.server.helper.BatchHelperR4;
+import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.DecimalType;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
@@ -175,9 +179,47 @@ public class MdmProviderClearLinkR4Test extends BaseLinkR4Test {
 		assertNoHistoricalLinksExist(List.of(myPractitionerGoldenResourceId.getValueAsString(), mySourcePatientId.getValueAsString()), new ArrayList<>());
 	}
 
+	@Test
+	public void testClearAllLinks_deletesRedirectedGoldenResources() {
+		createPatientAndUpdateLinks(buildJanePatient());
+		assertLinkCount(3);
+
+		List<IBaseResource> allGoldenPatients = getAllGoldenPatients();
+		assertThat(allGoldenPatients, hasSize(2));
+
+		IIdType redirectedGoldenPatientId = allGoldenPatients.get(0).getIdElement().toVersionless();
+		IIdType goldenPatientId = allGoldenPatients.get(1).getIdElement().toVersionless();
+
+		myMdmProvider.mergeGoldenResources(new StringType(redirectedGoldenPatientId.getValueAsString()),
+			new StringType(goldenPatientId.getValueAsString()),
+			null,
+			myRequestDetails);
+
+		Patient redirectedGoldenPatient = myPatientDao.read(redirectedGoldenPatientId, myRequestDetails);
+		List<Coding> patientTags = redirectedGoldenPatient.getMeta().getTag();
+		assertTrue(patientTags.stream()
+			.anyMatch(tag -> tag.getCode().equals(MdmConstants.CODE_GOLDEN_RECORD_REDIRECTED)));
+
+		assertLinkCount(4);
+		clearMdmLinks();
+		assertNoLinksExist();
+
+		try {
+			myPatientDao.read(redirectedGoldenPatientId, myRequestDetails);
+			fail();
+		} catch (ResourceNotFoundException e) {
+			assertEquals(Constants.STATUS_HTTP_404_NOT_FOUND, e.getStatusCode());
+			assertNoGoldenPatientsExist();
+		}
+	}
+
 	private void assertNoLinksExist() {
 		assertNoPatientLinksExist();
 		assertNoPractitionerLinksExist();
+	}
+
+	private void assertNoGoldenPatientsExist() {
+		assertThat(getAllGoldenPatients(), hasSize(0));
 	}
 
 	private void assertNoPatientLinksExist() {

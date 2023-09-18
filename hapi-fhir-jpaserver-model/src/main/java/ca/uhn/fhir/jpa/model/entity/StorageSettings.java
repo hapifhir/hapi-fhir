@@ -138,6 +138,13 @@ public class StorageSettings {
 	 * Since 6.4.0
 	 */
 	private boolean myQualifySubscriptionMatchingChannelName = true;
+	/**
+	 * Should the {@literal _lamguage} SearchParameter be supported
+	 * on this server?
+	 *
+	 * @since 7.0.0
+	 */
+	private boolean myLanguageSearchParameterEnabled = false;
 
 	/**
 	 * If set to true, the server will prevent the creation of Subscriptions which cannot be evaluated IN-MEMORY. This can improve
@@ -1293,6 +1300,23 @@ public class StorageSettings {
 	 */
 	public boolean isQualifySubscriptionMatchingChannelName() {
 		return myQualifySubscriptionMatchingChannelName;
+	}
+
+	/**
+	 * @return Should the {@literal _lamguage} SearchParameter be supported on this server? Defaults to {@literal false}.
+	 * @since 7.0.0
+	 */
+	public boolean isLanguageSearchParameterEnabled() {
+		return myLanguageSearchParameterEnabled;
+	}
+
+	/**
+	 * Should the {@literal _lamguage} SearchParameter be supported on this server? Defaults to {@literal false}.
+	 *
+	 * @since 7.0.0
+	 */
+	public void setLanguageSearchParameterEnabled(boolean theLanguageSearchParameterEnabled) {
+		myLanguageSearchParameterEnabled = theLanguageSearchParameterEnabled;
 	}
 
 	private static void validateTreatBaseUrlsAsLocal(String theUrl) {
