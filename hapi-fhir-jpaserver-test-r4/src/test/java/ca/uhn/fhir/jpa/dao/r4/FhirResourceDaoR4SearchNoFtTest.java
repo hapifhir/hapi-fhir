@@ -3831,7 +3831,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 //		String searchQuery = queries.get(0);
 //		assertEquals(searchQuery, 1, StringUtils.countMatches(searchQuery.toUpperCase(), "HFJ_SPIDX_TOKEN"));
 //		assertEquals(searchQuery, 1, StringUtils.countMatches(searchQuery.toUpperCase(), "LEFT OUTER JOIN"));
-//		assertEquals(searchQuery, 2, StringUtils.countMatches(searchQuery.toUpperCase(), "AND RESOURCETA0_.RES_UPDATED"));
+//		assertEquals(searchQuery, 2, StringUtils.countMatches(searchQuery.toUpperCase(), "AND r1_0.RES_UPDATED"));
 	}
 
 	@Test
@@ -4568,7 +4568,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		assertEquals(5, values.getResources(0, 1000).size());
 
 		String sql = myCaptureQueriesListener.logSelectQueriesForCurrentThread(0);
-		assertEquals(1, countMatches(sql, "limit '5'"), sql);
+		assertEquals(1, countMatches(sql, "fetch first '5'"), sql);
 	}
 
 	@Test

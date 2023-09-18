@@ -550,8 +550,8 @@ public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProvide
 
 			runInTransaction(() -> {
 
-				List currentResults = myEntityManager.createNativeQuery("select distinct resourceta0_.RES_ID as col_0_0_ from HFJ_RESOURCE resourceta0_ left outer join HFJ_SPIDX_STRING myparamsst1_ on resourceta0_.RES_ID=myparamsst1_.RES_ID where myparamsst1_.HASH_NORM_PREFIX='5901791607832193956' and (myparamsst1_.SP_VALUE_NORMALIZED like 'SECTION%') limit '500'").getResultList();
-				List currentResources = myEntityManager.createNativeQuery("select resourceta0_.RES_ID as col_0_0_ from HFJ_RESOURCE resourceta0_").getResultList();
+				List currentResults = myEntityManager.createNativeQuery("select distinct r1_0.RES_ID as col_0_0_ from HFJ_RESOURCE r1_0 left outer join HFJ_SPIDX_STRING myparamsst1_ on r1_0.RES_ID=myparamsst1_.RES_ID where myparamsst1_.HASH_NORM_PREFIX='5901791607832193956' and (myparamsst1_.SP_VALUE_NORMALIZED like 'SECTION%') limit '500'").getResultList();
+				List currentResources = myEntityManager.createNativeQuery("select r1_0.RES_ID as col_0_0_ from HFJ_RESOURCE r1_0").getResultList();
 
 				List<Search> searches = mySearchEntityDao.findAll();
 				assertEquals(1, searches.size());

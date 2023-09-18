@@ -38,6 +38,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
+import java.util.Objects;
 
 public class SearchQueryExecutor implements ISearchQueryExecutor {
 
@@ -51,7 +52,7 @@ public class SearchQueryExecutor implements ISearchQueryExecutor {
 	private EntityManager myEntityManager;
 
 	private boolean myQueryInitialized;
-	private ScrollableResultsIterator<Number> myResultSet;
+	private ScrollableResultsIterator<Object> myResultSet;
 	private Long myNext;
 
 	/**
@@ -144,7 +145,13 @@ public class SearchQueryExecutor implements ISearchQueryExecutor {
 				if (myResultSet == null || !myResultSet.hasNext()) {
 					myNext = NO_MORE;
 				} else {
-					Number next = myResultSet.next();
+					Object nextRow = Objects.requireNonNull(myResultSet.next());
+					Number next;
+					if (nextRow instanceof Number) {
+						next = (Number) nextRow;
+					} else {
+						next = (Number) ((Object[]) nextRow)[0];
+					}
 					myNext = next.longValue();
 				}
 
