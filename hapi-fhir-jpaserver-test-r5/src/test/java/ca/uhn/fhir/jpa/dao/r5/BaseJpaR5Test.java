@@ -19,7 +19,9 @@ import ca.uhn.fhir.jpa.binary.provider.BinaryAccessProvider;
 import ca.uhn.fhir.jpa.bulk.export.api.IBulkDataExportJobSchedulingHelper;
 import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
 import ca.uhn.fhir.jpa.dao.data.IForcedIdDao;
+import ca.uhn.fhir.jpa.dao.data.IResourceHistoryProvenanceDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceHistoryTableDao;
+import ca.uhn.fhir.jpa.dao.data.IResourceHistoryTagDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedComboStringUniqueDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamDateDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamQuantityDao;
@@ -292,6 +294,12 @@ public abstract class BaseJpaR5Test extends BaseJpaTest implements ITestDataBuil
 	@Autowired
 	protected IResourceHistoryTableDao myResourceHistoryTableDao;
 	@Autowired
+	protected IResourceTagDao myResourceTagDao;
+	@Autowired
+	protected IResourceHistoryTagDao myResourceHistoryTagDao;
+	@Autowired
+	protected IResourceHistoryProvenanceDao myResourceHistoryProvenanceDao;
+	@Autowired
 	protected IForcedIdDao myForcedIdDao;
 	@Autowired
 	@Qualifier("myCoverageDaoR5")
@@ -314,8 +322,6 @@ public abstract class BaseJpaR5Test extends BaseJpaTest implements ITestDataBuil
 	@Autowired
 	@Qualifier("myResourceProvidersR5")
 	protected ResourceProviderFactory myResourceProviders;
-	@Autowired
-	protected IResourceTagDao myResourceTagDao;
 	@Autowired
 	protected ISearchCoordinatorSvc mySearchCoordinatorSvc;
 	@Autowired(required = false)

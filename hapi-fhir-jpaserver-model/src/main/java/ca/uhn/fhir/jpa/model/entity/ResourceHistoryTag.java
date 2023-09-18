@@ -72,12 +72,21 @@ public class ResourceHistoryTag extends BaseTag implements Serializable {
 	@Column(name = "RES_ID", nullable = false)
 	private Long myResourceId;
 
-	public ResourceHistoryTag() {}
+	/**
+	 * Constructor
+	 */
+	public ResourceHistoryTag() {
+		super();
+	}
 
+	/**
+	 * Constructor
+	 */
 	public ResourceHistoryTag(
 			ResourceHistoryTable theResourceHistoryTable,
 			TagDefinition theTag,
 			PartitionablePartitionId theRequestPartitionId) {
+		this();
 		setTag(theTag);
 		setResource(theResourceHistoryTable);
 		setResourceId(theResourceHistoryTable.getResourceId());
