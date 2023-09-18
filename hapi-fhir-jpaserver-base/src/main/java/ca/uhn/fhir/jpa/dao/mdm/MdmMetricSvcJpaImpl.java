@@ -7,8 +7,8 @@ import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.mdm.api.params.GenerateMdmLinkMetricParameters;
 import ca.uhn.fhir.mdm.api.params.GenerateScoreMetricsParameters;
-import ca.uhn.fhir.mdm.model.MdmLinkScoreMetrics;
 import ca.uhn.fhir.mdm.model.MdmLinkMetrics;
+import ca.uhn.fhir.mdm.model.MdmLinkScoreMetrics;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Arrays;

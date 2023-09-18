@@ -5,8 +5,8 @@ import ca.uhn.fhir.jpa.mdm.models.LinkScoreMetricTestParams;
 import ca.uhn.fhir.jpa.mdm.models.ResourceMetricTestParams;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
-import ca.uhn.fhir.mdm.model.MdmLinkScoreMetrics;
 import ca.uhn.fhir.mdm.model.MdmLinkMetrics;
+import ca.uhn.fhir.mdm.model.MdmLinkScoreMetrics;
 
 import java.util.ArrayList;
 import java.util.Arrays;
