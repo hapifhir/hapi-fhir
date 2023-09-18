@@ -50,7 +50,9 @@ import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
+import java.util.Locale;
 import java.util.Properties;
+import java.util.function.Predicate;
 
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -68,6 +70,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 public class TestR5Config {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(TestR5Config.class);
+	public static final Predicate<String> SELECT_QUERY_INCLUSION_CRITERIA_EXCLUDING_SEQUENCE_QUERIES = CircularQueueCaptureQueriesListener.DEFAULT_SELECT_INCLUSION_CRITERIA.and(t -> !t.toLowerCase(Locale.US).startsWith("select next value"));
 	public static Integer ourMaxThreads;
 
 	static {
@@ -97,7 +100,8 @@ public class TestR5Config {
 
 	@Bean
 	public CircularQueueCaptureQueriesListener captureQueriesListener() {
-		return new CircularQueueCaptureQueriesListener();
+		return new CircularQueueCaptureQueriesListener()
+				.setSelectQueryInclusionCriteria(SELECT_QUERY_INCLUSION_CRITERIA_EXCLUDING_SEQUENCE_QUERIES);
 	}
 
 	@Bean

@@ -61,6 +61,7 @@ import java.sql.Connection;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
+import static ca.uhn.fhir.jpa.test.config.TestR5Config.SELECT_QUERY_INCLUSION_CRITERIA_EXCLUDING_SEQUENCE_QUERIES;
 import static org.junit.jupiter.api.Assertions.fail;
 
 @Configuration
@@ -82,7 +83,8 @@ public class TestDstu3Config {
 
 	@Bean
 	public CircularQueueCaptureQueriesListener captureQueriesListener() {
-		return new CircularQueueCaptureQueriesListener();
+		return new CircularQueueCaptureQueriesListener()
+				.setSelectQueryInclusionCriteria(SELECT_QUERY_INCLUSION_CRITERIA_EXCLUDING_SEQUENCE_QUERIES);
 	}
 
 	@Bean

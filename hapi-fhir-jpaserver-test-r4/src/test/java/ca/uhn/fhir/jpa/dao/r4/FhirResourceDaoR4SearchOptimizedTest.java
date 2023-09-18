@@ -89,9 +89,11 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 	@Autowired
 	private MatchUrlService myMatchUrlService;
 
+	@Override
 	@BeforeEach
-	public void before() {
-		mySearchCoordinatorSvcImpl = (SearchCoordinatorSvcImpl) ProxyUtil.getSingletonTarget(mySearchCoordinatorSvc, SearchCoordinatorSvcImpl.class);
+	public void before() throws Exception {
+		super.before();
+		mySearchCoordinatorSvcImpl = ProxyUtil.getSingletonTarget(mySearchCoordinatorSvc, SearchCoordinatorSvcImpl.class);
 		mySearchCoordinatorSvcImpl.setLoadingThrottleForUnitTests(null);
 		mySearchCoordinatorSvcImpl.setSyncSizeForUnitTests(QueryParameterUtils.DEFAULT_SYNC_SIZE);
 		myCaptureQueriesListener.setCaptureQueryStackTrace(true);
@@ -853,8 +855,8 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 			myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 
 			String selectQuery = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false);
-			assertEquals(1, StringUtils.countMatches(selectQuery.toLowerCase(), "forcedid0_.resource_type='observation'"), selectQuery);
-			assertEquals(1, StringUtils.countMatches(selectQuery.toLowerCase(), "forcedid0_.forced_id in ('a')"), selectQuery);
+			assertEquals(1, StringUtils.countMatches(selectQuery.toLowerCase(), "f1_0.resource_type='observation'"), selectQuery);
+			assertEquals(1, StringUtils.countMatches(selectQuery.toLowerCase(), "f1_0.forced_id in ('a')"), selectQuery);
 
 			selectQuery = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(1).getSql(true, false);
 			assertEquals(1, StringUtils.countMatches(selectQuery.toLowerCase(), "select t1.res_id from hfj_resource t1"), selectQuery);
@@ -895,8 +897,8 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 
 			assertEquals(1, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
 			String selectQuery = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false);
-			assertEquals(1, StringUtils.countMatches(selectQuery.toLowerCase(), "forcedid0_.resource_type='observation'"), selectQuery);
-			assertEquals(1, StringUtils.countMatches(selectQuery.toLowerCase(), "forcedid0_.forced_id in ('a')"), selectQuery);
+			assertEquals(1, StringUtils.countMatches(selectQuery.toLowerCase(), "f1_0.resource_type='observation'"), selectQuery);
+			assertEquals(1, StringUtils.countMatches(selectQuery.toLowerCase(), "f1_0.forced_id in ('a')"), selectQuery);
 		}
 
 		// Search by ID where at least one ID is a numeric ID
@@ -1504,8 +1506,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 
 		// Forced ID resolution
 		resultingQueryNotFormatted = queries.get(0);
-		assertThat(resultingQueryNotFormatted, containsString("RESOURCE_TYPE='Organization'"));
-		assertThat(resultingQueryNotFormatted, containsString("forcedid0_.RESOURCE_TYPE='Organization' and forcedid0_.FORCED_ID='ORG1' or forcedid0_.RESOURCE_TYPE='Organization' and forcedid0_.FORCED_ID='ORG2'"));
+		assertThat(resultingQueryNotFormatted, containsString("cast(f1_0.RESOURCE_TYPE as varchar)='Organization' and cast(f1_0.FORCED_ID as varchar)='ORG1' or cast(f1_0.RESOURCE_TYPE as varchar)='Organization' and cast(f1_0.FORCED_ID as varchar)='ORG2'"));
 
 		// The search itself
 		resultingQueryNotFormatted = queries.get(1);

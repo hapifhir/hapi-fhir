@@ -189,9 +189,11 @@ public class ConsumeFilesStepR4Test extends BasePartitioningR4Test {
 		// Validate
 
 		assertEquals(1, myCaptureQueriesListener.logSelectQueries().size());
+		String patientB = "cast(f1_0.RESOURCE_TYPE as varchar)='Patient' and cast(f1_0.FORCED_ID as varchar)='B' and cast(f1_0.PARTITION_ID as integer) is null";
+		String patientA = "cast(f1_0.RESOURCE_TYPE as varchar)='Patient' and cast(f1_0.FORCED_ID as varchar)='A' and cast(f1_0.PARTITION_ID as integer) is null";
 		assertThat(myCaptureQueriesListener.getSelectQueries().get(0).getSql(true, false),
-			either(containsString("forcedid0_.RESOURCE_TYPE='Patient' and forcedid0_.FORCED_ID='B' and (forcedid0_.PARTITION_ID is null) or forcedid0_.RESOURCE_TYPE='Patient' and forcedid0_.FORCED_ID='A' and (forcedid0_.PARTITION_ID is null)"))
-				.or(containsString("forcedid0_.RESOURCE_TYPE='Patient' and forcedid0_.FORCED_ID='A' and (forcedid0_.PARTITION_ID is null) or forcedid0_.RESOURCE_TYPE='Patient' and forcedid0_.FORCED_ID='B' and (forcedid0_.PARTITION_ID is null)")));
+			either(containsString(patientA + " or " + patientB))
+				.or(containsString(patientB + " or " + patientA)));
 		assertEquals(52, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
 		assertEquals(0, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
