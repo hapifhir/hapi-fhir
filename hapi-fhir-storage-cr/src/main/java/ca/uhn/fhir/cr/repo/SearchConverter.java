@@ -81,20 +81,15 @@ public class SearchConverter {
 		}
 		for (var entry : theSearchMap.entrySet()) {
 			// if list of parameters is the value
-			if(entry.getValue().size()>1 && !isOrList(entry.getValue()) && !isAndList(entry.getValue())){
-				//is value a TokenParam
-				if(isTokenParam(entry.getValue().get(0))) {
+			if (entry.getValue().size() > 1 && !isOrList(entry.getValue()) && !isAndList(entry.getValue())) {
+				// is value a TokenParam
+				if (isTokenParam(entry.getValue().get(0))) {
 					var tokenKey = entry.getKey();
 					var tokenList = new TokenOrListParam();
 					for (IQueryParameterType rec : entry.getValue()) {
 						tokenList.add((TokenParam) rec);
 					}
-					if(tokenKey.equals("medication")){
-						//TODO: MedicationRequest.medication incorrectly looks for referenceParam type instead of
-						// TokenParam this forces it to the correct value for CodeableConcept search.
-						tokenKey = "code";}
 					searchParameterMap.add(tokenKey, tokenList);
-				// TODO: Convert other param type Lists
 				}
 
 				// parameter type is single value list
@@ -104,7 +99,6 @@ public class SearchConverter {
 				}
 			}
 		}
-
 	}
 
 	public <T> void setParameterTypeValue(@Nonnull String theKey, @Nonnull T theParameterType) {
@@ -112,7 +106,7 @@ public class SearchConverter {
 			searchParameterMap.add(theKey, (IQueryParameterOr<?>) theParameterType);
 		} else if (isAndList(theParameterType)) {
 			searchParameterMap.add(theKey, (IQueryParameterAnd<?>) theParameterType);
-		//} else if ()
+			// } else if ()
 		} else {
 			searchParameterMap.add(theKey, (IQueryParameterType) theParameterType);
 		}
