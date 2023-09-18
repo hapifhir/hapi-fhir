@@ -1,26 +1,35 @@
 package ca.uhn.fhir.jaxrs.server.interceptor;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.isNull;
-import static org.mockito.Mockito.*;
-
-import java.net.URI;
-import java.util.HashMap;
-
-import javax.interceptor.InvocationContext;
-import jakarta.servlet.ServletException;
-import javax.ws.rs.core.*;
-
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-
 import ca.uhn.fhir.jaxrs.server.AbstractJaxRsProvider;
 import ca.uhn.fhir.jaxrs.server.test.TestJaxRsDummyPatientProvider;
 import ca.uhn.fhir.jaxrs.server.util.JaxRsRequest;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.server.exceptions.*;
+import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException;
 import ca.uhn.fhir.rest.server.interceptor.ExceptionHandlingInterceptor;
+import jakarta.interceptor.InvocationContext;
+import jakarta.servlet.ServletException;
+import jakarta.ws.rs.core.HttpHeaders;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.UriInfo;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
+import java.net.URI;
+import java.util.HashMap;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.when;
 
 public class JaxRsExceptionInterceptorTest {
 
@@ -89,7 +98,7 @@ public class JaxRsExceptionInterceptorTest {
 		when(context.proceed()).thenThrow(new ServletException());		
 		
 		JaxRsResponseException thrownException = new JaxRsResponseException(new NotImplementedOperationException("not implemented"));
-		doThrow(new javax.servlet.ServletException("someMessage")).when(exceptionHandler).handleException(request, thrownException);
+		doThrow(new jakarta.servlet.ServletException("someMessage")).when(exceptionHandler).handleException(request, thrownException);
 		Response result = interceptor.convertExceptionIntoResponse(request, thrownException);
 		assertEquals(InternalErrorException.STATUS_CODE, result.getStatus());
 	}

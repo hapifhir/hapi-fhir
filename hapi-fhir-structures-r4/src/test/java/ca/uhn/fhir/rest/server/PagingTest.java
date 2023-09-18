@@ -49,7 +49,7 @@ import static org.mockito.Mockito.when;
  */
 public class PagingTest {
 
-	private FhirContext ourContext = FhirContext.forR4();
+	private FhirContext ourContext = FhirContext.forR4Cached();
 	@RegisterExtension
 	public RestfulServerExtension myServerExtension = new RestfulServerExtension(ourContext);
 

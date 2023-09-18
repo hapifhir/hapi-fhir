@@ -223,8 +223,14 @@
 			<version>1.15</version>
 		</dependency>
 
+		<!-- Hibernate deps -->
+		<dependency>
+            <groupId>org.hibernate.orm</groupId>
+            <artifactId>hibernate-core</artifactId>
+        </dependency>
 
-	</dependencies>
+
+    </dependencies>
 
 	<reporting>
 		<plugins>

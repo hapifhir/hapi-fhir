@@ -47,6 +47,7 @@ import jakarta.persistence.criteria.Order;
 import jakarta.persistence.criteria.Path;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
+import jakarta.validation.constraints.NotNull;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.lang3.Validate;
@@ -73,7 +74,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
-import jakarta.validation.constraints.NotNull;
 
 import static ca.uhn.fhir.mdm.api.params.MdmQuerySearchParameters.GOLDEN_RESOURCE_NAME;
 import static ca.uhn.fhir.mdm.api.params.MdmQuerySearchParameters.GOLDEN_RESOURCE_PID_NAME;

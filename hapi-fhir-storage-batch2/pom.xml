@@ -51,12 +51,10 @@
 			<artifactId>hibernate-validator</artifactId>
 		</dependency>
 
-		<!-- FIXME: bump version
 		<dependency>
 			<groupId>org.glassfish</groupId>
 			<artifactId>jakarta.el</artifactId>
 		</dependency>
-		-->
 
 		<!-- test -->
 		<dependency>

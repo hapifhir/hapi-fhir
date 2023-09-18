@@ -29,16 +29,16 @@ import ca.uhn.fhir.jaxrs.server.util.JaxRsRequest.Builder;
 import ca.uhn.fhir.rest.api.*;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.rest.server.*;
+import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.HttpHeaders;
+import jakarta.ws.rs.core.MultivaluedMap;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.UriInfo;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.IOException;
 import java.util.Map.Entry;
 import java.util.*;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.MultivaluedMap;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriInfo;
 
 /**
  * This is the abstract superclass for all jaxrs providers. It contains some defaults implementing
@@ -103,7 +103,7 @@ public abstract class AbstractJaxRsProvider implements IRestfulServerDefaults {
 	/**
 	 * This method returns the server base, independent of the request or resource.
 	 *
-	 * @see javax.ws.rs.core.UriInfo#getBaseUri()
+	 * @see jakarta.ws.rs.core.UriInfo#getBaseUri()
 	 * @return the ascii string for the server base
 	 */
 	public String getBaseForServer() {

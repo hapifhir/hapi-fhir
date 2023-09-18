@@ -57,7 +57,7 @@ public class HapiFhirHibernateJpaDialectTest {
 		}
 
 		outcome = mySvc.convertHibernateAccessException(new HibernateException("this is a message"));
-		assertThat(outcome.getMessage(), containsString("HibernateException: this is a message"));
+		assertThat(outcome.getMessage(), containsString("this is a message"));
 
 	}
 

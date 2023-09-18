@@ -40,6 +40,7 @@ import ca.uhn.fhir.rest.param.ReferenceParam;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.PersistenceContextType;
+import jakarta.servlet.http.HttpServletResponse;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Observation;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,7 +50,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.TreeMap;
-import jakarta.servlet.http.HttpServletResponse;
 
 public class JpaResourceDaoObservation<T extends IBaseResource> extends BaseHapiFhirResourceDao<T>
 		implements IFhirResourceDaoObservation<T> {

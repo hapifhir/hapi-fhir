@@ -33,7 +33,7 @@ import org.apache.commons.dbcp2.BasicDataSource;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
-import org.hibernate.dialect.PostgreSQL10Dialect;
+import org.hibernate.dialect.PostgreSQLDialect;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
@@ -710,7 +710,7 @@ public class LoincFullLoadR4SandboxIT extends BaseJpaTest {
 		@Override
 		public String getHibernateDialect() {
 			if (USE_REAL_DB) {
-				return PostgreSQL10Dialect.class.getName();
+				return PostgreSQLDialect.class.getName();
 			}
 
 			return super.getHibernateDialect();

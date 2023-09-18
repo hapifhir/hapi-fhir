@@ -39,7 +39,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.function.Function;
 import javax.annotation.Nonnull;
-import javax.annotation.PostConstruct;
+import jakarta.annotation.PostConstruct;
 
 public class CdsServiceRegistryImpl implements ICdsServiceRegistry {
 	private static final Logger ourLog = LoggerFactory.getLogger(CdsServiceRegistryImpl.class);

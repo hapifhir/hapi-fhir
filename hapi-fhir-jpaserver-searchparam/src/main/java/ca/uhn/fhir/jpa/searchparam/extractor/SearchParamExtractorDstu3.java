@@ -24,6 +24,7 @@ import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import com.google.common.annotations.VisibleForTesting;
+import jakarta.annotation.PostConstruct;
 import org.hl7.fhir.dstu3.context.IWorkerContext;
 import org.hl7.fhir.dstu3.hapi.ctx.HapiWorkerContext;
 import org.hl7.fhir.dstu3.model.Base;
@@ -32,7 +33,6 @@ import org.hl7.fhir.instance.model.api.IBase;
 
 import java.util.ArrayList;
 import java.util.List;
-import javax.annotation.PostConstruct;
 
 public class SearchParamExtractorDstu3 extends BaseSearchParamExtractor implements ISearchParamExtractor {
 

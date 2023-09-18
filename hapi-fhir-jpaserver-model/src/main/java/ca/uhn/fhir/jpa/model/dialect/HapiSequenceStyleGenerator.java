@@ -47,7 +47,7 @@ import java.util.Properties;
  */
 @SuppressWarnings("unused")
 public class HapiSequenceStyleGenerator
-		implements IdentifierGenerator, PersistentIdentifierGenerator, BulkInsertionCapableIdentifierGenerator {
+		implements PersistentIdentifierGenerator, BulkInsertionCapableIdentifierGenerator {
 	private final SequenceStyleGenerator myGen = new SequenceStyleGenerator();
 
 	@Autowired
@@ -70,7 +70,7 @@ public class HapiSequenceStyleGenerator
 	@Override
 	public Serializable generate(SharedSessionContractImplementor theSession, Object theObject)
 			throws HibernateException {
-		Long retVal = myIdMassager.generate(myGeneratorName);
+		Long retVal = myIdMassager != null ? myIdMassager.generate(myGeneratorName) : null;
 		if (retVal == null) {
 			Long next = (Long) myGen.generate(theSession, theObject);
 			retVal = myIdMassager.massage(myGeneratorName, next);
@@ -86,6 +86,8 @@ public class HapiSequenceStyleGenerator
 		// StorageSettings should only be null when running in the DDL generation maven plugin
 		if (myStorageSettings != null) {
 			myIdMassager = ReflectionUtil.newInstance(myStorageSettings.getSequenceValueMassagerClass());
+		} else {
+			myIdMassager = new ISequenceValueMassager.NoopSequenceValueMassager();
 		}
 
 		// Create a HAPI FHIR sequence style generator
@@ -96,6 +98,7 @@ public class HapiSequenceStyleGenerator
 		props.put(OptimizableGenerator.OPT_PARAM, StandardOptimizerDescriptor.POOLED.getExternalName());
 		props.put(OptimizableGenerator.INITIAL_PARAM, "1");
 		props.put(OptimizableGenerator.INCREMENT_PARAM, "50");
+		props.put(GENERATOR_NAME, myGeneratorName);
 
 		myGen.configure(theType, props, theServiceRegistry);
 

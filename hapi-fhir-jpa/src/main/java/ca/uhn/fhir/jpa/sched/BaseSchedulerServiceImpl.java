@@ -41,7 +41,7 @@ import org.springframework.core.env.Environment;
 import java.util.Collection;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
-import javax.annotation.PostConstruct;
+import jakarta.annotation.PostConstruct;
 
 /**
  * This class provides task scheduling for the entire module using the Quartz library.

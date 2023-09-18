@@ -25,10 +25,17 @@ public class SearchQueryBuilderDialectSqlServerTest extends BaseSearchQueryBuild
 		logSql(generatedSql);
 
 		String sql = generatedSql.getSql();
-		assertTrue(sql.endsWith("ORDER BY -t1.SP_VALUE_LOW DESC offset 0 rows fetch next ? rows only"), sql);
+		sql = massageSql(sql);
+		assertTrue(sql.endsWith("ORDER BY -t1.SP_VALUE_LOW DESC offset 0 rows fetch first ? rows only"), sql);
 
 		assertEquals(3, StringUtils.countMatches(sql, "?"));
 		assertEquals(3, generatedSql.getBindVariables().size());
+	}
+
+	@Nonnull
+	private static String massageSql(String sql) {
+		sql = sql.replace("\n", " ").replaceAll(" +", " ");
+		return sql;
 	}
 
 	@Test
@@ -40,7 +47,8 @@ public class SearchQueryBuilderDialectSqlServerTest extends BaseSearchQueryBuild
 		logSql(generatedSql);
 
 		String sql = generatedSql.getSql();
-		assertTrue(sql.endsWith("select page0_ from query where __row__ >= ? and __row__ < ?"), sql);
+		sql = massageSql(sql);
+		assertTrue(sql.endsWith("order by @@version offset ? rows fetch next ? rows only"), sql);
 
 		assertEquals(3, StringUtils.countMatches(sql, "?"));
 		assertEquals(3, generatedSql.getBindVariables().size());
@@ -55,7 +63,8 @@ public class SearchQueryBuilderDialectSqlServerTest extends BaseSearchQueryBuild
 		logSql(generatedSql);
 
 		String sql = generatedSql.getSql();
-		assertTrue(sql.toUpperCase(Locale.ROOT).contains("SELECT TOP(?) T0.RES_ID FROM"), sql);
+		sql = massageSql(sql);
+		assertTrue(sql.endsWith("order by @@version offset 0 rows fetch first ? rows only"), sql);
 
 		assertEquals(2, StringUtils.countMatches(sql, "?"));
 		assertEquals(2, generatedSql.getBindVariables().size());

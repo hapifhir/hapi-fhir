@@ -61,6 +61,7 @@ import ca.uhn.fhir.util.OperationOutcomeUtil;
 import ca.uhn.fhir.util.SearchParameterUtil;
 import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.annotations.VisibleForTesting;
+import jakarta.servlet.http.HttpServletResponse;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -82,7 +83,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
-import jakarta.servlet.http.HttpServletResponse;
 
 import static ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters.ExportStyle;
 import static ca.uhn.fhir.util.DatatypeUtil.toStringValue;

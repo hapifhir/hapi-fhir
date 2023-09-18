@@ -66,7 +66,7 @@ import org.apache.commons.lang3.Validate;
 import org.hibernate.dialect.Dialect;
 import org.hibernate.dialect.SQLServerDialect;
 import org.hibernate.dialect.pagination.AbstractLimitHandler;
-import org.hibernate.engine.spi.RowSelection;
+import org.hibernate.query.spi.Limit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -520,7 +520,7 @@ public class SearchQueryBuilder {
 			maxResultsToFetch = defaultIfNull(maxResultsToFetch, 10000);
 
 			AbstractLimitHandler limitHandler = (AbstractLimitHandler) myDialect.getLimitHandler();
-			RowSelection selection = new RowSelection();
+			Limit selection = new Limit();
 			selection.setFirstRow(offset);
 			selection.setMaxRows(maxResultsToFetch);
 			sql = limitHandler.processSql(sql, selection);
@@ -536,14 +536,14 @@ public class SearchQueryBuilder {
 				if (sql.contains("top(?)")) {
 					bindVariables.add(0, maxResultsToFetch);
 				}
-				if (sql.contains("offset 0 rows fetch next ? rows only")) {
+				if (sql.contains("offset 0 rows fetch first ? rows only")) {
 					bindVariables.add(maxResultsToFetch);
 				}
 				if (sql.contains("offset ? rows fetch next ? rows only")) {
 					bindVariables.add(theOffset);
 					bindVariables.add(maxResultsToFetch);
 				}
-				if (offset != null && sql.contains("__row__")) {
+				if (offset != null && sql.contains("rownumber_")) {
 					bindVariables.add(theOffset + 1);
 					bindVariables.add(theOffset + maxResultsToFetch + 1);
 				}

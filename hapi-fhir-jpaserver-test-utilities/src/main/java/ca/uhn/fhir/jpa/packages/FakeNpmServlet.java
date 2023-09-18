@@ -20,6 +20,9 @@
 package ca.uhn.fhir.jpa.packages;
 
 import ca.uhn.fhir.rest.api.Constants;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,9 +30,6 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import jakarta.servlet.http.HttpServlet;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 
 public class FakeNpmServlet extends HttpServlet {
 	private static final Logger ourLog = LoggerFactory.getLogger(FakeNpmServlet.class);

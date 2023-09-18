@@ -32,6 +32,7 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.IoUtil;
 import ca.uhn.fhir.util.JsonUtil;
 import ca.uhn.fhir.util.ValidateUtil;
+import jakarta.servlet.http.HttpServletResponse;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.lang3.Validate;
@@ -56,7 +57,6 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import jakarta.servlet.http.HttpServletResponse;
 
 import static ca.uhn.fhir.jpa.fql.util.HfqlConstants.PROTOCOL_VERSION;
 import static org.apache.commons.lang3.StringUtils.defaultIfBlank;

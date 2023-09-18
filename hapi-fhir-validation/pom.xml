@@ -322,23 +322,13 @@
 
 		<!-- Dependencies for Schematron -->
 		<dependency>
-			<groupId>com.helger</groupId>
-			<artifactId>ph-schematron</artifactId>
+			<groupId>com.helger.schematron</groupId>
+			<artifactId>ph-schematron-api</artifactId>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>jakarta.activation</groupId>
-			<artifactId>jakarta.activation-api</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>javax.xml.bind</groupId>
-			<artifactId>jaxb-api</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.glassfish.jaxb</groupId>
-			<artifactId>jaxb-runtime</artifactId>
+			<groupId>com.helger.schematron</groupId>
+			<artifactId>ph-schematron-xslt</artifactId>
 			<scope>test</scope>
 		</dependency>
 

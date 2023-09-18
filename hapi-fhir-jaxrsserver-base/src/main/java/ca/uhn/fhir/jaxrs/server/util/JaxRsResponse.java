@@ -22,6 +22,8 @@ package ca.uhn.fhir.jaxrs.server.util;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.BaseRestfulResponse;
 import ca.uhn.fhir.util.IoUtil;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response.ResponseBuilder;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 
@@ -33,8 +35,6 @@ import java.io.Writer;
 import java.util.List;
 import java.util.Map.Entry;
 import javax.annotation.Nonnull;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.ResponseBuilder;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 

@@ -31,7 +31,7 @@ import org.hl7.fhir.dstu2.model.Subscription;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.annotation.PostConstruct;
+import jakarta.annotation.PostConstruct;
 
 public class MdmSubmitterInterceptorLoader {
 	private static final Logger ourLog = Logs.getMdmTroubleshootingLog();

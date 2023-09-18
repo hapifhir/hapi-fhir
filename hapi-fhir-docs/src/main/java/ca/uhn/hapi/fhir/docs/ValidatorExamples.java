@@ -35,6 +35,7 @@ import ca.uhn.fhir.validation.SchemaBaseValidator;
 import ca.uhn.fhir.validation.SingleValidationMessage;
 import ca.uhn.fhir.validation.ValidationResult;
 import ca.uhn.fhir.validation.schematron.SchematronBaseValidator;
+import jakarta.servlet.ServletException;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.filefilter.WildcardFileFilter;
 import org.hl7.fhir.common.hapi.validation.support.CachingValidationSupport;
@@ -59,7 +60,6 @@ import java.io.File;
 import java.io.FileReader;
 import java.util.List;
 import javax.annotation.Nonnull;
-import jakarta.servlet.ServletException;
 
 @SuppressWarnings({"serial", "unused"})
 public class ValidatorExamples {

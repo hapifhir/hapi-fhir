@@ -21,7 +21,6 @@ package ca.uhn.hapi.fhir.docs;
 
 import ca.uhn.fhir.rest.server.ETagSupportEnum;
 import ca.uhn.fhir.rest.server.RestfulServer;
-
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 

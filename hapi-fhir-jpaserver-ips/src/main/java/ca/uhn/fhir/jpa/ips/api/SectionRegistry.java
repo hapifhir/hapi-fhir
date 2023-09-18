@@ -36,7 +36,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
 import javax.annotation.Nullable;
-import javax.annotation.PostConstruct;
+import jakarta.annotation.PostConstruct;
 
 /**
  * This class is the registry for sections for the IPS document. It can be extended

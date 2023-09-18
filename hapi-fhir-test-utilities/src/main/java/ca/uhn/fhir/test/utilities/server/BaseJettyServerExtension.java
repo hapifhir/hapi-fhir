@@ -47,7 +47,7 @@ import org.springframework.web.context.support.GenericWebApplicationContext;
 import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.socket.config.annotation.WebSocketConfigurer;
 
-import javax.annotation.PreDestroy;
+import jakarta.annotation.PreDestroy;
 import jakarta.servlet.DispatcherType;
 import jakarta.servlet.Filter;
 import jakarta.servlet.FilterChain;

@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.jpa.model.dialect;
 
+import org.hibernate.dialect.DatabaseVersion;
 import org.hibernate.dialect.H2Dialect;
 
 /**
@@ -30,7 +31,7 @@ public class HapiFhirH2Dialect extends H2Dialect {
 	 * Constructor
 	 */
 	public HapiFhirH2Dialect() {
-		super();
+		super(DatabaseVersion.make(2, 0, 202));
 
 		/*
 		 * These mappings are already defined in the super() constructor, but they

@@ -568,7 +568,8 @@ public class JpaConfig {
 
 	@Bean(name = PERSISTED_JPA_BUNDLE_PROVIDER_BY_SEARCH)
 	@Scope("prototype")
-	public PersistedJpaBundleProvider newPersistedJpaBundleProvider(RequestDetails theRequest, Search theSearch) {
+	public PersistedJpaBundleProvider newPersistedJpaBundleProviderBySearch(
+			RequestDetails theRequest, Search theSearch) {
 		return new PersistedJpaBundleProvider(theRequest, theSearch);
 	}
 
@@ -705,7 +706,7 @@ public class JpaConfig {
 
 	@Bean(name = HISTORY_BUILDER)
 	@Scope("prototype")
-	public HistoryBuilder newPersistedJpaSearchFirstPageBundleProvider(
+	public HistoryBuilder newHistoryBuilder(
 			@Nullable String theResourceType,
 			@Nullable Long theResourceId,
 			@Nullable Date theRangeStartInclusive,
