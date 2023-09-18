@@ -7,7 +7,7 @@ import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.mdm.api.params.GenerateMdmLinkMetricParameters;
 import ca.uhn.fhir.mdm.api.params.GenerateScoreMetricsParameters;
-import ca.uhn.fhir.mdm.model.MdmLinkDataMetrics;
+import ca.uhn.fhir.mdm.model.MdmLinkScoreMetrics;
 import ca.uhn.fhir.mdm.model.MdmLinkMetrics;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -50,7 +50,7 @@ public class MdmMetricSvcJpaImpl extends BaseMdmMetricSvc {
 
 	@Transactional
 	@Override
-	public MdmLinkDataMetrics generateLinkScoreMetrics(GenerateScoreMetricsParameters theParameters) {
+	public MdmLinkScoreMetrics generateLinkScoreMetrics(GenerateScoreMetricsParameters theParameters) {
 		String resourceType = theParameters.getResourceType();
 
 		List<MdmMatchResultEnum> matchResultTypes = theParameters.getMatchTypes();
@@ -62,7 +62,7 @@ public class MdmMetricSvcJpaImpl extends BaseMdmMetricSvc {
 
 		Object[][] data = myJpaRepository.generateScoreMetrics(resourceType, matchResultTypes);
 
-		MdmLinkDataMetrics metrics = new MdmLinkDataMetrics();
+		MdmLinkScoreMetrics metrics = new MdmLinkScoreMetrics();
 		metrics.setResourceType(resourceType);
 		for (Object[] row : data) {
 			Double scoreValue = (Double) row[0];

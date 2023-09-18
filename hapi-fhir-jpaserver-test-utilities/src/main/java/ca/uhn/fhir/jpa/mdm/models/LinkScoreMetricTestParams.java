@@ -1,7 +1,7 @@
 package ca.uhn.fhir.jpa.mdm.models;
 
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
-import ca.uhn.fhir.mdm.model.MdmLinkDataMetrics;
+import ca.uhn.fhir.mdm.model.MdmLinkScoreMetrics;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,7 +11,7 @@ public class LinkScoreMetricTestParams {
 
 	private List<MdmMatchResultEnum> myMatchFilter;
 
-	private MdmLinkDataMetrics myExpectedLinkDataMetrics;
+	private MdmLinkScoreMetrics myExpectedLinkDataMetrics;
 
 	/**
 	 * The scores for each link.
@@ -28,11 +28,11 @@ public class LinkScoreMetricTestParams {
 		myInitialState = theInitialState;
 	}
 
-	public MdmLinkDataMetrics getExpectedLinkDataMetrics() {
+	public MdmLinkScoreMetrics getExpectedLinkDataMetrics() {
 		return myExpectedLinkDataMetrics;
 	}
 
-	public void setExpectedLinkDataMetrics(MdmLinkDataMetrics theExpectedLinkDataMetrics) {
+	public void setExpectedLinkDataMetrics(MdmLinkScoreMetrics theExpectedLinkDataMetrics) {
 		myExpectedLinkDataMetrics = theExpectedLinkDataMetrics;
 	}
 

@@ -9,7 +9,7 @@ import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.mdm.api.params.GenerateMdmLinkMetricParameters;
 import ca.uhn.fhir.mdm.api.params.GenerateMdmResourceMetricsParameters;
 import ca.uhn.fhir.mdm.api.params.GenerateScoreMetricsParameters;
-import ca.uhn.fhir.mdm.model.MdmLinkDataMetrics;
+import ca.uhn.fhir.mdm.model.MdmLinkScoreMetrics;
 import ca.uhn.fhir.mdm.model.MdmLinkMetrics;
 import ca.uhn.fhir.mdm.model.MdmResourceMetrics;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -108,13 +108,13 @@ public interface IMdmMetricSvcTest {
 			scoreMetricsParameters.addMatchType(matchType);
 		}
 		// test
-		MdmLinkDataMetrics actualMetrics = getMetricsSvc().generateLinkScoreMetrics(scoreMetricsParameters);
+		MdmLinkScoreMetrics actualMetrics = getMetricsSvc().generateLinkScoreMetrics(scoreMetricsParameters);
 
 		// verify
 		assertNotNull(actualMetrics);
 		assertEquals("Patient", actualMetrics.getResourceType());
 
-		MdmLinkDataMetrics expectedMetrics = theParams.getExpectedLinkDataMetrics();
+		MdmLinkScoreMetrics expectedMetrics = theParams.getExpectedLinkDataMetrics();
 
 		Map<String, Long> actual = actualMetrics.getScoreCounts();
 		Map<String, Long> expected = expectedMetrics.getScoreCounts();

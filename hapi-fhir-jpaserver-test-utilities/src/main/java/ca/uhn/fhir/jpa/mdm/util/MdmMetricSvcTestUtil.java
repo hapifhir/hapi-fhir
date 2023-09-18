@@ -5,7 +5,7 @@ import ca.uhn.fhir.jpa.mdm.models.LinkScoreMetricTestParams;
 import ca.uhn.fhir.jpa.mdm.models.ResourceMetricTestParams;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
-import ca.uhn.fhir.mdm.model.MdmLinkDataMetrics;
+import ca.uhn.fhir.mdm.model.MdmLinkScoreMetrics;
 import ca.uhn.fhir.mdm.model.MdmLinkMetrics;
 
 import java.util.ArrayList;
@@ -225,7 +225,7 @@ public class MdmMetricSvcTestUtil {
 				G3, AUTO, POSSIBLE_MATCH, P1
 			""");
 			p.setScores(Arrays.asList(2D, 2D, 1D));
-			MdmLinkDataMetrics metrics = new MdmLinkDataMetrics();
+			MdmLinkScoreMetrics metrics = new MdmLinkScoreMetrics();
 			metrics.setResourceType("Patient");
 			metrics.addScore("2.0", 2L);
 			metrics.addScore("1.0", 1L);
@@ -242,7 +242,7 @@ public class MdmMetricSvcTestUtil {
 				G2, AUTO, POSSIBLE_MATCH, P2
 			""");
 			p.setScores(Arrays.asList(null, 1D));
-			MdmLinkDataMetrics metrics = new MdmLinkDataMetrics();
+			MdmLinkScoreMetrics metrics = new MdmLinkScoreMetrics();
 			metrics.setResourceType("Patient");
 			metrics.addScore("NULL", 1L);
 			metrics.addScore("1.0", 1L);
@@ -263,7 +263,7 @@ public class MdmMetricSvcTestUtil {
 			""");
 			p.setScores(Arrays.asList(2D, 2D, 1D, 3D));
 			p.addMatchType(MdmMatchResultEnum.POSSIBLE_MATCH);
-			MdmLinkDataMetrics metrics = new MdmLinkDataMetrics();
+			MdmLinkScoreMetrics metrics = new MdmLinkScoreMetrics();
 			metrics.setResourceType("Patient");
 			metrics.addScore("2.0", 1L);
 			metrics.addScore("1.0", 1L);
@@ -276,7 +276,7 @@ public class MdmMetricSvcTestUtil {
 			// no links
 			LinkScoreMetricTestParams p = new LinkScoreMetricTestParams();
 			p.setInitialState("");
-			MdmLinkDataMetrics metrics = new MdmLinkDataMetrics();
+			MdmLinkScoreMetrics metrics = new MdmLinkScoreMetrics();
 			metrics.setResourceType("Patient");
 			p.setExpectedLinkDataMetrics(metrics);
 			parameters.add(p);

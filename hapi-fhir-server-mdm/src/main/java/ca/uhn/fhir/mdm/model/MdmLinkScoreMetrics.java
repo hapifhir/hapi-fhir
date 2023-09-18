@@ -6,7 +6,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-public class MdmLinkDataMetrics implements IModelJson {
+public class MdmLinkScoreMetrics implements IModelJson {
 
 	@JsonProperty("resourceType")
 	private String myResourceType;
