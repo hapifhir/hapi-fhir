@@ -27,6 +27,7 @@ import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.MetaUtil;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.ICompositeType;
@@ -182,8 +183,11 @@ public interface ITestDataBuilder {
 		return t -> ((IBaseResource)t).setId(theId.toUnqualifiedVersionless());
 	}
 
-	default ICreationArgument withTag(String theSystem, String theCode) {
-		return t -> ((IBaseResource)t).getMeta().addTag().setSystem(theSystem).setCode(theCode);
+	default ICreationArgument withTag(String theSystem, String theCode, Consumer<IBaseCoding>... theModifiers) {
+		return t -> {
+			IBaseCoding coding = ((IBaseResource) t).getMeta().addTag().setSystem(theSystem).setCode(theCode);
+			applyElementModifiers(coding, theModifiers);
+		};
 	}
 
 	default ICreationArgument withSecurity(String theSystem, String theCode) {
