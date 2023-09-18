@@ -107,6 +107,9 @@ public class JpaStorageSettings extends StorageSettings {
 	 * Child Configurations
 	 */
 	private static final Integer DEFAULT_INTERNAL_SYNCHRONOUS_SEARCH_SIZE = 10000;
+
+	private static final boolean DEFAULT_PREVENT_INVALIDATING_CONDITIONAL_MATCH_CRITERIA = false;
+
 	/**
 	 * Do not change default of {@code 0}!
 	 *
@@ -334,7 +337,8 @@ public class JpaStorageSettings extends StorageSettings {
 	 *
 	 * @since 6.8.2
 	 */
-	private boolean myPreventInvalidatingConditionalMatchCriteria = false;
+	private boolean myPreventInvalidatingConditionalMatchCriteria =
+			DEFAULT_PREVENT_INVALIDATING_CONDITIONAL_MATCH_CRITERIA;
 
 	/**
 	 * Constructor
@@ -358,6 +362,9 @@ public class JpaStorageSettings extends StorageSettings {
 		}
 		if (HapiSystemProperties.isUnitTestModeEnabled()) {
 			setJobFastTrackingEnabled(true);
+		}
+		if (HapiSystemProperties.isPreventInvalidatingConditionalMatchCriteria()) {
+			setPreventInvalidatingConditionalMatchCriteria(true);
 		}
 	}
 

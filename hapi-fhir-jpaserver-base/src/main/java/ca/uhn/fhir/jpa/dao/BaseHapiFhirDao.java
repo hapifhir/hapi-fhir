@@ -1060,7 +1060,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 	private String getConditionalCreateOrUpdateErrorMsg(CreateOrUpdateByMatch theCreateOrUpdate) {
 		return String.format(
 				"Failed to process conditional %s. " + "The supplied resource did not satisfy the conditional URL.",
-				theCreateOrUpdate);
+				theCreateOrUpdate.name().toLowerCase());
 	}
 
 	@SuppressWarnings("unchecked")
@@ -1371,10 +1371,10 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 
 			if (theEntity.getCreatedByMatchUrl() != null) {
 				createOrUpdateUrl = theEntity.getCreatedByMatchUrl();
-				createOrUpdate = CreateOrUpdateByMatch.create;
+				createOrUpdate = CreateOrUpdateByMatch.CREATE;
 			} else {
 				createOrUpdateUrl = theEntity.getUpdatedByMatchUrl();
-				createOrUpdate = CreateOrUpdateByMatch.update;
+				createOrUpdate = CreateOrUpdateByMatch.UPDATE;
 			}
 
 			verifyMatchUrlForConditionalCreateOrUpdate(
@@ -2003,7 +2003,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 	}
 
 	private enum CreateOrUpdateByMatch {
-		create,
-		update
+		CREATE,
+		UPDATE
 	}
 }
