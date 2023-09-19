@@ -91,6 +91,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.mock;
@@ -682,8 +683,10 @@ public class FhirInstanceValidatorDstu3Test {
 					} else if (t.getMessage().contains("sdf-15") && t.getMessage().contains("The name 'kind' is not valid for any of the possible types")) {
 						// Find constraint sdf-15 fails with stricter core validation.
 						return false;
-					}
-					else {
+					} else if (t.getMessage().contains("side is inherently a collection") && t.getMessage().endsWith("may fail or return false if there is more than one item in the content being evaluated")) {
+						// Some DSTU3 FHIRPath expressions now produce warnings if a singleton is compared to a collection that potentially has > 1 elements
+						return false;
+					} else {
 						return true;
 					}
 				})
@@ -1338,7 +1341,7 @@ public class FhirInstanceValidatorDstu3Test {
 		myInstanceVal.setValidatorPolicyAdvisor(policyAdvisor);
 		myVal.validateWithResult(input);
 
-		verify(fetcher, times(3)).resolveURL(any(), any(), anyString(), anyString(), anyString());
+		verify(fetcher, times(3)).resolveURL(any(), any(), anyString(), anyString(), anyString(), anyBoolean());
 		verify(policyAdvisor, times(4)).policyForReference(any(), any(), anyString(), anyString());
 		verify(fetcher, times(4)).fetch(any(), any(), anyString());
 	}
