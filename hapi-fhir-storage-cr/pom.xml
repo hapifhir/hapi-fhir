@@ -19,7 +19,7 @@
 
 	<properties>
 		<org.antlr-version>4.10.1</org.antlr-version>
-		<org.ogce.xpp3-version>1.1.6</org.ogce.xpp3-version>
+		<xpp3-version>1.1.6</xpp3-version>
 		<spring-security-core.version>5.7.8</spring-security-core.version>
 	</properties>
 
@@ -161,7 +161,7 @@
 		<dependency>
 			<groupId>org.ogce</groupId>
 			<artifactId>xpp3</artifactId>
-			<version>${org.ogce.xpp3-version}</version>
+			<version>${xpp3-version}</version>
 		</dependency>
 
 		<dependency>
