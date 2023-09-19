@@ -668,8 +668,6 @@ public class FhirInstanceValidatorDstu3Test {
 					} else if (t.getMessage().contains("ValueSet as a URI SHALL start with http:// or https:// or urn:")) {
 						// Some DSTU3 structures have missing binding information
 						return false;
-					} else if (t.getMessage().contains("The valueSet reference http://www.rfc-editor.org/bcp/bcp13.txt on element")) {
-						return false;
 					} else if (t.getMessage().contains("The Unicode sequence has unterminated bi-di control characters")) {
 						// Some DSTU3 structures contain bi-di control characters, and a check for this was added recently.
 						return false;
@@ -679,14 +677,16 @@ public class FhirInstanceValidatorDstu3Test {
 					} else if (t.getMessage().startsWith("value should not start or finish with whitespace") && t.getMessage().endsWith("\\u00a0'")) {
 						// Some DSTU3 messages end with a unicode Non-breaking space character
 						return false;
+					}  else if (t.getMessage().contains("Found # expecting a token name")) {
+						// Some DSTU3 messages contain incomplete encoding for single quotes (#39 vs &#39)
+						return false;
+					} else if (t.getMessage().contains("sdf-15") && t.getMessage().contains("The name 'kind' is not valid for any of the possible types")) {
+						// Find constraint sdf-15 fails with stricter core validation.
+						return false;
 					} else if (t.getMessage().contains("side is inherently a collection") && t.getMessage().endsWith("may fail or return false if there is more than one item in the content being evaluated")) {
 						// Some DSTU3 FHIRPath expressions now produce warnings if a singleton is compared to a collection that potentially has > 1 elements
 						return false;
-					} else if (t.getMessage().contains("children().element.first().label.empty() and children().element.first().code.empty() and children().element.first().requirements.empty()") && t.getMessage().contains("The function first can only be used on ordered collections")){
-						// This FHIRPath expression is present in FHIR 3.0.1 definitions, and would not be thrown for the 3.0.2 equivalent
-						return false;
-					}
-					else {
+					} else {
 						return true;
 					}
 				})
