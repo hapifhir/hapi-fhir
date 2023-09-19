@@ -151,11 +151,25 @@ public class InternalCodingDt extends BaseCodingDt implements ICompositeDatatype
 	 * is consistent across versions. However this cannot consistently be assured. and When the meaning is not guaranteed to be consistent, the version SHOULD be exchanged
 	 * </p>
 	 */
-	public StringDt getVersion() {
+	@Override
+	public StringDt getVersionElement() {
 		if (myVersion == null) {
 			myVersion = new StringDt();
 		}
 		return myVersion;
+	}
+
+	@Override
+	public BooleanDt getUserSelectedElement() {
+		return new BooleanDt();
+	}
+
+	/**
+	 * Legacy name for {@link #getVersionElement()}
+	 */
+	@Deprecated(since = "7.0.0")
+	public StringDt getVersion() {
+		return getVersionElement();
 	}
 
 	/**

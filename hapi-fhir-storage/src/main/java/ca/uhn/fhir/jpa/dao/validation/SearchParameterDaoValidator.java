@@ -98,10 +98,12 @@ public class SearchParameterDaoValidator {
 			return;
 		}
 
+		// Search parameters must have a base
 		if (isCompositeWithoutBase(searchParameter)) {
 			throw new UnprocessableEntityException(Msg.code(1113) + "SearchParameter.base is missing");
 		}
 
+		// Do we have a valid expression
 		if (isCompositeWithoutExpression(searchParameter)) {
 
 			// this is ok

@@ -1,0 +1,13 @@
+---
+type: fix
+issue: 5297
+title: "Several fixes have been made to the IPS generator:
+<ul>
+<li>The display names associated with several sections have been corrected to exactly match the LOINC definitions for their codes</li>
+<li>Immunizations will now be ordered from most recent to least recent</li>
+<li>IPS documents containing Consent resources for Advanced Directives could result in a crash</li>
+<li>IPS documents containing Procedure resources for History of Procedures with a performed date could result in a crash</li>
+<li>IPS documents containing AllergyIntolerance resources containing an occurrence but not a reaction date could result in a crash</li>
+<li>IPS documents containing AllergyIntolerance resources containing an onset value in string format could result in a crash</li>
+<li>IPS documents containing MedicationRequest resources with no associated Medication could result in a crash</li>
+</ul>"

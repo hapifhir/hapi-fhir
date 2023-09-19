@@ -25,6 +25,7 @@ import ca.uhn.fhir.jpa.mdm.svc.candidate.CandidateStrategyEnum;
 import ca.uhn.fhir.jpa.mdm.svc.candidate.MatchedGoldenResourceCandidate;
 import ca.uhn.fhir.jpa.mdm.svc.candidate.MdmGoldenResourceFindingSvc;
 import ca.uhn.fhir.mdm.api.IMdmLinkSvc;
+import ca.uhn.fhir.mdm.api.IMdmSurvivorshipService;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
 import ca.uhn.fhir.mdm.api.MdmMatchOutcome;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
@@ -68,6 +69,9 @@ public class MdmMatchLinkSvc {
 
 	@Autowired
 	private IBlockRuleEvaluationSvc myBlockRuleEvaluationSvc;
+
+	@Autowired
+	private IMdmSurvivorshipService myMdmSurvivorshipService;
 
 	/**
 	 * Given an MDM source (consisting of any supported MDM type), find a suitable Golden Resource candidate for them,
@@ -187,8 +191,8 @@ public class MdmMatchLinkSvc {
 				String.format(
 						"There were no matched candidates for MDM, creating a new %s Golden Resource.",
 						theResource.getIdElement().getResourceType()));
-		IAnyResource newGoldenResource =
-				myGoldenResourceHelper.createGoldenResourceFromMdmSourceResource(theResource, theMdmTransactionContext);
+		IAnyResource newGoldenResource = myGoldenResourceHelper.createGoldenResourceFromMdmSourceResource(
+				theResource, theMdmTransactionContext, myMdmSurvivorshipService);
 		// TODO GGG :)
 		// 1. Get the right helper
 		// 2. Create source resource for the MDM source
@@ -214,7 +218,7 @@ public class MdmMatchLinkSvc {
 					theMdmTransactionContext,
 					"Duplicate detected based on the fact that both resources have different external EIDs.");
 			IAnyResource newGoldenResource = myGoldenResourceHelper.createGoldenResourceFromMdmSourceResource(
-					theTargetResource, theMdmTransactionContext);
+					theTargetResource, theMdmTransactionContext, myMdmSurvivorshipService);
 
 			myMdmLinkSvc.updateLink(
 					newGoldenResource,
