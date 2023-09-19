@@ -1036,7 +1036,8 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		myDaoSearchParamSynchronizer = theDaoSearchParamSynchronizer;
 	}
 
-	private void verifyMatchUrlForConditionalCreate(
+	private void verifyMatchUrlForConditionalCreateOrUpdate(
+			CreateOrUpdateByMatch theCreateOrUpdate,
 			IBaseResource theResource,
 			String theIfNoneExist,
 			ResourceIndexedSearchParams theParams,
@@ -1044,11 +1045,17 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		// Make sure that the match URL was actually appropriate for the supplied resource
 		InMemoryMatchResult outcome =
 				myInMemoryResourceMatcher.match(theIfNoneExist, theResource, theParams, theRequestDetails);
+
 		if (outcome.supported() && !outcome.matched()) {
-			throw new InvalidRequestException(
-					Msg.code(929)
-							+ "Failed to process conditional create. The supplied resource did not satisfy the conditional URL.");
+			String errorMsg = getConditionalCreateOrUpdateErrorMsg(theCreateOrUpdate);
+			throw new InvalidRequestException(Msg.code(929) + errorMsg);
 		}
+	}
+
+	private String getConditionalCreateOrUpdateErrorMsg(CreateOrUpdateByMatch theCreateOrUpdate) {
+		return String.format(
+				"Failed to process conditional %s. " + "The supplied resource did not satisfy the conditional URL.",
+				theCreateOrUpdate.name().toLowerCase());
 	}
 
 	@SuppressWarnings("unchecked")
@@ -1173,17 +1180,8 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 				}
 
 				if (changed.isChanged()) {
-
-					// Make sure that the match URL was actually appropriate for the supplied
-					// resource. We only do this for version 1 right now since technically it
-					// is possible (and legal) for someone to be using a conditional update
-					// to match a resource and then update it in a way that it no longer
-					// matches. We could certainly make this configurable though in the
-					// future.
-					if (entity.getVersion() <= 1L && entity.getCreatedByMatchUrl() != null && thePerformIndexing) {
-						verifyMatchUrlForConditionalCreate(
-								theResource, entity.getCreatedByMatchUrl(), newParams, theRequest);
-					}
+					checkConditionalMatch(
+							entity, theUpdateVersion, theResource, thePerformIndexing, newParams, theRequest);
 
 					if (CURRENTLY_REINDEXING.get(theResource) != Boolean.TRUE) {
 						entity.setUpdated(theTransactionDetails.getTransactionDate());
@@ -1331,6 +1329,52 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		}
 
 		return entity;
+	}
+
+	/**
+	 * Make sure that the match URL was actually appropriate for the supplied
+	 * resource, if so configured, or do it only for first version, since technically it
+	 * is possible (and legal) for someone to be using a conditional update
+	 * to match a resource and then update it in a way that it no longer
+	 * matches.
+	 */
+	private void checkConditionalMatch(
+			ResourceTable theEntity,
+			boolean theUpdateVersion,
+			IBaseResource theResource,
+			boolean thePerformIndexing,
+			ResourceIndexedSearchParams theNewParams,
+			RequestDetails theRequest) {
+
+		if (!thePerformIndexing) {
+			return;
+		}
+
+		if (theEntity.getCreatedByMatchUrl() == null && theEntity.getUpdatedByMatchUrl() == null) {
+			return;
+		}
+
+		// version is not updated at this point, but could be pending for update, which we consider here
+		long pendingVersion = theEntity.getVersion();
+		if (theUpdateVersion && !theEntity.isVersionUpdatedInCurrentTransaction()) {
+			pendingVersion++;
+		}
+
+		if (myStorageSettings.isPreventInvalidatingConditionalMatchCriteria() || pendingVersion <= 1L) {
+			String createOrUpdateUrl;
+			CreateOrUpdateByMatch createOrUpdate;
+
+			if (theEntity.getCreatedByMatchUrl() != null) {
+				createOrUpdateUrl = theEntity.getCreatedByMatchUrl();
+				createOrUpdate = CreateOrUpdateByMatch.CREATE;
+			} else {
+				createOrUpdateUrl = theEntity.getUpdatedByMatchUrl();
+				createOrUpdate = CreateOrUpdateByMatch.UPDATE;
+			}
+
+			verifyMatchUrlForConditionalCreateOrUpdate(
+					createOrUpdate, theResource, createOrUpdateUrl, theNewParams, theRequest);
+		}
 	}
 
 	public IBasePersistedResource updateHistoryEntity(
@@ -1608,6 +1652,8 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 
 		// Notify IServerOperationInterceptors about pre-action call
 		notifyInterceptors(theRequestDetails, theResource, theOldResource, theTransactionDetails, true);
+
+		entity.setUpdatedByMatchUrl(theMatchUrl);
 
 		// Perform update
 		ResourceTable savedEntity = updateEntity(
@@ -1989,5 +2035,10 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 	@VisibleForTesting
 	public static void setValidationDisabledForUnitTest(boolean theValidationDisabledForUnitTest) {
 		ourValidationDisabledForUnitTest = theValidationDisabledForUnitTest;
+	}
+
+	private enum CreateOrUpdateByMatch {
+		CREATE,
+		UPDATE
 	}
 }
