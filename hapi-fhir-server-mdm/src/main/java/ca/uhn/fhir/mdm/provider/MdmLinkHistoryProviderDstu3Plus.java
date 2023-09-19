@@ -28,6 +28,7 @@ import ca.uhn.fhir.mdm.api.IMdmControllerSvc;
 import ca.uhn.fhir.mdm.api.params.MdmHistorySearchParameters;
 import ca.uhn.fhir.mdm.model.mdmevents.MdmHistoryEvent;
 import ca.uhn.fhir.mdm.model.mdmevents.MdmLinkWithRevisionJson;
+import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -62,13 +63,15 @@ public class MdmLinkHistoryProviderDstu3Plus extends BaseMdmProvider {
 
 	@Operation(name = ProviderConstants.MDM_LINK_HISTORY, idempotent = true)
 	public IBaseParameters historyLinks(
-			@OperationParam(
+			@Description(value = "The id of the Golden Resource (e.g. Golden Patient Resource).")
+					@OperationParam(
 							name = ProviderConstants.MDM_QUERY_LINKS_GOLDEN_RESOURCE_ID,
 							min = 0,
 							max = OperationParam.MAX_UNLIMITED,
 							typeName = "string")
 					List<IPrimitiveType<String>> theMdmGoldenResourceIds,
-			@OperationParam(
+			@Description(value = "The id of the source resource (e.g. Patient resource).")
+					@OperationParam(
 							name = ProviderConstants.MDM_QUERY_LINKS_RESOURCE_ID,
 							min = 0,
 							max = OperationParam.MAX_UNLIMITED,
