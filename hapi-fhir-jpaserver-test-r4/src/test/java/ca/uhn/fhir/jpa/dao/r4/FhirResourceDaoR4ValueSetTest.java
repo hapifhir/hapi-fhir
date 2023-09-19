@@ -148,7 +148,7 @@ public class FhirResourceDaoR4ValueSetTest extends BaseJpaR4Test {
 		outcome = myValidationSupport.validateCode(ctx, options, "http://cs", "child10", null, "http://vs");
 		assertNotNull(outcome);
 		assertTrue(outcome.isOk());
-		assertEquals("Code was validated against in-memory expansion of ValueSet: http://vs", outcome.getMessage());
+		assertEquals("Code was validated against in-memory expansion of ValueSet: http://vs", outcome.getSourceDetails());
 
 		outcome = myValidationSupport.validateCode(ctx, options, "http://cs", "childX", null, "http://vs");
 		assertNotNull(outcome);
@@ -160,7 +160,7 @@ public class FhirResourceDaoR4ValueSetTest extends BaseJpaR4Test {
 		outcome = myValidationSupport.validateCode(ctx, options, "http://cs-np", "code1", null, "http://vs");
 		assertNotNull(outcome);
 		assertTrue(outcome.isOk());
-		assertEquals("Code was validated against in-memory expansion of ValueSet: http://vs", outcome.getMessage());
+		assertEquals("Code was validated against in-memory expansion of ValueSet: http://vs", outcome.getSourceDetails());
 
 		outcome = myValidationSupport.validateCode(ctx, options, "http://cs-np", "codeX", null, "http://vs");
 		assertNotNull(outcome);
@@ -251,7 +251,7 @@ public class FhirResourceDaoR4ValueSetTest extends BaseJpaR4Test {
 		outcome = myValidationSupport.validateCode(ctx, options, "http://cs", "child10", null, "http://vs");
 		assertNotNull(outcome);
 		assertTrue(outcome.isOk());
-		assertEquals("Code was validated against in-memory expansion of ValueSet: http://vs", outcome.getMessage());
+		assertEquals("Code was validated against in-memory expansion of ValueSet: http://vs", outcome.getSourceDetails());
 
 		outcome = myValidationSupport.validateCode(ctx, options, "http://cs", "childX", null, "http://vs");
 		assertNotNull(outcome);
@@ -263,7 +263,7 @@ public class FhirResourceDaoR4ValueSetTest extends BaseJpaR4Test {
 		outcome = myValidationSupport.validateCode(ctx, options, "http://cs-np", "code1", null, "http://vs");
 		assertNotNull(outcome);
 		assertTrue(outcome.isOk());
-		assertEquals("Code was validated against in-memory expansion of ValueSet: http://vs", outcome.getMessage());
+		assertEquals("Code was validated against in-memory expansion of ValueSet: http://vs", outcome.getSourceDetails());
 
 		outcome = myValidationSupport.validateCode(ctx, options, "http://cs-np", "codeX", null, "http://vs");
 		assertNotNull(outcome);
@@ -344,7 +344,7 @@ public class FhirResourceDaoR4ValueSetTest extends BaseJpaR4Test {
 		Coding coding = null;
 		CodeableConcept codeableConcept = null;
 		IValidationSupport.CodeValidationResult result = myValueSetDao.validateCode(valueSetIdentifier, id, code, system, display, coding, codeableConcept, mySrd);
-		assertFalse(result.isOk());
+		assertTrue(result.isOk());
 		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
 		assertEquals("Concept Display \"Systolic blood pressure at First encounterXXXX\" does not match expected \"Systolic blood pressure at First encounter\" for in-memory expansion of ValueSet: http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2", result.getMessage());
 	}

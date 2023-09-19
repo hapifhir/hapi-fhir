@@ -255,23 +255,30 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 			String code = theResult.getCode();
 			String display = theResult.getDisplay();
 
-			String issueSeverity = theResult.getSeverityCode();
+			String issueSeverityCode = theResult.getSeverityCode();
 			String message = theResult.getMessage();
-			if (isNotBlank(code)) {
-				retVal = new ValidationResult(
-						theSystem,
-						null,
-						new org.hl7.fhir.r5.model.CodeSystem.ConceptDefinitionComponent()
-								.setCode(code)
-								.setDisplay(display),
-						null);
-			} else if (isNotBlank(issueSeverity)) {
-				retVal = new ValidationResult(
-						ValidationMessage.IssueSeverity.fromCode(issueSeverity),
-						message,
-						TerminologyServiceErrorClass.UNKNOWN,
-						null);
+			ValidationMessage.IssueSeverity issueSeverity = null;
+			if (issueSeverityCode != null) {
+				issueSeverity = ValidationMessage.IssueSeverity.fromCode(issueSeverityCode);
+			} else if (isNotBlank(message)) {
+				issueSeverity = ValidationMessage.IssueSeverity.INFORMATION;
 			}
+
+			CodeSystem.ConceptDefinitionComponent conceptDefinitionComponent = null;
+			if (code != null) {
+				conceptDefinitionComponent = new CodeSystem.ConceptDefinitionComponent()
+						.setCode(code)
+						.setDisplay(display);
+			}
+
+			retVal = new ValidationResult(
+					issueSeverity,
+					message,
+					theSystem,
+					theResult.getCodeSystemVersion(),
+					conceptDefinitionComponent,
+					display,
+					null);
 		}
 
 		if (retVal == null) {
@@ -677,6 +684,32 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 		throw new UnsupportedOperationException(Msg.code(650) + "Unable to fetch resources of type: " + theClass);
 	}
 
+	@Override
+	public boolean isForPublication() {
+		return false;
+	}
+
+	@Override
+	public void setForPublication(boolean b) {
+		throw new UnsupportedOperationException(Msg.code(2351));
+	}
+
+	public static ConceptValidationOptions convertConceptValidationOptions(ValidationOptions theOptions) {
+		ConceptValidationOptions retVal = new ConceptValidationOptions();
+		if (theOptions.isGuessSystem()) {
+			retVal = retVal.setInferSystem(true);
+		}
+		return retVal;
+	}
+
+	@Nonnull
+	public static VersionSpecificWorkerContextWrapper newVersionSpecificWorkerContextWrapper(
+			IValidationSupport theValidationSupport) {
+		VersionCanonicalizer versionCanonicalizer = new VersionCanonicalizer(theValidationSupport.getFhirContext());
+		return new VersionSpecificWorkerContextWrapper(
+				new ValidationSupportContext(theValidationSupport), versionCanonicalizer);
+	}
+
 	private static class ResourceKey {
 		private final int myHashCode;
 		private final String myResourceName;
@@ -721,31 +754,5 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 		public int hashCode() {
 			return myHashCode;
 		}
-	}
-
-	public static ConceptValidationOptions convertConceptValidationOptions(ValidationOptions theOptions) {
-		ConceptValidationOptions retVal = new ConceptValidationOptions();
-		if (theOptions.isGuessSystem()) {
-			retVal = retVal.setInferSystem(true);
-		}
-		return retVal;
-	}
-
-	@Nonnull
-	public static VersionSpecificWorkerContextWrapper newVersionSpecificWorkerContextWrapper(
-			IValidationSupport theValidationSupport) {
-		VersionCanonicalizer versionCanonicalizer = new VersionCanonicalizer(theValidationSupport.getFhirContext());
-		return new VersionSpecificWorkerContextWrapper(
-				new ValidationSupportContext(theValidationSupport), versionCanonicalizer);
-	}
-
-	@Override
-	public boolean isForPublication() {
-		return false;
-	}
-
-	@Override
-	public void setForPublication(boolean b) {
-		throw new UnsupportedOperationException(Msg.code(2351));
 	}
 }
