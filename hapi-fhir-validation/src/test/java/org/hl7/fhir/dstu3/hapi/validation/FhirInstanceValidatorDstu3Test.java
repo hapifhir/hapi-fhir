@@ -679,8 +679,8 @@ public class FhirInstanceValidatorDstu3Test {
 					}  else if (t.getMessage().contains("Found # expecting a token name")) {
 						// Some DSTU3 messages contain incomplete encoding for single quotes (#39 vs &#39)
 						return false;
-					} else if (t.getMessage().contains("The name 'kind' is not valid for any of the possible types")) {
-						// FIXME find constraint sdf-15 fails validation.
+					} else if (t.getMessage().contains("sdf-15") && t.getMessage().contains("The name 'kind' is not valid for any of the possible types")) {
+						// Find constraint sdf-15 fails with stricter core validation.
 						return false;
 					}
 					else {
