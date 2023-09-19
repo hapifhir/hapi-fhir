@@ -251,7 +251,7 @@ public class InMemoryTerminologyServerValidationSupportTest {
 		assertTrue(outcome.isOk());
 		assertEquals("28571000087109", outcome.getCode());
 		assertEquals("MODERNA COVID-19 mRNA-1273", outcome.getDisplay());
-		assertEquals("http://snomed.info/sct/20611000087101/version/20210331", outcome.getCodeSystemVersion());
+		assertEquals("0.17", outcome.getCodeSystemVersion());
 		assertThat(outcome.getMessage(), containsString("Concept Display \"BLAH\" does not match expected \"MODERNA COVID-19 mRNA-1273\""));
 		assertEquals("warning", outcome.getSeverityCode());
 		assertThat(outcome.getSourceDetails(), startsWith("Code was validated against in-memory expansion"));
