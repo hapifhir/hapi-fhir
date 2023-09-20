@@ -29,6 +29,7 @@ import ca.uhn.fhir.jpa.mdm.dao.MdmLinkDaoSvc;
 import ca.uhn.fhir.mdm.api.IGoldenResourceMergerSvc;
 import ca.uhn.fhir.mdm.api.IMdmLink;
 import ca.uhn.fhir.mdm.api.IMdmLinkSvc;
+import ca.uhn.fhir.mdm.api.IMdmSurvivorshipService;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
 import ca.uhn.fhir.mdm.api.MdmMatchOutcome;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
@@ -81,6 +82,9 @@ public class GoldenResourceMergerSvcImpl implements IGoldenResourceMergerSvc {
 	@Autowired
 	IInterceptorBroadcaster myInterceptorBroadcaster;
 
+	@Autowired
+	private IMdmSurvivorshipService myMdmSurvivorshipService;
+
 	@Override
 	@Transactional
 	public IAnyResource mergeGoldenResources(MdmMergeGoldenResourcesParams theParams) {
@@ -105,7 +109,8 @@ public class GoldenResourceMergerSvcImpl implements IGoldenResourceMergerSvc {
 					.getResource();
 		} else {
 			myGoldenResourceHelper.mergeIndentifierFields(fromGoldenResource, toGoldenResource, mdmTransactionContext);
-			myGoldenResourceHelper.mergeNonIdentiferFields(fromGoldenResource, toGoldenResource, mdmTransactionContext);
+			myMdmSurvivorshipService.applySurvivorshipRulesToGoldenResource(
+					fromGoldenResource, toGoldenResource, mdmTransactionContext);
 			// Save changes to the golden resource
 			myMdmResourceDaoSvc.upsertGoldenResource(toGoldenResource, resourceType);
 		}

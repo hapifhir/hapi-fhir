@@ -16,9 +16,11 @@ import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
 import ca.uhn.fhir.validation.SingleValidationMessage;
 import ca.uhn.fhir.validation.ValidationResult;
+import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
 import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.Validate;
+import org.hamcrest.Matchers;
 import org.hl7.fhir.common.hapi.validation.support.CachingValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.CommonCodeSystemsTerminologyService;
 import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
@@ -26,6 +28,7 @@ import org.hl7.fhir.common.hapi.validation.support.PrePopulatedValidationSupport
 import org.hl7.fhir.common.hapi.validation.support.SnapshotGeneratingValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
 import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
+import org.hl7.fhir.common.hapi.validation.validator.VersionSpecificWorkerContextWrapper;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.conformance.ProfileUtilities;
@@ -43,6 +46,7 @@ import org.hl7.fhir.r4.model.Consent;
 import org.hl7.fhir.r4.model.ContactPoint;
 import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.Extension;
+import org.hl7.fhir.r4.model.IntegerType;
 import org.hl7.fhir.r4.model.Media;
 import org.hl7.fhir.r4.model.Narrative;
 import org.hl7.fhir.r4.model.Observation;
@@ -51,7 +55,9 @@ import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Period;
 import org.hl7.fhir.r4.model.Practitioner;
+import org.hl7.fhir.r4.model.PrimitiveType;
 import org.hl7.fhir.r4.model.Procedure;
+import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.QuestionnaireResponse;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.RelatedPerson;
@@ -62,6 +68,7 @@ import org.hl7.fhir.r4.model.ValueSet;
 import org.hl7.fhir.r4.model.ValueSet.ValueSetExpansionComponent;
 import org.hl7.fhir.r4.terminologies.ValueSetExpander;
 import org.hl7.fhir.r4.utils.FHIRPathEngine;
+import org.hl7.fhir.r5.elementmodel.JsonParser;
 import org.hl7.fhir.r5.test.utils.ClassesLoadedFlags;
 import org.hl7.fhir.r5.utils.validation.IValidationPolicyAdvisor;
 import org.hl7.fhir.r5.utils.validation.IValidatorResourceFetcher;
@@ -98,16 +105,19 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.lessThan;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.startsWith;
+import static org.hl7.fhir.common.hapi.validation.support.CommonCodeSystemsTerminologyService.CURRENCIES_CODESYSTEM_URL;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.withSettings;
 
 public class FhirInstanceValidatorR4Test extends BaseTest {
 
@@ -923,7 +933,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 		ourLog.debug(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(operationOutcome));
 		assertEquals("Unrecognized property 'foo'", operationOutcome.getIssue().get(0).getDiagnostics());
 		assertEquals("Patient", operationOutcome.getIssue().get(0).getLocation().get(0).getValue());
-		assertEquals("Line 5, Col 23", operationOutcome.getIssue().get(0).getLocation().get(1).getValue());
+		assertEquals("Line[5] Col[23]", operationOutcome.getIssue().get(0).getLocation().get(1).getValue());
 	}
 
 	@Test
@@ -1264,7 +1274,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 		ValidationResult output = myFhirValidator.validateWithResult(input);
 		logResultsAndReturnAll(output);
 		assertEquals(
-			"The value provided ('notvalidcode') is not in the value set 'ObservationStatus' (http://hl7.org/fhir/ValueSet/observation-status|4.0.1), and a code is required from this value set) (error message = Unknown code 'notvalidcode' for in-memory expansion of ValueSet 'http://hl7.org/fhir/ValueSet/observation-status')",
+			"The value provided ('notvalidcode') is not in the value set 'ObservationStatus' (http://hl7.org/fhir/ValueSet/observation-status|4.0.1), and a code is required from this value set  (error message = Unknown code 'notvalidcode' for in-memory expansion of ValueSet 'http://hl7.org/fhir/ValueSet/observation-status')",
 			output.getMessages().get(0).getMessage());
 	}
 
@@ -1312,6 +1322,44 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 		List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
 		assertEquals(0, errors.size(), errors.toString());
 
+	}
+
+	@Test
+	public void testSliceValidation() throws IOException {
+		Patient patient = new Patient();
+		patient.getText().setDiv(new XhtmlNode().setValue("<div></div>")).setStatus(Narrative.NarrativeStatus.GENERATED);
+
+		Observation input = new Observation();
+		input.setSubject(new Reference("Patient/A"));
+		input.getText().setDiv(new XhtmlNode().setValue("<div>AA</div>")).setStatus(Narrative.NarrativeStatus.GENERATED);
+		input.setStatus(ObservationStatus.FINAL);
+		input.getCode().addCoding().setSystem("http://acme.org").setCode("12345");
+
+		addValidConcept("http://acme.org", "12345");
+
+		IValidationPolicyAdvisor policy = mock(IValidationPolicyAdvisor.class, withSettings().verboseLogging());
+		when(policy.policyForReference(any(), any(), any(), any())).thenReturn(ReferenceValidationPolicy.CHECK_VALID);
+		myInstanceVal.setValidatorPolicyAdvisor(policy);
+
+		IValidatorResourceFetcher fetcher = mock(IValidatorResourceFetcher.class, withSettings().verboseLogging());
+		when(fetcher.fetch(any(), any(), any())).thenAnswer(t -> {
+			return new JsonParser(new VersionSpecificWorkerContextWrapper(new ValidationSupportContext(myValidationSupport), new VersionCanonicalizer(ourCtx)))
+				.parse(ourCtx.newJsonParser().encodeResourceToString(patient), "Patient");
+		});
+		myInstanceVal.setValidatorResourceFetcher(fetcher);
+		myInstanceVal.setValidationSupport(myValidationSupport);
+		myInstanceVal.setBestPracticeWarningLevel(BestPracticeWarningLevel.Ignore);
+
+		ValidationResult output = myFhirValidator.validateWithResult(input);
+		OperationOutcome oo = (OperationOutcome) output.toOperationOutcome();
+		ourLog.info("Outcome: {}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
+		assertEquals(1, oo.getIssue().size());
+		assertEquals(OperationOutcome.IssueType.PROCESSING, oo.getIssue().get(0).getCode());
+		assertEquals(OperationOutcome.IssueSeverity.INFORMATION, oo.getIssue().get(0).getSeverity());
+		assertEquals("Details for Patient/A matching against profile http://hl7.org/fhir/StructureDefinition/Patient|4.0.1 - Observation.subject->Patient.text: Narrative.div: minimum required = 1, but only found 0 (from http://hl7.org/fhir/StructureDefinition/Narrative|4.0.1)", oo.getIssue().get(0).getDiagnostics());
+		assertThat(oo.getIssue().get(0).getLocation().stream().map(PrimitiveType::getValue).collect(Collectors.toList()), Matchers.contains(
+			"Observation.subject", "Line[1] Col[238]"
+		));
 	}
 
 	@Test
@@ -1416,7 +1464,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 		output = myFhirValidator.validateWithResult(input);
 		all = logResultsAndReturnNonInformationalOnes(output);
 		assertEquals(2, all.size());
-		assertThat(all.get(0).getMessage(), containsString("Validation failed for 'http://unitsofmeasure.org#Heck'"));
+		assertThat(all.get(0).getMessage(), containsString("The unit 'Heck' is unknown' at position 0 for 'http://unitsofmeasure.org#Heck'"));
 		assertThat(all.get(1).getMessage(), containsString("The value provided ('Heck') is not in the value set 'Body Temperature Units'"));
 
 	}
@@ -1469,7 +1517,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 		myInstanceVal.setValidatorPolicyAdvisor(policyAdvisor);
 		myFhirValidator.validateWithResult(encoded);
 
-		verify(resourceFetcher, times(12)).resolveURL(any(), any(), anyString(), anyString(), anyString());
+		verify(resourceFetcher, times(12)).resolveURL(any(), any(), anyString(), anyString(), anyString(), anyBoolean());
 		verify(policyAdvisor, times(12)).policyForContained(any(), any(), any(), any(), any(), any(), any());
 	}
 
@@ -1518,7 +1566,8 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 		ValidationResult output = myFhirValidator.validateWithResult(input);
 		List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
 		assertEquals(1, errors.size(), errors.toString());
-		assertThat(errors.get(0).getMessage(), containsString("The value provided ('BLAH') is not in the value set 'CurrencyCode' (http://hl7.org/fhir/ValueSet/currencies|4.0.1), and a code is required from this value set) (error message = Unknown code 'BLAH' for in-memory expansion of ValueSet 'http://hl7.org/fhir/ValueSet/currencies')"));
+		assertThat(errors.get(0).getMessage(), containsString("The value provided ('BLAH') is not in the value set 'CurrencyCode' (http://hl7.org/fhir/ValueSet/currencies|4.0.1)"));
+		assertThat(errors.get(0).getMessage(), containsString("error message = Unknown code \"urn:iso:std:iso:4217#BLAH\""));
 
 
 	}
@@ -1602,6 +1651,90 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 		}
 	}
 
+
+	@Test
+	void testValidateCommonCodes_Ucum_ErrorMessageIsPreserved() {
+		buildValidationSupportWithLogicalAndSupport(false);
+
+		Observation input = new Observation();
+		input.getText().setDiv(new XhtmlNode().setValue("<div>AA</div>")).setStatus(Narrative.NarrativeStatus.GENERATED);
+		input.setStatus(ObservationStatus.AMENDED);
+		input.getCode().addCoding().setSystem("http://loinc.org").setCode("1234").setDisplay("FOO");
+		input.setValue(new Quantity(
+			null,
+			123,
+			"http://unitsofmeasure.org",
+			"MG/DL",
+			"MG/DL"
+		));
+		String inputString = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(input);
+		ourLog.info("Input:\n{}", inputString);
+
+		ValidationResult result = myFhirValidator.validateWithResult(inputString);
+
+		OperationOutcome oo = (OperationOutcome) result.toOperationOutcome();
+		ourLog.info(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
+
+		assertEquals("Error processing unit 'MG/DL': The unit 'DL' is unknown' at position 3 for 'http://unitsofmeasure.org#MG/DL'", result.getMessages().get(0).getMessage());
+		assertEquals(ResultSeverityEnum.ERROR, result.getMessages().get(0).getSeverity());
+		assertEquals(15, result.getMessages().get(0).getLocationLine());
+		assertEquals(4, result.getMessages().get(0).getLocationCol());
+		assertEquals("Observation.value.ofType(Quantity)", result.getMessages().get(0).getLocationString());
+		assertEquals("Terminology_PassThrough_TX_Message", result.getMessages().get(0).getMessageId());
+
+		assertEquals(15, ((IntegerType) oo.getIssue().get(0).getExtensionByUrl("http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line").getValue()).getValue());
+		assertEquals(4, ((IntegerType) oo.getIssue().get(0).getExtensionByUrl("http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col").getValue()).getValue());
+		assertEquals("Terminology_PassThrough_TX_Message", ((StringType) oo.getIssue().get(0).getExtensionByUrl("http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id").getValue()).getValue());
+		assertEquals("Error processing unit 'MG/DL': The unit 'DL' is unknown' at position 3 for 'http://unitsofmeasure.org#MG/DL'", oo.getIssue().get(0).getDiagnostics());
+		assertEquals(OperationOutcome.IssueType.PROCESSING, oo.getIssue().get(0).getCode());
+		assertEquals(OperationOutcome.IssueSeverity.ERROR, oo.getIssue().get(0).getSeverity());
+		assertEquals(2, oo.getIssue().get(0).getLocation().size());
+		assertEquals("Observation.value.ofType(Quantity)", oo.getIssue().get(0).getLocation().get(0).getValue());
+		assertEquals("Line[15] Col[4]", oo.getIssue().get(0).getLocation().get(1).getValue());
+	}
+
+	@Test
+	void testValidateCommonCodes_Currency_ErrorMessageIsPreserved() {
+		buildValidationSupportWithLogicalAndSupport(false);
+
+		Observation input = new Observation();
+		input.getText().setDiv(new XhtmlNode().setValue("<div>AA</div>")).setStatus(Narrative.NarrativeStatus.GENERATED);
+		input.setStatus(ObservationStatus.AMENDED);
+		input.getCode().addCoding().setSystem("http://loinc.org").setCode("1234").setDisplay("FOO");
+		input.setValue(new Quantity(
+			null,
+			123,
+			CURRENCIES_CODESYSTEM_URL,
+			"blah",
+			"blah"
+		));
+		String inputString = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(input);
+		ourLog.info("Results:\n{}", inputString);
+
+		ValidationResult result = myFhirValidator.validateWithResult(inputString);
+
+		OperationOutcome oo = (OperationOutcome) result.toOperationOutcome();
+		ourLog.info(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
+
+		assertEquals("Unknown code 'urn:iso:std:iso:4217#blah' for 'urn:iso:std:iso:4217#blah'", result.getMessages().get(0).getMessage());
+		assertEquals(ResultSeverityEnum.ERROR, result.getMessages().get(0).getSeverity());
+		assertEquals(15, result.getMessages().get(0).getLocationLine());
+		assertEquals(4, result.getMessages().get(0).getLocationCol());
+		assertEquals("Observation.value.ofType(Quantity)", result.getMessages().get(0).getLocationString());
+		assertEquals("Terminology_PassThrough_TX_Message", result.getMessages().get(0).getMessageId());
+
+		assertEquals(15, ((IntegerType) oo.getIssue().get(0).getExtensionByUrl("http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line").getValue()).getValue());
+		assertEquals(4, ((IntegerType) oo.getIssue().get(0).getExtensionByUrl("http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col").getValue()).getValue());
+		assertEquals("Terminology_PassThrough_TX_Message", ((StringType) oo.getIssue().get(0).getExtensionByUrl("http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id").getValue()).getValue());
+		assertEquals("Unknown code 'urn:iso:std:iso:4217#blah' for 'urn:iso:std:iso:4217#blah'", oo.getIssue().get(0).getDiagnostics());
+		assertEquals(OperationOutcome.IssueType.PROCESSING, oo.getIssue().get(0).getCode());
+		assertEquals(OperationOutcome.IssueSeverity.ERROR, oo.getIssue().get(0).getSeverity());
+		assertEquals(2, oo.getIssue().get(0).getLocation().size());
+		assertEquals("Observation.value.ofType(Quantity)", oo.getIssue().get(0).getLocation().get(0).getValue());
+		assertEquals("Line[15] Col[4]", oo.getIssue().get(0).getLocation().get(1).getValue());
+	}
+
+
 	@Test
 	public void testPatientSingleCommunicationLanguage_en() throws IOException {
 		final String encoded = loadResource("patient-with-single-comm-lang-en.json");
@@ -1678,6 +1811,25 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 		}
 	}
 
+	private void buildValidationSupportWithLogicalAndSupport(boolean theLogicalAnd) {
+		myFhirValidator = ourCtx.newValidator();
+		myFhirValidator.setValidateAgainstStandardSchema(false);
+		myFhirValidator.setValidateAgainstStandardSchematron(false);
+		// This is only used if the validation is performed with validationOptions.isConcurrentBundleValidation = true
+		myFhirValidator.setExecutorService(Executors.newFixedThreadPool(4));
+
+		myMockSupport = mock(IValidationSupport.class);
+		when(myMockSupport.getFhirContext()).thenReturn(ourCtx);
+		ValidationSupportChain chain = new ValidationSupportChain(
+			myDefaultValidationSupport,
+			myMockSupport,
+			new CommonCodeSystemsTerminologyService(ourCtx),
+			new InMemoryTerminologyServerValidationSupport(ourCtx),
+			new SnapshotGeneratingValidationSupport(ourCtx));
+		myValidationSupport = new CachingValidationSupport(chain, theLogicalAnd);
+		myInstanceVal = new FhirInstanceValidator(myValidationSupport);
+		myFhirValidator.registerValidatorModule(myInstanceVal);
+	}
 
 	@AfterAll
 	public static void verifyFormatParsersNotLoaded() throws Exception {
@@ -1695,27 +1847,11 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 		assertFalse(ClassesLoadedFlags.ourXmlParserBaseLoaded);
 	}
 
-
 	@AfterAll
 	public static void afterClassClearContext() throws IOException, NoSuchFieldException {
 		myDefaultValidationSupport.flush();
 		myDefaultValidationSupport = null;
 		TestUtil.randomizeLocaleAndTimezone();
-	}
-
-	private void buildValidationSupportWithLogicalAndSupport(boolean theLogicalAnd) {
-		myFhirValidator = ourCtx.newValidator();
-		myFhirValidator.setValidateAgainstStandardSchema(false);
-		myFhirValidator.setValidateAgainstStandardSchematron(false);
-		// This is only used if the validation is performed with validationOptions.isConcurrentBundleValidation = true
-		myFhirValidator.setExecutorService(Executors.newFixedThreadPool(4));
-
-		myMockSupport = mock(IValidationSupport.class);
-		when(myMockSupport.getFhirContext()).thenReturn(ourCtx);
-		ValidationSupportChain chain = new ValidationSupportChain(myDefaultValidationSupport, myMockSupport, new InMemoryTerminologyServerValidationSupport(ourCtx), new CommonCodeSystemsTerminologyService(ourCtx), new SnapshotGeneratingValidationSupport(ourCtx));
-		myValidationSupport = new CachingValidationSupport(chain, theLogicalAnd);
-		myInstanceVal = new FhirInstanceValidator(myValidationSupport);
-		myFhirValidator.registerValidatorModule(myInstanceVal);
 	}
 
 }

@@ -20,9 +20,11 @@
 package ca.uhn.hapi.fhir.cdshooks.api;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 public interface ICdsConfigService {
 	@Nonnull
@@ -30,4 +32,9 @@ public interface ICdsConfigService {
 
 	@Nonnull
 	ObjectMapper getObjectMapper();
+
+	@Nullable
+	default DaoRegistry getDaoRegistry() {
+		return null;
+	}
 }

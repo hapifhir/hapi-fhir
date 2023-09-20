@@ -7,7 +7,7 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-deployable-pom</artifactId>
-		<version>6.9.3-SNAPSHOT</version>
+		<version>6.9.6-SNAPSHOT</version>
 
 		<relativePath>../hapi-deployable-pom/pom.xml</relativePath>
 	</parent>
@@ -19,7 +19,7 @@
 
 	<properties>
 		<org.antlr-version>4.10.1</org.antlr-version>
-		<org.codelibs.xpp3-version>1.1.4c.0</org.codelibs.xpp3-version>
+		<xpp3-version>1.1.6</xpp3-version>
 		<spring-security-core.version>5.7.8</spring-security-core.version>
 	</properties>
 
@@ -40,16 +40,6 @@
 				<groupId>ca.uhn.hapi.fhir</groupId>
 				<artifactId>hapi-fhir-validation</artifactId>
 				<version>${project.version}</version>
-				<exclusions>
-					<exclusion>
-						<groupId>xpp3</groupId>
-						<artifactId>xpp3_min</artifactId>
-					</exclusion>
-					<exclusion>
-						<groupId>xmlpull</groupId>
-						<artifactId>xmlpull</artifactId>
-					</exclusion>
-				</exclusions>
 			</dependency>
 			<dependency>
 				<groupId>ca.uhn.hapi.fhir</groupId>
@@ -169,9 +159,9 @@
 		</dependency>
 
 		<dependency>
-			<groupId>org.codelibs</groupId>
+			<groupId>org.ogce</groupId>
 			<artifactId>xpp3</artifactId>
-			<version>${org.codelibs.xpp3-version}</version>
+			<version>${xpp3-version}</version>
 		</dependency>
 
 		<dependency>

@@ -2087,6 +2087,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 					break;
 			}
 		}
+		myMetaTagSorter.sort(retVal);
 		return retVal;
 	}
 
@@ -2211,6 +2212,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		IIdType resourceId;
 		RestOperationTypeEnum update = RestOperationTypeEnum.UPDATE;
 		if (isNotBlank(theMatchUrl)) {
+			// Validate that the supplied resource matches the conditional.
 			Set<JpaPid> match = myMatchResourceUrlService.processMatchUrl(
 					theMatchUrl, myResourceType, theTransactionDetails, theRequest, theResource);
 			if (match.size() > 1) {

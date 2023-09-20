@@ -110,7 +110,7 @@ public class Batch2JobHelper {
 		} catch (ConditionTimeoutException e) {
 			String statuses = myJobPersistence.fetchInstances(100, 0)
 				.stream()
-				.map(t -> t.getJobDefinitionId() + "/" + t.getStatus().name())
+				.map(t -> t.getInstanceId() + " " + t.getJobDefinitionId() + "/" + t.getStatus().name())
 				.collect(Collectors.joining("\n"));
 			String currentStatus = myJobCoordinator.getInstance(theBatchJobId).getStatus().name();
 			fail("Job " + theBatchJobId + " still has status " + currentStatus + " - All statuses:\n" + statuses);

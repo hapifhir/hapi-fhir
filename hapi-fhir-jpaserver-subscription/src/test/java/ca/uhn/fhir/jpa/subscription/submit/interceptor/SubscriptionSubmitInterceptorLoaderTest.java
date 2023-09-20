@@ -6,12 +6,14 @@ import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.cache.IResourceVersionSvc;
+import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.searchparam.config.SearchParamConfig;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamProvider;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelFactory;
 import ca.uhn.fhir.jpa.subscription.submit.config.SubscriptionSubmitterConfig;
+import ca.uhn.fhir.subscription.api.IResourceModifiedMessagePersistenceSvc;
 import org.hl7.fhir.dstu2.model.Subscription;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -21,6 +23,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.transaction.PlatformTransactionManager;
 
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
@@ -34,24 +37,12 @@ import static org.mockito.Mockito.verify;
 })
 public class SubscriptionSubmitInterceptorLoaderTest {
 
-	@MockBean
-	private ISearchParamProvider mySearchParamProvider;
-	@MockBean
-	private IInterceptorService myInterceptorService;
-	@MockBean
-	private IValidationSupport myValidationSupport;
-	@MockBean
-	private SubscriptionChannelFactory mySubscriptionChannelFactory;
-	@MockBean
-	private DaoRegistry myDaoRegistry;
 	@Autowired
 	private SubscriptionSubmitInterceptorLoader mySubscriptionSubmitInterceptorLoader;
 	@Autowired
 	private SubscriptionMatcherInterceptor mySubscriptionMatcherInterceptor;
 	@MockBean
-	private IResourceVersionSvc myResourceVersionSvc;
-	@MockBean
-	private IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
+	private IInterceptorService myInterceptorService;
 
 	/**
 	 * It should be possible to run only the {@link SubscriptionSubmitterConfig} without the
@@ -81,6 +72,25 @@ public class SubscriptionSubmitInterceptorLoaderTest {
 			storageSettings.addSupportedSubscriptionType(Subscription.SubscriptionChannelType.RESTHOOK);
 			return storageSettings;
 		}
+
+		@MockBean
+		private ISearchParamProvider mySearchParamProvider;
+		@MockBean
+		private IValidationSupport myValidationSupport;
+		@MockBean
+		private SubscriptionChannelFactory mySubscriptionChannelFactory;
+		@MockBean
+		private DaoRegistry myDaoRegistry;
+		@MockBean
+		private IResourceVersionSvc myResourceVersionSvc;
+		@MockBean
+		private IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
+		@MockBean
+		private PlatformTransactionManager myPlatformTransactionManager;
+		@MockBean
+		private IResourceModifiedMessagePersistenceSvc myResourceModifiedMessagePersistenceSvc;
+		@MockBean
+		private IHapiTransactionService myHapiTransactionService;
 
 	}
 

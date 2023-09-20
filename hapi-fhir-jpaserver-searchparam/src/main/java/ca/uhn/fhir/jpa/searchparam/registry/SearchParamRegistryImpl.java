@@ -32,6 +32,8 @@ import ca.uhn.fhir.jpa.cache.IResourceChangeListenerRegistry;
 import ca.uhn.fhir.jpa.cache.ResourceChangeResult;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
@@ -193,6 +195,31 @@ public class SearchParamRegistryImpl
 		long overriddenCount = overrideBuiltinSearchParamsWithActiveJpaSearchParams(searchParams, theJpaSearchParams);
 		ourLog.trace("Have overridden {} built-in search parameters", overriddenCount);
 		removeInactiveSearchParams(searchParams);
+
+		/*
+		 * The _language SearchParameter is a weird exception - It is actually just a normal
+		 * token SP, but we explcitly ban SPs from registering themselves with a prefix
+		 * of "_" since that's system reserved so we put this one behind a settings toggle
+		 */
+		if (myStorageSettings.isLanguageSearchParameterEnabled()) {
+			IIdType id = myFhirContext.getVersion().newIdType();
+			id.setValue("SearchParameter/Resource-language");
+			RuntimeSearchParam sp = new RuntimeSearchParam(
+					id,
+					"http://hl7.org/fhir/SearchParameter/Resource-language",
+					Constants.PARAM_LANGUAGE,
+					"Language of the resource content",
+					"language",
+					RestSearchParameterTypeEnum.TOKEN,
+					Collections.emptySet(),
+					Collections.emptySet(),
+					RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE,
+					myFhirContext.getResourceTypes());
+			for (String baseResourceType : sp.getBase()) {
+				searchParams.add(baseResourceType, sp.getName(), sp);
+			}
+		}
+
 		myActiveSearchParams = searchParams;
 
 		myJpaSearchParamCache.populateActiveSearchParams(
@@ -282,7 +309,13 @@ public class SearchParamRegistryImpl
 
 	@Override
 	public void forceRefresh() {
+		RuntimeSearchParamCache activeSearchParams = myActiveSearchParams;
 		myResourceChangeListenerCache.forceRefresh();
+
+		// If the refresh didn't trigger a change, proceed with one anyway
+		if (myActiveSearchParams == activeSearchParams) {
+			rebuildActiveSearchParams();
+		}
 	}
 
 	@Override

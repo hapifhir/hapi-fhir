@@ -22,6 +22,7 @@ package ca.uhn.fhir.storage.test;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.test.utilities.ITestDataBuilder;
 import com.google.common.collect.HashMultimap;
@@ -47,10 +48,10 @@ public class DaoTestDataBuilder implements ITestDataBuilder.WithSupport, ITestDa
 
 	final FhirContext myFhirCtx;
 	final DaoRegistry myDaoRegistry;
-	SystemRequestDetails mySrd;
+	RequestDetails mySrd;
 	final SetMultimap<String, IIdType> myIds = HashMultimap.create();
 
-	public DaoTestDataBuilder(FhirContext theFhirCtx, DaoRegistry theDaoRegistry, SystemRequestDetails theSrd) {
+	public DaoTestDataBuilder(FhirContext theFhirCtx, DaoRegistry theDaoRegistry, RequestDetails theSrd) {
 		myFhirCtx = theFhirCtx;
 		myDaoRegistry = theDaoRegistry;
 		mySrd = theSrd;
