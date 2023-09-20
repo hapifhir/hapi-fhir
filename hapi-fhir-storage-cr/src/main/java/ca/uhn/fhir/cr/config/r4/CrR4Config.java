@@ -25,6 +25,7 @@ import ca.uhn.fhir.cr.common.IRepositoryFactory;
 import ca.uhn.fhir.cr.config.ProviderLoader;
 import ca.uhn.fhir.cr.config.ProviderSelector;
 import ca.uhn.fhir.cr.config.RepositoryConfig;
+import ca.uhn.fhir.cr.config.TerminologyCacheConfig;
 import ca.uhn.fhir.cr.r4.ICareGapsServiceFactory;
 import ca.uhn.fhir.cr.r4.ICqlExecutionServiceFactory;
 import ca.uhn.fhir.cr.r4.IMeasureServiceFactory;
@@ -52,7 +53,7 @@ import java.util.Map;
 import java.util.concurrent.Executor;
 
 @Configuration
-@Import(RepositoryConfig.class)
+@Import({RepositoryConfig.class, TerminologyCacheConfig.class})
 public class CrR4Config {
 
 	@Bean

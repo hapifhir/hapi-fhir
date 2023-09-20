@@ -25,6 +25,7 @@ import ca.uhn.fhir.cr.common.IRepositoryFactory;
 import ca.uhn.fhir.cr.config.ProviderLoader;
 import ca.uhn.fhir.cr.config.ProviderSelector;
 import ca.uhn.fhir.cr.config.RepositoryConfig;
+import ca.uhn.fhir.cr.config.TerminologyCacheConfig;
 import ca.uhn.fhir.cr.dstu3.IMeasureServiceFactory;
 import ca.uhn.fhir.cr.dstu3.measure.MeasureOperationsProvider;
 import ca.uhn.fhir.cr.dstu3.measure.MeasureService;
@@ -39,7 +40,7 @@ import java.util.Arrays;
 import java.util.Map;
 
 @Configuration
-@Import(RepositoryConfig.class)
+@Import({RepositoryConfig.class, TerminologyCacheConfig.class})
 public class CrDstu3Config {
 
 	@Bean
