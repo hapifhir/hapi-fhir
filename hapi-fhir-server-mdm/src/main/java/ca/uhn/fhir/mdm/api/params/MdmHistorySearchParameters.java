@@ -35,7 +35,6 @@ import javax.annotation.Nullable;
 public class MdmHistorySearchParameters {
 	private List<IIdType> myGoldenResourceIds = new ArrayList<>();
 	private List<IIdType> mySourceIds = new ArrayList<>();
-	private SearchOperatorEnum mySearchOperator = SearchOperatorEnum.OR;
 
 	public MdmHistorySearchParameters() {}
 
@@ -57,33 +56,18 @@ public class MdmHistorySearchParameters {
 		return this;
 	}
 
-	public SearchOperatorEnum getSearchOperator() {
-		return mySearchOperator;
-	}
-
-	public MdmHistorySearchParameters performOrSearch() {
-		this.mySearchOperator = SearchOperatorEnum.OR;
-		return this;
-	}
-
-	public MdmHistorySearchParameters performAndSearch() {
-		this.mySearchOperator = SearchOperatorEnum.AND;
-		return this;
-	}
-
 	@Override
 	public boolean equals(Object theO) {
 		if (this == theO) return true;
 		if (theO == null || getClass() != theO.getClass()) return false;
 		final MdmHistorySearchParameters that = (MdmHistorySearchParameters) theO;
 		return Objects.equals(myGoldenResourceIds, that.myGoldenResourceIds)
-				&& Objects.equals(mySourceIds, that.mySourceIds)
-				&& Objects.equals(mySearchOperator, that.mySearchOperator);
+				&& Objects.equals(mySourceIds, that.mySourceIds);
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(myGoldenResourceIds, mySourceIds, mySearchOperator);
+		return Objects.hash(myGoldenResourceIds, mySourceIds);
 	}
 
 	@Override
@@ -91,7 +75,6 @@ public class MdmHistorySearchParameters {
 		return new ToStringBuilder(this)
 				.append("myMdmGoldenResourceIds", myGoldenResourceIds)
 				.append("myMdmTargetResourceIds", mySourceIds)
-				.append("mySearchOperator", mySearchOperator)
 				.toString();
 	}
 

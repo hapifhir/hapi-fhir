@@ -22,7 +22,7 @@ package ca.uhn.fhir.mdm.provider;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.mdm.api.IMdmControllerSvc;
-import ca.uhn.fhir.mdm.api.MdmHistorySearchParameters;
+import ca.uhn.fhir.mdm.api.params.MdmHistorySearchParameters;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.mdm.api.paging.MdmPageLinkBuilder;
 import ca.uhn.fhir.mdm.api.paging.MdmPageLinkTuple;
@@ -253,8 +253,7 @@ public abstract class BaseMdmProvider {
 		if (theToMatch.getMdmLink().getMatchResult() == MdmMatchResultEnum.REDIRECT) {
 			MdmHistorySearchParameters params = new MdmHistorySearchParameters()
 					.setSourceIds(List.of(sourceId, goldenId))
-					.setGoldenResourceIds(List.of(sourceId, goldenId))
-					.performAndSearch();
+					.setGoldenResourceIds(List.of(sourceId, goldenId));
 
 			List<MdmLinkWithRevisionJson> result = myMdmControllerSvc.queryLinkHistory(params, theRequestDetails);
 			return containsPossibleDuplicate(result)
