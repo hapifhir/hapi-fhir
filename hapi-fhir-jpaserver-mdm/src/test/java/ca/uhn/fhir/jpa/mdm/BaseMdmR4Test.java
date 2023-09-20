@@ -183,6 +183,17 @@ abstract public class BaseMdmR4Test extends BaseJpaR4Test {
 
 	@Nonnull
 	protected Patient createPatient(Patient thePatient, boolean theMdmManaged, boolean isRedirect) {
+		return createPatientWithUpdate(
+			thePatient, theMdmManaged, isRedirect, false
+		);
+	}
+
+	protected Patient createPatientWithUpdate(
+		Patient thePatient,
+		boolean theMdmManaged,
+		boolean isRedirect,
+		boolean theUseUpdateBool
+	) {
 		if (theMdmManaged) {
 			MdmResourceUtil.setMdmManaged(thePatient);
 			if (isRedirect) {
@@ -192,9 +203,15 @@ abstract public class BaseMdmR4Test extends BaseJpaR4Test {
 			}
 		}
 
-		DaoMethodOutcome outcome = myPatientDao.create(thePatient);
-		Patient patient = (Patient) outcome.getResource();
-		patient.setId(outcome.getId());
+		Patient patient;
+		if (theUseUpdateBool) {
+			DaoMethodOutcome outcome = myPatientDao.update(thePatient);
+			patient = (Patient) outcome.getResource();
+		} else {
+			DaoMethodOutcome outcome = myPatientDao.create(thePatient);
+			patient = (Patient) outcome.getResource();
+			patient.setId(outcome.getId());
+		}
 		return patient;
 	}
 
@@ -209,8 +226,25 @@ abstract public class BaseMdmR4Test extends BaseJpaR4Test {
 		return patient;
 	}
 
+	public Patient createPatientOnPartition(
+		Patient thePatient,
+		boolean theMdmManaged,
+		boolean isRedirect,
+		RequestPartitionId theRequestPartitionId
+	) {
+		return createPatientOnPartition(
+			thePatient, theMdmManaged, isRedirect, theRequestPartitionId, false
+		);
+	}
+
 	@Nonnull
-	protected Patient createPatientOnPartition(Patient thePatient, boolean theMdmManaged, boolean isRedirect, RequestPartitionId theRequestPartitionId) {
+	protected Patient createPatientOnPartition(
+		Patient thePatient,
+		boolean theMdmManaged,
+		boolean isRedirect,
+		RequestPartitionId theRequestPartitionId,
+		boolean theDoUpdate
+	) {
 		if (theMdmManaged) {
 			MdmResourceUtil.setMdmManaged(thePatient);
 			if (isRedirect) {
@@ -222,9 +256,17 @@ abstract public class BaseMdmR4Test extends BaseJpaR4Test {
 
 		SystemRequestDetails systemRequestDetails = new SystemRequestDetails();
 		systemRequestDetails.setRequestPartitionId(theRequestPartitionId);
-		DaoMethodOutcome outcome = myPatientDao.create(thePatient, systemRequestDetails);
-		Patient patient = (Patient) outcome.getResource();
-		patient.setId(outcome.getId());
+
+		Patient patient;
+		if (theDoUpdate) {
+			DaoMethodOutcome outcome = myPatientDao.update(thePatient, systemRequestDetails);
+			patient = (Patient) outcome.getResource();
+			patient.setId(outcome.getId());
+		} else {
+			DaoMethodOutcome outcome = myPatientDao.create(thePatient, systemRequestDetails);
+			patient = (Patient) outcome.getResource();
+			patient.setId(outcome.getId());
+		}
 		patient.setUserData(Constants.RESOURCE_PARTITION_ID, theRequestPartitionId);
 		return patient;
 	}
