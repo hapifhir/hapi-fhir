@@ -946,7 +946,7 @@
 		<hibernate_search_version>6.2.1.Final</hibernate_search_version>
 		<logback_version>1.4.7</logback_version>
 	 	<!-- Update lucene version when you update hibernate-search version -->
-		<lucene_version>8.11.1</lucene_version>
+		<lucene_version>8.11.2</lucene_version>
 		<hamcrest_version>2.2</hamcrest_version>
 		<hibernate_validator_version>8.0.0.Final</hibernate_validator_version>
 		<httpcore_version>4.4.13</httpcore_version>
@@ -969,13 +969,13 @@
 		<slf4j_version>2.0.3</slf4j_version>
 		<log4j_to_slf4j_version>2.19.0</log4j_to_slf4j_version>
 		<spring_version>6.0.12</spring_version>
-		<spring_data_bom_version>2023.0.0</spring_data_bom_version>
+		<spring_data_bom_version>2023.0.4</spring_data_bom_version>
 		<spring_batch_version>4.3.3</spring_batch_version>
 		<spring_boot_version>3.1.0</spring_boot_version>
 		<spring_retry_version>1.2.2.RELEASE</spring_retry_version>
 
 		<stax2_api_version>3.1.4</stax2_api_version>
-		<testcontainers_version>1.17.1</testcontainers_version>
+		<testcontainers_version>1.19.0</testcontainers_version>
 		<thymeleaf-version>3.1.2.RELEASE</thymeleaf-version>
 		<woodstox_core_asl_version>4.4.1</woodstox_core_asl_version>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
@@ -1844,7 +1844,7 @@
 				-->
 				<groupId>org.elasticsearch.client</groupId>
 				<artifactId>elasticsearch-rest-high-level-client</artifactId>
-				<version>7.17.3</version>
+				<version>7.17.13</version>
 				<exclusions>
 					<exclusion>
 						<groupId>com.fasterxml.jackson.dataformat</groupId>

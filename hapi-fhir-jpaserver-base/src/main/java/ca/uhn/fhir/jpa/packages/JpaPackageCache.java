@@ -802,7 +802,7 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 			if (!thePackageSearchSpec.getFhirVersion().matches("([0-9]+\\.)+[0-9]+")) {
 				FhirVersionEnum versionEnum = FhirVersionEnum.forVersionString(thePackageSearchSpec.getFhirVersion());
 				if (versionEnum != null) {
-					predicates.add(theCb.equal(theRoot.get("myFhirVersion").as(FhirVersionEnum.class), versionEnum));
+					predicates.add(theCb.equal(theRoot.get("myFhirVersion").as(String.class), versionEnum.name()));
 				}
 			} else {
 				predicates.add(theCb.like(
