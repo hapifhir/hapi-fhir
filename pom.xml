@@ -897,12 +897,10 @@
 	</licenses>
 
 	<properties>
-		<fhir_core_version>6.0.22.2</fhir_core_version>
+		<fhir_core_version>6.1.2</fhir_core_version>
 		<spotless_version>2.37.0</spotless_version>
-		<ucum_version>1.0.3</ucum_version>
 		<surefire_jvm_args>-Dfile.encoding=UTF-8 -Xmx2048m</surefire_jvm_args>
 
-		<ucum_version>1.0.3</ucum_version>
 
 		<!-- configure timestamp in MANIFEST.MF for maven-war-provider -->
 		<maven.build.timestamp.format>yyyy-MM-dd'T'HH:mm:ss'Z'</maven.build.timestamp.format>
@@ -982,6 +980,7 @@
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 		<ebay_cors_filter_version>1.0.1</ebay_cors_filter_version>
 		<elastic_apm_version>1.28.4</elastic_apm_version>
+		<ucum_version>1.0.8</ucum_version>
 
 		<!-- CQL Support -->
 		<clinical-reasoning.version>3.0.0-PRE7</clinical-reasoning.version>
@@ -2190,14 +2189,9 @@
 				<scope>test</scope>
 			</dependency>
 			<dependency>
-				<groupId>xpp3</groupId>
+				<groupId>org.ogce</groupId>
 				<artifactId>xpp3</artifactId>
-				<version>1.1.4c</version>
-			</dependency>
-			<dependency>
-				<groupId>xpp3</groupId>
-				<artifactId>xpp3_xpath</artifactId>
-				<version>1.1.4c</version>
+				<version>1.1.6</version>
 			</dependency>
 			<dependency>
 				<groupId>org.flywaydb</groupId>

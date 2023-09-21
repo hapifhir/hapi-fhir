@@ -76,11 +76,12 @@ public class UnknownCodeSystemWarningValidationSupport extends BaseValidationSup
 		result.setSeverity(myNonExistentCodeSystemSeverity);
 		result.setMessage("CodeSystem is unknown and can't be validated: " + theCodeSystem);
 
+		// For information level, we just strip out the severity+message entirely
+		// so that nothing appears in the validation result
 		if (myNonExistentCodeSystemSeverity == IssueSeverity.INFORMATION) {
-			// for warnings, we don't set the code
-			// cause if we do, the severity is stripped out
-			// (see VersionSpecificWorkerContextWrapper.convertValidationResult)
 			result.setCode(theCode);
+			result.setSeverity(null);
+			result.setMessage(null);
 		}
 
 		return result;

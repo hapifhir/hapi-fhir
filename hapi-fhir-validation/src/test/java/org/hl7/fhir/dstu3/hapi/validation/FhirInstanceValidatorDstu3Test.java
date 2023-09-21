@@ -91,6 +91,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.mock;
@@ -667,8 +668,6 @@ public class FhirInstanceValidatorDstu3Test {
 					} else if (t.getMessage().contains("ValueSet as a URI SHALL start with http:// or https:// or urn:")) {
 						// Some DSTU3 structures have missing binding information
 						return false;
-					} else if (t.getMessage().contains("The valueSet reference http://www.rfc-editor.org/bcp/bcp13.txt on element")) {
-						return false;
 					} else if (t.getMessage().contains("The Unicode sequence has unterminated bi-di control characters")) {
 						// Some DSTU3 structures contain bi-di control characters, and a check for this was added recently.
 						return false;
@@ -677,6 +676,15 @@ public class FhirInstanceValidatorDstu3Test {
 						return false;
 					} else if (t.getMessage().startsWith("value should not start or finish with whitespace") && t.getMessage().endsWith("\\u00a0'")) {
 						// Some DSTU3 messages end with a unicode Non-breaking space character
+						return false;
+					}  else if (t.getMessage().contains("Found # expecting a token name")) {
+						// Some DSTU3 messages contain incomplete encoding for single quotes (#39 vs &#39)
+						return false;
+					} else if (t.getMessage().contains("sdf-15") && t.getMessage().contains("The name 'kind' is not valid for any of the possible types")) {
+						// Find constraint sdf-15 fails with stricter core validation.
+						return false;
+					} else if (t.getMessage().contains("side is inherently a collection") && t.getMessage().endsWith("may fail or return false if there is more than one item in the content being evaluated")) {
+						// Some DSTU3 FHIRPath expressions now produce warnings if a singleton is compared to a collection that potentially has > 1 elements
 						return false;
 					} else {
 						return true;
@@ -790,7 +798,7 @@ public class FhirInstanceValidatorDstu3Test {
 		Patient resource = loadResource("/dstu3/nl/nl-core-patient-01.json", Patient.class);
 		ValidationResult results = myVal.validateWithResult(resource);
 		List<SingleValidationMessage> outcome = logResultsAndReturnNonInformationalOnes(results);
-		assertThat(outcome.toString(), containsString("Could not confirm that the codes provided are in the value set 'LandGBACodelijst'"));
+		assertThat(outcome.toString(), containsString("The Coding provided (urn:oid:2.16.840.1.113883.2.4.4.16.34#6030) is not in the value set 'LandGBACodelijst'"));
 	}
 
 	private void loadNL() throws IOException {
@@ -1333,7 +1341,7 @@ public class FhirInstanceValidatorDstu3Test {
 		myInstanceVal.setValidatorPolicyAdvisor(policyAdvisor);
 		myVal.validateWithResult(input);
 
-		verify(fetcher, times(3)).resolveURL(any(), any(), anyString(), anyString(), anyString());
+		verify(fetcher, times(3)).resolveURL(any(), any(), anyString(), anyString(), anyString(), anyBoolean());
 		verify(policyAdvisor, times(4)).policyForReference(any(), any(), anyString(), anyString());
 		verify(fetcher, times(4)).fetch(any(), any(), anyString());
 	}

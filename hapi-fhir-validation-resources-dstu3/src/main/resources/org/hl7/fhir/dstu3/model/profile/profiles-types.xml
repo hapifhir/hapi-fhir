@@ -1,7 +1,7 @@
 <Bundle xmlns="http://hl7.org/fhir">
  <id value="types"></id>
  <meta>
-  <lastUpdated value="2017-04-17T17:38:22.515-04:00"></lastUpdated>
+  <lastUpdated value="2019-10-24T11:53:00+11:00"></lastUpdated>
  </meta>
  <type value="collection"></type>
  <entry>
@@ -10,12 +10,12 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="Element"></id>
     <meta>
-     <lastUpdated value="2017-04-17T17:38:22.515-04:00"></lastUpdated>
+     <lastUpdated value="2019-10-24T11:53:00+11:00"></lastUpdated>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/Element"></url>
     <name value="Element"></name>
     <status value="draft"></status>
-    <date value="2017-04-17T17:38:22-04:00"></date>
+    <date value="2019-10-24T11:53:00+11:00"></date>
     <publisher value="HL7 FHIR Standard"></publisher>
     <contact>
      <telecom>
@@ -24,7 +24,7 @@
      </telecom>
     </contact>
     <description value="Base StructureDefinition for Element Type"></description>
-    <fhirVersion value="3.0.1"></fhirVersion>
+    <fhirVersion value="3.0.2"></fhirVersion>
     <mapping>
      <identity value="rim"></identity>
      <uri value="http://hl7.org/v3"></uri>
@@ -164,12 +164,12 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="BackboneElement"></id>
     <meta>
-     <lastUpdated value="2017-04-17T17:38:22.515-04:00"></lastUpdated>
+     <lastUpdated value="2019-10-24T11:53:00+11:00"></lastUpdated>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/BackboneElement"></url>
     <name value="BackboneElement"></name>
     <status value="draft"></status>
-    <date value="2017-04-17T17:38:22-04:00"></date>
+    <date value="2019-10-24T11:53:00+11:00"></date>
     <publisher value="HL7 FHIR Standard"></publisher>
     <contact>
      <telecom>
@@ -178,7 +178,7 @@
      </telecom>
     </contact>
     <description value="Base StructureDefinition for BackboneElement Type"></description>
-    <fhirVersion value="3.0.1"></fhirVersion>
+    <fhirVersion value="3.0.2"></fhirVersion>
     <mapping>
      <identity value="rim"></identity>
      <uri value="http://hl7.org/v3"></uri>
@@ -323,12 +323,12 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="base64Binary"></id>
     <meta>
-     <lastUpdated value="2017-04-17T17:38:22.515-04:00"></lastUpdated>
+     <lastUpdated value="2019-10-24T11:53:00+11:00"></lastUpdated>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/base64Binary"></url>
     <name value="base64Binary"></name>
     <status value="draft"></status>
-    <date value="2017-04-17T17:38:22-04:00"></date>
+    <date value="2019-10-24T11:53:00+11:00"></date>
     <publisher value="HL7 FHIR Standard"></publisher>
     <contact>
      <telecom>
@@ -337,7 +337,7 @@
      </telecom>
     </contact>
     <description value="Base StructureDefinition for base64Binary Type: A stream of bytes"></description>
-    <fhirVersion value="3.0.1"></fhirVersion>
+    <fhirVersion value="3.0.2"></fhirVersion>
     <kind value="primitive-type"></kind>
     <abstract value="false"></abstract>
     <type value="base64Binary"></type>
@@ -401,7 +401,6 @@
       <definition value="The actual value"></definition>
       <min value="0"></min>
       <max value="1"></max>
-      <!-- Note: primitive values do not have an assigned type. e.g. this is compiler magic. XML, JSON and RDF types provided by extension -->
       <type>
        <code>
         <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-json-type">
@@ -433,7 +432,6 @@
       <definition value="Primitive value for base64Binary"></definition>
       <min value="0"></min>
       <max value="1"></max>
-      <!-- Note: primitive values do not have an assigned type. e.g. this is compiler magic. XML, JSON and RDF types provided by extension -->
       <type>
        <code>
         <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-json-type">
@@ -458,12 +456,12 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="boolean"></id>
     <meta>
-     <lastUpdated value="2017-04-17T17:38:22.515-04:00"></lastUpdated>
+     <lastUpdated value="2019-10-24T11:53:00+11:00"></lastUpdated>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/boolean"></url>
     <name value="boolean"></name>
     <status value="draft"></status>
-    <date value="2017-04-17T17:38:22-04:00"></date>
+    <date value="2019-10-24T11:53:00+11:00"></date>
     <publisher value="HL7 FHIR Standard"></publisher>
     <contact>
      <telecom>
@@ -472,7 +470,7 @@
      </telecom>
     </contact>
     <description value="Base StructureDefinition for boolean Type: Value of &quot;true&quot; or &quot;false&quot;"></description>
-    <fhirVersion value="3.0.1"></fhirVersion>
+    <fhirVersion value="3.0.2"></fhirVersion>
     <kind value="primitive-type"></kind>
     <abstract value="false"></abstract>
     <type value="boolean"></type>
@@ -535,7 +533,6 @@
       <definition value="The actual value"></definition>
       <min value="0"></min>
       <max value="1"></max>
-      <!-- Note: primitive values do not have an assigned type. e.g. this is compiler magic. XML, JSON and RDF types provided by extension -->
       <type>
        <code>
         <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-json-type">
@@ -566,7 +563,6 @@
       <definition value="Primitive value for boolean"></definition>
       <min value="0"></min>
       <max value="1"></max>
-      <!-- Note: primitive values do not have an assigned type. e.g. this is compiler magic. XML, JSON and RDF types provided by extension -->
       <type>
        <code>
         <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-json-type">
@@ -591,12 +587,12 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="code"></id>
     <meta>
-     <lastUpdated value="2017-04-17T17:38:22.515-04:00"></lastUpdated>
+     <lastUpdated value="2019-10-24T11:53:00+11:00"></lastUpdated>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/code"></url>
     <name value="code"></name>
     <status value="draft"></status>
-    <date value="2017-04-17T17:38:22-04:00"></date>
+    <date value="2019-10-24T11:53:00+11:00"></date>
     <publisher value="HL7 FHIR Standard"></publisher>
     <contact>
      <telecom>
@@ -605,7 +601,7 @@
      </telecom>
     </contact>
     <description value="Base StructureDefinition for code type: A string which has at least one character and no leading or trailing whitespace and where there is no whitespace other than single spaces in the contents"></description>
-    <fhirVersion value="3.0.1"></fhirVersion>
+    <fhirVersion value="3.0.2"></fhirVersion>
     <kind value="primitive-type"></kind>
     <abstract value="false"></abstract>
     <type value="code"></type>
@@ -678,7 +674,6 @@
        <min value="0"></min>
        <max value="1"></max>
       </base>
-      <!-- Note: primitive values do not have an assigned type. e.g. this is compiler magic. XML, JSON and RDF types provided by extension -->
       <type>
        <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-regex">
         <valueString value="[^\s]+([\s]?[^\s]+)*"></valueString>
@@ -712,7 +707,6 @@
       <definition value="Primitive value for code"></definition>
       <min value="0"></min>
       <max value="1"></max>
-      <!-- Note: primitive values do not have an assigned type. e.g. this is compiler magic. XML, JSON and RDF types provided by extension -->
       <type>
        <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-regex">
         <valueString value="[^\s]+([\s]?[^\s]+)*"></valueString>
@@ -740,12 +734,12 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="date"></id>
     <meta>
-     <lastUpdated value="2017-04-17T17:38:22.515-04:00"></lastUpdated>
+     <lastUpdated value="2019-10-24T11:53:00+11:00"></lastUpdated>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/date"></url>
     <name value="date"></name>
     <status value="draft"></status>
-    <date value="2017-04-17T17:38:22-04:00"></date>
+    <date value="2019-10-24T11:53:00+11:00"></date>
     <publisher value="HL7 FHIR Standard"></publisher>
     <contact>
      <telecom>
@@ -754,7 +748,7 @@
      </telecom>
     </contact>
     <description value="Base StructureDefinition for date Type: A date or partial date (e.g. just year or year + month). There is no time zone. The format is a union of the schema types gYear, gYearMonth and date.  Dates SHALL be valid dates."></description>
-    <fhirVersion value="3.0.1"></fhirVersion>
+    <fhirVersion value="3.0.2"></fhirVersion>
     <kind value="primitive-type"></kind>
     <abstract value="false"></abstract>
     <type value="date"></type>
@@ -817,7 +811,6 @@
       <definition value="The actual value"></definition>
       <min value="0"></min>
       <max value="1"></max>
-      <!-- Note: primitive values do not have an assigned type. e.g. this is compiler magic. XML, JSON and RDF types provided by extension -->
       <type>
        <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-regex">
         <valueString value="-?[0-9]{4}(-(0[1-9]|1[0-2])(-(0[0-9]|[1-2][0-9]|3[0-1]))?)?"></valueString>
@@ -851,7 +844,6 @@
       <definition value="Primitive value for date"></definition>
       <min value="0"></min>
       <max value="1"></max>
-      <!-- Note: primitive values do not have an assigned type. e.g. this is compiler magic. XML, JSON and RDF types provided by extension -->
       <type>
        <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-regex">
         <valueString value="-?[0-9]{4}(-(0[1-9]|1[0-2])(-(0[0-9]|[1-2][0-9]|3[0-1]))?)?"></valueString>
@@ -879,12 +871,12 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="dateTime"></id>
     <meta>
-     <lastUpdated value="2017-04-17T17:38:22.515-04:00"></lastUpdated>
+     <lastUpdated value="2019-10-24T11:53:00+11:00"></lastUpdated>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/dateTime"></url>
     <name value="dateTime"></name>
     <status value="draft"></status>
-    <date value="2017-04-17T17:38:22-04:00"></date>
+    <date value="2019-10-24T11:53:00+11:00"></date>
     <publisher value="HL7 FHIR Standard"></publisher>
     <contact>
      <telecom>
@@ -893,7 +885,7 @@
      </telecom>
     </contact>
     <description value="Base StructureDefinition for dateTime Type: A date, date-time or partial date (e.g. just year or year + month).  If hours and minutes are specified, a time zone SHALL be populated. The format is a union of the schema types gYear, gYearMonth, date and dateTime. Seconds must be provided due to schema type constraints but may be zero-filled and may be ignored.                 Dates SHALL be valid dates."></description>
-    <fhirVersion value="3.0.1"></fhirVersion>
+    <fhirVersion value="3.0.2"></fhirVersion>
     <kind value="primitive-type"></kind>
     <abstract value="false"></abstract>
     <type value="dateTime"></type>
@@ -956,10 +948,9 @@
       <definition value="The actual value"></definition>
       <min value="0"></min>
       <max value="1"></max>
-      <!-- Note: primitive values do not have an assigned type. e.g. this is compiler magic. XML, JSON and RDF types provided by extension -->
       <type>
        <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-regex">
-        <valueString value="-?[0-9]{4}(-(0[1-9]|1[0-2])(-(0[0-9]|[1-2][0-9]|3[0-1])(T([01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9](\.[0-9]+)?(Z|(\+|-)((0[0-9]|1[0-3]):[0-5][0-9]|14:00)))?)?)?"></valueString>
+        <valueString value="-?([0-9]([0-9]([0-9][1-9]|[1-9]0)|[1-9]00)|[1-9]000)(-(0[1-9]|1[0-2])(-(0[1-9]|[1-2][0-9]|3[0-1])(T([01][0-9]|2[0-3]):[0-5][0-9]:([0-5][0-9]|60)(\.[0-9]+)?(Z|(\+|-)((0[0-9]|1[0-3]):[0-5][0-9]|14:00)))?)?)?"></valueString>
        </extension>
        <code>
         <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-json-type">
@@ -990,10 +981,9 @@
       <definition value="Primitive value for dateTime"></definition>
       <min value="0"></min>
       <max value="1"></max>
-      <!-- Note: primitive values do not have an assigned type. e.g. this is compiler magic. XML, JSON and RDF types provided by extension -->
       <type>
        <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-regex">
-        <valueString value="-?[0-9]{4}(-(0[1-9]|1[0-2])(-(0[0-9]|[1-2][0-9]|3[0-1])(T([01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9](\.[0-9]+)?(Z|(\+|-)((0[0-9]|1[0-3]):[0-5][0-9]|14:00)))?)?)?"></valueString>
+        <valueString value="-?([0-9]([0-9]([0-9][1-9]|[1-9]0)|[1-9]00)|[1-9]000)(-(0[1-9]|1[0-2])(-(0[1-9]|[1-2][0-9]|3[0-1])(T([01][0-9]|2[0-3]):[0-5][0-9]:([0-5][0-9]|60)(\.[0-9]+)?(Z|(\+|-)((0[0-9]|1[0-3]):[0-5][0-9]|14:00)))?)?)?"></valueString>
        </extension>
        <code>
         <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-json-type">
@@ -1018,12 +1008,12 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="decimal"></id>
     <meta>
-     <lastUpdated value="2017-04-17T17:38:22.515-04:00"></lastUpdated>
+     <lastUpdated value="2019-10-24T11:53:00+11:00"></lastUpdated>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/decimal"></url>
     <name value="decimal"></name>
     <status value="draft"></status>
-    <date value="2017-04-17T17:38:22-04:00"></date>
+    <date value="2019-10-24T11:53:00+11:00"></date>
     <publisher value="HL7 FHIR Standard"></publisher>
     <contact>
      <telecom>
@@ -1032,7 +1022,7 @@
      </telecom>
     </contact>
     <description value="Base StructureDefinition for decimal Type: A rational number with implicit precision"></description>
-    <fhirVersion value="3.0.1"></fhirVersion>
+    <fhirVersion value="3.0.2"></fhirVersion>
     <kind value="primitive-type"></kind>
     <abstract value="false"></abstract>
     <type value="decimal"></type>
@@ -1096,7 +1086,6 @@
       <definition value="The actual value"></definition>
       <min value="0"></min>
       <max value="1"></max>
-      <!-- Note: primitive values do not have an assigned type. e.g. this is compiler magic. XML, JSON and RDF types provided by extension -->
       <type>
        <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-regex">
         <valueString value="-?([0]|([1-9][0-9]*))(\.[0-9]+)?"></valueString>
@@ -1131,7 +1120,6 @@
       <definition value="Primitive value for decimal"></definition>
       <min value="0"></min>
       <max value="1"></max>
-      <!-- Note: primitive values do not have an assigned type. e.g. this is compiler magic. XML, JSON and RDF types provided by extension -->
       <type>
        <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-regex">
         <valueString value="-?([0]|([1-9][0-9]*))(\.[0-9]+)?"></valueString>
@@ -1159,12 +1147,12 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="id"></id>
     <meta>
-     <lastUpdated value="2017-04-17T17:38:22.515-04:00"></lastUpdated>
+     <lastUpdated value="2019-10-24T11:53:00+11:00"></lastUpdated>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/id"></url>
     <name value="id"></name>
     <status value="draft"></status>
-    <date value="2017-04-17T17:38:22-04:00"></date>
+    <date value="2019-10-24T11:53:00+11:00"></date>
     <publisher value="HL7 FHIR Standard"></publisher>
     <contact>
      <telecom>
@@ -1173,7 +1161,7 @@
      </telecom>
     </contact>
     <description value="Base StructureDefinition for id type: Any combination of letters, numerals, &quot;-&quot; and &quot;.&quot;, with a length limit of 64 characters.  (This might be an integer, an unprefixed OID, UUID or any other identifier pattern that meets these constraints.)  Ids are case-insensitive."></description>
-    <fhirVersion value="3.0.1"></fhirVersion>
+    <fhirVersion value="3.0.2"></fhirVersion>
     <kind value="primitive-type"></kind>
     <abstract value="false"></abstract>
     <type value="id"></type>
@@ -1247,7 +1235,6 @@
        <min value="0"></min>
        <max value="1"></max>
       </base>
-      <!-- Note: primitive values do not have an assigned type. e.g. this is compiler magic. XML, JSON and RDF types provided by extension -->
       <type>
        <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-regex">
         <valueString value="[A-Za-z0-9\-\.]{1,64}"></valueString>
@@ -1282,7 +1269,6 @@
       <definition value="Primitive value for id"></definition>
       <min value="0"></min>
       <max value="1"></max>
-      <!-- Note: primitive values do not have an assigned type. e.g. this is compiler magic. XML, JSON and RDF types provided by extension -->
       <type>
        <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-regex">
         <valueString value="[A-Za-z0-9\-\.]{1,64}"></valueString>
@@ -1310,12 +1296,12 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="instant"></id>
     <meta>
-     <lastUpdated value="2017-04-17T17:38:22.515-04:00"></lastUpdated>
+     <lastUpdated value="2019-10-24T11:53:00+11:00"></lastUpdated>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/instant"></url>
     <name value="instant"></name>
     <status value="draft"></status>
-    <date value="2017-04-17T17:38:22-04:00"></date>
+    <date value="2019-10-24T11:53:00+11:00"></date>
     <publisher value="HL7 FHIR Standard"></publisher>
     <contact>
      <telecom>
@@ -1324,7 +1310,7 @@
      </telecom>
     </contact>
     <description value="Base StructureDefinition for instant Type: An instant in time - known at least to the second"></description>
-    <fhirVersion value="3.0.1"></fhirVersion>
+    <fhirVersion value="3.0.2"></fhirVersion>
     <kind value="primitive-type"></kind>
     <abstract value="false"></abstract>
     <type value="instant"></type>
@@ -1388,8 +1374,10 @@
       <definition value="The actual value"></definition>
       <min value="0"></min>
       <max value="1"></max>
-      <!-- Note: primitive values do not have an assigned type. e.g. this is compiler magic. XML, JSON and RDF types provided by extension -->
       <type>
+       <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-regex">
+        <valueString value="([0-9]([0-9]([0-9][1-9]|[1-9]0)|[1-9]00)|[1-9]000)-(0[1-9]|1[0-2])-(0[1-9]|[1-2][0-9]|3[0-1])T([01][0-9]|2[0-3]):[0-5][0-9]:([0-5][0-9]|60)(\.[0-9]+)?(Z|(\+|-)((0[0-9]|1[0-3]):[0-5][0-9]|14:00))"></valueString>
+       </extension>
        <code>
         <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-json-type">
          <valueString value="string"></valueString>
@@ -1420,8 +1408,10 @@
       <definition value="Primitive value for instant"></definition>
       <min value="0"></min>
       <max value="1"></max>
-      <!-- Note: primitive values do not have an assigned type. e.g. this is compiler magic. XML, JSON and RDF types provided by extension -->
       <type>
+       <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-regex">
+        <valueString value="([0-9]([0-9]([0-9][1-9]|[1-9]0)|[1-9]00)|[1-9]000)-(0[1-9]|1[0-2])-(0[1-9]|[1-2][0-9]|3[0-1])T([01][0-9]|2[0-3]):[0-5][0-9]:([0-5][0-9]|60)(\.[0-9]+)?(Z|(\+|-)((0[0-9]|1[0-3]):[0-5][0-9]|14:00))"></valueString>
+       </extension>
        <code>
         <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-json-type">
          <valueString value="string"></valueString>
@@ -1445,12 +1435,12 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="integer"></id>
     <meta>
-     <lastUpdated value="2017-04-17T17:38:22.515-04:00"></lastUpdated>
+     <lastUpdated value="2019-10-24T11:53:00+11:00"></lastUpdated>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/integer"></url>
     <name value="integer"></name>
     <status value="draft"></status>
-    <date value="2017-04-17T17:38:22-04:00"></date>
+    <date value="2019-10-24T11:53:00+11:00"></date>
     <publisher value="HL7 FHIR Standard"></publisher>
     <contact>
      <telecom>
@@ -1459,7 +1449,7 @@
      </telecom>
     </contact>
     <description value="Base StructureDefinition for integer Type: A whole number"></description>
-    <fhirVersion value="3.0.1"></fhirVersion>
+    <fhirVersion value="3.0.2"></fhirVersion>
     <kind value="primitive-type"></kind>
     <abstract value="false"></abstract>
     <type value="integer"></type>
@@ -1523,7 +1513,6 @@
       <definition value="The actual value"></definition>
       <min value="0"></min>
       <max value="1"></max>
-      <!-- Note: primitive values do not have an assigned type. e.g. this is compiler magic. XML, JSON and RDF types provided by extension -->
       <type>
        <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-regex">
         <valueString value="-?([0]|([1-9][0-9]*))"></valueString>
@@ -1560,7 +1549,6 @@
       <definition value="Primitive value for integer"></definition>
       <min value="0"></min>
       <max value="1"></max>
-      <!-- Note: primitive values do not have an assigned type. e.g. this is compiler magic. XML, JSON and RDF types provided by extension -->
       <type>
        <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-regex">
         <valueString value="-?([0]|([1-9][0-9]*))"></valueString>
@@ -1590,12 +1578,12 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="markdown"></id>
     <meta>
-     <lastUpdated value="2017-04-17T17:38:22.515-04:00"></lastUpdated>
+     <lastUpdated value="2019-10-24T11:53:00+11:00"></lastUpdated>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/markdown"></url>
     <name value="markdown"></name>
     <status value="draft"></status>
-    <date value="2017-04-17T17:38:22-04:00"></date>
+    <date value="2019-10-24T11:53:00+11:00"></date>
     <publisher value="HL7 FHIR Standard"></publisher>
     <contact>
      <telecom>
@@ -1604,7 +1592,7 @@
      </telecom>
     </contact>
     <description value="Base StructureDefinition for markdown type: A string that may contain markdown syntax for optional processing by a mark down presentation engine"></description>
-    <fhirVersion value="3.0.1"></fhirVersion>
+    <fhirVersion value="3.0.2"></fhirVersion>
     <kind value="primitive-type"></kind>
     <abstract value="false"></abstract>
     <type value="markdown"></type>
@@ -1678,7 +1666,6 @@
        <min value="0"></min>
        <max value="1"></max>
       </base>
-      <!-- Note: primitive values do not have an assigned type. e.g. this is compiler magic. XML, JSON and RDF types provided by extension -->
       <type>
        <code>
         <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-json-type">
@@ -1710,7 +1697,6 @@
       <definition value="Primitive value for markdown"></definition>
       <min value="0"></min>
       <max value="1"></max>
-      <!-- Note: primitive values do not have an assigned type. e.g. this is compiler magic. XML, JSON and RDF types provided by extension -->
       <type>
        <code>
         <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-json-type">
@@ -1735,12 +1721,12 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="oid"></id>
     <meta>
-     <lastUpdated value="2017-04-17T17:38:22.515-04:00"></lastUpdated>
+     <lastUpdated value="2019-10-24T11:53:00+11:00"></lastUpdated>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/oid"></url>
     <name value="oid"></name>
     <status value="draft"></status>
-    <date value="2017-04-17T17:38:22-04:00"></date>
+    <date value="2019-10-24T11:53:00+11:00"></date>
     <publisher value="HL7 FHIR Standard"></publisher>
     <contact>
      <telecom>
@@ -1749,7 +1735,7 @@
      </telecom>
     </contact>
     <description value="Base StructureDefinition for oid type: An OID represented as a URI"></description>
-    <fhirVersion value="3.0.1"></fhirVersion>
+    <fhirVersion value="3.0.2"></fhirVersion>
     <kind value="primitive-type"></kind>
     <abstract value="false"></abstract>
     <type value="oid"></type>
@@ -1823,7 +1809,6 @@
        <min value="0"></min>
        <max value="1"></max>
       </base>
-      <!-- Note: primitive values do not have an assigned type. e.g. this is compiler magic. XML, JSON and RDF types provided by extension -->
       <type>
        <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-regex">
         <valueString value="urn:oid:(0|[1-9][0-9]*)(\.(0|[1-9][0-9]*))*"></valueString>
@@ -1858,7 +1843,6 @@
       <definition value="Primitive value for oid"></definition>
       <min value="0"></min>
       <max value="1"></max>
-      <!-- Note: primitive values do not have an assigned type. e.g. this is compiler magic. XML, JSON and RDF types provided by extension -->
       <type>
        <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-regex">
         <valueString value="urn:oid:(0|[1-9][0-9]*)(\.(0|[1-9][0-9]*))*"></valueString>
@@ -1886,12 +1870,12 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="positiveInt"></id>
     <meta>
-     <lastUpdated value="2017-04-17T17:38:22.515-04:00"></lastUpdated>
+     <lastUpdated value="2019-10-24T11:53:00+11:00"></lastUpdated>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/positiveInt"></url>
     <name value="positiveInt"></name>
     <status value="draft"></status>
-    <date value="2017-04-17T17:38:22-04:00"></date>
+    <date value="2019-10-24T11:53:00+11:00"></date>
     <publisher value="HL7 FHIR Standard"></publisher>
     <contact>
      <telecom>
@@ -1900,7 +1884,7 @@
      </telecom>
     </contact>
     <description value="Base StructureDefinition for positiveInt type: An integer with a value that is positive (e.g. &gt;0)"></description>
-    <fhirVersion value="3.0.1"></fhirVersion>
+    <fhirVersion value="3.0.2"></fhirVersion>
     <kind value="primitive-type"></kind>
     <abstract value="false"></abstract>
     <type value="positiveInt"></type>
@@ -1973,7 +1957,6 @@
        <min value="0"></min>
        <max value="1"></max>
       </base>
-      <!-- Note: primitive values do not have an assigned type. e.g. this is compiler magic. XML, JSON and RDF types provided by extension -->
       <type>
        <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-regex">
         <valueString value="[1-9][0-9]*"></valueString>
@@ -2007,7 +1990,6 @@
       <definition value="Primitive value for positiveInt"></definition>
       <min value="0"></min>
       <max value="1"></max>
-      <!-- Note: primitive values do not have an assigned type. e.g. this is compiler magic. XML, JSON and RDF types provided by extension -->
       <type>
        <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-regex">
         <valueString value="[1-9][0-9]*"></valueString>
@@ -2035,12 +2017,12 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="string"></id>
     <meta>
-     <lastUpdated value="2017-04-17T17:38:22.515-04:00"></lastUpdated>
+     <lastUpdated value="2019-10-24T11:53:00+11:00"></lastUpdated>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/string"></url>
     <name value="string"></name>
     <status value="draft"></status>
-    <date value="2017-04-17T17:38:22-04:00"></date>
+    <date value="2019-10-24T11:53:00+11:00"></date>
     <publisher value="HL7 FHIR Standard"></publisher>
     <contact>
      <telecom>
@@ -2049,7 +2031,7 @@
      </telecom>
     </contact>
     <description value="Base StructureDefinition for string Type: A sequence of Unicode characters"></description>
-    <fhirVersion value="3.0.1"></fhirVersion>
+    <fhirVersion value="3.0.2"></fhirVersion>
     <kind value="primitive-type"></kind>
     <abstract value="false"></abstract>
     <type value="string"></type>
@@ -2113,7 +2095,6 @@
       <definition value="The actual value"></definition>
       <min value="0"></min>
       <max value="1"></max>
-      <!-- Note: primitive values do not have an assigned type. e.g. this is compiler magic. XML, JSON and RDF types provided by extension -->
       <type>
        <code>
         <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-json-type">
@@ -2146,7 +2127,6 @@
       <definition value="Primitive value for string"></definition>
       <min value="0"></min>
       <max value="1"></max>
-      <!-- Note: primitive values do not have an assigned type. e.g. this is compiler magic. XML, JSON and RDF types provided by extension -->
       <type>
        <code>
         <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-json-type">
@@ -2172,12 +2152,12 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="time"></id>
     <meta>
-     <lastUpdated value="2017-04-17T17:38:22.515-04:00"></lastUpdated>
+     <lastUpdated value="2019-10-24T11:53:00+11:00"></lastUpdated>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/time"></url>
     <name value="time"></name>
     <status value="draft"></status>
-    <date value="2017-04-17T17:38:22-04:00"></date>
+    <date value="2019-10-24T11:53:00+11:00"></date>
     <publisher value="HL7 FHIR Standard"></publisher>
     <contact>
      <telecom>
@@ -2186,7 +2166,7 @@
      </telecom>
     </contact>
     <description value="Base StructureDefinition for time Type: A time during the day, with no date specified"></description>
-    <fhirVersion value="3.0.1"></fhirVersion>
+    <fhirVersion value="3.0.2"></fhirVersion>
     <kind value="primitive-type"></kind>
     <abstract value="false"></abstract>
     <type value="time"></type>
@@ -2249,7 +2229,6 @@
       <definition value="The actual value"></definition>
       <min value="0"></min>
       <max value="1"></max>
-      <!-- Note: primitive values do not have an assigned type. e.g. this is compiler magic. XML, JSON and RDF types provided by extension -->
       <type>
        <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-regex">
         <valueString value="([01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9](\.[0-9]+)?"></valueString>
@@ -2283,7 +2262,6 @@
       <definition value="Primitive value for time"></definition>
       <min value="0"></min>
       <max value="1"></max>
-      <!-- Note: primitive values do not have an assigned type. e.g. this is compiler magic. XML, JSON and RDF types provided by extension -->
       <type>
        <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-regex">
         <valueString value="([01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9](\.[0-9]+)?"></valueString>
@@ -2311,12 +2289,12 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="unsignedInt"></id>
     <meta>
-     <lastUpdated value="2017-04-17T17:38:22.515-04:00"></lastUpdated>
+     <lastUpdated value="2019-10-24T11:53:00+11:00"></lastUpdated>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/unsignedInt"></url>
     <name value="unsignedInt"></name>
     <status value="draft"></status>
-    <date value="2017-04-17T17:38:22-04:00"></date>
+    <date value="2019-10-24T11:53:00+11:00"></date>
     <publisher value="HL7 FHIR Standard"></publisher>
     <contact>
      <telecom>
@@ -2325,7 +2303,7 @@
      </telecom>
     </contact>
     <description value="Base StructureDefinition for unsignedInt type: An integer with a value that is not negative (e.g. &gt;= 0)"></description>
-    <fhirVersion value="3.0.1"></fhirVersion>
+    <fhirVersion value="3.0.2"></fhirVersion>
     <kind value="primitive-type"></kind>
     <abstract value="false"></abstract>
     <type value="unsignedInt"></type>
@@ -2398,7 +2376,6 @@
        <min value="0"></min>
        <max value="1"></max>
       </base>
-      <!-- Note: primitive values do not have an assigned type. e.g. this is compiler magic. XML, JSON and RDF types provided by extension -->
       <type>
        <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-regex">
         <valueString value="[0]|([1-9][0-9]*)"></valueString>
@@ -2432,7 +2409,6 @@
       <definition value="Primitive value for unsignedInt"></definition>
       <min value="0"></min>
       <max value="1"></max>
-      <!-- Note: primitive values do not have an assigned type. e.g. this is compiler magic. XML, JSON and RDF types provided by extension -->
       <type>
        <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-regex">
         <valueString value="[0]|([1-9][0-9]*)"></valueString>
@@ -2460,12 +2436,12 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="uri"></id>
     <meta>
-     <lastUpdated value="2017-04-17T17:38:22.515-04:00"></lastUpdated>
+     <lastUpdated value="2019-10-24T11:53:00+11:00"></lastUpdated>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/uri"></url>
     <name value="uri"></name>
     <status value="draft"></status>
-    <date value="2017-04-17T17:38:22-04:00"></date>
+    <date value="2019-10-24T11:53:00+11:00"></date>
     <publisher value="HL7 FHIR Standard"></publisher>
     <contact>
      <telecom>
@@ -2474,7 +2450,7 @@
      </telecom>
     </contact>
     <description value="Base StructureDefinition for uri Type: String of characters used to identify a name or a resource"></description>
-    <fhirVersion value="3.0.1"></fhirVersion>
+    <fhirVersion value="3.0.2"></fhirVersion>
     <kind value="primitive-type"></kind>
     <abstract value="false"></abstract>
     <type value="uri"></type>
@@ -2538,7 +2514,6 @@
       <definition value="The actual value"></definition>
       <min value="0"></min>
       <max value="1"></max>
-      <!-- Note: primitive values do not have an assigned type. e.g. this is compiler magic. XML, JSON and RDF types provided by extension -->
       <type>
        <code>
         <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-json-type">
@@ -2570,7 +2545,6 @@
       <definition value="Primitive value for uri"></definition>
       <min value="0"></min>
       <max value="1"></max>
-      <!-- Note: primitive values do not have an assigned type. e.g. this is compiler magic. XML, JSON and RDF types provided by extension -->
       <type>
        <code>
         <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-json-type">
@@ -2595,12 +2569,12 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="uuid"></id>
     <meta>
-     <lastUpdated value="2017-04-17T17:38:22.515-04:00"></lastUpdated>
+     <lastUpdated value="2019-10-24T11:53:00+11:00"></lastUpdated>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/uuid"></url>
     <name value="uuid"></name>
     <status value="draft"></status>
-    <date value="2017-04-17T17:38:22-04:00"></date>
+    <date value="2019-10-24T11:53:00+11:00"></date>
     <publisher value="HL7 FHIR Standard"></publisher>
     <contact>
      <telecom>
@@ -2609,7 +2583,7 @@
      </telecom>
     </contact>
     <description value="Base StructureDefinition for uuid type: A UUID, represented as a URI"></description>
-    <fhirVersion value="3.0.1"></fhirVersion>
+    <fhirVersion value="3.0.2"></fhirVersion>
     <kind value="primitive-type"></kind>
     <abstract value="false"></abstract>
     <type value="uuid"></type>
@@ -2683,7 +2657,6 @@
        <min value="0"></min>
        <max value="1"></max>
       </base>
-      <!-- Note: primitive values do not have an assigned type. e.g. this is compiler magic. XML, JSON and RDF types provided by extension -->
       <type>
        <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-regex">
         <valueString value="urn:uuid:[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"></valueString>
@@ -2718,7 +2691,6 @@
       <definition value="Primitive value for uuid"></definition>
       <min value="0"></min>
       <max value="1"></max>
-      <!-- Note: primitive values do not have an assigned type. e.g. this is compiler magic. XML, JSON and RDF types provided by extension -->
       <type>
        <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-regex">
         <valueString value="urn:uuid:[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"></valueString>
@@ -2746,12 +2718,12 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="xhtml"></id>
     <meta>
-     <lastUpdated value="2017-04-17T17:38:22.515-04:00"></lastUpdated>
+     <lastUpdated value="2019-10-24T11:53:00+11:00"></lastUpdated>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/xhtml"></url>
     <name value="xhtml"></name>
     <status value="draft"></status>
-    <date value="2017-04-17T17:38:22-04:00"></date>
+    <date value="2019-10-24T11:53:00+11:00"></date>
     <publisher value="HL7 FHIR Standard"></publisher>
     <contact>
      <telecom>
@@ -2760,7 +2732,7 @@
      </telecom>
     </contact>
     <description value="Base StructureDefinition for xhtml Type"></description>
-    <fhirVersion value="3.0.1"></fhirVersion>
+    <fhirVersion value="3.0.2"></fhirVersion>
     <kind value="primitive-type"></kind>
     <abstract value="false"></abstract>
     <type value="xhtml"></type>
@@ -2815,7 +2787,6 @@
       <definition value="Actual xhtml"></definition>
       <min value="1"></min>
       <max value="1"></max>
-      <!-- Note: primitive values do not have an assigned type. e.g. this is compiler magic. XML, JSON and RDF types provided by extension -->
       <type>
        <code>
         <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-json-type">
@@ -2850,7 +2821,6 @@
       <definition value="Actual xhtml"></definition>
       <min value="1"></min>
       <max value="1"></max>
-      <!-- Note: primitive values do not have an assigned type. e.g. this is compiler magic. XML, JSON and RDF types provided by extension -->
       <type>
        <code>
         <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-json-type">
@@ -2875,12 +2845,12 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="Address"></id>
     <meta>
-     <lastUpdated value="2017-04-17T17:38:22.515-04:00"></lastUpdated>
+     <lastUpdated value="2019-10-24T11:53:00+11:00"></lastUpdated>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/Address"></url>
     <name value="Address"></name>
     <status value="draft"></status>
-    <date value="2017-04-17T17:38:22-04:00"></date>
+    <date value="2019-10-24T11:53:00+11:00"></date>
     <publisher value="HL7 FHIR Standard"></publisher>
     <contact>
      <telecom>
@@ -2890,7 +2860,7 @@
     </contact>
     <description value="Base StructureDefinition for Address Type"></description>
     <purpose value="Need to be able to record postal addresses, along with notes about their use."></purpose>
-    <fhirVersion value="3.0.1"></fhirVersion>
+    <fhirVersion value="3.0.2"></fhirVersion>
     <mapping>
      <identity value="v2"></identity>
      <uri value="http://hl7.org/v2"></uri>
@@ -3664,12 +3634,12 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="Age"></id>
     <meta>
-     <lastUpdated value="2017-04-17T17:38:22.515-04:00"></lastUpdated>
+     <lastUpdated value="2019-10-24T11:53:00+11:00"></lastUpdated>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/Age"></url>
     <name value="Age"></name>
     <status value="draft"></status>
-    <date value="2017-04-17T17:38:22-04:00"></date>
+    <date value="2019-10-24T11:53:00+11:00"></date>
     <publisher value="HL7 FHIR Standard"></publisher>
     <contact>
      <telecom>
@@ -3678,7 +3648,7 @@
      </telecom>
     </contact>
     <description value="Base StructureDefinition for Age Type"></description>
-    <fhirVersion value="3.0.1"></fhirVersion>
+    <fhirVersion value="3.0.2"></fhirVersion>
     <mapping>
      <identity value="rim"></identity>
      <uri value="http://hl7.org/v3"></uri>
@@ -3954,12 +3924,12 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="Annotation"></id>
     <meta>
-     <lastUpdated value="2017-04-17T17:38:22.515-04:00"></lastUpdated>
+     <lastUpdated value="2019-10-24T11:53:00+11:00"></lastUpdated>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/Annotation"></url>
     <name value="Annotation"></name>
     <status value="draft"></status>
-    <date value="2017-04-17T17:38:22-04:00"></date>
+    <date value="2019-10-24T11:53:00+11:00"></date>
     <publisher value="HL7 FHIR Standard"></publisher>
     <contact>
      <telecom>
@@ -3968,7 +3938,7 @@
      </telecom>
     </contact>
     <description value="Base StructureDefinition for Annotation Type"></description>
-    <fhirVersion value="3.0.1"></fhirVersion>
+    <fhirVersion value="3.0.2"></fhirVersion>
     <mapping>
      <identity value="v2"></identity>
      <uri value="http://hl7.org/v2"></uri>
@@ -4228,12 +4198,12 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="Attachment"></id>
     <meta>
-     <lastUpdated value="2017-04-17T17:38:22.515-04:00"></lastUpdated>
+     <lastUpdated value="2019-10-24T11:53:00+11:00"></lastUpdated>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/Attachment"></url>
     <name value="Attachment"></name>
     <status value="draft"></status>
-    <date value="2017-04-17T17:38:22-04:00"></date>
+    <date value="2019-10-24T11:53:00+11:00"></date>
     <publisher value="HL7 FHIR Standard"></publisher>
     <contact>
      <telecom>
@@ -4243,7 +4213,7 @@
     </contact>
     <description value="Base StructureDefinition for Attachment Type"></description>
     <purpose value="Many models need to include data defined in other specifications that is complex and opaque to the healthcare model. This includes documents, media recordings, structured data, etc."></purpose>
-    <fhirVersion value="3.0.1"></fhirVersion>
+    <fhirVersion value="3.0.2"></fhirVersion>
     <mapping>
      <identity value="v2"></identity>
      <uri value="http://hl7.org/v2"></uri>
@@ -4763,12 +4733,12 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="CodeableConcept"></id>
     <meta>
-     <lastUpdated value="2017-04-17T17:38:22.515-04:00"></lastUpdated>
+     <lastUpdated value="2019-10-24T11:53:00+11:00"></lastUpdated>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/CodeableConcept"></url>
     <name value="CodeableConcept"></name>
     <status value="draft"></status>
-    <date value="2017-04-17T17:38:22-04:00"></date>
+    <date value="2019-10-24T11:53:00+11:00"></date>
     <publisher value="HL7 FHIR Standard"></publisher>
     <contact>
      <telecom>
@@ -4778,7 +4748,7 @@
     </contact>
     <description value="Base StructureDefinition for CodeableConcept Type"></description>
     <purpose value="This is a common pattern in healthcare - a concept that may be defined by one or more codes from formal definitions including LOINC and SNOMED CT, and/or defined by the provision of text that captures a human sense of the concept."></purpose>
-    <fhirVersion value="3.0.1"></fhirVersion>
+    <fhirVersion value="3.0.2"></fhirVersion>
     <mapping>
      <identity value="v2"></identity>
      <uri value="http://hl7.org/v2"></uri>
@@ -5021,12 +4991,12 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="Coding"></id>
     <meta>
-     <lastUpdated value="2017-04-17T17:38:22.515-04:00"></lastUpdated>
+     <lastUpdated value="2019-10-24T11:53:00+11:00"></lastUpdated>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/Coding"></url>
     <name value="Coding"></name>
     <status value="draft"></status>
-    <date value="2017-04-17T17:38:22-04:00"></date>
+    <date value="2019-10-24T11:53:00+11:00"></date>
     <publisher value="HL7 FHIR Standard"></publisher>
     <contact>
      <telecom>
@@ -5036,7 +5006,7 @@
     </contact>
     <description value="Base StructureDefinition for Coding Type"></description>
     <purpose value="References to codes are very common in healthcare models."></purpose>
-    <fhirVersion value="3.0.1"></fhirVersion>
+    <fhirVersion value="3.0.2"></fhirVersion>
     <mapping>
      <identity value="v2"></identity>
      <uri value="http://hl7.org/v2"></uri>
@@ -5423,12 +5393,12 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="ContactDetail"></id>
     <meta>
-     <lastUpdated value="2017-04-17T17:38:22.515-04:00"></lastUpdated>
+     <lastUpdated value="2019-10-24T11:53:00+11:00"></lastUpdated>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/ContactDetail"></url>
     <name value="ContactDetail"></name>
     <status value="draft"></status>
-    <date value="2017-04-17T17:38:22-04:00"></date>
+    <date value="2019-10-24T11:53:00+11:00"></date>
     <publisher value="HL7 FHIR Standard"></publisher>
     <contact>
      <telecom>
@@ -5438,7 +5408,7 @@
     </contact>
     <description value="Base StructureDefinition for ContactDetail Type"></description>
     <purpose value="Need to track contact information in the same way across multiple resources."></purpose>
-    <fhirVersion value="3.0.1"></fhirVersion>
+    <fhirVersion value="3.0.2"></fhirVersion>
     <mapping>
      <identity value="rim"></identity>
      <uri value="http://hl7.org/v3"></uri>
@@ -5585,12 +5555,12 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="ContactPoint"></id>
     <meta>
-     <lastUpdated value="2017-04-17T17:38:22.515-04:00"></lastUpdated>
+     <lastUpdated value="2019-10-24T11:53:00+11:00"></lastUpdated>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/ContactPoint"></url>
     <name value="ContactPoint"></name>
     <status value="draft"></status>
-    <date value="2017-04-17T17:38:22-04:00"></date>
+    <date value="2019-10-24T11:53:00+11:00"></date>
     <publisher value="HL7 FHIR Standard"></publisher>
     <contact>
      <telecom>
@@ -5600,7 +5570,7 @@
     </contact>
     <description value="Base StructureDefinition for ContactPoint Type"></description>
     <purpose value="Need to track phone, fax, mobile, sms numbers, email addresses, twitter tags, etc."></purpose>
-    <fhirVersion value="3.0.1"></fhirVersion>
+    <fhirVersion value="3.0.2"></fhirVersion>
     <mapping>
      <identity value="v2"></identity>
      <uri value="http://hl7.org/v2"></uri>
@@ -6025,12 +5995,12 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="Contributor"></id>
     <meta>
-     <lastUpdated value="2017-04-17T17:38:22.515-04:00"></lastUpdated>
+     <lastUpdated value="2019-10-24T11:53:00+11:00"></lastUpdated>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/Contributor"></url>
     <name value="Contributor"></name>
     <status value="draft"></status>
-    <date value="2017-04-17T17:38:22-04:00"></date>
+    <date value="2019-10-24T11:53:00+11:00"></date>
     <publisher value="HL7 FHIR Standard"></publisher>
     <contact>
      <telecom>
@@ -6040,7 +6010,7 @@
     </contact>
     <description value="Base StructureDefinition for Contributor Type"></description>
     <purpose value="Need to track contributor information in the same way across multiple resources."></purpose>
-    <fhirVersion value="3.0.1"></fhirVersion>
+    <fhirVersion value="3.0.2"></fhirVersion>
     <mapping>
      <identity value="rim"></identity>
      <uri value="http://hl7.org/v3"></uri>
@@ -6227,12 +6197,12 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="Count"></id>
     <meta>
-     <lastUpdated value="2017-04-17T17:38:22.515-04:00"></lastUpdated>
+     <lastUpdated value="2019-10-24T11:53:00+11:00"></lastUpdated>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/Count"></url>
     <name value="Count"></name>
     <status value="draft"></status>
-    <date value="2017-04-17T17:38:22-04:00"></date>
+    <date value="2019-10-24T11:53:00+11:00"></date>
     <publisher value="HL7 FHIR Standard"></publisher>
     <contact>
      <telecom>
@@ -6242,7 +6212,7 @@
     </contact>
     <description value="Base StructureDefinition for Count Type"></description>
     <purpose value="Need to able to capture all sorts of measured values, even if the measured value are not precisely quantified. Values include exact measures such as 3.51g, customary units such as 3 tablets, and currencies such as $100.32USD."></purpose>
-    <fhirVersion value="3.0.1"></fhirVersion>
+    <fhirVersion value="3.0.2"></fhirVersion>
     <mapping>
      <identity value="v2"></identity>
      <uri value="http://hl7.org/v2"></uri>
@@ -6519,12 +6489,12 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="DataRequirement"></id>
     <meta>
-     <lastUpdated value="2017-04-17T17:38:22.515-04:00"></lastUpdated>
+     <lastUpdated value="2019-10-24T11:53:00+11:00"></lastUpdated>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/DataRequirement"></url>
     <name value="DataRequirement"></name>
     <status value="draft"></status>
-    <date value="2017-04-17T17:38:22-04:00"></date>
+    <date value="2019-10-24T11:53:00+11:00"></date>
     <publisher value="HL7 FHIR Standard"></publisher>
     <contact>
      <telecom>
@@ -6533,7 +6503,7 @@
      </telecom>
     </contact>
     <description value="Base StructureDefinition for DataRequirement Type"></description>
-    <fhirVersion value="3.0.1"></fhirVersion>
+    <fhirVersion value="3.0.2"></fhirVersion>
     <mapping>
      <identity value="rim"></identity>
      <uri value="http://hl7.org/v3"></uri>
@@ -7060,12 +7030,12 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="Distance"></id>
     <meta>
-     <lastUpdated value="2017-04-17T17:38:22.515-04:00"></lastUpdated>
+     <lastUpdated value="2019-10-24T11:53:00+11:00"></lastUpdated>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/Distance"></url>
     <name value="Distance"></name>
     <status value="draft"></status>
-    <date value="2017-04-17T17:38:22-04:00"></date>
+    <date value="2019-10-24T11:53:00+11:00"></date>
     <publisher value="HL7 FHIR Standard"></publisher>
     <contact>
      <telecom>
@@ -7074,7 +7044,7 @@
      </telecom>
     </contact>
     <description value="Base StructureDefinition for Distance Type"></description>
-    <fhirVersion value="3.0.1"></fhirVersion>
+    <fhirVersion value="3.0.2"></fhirVersion>
     <mapping>
      <identity value="rim"></identity>
      <uri value="http://hl7.org/v3"></uri>
@@ -7350,12 +7320,12 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="Dosage"></id>
     <meta>
-     <lastUpdated value="2017-04-17T17:38:22.515-04:00"></lastUpdated>
+     <lastUpdated value="2019-10-24T11:53:00+11:00"></lastUpdated>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/Dosage"></url>
     <name value="Dosage"></name>
     <status value="draft"></status>
-    <date value="2017-04-17T17:38:22-04:00"></date>
+    <date value="2019-10-24T11:53:00+11:00"></date>
     <publisher value="HL7 FHIR Standard"></publisher>
     <contact>
      <telecom>
@@ -7364,7 +7334,7 @@
      </telecom>
     </contact>
     <description value="Base StructureDefinition for Dosage Type"></description>
-    <fhirVersion value="3.0.1"></fhirVersion>
+    <fhirVersion value="3.0.2"></fhirVersion>
     <mapping>
      <identity value="rim"></identity>
      <uri value="http://hl7.org/v3"></uri>
@@ -8065,12 +8035,12 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="Duration"></id>
     <meta>
-     <lastUpdated value="2017-04-17T17:38:22.515-04:00"></lastUpdated>
+     <lastUpdated value="2019-10-24T11:53:00+11:00"></lastUpdated>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/Duration"></url>
     <name value="Duration"></name>
     <status value="draft"></status>
-    <date value="2017-04-17T17:38:22-04:00"></date>
+    <date value="2019-10-24T11:53:00+11:00"></date>
     <publisher value="HL7 FHIR Standard"></publisher>
     <contact>
      <telecom>
@@ -8079,7 +8049,7 @@
      </telecom>
     </contact>
     <description value="Base StructureDefinition for Duration Type"></description>
-    <fhirVersion value="3.0.1"></fhirVersion>
+    <fhirVersion value="3.0.2"></fhirVersion>
     <mapping>
      <identity value="rim"></identity>
      <uri value="http://hl7.org/v3"></uri>
@@ -8355,12 +8325,12 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="ElementDefinition"></id>
     <meta>
-     <lastUpdated value="2017-04-17T17:38:22.515-04:00"></lastUpdated>
+     <lastUpdated value="2019-10-24T11:53:00+11:00"></lastUpdated>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/ElementDefinition"></url>
     <name value="ElementDefinition"></name>
     <status value="draft"></status>
-    <date value="2017-04-17T17:38:22-04:00"></date>
+    <date value="2019-10-24T11:53:00+11:00"></date>
     <publisher value="HL7 FHIR Standard"></publisher>
     <contact>
      <telecom>
@@ -8369,7 +8339,7 @@
      </telecom>
     </contact>
     <description value="Base StructureDefinition for ElementDefinition Type"></description>
-    <fhirVersion value="3.0.1"></fhirVersion>
+    <fhirVersion value="3.0.2"></fhirVersion>
     <mapping>
      <identity value="dex"></identity>
      <uri value="http://wiki.ihe.net/index.php?title=Data_Element_Exchange"></uri>
@@ -8475,9 +8445,9 @@
       <constraint>
        <key value="eld-16"></key>
        <severity value="error"></severity>
-       <human value="sliceName must be a proper token"></human>
-       <expression value="sliceName.empty() or sliceName.matches('^[a-zA-Z0-9\\-\\_]+$')"></expression>
-       <xpath value="not(exists(f:sliceName/@value)) or matches(f:sliceName/@value, '^[a-zA-Z0-9\\-\\_]+$')"></xpath>
+       <human value="sliceName must be composed of proper tokens separated by &quot;/&quot;"></human>
+       <expression value="sliceName.empty() or sliceName.matches('^[a-zA-Z0-9\\/\\-\\_]+$')"></expression>
+       <xpath value="not(exists(f:sliceName/@value)) or matches(f:sliceName/@value, '^[a-zA-Z0-9\\/\\-\\_]+$')"></xpath>
       </constraint>
       <constraint>
        <key value="eld-15"></key>
@@ -10638,13 +10608,6 @@ Note that an element that has the property IsModifier is not necessarily a &quot
        <source value="Element"></source>
       </constraint>
       <constraint>
-       <key value="eld-10"></key>
-       <severity value="error"></severity>
-       <human value="provide either a reference or a description (or both)"></human>
-       <expression value="valueSet.exists() or description.exists()"></expression>
-       <xpath value="(exists(f:valueSetUri) or exists(f:valueSetReference)) or exists(f:description)"></xpath>
-      </constraint>
-      <constraint>
        <key value="eld-12"></key>
        <severity value="error"></severity>
        <human value="ValueSet as a URI SHALL start with http:// or https:// or urn:"></human>
@@ -10770,7 +10733,6 @@ Note that an element that has the property IsModifier is not necessarily a &quot
       <type>
        <code value="string"></code>
       </type>
-      <condition value="eld-10"></condition>
       <isSummary value="true"></isSummary>
       <mapping>
        <identity value="rim"></identity>
@@ -10795,7 +10757,6 @@ Note that an element that has the property IsModifier is not necessarily a &quot
        <code value="Reference"></code>
        <targetProfile value="http://hl7.org/fhir/StructureDefinition/ValueSet"></targetProfile>
       </type>
-      <condition value="eld-10"></condition>
       <condition value="eld-12"></condition>
       <isSummary value="true"></isSummary>
       <mapping>
@@ -11042,9 +11003,9 @@ Note that an element that has the property IsModifier is not necessarily a &quot
       <constraint>
        <key value="eld-16"></key>
        <severity value="error"></severity>
-       <human value="sliceName must be a proper token"></human>
-       <expression value="sliceName.empty() or sliceName.matches('^[a-zA-Z0-9\\-\\_]+$')"></expression>
-       <xpath value="not(exists(f:sliceName/@value)) or matches(f:sliceName/@value, '^[a-zA-Z0-9\\-\\_]+$')"></xpath>
+       <human value="sliceName must be composed of proper tokens separated by &quot;/&quot;"></human>
+       <expression value="sliceName.empty() or sliceName.matches('^[a-zA-Z0-9\\/\\-\\_]+$')"></expression>
+       <xpath value="not(exists(f:sliceName/@value)) or matches(f:sliceName/@value, '^[a-zA-Z0-9\\/\\-\\_]+$')"></xpath>
       </constraint>
       <constraint>
        <key value="eld-15"></key>
@@ -12795,13 +12756,6 @@ Note that an element that has the property IsModifier is not necessarily a &quot
       </type>
       <condition value="eld-11"></condition>
       <constraint>
-       <key value="eld-10"></key>
-       <severity value="error"></severity>
-       <human value="provide either a reference or a description (or both)"></human>
-       <expression value="valueSet.exists() or description.exists()"></expression>
-       <xpath value="(exists(f:valueSetUri) or exists(f:valueSetReference)) or exists(f:description)"></xpath>
-      </constraint>
-      <constraint>
        <key value="eld-12"></key>
        <severity value="error"></severity>
        <human value="ValueSet as a URI SHALL start with http:// or https:// or urn:"></human>
@@ -12877,7 +12831,6 @@ Note that an element that has the property IsModifier is not necessarily a &quot
       <type>
        <code value="string"></code>
       </type>
-      <condition value="eld-10"></condition>
       <isSummary value="true"></isSummary>
       <mapping>
        <identity value="rim"></identity>
@@ -12902,7 +12855,6 @@ Note that an element that has the property IsModifier is not necessarily a &quot
        <code value="Reference"></code>
        <targetProfile value="http://hl7.org/fhir/StructureDefinition/ValueSet"></targetProfile>
       </type>
-      <condition value="eld-10"></condition>
       <condition value="eld-12"></condition>
       <isSummary value="true"></isSummary>
       <mapping>
@@ -13034,12 +12986,12 @@ Note that an element that has the property IsModifier is not necessarily a &quot
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="Extension"></id>
     <meta>
-     <lastUpdated value="2017-04-17T17:38:22.515-04:00"></lastUpdated>
+     <lastUpdated value="2019-10-24T11:53:00+11:00"></lastUpdated>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/Extension"></url>
     <name value="Extension"></name>
     <status value="draft"></status>
-    <date value="2017-04-17T17:38:22-04:00"></date>
+    <date value="2019-10-24T11:53:00+11:00"></date>
     <publisher value="HL7 FHIR Standard"></publisher>
     <contact>
      <telecom>
@@ -13049,7 +13001,7 @@ Note that an element that has the property IsModifier is not necessarily a &quot
     </contact>
     <description value="Base StructureDefinition for Extension Type"></description>
     <purpose value="The ability to add extensions in a structured way is what keeps FHIR resources simple."></purpose>
-    <fhirVersion value="3.0.1"></fhirVersion>
+    <fhirVersion value="3.0.2"></fhirVersion>
     <mapping>
      <identity value="rim"></identity>
      <uri value="http://hl7.org/v3"></uri>
@@ -13454,12 +13406,12 @@ Note that an element that has the property IsModifier is not necessarily a &quot
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="HumanName"></id>
     <meta>
-     <lastUpdated value="2017-04-17T17:38:22.515-04:00"></lastUpdated>
+     <lastUpdated value="2019-10-24T11:53:00+11:00"></lastUpdated>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/HumanName"></url>
     <name value="HumanName"></name>
     <status value="draft"></status>
-    <date value="2017-04-17T17:38:22-04:00"></date>
+    <date value="2019-10-24T11:53:00+11:00"></date>
     <publisher value="HL7 FHIR Standard"></publisher>
     <contact>
      <telecom>
@@ -13469,7 +13421,7 @@ Note that an element that has the property IsModifier is not necessarily a &quot
     </contact>
     <description value="Base StructureDefinition for HumanName Type"></description>
     <purpose value="Need to be able to record names, along with notes about their use."></purpose>
-    <fhirVersion value="3.0.1"></fhirVersion>
+    <fhirVersion value="3.0.2"></fhirVersion>
     <mapping>
      <identity value="v2"></identity>
      <uri value="http://hl7.org/v2"></uri>
@@ -13960,12 +13912,12 @@ Note that an element that has the property IsModifier is not necessarily a &quot
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="Identifier"></id>
     <meta>
-     <lastUpdated value="2017-04-17T17:38:22.515-04:00"></lastUpdated>
+     <lastUpdated value="2019-10-24T11:53:00+11:00"></lastUpdated>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/Identifier"></url>
     <name value="Identifier"></name>
     <status value="draft"></status>
-    <date value="2017-04-17T17:38:22-04:00"></date>
+    <date value="2019-10-24T11:53:00+11:00"></date>
     <publisher value="HL7 FHIR Standard"></publisher>
     <contact>
      <telecom>
@@ -13975,7 +13927,7 @@ Note that an element that has the property IsModifier is not necessarily a &quot
     </contact>
     <description value="Base StructureDefinition for Identifier Type"></description>
     <purpose value="Need to be able to identify things with confidence and be sure that the identification is not subject to misinterpretation."></purpose>
-    <fhirVersion value="3.0.1"></fhirVersion>
+    <fhirVersion value="3.0.2"></fhirVersion>
     <mapping>
      <identity value="v2"></identity>
      <uri value="http://hl7.org/v2"></uri>
@@ -14159,7 +14111,7 @@ Where the system is known, a type is unnecessary because the type is always part
       </type>
       <example>
        <label value="General"></label>
-       <valueUri value="http://www.acme.com/identifiers/patient or urn:ietf:rfc:3986 if the Identifier.value itself is a full uri"></valueUri>
+       <valueUri value="http://www.acme.com/identifiers/patient"></valueUri>
       </example>
       <isSummary value="true"></isSummary>
       <mapping>
@@ -14352,7 +14304,7 @@ Where the system is known, a type is unnecessary because the type is always part
       </type>
       <example>
        <label value="General"></label>
-       <valueUri value="http://www.acme.com/identifiers/patient or urn:ietf:rfc:3986 if the Identifier.value itself is a full uri"></valueUri>
+       <valueUri value="http://www.acme.com/identifiers/patient"></valueUri>
       </example>
       <isSummary value="true"></isSummary>
       <mapping>
@@ -14454,12 +14406,12 @@ Where the system is known, a type is unnecessary because the type is always part
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="Meta"></id>
     <meta>
-     <lastUpdated value="2017-04-17T17:38:22.515-04:00"></lastUpdated>
+     <lastUpdated value="2019-10-24T11:53:00+11:00"></lastUpdated>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/Meta"></url>
     <name value="Meta"></name>
     <status value="draft"></status>
-    <date value="2017-04-17T17:38:22-04:00"></date>
+    <date value="2019-10-24T11:53:00+11:00"></date>
     <publisher value="HL7 FHIR Standard"></publisher>
     <contact>
      <telecom>
@@ -14468,7 +14420,7 @@ Where the system is known, a type is unnecessary because the type is always part
      </telecom>
     </contact>
     <description value="Base StructureDefinition for Meta Type"></description>
-    <fhirVersion value="3.0.1"></fhirVersion>
+    <fhirVersion value="3.0.2"></fhirVersion>
     <mapping>
      <identity value="rim"></identity>
      <uri value="http://hl7.org/v3"></uri>
@@ -14743,12 +14695,12 @@ Where the system is known, a type is unnecessary because the type is always part
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="Money"></id>
     <meta>
-     <lastUpdated value="2017-04-17T17:38:22.515-04:00"></lastUpdated>
+     <lastUpdated value="2019-10-24T11:53:00+11:00"></lastUpdated>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/Money"></url>
     <name value="Money"></name>
     <status value="draft"></status>
-    <date value="2017-04-17T17:38:22-04:00"></date>
+    <date value="2019-10-24T11:53:00+11:00"></date>
     <publisher value="HL7 FHIR Standard"></publisher>
     <contact>
      <telecom>
@@ -14757,7 +14709,7 @@ Where the system is known, a type is unnecessary because the type is always part
      </telecom>
     </contact>
     <description value="Base StructureDefinition for Money Type"></description>
-    <fhirVersion value="3.0.1"></fhirVersion>
+    <fhirVersion value="3.0.2"></fhirVersion>
     <mapping>
      <identity value="rim"></identity>
      <uri value="http://hl7.org/v3"></uri>
@@ -15033,12 +14985,12 @@ Where the system is known, a type is unnecessary because the type is always part
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="Narrative"></id>
     <meta>
-     <lastUpdated value="2017-04-17T17:38:22.515-04:00"></lastUpdated>
+     <lastUpdated value="2019-10-24T11:53:00+11:00"></lastUpdated>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/Narrative"></url>
     <name value="Narrative"></name>
     <status value="draft"></status>
-    <date value="2017-04-17T17:38:22-04:00"></date>
+    <date value="2019-10-24T11:53:00+11:00"></date>
     <publisher value="HL7 FHIR Standard"></publisher>
     <contact>
      <telecom>
@@ -15047,7 +14999,7 @@ Where the system is known, a type is unnecessary because the type is always part
      </telecom>
     </contact>
     <description value="Base StructureDefinition for Narrative Type"></description>
-    <fhirVersion value="3.0.1"></fhirVersion>
+    <fhirVersion value="3.0.2"></fhirVersion>
     <mapping>
      <identity value="rim"></identity>
      <uri value="http://hl7.org/v3"></uri>
@@ -15262,12 +15214,12 @@ Where the system is known, a type is unnecessary because the type is always part
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="ParameterDefinition"></id>
     <meta>
-     <lastUpdated value="2017-04-17T17:38:22.515-04:00"></lastUpdated>
+     <lastUpdated value="2019-10-24T11:53:00+11:00"></lastUpdated>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/ParameterDefinition"></url>
     <name value="ParameterDefinition"></name>
     <status value="draft"></status>
-    <date value="2017-04-17T17:38:22-04:00"></date>
+    <date value="2019-10-24T11:53:00+11:00"></date>
     <publisher value="HL7 FHIR Standard"></publisher>
     <contact>
      <telecom>
@@ -15276,7 +15228,7 @@ Where the system is known, a type is unnecessary because the type is always part
      </telecom>
     </contact>
     <description value="Base StructureDefinition for ParameterDefinition Type"></description>
-    <fhirVersion value="3.0.1"></fhirVersion>
+    <fhirVersion value="3.0.2"></fhirVersion>
     <mapping>
      <identity value="rim"></identity>
      <uri value="http://hl7.org/v3"></uri>
@@ -15579,12 +15531,12 @@ Where the system is known, a type is unnecessary because the type is always part
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="Period"></id>
     <meta>
-     <lastUpdated value="2017-04-17T17:38:22.515-04:00"></lastUpdated>
+     <lastUpdated value="2019-10-24T11:53:00+11:00"></lastUpdated>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/Period"></url>
     <name value="Period"></name>
     <status value="draft"></status>
-    <date value="2017-04-17T17:38:22-04:00"></date>
+    <date value="2019-10-24T11:53:00+11:00"></date>
     <publisher value="HL7 FHIR Standard"></publisher>
     <contact>
      <telecom>
@@ -15593,7 +15545,7 @@ Where the system is known, a type is unnecessary because the type is always part
      </telecom>
     </contact>
     <description value="Base StructureDefinition for Period Type"></description>
-    <fhirVersion value="3.0.1"></fhirVersion>
+    <fhirVersion value="3.0.2"></fhirVersion>
     <mapping>
      <identity value="v2"></identity>
      <uri value="http://hl7.org/v2"></uri>
@@ -15817,12 +15769,12 @@ Where the system is known, a type is unnecessary because the type is always part
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="Quantity"></id>
     <meta>
-     <lastUpdated value="2017-04-17T17:38:22.515-04:00"></lastUpdated>
+     <lastUpdated value="2019-10-24T11:53:00+11:00"></lastUpdated>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/Quantity"></url>
     <name value="Quantity"></name>
     <status value="draft"></status>
-    <date value="2017-04-17T17:38:22-04:00"></date>
+    <date value="2019-10-24T11:53:00+11:00"></date>
     <publisher value="HL7 FHIR Standard"></publisher>
     <contact>
      <telecom>
@@ -15832,7 +15784,7 @@ Where the system is known, a type is unnecessary because the type is always part
     </contact>
     <description value="Base StructureDefinition for Quantity Type"></description>
     <purpose value="Need to able to capture all sorts of measured values, even if the measured value are not precisely quantified. Values include exact measures such as 3.51g, customary units such as 3 tablets, and currencies such as $100.32USD."></purpose>
-    <fhirVersion value="3.0.1"></fhirVersion>
+    <fhirVersion value="3.0.2"></fhirVersion>
     <mapping>
      <identity value="v2"></identity>
      <uri value="http://hl7.org/v2"></uri>
@@ -16208,12 +16160,12 @@ Where the system is known, a type is unnecessary because the type is always part
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="Range"></id>
     <meta>
-     <lastUpdated value="2017-04-17T17:38:22.515-04:00"></lastUpdated>
+     <lastUpdated value="2019-10-24T11:53:00+11:00"></lastUpdated>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/Range"></url>
     <name value="Range"></name>
     <status value="draft"></status>
-    <date value="2017-04-17T17:38:22-04:00"></date>
+    <date value="2019-10-24T11:53:00+11:00"></date>
     <publisher value="HL7 FHIR Standard"></publisher>
     <contact>
      <telecom>
@@ -16223,7 +16175,7 @@ Where the system is known, a type is unnecessary because the type is always part
     </contact>
     <description value="Base StructureDefinition for Range Type"></description>
     <purpose value="Need to be able to specify ranges of values."></purpose>
-    <fhirVersion value="3.0.1"></fhirVersion>
+    <fhirVersion value="3.0.2"></fhirVersion>
     <mapping>
      <identity value="v2"></identity>
      <uri value="http://hl7.org/v2"></uri>
@@ -16449,12 +16401,12 @@ Where the system is known, a type is unnecessary because the type is always part
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="Ratio"></id>
     <meta>
-     <lastUpdated value="2017-04-17T17:38:22.515-04:00"></lastUpdated>
+     <lastUpdated value="2019-10-24T11:53:00+11:00"></lastUpdated>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/Ratio"></url>
     <name value="Ratio"></name>
     <status value="draft"></status>
-    <date value="2017-04-17T17:38:22-04:00"></date>
+    <date value="2019-10-24T11:53:00+11:00"></date>
     <publisher value="HL7 FHIR Standard"></publisher>
     <contact>
      <telecom>
@@ -16464,7 +16416,7 @@ Where the system is known, a type is unnecessary because the type is always part
     </contact>
     <description value="Base StructureDefinition for Ratio Type"></description>
     <purpose value="Need to able to capture ratios for some measurements (titers) and some rates (costs)."></purpose>
-    <fhirVersion value="3.0.1"></fhirVersion>
+    <fhirVersion value="3.0.2"></fhirVersion>
     <mapping>
      <identity value="v2"></identity>
      <uri value="http://hl7.org/v2"></uri>
@@ -16660,12 +16612,12 @@ Where the system is known, a type is unnecessary because the type is always part
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="Reference"></id>
     <meta>
-     <lastUpdated value="2017-04-17T17:38:22.515-04:00"></lastUpdated>
+     <lastUpdated value="2019-10-24T11:53:00+11:00"></lastUpdated>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/Reference"></url>
     <name value="Reference"></name>
     <status value="draft"></status>
-    <date value="2017-04-17T17:38:22-04:00"></date>
+    <date value="2019-10-24T11:53:00+11:00"></date>
     <publisher value="HL7 FHIR Standard"></publisher>
     <contact>
      <telecom>
@@ -16674,7 +16626,7 @@ Where the system is known, a type is unnecessary because the type is always part
      </telecom>
     </contact>
     <description value="Base StructureDefinition for Reference Type"></description>
-    <fhirVersion value="3.0.1"></fhirVersion>
+    <fhirVersion value="3.0.2"></fhirVersion>
     <mapping>
      <identity value="rim"></identity>
      <uri value="http://hl7.org/v3"></uri>
@@ -16911,12 +16863,12 @@ Applications converting a logical reference to a literal reference may choose to
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="RelatedArtifact"></id>
     <meta>
-     <lastUpdated value="2017-04-17T17:38:22.515-04:00"></lastUpdated>
+     <lastUpdated value="2019-10-24T11:53:00+11:00"></lastUpdated>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/RelatedArtifact"></url>
     <name value="RelatedArtifact"></name>
     <status value="draft"></status>
-    <date value="2017-04-17T17:38:22-04:00"></date>
+    <date value="2019-10-24T11:53:00+11:00"></date>
     <publisher value="HL7 FHIR Standard"></publisher>
     <contact>
      <telecom>
@@ -16926,7 +16878,7 @@ Applications converting a logical reference to a literal reference may choose to
     </contact>
     <description value="Base StructureDefinition for RelatedArtifact Type"></description>
     <purpose value="Knowledge resources must be able to provide enough information for consumers of the content (and/or interventions or results produced by the content) to be able to determine and understand the justification for and evidence in support of the content."></purpose>
-    <fhirVersion value="3.0.1"></fhirVersion>
+    <fhirVersion value="3.0.2"></fhirVersion>
     <mapping>
      <identity value="rim"></identity>
      <uri value="http://hl7.org/v3"></uri>
@@ -17189,12 +17141,12 @@ Applications converting a logical reference to a literal reference may choose to
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="SampledData"></id>
     <meta>
-     <lastUpdated value="2017-04-17T17:38:22.515-04:00"></lastUpdated>
+     <lastUpdated value="2019-10-24T11:53:00+11:00"></lastUpdated>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/SampledData"></url>
     <name value="SampledData"></name>
     <status value="draft"></status>
-    <date value="2017-04-17T17:38:22-04:00"></date>
+    <date value="2019-10-24T11:53:00+11:00"></date>
     <publisher value="HL7 FHIR Standard"></publisher>
     <contact>
      <telecom>
@@ -17204,7 +17156,7 @@ Applications converting a logical reference to a literal reference may choose to
     </contact>
     <description value="Base StructureDefinition for SampledData Type"></description>
     <purpose value="There is a need for a concise way to handle the data produced by devices that sample a physical state at a high frequency."></purpose>
-    <fhirVersion value="3.0.1"></fhirVersion>
+    <fhirVersion value="3.0.2"></fhirVersion>
     <mapping>
      <identity value="v2"></identity>
      <uri value="http://hl7.org/v2"></uri>
@@ -17544,12 +17496,12 @@ Applications converting a logical reference to a literal reference may choose to
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="Signature"></id>
     <meta>
-     <lastUpdated value="2017-04-17T17:38:22.515-04:00"></lastUpdated>
+     <lastUpdated value="2019-10-24T11:53:00+11:00"></lastUpdated>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/Signature"></url>
     <name value="Signature"></name>
     <status value="draft"></status>
-    <date value="2017-04-17T17:38:22-04:00"></date>
+    <date value="2019-10-24T11:53:00+11:00"></date>
     <publisher value="HL7 FHIR Standard"></publisher>
     <contact>
      <telecom>
@@ -17559,7 +17511,7 @@ Applications converting a logical reference to a literal reference may choose to
     </contact>
     <description value="Base StructureDefinition for Signature Type"></description>
     <purpose value="There are a number of places where content must be signed in healthcare."></purpose>
-    <fhirVersion value="3.0.1"></fhirVersion>
+    <fhirVersion value="3.0.2"></fhirVersion>
     <mapping>
      <identity value="rim"></identity>
      <uri value="http://hl7.org/v3"></uri>
@@ -17934,12 +17886,12 @@ Applications converting a logical reference to a literal reference may choose to
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="Timing"></id>
     <meta>
-     <lastUpdated value="2017-04-17T17:38:22.515-04:00"></lastUpdated>
+     <lastUpdated value="2019-10-24T11:53:00+11:00"></lastUpdated>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/Timing"></url>
     <name value="Timing"></name>
     <status value="draft"></status>
-    <date value="2017-04-17T17:38:22-04:00"></date>
+    <date value="2019-10-24T11:53:00+11:00"></date>
     <publisher value="HL7 FHIR Standard"></publisher>
     <contact>
      <telecom>
@@ -17949,7 +17901,7 @@ Applications converting a logical reference to a literal reference may choose to
     </contact>
     <description value="Base StructureDefinition for Timing Type"></description>
     <purpose value="Need to able to track proposed timing schedules. There are several different ways to do this: one or more specified times, a simple rules like three times a day, or  before/after meals."></purpose>
-    <fhirVersion value="3.0.1"></fhirVersion>
+    <fhirVersion value="3.0.2"></fhirVersion>
     <mapping>
      <identity value="v2"></identity>
      <uri value="http://hl7.org/v2"></uri>
@@ -18935,12 +18887,12 @@ Applications converting a logical reference to a literal reference may choose to
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="TriggerDefinition"></id>
     <meta>
-     <lastUpdated value="2017-04-17T17:38:22.515-04:00"></lastUpdated>
+     <lastUpdated value="2019-10-24T11:53:00+11:00"></lastUpdated>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/TriggerDefinition"></url>
     <name value="TriggerDefinition"></name>
     <status value="draft"></status>
-    <date value="2017-04-17T17:38:22-04:00"></date>
+    <date value="2019-10-24T11:53:00+11:00"></date>
     <publisher value="HL7 FHIR Standard"></publisher>
     <contact>
      <telecom>
@@ -18949,7 +18901,7 @@ Applications converting a logical reference to a literal reference may choose to
      </telecom>
     </contact>
     <description value="Base StructureDefinition for TriggerDefinition Type"></description>
-    <fhirVersion value="3.0.1"></fhirVersion>
+    <fhirVersion value="3.0.2"></fhirVersion>
     <mapping>
      <identity value="rim"></identity>
      <uri value="http://hl7.org/v3"></uri>
@@ -19178,12 +19130,12 @@ Applications converting a logical reference to a literal reference may choose to
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="UsageContext"></id>
     <meta>
-     <lastUpdated value="2017-04-17T17:38:22.515-04:00"></lastUpdated>
+     <lastUpdated value="2019-10-24T11:53:00+11:00"></lastUpdated>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/UsageContext"></url>
     <name value="UsageContext"></name>
     <status value="draft"></status>
-    <date value="2017-04-17T17:38:22-04:00"></date>
+    <date value="2019-10-24T11:53:00+11:00"></date>
     <publisher value="HL7 FHIR Standard"></publisher>
     <contact>
      <telecom>
@@ -19193,7 +19145,7 @@ Applications converting a logical reference to a literal reference may choose to
     </contact>
     <description value="Base StructureDefinition for UsageContext Type"></description>
     <purpose value="Consumers of the resource must be able to determine the intended applicability for the resource. Ideally, this information would be used programmatically to determine when and how it should be incorporated or exposed."></purpose>
-    <fhirVersion value="3.0.1"></fhirVersion>
+    <fhirVersion value="3.0.2"></fhirVersion>
     <mapping>
      <identity value="rim"></identity>
      <uri value="http://hl7.org/v3"></uri>
@@ -19390,12 +19342,12 @@ Applications converting a logical reference to a literal reference may choose to
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="SimpleQuantity"></id>
     <meta>
-     <lastUpdated value="2017-04-17T17:38:22.515-04:00"></lastUpdated>
+     <lastUpdated value="2019-10-24T11:53:00+11:00"></lastUpdated>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/SimpleQuantity"></url>
     <name value="SimpleQuantity"></name>
     <status value="draft"></status>
-    <date value="2017-04-17T17:38:22-04:00"></date>
+    <date value="2019-10-24T11:53:00+11:00"></date>
     <publisher value="HL7 FHIR Standard"></publisher>
     <contact>
      <telecom>
@@ -19404,7 +19356,7 @@ Applications converting a logical reference to a literal reference may choose to
      </telecom>
     </contact>
     <description value="A fixed quantity (no comparator)"></description>
-    <fhirVersion value="3.0.1"></fhirVersion>
+    <fhirVersion value="3.0.2"></fhirVersion>
     <mapping>
      <identity value="v2"></identity>
      <uri value="http://hl7.org/v2"></uri>
