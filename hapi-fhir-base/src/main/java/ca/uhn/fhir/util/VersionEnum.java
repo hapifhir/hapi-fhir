@@ -121,11 +121,11 @@ public enum VersionEnum {
 	V6_8_0,
 	V6_8_1,
 
-	V6_8_2;
+	V6_8_2,
+	V6_8_3;
 
 	public static VersionEnum latestVersion() {
 		VersionEnum[] values = VersionEnum.values();
 		return values[values.length - 1];
 	}
 }
-	V6_8_3,

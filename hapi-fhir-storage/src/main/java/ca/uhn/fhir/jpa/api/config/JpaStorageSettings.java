@@ -327,27 +327,6 @@ public class JpaStorageSettings extends StorageSettings {
 	 * Applies to MDM links.
 	 */
 	private boolean myNonResourceDbHistoryEnabled = true;
-	/**
-	 * Since 7.0.0
-	 */
-	private boolean myResourceHistoryDbEnabled = true;
-
-	/**
-	 * @since 7.0.0
-	 */
-	@Nonnull
-	private IValidationSupport.IssueSeverity myIssueSeverityForCodeDisplayMismatch =
-			IValidationSupport.IssueSeverity.WARNING;
-
-	/**
-	 * This setting allows preventing a conditional update to invalidate the match criteria.
-	 * <p/>
-	 * By default, this is disabled unless explicitly enabled.
-	 *
-	 * @since 6.8.2
-	 */
-	private boolean myPreventInvalidatingConditionalMatchCriteria =
-			DEFAULT_PREVENT_INVALIDATING_CONDITIONAL_MATCH_CRITERIA;
 
 	/**
 	 * Constructor
