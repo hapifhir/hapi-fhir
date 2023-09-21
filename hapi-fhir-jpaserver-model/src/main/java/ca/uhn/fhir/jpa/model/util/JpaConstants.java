@@ -310,6 +310,8 @@ public class JpaConstants {
 			"https://hapifhir.org/NamingSystem/bulk-export-binary-resource-type";
 	public static final Set<String> UNDESIRED_RESOURCE_LINKAGES_FOR_EVERYTHING_ON_PATIENT_INSTANCE =
 			Set.of("Provenance", "List", "Group");
+
+	public static final String BULK_DATA_ACCESS_IG_URL = "http://hl7.org/fhir/uv/bulkdata/CapabilityStatement/bulk-data";
 	/**
 	 * Non-instantiable
 	 */
