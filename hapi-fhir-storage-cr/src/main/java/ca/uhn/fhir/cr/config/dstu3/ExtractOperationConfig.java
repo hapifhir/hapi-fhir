@@ -17,11 +17,13 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.cr.config;
+package ca.uhn.fhir.cr.config.dstu3;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.cr.common.IRepositoryFactory;
+import ca.uhn.fhir.cr.config.ProviderLoader;
+import ca.uhn.fhir.cr.config.ProviderSelector;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.springframework.context.ApplicationContext;
@@ -32,16 +34,16 @@ import java.util.Map;
 
 public class ExtractOperationConfig {
 	@Bean
-	ca.uhn.fhir.cr.r4.IQuestionnaireResponseProcessorFactory r4QuestionnaireResponseProcessorFactory(
+	ca.uhn.fhir.cr.dstu3.IQuestionnaireResponseProcessorFactory dstu3QuestionnaireResponseProcessorFactory(
 			IRepositoryFactory theRepositoryFactory, EvaluationSettings theEvaluationSettings) {
-		return rd -> new org.opencds.cqf.fhir.cr.questionnaireresponse.r4.QuestionnaireResponseProcessor(
+		return rd -> new org.opencds.cqf.fhir.cr.questionnaireresponse.dstu3.QuestionnaireResponseProcessor(
 				theRepositoryFactory.create(rd), theEvaluationSettings);
 	}
 
 	@Bean
-	ca.uhn.fhir.cr.r4.questionnaireresponse.QuestionnaireResponseExtractProvider
-			r4QuestionnaireResponseExtractProvider() {
-		return new ca.uhn.fhir.cr.r4.questionnaireresponse.QuestionnaireResponseExtractProvider();
+	ca.uhn.fhir.cr.dstu3.questionnaireresponse.QuestionnaireResponseExtractProvider
+			dstu3QuestionnaireResponseExtractProvider() {
+		return new ca.uhn.fhir.cr.dstu3.questionnaireresponse.QuestionnaireResponseExtractProvider();
 	}
 
 	@Bean(name = "extractOperationLoader")
@@ -51,9 +53,10 @@ public class ExtractOperationConfig {
 		var selector = new ProviderSelector(
 				theFhirContext,
 				Map.of(
-						FhirVersionEnum.R4,
+						FhirVersionEnum.DSTU3,
 						Arrays.asList(
-								ca.uhn.fhir.cr.r4.questionnaireresponse.QuestionnaireResponseExtractProvider.class)));
+								ca.uhn.fhir.cr.dstu3.questionnaireresponse.QuestionnaireResponseExtractProvider
+										.class)));
 
 		return new ProviderLoader(theRestfulServer, theApplicationContext, selector);
 	}

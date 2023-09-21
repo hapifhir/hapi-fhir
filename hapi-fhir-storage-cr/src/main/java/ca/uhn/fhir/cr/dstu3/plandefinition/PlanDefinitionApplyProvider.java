@@ -41,19 +41,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-public class PlanDefinitionOperationsProvider {
-
+public class PlanDefinitionApplyProvider {
 	@Autowired
-	IPlanDefinitionProcessorFactory myDstu3PlanDefinitionServiceFactory;
+	IPlanDefinitionProcessorFactory myDstu3PlanDefinitionProcessorFactory;
 
 	/**
 	 * Implements the <a href=
 	 * "http://www.hl7.org/fhir/plandefinition-operation-apply.html">$apply</a>
 	 * operation found in the
 	 * <a href="http://www.hl7.org/fhir/clinicalreasoning-module.html">FHIR Clinical
-	 * Reasoning Module</a>. This implementation aims to be compatible with the
-	 * <a href="https://build.fhir.org/ig/HL7/cqf-recommendations/OperationDefinition-cpg-plandefinition-apply.html">
-	 * CPG IG</a>.
+	 * Reasoning Module</a>.
 	 *
 	 * @param theId                  The id of the PlanDefinition to apply
 	 * @param theCanonical           The canonical identifier for the PlanDefinition to apply (optionally version-specific)
@@ -71,6 +68,7 @@ public class PlanDefinitionOperationsProvider {
 	 * @param theSetting             The current setting of the request (inpatient, outpatient, etc.)
 	 * @param theSettingContext      Additional detail about the setting of the request, if any
 	 * @param theParameters          Any input parameters defined in libraries referenced by the PlanDefinition.
+	 * @param theUseServerData       Whether to use data from the server performing the evaluation.
 	 * @param theData                Data to be made available to the PlanDefinition evaluation.
 	 * @param theDataEndpoint        An endpoint to use to access data referenced by retrieve operations in libraries
 	 *                               referenced by the PlanDefinition.
@@ -103,10 +101,55 @@ public class PlanDefinitionOperationsProvider {
 			@OperationParam(name = "terminologyEndpoint") Endpoint theTerminologyEndpoint,
 			RequestDetails theRequestDetails)
 			throws InternalErrorException, FHIRException {
-		return this.myDstu3PlanDefinitionServiceFactory
+		return myDstu3PlanDefinitionProcessorFactory
 				.create(theRequestDetails)
 				.apply(
 						theId,
+						new StringType(theCanonical),
+						thePlanDefinition,
+						theSubject,
+						theEncounter,
+						thePractitioner,
+						theOrganization,
+						theUserType,
+						theUserLanguage,
+						theUserTaskContext,
+						theSetting,
+						theSettingContext,
+						theParameters,
+						theUseServerData == null ? true : theUseServerData.booleanValue(),
+						theData,
+						null,
+						theDataEndpoint,
+						theContentEndpoint,
+						theTerminologyEndpoint);
+	}
+
+	@Operation(name = ProviderConstants.CR_OPERATION_APPLY, idempotent = true, type = PlanDefinition.class)
+	public IBaseResource apply(
+			@OperationParam(name = "canonical") String theCanonical,
+			@OperationParam(name = "planDefinition") PlanDefinition thePlanDefinition,
+			@OperationParam(name = "subject") String theSubject,
+			@OperationParam(name = "encounter") String theEncounter,
+			@OperationParam(name = "practitioner") String thePractitioner,
+			@OperationParam(name = "organization") String theOrganization,
+			@OperationParam(name = "userType") CodeableConcept theUserType,
+			@OperationParam(name = "userLanguage") CodeableConcept theUserLanguage,
+			@OperationParam(name = "userTaskContext") CodeableConcept theUserTaskContext,
+			@OperationParam(name = "setting") CodeableConcept theSetting,
+			@OperationParam(name = "settingContext") CodeableConcept theSettingContext,
+			@OperationParam(name = "parameters") Parameters theParameters,
+			@OperationParam(name = "useServerData") BooleanType theUseServerData,
+			@OperationParam(name = "data") Bundle theData,
+			@OperationParam(name = "dataEndpoint") Endpoint theDataEndpoint,
+			@OperationParam(name = "contentEndpoint") Endpoint theContentEndpoint,
+			@OperationParam(name = "terminologyEndpoint") Endpoint theTerminologyEndpoint,
+			RequestDetails theRequestDetails)
+			throws InternalErrorException, FHIRException {
+		return myDstu3PlanDefinitionProcessorFactory
+				.create(theRequestDetails)
+				.apply(
+						null,
 						new StringType(theCanonical),
 						thePlanDefinition,
 						theSubject,

@@ -17,11 +17,13 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.cr.config;
+package ca.uhn.fhir.cr.config.dstu3;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.cr.common.IRepositoryFactory;
+import ca.uhn.fhir.cr.config.ProviderLoader;
+import ca.uhn.fhir.cr.config.ProviderSelector;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.springframework.context.ApplicationContext;
@@ -30,43 +32,42 @@ import org.springframework.context.annotation.Bean;
 import java.util.Arrays;
 import java.util.Map;
 
-public class ApplyOperationConfig {
-
+public class PackageOperationConfig {
 	@Bean
-	ca.uhn.fhir.cr.r4.IActivityDefinitionProcessorFactory r4ActivityDefinitionProcessorFactory(
+	ca.uhn.fhir.cr.dstu3.IPlanDefinitionProcessorFactory dstu3PlanDefinitionProcessorFactory(
 			IRepositoryFactory theRepositoryFactory, EvaluationSettings theEvaluationSettings) {
-		return rd -> new org.opencds.cqf.fhir.cr.activitydefinition.r4.ActivityDefinitionProcessor(
+		return rd -> new org.opencds.cqf.fhir.cr.plandefinition.dstu3.PlanDefinitionProcessor(
 				theRepositoryFactory.create(rd), theEvaluationSettings);
 	}
 
 	@Bean
-	ca.uhn.fhir.cr.r4.IPlanDefinitionProcessorFactory r4PlanDefinitionProcessorFactory(
+	ca.uhn.fhir.cr.dstu3.plandefinition.PlanDefinitionPackageProvider dstu3PlanDefinitionPackageProvider() {
+		return new ca.uhn.fhir.cr.dstu3.plandefinition.PlanDefinitionPackageProvider();
+	}
+
+	@Bean
+	ca.uhn.fhir.cr.dstu3.IQuestionnaireProcessorFactory dstu3QuestionnaireProcessorFactory(
 			IRepositoryFactory theRepositoryFactory, EvaluationSettings theEvaluationSettings) {
-		return rd -> new org.opencds.cqf.fhir.cr.plandefinition.r4.PlanDefinitionProcessor(
+		return rd -> new org.opencds.cqf.fhir.cr.questionnaire.dstu3.QuestionnaireProcessor(
 				theRepositoryFactory.create(rd), theEvaluationSettings);
 	}
 
 	@Bean
-	ca.uhn.fhir.cr.r4.activitydefinition.ActivityDefinitionApplyProvider r4ActivityDefinitionApplyProvider() {
-		return new ca.uhn.fhir.cr.r4.activitydefinition.ActivityDefinitionApplyProvider();
+	ca.uhn.fhir.cr.dstu3.questionnaire.QuestionnairePackageProvider dstu3QuestionnairePackageProvider() {
+		return new ca.uhn.fhir.cr.dstu3.questionnaire.QuestionnairePackageProvider();
 	}
 
-	@Bean
-	ca.uhn.fhir.cr.r4.plandefinition.PlanDefinitionApplyProvider r4PlanDefinitionApplyProvider() {
-		return new ca.uhn.fhir.cr.r4.plandefinition.PlanDefinitionApplyProvider();
-	}
-
-	@Bean(name = "applyOperationLoader")
-	public ProviderLoader applyOperationLoader(
+	@Bean(name = "packageOperationLoader")
+	public ProviderLoader packageOperationLoader(
 			ApplicationContext theApplicationContext, FhirContext theFhirContext, RestfulServer theRestfulServer) {
 
 		var selector = new ProviderSelector(
 				theFhirContext,
 				Map.of(
-						FhirVersionEnum.R4,
+						FhirVersionEnum.DSTU3,
 						Arrays.asList(
-								ca.uhn.fhir.cr.r4.activitydefinition.ActivityDefinitionApplyProvider.class,
-								ca.uhn.fhir.cr.r4.plandefinition.PlanDefinitionApplyProvider.class)));
+								ca.uhn.fhir.cr.dstu3.questionnaire.QuestionnairePackageProvider.class,
+								ca.uhn.fhir.cr.dstu3.plandefinition.PlanDefinitionPackageProvider.class)));
 
 		return new ProviderLoader(theRestfulServer, theApplicationContext, selector);
 	}

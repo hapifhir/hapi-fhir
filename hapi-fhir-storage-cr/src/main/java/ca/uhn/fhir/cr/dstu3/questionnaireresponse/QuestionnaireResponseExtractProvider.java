@@ -23,7 +23,7 @@ package ca.uhn.fhir.cr.dstu3.questionnaireresponse;
 import ca.uhn.fhir.cr.dstu3.IQuestionnaireResponseProcessorFactory;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
-import ca.uhn.fhir.rest.annotation.ResourceParam;
+import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
@@ -33,10 +33,9 @@ import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.springframework.beans.factory.annotation.Autowired;
 
-public class QuestionnaireResponseOperationsProvider {
-
+public class QuestionnaireResponseExtractProvider {
 	@Autowired
-	IQuestionnaireResponseProcessorFactory myDstu3QuestionnaireResponseServiceFactory;
+	IQuestionnaireResponseProcessorFactory myDstu3QuestionnaireResponseProcessorFactory;
 
 	/**
 	 * Implements the <a href=
@@ -53,11 +52,21 @@ public class QuestionnaireResponseOperationsProvider {
 	@Operation(name = ProviderConstants.CR_OPERATION_EXTRACT, idempotent = true, type = QuestionnaireResponse.class)
 	public IBaseBundle extract(
 			@IdParam IdType theId,
-			@ResourceParam QuestionnaireResponse theQuestionnaireResponse,
+			@OperationParam(name = "questionnaire-response") QuestionnaireResponse theQuestionnaireResponse,
 			RequestDetails theRequestDetails)
 			throws InternalErrorException, FHIRException {
-		return this.myDstu3QuestionnaireResponseServiceFactory
+		return myDstu3QuestionnaireResponseProcessorFactory
 				.create(theRequestDetails)
 				.extract(theId, theQuestionnaireResponse, null, null, null);
+	}
+
+	@Operation(name = ProviderConstants.CR_OPERATION_EXTRACT, idempotent = true, type = QuestionnaireResponse.class)
+	public IBaseBundle extract(
+			@OperationParam(name = "questionnaire-response") QuestionnaireResponse theQuestionnaireResponse,
+			RequestDetails theRequestDetails)
+			throws InternalErrorException, FHIRException {
+		return myDstu3QuestionnaireResponseProcessorFactory
+				.create(theRequestDetails)
+				.extract(null, theQuestionnaireResponse, null, null, null);
 	}
 }

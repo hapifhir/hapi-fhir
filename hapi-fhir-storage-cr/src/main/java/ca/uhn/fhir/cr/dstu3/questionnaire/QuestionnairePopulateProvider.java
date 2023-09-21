@@ -37,10 +37,9 @@ import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.springframework.beans.factory.annotation.Autowired;
 
-public class QuestionnaireOperationsProvider {
-
+public class QuestionnairePopulateProvider {
 	@Autowired
-	IQuestionnaireProcessorFactory myDstu3QuestionnaireServiceFactory;
+	IQuestionnaireProcessorFactory myDstu3QuestionnaireProcessorFactory;
 
 	/**
 	 * Implements a modified version of the <a href=
@@ -78,10 +77,36 @@ public class QuestionnaireOperationsProvider {
 			@OperationParam(name = "terminologyEndpoint") Endpoint theTerminologyEndpoint,
 			RequestDetails theRequestDetails)
 			throws InternalErrorException, FHIRException {
-		return this.myDstu3QuestionnaireServiceFactory
+		return myDstu3QuestionnaireProcessorFactory
 				.create(theRequestDetails)
 				.prePopulate(
 						theId,
+						new StringType(theCanonical),
+						theQuestionnaire,
+						theSubject,
+						theParameters,
+						theBundle,
+						theDataEndpoint,
+						theContentEndpoint,
+						theTerminologyEndpoint);
+	}
+
+	@Operation(name = ProviderConstants.CR_OPERATION_PREPOPULATE, idempotent = true, type = Questionnaire.class)
+	public Questionnaire prepopulate(
+			@OperationParam(name = "canonical") String theCanonical,
+			@OperationParam(name = "questionnaire") Questionnaire theQuestionnaire,
+			@OperationParam(name = "subject") String theSubject,
+			@OperationParam(name = "parameters") Parameters theParameters,
+			@OperationParam(name = "bundle") Bundle theBundle,
+			@OperationParam(name = "dataEndpoint") Endpoint theDataEndpoint,
+			@OperationParam(name = "contentEndpoint") Endpoint theContentEndpoint,
+			@OperationParam(name = "terminologyEndpoint") Endpoint theTerminologyEndpoint,
+			RequestDetails theRequestDetails)
+			throws InternalErrorException, FHIRException {
+		return myDstu3QuestionnaireProcessorFactory
+				.create(theRequestDetails)
+				.prePopulate(
+						null,
 						new StringType(theCanonical),
 						theQuestionnaire,
 						theSubject,
@@ -126,7 +151,7 @@ public class QuestionnaireOperationsProvider {
 			@OperationParam(name = "terminologyEndpoint") Endpoint theTerminologyEndpoint,
 			RequestDetails theRequestDetails)
 			throws InternalErrorException, FHIRException {
-		return (QuestionnaireResponse) this.myDstu3QuestionnaireServiceFactory
+		return (QuestionnaireResponse) myDstu3QuestionnaireProcessorFactory
 				.create(theRequestDetails)
 				.populate(
 						theId,
@@ -140,24 +165,29 @@ public class QuestionnaireOperationsProvider {
 						theTerminologyEndpoint);
 	}
 
-	/**
-	 * Implements a $package operation following the <a href=
-	 * "https://build.fhir.org/ig/HL7/crmi-ig/branches/master/packaging.html">CRMI IG</a>.
-	 *
-	 * @param theId             The id of the Questionnaire.
-	 * @param theCanonical      The canonical identifier for the questionnaire (optionally version-specific).
-	 * @param theRequestDetails The details (such as tenant) of this request. Usually
-	 *                          autopopulated by HAPI.
-	 * @return A Bundle containing the Questionnaire and all related Library, CodeSystem and ValueSet resources
-	 */
-	@Operation(name = ProviderConstants.CR_OPERATION_PACKAGE, idempotent = true, type = Questionnaire.class)
-	public Bundle packageQuestionnaire(
-			@IdParam IdType theId,
+	@Operation(name = ProviderConstants.CR_OPERATION_POPULATE, idempotent = true, type = Questionnaire.class)
+	public QuestionnaireResponse populate(
 			@OperationParam(name = "canonical") String theCanonical,
-			RequestDetails theRequestDetails) {
-
-		return (Bundle) this.myDstu3QuestionnaireServiceFactory
+			@OperationParam(name = "questionnaire") Questionnaire theQuestionnaire,
+			@OperationParam(name = "subject") String theSubject,
+			@OperationParam(name = "parameters") Parameters theParameters,
+			@OperationParam(name = "bundle") Bundle theBundle,
+			@OperationParam(name = "dataEndpoint") Endpoint theDataEndpoint,
+			@OperationParam(name = "contentEndpoint") Endpoint theContentEndpoint,
+			@OperationParam(name = "terminologyEndpoint") Endpoint theTerminologyEndpoint,
+			RequestDetails theRequestDetails)
+			throws InternalErrorException, FHIRException {
+		return (QuestionnaireResponse) myDstu3QuestionnaireProcessorFactory
 				.create(theRequestDetails)
-				.packageQuestionnaire(theId, new StringType(theCanonical), null, false);
+				.populate(
+						null,
+						new StringType(theCanonical),
+						theQuestionnaire,
+						theSubject,
+						theParameters,
+						theBundle,
+						theDataEndpoint,
+						theContentEndpoint,
+						theTerminologyEndpoint);
 	}
 }

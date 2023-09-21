@@ -41,18 +41,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-public class ActivityDefinitionOperationsProvider {
-
+public class ActivityDefinitionApplyProvider {
 	@Autowired
-	IActivityDefinitionProcessorFactory myDstu3ActivityDefinitionServiceFactory;
+	IActivityDefinitionProcessorFactory myDstu3ActivityDefinitionProcessorFactory;
 
 	/**
 	 * Implements the <a href=
 	 * "http://www.hl7.org/fhir/activitydefinition-operation-apply.html">$apply</a>
 	 * operation found in the
 	 * <a href="http://www.hl7.org/fhir/clinicalreasoning-module.html">FHIR Clinical
-	 * Reasoning Module</a>. This implementation aims to be compatible with the CPG
-	 * IG.
+	 * Reasoning Module</a>.
 	 *
 	 * @param theId                  The id of the ActivityDefinition to apply
 	 * @param theCanonical           The canonical identifier for the ActivityDefinition to apply (optionally version-specific)
@@ -70,6 +68,8 @@ public class ActivityDefinitionOperationsProvider {
 	 * @param theSetting             The current setting of the request (inpatient, outpatient, etc.)
 	 * @param theSettingContext      Additional detail about the setting of the request, if any
 	 * @param theParameters          Any input parameters defined in libraries referenced by the ActivityDefinition.
+	 * @param theUseServerData       Whether to use data from the server performing the evaluation.
+	 * @param theData                Data to be made available to the ActivityDefinition evaluation.
 	 * @param theDataEndpoint        An endpoint to use to access data referenced by retrieve operations in libraries
 	 *                               referenced by the ActivityDefinition.
 	 * @param theContentEndpoint     An endpoint to use to access content (i.e. libraries) referenced by the ActivityDefinition.
@@ -101,10 +101,54 @@ public class ActivityDefinitionOperationsProvider {
 			@OperationParam(name = "terminologyEndpoint") Endpoint theTerminologyEndpoint,
 			RequestDetails theRequestDetails)
 			throws InternalErrorException, FHIRException {
-		return this.myDstu3ActivityDefinitionServiceFactory
+		return myDstu3ActivityDefinitionProcessorFactory
 				.create(theRequestDetails)
 				.apply(
 						theId,
+						new StringType(theCanonical),
+						theActivityDefinition,
+						theSubject,
+						theEncounter,
+						thePractitioner,
+						theOrganization,
+						theUserType,
+						theUserLanguage,
+						theUserTaskContext,
+						theSetting,
+						theSettingContext,
+						theParameters,
+						theUseServerData == null ? true : theUseServerData.booleanValue(),
+						theData,
+						theDataEndpoint,
+						theContentEndpoint,
+						theTerminologyEndpoint);
+	}
+
+	@Operation(name = ProviderConstants.CR_OPERATION_APPLY, idempotent = true, type = ActivityDefinition.class)
+	public IBaseResource apply(
+			@OperationParam(name = "canonical") String theCanonical,
+			@OperationParam(name = "activityDefinition") ActivityDefinition theActivityDefinition,
+			@OperationParam(name = "subject") String theSubject,
+			@OperationParam(name = "encounter") String theEncounter,
+			@OperationParam(name = "practitioner") String thePractitioner,
+			@OperationParam(name = "organization") String theOrganization,
+			@OperationParam(name = "userType") CodeableConcept theUserType,
+			@OperationParam(name = "userLanguage") CodeableConcept theUserLanguage,
+			@OperationParam(name = "userTaskContext") CodeableConcept theUserTaskContext,
+			@OperationParam(name = "setting") CodeableConcept theSetting,
+			@OperationParam(name = "settingContext") CodeableConcept theSettingContext,
+			@OperationParam(name = "parameters") Parameters theParameters,
+			@OperationParam(name = "useServerData") BooleanType theUseServerData,
+			@OperationParam(name = "data") Bundle theData,
+			@OperationParam(name = "dataEndpoint") Endpoint theDataEndpoint,
+			@OperationParam(name = "contentEndpoint") Endpoint theContentEndpoint,
+			@OperationParam(name = "terminologyEndpoint") Endpoint theTerminologyEndpoint,
+			RequestDetails theRequestDetails)
+			throws InternalErrorException, FHIRException {
+		return myDstu3ActivityDefinitionProcessorFactory
+				.create(theRequestDetails)
+				.apply(
+						null,
 						new StringType(theCanonical),
 						theActivityDefinition,
 						theSubject,
