@@ -237,6 +237,31 @@ public class GraphQLR4Test extends BaseResourceProviderR4Test {
 		myCaptureQueriesListener.logSelectQueries();
 	}
 
+	@Test
+	public void testId_Search_Patient() throws IOException {
+		initTestPatients();
+
+		String query = "{PatientList(_id: " + myPatientId0.getIdPart() + ") {id}}";
+		HttpGet httpGet = new HttpGet(myServerBase + "/$graphql?query=" + UrlUtil.escapeUrlParam(query));
+
+		try (CloseableHttpResponse response = ourHttpClient.execute(httpGet)) {
+			String resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
+			ourLog.info(resp);
+
+			@Language("json")
+			String expected = """
+				{
+				"PatientList":[{
+				"id":" """ + myPatientId0 + """
+				/_history/1"
+				}]
+				}""";
+			assertEquals(TestUtil.stripWhitespace(DATA_PREFIX +
+				expected +
+				DATA_SUFFIX), TestUtil.stripWhitespace(resp));
+		}
+	}
+
 	private void initTestPatients() {
 		Patient p = new Patient();
 		p.addName()

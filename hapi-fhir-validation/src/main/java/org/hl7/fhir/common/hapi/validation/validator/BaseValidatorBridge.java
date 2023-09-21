@@ -7,6 +7,7 @@ import ca.uhn.fhir.validation.SingleValidationMessage;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.utilities.validation.ValidationMessage;
 
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -37,6 +38,9 @@ abstract class BaseValidatorBridge implements IValidatorModule {
 			}
 			if (riMessage.getMessageId() != null) {
 				hapiMessage.setMessageId(riMessage.getMessageId());
+			}
+			if (riMessage.sliceText != null && riMessage.sliceText.length > 0) {
+				hapiMessage.setSliceMessages(Arrays.asList(riMessage.sliceText));
 			}
 			theCtx.addValidationMessage(hapiMessage);
 		}

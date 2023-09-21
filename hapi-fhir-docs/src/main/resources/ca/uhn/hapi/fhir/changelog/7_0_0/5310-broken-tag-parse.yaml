@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 5310
+title: "Update DSTU2 tags and security labels with support for `userSelected` and `version` elements.
+        Also fix them on security labels in JPA storage."

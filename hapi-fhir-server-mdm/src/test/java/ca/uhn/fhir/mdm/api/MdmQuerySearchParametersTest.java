@@ -1,6 +1,7 @@
 package ca.uhn.fhir.mdm.api;
 
 import ca.uhn.fhir.mdm.api.paging.MdmPageRequest;
+import ca.uhn.fhir.mdm.api.params.MdmQuerySearchParameters;
 import org.junit.jupiter.api.Test;
 
 import java.util.Collections;

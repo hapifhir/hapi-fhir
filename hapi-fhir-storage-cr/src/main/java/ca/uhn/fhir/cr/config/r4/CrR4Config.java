@@ -52,7 +52,7 @@ import java.util.Map;
 import java.util.concurrent.Executor;
 
 @Configuration
-@Import(RepositoryConfig.class)
+@Import({RepositoryConfig.class})
 public class CrR4Config {
 
 	@Bean

@@ -7,7 +7,7 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-deployable-pom</artifactId>
-		<version>6.9.4-SNAPSHOT</version>
+		<version>6.9.7-SNAPSHOT</version>
 
 		<relativePath>../hapi-deployable-pom/pom.xml</relativePath>
 	</parent>
@@ -89,6 +89,11 @@
 			<groupId>org.opencds.cqf.fhir</groupId>
 			<artifactId>cqf-fhir-cr</artifactId>
 			<version>${clinical-reasoning.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.opencds.cqf.fhir</groupId>
+			<artifactId>cqf-fhir-jackson</artifactId>
+			<version>${clinical-reasoning.version}</version>
 			<exclusions>
 				<exclusion>
 					<groupId>xpp3</groupId>
@@ -98,12 +103,31 @@
 					<groupId>xmlpull</groupId>
 					<artifactId>xmlpull</artifactId>
 				</exclusion>
+				<exclusion>
+					<groupId>xmlpull</groupId>
+					<artifactId>xmlpull</artifactId>
+				</exclusion>
 			</exclusions>
+			<type>pom</type>
 		</dependency>
 		<dependency>
 			<groupId>org.opencds.cqf.fhir</groupId>
-			<artifactId>cqf-fhir-jackson</artifactId>
+			<artifactId>cqf-fhir-cql</artifactId>
 			<version>${clinical-reasoning.version}</version>
+			<exclusions>
+			<exclusion>
+				<groupId>xpp3</groupId>
+				<artifactId>xpp3_min</artifactId>
+			</exclusion>
+			<exclusion>
+				<groupId>xmlpull</groupId>
+				<artifactId>xmlpull</artifactId>
+			</exclusion>
+				<exclusion>
+					<groupId>xmlpull</groupId>
+					<artifactId>xmlpull</artifactId>
+				</exclusion>
+			</exclusions>
 			<type>pom</type>
 		</dependency>
 		<dependency>

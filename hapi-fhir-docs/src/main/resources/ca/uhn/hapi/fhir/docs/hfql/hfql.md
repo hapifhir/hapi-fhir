@@ -1,4 +1,4 @@
-# FQL Driver: SQL For FHIR Repositories
+# HFQL Driver: SQL For FHIR Repositories
 
 <div class="helpInfoCalloutBox">
 This is an <a href="https://smilecdr.com/docs/introduction/maturity_model.html">experimental module</a>. Use with caution. This API is likely to change.

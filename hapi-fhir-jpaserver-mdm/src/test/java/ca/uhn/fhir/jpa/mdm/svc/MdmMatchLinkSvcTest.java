@@ -1,17 +1,19 @@
 package ca.uhn.fhir.jpa.mdm.svc;
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
+import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.mdm.BaseMdmR4Test;
 import ca.uhn.fhir.jpa.mdm.config.BaseTestMdmConfig;
 import ca.uhn.fhir.jpa.mdm.config.BlockListConfig;
-import ca.uhn.fhir.jpa.mdm.helper.MdmLinkHelper;
 import ca.uhn.fhir.jpa.mdm.helper.testmodels.MDMState;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.mdm.api.IMdmLink;
 import ca.uhn.fhir.mdm.api.IMdmLinkSvc;
 import ca.uhn.fhir.mdm.api.IMdmLinkUpdaterSvc;
+import ca.uhn.fhir.mdm.api.IMdmSurvivorshipService;
 import ca.uhn.fhir.mdm.api.MdmConstants;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
 import ca.uhn.fhir.mdm.api.MdmMatchOutcome;
@@ -80,7 +82,6 @@ public class MdmMatchLinkSvcTest {
 
 	private static final Logger ourLog = getLogger(MdmMatchLinkSvcTest.class);
 
-
 	@Nested
 	public class NoBlockLinkTest extends BaseMdmR4Test {
 		@Autowired
@@ -90,10 +91,9 @@ public class MdmMatchLinkSvcTest {
 		@Autowired
 		private GoldenResourceHelper myGoldenResourceHelper;
 		@Autowired
-		private IMdmLinkUpdaterSvc myMdmLinkUpdaterSvc;
-
+		private IMdmSurvivorshipService myMdmSurvivorshipService;
 		@Autowired
-		private MdmLinkHelper myLinkHelper;
+		private IMdmLinkUpdaterSvc myMdmLinkUpdaterSvc;
 
 		@Test
 		public void testAddPatientLinksToNewGoldenResourceIfNoneFound() {
@@ -231,9 +231,26 @@ public class MdmMatchLinkSvcTest {
 			assertLinksMatchVector(null, null, null);
 		}
 
-		@Test
-		public void testWhenPOSSIBLE_MATCHOccursOnGoldenResourceThatHasBeenManuallyNOMATCHedThatItIsBlocked() {
-			Patient originalJane = createPatientAndUpdateLinks(buildJanePatient());
+	@Test
+	public void updateMdmLinksForMdmSource_singleCandidateDuringUpdate_DoesNotNullPointer() {
+
+		//Given: A patient exists with a matched golden resource.
+		Patient jane = createPatientAndUpdateLinks(buildJanePatient());
+		Patient goldenJane = getGoldenResourceFromTargetResource(jane);
+
+		//When: A patient who has no existing MDM links comes in as an update
+		Patient secondaryJane = createPatient(buildJanePatient(), false, false);
+		secondaryJane.setActive(true);
+		IAnyResource resource = (IAnyResource) myPatientDao.update(secondaryJane).getResource();
+
+		//Then: The secondary jane should link to the first jane.
+		myMdmMatchLinkSvc.updateMdmLinksForMdmSource(resource, buildUpdateResourceMdmTransactionContext());
+		assertThat(secondaryJane, is(sameGoldenResourceAs(jane)));
+	}
+
+	@Test
+	public void testWhenPOSSIBLE_MATCHOccursOnGoldenResourceThatHasBeenManuallyNOMATCHedThatItIsBlocked() {
+		Patient originalJane = createPatientAndUpdateLinks(buildJanePatient());
 
 			IBundleProvider search = myPatientDao.search(buildGoldenRecordSearchParameterMap());
 			IAnyResource janeGoldenResource = (IAnyResource) search.getResources(0, 1).get(0);
@@ -461,7 +478,11 @@ public class MdmMatchLinkSvcTest {
 
 			//In a normal situation, janePatient2 would just match to jane patient, but here we need to hack it so they are their
 			//own individual GoldenResource for the purpose of this test.
-			IAnyResource goldenResource = myGoldenResourceHelper.createGoldenResourceFromMdmSourceResource(janePatient2, new MdmTransactionContext(MdmTransactionContext.OperationType.CREATE_RESOURCE));
+			IAnyResource goldenResource = myGoldenResourceHelper.createGoldenResourceFromMdmSourceResource(
+				janePatient2,
+				new MdmTransactionContext(MdmTransactionContext.OperationType.CREATE_RESOURCE),
+				myMdmSurvivorshipService
+			);
 			myMdmLinkSvc.updateLink(goldenResource, janePatient2, MdmMatchOutcome.NEW_GOLDEN_RESOURCE_MATCH, MdmLinkSourceEnum.AUTO, createContextForCreate("Patient"));
 			assertThat(janePatient, is(not(sameGoldenResourceAs(janePatient2))));
 
@@ -575,7 +596,11 @@ public class MdmMatchLinkSvcTest {
 		public void testCreateGoldenResourceFromMdmTarget() {
 			// Create Use Case #2 - adding patient with no EID
 			Patient janePatient = buildJanePatient();
-			Patient janeGoldenResourcePatient = myGoldenResourceHelper.createGoldenResourceFromMdmSourceResource(janePatient, new MdmTransactionContext(MdmTransactionContext.OperationType.CREATE_RESOURCE));
+			Patient janeGoldenResourcePatient = myGoldenResourceHelper.createGoldenResourceFromMdmSourceResource(
+				janePatient,
+				new MdmTransactionContext(MdmTransactionContext.OperationType.CREATE_RESOURCE),
+				myMdmSurvivorshipService
+			);
 
 			// golden record now contains HAPI-generated EID and HAPI tag
 			assertTrue(MdmResourceUtil.isMdmManaged(janeGoldenResourcePatient));
@@ -751,8 +776,11 @@ public class MdmMatchLinkSvcTest {
 
 			//In a normal situation, janePatient2 would just match to jane patient, but here we need to hack it so they are their
 			//own individual GoldenResource for the purpose of this test.
-			IAnyResource goldenResource = myGoldenResourceHelper.createGoldenResourceFromMdmSourceResource(janePatient2,
-				new MdmTransactionContext(MdmTransactionContext.OperationType.CREATE_RESOURCE));
+			IAnyResource goldenResource = myGoldenResourceHelper.createGoldenResourceFromMdmSourceResource(
+				janePatient2,
+				new MdmTransactionContext(MdmTransactionContext.OperationType.CREATE_RESOURCE),
+				myMdmSurvivorshipService
+			);
 			myMdmLinkSvc.updateLink(goldenResource, janePatient2, MdmMatchOutcome.NEW_GOLDEN_RESOURCE_MATCH,
 				MdmLinkSourceEnum.AUTO, createContextForCreate("Patient"));
 			assertThat(janePatient, is(not(sameGoldenResourceAs(janePatient2))));

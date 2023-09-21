@@ -129,6 +129,7 @@ import javax.persistence.Tuple;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 
+import static ca.uhn.fhir.jpa.model.util.JpaConstants.UNDESIRED_RESOURCE_LINKAGES_FOR_EVERYTHING_ON_PATIENT_INSTANCE;
 import static ca.uhn.fhir.jpa.search.builder.QueryStack.LOCATION_POSITION;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -1380,7 +1381,8 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 					if (myParams != null
 							&& myParams.getEverythingMode() == SearchParameterMap.EverythingModeEnum.PATIENT_INSTANCE) {
 						sqlBuilder.append(" AND r.myTargetResourceType != 'Patient'");
-						sqlBuilder.append(" AND r.mySourceResourceType != 'Provenance'");
+						sqlBuilder.append(UNDESIRED_RESOURCE_LINKAGES_FOR_EVERYTHING_ON_PATIENT_INSTANCE.stream()
+								.collect(Collectors.joining("', '", " AND r.mySourceResourceType NOT IN ('", "')")));
 					}
 					if (hasDesiredResourceTypes) {
 						sqlBuilder.append(" AND r.myTargetResourceType IN (:desired_target_resource_types)");
@@ -2049,7 +2051,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 				}
 
 				if (myNext == null) {
-					// if we got here, it means the current PjaPid has already been processed
+					// if we got here, it means the current JpaPid has already been processed,
 					// and we will decide (here) if we need to fetch related resources recursively
 					if (myFetchIncludesForEverythingOperation) {
 						myIncludesIterator = new IncludesIterator(myPidSet, myRequest);

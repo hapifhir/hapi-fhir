@@ -39,7 +39,7 @@ import java.util.Arrays;
 import java.util.Map;
 
 @Configuration
-@Import(RepositoryConfig.class)
+@Import({RepositoryConfig.class})
 public class CrDstu3Config {
 
 	@Bean

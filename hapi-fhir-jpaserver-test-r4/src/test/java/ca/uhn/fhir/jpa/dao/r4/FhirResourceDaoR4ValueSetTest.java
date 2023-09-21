@@ -182,7 +182,7 @@ public class FhirResourceDaoR4ValueSetTest extends BaseJpaR4Test {
 		outcome = myValidationSupport.validateCode(ctx, options, "http://cs", "childX", null, "http://vs");
 		assertNotNull(outcome);
 		assertFalse(outcome.isOk());
-		assertThat(outcome.getMessage(), containsString("Unknown code http://cs#childX"));
+		assertThat(outcome.getMessage(), containsString("Unknown code \"http://cs#childX\""));
 		assertThat(outcome.getMessage(), containsString("Code validation occurred using a ValueSet expansion that was pre-calculated at "));
 
 		// Precalculated - Enumerated in non-present CS
@@ -195,7 +195,7 @@ public class FhirResourceDaoR4ValueSetTest extends BaseJpaR4Test {
 		outcome = myValidationSupport.validateCode(ctx, options, "http://cs-np", "codeX", null, "http://vs");
 		assertNotNull(outcome);
 		assertFalse(outcome.isOk());
-		assertThat(outcome.getMessage(), containsString("Unknown code http://cs-np#codeX"));
+		assertThat(outcome.getMessage(), containsString("Unknown code \"http://cs-np#codeX\""));
 		assertThat(outcome.getMessage(), containsString("Code validation occurred using a ValueSet expansion that was pre-calculated at "));
 
 	}
@@ -285,7 +285,7 @@ public class FhirResourceDaoR4ValueSetTest extends BaseJpaR4Test {
 		outcome = myValidationSupport.validateCode(ctx, options, "http://cs", "childX", null, "http://vs");
 		assertNotNull(outcome);
 		assertFalse(outcome.isOk());
-		assertThat(outcome.getMessage(), containsString("Unknown code http://cs#childX"));
+		assertThat(outcome.getMessage(), containsString("Unknown code \"http://cs#childX\""));
 		assertThat(outcome.getMessage(), containsString("Code validation occurred using a ValueSet expansion that was pre-calculated at "));
 
 		// Precalculated - Enumerated in non-present CS
@@ -298,7 +298,7 @@ public class FhirResourceDaoR4ValueSetTest extends BaseJpaR4Test {
 		outcome = myValidationSupport.validateCode(ctx, options, "http://cs-np", "codeX", null, "http://vs");
 		assertNotNull(outcome);
 		assertFalse(outcome.isOk());
-		assertThat(outcome.getMessage(), containsString("Unknown code http://cs-np#codeX"));
+		assertThat(outcome.getMessage(), containsString("Unknown code \"http://cs-np#codeX\""));
 		assertThat(outcome.getMessage(), containsString("Code validation occurred using a ValueSet expansion that was pre-calculated at "));
 
 	}
