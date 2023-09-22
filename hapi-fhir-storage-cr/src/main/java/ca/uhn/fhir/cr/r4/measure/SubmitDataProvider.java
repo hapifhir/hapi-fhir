@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.cr.r4.measure;
 
+import ca.uhn.fhir.cr.r4.ISubmitDataProcessorFactory;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
@@ -31,18 +32,16 @@ import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.MeasureReport;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
-import java.util.function.Function;
 
 public class SubmitDataProvider {
 	private static final Logger ourLog = LoggerFactory.getLogger(SubmitDataProvider.class);
 
-	Function<RequestDetails, SubmitDataService> mySubmitDataServiceFunction;
+	@Autowired
+	ISubmitDataProcessorFactory myR4SubmitDataProcessorFactory;
 
-	public SubmitDataProvider(Function<RequestDetails, SubmitDataService> submitDataServiceFunction) {
-		this.mySubmitDataServiceFunction = submitDataServiceFunction;
-	}
 	/**
 	 * Implements the <a href=
 	 * "http://hl7.org/fhir/R4/measure-operation-submit-data.html">$submit-data</a>
@@ -77,6 +76,6 @@ public class SubmitDataProvider {
 			@IdParam IdType theId,
 			@OperationParam(name = "measureReport", min = 1, max = 1) MeasureReport theReport,
 			@OperationParam(name = "resource") List<IBaseResource> theResources) {
-		return mySubmitDataServiceFunction.apply(theRequestDetails).submitData(theId, theReport, theResources);
+		return myR4SubmitDataProcessorFactory.create(theRequestDetails).submitData(theId, theReport, theResources);
 	}
 }

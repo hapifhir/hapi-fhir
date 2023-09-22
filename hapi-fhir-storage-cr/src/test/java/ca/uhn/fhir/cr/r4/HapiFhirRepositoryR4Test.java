@@ -4,13 +4,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
-import ca.uhn.fhir.cr.BaseCrR4TestServer;
+import ca.uhn.fhir.rest.param.*;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Encounter;
@@ -23,7 +20,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import ca.uhn.fhir.cr.repo.HapiFhirRepository;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.param.NumberParam;
 
 public class HapiFhirRepositoryR4Test extends BaseCrR4TestServer {
 
@@ -80,7 +76,6 @@ public class HapiFhirRepositoryR4Test extends BaseCrR4TestServer {
 		loadBundle(MY_TEST_DATA);
 
 		var requestDetails = setupRequestDetails();
-		requestDetails.setCompleteUrl("http://localhost:44465/fhir/context/Patient?_count=20");
 		var repository = new HapiFhirRepository(myDaoRegistry, requestDetails, myRestfulServer);
 		var result = repository.search(Bundle.class, Patient.class, withCountParam(20));
 		assertEquals(20, result.getEntry().size());
@@ -129,6 +124,47 @@ public class HapiFhirRepositoryR4Test extends BaseCrR4TestServer {
 		// verify all encounter resources captured
 		assertEquals(expectedEncounterCount, counter,
 			"Encounter search results don't match available resources");
+	}
+
+	@Test
+	void repositorySearchForEncounterWithMatchingCode() {
+		loadBundle("ColorectalCancerScreeningsFHIR-bundle.json");
+
+		//SearchConverter validation test for repository
+		List<IQueryParameterType> codeList = new ArrayList<>();
+		codeList.add(new TokenParam(new InternalCodingDt().setSystem("http://snomed.info/sct").setCode("185463005")));
+		codeList.add(new TokenParam(new InternalCodingDt().setSystem("http://snomed.info/sct").setCode("185464004")));
+		codeList.add(new TokenParam(new InternalCodingDt().setSystem("http://snomed.info/sct").setCode("185465003")));
+		codeList.add(new TokenParam(new InternalCodingDt().setSystem("http://snomed.info/sct").setCode("30346009")));
+		codeList.add(new TokenParam(new InternalCodingDt().setSystem("http://snomed.info/sct").setCode("3391000175108")));
+		codeList.add(new TokenParam(new InternalCodingDt().setSystem("http://snomed.info/sct").setCode("37894004")));
+		codeList.add(new TokenParam(new InternalCodingDt().setSystem("http://snomed.info/sct").setCode("439740005")));
+		codeList.add(new TokenParam(new InternalCodingDt().setSystem("http://www.ama-assn.org/go/cpt").setCode("99201")));
+		codeList.add(new TokenParam(new InternalCodingDt().setSystem("http://www.ama-assn.org/go/cpt").setCode("99202")));
+		codeList.add(new TokenParam(new InternalCodingDt().setSystem("http://www.ama-assn.org/go/cpt").setCode("99203")));
+		codeList.add(new TokenParam(new InternalCodingDt().setSystem("http://www.ama-assn.org/go/cpt").setCode("99204")));
+		codeList.add(new TokenParam(new InternalCodingDt().setSystem("http://www.ama-assn.org/go/cpt").setCode("99205")));
+		codeList.add(new TokenParam(new InternalCodingDt().setSystem("http://www.ama-assn.org/go/cpt").setCode("99212")));
+		codeList.add(new TokenParam(new InternalCodingDt().setSystem("http://www.ama-assn.org/go/cpt").setCode("99213")));
+		codeList.add(new TokenParam(new InternalCodingDt().setSystem("http://www.ama-assn.org/go/cpt").setCode("99214")));
+		codeList.add(new TokenParam(new InternalCodingDt().setSystem("http://www.ama-assn.org/go/cpt").setCode("99215")));
+
+		// replicate repository searchParam list
+		Map<String, List<IQueryParameterType>> searchParams = Map.of("type", codeList, "subject", Collections.singletonList(new ReferenceParam("Patient/numer-EXM130")));
+
+		var repository = new HapiFhirRepository(myDaoRegistry, setupRequestDetails(), myRestfulServer);
+
+		// replicate search for valueset codes
+		var result = repository.search(Bundle.class, Encounter.class, searchParams);
+
+		// count all resources in result
+		int counter = 0;
+		for (Object i : result.getEntry()) {
+			counter++;
+		}
+		// verify patient encounter was the only one found
+		assertEquals(1, counter,
+				"Encounter search results don't match available resources");
 	}
 
 	@Test

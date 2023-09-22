@@ -7,7 +7,7 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-deployable-pom</artifactId>
-		<version>6.9.6-SNAPSHOT</version>
+		<version>6.9.7-SNAPSHOT</version>
 
 		<relativePath>../hapi-deployable-pom/pom.xml</relativePath>
 	</parent>
@@ -77,43 +77,12 @@
 		</dependency>
 		<dependency>
 			<groupId>org.opencds.cqf.fhir</groupId>
-			<artifactId>cqf-fhir-api</artifactId>
+			<artifactId>cqf-fhir-cr</artifactId>
 			<version>${clinical-reasoning.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>org.opencds.cqf.cql</groupId>
-			<artifactId>evaluator.fhir</artifactId>
-			<version>${clinical-reasoning.version}</version>
-			<exclusions>
-				<exclusion>
-					<groupId>ca.uhn.hapi.fhir</groupId>
-					<artifactId>org.hl7.fhir.r4</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>ca.uhn.hapi.fhir</groupId>
-					<artifactId>org.hl7.fhir.r4b</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>ca.uhn.hapi.fhir</groupId>
-					<artifactId>org.hl7.fhir.r5</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>xpp3</groupId>
-					<artifactId>xpp3</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>xpp3</groupId>
-					<artifactId>xpp3_min</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>xmlpull</groupId>
-					<artifactId>xmlpull</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-		<dependency>
-			<groupId>org.opencds.cqf.cql</groupId>
-			<artifactId>evaluator.spring</artifactId>
+			<groupId>org.opencds.cqf.fhir</groupId>
+			<artifactId>cqf-fhir-jackson</artifactId>
 			<version>${clinical-reasoning.version}</version>
 			<exclusions>
 				<exclusion>
@@ -124,40 +93,33 @@
 					<groupId>xmlpull</groupId>
 					<artifactId>xmlpull</artifactId>
 				</exclusion>
-			</exclusions>
-		</dependency>
-		<dependency>
-			<groupId>org.opencds.cqf.cql</groupId>
-			<artifactId>evaluator.plandefinition</artifactId>
-			<version>${clinical-reasoning.version}</version>
-			<exclusions>
-				<exclusion>
-					<groupId>xpp3</groupId>
-					<artifactId>xpp3_min</artifactId>
-				</exclusion>
 				<exclusion>
 					<groupId>xmlpull</groupId>
 					<artifactId>xmlpull</artifactId>
 				</exclusion>
 			</exclusions>
-		</dependency>
-		<dependency>
-			<groupId>org.opencds.cqf.cql</groupId>
-			<artifactId>evaluator.jackson-deps</artifactId>
-			<version>${clinical-reasoning.version}</version>
 			<type>pom</type>
+		</dependency>
+		<dependency>
+			<groupId>org.opencds.cqf.fhir</groupId>
+			<artifactId>cqf-fhir-cql</artifactId>
+			<version>${clinical-reasoning.version}</version>
 			<exclusions>
-				<exclusion>
-					<groupId>xpp3</groupId>
-					<artifactId>xpp3_min</artifactId>
-				</exclusion>
+			<exclusion>
+				<groupId>xpp3</groupId>
+				<artifactId>xpp3_min</artifactId>
+			</exclusion>
+			<exclusion>
+				<groupId>xmlpull</groupId>
+				<artifactId>xmlpull</artifactId>
+			</exclusion>
 				<exclusion>
 					<groupId>xmlpull</groupId>
 					<artifactId>xmlpull</artifactId>
 				</exclusion>
 			</exclusions>
+			<type>pom</type>
 		</dependency>
-
 		<dependency>
 			<groupId>org.ogce</groupId>
 			<artifactId>xpp3</artifactId>
