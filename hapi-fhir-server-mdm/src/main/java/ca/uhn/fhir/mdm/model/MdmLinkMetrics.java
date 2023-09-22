@@ -2,18 +2,14 @@ package ca.uhn.fhir.mdm.model;
 
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
-import ca.uhn.fhir.model.api.IModelJson;
-import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.HashMap;
 import java.util.Map;
 
-public class MdmLinkMetrics implements IModelJson {
-
+public class MdmLinkMetrics {
 	/**
 	 * The resource type to which these metrics apply.
 	 */
-	@JsonProperty("resourceType")
 	private String myResourceType;
 
 	/**
@@ -26,7 +22,6 @@ public class MdmLinkMetrics implements IModelJson {
 	 *      AUTO    - 1
 	 *      MANUAL  - 3
 	 */
-	@JsonProperty("matchResult2linkSource2count")
 	private Map<MdmMatchResultEnum, Map<MdmLinkSourceEnum, Long>> myMatchTypeToLinkToCountMap;
 
 	public String getResourceType() {
@@ -45,7 +40,7 @@ public class MdmLinkMetrics implements IModelJson {
 	}
 
 	public void addMetric(
-			MdmMatchResultEnum theMdmMatchResultEnum, MdmLinkSourceEnum theLinkSourceEnum, long theCount) {
+		MdmMatchResultEnum theMdmMatchResultEnum, MdmLinkSourceEnum theLinkSourceEnum, long theCount) {
 		Map<MdmMatchResultEnum, Map<MdmLinkSourceEnum, Long>> map = getMatchTypeToLinkToCountMap();
 
 		if (!map.containsKey(theMdmMatchResultEnum)) {

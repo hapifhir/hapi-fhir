@@ -9,12 +9,13 @@ import ca.uhn.fhir.jpa.mdm.BaseMdmR4Test;
 import ca.uhn.fhir.jpa.mdm.IMdmMetricSvcTest;
 import ca.uhn.fhir.jpa.mdm.helper.MdmLinkHelper;
 import ca.uhn.fhir.jpa.mdm.helper.testmodels.MDMState;
+import ca.uhn.fhir.jpa.mdm.models.GenerateMetricsTestParameters;
 import ca.uhn.fhir.jpa.mdm.models.LinkMetricTestParameters;
 import ca.uhn.fhir.jpa.mdm.models.LinkScoreMetricTestParams;
 import ca.uhn.fhir.jpa.mdm.models.ResourceMetricTestParams;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.mdm.api.IMdmMetricSvc;
-import ca.uhn.fhir.mdm.model.MdmLinkMetrics;
+import ca.uhn.fhir.mdm.model.MdmMetrics;
 import ca.uhn.fhir.mdm.util.MdmResourceUtil;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -29,6 +30,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
 
+import javax.persistence.EntityManagerFactory;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.fail;
@@ -51,6 +53,9 @@ public class MdmMetricSvcJpaIT extends BaseMdmR4Test implements IMdmMetricSvcTes
 		private DaoRegistry myDaoRegistry;
 
 		@Autowired
+		private EntityManagerFactory myEntityManagerFactory;
+
+		@Autowired
 		private HapiFhirLocalContainerEntityManagerFactoryBean myEntityFactory;
 
 		// this has to be provided via spring, or the
@@ -59,7 +64,8 @@ public class MdmMetricSvcJpaIT extends BaseMdmR4Test implements IMdmMetricSvcTes
 		IMdmMetricSvc mdmMetricSvc() {
 			return new MdmMetricSvcJpaImpl(
 				myJpaRepository,
-				myDaoRegistry
+				myDaoRegistry,
+				myEntityManagerFactory
 			);
 		}
 	}
@@ -80,6 +86,18 @@ public class MdmMetricSvcJpaIT extends BaseMdmR4Test implements IMdmMetricSvcTes
 	@Override
 	public IMdmMetricSvc getMetricsSvc() {
 		return mySvc;
+	}
+
+	@Override
+	public void generateMdmMetricsSetup(GenerateMetricsTestParameters theParameters) {
+		if (StringUtils.isNotBlank(theParameters.getInitialState())) {
+			MDMState<Patient, JpaPid> state = new MDMState<>();
+			state.setInputState(theParameters.getInitialState());
+			myLinkHelper.setup(state);
+
+			// update scores if needed
+			setupScores(theParameters.getScores());
+		}
 	}
 
 	@Override
@@ -127,19 +145,22 @@ public class MdmMetricSvcJpaIT extends BaseMdmR4Test implements IMdmMetricSvcTes
 			myLinkHelper.setup(state);
 
 			// update scores if needed
-			List<MdmLink> links = myMdmLinkDao.findAll();
-			for (int i = 0; i < theParams.getScores().size() && i < links.size(); i++) {
-				Double score = theParams.getScores().get(i);
-				MdmLink link = links.get(i);
-				link.setScore(score);
-				myMdmLinkDao.save(link);
-			}
+			setupScores(theParams.getScores());
 		}
 	}
 
+	private void setupScores(List<Double> theParams) {
+		List<MdmLink> links = myMdmLinkDao.findAll();
+		for (int i = 0; i < theParams.size() && i < links.size(); i++) {
+			Double score = theParams.get(i);
+			MdmLink link = links.get(i);
+			link.setScore(score);
+			myMdmLinkDao.save(link);
+		}
+	}
 
 	@Override
-	public String getStringMetrics(MdmLinkMetrics theMetrics) {
+	public String getStringMetrics(MdmMetrics theMetrics) {
 		try {
 			return myObjectMapper.writeValueAsString(theMetrics);
 		} catch (JsonProcessingException ex) {

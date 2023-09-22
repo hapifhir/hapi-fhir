@@ -6,26 +6,42 @@ import ca.uhn.fhir.mdm.api.BaseMdmMetricSvc;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.mdm.api.params.GenerateMdmLinkMetricParameters;
+import ca.uhn.fhir.mdm.api.params.GenerateMdmMetricsParameters;
 import ca.uhn.fhir.mdm.api.params.GenerateScoreMetricsParameters;
 import ca.uhn.fhir.mdm.model.MdmLinkMetrics;
 import ca.uhn.fhir.mdm.model.MdmLinkScoreMetrics;
+import ca.uhn.fhir.mdm.model.MdmMetrics;
+import ca.uhn.fhir.mdm.model.MdmResourceMetrics;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.FlushModeType;
+import javax.persistence.PersistenceContext;
+import javax.persistence.PersistenceContextType;
+import javax.persistence.Query;
+import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class MdmMetricSvcJpaImpl extends BaseMdmMetricSvc {
 
 	private final IMdmLinkJpaMetricsRepository myJpaRepository;
 
-	public MdmMetricSvcJpaImpl(IMdmLinkJpaMetricsRepository theRepository, DaoRegistry theDaoRegistry) {
+	private final EntityManagerFactory myEntityManagerFactory;
+
+	public MdmMetricSvcJpaImpl(
+		IMdmLinkJpaMetricsRepository theRepository,
+		DaoRegistry theDaoRegistry,
+		EntityManagerFactory theEntityManagerFactory
+	) {
 		super(theDaoRegistry);
 		myJpaRepository = theRepository;
+		myEntityManagerFactory = theEntityManagerFactory;
 	}
 
-	@Transactional
-	@Override
-	public MdmLinkMetrics generateLinkMetrics(GenerateMdmLinkMetricParameters theParameters) {
+	protected MdmLinkMetrics generateLinkMetrics(GenerateMdmMetricsParameters theParameters) {
 		List<MdmLinkSourceEnum> linkSources = theParameters.getLinkSourceFilters();
 		List<MdmMatchResultEnum> matchResults = theParameters.getMatchResultFilters();
 
@@ -48,29 +64,88 @@ public class MdmMetricSvcJpaImpl extends BaseMdmMetricSvc {
 		return metrics;
 	}
 
-	@Transactional
-	@Override
-	public MdmLinkScoreMetrics generateLinkScoreMetrics(GenerateScoreMetricsParameters theParameters) {
+	protected MdmLinkScoreMetrics generateLinkScoreMetrics(GenerateMdmMetricsParameters theParameters) {
 		String resourceType = theParameters.getResourceType();
 
-		List<MdmMatchResultEnum> matchResultTypes = theParameters.getMatchTypes();
+		List<MdmMatchResultEnum> matchResultTypes = theParameters.getMatchResultFilters();
 
 		// if no result type filter, add all result types
 		if (matchResultTypes.isEmpty()) {
 			matchResultTypes = Arrays.asList(MdmMatchResultEnum.values());
 		}
 
-		Object[][] data = myJpaRepository.generateScoreMetrics(resourceType, matchResultTypes);
+		String sql = "SELECT %s FROM MPI_LINK ml WHERE ml.TARGET_TYPE = :resourceType "
+			+ "AND ml.MATCH_RESULT in (:matchResult)";
 
-		MdmLinkScoreMetrics metrics = new MdmLinkScoreMetrics();
-		metrics.setResourceType(resourceType);
-		for (Object[] row : data) {
-			Double scoreValue = (Double) row[0];
-			Long scoreCount = (Long) row[1];
-			String scoreStr = scoreValue == null ? NULL_VALUE : Double.toString(scoreValue);
-			metrics.addScore(scoreStr, scoreCount);
+		StringBuilder sb = new StringBuilder();
+		sb.append("sum(case when ml.SCORE is null then 1 else 0 end) as B_" + NULL_VALUE);
+
+
+		for (int i = 0; i < BUCKETS; i++) {
+			float bucket = (float) (i + 1) / BUCKETS;
+			sb.append(",\n");
+			if (i == 0) {
+				// score < .01
+				sb.append(
+					String.format("sum(case when ml.SCORE < %.2f then 1 else 0 end) as B%d", bucket, i)
+				);
+			} else {
+				// score >= i/100 && score < i/100
+				sb.append(
+					String.format("sum(case when ml.SCORE < %.2f then (case when ml.score >= %.2f then 1 else 0 end) else 0 end) as B%d", (float)(i - 1)/BUCKETS, bucket, i)
+				);
+			}
 		}
 
+		EntityManager em = myEntityManagerFactory.createEntityManager();
+
+		Query nativeQuery = em.createNativeQuery(
+			String.format(sql, sb.toString())
+		);
+
+		org.hibernate.query.Query<?> hibernateQuery = (org.hibernate.query.Query<?>) nativeQuery;
+
+		hibernateQuery.setParameter("resourceType", resourceType);
+		hibernateQuery.setParameter("matchResult", matchResultTypes.stream()
+			.map(Enum::ordinal).collect(Collectors.toList()));
+
+		List<?> results = hibernateQuery.getResultList();
+
+		em.close();
+
+		MdmLinkScoreMetrics metrics = new MdmLinkScoreMetrics();
+
+		// we only get one row back
+		Object[] row = (Object[]) results.get(0);
+		int length = row.length;
+		for (int i = 0; i < length; i++) {
+			// if there's nothing in the db, these values will all be null
+			BigInteger bi = row[i] != null ? (BigInteger)row[i] : BigInteger.valueOf(0);
+			float bucket = (float) i / BUCKETS;
+			if (i == 0) {
+				metrics.addScore(NULL_VALUE, bi.longValue());
+			} else if (i == 1) {
+				metrics.addScore(String.format(FIRST_BUCKET, bucket), bi.longValue());
+			} else {
+				metrics.addScore(String.format(NTH_BUCKET, (float)(i - 1)/BUCKETS, bucket), bi.longValue());
+			}
+		}
+
+		return metrics;
+	}
+
+	@Transactional
+	@Override
+	public MdmMetrics generateMdmMetrics(GenerateMdmMetricsParameters theParameters) {
+		MdmResourceMetrics resourceMetrics = generateResourceMetrics(theParameters);
+		MdmLinkMetrics linkMetrics = generateLinkMetrics(theParameters);
+		MdmLinkScoreMetrics scoreMetrics = generateLinkScoreMetrics(theParameters);
+
+		MdmMetrics metrics = MdmMetrics.fromSeperableMetrics(
+			resourceMetrics,
+			linkMetrics,
+			scoreMetrics
+		);
 		return metrics;
 	}
 }

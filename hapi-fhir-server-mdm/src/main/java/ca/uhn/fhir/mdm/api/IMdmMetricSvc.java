@@ -1,34 +1,19 @@
 package ca.uhn.fhir.mdm.api;
 
-import ca.uhn.fhir.mdm.api.params.GenerateMdmLinkMetricParameters;
-import ca.uhn.fhir.mdm.api.params.GenerateMdmResourceMetricsParameters;
-import ca.uhn.fhir.mdm.api.params.GenerateScoreMetricsParameters;
-import ca.uhn.fhir.mdm.model.MdmLinkMetrics;
-import ca.uhn.fhir.mdm.model.MdmLinkScoreMetrics;
-import ca.uhn.fhir.mdm.model.MdmResourceMetrics;
+import ca.uhn.fhir.mdm.api.params.GenerateMdmMetricsParameters;
+import ca.uhn.fhir.mdm.model.MdmMetrics;
 
 public interface IMdmMetricSvc {
 
 	/**
-	 * Generates the metrics for the provided parameters.
-	 *
-	 * MdmLinkMetrics are metrics related to the links themselves
-	 * (Counts of links by match_type (match, no_match, etc) and link_source (auto, manual))
+	 * Generates metrics on MDM Links.
+	 * Metrics include:
+	 * * breakdowns of counts of MATCH_RESULT types by LINK_SOURCE types.
+	 * * counts of resources of each type
+	 * * a histogram of score 'buckets' with the appropriate counts.
+	 * @param theParameters - Parameters defining resource type of interest,
+	 *                      as well as MatchResult and LinkSource filters.
+	 * @return The metrics in a JSON format.
 	 */
-	MdmLinkMetrics generateLinkMetrics(GenerateMdmLinkMetricParameters theParameters);
-
-	/**
-	 * Generates the metrics for the provided parameters.
-	 *
-	 * MdmResourceMetrics are metrics related to resource counts
-	 * (counts of GoldenResources, SourceResources, BlockedResources)
-	 */
-	MdmResourceMetrics generateResourceMetrics(GenerateMdmResourceMetricsParameters theParameters);
-
-	/**
-	 * Generates the metrics for the provided parameters.
-	 *
-	 * These metrics are unique value counts of MdmLink score.
-	 */
-	MdmLinkScoreMetrics generateLinkScoreMetrics(GenerateScoreMetricsParameters theParameters);
+	MdmMetrics generateMdmMetrics(GenerateMdmMetricsParameters theParameters);
 }

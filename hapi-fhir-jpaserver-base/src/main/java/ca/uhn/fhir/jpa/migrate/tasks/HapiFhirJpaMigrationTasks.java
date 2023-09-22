@@ -103,13 +103,13 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		Builder.BuilderWithTableName mdmLinkTable = version.onTable("MPI_LINK");
 
 		mdmLinkTable
-				.addIndex("20230911.1", "IDX_EMPI_TGT_LS_MR")
+				.addIndex("20230911.1", "IDX_EMPI_TGT_MR_LS")
 				.unique(false)
-				.withColumns("TARGET_TYPE", "LINK_SOURCE", "MATCH_RESULT");
+				.withColumns("TARGET_TYPE", "MATCH_RESULT", "LINK_SOURCE");
 		mdmLinkTable
-				.addIndex("20230911.2", "IDX_EMPi_TGT_SCORE_MR")
+				.addIndex("20230911.2", "IDX_EMPi_TGT_MR_SCore")
 				.unique(false)
-				.withColumns("TARGET_TYPE", "SCORE", "MATCH_RESULT");
+				.withColumns("TARGET_TYPE", "MATCH_RESULT", "SCORE");
 	}
 
 	protected void init680() {

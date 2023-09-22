@@ -25,12 +25,16 @@ public interface IMdmLinkJpaMetricsRepository extends JpaRepository<MdmLink, Lon
 			@Param("linkSources") List<MdmLinkSourceEnum> theLinkSources,
 			@Param("matchTypes") List<MdmMatchResultEnum> theMatchTypes);
 
-	@Query("SElECT DISTINCT ml.myScore AS score, count(*) "
-			+ "FROM MdmLink ml "
-			+ "WHERE ml.myMdmSourceType = :resourceName "
-			+ "AND ml.myMatchResult in (:matchTypes) "
-			+ "GROUP BY score "
-			+ "ORDER BY score")
-	Object[][] generateScoreMetrics(
-			@Param("resourceName") String theResourceType, @Param("matchTypes") List<MdmMatchResultEnum> theMatchTypes);
+//	@Query("SElECT "
+//			+ ":buckets "
+//			+ "FROM MdmLink ml "
+//			+ "WHERE ml.myMdmSourceType = :resourceName "
+//			+ "AND ml.myMatchResult in (:matchTypes) "
+//			+ "GROUP BY score "
+//			+ "ORDER BY score")
+//	Object[][] generateScoreMetrics(
+//		@Param("buckets") String theBucketsSql,
+//		@Param("resourceName") String theResourceType,
+//		@Param("matchTypes") List<MdmMatchResultEnum> theMatchTypes
+//	);
 }

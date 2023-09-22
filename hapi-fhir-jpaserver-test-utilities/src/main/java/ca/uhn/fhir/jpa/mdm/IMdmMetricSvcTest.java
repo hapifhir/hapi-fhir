@@ -1,20 +1,21 @@
 package ca.uhn.fhir.jpa.mdm;
 
+import ca.uhn.fhir.jpa.mdm.models.GenerateMetricsTestParameters;
 import ca.uhn.fhir.jpa.mdm.models.LinkMetricTestParameters;
 import ca.uhn.fhir.jpa.mdm.models.LinkScoreMetricTestParams;
 import ca.uhn.fhir.jpa.mdm.models.ResourceMetricTestParams;
+import ca.uhn.fhir.jpa.mdm.util.MdmMetricSvcTestUtil;
 import ca.uhn.fhir.mdm.api.IMdmMetricSvc;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
-import ca.uhn.fhir.mdm.api.params.GenerateMdmLinkMetricParameters;
-import ca.uhn.fhir.mdm.api.params.GenerateMdmResourceMetricsParameters;
-import ca.uhn.fhir.mdm.api.params.GenerateScoreMetricsParameters;
-import ca.uhn.fhir.mdm.model.MdmLinkMetrics;
-import ca.uhn.fhir.mdm.model.MdmLinkScoreMetrics;
+import ca.uhn.fhir.mdm.api.params.GenerateMdmMetricsParameters;
+import ca.uhn.fhir.mdm.model.MdmMetrics;
 import ca.uhn.fhir.mdm.model.MdmResourceMetrics;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
+import java.util.Arrays;
 import java.util.Map;
 import java.util.function.Supplier;
 
@@ -22,9 +23,50 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+/**
+ * Tests the various metrics returned by IMdmMetricSvc
+ * Because of the way these metrics are broken down in 3 different ways,
+ * these results are tested separately, even though there is a single
+ * entry point.
+ */
 public interface IMdmMetricSvcTest {
 
 	IMdmMetricSvc getMetricsSvc();
+
+	void generateMdmMetricsSetup(GenerateMetricsTestParameters theParameters);
+
+	@Test
+	default void generateMdmMetrics_generalTest_happyPath() {
+		// setup
+		GenerateMetricsTestParameters testParameters = new GenerateMetricsTestParameters();
+		testParameters.setInitialState(MdmMetricSvcTestUtil.OUR_BASIC_STATE);
+		testParameters.setScores(Arrays.asList(0.1, 0.2, 0.3, 0.4));
+
+		generateMdmMetricsSetup(testParameters);
+
+		// test
+		GenerateMdmMetricsParameters parameters = new GenerateMdmMetricsParameters("Patient");
+		MdmMetrics results = getMetricsSvc().generateMdmMetrics(parameters);
+
+		// verify
+		assertNotNull(results);
+		assertEquals("Patient", results.getResourceType());
+		assertEquals(4, results.getGoldenResourcesCount());
+		assertEquals(4, results.getSourceResourcesCount());
+		assertEquals(0, results.getExcludedResources());
+
+		Map<MdmMatchResultEnum, Map<MdmLinkSourceEnum, Long>> map = results.getMatchTypeToLinkToCountMap();
+		// See OUR_BASIC_STATE
+		assertEquals(3, map.size());
+		for (MdmMatchResultEnum matchResult : new MdmMatchResultEnum[] { MdmMatchResultEnum.MATCH, MdmMatchResultEnum.NO_MATCH, MdmMatchResultEnum.POSSIBLE_MATCH }) {
+			assertTrue(map.containsKey(matchResult));
+			Map<MdmLinkSourceEnum, Long> source2Count = map.get(matchResult);
+			assertNotNull(source2Count);
+			for (MdmLinkSourceEnum ls : MdmLinkSourceEnum.values()) {
+				assertNotNull(source2Count.get(ls));
+			}
+		}
+	}
 
 	void generateLinkMetricsSetup(LinkMetricTestParameters theParameters);
 
@@ -35,22 +77,22 @@ public interface IMdmMetricSvcTest {
 		generateLinkMetricsSetup(theParameters);
 
 		// all tests use Patient resource type
-		GenerateMdmLinkMetricParameters parameters = new GenerateMdmLinkMetricParameters("Patient");
+		GenerateMdmMetricsParameters parameters = new GenerateMdmMetricsParameters("Patient");
 		for (MdmLinkSourceEnum linkSource : theParameters.getLinkSourceFilters()) {
-			parameters.addLinkSourceFilter(linkSource);
+			parameters.addLinkSource(linkSource);
 		}
 		for (MdmMatchResultEnum matchResultEnum : theParameters.getMatchFilters()) {
-			parameters.addMatchResultFilter(matchResultEnum);
+			parameters.addMatchResult(matchResultEnum);
 		}
 
 		// test
-		MdmLinkMetrics metrics = getMetricsSvc().generateLinkMetrics(parameters);
+		MdmMetrics metrics = getMetricsSvc().generateMdmMetrics(parameters);
 
 		// verify
 		assertNotNull(metrics);
 		assertEquals(metrics.getResourceType(), "Patient");
 
-		MdmLinkMetrics expectedMetrics = theParameters.getExpectedMetrics();
+		MdmMetrics expectedMetrics = theParameters.getExpectedMetrics();
 
 		Supplier<String> err = () -> getComparingMetrics(metrics, expectedMetrics);
 
@@ -79,11 +121,9 @@ public interface IMdmMetricSvcTest {
 		// setup
 		generateResourceMetricsSetup(theParams);
 
-		GenerateMdmResourceMetricsParameters resourceMetricsParameters =
-				new GenerateMdmResourceMetricsParameters("Patient");
-
 		// test
-		MdmResourceMetrics results = getMetricsSvc().generateResourceMetrics(resourceMetricsParameters);
+		GenerateMdmMetricsParameters parameters = new GenerateMdmMetricsParameters("Patient");
+		MdmResourceMetrics results = getMetricsSvc().generateMdmMetrics(parameters);
 
 		// verify
 		assertNotNull(results);
@@ -103,18 +143,19 @@ public interface IMdmMetricSvcTest {
 		// setup
 		generateLinkScoreMetricsSetup(theParams);
 
-		GenerateScoreMetricsParameters scoreMetricsParameters = new GenerateScoreMetricsParameters("Patient");
+		GenerateMdmMetricsParameters scoreMetricsParameters = new GenerateMdmMetricsParameters("Patient");
 		for (MdmMatchResultEnum matchType : theParams.getMatchFilter()) {
-			scoreMetricsParameters.addMatchType(matchType);
+			scoreMetricsParameters.addMatchResult(matchType);
 		}
+
 		// test
-		MdmLinkScoreMetrics actualMetrics = getMetricsSvc().generateLinkScoreMetrics(scoreMetricsParameters);
+		MdmMetrics actualMetrics = getMetricsSvc().generateMdmMetrics(scoreMetricsParameters);
 
 		// verify
 		assertNotNull(actualMetrics);
 		assertEquals("Patient", actualMetrics.getResourceType());
 
-		MdmLinkScoreMetrics expectedMetrics = theParams.getExpectedLinkDataMetrics();
+		MdmMetrics expectedMetrics = theParams.getExpectedMetrics();
 
 		Map<String, Long> actual = actualMetrics.getScoreCounts();
 		Map<String, Long> expected = expectedMetrics.getScoreCounts();
@@ -125,10 +166,10 @@ public interface IMdmMetricSvcTest {
 		}
 	}
 
-	private String getComparingMetrics(MdmLinkMetrics theActual, MdmLinkMetrics theExpected) {
+	private String getComparingMetrics(MdmMetrics theActual, MdmMetrics theExpected) {
 		return String.format(
 				"\nExpected: \n%s - \nActual: \n%s", getStringMetrics(theExpected), getStringMetrics(theActual));
 	}
 
-	String getStringMetrics(MdmLinkMetrics theMetrics);
+	String getStringMetrics(MdmMetrics theMetrics);
 }

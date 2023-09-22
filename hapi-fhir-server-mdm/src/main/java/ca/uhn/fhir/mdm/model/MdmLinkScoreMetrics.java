@@ -1,14 +1,10 @@
 package ca.uhn.fhir.mdm.model;
 
-import ca.uhn.fhir.model.api.IModelJson;
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-public class MdmLinkScoreMetrics implements IModelJson {
+public class MdmLinkScoreMetrics {
 
-	@JsonProperty("resourceType")
 	private String myResourceType;
 
 	/**
@@ -16,7 +12,6 @@ public class MdmLinkScoreMetrics implements IModelJson {
 	 * Scores are typically Doubles. But we cast to string because
 	 * Score is not a non-null field, and so "NULL" is a value.
 	 */
-	@JsonProperty("scoreCounts")
 	private Map<String, Long> myScoreCounts;
 
 	public void setResourceType(String theResourceType) {
