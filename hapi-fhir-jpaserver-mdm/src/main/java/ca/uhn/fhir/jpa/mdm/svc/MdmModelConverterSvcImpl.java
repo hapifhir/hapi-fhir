@@ -24,8 +24,10 @@ import ca.uhn.fhir.mdm.api.IMdmLink;
 import ca.uhn.fhir.mdm.api.MdmLinkWithRevision;
 import ca.uhn.fhir.mdm.model.mdmevents.MdmLinkJson;
 import ca.uhn.fhir.mdm.model.mdmevents.MdmLinkWithRevisionJson;
-import org.apache.commons.math3.util.Precision;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 
 public class MdmModelConverterSvcImpl implements IMdmModelConverterSvc {
 
@@ -50,7 +52,7 @@ public class MdmModelConverterSvcImpl implements IMdmModelConverterSvc {
 		retVal.setLinkSource(theLink.getLinkSource());
 		retVal.setMatchResult(theLink.getMatchResult());
 		retVal.setLinkCreatedNewResource(theLink.getHadToCreateNewGoldenResource());
-		Double score = theLink.getScore() == null ? null : Precision.round(theLink.getScore(), 4);
+		Double score = theLink.getScore() == null ? null : BigDecimal.valueOf(theLink.getScore()).setScale(4, RoundingMode.HALF_UP).doubleValue();
 		retVal.setScore(score);
 		retVal.setUpdated(theLink.getUpdated());
 		retVal.setVersion(theLink.getVersion());

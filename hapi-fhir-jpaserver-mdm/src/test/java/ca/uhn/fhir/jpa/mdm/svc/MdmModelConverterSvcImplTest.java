@@ -10,7 +10,6 @@ import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
 import ca.uhn.fhir.mdm.api.MdmLinkWithRevision;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
-import org.apache.commons.math3.util.Precision;
 import org.hibernate.envers.RevisionType;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -19,6 +18,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.time.Month;
 import java.time.ZoneId;
@@ -37,7 +38,7 @@ public class MdmModelConverterSvcImplTest extends BaseMdmR4Test {
 		final String version = "1";
 		final boolean isLinkCreatedResource = false;
 		final double score = 0.8333333333333;
-		final double scoreRounded = Precision.round(score, 4);
+		final double scoreRounded = BigDecimal.valueOf(score).setScale(4, RoundingMode.HALF_UP).doubleValue();
 
 		MdmLink mdmLink = createGoldenPatientAndLinkToSourcePatient(MdmMatchResultEnum.MATCH, MdmLinkSourceEnum.MANUAL, version, createTime, updateTime, isLinkCreatedResource);
 		mdmLink.setScore(score);
@@ -63,7 +64,7 @@ public class MdmModelConverterSvcImplTest extends BaseMdmR4Test {
 		final boolean isLinkCreatedResource = false;
 		final long revisionNumber = 2L;
 		final double score = 0.8333333333333;
-		final double scoreRounded = Precision.round(score, 4);
+		final double scoreRounded = BigDecimal.valueOf(score).setScale(4, RoundingMode.HALF_UP).doubleValue();
 
 		MdmLink mdmLink = createGoldenPatientAndLinkToSourcePatient(MdmMatchResultEnum.MATCH, MdmLinkSourceEnum.MANUAL, version, createTime, updateTime, isLinkCreatedResource);
 		mdmLink.setScore(score);
