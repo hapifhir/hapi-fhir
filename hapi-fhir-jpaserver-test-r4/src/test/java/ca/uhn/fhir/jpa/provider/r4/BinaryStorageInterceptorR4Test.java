@@ -108,33 +108,7 @@ public class BinaryStorageInterceptorR4Test extends BaseResourceProviderR4Test {
 			return "prefix-" + extensionValus + "-";
 		}
 	}
-	@Test
-	public void testCreatingExternalizedBinaryTriggersPointcutUpdate() {
-		BinaryFilePrefixingInterceptor interceptor = new BinaryFilePrefixingInterceptor();
-		myInterceptorRegistry.registerInterceptor(interceptor);
-		// Create a resource with two metadata extensions on the binary
-		Binary binary = new Binary();
-		binary.setId("zoop123");
-		binary.setContentType("application/octet-stream");
-		Extension ext = binary.getMeta().addExtension();
-		ext.setUrl("http://foo");
-		ext.setValue(new StringType("bar"));
 
-		Extension ext2 = binary.getMeta().addExtension();
-		ext2.setUrl("http://foo2");
-		ext2.setValue(new StringType("bar2"));
-
-		binary.setData(SOME_BYTES);
-		DaoMethodOutcome outcome = myBinaryDao.update(binary, mySrd);
-
-		// Make sure it was externalized
-		outcome.getId().toUnqualifiedVersionless();
-		String encoded = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome.getResource());
-		ourLog.info("Encoded: {}", encoded);
-		assertThat(encoded, containsString(HapiExtensions.EXT_EXTERNALIZED_BINARY_ID));
-		assertThat(encoded, (containsString("prefix-bar-bar2-")));
-		myInterceptorRegistry.unregisterInterceptor(interceptor);
-	}
 	@ParameterizedTest
 	@EnumSource(value = RestOperationTypeEnum.class, names = {"CREATE", "UPDATE"})
 	public void testCreatingExternalizedBinaryAppliesPrefix(RestOperationTypeEnum theOperationType) {
