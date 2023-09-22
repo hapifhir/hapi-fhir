@@ -37,8 +37,6 @@ public class MdmConstants {
 	/**
 	 * Blocked resource tag info
 	 */
-	public static final String SYSTEM_BLOCKED_RESOURCE = "http://hapifhir.io/fhir/NamingSystem/mdm-blocked-record";
-
 	public static final String CODE_BLOCKED = "BLOCKED_RESOURCE";
 	public static final String CODE_BLOCKED_DISPLAY = "Source Resource is omitted from MDM matching.";
 

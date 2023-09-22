@@ -132,12 +132,22 @@ public final class MdmResourceUtil {
 				MdmConstants.DISPLAY_GOLDEN_REDIRECT);
 	}
 
+	/**
+	 * Adds the BLOCKED tag to the golden resource.
+	 * Because this is called *before* a resource is saved,
+	 * we must add a new system/code combo to it
+	 * @param theBaseResource
+	 * @return
+	 */
 	public static IBaseResource setGoldenResourceAsBlockedResourceGoldenResource(IBaseResource theBaseResource) {
-		return setTagOnResource(
-				theBaseResource,
-				MdmConstants.SYSTEM_BLOCKED_RESOURCE,
-				MdmConstants.CODE_BLOCKED,
-				MdmConstants.CODE_BLOCKED_DISPLAY);
+		IBaseCoding tag = theBaseResource.getMeta().addTag();
+		tag.setSystem(MdmConstants.SYSTEM_GOLDEN_RECORD_STATUS);
+		tag.setCode(MdmConstants.CODE_BLOCKED);
+		tag.setDisplay(MdmConstants.CODE_BLOCKED_DISPLAY);
+		tag.setUserSelected(false);
+		tag.setVersion("1");
+
+		return theBaseResource;
 	}
 
 	/**

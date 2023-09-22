@@ -34,8 +34,19 @@ public abstract class BaseMdmMetricSvc implements IMdmMetricSvc {
 
 	protected MdmResourceMetrics generateResourceMetrics(GenerateMdmMetricsParameters theParameters) {
 		String resourceType = theParameters.getResourceType();
+		@SuppressWarnings("rawtypes")
 		IFhirResourceDao dao = myDaoRegistry.getResourceDao(resourceType);
 
+		// TODO
+		/*
+		 * We are using 3 different queries to count:
+		 * * all resources
+		 * * all golden resources
+		 * * all blocked resources.
+		 *
+		 * This is inefficient and if we want, we can speed it up with
+		 * a custom query in the future.
+		 */
 		IBundleProvider outcome = null;
 		SearchParameterMap map = null;
 
