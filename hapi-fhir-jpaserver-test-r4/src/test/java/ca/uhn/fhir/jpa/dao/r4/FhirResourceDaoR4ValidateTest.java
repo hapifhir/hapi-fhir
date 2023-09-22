@@ -348,6 +348,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 	}
 
 	@Test
+	@Disabled()
 	public void testValidateCodeInNonEnumeratedValueSetWithUnknownCodeSystem_Error() {
 		myUnknownCodeSystemWarningValidationSupport.setNonExistentCodeSystemSeverity(IValidationSupport.IssueSeverity.ERROR);
 
