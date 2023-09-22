@@ -153,7 +153,7 @@ public class BinaryStorageInterceptorR4Test extends BaseResourceProviderR4Test {
 		@Hook(Pointcut.STORAGE_BINARY_ASSIGN_BLOB_ID_PREFIX)
 		public String provideBlobIdForBinary(RequestDetails theRequestDetails, IBaseResource theResource) {
 			ourLog.info("Received binary for prefixing!" + theResource.getIdElement());
-			return "prefix-test-blob-i-";
+			return "prefix-test-blob-id-";
 		}
 	}
 
