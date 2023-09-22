@@ -10,6 +10,7 @@ import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
 import ca.uhn.fhir.mdm.api.MdmLinkWithRevision;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
+import org.apache.commons.math3.util.Precision;
 import org.hibernate.envers.RevisionType;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -35,15 +36,19 @@ public class MdmModelConverterSvcImplTest extends BaseMdmR4Test {
 		final Date updateTime = new Date();
 		final String version = "1";
 		final boolean isLinkCreatedResource = false;
+		final double score = 0.8333333333333;
+		final double scoreRounded = Precision.round(score, 4);
 
-		final MdmLink mdmLink = createGoldenPatientAndLinkToSourcePatient(MdmMatchResultEnum.MATCH, MdmLinkSourceEnum.MANUAL, version, createTime, updateTime, isLinkCreatedResource);
+		MdmLink mdmLink = createGoldenPatientAndLinkToSourcePatient(MdmMatchResultEnum.MATCH, MdmLinkSourceEnum.MANUAL, version, createTime, updateTime, isLinkCreatedResource);
+		mdmLink.setScore(score);
+		mdmLink.setVector(61L);
 		myMdmLinkDao.save(mdmLink);
 
 		final MdmLinkJson actualMdmLinkJson = myMdmModelConverterSvc.toJson(mdmLink);
 
 		ourLog.info("actualMdmLinkJson: {}", actualMdmLinkJson);
 
-		assertEquals(getExepctedMdmLinkJson(mdmLink.getGoldenResourcePersistenceId().getId(), mdmLink.getSourcePersistenceId().getId(), MdmMatchResultEnum.MATCH, MdmLinkSourceEnum.MANUAL, version, createTime, updateTime, isLinkCreatedResource), actualMdmLinkJson);
+		assertEquals(getExepctedMdmLinkJson(mdmLink.getGoldenResourcePersistenceId().getId(), mdmLink.getSourcePersistenceId().getId(), MdmMatchResultEnum.MATCH, MdmLinkSourceEnum.MANUAL, version, createTime, updateTime, isLinkCreatedResource, scoreRounded), actualMdmLinkJson);
 	}
 
 	@Test
@@ -57,15 +62,20 @@ public class MdmModelConverterSvcImplTest extends BaseMdmR4Test {
 		final String version = "1";
 		final boolean isLinkCreatedResource = false;
 		final long revisionNumber = 2L;
+		final double score = 0.8333333333333;
+		final double scoreRounded = Precision.round(score, 4);
 
-		final MdmLink mdmLink = createGoldenPatientAndLinkToSourcePatient(MdmMatchResultEnum.MATCH, MdmLinkSourceEnum.MANUAL, version, createTime, updateTime, isLinkCreatedResource);
+		MdmLink mdmLink = createGoldenPatientAndLinkToSourcePatient(MdmMatchResultEnum.MATCH, MdmLinkSourceEnum.MANUAL, version, createTime, updateTime, isLinkCreatedResource);
+		mdmLink.setScore(score);
+		mdmLink.setVector(61L);
+		myMdmLinkDao.save(mdmLink);
 
 		final MdmLinkWithRevision<IMdmLink<? extends IResourcePersistentId<?>>> revision = new MdmLinkWithRevision<>(mdmLink, new EnversRevision(RevisionType.ADD, revisionNumber, revisionTimestamp));
 
 		final MdmLinkWithRevisionJson actualMdmLinkWithRevisionJson = myMdmModelConverterSvc.toJson(revision);
 
 		final MdmLinkWithRevisionJson expectedMdmLinkWithRevisionJson =
-			new MdmLinkWithRevisionJson(getExepctedMdmLinkJson(mdmLink.getGoldenResourcePersistenceId().getId(), mdmLink.getSourcePersistenceId().getId(), MdmMatchResultEnum.MATCH, MdmLinkSourceEnum.MANUAL, version, createTime, updateTime, isLinkCreatedResource), revisionNumber, revisionTimestamp);
+			new MdmLinkWithRevisionJson(getExepctedMdmLinkJson(mdmLink.getGoldenResourcePersistenceId().getId(), mdmLink.getSourcePersistenceId().getId(), MdmMatchResultEnum.MATCH, MdmLinkSourceEnum.MANUAL, version, createTime, updateTime, isLinkCreatedResource, scoreRounded), revisionNumber, revisionTimestamp);
 
 		assertMdmLinkRevisionsEqual(expectedMdmLinkWithRevisionJson, actualMdmLinkWithRevisionJson);
 	}
@@ -77,12 +87,14 @@ public class MdmModelConverterSvcImplTest extends BaseMdmR4Test {
 		assertEquals(expectedMdmLink.getSourceId(), actualMdmLink.getSourceId());
 		assertEquals(expectedMdmLink.getMatchResult(), actualMdmLink.getMatchResult());
 		assertEquals(expectedMdmLink.getLinkSource(), actualMdmLink.getLinkSource());
+		assertEquals(expectedMdmLink.getScore(), actualMdmLink.getScore());
+		assertEquals(expectedMdmLink.getVector(), actualMdmLink.getVector());
 
 		assertEquals(theExpectedMdmLinkWithRevisionJson.getRevisionNumber(), theActualMdmLinkWithRevisionJson.getRevisionNumber());
 		assertEquals(theExpectedMdmLinkWithRevisionJson.getRevisionTimestamp(), theActualMdmLinkWithRevisionJson.getRevisionTimestamp());
 	}
 
-	private MdmLinkJson getExepctedMdmLinkJson(Long theGoldenPatientId, Long theSourceId, MdmMatchResultEnum theMdmMatchResultEnum, MdmLinkSourceEnum theMdmLinkSourceEnum, String version, Date theCreateTime, Date theUpdateTime, boolean theLinkCreatedNewResource) {
+	private MdmLinkJson getExepctedMdmLinkJson(Long theGoldenPatientId, Long theSourceId, MdmMatchResultEnum theMdmMatchResultEnum, MdmLinkSourceEnum theMdmLinkSourceEnum, String version, Date theCreateTime, Date theUpdateTime, boolean theLinkCreatedNewResource, double theScore) {
 		final MdmLinkJson mdmLinkJson = new MdmLinkJson();
 
 		mdmLinkJson.setGoldenResourceId("Patient/" + theGoldenPatientId);
@@ -93,6 +105,10 @@ public class MdmModelConverterSvcImplTest extends BaseMdmR4Test {
 		mdmLinkJson.setCreated(theCreateTime);
 		mdmLinkJson.setUpdated(theUpdateTime);
 		mdmLinkJson.setLinkCreatedNewResource(theLinkCreatedNewResource);
+		mdmLinkJson.setScore(theScore);
+
+		// make sure vector is not converted
+		mdmLinkJson.setVector(null);
 
 		return mdmLinkJson;
 	}

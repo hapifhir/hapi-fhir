@@ -24,6 +24,7 @@ import ca.uhn.fhir.mdm.api.IMdmLink;
 import ca.uhn.fhir.mdm.api.MdmLinkWithRevision;
 import ca.uhn.fhir.mdm.model.mdmevents.MdmLinkJson;
 import ca.uhn.fhir.mdm.model.mdmevents.MdmLinkWithRevisionJson;
+import org.apache.commons.math3.util.Precision;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public class MdmModelConverterSvcImpl implements IMdmModelConverterSvc {
@@ -49,9 +50,9 @@ public class MdmModelConverterSvcImpl implements IMdmModelConverterSvc {
 		retVal.setLinkSource(theLink.getLinkSource());
 		retVal.setMatchResult(theLink.getMatchResult());
 		retVal.setLinkCreatedNewResource(theLink.getHadToCreateNewGoldenResource());
-		retVal.setScore(theLink.getScore());
+		Double score = theLink.getScore() == null ? null : Precision.round(theLink.getScore(), 4);
+		retVal.setScore(score);
 		retVal.setUpdated(theLink.getUpdated());
-		retVal.setVector(theLink.getVector());
 		retVal.setVersion(theLink.getVersion());
 		retVal.setRuleCount(theLink.getRuleCount());
 		return retVal;
