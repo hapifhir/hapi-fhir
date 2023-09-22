@@ -19,7 +19,6 @@
  */
 package ca.uhn.fhir.test.utilities;
 
-
 import com.gargoylesoftware.htmlunit.BrowserVersion;
 import com.gargoylesoftware.htmlunit.StringWebResponse;
 import com.gargoylesoftware.htmlunit.WebClient;

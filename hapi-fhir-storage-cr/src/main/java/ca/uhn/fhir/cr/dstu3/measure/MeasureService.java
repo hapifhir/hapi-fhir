@@ -52,8 +52,8 @@ public class MeasureService {
 	private final MeasureEvaluationOptions myMeasureEvaluationOptions;
 
 	public MeasureService(Repository theRepository, MeasureEvaluationOptions theMeasureEvaluationOptions) {
-		this.myRepository = theRepository;
-		this.myMeasureEvaluationOptions = theMeasureEvaluationOptions;
+		myRepository = theRepository;
+		myMeasureEvaluationOptions = theMeasureEvaluationOptions;
 	}
 
 	public static final List<ContactDetail> CQI_CONTACT_DETAIL = Collections.singletonList(new ContactDetail()

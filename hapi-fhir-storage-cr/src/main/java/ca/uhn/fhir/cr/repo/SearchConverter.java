@@ -106,7 +106,6 @@ public class SearchConverter {
 			searchParameterMap.add(theKey, (IQueryParameterOr<?>) theParameterType);
 		} else if (isAndList(theParameterType)) {
 			searchParameterMap.add(theKey, (IQueryParameterAnd<?>) theParameterType);
-			// } else if ()
 		} else {
 			searchParameterMap.add(theKey, (IQueryParameterType) theParameterType);
 		}
