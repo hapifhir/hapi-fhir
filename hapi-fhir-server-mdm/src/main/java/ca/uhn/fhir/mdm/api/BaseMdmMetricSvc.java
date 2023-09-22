@@ -4,7 +4,6 @@ import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.mdm.api.params.GenerateMdmMetricsParameters;
-import ca.uhn.fhir.mdm.api.params.GenerateMdmResourceMetricsParameters;
 import ca.uhn.fhir.mdm.model.MdmResourceMetrics;
 import ca.uhn.fhir.mdm.util.MdmSearchParamBuildingUtils;
 import ca.uhn.fhir.rest.api.SearchTotalModeEnum;

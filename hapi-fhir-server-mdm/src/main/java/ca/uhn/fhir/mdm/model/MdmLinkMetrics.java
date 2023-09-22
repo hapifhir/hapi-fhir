@@ -40,7 +40,7 @@ public class MdmLinkMetrics {
 	}
 
 	public void addMetric(
-		MdmMatchResultEnum theMdmMatchResultEnum, MdmLinkSourceEnum theLinkSourceEnum, long theCount) {
+			MdmMatchResultEnum theMdmMatchResultEnum, MdmLinkSourceEnum theLinkSourceEnum, long theCount) {
 		Map<MdmMatchResultEnum, Map<MdmLinkSourceEnum, Long>> map = getMatchTypeToLinkToCountMap();
 
 		if (!map.containsKey(theMdmMatchResultEnum)) {

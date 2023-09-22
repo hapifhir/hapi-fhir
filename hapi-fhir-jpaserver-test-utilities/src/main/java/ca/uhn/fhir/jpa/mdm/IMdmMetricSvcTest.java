@@ -58,7 +58,9 @@ public interface IMdmMetricSvcTest {
 		Map<MdmMatchResultEnum, Map<MdmLinkSourceEnum, Long>> map = results.getMatchTypeToLinkToCountMap();
 		// See OUR_BASIC_STATE
 		assertEquals(3, map.size());
-		for (MdmMatchResultEnum matchResult : new MdmMatchResultEnum[] { MdmMatchResultEnum.MATCH, MdmMatchResultEnum.NO_MATCH, MdmMatchResultEnum.POSSIBLE_MATCH }) {
+		for (MdmMatchResultEnum matchResult : new MdmMatchResultEnum[] {
+			MdmMatchResultEnum.MATCH, MdmMatchResultEnum.NO_MATCH, MdmMatchResultEnum.POSSIBLE_MATCH
+		}) {
 			assertTrue(map.containsKey(matchResult));
 			Map<MdmLinkSourceEnum, Long> source2Count = map.get(matchResult);
 			assertNotNull(source2Count);

@@ -6,17 +6,13 @@ import ca.uhn.fhir.jpa.mdm.models.ResourceMetricTestParams;
 import ca.uhn.fhir.mdm.api.BaseMdmMetricSvc;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
-import ca.uhn.fhir.mdm.model.MdmLinkMetrics;
-import ca.uhn.fhir.mdm.model.MdmLinkScoreMetrics;
 import ca.uhn.fhir.mdm.model.MdmMetrics;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * This provides parameter methods for the {@link ca.uhn.fhir.jpa.mdm.IMdmMetricSvcTest}.
@@ -304,15 +300,17 @@ public class MdmMetricSvcTestUtil {
 		}
 		metrics.addScore(BaseMdmMetricSvc.NULL_VALUE, nullCount);
 		for (int i = 0; i < BaseMdmMetricSvc.BUCKETS; i++) {
-			float bucket = (float)(i + 1)/BaseMdmMetricSvc.BUCKETS;
+			float bucket = (float) (i + 1) / BaseMdmMetricSvc.BUCKETS;
 			long count = 0;
-			if (score2Count.containsKey((double)bucket)) {
+			if (score2Count.containsKey((double) bucket)) {
 				count = score2Count.get((double) bucket);
 			}
 			if (i == 0) {
 				metrics.addScore(String.format(BaseMdmMetricSvc.FIRST_BUCKET, bucket), count);
 			} else {
-				metrics.addScore(String.format(BaseMdmMetricSvc.NTH_BUCKET, (float) i / BaseMdmMetricSvc.BUCKETS, bucket), count);
+				metrics.addScore(
+						String.format(BaseMdmMetricSvc.NTH_BUCKET, (float) i / BaseMdmMetricSvc.BUCKETS, bucket),
+						count);
 			}
 		}
 	}

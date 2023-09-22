@@ -27,11 +27,9 @@ public class GenerateMdmMetricsParameters {
 	 */
 	private List<MdmLinkSourceEnum> myLinkSourceFilters;
 
-
 	public GenerateMdmMetricsParameters(String theResourceType) {
 		myResourceType = theResourceType;
 	}
-
 
 	public String getResourceType() {
 		return myResourceType;
@@ -59,13 +57,13 @@ public class GenerateMdmMetricsParameters {
 		getLinkSourceFilters().add(theLinkSource);
 	}
 
-//	public GenerateMdmLinkMetricParameters toLinkMetricParams() {
-//
-//	}
-//
-//	public GenerateMdmResourceMetricsParameters toResourceMetricParams() {
-//
-//	}
-//
+	//	public GenerateMdmLinkMetricParameters toLinkMetricParams() {
+	//
+	//	}
+	//
+	//	public GenerateMdmResourceMetricsParameters toResourceMetricParams() {
+	//
+	//	}
+	//
 
 }

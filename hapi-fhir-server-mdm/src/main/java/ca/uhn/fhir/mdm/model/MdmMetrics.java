@@ -69,7 +69,7 @@ public class MdmMetrics extends MdmResourceMetrics implements IModelJson {
 	}
 
 	public void addMetric(
-		MdmMatchResultEnum theMdmMatchResultEnum, MdmLinkSourceEnum theLinkSourceEnum, long theCount) {
+			MdmMatchResultEnum theMdmMatchResultEnum, MdmLinkSourceEnum theLinkSourceEnum, long theCount) {
 		Map<MdmMatchResultEnum, Map<MdmLinkSourceEnum, Long>> map = getMatchTypeToLinkToCountMap();
 
 		if (!map.containsKey(theMdmMatchResultEnum)) {
@@ -119,10 +119,9 @@ public class MdmMetrics extends MdmResourceMetrics implements IModelJson {
 	}
 
 	public static MdmMetrics fromSeperableMetrics(
-		MdmResourceMetrics theMdmResourceMetrics,
-		MdmLinkMetrics theLinkMetrics,
-		MdmLinkScoreMetrics theLinkScoreMetrics
-	) {
+			MdmResourceMetrics theMdmResourceMetrics,
+			MdmLinkMetrics theLinkMetrics,
+			MdmLinkScoreMetrics theLinkScoreMetrics) {
 		MdmMetrics metrics = new MdmMetrics();
 		metrics.setResourceType(theMdmResourceMetrics.getResourceType());
 		metrics.setExcludedResources(theMdmResourceMetrics.getExcludedResources());

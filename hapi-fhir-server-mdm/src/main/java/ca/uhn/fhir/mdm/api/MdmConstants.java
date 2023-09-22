@@ -38,6 +38,7 @@ public class MdmConstants {
 	 * Blocked resource tag info
 	 */
 	public static final String CODE_BLOCKED = "BLOCKED_RESOURCE";
+
 	public static final String CODE_BLOCKED_DISPLAY = "Source Resource is omitted from MDM matching.";
 
 	public static final String FIHR_STRUCTURE_DEF_MATCH_GRADE_URL_NAMESPACE =
