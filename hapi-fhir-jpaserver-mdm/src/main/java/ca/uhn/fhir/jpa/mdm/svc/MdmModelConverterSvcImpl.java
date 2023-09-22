@@ -52,7 +52,11 @@ public class MdmModelConverterSvcImpl implements IMdmModelConverterSvc {
 		retVal.setLinkSource(theLink.getLinkSource());
 		retVal.setMatchResult(theLink.getMatchResult());
 		retVal.setLinkCreatedNewResource(theLink.getHadToCreateNewGoldenResource());
-		Double score = theLink.getScore() == null ? null : BigDecimal.valueOf(theLink.getScore()).setScale(4, RoundingMode.HALF_UP).doubleValue();
+		Double score = theLink.getScore() == null
+				? null
+				: BigDecimal.valueOf(theLink.getScore())
+						.setScale(4, RoundingMode.HALF_UP)
+						.doubleValue();
 		retVal.setScore(score);
 		retVal.setUpdated(theLink.getUpdated());
 		retVal.setVersion(theLink.getVersion());
