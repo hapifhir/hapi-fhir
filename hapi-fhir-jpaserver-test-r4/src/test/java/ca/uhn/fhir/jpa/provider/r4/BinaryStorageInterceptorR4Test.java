@@ -10,6 +10,7 @@ import ca.uhn.fhir.jpa.binary.interceptor.BinaryStorageInterceptor;
 import ca.uhn.fhir.jpa.binstore.MemoryBinaryStorageSvcImpl;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
+import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.client.api.IClientInterceptor;
 import ca.uhn.fhir.rest.client.api.IHttpRequest;
@@ -17,6 +18,7 @@ import ca.uhn.fhir.rest.client.api.IHttpResponse;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.HapiExtensions;
 import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
+import org.hl7.fhir.instance.model.api.IBaseMetaType;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Binary;
@@ -28,6 +30,9 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -104,7 +109,35 @@ public class BinaryStorageInterceptorR4Test extends BaseResourceProviderR4Test {
 		}
 	}
 	@Test
-	public void testCreatingExternalizedBinaryTriggersPointcut() {
+	public void testCreatingExternalizedBinaryTriggersPointcutUpdate() {
+		BinaryFilePrefixingInterceptor interceptor = new BinaryFilePrefixingInterceptor();
+		myInterceptorRegistry.registerInterceptor(interceptor);
+		// Create a resource with two metadata extensions on the binary
+		Binary binary = new Binary();
+		binary.setId("zoop123");
+		binary.setContentType("application/octet-stream");
+		Extension ext = binary.getMeta().addExtension();
+		ext.setUrl("http://foo");
+		ext.setValue(new StringType("bar"));
+
+		Extension ext2 = binary.getMeta().addExtension();
+		ext2.setUrl("http://foo2");
+		ext2.setValue(new StringType("bar2"));
+
+		binary.setData(SOME_BYTES);
+		DaoMethodOutcome outcome = myBinaryDao.update(binary, mySrd);
+
+		// Make sure it was externalized
+		outcome.getId().toUnqualifiedVersionless();
+		String encoded = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome.getResource());
+		ourLog.info("Encoded: {}", encoded);
+		assertThat(encoded, containsString(HapiExtensions.EXT_EXTERNALIZED_BINARY_ID));
+		assertThat(encoded, (containsString("prefix-bar-bar2-")));
+		myInterceptorRegistry.unregisterInterceptor(interceptor);
+	}
+	@ParameterizedTest
+	@EnumSource(value = RestOperationTypeEnum.class, names = {"CREATE", "UPDATE"})
+	public void testCreatingExternalizedBinaryAppliesPrefix(RestOperationTypeEnum theOperationType) {
 		BinaryFilePrefixingInterceptor interceptor = new BinaryFilePrefixingInterceptor();
 		myInterceptorRegistry.registerInterceptor(interceptor);
 		// Create a resource with two metadata extensions on the binary
@@ -119,22 +152,34 @@ public class BinaryStorageInterceptorR4Test extends BaseResourceProviderR4Test {
 		ext2.setValue(new StringType("bar2"));
 
 		binary.setData(SOME_BYTES);
-		DaoMethodOutcome outcome = myBinaryDao.create(binary, mySrd);
 
-		// Make sure it was externalized
+		DaoMethodOutcome outcome = null;
+
+		//Either CREATE or UPDATE
+		if (theOperationType == RestOperationTypeEnum.CREATE) {
+			outcome = myBinaryDao.create(binary, mySrd);
+		} else if (theOperationType == RestOperationTypeEnum.UPDATE) {
+			binary.setId("my-id");
+			outcome = myBinaryDao.update(binary, mySrd);
+		}
+
+		// Then: Sure it was externalized
 		outcome.getId().toUnqualifiedVersionless();
 		String encoded = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome.getResource());
 		ourLog.info("Encoded: {}", encoded);
 		assertThat(encoded, containsString(HapiExtensions.EXT_EXTERNALIZED_BINARY_ID));
+
+		// Then: Make sure the prefix was applied
 		assertThat(encoded, (containsString("prefix-bar-bar2-")));
 		myInterceptorRegistry.unregisterInterceptor(interceptor);
+
 	}
 
 	private static class BinaryBlobIdPrefixInterceptor {
 		@Hook(Pointcut.STORAGE_BINARY_ASSIGN_BLOB_ID_PREFIX)
 		public String provideBlobIdForBinary(RequestDetails theRequestDetails, IBaseResource theResource) {
 			ourLog.info("Received binary for prefixing!" + theResource.getIdElement());
-			return "prefix-test-blob-id-";
+			return "prefix-test-blob-i-";
 		}
 	}
 
