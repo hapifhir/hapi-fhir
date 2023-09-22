@@ -52,6 +52,7 @@ import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
 import ca.uhn.fhir.rest.server.RestfulServerUtils;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
 import ca.uhn.fhir.util.ArrayUtil;
@@ -125,7 +126,7 @@ public class BulkDataExportProvider {
 	 * $export
 	 */
 	@Operation(
-			name = JpaConstants.OPERATION_EXPORT,
+			name = ProviderConstants.OPERATION_EXPORT,
 			global = false /* set to true once we can handle this */,
 			manualResponse = true,
 			idempotent = true)
@@ -152,7 +153,7 @@ public class BulkDataExportProvider {
 					IPrimitiveType<String> theExportId,
 			ServletRequestDetails theRequestDetails) {
 		// JPA export provider
-		validatePreferAsyncHeader(theRequestDetails, JpaConstants.OPERATION_EXPORT);
+		validatePreferAsyncHeader(theRequestDetails, ProviderConstants.OPERATION_EXPORT);
 
 		BulkExportJobParameters BulkExportJobParameters = buildSystemBulkExportOptions(
 				theOutputFormat, theType, theSince, theTypeFilter, theExportId, theTypePostFetchFilterUrl);
@@ -212,7 +213,7 @@ public class BulkDataExportProvider {
 	/**
 	 * Group/[id]/$export
 	 */
-	@Operation(name = JpaConstants.OPERATION_EXPORT, manualResponse = true, idempotent = true, typeName = "Group")
+	@Operation(name = ProviderConstants.OPERATION_EXPORT, manualResponse = true, idempotent = true, typeName = "Group")
 	public void groupExport(
 			@IdParam IIdType theIdParam,
 			@OperationParam(name = JpaConstants.PARAM_EXPORT_OUTPUT_FORMAT, min = 0, max = 1, typeName = "string")
@@ -244,7 +245,7 @@ public class BulkDataExportProvider {
 		ourLog.debug("_typeFilter={}", theTypeFilter);
 		ourLog.debug("_mdm={}", theMdm);
 
-		validatePreferAsyncHeader(theRequestDetails, JpaConstants.OPERATION_EXPORT);
+		validatePreferAsyncHeader(theRequestDetails, ProviderConstants.OPERATION_EXPORT);
 
 		// verify the Group exists before starting the job
 		validateTargetsExists(theRequestDetails, "Group", List.of(theIdParam));
@@ -322,7 +323,7 @@ public class BulkDataExportProvider {
 	/**
 	 * Patient/$export
 	 */
-	@Operation(name = JpaConstants.OPERATION_EXPORT, manualResponse = true, idempotent = true, typeName = "Patient")
+	@Operation(name = ProviderConstants.OPERATION_EXPORT, manualResponse = true, idempotent = true, typeName = "Patient")
 	public void patientExport(
 			@OperationParam(name = JpaConstants.PARAM_EXPORT_OUTPUT_FORMAT, min = 0, max = 1, typeName = "string")
 					IPrimitiveType<String> theOutputFormat,
@@ -351,7 +352,7 @@ public class BulkDataExportProvider {
 			@OperationParam(name = JpaConstants.PARAM_EXPORT_IDENTIFIER, min = 0, max = 1, typeName = "string")
 					IPrimitiveType<String> theExportIdentifier,
 			ServletRequestDetails theRequestDetails) {
-		validatePreferAsyncHeader(theRequestDetails, JpaConstants.OPERATION_EXPORT);
+		validatePreferAsyncHeader(theRequestDetails, ProviderConstants.OPERATION_EXPORT);
 
 		if (thePatient != null) {
 			validateTargetsExists(
@@ -376,7 +377,7 @@ public class BulkDataExportProvider {
 	/**
 	 * Patient/[id]/$export
 	 */
-	@Operation(name = JpaConstants.OPERATION_EXPORT, manualResponse = true, idempotent = true, typeName = "Patient")
+	@Operation(name = ProviderConstants.OPERATION_EXPORT, manualResponse = true, idempotent = true, typeName = "Patient")
 	public void patientInstanceExport(
 			@IdParam IIdType theIdParam,
 			@OperationParam(name = JpaConstants.PARAM_EXPORT_OUTPUT_FORMAT, min = 0, max = 1, typeName = "string")
@@ -400,7 +401,7 @@ public class BulkDataExportProvider {
 			@OperationParam(name = JpaConstants.PARAM_EXPORT_IDENTIFIER, min = 0, max = 1, typeName = "string")
 					IPrimitiveType<String> theExportIdentifier,
 			ServletRequestDetails theRequestDetails) {
-		validatePreferAsyncHeader(theRequestDetails, JpaConstants.OPERATION_EXPORT);
+		validatePreferAsyncHeader(theRequestDetails, ProviderConstants.OPERATION_EXPORT);
 
 		validateTargetsExists(theRequestDetails, "Patient", List.of(theIdParam));
 
@@ -422,7 +423,7 @@ public class BulkDataExportProvider {
 	 */
 	@SuppressWarnings("unchecked")
 	@Operation(
-			name = JpaConstants.OPERATION_EXPORT_POLL_STATUS,
+			name = ProviderConstants.OPERATION_EXPORT_POLL_STATUS,
 			manualResponse = true,
 			idempotent = true,
 			deleteEnabled = true)
@@ -712,7 +713,7 @@ public class BulkDataExportProvider {
 		if (serverBase == null) {
 			throw new InternalErrorException(Msg.code(2136) + "Unable to get the server base.");
 		}
-		String pollLocation = serverBase + "/" + JpaConstants.OPERATION_EXPORT_POLL_STATUS + "?"
+		String pollLocation = serverBase + "/" + ProviderConstants.OPERATION_EXPORT_POLL_STATUS + "?"
 				+ JpaConstants.PARAM_EXPORT_POLL_STATUS_JOB_ID + "=" + theInstanceId;
 		pollLocation = UrlUtil.sanitizeHeaderValue(pollLocation);
 

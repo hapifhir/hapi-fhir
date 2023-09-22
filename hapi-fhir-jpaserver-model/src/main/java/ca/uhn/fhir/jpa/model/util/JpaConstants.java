@@ -167,14 +167,6 @@ public class JpaConstants {
 	 */
 	public static final String OPERATION_IMPORT_POLL_STATUS = "$import-poll-status";
 	/**
-	 * Operation name for the "$export" operation
-	 */
-	public static final String OPERATION_EXPORT = "$export";
-	/**
-	 * Operation name for the "$export-poll-status" operation
-	 */
-	public static final String OPERATION_EXPORT_POLL_STATUS = "$export-poll-status";
-	/**
 	 * Operation name for the "$lastn" operation
 	 */
 	public static final String OPERATION_LASTN = "$lastn";
@@ -311,7 +303,6 @@ public class JpaConstants {
 	public static final Set<String> UNDESIRED_RESOURCE_LINKAGES_FOR_EVERYTHING_ON_PATIENT_INSTANCE =
 			Set.of("Provenance", "List", "Group");
 
-	public static final String BULK_DATA_ACCESS_IG_URL = "http://hl7.org/fhir/uv/bulkdata/CapabilityStatement/bulk-data";
 	/**
 	 * Non-instantiable
 	 */

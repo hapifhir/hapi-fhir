@@ -536,10 +536,24 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 			}
 		}
 
+		maybeAddBulkDataDeclarationToConformingToIg(terser, retVal, configuration.getServerBindings());
+
 		postProcessRest(terser, rest);
 		postProcess(terser, retVal);
 
 		return retVal;
+	}
+
+	private void maybeAddBulkDataDeclarationToConformingToIg(FhirTerser theTerser, IBaseConformance theBaseConformance, List<BaseMethodBinding> therServerBindings) {
+		boolean bulkExportEnabled = therServerBindings.stream()
+			.filter(OperationMethodBinding.class::isInstance)
+			.map(OperationMethodBinding.class::cast)
+			.map(OperationMethodBinding::getName)
+			.anyMatch(ProviderConstants.OPERATION_EXPORT::equals);
+
+		if (bulkExportEnabled){
+			theTerser.addElement(theBaseConformance, "instantiates", Constants.BULK_DATA_ACCESS_IG_URL);
+		}
 	}
 
 	/**
