@@ -248,9 +248,9 @@ public class CdsCrServiceR4 implements ICdsCrService {
 		}
 
 		// Leaving this out until the spec details how to map system actions.
-//		if (theAction.hasType() && theAction.hasResource()) {
-//			resolveSystemAction(theAction);
-//		}
+		//		if (theAction.hasType() && theAction.hasResource()) {
+		//			resolveSystemAction(theAction);
+		//		}
 
 		return card;
 	}
@@ -302,9 +302,9 @@ public class CdsCrServiceR4 implements ICdsCrService {
 		if (theAction.hasResource()) {
 			suggestionAction.setResource(resolveResource(theAction.getResource()));
 			// Leaving this out until the spec details how to map system actions.
-//			if (!suggestionAction.getType().isEmpty()) {
-//				resolveSystemAction(theAction);
-//			}
+			//			if (!suggestionAction.getType().isEmpty()) {
+			//				resolveSystemAction(theAction);
+			//			}
 		}
 
 		return suggestionAction;

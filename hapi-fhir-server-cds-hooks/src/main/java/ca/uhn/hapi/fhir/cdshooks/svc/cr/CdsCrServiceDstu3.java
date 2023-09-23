@@ -226,9 +226,9 @@ public class CdsCrServiceDstu3 implements ICdsCrService {
 		}
 
 		// Leaving this out until the spec details how to map system actions.
-//		if (theAction.hasType() && theAction.hasResource()) {
-//			resolveSystemAction(theAction);
-//		}
+		//		if (theAction.hasType() && theAction.hasResource()) {
+		//			resolveSystemAction(theAction);
+		//		}
 
 		return card;
 	}
