@@ -51,18 +51,6 @@ public class CrDiscoveryServiceDstu3 implements ICrDiscoveryService {
 		myMaxUriLength = DEFAULT_MAX_URI_LENGTH;
 	}
 
-	public int getMaxUriLength() {
-		return myMaxUriLength;
-	}
-
-	public void setMaxUriLength(int theMaxUriLength) {
-		if (theMaxUriLength <= 0) {
-			throw new IllegalArgumentException("maxUriLength must be > 0");
-		}
-
-		myMaxUriLength = theMaxUriLength;
-	}
-
 	public CdsServiceJson resolveService() {
 		return resolveService(
 				CdsCrUtils.readPlanDefinitionFromRepository(FhirVersionEnum.DSTU3, myRepository, myPlanDefinitionId));
