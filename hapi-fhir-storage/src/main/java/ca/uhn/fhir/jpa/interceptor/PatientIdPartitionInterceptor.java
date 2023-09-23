@@ -43,6 +43,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.IdType;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -150,21 +151,23 @@ public class PatientIdPartitionInterceptor {
 				}
 				break;
 			case SEARCH_TYPE:
-				SearchParameterMap params = (SearchParameterMap) theReadDetails.getSearchParams();
-				String idPart = null;
+				SearchParameterMap params = theReadDetails.getSearchParams();
+
 				if ("Patient".equals(theReadDetails.getResourceType())) {
-					idPart = getSingleResourceIdValueOrNull(params, "_id", "Patient");
+					List<String> idParts = getResourceIdList(params, "_id", "Patient", false);
+
+					if (idParts.size() == 1) {
+						return provideCompartmentMemberInstanceResponse(theRequestDetails, idParts.get(0));
+					} else {
+						return RequestPartitionId.allPartitions();
+					}
 				} else {
 					for (RuntimeSearchParam nextCompartmentSp : compartmentSps) {
-						idPart = getSingleResourceIdValueOrNull(params, nextCompartmentSp.getName(), "Patient");
-						if (idPart != null) {
-							break;
+						List<String> idParts = getResourceIdList(params, nextCompartmentSp.getName(), "Patient", true);
+						if (!idParts.isEmpty()) {
+							return provideCompartmentMemberInstanceResponse(theRequestDetails, idParts.get(0));
 						}
 					}
-				}
-
-				if (isNotBlank(idPart)) {
-					return provideCompartmentMemberInstanceResponse(theRequestDetails, idPart);
 				}
 
 				break;
@@ -191,39 +194,40 @@ public class PatientIdPartitionInterceptor {
 				.collect(Collectors.toList());
 	}
 
-	private String getSingleResourceIdValueOrNull(
-			SearchParameterMap theParams, String theParamName, String theResourceType) {
-		String idPart = null;
+	private List<String> getResourceIdList(
+			SearchParameterMap theParams, String theParamName, String theResourceType, boolean theExpectOnlyOneBool) {
+		List<String> idParts = new ArrayList<>();
 		List<List<IQueryParameterType>> idParamAndList = theParams.get(theParamName);
-		if (idParamAndList != null && idParamAndList.size() == 1) {
-			List<IQueryParameterType> idParamOrList = idParamAndList.get(0);
-			if (idParamOrList.size() == 1) {
-				IQueryParameterType idParam = idParamOrList.get(0);
-				if (isNotBlank(idParam.getQueryParameterQualifier())) {
-					throw new MethodNotAllowedException(Msg.code(1322) + "The parameter " + theParamName
-							+ idParam.getQueryParameterQualifier() + " is not supported in patient compartment mode");
-				}
-				if (idParam instanceof ReferenceParam) {
-					String chain = ((ReferenceParam) idParam).getChain();
-					if (chain != null) {
-						throw new MethodNotAllowedException(Msg.code(1323) + "The parameter " + theParamName + "."
-								+ chain + " is not supported in patient compartment mode");
+		if (idParamAndList != null) {
+			for (List<IQueryParameterType> idParamOrList : idParamAndList) {
+				for (IQueryParameterType idParam : idParamOrList) {
+					if (isNotBlank(idParam.getQueryParameterQualifier())) {
+						throw new MethodNotAllowedException(
+								Msg.code(1322) + "The parameter " + theParamName + idParam.getQueryParameterQualifier()
+										+ " is not supported in patient compartment mode");
+					}
+					if (idParam instanceof ReferenceParam) {
+						String chain = ((ReferenceParam) idParam).getChain();
+						if (chain != null) {
+							throw new MethodNotAllowedException(Msg.code(1323) + "The parameter " + theParamName + "."
+									+ chain + " is not supported in patient compartment mode");
+						}
+					}
+
+					IdType id = new IdType(idParam.getValueAsQueryToken(myFhirContext));
+					if (!id.hasResourceType() || id.getResourceType().equals(theResourceType)) {
+						idParts.add(id.getIdPart());
 					}
 				}
-
-				IdType id = new IdType(idParam.getValueAsQueryToken(myFhirContext));
-				if (!id.hasResourceType() || id.getResourceType().equals(theResourceType)) {
-					idPart = id.getIdPart();
-				}
-			} else if (idParamOrList.size() > 1) {
-				throw new MethodNotAllowedException(Msg.code(1324) + "Multiple values for parameter " + theParamName
-						+ " is not supported in patient compartment mode");
 			}
-		} else if (idParamAndList != null && idParamAndList.size() > 1) {
-			throw new MethodNotAllowedException(Msg.code(1325) + "Multiple values for parameter " + theParamName
+		}
+
+		if (theExpectOnlyOneBool && idParts.size() > 1) {
+			throw new MethodNotAllowedException(Msg.code(1324) + "Multiple values for parameter " + theParamName
 					+ " is not supported in patient compartment mode");
 		}
-		return idPart;
+
+		return idParts;
 	}
 
 	/**

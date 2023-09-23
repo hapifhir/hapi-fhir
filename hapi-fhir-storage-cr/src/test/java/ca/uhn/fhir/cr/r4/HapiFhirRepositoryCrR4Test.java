@@ -1,6 +1,5 @@
 package ca.uhn.fhir.cr.r4;
 
-import static ca.uhn.fhir.rest.param.TokenParamModifier.TEXT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -8,7 +7,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.param.*;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import org.hl7.fhir.r4.model.Bundle;
@@ -23,7 +21,7 @@ import ca.uhn.fhir.cr.repo.HapiFhirRepository;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.api.Constants;
 
-public class HapiFhirRepositoryCrR4Test extends BaseCrR4TestServer {
+public class HapiFhirRepositoryR4Test extends BaseCrR4TestServer {
 
 	@Autowired
 	RestfulServer myRestfulServer;

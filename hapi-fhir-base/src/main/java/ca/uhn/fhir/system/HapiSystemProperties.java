@@ -36,6 +36,8 @@ public final class HapiSystemProperties {
 	static final String TEST_MODE = "test";
 	static final String UNIT_TEST_MODE = "unit_test_mode";
 	static final long DEFAULT_TEST_SYSTEM_PROP_VALIDATION_RESOURCE_CACHES_MS = 10 * DateUtils.MILLIS_PER_SECOND;
+	static final String PREVENT_INVALIDATING_CONDITIONAL_MATCH_CRITERIA =
+			"hapi.storage.prevent_invalidating_conditional_match_criteria";
 
 	private HapiSystemProperties() {}
 
@@ -157,5 +159,10 @@ public final class HapiSystemProperties {
 
 	public static boolean isSuppressHapiFhirVersionLogEnabled() {
 		return Boolean.parseBoolean(System.getProperty(SUPPRESS_HAPI_FHIR_VERSION_LOG));
+	}
+
+	public static boolean isPreventInvalidatingConditionalMatchCriteria() {
+		return Boolean.parseBoolean(System.getProperty(
+				HapiSystemProperties.PREVENT_INVALIDATING_CONDITIONAL_MATCH_CRITERIA, Boolean.FALSE.toString()));
 	}
 }

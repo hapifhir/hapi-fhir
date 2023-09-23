@@ -12,6 +12,7 @@ import org.hl7.fhir.dstu3.model.ExpressionNode;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.TypeDetails;
 import org.hl7.fhir.dstu3.utils.FHIRPathEngine;
+import org.hl7.fhir.dstu3.utils.FHIRPathUtilityClasses.FunctionDetails;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.exceptions.PathEngineException;
 import org.hl7.fhir.instance.model.api.IBase;
