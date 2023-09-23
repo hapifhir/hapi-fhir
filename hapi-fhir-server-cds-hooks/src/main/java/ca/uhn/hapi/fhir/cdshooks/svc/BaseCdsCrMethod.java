@@ -20,6 +20,7 @@
 package ca.uhn.hapi.fhir.cdshooks.svc;
 
 import ca.uhn.fhir.context.ConfigurationException;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.hapi.fhir.cdshooks.api.ICdsMethod;
@@ -40,7 +41,7 @@ abstract class BaseCdsCrMethod implements ICdsMethod {
 			if (e.getCause() != null && e.getCause() instanceof BaseServerResponseException) {
 				throw (BaseServerResponseException) e.getCause();
 			}
-			throw new ConfigurationException("Failed to invoke $apply on " + theServiceId, e);
+			throw new ConfigurationException(Msg.code(2434) + "Failed to invoke $apply on " + theServiceId, e);
 		}
 	}
 }

@@ -58,10 +58,10 @@ import static org.opencds.cqf.fhir.utility.dstu3.Parameters.parameters;
 import static org.opencds.cqf.fhir.utility.dstu3.Parameters.part;
 
 public class CdsCrServiceDstu3 implements ICdsCrService {
-	private final RequestDetails myRequestDetails;
-	private final Repository myRepository;
-	private CarePlan myResponse;
-	private CdsServiceResponseJson myServiceResponse;
+	protected final RequestDetails myRequestDetails;
+	protected final Repository myRepository;
+	protected CarePlan myResponse;
+	protected CdsServiceResponseJson myServiceResponse;
 
 	public CdsCrServiceDstu3(RequestDetails theRequestDetails, Repository theRepository) {
 		myRequestDetails = theRequestDetails;
@@ -116,12 +116,12 @@ public class CdsCrServiceDstu3 implements ICdsCrService {
 		return parameters;
 	}
 
-	private String getTokenType(CdsServiceRequestAuthorizationJson theJson) {
+	protected String getTokenType(CdsServiceRequestAuthorizationJson theJson) {
 		String tokenType = theJson.getTokenType();
 		return tokenType == null || tokenType.isEmpty() ? "Bearer" : tokenType;
 	}
 
-	private Parameters addCqlParameters(
+	protected Parameters addCqlParameters(
 			Parameters theParameters, IBaseResource theContextResource, String theParamName) {
 		// We are making the assumption that a Library created for a hook will provide parameters for the fields
 		// specified for the hook
@@ -143,7 +143,7 @@ public class CdsCrServiceDstu3 implements ICdsCrService {
 		return theParameters;
 	}
 
-	private Map<String, Resource> getResourcesFromBundle(Bundle theBundle) {
+	protected Map<String, Resource> getResourcesFromBundle(Bundle theBundle) {
 		// using HashMap to avoid duplicates
 		Map<String, Resource> resourceMap = new HashMap<>();
 		theBundle
@@ -152,7 +152,7 @@ public class CdsCrServiceDstu3 implements ICdsCrService {
 		return resourceMap;
 	}
 
-	private Bundle getPrefetchResources(CdsServiceRequestJson theJson) {
+	protected Bundle getPrefetchResources(CdsServiceRequestJson theJson) {
 		// using HashMap to avoid duplicates
 		Map<String, Resource> resourceMap = new HashMap<>();
 		Bundle prefetchResources = new Bundle();
@@ -188,7 +188,7 @@ public class CdsCrServiceDstu3 implements ICdsCrService {
 		return serviceResponse;
 	}
 
-	private List<CdsServiceResponseLinkJson> resolvePlanLinks(PlanDefinition thePlanDefinition) {
+	protected List<CdsServiceResponseLinkJson> resolvePlanLinks(PlanDefinition thePlanDefinition) {
 		List<CdsServiceResponseLinkJson> links = new ArrayList<>();
 		// links - listed on each card
 		if (thePlanDefinition.hasRelatedArtifact()) {
@@ -209,7 +209,7 @@ public class CdsCrServiceDstu3 implements ICdsCrService {
 		return links;
 	}
 
-	private CdsServiceResponseCardJson resolveAction(
+	protected CdsServiceResponseCardJson resolveAction(
 			RequestGroup.RequestGroupActionComponent theAction, List<CdsServiceResponseLinkJson> theLinks) {
 		CdsServiceResponseCardJson card = new CdsServiceResponseCardJson()
 				.setSummary(theAction.getTitle())
@@ -233,7 +233,7 @@ public class CdsCrServiceDstu3 implements ICdsCrService {
 		return card;
 	}
 
-	private void resolveSystemAction(RequestGroup.RequestGroupActionComponent theAction) {
+	protected void resolveSystemAction(RequestGroup.RequestGroupActionComponent theAction) {
 		if (theAction.hasType()
 				&& theAction.getType().hasCode()
 				&& !theAction.getType().getCode().equals("fire-event")) {
@@ -243,7 +243,7 @@ public class CdsCrServiceDstu3 implements ICdsCrService {
 		}
 	}
 
-	private CdsServiceResponseCardSourceJson resolveSource(RequestGroup.RequestGroupActionComponent theAction) {
+	protected CdsServiceResponseCardSourceJson resolveSource(RequestGroup.RequestGroupActionComponent theAction) {
 		RelatedArtifact documentation = theAction.getDocumentationFirstRep();
 		CdsServiceResponseCardSourceJson source = new CdsServiceResponseCardSourceJson()
 				.setLabel(documentation.getDisplay())
@@ -256,7 +256,7 @@ public class CdsCrServiceDstu3 implements ICdsCrService {
 		return source;
 	}
 
-	private CdsServiceResponseSuggestionJson resolveSuggestion(RequestGroup.RequestGroupActionComponent theAction) {
+	protected CdsServiceResponseSuggestionJson resolveSuggestion(RequestGroup.RequestGroupActionComponent theAction) {
 		CdsServiceResponseSuggestionJson suggestion = new CdsServiceResponseSuggestionJson()
 				.setLabel(theAction.getTitle())
 				.setUuid(theAction.getId());
@@ -265,7 +265,7 @@ public class CdsCrServiceDstu3 implements ICdsCrService {
 		return suggestion;
 	}
 
-	private CdsServiceResponseSuggestionActionJson resolveSuggestionAction(
+	protected CdsServiceResponseSuggestionActionJson resolveSuggestionAction(
 			RequestGroup.RequestGroupActionComponent theAction) {
 		CdsServiceResponseSuggestionActionJson suggestionAction =
 				new CdsServiceResponseSuggestionActionJson().setDescription(theAction.getDescription());
@@ -282,7 +282,7 @@ public class CdsCrServiceDstu3 implements ICdsCrService {
 		return suggestionAction;
 	}
 
-	private IBaseResource resolveResource(Reference theReference) {
+	protected IBaseResource resolveResource(Reference theReference) {
 		return myResponse.getContained().stream()
 				.filter(resource -> resource.getId().equals(theReference.getReference()))
 				.findFirst()

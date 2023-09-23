@@ -14,6 +14,7 @@ import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.codesystems.ActionType;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
@@ -60,6 +61,7 @@ public class CdsCrServiceR4Test extends BaseCrTest {
 	}
 
 	@Test
+	@Disabled // Disabled until the CDS on FHIR specification details how to map system actions.
 	public void testSystemActionResponse() {
 		final Bundle bundle = ClasspathUtil.loadResource(myFhirContext, Bundle.class, "Bundle-DischargeInstructionsPlan-Content.json");
 		final Repository repository = new InMemoryFhirRepository(myFhirContext, bundle);

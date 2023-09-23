@@ -38,12 +38,12 @@ import java.util.List;
 
 public class CrDiscoveryServiceDstu3 implements ICrDiscoveryService {
 
-	private final String PATIENT_ID_CONTEXT = "{{context.patientId}}";
-	private final int DEFAULT_MAX_URI_LENGTH = 8000;
-	private int myMaxUriLength;
+	protected final String PATIENT_ID_CONTEXT = "{{context.patientId}}";
+	protected final int DEFAULT_MAX_URI_LENGTH = 8000;
+	protected int myMaxUriLength;
 
-	private Repository myRepository;
-	private final IIdType myPlanDefinitionId;
+	protected Repository myRepository;
+	protected final IIdType myPlanDefinitionId;
 
 	public CrDiscoveryServiceDstu3(IIdType thePlanDefinitionId, Repository theRepository) {
 		myPlanDefinitionId = thePlanDefinitionId;
@@ -68,7 +68,7 @@ public class CrDiscoveryServiceDstu3 implements ICrDiscoveryService {
 				CdsCrUtils.readPlanDefinitionFromRepository(FhirVersionEnum.DSTU3, myRepository, myPlanDefinitionId));
 	}
 
-	private CdsServiceJson resolveService(IBaseResource thePlanDefinition) {
+	protected CdsServiceJson resolveService(IBaseResource thePlanDefinition) {
 		if (thePlanDefinition instanceof PlanDefinition) {
 			PlanDefinition planDef = (PlanDefinition) thePlanDefinition;
 			return new CrDiscoveryElementDstu3(planDef, getPrefetchUrlList(planDef)).getCdsServiceJson();
@@ -145,7 +145,7 @@ public class CrDiscoveryServiceDstu3 implements ICrDiscoveryService {
 		return result;
 	}
 
-	private StringBuilder getCodesStringBuilder(
+	protected StringBuilder getCodesStringBuilder(
 			List<String> theList, StringBuilder theCodes, String theSystem, String theCode) {
 		String codeToken = theSystem + "|" + theCode;
 		int postAppendLength = theCodes.length() + codeToken.length();
@@ -222,7 +222,7 @@ public class CrDiscoveryServiceDstu3 implements ICrDiscoveryService {
 		return prefetchList;
 	}
 
-	private String mapCodePathToSearchParam(String theDataType, String thePath) {
+	protected String mapCodePathToSearchParam(String theDataType, String thePath) {
 		switch (theDataType) {
 			case "MedicationAdministration":
 				if (thePath.equals("medication")) return "code";

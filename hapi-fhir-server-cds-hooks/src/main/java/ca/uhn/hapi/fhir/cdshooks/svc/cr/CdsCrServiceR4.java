@@ -20,6 +20,7 @@
 package ca.uhn.hapi.fhir.cdshooks.svc.cr;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.hapi.fhir.cdshooks.api.json.*;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -58,10 +59,10 @@ import static org.opencds.cqf.fhir.utility.r4.Parameters.parameters;
 import static org.opencds.cqf.fhir.utility.r4.Parameters.part;
 
 public class CdsCrServiceR4 implements ICdsCrService {
-	private final RequestDetails myRequestDetails;
-	private final Repository myRepository;
-	private Bundle myResponseBundle;
-	private CdsServiceResponseJson myServiceResponse;
+	protected final RequestDetails myRequestDetails;
+	protected final Repository myRepository;
+	protected Bundle myResponseBundle;
+	protected CdsServiceResponseJson myServiceResponse;
 
 	public CdsCrServiceR4(RequestDetails theRequestDetails, Repository theRepository) {
 		myRequestDetails = theRequestDetails;
@@ -116,12 +117,12 @@ public class CdsCrServiceR4 implements ICdsCrService {
 		return parameters;
 	}
 
-	private String getTokenType(CdsServiceRequestAuthorizationJson theJson) {
+	protected String getTokenType(CdsServiceRequestAuthorizationJson theJson) {
 		String tokenType = theJson.getTokenType();
 		return tokenType == null || tokenType.isEmpty() ? "Bearer" : tokenType;
 	}
 
-	private Parameters addCqlParameters(
+	protected Parameters addCqlParameters(
 			Parameters theParameters, IBaseResource theContextResource, String theParamName) {
 		// We are making the assumption that a Library created for a hook will provide parameters for the fields
 		// specified for the hook
@@ -143,7 +144,7 @@ public class CdsCrServiceR4 implements ICdsCrService {
 		return theParameters;
 	}
 
-	private Map<String, Resource> getResourcesFromBundle(Bundle theBundle) {
+	protected Map<String, Resource> getResourcesFromBundle(Bundle theBundle) {
 		// using HashMap to avoid duplicates
 		Map<String, Resource> resourceMap = new HashMap<>();
 		theBundle
@@ -152,7 +153,7 @@ public class CdsCrServiceR4 implements ICdsCrService {
 		return resourceMap;
 	}
 
-	private Bundle getPrefetchResources(CdsServiceRequestJson theJson) {
+	protected Bundle getPrefetchResources(CdsServiceRequestJson theJson) {
 		// using HashMap to avoid duplicates
 		Map<String, Resource> resourceMap = new HashMap<>();
 		Bundle prefetchResources = new Bundle();
@@ -188,7 +189,7 @@ public class CdsCrServiceR4 implements ICdsCrService {
 		return myServiceResponse;
 	}
 
-	private List<CdsServiceResponseLinkJson> resolvePlanLinks(PlanDefinition thePlanDefinition) {
+	protected List<CdsServiceResponseLinkJson> resolvePlanLinks(PlanDefinition thePlanDefinition) {
 		List<CdsServiceResponseLinkJson> links = new ArrayList<>();
 		// links - listed on each card
 		if (thePlanDefinition.hasRelatedArtifact()) {
@@ -209,7 +210,7 @@ public class CdsCrServiceR4 implements ICdsCrService {
 		return links;
 	}
 
-	private CdsServiceResponseCardJson resolveAction(
+	protected CdsServiceResponseCardJson resolveAction(
 			RequestGroup.RequestGroupActionComponent theAction, List<CdsServiceResponseLinkJson> theLinks) {
 		CdsServiceResponseCardJson card = new CdsServiceResponseCardJson()
 				.setSummary(theAction.getTitle())
@@ -217,25 +218,7 @@ public class CdsCrServiceR4 implements ICdsCrService {
 				.setLinks(theLinks);
 
 		if (theAction.hasPriority()) {
-			CdsServiceIndicatorEnum indicator;
-			switch (theAction.getPriority().toCode()) {
-				case "routine":
-					indicator = CdsServiceIndicatorEnum.INFO;
-					break;
-				case "urgent":
-					indicator = CdsServiceIndicatorEnum.WARNING;
-					break;
-				case "stat":
-					indicator = CdsServiceIndicatorEnum.CRITICAL;
-					break;
-				default:
-					indicator = null;
-					break;
-			}
-			if (indicator == null) {
-				throwInvalidPriority(theAction.getPriority().toCode());
-			}
-			card.setIndicator(indicator);
+			card.setIndicator(resolveIndicator(theAction.getPriority().toCode()));
 		}
 
 		if (theAction.hasDocumentation()) {
@@ -255,7 +238,31 @@ public class CdsCrServiceR4 implements ICdsCrService {
 		return card;
 	}
 
-	private void resolveSystemAction(RequestGroup.RequestGroupActionComponent theAction) {
+	protected CdsServiceIndicatorEnum resolveIndicator(String theCode) {
+		CdsServiceIndicatorEnum indicator;
+		switch (theCode) {
+			case "routine":
+				indicator = CdsServiceIndicatorEnum.INFO;
+				break;
+			case "urgent":
+				indicator = CdsServiceIndicatorEnum.WARNING;
+				break;
+			case "stat":
+				indicator = CdsServiceIndicatorEnum.CRITICAL;
+				break;
+			default:
+				indicator = null;
+				break;
+		}
+		if (indicator == null) {
+			// Code 2435-2440 are reserved for this error message across versions
+			throw new IllegalArgumentException(Msg.code(2435) + "Invalid priority code: " + theCode);
+		}
+
+		return indicator;
+	}
+
+	protected void resolveSystemAction(RequestGroup.RequestGroupActionComponent theAction) {
 		if (theAction.hasType()
 				&& theAction.getType().hasCoding()
 				&& theAction.getType().getCodingFirstRep().hasCode()
@@ -266,7 +273,7 @@ public class CdsCrServiceR4 implements ICdsCrService {
 		}
 	}
 
-	private CdsServiceResponseCardSourceJson resolveSource(RequestGroup.RequestGroupActionComponent theAction) {
+	protected CdsServiceResponseCardSourceJson resolveSource(RequestGroup.RequestGroupActionComponent theAction) {
 		RelatedArtifact documentation = theAction.getDocumentationFirstRep();
 		CdsServiceResponseCardSourceJson source = new CdsServiceResponseCardSourceJson()
 				.setLabel(documentation.getDisplay())
@@ -279,7 +286,7 @@ public class CdsCrServiceR4 implements ICdsCrService {
 		return source;
 	}
 
-	private CdsServiceResponseSuggestionJson resolveSuggestion(RequestGroup.RequestGroupActionComponent theAction) {
+	protected CdsServiceResponseSuggestionJson resolveSuggestion(RequestGroup.RequestGroupActionComponent theAction) {
 		CdsServiceResponseSuggestionJson suggestion = new CdsServiceResponseSuggestionJson()
 				.setLabel(theAction.getTitle())
 				.setUuid(theAction.getId());
@@ -288,7 +295,7 @@ public class CdsCrServiceR4 implements ICdsCrService {
 		return suggestion;
 	}
 
-	private CdsServiceResponseSuggestionActionJson resolveSuggestionAction(
+	protected CdsServiceResponseSuggestionActionJson resolveSuggestionAction(
 			RequestGroup.RequestGroupActionComponent theAction) {
 		CdsServiceResponseSuggestionActionJson suggestionAction =
 				new CdsServiceResponseSuggestionActionJson().setDescription(theAction.getDescription());
@@ -310,7 +317,7 @@ public class CdsCrServiceR4 implements ICdsCrService {
 		return suggestionAction;
 	}
 
-	private IBaseResource resolveResource(Reference theReference) {
+	protected IBaseResource resolveResource(Reference theReference) {
 		String reference = theReference.getReference();
 		String[] split = reference.split("/");
 		String id = reference.contains("/") ? split[1] : reference;

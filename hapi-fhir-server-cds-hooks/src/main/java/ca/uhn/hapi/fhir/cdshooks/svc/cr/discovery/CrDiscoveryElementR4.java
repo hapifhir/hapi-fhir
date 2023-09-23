@@ -27,8 +27,8 @@ import org.hl7.fhir.r4.model.TriggerDefinition;
 import java.util.stream.Collectors;
 
 public class CrDiscoveryElementR4 implements ICrDiscoveryElement {
-	private PlanDefinition myPlanDefinition;
-	private PrefetchUrlList myPrefetchUrlList;
+	protected PlanDefinition myPlanDefinition;
+	protected PrefetchUrlList myPrefetchUrlList;
 
 	public CrDiscoveryElementR4(PlanDefinition thePlanDefinition, PrefetchUrlList thePrefetchUrlList) {
 		myPlanDefinition = thePlanDefinition;

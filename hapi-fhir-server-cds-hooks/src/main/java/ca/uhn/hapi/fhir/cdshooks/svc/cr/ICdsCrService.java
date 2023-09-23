@@ -80,8 +80,4 @@ public interface ICdsCrService {
 				return null;
 		}
 	}
-
-	default void throwInvalidPriority(String theCode) {
-		throw new IllegalArgumentException(Msg.code(2434) + "Invalid priority code: " + theCode);
-	}
 }
