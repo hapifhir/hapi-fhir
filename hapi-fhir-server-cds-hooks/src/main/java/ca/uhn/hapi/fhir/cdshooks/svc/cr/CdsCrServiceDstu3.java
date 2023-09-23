@@ -225,9 +225,10 @@ public class CdsCrServiceDstu3 implements ICdsCrService {
 			theAction.getAction().forEach(action -> resolveSuggestion(action));
 		}
 
-		if (theAction.hasType() && theAction.hasResource()) {
-			resolveSystemAction(theAction);
-		}
+		// Leaving this out until the spec details how to map system actions.
+//		if (theAction.hasType() && theAction.hasResource()) {
+//			resolveSystemAction(theAction);
+//		}
 
 		return card;
 	}
