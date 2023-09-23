@@ -36,43 +36,25 @@ import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import com.fasterxml.jackson.core.JsonProcessingException;
+import co.elastic.clients.elasticsearch.ElasticsearchClient;
+import co.elastic.clients.elasticsearch._types.FieldValue;
+import co.elastic.clients.elasticsearch._types.Result;
+import co.elastic.clients.elasticsearch._types.aggregations.Aggregation;
+import co.elastic.clients.elasticsearch._types.query_dsl.BoolQuery;
+import co.elastic.clients.elasticsearch._types.query_dsl.Query;
+import co.elastic.clients.elasticsearch._types.query_dsl.TermQuery;
+import co.elastic.clients.elasticsearch.core.IndexRequest;
+import co.elastic.clients.elasticsearch.core.IndexResponse;
+import co.elastic.clients.elasticsearch.core.SearchRequest;
+import co.elastic.clients.elasticsearch.core.SearchResponse;
+import co.elastic.clients.elasticsearch.core.search.Hit;
+import co.elastic.clients.elasticsearch.indices.ExistsRequest;
+import co.elastic.clients.json.JsonData;
+import co.elastic.clients.util.NamedValue;
+import co.elastic.clients.util.ObjectBuilder;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.Validate;
-import org.elasticsearch.action.DocWriteResponse;
-import org.elasticsearch.action.admin.indices.refresh.RefreshRequest;
-import org.elasticsearch.action.index.IndexRequest;
-import org.elasticsearch.action.index.IndexResponse;
-import org.elasticsearch.action.search.SearchRequest;
-import org.elasticsearch.action.search.SearchResponse;
-import org.elasticsearch.client.RequestOptions;
-import org.elasticsearch.client.RestHighLevelClient;
-import org.elasticsearch.client.indices.CreateIndexRequest;
-import org.elasticsearch.client.indices.CreateIndexResponse;
-import org.elasticsearch.client.indices.GetIndexRequest;
-import org.elasticsearch.index.query.BoolQueryBuilder;
-import org.elasticsearch.index.query.MatchQueryBuilder;
-import org.elasticsearch.index.query.QueryBuilders;
-import org.elasticsearch.index.query.RangeQueryBuilder;
-import org.elasticsearch.index.reindex.DeleteByQueryRequest;
-import org.elasticsearch.search.SearchHit;
-import org.elasticsearch.search.SearchHits;
-import org.elasticsearch.search.aggregations.AggregationBuilder;
-import org.elasticsearch.search.aggregations.AggregationBuilders;
-import org.elasticsearch.search.aggregations.Aggregations;
-import org.elasticsearch.search.aggregations.BucketOrder;
-import org.elasticsearch.search.aggregations.bucket.composite.CompositeAggregationBuilder;
-import org.elasticsearch.search.aggregations.bucket.composite.CompositeValuesSourceBuilder;
-import org.elasticsearch.search.aggregations.bucket.composite.ParsedComposite;
-import org.elasticsearch.search.aggregations.bucket.composite.TermsValuesSourceBuilder;
-import org.elasticsearch.search.aggregations.bucket.terms.ParsedTerms;
-import org.elasticsearch.search.aggregations.bucket.terms.Terms;
-import org.elasticsearch.search.aggregations.bucket.terms.TermsAggregationBuilder;
-import org.elasticsearch.search.aggregations.metrics.ParsedTopHits;
-import org.elasticsearch.search.builder.SearchSourceBuilder;
-import org.elasticsearch.search.sort.SortOrder;
-import org.elasticsearch.xcontent.XContentType;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -81,8 +63,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.StringReader;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.function.Function;
@@ -132,7 +114,7 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 
 	private static final String OBSERVATION_RESOURCE_NAME = "Observation";
 
-	private final RestHighLevelClient myRestHighLevelClient;
+	private final ElasticsearchClient myRestHighLevelClient;
 
 	private final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -155,6 +137,7 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 
 	public ElasticsearchSvcImpl(
 			String theProtocol, String theHostname, @Nullable String theUsername, @Nullable String thePassword) {
+
 		myRestHighLevelClient = ElasticsearchRestClientFactory.createElasticsearchHighLevelRestClient(
 				theProtocol, theHostname, theUsername, thePassword);
 
@@ -200,16 +183,15 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 	}
 
 	private boolean createIndex(String theIndexName, String theMapping) throws IOException {
-		CreateIndexRequest request = new CreateIndexRequest(theIndexName);
-		request.source(theMapping, XContentType.JSON);
-		CreateIndexResponse createIndexResponse =
-				myRestHighLevelClient.indices().create(request, RequestOptions.DEFAULT);
-		return createIndexResponse.isAcknowledged();
+		return myRestHighLevelClient
+				.indices()
+				.create(cir -> cir.index(theIndexName).withJson(new StringReader(theMapping)))
+				.acknowledged();
 	}
 
 	private boolean indexExists(String theIndexName) throws IOException {
-		GetIndexRequest request = new GetIndexRequest(theIndexName);
-		return myRestHighLevelClient.indices().exists(request, RequestOptions.DEFAULT);
+		ExistsRequest request = new ExistsRequest.Builder().index(theIndexName).build();
+		return myRestHighLevelClient.indices().exists(request).value();
 	}
 
 	@Override
@@ -248,11 +230,12 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 						subject,
 						theSearchParameterMap,
 						theFhirContext,
+						OBSERVATION_SUBJECT_FIELD_NAME,
 						createObservationSubjectAggregationBuilder(
 								getMaxParameter(theSearchParameterMap), topHitsInclude));
 				ourLog.debug("ElasticSearch query: {}", myLastNRequest.source().toString());
 				try {
-					SearchResponse lastnResponse = executeSearchRequest(myLastNRequest);
+					SearchResponse<ObservationJson> lastnResponse = executeSearchRequest(myLastNRequest);
 					searchResults.addAll(buildObservationList(
 							lastnResponse, setValue, theSearchParameterMap, theFhirContext, theMaxResultsToFetch));
 				} catch (IOException theE) {
@@ -261,12 +244,14 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 			}
 		} else {
 			SearchRequest myLastNRequest = buildObservationsSearchRequest(
+					null,
 					theSearchParameterMap,
 					theFhirContext,
+					GROUP_BY_CODE,
 					createObservationCodeAggregationBuilder(getMaxParameter(theSearchParameterMap), topHitsInclude));
 			ourLog.debug("ElasticSearch query: {}", myLastNRequest.source().toString());
 			try {
-				SearchResponse lastnResponse = executeSearchRequest(myLastNRequest);
+				SearchResponse<ObservationJson> lastnResponse = executeSearchRequest(myLastNRequest);
 				searchResults.addAll(buildObservationList(
 						lastnResponse, setValue, theSearchParameterMap, theFhirContext, theMaxResultsToFetch));
 			} catch (IOException theE) {
@@ -319,45 +304,62 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 		return referenceList;
 	}
 
-	private CompositeAggregationBuilder createObservationSubjectAggregationBuilder(
+	private Function<Aggregation.Builder, ObjectBuilder<Aggregation>> createObservationSubjectAggregationBuilder(
 			Integer theMaxNumberObservationsPerCode, String[] theTopHitsInclude) {
-		CompositeValuesSourceBuilder<?> subjectValuesBuilder =
-				new TermsValuesSourceBuilder(OBSERVATION_SUBJECT_FIELD_NAME).field(OBSERVATION_SUBJECT_FIELD_NAME);
-		List<CompositeValuesSourceBuilder<?>> compositeAggSubjectSources = new ArrayList<>();
-		compositeAggSubjectSources.add(subjectValuesBuilder);
-		CompositeAggregationBuilder compositeAggregationSubjectBuilder =
-				new CompositeAggregationBuilder(GROUP_BY_SUBJECT, compositeAggSubjectSources);
-		compositeAggregationSubjectBuilder.subAggregation(
-				createObservationCodeAggregationBuilder(theMaxNumberObservationsPerCode, theTopHitsInclude));
-		compositeAggregationSubjectBuilder.size(10000);
 
-		return compositeAggregationSubjectBuilder;
+		Function<Aggregation.Builder, ObjectBuilder<Aggregation>> retVal = ab -> {
+			return ab.terms(t -> t.field(OBSERVATION_SUBJECT_FIELD_NAME))
+					.aggregations(
+							GROUP_BY_CODE,
+							createObservationCodeAggregationBuilder(
+									theMaxNumberObservationsPerCode, theTopHitsInclude));
+		};
+		return retVal;
+
+		//		CompositeValuesSourceBuilder<?> subjectValuesBuilder =
+		//				new TermsValuesSourceBuilder(OBSERVATION_SUBJECT_FIELD_NAME).field(OBSERVATION_SUBJECT_FIELD_NAME);
+		//		List<CompositeValuesSourceBuilder<?>> compositeAggSubjectSources = new ArrayList<>();
+		//		compositeAggSubjectSources.add(subjectValuesBuilder);
+		//		CompositeAggregationBuilder compositeAggregationSubjectBuilder =
+		//				new CompositeAggregationBuilder(GROUP_BY_SUBJECT, compositeAggSubjectSources);
+		//		compositeAggregationSubjectBuilder.subAggregation(
+		//				createObservationCodeAggregationBuilder(theMaxNumberObservationsPerCode, theTopHitsInclude));
+		//		compositeAggregationSubjectBuilder.size(10000);
+		//
+		//		return compositeAggregationSubjectBuilder;
 	}
 
-	private TermsAggregationBuilder createObservationCodeAggregationBuilder(
+	private Function<Aggregation.Builder, ObjectBuilder<Aggregation>> createObservationCodeAggregationBuilder(
 			int theMaxNumberObservationsPerCode, String[] theTopHitsInclude) {
-		TermsAggregationBuilder observationCodeCodeAggregationBuilder =
-				new TermsAggregationBuilder(GROUP_BY_CODE).field(OBSERVATION_CODEVALUE_FIELD_NAME);
-		observationCodeCodeAggregationBuilder.order(BucketOrder.key(true));
-		// Top Hits Aggregation
-		observationCodeCodeAggregationBuilder.subAggregation(AggregationBuilders.topHits(MOST_RECENT_EFFECTIVE)
-				.sort(OBSERVATION_EFFECTIVEDTM_FIELD_NAME, SortOrder.DESC)
-				.fetchSource(theTopHitsInclude, null)
-				.size(theMaxNumberObservationsPerCode));
-		observationCodeCodeAggregationBuilder.size(10000);
-		TermsAggregationBuilder observationCodeSystemAggregationBuilder =
-				new TermsAggregationBuilder(GROUP_BY_SYSTEM).field(OBSERVATION_CODESYSTEM_FIELD_NAME);
-		observationCodeSystemAggregationBuilder.order(BucketOrder.key(true));
-		observationCodeSystemAggregationBuilder.subAggregation(observationCodeCodeAggregationBuilder);
-		return observationCodeSystemAggregationBuilder;
+		Function<Aggregation.Builder, ObjectBuilder<Aggregation>> retVal = ab -> {
+			NamedValue<co.elastic.clients.elasticsearch._types.SortOrder> order = null;
+			return ab.terms(t -> t.field(OBSERVATION_CODEVALUE_FIELD_NAME).order(order));
+		};
+
+		//		TermsAggregationBuilder observationCodeCodeAggregationBuilder =
+		//				new TermsAggregationBuilder(GROUP_BY_CODE).field(OBSERVATION_CODEVALUE_FIELD_NAME);
+		//		observationCodeCodeAggregationBuilder.order(BucketOrder.key(true));
+		//		// Top Hits Aggregation
+		//		observationCodeCodeAggregationBuilder.subAggregation(AggregationBuilders.topHits(MOST_RECENT_EFFECTIVE)
+		//				.sort(OBSERVATION_EFFECTIVEDTM_FIELD_NAME, SortOrder.DESC)
+		//				.fetchSource(theTopHitsInclude, null)
+		//				.size(theMaxNumberObservationsPerCode));
+		//		observationCodeCodeAggregationBuilder.size(10000);
+		//		TermsAggregationBuilder observationCodeSystemAggregationBuilder =
+		//				new TermsAggregationBuilder(GROUP_BY_SYSTEM).field(OBSERVATION_CODESYSTEM_FIELD_NAME);
+		//		observationCodeSystemAggregationBuilder.order(BucketOrder.key(true));
+		//		observationCodeSystemAggregationBuilder.subAggregation(observationCodeCodeAggregationBuilder);
+		//		//		return observationCodeSystemAggregationBuilder;
+
+		return retVal;
 	}
 
 	private SearchResponse executeSearchRequest(SearchRequest searchRequest) throws IOException {
-		return myRestHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
+		return myRestHighLevelClient.search(searchRequest, Object.class);
 	}
 
 	private <T> List<T> buildObservationList(
-			SearchResponse theSearchResponse,
+			SearchResponse<ObservationJson> theSearchResponse,
 			Function<ObservationJson, T> setValue,
 			SearchParameterMap theSearchParameterMap,
 			FhirContext theFhirContext,
@@ -366,123 +368,111 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 		List<T> theObservationList = new ArrayList<>();
 		if (theSearchParameterMap.containsKey(LastNParameterHelper.getPatientParamName(theFhirContext))
 				|| theSearchParameterMap.containsKey(LastNParameterHelper.getSubjectParamName(theFhirContext))) {
-			for (ParsedComposite.ParsedBucket subjectBucket : getSubjectBuckets(theSearchResponse)) {
-				if (theMaxResultsToFetch != null && theObservationList.size() >= theMaxResultsToFetch) {
-					break;
-				}
-				for (Terms.Bucket observationCodeBucket : getObservationCodeBuckets(subjectBucket)) {
-					if (theMaxResultsToFetch != null && theObservationList.size() >= theMaxResultsToFetch) {
-						break;
-					}
-					for (SearchHit lastNMatch : getLastNMatches(observationCodeBucket)) {
-						if (theMaxResultsToFetch != null && theObservationList.size() >= theMaxResultsToFetch) {
-							break;
-						}
-						String indexedObservation = lastNMatch.getSourceAsString();
-						ObservationJson observationJson =
-								objectMapper.readValue(indexedObservation, ObservationJson.class);
-						theObservationList.add(setValue.apply(observationJson));
-					}
-				}
-			}
+			//			for (ParsedComposite.ParsedBucket subjectBucket : getSubjectBuckets(theSearchResponse)) {
+			//				if (theMaxResultsToFetch != null && theObservationList.size() >= theMaxResultsToFetch) {
+			//					break;
+			//				}
+			//				for (Terms.Bucket observationCodeBucket : getObservationCodeBuckets(subjectBucket)) {
+			//					if (theMaxResultsToFetch != null && theObservationList.size() >= theMaxResultsToFetch) {
+			//						break;
+			//					}
+			//					for (SearchHit lastNMatch : getLastNMatches(observationCodeBucket)) {
+			//						if (theMaxResultsToFetch != null && theObservationList.size() >= theMaxResultsToFetch) {
+			//							break;
+			//						}
+			//						String indexedObservation = lastNMatch.getSourceAsString();
+			//						ObservationJson observationJson =
+			//								objectMapper.readValue(indexedObservation, ObservationJson.class);
+			//						theObservationList.add(setValue.apply(observationJson));
+			//					}
+			//				}
+			//			}
 		} else {
-			for (Terms.Bucket observationCodeBucket : getObservationCodeBuckets(theSearchResponse)) {
-				if (theMaxResultsToFetch != null && theObservationList.size() >= theMaxResultsToFetch) {
-					break;
-				}
-				for (SearchHit lastNMatch : getLastNMatches(observationCodeBucket)) {
-					if (theMaxResultsToFetch != null && theObservationList.size() >= theMaxResultsToFetch) {
-						break;
-					}
-					String indexedObservation = lastNMatch.getSourceAsString();
-					ObservationJson observationJson = objectMapper.readValue(indexedObservation, ObservationJson.class);
-					theObservationList.add(setValue.apply(observationJson));
-				}
-			}
+			//			for (Terms.Bucket observationCodeBucket : getObservationCodeBuckets(theSearchResponse)) {
+			//				if (theMaxResultsToFetch != null && theObservationList.size() >= theMaxResultsToFetch) {
+			//					break;
+			//				}
+			//				for (SearchHit lastNMatch : getLastNMatches(observationCodeBucket)) {
+			//					if (theMaxResultsToFetch != null && theObservationList.size() >= theMaxResultsToFetch) {
+			//						break;
+			//					}
+			//					String indexedObservation = lastNMatch.getSourceAsString();
+			//					ObservationJson observationJson = objectMapper.readValue(indexedObservation, ObservationJson.class);
+			//					theObservationList.add(setValue.apply(observationJson));
+			//				}
+			//			}
 		}
 
 		return theObservationList;
 	}
 
-	private List<ParsedComposite.ParsedBucket> getSubjectBuckets(SearchResponse theSearchResponse) {
-		Aggregations responseAggregations = theSearchResponse.getAggregations();
-		ParsedComposite aggregatedSubjects = responseAggregations.get(GROUP_BY_SUBJECT);
-		return aggregatedSubjects.getBuckets();
-	}
-
-	private List<? extends Terms.Bucket> getObservationCodeBuckets(SearchResponse theSearchResponse) {
-		Aggregations responseAggregations = theSearchResponse.getAggregations();
-		return getObservationCodeBuckets(responseAggregations);
-	}
-
-	private List<? extends Terms.Bucket> getObservationCodeBuckets(ParsedComposite.ParsedBucket theSubjectBucket) {
-		Aggregations observationCodeSystemAggregations = theSubjectBucket.getAggregations();
-		return getObservationCodeBuckets(observationCodeSystemAggregations);
-	}
-
-	private List<? extends Terms.Bucket> getObservationCodeBuckets(Aggregations theObservationCodeSystemAggregations) {
-		List<Terms.Bucket> retVal = new ArrayList<>();
-		ParsedTerms aggregatedObservationCodeSystems = theObservationCodeSystemAggregations.get(GROUP_BY_SYSTEM);
-		for (Terms.Bucket observationCodeSystem : aggregatedObservationCodeSystems.getBuckets()) {
-			Aggregations observationCodeCodeAggregations = observationCodeSystem.getAggregations();
-			ParsedTerms aggregatedObservationCodeCodes = observationCodeCodeAggregations.get(GROUP_BY_CODE);
-			retVal.addAll(aggregatedObservationCodeCodes.getBuckets());
-		}
-		return retVal;
-	}
-
-	private SearchHit[] getLastNMatches(Terms.Bucket theObservationCodeBucket) {
-		Aggregations topHitObservationCodes = theObservationCodeBucket.getAggregations();
-		ParsedTopHits parsedTopHits = topHitObservationCodes.get(MOST_RECENT_EFFECTIVE);
-		return parsedTopHits.getHits().getHits();
-	}
+	//	private List<ParsedComposite.ParsedBucket> getSubjectBuckets(SearchResponse<ObservationJson> theSearchResponse) {
+	//		Map<String, Aggregate> responseAggregations = theSearchResponse.aggregations();
+	//		Aggregate aggregatedSubjects = responseAggregations.get(GROUP_BY_SUBJECT);
+	//		throw new InternalErrorException("foo");
+	//	}
+	//
+	//	private List<? extends Terms.Bucket> getObservationCodeBuckets(SearchResponse theSearchResponse) {
+	//		throw new InternalErrorException("blah");
+	//		//		Aggregations responseAggregations = theSearchResponse.getAggregations();
+	//		//		return getObservationCodeBuckets(responseAggregations);
+	//	}
+	//
+	//	private List<? extends Terms.Bucket> getObservationCodeBuckets(ParsedComposite.ParsedBucket theSubjectBucket) {
+	//		Aggregations observationCodeSystemAggregations = theSubjectBucket.getAggregations();
+	//		return getObservationCodeBuckets(observationCodeSystemAggregations);
+	//	}
+	//
+	//	private List<? extends Terms.Bucket> getObservationCodeBuckets(Aggregations theObservationCodeSystemAggregations)
+	// {
+	//		List<Terms.Bucket> retVal = new ArrayList<>();
+	//		ParsedTerms aggregatedObservationCodeSystems = theObservationCodeSystemAggregations.get(GROUP_BY_SYSTEM);
+	//		for (Terms.Bucket observationCodeSystem : aggregatedObservationCodeSystems.getBuckets()) {
+	//			Aggregations observationCodeCodeAggregations = observationCodeSystem.getAggregations();
+	//			ParsedTerms aggregatedObservationCodeCodes = observationCodeCodeAggregations.get(GROUP_BY_CODE);
+	//			retVal.addAll(aggregatedObservationCodeCodes.getBuckets());
+	//		}
+	//		return retVal;
+	//	}
+	//
+	//	private SearchHit[] getLastNMatches(Terms.Bucket theObservationCodeBucket) {
+	//		Aggregations topHitObservationCodes = theObservationCodeBucket.getAggregations();
+	//		ParsedTopHits parsedTopHits = topHitObservationCodes.get(MOST_RECENT_EFFECTIVE);
+	//		return parsedTopHits.getHits().getHits();
+	//	}
 
 	private SearchRequest buildObservationsSearchRequest(
+			@Nullable String theSubjectParam,
 			SearchParameterMap theSearchParameterMap,
 			FhirContext theFhirContext,
-			AggregationBuilder theAggregationBuilder) {
-		SearchRequest searchRequest = new SearchRequest(OBSERVATION_INDEX);
-		SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
-		// Query
-		if (!searchParamsHaveLastNCriteria(theSearchParameterMap, theFhirContext)) {
-			searchSourceBuilder.query(QueryBuilders.matchAllQuery());
-		} else {
-			BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
+			String theAggregationKey,
+			Function<Aggregation.Builder, ObjectBuilder<Aggregation>> theAggregationBuilder) {
+
+		Function<BoolQuery.Builder, ObjectBuilder<BoolQuery>> bqb = boolQueryBuilder -> {
+			Function<Query.Builder, ObjectBuilder<Query>> qbbm;
+			if (theSubjectParam != null) {
+				qbbm = i -> {
+					i.term(TermQuery.of(
+							tq -> tq.field(OBSERVATION_SUBJECT_FIELD_NAME).field(theSubjectParam)));
+					return i;
+				};
+			} else {
+				qbbm = i -> {
+					i.matchAll(t -> t);
+					return i;
+				};
+			}
+
+			boolQueryBuilder.must(qbbm);
 			addCategoriesCriteria(boolQueryBuilder, theSearchParameterMap, theFhirContext);
 			addObservationCodeCriteria(boolQueryBuilder, theSearchParameterMap, theFhirContext);
 			addDateCriteria(boolQueryBuilder, theSearchParameterMap, theFhirContext);
-			searchSourceBuilder.query(boolQueryBuilder);
-		}
-		searchSourceBuilder.size(0);
-
-		// Aggregation by order codes
-		searchSourceBuilder.aggregation(theAggregationBuilder);
-		searchRequest.source(searchSourceBuilder);
-
-		return searchRequest;
-	}
-
-	private SearchRequest buildObservationsSearchRequest(
-			String theSubjectParam,
-			SearchParameterMap theSearchParameterMap,
-			FhirContext theFhirContext,
-			AggregationBuilder theAggregationBuilder) {
-		SearchRequest searchRequest = new SearchRequest(OBSERVATION_INDEX);
-		SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
-		// Query
-		BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
-		boolQueryBuilder.must(QueryBuilders.termQuery(OBSERVATION_SUBJECT_FIELD_NAME, theSubjectParam));
-		addCategoriesCriteria(boolQueryBuilder, theSearchParameterMap, theFhirContext);
-		addObservationCodeCriteria(boolQueryBuilder, theSearchParameterMap, theFhirContext);
-		addDateCriteria(boolQueryBuilder, theSearchParameterMap, theFhirContext);
-		searchSourceBuilder.query(boolQueryBuilder);
-		searchSourceBuilder.size(0);
-
-		// Aggregation by order codes
-		searchSourceBuilder.aggregation(theAggregationBuilder);
-		searchRequest.source(searchSourceBuilder);
-
-		return searchRequest;
+			return boolQueryBuilder;
+		};
+		return SearchRequest.of(sr -> sr.index(OBSERVATION_INDEX)
+				.query(qb -> qb.bool(bqb))
+				.size(0)
+				.aggregations(theAggregationKey, theAggregationBuilder));
 	}
 
 	private Boolean searchParamsHaveLastNCriteria(
@@ -495,15 +485,15 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 	}
 
 	private void addCategoriesCriteria(
-			BoolQueryBuilder theBoolQueryBuilder,
+			BoolQuery.Builder theBoolQueryBuilder,
 			SearchParameterMap theSearchParameterMap,
 			FhirContext theFhirContext) {
 		String categoryParamName = LastNParameterHelper.getCategoryParamName(theFhirContext);
 		if (theSearchParameterMap.containsKey(categoryParamName)) {
-			ArrayList<String> codeSystemHashList = new ArrayList<>();
-			ArrayList<String> codeOnlyList = new ArrayList<>();
-			ArrayList<String> systemOnlyList = new ArrayList<>();
-			ArrayList<String> textOnlyList = new ArrayList<>();
+			ArrayList<FieldValue> codeSystemHashList = new ArrayList<>();
+			ArrayList<FieldValue> codeOnlyList = new ArrayList<>();
+			ArrayList<FieldValue> systemOnlyList = new ArrayList<>();
+			ArrayList<FieldValue> textOnlyList = new ArrayList<>();
 			List<List<IQueryParameterType>> andOrParams = theSearchParameterMap.get(categoryParamName);
 			for (List<? extends IQueryParameterType> nextAnd : andOrParams) {
 				codeSystemHashList.addAll(getCodingCodeSystemValues(nextAnd));
@@ -511,38 +501,41 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 				systemOnlyList.addAll(getCodingSystemOnlyValues(nextAnd));
 				textOnlyList.addAll(getCodingTextOnlyValues(nextAnd));
 			}
-			if (codeSystemHashList.size() > 0) {
-				theBoolQueryBuilder.must(
-						QueryBuilders.termsQuery(OBSERVATION_CATEGORYHASH_FIELD_NAME, codeSystemHashList));
+			if (!codeSystemHashList.isEmpty()) {
+				theBoolQueryBuilder.must(mf -> mf.terms(tb ->
+						tb.field(OBSERVATION_CATEGORYHASH_FIELD_NAME).terms(tbf -> tbf.value(codeSystemHashList))));
 			}
-			if (codeOnlyList.size() > 0) {
-				theBoolQueryBuilder.must(QueryBuilders.termsQuery(OBSERVATION_CATEGORYVALUE_FIELD_NAME, codeOnlyList));
+			if (!codeOnlyList.isEmpty()) {
+				theBoolQueryBuilder.must(mf -> mf.terms(
+						tb -> tb.field(OBSERVATION_CATEGORYVALUE_FIELD_NAME).terms(tbf -> tbf.value(codeOnlyList))));
 			}
-			if (systemOnlyList.size() > 0) {
-				theBoolQueryBuilder.must(
-						QueryBuilders.termsQuery(OBSERVATION_CATEGORYSYSTEM_FIELD_NAME, systemOnlyList));
+			if (!systemOnlyList.isEmpty()) {
+				theBoolQueryBuilder.must(mf -> mf.terms(
+						tb -> tb.field(OBSERVATION_CATEGORYSYSTEM_FIELD_NAME).terms(tbf -> tbf.value(systemOnlyList))));
 			}
-			if (textOnlyList.size() > 0) {
-				BoolQueryBuilder myTextBoolQueryBuilder = QueryBuilders.boolQuery();
-				for (String textOnlyParam : textOnlyList) {
-					myTextBoolQueryBuilder.should(QueryBuilders.matchPhrasePrefixQuery(
-							OBSERVATION_CATEGORYDISPLAY_FIELD_NAME, textOnlyParam));
-					myTextBoolQueryBuilder.should(
-							QueryBuilders.matchPhrasePrefixQuery(OBSERVATION_CATEGORYTEXT_FIELD_NAME, textOnlyParam));
-				}
-				theBoolQueryBuilder.must(myTextBoolQueryBuilder);
+			if (!textOnlyList.isEmpty()) {
+				theBoolQueryBuilder.must(mf -> {
+					for (FieldValue textOnlyParam : textOnlyList) {
+						mf.bool(bq -> bq.should(sq ->
+										sq.matchPhrasePrefix(mfp -> mfp.field(OBSERVATION_CATEGORYDISPLAY_FIELD_NAME)
+												.query(textOnlyParam.stringValue())))
+								.should(sq -> sq.matchPhrasePrefix(mfp -> mfp.field(OBSERVATION_CATEGORYTEXT_FIELD_NAME)
+										.query(textOnlyParam.stringValue()))));
+					}
+					return mf;
+				});
 			}
 		}
 	}
 
-	private List<String> getCodingCodeSystemValues(List<? extends IQueryParameterType> codeParams) {
-		ArrayList<String> codeSystemHashList = new ArrayList<>();
+	private List<FieldValue> getCodingCodeSystemValues(List<? extends IQueryParameterType> codeParams) {
+		ArrayList<FieldValue> codeSystemHashList = new ArrayList<>();
 		for (IQueryParameterType nextOr : codeParams) {
 			if (nextOr instanceof TokenParam) {
 				TokenParam ref = (TokenParam) nextOr;
 				if (ref.getSystem() != null && ref.getValue() != null) {
-					codeSystemHashList.add(
-							String.valueOf(CodeSystemHash.hashCodeSystem(ref.getSystem(), ref.getValue())));
+					codeSystemHashList.add(FieldValue.of(
+							String.valueOf(CodeSystemHash.hashCodeSystem(ref.getSystem(), ref.getValue()))));
 				}
 			} else {
 				throw new IllegalArgumentException(
@@ -552,14 +545,14 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 		return codeSystemHashList;
 	}
 
-	private List<String> getCodingCodeOnlyValues(List<? extends IQueryParameterType> codeParams) {
-		ArrayList<String> codeOnlyList = new ArrayList<>();
+	private List<FieldValue> getCodingCodeOnlyValues(List<? extends IQueryParameterType> codeParams) {
+		ArrayList<FieldValue> codeOnlyList = new ArrayList<>();
 		for (IQueryParameterType nextOr : codeParams) {
 
 			if (nextOr instanceof TokenParam) {
 				TokenParam ref = (TokenParam) nextOr;
 				if (ref.getValue() != null && ref.getSystem() == null && !ref.isText()) {
-					codeOnlyList.add(ref.getValue());
+					codeOnlyList.add(FieldValue.of(ref.getValue()));
 				}
 			} else {
 				throw new IllegalArgumentException(
@@ -569,14 +562,14 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 		return codeOnlyList;
 	}
 
-	private List<String> getCodingSystemOnlyValues(List<? extends IQueryParameterType> codeParams) {
-		ArrayList<String> systemOnlyList = new ArrayList<>();
+	private List<FieldValue> getCodingSystemOnlyValues(List<? extends IQueryParameterType> codeParams) {
+		ArrayList<FieldValue> systemOnlyList = new ArrayList<>();
 		for (IQueryParameterType nextOr : codeParams) {
 
 			if (nextOr instanceof TokenParam) {
 				TokenParam ref = (TokenParam) nextOr;
 				if (ref.getValue() == null && ref.getSystem() != null) {
-					systemOnlyList.add(ref.getSystem());
+					systemOnlyList.add(FieldValue.of(ref.getSystem()));
 				}
 			} else {
 				throw new IllegalArgumentException(
@@ -586,14 +579,14 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 		return systemOnlyList;
 	}
 
-	private List<String> getCodingTextOnlyValues(List<? extends IQueryParameterType> codeParams) {
-		ArrayList<String> textOnlyList = new ArrayList<>();
+	private List<FieldValue> getCodingTextOnlyValues(List<? extends IQueryParameterType> codeParams) {
+		ArrayList<FieldValue> textOnlyList = new ArrayList<>();
 		for (IQueryParameterType nextOr : codeParams) {
 
 			if (nextOr instanceof TokenParam) {
 				TokenParam ref = (TokenParam) nextOr;
 				if (ref.isText() && ref.getValue() != null) {
-					textOnlyList.add(ref.getValue());
+					textOnlyList.add(FieldValue.of(ref.getValue()));
 				}
 			} else {
 				throw new IllegalArgumentException(
@@ -604,15 +597,15 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 	}
 
 	private void addObservationCodeCriteria(
-			BoolQueryBuilder theBoolQueryBuilder,
+			BoolQuery.Builder theBoolQueryBuilder,
 			SearchParameterMap theSearchParameterMap,
 			FhirContext theFhirContext) {
 		String codeParamName = LastNParameterHelper.getCodeParamName(theFhirContext);
 		if (theSearchParameterMap.containsKey(codeParamName)) {
-			ArrayList<String> codeSystemHashList = new ArrayList<>();
-			ArrayList<String> codeOnlyList = new ArrayList<>();
-			ArrayList<String> systemOnlyList = new ArrayList<>();
-			ArrayList<String> textOnlyList = new ArrayList<>();
+			ArrayList<FieldValue> codeSystemHashList = new ArrayList<>();
+			ArrayList<FieldValue> codeOnlyList = new ArrayList<>();
+			ArrayList<FieldValue> systemOnlyList = new ArrayList<>();
+			ArrayList<FieldValue> textOnlyList = new ArrayList<>();
 			List<List<IQueryParameterType>> andOrParams = theSearchParameterMap.get(codeParamName);
 			for (List<? extends IQueryParameterType> nextAnd : andOrParams) {
 				codeSystemHashList.addAll(getCodingCodeSystemValues(nextAnd));
@@ -620,63 +613,73 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 				systemOnlyList.addAll(getCodingSystemOnlyValues(nextAnd));
 				textOnlyList.addAll(getCodingTextOnlyValues(nextAnd));
 			}
-			if (codeSystemHashList.size() > 0) {
-				theBoolQueryBuilder.must(QueryBuilders.termsQuery(OBSERVATION_CODEHASH_FIELD_NAME, codeSystemHashList));
+			if (!codeSystemHashList.isEmpty()) {
+				theBoolQueryBuilder.must(mf -> mf.terms(
+						tb -> tb.field(OBSERVATION_CODEHASH_FIELD_NAME).terms(tbf -> tbf.value(codeSystemHashList))));
 			}
-			if (codeOnlyList.size() > 0) {
-				theBoolQueryBuilder.must(QueryBuilders.termsQuery(OBSERVATION_CODEVALUE_FIELD_NAME, codeOnlyList));
+			if (!codeOnlyList.isEmpty()) {
+				theBoolQueryBuilder.must(mf -> mf.terms(
+						tb -> tb.field(OBSERVATION_CODEVALUE_FIELD_NAME).terms(tbf -> tbf.value(codeOnlyList))));
 			}
-			if (systemOnlyList.size() > 0) {
-				theBoolQueryBuilder.must(QueryBuilders.termsQuery(OBSERVATION_CODESYSTEM_FIELD_NAME, systemOnlyList));
+			if (!systemOnlyList.isEmpty()) {
+				theBoolQueryBuilder.must(mf -> mf.terms(
+						tb -> tb.field(OBSERVATION_CODESYSTEM_FIELD_NAME).terms(tbf -> tbf.value(systemOnlyList))));
 			}
-			if (textOnlyList.size() > 0) {
-				BoolQueryBuilder myTextBoolQueryBuilder = QueryBuilders.boolQuery();
-				for (String textOnlyParam : textOnlyList) {
-					myTextBoolQueryBuilder.should(
-							QueryBuilders.matchPhrasePrefixQuery(OBSERVATION_CODEDISPLAY_FIELD_NAME, textOnlyParam));
-					myTextBoolQueryBuilder.should(
-							QueryBuilders.matchPhrasePrefixQuery(OBSERVATION_CODE_TEXT_FIELD_NAME, textOnlyParam));
-				}
-				theBoolQueryBuilder.must(myTextBoolQueryBuilder);
+			if (!textOnlyList.isEmpty()) {
+				theBoolQueryBuilder.must(mf -> {
+					for (FieldValue textOnlyParam : textOnlyList) {
+						mf.bool(bq -> bq.should(
+										sq -> sq.matchPhrasePrefix(mfp -> mfp.field(OBSERVATION_CODEDISPLAY_FIELD_NAME)
+												.query(textOnlyParam.stringValue())))
+								.should(sq -> sq.matchPhrasePrefix(mfp -> mfp.field(OBSERVATION_CODE_TEXT_FIELD_NAME)
+										.query(textOnlyParam.stringValue()))));
+					}
+					return mf;
+				});
 			}
 		}
 	}
 
 	private void addDateCriteria(
-			BoolQueryBuilder theBoolQueryBuilder,
+			BoolQuery.Builder theBoolQueryBuilder,
 			SearchParameterMap theSearchParameterMap,
 			FhirContext theFhirContext) {
 		String dateParamName = LastNParameterHelper.getEffectiveParamName(theFhirContext);
 		if (theSearchParameterMap.containsKey(dateParamName)) {
 			List<List<IQueryParameterType>> andOrParams = theSearchParameterMap.get(dateParamName);
 			for (List<? extends IQueryParameterType> nextAnd : andOrParams) {
-				BoolQueryBuilder myDateBoolQueryBuilder = new BoolQueryBuilder();
-				for (IQueryParameterType nextOr : nextAnd) {
-					if (nextOr instanceof DateParam) {
-						DateParam myDate = (DateParam) nextOr;
-						createDateCriteria(myDate, myDateBoolQueryBuilder);
+				theBoolQueryBuilder.must(mb -> mb.bool(bqb -> {
+					for (IQueryParameterType nextOr : nextAnd) {
+						if (nextOr instanceof DateParam) {
+							DateParam myDate = (DateParam) nextOr;
+							createDateCriteria(myDate, bqb);
+						}
 					}
-				}
-				theBoolQueryBuilder.must(myDateBoolQueryBuilder);
+					return bqb;
+				}));
 			}
 		}
 	}
 
-	private void createDateCriteria(DateParam theDate, BoolQueryBuilder theBoolQueryBuilder) {
+	private void createDateCriteria(DateParam theDate, BoolQuery.Builder theBoolQueryBuilder) {
 		Long dateInstant = theDate.getValue().getTime();
-		RangeQueryBuilder myRangeQueryBuilder = new RangeQueryBuilder(OBSERVATION_EFFECTIVEDTM_FIELD_NAME);
 
 		ParamPrefixEnum prefix = theDate.getPrefix();
 		if (prefix == ParamPrefixEnum.GREATERTHAN || prefix == ParamPrefixEnum.STARTS_AFTER) {
-			theBoolQueryBuilder.should(myRangeQueryBuilder.gt(dateInstant));
+			theBoolQueryBuilder.should(s ->
+					s.range(r -> r.field(OBSERVATION_EFFECTIVEDTM_FIELD_NAME).gt(JsonData.of(dateInstant))));
 		} else if (prefix == ParamPrefixEnum.LESSTHAN || prefix == ParamPrefixEnum.ENDS_BEFORE) {
-			theBoolQueryBuilder.should(myRangeQueryBuilder.lt(dateInstant));
+			theBoolQueryBuilder.should(s ->
+					s.range(r -> r.field(OBSERVATION_EFFECTIVEDTM_FIELD_NAME).lt(JsonData.of(dateInstant))));
 		} else if (prefix == ParamPrefixEnum.LESSTHAN_OR_EQUALS) {
-			theBoolQueryBuilder.should(myRangeQueryBuilder.lte(dateInstant));
+			theBoolQueryBuilder.should(s ->
+					s.range(r -> r.field(OBSERVATION_EFFECTIVEDTM_FIELD_NAME).lte(JsonData.of(dateInstant))));
 		} else if (prefix == ParamPrefixEnum.GREATERTHAN_OR_EQUALS) {
-			theBoolQueryBuilder.should(myRangeQueryBuilder.gte(dateInstant));
+			theBoolQueryBuilder.should(s ->
+					s.range(r -> r.field(OBSERVATION_EFFECTIVEDTM_FIELD_NAME).gte(JsonData.of(dateInstant))));
 		} else {
-			theBoolQueryBuilder.should(new MatchQueryBuilder(OBSERVATION_EFFECTIVEDTM_FIELD_NAME, dateInstant));
+			theBoolQueryBuilder.should(s ->
+					s.match(m -> m.field(OBSERVATION_EFFECTIVEDTM_FIELD_NAME).query(dateInstant)));
 		}
 	}
 
@@ -688,24 +691,17 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 
 	@VisibleForTesting
 	List<CodeJson> queryAllIndexedObservationCodesForTest() throws IOException {
-		SearchRequest codeSearchRequest = new SearchRequest(OBSERVATION_CODE_INDEX);
-		SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
-		// Query
-		searchSourceBuilder.query(QueryBuilders.matchAllQuery());
-		searchSourceBuilder.size(1000);
-		codeSearchRequest.source(searchSourceBuilder);
-		SearchResponse codeSearchResponse = executeSearchRequest(codeSearchRequest);
-		return buildCodeResult(codeSearchResponse);
-	}
-
-	private List<CodeJson> buildCodeResult(SearchResponse theSearchResponse) throws JsonProcessingException {
-		SearchHits codeHits = theSearchResponse.getHits();
-		List<CodeJson> codes = new ArrayList<>();
-		for (SearchHit codeHit : codeHits) {
-			CodeJson code = objectMapper.readValue(codeHit.getSourceAsString(), CodeJson.class);
-			codes.add(code);
-		}
-		return codes;
+		return myRestHighLevelClient
+				.search(
+						sb -> sb.index(OBSERVATION_CODE_INDEX)
+								.query(qb -> qb.matchAll(mab -> mab))
+								.size(1000),
+						CodeJson.class)
+				.hits()
+				.hits()
+				.stream()
+				.map(t -> t.source())
+				.collect(Collectors.toList());
 	}
 
 	@Override
@@ -717,13 +713,13 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 		SearchRequest theSearchRequest = buildSingleObservationSearchRequest(theDocumentID);
 		ObservationJson observationDocumentJson = null;
 		try {
-			SearchResponse observationDocumentResponse = executeSearchRequest(theSearchRequest);
-			SearchHit[] observationDocumentHits =
-					observationDocumentResponse.getHits().getHits();
-			if (observationDocumentHits.length > 0) {
+			SearchResponse<ObservationJson> observationDocumentResponse =
+					myRestHighLevelClient.search(theSearchRequest, ObservationJson.class);
+			List<Hit<ObservationJson>> observationDocumentHits =
+					observationDocumentResponse.hits().hits();
+			if (!observationDocumentHits.isEmpty()) {
 				// There should be no more than one hit for the identifier
-				String observationDocument = observationDocumentHits[0].getSourceAsString();
-				observationDocumentJson = objectMapper.readValue(observationDocument, ObservationJson.class);
+				observationDocumentJson = observationDocumentHits.get(0).source();
 			}
 
 		} catch (IOException theE) {
@@ -735,16 +731,9 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 	}
 
 	private SearchRequest buildSingleObservationSearchRequest(String theObservationIdentifier) {
-		SearchRequest searchRequest = new SearchRequest(OBSERVATION_INDEX);
-		SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
-		BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
-		boolQueryBuilder.must(QueryBuilders.termQuery(OBSERVATION_IDENTIFIER_FIELD_NAME, theObservationIdentifier));
-		searchSourceBuilder.query(boolQueryBuilder);
-		searchSourceBuilder.size(1);
-
-		searchRequest.source(searchSourceBuilder);
-
-		return searchRequest;
+		return SearchRequest.of(srb -> srb.query(qb -> qb.bool(bb -> bb.must(mb -> mb.term(
+						tb -> tb.field(OBSERVATION_IDENTIFIER_FIELD_NAME).value(theObservationIdentifier)))))
+				.size(1));
 	}
 
 	@Override
@@ -756,13 +745,13 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 		SearchRequest theSearchRequest = buildSingleObservationCodeSearchRequest(theCodeSystemHash, theText);
 		CodeJson observationCodeDocumentJson = null;
 		try {
-			SearchResponse observationCodeDocumentResponse = executeSearchRequest(theSearchRequest);
-			SearchHit[] observationCodeDocumentHits =
-					observationCodeDocumentResponse.getHits().getHits();
-			if (observationCodeDocumentHits.length > 0) {
+			SearchResponse<CodeJson> observationCodeDocumentResponse =
+					myRestHighLevelClient.search(theSearchRequest, CodeJson.class);
+			List<Hit<CodeJson>> observationCodeDocumentHits =
+					observationCodeDocumentResponse.hits().hits();
+			if (!observationCodeDocumentHits.isEmpty()) {
 				// There should be no more than one hit for the code lookup.
-				String observationCodeDocument = observationCodeDocumentHits[0].getSourceAsString();
-				observationCodeDocumentJson = objectMapper.readValue(observationCodeDocument, CodeJson.class);
+				observationCodeDocumentJson = observationCodeDocumentHits.get(0).source();
 			}
 
 		} catch (IOException theE) {
@@ -774,30 +763,28 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 	}
 
 	private SearchRequest buildSingleObservationCodeSearchRequest(String theCodeSystemHash, String theText) {
-		SearchRequest searchRequest = new SearchRequest(OBSERVATION_CODE_INDEX);
-		SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
-		BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
-		if (theCodeSystemHash != null) {
-			boolQueryBuilder.must(QueryBuilders.termQuery(CODE_HASH, theCodeSystemHash));
-		} else {
-			boolQueryBuilder.must(QueryBuilders.matchPhraseQuery(CODE_TEXT, theText));
-		}
+		Function<Query.Builder, ObjectBuilder<Query>> qb = i -> {
+			if (theCodeSystemHash != null) {
+				i.term(tq -> tq.field(CODE_HASH).value(theCodeSystemHash));
+			} else {
+				i.matchPhrase(mp -> mp.field(CODE_TEXT).query(theText));
+			}
+			return i;
+		};
 
-		searchSourceBuilder.query(boolQueryBuilder);
-		searchSourceBuilder.size(1);
-
-		searchRequest.source(searchSourceBuilder);
-
-		return searchRequest;
+		return SearchRequest.of(i -> i.index(OBSERVATION_CODE_INDEX).size(1).query(q -> q.bool(qb2 -> qb2.must(qb))));
 	}
 
 	@Override
 	public Boolean createOrUpdateObservationIndex(String theDocumentId, ObservationJson theObservationDocument) {
 		try {
-			String documentToIndex = objectMapper.writeValueAsString(theObservationDocument);
-			return performIndex(
-					OBSERVATION_INDEX, theDocumentId, documentToIndex, ElasticsearchSvcImpl.OBSERVATION_DOCUMENT_TYPE);
-		} catch (IOException theE) {
+			IndexRequest<ObservationJson> request = IndexRequest.of(
+					i -> i.index(OBSERVATION_INDEX).id(theDocumentId).document(theObservationDocument));
+			IndexResponse indexResponse = myRestHighLevelClient.index(request);
+
+			Result result = indexResponse.result();
+			return (result == Result.Created || result == Result.Updated);
+		} catch (IOException e) {
 			throw new InvalidRequestException(
 					Msg.code(1189) + "Unable to persist Observation document " + theDocumentId);
 		}
@@ -807,41 +794,31 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 	public Boolean createOrUpdateObservationCodeIndex(
 			String theCodeableConceptID, CodeJson theObservationCodeDocument) {
 		try {
-			String documentToIndex = objectMapper.writeValueAsString(theObservationCodeDocument);
-			return performIndex(
-					OBSERVATION_CODE_INDEX,
-					theCodeableConceptID,
-					documentToIndex,
-					ElasticsearchSvcImpl.CODE_DOCUMENT_TYPE);
+			IndexRequest<CodeJson> request = IndexRequest.of(i ->
+					i.index(OBSERVATION_CODE_INDEX).id(theCodeableConceptID).document(theObservationCodeDocument));
+			IndexResponse indexResponse = myRestHighLevelClient.index(request);
+
+			Result result = indexResponse.result();
+			return (result == Result.Created || result == Result.Updated);
 		} catch (IOException theE) {
 			throw new InvalidRequestException(
 					Msg.code(1190) + "Unable to persist Observation Code document " + theCodeableConceptID);
 		}
 	}
 
-	private boolean performIndex(
-			String theIndexName, String theDocumentId, String theIndexDocument, String theDocumentType)
-			throws IOException {
-		IndexResponse indexResponse = myRestHighLevelClient.index(
-				createIndexRequest(theIndexName, theDocumentId, theIndexDocument, theDocumentType),
-				RequestOptions.DEFAULT);
-
-		return (indexResponse.getResult() == DocWriteResponse.Result.CREATED)
-				|| (indexResponse.getResult() == DocWriteResponse.Result.UPDATED);
-	}
-
 	@Override
 	public void close() throws IOException {
-		myRestHighLevelClient.close();
+		// nothing
 	}
 
 	@Override
 	public List<IBaseResource> getObservationResources(Collection<? extends IResourcePersistentId> thePids) {
 		SearchRequest searchRequest = buildObservationResourceSearchRequest(thePids);
 		try {
-			SearchResponse observationDocumentResponse = executeSearchRequest(searchRequest);
-			SearchHit[] observationDocumentHits =
-					observationDocumentResponse.getHits().getHits();
+			SearchResponse<ObservationJson> observationDocumentResponse =
+					myRestHighLevelClient.search(searchRequest, ObservationJson.class);
+			List<Hit<ObservationJson>> observationDocumentHits =
+					observationDocumentResponse.hits().hits();
 			IParser parser = TolerantJsonParser.createWithLenientErrorHandling(myContext, null);
 			Class<? extends IBaseResource> resourceType =
 					myContext.getResourceDefinition(OBSERVATION_RESOURCE_NAME).getImplementingClass();
@@ -849,8 +826,8 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 			 * @see ca.uhn.fhir.jpa.dao.BaseHapiFhirDao#toResource(Class, IBaseResourceEntity, Collection, boolean) for
 			 * details about parsing raw json to BaseResource
 			 */
-			return Arrays.stream(observationDocumentHits)
-					.map(this::parseObservationJson)
+			return observationDocumentHits.stream()
+					.map(Hit::source)
 					.map(observationJson -> parser.parseResource(resourceType, observationJson.getResource()))
 					.collect(Collectors.toList());
 		} catch (IOException theE) {
@@ -859,41 +836,34 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 		}
 	}
 
-	private ObservationJson parseObservationJson(SearchHit theSearchHit) {
-		try {
-			return objectMapper.readValue(theSearchHit.getSourceAsString(), ObservationJson.class);
-		} catch (JsonProcessingException exp) {
-			throw new InvalidRequestException(Msg.code(2004) + "Unable to parse the observation resource json", exp);
-		}
-	}
+	//	private ObservationJson parseObservationJson(SearchHit theSearchHit) {
+	//		try {
+	//			return objectMapper.readValue(theSearchHit.getSourceAsString(), ObservationJson.class);
+	//		} catch (JsonProcessingException exp) {
+	//			throw new InvalidRequestException(Msg.code(2004) + "Unable to parse the observation resource json", exp);
+	//		}
+	//	}
 
 	private SearchRequest buildObservationResourceSearchRequest(Collection<? extends IResourcePersistentId> thePids) {
-		SearchRequest searchRequest = new SearchRequest(OBSERVATION_INDEX);
-		SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
-		// Query
-		BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
-		List<String> pidParams = thePids.stream().map(Object::toString).collect(Collectors.toList());
-		boolQueryBuilder.must(QueryBuilders.termsQuery(OBSERVATION_IDENTIFIER_FIELD_NAME, pidParams));
-		searchSourceBuilder.query(boolQueryBuilder);
-		searchSourceBuilder.size(thePids.size());
-		searchRequest.source(searchSourceBuilder);
-		return searchRequest;
-	}
+		List<FieldValue> values = thePids.stream()
+				.map(Object::toString)
+				.map(v -> FieldValue.of(v))
+				.collect(Collectors.toList());
 
-	private IndexRequest createIndexRequest(
-			String theIndexName, String theDocumentId, String theObservationDocument, String theDocumentType) {
-		IndexRequest request = new IndexRequest(theIndexName);
-		request.id(theDocumentId);
-		request.source(theObservationDocument, XContentType.JSON);
-		return request;
+		return SearchRequest.of(sr -> sr.index(OBSERVATION_INDEX)
+				.query(qb -> qb.bool(bb -> bb.must(bbm -> {
+					bbm.terms(terms ->
+							terms.field(OBSERVATION_IDENTIFIER_FIELD_NAME).terms(termsb -> termsb.value(values)));
+					return bbm;
+				})))
+				.size(thePids.size()));
 	}
 
 	@Override
 	public void deleteObservationDocument(String theDocumentId) {
-		DeleteByQueryRequest deleteByQueryRequest = new DeleteByQueryRequest(OBSERVATION_INDEX);
-		deleteByQueryRequest.setQuery(QueryBuilders.termQuery(OBSERVATION_IDENTIFIER_FIELD_NAME, theDocumentId));
 		try {
-			myRestHighLevelClient.deleteByQuery(deleteByQueryRequest, RequestOptions.DEFAULT);
+			myRestHighLevelClient.deleteByQuery(qb -> qb.query(ob ->
+					ob.term(tb -> tb.field(OBSERVATION_IDENTIFIER_FIELD_NAME).value(theDocumentId))));
 		} catch (IOException theE) {
 			throw new InvalidRequestException(Msg.code(1191) + "Unable to delete Observation " + theDocumentId);
 		}
@@ -901,13 +871,11 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 
 	@VisibleForTesting
 	public void deleteAllDocumentsForTest(String theIndexName) throws IOException {
-		DeleteByQueryRequest deleteByQueryRequest = new DeleteByQueryRequest(theIndexName);
-		deleteByQueryRequest.setQuery(QueryBuilders.matchAllQuery());
-		myRestHighLevelClient.deleteByQuery(deleteByQueryRequest, RequestOptions.DEFAULT);
+		myRestHighLevelClient.deleteByQuery(ob -> ob.index(theIndexName).query(fn -> fn.matchAll(mab -> mab)));
 	}
 
 	@VisibleForTesting
 	public void refreshIndex(String theIndexName) throws IOException {
-		myRestHighLevelClient.indices().refresh(new RefreshRequest(theIndexName), RequestOptions.DEFAULT);
+		myRestHighLevelClient.indices().refresh(fn -> fn.index(theIndexName));
 	}
 }
