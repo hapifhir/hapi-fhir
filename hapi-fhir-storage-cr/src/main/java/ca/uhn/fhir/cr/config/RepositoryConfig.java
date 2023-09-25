@@ -31,6 +31,7 @@ import org.springframework.context.annotation.Configuration;
 public class RepositoryConfig {
 	@Autowired(required = false)
 	private DaoRegistry myDaoRegistry;
+
 	@Autowired(required = false)
 	private RestfulServer myRestfulServer;
 

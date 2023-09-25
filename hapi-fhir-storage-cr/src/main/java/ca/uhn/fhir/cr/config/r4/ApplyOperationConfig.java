@@ -36,6 +36,7 @@ import java.util.Map;
 public class ApplyOperationConfig {
 	@Autowired(required = false)
 	EvaluationSettings myEvaluationSettings;
+
 	@Autowired(required = false)
 	private RestfulServer myRestfulServer;
 
