@@ -1,0 +1,6 @@
+---
+type: add
+issue: 5089
+title: "Updating storage-cr module to latest CQL 3.0.0, latest cql engine improvements, and Clinical Reasoning operations 
+to leverage repository api pattern. This will remove several dependencies from within hapi-fhir to make future maintenance 
+simpler and performance more robust."
