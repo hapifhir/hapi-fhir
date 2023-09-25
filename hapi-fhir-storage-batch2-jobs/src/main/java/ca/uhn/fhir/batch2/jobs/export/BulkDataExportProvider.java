@@ -323,7 +323,11 @@ public class BulkDataExportProvider {
 	/**
 	 * Patient/$export
 	 */
-	@Operation(name = ProviderConstants.OPERATION_EXPORT, manualResponse = true, idempotent = true, typeName = "Patient")
+	@Operation(
+			name = ProviderConstants.OPERATION_EXPORT,
+			manualResponse = true,
+			idempotent = true,
+			typeName = "Patient")
 	public void patientExport(
 			@OperationParam(name = JpaConstants.PARAM_EXPORT_OUTPUT_FORMAT, min = 0, max = 1, typeName = "string")
 					IPrimitiveType<String> theOutputFormat,
@@ -377,7 +381,11 @@ public class BulkDataExportProvider {
 	/**
 	 * Patient/[id]/$export
 	 */
-	@Operation(name = ProviderConstants.OPERATION_EXPORT, manualResponse = true, idempotent = true, typeName = "Patient")
+	@Operation(
+			name = ProviderConstants.OPERATION_EXPORT,
+			manualResponse = true,
+			idempotent = true,
+			typeName = "Patient")
 	public void patientInstanceExport(
 			@IdParam IIdType theIdParam,
 			@OperationParam(name = JpaConstants.PARAM_EXPORT_OUTPUT_FORMAT, min = 0, max = 1, typeName = "string")

@@ -70,8 +70,6 @@ import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
-import javax.servlet.ServletContext;
-import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -83,6 +81,8 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import javax.servlet.ServletContext;
+import javax.servlet.http.HttpServletRequest;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -416,7 +416,7 @@ public class ServerCapabilityStatementProvider extends BaseServerCapabilityState
 			}
 		}
 
-    maybeAddBulkDataDeclarationToConformingToIg(retVal, serverConfiguration.getServerBindings());
+		maybeAddBulkDataDeclarationToConformingToIg(retVal, serverConfiguration.getServerBindings());
 
 		return retVal;
 	}
@@ -717,15 +717,16 @@ public class ServerCapabilityStatementProvider extends BaseServerCapabilityState
 		});
 	}
 
-  private void maybeAddBulkDataDeclarationToConformingToIg(CapabilityStatement theCapabilityStatement, List<BaseMethodBinding> therServerBindings) {
-    boolean bulkExportEnabled = therServerBindings.stream()
-        .filter(OperationMethodBinding.class::isInstance)
-        .map(OperationMethodBinding.class::cast)
-        .map(OperationMethodBinding::getName)
-        .anyMatch(ProviderConstants.OPERATION_EXPORT::equals);
+	private void maybeAddBulkDataDeclarationToConformingToIg(
+			CapabilityStatement theCapabilityStatement, List<BaseMethodBinding> therServerBindings) {
+		boolean bulkExportEnabled = therServerBindings.stream()
+				.filter(OperationMethodBinding.class::isInstance)
+				.map(OperationMethodBinding.class::cast)
+				.map(OperationMethodBinding::getName)
+				.anyMatch(ProviderConstants.OPERATION_EXPORT::equals);
 
-    if (bulkExportEnabled){
-      theCapabilityStatement.addInstantiates(Constants.BULK_DATA_ACCESS_IG_URL);
-    }
-  }
+		if (bulkExportEnabled) {
+			theCapabilityStatement.addInstantiates(Constants.BULK_DATA_ACCESS_IG_URL);
+		}
+	}
 }

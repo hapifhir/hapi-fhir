@@ -331,7 +331,8 @@ public class Constants {
 	 */
 	public static final int UUID_LENGTH = 36;
 
-	public static final String BULK_DATA_ACCESS_IG_URL = "http://hl7.org/fhir/uv/bulkdata/CapabilityStatement/bulk-data";
+	public static final String BULK_DATA_ACCESS_IG_URL =
+			"http://hl7.org/fhir/uv/bulkdata/CapabilityStatement/bulk-data";
 
 	/**
 	 * Application configuration key used to enable or disable Hibernate Envers.
