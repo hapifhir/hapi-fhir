@@ -48,16 +48,13 @@ import static org.slf4j.LoggerFactory.getLogger;
 public class MdmLinkHistoryProviderDstu3Plus extends BaseMdmProvider {
 	private static final Logger ourLog = getLogger(MdmLinkHistoryProviderDstu3Plus.class);
 
-	private final IMdmControllerSvc myMdmControllerSvc;
-
 	private final IInterceptorBroadcaster myInterceptorBroadcaster;
 
 	public MdmLinkHistoryProviderDstu3Plus(
 			FhirContext theFhirContext,
 			IMdmControllerSvc theMdmControllerSvc,
 			IInterceptorBroadcaster theIInterceptorBroadcaster) {
-		super(theFhirContext);
-		myMdmControllerSvc = theMdmControllerSvc;
+		super(theFhirContext, theMdmControllerSvc);
 		myInterceptorBroadcaster = theIInterceptorBroadcaster;
 	}
 
@@ -93,7 +90,7 @@ public class MdmLinkHistoryProviderDstu3Plus extends BaseMdmProvider {
 		final List<MdmLinkWithRevisionJson> mdmLinkRevisionsFromSvc =
 				myMdmControllerSvc.queryLinkHistory(mdmHistorySearchParameters, theRequestDetails);
 
-		parametersFromMdmLinkRevisions(retVal, mdmLinkRevisionsFromSvc);
+		parametersFromMdmLinkRevisions(retVal, mdmLinkRevisionsFromSvc, theRequestDetails);
 
 		if (myInterceptorBroadcaster.hasHooks(Pointcut.MDM_POST_LINK_HISTORY)) {
 			// MDM_POST_LINK_HISTORY hook

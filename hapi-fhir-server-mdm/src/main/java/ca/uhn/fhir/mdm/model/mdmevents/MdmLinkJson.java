@@ -21,11 +21,15 @@ package ca.uhn.fhir.mdm.model.mdmevents;
 
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
+import ca.uhn.fhir.mdm.rules.json.MdmRulesJson;
 import ca.uhn.fhir.model.api.IModelJson;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 
 public class MdmLinkJson implements IModelJson {
 
@@ -70,6 +74,14 @@ public class MdmLinkJson implements IModelJson {
 
 	@JsonProperty("ruleCount")
 	private Long myRuleCount;
+
+	/**
+	 * Matched rules are the rules, as defined in the matchResultMap, that evaluated true
+	 * for this link. This property stores the name of the rule, represented by a String,
+	 * and the corresponding MatchResultEnum for that rule.
+	 */
+	@JsonProperty(value = "matchedRules")
+	private Set<Map.Entry<String, MdmMatchResultEnum>> myRule = new HashSet<>();
 
 	public String getGoldenResourceId() {
 		return myGoldenResourceId;
@@ -176,6 +188,14 @@ public class MdmLinkJson implements IModelJson {
 
 	public void setRuleCount(Long theRuleCount) {
 		myRuleCount = theRuleCount;
+	}
+
+	public Set<Map.Entry<String, MdmMatchResultEnum>> getRule() {
+		return myRule;
+	}
+
+	public void translateAndSetRule(MdmRulesJson theRule, Long theVector) {
+		myRule = theRule.getMatchedRulesFromVectorMap(theVector);
 	}
 
 	@Override

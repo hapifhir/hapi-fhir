@@ -35,15 +35,16 @@ public class MdmModelConverterSvcImplTest extends BaseMdmR4Test {
 		final Date updateTime = new Date();
 		final String version = "1";
 		final boolean isLinkCreatedResource = false;
+		final long vector = 4L;
 
-		final MdmLink mdmLink = createGoldenPatientAndLinkToSourcePatient(MdmMatchResultEnum.MATCH, MdmLinkSourceEnum.MANUAL, version, createTime, updateTime, isLinkCreatedResource);
+		final MdmLink mdmLink = createGoldenPatientAndLinkToSourcePatient(MdmMatchResultEnum.MATCH, MdmLinkSourceEnum.MANUAL, version, createTime, updateTime, isLinkCreatedResource, vector);
 		myMdmLinkDao.save(mdmLink);
 
 		final MdmLinkJson actualMdmLinkJson = myMdmModelConverterSvc.toJson(mdmLink);
 
 		ourLog.info("actualMdmLinkJson: {}", actualMdmLinkJson);
 
-		assertEquals(getExepctedMdmLinkJson(mdmLink.getGoldenResourcePersistenceId().getId(), mdmLink.getSourcePersistenceId().getId(), MdmMatchResultEnum.MATCH, MdmLinkSourceEnum.MANUAL, version, createTime, updateTime, isLinkCreatedResource), actualMdmLinkJson);
+		assertEquals(getExepctedMdmLinkJson(mdmLink.getGoldenResourcePersistenceId().getId(), mdmLink.getSourcePersistenceId().getId(), MdmMatchResultEnum.MATCH, MdmLinkSourceEnum.MANUAL, version, createTime, updateTime, isLinkCreatedResource, vector), actualMdmLinkJson);
 	}
 
 	@Test
@@ -57,15 +58,16 @@ public class MdmModelConverterSvcImplTest extends BaseMdmR4Test {
 		final String version = "1";
 		final boolean isLinkCreatedResource = false;
 		final long revisionNumber = 2L;
+		final long vector = 4L;
 
-		final MdmLink mdmLink = createGoldenPatientAndLinkToSourcePatient(MdmMatchResultEnum.MATCH, MdmLinkSourceEnum.MANUAL, version, createTime, updateTime, isLinkCreatedResource);
+		final MdmLink mdmLink = createGoldenPatientAndLinkToSourcePatient(MdmMatchResultEnum.MATCH, MdmLinkSourceEnum.MANUAL, version, createTime, updateTime, isLinkCreatedResource, vector);
 
 		final MdmLinkWithRevision<IMdmLink<? extends IResourcePersistentId<?>>> revision = new MdmLinkWithRevision<>(mdmLink, new EnversRevision(RevisionType.ADD, revisionNumber, revisionTimestamp));
 
 		final MdmLinkWithRevisionJson actualMdmLinkWithRevisionJson = myMdmModelConverterSvc.toJson(revision);
 
 		final MdmLinkWithRevisionJson expectedMdmLinkWithRevisionJson =
-			new MdmLinkWithRevisionJson(getExepctedMdmLinkJson(mdmLink.getGoldenResourcePersistenceId().getId(), mdmLink.getSourcePersistenceId().getId(), MdmMatchResultEnum.MATCH, MdmLinkSourceEnum.MANUAL, version, createTime, updateTime, isLinkCreatedResource), revisionNumber, revisionTimestamp);
+			new MdmLinkWithRevisionJson(getExepctedMdmLinkJson(mdmLink.getGoldenResourcePersistenceId().getId(), mdmLink.getSourcePersistenceId().getId(), MdmMatchResultEnum.MATCH, MdmLinkSourceEnum.MANUAL, version, createTime, updateTime, isLinkCreatedResource, vector), revisionNumber, revisionTimestamp);
 
 		assertMdmLinkRevisionsEqual(expectedMdmLinkWithRevisionJson, actualMdmLinkWithRevisionJson);
 	}
@@ -82,7 +84,7 @@ public class MdmModelConverterSvcImplTest extends BaseMdmR4Test {
 		assertEquals(theExpectedMdmLinkWithRevisionJson.getRevisionTimestamp(), theActualMdmLinkWithRevisionJson.getRevisionTimestamp());
 	}
 
-	private MdmLinkJson getExepctedMdmLinkJson(Long theGoldenPatientId, Long theSourceId, MdmMatchResultEnum theMdmMatchResultEnum, MdmLinkSourceEnum theMdmLinkSourceEnum, String version, Date theCreateTime, Date theUpdateTime, boolean theLinkCreatedNewResource) {
+	private MdmLinkJson getExepctedMdmLinkJson(Long theGoldenPatientId, Long theSourceId, MdmMatchResultEnum theMdmMatchResultEnum, MdmLinkSourceEnum theMdmLinkSourceEnum, String version, Date theCreateTime, Date theUpdateTime, boolean theLinkCreatedNewResource, Long theVector) {
 		final MdmLinkJson mdmLinkJson = new MdmLinkJson();
 
 		mdmLinkJson.setGoldenResourceId("Patient/" + theGoldenPatientId);
@@ -93,6 +95,8 @@ public class MdmModelConverterSvcImplTest extends BaseMdmR4Test {
 		mdmLinkJson.setCreated(theCreateTime);
 		mdmLinkJson.setUpdated(theUpdateTime);
 		mdmLinkJson.setLinkCreatedNewResource(theLinkCreatedNewResource);
+		mdmLinkJson.setVector(theVector);
+		mdmLinkJson.translateAndSetRule(myMdmSettings.getMdmRules(), theVector);
 
 		return mdmLinkJson;
 	}
