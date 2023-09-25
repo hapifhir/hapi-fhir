@@ -23,13 +23,22 @@ import ca.uhn.fhir.cr.common.IRepositoryFactory;
 import ca.uhn.fhir.cr.repo.HapiFhirRepository;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.rest.server.RestfulServer;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class RepositoryConfig {
+	@Autowired(required = false)
+	private DaoRegistry myDaoRegistry;
+	@Autowired(required = false)
+	private RestfulServer myRestfulServer;
+
 	@Bean
-	IRepositoryFactory repositoryFactory(DaoRegistry theDaoRegistry, RestfulServer theRestfulServer) {
-		return rd -> new HapiFhirRepository(theDaoRegistry, rd, theRestfulServer);
+	IRepositoryFactory repositoryFactory() {
+		if (myDaoRegistry == null || myRestfulServer == null) {
+			return null;
+		}
+		return rd -> new HapiFhirRepository(myDaoRegistry, rd, myRestfulServer);
 	}
 }

@@ -26,6 +26,7 @@ import ca.uhn.fhir.cr.config.ProviderLoader;
 import ca.uhn.fhir.cr.config.ProviderSelector;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 
@@ -33,11 +34,19 @@ import java.util.Arrays;
 import java.util.Map;
 
 public class ExtractOperationConfig {
+	@Autowired(required = false)
+	EvaluationSettings myEvaluationSettings;
+	@Autowired(required = false)
+	private RestfulServer myRestfulServer;
+
 	@Bean
 	ca.uhn.fhir.cr.r4.IQuestionnaireResponseProcessorFactory r4QuestionnaireResponseProcessorFactory(
-			IRepositoryFactory theRepositoryFactory, EvaluationSettings theEvaluationSettings) {
+			IRepositoryFactory theRepositoryFactory) {
+		if (myEvaluationSettings == null) {
+			return null;
+		}
 		return rd -> new org.opencds.cqf.fhir.cr.questionnaireresponse.r4.QuestionnaireResponseProcessor(
-				theRepositoryFactory.create(rd), theEvaluationSettings);
+				theRepositoryFactory.create(rd), myEvaluationSettings);
 	}
 
 	@Bean
@@ -47,9 +56,10 @@ public class ExtractOperationConfig {
 	}
 
 	@Bean(name = "extractOperationLoader")
-	public ProviderLoader extractOperationLoader(
-			ApplicationContext theApplicationContext, FhirContext theFhirContext, RestfulServer theRestfulServer) {
-
+	public ProviderLoader extractOperationLoader(ApplicationContext theApplicationContext, FhirContext theFhirContext) {
+		if (myRestfulServer == null) {
+			return null;
+		}
 		var selector = new ProviderSelector(
 				theFhirContext,
 				Map.of(
@@ -57,6 +67,6 @@ public class ExtractOperationConfig {
 						Arrays.asList(
 								ca.uhn.fhir.cr.r4.questionnaireresponse.QuestionnaireResponseExtractProvider.class)));
 
-		return new ProviderLoader(theRestfulServer, theApplicationContext, selector);
+		return new ProviderLoader(myRestfulServer, theApplicationContext, selector);
 	}
 }
