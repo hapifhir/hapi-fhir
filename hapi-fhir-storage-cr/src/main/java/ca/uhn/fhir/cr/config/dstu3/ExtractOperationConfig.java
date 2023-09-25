@@ -26,28 +26,22 @@ import ca.uhn.fhir.cr.config.ProviderLoader;
 import ca.uhn.fhir.cr.config.ProviderSelector;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 
 import java.util.Arrays;
 import java.util.Map;
 
+@Configuration
+@ConditionalOnBean({IRepositoryFactory.class, RestfulServer.class, EvaluationSettings.class})
 public class ExtractOperationConfig {
-	@Autowired(required = false)
-	EvaluationSettings myEvaluationSettings;
-
-	@Autowired(required = false)
-	private RestfulServer myRestfulServer;
-
 	@Bean
 	ca.uhn.fhir.cr.dstu3.IQuestionnaireResponseProcessorFactory dstu3QuestionnaireResponseProcessorFactory(
-			IRepositoryFactory theRepositoryFactory) {
-		if (myEvaluationSettings == null) {
-			return null;
-		}
+			IRepositoryFactory theRepositoryFactory, EvaluationSettings theEvaluationSettings) {
 		return rd -> new org.opencds.cqf.fhir.cr.questionnaireresponse.dstu3.QuestionnaireResponseProcessor(
-				theRepositoryFactory.create(rd), myEvaluationSettings);
+				theRepositoryFactory.create(rd), theEvaluationSettings);
 	}
 
 	@Bean
@@ -57,10 +51,8 @@ public class ExtractOperationConfig {
 	}
 
 	@Bean(name = "extractOperationLoader")
-	public ProviderLoader extractOperationLoader(ApplicationContext theApplicationContext, FhirContext theFhirContext) {
-		if (myRestfulServer == null) {
-			return null;
-		}
+	public ProviderLoader extractOperationLoader(
+			ApplicationContext theApplicationContext, FhirContext theFhirContext, RestfulServer theRestfulServer) {
 		var selector = new ProviderSelector(
 				theFhirContext,
 				Map.of(
@@ -69,6 +61,6 @@ public class ExtractOperationConfig {
 								ca.uhn.fhir.cr.dstu3.questionnaireresponse.QuestionnaireResponseExtractProvider
 										.class)));
 
-		return new ProviderLoader(myRestfulServer, theApplicationContext, selector);
+		return new ProviderLoader(theRestfulServer, theApplicationContext, selector);
 	}
 }

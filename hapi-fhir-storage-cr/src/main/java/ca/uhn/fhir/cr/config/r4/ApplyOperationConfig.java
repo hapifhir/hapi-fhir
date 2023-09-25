@@ -26,38 +26,29 @@ import ca.uhn.fhir.cr.config.ProviderLoader;
 import ca.uhn.fhir.cr.config.ProviderSelector;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 
 import java.util.Arrays;
 import java.util.Map;
 
+@Configuration
+@ConditionalOnBean({IRepositoryFactory.class, RestfulServer.class, EvaluationSettings.class})
 public class ApplyOperationConfig {
-	@Autowired(required = false)
-	EvaluationSettings myEvaluationSettings;
-
-	@Autowired(required = false)
-	private RestfulServer myRestfulServer;
-
 	@Bean
 	ca.uhn.fhir.cr.r4.IActivityDefinitionProcessorFactory r4ActivityDefinitionProcessorFactory(
-			IRepositoryFactory theRepositoryFactory) {
-		if (myEvaluationSettings == null) {
-			return null;
-		}
+			IRepositoryFactory theRepositoryFactory, EvaluationSettings theEvaluationSettings) {
 		return rd -> new org.opencds.cqf.fhir.cr.activitydefinition.r4.ActivityDefinitionProcessor(
-				theRepositoryFactory.create(rd), myEvaluationSettings);
+				theRepositoryFactory.create(rd), theEvaluationSettings);
 	}
 
 	@Bean
 	ca.uhn.fhir.cr.r4.IPlanDefinitionProcessorFactory r4PlanDefinitionProcessorFactory(
-			IRepositoryFactory theRepositoryFactory) {
-		if (myEvaluationSettings == null) {
-			return null;
-		}
+			IRepositoryFactory theRepositoryFactory, EvaluationSettings theEvaluationSettings) {
 		return rd -> new org.opencds.cqf.fhir.cr.plandefinition.r4.PlanDefinitionProcessor(
-				theRepositoryFactory.create(rd), myEvaluationSettings);
+				theRepositoryFactory.create(rd), theEvaluationSettings);
 	}
 
 	@Bean
@@ -71,10 +62,8 @@ public class ApplyOperationConfig {
 	}
 
 	@Bean(name = "applyOperationLoader")
-	public ProviderLoader applyOperationLoader(ApplicationContext theApplicationContext, FhirContext theFhirContext) {
-		if (myRestfulServer == null) {
-			return null;
-		}
+	public ProviderLoader applyOperationLoader(
+			ApplicationContext theApplicationContext, FhirContext theFhirContext, RestfulServer theRestfulServer) {
 		var selector = new ProviderSelector(
 				theFhirContext,
 				Map.of(
@@ -83,6 +72,6 @@ public class ApplyOperationConfig {
 								ca.uhn.fhir.cr.r4.activitydefinition.ActivityDefinitionApplyProvider.class,
 								ca.uhn.fhir.cr.r4.plandefinition.PlanDefinitionApplyProvider.class)));
 
-		return new ProviderLoader(myRestfulServer, theApplicationContext, selector);
+		return new ProviderLoader(theRestfulServer, theApplicationContext, selector);
 	}
 }

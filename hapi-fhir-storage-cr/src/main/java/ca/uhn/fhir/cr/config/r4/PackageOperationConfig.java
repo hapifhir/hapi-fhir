@@ -26,28 +26,22 @@ import ca.uhn.fhir.cr.config.ProviderLoader;
 import ca.uhn.fhir.cr.config.ProviderSelector;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 
 import java.util.Arrays;
 import java.util.Map;
 
+@Configuration
+@ConditionalOnBean({IRepositoryFactory.class, RestfulServer.class, EvaluationSettings.class})
 public class PackageOperationConfig {
-	@Autowired(required = false)
-	EvaluationSettings myEvaluationSettings;
-
-	@Autowired(required = false)
-	private RestfulServer myRestfulServer;
-
 	@Bean
 	ca.uhn.fhir.cr.r4.IPlanDefinitionProcessorFactory r4PlanDefinitionProcessorFactory(
-			IRepositoryFactory theRepositoryFactory) {
-		if (myEvaluationSettings == null) {
-			return null;
-		}
+			IRepositoryFactory theRepositoryFactory, EvaluationSettings theEvaluationSettings) {
 		return rd -> new org.opencds.cqf.fhir.cr.plandefinition.r4.PlanDefinitionProcessor(
-				theRepositoryFactory.create(rd), myEvaluationSettings);
+				theRepositoryFactory.create(rd), theEvaluationSettings);
 	}
 
 	@Bean
@@ -57,12 +51,9 @@ public class PackageOperationConfig {
 
 	@Bean
 	ca.uhn.fhir.cr.r4.IQuestionnaireProcessorFactory r4QuestionnaireProcessorFactory(
-			IRepositoryFactory theRepositoryFactory) {
-		if (myEvaluationSettings == null) {
-			return null;
-		}
+			IRepositoryFactory theRepositoryFactory, EvaluationSettings theEvaluationSettings) {
 		return rd -> new org.opencds.cqf.fhir.cr.questionnaire.r4.QuestionnaireProcessor(
-				theRepositoryFactory.create(rd), myEvaluationSettings);
+				theRepositoryFactory.create(rd), theEvaluationSettings);
 	}
 
 	@Bean
@@ -71,10 +62,8 @@ public class PackageOperationConfig {
 	}
 
 	@Bean(name = "packageOperationLoader")
-	public ProviderLoader packageOperationLoader(ApplicationContext theApplicationContext, FhirContext theFhirContext) {
-		if (myRestfulServer == null) {
-			return null;
-		}
+	public ProviderLoader packageOperationLoader(
+			ApplicationContext theApplicationContext, FhirContext theFhirContext, RestfulServer theRestfulServer) {
 		var selector = new ProviderSelector(
 				theFhirContext,
 				Map.of(
@@ -83,6 +72,6 @@ public class PackageOperationConfig {
 								ca.uhn.fhir.cr.r4.questionnaire.QuestionnairePackageProvider.class,
 								ca.uhn.fhir.cr.r4.plandefinition.PlanDefinitionPackageProvider.class)));
 
-		return new ProviderLoader(myRestfulServer, theApplicationContext, selector);
+		return new ProviderLoader(theRestfulServer, theApplicationContext, selector);
 	}
 }
