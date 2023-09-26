@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 5336
+jira: SMILE-7406
+title: "Previously, on PostgreSQL, the $mdm-link-history would fail for unknown ids and all subsequent requests. This
+is now fixed."
