@@ -215,11 +215,11 @@ public class BulkDataExportProvider {
 	 * Group/[id]/$export
 	 */
 	@Operation(
-		name = ProviderConstants.OPERATION_EXPORT,
-		manualResponse = true,
-		idempotent = true,
-		typeName = "Group",
-		canonicalUrl = "http://hl7.org/fhir/uv/bulkdata/OperationDefinition/group-export")
+			name = ProviderConstants.OPERATION_EXPORT,
+			manualResponse = true,
+			idempotent = true,
+			typeName = "Group",
+			canonicalUrl = "http://hl7.org/fhir/uv/bulkdata/OperationDefinition/group-export")
 	public void groupExport(
 			@IdParam IIdType theIdParam,
 			@OperationParam(name = JpaConstants.PARAM_EXPORT_OUTPUT_FORMAT, min = 0, max = 1, typeName = "string")
