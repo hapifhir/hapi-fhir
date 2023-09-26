@@ -20,7 +20,9 @@
 package ca.uhn.hapi.fhir.cdshooks.api;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.cr.common.IRepositoryFactory;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.rest.server.RestfulServer;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import javax.annotation.Nonnull;
@@ -35,6 +37,16 @@ public interface ICdsConfigService {
 
 	@Nullable
 	default DaoRegistry getDaoRegistry() {
+		return null;
+	}
+
+	@Nullable
+	default IRepositoryFactory getRepositoryFactory() {
+		return null;
+	}
+
+	@Nullable
+	default RestfulServer getRestfulServer() {
 		return null;
 	}
 }

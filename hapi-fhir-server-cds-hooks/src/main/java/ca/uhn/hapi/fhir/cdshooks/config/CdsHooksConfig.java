@@ -163,7 +163,8 @@ public class CdsHooksConfig {
 	@Bean
 	public ICdsConfigService cdsConfigService(
 			FhirContext theFhirContext, @Qualifier(CDS_HOOKS_OBJECT_MAPPER_FACTORY) ObjectMapper theObjectMapper) {
-		return new CdsConfigServiceImpl(theFhirContext, theObjectMapper, myDaoRegistry);
+		return new CdsConfigServiceImpl(
+				theFhirContext, theObjectMapper, myDaoRegistry, myRepositoryFactory, myRestfulServer);
 	}
 
 	@Bean
