@@ -718,8 +718,8 @@ public class ServerCapabilityStatementProvider extends BaseServerCapabilityState
 	}
 
 	private void maybeAddBulkDataDeclarationToConformingToIg(
-			CapabilityStatement theCapabilityStatement, List<BaseMethodBinding> therServerBindings) {
-		boolean bulkExportEnabled = therServerBindings.stream()
+			CapabilityStatement theCapabilityStatement, List<BaseMethodBinding> theServerBindings) {
+		boolean bulkExportEnabled = theServerBindings.stream()
 				.filter(OperationMethodBinding.class::isInstance)
 				.map(OperationMethodBinding.class::cast)
 				.map(OperationMethodBinding::getName)

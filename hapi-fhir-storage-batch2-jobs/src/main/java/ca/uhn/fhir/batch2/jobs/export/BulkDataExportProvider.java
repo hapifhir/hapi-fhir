@@ -129,7 +129,8 @@ public class BulkDataExportProvider {
 			name = ProviderConstants.OPERATION_EXPORT,
 			global = false /* set to true once we can handle this */,
 			manualResponse = true,
-			idempotent = true)
+			idempotent = true,
+			canonicalUrl = "http://hl7.org/fhir/uv/bulkdata/OperationDefinition/export")
 	public void export(
 			@OperationParam(name = JpaConstants.PARAM_EXPORT_OUTPUT_FORMAT, min = 0, max = 1, typeName = "string")
 					IPrimitiveType<String> theOutputFormat,
@@ -213,7 +214,12 @@ public class BulkDataExportProvider {
 	/**
 	 * Group/[id]/$export
 	 */
-	@Operation(name = ProviderConstants.OPERATION_EXPORT, manualResponse = true, idempotent = true, typeName = "Group")
+	@Operation(
+		name = ProviderConstants.OPERATION_EXPORT,
+		manualResponse = true,
+		idempotent = true,
+		typeName = "Group",
+		canonicalUrl = "http://hl7.org/fhir/uv/bulkdata/OperationDefinition/group-export")
 	public void groupExport(
 			@IdParam IIdType theIdParam,
 			@OperationParam(name = JpaConstants.PARAM_EXPORT_OUTPUT_FORMAT, min = 0, max = 1, typeName = "string")
@@ -327,7 +333,8 @@ public class BulkDataExportProvider {
 			name = ProviderConstants.OPERATION_EXPORT,
 			manualResponse = true,
 			idempotent = true,
-			typeName = "Patient")
+			typeName = "Patient",
+			canonicalUrl = "http://hl7.org/fhir/uv/bulkdata/OperationDefinition/patient-export")
 	public void patientExport(
 			@OperationParam(name = JpaConstants.PARAM_EXPORT_OUTPUT_FORMAT, min = 0, max = 1, typeName = "string")
 					IPrimitiveType<String> theOutputFormat,

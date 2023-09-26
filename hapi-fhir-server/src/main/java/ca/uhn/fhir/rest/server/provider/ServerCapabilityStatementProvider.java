@@ -545,8 +545,8 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 	}
 
 	private void maybeAddBulkDataDeclarationToConformingToIg(
-			FhirTerser theTerser, IBaseConformance theBaseConformance, List<BaseMethodBinding> therServerBindings) {
-		boolean bulkExportEnabled = therServerBindings.stream()
+			FhirTerser theTerser, IBaseConformance theBaseConformance, List<BaseMethodBinding> theServerBindings) {
+		boolean bulkExportEnabled = theServerBindings.stream()
 				.filter(OperationMethodBinding.class::isInstance)
 				.map(OperationMethodBinding.class::cast)
 				.map(OperationMethodBinding::getName)
