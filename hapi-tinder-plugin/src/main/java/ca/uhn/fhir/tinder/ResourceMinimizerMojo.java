@@ -198,6 +198,7 @@ public class ResourceMinimizerMojo extends AbstractMojo {
 		//		byteCount += m.getByteCount();
 		//		fileCount += m.getFileCount();
 		//
+
 		//		m = new ResourceMinimizerMojo();
 		//		m.myCtx = ctxDstu3;
 		//		m.targetDirectory = new

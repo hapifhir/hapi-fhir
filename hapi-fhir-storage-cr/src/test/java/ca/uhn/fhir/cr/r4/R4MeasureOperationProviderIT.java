@@ -1,6 +1,5 @@
 package ca.uhn.fhir.cr.r4;
 
-import ca.uhn.fhir.cr.BaseCrR4TestServer;
 import ca.uhn.fhir.cr.r4.measure.MeasureOperationsProvider;
 import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.IdType;
@@ -20,8 +19,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(SpringExtension.class)
-class R4MeasureOperationProviderIT extends BaseCrR4TestServer
-{
+class R4MeasureOperationProviderIT extends BaseCrR4TestServer {
 	@Autowired
 	MeasureOperationsProvider myMeasureOperationsProvider;
 
@@ -49,6 +47,11 @@ class R4MeasureOperationProviderIT extends BaseCrR4TestServer
 	void testMeasureEvaluate_EXM130()  {
 		loadBundle("ColorectalCancerScreeningsFHIR-bundle.json");
 		runEvaluateMeasure("2019-01-01", "2019-12-31", "Patient/numer-EXM130", "ColorectalCancerScreeningsFHIR", "Individual", null);
+	}
+	@Test
+	void testMeasureEvaluate_EXM104() {
+		loadBundle("Exm104FhirR4MeasureBundle.json");
+		runEvaluateMeasure("2019-01-01", "2019-12-31", "Patient/numer-EXM104", "measure-EXM104-8.2.000", "Individual", null);
 	}
 
 	private void runWithPatient(String measureId, String patientId, int initialPopulationCount, int denominatorCount,

@@ -179,3 +179,10 @@ Clients may want to disable this setting for performance reasons as it populates
 
 Setting this property explicitly to false disables the feature:  [Non Resource DB History](/apidocs/hapi-fhir-storage/ca/uhn/fhir/jpa/api/config/JpaStorageSettings.html#isNonResourceDbHistoryEnabled())
 
+# Prevent Conditional Updates to Invalidate Match Criteria
+
+JPA Server prevents conditional updated to invalidate match criteria for first version of resources. 
+This setting, disabled by default, allows to configure the same behaviour for later versions.
+
+Setting this property explicitly to true enables the feature: [Prevent Conditional Updates Invalidating Match Criteria](/apidocs/hapi-fhir-storage/ca/uhn/fhir/jpa/api/config/JpaStorageSettings.html#isPreventInvalidatingConditionalMatchCriteria())
+

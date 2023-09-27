@@ -25,6 +25,7 @@ import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.mdm.api.IMdmLink;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.hibernate.envers.AuditTable;
 import org.hibernate.envers.Audited;
@@ -164,6 +165,7 @@ public class MdmLink extends AuditableBasePartitionable implements IMdmLink<JpaP
 	private Boolean myHadToCreateNewGoldenResource;
 
 	@Column(name = "VECTOR")
+	@JsonIgnore
 	private Long myVector;
 
 	@Column(name = "SCORE")

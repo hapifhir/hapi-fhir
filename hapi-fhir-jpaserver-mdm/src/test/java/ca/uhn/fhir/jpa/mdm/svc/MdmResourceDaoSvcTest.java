@@ -2,28 +2,41 @@ package ca.uhn.fhir.jpa.mdm.svc;
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.entity.PartitionEntity;
+import ca.uhn.fhir.jpa.interceptor.PatientIdPartitionInterceptor;
 import ca.uhn.fhir.jpa.mdm.BaseMdmR4Test;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
+import ca.uhn.fhir.mdm.api.IMdmResourceDaoSvc;
 import ca.uhn.fhir.mdm.util.MdmResourceUtil;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
+import ca.uhn.fhir.rest.param.StringOrListParam;
+import ca.uhn.fhir.rest.param.StringParam;
 import org.hl7.fhir.instance.model.api.IAnyResource;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Optional;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class MdmResourceDaoSvcTest extends BaseMdmR4Test {
 	private static final String TEST_EID = "TEST_EID";
 	@Autowired
-	MdmResourceDaoSvcImpl myResourceDaoSvc;
+	IMdmResourceDaoSvc myResourceDaoSvc;
+	@Autowired
+	private ISearchParamExtractor mySearchParamExtractor;
 
 	@Override
 	@AfterEach
@@ -75,6 +88,74 @@ public class MdmResourceDaoSvcTest extends BaseMdmR4Test {
 		Optional<IAnyResource> foundSourcePatient = myResourceDaoSvc.searchGoldenResourceByEID(TEST_EID, "Patient", requestPartitionId);
 		assertTrue(foundSourcePatient.isPresent());
 		assertThat(foundSourcePatient.get().getIdElement().toUnqualifiedVersionless().getValue(), is(goodSourcePatient.getIdElement().toUnqualifiedVersionless().getValue()));
+	}
+
+	@Test
+	public void testSearchForMultiplePatientsByIdInPartitionedEnvironment() {
+		// setup
+		int resourceCount = 3;
+		String[] idPrefaces = new String[] {
+			"RED", "BLUE", "GREEN"
+		};
+
+		SearchParameterMap map;
+		IBundleProvider result;
+
+		myPartitionSettings.setPartitioningEnabled(true);
+		myPartitionSettings.setUnnamedPartitionMode(true);
+		myPartitionSettings.setIncludePartitionInSearchHashes(false);
+
+		PatientIdPartitionInterceptor interceptor = new PatientIdPartitionInterceptor(myFhirContext, mySearchParamExtractor, myPartitionSettings);
+		myInterceptorRegistry.registerInterceptor(interceptor);
+
+		try {
+			StringOrListParam patientIds = new StringOrListParam();
+			for (int i = 0; i < resourceCount; i++) {
+				String idPreface = idPrefaces[i];
+				Patient patient = new Patient();
+				patient.setId("Patient/" + idPreface + i);
+				// patients must be created with a forced id for PatientId partitioning
+				Patient patientOnPartition = createPatientWithUpdate(patient,
+					true, false, true);
+				patientIds.add(new StringParam("Patient/" +
+					patientOnPartition.getIdElement().getIdPart()
+				));
+			}
+
+			// test
+			map = SearchParameterMap.newSynchronous();
+			map.add("_id", patientIds);
+			result = myPatientDao.search(map, new SystemRequestDetails());
+
+			// verify
+			assertNotNull(result);
+			assertFalse(result.isEmpty());
+			List<IBaseResource> resources = result.getAllResources();
+			assertEquals(resourceCount, resources.size());
+			int count = 0;
+			for (IBaseResource resource : resources) {
+				String id = idPrefaces[count++];
+				assertTrue(resource instanceof Patient);
+				Patient patient = (Patient) resource;
+				assertTrue(patient.getId().contains(id));
+			}
+
+			// ensure single id works too
+			StringParam firstId = patientIds.getValuesAsQueryTokens().get(0);
+			map = SearchParameterMap.newSynchronous();
+			map.add("_id", firstId);
+			result = myPatientDao.search(map, new SystemRequestDetails());
+
+			// verify 2
+			assertNotNull(result);
+			resources = result.getAllResources();
+			assertEquals(1, resources.size());
+			assertTrue(result.getAllResources().get(0) instanceof Patient);
+			Patient patient = (Patient) result.getAllResources().get(0);
+			assertTrue(patient.getId().contains(firstId.getValue()));
+		} finally {
+			myInterceptorRegistry.unregisterInterceptor(interceptor);
+		}
 	}
 
 	@Test

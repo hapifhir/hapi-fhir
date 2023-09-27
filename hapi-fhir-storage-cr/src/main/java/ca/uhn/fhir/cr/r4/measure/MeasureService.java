@@ -19,22 +19,10 @@
  */
 package ca.uhn.fhir.cr.r4.measure;
 
-import ca.uhn.fhir.cr.common.IDaoRegistryUser;
-import ca.uhn.fhir.cr.common.IDataProviderFactory;
-import ca.uhn.fhir.cr.common.IFhirDalFactory;
-import ca.uhn.fhir.cr.common.ILibrarySourceProviderFactory;
-import ca.uhn.fhir.cr.common.ITerminologyProviderFactory;
-import ca.uhn.fhir.cr.constant.MeasureReportConstants;
-import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
-import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
-import ca.uhn.fhir.rest.api.server.IBundleProvider;
-import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.util.BundleBuilder;
 import org.apache.commons.lang3.StringUtils;
-import org.cqframework.cql.cql2elm.LibrarySourceProvider;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
@@ -44,37 +32,44 @@ import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.IdType;
-import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.MeasureReport;
+import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.SearchParameter;
 import org.hl7.fhir.r4.model.StringType;
-import org.opencds.cqf.cql.engine.data.DataProvider;
-import org.opencds.cqf.cql.engine.fhir.terminology.R4FhirTerminologyProvider;
-import org.opencds.cqf.cql.engine.terminology.TerminologyProvider;
-import org.opencds.cqf.cql.evaluator.fhir.dal.FhirDal;
-import org.opencds.cqf.cql.evaluator.fhir.util.Clients;
-import org.opencds.cqf.cql.evaluator.library.EvaluationSettings;
-import org.opencds.cqf.cql.evaluator.measure.MeasureEvaluationOptions;
+import org.opencds.cqf.fhir.api.Repository;
+import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
+import org.opencds.cqf.fhir.cr.measure.r4.R4MeasureProcessor;
+import org.opencds.cqf.fhir.cr.measure.r4.R4RepositorySubjectProvider;
+import org.opencds.cqf.fhir.utility.iterable.BundleIterator;
+import org.opencds.cqf.fhir.utility.monad.Eithers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static ca.uhn.fhir.cr.constant.MeasureReportConstants.COUNTRY_CODING_SYSTEM_CODE;
-import static ca.uhn.fhir.cr.constant.MeasureReportConstants.MEASUREREPORT_MEASURE_SUPPLEMENTALDATA_EXTENSION;
-import static ca.uhn.fhir.cr.constant.MeasureReportConstants.MEASUREREPORT_SUPPLEMENTALDATA_SEARCHPARAMETER_DEFINITION_DATE;
-import static ca.uhn.fhir.cr.constant.MeasureReportConstants.MEASUREREPORT_SUPPLEMENTALDATA_SEARCHPARAMETER_URL;
-import static ca.uhn.fhir.cr.constant.MeasureReportConstants.MEASUREREPORT_SUPPLEMENTALDATA_SEARCHPARAMETER_VERSION;
-import static ca.uhn.fhir.cr.constant.MeasureReportConstants.US_COUNTRY_CODE;
-import static ca.uhn.fhir.cr.constant.MeasureReportConstants.US_COUNTRY_DISPLAY;
+import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.COUNTRY_CODING_SYSTEM_CODE;
+import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.MEASUREREPORT_MEASURE_SUPPLEMENTALDATA_EXTENSION;
+import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.MEASUREREPORT_PRODUCT_LINE_EXT_URL;
+import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.MEASUREREPORT_SUPPLEMENTALDATA_SEARCHPARAMETER_DEFINITION_DATE;
+import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.MEASUREREPORT_SUPPLEMENTALDATA_SEARCHPARAMETER_URL;
+import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.MEASUREREPORT_SUPPLEMENTALDATA_SEARCHPARAMETER_VERSION;
+import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.US_COUNTRY_CODE;
+import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.US_COUNTRY_DISPLAY;
 
-public class MeasureService implements IDaoRegistryUser {
+public class MeasureService {
 
+	private final Repository myRepository;
+	private final MeasureEvaluationOptions myMeasureEvaluationOptions;
 	private Logger ourLogger = LoggerFactory.getLogger(MeasureService.class);
+
+	public MeasureService(Repository theRepository, MeasureEvaluationOptions theMeasureEvaluationOptions) {
+		this.myRepository = theRepository;
+		this.myMeasureEvaluationOptions = theMeasureEvaluationOptions;
+	}
 
 	public static final List<ContactDetail> CQI_CONTACTDETAIL = Collections.singletonList(new ContactDetail()
 			.addTelecom(new ContactPoint()
@@ -106,49 +101,6 @@ public class MeasureService implements IDaoRegistryUser {
 			.setXpathUsage(SearchParameter.XPathUsageType.NORMAL)
 			.setTitle("Supplemental Data")
 			.setId("deqm-measurereport-supplemental-data");
-
-	@Autowired
-	protected ITerminologyProviderFactory myTerminologyProviderFactory;
-
-	@Autowired
-	protected IDataProviderFactory myCqlDataProviderFactory;
-
-	@Autowired
-	protected org.opencds.cqf.cql.evaluator.builder.DataProviderFactory myDataProviderFactory;
-
-	@Autowired
-	protected ILibrarySourceProviderFactory myLibraryContentProviderFactory;
-
-	@Autowired
-	protected IFhirDalFactory myFhirDalFactory;
-
-	@Autowired
-	protected Map<org.cqframework.cql.elm.execution.VersionedIdentifier, org.cqframework.cql.elm.execution.Library>
-			myGlobalLibraryCache;
-
-	@Autowired
-	protected MeasureEvaluationOptions myMeasureEvaluationOptions;
-
-	@Autowired
-	protected EvaluationSettings myEvaluationSettings;
-
-	@Autowired
-	protected DaoRegistry myDaoRegistry;
-
-	protected RequestDetails myRequestDetails;
-
-	public RequestDetails getRequestDetails() {
-		return this.myRequestDetails;
-	}
-
-	/**
-	 * Get The details (such as tenant) of this request. Usually auto-populated HAPI.
-	 *
-	 * @return RequestDetails
-	 */
-	public void setRequestDetails(RequestDetails theRequestDetails) {
-		this.myRequestDetails = theRequestDetails;
-	}
 
 	/**
 	 * Implements the <a href=
@@ -185,121 +137,80 @@ public class MeasureService implements IDaoRegistryUser {
 
 		ensureSupplementalDataElementSearchParameter();
 
-		Measure measure = read(theId, myRequestDetails);
-
-		TerminologyProvider terminologyProvider;
-
-		if (theTerminologyEndpoint != null) {
-			IGenericClient client = Clients.forEndpoint(getFhirContext(), theTerminologyEndpoint);
-			terminologyProvider = new R4FhirTerminologyProvider(client);
-		} else {
-			terminologyProvider = this.myTerminologyProviderFactory.create(myRequestDetails);
-		}
-
-		DataProvider dataProvider = this.myCqlDataProviderFactory.create(myRequestDetails, terminologyProvider);
-		LibrarySourceProvider libraryContentProvider = this.myLibraryContentProviderFactory.create(myRequestDetails);
-		FhirDal fhirDal = this.myFhirDalFactory.create(myRequestDetails);
-
-		org.opencds.cqf.cql.evaluator.measure.r4.R4MeasureProcessor measureProcessor =
-				new org.opencds.cqf.cql.evaluator.measure.r4.R4MeasureProcessor(
-						null,
-						this.myDataProviderFactory,
-						null,
-						null,
-						null,
-						terminologyProvider,
-						libraryContentProvider,
-						dataProvider,
-						fhirDal,
-						myMeasureEvaluationOptions,
-						myEvaluationSettings.getCqlOptions(),
-						myEvaluationSettings.getLibraryCache());
+		var r4MeasureProcessor =
+				new R4MeasureProcessor(myRepository, myMeasureEvaluationOptions, new R4RepositorySubjectProvider());
 
 		MeasureReport measureReport = null;
 
+		// SUBJECT LIST SETTERS
 		if (StringUtils.isBlank(theSubject) && StringUtils.isNotBlank(thePractitioner)) {
-			List<String> subjectIds = getPractitionerPatients(thePractitioner, myRequestDetails);
-			measureReport = measureProcessor.evaluateMeasure(
-					measure.getUrl(),
+			List<String> subjectIds = getPractitionerPatients(thePractitioner, myRepository);
+
+			measureReport = r4MeasureProcessor.evaluateMeasure(
+					Eithers.forMiddle3(theId),
 					thePeriodStart,
 					thePeriodEnd,
 					theReportType,
 					subjectIds,
-					theLastReceivedOn,
-					null,
-					null,
-					null,
 					theAdditionalData);
-		} else if (StringUtils.isNotBlank(theSubject)) {
-			measureReport = measureProcessor.evaluateMeasure(
-					measure.getUrl(),
-					thePeriodStart,
-					thePeriodEnd,
-					theReportType,
-					theSubject,
-					null,
-					theLastReceivedOn,
-					null,
-					null,
-					null,
-					theAdditionalData);
-		} else if (StringUtils.isBlank(theSubject) && StringUtils.isBlank(thePractitioner)) {
-			measureReport = measureProcessor.evaluateMeasure(
-					measure.getUrl(),
-					thePeriodStart,
-					thePeriodEnd,
-					theReportType,
-					null,
-					null,
-					theLastReceivedOn,
-					null,
-					null,
-					null,
-					theAdditionalData);
-		}
 
+		} else if (StringUtils.isNotBlank(theSubject)) {
+			measureReport = r4MeasureProcessor.evaluateMeasure(
+					Eithers.forMiddle3(theId),
+					thePeriodStart,
+					thePeriodEnd,
+					theReportType,
+					Collections.singletonList(theSubject),
+					theAdditionalData);
+
+		} else if (StringUtils.isBlank(theSubject) && StringUtils.isBlank(thePractitioner)) {
+			measureReport = r4MeasureProcessor.evaluateMeasure(
+					Eithers.forMiddle3(theId), thePeriodStart, thePeriodEnd, theReportType, null, theAdditionalData);
+		}
+		// add ProductLine after report is generated
 		addProductLineExtension(measureReport, theProductLine);
 
 		return measureReport;
 	}
 
-	private List<String> getPractitionerPatients(String thePractitioner, RequestDetails theRequestDetails) {
-		SearchParameterMap map = SearchParameterMap.newSynchronous();
-		map.add(
+	private List<String> getPractitionerPatients(String thePractitioner, Repository theRepository) {
+		List<String> patients = new ArrayList<>();
+
+		Map<String, List<IQueryParameterType>> map = new HashMap<>();
+		map.put(
 				"general-practitioner",
-				new ReferenceParam(
+				Collections.singletonList(new ReferenceParam(
 						thePractitioner.startsWith("Practitioner/")
 								? thePractitioner
-								: "Practitioner/" + thePractitioner));
-		List<String> patients = new ArrayList<>();
-		IBundleProvider patientProvider =
-				myDaoRegistry.getResourceDao("Patient").search(map, theRequestDetails);
-		List<IBaseResource> patientList = patientProvider.getAllResources();
-		patientList.forEach(x -> patients.add(
-				x.getIdElement().getResourceType() + "/" + x.getIdElement().getIdPart()));
+								: "Practitioner/" + thePractitioner)));
+
+		var bundle = theRepository.search(Bundle.class, Patient.class, map);
+		var iterator = new BundleIterator<>(theRepository, bundle);
+
+		while (iterator.hasNext()) {
+			var patient = iterator.next().getResource();
+			var refString = patient.getIdElement().getResourceType() + "/"
+					+ patient.getIdElement().getIdPart();
+			patients.add(refString);
+		}
 		return patients;
 	}
 
 	private void addProductLineExtension(MeasureReport theMeasureReport, String theProductLine) {
 		if (theProductLine != null) {
 			Extension ext = new Extension();
-			ext.setUrl(MeasureReportConstants.MEASUREREPORT_PRODUCT_LINE_EXT_URL);
+			ext.setUrl(MEASUREREPORT_PRODUCT_LINE_EXT_URL);
 			ext.setValue(new StringType(theProductLine));
 			theMeasureReport.addExtension(ext);
 		}
 	}
 
-	@Override
-	public DaoRegistry getDaoRegistry() {
-		return this.myDaoRegistry;
-	}
-
 	protected void ensureSupplementalDataElementSearchParameter() {
 		// create a transaction bundle
-		BundleBuilder builder = new BundleBuilder(getFhirContext());
+		BundleBuilder builder = new BundleBuilder(myRepository.fhirContext());
 
 		// set the request to be condition on code == supplemental data
 		builder.addTransactionCreateEntry(SUPPLEMENTAL_DATA_SEARCHPARAMETER).conditional("code=supplemental-data");
-		transaction(builder.getBundle(), this.myRequestDetails);
+		myRepository.transaction(builder.getBundle());
 	}
 }
