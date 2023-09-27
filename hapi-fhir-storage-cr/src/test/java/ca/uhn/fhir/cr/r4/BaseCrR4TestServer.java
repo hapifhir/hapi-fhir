@@ -2,6 +2,10 @@ package ca.uhn.fhir.cr.r4;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.cr.IResourceLoader;
+import ca.uhn.fhir.cr.config.r4.ApplyOperationConfig;
+import ca.uhn.fhir.cr.config.r4.ExtractOperationConfig;
+import ca.uhn.fhir.cr.config.r4.PackageOperationConfig;
+import ca.uhn.fhir.cr.config.r4.PopulateOperationConfig;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
@@ -35,7 +39,13 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 
-@ContextConfiguration(classes = {TestCrR4Config.class})
+@ContextConfiguration(classes = {
+	TestCrR4Config.class,
+	ApplyOperationConfig.class,
+	ExtractOperationConfig.class,
+	PackageOperationConfig.class,
+	PopulateOperationConfig.class
+})
 public abstract class BaseCrR4TestServer extends BaseJpaR4Test implements IResourceLoader {
 
 	public static IGenericClient ourClient;

@@ -31,12 +31,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 @Configuration
-@Import({TestCrConfig.class, CrR4Config.class,
-	ApplyOperationConfig.class,
-	ExtractOperationConfig.class,
-	PackageOperationConfig.class,
-	PopulateOperationConfig.class
-})
+@Import({TestCrConfig.class, CrR4Config.class})
 public class TestCrR4Config {
 	@Primary
 	@Bean

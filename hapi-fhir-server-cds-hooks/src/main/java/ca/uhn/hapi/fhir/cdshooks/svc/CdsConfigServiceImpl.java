@@ -20,7 +20,9 @@
 package ca.uhn.hapi.fhir.cdshooks.svc;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.cr.common.IRepositoryFactory;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.hapi.fhir.cdshooks.api.ICdsConfigService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -31,14 +33,20 @@ public class CdsConfigServiceImpl implements ICdsConfigService {
 	private final FhirContext myFhirContext;
 	private final ObjectMapper myObjectMapper;
 	private final DaoRegistry myDaoRegistry;
+	private final IRepositoryFactory myRepositoryFactory;
+	private final RestfulServer myRestfulServer;
 
 	public CdsConfigServiceImpl(
 			@Nonnull FhirContext theFhirContext,
 			@Nonnull ObjectMapper theObjectMapper,
-			@Nullable DaoRegistry theDaoRegistry) {
+			@Nullable DaoRegistry theDaoRegistry,
+			@Nullable IRepositoryFactory theRepositoryFactory,
+			@Nullable RestfulServer theRestfulServer) {
 		myFhirContext = theFhirContext;
 		myObjectMapper = theObjectMapper;
 		myDaoRegistry = theDaoRegistry;
+		myRepositoryFactory = theRepositoryFactory;
+		myRestfulServer = theRestfulServer;
 	}
 
 	@Nonnull
@@ -57,5 +65,17 @@ public class CdsConfigServiceImpl implements ICdsConfigService {
 	@Override
 	public DaoRegistry getDaoRegistry() {
 		return myDaoRegistry;
+	}
+
+	@Nullable
+	@Override
+	public IRepositoryFactory getRepositoryFactory() {
+		return myRepositoryFactory;
+	}
+
+	@Nullable
+	@Override
+	public RestfulServer getRestfulServer() {
+		return myRestfulServer;
 	}
 }
