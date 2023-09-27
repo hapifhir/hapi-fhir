@@ -164,7 +164,7 @@ public interface IMdmMetricSvcTest {
 		assertEquals(expected.size(), actual.size());
 		for (String score : expected.keySet()) {
 			assertTrue(actual.containsKey(score), String.format("Score of %s is not in results", score));
-			assertEquals(expected.get(score), actual.get(score));
+			assertEquals(expected.get(score), actual.get(score), score);
 		}
 	}
 

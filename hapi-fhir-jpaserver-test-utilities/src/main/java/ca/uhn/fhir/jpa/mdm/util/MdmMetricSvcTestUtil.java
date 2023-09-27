@@ -14,6 +14,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+
 /**
  * This provides parameter methods for the {@link ca.uhn.fhir.jpa.mdm.IMdmMetricSvcTest}.
  */
@@ -261,7 +263,7 @@ public class MdmMetricSvcTestUtil {
 				G3, AUTO, POSSIBLE_MATCH, P3
 				G4, AUTO, MATCH, P4
 			""");
-			p.setScores(Arrays.asList(.4D, .4D, .1D, .3D));
+			p.setScores(Arrays.asList(0.4D, 0.4D, 0.1D, 0.3D));
 			p.addMatchType(MdmMatchResultEnum.POSSIBLE_MATCH);
 			MdmMetrics metrics = new MdmMetrics();
 			metrics.setResourceType("Patient");
@@ -286,24 +288,43 @@ public class MdmMetricSvcTestUtil {
 	}
 
 	private static void populateScoreIntoMetrics(LinkScoreMetricTestParams p, MdmMetrics metrics) {
+		String initialState = p.getInitialState();
+		Map<Integer, MdmMatchResultEnum> indexToMatchResult = new HashMap<>();
+		if (isNotBlank(initialState)) {
+			String[] states = initialState.split("\n");
+			int len = states.length;
+			for (int i = 0; i < len; i++) {
+				String state = states[i];
+				String[] values = state.split(",");
+				indexToMatchResult.put(i, MdmMatchResultEnum.valueOf(values[2].trim()));
+			}
+		}
+
 		Map<Double, Long> score2Count = new HashMap<>();
 		long nullCount = 0;
-		for (Double d : p.getScores()) {
-			if (d == null) {
-				nullCount++;
-			} else {
-				if (!score2Count.containsKey(d)) {
-					score2Count.put(d, 0L);
+		for (int i = 0; i < p.getScores().size(); i++) {
+			MdmMatchResultEnum matchResult = indexToMatchResult.get(i);
+			// if it's not a filtered value, add it to the expected metrics
+			if (p.getMatchFilter().isEmpty() || p.getMatchFilter().contains(matchResult)) {
+				Double d = p.getScores().get(i);
+				if (d == null) {
+					nullCount++;
+				} else {
+					if (!score2Count.containsKey(d)) {
+						score2Count.put(d, 0L);
+					}
+					score2Count.put(d, score2Count.get(d) + 1);
 				}
-				score2Count.put(d, score2Count.get(d) + 1);
 			}
 		}
 		metrics.addScore(BaseMdmMetricSvc.NULL_VALUE, nullCount);
 		for (int i = 0; i < BaseMdmMetricSvc.BUCKETS; i++) {
-			float bucket = (float) (i + 1) / BaseMdmMetricSvc.BUCKETS;
+			double bucket = (double) Math.round((float) (100 * (i + 1)) / BaseMdmMetricSvc.BUCKETS) / 100;
 			long count = 0;
-			if (score2Count.containsKey((double) bucket)) {
-				count = score2Count.get((double) bucket);
+			// TODO - do not add it if the corresponding link does not have
+			// the correct MATCH_RESULT value
+			if (score2Count.containsKey(bucket)) {
+				count = score2Count.get(bucket);
 			}
 			if (i == 0) {
 				metrics.addScore(String.format(BaseMdmMetricSvc.FIRST_BUCKET, bucket), count);

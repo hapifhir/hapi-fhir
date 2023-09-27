@@ -19,16 +19,29 @@ public abstract class BaseMdmMetricSvc implements IMdmMetricSvc {
 	 */
 	public static final int BUCKETS = 100;
 
+	/**
+	 * The NULL label
+	 */
 	public static final String NULL_VALUE = "NULL";
 
+	/**
+	 * The label for the first bucket
+	 */
 	public static final String FIRST_BUCKET = "x_<_%.2f";
 
+	/**
+	 * The label for the nth bucket (2... buckets)
+	 */
 	public static final String NTH_BUCKET = "%.2f_<_x_<=_%.2f";
 
 	protected final DaoRegistry myDaoRegistry;
 
 	public BaseMdmMetricSvc(DaoRegistry theDaoRegistry) {
 		myDaoRegistry = theDaoRegistry;
+	}
+
+	protected double getBucket(int theBucketId) {
+		return (double) Math.round((float) (100 * theBucketId) / BUCKETS) / 100;
 	}
 
 	protected MdmResourceMetrics generateResourceMetrics(GenerateMdmMetricsParameters theParameters) {

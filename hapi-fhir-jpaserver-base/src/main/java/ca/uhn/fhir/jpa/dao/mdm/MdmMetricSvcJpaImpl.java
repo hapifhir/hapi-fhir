@@ -12,13 +12,13 @@ import ca.uhn.fhir.mdm.model.MdmMetrics;
 import ca.uhn.fhir.mdm.model.MdmResourceMetrics;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.Query;
 import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.Query;
 
 public class MdmMetricSvcJpaImpl extends BaseMdmMetricSvc {
 
@@ -75,16 +75,16 @@ public class MdmMetricSvcJpaImpl extends BaseMdmMetricSvc {
 		sb.append("sum(case when ml.SCORE is null then 1 else 0 end) as B_" + NULL_VALUE);
 
 		for (int i = 0; i < BUCKETS; i++) {
-			float bucket = (float) (i + 1) / BUCKETS;
+			double bucket = getBucket(i + 1);
 			sb.append(",\n");
 			if (i == 0) {
-				// score < .01
-				sb.append(String.format("sum(case when ml.SCORE < %.2f then 1 else 0 end) as B%d", bucket, i));
+				// score <= .01
+				sb.append(String.format("sum(case when ml.SCORE <= %.2f then 1 else 0 end) as B%d", bucket, i));
 			} else {
-				// score >= i/100 && score < i/100
+				// score > i/100 && score <= i/100
 				sb.append(String.format(
-						"sum(case when ml.SCORE < %.2f then (case when ml.score >= %.2f then 1 else 0 end) else 0 end) as B%d",
-						(float) (i - 1) / BUCKETS, bucket, i));
+					"sum(case when ml.score > %.2f and ml.SCORE <= %.2f then 1 else 0 end) as B%d",
+					getBucket(i), bucket, i));
 			}
 		}
 
@@ -110,13 +110,13 @@ public class MdmMetricSvcJpaImpl extends BaseMdmMetricSvc {
 		for (int i = 0; i < length; i++) {
 			// if there's nothing in the db, these values will all be null
 			BigInteger bi = row[i] != null ? (BigInteger) row[i] : BigInteger.valueOf(0);
-			float bucket = (float) i / BUCKETS;
+			double bucket = getBucket(i);
 			if (i == 0) {
 				metrics.addScore(NULL_VALUE, bi.longValue());
 			} else if (i == 1) {
 				metrics.addScore(String.format(FIRST_BUCKET, bucket), bi.longValue());
 			} else {
-				metrics.addScore(String.format(NTH_BUCKET, (float) (i - 1) / BUCKETS, bucket), bi.longValue());
+				metrics.addScore(String.format(NTH_BUCKET, getBucket(i - 1), bucket), bi.longValue());
 			}
 		}
 
