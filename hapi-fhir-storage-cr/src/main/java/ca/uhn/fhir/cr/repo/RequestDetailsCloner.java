@@ -67,7 +67,6 @@ class RequestDetailsCloner {
 		}
 
 		DetailsBuilder setParameters(IBaseParameters theParameters) {
-			// myDetails.setResource(theParameters);
 			IParser parser = myDetails.getServer().getFhirContext().newJsonParser();
 			myDetails.setRequestContents(
 					parser.encodeResourceToString(theParameters).getBytes());

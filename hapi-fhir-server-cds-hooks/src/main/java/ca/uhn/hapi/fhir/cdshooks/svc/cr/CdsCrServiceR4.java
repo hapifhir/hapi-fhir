@@ -79,7 +79,6 @@ public class CdsCrServiceR4 implements ICdsCrService {
 
 	public Parameters encodeParams(CdsServiceRequestJson theJson) {
 		Parameters parameters = parameters()
-				// .addParameter(part(APPLY_PARAMETER_CANONICAL, canonical))
 				.addParameter(part(APPLY_PARAMETER_SUBJECT, theJson.getContext().getString(CDS_PARAMETER_PATIENT_ID)));
 		if (theJson.getContext().containsKey(CDS_PARAMETER_USER_ID)) {
 			parameters.addParameter(
@@ -177,14 +176,16 @@ public class CdsCrServiceR4 implements ICdsCrService {
 		assert theResponse instanceof Bundle;
 		myResponseBundle = (Bundle) theResponse;
 		myServiceResponse = new CdsServiceResponseJson();
-		RequestGroup mainRequest =
-				(RequestGroup) myResponseBundle.getEntry().get(0).getResource();
-		CanonicalType canonical = mainRequest.getInstantiatesCanonical().get(0);
-		PlanDefinition planDef = myRepository.read(
-				PlanDefinition.class,
-				new IdType(Canonicals.getResourceType(canonical), Canonicals.getIdPart(canonical)));
-		List<CdsServiceResponseLinkJson> links = resolvePlanLinks(planDef);
-		mainRequest.getAction().forEach(action -> myServiceResponse.addCard(resolveAction(action, links)));
+		if (myResponseBundle.hasEntry()) {
+			RequestGroup mainRequest =
+					(RequestGroup) myResponseBundle.getEntry().get(0).getResource();
+			CanonicalType canonical = mainRequest.getInstantiatesCanonical().get(0);
+			PlanDefinition planDef = myRepository.read(
+					PlanDefinition.class,
+					new IdType(Canonicals.getResourceType(canonical), Canonicals.getIdPart(canonical)));
+			List<CdsServiceResponseLinkJson> links = resolvePlanLinks(planDef);
+			mainRequest.getAction().forEach(action -> myServiceResponse.addCard(resolveAction(action, links)));
+		}
 
 		return myServiceResponse;
 	}
@@ -322,12 +323,12 @@ public class CdsCrServiceR4 implements ICdsCrService {
 		String[] split = reference.split("/");
 		String id = reference.contains("/") ? split[1] : reference;
 		String resourceType = reference.contains("/") ? split[0] : theReference.getType();
-		return myResponseBundle.getEntry().stream()
+		List<IBaseResource> results = myResponseBundle.getEntry().stream()
 				.filter(entry -> entry.hasResource()
 						&& entry.getResource().getResourceType().toString().equals(resourceType)
 						&& entry.getResource().getIdPart().equals(id))
 				.map(entry -> entry.getResource())
-				.collect(Collectors.toList())
-				.get(0);
+				.collect(Collectors.toList());
+		return results.isEmpty() ? null : results.get(0);
 	}
 }

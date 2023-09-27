@@ -78,9 +78,7 @@ public class CdsCrServiceR5 implements ICdsCrService {
 	}
 
 	public Parameters encodeParams(CdsServiceRequestJson theJson) {
-		// CanonicalType canonical = ;
 		Parameters parameters = parameters()
-				// .addParameter(part(APPLY_PARAMETER_CANONICAL, canonical))
 				.addParameter(part(APPLY_PARAMETER_SUBJECT, theJson.getContext().getString(CDS_PARAMETER_PATIENT_ID)));
 		if (theJson.getContext().containsKey(CDS_PARAMETER_USER_ID)) {
 			parameters.addParameter(
@@ -177,14 +175,16 @@ public class CdsCrServiceR5 implements ICdsCrService {
 		assert theResponse instanceof Bundle;
 		myResponseBundle = (Bundle) theResponse;
 		CdsServiceResponseJson serviceResponse = new CdsServiceResponseJson();
-		RequestOrchestration mainRequest =
-				(RequestOrchestration) myResponseBundle.getEntry().get(0).getResource();
-		CanonicalType canonical = mainRequest.getInstantiatesCanonical().get(0);
-		PlanDefinition planDef = myRepository.read(
-				PlanDefinition.class,
-				new IdType(Canonicals.getResourceType(canonical), Canonicals.getIdPart(canonical)));
-		List<CdsServiceResponseLinkJson> links = resolvePlanLinks(planDef);
-		mainRequest.getAction().forEach(action -> serviceResponse.addCard(resolveAction(action, links)));
+		if (myResponseBundle.hasEntry()) {
+			RequestOrchestration mainRequest =
+					(RequestOrchestration) myResponseBundle.getEntry().get(0).getResource();
+			CanonicalType canonical = mainRequest.getInstantiatesCanonical().get(0);
+			PlanDefinition planDef = myRepository.read(
+					PlanDefinition.class,
+					new IdType(Canonicals.getResourceType(canonical), Canonicals.getIdPart(canonical)));
+			List<CdsServiceResponseLinkJson> links = resolvePlanLinks(planDef);
+			mainRequest.getAction().forEach(action -> serviceResponse.addCard(resolveAction(action, links)));
+		}
 
 		return serviceResponse;
 	}
@@ -323,12 +323,15 @@ public class CdsCrServiceR5 implements ICdsCrService {
 
 	protected IBaseResource resolveResource(Reference theReference) {
 		String reference = theReference.getReference();
-		String id = reference.contains("/") ? reference.split("/")[1] : reference;
-		return myResponseBundle.getEntry().stream()
-				.filter(entry ->
-						entry.hasResource() && entry.getResource().getId().equals(id))
+		String[] split = reference.split("/");
+		String id = reference.contains("/") ? split[1] : reference;
+		String resourceType = reference.contains("/") ? split[0] : theReference.getType();
+		List<IBaseResource> results = myResponseBundle.getEntry().stream()
+				.filter(entry -> entry.hasResource()
+						&& entry.getResource().getResourceType().toString().equals(resourceType)
+						&& entry.getResource().getIdPart().equals(id))
 				.map(entry -> entry.getResource())
-				.collect(Collectors.toList())
-				.get(0);
+				.collect(Collectors.toList());
+		return results.isEmpty() ? null : results.get(0);
 	}
 }

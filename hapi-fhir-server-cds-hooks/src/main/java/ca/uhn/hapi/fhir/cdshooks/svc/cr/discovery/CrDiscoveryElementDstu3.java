@@ -37,7 +37,8 @@ public class CrDiscoveryElementDstu3 implements ICrDiscoveryElement {
 
 	public CdsServiceJson getCdsServiceJson() {
 		if (myPlanDefinition == null
-				&& myPlanDefinition.getAction().stream().noneMatch(a -> a.hasTriggerDefinition())) {
+				|| !myPlanDefinition.hasAction()
+				|| myPlanDefinition.getAction().stream().noneMatch(a -> a.hasTriggerDefinition())) {
 			return null;
 		}
 

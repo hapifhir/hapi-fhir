@@ -36,7 +36,9 @@ public class CrDiscoveryElementR4 implements ICrDiscoveryElement {
 	}
 
 	public CdsServiceJson getCdsServiceJson() {
-		if (myPlanDefinition == null && myPlanDefinition.getAction().stream().noneMatch(a -> a.hasTrigger())) {
+		if (myPlanDefinition == null
+				|| !myPlanDefinition.hasAction()
+				|| myPlanDefinition.getAction().stream().noneMatch(a -> a.hasTrigger())) {
 			return null;
 		}
 

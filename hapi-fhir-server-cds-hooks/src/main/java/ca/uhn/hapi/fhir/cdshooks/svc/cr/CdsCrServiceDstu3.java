@@ -77,9 +77,7 @@ public class CdsCrServiceDstu3 implements ICdsCrService {
 	}
 
 	public Parameters encodeParams(CdsServiceRequestJson theJson) {
-		// CanonicalType canonical = ;
 		Parameters parameters = parameters()
-				// .addParameter(part(APPLY_PARAMETER_CANONICAL, canonical))
 				.addParameter(part(APPLY_PARAMETER_SUBJECT, theJson.getContext().getString(CDS_PARAMETER_PATIENT_ID)));
 		if (theJson.getContext().containsKey(CDS_PARAMETER_USER_ID)) {
 			parameters.addParameter(
@@ -176,14 +174,16 @@ public class CdsCrServiceDstu3 implements ICdsCrService {
 		assert theResponse instanceof CarePlan;
 		myResponse = (CarePlan) theResponse;
 		CdsServiceResponseJson serviceResponse = new CdsServiceResponseJson();
-		Reference requestGroupRef = myResponse.getActivity().get(0).getReference();
-		RequestGroup mainRequest = (RequestGroup) resolveResource(requestGroupRef);
-		StringType canonical = mainRequest.getDefinition().get(0).getReferenceElement_();
-		PlanDefinition planDef = myRepository.read(
-				PlanDefinition.class,
-				new IdType(Canonicals.getResourceType(canonical), Canonicals.getIdPart(canonical)));
-		List<CdsServiceResponseLinkJson> links = resolvePlanLinks(planDef);
-		mainRequest.getAction().forEach(action -> serviceResponse.addCard(resolveAction(action, links)));
+		if (myResponse.hasActivity()) {
+			Reference requestGroupRef = myResponse.getActivity().get(0).getReference();
+			RequestGroup mainRequest = (RequestGroup) resolveResource(requestGroupRef);
+			StringType canonical = mainRequest.getDefinition().get(0).getReferenceElement_();
+			PlanDefinition planDef = myRepository.read(
+					PlanDefinition.class,
+					new IdType(Canonicals.getResourceType(canonical), Canonicals.getIdPart(canonical)));
+			List<CdsServiceResponseLinkJson> links = resolvePlanLinks(planDef);
+			mainRequest.getAction().forEach(action -> serviceResponse.addCard(resolveAction(action, links)));
+		}
 
 		return serviceResponse;
 	}
