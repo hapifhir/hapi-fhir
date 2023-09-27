@@ -99,21 +99,13 @@ public class CdsHooksConfig {
 				theCrDiscoveryServiceFactory);
 	}
 
-	private RequestDetails createRequestDetails(FhirContext theFhirContext, String theId) {
-		SystemRequestDetails rd = new SystemRequestDetails();
-		rd.setServer(myRestfulServer);
-		rd.setResponse(new SystemRestfulResponse(rd));
-		rd.setId(Ids.newId(theFhirContext.getVersion().getVersion(), PLAN_DEFINITION_RESOURCE_NAME, theId));
-		return rd;
-	}
-
 	@Bean
-	public ICdsCrServiceFactory cdsCrServiceFactory(FhirContext theFhirContext) {
+	public ICdsCrServiceFactory cdsCrServiceFactory(FhirContext theFhirContext, ICdsConfigService theCdsConfigService) {
 		return id -> {
 			if (myRepositoryFactory == null) {
 				return null;
 			}
-			RequestDetails rd = createRequestDetails(theFhirContext, id);
+			RequestDetails rd = theCdsConfigService.createRequestDetails(theFhirContext, id, PLAN_DEFINITION_RESOURCE_NAME);
 			Repository repository = myRepositoryFactory.create(rd);
 			switch (theFhirContext.getVersion().getVersion()) {
 				case DSTU3:
@@ -129,12 +121,12 @@ public class CdsHooksConfig {
 	}
 
 	@Bean
-	public ICrDiscoveryServiceFactory crDiscoveryServiceFactory(FhirContext theFhirContext) {
+	public ICrDiscoveryServiceFactory crDiscoveryServiceFactory(FhirContext theFhirContext, ICdsConfigService theCdsConfigService) {
 		return id -> {
 			if (myRepositoryFactory == null) {
 				return null;
 			}
-			RequestDetails rd = createRequestDetails(theFhirContext, id);
+			RequestDetails rd = theCdsConfigService.createRequestDetails(theFhirContext, id, PLAN_DEFINITION_RESOURCE_NAME);
 			Repository repository = myRepositoryFactory.create(rd);
 			switch (theFhirContext.getVersion().getVersion()) {
 				case DSTU3:
