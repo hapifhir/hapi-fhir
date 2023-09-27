@@ -28,9 +28,7 @@ public class MdmMetrics extends MdmResourceMetrics implements IModelJson {
 	private Map<MdmMatchResultEnum, Map<MdmLinkSourceEnum, Long>> myMatchTypeToLinkToCountMap;
 
 	/**
-	 * Map of Score:Count
-	 * Scores are typically Doubles. But we cast to string because
-	 * Score is not a non-null field, and so "NULL" is a value.
+	 * Score buckets (in brackets of 0.01 size, and null) to counts.
 	 */
 	@JsonProperty("scoreCounts")
 	private Map<String, Long> myScoreCounts;

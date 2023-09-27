@@ -12,13 +12,13 @@ import ca.uhn.fhir.mdm.model.MdmMetrics;
 import ca.uhn.fhir.mdm.model.MdmResourceMetrics;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.Query;
 import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.Query;
 
 public class MdmMetricSvcJpaImpl extends BaseMdmMetricSvc {
 
@@ -83,8 +83,8 @@ public class MdmMetricSvcJpaImpl extends BaseMdmMetricSvc {
 			} else {
 				// score > i/100 && score <= i/100
 				sb.append(String.format(
-					"sum(case when ml.score > %.2f and ml.SCORE <= %.2f then 1 else 0 end) as B%d",
-					getBucket(i), bucket, i));
+						"sum(case when ml.score > %.2f and ml.SCORE <= %.2f then 1 else 0 end) as B%d",
+						getBucket(i), bucket, i));
 			}
 		}
 
