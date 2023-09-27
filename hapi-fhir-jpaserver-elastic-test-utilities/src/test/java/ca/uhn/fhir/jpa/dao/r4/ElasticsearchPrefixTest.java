@@ -3,6 +3,8 @@ package ca.uhn.fhir.jpa.dao.r4;
 import ca.uhn.fhir.jpa.config.ElasticsearchWithPrefixConfig;
 import ca.uhn.fhir.jpa.search.lastn.ElasticsearchRestClientFactory;
 import ca.uhn.fhir.test.utilities.docker.RequiresDocker;
+import co.elastic.clients.elasticsearch.ElasticsearchClient;
+import co.elastic.clients.elasticsearch.indices.GetIndexResponse;
 import org.apache.http.util.EntityUtils;
 import org.elasticsearch.client.Request;
 import org.elasticsearch.client.Response;
@@ -17,6 +19,9 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.testcontainers.elasticsearch.ElasticsearchContainer;
 
 import java.io.IOException;
+import java.util.Collection;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
@@ -36,13 +41,15 @@ public class ElasticsearchPrefixTest {
 	@Test
 	public void test() throws IOException {
 		//Given
-		RestHighLevelClient elasticsearchHighLevelRestClient = ElasticsearchRestClientFactory.createElasticsearchHighLevelRestClient(
+		ElasticsearchClient elasticsearchHighLevelRestClient = ElasticsearchRestClientFactory.createElasticsearchHighLevelRestClient(
 			"http", elasticsearchContainer.getHost() + ":" + elasticsearchContainer.getMappedPort(9200), "", "");
 
 		//When
-		RestClient lowLevelClient = elasticsearchHighLevelRestClient.getLowLevelClient();
-		Response get = lowLevelClient.performRequest(new Request("GET", "/_cat/indices"));
-		String catIndexes = EntityUtils.toString(get.getEntity());
+		GetIndexResponse indicesResponse = elasticsearchHighLevelRestClient
+			.indices()
+			.get(i -> i);
+
+		String catIndexes = indicesResponse.result().toString();
 
 		//Then
 		assertThat(catIndexes, containsString(ELASTIC_PREFIX + "-resourcetable-000001"));
