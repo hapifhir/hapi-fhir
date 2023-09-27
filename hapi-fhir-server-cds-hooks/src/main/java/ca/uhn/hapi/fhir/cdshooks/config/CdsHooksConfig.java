@@ -26,8 +26,6 @@ import ca.uhn.fhir.jpa.cache.IResourceChangeListenerRegistry;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
-import ca.uhn.fhir.rest.api.server.SystemRestfulResponse;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.hapi.fhir.cdshooks.api.ICdsConfigService;
 import ca.uhn.hapi.fhir.cdshooks.api.ICdsHooksDaoAuthorizationSvc;
@@ -51,7 +49,6 @@ import ca.uhn.hapi.fhir.cdshooks.svc.prefetch.CdsPrefetchSvc;
 import ca.uhn.hapi.fhir.cdshooks.svc.prefetch.CdsResolutionStrategySvc;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.opencds.cqf.fhir.api.Repository;
-import org.opencds.cqf.fhir.utility.Ids;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
@@ -105,7 +102,8 @@ public class CdsHooksConfig {
 			if (myRepositoryFactory == null) {
 				return null;
 			}
-			RequestDetails rd = theCdsConfigService.createRequestDetails(theFhirContext, id, PLAN_DEFINITION_RESOURCE_NAME);
+			RequestDetails rd =
+					theCdsConfigService.createRequestDetails(theFhirContext, id, PLAN_DEFINITION_RESOURCE_NAME);
 			Repository repository = myRepositoryFactory.create(rd);
 			switch (theFhirContext.getVersion().getVersion()) {
 				case DSTU3:
@@ -121,12 +119,14 @@ public class CdsHooksConfig {
 	}
 
 	@Bean
-	public ICrDiscoveryServiceFactory crDiscoveryServiceFactory(FhirContext theFhirContext, ICdsConfigService theCdsConfigService) {
+	public ICrDiscoveryServiceFactory crDiscoveryServiceFactory(
+			FhirContext theFhirContext, ICdsConfigService theCdsConfigService) {
 		return id -> {
 			if (myRepositoryFactory == null) {
 				return null;
 			}
-			RequestDetails rd = theCdsConfigService.createRequestDetails(theFhirContext, id, PLAN_DEFINITION_RESOURCE_NAME);
+			RequestDetails rd =
+					theCdsConfigService.createRequestDetails(theFhirContext, id, PLAN_DEFINITION_RESOURCE_NAME);
 			Repository repository = myRepositoryFactory.create(rd);
 			switch (theFhirContext.getVersion().getVersion()) {
 				case DSTU3:
