@@ -66,6 +66,7 @@ public class ResponseBundleBuilder {
 
 	private static IBaseBundle buildBundle(
 			ResponseBundleRequest theResponseBundleRequest, ResponsePage pageResponse, BundleLinks links) {
+
 		final IRestfulServer<?> server = theResponseBundleRequest.server;
 		final IVersionSpecificBundleFactory bundleFactory =
 				server.getFhirContext().newBundleFactory();
@@ -157,6 +158,10 @@ public class ResponseBundleBuilder {
 			ResponsePage.ResponsePageBuilder theResponsePageBuilder) {
 		final List<IBaseResource> retval;
 		if (theNumToReturn > 0 || theBundleProvider.getCurrentPageId() != null) {
+			// fixme ep
+			// fetch a page worth and invoke on consent, if not enough, go fecth more, and run consent.
+			// this can be tricky at this point.  we would need to get to here with a clean and full resourceList
+			// (theBundleProvider.getResources())
 			retval = theBundleProvider.getResources(
 					theResponseBundleRequest.offset,
 					theNumToReturn + theResponseBundleRequest.offset,

@@ -55,6 +55,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -144,6 +145,7 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 		Object[] params = createMethodParams(theRequest);
 
 		Object resultObj = invokeServer(theServer, theRequest, params);
+		// fixme ep resultObj already had the resources to be returned
 		if (resultObj == null) {
 			return null;
 		}
@@ -194,11 +196,13 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 							theServer,
 							theRequest,
 							params,
-							(IBundleProvider) resultObj,
+							bundleProvider,
 							count,
 							responseBundleType,
 							linkSelf);
-					responseObject = myResponseBundleBuilder.buildResponseBundle(responseBundleRequest);
+					// myResponseBundleBuilder instanceOf ResponseBundleBuilder
+				responseObject = myResponseBundleBuilder.buildResponseBundle(responseBundleRequest);
+					// fixme ep We need to call consent somewhere above here
 				}
 				break;
 			}
