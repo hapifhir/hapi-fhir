@@ -24,7 +24,6 @@ import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.util.ParametersUtil;
-import joptsimple.internal.Strings;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.ParseException;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
@@ -111,7 +110,7 @@ public class ReindexTerminologyCommand extends BaseRequestGeneratingCommand {
 	@Nonnull
 	private String getResponseMessage(IBaseParameters response) {
 		List<String> message = ParametersUtil.getNamedParameterValuesAsString(myFhirCtx, response, "message");
-		return Strings.join(message, NL);
+		return String.join(NL, message);
 	}
 
 	public static final String NL = System.getProperty("line.separator");

@@ -80,7 +80,7 @@ public class TestRestfulServer extends RestfulServer {
 	public void destroy() {
 		super.destroy();
 		ourLog.info("Server is shutting down");
-		myAppCtx.destroy();
+		myAppCtx.close();
 	}
 
 	@SuppressWarnings("unchecked")

@@ -11,14 +11,12 @@ import ca.uhn.fhir.jpa.search.lastn.ElasticsearchRestClientFactory;
 import ca.uhn.fhir.jpa.test.config.BlockLargeNumbersOfParamsListener;
 import ca.uhn.fhir.jpa.test.config.TestHSearchAddInConfig;
 import ca.uhn.fhir.jpa.util.CurrentThreadCaptureQueriesListener;
+import co.elastic.clients.elasticsearch.ElasticsearchClient;
+import co.elastic.clients.elasticsearch.indices.PutTemplateResponse;
+import co.elastic.clients.json.JsonData;
 import net.ttddyy.dsproxy.listener.logging.SLF4JLogLevel;
 import net.ttddyy.dsproxy.support.ProxyDataSourceBuilder;
 import org.apache.commons.dbcp2.BasicDataSource;
-import org.elasticsearch.action.support.master.AcknowledgedResponse;
-import org.elasticsearch.client.RequestOptions;
-import org.elasticsearch.client.RestHighLevelClient;
-import org.elasticsearch.client.indices.PutIndexTemplateRequest;
-import org.elasticsearch.common.settings.Settings;
 import org.hibernate.jpa.HibernatePersistenceProvider;
 import org.hibernate.search.backend.elasticsearch.cfg.ElasticsearchBackendSettings;
 import org.hibernate.search.backend.elasticsearch.cfg.ElasticsearchIndexSettings;
@@ -36,7 +34,7 @@ import org.testcontainers.elasticsearch.ElasticsearchContainer;
 
 import javax.sql.DataSource;
 import java.io.IOException;
-import java.util.Arrays;
+import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
@@ -126,14 +124,15 @@ public class ElasticsearchWithPrefixConfig {
 		//This tells elasticsearch to use our custom index naming strategy.
 		extraProperties.put(BackendSettings.backendKey(ElasticsearchBackendSettings.LAYOUT_STRATEGY), IndexNamePrefixLayoutStrategy.class.getName());
 
-		PutIndexTemplateRequest ngramTemplate = new PutIndexTemplateRequest("ngram-template")
-			.patterns(Arrays.asList("*resourcetable-*", "*termconcept-*"))
-			.settings(Settings.builder().put("index.max_ngram_diff", 50));
-
 		try {
-			RestHighLevelClient elasticsearchHighLevelRestClient = ElasticsearchRestClientFactory.createElasticsearchHighLevelRestClient("http", host + ":" + httpPort, "", "");
-			AcknowledgedResponse acknowledgedResponse = elasticsearchHighLevelRestClient.indices().putTemplate(ngramTemplate, RequestOptions.DEFAULT);
-			assert acknowledgedResponse.isAcknowledged();
+			ElasticsearchClient elasticsearchHighLevelRestClient = ElasticsearchRestClientFactory.createElasticsearchHighLevelRestClient("http", host + ":" + httpPort, "", "");
+			PutTemplateResponse acknowledgedResponse = elasticsearchHighLevelRestClient
+				.indices()
+				.putTemplate(b -> b
+					.name("ngram-template")
+					.indexPatterns("*resourcetable-*", "*termconcept-*")
+					.settings(Map.of("index.max_ngram_diff", JsonData.of(50))));
+			assert acknowledgedResponse.acknowledged();
 		} catch (IOException theE) {
 			theE.printStackTrace();
 			throw new ConfigurationException("Couldn't connect to the elasticsearch server to create necessary templates. Ensure the Elasticsearch user has permissions to create templates.");

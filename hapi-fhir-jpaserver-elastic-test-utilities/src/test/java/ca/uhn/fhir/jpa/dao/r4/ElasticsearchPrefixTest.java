@@ -4,12 +4,9 @@ import ca.uhn.fhir.jpa.config.ElasticsearchWithPrefixConfig;
 import ca.uhn.fhir.jpa.search.lastn.ElasticsearchRestClientFactory;
 import ca.uhn.fhir.test.utilities.docker.RequiresDocker;
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
+import co.elastic.clients.elasticsearch.cat.IndicesResponse;
+import co.elastic.clients.elasticsearch.cat.indices.IndicesRecord;
 import co.elastic.clients.elasticsearch.indices.GetIndexResponse;
-import org.apache.http.util.EntityUtils;
-import org.elasticsearch.client.Request;
-import org.elasticsearch.client.Response;
-import org.elasticsearch.client.RestClient;
-import org.elasticsearch.client.RestHighLevelClient;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,8 +16,6 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.testcontainers.elasticsearch.ElasticsearchContainer;
 
 import java.io.IOException;
-import java.util.Collection;
-import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -45,11 +40,11 @@ public class ElasticsearchPrefixTest {
 			"http", elasticsearchContainer.getHost() + ":" + elasticsearchContainer.getMappedPort(9200), "", "");
 
 		//When
-		GetIndexResponse indicesResponse = elasticsearchHighLevelRestClient
-			.indices()
-			.get(i -> i);
+		IndicesResponse indicesResponse = elasticsearchHighLevelRestClient
+			.cat()
+			.indices();
 
-		String catIndexes = indicesResponse.result().toString();
+		String catIndexes = indicesResponse.valueBody().stream().map(IndicesRecord::index).collect(Collectors.joining(","));
 
 		//Then
 		assertThat(catIndexes, containsString(ELASTIC_PREFIX + "-resourcetable-000001"));
