@@ -26,10 +26,9 @@ import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedJsonMessage;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.log.Logs;
 import com.google.common.annotations.VisibleForTesting;
+import jakarta.annotation.PreDestroy;
 import org.slf4j.Logger;
 import org.springframework.stereotype.Service;
-
-import jakarta.annotation.PreDestroy;
 
 @Service
 public class MdmQueueConsumerLoader {

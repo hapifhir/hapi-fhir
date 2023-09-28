@@ -27,11 +27,10 @@ import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.interceptor.IMdmStorageInterceptor;
 import ca.uhn.fhir.mdm.interceptor.MdmSearchExpandingInterceptor;
 import ca.uhn.fhir.mdm.log.Logs;
+import jakarta.annotation.PostConstruct;
 import org.hl7.fhir.dstu2.model.Subscription;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-
-import jakarta.annotation.PostConstruct;
 
 public class MdmSubmitterInterceptorLoader {
 	private static final Logger ourLog = Logs.getMdmTroubleshootingLog();

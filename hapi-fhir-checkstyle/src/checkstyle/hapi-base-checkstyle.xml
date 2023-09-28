@@ -17,6 +17,10 @@
 			<!-- The (?i) below means Case Insensitive -->
 			<property name="format" value="(?i)FIXME"/>
 		</module>
+		<!-- Ban star imports -->
+		<module name="RegexpSinglelineJava">
+			<property name="format" value="^import .*\*;"/>
+		</module>
 
 		<module name="RegexpSinglelineJava">
 			<property name="format" value="System\.out\.println"/>

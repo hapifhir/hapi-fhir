@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.jpa.ips.api;
 
+import jakarta.annotation.PostConstruct;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -36,7 +37,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
 import javax.annotation.Nullable;
-import jakarta.annotation.PostConstruct;
 
 /**
  * This class is the registry for sections for the IPS document. It can be extended
