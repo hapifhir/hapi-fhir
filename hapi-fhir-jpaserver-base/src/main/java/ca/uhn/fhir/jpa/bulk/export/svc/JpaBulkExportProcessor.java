@@ -303,13 +303,14 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 			ExportPIDIteratorParameters theParams, RuntimeResourceDefinition theDef) throws IOException {
 		LinkedHashSet<JpaPid> pids = new LinkedHashSet<>();
 		// Check if the patient compartment search parameter is active to enable export of this resource
-		RuntimeSearchParam activeSearchParam = getActivePatientSearchParamForCurrentResourceType(theParams.getResourceType());
+		RuntimeSearchParam activeSearchParam =
+				getActivePatientSearchParamForCurrentResourceType(theParams.getResourceType());
 		if (activeSearchParam != null) {
 			// expand the group pid -> list of patients in that group (list of patient pids)
 			Set<JpaPid> expandedMemberResourceIds = expandAllPatientPidsFromGroup(theParams);
 			assert !expandedMemberResourceIds.isEmpty();
 			Logs.getBatchTroubleshootingLog()
-				.debug("{} has been expanded to members:[{}]", theParams.getGroupId(), expandedMemberResourceIds);
+					.debug("{} has been expanded to members:[{}]", theParams.getGroupId(), expandedMemberResourceIds);
 
 			// for each patient pid ->
 			//	search for the target resources, with their correct patient references, chunked.
@@ -610,7 +611,7 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 
 	private RuntimeSearchParam getActivePatientSearchParamForCurrentResourceType(String resourceType) {
 		RuntimeSearchParam runtimeSearchParam = getPatientSearchParamForCurrentResourceType(resourceType);
-        return searchParamRegistry.getActiveSearchParam(resourceType, runtimeSearchParam.getName());
+		return searchParamRegistry.getActiveSearchParam(resourceType, runtimeSearchParam.getName());
 	}
 
 	/**
