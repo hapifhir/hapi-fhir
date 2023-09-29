@@ -48,6 +48,7 @@ import ca.uhn.hapi.fhir.cdshooks.svc.prefetch.CdsPrefetchFhirClientSvc;
 import ca.uhn.hapi.fhir.cdshooks.svc.prefetch.CdsPrefetchSvc;
 import ca.uhn.hapi.fhir.cdshooks.svc.prefetch.CdsResolutionStrategySvc;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.opencds.cqf.fhir.api.Repository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -163,8 +164,8 @@ public class CdsHooksConfig {
 			}
 			try {
 				Constructor<? extends ICrDiscoveryService> constructor =
-						clazz.get().getConstructor(RequestDetails.class, Repository.class);
-				return constructor.newInstance(rd, repository);
+						clazz.get().getConstructor(IIdType.class, Repository.class);
+				return constructor.newInstance(rd.getId(), repository);
 			} catch (NoSuchMethodException
 					| InvocationTargetException
 					| InstantiationException
