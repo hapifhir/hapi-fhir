@@ -19,10 +19,12 @@
  */
 package ca.uhn.fhir.cr.common;
 
+import antlr.StringUtils;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.cache.IResourceChangeEvent;
 import ca.uhn.fhir.jpa.cache.IResourceChangeListener;
+import ca.uhn.fhir.jpa.cache.ResourceChangeListenerCache;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.hl7.elm.r1.VersionedIdentifier;
@@ -45,14 +47,14 @@ public class CodeCacheResourceChangeListener implements IResourceChangeListener 
 			org.slf4j.LoggerFactory.getLogger(CodeCacheResourceChangeListener.class);
 
 	private final IFhirResourceDao<?> myValueSetDao;
-	private final Map<VersionedIdentifier, List<Code>> myGlobalCodeCache;
+	private final Map<String, List<Code>> myGlobalValueSetCache;
 	private final Function<IBaseResource, String> myUrlFunction;
 	private final Function<IBaseResource, String> myVersionFunction;
 
 	public CodeCacheResourceChangeListener(
-			DaoRegistry theDaoRegistry, Map<VersionedIdentifier, List<Code>> theGlobalCodeCache) {
+			DaoRegistry theDaoRegistry, Map<String, List<Code>> theGlobalValueSetCache) {
 		this.myValueSetDao = theDaoRegistry.getResourceDao("ValueSet");
-		this.myGlobalCodeCache = theGlobalCodeCache;
+		this.myGlobalValueSetCache = theGlobalValueSetCache;
 		this.myUrlFunction = Reflections.getUrlFunction(myValueSetDao.getResourceType());
 		this.myVersionFunction = Reflections.getVersionFunction(myValueSetDao.getResourceType());
 	}
@@ -97,13 +99,19 @@ public class CodeCacheResourceChangeListener implements IResourceChangeListener 
 			ourLog.debug(
 					"Failed to locate resource {} to look up url and version. Clearing all codes from cache.",
 					theId.getValueAsString());
-			this.myGlobalCodeCache.clear();
+			myGlobalValueSetCache.clear();
 			return;
 		}
 
 		String url = this.myUrlFunction.apply(valueSet);
 		String version = this.myVersionFunction.apply(valueSet);
-
-		this.myGlobalCodeCache.remove(new VersionedIdentifier().withId(url).withVersion(version));
+		String canonicalUrl;
+		if(version.isEmpty() || version.isBlank()){
+			canonicalUrl = url;
+		}
+		else {
+			canonicalUrl = url + "|" + version;
+		}
+		myGlobalValueSetCache.remove(canonicalUrl);
 	}
 }
