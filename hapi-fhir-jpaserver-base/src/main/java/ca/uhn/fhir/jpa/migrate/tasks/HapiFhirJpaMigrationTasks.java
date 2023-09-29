@@ -93,6 +93,23 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		init640_after_20230126();
 		init660();
 		init680();
+		init700();
+	}
+
+	protected void init700() {
+		Builder version = forVersion(VersionEnum.V7_0_0);
+
+		// new indices on MdmLink
+		Builder.BuilderWithTableName mdmLinkTable = version.onTable("MPI_LINK");
+
+		mdmLinkTable
+				.addIndex("20230911.1", "IDX_EMPI_TGT_MR_LS")
+				.unique(false)
+				.withColumns("TARGET_TYPE", "MATCH_RESULT", "LINK_SOURCE");
+		mdmLinkTable
+				.addIndex("20230911.2", "IDX_EMPi_TGT_MR_SCore")
+				.unique(false)
+				.withColumns("TARGET_TYPE", "MATCH_RESULT", "SCORE");
 	}
 
 	protected void init680() {

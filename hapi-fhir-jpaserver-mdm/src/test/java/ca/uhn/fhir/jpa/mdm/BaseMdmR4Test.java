@@ -98,8 +98,6 @@ abstract public class BaseMdmR4Test extends BaseJpaR4Test {
 		.setValue("555-555-5555");
 	private static final String NAME_GIVEN_FRANK = "Frank";
 
-
-
 	@Autowired
 	protected IFhirResourceDao<Patient> myPatientDao;
 	@Autowired

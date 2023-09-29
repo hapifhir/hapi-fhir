@@ -116,6 +116,14 @@ public class GoldenResourceHelper {
 		MdmResourceUtil.setMdmManaged(newGoldenResource);
 		MdmResourceUtil.setGoldenResource(newGoldenResource);
 
+		// TODO - on updating links, if resolving a link, this should go away?
+		// blocked resource's golden resource will be marked special
+		// they are not part of MDM matching algorithm (will not link to other resources)
+		// but other resources can link to them
+		if (theMdmTransactionContext.getIsBlocked()) {
+			MdmResourceUtil.setGoldenResourceAsBlockedResourceGoldenResource(newGoldenResource);
+		}
+
 		// add the partition id to the new resource
 		newGoldenResource.setUserData(
 				Constants.RESOURCE_PARTITION_ID,
