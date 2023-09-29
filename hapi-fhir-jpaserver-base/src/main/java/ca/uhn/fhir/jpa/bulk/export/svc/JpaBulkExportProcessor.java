@@ -609,9 +609,19 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 		}
 	}
 
-	private RuntimeSearchParam getActivePatientSearchParamForCurrentResourceType(String resourceType) {
-		RuntimeSearchParam runtimeSearchParam = getPatientSearchParamForCurrentResourceType(resourceType);
-		return searchParamRegistry.getActiveSearchParam(resourceType, runtimeSearchParam.getName());
+	private RuntimeSearchParam getActivePatientSearchParamForCurrentResourceType(String theResourceType) {
+		String activeSearchParamName = "";
+		String resourceToCheck = theResourceType;
+		if (!PATIENT_BULK_EXPORT_FORWARD_REFERENCE_RESOURCE_TYPES.contains(theResourceType)) {
+			activeSearchParamName= getPatientSearchParamForCurrentResourceType(theResourceType).getName();
+		} else if ("Practitioner".equalsIgnoreCase(theResourceType)) {
+			resourceToCheck = "Patient";
+			activeSearchParamName = "general-practitioner";
+		} else if ("Organization".equalsIgnoreCase(theResourceType)) {
+			resourceToCheck = "Patient";
+			activeSearchParamName = "organization";
+		}
+		return searchParamRegistry.getActiveSearchParam(resourceToCheck, activeSearchParamName);
 	}
 
 	/**

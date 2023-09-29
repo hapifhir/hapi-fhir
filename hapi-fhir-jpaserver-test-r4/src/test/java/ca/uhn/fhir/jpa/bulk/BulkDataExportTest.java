@@ -156,7 +156,7 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testGroupBulkExportWithMissingObservationSearchParams() {
-		mySearchParameterDao.update(createDisabledObservationSearchParameter(), mySrd);
+		mySearchParameterDao.update(createDisabledObservationPatientSearchParameter(), mySrd);
 		mySearchParamRegistry.forceRefresh();
 
 		// Create some resources
@@ -190,10 +190,41 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 		options.setGroupId("Group/G");
 		options.setExportStyle(BulkExportJobParameters.ExportStyle.GROUP);
 		options.setOutputFormat(Constants.CT_FHIR_NDJSON);
-		verifyBulkExportResults(options, Collections.singletonList("Patient/PF"), Collections.singletonList("Patient/PM"));
+		verifyBulkExportResults(options, List.of("Patient/PF", "Patient/PM"), Collections.singletonList(obsId));
 	}
 
-	private SearchParameter createDisabledObservationSearchParameter() {
+	@Test
+	public void testGroupBulkExportWithMissingPatientSearchParams() {
+		mySearchParameterDao.update(createDisabledPatientPractitionerSearchParameter(), mySrd);
+		mySearchParamRegistry.forceRefresh();
+
+		Practitioner practitioner = new Practitioner();
+		practitioner.setActive(true);
+		String practId = myClient.create().resource(practitioner).execute().getId().toUnqualifiedVersionless().getValue();
+
+		// Create some resources
+		Patient patient = new Patient();
+		patient.setId("P1");
+		patient.setActive(true);
+		patient.addGeneralPractitioner().setReference(practId);
+		myClient.update().resource(patient).execute();
+
+		Group group = new Group();
+		group.setId("Group/G");
+		group.setActive(true);
+		group.addMember().getEntity().setReference("Patient/P1");
+		myClient.update().resource(group).execute();
+
+		// set the export options
+		BulkExportJobParameters options = new BulkExportJobParameters();
+		options.setResourceTypes(Sets.newHashSet("Patient", "Practitioner"));
+		options.setGroupId("Group/G");
+		options.setExportStyle(BulkExportJobParameters.ExportStyle.GROUP);
+		options.setOutputFormat(Constants.CT_FHIR_NDJSON);
+		verifyBulkExportResults(options, Collections.singletonList("Patient/P1"), Collections.singletonList(practId));
+	}
+
+	private SearchParameter createDisabledObservationPatientSearchParameter() {
 		SearchParameter observation_patient = new SearchParameter();
 		observation_patient.setId("clinical-patient");
 		observation_patient.addBase("Observation");
@@ -203,6 +234,18 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 		observation_patient.addTarget("Patient");
 		observation_patient.setExpression("Observation.subject.where(resolve() is Patient)");
 		return observation_patient;
+	}
+
+	private SearchParameter createDisabledPatientPractitionerSearchParameter() {
+		SearchParameter patient_practitioner = new SearchParameter();
+		patient_practitioner.setId("Patient-general-practitioner");
+		patient_practitioner.addBase("Patient");
+		patient_practitioner.setStatus(Enumerations.PublicationStatus.RETIRED);
+		patient_practitioner.setCode("general-practitioner");
+		patient_practitioner.setType(Enumerations.SearchParamType.REFERENCE);
+		patient_practitioner.addTarget("Practitioner");
+		patient_practitioner.setExpression("Patient.generalPractitioner");
+		return patient_practitioner;
 	}
 
 	@Test
@@ -501,7 +544,7 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 
 		// set the export options
 		BulkExportJobParameters options = new BulkExportJobParameters();
-		options.setResourceTypes(Sets.newHashSet("Patient", "Encounter"));
+		options.setResourceTypes(Sets.newHashSet("Patient", "Encounter", "Practitioner"));
 		options.setGroupId("Group/G1");
 		options.setFilters(new HashSet<>());
 		options.setExportStyle(BulkExportJobParameters.ExportStyle.GROUP);
@@ -542,7 +585,7 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 
 		// set the export options
 		BulkExportJobParameters options = new BulkExportJobParameters();
-		options.setResourceTypes(Sets.newHashSet("Patient", "Encounter", "Observation"));
+		options.setResourceTypes(Sets.newHashSet("Patient", "Encounter", "Observation", "Practitioner"));
 		options.setGroupId("Group/G1");
 		options.setFilters(new HashSet<>());
 		options.setExportStyle(BulkExportJobParameters.ExportStyle.GROUP);
@@ -599,7 +642,7 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 
 		// set the export options
 		BulkExportJobParameters options = new BulkExportJobParameters();
-		options.setResourceTypes(Sets.newHashSet("Patient", "Observation", "Provenance"));
+		options.setResourceTypes(Sets.newHashSet("Patient", "Observation", "Provenance", "Device"));
 		options.setGroupId("Group/G1");
 		options.setFilters(new HashSet<>());
 		options.setExportStyle(BulkExportJobParameters.ExportStyle.GROUP);
@@ -999,10 +1042,7 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 				} catch (IOException e) {
 					fail(e.toString());
 				}
-
 			}
-
-			return jobInstance;
 		}
 
 		for (String containedString : theContainedList) {
