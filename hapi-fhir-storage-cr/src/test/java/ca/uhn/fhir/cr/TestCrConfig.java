@@ -108,7 +108,6 @@ public class TestCrConfig {
 	}
 
 	@Bean
-	@Scope("prototype")
 	public ModelManager modelManager(Map<ModelIdentifier, Model> theGlobalModelCache) {
 		return new ModelManager(theGlobalModelCache);
 	}
@@ -130,7 +129,6 @@ public class TestCrConfig {
 
 
 	@Bean
-	@Primary
 	public ElmCacheResourceChangeListener elmCacheResourceChangeListener(
 		IResourceChangeListenerRegistry theResourceChangeListenerRegistry,
 		DaoRegistry theDaoRegistry,
@@ -143,13 +141,10 @@ public class TestCrConfig {
 	}
 
 	@Bean
-	@Primary
 	public CodeCacheResourceChangeListener codeCacheResourceChangeListener(
 		IResourceChangeListenerRegistry theResourceChangeListenerRegistry,
 		EvaluationSettings theEvaluationSettings,
-		DaoRegistry theDaoRegistry,
-		ResourceChangeListenerCacheFactory theResourceChangeListenerCacheFactory,
-		ResourceChangeListenerCacheRefresherImpl theResourceChangeListenerCacheRefresher) {
+		DaoRegistry theDaoRegistry) {
 
 		CodeCacheResourceChangeListener listener = new CodeCacheResourceChangeListener(theDaoRegistry, theEvaluationSettings.getValueSetCache());
 		//registry
@@ -159,16 +154,6 @@ public class TestCrConfig {
 		return listener;
 	}
 
-	/*@Bean
-	ResourceChangeListenerCacheFactory resourceChangeListenerCacheFactory() {
-		return new ResourceChangeListenerCacheFactory();
-	}
-	@Bean
-	@Scope("prototype")
-	ResourceChangeListenerCache resourceChangeListenerCache(String theResourceName, IResourceChangeListener theResourceChangeListener, SearchParameterMap theSearchParameterMap, long theRemoteRefreshIntervalMs) {
-		return new ResourceChangeListenerCache(theResourceName, theResourceChangeListener, theSearchParameterMap, theRemoteRefreshIntervalMs);
-	}
-*/
 	@Bean
 	public IResourceChangeListenerRegistry resourceChangeListenerRegistry(InMemoryResourceMatcher theInMemoryResourceMatcher, FhirContext theFhirContext, ResourceChangeListenerCacheFactory theResourceChangeListenerCacheFactory) {
 		return new ResourceChangeListenerRegistryImpl(theFhirContext, theResourceChangeListenerCacheFactory, theInMemoryResourceMatcher);
@@ -180,8 +165,7 @@ public class TestCrConfig {
 	}
 	@Bean
 	public ResourceChangeListenerRegistryInterceptor resourceChangeListenerRegistryInterceptor() {
-		return new ResourceChangeListenerRegistryInterceptor();}
-
-
+		return new ResourceChangeListenerRegistryInterceptor();
+	}
 
 }

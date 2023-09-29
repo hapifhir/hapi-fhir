@@ -52,8 +52,6 @@ class R4MeasureOperationProviderIT extends BaseCrR4TestServer {
 	@Autowired
 	ResourceChangeListenerCacheRefresherImpl myResourceChangeListenerCacheRefresher;
 
-	@Autowired
-	ResourceChangeListenerRegistryInterceptor myResourceChangeListenerRegistryInterceptor;
 
 	public MeasureReport runEvaluateMeasure(String periodStart, String periodEnd, String subject, String measureId, String reportType, String practitioner){
 
@@ -77,24 +75,27 @@ class R4MeasureOperationProviderIT extends BaseCrR4TestServer {
 
 	@Test
 	void testMeasureEvaluate_EXM130() throws InterruptedException {
-		myResourceChangeListenerCacheRefresher.forceRefreshAllCachesForUnitTest();
+
+		assertTrue(myResourceChangeListenerRegistry.getWatchedResourceNames().contains("ValueSet"));
 
 		loadBundle("ColorectalCancerScreeningsFHIR-bundle.json");
 		runEvaluateMeasure("2019-01-01", "2019-12-31", "Patient/numer-EXM130", "ColorectalCancerScreeningsFHIR", "Individual", null);
+
+		// This is a manual init
+		myResourceChangeListenerCacheRefresher.refreshExpiredCachesAndNotifyListeners();
 
 		//cached valueSets
 		assertEquals(11, myEvaluationSettings.getValueSetCache().size());
 		//remove valueset from server
 		var id = new IdType("ValueSet/2.16.840.1.113883.3.464.1003.101.12.1001");
 		ourClient.delete().resourceById(id).execute();
-		//notify listener
-		var valueSet = new ValueSet();
-		myResourceChangeListenerRegistryInterceptor.deleted(valueSet);
-		myResourceChangeListenerCacheRefresher.forceRefreshAllCachesForUnitTest();
 
-		//valueset should be removed from cache
-		assertEquals(10, myEvaluationSettings.getValueSetCache().size());
+		// This is a manual refresh - Look at the update interval for the listener, there's a 1000 ms
+		// delay. That means this thread has to wait at least 1000 ms before checking the cache.
+		myResourceChangeListenerCacheRefresher.refreshExpiredCachesAndNotifyListeners();
 
+		//_ALL_ valuesets should be removed from cache (check the logic for removing by Id)
+		assertEquals(0, myEvaluationSettings.getValueSetCache().size());
 	}
 	@Test
 	void testMeasureEvaluate_EXM104() {
