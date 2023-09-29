@@ -155,15 +155,7 @@ public class TestCrConfig {
 		//registry
 		theResourceChangeListenerRegistry.registerResourceResourceChangeListener(
 			"ValueSet", SearchParameterMap.newSynchronous(), listener,1000);
-		//change listener cache
-		theResourceChangeListenerCacheFactory.
-		var cache = theResourceChangeListenerCacheFactory.newResourceChangeListenerCache(
-			"ValueSet", SearchParameterMap.newSynchronous(), listener, 1000);
-		ResourceVersionMap newResourceVersionMap = ResourceVersionMap.fromResourceTableEntities(Collections.emptyList());
-		theResourceChangeListenerCacheRefresher.refreshCacheAndNotifyListener(cache);
-		cache.setInitialized(true);
-		theResourceChangeListenerRegistry.contains(cache);
-		theResourceChangeListenerRegistry.
+
 		return listener;
 	}
 
