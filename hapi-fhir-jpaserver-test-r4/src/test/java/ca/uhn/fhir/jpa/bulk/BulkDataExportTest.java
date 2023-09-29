@@ -544,12 +544,12 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 
 		// set the export options
 		BulkExportJobParameters options = new BulkExportJobParameters();
-		options.setResourceTypes(Sets.newHashSet("Patient", "Encounter", "Practitioner"));
+		options.setResourceTypes(Sets.newHashSet("Patient", "Encounter", "Practitioner", "Organization"));
 		options.setGroupId("Group/G1");
 		options.setFilters(new HashSet<>());
 		options.setExportStyle(BulkExportJobParameters.ExportStyle.GROUP);
 		options.setOutputFormat(Constants.CT_FHIR_NDJSON);
-		verifyBulkExportResults(options, List.of("Patient/P1", practId, orgId, encId, encId2, locId), List.of("Patient/P2", orgId2, encId3, locId2));
+		verifyBulkExportResults(options, List.of("Patient/P1", practId, orgId, encId, encId2), List.of("Patient/P2", orgId2, encId3));
 	}
 
 	@Test

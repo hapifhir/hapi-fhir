@@ -613,7 +613,8 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 		String activeSearchParamName = "";
 		String resourceToCheck = theResourceType;
 		if (!PATIENT_BULK_EXPORT_FORWARD_REFERENCE_RESOURCE_TYPES.contains(theResourceType)) {
-			activeSearchParamName= getPatientSearchParamForCurrentResourceType(theResourceType).getName();
+			activeSearchParamName =
+					getPatientSearchParamForCurrentResourceType(theResourceType).getName();
 		} else if ("Practitioner".equalsIgnoreCase(theResourceType)) {
 			resourceToCheck = "Patient";
 			activeSearchParamName = "general-practitioner";
