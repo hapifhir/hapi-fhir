@@ -328,6 +328,9 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 					throw new RuntimeException(Msg.code(2346) + "Couldn't close query iterator", ex);
 				}
 			});
+		} else {
+			ourLog.warn("No active patient compartment search parameter(s) for resource type "
+					+ theParams.getResourceType());
 		}
 		return pids;
 	}
