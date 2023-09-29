@@ -30,6 +30,7 @@ import ca.uhn.fhir.jpa.mdm.dao.MdmLinkDaoSvc;
 import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
 import ca.uhn.fhir.mdm.api.IMdmLink;
 import ca.uhn.fhir.mdm.api.IMdmLinkUpdaterSvc;
+import ca.uhn.fhir.mdm.api.IMdmResourceDaoSvc;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.api.IMdmSurvivorshipService;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
@@ -72,7 +73,7 @@ public class MdmLinkUpdaterSvcImpl implements IMdmLinkUpdaterSvc {
 	MdmLinkDaoSvc myMdmLinkDaoSvc;
 
 	@Autowired
-	MdmResourceDaoSvc myMdmResourceDaoSvc;
+	IMdmResourceDaoSvc myMdmResourceDaoSvc;
 
 	@Autowired
 	MdmMatchLinkSvc myMdmMatchLinkSvc;
