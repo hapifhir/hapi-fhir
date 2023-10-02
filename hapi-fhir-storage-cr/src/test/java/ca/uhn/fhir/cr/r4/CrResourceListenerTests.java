@@ -4,6 +4,7 @@ import ca.uhn.fhir.jpa.cache.ResourceChangeListenerCacheRefresherImpl;
 import ca.uhn.fhir.jpa.cache.ResourceChangeListenerRegistryImpl;
 import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.Parameters;
 import org.junit.jupiter.api.Test;
@@ -95,6 +96,56 @@ public class CrResourceListenerTests extends BaseCrR4TestServer {
 
 		//_ALL_ Libraries should be removed from cache
 		assertEquals(0, myEvaluationSettings.getLibraryCache().size());
+	}
+
+	@Test
+	void testNewVersionLibraryAdd() throws InterruptedException {
+
+		assertTrue(myResourceChangeListenerRegistry.getWatchedResourceNames().contains("Library"));
+		// load measure bundle with measure library version
+		loadBundle("ColorectalCancerScreeningsFHIR-bundle.json");
+		// evaluate-measure adds library to repository cache
+		runEvaluateMeasure("2019-01-01", "2019-12-31", "Patient/numer-EXM130", "ColorectalCancerScreeningsFHIR", "Individual", null);
+
+		//cached libraries from bundle
+		assertEquals(7, myEvaluationSettings.getLibraryCache().size());
+
+		// manually refresh cache
+		myResourceChangeListenerCacheRefresher.refreshExpiredCachesAndNotifyListeners();
+
+		// add new version of measure Library to server
+		loadBundle("multiversion/EXM130-0.0.002-bundle.json");
+
+		// manually refresh cache
+		myResourceChangeListenerCacheRefresher.refreshExpiredCachesAndNotifyListeners();
+
+		//cache should be invalidated for library id and removed
+		assertEquals(6, myEvaluationSettings.getLibraryCache().size());
+	}
+
+	@Test
+	void testNewVersionValueSetAdd() throws InterruptedException {
+
+		assertTrue(myResourceChangeListenerRegistry.getWatchedResourceNames().contains("ValueSet"));
+		// load measure bundle with measure library version
+		loadBundle("ColorectalCancerScreeningsFHIR-bundle.json");
+		// evaluate-measure adds library to repository cache
+		runEvaluateMeasure("2019-01-01", "2019-12-31", "Patient/numer-EXM130", "ColorectalCancerScreeningsFHIR", "Individual", null);
+
+		//cached libraries from bundle
+		assertEquals(11, myEvaluationSettings.getValueSetCache().size());
+
+		// manually refresh cache
+		myResourceChangeListenerCacheRefresher.refreshExpiredCachesAndNotifyListeners();
+
+		// add new version of measure Library to server
+		loadBundle("multiversion/valueset-version-bundle.json");
+
+		// manually refresh cache
+		myResourceChangeListenerCacheRefresher.refreshExpiredCachesAndNotifyListeners();
+
+		//cache should be invalidated for library id and removed
+		assertEquals(10, myEvaluationSettings.getValueSetCache().size());
 	}
 
 }

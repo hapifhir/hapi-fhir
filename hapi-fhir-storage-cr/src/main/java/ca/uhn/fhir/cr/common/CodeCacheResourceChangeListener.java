@@ -104,14 +104,16 @@ public class CodeCacheResourceChangeListener implements IResourceChangeListener 
 		}
 
 		String url = this.myUrlFunction.apply(valueSet);
-		String version = this.myVersionFunction.apply(valueSet);
-		String canonicalUrl;
-		if(version.isEmpty() || version.isBlank()){
-			canonicalUrl = url;
+
+
+		var valuesets = myGlobalValueSetCache.keySet();
+
+		for (String key : valuesets) {
+			var urlKey = key;
+			if (urlKey.contains(url)){
+				myGlobalValueSetCache.remove(key);
+				ourLog.warn("Successfully removed valueSet from ValueSetCache: " + url + " due to updated resource");
+			}
 		}
-		else {
-			canonicalUrl = url + "|" + version;
-		}
-		myGlobalValueSetCache.remove(canonicalUrl);
 	}
 }
