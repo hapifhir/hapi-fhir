@@ -3,29 +3,20 @@ root = true
 [*]
 end_of_line = lf
 insert_final_newline = true
-indent_style = space
+indent_style = tab
 tab_width = 4
-indent_size = 4
 charset = utf-8
 
 [*.xml]
-indent_style = tab
 tab_width = 3
-indent_size = 3
 
 [*.json]
-indent_style = tab
 tab_width = 3
-indent_size = 3
 
 [*.vm]
-indent_style = tab
 tab_width = 3
-indent_size = 3
-
 
 [*.java]
-indent_style = tab
 ij_continuation_indent_size = 4
 ij_java_align_consecutive_assignments = false
 ij_java_align_consecutive_variable_declarations = false
@@ -276,4 +267,3 @@ ij_java_while_on_new_line = false
 ij_java_wrap_comments = false
 ij_java_wrap_first_method_in_call_chain = false
 ij_java_wrap_long_lines = false
-
