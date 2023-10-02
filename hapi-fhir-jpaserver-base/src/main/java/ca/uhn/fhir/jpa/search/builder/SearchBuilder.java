@@ -1400,7 +1400,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 							q.setMaxResults(maxCount);
 						}
 						if (hasDesiredResourceTypes) {
-							q.setParameter("desired_target_resource_types", String.join(", ", desiredResourceTypes));
+							q.setParameter("desired_target_resource_types", desiredResourceTypes);
 						}
 						List<?> results = q.getResultList();
 						for (Object nextRow : results) {
