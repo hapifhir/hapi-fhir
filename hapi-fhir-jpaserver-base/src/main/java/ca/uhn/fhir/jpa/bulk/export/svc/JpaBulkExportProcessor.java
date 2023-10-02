@@ -123,7 +123,7 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 	private IHapiTransactionService myHapiTransactionService;
 
 	@Autowired
-	private ISearchParamRegistry searchParamRegistry;
+	private ISearchParamRegistry mySearchParamRegistry;
 
 	private IFhirPath myFhirPath;
 
@@ -625,7 +625,7 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 			resourceToCheck = "Patient";
 			activeSearchParamName = "organization";
 		}
-		return searchParamRegistry.getActiveSearchParam(resourceToCheck, activeSearchParamName);
+		return mySearchParamRegistry.getActiveSearchParam(resourceToCheck, activeSearchParamName);
 	}
 
 	/**
