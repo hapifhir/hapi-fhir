@@ -43,6 +43,7 @@ public class FhirPathR4 implements IFhirPath {
 		} catch (FHIRException e) {
 			throw new FhirPathExecutionException(Msg.code(2409) + e);
 		}
+		System.out.println("zoop");
 		return (List<T>) evaluate(theInput, parsed, theReturnType);
 	}
 
