@@ -87,7 +87,7 @@ public class CodeCacheResourceChangeListener implements IResourceChangeListener 
 
 		IBaseResource valueSet;
 		try {
-			valueSet = this.myValueSetDao.read(theId);
+			valueSet = this.myValueSetDao.read(theId.toUnqualifiedVersionless());
 		}
 		// This happens when a Library is deleted entirely, so it's impossible to look up
 		// name and version.

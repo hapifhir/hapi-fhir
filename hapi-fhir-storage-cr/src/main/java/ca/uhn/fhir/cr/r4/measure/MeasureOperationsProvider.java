@@ -60,8 +60,6 @@ public class MeasureOperationsProvider {
 	 * @param theAdditionalData the data bundle containing additional data
 	 * @param theRequestDetails The details (such as tenant) of this request. Usually
 	 *                          autopopulated HAPI.
-	 * @param theReporter		the optional reference parameter to add to MeasureReport.reporter.
-	 *                          This is typically Practitioner | PractitionerRole | Location | Organization reference
 	 * @return the calculated MeasureReport
 	 */
 	@Operation(name = ProviderConstants.CQL_EVALUATE_MEASURE, idempotent = true, type = Measure.class)
@@ -76,7 +74,6 @@ public class MeasureOperationsProvider {
 			@OperationParam(name = "productLine") String theProductLine,
 			@OperationParam(name = "additionalData") Bundle theAdditionalData,
 			@OperationParam(name = "terminologyEndpoint") Endpoint theTerminologyEndpoint,
-			@OperationParam(name = "reporter") String theReporter,
 			RequestDetails theRequestDetails)
 			throws InternalErrorException, FHIRException {
 		return myR4MeasureServiceFactory
@@ -93,7 +90,6 @@ public class MeasureOperationsProvider {
 						null,
 						theAdditionalData,
 						theProductLine,
-						thePractitioner,
-						theReporter);
+						thePractitioner);
 	}
 }

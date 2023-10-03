@@ -106,19 +106,8 @@ public class ElmCacheResourceChangeListener implements IResourceChangeListener {
 		}
 
 		String name = this.myNameFunction.apply(library);
-		// when reading updated version from dao, it only reads the newest version updated in server,
-		// so matching on version will not update the cache. For now we will have to remove any match on resourceId
-		// TODO: use resource change event to match on id and version and pass into cache-invalidation, otherwise we
-		// will not be able to retain multiple versions in one cache
+		String version = this.myVersionFunction.apply(library);
 
-		var libraries = myGlobalLibraryCache.keySet();
-
-		for (VersionedIdentifier key : libraries) {
-			var id = key.getId();
-			if (key.getId().equals(name)) {
-				myGlobalLibraryCache.remove(key);
-				ourLog.warn("Successfully removed Library from ELMCache: " + name + " due to updated resource");
-			}
-		}
+		this.myGlobalLibraryCache.remove(new VersionedIdentifier().withId(name).withVersion(version));
 	}
 }
