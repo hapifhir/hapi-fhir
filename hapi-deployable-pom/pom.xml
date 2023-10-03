@@ -15,7 +15,7 @@
 
 	<name>HAPI FHIR - Deployable Artifact Parent POM</name>
 
-	<build>
+    <build>
 		<plugins>
 			<!-- Anything deployable inherits the parent spotless configuration -->
 			<plugin>

@@ -108,6 +108,7 @@
 		<module>hapi-fhir-jpaserver-model</module>
 		<module>hapi-fhir-jpaserver-searchparam</module>
 		<module>hapi-fhir-jpaserver-subscription</module>
+		<module>hapi-fhir-jpaserver-schema</module>
 		<module>hapi-fhir-jaxrsserver-base</module>
 		<module>hapi-fhir-jpaserver-base</module>
 		<module>hapi-fhir-sql-migrate</module>
@@ -1778,6 +1779,11 @@
 						<groupId>*</groupId>
 					</exclusion>
 				</exclusions>
+			</dependency>
+			<dependency>
+				<groupId>org.hibernate.orm</groupId>
+				<artifactId>hibernate-ant</artifactId>
+				<version>${hibernate_version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.hibernate.orm</groupId>

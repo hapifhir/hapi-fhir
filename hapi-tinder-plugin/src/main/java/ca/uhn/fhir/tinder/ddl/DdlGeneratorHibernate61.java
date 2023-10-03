@@ -1,275 +1,157 @@
 package ca.uhn.fhir.tinder.ddl;
 
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import jakarta.persistence.Entity;
+import jakarta.persistence.MappedSuperclass;
+import org.apache.commons.lang3.Validate;
 import org.apache.maven.plugin.MojoFailureException;
+import org.hibernate.boot.Metadata;
 import org.hibernate.boot.MetadataSources;
 import org.hibernate.boot.registry.StandardServiceRegistry;
 import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
+import org.hibernate.cfg.AvailableSettings;
+import org.hibernate.engine.jdbc.connections.internal.UserSuppliedConnectionProviderImpl;
+import org.hibernate.engine.jdbc.connections.spi.ConnectionProvider;
+import org.hibernate.tool.hbm2ddl.SchemaExport;
 import org.hibernate.tool.schema.TargetType;
-//import org.hibernate.tool.hbm2ddl.SchemaExport;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider;
+import org.springframework.core.type.filter.AnnotationTypeFilter;
 
+import javax.annotation.Nonnull;
 import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.Comparator;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.EnumSet;
-import java.util.Map;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
-public class DdlGeneratorHibernate61  {
+public class DdlGeneratorHibernate61 {
+    private static final Logger ourLog = LoggerFactory.getLogger(DdlGeneratorHibernate61.class);
+    private final Set<String> myPackages = new HashSet<>();
+    private final List<DialectDescriptor> myDialects = new ArrayList<>();
+    private File myOutputDirectory;
 
-//    public void generateDdl(
-//        final String dialectClassName,
-//        final Set<Package> packages,
-//        final Set<Class<?>> entityClasses,
-//        final GenerateDdlMojo mojo
-//    ) throws MojoFailureException {
-//        final StandardServiceRegistryBuilder registryBuilder
-//            = new StandardServiceRegistryBuilder();
-//        processPersistenceXml(registryBuilder, mojo);
-//
-//           registryBuilder.applySetting("hibernate.hbm2ddl.auto", "create");
-//        registryBuilder.applySetting("hibernate.dialect", dialectClassName);
-//
-//        if (!mojo.getPersistenceProperties().isEmpty()) {
-//            mojo.getLog().info("Applying persistence properties set in POM...");
-//            final Map<String, Object> properties = mojo
-//                .getPersistenceProperties()
-//                .entrySet()
-//                .stream()
-//                .filter(
-//                    property -> !property.getKey().equals(
-//                        "hibernate.hbm2ddl.auto"
-//                    )
-//                )
-//                .filter(
-//                    property -> !property.getKey().equals(
-//                        "hibernate.dialect"
-//                    )
-//                )
-//                .collect(
-//                    Collectors.toMap(
-//                        property -> property.getKey(),
-//                        property -> property.getValue()
-//                    )
-//                );
-//
-//            for (final Map.Entry<String, Object> property : properties
-//                .entrySet()) {
-//                mojo.getLog().info(
-//                    String.format(
-//                        "Setting peristence property %s = %s",
-//                        property.getKey(),
-//                        property.getValue()
-//                    )
-//                );
-//            }
-//
-//            registryBuilder.applySettings(properties);
-//        }
-//
-//        final StandardServiceRegistry standardRegistry = registryBuilder.build();
-//
-//        final MetadataSources metadataSources = new MetadataSources(
-//            standardRegistry
-//        );
-//
-//        if (packages.isEmpty()) {
-//            System.err.println("No packages to process.");
-//        }
-//        for (final Package aPackage : packages) {
-//            System.err.printf("will process package %s%n", aPackage.getName());
-//            metadataSources.addPackage(aPackage);
-//        }
-//        for (final Class<?> entityClass : entityClasses) {
-//            metadataSources.addAnnotatedClass(entityClass);
-//        }
-//
-//        final SchemaExport export = new SchemaExport();
-//        export.setDelimiter(";");
-//
-//        final Path tmpDir;
-//        try {
-//            tmpDir = Files.createTempDirectory("hibernate5-ddl-maven-plugin");
-//        } catch (IOException ex) {
-//            throw new MojoFailureException("Failed to create work dir.", ex);
-//        }
-//
-//        final Metadata metadata = metadataSources.buildMetadata();
-//
-//        export.setManageNamespaces(true);
-//        export.setOutputFile(
-//            String.format(
-//                "%s/%s.sql",
-//                tmpDir.toString(),
-//                mojo.getDialectNameFromClassName(dialectClassName)
-//            )
-//        );
-//        export.setFormat(true);
-//        if (mojo.isCreateDropStatements()) {
-//            export.execute(
-//                EnumSet.of(TargetType.SCRIPT),
-//                SchemaExport.Action.BOTH,
-//                metadata
-//            );
-//        } else {
-//            export.execute(
-//                EnumSet.of(TargetType.SCRIPT),
-//                SchemaExport.Action.CREATE,
-//                metadata
-//            );
-//        }
-//
-//        mojo.writeOutputFile(dialectClassName, tmpDir);
-//
-//        try {
-//            Files
-//                .walk(tmpDir)
-//                .sorted(Comparator.reverseOrder())
-//                .map(Path::toFile)
-//                .forEach(File::delete);
-//        } catch (IOException ex) {
-//            throw new MojoFailureException("Failed to clean up temporary files.",
-//                                           ex);
-//        }
-//    }
-//
-//    public void generateDdl(
-//        final Dialect dialect,
-//        final Set<Package> packages,
-//        final Set<Class<?>> entityClasses,
-//        final GenerateDdlMojo mojo
-//    )
-//        throws MojoFailureException {
-//
-//        generateDdl(
-//            dialect.getDialectClassName(), packages, entityClasses, mojo
-//        );
-//    }
-//
-//    /**
-//     * Helper method for processing the {@code persistence.xml} file.
-//     *
-//     * @param registryBuilder {@link StandardServiceRegistryBuilder} from
-//     *                        Hibernate.
-//     * @param mojo            Provides access to the Maven {@link Log} and the
-//     *                        properties provided to the Mojo.
-//     */
-//    private void processPersistenceXml(
-//        final StandardServiceRegistryBuilder registryBuilder,
-//        final GenerateDdlMojo mojo
-//    ) {
-//        final Log log = mojo.getLog();
-//        final File persistenceXml = mojo.getPersistenceXml();
-//
-//        if (persistenceXml != null) {
-//            if (Files.exists(persistenceXml.toPath())) {
-//                try (InputStream inputStream = new FileInputStream(
-//                    mojo.getPersistenceXml()
-//                )) {
-//                    log.info(
-//                        "persistence.xml found, looking for properties..."
-//                    );
-//
-//                    final SAXParser parser = SAXParserFactory
-//                        .newInstance()
-//                        .newSAXParser();
-//
-//                    parser.parse(
-//                        inputStream,
-//                        new PersistenceXmlHandler(
-//                            registryBuilder,
-//                            mojo.getLog(),
-//                            new HashSet<>(
-//                                Arrays.asList(
-//                                    mojo.getPersistencePropertiesToUse()
-//                                )
-//                            )
-//                        )
-//                    );
-//
-//                } catch (IOException ex) {
-//                    log.error(
-//                        "Failed to open persistence.xml. "
-//                            + "Not processing properties.",
-//                        ex
-//                    );
-//                } catch (ParserConfigurationException | SAXException ex) {
-//                    log.error(
-//                        "Error parsing persistence.xml. "
-//                            + "Not processing properties",
-//                        ex
-//                    );
-//                }
-//            } else {
-//                log.warn(
-//                    String.format(
-//                        "persistence.xml file '%s' does not exist. Ignoring.",
-//                        persistenceXml.getPath()
-//                    )
-//                );
-//            }
-//        }
-//    }
-//
-//    /**
-//     * A SAX Handler for processing the {@code persistence.xml} file. Used by
-//     * {@link #processPersistenceXml(org.hibernate.boot.registry.StandardServiceRegistryBuilder, de.jpdigital.maven.plugins.hibernate5ddl.GenerateDdlMojo) }.
-//     */
-//    private static class PersistenceXmlHandler extends DefaultHandler {
-//
-//        private final transient StandardServiceRegistryBuilder registryBuilder;
-//
-//        private final transient Set<String> propertiesToUse;
-//
-//        private final transient Log log;
-//
-//        public PersistenceXmlHandler(
-//            final StandardServiceRegistryBuilder registryBuilder,
-//            final Log log,
-//            final Set<String> propertiesToUse
-//        ) {
-//            this.registryBuilder = registryBuilder;
-//            this.log = log;
-//            this.propertiesToUse = propertiesToUse;
-//        }
-//
-//        @Override
-//        public void startElement(
-//            final String uri,
-//            final String localName,
-//            final String qName,
-//            final Attributes attributes
-//        ) {
-//            log.info(
-//                String.format(
-//                    "Found element with uri = '%s', localName = '%s', qName = '%s'...",
-//                    uri,
-//                    localName,
-//                    qName
-//                )
-//            );
-//
-//            if ("property".equals(qName)
-//                    && propertiesToUse.contains(attributes.getValue("name"))) {
-//
-//                final String propertyName = attributes.getValue("name");
-//                final String propertyValue = attributes.getValue("value");
-//
-//                if (propertyName != null && !propertyName.isEmpty()
-//                        && propertyValue != null && !propertyValue.isEmpty()) {
-//                    log.info(
-//                        String.format(
-//                            "Found property %s = %s in persistence.xml",
-//                            propertyName,
-//                            propertyValue
-//                        )
-//                    );
-//                    registryBuilder.applySetting(propertyName, propertyValue);
-//                }
-//            }
-//        }
-//
-//    }
+    public void addPackage(String thePackage) {
+        Validate.notNull(thePackage);
+        myPackages.add(thePackage);
+    }
 
+    public void addDialect(String theDialectClassName, String theFileName) {
+        Validate.notBlank(theDialectClassName);
+        Validate.notBlank(theFileName);
+        myDialects.add(new DialectDescriptor(theDialectClassName, theFileName));
+    }
+
+    public void setOutputDirectory(File theOutputDirectory) {
+        Validate.notNull(theOutputDirectory);
+        myOutputDirectory = theOutputDirectory;
+    }
+
+    public void generateDdl() throws MojoFailureException {
+        for (DialectDescriptor nextDialect : myDialects) {
+            String fileName = nextDialect.getFileName();
+            String dialectClassName = nextDialect.getDialectClassName();
+
+            Set<String> entityClassNames = scanClasspathForEntityClasses(myPackages);
+
+            /*
+             * The hibernate bootstrap process insists on having a DB connection even
+             * if it will never be used. So we just create a placeholder H2 connection
+             * here. The schema export doesn't actually touch this DB, so it doesn't
+             * matter that it doesn't correlate to the specified dialect.
+             */
+            ConnectionProvider connectionProvider = new UserSuppliedConnectionProviderImpl() {
+                private static final long serialVersionUID = 4147495169899817244L;
+
+                @Override
+                public Connection getConnection() throws SQLException {
+                    ourLog.trace("Using internal driver: {}", org.h2.Driver.class);
+                    return DriverManager.getConnection("jdbc:h2:mem:tmp", "sa", "sa");
+                }
+
+                @Override
+                public void closeConnection(Connection conn) throws SQLException {
+                    conn.close();
+                }
+            };
+
+            StandardServiceRegistryBuilder registryBuilder = new StandardServiceRegistryBuilder();
+            registryBuilder.applySetting(AvailableSettings.HBM2DDL_AUTO, "create");
+            registryBuilder.applySetting(AvailableSettings.DIALECT, dialectClassName);
+            registryBuilder.addService(ConnectionProvider.class, connectionProvider);
+            StandardServiceRegistry standardRegistry = registryBuilder.build();
+            MetadataSources metadataSources = new MetadataSources(standardRegistry);
+
+            for (String next : entityClassNames) {
+                try {
+                    metadataSources.addAnnotatedClass(Class.forName(next));
+                } catch (ClassNotFoundException e) {
+                    throw new MojoFailureException("Can not find class " + next, e);
+                }
+            }
+
+            Metadata metadata = metadataSources.buildMetadata();
+
+            EnumSet<TargetType> targetTypes = EnumSet.of(TargetType.SCRIPT);
+            SchemaExport.Action action = SchemaExport.Action.CREATE;
+
+            String outputFile = new File(myOutputDirectory, fileName).getAbsolutePath();
+            ourLog.info("Writing to file: {}", outputFile);
+
+            SchemaExport schemaExport = new SchemaExport();
+            schemaExport.setFormat(true);
+            schemaExport.setDelimiter(";");
+            schemaExport.setOutputFile(outputFile);
+            schemaExport.setOverrideOutputFileContent();
+            schemaExport.execute(targetTypes, action, metadata, standardRegistry);
+        }
+    }
+
+    @Nonnull
+    private static Set<String> scanClasspathForEntityClasses(Set<String> thePackages) throws MojoFailureException {
+        Set<String> entityClassNames = new HashSet<>();
+        for (final String nextPackage : thePackages) {
+            ClassPathScanningCandidateComponentProvider provider = new ClassPathScanningCandidateComponentProvider(false);
+            provider.addIncludeFilter(new AnnotationTypeFilter(Entity.class));
+            provider.addIncludeFilter(new AnnotationTypeFilter(MappedSuperclass.class));
+
+            boolean found = false;
+            for (BeanDefinition definition : provider.findCandidateComponents(nextPackage)) {
+                if (definition.getBeanClassName() != null) {
+                    ourLog.debug("Found entity class: {}", definition.getBeanClassName());
+                    entityClassNames.add(definition.getBeanClassName());
+                    found = true;
+                }
+            }
+
+            if (!found) {
+                throw new MojoFailureException("No @Entity classes found in package: " + nextPackage);
+            }
+        }
+        return entityClassNames;
+    }
+
+    private static class DialectDescriptor {
+        private final String myDialectClassName;
+        private final String myFileName;
+
+        public DialectDescriptor(String theDialectClassName, String theFileName) {
+            myDialectClassName = theDialectClassName;
+            myFileName = theFileName;
+        }
+
+        public String getDialectClassName() {
+            return myDialectClassName;
+        }
+
+        public String getFileName() {
+            return myFileName;
+        }
+    }
 }
