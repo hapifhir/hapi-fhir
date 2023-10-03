@@ -133,6 +133,24 @@ public final class MdmResourceUtil {
 	}
 
 	/**
+	 * Adds the BLOCKED tag to the golden resource.
+	 * Because this is called *before* a resource is saved,
+	 * we must add a new system/code combo to it
+	 * @param theBaseResource
+	 * @return
+	 */
+	public static IBaseResource setGoldenResourceAsBlockedResourceGoldenResource(IBaseResource theBaseResource) {
+		IBaseCoding tag = theBaseResource.getMeta().addTag();
+		tag.setSystem(MdmConstants.SYSTEM_GOLDEN_RECORD_STATUS);
+		tag.setCode(MdmConstants.CODE_BLOCKED);
+		tag.setDisplay(MdmConstants.CODE_BLOCKED_DISPLAY);
+		tag.setUserSelected(false);
+		tag.setVersion("1");
+
+		return theBaseResource;
+	}
+
+	/**
 	 * WARNING: This code may _look_ like it replaces in place a code of a tag, but this DOES NOT ACTUALLY WORK!. In reality what will
 	 * happen is a secondary tag will be created with the same system. the only way to actually remove a tag from a resource
 	 * is by calling dao.removeTag(). This logic here is for the case where our representation of the resource still happens to contain

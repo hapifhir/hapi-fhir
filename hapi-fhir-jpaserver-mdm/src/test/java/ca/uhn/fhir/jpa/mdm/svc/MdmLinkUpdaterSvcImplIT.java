@@ -41,7 +41,7 @@ class MdmLinkUpdaterSvcImplIT extends BaseMdmR4Test {
 	private IMdmLinkUpdaterSvc myMdmLinkUpdaterSvc;
 
 	@Autowired
-	private MdmResourceDaoSvc myMdmResourceDaoSvc;
+	private MdmResourceDaoSvcImpl myMdmResourceDaoSvc;
 
 	@Autowired
 	private MessageHelper myMessageHelper;

@@ -403,7 +403,7 @@ public class ParametersUtil {
 	public static void addPartDecimal(FhirContext theContext, IBase theParameter, String theName, Double theValue) {
 		IPrimitiveType<BigDecimal> value = (IPrimitiveType<BigDecimal>)
 				theContext.getElementDefinition("decimal").newInstance();
-		value.setValue(theValue == null ? null : new BigDecimal(theValue));
+		value.setValue(theValue == null ? null : BigDecimal.valueOf(theValue));
 
 		addPart(theContext, theParameter, theName, value);
 	}

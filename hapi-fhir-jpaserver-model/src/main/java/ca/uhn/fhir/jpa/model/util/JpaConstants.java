@@ -167,14 +167,6 @@ public class JpaConstants {
 	 */
 	public static final String OPERATION_IMPORT_POLL_STATUS = "$import-poll-status";
 	/**
-	 * Operation name for the "$export" operation
-	 */
-	public static final String OPERATION_EXPORT = "$export";
-	/**
-	 * Operation name for the "$export-poll-status" operation
-	 */
-	public static final String OPERATION_EXPORT_POLL_STATUS = "$export-poll-status";
-	/**
 	 * Operation name for the "$lastn" operation
 	 */
 	public static final String OPERATION_LASTN = "$lastn";
@@ -309,6 +301,7 @@ public class JpaConstants {
 			"https://hapifhir.org/NamingSystem/bulk-export-binary-resource-type";
 	public static final Set<String> UNDESIRED_RESOURCE_LINKAGES_FOR_EVERYTHING_ON_PATIENT_INSTANCE =
 			Set.of("Provenance", "List", "Group");
+
 	/**
 	 * Non-instantiable
 	 */

@@ -553,9 +553,27 @@ public interface IValidationSupport {
 		private String myCodeSystemVersion;
 		private List<BaseConceptProperty> myProperties;
 		private String myDisplay;
+		private String mySourceDetails;
 
 		public CodeValidationResult() {
 			super();
+		}
+
+		/**
+		 * This field may contain information about what the source of the
+		 * validation information was.
+		 */
+		public String getSourceDetails() {
+			return mySourceDetails;
+		}
+
+		/**
+		 * This field may contain information about what the source of the
+		 * validation information was.
+		 */
+		public CodeValidationResult setSourceDetails(String theSourceDetails) {
+			mySourceDetails = theSourceDetails;
+			return this;
 		}
 
 		public String getDisplay() {

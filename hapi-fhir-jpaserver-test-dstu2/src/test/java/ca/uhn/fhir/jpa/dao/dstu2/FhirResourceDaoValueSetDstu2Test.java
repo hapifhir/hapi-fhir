@@ -103,9 +103,10 @@ public class FhirResourceDaoValueSetDstu2Test extends BaseJpaDstu2Test {
 		CodingDt coding = null;
 		CodeableConceptDt codeableConcept = null;
 		IValidationSupport.CodeValidationResult result = myValueSetDao.validateCode(valueSetIdentifier, id, code, system, display, coding, codeableConcept, mySrd);
-		assertFalse(result.isOk());
+		assertTrue(result.isOk());
 		assertEquals("Concept Display \"Systolic blood pressure at First encounterXXXX\" does not match expected \"Systolic blood pressure at First encounter\" for in-memory expansion of ValueSet: http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2", result.getMessage());
 		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
+		assertEquals(IValidationSupport.IssueSeverity.WARNING, result.getSeverity());
 	}
 
 	@Test

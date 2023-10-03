@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-deployable-pom</artifactId>
-		<version>6.9.6-SNAPSHOT</version>
+		<version>6.9.9-SNAPSHOT</version>
 
 		<relativePath>../hapi-deployable-pom/pom.xml</relativePath>
 	</parent>
@@ -79,19 +79,11 @@
 					<groupId>org.apache.commons</groupId>
 					<artifactId>commons-collections4</artifactId>
 				</exclusion>
-				<exclusion>
-					<groupId>xpp3</groupId>
-					<artifactId>xpp3</artifactId>
-				</exclusion>
+
 			</exclusions>
 		</dependency>
 
-		<!-- These two dependencies replaces the version of xpp3 that's bundled with Ucum with one that's Java 9+ compatible -->
-		<dependency>
-			<groupId>org.codelibs</groupId>
-			<artifactId>xpp3</artifactId>
-			<version>1.1.4c.0</version>
-		</dependency>
+
 
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
@@ -103,10 +95,6 @@
             <groupId>org.fhir</groupId>
             <artifactId>ucum</artifactId>
 			  <exclusions>
-				  <exclusion>
-					  <groupId>xpp3</groupId>
-					  <artifactId>xpp3</artifactId>
-				  </exclusion>
 				  <exclusion>
 					  <groupId>junit</groupId>
 					  <artifactId>junit</artifactId>

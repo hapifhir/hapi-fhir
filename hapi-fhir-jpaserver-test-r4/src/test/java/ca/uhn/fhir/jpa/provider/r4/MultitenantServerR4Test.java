@@ -23,6 +23,7 @@ import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.test.utilities.ITestDataBuilder;
 import ca.uhn.fhir.util.JsonUtil;
@@ -713,7 +714,7 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 		}
 
 		private String buildExportUrl(String createInPartition, String jobId) {
-			return myClient.getServerBase() + "/" + createInPartition + "/" + JpaConstants.OPERATION_EXPORT_POLL_STATUS + "?"
+			return myClient.getServerBase() + "/" + createInPartition + "/" + ProviderConstants.OPERATION_EXPORT_POLL_STATUS + "?"
 				+ JpaConstants.PARAM_EXPORT_POLL_STATUS_JOB_ID + "=" + jobId;
 		}
 	}

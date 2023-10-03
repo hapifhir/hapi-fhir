@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.cr.r4.measure;
 
+import ca.uhn.fhir.cr.r4.IMeasureServiceFactory;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
@@ -33,11 +34,9 @@ import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.MeasureReport;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.function.Function;
-
 public class MeasureOperationsProvider {
 	@Autowired
-	Function<RequestDetails, MeasureService> myR4MeasureServiceFactory;
+	IMeasureServiceFactory myR4MeasureServiceFactory;
 
 	/**
 	 * Implements the <a href=
@@ -76,8 +75,8 @@ public class MeasureOperationsProvider {
 			@OperationParam(name = "terminologyEndpoint") Endpoint theTerminologyEndpoint,
 			RequestDetails theRequestDetails)
 			throws InternalErrorException, FHIRException {
-		return this.myR4MeasureServiceFactory
-				.apply(theRequestDetails)
+		return myR4MeasureServiceFactory
+				.create(theRequestDetails)
 				.evaluateMeasure(
 						theId,
 						thePeriodStart,

@@ -55,6 +55,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.awt.*;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -235,7 +236,7 @@ public class BinaryStorageInterceptor<T extends IPrimitiveType<byte[]>> {
 				if (shouldStoreBlob) {
 
 					String newBlobId;
-					if (resourceId.hasIdPart()) {
+					if (thePointcut == Pointcut.STORAGE_PRESTORAGE_RESOURCE_UPDATED) {
 						ByteArrayInputStream inputStream = new ByteArrayInputStream(data);
 						StoredDetails storedDetails = myBinaryStorageSvc.storeBlob(
 								resourceId, null, nextContentType, inputStream, theRequestDetails);

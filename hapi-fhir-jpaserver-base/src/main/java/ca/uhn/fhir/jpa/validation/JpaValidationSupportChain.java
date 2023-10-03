@@ -58,6 +58,9 @@ public class JpaValidationSupportChain extends ValidationSupportChain {
 	@Autowired
 	private UnknownCodeSystemWarningValidationSupport myUnknownCodeSystemWarningValidationSupport;
 
+	@Autowired
+	private InMemoryTerminologyServerValidationSupport myInMemoryTerminologyServerValidationSupport;
+
 	/**
 	 * Constructor
 	 */
@@ -81,7 +84,7 @@ public class JpaValidationSupportChain extends ValidationSupportChain {
 		addValidationSupport(myJpaValidationSupport);
 		addValidationSupport(myTerminologyService);
 		addValidationSupport(new SnapshotGeneratingValidationSupport(myFhirContext));
-		addValidationSupport(new InMemoryTerminologyServerValidationSupport(myFhirContext));
+		addValidationSupport(myInMemoryTerminologyServerValidationSupport);
 		addValidationSupport(myNpmJpaValidationSupport);
 		addValidationSupport(new CommonCodeSystemsTerminologyService(myFhirContext));
 		addValidationSupport(myConceptMappingSvc);

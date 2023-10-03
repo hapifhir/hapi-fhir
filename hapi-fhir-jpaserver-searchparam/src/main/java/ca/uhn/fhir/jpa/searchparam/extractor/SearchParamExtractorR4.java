@@ -40,6 +40,7 @@ import org.hl7.fhir.r4.model.ResourceType;
 import org.hl7.fhir.r4.model.TypeDetails;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.hl7.fhir.r4.utils.FHIRPathEngine;
+import org.hl7.fhir.r4.utils.FHIRPathUtilityClasses.FunctionDetails;
 
 import java.util.Collections;
 import java.util.HashMap;

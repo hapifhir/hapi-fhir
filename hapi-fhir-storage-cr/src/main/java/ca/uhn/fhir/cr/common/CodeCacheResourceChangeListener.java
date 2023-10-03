@@ -25,11 +25,11 @@ import ca.uhn.fhir.jpa.cache.IResourceChangeEvent;
 import ca.uhn.fhir.jpa.cache.IResourceChangeListener;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import org.cqframework.cql.elm.execution.VersionedIdentifier;
+import org.hl7.elm.r1.VersionedIdentifier;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.opencds.cqf.cql.engine.runtime.Code;
-import org.opencds.cqf.cql.evaluator.fhir.util.Reflections;
+import org.opencds.cqf.fhir.utility.Reflections;
 
 import java.util.Collection;
 import java.util.List;

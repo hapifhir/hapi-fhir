@@ -1,0 +1,5 @@
+---
+type: change
+issue: 5262
+title: "Previously, when both resourceId and goldenResourceId are provided to the mdm link history operation, they will
+be treated as an OR. This is now changed to AND in order to comply with REST conventions."

@@ -162,7 +162,6 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 			boolean theExcludeDeleted)
 			throws ResourceNotFoundException {
 		assert myDontCheckActiveTransactionForUnitTest || TransactionSynchronizationManager.isSynchronizationActive();
-		assert theRequestPartitionId != null;
 
 		if (theResourceId.contains("/")) {
 			theResourceId = theResourceId.substring(theResourceId.indexOf("/") + 1);
@@ -510,8 +509,6 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 
 	private Map<String, List<IResourceLookup<JpaPid>>> translateForcedIdToPids(
 			@Nonnull RequestPartitionId theRequestPartitionId, Collection<IIdType> theId, boolean theExcludeDeleted) {
-		assert theRequestPartitionId != null;
-
 		theId.forEach(id -> Validate.isTrue(id.hasIdPart()));
 
 		if (theId.isEmpty()) {

@@ -9,6 +9,9 @@
         <li>Logback (All): 1.4.4 -&gt; 1.4.7</li>
         <li>H2 Database (JPA): 2.1.214 -&gt; 2.2.220</li>
         <li>Thymeleaf (Testpage Overlay): 3.0.14.RELEASE -&gt; 3.1.2.RELEASE</li>
+        <li>xpp3 (All): 1.1.4c.0 -&gt; 1.1.6</li>
+        <li>HtmlUnit (All): 2.67.0 -&gt; 2.70.0</li>
+        <li>org.hl7.fhir.core (All): 6.0.22.2 -&gt; 6.1.2</li>
         <li>Spring Framework (JPA): 5.3.27 -&gt; 6.0.12</li>
         <li>Spring Data BOM (JPA): 2021.2.2 -&gt; 2023.0.0</li>
         <li>Hibernate (JPA): 5.6.15.Final -&gt; 6.2.8.Final</li>

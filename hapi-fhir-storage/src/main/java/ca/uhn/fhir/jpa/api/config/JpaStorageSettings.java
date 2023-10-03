@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.jpa.api.config;
 
+import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.jpa.api.model.HistoryCountModeEnum;
 import ca.uhn.fhir.jpa.api.model.WarmCacheEntry;
 import ca.uhn.fhir.jpa.model.entity.ResourceEncodingEnum;
@@ -107,6 +108,9 @@ public class JpaStorageSettings extends StorageSettings {
 	 * Child Configurations
 	 */
 	private static final Integer DEFAULT_INTERNAL_SYNCHRONOUS_SEARCH_SIZE = 10000;
+
+	private static final boolean DEFAULT_PREVENT_INVALIDATING_CONDITIONAL_MATCH_CRITERIA = false;
+
 	/**
 	 * Do not change default of {@code 0}!
 	 *
@@ -332,6 +336,23 @@ public class JpaStorageSettings extends StorageSettings {
 	private boolean myResourceHistoryDbEnabled = true;
 
 	/**
+	 * @since 7.0.0
+	 */
+	@Nonnull
+	private IValidationSupport.IssueSeverity myIssueSeverityForCodeDisplayMismatch =
+			IValidationSupport.IssueSeverity.WARNING;
+
+	/**
+	 * This setting allows preventing a conditional update to invalidate the match criteria.
+	 * <p/>
+	 * By default, this is disabled unless explicitly enabled.
+	 *
+	 * @since 6.8.2
+	 */
+	private boolean myPreventInvalidatingConditionalMatchCriteria =
+			DEFAULT_PREVENT_INVALIDATING_CONDITIONAL_MATCH_CRITERIA;
+
+	/**
 	 * Constructor
 	 */
 	public JpaStorageSettings() {
@@ -353,6 +374,9 @@ public class JpaStorageSettings extends StorageSettings {
 		}
 		if (HapiSystemProperties.isUnitTestModeEnabled()) {
 			setJobFastTrackingEnabled(true);
+		}
+		if (HapiSystemProperties.isPreventInvalidatingConditionalMatchCriteria()) {
+			setPreventInvalidatingConditionalMatchCriteria(true);
 		}
 	}
 
@@ -2361,6 +2385,41 @@ public class JpaStorageSettings extends StorageSettings {
 	}
 
 	/**
+	 * This setting controls the validation issue severity to report when a code validation
+	 * finds that the code is present in the given CodeSystem, but the display name being
+	 * validated doesn't match the expected value(s). Defaults to
+	 * {@link ca.uhn.fhir.context.support.IValidationSupport.IssueSeverity#WARNING}. Set this
+	 * value to {@link ca.uhn.fhir.context.support.IValidationSupport.IssueSeverity#INFORMATION}
+	 * if you don't want to see display name validation issues at all in resource validation
+	 * outcomes.
+	 *
+	 * @since 7.0.0
+	 */
+	@Nonnull
+	public IValidationSupport.IssueSeverity getIssueSeverityForCodeDisplayMismatch() {
+		return myIssueSeverityForCodeDisplayMismatch;
+	}
+
+	/**
+	 * This setting controls the validation issue severity to report when a code validation
+	 * finds that the code is present in the given CodeSystem, but the display name being
+	 * validated doesn't match the expected value(s). Defaults to
+	 * {@link ca.uhn.fhir.context.support.IValidationSupport.IssueSeverity#WARNING}. Set this
+	 * value to {@link ca.uhn.fhir.context.support.IValidationSupport.IssueSeverity#INFORMATION}
+	 * if you don't want to see display name validation issues at all in resource validation
+	 * outcomes.
+	 *
+	 * @param theIssueSeverityForCodeDisplayMismatch The severity. Must not be {@literal null}.
+	 * @since 7.0.0
+	 */
+	public void setIssueSeverityForCodeDisplayMismatch(
+			@Nonnull IValidationSupport.IssueSeverity theIssueSeverityForCodeDisplayMismatch) {
+		Validate.notNull(
+				theIssueSeverityForCodeDisplayMismatch, "theIssueSeverityForCodeDisplayMismatch must not be null");
+		myIssueSeverityForCodeDisplayMismatch = theIssueSeverityForCodeDisplayMismatch;
+	}
+
+	/**
 	 * This setting controls whether MdmLink and other non-resource DB history is enabled.
 	 * <p/>
 	 * By default, this is enabled unless explicitly disabled.
@@ -2370,6 +2429,14 @@ public class JpaStorageSettings extends StorageSettings {
 	 */
 	public void setNonResourceDbHistoryEnabled(boolean theNonResourceDbHistoryEnabled) {
 		myNonResourceDbHistoryEnabled = theNonResourceDbHistoryEnabled;
+	}
+
+	public void setPreventInvalidatingConditionalMatchCriteria(boolean theCriteria) {
+		myPreventInvalidatingConditionalMatchCriteria = theCriteria;
+	}
+
+	public boolean isPreventInvalidatingConditionalMatchCriteria() {
+		return myPreventInvalidatingConditionalMatchCriteria;
 	}
 
 	public enum StoreMetaSourceInformationEnum {

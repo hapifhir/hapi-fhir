@@ -50,6 +50,7 @@ import jakarta.persistence.criteria.Root;
 import jakarta.validation.constraints.NotNull;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.ListUtils;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.Validate;
 import org.hibernate.envers.AuditReader;
 import org.hibernate.envers.RevisionType;
@@ -371,28 +372,39 @@ public class MdmLinkDaoJpaImpl implements IMdmLinkDao<JpaPid, MdmLink> {
 		final AuditQueryCreator auditQueryCreator = myAuditReader.createQuery();
 
 		try {
-			final AuditCriterion goldenResourceIdCriterion = AuditEntity.property(GOLDEN_RESOURCE_PID_NAME)
-					.in(convertToLongIds(theMdmHistorySearchParameters.getGoldenResourceIds()));
-			final AuditCriterion resourceIdCriterion = AuditEntity.property(SOURCE_PID_NAME)
-					.in(convertToLongIds(theMdmHistorySearchParameters.getSourceIds()));
+			final AuditCriterion goldenResourceIdCriterion = buildAuditCriterionOrNull(
+					theMdmHistorySearchParameters.getGoldenResourceIds(), GOLDEN_RESOURCE_PID_NAME);
+
+			final AuditCriterion resourceIdCriterion =
+					buildAuditCriterionOrNull(theMdmHistorySearchParameters.getSourceIds(), SOURCE_PID_NAME);
 
 			final AuditCriterion goldenResourceAndOrResourceIdCriterion;
 
 			if (!theMdmHistorySearchParameters.getGoldenResourceIds().isEmpty()
 					&& !theMdmHistorySearchParameters.getSourceIds().isEmpty()) {
-				if (theMdmHistorySearchParameters.getParameterJoinType() == MdmHistorySearchParameters.JoinType.AND) {
-					// 'and' the source and golden ids
-					goldenResourceAndOrResourceIdCriterion =
-							AuditEntity.and(goldenResourceIdCriterion, resourceIdCriterion);
-				} else {
-					// default is 'or'
-					goldenResourceAndOrResourceIdCriterion =
-							AuditEntity.or(goldenResourceIdCriterion, resourceIdCriterion);
+
+				// Make sure the criterion does not contain empty IN clause, e.g. id IN (), which postgres (likely other
+				// sql servers) do not like. Directly return empty result instead.
+				if (ObjectUtils.anyNull(goldenResourceIdCriterion, resourceIdCriterion)) {
+					return new ArrayList<>();
 				}
+				goldenResourceAndOrResourceIdCriterion =
+						AuditEntity.and(goldenResourceIdCriterion, resourceIdCriterion);
+
 			} else if (!theMdmHistorySearchParameters.getGoldenResourceIds().isEmpty()) {
+
+				if (ObjectUtils.anyNull(goldenResourceIdCriterion)) {
+					return new ArrayList<>();
+				}
 				goldenResourceAndOrResourceIdCriterion = goldenResourceIdCriterion;
+
 			} else if (!theMdmHistorySearchParameters.getSourceIds().isEmpty()) {
+
+				if (ObjectUtils.anyNull(resourceIdCriterion)) {
+					return new ArrayList<>();
+				}
 				goldenResourceAndOrResourceIdCriterion = resourceIdCriterion;
+
 			} else {
 				throw new IllegalArgumentException(Msg.code(2298)
 						+ "$mdm-link-history Golden resource and source query IDs cannot both be empty.");
@@ -425,6 +437,12 @@ public class MdmLinkDaoJpaImpl implements IMdmLinkDao<JpaPid, MdmLink> {
 				.stream()
 				.map(JpaPid::getId)
 				.collect(Collectors.toUnmodifiableList());
+	}
+
+	private AuditCriterion buildAuditCriterionOrNull(
+			List<IIdType> theMdmHistorySearchParameterIds, String theProperty) {
+		List<Long> longIds = convertToLongIds(theMdmHistorySearchParameterIds);
+		return longIds.isEmpty() ? null : AuditEntity.property(theProperty).in(longIds);
 	}
 
 	private MdmLinkWithRevision<MdmLink> buildRevisionFromObjectArray(Object[] theArray) {

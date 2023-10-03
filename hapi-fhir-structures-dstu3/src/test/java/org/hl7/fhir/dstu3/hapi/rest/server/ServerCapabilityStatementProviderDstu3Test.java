@@ -32,6 +32,7 @@ import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.server.HardcodedServerAddressStrategy;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.ResourceBinding;
 import ca.uhn.fhir.rest.server.RestfulServer;
@@ -40,6 +41,8 @@ import ca.uhn.fhir.rest.server.method.BaseMethodBinding;
 import ca.uhn.fhir.rest.server.method.IParameter;
 import ca.uhn.fhir.rest.server.method.SearchMethodBinding;
 import ca.uhn.fhir.rest.server.method.SearchParameter;
+import ca.uhn.fhir.rest.server.provider.BulkDataExportProvider;
+import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.validation.FhirValidator;
@@ -81,6 +84,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.containsString;
@@ -845,6 +849,24 @@ public class ServerCapabilityStatementProviderDstu3Test {
             .findFirst().get();
         assertThat(patientResource.getProfile().getReference(), containsString(PATIENT_SUB));
     }
+
+	@Test
+	public void testMethodGetServerConformance_whenServerSupportsExportOperation_willIncludeInstantiatesElement() throws Exception {
+		// given
+		RestfulServer rs = new RestfulServer(ourCtx);
+		rs.setProviders(new BulkDataExportProvider());
+		rs.setServerAddressStrategy(new HardcodedServerAddressStrategy("http://localhost/baseR3"));
+		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider();
+		rs.setServerConformanceProvider(sc);
+
+		// when
+		rs.init(createServletConfig());
+		CapabilityStatement conformance = sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
+
+		// then
+		String instantiatesFirstRepValue = conformance.getInstantiates().get(0).getValue();
+		assertThat(instantiatesFirstRepValue, equalTo(Constants.BULK_DATA_ACCESS_IG_URL));
+	}
 
 	private List<String> toOperationIdParts(List<CapabilityStatementRestOperationComponent> theOperation) {
 		ArrayList<String> retVal = Lists.newArrayList();

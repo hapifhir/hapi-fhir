@@ -28,6 +28,7 @@ public class MdmPartitionedGoldenResourceFindingTest extends BaseMdmR4Test {
 	public void testNoMatchOnResourcesInDifferentPartition(){
 		myMdmSettings.setSearchAllPartitionForMatch(false);
 		myPartitionSettings.setPartitioningEnabled(true);
+		myPartitionSettings.setUnnamedPartitionMode(false);
 		myPartitionLookupSvc.createPartition(new PartitionEntity().setId(1).setName(PARTITION_1), null);
 		myPartitionLookupSvc.createPartition(new PartitionEntity().setId(2).setName(PARTITION_2), null);
 
@@ -51,6 +52,7 @@ public class MdmPartitionedGoldenResourceFindingTest extends BaseMdmR4Test {
 	public void testMatchOnResourcesInDifferentPartitionIfSearchAllPartition(){
 		myMdmSettings.setSearchAllPartitionForMatch(true);
 		myPartitionSettings.setPartitioningEnabled(true);
+		myPartitionSettings.setUnnamedPartitionMode(false);
 		myPartitionLookupSvc.createPartition(new PartitionEntity().setId(1).setName(PARTITION_1), null);
 		myPartitionLookupSvc.createPartition(new PartitionEntity().setId(2).setName(PARTITION_2), null);
 
