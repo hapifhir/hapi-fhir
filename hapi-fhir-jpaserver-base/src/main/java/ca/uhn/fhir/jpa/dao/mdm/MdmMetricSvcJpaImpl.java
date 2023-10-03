@@ -10,15 +10,15 @@ import ca.uhn.fhir.mdm.model.MdmLinkMetrics;
 import ca.uhn.fhir.mdm.model.MdmLinkScoreMetrics;
 import ca.uhn.fhir.mdm.model.MdmMetrics;
 import ca.uhn.fhir.mdm.model.MdmResourceMetrics;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityManagerFactory;
+import jakarta.persistence.Query;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.Query;
 
 public class MdmMetricSvcJpaImpl extends BaseMdmMetricSvc {
 
