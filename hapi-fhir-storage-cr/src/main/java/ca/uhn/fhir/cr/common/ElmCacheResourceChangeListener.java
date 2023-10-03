@@ -26,7 +26,6 @@ import ca.uhn.fhir.jpa.cache.IResourceChangeListener;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.cqframework.cql.cql2elm.model.CompiledLibrary;
-import org.hibernate.mapping.Any;
 import org.hl7.elm.r1.VersionedIdentifier;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -107,20 +106,19 @@ public class ElmCacheResourceChangeListener implements IResourceChangeListener {
 		}
 
 		String name = this.myNameFunction.apply(library);
-			// when reading updated version from dao, it only reads the newest version updated in server,
-			// so matching on version will not update the cache. For now we will have to remove any match on resourceId
-			// TODO: use resource change event to match on id and version and pass into cache-invalidation, otherwise we will not be able to retain multiple versions in one cache
-
+		// when reading updated version from dao, it only reads the newest version updated in server,
+		// so matching on version will not update the cache. For now we will have to remove any match on resourceId
+		// TODO: use resource change event to match on id and version and pass into cache-invalidation, otherwise we
+		// will not be able to retain multiple versions in one cache
 
 		var libraries = myGlobalLibraryCache.keySet();
 
 		for (VersionedIdentifier key : libraries) {
 			var id = key.getId();
-			if (key.getId().equals(name)){
+			if (key.getId().equals(name)) {
 				myGlobalLibraryCache.remove(key);
 				ourLog.warn("Successfully removed Library from ELMCache: " + name + " due to updated resource");
 			}
 		}
-		}
-
+	}
 }

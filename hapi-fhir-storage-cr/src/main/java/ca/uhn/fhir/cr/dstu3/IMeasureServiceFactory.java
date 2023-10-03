@@ -19,10 +19,10 @@
  */
 package ca.uhn.fhir.cr.dstu3;
 
-import ca.uhn.fhir.cr.dstu3.measure.MeasureService;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import org.opencds.cqf.fhir.cr.measure.dstu3.Dstu3MeasureService;
 
 @FunctionalInterface
 public interface IMeasureServiceFactory {
-	MeasureService create(RequestDetails theRequestDetails);
+	Dstu3MeasureService create(RequestDetails theRequestDetails);
 }

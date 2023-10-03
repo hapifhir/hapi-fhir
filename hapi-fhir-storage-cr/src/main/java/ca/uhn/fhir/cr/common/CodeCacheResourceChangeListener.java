@@ -19,15 +19,12 @@
  */
 package ca.uhn.fhir.cr.common;
 
-import antlr.StringUtils;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.cache.IResourceChangeEvent;
 import ca.uhn.fhir.jpa.cache.IResourceChangeListener;
-import ca.uhn.fhir.jpa.cache.ResourceChangeListenerCache;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import org.hl7.elm.r1.VersionedIdentifier;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.opencds.cqf.cql.engine.runtime.Code;
@@ -51,8 +48,7 @@ public class CodeCacheResourceChangeListener implements IResourceChangeListener 
 	private final Function<IBaseResource, String> myUrlFunction;
 	private final Function<IBaseResource, String> myVersionFunction;
 
-	public CodeCacheResourceChangeListener(
-			DaoRegistry theDaoRegistry, Map<String, List<Code>> theGlobalValueSetCache) {
+	public CodeCacheResourceChangeListener(DaoRegistry theDaoRegistry, Map<String, List<Code>> theGlobalValueSetCache) {
 		this.myValueSetDao = theDaoRegistry.getResourceDao("ValueSet");
 		this.myGlobalValueSetCache = theGlobalValueSetCache;
 		this.myUrlFunction = Reflections.getUrlFunction(myValueSetDao.getResourceType());
@@ -105,12 +101,11 @@ public class CodeCacheResourceChangeListener implements IResourceChangeListener 
 
 		String url = this.myUrlFunction.apply(valueSet);
 
-
 		var valuesets = myGlobalValueSetCache.keySet();
 
 		for (String key : valuesets) {
 			var urlKey = key;
-			if (urlKey.contains(url)){
+			if (urlKey.contains(url)) {
 				myGlobalValueSetCache.remove(key);
 				ourLog.warn("Successfully removed valueSet from ValueSetCache: " + url + " due to updated resource");
 			}
