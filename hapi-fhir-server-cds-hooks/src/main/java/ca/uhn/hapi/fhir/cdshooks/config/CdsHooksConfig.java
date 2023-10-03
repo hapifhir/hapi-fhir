@@ -34,28 +34,36 @@ import ca.uhn.hapi.fhir.cdshooks.module.CdsHooksObjectMapperFactory;
 import ca.uhn.hapi.fhir.cdshooks.svc.CdsConfigServiceImpl;
 import ca.uhn.hapi.fhir.cdshooks.svc.CdsHooksContextBooter;
 import ca.uhn.hapi.fhir.cdshooks.svc.CdsServiceRegistryImpl;
-import ca.uhn.hapi.fhir.cdshooks.svc.cr.CdsCrServiceDstu3;
-import ca.uhn.hapi.fhir.cdshooks.svc.cr.CdsCrServiceR4;
-import ca.uhn.hapi.fhir.cdshooks.svc.cr.CdsCrServiceR5;
+import ca.uhn.hapi.fhir.cdshooks.svc.cr.CdsCrServiceRegistry;
 import ca.uhn.hapi.fhir.cdshooks.svc.cr.CdsServiceInterceptor;
+import ca.uhn.hapi.fhir.cdshooks.svc.cr.ICdsCrService;
 import ca.uhn.hapi.fhir.cdshooks.svc.cr.ICdsCrServiceFactory;
-import ca.uhn.hapi.fhir.cdshooks.svc.cr.discovery.CrDiscoveryServiceDstu3;
-import ca.uhn.hapi.fhir.cdshooks.svc.cr.discovery.CrDiscoveryServiceR4;
-import ca.uhn.hapi.fhir.cdshooks.svc.cr.discovery.CrDiscoveryServiceR5;
+import ca.uhn.hapi.fhir.cdshooks.svc.cr.ICdsCrServiceRegistry;
+import ca.uhn.hapi.fhir.cdshooks.svc.cr.discovery.CdsCrDiscoveryServiceRegistry;
+import ca.uhn.hapi.fhir.cdshooks.svc.cr.discovery.ICdsCrDiscoveryServiceRegistry;
+import ca.uhn.hapi.fhir.cdshooks.svc.cr.discovery.ICrDiscoveryService;
 import ca.uhn.hapi.fhir.cdshooks.svc.cr.discovery.ICrDiscoveryServiceFactory;
 import ca.uhn.hapi.fhir.cdshooks.svc.prefetch.CdsPrefetchDaoSvc;
 import ca.uhn.hapi.fhir.cdshooks.svc.prefetch.CdsPrefetchFhirClientSvc;
 import ca.uhn.hapi.fhir.cdshooks.svc.prefetch.CdsPrefetchSvc;
 import ca.uhn.hapi.fhir.cdshooks.svc.prefetch.CdsResolutionStrategySvc;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.opencds.cqf.fhir.api.Repository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.util.Optional;
+
 @Configuration
 public class CdsHooksConfig {
+	private static final Logger ourLog = LoggerFactory.getLogger(CdsHooksConfig.class);
 
 	public static final String CDS_HOOKS_OBJECT_MAPPER_FACTORY = "cdsHooksObjectMapperFactory";
 
@@ -97,7 +105,15 @@ public class CdsHooksConfig {
 	}
 
 	@Bean
-	public ICdsCrServiceFactory cdsCrServiceFactory(FhirContext theFhirContext, ICdsConfigService theCdsConfigService) {
+	public ICdsCrServiceRegistry cdsCrServiceRegistry() {
+		return new CdsCrServiceRegistry();
+	}
+
+	@Bean
+	public ICdsCrServiceFactory cdsCrServiceFactory(
+			FhirContext theFhirContext,
+			ICdsConfigService theCdsConfigService,
+			ICdsCrServiceRegistry theCdsCrServiceRegistry) {
 		return id -> {
 			if (myRepositoryFactory == null) {
 				return null;
@@ -105,22 +121,35 @@ public class CdsHooksConfig {
 			RequestDetails rd =
 					theCdsConfigService.createRequestDetails(theFhirContext, id, PLAN_DEFINITION_RESOURCE_NAME);
 			Repository repository = myRepositoryFactory.create(rd);
-			switch (theFhirContext.getVersion().getVersion()) {
-				case DSTU3:
-					return new CdsCrServiceDstu3(rd, repository);
-				case R4:
-					return new CdsCrServiceR4(rd, repository);
-				case R5:
-					return new CdsCrServiceR5(rd, repository);
-				default:
-					return null;
+			Optional<Class<? extends ICdsCrService>> clazz =
+					theCdsCrServiceRegistry.find(theFhirContext.getVersion().getVersion());
+			if (clazz.isEmpty()) {
+				return null;
+			}
+			try {
+				Constructor<? extends ICdsCrService> constructor =
+						clazz.get().getConstructor(RequestDetails.class, Repository.class);
+				return constructor.newInstance(rd, repository);
+			} catch (NoSuchMethodException
+					| InvocationTargetException
+					| InstantiationException
+					| IllegalAccessException e) {
+				ourLog.error("Error encountered attempting to construct the CdsCrService: " + e.getMessage());
+				return null;
 			}
 		};
 	}
 
 	@Bean
+	public ICdsCrDiscoveryServiceRegistry cdsCrDiscoveryServiceRegistry() {
+		return new CdsCrDiscoveryServiceRegistry();
+	}
+
+	@Bean
 	public ICrDiscoveryServiceFactory crDiscoveryServiceFactory(
-			FhirContext theFhirContext, ICdsConfigService theCdsConfigService) {
+			FhirContext theFhirContext,
+			ICdsConfigService theCdsConfigService,
+			ICdsCrDiscoveryServiceRegistry theCdsCrDiscoveryServiceRegistry) {
 		return id -> {
 			if (myRepositoryFactory == null) {
 				return null;
@@ -128,15 +157,21 @@ public class CdsHooksConfig {
 			RequestDetails rd =
 					theCdsConfigService.createRequestDetails(theFhirContext, id, PLAN_DEFINITION_RESOURCE_NAME);
 			Repository repository = myRepositoryFactory.create(rd);
-			switch (theFhirContext.getVersion().getVersion()) {
-				case DSTU3:
-					return new CrDiscoveryServiceDstu3(rd.getId(), repository);
-				case R4:
-					return new CrDiscoveryServiceR4(rd.getId(), repository);
-				case R5:
-					return new CrDiscoveryServiceR5(rd.getId(), repository);
-				default:
-					return null;
+			Optional<Class<? extends ICrDiscoveryService>> clazz = theCdsCrDiscoveryServiceRegistry.find(
+					theFhirContext.getVersion().getVersion());
+			if (clazz.isEmpty()) {
+				return null;
+			}
+			try {
+				Constructor<? extends ICrDiscoveryService> constructor =
+						clazz.get().getConstructor(IIdType.class, Repository.class);
+				return constructor.newInstance(rd.getId(), repository);
+			} catch (NoSuchMethodException
+					| InvocationTargetException
+					| InstantiationException
+					| IllegalAccessException e) {
+				ourLog.error("Error encountered attempting to construct the CrDiscoveryService: " + e.getMessage());
+				return null;
 			}
 		};
 	}
