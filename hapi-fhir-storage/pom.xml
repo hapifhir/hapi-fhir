@@ -160,6 +160,12 @@
 			<groupId>org.springframework.data</groupId>
 			<artifactId>spring-data-commons</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-jpaserver-test-utilities</artifactId>
+			<version>6.9.9-SNAPSHOT</version>
+			<scope>test</scope>
+		</dependency>
 
 	</dependencies>
 	<build>
