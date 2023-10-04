@@ -37,6 +37,17 @@ public class FhirResourceDaoR4SearchLastNAsyncIT extends BaseR4SearchLastN {
 	@Autowired
 	private ISearchDao mySearchDao;
 
+	@BeforeEach
+	public void enableAdvancedHSearchIndexing() {
+		myStorageSettings.setLastNEnabled(true);
+		myStorageSettings.setAdvancedHSearchIndexing(true);
+	}
+
+	@AfterEach
+	public void disableAdvancedHSearchIndex() {
+		myStorageSettings.setAdvancedHSearchIndexing(new JpaStorageSettings().isAdvancedHSearchIndexing());
+	}
+
 	@Override
 	@BeforeEach
 	public void before() throws Exception {

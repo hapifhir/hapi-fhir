@@ -109,7 +109,7 @@ public class MdmMetricSvcJpaImpl extends BaseMdmMetricSvc {
 		int length = row.length;
 		for (int i = 0; i < length; i++) {
 			// if there's nothing in the db, these values will all be null
-			BigInteger bi = row[i] != null ? (BigInteger) row[i] : BigInteger.valueOf(0);
+			Number bi = row[i] != null ? (Number) row[i] : BigInteger.valueOf(0);
 			double bucket = getBucket(i);
 			if (i == 0) {
 				metrics.addScore(NULL_VALUE, bi.longValue());

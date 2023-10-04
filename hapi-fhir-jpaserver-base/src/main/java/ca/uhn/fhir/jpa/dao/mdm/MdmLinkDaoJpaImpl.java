@@ -88,10 +88,10 @@ public class MdmLinkDaoJpaImpl implements IMdmLinkDao<JpaPid, MdmLink> {
 	private static final Logger ourLog = LoggerFactory.getLogger(MdmLinkDaoJpaImpl.class);
 
 	@Autowired
-	IMdmLinkJpaRepository myMdmLinkDao;
+	protected EntityManager myEntityManager;
 
 	@Autowired
-	protected EntityManager myEntityManager;
+	IMdmLinkJpaRepository myMdmLinkDao;
 
 	@Autowired
 	private IIdHelperService<JpaPid> myIdHelperService;
@@ -247,6 +247,8 @@ public class MdmLinkDaoJpaImpl implements IMdmLinkDao<JpaPid, MdmLink> {
 
 	@Override
 	public Page<MdmLink> search(MdmQuerySearchParameters theParams) {
+		Long totalResults = countTotalResults(theParams);
+
 		CriteriaBuilder criteriaBuilder = myEntityManager.getCriteriaBuilder();
 		CriteriaQuery<MdmLink> criteriaQuery = criteriaBuilder.createQuery(MdmLink.class);
 		Root<MdmLink> from = criteriaQuery.from(MdmLink.class);
@@ -258,20 +260,28 @@ public class MdmLinkDaoJpaImpl implements IMdmLinkDao<JpaPid, MdmLink> {
 		if (!orderList.isEmpty()) {
 			criteriaQuery.orderBy(orderList);
 		}
-		TypedQuery<MdmLink> typedQuery = myEntityManager.createQuery(criteriaQuery.where(finalQuery));
 
-		CriteriaQuery<Long> countQuery = criteriaBuilder.createQuery(Long.class);
-		countQuery.select(criteriaBuilder.count(countQuery.from(MdmLink.class))).where(finalQuery);
-
-		Long totalResults = myEntityManager.createQuery(countQuery).getSingleResult();
 		MdmPageRequest pageRequest = theParams.getPageRequest();
-
+		TypedQuery<MdmLink> typedQuery = myEntityManager.createQuery(criteriaQuery.where(finalQuery));
 		List<MdmLink> result = typedQuery
 				.setFirstResult(pageRequest.getOffset())
 				.setMaxResults(pageRequest.getCount())
 				.getResultList();
 
 		return new PageImpl<>(result, PageRequest.of(pageRequest.getPage(), pageRequest.getCount()), totalResults);
+	}
+
+	private Long countTotalResults(MdmQuerySearchParameters theParams) {
+		CriteriaBuilder criteriaBuilder = myEntityManager.getCriteriaBuilder();
+		CriteriaQuery<Long> countQuery = criteriaBuilder.createQuery(Long.class);
+		Root<MdmLink> from = countQuery.from(MdmLink.class);
+
+		List<Predicate> andPredicates = buildPredicates(theParams, criteriaBuilder, from);
+		Predicate finalQuery = criteriaBuilder.and(andPredicates.toArray(new Predicate[0]));
+
+		countQuery.select(criteriaBuilder.count(from)).where(finalQuery);
+
+		return myEntityManager.createQuery(countQuery).getSingleResult();
 	}
 
 	@NotNull

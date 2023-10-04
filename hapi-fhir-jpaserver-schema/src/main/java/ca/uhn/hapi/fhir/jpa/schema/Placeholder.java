@@ -5,6 +5,5 @@ package ca.uhn.hapi.fhir.jpa.schema;
  */
 public class Placeholder {
 
-    private Placeholder() {}
-
+	private Placeholder() {}
 }

@@ -497,15 +497,8 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 							myRequestPartitionId, myResourceName, String.valueOf(lastNResourceId)))
 					.collect(Collectors.toList());
 		} else {
-			if (myIElasticsearchSvc == null) {
-				throw new InvalidRequestException(Msg.code(2033)
-						+ "LastN operation is not enabled on this service, can not process this request");
-			}
-			// use the dedicated observation ES/Lucene index to support lastN query
-			return myIElasticsearchSvc.executeLastN(myParams, myContext, theMaximumResults).stream()
-					.map(lastnResourceId -> myIdHelperService.resolveResourcePersistentIds(
-							myRequestPartitionId, myResourceName, lastnResourceId))
-					.collect(Collectors.toList());
+			throw new InvalidRequestException(
+					Msg.code(2033) + "LastN operation is not enabled on this service, can not process this request");
 		}
 	}
 

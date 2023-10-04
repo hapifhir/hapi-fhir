@@ -45,7 +45,7 @@ public class TestCrDstu3Config {
 	@Bean
 	public EvaluationSettings evaluationSettings(TestCqlProperties theCqlProperties, Map<VersionedIdentifier, CompiledLibrary> theGlobalLibraryCache, Map<ModelIdentifier, Model> theGlobalModelCache) {
 		var evaluationSettings = EvaluationSettings.getDefault();
-		var cqlEngineOptions = evaluationSettings.getEngineOptions();
+		var cqlEngineOptions = evaluationSettings.getCqlOptions().getCqlEngineOptions();
 		Set<CqlEngine.Options> options = EnumSet.noneOf(CqlEngine.Options.class);
 		if (theCqlProperties.isCqlRuntimeEnableExpressionCaching()) {
 			options.add(CqlEngine.Options.EnableExpressionCaching);

@@ -70,6 +70,13 @@
 	</dependencyManagement>
 
 	<dependencies>
+		<!-- FIXME: move version to parent -->
+		<dependency>
+			<groupId>com.fasterxml.jackson.module</groupId>
+			<artifactId>jackson-module-jakarta-xmlbind-annotations</artifactId>
+			<version>2.15.2</version>
+		</dependency>
+
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-converter</artifactId>
@@ -79,6 +86,12 @@
 			<groupId>org.opencds.cqf.fhir</groupId>
 			<artifactId>cqf-fhir-cr</artifactId>
 			<version>${clinical-reasoning.version}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>com.fasterxml.jackson.module</groupId>
+					<artifactId>jackson-module-jaxb-annotations</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.opencds.cqf.fhir</groupId>
@@ -97,6 +110,10 @@
 					<groupId>xmlpull</groupId>
 					<artifactId>xmlpull</artifactId>
 				</exclusion>
+				<exclusion>
+						<groupId>com.fasterxml.jackson.module</groupId>
+						<artifactId>jackson-module-jaxb-annotations</artifactId>
+					</exclusion>
 			</exclusions>
 			<type>pom</type>
 		</dependency>
@@ -116,6 +133,10 @@
 				<exclusion>
 					<groupId>xmlpull</groupId>
 					<artifactId>xmlpull</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>com.fasterxml.jackson.module</groupId>
+					<artifactId>jackson-module-jaxb-annotations</artifactId>
 				</exclusion>
 			</exclusions>
 			<type>pom</type>
@@ -149,6 +170,11 @@
 		<dependency>
 			<groupId>jakarta.servlet</groupId>
 			<artifactId>jakarta.servlet-api</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>jakarta.xml.bind</groupId>
+			<artifactId>jakarta.xml.bind-api</artifactId>
 		</dependency>
 
 		<!-- test -->

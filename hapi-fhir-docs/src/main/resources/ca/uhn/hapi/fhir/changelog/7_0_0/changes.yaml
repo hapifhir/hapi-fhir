@@ -17,7 +17,7 @@
         <li>Hibernate (JPA): 5.6.15.Final -&gt; 6.2.8.Final</li>
         <li>Hibernate Validator (JPA): 6.1.5.Final -&gt; 8.0.0.Final</li>
         <li>Hibernate Search (JPA): 6.1.6.Final -&gt; 6.2.1.Final</li>
-        <li>Spring Boot (Boot+Starter): 2.7.12 -&gt; 3.1.0</li>
+        <li>Spring Boot (Boot+Starter): 2.7.12 -&gt; 3.1.4</li>
         <li>Jetty (CLI): 10.0.14 -&gt; 11.0.15</li>
         <li>Phloc Schematron (Schematron Validator): 5.6.5 -&gt; 7.1.2</li>
         <li>RestEasy (JAX-RS Server): 5.0.2.Final -&gt; 6.2.5.Final</li>
@@ -29,3 +29,4 @@
 
 FIXME: Make sure to test RES_TEXT_VC types on each DB
 FIXME: Note postgres 11 as minimum
+FIXME: Note LastN now requires advanced HSearch indexing
