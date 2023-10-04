@@ -1,6 +1,6 @@
 package ca.uhn.fhir.jpa.dao.tx;
 
-import ca.uhn.fhir.jpa.dao.expunge.PartitionAwareFinder;
+import ca.uhn.fhir.jpa.dao.expunge.PartitionAwareSupplier;
 import ca.uhn.fhir.jpa.svc.MockHapiTransactionService;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
@@ -21,7 +21,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
-public class PartitionAwareFinderTest {
+public class PartitionAwareSupplierTest {
 
 	@Spy
 	private MockHapiTransactionService myHapiTransactionService;
@@ -35,8 +35,8 @@ public class PartitionAwareFinderTest {
 	public void testMethodFindInPartitionedContext_withRequestDetailsHavingTenantId_willExecuteOnSpecifiedPartition(){
 		RequestDetails requestDetails = getRequestDetails();
 
-		PartitionAwareFinder partitionAwareFinder = new PartitionAwareFinder(myHapiTransactionService, requestDetails);
-		partitionAwareFinder.supplyInPartitionedContext(getResourcePersistentIdSupplier());
+		PartitionAwareSupplier partitionAwareSupplier = new PartitionAwareSupplier(myHapiTransactionService, requestDetails);
+		partitionAwareSupplier.supplyInPartitionedContext(getResourcePersistentIdSupplier());
 
 		assertTransactionServiceWasInvokedWithTenantId(expectedTenantId);
 

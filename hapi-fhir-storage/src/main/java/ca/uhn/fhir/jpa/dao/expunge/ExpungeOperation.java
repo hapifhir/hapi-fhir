@@ -102,11 +102,9 @@ public class ExpungeOperation implements Callable<ExpungeOutcome> {
 	}
 
 	private List<IResourcePersistentId> findHistoricalVersionsOfDeletedResources() {
-		List<IResourcePersistentId> retVal = getPartitionAwareFinder()
-			.supplyInPartitionedContext(
-				() -> myResourceExpungeService.findHistoricalVersionsOfDeletedResources(
-				myResourceName, myResourceId, myRemainingCount.get())
-			);
+		List<IResourcePersistentId> retVal = getPartitionAwareSupplier()
+				.supplyInPartitionedContext(() -> myResourceExpungeService.findHistoricalVersionsOfDeletedResources(
+						myResourceName, myResourceId, myRemainingCount.get()));
 
 		ourLog.debug("Found {} historical versions", retVal.size());
 		return retVal;
@@ -121,12 +119,9 @@ public class ExpungeOperation implements Callable<ExpungeOutcome> {
 	}
 
 	private void expungeOldVersions() {
-		List<IResourcePersistentId> historicalIds =
-			getPartitionAwareFinder()
-			.supplyInPartitionedContext(
-				() -> myResourceExpungeService.findHistoricalVersionsOfNonDeletedResources(
-				myResourceName, myResourceId, myRemainingCount.get())
-			);
+		List<IResourcePersistentId> historicalIds = getPartitionAwareSupplier()
+				.supplyInPartitionedContext(() -> myResourceExpungeService.findHistoricalVersionsOfNonDeletedResources(
+						myResourceName, myResourceId, myRemainingCount.get()));
 
 		getPartitionRunner()
 				.runInPartitionedThreads(
@@ -135,11 +130,8 @@ public class ExpungeOperation implements Callable<ExpungeOutcome> {
 								myRequestDetails, partition, myRemainingCount));
 	}
 
-	private PartitionAwareFinder getPartitionAwareFinder(){
-		return new PartitionAwareFinder(
-			myTxService,
-			myRequestDetails
-		);
+	private PartitionAwareSupplier getPartitionAwareSupplier() {
+		return new PartitionAwareSupplier(myTxService, myRequestDetails);
 	}
 
 	private PartitionRunner getPartitionRunner() {
