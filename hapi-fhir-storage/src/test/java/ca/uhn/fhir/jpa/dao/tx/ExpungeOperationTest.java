@@ -18,6 +18,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.times;
@@ -65,10 +68,13 @@ public class ExpungeOperationTest {
 		verify(myHapiTransactionService, times(5)).doExecute(builderArgumentCaptor.capture(), any());
 		List<HapiTransactionService.ExecutionBuilder> methodArgumentExecutionBuilders = builderArgumentCaptor.getAllValues();
 
-		methodArgumentExecutionBuilders.stream()
+		boolean allMatching = methodArgumentExecutionBuilders.stream()
 			.map(HapiTransactionService.ExecutionBuilder::getRequestDetailsForTesting)
 			.map(RequestDetails::getTenantId)
 			.allMatch(theExpectedTenantId::equals);
+
+
+		assertThat(allMatching, is(equalTo(true)));
 	}
 
 	private RequestDetails getRequestDetails() {

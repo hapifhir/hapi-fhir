@@ -16,6 +16,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.function.Supplier;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -48,12 +51,11 @@ public class PartitionAwareSupplierTest {
 
 	private void assertTransactionServiceWasInvokedWithTenantId(String theExpectedTenantId) {
 		verify(myHapiTransactionService, times(1)).doExecute(builderArgumentCaptor.capture(), any());
-		List<HapiTransactionService.ExecutionBuilder> methodArgumentExecutionBuilders = builderArgumentCaptor.getAllValues();
+		HapiTransactionService.ExecutionBuilder methodArgumentExecutionBuilder = builderArgumentCaptor.getValue();
 
-		methodArgumentExecutionBuilders.stream()
-			.map(HapiTransactionService.ExecutionBuilder::getRequestDetailsForTesting)
-			.map(RequestDetails::getTenantId)
-			.allMatch(theExpectedTenantId::equals);
+		String requestDetailsTenantId = methodArgumentExecutionBuilder.getRequestDetailsForTesting().getTenantId();
+
+		assertThat(requestDetailsTenantId, is(equalTo(theExpectedTenantId)));
 	}
 
 	private RequestDetails getRequestDetails() {
