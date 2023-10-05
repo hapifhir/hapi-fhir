@@ -212,8 +212,8 @@ public class ResourceProviderRevIncludeTest extends BaseResourceProviderR4Test {
 		assertEquals(4, foundResources.size());
 		assertEquals(episodeOfCareId.getIdPart(), foundResources.get(0).getIdElement().getIdPart());
 		assertEquals(encounterId.getIdPart(), foundResources.get(1).getIdElement().getIdPart());
-		assertEquals(pid.getIdPart(), foundResources.get(2).getIdElement().getIdPart());
-		assertEquals(taskId.getIdPart(), foundResources.get(3).getIdElement().getIdPart());
+		assertEquals(taskId.getIdPart(), foundResources.get(2).getIdElement().getIdPart());
+		assertEquals(pid.getIdPart(), foundResources.get(3).getIdElement().getIdPart());
 	}
 
 }

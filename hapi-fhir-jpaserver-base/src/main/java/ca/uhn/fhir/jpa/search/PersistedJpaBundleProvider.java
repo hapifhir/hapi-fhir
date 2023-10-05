@@ -462,6 +462,23 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 		if (mySearchEntity.getSearchType() == SearchTypeEnum.SEARCH) {
 			Integer maxIncludes = myStorageSettings.getMaximumIncludesToLoadPerPage();
 
+			// Load non-iterate _revincludes
+			Set<JpaPid> nonIterateRevIncludedPids = theSearchBuilder.loadIncludes(
+				myContext,
+				myEntityManager,
+				thePids,
+				mySearchEntity.toRevIncludesList(false),
+				true,
+				mySearchEntity.getLastUpdated(),
+				myUuid,
+				myRequest,
+				maxIncludes);
+			if (maxIncludes != null) {
+				maxIncludes -= nonIterateRevIncludedPids.size();
+			}
+			thePids.addAll(nonIterateRevIncludedPids);
+			includedPidList.addAll(nonIterateRevIncludedPids);
+
 			// Load non-iterate _includes
 			Set<JpaPid> nonIterateIncludedPids = theSearchBuilder.loadIncludes(
 					myContext,
@@ -479,22 +496,22 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 			thePids.addAll(nonIterateIncludedPids);
 			includedPidList.addAll(nonIterateIncludedPids);
 
-			// Load non-iterate _revincludes
-			Set<JpaPid> nonIterateRevIncludedPids = theSearchBuilder.loadIncludes(
-					myContext,
-					myEntityManager,
-					thePids,
-					mySearchEntity.toRevIncludesList(false),
-					true,
-					mySearchEntity.getLastUpdated(),
-					myUuid,
-					myRequest,
-					maxIncludes);
+			// Load iterate _revinclude
+			Set<JpaPid> iterateRevIncludedPids = theSearchBuilder.loadIncludes(
+				myContext,
+				myEntityManager,
+				thePids,
+				mySearchEntity.toRevIncludesList(true),
+				true,
+				mySearchEntity.getLastUpdated(),
+				myUuid,
+				myRequest,
+				maxIncludes);
 			if (maxIncludes != null) {
-				maxIncludes -= nonIterateRevIncludedPids.size();
+				maxIncludes -= iterateRevIncludedPids.size();
 			}
-			thePids.addAll(nonIterateRevIncludedPids);
-			includedPidList.addAll(nonIterateRevIncludedPids);
+			thePids.addAll(iterateRevIncludedPids);
+			includedPidList.addAll(iterateRevIncludedPids);
 
 			// Load iterate _includes
 			Set<JpaPid> iterateIncludedPids = theSearchBuilder.loadIncludes(
@@ -507,25 +524,8 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 					myUuid,
 					myRequest,
 					maxIncludes);
-			if (maxIncludes != null) {
-				maxIncludes -= iterateIncludedPids.size();
-			}
 			thePids.addAll(iterateIncludedPids);
 			includedPidList.addAll(iterateIncludedPids);
-
-			// Load iterate _revinclude
-			Set<JpaPid> iterateRevIncludedPids = theSearchBuilder.loadIncludes(
-					myContext,
-					myEntityManager,
-					thePids,
-					mySearchEntity.toRevIncludesList(true),
-					true,
-					mySearchEntity.getLastUpdated(),
-					myUuid,
-					myRequest,
-					maxIncludes);
-			thePids.addAll(iterateRevIncludedPids);
-			includedPidList.addAll(iterateRevIncludedPids);
 		}
 
 		// Execute the query and make sure we return distinct results
