@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 5353
+jira: SMILE-7451
+title: "Previously, using revincludes without iterate and revincludes and includes with iterate together,
+will omit some resources that should be included. This issue has been fixed."
