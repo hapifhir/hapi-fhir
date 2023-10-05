@@ -464,15 +464,15 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 
 			// Load non-iterate _revincludes
 			Set<JpaPid> nonIterateRevIncludedPids = theSearchBuilder.loadIncludes(
-				myContext,
-				myEntityManager,
-				thePids,
-				mySearchEntity.toRevIncludesList(false),
-				true,
-				mySearchEntity.getLastUpdated(),
-				myUuid,
-				myRequest,
-				maxIncludes);
+					myContext,
+					myEntityManager,
+					thePids,
+					mySearchEntity.toRevIncludesList(false),
+					true,
+					mySearchEntity.getLastUpdated(),
+					myUuid,
+					myRequest,
+					maxIncludes);
 			if (maxIncludes != null) {
 				maxIncludes -= nonIterateRevIncludedPids.size();
 			}
@@ -498,15 +498,15 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 
 			// Load iterate _revinclude
 			Set<JpaPid> iterateRevIncludedPids = theSearchBuilder.loadIncludes(
-				myContext,
-				myEntityManager,
-				thePids,
-				mySearchEntity.toRevIncludesList(true),
-				true,
-				mySearchEntity.getLastUpdated(),
-				myUuid,
-				myRequest,
-				maxIncludes);
+					myContext,
+					myEntityManager,
+					thePids,
+					mySearchEntity.toRevIncludesList(true),
+					true,
+					mySearchEntity.getLastUpdated(),
+					myUuid,
+					myRequest,
+					maxIncludes);
 			if (maxIncludes != null) {
 				maxIncludes -= iterateRevIncludedPids.size();
 			}
