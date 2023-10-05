@@ -8,6 +8,7 @@ import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.svc.MockHapiTransactionService;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -31,13 +32,18 @@ import static org.mockito.Mockito.when;
 public class ExpungeOperationTest {
 
 	@Captor
-	private ArgumentCaptor<HapiTransactionService.ExecutionBuilder> builderArgumentCaptor;
+	private ArgumentCaptor<HapiTransactionService.ExecutionBuilder> myBuilderArgumentCaptor;
 	@Spy
 	private MockHapiTransactionService myHapiTransactionService;
-	private JpaStorageSettings myStorageSettings = new JpaStorageSettings();
+	private JpaStorageSettings myStorageSettings;
 	@Mock
 	private IResourceExpungeService myIResourceExpungeService;
-	private final String expectedTenantId = "TenantA";
+	private static final String ourExpectedTenantId = "TenantA";
+
+	@BeforeEach
+	public void beforeEach(){
+		myStorageSettings = new JpaStorageSettings();
+	}
 
 	@Test
 	public void testExpunge_onSpecificTenant_willPerformExpungeOnSpecificTenant(){
@@ -58,28 +64,27 @@ public class ExpungeOperationTest {
 		expungeOperation.call();
 
 		// then
-		assertTransactionServiceWasInvokedWithTenantId(expectedTenantId);
+		assertTransactionServiceWasInvokedWithTenantId(ourExpectedTenantId);
 	}
 
 	private void assertTransactionServiceWasInvokedWithTenantId(String theExpectedTenantId) {
 		// we have set the expungeOptions to setExpungeDeletedResources and SetExpungeOldVersions to true.
 		// as a result, we will be making 5 trips to the db.  let's make sure that each trip was done with
 		// the hapiTransaction service and that the tenantId was specified.
-		verify(myHapiTransactionService, times(5)).doExecute(builderArgumentCaptor.capture(), any());
-		List<HapiTransactionService.ExecutionBuilder> methodArgumentExecutionBuilders = builderArgumentCaptor.getAllValues();
+		verify(myHapiTransactionService, times(5)).doExecute(myBuilderArgumentCaptor.capture(), any());
+		List<HapiTransactionService.ExecutionBuilder> methodArgumentExecutionBuilders = myBuilderArgumentCaptor.getAllValues();
 
 		boolean allMatching = methodArgumentExecutionBuilders.stream()
 			.map(HapiTransactionService.ExecutionBuilder::getRequestDetailsForTesting)
 			.map(RequestDetails::getTenantId)
 			.allMatch(theExpectedTenantId::equals);
 
-
 		assertThat(allMatching, is(equalTo(true)));
 	}
 
 	private RequestDetails getRequestDetails() {
 		RequestDetails requestDetails =	new ServletRequestDetails();
-		requestDetails.setTenantId(expectedTenantId);
+		requestDetails.setTenantId(ourExpectedTenantId);
 		return requestDetails;
 	}
 

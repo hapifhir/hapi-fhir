@@ -30,9 +30,9 @@ public class PartitionAwareSupplierTest {
 	private MockHapiTransactionService myHapiTransactionService;
 
 	@Captor
-	private ArgumentCaptor<HapiTransactionService.ExecutionBuilder> builderArgumentCaptor;
+	private ArgumentCaptor<HapiTransactionService.ExecutionBuilder> myBuilderArgumentCaptor;
 
-	private final String expectedTenantId = "TenantA";
+	private static final String ourExpectedTenantId = "TenantA";
 
 	@Test
 	public void testMethodFindInPartitionedContext_withRequestDetailsHavingTenantId_willExecuteOnSpecifiedPartition(){
@@ -41,7 +41,7 @@ public class PartitionAwareSupplierTest {
 		PartitionAwareSupplier partitionAwareSupplier = new PartitionAwareSupplier(myHapiTransactionService, requestDetails);
 		partitionAwareSupplier.supplyInPartitionedContext(getResourcePersistentIdSupplier());
 
-		assertTransactionServiceWasInvokedWithTenantId(expectedTenantId);
+		assertTransactionServiceWasInvokedWithTenantId(ourExpectedTenantId);
 
 	}
 
@@ -50,8 +50,8 @@ public class PartitionAwareSupplierTest {
 	}
 
 	private void assertTransactionServiceWasInvokedWithTenantId(String theExpectedTenantId) {
-		verify(myHapiTransactionService, times(1)).doExecute(builderArgumentCaptor.capture(), any());
-		HapiTransactionService.ExecutionBuilder methodArgumentExecutionBuilder = builderArgumentCaptor.getValue();
+		verify(myHapiTransactionService, times(1)).doExecute(myBuilderArgumentCaptor.capture(), any());
+		HapiTransactionService.ExecutionBuilder methodArgumentExecutionBuilder = myBuilderArgumentCaptor.getValue();
 
 		String requestDetailsTenantId = methodArgumentExecutionBuilder.getRequestDetailsForTesting().getTenantId();
 
@@ -60,7 +60,7 @@ public class PartitionAwareSupplierTest {
 
 	private RequestDetails getRequestDetails() {
 		RequestDetails requestDetails =	new ServletRequestDetails();
-		requestDetails.setTenantId(expectedTenantId);
+		requestDetails.setTenantId(ourExpectedTenantId);
 		return requestDetails;
 	}
 
