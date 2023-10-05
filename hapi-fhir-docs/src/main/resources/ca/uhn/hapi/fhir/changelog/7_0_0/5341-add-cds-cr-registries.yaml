@@ -1,0 +1,4 @@
+---
+type: add
+issue: 5341
+title: "Added registries for CdsCrServices and CrDiscoveryServices in CDS Hooks to allow registration of custom services."

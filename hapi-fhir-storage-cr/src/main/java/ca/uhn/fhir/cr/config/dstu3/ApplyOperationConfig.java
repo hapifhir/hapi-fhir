@@ -26,14 +26,17 @@ import ca.uhn.fhir.cr.config.ProviderLoader;
 import ca.uhn.fhir.cr.config.ProviderSelector;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 
 import java.util.Arrays;
 import java.util.Map;
 
+@Configuration
+@ConditionalOnBean({IRepositoryFactory.class, RestfulServer.class, EvaluationSettings.class})
 public class ApplyOperationConfig {
-
 	@Bean
 	ca.uhn.fhir.cr.dstu3.IActivityDefinitionProcessorFactory dstu3ActivityDefinitionProcessorFactory(
 			IRepositoryFactory theRepositoryFactory, EvaluationSettings theEvaluationSettings) {
@@ -61,7 +64,6 @@ public class ApplyOperationConfig {
 	@Bean(name = "applyOperationLoader")
 	public ProviderLoader applyOperationLoader(
 			ApplicationContext theApplicationContext, FhirContext theFhirContext, RestfulServer theRestfulServer) {
-
 		var selector = new ProviderSelector(
 				theFhirContext,
 				Map.of(

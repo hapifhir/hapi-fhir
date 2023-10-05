@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.jpa.mdm.svc;
 
+import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.mdm.models.FindGoldenResourceCandidatesParams;
 import ca.uhn.fhir.jpa.mdm.svc.candidate.CandidateList;
 import ca.uhn.fhir.jpa.mdm.svc.candidate.CandidateStrategyEnum;
@@ -71,6 +72,9 @@ public class MdmMatchLinkSvc {
 	private IBlockRuleEvaluationSvc myBlockRuleEvaluationSvc;
 
 	@Autowired
+	private DaoRegistry myDaoRegistry;
+
+	@Autowired
 	private IMdmSurvivorshipService myMdmSurvivorshipService;
 
 	/**
@@ -106,6 +110,8 @@ public class MdmMatchLinkSvc {
 		 * (so that future resources may match to it).
 		 */
 		boolean isResourceBlocked = myBlockRuleEvaluationSvc.isMdmMatchingBlocked(theResource);
+		// we will mark the golden resource special for this
+		theMdmTransactionContext.setIsBlocked(isResourceBlocked);
 
 		if (!isResourceBlocked) {
 			FindGoldenResourceCandidatesParams params =

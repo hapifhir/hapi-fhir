@@ -23,6 +23,7 @@ import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
+import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.util.Batch2JobDefinitionConstants;
 import ca.uhn.fhir.util.BundleBuilder;
 import ca.uhn.fhir.util.JsonUtil;
@@ -1452,7 +1453,7 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 			outcome = myClient
 				.operation()
 				.onInstance("Group/" + theGroupOrPatientId)
-				.named(JpaConstants.OPERATION_EXPORT)
+				.named(ProviderConstants.OPERATION_EXPORT)
 				.withParameters(parameters)
 				.returnMethodOutcome()
 				.withAdditionalHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC)
@@ -1463,7 +1464,7 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 			outcome = myClient
 				.operation()
 				.onInstance("Patient/" + theGroupOrPatientId)
-				.named(JpaConstants.OPERATION_EXPORT)
+				.named(ProviderConstants.OPERATION_EXPORT)
 				.withParameters(parameters)
 				.returnMethodOutcome()
 				.withAdditionalHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC)
@@ -1473,7 +1474,7 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 			outcome = myClient
 				.operation()
 				.onServer()
-				.named(JpaConstants.OPERATION_EXPORT)
+				.named(ProviderConstants.OPERATION_EXPORT)
 				.withParameters(parameters)
 				.returnMethodOutcome()
 				.withAdditionalHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC)
