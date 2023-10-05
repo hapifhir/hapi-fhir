@@ -38,13 +38,11 @@ public class FhirPathR4 implements IFhirPath {
 	@Override
 	public <T extends IBase> List<T> evaluate(IBase theInput, String thePath, Class<T> theReturnType) {
 		ExpressionNode parsed;
-		System.out.println("zoop2");
 		try {
 			parsed = myEngine.parse(thePath);
 		} catch (FHIRException e) {
 			throw new FhirPathExecutionException(Msg.code(2409) + e);
 		}
-		System.out.println("zoop");
 		return (List<T>) evaluate(theInput, parsed, theReturnType);
 	}
 
