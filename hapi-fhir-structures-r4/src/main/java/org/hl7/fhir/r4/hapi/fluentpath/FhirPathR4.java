@@ -22,8 +22,7 @@ import java.util.List;
 import java.util.Optional;
 import javax.annotation.Nonnull;
 
-public class FhirPathR4 implements IFhirPath
-{
+public class FhirPathR4 implements IFhirPath {
 
 	private final FHIRPathEngine myEngine;
 
@@ -52,14 +51,14 @@ public class FhirPathR4 implements IFhirPath
 	@SuppressWarnings("unchecked")
 	@Override
 	public <T extends IBase> List<T> evaluate(
-		IBase theInput, IParsedExpression theParsedExpression, Class<T> theReturnType) {
+			IBase theInput, IParsedExpression theParsedExpression, Class<T> theReturnType) {
 		ExpressionNode expressionNode = ((ParsedExpression) theParsedExpression).myParsedExpression;
 		return (List<T>) evaluate(theInput, expressionNode, theReturnType);
 	}
 
 	@Nonnull
 	private <T extends IBase> List<Base> evaluate(
-		IBase theInput, ExpressionNode expressionNode, Class<T> theReturnType) {
+			IBase theInput, ExpressionNode expressionNode, Class<T> theReturnType) {
 		List<Base> result;
 		try {
 			result = myEngine.evaluate((Base) theInput, expressionNode);
@@ -70,7 +69,7 @@ public class FhirPathR4 implements IFhirPath
 		for (IBase next : result) {
 			if (!theReturnType.isAssignableFrom(next.getClass())) {
 				throw new FhirPathExecutionException(Msg.code(256) + "FhirPath expression returned unexpected type "
-					+ next.getClass().getSimpleName() + " - Expected " + theReturnType.getName());
+						+ next.getClass().getSimpleName() + " - Expected " + theReturnType.getName());
 			}
 		}
 		return result;
@@ -83,7 +82,7 @@ public class FhirPathR4 implements IFhirPath
 
 	@Override
 	public <T extends IBase> Optional<T> evaluateFirst(
-		IBase theInput, IParsedExpression theParsedExpression, Class<T> theReturnType) {
+			IBase theInput, IParsedExpression theParsedExpression, Class<T> theReturnType) {
 		return evaluate(theInput, theParsedExpression, theReturnType).stream().findFirst();
 	}
 
@@ -94,12 +93,11 @@ public class FhirPathR4 implements IFhirPath
 
 	@Override
 	public void setEvaluationContext(@Nonnull IFhirPathEvaluationContext theEvaluationContext) {
-		myEngine.setHostServices(new FHIRPathEngine.IEvaluationContext()
-		{
+		myEngine.setHostServices(new FHIRPathEngine.IEvaluationContext() {
 
 			@Override
 			public List<Base> resolveConstant(Object appContext, String name, boolean beforeContext)
-				throws PathEngineException {
+					throws PathEngineException {
 				return null;
 			}
 
@@ -120,13 +118,13 @@ public class FhirPathR4 implements IFhirPath
 
 			@Override
 			public TypeDetails checkFunction(Object appContext, String functionName, List<TypeDetails> parameters)
-				throws PathEngineException {
+					throws PathEngineException {
 				return null;
 			}
 
 			@Override
 			public List<Base> executeFunction(
-				Object appContext, List<Base> focus, String functionName, List<List<Base>> parameters) {
+					Object appContext, List<Base> focus, String functionName, List<List<Base>> parameters) {
 				return null;
 			}
 
@@ -147,8 +145,7 @@ public class FhirPathR4 implements IFhirPath
 		});
 	}
 
-	private static class ParsedExpression implements IParsedExpression
-	{
+	private static class ParsedExpression implements IParsedExpression {
 
 		private final ExpressionNode myParsedExpression;
 
