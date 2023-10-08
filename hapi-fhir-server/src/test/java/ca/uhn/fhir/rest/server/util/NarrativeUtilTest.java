@@ -22,7 +22,7 @@ public class NarrativeUtilTest {
 		"null , null"
 	})
 	public void testValidateIsCaseInsensitive(String theHtml, String theExpected) {
-		String output = NarrativeUtil.sanitize(fixNull(theHtml));
+		String output = NarrativeUtil.sanitizeHtmlFragment(fixNull(theHtml));
 		assertEquals(fixNull(theExpected), output);
 	}
 
