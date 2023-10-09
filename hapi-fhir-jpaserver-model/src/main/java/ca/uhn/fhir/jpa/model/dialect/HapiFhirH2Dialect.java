@@ -32,7 +32,7 @@ public class HapiFhirH2Dialect extends H2Dialect {
 	 * Constructor
 	 */
 	public HapiFhirH2Dialect() {
-		super(DatabaseVersion.make(2,2,220));
+		super(DatabaseVersion.make(2, 2, 220));
 
 		/*
 		 * These mappings are already defined in the super() constructor, but they

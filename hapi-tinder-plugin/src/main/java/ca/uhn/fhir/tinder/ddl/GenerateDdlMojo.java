@@ -7,6 +7,7 @@ import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
+import org.apache.maven.project.MavenProject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,9 +19,11 @@ import static org.apache.commons.lang3.StringUtils.trim;
 
 @Mojo(
 	name = "generate-ddl",
-	defaultPhase = LifecyclePhase.PREPARE_PACKAGE,
+	defaultPhase = LifecyclePhase.PROCESS_CLASSES,
+	requiresDependencyCollection = ResolutionScope.COMPILE_PLUS_RUNTIME,
 	requiresDependencyResolution = ResolutionScope.COMPILE_PLUS_RUNTIME,
-	threadSafe = true)
+	threadSafe = true,
+	requiresProject = true)
 public class GenerateDdlMojo extends AbstractMojo {
 	private static final Logger ourLog = LoggerFactory.getLogger(GenerateDdlMojo.class);
 
@@ -30,6 +33,8 @@ public class GenerateDdlMojo extends AbstractMojo {
 	private List<Dialect> dialects;
 	@Parameter
 	private String outputDirectory;
+	@Parameter(defaultValue = "${project}", readonly = true)
+	private transient MavenProject project;
 
 	@Override
 	public void execute() throws MojoExecutionException, MojoFailureException {
@@ -50,10 +55,11 @@ public class GenerateDdlMojo extends AbstractMojo {
 		}
 
 		for (Dialect nextDialect : dialects) {
-			generator.addDialect(nextDialect.getClassName(), nextDialect.getTargetFileName());
+			generator.addDialect(nextDialect);
 		}
 
 		generator.setOutputDirectory(outputDirectoryFile);
+		generator.setProject(project);
 
 		ourLog.info("Beginning DDL export");
 		generator.generateDdl();
@@ -64,7 +70,7 @@ public class GenerateDdlMojo extends AbstractMojo {
 		GenerateDdlMojo m = new GenerateDdlMojo();
 		m.packageNames = List.of("ca.uhn.fhir.jpa.model.entity");
 		m.outputDirectory = "target";
-		m.dialects = List.of(new Dialect("ca.uhn.fhir.jpa.model.dialect.HapiFhirPostgres94Dialect","hapifhirpostgres94.sql"));
+		m.dialects = List.of(new Dialect("ca.uhn.fhir.jpa.model.dialect.HapiFhirPostgresDialect","hapifhirpostgres94.sql"));
 		m.execute();
 	}
 

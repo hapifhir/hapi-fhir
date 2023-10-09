@@ -1,6 +1,6 @@
 /*-
  * #%L
- * HAPI FHIR JPA Server - Schema
+ * HAPI FHIR JPA Model
  * %%
  * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
@@ -17,12 +17,18 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.hapi.fhir.jpa.schema;
+package ca.uhn.fhir.jpa.model.dialect;
+
+import org.hibernate.dialect.DatabaseVersion;
+import org.hibernate.dialect.DerbyDialect;
 
 /**
- * This is a blank class just to ensure that we generate an empty source and javadoc jar
+ * Dialect for Oracle database.
+ * Minimum version: 10.14.2
  */
-public class Placeholder {
+public class HapiFhirDerbyDialect extends DerbyDialect {
 
-	private Placeholder() {}
+	public HapiFhirDerbyDialect() {
+		super(DatabaseVersion.make(10, 14, 2));
+	}
 }

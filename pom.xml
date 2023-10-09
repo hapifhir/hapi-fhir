@@ -108,7 +108,6 @@
 		<module>hapi-fhir-jpaserver-model</module>
 		<module>hapi-fhir-jpaserver-searchparam</module>
 		<module>hapi-fhir-jpaserver-subscription</module>
-		<module>hapi-fhir-jpaserver-schema</module>
 		<module>hapi-fhir-jaxrsserver-base</module>
 		<module>hapi-fhir-jpaserver-base</module>
 		<module>hapi-fhir-sql-migrate</module>
@@ -1565,12 +1564,12 @@
 			<dependency>
 				<groupId>org.apache.maven</groupId>
 				<artifactId>maven-plugin-api</artifactId>
-				<version>3.6.3</version>
+				<version>3.8.6</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.maven.plugin-tools</groupId>
 				<artifactId>maven-plugin-annotations</artifactId>
-				<version>3.6.0</version>
+				<version>3.9.0</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.poi</groupId>
