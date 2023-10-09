@@ -23,7 +23,8 @@ import org.hibernate.dialect.DatabaseVersion;
 import org.hibernate.dialect.H2Dialect;
 
 /**
- * HAPI FHIR dialect for H2 database
+ * Dialect for H2 database.
+ * Minimum version: 2.2.220
  */
 public class HapiFhirH2Dialect extends H2Dialect {
 
@@ -31,7 +32,7 @@ public class HapiFhirH2Dialect extends H2Dialect {
 	 * Constructor
 	 */
 	public HapiFhirH2Dialect() {
-		super(DatabaseVersion.make(2, 0, 202));
+		super(DatabaseVersion.make(2,2,220));
 
 		/*
 		 * These mappings are already defined in the super() constructor, but they
