@@ -118,9 +118,9 @@ public class TestR4BConfig {
 
 	@Bean
 	public LocalContainerEntityManagerFactoryBean entityManagerFactory(
-			ConfigurableListableBeanFactory theConfigurableListableBeanFactory, FhirContext theFhirContext) {
+			ConfigurableListableBeanFactory theConfigurableListableBeanFactory, FhirContext theFhirContext, JpaStorageSettings theStorageSettings) {
 		LocalContainerEntityManagerFactoryBean retVal = HapiEntityManagerFactoryUtil.newEntityManagerFactory(
-				theConfigurableListableBeanFactory, theFhirContext);
+				theConfigurableListableBeanFactory, theFhirContext, theStorageSettings);
 		retVal.setPersistenceUnitName("PU_HapiFhirJpaR4B");
 		retVal.setDataSource(dataSource());
 		retVal.setJpaProperties(jpaProperties());

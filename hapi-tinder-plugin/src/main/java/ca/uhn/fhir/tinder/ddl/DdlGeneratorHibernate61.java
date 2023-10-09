@@ -1,6 +1,6 @@
 package ca.uhn.fhir.tinder.ddl;
 
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.jpa.util.ISequenceValueMassager;
 import jakarta.persistence.Entity;
 import jakarta.persistence.MappedSuperclass;
 import org.apache.commons.io.FileUtils;
@@ -13,8 +13,6 @@ import org.hibernate.boot.registry.BootstrapServiceRegistry;
 import org.hibernate.boot.registry.BootstrapServiceRegistryBuilder;
 import org.hibernate.boot.registry.StandardServiceRegistry;
 import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
-import org.hibernate.boot.registry.classloading.internal.ClassLoaderServiceImpl;
-import org.hibernate.boot.registry.classloading.spi.ClassLoaderService;
 import org.hibernate.cfg.AvailableSettings;
 import org.hibernate.engine.jdbc.connections.internal.UserSuppliedConnectionProviderImpl;
 import org.hibernate.engine.jdbc.connections.spi.ConnectionProvider;
@@ -90,6 +88,7 @@ public class DdlGeneratorHibernate61 {
 			registryBuilder.applySetting(AvailableSettings.HBM2DDL_AUTO, "create");
 			registryBuilder.applySetting(AvailableSettings.DIALECT, dialectClassName);
 			registryBuilder.addService(ConnectionProvider.class, connectionProvider);
+			registryBuilder.addService(ISequenceValueMassager.class, new ISequenceValueMassager.NoopSequenceValueMassager());
 			StandardServiceRegistry standardRegistry = registryBuilder.build();
 			MetadataSources metadataSources = new MetadataSources(standardRegistry);
 

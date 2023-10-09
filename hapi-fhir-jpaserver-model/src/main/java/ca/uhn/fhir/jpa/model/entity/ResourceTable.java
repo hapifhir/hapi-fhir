@@ -136,7 +136,7 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	private boolean myHasLinks;
 
 	@Id
-	@GenericGenerator(name = "SEQ_RESOURCE_ID", strategy = "ca.uhn.fhir.jpa.model.dialect.HapiSequenceStyleGenerator")
+	@GenericGenerator(name = "SEQ_RESOURCE_ID", type = ca.uhn.fhir.jpa.model.dialect.HapiSequenceStyleGenerator.class)
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_RESOURCE_ID")
 	@Column(name = "RES_ID")
 	@GenericField(projectable = Projectable.YES)

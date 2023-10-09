@@ -20,11 +20,12 @@
 package ca.uhn.fhir.jpa.model.dialect;
 
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
-import ca.uhn.fhir.util.ReflectionUtil;
+import ca.uhn.fhir.jpa.util.ISequenceValueMassager;
 import org.apache.commons.lang3.Validate;
 import org.hibernate.HibernateException;
 import org.hibernate.MappingException;
 import org.hibernate.boot.model.relational.Database;
+import org.hibernate.boot.model.relational.ExportableProducer;
 import org.hibernate.boot.model.relational.SqlStringGenerationContext;
 import org.hibernate.engine.spi.SharedSessionContractImplementor;
 import org.hibernate.id.BulkInsertionCapableIdentifierGenerator;
@@ -47,7 +48,8 @@ import java.util.Properties;
  */
 @SuppressWarnings("unused")
 public class HapiSequenceStyleGenerator
-		implements PersistentIdentifierGenerator, BulkInsertionCapableIdentifierGenerator {
+		implements PersistentIdentifierGenerator, BulkInsertionCapableIdentifierGenerator, ExportableProducer {
+	public static final String ID_MASSAGER_TYPE_KEY = "hapi_fhir.sequence_generator_massager";
 	private final SequenceStyleGenerator myGen = new SequenceStyleGenerator();
 
 	@Autowired
@@ -82,11 +84,8 @@ public class HapiSequenceStyleGenerator
 	public void configure(Type theType, Properties theParams, ServiceRegistry theServiceRegistry)
 			throws MappingException {
 
-		// Instantiate the ID massager
-		// StorageSettings should only be null when running in the DDL generation maven plugin
-		if (myStorageSettings != null) {
-			myIdMassager = ReflectionUtil.newInstance(myStorageSettings.getSequenceValueMassagerClass());
-		} else {
+		myIdMassager = theServiceRegistry.getService(ISequenceValueMassager.class);
+		if (myIdMassager == null) {
 			myIdMassager = new ISequenceValueMassager.NoopSequenceValueMassager();
 		}
 
