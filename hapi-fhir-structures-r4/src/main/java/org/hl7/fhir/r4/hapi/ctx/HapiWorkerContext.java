@@ -462,7 +462,7 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 	}
 
 	public boolean isPrimitiveType(String theType) {
-		return List.of(
+		return Arrays.asList(
 						"boolean",
 						"integer",
 						"integer64",
