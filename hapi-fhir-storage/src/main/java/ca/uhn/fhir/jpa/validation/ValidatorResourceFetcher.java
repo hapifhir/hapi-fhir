@@ -43,6 +43,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.Locale;
 
 public class ValidatorResourceFetcher implements IValidatorResourceFetcher {
@@ -79,7 +80,10 @@ public class ValidatorResourceFetcher implements IValidatorResourceFetcher {
 
 		try {
 			return new JsonParser(myVersionSpecificContextWrapper)
-					.parse(myFhirContext.newJsonParser().encodeResourceToString(target), resourceType);
+					.parse(
+							new ArrayList<>(),
+							org.hl7.fhir.utilities.json.parser.JsonParser.parseObject(
+									myFhirContext.newJsonParser().encodeResourceToString(target)));
 		} catch (Exception e) {
 			throw new FHIRException(Msg.code(576) + e);
 		}

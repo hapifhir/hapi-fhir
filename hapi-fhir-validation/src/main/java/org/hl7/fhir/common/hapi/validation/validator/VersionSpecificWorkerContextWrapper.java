@@ -313,7 +313,7 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 		String error = expanded.getError();
 		TerminologyServiceErrorClass result = null;
 
-		return new ValueSetExpansionOutcome(convertedResult, error, result);
+		return new ValueSetExpansionOutcome(convertedResult, error, result, expanded.getErrorIsFromServer());
 	}
 
 	@Override
@@ -459,6 +459,24 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 		List<StructureDefinition> allStructures = new ArrayList<>(allStructures());
 		allStructures.removeIf(sd -> !sd.hasType() || !sd.getType().equals(typeName));
 		return allStructures;
+	}
+
+	@Override
+	public boolean isPrimitiveType(String s) {
+		List<StructureDefinition> allStructures = new ArrayList<>(allStructures());
+		return allStructures.stream()
+				.filter(structureDefinition ->
+						structureDefinition.getKind() == StructureDefinition.StructureDefinitionKind.PRIMITIVETYPE)
+				.anyMatch(structureDefinition -> s.equals(structureDefinition.getType()));
+	}
+
+	@Override
+	public boolean isDataType(String s) {
+		List<StructureDefinition> allStructures = new ArrayList<>(allStructures());
+		return allStructures.stream()
+				.filter(structureDefinition ->
+						structureDefinition.getKind() == StructureDefinition.StructureDefinitionKind.COMPLEXTYPE)
+				.anyMatch(structureDefinition -> s.equals(structureDefinition.getType()));
 	}
 
 	@Override

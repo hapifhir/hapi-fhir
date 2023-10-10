@@ -85,6 +85,7 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -1344,7 +1345,9 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 		IValidatorResourceFetcher fetcher = mock(IValidatorResourceFetcher.class, withSettings().verboseLogging());
 		when(fetcher.fetch(any(), any(), any())).thenAnswer(t -> {
 			return new JsonParser(new VersionSpecificWorkerContextWrapper(new ValidationSupportContext(myValidationSupport), new VersionCanonicalizer(ourCtx)))
-				.parse(ourCtx.newJsonParser().encodeResourceToString(patient), "Patient");
+				.parse( new ArrayList<>(),
+					org.hl7.fhir.utilities.json.parser.JsonParser.parseObject(ourCtx.newJsonParser().encodeResourceToString(patient))
+				);
 		});
 		myInstanceVal.setValidatorResourceFetcher(fetcher);
 		myInstanceVal.setValidationSupport(myValidationSupport);

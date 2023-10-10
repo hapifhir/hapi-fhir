@@ -264,7 +264,8 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 		input.getCompose().addInclude(theInc);
 		IValidationSupport.ValueSetExpansionOutcome output =
 				myValidationSupport.expandValueSet(new ValidationSupportContext(myValidationSupport), null, input);
-		return new ValueSetExpansionOutcome((ValueSet) output.getValueSet(), output.getError(), null);
+		return new ValueSetExpansionOutcome(
+				(ValueSet) output.getValueSet(), output.getError(), null, output.getErrorIsFromServer());
 	}
 
 	@Override
@@ -325,6 +326,16 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 	@Override
 	public List<StructureDefinition> fetchTypeDefinitions(String n) {
 		throw new UnsupportedOperationException(Msg.code(234));
+	}
+
+	@Override
+	public boolean isPrimitiveType(String s) {
+		throw new UnsupportedOperationException(Msg.code(2441));
+	}
+
+	@Override
+	public boolean isDataType(String s) {
+		throw new UnsupportedOperationException(Msg.code(2442));
 	}
 
 	@Override

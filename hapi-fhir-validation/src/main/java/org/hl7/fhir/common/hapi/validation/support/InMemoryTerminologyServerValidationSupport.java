@@ -128,7 +128,7 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 			expansionR5 = expandValueSetToCanonical(
 					theValidationSupportContext, theValueSetToExpand, theWantSystemAndVersion, theWantCode);
 		} catch (ExpansionCouldNotBeCompletedInternallyException e) {
-			return new ValueSetExpansionOutcome(e.getMessage());
+			return new ValueSetExpansionOutcome(e.getMessage(), false);
 		}
 		if (expansionR5 == null) {
 			return null;
