@@ -204,7 +204,8 @@ public class JpaModelScannerAndVerifier {
 						Validate.isTrue(sequenceGenerator != null ^ genericGenerator != null);
 
 						if (genericGenerator != null) {
-							assertEquals("ca.uhn.fhir.jpa.model.dialect.HapiSequenceStyleGenerator", genericGenerator.strategy());
+							assertEquals("ca.uhn.fhir.jpa.model.dialect.HapiSequenceStyleGenerator", genericGenerator.type().getName());
+							assertEquals("native", genericGenerator.strategy());
 							assertEquals(generatedValue.generator(), genericGenerator.name());
 						} else {
 							Validate.notNull(sequenceGenerator);
@@ -409,7 +410,7 @@ public class JpaModelScannerAndVerifier {
 	}
 
 	private static void assertEquals(Object theGenerator, Object theName) {
-		Validate.isTrue(theGenerator.equals(theName));
+		Validate.isTrue(theGenerator.equals(theName), "Generator " + theGenerator + " doesn't match name " + theName);
 	}
 
 	private static void assertNotADuplicateName(String theName, Set<String> theNames) {
