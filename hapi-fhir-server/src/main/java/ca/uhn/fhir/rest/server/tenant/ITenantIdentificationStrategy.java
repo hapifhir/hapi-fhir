@@ -26,7 +26,7 @@ public interface ITenantIdentificationStrategy {
 
 	/**
 	 * Implementations should use this method to determine the tenant ID
-	 * based on the incoming request andand populate it in the
+	 * based on the incoming request and populate it in the
 	 * {@link RequestDetails#setTenantId(String)}.
 	 *
 	 * @param theUrlPathTokenizer The tokenizer which is used to parse the request path
