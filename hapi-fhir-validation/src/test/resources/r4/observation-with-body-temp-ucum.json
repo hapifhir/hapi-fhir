@@ -1,11 +1,21 @@
 {
 	"resourceType": "Observation",
 	"id": "bodytemp",
+	"text": {
+		"status": "generated",
+		"div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">AA</div>"
+	},
 	"meta": {
 		"profile": [
 			"http://hl7.org/fhir/StructureDefinition/bodytemp"
 		]
 	},
+	"performer": [
+		{
+			"reference": "Practitioner/124",
+			"display": "W. Coyote"
+		}
+	],
 	"status": "final",
 	"category": [
 		{
