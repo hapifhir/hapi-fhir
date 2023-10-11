@@ -1176,7 +1176,7 @@ public class FhirInstanceValidatorDstu3Test {
 
 	@Test
 	public void testValidateResourceWithDefaultValueset() {
-		Observation input = new Observation();
+		Observation input = createObservationWithDefaultSubjectPerfomerEffective();
 
 		input.setStatus(ObservationStatus.FINAL);
 		input.getCode().setText("No code here!");
@@ -1208,7 +1208,7 @@ public class FhirInstanceValidatorDstu3Test {
 
 	@Test
 	public void testValidateResourceWithExampleBindingCodeValidationFailing() {
-		Observation input = new Observation();
+		Observation input = createObservationWithDefaultSubjectPerfomerEffective();
 
 		myInstanceVal.setValidationSupport(myValidationSupport);
 
@@ -1240,7 +1240,7 @@ public class FhirInstanceValidatorDstu3Test {
 
 	@Test
 	public void testValidateResourceWithExampleBindingCodeValidationPassingLoinc() {
-		Observation input = new Observation();
+		Observation input = createObservationWithDefaultSubjectPerfomerEffective();
 
 		myInstanceVal.setValidationSupport(myValidationSupport);
 		addValidConcept("http://loinc.org", "12345");
@@ -1255,7 +1255,7 @@ public class FhirInstanceValidatorDstu3Test {
 
 	@Test
 	public void testValidateResourceWithExampleBindingCodeValidationPassingLoincWithExpansion() {
-		Observation input = new Observation();
+		Observation input = createObservationWithDefaultSubjectPerfomerEffective();
 
 		ValueSetExpansionComponent expansionComponent = new ValueSetExpansionComponent();
 		expansionComponent.addContains().setSystem("http://loinc.org").setCode("12345").setDisplay("Some display code");
@@ -1275,7 +1275,7 @@ public class FhirInstanceValidatorDstu3Test {
 
 	@Test
 	public void testValidateResourceWithExampleBindingCodeValidationPassingNonLoinc() {
-		Observation input = new Observation();
+		Observation input = createObservationWithDefaultSubjectPerfomerEffective();
 
 		myInstanceVal.setValidationSupport(myValidationSupport);
 		addValidConcept("http://acme.org", "12345");
@@ -1286,6 +1286,14 @@ public class FhirInstanceValidatorDstu3Test {
 		ValidationResult output = myVal.validateWithResult(input);
 		List<SingleValidationMessage> errors = logResultsAndReturnAll(output);
 		assertEquals(0, errors.size(), errors.toString());
+	}
+
+	private Observation createObservationWithDefaultSubjectPerfomerEffective() {
+		Observation observation = new Observation();
+		observation.setSubject(new Reference("Patient/123"));
+		observation.addPerformer(new Reference("Practitioner/124"));
+		observation.setEffective(new DateTimeType("2023-01-01T11:22:33Z"));
+		return observation;
 	}
 
 	@Test
