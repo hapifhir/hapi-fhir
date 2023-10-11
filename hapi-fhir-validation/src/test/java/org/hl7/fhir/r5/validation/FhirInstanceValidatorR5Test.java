@@ -288,6 +288,9 @@ public class FhirInstanceValidatorR5Test {
 	@Test
 	public void testValidateDoesntEnforceBestPracticesByDefault() {
 		Observation input = new Observation();
+		input.addPerformer(new Reference("Practitioner/124"));
+		input.setEffective(new DateTimeType("2023-01-01T11:22:33Z"));
+
 		input.getText().setDiv(new XhtmlNode().setValue("<div>AA</div>")).setStatus(Narrative.NarrativeStatus.GENERATED);
 		input.setStatus(Enumerations.ObservationStatus.AMENDED);
 		input.getCode().addCoding().setSystem("http://loinc.org").setCode("1234").setDisplay("FOO");
@@ -304,7 +307,7 @@ public class FhirInstanceValidatorR5Test {
 		result = val.validateWithResult(input);
 		all = logResultsAndReturnAll(result);
 		assertTrue(result.isSuccessful());
-		assertThat(all, empty());
+		assertThat(all, hasSize(1));
 
 		// With BPs enabled
 		val = ourCtx.newValidator();
@@ -315,7 +318,7 @@ public class FhirInstanceValidatorR5Test {
 		result = val.validateWithResult(input);
 		all = logResultsAndReturnAll(result);
 		assertFalse(result.isSuccessful());
-		assertEquals("All observations should have a subject", all.get(0).getMessage());
+		assertEquals("Best Practice Recommendation: In general, all observations should have a subject", all.get(0).getMessage());
 	}
 
 
@@ -683,8 +686,7 @@ public class FhirInstanceValidatorR5Test {
 
 	@Test
 	public void testValidateRawXmlWithMissingRootNamespace() {
-		String input = ""
-			+ "<Patient>"
+		String input = "<Patient>"
 			+ "    <text>"
 			+ "        <status value=\"generated\"/>"
 			+ "        <div xmlns=\"http://www.w3.org/1999/xhtml\">Some narrative</div>"
@@ -700,7 +702,7 @@ public class FhirInstanceValidatorR5Test {
 
 		ValidationResult output = myVal.validateWithResult(input);
 		assertEquals(1, output.getMessages().size(), output.toString());
-		assertEquals("This does not appear to be a FHIR resource (unknown namespace/name 'noNamespace::Patient')", output.getMessages().get(0).getMessage());
+		assertEquals("This content cannot be parsed (unknown or unrecognised XML Root element namespace/name 'noNamespace::Patient')", output.getMessages().get(0).getMessage());
 		ourLog.info(output.getMessages().get(0).getLocationString());
 	}
 
@@ -756,6 +758,7 @@ public class FhirInstanceValidatorR5Test {
 		 * Now a bad code
 		 */
 		rp = new RelatedPerson();
+		rp.getText().setDiv(new XhtmlNode().setValue("<div>AA</div>")).setStatus(Narrative.NarrativeStatus.GENERATED);
 		rp.getPatient().setReference("Patient/1");
 		rp.addRelationship().addCoding().setSystem("http://terminology.hl7.org/CodeSystem/v2-0131").setCode("GAGAGAGA");
 
@@ -774,6 +777,8 @@ public class FhirInstanceValidatorR5Test {
 		addValidConcept("http://loinc.org", "1234567");
 
 		Observation input = new Observation();
+		input.getText().setDiv(new XhtmlNode().setValue("<div>AA</div>")).setStatus(Narrative.NarrativeStatus.GENERATED);
+
 		// input.getMeta().addProfile("http://hl7.org/fhir/StructureDefinition/devicemetricobservation");
 
 		input.addIdentifier().setSystem("http://acme").setValue("12345");
@@ -787,6 +792,14 @@ public class FhirInstanceValidatorR5Test {
 
 		assertEquals(ResultSeverityEnum.ERROR, errors.get(0).getSeverity());
 		assertEquals("Unknown code for 'http://loinc.org#12345'", errors.get(0).getMessage());
+	}
+
+	private Observation createObservationWithDefaultSubjectPerfomerEffective() {
+		Observation observation = new Observation();
+		observation.setSubject(new Reference("Patient/123"));
+		observation.addPerformer(new Reference("Practitioner/124"));
+		observation.setEffective(new DateTimeType("2023-01-01T11:22:33Z"));
+		return observation;
 	}
 
 	@Test
@@ -845,7 +858,7 @@ public class FhirInstanceValidatorR5Test {
 
 	@Test
 	public void testValidateResourceWithDefaultValueset() {
-		Observation input = new Observation();
+		Observation input = createObservationWithDefaultSubjectPerfomerEffective();
 
 		input.getText().setDiv(new XhtmlNode().setValue("<div>AA</div>")).setStatus(Narrative.NarrativeStatus.GENERATED);
 		input.setStatus(Enumerations.ObservationStatus.FINAL);
@@ -854,8 +867,9 @@ public class FhirInstanceValidatorR5Test {
 		ourLog.debug(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(input));
 
 		ValidationResult output = myVal.validateWithResult(input);
-		assertEquals(output.getMessages().size(), 0);
+		assertEquals(0,output.getMessages().size());
 	}
+
 
 	@Test
 	public void testValidateResourceWithDefaultValuesetBadCode() {
@@ -880,7 +894,7 @@ public class FhirInstanceValidatorR5Test {
 
 	@Test
 	public void testValidateResourceWithExampleBindingCodeValidationFailing() {
-		Observation input = new Observation();
+		Observation input = createObservationWithDefaultSubjectPerfomerEffective();
 		input.getText().setDiv(new XhtmlNode().setValue("<div>AA</div>")).setStatus(Narrative.NarrativeStatus.GENERATED);
 
 		myInstanceVal.setValidationSupport(myValidationSupport);
@@ -914,7 +928,7 @@ public class FhirInstanceValidatorR5Test {
 
 	@Test
 	public void testValidateResourceWithExampleBindingCodeValidationPassingLoinc() {
-		Observation input = new Observation();
+		Observation input = createObservationWithDefaultSubjectPerfomerEffective();
 		input.getText().setDiv(new XhtmlNode().setValue("<div>AA</div>")).setStatus(Narrative.NarrativeStatus.GENERATED);
 
 		myInstanceVal.setValidationSupport(myValidationSupport);
@@ -930,7 +944,7 @@ public class FhirInstanceValidatorR5Test {
 
 	@Test
 	public void testValidateResourceWithExampleBindingCodeValidationPassingLoincWithExpansion() {
-		Observation input = new Observation();
+		Observation input = createObservationWithDefaultSubjectPerfomerEffective();
 		input.getText().setDiv(new XhtmlNode().setValue("<div>AA</div>")).setStatus(Narrative.NarrativeStatus.GENERATED);
 
 		ValueSetExpansionComponent expansionComponent = new ValueSetExpansionComponent();
@@ -951,7 +965,7 @@ public class FhirInstanceValidatorR5Test {
 
 	@Test
 	public void testValidateResourceWithExampleBindingCodeValidationPassingNonLoinc() {
-		Observation input = new Observation();
+		Observation input = createObservationWithDefaultSubjectPerfomerEffective();
 		input.getText().setDiv(new XhtmlNode().setValue("<div>AA</div>")).setStatus(Narrative.NarrativeStatus.GENERATED);
 
 		myInstanceVal.setValidationSupport(myValidationSupport);
