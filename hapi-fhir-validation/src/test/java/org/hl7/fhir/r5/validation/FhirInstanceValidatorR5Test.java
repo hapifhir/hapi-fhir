@@ -308,6 +308,7 @@ public class FhirInstanceValidatorR5Test {
 		all = logResultsAndReturnAll(result);
 		assertTrue(result.isSuccessful());
 		assertThat(all, hasSize(1));
+		assertEquals("Best Practice Recommendation: In general, all observations should have a subject", all.get(0).getMessage());
 
 		// With BPs enabled
 		val = ourCtx.newValidator();
