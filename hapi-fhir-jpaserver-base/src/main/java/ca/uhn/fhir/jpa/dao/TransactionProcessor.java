@@ -367,29 +367,25 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 			CriteriaBuilder cb = myEntityManager.getCriteriaBuilder();
 			CriteriaQuery<Tuple> cq = cb.createTupleQuery();
 			Root<ResourceIndexedSearchParamToken> from = cq.from(ResourceIndexedSearchParamToken.class);
-			cq.multiselect(
-					from.get("myResourcePid").as(Long.class),
-					from.get(theIndexColumnName).as(Long.class));
+			cq.multiselect(from.get("myResourcePid"), from.get(theIndexColumnName));
 
 			Predicate masterPredicate;
 			if (theHashesForIndexColumn.size() == 1) {
 				masterPredicate = cb.equal(
-						from.get(theIndexColumnName).as(Long.class),
+						from.get(theIndexColumnName),
 						theHashesForIndexColumn.iterator().next());
 			} else {
-				masterPredicate = from.get(theIndexColumnName).as(Long.class).in(theHashesForIndexColumn);
+				masterPredicate = from.get(theIndexColumnName).in(theHashesForIndexColumn);
 			}
 
 			if (myPartitionSettings.isPartitioningEnabled()
 					&& !myPartitionSettings.isIncludePartitionInSearchHashes()) {
 				if (theRequestPartitionId.isDefaultPartition()) {
-					Predicate partitionIdCriteria =
-							cb.isNull(from.get("myPartitionIdValue").as(Integer.class));
+					Predicate partitionIdCriteria = cb.isNull(from.get("myPartitionIdValue"));
 					masterPredicate = cb.and(partitionIdCriteria, masterPredicate);
 				} else if (!theRequestPartitionId.isAllPartitions()) {
-					Predicate partitionIdCriteria = from.get("myPartitionIdValue")
-							.as(Integer.class)
-							.in(theRequestPartitionId.getPartitionIds());
+					Predicate partitionIdCriteria =
+							from.get("myPartitionIdValue").in(theRequestPartitionId.getPartitionIds());
 					masterPredicate = cb.and(partitionIdCriteria, masterPredicate);
 				}
 			}

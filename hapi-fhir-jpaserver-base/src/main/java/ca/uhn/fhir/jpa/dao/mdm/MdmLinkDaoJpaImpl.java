@@ -290,7 +290,7 @@ public class MdmLinkDaoJpaImpl implements IMdmLinkDao<JpaPid, MdmLink> {
 		List<Predicate> andPredicates = new ArrayList<>();
 		if (theParams.getGoldenResourceId() != null) {
 			Predicate goldenResourcePredicate = criteriaBuilder.equal(
-					from.get(GOLDEN_RESOURCE_PID_NAME).as(Long.class),
+					from.get(GOLDEN_RESOURCE_PID_NAME),
 					(myIdHelperService.getPidOrThrowException(
 									RequestPartitionId.allPartitions(), theParams.getGoldenResourceId()))
 							.getId());
@@ -298,33 +298,31 @@ public class MdmLinkDaoJpaImpl implements IMdmLinkDao<JpaPid, MdmLink> {
 		}
 		if (theParams.getSourceId() != null) {
 			Predicate sourceIdPredicate = criteriaBuilder.equal(
-					from.get(SOURCE_PID_NAME).as(Long.class),
+					from.get(SOURCE_PID_NAME),
 					(myIdHelperService.getPidOrThrowException(
 									RequestPartitionId.allPartitions(), theParams.getSourceId()))
 							.getId());
 			andPredicates.add(sourceIdPredicate);
 		}
 		if (theParams.getMatchResult() != null) {
-			Predicate matchResultPredicate = criteriaBuilder.equal(
-					from.get(MATCH_RESULT_NAME).as(MdmMatchResultEnum.class), theParams.getMatchResult());
+			Predicate matchResultPredicate =
+					criteriaBuilder.equal(from.get(MATCH_RESULT_NAME), theParams.getMatchResult());
 			andPredicates.add(matchResultPredicate);
 		}
 		if (theParams.getLinkSource() != null) {
-			Predicate linkSourcePredicate = criteriaBuilder.equal(
-					from.get(LINK_SOURCE_NAME).as(MdmLinkSourceEnum.class), theParams.getLinkSource());
+			Predicate linkSourcePredicate =
+					criteriaBuilder.equal(from.get(LINK_SOURCE_NAME), theParams.getLinkSource());
 			andPredicates.add(linkSourcePredicate);
 		}
 		if (!CollectionUtils.isEmpty(theParams.getPartitionIds())) {
-			Expression<Integer> exp =
-					from.get(PARTITION_ID_NAME).get(PARTITION_ID_NAME).as(Integer.class);
+			Expression<Integer> exp = from.get(PARTITION_ID_NAME).get(PARTITION_ID_NAME);
 			Predicate linkSourcePredicate = exp.in(theParams.getPartitionIds());
 			andPredicates.add(linkSourcePredicate);
 		}
 
 		if (theParams.getResourceType() != null) {
 			Predicate resourceTypePredicate = criteriaBuilder.equal(
-					from.get(GOLDEN_RESOURCE_NAME).get(RESOURCE_TYPE_NAME).as(String.class),
-					theParams.getResourceType());
+					from.get(GOLDEN_RESOURCE_NAME).get(RESOURCE_TYPE_NAME), theParams.getResourceType());
 			andPredicates.add(resourceTypePredicate);
 		}
 

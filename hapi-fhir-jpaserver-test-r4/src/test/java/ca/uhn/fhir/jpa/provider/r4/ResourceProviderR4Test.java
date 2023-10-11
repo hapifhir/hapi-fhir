@@ -936,12 +936,14 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 		ourLog.info("About to perform search for: {}", theUri);
 
+		myCaptureQueriesListener.clear();
 		try (CloseableHttpResponse response = ourHttpClient.execute(get)) {
 			String resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(resp);
 			Bundle bundle = myFhirContext.newXmlParser().parseResource(Bundle.class, resp);
 			ids = toUnqualifiedIdValues(bundle);
 		}
+		myCaptureQueriesListener.logSelectQueries(true, true);
 		return ids;
 	}
 

@@ -1506,7 +1506,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 
 		// Forced ID resolution
 		resultingQueryNotFormatted = queries.get(0);
-		assertThat(resultingQueryNotFormatted, containsString("cast(f1_0.RESOURCE_TYPE as varchar)='Organization' and cast(f1_0.FORCED_ID as varchar)='ORG1' or cast(f1_0.RESOURCE_TYPE as varchar)='Organization' and cast(f1_0.FORCED_ID as varchar)='ORG2'"));
+		assertThat(resultingQueryNotFormatted, containsString("f1_0.RESOURCE_TYPE='Organization' and f1_0.FORCED_ID='ORG1' or f1_0.RESOURCE_TYPE='Organization' and f1_0.FORCED_ID='ORG2'"));
 
 		// The search itself
 		resultingQueryNotFormatted = queries.get(1);

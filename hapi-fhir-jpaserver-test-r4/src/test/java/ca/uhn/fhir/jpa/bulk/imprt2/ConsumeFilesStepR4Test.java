@@ -189,8 +189,8 @@ public class ConsumeFilesStepR4Test extends BasePartitioningR4Test {
 		// Validate
 
 		assertEquals(1, myCaptureQueriesListener.logSelectQueries().size());
-		String patientB = "cast(f1_0.RESOURCE_TYPE as varchar)='Patient' and cast(f1_0.FORCED_ID as varchar)='B' and cast(f1_0.PARTITION_ID as integer) is null";
-		String patientA = "cast(f1_0.RESOURCE_TYPE as varchar)='Patient' and cast(f1_0.FORCED_ID as varchar)='A' and cast(f1_0.PARTITION_ID as integer) is null";
+		String patientB = "f1_0.RESOURCE_TYPE='Patient' and f1_0.FORCED_ID='B' and f1_0.PARTITION_ID is null";
+		String patientA = "f1_0.RESOURCE_TYPE='Patient' and f1_0.FORCED_ID='A' and f1_0.PARTITION_ID is null";
 		assertThat(myCaptureQueriesListener.getSelectQueries().get(0).getSql(true, false),
 			either(containsString(patientA + " or " + patientB))
 				.or(containsString(patientB + " or " + patientA)));

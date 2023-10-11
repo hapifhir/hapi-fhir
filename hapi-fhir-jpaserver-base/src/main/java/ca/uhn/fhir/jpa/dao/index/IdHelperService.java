@@ -384,10 +384,7 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 		 * on Postgres does confirm that this lookup does use the index and is pretty
 		 * performant.
 		 */
-		criteriaQuery.multiselect(
-				from.get("myResourcePid").as(Long.class),
-				from.get("myResourceType").as(String.class),
-				from.get("myForcedId").as(String.class));
+		criteriaQuery.multiselect(from.get("myResourcePid"), from.get("myResourceType"), from.get("myForcedId"));
 
 		List<Predicate> predicates = new ArrayList<>(theIds.size());
 		for (IIdType next : theIds) {
@@ -395,11 +392,11 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 			List<Predicate> andPredicates = new ArrayList<>(3);
 
 			if (isNotBlank(next.getResourceType())) {
-				Predicate typeCriteria = cb.equal(from.get("myResourceType").as(String.class), next.getResourceType());
+				Predicate typeCriteria = cb.equal(from.get("myResourceType"), next.getResourceType());
 				andPredicates.add(typeCriteria);
 			}
 
-			Predicate idCriteria = cb.equal(from.get("myForcedId").as(String.class), next.getIdPart());
+			Predicate idCriteria = cb.equal(from.get("myForcedId"), next.getIdPart());
 			andPredicates.add(idCriteria);
 			getOptionalPartitionPredicate(theRequestPartitionId, cb, from).ifPresent(andPredicates::add);
 			predicates.add(cb.and(andPredicates.toArray(EMPTY_PREDICATE_ARRAY)));
@@ -436,19 +433,16 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 		if (myPartitionSettings.isAllowUnqualifiedCrossPartitionReference()) {
 			return Optional.empty();
 		} else if (theRequestPartitionId.isDefaultPartition() && myPartitionSettings.getDefaultPartitionId() == null) {
-			Predicate partitionIdCriteria =
-					cb.isNull(from.get("myPartitionIdValue").as(Integer.class));
+			Predicate partitionIdCriteria = cb.isNull(from.get("myPartitionIdValue"));
 			return Optional.of(partitionIdCriteria);
 		} else if (!theRequestPartitionId.isAllPartitions()) {
 			List<Integer> partitionIds = theRequestPartitionId.getPartitionIds();
 			partitionIds = replaceDefaultPartitionIdIfNonNull(myPartitionSettings, partitionIds);
 			if (partitionIds.size() > 1) {
-				Predicate partitionIdCriteria =
-						from.get("myPartitionIdValue").as(Integer.class).in(partitionIds);
+				Predicate partitionIdCriteria = from.get("myPartitionIdValue").in(partitionIds);
 				return Optional.of(partitionIdCriteria);
 			} else if (partitionIds.size() == 1) {
-				Predicate partitionIdCriteria =
-						cb.equal(from.get("myPartitionIdValue").as(Integer.class), partitionIds.get(0));
+				Predicate partitionIdCriteria = cb.equal(from.get("myPartitionIdValue"), partitionIds.get(0));
 				return Optional.of(partitionIdCriteria);
 			}
 		}

@@ -788,14 +788,13 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 			Join<NpmPackageVersionEntity, NpmPackageVersionResourceEntity> resources =
 					theRoot.join("myResources", JoinType.LEFT);
 
-			predicates.add(theCb.equal(
-					resources.get("myCanonicalUrl").as(String.class), thePackageSearchSpec.getResourceUrl()));
+			predicates.add(theCb.equal(resources.get("myCanonicalUrl"), thePackageSearchSpec.getResourceUrl()));
 		}
 
 		if (isNotBlank(thePackageSearchSpec.getDescription())) {
 			String searchTerm = "%" + thePackageSearchSpec.getDescription() + "%";
 			searchTerm = StringUtil.normalizeStringForSearchIndexing(searchTerm);
-			predicates.add(theCb.like(theRoot.get("myDescriptionUpper").as(String.class), searchTerm));
+			predicates.add(theCb.like(theRoot.get("myDescriptionUpper"), searchTerm));
 		}
 
 		if (isNotBlank(thePackageSearchSpec.getFhirVersion())) {
@@ -805,8 +804,7 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 					predicates.add(theCb.equal(theRoot.get("myFhirVersion").as(String.class), versionEnum.name()));
 				}
 			} else {
-				predicates.add(theCb.like(
-						theRoot.get("myFhirVersionId").as(String.class), thePackageSearchSpec.getFhirVersion() + "%"));
+				predicates.add(theCb.like(theRoot.get("myFhirVersionId"), thePackageSearchSpec.getFhirVersion() + "%"));
 			}
 		}
 
