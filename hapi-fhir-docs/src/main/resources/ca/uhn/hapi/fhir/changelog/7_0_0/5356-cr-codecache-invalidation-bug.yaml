@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 5356
+title: "Clinical reasoning bug that did not invalidate resources in repository api global caches for terminology and libraries when updates/deletes were made."

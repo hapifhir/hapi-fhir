@@ -27,9 +27,9 @@ import ca.uhn.fhir.cr.config.ProviderSelector;
 import ca.uhn.fhir.cr.config.RepositoryConfig;
 import ca.uhn.fhir.cr.dstu3.IMeasureServiceFactory;
 import ca.uhn.fhir.cr.dstu3.measure.MeasureOperationsProvider;
-import ca.uhn.fhir.cr.dstu3.measure.MeasureService;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
+import org.opencds.cqf.fhir.cr.measure.dstu3.Dstu3MeasureService;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -45,7 +45,7 @@ public class CrDstu3Config {
 	@Bean
 	IMeasureServiceFactory dstu3MeasureServiceFactory(
 			IRepositoryFactory theRepositoryFactory, MeasureEvaluationOptions theEvaluationOptions) {
-		return rd -> new MeasureService(theRepositoryFactory.create(rd), theEvaluationOptions);
+		return rd -> new Dstu3MeasureService(theRepositoryFactory.create(rd), theEvaluationOptions);
 	}
 
 	@Bean
