@@ -40,8 +40,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLDecoder;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -608,7 +606,7 @@ public class UrlUtil {
 	 * Creates list of sub URIs candidates for search with :above modifier
 	 * Example input: http://[host]/[pathPart1]/[pathPart2]
 	 * Example output: http://[host], http://[host]/[pathPart1], http://[host]/[pathPart1]/[pathPart2]
-	 * 
+	 *
 	 * Note that [pathPart2] also will contain any query string and/or fragment from the input
 	 * Note also that all parts of url are as presented in the input without any %xx decoding
 	 *
@@ -630,8 +628,8 @@ public class UrlUtil {
 
 		String path = uri.getScheme() + "://";
 		int stopLen = path.length();
-		
-		path +=  uri.getRawAuthority() + uri.getRawPath();
+
+		path += uri.getRawAuthority() + uri.getRawPath();
 		if (uri.getRawQuery() != null) {
 			path += "?" + uri.getRawQuery();
 		}
@@ -641,7 +639,7 @@ public class UrlUtil {
 		candidates.add(path);
 
 		int ix = path.length();
-		while ((ix = path.substring(0, ix-1).lastIndexOf('/')) > stopLen) {
+		while ((ix = path.substring(0, ix - 1).lastIndexOf('/')) > stopLen) {
 			candidates.add(path.substring(0, ix));
 		}
 
