@@ -32,7 +32,6 @@ import ca.uhn.fhir.cr.r4.ISubmitDataProcessorFactory;
 import ca.uhn.fhir.cr.r4.cqlexecution.CqlExecutionOperationProvider;
 import ca.uhn.fhir.cr.r4.measure.CareGapsOperationProvider;
 import ca.uhn.fhir.cr.r4.measure.MeasureOperationsProvider;
-import ca.uhn.fhir.cr.r4.measure.MeasureService;
 import ca.uhn.fhir.cr.r4.measure.SubmitDataProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
@@ -40,6 +39,7 @@ import org.opencds.cqf.fhir.cr.cql.r4.R4CqlExecutionService;
 import org.opencds.cqf.fhir.cr.measure.CareGapsProperties;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.r4.R4CareGapsService;
+import org.opencds.cqf.fhir.cr.measure.r4.R4MeasureService;
 import org.opencds.cqf.fhir.cr.measure.r4.R4SubmitDataService;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationContext;
@@ -58,7 +58,7 @@ public class CrR4Config {
 	@Bean
 	IMeasureServiceFactory r4MeasureServiceFactory(
 			IRepositoryFactory theRepositoryFactory, MeasureEvaluationOptions theEvaluationOptions) {
-		return rd -> new MeasureService(theRepositoryFactory.create(rd), theEvaluationOptions);
+		return rd -> new R4MeasureService(theRepositoryFactory.create(rd), theEvaluationOptions);
 	}
 
 	@Bean
