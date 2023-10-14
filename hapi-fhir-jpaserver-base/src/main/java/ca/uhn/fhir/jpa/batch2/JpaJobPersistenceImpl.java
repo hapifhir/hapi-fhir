@@ -291,27 +291,34 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	}
 
 	@Override
-	@Transactional(propagation = Propagation.REQUIRES_NEW)
 	public WorkChunkStatusEnum onWorkChunkError(WorkChunkErrorEvent theParameters) {
-		String chunkId = theParameters.getChunkId();
-		String errorMessage = truncateErrorMessage(theParameters.getErrorMsg());
-		int changeCount = myWorkChunkRepository.updateChunkStatusAndIncrementErrorCountForEndError(
-				chunkId, new Date(), errorMessage, WorkChunkStatusEnum.ERRORED);
-		Validate.isTrue(changeCount > 0, "changed chunk matching %s", chunkId);
+		WorkChunkStatusEnum execute = myTransactionService
+				.withSystemRequest()
+				.withPropagation(Propagation.REQUIRES_NEW)
+				.execute(() -> {
+					String chunkId = theParameters.getChunkId();
+					String errorMessage = truncateErrorMessage(theParameters.getErrorMsg());
+					int changeCount = myWorkChunkRepository.updateChunkStatusAndIncrementErrorCountForEndError(
+							chunkId, new Date(), errorMessage, WorkChunkStatusEnum.ERRORED);
+					Validate.isTrue(changeCount > 0, "changed chunk matching %s", chunkId);
 
-		Query query = myEntityManager.createQuery("update Batch2WorkChunkEntity " + "set myStatus = :failed "
-				+ ",myErrorMessage = CONCAT('Too many errors: ', CAST(myErrorCount as string), '. Last error msg was ', myErrorMessage) "
-				+ "where myId = :chunkId and myErrorCount > :maxCount");
-		query.setParameter("chunkId", chunkId);
-		query.setParameter("failed", WorkChunkStatusEnum.FAILED);
-		query.setParameter("maxCount", MAX_CHUNK_ERROR_COUNT);
-		int failChangeCount = query.executeUpdate();
+					Query query =
+							myEntityManager.createQuery("update Batch2WorkChunkEntity " + "set myStatus = :failed "
+									+ ",myErrorMessage = CONCAT('Too many errors: ', CAST(myErrorCount as string), '. Last error msg was ', myErrorMessage) "
+									+ "where myId = :chunkId and myErrorCount > :maxCount");
+					query.setParameter("chunkId", chunkId);
+					query.setParameter("failed", WorkChunkStatusEnum.FAILED);
+					query.setParameter("maxCount", MAX_CHUNK_ERROR_COUNT);
+					int failChangeCount = query.executeUpdate();
 
-		if (failChangeCount > 0) {
-			return WorkChunkStatusEnum.FAILED;
-		} else {
-			return WorkChunkStatusEnum.ERRORED;
-		}
+					if (failChangeCount > 0) {
+						return WorkChunkStatusEnum.FAILED;
+					} else {
+						return WorkChunkStatusEnum.ERRORED;
+					}
+				});
+		ourLog.trace("Status is now: {}", execute);
+		return execute;
 	}
 
 	@Override

@@ -1064,7 +1064,7 @@
 			</dependency>
 			<dependency>
 				<groupId>com.fasterxml.jackson.module</groupId>
-				<artifactId>jackson-module-jaxb-annotations</artifactId>
+				<artifactId>jackson-module-jakarta-xmlbind-annotations</artifactId>
 				<version>${jackson_version}</version>
 			</dependency>
 			<dependency>
@@ -1382,8 +1382,8 @@
 			</dependency>
 			<dependency>
 				<groupId>org.springdoc</groupId>
-				<artifactId>springdoc-openapi-ui</artifactId>
-				<version>1.5.13</version>
+				<artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+				<version>2.2.0</version>
 			</dependency>
 			<dependency>
 				<groupId>net.sourceforge.htmlunit</groupId>

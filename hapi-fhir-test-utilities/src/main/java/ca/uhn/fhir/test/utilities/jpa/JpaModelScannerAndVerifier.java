@@ -197,20 +197,20 @@ public class JpaModelScannerAndVerifier {
 					if (generatedValue != null) {
 						Validate.notBlank(generatedValue.generator(), "Field has no @GeneratedValue.generator(): %s", nextField);
 						assertNotADuplicateName(generatedValue.generator(), theNames);
-						assertEquals(generatedValue.strategy(), GenerationType.AUTO);
+						assertEqualsForIdGenerator(nextField, generatedValue.strategy(), GenerationType.AUTO);
 
 						GenericGenerator genericGenerator = nextField.getAnnotation(GenericGenerator.class);
 						SequenceGenerator sequenceGenerator = nextField.getAnnotation(SequenceGenerator.class);
 						Validate.isTrue(sequenceGenerator != null ^ genericGenerator != null);
 
 						if (genericGenerator != null) {
-							assertEquals("ca.uhn.fhir.jpa.model.dialect.HapiSequenceStyleGenerator", genericGenerator.type().getName());
-							assertEquals("native", genericGenerator.strategy());
-							assertEquals(generatedValue.generator(), genericGenerator.name());
+							assertEqualsForIdGenerator(nextField, "ca.uhn.fhir.jpa.model.dialect.HapiSequenceStyleGenerator", genericGenerator.type().getName());
+							assertEqualsForIdGenerator(nextField, "native", genericGenerator.strategy());
+							assertEqualsForIdGenerator(nextField, generatedValue.generator(), genericGenerator.name());
 						} else {
 							Validate.notNull(sequenceGenerator);
-							assertEquals(generatedValue.generator(), sequenceGenerator.name());
-							assertEquals(generatedValue.generator(), sequenceGenerator.sequenceName());
+							assertEqualsForIdGenerator(nextField, generatedValue.generator(), sequenceGenerator.name());
+							assertEqualsForIdGenerator(nextField, generatedValue.generator(), sequenceGenerator.sequenceName());
 						}
 					}
 				}
@@ -409,8 +409,8 @@ public class JpaModelScannerAndVerifier {
 		return retVal;
 	}
 
-	private static void assertEquals(Object theGenerator, Object theName) {
-		Validate.isTrue(theGenerator.equals(theName), "Generator " + theGenerator + " doesn't match name " + theName);
+	private static void assertEqualsForIdGenerator(Field theSource, Object theExpectedGenerator, Object theActualGenerator) {
+		Validate.isTrue(theExpectedGenerator.equals(theActualGenerator), "Value " + theActualGenerator + " doesn't match expected " + theExpectedGenerator + " for ID generator on " + theSource);
 	}
 
 	private static void assertNotADuplicateName(String theName, Set<String> theNames) {
