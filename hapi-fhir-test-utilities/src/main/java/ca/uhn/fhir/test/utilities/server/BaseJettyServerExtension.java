@@ -25,17 +25,17 @@ import org.apache.commons.lang3.Validate;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
+import org.eclipse.jetty.ee10.servlet.FilterHolder;
+import org.eclipse.jetty.ee10.servlet.ServletContextHandler;
+import org.eclipse.jetty.ee10.servlet.ServletHolder;
+import org.eclipse.jetty.ee10.websocket.jakarta.server.config.JakartaWebSocketServletContainerInitializer;
 import org.eclipse.jetty.io.Connection;
 import org.eclipse.jetty.io.Connection.Listener;
 import org.eclipse.jetty.server.Connector;
+import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.HttpConnectionFactory;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
-import org.eclipse.jetty.server.handler.HandlerList;
-import org.eclipse.jetty.servlet.FilterHolder;
-import org.eclipse.jetty.servlet.ServletContextHandler;
-import org.eclipse.jetty.servlet.ServletHolder;
-import org.eclipse.jetty.websocket.server.config.JettyWebSocketServletContainerInitializer;
 import org.junit.jupiter.api.extension.AfterAllCallback;
 import org.junit.jupiter.api.extension.AfterEachCallback;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
@@ -175,7 +175,7 @@ public abstract class BaseJettyServerExtension<T extends BaseJettyServerExtensio
 
 		ServletHolder servletHolder = new ServletHolder(provideServlet());
 
-		HandlerList handlerList = new HandlerList();
+		List<Handler> handlerList = new ArrayList<>();
 
 		ServletContextHandler contextHandler = new ServletContextHandler();
 		contextHandler.setContextPath(myContextPath);
@@ -184,7 +184,7 @@ public abstract class BaseJettyServerExtension<T extends BaseJettyServerExtensio
 		for (Filter next : myServletFilters) {
 			contextHandler.addFilter(new FilterHolder(next), "/*", EnumSet.allOf(DispatcherType.class));
 		}
-		handlerList.addHandler(contextHandler);
+		handlerList.add(contextHandler);
 
 		if (myEnableSpringWebsocketSupport != null) {
 
@@ -200,14 +200,15 @@ public abstract class BaseJettyServerExtension<T extends BaseJettyServerExtensio
 
 			ServletContextHandler servletContextHandler = new ServletContextHandler();
 			servletContextHandler.setContextPath(myEnableSpringWebsocketContextPath);
-			servletContextHandler.setAllowNullPathInfo(true);
+			servletContextHandler.setAllowNullPathInContext(true);
 			servletContextHandler.addServlet(new ServletHolder(dispatcherServlet), "/*");
-			JettyWebSocketServletContainerInitializer.configure(servletContextHandler, null);
 
-			handlerList.addHandler(servletContextHandler);
+			JakartaWebSocketServletContainerInitializer.configure(servletContextHandler, null);
+
+			handlerList.add(servletContextHandler);
 		}
 
-		myServer.setHandler(handlerList);
+		myServer.setHandler(new Handler.Sequence(handlerList));
 		myServer.start();
 
 		myPort = JettyUtil.getPortForStartedServer(myServer);

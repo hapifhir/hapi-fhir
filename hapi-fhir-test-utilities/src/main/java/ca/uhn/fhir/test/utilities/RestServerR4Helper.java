@@ -33,6 +33,7 @@ import ca.uhn.fhir.rest.server.IServerAddressStrategy;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.provider.HashMapResourceProvider;
+import org.eclipse.jetty.ee10.servlet.ServletApiRequest;
 import org.eclipse.jetty.server.Request;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -344,11 +345,11 @@ public class RestServerR4Helper extends BaseRestServerHelper implements BeforeEa
 
 		@Override
 		protected void service(HttpServletRequest theReq, HttpServletResponse theResp) throws ServletException, IOException {
-			Request request = (Request) theReq;
+			ServletApiRequest request = (ServletApiRequest) theReq;
 
 			Map<String, String> headers = pullOutHeaders(theReq);
 			myRequestHeaders.add(headers);
-			myRequestUrls.add(request.getOriginalURI());
+			myRequestUrls.add(request.getRequestURI());
 			myRequestVerbs.add(request.getMethod());
 			super.service(theReq, theResp);
 		}

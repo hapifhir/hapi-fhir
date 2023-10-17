@@ -45,7 +45,6 @@
 					<checkRuntimeClasspath>false</checkRuntimeClasspath>
 					<checkTestClasspath>false</checkTestClasspath>
 					<skip>false</skip>
-					<quiet>false</quiet>
 					<preferLocal>true</preferLocal>
 					<useResultFile>true</useResultFile>
 					<resultFileMinClasspathCount>2</resultFileMinClasspathCount>
@@ -102,6 +101,10 @@
 						<dependency>
 							<groupId>net.bytebuddy</groupId>
 							<artifactId>byte-buddy</artifactId>
+						</dependency>
+						<dependency>
+							<groupId>org.eclipse.jetty.ee10</groupId>
+							<artifactId>jetty-ee10-runner</artifactId>
 						</dependency>
 					</ignoredDependencies>
 					<ignoredResourcePatterns>

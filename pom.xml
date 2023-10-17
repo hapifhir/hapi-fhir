@@ -935,7 +935,7 @@
 		<jaxb_runtime_version>4.0.3</jaxb_runtime_version>
 		<jena_version>4.8.0</jena_version>
 		<jersey_version>3.0.3</jersey_version>
-		<jetty_version>11.0.15</jetty_version>
+		<jetty_version>12.0.2</jetty_version>
 		<jsr305_version>3.0.2</jsr305_version>
 		<junit_version>5.9.1</junit_version>
 		<flexmark_version>0.64.8</flexmark_version>
@@ -1317,6 +1317,11 @@
 				<version>2.0.1</version>
 			</dependency>
 			<dependency>
+				<groupId>jakarta.websocket</groupId>
+				<artifactId>jakarta.websocket-client-api</artifactId>
+				<version>2.1.1</version>
+			</dependency>
+			<dependency>
 				<groupId>jakarta.ws.rs</groupId>
 				<artifactId>jakarta.ws.rs-api</artifactId>
 				<version>3.1.0</version>
@@ -1367,12 +1372,17 @@
 			</dependency>
 			<dependency>
 				<groupId>io.swagger.core.v3</groupId>
-				<artifactId>swagger-models</artifactId>
+				<artifactId>swagger-annotations-jakarta</artifactId>
 				<version>${swagger_version}</version>
 			</dependency>
 			<dependency>
 				<groupId>io.swagger.core.v3</groupId>
-				<artifactId>swagger-core</artifactId>
+				<artifactId>swagger-models-jakarta</artifactId>
+				<version>${swagger_version}</version>
+			</dependency>
+			<dependency>
+				<groupId>io.swagger.core.v3</groupId>
+				<artifactId>swagger-core-jakarta</artifactId>
 				<version>${swagger_version}</version>
 			</dependency>
 			<dependency>
@@ -1632,13 +1642,28 @@
 				<version>${ebay_cors_filter_version}</version>
 			</dependency>
 			<dependency>
-				<groupId>org.eclipse.jetty</groupId>
-				<artifactId>jetty-http</artifactId>
+				<groupId>org.eclipse.jetty.ee10</groupId>
+				<artifactId>jetty-ee10-servlet</artifactId>
+				<version>${jetty_version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.eclipse.jetty.ee10</groupId>
+				<artifactId>jetty-ee10-servlets</artifactId>
+				<version>${jetty_version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.eclipse.jetty.ee10.websocket</groupId>
+				<artifactId>jetty-ee10-websocket-jakarta-client</artifactId>
+				<version>${jetty_version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.eclipse.jetty.ee10.websocket</groupId>
+				<artifactId>jetty-ee10-websocket-jakarta-server</artifactId>
 				<version>${jetty_version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.eclipse.jetty</groupId>
-				<artifactId>jetty-servlets</artifactId>
+				<artifactId>jetty-http</artifactId>
 				<version>${jetty_version}</version>
 			</dependency>
 			<dependency>
@@ -1658,22 +1683,12 @@
 			</dependency>
 			<dependency>
 				<groupId>org.eclipse.jetty</groupId>
-				<artifactId>jetty-servlet</artifactId>
-				<version>${jetty_version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.eclipse.jetty</groupId>
 				<artifactId>jetty-server</artifactId>
 				<version>${jetty_version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.eclipse.jetty</groupId>
 				<artifactId>jetty-util</artifactId>
-				<version>${jetty_version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.eclipse.jetty</groupId>
-				<artifactId>jetty-webapp</artifactId>
 				<version>${jetty_version}</version>
 			</dependency>
 			<dependency>
@@ -1698,7 +1713,7 @@
 			</dependency>
 			<dependency>
 				<groupId>org.eclipse.jetty.websocket</groupId>
-				<artifactId>websocket-jetty-server</artifactId>
+				<artifactId>jetty-websocket-jetty-server</artifactId>
 				<version>${jetty_version}</version>
 			</dependency>
 			<dependency>
@@ -2253,7 +2268,7 @@
 				<plugin>
 					<groupId>org.basepom.maven</groupId>
 					<artifactId>duplicate-finder-maven-plugin</artifactId>
-					<version>1.5.0</version>
+					<version>2.0.1</version>
 				</plugin>
 				<plugin>
 					<groupId>de.jpdigital</groupId>

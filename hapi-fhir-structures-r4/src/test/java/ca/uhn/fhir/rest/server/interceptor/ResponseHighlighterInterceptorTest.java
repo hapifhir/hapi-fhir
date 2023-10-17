@@ -19,12 +19,14 @@ import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.ResponseDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
+import ca.uhn.fhir.rest.server.FifoMemoryPagingProvider;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.IRestfulServerDefaults;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
-import ca.uhn.fhir.test.utilities.JettyUtil;
+import ca.uhn.fhir.test.utilities.HttpClientExtension;
+import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.base.Charsets;
@@ -32,12 +34,6 @@ import com.helger.collection.iterate.ArrayEnumeration;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.servlet.ServletHandler;
-import org.eclipse.jetty.servlet.ServletHolder;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -55,9 +51,9 @@ import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.Type;
 import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.springframework.web.cors.CorsConfiguration;
 
 import javax.annotation.Nonnull;
@@ -73,7 +69,6 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
@@ -89,19 +84,47 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-public class ResponseHighlightingInterceptorTest {
+public class ResponseHighlighterInterceptorTest {
 
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResponseHighlightingInterceptorTest.class);
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResponseHighlighterInterceptorTest.class);
 	private static final ResponseHighlighterInterceptor ourInterceptor = new ResponseHighlighterInterceptor();
 	private static final FhirContext ourCtx = FhirContext.forR4Cached();
-	private static Server ourServer;
-	private static CloseableHttpClient ourClient;
-	private static int ourPort;
-	private static RestfulServer ourServlet;
-	private static DummyPatientResourceProvider ourPatientProvider = new DummyPatientResourceProvider();
+	private DummyPatientResourceProvider ourPatientProvider = new DummyPatientResourceProvider();
+
+	@RegisterExtension
+	public RestfulServerExtension ourServer = new RestfulServerExtension(ourCtx)
+		 .registerProvider(ourPatientProvider)
+		 .registerProvider(new DummyBinaryResourceProvider())
+		 .registerProvider(new GraphQLProvider())
+		 .withPagingProvider(new FifoMemoryPagingProvider(100))
+		 .setDefaultResponseEncoding(EncodingEnum.XML)
+		 .setDefaultPrettyPrint(false)
+		 .withServer(s->s.setBundleInclusionRule(BundleInclusionRule.BASED_ON_RESOURCE_PRESENCE));
+
+	@RegisterExtension
+	private HttpClientExtension ourClient = new HttpClientExtension();
 
 	@BeforeEach
 	public void before() {
+		/*
+		 * Enable CORS
+		 */
+		CorsConfiguration config = new CorsConfiguration();
+		CorsInterceptor corsInterceptor = new CorsInterceptor(config);
+		config.addAllowedHeader("Origin");
+		config.addAllowedHeader("Accept");
+		config.addAllowedHeader("X-Requested-With");
+		config.addAllowedHeader("Content-Type");
+		config.addAllowedHeader("Access-Control-Request-Method");
+		config.addAllowedHeader("Access-Control-Request-Headers");
+		config.addAllowedOrigin("*");
+		config.addExposedHeader("Location");
+		config.addExposedHeader("Content-Location");
+		config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+		ourServer.registerInterceptor(corsInterceptor);
+
+		ourServer.registerInterceptor(ourInterceptor);
+
 		ResponseHighlighterInterceptor defaults = new ResponseHighlighterInterceptor();
 		ourInterceptor.setShowRequestHeaders(defaults.isShowRequestHeaders());
 		ourInterceptor.setShowResponseHeaders(defaults.isShowResponseHeaders());
@@ -114,7 +137,7 @@ public class ResponseHighlightingInterceptorTest {
 	 */
 	@Test
 	public void testBinaryOperationHtmlResponseFromProvider() throws Exception {
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/html/$binaryOp");
+		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/html/$binaryOp");
 		httpGet.addHeader("Accept", "text/html");
 
 		CloseableHttpResponse status = ourClient.execute(httpGet);
@@ -128,7 +151,7 @@ public class ResponseHighlightingInterceptorTest {
 
 	@Test
 	public void testInvalidRequest() throws Exception {
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/html?_elements=Patient:foo");
+		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/html?_elements=Patient:foo");
 		httpGet.addHeader("Accept", "text/html");
 
 		CloseableHttpResponse status = ourClient.execute(httpGet);
@@ -141,7 +164,7 @@ public class ResponseHighlightingInterceptorTest {
 
 	@Test
 	public void testBinaryReadAcceptBrowser() throws Exception {
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Binary/foo");
+		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Binary/foo");
 		httpGet.addHeader("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:40.0) Gecko/20100101 Firefox/40.1");
 		httpGet.addHeader("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8");
 
@@ -159,7 +182,7 @@ public class ResponseHighlightingInterceptorTest {
 	 */
 	@Test
 	public void testBinaryReadHtmlResponseFromProvider() throws Exception {
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Binary/html");
+		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Binary/html");
 		httpGet.addHeader("Accept", "text/html");
 
 		CloseableHttpResponse status = ourClient.execute(httpGet);
@@ -173,7 +196,7 @@ public class ResponseHighlightingInterceptorTest {
 
 	@Test
 	public void testBinaryReadAcceptFhirJson() throws Exception {
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Binary/foo");
+		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Binary/foo");
 		httpGet.addHeader("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:40.0) Gecko/20100101 Firefox/40.1");
 		httpGet.addHeader("Accept", Constants.CT_FHIR_JSON);
 
@@ -189,7 +212,7 @@ public class ResponseHighlightingInterceptorTest {
 
 	@Test
 	public void testBinaryReadAcceptMissing() throws Exception {
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Binary/foo");
+		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Binary/foo");
 
 		CloseableHttpResponse status = ourClient.execute(httpGet);
 		byte[] responseContent = IOUtils.toByteArray(status.getEntity().getContent());
@@ -304,7 +327,7 @@ public class ResponseHighlightingInterceptorTest {
 
 	@Test
 	public void testForceApplicationJson() throws Exception {
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1?_format=application/json");
+		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/1?_format=application/json");
 		httpGet.addHeader("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:40.0) Gecko/20100101 Firefox/40.1");
 
 		CloseableHttpResponse status = ourClient.execute(httpGet);
@@ -317,7 +340,7 @@ public class ResponseHighlightingInterceptorTest {
 
 	@Test
 	public void testForceApplicationJsonFhir() throws Exception {
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1?_format=application/json+fhir");
+		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/1?_format=application/json+fhir");
 		httpGet.addHeader("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:40.0) Gecko/20100101 Firefox/40.1");
 
 		CloseableHttpResponse status = ourClient.execute(httpGet);
@@ -330,7 +353,7 @@ public class ResponseHighlightingInterceptorTest {
 
 	@Test
 	public void testForceApplicationJsonPlusFhir() throws Exception {
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1?_format=" + UrlUtil.escapeUrlParam("application/json+fhir"));
+		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/1?_format=" + UrlUtil.escapeUrlParam("application/json+fhir"));
 		httpGet.addHeader("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:40.0) Gecko/20100101 Firefox/40.1");
 
 		CloseableHttpResponse status = ourClient.execute(httpGet);
@@ -343,7 +366,7 @@ public class ResponseHighlightingInterceptorTest {
 
 	@Test
 	public void testForceApplicationXml() throws Exception {
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1?_format=application/xml");
+		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/1?_format=application/xml");
 		httpGet.addHeader("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:40.0) Gecko/20100101 Firefox/40.1");
 
 		CloseableHttpResponse status = ourClient.execute(httpGet);
@@ -356,7 +379,7 @@ public class ResponseHighlightingInterceptorTest {
 
 	@Test
 	public void testForceApplicationXmlFhir() throws Exception {
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1?_format=application/xml+fhir");
+		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/1?_format=application/xml+fhir");
 		httpGet.addHeader("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:40.0) Gecko/20100101 Firefox/40.1");
 
 		CloseableHttpResponse status = ourClient.execute(httpGet);
@@ -369,7 +392,7 @@ public class ResponseHighlightingInterceptorTest {
 
 	@Test
 	public void testForceApplicationXmlPlusFhir() throws Exception {
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1?_format=" + UrlUtil.escapeUrlParam("application/xml+fhir"));
+		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/1?_format=" + UrlUtil.escapeUrlParam("application/xml+fhir"));
 		httpGet.addHeader("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:40.0) Gecko/20100101 Firefox/40.1");
 
 		CloseableHttpResponse status = ourClient.execute(httpGet);
@@ -382,7 +405,7 @@ public class ResponseHighlightingInterceptorTest {
 
 	@Test
 	public void testForceHtmlJson() throws Exception {
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1?_format=html/json");
+		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/1?_format=html/json");
 		httpGet.addHeader("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:40.0) Gecko/20100101 Firefox/40.1");
 
 		CloseableHttpResponse status = ourClient.execute(httpGet);
@@ -400,7 +423,7 @@ public class ResponseHighlightingInterceptorTest {
 
 	@Test
 	public void testForceHtmlTurtle() throws Exception {
-		String url = "http://localhost:" + ourPort + "/Patient/1?_format=html/turtle";
+		String url = ourServer.getBaseUrl() + "/Patient/1?_format=html/turtle";
 		HttpGet httpGet = new HttpGet(url);
 		httpGet.addHeader("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:40.0) Gecko/20100101 Firefox/40.1");
 
@@ -419,7 +442,7 @@ public class ResponseHighlightingInterceptorTest {
 
 	@Test
 	public void testForceHtmlJsonWithAdditionalParts() throws Exception {
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1?_format=" + UrlUtil.escapeUrlParam("html/json; fhirVersion=1.0"));
+		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/1?_format=" + UrlUtil.escapeUrlParam("html/json; fhirVersion=1.0"));
 		httpGet.addHeader("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:40.0) Gecko/20100101 Firefox/40.1");
 
 		CloseableHttpResponse status = ourClient.execute(httpGet);
@@ -435,7 +458,7 @@ public class ResponseHighlightingInterceptorTest {
 
 	@Test
 	public void testForceHtmlXml() throws Exception {
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1?_format=html/xml");
+		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/1?_format=html/xml");
 		httpGet.addHeader("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:40.0) Gecko/20100101 Firefox/40.1");
 
 		CloseableHttpResponse status = ourClient.execute(httpGet);
@@ -450,7 +473,7 @@ public class ResponseHighlightingInterceptorTest {
 
 	@Test
 	public void testForceJson() throws Exception {
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1?_format=json");
+		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/1?_format=json");
 		httpGet.addHeader("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:40.0) Gecko/20100101 Firefox/40.1");
 
 		CloseableHttpResponse status = ourClient.execute(httpGet);
@@ -463,7 +486,7 @@ public class ResponseHighlightingInterceptorTest {
 
 	@Test
 	public void testForceResponseTime() throws Exception {
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1?_format=html/json");
+		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/1?_format=html/json");
 
 		CloseableHttpResponse status = ourClient.execute(httpGet);
 		String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
@@ -477,7 +500,7 @@ public class ResponseHighlightingInterceptorTest {
 
 	@Test
 	public void testGetInvalidResource() throws Exception {
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Foobar/123");
+		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Foobar/123");
 		httpGet.addHeader("Accept", "text/html");
 		CloseableHttpResponse status = ourClient.execute(httpGet);
 		String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
@@ -492,7 +515,7 @@ public class ResponseHighlightingInterceptorTest {
 
 	@Test
 	public void testGetInvalidResourceNoAcceptHeader() throws Exception {
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Foobar/123");
+		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Foobar/123");
 		CloseableHttpResponse status = ourClient.execute(httpGet);
 		String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 		status.close();
@@ -508,7 +531,7 @@ public class ResponseHighlightingInterceptorTest {
 
 	@Test
 	public void testGetRoot() throws Exception {
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/");
+		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/");
 		httpGet.addHeader("Accept", "text/html");
 		CloseableHttpResponse status = ourClient.execute(httpGet);
 		String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
@@ -523,7 +546,7 @@ public class ResponseHighlightingInterceptorTest {
 
 	@Test
 	public void testHighlightGraphQLResponse() throws Exception {
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/A/$graphql?query=" + UrlUtil.escapeUrlParam("{name}"));
+		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/A/$graphql?query=" + UrlUtil.escapeUrlParam("{name}"));
 		httpGet.addHeader("Accept", "text/html");
 		CloseableHttpResponse status = ourClient.execute(httpGet);
 		String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
@@ -538,7 +561,7 @@ public class ResponseHighlightingInterceptorTest {
 
 	@Test
 	public void testHighlightGraphQLResponseNonHighlighted() throws Exception {
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/A/$graphql?query=" + UrlUtil.escapeUrlParam("{name}"));
+		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/A/$graphql?query=" + UrlUtil.escapeUrlParam("{name}"));
 		httpGet.addHeader("Accept", "application/jon");
 		CloseableHttpResponse status = ourClient.execute(httpGet);
 		String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
@@ -589,10 +612,10 @@ public class ResponseHighlightingInterceptorTest {
 			OperationOutcome oo = (OperationOutcome) theArgs.get(IBaseOperationOutcome.class);
 			oo.addIssue().setDiagnostics("HELP IM A BUG");
 		};
-		ourServlet.getInterceptorService().registerAnonymousInterceptor(Pointcut.SERVER_OUTGOING_FAILURE_OPERATIONOUTCOME, outgoingResponseInterceptor);
+		ourServer.getInterceptorService().registerAnonymousInterceptor(Pointcut.SERVER_OUTGOING_FAILURE_OPERATIONOUTCOME, outgoingResponseInterceptor);
 		try {
 
-			HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Foobar/123");
+			HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Foobar/123");
 			httpGet.addHeader("Accept", "text/html");
 			CloseableHttpResponse status = ourClient.execute(httpGet);
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
@@ -604,7 +627,7 @@ public class ResponseHighlightingInterceptorTest {
 
 		} finally {
 
-			ourServlet.getInterceptorService().unregisterInterceptor(outgoingResponseInterceptor);
+			ourServer.getInterceptorService().unregisterInterceptor(outgoingResponseInterceptor);
 
 		}
 	}
@@ -813,9 +836,9 @@ public class ResponseHighlightingInterceptorTest {
 	 */
 	@Test
 	public void testPrettyPrintDefaultsToTrue() throws Exception {
-		ourServlet.setDefaultPrettyPrint(false);
+		ourServer.setDefaultPrettyPrint(false);
 
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1");
+		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/1");
 		httpGet.addHeader("Accept", "text/html");
 
 		CloseableHttpResponse status = ourClient.execute(httpGet);
@@ -831,9 +854,9 @@ public class ResponseHighlightingInterceptorTest {
 	 */
 	@Test
 	public void testPrettyPrintDefaultsToTrueWithExplicitFalse() throws Exception {
-		ourServlet.setDefaultPrettyPrint(false);
+		ourServer.setDefaultPrettyPrint(false);
 
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1?_pretty=false");
+		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/1?_pretty=false");
 		httpGet.addHeader("Accept", "text/html");
 
 		CloseableHttpResponse status = ourClient.execute(httpGet);
@@ -849,9 +872,9 @@ public class ResponseHighlightingInterceptorTest {
 	 */
 	@Test
 	public void testPrettyPrintDefaultsToTrueWithExplicitTrue() throws Exception {
-		ourServlet.setDefaultPrettyPrint(false);
+		ourServer.setDefaultPrettyPrint(false);
 
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1?_pretty=true");
+		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/1?_pretty=true");
 		httpGet.addHeader("Accept", "text/html");
 
 		CloseableHttpResponse status = ourClient.execute(httpGet);
@@ -864,7 +887,7 @@ public class ResponseHighlightingInterceptorTest {
 
 	@Test
 	public void testSearchWithSummaryParam() throws Exception {
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_query=searchWithWildcardRetVal&_summary=count");
+		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?_query=searchWithWildcardRetVal&_summary=count");
 		httpGet.addHeader("Accept", "html");
 		CloseableHttpResponse status = ourClient.execute(httpGet);
 		String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
@@ -880,7 +903,7 @@ public class ResponseHighlightingInterceptorTest {
 		ourInterceptor.setShowRequestHeaders(false);
 		ourInterceptor.setShowResponseHeaders(false);
 
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1?_format=html/json");
+		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/1?_format=html/json");
 
 		CloseableHttpResponse status = ourClient.execute(httpGet);
 		String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
@@ -897,7 +920,7 @@ public class ResponseHighlightingInterceptorTest {
 		ourInterceptor.setShowRequestHeaders(true);
 		ourInterceptor.setShowResponseHeaders(false);
 
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1?_format=html/json");
+		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/1?_format=html/json");
 
 		CloseableHttpResponse status = ourClient.execute(httpGet);
 		String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
@@ -914,7 +937,7 @@ public class ResponseHighlightingInterceptorTest {
 		ourInterceptor.setShowRequestHeaders(true);
 		ourInterceptor.setShowResponseHeaders(true);
 
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1?_format=html/json");
+		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/1?_format=html/json");
 
 		CloseableHttpResponse status = ourClient.execute(httpGet);
 		String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
@@ -930,7 +953,7 @@ public class ResponseHighlightingInterceptorTest {
 	public void testShowResponse() throws Exception {
 		ourInterceptor.setShowResponseHeaders(true);
 
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1?_format=html/json");
+		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/1?_format=html/json");
 
 		CloseableHttpResponse status = ourClient.execute(httpGet);
 		String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
@@ -949,7 +972,7 @@ public class ResponseHighlightingInterceptorTest {
 		patient.getText().setDivAsString("<div><table><thead><tr><th>Header1</th><th>Header2</th></tr></thead><tr><td>A cell</td><td>A cell</td></tr><tr><td>A cell 2</td><td>A cell 2</td></tr></table></div>");
 		ourPatientProvider.myNextPatientOpResponse = patient;
 
-		String url = "http://localhost:" + ourPort + "/Patient/1/$patientOp?_format=html/json";
+		String url = ourServer.getBaseUrl() + "/Patient/1/$patientOp?_format=html/json";
 		HttpGet httpGet = new HttpGet(url);
 		try (CloseableHttpResponse response = ourClient.execute(httpGet)) {
 			String resp = IOUtils.toString(response.getEntity().getContent(), Charsets.UTF_8);
@@ -969,7 +992,7 @@ public class ResponseHighlightingInterceptorTest {
 
 		ourInterceptor.setShowNarrative(false);
 
-		String url = "http://localhost:" + ourPort + "/Patient/1/$patientOp?_format=html/json";
+		String url = ourServer.getBaseUrl() + "/Patient/1/$patientOp?_format=html/json";
 		HttpGet httpGet = new HttpGet(url);
 		try (CloseableHttpResponse response = ourClient.execute(httpGet)) {
 			String resp = IOUtils.toString(response.getEntity().getContent(), Charsets.UTF_8);
@@ -986,7 +1009,7 @@ public class ResponseHighlightingInterceptorTest {
 		patient.getText().setDivAsString("<div><table onclick=\"foo();\"><thead><tr><th>Header1</th><th>Header2</th></tr></thead><tr><td>A cell</td><td>A cell</td></tr><tr><td>A cell 2</td><td>A cell 2</td></tr></table></div>");
 		ourPatientProvider.myNextPatientOpResponse = patient;
 
-		String url = "http://localhost:" + ourPort + "/Patient/1/$patientOp?_format=html/json";
+		String url = ourServer.getBaseUrl() + "/Patient/1/$patientOp?_format=html/json";
 		HttpGet httpGet = new HttpGet(url);
 		try (CloseableHttpResponse response = ourClient.execute(httpGet)) {
 			String resp = IOUtils.toString(response.getEntity().getContent(), Charsets.UTF_8);
@@ -1192,51 +1215,9 @@ public class ResponseHighlightingInterceptorTest {
 
 	@AfterAll
 	public static void afterClassClearContext() throws Exception {
-		JettyUtil.closeServer(ourServer);
 		TestUtil.randomizeLocaleAndTimezone();
 	}
 
-	@BeforeAll
-	public static void beforeClass() throws Exception {
-		ourServer = new Server(0);
-
-		ServletHandler proxyHandler = new ServletHandler();
-		ourServlet = new RestfulServer(ourCtx);
-		ourServlet.setDefaultResponseEncoding(EncodingEnum.XML);
-
-		/*
-		 * Enable CORS
-		 */
-		CorsConfiguration config = new CorsConfiguration();
-		CorsInterceptor corsInterceptor = new CorsInterceptor(config);
-		config.addAllowedHeader("Origin");
-		config.addAllowedHeader("Accept");
-		config.addAllowedHeader("X-Requested-With");
-		config.addAllowedHeader("Content-Type");
-		config.addAllowedHeader("Access-Control-Request-Method");
-		config.addAllowedHeader("Access-Control-Request-Headers");
-		config.addAllowedOrigin("*");
-		config.addExposedHeader("Location");
-		config.addExposedHeader("Content-Location");
-		config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-		ourServlet.registerInterceptor(corsInterceptor);
-
-		ourServlet.registerInterceptor(ourInterceptor);
-		ourServlet.registerProviders(ourPatientProvider, new DummyBinaryResourceProvider(), new GraphQLProvider());
-		ourServlet.setBundleInclusionRule(BundleInclusionRule.BASED_ON_RESOURCE_PRESENCE);
-		ServletHolder servletHolder = new ServletHolder(ourServlet);
-		proxyHandler.addServletWithMapping(servletHolder, "/*");
-
-		ourServer.setHandler(proxyHandler);
-		JettyUtil.startServer(ourServer);
-		ourPort = JettyUtil.getPortForStartedServer(ourServer);
-
-		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
-		HttpClientBuilder builder = HttpClientBuilder.create();
-		builder.setConnectionManager(connectionManager);
-		ourClient = builder.build();
-
-	}
 
 	@Nonnull
 	private static SystemRequestDetails newRequest() {

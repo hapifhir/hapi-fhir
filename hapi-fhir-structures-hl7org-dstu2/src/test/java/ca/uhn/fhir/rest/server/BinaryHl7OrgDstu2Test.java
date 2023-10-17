@@ -9,7 +9,10 @@ import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.test.utilities.HttpClientExtension;
 import ca.uhn.fhir.test.utilities.JettyUtil;
+import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
+import ca.uhn.fhir.util.TestUtil;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -20,8 +23,8 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.servlet.ServletHandler;
-import org.eclipse.jetty.servlet.ServletHolder;
+import org.eclipse.jetty.ee10.servlet.ServletHandler;
+import org.eclipse.jetty.ee10.servlet.ServletHolder;
 import org.hl7.fhir.dstu2.model.Binary;
 import org.hl7.fhir.dstu2.model.IdType;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -29,6 +32,7 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
 import java.util.Collections;
 import java.util.List;
@@ -45,12 +49,18 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class BinaryHl7OrgDstu2Test {
 
   private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BinaryHl7OrgDstu2Test.class);
-  private static CloseableHttpClient ourClient;
-  private static FhirContext ourCtx = FhirContext.forDstu2Hl7Org();
+  private static final FhirContext ourCtx = FhirContext.forDstu2Hl7OrgCached();
   private static Binary ourLast;
-  private static int ourPort;
 
-  private static Server ourServer;
+  @RegisterExtension
+  public static RestfulServerExtension ourServer = new RestfulServerExtension(ourCtx)
+      .registerProvider(new ResourceProvider())
+      .withPagingProvider(new FifoMemoryPagingProvider(100))
+      .setDefaultResponseEncoding(EncodingEnum.XML)
+      .setDefaultPrettyPrint(false);
+
+  @RegisterExtension
+  public static HttpClientExtension ourClient = new HttpClientExtension();
 
   @BeforeEach
   public void before() {
@@ -59,7 +69,7 @@ public class BinaryHl7OrgDstu2Test {
 
   @Test
   public void testReadWithExplicitTypeXml() throws Exception {
-    HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Binary/foo?_format=xml");
+    HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Binary/foo?_format=xml");
     HttpResponse status = ourClient.execute(httpGet);
     String responseContent = IOUtils.toString(status.getEntity().getContent(), "UTF-8");
     IOUtils.closeQuietly(status.getEntity().getContent());
@@ -76,7 +86,7 @@ public class BinaryHl7OrgDstu2Test {
 
   @Test
   public void testReadWithExplicitTypeJson() throws Exception {
-    HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Binary/foo?_format=json");
+    HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Binary/foo?_format=json");
     HttpResponse status = ourClient.execute(httpGet);
     String responseContent = IOUtils.toString(status.getEntity().getContent(), "UTF-8");
     IOUtils.closeQuietly(status.getEntity().getContent());
@@ -94,7 +104,7 @@ public class BinaryHl7OrgDstu2Test {
 
   @Test
   public void testCreate() throws Exception {
-    HttpPost http = new HttpPost("http://localhost:" + ourPort + "/Binary");
+    HttpPost http = new HttpPost(ourServer.getBaseUrl() + "/Binary");
     http.setEntity(new ByteArrayEntity(new byte[]{1, 2, 3, 4}, ContentType.create("foo/bar", "UTF-8")));
 
     HttpResponse status = ourClient.execute(http);
@@ -107,7 +117,7 @@ public class BinaryHl7OrgDstu2Test {
 
   @Test
   public void testRead() throws Exception {
-    HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Binary/foo");
+    HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Binary/foo");
     HttpResponse status = ourClient.execute(httpGet);
     byte[] responseContent = IOUtils.toByteArray(status.getEntity().getContent());
     IOUtils.closeQuietly(status.getEntity().getContent());
@@ -119,7 +129,7 @@ public class BinaryHl7OrgDstu2Test {
 
   @Test
   public void testSearchJson() throws Exception {
-    HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Binary?_pretty=true&_format=json");
+    HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Binary?_pretty=true&_format=json");
     HttpResponse status = ourClient.execute(httpGet);
     String responseContent = IOUtils.toString(status.getEntity().getContent());
     IOUtils.closeQuietly(status.getEntity().getContent());
@@ -137,7 +147,7 @@ public class BinaryHl7OrgDstu2Test {
 
   @Test
   public void testSearchXml() throws Exception {
-    HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Binary?_pretty=true");
+    HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Binary?_pretty=true");
     HttpResponse status = ourClient.execute(httpGet);
     String responseContent = IOUtils.toString(status.getEntity().getContent());
     IOUtils.closeQuietly(status.getEntity().getContent());
@@ -191,30 +201,7 @@ public class BinaryHl7OrgDstu2Test {
 
   @AfterAll
   public static void afterClass() throws Exception {
-    JettyUtil.closeServer(ourServer);
-  }
-
-  @BeforeAll
-  public static void beforeClass() throws Exception {
-    ourServer = new Server(0);
-
-    ResourceProvider patientProvider = new ResourceProvider();
-
-    ServletHandler proxyHandler = new ServletHandler();
-    RestfulServer servlet = new RestfulServer(ourCtx);
-    servlet.setResourceProviders(patientProvider);
-    servlet.setDefaultResponseEncoding(EncodingEnum.XML);
-    ServletHolder servletHolder = new ServletHolder(servlet);
-    proxyHandler.addServletWithMapping(servletHolder, "/*");
-    ourServer.setHandler(proxyHandler);
-    JettyUtil.startServer(ourServer);
-    ourPort = JettyUtil.getPortForStartedServer(ourServer);
-
-    PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
-    HttpClientBuilder builder = HttpClientBuilder.create();
-    builder.setConnectionManager(connectionManager);
-    ourClient = builder.build();
-
+    TestUtil.randomizeLocaleAndTimezone();
   }
 
 }

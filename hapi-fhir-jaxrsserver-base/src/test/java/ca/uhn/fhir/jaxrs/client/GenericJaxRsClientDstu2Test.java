@@ -34,6 +34,8 @@ import ca.uhn.fhir.rest.client.exceptions.InvalidResponseException;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.test.utilities.JettyUtil;
+import ca.uhn.fhir.test.utilities.server.HttpServletExtension;
+import ca.uhn.fhir.test.utilities.server.RequestCaptureServlet;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -53,6 +55,8 @@ import org.junit.jupiter.api.Test;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.junit.jupiter.api.extension.RegisterExtension;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
@@ -73,23 +77,15 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 public class GenericJaxRsClientDstu2Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(GenericJaxRsClientDstu2Test.class);
-	private static FhirContext ourCtx;
-	private static int ourPort;
-	private static Server ourServer;
-	private static int ourResponseCount = 0;
-	private static String[] ourResponseBodies;
-	private static String ourResponseBody;
-	private static String ourResponseContentType;
-	private static int ourResponseStatus;
-	private static String ourRequestUri;
-	private static List<String> ourRequestUriAll;
-	private static String ourRequestMethod;
-	private static String ourRequestContentType;
-	private static byte[] ourRequestBodyBytes;
-	private static String ourRequestBodyString;
-	private static ArrayListMultimap<String, Header> ourRequestHeaders;
-	private static List<ArrayListMultimap<String, Header>> ourRequestHeadersAll;
-	private static Map<String, Header> ourRequestFirstHeaders;
+
+	private static final FhirContext ourCtx = FhirContext.forDstu2();
+
+	private static final RequestCaptureServlet MY_SERVLET = new RequestCaptureServlet();
+
+	@RegisterExtension
+	public static final HttpServletExtension ourServer = new HttpServletExtension()
+		.withServlet(MY_SERVLET)
+		.keepAliveBetweenTests();
 
 	@BeforeEach
 	public void before() {
@@ -97,7 +93,7 @@ public class GenericJaxRsClientDstu2Test {
 		clientFactory.setServerValidationMode(ServerValidationModeEnum.NEVER);
 
 		ourCtx.setRestfulClientFactory(clientFactory);
-		ourResponseCount = 0;
+		MY_SERVLET.reset();
 	}
 
 	private String getPatientFeedWithOneResult() {
@@ -129,28 +125,28 @@ public class GenericJaxRsClientDstu2Test {
 		conf.setCopyright("COPY");
 
 		final String respString = p.encodeResourceToString(conf);
-		ourResponseContentType = Constants.CT_FHIR_XML + "; charset=UTF-8";
-		ourResponseBody = respString;
+		MY_SERVLET.ourResponseContentType = Constants.CT_FHIR_XML + "; charset=UTF-8";
+		MY_SERVLET.ourResponseBody = respString;
 
-		IGenericClient client = ourCtx.newRestfulGenericClient("http://localhost:" + ourPort + "/fhir");
+		IGenericClient client = ourCtx.newRestfulGenericClient(ourServer.getBaseUrl() + "/fhir");
 
 
 		client.fetchConformance().ofType(Conformance.class).execute();
-		assertEquals("http://localhost:" + ourPort + "/fhir/metadata", ourRequestUri);
-		assertEquals(1, ourRequestHeaders.get("Accept").size());
-		assertThat(ourRequestHeaders.get("Accept").get(0).getValue(), containsString(Constants.HEADER_ACCEPT_VALUE_XML_OR_JSON_LEGACY));
+		assertEquals(ourServer.getBaseUrl() + "/fhir/metadata", MY_SERVLET.ourRequestUri);
+		assertEquals(1, MY_SERVLET.ourRequestHeaders.get("Accept").size());
+		assertThat(MY_SERVLET.ourRequestHeaders.get("Accept").get(0).getValue(), containsString(Constants.HEADER_ACCEPT_VALUE_XML_OR_JSON_LEGACY));
 
 
 		client.fetchConformance().ofType(Conformance.class).encodedJson().execute();
-		assertEquals("http://localhost:" + ourPort + "/fhir/metadata?_format=json", ourRequestUri);
-		assertEquals(1, ourRequestHeaders.get("Accept").size());
-		assertThat(ourRequestHeaders.get("Accept").get(0).getValue(), containsString(Constants.CT_FHIR_JSON));
+		assertEquals(ourServer.getBaseUrl() + "/fhir/metadata?_format=json", MY_SERVLET.ourRequestUri);
+		assertEquals(1, MY_SERVLET.ourRequestHeaders.get("Accept").size());
+		assertThat(MY_SERVLET.ourRequestHeaders.get("Accept").get(0).getValue(), containsString(Constants.CT_FHIR_JSON));
 
 
 		client.fetchConformance().ofType(Conformance.class).encodedXml().execute();
-		assertEquals("http://localhost:" + ourPort + "/fhir/metadata?_format=xml", ourRequestUri);
-		assertEquals(1, ourRequestHeaders.get("Accept").size());
-		assertThat(ourRequestHeaders.get("Accept").get(0).getValue(), containsString(Constants.CT_FHIR_XML));
+		assertEquals(ourServer.getBaseUrl() + "/fhir/metadata?_format=xml", MY_SERVLET.ourRequestUri);
+		assertEquals(1, MY_SERVLET.ourRequestHeaders.get("Accept").size());
+		assertThat(MY_SERVLET.ourRequestHeaders.get("Accept").get(0).getValue(), containsString(Constants.CT_FHIR_XML));
 
 	}
 
@@ -164,24 +160,24 @@ public class GenericJaxRsClientDstu2Test {
 		final Patient patient = new Patient();
 		patient.addName().addFamily("FAMILY");
 
-		ourResponseContentType = Constants.CT_FHIR_XML + "; charset=UTF-8";
-		ourResponseBodies = new String[]{p.encodeResourceToString(conf), p.encodeResourceToString(patient)};
+		MY_SERVLET.ourResponseContentType = Constants.CT_FHIR_XML + "; charset=UTF-8";
+		MY_SERVLET.ourResponseBodies = new String[]{p.encodeResourceToString(conf), p.encodeResourceToString(patient)};
 
 		ourCtx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.ONCE);
-		IGenericClient client = ourCtx.newRestfulGenericClient("http://localhost:" + ourPort + "/fhir");
+		IGenericClient client = ourCtx.newRestfulGenericClient(ourServer.getBaseUrl() + "/fhir");
 
 		Patient resp = client.read(Patient.class, new IdDt("123"));
 		assertEquals("FAMILY", resp.getName().get(0).getFamily().get(0).getValue());
-		assertEquals("http://localhost:" + ourPort + "/fhir/metadata", ourRequestUriAll.get(0));
-		assertEquals(1, ourRequestHeadersAll.get(0).get("Accept").size());
-		assertThat(ourRequestHeadersAll.get(0).get("Accept").get(0).getValue(), containsString(Constants.HEADER_ACCEPT_VALUE_XML_OR_JSON_LEGACY));
-		assertThat(ourRequestHeadersAll.get(0).get("Accept").get(0).getValue(), containsString(Constants.CT_FHIR_XML));
-		assertThat(ourRequestHeadersAll.get(0).get("Accept").get(0).getValue(), containsString(Constants.CT_FHIR_JSON));
-		assertEquals("http://localhost:" + ourPort + "/fhir/Patient/123", ourRequestUriAll.get(1));
-		assertEquals(1, ourRequestHeadersAll.get(1).get("Accept").size());
-		assertThat(ourRequestHeadersAll.get(1).get("Accept").get(0).getValue(), containsString(Constants.HEADER_ACCEPT_VALUE_XML_OR_JSON_LEGACY));
-		assertThat(ourRequestHeadersAll.get(1).get("Accept").get(0).getValue(), containsString(Constants.CT_FHIR_XML));
-		assertThat(ourRequestHeadersAll.get(1).get("Accept").get(0).getValue(), containsString(Constants.CT_FHIR_JSON));
+		assertEquals(ourServer.getBaseUrl() + "/fhir/metadata", MY_SERVLET.ourRequestUriAll.get(0));
+		assertEquals(1, MY_SERVLET.ourRequestHeadersAll.get(0).get("Accept").size());
+		assertThat(MY_SERVLET.ourRequestHeadersAll.get(0).get("Accept").get(0).getValue(), containsString(Constants.HEADER_ACCEPT_VALUE_XML_OR_JSON_LEGACY));
+		assertThat(MY_SERVLET.ourRequestHeadersAll.get(0).get("Accept").get(0).getValue(), containsString(Constants.CT_FHIR_XML));
+		assertThat(MY_SERVLET.ourRequestHeadersAll.get(0).get("Accept").get(0).getValue(), containsString(Constants.CT_FHIR_JSON));
+		assertEquals(ourServer.getBaseUrl() + "/fhir/Patient/123", MY_SERVLET.ourRequestUriAll.get(1));
+		assertEquals(1, MY_SERVLET.ourRequestHeadersAll.get(1).get("Accept").size());
+		assertThat(MY_SERVLET.ourRequestHeadersAll.get(1).get("Accept").get(0).getValue(), containsString(Constants.HEADER_ACCEPT_VALUE_XML_OR_JSON_LEGACY));
+		assertThat(MY_SERVLET.ourRequestHeadersAll.get(1).get("Accept").get(0).getValue(), containsString(Constants.CT_FHIR_XML));
+		assertThat(MY_SERVLET.ourRequestHeadersAll.get(1).get("Accept").get(0).getValue(), containsString(Constants.CT_FHIR_JSON));
 	}
 
 	@Test
@@ -194,23 +190,23 @@ public class GenericJaxRsClientDstu2Test {
 		final Patient patient = new Patient();
 		patient.addName().addFamily("FAMILY");
 
-		ourResponseContentType = Constants.CT_FHIR_XML + "; charset=UTF-8";
-		ourResponseBodies = new String[]{p.encodeResourceToString(conf), p.encodeResourceToString(patient)};
+		MY_SERVLET.ourResponseContentType = Constants.CT_FHIR_XML + "; charset=UTF-8";
+		MY_SERVLET.ourResponseBodies = new String[]{p.encodeResourceToString(conf), p.encodeResourceToString(patient)};
 
 		ourCtx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.ONCE);
-		IGenericClient client = ourCtx.newRestfulGenericClient("http://localhost:" + ourPort + "/fhir");
+		IGenericClient client = ourCtx.newRestfulGenericClient(ourServer.getBaseUrl() + "/fhir");
 		client.setEncoding(EncodingEnum.JSON);
 
 		Patient resp = client.read(Patient.class, new IdDt("123"));
 		assertEquals("FAMILY", resp.getName().get(0).getFamily().get(0).getValue());
-		assertEquals("http://localhost:" + ourPort + "/fhir/metadata?_format=json", ourRequestUriAll.get(0));
-		assertEquals(1, ourRequestHeadersAll.get(0).get("Accept").size());
-		assertThat(ourRequestHeadersAll.get(0).get("Accept").get(0).getValue(), containsString(Constants.CT_FHIR_JSON));
-		assertThat(ourRequestHeadersAll.get(0).get("Accept").get(0).getValue(), not(containsString(Constants.CT_FHIR_XML)));
-		assertEquals("http://localhost:" + ourPort + "/fhir/Patient/123?_format=json", ourRequestUriAll.get(1));
-		assertEquals(1, ourRequestHeadersAll.get(1).get("Accept").size());
-		assertThat(ourRequestHeadersAll.get(1).get("Accept").get(0).getValue(), containsString(Constants.CT_FHIR_JSON));
-		assertThat(ourRequestHeadersAll.get(1).get("Accept").get(0).getValue(), not(containsString(Constants.CT_FHIR_XML)));
+		assertEquals(ourServer.getBaseUrl() + "/fhir/metadata?_format=json", MY_SERVLET.ourRequestUriAll.get(0));
+		assertEquals(1, MY_SERVLET.ourRequestHeadersAll.get(0).get("Accept").size());
+		assertThat(MY_SERVLET.ourRequestHeadersAll.get(0).get("Accept").get(0).getValue(), containsString(Constants.CT_FHIR_JSON));
+		assertThat(MY_SERVLET.ourRequestHeadersAll.get(0).get("Accept").get(0).getValue(), not(containsString(Constants.CT_FHIR_XML)));
+		assertEquals(ourServer.getBaseUrl() + "/fhir/Patient/123?_format=json", MY_SERVLET.ourRequestUriAll.get(1));
+		assertEquals(1, MY_SERVLET.ourRequestHeadersAll.get(1).get("Accept").size());
+		assertThat(MY_SERVLET.ourRequestHeadersAll.get(1).get("Accept").get(0).getValue(), containsString(Constants.CT_FHIR_JSON));
+		assertThat(MY_SERVLET.ourRequestHeadersAll.get(1).get("Accept").get(0).getValue(), not(containsString(Constants.CT_FHIR_XML)));
 	}
 
 	@Test
@@ -223,16 +219,16 @@ public class GenericJaxRsClientDstu2Test {
 
 		final String respString = p.encodeResourceToString(conf);
 
-		ourResponseContentType = Constants.CT_FHIR_XML + "; charset=UTF-8";
-		ourResponseBody = respString;
+		MY_SERVLET.ourResponseContentType = Constants.CT_FHIR_XML + "; charset=UTF-8";
+		MY_SERVLET.ourResponseBody = respString;
 
-		IGenericClient client = ourCtx.newRestfulGenericClient("http://localhost:" + ourPort + "/fhir");
+		IGenericClient client = ourCtx.newRestfulGenericClient(ourServer.getBaseUrl() + "/fhir");
 
 		Conformance resp = client.capabilities().ofType(Conformance.class).execute();
 
-		assertEquals("http://localhost:" + ourPort + "/fhir/metadata", ourRequestUri);
+		assertEquals(ourServer.getBaseUrl() + "/fhir/metadata", MY_SERVLET.ourRequestUri);
 		assertEquals("COPY", resp.getCopyright());
-		assertEquals("GET", ourRequestMethod);
+		assertEquals("GET", MY_SERVLET.ourRequestMethod);
 
 
 	}
@@ -245,7 +241,7 @@ public class GenericJaxRsClientDstu2Test {
 		ourCtx.setRestfulClientFactory(clientFactory);
 
 		try {
-			ourCtx.newRestfulGenericClient("http://localhost:" + ourPort + "/fhir");
+			ourCtx.newRestfulGenericClient(ourServer.getBaseUrl() + "/fhir");
 			fail();
 		} catch (IllegalStateException e) {
 			assertEquals(Msg.code(1355) + "JaxRsRestfulClientFactory does not have FhirContext defined. This must be set via JaxRsRestfulClientFactory#setFhirContext(FhirContext)", e.getMessage());
@@ -254,7 +250,7 @@ public class GenericJaxRsClientDstu2Test {
 
 	@Test
 	public void testCreate() {
-		IGenericClient client = ourCtx.newRestfulGenericClient("http://localhost:" + ourPort + "/fhir");
+		IGenericClient client = ourCtx.newRestfulGenericClient(ourServer.getBaseUrl() + "/fhir");
 
 
 		Patient p = new Patient();
@@ -262,23 +258,23 @@ public class GenericJaxRsClientDstu2Test {
 
 		client.create().resource(p).encodedXml().execute();
 
-		assertEquals(1, ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE).size());
-		assertEquals(EncodingEnum.XML.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8, ourRequestFirstHeaders.get(Constants.HEADER_CONTENT_TYPE).getValue().replace(";char", "; char"));
-		assertThat(ourRequestBodyString, containsString("<family value=\"FOOFAMILY\"/>"));
-		assertEquals("http://localhost:" + ourPort + "/fhir/Patient", ourRequestUri);
-		assertEquals("POST", ourRequestMethod);
+		assertEquals(1, MY_SERVLET.ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE).size());
+		assertEquals(EncodingEnum.XML.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8, MY_SERVLET.ourRequestFirstHeaders.get(Constants.HEADER_CONTENT_TYPE).getValue().replace(";char", "; char"));
+		assertThat(MY_SERVLET.ourRequestBodyString, containsString("<family value=\"FOOFAMILY\"/>"));
+		assertEquals(ourServer.getBaseUrl() + "/fhir/Patient", MY_SERVLET.ourRequestUri);
+		assertEquals("POST", MY_SERVLET.ourRequestMethod);
 
 
 		p.setId("123");
 
 		client.create().resource(p).encodedXml().execute();
-		assertEquals(1, ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE).size());
-		assertEquals(EncodingEnum.XML.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8, ourRequestFirstHeaders.get(Constants.HEADER_CONTENT_TYPE).getValue().replace(";char", "; char"));
-		String body = ourRequestBodyString;
+		assertEquals(1, MY_SERVLET.ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE).size());
+		assertEquals(EncodingEnum.XML.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8, MY_SERVLET.ourRequestFirstHeaders.get(Constants.HEADER_CONTENT_TYPE).getValue().replace(";char", "; char"));
+		String body = MY_SERVLET.ourRequestBodyString;
 		assertThat(body, containsString("<family value=\"FOOFAMILY\"/>"));
 		assertThat(body, not(containsString("123")));
-		assertEquals("http://localhost:" + ourPort + "/fhir/Patient", ourRequestUri);
-		assertEquals("POST", ourRequestMethod);
+		assertEquals(ourServer.getBaseUrl() + "/fhir/Patient", MY_SERVLET.ourRequestUri);
+		assertEquals("POST", MY_SERVLET.ourRequestMethod);
 
 
 	}
@@ -287,39 +283,39 @@ public class GenericJaxRsClientDstu2Test {
 	public void testCreateConditional() {
 
 
-		ourResponseStatus = Constants.STATUS_HTTP_204_NO_CONTENT;
+		MY_SERVLET.ourResponseStatus = Constants.STATUS_HTTP_204_NO_CONTENT;
 
-		IGenericClient client = ourCtx.newRestfulGenericClient("http://localhost:" + ourPort + "/fhir");
+		IGenericClient client = ourCtx.newRestfulGenericClient(ourServer.getBaseUrl() + "/fhir");
 
 
 		Patient p = new Patient();
 		p.addName().addFamily("FOOFAMILY");
 
 		client.create().resource(p).conditionalByUrl("Patient?name=foo").encodedXml().execute();
-		assertEquals(1, ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE).size());
-		assertEquals(EncodingEnum.XML.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8, ourRequestFirstHeaders.get(Constants.HEADER_CONTENT_TYPE).getValue().replace(";char", "; char"));
-		assertThat(ourRequestBodyString, containsString("<family value=\"FOOFAMILY\"/>"));
-		assertEquals("http://localhost:" + ourPort + "/fhir/Patient", ourRequestUri);
-		assertEquals("http://localhost:" + ourPort + "/fhir/Patient?name=foo", ourRequestFirstHeaders.get(Constants.HEADER_IF_NONE_EXIST).getValue());
-		assertEquals("POST", ourRequestMethod);
+		assertEquals(1, MY_SERVLET.ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE).size());
+		assertEquals(EncodingEnum.XML.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8, MY_SERVLET.ourRequestFirstHeaders.get(Constants.HEADER_CONTENT_TYPE).getValue().replace(";char", "; char"));
+		assertThat(MY_SERVLET.ourRequestBodyString, containsString("<family value=\"FOOFAMILY\"/>"));
+		assertEquals(ourServer.getBaseUrl() + "/fhir/Patient", MY_SERVLET.ourRequestUri);
+		assertEquals(ourServer.getBaseUrl() + "/fhir/Patient?name=foo", MY_SERVLET.ourRequestFirstHeaders.get(Constants.HEADER_IF_NONE_EXIST).getValue());
+		assertEquals("POST", MY_SERVLET.ourRequestMethod);
 
 
 		client.create().resource(p).conditionalByUrl("Patient?name=http://foo|bar").encodedXml().execute();
-		assertEquals(1, ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE).size());
-		assertEquals(EncodingEnum.XML.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8, ourRequestFirstHeaders.get(Constants.HEADER_CONTENT_TYPE).getValue().replace(";char", "; char"));
-		assertThat(ourRequestBodyString, containsString("<family value=\"FOOFAMILY\"/>"));
-		assertEquals("http://localhost:" + ourPort + "/fhir/Patient", ourRequestUri);
-		assertEquals("http://localhost:" + ourPort + "/fhir/Patient?name=http%3A//foo%7Cbar", ourRequestFirstHeaders.get(Constants.HEADER_IF_NONE_EXIST).getValue());
-		assertEquals("POST", ourRequestMethod);
+		assertEquals(1, MY_SERVLET.ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE).size());
+		assertEquals(EncodingEnum.XML.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8, MY_SERVLET.ourRequestFirstHeaders.get(Constants.HEADER_CONTENT_TYPE).getValue().replace(";char", "; char"));
+		assertThat(MY_SERVLET.ourRequestBodyString, containsString("<family value=\"FOOFAMILY\"/>"));
+		assertEquals(ourServer.getBaseUrl() + "/fhir/Patient", MY_SERVLET.ourRequestUri);
+		assertEquals(ourServer.getBaseUrl() + "/fhir/Patient?name=http%3A//foo%7Cbar", MY_SERVLET.ourRequestFirstHeaders.get(Constants.HEADER_IF_NONE_EXIST).getValue());
+		assertEquals("POST", MY_SERVLET.ourRequestMethod);
 
 
 		client.create().resource(p).conditional().where(Patient.NAME.matches().value("foo")).encodedXml().execute();
-		assertEquals(1, ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE).size());
-		assertEquals(EncodingEnum.XML.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8, ourRequestFirstHeaders.get(Constants.HEADER_CONTENT_TYPE).getValue().replace(";char", "; char"));
-		assertThat(ourRequestBodyString, containsString("<family value=\"FOOFAMILY\"/>"));
-		assertEquals("http://localhost:" + ourPort + "/fhir/Patient", ourRequestUri);
-		assertEquals("http://localhost:" + ourPort + "/fhir/Patient?name=foo", ourRequestFirstHeaders.get(Constants.HEADER_IF_NONE_EXIST).getValue());
-		assertEquals("POST", ourRequestMethod);
+		assertEquals(1, MY_SERVLET.ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE).size());
+		assertEquals(EncodingEnum.XML.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8, MY_SERVLET.ourRequestFirstHeaders.get(Constants.HEADER_CONTENT_TYPE).getValue().replace(";char", "; char"));
+		assertThat(MY_SERVLET.ourRequestBodyString, containsString("<family value=\"FOOFAMILY\"/>"));
+		assertEquals(ourServer.getBaseUrl() + "/fhir/Patient", MY_SERVLET.ourRequestUri);
+		assertEquals(ourServer.getBaseUrl() + "/fhir/Patient?name=foo", MY_SERVLET.ourRequestFirstHeaders.get(Constants.HEADER_IF_NONE_EXIST).getValue());
+		assertEquals("POST", MY_SERVLET.ourRequestMethod);
 
 
 	}
@@ -328,22 +324,22 @@ public class GenericJaxRsClientDstu2Test {
 	public void testCreatePrefer() {
 
 
-		ourResponseStatus = Constants.STATUS_HTTP_204_NO_CONTENT;
+		MY_SERVLET.ourResponseStatus = Constants.STATUS_HTTP_204_NO_CONTENT;
 
-		IGenericClient client = ourCtx.newRestfulGenericClient("http://localhost:" + ourPort + "/fhir");
+		IGenericClient client = ourCtx.newRestfulGenericClient(ourServer.getBaseUrl() + "/fhir");
 
 
 		Patient p = new Patient();
 		p.addName().addFamily("FOOFAMILY");
 
 		client.create().resource(p).prefer(PreferReturnEnum.MINIMAL).execute();
-		assertEquals(1, ourRequestHeaders.get(Constants.HEADER_PREFER).size());
-		assertEquals(Constants.HEADER_PREFER_RETURN + '=' + Constants.HEADER_PREFER_RETURN_MINIMAL, ourRequestHeaders.get(Constants.HEADER_PREFER).get(0).getValue());
+		assertEquals(1, MY_SERVLET.ourRequestHeaders.get(Constants.HEADER_PREFER).size());
+		assertEquals(Constants.HEADER_PREFER_RETURN + '=' + Constants.HEADER_PREFER_RETURN_MINIMAL, MY_SERVLET.ourRequestHeaders.get(Constants.HEADER_PREFER).get(0).getValue());
 
 
 		client.create().resource(p).prefer(PreferReturnEnum.REPRESENTATION).execute();
-		assertEquals(1, ourRequestHeaders.get(Constants.HEADER_PREFER).size());
-		assertEquals(Constants.HEADER_PREFER_RETURN + '=' + Constants.HEADER_PREFER_RETURN_REPRESENTATION, ourRequestHeaders.get(Constants.HEADER_PREFER).get(0).getValue());
+		assertEquals(1, MY_SERVLET.ourRequestHeaders.get(Constants.HEADER_PREFER).size());
+		assertEquals(Constants.HEADER_PREFER_RETURN + '=' + Constants.HEADER_PREFER_RETURN_REPRESENTATION, MY_SERVLET.ourRequestHeaders.get(Constants.HEADER_PREFER).get(0).getValue());
 
 
 	}
@@ -355,11 +351,11 @@ public class GenericJaxRsClientDstu2Test {
 		final String formatted = ourCtx.newXmlParser().encodeResourceToString(p);
 
 
-		ourResponseStatus = Constants.STATUS_HTTP_200_OK;
-		ourResponseContentType = Constants.CT_FHIR_XML + "; charset=UTF-8";
-		ourResponseBody = formatted;
+		MY_SERVLET.ourResponseStatus = Constants.STATUS_HTTP_200_OK;
+		MY_SERVLET.ourResponseContentType = Constants.CT_FHIR_XML + "; charset=UTF-8";
+		MY_SERVLET.ourResponseBody = formatted;
 
-		IGenericClient client = ourCtx.newRestfulGenericClient("http://localhost:" + ourPort + "/fhir");
+		IGenericClient client = ourCtx.newRestfulGenericClient(ourServer.getBaseUrl() + "/fhir");
 
 		p = new Patient();
 		p.setId(new IdDt("1"));
@@ -372,38 +368,38 @@ public class GenericJaxRsClientDstu2Test {
 
 	@Test
 	public void testDeleteConditional() {
-		ourResponseStatus = Constants.STATUS_HTTP_204_NO_CONTENT;
+		MY_SERVLET.ourResponseStatus = Constants.STATUS_HTTP_204_NO_CONTENT;
 
-		IGenericClient client = ourCtx.newRestfulGenericClient("http://localhost:" + ourPort + "/fhir");
+		IGenericClient client = ourCtx.newRestfulGenericClient(ourServer.getBaseUrl() + "/fhir");
 
 
 		client.delete().resourceById(new IdDt("Patient/123")).execute();
-		assertEquals("DELETE", ourRequestMethod);
-		assertEquals("http://localhost:" + ourPort + "/fhir/Patient/123", ourRequestUri);
+		assertEquals("DELETE", MY_SERVLET.ourRequestMethod);
+		assertEquals(ourServer.getBaseUrl() + "/fhir/Patient/123", MY_SERVLET.ourRequestUri);
 
 
 		client.delete().resourceConditionalByUrl("Patient?name=foo").execute();
-		assertEquals("DELETE", ourRequestMethod);
-		assertEquals("http://localhost:" + ourPort + "/fhir/Patient?name=foo", ourRequestUri);
+		assertEquals("DELETE", MY_SERVLET.ourRequestMethod);
+		assertEquals(ourServer.getBaseUrl() + "/fhir/Patient?name=foo", MY_SERVLET.ourRequestUri);
 
 
 		client.delete().resourceConditionalByType("Patient").where(Patient.NAME.matches().value("foo")).execute();
-		assertEquals("DELETE", ourRequestMethod);
-		assertEquals("http://localhost:" + ourPort + "/fhir/Patient?name=foo", ourRequestUri);
+		assertEquals("DELETE", MY_SERVLET.ourRequestMethod);
+		assertEquals(ourServer.getBaseUrl() + "/fhir/Patient?name=foo", MY_SERVLET.ourRequestUri);
 
 
 	}
 
 	@Test
 	public void testDelete() {
-		ourResponseStatus = Constants.STATUS_HTTP_204_NO_CONTENT;
+		MY_SERVLET.ourResponseStatus = Constants.STATUS_HTTP_204_NO_CONTENT;
 
-		IGenericClient client = ourCtx.newRestfulGenericClient("http://localhost:" + ourPort + "/fhir");
+		IGenericClient client = ourCtx.newRestfulGenericClient(ourServer.getBaseUrl() + "/fhir");
 
 
 		client.delete().resourceById(new IdDt("Patient/123")).execute();
-		assertEquals("DELETE", ourRequestMethod);
-		assertEquals("http://localhost:" + ourPort + "/fhir/Patient/123", ourRequestUri);
+		assertEquals("DELETE", MY_SERVLET.ourRequestMethod);
+		assertEquals(ourServer.getBaseUrl() + "/fhir/Patient/123", MY_SERVLET.ourRequestUri);
 
 	}
 
@@ -412,10 +408,10 @@ public class GenericJaxRsClientDstu2Test {
 
 		final String msg = getPatientFeedWithOneResult();
 
-		ourResponseContentType = Constants.CT_FHIR_XML + "; charset=UTF-8";
-		ourResponseBody = msg;
+		MY_SERVLET.ourResponseContentType = Constants.CT_FHIR_XML + "; charset=UTF-8";
+		MY_SERVLET.ourResponseBody = msg;
 
-		IGenericClient client = ourCtx.newRestfulGenericClient("http://localhost:" + ourPort + "/fhir");
+		IGenericClient client = ourCtx.newRestfulGenericClient(ourServer.getBaseUrl() + "/fhir");
 
 
 		ca.uhn.fhir.model.dstu2.resource.Bundle response;
@@ -427,7 +423,7 @@ public class GenericJaxRsClientDstu2Test {
 			.andReturnBundle(ca.uhn.fhir.model.dstu2.resource.Bundle.class)
 			.execute();
 
-		assertEquals("http://localhost:" + ourPort + "/fhir/_history", ourRequestUri);
+		assertEquals(ourServer.getBaseUrl() + "/fhir/_history", MY_SERVLET.ourRequestUri);
 		assertEquals(1, response.getEntry().size());
 
 
@@ -439,7 +435,7 @@ public class GenericJaxRsClientDstu2Test {
 			.count(null)
 			.execute();
 
-		assertEquals("http://localhost:" + ourPort + "/fhir/_history", ourRequestUri);
+		assertEquals(ourServer.getBaseUrl() + "/fhir/_history", MY_SERVLET.ourRequestUri);
 		assertEquals(1, response.getEntry().size());
 
 
@@ -450,7 +446,7 @@ public class GenericJaxRsClientDstu2Test {
 			.since(new InstantDt())
 			.execute();
 
-		assertEquals("http://localhost:" + ourPort + "/fhir/_history", ourRequestUri);
+		assertEquals(ourServer.getBaseUrl() + "/fhir/_history", MY_SERVLET.ourRequestUri);
 		assertEquals(1, response.getEntry().size());
 
 
@@ -460,7 +456,7 @@ public class GenericJaxRsClientDstu2Test {
 			.andReturnBundle(ca.uhn.fhir.model.dstu2.resource.Bundle.class)
 			.execute();
 
-		assertEquals("http://localhost:" + ourPort + "/fhir/Patient/_history", ourRequestUri);
+		assertEquals(ourServer.getBaseUrl() + "/fhir/Patient/_history", MY_SERVLET.ourRequestUri);
 		assertEquals(1, response.getEntry().size());
 
 
@@ -470,7 +466,7 @@ public class GenericJaxRsClientDstu2Test {
 			.andReturnBundle(ca.uhn.fhir.model.dstu2.resource.Bundle.class)
 			.execute();
 
-		assertEquals("http://localhost:" + ourPort + "/fhir/Patient/123/_history", ourRequestUri);
+		assertEquals(ourServer.getBaseUrl() + "/fhir/Patient/123/_history", MY_SERVLET.ourRequestUri);
 		assertEquals(1, response.getEntry().size());
 
 
@@ -482,7 +478,7 @@ public class GenericJaxRsClientDstu2Test {
 			.since(new InstantDt("2001-01-02T11:22:33Z"))
 			.execute();
 
-		assertThat(ourRequestUri, either(equalTo("http://localhost:" + ourPort + "/fhir/Patient/123/_history?_since=2001-01-02T11:22:33Z&_count=123")).or(equalTo("http://localhost:" + ourPort + "/fhir/Patient/123/_history?_count=123&_since=2001-01-02T11:22:33Z")));
+		assertThat(MY_SERVLET.ourRequestUri, either(equalTo(ourServer.getBaseUrl() + "/fhir/Patient/123/_history?_since=2001-01-02T11:22:33Z&_count=123")).or(equalTo(ourServer.getBaseUrl() + "/fhir/Patient/123/_history?_count=123&_since=2001-01-02T11:22:33Z")));
 		assertEquals(1, response.getEntry().size());
 
 
@@ -493,7 +489,7 @@ public class GenericJaxRsClientDstu2Test {
 			.since(new InstantDt("2001-01-02T11:22:33Z").getValue())
 			.execute();
 
-		assertThat(ourRequestUri, containsString("_since=2001-01"));
+		assertThat(MY_SERVLET.ourRequestUri, containsString("_since=2001-01"));
 		assertEquals(1, response.getEntry().size());
 
 	}
@@ -508,10 +504,10 @@ public class GenericJaxRsClientDstu2Test {
 		outParams.addParameter().setName("meta").setValue(new MetaDt().addProfile("urn:profile:out"));
 		final String respString = p.encodeResourceToString(outParams);
 
-		ourResponseContentType = Constants.CT_FHIR_XML + "; charset=UTF-8";
-		ourResponseBody = respString;
+		MY_SERVLET.ourResponseContentType = Constants.CT_FHIR_XML + "; charset=UTF-8";
+		MY_SERVLET.ourResponseBody = respString;
 
-		IGenericClient client = ourCtx.newRestfulGenericClient("http://localhost:" + ourPort + "/fhir");
+		IGenericClient client = ourCtx.newRestfulGenericClient(ourServer.getBaseUrl() + "/fhir");
 
 
 		MetaDt resp = client
@@ -522,10 +518,10 @@ public class GenericJaxRsClientDstu2Test {
 			.encodedXml()
 			.execute();
 
-		assertEquals("http://localhost:" + ourPort + "/fhir/Patient/123/$meta-add", ourRequestUri);
+		assertEquals(ourServer.getBaseUrl() + "/fhir/Patient/123/$meta-add", MY_SERVLET.ourRequestUri);
 		assertEquals("urn:profile:out", resp.getProfile().get(0).getValue());
-		assertEquals("POST", ourRequestMethod);
-		assertEquals("<Parameters xmlns=\"http://hl7.org/fhir\"><parameter><name value=\"meta\"/><valueMeta><profile value=\"urn:profile:in\"/></valueMeta></parameter></Parameters>", ourRequestBodyString);
+		assertEquals("POST", MY_SERVLET.ourRequestMethod);
+		assertEquals("<Parameters xmlns=\"http://hl7.org/fhir\"><parameter><name value=\"meta\"/><valueMeta><profile value=\"urn:profile:in\"/></valueMeta></parameter></Parameters>", MY_SERVLET.ourRequestBodyString);
 
 
 	}
@@ -541,10 +537,10 @@ public class GenericJaxRsClientDstu2Test {
 		outParams.addParameter().setName("meta").setValue(new MetaDt().addProfile("urn:profile:out"));
 		final String respString = p.encodeResourceToString(outParams);
 
-		ourResponseContentType = Constants.CT_FHIR_XML + "; charset=UTF-8";
-		ourResponseBody = respString;
+		MY_SERVLET.ourResponseContentType = Constants.CT_FHIR_XML + "; charset=UTF-8";
+		MY_SERVLET.ourResponseBody = respString;
 
-		IGenericClient client = ourCtx.newRestfulGenericClient("http://localhost:" + ourPort + "/fhir");
+		IGenericClient client = ourCtx.newRestfulGenericClient(ourServer.getBaseUrl() + "/fhir");
 
 
 		MetaDt resp = client
@@ -553,9 +549,9 @@ public class GenericJaxRsClientDstu2Test {
 			.fromServer()
 			.execute();
 
-		assertEquals("http://localhost:" + ourPort + "/fhir/$meta", ourRequestUri);
+		assertEquals(ourServer.getBaseUrl() + "/fhir/$meta", MY_SERVLET.ourRequestUri);
 		assertEquals("urn:profile:out", resp.getProfile().get(0).getValue());
-		assertEquals("GET", ourRequestMethod);
+		assertEquals("GET", MY_SERVLET.ourRequestMethod);
 
 
 		resp = client
@@ -564,9 +560,9 @@ public class GenericJaxRsClientDstu2Test {
 			.fromType("Patient")
 			.execute();
 
-		assertEquals("http://localhost:" + ourPort + "/fhir/Patient/$meta", ourRequestUri);
+		assertEquals(ourServer.getBaseUrl() + "/fhir/Patient/$meta", MY_SERVLET.ourRequestUri);
 		assertEquals("urn:profile:out", resp.getProfile().get(0).getValue());
-		assertEquals("GET", ourRequestMethod);
+		assertEquals("GET", MY_SERVLET.ourRequestMethod);
 
 
 		resp = client
@@ -575,9 +571,9 @@ public class GenericJaxRsClientDstu2Test {
 			.fromResource(new IdDt("Patient/123"))
 			.execute();
 
-		assertEquals("http://localhost:" + ourPort + "/fhir/Patient/123/$meta", ourRequestUri);
+		assertEquals(ourServer.getBaseUrl() + "/fhir/Patient/123/$meta", MY_SERVLET.ourRequestUri);
 		assertEquals("urn:profile:out", resp.getProfile().get(0).getValue());
-		assertEquals("GET", ourRequestMethod);
+		assertEquals("GET", MY_SERVLET.ourRequestMethod);
 
 
 	}
@@ -597,10 +593,10 @@ public class GenericJaxRsClientDstu2Test {
 		final String respString = p.encodeResourceToString(outParams);
 
 
-		ourResponseContentType = Constants.CT_FHIR_XML + "; charset=UTF-8";
-		ourResponseBody = respString;
+		MY_SERVLET.ourResponseContentType = Constants.CT_FHIR_XML + "; charset=UTF-8";
+		MY_SERVLET.ourResponseBody = respString;
 
-		IGenericClient client = ourCtx.newRestfulGenericClient("http://localhost:" + ourPort + "/fhir");
+		IGenericClient client = ourCtx.newRestfulGenericClient(ourServer.getBaseUrl() + "/fhir");
 
 
 		Parameters resp = client
@@ -611,9 +607,9 @@ public class GenericJaxRsClientDstu2Test {
 			.useHttpGet()
 			.execute();
 
-		assertEquals("http://localhost:" + ourPort + "/fhir/$SOMEOPERATION?param1=STRINGVALIN1&param1=STRINGVALIN1b&param2=STRINGVALIN2", ourRequestUri);
+		assertEquals(ourServer.getBaseUrl() + "/fhir/$SOMEOPERATION?param1=STRINGVALIN1&param1=STRINGVALIN1b&param2=STRINGVALIN2", MY_SERVLET.ourRequestUri);
 		assertEquals(respString, p.encodeResourceToString(resp));
-		assertEquals("GET", ourRequestMethod);
+		assertEquals("GET", MY_SERVLET.ourRequestMethod);
 
 
 		resp = client
@@ -624,9 +620,9 @@ public class GenericJaxRsClientDstu2Test {
 			.useHttpGet()
 			.execute();
 
-		assertEquals("http://localhost:" + ourPort + "/fhir/Patient/$SOMEOPERATION?param1=STRINGVALIN1&param1=STRINGVALIN1b&param2=STRINGVALIN2", ourRequestUri);
+		assertEquals(ourServer.getBaseUrl() + "/fhir/Patient/$SOMEOPERATION?param1=STRINGVALIN1&param1=STRINGVALIN1b&param2=STRINGVALIN2", MY_SERVLET.ourRequestUri);
 		assertEquals(respString, p.encodeResourceToString(resp));
-		assertEquals("GET", ourRequestMethod);
+		assertEquals("GET", MY_SERVLET.ourRequestMethod);
 
 
 		resp = client
@@ -637,9 +633,9 @@ public class GenericJaxRsClientDstu2Test {
 			.useHttpGet()
 			.execute();
 
-		assertEquals("http://localhost:" + ourPort + "/fhir/Patient/123/$SOMEOPERATION?param1=STRINGVALIN1&param1=STRINGVALIN1b&param2=STRINGVALIN2", ourRequestUri);
+		assertEquals(ourServer.getBaseUrl() + "/fhir/Patient/123/$SOMEOPERATION?param1=STRINGVALIN1&param1=STRINGVALIN1b&param2=STRINGVALIN2", MY_SERVLET.ourRequestUri);
 		assertEquals(respString, p.encodeResourceToString(resp));
-		assertEquals("GET", ourRequestMethod);
+		assertEquals("GET", MY_SERVLET.ourRequestMethod);
 
 
 		// @formatter:off
@@ -651,7 +647,7 @@ public class GenericJaxRsClientDstu2Test {
 			.useHttpGet()
 			.execute();
 		// @formatter:on
-		assertEquals("http://localhost:" + ourPort + "/fhir/Patient/123/$SOMEOPERATION?param1=STRINGVALIN1&param1=STRINGVALIN1b&param2=STRINGVALIN2", ourRequestUri);
+		assertEquals(ourServer.getBaseUrl() + "/fhir/Patient/123/$SOMEOPERATION?param1=STRINGVALIN1&param1=STRINGVALIN1b&param2=STRINGVALIN2", MY_SERVLET.ourRequestUri);
 
 	}
 
@@ -664,10 +660,10 @@ public class GenericJaxRsClientDstu2Test {
 		outParams.addParameter().setValue(new StringDt("STRINGVALOUT2"));
 		final String respString = p.encodeResourceToString(outParams);
 
-		ourResponseContentType = Constants.CT_FHIR_XML + "; charset=UTF-8";
-		ourResponseBody = respString;
+		MY_SERVLET.ourResponseContentType = Constants.CT_FHIR_XML + "; charset=UTF-8";
+		MY_SERVLET.ourResponseBody = respString;
 
-		IGenericClient client = ourCtx.newRestfulGenericClient("http://localhost:" + ourPort + "/fhir");
+		IGenericClient client = ourCtx.newRestfulGenericClient(ourServer.getBaseUrl() + "/fhir");
 
 
 		Parameters resp = client
@@ -678,9 +674,9 @@ public class GenericJaxRsClientDstu2Test {
 			.useHttpGet()
 			.execute();
 
-		assertEquals("http://localhost:" + ourPort + "/fhir/$SOMEOPERATION", ourRequestUri);
+		assertEquals(ourServer.getBaseUrl() + "/fhir/$SOMEOPERATION", MY_SERVLET.ourRequestUri);
 		assertEquals(respString, p.encodeResourceToString(resp));
-		assertEquals("GET", ourRequestMethod);
+		assertEquals("GET", MY_SERVLET.ourRequestMethod);
 
 
 		resp = client
@@ -691,9 +687,9 @@ public class GenericJaxRsClientDstu2Test {
 			.useHttpGet()
 			.execute();
 
-		assertEquals("http://localhost:" + ourPort + "/fhir/Patient/$SOMEOPERATION", ourRequestUri);
+		assertEquals(ourServer.getBaseUrl() + "/fhir/Patient/$SOMEOPERATION", MY_SERVLET.ourRequestUri);
 		assertEquals(respString, p.encodeResourceToString(resp));
-		assertEquals("GET", ourRequestMethod);
+		assertEquals("GET", MY_SERVLET.ourRequestMethod);
 
 
 		resp = client
@@ -704,9 +700,9 @@ public class GenericJaxRsClientDstu2Test {
 			.useHttpGet()
 			.execute();
 
-		assertEquals("http://localhost:" + ourPort + "/fhir/Patient/123/$SOMEOPERATION", ourRequestUri);
+		assertEquals(ourServer.getBaseUrl() + "/fhir/Patient/123/$SOMEOPERATION", MY_SERVLET.ourRequestUri);
 		assertEquals(respString, p.encodeResourceToString(resp));
-		assertEquals("GET", ourRequestMethod);
+		assertEquals("GET", MY_SERVLET.ourRequestMethod);
 
 
 		// @formatter:off
@@ -718,18 +714,18 @@ public class GenericJaxRsClientDstu2Test {
 			.useHttpGet()
 			.execute();
 		// @formatter:on
-		assertEquals("http://localhost:" + ourPort + "/fhir/Patient/123/$SOMEOPERATION", ourRequestUri);
+		assertEquals(ourServer.getBaseUrl() + "/fhir/Patient/123/$SOMEOPERATION", MY_SERVLET.ourRequestUri);
 
 	}
 
 	@Test
 	public void testOperationWithBundleResponseJson() {
 
-		ourResponseContentType = Constants.CT_FHIR_JSON;
-		final String respString = "{\n" + "    \"resourceType\":\"Bundle\",\n" + "    \"id\":\"8cef5f2a-0ba9-43a5-be26-c8dde9ff0e19\",\n" + "    \"base\":\"http://localhost:" + ourPort + "/fhir\"\n" + "}";
-		ourResponseBody = respString;
+		MY_SERVLET.ourResponseContentType = Constants.CT_FHIR_JSON;
+		final String respString = "{\n" + "    \"resourceType\":\"Bundle\",\n" + "    \"id\":\"8cef5f2a-0ba9-43a5-be26-c8dde9ff0e19\",\n" + "    \"base\":\"" + ourServer.getBaseUrl() + "/fhir\"\n" + "}";
+		MY_SERVLET.ourResponseBody = respString;
 
-		IGenericClient client = ourCtx.newRestfulGenericClient("http://localhost:" + ourPort + "/fhir");
+		IGenericClient client = ourCtx.newRestfulGenericClient(ourServer.getBaseUrl() + "/fhir");
 
 		client.registerInterceptor(new LoggingInterceptor(true));
 
@@ -765,10 +761,10 @@ public class GenericJaxRsClientDstu2Test {
 		outParams.setTotal(123);
 		final String respString = p.encodeResourceToString(outParams);
 
-		ourResponseContentType = Constants.CT_FHIR_XML + "; charset=UTF-8";
-		ourResponseBody = respString;
+		MY_SERVLET.ourResponseContentType = Constants.CT_FHIR_XML + "; charset=UTF-8";
+		MY_SERVLET.ourResponseBody = respString;
 
-		IGenericClient client = ourCtx.newRestfulGenericClient("http://localhost:" + ourPort + "/fhir");
+		IGenericClient client = ourCtx.newRestfulGenericClient(ourServer.getBaseUrl() + "/fhir");
 
 
 		Parameters resp = client
@@ -777,11 +773,11 @@ public class GenericJaxRsClientDstu2Test {
 			.named("$SOMEOPERATION")
 			.withParameters(inParams).encodedXml().execute();
 
-		assertEquals("http://localhost:" + ourPort + "/fhir/$SOMEOPERATION", ourRequestUri);
-		assertEquals(1, ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE).size());
-		assertEquals(EncodingEnum.XML.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8, ourRequestFirstHeaders.get(Constants.HEADER_CONTENT_TYPE).getValue().replace(";char", "; char"));
-		assertEquals(ourRequestBodyString, reqString);
-		assertEquals("POST", ourRequestMethod);
+		assertEquals(ourServer.getBaseUrl() + "/fhir/$SOMEOPERATION", MY_SERVLET.ourRequestUri);
+		assertEquals(1, MY_SERVLET.ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE).size());
+		assertEquals(EncodingEnum.XML.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8, MY_SERVLET.ourRequestFirstHeaders.get(Constants.HEADER_CONTENT_TYPE).getValue().replace(";char", "; char"));
+		assertEquals(MY_SERVLET.ourRequestBodyString, reqString);
+		assertEquals("POST", MY_SERVLET.ourRequestMethod);
 		assertEquals(1, resp.getParameter().size());
 		assertEquals(ca.uhn.fhir.model.dstu2.resource.Bundle.class, resp.getParameter().get(0).getResource().getClass());
 
@@ -796,10 +792,10 @@ public class GenericJaxRsClientDstu2Test {
 		outParams.addParameter().setValue(new StringDt("STRINGVALOUT2"));
 		final String respString = p.encodeResourceToString(outParams);
 
-		ourResponseContentType = Constants.CT_FHIR_XML + "; charset=UTF-8";
-		ourResponseBody = respString;
+		MY_SERVLET.ourResponseContentType = Constants.CT_FHIR_XML + "; charset=UTF-8";
+		MY_SERVLET.ourResponseBody = respString;
 
-		IGenericClient client = ourCtx.newRestfulGenericClient("http://localhost:" + ourPort + "/fhir");
+		IGenericClient client = ourCtx.newRestfulGenericClient(ourServer.getBaseUrl() + "/fhir");
 
 
 		Parameters resp = client
@@ -811,12 +807,12 @@ public class GenericJaxRsClientDstu2Test {
 			.encodedXml()
 			.execute();
 
-		assertEquals("http://localhost:" + ourPort + "/fhir/$SOMEOPERATION", ourRequestUri);
+		assertEquals(ourServer.getBaseUrl() + "/fhir/$SOMEOPERATION", MY_SERVLET.ourRequestUri);
 		assertEquals(respString, p.encodeResourceToString(resp));
-		assertEquals(1, ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE).size());
-		assertEquals(EncodingEnum.XML.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8, ourRequestFirstHeaders.get(Constants.HEADER_CONTENT_TYPE).getValue().replace(";char", "; char"));
-		assertEquals("POST", ourRequestMethod);
-		assertEquals("<Parameters xmlns=\"http://hl7.org/fhir\"><parameter><name value=\"name1\"/><valueString value=\"value1\"/></parameter><parameter><name value=\"name2\"/><valueString value=\"value1\"/></parameter></Parameters>", (ourRequestBodyString));
+		assertEquals(1, MY_SERVLET.ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE).size());
+		assertEquals(EncodingEnum.XML.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8, MY_SERVLET.ourRequestFirstHeaders.get(Constants.HEADER_CONTENT_TYPE).getValue().replace(";char", "; char"));
+		assertEquals("POST", MY_SERVLET.ourRequestMethod);
+		assertEquals("<Parameters xmlns=\"http://hl7.org/fhir\"><parameter><name value=\"name1\"/><valueString value=\"value1\"/></parameter><parameter><name value=\"name2\"/><valueString value=\"value1\"/></parameter></Parameters>", (MY_SERVLET.ourRequestBodyString));
 
 
 		/*
@@ -833,13 +829,13 @@ public class GenericJaxRsClientDstu2Test {
 			.encodedXml()
 			.execute();
 
-		assertEquals("http://localhost:" + ourPort + "/fhir/$SOMEOPERATION", ourRequestUri);
+		assertEquals(ourServer.getBaseUrl() + "/fhir/$SOMEOPERATION", MY_SERVLET.ourRequestUri);
 		assertEquals(respString, p.encodeResourceToString(resp));
-		assertEquals(1, ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE).size());
-		assertEquals(EncodingEnum.XML.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8, ourRequestFirstHeaders.get(Constants.HEADER_CONTENT_TYPE).getValue().replace(";char", "; char"));
-		assertEquals("POST", ourRequestMethod);
+		assertEquals(1, MY_SERVLET.ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE).size());
+		assertEquals(EncodingEnum.XML.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8, MY_SERVLET.ourRequestFirstHeaders.get(Constants.HEADER_CONTENT_TYPE).getValue().replace(";char", "; char"));
+		assertEquals("POST", MY_SERVLET.ourRequestMethod);
 		assertEquals("<Parameters xmlns=\"http://hl7.org/fhir\"><parameter><name value=\"name1\"/><valueIdentifier><system value=\"system1\"/><value value=\"value1\"/></valueIdentifier></parameter><parameter><name value=\"name2\"/><valueString value=\"value1\"/></parameter></Parameters>",
-			(ourRequestBodyString));
+			(MY_SERVLET.ourRequestBodyString));
 
 
 		/*
@@ -856,21 +852,21 @@ public class GenericJaxRsClientDstu2Test {
 			.encodedXml()
 			.execute();
 
-		assertEquals("http://localhost:" + ourPort + "/fhir/$SOMEOPERATION", ourRequestUri);
+		assertEquals(ourServer.getBaseUrl() + "/fhir/$SOMEOPERATION", MY_SERVLET.ourRequestUri);
 		assertEquals(respString, p.encodeResourceToString(resp));
-		assertEquals(1, ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE).size());
-		assertEquals(EncodingEnum.XML.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8, ourRequestFirstHeaders.get(Constants.HEADER_CONTENT_TYPE).getValue().replace(";char", "; char"));
-		assertEquals("POST", ourRequestMethod);
+		assertEquals(1, MY_SERVLET.ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE).size());
+		assertEquals(EncodingEnum.XML.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8, MY_SERVLET.ourRequestFirstHeaders.get(Constants.HEADER_CONTENT_TYPE).getValue().replace(";char", "; char"));
+		assertEquals("POST", MY_SERVLET.ourRequestMethod);
 		assertEquals(
 			"<Parameters xmlns=\"http://hl7.org/fhir\"><parameter><name value=\"name1\"/><valueIdentifier><system value=\"system1\"/><value value=\"value1\"/></valueIdentifier></parameter><parameter><name value=\"name2\"/><resource><Patient xmlns=\"http://hl7.org/fhir\"><active value=\"true\"/></Patient></resource></parameter></Parameters>",
-			(ourRequestBodyString));
+			(MY_SERVLET.ourRequestBodyString));
 
 
 	}
 
 	@Test
 	public void testOperationWithInvalidParam() {
-		IGenericClient client = ourCtx.newRestfulGenericClient("http://localhost:" + ourPort + "/fhir");
+		IGenericClient client = ourCtx.newRestfulGenericClient(ourServer.getBaseUrl() + "/fhir");
 
 		// Who knows what the heck this is!
 		IBase weirdBase = new IBase() {
@@ -928,10 +924,10 @@ public class GenericJaxRsClientDstu2Test {
 		final String respString = p.encodeResourceToString(outParams);
 
 
-		ourResponseContentType = Constants.CT_FHIR_XML + "; charset=UTF-8";
-		ourResponseBody = respString;
+		MY_SERVLET.ourResponseContentType = Constants.CT_FHIR_XML + "; charset=UTF-8";
+		MY_SERVLET.ourResponseBody = respString;
 
-		IGenericClient client = ourCtx.newRestfulGenericClient("http://localhost:" + ourPort + "/fhir");
+		IGenericClient client = ourCtx.newRestfulGenericClient(ourServer.getBaseUrl() + "/fhir");
 
 
 		client
@@ -944,7 +940,7 @@ public class GenericJaxRsClientDstu2Test {
 			.execute();
 
 
-		assertEquals("http://localhost:" + ourPort + "/fhir/Patient/1/$validate-code?code=8495-4&system=http%3A%2F%2Floinc.org", ourRequestUri);
+		assertEquals(ourServer.getBaseUrl() + "/fhir/Patient/1/$validate-code?code=8495-4&system=http%3A%2F%2Floinc.org", MY_SERVLET.ourRequestUri);
 
 
 		client
@@ -958,9 +954,9 @@ public class GenericJaxRsClientDstu2Test {
 			.execute();
 
 
-		assertEquals("http://localhost:" + ourPort + "/fhir/Patient/1/$validate-code", ourRequestUri);
-		ourLog.info(ourRequestBodyString);
-		assertEquals("<Parameters xmlns=\"http://hl7.org/fhir\"><parameter><name value=\"code\"/><valueCode value=\"8495-4\"/></parameter><parameter><name value=\"system\"/><valueUri value=\"http://loinc.org\"/></parameter></Parameters>", ourRequestBodyString);
+		assertEquals(ourServer.getBaseUrl() + "/fhir/Patient/1/$validate-code", MY_SERVLET.ourRequestUri);
+		ourLog.info(MY_SERVLET.ourRequestBodyString);
+		assertEquals("<Parameters xmlns=\"http://hl7.org/fhir\"><parameter><name value=\"code\"/><valueCode value=\"8495-4\"/></parameter><parameter><name value=\"system\"/><valueUri value=\"http://loinc.org\"/></parameter></Parameters>", MY_SERVLET.ourRequestBodyString);
 
 	}
 
@@ -979,10 +975,10 @@ public class GenericJaxRsClientDstu2Test {
 		final String respString = p.encodeResourceToString(outParams);
 
 
-		ourResponseContentType = Constants.CT_FHIR_XML + "; charset=UTF-8";
-		ourResponseBody = respString;
+		MY_SERVLET.ourResponseContentType = Constants.CT_FHIR_XML + "; charset=UTF-8";
+		MY_SERVLET.ourResponseBody = respString;
 
-		IGenericClient client = ourCtx.newRestfulGenericClient("http://localhost:" + ourPort + "/fhir");
+		IGenericClient client = ourCtx.newRestfulGenericClient(ourServer.getBaseUrl() + "/fhir");
 
 
 		Parameters resp = client
@@ -991,12 +987,12 @@ public class GenericJaxRsClientDstu2Test {
 			.named("$SOMEOPERATION")
 			.withParameters(inParams).encodedXml().execute();
 
-		assertEquals("http://localhost:" + ourPort + "/fhir/$SOMEOPERATION", ourRequestUri);
+		assertEquals(ourServer.getBaseUrl() + "/fhir/$SOMEOPERATION", MY_SERVLET.ourRequestUri);
 		assertEquals(respString, p.encodeResourceToString(resp));
-		assertEquals(1, ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE).size());
-		assertEquals(EncodingEnum.XML.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8, ourRequestFirstHeaders.get(Constants.HEADER_CONTENT_TYPE).getValue().replace(";char", "; char"));
-		assertEquals(ourRequestBodyString, reqString);
-		assertEquals("POST", ourRequestMethod);
+		assertEquals(1, MY_SERVLET.ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE).size());
+		assertEquals(EncodingEnum.XML.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8, MY_SERVLET.ourRequestFirstHeaders.get(Constants.HEADER_CONTENT_TYPE).getValue().replace(";char", "; char"));
+		assertEquals(MY_SERVLET.ourRequestBodyString, reqString);
+		assertEquals("POST", MY_SERVLET.ourRequestMethod);
 
 
 		resp = client
@@ -1005,12 +1001,12 @@ public class GenericJaxRsClientDstu2Test {
 			.named("$SOMEOPERATION")
 			.withParameters(inParams).encodedXml().execute();
 
-		assertEquals("http://localhost:" + ourPort + "/fhir/Patient/$SOMEOPERATION", ourRequestUri);
+		assertEquals(ourServer.getBaseUrl() + "/fhir/Patient/$SOMEOPERATION", MY_SERVLET.ourRequestUri);
 		assertEquals(respString, p.encodeResourceToString(resp));
-		assertEquals(1, ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE).size());
-		assertEquals(EncodingEnum.XML.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8, ourRequestFirstHeaders.get(Constants.HEADER_CONTENT_TYPE).getValue().replace(";char", "; char"));
-		assertEquals(ourRequestBodyString, reqString);
-		assertEquals("POST", ourRequestMethod);
+		assertEquals(1, MY_SERVLET.ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE).size());
+		assertEquals(EncodingEnum.XML.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8, MY_SERVLET.ourRequestFirstHeaders.get(Constants.HEADER_CONTENT_TYPE).getValue().replace(";char", "; char"));
+		assertEquals(MY_SERVLET.ourRequestBodyString, reqString);
+		assertEquals("POST", MY_SERVLET.ourRequestMethod);
 
 
 		resp = client
@@ -1021,17 +1017,17 @@ public class GenericJaxRsClientDstu2Test {
 			.encodedXml()
 			.execute();
 
-		assertEquals("http://localhost:" + ourPort + "/fhir/Patient/123/$SOMEOPERATION", ourRequestUri);
+		assertEquals(ourServer.getBaseUrl() + "/fhir/Patient/123/$SOMEOPERATION", MY_SERVLET.ourRequestUri);
 		assertEquals(respString, p.encodeResourceToString(resp));
-		assertEquals(1, ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE).size());
-		assertEquals(EncodingEnum.XML.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8, ourRequestFirstHeaders.get(Constants.HEADER_CONTENT_TYPE).getValue().replace(";char", "; char"));
-		assertEquals(ourRequestBodyString, reqString);
-		assertEquals("POST", ourRequestMethod);
+		assertEquals(1, MY_SERVLET.ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE).size());
+		assertEquals(EncodingEnum.XML.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8, MY_SERVLET.ourRequestFirstHeaders.get(Constants.HEADER_CONTENT_TYPE).getValue().replace(";char", "; char"));
+		assertEquals(MY_SERVLET.ourRequestBodyString, reqString);
+		assertEquals("POST", MY_SERVLET.ourRequestMethod);
 
 
 		resp = client.operation().onInstance(new IdDt("http://foo.com/bar/baz/Patient/123/_history/22")).named("$SOMEOPERATION").withParameters(inParams).execute();
 		// @formatter:on
-		assertEquals("http://localhost:" + ourPort + "/fhir/Patient/123/$SOMEOPERATION", ourRequestUri);
+		assertEquals(ourServer.getBaseUrl() + "/fhir/Patient/123/$SOMEOPERATION", MY_SERVLET.ourRequestUri);
 
 	}
 
@@ -1048,10 +1044,10 @@ public class GenericJaxRsClientDstu2Test {
 		final String respString = p.encodeResourceToString(outParams);
 
 
-		ourResponseContentType = Constants.CT_FHIR_XML + "; charset=UTF-8";
-		ourResponseBody = respString;
+		MY_SERVLET.ourResponseContentType = Constants.CT_FHIR_XML + "; charset=UTF-8";
+		MY_SERVLET.ourResponseBody = respString;
 
-		IGenericClient client = ourCtx.newRestfulGenericClient("http://localhost:" + ourPort + "/fhir");
+		IGenericClient client = ourCtx.newRestfulGenericClient(ourServer.getBaseUrl() + "/fhir");
 
 
 		Parameters resp = client
@@ -1060,12 +1056,12 @@ public class GenericJaxRsClientDstu2Test {
 			.named("$SOMEOPERATION")
 			.withNoParameters(Parameters.class).encodedXml().execute();
 
-		assertEquals("http://localhost:" + ourPort + "/fhir/$SOMEOPERATION", ourRequestUri);
+		assertEquals(ourServer.getBaseUrl() + "/fhir/$SOMEOPERATION", MY_SERVLET.ourRequestUri);
 		assertEquals(respString, p.encodeResourceToString(resp));
-		assertEquals(1, ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE).size());
-		assertEquals(EncodingEnum.XML.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8, ourRequestFirstHeaders.get(Constants.HEADER_CONTENT_TYPE).getValue().replace(";char", "; char"));
-		assertEquals(ourRequestBodyString, reqString);
-		assertEquals("POST", ourRequestMethod);
+		assertEquals(1, MY_SERVLET.ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE).size());
+		assertEquals(EncodingEnum.XML.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8, MY_SERVLET.ourRequestFirstHeaders.get(Constants.HEADER_CONTENT_TYPE).getValue().replace(";char", "; char"));
+		assertEquals(MY_SERVLET.ourRequestBodyString, reqString);
+		assertEquals("POST", MY_SERVLET.ourRequestMethod);
 
 
 		resp = client
@@ -1074,12 +1070,12 @@ public class GenericJaxRsClientDstu2Test {
 			.named("$SOMEOPERATION")
 			.withNoParameters(Parameters.class).encodedXml().execute();
 
-		assertEquals("http://localhost:" + ourPort + "/fhir/Patient/$SOMEOPERATION", ourRequestUri);
+		assertEquals(ourServer.getBaseUrl() + "/fhir/Patient/$SOMEOPERATION", MY_SERVLET.ourRequestUri);
 		assertEquals(respString, p.encodeResourceToString(resp));
-		assertEquals(1, ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE).size());
-		assertEquals(EncodingEnum.XML.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8, ourRequestFirstHeaders.get(Constants.HEADER_CONTENT_TYPE).getValue().replace(";char", "; char"));
-		assertEquals(ourRequestBodyString, reqString);
-		assertEquals("POST", ourRequestMethod);
+		assertEquals(1, MY_SERVLET.ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE).size());
+		assertEquals(EncodingEnum.XML.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8, MY_SERVLET.ourRequestFirstHeaders.get(Constants.HEADER_CONTENT_TYPE).getValue().replace(";char", "; char"));
+		assertEquals(MY_SERVLET.ourRequestBodyString, reqString);
+		assertEquals("POST", MY_SERVLET.ourRequestMethod);
 
 
 		resp = client
@@ -1088,12 +1084,12 @@ public class GenericJaxRsClientDstu2Test {
 			.named("$SOMEOPERATION")
 			.withNoParameters(Parameters.class).encodedXml().execute();
 
-		assertEquals("http://localhost:" + ourPort + "/fhir/Patient/123/$SOMEOPERATION", ourRequestUri);
+		assertEquals(ourServer.getBaseUrl() + "/fhir/Patient/123/$SOMEOPERATION", MY_SERVLET.ourRequestUri);
 		assertEquals(respString, p.encodeResourceToString(resp));
-		assertEquals(1, ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE).size());
-		assertEquals(EncodingEnum.XML.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8, ourRequestFirstHeaders.get(Constants.HEADER_CONTENT_TYPE).getValue().replace(";char", "; char"));
-		assertEquals(ourRequestBodyString, reqString);
-		assertEquals("POST", ourRequestMethod);
+		assertEquals(1, MY_SERVLET.ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE).size());
+		assertEquals(EncodingEnum.XML.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8, MY_SERVLET.ourRequestFirstHeaders.get(Constants.HEADER_CONTENT_TYPE).getValue().replace(";char", "; char"));
+		assertEquals(MY_SERVLET.ourRequestBodyString, reqString);
+		assertEquals("POST", MY_SERVLET.ourRequestMethod);
 
 
 		// @formatter:off
@@ -1104,22 +1100,22 @@ public class GenericJaxRsClientDstu2Test {
 			.withNoParameters(Parameters.class)
 			.execute();
 		// @formatter:on
-		assertEquals("http://localhost:" + ourPort + "/fhir/Patient/123/$SOMEOPERATION", ourRequestUri);
+		assertEquals(ourServer.getBaseUrl() + "/fhir/Patient/123/$SOMEOPERATION", MY_SERVLET.ourRequestUri);
 
 	}
 
 	@Test
 	public void testPageNext() {
 
-		ourResponseContentType = Constants.CT_FHIR_XML + "; charset=UTF-8";
-		ourResponseBody = getPatientFeedWithOneResult();
+		MY_SERVLET.ourResponseContentType = Constants.CT_FHIR_XML + "; charset=UTF-8";
+		MY_SERVLET.ourResponseBody = getPatientFeedWithOneResult();
 
-		IGenericClient client = ourCtx.newRestfulGenericClient("http://localhost:" + ourPort + "/fhir");
+		IGenericClient client = ourCtx.newRestfulGenericClient(ourServer.getBaseUrl() + "/fhir");
 
 
 		ca.uhn.fhir.model.dstu2.resource.Bundle sourceBundle = new ca.uhn.fhir.model.dstu2.resource.Bundle();
-		sourceBundle.getLinkOrCreate(IBaseBundle.LINK_PREV).setUrl("http://localhost:" + ourPort + "/fhir/prev");
-		sourceBundle.getLinkOrCreate(IBaseBundle.LINK_NEXT).setUrl("http://localhost:" + ourPort + "/fhir/next");
+		sourceBundle.getLinkOrCreate(IBaseBundle.LINK_PREV).setUrl(ourServer.getBaseUrl() + "/fhir/prev");
+		sourceBundle.getLinkOrCreate(IBaseBundle.LINK_NEXT).setUrl(ourServer.getBaseUrl() + "/fhir/next");
 
 
 		ca.uhn.fhir.model.dstu2.resource.Bundle resp = client
@@ -1129,14 +1125,14 @@ public class GenericJaxRsClientDstu2Test {
 
 
 		assertEquals(1, resp.getEntry().size());
-		assertEquals("http://localhost:" + ourPort + "/fhir/next", ourRequestUri);
+		assertEquals(ourServer.getBaseUrl() + "/fhir/next", MY_SERVLET.ourRequestUri);
 
 
 	}
 
 	@Test
 	public void testPageNextNoLink() {
-		IGenericClient client = ourCtx.newRestfulGenericClient("http://localhost:" + ourPort + "/fhir");
+		IGenericClient client = ourCtx.newRestfulGenericClient(ourServer.getBaseUrl() + "/fhir");
 
 		ca.uhn.fhir.model.dstu2.resource.Bundle sourceBundle = new ca.uhn.fhir.model.dstu2.resource.Bundle();
 		try {
@@ -1150,14 +1146,14 @@ public class GenericJaxRsClientDstu2Test {
 	public void testPagePrev() {
 
 
-		ourResponseContentType = Constants.CT_FHIR_XML + "; charset=UTF-8";
-		ourResponseBody = getPatientFeedWithOneResult();
+		MY_SERVLET.ourResponseContentType = Constants.CT_FHIR_XML + "; charset=UTF-8";
+		MY_SERVLET.ourResponseBody = getPatientFeedWithOneResult();
 
-		IGenericClient client = ourCtx.newRestfulGenericClient("http://localhost:" + ourPort + "/fhir");
+		IGenericClient client = ourCtx.newRestfulGenericClient(ourServer.getBaseUrl() + "/fhir");
 
 
 		ca.uhn.fhir.model.dstu2.resource.Bundle sourceBundle = new ca.uhn.fhir.model.dstu2.resource.Bundle();
-		sourceBundle.getLinkOrCreate("previous").setUrl("http://localhost:" + ourPort + "/fhir/prev");
+		sourceBundle.getLinkOrCreate("previous").setUrl(ourServer.getBaseUrl() + "/fhir/prev");
 
 
 		ca.uhn.fhir.model.dstu2.resource.Bundle resp = client
@@ -1167,7 +1163,7 @@ public class GenericJaxRsClientDstu2Test {
 
 
 		assertEquals(1, resp.getEntry().size());
-		assertEquals("http://localhost:" + ourPort + "/fhir/prev", ourRequestUri);
+		assertEquals(ourServer.getBaseUrl() + "/fhir/prev", MY_SERVLET.ourRequestUri);
 
 
 		/*
@@ -1175,7 +1171,7 @@ public class GenericJaxRsClientDstu2Test {
 		 */
 
 		sourceBundle = new ca.uhn.fhir.model.dstu2.resource.Bundle();
-		sourceBundle.getLinkOrCreate("prev").setUrl("http://localhost:" + ourPort + "/fhir/prev");
+		sourceBundle.getLinkOrCreate("prev").setUrl(ourServer.getBaseUrl() + "/fhir/prev");
 
 
 		resp = client
@@ -1185,7 +1181,7 @@ public class GenericJaxRsClientDstu2Test {
 
 
 		assertEquals(1, resp.getEntry().size());
-		assertEquals("http://localhost:" + ourPort + "/fhir/prev", ourRequestUri);
+		assertEquals(ourServer.getBaseUrl() + "/fhir/prev", MY_SERVLET.ourRequestUri);
 
 
 	}
@@ -1197,16 +1193,16 @@ public class GenericJaxRsClientDstu2Test {
 		patient.addName().addFamily("FAM");
 		final String respString = ourCtx.newXmlParser().encodeResourceToString(patient);
 
-		ourResponseContentType = Constants.CT_FHIR_XML + "; charset=UTF-8";
-		ourResponseBody = respString;
+		MY_SERVLET.ourResponseContentType = Constants.CT_FHIR_XML + "; charset=UTF-8";
+		MY_SERVLET.ourResponseBody = respString;
 
-		IGenericClient client = ourCtx.newRestfulGenericClient("http://localhost:" + ourPort + "/fhir");
+		IGenericClient client = ourCtx.newRestfulGenericClient(ourServer.getBaseUrl() + "/fhir");
 
 		Patient response;
 
 
-		response = (Patient) client.read(new UriDt("http://localhost:" + ourPort + "/fhir/Patient/123"));
-		assertEquals("http://localhost:" + ourPort + "/fhir/Patient/123", ourRequestUri);
+		response = (Patient) client.read(new UriDt(ourServer.getBaseUrl() + "/fhir/Patient/123"));
+		assertEquals(ourServer.getBaseUrl() + "/fhir/Patient/123", MY_SERVLET.ourRequestUri);
 		assertEquals("FAM", response.getName().get(0).getFamily().get(0).getValue());
 	}
 
@@ -1217,15 +1213,15 @@ public class GenericJaxRsClientDstu2Test {
 		patient.addName().addFamily("FAM");
 		final String respString = ourCtx.newXmlParser().encodeResourceToString(patient);
 
-		ourResponseContentType = Constants.CT_FHIR_XML + "; charset=UTF-8";
-		ourResponseBody = respString;
+		MY_SERVLET.ourResponseContentType = Constants.CT_FHIR_XML + "; charset=UTF-8";
+		MY_SERVLET.ourResponseBody = respString;
 
-		IGenericClient client = ourCtx.newRestfulGenericClient("http://localhost:" + ourPort + "/fhir");
+		IGenericClient client = ourCtx.newRestfulGenericClient(ourServer.getBaseUrl() + "/fhir");
 
 		Patient response;
 
-		response = client.read().resource(Patient.class).withUrl(new IdDt("http://localhost:" + ourPort + "/AAA/Patient/123")).execute();
-		assertEquals("http://localhost:" + ourPort + "/AAA/Patient/123", ourRequestUri);
+		response = client.read().resource(Patient.class).withUrl(new IdDt(ourServer.getBaseUrl() + "/AAA/Patient/123")).execute();
+		assertEquals(ourServer.getBaseUrl() + "/AAA/Patient/123", MY_SERVLET.ourRequestUri);
 		assertEquals("FAM", response.getName().get(0).getFamily().get(0).getValue());
 	}
 
@@ -1248,10 +1244,10 @@ public class GenericJaxRsClientDstu2Test {
 			"</Bundle>";
 
 
-		ourResponseContentType = Constants.CT_FHIR_XML + "; charset=UTF-8";
-		ourResponseBody = input;
+		MY_SERVLET.ourResponseContentType = Constants.CT_FHIR_XML + "; charset=UTF-8";
+		MY_SERVLET.ourResponseBody = input;
 
-		IGenericClient client = ourCtx.newRestfulGenericClient("http://localhost:" + ourPort + "/fhir");
+		IGenericClient client = ourCtx.newRestfulGenericClient(ourServer.getBaseUrl() + "/fhir");
 
 		ca.uhn.fhir.model.dstu2.resource.Bundle response;
 
@@ -1269,10 +1265,10 @@ public class GenericJaxRsClientDstu2Test {
 		String msg = "{\"resourceType\":\"Patient\",\"id\":\"1\",\"meta\":{\"versionId\":\"1\",\"lastUpdated\":\"2014-12-20T18:41:29.706-05:00\"},\"identifier\":[{\"system\":\"urn:MultiFhirVersionTest\",\"value\":\"testSubmitPatient01\"}]}";
 
 
-		ourResponseContentType = Constants.CT_FHIR_JSON + "; charset=UTF-8";
-		ourResponseBody = msg;
+		MY_SERVLET.ourResponseContentType = Constants.CT_FHIR_JSON + "; charset=UTF-8";
+		MY_SERVLET.ourResponseBody = msg;
 
-		IGenericClient client = ourCtx.newRestfulGenericClient("http://localhost:" + ourPort + "/fhir");
+		IGenericClient client = ourCtx.newRestfulGenericClient(ourServer.getBaseUrl() + "/fhir");
 
 		IBaseResource response = client.read()
 			.resource("Patient")
@@ -1280,7 +1276,7 @@ public class GenericJaxRsClientDstu2Test {
 			.elementsSubset("name", "identifier")
 			.execute();
 
-		assertThat(ourRequestUri, either(equalTo("http://localhost:" + ourPort + "/fhir/Patient/123?_elements=name%2Cidentifier")).or(equalTo("http://localhost:" + ourPort + "/fhir/Patient/123?_elements=identifier%2Cname")));
+		assertThat(MY_SERVLET.ourRequestUri, either(equalTo(ourServer.getBaseUrl() + "/fhir/Patient/123?_elements=name%2Cidentifier")).or(equalTo(ourServer.getBaseUrl() + "/fhir/Patient/123?_elements=identifier%2Cname")));
 		assertEquals(Patient.class, response.getClass());
 
 	}
@@ -1290,11 +1286,11 @@ public class GenericJaxRsClientDstu2Test {
 		String msg = "<>>>><<<<>";
 
 
-		ourResponseContentType = Constants.CT_HTML + "; charset=UTF-8";
-		ourResponseBody = msg;
+		MY_SERVLET.ourResponseContentType = Constants.CT_HTML + "; charset=UTF-8";
+		MY_SERVLET.ourResponseBody = msg;
 
 
-		IGenericClient client = ourCtx.newRestfulGenericClient("http://localhost:" + ourPort + "/fhir");
+		IGenericClient client = ourCtx.newRestfulGenericClient(ourServer.getBaseUrl() + "/fhir");
 
 
 		try {
@@ -1314,11 +1310,11 @@ public class GenericJaxRsClientDstu2Test {
 		String msg = "<div>HELP IM A DIV</div>";
 
 
-		ourResponseContentType = Constants.CT_HTML + "; charset=UTF-8";
-		ourResponseBody = msg;
+		MY_SERVLET.ourResponseContentType = Constants.CT_HTML + "; charset=UTF-8";
+		MY_SERVLET.ourResponseBody = msg;
 
 
-		IGenericClient client = ourCtx.newRestfulGenericClient("http://localhost:" + ourPort + "/fhir");
+		IGenericClient client = ourCtx.newRestfulGenericClient(ourServer.getBaseUrl() + "/fhir");
 
 		Patient response = client.read()
 			.resource(Patient.class)
@@ -1326,7 +1322,7 @@ public class GenericJaxRsClientDstu2Test {
 			.summaryMode(SummaryEnum.TEXT)
 			.execute();
 
-		assertEquals("http://localhost:" + ourPort + "/fhir/Patient/123?_summary=text", ourRequestUri);
+		assertEquals(ourServer.getBaseUrl() + "/fhir/Patient/123?_summary=text", MY_SERVLET.ourRequestUri);
 		assertEquals(Patient.class, response.getClass());
 		assertEquals("<div xmlns=\"http://www.w3.org/1999/xhtml\">HELP IM A DIV</div>", response.getText().getDiv().getValueAsString());
 
@@ -1337,11 +1333,11 @@ public class GenericJaxRsClientDstu2Test {
 		String msg = "{\"resourceType\":\"Bundle\",\"id\":null,\"base\":\"http://localhost:57931/fhir/contextDev\",\"total\":1,\"link\":[{\"relation\":\"self\",\"url\":\"http://localhost:57931/fhir/contextDev/Patient?identifier=urn%3AMultiFhirVersionTest%7CtestSubmitPatient01&_format=json\"}],\"entry\":[{\"resource\":{\"resourceType\":\"Patient\",\"id\":\"1\",\"meta\":{\"versionId\":\"1\",\"lastUpdated\":\"2014-12-20T18:41:29.706-05:00\"},\"identifier\":[{\"system\":\"urn:MultiFhirVersionTest\",\"value\":\"testSubmitPatient01\"}]}}]}";
 
 
-		ourResponseContentType = Constants.CT_FHIR_JSON + "; charset=UTF-8";
-		ourResponseBody = msg;
+		MY_SERVLET.ourResponseContentType = Constants.CT_FHIR_JSON + "; charset=UTF-8";
+		MY_SERVLET.ourResponseBody = msg;
 
 
-		IGenericClient client = ourCtx.newRestfulGenericClient("http://localhost:" + ourPort + "/fhir");
+		IGenericClient client = ourCtx.newRestfulGenericClient(ourServer.getBaseUrl() + "/fhir");
 
 		Bundle response = client.search()
 			.forResource("Patient")
@@ -1349,7 +1345,7 @@ public class GenericJaxRsClientDstu2Test {
 			.returnBundle(Bundle.class)
 			.execute();
 
-		assertEquals("http://localhost:" + ourPort + "/fhir/Patient?name=james", ourRequestUri);
+		assertEquals(ourServer.getBaseUrl() + "/fhir/Patient?name=james", MY_SERVLET.ourRequestUri);
 		assertEquals(Patient.class, response.getEntry().get(0).getResource().getClass());
 
 	}
@@ -1360,19 +1356,19 @@ public class GenericJaxRsClientDstu2Test {
 		final String msg = getPatientFeedWithOneResult();
 
 
-		ourResponseContentType = Constants.CT_FHIR_XML + "; charset=UTF-8";
-		ourResponseBody = msg;
+		MY_SERVLET.ourResponseContentType = Constants.CT_FHIR_XML + "; charset=UTF-8";
+		MY_SERVLET.ourResponseBody = msg;
 
-		IGenericClient client = ourCtx.newRestfulGenericClient("http://localhost:" + ourPort + "/fhir");
+		IGenericClient client = ourCtx.newRestfulGenericClient(ourServer.getBaseUrl() + "/fhir");
 
 
 		ca.uhn.fhir.model.dstu2.resource.Bundle response = client.search()
-			.byUrl("http://localhost:" + ourPort + "/AAA?name=http://foo|bar")
+			.byUrl(ourServer.getBaseUrl() + "/AAA?name=http://foo|bar")
 			.encodedJson()
 			.returnBundle(ca.uhn.fhir.model.dstu2.resource.Bundle.class)
 			.execute();
 
-		assertEquals("http://localhost:" + ourPort + "/AAA?name=http%3A//foo%7Cbar&_format=json", ourRequestUri);
+		assertEquals(ourServer.getBaseUrl() + "/AAA?name=http%3A//foo%7Cbar&_format=json", MY_SERVLET.ourRequestUri);
 		assertNotNull(response);
 
 
@@ -1382,7 +1378,7 @@ public class GenericJaxRsClientDstu2Test {
 			.returnBundle(ca.uhn.fhir.model.dstu2.resource.Bundle.class)
 			.execute();
 
-		assertEquals("http://localhost:" + ourPort + "/fhir/Patient?name=http%3A//foo%7Cbar&_format=json", ourRequestUri);
+		assertEquals(ourServer.getBaseUrl() + "/fhir/Patient?name=http%3A//foo%7Cbar&_format=json", MY_SERVLET.ourRequestUri);
 		assertNotNull(response);
 
 
@@ -1392,7 +1388,7 @@ public class GenericJaxRsClientDstu2Test {
 			.returnBundle(ca.uhn.fhir.model.dstu2.resource.Bundle.class)
 			.execute();
 
-		assertEquals("http://localhost:" + ourPort + "/fhir/Patient?name=http%3A//foo%7Cbar&_format=json", ourRequestUri);
+		assertEquals(ourServer.getBaseUrl() + "/fhir/Patient?name=http%3A//foo%7Cbar&_format=json", MY_SERVLET.ourRequestUri);
 		assertNotNull(response);
 
 
@@ -1401,7 +1397,7 @@ public class GenericJaxRsClientDstu2Test {
 			.returnBundle(ca.uhn.fhir.model.dstu2.resource.Bundle.class)
 			.execute();
 
-		assertEquals("http://localhost:" + ourPort + "/fhir/Patient", ourRequestUri);
+		assertEquals(ourServer.getBaseUrl() + "/fhir/Patient", MY_SERVLET.ourRequestUri);
 		assertNotNull(response);
 
 
@@ -1410,7 +1406,7 @@ public class GenericJaxRsClientDstu2Test {
 			.returnBundle(ca.uhn.fhir.model.dstu2.resource.Bundle.class)
 			.execute();
 
-		assertEquals("http://localhost:" + ourPort + "/fhir/Patient", ourRequestUri);
+		assertEquals(ourServer.getBaseUrl() + "/fhir/Patient", MY_SERVLET.ourRequestUri);
 		assertNotNull(response);
 
 
@@ -1429,11 +1425,11 @@ public class GenericJaxRsClientDstu2Test {
 		String msg = IOUtils.toString(GenericJaxRsClientDstu2Test.class.getResourceAsStream("/bundle_orion.xml"));
 
 
-		ourResponseContentType = Constants.CT_FHIR_XML + "; charset=UTF-8";
-		ourResponseBody = msg;
+		MY_SERVLET.ourResponseContentType = Constants.CT_FHIR_XML + "; charset=UTF-8";
+		MY_SERVLET.ourResponseBody = msg;
 
 
-		IGenericClient client = ourCtx.newRestfulGenericClient("http://localhost:" + ourPort + "/fhir");
+		IGenericClient client = ourCtx.newRestfulGenericClient(ourServer.getBaseUrl() + "/fhir");
 
 
 		ca.uhn.fhir.model.dstu2.resource.Bundle response = client.search()
@@ -1458,11 +1454,11 @@ public class GenericJaxRsClientDstu2Test {
 		String msg = "{\"resourceType\":\"Bundle\",\"id\":null,\"base\":\"http://localhost:57931/fhir/contextDev\",\"total\":1,\"link\":[{\"relation\":\"self\",\"url\":\"http://localhost:57931/fhir/contextDev/Patient?identifier=urn%3AMultiFhirVersionTest%7CtestSubmitPatient01&_format=json\"}],\"entry\":[{\"resource\":{\"resourceType\":\"Patient\",\"id\":\"1\",\"meta\":{\"versionId\":\"1\",\"lastUpdated\":\"2014-12-20T18:41:29.706-05:00\"},\"identifier\":[{\"system\":\"urn:MultiFhirVersionTest\",\"value\":\"testSubmitPatient01\"}]}}]}";
 
 
-		ourResponseContentType = Constants.CT_FHIR_JSON + "; charset=UTF-8";
-		ourResponseBody = msg;
+		MY_SERVLET.ourResponseContentType = Constants.CT_FHIR_JSON + "; charset=UTF-8";
+		MY_SERVLET.ourResponseBody = msg;
 
 
-		IGenericClient client = ourCtx.newRestfulGenericClient("http://localhost:" + ourPort + "/fhir");
+		IGenericClient client = ourCtx.newRestfulGenericClient(ourServer.getBaseUrl() + "/fhir");
 
 
 		Bundle response = client.search()
@@ -1473,7 +1469,7 @@ public class GenericJaxRsClientDstu2Test {
 			.execute();
 
 
-		assertThat(ourRequestUri, either(equalTo("http://localhost:" + ourPort + "/fhir/Patient?name=james&_elements=name%2Cidentifier")).or(equalTo("http://localhost:" + ourPort + "/fhir/Patient?name=james&_elements=identifier%2Cname")));
+		assertThat(MY_SERVLET.ourRequestUri, either(equalTo(ourServer.getBaseUrl() + "/fhir/Patient?name=james&_elements=name%2Cidentifier")).or(equalTo(ourServer.getBaseUrl() + "/fhir/Patient?name=james&_elements=identifier%2Cname")));
 		assertEquals(Patient.class, response.getEntry().get(0).getResource().getClass());
 
 	}
@@ -1483,11 +1479,11 @@ public class GenericJaxRsClientDstu2Test {
 		String msg = "{\"resourceType\":\"Bundle\",\"id\":null,\"base\":\"http://localhost:57931/fhir/contextDev\",\"total\":1,\"link\":[{\"relation\":\"self\",\"url\":\"http://localhost:57931/fhir/contextDev/Patient?identifier=urn%3AMultiFhirVersionTest%7CtestSubmitPatient01&_format=json\"}],\"entry\":[{\"resource\":{\"resourceType\":\"Patient\",\"id\":\"1\",\"meta\":{\"versionId\":\"1\",\"lastUpdated\":\"2014-12-20T18:41:29.706-05:00\"},\"identifier\":[{\"system\":\"urn:MultiFhirVersionTest\",\"value\":\"testSubmitPatient01\"}]}}]}";
 
 
-		ourResponseContentType = Constants.CT_FHIR_JSON + "; charset=UTF-8";
-		ourResponseBody = msg;
+		MY_SERVLET.ourResponseContentType = Constants.CT_FHIR_JSON + "; charset=UTF-8";
+		MY_SERVLET.ourResponseBody = msg;
 
 
-		IGenericClient client = ourCtx.newRestfulGenericClient("http://localhost:" + ourPort + "/fhir");
+		IGenericClient client = ourCtx.newRestfulGenericClient(ourServer.getBaseUrl() + "/fhir");
 
 
 		Bundle response = client.search()
@@ -1499,18 +1495,18 @@ public class GenericJaxRsClientDstu2Test {
 			.execute();
 
 
-		assertEquals("http://localhost:" + ourPort + "/fhir/Patient/_search?_elements=identifier%2Cname", ourRequestUri);
+		assertEquals(ourServer.getBaseUrl() + "/fhir/Patient/_search?_elements=identifier%2Cname", MY_SERVLET.ourRequestUri);
 
-		//		assertThat(ourRequestUri,
-		//				either(equalTo("http://localhost:" + ourPort + "/fhir/Patient?name=james&_elements=name%2Cidentifier")).or(equalTo("http://localhost:" + ourPort + "/fhir/Patient?name=james&_elements=identifier%2Cname")));
+		//		assertThat(MY_SERVLET.ourRequestUri,
+		//				either(equalTo(ourServer.getBaseUrl() + "/fhir/Patient?name=james&_elements=name%2Cidentifier")).or(equalTo(ourServer.getBaseUrl() + "/fhir/Patient?name=james&_elements=identifier%2Cname")));
 
 		assertEquals(Patient.class, response.getEntry().get(0).getResource().getClass());
 
-		assertEquals("name=james", ourRequestBodyString);
+		assertEquals("name=james", MY_SERVLET.ourRequestBodyString);
 
-		assertEquals("application/x-www-form-urlencoded", ourRequestContentType.replace(";char", "; char").toLowerCase());
-		assertEquals(Constants.HEADER_ACCEPT_VALUE_XML_OR_JSON_LEGACY, ourRequestFirstHeaders.get("Accept").getValue());
-		assertThat(ourRequestFirstHeaders.get("User-Agent").getValue(), not(emptyString()));
+		assertEquals("application/x-www-form-urlencoded", MY_SERVLET.ourRequestContentType.replace(";char", "; char").toLowerCase());
+		assertEquals(Constants.HEADER_ACCEPT_VALUE_XML_OR_JSON_LEGACY, MY_SERVLET.ourRequestFirstHeaders.get("Accept").getValue());
+		assertThat(MY_SERVLET.ourRequestFirstHeaders.get("User-Agent").getValue(), not(emptyString()));
 	}
 
 	@Test
@@ -1518,11 +1514,11 @@ public class GenericJaxRsClientDstu2Test {
 		String msg = "{\"resourceType\":\"Bundle\",\"id\":null,\"base\":\"http://localhost:57931/fhir/contextDev\",\"total\":1,\"link\":[{\"relation\":\"self\",\"url\":\"http://localhost:57931/fhir/contextDev/Patient?identifier=urn%3AMultiFhirVersionTest%7CtestSubmitPatient01&_format=json\"}],\"entry\":[{\"resource\":{\"resourceType\":\"Patient\",\"id\":\"1\",\"meta\":{\"versionId\":\"1\",\"lastUpdated\":\"2014-12-20T18:41:29.706-05:00\"},\"identifier\":[{\"system\":\"urn:MultiFhirVersionTest\",\"value\":\"testSubmitPatient01\"}]}}]}";
 
 
-		ourResponseContentType = Constants.CT_FHIR_JSON + "; charset=UTF-8";
-		ourResponseBody = msg;
+		MY_SERVLET.ourResponseContentType = Constants.CT_FHIR_JSON + "; charset=UTF-8";
+		MY_SERVLET.ourResponseBody = msg;
 
 
-		IGenericClient client = ourCtx.newRestfulGenericClient("http://localhost:" + ourPort + "/fhir");
+		IGenericClient client = ourCtx.newRestfulGenericClient(ourServer.getBaseUrl() + "/fhir");
 
 
 		Bundle response = client.search()
@@ -1535,18 +1531,18 @@ public class GenericJaxRsClientDstu2Test {
 			.execute();
 
 
-		assertThat(ourRequestUri, containsString("http://localhost:" + ourPort + "/fhir/Patient/_search?"));
-		assertThat(ourRequestUri, containsString("_elements=identifier%2Cname"));
+		assertThat(MY_SERVLET.ourRequestUri, containsString(ourServer.getBaseUrl() + "/fhir/Patient/_search?"));
+		assertThat(MY_SERVLET.ourRequestUri, containsString("_elements=identifier%2Cname"));
 
-		//		assertThat(ourRequestUri,
-		//				either(equalTo("http://localhost:" + ourPort + "/fhir/Patient?name=james&_elements=name%2Cidentifier")).or(equalTo("http://localhost:" + ourPort + "/fhir/Patient?name=james&_elements=identifier%2Cname")));
+		//		assertThat(MY_SERVLET.ourRequestUri,
+		//				either(equalTo(ourServer.getBaseUrl() + "/fhir/Patient?name=james&_elements=name%2Cidentifier")).or(equalTo(ourServer.getBaseUrl() + "/fhir/Patient?name=james&_elements=identifier%2Cname")));
 
 		assertEquals(Patient.class, response.getEntry().get(0).getResource().getClass());
 
-		assertEquals("name=james", ourRequestBodyString);
+		assertEquals("name=james", MY_SERVLET.ourRequestBodyString);
 
-		assertEquals("application/x-www-form-urlencoded", ourRequestContentType);
-		assertEquals(Constants.CT_FHIR_JSON, ourRequestFirstHeaders.get("Accept").getValue());
+		assertEquals("application/x-www-form-urlencoded", MY_SERVLET.ourRequestContentType);
+		assertEquals(Constants.CT_FHIR_JSON, MY_SERVLET.ourRequestFirstHeaders.get("Accept").getValue());
 	}
 
 	@Test
@@ -1554,11 +1550,11 @@ public class GenericJaxRsClientDstu2Test {
 		String msg = "{\"resourceType\":\"Bundle\",\"id\":null,\"base\":\"http://localhost:57931/fhir/contextDev\",\"total\":1,\"link\":[{\"relation\":\"self\",\"url\":\"http://localhost:57931/fhir/contextDev/Patient?identifier=urn%3AMultiFhirVersionTest%7CtestSubmitPatient01&_format=json\"}],\"entry\":[{\"resource\":{\"resourceType\":\"Patient\",\"id\":\"1\",\"meta\":{\"versionId\":\"1\",\"lastUpdated\":\"2014-12-20T18:41:29.706-05:00\"},\"identifier\":[{\"system\":\"urn:MultiFhirVersionTest\",\"value\":\"testSubmitPatient01\"}]}}]}";
 
 
-		ourResponseContentType = Constants.CT_FHIR_JSON + "; charset=UTF-8";
-		ourResponseBody = msg;
+		MY_SERVLET.ourResponseContentType = Constants.CT_FHIR_JSON + "; charset=UTF-8";
+		MY_SERVLET.ourResponseBody = msg;
 
 
-		IGenericClient client = ourCtx.newRestfulGenericClient("http://localhost:" + ourPort + "/fhir");
+		IGenericClient client = ourCtx.newRestfulGenericClient(ourServer.getBaseUrl() + "/fhir");
 
 
 		Bundle response = client.search()
@@ -1569,7 +1565,7 @@ public class GenericJaxRsClientDstu2Test {
 			.execute();
 
 
-		assertEquals("http://localhost:" + ourPort + "/fhir/Patient?name=james&_lastUpdated=ge2011-01-01&_lastUpdated=le2012-01-01", ourRequestUri);
+		assertEquals(ourServer.getBaseUrl() + "/fhir/Patient?name=james&_lastUpdated=ge2011-01-01&_lastUpdated=le2012-01-01", MY_SERVLET.ourRequestUri);
 		assertEquals(Patient.class, response.getEntry().get(0).getResource().getClass());
 
 	}
@@ -1579,11 +1575,11 @@ public class GenericJaxRsClientDstu2Test {
 		String msg = "{\"resourceType\":\"Bundle\",\"id\":null,\"base\":\"http://localhost:57931/fhir/contextDev\",\"total\":1,\"link\":[{\"relation\":\"self\",\"url\":\"http://localhost:57931/fhir/contextDev/Patient?identifier=urn%3AMultiFhirVersionTest%7CtestSubmitPatient01&_format=json\"}],\"entry\":[{\"resource\":{\"resourceType\":\"Patient\",\"id\":\"1\",\"meta\":{\"versionId\":\"1\",\"lastUpdated\":\"2014-12-20T18:41:29.706-05:00\"},\"identifier\":[{\"system\":\"urn:MultiFhirVersionTest\",\"value\":\"testSubmitPatient01\"}]}}]}";
 
 
-		ourResponseContentType = Constants.CT_FHIR_JSON + "; charset=UTF-8";
-		ourResponseBody = msg;
+		MY_SERVLET.ourResponseContentType = Constants.CT_FHIR_JSON + "; charset=UTF-8";
+		MY_SERVLET.ourResponseBody = msg;
 
 
-		IGenericClient client = ourCtx.newRestfulGenericClient("http://localhost:" + ourPort + "/fhir");
+		IGenericClient client = ourCtx.newRestfulGenericClient(ourServer.getBaseUrl() + "/fhir");
 
 
 		Bundle response = client.search()
@@ -1596,7 +1592,7 @@ public class GenericJaxRsClientDstu2Test {
 			.execute();
 
 
-		assertEquals("http://localhost:" + ourPort + "/fhir/Patient?_security=system1%7Ccode1&_security=system2%7Ccode2&_profile=http%3A%2F%2Ffoo1&_profile=http%3A%2F%2Ffoo2", ourRequestUri);
+		assertEquals(ourServer.getBaseUrl() + "/fhir/Patient?_security=system1%7Ccode1&_security=system2%7Ccode2&_profile=http%3A%2F%2Ffoo1&_profile=http%3A%2F%2Ffoo2", MY_SERVLET.ourRequestUri);
 		assertEquals(Patient.class, response.getEntry().get(0).getResource().getClass());
 
 	}
@@ -1608,11 +1604,11 @@ public class GenericJaxRsClientDstu2Test {
 		String msg = getPatientFeedWithOneResult();
 
 
-		ourResponseContentType = Constants.CT_FHIR_XML + "; charset=UTF-8";
-		ourResponseBody = msg;
+		MY_SERVLET.ourResponseContentType = Constants.CT_FHIR_XML + "; charset=UTF-8";
+		MY_SERVLET.ourResponseBody = msg;
 
 
-		IGenericClient client = ourCtx.newRestfulGenericClient("http://localhost:" + ourPort + "/fhir");
+		IGenericClient client = ourCtx.newRestfulGenericClient(ourServer.getBaseUrl() + "/fhir");
 
 
 		Bundle response = client.search()
@@ -1623,7 +1619,7 @@ public class GenericJaxRsClientDstu2Test {
 			.execute();
 
 
-		assertEquals("http://localhost:" + ourPort + "/fhir/Patient?_revinclude=Provenance%3Atarget&_format=json", ourRequestUri);
+		assertEquals(ourServer.getBaseUrl() + "/fhir/Patient?_revinclude=Provenance%3Atarget&_format=json", MY_SERVLET.ourRequestUri);
 
 	}
 
@@ -1632,11 +1628,11 @@ public class GenericJaxRsClientDstu2Test {
 		String msg = "{\"resourceType\":\"Bundle\",\"id\":null,\"base\":\"http://localhost:57931/fhir/contextDev\",\"total\":1,\"link\":[{\"relation\":\"self\",\"url\":\"http://localhost:57931/fhir/contextDev/Patient?identifier=urn%3AMultiFhirVersionTest%7CtestSubmitPatient01&_format=json\"}],\"entry\":[{\"resource\":{\"resourceType\":\"Patient\",\"id\":\"1\",\"meta\":{\"versionId\":\"1\",\"lastUpdated\":\"2014-12-20T18:41:29.706-05:00\"},\"identifier\":[{\"system\":\"urn:MultiFhirVersionTest\",\"value\":\"testSubmitPatient01\"}]}}]}";
 
 
-		ourResponseContentType = Constants.CT_FHIR_JSON + "; charset=UTF-8";
-		ourResponseBody = msg;
+		MY_SERVLET.ourResponseContentType = Constants.CT_FHIR_JSON + "; charset=UTF-8";
+		MY_SERVLET.ourResponseBody = msg;
 
 
-		IGenericClient client = ourCtx.newRestfulGenericClient("http://localhost:" + ourPort + "/fhir");
+		IGenericClient client = ourCtx.newRestfulGenericClient(ourServer.getBaseUrl() + "/fhir");
 
 
 		Bundle response = client.search()
@@ -1647,7 +1643,7 @@ public class GenericJaxRsClientDstu2Test {
 			.execute();
 
 
-		assertEquals("http://localhost:" + ourPort + "/fhir/Patient?name=james&_summary=false", ourRequestUri);
+		assertEquals(ourServer.getBaseUrl() + "/fhir/Patient?name=james&_summary=false", MY_SERVLET.ourRequestUri);
 		assertEquals(Patient.class, response.getEntry().get(0).getResource().getClass());
 
 	}
@@ -1661,12 +1657,12 @@ public class GenericJaxRsClientDstu2Test {
 		String respString = ourCtx.newJsonParser().encodeResourceToString(resp);
 
 
-		ourResponseContentType = Constants.CT_FHIR_JSON + "; charset=UTF-8";
-		ourResponseBody = respString;
+		MY_SERVLET.ourResponseContentType = Constants.CT_FHIR_JSON + "; charset=UTF-8";
+		MY_SERVLET.ourResponseBody = respString;
 
-		IGenericClient client = ourCtx.newRestfulGenericClient("http://localhost:" + ourPort + "/fhir");
+		IGenericClient client = ourCtx.newRestfulGenericClient(ourServer.getBaseUrl() + "/fhir");
 
-		List<IBaseResource> input = new ArrayList<IBaseResource>();
+		List<IBaseResource> input = new ArrayList<>();
 
 		Patient p1 = new Patient(); // No ID
 		p1.addName().addFamily("PATIENT1");
@@ -1684,10 +1680,10 @@ public class GenericJaxRsClientDstu2Test {
 			.execute();
 
 
-		assertEquals("http://localhost:" + ourPort + "/fhir", ourRequestUri);
+		assertEquals(ourServer.getBaseUrl() + "/fhir", MY_SERVLET.ourRequestUri);
 		assertEquals(2, response.size());
 
-		String requestString = ourRequestBodyString;
+		String requestString = MY_SERVLET.ourRequestBodyString;
 		ca.uhn.fhir.model.dstu2.resource.Bundle requestBundle = ourCtx.newJsonParser().parseResource(ca.uhn.fhir.model.dstu2.resource.Bundle.class, requestString);
 		assertEquals(2, requestBundle.getEntry().size());
 		assertEquals("POST", requestBundle.getEntry().get(0).getRequest().getMethod());
@@ -1720,10 +1716,10 @@ public class GenericJaxRsClientDstu2Test {
 		resp.addEntry().getResponse().setLocation("Patient/2/_history/2");
 
 
-		ourResponseContentType = Constants.CT_FHIR_JSON + "; charset=UTF-8";
-		ourResponseBody = reqString;
+		MY_SERVLET.ourResponseContentType = Constants.CT_FHIR_JSON + "; charset=UTF-8";
+		MY_SERVLET.ourResponseBody = reqString;
 
-		IGenericClient client = ourCtx.newRestfulGenericClient("http://localhost:" + ourPort + "/fhir");
+		IGenericClient client = ourCtx.newRestfulGenericClient(ourServer.getBaseUrl() + "/fhir");
 
 
 		String response = client.transaction()
@@ -1731,9 +1727,9 @@ public class GenericJaxRsClientDstu2Test {
 			.execute();
 
 
-		assertEquals("http://localhost:" + ourPort + "/fhir/", ourRequestUri);
+		assertEquals(ourServer.getBaseUrl() + "/fhir/", MY_SERVLET.ourRequestUri);
 		assertThat(response, containsString("\"Bundle\""));
-		assertEquals("application/json+fhir;charset=UTF-8", ourRequestFirstHeaders.get("Content-Type").getValue());
+		assertEquals("application/json+fhir;charset=UTF-8", MY_SERVLET.ourRequestFirstHeaders.get("Content-Type").getValue());
 
 
 		response = client.transaction()
@@ -1742,8 +1738,8 @@ public class GenericJaxRsClientDstu2Test {
 			.execute();
 
 
-		assertEquals("http://localhost:" + ourPort + "/fhir/", ourRequestUri);
-		assertEquals("application/xml+fhir;charset=UTF-8", ourRequestFirstHeaders.get("Content-Type").getValue());
+		assertEquals(ourServer.getBaseUrl() + "/fhir/", MY_SERVLET.ourRequestUri);
+		assertEquals("application/xml+fhir;charset=UTF-8", MY_SERVLET.ourRequestFirstHeaders.get("Content-Type").getValue());
 
 	}
 
@@ -1756,10 +1752,10 @@ public class GenericJaxRsClientDstu2Test {
 		String respString = ourCtx.newJsonParser().encodeResourceToString(resp);
 
 
-		ourResponseContentType = Constants.CT_FHIR_JSON + "; charset=UTF-8";
-		ourResponseBody = respString;
+		MY_SERVLET.ourResponseContentType = Constants.CT_FHIR_JSON + "; charset=UTF-8";
+		MY_SERVLET.ourResponseBody = respString;
 
-		IGenericClient client = ourCtx.newRestfulGenericClient("http://localhost:" + ourPort + "/fhir");
+		IGenericClient client = ourCtx.newRestfulGenericClient(ourServer.getBaseUrl() + "/fhir");
 
 		ca.uhn.fhir.model.dstu2.resource.Bundle input = new ca.uhn.fhir.model.dstu2.resource.Bundle();
 
@@ -1779,7 +1775,7 @@ public class GenericJaxRsClientDstu2Test {
 			.execute();
 
 
-		assertEquals("http://localhost:" + ourPort + "/fhir", ourRequestUri);
+		assertEquals(ourServer.getBaseUrl() + "/fhir", MY_SERVLET.ourRequestUri);
 		assertEquals(2, response.getEntry().size());
 
 		assertEquals("Patient/1/_history/1", response.getEntry().get(0).getResponse().getLocation());
@@ -1790,52 +1786,52 @@ public class GenericJaxRsClientDstu2Test {
 	public void testUpdateConditional() {
 
 
-		ourResponseStatus = Constants.STATUS_HTTP_204_NO_CONTENT;
+		MY_SERVLET.ourResponseStatus = Constants.STATUS_HTTP_204_NO_CONTENT;
 
-		IGenericClient client = ourCtx.newRestfulGenericClient("http://localhost:" + ourPort + "/fhir");
+		IGenericClient client = ourCtx.newRestfulGenericClient(ourServer.getBaseUrl() + "/fhir");
 
 
 		Patient p = new Patient();
 		p.addName().addFamily("FOOFAMILY");
 
 		client.update().resource(p).conditionalByUrl("Patient?name=foo").encodedXml().execute();
-		assertEquals(1, ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE).size());
-		assertEquals(EncodingEnum.XML.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8, ourRequestFirstHeaders.get(Constants.HEADER_CONTENT_TYPE).getValue().replace(";char", "; char"));
-		assertThat(ourRequestBodyString, containsString("<family value=\"FOOFAMILY\"/>"));
-		assertEquals("PUT", ourRequestMethod);
-		assertEquals("http://localhost:" + ourPort + "/fhir/Patient?name=foo", ourRequestUri);
+		assertEquals(1, MY_SERVLET.ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE).size());
+		assertEquals(EncodingEnum.XML.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8, MY_SERVLET.ourRequestFirstHeaders.get(Constants.HEADER_CONTENT_TYPE).getValue().replace(";char", "; char"));
+		assertThat(MY_SERVLET.ourRequestBodyString, containsString("<family value=\"FOOFAMILY\"/>"));
+		assertEquals("PUT", MY_SERVLET.ourRequestMethod);
+		assertEquals(ourServer.getBaseUrl() + "/fhir/Patient?name=foo", MY_SERVLET.ourRequestUri);
 
 
 		client.update().resource(p).conditionalByUrl("Patient?name=http://foo|bar").encodedXml().execute();
-		assertEquals(1, ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE).size());
-		assertEquals(EncodingEnum.XML.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8, ourRequestFirstHeaders.get(Constants.HEADER_CONTENT_TYPE).getValue().replace(";char", "; char"));
-		assertThat(ourRequestBodyString, containsString("<family value=\"FOOFAMILY\"/>"));
-		assertEquals("PUT", ourRequestMethod);
-		assertEquals("http://localhost:" + ourPort + "/fhir/Patient?name=http%3A//foo%7Cbar", ourRequestUri);
+		assertEquals(1, MY_SERVLET.ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE).size());
+		assertEquals(EncodingEnum.XML.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8, MY_SERVLET.ourRequestFirstHeaders.get(Constants.HEADER_CONTENT_TYPE).getValue().replace(";char", "; char"));
+		assertThat(MY_SERVLET.ourRequestBodyString, containsString("<family value=\"FOOFAMILY\"/>"));
+		assertEquals("PUT", MY_SERVLET.ourRequestMethod);
+		assertEquals(ourServer.getBaseUrl() + "/fhir/Patient?name=http%3A//foo%7Cbar", MY_SERVLET.ourRequestUri);
 
 
 		client.update().resource(ourCtx.newXmlParser().encodeResourceToString(p)).conditionalByUrl("Patient?name=foo").encodedXml().execute();
-		assertEquals(1, ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE).size());
-		assertEquals(EncodingEnum.XML.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8, ourRequestFirstHeaders.get(Constants.HEADER_CONTENT_TYPE).getValue().replace(";char", "; char"));
-		assertThat(ourRequestBodyString, containsString("<family value=\"FOOFAMILY\"/>"));
-		assertEquals("PUT", ourRequestMethod);
-		assertEquals("http://localhost:" + ourPort + "/fhir/Patient?name=foo", ourRequestUri);
+		assertEquals(1, MY_SERVLET.ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE).size());
+		assertEquals(EncodingEnum.XML.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8, MY_SERVLET.ourRequestFirstHeaders.get(Constants.HEADER_CONTENT_TYPE).getValue().replace(";char", "; char"));
+		assertThat(MY_SERVLET.ourRequestBodyString, containsString("<family value=\"FOOFAMILY\"/>"));
+		assertEquals("PUT", MY_SERVLET.ourRequestMethod);
+		assertEquals(ourServer.getBaseUrl() + "/fhir/Patient?name=foo", MY_SERVLET.ourRequestUri);
 
 
 		client.update().resource(p).conditional().where(Patient.NAME.matches().value("foo")).and(Patient.ADDRESS.matches().value("AAA|BBB")).encodedXml().execute();
-		assertEquals(1, ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE).size());
-		assertEquals(EncodingEnum.XML.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8, ourRequestFirstHeaders.get(Constants.HEADER_CONTENT_TYPE).getValue().replace(";char", "; char"));
-		assertThat(ourRequestBodyString, containsString("<family value=\"FOOFAMILY\"/>"));
-		assertEquals("PUT", ourRequestMethod);
-		assertEquals("http://localhost:" + ourPort + "/fhir/Patient?name=foo&address=AAA%5C%7CBBB", ourRequestUri);
+		assertEquals(1, MY_SERVLET.ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE).size());
+		assertEquals(EncodingEnum.XML.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8, MY_SERVLET.ourRequestFirstHeaders.get(Constants.HEADER_CONTENT_TYPE).getValue().replace(";char", "; char"));
+		assertThat(MY_SERVLET.ourRequestBodyString, containsString("<family value=\"FOOFAMILY\"/>"));
+		assertEquals("PUT", MY_SERVLET.ourRequestMethod);
+		assertEquals(ourServer.getBaseUrl() + "/fhir/Patient?name=foo&address=AAA%5C%7CBBB", MY_SERVLET.ourRequestUri);
 
 
 		client.update().resource(ourCtx.newXmlParser().encodeResourceToString(p)).conditional().where(Patient.NAME.matches().value("foo")).and(Patient.ADDRESS.matches().value("AAA|BBB")).encodedXml().execute();
-		assertEquals(1, ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE).size());
-		assertEquals(EncodingEnum.XML.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8, ourRequestFirstHeaders.get(Constants.HEADER_CONTENT_TYPE).getValue().replace(";char", "; char"));
-		assertThat(ourRequestBodyString, containsString("<family value=\"FOOFAMILY\"/>"));
-		assertEquals("PUT", ourRequestMethod);
-		assertEquals("http://localhost:" + ourPort + "/fhir/Patient?name=foo&address=AAA%5C%7CBBB", ourRequestUri);
+		assertEquals(1, MY_SERVLET.ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE).size());
+		assertEquals(EncodingEnum.XML.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8, MY_SERVLET.ourRequestFirstHeaders.get(Constants.HEADER_CONTENT_TYPE).getValue().replace(";char", "; char"));
+		assertThat(MY_SERVLET.ourRequestBodyString, containsString("<family value=\"FOOFAMILY\"/>"));
+		assertEquals("PUT", MY_SERVLET.ourRequestMethod);
+		assertEquals(ourServer.getBaseUrl() + "/fhir/Patient?name=foo&address=AAA%5C%7CBBB", MY_SERVLET.ourRequestUri);
 
 
 	}
@@ -1844,9 +1840,9 @@ public class GenericJaxRsClientDstu2Test {
 	public void testUpdateNonFluent() {
 
 
-		ourResponseStatus = Constants.STATUS_HTTP_204_NO_CONTENT;
+		MY_SERVLET.ourResponseStatus = Constants.STATUS_HTTP_204_NO_CONTENT;
 
-		IGenericClient client = ourCtx.newRestfulGenericClient("http://localhost:" + ourPort + "/fhir");
+		IGenericClient client = ourCtx.newRestfulGenericClient(ourServer.getBaseUrl() + "/fhir");
 		client.setEncoding(EncodingEnum.XML);
 
 
@@ -1854,19 +1850,19 @@ public class GenericJaxRsClientDstu2Test {
 		p.addName().addFamily("FOOFAMILY");
 
 		client.update(new IdDt("Patient/123"), p);
-		assertEquals(1, ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE).size());
-		assertEquals(EncodingEnum.XML.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8, ourRequestFirstHeaders.get(Constants.HEADER_CONTENT_TYPE).getValue().replace(";char", "; char"));
-		assertThat(ourRequestBodyString, containsString("<family value=\"FOOFAMILY\"/>"));
-		assertEquals("http://localhost:" + ourPort + "/fhir/Patient/123?_format=xml", ourRequestUri);
-		assertEquals("PUT", ourRequestMethod);
+		assertEquals(1, MY_SERVLET.ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE).size());
+		assertEquals(EncodingEnum.XML.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8, MY_SERVLET.ourRequestFirstHeaders.get(Constants.HEADER_CONTENT_TYPE).getValue().replace(";char", "; char"));
+		assertThat(MY_SERVLET.ourRequestBodyString, containsString("<family value=\"FOOFAMILY\"/>"));
+		assertEquals(ourServer.getBaseUrl() + "/fhir/Patient/123?_format=xml", MY_SERVLET.ourRequestUri);
+		assertEquals("PUT", MY_SERVLET.ourRequestMethod);
 
 
 		client.update("123", p);
-		assertEquals(1, ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE).size());
-		assertEquals(EncodingEnum.XML.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8, ourRequestFirstHeaders.get(Constants.HEADER_CONTENT_TYPE).getValue().replace(";char", "; char"));
-		assertThat(ourRequestBodyString, containsString("<family value=\"FOOFAMILY\"/>"));
-		assertEquals("http://localhost:" + ourPort + "/fhir/Patient/123?_format=xml", ourRequestUri);
-		assertEquals("PUT", ourRequestMethod);
+		assertEquals(1, MY_SERVLET.ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE).size());
+		assertEquals(EncodingEnum.XML.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8, MY_SERVLET.ourRequestFirstHeaders.get(Constants.HEADER_CONTENT_TYPE).getValue().replace(";char", "; char"));
+		assertThat(MY_SERVLET.ourRequestBodyString, containsString("<family value=\"FOOFAMILY\"/>"));
+		assertEquals(ourServer.getBaseUrl() + "/fhir/Patient/123?_format=xml", MY_SERVLET.ourRequestUri);
+		assertEquals("PUT", MY_SERVLET.ourRequestMethod);
 
 	}
 
@@ -1874,9 +1870,9 @@ public class GenericJaxRsClientDstu2Test {
 	public void testUpdatePrefer() {
 
 
-		ourResponseStatus = Constants.STATUS_HTTP_204_NO_CONTENT;
+		MY_SERVLET.ourResponseStatus = Constants.STATUS_HTTP_204_NO_CONTENT;
 
-		IGenericClient client = ourCtx.newRestfulGenericClient("http://localhost:" + ourPort + "/fhir");
+		IGenericClient client = ourCtx.newRestfulGenericClient(ourServer.getBaseUrl() + "/fhir");
 
 
 		Patient p = new Patient();
@@ -1884,13 +1880,13 @@ public class GenericJaxRsClientDstu2Test {
 		p.addName().addFamily("FOOFAMILY");
 
 		client.update().resource(p).prefer(PreferReturnEnum.MINIMAL).execute();
-		assertEquals(1, ourRequestHeaders.get(Constants.HEADER_PREFER).size());
-		assertEquals(Constants.HEADER_PREFER_RETURN + '=' + Constants.HEADER_PREFER_RETURN_MINIMAL, ourRequestHeaders.get(Constants.HEADER_PREFER).get(0).getValue());
+		assertEquals(1, MY_SERVLET.ourRequestHeaders.get(Constants.HEADER_PREFER).size());
+		assertEquals(Constants.HEADER_PREFER_RETURN + '=' + Constants.HEADER_PREFER_RETURN_MINIMAL, MY_SERVLET.ourRequestHeaders.get(Constants.HEADER_PREFER).get(0).getValue());
 
 
 		client.update().resource(p).prefer(PreferReturnEnum.REPRESENTATION).execute();
-		assertEquals(1, ourRequestHeaders.get(Constants.HEADER_PREFER).size());
-		assertEquals(Constants.HEADER_PREFER_RETURN + '=' + Constants.HEADER_PREFER_RETURN_REPRESENTATION, ourRequestHeaders.get(Constants.HEADER_PREFER).get(0).getValue());
+		assertEquals(1, MY_SERVLET.ourRequestHeaders.get(Constants.HEADER_PREFER).size());
+		assertEquals(Constants.HEADER_PREFER_RETURN + '=' + Constants.HEADER_PREFER_RETURN_REPRESENTATION, MY_SERVLET.ourRequestHeaders.get(Constants.HEADER_PREFER).get(0).getValue());
 
 
 	}
@@ -1902,11 +1898,11 @@ public class GenericJaxRsClientDstu2Test {
 		final String formatted = ourCtx.newXmlParser().encodeResourceToString(p);
 
 
-		ourResponseStatus = Constants.STATUS_HTTP_200_OK;
-		ourResponseContentType = Constants.CT_FHIR_XML + "; charset=UTF-8";
-		ourResponseBody = formatted;
+		MY_SERVLET.ourResponseStatus = Constants.STATUS_HTTP_200_OK;
+		MY_SERVLET.ourResponseContentType = Constants.CT_FHIR_XML + "; charset=UTF-8";
+		MY_SERVLET.ourResponseBody = formatted;
 
-		IGenericClient client = ourCtx.newRestfulGenericClient("http://localhost:" + ourPort + "/fhir");
+		IGenericClient client = ourCtx.newRestfulGenericClient(ourServer.getBaseUrl() + "/fhir");
 
 		p = new Patient();
 		p.setId(new IdDt("1"));
@@ -1925,10 +1921,10 @@ public class GenericJaxRsClientDstu2Test {
 		final String msg = ourCtx.newXmlParser().encodeResourceToString(oo);
 
 
-		ourResponseContentType = Constants.CT_FHIR_XML + "; charset=UTF-8";
-		ourResponseBody = msg;
+		MY_SERVLET.ourResponseContentType = Constants.CT_FHIR_XML + "; charset=UTF-8";
+		MY_SERVLET.ourResponseBody = msg;
 
-		IGenericClient client = ourCtx.newRestfulGenericClient("http://localhost:" + ourPort + "/fhir");
+		IGenericClient client = ourCtx.newRestfulGenericClient(ourServer.getBaseUrl() + "/fhir");
 
 		Patient p = new Patient();
 		p.addName().addGiven("GIVEN");
@@ -1937,33 +1933,33 @@ public class GenericJaxRsClientDstu2Test {
 		MethodOutcome response;
 
 		response = client.validate().resource(p).encodedXml().execute();
-		assertEquals("http://localhost:" + ourPort + "/fhir/Patient/$validate", ourRequestUri);
-		assertEquals("POST", ourRequestMethod);
-		assertEquals("<Parameters xmlns=\"http://hl7.org/fhir\"><parameter><name value=\"resource\"/><resource><Patient xmlns=\"http://hl7.org/fhir\"><name><given value=\"GIVEN\"/></name></Patient></resource></parameter></Parameters>", ourRequestBodyString);
+		assertEquals(ourServer.getBaseUrl() + "/fhir/Patient/$validate", MY_SERVLET.ourRequestUri);
+		assertEquals("POST", MY_SERVLET.ourRequestMethod);
+		assertEquals("<Parameters xmlns=\"http://hl7.org/fhir\"><parameter><name value=\"resource\"/><resource><Patient xmlns=\"http://hl7.org/fhir\"><name><given value=\"GIVEN\"/></name></Patient></resource></parameter></Parameters>", MY_SERVLET.ourRequestBodyString);
 		assertNotNull(response.getOperationOutcome());
 		assertEquals("FOOBAR", toOo(response.getOperationOutcome()).getIssueFirstRep().getDiagnosticsElement().getValue());
 
 
 		response = client.validate().resource(ourCtx.newXmlParser().encodeResourceToString(p)).encodedXml().execute();
-		assertEquals("http://localhost:" + ourPort + "/fhir/Patient/$validate", ourRequestUri);
-		assertEquals("POST", ourRequestMethod);
-		assertEquals("<Parameters xmlns=\"http://hl7.org/fhir\"><parameter><name value=\"resource\"/><resource><Patient xmlns=\"http://hl7.org/fhir\"><name><given value=\"GIVEN\"/></name></Patient></resource></parameter></Parameters>", ourRequestBodyString);
+		assertEquals(ourServer.getBaseUrl() + "/fhir/Patient/$validate", MY_SERVLET.ourRequestUri);
+		assertEquals("POST", MY_SERVLET.ourRequestMethod);
+		assertEquals("<Parameters xmlns=\"http://hl7.org/fhir\"><parameter><name value=\"resource\"/><resource><Patient xmlns=\"http://hl7.org/fhir\"><name><given value=\"GIVEN\"/></name></Patient></resource></parameter></Parameters>", MY_SERVLET.ourRequestBodyString);
 		assertNotNull(response.getOperationOutcome());
 		assertEquals("FOOBAR", toOo(response.getOperationOutcome()).getIssueFirstRep().getDiagnosticsElement().getValue());
 
 
 		response = client.validate().resource(ourCtx.newJsonParser().encodeResourceToString(p)).execute();
-		assertEquals("http://localhost:" + ourPort + "/fhir/Patient/$validate", ourRequestUri);
-		assertEquals("POST", ourRequestMethod);
-		assertEquals("{\"resourceType\":\"Parameters\",\"parameter\":[{\"name\":\"resource\",\"resource\":{\"resourceType\":\"Patient\",\"name\":[{\"given\":[\"GIVEN\"]}]}}]}", ourRequestBodyString);
+		assertEquals(ourServer.getBaseUrl() + "/fhir/Patient/$validate", MY_SERVLET.ourRequestUri);
+		assertEquals("POST", MY_SERVLET.ourRequestMethod);
+		assertEquals("{\"resourceType\":\"Parameters\",\"parameter\":[{\"name\":\"resource\",\"resource\":{\"resourceType\":\"Patient\",\"name\":[{\"given\":[\"GIVEN\"]}]}}]}", MY_SERVLET.ourRequestBodyString);
 		assertNotNull(response.getOperationOutcome());
 		assertEquals("FOOBAR", toOo(response.getOperationOutcome()).getIssueFirstRep().getDiagnosticsElement().getValue());
 
 
 		response = client.validate().resource(ourCtx.newJsonParser().encodeResourceToString(p)).prettyPrint().execute();
-		assertEquals("http://localhost:" + ourPort + "/fhir/Patient/$validate?_pretty=true", ourRequestUri);
-		assertEquals("POST", ourRequestMethod);
-		assertThat(ourRequestBodyString, containsString("\"resourceType\": \"Parameters\",\n"));
+		assertEquals(ourServer.getBaseUrl() + "/fhir/Patient/$validate?_pretty=true", MY_SERVLET.ourRequestUri);
+		assertEquals("POST", MY_SERVLET.ourRequestMethod);
+		assertThat(MY_SERVLET.ourRequestBodyString, containsString("\"resourceType\": \"Parameters\",\n"));
 		assertNotNull(response.getOperationOutcome());
 		assertEquals("FOOBAR", toOo(response.getOperationOutcome()).getIssueFirstRep().getDiagnosticsElement().getValue());
 
@@ -1975,10 +1971,10 @@ public class GenericJaxRsClientDstu2Test {
 		oo.addIssue().setDiagnostics("FOOBAR");
 		final String msg = ourCtx.newXmlParser().encodeResourceToString(oo);
 
-		ourResponseContentType = Constants.CT_FHIR_XML + "; charset=UTF-8";
-		ourResponseBody = msg;
+		MY_SERVLET.ourResponseContentType = Constants.CT_FHIR_XML + "; charset=UTF-8";
+		MY_SERVLET.ourResponseBody = msg;
 
-		IGenericClient client = ourCtx.newRestfulGenericClient("http://localhost:" + ourPort + "/fhir");
+		IGenericClient client = ourCtx.newRestfulGenericClient(ourServer.getBaseUrl() + "/fhir");
 		client.setEncoding(EncodingEnum.XML);
 
 		Patient p = new Patient();
@@ -1991,9 +1987,9 @@ public class GenericJaxRsClientDstu2Test {
 		response = client.validate(p);
 
 
-		assertEquals("http://localhost:" + ourPort + "/fhir/Patient/$validate?_format=xml", ourRequestUri);
-		assertEquals("POST", ourRequestMethod);
-		assertEquals("<Parameters xmlns=\"http://hl7.org/fhir\"><parameter><name value=\"resource\"/><resource><Patient xmlns=\"http://hl7.org/fhir\"><name><given value=\"GIVEN\"/></name></Patient></resource></parameter></Parameters>", ourRequestBodyString);
+		assertEquals(ourServer.getBaseUrl() + "/fhir/Patient/$validate?_format=xml", MY_SERVLET.ourRequestUri);
+		assertEquals("POST", MY_SERVLET.ourRequestMethod);
+		assertEquals("<Parameters xmlns=\"http://hl7.org/fhir\"><parameter><name value=\"resource\"/><resource><Patient xmlns=\"http://hl7.org/fhir\"><name><given value=\"GIVEN\"/></name></Patient></resource></parameter></Parameters>", MY_SERVLET.ourRequestBodyString);
 		assertNotNull(response.getOperationOutcome());
 		assertEquals("FOOBAR", toOo(response.getOperationOutcome()).getIssueFirstRep().getDiagnosticsElement().getValue());
 
@@ -2003,77 +1999,4 @@ public class GenericJaxRsClientDstu2Test {
 		return (OperationOutcome) theOperationOutcome;
 	}
 
-	@BeforeEach
-	public void beforeReset() {
-		ourRequestUri = null;
-		ourRequestUriAll = Lists.newArrayList();
-		ourResponseStatus = 200;
-		ourResponseBody = null;
-		ourResponseBodies = null;
-		ourResponseCount = 0;
-
-		ourResponseContentType = null;
-		ourRequestContentType = null;
-		ourRequestBodyBytes = null;
-		ourRequestBodyString = null;
-		ourRequestHeaders = null;
-		ourRequestFirstHeaders = null;
-		ourRequestMethod = null;
-		ourRequestHeadersAll = Lists.newArrayList();
-	}
-
-	@BeforeAll
-	public static void beforeClass() throws Exception {
-		ourCtx = FhirContext.forDstu2();
-
-		ourServer = new Server(0);
-		ourServer.setHandler(new AbstractHandler() {
-
-			@Override
-			public void handle(String theArg0, Request theRequest, HttpServletRequest theServletRequest, HttpServletResponse theResp) throws IOException {
-				theRequest.setHandled(true);
-				ourRequestUri = theRequest.getHttpURI().toString();
-				ourRequestUriAll.add(ourRequestUri);
-				ourRequestMethod = theRequest.getMethod();
-				ourRequestContentType = theServletRequest.getContentType();
-				ourRequestBodyBytes = IOUtils.toByteArray(theServletRequest.getInputStream());
-				ourRequestBodyString = new String(ourRequestBodyBytes, Charsets.UTF_8);
-
-				ourRequestHeaders = ArrayListMultimap.create();
-				ourRequestHeadersAll.add(ourRequestHeaders);
-				ourRequestFirstHeaders = Maps.newHashMap();
-
-				for (Enumeration<String> headerNameEnum = theRequest.getHeaderNames(); headerNameEnum.hasMoreElements(); ) {
-					String nextName = headerNameEnum.nextElement();
-					for (Enumeration<String> headerValueEnum = theRequest.getHeaders(nextName); headerValueEnum.hasMoreElements(); ) {
-						String nextValue = headerValueEnum.nextElement();
-						if (ourRequestFirstHeaders.containsKey(nextName) == false) {
-							ourRequestFirstHeaders.put(nextName, new Header(nextName, nextValue));
-						}
-						ourRequestHeaders.put(nextName, new Header(nextName, nextValue));
-					}
-				}
-
-				theResp.setStatus(ourResponseStatus);
-
-				if (ourResponseBody != null) {
-					theResp.setContentType(ourResponseContentType);
-					theResp.getWriter().write(ourResponseBody);
-				} else if (ourResponseBodies != null) {
-					theResp.setContentType(ourResponseContentType);
-					theResp.getWriter().write(ourResponseBodies[ourResponseCount]);
-				}
-
-				ourResponseCount++;
-			}
-		});
-
-		JettyUtil.startServer(ourServer);
-		ourPort = JettyUtil.getPortForStartedServer(ourServer);
-	}
-
-	@AfterAll
-	public static void afterClass() throws Exception {
-		JettyUtil.closeServer(ourServer);
-	}
 }

@@ -19,8 +19,10 @@
  */
 package ca.uhn.fhir.test.utilities;
 
+import org.apache.commons.lang3.time.DateUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.config.SocketConfig;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
@@ -49,6 +51,13 @@ public class HttpClientExtension implements BeforeEachCallback, AfterEachCallbac
 		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
 		connectionManager.setMaxTotal(99);
 		connectionManager.setDefaultMaxPerRoute(99);
+
+		SocketConfig socketConfig = SocketConfig
+			.copy(SocketConfig.DEFAULT)
+			.setSoTimeout((int) (30 * DateUtils.MILLIS_PER_SECOND))
+			.build();
+		connectionManager.setDefaultSocketConfig(socketConfig);
+
 		myClient = HttpClientBuilder
 			.create()
 			.setConnectionManager(connectionManager)

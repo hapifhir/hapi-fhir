@@ -19,31 +19,32 @@
  */
 package ca.uhn.fhir.jpa.util;
 
+import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
-import ca.uhn.fhir.jpa.subscription.SocketImplementation;
-import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
-import org.eclipse.jetty.websocket.api.Session;
-import org.eclipse.jetty.websocket.client.ClientUpgradeRequest;
-import org.eclipse.jetty.websocket.client.WebSocketClient;
+import jakarta.websocket.ClientEndpoint;
+import jakarta.websocket.ContainerProvider;
+import jakarta.websocket.OnMessage;
+import jakarta.websocket.Session;
+import jakarta.websocket.WebSocketContainer;
 import org.junit.jupiter.api.extension.AfterEachCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
+@ClientEndpoint
 public class WebsocketSubscriptionClient implements AfterEachCallback {
 	private static final Logger ourLog = LoggerFactory.getLogger(WebsocketSubscriptionClient.class);
 	private final Supplier<RestfulServerExtension> myServerSupplier;
 	private final Supplier<StorageSettings> myStorageSettings;
-	private WebSocketClient myWebSocketClient;
-	private SocketImplementation mySocketImplementation;
+	private jakarta.websocket.Session mySession;
+	private List<String> myMessages = new ArrayList<>();
 
 	/**
 	 * Constructor
@@ -64,20 +65,13 @@ public class WebsocketSubscriptionClient implements AfterEachCallback {
 		RestfulServerExtension server = myServerSupplier.get();
 		assert server != null;
 
-		myWebSocketClient = new WebSocketClient();
-		mySocketImplementation = new SocketImplementation(theSubscriptionId, EncodingEnum.JSON);
-
 		try {
-			myWebSocketClient.start();
 			URI echoUri = new URI("ws://localhost:" + server.getPort() + server.getWebsocketContextPath()
 					+ myStorageSettings.get().getWebsocketContextPath());
-			ClientUpgradeRequest request = new ClientUpgradeRequest();
-			ourLog.info("Connecting to : {}", echoUri);
 
-			Future<Session> connection;
-			connection = myWebSocketClient.connect(mySocketImplementation, echoUri, request);
-			Session session = connection.get(20, TimeUnit.SECONDS);
-			ourLog.info("Connected to WS: {}", session.isOpen());
+			WebSocketContainer container = ContainerProvider.getWebSocketContainer();
+			mySession = container.connectToServer(this, echoUri);
+			ourLog.info("Connected to WS: {}", mySession.isOpen());
 		} catch (Exception e) {
 			throw new InternalErrorException(e);
 		}
@@ -85,13 +79,18 @@ public class WebsocketSubscriptionClient implements AfterEachCallback {
 
 	@Override
 	public void afterEach(ExtensionContext theExtensionContext) throws Exception {
-		if (myWebSocketClient != null) {
+		if (mySession != null) {
 			ourLog.info("Shutting down websocket client");
-			myWebSocketClient.stop();
+			mySession.close();
 		}
 	}
 
+	@OnMessage
+	public void processMessageFromServer(String message, Session session) {
+		myMessages.add(message);
+	}
+
 	public List<String> getMessages() {
-		return mySocketImplementation.getMessages();
+		return myMessages;
 	}
 }

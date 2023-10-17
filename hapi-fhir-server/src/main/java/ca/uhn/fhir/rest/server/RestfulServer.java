@@ -367,6 +367,10 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 				.forEach(t -> t.close());
 		myGlobalBinding.getMethodBindings().forEach(t -> t.close());
 		myServerBinding.getMethodBindings().forEach(t -> t.close());
+
+		myResourceNameToBinding.clear();
+		myGlobalBinding.getMethodBindings().clear();
+		myServerBinding.getMethodBindings().clear();
 	}
 
 	/**
@@ -964,6 +968,10 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 	 */
 	public void setServerConformanceProvider(@Nonnull Object theServerConformanceProvider) {
 		Validate.notNull(theServerConformanceProvider, "theServerConformanceProvider must not be null");
+
+		if (myServerConformanceProvider != null) {
+			unregisterProvider(myServerConformanceProvider);
+		}
 
 		// call the setRestfulServer() method to point the Conformance
 		// Provider to this server instance. This is done to avoid
