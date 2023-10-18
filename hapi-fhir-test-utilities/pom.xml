@@ -129,7 +129,7 @@
 			<artifactId>swagger-annotations-jakarta</artifactId>
 		</dependency>
 
-        <!-- Jetty -->
+      <!-- Jetty -->
 		<dependency>
 			<groupId>org.eclipse.jetty</groupId>
 			<artifactId>jetty-server</artifactId>

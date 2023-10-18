@@ -41,6 +41,11 @@ import org.apache.commons.io.filefilter.FileFileFilter;
 import org.apache.commons.io.filefilter.IOFileFilter;
 import org.apache.commons.io.filefilter.SuffixFileFilter;
 import org.apache.commons.lang3.time.DateUtils;
+import org.eclipse.jetty.ee10.servlet.ServletContextHandler;
+import org.eclipse.jetty.ee10.servlet.ServletHolder;
+import org.eclipse.jetty.server.Connector;
+import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.ServerConnector;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -62,20 +67,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.atomic.AtomicLong;
 import java.util.zip.GZIPInputStream;
 import javax.annotation.Nonnull;
-
-import org.eclipse.jetty.ee10.servlet.FilterHolder;
-import org.eclipse.jetty.ee10.servlet.ServletContextHandler;
-import org.eclipse.jetty.ee10.servlet.ServletHolder;
-import org.eclipse.jetty.io.Connection;
-import org.eclipse.jetty.io.Connection.Listener;
-import org.eclipse.jetty.server.Connector;
-import org.eclipse.jetty.server.Handler;
-import org.eclipse.jetty.server.HttpConnectionFactory;
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.server.ServerConnector;
 
 public class BulkImportCommand extends BaseCommand {
 
@@ -247,7 +240,7 @@ public class BulkImportCommand extends BaseCommand {
 		ServerConnector connector = new ServerConnector(myServer);
 		connector.setIdleTimeout(DateUtils.MILLIS_PER_MINUTE);
 		connector.setPort(myPort);
-		myServer.setConnectors(new Connector[]{connector});
+		myServer.setConnectors(new Connector[] {connector});
 
 		myServlet = new BulkImportFileServlet();
 		for (File t : files) {
