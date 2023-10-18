@@ -174,13 +174,12 @@ public class ResourceModifiedSubmitterSvc implements IResourceModifiedConsumer, 
 						"Channel submission failed for resource with id {} matching subscription with id {}.  Further attempts will be performed at later time.",
 						payloadId,
 						subscriptionId,
-					exception);
+						exception);
 				processed = false;
 				theStatus.setRollbackOnly();
 			} catch (Exception ex) {
 				// catch other errors
-				ourLog.error("Unexpected error encountered while processing resource modified message.",
-					ex);
+				ourLog.error("Unexpected error encountered while processing resource modified message.", ex);
 				processed = false;
 				theStatus.setRollbackOnly();
 			}
@@ -207,7 +206,9 @@ public class ResourceModifiedSubmitterSvc implements IResourceModifiedConsumer, 
 					persistedResourceModifiedMessagePk.getResourceVersion());
 
 			ourLog.warn(
-					"Scheduled submission will be ignored since resource {} cannot be found", idType.asStringValue(), e);
+					"Scheduled submission will be ignored since resource {} cannot be found",
+					idType.asStringValue(),
+					e);
 		} catch (Exception ex) {
 			ourLog.error("Unknown error encountered on inflation of resources.", ex);
 		}
