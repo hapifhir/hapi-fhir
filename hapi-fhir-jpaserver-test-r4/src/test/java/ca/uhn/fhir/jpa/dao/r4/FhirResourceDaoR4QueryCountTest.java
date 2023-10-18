@@ -19,12 +19,15 @@ import ca.uhn.fhir.jpa.api.model.HistoryCountModeEnum;
 import ca.uhn.fhir.jpa.dao.data.ISearchParamPresentDao;
 import ca.uhn.fhir.jpa.entity.TermValueSet;
 import ca.uhn.fhir.jpa.entity.TermValueSetPreExpansionStatusEnum;
+import ca.uhn.fhir.jpa.interceptor.PerformanceTracingLoggingInterceptor;
 import ca.uhn.fhir.jpa.model.entity.ForcedId;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.search.PersistedJpaSearchFirstPageBundleProvider;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.jpa.searchparam.submit.interceptor.SearchParamValidatingInterceptor;
+import ca.uhn.fhir.jpa.subscription.submit.interceptor.SubscriptionValidatingInterceptor;
 import ca.uhn.fhir.jpa.subscription.submit.svc.ResourceModifiedSubmitterSvc;
 import ca.uhn.fhir.jpa.subscription.triggering.ISubscriptionTriggeringSvc;
 import ca.uhn.fhir.jpa.term.TermReadSvcImpl;
@@ -106,6 +109,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.mockito.ArgumentMatchers.contains;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -177,6 +181,12 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		// Pre-cache all StructureDefinitions so that query doesn't affect other counts
 		myValidationSupport.invalidateCaches();
 		myValidationSupport.fetchAllStructureDefinitions();
+
+		assertThat(myInterceptorRegistry.getAllRegisteredInterceptors().stream().map(t->t.getClass()).toList().toString(), myInterceptorRegistry.getAllRegisteredInterceptors().stream().map(t->t.getClass()).toList(), containsInAnyOrder(
+			SubscriptionValidatingInterceptor.class,
+			SearchParamValidatingInterceptor.class,
+			PerformanceTracingLoggingInterceptor.class
+		));
 	}
 
 	/**
@@ -184,6 +194,8 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 	 */
 	@Test
 	public void testExpungeAllVersionsWithTagsDeletesRow() {
+		ourLog.info("All interceptors:\n * " + myInterceptorRegistry.getAllRegisteredInterceptors().stream().map(t->t.toString()).collect(Collectors.joining("\n * ")));
+
 		// Setup
 		// Create then delete
 		for (int i = 0; i < 5; i++) {
