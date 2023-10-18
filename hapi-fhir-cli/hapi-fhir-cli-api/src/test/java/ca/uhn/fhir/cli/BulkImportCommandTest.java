@@ -8,6 +8,7 @@ import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
+import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.system.HapiSystemProperties;
@@ -52,9 +53,9 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class BulkImportCommandIT {
+public class BulkImportCommandTest {
 
-	private static final Logger ourLog = LoggerFactory.getLogger(BulkImportCommandIT.class);
+	private static final Logger ourLog = LoggerFactory.getLogger(BulkImportCommandTest.class);
 
 	static {
 		HapiSystemProperties.enableTestMode();
@@ -72,11 +73,14 @@ public class BulkImportCommandIT {
 	private Path myTempDir;
 	@Captor
 	private ArgumentCaptor<JobInstanceStartRequest> myStartCaptor;
+	@Mock
+	private IRequestPartitionHelperSvc myRequestPartitionService;
 
 	@BeforeEach
 	public void beforeEach() throws IOException {
 		myProvider.setFhirContext(myCtx);
 		myProvider.setJobCoordinator(myJobCoordinator);
+		myProvider.setRequestPartitionHelperService(myRequestPartitionService);
 		myTempDir = Files.createTempDirectory("hapifhir");
 		ourLog.info("Created temp directory: {}", myTempDir);
 	}
@@ -96,19 +100,12 @@ public class BulkImportCommandIT {
 	@Test
 	public void testBulkImport() throws IOException {
 
-		JobInstance jobInfo = new JobInstance()
-			.setStatus(StatusEnum.COMPLETED)
-			.setCreateTime(parseDate("2022-01-01T12:00:00-04:00"))
-			.setStartTime(parseDate("2022-01-01T12:10:00-04:00"));
-
-		when(myJobCoordinator.getInstance(eq("THE-JOB-ID"))).thenReturn(jobInfo);
-
 		String fileContents1 = "{\"resourceType\":\"Observation\"}\n{\"resourceType\":\"Observation\"}";
 		String fileContents2 = "{\"resourceType\":\"Patient\"}\n{\"resourceType\":\"Patient\"}";
 		writeNdJsonFileToTempDirectory(fileContents1, "file1.json");
 		writeNdJsonFileToTempDirectory(fileContents2, "file2.json");
 
-		when(myJobCoordinator.startInstance(any())).thenReturn(createJobStartResponse("THE-JOB-ID"));
+		when(myJobCoordinator.startInstance(any(), any())).thenReturn(createJobStartResponse("THE-JOB-ID"));
 
 		// Start the command in a separate thread
 		new Thread(() -> App.main(new String[]{
@@ -123,7 +120,7 @@ public class BulkImportCommandIT {
 		await().until(() -> myRestfulServerExtension.getRequestContentTypes().size(), equalTo(2));
 		ourLog.info("Initiation requests complete");
 
-		verify(myJobCoordinator, timeout(10000).times(1)).startInstance(myStartCaptor.capture());
+		verify(myJobCoordinator, timeout(10000).times(1)).startInstance(any(), myStartCaptor.capture());
 
 		JobInstanceStartRequest startRequest = myStartCaptor.getValue();
 		BulkImportJobParameters jobParameters = startRequest.getParameters(BulkImportJobParameters.class);
@@ -149,7 +146,7 @@ public class BulkImportCommandIT {
 		writeNdJsonFileToTempDirectory(fileContents1, "file1.json.gz");
 		writeNdJsonFileToTempDirectory(fileContents2, "file2.json.gz");
 
-		when(myJobCoordinator.startInstance(any()))
+		when(myJobCoordinator.startInstance(any(), any()))
 			.thenReturn(createJobStartResponse("THE-JOB-ID"));
 
 		// Start the command in a separate thread
@@ -165,7 +162,7 @@ public class BulkImportCommandIT {
 		await().until(() -> myRestfulServerExtension.getRequestContentTypes().size(), equalTo(2));
 		ourLog.info("Initiation requests complete");
 
-		verify(myJobCoordinator, timeout(10000).times(1)).startInstance(myStartCaptor.capture());
+		verify(myJobCoordinator, timeout(10000).times(1)).startInstance(any(), myStartCaptor.capture());
 
 		JobInstanceStartRequest startRequest = myStartCaptor.getValue();
 		BulkImportJobParameters jobParameters = startRequest.getParameters(BulkImportJobParameters.class);
@@ -191,7 +188,7 @@ public class BulkImportCommandIT {
 		writeNdJsonFileToTempDirectory(fileContents1, "file1.json");
 		writeNdJsonFileToTempDirectory(fileContents2, "file2.json");
 
-		when(myJobCoordinator.startInstance(any())).thenReturn(createJobStartResponse("THE-JOB-ID"));
+		when(myJobCoordinator.startInstance(any(), any())).thenReturn(createJobStartResponse("THE-JOB-ID"));
 
 		// Start the command in a separate thread
 		new Thread(() -> App.main(new String[]{
@@ -206,7 +203,7 @@ public class BulkImportCommandIT {
 		await().until(() -> myRestfulServerExtension.getRequestContentTypes().size(), equalTo(2));
 		ourLog.info("Initiation requests complete");
 
-		verify(myJobCoordinator, timeout(10000).times(1)).startInstance(myStartCaptor.capture());
+		verify(myJobCoordinator, timeout(10000).times(1)).startInstance(any(), myStartCaptor.capture());
 
 		try{
 			JobInstanceStartRequest startRequest = myStartCaptor.getValue();

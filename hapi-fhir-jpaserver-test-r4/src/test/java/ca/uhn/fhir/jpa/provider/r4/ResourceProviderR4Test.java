@@ -366,12 +366,14 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		IFhirResourceDao<Organization> organizationDao = myDaoRegistry.getResourceDao(Organization.class);
 		Organization organizationWithNoProfile = new Organization();
 		organizationWithNoProfile.setName("noProfile");
-		organizationDao.create(organizationWithNoProfile);
+		organizationDao.create(organizationWithNoProfile, mySrd);
 
+		myCaptureQueriesListener.clear();
 		Organization organizationWithProfile = new Organization();
 		organizationWithProfile.setName("withProfile");
 		organizationWithProfile.getMeta().addProfile("http://foo");
-		organizationDao.create(organizationWithProfile);
+		organizationDao.create(organizationWithProfile, mySrd);
+		myCaptureQueriesListener.logInsertQueries();
 
 		runInTransaction(() -> {
 			List<ResourceIndexedSearchParamUri> matched = myResourceIndexedSearchParamUriDao.findAll().stream()

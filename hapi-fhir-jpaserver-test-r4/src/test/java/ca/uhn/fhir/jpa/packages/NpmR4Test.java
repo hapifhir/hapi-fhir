@@ -26,6 +26,7 @@ import ca.uhn.fhir.rest.server.interceptor.partition.RequestTenantPartitionInter
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.test.utilities.JettyUtil;
 import ca.uhn.fhir.test.utilities.ProxyUtil;
+import ca.uhn.fhir.test.utilities.server.HttpServletExtension;
 import ca.uhn.fhir.util.ClasspathUtil;
 import ca.uhn.fhir.util.JsonUtil;
 import ca.uhn.fhir.validation.ValidationResult;
@@ -51,6 +52,7 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -90,18 +92,20 @@ public class NpmR4Test extends BaseJpaR4Test {
 	private IHapiPackageCacheManager myPackageCacheManager;
 	@Autowired
 	private NpmJpaValidationSupport myNpmJpaValidationSupport;
-	private Server myServer;
 	@Autowired
 	private INpmPackageDao myPackageDao;
 	@Autowired
 	private INpmPackageVersionDao myPackageVersionDao;
 	@Autowired
 	private INpmPackageVersionResourceDao myPackageVersionResourceDao;
-	private FakeNpmServlet myFakeNpmServlet;
 	@Autowired
 	private IInterceptorService myInterceptorService;
 	@Autowired
 	private RequestTenantPartitionInterceptor myRequestTenantPartitionInterceptor;
+	private FakeNpmServlet myFakeNpmServlet = new FakeNpmServlet();
+	@RegisterExtension
+	public HttpServletExtension myServer = new HttpServletExtension()
+		.withServlet(myFakeNpmServlet);
 
 	@Override
 	@BeforeEach
@@ -110,17 +114,8 @@ public class NpmR4Test extends BaseJpaR4Test {
 
 		JpaPackageCache jpaPackageCache = ProxyUtil.getSingletonTarget(myPackageCacheManager, JpaPackageCache.class);
 
-		myServer = new Server(0);
-		ServletHandler proxyHandler = new ServletHandler();
-		myFakeNpmServlet = new FakeNpmServlet();
-		ServletHolder servletHolder = new ServletHolder(myFakeNpmServlet);
-		proxyHandler.addServletWithMapping(servletHolder, "/*");
-		myServer.setHandler(proxyHandler);
-		myServer.start();
-
-		int port = JettyUtil.getPortForStartedServer(myServer);
 		jpaPackageCache.getPackageServers().clear();
-		String url = "http://localhost:" + port;
+		String url = myServer.getBaseUrl();
 		ourLog.info("Package server is at base: {}", url);
 		jpaPackageCache.addPackageServer(new PackageServer(url));
 
@@ -129,7 +124,6 @@ public class NpmR4Test extends BaseJpaR4Test {
 
 	@AfterEach
 	public void after() throws Exception {
-		JettyUtil.closeServer(myServer);
 		myStorageSettings.setAllowExternalReferences(new JpaStorageSettings().isAllowExternalReferences());
 		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(new JpaStorageSettings().isAutoCreatePlaceholderReferenceTargets());
 		myPartitionSettings.setPartitioningEnabled(false);
@@ -219,7 +213,7 @@ public class NpmR4Test extends BaseJpaR4Test {
 		myPackageInstallerSvc.install(spec);
 
 		// Be sure no further communication with the server
-		JettyUtil.closeServer(myServer);
+		myServer.stopServer();
 
 		// Make sure we can fetch the package by ID and Version
 		NpmPackage pkg = myPackageCacheManager.loadPackage("nictiz.fhir.nl.stu3.questionnaires", "1.0.2");
@@ -262,7 +256,7 @@ public class NpmR4Test extends BaseJpaR4Test {
 		assertEquals(1, outcome.getResourcesInstalled().get("CodeSystem"));
 
 		// Be sure no further communication with the server
-		JettyUtil.closeServer(myServer);
+		myServer.stopServer();
 
 		// Make sure we can fetch the package by ID and Version
 		NpmPackage pkg = myPackageCacheManager.loadPackage("hl7.fhir.uv.shorthand", "0.12.0");
@@ -332,7 +326,7 @@ public class NpmR4Test extends BaseJpaR4Test {
 		assertEquals(1, outcome.getResourcesInstalled().get("CodeSystem"));
 
 		// Be sure no further communication with the server
-		JettyUtil.closeServer(myServer);
+		myServer.stopServer();
 
 		// Make sure we can fetch the package by ID and Version
 		NpmPackage pkg = myPackageCacheManager.loadPackage("hl7.fhir.uv.shorthand", "0.12.0");
@@ -402,7 +396,7 @@ public class NpmR4Test extends BaseJpaR4Test {
 		PackageInstallationSpec spec = new PackageInstallationSpec().setName("hl7.fhir.uv.shorthand").setVersion("0.13.0").setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL);
 		PackageInstallOutcomeJson outcome = myPackageInstallerSvc.install(spec);
 		// Be sure no further communication with the server
-		JettyUtil.closeServer(myServer);
+		myServer.stopServer();
 
 		// Search for the installed resource
 		runInTransaction(() -> {
@@ -431,7 +425,7 @@ public class NpmR4Test extends BaseJpaR4Test {
 		assertEquals(3, outcome.getResourcesInstalled().get("Organization"));
 
 		// Be sure no further communication with the server
-		JettyUtil.closeServer(myServer);
+		myServer.stopServer();
 
 		// Search for the installed resources
 		runInTransaction(() -> {
@@ -471,7 +465,7 @@ public class NpmR4Test extends BaseJpaR4Test {
 		assertEquals(3, outcome.getResourcesInstalled().get("Organization"));
 
 		// Be sure no further communication with the server
-		JettyUtil.closeServer(myServer);
+		myServer.stopServer();
 
 		// Search for the installed resources
 		mySrd = mock(ServletRequestDetails.class);
@@ -540,7 +534,7 @@ public class NpmR4Test extends BaseJpaR4Test {
 		assertEquals(1, outcome.getResourcesInstalled().get("ImplementationGuide"));
 
 		// Be sure no further communication with the server
-		JettyUtil.closeServer(myServer);
+		myServer.stopServer();
 
 		// Search for the installed resources
 		runInTransaction(() -> {
@@ -621,7 +615,7 @@ public class NpmR4Test extends BaseJpaR4Test {
 		myPackageInstallerSvc.install(spec);
 
 		// Be sure no further communication with the server
-		JettyUtil.closeServer(myServer);
+		myServer.stopServer();
 
 		// Make sure we can fetch the package by ID and Version
 		NpmPackage pkg = myPackageCacheManager.loadPackage("UK.Core.r4", "1.1.0");
@@ -930,7 +924,7 @@ public class NpmR4Test extends BaseJpaR4Test {
 		assertEquals(2, outcome.getResourcesInstalled().get("StructureDefinition"));
 
 		// Be sure no further communication with the server
-		JettyUtil.closeServer(myServer);
+		myServer.stopServer();
 
 		// Search for the installed resource
 		runInTransaction(() -> {
@@ -967,7 +961,7 @@ public class NpmR4Test extends BaseJpaR4Test {
 		assertEquals(2, outcome.getResourcesInstalled().get("StructureDefinition"));
 
 		// Be sure no further communication with the server
-		JettyUtil.closeServer(myServer);
+		myServer.stopServer();
 
 		// Search for the installed resource
 		runInTransaction(() -> {

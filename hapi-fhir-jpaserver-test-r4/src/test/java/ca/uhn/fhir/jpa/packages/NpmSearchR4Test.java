@@ -36,8 +36,10 @@ public class NpmSearchR4Test extends BaseJpaR4Test {
 	@Autowired
 	private INpmPackageVersionResourceDao myPackageVersionResourceDao;
 
+	@Override
 	@BeforeEach
 	public void before() throws Exception {
+		super.before();
 		JpaPackageCache jpaPackageCache = ProxyUtil.getSingletonTarget(myPackageCacheManager, JpaPackageCache.class);
 		jpaPackageCache.getPackageServers().clear();
 	}

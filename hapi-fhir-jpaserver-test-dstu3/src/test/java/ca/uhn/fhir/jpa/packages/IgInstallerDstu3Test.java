@@ -10,6 +10,7 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.test.utilities.JettyUtil;
 import ca.uhn.fhir.test.utilities.ProxyUtil;
+import ca.uhn.fhir.test.utilities.server.HttpServletExtension;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.ee10.servlet.ServletHandler;
 import org.eclipse.jetty.ee10.servlet.ServletHolder;
@@ -21,6 +22,7 @@ import org.hl7.fhir.utilities.npm.PackageServer;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,36 +49,29 @@ public class IgInstallerDstu3Test extends BaseJpaDstu3Test {
 	@Autowired
 	@Qualifier(PackageUtils.LOADER_WITH_CACHE)
 	private IHapiPackageCacheManager myPackageCacheManager;
-	private Server myServer;
-	private FakeNpmServlet myFakeNpmServlet;
 	@Autowired
 	private INpmPackageVersionDao myPackageVersionDao;
-	private int myPort;
 
+	private FakeNpmServlet myFakeNpmServlet = new FakeNpmServlet();
+	@RegisterExtension
+	public HttpServletExtension myServer = new HttpServletExtension()
+		.withServlet(myFakeNpmServlet);
+	
+	
 	@Override
 	@BeforeEach
 	public void before() throws Exception {
 		super.before();
 		JpaPackageCache jpaPackageCache = ProxyUtil.getSingletonTarget(myPackageCacheManager, JpaPackageCache.class);
-
-		myServer = new Server(0);
-		ServletHandler proxyHandler = new ServletHandler();
-		myFakeNpmServlet = new FakeNpmServlet();
-		ServletHolder servletHolder = new ServletHolder(myFakeNpmServlet);
-		proxyHandler.addServletWithMapping(servletHolder, "/*");
-		myServer.setHandler(proxyHandler);
-		myServer.start();
-
-		myPort = JettyUtil.getPortForStartedServer(myServer);
+		
 		jpaPackageCache.getPackageServers().clear();
-		jpaPackageCache.addPackageServer(new PackageServer("http://localhost:" + myPort));
+		jpaPackageCache.addPackageServer(new PackageServer(myServer.getBaseUrl()));
 
 		myFakeNpmServlet.getResponses().clear();
 	}
 
 	@AfterEach
 	public void after() throws Exception {
-		JettyUtil.closeServer(myServer);
 		myStorageSettings.setAllowExternalReferences(new JpaStorageSettings().isAllowExternalReferences());
 	}
 
@@ -156,7 +151,7 @@ public class IgInstallerDstu3Test extends BaseJpaDstu3Test {
 		igInstaller.install(new PackageInstallationSpec()
 			.setName("nictiz.fhir.nl.stu3.questionnaires")
 			.setVersion("1.0.2")
-			.setPackageUrl("http://localhost:" + myPort + "/foo.tgz")
+			.setPackageUrl(myServer.getBaseUrl() + "/foo.tgz")
 		);
 
 		runInTransaction(() -> {
@@ -240,7 +235,7 @@ public class IgInstallerDstu3Test extends BaseJpaDstu3Test {
 			igInstaller.install(new PackageInstallationSpec()
 				.setName("blah")
 				.setVersion("1.0.2")
-				.setPackageUrl("http://localhost:" + myPort + "/foo.tgz")
+				.setPackageUrl(myServer.getBaseUrl() + "/foo.tgz")
 			);
 			fail();
 		} catch (InvalidRequestException e) {
@@ -255,11 +250,11 @@ public class IgInstallerDstu3Test extends BaseJpaDstu3Test {
 			igInstaller.install(new PackageInstallationSpec()
 				.setName("blah")
 				.setVersion("1.0.2")
-				.setPackageUrl("http://localhost:" + myPort + "/foo.tgz")
+				.setPackageUrl(myServer.getBaseUrl() + "/foo.tgz")
 			);
 			fail();
 		} catch (ResourceNotFoundException e) {
-			assertEquals(Msg.code(1303) + "Received HTTP 404 from URL: http://localhost:" + myPort + "/foo.tgz", e.getMessage());
+			assertEquals(Msg.code(1303) + "Received HTTP 404 from URL: " + myServer.getBaseUrl() + "/foo.tgz", e.getMessage());
 		}
 
 	}

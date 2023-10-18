@@ -19,14 +19,13 @@
  */
 package ca.uhn.fhir.jpa.util;
 
-import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
+import ca.uhn.fhir.jpa.subscription.SocketImplementation;
+import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import jakarta.websocket.ClientEndpoint;
 import jakarta.websocket.ContainerProvider;
-import jakarta.websocket.OnMessage;
-import jakarta.websocket.Session;
 import jakarta.websocket.WebSocketContainer;
 import org.junit.jupiter.api.extension.AfterEachCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
@@ -34,7 +33,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.net.URI;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
 
@@ -44,7 +42,7 @@ public class WebsocketSubscriptionClient implements AfterEachCallback {
 	private final Supplier<RestfulServerExtension> myServerSupplier;
 	private final Supplier<StorageSettings> myStorageSettings;
 	private jakarta.websocket.Session mySession;
-	private List<String> myMessages = new ArrayList<>();
+	private SocketImplementation mySocketImplementation;
 
 	/**
 	 * Constructor
@@ -65,12 +63,14 @@ public class WebsocketSubscriptionClient implements AfterEachCallback {
 		RestfulServerExtension server = myServerSupplier.get();
 		assert server != null;
 
+		mySocketImplementation = new SocketImplementation(theSubscriptionId, EncodingEnum.JSON);
+
 		try {
 			URI echoUri = new URI("ws://localhost:" + server.getPort() + server.getWebsocketContextPath()
 					+ myStorageSettings.get().getWebsocketContextPath());
 
 			WebSocketContainer container = ContainerProvider.getWebSocketContainer();
-			mySession = container.connectToServer(this, echoUri);
+			mySession = container.connectToServer(mySocketImplementation, echoUri);
 			ourLog.info("Connected to WS: {}", mySession.isOpen());
 		} catch (Exception e) {
 			throw new InternalErrorException(e);
@@ -85,12 +85,7 @@ public class WebsocketSubscriptionClient implements AfterEachCallback {
 		}
 	}
 
-	@OnMessage
-	public void processMessageFromServer(String message, Session session) {
-		myMessages.add(message);
-	}
-
 	public List<String> getMessages() {
-		return myMessages;
+		return mySocketImplementation.getMessages();
 	}
 }

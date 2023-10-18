@@ -20,17 +20,17 @@
 package ca.uhn.fhir.jpa.subscription;
 
 import ca.uhn.fhir.rest.api.EncodingEnum;
-import org.eclipse.jetty.websocket.api.Session;
-import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
-import org.eclipse.jetty.websocket.api.annotations.OnWebSocketOpen;
-import org.eclipse.jetty.websocket.api.annotations.WebSocket;
+import jakarta.websocket.ClientEndpoint;
+import jakarta.websocket.OnMessage;
+import jakarta.websocket.OnOpen;
+import jakarta.websocket.Session;
 import org.slf4j.Logger;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-@WebSocket
+@ClientEndpoint
 public class SocketImplementation {
 
 	private static final Logger ourLog = org.slf4j.LoggerFactory.getLogger(SocketImplementation.class);
@@ -53,7 +53,7 @@ public class SocketImplementation {
 	public void keepAlive() {
 		if (this.session != null) {
 			try {
-				session.sendText("keep alive", null);
+				session.getBasicRemote().sendText("keep alive");
 			} catch (Throwable t) {
 				ourLog.error("Failure", t);
 			}
@@ -66,14 +66,14 @@ public class SocketImplementation {
 	 *
 	 * @param session
 	 */
-	@OnWebSocketOpen
+	@OnOpen
 	public void onConnect(Session session) {
 		ourLog.info("Got connect: {}", session);
 		this.session = session;
 		try {
 			String sending = "bind " + myCriteria;
 			ourLog.info("Sending: {}", sending);
-			session.sendText(sending, null);
+			session.getBasicRemote().sendText(sending);
 
 			ourLog.info("Connection: DONE");
 		} catch (Throwable t) {
@@ -87,7 +87,7 @@ public class SocketImplementation {
 	 *
 	 * @param theMsg
 	 */
-	@OnWebSocketMessage
+	@OnMessage
 	public void onMessage(String theMsg) {
 		ourLog.info("Got msg: " + theMsg);
 		myMessages.add(theMsg);
