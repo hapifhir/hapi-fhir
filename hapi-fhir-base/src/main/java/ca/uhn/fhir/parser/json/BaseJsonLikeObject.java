@@ -51,5 +51,4 @@ public abstract class BaseJsonLikeObject extends BaseJsonLikeValue {
 	public abstract Iterator<String> keyIterator();
 
 	public abstract BaseJsonLikeValue get(String key);
-
 }

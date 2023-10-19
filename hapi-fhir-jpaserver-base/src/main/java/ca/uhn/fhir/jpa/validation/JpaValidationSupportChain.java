@@ -46,14 +46,21 @@ public class JpaValidationSupportChain extends ValidationSupportChain {
 	@Qualifier("myDefaultProfileValidationSupport")
 	@Autowired
 	private IValidationSupport myDefaultProfileValidationSupport;
+
 	@Autowired
 	private ITermReadSvc myTerminologyService;
+
 	@Autowired
 	private NpmJpaValidationSupport myNpmJpaValidationSupport;
+
 	@Autowired
 	private ITermConceptMappingSvc myConceptMappingSvc;
+
 	@Autowired
 	private UnknownCodeSystemWarningValidationSupport myUnknownCodeSystemWarningValidationSupport;
+
+	@Autowired
+	private InMemoryTerminologyServerValidationSupport myInMemoryTerminologyServerValidationSupport;
 
 	/**
 	 * Constructor
@@ -78,7 +85,7 @@ public class JpaValidationSupportChain extends ValidationSupportChain {
 		addValidationSupport(myJpaValidationSupport);
 		addValidationSupport(myTerminologyService);
 		addValidationSupport(new SnapshotGeneratingValidationSupport(myFhirContext));
-		addValidationSupport(new InMemoryTerminologyServerValidationSupport(myFhirContext));
+		addValidationSupport(myInMemoryTerminologyServerValidationSupport);
 		addValidationSupport(myNpmJpaValidationSupport);
 		addValidationSupport(new CommonCodeSystemsTerminologyService(myFhirContext));
 		addValidationSupport(myConceptMappingSvc);
@@ -86,5 +93,4 @@ public class JpaValidationSupportChain extends ValidationSupportChain {
 		// This needs to be last in the chain, it was designed for that
 		addValidationSupport(myUnknownCodeSystemWarningValidationSupport);
 	}
-
 }

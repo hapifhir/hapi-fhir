@@ -5,6 +5,7 @@ import ca.uhn.fhir.context.api.BundleInclusionRule;
 import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.narrative.DefaultThymeleafNarrativeGenerator;
 import ca.uhn.fhir.rest.annotation.GraphQL;
 import ca.uhn.fhir.rest.annotation.GraphQLQueryUrl;
 import ca.uhn.fhir.rest.annotation.IdParam;
@@ -105,6 +106,7 @@ public class ResponseHighlightingInterceptorTest {
 		ourInterceptor.setShowRequestHeaders(defaults.isShowRequestHeaders());
 		ourInterceptor.setShowResponseHeaders(defaults.isShowResponseHeaders());
 		ourInterceptor.setShowNarrative(defaults.isShowNarrative());
+		ourCtx.setNarrativeGenerator(new DefaultThymeleafNarrativeGenerator());
 	}
 
 	/**
@@ -310,7 +312,7 @@ public class ResponseHighlightingInterceptorTest {
 		status.close();
 		assertEquals(200, status.getStatusLine().getStatusCode());
 		assertEquals(Constants.CT_FHIR_JSON_NEW + ";charset=utf-8", status.getFirstHeader("content-type").getValue().replace(" ", "").toLowerCase());
-		assertThat(responseContent, not(containsString("html")));
+		assertThat(responseContent, not(containsString("<html")));
 	}
 
 	@Test
@@ -323,7 +325,7 @@ public class ResponseHighlightingInterceptorTest {
 		status.close();
 		assertEquals(200, status.getStatusLine().getStatusCode());
 		assertEquals(Constants.CT_FHIR_JSON + ";charset=utf-8", status.getFirstHeader("content-type").getValue().replace(" ", "").toLowerCase());
-		assertThat(responseContent, not(containsString("html")));
+		assertThat(responseContent, not(containsString("<html")));
 	}
 
 	@Test
@@ -336,7 +338,7 @@ public class ResponseHighlightingInterceptorTest {
 		status.close();
 		assertEquals(200, status.getStatusLine().getStatusCode());
 		assertEquals(Constants.CT_FHIR_JSON + ";charset=utf-8", status.getFirstHeader("content-type").getValue().replace(" ", "").toLowerCase());
-		assertThat(responseContent, not(containsString("html")));
+		assertThat(responseContent, not(containsString("<html")));
 	}
 
 	@Test
@@ -349,7 +351,7 @@ public class ResponseHighlightingInterceptorTest {
 		status.close();
 		assertEquals(200, status.getStatusLine().getStatusCode());
 		assertEquals(Constants.CT_FHIR_XML_NEW + ";charset=utf-8", status.getFirstHeader("content-type").getValue().replace(" ", "").toLowerCase());
-		assertThat(responseContent, not(containsString("html")));
+		assertThat(responseContent, not(containsString("<html")));
 	}
 
 	@Test
@@ -362,7 +364,7 @@ public class ResponseHighlightingInterceptorTest {
 		status.close();
 		assertEquals(200, status.getStatusLine().getStatusCode());
 		assertEquals(Constants.CT_FHIR_XML + ";charset=utf-8", status.getFirstHeader("content-type").getValue().replace(" ", "").toLowerCase());
-		assertThat(responseContent, not(containsString("html")));
+		assertThat(responseContent, not(containsString("<html")));
 	}
 
 	@Test
@@ -375,7 +377,7 @@ public class ResponseHighlightingInterceptorTest {
 		status.close();
 		assertEquals(200, status.getStatusLine().getStatusCode());
 		assertEquals(Constants.CT_FHIR_XML + ";charset=utf-8", status.getFirstHeader("content-type").getValue().replace(" ", "").toLowerCase());
-		assertThat(responseContent, not(containsString("html")));
+		assertThat(responseContent, not(containsString("<html")));
 	}
 
 	@Test
@@ -390,9 +392,8 @@ public class ResponseHighlightingInterceptorTest {
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
 		assertEquals("text/html;charset=utf-8", status.getFirstHeader("content-type").getValue().replace(" ", "").toLowerCase());
-		assertThat(responseContent, containsString("html"));
+		assertThat(responseContent, containsString("<html"));
 		assertThat(responseContent, containsString(">{<"));
-		assertThat(responseContent, not(containsString("&lt;")));
 		assertThat(responseContent, containsString(Constants.HEADER_REQUEST_ID));
 
 	}
@@ -410,7 +411,7 @@ public class ResponseHighlightingInterceptorTest {
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
 		assertEquals("text/html;charset=utf-8", status.getFirstHeader("content-type").getValue().replace(" ", "").toLowerCase());
-		assertThat(responseContent, containsString("html"));
+		assertThat(responseContent, containsString("<html"));
 		assertThat(responseContent, containsString("<span class='hlQuot'>&quot;urn:hapitest:mrns&quot;</span>"));
 		assertThat(responseContent, containsString(Constants.HEADER_REQUEST_ID));
 
@@ -426,9 +427,8 @@ public class ResponseHighlightingInterceptorTest {
 		status.close();
 		assertEquals(200, status.getStatusLine().getStatusCode());
 		assertEquals("text/html;charset=utf-8", status.getFirstHeader("content-type").getValue().replace(" ", "").toLowerCase());
-		assertThat(responseContent, containsString("html"));
+		assertThat(responseContent, containsString("<html"));
 		assertThat(responseContent, containsString(">{<"));
-		assertThat(responseContent, not(containsString("&lt;")));
 
 		ourLog.info(responseContent);
 	}
@@ -443,7 +443,7 @@ public class ResponseHighlightingInterceptorTest {
 		status.close();
 		assertEquals(200, status.getStatusLine().getStatusCode());
 		assertEquals("text/html;charset=utf-8", status.getFirstHeader("content-type").getValue().replace(" ", "").toLowerCase());
-		assertThat(responseContent, containsString("html"));
+		assertThat(responseContent, containsString("<html"));
 		assertThat(responseContent, not(containsString(">{<")));
 		assertThat(responseContent, containsString("&lt;"));
 	}
@@ -458,7 +458,7 @@ public class ResponseHighlightingInterceptorTest {
 		status.close();
 		assertEquals(200, status.getStatusLine().getStatusCode());
 		assertEquals(Constants.CT_FHIR_JSON_NEW + ";charset=utf-8", status.getFirstHeader("content-type").getValue().replace(" ", "").toLowerCase());
-		assertThat(responseContent, not(containsString("html")));
+		assertThat(responseContent, not(containsString("<html")));
 	}
 
 	@Test

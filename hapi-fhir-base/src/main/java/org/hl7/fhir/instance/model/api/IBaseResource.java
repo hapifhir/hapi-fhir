@@ -19,21 +19,22 @@
  */
 package org.hl7.fhir.instance.model.api;
 
+import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.model.api.IElement;
+import ca.uhn.fhir.model.api.Include;
+import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
+
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.model.api.IElement;
-import ca.uhn.fhir.model.api.Include;
-
 /**
- * For now, this is a simple marker interface indicating that a class is a resource type. 
+ * For now, this is a simple marker interface indicating that a class is a resource type.
  * There are two concrete types of implementations of this interrface. The first are
- * HL7.org's Resource structures (e.g. 
+ * HL7.org's Resource structures (e.g.
  * <code>org.hl7.fhir.instance.model.Patient</code>) and
- * the second are HAPI's Resource structures, e.g. 
+ * the second are HAPI's Resource structures, e.g.
  * <code>ca.uhn.fhir.model.dstu.resource.Patient</code>)
  */
 public interface IBaseResource extends IBase, IElement {
@@ -51,11 +52,17 @@ public interface IBaseResource extends IBase, IElement {
 	Set<Include> WILDCARD_ALL_SET = Collections.unmodifiableSet(new HashSet<>(Arrays.asList(INCLUDE_ALL)));
 
 	IIdType getIdElement();
-	
+
 	IBaseResource setId(String theId);
 
 	IBaseResource setId(IIdType theId);
 
 	FhirVersionEnum getStructureFhirVersionEnum();
 
+	/**
+	 * @return <code>true</code> if this resource has been deleted
+	 */
+	default boolean isDeleted() {
+		return ResourceMetadataKeyEnum.DELETED_AT.get(this) != null;
+	}
 }

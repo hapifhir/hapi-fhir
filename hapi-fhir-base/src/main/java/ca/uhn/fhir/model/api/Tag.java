@@ -19,24 +19,25 @@
  */
 package ca.uhn.fhir.model.api;
 
-import java.net.URI;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
 
+import java.net.URI;
+import java.util.Objects;
+
 /**
  * A single tag
  * <p>
- * Note on equality- When computing hashCode or equals values for this class, only the 
- * {@link #getScheme() scheme} and 
+ * Note on equality- When computing hashCode or equals values for this class, only the
+ * {@link #getScheme() scheme} and
  * </p>
  */
 public class Tag extends BaseElement implements IElement, IBaseCoding {
-	
+
 	private static final long serialVersionUID = 1L;
-	
+
 	public static final String ATTR_LABEL = "label";
 	public static final String ATTR_SCHEME = "scheme";
 	public static final String ATTR_TERM = "term";
@@ -58,10 +59,9 @@ public class Tag extends BaseElement implements IElement, IBaseCoding {
 	private String myScheme;
 	private String myTerm;
 	private String myVersion;
-	private boolean myUserSelected;
+	private Boolean myUserSelected;
 
-	public Tag() {
-	}
+	public Tag() {}
 
 	/**
 	 * @deprecated There is no reason to create a tag with a term and not a scheme, so this constructor will be removed
@@ -92,7 +92,6 @@ public class Tag extends BaseElement implements IElement, IBaseCoding {
 		myLabel = theLabel;
 	}
 
-
 	public String getLabel() {
 		return myLabel;
 	}
@@ -107,44 +106,25 @@ public class Tag extends BaseElement implements IElement, IBaseCoding {
 
 	@Override
 	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
+		if (this == obj) return true;
+		if (obj == null) return false;
+		if (getClass() != obj.getClass()) return false;
 		Tag other = (Tag) obj;
-		if (myScheme == null) {
-			if (other.myScheme != null)
-				return false;
-		} else if (!myScheme.equals(other.myScheme))
-			return false;
-		if (myTerm == null) {
-			if (other.myTerm != null)
-				return false;
-		} else if (!myTerm.equals(other.myTerm))
-			return false;
 
-		if (myVersion == null) {
-			if (other.getVersion() != null)
-				return false;
-		} else if (!myVersion.equals(other.getVersion()))
-			return false;
-
-		if (myUserSelected != other.getUserSelected())
-			return false;
-
-		return true;
+		return Objects.equals(myScheme, other.myScheme)
+				&& Objects.equals(myTerm, other.myTerm)
+				&& Objects.equals(myVersion, other.myVersion)
+				&& Objects.equals(myUserSelected, other.myUserSelected);
 	}
 
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((myScheme == null) ? 0 : myScheme.hashCode());
-		result = prime * result + ((myTerm == null) ? 0 : myTerm.hashCode());
-		result = prime * result + ((myVersion == null) ? 0 : myVersion.hashCode());
-		result = prime * result + Boolean.hashCode(myUserSelected);
+		result = prime * result + Objects.hashCode(myScheme);
+		result = prime * result + Objects.hashCode(myTerm);
+		result = prime * result + Objects.hashCode(myVersion);
+		result = prime * result + Objects.hashCode(myUserSelected);
 		return result;
 	}
 
@@ -225,7 +205,9 @@ public class Tag extends BaseElement implements IElement, IBaseCoding {
 	}
 
 	@Override
-	public String getVersion() { return myVersion; }
+	public String getVersion() {
+		return myVersion;
+	}
 
 	@Override
 	public IBaseCoding setVersion(String theVersion) {
@@ -234,7 +216,13 @@ public class Tag extends BaseElement implements IElement, IBaseCoding {
 	}
 
 	@Override
-	public boolean getUserSelected() { return myUserSelected; }
+	public boolean getUserSelected() {
+		return myUserSelected != null && myUserSelected;
+	}
+
+	public Boolean getUserSelectedBoolean() {
+		return myUserSelected;
+	}
 
 	@Override
 	public IBaseCoding setUserSelected(boolean theUserSelected) {
@@ -242,4 +230,7 @@ public class Tag extends BaseElement implements IElement, IBaseCoding {
 		return this;
 	}
 
+	public void setUserSelectedBoolean(Boolean theUserSelected) {
+		myUserSelected = theUserSelected;
+	}
 }

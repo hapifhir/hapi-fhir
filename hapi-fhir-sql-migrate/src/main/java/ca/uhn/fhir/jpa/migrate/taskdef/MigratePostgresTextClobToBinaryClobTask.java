@@ -25,7 +25,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.sql.SQLException;
-import java.util.Locale;
 
 public class MigratePostgresTextClobToBinaryClobTask extends BaseTableColumnTask {
 	private static final Logger ourLog = LoggerFactory.getLogger(MigratePostgresTextClobToBinaryClobTask.class);
@@ -40,7 +39,8 @@ public class MigratePostgresTextClobToBinaryClobTask extends BaseTableColumnTask
 	@Override
 	public void validate() {
 		super.validate();
-		setDescription("Migrate text clob " + getColumnName() + " from table " + getTableName() + " (only affects Postgresql)");
+		setDescription("Migrate text clob " + getColumnName() + " from table " + getTableName()
+				+ " (only affects Postgresql)");
 	}
 
 	@Override
@@ -62,9 +62,11 @@ public class MigratePostgresTextClobToBinaryClobTask extends BaseTableColumnTask
 		columnName = columnName.toLowerCase();
 
 		executeSql(tableName, "alter table " + tableName + " add column " + tempColumnName + " oid");
-		executeSql(tableName, "update " + tableName + " set " + tempColumnName + " = cast(" + columnName + " as oid) where " + columnName + " is not null");
+		executeSql(
+				tableName,
+				"update " + tableName + " set " + tempColumnName + " = cast(" + columnName + " as oid) where "
+						+ columnName + " is not null");
 		executeSql(tableName, "alter table " + tableName + " drop column " + columnName);
 		executeSql(tableName, "alter table " + tableName + " rename column " + tempColumnName + " to " + columnName);
-
 	}
 }

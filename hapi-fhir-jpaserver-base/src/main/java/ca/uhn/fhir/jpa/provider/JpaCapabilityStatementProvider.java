@@ -39,8 +39,8 @@ import org.hl7.fhir.r4.model.CapabilityStatement.ConditionalDeleteStatus;
 import org.hl7.fhir.r4.model.CapabilityStatement.ResourceVersionPolicy;
 import org.hl7.fhir.r4.model.Meta;
 
-import javax.annotation.Nonnull;
 import java.util.Map;
+import javax.annotation.Nonnull;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -58,7 +58,12 @@ public class JpaCapabilityStatementProvider extends ServerCapabilityStatementPro
 	/**
 	 * Constructor
 	 */
-	public JpaCapabilityStatementProvider(@Nonnull RestfulServer theRestfulServer, @Nonnull IFhirSystemDao<?, ?> theSystemDao, @Nonnull JpaStorageSettings theStorageSettings, @Nonnull ISearchParamRegistry theSearchParamRegistry, IValidationSupport theValidationSupport) {
+	public JpaCapabilityStatementProvider(
+			@Nonnull RestfulServer theRestfulServer,
+			@Nonnull IFhirSystemDao<?, ?> theSystemDao,
+			@Nonnull JpaStorageSettings theStorageSettings,
+			@Nonnull ISearchParamRegistry theSearchParamRegistry,
+			IValidationSupport theValidationSupport) {
 		super(theRestfulServer, theSearchParamRegistry, theValidationSupport);
 
 		Validate.notNull(theRestfulServer);
@@ -90,12 +95,18 @@ public class JpaCapabilityStatementProvider extends ServerCapabilityStatementPro
 	protected void postProcessRest(FhirTerser theTerser, IBase theRest) {
 		super.postProcessRest(theTerser, theRest);
 
-		if (myStorageSettings.getSupportedSubscriptionTypes().contains(org.hl7.fhir.dstu2.model.Subscription.SubscriptionChannelType.WEBSOCKET)) {
+		if (myStorageSettings
+				.getSupportedSubscriptionTypes()
+				.contains(org.hl7.fhir.dstu2.model.Subscription.SubscriptionChannelType.WEBSOCKET)) {
 			if (isNotBlank(myStorageSettings.getWebsocketContextPath())) {
-				ExtensionUtil.setExtension(myContext, theRest, Constants.CAPABILITYSTATEMENT_WEBSOCKET_URL, "uri", myStorageSettings.getWebsocketContextPath());
+				ExtensionUtil.setExtension(
+						myContext,
+						theRest,
+						Constants.CAPABILITYSTATEMENT_WEBSOCKET_URL,
+						"uri",
+						myStorageSettings.getWebsocketContextPath());
 			}
 		}
-
 	}
 
 	@Override
@@ -116,11 +127,15 @@ public class JpaCapabilityStatementProvider extends ServerCapabilityStatementPro
 			if (counts != null) {
 				Long count = counts.get(theResourceName);
 				if (count != null) {
-					ExtensionUtil.setExtension(myContext, theResource, ExtensionConstants.CONF_RESOURCE_COUNT, "decimal", Long.toString(count));
+					ExtensionUtil.setExtension(
+							myContext,
+							theResource,
+							ExtensionConstants.CONF_RESOURCE_COUNT,
+							"decimal",
+							Long.toString(count));
 				}
 			}
 		}
-
 	}
 
 	public boolean isIncludeResourceCounts() {

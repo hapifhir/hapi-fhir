@@ -35,28 +35,44 @@ import javax.persistence.MapsId;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
-@Table(name = "HFJ_RES_VER_PROV", indexes = {
-	@Index(name = "IDX_RESVERPROV_SOURCEURI", columnList = "SOURCE_URI"),
-	@Index(name = "IDX_RESVERPROV_REQUESTID", columnList = "REQUEST_ID"),
-	//@Index(name = "IDX_RESVERPROV_RESID", columnList = "RES_PID")
-})
+import static ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable.SOURCE_URI_LENGTH;
+
+@Table(
+		name = "HFJ_RES_VER_PROV",
+		indexes = {
+			@Index(name = "IDX_RESVERPROV_SOURCEURI", columnList = "SOURCE_URI"),
+			@Index(name = "IDX_RESVERPROV_REQUESTID", columnList = "REQUEST_ID"),
+			@Index(name = "IDX_RESVERPROV_RES_PID", columnList = "RES_PID")
+		})
 @Entity
 public class ResourceHistoryProvenanceEntity extends BasePartitionable {
-
-	public static final int SOURCE_URI_LENGTH = 100;
 
 	@Id
 	@Column(name = "RES_VER_PID")
 	private Long myId;
+
 	@OneToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "RES_VER_PID", referencedColumnName = "PID", foreignKey = @ForeignKey(name = "FK_RESVERPROV_RESVER_PID"), nullable = false, insertable = false, updatable = false)
+	@JoinColumn(
+			name = "RES_VER_PID",
+			referencedColumnName = "PID",
+			foreignKey = @ForeignKey(name = "FK_RESVERPROV_RESVER_PID"),
+			nullable = false,
+			insertable = false,
+			updatable = false)
 	@MapsId
 	private ResourceHistoryTable myResourceHistoryTable;
+
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "RES_PID", referencedColumnName = "RES_ID", foreignKey = @ForeignKey(name = "FK_RESVERPROV_RES_PID"), nullable = false)
+	@JoinColumn(
+			name = "RES_PID",
+			referencedColumnName = "RES_ID",
+			foreignKey = @ForeignKey(name = "FK_RESVERPROV_RES_PID"),
+			nullable = false)
 	private ResourceTable myResourceTable;
+
 	@Column(name = "SOURCE_URI", length = SOURCE_URI_LENGTH, nullable = true)
 	private String mySourceUri;
+
 	@Column(name = "REQUEST_ID", length = Constants.REQUEST_ID_LENGTH, nullable = true)
 	private String myRequestId;
 
@@ -103,6 +119,4 @@ public class ResourceHistoryProvenanceEntity extends BasePartitionable {
 	public Long getId() {
 		return myId;
 	}
-
-
 }

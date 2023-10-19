@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 4952
+title: "Previously, the resource server Id strategy was not honoured when doing a create with a conditional update 
+operation on a resource where the ID was not assigned. This is now fixed."

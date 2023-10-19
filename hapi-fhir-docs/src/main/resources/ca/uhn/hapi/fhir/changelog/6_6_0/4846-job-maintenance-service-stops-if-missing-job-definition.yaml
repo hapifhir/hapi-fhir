@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 4846
+title: "Job maintenance service would throw an exception if a job definition is unknown, this would run maintenance on every job instance after it.
+Now the maintenance will skip over unknown job definitions and display a warning log message indication a job definition is missing."

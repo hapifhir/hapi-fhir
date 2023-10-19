@@ -19,7 +19,6 @@
  */
 package ca.uhn.fhir.jpa.interceptor;
 
-
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
@@ -49,7 +48,8 @@ import java.util.stream.Collectors;
 public class TransactionConcurrencySemaphoreInterceptor {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(TransactionConcurrencySemaphoreInterceptor.class);
-	private static final String HELD_SEMAPHORES = TransactionConcurrencySemaphoreInterceptor.class.getName() + "_HELD_SEMAPHORES";
+	private static final String HELD_SEMAPHORES =
+			TransactionConcurrencySemaphoreInterceptor.class.getName() + "_HELD_SEMAPHORES";
 	private final Cache<String, Semaphore> mySemaphoreCache;
 	private final MemoryCacheService myMemoryCacheService;
 	private boolean myLogWaits;
@@ -78,21 +78,33 @@ public class TransactionConcurrencySemaphoreInterceptor {
 	}
 
 	@Hook(Pointcut.STORAGE_TRANSACTION_WRITE_OPERATIONS_PRE)
-	public void pre(TransactionDetails theTransactionDetails, TransactionWriteOperationsDetails theWriteOperationsDetails) {
+	public void pre(
+			TransactionDetails theTransactionDetails, TransactionWriteOperationsDetails theWriteOperationsDetails) {
 		List<Semaphore> heldSemaphores = new ArrayList<>();
 		Map<String, Semaphore> pendingAndHeldSemaphores = new HashMap<>();
 
 		AtomicBoolean locked = new AtomicBoolean(false);
 		try {
-			acquireSemaphoresForUrlList(locked, heldSemaphores, pendingAndHeldSemaphores, theWriteOperationsDetails.getUpdateRequestUrls(), false);
-			acquireSemaphoresForUrlList(locked, heldSemaphores, pendingAndHeldSemaphores, theWriteOperationsDetails.getConditionalCreateRequestUrls(), true);
+			acquireSemaphoresForUrlList(
+					locked,
+					heldSemaphores,
+					pendingAndHeldSemaphores,
+					theWriteOperationsDetails.getUpdateRequestUrls(),
+					false);
+			acquireSemaphoresForUrlList(
+					locked,
+					heldSemaphores,
+					pendingAndHeldSemaphores,
+					theWriteOperationsDetails.getConditionalCreateRequestUrls(),
+					true);
 
 			pendingAndHeldSemaphores.keySet().removeIf(k -> pendingAndHeldSemaphores.get(k) == null);
 			if (!pendingAndHeldSemaphores.isEmpty()) {
 				if (isLogWaits()) {
-					ourLog.info("Waiting to acquire write semaphore for URLs:{}{}",
-						(pendingAndHeldSemaphores.size() > 1 ? "\n * " : ""),
-						(pendingAndHeldSemaphores.keySet().stream().sorted().collect(Collectors.joining("\n * "))));
+					ourLog.info(
+							"Waiting to acquire write semaphore for URLs:{}{}",
+							(pendingAndHeldSemaphores.size() > 1 ? "\n * " : ""),
+							(pendingAndHeldSemaphores.keySet().stream().sorted().collect(Collectors.joining("\n * "))));
 				}
 				for (Map.Entry<String, Semaphore> nextEntry : pendingAndHeldSemaphores.entrySet()) {
 					Semaphore nextSemaphore = nextEntry.getValue();
@@ -101,7 +113,10 @@ public class TransactionConcurrencySemaphoreInterceptor {
 							ourLog.trace("Acquired semaphore {} on request URL: {}", nextSemaphore, nextEntry.getKey());
 							heldSemaphores.add(nextSemaphore);
 						} else {
-							ourLog.warn("Timed out waiting for semaphore {} on request URL: {}", nextSemaphore, nextEntry.getKey());
+							ourLog.warn(
+									"Timed out waiting for semaphore {} on request URL: {}",
+									nextSemaphore,
+									nextEntry.getKey());
 							break;
 						}
 					} catch (InterruptedException e) {
@@ -111,7 +126,7 @@ public class TransactionConcurrencySemaphoreInterceptor {
 				}
 			}
 
-		theTransactionDetails.putUserData(HELD_SEMAPHORES, heldSemaphores);
+			theTransactionDetails.putUserData(HELD_SEMAPHORES, heldSemaphores);
 
 		} finally {
 			if (locked.get()) {
@@ -120,7 +135,12 @@ public class TransactionConcurrencySemaphoreInterceptor {
 		}
 	}
 
-	private void acquireSemaphoresForUrlList(AtomicBoolean theLocked, List<Semaphore> theHeldSemaphores, Map<String, Semaphore> thePendingAndHeldSemaphores, List<String> urls, boolean isConditionalCreates) {
+	private void acquireSemaphoresForUrlList(
+			AtomicBoolean theLocked,
+			List<Semaphore> theHeldSemaphores,
+			Map<String, Semaphore> thePendingAndHeldSemaphores,
+			List<String> urls,
+			boolean isConditionalCreates) {
 		for (String nextUrl : urls) {
 
 			if (isConditionalCreates) {
@@ -144,7 +164,7 @@ public class TransactionConcurrencySemaphoreInterceptor {
 				ourLog.trace("Acquired semaphore {} on request URL: {}", semaphore, nextUrl);
 				theHeldSemaphores.add(semaphore);
 				thePendingAndHeldSemaphores.put(nextUrl, null);
-				} else {
+			} else {
 				thePendingAndHeldSemaphores.put(nextUrl, semaphore);
 			}
 		}
@@ -172,6 +192,4 @@ public class TransactionConcurrencySemaphoreInterceptor {
 	public long countSemaphores() {
 		return mySemaphoreCache.estimatedSize();
 	}
-
-
 }

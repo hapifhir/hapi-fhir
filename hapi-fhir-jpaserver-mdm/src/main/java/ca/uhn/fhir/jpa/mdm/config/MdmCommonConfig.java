@@ -20,8 +20,13 @@
 package ca.uhn.fhir.jpa.mdm.config;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.nickname.INicknameSvc;
+import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.interceptor.MdmSearchExpandingInterceptor;
 import ca.uhn.fhir.mdm.rules.config.MdmRuleValidator;
+import ca.uhn.fhir.mdm.rules.matcher.IMatcherFactory;
+import ca.uhn.fhir.mdm.rules.matcher.MdmMatcherFactory;
+import ca.uhn.fhir.mdm.rules.svc.MdmResourceMatcherSvc;
 import ca.uhn.fhir.mdm.svc.MdmLinkDeleteSvc;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import org.springframework.context.annotation.Bean;
@@ -34,6 +39,7 @@ public class MdmCommonConfig {
 	MdmRuleValidator mdmRuleValidator(FhirContext theFhirContext, ISearchParamRegistry theSearchParamRetriever) {
 		return new MdmRuleValidator(theFhirContext, theSearchParamRetriever);
 	}
+
 	@Bean
 	@Lazy
 	public MdmSearchExpandingInterceptor mdmSearchExpandingInterceptor() {
@@ -43,5 +49,19 @@ public class MdmCommonConfig {
 	@Bean
 	MdmLinkDeleteSvc mdmLinkDeleteSvc() {
 		return new MdmLinkDeleteSvc();
+	}
+
+	@Bean
+	@Lazy
+	MdmResourceMatcherSvc mdmResourceComparatorSvc(
+			FhirContext theFhirContext, IMatcherFactory theIMatcherFactory, IMdmSettings theMdmSettings) {
+		return new MdmResourceMatcherSvc(theFhirContext, theIMatcherFactory, theMdmSettings);
+	}
+
+	@Bean
+	@Lazy
+	public IMatcherFactory matcherFactory(
+			FhirContext theFhirContext, IMdmSettings theSettings, INicknameSvc theNicknameSvc) {
+		return new MdmMatcherFactory(theFhirContext, theSettings, theNicknameSvc);
 	}
 }

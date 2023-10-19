@@ -32,16 +32,18 @@ public final class HapiEntityManagerFactoryUtil {
 	 * This method provides a partially completed entity manager
 	 * factory with HAPI FHIR customizations
 	 */
-	public static LocalContainerEntityManagerFactoryBean newEntityManagerFactory(ConfigurableListableBeanFactory myConfigurableListableBeanFactory, FhirContext theFhirContext) {
-		LocalContainerEntityManagerFactoryBean retVal = new HapiFhirLocalContainerEntityManagerFactoryBean(myConfigurableListableBeanFactory);
+	public static LocalContainerEntityManagerFactoryBean newEntityManagerFactory(
+			ConfigurableListableBeanFactory myConfigurableListableBeanFactory, FhirContext theFhirContext) {
+		LocalContainerEntityManagerFactoryBean retVal =
+				new HapiFhirLocalContainerEntityManagerFactoryBean(myConfigurableListableBeanFactory);
 		configureEntityManagerFactory(retVal, theFhirContext);
 		return retVal;
 	}
 
-	public static void configureEntityManagerFactory(LocalContainerEntityManagerFactoryBean theFactory, FhirContext theFhirContext) {
+	public static void configureEntityManagerFactory(
+			LocalContainerEntityManagerFactoryBean theFactory, FhirContext theFhirContext) {
 		theFactory.setJpaDialect(new HapiFhirHibernateJpaDialect(theFhirContext.getLocalizer()));
 		theFactory.setPackagesToScan("ca.uhn.fhir.jpa.model.entity", "ca.uhn.fhir.jpa.entity");
 		theFactory.setPersistenceProvider(new HibernatePersistenceProvider());
 	}
-
 }

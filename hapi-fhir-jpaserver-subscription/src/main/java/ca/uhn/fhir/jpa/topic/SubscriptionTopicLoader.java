@@ -24,26 +24,26 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
-import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionConstants;
 import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.subscription.SubscriptionConstants;
+import ca.uhn.fhir.util.Logs;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r5.model.Enumerations;
 import org.hl7.fhir.r5.model.SubscriptionTopic;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.annotation.Nonnull;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
+import javax.annotation.Nonnull;
 
 public class SubscriptionTopicLoader extends BaseResourceCacheSynchronizer {
-	private static final Logger ourLog = LoggerFactory.getLogger(SubscriptionTopicLoader.class);
+	private static final Logger ourLog = Logs.getSubscriptionTopicLog();
 
 	@Autowired
 	private FhirContext myFhirContext;
+
 	@Autowired
 	private SubscriptionTopicRegistry mySubscriptionTopicRegistry;
 
@@ -107,13 +107,10 @@ public class SubscriptionTopicLoader extends BaseResourceCacheSynchronizer {
 		if (theResource instanceof SubscriptionTopic) {
 			return (SubscriptionTopic) theResource;
 		} else if (theResource instanceof org.hl7.fhir.r4b.model.SubscriptionTopic) {
-			return myFhirContext.newJsonParser().parseResource(SubscriptionTopic.class, FhirContext.forR4BCached().newJsonParser().encodeResourceToString(theResource));
-			// WIP STR5 VersionConvertorFactory_43_50 when it supports SubscriptionTopic
-			// track here: https://github.com/hapifhir/org.hl7.fhir.core/issues/1212
-//			return (SubscriptionTopic) VersionConvertorFactory_43_50.convertResource((org.hl7.fhir.r4b.model.SubscriptionTopic) theResource);
+			return SubscriptionTopicCanonicalizer.canonicalizeTopic(myFhirContext, theResource);
 		} else {
-			throw new IllegalArgumentException(Msg.code(2332) + "Only R4B and R5 SubscriptionTopic is currently supported.  Found " + theResource.getClass());
+			throw new IllegalArgumentException(Msg.code(2332)
+					+ "Only R4B and R5 SubscriptionTopic is currently supported.  Found " + theResource.getClass());
 		}
 	}
 }
-

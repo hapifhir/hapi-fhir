@@ -48,7 +48,8 @@ public class ParsedLocationParam {
 		try {
 			return Double.parseDouble(defaultString(theValue));
 		} catch (NumberFormatException e) {
-			throw new InvalidRequestException(Msg.code(2308) + "Invalid lat/lon parameter value: " + UrlUtil.sanitizeUrlPart(theValue));
+			throw new InvalidRequestException(
+					Msg.code(2308) + "Invalid lat/lon parameter value: " + UrlUtil.sanitizeUrlPart(theValue));
 		}
 	}
 
@@ -74,12 +75,14 @@ public class ParsedLocationParam {
 			String value = param.getValue();
 			String[] parts = value.split(":");
 			if (parts.length != 2) {
-				throw new IllegalArgumentException(Msg.code(1228) + "Invalid position format '" + value + "'.  Required format is 'latitude:longitude'");
+				throw new IllegalArgumentException(Msg.code(1228) + "Invalid position format '" + value
+						+ "'.  Required format is 'latitude:longitude'");
 			}
 			latitudeValue = parts[0];
 			longitudeValue = parts[1];
 			if (isBlank(latitudeValue) || isBlank(longitudeValue)) {
-				throw new IllegalArgumentException(Msg.code(1229) + "Invalid position format '" + value + "'.  Both latitude and longitude must be provided.");
+				throw new IllegalArgumentException(Msg.code(1229) + "Invalid position format '" + value
+						+ "'.  Both latitude and longitude must be provided.");
 			}
 			QuantityParam distanceParam = theParams.getNearDistanceParam();
 			if (distanceParam != null) {
@@ -90,12 +93,15 @@ public class ParsedLocationParam {
 			String value = param.getValue();
 			String[] parts = StringUtils.split(value, '|');
 			if (parts.length < 2 || parts.length > 4) {
-				throw new IllegalArgumentException(Msg.code(1230) + "Invalid position format '" + value + "'.  Required format is 'latitude|longitude' or 'latitude|longitude|distance' or 'latitude|longitude|distance|units'");
+				throw new IllegalArgumentException(
+						Msg.code(1230) + "Invalid position format '" + value
+								+ "'.  Required format is 'latitude|longitude' or 'latitude|longitude|distance' or 'latitude|longitude|distance|units'");
 			}
 			latitudeValue = parts[0];
 			longitudeValue = parts[1];
 			if (isBlank(latitudeValue) || isBlank(longitudeValue)) {
-				throw new IllegalArgumentException(Msg.code(1231) + "Invalid position format '" + value + "'.  Both latitude and longitude must be provided.");
+				throw new IllegalArgumentException(Msg.code(1231) + "Invalid position format '" + value
+						+ "'.  Both latitude and longitude must be provided.");
 			}
 			if (parts.length >= 3) {
 				String distanceString = parts[2];
@@ -107,13 +113,10 @@ public class ParsedLocationParam {
 					String distanceUnits = parts[3];
 					distanceKm = UcumServiceUtil.convert(distanceKm, distanceUnits, "km");
 				}
-
 			}
 		} else {
 			throw new IllegalArgumentException(Msg.code(1232) + "Invalid position type: " + theParam.getClass());
 		}
-
-
 
 		return new ParsedLocationParam(latitudeValue, longitudeValue, distanceKm);
 	}

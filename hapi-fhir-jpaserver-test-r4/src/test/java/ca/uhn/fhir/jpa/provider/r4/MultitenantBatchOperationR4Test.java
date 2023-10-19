@@ -32,10 +32,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.jpa.model.util.JpaConstants.DEFAULT_PARTITION_NAME;
-import static org.awaitility.Awaitility.await;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.in;
 import static org.hamcrest.Matchers.isA;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -108,7 +106,7 @@ public class MultitenantBatchOperationR4Test extends BaseMultitenantResourceProv
 		String jobId = BatchHelperR4.jobIdFromBatch2Parameters(response);
 		myBatch2JobHelper.awaitJobCompletion(jobId);
 
-		assertThat(interceptor.requestPartitionIds, hasSize(3));
+		assertThat(interceptor.requestPartitionIds, hasSize(4));
 		RequestPartitionId partitionId = interceptor.requestPartitionIds.get(0);
 		assertEquals(TENANT_B_ID, partitionId.getFirstPartitionIdOrNull());
 		assertEquals(TENANT_B, partitionId.getFirstPartitionNameOrNull());

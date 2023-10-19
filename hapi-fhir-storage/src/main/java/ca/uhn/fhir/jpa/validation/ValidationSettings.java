@@ -53,8 +53,10 @@ public class ValidationSettings {
 	 *
 	 * @since 5.1.0
 	 */
-	public void setLocalReferenceValidationDefaultPolicy(@Nonnull ReferenceValidationPolicy theLocalReferenceValidationDefaultPolicy) {
-		Validate.notNull(theLocalReferenceValidationDefaultPolicy, "theLocalReferenceValidationDefaultPolicy must not be null");
+	public void setLocalReferenceValidationDefaultPolicy(
+			@Nonnull ReferenceValidationPolicy theLocalReferenceValidationDefaultPolicy) {
+		Validate.notNull(
+				theLocalReferenceValidationDefaultPolicy, "theLocalReferenceValidationDefaultPolicy must not be null");
 		myLocalReferenceValidationDefaultPolicy = theLocalReferenceValidationDefaultPolicy;
 	}
 }

@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 4987
+title: "Search bundle entry parts were being created as `INCLUDE` unless explicitly indicated as `MATCH`.
+   This has been fixed. Now they are created as `MATCH` unless explicitly indicated as `INCLUDE`."

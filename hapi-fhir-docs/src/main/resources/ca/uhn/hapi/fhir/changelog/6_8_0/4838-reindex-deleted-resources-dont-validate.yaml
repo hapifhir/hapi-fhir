@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 4838
+title: "When reindexing resources, deleted resources could incorrectly fail validation rules and
+  cause the reindex job to not complete correctly. This has been corrected."

@@ -26,5 +26,4 @@ public interface ICriterionInternal {
 	String getParameterValue(FhirContext theContext);
 
 	String getParameterName();
-	
 }

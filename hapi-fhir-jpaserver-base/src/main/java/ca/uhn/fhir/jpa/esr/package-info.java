@@ -31,4 +31,3 @@
  * @since 6.6.0
  */
 package ca.uhn.fhir.jpa.esr;
-

@@ -1,7 +1,7 @@
 package ca.uhn.fhir.mdm.rules.json;
 
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
-import ca.uhn.fhir.mdm.rules.matcher.MdmMatcherEnum;
+import ca.uhn.fhir.mdm.rules.matcher.models.MatchTypeEnum;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -27,7 +27,7 @@ public class VectorMatchResultMapTest {
 	@Test
 	public void testMatchBeforePossibleMatch() {
 		MdmRulesJson mdmRulesJson = new MdmRulesJson();
-		MdmMatcherJson matcherJson = new MdmMatcherJson().setAlgorithm(MdmMatcherEnum.STRING);
+		MdmMatcherJson matcherJson = new MdmMatcherJson().setAlgorithm(MatchTypeEnum.STRING);
 		mdmRulesJson.addMatchField(new MdmFieldMatchJson().setName("given").setResourceType("Patient").setResourcePath("name.given").setMatcher(matcherJson));
 		mdmRulesJson.addMatchField(new MdmFieldMatchJson().setName("family").setResourceType("Patient").setResourcePath("name.family").setMatcher(matcherJson));
 		mdmRulesJson.addMatchField(new MdmFieldMatchJson().setName("prefix").setResourceType("Patient").setResourcePath("name.prefix").setMatcher(matcherJson));

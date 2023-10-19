@@ -52,7 +52,8 @@ public class JsonPatchUtils {
 			JsonNode jsonPatchNode = mapper.readTree(parser);
 			patch = JsonPatch.fromJson(jsonPatchNode);
 
-			JsonNode originalJsonDocument = mapper.readTree(theCtx.newJsonParser().encodeResourceToString(theResourceToUpdate));
+			JsonNode originalJsonDocument =
+					mapper.readTree(theCtx.newJsonParser().encodeResourceToString(theResourceToUpdate));
 			JsonNode after = patch.apply(originalJsonDocument);
 
 			@SuppressWarnings("unchecked")
@@ -67,10 +68,15 @@ public class JsonPatchUtils {
 			try {
 				retVal = fhirJsonParser.parseResource(clazz, postPatchedContent);
 			} catch (DataFormatException e) {
-				String resourceId = theResourceToUpdate.getIdElement().toUnqualifiedVersionless().getValue();
-				String resourceType = theCtx.getResourceDefinition(theResourceToUpdate).getName();
+				String resourceId = theResourceToUpdate
+						.getIdElement()
+						.toUnqualifiedVersionless()
+						.getValue();
+				String resourceType =
+						theCtx.getResourceDefinition(theResourceToUpdate).getName();
 				resourceId = defaultString(resourceId, resourceType);
-				String msg = theCtx.getLocalizer().getMessage(JsonPatchUtils.class, "failedToApplyPatch", resourceId, e.getMessage());
+				String msg = theCtx.getLocalizer()
+						.getMessage(JsonPatchUtils.class, "failedToApplyPatch", resourceId, e.getMessage());
 				throw new InvalidRequestException(Msg.code(1271) + msg);
 			}
 			return retVal;
@@ -78,7 +84,5 @@ public class JsonPatchUtils {
 		} catch (IOException | JsonPatchException theE) {
 			throw new InvalidRequestException(Msg.code(1272) + theE.getMessage());
 		}
-
 	}
-
 }

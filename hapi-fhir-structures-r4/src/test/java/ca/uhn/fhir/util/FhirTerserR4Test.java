@@ -12,6 +12,7 @@ import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Bundle;
@@ -32,6 +33,7 @@ import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Patient.LinkType;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.PrimitiveType;
+import org.hl7.fhir.r4.model.Provenance;
 import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.ResourceType;
@@ -509,6 +511,54 @@ public class FhirTerserR4Test {
 		assertEquals(1, strings.size());
 		assertThat(toStrings(strings), containsInAnyOrder("BUNDLE"));
 
+	}
+
+	@Test
+	public void testGetAllResourceReferences() {
+		// setup
+		Provenance p = new Provenance();
+		p.addTarget(new Reference("Observation/1"));
+		p.addTarget(new Reference("Observation/2"));
+		p.setLocation(new Reference("Location/3"));
+		p.getAgentFirstRep().setWho(new Reference("Practitioner/4"));
+		p.getAgentFirstRep().setOnBehalfOf(new Reference("Organization/5"));
+		p.getEntityFirstRep().setWhat(new Reference("DocumentReference/6"));
+
+		// execute
+		FhirTerser t = myCtx.newTerser();
+		List<ResourceReferenceInfo> references = t.getAllResourceReferences(p);
+
+		// validate
+		assertEquals(6, references.size());
+		assertThat(toResourceIds(references), containsInAnyOrder("Observation/1", "Observation/2", "Location/3", "Practitioner/4", "Organization/5", "DocumentReference/6"));
+	}
+
+	@Test
+	public void testGetAllResourceReferencesExcluding() {
+		// setup
+		Provenance p = new Provenance();
+		p.addTarget(new Reference("Observation/1"));
+		p.addTarget(new Reference("Observation/2"));
+		p.setLocation(new Reference("Location/3"));
+		p.getAgentFirstRep().setWho(new Reference("Practitioner/4"));
+		p.getAgentFirstRep().setOnBehalfOf(new Reference("Organization/5"));
+		p.getEntityFirstRep().setWhat(new Reference("DocumentReference/6"));
+
+		// execute
+		FhirTerser t = myCtx.newTerser();
+		List<ResourceReferenceInfo> references = t.getAllResourceReferencesExcluding(p, List.of("target"));
+
+		// validate
+		assertEquals(4, references.size());
+		assertThat(toResourceIds(references), containsInAnyOrder("Location/3", "Practitioner/4", "Organization/5", "DocumentReference/6"));
+	}
+
+	private List<String> toResourceIds(List<ResourceReferenceInfo> references) {
+		return references.stream()
+			 .map(ResourceReferenceInfo::getResourceReference)
+			 .map(IBaseReference::getReferenceElement)
+			 .map(IIdType::getValue)
+			 .collect(Collectors.toList());
 	}
 
 	@Test

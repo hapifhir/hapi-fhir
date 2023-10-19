@@ -63,16 +63,21 @@ public class TermVersionAdapterSvcR4 extends BaseTermVersionAdapterSvcImpl imple
 	}
 
 	@Override
-	public IIdType createOrUpdateCodeSystem(org.hl7.fhir.r4.model.CodeSystem theCodeSystemResource, RequestDetails theRequestDetails) {
+	public IIdType createOrUpdateCodeSystem(
+			org.hl7.fhir.r4.model.CodeSystem theCodeSystemResource, RequestDetails theRequestDetails) {
 		validateCodeSystemForStorage(theCodeSystemResource);
 		if (isBlank(theCodeSystemResource.getIdElement().getIdPart())) {
 			if (theCodeSystemResource.getUrl().contains(LOINC_LOW)) {
 				throw new InvalidParameterException(Msg.code(859) + "'loinc' CodeSystem must have an 'ID' element");
 			}
 			String matchUrl = "CodeSystem?url=" + UrlUtil.escapeUrlParam(theCodeSystemResource.getUrl());
-			return myCodeSystemResourceDao.update(theCodeSystemResource, matchUrl, theRequestDetails).getId();
+			return myCodeSystemResourceDao
+					.update(theCodeSystemResource, matchUrl, theRequestDetails)
+					.getId();
 		} else {
-			return myCodeSystemResourceDao.update(theCodeSystemResource, theRequestDetails).getId();
+			return myCodeSystemResourceDao
+					.update(theCodeSystemResource, theRequestDetails)
+					.getId();
 		}
 	}
 
@@ -95,5 +100,4 @@ public class TermVersionAdapterSvcR4 extends BaseTermVersionAdapterSvcImpl imple
 			myValueSetResourceDao.update(theValueSet);
 		}
 	}
-
 }

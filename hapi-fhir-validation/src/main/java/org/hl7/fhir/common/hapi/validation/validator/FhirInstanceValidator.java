@@ -13,15 +13,16 @@ import org.hl7.fhir.r5.model.Base;
 import org.hl7.fhir.r5.model.TypeDetails;
 import org.hl7.fhir.r5.model.ValueSet;
 import org.hl7.fhir.r5.utils.FHIRPathEngine;
+import org.hl7.fhir.r5.utils.FHIRPathUtilityClasses.FunctionDetails;
 import org.hl7.fhir.r5.utils.validation.IValidationPolicyAdvisor;
 import org.hl7.fhir.r5.utils.validation.IValidatorResourceFetcher;
 import org.hl7.fhir.r5.utils.validation.constants.BestPracticeWarningLevel;
 import org.hl7.fhir.utilities.validation.ValidationMessage;
 
-import javax.annotation.Nonnull;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import javax.annotation.Nonnull;
 
 @SuppressWarnings({"PackageAccessibility", "Duplicates"})
 public class FhirInstanceValidator extends BaseValidatorBridge implements IInstanceValidatorModule {
@@ -225,24 +226,25 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 		VersionSpecificWorkerContextWrapper wrappedWorkerContext = provideWorkerContext();
 
 		return new ValidatorWrapper()
-			.setAnyExtensionsAllowed(isAnyExtensionsAllowed())
-			.setBestPracticeWarningLevel(getBestPracticeWarningLevel())
-			.setErrorForUnknownProfiles(isErrorForUnknownProfiles())
-			.setExtensionDomains(getExtensionDomains())
-			.setValidationPolicyAdvisor(validatorPolicyAdvisor)
-			.setNoTerminologyChecks(isNoTerminologyChecks())
-			.setNoExtensibleWarnings(isNoExtensibleWarnings())
-			.setNoBindingMsgSuppressed(isNoBindingMsgSuppressed())
-			.setValidatorResourceFetcher(getValidatorResourceFetcher())
-			.setAssumeValidRestReferences(isAssumeValidRestReferences())
-			.validate(wrappedWorkerContext, theValidationCtx);
+				.setAnyExtensionsAllowed(isAnyExtensionsAllowed())
+				.setBestPracticeWarningLevel(getBestPracticeWarningLevel())
+				.setErrorForUnknownProfiles(isErrorForUnknownProfiles())
+				.setExtensionDomains(getExtensionDomains())
+				.setValidationPolicyAdvisor(validatorPolicyAdvisor)
+				.setNoTerminologyChecks(isNoTerminologyChecks())
+				.setNoExtensibleWarnings(isNoExtensibleWarnings())
+				.setNoBindingMsgSuppressed(isNoBindingMsgSuppressed())
+				.setValidatorResourceFetcher(getValidatorResourceFetcher())
+				.setAssumeValidRestReferences(isAssumeValidRestReferences())
+				.validate(wrappedWorkerContext, theValidationCtx);
 	}
 
 	@Nonnull
 	protected VersionSpecificWorkerContextWrapper provideWorkerContext() {
 		VersionSpecificWorkerContextWrapper wrappedWorkerContext = myWrappedWorkerContext;
 		if (wrappedWorkerContext == null) {
-			wrappedWorkerContext = VersionSpecificWorkerContextWrapper.newVersionSpecificWorkerContextWrapper(myValidationSupport);
+			wrappedWorkerContext =
+					VersionSpecificWorkerContextWrapper.newVersionSpecificWorkerContextWrapper(myValidationSupport);
 		}
 		myWrappedWorkerContext = wrappedWorkerContext;
 		return wrappedWorkerContext;
@@ -283,11 +285,11 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 		}
 	}
 
-
 	public static class NullEvaluationContext implements FHIRPathEngine.IEvaluationContext {
 
 		@Override
-		public List<Base> resolveConstant(Object appContext, String name, boolean beforeContext) throws PathEngineException {
+		public List<Base> resolveConstant(Object appContext, String name, boolean beforeContext)
+				throws PathEngineException {
 			return Collections.emptyList();
 		}
 
@@ -307,12 +309,14 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 		}
 
 		@Override
-		public TypeDetails checkFunction(Object appContext, String functionName, List<TypeDetails> parameters) throws PathEngineException {
+		public TypeDetails checkFunction(Object appContext, String functionName, List<TypeDetails> parameters)
+				throws PathEngineException {
 			return null;
 		}
 
 		@Override
-		public List<Base> executeFunction(Object appContext, List<Base> focus, String functionName, List<List<Base>> parameters) {
+		public List<Base> executeFunction(
+				Object appContext, List<Base> focus, String functionName, List<List<Base>> parameters) {
 			return null;
 		}
 
@@ -331,6 +335,4 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 			return null;
 		}
 	}
-
-
 }

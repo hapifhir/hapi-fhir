@@ -64,7 +64,11 @@ public class HapiMigrationLock implements AutoCloseable {
 				retryCount++;
 
 				if (retryCount < ourMaxRetryAttempts) {
-					ourLog.info("Waiting for lock on {}.  Retry {}/{}", myMigrationStorageSvc.getMigrationTablename(), retryCount, ourMaxRetryAttempts);
+					ourLog.info(
+							"Waiting for lock on {}.  Retry {}/{}",
+							myMigrationStorageSvc.getMigrationTablename(),
+							retryCount,
+							ourMaxRetryAttempts);
 					Thread.sleep(SLEEP_MILLIS_BETWEEN_LOCK_RETRIES);
 				}
 			} catch (InterruptedException ex) {
@@ -72,12 +76,14 @@ public class HapiMigrationLock implements AutoCloseable {
 			}
 		} while (retryCount < ourMaxRetryAttempts);
 
-		String message = "Unable to obtain table lock - another database migration may be running.  If no " +
-			"other database migration is running, then the previous migration did not shut down properly and the " +
-			"lock record needs to be deleted manually.  The lock record is located in the " + myMigrationStorageSvc.getMigrationTablename() + " table with " +
-			"INSTALLED_RANK = " + LOCK_PID;
+		String message = "Unable to obtain table lock - another database migration may be running.  If no "
+				+ "other database migration is running, then the previous migration did not shut down properly and the "
+				+ "lock record needs to be deleted manually.  The lock record is located in the "
+				+ myMigrationStorageSvc.getMigrationTablename() + " table with " + "INSTALLED_RANK = "
+				+ LOCK_PID;
 
-		Optional<HapiMigrationEntity> otherLockFound = myMigrationStorageSvc.findFirstByPidAndNotDescription(LOCK_PID, myLockDescription);
+		Optional<HapiMigrationEntity> otherLockFound =
+				myMigrationStorageSvc.findFirstByPidAndNotDescription(LOCK_PID, myLockDescription);
 		if (otherLockFound.isPresent()) {
 			message += " and DESCRIPTION = " + otherLockFound.get().getDescription();
 		}
@@ -98,7 +104,8 @@ public class HapiMigrationLock implements AutoCloseable {
 			return false;
 		}
 
-		ourLog.info("Repairing lock table.  Removing row in " + myMigrationStorageSvc.getMigrationTablename() + " with INSTALLED_RANK = " + LOCK_PID + " and DESCRIPTION = " + description);
+		ourLog.info("Repairing lock table.  Removing row in " + myMigrationStorageSvc.getMigrationTablename()
+				+ " with INSTALLED_RANK = " + LOCK_PID + " and DESCRIPTION = " + description);
 		boolean result = myMigrationStorageSvc.deleteLockRecord(description);
 		if (result) {
 			ourLog.info("Successfully removed lock record");

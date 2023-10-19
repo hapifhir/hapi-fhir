@@ -35,7 +35,8 @@ import javax.annotation.Nonnull;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
-public class FetchPartitionedFilesStep implements IFirstJobStepWorker<Batch2BulkImportPullJobParameters, BulkImportFilePartitionResult> {
+public class FetchPartitionedFilesStep
+		implements IFirstJobStepWorker<Batch2BulkImportPullJobParameters, BulkImportFilePartitionResult> {
 	private static final Logger ourLog = getLogger(FetchPartitionedFilesStep.class);
 
 	private final IBulkDataImportSvc myBulkDataImportSvc;
@@ -47,9 +48,9 @@ public class FetchPartitionedFilesStep implements IFirstJobStepWorker<Batch2Bulk
 	@Nonnull
 	@Override
 	public RunOutcome run(
-		@Nonnull StepExecutionDetails<Batch2BulkImportPullJobParameters, VoidModel> theStepExecutionDetails,
-		@Nonnull IJobDataSink<BulkImportFilePartitionResult> theDataSink
-	) throws JobExecutionFailedException {
+			@Nonnull StepExecutionDetails<Batch2BulkImportPullJobParameters, VoidModel> theStepExecutionDetails,
+			@Nonnull IJobDataSink<BulkImportFilePartitionResult> theDataSink)
+			throws JobExecutionFailedException {
 		String jobId = theStepExecutionDetails.getParameters().getJobId();
 
 		ourLog.info("Start FetchPartitionedFilesStep for jobID {} ", jobId);
@@ -68,7 +69,10 @@ public class FetchPartitionedFilesStep implements IFirstJobStepWorker<Batch2Bulk
 			theDataSink.accept(result);
 		}
 
-		ourLog.info("FetchPartitionedFilesStep complete for jobID {}.  Submitted {} files to next step.", jobId, job.getFileCount());
+		ourLog.info(
+				"FetchPartitionedFilesStep complete for jobID {}.  Submitted {} files to next step.",
+				jobId,
+				job.getFileCount());
 
 		return RunOutcome.SUCCESS;
 	}

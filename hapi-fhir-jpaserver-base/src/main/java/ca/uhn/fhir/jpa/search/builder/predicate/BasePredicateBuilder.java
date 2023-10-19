@@ -29,9 +29,9 @@ import com.healthmarketscience.sqlbuilder.BinaryCondition;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbColumn;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbTable;
 
-import javax.annotation.Nonnull;
 import java.util.Collection;
 import java.util.List;
+import javax.annotation.Nonnull;
 
 public abstract class BasePredicateBuilder {
 
@@ -40,7 +40,6 @@ public abstract class BasePredicateBuilder {
 	public BasePredicateBuilder(SearchQueryBuilder theSearchSqlBuilder) {
 		mySearchSqlBuilder = theSearchSqlBuilder;
 	}
-
 
 	PartitionSettings getPartitionSettings() {
 		return mySearchSqlBuilder.getPartitionSettings();
@@ -76,8 +75,8 @@ public abstract class BasePredicateBuilder {
 		mySearchSqlBuilder.setMatchNothing();
 	}
 
-
-	protected BinaryCondition createConditionForValueWithComparator(ParamPrefixEnum theComparator, DbColumn theColumn, Object theValue) {
+	protected BinaryCondition createConditionForValueWithComparator(
+			ParamPrefixEnum theComparator, DbColumn theColumn, Object theValue) {
 		return mySearchSqlBuilder.createConditionForValueWithComparator(theComparator, theColumn, theValue);
 	}
 
@@ -88,5 +87,4 @@ public abstract class BasePredicateBuilder {
 	public void addJoin(DbTable theFromTable, DbTable theToTable, DbColumn theFromColumn, DbColumn theToColumn) {
 		mySearchSqlBuilder.addJoin(theFromTable, theToTable, theFromColumn, theToColumn);
 	}
-
 }

@@ -1,0 +1,9 @@
+---
+type: fix
+issue: 5005
+title: "
+   Nickname Service Config has been moved out of search parameters
+   as an optional config to add.
+   Nickname service now has an interface to allow flexibility
+   in implementation.
+"

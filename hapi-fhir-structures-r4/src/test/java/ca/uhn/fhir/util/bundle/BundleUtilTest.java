@@ -1,11 +1,14 @@
 package ca.uhn.fhir.util.bundle;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.valueset.BundleEntrySearchModeEnum;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.BundleBuilder;
 import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.TestUtil;
 import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.Medication;
@@ -16,12 +19,14 @@ import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.UriType;
 import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
 
+import static ca.uhn.fhir.util.BundleUtil.DIFFERENT_LINK_ERROR_MSG;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
@@ -33,39 +38,135 @@ import static org.hl7.fhir.r4.model.Bundle.HTTPVerb.GET;
 import static org.hl7.fhir.r4.model.Bundle.HTTPVerb.POST;
 import static org.hl7.fhir.r4.model.Bundle.HTTPVerb.PUT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class BundleUtilTest {
 
-	private static FhirContext ourCtx = FhirContext.forR4();
+	private static final FhirContext ourCtx = FhirContext.forR4Cached();
 
-	@Test
-	public void testGetLink() {
-		Bundle b = new Bundle();
-		b.getLinkOrCreate("prev").setUrl("http://bar");
-		b.getLinkOrCreate("next").setUrl("http://foo");
-		assertEquals("http://foo", BundleUtil.getLinkUrlOfType(ourCtx, b, "next"));
-	}
 
-	@Test
-	public void testGetLinkDoesntExist() {
-		Bundle b = new Bundle();
-		b.getLinkOrCreate("prev").setUrl("http://bar");
-		assertEquals(null, BundleUtil.getLinkUrlOfType(ourCtx, b, "next"));
+	@Nested
+	public class TestGetLinkUrlOfType {
+
+		@Test
+		public void testGetNextExists() {
+			Bundle b = new Bundle();
+			b.getLinkOrCreate("prev").setUrl("http://bar");
+			b.getLinkOrCreate("next").setUrl("http://foo");
+			assertEquals("http://foo", BundleUtil.getLinkUrlOfType(ourCtx, b, "next"));
+		}
+
+		@Test
+		public void testGetNextDoesntExist() {
+			Bundle b = new Bundle();
+			b.getLinkOrCreate("prev").setUrl("http://bar");
+			assertNull(BundleUtil.getLinkUrlOfType(ourCtx, b, "next"));
+		}
+
+		@Nested
+		public class TestGetPreviousLink {
+
+			@Test
+			public void testGetPrevious_exists_and_no_prev() {
+				Bundle b = new Bundle();
+				b.getLinkOrCreate(IBaseBundle.LINK_PREV).setUrl("http://bar");
+				assertEquals("http://bar", BundleUtil.getLinkUrlOfType(ourCtx, b, IBaseBundle.LINK_PREV));
+			}
+
+			@Test
+			public void testGetPrevious_exists_and_prev_also_and_equals() {
+				Bundle b = new Bundle();
+				b.getLinkOrCreate(IBaseBundle.LINK_PREV).setUrl("http://bar");
+				b.getLinkOrCreate("prev").setUrl("http://bar");
+				assertEquals("http://bar", BundleUtil.getLinkUrlOfType(ourCtx, b, IBaseBundle.LINK_PREV));
+			}
+
+			@Test
+			public void testGetPrevious_exists_and_prev_also_and_different_must_throw() {
+				Bundle b = new Bundle();
+				b.getLinkOrCreate(IBaseBundle.LINK_PREV).setUrl("http://bar");
+				b.getLinkOrCreate("prev").setUrl("http://foo");
+				InternalErrorException thrown = assertThrows(InternalErrorException.class,
+					() -> BundleUtil.getLinkUrlOfType(ourCtx, b, IBaseBundle.LINK_PREV));
+
+				String expectedExceptionMsg = Msg.code(2368) + DIFFERENT_LINK_ERROR_MSG
+					.replace("$PREVIOUS", "http://bar").replace("$PREV", "http://foo");
+				assertEquals(expectedExceptionMsg, thrown.getMessage());
+			}
+
+			@Test
+			public void testGetPrevious_doesnt_exist_neither_prev() {
+				Bundle b = new Bundle();
+				assertNull(BundleUtil.getLinkUrlOfType(ourCtx, b, IBaseBundle.LINK_PREV));
+			}
+
+			@Test
+			public void testGetPrevious_doesnt_exist_but_prev_does() {
+				Bundle b = new Bundle();
+				b.getLinkOrCreate("prev").setUrl("http://bar");
+				assertEquals("http://bar", BundleUtil.getLinkUrlOfType(ourCtx, b, IBaseBundle.LINK_PREV));
+			}
+
+			@Test
+			public void testGetPrev_exists_and_no_previous() {
+				Bundle b = new Bundle();
+				b.getLinkOrCreate("prev").setUrl("http://bar");
+				assertEquals("http://bar", BundleUtil.getLinkUrlOfType(ourCtx, b, "prev"));
+			}
+
+			@Test
+			public void testGetPrev_exists_and_previous_also_and_equals() {
+				Bundle b = new Bundle();
+				b.getLinkOrCreate(IBaseBundle.LINK_PREV).setUrl("http://bar");
+				b.getLinkOrCreate("prev").setUrl("http://bar");
+				assertEquals("http://bar", BundleUtil.getLinkUrlOfType(ourCtx, b, "prev"));
+			}
+
+			@Test
+			public void testGetPrev_exists_and_previous_also_and_different_must_throw() {
+				Bundle b = new Bundle();
+				b.getLinkOrCreate(IBaseBundle.LINK_PREV).setUrl("http://bar");
+				b.getLinkOrCreate("prev").setUrl("http://foo");
+				InternalErrorException thrown = assertThrows(InternalErrorException.class,
+					() -> BundleUtil.getLinkUrlOfType(ourCtx, b, "prev"));
+
+				String expectedExceptionMsg = Msg.code(2368) + DIFFERENT_LINK_ERROR_MSG
+					.replace("$PREVIOUS", "http://bar").replace("$PREV", "http://foo");
+				assertEquals(expectedExceptionMsg, thrown.getMessage());
+			}
+
+			@Test
+			public void testGetPrev_doesnt_exist_neither_previous() {
+				Bundle b = new Bundle();
+				assertNull(BundleUtil.getLinkUrlOfType(ourCtx, b, "prev"));
+			}
+
+			@Test
+			public void testGetPrev_doesnt_exist_but_previous_does() {
+				Bundle b = new Bundle();
+				b.getLinkOrCreate(IBaseBundle.LINK_PREV).setUrl("http://bar");
+				assertEquals("http://bar", BundleUtil.getLinkUrlOfType(ourCtx, b, "prev"));
+			}
+		}
 	}
 
 	@Test
 	public void testGetTotal() {
 		Bundle b = new Bundle();
 		b.setTotal(999);
-		assertEquals(999, BundleUtil.getTotal(ourCtx, b).intValue());
+		Integer total = BundleUtil.getTotal(ourCtx, b);
+		assertNotNull(total);
+		assertEquals(999, total.intValue());
 	}
 
 	@Test
 	public void testGetTotalNull() {
 		Bundle b = new Bundle();
-		assertEquals(null, BundleUtil.getTotal(ourCtx, b));
+		assertNull(BundleUtil.getTotal(ourCtx, b));
 	}
 
 	@Test
@@ -148,7 +249,6 @@ public class BundleUtilTest {
 
 		assertThat(b.getEntry(), hasSize(4));
 
-		List<Bundle.BundleEntryComponent> entry = b.getEntry();
 		int observationIndex = getIndexOfEntryWithId("Observation/O1", b);
 		int patientIndex = getIndexOfEntryWithId("Patient/P1", b);
 		int organizationIndex = getIndexOfEntryWithId("Organization/Org1", b);
@@ -182,7 +282,7 @@ public class BundleUtilTest {
 		try {
 			BundleUtil.sortEntriesIntoProcessingOrder(ourCtx, b);
 			fail();
-		} catch (IllegalStateException e ) {
+		} catch (IllegalStateException ignored) {
 
 		}
 	}
@@ -274,71 +374,72 @@ public class BundleUtilTest {
 	@Test
 	public void testBundleToSearchBundleEntryParts() {
 		//Given
-		String bundleString = "{\n" +
-			"  \"resourceType\": \"Bundle\",\n" +
-			"  \"id\": \"bd194b7f-ac1e-429a-a206-ee2c470f23b5\",\n" +
-			"  \"meta\": {\n" +
-			"    \"lastUpdated\": \"2021-10-18T16:25:55.330-07:00\"\n" +
-			"  },\n" +
-			"  \"type\": \"searchset\",\n" +
-			"  \"total\": 1,\n" +
-			"  \"link\": [\n" +
-			"    {\n" +
-			"      \"relation\": \"self\",\n" +
-			"      \"url\": \"http://localhost:8000/Patient?_count=1&_id=pata&_revinclude=Condition%3Asubject%3APatient\"\n" +
-			"    }\n" +
-			"  ],\n" +
-			"  \"entry\": [\n" +
-			"    {\n" +
-			"      \"fullUrl\": \"http://localhost:8000/Patient/pata\",\n" +
-			"      \"resource\": {\n" +
-			"        \"resourceType\": \"Patient\",\n" +
-			"        \"id\": \"pata\",\n" +
-			"        \"meta\": {\n" +
-			"          \"versionId\": \"1\",\n" +
-			"          \"lastUpdated\": \"2021-10-18T16:25:48.954-07:00\",\n" +
-			"          \"source\": \"#rnEjIucr8LR6Ze3x\"\n" +
-			"        },\n" +
-			"        \"name\": [\n" +
-			"          {\n" +
-			"            \"family\": \"Simpson\",\n" +
-			"            \"given\": [\n" +
-			"              \"Homer\",\n" +
-			"              \"J\"\n" +
-			"            ]\n" +
-			"          }\n" +
-			"        ]\n" +
-			"      },\n" +
-			"      \"search\": {\n" +
-			"        \"mode\": \"match\"\n" +
-			"      }\n" +
-			"    },\n" +
-			"    {\n" +
-			"      \"fullUrl\": \"http://localhost:8000/Condition/1626\",\n" +
-			"      \"resource\": {\n" +
-			"        \"resourceType\": \"Condition\",\n" +
-			"        \"id\": \"1626\",\n" +
-			"        \"meta\": {\n" +
-			"          \"versionId\": \"1\",\n" +
-			"          \"lastUpdated\": \"2021-10-18T16:25:51.672-07:00\",\n" +
-			"          \"source\": \"#gSOcGAdA3acaaNq1\"\n" +
-			"        },\n" +
-			"        \"identifier\": [\n" +
-			"          {\n" +
-			"            \"system\": \"urn:hssc:musc:conditionid\",\n" +
-			"            \"value\": \"1064115000.1.5\"\n" +
-			"          }\n" +
-			"        ],\n" +
-			"        \"subject\": {\n" +
-			"          \"reference\": \"Patient/pata\"\n" +
-			"        }\n" +
-			"      },\n" +
-			"      \"search\": {\n" +
-			"        \"mode\": \"include\"\n" +
-			"      }\n" +
-			"    }\n" +
-			"  ]\n" +
-			"}";
+		String bundleString = """
+			{
+			  "resourceType": "Bundle",
+			  "id": "bd194b7f-ac1e-429a-a206-ee2c470f23b5",
+			  "meta": {
+			    "lastUpdated": "2021-10-18T16:25:55.330-07:00"
+			  },
+			  "type": "searchset",
+			  "total": 1,
+			  "link": [
+			    {
+			      "relation": "self",
+			      "url": "http://localhost:8000/Patient?_count=1&_id=pata&_revinclude=Condition%3Asubject%3APatient"
+			    }
+			  ],
+			  "entry": [
+			    {
+			      "fullUrl": "http://localhost:8000/Patient/pata",
+			      "resource": {
+			        "resourceType": "Patient",
+			        "id": "pata",
+			        "meta": {
+			          "versionId": "1",
+			          "lastUpdated": "2021-10-18T16:25:48.954-07:00",
+			          "source": "#rnEjIucr8LR6Ze3x"
+			        },
+			        "name": [
+			          {
+			            "family": "Simpson",
+			            "given": [
+			              "Homer",
+			              "J"
+			            ]
+			          }
+			        ]
+			      },
+			      "search": {
+			        "mode": "match"
+			      }
+			    },
+			    {
+			      "fullUrl": "http://localhost:8000/Condition/1626",
+			      "resource": {
+			        "resourceType": "Condition",
+			        "id": "1626",
+			        "meta": {
+			          "versionId": "1",
+			          "lastUpdated": "2021-10-18T16:25:51.672-07:00",
+			          "source": "#gSOcGAdA3acaaNq1"
+			        },
+			        "identifier": [
+			          {
+			            "system": "urn:hssc:musc:conditionid",
+			            "value": "1064115000.1.5"
+			          }
+			        ],
+			        "subject": {
+			          "reference": "Patient/pata"
+			        }
+			      },
+			      "search": {
+			        "mode": "include"
+			      }
+			    }
+			  ]
+			}""";
 
 		Bundle bundle = ourCtx.newJsonParser().parseResource(Bundle.class, bundleString);
 

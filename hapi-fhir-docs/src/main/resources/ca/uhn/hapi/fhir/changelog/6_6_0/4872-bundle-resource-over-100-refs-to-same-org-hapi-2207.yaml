@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 4872
+title: "POSTing a Bundle with over 100 references to the same resource will fail with HAPI-2207 'Multiple resources match'.
+        This has been fixed."

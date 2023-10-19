@@ -23,6 +23,7 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
+import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -40,13 +41,16 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.Version;
-import java.util.Date;
 
 @Entity()
-@Table(name = "NPM_PACKAGE_VER_RES", uniqueConstraints = {
-}, indexes = {
-	@Index(name = "IDX_PACKVERRES_URL", columnList = "CANONICAL_URL")
-})
+@Table(
+		name = "NPM_PACKAGE_VER_RES",
+		uniqueConstraints = {},
+		indexes = {
+			@Index(name = "IDX_PACKVERRES_URL", columnList = "CANONICAL_URL"),
+			@Index(name = "FK_NPM_PACKVERRES_PACKVER", columnList = "PACKVER_PID"),
+			@Index(name = "FK_NPM_PKVR_RESID", columnList = "BINARY_RES_ID")
+		})
 public class NpmPackageVersionResourceEntity {
 
 	@Id
@@ -54,29 +58,48 @@ public class NpmPackageVersionResourceEntity {
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_NPM_PACKVERRES")
 	@Column(name = "PID")
 	private Long myId;
+
 	@ManyToOne
-	@JoinColumn(name = "PACKVER_PID", referencedColumnName = "PID", foreignKey = @ForeignKey(name = "FK_NPM_PACKVERRES_PACKVER"), nullable = false)
+	@JoinColumn(
+			name = "PACKVER_PID",
+			referencedColumnName = "PID",
+			foreignKey = @ForeignKey(name = "FK_NPM_PACKVERRES_PACKVER"),
+			nullable = false)
 	private NpmPackageVersionEntity myPackageVersion;
+
 	@OneToOne
-	@JoinColumn(name = "BINARY_RES_ID", referencedColumnName = "RES_ID", nullable = false, foreignKey = @ForeignKey(name = "FK_NPM_PKVR_RESID"))
+	@JoinColumn(
+			name = "BINARY_RES_ID",
+			referencedColumnName = "RES_ID",
+			nullable = false,
+			foreignKey = @ForeignKey(name = "FK_NPM_PKVR_RESID"))
 	private ResourceTable myResourceBinary;
+
 	@Column(name = "FILE_DIR", length = 200)
 	private String myDirectory;
+
 	@Column(name = "FILE_NAME", length = 200)
 	private String myFilename;
+
 	@Column(name = "RES_TYPE", length = ResourceTable.RESTYPE_LEN, nullable = false)
 	private String myResourceType;
+
 	@Column(name = "CANONICAL_URL", length = 200)
 	private String myCanonicalUrl;
+
 	@Column(name = "CANONICAL_VERSION", length = 200)
 	private String myCanonicalVersion;
+
 	@Enumerated(EnumType.STRING)
 	@Column(name = "FHIR_VERSION", length = NpmPackageVersionEntity.FHIR_VERSION_LENGTH, nullable = false)
 	private FhirVersionEnum myFhirVersion;
+
 	@Column(name = "FHIR_VERSION_ID", length = NpmPackageVersionEntity.FHIR_VERSION_ID_LENGTH, nullable = false)
 	private String myFhirVersionId;
+
 	@Column(name = "RES_SIZE_BYTES", nullable = false)
 	private long myResSizeBytes;
+
 	@Temporal(TemporalType.TIMESTAMP)
 	@Version
 	@Column(name = "UPDATED_TIME", nullable = false)
@@ -162,16 +185,15 @@ public class NpmPackageVersionResourceEntity {
 	public String toString() {
 
 		return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
-			.append("myId", myId)
-			.append("myCanonicalUrl", myCanonicalUrl)
-			.append("myCanonicalVersion", myCanonicalVersion)
-			.append("myResourceType", myResourceType)
-			.append("myDirectory", myDirectory)
-			.append("myFilename", myFilename)
-			.append("myPackageVersion", myPackageVersion)
-			.append("myResSizeBytes", myResSizeBytes)
-			.append("myVersion", myVersion)
-			.toString();
+				.append("myId", myId)
+				.append("myCanonicalUrl", myCanonicalUrl)
+				.append("myCanonicalVersion", myCanonicalVersion)
+				.append("myResourceType", myResourceType)
+				.append("myDirectory", myDirectory)
+				.append("myFilename", myFilename)
+				.append("myPackageVersion", myPackageVersion)
+				.append("myResSizeBytes", myResSizeBytes)
+				.append("myVersion", myVersion)
+				.toString();
 	}
-
 }

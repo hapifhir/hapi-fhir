@@ -32,12 +32,11 @@ public class PackageUtils {
 	 * Default install types
 	 */
 	public static List<String> DEFAULT_INSTALL_TYPES = Collections.unmodifiableList(Lists.newArrayList(
-		"NamingSystem",
-		"CodeSystem",
-		"ValueSet",
-		"StructureDefinition",
-		"ConceptMap",
-		"SearchParameter",
-		"Subscription"
-	));
+			"NamingSystem",
+			"CodeSystem",
+			"ValueSet",
+			"StructureDefinition",
+			"ConceptMap",
+			"SearchParameter",
+			"Subscription"));
 }

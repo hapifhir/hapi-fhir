@@ -56,7 +56,9 @@ public class TokenParam extends BaseParam /*implements IQueryParameterType*/ {
 	 * @param theCodingDt The coding
 	 */
 	public TokenParam(BaseCodingDt theCodingDt) {
-		this(toSystemValue(theCodingDt.getSystemElement()), theCodingDt.getCodeElement().getValue());
+		this(
+				toSystemValue(theCodingDt.getSystemElement()),
+				theCodingDt.getCodeElement().getValue());
 	}
 
 	/**
@@ -67,7 +69,9 @@ public class TokenParam extends BaseParam /*implements IQueryParameterType*/ {
 	 * @param theIdentifierDt The identifier
 	 */
 	public TokenParam(BaseIdentifierDt theIdentifierDt) {
-		this(toSystemValue(theIdentifierDt.getSystemElement()), theIdentifierDt.getValueElement().getValue());
+		this(
+				toSystemValue(theIdentifierDt.getSystemElement()),
+				theIdentifierDt.getValueElement().getValue());
 	}
 
 	/**
@@ -87,7 +91,9 @@ public class TokenParam extends BaseParam /*implements IQueryParameterType*/ {
 
 	public TokenParam(String theSystem, String theValue, boolean theText) {
 		if (theText && isNotBlank(theSystem)) {
-			throw new IllegalArgumentException(Msg.code(1938) + "theSystem can not be non-blank if theText is true (:text searches do not include a system). In other words, set the first parameter to null for a text search");
+			throw new IllegalArgumentException(
+					Msg.code(1938)
+							+ "theSystem can not be non-blank if theText is true (:text searches do not include a system). In other words, set the first parameter to null for a text search");
 		}
 		setSystem(theSystem);
 		setValue(theValue);
@@ -125,7 +131,9 @@ public class TokenParam extends BaseParam /*implements IQueryParameterType*/ {
 	String doGetValueAsQueryToken(FhirContext theContext) {
 		if (getSystem() != null) {
 			if (getValue() != null) {
-				return ParameterUtil.escape(StringUtils.defaultString(getSystem())) + '|' + ParameterUtil.escape(getValue());
+				return ParameterUtil.escape(StringUtils.defaultString(getSystem()))
+						+ '|'
+						+ ParameterUtil.escape(getValue());
 			} else {
 				return ParameterUtil.escape(StringUtils.defaultString(getSystem())) + '|';
 			}
@@ -242,7 +250,6 @@ public class TokenParam extends BaseParam /*implements IQueryParameterType*/ {
 		return this;
 	}
 
-
 	@Override
 	public String toString() {
 		ToStringBuilder builder = new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE);
@@ -288,5 +295,4 @@ public class TokenParam extends BaseParam /*implements IQueryParameterType*/ {
 	private static String toSystemValue(UriDt theSystem) {
 		return theSystem.getValueAsString();
 	}
-
 }

@@ -58,5 +58,4 @@ public abstract class BaseContainedDt implements IDatatype {
 	public boolean hasFormatComment() {
 		return false;
 	}
-
 }

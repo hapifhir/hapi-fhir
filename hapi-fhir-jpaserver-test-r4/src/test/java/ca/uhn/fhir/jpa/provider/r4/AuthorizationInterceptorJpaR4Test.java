@@ -1,7 +1,7 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.jpa.bulk.export.provider.BulkDataExportProvider;
+import ca.uhn.fhir.batch2.jobs.export.BulkDataExportProvider;
 import ca.uhn.fhir.jpa.delete.ThreadSafeResourceDeleterSvc;
 import ca.uhn.fhir.jpa.interceptor.CascadingDeleteInterceptor;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
@@ -1120,7 +1120,6 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 		assertEquals(3, resp.getEntry().size());
 		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(resp));
 	}
-
 
 	@Test
 	public void testOperationEverything_SomeIncludedResourcesNotAuthorized() {

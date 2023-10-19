@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 4888
+jira: SMILE-6047
+title: "Previously, it was possible to create composite SP with any types of SP as components. 
+This has been fixed by limiting the component SP types to String, Token, Date, or Quantity."

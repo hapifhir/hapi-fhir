@@ -19,7 +19,6 @@
  */
 package ca.uhn.fhir.jpa.subscription.match.matcher.matching;
 
-import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryMatchResult;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
@@ -33,10 +32,13 @@ public class CompositeInMemoryDaoSubscriptionMatcher implements ISubscriptionMat
 
 	private final DaoSubscriptionMatcher myDaoSubscriptionMatcher;
 	private final InMemorySubscriptionMatcher myInMemorySubscriptionMatcher;
+
 	@Autowired
 	StorageSettings myStorageSettings;
 
-	public CompositeInMemoryDaoSubscriptionMatcher(DaoSubscriptionMatcher theDaoSubscriptionMatcher, InMemorySubscriptionMatcher theInMemorySubscriptionMatcher) {
+	public CompositeInMemoryDaoSubscriptionMatcher(
+			DaoSubscriptionMatcher theDaoSubscriptionMatcher,
+			InMemorySubscriptionMatcher theInMemorySubscriptionMatcher) {
 		myDaoSubscriptionMatcher = theDaoSubscriptionMatcher;
 		myInMemorySubscriptionMatcher = theInMemorySubscriptionMatcher;
 	}
@@ -49,7 +51,11 @@ public class CompositeInMemoryDaoSubscriptionMatcher implements ISubscriptionMat
 			if (result.supported()) {
 				result.setInMemory(true);
 			} else {
-				ourLog.info("Criteria {} for Subscription {} not supported by InMemoryMatcher: {}.  Reverting to DatabaseMatcher", theSubscription.getCriteriaString(), theSubscription.getIdElementString(), result.getUnsupportedReason());
+				ourLog.info(
+						"Criteria {} for Subscription {} not supported by InMemoryMatcher: {}.  Reverting to DatabaseMatcher",
+						theSubscription.getCriteriaString(),
+						theSubscription.getIdElementString(),
+						result.getUnsupportedReason());
 				result = myDaoSubscriptionMatcher.match(theSubscription, theMsg);
 			}
 		} else {

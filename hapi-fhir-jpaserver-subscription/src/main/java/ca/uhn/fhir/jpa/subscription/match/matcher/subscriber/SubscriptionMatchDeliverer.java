@@ -37,6 +37,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.messaging.MessageChannel;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 
 public class SubscriptionMatchDeliverer {
@@ -45,63 +48,108 @@ public class SubscriptionMatchDeliverer {
 	private final IInterceptorBroadcaster myInterceptorBroadcaster;
 	private final SubscriptionChannelRegistry mySubscriptionChannelRegistry;
 
-	public SubscriptionMatchDeliverer(FhirContext theFhirContext, IInterceptorBroadcaster theInterceptorBroadcaster, SubscriptionChannelRegistry theSubscriptionChannelRegistry) {
+	public SubscriptionMatchDeliverer(
+			FhirContext theFhirContext,
+			IInterceptorBroadcaster theInterceptorBroadcaster,
+			SubscriptionChannelRegistry theSubscriptionChannelRegistry) {
 		myFhirContext = theFhirContext;
 		myInterceptorBroadcaster = theInterceptorBroadcaster;
 		mySubscriptionChannelRegistry = theSubscriptionChannelRegistry;
 	}
 
-	public boolean deliverPayload(IBaseResource thePayload, ResourceModifiedMessage theMsg, ActiveSubscription theActiveSubscription, InMemoryMatchResult matchResult) {
-			EncodingEnum encoding = null;
+	public boolean deliverPayload(
+			@Nullable IBaseResource thePayload,
+			@Nonnull ResourceModifiedMessage theMsg,
+			@Nonnull ActiveSubscription theActiveSubscription,
+			@Nullable InMemoryMatchResult theInMemoryMatchResult) {
+		SubscriptionDeliveryRequest subscriptionDeliveryRequest;
+		if (thePayload != null) {
+			subscriptionDeliveryRequest = new SubscriptionDeliveryRequest(thePayload, theMsg, theActiveSubscription);
+		} else {
+			subscriptionDeliveryRequest =
+					new SubscriptionDeliveryRequest(theMsg.getPayloadId(myFhirContext), theMsg, theActiveSubscription);
+		}
+		ResourceDeliveryMessage deliveryMsg = buildResourceDeliveryMessage(subscriptionDeliveryRequest);
+		deliveryMsg.copyAdditionalPropertiesFrom(theMsg);
 
-		CanonicalSubscription subscription = theActiveSubscription.getSubscription();
-		String subscriptionId = theActiveSubscription.getId();;
+		return sendToDeliveryChannel(theActiveSubscription, theInMemoryMatchResult, deliveryMsg);
+	}
 
-		if (subscription != null && subscription.getPayloadString() != null && !subscription.getPayloadString().isEmpty()) {
+	public boolean deliverPayload(
+			@Nonnull SubscriptionDeliveryRequest subscriptionDeliveryRequest,
+			@Nullable InMemoryMatchResult theInMemoryMatchResult) {
+		ResourceDeliveryMessage deliveryMsg = buildResourceDeliveryMessage(subscriptionDeliveryRequest);
+
+		return sendToDeliveryChannel(
+				subscriptionDeliveryRequest.getActiveSubscription(), theInMemoryMatchResult, deliveryMsg);
+	}
+
+	private boolean sendToDeliveryChannel(
+			@Nonnull ActiveSubscription theActiveSubscription,
+			@Nullable InMemoryMatchResult theInMemoryMatchResult,
+			@Nonnull ResourceDeliveryMessage deliveryMsg) {
+		if (!callHooks(theActiveSubscription, theInMemoryMatchResult, deliveryMsg)) {
+			return false;
+		}
+
+		boolean retVal = false;
+		ResourceDeliveryJsonMessage wrappedMsg = new ResourceDeliveryJsonMessage(deliveryMsg);
+		MessageChannel deliveryChannel =
+				mySubscriptionChannelRegistry.getDeliverySenderChannel(theActiveSubscription.getChannelName());
+		if (deliveryChannel != null) {
+			retVal = true;
+			trySendToDeliveryChannel(wrappedMsg, deliveryChannel);
+		} else {
+			ourLog.warn("Do not have delivery channel for subscription {}", theActiveSubscription.getId());
+		}
+		return retVal;
+	}
+
+	private ResourceDeliveryMessage buildResourceDeliveryMessage(@Nonnull SubscriptionDeliveryRequest theRequest) {
+		EncodingEnum encoding = null;
+
+		CanonicalSubscription subscription = theRequest.getSubscription();
+
+		if (subscription != null
+				&& subscription.getPayloadString() != null
+				&& !subscription.getPayloadString().isEmpty()) {
 			encoding = EncodingEnum.forContentType(subscription.getPayloadString());
 		}
 		encoding = defaultIfNull(encoding, EncodingEnum.JSON);
 
 		ResourceDeliveryMessage deliveryMsg = new ResourceDeliveryMessage();
-		deliveryMsg.setPartitionId(theMsg.getPartitionId());
+		deliveryMsg.setPartitionId(theRequest.getRequestPartitionId());
 
-		if (thePayload != null) {
-			deliveryMsg.setPayload(myFhirContext, thePayload, encoding);
+		if (theRequest.hasPayload()) {
+			deliveryMsg.setPayload(myFhirContext, theRequest.getPayload(), encoding);
 		} else {
-			deliveryMsg.setPayloadId(theMsg.getPayloadId(myFhirContext));
+			deliveryMsg.setPayloadId(theRequest.getPayloadId());
 		}
 		deliveryMsg.setSubscription(subscription);
-		deliveryMsg.setOperationType(theMsg.getOperationType());
-		deliveryMsg.setTransactionId(theMsg.getTransactionId());
-		deliveryMsg.copyAdditionalPropertiesFrom(theMsg);
+		deliveryMsg.setOperationType(theRequest.getOperationType());
+		deliveryMsg.setTransactionId(theRequest.getTransactionId());
+		return deliveryMsg;
+	}
 
+	private boolean callHooks(
+			ActiveSubscription theActiveSubscription,
+			InMemoryMatchResult theInMemoryMatchResult,
+			ResourceDeliveryMessage deliveryMsg) {
 		// Interceptor call: SUBSCRIPTION_RESOURCE_MATCHED
 		HookParams params = new HookParams()
-			.add(CanonicalSubscription.class, theActiveSubscription.getSubscription())
-			.add(ResourceDeliveryMessage.class, deliveryMsg)
-			.add(InMemoryMatchResult.class, matchResult);
+				.add(CanonicalSubscription.class, theActiveSubscription.getSubscription())
+				.add(ResourceDeliveryMessage.class, deliveryMsg)
+				.add(InMemoryMatchResult.class, theInMemoryMatchResult);
 		if (!myInterceptorBroadcaster.callHooks(Pointcut.SUBSCRIPTION_RESOURCE_MATCHED, params)) {
-			ourLog.info("Interceptor has decided to abort processing of subscription {}", subscriptionId);
+			ourLog.info(
+					"Interceptor has decided to abort processing of subscription {}", theActiveSubscription.getId());
 			return false;
 		}
-
-		return sendToDeliveryChannel(theActiveSubscription, deliveryMsg);
+		return true;
 	}
 
-	private boolean sendToDeliveryChannel(ActiveSubscription nextActiveSubscription, ResourceDeliveryMessage theDeliveryMsg) {
-		boolean retVal = false;
-		ResourceDeliveryJsonMessage wrappedMsg = new ResourceDeliveryJsonMessage(theDeliveryMsg);
-		MessageChannel deliveryChannel = mySubscriptionChannelRegistry.getDeliverySenderChannel(nextActiveSubscription.getChannelName());
-		if (deliveryChannel != null) {
-			retVal = true;
-			trySendToDeliveryChannel(wrappedMsg, deliveryChannel);
-		} else {
-			ourLog.warn("Do not have delivery channel for subscription {}", nextActiveSubscription.getId());
-		}
-		return retVal;
-	}
-
-	private void trySendToDeliveryChannel(ResourceDeliveryJsonMessage theWrappedMsg, MessageChannel theDeliveryChannel) {
+	private void trySendToDeliveryChannel(
+			ResourceDeliveryJsonMessage theWrappedMsg, MessageChannel theDeliveryChannel) {
 		try {
 			boolean success = theDeliveryChannel.send(theWrappedMsg);
 			if (!success) {

@@ -75,7 +75,11 @@ public interface ISearchCacheSvc {
 	 * @param theRequestPartitionId Search should examine only the requested partitions. Cache MUST not return results matching the given partition IDs
 	 * @return A collection of candidate searches
 	 */
-	Optional<Search> findCandidatesForReuse(String theResourceType, String theQueryString, Instant theCreatedAfter, RequestPartitionId theRequestPartitionId);
+	Optional<Search> findCandidatesForReuse(
+			String theResourceType,
+			String theQueryString,
+			Instant theCreatedAfter,
+			RequestPartitionId theRequestPartitionId);
 
 	/**
 	 * This method will be called periodically to delete stale searches. Implementations are not required to do anything

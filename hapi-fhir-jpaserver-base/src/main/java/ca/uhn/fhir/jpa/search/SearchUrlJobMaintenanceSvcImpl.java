@@ -68,8 +68,7 @@ public class SearchUrlJobMaintenanceSvcImpl implements ISearchUrlJobMaintenanceS
 		return new Date(System.currentTimeMillis() - OUR_CUTOFF_IN_MILLISECONDS);
 	}
 
-	public static class SearchUrlMaintenanceJob implements HapiJob{
-
+	public static class SearchUrlMaintenanceJob implements HapiJob {
 
 		@Autowired
 		private ISearchUrlJobMaintenanceSvc mySearchUrlJobMaintenanceSvc;
@@ -78,6 +77,5 @@ public class SearchUrlJobMaintenanceSvcImpl implements ISearchUrlJobMaintenanceS
 		public void execute(JobExecutionContext theJobExecutionContext) throws JobExecutionException {
 			mySearchUrlJobMaintenanceSvc.removeStaleEntries();
 		}
-
 	}
 }

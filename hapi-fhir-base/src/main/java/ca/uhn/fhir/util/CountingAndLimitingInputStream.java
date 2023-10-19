@@ -56,7 +56,6 @@ public class CountingAndLimitingInputStream extends InputStream {
 		}
 	}
 
-
 	/**
 	 * Wraps another input stream, counting the number of bytes read.
 	 *

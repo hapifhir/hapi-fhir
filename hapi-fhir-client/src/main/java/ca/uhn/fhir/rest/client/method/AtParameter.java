@@ -27,5 +27,4 @@ class AtParameter extends SinceOrAtParameter {
 	public AtParameter() {
 		super(Constants.PARAM_AT, At.class);
 	}
-
 }

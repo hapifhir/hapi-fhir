@@ -82,10 +82,10 @@ public class ScheduledJobDefinition {
 	@Override
 	public String toString() {
 		return new ToStringBuilder(this)
-			.append("myJobClass", myJobClass)
-			.append("myId", myId)
-			.append("myGroup", myGroup)
-			.toString();
+				.append("myJobClass", myJobClass)
+				.append("myId", myId)
+				.append("myGroup", myGroup)
+				.toString();
 	}
 
 	public JobKey toJobKey() {

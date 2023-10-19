@@ -1,13 +1,14 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
+import ca.uhn.fhir.batch2.api.IJobCoordinator;
+import ca.uhn.fhir.batch2.jobs.export.BulkDataExportProvider;
+import ca.uhn.fhir.batch2.model.JobInstance;
+import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.api.model.Batch2JobInfo;
 import ca.uhn.fhir.jpa.api.model.BulkExportJobResults;
-import ca.uhn.fhir.jpa.api.svc.IBatch2JobRunner;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
-import ca.uhn.fhir.jpa.bulk.export.model.BulkExportJobStatusEnum;
 import ca.uhn.fhir.jpa.bulk.export.model.BulkExportResponseJson;
 import ca.uhn.fhir.jpa.bulk.export.provider.BulkDataExportProvider;
 import ca.uhn.fhir.jpa.dao.data.custom.IForcedIdQueries;
@@ -19,11 +20,11 @@ import ca.uhn.fhir.jpa.partition.RequestPartitionHelperSvc;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
-import ca.uhn.fhir.rest.api.server.bulk.BulkDataExportOptions;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.test.utilities.ITestDataBuilder;
 import ca.uhn.fhir.util.JsonUtil;
@@ -70,6 +71,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.isNotNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
@@ -621,7 +623,7 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 		private BulkDataExportProvider myProvider;
 
 		@Mock
-		private IBatch2JobRunner myJobRunner;
+		private IJobCoordinator myJobCoordinator;
 
 		@Spy
 		private RequestPartitionHelperSvc myRequestPartitionHelperSvc = new MultitenantServerR4Test.PartitionTesting.MyRequestPartitionHelperSvc();
@@ -661,21 +663,22 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 			map.put("Patient", Arrays.asList("Binary/1", "Binary/2"));
 			results.setResourceTypeToBinaryIds(map);
 
-			Batch2JobInfo jobInfo = new Batch2JobInfo();
-			jobInfo.setJobId(jobId);
-			jobInfo.setStatus(BulkExportJobStatusEnum.COMPLETE);
+			JobInstance jobInfo = new JobInstance();
+			jobInfo.setInstanceId(jobId);
+			jobInfo.setStatus(StatusEnum.COMPLETED);
 			jobInfo.setReport(JsonUtil.serialize(results));
+			jobInfo.setParameters(new BulkExportJobParameters());
 
 			// Create a bulk job
-			BulkDataExportOptions options = new BulkDataExportOptions();
+			BulkExportJobParameters options = new BulkExportJobParameters();
 			options.setResourceTypes(Sets.newHashSet("Patient"));
-			options.setExportStyle(BulkDataExportOptions.ExportStyle.SYSTEM);
+			options.setExportStyle(BulkExportJobParameters.ExportStyle.SYSTEM);
 
 			Batch2JobStartResponse startResponse = new Batch2JobStartResponse();
 			startResponse.setInstanceId(jobId);
-			when(myJobRunner.startNewJob(any()))
+			when(myJobCoordinator.startInstance(isNotNull(), any()))
 				.thenReturn(startResponse);
-			when(myJobRunner.getJobInfo(anyString()))
+			when(myJobCoordinator.getInstance(anyString()))
 				.thenReturn(jobInfo);
 
 			// mocking
@@ -712,7 +715,7 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 		}
 
 		private String buildExportUrl(String createInPartition, String jobId) {
-			return myClient.getServerBase() + "/" + createInPartition + "/" + JpaConstants.OPERATION_EXPORT_POLL_STATUS + "?"
+			return myClient.getServerBase() + "/" + createInPartition + "/" + ProviderConstants.OPERATION_EXPORT_POLL_STATUS + "?"
 				+ JpaConstants.PARAM_EXPORT_POLL_STATUS_JOB_ID + "=" + jobId;
 		}
 	}

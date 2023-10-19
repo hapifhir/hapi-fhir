@@ -33,16 +33,13 @@ import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Patient;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.Set;
+import javax.servlet.http.HttpServletRequest;
 
 @SuppressWarnings("InnerClassMayBeStatic")
 public class PartitionExamples {
 
-	public void multitenantServer() {
-
-	}
-
+	public void multitenantServer() {}
 
 	// START SNIPPET: partitionInterceptorRequestPartition
 	@Interceptor
@@ -63,10 +60,8 @@ public class PartitionExamples {
 			String tenantId = theRequestDetails.getTenantId();
 			return RequestPartitionId.fromPartitionName(tenantId);
 		}
-
 	}
 	// END SNIPPET: partitionInterceptorRequestPartition
-
 
 	// START SNIPPET: partitionInterceptorHeaders
 	@Interceptor
@@ -83,10 +78,8 @@ public class PartitionExamples {
 			String partitionName = theRequestDetails.getHeader("X-Partition-Name");
 			return RequestPartitionId.fromPartitionName(partitionName);
 		}
-
 	}
 	// END SNIPPET: partitionInterceptorHeaders
-
 
 	// START SNIPPET: partitionInterceptorResourceContents
 	@Interceptor
@@ -97,15 +90,13 @@ public class PartitionExamples {
 			if (theResource instanceof Patient) {
 				return RequestPartitionId.fromPartitionName("PATIENT");
 			} else if (theResource instanceof Observation) {
-					return RequestPartitionId.fromPartitionName("OBSERVATION");
+				return RequestPartitionId.fromPartitionName("OBSERVATION");
 			} else {
 				return RequestPartitionId.fromPartitionName("OTHER");
 			}
 		}
-
 	}
 	// END SNIPPET: partitionInterceptorResourceContents
-
 
 	// START SNIPPET: partitionInterceptorReadAllPartitions
 	@Interceptor
@@ -115,10 +106,8 @@ public class PartitionExamples {
 		public RequestPartitionId readPartition() {
 			return RequestPartitionId.allPartitions();
 		}
-
 	}
 	// END SNIPPET: partitionInterceptorReadAllPartitions
-
 
 	// START SNIPPET: partitionInterceptorReadBasedOnScopes
 	@Interceptor
@@ -128,21 +117,18 @@ public class PartitionExamples {
 		public RequestPartitionId readPartition(ServletRequestDetails theRequest) {
 
 			HttpServletRequest servletRequest = theRequest.getServletRequest();
-			Set<String> approvedScopes = (Set<String>) servletRequest.getAttribute("ca.cdr.servletattribute.session.oidc.approved_scopes");
+			Set<String> approvedScopes =
+					(Set<String>) servletRequest.getAttribute("ca.cdr.servletattribute.session.oidc.approved_scopes");
 
-			String partition = approvedScopes
-				.stream()
-				.filter(t->t.startsWith("partition-"))
-				.map(t->t.substring("partition-".length()))
-				.findFirst()
-				.orElseThrow(()->new InvalidRequestException("No partition scopes found in request"));
+			String partition = approvedScopes.stream()
+					.filter(t -> t.startsWith("partition-"))
+					.map(t -> t.substring("partition-".length()))
+					.findFirst()
+					.orElseThrow(() -> new InvalidRequestException("No partition scopes found in request"));
 			return RequestPartitionId.fromPartitionName(partition);
-
 		}
-
 	}
 	// END SNIPPET: partitionInterceptorReadBasedOnScopes
-
 
 	// START SNIPPET: multitenantServer
 	public class MultitenantServer extends RestfulServer {
@@ -168,6 +154,5 @@ public class PartitionExamples {
 		}
 	}
 	// END SNIPPET: multitenantServer
-
 
 }

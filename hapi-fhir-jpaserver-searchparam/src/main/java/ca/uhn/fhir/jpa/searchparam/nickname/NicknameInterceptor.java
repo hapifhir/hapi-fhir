@@ -21,13 +21,13 @@ package ca.uhn.fhir.jpa.searchparam.nickname;
 
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.jpa.nickname.INicknameSvc;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.param.StringParam;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -37,10 +37,10 @@ import java.util.Map;
 public class NicknameInterceptor {
 	private static final Logger ourLog = LoggerFactory.getLogger(NicknameInterceptor.class);
 
-	private final NicknameSvc myNicknameSvc;
+	private final INicknameSvc myNicknameSvc;
 
-	public NicknameInterceptor() throws IOException {
-		myNicknameSvc = new NicknameSvc();
+	public NicknameInterceptor(INicknameSvc theNicknameSvc) {
+		myNicknameSvc = theNicknameSvc;
 	}
 
 	@Hook(Pointcut.STORAGE_PRESEARCH_REGISTERED)
@@ -68,16 +68,14 @@ public class NicknameInterceptor {
 				if (stringParam.isNicknameExpand()) {
 					ourLog.debug("Found a nickname parameter to expand: {} {}", theParamName, stringParam);
 					toRemove.add(stringParam);
-					//First, attempt to expand as a formal name
+					// First, attempt to expand as a formal name
 					String name = stringParam.getValue().toLowerCase(Locale.ROOT);
 					Collection<String> expansions = myNicknameSvc.getEquivalentNames(name);
 					if (expansions == null) {
 						continue;
 					}
 					ourLog.debug("Parameter has been expanded to: {} {}", theParamName, String.join(", ", expansions));
-					expansions.stream()
-						.map(StringParam::new)
-						.forEach(toAdd::add);
+					expansions.stream().map(StringParam::new).forEach(toAdd::add);
 				}
 			}
 		}

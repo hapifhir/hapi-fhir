@@ -133,7 +133,7 @@ public class AddTableByColumnTask extends BaseTableTask {
 
 		// foreign keys
 		if (!myFKColumns.isEmpty()) {
-			for (int i =0; i < myFKColumns.size(); i++) {
+			for (int i = 0; i < myFKColumns.size(); i++) {
 				if (i > 0) {
 					sb.append(", ");
 				}
@@ -171,13 +171,13 @@ public class AddTableByColumnTask extends BaseTableTask {
 
 	@Override
 	public void doExecute() throws SQLException {
-		if (myCheckForExistingTables && JdbcUtils.getTableNames(getConnectionProperties()).contains(getTableName())) {
+		if (myCheckForExistingTables
+				&& JdbcUtils.getTableNames(getConnectionProperties()).contains(getTableName())) {
 			logInfo(ourLog, "Already have table named {} - No action performed", getTableName());
 			return;
 		}
 
 		executeSql(getTableName(), generateSQLCreateScript());
-
 	}
 
 	@Override

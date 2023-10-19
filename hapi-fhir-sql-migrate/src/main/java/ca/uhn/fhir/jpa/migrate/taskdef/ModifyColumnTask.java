@@ -54,7 +54,11 @@ public class ModifyColumnTask extends BaseTableColumnTypeTask {
 
 		Set<String> columnNames = JdbcUtils.getColumnNames(getConnectionProperties(), getTableName());
 		if (!columnNames.contains(getColumnName())) {
-			logInfo(ourLog, "Column {} doesn't exist on table {} - No action performed", getColumnName(), getTableName());
+			logInfo(
+					ourLog,
+					"Column {} doesn't exist on table {} - No action performed",
+					getColumnName(),
+					getTableName());
 			return;
 		}
 
@@ -83,7 +87,13 @@ public class ModifyColumnTask extends BaseTableColumnTypeTask {
 		boolean alreadyOfCorrectType = existingType.equals(getColumnType(), taskColumnLength);
 		boolean alreadyCorrectNullable = isNullable() == nullable;
 		if (alreadyOfCorrectType && alreadyCorrectNullable) {
-			logInfo(ourLog, "Column {} on table {} is already of type {} and has nullable {} - No action performed", getColumnName(), getTableName(), existingType, nullable);
+			logInfo(
+					ourLog,
+					"Column {} on table {} is already of type {} and has nullable {} - No action performed",
+					getColumnName(),
+					getTableName(),
+					existingType,
+					nullable);
 			return;
 		}
 
@@ -95,7 +105,8 @@ public class ModifyColumnTask extends BaseTableColumnTypeTask {
 		switch (getDriverType()) {
 			case DERBY_EMBEDDED:
 				if (!alreadyOfCorrectType) {
-					sql = "alter table " + getTableName() + " alter column " + getColumnName() + " set data type " + type;
+					sql = "alter table " + getTableName() + " alter column " + getColumnName() + " set data type "
+							+ type;
 				}
 				if (!alreadyCorrectNullable) {
 					sqlNotNull = "alter table " + getTableName() + " alter column " + getColumnName() + notNull;
@@ -113,15 +124,18 @@ public class ModifyColumnTask extends BaseTableColumnTypeTask {
 				}
 				if (!alreadyCorrectNullable) {
 					if (isNullable()) {
-						sqlNotNull = "alter table " + getTableName() + " alter column " + getColumnName() + " drop not null";
+						sqlNotNull =
+								"alter table " + getTableName() + " alter column " + getColumnName() + " drop not null";
 					} else {
-						sqlNotNull = "alter table " + getTableName() + " alter column " + getColumnName() + " set not null";
+						sqlNotNull =
+								"alter table " + getTableName() + " alter column " + getColumnName() + " set not null";
 					}
 				}
 				break;
 			case ORACLE_12C:
 				String oracleNullableStmt = !alreadyCorrectNullable ? notNull : "";
-				sql = "alter table " + getTableName() + " modify ( " + getColumnName() + " " + type + oracleNullableStmt + " )";
+				sql = "alter table " + getTableName() + " modify ( " + getColumnName() + " " + type + oracleNullableStmt
+						+ " )";
 				break;
 			case MSSQL_2012:
 				sql = "alter table " + getTableName() + " alter column " + getColumnName() + " " + type + notNull;
@@ -132,9 +146,11 @@ public class ModifyColumnTask extends BaseTableColumnTypeTask {
 				}
 				if (!alreadyCorrectNullable) {
 					if (isNullable()) {
-						sqlNotNull = "alter table " + getTableName() + " alter column " + getColumnName() + " drop not null";
+						sqlNotNull =
+								"alter table " + getTableName() + " alter column " + getColumnName() + " drop not null";
 					} else {
-						sqlNotNull = "alter table " + getTableName() + " alter column " + getColumnName() + " set not null";
+						sqlNotNull =
+								"alter table " + getTableName() + " alter column " + getColumnName() + " set not null";
 					}
 				}
 				break;
@@ -162,26 +178,33 @@ public class ModifyColumnTask extends BaseTableColumnTypeTask {
 		// Oracle sometimes stores the NULLABLE property in a Constraint, so override the result if this is an Oracle DB
 		switch (getDriverType()) {
 			case ORACLE_12C:
-				@Language("SQL") String findNullableConstraintSql =
-					"SELECT acc.owner, acc.table_name, acc.column_name, search_condition_vc " +
-						"FROM all_cons_columns acc, all_constraints ac " +
-						"WHERE acc.constraint_name = ac.constraint_name " +
-						"AND acc.table_name = ac.table_name " +
-						"AND ac.constraint_type = ? " +
-						"AND acc.table_name = ? " +
-						"AND acc.column_name = ? " +
-						"AND search_condition_vc = ? ";
+				@Language("SQL")
+				String findNullableConstraintSql =
+						"SELECT acc.owner, acc.table_name, acc.column_name, search_condition_vc "
+								+ "FROM all_cons_columns acc, user_constraints uc "
+								+ "WHERE acc.constraint_name = uc.constraint_name "
+								+ "AND acc.table_name = uc.table_name "
+								+ "AND uc.constraint_type = ? "
+								+ "AND acc.table_name = ? "
+								+ "AND acc.column_name = ? "
+								+ "AND search_condition_vc = ? ";
 				String[] params = new String[4];
 				params[0] = "C";
 				params[1] = tableName.toUpperCase();
 				params[2] = columnName.toUpperCase();
 				params[3] = "\"" + columnName.toUpperCase() + "\" IS NOT NULL";
-				List<Map<String, Object>> queryResults = getConnectionProperties().getTxTemplate().execute(t -> {
-					return getConnectionProperties().newJdbcTemplate().query(findNullableConstraintSql, params, new ColumnMapRowMapper());
-				});
-				// If this query returns a row then the existence of that row indicates that a NOT NULL constraint exists
+				List<Map<String, Object>> queryResults = getConnectionProperties()
+						.getTxTemplate()
+						.execute(t -> getConnectionProperties()
+								.newJdbcTemplate()
+								.query(findNullableConstraintSql, params, new ColumnMapRowMapper()));
+				// If this query returns a row then the existence of that row indicates that a NOT NULL constraint
+				// exists
 				// on this Column and we must override whatever result was previously calculated and set it to false
-				if (queryResults != null && queryResults.size() > 0 && queryResults.get(0) != null && !queryResults.get(0).isEmpty()) {
+				if (queryResults != null
+						&& queryResults.size() > 0
+						&& queryResults.get(0) != null
+						&& !queryResults.get(0).isEmpty()) {
 					result = false;
 				}
 				break;

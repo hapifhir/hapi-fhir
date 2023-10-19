@@ -24,5 +24,4 @@ public class TrustStoreInfo extends BaseStoreInfo {
 	public TrustStoreInfo(String theFilePath, String theStorePass, String theAlias) {
 		super(theFilePath, theStorePass, theAlias);
 	}
-
 }

@@ -67,7 +67,8 @@ public class IpsContext {
 		private final IpsSectionEnum mySection;
 		private final String myResourceType;
 
-		private IpsSectionContext(IBaseResource theSubject, IIdType theSubjectId, IpsSectionEnum theSection, String theResourceType) {
+		private IpsSectionContext(
+				IBaseResource theSubject, IIdType theSubjectId, IpsSectionEnum theSection, String theResourceType) {
 			super(theSubject, theSubjectId);
 			mySection = theSection;
 			myResourceType = theResourceType;
@@ -81,5 +82,4 @@ public class IpsContext {
 			return mySection;
 		}
 	}
-
 }

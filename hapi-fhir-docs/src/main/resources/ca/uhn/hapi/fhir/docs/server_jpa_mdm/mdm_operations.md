@@ -250,14 +250,17 @@ This operation takes the following parameters:
 </table>
 
 
-This operation returns a `Parameters` resource that looks like the following, in the example case where an MdmLink was updated from MATCH to NO_MATCH, with the MDM revisions sorted in *descending* order:
+This operation returns a `Parameters` resource that looks like the following, in the example case where an MdmLink was updated from MATCH to NO_MATCH. The MDM revisions are sorted:
+* First by golden resource ID in *ascending* order 
+* Second by source resource ID in *ascending* order
+* Third by revision timestamp in *descending* order.
 
 If there are any duplication between results returned by a combination of golden resource IDs and source IDs, they will be included only once.  So, for example, if there is one historical MDM link for golden resource 123 and source resource 456, and both of these identifiers are in the query, only a single historical entry will be returned.
 
 ### Example Use
 
 ```url
-http://example.com/$mdm-link-history?goldenResourceId=1553&sourceResourceId=1552
+http://example.com/$mdm-link-history?goldenResourceId=1553&resourceId=1552
 ```
 
 ```json
@@ -813,13 +816,13 @@ Content-Type: application/fhir+json; charset=UTF-8
         {
             "name":"resource",
             "resource": {
-                "resourceType":"Orgaization",
+                "resourceType":"Organization",
                 "name": "McMaster Family Practice"
             }
         },
         {
             "name":"resourceType",
-            "valueString": "Orgaization"
+            "valueString": "Organization"
         }
     ]
 }
@@ -836,7 +839,8 @@ your ruleset. It permits the user to reset the state of their MDM system without
 and Golden Resources.
 
 After the operation is complete, all targeted MDM links are removed from the system, and their related Golden Resources
-are deleted and expunged from the server.
+are deleted and expunged from the server. Additionally, the link history for targeted links and their related golden 
+resources will also be expunged.
 
 This operation takes two optional Parameters.
 

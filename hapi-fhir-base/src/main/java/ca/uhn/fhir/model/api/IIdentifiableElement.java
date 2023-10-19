@@ -55,5 +55,4 @@ public interface IIdentifiableElement extends IElement {
 	 */
 	@Deprecated
 	void setId(String theId);
-
 }

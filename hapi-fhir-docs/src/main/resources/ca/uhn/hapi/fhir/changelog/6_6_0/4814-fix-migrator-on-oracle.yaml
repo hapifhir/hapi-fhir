@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 4814
+title: "A recent regression prevented the SQL Migrator from running on Oracle. This has been
+  corrected."

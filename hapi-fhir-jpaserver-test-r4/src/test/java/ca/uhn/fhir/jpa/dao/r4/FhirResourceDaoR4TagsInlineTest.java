@@ -100,6 +100,9 @@ public class FhirResourceDaoR4TagsInlineTest extends BaseResourceProviderR4Test 
 		mySearchParameterDao.update(searchParameter, mySrd);
 		mySearchParamRegistry.forceRefresh();
 
+		logAllResources();
+		logAllResourceVersions();
+
 		createPatientsForInlineSearchTests();
 
 		logAllTokenIndexes();

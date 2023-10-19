@@ -28,6 +28,7 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.util.Collections;
 import java.util.Date;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -53,7 +54,7 @@ public class InstanceReindexServiceImplNarrativeR5Test {
 		newParams.myComboTokenNonUnique.add(new ResourceIndexedComboTokenNonUnique(myPartitionSettings, myEntity, "Patient?identifier=123"));
 
 		// Test
-		Parameters outcome = mySvc.buildIndexResponse(newParams(), newParams, true);
+		Parameters outcome = mySvc.buildIndexResponse(newParams(), newParams, true, Collections.emptyList());
 		ourLog.info("Output:\n{}", myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
 
 		// Verify
@@ -71,7 +72,7 @@ public class InstanceReindexServiceImplNarrativeR5Test {
 		newParams.myComboStringUniques.add(new ResourceIndexedComboStringUnique(myEntity, "Patient?identifier=123", new IdType("Parameter/foo")));
 
 		// Test
-		Parameters outcome = mySvc.buildIndexResponse(newParams(), newParams, true);
+		Parameters outcome = mySvc.buildIndexResponse(newParams(), newParams, true, Collections.emptyList());
 		ourLog.info("Output:\n{}", myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
 
 		// Verify
@@ -94,7 +95,7 @@ public class InstanceReindexServiceImplNarrativeR5Test {
 		newParams.mySearchParamPresentEntities.add(subject);
 
 		// Test
-		Parameters outcome = mySvc.buildIndexResponse(newParams(), newParams, true);
+		Parameters outcome = mySvc.buildIndexResponse(newParams(), newParams, true, Collections.emptyList());
 		ourLog.info("Output:\n{}", myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
 
 		// Verify
@@ -117,7 +118,7 @@ public class InstanceReindexServiceImplNarrativeR5Test {
 		newParams.myNumberParams.add(new ResourceIndexedSearchParamNumber(myPartitionSettings, "Immunization", "dose", BigDecimal.ONE));
 
 		// Test
-		Parameters outcome = mySvc.buildIndexResponse(newParams(), newParams, true);
+		Parameters outcome = mySvc.buildIndexResponse(newParams(), newParams, true, Collections.emptyList());
 		ourLog.info("Output:\n{}", myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
 
 		// Verify
@@ -136,7 +137,7 @@ public class InstanceReindexServiceImplNarrativeR5Test {
 		newParams.myLinks.add(ResourceLink.forLocalReference("Observation.subject", myEntity, "Patient", 123L, "123", new Date(), 555L));
 
 		// Test
-		Parameters outcome = mySvc.buildIndexResponse(newParams(), newParams, true);
+		Parameters outcome = mySvc.buildIndexResponse(newParams(), newParams, true, Collections.emptyList());
 		ourLog.info("Output:\n{}", myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
 
 		// Verify
@@ -156,7 +157,7 @@ public class InstanceReindexServiceImplNarrativeR5Test {
 		newParams.myLinks.add(ResourceLink.forLogicalReference("Observation.subject", myEntity, "http://foo/base/Patient/456", new Date()));
 
 		// Test
-		Parameters outcome = mySvc.buildIndexResponse(newParams(), newParams, true);
+		Parameters outcome = mySvc.buildIndexResponse(newParams(), newParams, true, Collections.emptyList());
 		ourLog.info("Output:\n{}", myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
 
 		// Verify
@@ -177,7 +178,7 @@ public class InstanceReindexServiceImplNarrativeR5Test {
 		newParams.myLinks.add(ResourceLink.forAbsoluteReference("Observation.subject", myEntity, new IdType("http://foo/base/Patient/123"), new Date()));
 
 		// Test
-		Parameters outcome = mySvc.buildIndexResponse(newParams(), newParams, true);
+		Parameters outcome = mySvc.buildIndexResponse(newParams(), newParams, true, Collections.emptyList());
 		ourLog.info("Output:\n{}", myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
 
 		// Verify
@@ -198,7 +199,7 @@ public class InstanceReindexServiceImplNarrativeR5Test {
 		newParams.myQuantityParams.add(new ResourceIndexedSearchParamQuantity(myPartitionSettings, "Observation", "value-quantity", BigDecimal.valueOf(123), "http://unitsofmeasure.org", "kg"));
 
 		// Test
-		Parameters outcome = mySvc.buildIndexResponse(newParams(), newParams, true);
+		Parameters outcome = mySvc.buildIndexResponse(newParams(), newParams, true, Collections.emptyList());
 		ourLog.info("Output:\n{}", myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
 
 		// Verify
@@ -219,7 +220,7 @@ public class InstanceReindexServiceImplNarrativeR5Test {
 		newParams.myQuantityNormalizedParams.add(new ResourceIndexedSearchParamQuantityNormalized(myPartitionSettings, "Observation", "value-quantity", 123.0, "http://unitsofmeasure.org", "kg"));
 
 		// Test
-		Parameters outcome = mySvc.buildIndexResponse(newParams(), newParams, true);
+		Parameters outcome = mySvc.buildIndexResponse(newParams(), newParams, true, Collections.emptyList());
 		ourLog.info("Output:\n{}", myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
 
 		// Verify
@@ -240,7 +241,7 @@ public class InstanceReindexServiceImplNarrativeR5Test {
 		newParams.myStringParams.add(new ResourceIndexedSearchParamString(myPartitionSettings, myStorageSettings, "Patient", "family", "Simpson", "SIMPSON"));
 
 		// Test
-		Parameters outcome = mySvc.buildIndexResponse(newParams(), newParams, true);
+		Parameters outcome = mySvc.buildIndexResponse(newParams(), newParams, true, Collections.emptyList());
 		ourLog.info("Output:\n{}", myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
 
 		// Verify
@@ -260,7 +261,7 @@ public class InstanceReindexServiceImplNarrativeR5Test {
 		newParams.myTokenParams.add(new ResourceIndexedSearchParamToken(myPartitionSettings, "Observation", "identifier", "http://id-system", "id-value"));
 
 		// Test
-		Parameters outcome = mySvc.buildIndexResponse(newParams(), newParams, true);
+		Parameters outcome = mySvc.buildIndexResponse(newParams(), newParams, true, Collections.emptyList());
 		ourLog.info("Output:\n{}", myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
 
 		// Verify
@@ -280,7 +281,7 @@ public class InstanceReindexServiceImplNarrativeR5Test {
 		newParams.myUriParams.add(new ResourceIndexedSearchParamUri(myPartitionSettings, "CodeSystem", "uri", "http://some-codesystem"));
 
 		// Test
-		Parameters outcome = mySvc.buildIndexResponse(newParams(), newParams, true);
+		Parameters outcome = mySvc.buildIndexResponse(newParams(), newParams, true, Collections.emptyList());
 		ourLog.info("Output:\n{}", myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
 
 		// Verify

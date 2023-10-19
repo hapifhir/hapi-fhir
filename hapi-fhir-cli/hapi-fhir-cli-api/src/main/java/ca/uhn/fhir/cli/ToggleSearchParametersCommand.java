@@ -43,14 +43,16 @@ public class ToggleSearchParametersCommand extends BaseCommand {
 		Options options = new Options();
 		addFhirVersionOption(options);
 		addBaseUrlOption(options);
-		addRequiredOption(options, "u", "url", true, "The code system URL associated with this upload (e.g. " + ITermLoaderSvc.SCT_URI + ")");
+		addRequiredOption(
+				options,
+				"u",
+				"url",
+				true,
+				"The code system URL associated with this upload (e.g. " + ITermLoaderSvc.SCT_URI + ")");
 		addBasicAuthOption(options);
 		return options;
 	}
 
 	@Override
-	public void run(CommandLine theCommandLine) throws ParseException, ExecutionException {
-
-	}
-
+	public void run(CommandLine theCommandLine) throws ParseException, ExecutionException {}
 }

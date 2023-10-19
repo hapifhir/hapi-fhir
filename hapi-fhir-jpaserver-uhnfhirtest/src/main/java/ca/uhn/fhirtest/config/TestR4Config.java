@@ -39,10 +39,10 @@ import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
-import javax.persistence.EntityManagerFactory;
-import javax.sql.DataSource;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
+import javax.persistence.EntityManagerFactory;
+import javax.sql.DataSource;
 
 @Configuration
 @Import({CommonConfig.class, JpaR4Config.class, HapiJpaConfig.class})
@@ -88,7 +88,6 @@ public class TestR4Config {
 		return retVal;
 	}
 
-
 	@Bean(name = "myPersistenceDataSourceR4")
 	public DataSource dataSource() {
 		BasicDataSource retVal = new BasicDataSource();
@@ -102,13 +101,12 @@ public class TestR4Config {
 		retVal.setPassword(myDbPassword);
 		TestR5Config.applyCommonDatasourceParams(retVal);
 
-		DataSource dataSource = ProxyDataSourceBuilder
-			.create(retVal)
-//			.logQueryBySlf4j(SLF4JLogLevel.INFO, "SQL")
-			.logSlowQueryBySlf4j(10000, TimeUnit.MILLISECONDS)
-			.afterQuery(new CurrentThreadCaptureQueriesListener())
-			.countQuery()
-			.build();
+		DataSource dataSource = ProxyDataSourceBuilder.create(retVal)
+				//			.logQueryBySlf4j(SLF4JLogLevel.INFO, "SQL")
+				.logSlowQueryBySlf4j(10000, TimeUnit.MILLISECONDS)
+				.afterQuery(new CurrentThreadCaptureQueriesListener())
+				.countQuery()
+				.build();
 
 		return dataSource;
 	}
@@ -122,8 +120,10 @@ public class TestR4Config {
 	}
 
 	@Bean
-	public LocalContainerEntityManagerFactoryBean entityManagerFactory(ConfigurableListableBeanFactory theConfigurableListableBeanFactory, FhirContext theFhirContext) {
-		LocalContainerEntityManagerFactoryBean retVal = HapiEntityManagerFactoryUtil.newEntityManagerFactory(theConfigurableListableBeanFactory, theFhirContext);
+	public LocalContainerEntityManagerFactoryBean entityManagerFactory(
+			ConfigurableListableBeanFactory theConfigurableListableBeanFactory, FhirContext theFhirContext) {
+		LocalContainerEntityManagerFactoryBean retVal = HapiEntityManagerFactoryUtil.newEntityManagerFactory(
+				theConfigurableListableBeanFactory, theFhirContext);
 		retVal.setPersistenceUnitName("PU_HapiFhirJpaR4");
 		retVal.setDataSource(dataSource());
 		retVal.setJpaProperties(jpaProperties());
@@ -147,8 +147,9 @@ public class TestR4Config {
 		extraProperties.put("hibernate.cache.use_minimal_puts", "false");
 
 		extraProperties.put(BackendSettings.backendKey(BackendSettings.TYPE), "lucene");
-		extraProperties.put(BackendSettings.backendKey(LuceneBackendSettings.ANALYSIS_CONFIGURER),
-			HapiHSearchAnalysisConfigurers.HapiLuceneAnalysisConfigurer.class.getName());
+		extraProperties.put(
+				BackendSettings.backendKey(LuceneBackendSettings.ANALYSIS_CONFIGURER),
+				HapiHSearchAnalysisConfigurers.HapiLuceneAnalysisConfigurer.class.getName());
 		extraProperties.put(BackendSettings.backendKey(LuceneIndexSettings.DIRECTORY_TYPE), "local-filesystem");
 		extraProperties.put(BackendSettings.backendKey(LuceneIndexSettings.DIRECTORY_ROOT), myFhirLuceneLocation);
 		extraProperties.put(BackendSettings.backendKey(LuceneBackendSettings.LUCENE_VERSION), "LUCENE_CURRENT");
@@ -162,7 +163,8 @@ public class TestR4Config {
 	 */
 	@Bean
 	@Lazy
-	public RequestValidatingInterceptor requestValidatingInterceptor(IInstanceValidatorModule theFhirInstanceValidator) {
+	public RequestValidatingInterceptor requestValidatingInterceptor(
+			IInstanceValidatorModule theFhirInstanceValidator) {
 		RequestValidatingInterceptor requestValidator = new RequestValidatingInterceptor();
 		requestValidator.setFailOnSeverity(null);
 		requestValidator.setAddResponseHeaderOnSeverity(null);
@@ -200,7 +202,8 @@ public class TestR4Config {
 	}
 
 	@Bean
-	public IIpsGeneratorSvc ipsGeneratorSvc(FhirContext theFhirContext, IIpsGenerationStrategy theGenerationStrategy, DaoRegistry theDaoRegistry) {
+	public IIpsGeneratorSvc ipsGeneratorSvc(
+			FhirContext theFhirContext, IIpsGenerationStrategy theGenerationStrategy, DaoRegistry theDaoRegistry) {
 		return new IpsGeneratorSvcImpl(theFhirContext, theGenerationStrategy, theDaoRegistry);
 	}
 
@@ -208,5 +211,4 @@ public class TestR4Config {
 	public IpsOperationProvider ipsOperationProvider(IIpsGeneratorSvc theIpsGeneratorSvc) {
 		return new IpsOperationProvider(theIpsGeneratorSvc);
 	}
-
 }

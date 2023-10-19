@@ -25,24 +25,24 @@ import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
 import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.api.VoidModel;
-import ca.uhn.fhir.batch2.jobs.export.models.BulkExportJobParameters;
 import ca.uhn.fhir.batch2.jobs.export.models.ResourceIdList;
 import ca.uhn.fhir.batch2.jobs.models.BatchResourceId;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.bulk.export.api.IBulkExportProcessor;
 import ca.uhn.fhir.jpa.bulk.export.model.ExportPIDIteratorParameters;
+import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import javax.annotation.Nonnull;
 
 public class FetchResourceIdsStep implements IFirstJobStepWorker<BulkExportJobParameters, ResourceIdList> {
 	private static final Logger ourLog = LoggerFactory.getLogger(FetchResourceIdsStep.class);
@@ -55,10 +55,14 @@ public class FetchResourceIdsStep implements IFirstJobStepWorker<BulkExportJobPa
 
 	@Nonnull
 	@Override
-	public RunOutcome run(@Nonnull StepExecutionDetails<BulkExportJobParameters, VoidModel> theStepExecutionDetails,
-								 @Nonnull IJobDataSink<ResourceIdList> theDataSink) throws JobExecutionFailedException {
+	public RunOutcome run(
+			@Nonnull StepExecutionDetails<BulkExportJobParameters, VoidModel> theStepExecutionDetails,
+			@Nonnull IJobDataSink<ResourceIdList> theDataSink)
+			throws JobExecutionFailedException {
 		BulkExportJobParameters params = theStepExecutionDetails.getParameters();
-		ourLog.info("Fetching resource IDs for bulk export job instance[{}]", theStepExecutionDetails.getInstance().getInstanceId());
+		ourLog.info(
+				"Fetching resource IDs for bulk export job instance[{}]",
+				theStepExecutionDetails.getInstance().getInstanceId());
 
 		ExportPIDIteratorParameters providerParams = new ExportPIDIteratorParameters();
 		providerParams.setInstanceId(theStepExecutionDetails.getInstance().getInstanceId());
@@ -71,16 +75,30 @@ public class FetchResourceIdsStep implements IFirstJobStepWorker<BulkExportJobPa
 		providerParams.setExpandMdm(params.isExpandMdm());
 		providerParams.setPartitionId(params.getPartitionId());
 
+		/*
+		 * we set all the requested resource types here so that
+		 * when we recursively fetch resource types for a given patient/group
+		 * we don't recurse for types that they did not request
+		 */
+		providerParams.setRequestedResourceTypes(params.getResourceTypes());
+
 		int submissionCount = 0;
 		try {
 			Set<BatchResourceId> submittedBatchResourceIds = new HashSet<>();
 
+			/*
+			 * We will fetch ids for each resource type in the ResourceTypes (_type filter).
+			 */
 			for (String resourceType : params.getResourceTypes()) {
 				providerParams.setResourceType(resourceType);
 
 				// filters are the filters for searching
-				ourLog.info("Running FetchResourceIdsStep for resource type: {} with params: {}", resourceType, providerParams);
-				Iterator<IResourcePersistentId> pidIterator = myBulkExportProcessor.getResourcePidIterator(providerParams);
+				ourLog.info(
+						"Running FetchResourceIdsStep for resource type: {} with params: {}",
+						resourceType,
+						providerParams);
+				Iterator<IResourcePersistentId> pidIterator =
+						myBulkExportProcessor.getResourcePidIterator(providerParams);
 				List<BatchResourceId> idsToSubmit = new ArrayList<>();
 
 				if (!pidIterator.hasNext()) {
@@ -128,10 +146,11 @@ public class FetchResourceIdsStep implements IFirstJobStepWorker<BulkExportJobPa
 		return RunOutcome.SUCCESS;
 	}
 
-	private void submitWorkChunk(List<BatchResourceId> theBatchResourceIds,
-										  String theResourceType,
-										  BulkExportJobParameters theParams,
-										  IJobDataSink<ResourceIdList> theDataSink) {
+	private void submitWorkChunk(
+			List<BatchResourceId> theBatchResourceIds,
+			String theResourceType,
+			BulkExportJobParameters theParams,
+			IJobDataSink<ResourceIdList> theDataSink) {
 		ResourceIdList idList = new ResourceIdList();
 
 		idList.setIds(theBatchResourceIds);

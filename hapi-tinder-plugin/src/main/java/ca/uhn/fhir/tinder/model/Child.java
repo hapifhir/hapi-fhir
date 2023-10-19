@@ -83,7 +83,8 @@ public abstract class Child extends BaseElement {
 				retVal = getSingleType();
 			}
 		} else {
-			if (this instanceof Extension && ((Extension) this).getChildExtensions().size() > 0) {
+			if (this instanceof Extension
+					&& ((Extension) this).getChildExtensions().size() > 0) {
 				retVal = ((Extension) this).getNameType();
 			} else {
 				retVal = IDatatype.class.getSimpleName();
@@ -131,11 +132,11 @@ public abstract class Child extends BaseElement {
 		// } else {
 		// retVal = (elemName + getTypeSuffix());
 		// }
-		
+
 		if (retVal.equals("ResourceDt")) {
 			retVal = "IResource";
 		}
-		
+
 		return retVal;
 	}
 
@@ -152,19 +153,19 @@ public abstract class Child extends BaseElement {
 		return false;
 	}
 
-	public boolean isPrimitive (String theType) {
+	public boolean isPrimitive(String theType) {
 		return isPrimitiveInternal(theType);
 	}
 
 	public boolean isPrimitive() {
-		
+
 		if (IDatatype.class.getSimpleName().equals(getReferenceType())) {
 			return false;
 		}
 		return isPrimitiveInternal(getSingleType());
 	}
 
-	protected boolean isPrimitiveInternal (String theType) {
+	protected boolean isPrimitiveInternal(String theType) {
 		try {
 			String name = "ca.uhn.fhir.model.primitive." + theType;
 			Class.forName(name);
@@ -174,7 +175,7 @@ public abstract class Child extends BaseElement {
 		}
 	}
 
-	public String getPrimitiveType (String theType) throws ClassNotFoundException {
+	public String getPrimitiveType(String theType) throws ClassNotFoundException {
 		return getPrimitiveTypeInternal(theType);
 	}
 
@@ -182,13 +183,13 @@ public abstract class Child extends BaseElement {
 		return getPrimitiveTypeInternal(getSingleType());
 	}
 
-	protected String getPrimitiveTypeInternal (String theType) throws ClassNotFoundException {
+	protected String getPrimitiveTypeInternal(String theType) throws ClassNotFoundException {
 		String name = "ca.uhn.fhir.model.primitive." + theType;
 		Class<?> clazz = Class.forName(name);
 		if (clazz.equals(IdDt.class)) {
 			return String.class.getSimpleName();
 		}
-			
+
 		while (!clazz.getSuperclass().equals(BasePrimitive.class)) {
 			clazz = clazz.getSuperclass();
 			if (clazz.equals(Object.class)) {
@@ -199,7 +200,8 @@ public abstract class Child extends BaseElement {
 		ParameterizedType type = (ParameterizedType) clazz.getGenericSuperclass();
 		Type type2 = type.getActualTypeArguments()[0];
 		if (type2 instanceof GenericArrayType) {
-			String arrayType = ((GenericArrayType) type2).getGenericComponentType().toString();
+			String arrayType =
+					((GenericArrayType) type2).getGenericComponentType().toString();
 			return arrayType + "[]";
 		}
 		Class<?> rawType = (Class<?>) type2;
@@ -228,5 +230,4 @@ public abstract class Child extends BaseElement {
 	public boolean isSingleChildInstantiable() {
 		return true;
 	}
-
 }

@@ -27,7 +27,8 @@ import org.springframework.core.task.AsyncTaskExecutor;
  */
 public class ThreadPoolFactory {
 
-	public AsyncTaskExecutor newThreadPool(Integer theBundleBatchPoolSize, Integer theBundleBatchMaxPoolSize, String theThreadPrefix) {
+	public AsyncTaskExecutor newThreadPool(
+			Integer theBundleBatchPoolSize, Integer theBundleBatchMaxPoolSize, String theThreadPrefix) {
 		return ThreadPoolUtil.newThreadPool(theBundleBatchPoolSize, theBundleBatchMaxPoolSize, theThreadPrefix);
 	}
 }

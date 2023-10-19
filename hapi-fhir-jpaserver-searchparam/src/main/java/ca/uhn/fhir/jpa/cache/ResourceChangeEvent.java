@@ -36,13 +36,19 @@ public class ResourceChangeEvent implements IResourceChangeEvent {
 	private final List<IIdType> myUpdatedResourceIds;
 	private final List<IIdType> myDeletedResourceIds;
 
-	private ResourceChangeEvent(Collection<IIdType> theCreatedResourceIds, Collection<IIdType> theUpdatedResourceIds, Collection<IIdType> theDeletedResourceIds) {
+	private ResourceChangeEvent(
+			Collection<IIdType> theCreatedResourceIds,
+			Collection<IIdType> theUpdatedResourceIds,
+			Collection<IIdType> theDeletedResourceIds) {
 		myCreatedResourceIds = copyFrom(theCreatedResourceIds);
 		myUpdatedResourceIds = copyFrom(theUpdatedResourceIds);
 		myDeletedResourceIds = copyFrom(theDeletedResourceIds);
 	}
 
-	public static ResourceChangeEvent fromCreatedUpdatedDeletedResourceIds(List<IIdType> theCreatedResourceIds, List<IIdType> theUpdatedResourceIds, List<IIdType> theDeletedResourceIds) {
+	public static ResourceChangeEvent fromCreatedUpdatedDeletedResourceIds(
+			List<IIdType> theCreatedResourceIds,
+			List<IIdType> theUpdatedResourceIds,
+			List<IIdType> theDeletedResourceIds) {
 		return new ResourceChangeEvent(theCreatedResourceIds, theUpdatedResourceIds, theDeletedResourceIds);
 	}
 
@@ -75,9 +81,9 @@ public class ResourceChangeEvent implements IResourceChangeEvent {
 	@Override
 	public String toString() {
 		return new ToStringBuilder(this)
-			.append("myCreatedResourceIds", myCreatedResourceIds)
-			.append("myUpdatedResourceIds", myUpdatedResourceIds)
-			.append("myDeletedResourceIds", myDeletedResourceIds)
-			.toString();
+				.append("myCreatedResourceIds", myCreatedResourceIds)
+				.append("myUpdatedResourceIds", myUpdatedResourceIds)
+				.append("myDeletedResourceIds", myDeletedResourceIds)
+				.toString();
 	}
 }

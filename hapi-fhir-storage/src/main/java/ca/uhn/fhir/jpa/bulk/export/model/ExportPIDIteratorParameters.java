@@ -20,16 +20,19 @@
 package ca.uhn.fhir.jpa.bulk.export.model;
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.rest.api.server.bulk.BulkDataExportOptions;
+import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import static org.apache.commons.lang3.StringUtils.isBlank;
+
 public class ExportPIDIteratorParameters {
 	/**
-	 * Resource type
+	 * The primary resource type of interest
 	 */
 	private String myResourceType;
 
@@ -52,11 +55,12 @@ public class ExportPIDIteratorParameters {
 	 * of results/status).
 	 */
 	private String myInstanceId;
+
 	private String myChunkId;
 	/**
 	 * The export style
 	 */
-	private BulkDataExportOptions.ExportStyle myExportStyle;
+	private BulkExportJobParameters.ExportStyle myExportStyle;
 	/**
 	 * the group id
 	 */
@@ -73,6 +77,12 @@ public class ExportPIDIteratorParameters {
 	 * The partition id
 	 */
 	private RequestPartitionId myPartitionId;
+
+	/**
+	 * The list of resource types to recurse on.
+	 * This should always have at least one resource in it (the resource being requested)!
+	 */
+	private List<String> myRequestedResourceTypes;
 
 	public String getChunkId() {
 		return myChunkId;
@@ -114,11 +124,11 @@ public class ExportPIDIteratorParameters {
 		myInstanceId = theInstanceId;
 	}
 
-	public BulkDataExportOptions.ExportStyle getExportStyle() {
+	public BulkExportJobParameters.ExportStyle getExportStyle() {
 		return myExportStyle;
 	}
 
-	public void setExportStyle(BulkDataExportOptions.ExportStyle theExportStyle) {
+	public void setExportStyle(BulkExportJobParameters.ExportStyle theExportStyle) {
 		myExportStyle = theExportStyle;
 	}
 
@@ -158,9 +168,22 @@ public class ExportPIDIteratorParameters {
 		myPartitionId = thePartitionId;
 	}
 
+	public List<String> getRequestedResourceTypes() {
+		if (myRequestedResourceTypes == null) {
+			myRequestedResourceTypes = new ArrayList<>();
+			if (!isBlank(myResourceType)) {
+				myRequestedResourceTypes.add(myResourceType);
+			}
+		}
+		return myRequestedResourceTypes;
+	}
+
+	public void setRequestedResourceTypes(List<String> theRequestedResourceTypes) {
+		myRequestedResourceTypes = theRequestedResourceTypes;
+	}
+
 	@Override
 	public String toString() {
 		return ToStringBuilder.reflectionToString(this, ToStringStyle.SHORT_PREFIX_STYLE);
 	}
-
 }

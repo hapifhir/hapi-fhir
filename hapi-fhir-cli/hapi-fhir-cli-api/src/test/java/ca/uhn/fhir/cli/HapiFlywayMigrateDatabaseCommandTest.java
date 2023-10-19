@@ -181,8 +181,6 @@ public class HapiFlywayMigrateDatabaseCommandTest {
 		// Verify that foreign key FK_SEARCHRES_RES on HFJ_SEARCH_RESULT still exists
 		foreignKeys = JdbcUtils.getForeignKeys(connectionProperties, "HFJ_RESOURCE", "HFJ_SEARCH_RESULT");
 		assertTrue(foreignKeys.contains("FK_SEARCHRES_RES"));
-
-
 	}
 
 	@Test

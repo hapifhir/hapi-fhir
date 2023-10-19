@@ -27,5 +27,4 @@ public final class MetadataKeyResourcePid extends ResourceMetadataKeyEnum<Long> 
 	MetadataKeyResourcePid(String theValue) {
 		super(theValue, Long.class);
 	}
-
 }

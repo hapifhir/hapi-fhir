@@ -19,19 +19,19 @@
  */
 package ca.uhn.fhir.rest.server;
 
-import javax.servlet.http.HttpServletRequest;
-
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 
+import javax.servlet.http.HttpServletRequest;
+
 public interface IServerConformanceProvider<T extends IBaseResource> {
 
 	/**
 	 * Actually create and return the conformance statement
-	 * 
+	 *
 	 * See the class documentation for an important note if you are extending this class
 	 */
 	T getServerConformance(HttpServletRequest theRequest, RequestDetails theRequestDetails);
@@ -45,7 +45,7 @@ public interface IServerConformanceProvider<T extends IBaseResource> {
 	 * This setter is needed in implementation classes (along with
 	 * a no-arg constructor) to avoid reference cycles in the
 	 * Spring wiring of a RestfulServer instance.
-	 * 
+	 *
 	 * @param theRestfulServer
 	 */
 	void setRestfulServer(RestfulServer theRestfulServer);

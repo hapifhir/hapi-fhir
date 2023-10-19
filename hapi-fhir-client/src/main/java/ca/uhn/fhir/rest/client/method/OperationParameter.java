@@ -19,33 +19,30 @@
  */
 package ca.uhn.fhir.rest.client.method;
 
+import ca.uhn.fhir.context.ConfigurationException;
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-
+import ca.uhn.fhir.model.api.IDatatype;
+import ca.uhn.fhir.model.api.IQueryParameterAnd;
+import ca.uhn.fhir.model.api.IQueryParameterOr;
+import ca.uhn.fhir.model.api.IQueryParameterType;
+import ca.uhn.fhir.rest.annotation.OperationParam;
+import ca.uhn.fhir.rest.api.ValidationModeEnum;
+import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.util.ParametersUtil;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
-import ca.uhn.fhir.context.ConfigurationException;
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.api.IDatatype;
-import ca.uhn.fhir.model.api.IQueryParameterAnd;
-import ca.uhn.fhir.model.api.IQueryParameterOr;
-import ca.uhn.fhir.model.api.IQueryParameterType;
-import ca.uhn.fhir.rest.annotation.OperationParam;
-import ca.uhn.fhir.rest.api.QualifiedParamList;
-import ca.uhn.fhir.rest.api.ValidationModeEnum;
-import ca.uhn.fhir.rest.param.DateRangeParam;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import ca.uhn.fhir.util.ParametersUtil;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 
 public class OperationParameter implements IParameter {
 
@@ -56,8 +53,10 @@ public class OperationParameter implements IParameter {
 
 	private final FhirContext myContext;
 	private IOperationParamConverter myConverter;
+
 	@SuppressWarnings("rawtypes")
 	private int myMax;
+
 	private int myMin;
 	private final String myName;
 	private Class<?> myParameterType;
@@ -79,7 +78,6 @@ public class OperationParameter implements IParameter {
 		return myContext;
 	}
 
-
 	public String getName() {
 		return myName;
 	}
@@ -97,10 +95,17 @@ public class OperationParameter implements IParameter {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public void initializeTypes(Method theMethod, Class<? extends Collection<?>> theOuterCollectionType, Class<? extends Collection<?>> theInnerCollectionType, Class<?> theParameterType) {
+	public void initializeTypes(
+			Method theMethod,
+			Class<? extends Collection<?>> theOuterCollectionType,
+			Class<? extends Collection<?>> theInnerCollectionType,
+			Class<?> theParameterType) {
 		if (getContext().getVersion().getVersion().isRi()) {
 			if (IDatatype.class.isAssignableFrom(theParameterType)) {
-				throw new ConfigurationException(Msg.code(1408) + "Incorrect use of type " + theParameterType.getSimpleName() + " as parameter type for method when context is for version " + getContext().getVersion().getVersion().name() + " in method: " + theMethod.toString());
+				throw new ConfigurationException(Msg.code(1408) + "Incorrect use of type "
+						+ theParameterType.getSimpleName()
+						+ " as parameter type for method when context is for version "
+						+ getContext().getVersion().getVersion().name() + " in method: " + theMethod.toString());
 			}
 		}
 
@@ -121,12 +126,11 @@ public class OperationParameter implements IParameter {
 
 		boolean typeIsConcrete = !myParameterType.isInterface() && !Modifier.isAbstract(myParameterType.getModifiers());
 
-		//@formatter:off
-		boolean isSearchParam = 
-			IQueryParameterType.class.isAssignableFrom(myParameterType) || 
-			IQueryParameterOr.class.isAssignableFrom(myParameterType) ||
-			IQueryParameterAnd.class.isAssignableFrom(myParameterType); 
-		//@formatter:off
+		// @formatter:off
+		boolean isSearchParam = IQueryParameterType.class.isAssignableFrom(myParameterType)
+				|| IQueryParameterOr.class.isAssignableFrom(myParameterType)
+				|| IQueryParameterAnd.class.isAssignableFrom(myParameterType);
+		// @formatter:off
 
 		/*
 		 * Note: We say here !IBase.class.isAssignableFrom because a bunch of DSTU1/2 datatypes also
@@ -148,19 +152,21 @@ public class OperationParameter implements IParameter {
 			} else if (myParameterType.equals(ValidationModeEnum.class)) {
 				myParamType = "code";
 			} else if (IBase.class.isAssignableFrom(myParameterType) && typeIsConcrete) {
-				myParamType = myContext.getElementDefinition((Class<? extends IBase>) myParameterType).getName();
+				myParamType = myContext
+						.getElementDefinition((Class<? extends IBase>) myParameterType)
+						.getName();
 			} else if (isSearchParam) {
 				myParamType = "string";
 				mySearchParameterBinding = new SearchParameter(myName, myMin > 0);
 				mySearchParameterBinding.setCompositeTypes(COMPOSITE_TYPES);
-				mySearchParameterBinding.setType(myContext, theParameterType, theInnerCollectionType, theOuterCollectionType);
+				mySearchParameterBinding.setType(
+						myContext, theParameterType, theInnerCollectionType, theOuterCollectionType);
 				myConverter = new OperationParamConverter();
 			} else {
-				throw new ConfigurationException(Msg.code(1409) + "Invalid type for @OperationParam: " + myParameterType.getName());
+				throw new ConfigurationException(
+						Msg.code(1409) + "Invalid type for @OperationParam: " + myParameterType.getName());
 			}
-
 		}
-
 	}
 
 	public OperationParameter setConverter(IOperationParamConverter theConverter) {
@@ -169,7 +175,12 @@ public class OperationParameter implements IParameter {
 	}
 
 	@Override
-	public void translateClientArgumentIntoQueryArgument(FhirContext theContext, Object theSourceClientArgument, Map<String, List<String>> theTargetQueryArguments, IBaseResource theTargetResource) throws InternalErrorException {
+	public void translateClientArgumentIntoQueryArgument(
+			FhirContext theContext,
+			Object theSourceClientArgument,
+			Map<String, List<String>> theTargetQueryArguments,
+			IBaseResource theTargetResource)
+			throws InternalErrorException {
 		assert theTargetResource != null;
 		Object sourceClientArgument = theSourceClientArgument;
 		if (sourceClientArgument == null) {
@@ -180,10 +191,9 @@ public class OperationParameter implements IParameter {
 			sourceClientArgument = myConverter.outgoingClient(sourceClientArgument);
 		}
 
-		ParametersUtil.addParameterToParameters(theContext, (IBaseParameters) theTargetResource, myName, sourceClientArgument);
+		ParametersUtil.addParameterToParameters(
+				theContext, (IBaseParameters) theTargetResource, myName, sourceClientArgument);
 	}
-
-
 
 	public static void throwInvalidMode(String paramValues) {
 		throw new InvalidRequestException(Msg.code(1410) + "Invalid mode value: \"" + paramValues + "\"");
@@ -192,7 +202,6 @@ public class OperationParameter implements IParameter {
 	interface IOperationParamConverter {
 
 		Object outgoingClient(Object theObject);
-
 	}
 
 	class OperationParamConverter implements IOperationParamConverter {
@@ -204,12 +213,10 @@ public class OperationParameter implements IParameter {
 		@Override
 		public Object outgoingClient(Object theObject) {
 			IQueryParameterType obj = (IQueryParameterType) theObject;
-			IPrimitiveType<?> retVal = (IPrimitiveType<?>) myContext.getElementDefinition("string").newInstance();
+			IPrimitiveType<?> retVal =
+					(IPrimitiveType<?>) myContext.getElementDefinition("string").newInstance();
 			retVal.setValueAsString(obj.getValueAsQueryToken(myContext));
 			return retVal;
 		}
-
 	}
-
-
 }

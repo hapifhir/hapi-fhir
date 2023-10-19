@@ -37,5 +37,4 @@ public enum HistoryCountModeEnum {
 	 * Do not include a count in history responses
 	 */
 	COUNT_DISABLED
-
 }

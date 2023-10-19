@@ -32,5 +32,4 @@ public class PartitionInterceptorReadAllPartitions {
 	public RequestPartitionId readPartition() {
 		return RequestPartitionId.allPartitions();
 	}
-
 }

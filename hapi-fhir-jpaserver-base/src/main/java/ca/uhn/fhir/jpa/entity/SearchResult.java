@@ -22,13 +22,17 @@ package ca.uhn.fhir.jpa.entity;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
-import javax.persistence.*;
 import java.io.Serializable;
+import javax.persistence.*;
 
 @Entity
-@Table(name = "HFJ_SEARCH_RESULT", uniqueConstraints = {
-	@UniqueConstraint(name = "IDX_SEARCHRES_ORDER", columnNames = {"SEARCH_PID", "SEARCH_ORDER"})
-})
+@Table(
+		name = "HFJ_SEARCH_RESULT",
+		uniqueConstraints = {
+			@UniqueConstraint(
+					name = "IDX_SEARCHRES_ORDER",
+					columnNames = {"SEARCH_PID", "SEARCH_ORDER"})
+		})
 public class SearchResult implements Serializable {
 
 	private static final long serialVersionUID = 1L;
@@ -38,10 +42,13 @@ public class SearchResult implements Serializable {
 	@Id
 	@Column(name = "PID")
 	private Long myId;
+
 	@Column(name = "SEARCH_ORDER", nullable = false, insertable = true, updatable = false)
 	private int myOrder;
+
 	@Column(name = "RESOURCE_PID", insertable = true, updatable = false, nullable = false)
 	private Long myResourcePid;
+
 	@Column(name = "SEARCH_PID", insertable = true, updatable = false, nullable = false)
 	private Long mySearchPid;
 
@@ -63,10 +70,10 @@ public class SearchResult implements Serializable {
 	@Override
 	public String toString() {
 		return new ToStringBuilder(this)
-			.append("search", mySearchPid)
-			.append("order", myOrder)
-			.append("resourcePid", myResourcePid)
-			.toString();
+				.append("search", mySearchPid)
+				.append("order", myOrder)
+				.append("resourcePid", myResourcePid)
+				.toString();
 	}
 
 	@Override

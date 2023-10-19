@@ -58,5 +58,4 @@ public interface IAuthRuleBuilderOperationNamed {
 	 * Rule applies to invocations of this operation at any level (server, type or instance)
 	 */
 	IAuthRuleBuilderOperationNamedAndScoped atAnyLevel();
-
 }

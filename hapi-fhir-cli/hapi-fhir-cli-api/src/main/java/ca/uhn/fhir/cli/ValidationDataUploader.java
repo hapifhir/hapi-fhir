@@ -19,9 +19,9 @@
  */
 package ca.uhn.fhir.cli;
 
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.dstu2.resource.Bundle;
 import ca.uhn.fhir.model.dstu2.resource.Bundle.Entry;
 import ca.uhn.fhir.model.dstu2.resource.StructureDefinition;
@@ -61,7 +61,13 @@ public class ValidationDataUploader extends BaseCommand {
 		for (Iterator<Entry> iter = theBundle.getEntry().iterator(); iter.hasNext(); ) {
 			IBaseResource next = iter.next().getResource();
 			for (IIdType nextExclude : myExcludes) {
-				if (nextExclude.hasResourceType() && nextExclude.toUnqualifiedVersionless().getValue().equals(next.getIdElement().toUnqualifiedVersionless().getValue())) {
+				if (nextExclude.hasResourceType()
+						&& nextExclude
+								.toUnqualifiedVersionless()
+								.getValue()
+								.equals(next.getIdElement()
+										.toUnqualifiedVersionless()
+										.getValue())) {
 					iter.remove();
 					continue;
 				} else if (nextExclude.getIdPart().equals(next.getIdElement().getIdPart())) {
@@ -76,7 +82,13 @@ public class ValidationDataUploader extends BaseCommand {
 		for (Iterator<BundleEntryComponent> iter = theBundle.getEntry().iterator(); iter.hasNext(); ) {
 			IBaseResource next = iter.next().getResource();
 			for (IIdType nextExclude : myExcludes) {
-				if (nextExclude.hasResourceType() && nextExclude.toUnqualifiedVersionless().getValue().equals(next.getIdElement().toUnqualifiedVersionless().getValue())) {
+				if (nextExclude.hasResourceType()
+						&& nextExclude
+								.toUnqualifiedVersionless()
+								.getValue()
+								.equals(next.getIdElement()
+										.toUnqualifiedVersionless()
+										.getValue())) {
 					iter.remove();
 					continue;
 				} else if (nextExclude.getIdPart().equals(next.getIdElement().getIdPart())) {
@@ -88,10 +100,18 @@ public class ValidationDataUploader extends BaseCommand {
 	}
 
 	private void filterBundle(org.hl7.fhir.r4.model.Bundle theBundle) {
-		for (Iterator<org.hl7.fhir.r4.model.Bundle.BundleEntryComponent> iter = theBundle.getEntry().iterator(); iter.hasNext(); ) {
+		for (Iterator<org.hl7.fhir.r4.model.Bundle.BundleEntryComponent> iter =
+						theBundle.getEntry().iterator();
+				iter.hasNext(); ) {
 			IBaseResource next = iter.next().getResource();
 			for (IIdType nextExclude : myExcludes) {
-				if (nextExclude.hasResourceType() && nextExclude.toUnqualifiedVersionless().getValue().equals(next.getIdElement().toUnqualifiedVersionless().getValue())) {
+				if (nextExclude.hasResourceType()
+						&& nextExclude
+								.toUnqualifiedVersionless()
+								.getValue()
+								.equals(next.getIdElement()
+										.toUnqualifiedVersionless()
+										.getValue())) {
 					iter.remove();
 					continue;
 				} else if (nextExclude.getIdPart().equals(next.getIdElement().getIdPart())) {
@@ -119,7 +139,8 @@ public class ValidationDataUploader extends BaseCommand {
 
 		addFhirVersionOption(options);
 
-		opt = new Option(BASE_URL_PARAM, "target", true, "Base URL for the target server (e.g. \"http://example.com/fhir\")");
+		opt = new Option(
+				BASE_URL_PARAM, "target", true, "Base URL for the target server (e.g. \"http://example.com/fhir\")");
 		opt.setRequired(true);
 		options.addOption(opt);
 
@@ -163,10 +184,10 @@ public class ValidationDataUploader extends BaseCommand {
 		} else if (ctx.getVersion().getVersion() == FhirVersionEnum.R4) {
 			uploadDefinitionsR4(theCommandLine, ctx);
 		}
-
 	}
 
-	private void uploadDefinitionsDstu2(CommandLine theCommandLine, FhirContext ctx) throws CommandFailureException, ParseException {
+	private void uploadDefinitionsDstu2(CommandLine theCommandLine, FhirContext ctx)
+			throws CommandFailureException, ParseException {
 		IGenericClient client = newClient(theCommandLine);
 
 		ourLog.info("Uploading definitions to server");
@@ -176,7 +197,10 @@ public class ValidationDataUploader extends BaseCommand {
 		String vsContents;
 		try {
 			ctx.getVersion().getPathToSchemaDefinitions();
-			vsContents = IOUtils.toString(ValidationDataUploader.class.getResourceAsStream("/org/hl7/fhir/instance/model/valueset/" + "valuesets.xml"), "UTF-8");
+			vsContents = IOUtils.toString(
+					ValidationDataUploader.class.getResourceAsStream(
+							"/org/hl7/fhir/instance/model/valueset/" + "valuesets.xml"),
+					"UTF-8");
 		} catch (IOException e) {
 			throw new CommandFailureException(Msg.code(1591) + e.toString());
 		}
@@ -188,14 +212,19 @@ public class ValidationDataUploader extends BaseCommand {
 			ValueSet next = (ValueSet) i.getResource();
 			next.setId(next.getIdElement().toUnqualifiedVersionless());
 
-			ourLog.info("Uploading ValueSet {}/{} : {}", new Object[] {count, total, next.getIdElement().getValue()});
+			ourLog.info(
+					"Uploading ValueSet {}/{} : {}",
+					new Object[] {count, total, next.getIdElement().getValue()});
 			client.update().resource(next).execute();
 
 			count++;
 		}
 
 		try {
-			vsContents = IOUtils.toString(ValidationDataUploader.class.getResourceAsStream("/org/hl7/fhir/instance/model/valueset/" + "v3-codesystems.xml"), "UTF-8");
+			vsContents = IOUtils.toString(
+					ValidationDataUploader.class.getResourceAsStream(
+							"/org/hl7/fhir/instance/model/valueset/" + "v3-codesystems.xml"),
+					"UTF-8");
 		} catch (IOException e) {
 			throw new CommandFailureException(Msg.code(1592) + e.toString());
 		}
@@ -207,14 +236,19 @@ public class ValidationDataUploader extends BaseCommand {
 			ValueSet next = (ValueSet) i.getResource();
 			next.setId(next.getIdElement().toUnqualifiedVersionless());
 
-			ourLog.info("Uploading v3-codesystems ValueSet {}/{} : {}", new Object[] {count, total, next.getIdElement().getValue()});
+			ourLog.info(
+					"Uploading v3-codesystems ValueSet {}/{} : {}",
+					new Object[] {count, total, next.getIdElement().getValue()});
 			client.update().resource(next).execute();
 
 			count++;
 		}
 
 		try {
-			vsContents = IOUtils.toString(ValidationDataUploader.class.getResourceAsStream("/org/hl7/fhir/instance/model/valueset/" + "v2-tables.xml"), "UTF-8");
+			vsContents = IOUtils.toString(
+					ValidationDataUploader.class.getResourceAsStream(
+							"/org/hl7/fhir/instance/model/valueset/" + "v2-tables.xml"),
+					"UTF-8");
 		} catch (IOException e) {
 			throw new CommandFailureException(Msg.code(1593) + e.toString());
 		}
@@ -225,7 +259,9 @@ public class ValidationDataUploader extends BaseCommand {
 			ValueSet next = (ValueSet) i.getResource();
 			next.setId(next.getIdElement().toUnqualifiedVersionless());
 
-			ourLog.info("Uploading v2-tables ValueSet {}/{} : {}", new Object[] {count, total, next.getIdElement().getValue()});
+			ourLog.info(
+					"Uploading v2-tables ValueSet {}/{} : {}",
+					new Object[] {count, total, next.getIdElement().getValue()});
 			client.update().resource(next).execute();
 			count++;
 		}
@@ -235,7 +271,8 @@ public class ValidationDataUploader extends BaseCommand {
 		ResourcePatternResolver patternResolver = new PathMatchingResourcePatternResolver();
 		Resource[] mappingLocations;
 		try {
-			mappingLocations = patternResolver.getResources("classpath*:org/hl7/fhir/instance/model/profile/" + "*.profile.xml");
+			mappingLocations =
+					patternResolver.getResources("classpath*:org/hl7/fhir/instance/model/profile/" + "*.profile.xml");
 		} catch (IOException e) {
 			throw new CommandFailureException(Msg.code(1594) + e.toString());
 		}
@@ -244,13 +281,16 @@ public class ValidationDataUploader extends BaseCommand {
 		for (Resource i : mappingLocations) {
 			StructureDefinition next;
 			try {
-				next = ctx.newXmlParser().parseResource(StructureDefinition.class, IOUtils.toString(i.getInputStream(), "UTF-8"));
+				next = ctx.newXmlParser()
+						.parseResource(StructureDefinition.class, IOUtils.toString(i.getInputStream(), "UTF-8"));
 			} catch (Exception e) {
 				throw new CommandFailureException(Msg.code(1595) + e.toString());
 			}
 			next.setId(next.getIdElement().toUnqualifiedVersionless());
 
-			ourLog.info("Uploading StructureDefinition {}/{} : {}", new Object[] {count, total, next.getIdElement().getValue()});
+			ourLog.info(
+					"Uploading StructureDefinition {}/{} : {}",
+					new Object[] {count, total, next.getIdElement().getValue()});
 			try {
 				client.update().resource(next).execute();
 			} catch (Exception e) {
@@ -266,7 +306,8 @@ public class ValidationDataUploader extends BaseCommand {
 		ourLog.info("Finished uploading definitions to server (took {} ms)", delay);
 	}
 
-	private void uploadDefinitionsDstu3(CommandLine theCommandLine, FhirContext theCtx) throws CommandFailureException, ParseException {
+	private void uploadDefinitionsDstu3(CommandLine theCommandLine, FhirContext theCtx)
+			throws CommandFailureException, ParseException {
 		IGenericClient client = newClient(theCommandLine);
 		ourLog.info("Uploading definitions to server");
 
@@ -278,7 +319,10 @@ public class ValidationDataUploader extends BaseCommand {
 
 		try {
 			theCtx.getVersion().getPathToSchemaDefinitions();
-			vsContents = IOUtils.toString(ValidationDataUploader.class.getResourceAsStream("/org/hl7/fhir/dstu3/model/valueset/" + "valuesets.xml"), "UTF-8");
+			vsContents = IOUtils.toString(
+					ValidationDataUploader.class.getResourceAsStream(
+							"/org/hl7/fhir/dstu3/model/valueset/" + "valuesets.xml"),
+					"UTF-8");
 		} catch (IOException e) {
 			throw new CommandFailureException(Msg.code(1596) + e.toString());
 		}
@@ -293,7 +337,9 @@ public class ValidationDataUploader extends BaseCommand {
 
 			int bytes = theCtx.newXmlParser().encodeResourceToString(next).length();
 
-			ourLog.info("Uploading ValueSet {}/{} : {} ({} bytes}", new Object[] {count, total, next.getIdElement().getValue(), bytes});
+			ourLog.info(
+					"Uploading ValueSet {}/{} : {} ({} bytes}",
+					new Object[] {count, total, next.getIdElement().getValue(), bytes});
 			try {
 				IIdType id = client.update().resource(next).execute().getId();
 				ourLog.info("  - Got ID: {}", id.getValue());
@@ -306,7 +352,10 @@ public class ValidationDataUploader extends BaseCommand {
 		}
 
 		try {
-			vsContents = IOUtils.toString(ValidationDataUploader.class.getResourceAsStream("/org/hl7/fhir/dstu3/model/valueset/" + "v3-codesystems.xml"), "UTF-8");
+			vsContents = IOUtils.toString(
+					ValidationDataUploader.class.getResourceAsStream(
+							"/org/hl7/fhir/dstu3/model/valueset/" + "v3-codesystems.xml"),
+					"UTF-8");
 		} catch (IOException e) {
 			throw new CommandFailureException(Msg.code(1597) + e.toString());
 		}
@@ -320,7 +369,9 @@ public class ValidationDataUploader extends BaseCommand {
 			org.hl7.fhir.dstu3.model.Resource next = i.getResource();
 			next.setId(next.getIdElement().toUnqualifiedVersionless());
 
-			ourLog.info("Uploading v3-codesystems ValueSet {}/{} : {}", new Object[] {count, total, next.getIdElement().getValue()});
+			ourLog.info(
+					"Uploading v3-codesystems ValueSet {}/{} : {}",
+					new Object[] {count, total, next.getIdElement().getValue()});
 			try {
 				client.update().resource(next).execute();
 			} catch (Exception e) {
@@ -330,7 +381,10 @@ public class ValidationDataUploader extends BaseCommand {
 		}
 
 		try {
-			vsContents = IOUtils.toString(ValidationDataUploader.class.getResourceAsStream("/org/hl7/fhir/dstu3/model/valueset/" + "v2-tables.xml"), "UTF-8");
+			vsContents = IOUtils.toString(
+					ValidationDataUploader.class.getResourceAsStream(
+							"/org/hl7/fhir/dstu3/model/valueset/" + "v2-tables.xml"),
+					"UTF-8");
 		} catch (IOException e) {
 			throw new CommandFailureException(Msg.code(1598) + e.toString());
 		}
@@ -345,13 +399,14 @@ public class ValidationDataUploader extends BaseCommand {
 			}
 			next.setId(next.getIdElement().toUnqualifiedVersionless());
 
-			ourLog.info("Uploading v2-tables ValueSet {}/{} : {}", new Object[] {count, total, next.getIdElement().getValue()});
+			ourLog.info(
+					"Uploading v2-tables ValueSet {}/{} : {}",
+					new Object[] {count, total, next.getIdElement().getValue()});
 			client.update().resource(next).execute();
 			count++;
 		}
 
 		ourLog.info("Finished uploading ValueSets");
-
 
 		uploadDstu3Profiles(theCtx, client, "profile/profiles-resources");
 		uploadDstu3Profiles(theCtx, client, "profile/profiles-types");
@@ -365,7 +420,8 @@ public class ValidationDataUploader extends BaseCommand {
 		ourLog.info("Finished uploading definitions to server (took {} ms)", delay);
 	}
 
-	private void uploadDefinitionsR4(CommandLine theCommandLine, FhirContext theCtx) throws CommandFailureException, ParseException {
+	private void uploadDefinitionsR4(CommandLine theCommandLine, FhirContext theCtx)
+			throws CommandFailureException, ParseException {
 		IGenericClient client = newClient(theCommandLine);
 		ourLog.info("Uploading definitions to server");
 
@@ -377,7 +433,10 @@ public class ValidationDataUploader extends BaseCommand {
 
 		try {
 			theCtx.getVersion().getPathToSchemaDefinitions();
-			vsContents = IOUtils.toString(ValidationDataUploader.class.getResourceAsStream("/org/hl7/fhir/r4/model/valueset/" + "valuesets.xml"), "UTF-8");
+			vsContents = IOUtils.toString(
+					ValidationDataUploader.class.getResourceAsStream(
+							"/org/hl7/fhir/r4/model/valueset/" + "valuesets.xml"),
+					"UTF-8");
 		} catch (IOException e) {
 			throw new CommandFailureException(Msg.code(1599) + e.toString());
 		}
@@ -392,7 +451,9 @@ public class ValidationDataUploader extends BaseCommand {
 
 			int bytes = theCtx.newXmlParser().encodeResourceToString(next).length();
 
-			ourLog.info("Uploading ValueSet {}/{} : {} ({} bytes}", new Object[] {count, total, next.getIdElement().getValue(), bytes});
+			ourLog.info(
+					"Uploading ValueSet {}/{} : {} ({} bytes}",
+					new Object[] {count, total, next.getIdElement().getValue(), bytes});
 			try {
 				IIdType id = client.update().resource(next).execute().getId();
 				ourLog.info("  - Got ID: {}", id.getValue());
@@ -403,7 +464,10 @@ public class ValidationDataUploader extends BaseCommand {
 		}
 
 		try {
-			vsContents = IOUtils.toString(ValidationDataUploader.class.getResourceAsStream("/org/hl7/fhir/r4/model/valueset/" + "v3-codesystems.xml"), "UTF-8");
+			vsContents = IOUtils.toString(
+					ValidationDataUploader.class.getResourceAsStream(
+							"/org/hl7/fhir/r4/model/valueset/" + "v3-codesystems.xml"),
+					"UTF-8");
 		} catch (IOException e) {
 			throw new CommandFailureException(Msg.code(1600) + e.toString());
 		}
@@ -416,14 +480,19 @@ public class ValidationDataUploader extends BaseCommand {
 			org.hl7.fhir.r4.model.Resource next = i.getResource();
 			next.setId(next.getIdElement().toUnqualifiedVersionless());
 
-			ourLog.info("Uploading v3-codesystems ValueSet {}/{} : {}", new Object[] {count, total, next.getIdElement().getValue()});
+			ourLog.info(
+					"Uploading v3-codesystems ValueSet {}/{} : {}",
+					new Object[] {count, total, next.getIdElement().getValue()});
 			client.update().resource(next).execute();
 
 			count++;
 		}
 
 		try {
-			vsContents = IOUtils.toString(ValidationDataUploader.class.getResourceAsStream("/org/hl7/fhir/r4/model/valueset/" + "v2-tables.xml"), "UTF-8");
+			vsContents = IOUtils.toString(
+					ValidationDataUploader.class.getResourceAsStream(
+							"/org/hl7/fhir/r4/model/valueset/" + "v2-tables.xml"),
+					"UTF-8");
 		} catch (IOException e) {
 			throw new CommandFailureException(Msg.code(1601) + e.toString());
 		}
@@ -434,17 +503,19 @@ public class ValidationDataUploader extends BaseCommand {
 		for (org.hl7.fhir.r4.model.Bundle.BundleEntryComponent i : bundle.getEntry()) {
 			org.hl7.fhir.r4.model.Resource next = i.getResource();
 			if (next.getIdElement().isIdPartValidLong()) {
-				next.setIdElement(new org.hl7.fhir.r4.model.IdType("v2-" + next.getIdElement().getIdPart()));
+				next.setIdElement(new org.hl7.fhir.r4.model.IdType(
+						"v2-" + next.getIdElement().getIdPart()));
 			}
 			next.setId(next.getIdElement().toUnqualifiedVersionless());
 
-			ourLog.info("Uploading v2-tables ValueSet {}/{} : {}", new Object[] {count, total, next.getIdElement().getValue()});
+			ourLog.info(
+					"Uploading v2-tables ValueSet {}/{} : {}",
+					new Object[] {count, total, next.getIdElement().getValue()});
 			client.update().resource(next).execute();
 			count++;
 		}
 
 		ourLog.info("Finished uploading ValueSets");
-
 
 		uploadR4Profiles(theCtx, client, "profile/profiles-resources");
 		uploadR4Profiles(theCtx, client, "profile/profiles-types");
@@ -458,14 +529,17 @@ public class ValidationDataUploader extends BaseCommand {
 		ourLog.info("Finished uploading definitions to server (took {} ms)", delay);
 	}
 
-	private void uploadDstu3Profiles(FhirContext ctx, IGenericClient client, String theName) throws CommandFailureException {
+	private void uploadDstu3Profiles(FhirContext ctx, IGenericClient client, String theName)
+			throws CommandFailureException {
 		int total;
 		int count;
 		org.hl7.fhir.dstu3.model.Bundle bundle;
 		ourLog.info("Uploading " + theName);
 		String vsContents;
 		try {
-			vsContents = IOUtils.toString(ValidationDataUploader.class.getResourceAsStream("/org/hl7/fhir/dstu3/model/" + theName + ".xml"), "UTF-8");
+			vsContents = IOUtils.toString(
+					ValidationDataUploader.class.getResourceAsStream("/org/hl7/fhir/dstu3/model/" + theName + ".xml"),
+					"UTF-8");
 		} catch (IOException e) {
 			throw new CommandFailureException(Msg.code(1602) + e.toString());
 		}
@@ -488,7 +562,10 @@ public class ValidationDataUploader extends BaseCommand {
 					return -1;
 				}
 				// StructureDefinition, then OperationDefinition, then CompartmentDefinition
-				return theO2.getResource().getClass().getName().compareTo(theO1.getResource().getClass().getName());
+				return theO2.getResource()
+						.getClass()
+						.getName()
+						.compareTo(theO1.getResource().getClass().getName());
 			}
 		});
 
@@ -499,21 +576,26 @@ public class ValidationDataUploader extends BaseCommand {
 				continue;
 			}
 
-			ourLog.info("Uploading {} StructureDefinition {}/{} : {}", new Object[] {theName, count, total, next.getIdElement().getValue()});
+			ourLog.info(
+					"Uploading {} StructureDefinition {}/{} : {}",
+					new Object[] {theName, count, total, next.getIdElement().getValue()});
 			client.update().resource(next).execute();
 
 			count++;
 		}
 	}
 
-	private void uploadR4Profiles(FhirContext theContext, IGenericClient theClient, String theName) throws CommandFailureException {
+	private void uploadR4Profiles(FhirContext theContext, IGenericClient theClient, String theName)
+			throws CommandFailureException {
 		int total;
 		int count;
 		org.hl7.fhir.r4.model.Bundle bundle;
 		ourLog.info("Uploading " + theName);
 		String vsContents;
 		try {
-			vsContents = IOUtils.toString(ValidationDataUploader.class.getResourceAsStream("/org/hl7/fhir/r4/model/" + theName + ".xml"), "UTF-8");
+			vsContents = IOUtils.toString(
+					ValidationDataUploader.class.getResourceAsStream("/org/hl7/fhir/r4/model/" + theName + ".xml"),
+					"UTF-8");
 		} catch (IOException e) {
 			throw new CommandFailureException(Msg.code(1603) + e.toString());
 		}
@@ -525,7 +607,9 @@ public class ValidationDataUploader extends BaseCommand {
 
 		Collections.sort(bundle.getEntry(), new Comparator<org.hl7.fhir.r4.model.Bundle.BundleEntryComponent>() {
 			@Override
-			public int compare(org.hl7.fhir.r4.model.Bundle.BundleEntryComponent theO1, org.hl7.fhir.r4.model.Bundle.BundleEntryComponent theO2) {
+			public int compare(
+					org.hl7.fhir.r4.model.Bundle.BundleEntryComponent theO1,
+					org.hl7.fhir.r4.model.Bundle.BundleEntryComponent theO2) {
 				if (theO1.getResource() == null && theO2.getResource() == null) {
 					return 0;
 				}
@@ -536,7 +620,10 @@ public class ValidationDataUploader extends BaseCommand {
 					return -1;
 				}
 				// StructureDefinition, then OperationDefinition, then CompartmentDefinition
-				return theO2.getResource().getClass().getName().compareTo(theO1.getResource().getClass().getName());
+				return theO2.getResource()
+						.getClass()
+						.getName()
+						.compareTo(theO1.getResource().getClass().getName());
 			}
 		});
 
@@ -547,7 +634,9 @@ public class ValidationDataUploader extends BaseCommand {
 				continue;
 			}
 
-			ourLog.info("Uploading {} StructureDefinition {}/{} : {}", new Object[] {theName, count, total, next.getIdElement().getValue()});
+			ourLog.info(
+					"Uploading {} StructureDefinition {}/{} : {}",
+					new Object[] {theName, count, total, next.getIdElement().getValue()});
 			try {
 				theClient.update().resource(next).execute();
 			} catch (BaseServerResponseException e) {
@@ -557,5 +646,4 @@ public class ValidationDataUploader extends BaseCommand {
 			count++;
 		}
 	}
-
 }

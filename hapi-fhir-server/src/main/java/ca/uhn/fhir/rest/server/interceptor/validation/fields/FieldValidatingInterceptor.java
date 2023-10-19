@@ -19,9 +19,9 @@
  */
 package ca.uhn.fhir.rest.server.interceptor.validation.fields;
 
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.fhirpath.IFhirPath;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
@@ -29,7 +29,6 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.interceptor.ConfigLoader;
 import ca.uhn.fhir.util.ExtensionUtil;
 import org.hl7.fhir.instance.model.api.IBase;
-import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.slf4j.Logger;
@@ -70,8 +69,13 @@ public class FieldValidatingInterceptor {
 	}
 
 	@Hook(Pointcut.STORAGE_PRESTORAGE_RESOURCE_UPDATED)
-	public void resourcePreUpdate(RequestDetails theRequest, IBaseResource theOldResource, IBaseResource theNewResource) {
-		ourLog.debug("Validating address on update for resource {} / old resource {} / request {}", theOldResource, theNewResource, theRequest);
+	public void resourcePreUpdate(
+			RequestDetails theRequest, IBaseResource theOldResource, IBaseResource theNewResource) {
+		ourLog.debug(
+				"Validating address on update for resource {} / old resource {} / request {}",
+				theOldResource,
+				theNewResource,
+				theRequest);
 		handleRequest(theRequest, theNewResource);
 	}
 
@@ -137,7 +141,8 @@ public class FieldValidatingInterceptor {
 		try {
 			return (IValidator) Class.forName(theValue).getDeclaredConstructor().newInstance();
 		} catch (Exception e) {
-			throw new IllegalStateException(Msg.code(348) + String.format("Unable to create validator for %s", theValue), e);
+			throw new IllegalStateException(
+					Msg.code(348) + String.format("Unable to create validator for %s", theValue), e);
 		}
 	}
 

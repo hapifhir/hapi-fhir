@@ -36,7 +36,6 @@ public class MdmResourceMatcherSvcR4Test extends BaseMdmRulesR4Test {
 	public void testCompareFirstNameMatch() {
 		MdmMatchOutcome result = myMdmResourceMatcherSvc.match(myJohn, myJohny);
 		assertMatchResult(MdmMatchResultEnum.POSSIBLE_MATCH, 1L, 0.816, false, false, result);
-
 	}
 
 	@Test
@@ -57,5 +56,20 @@ public class MdmResourceMatcherSvcR4Test extends BaseMdmRulesR4Test {
 		patient3.setId("Patient/3");
 		patient3.addName().addGiven("Henry");
 		assertMatchResult(MdmMatchResultEnum.NO_MATCH, 0L, 0.0, false, false, myMdmResourceMatcherSvc.getMatchResult(myJohn, patient3));
+	}
+
+	@Test
+	public void testScoreOnlySummedWhenMatchFieldMatches() {
+		MdmMatchOutcome outcome = myMdmResourceMatcherSvc.getMatchResult(myJohn, myJohny);
+		assertMatchResult(MdmMatchResultEnum.POSSIBLE_MATCH, 1L, 0.816, false, false, outcome);
+
+		myJohn.addName().setFamily("Smith");
+		myJohny.addName().setFamily("htims");
+		outcome = myMdmResourceMatcherSvc.getMatchResult(myJohn, myJohny);
+		assertMatchResult(MdmMatchResultEnum.POSSIBLE_MATCH, 1L, 0.816, false, false, outcome);
+
+		myJohny.addName().setFamily("Smith");
+		outcome = myMdmResourceMatcherSvc.getMatchResult(myJohn, myJohny);
+		assertMatchResult(MdmMatchResultEnum.MATCH, 3L, 1.816, false, false, outcome);
 	}
 }

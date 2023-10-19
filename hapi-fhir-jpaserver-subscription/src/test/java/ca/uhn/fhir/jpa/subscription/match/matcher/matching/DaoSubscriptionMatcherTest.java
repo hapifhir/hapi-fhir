@@ -12,6 +12,7 @@ import ca.uhn.fhir.jpa.searchparam.config.SearchParamConfig;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamProvider;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelFactory;
 import ca.uhn.fhir.jpa.subscription.match.config.SubscriptionProcessorConfig;
+import ca.uhn.fhir.jpa.subscription.match.deliver.email.IEmailSender;
 import ca.uhn.fhir.jpa.subscription.submit.config.SubscriptionSubmitterConfig;
 import ca.uhn.fhir.jpa.subscription.submit.interceptor.SubscriptionQueryValidator;
 import org.junit.jupiter.api.Test;
@@ -85,6 +86,10 @@ public class DaoSubscriptionMatcherTest {
 			return mock(IRequestPartitionHelperSvc.class);
 		}
 
+		@Bean
+		public IEmailSender emailSender(){
+			return mock(IEmailSender.class);
+		}
 	}
 
 }

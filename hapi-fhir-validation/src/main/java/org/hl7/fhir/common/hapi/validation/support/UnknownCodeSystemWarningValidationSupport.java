@@ -45,18 +45,27 @@ public class UnknownCodeSystemWarningValidationSupport extends BaseValidationSup
 
 	@Nullable
 	@Override
-	public LookupCodeResult lookupCode(ValidationSupportContext theValidationSupportContext, String theSystem, String theCode, String theDisplayLanguage) {
+	public LookupCodeResult lookupCode(
+			ValidationSupportContext theValidationSupportContext,
+			String theSystem,
+			String theCode,
+			String theDisplayLanguage) {
 		// filters out error/fatal
 		if (canValidateCodeSystem(theValidationSupportContext, theSystem)) {
-			return new LookupCodeResult()
-				.setFound(true);
+			return new LookupCodeResult().setFound(true);
 		}
 
 		return null;
 	}
 
 	@Override
-	public CodeValidationResult validateCode(@Nonnull ValidationSupportContext theValidationSupportContext, @Nonnull ConceptValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl) {
+	public CodeValidationResult validateCode(
+			@Nonnull ValidationSupportContext theValidationSupportContext,
+			@Nonnull ConceptValidationOptions theOptions,
+			String theCodeSystem,
+			String theCode,
+			String theDisplay,
+			String theValueSetUrl) {
 		// filters out error/fatal
 		if (!canValidateCodeSystem(theValidationSupportContext, theCodeSystem)) {
 			return null;
@@ -67,11 +76,12 @@ public class UnknownCodeSystemWarningValidationSupport extends BaseValidationSup
 		result.setSeverity(myNonExistentCodeSystemSeverity);
 		result.setMessage("CodeSystem is unknown and can't be validated: " + theCodeSystem);
 
+		// For information level, we just strip out the severity+message entirely
+		// so that nothing appears in the validation result
 		if (myNonExistentCodeSystemSeverity == IssueSeverity.INFORMATION) {
-			// for warnings, we don't set the code
-			// cause if we do, the severity is stripped out
-			// (see VersionSpecificWorkerContextWrapper.convertValidationResult)
 			result.setCode(theCode);
+			result.setSeverity(null);
+			result.setMessage(null);
 		}
 
 		return result;
@@ -79,15 +89,22 @@ public class UnknownCodeSystemWarningValidationSupport extends BaseValidationSup
 
 	@Nullable
 	@Override
-	public CodeValidationResult validateCodeInValueSet(ValidationSupportContext theValidationSupportContext, ConceptValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, @Nonnull IBaseResource theValueSet) {
+	public CodeValidationResult validateCodeInValueSet(
+			ValidationSupportContext theValidationSupportContext,
+			ConceptValidationOptions theOptions,
+			String theCodeSystem,
+			String theCode,
+			String theDisplay,
+			@Nonnull IBaseResource theValueSet) {
 		if (!canValidateCodeSystem(theValidationSupportContext, theCodeSystem)) {
 			return null;
 		}
 
 		return new CodeValidationResult()
-			.setCode(theCode)
-			.setSeverity(IssueSeverity.INFORMATION)
-			.setMessage("Code " + theCodeSystem + "#" + theCode + " was not checked because the CodeSystem is not available");
+				.setCode(theCode)
+				.setSeverity(IssueSeverity.INFORMATION)
+				.setMessage("Code " + theCodeSystem + "#" + theCode
+						+ " was not checked because the CodeSystem is not available");
 	}
 
 	/**
@@ -105,7 +122,7 @@ public class UnknownCodeSystemWarningValidationSupport extends BaseValidationSup
 				return true;
 			default:
 				ourLog.info("Unknown issue severity " + myNonExistentCodeSystemSeverity.name()
-					+ ". Treating as INFO/WARNING");
+						+ ". Treating as INFO/WARNING");
 				return true;
 		}
 	}
@@ -116,15 +133,15 @@ public class UnknownCodeSystemWarningValidationSupport extends BaseValidationSup
 	 * @param theCodeSystem
 	 * @return
 	 */
-	private boolean canValidateCodeSystem(ValidationSupportContext theValidationSupportContext,
-													  String theCodeSystem) {
+	private boolean canValidateCodeSystem(ValidationSupportContext theValidationSupportContext, String theCodeSystem) {
 		if (!allowNonExistentCodeSystems()) {
 			return false;
 		}
 		if (theCodeSystem == null) {
 			return false;
 		}
-		IBaseResource codeSystem = theValidationSupportContext.getRootValidationSupport().fetchCodeSystem(theCodeSystem);
+		IBaseResource codeSystem =
+				theValidationSupportContext.getRootValidationSupport().fetchCodeSystem(theCodeSystem);
 		if (codeSystem != null) {
 			return false;
 		}

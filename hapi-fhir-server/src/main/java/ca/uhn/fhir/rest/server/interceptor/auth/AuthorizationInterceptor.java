@@ -28,7 +28,7 @@ import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.IPreResourceShowDetails;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.api.server.bulk.BulkDataExportOptions;
+import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
 import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
 import ca.uhn.fhir.rest.server.interceptor.consent.ConsentInterceptor;
 import com.google.common.collect.Lists;
@@ -44,17 +44,16 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.IdentityHashMap;
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
@@ -77,12 +76,15 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 @Interceptor(order = AuthorizationConstants.ORDER_AUTH_INTERCEPTOR)
 public class AuthorizationInterceptor implements IRuleApplier {
 
-	public static final String REQUEST_ATTRIBUTE_BULK_DATA_EXPORT_OPTIONS = AuthorizationInterceptor.class.getName() + "_BulkDataExportOptions";
+	public static final String REQUEST_ATTRIBUTE_BULK_DATA_EXPORT_OPTIONS =
+			AuthorizationInterceptor.class.getName() + "_BulkDataExportOptions";
 	private static final AtomicInteger ourInstanceCount = new AtomicInteger(0);
 	private static final Logger ourLog = LoggerFactory.getLogger(AuthorizationInterceptor.class);
 	private final int myInstanceIndex = ourInstanceCount.incrementAndGet();
-	private final String myRequestSeenResourcesKey = AuthorizationInterceptor.class.getName() + "_" + myInstanceIndex + "_SEENRESOURCES";
-	private final String myRequestRuleListKey = AuthorizationInterceptor.class.getName() + "_" + myInstanceIndex + "_RULELIST";
+	private final String myRequestSeenResourcesKey =
+			AuthorizationInterceptor.class.getName() + "_" + myInstanceIndex + "_SEENRESOURCES";
+	private final String myRequestRuleListKey =
+			AuthorizationInterceptor.class.getName() + "_" + myInstanceIndex + "_RULELIST";
 	private PolicyEnum myDefaultPolicy = PolicyEnum.DENY;
 	private Set<AuthorizationFlagsEnum> myFlags = Collections.emptySet();
 	private IValidationSupport myValidationSupport;
@@ -119,9 +121,15 @@ public class AuthorizationInterceptor implements IRuleApplier {
 		myTroubleshootingLog = theTroubleshootingLog;
 	}
 
-	private void applyRulesAndFailIfDeny(RestOperationTypeEnum theOperation, RequestDetails theRequestDetails, IBaseResource theInputResource, IIdType theInputResourceId,
-													 IBaseResource theOutputResource, Pointcut thePointcut) {
-		Verdict decision = applyRulesAndReturnDecision(theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource, thePointcut);
+	private void applyRulesAndFailIfDeny(
+			RestOperationTypeEnum theOperation,
+			RequestDetails theRequestDetails,
+			IBaseResource theInputResource,
+			IIdType theInputResourceId,
+			IBaseResource theOutputResource,
+			Pointcut thePointcut) {
+		Verdict decision = applyRulesAndReturnDecision(
+				theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource, thePointcut);
 
 		if (decision.getDecision() == PolicyEnum.ALLOW) {
 			return;
@@ -131,26 +139,41 @@ public class AuthorizationInterceptor implements IRuleApplier {
 	}
 
 	@Override
-	public Verdict applyRulesAndReturnDecision(RestOperationTypeEnum theOperation, RequestDetails theRequestDetails, IBaseResource theInputResource, IIdType theInputResourceId,
-															 IBaseResource theOutputResource, Pointcut thePointcut) {
+	public Verdict applyRulesAndReturnDecision(
+			RestOperationTypeEnum theOperation,
+			RequestDetails theRequestDetails,
+			IBaseResource theInputResource,
+			IIdType theInputResourceId,
+			IBaseResource theOutputResource,
+			Pointcut thePointcut) {
 		@SuppressWarnings("unchecked")
-		List<IAuthRule> rules = (List<IAuthRule>) theRequestDetails.getUserData().get(myRequestRuleListKey);
+		List<IAuthRule> rules =
+				(List<IAuthRule>) theRequestDetails.getUserData().get(myRequestRuleListKey);
 		if (rules == null) {
 			rules = buildRuleList(theRequestDetails);
 			theRequestDetails.getUserData().put(myRequestRuleListKey, rules);
 		}
 		Set<AuthorizationFlagsEnum> flags = getFlags();
 
-		ourLog.trace("Applying {} rules to render an auth decision for operation {}, theInputResource type={}, theOutputResource type={}, thePointcut={} ",
-			rules.size(),
-			getPointcutNameOrEmpty(thePointcut),
-			getResourceTypeOrEmpty(theInputResource),
-			getResourceTypeOrEmpty(theOutputResource));
+		ourLog.trace(
+				"Applying {} rules to render an auth decision for operation {}, theInputResource type={}, theOutputResource type={}, thePointcut={} ",
+				rules.size(),
+				getPointcutNameOrEmpty(thePointcut),
+				getResourceTypeOrEmpty(theInputResource),
+				getResourceTypeOrEmpty(theOutputResource));
 
 		Verdict verdict = null;
 		for (IAuthRule nextRule : rules) {
 			ourLog.trace("Rule being applied - {}", nextRule);
-			verdict = nextRule.applyRule(theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource, this, flags, thePointcut);
+			verdict = nextRule.applyRule(
+					theOperation,
+					theRequestDetails,
+					theInputResource,
+					theInputResourceId,
+					theOutputResource,
+					this,
+					flags,
+					thePointcut);
 			if (verdict != null) {
 				ourLog.trace("Rule {} returned decision {}", nextRule, verdict.getDecision());
 				break;
@@ -192,10 +215,12 @@ public class AuthorizationInterceptor implements IRuleApplier {
 	 *
 	 * @param theAuthorizationSearchParamMatcher The search parameter matcher. Defaults to null.
 	 */
-	public void setAuthorizationSearchParamMatcher(@Nullable IAuthorizationSearchParamMatcher theAuthorizationSearchParamMatcher) {
+	public void setAuthorizationSearchParamMatcher(
+			@Nullable IAuthorizationSearchParamMatcher theAuthorizationSearchParamMatcher) {
 		this.myAuthorizationSearchParamMatcher = theAuthorizationSearchParamMatcher;
 	}
 
+	@Override
 	@Nullable
 	public IAuthorizationSearchParamMatcher getSearchParamMatcher() {
 		return myAuthorizationSearchParamMatcher;
@@ -271,9 +296,9 @@ public class AuthorizationInterceptor implements IRuleApplier {
 
 			default:
 				// Should not happen
-				throw new IllegalStateException(Msg.code(332) + "Unable to apply security to event of type " + theOperation);
+				throw new IllegalStateException(
+						Msg.code(332) + "Unable to apply security to event of type " + theOperation);
 		}
-
 	}
 
 	/**
@@ -356,7 +381,11 @@ public class AuthorizationInterceptor implements IRuleApplier {
 		throw new ForbiddenOperationException(Msg.code(334) + "Access denied by default policy (no applicable rules)");
 	}
 
-	private void handleUserOperation(RequestDetails theRequest, IBaseResource theResource, RestOperationTypeEnum theOperation, Pointcut thePointcut) {
+	private void handleUserOperation(
+			RequestDetails theRequest,
+			IBaseResource theResource,
+			RestOperationTypeEnum theOperation,
+			Pointcut thePointcut) {
 		applyRulesAndFailIfDeny(theOperation, theRequest, theResource, theResource.getIdElement(), null, thePointcut);
 	}
 
@@ -383,11 +412,13 @@ public class AuthorizationInterceptor implements IRuleApplier {
 				return;
 		}
 
-		applyRulesAndFailIfDeny(theRequest.getRestOperationType(), theRequest, inputResource, inputResourceId, null, thePointcut);
+		applyRulesAndFailIfDeny(
+				theRequest.getRestOperationType(), theRequest, inputResource, inputResourceId, null, thePointcut);
 	}
 
 	@Hook(Pointcut.STORAGE_PRESHOW_RESOURCES)
-	public void hookPreShow(RequestDetails theRequestDetails, IPreResourceShowDetails theDetails, Pointcut thePointcut) {
+	public void hookPreShow(
+			RequestDetails theRequestDetails, IPreResourceShowDetails theDetails, Pointcut thePointcut) {
 		for (int i = 0; i < theDetails.size(); i++) {
 			IBaseResource next = theDetails.getResource(i);
 			checkOutgoingResourceAndFailIfDeny(theRequestDetails, next, thePointcut);
@@ -395,35 +426,72 @@ public class AuthorizationInterceptor implements IRuleApplier {
 	}
 
 	@Hook(Pointcut.SERVER_OUTGOING_RESPONSE)
-	public void hookOutgoingResponse(RequestDetails theRequestDetails, IBaseResource theResponseObject, Pointcut thePointcut) {
+	public void hookOutgoingResponse(
+			RequestDetails theRequestDetails, IBaseResource theResponseObject, Pointcut thePointcut) {
 		checkOutgoingResourceAndFailIfDeny(theRequestDetails, theResponseObject, thePointcut);
 	}
 
 	@Hook(Pointcut.STORAGE_CASCADE_DELETE)
-	public void hookCascadeDeleteForConflict(RequestDetails theRequestDetails, Pointcut thePointcut, IBaseResource theResourceToDelete) {
+	public void hookCascadeDeleteForConflict(
+			RequestDetails theRequestDetails, Pointcut thePointcut, IBaseResource theResourceToDelete) {
 		Validate.notNull(theResourceToDelete); // just in case
 		checkPointcutAndFailIfDeny(theRequestDetails, thePointcut, theResourceToDelete);
 	}
 
 	@Hook(Pointcut.STORAGE_PRE_DELETE_EXPUNGE)
 	public void hookDeleteExpunge(RequestDetails theRequestDetails, Pointcut thePointcut) {
-		applyRulesAndFailIfDeny(theRequestDetails.getRestOperationType(), theRequestDetails, null, null, null, thePointcut);
+		applyRulesAndFailIfDeny(
+				theRequestDetails.getRestOperationType(), theRequestDetails, null, null, null, thePointcut);
 	}
 
 	@Hook(Pointcut.STORAGE_INITIATE_BULK_EXPORT)
-	public void initiateBulkExport(RequestDetails theRequestDetails, BulkDataExportOptions theBulkExportOptions, Pointcut thePointcut) {
+	public void initiateBulkExport(
+			RequestDetails theRequestDetails, BulkExportJobParameters theBulkExportOptions, Pointcut thePointcut) {
+		//		RestOperationTypeEnum restOperationType =
+		// determineRestOperationTypeFromBulkExportOptions(theBulkExportOptions);
 		RestOperationTypeEnum restOperationType = RestOperationTypeEnum.EXTENDED_OPERATION_SERVER;
+
 		if (theRequestDetails != null) {
 			theRequestDetails.setAttribute(REQUEST_ATTRIBUTE_BULK_DATA_EXPORT_OPTIONS, theBulkExportOptions);
 		}
 		applyRulesAndFailIfDeny(restOperationType, theRequestDetails, null, null, null, thePointcut);
 	}
 
-	private void checkPointcutAndFailIfDeny(RequestDetails theRequestDetails, Pointcut thePointcut, @Nonnull IBaseResource theInputResource) {
-		applyRulesAndFailIfDeny(theRequestDetails.getRestOperationType(), theRequestDetails, theInputResource, theInputResource.getIdElement(), null, thePointcut);
+	/**
+	 * TODO GGG This method should eventually be used when invoking the rules applier.....however we currently rely on the incorrect
+	 * behaviour of passing down `EXTENDED_OPERATION_SERVER`.
+	 */
+	private RestOperationTypeEnum determineRestOperationTypeFromBulkExportOptions(
+			BulkExportJobParameters theBulkExportOptions) {
+		RestOperationTypeEnum restOperationType = RestOperationTypeEnum.EXTENDED_OPERATION_SERVER;
+		BulkExportJobParameters.ExportStyle exportStyle = theBulkExportOptions.getExportStyle();
+		if (exportStyle.equals(BulkExportJobParameters.ExportStyle.SYSTEM)) {
+			restOperationType = RestOperationTypeEnum.EXTENDED_OPERATION_SERVER;
+		} else if (exportStyle.equals(BulkExportJobParameters.ExportStyle.PATIENT)) {
+			if (theBulkExportOptions.getPatientIds().size() == 1) {
+				restOperationType = RestOperationTypeEnum.EXTENDED_OPERATION_INSTANCE;
+			} else {
+				restOperationType = RestOperationTypeEnum.EXTENDED_OPERATION_TYPE;
+			}
+		} else if (exportStyle.equals(BulkExportJobParameters.ExportStyle.GROUP)) {
+			restOperationType = RestOperationTypeEnum.EXTENDED_OPERATION_INSTANCE;
+		}
+		return restOperationType;
 	}
 
-	private void checkOutgoingResourceAndFailIfDeny(RequestDetails theRequestDetails, IBaseResource theResponseObject, Pointcut thePointcut) {
+	private void checkPointcutAndFailIfDeny(
+			RequestDetails theRequestDetails, Pointcut thePointcut, @Nonnull IBaseResource theInputResource) {
+		applyRulesAndFailIfDeny(
+				theRequestDetails.getRestOperationType(),
+				theRequestDetails,
+				theInputResource,
+				theInputResource.getIdElement(),
+				null,
+				thePointcut);
+	}
+
+	private void checkOutgoingResourceAndFailIfDeny(
+			RequestDetails theRequestDetails, IBaseResource theResponseObject, Pointcut thePointcut) {
 
 		switch (determineOperationDirection(theRequestDetails.getRestOperationType())) {
 			case IN:
@@ -435,7 +503,8 @@ public class AuthorizationInterceptor implements IRuleApplier {
 		}
 
 		// Don't check the value twice
-		IdentityHashMap<IBaseResource, Boolean> alreadySeenMap = ConsentInterceptor.getAlreadySeenResourcesMap(theRequestDetails, myRequestSeenResourcesKey);
+		IdentityHashMap<IBaseResource, Boolean> alreadySeenMap =
+				ConsentInterceptor.getAlreadySeenResourcesMap(theRequestDetails, myRequestSeenResourcesKey);
 		if (alreadySeenMap.putIfAbsent(theResponseObject, Boolean.TRUE) != null) {
 			return;
 		}
@@ -469,7 +538,8 @@ public class AuthorizationInterceptor implements IRuleApplier {
 		}
 
 		for (IBaseResource nextResponse : resources) {
-			applyRulesAndFailIfDeny(theRequestDetails.getRestOperationType(), theRequestDetails, null, null, nextResponse, thePointcut);
+			applyRulesAndFailIfDeny(
+					theRequestDetails.getRestOperationType(), theRequestDetails, null, null, nextResponse, thePointcut);
 		}
 	}
 
@@ -484,7 +554,11 @@ public class AuthorizationInterceptor implements IRuleApplier {
 	}
 
 	@Hook(Pointcut.STORAGE_PRESTORAGE_RESOURCE_UPDATED)
-	public void hookResourcePreUpdate(RequestDetails theRequest, IBaseResource theOldResource, IBaseResource theNewResource, Pointcut thePointcut) {
+	public void hookResourcePreUpdate(
+			RequestDetails theRequest,
+			IBaseResource theOldResource,
+			IBaseResource theNewResource,
+			Pointcut thePointcut) {
 		if (theOldResource != null) {
 			handleUserOperation(theRequest, theOldResource, RestOperationTypeEnum.UPDATE, thePointcut);
 		}
@@ -498,7 +572,8 @@ public class AuthorizationInterceptor implements IRuleApplier {
 		OUT,
 	}
 
-	static List<IBaseResource> toListOfResourcesAndExcludeContainer(IBaseResource theResponseObject, FhirContext fhirContext) {
+	static List<IBaseResource> toListOfResourcesAndExcludeContainer(
+			IBaseResource theResponseObject, FhirContext fhirContext) {
 		if (theResponseObject == null) {
 			return Collections.emptyList();
 		}
@@ -524,7 +599,7 @@ public class AuthorizationInterceptor implements IRuleApplier {
 		}
 
 		// Don't apply security to OperationOutcome
-		retVal.removeIf(t->t instanceof IBaseOperationOutcome);
+		retVal.removeIf(t -> t instanceof IBaseOperationOutcome);
 
 		return retVal;
 	}
@@ -562,29 +637,27 @@ public class AuthorizationInterceptor implements IRuleApplier {
 			b.append("decision", myDecision.name());
 			return b.build();
 		}
-
 	}
 
 	private Object getPointcutNameOrEmpty(Pointcut thePointcut) {
 		return nonNull(thePointcut) ? thePointcut.name() : EMPTY;
 	}
 
-	private String getResourceTypeOrEmpty(IBaseResource theResource){
+	private String getResourceTypeOrEmpty(IBaseResource theResource) {
 		String retVal = StringUtils.EMPTY;
 
-		if(isNull(theResource)){
+		if (isNull(theResource)) {
 			return retVal;
 		}
 
-		if(isNull(theResource.getIdElement())){
+		if (isNull(theResource.getIdElement())) {
 			return retVal;
 		}
 
-		if(isNull(theResource.getIdElement().getResourceType())){
+		if (isNull(theResource.getIdElement().getResourceType())) {
 			return retVal;
 		}
 
 		return theResource.getIdElement().getResourceType();
 	}
-
 }

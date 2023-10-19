@@ -34,7 +34,12 @@ public class BundleEntryMutator {
 	private final FhirContext myFhirContext;
 	private final BaseRuntimeElementCompositeDefinition<?> myEntryDefinition;
 
-	public BundleEntryMutator(FhirContext theFhirContext, IBase theEntry, BaseRuntimeChildDefinition theRequestChildDef, BaseRuntimeElementCompositeDefinition<?> theChildContentsDef, BaseRuntimeElementCompositeDefinition<?> theEntryDefinition) {
+	public BundleEntryMutator(
+			FhirContext theFhirContext,
+			IBase theEntry,
+			BaseRuntimeChildDefinition theRequestChildDef,
+			BaseRuntimeElementCompositeDefinition<?> theChildContentsDef,
+			BaseRuntimeElementCompositeDefinition<?> theEntryDefinition) {
 		myFhirContext = theFhirContext;
 		myEntry = theEntry;
 		myRequestChildDef = theRequestChildDef;
@@ -52,7 +57,8 @@ public class BundleEntryMutator {
 
 	@SuppressWarnings("unchecked")
 	public void setFullUrl(String theFullUrl) {
-		IPrimitiveType<String> value = (IPrimitiveType<String>) myFhirContext.getElementDefinition("uri").newInstance();
+		IPrimitiveType<String> value = (IPrimitiveType<String>)
+				myFhirContext.getElementDefinition("uri").newInstance();
 		value.setValue(theFullUrl);
 
 		BaseRuntimeChildDefinition fullUrlChild = myEntryDefinition.getChildByName("fullUrl");

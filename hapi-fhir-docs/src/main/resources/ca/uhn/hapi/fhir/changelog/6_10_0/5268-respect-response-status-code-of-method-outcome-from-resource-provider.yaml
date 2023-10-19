@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 5268
+title: "Previously, the response status code set in a `MethodOutcome` of a Resource provider was not respected.
+This has been fixed."

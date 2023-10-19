@@ -23,20 +23,16 @@ import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
-import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
-import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.parser.LenientErrorHandler;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.ClasspathUtil;
 import org.apache.commons.lang3.StringUtils;
-import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
-import javax.annotation.Nullable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -46,8 +42,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Properties;
+import javax.annotation.Nullable;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -55,7 +51,8 @@ class DefaultProfileValidationSupportBundleStrategy implements IValidationSuppor
 
 	private static final String URL_PREFIX_STRUCTURE_DEFINITION = "http://hl7.org/fhir/StructureDefinition/";
 	private static final String URL_PREFIX_STRUCTURE_DEFINITION_BASE = "http://hl7.org/fhir/";
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(DefaultProfileValidationSupport.class);
+	private static final org.slf4j.Logger ourLog =
+			org.slf4j.LoggerFactory.getLogger(DefaultProfileValidationSupport.class);
 	private final FhirContext myCtx;
 
 	private Map<String, IBaseResource> myCodeSystems;
@@ -73,7 +70,6 @@ class DefaultProfileValidationSupportBundleStrategy implements IValidationSuppor
 		myCtx = theFhirContext;
 	}
 
-
 	private void initializeResourceLists() {
 
 		if (myTerminologyResources != null && myStructureDefinitionResources != null) {
@@ -90,7 +86,8 @@ class DefaultProfileValidationSupportBundleStrategy implements IValidationSuppor
 				terminologyResources.add("/org/hl7/fhir/instance/model/valueset/v3-codesystems.xml");
 				Properties profileNameProperties = new Properties();
 				try {
-					profileNameProperties.load(DefaultProfileValidationSupport.class.getResourceAsStream("/org/hl7/fhir/instance/model/profile/profiles.properties"));
+					profileNameProperties.load(DefaultProfileValidationSupport.class.getResourceAsStream(
+							"/org/hl7/fhir/instance/model/profile/profiles.properties"));
 					for (Object nextKey : profileNameProperties.keySet()) {
 						structureDefinitionResources.add("/org/hl7/fhir/instance/model/profile/" + nextKey);
 					}
@@ -148,7 +145,6 @@ class DefaultProfileValidationSupportBundleStrategy implements IValidationSuppor
 		myStructureDefinitionResources = structureDefinitionResources;
 	}
 
-
 	@Override
 	public List<IBaseResource> fetchAllConformanceResources() {
 		ArrayList<IBaseResource> retVal = new ArrayList<>();
@@ -168,7 +164,6 @@ class DefaultProfileValidationSupportBundleStrategy implements IValidationSuppor
 	public <T extends IBaseResource> List<T> fetchAllNonBaseStructureDefinitions() {
 		return null;
 	}
-
 
 	@Override
 	public IBaseResource fetchCodeSystem(String theSystem) {
@@ -208,8 +203,12 @@ class DefaultProfileValidationSupportBundleStrategy implements IValidationSuppor
 				candidate = valueSets.get(system);
 			}
 
-			if (candidate != null && isNotBlank(version) && !system.startsWith("http://hl7.org") && !system.startsWith("http://terminology.hl7.org")) {
-				if (!StringUtils.equals(version, myCtx.newTerser().getSinglePrimitiveValueOrNull(candidate, "version"))) {
+			if (candidate != null
+					&& isNotBlank(version)
+					&& !system.startsWith("http://hl7.org")
+					&& !system.startsWith("http://terminology.hl7.org")) {
+				if (!StringUtils.equals(
+						version, myCtx.newTerser().getSinglePrimitiveValueOrNull(candidate, "version"))) {
 					candidate = null;
 				}
 			}
@@ -239,7 +238,9 @@ class DefaultProfileValidationSupportBundleStrategy implements IValidationSuppor
 				 * search parameters eg "value.as(String)" when it should be
 				 * "value.as(string)". This lets us be a bit lenient about this.
 				 */
-				if (myCtx.getVersion().getVersion() == FhirVersionEnum.R4 || myCtx.getVersion().getVersion() == FhirVersionEnum.R4B || myCtx.getVersion().getVersion() == FhirVersionEnum.R5) {
+				if (myCtx.getVersion().getVersion() == FhirVersionEnum.R4
+						|| myCtx.getVersion().getVersion() == FhirVersionEnum.R4B
+						|| myCtx.getVersion().getVersion() == FhirVersionEnum.R5) {
 					String end = url.substring(URL_PREFIX_STRUCTURE_DEFINITION.length());
 					if (Character.isUpperCase(end.charAt(0))) {
 						String newEnd = Character.toLowerCase(end.charAt(0)) + end.substring(1);
@@ -251,9 +252,7 @@ class DefaultProfileValidationSupportBundleStrategy implements IValidationSuppor
 						}
 					}
 				}
-
 			}
-
 		}
 		return retVal;
 	}
@@ -289,7 +288,8 @@ class DefaultProfileValidationSupportBundleStrategy implements IValidationSuppor
 		return structureDefinitions;
 	}
 
-	private void loadCodeSystems(Map<String, IBaseResource> theCodeSystems, Map<String, IBaseResource> theValueSets, String theClasspath) {
+	private void loadCodeSystems(
+			Map<String, IBaseResource> theCodeSystems, Map<String, IBaseResource> theValueSets, String theClasspath) {
 		ourLog.info("Loading CodeSystem/ValueSet from classpath: {}", theClasspath);
 		InputStream inputStream = DefaultProfileValidationSupport.class.getResourceAsStream(theClasspath);
 		InputStreamReader reader = null;
@@ -319,8 +319,8 @@ class DefaultProfileValidationSupportBundleStrategy implements IValidationSuppor
 						switch (myCtx.getVersion().getVersion()) {
 							case DSTU2:
 							case DSTU2_HL7ORG:
-
-								IPrimitiveType<?> codeSystem = myCtx.newTerser().getSingleValueOrNull(next, "ValueSet.codeSystem.system", IPrimitiveType.class);
+								IPrimitiveType<?> codeSystem = myCtx.newTerser()
+										.getSingleValueOrNull(next, "ValueSet.codeSystem.system", IPrimitiveType.class);
 								if (codeSystem != null && isNotBlank(codeSystem.getValueAsString())) {
 									theCodeSystems.put(codeSystem.getValueAsString(), next);
 								}
@@ -336,8 +336,6 @@ class DefaultProfileValidationSupportBundleStrategy implements IValidationSuppor
 								break;
 						}
 					}
-
-
 				}
 			} finally {
 				try {
@@ -356,15 +354,14 @@ class DefaultProfileValidationSupportBundleStrategy implements IValidationSuppor
 		// Load built-in system
 
 		if (myCtx.getVersion().getVersion().isEqualOrNewerThan(FhirVersionEnum.DSTU3)) {
-			String storageCodeEnum = ClasspathUtil.loadResource("ca/uhn/fhir/context/support/HapiFhirStorageResponseCode.json");
-			IBaseResource storageCodeCodeSystem = myCtx.newJsonParser().setParserErrorHandler(new LenientErrorHandler()).parseResource(storageCodeEnum);
+			String storageCodeEnum =
+					ClasspathUtil.loadResource("ca/uhn/fhir/context/support/HapiFhirStorageResponseCode.json");
+			IBaseResource storageCodeCodeSystem = myCtx.newJsonParser()
+					.setParserErrorHandler(new LenientErrorHandler())
+					.parseResource(storageCodeEnum);
 			String url = myCtx.newTerser().getSinglePrimitiveValueOrNull(storageCodeCodeSystem, "url");
 			theCodeSystems.put(url, storageCodeCodeSystem);
 		}
-
-
-
-
 	}
 
 	private void loadStructureDefinitions(Map<String, IBaseResource> theCodeSystems, String theClasspath) {
@@ -372,7 +369,12 @@ class DefaultProfileValidationSupportBundleStrategy implements IValidationSuppor
 
 		String packageUserData = null;
 		if (myCtx.getVersion().getVersion().isEqualOrNewerThan(FhirVersionEnum.DSTU3)) {
-			packageUserData = "hl7.fhir." + myCtx.getVersion().getVersion().name().replace("DSTU", "R").toLowerCase(Locale.US);
+			packageUserData = "hl7.fhir."
+					+ myCtx.getVersion()
+							.getVersion()
+							.name()
+							.replace("DSTU", "R")
+							.toLowerCase(Locale.US);
 		}
 
 		try (InputStream valueSetText = DefaultProfileValidationSupport.class.getResourceAsStream(theClasspath)) {
@@ -389,7 +391,6 @@ class DefaultProfileValidationSupportBundleStrategy implements IValidationSuppor
 							if (isNotBlank(url)) {
 								theCodeSystems.put(url, next);
 							}
-
 						}
 
 						// This is used by the validator to determine which package a given SD came from.
@@ -397,7 +398,6 @@ class DefaultProfileValidationSupportBundleStrategy implements IValidationSuppor
 						if (packageUserData != null) {
 							next.setUserData("package", packageUserData);
 						}
-
 					}
 				}
 			} else {
@@ -426,5 +426,4 @@ class DefaultProfileValidationSupportBundleStrategy implements IValidationSuppor
 		ArrayList<IBaseResource> retVal = new ArrayList<>(theMap.values());
 		return (List<T>) Collections.unmodifiableList(retVal);
 	}
-
 }

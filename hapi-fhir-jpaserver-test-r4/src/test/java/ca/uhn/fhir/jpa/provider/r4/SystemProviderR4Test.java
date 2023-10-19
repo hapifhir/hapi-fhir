@@ -72,6 +72,7 @@ import org.hl7.fhir.r4.model.DecimalType;
 import org.hl7.fhir.r4.model.DiagnosticReport;
 import org.hl7.fhir.r4.model.Enumerations.AdministrativeGender;
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.IntegerType;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.OperationDefinition;
 import org.hl7.fhir.r4.model.OperationOutcome;
@@ -956,7 +957,7 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 		input.addParameter(ProviderConstants.OPERATION_DELETE_EXPUNGE_URL, "Observation?subject.active=false");
 		input.addParameter(ProviderConstants.OPERATION_DELETE_EXPUNGE_URL, "DiagnosticReport?subject.active=false");
 		int batchSize = 2;
-		input.addParameter(ProviderConstants.OPERATION_DELETE_BATCH_SIZE, new DecimalType(batchSize));
+		input.addParameter(ProviderConstants.OPERATION_DELETE_BATCH_SIZE, new IntegerType(batchSize));
 
 		// execute
 

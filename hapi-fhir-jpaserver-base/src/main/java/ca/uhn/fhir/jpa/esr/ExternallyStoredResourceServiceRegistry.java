@@ -21,9 +21,9 @@ package ca.uhn.fhir.jpa.esr;
 
 import org.apache.commons.lang3.Validate;
 
-import javax.annotation.Nonnull;
 import java.util.HashMap;
 import java.util.Map;
+import javax.annotation.Nonnull;
 
 import static org.apache.commons.lang3.StringUtils.defaultString;
 
@@ -39,7 +39,10 @@ public class ExternallyStoredResourceServiceRegistry {
 	 */
 	public void registerProvider(@Nonnull IExternallyStoredResourceService theProvider) {
 		String id = defaultString(theProvider.getId());
-		Validate.isTrue(id.matches(VALID_ID_PATTERN), "Invalid provider ID (must match pattern " + VALID_ID_PATTERN + "): %s", id);
+		Validate.isTrue(
+				id.matches(VALID_ID_PATTERN),
+				"Invalid provider ID (must match pattern " + VALID_ID_PATTERN + "): %s",
+				id);
 		Validate.isTrue(!myIdToProvider.containsKey(id), "Already have a provider with ID: %s", id);
 
 		myIdToProvider.put(id, theProvider);

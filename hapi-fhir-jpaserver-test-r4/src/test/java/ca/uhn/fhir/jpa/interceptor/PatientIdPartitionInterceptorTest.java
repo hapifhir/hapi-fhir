@@ -279,7 +279,7 @@ public class PatientIdPartitionInterceptorTest extends BaseJpaR4SystemTest {
 					.add("subject", new TokenParam("http://foo", "2"))
 				, mySrd);
 		} catch (MethodNotAllowedException e) {
-			assertEquals(Msg.code(1325) + "Multiple values for parameter subject is not supported in patient compartment mode", e.getMessage());
+			assertEquals(Msg.code(1324) + "Multiple values for parameter subject is not supported in patient compartment mode", e.getMessage());
 		}
 
 		// Multiple ORs

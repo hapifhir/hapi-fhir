@@ -60,12 +60,12 @@ public class SubscriptionsRequireManualActivationInterceptorR4 extends ServerOpe
 		}
 	}
 
-
 	public void setDao(IFhirResourceDao<Subscription> theDao) {
 		myDao = theDao;
 	}
 
-	private void verifyStatusOk(RestOperationTypeEnum theOperation, IBaseResource theOldResourceOrNull, IBaseResource theResource) {
+	private void verifyStatusOk(
+			RestOperationTypeEnum theOperation, IBaseResource theOldResourceOrNull, IBaseResource theResource) {
 		Subscription subscription = (Subscription) theResource;
 		SubscriptionStatus newStatus = subscription.getStatusElement().getValue();
 
@@ -75,7 +75,9 @@ public class SubscriptionsRequireManualActivationInterceptorR4 extends ServerOpe
 
 		if (newStatus == null) {
 			String actualCode = subscription.getStatusElement().getValueAsString();
-			throw new UnprocessableEntityException(Msg.code(807) + "Can not " + theOperation.getCode() + " resource: Subscription.status must be populated on this server" + ((isNotBlank(actualCode)) ? " (invalid value " + actualCode + ")" : ""));
+			throw new UnprocessableEntityException(Msg.code(807) + "Can not " + theOperation.getCode()
+					+ " resource: Subscription.status must be populated on this server"
+					+ ((isNotBlank(actualCode)) ? " (invalid value " + actualCode + ")" : ""));
 		}
 
 		if (theOldResourceOrNull != null) {
@@ -93,8 +95,13 @@ public class SubscriptionsRequireManualActivationInterceptorR4 extends ServerOpe
 		}
 	}
 
-	private void verifyActiveStatus(RestOperationTypeEnum theOperation, Subscription theSubscription, SubscriptionStatus newStatus, SubscriptionStatus theExistingStatus) {
-		SubscriptionChannelType channelType = theSubscription.getChannel().getTypeElement().getValue();
+	private void verifyActiveStatus(
+			RestOperationTypeEnum theOperation,
+			Subscription theSubscription,
+			SubscriptionStatus newStatus,
+			SubscriptionStatus theExistingStatus) {
+		SubscriptionChannelType channelType =
+				theSubscription.getChannel().getTypeElement().getValue();
 
 		if (channelType == null) {
 			throw new UnprocessableEntityException(Msg.code(808) + "Subscription.channel.type must be populated");
@@ -105,14 +112,19 @@ public class SubscriptionsRequireManualActivationInterceptorR4 extends ServerOpe
 		}
 
 		if (theExistingStatus != null) {
-			throw new UnprocessableEntityException(Msg.code(809) + "Subscription.status can not be changed from " + describeStatus(theExistingStatus) + " to " + describeStatus(newStatus));
+			throw new UnprocessableEntityException(Msg.code(809) + "Subscription.status can not be changed from "
+					+ describeStatus(theExistingStatus) + " to " + describeStatus(newStatus));
 		}
 
 		if (theSubscription.getStatus() == null) {
-			throw new UnprocessableEntityException(Msg.code(810) + "Can not " + theOperation.getCode().toLowerCase() + " resource: Subscription.status must be populated on this server");
+			throw new UnprocessableEntityException(
+					Msg.code(810) + "Can not " + theOperation.getCode().toLowerCase()
+							+ " resource: Subscription.status must be populated on this server");
 		}
 
-		throw new UnprocessableEntityException(Msg.code(811) + "Subscription.status must be '" + SubscriptionStatus.OFF.toCode() + "' or '" + SubscriptionStatus.REQUESTED.toCode() + "' on a newly created subscription");
+		throw new UnprocessableEntityException(
+				Msg.code(811) + "Subscription.status must be '" + SubscriptionStatus.OFF.toCode() + "' or '"
+						+ SubscriptionStatus.REQUESTED.toCode() + "' on a newly created subscription");
 	}
 
 	private String describeStatus(SubscriptionStatus existingStatus) {
@@ -124,5 +136,4 @@ public class SubscriptionsRequireManualActivationInterceptorR4 extends ServerOpe
 		}
 		return existingStatusString;
 	}
-
 }

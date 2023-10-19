@@ -33,7 +33,7 @@ import org.hl7.fhir.r4.model.Patient;
 import java.util.Collections;
 import java.util.List;
 
-//START SNIPPET: provider
+// START SNIPPET: provider
 
 /**
  * All resource providers must implement IResourceProvider
@@ -49,15 +49,15 @@ public class RestfulObservationResourceProvider implements IResourceProvider {
 	public Class<Patient> getResourceType() {
 		return Patient.class;
 	}
-	
+
 	/**
 	 * The "@Read" annotation indicates that this method supports the
-	 * read operation. It takes one argument, the Resource type being returned. 
-	 * 
+	 * read operation. It takes one argument, the Resource type being returned.
+	 *
 	 * @param theId
 	 *    The read operation takes one parameter, which must be of type
 	 *    IdType and must be annotated with the "@Read.IdParam" annotation.
-	 * @return 
+	 * @return
 	 *    Returns a resource matching this identifier, or null if none exists.
 	 */
 	@Read()
@@ -73,11 +73,11 @@ public class RestfulObservationResourceProvider implements IResourceProvider {
 	}
 
 	/**
-	 * The "@Search" annotation indicates that this method supports the 
+	 * The "@Search" annotation indicates that this method supports the
 	 * search operation. You may have many different methods annotated with
 	 * this annotation, to support many different search criteria. This
 	 * example searches by family name.
-	 * 
+	 *
 	 * @param theFamilyName
 	 *    This operation takes one parameter which is the search criteria. It is
 	 *    annotated with the "@Required" annotation. This annotation takes one argument,
@@ -101,6 +101,5 @@ public class RestfulObservationResourceProvider implements IResourceProvider {
 		patient.setGender(Enumerations.AdministrativeGender.MALE);
 		return Collections.singletonList(patient);
 	}
-
 }
-//END SNIPPET: provider
+// END SNIPPET: provider

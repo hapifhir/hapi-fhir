@@ -347,14 +347,14 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 	public void testConditionalCreateWithPlusInUrl() {
 		Observation obs = new Observation();
 		obs.addIdentifier().setValue("20210427133226.444+0800");
-		DaoMethodOutcome outcome = myObservationDao.create(obs, "identifier=20210427133226.444+0800", new SystemRequestDetails());
+		DaoMethodOutcome outcome = myObservationDao.create(obs, "identifier=20210427133226.444%2B0800", new SystemRequestDetails());
 		assertTrue(outcome.getCreated());
 
 		logAllTokenIndexes();
 		myCaptureQueriesListener.clear();
 		obs = new Observation();
 		obs.addIdentifier().setValue("20210427133226.444+0800");
-		outcome = myObservationDao.create(obs, "identifier=20210427133226.444+0800", new SystemRequestDetails());
+		outcome = myObservationDao.create(obs, "identifier=20210427133226.444%2B0800", new SystemRequestDetails());
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 		assertFalse(outcome.getCreated());
 	}
@@ -403,7 +403,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 	public void testCreateResource_withConditionalCreate_willAddSearchUrlEntity(){
 		// given
 		String identifierCode = "20210427133226.4440+800";
-		String matchUrl = "identifier=" + identifierCode;
+		String matchUrl = "identifier=" + identifierCode.replace("+", "%2B");
 		Observation obs = new Observation();
 		obs.addIdentifier().setValue(identifierCode);
 		// when
@@ -411,7 +411,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 
 		// then
 		Long expectedResId = outcome.getId().getIdPartAsLong();
-		String expectedNormalizedMatchUrl = obs.fhirType() + "?" + StringUtils.replace(matchUrl, "+", "%2B");
+		String expectedNormalizedMatchUrl = obs.fhirType() + "?" + matchUrl;
 
 		assertTrue(outcome.getCreated());
 		ResourceSearchUrlEntity searchUrlEntity = myResourceSearchUrlDao.findAll().get(0);

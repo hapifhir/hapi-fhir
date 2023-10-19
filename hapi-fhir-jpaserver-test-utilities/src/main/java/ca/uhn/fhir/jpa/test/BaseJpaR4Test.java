@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.jpa.test;
 
+import ca.uhn.fhir.batch2.jobs.export.BulkDataExportProvider;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
@@ -37,11 +38,11 @@ import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.binary.interceptor.BinaryStorageInterceptor;
 import ca.uhn.fhir.jpa.binary.provider.BinaryAccessProvider;
 import ca.uhn.fhir.jpa.bulk.export.api.IBulkDataExportJobSchedulingHelper;
-import ca.uhn.fhir.jpa.bulk.export.provider.BulkDataExportProvider;
 import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
 import ca.uhn.fhir.jpa.dao.data.IForcedIdDao;
 import ca.uhn.fhir.jpa.dao.data.IMdmLinkJpaRepository;
 import ca.uhn.fhir.jpa.dao.data.IPartitionDao;
+import ca.uhn.fhir.jpa.dao.data.IResourceHistoryProvenanceDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceHistoryTableDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceHistoryTagDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedComboStringUniqueDao;
@@ -143,6 +144,7 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.Group;
 import org.hl7.fhir.r4.model.Immunization;
 import org.hl7.fhir.r4.model.ImmunizationRecommendation;
+import org.hl7.fhir.r4.model.ListResource;
 import org.hl7.fhir.r4.model.Location;
 import org.hl7.fhir.r4.model.Media;
 import org.hl7.fhir.r4.model.Medication;
@@ -338,6 +340,9 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 	@Qualifier("myGroupDaoR4")
 	protected IFhirResourceDao<Group> myGroupDao;
 	@Autowired
+	@Qualifier("myListDaoR4")
+	protected IFhirResourceDao<ListResource> myListDao;
+	@Autowired
 	@Qualifier("myMolecularSequenceDaoR4")
 	protected IFhirResourceDao<MolecularSequence> myMolecularSequenceDao;
 	@Autowired
@@ -417,6 +422,8 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 	protected IResourceTableDao myResourceTableDao;
 	@Autowired
 	protected IResourceHistoryTableDao myResourceHistoryTableDao;
+	@Autowired
+	protected IResourceHistoryProvenanceDao myResourceHistoryProvenanceDao;
 	@Autowired
 	@Qualifier("myCoverageDaoR4")
 	protected IFhirResourceDao<Coverage> myCoverageDao;
@@ -515,6 +522,8 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 	@Autowired
 	protected IMdmLinkJpaRepository myMdmLinkDao;
 	@Autowired
+	protected IMdmLinkJpaRepository myMdmLinkHistoryDao;
+	@Autowired
 	private IValidationSupport myJpaValidationSupportChainR4;
 	private PerformanceTracingLoggingInterceptor myPerformanceTracingLoggingInterceptor;
 	@Autowired
@@ -583,6 +592,7 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 	@AfterEach
 	public void afterPurgeDatabase() {
 		runInTransaction(() -> {
+			myMdmLinkHistoryDao.deleteAll();
 			myMdmLinkDao.deleteAll();
 		});
 		purgeDatabase(myStorageSettings, mySystemDao, myResourceReindexingSvc, mySearchCoordinatorSvc, mySearchParamRegistry, myBulkDataScheduleHelper);
@@ -620,13 +630,16 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 		return myTxManager;
 	}
 
-	protected void validate(IBaseResource theResource) {
+	protected ValidationResult validateWithResult(IBaseResource theResource) {
 		FhirValidator validatorModule = myFhirContext.newValidator();
 		FhirInstanceValidator instanceValidator = new FhirInstanceValidator(myValidationSupport);
 		instanceValidator.setBestPracticeWarningLevel(BestPracticeWarningLevel.Ignore);
 		instanceValidator.setValidatorPolicyAdvisor(new ValidationPolicyAdvisor());
 		validatorModule.registerValidatorModule(instanceValidator);
-		ValidationResult result = validatorModule.validateWithResult(theResource);
+		return validatorModule.validateWithResult(theResource);
+	}
+	protected void validate(IBaseResource theResource) {
+		ValidationResult result = validateWithResult(theResource);
 		if (!result.isSuccessful()) {
 			fail(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(result.toOperationOutcome()));
 		}

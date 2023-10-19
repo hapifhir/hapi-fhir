@@ -26,13 +26,12 @@ abstract class BaseClientParam implements IParam {
 
 	@Override
 	public ICriterion<?> isMissing(boolean theMissing) {
-		return new MissingCriterion(theMissing ? Constants.PARAMQUALIFIER_MISSING_TRUE : Constants.PARAMQUALIFIER_MISSING_FALSE);
+		return new MissingCriterion(
+				theMissing ? Constants.PARAMQUALIFIER_MISSING_TRUE : Constants.PARAMQUALIFIER_MISSING_FALSE);
 	}
 
-	private class MissingCriterion implements ICriterion<IParam>, ICriterionInternal
-	{
+	private class MissingCriterion implements ICriterion<IParam>, ICriterionInternal {
 		private String myParameterValue;
-
 
 		public MissingCriterion(String theParameterValue) {
 			myParameterValue = theParameterValue;
@@ -47,7 +46,5 @@ abstract class BaseClientParam implements IParam {
 		public String getParameterName() {
 			return BaseClientParam.this.getParamName() + Constants.PARAMQUALIFIER_MISSING;
 		}
-		
 	}
-	
 }

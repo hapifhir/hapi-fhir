@@ -108,7 +108,9 @@ public class ApacheHttpRequest extends BaseHttpRequest implements IHttpRequest {
 			HttpEntity entity = ((HttpEntityEnclosingRequest) myRequest).getEntity();
 			if (entity.isRepeatable()) {
 				final Header contentTypeHeader = myRequest.getFirstHeader("Content-Type");
-				Charset charset = contentTypeHeader == null ? null : ContentType.parse(contentTypeHeader.getValue()).getCharset();
+				Charset charset = contentTypeHeader == null
+						? null
+						: ContentType.parse(contentTypeHeader.getValue()).getCharset();
 				return IOUtils.toString(entity.getContent(), charset);
 			}
 		}
@@ -129,5 +131,4 @@ public class ApacheHttpRequest extends BaseHttpRequest implements IHttpRequest {
 	public String toString() {
 		return myRequest.toString();
 	}
-
 }

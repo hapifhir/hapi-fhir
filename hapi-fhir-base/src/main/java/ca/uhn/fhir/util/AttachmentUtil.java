@@ -46,18 +46,15 @@ public class AttachmentUtil {
 	}
 
 	@SuppressWarnings("unchecked")
-	private static <T> IPrimitiveType<T> getOrCreateChild(FhirContext theContext, ICompositeType theAttachment, String theChildName, String theChildDatatype) {
+	private static <T> IPrimitiveType<T> getOrCreateChild(
+			FhirContext theContext, ICompositeType theAttachment, String theChildName, String theChildDatatype) {
 		BaseRuntimeChildDefinition entryChild = getChild(theContext, theAttachment, theChildName);
 		List<IBase> entries = entryChild.getAccessor().getValues(theAttachment);
-		return entries
-			.stream()
-			.map(t -> (IPrimitiveType<T>) t)
-			.findFirst()
-			.orElseGet(() -> {
-				IPrimitiveType<String> string = newPrimitive(theContext, theChildDatatype, null);
-				entryChild.getMutator().setValue(theAttachment, string);
-				return (IPrimitiveType<T>) string;
-			});
+		return entries.stream().map(t -> (IPrimitiveType<T>) t).findFirst().orElseGet(() -> {
+			IPrimitiveType<String> string = newPrimitive(theContext, theChildDatatype, null);
+			entryChild.getMutator().setValue(theAttachment, string);
+			return (IPrimitiveType<T>) string;
+		});
 	}
 
 	public static void setUrl(FhirContext theContext, ICompositeType theAttachment, String theUrl) {
@@ -84,8 +81,8 @@ public class AttachmentUtil {
 		BaseRuntimeChildDefinition entryChild = getChild(theContext, theAttachment, "size");
 		if (theLength == null) {
 			entryChild.getMutator().setValue(theAttachment, null);
-		} else if (theContext.getVersion().getVersion().isEqualOrNewerThan(FhirVersionEnum.R5)){
-			entryChild.getMutator().setValue(theAttachment, newPrimitive(theContext, "integer64", (long)theLength));
+		} else if (theContext.getVersion().getVersion().isEqualOrNewerThan(FhirVersionEnum.R5)) {
+			entryChild.getMutator().setValue(theAttachment, newPrimitive(theContext, "integer64", (long) theLength));
 		} else {
 			entryChild.getMutator().setValue(theAttachment, newPrimitive(theContext, "unsignedInt", theLength));
 		}
@@ -107,7 +104,8 @@ public class AttachmentUtil {
 	 * This is internal API- Use with caution as it may change
 	 */
 	static BaseRuntimeChildDefinition getChild(FhirContext theContext, IBase theElement, String theName) {
-		BaseRuntimeElementCompositeDefinition<?> def = (BaseRuntimeElementCompositeDefinition<?>) theContext.getElementDefinition(theElement.getClass());
+		BaseRuntimeElementCompositeDefinition<?> def =
+				(BaseRuntimeElementCompositeDefinition<?>) theContext.getElementDefinition(theElement.getClass());
 		return def.getChildByName(theName);
 	}
 

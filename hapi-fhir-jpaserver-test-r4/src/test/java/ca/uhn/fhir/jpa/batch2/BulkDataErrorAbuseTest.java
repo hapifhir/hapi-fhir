@@ -1,16 +1,17 @@
 package ca.uhn.fhir.jpa.batch2;
 
+import ca.uhn.fhir.batch2.api.IJobCoordinator;
+import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
+import ca.uhn.fhir.batch2.model.JobInstance;
+import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.model.BulkExportJobResults;
-import ca.uhn.fhir.jpa.api.model.BulkExportParameters;
-import ca.uhn.fhir.jpa.api.svc.IBatch2JobRunner;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.test.config.TestR4Config;
-import ca.uhn.fhir.jpa.util.BulkExportUtils;
 import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.api.server.bulk.BulkDataExportOptions;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.util.Batch2JobDefinitionConstants;
 import ca.uhn.fhir.util.JsonUtil;
 import com.google.common.collect.Sets;
 import org.hl7.fhir.r4.model.Binary;
@@ -44,6 +45,7 @@ import java.util.concurrent.TimeUnit;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.emptyOrNullString;
+import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -58,7 +60,7 @@ public class BulkDataErrorAbuseTest extends BaseResourceProviderR4Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(BulkDataErrorAbuseTest.class);
 
 	@Autowired
-	private IBatch2JobRunner myJobRunner;
+	private IJobCoordinator myJobCoordinator;
 
 	@BeforeEach
 	void beforeEach() {
@@ -119,11 +121,11 @@ public class BulkDataErrorAbuseTest extends BaseResourceProviderR4Test {
 		myClient.update().resource(group).execute();
 
 		// set the export options
-		BulkDataExportOptions options = new BulkDataExportOptions();
+		BulkExportJobParameters options = new BulkExportJobParameters();
 		options.setResourceTypes(Sets.newHashSet("Patient"));
-		options.setGroupId(new IdType("Group", "G2"));
+		options.setGroupId("Group/G2");
 		options.setFilters(new HashSet<>());
-		options.setExportStyle(BulkDataExportOptions.ExportStyle.GROUP);
+		options.setExportStyle(BulkExportJobParameters.ExportStyle.GROUP);
 		options.setOutputFormat(Constants.CT_FHIR_NDJSON);
 
 		BlockingQueue<Runnable> workQueue = new LinkedBlockingQueue<>();
@@ -181,7 +183,8 @@ public class BulkDataErrorAbuseTest extends BaseResourceProviderR4Test {
 
 	private void verifyBulkExportResults(String theInstanceId, List<String> theContainedList, List<String> theExcludedList) {
 		// Iterate over the files
-		String report = myJobRunner.getJobInfo(theInstanceId).getReport();
+		JobInstance jobInfo = myJobCoordinator.getInstance(theInstanceId);
+		String report = jobInfo.getReport();
 		ourLog.debug("Export job {} report: {}", theInstanceId, report);
 		if (!theContainedList.isEmpty()) {
 			assertThat("report for instance " + theInstanceId + " is empty", report, not(emptyOrNullString()));
@@ -227,12 +230,18 @@ public class BulkDataErrorAbuseTest extends BaseResourceProviderR4Test {
 		for (String excludedString : theExcludedList) {
 			assertThat("export doesn't have expected ids", foundIds, not(hasItem(excludedString)));
 		}
+
+		assertThat(jobInfo.getCombinedRecordsProcessed(), equalTo(2));
+
+		ourLog.info("Job {} ok", theInstanceId);
 	}
 
-	private String startJob(BulkDataExportOptions theOptions) {
-		BulkExportParameters startRequest = BulkExportUtils.createBulkExportJobParametersFromExportOptions(theOptions);
-		startRequest.setUseExistingJobsFirst(false);
-		Batch2JobStartResponse startResponse = myJobRunner.startNewJob(startRequest);
+	private String startJob(BulkExportJobParameters theOptions) {
+		JobInstanceStartRequest startRequest = new JobInstanceStartRequest();
+		startRequest.setJobDefinitionId(Batch2JobDefinitionConstants.BULK_EXPORT);
+		startRequest.setUseCache(false);
+		startRequest.setParameters(theOptions);
+		Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(mySrd, startRequest);
 		assertNotNull(startResponse);
 		return startResponse.getInstanceId();
 	}

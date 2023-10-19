@@ -1,0 +1,5 @@
+
+---
+type: fix
+issue: 4968
+title: "Previously, when performing a `$mdm-clear` followed by an update to an existing resource without doing the required `$mdm-submit` first, a non-descriptive NullPointerException was thrown. To fix this, an exception that includes a more descriptive/suggestive message will be thrown when this condition is detected."

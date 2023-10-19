@@ -53,7 +53,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * </p>
  */
 @DatatypeDef(name = "id", profileOf = StringDt.class)
-public class IdDt extends UriDt implements /*IPrimitiveDatatype<String>, */IIdType {
+public class IdDt extends UriDt implements /*IPrimitiveDatatype<String>, */ IIdType {
 
 	private String myBaseUrl;
 	private boolean myHaveComponentParts;
@@ -182,7 +182,10 @@ public class IdDt extends UriDt implements /*IPrimitiveDatatype<String>, */IIdTy
 	}
 
 	private void setHaveComponentParts(IdDt theIdDt) {
-		if (isBlank(myBaseUrl) && isBlank(myResourceType) && isBlank(myUnqualifiedId) && isBlank(myUnqualifiedVersionId)) {
+		if (isBlank(myBaseUrl)
+				&& isBlank(myResourceType)
+				&& isBlank(myUnqualifiedId)
+				&& isBlank(myUnqualifiedVersionId)) {
 			myHaveComponentParts = false;
 		} else {
 			myHaveComponentParts = true;
@@ -198,7 +201,8 @@ public class IdDt extends UriDt implements /*IPrimitiveDatatype<String>, */IIdTy
 		} else if (theResouce instanceof IAnyResource) {
 			((IAnyResource) theResouce).setId(getValue());
 		} else {
-			throw new IllegalArgumentException(Msg.code(1876) + "Unknown resource class type, does not implement IResource or extend Resource");
+			throw new IllegalArgumentException(
+					Msg.code(1876) + "Unknown resource class type, does not implement IResource or extend Resource");
 		}
 	}
 
@@ -230,7 +234,9 @@ public class IdDt extends UriDt implements /*IPrimitiveDatatype<String>, */IIdTy
 		if (theId.isEmpty()) {
 			return isEmpty();
 		}
-		return ObjectUtils.equals(getResourceType(), theId.getResourceType()) && ObjectUtils.equals(getIdPart(), theId.getIdPart()) && ObjectUtils.equals(getVersionIdPart(), theId.getVersionIdPart());
+		return ObjectUtils.equals(getResourceType(), theId.getResourceType())
+				&& ObjectUtils.equals(getIdPart(), theId.getIdPart())
+				&& ObjectUtils.equals(getVersionIdPart(), theId.getVersionIdPart());
 	}
 
 	/**
@@ -284,7 +290,6 @@ public class IdDt extends UriDt implements /*IPrimitiveDatatype<String>, */IIdTy
 	public String getResourceType() {
 		return myResourceType;
 	}
-
 
 	/**
 	 * Returns the value of this ID. Note that this value may be a fully qualified URL, a relative/partial URL, or a simple ID. Use {@link #getIdPart()} to get just the ID portion.
@@ -395,8 +400,10 @@ public class IdDt extends UriDt implements /*IPrimitiveDatatype<String>, */IIdTy
 					}
 					if (typeIndex >= idIndex) {
 						// e.g. http://example.org/foo
-						// 'foo' was the id but we're making that the resource type. Nullify the id part because we don't have an id.
-						// Also set null value to the super.setValue() and enable myHaveComponentParts so it forces getValue() to properly
+						// 'foo' was the id but we're making that the resource type. Nullify the id part because we
+						// don't have an id.
+						// Also set null value to the super.setValue() and enable myHaveComponentParts so it forces
+						// getValue() to properly
 						// recreate the url
 						myResourceType = myUnqualifiedId;
 						myUnqualifiedId = null;
@@ -409,10 +416,8 @@ public class IdDt extends UriDt implements /*IPrimitiveDatatype<String>, */IIdTy
 					if (typeIndex > 4) {
 						myBaseUrl = theValue.substring(0, typeIndex);
 					}
-
 				}
 			}
-
 		}
 		return this;
 	}
@@ -555,7 +560,7 @@ public class IdDt extends UriDt implements /*IPrimitiveDatatype<String>, */IIdTy
 	 *
 	 * @deprecated
 	 */
-	@Deprecated //override deprecated method
+	@Deprecated // override deprecated method
 	@Override
 	public void setId(IdDt theId) {
 		setValue(theId.getValue());
@@ -564,11 +569,16 @@ public class IdDt extends UriDt implements /*IPrimitiveDatatype<String>, */IIdTy
 	@Override
 	public IIdType setParts(String theBaseUrl, String theResourceType, String theIdPart, String theVersionIdPart) {
 		if (isNotBlank(theVersionIdPart)) {
-			Validate.notBlank(theResourceType, "If theVersionIdPart is populated, theResourceType and theIdPart must be populated");
-			Validate.notBlank(theIdPart, "If theVersionIdPart is populated, theResourceType and theIdPart must be populated");
+			Validate.notBlank(
+					theResourceType,
+					"If theVersionIdPart is populated, theResourceType and theIdPart must be populated");
+			Validate.notBlank(
+					theIdPart, "If theVersionIdPart is populated, theResourceType and theIdPart must be populated");
 		}
 		if (isNotBlank(theBaseUrl) && isNotBlank(theIdPart)) {
-			Validate.notBlank(theResourceType, "If theBaseUrl is populated and theIdPart is populated, theResourceType must be populated");
+			Validate.notBlank(
+					theResourceType,
+					"If theBaseUrl is populated and theIdPart is populated, theResourceType must be populated");
 		}
 
 		setValue(null);
@@ -712,5 +722,4 @@ public class IdDt extends UriDt implements /*IPrimitiveDatatype<String>, */IIdTy
 		}
 		return theIdPart.toString();
 	}
-
 }

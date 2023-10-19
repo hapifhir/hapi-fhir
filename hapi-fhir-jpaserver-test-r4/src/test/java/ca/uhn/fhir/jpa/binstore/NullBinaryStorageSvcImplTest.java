@@ -9,7 +9,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class NullBinaryStorageSvcImplTest {
 
-	private NullBinaryStorageSvcImpl mySvc = new NullBinaryStorageSvcImpl();
+	private final NullBinaryStorageSvcImpl mySvc = new NullBinaryStorageSvcImpl();
 
 	@Test
 	public void shouldStoreBlob() {
@@ -18,43 +18,31 @@ public class NullBinaryStorageSvcImplTest {
 
 	@Test
 	public void storeBlob() {
-		assertThrows(UnsupportedOperationException.class, () -> {
-			mySvc.storeBlob(null, null, null, null);
-		});
+		assertThrows(UnsupportedOperationException.class, () -> mySvc.storeBlob(null, null, null, null, null));
 	}
 
 	@Test
 	public void fetchBlobDetails() {
-		assertThrows(UnsupportedOperationException.class, () -> {
-			mySvc.fetchBlobDetails(null, null);
-		});
+		assertThrows(UnsupportedOperationException.class, () -> mySvc.fetchBlobDetails(null, null));
 	}
 
 	@Test
 	public void writeBlob() {
-		assertThrows(UnsupportedOperationException.class, () -> {
-			mySvc.writeBlob(null, null, null);
-		});
+		assertThrows(UnsupportedOperationException.class, () -> mySvc.writeBlob(null, null, null));
 	}
 
 	@Test
 	public void expungeBlob() {
-		assertThrows(UnsupportedOperationException.class, () -> {
-			mySvc.expungeBlob(null, null);
-		});
+		assertThrows(UnsupportedOperationException.class, () -> mySvc.expungeBlob(null, null));
 	}
 
 	@Test
 	public void fetchBlob() {
-		assertThrows(UnsupportedOperationException.class, () -> {
-			mySvc.fetchBlob(null, null);
-		});
+		assertThrows(UnsupportedOperationException.class, () -> mySvc.fetchBlob(null, null));
 	}
 
 	@Test
 	public void newBlobId() {
-		assertThrows(UnsupportedOperationException.class, () -> {
-			mySvc.newBlobId();
-		});
+		assertThrows(UnsupportedOperationException.class, () -> mySvc.newBlobId());
 	}
 }

@@ -19,9 +19,9 @@
  */
 package ca.uhn.fhir.batch2.model;
 
-import ca.uhn.fhir.jpa.util.JsonDateDeserializer;
-import ca.uhn.fhir.jpa.util.JsonDateSerializer;
 import ca.uhn.fhir.model.api.IModelJson;
+import ca.uhn.fhir.rest.server.util.JsonDateDeserializer;
+import ca.uhn.fhir.rest.server.util.JsonDateSerializer;
 import ca.uhn.fhir.util.JsonUtil;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
@@ -45,7 +45,8 @@ public class WorkChunk implements IModelJson {
 	private String myId;
 
 	@JsonProperty("sequence")
-	// TODO MB danger - these repeat with a job or even a single step.  They start at 0 for every parent chunk.  Review after merge.
+	// TODO MB danger - these repeat with a job or even a single step.  They start at 0 for every parent chunk.  Review
+	// after merge.
 	private int mySequence;
 
 	@JsonProperty("status")
@@ -85,6 +86,7 @@ public class WorkChunk implements IModelJson {
 	@JsonSerialize(using = JsonDateSerializer.class)
 	@JsonDeserialize(using = JsonDateDeserializer.class)
 	private Date myUpdateTime;
+
 	@JsonProperty(value = "recordsProcessed", access = JsonProperty.Access.READ_ONLY)
 	private Integer myRecordsProcessed;
 
@@ -93,6 +95,9 @@ public class WorkChunk implements IModelJson {
 
 	@JsonProperty(value = "errorCount", access = JsonProperty.Access.READ_ONLY)
 	private int myErrorCount;
+
+	@JsonProperty(value = "warningMessage", access = JsonProperty.Access.READ_ONLY)
+	private String myWarningMessage;
 
 	/**
 	 * Constructor
@@ -246,6 +251,15 @@ public class WorkChunk implements IModelJson {
 		myUpdateTime = theUpdateTime;
 	}
 
+	public String getWarningMessage() {
+		return myWarningMessage;
+	}
+
+	public WorkChunk setWarningMessage(String theWarningMessage) {
+		myWarningMessage = theWarningMessage;
+		return this;
+	}
+
 	@Override
 	public String toString() {
 		ToStringBuilder b = new ToStringBuilder(this);
@@ -267,6 +281,9 @@ public class WorkChunk implements IModelJson {
 		}
 		if (myErrorCount > 0) {
 			b.append("ErrorCount", myErrorCount);
+		}
+		if (isNotBlank(myWarningMessage)) {
+			b.append("WarningMessage", myWarningMessage);
 		}
 		return b.toString();
 	}

@@ -32,7 +32,11 @@ public class Bindings {
 	private final HashMap<String, List<OperationMethodBinding>> myOperationIdToBindings;
 	private final IdentityHashMap<OperationMethodBinding, String> myOperationBindingToId;
 
-	public Bindings(IdentityHashMap<SearchMethodBinding, String> theNamedSearchMethodBindingToName, HashMap<String, List<SearchMethodBinding>> theSearchNameToBindings, HashMap<String, List<OperationMethodBinding>> theOperationIdToBindings, IdentityHashMap<OperationMethodBinding, String> theOperationBindingToName) {
+	public Bindings(
+			IdentityHashMap<SearchMethodBinding, String> theNamedSearchMethodBindingToName,
+			HashMap<String, List<SearchMethodBinding>> theSearchNameToBindings,
+			HashMap<String, List<OperationMethodBinding>> theOperationIdToBindings,
+			IdentityHashMap<OperationMethodBinding, String> theOperationBindingToName) {
 		myNamedSearchMethodBindingToName = theNamedSearchMethodBindingToName;
 		mySearchNameToBindings = theSearchNameToBindings;
 		myOperationIdToBindings = theOperationIdToBindings;

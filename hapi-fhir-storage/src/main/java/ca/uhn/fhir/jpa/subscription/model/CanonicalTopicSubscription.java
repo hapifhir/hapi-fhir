@@ -132,4 +132,8 @@ public class CanonicalTopicSubscription {
 	public int hashCode() {
 		return new HashCodeBuilder(17, 37).append(myTopic).toHashCode();
 	}
+
+	public boolean hasFilters() {
+		return myFilters != null && !myFilters.isEmpty();
+	}
 }

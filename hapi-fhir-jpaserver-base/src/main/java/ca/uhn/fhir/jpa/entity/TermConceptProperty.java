@@ -31,6 +31,8 @@ import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextFi
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.GenericField;
 import org.hibernate.validator.constraints.NotBlank;
 
+import java.io.Serializable;
+import java.nio.charset.StandardCharsets;
 import javax.annotation.Nonnull;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -45,24 +47,30 @@ import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
-import java.io.Serializable;
-import java.nio.charset.StandardCharsets;
 
 import static org.apache.commons.lang3.StringUtils.left;
 import static org.apache.commons.lang3.StringUtils.length;
 
 @Entity
-@Table(name = "TRM_CONCEPT_PROPERTY", uniqueConstraints = { }, indexes = {
-	// must have same name that indexed FK or SchemaMigrationTest complains because H2 sets this index automatically
-	@Index(name = "FK_CONCEPTPROP_CONCEPT",  columnList = "CONCEPT_PID", unique = false)
-})
+@Table(
+		name = "TRM_CONCEPT_PROPERTY",
+		uniqueConstraints = {},
+		indexes = {
+			// must have same name that indexed FK or SchemaMigrationTest complains because H2 sets this index
+			// automatically
+			@Index(name = "FK_CONCEPTPROP_CONCEPT", columnList = "CONCEPT_PID", unique = false),
+			@Index(name = "FK_CONCEPTPROP_CSV", columnList = "CS_VER_PID")
+		})
 public class TermConceptProperty implements Serializable {
 	public static final int MAX_PROPTYPE_ENUM_LENGTH = 6;
 	private static final long serialVersionUID = 1L;
 	private static final int MAX_LENGTH = 500;
 
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "CONCEPT_PID", referencedColumnName = "PID", foreignKey = @ForeignKey(name = "FK_CONCEPTPROP_CONCEPT"))
+	@JoinColumn(
+			name = "CONCEPT_PID",
+			referencedColumnName = "PID",
+			foreignKey = @ForeignKey(name = "FK_CONCEPTPROP_CONCEPT"))
 	private TermConcept myConcept;
 
 	/**
@@ -71,7 +79,11 @@ public class TermConceptProperty implements Serializable {
 	 * @since 3.5.0
 	 */
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "CS_VER_PID", nullable = true, referencedColumnName = "PID", foreignKey = @ForeignKey(name = "FK_CONCEPTPROP_CSV"))
+	@JoinColumn(
+			name = "CS_VER_PID",
+			nullable = true,
+			referencedColumnName = "PID",
+			foreignKey = @ForeignKey(name = "FK_CONCEPTPROP_CSV"))
 	private TermCodeSystemVersion myCodeSystemVersion;
 
 	@Id()
@@ -128,8 +140,10 @@ public class TermConceptProperty implements Serializable {
 	 * Relevant only for properties of type {@link TermConceptPropertyTypeEnum#CODING}
 	 */
 	public TermConceptProperty setCodeSystem(String theCodeSystem) {
-		ValidateUtil.isNotTooLongOrThrowIllegalArgument(theCodeSystem, MAX_LENGTH,
-			"Property code system exceeds maximum length (" + MAX_LENGTH + "): " + length(theCodeSystem));
+		ValidateUtil.isNotTooLongOrThrowIllegalArgument(
+				theCodeSystem,
+				MAX_LENGTH,
+				"Property code system exceeds maximum length (" + MAX_LENGTH + "): " + length(theCodeSystem));
 		myCodeSystem = theCodeSystem;
 		return this;
 	}
@@ -155,8 +169,8 @@ public class TermConceptProperty implements Serializable {
 
 	public TermConceptProperty setKey(@Nonnull String theKey) {
 		ValidateUtil.isNotBlankOrThrowIllegalArgument(theKey, "theKey must not be null or empty");
-		ValidateUtil.isNotTooLongOrThrowIllegalArgument(theKey, MAX_LENGTH,
-			"Code exceeds maximum length (" + MAX_LENGTH + "): " + length(theKey));
+		ValidateUtil.isNotTooLongOrThrowIllegalArgument(
+				theKey, MAX_LENGTH, "Code exceeds maximum length (" + MAX_LENGTH + "): " + length(theKey));
 		myKey = theKey;
 		return this;
 	}
@@ -234,10 +248,10 @@ public class TermConceptProperty implements Serializable {
 	@Override
 	public String toString() {
 		return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
-			.append("conceptPid", myConcept.getId())
-			.append("key", myKey)
-			.append("value", getValue())
-			.toString();
+				.append("conceptPid", myConcept.getId())
+				.append("key", myKey)
+				.append("value", getValue())
+				.toString();
 	}
 
 	@Override
@@ -253,23 +267,23 @@ public class TermConceptProperty implements Serializable {
 		TermConceptProperty that = (TermConceptProperty) theO;
 
 		return new EqualsBuilder()
-			.append(myKey, that.myKey)
-			.append(myValue, that.myValue)
-			.append(myType, that.myType)
-			.append(myCodeSystem, that.myCodeSystem)
-			.append(myDisplay, that.myDisplay)
-			.isEquals();
+				.append(myKey, that.myKey)
+				.append(myValue, that.myValue)
+				.append(myType, that.myType)
+				.append(myCodeSystem, that.myCodeSystem)
+				.append(myDisplay, that.myDisplay)
+				.isEquals();
 	}
 
 	@Override
 	public int hashCode() {
 		return new HashCodeBuilder(17, 37)
-			.append(myKey)
-			.append(myValue)
-			.append(myType)
-			.append(myCodeSystem)
-			.append(myDisplay)
-			.toHashCode();
+				.append(myKey)
+				.append(myValue)
+				.append(myType)
+				.append(myCodeSystem)
+				.append(myDisplay)
+				.toHashCode();
 	}
 
 	public Long getPid() {

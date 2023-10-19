@@ -42,10 +42,11 @@ public class MissingQueryParameterPredicateParams {
 	 */
 	private RequestPartitionId myRequestPartitionId;
 
-	public MissingQueryParameterPredicateParams(ca.uhn.fhir.jpa.search.builder.predicate.ResourceTablePredicateBuilder theResourceTablePredicateBuilder,
-															  boolean theTheMissing,
-															  String theParamName,
-															  ca.uhn.fhir.interceptor.model.RequestPartitionId theRequestPartitionId) {
+	public MissingQueryParameterPredicateParams(
+			ca.uhn.fhir.jpa.search.builder.predicate.ResourceTablePredicateBuilder theResourceTablePredicateBuilder,
+			boolean theTheMissing,
+			String theParamName,
+			ca.uhn.fhir.interceptor.model.RequestPartitionId theRequestPartitionId) {
 		myResourceTablePredicateBuilder = theResourceTablePredicateBuilder;
 		myIsMissing = theTheMissing;
 		myParamName = theParamName;

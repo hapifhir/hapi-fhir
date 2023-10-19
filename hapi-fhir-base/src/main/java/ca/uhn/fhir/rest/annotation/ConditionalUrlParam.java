@@ -26,7 +26,7 @@ import java.lang.annotation.Target;
 
 /**
  * On the {@link Update}, {@link Create} and {@link Delete} operation methods, this annotation
- * can be used to mark a {@link String} parameter which will be populated with the 
+ * can be used to mark a {@link String} parameter which will be populated with the
  * conditional "search" URL for the operation, if an incoming client invocation is
  * a conditional operation. For non-conditional invocations, the value will be set to
  * <code>null</code> so it is important to handle <code>null</code>.
@@ -45,8 +45,7 @@ public @interface ConditionalUrlParam {
 	 * <p>
 	 * Note that this flag is only a hint to the Conformance statement generator,
 	 * it does not actually affect how the server itself works.
-	 * </p>  
+	 * </p>
 	 */
 	boolean supportsMultiple() default false;
-	
 }

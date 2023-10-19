@@ -28,5 +28,4 @@ import java.util.Collection;
 public interface ISearchParamPresenceSvc {
 
 	AddRemoveCount updatePresence(ResourceTable theResource, Collection<SearchParamPresentEntity> thePresenceEntities);
-
 }

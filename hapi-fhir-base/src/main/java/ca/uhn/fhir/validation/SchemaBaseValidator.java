@@ -31,12 +31,6 @@ import org.xml.sax.SAXException;
 import org.xml.sax.SAXNotRecognizedException;
 import org.xml.sax.SAXParseException;
 
-import javax.xml.XMLConstants;
-import javax.xml.transform.Source;
-import javax.xml.transform.stream.StreamSource;
-import javax.xml.validation.Schema;
-import javax.xml.validation.SchemaFactory;
-import javax.xml.validation.Validator;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.StringReader;
@@ -45,9 +39,16 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import javax.xml.XMLConstants;
+import javax.xml.transform.Source;
+import javax.xml.transform.stream.StreamSource;
+import javax.xml.validation.Schema;
+import javax.xml.validation.SchemaFactory;
+import javax.xml.validation.Validator;
 
 public class SchemaBaseValidator implements IValidatorModule {
-	public static final String RESOURCES_JAR_NOTE = "Note that as of HAPI FHIR 1.2, DSTU2 validation files are kept in a separate JAR (hapi-fhir-validation-resources-XXX.jar) which must be added to your classpath. See the HAPI FHIR download page for more information.";
+	public static final String RESOURCES_JAR_NOTE =
+			"Note that as of HAPI FHIR 1.2, DSTU2 validation files are kept in a separate JAR (hapi-fhir-validation-resources-XXX.jar) which must be added to your classpath. See the HAPI FHIR download page for more information.";
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SchemaBaseValidator.class);
 	private static final Set<String> SCHEMA_NAMES;
@@ -84,7 +85,8 @@ public class SchemaBaseValidator implements IValidatorModule {
 			if (theContext.getResourceAsStringEncoding() == EncodingEnum.XML) {
 				encodedResource = theContext.getResourceAsString();
 			} else {
-				encodedResource = theContext.getFhirContext().newXmlParser().encodeResourceToString((IBaseResource) theContext.getResource());
+				encodedResource = theContext.getFhirContext().newXmlParser().encodeResourceToString((IBaseResource)
+						theContext.getResource());
 			}
 
 			try {
@@ -138,9 +140,10 @@ public class SchemaBaseValidator implements IValidatorModule {
 					ourJaxp15Supported = false;
 					ourLog.warn("Jaxp 1.5 Support not found.", e);
 				}
-				schema = schemaFactory.newSchema(new Source[]{baseSource});
+				schema = schemaFactory.newSchema(new Source[] {baseSource});
 			} catch (SAXException e) {
-				throw new ConfigurationException(Msg.code(1968) + "Could not load/parse schema file: " + "fhir-single.xsd", e);
+				throw new ConfigurationException(
+						Msg.code(1968) + "Could not load/parse schema file: " + "fhir-single.xsd", e);
 			}
 			myKeyToSchema.put(key, schema);
 			return schema;
@@ -161,11 +164,11 @@ public class SchemaBaseValidator implements IValidatorModule {
 	}
 
 	private final class MyResourceResolver implements LSResourceResolver {
-		private MyResourceResolver() {
-		}
+		private MyResourceResolver() {}
 
 		@Override
-		public LSInput resolveResource(String theType, String theNamespaceURI, String thePublicId, String theSystemId, String theBaseURI) {
+		public LSInput resolveResource(
+				String theType, String theNamespaceURI, String thePublicId, String theSystemId, String theBaseURI) {
 			if (theSystemId != null && SCHEMA_NAMES.contains(theSystemId)) {
 				LSInputImpl input = new LSInputImpl();
 				input.setPublicId(thePublicId);
@@ -178,7 +181,6 @@ public class SchemaBaseValidator implements IValidatorModule {
 				byte[] bytes = ClasspathUtil.loadResourceAsByteArray(pathToBase);
 				input.setByteStream(new ByteArrayInputStream(bytes));
 				return input;
-
 			}
 
 			throw new ConfigurationException(Msg.code(1969) + "Unknown schema: " + theSystemId);
@@ -216,11 +218,9 @@ public class SchemaBaseValidator implements IValidatorModule {
 		public void warning(SAXParseException theException) {
 			addIssue(theException, ResultSeverityEnum.WARNING);
 		}
-
 	}
 
 	public static boolean isJaxp15Supported() {
 		return ourJaxp15Supported;
 	}
-
 }

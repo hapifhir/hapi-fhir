@@ -151,6 +151,7 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 		request.setPageStart(index);
 		request.setBatchSize(size);
 		request.setSort(Sort.unsorted());
+		request.setJobStatus("");
 
 		Page<JobInstance> page;
 		Iterator<JobInstance> iterator;
@@ -219,6 +220,15 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 		// Since there was only one chunk, the job should proceed without requiring a maintenance pass
 		myBatch2JobHelper.awaitJobCompletion(batchJobId);
 		myLastStepLatch.awaitExpected();
+
+		final List<JobInstance> jobInstances = myJobPersistence.fetchInstances(10, 0);
+
+		assertEquals(1, jobInstances.size());
+
+		final JobInstance jobInstance = jobInstances.get(0);
+
+		assertEquals(StatusEnum.COMPLETED, jobInstance.getStatus());
+		assertEquals(1.0, jobInstance.getProgress());
 	}
 
 	private void createThreeStepReductionJob(
@@ -360,6 +370,15 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 				testInfo + i
 			));
 		}
+
+		final List<JobInstance> jobInstances = myJobPersistence.fetchInstances(10, 0);
+
+		assertEquals(1, jobInstances.size());
+
+		final JobInstance jobInstance = jobInstances.get(0);
+
+		assertEquals(StatusEnum.COMPLETED, jobInstance.getStatus());
+		assertEquals(1.0, jobInstance.getProgress());
 	}
 
 	@Test

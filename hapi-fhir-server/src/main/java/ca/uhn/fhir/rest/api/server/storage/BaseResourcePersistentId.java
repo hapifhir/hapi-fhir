@@ -32,7 +32,6 @@ public abstract class BaseResourcePersistentId<T> implements IResourcePersistent
 	private final String myResourceType;
 	private IIdType myAssociatedResourceId;
 
-
 	protected BaseResourcePersistentId(String theResourceType) {
 		myResourceType = theResourceType;
 	}
@@ -65,7 +64,6 @@ public abstract class BaseResourcePersistentId<T> implements IResourcePersistent
 	public int hashCode() {
 		return Objects.hash(myVersion);
 	}
-
 
 	@Override
 	public Long getVersion() {

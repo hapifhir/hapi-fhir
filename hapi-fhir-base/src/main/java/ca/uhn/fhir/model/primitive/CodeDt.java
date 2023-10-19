@@ -19,14 +19,14 @@
  */
 package ca.uhn.fhir.model.primitive;
 
-import static org.apache.commons.lang3.StringUtils.defaultString;
-import static org.apache.commons.lang3.StringUtils.isBlank;
-
 import ca.uhn.fhir.model.api.BasePrimitive;
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import ca.uhn.fhir.model.api.annotation.SimpleSetter;
 
-@DatatypeDef(name = "code", profileOf=StringDt.class)
+import static org.apache.commons.lang3.StringUtils.defaultString;
+import static org.apache.commons.lang3.StringUtils.isBlank;
+
+@DatatypeDef(name = "code", profileOf = StringDt.class)
 public class CodeDt extends BasePrimitive<String> implements Comparable<CodeDt> {
 
 	/**
@@ -66,5 +66,4 @@ public class CodeDt extends BasePrimitive<String> implements Comparable<CodeDt> 
 	protected String encode(String theValue) {
 		return theValue;
 	}
-
 }

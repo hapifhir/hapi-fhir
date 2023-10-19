@@ -34,8 +34,8 @@ import ca.uhn.fhir.util.Logs;
 import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
 
-import javax.annotation.Nullable;
 import java.util.Optional;
+import javax.annotation.Nullable;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
@@ -73,12 +73,9 @@ public class WorkChunkProcessor {
 	 * @param <OT>         - Step output parameters Type
 	 * @return - JobStepExecution output. Contains the datasink and whether or not the execution had succeeded.
 	 */
-	public <PT extends IModelJson, IT extends IModelJson, OT extends IModelJson> JobStepExecutorOutput<PT, IT, OT>
-	doExecution(
-		JobWorkCursor<PT, IT, OT> theCursor,
-		JobInstance theInstance,
-		@Nullable WorkChunk theWorkChunk
-	) {
+	public <PT extends IModelJson, IT extends IModelJson, OT extends IModelJson>
+			JobStepExecutorOutput<PT, IT, OT> doExecution(
+					JobWorkCursor<PT, IT, OT> theCursor, JobInstance theInstance, @Nullable WorkChunk theWorkChunk) {
 		JobDefinitionStep<PT, IT, OT> step = theCursor.getCurrentStep();
 		JobDefinition<PT> jobDefinition = theCursor.getJobDefinition();
 		String instanceId = theInstance.getInstanceId();
@@ -92,7 +89,8 @@ public class WorkChunkProcessor {
 
 		// all other kinds of steps
 		Validate.notNull(theWorkChunk);
-		Optional<StepExecutionDetails<PT, IT>> stepExecutionDetailsOpt = getExecutionDetailsForNonReductionStep(theWorkChunk, theInstance, inputType, parameters);
+		Optional<StepExecutionDetails<PT, IT>> stepExecutionDetailsOpt =
+				getExecutionDetailsForNonReductionStep(theWorkChunk, theInstance, inputType, parameters);
 		if (!stepExecutionDetailsOpt.isPresent()) {
 			return new JobStepExecutorOutput<>(false, dataSink);
 		}
@@ -110,18 +108,18 @@ public class WorkChunkProcessor {
 	 * Get the correct datasink for the cursor/job provided.
 	 */
 	@SuppressWarnings("unchecked")
-	protected <PT extends IModelJson, IT extends IModelJson, OT extends IModelJson> BaseDataSink<PT, IT, OT> getDataSink(
-		JobWorkCursor<PT, IT, OT> theCursor,
-		JobDefinition<PT> theJobDefinition,
-		String theInstanceId
-	) {
+	protected <PT extends IModelJson, IT extends IModelJson, OT extends IModelJson>
+			BaseDataSink<PT, IT, OT> getDataSink(
+					JobWorkCursor<PT, IT, OT> theCursor, JobDefinition<PT> theJobDefinition, String theInstanceId) {
 		BaseDataSink<PT, IT, OT> dataSink;
 
 		assert !theCursor.isReductionStep();
 		if (theCursor.isFinalStep()) {
-			dataSink = (BaseDataSink<PT, IT, OT>) new FinalStepDataSink<>(theJobDefinition.getJobDefinitionId(), theInstanceId, theCursor.asFinalCursor());
+			dataSink = (BaseDataSink<PT, IT, OT>) new FinalStepDataSink<>(
+					theJobDefinition.getJobDefinitionId(), theInstanceId, theCursor.asFinalCursor());
 		} else {
-			dataSink = new JobDataSink<>(myBatchJobSender, myJobPersistence, theJobDefinition, theInstanceId, theCursor);
+			dataSink =
+					new JobDataSink<>(myBatchJobSender, myJobPersistence, theJobDefinition, theInstanceId, theCursor);
 		}
 		return dataSink;
 	}
@@ -129,17 +127,18 @@ public class WorkChunkProcessor {
 	/**
 	 * Construct execution details for non-reduction step
 	 */
-	private <PT extends IModelJson, IT extends IModelJson> Optional<StepExecutionDetails<PT, IT>> getExecutionDetailsForNonReductionStep(
-		WorkChunk theWorkChunk,
-		JobInstance theInstance,
-		Class<IT> theInputType,
-		PT theParameters
-	) {
+	private <PT extends IModelJson, IT extends IModelJson>
+			Optional<StepExecutionDetails<PT, IT>> getExecutionDetailsForNonReductionStep(
+					WorkChunk theWorkChunk, JobInstance theInstance, Class<IT> theInputType, PT theParameters) {
 		IT inputData = null;
 
 		if (!theInputType.equals(VoidModel.class)) {
 			if (isBlank(theWorkChunk.getData())) {
-				ourLog.info("Ignoring chunk[{}] for step[{}] in status[{}] because it has no data", theWorkChunk.getId(), theWorkChunk.getTargetStepId(), theWorkChunk.getStatus());
+				ourLog.info(
+						"Ignoring chunk[{}] for step[{}] in status[{}] because it has no data",
+						theWorkChunk.getId(),
+						theWorkChunk.getTargetStepId(),
+						theWorkChunk.getStatus());
 				return Optional.empty();
 			}
 			inputData = theWorkChunk.getData(theInputType);

@@ -1,19 +1,19 @@
 package ca.uhn.fhir.jpa.bulk;
 
+import ca.uhn.fhir.batch2.api.IJobCoordinator;
+import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.api.model.BulkExportJobResults;
-import ca.uhn.fhir.jpa.api.svc.IBatch2JobRunner;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.test.BaseJpaTest;
 import ca.uhn.fhir.jpa.test.config.TestHSearchAddInConfig;
 import ca.uhn.fhir.jpa.test.config.TestR4Config;
-import ca.uhn.fhir.jpa.util.BulkExportUtils;
 import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.api.server.bulk.BulkDataExportOptions;
+import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
+import ca.uhn.fhir.util.Batch2JobDefinitionConstants;
 import ca.uhn.fhir.util.JsonUtil;
 import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Meta;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -45,12 +45,13 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 public class BulkGroupExportWithIndexedSearchParametersTest extends BaseJpaTest {
 
 	private final FhirContext myCtx = FhirContext.forR4Cached();
-	@Autowired private IBatch2JobRunner myJobRunner;
 	@Autowired private PlatformTransactionManager myTxManager;
 	@Autowired
 	@Qualifier("mySystemDaoR4")
 	protected IFhirSystemDao<Bundle, Meta> mySystemDao;
 
+	@Autowired
+	private IJobCoordinator myJobCoordinator;
 
 	@BeforeEach
 	void setUp() {
@@ -72,28 +73,32 @@ public class BulkGroupExportWithIndexedSearchParametersTest extends BaseJpaTest 
 		mySystemDao.transaction(mySrd, inputBundle);
 
 		// set the export options
-		BulkDataExportOptions options = new BulkDataExportOptions();
+		BulkExportJobParameters options = new BulkExportJobParameters();
 		options.setResourceTypes(Set.of("Patient", "Observation", "Group"));
-		options.setGroupId(new IdType("Group", "G1"));
-		options.setExportStyle(BulkDataExportOptions.ExportStyle.GROUP);
+		options.setGroupId("Group/G1");
+		options.setExportStyle(BulkExportJobParameters.ExportStyle.GROUP);
 		options.setOutputFormat(Constants.CT_FHIR_NDJSON);
 
 		BulkExportJobResults jobResults = getBulkExportJobResults(options);
 		assertThat(jobResults.getResourceTypeToBinaryIds().keySet(), containsInAnyOrder("Patient", "Observation", "Group"));
 	}
 
-	private BulkExportJobResults getBulkExportJobResults(BulkDataExportOptions theOptions) {
-		Batch2JobStartResponse startResponse = myJobRunner.startNewJob(BulkExportUtils.createBulkExportJobParametersFromExportOptions(theOptions));
+	private BulkExportJobResults getBulkExportJobResults(BulkExportJobParameters theOptions) {
+		JobInstanceStartRequest startRequest = new JobInstanceStartRequest();
+		startRequest.setJobDefinitionId(Batch2JobDefinitionConstants.BULK_EXPORT);
+		startRequest.setParameters(theOptions);
+
+		Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(mySrd, startRequest);
 
 		assertNotNull(startResponse);
 
 		// Run a scheduled pass to build the export
 		myBatch2JobHelper.awaitJobCompletion(startResponse.getInstanceId());
 
-		await().until(() -> myJobRunner.getJobInfo(startResponse.getInstanceId()).getReport() != null);
+		await().until(() -> myJobCoordinator.getInstance(startResponse.getInstanceId()).getReport() != null);
 
 		// Iterate over the files
-		String report = myJobRunner.getJobInfo(startResponse.getInstanceId()).getReport();
+		String report = myJobCoordinator.getInstance(startResponse.getInstanceId()).getReport();
 		return  JsonUtil.deserialize(report, BulkExportJobResults.class);
 	}
 

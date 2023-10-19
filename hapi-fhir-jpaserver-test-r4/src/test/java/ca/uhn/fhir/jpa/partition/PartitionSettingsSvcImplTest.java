@@ -104,6 +104,27 @@ public class PartitionSettingsSvcImplTest extends BaseJpaR4Test {
 	}
 
 	@Test
+	public void testCreatePartition_whenPartitionIdAlreadyExists_operationNotAllowed(){
+		try {
+			PartitionEntity partition = new PartitionEntity();
+			partition.setId(123);
+			partition.setName("NAME123");
+			partition.setDescription("A description");
+			myPartitionConfigSvc.createPartition(partition, null);
+
+			partition = new PartitionEntity();
+			partition.setId(123);
+			partition.setName("NAME111");
+			partition.setDescription("A description");
+			myPartitionConfigSvc.createPartition(partition, null);
+		}
+
+		catch (InvalidRequestException e) {
+			assertEquals( Msg.code(2366) + "Partition ID already exists", e.getMessage());
+		}
+	}
+
+	@Test
 	public void testUpdatePartition_TryToRenameDefault() {
 		PartitionEntity partition = new PartitionEntity();
 		partition.setId(null);

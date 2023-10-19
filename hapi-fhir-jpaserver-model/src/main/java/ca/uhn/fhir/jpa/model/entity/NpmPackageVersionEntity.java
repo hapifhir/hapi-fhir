@@ -24,6 +24,8 @@ import ca.uhn.fhir.util.StringUtil;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
+import java.util.Date;
+import java.util.List;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -42,14 +44,16 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.Version;
-import java.util.Date;
-import java.util.List;
 
 @Entity()
-@Table(name = "NPM_PACKAGE_VER", uniqueConstraints = {
-}, indexes = {
-	@Index(name = "IDX_PACKVER", columnList = "PACKAGE_ID,VERSION_ID", unique = true)
-})
+@Table(
+		name = "NPM_PACKAGE_VER",
+		uniqueConstraints = {},
+		indexes = {
+			@Index(name = "IDX_PACKVER", columnList = "PACKAGE_ID,VERSION_ID", unique = true),
+			@Index(name = "FK_NPM_PKV_PKG", columnList = "PACKAGE_PID"),
+			@Index(name = "FK_NPM_PKV_RESID", columnList = "BINARY_RES_ID")
+		})
 public class NpmPackageVersionEntity {
 
 	public static final int VERSION_ID_LENGTH = 200;
@@ -62,36 +66,53 @@ public class NpmPackageVersionEntity {
 	@Id
 	@Column(name = "PID")
 	private Long myId;
+
 	@Column(name = "PACKAGE_ID", length = NpmPackageEntity.PACKAGE_ID_LENGTH, nullable = false)
 	private String myPackageId;
+
 	@Column(name = "VERSION_ID", length = NpmPackageVersionEntity.VERSION_ID_LENGTH, nullable = false)
 	private String myVersionId;
+
 	@ManyToOne
 	@JoinColumn(name = "PACKAGE_PID", nullable = false, foreignKey = @ForeignKey(name = "FK_NPM_PKV_PKG"))
 	private NpmPackageEntity myPackage;
+
 	@OneToOne
-	@JoinColumn(name = "BINARY_RES_ID", referencedColumnName = "RES_ID", nullable = false, foreignKey = @ForeignKey(name = "FK_NPM_PKV_RESID"))
+	@JoinColumn(
+			name = "BINARY_RES_ID",
+			referencedColumnName = "RES_ID",
+			nullable = false,
+			foreignKey = @ForeignKey(name = "FK_NPM_PKV_RESID"))
 	private ResourceTable myPackageBinary;
+
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "SAVED_TIME", nullable = false)
 	private Date mySavedTime;
+
 	@Column(name = "PKG_DESC", nullable = true, length = PACKAGE_DESC_LENGTH)
 	private String myDescription;
+
 	@Column(name = "DESC_UPPER", nullable = true, length = PACKAGE_DESC_LENGTH)
 	private String myDescriptionUpper;
+
 	@Column(name = "CURRENT_VERSION", nullable = false)
 	private boolean myCurrentVersion;
+
 	@Column(name = "FHIR_VERSION_ID", length = NpmPackageVersionEntity.FHIR_VERSION_ID_LENGTH, nullable = false)
 	private String myFhirVersionId;
+
 	@Enumerated(EnumType.STRING)
 	@Column(name = "FHIR_VERSION", length = NpmPackageVersionEntity.FHIR_VERSION_LENGTH, nullable = false)
 	private FhirVersionEnum myFhirVersion;
+
 	@Column(name = "PACKAGE_SIZE_BYTES", nullable = false)
 	private long myPackageSizeBytes;
+
 	@Temporal(TemporalType.TIMESTAMP)
 	@Version
 	@Column(name = "UPDATED_TIME", nullable = false)
 	private Date myUpdatedTime;
+
 	@OneToMany(mappedBy = "myPackageVersion")
 	private List<NpmPackageVersionResourceEntity> myResources;
 
@@ -179,12 +200,12 @@ public class NpmPackageVersionEntity {
 	@Override
 	public String toString() {
 		return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
-			.append("myId", myId)
-			.append("myPackageId", myPackageId)
-			.append("myVersionId", myVersionId)
-			.append("myDescriptionUpper", myDescriptionUpper)
-			.append("myFhirVersionId", myFhirVersionId)
-			.toString();
+				.append("myId", myId)
+				.append("myPackageId", myPackageId)
+				.append("myVersionId", myVersionId)
+				.append("myDescriptionUpper", myDescriptionUpper)
+				.append("myFhirVersionId", myFhirVersionId)
+				.toString();
 	}
 
 	public List<NpmPackageVersionResourceEntity> getResources() {

@@ -117,10 +117,14 @@ public class TermCodeSystemDeleteJobSvc implements ITermCodeSystemDeleteJobSvc {
 		ourLog.debug("Executing for codeSystemVersionId: {}", theVersionPid);
 
 		// if TermCodeSystemVersion being deleted is current, disconnect it form TermCodeSystem
-		Optional<TermCodeSystem> codeSystemOpt = myCodeSystemDao.findWithCodeSystemVersionAsCurrentVersion(theVersionPid);
+		Optional<TermCodeSystem> codeSystemOpt =
+				myCodeSystemDao.findWithCodeSystemVersionAsCurrentVersion(theVersionPid);
 		if (codeSystemOpt.isPresent()) {
 			TermCodeSystem codeSystem = codeSystemOpt.get();
-			ourLog.info("Removing code system version: {} as current version of code system: {}", theVersionPid, codeSystem.getPid());
+			ourLog.info(
+					"Removing code system version: {} as current version of code system: {}",
+					theVersionPid,
+					codeSystem.getPid());
 			codeSystem.setCurrentVersion(null);
 			myCodeSystemDao.save(codeSystem);
 		}

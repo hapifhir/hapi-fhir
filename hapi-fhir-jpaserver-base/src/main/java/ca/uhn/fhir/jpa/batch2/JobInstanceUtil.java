@@ -60,6 +60,7 @@ class JobInstanceUtil {
 		retVal.setCurrentGatedStepId(theEntity.getCurrentGatedStepId());
 		retVal.setReport(theEntity.getReport());
 		retVal.setEstimatedTimeRemaining(theEntity.getEstimatedTimeRemaining());
+		retVal.setWarningMessages(theEntity.getWarningMessages());
 		return retVal;
 	}
 
@@ -68,7 +69,8 @@ class JobInstanceUtil {
 	 * @param theJobInstance the job
 	 * @param theJobInstanceEntity the target entity
 	 */
-	public static void fromInstanceToEntity(@Nonnull JobInstance theJobInstance, @Nonnull Batch2JobInstanceEntity theJobInstanceEntity) {
+	public static void fromInstanceToEntity(
+			@Nonnull JobInstance theJobInstance, @Nonnull Batch2JobInstanceEntity theJobInstanceEntity) {
 		theJobInstanceEntity.setId(theJobInstance.getInstanceId());
 		theJobInstanceEntity.setDefinitionId(theJobInstance.getJobDefinitionId());
 		theJobInstanceEntity.setDefinitionVersion(theJobInstance.getJobDefinitionVersion());
@@ -80,7 +82,8 @@ class JobInstanceUtil {
 		theJobInstanceEntity.setEndTime(theJobInstance.getEndTime());
 		theJobInstanceEntity.setUpdateTime(theJobInstance.getUpdateTime());
 		theJobInstanceEntity.setCombinedRecordsProcessed(theJobInstance.getCombinedRecordsProcessed());
-		theJobInstanceEntity.setCombinedRecordsProcessedPerSecond(theJobInstance.getCombinedRecordsProcessedPerSecond());
+		theJobInstanceEntity.setCombinedRecordsProcessedPerSecond(
+				theJobInstance.getCombinedRecordsProcessedPerSecond());
 		theJobInstanceEntity.setTotalElapsedMillis(theJobInstance.getTotalElapsedMillis());
 		theJobInstanceEntity.setWorkChunksPurged(theJobInstance.isWorkChunksPurged());
 		theJobInstanceEntity.setProgress(theJobInstance.getProgress());
@@ -91,6 +94,7 @@ class JobInstanceUtil {
 		theJobInstanceEntity.setCurrentGatedStepId(theJobInstance.getCurrentGatedStepId());
 		theJobInstanceEntity.setReport(theJobInstance.getReport());
 		theJobInstanceEntity.setEstimatedTimeRemaining(theJobInstance.getEstimatedTimeRemaining());
+		theJobInstanceEntity.setWarningMessages(theJobInstance.getWarningMessages());
 	}
 
 	/**
@@ -118,6 +122,7 @@ class JobInstanceUtil {
 		retVal.setRecordsProcessed(theEntity.getRecordsProcessed());
 		// note: may be null out if queried NoData
 		retVal.setData(theEntity.getSerializedData());
+		retVal.setWarningMessage(theEntity.getWarningMessage());
 		return retVal;
 	}
 }

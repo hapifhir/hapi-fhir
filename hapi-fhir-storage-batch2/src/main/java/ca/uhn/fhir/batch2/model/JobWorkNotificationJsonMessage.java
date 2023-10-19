@@ -52,5 +52,4 @@ public class JobWorkNotificationJsonMessage extends BaseJsonMessage<JobWorkNotif
 	public void setPayload(JobWorkNotification thePayload) {
 		myPayload = thePayload;
 	}
-
 }

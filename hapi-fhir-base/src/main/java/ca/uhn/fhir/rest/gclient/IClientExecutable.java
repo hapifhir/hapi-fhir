@@ -27,7 +27,6 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import java.util.List;
 
-
 public interface IClientExecutable<T extends IClientExecutable<?, Y>, Y> {
 
 	/**

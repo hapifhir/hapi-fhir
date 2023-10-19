@@ -29,7 +29,6 @@ import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedJsonMessage;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
-import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.slf4j.Logger;
@@ -49,12 +48,16 @@ import javax.annotation.Nonnull;
  */
 public class SubscriptionRegisteringSubscriber implements MessageHandler {
 	private static final Logger ourLog = LoggerFactory.getLogger(SubscriptionRegisteringSubscriber.class);
+
 	@Autowired
 	private FhirContext myFhirContext;
+
 	@Autowired
 	private SubscriptionRegistry mySubscriptionRegistry;
+
 	@Autowired
 	private SubscriptionCanonicalizer mySubscriptionCanonicalizer;
+
 	@Autowired
 	private DaoRegistry myDaoRegistry;
 
@@ -93,17 +96,15 @@ public class SubscriptionRegisteringSubscriber implements MessageHandler {
 		// - in order to store partition id in the userdata of the resource for partitioned subscriptions
 		// - in case we're processing out of order and a create-then-delete has been processed backwards (or vice versa)
 
-		IBaseResource payloadResource;
 		IIdType payloadId = payload.getPayloadId(myFhirContext).toUnqualifiedVersionless();
-		try {
-			IFhirResourceDao<?> subscriptionDao = myDaoRegistry.getResourceDao("Subscription");
-			RequestDetails systemRequestDetails = getPartitionAwareRequestDetails(payload);
-			payloadResource = subscriptionDao.read(payloadId, systemRequestDetails);
-			if (payloadResource == null) {
-				// Only for unit test
-				payloadResource = payload.getPayload(myFhirContext);
-			}
-		} catch (ResourceGoneException e) {
+		IFhirResourceDao<?> subscriptionDao = myDaoRegistry.getResourceDao("Subscription");
+		RequestDetails systemRequestDetails = getPartitionAwareRequestDetails(payload);
+		IBaseResource payloadResource = subscriptionDao.read(payloadId, systemRequestDetails, true);
+		if (payloadResource == null) {
+			// Only for unit test
+			payloadResource = payload.getPayload(myFhirContext);
+		}
+		if (payloadResource.isDeleted()) {
 			mySubscriptionRegistry.unregisterSubscriptionIfRegistered(payloadId.getIdPart());
 			return;
 		}
@@ -114,7 +115,6 @@ public class SubscriptionRegisteringSubscriber implements MessageHandler {
 		} else {
 			mySubscriptionRegistry.unregisterSubscriptionIfRegistered(payloadId.getIdPart());
 		}
-
 	}
 
 	/**
@@ -126,11 +126,11 @@ public class SubscriptionRegisteringSubscriber implements MessageHandler {
 	private RequestDetails getPartitionAwareRequestDetails(ResourceModifiedMessage payload) {
 		RequestPartitionId payloadPartitionId = payload.getPartitionId();
 		if (payloadPartitionId == null || payloadPartitionId.isDefaultPartition()) {
-			// This may look redundant but the package installer STORE_AND_INSTALL Subscriptions when partitioning is enabled
+			// This may look redundant but the package installer STORE_AND_INSTALL Subscriptions when partitioning is
+			// enabled
 			// creates a corrupt default partition.  This resets it to a clean one.
 			payloadPartitionId = RequestPartitionId.defaultPartition();
 		}
 		return new SystemRequestDetails().setRequestPartitionId(payloadPartitionId);
 	}
-
 }

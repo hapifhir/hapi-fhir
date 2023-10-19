@@ -58,17 +58,18 @@ public class ExtendedHSearchIndexData {
 	private String myResourceJSON;
 	private IBaseResource myResource;
 
-	public ExtendedHSearchIndexData(FhirContext theFhirContext, StorageSettings theStorageSettings, IBaseResource theResource) {
+	public ExtendedHSearchIndexData(
+			FhirContext theFhirContext, StorageSettings theStorageSettings, IBaseResource theResource) {
 		this.myFhirContext = theFhirContext;
 		this.myStorageSettings = theStorageSettings;
 		myResource = theResource;
 	}
 
 	private <V> BiConsumer<String, V> ifNotContained(BiConsumer<String, V> theIndexWriter) {
-		return (s,v) -> {
+		return (s, v) -> {
 			// Ignore contained resources for now.
 			if (!s.contains(".")) {
-				theIndexWriter.accept(s,v);
+				theIndexWriter.accept(s, v);
 			}
 		};
 	}
@@ -111,9 +112,9 @@ public class ExtendedHSearchIndexData {
 	/**
 	 * Add if not already present.
 	 */
-	public void addTokenIndexDataIfNotPresent(String theSpName, String theSystem,  String theValue) {
+	public void addTokenIndexDataIfNotPresent(String theSpName, String theSystem, String theValue) {
 		boolean isPresent = mySearchParamTokens.get(theSpName).stream()
-			.anyMatch(c -> Objects.equals(c.getSystem(), theSystem) && Objects.equals(c.getCode(), theValue));
+				.anyMatch(c -> Objects.equals(c.getSystem(), theSystem) && Objects.equals(c.getCode(), theValue));
 		if (!isPresent) {
 			addTokenIndexData(theSpName, new CodingDt(theSystem, theValue));
 		}
@@ -131,15 +132,24 @@ public class ExtendedHSearchIndexData {
 		mySearchParamLinks.put(theSpName, theTargetResourceId);
 	}
 
-	public void addDateIndexData(String theSpName, Date theLowerBound, int theLowerBoundOrdinal, Date theUpperBound, int theUpperBoundOrdinal) {
-		addDateIndexData(theSpName, new DateSearchIndexData(theLowerBound, theLowerBoundOrdinal, theUpperBound, theUpperBoundOrdinal));
+	public void addDateIndexData(
+			String theSpName,
+			Date theLowerBound,
+			int theLowerBoundOrdinal,
+			Date theUpperBound,
+			int theUpperBoundOrdinal) {
+		addDateIndexData(
+				theSpName,
+				new DateSearchIndexData(theLowerBound, theLowerBoundOrdinal, theUpperBound, theUpperBoundOrdinal));
 	}
 
 	public void addDateIndexData(String theSpName, DateSearchIndexData value) {
 		mySearchParamDates.put(theSpName, value);
 	}
 
-	public SetMultimap<String, DateSearchIndexData> getDateIndexData() { return mySearchParamDates; }
+	public SetMultimap<String, DateSearchIndexData> getDateIndexData() {
+		return mySearchParamDates;
+	}
 
 	public void addNumberIndexDataIfNotPresent(String theParamName, BigDecimal theValue) {
 		mySearchParamNumbers.put(theParamName, theValue);
@@ -149,7 +159,9 @@ public class ExtendedHSearchIndexData {
 		mySearchParamQuantities.put(theSpName, value);
 	}
 
-	public SetMultimap<String,QuantitySearchIndexData> getQuantityIndexData () {return mySearchParamQuantities;}
+	public SetMultimap<String, QuantitySearchIndexData> getQuantityIndexData() {
+		return mySearchParamQuantities;
+	}
 
 	public void setForcedId(String theForcedId) {
 		myForcedId = theForcedId;
@@ -160,8 +172,8 @@ public class ExtendedHSearchIndexData {
 	}
 
 	public void setRawResourceData(String theResourceJSON) {
-		 myResourceJSON = theResourceJSON;
-    }
+		myResourceJSON = theResourceJSON;
+	}
 
 	public SetMultimap<String, CompositeSearchIndexData> getSearchParamComposites() {
 		return mySearchParamComposites;

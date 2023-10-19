@@ -1,5 +1,10 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
+import ca.uhn.fhir.batch2.api.IJobCoordinator;
+import ca.uhn.fhir.batch2.jobs.expunge.DeleteExpungeAppCtx;
+import ca.uhn.fhir.batch2.jobs.expunge.DeleteExpungeJobParameters;
+import ca.uhn.fhir.batch2.model.JobInstance;
+import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.HookParams;
@@ -7,6 +12,7 @@ import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
+import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ForcedId;
@@ -67,6 +73,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
 import java.time.LocalDate;
@@ -103,6 +110,9 @@ import static org.mockito.Mockito.verify;
 
 public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(PartitioningSqlR4Test.class);
+
+	@Autowired
+	private IJobCoordinator myJobCoordinator;
 
 	@BeforeEach
 	public void disableAdvanceIndexing() {
@@ -677,6 +687,56 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		Long patientId = new IdType(output.getEntry().get(1).getResponse().getLocation()).getIdPartAsLong();
 
 		assertPersistedPartitionIdMatches(patientId);
+	}
+
+
+	@Test
+	public void testDeleteExpunge_Cascade() {
+		myPartitionSettings.setPartitioningEnabled(true);
+
+		addCreatePartition(myPartitionId, myPartitionDate);
+		addCreatePartition(myPartitionId, myPartitionDate);
+		IIdType p1 = createPatient(withActiveTrue());
+		IIdType o1 = createObservation(withSubject(p1));
+
+		addCreatePartition(myPartitionId2, myPartitionDate);
+		addCreatePartition(myPartitionId2, myPartitionDate);
+		IIdType p2 = createPatient(withActiveTrue());
+		IIdType o2 = createObservation(withSubject(p2));
+
+		// validate precondition
+		addReadAllPartitions();
+		addReadAllPartitions();
+		assertEquals(2, myPatientDao.search(SearchParameterMap.newSynchronous(), mySrd).size());
+		assertEquals(2, myObservationDao.search(SearchParameterMap.newSynchronous(), mySrd).size());
+		addReadPartition(myPartitionId);
+		addReadPartition(myPartitionId);
+		assertEquals(1, myPatientDao.search(SearchParameterMap.newSynchronous(), mySrd).size());
+		assertEquals(1, myObservationDao.search(SearchParameterMap.newSynchronous(), mySrd).size());
+
+		DeleteExpungeJobParameters jobParameters = new DeleteExpungeJobParameters();
+		jobParameters.addUrl("Patient?_id=" + p1.getIdPart() + "," + p2.getIdPart());
+		jobParameters.setRequestPartitionId(RequestPartitionId.fromPartitionId(myPartitionId));
+		jobParameters.setCascade(true);
+
+		JobInstanceStartRequest startRequest = new JobInstanceStartRequest();
+		startRequest.setParameters(jobParameters);
+		startRequest.setJobDefinitionId(DeleteExpungeAppCtx.JOB_DELETE_EXPUNGE);
+
+		// execute
+		Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(startRequest);
+
+		// Validate
+		JobInstance outcome = myBatch2JobHelper.awaitJobCompletion(startResponse);
+		assertEquals(2, outcome.getCombinedRecordsProcessed());
+		addReadAllPartitions();
+		assertDoesntExist(p1);
+		addReadAllPartitions();
+		assertDoesntExist(o1);
+		addReadAllPartitions();
+		assertNotGone(p2);
+		addReadAllPartitions();
+		assertNotGone(o2);
 	}
 
 	private void assertPersistedPartitionIdMatches(Long patientId) {

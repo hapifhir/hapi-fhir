@@ -40,5 +40,4 @@ public class JpaHapiTransactionService extends HapiTransactionService {
 		}
 		return myCustomIsolationSupported;
 	}
-
 }

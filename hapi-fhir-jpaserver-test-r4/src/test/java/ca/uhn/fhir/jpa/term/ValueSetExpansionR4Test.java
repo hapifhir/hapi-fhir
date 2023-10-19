@@ -22,7 +22,9 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import com.google.common.collect.Lists;
 import org.hamcrest.MatcherAssert;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.Enumerations;
@@ -33,7 +35,6 @@ import org.hl7.fhir.r4.model.ValueSet;
 import org.hl7.fhir.r4.model.codesystems.HttpVerb;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.slf4j.Logger;
@@ -47,7 +48,6 @@ import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.util.HapiExtensions.EXT_VALUESET_EXPANSION_MESSAGE;
@@ -466,7 +466,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 		String code = "male";
 		IValidationSupport.CodeValidationResult outcome = myValueSetDao.validateCode(new CodeType(valueSetUrl), null, new CodeType(code), new CodeType(codeSystemUrl), null, null, null, mySrd);
 		assertTrue(outcome.isOk());
-		assertEquals("Code was validated against in-memory expansion of ValueSet: http://hl7.org/fhir/ValueSet/administrative-gender", outcome.getMessage());
+		assertEquals("Code was validated against in-memory expansion of ValueSet: http://hl7.org/fhir/ValueSet/administrative-gender", outcome.getSourceDetails());
 
 		// Validate Code - Bad
 		code = "AAA";
@@ -1018,6 +1018,46 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 
 		//It is enough to test that the sublist returned is the correct one.
 		MatcherAssert.assertThat(myValueSetTestUtil.toCodes(expandedValueSet), is(equalTo(expandedConceptCodes.subList(1, 23))));
+	}
+
+	/**
+	 * This test intended to check that version of included CodeSystem in task-code ValueSet is correct
+	 * There is a typo in the FHIR Specification: <a href="http://hl7.org/fhir/R4/valueset-task-code.xml.html"/>
+	 * As agreed in FHIR-30377 included CodeSystem version for task-code ValueSet changed from 3.6.0 to 4.0.1
+	 * <a href="https://jira.hl7.org/browse/FHIR-30377">Source resources for task-code ValueSet reference old version of CodeSystem</a>
+	 */
+	@Test
+	public void testExpandTaskCodeValueSet_withCorrectedCodeSystemVersion_willExpandCorrectly() throws IOException {
+		// load validation file
+		Bundle r4ValueSets = loadResourceFromClasspath(Bundle.class, "/org/hl7/fhir/r4/model/valueset/valuesets.xml");
+		ValueSet taskCodeVs = (ValueSet) findResourceByFullUrlInBundle(r4ValueSets, "http://hl7.org/fhir/ValueSet/task-code");
+		CodeSystem taskCodeCs = (CodeSystem) findResourceByFullUrlInBundle(r4ValueSets, "http://hl7.org/fhir/CodeSystem/task-code");
+
+		// check valueSet and codeSystem versions
+		String expectedCodeSystemVersion = "4.0.1";
+		assertEquals(expectedCodeSystemVersion, taskCodeCs.getVersion());
+		assertEquals(expectedCodeSystemVersion, taskCodeVs.getVersion());
+		assertEquals(expectedCodeSystemVersion, taskCodeVs.getCompose().getInclude().get(0).getVersion());
+
+		myCodeSystemDao.create(taskCodeCs);
+		IIdType id = myValueSetDao.create(taskCodeVs).getId();
+
+		ValueSet expandedValueSet = myValueSetDao.expand(id, new ValueSetExpansionOptions(), mySrd);
+
+		// check expansion size and include CodeSystem version
+		assertEquals(7, expandedValueSet.getExpansion().getContains().size());
+		assertEquals(1, expandedValueSet.getCompose().getInclude().size());
+		assertEquals(expectedCodeSystemVersion, expandedValueSet.getCompose().getInclude().get(0).getVersion());
+	}
+
+	private IBaseResource findResourceByFullUrlInBundle(Bundle thebundle, String theFullUrl) {
+		Optional<Bundle.BundleEntryComponent> bundleEntry = thebundle.getEntry().stream()
+			.filter(entry -> theFullUrl.equals(entry.getFullUrl()))
+			.findFirst();
+		if (bundleEntry.isEmpty()) {
+			fail("Can't find resource: " + theFullUrl);
+		}
+		return bundleEntry.get().getResource();
 	}
 
 
@@ -1595,10 +1635,11 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 		code = "28571000087109";
 		display = "BLAH";
 		outcome = myValueSetDao.validateCode(null, vsId, new CodeType(code), new UriType(codeSystemUrl), new StringType(display), null, null, mySrd);
-		assertFalse(outcome.isOk());
-		assertEquals(null, outcome.getCode());
+		assertTrue(outcome.isOk());
+		assertEquals("28571000087109", outcome.getCode());
 		assertEquals("MODERNA COVID-19 mRNA-1273", outcome.getDisplay());
 		assertEquals("Concept Display \"BLAH\" does not match expected \"MODERNA COVID-19 mRNA-1273\" for in-memory expansion of ValueSet: http://ehealthontario.ca/fhir/ValueSet/vaccinecode", outcome.getMessage());
+		assertEquals("Code was validated against in-memory expansion of ValueSet: http://ehealthontario.ca/fhir/ValueSet/vaccinecode", outcome.getSourceDetails());
 		assertEquals("0.17", outcome.getCodeSystemVersion());
 
 		// Validate code - good code, good display
@@ -1640,11 +1681,11 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 		code = "28571000087109";
 		display = "BLAH";
 		outcome = myValueSetDao.validateCode(null, vsId, new CodeType(code), new UriType(codeSystemUrl), new StringType(display), null, null, mySrd);
-		assertFalse(outcome.isOk());
-		assertEquals(null, outcome.getCode());
+		assertTrue(outcome.isOk());
+		assertEquals("28571000087109", outcome.getCode());
 		assertEquals("MODERNA COVID-19 mRNA-1273", outcome.getDisplay());
 		assertEquals("0.17", outcome.getCodeSystemVersion());
-		assertThat(outcome.getMessage(), containsString("Unable to validate code http://snomed.info/sct#28571000087109 - Concept Display \"BLAH\" does not match expected \"MODERNA COVID-19 mRNA-1273\" for CodeSystem: http://snomed.info/sct - Code validation occurred using a ValueSet expansion that was pre-calculated at"));
+		assertEquals("Concept Display \"BLAH\" does not match expected \"MODERNA COVID-19 mRNA-1273\"", outcome.getMessage());
 
 		// Validate code - good code, good display
 		codeSystemUrl = "http://snomed.info/sct";

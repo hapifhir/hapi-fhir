@@ -27,10 +27,9 @@ public interface IValidate {
 	 * Use a resource as validate input
 	 */
 	IValidateUntyped resource(IBaseResource theResource);
-	
+
 	/**
 	 * Use a raw resource as validate input
 	 */
 	IValidateUntyped resource(String theRawResource);
-
 }

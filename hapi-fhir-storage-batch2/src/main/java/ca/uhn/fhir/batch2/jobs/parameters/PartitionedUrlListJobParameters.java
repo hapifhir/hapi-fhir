@@ -19,14 +19,13 @@
  */
 package ca.uhn.fhir.batch2.jobs.parameters;
 
-import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.commons.lang3.Validate;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 public class PartitionedUrlListJobParameters extends PartitionedJobParameters {
 	@JsonProperty("partitionedUrl")
@@ -49,7 +48,6 @@ public class PartitionedUrlListJobParameters extends PartitionedJobParameters {
 	public PartitionedUrlListJobParameters addUrl(@Nonnull String theUrl) {
 		PartitionedUrl partitionedUrl = new PartitionedUrl();
 		partitionedUrl.setUrl(theUrl);
-		partitionedUrl.setRequestPartitionId(RequestPartitionId.defaultPartition());
 		return addPartitionedUrl(partitionedUrl);
 	}
 }

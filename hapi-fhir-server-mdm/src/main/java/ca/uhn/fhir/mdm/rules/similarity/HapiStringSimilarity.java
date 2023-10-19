@@ -20,7 +20,7 @@
 package ca.uhn.fhir.mdm.rules.similarity;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.mdm.rules.matcher.BaseHapiStringMetric;
+import ca.uhn.fhir.mdm.rules.matcher.util.StringMatcherUtils;
 import info.debatty.java.stringsimilarity.interfaces.NormalizedStringSimilarity;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
@@ -28,8 +28,8 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 /**
  * Similarity measure for two IBase fields whose similarity can be measured by their String representations.
  */
-public class HapiStringSimilarity extends BaseHapiStringMetric implements IMdmFieldSimilarity {
-	private final NormalizedStringSimilarity myStringSimilarity;
+public class HapiStringSimilarity implements IMdmFieldSimilarity {
+	protected final NormalizedStringSimilarity myStringSimilarity;
 
 	public HapiStringSimilarity(NormalizedStringSimilarity theStringSimilarity) {
 		myStringSimilarity = theStringSimilarity;
@@ -38,8 +38,8 @@ public class HapiStringSimilarity extends BaseHapiStringMetric implements IMdmFi
 	@Override
 	public double similarity(FhirContext theFhirContext, IBase theLeftBase, IBase theRightBase, boolean theExact) {
 		if (theLeftBase instanceof IPrimitiveType && theRightBase instanceof IPrimitiveType) {
-			String leftString = extractString((IPrimitiveType<?>) theLeftBase, theExact);
-			String rightString = extractString((IPrimitiveType<?>) theRightBase, theExact);
+			String leftString = StringMatcherUtils.extractString((IPrimitiveType<?>) theLeftBase, theExact);
+			String rightString = StringMatcherUtils.extractString((IPrimitiveType<?>) theRightBase, theExact);
 
 			return myStringSimilarity.similarity(leftString, rightString);
 		}

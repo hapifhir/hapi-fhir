@@ -40,13 +40,16 @@ import javax.persistence.UniqueConstraint;
 
 @Entity
 @Table(
-	name = "HFJ_RES_TAG",
-   indexes = {
-		@Index(name = "IDX_RES_TAG_RES_TAG", columnList = "RES_ID, TAG_ID, PARTITION_ID"),
-		@Index(name = "IDX_RES_TAG_TAG_RES", columnList = "TAG_ID, RES_ID, PARTITION_ID")
-	},
-	uniqueConstraints = { @UniqueConstraint(name = "IDX_RESTAG_TAGID", columnNames = {"RES_ID", "TAG_ID"})
-})
+		name = "HFJ_RES_TAG",
+		indexes = {
+			@Index(name = "IDX_RES_TAG_RES_TAG", columnList = "RES_ID, TAG_ID, PARTITION_ID"),
+			@Index(name = "IDX_RES_TAG_TAG_RES", columnList = "TAG_ID, RES_ID, PARTITION_ID")
+		},
+		uniqueConstraints = {
+			@UniqueConstraint(
+					name = "IDX_RESTAG_TAGID",
+					columnNames = {"RES_ID", "TAG_ID"})
+		})
 public class ResourceTag extends BaseTag {
 
 	private static final long serialVersionUID = 1L;
@@ -57,7 +60,9 @@ public class ResourceTag extends BaseTag {
 	@Column(name = "PID")
 	private Long myId;
 
-	@ManyToOne(cascade = {}, fetch = FetchType.LAZY)
+	@ManyToOne(
+			cascade = {},
+			fetch = FetchType.LAZY)
 	@JoinColumn(name = "RES_ID", referencedColumnName = "RES_ID", foreignKey = @ForeignKey(name = "FK_RESTAG_RESOURCE"))
 	private ResourceTable myResource;
 
@@ -77,7 +82,8 @@ public class ResourceTag extends BaseTag {
 	/**
 	 * Constructor
 	 */
-	public ResourceTag(ResourceTable theResourceTable, TagDefinition theTag, PartitionablePartitionId theRequestPartitionId) {
+	public ResourceTag(
+			ResourceTable theResourceTable, TagDefinition theTag, PartitionablePartitionId theRequestPartitionId) {
 		setTag(theTag);
 		setResource(theResourceTable);
 		setResourceId(theResourceTable.getId());
@@ -145,5 +151,4 @@ public class ResourceTag extends BaseTag {
 		b.append("tag", getTag().getId());
 		return b.build();
 	}
-
 }

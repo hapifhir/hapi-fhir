@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.jpa.api.config;
 
+import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.jpa.api.model.HistoryCountModeEnum;
 import ca.uhn.fhir.jpa.api.model.WarmCacheEntry;
 import ca.uhn.fhir.jpa.model.entity.ResourceEncodingEnum;
@@ -36,14 +37,14 @@ import org.hl7.fhir.r4.model.Bundle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 @SuppressWarnings("JavadocLinkAsPlainText")
 public class JpaStorageSettings extends StorageSettings {
@@ -67,25 +68,28 @@ public class JpaStorageSettings extends StorageSettings {
 	 * </ul>
 	 */
 	@SuppressWarnings("WeakerAccess")
-	public static final Set<String> DEFAULT_BUNDLE_TYPES_ALLOWED_FOR_STORAGE = Collections.unmodifiableSet(new TreeSet<>(Sets.newHashSet(
-		Bundle.BundleType.COLLECTION.toCode(),
-		Bundle.BundleType.DOCUMENT.toCode(),
-		Bundle.BundleType.MESSAGE.toCode()
-	)));
+	public static final Set<String> DEFAULT_BUNDLE_TYPES_ALLOWED_FOR_STORAGE =
+			Collections.unmodifiableSet(new TreeSet<>(Sets.newHashSet(
+					Bundle.BundleType.COLLECTION.toCode(),
+					Bundle.BundleType.DOCUMENT.toCode(),
+					Bundle.BundleType.MESSAGE.toCode())));
 	// update setter javadoc if default changes
 	public static final int DEFAULT_MAX_EXPANSION_SIZE = 1000;
-	public static final HistoryCountModeEnum DEFAULT_HISTORY_COUNT_MODE = HistoryCountModeEnum.CACHED_ONLY_WITHOUT_OFFSET;
+	public static final HistoryCountModeEnum DEFAULT_HISTORY_COUNT_MODE =
+			HistoryCountModeEnum.CACHED_ONLY_WITHOUT_OFFSET;
 	/**
 	 * This constant applies to task enablement, e.g. {@link #setEnableTaskStaleSearchCleanup(boolean)}.
 	 * <p>
 	 * By default, all are enabled.
 	 */
 	public static final boolean DEFAULT_ENABLE_TASKS = true;
+
 	public static final int DEFAULT_MAXIMUM_INCLUDES_TO_LOAD_PER_PAGE = 1000;
 	/**
 	 * @since 5.5.0
 	 */
 	public static final TagStorageModeEnum DEFAULT_TAG_STORAGE_MODE = TagStorageModeEnum.VERSIONED;
+
 	public static final int DEFAULT_EXPUNGE_BATCH_SIZE = 800;
 	public static final int DEFAULT_BUNDLE_BATCH_QUEUE_CAPACITY = 200;
 
@@ -96,6 +100,7 @@ public class JpaStorageSettings extends StorageSettings {
 	 * @see #setMaximumSearchResultCountInTransaction(Integer)
 	 */
 	private static final Integer DEFAULT_MAXIMUM_SEARCH_RESULT_COUNT_IN_TRANSACTION = null;
+
 	private static final Logger ourLog = LoggerFactory.getLogger(JpaStorageSettings.class);
 	private static final int DEFAULT_REINDEX_BATCH_SIZE = 800;
 	private static final int DEFAULT_MAXIMUM_DELETE_CONFLICT_COUNT = 60;
@@ -103,6 +108,9 @@ public class JpaStorageSettings extends StorageSettings {
 	 * Child Configurations
 	 */
 	private static final Integer DEFAULT_INTERNAL_SYNCHRONOUS_SEARCH_SIZE = 10000;
+
+	private static final boolean DEFAULT_PREVENT_INVALIDATING_CONDITIONAL_MATCH_CRITERIA = false;
+
 	/**
 	 * Do not change default of {@code 0}!
 	 *
@@ -113,7 +121,8 @@ public class JpaStorageSettings extends StorageSettings {
 	 * update setter javadoc if default changes
 	 */
 	@Nonnull
-	private final Long myTranslationCachesExpireAfterWriteInMinutes = DEFAULT_TRANSLATION_CACHES_EXPIRE_AFTER_WRITE_IN_MINUTES;
+	private final Long myTranslationCachesExpireAfterWriteInMinutes =
+			DEFAULT_TRANSLATION_CACHES_EXPIRE_AFTER_WRITE_IN_MINUTES;
 	/**
 	 * @since 5.5.0
 	 */
@@ -123,11 +132,13 @@ public class JpaStorageSettings extends StorageSettings {
 	 * update setter javadoc if default changes
 	 */
 	private boolean myAllowInlineMatchUrlReferences = true;
+
 	private boolean myAllowMultipleDelete;
 	/**
 	 * update setter javadoc if default changes
 	 */
 	private int myDeferIndexingForCodesystemsOfSize = 100;
+
 	private boolean myDeleteStaleSearches = true;
 	private boolean myEnforceReferentialIntegrityOnDelete = true;
 	private boolean myUniqueIndexesEnabled = true;
@@ -144,6 +155,7 @@ public class JpaStorageSettings extends StorageSettings {
 	 * update setter javadoc if default changes
 	 */
 	private Integer myFetchSizeDefaultMaximum = null;
+
 	private int myMaximumExpansionSize = DEFAULT_MAX_EXPANSION_SIZE;
 	private Integer myMaximumSearchResultCountInTransaction = DEFAULT_MAXIMUM_SEARCH_RESULT_COUNT_IN_TRANSACTION;
 	private ResourceEncodingEnum myResourceEncoding = ResourceEncodingEnum.JSONC;
@@ -151,6 +163,7 @@ public class JpaStorageSettings extends StorageSettings {
 	 * update setter javadoc if default changes
 	 */
 	private Integer myResourceMetaCountHardLimit = 1000;
+
 	private Long myReuseCachedSearchResultsForMillis = DEFAULT_REUSE_CACHED_SEARCH_RESULTS_FOR_MILLIS;
 	private boolean mySchedulingDisabled;
 	private boolean mySuppressUpdatesWithNoChange = true;
@@ -175,7 +188,8 @@ public class JpaStorageSettings extends StorageSettings {
 	private boolean myEnforceReferenceTargetTypes = true;
 	private ClientIdStrategyEnum myResourceClientIdStrategy = ClientIdStrategyEnum.ALPHANUMERIC;
 	private boolean myFilterParameterEnabled = false;
-	private StoreMetaSourceInformationEnum myStoreMetaSourceInformation = StoreMetaSourceInformationEnum.SOURCE_URI_AND_REQUEST_ID;
+	private StoreMetaSourceInformationEnum myStoreMetaSourceInformation =
+			StoreMetaSourceInformationEnum.SOURCE_URI_AND_REQUEST_ID;
 	private HistoryCountModeEnum myHistoryCountMode = DEFAULT_HISTORY_COUNT_MODE;
 	private int myInternalSynchronousSearchSize = DEFAULT_INTERNAL_SYNCHRONOUS_SEARCH_SIZE;
 	/**
@@ -238,6 +252,7 @@ public class JpaStorageSettings extends StorageSettings {
 	 * @since 5.5.0
 	 */
 	private boolean myEnableTaskBulkExportJobExecution;
+
 	private boolean myAccountForDateIndexNulls;
 	/**
 	 * @since 5.6.0
@@ -315,6 +330,27 @@ public class JpaStorageSettings extends StorageSettings {
 	 * Applies to MDM links.
 	 */
 	private boolean myNonResourceDbHistoryEnabled = true;
+	/**
+	 * Since 7.0.0
+	 */
+	private boolean myResourceHistoryDbEnabled = true;
+
+	/**
+	 * @since 7.0.0
+	 */
+	@Nonnull
+	private IValidationSupport.IssueSeverity myIssueSeverityForCodeDisplayMismatch =
+			IValidationSupport.IssueSeverity.WARNING;
+
+	/**
+	 * This setting allows preventing a conditional update to invalidate the match criteria.
+	 * <p/>
+	 * By default, this is disabled unless explicitly enabled.
+	 *
+	 * @since 6.8.2
+	 */
+	private boolean myPreventInvalidatingConditionalMatchCriteria =
+			DEFAULT_PREVENT_INVALIDATING_CONDITIONAL_MATCH_CRITERIA;
 
 	/**
 	 * Constructor
@@ -339,7 +375,9 @@ public class JpaStorageSettings extends StorageSettings {
 		if (HapiSystemProperties.isUnitTestModeEnabled()) {
 			setJobFastTrackingEnabled(true);
 		}
-
+		if (HapiSystemProperties.isPreventInvalidatingConditionalMatchCriteria()) {
+			setPreventInvalidatingConditionalMatchCriteria(true);
+		}
 	}
 
 	/**
@@ -1282,8 +1320,10 @@ public class JpaStorageSettings extends StorageSettings {
 	 *
 	 * @since 4.2.0
 	 */
-	public void setPopulateIdentifierInAutoCreatedPlaceholderReferenceTargets(boolean thePopulateIdentifierInAutoCreatedPlaceholderReferenceTargets) {
-		myPopulateIdentifierInAutoCreatedPlaceholderReferenceTargets = thePopulateIdentifierInAutoCreatedPlaceholderReferenceTargets;
+	public void setPopulateIdentifierInAutoCreatedPlaceholderReferenceTargets(
+			boolean thePopulateIdentifierInAutoCreatedPlaceholderReferenceTargets) {
+		myPopulateIdentifierInAutoCreatedPlaceholderReferenceTargets =
+				thePopulateIdentifierInAutoCreatedPlaceholderReferenceTargets;
 	}
 
 	/**
@@ -1470,7 +1510,8 @@ public class JpaStorageSettings extends StorageSettings {
 	 * SearchParameter resource is added or changed. This should generally
 	 * be true (which is the default)
 	 */
-	public void setMarkResourcesForReindexingUponSearchParameterChange(boolean theMarkResourcesForReindexingUponSearchParameterChange) {
+	public void setMarkResourcesForReindexingUponSearchParameterChange(
+			boolean theMarkResourcesForReindexingUponSearchParameterChange) {
 		myMarkResourcesForReindexingUponSearchParameterChange = theMarkResourcesForReindexingUponSearchParameterChange;
 	}
 
@@ -1506,7 +1547,6 @@ public class JpaStorageSettings extends StorageSettings {
 	 */
 	public void setSuppressUpdatesWithNoChange(boolean theSuppressUpdatesWithNoChange) {
 		mySuppressUpdatesWithNoChange = theSuppressUpdatesWithNoChange;
-
 	}
 
 	/**
@@ -1791,7 +1831,8 @@ public class JpaStorageSettings extends StorageSettings {
 	 */
 	public void setPreExpandValueSetsMaxCount(int thePreExpandValueSetsMaxCount) {
 		myPreExpandValueSetsMaxCount = thePreExpandValueSetsMaxCount;
-		setPreExpandValueSetsDefaultCount(Math.min(getPreExpandValueSetsDefaultCount(), getPreExpandValueSetsMaxCount()));
+		setPreExpandValueSetsDefaultCount(
+				Math.min(getPreExpandValueSetsDefaultCount(), getPreExpandValueSetsMaxCount()));
 	}
 
 	/**
@@ -1823,6 +1864,7 @@ public class JpaStorageSettings extends StorageSettings {
 	/**
 	 * <p>
 	 * This determines the maximum number of conflicts that should be fetched and handled while retrying a delete of a resource.
+	 * This can also be thought of as the maximum number of rounds of cascading deletion.
 	 * </p>
 	 * <p>
 	 * The default value for this setting is {@code 60}.
@@ -1837,6 +1879,7 @@ public class JpaStorageSettings extends StorageSettings {
 	/**
 	 * <p>
 	 * This determines the maximum number of conflicts that should be fetched and handled while retrying a delete of a resource.
+	 * This can also be thought of as the maximum number of rounds of cascading deletion.
 	 * </p>
 	 * <p>
 	 * The default value for this setting is {@code 60}.
@@ -1892,7 +1935,6 @@ public class JpaStorageSettings extends StorageSettings {
 	public void setInternalSynchronousSearchSize(Integer theInternalSynchronousSearchSize) {
 		myInternalSynchronousSearchSize = theInternalSynchronousSearchSize;
 	}
-
 
 	/**
 	 * If this is enabled (this is the default), this server will attempt to activate and run <b>Bulk Import</b>
@@ -2136,7 +2178,6 @@ public class JpaStorageSettings extends StorageSettings {
 		return myAllowAutoInflateBinaries;
 	}
 
-
 	/**
 	 * This setting indicates whether binaries are allowed to be automatically inflated from external storage during requests.
 	 * Default is true.
@@ -2290,8 +2331,49 @@ public class JpaStorageSettings extends StorageSettings {
 	}
 
 	/**
+	 * If set to {@literal false} (default is {@literal true}), the server will not
+	 * preserve resource history and will delete previous versions of resources when
+	 * a resource is updated.
+	 * <p>
+	 * Note that this does not make the server completely version-less. Resources will
+	 * still have a version number which increases every time a resource is modified,
+	 * operations such as vread and history will still be supported, and features
+	 * such as ETags and ETag-aware updates will still work. Disabling this setting
+	 * simply means that when a resource is updated, the previous version of the
+	 * resource will be expunged. This could be done in order to conserve space, or
+	 * in cases where there is no business value to storing previous versions of
+	 * resources.
+	 * </p>
+	 *
+	 * @since 7.0.0
+	 */
+	public boolean isResourceDbHistoryEnabled() {
+		return myResourceHistoryDbEnabled;
+	}
+
+	/**
+	 * If set to {@literal false} (default is {@literal true}), the server will not
+	 * preserve resource history and will delete previous versions of resources when
+	 * a resource is updated.
+	 * <p>
+	 * Note that this does not make the server completely version-less. Resources will
+	 * still have a version number which increases every time a resource is modified,
+	 * operations such as vread and history will still be supported, and features
+	 * such as ETags and ETag-aware updates will still work. Disabling this setting
+	 * simply means that when a resource is updated, the previous version of the
+	 * resource will be expunged. This could be done in order to conserve space, or
+	 * in cases where there is no business value to storing previous versions of
+	 * resources.
+	 * </p>
+	 *
+	 * @since 7.0.0
+	 */
+	public void setResourceDbHistoryEnabled(boolean theResourceHistoryEnabled) {
+		myResourceHistoryDbEnabled = theResourceHistoryEnabled;
+	}
+
+	/**
 	 * This setting controls whether MdmLink and other non-resource DB history is enabled.
-	 * This setting controls whether non-resource DB history is enabled
 	 * <p/>
 	 * By default, this is enabled unless explicitly disabled.
 	 *
@@ -2302,9 +2384,59 @@ public class JpaStorageSettings extends StorageSettings {
 		return myNonResourceDbHistoryEnabled;
 	}
 
+	/**
+	 * This setting controls the validation issue severity to report when a code validation
+	 * finds that the code is present in the given CodeSystem, but the display name being
+	 * validated doesn't match the expected value(s). Defaults to
+	 * {@link ca.uhn.fhir.context.support.IValidationSupport.IssueSeverity#WARNING}. Set this
+	 * value to {@link ca.uhn.fhir.context.support.IValidationSupport.IssueSeverity#INFORMATION}
+	 * if you don't want to see display name validation issues at all in resource validation
+	 * outcomes.
+	 *
+	 * @since 7.0.0
+	 */
+	@Nonnull
+	public IValidationSupport.IssueSeverity getIssueSeverityForCodeDisplayMismatch() {
+		return myIssueSeverityForCodeDisplayMismatch;
+	}
 
+	/**
+	 * This setting controls the validation issue severity to report when a code validation
+	 * finds that the code is present in the given CodeSystem, but the display name being
+	 * validated doesn't match the expected value(s). Defaults to
+	 * {@link ca.uhn.fhir.context.support.IValidationSupport.IssueSeverity#WARNING}. Set this
+	 * value to {@link ca.uhn.fhir.context.support.IValidationSupport.IssueSeverity#INFORMATION}
+	 * if you don't want to see display name validation issues at all in resource validation
+	 * outcomes.
+	 *
+	 * @param theIssueSeverityForCodeDisplayMismatch The severity. Must not be {@literal null}.
+	 * @since 7.0.0
+	 */
+	public void setIssueSeverityForCodeDisplayMismatch(
+			@Nonnull IValidationSupport.IssueSeverity theIssueSeverityForCodeDisplayMismatch) {
+		Validate.notNull(
+				theIssueSeverityForCodeDisplayMismatch, "theIssueSeverityForCodeDisplayMismatch must not be null");
+		myIssueSeverityForCodeDisplayMismatch = theIssueSeverityForCodeDisplayMismatch;
+	}
+
+	/**
+	 * This setting controls whether MdmLink and other non-resource DB history is enabled.
+	 * <p/>
+	 * By default, this is enabled unless explicitly disabled.
+	 *
+	 * @param theNonResourceDbHistoryEnabled Whether non-resource DB history is enabled (default is true);
+	 * @since 6.6.0
+	 */
 	public void setNonResourceDbHistoryEnabled(boolean theNonResourceDbHistoryEnabled) {
 		myNonResourceDbHistoryEnabled = theNonResourceDbHistoryEnabled;
+	}
+
+	public void setPreventInvalidatingConditionalMatchCriteria(boolean theCriteria) {
+		myPreventInvalidatingConditionalMatchCriteria = theCriteria;
+	}
+
+	public boolean isPreventInvalidatingConditionalMatchCriteria() {
+		return myPreventInvalidatingConditionalMatchCriteria;
 	}
 
 	public enum StoreMetaSourceInformationEnum {
@@ -2329,8 +2461,6 @@ public class JpaStorageSettings extends StorageSettings {
 			return myStoreRequestId;
 		}
 	}
-
-
 
 	/**
 	 * This enum provides allowable options for {@link #setResourceServerIdStrategy(IdStrategyEnum)}
@@ -2398,6 +2528,5 @@ public class JpaStorageSettings extends StorageSettings {
 		 * of the resource.
 		 */
 		INLINE
-
 	}
 }

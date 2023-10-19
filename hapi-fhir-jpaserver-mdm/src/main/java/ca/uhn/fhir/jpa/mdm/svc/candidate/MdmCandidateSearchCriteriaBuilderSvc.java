@@ -26,12 +26,12 @@ import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 @Service
 public class MdmCandidateSearchCriteriaBuilderSvc {
@@ -46,32 +46,37 @@ public class MdmCandidateSearchCriteriaBuilderSvc {
 	 * Patient?active=true&name.given=Gary,Grant&name.family=Graham
 	 */
 	@Nonnull
-	public Optional<String> buildResourceQueryString(String theResourceType, IAnyResource theResource, List<String> theFilterCriteria, @Nullable MdmResourceSearchParamJson resourceSearchParam) {
+	public Optional<String> buildResourceQueryString(
+			String theResourceType,
+			IAnyResource theResource,
+			List<String> theFilterCriteria,
+			@Nullable MdmResourceSearchParamJson resourceSearchParam) {
 		List<String> criteria = new ArrayList<>();
 
 		// If there are candidate search params, then make use of them, otherwise, search with only the filters.
 		if (resourceSearchParam != null) {
 			resourceSearchParam.iterator().forEachRemaining(searchParam -> {
-				//to compare it to all known GOLDEN_RESOURCE objects, using the overlapping search parameters that they have.
-				List<String> valuesFromResourceForSearchParam = myMdmSearchParamSvc.getValueFromResourceForSearchParam(theResource, searchParam);
+				// to compare it to all known GOLDEN_RESOURCE objects, using the overlapping search parameters that they
+				// have.
+				List<String> valuesFromResourceForSearchParam =
+						myMdmSearchParamSvc.getValueFromResourceForSearchParam(theResource, searchParam);
 				if (!valuesFromResourceForSearchParam.isEmpty()) {
 					criteria.add(buildResourceMatchQuery(searchParam, valuesFromResourceForSearchParam));
 				}
 			});
 			if (criteria.isEmpty()) {
-				//TODO GGG/KHS, re-evaluate whether we should early drop here.
+				// TODO GGG/KHS, re-evaluate whether we should early drop here.
 				return Optional.empty();
 			}
 		}
 
 		criteria.addAll(theFilterCriteria);
-		return Optional.of(theResourceType + "?" +  String.join("&", criteria));
+		return Optional.of(theResourceType + "?" + String.join("&", criteria));
 	}
 
 	private String buildResourceMatchQuery(String theSearchParamName, List<String> theResourceValues) {
-		String nameValueOrList = theResourceValues.stream()
-			.map(UrlUtil::escapeUrlParam)
-			.collect(Collectors.joining(","));
+		String nameValueOrList =
+				theResourceValues.stream().map(UrlUtil::escapeUrlParam).collect(Collectors.joining(","));
 		return theSearchParamName + "=" + nameValueOrList;
 	}
 }

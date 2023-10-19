@@ -1,0 +1,25 @@
+{
+	"resourceType": "Library",
+	"id": "SimpleR4Library",
+	"name": "SimpleR4Library",
+	"version": "0.0.1",
+	"status": "active",
+	"experimental": false,
+	"type": {
+		"coding": [
+			{
+				"system": "http://terminology.hl7.org/CodeSystem/library-type",
+				"code": "logic-library"
+			}
+		]
+	},
+	"date": "2021-04-23T15:32:03+00:00",
+	"publisher": "National Committee for Quality Assurance",
+	"description": "Simple Library for Testing Simple Expressions",
+	"content": [
+		{
+			"contentType": "text/cql",
+			"data": "bGlicmFyeSBTaW1wbGVSNExpYnJhcnkgdmVyc2lvbiAnMC4wLjEnCgp1c2luZyBGSElSIHZlcnNpb24gJzQuMC4xJwoKaW5jbHVkZSBGSElSSGVscGVycyB2ZXJzaW9uICc0LjAuMScgY2FsbGVkIEZISVJIZWxwZXJzCgpjb250ZXh0IFBhdGllbnQKCmRlZmluZSBzaW1wbGVCb29sZWFuRXhwcmVzc2lvbjogdHJ1ZQoKZGVmaW5lIG9ic2VydmF0aW9uUmV0cmlldmU6IFtPYnNlcnZhdGlvbl0KCmRlZmluZSBvYnNlcnZhdGlvbkhhc0NvZGU6IG5vdCBJc051bGwoKFtPYnNlcnZhdGlvbl0pLmNvZGUpCgpkZWZpbmUgIkluaXRpYWwgUG9wdWxhdGlvbiI6IG9ic2VydmF0aW9uSGFzQ29kZQoKZGVmaW5lICJEZW5vbWluYXRvciI6ICJJbml0aWFsIFBvcHVsYXRpb24iCgpkZWZpbmUgIk51bWVyYXRvciI6ICJEZW5vbWluYXRvciIK"
+		}
+	]
+}

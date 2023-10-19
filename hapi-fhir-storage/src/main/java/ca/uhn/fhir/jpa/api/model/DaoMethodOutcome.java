@@ -111,5 +111,4 @@ public class DaoMethodOutcome extends MethodOutcome {
 		myResourcePersistentId = theResourcePersistentId;
 		return this;
 	}
-
 }

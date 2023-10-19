@@ -34,7 +34,8 @@ public class TinderResourceGeneratorMojo extends AbstractGeneratorMojo {
 		File packageDirectoryBase = configuration.getPackageDirectoryBase();
 		packageDirectoryBase.mkdirs();
 
-		ResourceGeneratorUsingModel gen = new ResourceGeneratorUsingModel(configuration.getVersion(), configuration.getBaseDir());
+		ResourceGeneratorUsingModel gen =
+				new ResourceGeneratorUsingModel(configuration.getVersion(), configuration.getBaseDir());
 		gen.setBaseResourceNames(configuration.getResourceNames());
 
 		try {
@@ -52,7 +53,8 @@ public class TinderResourceGeneratorMojo extends AbstractGeneratorMojo {
 
 			VelocityEngine v = new VelocityEngine();
 			v.setProperty(RuntimeConstants.RESOURCE_LOADERS, "cp");
-			v.setProperty("resource.loader.cp.class", "org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader");
+			v.setProperty(
+					"resource.loader.cp.class", "org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader");
 			v.setProperty("runtime.strict_mode.enable", Boolean.TRUE);
 
 			InputStream templateIs = ResourceGeneratorUsingSpreadsheet.class.getResourceAsStream(templateName);
@@ -65,8 +67,8 @@ public class TinderResourceGeneratorMojo extends AbstractGeneratorMojo {
 
 			Resource resource = new Resource();
 			resource.setDirectory(packageDirectoryBase.getAbsolutePath());
-			//resource.setDirectory(targetDirectory.getAbsolutePath());
-			//resource.addInclude(packageBase);
+			// resource.setDirectory(targetDirectory.getAbsolutePath());
+			// resource.addInclude(packageBase);
 			myProject.addResource(resource);
 
 		} catch (Exception e) {
@@ -84,7 +86,5 @@ public class TinderResourceGeneratorMojo extends AbstractGeneratorMojo {
 		public String html(String theHtml) {
 			return StringEscapeUtils.escapeHtml4(theHtml);
 		}
-
-
 	}
 }

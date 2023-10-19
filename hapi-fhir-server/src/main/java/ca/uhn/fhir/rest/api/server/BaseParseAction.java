@@ -39,5 +39,4 @@ public abstract class BaseParseAction<T> {
 	}
 
 	public abstract void execute(IParser parser, Writer writer) throws IOException;
-
 }

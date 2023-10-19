@@ -19,7 +19,6 @@
  */
 package ca.uhn.fhir.jpa.dao.data;
 
-import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.entity.SearchResult;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -31,14 +30,14 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 
 public interface ISearchResultDao extends JpaRepository<SearchResult, Long>, IHapiFhirJpaRepository {
-	
-	@Query(value="SELECT r.myResourcePid FROM SearchResult r WHERE r.mySearchPid = :search ORDER BY r.myOrder ASC")
+
+	@Query(value = "SELECT r.myResourcePid FROM SearchResult r WHERE r.mySearchPid = :search ORDER BY r.myOrder ASC")
 	Slice<Long> findWithSearchPid(@Param("search") Long theSearchPid, Pageable thePage);
 
-	@Query(value="SELECT r.myResourcePid FROM SearchResult r WHERE r.mySearchPid = :search")
+	@Query(value = "SELECT r.myResourcePid FROM SearchResult r WHERE r.mySearchPid = :search")
 	List<Long> findWithSearchPidOrderIndependent(@Param("search") Long theSearchPid);
 
-	@Query(value="SELECT r.myId FROM SearchResult r WHERE r.mySearchPid = :search")
+	@Query(value = "SELECT r.myId FROM SearchResult r WHERE r.mySearchPid = :search")
 	Slice<Long> findForSearch(Pageable thePage, @Param("search") Long theSearchPid);
 
 	@Modifying

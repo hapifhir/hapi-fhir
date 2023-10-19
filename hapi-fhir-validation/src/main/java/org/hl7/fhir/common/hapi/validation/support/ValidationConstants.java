@@ -28,5 +28,5 @@ public class ValidationConstants {
 	public static final String LOINC_GENERIC_VALUESET_URL_PLUS_SLASH = LOINC_GENERIC_VALUESET_URL + "/";
 
 	// not to be instantiated
-	private ValidationConstants() { }
+	private ValidationConstants() {}
 }

@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.binstore;
 import ca.uhn.fhir.jpa.binary.api.IBinaryStorageSvc;
 import ca.uhn.fhir.jpa.binary.api.StoredDetails;
 import ca.uhn.fhir.jpa.binary.svc.BaseBinaryStorageSvcImpl;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import com.google.common.hash.HashingInputStream;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.input.CountingInputStream;
@@ -32,6 +33,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Date;
 import java.util.concurrent.ConcurrentHashMap;
+import javax.annotation.Nonnull;
 
 /**
  * Purely in-memory implementation of binary storage service. This is really
@@ -40,8 +42,8 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class MemoryBinaryStorageSvcImpl extends BaseBinaryStorageSvcImpl implements IBinaryStorageSvc {
 
-	private ConcurrentHashMap<String, byte[]> myDataMap = new ConcurrentHashMap<>();
-	private ConcurrentHashMap<String, StoredDetails> myDetailsMap = new ConcurrentHashMap<>();
+	private final ConcurrentHashMap<String, byte[]> myDataMap = new ConcurrentHashMap<>();
+	private final ConcurrentHashMap<String, StoredDetails> myDetailsMap = new ConcurrentHashMap<>();
 
 	/**
 	 * Constructor
@@ -50,18 +52,26 @@ public class MemoryBinaryStorageSvcImpl extends BaseBinaryStorageSvcImpl impleme
 		super();
 	}
 
+	@Nonnull
 	@Override
-	public StoredDetails storeBlob(IIdType theResourceId, String theBlobIdOrNull, String theContentType, InputStream theInputStream) throws IOException {
-		String id = super.provideIdForNewBlob(theBlobIdOrNull);
-		String key = toKey(theResourceId, id);
+	public StoredDetails storeBlob(
+			IIdType theResourceId,
+			String theBlobIdOrNull,
+			String theContentType,
+			InputStream theInputStream,
+			RequestDetails theRequestDetails)
+			throws IOException {
 
 		HashingInputStream hashingIs = createHashingInputStream(theInputStream);
 		CountingInputStream countingIs = createCountingInputStream(hashingIs);
 
 		byte[] bytes = IOUtils.toByteArray(countingIs);
+		String id = super.provideIdForNewBlob(theBlobIdOrNull, bytes, theRequestDetails, theContentType);
+		String key = toKey(theResourceId, id);
 		theInputStream.close();
 		myDataMap.put(key, bytes);
-		StoredDetails storedDetails = new StoredDetails(id, countingIs.getByteCount(), theContentType, hashingIs, new Date());
+		StoredDetails storedDetails =
+				new StoredDetails(id, countingIs.getByteCount(), theContentType, hashingIs, new Date());
 		myDetailsMap.put(key, storedDetails);
 		return storedDetails;
 	}

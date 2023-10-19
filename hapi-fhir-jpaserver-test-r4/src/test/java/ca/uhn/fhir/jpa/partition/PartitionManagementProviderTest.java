@@ -17,6 +17,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.RegisterExtension;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.stubbing.Answer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,7 +35,9 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -94,10 +98,46 @@ public class PartitionManagementProviderTest {
 		assertEquals("a description", ((StringType) response.getParameterValue(ProviderConstants.PARTITION_MANAGEMENT_PARTITION_DESC)).getValue());
 	}
 
+	@Test
+	public void testCreatePartitionWithNameOnlyAutogeneratesId() {
+
+		when(myPartitionConfigSvc.createPartition(any(), any())).thenAnswer(createAnswer());
+
+		Parameters input = createInputPartitionWithoutId();;
+		ourLog.debug("Input:\n{}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(input));
+
+		Parameters response = myClient
+			.operation()
+			.onServer()
+			.named(ProviderConstants.PARTITION_MANAGEMENT_CREATE_PARTITION)
+			.withParameters(input)
+			.encodedXml()
+			.execute();
+
+		ourLog.debug("Response:\n{}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(response));
+		ArgumentCaptor<PartitionEntity> entityCaptor = ArgumentCaptor.forClass(PartitionEntity.class);
+		verify(myPartitionConfigSvc, times(1)).createPartition(entityCaptor.capture(), any());
+		verify(myPartitionConfigSvc, times(1)).generateRandomUnusedPartitionId();
+		verifyNoMoreInteractions(myPartitionConfigSvc);
+		PartitionEntity value = entityCaptor.getValue();
+
+		assertThat(value.getName(), is(equalTo("PARTITION-123")));
+		assertThat(value.getId(), is(instanceOf(Integer.class)));
+		assertThat(value.getDescription(), is(equalTo("a description")));
+	}
+
 	@Nonnull
 	private Parameters createInputPartition() {
 		Parameters input = new Parameters();
 		input.addParameter(ProviderConstants.PARTITION_MANAGEMENT_PARTITION_ID, new IntegerType(123));
+		input.addParameter(ProviderConstants.PARTITION_MANAGEMENT_PARTITION_NAME, new CodeType("PARTITION-123"));
+		input.addParameter(ProviderConstants.PARTITION_MANAGEMENT_PARTITION_DESC, new StringType("a description"));
+		return input;
+	}
+
+	@Nonnull
+	private Parameters createInputPartitionWithoutId() {
+		Parameters input = new Parameters();
 		input.addParameter(ProviderConstants.PARTITION_MANAGEMENT_PARTITION_NAME, new CodeType("PARTITION-123"));
 		input.addParameter(ProviderConstants.PARTITION_MANAGEMENT_PARTITION_DESC, new StringType("a description"));
 		return input;

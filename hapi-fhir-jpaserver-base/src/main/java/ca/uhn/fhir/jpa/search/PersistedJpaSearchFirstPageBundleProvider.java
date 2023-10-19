@@ -30,24 +30,33 @@ import ca.uhn.fhir.jpa.util.QueryParameterUtils;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.valueset.BundleEntrySearchModeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.server.method.ResponsePage;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nonnull;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+import javax.annotation.Nonnull;
 
 public class PersistedJpaSearchFirstPageBundleProvider extends PersistedJpaBundleProvider {
 	private static final Logger ourLog = LoggerFactory.getLogger(PersistedJpaSearchFirstPageBundleProvider.class);
 	private final SearchTask mySearchTask;
+
+	@SuppressWarnings("rawtypes")
 	private final ISearchBuilder mySearchBuilder;
 
 	/**
 	 * Constructor
 	 */
-	public PersistedJpaSearchFirstPageBundleProvider(Search theSearch, SearchTask theSearchTask, ISearchBuilder theSearchBuilder, RequestDetails theRequest, RequestPartitionId theRequestPartitionId) {
+	@SuppressWarnings("rawtypes")
+	public PersistedJpaSearchFirstPageBundleProvider(
+			Search theSearch,
+			SearchTask theSearchTask,
+			ISearchBuilder theSearchBuilder,
+			RequestDetails theRequest,
+			RequestPartitionId theRequestPartitionId) {
 		super(theRequest, theSearch.getUuid());
 
 		assert theSearch.getSearchType() != SearchTypeEnum.HISTORY;
@@ -60,7 +69,8 @@ public class PersistedJpaSearchFirstPageBundleProvider extends PersistedJpaBundl
 
 	@Nonnull
 	@Override
-	public List<IBaseResource> getResources(int theFromIndex, int theToIndex) {
+	public List<IBaseResource> getResources(
+			int theFromIndex, int theToIndex, @Nonnull ResponsePage.ResponsePageBuilder thePageBuilder) {
 		ensureSearchEntityLoaded();
 		QueryParameterUtils.verifySearchHasntFailedOrThrowInternalErrorException(getSearchEntity());
 
@@ -73,33 +83,30 @@ public class PersistedJpaSearchFirstPageBundleProvider extends PersistedJpaBundl
 		RequestPartitionId requestPartitionId = getRequestPartitionId();
 
 		List<IBaseResource> retVal = myTxService
-			.withRequest(myRequest)
-			.withRequestPartitionId(requestPartitionId)
-			.execute(() -> toResourceList(mySearchBuilder, pids));
+				.withRequest(myRequest)
+				.withRequestPartitionId(requestPartitionId)
+				.execute(() -> toResourceList(mySearchBuilder, pids, thePageBuilder));
 
 		long totalCountWanted = theToIndex - theFromIndex;
-		long totalCountMatch = (int) retVal
-			.stream()
-			.filter(t -> !isInclude(t))
-			.count();
+		long totalCountMatch = (int) retVal.stream().filter(t -> !isInclude(t)).count();
 
 		if (totalCountMatch < totalCountWanted) {
 			if (getSearchEntity().getStatus() == SearchStatusEnum.PASSCMPLET
-				|| ((getSearchEntity().getStatus() == SearchStatusEnum.FINISHED && getSearchEntity().getNumFound() >= theToIndex))) {
+					|| ((getSearchEntity().getStatus() == SearchStatusEnum.FINISHED
+							&& getSearchEntity().getNumFound() >= theToIndex))) {
 
 				/*
 				 * This is a bit of complexity to account for the possibility that
 				 * the consent service has filtered some results.
 				 */
-				Set<String> existingIds = retVal
-					.stream()
-					.map(t -> t.getIdElement().getValue())
-					.filter(t -> t != null)
-					.collect(Collectors.toSet());
+				Set<String> existingIds = retVal.stream()
+						.map(t -> t.getIdElement().getValue())
+						.filter(t -> t != null)
+						.collect(Collectors.toSet());
 
 				long remainingWanted = totalCountWanted - totalCountMatch;
 				long fromIndex = theToIndex - remainingWanted;
-				List<IBaseResource> remaining = super.getResources((int) fromIndex, theToIndex);
+				List<IBaseResource> remaining = super.getResources((int) fromIndex, theToIndex, thePageBuilder);
 				remaining.forEach(t -> {
 					if (!existingIds.contains(t.getIdElement().getValue())) {
 						retVal.add(t);
@@ -130,5 +137,4 @@ public class PersistedJpaSearchFirstPageBundleProvider extends PersistedJpaBundl
 		}
 		return super.size();
 	}
-
 }

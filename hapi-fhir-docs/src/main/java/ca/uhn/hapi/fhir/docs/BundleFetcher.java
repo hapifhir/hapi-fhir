@@ -46,20 +46,16 @@ public class BundleFetcher {
 		List<IBaseResource> patients = new ArrayList<>();
 
 		// We'll do a search for all Patients and extract the first page
-		Bundle bundle = client
-			.search()
-			.forResource(Patient.class)
-			.where(Patient.NAME.matches().value("smith"))
-			.returnBundle(Bundle.class)
-			.execute();
+		Bundle bundle = client.search()
+				.forResource(Patient.class)
+				.where(Patient.NAME.matches().value("smith"))
+				.returnBundle(Bundle.class)
+				.execute();
 		patients.addAll(BundleUtil.toListOfResources(ctx, bundle));
 
 		// Load the subsequent pages
 		while (bundle.getLink(IBaseBundle.LINK_NEXT) != null) {
-			bundle = client
-				.loadPage()
-				.next(bundle)
-				.execute();
+			bundle = client.loadPage().next(bundle).execute();
 			patients.addAll(BundleUtil.toListOfResources(ctx, bundle));
 		}
 
@@ -67,5 +63,3 @@ public class BundleFetcher {
 		// END SNIPPET: loadAll
 	}
 }
-
-

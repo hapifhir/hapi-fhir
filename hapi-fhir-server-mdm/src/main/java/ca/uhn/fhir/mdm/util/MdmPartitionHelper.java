@@ -33,7 +33,7 @@ public class MdmPartitionHelper {
 	private final MessageHelper myMessageHelper;
 	private final IMdmSettings myMdmSettings;
 
-	public MdmPartitionHelper(MessageHelper theMessageHelper, IMdmSettings theMdmSettings){
+	public MdmPartitionHelper(MessageHelper theMessageHelper, IMdmSettings theMdmSettings) {
 		myMessageHelper = theMessageHelper;
 		myMdmSettings = theMdmSettings;
 	}
@@ -46,13 +46,19 @@ public class MdmPartitionHelper {
 	 * @param theFromResource
 	 * @param theToResource
 	 */
-	public void validateMdmResourcesPartitionMatches(IAnyResource theFromResource, IAnyResource theToResource){
-		if (!myMdmSettings.getSearchAllPartitionForMatch()){
-			RequestPartitionId fromGoldenResourcePartitionId = (RequestPartitionId) theFromResource.getUserData(Constants.RESOURCE_PARTITION_ID);
-			RequestPartitionId toGoldenPartitionId = (RequestPartitionId) theToResource.getUserData(Constants.RESOURCE_PARTITION_ID);
-			if (fromGoldenResourcePartitionId != null && toGoldenPartitionId != null && fromGoldenResourcePartitionId.hasPartitionIds() && toGoldenPartitionId.hasPartitionIds() &&
-				!fromGoldenResourcePartitionId.hasPartitionId(toGoldenPartitionId.getFirstPartitionIdOrNull())) {
-				throw new InvalidRequestException(Msg.code(2075) + myMessageHelper.getMessageForMismatchPartition(theFromResource, theToResource));
+	public void validateMdmResourcesPartitionMatches(IAnyResource theFromResource, IAnyResource theToResource) {
+		if (!myMdmSettings.getSearchAllPartitionForMatch()) {
+			RequestPartitionId fromGoldenResourcePartitionId =
+					(RequestPartitionId) theFromResource.getUserData(Constants.RESOURCE_PARTITION_ID);
+			RequestPartitionId toGoldenPartitionId =
+					(RequestPartitionId) theToResource.getUserData(Constants.RESOURCE_PARTITION_ID);
+			if (fromGoldenResourcePartitionId != null
+					&& toGoldenPartitionId != null
+					&& fromGoldenResourcePartitionId.hasPartitionIds()
+					&& toGoldenPartitionId.hasPartitionIds()
+					&& !fromGoldenResourcePartitionId.hasPartitionId(toGoldenPartitionId.getFirstPartitionIdOrNull())) {
+				throw new InvalidRequestException(Msg.code(2075)
+						+ myMessageHelper.getMessageForMismatchPartition(theFromResource, theToResource));
 			}
 		}
 	}
@@ -64,20 +70,18 @@ public class MdmPartitionHelper {
 	 * @param theResource
 	 * @return The RequestPartitionId that should be used for the candidate search for the given resource
 	 */
-	public RequestPartitionId getRequestPartitionIdFromResourceForSearch(IAnyResource theResource){
-		if (myMdmSettings.getSearchAllPartitionForMatch()){
+	public RequestPartitionId getRequestPartitionIdFromResourceForSearch(IAnyResource theResource) {
+		if (myMdmSettings.getSearchAllPartitionForMatch()) {
 			return RequestPartitionId.allPartitions();
-		}
-		else {
+		} else {
 			return (RequestPartitionId) theResource.getUserData(Constants.RESOURCE_PARTITION_ID);
 		}
 	}
 
-	public RequestPartitionId getRequestPartitionIdForNewGoldenResources(IAnyResource theSourceResource){
-		if (StringUtils.isBlank(myMdmSettings.getGoldenResourcePartitionName())){
+	public RequestPartitionId getRequestPartitionIdForNewGoldenResources(IAnyResource theSourceResource) {
+		if (StringUtils.isBlank(myMdmSettings.getGoldenResourcePartitionName())) {
 			return (RequestPartitionId) theSourceResource.getUserData(Constants.RESOURCE_PARTITION_ID);
-		}
-		else {
+		} else {
 			return RequestPartitionId.fromPartitionName(myMdmSettings.getGoldenResourcePartitionName());
 		}
 	}

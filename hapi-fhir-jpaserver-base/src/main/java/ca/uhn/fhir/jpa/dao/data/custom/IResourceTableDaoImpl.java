@@ -21,10 +21,10 @@ package ca.uhn.fhir.jpa.dao.data.custom;
 
 import org.springframework.stereotype.Component;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 import java.util.Collection;
 import java.util.List;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 
 @Component
 /**
@@ -44,7 +44,8 @@ public class IResourceTableDaoImpl implements IForcedIdQueries {
 	 * is an object array, where the order matters (the array represents columns returned by the query).
 	 * Deleted resources are not filtered.
 	 */
-	public Collection<Object[]> findAndResolveByForcedIdWithNoTypeIncludeDeleted(String theResourceType, Collection<String> theForcedIds) {
+	public Collection<Object[]> findAndResolveByForcedIdWithNoTypeIncludeDeleted(
+			String theResourceType, Collection<String> theForcedIds) {
 		return findAndResolveByForcedIdWithNoType(theResourceType, theForcedIds, false);
 	}
 
@@ -63,10 +64,11 @@ public class IResourceTableDaoImpl implements IForcedIdQueries {
 			query += " AND t.myDeleted IS NULL";
 		}
 
-		return myEntityManager.createQuery(query)
-			.setParameter("resource_type", theResourceType)
-			.setParameter("forced_id", theForcedIds)
-			.getResultList();
+		return myEntityManager
+				.createQuery(query)
+				.setParameter("resource_type", theResourceType)
+				.setParameter("forced_id", theForcedIds)
+				.getResultList();
 	}
 
 	/**
@@ -85,13 +87,13 @@ public class IResourceTableDaoImpl implements IForcedIdQueries {
 			query += " AND t.myDeleted IS NULL";
 		}
 
-		return myEntityManager.createQuery(query)
-			.setParameter("resource_type", theResourceType)
-			.setParameter("forced_id", theForcedIds)
-			.setParameter("partition_id", thePartitionId)
-			.getResultList();
+		return myEntityManager
+				.createQuery(query)
+				.setParameter("resource_type", theResourceType)
+				.setParameter("forced_id", theForcedIds)
+				.setParameter("partition_id", thePartitionId)
+				.getResultList();
 	}
-
 
 	/**
 	 * This method returns a Collection where each row is an element in the collection. Each element in the collection
@@ -109,10 +111,11 @@ public class IResourceTableDaoImpl implements IForcedIdQueries {
 			query += " AND t.myDeleted IS NULL";
 		}
 
-		return myEntityManager.createQuery(query)
-			.setParameter("resource_type", theResourceType)
-			.setParameter("forced_id", theForcedIds)
-			.getResultList();
+		return myEntityManager
+				.createQuery(query)
+				.setParameter("resource_type", theResourceType)
+				.setParameter("forced_id", theForcedIds)
+				.getResultList();
 	}
 
 	/**
@@ -130,10 +133,11 @@ public class IResourceTableDaoImpl implements IForcedIdQueries {
 			query += " AND t.myDeleted IS NULL";
 		}
 
-		return myEntityManager.createQuery(query)
-			.setParameter("resource_type", theResourceType)
-			.setParameter("forced_id", theForcedIds)
-			.setParameter("partition_id", thePartitionIdsWithoutDefault)
-			.getResultList();
+		return myEntityManager
+				.createQuery(query)
+				.setParameter("resource_type", theResourceType)
+				.setParameter("forced_id", theForcedIds)
+				.setParameter("partition_id", thePartitionIdsWithoutDefault)
+				.getResultList();
 	}
 }

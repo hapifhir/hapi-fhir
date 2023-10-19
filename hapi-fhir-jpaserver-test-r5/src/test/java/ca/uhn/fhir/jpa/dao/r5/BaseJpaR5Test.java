@@ -19,7 +19,9 @@ import ca.uhn.fhir.jpa.binary.provider.BinaryAccessProvider;
 import ca.uhn.fhir.jpa.bulk.export.api.IBulkDataExportJobSchedulingHelper;
 import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
 import ca.uhn.fhir.jpa.dao.data.IForcedIdDao;
+import ca.uhn.fhir.jpa.dao.data.IResourceHistoryProvenanceDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceHistoryTableDao;
+import ca.uhn.fhir.jpa.dao.data.IResourceHistoryTagDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedComboStringUniqueDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamDateDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamQuantityDao;
@@ -49,6 +51,7 @@ import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.provider.JpaSystemProvider;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.search.IStaleSearchDeletingSvc;
+import ca.uhn.fhir.jpa.search.reindex.IInstanceReindexService;
 import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
 import ca.uhn.fhir.jpa.search.warm.ICacheWarmingSvc;
 import ca.uhn.fhir.jpa.searchparam.registry.SearchParamRegistryImpl;
@@ -143,6 +146,8 @@ import static org.mockito.Mockito.mock;
 public abstract class BaseJpaR5Test extends BaseJpaTest implements ITestDataBuilder {
 	@Autowired
 	protected PartitionSettings myPartitionSettings;
+	@Autowired
+	protected IInstanceReindexService myInstanceReindexService;
 	@Autowired
 	protected ITermCodeSystemStorageSvc myTermCodeSystemStorageSvc;
 	@Autowired
@@ -289,6 +294,12 @@ public abstract class BaseJpaR5Test extends BaseJpaTest implements ITestDataBuil
 	@Autowired
 	protected IResourceHistoryTableDao myResourceHistoryTableDao;
 	@Autowired
+	protected IResourceTagDao myResourceTagDao;
+	@Autowired
+	protected IResourceHistoryTagDao myResourceHistoryTagDao;
+	@Autowired
+	protected IResourceHistoryProvenanceDao myResourceHistoryProvenanceDao;
+	@Autowired
 	protected IForcedIdDao myForcedIdDao;
 	@Autowired
 	@Qualifier("myCoverageDaoR5")
@@ -311,8 +322,6 @@ public abstract class BaseJpaR5Test extends BaseJpaTest implements ITestDataBuil
 	@Autowired
 	@Qualifier("myResourceProvidersR5")
 	protected ResourceProviderFactory myResourceProviders;
-	@Autowired
-	protected IResourceTagDao myResourceTagDao;
 	@Autowired
 	protected ISearchCoordinatorSvc mySearchCoordinatorSvc;
 	@Autowired(required = false)
@@ -437,15 +446,15 @@ public abstract class BaseJpaR5Test extends BaseJpaTest implements ITestDataBuil
 	@Override
 	protected void afterResetInterceptors() {
 		super.afterResetInterceptors();
-		myInterceptorRegistry.unregisterInterceptor(myPerformanceTracingLoggingInterceptor);
+//		myInterceptorRegistry.unregisterInterceptor(myPerformanceTracingLoggingInterceptor);
 	}
 
 	@BeforeEach
 	public void beforeCreateInterceptor() {
 		myInterceptor = mock(IServerInterceptor.class);
 
-		myPerformanceTracingLoggingInterceptor = new PerformanceTracingLoggingInterceptor();
-		myInterceptorRegistry.registerInterceptor(myPerformanceTracingLoggingInterceptor);
+//		myPerformanceTracingLoggingInterceptor = new PerformanceTracingLoggingInterceptor();
+//		myInterceptorRegistry.registerInterceptor(myPerformanceTracingLoggingInterceptor);
 	}
 
 	@BeforeEach

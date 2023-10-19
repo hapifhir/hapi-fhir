@@ -7,6 +7,7 @@ import ca.uhn.fhir.rest.server.interceptor.auth.RuleBuilder;
 import ca.uhn.fhir.test.utilities.ITestDataBuilder;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Observation;
@@ -142,7 +143,7 @@ public class AuthorizationInterceptorMultitenantJpaR4Test extends BaseMultitenan
 		Bundle output = myClient
 			.search()
 			.forResource("Observation")
-			.include(Observation.INCLUDE_ALL)
+			.include(IBaseResource.INCLUDE_ALL)
 			.returnBundle(Bundle.class)
 			.execute();
 		assertEquals(2, output.getEntry().size());
@@ -165,7 +166,7 @@ public class AuthorizationInterceptorMultitenantJpaR4Test extends BaseMultitenan
 			myClient
 				.search()
 				.forResource("Observation")
-				.include(Observation.INCLUDE_ALL)
+				.include(IBaseResource.INCLUDE_ALL)
 				.returnBundle(Bundle.class)
 				.execute();
 			fail();
@@ -198,7 +199,7 @@ public class AuthorizationInterceptorMultitenantJpaR4Test extends BaseMultitenan
 		Bundle bundle = myClient
 			.search()
 			.forResource("Observation")
-			.include(Observation.INCLUDE_ALL)
+			.include(IBaseResource.INCLUDE_ALL)
 			.sort().ascending(Observation.IDENTIFIER)
 			.returnBundle(Bundle.class)
 			.count(3)

@@ -43,7 +43,7 @@ public class BundleBuilderExamples {
 	private IGenericClient myFhirClient;
 
 	public void update() throws FHIRException {
-		//START SNIPPET: update
+		// START SNIPPET: update
 		// Create a TransactionBuilder
 		BundleBuilder builder = new BundleBuilder(myFhirContext);
 
@@ -56,12 +56,13 @@ public class BundleBuilderExamples {
 		builder.addTransactionUpdateEntry(patient);
 
 		// Execute the transaction
-		IBaseBundle outcome = myFhirClient.transaction().withBundle(builder.getBundle()).execute();
-		//END SNIPPET: update
+		IBaseBundle outcome =
+				myFhirClient.transaction().withBundle(builder.getBundle()).execute();
+		// END SNIPPET: update
 	}
 
 	public void updateConditional() throws FHIRException {
-		//START SNIPPET: updateConditional
+		// START SNIPPET: updateConditional
 		// Create a TransactionBuilder
 		BundleBuilder builder = new BundleBuilder(myFhirContext);
 
@@ -74,12 +75,13 @@ public class BundleBuilderExamples {
 		builder.addTransactionUpdateEntry(patient).conditional("Patient?identifier=http://foo|bar");
 
 		// Execute the transaction
-		IBaseBundle outcome = myFhirClient.transaction().withBundle(builder.getBundle()).execute();
-		//END SNIPPET: updateConditional
+		IBaseBundle outcome =
+				myFhirClient.transaction().withBundle(builder.getBundle()).execute();
+		// END SNIPPET: updateConditional
 	}
 
 	public void create() throws FHIRException {
-		//START SNIPPET: create
+		// START SNIPPET: create
 		// Create a TransactionBuilder
 		BundleBuilder builder = new BundleBuilder(myFhirContext);
 
@@ -91,12 +93,13 @@ public class BundleBuilderExamples {
 		builder.addTransactionCreateEntry(patient);
 
 		// Execute the transaction
-		IBaseBundle outcome = myFhirClient.transaction().withBundle(builder.getBundle()).execute();
-		//END SNIPPET: create
+		IBaseBundle outcome =
+				myFhirClient.transaction().withBundle(builder.getBundle()).execute();
+		// END SNIPPET: create
 	}
 
 	public void createConditional() throws FHIRException {
-		//START SNIPPET: createConditional
+		// START SNIPPET: createConditional
 		// Create a TransactionBuilder
 		BundleBuilder builder = new BundleBuilder(myFhirContext);
 
@@ -109,12 +112,13 @@ public class BundleBuilderExamples {
 		builder.addTransactionCreateEntry(patient).conditional("Patient?identifier=http://foo|bar");
 
 		// Execute the transaction
-		IBaseBundle outcome = myFhirClient.transaction().withBundle(builder.getBundle()).execute();
-		//END SNIPPET: createConditional
+		IBaseBundle outcome =
+				myFhirClient.transaction().withBundle(builder.getBundle()).execute();
+		// END SNIPPET: createConditional
 	}
 
 	public void patch() throws FHIRException {
-		//START SNIPPET: patch
+		// START SNIPPET: patch
 
 		// Create a FHIR Patch object
 		Parameters patch = new Parameters();
@@ -133,12 +137,13 @@ public class BundleBuilderExamples {
 		builder.addTransactionFhirPatchEntry(targetId, patch);
 
 		// Execute the transaction
-		IBaseBundle outcome = myFhirClient.transaction().withBundle(builder.getBundle()).execute();
-		//END SNIPPET: patch
+		IBaseBundle outcome =
+				myFhirClient.transaction().withBundle(builder.getBundle()).execute();
+		// END SNIPPET: patch
 	}
 
 	public void patchConditional() throws FHIRException {
-		//START SNIPPET: patchConditional
+		// START SNIPPET: patchConditional
 
 		// Create a FHIR Patch object
 		Parameters patch = new Parameters();
@@ -154,21 +159,20 @@ public class BundleBuilderExamples {
 		String conditionalUrl = "Patient?identifier=http://foo|123";
 		builder.addTransactionFhirPatchEntry(patch).conditional(conditionalUrl);
 
-
 		// Execute the transaction
-		IBaseBundle outcome = myFhirClient.transaction().withBundle(builder.getBundle()).execute();
-		//END SNIPPET: patchConditional
+		IBaseBundle outcome =
+				myFhirClient.transaction().withBundle(builder.getBundle()).execute();
+		// END SNIPPET: patchConditional
 	}
 
 	public void customizeBundle() throws FHIRException {
-		//START SNIPPET: customizeBundle
+		// START SNIPPET: customizeBundle
 		// Create a TransactionBuilder
 		BundleBuilder builder = new BundleBuilder(myFhirContext);
 		// Set bundle type to be searchset
-		builder
-			.setBundleField("type", "searchset")
-			.setBundleField("id", UUID.randomUUID().toString())
-			.setMetaField("lastUpdated", builder.newPrimitive("instant", new Date()));
+		builder.setBundleField("type", "searchset")
+				.setBundleField("id", UUID.randomUUID().toString())
+				.setMetaField("lastUpdated", builder.newPrimitive("instant", new Date()));
 
 		// Create bundle entry
 		IBase entry = builder.addEntry();
@@ -183,7 +187,6 @@ public class BundleBuilderExamples {
 		IBase search = builder.addSearch(entry);
 		builder.setSearchField(search, "mode", "match");
 		builder.setSearchField(search, "score", builder.newPrimitive("decimal", BigDecimal.ONE));
-		//END SNIPPET: customizeBundle
+		// END SNIPPET: customizeBundle
 	}
-
 }

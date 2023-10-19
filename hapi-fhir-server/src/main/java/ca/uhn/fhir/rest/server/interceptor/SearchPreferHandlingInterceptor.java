@@ -38,13 +38,13 @@ import ca.uhn.fhir.rest.server.method.SearchMethodBinding;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import org.apache.commons.lang3.Validate;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.util.HashMap;
-import java.util.List;
-import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -56,6 +56,7 @@ public class SearchPreferHandlingInterceptor {
 
 	@Nonnull
 	private PreferHandlingEnum myDefaultBehaviour;
+
 	@Nullable
 	private ISearchParamRegistry mySearchParamRegistry;
 
@@ -77,7 +78,9 @@ public class SearchPreferHandlingInterceptor {
 	}
 
 	@Hook(Pointcut.SERVER_INCOMING_REQUEST_PRE_HANDLER_SELECTED)
-	public void incomingRequestPostProcessed(RequestDetails theRequestDetails, HttpServletRequest theRequest, HttpServletResponse theResponse) throws AuthenticationException {
+	public void incomingRequestPostProcessed(
+			RequestDetails theRequestDetails, HttpServletRequest theRequest, HttpServletResponse theResponse)
+			throws AuthenticationException {
 		if (!SearchMethodBinding.isPlainSearchRequest(theRequestDetails)) {
 			return;
 		}
@@ -91,7 +94,8 @@ public class SearchPreferHandlingInterceptor {
 		String preferHeader = theRequestDetails.getHeader(Constants.HEADER_PREFER);
 		PreferHandlingEnum handling = null;
 		if (isNotBlank(preferHeader)) {
-			PreferHeader parsedPreferHeader = RestfulServerUtils.parsePreferHeader((IRestfulServer<?>) theRequestDetails.getServer(), preferHeader);
+			PreferHeader parsedPreferHeader = RestfulServerUtils.parsePreferHeader(
+					(IRestfulServer<?>) theRequestDetails.getServer(), preferHeader);
 			handling = parsedPreferHeader.getHanding();
 		}
 
@@ -140,14 +144,20 @@ public class SearchPreferHandlingInterceptor {
 				} else {
 
 					// Strict handling
-					List<String> allowedParams = searchParamRetriever.getActiveSearchParams(resourceName).getSearchParamNames().stream().sorted().distinct().collect(Collectors.toList());
+					List<String> allowedParams =
+							searchParamRetriever.getActiveSearchParams(resourceName).getSearchParamNames().stream()
+									.sorted()
+									.distinct()
+									.collect(Collectors.toList());
 					HapiLocalizer localizer = theRequestDetails.getFhirContext().getLocalizer();
-					String msg = localizer.getMessage("ca.uhn.fhir.jpa.dao.BaseStorageDao.invalidSearchParameter", paramName, resourceName, allowedParams);
+					String msg = localizer.getMessage(
+							"ca.uhn.fhir.jpa.dao.BaseStorageDao.invalidSearchParameter",
+							paramName,
+							resourceName,
+							allowedParams);
 					throw new InvalidRequestException(Msg.code(323) + msg);
-
 				}
 			}
-
 		}
 
 		if (newMap != null) {

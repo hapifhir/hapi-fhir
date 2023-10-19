@@ -53,4 +53,3 @@
  * Activated by {@link ca.uhn.fhir.jpa.api.config.JpaStorageSettings#setAdvancedHSearchIndexing(boolean)}.
  */
 package ca.uhn.fhir.jpa.dao.search;
-

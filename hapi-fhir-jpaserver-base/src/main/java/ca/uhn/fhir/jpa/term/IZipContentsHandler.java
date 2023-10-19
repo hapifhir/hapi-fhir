@@ -26,5 +26,4 @@ import java.io.Reader;
 public interface IZipContentsHandler {
 
 	void handle(Reader theReader, String theFilename) throws IOException;
-
 }

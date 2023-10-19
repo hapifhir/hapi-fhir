@@ -21,7 +21,6 @@ package ca.uhn.fhir.sl.cache;
  */
 
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 
 /**
  * This interface is a blend between
@@ -31,9 +30,9 @@ import java.util.concurrent.CompletableFuture;
  * Please check their documentation for information in the methods below.
  */
 public interface LoadingCache<K, V> extends Cache<K, V> {
-    V get(K key);
+	V get(K key);
 
-    Map<K, V> getAll(Iterable<? extends K> keys);
+	Map<K, V> getAll(Iterable<? extends K> keys);
 
-    void refresh(K key);
+	void refresh(K key);
 }

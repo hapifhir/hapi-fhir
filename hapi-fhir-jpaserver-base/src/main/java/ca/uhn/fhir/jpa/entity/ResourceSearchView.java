@@ -31,6 +31,8 @@ import ca.uhn.fhir.rest.api.Constants;
 import org.hibernate.annotations.Immutable;
 import org.hibernate.annotations.Subselect;
 
+import java.io.Serializable;
+import java.util.Date;
 import javax.annotation.Nullable;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -40,9 +42,8 @@ import javax.persistence.Id;
 import javax.persistence.Lob;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
-import java.io.Serializable;
-import java.util.Date;
 
+@SuppressWarnings("SqlDialectInspection")
 @Entity
 @Immutable
 @Subselect("SELECT h.pid               as pid,            " +
@@ -71,45 +72,58 @@ public class ResourceSearchView implements IBaseResourceEntity, Serializable {
 	@Id
 	@Column(name = "PID")
 	private Long myId;
+
 	@Column(name = "RES_ID")
 	private Long myResourceId;
+
 	@Column(name = "RES_TYPE", length = Constants.MAX_RESOURCE_NAME_LENGTH)
 	private String myResourceType;
+
 	@Column(name = "RES_VERSION")
 	@Enumerated(EnumType.STRING)
 	private FhirVersionEnum myFhirVersion;
+
 	@Column(name = "RES_VER")
 	private Long myResourceVersion;
+
 	@Column(name = "PROV_REQUEST_ID", length = Constants.REQUEST_ID_LENGTH)
 	private String myProvenanceRequestId;
-	@Column(name = "PROV_SOURCE_URI", length = ResourceHistoryProvenanceEntity.SOURCE_URI_LENGTH)
+
+	@Column(name = "PROV_SOURCE_URI", length = ResourceHistoryTable.SOURCE_URI_LENGTH)
 	private String myProvenanceSourceUri;
+
 	@Column(name = "HAS_TAGS")
 	private boolean myHasTags;
+
 	@Column(name = "RES_DELETED_AT")
 	@Temporal(TemporalType.TIMESTAMP)
 	private Date myDeleted;
+
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "RES_PUBLISHED")
 	private Date myPublished;
+
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "RES_UPDATED")
 	private Date myUpdated;
+
 	@Column(name = "RES_TEXT")
 	@Lob()
 	private byte[] myResource;
+
 	@Column(name = "RES_TEXT_VC")
 	private String myResourceTextVc;
+
 	@Column(name = "RES_ENCODING")
 	@Enumerated(EnumType.STRING)
 	private ResourceEncodingEnum myEncoding;
 	@Column(name = "FORCED_PID", length = ResourceTable.MAX_FORCED_ID_LENGTH)
 	private String myForcedPid;
+
 	@Column(name = "PARTITION_ID")
 	private Integer myPartitionId;
 
-	public ResourceSearchView() {
-	}
+	public ResourceSearchView() {}
 
 	public String getResourceTextVc() {
 		return myResourceTextVc;
@@ -158,7 +172,7 @@ public class ResourceSearchView implements IBaseResourceEntity, Serializable {
 			return new IdDt(myResourceType + '/' + id + '/' + Constants.PARAM_HISTORY + '/' + getVersion());
 		} else {
 			return new IdDt(
-				getResourceType() + '/' + getForcedId() + '/' + Constants.PARAM_HISTORY + '/' + getVersion());
+					getResourceType() + '/' + getForcedId() + '/' + Constants.PARAM_HISTORY + '/' + getVersion());
 		}
 	}
 
@@ -222,5 +236,4 @@ public class ResourceSearchView implements IBaseResourceEntity, Serializable {
 	public ResourceEncodingEnum getEncoding() {
 		return myEncoding;
 	}
-
 }
