@@ -1,0 +1,4 @@
+---
+type: change
+issue: 5378
+title: "The search cache is now active when using the ConsentInterceptor."
