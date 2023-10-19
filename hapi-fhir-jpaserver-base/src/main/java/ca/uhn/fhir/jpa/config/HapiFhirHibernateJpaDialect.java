@@ -35,6 +35,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataAccessException;
 import org.springframework.orm.jpa.vendor.HibernateJpaDialect;
 
+import javax.annotation.Nonnull;
 import javax.persistence.PersistenceException;
 
 import static org.apache.commons.lang3.StringUtils.defaultString;
@@ -43,7 +44,8 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 public class HapiFhirHibernateJpaDialect extends HibernateJpaDialect {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(HapiFhirHibernateJpaDialect.class);
-	private HapiLocalizer myLocalizer;
+	static final String RESOURCE_VERSION_CONSTRAINT_FAILURE = "resourceVersionConstraintFailure";
+	private final HapiLocalizer myLocalizer;
 
 	/**
 	 * Constructor
@@ -61,7 +63,7 @@ public class HapiFhirHibernateJpaDialect extends HibernateJpaDialect {
 	}
 
 	@Override
-	protected DataAccessException convertHibernateAccessException(HibernateException theException) {
+	protected DataAccessException convertHibernateAccessException(@Nonnull HibernateException theException) {
 		return convertHibernateAccessException(theException, null);
 	}
 
@@ -88,20 +90,17 @@ public class HapiFhirHibernateJpaDialect extends HibernateJpaDialect {
 				throwWhenConstraintReferencesIndex(
 						constraintName,
 						ResourceHistoryTable.IDX_RESVER_ID_VER,
-						823,
-						messageToPrepend,
-						"resourceVersionConstraintFailure");
+						Msg.code(823) + messageToPrepend,
+						RESOURCE_VERSION_CONSTRAINT_FAILURE);
 				throwWhenConstraintReferencesIndex(
 						constraintName,
 						ResourceIndexedComboStringUnique.IDX_IDXCMPSTRUNIQ_STRING,
-						824,
-						messageToPrepend,
+						Msg.code(824) + messageToPrepend,
 						"resourceIndexedCompositeStringUniqueConstraintFailure");
 				throwWhenConstraintReferencesIndex(
 						constraintName,
 						ResourceTable.IDX_RES_FHIR_ID,
-						825,
-						messageToPrepend,
+						Msg.code(825) + messageToPrepend,
 						"forcedIdConstraintFailure");
 				if (constraintName.contains(ResourceSearchUrlEntity.RES_SEARCH_URL_COLUMN_NAME)) {
 					throw super.convertHibernateAccessException(theException);
@@ -125,7 +124,7 @@ public class HapiFhirHibernateJpaDialect extends HibernateJpaDialect {
 		 */
 		if (theException instanceof org.hibernate.StaleStateException) {
 			String msg = messageToPrepend
-					+ myLocalizer.getMessage(HapiFhirHibernateJpaDialect.class, "resourceVersionConstraintFailure");
+					+ myLocalizer.getMessage(HapiFhirHibernateJpaDialect.class, RESOURCE_VERSION_CONSTRAINT_FAILURE);
 			throw new ResourceVersionConflictException(Msg.code(826) + msg);
 		}
 		if (theException instanceof org.hibernate.PessimisticLockException) {
@@ -133,7 +132,8 @@ public class HapiFhirHibernateJpaDialect extends HibernateJpaDialect {
 			String sql = defaultString(ex.getSQL()).toUpperCase();
 			if (sql.contains(ResourceHistoryTable.HFJ_RES_VER)) {
 				String msg = messageToPrepend
-						+ myLocalizer.getMessage(HapiFhirHibernateJpaDialect.class, "resourceVersionConstraintFailure");
+						+ myLocalizer.getMessage(
+								HapiFhirHibernateJpaDialect.class, RESOURCE_VERSION_CONSTRAINT_FAILURE);
 				throw new ResourceVersionConflictException(Msg.code(827) + msg);
 			}
 		}
@@ -143,11 +143,10 @@ public class HapiFhirHibernateJpaDialect extends HibernateJpaDialect {
 	}
 
 	private void throwWhenConstraintReferencesIndex(
-			String constraintName, String idxName, int errorCode, String messageToPrepend, String errorMessageKey) {
+			String constraintName, String idxName, String theMessagePrefix, String errorMessageKey) {
 		if (constraintName.contains(idxName)) {
-			throw new ResourceVersionConflictException(Msg.code(errorCode)
-					+ messageToPrepend
-					+ myLocalizer.getMessage(HapiFhirHibernateJpaDialect.class, errorMessageKey));
+			throw new ResourceVersionConflictException(
+					theMessagePrefix + myLocalizer.getMessage(HapiFhirHibernateJpaDialect.class, errorMessageKey));
 		}
 	}
 }

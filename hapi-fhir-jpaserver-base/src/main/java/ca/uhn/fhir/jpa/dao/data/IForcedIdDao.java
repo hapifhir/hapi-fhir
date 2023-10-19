@@ -30,6 +30,7 @@ import org.springframework.stereotype.Repository;
  * Legacy forced_id implementation.
  *
  * @deprecated we now have a fhir_id column directly on HFJ_RESOURCE.
+ * No runtime code should query this table except for deletions by PK.
  * To be deleted in 2024 (zero-downtime).
  */
 @Deprecated(since = "6.7")
