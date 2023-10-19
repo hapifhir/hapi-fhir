@@ -1,0 +1,9 @@
+---
+type: add
+issue: 5366
+jira: SMILE-5184
+title: "Package installer overrides SearchParameter with the same code and that include 
+    the base resources from the installed SearchParameter. That was resulting in the removal of some
+    build-in search parameters that are linked to multiple base resources. 
+    This was happening when installing US Core package as an example.
+    This change allows the existing SearchParameter to continue to exist with the remaining base resources."
