@@ -186,14 +186,6 @@ public class ConsentInterceptor {
 		return false;
 	}
 
-	@Hook(value = Pointcut.STORAGE_PRESEARCH_REGISTERED)
-	public void interceptPreSearchRegistered(
-			RequestDetails theRequestDetails, ICachedSearchDetails theCachedSearchDetails) {
-		if (!isRequestAuthorized(theRequestDetails)) {
-			theCachedSearchDetails.setCannotBeReused();
-		}
-	}
-
 	@Hook(value = Pointcut.STORAGE_PREACCESS_RESOURCES)
 	public void interceptPreAccess(
 			RequestDetails theRequestDetails, IPreResourceAccessDetails thePreResourceAccessDetails) {
