@@ -176,7 +176,9 @@ public class ResourceModifiedSubmitterSvc implements IResourceModifiedConsumer, 
 				theStatus.setRollbackOnly();
 			} catch (Exception ex) {
 				// catch other errors
-				ourLog.error("Unexpected error encountered while processing resource modified message. Marking as processed to prevent further errors.", ex);
+				ourLog.error(
+						"Unexpected error encountered while processing resource modified message. Marking as processed to prevent further errors.",
+						ex);
 				processed = true;
 			}
 
