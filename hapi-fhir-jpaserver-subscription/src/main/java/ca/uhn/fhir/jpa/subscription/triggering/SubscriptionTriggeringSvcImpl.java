@@ -266,6 +266,7 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 			RuntimeResourceDefinition resourceDef = UrlUtil.parseUrlResourceType(myFhirContext, nextSearchUrl);
 			String queryPart = nextSearchUrl.substring(nextSearchUrl.indexOf('?'));
 			SearchParameterMap params = myMatchUrlService.translateMatchUrl(queryPart, resourceDef);
+			params.setCount(myMaxSubmitPerPass);
 
 			String resourceType = resourceDef.getName();
 			IFhirResourceDao<?> callingDao = myDaoRegistry.getResourceDao(resourceType);
