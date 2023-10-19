@@ -163,7 +163,7 @@ public class ResourceModifiedSubmitterSvcTest {
 	}
 
 	@Test
-	public void testSubmitPersistedResource_withMissingResource() {
+	public void testSubmitPersistedResource_withMissingResource_processes() {
 		// setup
 		String patientId = "Patient/123";
 		String exceptionString = "A random exception";
@@ -189,7 +189,7 @@ public class ResourceModifiedSubmitterSvcTest {
 		boolean processed = myResourceModifiedSubmitterSvc.submitPersisedResourceModifiedMessage(resourceModified);
 
 		// then
-		assertFalse(processed);
+		assertTrue(processed);
 
 		// verify
 		verify(myChannelProducer)
