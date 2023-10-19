@@ -70,9 +70,9 @@ public abstract class BaseHasResource extends BasePartitionable
 	 * after an update
 	 */
 	@Transient
+	// TODO MB forced_id delete this in step 3
 	private transient String myTransientForcedId;
 
-	// wipmb forced_id - I think this is obsolete with the new column.
 	public String getTransientForcedId() {
 		return myTransientForcedId;
 	}

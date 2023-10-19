@@ -100,7 +100,6 @@ public class IdHelperServiceTest {
 		// when
 		when(myStorageSettings.isDeleteEnabled())
 			.thenReturn(true);
-		// wipmb forced_id - simplify?
 		when(myResourceTableDao.findAndResolveByForcedIdWithNoType(Mockito.anyString(),
 			Mockito.anyList(), Mockito.anyBoolean()))
 			.thenReturn(Collections.singletonList(redView))

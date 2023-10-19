@@ -39,7 +39,7 @@ import javax.persistence.UniqueConstraint;
 
 @Entity()
 @Table(
-		name = ForcedId.HFJ_FORCED_ID,
+		name = "HFJ_FORCED_ID",
 		uniqueConstraints = {
 			@UniqueConstraint(
 					name = "IDX_FORCEDID_RESID",
@@ -64,13 +64,11 @@ import javax.persistence.UniqueConstraint;
 			 */
 			@Index(name = "IDX_FORCEID_FID", columnList = "FORCED_ID"),
 			// @Index(name = "IDX_FORCEID_RESID", columnList = "RESOURCE_PID"),
-			// TODO GGG potentiall add a type + res_id index here, specifically for deletion?
 		})
 public class ForcedId extends BasePartitionable {
 
 	public static final int MAX_FORCED_ID_LENGTH = 100;
 	public static final String IDX_FORCEDID_TYPE_FID = "IDX_FORCEDID_TYPE_FID";
-	public static final String HFJ_FORCED_ID = "HFJ_FORCED_ID";
 
 	@Column(name = "FORCED_ID", nullable = false, length = MAX_FORCED_ID_LENGTH, updatable = false)
 	private String myForcedId;

@@ -21,10 +21,10 @@ package ca.uhn.fhir.jpa.config;
 
 import ca.uhn.fhir.i18n.HapiLocalizer;
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.jpa.model.entity.ForcedId;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedComboStringUnique;
 import ca.uhn.fhir.jpa.model.entity.ResourceSearchUrlEntity;
+import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.system.HapiSystemProperties;
 import org.hibernate.HibernateException;
@@ -85,25 +85,24 @@ public class HapiFhirHibernateJpaDialect extends HibernateJpaDialect {
 			 */
 			if (isNotBlank(constraintName)) {
 				constraintName = constraintName.toUpperCase();
-				if (constraintName.contains(ResourceHistoryTable.IDX_RESVER_ID_VER)) {
-					throw new ResourceVersionConflictException(Msg.code(823)
-							+ messageToPrepend
-							+ myLocalizer.getMessage(
-									HapiFhirHibernateJpaDialect.class, "resourceVersionConstraintFailure"));
-				}
-				if (constraintName.contains(ResourceIndexedComboStringUnique.IDX_IDXCMPSTRUNIQ_STRING)) {
-					throw new ResourceVersionConflictException(Msg.code(824)
-							+ messageToPrepend
-							+ myLocalizer.getMessage(
-									HapiFhirHibernateJpaDialect.class,
-									"resourceIndexedCompositeStringUniqueConstraintFailure"));
-				}
-				// wipmb forced_id need new constraint on resource table - unique
-				if (constraintName.contains(ForcedId.IDX_FORCEDID_TYPE_FID)) {
-					throw new ResourceVersionConflictException(Msg.code(825)
-							+ messageToPrepend
-							+ myLocalizer.getMessage(HapiFhirHibernateJpaDialect.class, "forcedIdConstraintFailure"));
-				}
+				throwWhenConstraintReferencesIndex(
+						constraintName,
+						ResourceHistoryTable.IDX_RESVER_ID_VER,
+						823,
+						messageToPrepend,
+						"resourceVersionConstraintFailure");
+				throwWhenConstraintReferencesIndex(
+						constraintName,
+						ResourceIndexedComboStringUnique.IDX_IDXCMPSTRUNIQ_STRING,
+						824,
+						messageToPrepend,
+						"resourceIndexedCompositeStringUniqueConstraintFailure");
+				throwWhenConstraintReferencesIndex(
+						constraintName,
+						ResourceTable.IDX_RES_FHIR_ID,
+						825,
+						messageToPrepend,
+						"forcedIdConstraintFailure");
 				if (constraintName.contains(ResourceSearchUrlEntity.RES_SEARCH_URL_COLUMN_NAME)) {
 					throw super.convertHibernateAccessException(theException);
 				}
@@ -141,5 +140,14 @@ public class HapiFhirHibernateJpaDialect extends HibernateJpaDialect {
 
 		DataAccessException retVal = super.convertHibernateAccessException(theException);
 		return retVal;
+	}
+
+	private void throwWhenConstraintReferencesIndex(
+			String constraintName, String idxName, int errorCode, String messageToPrepend, String errorMessageKey) {
+		if (constraintName.contains(idxName)) {
+			throw new ResourceVersionConflictException(Msg.code(errorCode)
+					+ messageToPrepend
+					+ myLocalizer.getMessage(HapiFhirHibernateJpaDialect.class, errorMessageKey));
+		}
 	}
 }

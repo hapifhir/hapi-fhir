@@ -28,6 +28,7 @@ import ca.uhn.fhir.jpa.model.search.SearchParamTextPropertyBinder;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.Constants;
 import com.google.common.annotations.VisibleForTesting;
+import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hibernate.Session;
@@ -76,7 +77,7 @@ import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 import javax.persistence.Version;
 
-import static ca.uhn.fhir.jpa.model.entity.ResourceTable.IDX_FORCEDID_TYPE_FID;
+import static ca.uhn.fhir.jpa.model.entity.ResourceTable.IDX_RES_FHIR_ID;
 
 @Indexed(routingBinder = @RoutingBinderRef(type = ResourceTableRoutingBinder.class))
 @Entity
@@ -84,15 +85,15 @@ import static ca.uhn.fhir.jpa.model.entity.ResourceTable.IDX_FORCEDID_TYPE_FID;
 		name = ResourceTable.HFJ_RESOURCE,
 		uniqueConstraints = {
 			@UniqueConstraint(
-					name = IDX_FORCEDID_TYPE_FID,
-					columnNames = {"RES_TYPE", "FHIR_ID"})
+					name = IDX_RES_FHIR_ID,
+					columnNames = {"FHIR_ID", "RES_TYPE"})
 		},
 		indexes = {
 			// Do not reuse previously used index name: IDX_INDEXSTATUS, IDX_RES_TYPE
 			@Index(name = "IDX_RES_DATE", columnList = BaseHasResource.RES_UPDATED),
 			@Index(
 					name = "IDX_RES_TYPE_DEL_UPDATED",
-					columnList = "RES_TYPE,RES_DELETED_AT,RES_UPDATED,PARTITION_ID,RES_ID"),
+					columnList = "RES_TYPE,RES_DELETED_AT,RES_UPDATED,PARTITION_ID,RES_ID")
 		})
 @NamedEntityGraph(name = "Resource.noJoins")
 public class ResourceTable extends BaseHasResource implements Serializable, IBasePersistedResource<JpaPid> {
@@ -101,10 +102,8 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	public static final String RES_TYPE = "RES_TYPE";
 	private static final int MAX_LANGUAGE_LENGTH = 20;
 	private static final long serialVersionUID = 1L;
-	// wipmb forced_id rename
-	public static final int MAX_FORCED_ID_LENGTH = ForcedId.MAX_FORCED_ID_LENGTH;
-	// wipmb forced_id rename
-	public static final String IDX_FORCEDID_TYPE_FID = ForcedId.IDX_FORCEDID_TYPE_FID;
+	public static final int MAX_FORCED_ID_LENGTH = 100;
+	public static final String IDX_RES_FHIR_ID = "IDX_RES_FHIR_ID";
 
 	/**
 	 * Holds the narrative text only - Used for Fulltext searching but not directly stored in the DB
@@ -993,9 +992,10 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	}
 
 	private void populateId(IIdType retVal) {
+		Validate.notNull(myFhirId, "Resource id should have already been assigned.");
+		// wipmb forced_id I think myFhirId is non-null, except maybe on create path.
 		if (myFhirId != null && !myFhirId.isEmpty()) {
 			retVal.setValue(getResourceType() + '/' + myFhirId + '/' + Constants.PARAM_HISTORY + '/' + getVersion());
-			// wipmb forced_id I think myFhirId is non-null, except maybe on create path.
 		} else if (getTransientForcedId() != null) {
 			// Avoid a join query if possible
 			retVal.setValue(getResourceType()
@@ -1061,7 +1061,6 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	}
 
 	/**
-	 * fixme is this right?
 	 * Populate myFhirId with server-assigned sequence id when no client-id provided.
 	 * We eat this complexity during insert to simplify query time with a uniform column.
 	 * Server-assigned sequence ids aren't available until just before insertion.

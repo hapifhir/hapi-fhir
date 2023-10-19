@@ -31,8 +31,6 @@ import javax.persistence.PersistenceContext;
  * Custom query implementations.
  * Don't change the name of this class.  Spring Data requires the name to match.
  * https://stackoverflow.com/questions/11880924/how-to-add-custom-method-to-spring-data-jpa
- *
- * wipmb forced_id - rewrite the queries
  */
 public class IResourceTableDaoImpl implements IForcedIdQueries {
 
@@ -81,7 +79,7 @@ public class IResourceTableDaoImpl implements IForcedIdQueries {
 			Collection<String> theForcedIds,
 			Collection<Integer> thePartitionId,
 			boolean theExcludeDeleted) {
-		String query = "" + "SELECT t.myResourceType, t.id, t.myFhirId, t.myDeleted "
+		String query = "SELECT t.myResourceType, t.id, t.myFhirId, t.myDeleted "
 				+ "FROM ResourceTable t "
 				+ "WHERE t.myResourceType = :resource_type AND t.myFhirId IN ( :forced_id ) AND t.myPartitionIdValue IN ( :partition_id )";
 

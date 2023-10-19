@@ -36,12 +36,6 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface IForcedIdDao extends JpaRepository<ForcedId, Long>, IHapiFhirJpaRepository {
 
-	//	@Query("SELECT f FROM ForcedId f WHERE f.myResourcePid IN (:resource_pids)")
-	//	List<ForcedId> findAllByResourcePid(@Param("resource_pids") List<Long> theResourcePids);
-	//
-	//	@Query("SELECT f FROM ForcedId f WHERE f.myResourcePid = :resource_pid")
-	//	Optional<ForcedId> findByResourcePid(@Param("resource_pid") Long theResourcePid);
-
 	@Modifying
 	@Query("DELETE FROM ForcedId t WHERE t.myId = :pid")
 	void deleteByPid(@Param("pid") Long theId);
