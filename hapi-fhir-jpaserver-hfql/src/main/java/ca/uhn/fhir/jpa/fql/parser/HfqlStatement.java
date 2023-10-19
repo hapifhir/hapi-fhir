@@ -26,6 +26,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
@@ -301,6 +302,11 @@ public class HfqlStatement implements IModelJson {
 
 		public List<String> getRight() {
 			return myRight;
+		}
+
+		public void setRight(String... theValues) {
+			myRight.clear();
+			myRight.addAll(Arrays.asList(theValues));
 		}
 
 		public void addRight(String theRight) {

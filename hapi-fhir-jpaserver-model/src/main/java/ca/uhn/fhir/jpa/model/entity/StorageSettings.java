@@ -26,6 +26,7 @@ import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.rest.server.interceptor.ResponseTerminologyTranslationSvc;
 import ca.uhn.fhir.util.HapiExtensions;
 import com.google.common.annotations.VisibleForTesting;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.dstu2.model.Subscription;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
@@ -137,6 +138,13 @@ public class StorageSettings {
 	 * Since 6.4.0
 	 */
 	private boolean myQualifySubscriptionMatchingChannelName = true;
+	/**
+	 * Should the {@literal _lamguage} SearchParameter be supported
+	 * on this server?
+	 *
+	 * @since 7.0.0
+	 */
+	private boolean myLanguageSearchParameterEnabled = false;
 
 	/**
 	 * If set to true, the server will prevent the creation of Subscriptions which cannot be evaluated IN-MEMORY. This can improve
@@ -781,6 +789,15 @@ public class StorageSettings {
 		return Collections.unmodifiableSet(mySupportedSubscriptionTypes);
 	}
 
+	/**
+	 * Indicate whether a subscription channel type is supported by this server.
+	 *
+	 * @return true if at least one subscription channel type is supported by this server false otherwise.
+	 */
+	public boolean hasSupportedSubscriptionTypes() {
+		return CollectionUtils.isNotEmpty(mySupportedSubscriptionTypes);
+	}
+
 	@VisibleForTesting
 	public void clearSupportedSubscriptionTypesForUnitTest() {
 		mySupportedSubscriptionTypes.clear();
@@ -1283,6 +1300,23 @@ public class StorageSettings {
 	 */
 	public boolean isQualifySubscriptionMatchingChannelName() {
 		return myQualifySubscriptionMatchingChannelName;
+	}
+
+	/**
+	 * @return Should the {@literal _lamguage} SearchParameter be supported on this server? Defaults to {@literal false}.
+	 * @since 7.0.0
+	 */
+	public boolean isLanguageSearchParameterEnabled() {
+		return myLanguageSearchParameterEnabled;
+	}
+
+	/**
+	 * Should the {@literal _lamguage} SearchParameter be supported on this server? Defaults to {@literal false}.
+	 *
+	 * @since 7.0.0
+	 */
+	public void setLanguageSearchParameterEnabled(boolean theLanguageSearchParameterEnabled) {
+		myLanguageSearchParameterEnabled = theLanguageSearchParameterEnabled;
 	}
 
 	private static void validateTreatBaseUrlsAsLocal(String theUrl) {

@@ -1,0 +1,4 @@
+---
+type: add
+issue: 5290
+title: "Added storage property to prevent conditional updates from invalidating match criteria."

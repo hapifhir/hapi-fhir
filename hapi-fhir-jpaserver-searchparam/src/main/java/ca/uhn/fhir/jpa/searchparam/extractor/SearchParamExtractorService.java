@@ -64,6 +64,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r4.model.IdType;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
@@ -692,8 +693,20 @@ public class SearchParamExtractorService {
 			return;
 		}
 
-		final boolean hasNoIdentifier = !nextReference.hasIdentifier();
-		final String baseUrl = hasNoIdentifier ? nextId.getBaseUrl() : null;
+		String baseUrl = nextId.getBaseUrl();
+
+		// If this is a conditional URL, the part after the question mark
+		// can include URLs (e.g. token system URLs) and these really confuse
+		// the IdType parser because a conditional URL isn't actually a valid
+		// FHIR ID. So in order to truly determine whether we're dealing with
+		// an absolute reference, we strip the query part and reparse
+		// the reference.
+		int questionMarkIndex = nextId.getValue().indexOf('?');
+		if (questionMarkIndex != -1) {
+			IdType preQueryId = new IdType(nextId.getValue().substring(0, questionMarkIndex - 1));
+			baseUrl = preQueryId.getBaseUrl();
+		}
+
 		String typeString = nextId.getResourceType();
 		if (isBlank(typeString)) {
 			String msg = "Invalid resource reference found at path[" + path + "] - Does not contain resource type - "

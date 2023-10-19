@@ -30,18 +30,17 @@ import ca.uhn.fhir.batch2.jobs.chunk.TypedPidJson;
 import ca.uhn.fhir.batch2.jobs.parameters.PartitionedJobParameters;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.pid.IResourcePidList;
-import ca.uhn.fhir.jpa.api.pid.TypedResourcePid;
-import ca.uhn.fhir.system.HapiSystemProperties;
 import ca.uhn.fhir.util.Logs;
+import com.google.common.collect.Iterators;
+import com.google.common.collect.UnmodifiableIterator;
 import org.slf4j.Logger;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 
 public class ResourceIdListStep<PT extends PartitionedJobParameters, IT extends ChunkRangeJson>
@@ -75,11 +74,8 @@ public class ResourceIdListStep<PT extends PartitionedJobParameters, IT extends 
 
 		ourLog.info("Beginning scan for reindex IDs in range {} to {}", start, end);
 
-		Date nextStart = start;
 		RequestPartitionId requestPartitionId =
 				theStepExecutionDetails.getParameters().getRequestPartitionId();
-		Set<TypedPidJson> idBuffer = new LinkedHashSet<>();
-		long previousLastTime = 0L;
 		int totalIdsFound = 0;
 		int chunkCount = 0;
 
@@ -88,57 +84,32 @@ public class ResourceIdListStep<PT extends PartitionedJobParameters, IT extends 
 			// we won't go over MAX_BATCH_OF_IDS
 			maxBatchId = Math.min(batchSize.intValue(), maxBatchId);
 		}
-		while (true) {
-			IResourcePidList nextChunk = myIdChunkProducer.fetchResourceIdsPage(
-					nextStart, end, pageSize, requestPartitionId, theStepExecutionDetails.getData());
 
-			if (nextChunk.isEmpty()) {
-				ourLog.info("No data returned");
-				break;
-			}
+		final IResourcePidList nextChunk = myIdChunkProducer.fetchResourceIdsPage(
+				start, end, pageSize, requestPartitionId, theStepExecutionDetails.getData());
 
-			// If we get the same last time twice in a row, we've clearly reached the end
-			if (nextChunk.getLastDate().getTime() == previousLastTime) {
-				ourLog.info("Matching final timestamp of {}, loading is completed", new Date(previousLastTime));
-				break;
-			}
+		if (nextChunk.isEmpty()) {
+			ourLog.info("No data returned");
+		} else {
+			ourLog.debug("Found {} IDs from {} to {}", nextChunk.size(), start, nextChunk.getLastDate());
 
-			ourLog.info("Found {} IDs from {} to {}", nextChunk.size(), nextStart, nextChunk.getLastDate());
-			if (nextChunk.size() < 10 && HapiSystemProperties.isTestModeEnabled()) {
-				// TODO: I've added this in order to troubleshoot MultitenantBatchOperationR4Test
-				// which is failing intermittently. If that stops, makes sense to remove this
-				ourLog.info(" * PIDS: {}", nextChunk);
-			}
+			final Set<TypedPidJson> idBuffer = nextChunk.getTypedResourcePids().stream()
+					.map(TypedPidJson::new)
+					.collect(Collectors.toCollection(LinkedHashSet::new));
 
-			for (TypedResourcePid typedResourcePid : nextChunk.getTypedResourcePids()) {
-				TypedPidJson nextId = new TypedPidJson(typedResourcePid);
-				idBuffer.add(nextId);
-			}
+			final UnmodifiableIterator<List<TypedPidJson>> partition =
+					Iterators.partition(idBuffer.iterator(), maxBatchId);
 
-			previousLastTime = nextChunk.getLastDate().getTime();
-			nextStart = nextChunk.getLastDate();
-
-			while (idBuffer.size() > maxBatchId) {
-				List<TypedPidJson> submissionIds = new ArrayList<>();
-				for (Iterator<TypedPidJson> iter = idBuffer.iterator(); iter.hasNext(); ) {
-					submissionIds.add(iter.next());
-					iter.remove();
-					if (submissionIds.size() == maxBatchId) {
-						break;
-					}
-				}
+			while (partition.hasNext()) {
+				final List<TypedPidJson> submissionIds = partition.next();
 
 				totalIdsFound += submissionIds.size();
 				chunkCount++;
 				submitWorkChunk(submissionIds, nextChunk.getRequestPartitionId(), theDataSink);
 			}
+
+			ourLog.info("Submitted {} chunks with {} resource IDs", chunkCount, totalIdsFound);
 		}
-
-		totalIdsFound += idBuffer.size();
-		chunkCount++;
-		submitWorkChunk(idBuffer, requestPartitionId, theDataSink);
-
-		ourLog.info("Submitted {} chunks with {} resource IDs", chunkCount, totalIdsFound);
 		return RunOutcome.SUCCESS;
 	}
 

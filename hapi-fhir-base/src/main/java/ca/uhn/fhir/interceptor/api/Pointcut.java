@@ -1484,6 +1484,15 @@ public enum Pointcut implements IPointcut {
 	 * to the new contents of the resource. These changes will be reflected in
 	 * permanent storage.
 	 * </p>
+	 * <p>
+	 * <b>NO-OPS:</b> If the client has submitted an update that does not actually make any changes
+	 * (i.e. the resource they include in the PUT body is identical to the content that
+	 * was already stored) the server may choose to ignore the update and perform
+	 * a "NO-OP". In this case, this pointcut is still invoked, but {@link #STORAGE_PRECOMMIT_RESOURCE_UPDATED}
+	 * will not be. Hook methods for this pointcut may make changes to the new contents of the
+	 * resource being updated, and in this case the NO-OP will be cancelled and
+	 * {@link #STORAGE_PRECOMMIT_RESOURCE_UPDATED} will also be invoked.
+	 * </p>
 	 * Hooks may accept the following parameters:
 	 * <ul>
 	 * <li>org.hl7.fhir.instance.model.api.IBaseResource - The previous contents of the resource being updated</li>
@@ -1616,6 +1625,10 @@ public enum Pointcut implements IPointcut {
 	 * (both the previous and new contents) but should generally not make any
 	 * changes as storage has already occurred. Changes will not be reflected
 	 * in storage, but may be reflected in the HTTP response.
+	 * </p>
+	 * <p>
+	 * NO-OP note: See {@link #STORAGE_PRESTORAGE_RESOURCE_UPDATED} for a note on
+	 * no-op updates when no changes are detected.
 	 * </p>
 	 * Hooks may accept the following parameters:
 	 * <ul>

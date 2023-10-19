@@ -117,6 +117,7 @@ public class JpaPackageCacheTest extends BaseJpaR4Test {
 	public void testSaveAndDeletePackageUnnamedPartitionsEnabled() throws IOException {
 		myPartitionSettings.setPartitioningEnabled(true);
 		myPartitionSettings.setDefaultPartitionId(0);
+		boolean isUnnamed = myPartitionSettings.isUnnamedPartitionMode();
 		myPartitionSettings.setUnnamedPartitionMode(true);
 		PatientIdPartitionInterceptor patientIdPartitionInterceptor = new PatientIdPartitionInterceptor(myFhirContext, mySearchParamExtractor, myPartitionSettings);
 		myInterceptorService.registerInterceptor(patientIdPartitionInterceptor);
@@ -145,6 +146,7 @@ public class JpaPackageCacheTest extends BaseJpaR4Test {
 			List<String> deleteOutcomeMsgs = deleteOutcomeJson.getMessage();
 			assertEquals("Deleting package hl7.fhir.uv.shorthand#0.12.0", deleteOutcomeMsgs.get(0));
 		} finally {
+			myPartitionSettings.setUnnamedPartitionMode(isUnnamed);
 			myInterceptorService.unregisterInterceptor(patientIdPartitionInterceptor);
 			myInterceptorService.unregisterInterceptor(myRequestTenantPartitionInterceptor);
 		}

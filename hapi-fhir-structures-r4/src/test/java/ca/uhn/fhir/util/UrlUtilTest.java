@@ -1,19 +1,26 @@
 package ca.uhn.fhir.util;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.apache.http.message.BasicNameValuePair;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.ValueSource;
+
+import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class UrlUtilTest {
 
@@ -167,4 +174,37 @@ public class UrlUtilTest {
 		}
 	}
 
+	@Test
+	public void testGetAboveUriCandidates_returnsUriList() {
+		List<String> candidates = UrlUtil.getAboveUriCandidates("http://host/v1/v2/v3/v4");
+		assertThat(candidates, hasSize(5));
+		assertThat(candidates, containsInAnyOrder("http://host/v1/v2/v3/v4", "http://host/v1/v2/v3",
+			"http://host/v1/v2", "http://host/v1", "http://host"));
+	}
+
+	@Test
+	public void testGetAboveUriCandidates_withHostOnly_returnsHostUri() {
+		List<String> candidates = UrlUtil.getAboveUriCandidates("http://host");
+		assertThat(candidates, hasSize(1));
+		assertThat(candidates, containsInAnyOrder("http://host"));
+	}
+
+	@Test
+	public void testGetAboveUriCandidates_withFullUri_returnsUriList() {
+		List<String> candidates = UrlUtil.getAboveUriCandidates("https://host.com:8080/path1/path2?name=name#name");
+		assertThat(candidates, hasSize(3));
+		assertThat(candidates, containsInAnyOrder("https://host.com:8080/path1/path2?name=name#name",
+			"https://host.com:8080/path1", "https://host.com:8080"));
+	}
+
+	@ParameterizedTest
+	@ValueSource(strings = {"invalid_uri", "http://some-source/ with_invalid_uri", "http://"})
+	public void testGetAboveUriCandidates_withInvalidURI_throwsException(String theUri) {
+		try {
+			UrlUtil.getAboveUriCandidates(theUri);
+			fail();
+		} catch (InvalidRequestException e) {
+			assertEquals(Msg.code(2419) + "Provided URI is not valid: " + theUri, e.getMessage());
+		}
+	}
 }

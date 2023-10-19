@@ -23,6 +23,7 @@ import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
+import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.util.Batch2JobDefinitionConstants;
 import ca.uhn.fhir.util.BundleBuilder;
 import ca.uhn.fhir.util.JsonUtil;
@@ -115,6 +116,8 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 
 	@Nested
 	public class SpecConformanceTests {
+
+
 
 
 		@Test
@@ -604,6 +607,47 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 
 	@Nested
 	public class GroupBulkExportTests {
+
+		@Test
+		public void testGroupExportSuccessfulyExportsPatientForwardReferences() {
+			BundleBuilder bb = new BundleBuilder(myFhirContext);
+
+			Group group = new Group();
+			group.setId("Group/G");
+			group.setActive(true);
+			bb.addTransactionUpdateEntry(group);
+
+			Practitioner pract = new Practitioner();
+			pract.setId("PRACT-IN-GROUP");
+			bb.addTransactionUpdateEntry(pract);
+
+			Organization organization = new Organization();
+			organization.setId("ORG-IN-GROUP");
+			bb.addTransactionUpdateEntry(organization);
+
+			Patient patient = new Patient();
+			patient.setId("PAT-IN-GROUP");
+			patient.setGender(Enumerations.AdministrativeGender.FEMALE);
+			patient.setActive(true);
+			patient.setManagingOrganization(new Reference("Organization/ORG-IN-GROUP"));
+			patient.setGeneralPractitioner(List.of(new Reference("Practitioner/PRACT-IN-GROUP")));
+			bb.addTransactionUpdateEntry(patient);
+
+			group.addMember().getEntity().setReference("Patient/PAT-IN-GROUP");
+
+			myClient.transaction().withBundle(bb.getBundle()).execute();
+
+			HashSet<String> resourceTypes = Sets.newHashSet();
+			BulkExportJobResults bulkExportJobResults = startGroupBulkExportJobAndAwaitCompletion(resourceTypes, new HashSet<>(), "G");
+			Map<String, List<IBaseResource>> firstMap = convertJobResultsToResources(bulkExportJobResults);
+
+			assertThat(firstMap.keySet(), hasSize(4));
+			assertThat(firstMap.get("Group"), hasSize(1));
+			assertThat(firstMap.get("Patient"), hasSize(1));
+			assertThat(firstMap.get("Practitioner"), hasSize(1));
+			assertThat(firstMap.get("Organization"), hasSize(1));
+		}
+
 		@Test
 		public void testVeryLargeGroup() {
 
@@ -1409,7 +1453,7 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 			outcome = myClient
 				.operation()
 				.onInstance("Group/" + theGroupOrPatientId)
-				.named(JpaConstants.OPERATION_EXPORT)
+				.named(ProviderConstants.OPERATION_EXPORT)
 				.withParameters(parameters)
 				.returnMethodOutcome()
 				.withAdditionalHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC)
@@ -1420,7 +1464,7 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 			outcome = myClient
 				.operation()
 				.onInstance("Patient/" + theGroupOrPatientId)
-				.named(JpaConstants.OPERATION_EXPORT)
+				.named(ProviderConstants.OPERATION_EXPORT)
 				.withParameters(parameters)
 				.returnMethodOutcome()
 				.withAdditionalHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC)
@@ -1430,7 +1474,7 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 			outcome = myClient
 				.operation()
 				.onServer()
-				.named(JpaConstants.OPERATION_EXPORT)
+				.named(ProviderConstants.OPERATION_EXPORT)
 				.withParameters(parameters)
 				.returnMethodOutcome()
 				.withAdditionalHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC)

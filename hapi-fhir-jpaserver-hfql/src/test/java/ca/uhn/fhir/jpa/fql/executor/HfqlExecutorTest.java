@@ -924,7 +924,7 @@ public class HfqlExecutorTest {
 	}
 
 	@Test
-	public void testWhere_Id_In_CommaList() {
+	public void testWhere_Id_In_CommaList_SearchMatch() {
 		IFhirResourceDao<Observation> patientDao = initDao(Observation.class);
 		Observation resource = new Observation();
 		resource.getMeta().setVersionId("5");
@@ -960,6 +960,34 @@ public class HfqlExecutorTest {
 		assertNull(((TokenParam) map.get("_id").get(0).get(1)).getSystem());
 		assertEquals("Patient/456", ((TokenParam) map.get("_id").get(0).get(1)).getValue());
 	}
+
+	@Test
+	public void testWhere_FhirPathElevatedToSearchParam_Id_Equals() {
+		IFhirResourceDao<Patient> patientDao = initDao(Patient.class);
+		when(patientDao.search(any(), any())).thenReturn(createProviderWithSomeSimpsonsAndFlanders());
+
+		String statement = """
+					select id
+					from Patient
+					where	id IN ('HOMER0', 'HOMER1')
+			""";
+
+		IHfqlExecutionResult result = myHfqlExecutor.executeInitialSearch(statement, null, mySrd);
+
+		assertTrue(result.hasNext());
+		List<Object> nextRow = result.getNextRow().getRowValues();
+		assertEquals("HOMER0", nextRow.get(0));
+
+		verify(patientDao, times(1)).search(mySearchParameterMapCaptor.capture(), any());
+		SearchParameterMap map = mySearchParameterMapCaptor.getValue();
+		assertEquals(1, map.get("_id").size());
+		assertEquals(2, map.get("_id").get(0).size());
+		assertNull(((TokenParam) map.get("_id").get(0).get(0)).getSystem());
+		assertEquals("HOMER0", ((TokenParam) map.get("_id").get(0).get(0)).getValue());
+		assertNull(((TokenParam) map.get("_id").get(0).get(1)).getSystem());
+		assertEquals("HOMER1", ((TokenParam) map.get("_id").get(0).get(1)).getValue());
+	}
+
 
 	@Test
 	public void testSearch_QualifiedSelect() {
@@ -1211,6 +1239,20 @@ public class HfqlExecutorTest {
 		assertErrorMessage(result, "HAPI-2413: search_match function requires 2 arguments");
 	}
 
+	@Test
+	public void testError_InvalidWhereParameter() {
+		initDao(Patient.class);
+
+		String input = """
+			select name.family
+			from Patient
+			where Blah = '123'
+			""";
+
+		IHfqlExecutionResult result = myHfqlExecutor.executeInitialSearch(input, null, mySrd);
+		assertErrorMessage(result, "HAPI-2429: Resource type Patient does not have a root element named 'Blah'");
+	}
+
 	@SuppressWarnings("unchecked")
 	private <T extends IBaseResource> IFhirResourceDao<T> initDao(Class<T> theType) {
 		IFhirResourceDao<T> retVal = mock(IFhirResourceDao.class);
@@ -1325,6 +1367,7 @@ public class HfqlExecutorTest {
 	@Nonnull
 	private static Patient createPatientHomerSimpson() {
 		Patient homer = new Patient();
+		homer.setId("HOMER0");
 		homer.getMeta().setVersionId("2");
 		homer.addName().setFamily("Simpson").addGiven("Homer").addGiven("Jay");
 		homer.addIdentifier().setSystem("http://system").setValue("value0");

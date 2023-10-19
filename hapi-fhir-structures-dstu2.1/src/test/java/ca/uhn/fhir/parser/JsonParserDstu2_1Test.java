@@ -6,6 +6,7 @@ import ca.uhn.fhir.narrative.DefaultThymeleafNarrativeGenerator;
 import ca.uhn.fhir.parser.IParserErrorHandler.IParseLocation;
 import ca.uhn.fhir.parser.PatientWithExtendedContactDstu3.CustomContactComponent;
 import ca.uhn.fhir.parser.XmlParserDstu2_1Test.TestPatientFor327;
+import ca.uhn.fhir.util.ClasspathUtil;
 import ca.uhn.fhir.util.TestUtil;
 import com.google.common.collect.Sets;
 import net.sf.json.JSON;
@@ -1222,7 +1223,7 @@ public class JsonParserDstu2_1Test {
 	@Test
 	@Disabled
 	public void testParseAndEncodeBundle() throws Exception {
-		String content = IOUtils.toString(JsonParserDstu2_1Test.class.getResourceAsStream("/bundle-example.json"), StandardCharsets.UTF_8);
+		String content = ClasspathUtil.loadResource("/bundle-example.json");
 
 		Bundle parsed = ourCtx.newXmlParser().parseResource(Bundle.class, content);
 		assertEquals("Bundle/example/_history/1", parsed.getIdElement().getValue());
@@ -1271,7 +1272,7 @@ public class JsonParserDstu2_1Test {
 	@Test
 	@Disabled
 	public void testParseAndEncodeBundleFromXmlToJson() throws Exception {
-		String content = IOUtils.toString(JsonParserDstu2_1Test.class.getResourceAsStream("/bundle-example2.xml"), StandardCharsets.UTF_8);
+		String content = ClasspathUtil.loadResource("/bundle-example2.xml");
 
 		Bundle parsed = ourCtx.newXmlParser().parseResource(Bundle.class, content);
 
@@ -1296,7 +1297,7 @@ public class JsonParserDstu2_1Test {
 	@Test
 	@Disabled
 	public void testParseAndEncodeBundleNewStyle() throws Exception {
-		String content = IOUtils.toString(JsonParserDstu2_1Test.class.getResourceAsStream("/bundle-example.json"), StandardCharsets.UTF_8);
+		String content = ClasspathUtil.loadResource("/bundle-example.json");
 
 		Bundle parsed = ourCtx.newJsonParser().parseResource(Bundle.class, content);
 		assertEquals("Bundle/example/_history/1", parsed.getIdElement().getValue());

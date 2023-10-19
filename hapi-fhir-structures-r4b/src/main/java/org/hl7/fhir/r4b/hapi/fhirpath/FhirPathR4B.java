@@ -16,6 +16,7 @@ import org.hl7.fhir.r4b.model.IdType;
 import org.hl7.fhir.r4b.model.TypeDetails;
 import org.hl7.fhir.r4b.model.ValueSet;
 import org.hl7.fhir.r4b.utils.FHIRPathEngine;
+import org.hl7.fhir.r4b.utils.FHIRPathUtilityClasses.FunctionDetails;
 
 import java.util.List;
 import java.util.Optional;

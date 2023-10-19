@@ -21,6 +21,7 @@ package ca.uhn.fhir.rest.server;
 
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.server.method.ResponsePage;
 import ca.uhn.fhir.util.CoverageIgnore;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
@@ -47,7 +48,8 @@ public class BundleProviders {
 		return new IBundleProvider() {
 			@Nonnull
 			@Override
-			public List<IBaseResource> getResources(int theFromIndex, int theToIndex) {
+			public List<IBaseResource> getResources(
+					int theFromIndex, int theToIndex, ResponsePage.ResponsePageBuilder theResponsePageBuilder) {
 				return Collections.emptyList();
 			}
 

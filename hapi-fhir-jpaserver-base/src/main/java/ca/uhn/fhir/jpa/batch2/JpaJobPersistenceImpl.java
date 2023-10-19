@@ -36,7 +36,12 @@ import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.entity.Batch2JobInstanceEntity;
 import ca.uhn.fhir.jpa.entity.Batch2WorkChunkEntity;
 import ca.uhn.fhir.model.api.PagingIterator;
+import ca.uhn.fhir.util.Batch2JobDefinitionConstants;
 import ca.uhn.fhir.util.Logs;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
@@ -220,12 +225,42 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 		List<Batch2JobInstanceEntity> instanceEntities;
 
 		if (statuses != null && !statuses.isEmpty()) {
+			if (definitionId.equals(Batch2JobDefinitionConstants.BULK_EXPORT)) {
+				if (originalRequestUrlTruncation(params) != null) {
+					params = originalRequestUrlTruncation(params);
+				}
+			}
 			instanceEntities = myJobInstanceRepository.findInstancesByJobIdParamsAndStatus(
 					definitionId, params, statuses, pageable);
 		} else {
 			instanceEntities = myJobInstanceRepository.findInstancesByJobIdAndParams(definitionId, params, pageable);
 		}
 		return toInstanceList(instanceEntities);
+	}
+
+	private String originalRequestUrlTruncation(String theParams) {
+		try {
+			ObjectMapper mapper = new ObjectMapper();
+			mapper.configure(JsonParser.Feature.ALLOW_UNQUOTED_FIELD_NAMES, true);
+			mapper.configure(JsonParser.Feature.ALLOW_SINGLE_QUOTES, true);
+			JsonNode rootNode = mapper.readTree(theParams);
+			String originalUrl = "originalRequestUrl";
+
+			if (rootNode instanceof ObjectNode) {
+				ObjectNode objectNode = (ObjectNode) rootNode;
+
+				if (objectNode.has(originalUrl)) {
+					String url = objectNode.get(originalUrl).asText();
+					if (url.contains("?")) {
+						objectNode.put(originalUrl, url.split("\\?")[0]);
+					}
+				}
+				return mapper.writeValueAsString(objectNode);
+			}
+		} catch (Exception e) {
+			ourLog.info("Error Truncating Original Request Url", e);
+		}
+		return null;
 	}
 
 	@Override
@@ -265,7 +300,7 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 		Validate.isTrue(changeCount > 0, "changed chunk matching %s", chunkId);
 
 		Query query = myEntityManager.createQuery("update Batch2WorkChunkEntity " + "set myStatus = :failed "
-				+ ",myErrorMessage = CONCAT('Too many errors: ',  myErrorCount, '. Last error msg was ', myErrorMessage) "
+				+ ",myErrorMessage = CONCAT('Too many errors: ', CAST(myErrorCount as string), '. Last error msg was ', myErrorMessage) "
 				+ "where myId = :chunkId and myErrorCount > :maxCount");
 		query.setParameter("chunkId", chunkId);
 		query.setParameter("failed", WorkChunkStatusEnum.FAILED);

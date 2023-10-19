@@ -117,6 +117,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -1854,14 +1855,23 @@ public class QueryStack {
 			throw new InvalidRequestException(Msg.code(1216) + msg);
 		}
 
-		SourcePredicateBuilder join = createOrReusePredicateBuilder(
-						PredicateBuilderTypeEnum.SOURCE,
-						theSourceJoinColumn,
-						Constants.PARAM_SOURCE,
-						() -> mySqlBuilder.addSourcePredicateBuilder(theSourceJoinColumn))
-				.getResult();
-
 		List<Condition> orPredicates = new ArrayList<>();
+
+		// :missing=true modifier processing requires "LEFT JOIN" with HFJ_RESOURCE table to return correct results
+		// if both sourceUri and requestId are not populated for the resource
+		Optional<? extends IQueryParameterType> isMissingSourceOptional = theList.stream()
+				.filter(nextParameter -> nextParameter.getMissing() != null && nextParameter.getMissing())
+				.findFirst();
+
+		if (isMissingSourceOptional.isPresent()) {
+			SourcePredicateBuilder join =
+					getSourcePredicateBuilder(theSourceJoinColumn, SelectQuery.JoinType.LEFT_OUTER);
+			orPredicates.add(join.createPredicateMissingSourceUri());
+			return toOrPredicate(orPredicates);
+		}
+		// for all other cases we use "INNER JOIN" to match search parameters
+		SourcePredicateBuilder join = getSourcePredicateBuilder(theSourceJoinColumn, SelectQuery.JoinType.INNER);
+
 		for (IQueryParameterType nextParameter : theList) {
 			SourceParam sourceParameter = new SourceParam(nextParameter.getValueAsQueryToken(myFhirContext));
 			String sourceUri = sourceParameter.getSourceUri();
@@ -1870,13 +1880,24 @@ public class QueryStack {
 				orPredicates.add(toAndPredicate(
 						join.createPredicateSourceUri(sourceUri), join.createPredicateRequestId(requestId)));
 			} else if (isNotBlank(sourceUri)) {
-				orPredicates.add(join.createPredicateSourceUri(sourceUri));
+				orPredicates.add(
+						join.createPredicateSourceUriWithModifiers(nextParameter, myStorageSettings, sourceUri));
 			} else if (isNotBlank(requestId)) {
 				orPredicates.add(join.createPredicateRequestId(requestId));
 			}
 		}
 
 		return toOrPredicate(orPredicates);
+	}
+
+	private SourcePredicateBuilder getSourcePredicateBuilder(
+			@Nullable DbColumn theSourceJoinColumn, SelectQuery.JoinType theJoinType) {
+		return createOrReusePredicateBuilder(
+						PredicateBuilderTypeEnum.SOURCE,
+						theSourceJoinColumn,
+						Constants.PARAM_SOURCE,
+						() -> mySqlBuilder.addSourcePredicateBuilder(theSourceJoinColumn, theJoinType))
+				.getResult();
 	}
 
 	public Condition createPredicateString(
@@ -2658,6 +2679,7 @@ public class QueryStack {
 		Condition predicate =
 				table.createEverythingPredicate(theResourceName, theTypeSourceResourceNames, theTargetPids);
 		mySqlBuilder.addPredicate(predicate);
+		mySqlBuilder.getSelect().setIsDistinct(true);
 	}
 
 	public IQueryParameterType newParameterInstance(
@@ -2787,7 +2809,7 @@ public class QueryStack {
 		private List<String> extractPaths(String theResourceType, RuntimeSearchParam theSearchParam) {
 			List<String> pathsForType = theSearchParam.getPathsSplit().stream()
 					.map(String::trim)
-					.filter(t -> t.startsWith(theResourceType))
+					.filter(t -> (t.startsWith(theResourceType) || t.startsWith("(" + theResourceType)))
 					.collect(Collectors.toList());
 			if (pathsForType.isEmpty()) {
 				ourLog.warn(

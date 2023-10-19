@@ -27,6 +27,7 @@ import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.MetaUtil;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.ICompositeType;
@@ -78,6 +79,13 @@ public interface ITestDataBuilder {
 	 */
 	default ICreationArgument withActiveFalse() {
 		return t -> __setPrimitiveChild(getFhirContext(), t, "active", "boolean", "false");
+	}
+
+	/**
+	 * Set Resource.language
+	 */
+	default ICreationArgument withLanguage(String theLanguage) {
+		return t -> __setPrimitiveChild(getFhirContext(), t, "language", "string", theLanguage);
 	}
 
 	/**
@@ -175,8 +183,11 @@ public interface ITestDataBuilder {
 		return t -> ((IBaseResource)t).setId(theId.toUnqualifiedVersionless());
 	}
 
-	default ICreationArgument withTag(String theSystem, String theCode) {
-		return t -> ((IBaseResource)t).getMeta().addTag().setSystem(theSystem).setCode(theCode);
+	default ICreationArgument withTag(String theSystem, String theCode, Consumer<IBaseCoding>... theModifiers) {
+		return t -> {
+			IBaseCoding coding = ((IBaseResource) t).getMeta().addTag().setSystem(theSystem).setCode(theCode);
+			applyElementModifiers(coding, theModifiers);
+		};
 	}
 
 	default ICreationArgument withSecurity(String theSystem, String theCode) {
@@ -189,6 +200,10 @@ public interface ITestDataBuilder {
 
 	default ICreationArgument withSource(FhirContext theContext, String theSource) {
 		return t -> MetaUtil.setSource(theContext, ((IBaseResource)t).getMeta(), theSource);
+	}
+
+	default ICreationArgument withSource(String theSource) {
+		return t -> MetaUtil.setSource(getFhirContext(), ((IBaseResource)t).getMeta(), theSource);
 	}
 
 	default ICreationArgument withLastUpdated(Date theLastUpdated) {
@@ -225,6 +240,10 @@ public interface ITestDataBuilder {
 
 	default IIdType createOrganization(ICreationArgument... theModifiers) {
 		return createResource("Organization", theModifiers);
+	}
+
+	default IIdType createPractitioner(ICreationArgument... theModifiers) {
+		return createResource("Practitioner", theModifiers);
 	}
 
 	default IIdType createResource(String theResourceType, ICreationArgument... theModifiers) {
@@ -404,6 +423,8 @@ public interface ITestDataBuilder {
 	}
 
 	interface Support {
+		void setRequestId(String theRequestId);
+
 		FhirContext getFhirContext();
 
 		IIdType doCreateResource(IBaseResource theResource);
@@ -443,6 +464,11 @@ public interface ITestDataBuilder {
 
 		public SupportNoDao(FhirContext theFhirContext) {
 			myFhirContext = theFhirContext;
+		}
+
+		@Override
+		public void setRequestId(String theRequestId) {
+			// do nothing
 		}
 
 		@Override

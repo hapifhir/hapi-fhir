@@ -27,6 +27,7 @@ import ca.uhn.hapi.fhir.cdshooks.api.ICdsHooksDaoAuthorizationSvc;
 import ca.uhn.hapi.fhir.cdshooks.api.ICdsServiceMethod;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceJson;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceRequestJson;
+import ca.uhn.hapi.fhir.cdshooks.svc.CdsCrServiceMethod;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,6 +57,11 @@ public class CdsPrefetchSvc {
 
 	public void augmentRequest(CdsServiceRequestJson theCdsServiceRequestJson, ICdsServiceMethod theServiceMethod) {
 		CdsServiceJson serviceSpec = theServiceMethod.getCdsServiceJson();
+		if (theServiceMethod instanceof CdsCrServiceMethod) {
+			// CdsCrServices will retrieve data from the dao or fhir server passed in as needed,
+			// checking for missing prefetch is not necessary.
+			return;
+		}
 		Set<String> missingPrefetch = findMissingPrefetch(serviceSpec, theCdsServiceRequestJson);
 		if (missingPrefetch.isEmpty()) {
 			return;

@@ -84,7 +84,7 @@ public class BulkExportJobParameters implements IModelJson {
 	 * Patient id(s)
 	 */
 	@JsonProperty("patientIds")
-	private List<String> myPatientIds;
+	private List<String> myPatientIds = new ArrayList<>();
 
 	/**
 	 * The request which originated the request.

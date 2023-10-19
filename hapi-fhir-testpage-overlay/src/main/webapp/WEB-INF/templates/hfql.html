@@ -41,16 +41,7 @@
 
 					<div th:replace="tmpl-banner :: banner"></div>
 
-               <div class="card" style="margin-top: 10px;">
-                  <h3 class="card-header">HFQL / SQL Execution</h3>
-                  <div class="card-body">
-                     This page can be used to execute queries using the HAPI FHIR Query Language (HFQL),
-                     which is a SQL-like syntax for querying FHIR repositories. Learn more about
-                     the HFQL syntax at:
-                     <a href="https://smilecdr.com/docs/hfql/">https://smilecdr.com/docs/hfql/</a>.
-                     This UI will display a maximum of [[${rowLimit}]] rows.
-                  </div>
-               </div>
+               <div th:replace="tmpl-hfql-banner-card :: banner"></div>
 
                <!-- ************************************************ -->
                <!-- ** SQL Editor                                 ** -->
@@ -71,8 +62,6 @@
                      <script th:src="@{/resources/ace-builds/src-min-noconflict/ace.js}"></script>
                      <script>
                         const editor = ace.edit("editor");
-                        editor.setTheme("ace/theme/eclipse");
-                        editor.setTheme("ace/theme/vibrant_ink");
                         editor.setTheme("ace/theme/cobalt");
                         editor.session.setMode("ace/mode/sql");
                         editor.setShowPrintMargin(false);
@@ -140,6 +129,6 @@
 
 	</form>
 	
-	<div th:replace="tmpl-footer :: footer" ></div>
+	<div th:replace="~{tmpl-footer :: footer}" ></div>
 </body>
 </html>

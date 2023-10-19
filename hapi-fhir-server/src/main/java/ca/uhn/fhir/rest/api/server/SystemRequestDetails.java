@@ -31,6 +31,7 @@ import ca.uhn.fhir.rest.server.ETagSupportEnum;
 import ca.uhn.fhir.rest.server.ElementsSupportEnum;
 import ca.uhn.fhir.rest.server.IPagingProvider;
 import ca.uhn.fhir.rest.server.IRestfulServerDefaults;
+import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableListMultimap;
@@ -72,6 +73,7 @@ public class SystemRequestDetails extends RequestDetails {
 		super(theDetails);
 		if (nonNull(theDetails.getServer())) {
 			myServer = theDetails.getServer();
+			myFhirContext = theDetails.getFhirContext();
 		}
 	}
 
@@ -150,6 +152,10 @@ public class SystemRequestDetails extends RequestDetails {
 	@Override
 	public IRestfulServerDefaults getServer() {
 		return myServer;
+	}
+
+	public void setServer(RestfulServer theServer) {
+		this.myServer = theServer;
 	}
 
 	@Override

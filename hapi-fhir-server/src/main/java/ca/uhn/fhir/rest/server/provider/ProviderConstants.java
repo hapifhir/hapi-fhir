@@ -231,4 +231,13 @@ public class ProviderConstants {
 	 */
 	@Deprecated
 	public static final String PERFORM_REINDEXING_PASS = "$perform-reindexing-pass";
+
+	/**
+	 * Operation name for the "$export-poll-status" operation
+	 */
+	public static final String OPERATION_EXPORT_POLL_STATUS = "$export-poll-status";
+	/**
+	 * Operation name for the "$export" operation
+	 */
+	public static final String OPERATION_EXPORT = "$export";
 }

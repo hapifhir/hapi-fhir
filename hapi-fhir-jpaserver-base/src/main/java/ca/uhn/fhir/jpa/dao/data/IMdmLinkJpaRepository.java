@@ -50,6 +50,13 @@ public interface IMdmLinkJpaRepository
 	@Query("DELETE FROM MdmLink f WHERE myGoldenResourcePid IN (:goldenPids) OR mySourcePid IN (:goldenPids)")
 	void deleteLinksWithAnyReferenceToPids(@Param("goldenPids") List<Long> theResourcePids);
 
+	@Modifying
+	@Query(
+			value =
+					"DELETE FROM MPI_LINK_AUD f WHERE GOLDEN_RESOURCE_PID IN (:goldenPids) OR TARGET_PID IN (:goldenPids)",
+			nativeQuery = true)
+	void deleteLinksHistoryWithAnyReferenceToPids(@Param("goldenPids") List<Long> theResourcePids);
+
 	@Query("SELECT ml2.myGoldenResourcePid as goldenPid, ml2.mySourcePid as sourcePid FROM MdmLink ml2 "
 			+ "WHERE ml2.myMatchResult=:matchResult "
 			+ "AND ml2.myGoldenResourcePid IN ("
@@ -81,6 +88,15 @@ public interface IMdmLinkJpaRepository
 			+ "AND ml.myMatchResult=:matchResult")
 	List<MdmPidTuple> expandPidsBySourcePidAndMatchResult(
 			@Param("sourcePid") Long theSourcePid, @Param("matchResult") MdmMatchResultEnum theMdmMatchResultEnum);
+
+	@Query("SELECT ml " + "FROM MdmLink ml "
+			+ "INNER JOIN MdmLink ml2 "
+			+ "on ml.myGoldenResourcePid=ml2.myGoldenResourcePid "
+			+ "WHERE ml2.mySourcePid=:sourcePid "
+			+ "AND ml2.myMatchResult!=:matchResult")
+	List<MdmLink> findLinksAssociatedWithGoldenResourceOfSourceResourceExcludingMatchResult(
+			@Param("sourcePid") Long theSourcePid,
+			@Param("matchResult") MdmMatchResultEnum theMdmMatchResultEnumToExclude);
 
 	@Query(
 			"SELECT ml.myGoldenResourcePid as goldenPid, ml.mySourcePid as sourcePid FROM MdmLink ml WHERE ml.myGoldenResourcePid = :goldenPid and ml.myMatchResult = :matchResult")
