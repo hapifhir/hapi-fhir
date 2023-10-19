@@ -353,7 +353,7 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 				RuntimeResourceDefinition resourceDef =
 						myFhirContext.getResourceDefinition(theJobDetails.getCurrentSearchResourceType());
 				ISearchBuilder searchBuilder = mySearchBuilderFactory.newSearchBuilder(
-					resourceDao, resourceType, resourceDef.getImplementingClass());
+						resourceDao, resourceType, resourceDef.getImplementingClass());
 				List<IBaseResource> listToPopulate = new ArrayList<>();
 
 				myTransactionService.withRequest(null).execute(() -> {
@@ -377,7 +377,7 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 			theJobDetails.setCurrentSearchLastUploadedIndex(highestIndexSubmitted.get());
 
 			if (allResourceIds.isEmpty()
-                || (theJobDetails.getCurrentSearchCount() != null
+					|| (theJobDetails.getCurrentSearchCount() != null
 							&& toIndex >= theJobDetails.getCurrentSearchCount())) {
 				ourLog.info(
 						"Triggering job[{}] search {} has completed ",

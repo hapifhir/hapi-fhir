@@ -247,11 +247,13 @@ public class CircularQueueCaptureQueriesListener extends BaseCaptureQueriesListe
 	}
 
 	@Nonnull
-	private static List<String> renderQueriesForLogging(boolean theInlineParams, boolean theFormatSql, List<SqlQuery> queries) {
+	private static List<String> renderQueriesForLogging(
+			boolean theInlineParams, boolean theFormatSql, List<SqlQuery> queries) {
 		List<String> queriesStrings = new ArrayList<>();
 		for (int i = 0; i < queries.size(); i++) {
 			SqlQuery query = queries.get(i);
-			String remderedString = "[" + i + "] " + CircularQueueCaptureQueriesListener.formatQueryAsSql(query, theInlineParams, theFormatSql);
+			String remderedString = "[" + i + "] "
+					+ CircularQueueCaptureQueriesListener.formatQueryAsSql(query, theInlineParams, theFormatSql);
 			queriesStrings.add(remderedString);
 		}
 		return queriesStrings;
@@ -309,10 +311,9 @@ public class CircularQueueCaptureQueriesListener extends BaseCaptureQueriesListe
 	 * Log all captured INSERT queries
 	 */
 	public int logInsertQueries(Predicate<SqlQuery> theInclusionPredicate) {
-		List<SqlQuery> insertQueries = getInsertQueries()
-			.stream()
-			.filter(t -> theInclusionPredicate == null || theInclusionPredicate.test(t))
-			.collect(Collectors.toList());
+		List<SqlQuery> insertQueries = getInsertQueries().stream()
+				.filter(t -> theInclusionPredicate == null || theInclusionPredicate.test(t))
+				.collect(Collectors.toList());
 		boolean inlineParams = true;
 		List<String> queries = insertQueries.stream()
 				.map(t -> CircularQueueCaptureQueriesListener.formatQueryAsSql(t, inlineParams, inlineParams))
