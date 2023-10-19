@@ -804,6 +804,24 @@ public class BalpAuditCaptureInterceptorTest implements ITestDataBuilder {
 		assertHasPatientEntities(auditEvent, patientId.toUnqualified().getValue());
 	}
 
+	@Test
+	public void testSearchMultiplePatientsWithMultipleAuditEvents()
+	{
+		Patient p1 = buildResource("Patient", withId("P1"), withFamily("Simpson"), withGiven("Homer"));
+		Patient p2 = buildResource("Patient", withId("P2"), withFamily("Simpson"), withGiven("Marge"));
+
+		myPatientProvider.store(p1);
+		myPatientProvider.store(p2);
+
+		Bundle outcome = myClient
+			.search()
+			.forResource(Patient.class)
+			.returnBundle(Bundle.class)
+			.execute();
+
+		verify(myAuditEventSink, times(2)).recordAuditEvent(myAuditEventCaptor.capture());
+	}
+
 	private void create10Observations(String... thePatientIds) {
 		for (int i = 0; i < 10; i++) {
 			createObservation(withId("O" + i), withSubject(thePatientIds[i % thePatientIds.length]));
