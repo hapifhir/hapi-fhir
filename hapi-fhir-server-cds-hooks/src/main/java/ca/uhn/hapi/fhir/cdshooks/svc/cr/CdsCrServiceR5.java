@@ -22,7 +22,17 @@ package ca.uhn.hapi.fhir.cdshooks.svc.cr;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.hapi.fhir.cdshooks.api.json.*;
+import ca.uhn.hapi.fhir.cdshooks.api.ICdsConfigService;
+import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceIndicatorEnum;
+import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceRequestAuthorizationJson;
+import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceRequestJson;
+import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceResponseCardJson;
+import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceResponseCardSourceJson;
+import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceResponseJson;
+import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceResponseLinkJson;
+import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceResponseSuggestionActionJson;
+import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceResponseSuggestionJson;
+import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceResponseSystemActionJson;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r5.model.Bundle;
 import org.hl7.fhir.r5.model.CanonicalType;
@@ -61,10 +71,13 @@ import static org.opencds.cqf.fhir.utility.r5.Parameters.part;
 public class CdsCrServiceR5 implements ICdsCrService {
 	protected final RequestDetails myRequestDetails;
 	protected final Repository myRepository;
+	protected final ICdsConfigService myCdsConfigService;
 	protected Bundle myResponseBundle;
 	protected CdsServiceResponseJson myServiceResponse;
 
-	public CdsCrServiceR5(RequestDetails theRequestDetails, Repository theRepository) {
+	public CdsCrServiceR5(
+			RequestDetails theRequestDetails, Repository theRepository, ICdsConfigService theCdsConfigService) {
+		myCdsConfigService = theCdsConfigService;
 		myRequestDetails = theRequestDetails;
 		myRepository = theRepository;
 	}
@@ -109,6 +122,10 @@ public class CdsCrServiceR5 implements ICdsCrService {
 				endpoint.addHeader(String.format(
 						"Authorization: %s %s",
 						tokenType, theJson.getServiceRequestAuthorizationJson().getAccessToken()));
+				if (theJson.getServiceRequestAuthorizationJson().getSubject() != null) {
+					endpoint.addHeader(myCdsConfigService.getCdsCrSettings().getClientIdHeaderName() + ": "
+							+ theJson.getServiceRequestAuthorizationJson().getSubject());
+				}
 			}
 			parameters.addParameter(part(APPLY_PARAMETER_DATA_ENDPOINT, endpoint));
 		}
