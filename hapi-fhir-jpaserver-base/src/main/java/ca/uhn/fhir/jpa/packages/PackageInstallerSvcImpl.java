@@ -63,12 +63,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import javax.annotation.PostConstruct;
 
 import static ca.uhn.fhir.jpa.packages.util.PackageUtils.DEFAULT_INSTALL_TYPES;
 import static ca.uhn.fhir.util.SearchParameterUtil.getBaseAsStrings;
@@ -436,7 +436,10 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 		if (theExistingResource == null) {
 			return false;
 		}
-		if (theExistingResource.getIdElement().getIdPart().equals(theResource.getIdElement().getIdPart())) {
+		if (theExistingResource
+				.getIdElement()
+				.getIdPart()
+				.equals(theResource.getIdElement().getIdPart())) {
 			return false;
 		}
 		Collection<String> remainingBaseList = new HashSet<>(getBaseAsStrings(myFhirContext, theExistingResource));
