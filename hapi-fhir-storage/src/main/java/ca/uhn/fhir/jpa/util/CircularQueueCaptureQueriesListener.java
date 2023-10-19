@@ -208,10 +208,9 @@ public class CircularQueueCaptureQueriesListener extends BaseCaptureQueriesListe
 	 * Log all captured UPDATE queries
 	 */
 	public String logUpdateQueriesForCurrentThread() {
-		List<String> queries = getUpdateQueriesForCurrentThread().stream()
-				.map(CircularQueueCaptureQueriesListener::formatQueryAsSql)
-				.collect(Collectors.toList());
-		String joined = String.join("\n", queries);
+		List<SqlQuery> queries = getUpdateQueriesForCurrentThread();
+		List<String> queriesStrings = renderQueriesForLogging(true, true, queries);
+		String joined = String.join("\n", queriesStrings);
 		ourLog.info("Update Queries:\n{}", joined);
 		return joined;
 	}
@@ -222,26 +221,12 @@ public class CircularQueueCaptureQueriesListener extends BaseCaptureQueriesListe
 	 * @return
 	 */
 	public String logSelectQueriesForCurrentThread(int... theIndexes) {
-		List<String> queries = getSelectQueriesForCurrentThread().stream()
+		List<String> queriesStrings = getSelectQueriesForCurrentThread().stream()
 				.map(CircularQueueCaptureQueriesListener::formatQueryAsSql)
 				.collect(Collectors.toList());
-
-		List<String> newList = new ArrayList<>();
-		if (theIndexes != null && theIndexes.length > 0) {
-			for (int i = 0; i < theIndexes.length; i++) {
-				int index = theIndexes[i];
-				newList.add("[" + index + "] " + queries.get(index));
-			}
-		} else {
-			for (int i = 0; i < queries.size(); i++) {
-				newList.add("[" + i + "] " + queries.get(i));
-			}
-		}
-		queries = newList;
-
-		String queriesAsString = String.join("\n", queries);
-		ourLog.info("Select Queries:\n{}", queriesAsString);
-		return queriesAsString;
+		String joined = String.join("\n", queriesStrings);
+		ourLog.info("Select Queries:\n{}", joined);
+		return joined;
 	}
 
 	/**
@@ -256,20 +241,30 @@ public class CircularQueueCaptureQueriesListener extends BaseCaptureQueriesListe
 	 */
 	public List<SqlQuery> logSelectQueries(boolean theInlineParams, boolean theFormatSql) {
 		List<SqlQuery> queries = getSelectQueries();
-		List<String> queriesStrings = queries.stream()
-				.map(t -> CircularQueueCaptureQueriesListener.formatQueryAsSql(t, theInlineParams, theFormatSql))
-				.collect(Collectors.toList());
+		List<String> queriesStrings = renderQueriesForLogging(theInlineParams, theFormatSql, queries);
 		ourLog.info("Select Queries:\n{}", String.join("\n", queriesStrings));
 		return queries;
+	}
+
+	@Nonnull
+	private static List<String> renderQueriesForLogging(boolean theInlineParams, boolean theFormatSql, List<SqlQuery> queries) {
+		List<String> queriesStrings = new ArrayList<>();
+		for (int i = 0; i < queries.size(); i++) {
+			SqlQuery query = queries.get(i);
+			String remderedString = "[" + i + "] " + CircularQueueCaptureQueriesListener.formatQueryAsSql(query, theInlineParams, theFormatSql);
+			queriesStrings.add(remderedString);
+		}
+		return queriesStrings;
 	}
 
 	/**
 	 * Log first captured SELECT query
 	 */
 	public void logFirstSelectQueryForCurrentThread() {
+		boolean inlineParams = true;
 		String firstSelectQuery = getSelectQueriesForCurrentThread().stream()
 				.findFirst()
-				.map(CircularQueueCaptureQueriesListener::formatQueryAsSql)
+				.map(t -> CircularQueueCaptureQueriesListener.formatQueryAsSql(t, inlineParams, inlineParams))
 				.orElse("NONE FOUND");
 		ourLog.info("First select SqlQuery:\n{}", firstSelectQuery);
 	}
@@ -278,10 +273,9 @@ public class CircularQueueCaptureQueriesListener extends BaseCaptureQueriesListe
 	 * Log all captured INSERT queries
 	 */
 	public String logInsertQueriesForCurrentThread() {
-		List<String> queries = getInsertQueriesForCurrentThread().stream()
-				.map(CircularQueueCaptureQueriesListener::formatQueryAsSql)
-				.collect(Collectors.toList());
-		String queriesAsString = String.join("\n", queries);
+		List<SqlQuery> queries = getInsertQueriesForCurrentThread();
+		List<String> queriesStrings = renderQueriesForLogging(true, true, queries);
+		String queriesAsString = String.join("\n", queriesStrings);
 		ourLog.info("Insert Queries:\n{}", queriesAsString);
 		return queriesAsString;
 	}
@@ -290,20 +284,18 @@ public class CircularQueueCaptureQueriesListener extends BaseCaptureQueriesListe
 	 * Log all captured queries
 	 */
 	public void logAllQueriesForCurrentThread() {
-		List<String> queries = getAllQueriesForCurrentThread().stream()
-				.map(CircularQueueCaptureQueriesListener::formatQueryAsSql)
-				.collect(Collectors.toList());
-		ourLog.info("Queries:\n{}", String.join("\n", queries));
+		List<SqlQuery> queries = getAllQueriesForCurrentThread();
+		List<String> queriesStrings = renderQueriesForLogging(true, true, queries);
+		ourLog.info("Queries:\n{}", String.join("\n", queriesStrings));
 	}
 
 	/**
 	 * Log all captured queries
 	 */
 	public void logAllQueries() {
-		List<String> queries = getCapturedQueries().stream()
-				.map(CircularQueueCaptureQueriesListener::formatQueryAsSql)
-				.collect(Collectors.toList());
-		ourLog.info("Queries:\n{}", String.join("\n", queries));
+		List<SqlQuery> queries = getCapturedQueries();
+		List<String> queriesStrings = renderQueriesForLogging(true, true, queries);
+		ourLog.info("Queries:\n{}", String.join("\n", queriesStrings));
 	}
 
 	/**
@@ -317,10 +309,13 @@ public class CircularQueueCaptureQueriesListener extends BaseCaptureQueriesListe
 	 * Log all captured INSERT queries
 	 */
 	public int logInsertQueries(Predicate<SqlQuery> theInclusionPredicate) {
-		List<SqlQuery> insertQueries = getInsertQueries();
+		List<SqlQuery> insertQueries = getInsertQueries()
+			.stream()
+			.filter(t -> theInclusionPredicate == null || theInclusionPredicate.test(t))
+			.collect(Collectors.toList());
+		boolean inlineParams = true;
 		List<String> queries = insertQueries.stream()
-				.filter(t -> theInclusionPredicate == null || theInclusionPredicate.test(t))
-				.map(CircularQueueCaptureQueriesListener::formatQueryAsSql)
+				.map(t -> CircularQueueCaptureQueriesListener.formatQueryAsSql(t, inlineParams, inlineParams))
 				.collect(Collectors.toList());
 		ourLog.info("Insert Queries:\n{}", String.join("\n", queries));
 
@@ -331,23 +326,20 @@ public class CircularQueueCaptureQueriesListener extends BaseCaptureQueriesListe
 	 * Log all captured INSERT queries
 	 */
 	public int logUpdateQueries() {
-		List<SqlQuery> updateQueries = getUpdateQueries();
-		List<String> queries = updateQueries.stream()
-				.map(CircularQueueCaptureQueriesListener::formatQueryAsSql)
-				.collect(Collectors.toList());
-		ourLog.info("Update Queries:\n{}", String.join("\n", queries));
+		List<SqlQuery> queries = getUpdateQueries();
+		List<String> queriesStrings = renderQueriesForLogging(true, true, queries);
+		ourLog.info("Update Queries:\n{}", String.join("\n", queriesStrings));
 
-		return countQueries(updateQueries);
+		return countQueries(queries);
 	}
 
 	/**
 	 * Log all captured DELETE queries
 	 */
 	public String logDeleteQueriesForCurrentThread() {
-		List<String> queries = getDeleteQueriesForCurrentThread().stream()
-				.map(CircularQueueCaptureQueriesListener::formatQueryAsSql)
-				.collect(Collectors.toList());
-		String joined = String.join("\n", queries);
+		List<SqlQuery> queries = getDeleteQueriesForCurrentThread();
+		List<String> queriesStrings = renderQueriesForLogging(true, true, queries);
+		String joined = String.join("\n", queriesStrings);
 		ourLog.info("Delete Queries:\n{}", joined);
 		return joined;
 	}
@@ -356,13 +348,11 @@ public class CircularQueueCaptureQueriesListener extends BaseCaptureQueriesListe
 	 * Log all captured DELETE queries
 	 */
 	public int logDeleteQueries() {
-		List<SqlQuery> deleteQueries = getDeleteQueries();
-		List<String> queries = deleteQueries.stream()
-				.map(CircularQueueCaptureQueriesListener::formatQueryAsSql)
-				.collect(Collectors.toList());
-		ourLog.info("Delete Queries:\n{}", String.join("\n", queries));
+		List<SqlQuery> queries = getDeleteQueries();
+		List<String> queriesStrings = renderQueriesForLogging(true, true, queries);
+		ourLog.info("Delete Queries:\n{}", String.join("\n", queriesStrings));
 
-		return countQueries(deleteQueries);
+		return countQueries(queries);
 	}
 
 	public int countSelectQueries() {
