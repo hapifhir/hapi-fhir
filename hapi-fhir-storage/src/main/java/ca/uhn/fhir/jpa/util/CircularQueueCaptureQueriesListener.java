@@ -224,9 +224,9 @@ public class CircularQueueCaptureQueriesListener extends BaseCaptureQueriesListe
 
 		List<String> newList = new ArrayList<>();
 		if (theIndexes != null && theIndexes.length > 0) {
-            for (int index : theIndexes) {
-                newList.add(queriesStrings.get(index));
-            }
+			for (int index : theIndexes) {
+				newList.add(queriesStrings.get(index));
+			}
 			queriesStrings = newList;
 		}
 
