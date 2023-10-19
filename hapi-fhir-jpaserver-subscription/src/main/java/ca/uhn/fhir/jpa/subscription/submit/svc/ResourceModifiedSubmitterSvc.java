@@ -161,14 +161,11 @@ public class ResourceModifiedSubmitterSvc implements IResourceModifiedConsumer, 
 				}
 			} catch (MessageDeliveryException exception) {
 				// we encountered an issue when trying to send the message so mark the transaction for rollback
-				String payloadId;
-				String subscriptionId;
+				String payloadId = "[unknown]";
+				String subscriptionId = "[unknown]";
 				if (resourceModifiedMessage != null) {
 					payloadId = resourceModifiedMessage.getPayloadId();
 					subscriptionId = resourceModifiedMessage.getSubscriptionId();
-				} else {
-					payloadId = "[unknown]";
-					subscriptionId = "[unknown]";
 				}
 				ourLog.error(
 						"Channel submission failed for resource with id {} matching subscription with id {}.  Further attempts will be performed at later time.",
@@ -179,9 +176,8 @@ public class ResourceModifiedSubmitterSvc implements IResourceModifiedConsumer, 
 				theStatus.setRollbackOnly();
 			} catch (Exception ex) {
 				// catch other errors
-				ourLog.error("Unexpected error encountered while processing resource modified message.", ex);
-				processed = false;
-				theStatus.setRollbackOnly();
+				ourLog.error("Unexpected error encountered while processing resource modified message. Marking as processed to prevent further errors.", ex);
+				processed = true;
 			}
 
 			return processed;
