@@ -992,8 +992,6 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	}
 
 	private void populateId(IIdType retVal) {
-		Validate.notNull(myFhirId, "Resource id should have already been assigned.");
-		// wipmb forced_id I think myFhirId is non-null, except maybe on create path.
 		if (myFhirId != null && !myFhirId.isEmpty()) {
 			retVal.setValue(getResourceType() + '/' + myFhirId + '/' + Constants.PARAM_HISTORY + '/' + getVersion());
 		} else if (getTransientForcedId() != null) {
