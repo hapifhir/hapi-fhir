@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.subscription.resthook;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.subscription.BaseSubscriptionsR4Test;
+import ca.uhn.fhir.jpa.subscription.submit.svc.ResourceModifiedSubmitterSvc;
 import ca.uhn.fhir.jpa.test.util.StoppableSubscriptionDeliveringRestHookSubscriber;
 import ca.uhn.fhir.jpa.topic.SubscriptionTopicDispatcher;
 import ca.uhn.fhir.jpa.topic.SubscriptionTopicRegistry;
@@ -31,6 +32,7 @@ import org.hl7.fhir.r4.model.SearchParameter;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.Subscription;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -63,6 +65,9 @@ import static org.junit.jupiter.api.Assertions.fail;
  */
 public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(RestHookTestR4Test.class);
+
+	@Autowired
+	ResourceModifiedSubmitterSvc myResourceModifiedSubmitterSvc;
 
 	@Autowired
 	StoppableSubscriptionDeliveringRestHookSubscriber myStoppableSubscriptionDeliveringRestHookSubscriber;
@@ -112,7 +117,6 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		assertEquals(1, subscription.getMeta().getTag().size());
 		assertEquals("IN_MEMORY", subscription.getMeta().getTag().get(0).getCode());
 	}
-
 
 	@Test
 	public void testRestHookSubscriptionApplicationFhirJson() throws Exception {

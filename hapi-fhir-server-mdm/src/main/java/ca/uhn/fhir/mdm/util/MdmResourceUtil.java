@@ -118,12 +118,36 @@ public final class MdmResourceUtil {
 				MdmConstants.DISPLAY_GOLDEN_RECORD);
 	}
 
+	/**
+	 * Sets the provided resource as 'redirected' golden resource.
+	 * This is done when a Golden Resource has been deprecated
+	 * and is no longer the primary golden resource (for example,
+	 * after a merge of 2 golden resources).
+	 */
 	public static IBaseResource setGoldenResourceRedirected(IBaseResource theBaseResource) {
 		return setTagOnResource(
 				theBaseResource,
 				MdmConstants.SYSTEM_GOLDEN_RECORD_STATUS,
 				MdmConstants.CODE_GOLDEN_RECORD_REDIRECTED,
 				MdmConstants.DISPLAY_GOLDEN_REDIRECT);
+	}
+
+	/**
+	 * Adds the BLOCKED tag to the golden resource.
+	 * Because this is called *before* a resource is saved,
+	 * we must add a new system/code combo to it
+	 * @param theBaseResource
+	 * @return
+	 */
+	public static IBaseResource setGoldenResourceAsBlockedResourceGoldenResource(IBaseResource theBaseResource) {
+		IBaseCoding tag = theBaseResource.getMeta().addTag();
+		tag.setSystem(MdmConstants.SYSTEM_GOLDEN_RECORD_STATUS);
+		tag.setCode(MdmConstants.CODE_BLOCKED);
+		tag.setDisplay(MdmConstants.CODE_BLOCKED_DISPLAY);
+		tag.setUserSelected(false);
+		tag.setVersion("1");
+
+		return theBaseResource;
 	}
 
 	/**

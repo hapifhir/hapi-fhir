@@ -26,6 +26,7 @@ import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedComboStringUnique;
 import ca.uhn.fhir.jpa.model.entity.ResourceSearchUrlEntity;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
+import ca.uhn.fhir.system.HapiSystemProperties;
 import org.hibernate.HibernateException;
 import org.hibernate.PessimisticLockException;
 import org.hibernate.exception.ConstraintViolationException;
@@ -69,6 +70,10 @@ public class HapiFhirHibernateJpaDialect extends HibernateJpaDialect {
 		String messageToPrepend = "";
 		if (isNotBlank(theMessageToPrepend)) {
 			messageToPrepend = theMessageToPrepend + " - ";
+		}
+
+		if (HapiSystemProperties.isUnitTestModeEnabled()) {
+			ourLog.error("Hibernate exception", theException);
 		}
 
 		if (theException instanceof ConstraintViolationException) {

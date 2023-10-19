@@ -100,7 +100,9 @@ public class ReductionStepDataSink<PT extends IModelJson, IT extends IModelJson,
 					"Finalizing job instance {} with report length {} chars",
 					instance.getInstanceId(),
 					dataString.length());
-			ourLog.atTrace().addArgument(() -> JsonUtil.serialize(instance)).log("New instance state: {}");
+			if (ourLog.isTraceEnabled()) {
+				ourLog.trace("New instance state: {}", JsonUtil.serialize(instance));
+			}
 
 			return true;
 		});

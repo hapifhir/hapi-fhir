@@ -93,6 +93,23 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		init640_after_20230126();
 		init660();
 		init680();
+		init700();
+	}
+
+	protected void init700() {
+		Builder version = forVersion(VersionEnum.V7_0_0);
+
+		// new indices on MdmLink
+		Builder.BuilderWithTableName mdmLinkTable = version.onTable("MPI_LINK");
+
+		mdmLinkTable
+				.addIndex("20230911.1", "IDX_EMPI_TGT_MR_LS")
+				.unique(false)
+				.withColumns("TARGET_TYPE", "MATCH_RESULT", "LINK_SOURCE");
+		mdmLinkTable
+				.addIndex("20230911.2", "IDX_EMPi_TGT_MR_SCore")
+				.unique(false)
+				.withColumns("TARGET_TYPE", "MATCH_RESULT", "SCORE");
 	}
 
 	protected void init680() {
@@ -435,6 +452,16 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			empiLink.addForeignKey("20230306.7", "FKAOW7NXNCLOEC419ARS0FPP58M")
 					.toColumn(revColumnName)
 					.references(enversRevisionTable, revColumnName);
+		}
+
+		{
+			Builder.BuilderAddTableByColumns resourceModifiedTable =
+					version.addTableByColumns("20230315.1", "HFJ_RESOURCE_MODIFIED", "RES_ID", "RES_VER");
+			resourceModifiedTable.addColumn("RES_ID").nonNullable().type(ColumnTypeEnum.STRING, 256);
+			resourceModifiedTable.addColumn("RES_VER").nonNullable().type(ColumnTypeEnum.STRING, 8);
+			resourceModifiedTable.addColumn("CREATED_TIME").nonNullable().type(ColumnTypeEnum.DATE_TIMESTAMP);
+			resourceModifiedTable.addColumn("SUMMARY_MESSAGE").nonNullable().type(ColumnTypeEnum.STRING, 4000);
+			resourceModifiedTable.addColumn("RESOURCE_TYPE").nonNullable().type(ColumnTypeEnum.STRING, 40);
 		}
 
 		{

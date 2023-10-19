@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 5307
+title: "Some search parameters include parenthetical expressions (e.g. `(MedicationRequest.medication as Reference)`).
+The leading `(` was causing searches using parenthetical expressions to fail where the reference target was a contained resource.
+This has been corrected."

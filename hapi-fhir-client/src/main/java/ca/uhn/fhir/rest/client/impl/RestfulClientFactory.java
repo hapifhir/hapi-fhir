@@ -75,8 +75,7 @@ public abstract class RestfulClientFactory implements IRestfulClientFactory {
 	/**
 	 * Constructor
 	 *
-	 * @param theFhirContext
-	 *           The context
+	 * @param theFhirContext The context
 	 */
 	public RestfulClientFactory(FhirContext theFhirContext) {
 		myContext = theFhirContext;
@@ -142,13 +141,10 @@ public abstract class RestfulClientFactory implements IRestfulClientFactory {
 	/**
 	 * Instantiates a new client instance
 	 *
-	 * @param theClientType
-	 *           The client type, which is an interface type to be instantiated
-	 * @param theServerBase
-	 *           The URL of the base for the restful FHIR server to connect to
+	 * @param theClientType The client type, which is an interface type to be instantiated
+	 * @param theServerBase The URL of the base for the restful FHIR server to connect to
 	 * @return A newly created client
-	 * @throws ConfigurationException
-	 *            If the interface type is not an interface
+	 * @throws ConfigurationException If the interface type is not an interface
 	 */
 	@Override
 	public synchronized <T extends IRestfulClient> T newClient(Class<T> theClientType, String theServerBase) {
@@ -281,13 +277,8 @@ public abstract class RestfulClientFactory implements IRestfulClientFactory {
 				break;
 
 			case ONCE:
-				if (myValidatedServerBaseUrls.contains(serverBase)) {
-					break;
-				}
-
 				synchronized (myValidatedServerBaseUrls) {
-					if (!myValidatedServerBaseUrls.contains(serverBase)) {
-						myValidatedServerBaseUrls.add(serverBase);
+					if (myValidatedServerBaseUrls.add(serverBase)) {
 						validateServerBase(serverBase, theHttpClient, theClient);
 					}
 				}
@@ -396,20 +387,13 @@ public abstract class RestfulClientFactory implements IRestfulClientFactory {
 		}
 
 		String serverBase = normalizeBaseUrlForMap(theServerBase);
-		if (myValidatedServerBaseUrls.contains(serverBase)) {
-			return;
-		}
-
-		synchronized (myValidatedServerBaseUrls) {
-			myValidatedServerBaseUrls.add(serverBase);
-		}
+		myValidatedServerBaseUrls.add(serverBase);
 	}
 
 	/**
 	 * Get the http client for the given server base
 	 *
-	 * @param theServerBase
-	 *           the server base
+	 * @param theServerBase the server base
 	 * @return the http client
 	 */
 	protected abstract IHttpClient getHttpClient(String theServerBase);

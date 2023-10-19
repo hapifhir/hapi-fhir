@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.cr.r4.measure;
 
+import ca.uhn.fhir.cr.r4.IMeasureServiceFactory;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
@@ -31,13 +32,12 @@ import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.MeasureReport;
+import org.opencds.cqf.fhir.utility.monad.Eithers;
 import org.springframework.beans.factory.annotation.Autowired;
-
-import java.util.function.Function;
 
 public class MeasureOperationsProvider {
 	@Autowired
-	Function<RequestDetails, MeasureService> myR4MeasureServiceFactory;
+	IMeasureServiceFactory myR4MeasureServiceFactory;
 
 	/**
 	 * Implements the <a href=
@@ -76,18 +76,20 @@ public class MeasureOperationsProvider {
 			@OperationParam(name = "terminologyEndpoint") Endpoint theTerminologyEndpoint,
 			RequestDetails theRequestDetails)
 			throws InternalErrorException, FHIRException {
-		return this.myR4MeasureServiceFactory
-				.apply(theRequestDetails)
-				.evaluateMeasure(
-						theId,
+		return myR4MeasureServiceFactory
+				.create(theRequestDetails)
+				.evaluate(
+						Eithers.forMiddle3(theId),
 						thePeriodStart,
 						thePeriodEnd,
 						theReportType,
 						theSubject,
-						thePractitioner,
 						theLastReceivedOn,
-						theProductLine,
+						null,
+						theTerminologyEndpoint,
+						null,
 						theAdditionalData,
-						theTerminologyEndpoint);
+						theProductLine,
+						thePractitioner);
 	}
 }

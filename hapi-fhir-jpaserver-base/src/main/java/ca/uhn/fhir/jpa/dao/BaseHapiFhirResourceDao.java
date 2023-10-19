@@ -107,7 +107,6 @@ import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
-import ca.uhn.fhir.util.ObjectUtil;
 import ca.uhn.fhir.util.ReflectionUtil;
 import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.UrlUtil;
@@ -143,7 +142,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -1118,9 +1116,9 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		for (TagDefinition nextDef : tags) {
 			for (BaseTag next : new ArrayList<BaseTag>(theEntity.getTags())) {
-				if (ObjectUtil.equals(next.getTag().getTagType(), nextDef.getTagType())
-						&& ObjectUtil.equals(next.getTag().getSystem(), nextDef.getSystem())
-						&& ObjectUtil.equals(next.getTag().getCode(), nextDef.getCode())) {
+				if (Objects.equals(next.getTag().getTagType(), nextDef.getTagType())
+						&& Objects.equals(next.getTag().getSystem(), nextDef.getSystem())
+						&& Objects.equals(next.getTag().getCode(), nextDef.getCode())) {
 					myEntityManager.remove(next);
 					theEntity.getTags().remove(next);
 				}
@@ -1156,17 +1154,25 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		myInterceptorBroadcaster.callHooks(Pointcut.STORAGE_PRECOMMIT_RESOURCE_UPDATED, preCommitParams);
 	}
 
-	private void validateExpungeEnabled() {
-		if (!getStorageSettings().isExpungeEnabled()) {
-			throw new MethodNotAllowedException(Msg.code(968) + "$expunge is not enabled on this server");
-		}
-	}
-
 	@Override
 	@Transactional(propagation = Propagation.NEVER)
 	public ExpungeOutcome expunge(IIdType theId, ExpungeOptions theExpungeOptions, RequestDetails theRequest) {
 		validateExpungeEnabled();
 		return forceExpungeInExistingTransaction(theId, theExpungeOptions, theRequest);
+	}
+
+	@Override
+	@Transactional(propagation = Propagation.NEVER)
+	public ExpungeOutcome expunge(ExpungeOptions theExpungeOptions, RequestDetails theRequestDetails) {
+		ourLog.info("Beginning TYPE[{}] expunge operation", getResourceName());
+		validateExpungeEnabled();
+		return myExpungeService.expunge(getResourceName(), null, theExpungeOptions, theRequestDetails);
+	}
+
+	private void validateExpungeEnabled() {
+		if (!getStorageSettings().isExpungeEnabled()) {
+			throw new MethodNotAllowedException(Msg.code(968) + "$expunge is not enabled on this server");
+		}
 	}
 
 	@Override
@@ -1203,14 +1209,6 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	}
 
 	@Override
-	@Transactional(propagation = Propagation.NEVER)
-	public ExpungeOutcome expunge(ExpungeOptions theExpungeOptions, RequestDetails theRequestDetails) {
-		ourLog.info("Beginning TYPE[{}] expunge operation", getResourceName());
-
-		return myExpungeService.expunge(getResourceName(), null, theExpungeOptions, theRequestDetails);
-	}
-
-	@Override
 	@Nonnull
 	public String getResourceName() {
 		return myResourceName;
@@ -1236,10 +1234,9 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		IBundleProvider retVal = myTransactionService
 				.withRequest(theRequestDetails)
 				.withRequestPartitionId(requestPartitionId)
-				.execute(() -> {
-					return myPersistedJpaBundleProviderFactory.history(
-							theRequestDetails, myResourceName, null, theSince, theUntil, theOffset, requestPartitionId);
-				});
+				.execute(() -> myPersistedJpaBundleProviderFactory.history(
+						theRequestDetails, myResourceName, null, theSince, theUntil, theOffset, requestPartitionId));
+
 		ourLog.debug("Processed history on {} in {}ms", myResourceName, w.getMillisAndRestart());
 		return retVal;
 	}
@@ -1503,7 +1500,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		JpaPid jpaPid = (JpaPid) thePid;
 
 		Optional<ResourceTable> entity = myResourceTableDao.findById(jpaPid.getId());
-		if (!entity.isPresent()) {
+		if (entity.isEmpty()) {
 			throw new ResourceNotFoundException(Msg.code(975) + "No resource found with PID " + jpaPid);
 		}
 		if (isDeleted(entity.get()) && !theDeletedOk) {
@@ -1554,7 +1551,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		T retVal = myJpaStorageResourceParser.toResource(myResourceType, entity, null, false);
 
-		if (theDeletedOk == false) {
+		if (!theDeletedOk) {
 			if (isDeleted(entity)) {
 				throw createResourceGoneException(entity);
 			}
@@ -1588,7 +1585,6 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				.execute(() -> readEntity(theId, true, theRequest, requestPartitionId));
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public ReindexOutcome reindex(
 			IResourcePersistentId thePid,
@@ -1657,7 +1653,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			CURRENTLY_REINDEXING.put(theResource, Boolean.TRUE);
 		}
 
-		ResourceTable resourceTable = updateEntity(
+		updateEntity(
 				null, theResource, theEntity, theEntity.getDeleted(), true, false, transactionDetails, true, false);
 		if (theResource != null) {
 			CURRENTLY_REINDEXING.put(theResource, null);
@@ -1743,7 +1739,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			} else {
 				if (readPartitions.contains(null)) {
 					List<Integer> readPartitionsWithoutNull =
-							readPartitions.stream().filter(t -> t != null).collect(Collectors.toList());
+							readPartitions.stream().filter(Objects::nonNull).collect(Collectors.toList());
 					entity = myResourceTableDao
 							.readByPartitionIdsOrNull(readPartitionsWithoutNull, pid.getId())
 							.orElse(null);
@@ -1771,7 +1767,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		}
 
 		if (theId.hasVersionIdPart()) {
-			if (theId.isVersionIdPartValidLong() == false) {
+			if (!theId.isVersionIdPartValidLong()) {
 				throw new ResourceNotFoundException(Msg.code(978)
 						+ getContext()
 								.getLocalizer()
@@ -1884,9 +1880,9 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		}
 
 		for (BaseTag next : new ArrayList<>(entity.getTags())) {
-			if (ObjectUtil.equals(next.getTag().getTagType(), theTagType)
-					&& ObjectUtil.equals(next.getTag().getSystem(), theScheme)
-					&& ObjectUtil.equals(next.getTag().getCode(), theTerm)) {
+			if (Objects.equals(next.getTag().getTagType(), theTagType)
+					&& Objects.equals(next.getTag().getSystem(), theScheme)
+					&& Objects.equals(next.getTag().getCode(), theTerm)) {
 				myEntityManager.remove(next);
 				entity.getTags().remove(next);
 			}
@@ -1937,7 +1933,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		translateListSearchParams(theParams);
 
-		notifySearchInterceptors(theParams, theRequest);
+		setOffsetAndCount(theParams, theRequest);
 
 		CacheControlDirective cacheControlDirective = new CacheControlDirective();
 		if (theRequest != null) {
@@ -1965,11 +1961,9 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	}
 
 	private void translateListSearchParams(SearchParameterMap theParams) {
-		Iterator<String> keyIterator = theParams.keySet().iterator();
 
 		// Translate _list=42 to _has=List:item:_id=42
-		while (keyIterator.hasNext()) {
-			String key = keyIterator.next();
+		for (String key : theParams.keySet()) {
 			if (Constants.PARAM_LIST.equals((key))) {
 				List<List<IQueryParameterType>> andOrValues = theParams.get(key);
 				theParams.remove(key);
@@ -1990,7 +1984,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		}
 	}
 
-	private void notifySearchInterceptors(SearchParameterMap theParams, RequestDetails theRequest) {
+	protected void setOffsetAndCount(SearchParameterMap theParams, RequestDetails theRequest) {
 		if (theRequest != null) {
 
 			if (theRequest.isSubRequest()) {
@@ -2000,7 +1994,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 							1,
 							Integer.MAX_VALUE,
 							max,
-							"Maximum search result count in transaction ust be a positive integer");
+							"Maximum search result count in transaction must be a positive integer");
 					theParams.setLoadSynchronousUpTo(getStorageSettings().getMaximumSearchResultCountInTransaction());
 				}
 			}
@@ -2051,7 +2045,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 						theParams.setLoadSynchronousUpTo(myStorageSettings.getInternalSynchronousSearchSize());
 					}
 
-					ISearchBuilder builder =
+					ISearchBuilder<?> builder =
 							mySearchBuilderFactory.newSearchBuilder(this, getResourceName(), getResourceType());
 
 					List<JpaPid> ids = new ArrayList<>();
@@ -2093,6 +2087,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 					break;
 			}
 		}
+		myMetaTagSorter.sort(retVal);
 		return retVal;
 	}
 
@@ -2208,9 +2203,8 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			RequestDetails theRequest,
 			TransactionDetails theTransactionDetails,
 			RequestPartitionId theRequestPartitionId) {
-		T resource = theResource;
 
-		preProcessResourceForStorage(resource);
+		preProcessResourceForStorage(theResource);
 		preProcessResourceForStorage(theResource, theRequest, theTransactionDetails, thePerformIndexing);
 
 		ResourceTable entity = null;
@@ -2218,6 +2212,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		IIdType resourceId;
 		RestOperationTypeEnum update = RestOperationTypeEnum.UPDATE;
 		if (isNotBlank(theMatchUrl)) {
+			// Validate that the supplied resource matches the conditional.
 			Set<JpaPid> match = myMatchResourceUrlService.processMatchUrl(
 					theMatchUrl, myResourceType, theTransactionDetails, theRequest, theResource);
 			if (match.size() > 1) {
@@ -2235,8 +2230,8 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				entity = myEntityManager.find(ResourceTable.class, pid.getId());
 				resourceId = entity.getIdDt();
 				if (myFhirContext.getVersion().getVersion().isEqualOrNewerThan(FhirVersionEnum.R4)
-						&& resource.getIdElement().getIdPart() != null) {
-					if (!Objects.equals(resource.getIdElement().getIdPart(), resourceId.getIdPart())) {
+						&& theResource.getIdElement().getIdPart() != null) {
+					if (!Objects.equals(theResource.getIdElement().getIdPart(), resourceId.getIdPart())) {
 						String msg = getContext()
 								.getLocalizer()
 								.getMessageSanitized(
@@ -2257,7 +2252,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				}
 				DaoMethodOutcome outcome = doCreateForPostOrPut(
 						theRequest,
-						resource,
+						theResource,
 						theMatchUrl,
 						false,
 						thePerformIndexing,
@@ -2303,7 +2298,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			if (create) {
 				return doCreateForPostOrPut(
 						theRequest,
-						resource,
+						theResource,
 						null,
 						false,
 						thePerformIndexing,
@@ -2320,7 +2315,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				theMatchUrl,
 				thePerformIndexing,
 				theForceUpdateVersion,
-				resource,
+				theResource,
 				entity,
 				update,
 				theTransactionDetails);
@@ -2413,7 +2408,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		entity.setDeleted(null);
 		boolean isUpdatingCurrent = resourceId.hasVersionIdPart()
 				&& Long.parseLong(resourceId.getVersionIdPart()) == currentEntity.getVersion();
-		IBasePersistedResource savedEntity = updateHistoryEntity(
+		IBasePersistedResource<?> savedEntity = updateHistoryEntity(
 				theRequest, theResource, currentEntity, entity, resourceId, theTransactionDetails, isUpdatingCurrent);
 		DaoMethodOutcome outcome = toMethodOutcome(
 						theRequest, savedEntity, theResource, null, RestOperationTypeEnum.UPDATE)
@@ -2437,7 +2432,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		TransactionDetails transactionDetails = new TransactionDetails();
 
 		if (theMode == ValidationModeEnum.DELETE) {
-			if (theId == null || theId.hasIdPart() == false) {
+			if (theId == null || !theId.hasIdPart()) {
 				throw new InvalidRequestException(
 						Msg.code(991) + "No ID supplied. ID is required when validating with mode=DELETE");
 			}
@@ -2570,7 +2565,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 							Msg.code(997) + "Resource has an ID - ID must not be populated for a FHIR create");
 				}
 			} else if (myMode == ValidationModeEnum.UPDATE) {
-				if (hasId == false) {
+				if (!hasId) {
 					throw new UnprocessableEntityException(
 							Msg.code(998) + "Resource has no ID - ID must be populated for a FHIR update");
 				}

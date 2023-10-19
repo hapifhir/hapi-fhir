@@ -29,7 +29,7 @@ import java.util.List;
 public abstract class BaseProviderR4Test extends BaseMdmR4Test {
 	protected MdmProviderDstu3Plus myMdmProvider;
 	@Autowired
-	private IMdmControllerSvc myMdmControllerSvc;
+	protected IMdmControllerSvc myMdmControllerSvc;
 	@Autowired
 	private IMdmSubmitSvc myMdmSubmitSvc;
 	@Autowired
@@ -56,7 +56,12 @@ public abstract class BaseProviderR4Test extends BaseMdmR4Test {
 
 	@BeforeEach
 	public void before() throws Exception {
-		myMdmProvider = new MdmProviderDstu3Plus(myFhirContext, myMdmControllerSvc, myMdmHelper, myMdmSubmitSvc, myMdmSettings);
+		myMdmProvider = new MdmProviderDstu3Plus(myFhirContext,
+			myMdmControllerSvc,
+			myMdmHelper,
+			myMdmSubmitSvc,
+			myInterceptorBroadcaster,
+			myMdmSettings);
 		defaultScript = myMdmSettings.getScriptText();
 	}
 

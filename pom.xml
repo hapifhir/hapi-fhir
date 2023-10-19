@@ -9,7 +9,7 @@
 	<groupId>ca.uhn.hapi.fhir</groupId>
 	<artifactId>hapi-fhir</artifactId>
 	<packaging>pom</packaging>
-	<version>6.8.0-SNAPSHOT</version>
+	<version>6.9.10-SNAPSHOT</version>
 
 	<name>HAPI-FHIR</name>
 	<description>An open-source implementation of the FHIR specification in Java.</description>
@@ -897,12 +897,10 @@
 	</licenses>
 
 	<properties>
-		<fhir_core_version>6.0.22</fhir_core_version>
+		<fhir_core_version>6.1.2</fhir_core_version>
 		<spotless_version>2.37.0</spotless_version>
-		<ucum_version>1.0.3</ucum_version>
 		<surefire_jvm_args>-Dfile.encoding=UTF-8 -Xmx2048m</surefire_jvm_args>
 
-		<ucum_version>1.0.3</ucum_version>
 
 		<!-- configure timestamp in MANIFEST.MF for maven-war-provider -->
 		<maven.build.timestamp.format>yyyy-MM-dd'T'HH:mm:ss'Z'</maven.build.timestamp.format>
@@ -941,12 +939,12 @@
 		<jetty_version>10.0.14</jetty_version>
 		<jsr305_version>3.0.2</jsr305_version>
 		<junit_version>5.9.1</junit_version>
-		<flexmark_version>0.50.40</flexmark_version>
+		<flexmark_version>0.64.8</flexmark_version>
 		<flyway_version>9.4.0</flyway_version>
 		<hibernate_version>5.6.15.Final</hibernate_version>
 		<hibernate_search_version>6.1.6.Final</hibernate_search_version>
-		<logback_version>1.4.4</logback_version>
-		<!-- Update lucene version when you update hibernate-search version -->
+		<logback_version>1.4.7</logback_version>
+	 	<!-- Update lucene version when you update hibernate-search version -->
 		<lucene_version>8.11.1</lucene_version>
 		<hamcrest_version>2.2</hamcrest_version>
 		<hibernate_validator_version>6.1.5.Final</hibernate_validator_version>
@@ -977,18 +975,15 @@
 
 		<stax2_api_version>3.1.4</stax2_api_version>
 		<testcontainers_version>1.17.1</testcontainers_version>
-		<thymeleaf-version>3.0.14.RELEASE</thymeleaf-version>
+		<thymeleaf-version>3.1.2.RELEASE</thymeleaf-version>
 		<woodstox_core_asl_version>4.4.1</woodstox_core_asl_version>
-
-		<!-- We are aiming to still work on a very old version of SLF4j even though we depend on the newest, just to be nice to users of the API. This version is tested in the hapi-fhir-cobertura. -->
-		<slf4j_target_version>1.6.0</slf4j_target_version>
-
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 		<ebay_cors_filter_version>1.0.1</ebay_cors_filter_version>
-
 		<elastic_apm_version>1.28.4</elastic_apm_version>
+		<ucum_version>1.0.8</ucum_version>
+
 		<!-- CQL Support -->
-		<clinical-reasoning.version>3.0.0-PRE5</clinical-reasoning.version>
+		<clinical-reasoning.version>3.0.0-PRE8</clinical-reasoning.version>
 
 		<!-- Site properties -->
 		<fontawesomeVersion>5.4.1</fontawesomeVersion>
@@ -1145,7 +1140,7 @@
 			<dependency>
 				<groupId>com.h2database</groupId>
 				<artifactId>h2</artifactId>
-				<version>2.1.214</version>
+				<version>2.2.220</version>
 			</dependency>
 			<dependency>
 				<groupId>com.helger</groupId>
@@ -1351,7 +1346,7 @@
 			<dependency>
 				<groupId>com.microsoft.sqlserver</groupId>
 				<artifactId>mssql-jdbc</artifactId>
-				<version>9.4.1.jre8</version>
+				<version>12.2.0.jre11</version>
 			</dependency>
 			<dependency>
 				<groupId>javax.servlet</groupId>
@@ -1400,7 +1395,7 @@
 			<dependency>
 				<groupId>net.sourceforge.htmlunit</groupId>
 				<artifactId>htmlunit</artifactId>
-				<version>2.67.0</version>
+				<version>2.70.0</version>
 				<exclusions>
 					<exclusion>
 						<!-- Don't let HTMLUnit bring in Jetty 9 -->
@@ -2194,14 +2189,9 @@
 				<scope>test</scope>
 			</dependency>
 			<dependency>
-				<groupId>xpp3</groupId>
+				<groupId>org.ogce</groupId>
 				<artifactId>xpp3</artifactId>
-				<version>1.1.4c</version>
-			</dependency>
-			<dependency>
-				<groupId>xpp3</groupId>
-				<artifactId>xpp3_xpath</artifactId>
-				<version>1.1.4c</version>
+				<version>1.1.6</version>
 			</dependency>
 			<dependency>
 				<groupId>org.flywaydb</groupId>

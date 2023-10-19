@@ -48,7 +48,7 @@ The narrative properties file should contain definitions using the profile URL o
 
 ```properties
 ips-allergyintolerance.resourceType=Bundle
-ips-allergyintolerance.profile=http://hl7.org/fhir/uv/ips/StructureDefinition/AllergiesAndIntolerances-uv-ips
+ips-allergyintolerance.profile=https://hl7.org/fhir/uv/ips/StructureDefinition-Composition-uv-ips-definitions.html#Composition.section:sectionAllergies
 ips-allergyintolerance.narrative=classpath:ca/uhn/fhir/jpa/ips/narrative/allergyintolerance.html
 ```
 

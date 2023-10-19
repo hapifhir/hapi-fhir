@@ -1484,6 +1484,15 @@ public enum Pointcut implements IPointcut {
 	 * to the new contents of the resource. These changes will be reflected in
 	 * permanent storage.
 	 * </p>
+	 * <p>
+	 * <b>NO-OPS:</b> If the client has submitted an update that does not actually make any changes
+	 * (i.e. the resource they include in the PUT body is identical to the content that
+	 * was already stored) the server may choose to ignore the update and perform
+	 * a "NO-OP". In this case, this pointcut is still invoked, but {@link #STORAGE_PRECOMMIT_RESOURCE_UPDATED}
+	 * will not be. Hook methods for this pointcut may make changes to the new contents of the
+	 * resource being updated, and in this case the NO-OP will be cancelled and
+	 * {@link #STORAGE_PRECOMMIT_RESOURCE_UPDATED} will also be invoked.
+	 * </p>
 	 * Hooks may accept the following parameters:
 	 * <ul>
 	 * <li>org.hl7.fhir.instance.model.api.IBaseResource - The previous contents of the resource being updated</li>
@@ -1616,6 +1625,10 @@ public enum Pointcut implements IPointcut {
 	 * (both the previous and new contents) but should generally not make any
 	 * changes as storage has already occurred. Changes will not be reflected
 	 * in storage, but may be reflected in the HTTP response.
+	 * </p>
+	 * <p>
+	 * NO-OP note: See {@link #STORAGE_PRESTORAGE_RESOURCE_UPDATED} for a note on
+	 * no-op updates when no changes are detected.
 	 * </p>
 	 * Hooks may accept the following parameters:
 	 * <ul>
@@ -2250,7 +2263,7 @@ public enum Pointcut implements IPointcut {
 	 * <ul>
 	 * <li>ca.uhn.fhir.rest.server.messaging.ResourceOperationMessage - This parameter should not be modified as processing is complete when this hook is invoked.</li>
 	 * <li>ca.uhn.fhir.rest.server.TransactionLogMessages - This parameter is for informational messages provided by the MDM module during MDM processing.</li>
-	 * <li>ca.uhn.fhir.mdm.api.MdmLinkChangeEvent - Contains information about the change event, including target and golden resource IDs and the operation type.</li>
+	 * <li>ca.uhn.fhir.mdm.model.mdmevents.MdmLinkEvent - Contains information about the change event, including target and golden resource IDs and the operation type.</li>
 	 * </ul>
 	 * </p>
 	 * <p>
@@ -2261,7 +2274,192 @@ public enum Pointcut implements IPointcut {
 			void.class,
 			"ca.uhn.fhir.rest.server.messaging.ResourceOperationMessage",
 			"ca.uhn.fhir.rest.server.TransactionLogMessages",
-			"ca.uhn.fhir.mdm.api.MdmLinkEvent"),
+			"ca.uhn.fhir.mdm.model.mdmevents.MdmLinkEvent"),
+
+	/**
+	 * <b>MDM Create Link</b>
+	 * This hook is invoked after an MDM link is created,
+	 * and changes have been persisted to the database.
+	 * <p>
+	 * Hook may accept the following parameters:
+	 * </p>
+	 * <ul>
+	 * <li>
+	 * ca.uhn.fhir.rest.api.server.RequestDetails - An object containing details about the request that is about to be processed, including details such as the
+	 * resource type and logical ID (if any) and other FHIR-specific aspects of the request which have been
+	 * pulled out of the servlet request.
+	 * </li>
+	 * <li>
+	 * ca.uhn.fhir.mdm.api.MdmLinkChangeEvent - Contains information about the link event, including target and golden resource IDs and the operation type.
+	 * </li>
+	 * </ul>
+	 * <p>
+	 * Hooks should return <code>void</code>.
+	 * </p>
+	 */
+	MDM_POST_CREATE_LINK(
+			void.class, "ca.uhn.fhir.rest.api.server.RequestDetails", "ca.uhn.fhir.mdm.model.mdmevents.MdmLinkEvent"),
+
+	/**
+	 * <b>MDM Update Link</b>
+	 * This hook is invoked after an MDM link is updated,
+	 * and changes have been persisted to the database.
+	 * <p>
+	 * Hook may accept the following parameters:
+	 * </p>
+	 * <ul>
+	 * <li>
+	 * ca.uhn.fhir.rest.api.server.RequestDetails - An object containing details about the request that is about to be processed, including details such as the
+	 * resource type and logical ID (if any) and other FHIR-specific aspects of the request which have been
+	 * pulled out of the servlet request.
+	 * </li>
+	 * <li>
+	 * ca.uhn.fhir.mdm.api.MdmLinkChangeEvent - Contains information about the link event, including target and golden resource IDs and the operation type.
+	 * </li>
+	 * </ul>
+	 * <p>
+	 * Hooks should return <code>void</code>.
+	 * </p>
+	 */
+	MDM_POST_UPDATE_LINK(
+			void.class, "ca.uhn.fhir.rest.api.server.RequestDetails", "ca.uhn.fhir.mdm.model.mdmevents.MdmLinkEvent"),
+
+	/**
+	 * <b>MDM Merge Golden Resources</b>
+	 * This hook is invoked after 2 golden resources have been
+	 * merged together and results persisted.
+	 * <p>
+	 * Hook may accept the following parameters:
+	 * </p>
+	 * <ul>
+	 * <li>
+	 * ca.uhn.fhir.rest.api.server.RequestDetails - An object containing details about the request that is about to be processed, including details such as the
+	 * resource type and logical ID (if any) and other FHIR-specific aspects of the request which have been
+	 * pulled out of the servlet request.
+	 * </li>
+	 * <li>
+	 * ca.uhn.fhir.mdm.model.mdmevents.MdmMergeEvent - Contains information about the from and to resources.
+	 * </li>
+	 * </ul>
+	 * <p>
+	 * Hooks should return <code>void</code>.
+	 * </p>
+	 */
+	MDM_POST_MERGE_GOLDEN_RESOURCES(
+			void.class, "ca.uhn.fhir.rest.api.server.RequestDetails", "ca.uhn.fhir.mdm.model.mdmevents.MdmMergeEvent"),
+
+	/**
+	 * <b>MDM Link History Hook:</b>
+	 * This hook is invoked after link histories are queried,
+	 * but before the results are returned to the caller.
+	 * <p>
+	 * Hook may accept the following parameters:
+	 * </p>
+	 * <ul>
+	 * <li>
+	 * ca.uhn.fhir.rest.api.server.RequestDetails - An object containing details about the request that is about to be processed.
+	 * </li>
+	 * <li>
+	 * ca.uhn.fhir.mdm.model.mdmevents.MdmHistoryEvent - An MDM History Event containing
+	 * information about the requested golden resource ids and/or source ids input, and
+	 * the returned link histories.
+	 * </li>
+	 * </ul>
+	 */
+	MDM_POST_LINK_HISTORY(
+			void.class,
+			"ca.uhn.fhir.rest.api.server.RequestDetails",
+			"ca.uhn.fhir.mdm.model.mdmevents.MdmHistoryEvent"),
+
+	/**
+	 * <b>MDM Not Duplicate/Unduplicate Hook:</b>
+	 * This hook is invoked after 2 golden resources with an existing link
+	 * of "POSSIBLE_DUPLICATE" get unlinked/unduplicated.
+	 * <p>
+	 * This hook accepts the following parameters:
+	 * </p>
+	 * <ul>
+	 * <li>
+	 * ca.uhn.fhir.rest.api.server.RequestDetails - An object containing details about the request that is about to be processed.
+	 * </li>
+	 * <li>
+	 * ca.uhn.fhir.mdm.model.mdmevents.MdmLinkEvent - the resulting final link
+	 * between the 2 golden resources; now a NO_MATCH link.
+	 * </li>
+	 * </ul>
+	 */
+	MDM_POST_NOT_DUPLICATE(
+			void.class, "ca.uhn.fhir.rest.api.server.RequestDetails", "ca.uhn.fhir.mdm.model.mdmevents.MdmLinkEvent"),
+
+	/**
+	 * <b>MDM Clear Hook:</b>
+	 * This hook is invoked when an mdm clear operation is requested.
+	 * <p>
+	 * This hook accepts the following parameters:
+	 * </p>
+	 * <ul>
+	 * <li>
+	 * ca.uhn.fhir.rest.api.server.RequestDetails - An object containing details about the request that is about to be processed.
+	 * </li>
+	 * <li>
+	 * ca.uhn.fhir.mdm.model.mdmevents.MdmClearEvent - the event containing information on the clear command,
+	 * including the type filter (if any) and the batch size (if any).
+	 * </li>
+	 * </ul>
+	 */
+	MDM_CLEAR(
+			void.class, "ca.uhn.fhir.rest.api.server.RequestDetails", "ca.uhn.fhir.mdm.model.mdmevents.MdmClearEvent"),
+
+	/**
+	 * <b>MDM Submit Hook:</b>
+	 * This hook is invoked whenever when mdm submit operation is requested.
+	 * MDM submits can be invoked in multiple ways.
+	 * Some of which accept asynchronous calling, and some of which do not.
+	 * <p>
+	 * If the MDM Submit operation is asynchronous
+	 * (typically because the Prefer: respond-async header has been provided)
+	 * this hook will be invoked after the job is submitted, but before it has
+	 * necessarily been executed.
+	 * </p>
+	 * <p>
+	 * If the MDM Submit operation is synchronous,
+	 * this hook will be invoked immediately after the submit operation
+	 * has been executed, but before the call is returned to the caller.
+	 * </p>
+	 * <ul>
+	 * <li>
+	 * On Patient Type. Can be synchronous or asynchronous.
+	 * </li>
+	 * <li>
+	 * On Practitioner Type. Can be synchronous or asynchronous.
+	 * </li>
+	 * <li>
+	 * On specific patient instances. Is always synchronous.
+	 * </li>
+	 * <li>
+	 * On specific practitioner instances. Is always synchronous.
+	 * </li>
+	 * <li>
+	 * On the server (ie, not on any resource) with or without a resource filter.
+	 * Can be synchronous or asynchronous.
+	 * </li>
+	 * </ul>
+	 * <p>
+	 * In all cases, this hook will take the following parameters:
+	 * </p>
+	 * <ul>
+	 * <li>
+	 * ca.uhn.fhir.rest.api.server.RequestDetails - An object containing details about the request that is about to be processed.
+	 * </li>
+	 * <li>
+	 * ca.uhn.fhir.mdm.model.mdmevents.MdmSubmitEvent - An event with the Mdm Submit information
+	 * (urls specifying paths that will be searched for MDM submit, as well as
+	 * if this was an asynchronous request or not).
+	 * </li>
+	 * </ul>
+	 */
+	MDM_SUBMIT(
+			void.class, "ca.uhn.fhir.rest.api.server.RequestDetails", "ca.uhn.fhir.mdm.model.mdmevents.MdmSubmitEvent"),
 
 	/**
 	 * <b>JPA Hook:</b>

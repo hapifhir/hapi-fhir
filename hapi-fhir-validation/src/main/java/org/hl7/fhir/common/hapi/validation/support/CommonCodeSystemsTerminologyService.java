@@ -38,6 +38,7 @@ import java.util.Optional;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -124,8 +125,8 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 				break;
 
 			case LANGUAGES_VALUESET_URL:
-				if (!LANGUAGES_CODESYSTEM_URL.equals(theCodeSystem)
-						&& !(theCodeSystem == null && theOptions.isInferSystem())) {
+				expectSystem = LANGUAGES_CODESYSTEM_URL;
+				if (!expectSystem.equals(theCodeSystem) && !(theCodeSystem == null && theOptions.isInferSystem())) {
 					return new CodeValidationResult()
 							.setSeverity(IssueSeverity.ERROR)
 							.setMessage("Inappropriate CodeSystem URL \"" + theCodeSystem + "\" for ValueSet: "
@@ -155,8 +156,8 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 				}
 
 			case ALL_LANGUAGES_VALUESET_URL:
-				if (!LANGUAGES_CODESYSTEM_URL.equals(theCodeSystem)
-						&& !(theCodeSystem == null && theOptions.isInferSystem())) {
+				expectSystem = LANGUAGES_CODESYSTEM_URL;
+				if (!expectSystem.equals(theCodeSystem) && !(theCodeSystem == null && theOptions.isInferSystem())) {
 					return new CodeValidationResult()
 							.setSeverity(IssueSeverity.ERROR)
 							.setMessage("Inappropriate CodeSystem URL \"" + theCodeSystem + "\" for ValueSet: "
@@ -178,8 +179,9 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 
 			case UCUM_VALUESET_URL: {
 				String system = theCodeSystem;
+				expectSystem = UCUM_CODESYSTEM_URL;
 				if (system == null && theOptions.isInferSystem()) {
-					system = UCUM_CODESYSTEM_URL;
+					system = expectSystem;
 				}
 				CodeValidationResult validationResult =
 						validateLookupCode(theValidationSupportContext, theCode, system);
@@ -197,9 +199,11 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 				}
 			}
 
-			return new CodeValidationResult()
-					.setSeverity(IssueSeverity.ERROR)
-					.setMessage("Code \"" + theCode + "\" is not in system: " + USPS_CODESYSTEM_URL);
+			String actualSystem = defaultIfBlank(theCodeSystem, expectSystem);
+			String unknownCodeMessage = myFhirContext
+					.getLocalizer()
+					.getMessage("ca.uhn.fhir.jpa.term.TermReadSvcImpl.unknownCodeInSystem", actualSystem, theCode);
+			return new CodeValidationResult().setSeverity(IssueSeverity.ERROR).setMessage(unknownCodeMessage);
 		}
 
 		if (isBlank(theValueSetUrl)) {
@@ -219,6 +223,10 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 				validationResult = new CodeValidationResult()
 						.setCode(lookupResult.getSearchedForCode())
 						.setDisplay(lookupResult.getCodeDisplay());
+			} else if (lookupResult.getErrorMessage() != null) {
+				validationResult = new CodeValidationResult()
+						.setSeverity(IssueSeverity.ERROR)
+						.setMessage(lookupResult.getErrorMessage());
 			}
 		}
 
@@ -267,6 +275,7 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 		retVal.setSearchedForCode(theCode);
 		retVal.setSearchedForSystem(theSystem);
 		retVal.setFound(false);
+		retVal.setErrorMessage("Code '" + theCode + "' is not valid for system: " + theSystem);
 		return retVal;
 	}
 
@@ -390,20 +399,22 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 	private LookupCodeResult lookupUcumCode(String theCode) {
 		InputStream input = ClasspathUtil.loadResourceAsStream("/ucum-essence.xml");
 		String outcome = null;
-		try {
-			UcumEssenceService svc = new UcumEssenceService(input);
-			outcome = svc.analyse(theCode);
-		} catch (UcumException e) {
-			ourLog.warn("Failed parse UCUM code: {}", theCode, e);
-		} finally {
-			ClasspathUtil.close(input);
-		}
 		LookupCodeResult retVal = new LookupCodeResult();
 		retVal.setSearchedForCode(theCode);
 		retVal.setSearchedForSystem(UCUM_CODESYSTEM_URL);
-		if (outcome != null) {
-			retVal.setFound(true);
-			retVal.setCodeDisplay(outcome);
+
+		try {
+			UcumEssenceService svc = new UcumEssenceService(input);
+			outcome = svc.analyse(theCode);
+			if (outcome != null) {
+				retVal.setFound(true);
+				retVal.setCodeDisplay(outcome);
+			}
+		} catch (UcumException e) {
+			ourLog.debug("Failed parse UCUM code: {}", theCode, e);
+			retVal.setErrorMessage(e.getMessage());
+		} finally {
+			ClasspathUtil.close(input);
 		}
 		return retVal;
 	}

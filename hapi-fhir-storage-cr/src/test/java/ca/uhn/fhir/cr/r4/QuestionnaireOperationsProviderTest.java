@@ -1,8 +1,8 @@
 package ca.uhn.fhir.cr.r4;
 
-import ca.uhn.fhir.cr.BaseCrR4Test;
-import ca.uhn.fhir.cr.r4.questionnaire.QuestionnaireOperationsProvider;
-import org.hl7.fhir.r4.model.BooleanType;
+
+import ca.uhn.fhir.cr.r4.questionnaire.QuestionnairePackageProvider;
+import ca.uhn.fhir.cr.r4.questionnaire.QuestionnairePopulateProvider;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Parameters;
@@ -13,9 +13,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class QuestionnaireOperationsProviderTest extends BaseCrR4Test {
+public class QuestionnaireOperationsProviderTest extends BaseCrR4TestServer {
 	@Autowired
-	QuestionnaireOperationsProvider questionnaireOperationsProvider;
+	QuestionnairePopulateProvider myQuestionnairePopulateProvider;
+
+	@Autowired
+	QuestionnairePackageProvider myQuestionnairePackageProvider;
 
 	@Test
 	void testPopulate() {
@@ -24,7 +27,7 @@ public class QuestionnaireOperationsProviderTest extends BaseCrR4Test {
 		var requestDetails = setupRequestDetails();
 		var theSubject = "positive";
 		var parameters = new Parameters().addParameter("Service Request Id", "SleepStudy").addParameter("Service Request Id", "SleepStudy2");
-		var result = this.questionnaireOperationsProvider.populate(new IdType("Questionnaire", "ASLPA1"),
+		var result = myQuestionnairePopulateProvider.populate(new IdType("Questionnaire", "ASLPA1"),
 			null, null, theSubject, parameters,
 			null, null, null, null,
 			requestDetails);
@@ -41,7 +44,7 @@ public class QuestionnaireOperationsProviderTest extends BaseCrR4Test {
 		var requestDetails = setupRequestDetails();
 		var theSubject = "positive";
 		var parameters = new Parameters().addParameter("Service Request Id", "SleepStudy").addParameter("Service Request Id", "SleepStudy2");
-		var result = this.questionnaireOperationsProvider.prepopulate(new IdType("Questionnaire", "ASLPA1"),
+		var result = myQuestionnairePopulateProvider.prepopulate(new IdType("Questionnaire", "ASLPA1"),
 			null, null, theSubject, parameters,
 			null, null, null, null,
 			requestDetails);
@@ -54,7 +57,7 @@ public class QuestionnaireOperationsProviderTest extends BaseCrR4Test {
 	void testQuestionnairePackage() {
 		loadBundle("ca/uhn/fhir/cr/r4/Bundle-QuestionnairePackage.json");
 		var requestDetails = setupRequestDetails();
-		var result = this.questionnaireOperationsProvider.packageQuestionnaire(null,
+		var result = myQuestionnairePackageProvider.packageQuestionnaire(null,
 			"http://example.org/sdh/dtr/aslp/Questionnaire/ASLPA1", "true",
 			requestDetails);
 

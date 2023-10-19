@@ -7,7 +7,7 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-deployable-pom</artifactId>
-		<version>6.8.0-SNAPSHOT</version>
+		<version>6.9.10-SNAPSHOT</version>
 
 		<relativePath>../hapi-deployable-pom/pom.xml</relativePath>
 	</parent>
@@ -19,7 +19,7 @@
 
 	<properties>
 		<org.antlr-version>4.10.1</org.antlr-version>
-		<org.codelibs.xpp3-version>1.1.4c.0</org.codelibs.xpp3-version>
+		<xpp3-version>1.1.6</xpp3-version>
 		<spring-security-core.version>5.7.8</spring-security-core.version>
 	</properties>
 
@@ -40,16 +40,6 @@
 				<groupId>ca.uhn.hapi.fhir</groupId>
 				<artifactId>hapi-fhir-validation</artifactId>
 				<version>${project.version}</version>
-				<exclusions>
-					<exclusion>
-						<groupId>xpp3</groupId>
-						<artifactId>xpp3_min</artifactId>
-					</exclusion>
-					<exclusion>
-						<groupId>xmlpull</groupId>
-						<artifactId>xmlpull</artifactId>
-					</exclusion>
-				</exclusions>
 			</dependency>
 			<dependency>
 				<groupId>ca.uhn.hapi.fhir</groupId>
@@ -87,43 +77,12 @@
 		</dependency>
 		<dependency>
 			<groupId>org.opencds.cqf.fhir</groupId>
-			<artifactId>cqf-fhir-api</artifactId>
+			<artifactId>cqf-fhir-cr</artifactId>
 			<version>${clinical-reasoning.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>org.opencds.cqf.cql</groupId>
-			<artifactId>evaluator.fhir</artifactId>
-			<version>${clinical-reasoning.version}</version>
-			<exclusions>
-				<exclusion>
-					<groupId>ca.uhn.hapi.fhir</groupId>
-					<artifactId>org.hl7.fhir.r4</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>ca.uhn.hapi.fhir</groupId>
-					<artifactId>org.hl7.fhir.r4b</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>ca.uhn.hapi.fhir</groupId>
-					<artifactId>org.hl7.fhir.r5</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>xpp3</groupId>
-					<artifactId>xpp3</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>xpp3</groupId>
-					<artifactId>xpp3_min</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>xmlpull</groupId>
-					<artifactId>xmlpull</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-		<dependency>
-			<groupId>org.opencds.cqf.cql</groupId>
-			<artifactId>evaluator.spring</artifactId>
+			<groupId>org.opencds.cqf.fhir</groupId>
+			<artifactId>cqf-fhir-jackson</artifactId>
 			<version>${clinical-reasoning.version}</version>
 			<exclusions>
 				<exclusion>
@@ -134,44 +93,37 @@
 					<groupId>xmlpull</groupId>
 					<artifactId>xmlpull</artifactId>
 				</exclusion>
-			</exclusions>
-		</dependency>
-		<dependency>
-			<groupId>org.opencds.cqf.cql</groupId>
-			<artifactId>evaluator.plandefinition</artifactId>
-			<version>${clinical-reasoning.version}</version>
-			<exclusions>
-				<exclusion>
-					<groupId>xpp3</groupId>
-					<artifactId>xpp3_min</artifactId>
-				</exclusion>
 				<exclusion>
 					<groupId>xmlpull</groupId>
 					<artifactId>xmlpull</artifactId>
 				</exclusion>
 			</exclusions>
-		</dependency>
-		<dependency>
-			<groupId>org.opencds.cqf.cql</groupId>
-			<artifactId>evaluator.jackson-deps</artifactId>
-			<version>${clinical-reasoning.version}</version>
 			<type>pom</type>
+		</dependency>
+		<dependency>
+			<groupId>org.opencds.cqf.fhir</groupId>
+			<artifactId>cqf-fhir-cql</artifactId>
+			<version>${clinical-reasoning.version}</version>
 			<exclusions>
-				<exclusion>
-					<groupId>xpp3</groupId>
-					<artifactId>xpp3_min</artifactId>
-				</exclusion>
+			<exclusion>
+				<groupId>xpp3</groupId>
+				<artifactId>xpp3_min</artifactId>
+			</exclusion>
+			<exclusion>
+				<groupId>xmlpull</groupId>
+				<artifactId>xmlpull</artifactId>
+			</exclusion>
 				<exclusion>
 					<groupId>xmlpull</groupId>
 					<artifactId>xmlpull</artifactId>
 				</exclusion>
 			</exclusions>
+			<type>pom</type>
 		</dependency>
-
 		<dependency>
-			<groupId>org.codelibs</groupId>
+			<groupId>org.ogce</groupId>
 			<artifactId>xpp3</artifactId>
-			<version>${org.codelibs.xpp3-version}</version>
+			<version>${xpp3-version}</version>
 		</dependency>
 
 		<dependency>
@@ -185,6 +137,12 @@
 			<groupId>org.springframework.security</groupId>
 			<artifactId>spring-security-core</artifactId>
 			<version>${spring-security-core.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-autoconfigure</artifactId>
+			<version>${spring_boot_version}</version>
 		</dependency>
 
 		<!-- This is needed for the CqlExceptionHandlingInterceptor -->

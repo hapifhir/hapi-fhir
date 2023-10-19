@@ -19,10 +19,10 @@
  */
 package ca.uhn.fhir.cr.dstu3;
 
-import org.opencds.cqf.cql.evaluator.plandefinition.dstu3.PlanDefinitionProcessor;
-import org.opencds.cqf.fhir.api.Repository;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
+import org.opencds.cqf.fhir.cr.plandefinition.dstu3.PlanDefinitionProcessor;
 
 @FunctionalInterface
 public interface IPlanDefinitionProcessorFactory {
-	PlanDefinitionProcessor create(Repository theRepository);
+	PlanDefinitionProcessor create(RequestDetails theRequestDetails);
 }

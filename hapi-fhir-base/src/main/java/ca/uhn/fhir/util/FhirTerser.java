@@ -287,9 +287,33 @@ public class FhirTerser {
 		return retVal;
 	}
 
+	/**
+	 * Extracts all outbound references from a resource
+	 *
+	 * @param theResource the resource to be analyzed
+	 * @return a list of references to other resources
+	 */
 	public List<ResourceReferenceInfo> getAllResourceReferences(final IBaseResource theResource) {
+		return getAllResourceReferencesExcluding(theResource, Lists.newArrayList());
+	}
+
+	/**
+	 * Extracts all outbound references from a resource, excluding any that are located on black-listed parts of the
+	 * resource
+	 *
+	 * @param theResource       the resource to be analyzed
+	 * @param thePathsToExclude a list of dot-delimited paths not to include in the result
+	 * @return a list of references to other resources
+	 */
+	public List<ResourceReferenceInfo> getAllResourceReferencesExcluding(
+			final IBaseResource theResource, List<String> thePathsToExclude) {
 		final ArrayList<ResourceReferenceInfo> retVal = new ArrayList<>();
 		BaseRuntimeElementCompositeDefinition<?> def = myContext.getResourceDefinition(theResource);
+		List<List<String>> tokenizedPathsToExclude = thePathsToExclude.stream()
+				.map(path -> StringUtils.split(path, "."))
+				.map(Lists::newArrayList)
+				.collect(Collectors.toList());
+
 		visit(newMap(), theResource, theResource, null, null, def, new IModelVisitor() {
 			@Override
 			public void acceptElement(
@@ -301,6 +325,10 @@ public class FhirTerser {
 				if (theElement == null || theElement.isEmpty()) {
 					return;
 				}
+
+				if (thePathToElement != null && pathShouldBeExcluded(tokenizedPathsToExclude, thePathToElement)) {
+					return;
+				}
 				if (IBaseReference.class.isAssignableFrom(theElement.getClass())) {
 					retVal.add(new ResourceReferenceInfo(
 							myContext, theOuterResource, thePathToElement, (IBaseReference) theElement));
@@ -308,6 +336,19 @@ public class FhirTerser {
 			}
 		});
 		return retVal;
+	}
+
+	private boolean pathShouldBeExcluded(List<List<String>> theTokenizedPathsToExclude, List<String> thePathToElement) {
+		return theTokenizedPathsToExclude.stream().anyMatch(p -> {
+			// Check whether the path to the element starts with the path to be excluded
+			if (p.size() > thePathToElement.size()) {
+				return false;
+			}
+
+			List<String> prefix = thePathToElement.subList(0, p.size());
+
+			return Objects.equals(p, prefix);
+		});
 	}
 
 	private BaseRuntimeChildDefinition getDefinition(

@@ -71,7 +71,17 @@ import ca.uhn.fhir.rest.api.QualifiedParamList;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.api.SearchContainedModeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.param.*;
+import ca.uhn.fhir.rest.param.CompositeParam;
+import ca.uhn.fhir.rest.param.DateParam;
+import ca.uhn.fhir.rest.param.HasParam;
+import ca.uhn.fhir.rest.param.NumberParam;
+import ca.uhn.fhir.rest.param.QuantityParam;
+import ca.uhn.fhir.rest.param.ReferenceParam;
+import ca.uhn.fhir.rest.param.SpecialParam;
+import ca.uhn.fhir.rest.param.StringParam;
+import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.param.TokenParamModifier;
+import ca.uhn.fhir.rest.param.UriParam;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
@@ -120,8 +130,11 @@ import static ca.uhn.fhir.jpa.util.QueryParameterUtils.toAndPredicate;
 import static ca.uhn.fhir.jpa.util.QueryParameterUtils.toEqualToOrInPredicate;
 import static ca.uhn.fhir.jpa.util.QueryParameterUtils.toOperation;
 import static ca.uhn.fhir.jpa.util.QueryParameterUtils.toOrPredicate;
-import static ca.uhn.fhir.rest.api.Constants.*;
-import static org.apache.commons.lang3.StringUtils.*;
+import static ca.uhn.fhir.rest.api.Constants.PARAM_HAS;
+import static ca.uhn.fhir.rest.api.Constants.PARAM_ID;
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.split;
 
 public class QueryStack {
 
@@ -1877,6 +1890,16 @@ public class QueryStack {
 		return toOrPredicate(orPredicates);
 	}
 
+	private SourcePredicateBuilder getSourcePredicateBuilder(
+			@Nullable DbColumn theSourceJoinColumn, SelectQuery.JoinType theJoinType) {
+		return createOrReusePredicateBuilder(
+						PredicateBuilderTypeEnum.SOURCE,
+						theSourceJoinColumn,
+						Constants.PARAM_SOURCE,
+						() -> mySqlBuilder.addSourcePredicateBuilder(theSourceJoinColumn, theJoinType))
+				.getResult();
+	}
+
 	// TODO: Preliminary method for handling _lastUpdated
 	private Condition createPredicateLastUpdated(
 			@Nullable DbColumn theSourceJoinColumn,
@@ -2699,6 +2722,7 @@ public class QueryStack {
 		Condition predicate =
 				table.createEverythingPredicate(theResourceName, theTypeSourceResourceNames, theTargetPids);
 		mySqlBuilder.addPredicate(predicate);
+		mySqlBuilder.getSelect().setIsDistinct(true);
 	}
 
 	public IQueryParameterType newParameterInstance(
@@ -2828,7 +2852,7 @@ public class QueryStack {
 		private List<String> extractPaths(String theResourceType, RuntimeSearchParam theSearchParam) {
 			List<String> pathsForType = theSearchParam.getPathsSplit().stream()
 					.map(String::trim)
-					.filter(t -> t.startsWith(theResourceType))
+					.filter(t -> (t.startsWith(theResourceType) || t.startsWith("(" + theResourceType)))
 					.collect(Collectors.toList());
 			if (pathsForType.isEmpty()) {
 				ourLog.warn(

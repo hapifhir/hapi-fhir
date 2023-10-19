@@ -31,9 +31,9 @@ import ca.uhn.fhir.jpa.mdm.svc.candidate.TooManyCandidatesException;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedJsonMessage;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
-import ca.uhn.fhir.mdm.api.MdmLinkEvent;
 import ca.uhn.fhir.mdm.log.Logs;
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
+import ca.uhn.fhir.mdm.model.mdmevents.MdmLinkEvent;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.TransactionLogMessages;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -81,10 +81,10 @@ public class MdmMessageHandler implements MessageHandler {
 
 		ResourceModifiedMessage msg = ((ResourceModifiedJsonMessage) theMessage).getPayload();
 		try {
-
 			IBaseResource sourceResource = msg.getNewPayload(myFhirContext);
 
-			if (myMdmResourceFilteringSvc.shouldBeProcessed((IAnyResource) sourceResource)) {
+			boolean toProcess = myMdmResourceFilteringSvc.shouldBeProcessed((IAnyResource) sourceResource);
+			if (toProcess) {
 				matchMdmAndUpdateLinks(sourceResource, msg);
 			}
 		} catch (TooManyCandidatesException e) {

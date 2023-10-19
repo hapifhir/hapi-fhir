@@ -17,7 +17,6 @@ import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
-import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.HapiExtensions;
@@ -52,6 +51,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.jpa.dao.BaseHapiFhirDao.INDEX_STATUS_INDEXED;
+import static ca.uhn.fhir.jpa.dao.BaseHapiFhirDao.INDEX_STATUS_INDEXING_FAILED;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.containsString;
@@ -862,12 +862,14 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 		executeReindex("Coverage?");
 
 		runInTransaction(() -> {
-			List<ResourceTable> tables = myResourceTableDao.findAll();
-			String resourceIds = tables.stream().map(t -> t.getIdDt().getValue()).collect(Collectors.joining(", "));
+			List<ResourceTable> resources = myResourceTableDao.findAll();
+			String resourceIds = resources.stream().map(t -> t.getIdDt().getValue()).collect(Collectors.joining(", "));
 			// 1 patient, 1 coverage, 3 search parameters
-			assertEquals(5, tables.size(), resourceIds);
-			for (int i = 0; i < tables.size(); i++) {
-				assertEquals(INDEX_STATUS_INDEXED, tables.get(i).getIndexStatus().intValue());
+			assertEquals(5, resources.size(), resourceIds);
+			for (int i = 0; i < resources.size(); i++) {
+				int indexStatus = resources.get(i).getIndexStatus().intValue();
+				assertEquals(INDEX_STATUS_INDEXED, indexStatus, "Expected resource " + i + " to have index status INDEXED but was " +
+					(indexStatus == INDEX_STATUS_INDEXING_FAILED ? "FAILED" : "UNKNOWN(" + indexStatus + ")"));
 			}
 		});
 
@@ -890,7 +892,8 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 		JobInstanceStartRequest startRequest = new JobInstanceStartRequest();
 		startRequest.setJobDefinitionId(ReindexAppCtx.JOB_REINDEX);
 		startRequest.setParameters(parameters);
-		Batch2JobStartResponse res = myJobCoordinator.startInstance(startRequest);
+		Batch2JobStartResponse res = myJobCoordinator.startInstance(mySrd, startRequest);
+		ourLog.info("Started reindex job with id {}", res.getInstanceId());
 		myBatch2JobHelper.awaitJobCompletion(res);
 	}
 

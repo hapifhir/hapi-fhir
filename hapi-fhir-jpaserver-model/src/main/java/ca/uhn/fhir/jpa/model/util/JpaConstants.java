@@ -23,6 +23,8 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.util.HapiExtensions;
 
+import java.util.Set;
+
 public class JpaConstants {
 
 	/**
@@ -83,7 +85,7 @@ public class JpaConstants {
 	 * Header name for the "X-Meta-Snapshot-Mode" header, which
 	 * specifies that properties in meta (tags, profiles, security labels)
 	 * should be treated as a snapshot, meaning that these things will
-	 * be removed if they are nt explicitly included in updates
+	 * be removed if they are not explicitly included in updates
 	 */
 	public static final String HEADER_META_SNAPSHOT_MODE = "X-Meta-Snapshot-Mode";
 	/**
@@ -164,14 +166,6 @@ public class JpaConstants {
 	 * Operation name for the "$import-poll-status" operation
 	 */
 	public static final String OPERATION_IMPORT_POLL_STATUS = "$import-poll-status";
-	/**
-	 * Operation name for the "$export" operation
-	 */
-	public static final String OPERATION_EXPORT = "$export";
-	/**
-	 * Operation name for the "$export-poll-status" operation
-	 */
-	public static final String OPERATION_EXPORT_POLL_STATUS = "$export-poll-status";
 	/**
 	 * Operation name for the "$lastn" operation
 	 */
@@ -306,6 +300,8 @@ public class JpaConstants {
 	public static final String BULK_META_EXTENSION_JOB_ID = "https://hapifhir.org/NamingSystem/bulk-export-job-id";
 	public static final String BULK_META_EXTENSION_RESOURCE_TYPE =
 			"https://hapifhir.org/NamingSystem/bulk-export-binary-resource-type";
+	public static final Set<String> UNDESIRED_RESOURCE_LINKAGES_FOR_EVERYTHING_ON_PATIENT_INSTANCE =
+			Set.of("Provenance", "List", "Group");
 
 	/**
 	 * Non-instantiable

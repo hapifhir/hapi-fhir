@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.rest.server;
 
+import ca.uhn.fhir.rest.server.method.ResponsePage;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
@@ -85,9 +86,11 @@ public class BundleProviderWithNamedPages extends SimpleBundleProvider {
 		return this;
 	}
 
+	@SuppressWarnings("unchecked")
 	@Nonnull
 	@Override
-	public List<IBaseResource> getResources(int theFromIndex, int theToIndex) {
+	public List<IBaseResource> getResources(
+			int theFromIndex, int theToIndex, @Nonnull ResponsePage.ResponsePageBuilder theResponsePageBuilder) {
 		return (List<IBaseResource>) getList(); // indexes are ignored for this provider type
 	}
 

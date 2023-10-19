@@ -42,7 +42,8 @@ public class MailSvcIT {
 		// execute
 		fixture.sendMail(email);
 		// validate
-		assertTrue(ourGreenMail.waitForIncomingEmail(5000, 1));
+		boolean condition = ourGreenMail.waitForIncomingEmail(5000, 1);
+		assertTrue(condition);
 		final MimeMessage[] receivedMessages = ourGreenMail.getReceivedMessages();
 		assertEquals(1, receivedMessages.length);
 		assertEquals(SUBJECT, receivedMessages[0].getSubject());
