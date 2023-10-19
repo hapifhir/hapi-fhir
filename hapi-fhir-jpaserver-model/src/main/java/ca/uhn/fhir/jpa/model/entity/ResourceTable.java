@@ -92,7 +92,8 @@ import static ca.uhn.fhir.jpa.model.entity.ResourceTable.IDX_RES_FHIR_ID;
 			@Index(name = "IDX_RES_DATE", columnList = BaseHasResource.RES_UPDATED),
 			@Index(
 					name = "IDX_RES_TYPE_DEL_UPDATED",
-					columnList = "RES_TYPE,RES_DELETED_AT,RES_UPDATED,PARTITION_ID,RES_ID")
+					columnList = "RES_TYPE,RES_DELETED_AT,RES_UPDATED,PARTITION_ID,RES_ID"),
+			@Index(name = "IDX_RES_RESID_UPDATED", columnList = "RES_ID, RES_UPDATED, PARTITION_ID")
 		})
 @NamedEntityGraph(name = "Resource.noJoins")
 public class ResourceTable extends BaseHasResource implements Serializable, IBasePersistedResource<JpaPid> {
