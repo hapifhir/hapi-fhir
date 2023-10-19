@@ -991,21 +991,18 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	}
 
 	private void populateId(IIdType retVal) {
+		String resourceId;
 		if (myFhirId != null && !myFhirId.isEmpty()) {
-			retVal.setValue(getResourceType() + '/' + myFhirId + '/' + Constants.PARAM_HISTORY + '/' + getVersion());
+			resourceId = myFhirId;
 		} else if (getTransientForcedId() != null) {
-			// Avoid a join query if possible
-			retVal.setValue(getResourceType()
-					+ '/'
-					+ getTransientForcedId()
-					+ '/'
-					+ Constants.PARAM_HISTORY
-					+ '/'
-					+ getVersion());
+			resourceId = getTransientForcedId();
+		} else if (myForcedId != null) {
+			resourceId = myForcedId.getForcedId();
 		} else {
 			Long id = this.getResourceId();
-			retVal.setValue(getResourceType() + '/' + id + '/' + Constants.PARAM_HISTORY + '/' + getVersion());
+			resourceId = Long.toString(id);
 		}
+		retVal.setValue(getResourceType() + '/' + resourceId + '/' + Constants.PARAM_HISTORY + '/' + getVersion());
 	}
 
 	public String getCreatedByMatchUrl() {
