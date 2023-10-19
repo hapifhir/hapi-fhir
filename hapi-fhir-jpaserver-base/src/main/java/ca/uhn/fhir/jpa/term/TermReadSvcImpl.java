@@ -2970,15 +2970,16 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 	@Override
 	public Optional<IBaseResource> readCodeSystemByForcedId(String theForcedId) {
 		@SuppressWarnings("unchecked")
-		List<ResourceTable> resultList = (List<ResourceTable>) myEntityManager.createQuery(
-			"select r from ResourceTable r " +
-				"where r.myResourceType = 'CodeSystem' and r.myFhirId = :fhirId")
-			.setParameter("fhirId", theForcedId).getResultList();
+		List<ResourceTable> resultList = (List<ResourceTable>) myEntityManager
+				.createQuery("select r from ResourceTable r "
+						+ "where r.myResourceType = 'CodeSystem' and r.myFhirId = :fhirId")
+				.setParameter("fhirId", theForcedId)
+				.getResultList();
 		if (resultList.isEmpty()) return Optional.empty();
 
 		if (resultList.size() > 1)
-			throw new NonUniqueResultException(Msg.code(911) + "More than one CodeSystem is pointed by forcedId: " + theForcedId + ". Was constraint "
-				+ ResourceTable.IDX_FORCEDID_TYPE_FID + " removed?");
+			throw new NonUniqueResultException(Msg.code(911) + "More than one CodeSystem is pointed by forcedId: "
+					+ theForcedId + ". Was constraint " + ResourceTable.IDX_FORCEDID_TYPE_FID + " removed?");
 
 		IFhirResourceDao<CodeSystem> csDao = myDaoRegistry.getResourceDao("CodeSystem");
 		IBaseResource cs = myJpaStorageResourceParser.toResource(resultList.get(0), false);

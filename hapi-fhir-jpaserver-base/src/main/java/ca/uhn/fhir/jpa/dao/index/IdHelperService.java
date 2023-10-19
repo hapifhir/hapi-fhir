@@ -382,10 +382,9 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 		 * performant.
 		 */
 		criteriaQuery.multiselect(
-			from.get("myId").as(Long.class),
-			from.get("myResourceType").as(String.class),
-			from.get("myFhirId").as(String.class)
-		);
+				from.get("myId").as(Long.class),
+				from.get("myResourceType").as(String.class),
+				from.get("myFhirId").as(String.class));
 
 		// one create one clause per id.
 		List<Predicate> predicates = new ArrayList<>(theIds.size());
@@ -431,7 +430,8 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 	 * 2. If it is default partition and default partition id is null, then return predicate for null partition.
 	 * 3. If the requested partition search is not all partition, return the request partition as predicate.
 	 */
-	private Optional<Predicate> getOptionalPartitionPredicate(RequestPartitionId theRequestPartitionId, CriteriaBuilder cb, Root<ResourceTable> from) {
+	private Optional<Predicate> getOptionalPartitionPredicate(
+			RequestPartitionId theRequestPartitionId, CriteriaBuilder cb, Root<ResourceTable> from) {
 		if (myPartitionSettings.isAllowUnqualifiedCrossPartitionReference()) {
 			return Optional.empty();
 		} else if (theRequestPartitionId.isDefaultPartition() && myPartitionSettings.getDefaultPartitionId() == null) {
@@ -485,7 +485,10 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 	@Override
 	public Optional<String> translatePidIdToForcedIdWithCache(JpaPid theId) {
 		// wipmb do we still need this?  Check up to see if callers already have it.
-		return myMemoryCacheService.get(MemoryCacheService.CacheEnum.PID_TO_FORCED_ID, theId.getId(), pid -> myResourceTableDao.findById(pid).map(ResourceTable::asTypedFhirResourceId));
+		return myMemoryCacheService.get(
+				MemoryCacheService.CacheEnum.PID_TO_FORCED_ID,
+				theId.getId(),
+				pid -> myResourceTableDao.findById(pid).map(ResourceTable::asTypedFhirResourceId));
 	}
 
 	private ListMultimap<String, String> organizeIdsByResourceType(Collection<IIdType> theIds) {
@@ -550,65 +553,74 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 			if (nextIds.size() > 0) {
 				// wipmb replace?
 
-//				assert isNotBlank(nextResourceType);
-//
-//				// wipmb forced_id need test?
-//				CriteriaBuilder cb = myEntityManager.getCriteriaBuilder();
-//				CriteriaQuery<Tuple> criteriaQuery = cb.createTupleQuery();
-//				Root<ResourceTable> from = criteriaQuery.from(ResourceTable.class);
-//				criteriaQuery.multiselect(
-//					from.get("myResourceType").as(String.class),
-//					from.get("myId").as(Long.class),
-//					from.get("myFhirId").as(String.class),
-//					from.get("myDeleted").as(Date.class)
-//				);
-//
-//				Predicate andPredicates = cb.and(
-//					cb.equal(from.get("myResourceType").as(String.class), nextResourceType),
-//				   cb.in(from.get("myFhirId").as(String.class)).in(nextIds));
-//
-//				if (theExcludeDeleted) {
-//					andPredicates = cb.and(andPredicates, cb.isNotNull(from.get("myDeleted").as(Date.class)));
-//				}
+				//				assert isNotBlank(nextResourceType);
+				//
+				//				// wipmb forced_id need test?
+				//				CriteriaBuilder cb = myEntityManager.getCriteriaBuilder();
+				//				CriteriaQuery<Tuple> criteriaQuery = cb.createTupleQuery();
+				//				Root<ResourceTable> from = criteriaQuery.from(ResourceTable.class);
+				//				criteriaQuery.multiselect(
+				//					from.get("myResourceType").as(String.class),
+				//					from.get("myId").as(Long.class),
+				//					from.get("myFhirId").as(String.class),
+				//					from.get("myDeleted").as(Date.class)
+				//				);
+				//
+				//				Predicate andPredicates = cb.and(
+				//					cb.equal(from.get("myResourceType").as(String.class), nextResourceType),
+				//				   cb.in(from.get("myFhirId").as(String.class)).in(nextIds));
+				//
+				//				if (theExcludeDeleted) {
+				//					andPredicates = cb.and(andPredicates, cb.isNotNull(from.get("myDeleted").as(Date.class)));
+				//				}
 
-//				if (!requestPartitionId.isAllPartitions()) {
-//					// restrict to partition
-//					Predicate partitionPredicate;
-//					if (requestPartitionId.isDefaultPartition()) {
-//						partitionPredicate = cb.isNull(from.get("myPartitionIdValue"));
-//					} else if (requestPartitionId.hasDefaultPartitionId()) {
-//						partitionPredicate = cb.or(
-//							cb.isNull(from.get("myPartitionIdValue")),
-//							cb.in(from.get("myPartitionIdValue").as(Integer.class)).in(requestPartitionId.getPartitionIdsWithoutDefault())
-//						);
-//					} else {
-//						partitionPredicate = cb.in(from.get("myPartitionIdValue").as(Integer.class)).in(requestPartitionId.getPartitionIdsWithoutDefault());
-//					}
-//					andPredicates = cb.and(andPredicates, partitionPredicate);
-//				}
-//
-//				TypedQuery<Tuple> query = myEntityManager.createQuery(criteriaQuery.where(andPredicates));
-//
-//				List<Tuple> views = query.getResultList();
-//
-//				for (Tuple next : views) {
-//					String resourceType = (String) next.get(0);
-//					Long resourcePid = (Long) next.get(1);
-//					String forcedId = (String) next.get(2);
-//					Date deletedAt = (Date) next.get(3);
+				//				if (!requestPartitionId.isAllPartitions()) {
+				//					// restrict to partition
+				//					Predicate partitionPredicate;
+				//					if (requestPartitionId.isDefaultPartition()) {
+				//						partitionPredicate = cb.isNull(from.get("myPartitionIdValue"));
+				//					} else if (requestPartitionId.hasDefaultPartitionId()) {
+				//						partitionPredicate = cb.or(
+				//							cb.isNull(from.get("myPartitionIdValue")),
+				//
+				//	cb.in(from.get("myPartitionIdValue").as(Integer.class)).in(requestPartitionId.getPartitionIdsWithoutDefault())
+				//						);
+				//					} else {
+				//						partitionPredicate =
+				// cb.in(from.get("myPartitionIdValue").as(Integer.class)).in(requestPartitionId.getPartitionIdsWithoutDefault());
+				//					}
+				//					andPredicates = cb.and(andPredicates, partitionPredicate);
+				//				}
+				//
+				//				TypedQuery<Tuple> query = myEntityManager.createQuery(criteriaQuery.where(andPredicates));
+				//
+				//				List<Tuple> views = query.getResultList();
+				//
+				//				for (Tuple next : views) {
+				//					String resourceType = (String) next.get(0);
+				//					Long resourcePid = (Long) next.get(1);
+				//					String forcedId = (String) next.get(2);
+				//					Date deletedAt = (Date) next.get(3);
 
 				Collection<Object[]> views;
 				assert isNotBlank(nextResourceType);
 
 				if (requestPartitionId.isAllPartitions()) {
-					views = myResourceTableDao.findAndResolveByForcedIdWithNoType(nextResourceType, nextIds, theExcludeDeleted);
+					views = myResourceTableDao.findAndResolveByForcedIdWithNoType(
+							nextResourceType, nextIds, theExcludeDeleted);
 				} else {
 					if (requestPartitionId.isDefaultPartition()) {
-						views = myResourceTableDao.findAndResolveByForcedIdWithNoTypeInPartitionNull(nextResourceType, nextIds, theExcludeDeleted);
+						views = myResourceTableDao.findAndResolveByForcedIdWithNoTypeInPartitionNull(
+								nextResourceType, nextIds, theExcludeDeleted);
 					} else if (requestPartitionId.hasDefaultPartitionId()) {
-						views = myResourceTableDao.findAndResolveByForcedIdWithNoTypeInPartitionIdOrNullPartitionId(nextResourceType, nextIds, requestPartitionId.getPartitionIdsWithoutDefault(), theExcludeDeleted);
+						views = myResourceTableDao.findAndResolveByForcedIdWithNoTypeInPartitionIdOrNullPartitionId(
+								nextResourceType,
+								nextIds,
+								requestPartitionId.getPartitionIdsWithoutDefault(),
+								theExcludeDeleted);
 					} else {
-						views = myResourceTableDao.findAndResolveByForcedIdWithNoTypeInPartition(nextResourceType, nextIds, requestPartitionId.getPartitionIds(), theExcludeDeleted);
+						views = myResourceTableDao.findAndResolveByForcedIdWithNoTypeInPartition(
+								nextResourceType, nextIds, requestPartitionId.getPartitionIds(), theExcludeDeleted);
 					}
 				}
 

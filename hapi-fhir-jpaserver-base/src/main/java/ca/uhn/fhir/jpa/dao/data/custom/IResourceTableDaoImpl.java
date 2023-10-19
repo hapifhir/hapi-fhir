@@ -54,11 +54,11 @@ public class IResourceTableDaoImpl implements IForcedIdQueries {
 	 * is an object array, where the order matters (the array represents columns returned by the query).
 	 * Deleted resources are optionally filtered. Be careful if you change this query in any way.
 	 */
-	public Collection<Object[]> findAndResolveByForcedIdWithNoType(String theResourceType, Collection<String> theForcedIds, boolean theExcludeDeleted) {
-		String query = "" +
-			"SELECT t.myResourceType, t.id, t.myFhirId, t.myDeleted " +
-			"FROM ResourceTable t " +
-			"WHERE t.myResourceType = :resource_type AND t.myFhirId IN ( :forced_id )";
+	public Collection<Object[]> findAndResolveByForcedIdWithNoType(
+			String theResourceType, Collection<String> theForcedIds, boolean theExcludeDeleted) {
+		String query = "SELECT t.myResourceType, t.id, t.myFhirId, t.myDeleted "
+				+ "FROM ResourceTable t "
+				+ "WHERE t.myResourceType = :resource_type AND t.myFhirId IN ( :forced_id )";
 
 		if (theExcludeDeleted) {
 			query += " AND t.myDeleted IS NULL";
@@ -76,12 +76,14 @@ public class IResourceTableDaoImpl implements IForcedIdQueries {
 	 * is an object array, where the order matters (the array represents columns returned by the query).
 	 * Deleted resources are optionally filtered. Be careful if you change this query in any way.
 	 */
-	public Collection<Object[]> findAndResolveByForcedIdWithNoTypeInPartition(String theResourceType, Collection<String> theForcedIds, Collection<Integer> thePartitionId, boolean theExcludeDeleted) {
-		String query = "" +
-			"SELECT t.myResourceType, t.id, t.myFhirId, t.myDeleted " +
-			"FROM ResourceTable t " +
-			"WHERE t.myResourceType = :resource_type AND t.myFhirId IN ( :forced_id ) AND t.myPartitionIdValue IN ( :partition_id )";
-
+	public Collection<Object[]> findAndResolveByForcedIdWithNoTypeInPartition(
+			String theResourceType,
+			Collection<String> theForcedIds,
+			Collection<Integer> thePartitionId,
+			boolean theExcludeDeleted) {
+		String query = "" + "SELECT t.myResourceType, t.id, t.myFhirId, t.myDeleted "
+				+ "FROM ResourceTable t "
+				+ "WHERE t.myResourceType = :resource_type AND t.myFhirId IN ( :forced_id ) AND t.myPartitionIdValue IN ( :partition_id )";
 
 		if (theExcludeDeleted) {
 			query += " AND t.myDeleted IS NULL";
@@ -100,12 +102,11 @@ public class IResourceTableDaoImpl implements IForcedIdQueries {
 	 * is an object array, where the order matters (the array represents columns returned by the query).
 	 * Deleted resources are optionally filtered. Be careful if you change this query in any way.
 	 */
-	public Collection<Object[]> findAndResolveByForcedIdWithNoTypeInPartitionNull(String theResourceType, Collection<String> theForcedIds, boolean theExcludeDeleted) {
-		String query = "" +
-			"SELECT t.myResourceType, t.id, t.myFhirId, t.myDeleted " +
-			"FROM ResourceTable t " +
-			"WHERE t.myResourceType = :resource_type AND t.myFhirId IN ( :forced_id ) AND t.myPartitionIdValue IS NULL";
-
+	public Collection<Object[]> findAndResolveByForcedIdWithNoTypeInPartitionNull(
+			String theResourceType, Collection<String> theForcedIds, boolean theExcludeDeleted) {
+		String query = "SELECT t.myResourceType, t.id, t.myFhirId, t.myDeleted "
+				+ "FROM ResourceTable t "
+				+ "WHERE t.myResourceType = :resource_type AND t.myFhirId IN ( :forced_id ) AND t.myPartitionIdValue IS NULL";
 
 		if (theExcludeDeleted) {
 			query += " AND t.myDeleted IS NULL";
@@ -123,11 +124,14 @@ public class IResourceTableDaoImpl implements IForcedIdQueries {
 	 * is an object array, where the order matters (the array represents columns returned by the query).
 	 * Deleted resources are optionally filtered. Be careful if you change this query in any way.
 	 */
-	public Collection<Object[]> findAndResolveByForcedIdWithNoTypeInPartitionIdOrNullPartitionId(String theResourceType, Collection<String> theForcedIds, List<Integer> thePartitionIdsWithoutDefault, boolean theExcludeDeleted) {
-		String query = "" +
-			"SELECT t.myResourceType, t.id, t.myFhirId, t.myDeleted " +
-			"FROM ResourceTable t " +
-			"WHERE t.myResourceType = :resource_type AND t.myFhirId IN ( :forced_id ) AND (t.myPartitionIdValue IS NULL OR t.myPartitionIdValue IN ( :partition_id ))";
+	public Collection<Object[]> findAndResolveByForcedIdWithNoTypeInPartitionIdOrNullPartitionId(
+			String theResourceType,
+			Collection<String> theForcedIds,
+			List<Integer> thePartitionIdsWithoutDefault,
+			boolean theExcludeDeleted) {
+		String query = "SELECT t.myResourceType, t.id, t.myFhirId, t.myDeleted "
+				+ "FROM ResourceTable t "
+				+ "WHERE t.myResourceType = :resource_type AND t.myFhirId IN ( :forced_id ) AND (t.myPartitionIdValue IS NULL OR t.myPartitionIdValue IN ( :partition_id ))";
 
 		if (theExcludeDeleted) {
 			query += " AND t.myDeleted IS NULL";

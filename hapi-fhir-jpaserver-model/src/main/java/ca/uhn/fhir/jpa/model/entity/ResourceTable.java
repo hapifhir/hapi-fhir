@@ -78,15 +78,22 @@ import javax.persistence.Version;
 
 import static ca.uhn.fhir.jpa.model.entity.ResourceTable.IDX_FORCEDID_TYPE_FID;
 
-@Indexed(routingBinder= @RoutingBinderRef(type = ResourceTableRoutingBinder.class))
+@Indexed(routingBinder = @RoutingBinderRef(type = ResourceTableRoutingBinder.class))
 @Entity
-@Table(name = ResourceTable.HFJ_RESOURCE, uniqueConstraints = {
-	@UniqueConstraint(name = IDX_FORCEDID_TYPE_FID, columnNames = {"RES_TYPE", "FHIR_ID"})
-}, indexes = {
-	// Do not reuse previously used index name: IDX_INDEXSTATUS, IDX_RES_TYPE
-	@Index(name = "IDX_RES_DATE", columnList = BaseHasResource.RES_UPDATED),
-	@Index(name = "IDX_RES_TYPE_DEL_UPDATED", columnList = "RES_TYPE,RES_DELETED_AT,RES_UPDATED,PARTITION_ID,RES_ID"),
-})
+@Table(
+		name = ResourceTable.HFJ_RESOURCE,
+		uniqueConstraints = {
+			@UniqueConstraint(
+					name = IDX_FORCEDID_TYPE_FID,
+					columnNames = {"RES_TYPE", "FHIR_ID"})
+		},
+		indexes = {
+			// Do not reuse previously used index name: IDX_INDEXSTATUS, IDX_RES_TYPE
+			@Index(name = "IDX_RES_DATE", columnList = BaseHasResource.RES_UPDATED),
+			@Index(
+					name = "IDX_RES_TYPE_DEL_UPDATED",
+					columnList = "RES_TYPE,RES_DELETED_AT,RES_UPDATED,PARTITION_ID,RES_ID"),
+		})
 @NamedEntityGraph(name = "Resource.noJoins")
 public class ResourceTable extends BaseHasResource implements Serializable, IBasePersistedResource<JpaPid> {
 	public static final int RESTYPE_LEN = 40;
@@ -1052,7 +1059,6 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	public String asTypedFhirResourceId() {
 		return getResourceType() + "/" + getFhirId();
 	}
-
 
 	/**
 	 * fixme is this right?

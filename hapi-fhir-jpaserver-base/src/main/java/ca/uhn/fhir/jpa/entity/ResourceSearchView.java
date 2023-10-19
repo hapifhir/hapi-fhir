@@ -23,7 +23,7 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.jpa.model.entity.IBaseResourceEntity;
 import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
 import ca.uhn.fhir.jpa.model.entity.ResourceEncodingEnum;
-import ca.uhn.fhir.jpa.model.entity.ResourceHistoryProvenanceEntity;
+import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
@@ -46,25 +46,26 @@ import javax.persistence.TemporalType;
 @SuppressWarnings("SqlDialectInspection")
 @Entity
 @Immutable
-@Subselect("SELECT h.pid               as pid,            " +
-	"               r.res_id            as res_id,         " +
-	"               h.res_type          as res_type,       " +
-	"               h.res_version       as res_version,    " + // FHIR version
-	"               h.res_ver           as res_ver,        " + // resource version
-	"               h.has_tags          as has_tags,       " +
-	"               h.res_deleted_at    as res_deleted_at, " +
-	"               h.res_published     as res_published,  " +
-	"               h.res_updated       as res_updated,    " +
-	"               h.res_text          as res_text,       " +
-	"               h.res_text_vc       as res_text_vc,    " +
-	"               h.res_encoding      as res_encoding,   " +
-	"               h.PARTITION_ID      as PARTITION_ID,   " +
-	"               p.SOURCE_URI        as PROV_SOURCE_URI," +
-	"               p.REQUEST_ID        as PROV_REQUEST_ID," +
-	"               r.fhir_id           as FORCED_PID      " +
-	"FROM HFJ_RESOURCE r "
-	+ "    INNER JOIN HFJ_RES_VER h ON r.res_id = h.res_id and r.res_ver = h.res_ver"
-	+ "    LEFT OUTER JOIN HFJ_RES_VER_PROV p ON p.res_ver_pid = h.pid ")
+@Subselect("SELECT h.pid               as pid,            " + "               r.res_id            as res_id,         "
+		+ "               h.res_type          as res_type,       "
+		+ "               h.res_version       as res_version,    "
+		+ // FHIR version
+		"               h.res_ver           as res_ver,        "
+		+ // resource version
+		"               h.has_tags          as has_tags,       "
+		+ "               h.res_deleted_at    as res_deleted_at, "
+		+ "               h.res_published     as res_published,  "
+		+ "               h.res_updated       as res_updated,    "
+		+ "               h.res_text          as res_text,       "
+		+ "               h.res_text_vc       as res_text_vc,    "
+		+ "               h.res_encoding      as res_encoding,   "
+		+ "               h.PARTITION_ID      as PARTITION_ID,   "
+		+ "               p.SOURCE_URI        as PROV_SOURCE_URI,"
+		+ "               p.REQUEST_ID        as PROV_REQUEST_ID,"
+		+ "               r.fhir_id           as FORCED_PID      "
+		+ "FROM HFJ_RESOURCE r "
+		+ "    INNER JOIN HFJ_RES_VER h ON r.res_id = h.res_id and r.res_ver = h.res_ver"
+		+ "    LEFT OUTER JOIN HFJ_RES_VER_PROV p ON p.res_ver_pid = h.pid ")
 public class ResourceSearchView implements IBaseResourceEntity, Serializable {
 
 	private static final long serialVersionUID = 1L;
@@ -117,6 +118,7 @@ public class ResourceSearchView implements IBaseResourceEntity, Serializable {
 	@Column(name = "RES_ENCODING")
 	@Enumerated(EnumType.STRING)
 	private ResourceEncodingEnum myEncoding;
+
 	@Column(name = "FORCED_PID", length = ResourceTable.MAX_FORCED_ID_LENGTH)
 	private String myForcedPid;
 

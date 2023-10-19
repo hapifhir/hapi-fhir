@@ -37,7 +37,8 @@ import java.util.Map;
 import java.util.Optional;
 
 @Transactional(propagation = Propagation.MANDATORY)
-public interface IResourceTableDao extends JpaRepository<ResourceTable, Long>, IHapiFhirJpaRepository, IForcedIdQueries {
+public interface IResourceTableDao
+		extends JpaRepository<ResourceTable, Long>, IHapiFhirJpaRepository, IForcedIdQueries {
 
 	@Query("SELECT t.myId FROM ResourceTable t WHERE t.myDeleted IS NOT NULL")
 	Slice<Long> findIdsOfDeletedResources(Pageable thePageable);

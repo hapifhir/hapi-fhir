@@ -19,7 +19,6 @@
  */
 package ca.uhn.fhir.jpa.entity;
 
-
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 
 import java.io.Serializable;
