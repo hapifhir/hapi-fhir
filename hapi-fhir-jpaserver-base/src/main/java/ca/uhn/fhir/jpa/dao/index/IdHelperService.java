@@ -537,7 +537,8 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 							myMemoryCacheService.getIfPresent(MemoryCacheService.CacheEnum.RESOURCE_LOOKUP, nextKey);
 					if (cachedLookup != null) {
 						forcedIdIterator.remove();
-						retVal.computeIfAbsent(nextForcedId, id -> new ArrayList<>(List.of(cachedLookup)));
+						retVal.computeIfAbsent(nextForcedId, id -> new ArrayList<>())
+								.add(cachedLookup);
 					}
 				}
 			}
@@ -572,7 +573,7 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 					Date deletedAt = (Date) next[3];
 
 					JpaResourceLookup lookup = new JpaResourceLookup(resourceType, resourcePid, deletedAt);
-					retVal.computeIfAbsent(forcedId, id -> new ArrayList<>(List.of(lookup)));
+					retVal.computeIfAbsent(forcedId, id -> new ArrayList<>()).add(lookup);
 
 					if (!myStorageSettings.isDeleteEnabled()) {
 						String key = resourceType + "/" + forcedId;
@@ -609,7 +610,7 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 						myMemoryCacheService.getIfPresent(MemoryCacheService.CacheEnum.RESOURCE_LOOKUP, nextKey);
 				if (cachedLookup != null) {
 					forcedIdIterator.remove();
-					theTargets.computeIfAbsent(nextKey, id -> new ArrayList<>(List.of(cachedLookup)));
+					theTargets.computeIfAbsent(nextKey, id -> new ArrayList<>()).add(cachedLookup);
 				}
 			}
 		}
