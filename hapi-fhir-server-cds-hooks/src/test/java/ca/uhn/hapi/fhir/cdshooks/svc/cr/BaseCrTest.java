@@ -14,4 +14,6 @@ public abstract class BaseCrTest {
 
 	@Autowired
 	protected FhirContext myFhirContext;
+	@Autowired
+	protected CdsCrSettings myCdsCrSettings;
 }

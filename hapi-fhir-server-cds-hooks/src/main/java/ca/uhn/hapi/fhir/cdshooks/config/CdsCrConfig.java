@@ -1,6 +1,6 @@
 /*-
  * #%L
- * HAPI FHIR - Clinical Reasoning
+ * HAPI FHIR - CDS Hooks
  * %%
  * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
@@ -17,19 +17,21 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.cr.config;
+package ca.uhn.hapi.fhir.cdshooks.config;
 
-import ca.uhn.fhir.cr.common.IRepositoryFactory;
-import ca.uhn.fhir.cr.repo.HapiFhirRepository;
-import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
-import ca.uhn.fhir.rest.server.RestfulServer;
-import org.springframework.context.annotation.Bean;
+import ca.uhn.fhir.cr.config.CrConfigCondition;
+import ca.uhn.fhir.cr.config.RepositoryConfig;
+import ca.uhn.fhir.cr.config.r4.ApplyOperationConfig;
+import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 
+/**
+ * This class exists as a wrapper for the CR configs required for CDS on FHIR to be loaded only when dependencies are met.
+ * Adding the condition to the configs themselves causes issues with downstream projects.
+ *
+ */
 @Configuration
-public class RepositoryConfig {
-	@Bean
-	IRepositoryFactory repositoryFactory(DaoRegistry theDaoRegistry, RestfulServer theRestfulServer) {
-		return rd -> new HapiFhirRepository(theDaoRegistry, rd, theRestfulServer);
-	}
-}
+@Conditional(CrConfigCondition.class)
+@Import({RepositoryConfig.class, ApplyOperationConfig.class})
+public class CdsCrConfig {}

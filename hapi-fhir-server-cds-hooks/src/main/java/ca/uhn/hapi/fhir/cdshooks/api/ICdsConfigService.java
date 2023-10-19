@@ -26,6 +26,7 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRestfulResponse;
 import ca.uhn.fhir.rest.server.RestfulServer;
+import ca.uhn.hapi.fhir.cdshooks.svc.cr.CdsCrSettings;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.opencds.cqf.fhir.utility.Ids;
 
@@ -38,6 +39,9 @@ public interface ICdsConfigService {
 
 	@Nonnull
 	ObjectMapper getObjectMapper();
+
+	@Nonnull
+	CdsCrSettings getCdsCrSettings();
 
 	@Nullable
 	default DaoRegistry getDaoRegistry() {
