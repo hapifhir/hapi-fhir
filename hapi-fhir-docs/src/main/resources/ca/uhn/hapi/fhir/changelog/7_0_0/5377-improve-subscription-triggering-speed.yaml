@@ -1,0 +1,5 @@
+---
+type: perf
+issue: 5377
+jira: SMILE-7545
+title: "Subscription triggering via the `$trigger-subscription` operation is now multi-threaded, which significantly improves performance for large data sets."
