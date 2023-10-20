@@ -360,8 +360,9 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 			return;
 		}
 
-		IFhirResourceDao dao = myDaoRegistry.getResourceDao(theResource.getClass());
-		SearchParameterMap map = createSearchParameterMapFor(theResource);
+		String resourceType = myFhirContext.getResourceType(theResource);
+		IFhirResourceDao dao = myDaoRegistry.getResourceDao(resourceType);
+		SearchParameterMap map = createSearchParameterMapFor(resourceType, theResource);
 		IBundleProvider searchResult = searchResource(dao, map);
 
 		String resourceQuery = map.toNormalizedQueryString(myFhirContext);
@@ -376,7 +377,7 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 				!searchResult.isEmpty() ? searchResult.getResources(0, 1).get(0) : null;
 		boolean isInstalled = createOrUpdateResource(dao, theResource, existingResource);
 		if (isInstalled) {
-			theOutcome.incrementResourcesInstalled(resourceQuery);
+			theOutcome.incrementResourcesInstalled(resourceType);
 		}
 	}
 
@@ -430,7 +431,7 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 
 	private boolean updateExistingResourceIfNecessary(
 			IFhirResourceDao theDao, IBaseResource theResource, IBaseResource theExistingResource) {
-		if (!theResource.getClass().getSimpleName().equals("SearchParameter")) {
+		if (!"SearchParameter".equals(theResource.getClass().getSimpleName())) {
 			return false;
 		}
 		if (theExistingResource == null) {
@@ -603,14 +604,14 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 		}
 	}
 
-	private SearchParameterMap createSearchParameterMapFor(IBaseResource theResource) {
-		if (theResource.getClass().getSimpleName().equals("NamingSystem")) {
+	private SearchParameterMap createSearchParameterMapFor(String resourceType, IBaseResource theResource) {
+		if ("NamingSystem".equals(resourceType)) {
 			String uniqueId = extractUniqeIdFromNamingSystem(theResource);
 			return SearchParameterMap.newSynchronous().add("value", new StringParam(uniqueId).setExact(true));
-		} else if (theResource.getClass().getSimpleName().equals("Subscription")) {
+		} else if ("Subscription".equals(resourceType)) {
 			String id = extractSimpleValue(theResource, "id");
 			return SearchParameterMap.newSynchronous().add("_id", new TokenParam(id));
-		} else if (theResource.getClass().getSimpleName().equals("SearchParameter")) {
+		} else if ("SearchParameter".equals(resourceType)) {
 			return buildSearchParameterMapForSearchParameter(theResource);
 		} else if (resourceHasUrlElement(theResource)) {
 			String url = extractSimpleValue(theResource, "url");
