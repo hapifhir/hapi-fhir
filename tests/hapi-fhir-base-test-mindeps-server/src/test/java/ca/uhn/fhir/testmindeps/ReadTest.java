@@ -18,6 +18,7 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
+import org.eclipse.jetty.ee10.servlet.ServletContextHandler;
 import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
@@ -124,14 +125,16 @@ public class ReadTest {
 
 		DummyProvider patientProvider = new DummyProvider();
 
-		ServletHandler proxyHandler = new ServletHandler();
 		RestfulServer servlet = new RestfulServer();
 		servlet.setDefaultResponseEncoding(EncodingEnum.XML);
 		ourCtx = servlet.getFhirContext();
 		servlet.setResourceProviders(patientProvider, new DummyBinaryProvider());
 		ServletHolder servletHolder = new ServletHolder(servlet);
-		proxyHandler.addServletWithMapping(servletHolder, "/*");
-		ourServer.setHandler(proxyHandler);
+
+		ServletContextHandler contextHandler = new ServletContextHandler();
+		contextHandler.addServlet(servletHolder, "/*");
+
+		ourServer.setHandler(contextHandler);
 		ourServer.start();
         Connector[] connectors = ourServer.getConnectors();
         assert connectors.length == 1;

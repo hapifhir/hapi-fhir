@@ -8,6 +8,8 @@ import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.interceptor.CapturingInterceptor;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.test.utilities.JettyUtil;
+import ca.uhn.fhir.test.utilities.server.HttpServletExtension;
+import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.ParseException;
@@ -18,6 +20,7 @@ import org.hl7.fhir.r4.model.IdType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.Logger;
@@ -46,33 +49,29 @@ public class HeaderPassthroughOptionTest {
 	private static final Logger ourLog = LoggerFactory.getLogger(HeaderPassthroughOptionTest.class);
 
 	final String FHIR_VERSION = "r4";
-	private FhirContext myCtx = FhirContext.forR4();
-	private Server myServer;
-	private int myPort;
+	private final FhirContext myCtx = FhirContext.forR4Cached();
 	private final String headerKey1 = "test-header-key-1";
 	private final String headerValue1 = "test header value-1";
 	private static final String ourConceptsFileName = "target/concepts.csv";
 	private static final String ourHierarchyFileName = "target/hierarchy.csv";
+	private static final AtomicInteger ourFilenameCounter = new AtomicInteger();
 	private final CapturingInterceptor myCapturingInterceptor = new CapturingInterceptor();
 	private final UploadTerminologyCommand testedCommand =
 		new RequestCapturingUploadTerminologyCommand(myCapturingInterceptor);
+	private final TerminologyUploaderProvider myProvider = new TerminologyUploaderProvider();
 
 	@Mock
 	protected ITermLoaderSvc myTermLoaderSvc;
-	private static final AtomicInteger ourFilenameCounter = new AtomicInteger();
+
+	@RegisterExtension
+	public RestfulServerExtension myServer = new RestfulServerExtension(myCtx)
+		.registerProvider(myProvider);
 
 	@BeforeEach
-	public void beforeEach() throws Exception {
-		myServer = new Server(0);
-		TerminologyUploaderProvider provider = new TerminologyUploaderProvider(myCtx, myTermLoaderSvc);
-		ServletHandler proxyHandler = new ServletHandler();
-		RestfulServer servlet = new RestfulServer(myCtx);
-		servlet.registerProvider(provider);
-		ServletHolder servletHolder = new ServletHolder(servlet);
-		proxyHandler.addServletWithMapping(servletHolder, "/*");
-		myServer.setHandler(proxyHandler);
-		JettyUtil.startServer(myServer);
-		myPort = JettyUtil.getPortForStartedServer(myServer);
+	public void beforeEach() {
+		myProvider.setContext(myCtx);
+		myProvider.setTerminologyLoaderSvc(myTermLoaderSvc);
+
 		when(myTermLoaderSvc.loadCustom(eq("http://foo"), anyList(), any()))
 			.thenReturn(new UploadStatistics(100, new IdType("CodeSystem/101")));
 	}
@@ -85,7 +84,7 @@ public class HeaderPassthroughOptionTest {
 		String[] args = new String[]{
 			"-v", FHIR_VERSION,
 			"-m", "SNAPSHOT",
-			"-t", "http://localhost:" + myPort,
+			"-t", myServer.getBaseUrl(),
 			"-u", "http://foo",
 			"-d", getConceptFilename(filenameCounter),
 			"-d", getHierarchyFilename(filenameCounter),
@@ -115,7 +114,7 @@ public class HeaderPassthroughOptionTest {
 		String[] args = new String[]{
 			"-v", FHIR_VERSION,
 			"-m", "SNAPSHOT",
-			"-t", "http://localhost:" + myPort,
+			"-t", myServer.getBaseUrl(),
 			"-u", "http://foo",
 			"-d", getConceptFilename(filenameCounter),
 			"-d", getHierarchyFilename(filenameCounter),
@@ -149,7 +148,7 @@ public class HeaderPassthroughOptionTest {
 		String[] args = new String[]{
 			"-v", FHIR_VERSION,
 			"-m", "SNAPSHOT",
-			"-t", "http://localhost:" + myPort,
+			"-t", myServer.getBaseUrl(),
 			"-u", "http://foo",
 			"-d", getConceptFilename(filenameCounter),
 			"-d", getHierarchyFilename(filenameCounter),

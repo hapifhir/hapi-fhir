@@ -27,6 +27,8 @@ import com.google.common.annotations.VisibleForTesting;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.PersistenceContextType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -36,6 +38,8 @@ import java.util.List;
 
 @Service
 public class DaoSearchParamSynchronizer {
+	private static final Logger ourLog = LoggerFactory.getLogger(DaoSearchParamSynchronizer.class);
+
 	@PersistenceContext(type = PersistenceContextType.TRANSACTION)
 	protected EntityManager myEntityManager;
 
@@ -89,9 +93,13 @@ public class DaoSearchParamSynchronizer {
 		tryToReuseIndexEntities(paramsToRemove, paramsToAdd);
 
 		for (T next : paramsToRemove) {
+			if (!myEntityManager.contains(next)) {
+				// If a resource is created and deleted in the same transaction, we can end up
+				// in a state where we're deleting entities that don't actually exist. Hibernate
+				// 6 is stricter about this, so we skip here.
+				continue;
+			}
 			myEntityManager.remove(next);
-			theEntity.getParamsQuantity().remove(next);
-			theEntity.getParamsQuantityNormalized().remove(next);
 		}
 		for (T next : paramsToAdd) {
 			myEntityManager.merge(next);

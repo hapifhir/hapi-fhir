@@ -446,6 +446,10 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 		return retVal;
 	}
 
+	public void setTerminologyLoaderSvc(ITermLoaderSvc theTermLoaderSvc) {
+		myTerminologyLoaderSvc = theTermLoaderSvc;
+	}
+
 	public static class FileBackedFileDescriptor implements ITermLoaderSvc.FileDescriptor {
 		private final File myNextFile;
 
