@@ -38,7 +38,8 @@ public class DelegatingConsentService implements IConsentService {
 	}
 
 	@Override
-	public boolean shouldProcessCanSeeResource(RequestDetails theRequestDetails, IConsentContextServices theContextServices) {
+	public boolean shouldProcessCanSeeResource(
+			RequestDetails theRequestDetails, IConsentContextServices theContextServices) {
 		return myTarget.shouldProcessCanSeeResource(theRequestDetails, theContextServices);
 	}
 
