@@ -28,6 +28,7 @@ import ca.uhn.fhir.jpa.migrate.taskdef.ArbitrarySqlTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.CalculateHashesTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.CalculateOrdinalDatesTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.ColumnTypeEnum;
+import ca.uhn.fhir.jpa.migrate.taskdef.ForceIdMigrationCopyTask;
 import ca.uhn.fhir.jpa.migrate.tasks.api.BaseMigrationTasks;
 import ca.uhn.fhir.jpa.migrate.tasks.api.Builder;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
@@ -110,6 +111,19 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 				.addIndex("20230911.2", "IDX_EMPi_TGT_MR_SCore")
 				.unique(false)
 				.withColumns("TARGET_TYPE", "MATCH_RESULT", "SCORE");
+
+		// Move forced_id constraints to hfj_resource and the new fhir_id column
+		// Note: we leave the HFJ_FORCED_ID.IDX_FORCEDID_TYPE_FID index in place to support old writers for a while.
+		version.addTask(new ForceIdMigrationCopyTask(version.getRelease(), "20231018.1"));
+
+		Builder.BuilderWithTableName hfjResource = version.onTable("HFJ_RESOURCE");
+		hfjResource.modifyColumn("20231018.2", "FHIR_ID").nonNullable();
+		hfjResource
+				.addIndex("20231018.3", "IDX_RES_FHIR_ID")
+				.unique(true)
+				.online(true)
+				.includeColumns("RES_ID")
+				.withColumns("FHIR_ID", "RES_TYPE");
 	}
 
 	protected void init680() {
