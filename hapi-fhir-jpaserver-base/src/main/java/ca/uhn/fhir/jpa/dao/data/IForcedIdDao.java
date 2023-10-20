@@ -33,7 +33,7 @@ import org.springframework.stereotype.Repository;
  * No runtime code should query this table except for deletions by PK.
  * To be deleted in 2024 (zero-downtime).
  */
-@Deprecated(since = "6.7")
+@Deprecated(since = "6.10")
 @Repository
 public interface IForcedIdDao extends JpaRepository<ForcedId, Long>, IHapiFhirJpaRepository {
 
