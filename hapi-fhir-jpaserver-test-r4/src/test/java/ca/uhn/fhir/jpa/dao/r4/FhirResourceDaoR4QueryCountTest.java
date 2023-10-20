@@ -3120,11 +3120,14 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 			myCaptureQueriesListener.clear();
 			mySubscriptionTriggeringSvc.runDeliveryPass();
 			mySubscriptionTriggeringSvc.runDeliveryPass();
+			mySubscriptionTriggeringSvc.runDeliveryPass();
+			mySubscriptionTriggeringSvc.runDeliveryPass();
+			mySubscriptionTriggeringSvc.runDeliveryPass();
 			myCaptureQueriesListener.logSelectQueries();
 			ourPatientProvider.waitForUpdateCount(200);
 
 			// Validate
-			assertEquals(3, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+			assertEquals(7, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
 			assertEquals(0, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
 			assertEquals(0, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
 			assertEquals(0, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());

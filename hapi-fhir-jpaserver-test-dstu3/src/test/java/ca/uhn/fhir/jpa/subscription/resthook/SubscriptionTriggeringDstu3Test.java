@@ -44,6 +44,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.servlet.http.HttpServletRequest;
@@ -499,14 +501,18 @@ public class SubscriptionTriggeringDstu3Test extends BaseResourceProviderDstu3Te
 			myInterceptorService.unregisterInterceptor(forceSynchronousSearchInterceptor);
 		}
 
-		@Test
-		public void testTriggerSubscriptionInSynchronousQueryMode() throws Exception {
-			((SubscriptionTriggeringSvcImpl)mySubscriptionTriggeringSvc).setMaxSubmitPerPass(10);
+		@ParameterizedTest
+		@CsvSource({
+			"10",
+			"10000"
+		})
+		public void testTriggerSubscriptionInSynchronousQueryMode(int theMaxSubmitPerpass) throws Exception {
+			((SubscriptionTriggeringSvcImpl)mySubscriptionTriggeringSvc).setMaxSubmitPerPass(theMaxSubmitPerpass);
 
 			String payload = "application/fhir+json";
 			IdType sub2id = createSubscription("Patient?", payload, ourListenerServerBase).getIdElement();
 
-			int numberOfPatient = 15;
+			int numberOfPatient = 200;
 
 			// Create lots
 			createPatientsAndWait(numberOfPatient);
@@ -522,9 +528,9 @@ public class SubscriptionTriggeringDstu3Test extends BaseResourceProviderDstu3Te
 				.withParameter(Parameters.class, ProviderConstants.SUBSCRIPTION_TRIGGERING_PARAM_SEARCH_URL, new StringType("Patient?"))
 				.execute();
 
-			mySubscriptionTriggeringSvc.runDeliveryPass();
-			mySubscriptionTriggeringSvc.runDeliveryPass();
-			mySubscriptionTriggeringSvc.runDeliveryPass();
+			for (int i = 0; i < 20; i++) {
+				mySubscriptionTriggeringSvc.runDeliveryPass();
+			}
 
 			waitForSize(0, ourCreatedPatients);
 			waitForSize(numberOfPatient, ourUpdatedPatients);

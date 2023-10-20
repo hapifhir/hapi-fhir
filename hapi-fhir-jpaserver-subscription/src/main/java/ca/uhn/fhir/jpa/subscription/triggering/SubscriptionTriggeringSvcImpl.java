@@ -266,7 +266,6 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 			RuntimeResourceDefinition resourceDef = UrlUtil.parseUrlResourceType(myFhirContext, nextSearchUrl);
 			String queryPart = nextSearchUrl.substring(nextSearchUrl.indexOf('?'));
 			SearchParameterMap params = myMatchUrlService.translateMatchUrl(queryPart, resourceDef);
-			params.setCount(myMaxSubmitPerPass);
 
 			String resourceType = resourceDef.getName();
 			IFhirResourceDao<?> callingDao = myDaoRegistry.getResourceDao(resourceType);
@@ -414,6 +413,10 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 
 		if (nonNull(search) && !search.isEmpty()) {
 
+			if (search.getCurrentPageSize() != null) {
+				toIndex = search.getCurrentPageSize();
+			}
+
 			// we already have data from the initial step so process as much as we can.
 			ourLog.info("Triggered job[{}] will process up to {} resources", theJobDetails.getJobId(), toIndex);
 			allCurrentResources = search.getResources(0, toIndex);
@@ -437,7 +440,7 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 					offset);
 
 			search = mySearchService.executeQuery(resourceDef.getName(), params, RequestPartitionId.allPartitions());
-			allCurrentResources = search.getAllResources();
+			allCurrentResources = search.getResources(0, submittableCount);
 		}
 
 		ourLog.info("Triggered job[{}] delivering {} resources", theJobDetails.getJobId(), allCurrentResources.size());
@@ -462,7 +465,7 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 
 			if (allCurrentResources.isEmpty()
 					|| nonNull(theJobDetails.getCurrentSearchCount())
-							&& toIndex >= theJobDetails.getCurrentSearchCount()) {
+							&& toIndex > theJobDetails.getCurrentSearchCount()) {
 				ourLog.info(
 						"Triggered job[{}] for search URL {} has completed ",
 						theJobDetails.getJobId(),
