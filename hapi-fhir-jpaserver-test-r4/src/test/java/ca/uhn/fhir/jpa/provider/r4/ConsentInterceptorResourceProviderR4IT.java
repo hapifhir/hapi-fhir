@@ -12,6 +12,7 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.PreferReturnEnum;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.client.api.IHttpResponse;
 import ca.uhn.fhir.rest.client.interceptor.CapturingInterceptor;
 import ca.uhn.fhir.rest.gclient.StringClientParam;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
@@ -66,12 +67,15 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.apache.commons.lang3.StringUtils.leftPad;
 import static org.awaitility.Awaitility.await;
-import static org.hamcrest.CoreMatchers.containsString;
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.not;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.not;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.blankOrNullString;
 import static org.hamcrest.Matchers.hasSize;
@@ -189,8 +193,64 @@ public class ConsentInterceptorResourceProviderR4IT extends BaseResourceProvider
 		myServer.getRestfulServer().getInterceptorService().registerInterceptor(myConsentInterceptor);
 
 		// Perform a search and only allow even
+		String context = "active consent - hide odd";
 		consentService.setTarget(new ConsentSvcCantSeeOddNumbered());
-		Bundle result = myClient
+		List<String> returnedIdValues = searchForObservations();
+		assertEquals(myObservationIdsEvenOnly.subList(0, 15), returnedIdValues);
+		assertResponseIsNotFromCache(context, capture.getLastResponse());
+
+		// Perform a search and only allow odd
+		context = "active consent - hide even";
+		consentService.setTarget(new ConsentSvcCantSeeEvenNumbered());
+		returnedIdValues = searchForObservations();
+		assertEquals(myObservationIdsOddOnly.subList(0, 15), returnedIdValues);
+		assertResponseIsNotFromCache(context, capture.getLastResponse());
+
+		// Perform a search and allow all with a PROCEED
+		context = "active consent - PROCEED on cache";
+		consentService.setTarget(new ConsentSvcNop(ConsentOperationStatusEnum.PROCEED));
+		returnedIdValues = searchForObservations();
+		assertEquals(myObservationIds.subList(0, 15), returnedIdValues);
+		assertResponseIsNotFromCache(context, capture.getLastResponse());
+
+		// Perform a search and allow all with an AUTHORIZED (no further checking)
+		context = "active consent - AUTHORIZED after a PROCEED";
+		consentService.setTarget(new ConsentSvcNop(ConsentOperationStatusEnum.AUTHORIZED));
+		returnedIdValues = searchForObservations();
+		assertEquals(myObservationIds.subList(0, 15), returnedIdValues);
+
+		// Perform a second search and allow all with an AUTHORIZED (no further checking)
+		// which means we should finally get one from the cache
+		context = "active consent - AUTHORIZED after AUTHORIZED";
+		consentService.setTarget(new ConsentSvcNop(ConsentOperationStatusEnum.AUTHORIZED));
+		returnedIdValues = searchForObservations();
+		assertEquals(myObservationIds.subList(0, 15), returnedIdValues);
+		assertResponseIsFromCache(context, capture.getLastResponse());
+
+		// Perform another search, now with an active consent interceptor that promises not to use canSeeResource.
+		// Should re-use cache result
+		context = "active consent - canSeeResource disabled, after AUTHORIZED - should reuse cache";
+		consentService.setTarget(new ConsentSvcNop(ConsentOperationStatusEnum.PROCEED, false));
+		returnedIdValues = searchForObservations();
+		assertEquals(myObservationIds.subList(0, 15), returnedIdValues);
+		assertResponseIsFromCache(context, capture.getLastResponse());
+
+		myClient.unregisterInterceptor(capture);
+	}
+
+	private static void assertResponseIsNotFromCache(String theContext, IHttpResponse lastResponse) {
+		List<String> cacheOutcome= lastResponse.getHeaders(Constants.HEADER_X_CACHE);
+		assertThat(theContext + " - No cache response headers", cacheOutcome, empty());
+	}
+
+	private static void assertResponseIsFromCache(String theContext, IHttpResponse lastResponse) {
+		List<String> cacheOutcome = lastResponse.getHeaders(Constants.HEADER_X_CACHE);
+		assertThat(theContext + " - Response came from cache", cacheOutcome, hasItem(matchesPattern("^HIT from .*")));
+	}
+
+	private List<String> searchForObservations() {
+		Bundle result;
+		result = myClient
 			.search()
 			.forResource("Observation")
 			.sort()
@@ -199,77 +259,7 @@ public class ConsentInterceptorResourceProviderR4IT extends BaseResourceProvider
 			.count(15)
 			.execute();
 		List<IBaseResource> resources = BundleUtil.toListOfResources(myFhirContext, result);
-		List<String> returnedIdValues = toUnqualifiedVersionlessIdValues(resources);
-		assertEquals(myObservationIdsEvenOnly.subList(0, 15), returnedIdValues);
-		List<String> cacheOutcome = capture.getLastResponse().getHeaders(Constants.HEADER_X_CACHE);
-		assertEquals(0, cacheOutcome.size());
-
-		// Perform a search and only allow odd
-		consentService.setTarget(new ConsentSvcCantSeeEvenNumbered());
-		result = myClient
-			.search()
-			.forResource("Observation")
-			.sort()
-			.ascending(Observation.SP_IDENTIFIER)
-			.returnBundle(Bundle.class)
-			.count(15)
-			.execute();
-		resources = BundleUtil.toListOfResources(myFhirContext, result);
-		returnedIdValues = toUnqualifiedVersionlessIdValues(resources);
-		assertEquals(myObservationIdsOddOnly.subList(0, 15), returnedIdValues);
-		cacheOutcome = capture.getLastResponse().getHeaders(Constants.HEADER_X_CACHE);
-		assertEquals(0, cacheOutcome.size());
-
-		// Perform a search and allow all with a PROCEED
-		consentService.setTarget(new ConsentSvcNop(ConsentOperationStatusEnum.PROCEED));
-		result = myClient
-			.search()
-			.forResource("Observation")
-			.sort()
-			.ascending(Observation.SP_IDENTIFIER)
-			.returnBundle(Bundle.class)
-			.count(15)
-			.execute();
-		resources = BundleUtil.toListOfResources(myFhirContext, result);
-		returnedIdValues = toUnqualifiedVersionlessIdValues(resources);
-		assertEquals(myObservationIds.subList(0, 15), returnedIdValues);
-		cacheOutcome = capture.getLastResponse().getHeaders(Constants.HEADER_X_CACHE);
-		assertEquals(0, cacheOutcome.size());
-
-		// Perform a search and allow all with an AUTHORIZED (no further checking)
-		consentService.setTarget(new ConsentSvcNop(ConsentOperationStatusEnum.AUTHORIZED));
-		result = myClient
-			.search()
-			.forResource("Observation")
-			.sort()
-			.ascending(Observation.SP_IDENTIFIER)
-			.returnBundle(Bundle.class)
-			.count(15)
-			.execute();
-		resources = BundleUtil.toListOfResources(myFhirContext, result);
-		returnedIdValues = toUnqualifiedVersionlessIdValues(resources);
-		assertEquals(myObservationIds.subList(0, 15), returnedIdValues);
-		cacheOutcome = capture.getLastResponse().getHeaders(Constants.HEADER_X_CACHE);
-		assertEquals(0, cacheOutcome.size());
-
-		// Perform a second search and allow all with an AUTHORIZED (no further checking)
-		// which means we should finally get one from the cache
-		consentService.setTarget(new ConsentSvcNop(ConsentOperationStatusEnum.AUTHORIZED));
-		result = myClient
-			.search()
-			.forResource("Observation")
-			.sort()
-			.ascending(Observation.SP_IDENTIFIER)
-			.returnBundle(Bundle.class)
-			.count(15)
-			.execute();
-		resources = BundleUtil.toListOfResources(myFhirContext, result);
-		returnedIdValues = toUnqualifiedVersionlessIdValues(resources);
-		assertEquals(myObservationIds.subList(0, 15), returnedIdValues);
-		cacheOutcome = capture.getLastResponse().getHeaders(Constants.HEADER_X_CACHE);
-		assertThat(cacheOutcome.get(0), matchesPattern("^HIT from .*"));
-
-		myClient.unregisterInterceptor(capture);
+		return toUnqualifiedVersionlessIdValues(resources);
 	}
 
 	@Test
@@ -998,14 +988,25 @@ public class ConsentInterceptorResourceProviderR4IT extends BaseResourceProvider
 	private static class ConsentSvcNop implements IConsentService {
 
 		private final ConsentOperationStatusEnum myOperationStatus;
+		private boolean myEnableCanSeeResource = true;
 
 		private ConsentSvcNop(ConsentOperationStatusEnum theOperationStatus) {
 			myOperationStatus = theOperationStatus;
 		}
 
+		private ConsentSvcNop(ConsentOperationStatusEnum theOperationStatus, boolean theEnableCanSeeResource) {
+			myOperationStatus = theOperationStatus;
+			myEnableCanSeeResource = theEnableCanSeeResource;
+		}
+
 		@Override
 		public ConsentOutcome startOperation(RequestDetails theRequestDetails, IConsentContextServices theContextServices) {
 			return new ConsentOutcome(myOperationStatus);
+		}
+
+		@Override
+		public boolean shouldProcessCanSeeResource(RequestDetails theRequestDetails, IConsentContextServices theContextServices) {
+			return myEnableCanSeeResource;
 		}
 
 		@Override

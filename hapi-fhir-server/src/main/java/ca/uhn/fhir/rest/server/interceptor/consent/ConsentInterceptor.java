@@ -45,6 +45,8 @@ import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -178,39 +180,40 @@ public class ConsentInterceptor {
 		}
 	}
 
+	/**
+	 * Check if this request is eligible for cached search results.
+	 * We can't use a cached result if consent may use canSeeResource.
+	 * This checks for AUTHORIZED requests, and the responses from shouldProcessCanSeeResource()
+	 * to see if this holds.
+	 * @return may the request be satisfied from cache.
+	 */
 	@Hook(value = Pointcut.STORAGE_PRECHECK_FOR_CACHED_SEARCH)
-	public boolean interceptPreCheckForCachedSearch(RequestDetails theRequestDetails) {
-		if (isRequestAuthorized(theRequestDetails)) {
-			return true;
+	public boolean interceptPreCheckForCachedSearch(@Nonnull RequestDetails theRequestDetails) {
+		return !isProcessCanSeeResource(theRequestDetails, null);
+	}
+
+	/**
+	 * Check if the search results from this request might be reused by later searches.
+	 * We can't use a cached result if consent may use canSeeResource.
+	 * This checks for AUTHORIZED requests, and the responses from shouldProcessCanSeeResource()
+	 * to see if this holds.
+	 * If not, marks the result as single-use.
+	 */
+	@Hook(value = Pointcut.STORAGE_PRESEARCH_REGISTERED)
+	public void interceptPreSearchRegistered(
+		RequestDetails theRequestDetails, ICachedSearchDetails theCachedSearchDetails) {
+		if (isProcessCanSeeResource(theRequestDetails, null)) {
+			theCachedSearchDetails.setCannotBeReused();
 		}
-		return false;
 	}
 
 	@Hook(value = Pointcut.STORAGE_PREACCESS_RESOURCES)
 	public void interceptPreAccess(
 			RequestDetails theRequestDetails, IPreResourceAccessDetails thePreResourceAccessDetails) {
-		if (isRequestAuthorized(theRequestDetails)) {
-			return;
-		}
-		if (isSkipServiceForRequest(theRequestDetails)) {
-			return;
-		}
-		if (myConsentService.isEmpty()) {
-			return;
-		}
 
-		// First check if we should be calling canSeeResource for the individual
-		// consent services
+		// Flags for each service
 		boolean[] processConsentSvcs = new boolean[myConsentService.size()];
-		boolean processAnyConsentSvcs = false;
-		for (int consentSvcIdx = 0; consentSvcIdx < myConsentService.size(); consentSvcIdx++) {
-			IConsentService nextService = myConsentService.get(consentSvcIdx);
-
-			boolean shouldCallCanSeeResource =
-					nextService.shouldProcessCanSeeResource(theRequestDetails, myContextConsentServices);
-			processAnyConsentSvcs |= shouldCallCanSeeResource;
-			processConsentSvcs[consentSvcIdx] = shouldCallCanSeeResource;
-		}
+		boolean processAnyConsentSvcs = isProcessCanSeeResource(theRequestDetails, processConsentSvcs);
 
 		if (!processAnyConsentSvcs) {
 			return;
@@ -252,6 +255,38 @@ public class ConsentInterceptor {
 				}
 			}
 		}
+	}
+
+	/**
+	 * Is canSeeResource() active in any services?
+	 * @param theProcessConsentSvcsFlags filled in with the responses from shouldProcessCanSeeResource each service
+	 * @return true of any service responded true to shouldProcessCanSeeResource()
+	 */
+	private boolean isProcessCanSeeResource(@Nonnull RequestDetails theRequestDetails, @Nullable boolean[] theProcessConsentSvcsFlags) {
+		if (isRequestAuthorized(theRequestDetails)) {
+			return false;
+		}
+		if (isSkipServiceForRequest(theRequestDetails)) {
+			return false;
+		}
+		if (myConsentService.isEmpty()) {
+			return false;
+		}
+
+		if (theProcessConsentSvcsFlags == null ) {
+			theProcessConsentSvcsFlags = new boolean[myConsentService.size()];
+		}
+		Validate.isTrue(theProcessConsentSvcsFlags.length == myConsentService.size());
+		boolean processAnyConsentSvcs = false;
+		for (int consentSvcIdx = 0; consentSvcIdx < myConsentService.size(); consentSvcIdx++) {
+			IConsentService nextService = myConsentService.get(consentSvcIdx);
+
+			boolean shouldCallCanSeeResource =
+					nextService.shouldProcessCanSeeResource(theRequestDetails, myContextConsentServices);
+			processAnyConsentSvcs |= shouldCallCanSeeResource;
+			theProcessConsentSvcsFlags[consentSvcIdx] = shouldCallCanSeeResource;
+		}
+		return processAnyConsentSvcs;
 	}
 
 	@Hook(value = Pointcut.STORAGE_PRESHOW_RESOURCES)
