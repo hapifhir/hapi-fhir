@@ -54,7 +54,7 @@ public class IResourceTableDaoImpl implements IForcedIdQueries {
 	 */
 	public Collection<Object[]> findAndResolveByForcedIdWithNoType(
 			String theResourceType, Collection<String> theForcedIds, boolean theExcludeDeleted) {
-		String query = "SELECT t.myResourceType, t.id, t.myFhirId, t.myDeleted "
+		String query = "SELECT t.myResourceType, t.myId, t.myFhirId, t.myDeleted "
 				+ "FROM ResourceTable t "
 				+ "WHERE t.myResourceType = :resource_type AND t.myFhirId IN ( :forced_id )";
 
@@ -79,7 +79,7 @@ public class IResourceTableDaoImpl implements IForcedIdQueries {
 			Collection<String> theForcedIds,
 			Collection<Integer> thePartitionId,
 			boolean theExcludeDeleted) {
-		String query = "SELECT t.myResourceType, t.id, t.myFhirId, t.myDeleted "
+		String query = "SELECT t.myResourceType, t.myId, t.myFhirId, t.myDeleted "
 				+ "FROM ResourceTable t "
 				+ "WHERE t.myResourceType = :resource_type AND t.myFhirId IN ( :forced_id ) AND t.myPartitionIdValue IN ( :partition_id )";
 
@@ -102,7 +102,7 @@ public class IResourceTableDaoImpl implements IForcedIdQueries {
 	 */
 	public Collection<Object[]> findAndResolveByForcedIdWithNoTypeInPartitionNull(
 			String theResourceType, Collection<String> theForcedIds, boolean theExcludeDeleted) {
-		String query = "SELECT t.myResourceType, t.id, t.myFhirId, t.myDeleted "
+		String query = "SELECT t.myResourceType, t.myId, t.myFhirId, t.myDeleted "
 				+ "FROM ResourceTable t "
 				+ "WHERE t.myResourceType = :resource_type AND t.myFhirId IN ( :forced_id ) AND t.myPartitionIdValue IS NULL";
 
@@ -127,7 +127,7 @@ public class IResourceTableDaoImpl implements IForcedIdQueries {
 			Collection<String> theForcedIds,
 			List<Integer> thePartitionIdsWithoutDefault,
 			boolean theExcludeDeleted) {
-		String query = "SELECT t.myResourceType, t.id, t.myFhirId, t.myDeleted "
+		String query = "SELECT t.myResourceType, t.myId, t.myFhirId, t.myDeleted "
 				+ "FROM ResourceTable t "
 				+ "WHERE t.myResourceType = :resource_type AND t.myFhirId IN ( :forced_id ) AND (t.myPartitionIdValue IS NULL OR t.myPartitionIdValue IN ( :partition_id ))";
 
