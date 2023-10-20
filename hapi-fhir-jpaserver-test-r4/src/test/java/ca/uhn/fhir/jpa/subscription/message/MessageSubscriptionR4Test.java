@@ -60,7 +60,8 @@ public class MessageSubscriptionR4Test extends BaseSubscriptionsR4Test {
 		myStorageSettings.setTagStorageMode(new JpaStorageSettings().getTagStorageMode());
 	}
 
-	@BeforeEach
+	@Override
+    @BeforeEach
 	public void beforeRegisterRestHookListener() {
 		mySubscriptionTestUtil.registerMessageInterceptor();
 
