@@ -360,9 +360,8 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 			return;
 		}
 
-		String resourceType = myFhirContext.getResourceType(theResource);
-		IFhirResourceDao dao = myDaoRegistry.getResourceDao(resourceType);
-		SearchParameterMap map = createSearchParameterMapFor(resourceType, theResource);
+		IFhirResourceDao dao = myDaoRegistry.getResourceDao(theResource.getClass());
+		SearchParameterMap map = createSearchParameterMapFor(theResource);
 		IBundleProvider searchResult = searchResource(dao, map);
 
 		String resourceQuery = map.toNormalizedQueryString(myFhirContext);
@@ -377,7 +376,7 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 				!searchResult.isEmpty() ? searchResult.getResources(0, 1).get(0) : null;
 		boolean isInstalled = createOrUpdateResource(dao, theResource, existingResource);
 		if (isInstalled) {
-			theOutcome.incrementResourcesInstalled(resourceType);
+			theOutcome.incrementResourcesInstalled(myFhirContext.getResourceType(theResource));
 		}
 	}
 
@@ -604,7 +603,8 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 		}
 	}
 
-	private SearchParameterMap createSearchParameterMapFor(String resourceType, IBaseResource theResource) {
+	private SearchParameterMap createSearchParameterMapFor(IBaseResource theResource) {
+		String resourceType = theResource.getClass().getSimpleName();
 		if ("NamingSystem".equals(resourceType)) {
 			String uniqueId = extractUniqeIdFromNamingSystem(theResource);
 			return SearchParameterMap.newSynchronous().add("value", new StringParam(uniqueId).setExact(true));
