@@ -6,7 +6,6 @@ import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
-import ca.uhn.fhir.jpa.dao.data.IForcedIdDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceReindexJobDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.entity.ResourceReindexJobEntity;
@@ -60,8 +59,6 @@ public class ResourceReindexingSvcImplTest {
 
 	@Mock
 	private DaoRegistry myDaoRegistry;
-	@Mock
-	private IForcedIdDao myForcedIdDao;
 	@Mock
 	private IResourceReindexJobDao myReindexJobDao;
 	@Mock

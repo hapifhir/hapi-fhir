@@ -19,7 +19,6 @@
  */
 package ca.uhn.fhir.jpa.dao.data;
 
-import ca.uhn.fhir.jpa.dao.data.custom.IForcedIdQueries;
 import ca.uhn.fhir.jpa.model.entity.ForcedId;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -27,17 +26,16 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
-import java.util.Optional;
-
+/**
+ * Legacy forced_id implementation.
+ *
+ * @deprecated we now have a fhir_id column directly on HFJ_RESOURCE.
+ * No runtime code should query this table except for deletions by PK.
+ * To be deleted in 2024 (zero-downtime).
+ */
+@Deprecated(since = "6.10")
 @Repository
-public interface IForcedIdDao extends JpaRepository<ForcedId, Long>, IHapiFhirJpaRepository, IForcedIdQueries {
-
-	@Query("SELECT f FROM ForcedId f WHERE f.myResourcePid IN (:resource_pids)")
-	List<ForcedId> findAllByResourcePid(@Param("resource_pids") List<Long> theResourcePids);
-
-	@Query("SELECT f FROM ForcedId f WHERE f.myResourcePid = :resource_pid")
-	Optional<ForcedId> findByResourcePid(@Param("resource_pid") Long theResourcePid);
+public interface IForcedIdDao extends JpaRepository<ForcedId, Long>, IHapiFhirJpaRepository {
 
 	@Modifying
 	@Query("DELETE FROM ForcedId t WHERE t.myId = :pid")

@@ -27,9 +27,12 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 
 @Component
-// Don't change the name of this class.  Spring Data requires the name to match.
-// See https://stackoverflow.com/questions/11880924/how-to-add-custom-method-to-spring-data-jpa
-public class IForcedIdDaoImpl implements IForcedIdQueries {
+/**
+ * Custom query implementations.
+ * Don't change the name of this class.  Spring Data requires the name to match.
+ * https://stackoverflow.com/questions/11880924/how-to-add-custom-method-to-spring-data-jpa
+ */
+public class IResourceTableDaoImpl implements IForcedIdQueries {
 
 	@PersistenceContext
 	private EntityManager myEntityManager;
@@ -51,11 +54,9 @@ public class IForcedIdDaoImpl implements IForcedIdQueries {
 	 */
 	public Collection<Object[]> findAndResolveByForcedIdWithNoType(
 			String theResourceType, Collection<String> theForcedIds, boolean theExcludeDeleted) {
-		String query = "" + "SELECT "
-				+ "   f.myResourceType, f.myResourcePid, f.myForcedId, t.myDeleted "
-				+ "FROM ForcedId f "
-				+ "JOIN ResourceTable t ON t.myId = f.myResourcePid "
-				+ "WHERE f.myResourceType = :resource_type AND f.myForcedId IN ( :forced_id )";
+		String query = "SELECT t.myResourceType, t.myId, t.myFhirId, t.myDeleted "
+				+ "FROM ResourceTable t "
+				+ "WHERE t.myResourceType = :resource_type AND t.myFhirId IN ( :forced_id )";
 
 		if (theExcludeDeleted) {
 			query += " AND t.myDeleted IS NULL";
@@ -78,11 +79,9 @@ public class IForcedIdDaoImpl implements IForcedIdQueries {
 			Collection<String> theForcedIds,
 			Collection<Integer> thePartitionId,
 			boolean theExcludeDeleted) {
-		String query = "" + "SELECT "
-				+ "   f.myResourceType, f.myResourcePid, f.myForcedId, t.myDeleted "
-				+ "FROM ForcedId f "
-				+ "JOIN ResourceTable t ON t.myId = f.myResourcePid "
-				+ "WHERE f.myResourceType = :resource_type AND f.myForcedId IN ( :forced_id ) AND f.myPartitionIdValue IN ( :partition_id )";
+		String query = "SELECT t.myResourceType, t.myId, t.myFhirId, t.myDeleted "
+				+ "FROM ResourceTable t "
+				+ "WHERE t.myResourceType = :resource_type AND t.myFhirId IN ( :forced_id ) AND t.myPartitionIdValue IN ( :partition_id )";
 
 		if (theExcludeDeleted) {
 			query += " AND t.myDeleted IS NULL";
@@ -103,11 +102,9 @@ public class IForcedIdDaoImpl implements IForcedIdQueries {
 	 */
 	public Collection<Object[]> findAndResolveByForcedIdWithNoTypeInPartitionNull(
 			String theResourceType, Collection<String> theForcedIds, boolean theExcludeDeleted) {
-		String query = "" + "SELECT "
-				+ "   f.myResourceType, f.myResourcePid, f.myForcedId, t.myDeleted "
-				+ "FROM ForcedId f "
-				+ "JOIN ResourceTable t ON t.myId = f.myResourcePid "
-				+ "WHERE f.myResourceType = :resource_type AND f.myForcedId IN ( :forced_id ) AND f.myPartitionIdValue IS NULL";
+		String query = "SELECT t.myResourceType, t.myId, t.myFhirId, t.myDeleted "
+				+ "FROM ResourceTable t "
+				+ "WHERE t.myResourceType = :resource_type AND t.myFhirId IN ( :forced_id ) AND t.myPartitionIdValue IS NULL";
 
 		if (theExcludeDeleted) {
 			query += " AND t.myDeleted IS NULL";
@@ -130,11 +127,9 @@ public class IForcedIdDaoImpl implements IForcedIdQueries {
 			Collection<String> theForcedIds,
 			List<Integer> thePartitionIdsWithoutDefault,
 			boolean theExcludeDeleted) {
-		String query = "" + "SELECT "
-				+ "   f.myResourceType, f.myResourcePid, f.myForcedId, t.myDeleted "
-				+ "FROM ForcedId f "
-				+ "JOIN ResourceTable t ON t.myId = f.myResourcePid "
-				+ "WHERE f.myResourceType = :resource_type AND f.myForcedId IN ( :forced_id ) AND (f.myPartitionIdValue IS NULL OR f.myPartitionIdValue IN ( :partition_id ))";
+		String query = "SELECT t.myResourceType, t.myId, t.myFhirId, t.myDeleted "
+				+ "FROM ResourceTable t "
+				+ "WHERE t.myResourceType = :resource_type AND t.myFhirId IN ( :forced_id ) AND (t.myPartitionIdValue IS NULL OR t.myPartitionIdValue IN ( :partition_id ))";
 
 		if (theExcludeDeleted) {
 			query += " AND t.myDeleted IS NULL";

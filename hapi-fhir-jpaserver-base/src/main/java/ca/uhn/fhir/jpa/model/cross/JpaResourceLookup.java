@@ -23,7 +23,7 @@ import ca.uhn.fhir.jpa.model.dao.JpaPid;
 
 import java.util.Date;
 
-public class JpaResourceLookup implements IResourceLookup {
+public class JpaResourceLookup implements IResourceLookup<JpaPid> {
 	private final String myResourceType;
 	private final Long myResourcePid;
 	private final Date myDeletedAt;

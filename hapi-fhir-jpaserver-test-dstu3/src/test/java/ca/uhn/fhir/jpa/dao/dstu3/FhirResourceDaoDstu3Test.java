@@ -44,7 +44,6 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.ClasspathUtil;
 import com.google.common.collect.Lists;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.hamcrest.Matchers;
 import org.hamcrest.core.StringContains;
@@ -104,7 +103,6 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -632,7 +630,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 			if (readBackResource.getForcedId() != null) {
 				assertEquals(myExpectedId, readBackResource.getForcedId().getForcedId(),
 					"legacy join populated");
-				assertEquals(myExpectedId, readBackView.getForcedId(),
+				assertEquals(myExpectedId, readBackView.getFhirId(),
 					"legacy join populated");
 			} else {
 				assertEquals(IdStrategyEnum.SEQUENTIAL_NUMERIC, theServerIdStrategy,
