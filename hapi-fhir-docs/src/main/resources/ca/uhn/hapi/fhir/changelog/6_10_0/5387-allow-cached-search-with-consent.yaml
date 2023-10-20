@@ -1,0 +1,6 @@
+---
+type: perf
+issue: 5387
+title: "Enable the cache when for some requests when a consent interceptor is active.  
+  If no consent server filters with canSeeResource (i.e. shouldProcessCanSeeResource() returns false), or startOperation()
+   returns AUTHORIZED, then cached results are safe."
