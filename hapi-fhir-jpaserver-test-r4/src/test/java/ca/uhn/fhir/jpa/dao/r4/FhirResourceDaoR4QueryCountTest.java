@@ -19,6 +19,7 @@ import ca.uhn.fhir.jpa.api.model.HistoryCountModeEnum;
 import ca.uhn.fhir.jpa.dao.data.ISearchParamPresentDao;
 import ca.uhn.fhir.jpa.entity.TermValueSet;
 import ca.uhn.fhir.jpa.entity.TermValueSetPreExpansionStatusEnum;
+import ca.uhn.fhir.jpa.interceptor.ForceOffsetSearchModeInterceptor;
 import ca.uhn.fhir.jpa.model.entity.ForcedId;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
@@ -27,7 +28,9 @@ import ca.uhn.fhir.jpa.search.PersistedJpaSearchFirstPageBundleProvider;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.subscription.submit.svc.ResourceModifiedSubmitterSvc;
 import ca.uhn.fhir.jpa.subscription.triggering.ISubscriptionTriggeringSvc;
+import ca.uhn.fhir.jpa.subscription.triggering.SubscriptionTriggeringSvcImpl;
 import ca.uhn.fhir.jpa.term.TermReadSvcImpl;
+import ca.uhn.fhir.jpa.test.util.SubscriptionTestUtil;
 import ca.uhn.fhir.jpa.util.SqlQuery;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
@@ -40,9 +43,12 @@ import ca.uhn.fhir.rest.server.SimpleBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.interceptor.auth.AuthorizationInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.auth.PolicyEnum;
+import ca.uhn.fhir.rest.server.provider.ProviderConstants;
+import ca.uhn.fhir.test.utilities.ProxyUtil;
 import ca.uhn.fhir.test.utilities.server.HashMapResourceProviderExtension;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.BundleBuilder;
+import org.hamcrest.CoreMatchers;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.BooleanType;
@@ -94,12 +100,16 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
+import static ca.uhn.fhir.jpa.subscription.FhirR4Util.createSubscription;
 import static org.apache.commons.lang3.StringUtils.countMatches;
+import static org.awaitility.Awaitility.await;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -145,6 +155,9 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 	private ReindexStep myReindexStep;
 	@Autowired
 	private DeleteExpungeStep myDeleteExpungeStep;
+	@Autowired
+	protected SubscriptionTestUtil mySubscriptionTestUtil;
+
 
 	@AfterEach
 	public void afterResetDao() {
@@ -167,6 +180,8 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 
 		myFhirContext.getParserOptions().setStripVersionsFromReferences(true);
 		TermReadSvcImpl.setForceDisableHibernateSearchForUnitTest(false);
+
+		mySubscriptionTestUtil.unregisterSubscriptionInterceptor();
 	}
 
 	@Override
@@ -3073,8 +3088,6 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 
 		Bundle input = bb.getBundleTyped();
 
-//		input.getEntry().get(0).
-
 		myCaptureQueriesListener.clear();
 		mySystemDao.transaction(mySrd, input);
 		assertEquals(1, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
@@ -3087,37 +3100,102 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 	 */
 	@SuppressWarnings("unchecked")
 	@Test
-	public void testTriggerSubscription() throws Exception {
+	public void testTriggerSubscription_Sync() throws Exception {
 		// Setup
+		IntStream.range(0, 200).forEach(i->createAPatient());
 
-		myStorageSettings.addSupportedSubscriptionType(org.hl7.fhir.dstu2.model.Subscription.SubscriptionChannelType.RESTHOOK);
-		myResourceModifiedSubmitterSvc.startIfNeeded();
+		mySubscriptionTestUtil.registerRestHookInterceptor();
+		ForceOffsetSearchModeInterceptor interceptor = new ForceOffsetSearchModeInterceptor();
+		myInterceptorRegistry.registerInterceptor(interceptor);
+		try {
+			String payload = "application/fhir+json";
+			Subscription subscription = createSubscription("Patient?", payload, ourServer.getBaseUrl(), null);
+			IIdType subscriptionId = mySubscriptionDao.create(subscription, mySrd).getId();
 
-		for (int i = 0; i < 10; i++) {
-			createPatient(withActiveTrue());
+			waitForActivatedSubscriptionCount(1);
+
+			mySubscriptionTriggeringSvc.triggerSubscription(null, List.of(new StringType("Patient?")), subscriptionId);
+
+			// Test
+			myCaptureQueriesListener.clear();
+			mySubscriptionTriggeringSvc.runDeliveryPass();
+			mySubscriptionTriggeringSvc.runDeliveryPass();
+			mySubscriptionTriggeringSvc.runDeliveryPass();
+			mySubscriptionTriggeringSvc.runDeliveryPass();
+			mySubscriptionTriggeringSvc.runDeliveryPass();
+			myCaptureQueriesListener.logSelectQueries();
+			ourPatientProvider.waitForUpdateCount(200);
+
+			// Validate
+			assertEquals(7, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+			assertEquals(0, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
+			assertEquals(0, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
+			assertEquals(0, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
+		} finally {
+			myInterceptorRegistry.unregisterInterceptor(interceptor);
 		}
+	}
 
-		Subscription subscription = new Subscription();
-		subscription.getChannel().setEndpoint(ourServer.getBaseUrl());
-		subscription.getChannel().setType(Subscription.SubscriptionChannelType.RESTHOOK);
-		subscription.getChannel().setPayload(Constants.CT_FHIR_JSON_NEW);
-		subscription.setStatus(Subscription.SubscriptionStatus.REQUESTED);
-		subscription.setCriteria("Patient?active=true");
-		IIdType subscriptionId = mySubscriptionDao.create(subscription, mySrd).getId().toUnqualifiedVersionless();
+
+	@Test
+	public void testTriggerSubscription_Async() throws Exception {
+		// Setup
+		IntStream.range(0, 200).forEach(i->createAPatient());
+
+		mySubscriptionTestUtil.registerRestHookInterceptor();
+
+		String payload = "application/fhir+json";
+		Subscription subscription = createSubscription("Patient?", payload, ourServer.getBaseUrl(), null);
+		IIdType subId = mySubscriptionDao.create(subscription, mySrd).getId();
+
 		waitForActivatedSubscriptionCount(1);
-
-		mySubscriptionTriggeringSvc.triggerSubscription(null, List.of(new StringType("Patient?active=true")), subscriptionId);
 
 		// Test
 		myCaptureQueriesListener.clear();
-		mySubscriptionTriggeringSvc.runDeliveryPass();
-		ourPatientProvider.waitForUpdateCount(10);
+		Parameters response = myClient
+			.operation()
+			.onInstance(subId)
+			.named(JpaConstants.OPERATION_TRIGGER_SUBSCRIPTION)
+			.withParameter(Parameters.class, ProviderConstants.SUBSCRIPTION_TRIGGERING_PARAM_SEARCH_URL, new StringType("Patient?"))
+			.execute();
+		String responseValue = response.getParameter().get(0).getValue().primitiveValue();
+		assertThat(responseValue, CoreMatchers.containsString("Subscription triggering job submitted as JOB ID"));
 
-		// Validate
-		assertEquals(6, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
-		assertEquals(1, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
-		assertEquals(11, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
-		assertEquals(0, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
+		assertEquals(3, myCaptureQueriesListener.countSelectQueries());
+		assertEquals(0, myCaptureQueriesListener.countInsertQueries());
+		assertEquals(0, myCaptureQueriesListener.countUpdateQueries());
+		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
+
+		myCaptureQueriesListener.clear();
+		mySubscriptionTriggeringSvc.runDeliveryPass();
+
+		myCaptureQueriesListener.logInsertQueries();
+		assertEquals(15, myCaptureQueriesListener.countSelectQueries());
+		assertEquals(201, myCaptureQueriesListener.countInsertQueries());
+		assertEquals(3, myCaptureQueriesListener.countUpdateQueries());
+		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
+
+		myCaptureQueriesListener.clear();
+		mySubscriptionTriggeringSvc.runDeliveryPass();
+
+		assertEquals(2, myCaptureQueriesListener.countSelectQueries());
+		assertEquals(0, myCaptureQueriesListener.countInsertQueries());
+		assertEquals(0, myCaptureQueriesListener.countUpdateQueries());
+		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
+
+		myCaptureQueriesListener.clear();
+		mySubscriptionTriggeringSvc.runDeliveryPass();
+
+		assertEquals(0, myCaptureQueriesListener.countSelectQueries());
+		assertEquals(0, myCaptureQueriesListener.countInsertQueries());
+		assertEquals(0, myCaptureQueriesListener.countUpdateQueries());
+		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
+
+		SubscriptionTriggeringSvcImpl svc = ProxyUtil.getSingletonTarget(mySubscriptionTriggeringSvc, SubscriptionTriggeringSvcImpl.class);
+		assertEquals(0, svc.getActiveJobCount());
+
+		assertEquals(0, ourPatientProvider.getCountCreate());
+		await().until(ourPatientProvider::getCountUpdate, equalTo(200L));
 
 	}
 
