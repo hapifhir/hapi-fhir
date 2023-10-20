@@ -45,8 +45,6 @@ import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -55,6 +53,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 import static ca.uhn.fhir.rest.api.Constants.URL_TOKEN_METADATA;
 import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_META;
@@ -201,7 +201,7 @@ public class ConsentInterceptor {
 	 */
 	@Hook(value = Pointcut.STORAGE_PRESEARCH_REGISTERED)
 	public void interceptPreSearchRegistered(
-		RequestDetails theRequestDetails, ICachedSearchDetails theCachedSearchDetails) {
+			RequestDetails theRequestDetails, ICachedSearchDetails theCachedSearchDetails) {
 		if (isProcessCanSeeResource(theRequestDetails, null)) {
 			theCachedSearchDetails.setCannotBeReused();
 		}
@@ -262,7 +262,8 @@ public class ConsentInterceptor {
 	 * @param theProcessConsentSvcsFlags filled in with the responses from shouldProcessCanSeeResource each service
 	 * @return true of any service responded true to shouldProcessCanSeeResource()
 	 */
-	private boolean isProcessCanSeeResource(@Nonnull RequestDetails theRequestDetails, @Nullable boolean[] theProcessConsentSvcsFlags) {
+	private boolean isProcessCanSeeResource(
+			@Nonnull RequestDetails theRequestDetails, @Nullable boolean[] theProcessConsentSvcsFlags) {
 		if (isRequestAuthorized(theRequestDetails)) {
 			return false;
 		}
@@ -273,7 +274,7 @@ public class ConsentInterceptor {
 			return false;
 		}
 
-		if (theProcessConsentSvcsFlags == null ) {
+		if (theProcessConsentSvcsFlags == null) {
 			theProcessConsentSvcsFlags = new boolean[myConsentService.size()];
 		}
 		Validate.isTrue(theProcessConsentSvcsFlags.length == myConsentService.size());
