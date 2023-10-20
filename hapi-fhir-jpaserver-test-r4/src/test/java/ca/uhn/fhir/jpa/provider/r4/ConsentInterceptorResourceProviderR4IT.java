@@ -518,6 +518,7 @@ public class ConsentInterceptorResourceProviderR4IT extends BaseResourceProvider
 
 		IConsentService svc = mock(IConsentService.class);
 		when(svc.startOperation(any(), any())).thenReturn(ConsentOutcome.PROCEED);
+		when(svc.shouldProcessCanSeeResource(any(), any())).thenReturn(true);
 		when(svc.canSeeResource(any(), any(), any())).thenReturn(ConsentOutcome.REJECT);
 
 		consentService.setTarget(svc);
@@ -550,6 +551,7 @@ public class ConsentInterceptorResourceProviderR4IT extends BaseResourceProvider
 
 		IConsentService svc = mock(IConsentService.class);
 		when(svc.startOperation(any(), any())).thenReturn(ConsentOutcome.PROCEED);
+		when(svc.shouldProcessCanSeeResource(any(), any())).thenReturn(true);
 		when(svc.canSeeResource(any(RequestDetails.class), any(IBaseResource.class), any())).thenAnswer(t -> {
 			IBaseResource resource = t.getArgument(1, IBaseResource.class);
 			if (resource instanceof Organization) {
