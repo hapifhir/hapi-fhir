@@ -27,7 +27,7 @@ The ConsentInterceptor requires a user-supplied instance of the [IConsentService
 
 ## Performance and Privacy
 
-The `canSeeResource()` operation requires inspecting every resource while during a search and editing the results.
+The `canSeeResource()` operation requires inspecting every resource during a search and editing the results.
 This is slower than the normal path, and will block the use of the search cache.
 The `willSeeResource()` check is safe for cached searches, but removed resources may be 'visible' as holes in returned bundles.
 If this information leak is acceptable, then the search cache can be enabled by blocking the use of `canSeeResource()` by returning `false` from `processCanSeeResource()`.
