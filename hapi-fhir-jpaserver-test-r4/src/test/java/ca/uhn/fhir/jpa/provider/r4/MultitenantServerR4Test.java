@@ -23,6 +23,7 @@ import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import ca.uhn.fhir.rest.server.interceptor.auth.SearchNarrowingInterceptor;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.test.utilities.ITestDataBuilder;
@@ -40,6 +41,7 @@ import org.hl7.fhir.r4.model.Condition;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -65,6 +67,7 @@ import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -422,6 +425,54 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 			assertEquals(1, resourceTable.getPartitionId().getPartitionId());
 		});
 
+	}
+
+	@Test
+	public void testTransactionPut_withSearchNarrowingInterceptor_createsPatient() {
+		// setup
+		IBaseResource patientA = buildPatient(withTenant(TENANT_B), withActiveTrue(), withId("1234a"),
+			withFamily("Family"), withGiven("Given"));
+
+		Bundle transactioBundle = new Bundle();
+		transactioBundle.setType(Bundle.BundleType.TRANSACTION);
+		transactioBundle.addEntry()
+			.setFullUrl("http://localhost:8000/TENANT-A/Patient/1234a")
+			.setResource((Resource) patientA)
+			.getRequest().setUrl("Patient/1234a").setMethod(Bundle.HTTPVerb.PUT);
+
+		myServer.registerInterceptor(new SearchNarrowingInterceptor());
+
+		// execute
+		myClient.transaction().withBundle(transactioBundle).execute();
+
+		// verify - read back using DAO
+		SystemRequestDetails requestDetails = new SystemRequestDetails();
+		requestDetails.setTenantId(TENANT_B);
+		Patient patient1 = myPatientDao.read(new IdType("Patient/1234a"), requestDetails);
+		assertEquals("Family", patient1.getName().get(0).getFamily());
+	}
+
+	@Test
+	public void testTransactionGet_withSearchNarrowingInterceptor_retrievesPatient() {
+		// setup
+		createPatient(withTenant(TENANT_B), withActiveTrue(), withId("1234a"),
+			withFamily("Family"), withGiven("Given"));
+
+		Bundle transactioBundle = new Bundle();
+		transactioBundle.setType(Bundle.BundleType.TRANSACTION);
+		transactioBundle.addEntry()
+			.getRequest().setUrl("Patient/1234a").setMethod(Bundle.HTTPVerb.GET);
+
+		myServer.registerInterceptor(new SearchNarrowingInterceptor());
+
+		// execute
+		Bundle result = myClient.transaction().withBundle(transactioBundle).execute();
+
+		// verify
+		assertEquals(1, result.getEntry().size());
+		Patient retrievedPatient = (Patient) result.getEntry().get(0).getResource();
+		assertNotNull(retrievedPatient);
+		assertEquals("Family", retrievedPatient.getName().get(0).getFamily());
 	}
 
 	@Test
