@@ -170,7 +170,7 @@ public class DatabaseSearchCacheSvcImpl implements ISearchCacheSvc {
 	}
 
 	@Override
-	public void pollForStaleSearchesAndDeleteThem(RequestPartitionId theRequestPartitionId) {
+	public void pollForStaleSearchesAndDeleteThem(RequestPartitionId theRequestPartitionId, Instant theDeadline) {
 		HapiTransactionService.noTransactionAllowed();
 
 		if (!myStorageSettings.isExpireSearchResults()) {

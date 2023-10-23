@@ -31,6 +31,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+
 import static ca.uhn.fhir.jpa.search.cache.DatabaseSearchCacheSvcImpl.SEARCH_CLEANUP_JOB_INTERVAL_MILLIS;
 
 /**
@@ -53,7 +56,15 @@ public class StaleSearchDeletingSvcImpl implements IStaleSearchDeletingSvc, IHas
 	@Override
 	@Transactional(propagation = Propagation.NEVER)
 	public void pollForStaleSearchesAndDeleteThem() {
-		mySearchCacheSvc.pollForStaleSearchesAndDeleteThem(RequestPartitionId.allPartitions());
+		mySearchCacheSvc.pollForStaleSearchesAndDeleteThem(RequestPartitionId.allPartitions(), getDeadline());
+	}
+
+	/**
+	 * Calculate a deadline to finish before the next scheduled run.
+	 */
+	protected Instant getDeadline() {
+		// target a 90% duty-cycle to avoid confusing quartz
+		return Instant.now().plus((long) (SEARCH_CLEANUP_JOB_INTERVAL_MILLIS * 0.90), ChronoUnit.MILLIS);
 	}
 
 	@Override
