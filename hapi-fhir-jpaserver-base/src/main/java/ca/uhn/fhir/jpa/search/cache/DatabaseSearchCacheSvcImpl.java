@@ -27,34 +27,31 @@ import ca.uhn.fhir.jpa.dao.data.ISearchIncludeDao;
 import ca.uhn.fhir.jpa.dao.data.ISearchResultDao;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
+import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService.IExecutionBuilder;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
+import ca.uhn.fhir.system.HapiSystemProperties;
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.Lists;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.dstu3.model.InstantType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Slice;
 import org.springframework.jdbc.core.ConnectionCallback;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.annotation.Nonnull;
-import javax.sql.DataSource;
 import java.time.Instant;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import javax.annotation.Nonnull;
+import javax.sql.DataSource;
 
 public class DatabaseSearchCacheSvcImpl implements ISearchCacheSvc {
 	/*
@@ -188,6 +185,13 @@ public class DatabaseSearchCacheSvcImpl implements ISearchCacheSvc {
 		boolean myDeadlineLogged = false;
 		final Date myCutoffForDeletion;
 		final Set<Long> mySearchesToMarkForDeletion = new HashSet<>();
+		final Set<Long> mySearchPidsToDelete = new HashSet<>();
+		final Set<Long> mySearchPidsToDeleteResults = new HashSet<>();
+		/**
+		 * Number of results we have queued up in mySearchPidsToDeleteResults to delete.
+		 * We try to keep this to a reasonable size to avoid long transactions that may escalate to a table lock.
+		 */
+		private int myPendingSearchResultCount = 0;
 
 		DeleteRun(Instant theDeadline, Date theCutoffForDeletion, RequestPartitionId theRequestPartitionId) {
 			myDeadline = theDeadline;
@@ -198,43 +202,46 @@ public class DatabaseSearchCacheSvcImpl implements ISearchCacheSvc {
 		/**
 		 * Iterate over all theMarkDeletedTargets ids and mark them as deleted in batches of size ourMaximumSearchesToCheckForDeletionCandidacy
 		 */
-		public void markDeleted(@Nonnull Iterable<Long> theMarkDeletedTargets, TransactionStatus theStatus) {
+		public void markDeletedInBatches(@Nonnull Iterable<Long> theMarkDeletedTargets) {
 			assert theMarkDeletedTargets != null;
 
 			for (final Long nextSearchToDelete : theMarkDeletedTargets) {
-				ourLog.debug("Marking search with PID {} as ready for deletion", nextSearchToDelete);
-				mySearchesToMarkForDeletion.add(nextSearchToDelete);
-
-				if (mySearchesToMarkForDeletion.size() >= ourMaximumSearchesToCheckForDeletionCandidacy) {
-					flushDeleteMarks(theStatus);
-				}
 				if (isPastDeadline()) {
 					break;
 				}
+				if (mySearchesToMarkForDeletion.size() >= ourMaximumSearchesToCheckForDeletionCandidacy) {
+					flushDeleteMarks();
+				}
+				ourLog.debug("Marking search with PID {} as ready for deletion", nextSearchToDelete);
+				mySearchesToMarkForDeletion.add(nextSearchToDelete);
 			}
-			flushDeleteMarks(theStatus);
+			flushDeleteMarks();
 		}
 
 		/**
 		 * Mark all ids in the mySearchesToMarkForDeletion buffer as deleted, and clear the buffer.
 		 */
-		public void flushDeleteMarks(TransactionStatus theStatus) {
+		public void flushDeleteMarks() {
 			if (mySearchesToMarkForDeletion.isEmpty()) {
 				return;
 			}
-
 			ourLog.debug("Marking {} searches as deleted", mySearchesToMarkForDeletion.size());
-			// we commit these as a batch.
 			mySearchDao.updateDeleted(mySearchesToMarkForDeletion, true);
+			commitOpenChanges();
+			mySearchesToMarkForDeletion.clear();
+		}
+
+		/**
+		 * Dig into the guts of our Hibernate session, flush any changes in the session, and commit the underlying connection.
+		 */
+		private void commitOpenChanges() {
 			// flush to force Hibernate to actually get a connection from the pool
 			mySearchDao.flush();
 			// goofy hack to get the underlying connection and commit
-			new JdbcTemplate(myDataSource).execute((ConnectionCallback<?>) con->{
+			new JdbcTemplate(myDataSource).execute((ConnectionCallback<?>) con -> {
 				con.commit();
 				return null;
 			});
-
-			mySearchesToMarkForDeletion.clear();
 		}
 
 		boolean isPastDeadline() {
@@ -244,6 +251,73 @@ public class DatabaseSearchCacheSvcImpl implements ISearchCacheSvc {
 				myDeadlineLogged = true;
 			}
 			return result;
+		}
+
+		private int deleteMarkedSearches() {
+			final Iterable<Object[]> toDelete = mySearchDao.findDeleted();
+			assert toDelete != null;
+
+			int count = 0;
+			for (final Object[] nextSearchToDelete : toDelete) {
+				long searchPid = (long) nextSearchToDelete[0];
+				Integer numberOfResults = (Integer) nextSearchToDelete[1];
+				numberOfResults = numberOfResults == null ? 0 : numberOfResults;
+
+				ourLog.trace("Buffering deletion Search with pid {} and {} results", searchPid, numberOfResults);
+
+				deleteSearchAndResults(searchPid, numberOfResults);
+				count += 1;
+				if (isPastDeadline()) {
+					break;
+				}
+			}
+			flushSearchResultDeletes();
+			flushSearchDeletes();
+			return count;
+		}
+
+		private void deleteSearchAndResults(long theSearchPid, int theNumberOfResults) {
+			// fixme check for oversize.
+
+			mySearchPidsToDeleteResults.add(theSearchPid);
+			mySearchPidsToDelete.add(theSearchPid);
+			myPendingSearchResultCount += theNumberOfResults;
+
+			// fixme constant?
+			if (myPendingSearchResultCount > 50000) {
+				flushSearchResultDeletes();
+			}
+
+			if (mySearchPidsToDelete.size() > 1000) {
+				flushSearchResultDeletes();
+				flushSearchDeletes();
+			}
+		}
+
+		private void flushSearchDeletes() {
+			if (mySearchPidsToDelete.isEmpty()) {
+				return;
+			}
+			ourLog.debug("Deleting {} Search records", mySearchPidsToDelete.size());
+			mySearchIncludeDao.deleteForSearch(mySearchPidsToDelete);
+			mySearchDao.deleteByPids(mySearchPidsToDelete);
+			commitOpenChanges();
+			mySearchPidsToDelete.clear();
+		}
+
+		private void flushSearchResultDeletes() {
+			if (mySearchPidsToDeleteResults.isEmpty()) {
+				return;
+			}
+			ourLog.debug("Deleting {} Search Results", mySearchPidsToDeleteResults.size());
+			mySearchResultDao.deleteBySearchIds(mySearchPidsToDeleteResults);
+			commitOpenChanges();
+			mySearchPidsToDeleteResults.clear();
+			myPendingSearchResultCount = 0;
+		}
+
+		IExecutionBuilder getTxBuilder() {
+			return myTransactionService.withSystemRequest().withRequestPartitionId(myRequestPartitionId);
 		}
 	}
 
@@ -262,46 +336,24 @@ public class DatabaseSearchCacheSvcImpl implements ISearchCacheSvc {
 		ourLog.debug("Searching for searches which are before {}", cutoff);
 
 		// Mark searches as deleted if they should be
-		myTransactionService.withSystemRequestOnPartition(theRequestPartitionId).execute(theStatus -> {
+		run.getTxBuilder().execute(theStatus -> {
 			final Iterable<Long> toMarkDeleted = mySearchDao.findWhereCreatedBefore(cutoff, new Date(now()));
 
-			run.markDeleted(toMarkDeleted, theStatus);
+			run.markDeletedInBatches(toMarkDeleted);
+
+			if (run.isPastDeadline()) {
+				return null;
+			}
+
+			// Delete searches that are marked as deleted
+			int deletedCount = run.deleteMarkedSearches();
+
+			if ((ourLog.isDebugEnabled() || HapiSystemProperties.isTestModeEnabled()) && (deletedCount > 0)) {
+				Long total = mySearchDao.count();
+				ourLog.debug("Deleted {} searches, {} remaining", deletedCount, total);
+			}
 			return null;
 		});
-
-		if (run.isPastDeadline()) {
-			return;
-		}
-		// Delete searches that are marked as deleted
-		final Iterable<Object[]> toDelete = myTransactionService
-				.withSystemRequestOnPartition(theRequestPartitionId)
-				.execute(theStatus ->
-						mySearchDao.findDeleted());
-		assert toDelete != null;
-		for (final Object[] nextSearchToDelete : toDelete) {
-			long id = (long) nextSearchToDelete[0];
-			Integer max = (Integer) nextSearchToDelete[1];
-			ourLog.debug("Deleting search with PID {}", id);
-			myTransactionService
-					.withSystemRequest()
-					.withRequestPartitionId(theRequestPartitionId)
-					.execute(t -> {
-						deleteSearch(id);
-						return null;
-					});
-		}
-
-		// wipmb broken
-		//int count = toDelete.getContent().size();
-//		if (count > 0) {
-//			if (ourLog.isDebugEnabled() || HapiSystemProperties.isTestModeEnabled()) {
-//				Long total = myTransactionService
-//						.withSystemRequest()
-//						.withRequestPartitionId(theRequestPartitionId)
-//						.execute(t -> mySearchDao.count());
-//				ourLog.debug("Deleted {} searches, {} remaining", count, total);
-//			}
-//		}
 	}
 
 	@Nonnull
@@ -319,46 +371,6 @@ public class DatabaseSearchCacheSvcImpl implements ISearchCacheSvc {
 					new InstantType(new Date(now())));
 		}
 		return cutoff;
-	}
-
-	private void deleteSearch(final Long theSearchPid) {
-		mySearchDao.findById(theSearchPid).ifPresent(searchToDelete -> {
-			mySearchIncludeDao.deleteForSearch(searchToDelete.getId());
-
-			/*
-			 * Note, we're only deleting up to 500 results in an individual search here. This
-			 * is to prevent really long running transactions in cases where there are
-			 * huge searches with tons of results in them. By the time we've gotten here
-			 * we have marked the parent Search entity as deleted, so it's not such a
-			 * huge deal to be only partially deleting search results. They'll get deleted
-			 * eventually
-			 */
-			int max = ourMaximumResultsToDeleteInOnePass;
-			Slice<Long> resultPids = mySearchResultDao.findForSearch(PageRequest.of(0, max), searchToDelete.getId());
-			if (resultPids.hasContent()) {
-				List<List<Long>> partitions =
-						Lists.partition(resultPids.getContent(), ourMaximumResultsToDeleteInOneStatement);
-				for (List<Long> nextPartition : partitions) {
-					mySearchResultDao.deleteByIds(nextPartition);
-				}
-			}
-
-			// Only delete if we don't have results left in this search
-			if (resultPids.getNumberOfElements() < max) {
-				ourLog.debug(
-						"Deleting search {}/{} - Created[{}]",
-						searchToDelete.getId(),
-						searchToDelete.getUuid(),
-						new InstantType(searchToDelete.getCreated()));
-				mySearchDao.deleteByPid(searchToDelete.getId());
-			} else {
-				ourLog.debug(
-						"Purged {} search results for deleted search {}/{}",
-						resultPids.getSize(),
-						searchToDelete.getId(),
-						searchToDelete.getUuid());
-			}
-		});
 	}
 
 	@VisibleForTesting

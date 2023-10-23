@@ -51,16 +51,15 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.interceptor.TransactionAspectSupport;
 import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.Objects;
 import java.util.concurrent.Callable;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 /**
  * @see IHapiTransactionService for an explanation of this class
@@ -516,10 +515,9 @@ public class HapiTransactionService implements IHapiTransactionService {
 	}
 
 	@Nullable
-	private static <T> T executeInExistingTransaction(TransactionCallback<T> theCallback) {
-		// lookup the current tx handle.
-		TransactionStatus existingTransaction = TransactionAspectSupport.currentTransactionStatus();
-		return theCallback.doInTransaction(existingTransaction);
+	private <T> T executeInExistingTransaction(@Nonnull TransactionCallback<T> theCallback) {
+		// TODO we could probably track the TransactionStatus we need as a thread local like we do our partition id.
+		return theCallback.doInTransaction(null);
 	}
 
 	/**

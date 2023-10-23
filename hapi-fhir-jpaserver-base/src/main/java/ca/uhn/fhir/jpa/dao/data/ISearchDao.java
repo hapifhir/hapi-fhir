@@ -30,7 +30,10 @@ import java.util.Date;
 import java.util.Optional;
 import java.util.Set;
 
-public interface ISearchDao extends JpaRepository<Search, Long>, IHapiFhirJpaRepository {
+public interface ISearchDao extends JpaRepository<Search, Long>
+// wipmb does this work?
+//	, IHapiFhirJpaRepository
+{
 
 	@Query("SELECT s FROM Search s LEFT OUTER JOIN FETCH s.myIncludes WHERE s.myUuid = :uuid")
 	Optional<Search> findByUuidAndFetchIncludes(@Param("uuid") String theUuid);
@@ -39,7 +42,8 @@ public interface ISearchDao extends JpaRepository<Search, Long>, IHapiFhirJpaRep
 			"SELECT s.myId FROM Search s WHERE (s.myCreated < :cutoff) AND (s.myExpiryOrNull IS NULL OR s.myExpiryOrNull < :now) AND (s.myDeleted IS NULL OR s.myDeleted = FALSE)")
 	Iterable<Long> findWhereCreatedBefore(@Param("cutoff") Date theCutoff, @Param("now") Date theNow);
 
-	@Query("SELECT s.myId, (select max(sr.myOrder) as maxOrder from SearchResult sr where sr.mySearchPid = s.myId) FROM Search s WHERE s.myDeleted = TRUE")
+	@Query(
+			"SELECT s.myId, (select max(sr.myOrder) as maxOrder from SearchResult sr where sr.mySearchPid = s.myId) FROM Search s WHERE s.myDeleted = TRUE")
 	Iterable<Object[]> findDeleted();
 
 	@Query(
@@ -54,9 +58,13 @@ public interface ISearchDao extends JpaRepository<Search, Long>, IHapiFhirJpaRep
 
 	@Modifying
 	@Query("UPDATE Search s SET s.myDeleted = :deleted WHERE s.myId in (:pids)")
-	void updateDeleted(@Param("pids") Set<Long> thePid, @Param("deleted") boolean theDeleted);
+	int updateDeleted(@Param("pids") Set<Long> thePid, @Param("deleted") boolean theDeleted);
 
 	@Modifying
 	@Query("DELETE FROM Search s WHERE s.myId = :pid")
 	void deleteByPid(@Param("pid") Long theId);
+
+	@Modifying
+	@Query("DELETE FROM Search s WHERE s.myId in (:pids)")
+	void deleteByPids(@Param("pids") Collection<Long> theSearchToDelete);
 }

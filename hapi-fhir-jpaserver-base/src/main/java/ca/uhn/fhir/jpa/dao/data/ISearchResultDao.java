@@ -27,6 +27,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.Collection;
 import java.util.List;
 
 public interface ISearchResultDao extends JpaRepository<SearchResult, Long>, IHapiFhirJpaRepository {
@@ -43,6 +44,10 @@ public interface ISearchResultDao extends JpaRepository<SearchResult, Long>, IHa
 	@Modifying
 	@Query("DELETE FROM SearchResult s WHERE s.myId IN :ids")
 	void deleteByIds(@Param("ids") List<Long> theContent);
+
+	@Modifying
+	@Query("DELETE FROM SearchResult s WHERE s.mySearchPid IN :searchIds")
+	void deleteBySearchIds(@Param("searchIds") Collection<Long> theSearchIds);
 
 	@Query("SELECT count(r) FROM SearchResult r WHERE r.mySearchPid = :search")
 	int countForSearch(@Param("search") Long theSearchPid);

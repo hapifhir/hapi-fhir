@@ -64,8 +64,8 @@ public class StaleSearchDeletingSvcImpl implements IStaleSearchDeletingSvc, IHas
 	 */
 	protected Instant getDeadline() {
 		return Instant.ofEpochMilli(DatabaseSearchCacheSvcImpl.now())
-			// target a 90% duty-cycle to avoid confusing quartz
-			.plus((long) (SEARCH_CLEANUP_JOB_INTERVAL_MILLIS * 0.90), ChronoUnit.MILLIS);
+				// target a 90% duty-cycle to avoid confusing quartz
+				.plus((long) (SEARCH_CLEANUP_JOB_INTERVAL_MILLIS * 0.90), ChronoUnit.MILLIS);
 	}
 
 	@Override
