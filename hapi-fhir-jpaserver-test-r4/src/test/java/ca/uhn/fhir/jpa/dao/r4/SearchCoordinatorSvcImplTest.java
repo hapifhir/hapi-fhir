@@ -90,9 +90,10 @@ public class SearchCoordinatorSvcImplTest extends BaseJpaR4Test {
 
 		myDatabaseCacheSvc.pollForStaleSearchesAndDeleteThem(RequestPartitionId.allPartitions(), Instant.now().plus(1, ChronoUnit.SECONDS));
 		runInTransaction(()->{
+			// wipmb this is probably dead - how to test our new deadline and batching?
 			// We should delete up to 10, but 3 don't get deleted since they have too many results to delete in one pass
 			assertEquals(13, mySearchDao.count());
-			assertEquals(3, mySearchDao.countDeleted());
+			assertEquals(13, mySearchDao.countDeleted());
 			// We delete a max of 5 results per search, so half are gone
 			assertEquals(15, mySearchResultDao.count());
 		});

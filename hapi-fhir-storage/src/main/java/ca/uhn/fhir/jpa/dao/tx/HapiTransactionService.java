@@ -51,6 +51,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.support.DefaultTransactionDefinition;
 import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
@@ -243,7 +244,8 @@ public class HapiTransactionService implements IHapiTransactionService {
 				 * and it's not a read-only transaction, we don't need to open a new transaction
 				 * so let's just add a method to the stack trace that makes this obvious.
 				 */
-				return executeInExistingTransaction(theCallback);
+				TransactionStatus transaction = myTransactionManager.getTransaction(new DefaultTransactionDefinition());
+				return executeInExistingTransaction(theCallback, transaction);
 			}
 		} else if (myTransactionPropagationWhenChangingPartitions == Propagation.REQUIRES_NEW) {
 			return executeInNewTransactionForPartitionChange(
@@ -514,8 +516,9 @@ public class HapiTransactionService implements IHapiTransactionService {
 	}
 
 	@Nullable
-	private static <T> T executeInExistingTransaction(TransactionCallback<T> theCallback) {
-		return theCallback.doInTransaction(null);
+	private static <T> T executeInExistingTransaction(
+			TransactionCallback<T> theCallback, TransactionStatus theTransaction) {
+		return theCallback.doInTransaction(theTransaction);
 	}
 
 	/**

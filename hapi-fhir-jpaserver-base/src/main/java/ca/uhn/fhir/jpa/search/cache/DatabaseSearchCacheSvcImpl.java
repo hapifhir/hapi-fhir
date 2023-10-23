@@ -40,14 +40,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
+import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import javax.annotation.Nonnull;
 
 public class DatabaseSearchCacheSvcImpl implements ISearchCacheSvc {
 	/*
@@ -62,7 +61,7 @@ public class DatabaseSearchCacheSvcImpl implements ISearchCacheSvc {
 	private static final Logger ourLog = LoggerFactory.getLogger(DatabaseSearchCacheSvcImpl.class);
 	private static int ourMaximumResultsToDeleteInOneStatement = DEFAULT_MAX_RESULTS_TO_DELETE_IN_ONE_STMT;
 	private static int ourMaximumResultsToDeleteInOnePass = DEFAULT_MAX_RESULTS_TO_DELETE_IN_ONE_PAS;
-	private static int ourMaximumSearchesToCheckForDeletionCandidacy = DEFAULT_MAX_DELETE_CANDIDATES_TO_FIND;
+	private static int ourMaximumSearchesToCheckForDeletionCandidacy = 2;
 	private static Long ourNowForUnitTests;
 	/*
 	 * We give a bit of extra leeway just to avoid race conditions where a query result
@@ -79,6 +78,9 @@ public class DatabaseSearchCacheSvcImpl implements ISearchCacheSvc {
 
 	@Autowired
 	private ISearchIncludeDao mySearchIncludeDao;
+
+	@Autowired
+	private PlatformTransactionManager myPlatformTransactionManager;
 
 	@Autowired
 	private IHapiTransactionService myTransactionService;
@@ -169,6 +171,69 @@ public class DatabaseSearchCacheSvcImpl implements ISearchCacheSvc {
 		return Optional.empty();
 	}
 
+	class DeleteRun {
+		final RequestPartitionId myRequestPartitionId;
+		final Instant myDeadline;
+		final Date myCutoffForDeletion;
+		final Set<Long> mySearchesToMarkForDeletion = new HashSet<>();
+
+		DeleteRun(Instant theDeadline, Date theCutoffForDeletion, RequestPartitionId theRequestPartitionId) {
+			myDeadline = theDeadline;
+			myCutoffForDeletion = theCutoffForDeletion;
+			myRequestPartitionId = theRequestPartitionId;
+		}
+
+		/**
+		 * Iterate over all theMarkDeletedTargets ids and mark them as deleted in batches of size ourMaximumSearchesToCheckForDeletionCandidacy
+		 */
+		public void markDeleted(@Nonnull Iterable<Long> theMarkDeletedTargets) {
+			assert theMarkDeletedTargets != null;
+
+			for (final Long nextSearchToDelete : theMarkDeletedTargets) {
+				ourLog.debug("Deleting search with PID {}", nextSearchToDelete);
+				mySearchesToMarkForDeletion.add(nextSearchToDelete);
+
+				if (mySearchesToMarkForDeletion.size() >= ourMaximumSearchesToCheckForDeletionCandidacy) {
+					flushDeleteMarks();
+				}
+				if (isPastDeadline()) {
+					break;
+				}
+			}
+			flushDeleteMarks();
+		}
+
+		/**
+		 * Mark all ids in the mySearchesToMarkForDeletion buffer as deleted, and clear the buffer.
+		 */
+		public void flushDeleteMarks() {
+			if (mySearchesToMarkForDeletion.isEmpty()) {
+				return;
+			}
+
+			myTransactionService
+					.withSystemRequest()
+					.withRequestPartitionId(myRequestPartitionId)
+					.withPropagation(Propagation.REQUIRED)
+					.execute(t -> {
+						ourLog.debug("Marking {} searches as deleted", mySearchesToMarkForDeletion.size());
+						mySearchDao.updateDeleted(mySearchesToMarkForDeletion, true);
+						myPlatformTransactionManager.commit(t);
+						return null;
+					});
+
+			mySearchesToMarkForDeletion.clear();
+		}
+
+		boolean isPastDeadline() {
+			boolean result = Instant.ofEpochMilli(now()).isAfter(myDeadline);
+			if (result) {
+				ourLog.warn("Search cache cleaner did not finish all work before deadline.");
+			}
+			return result;
+		}
+	}
+
 	@Override
 	public void pollForStaleSearchesAndDeleteThem(RequestPartitionId theRequestPartitionId, Instant theDeadline) {
 		HapiTransactionService.noTransactionAllowed();
@@ -177,37 +242,19 @@ public class DatabaseSearchCacheSvcImpl implements ISearchCacheSvc {
 			return;
 		}
 
-		long cutoffMillis = myStorageSettings.getExpireSearchResultsAfterMillis();
-		if (myStorageSettings.getReuseCachedSearchResultsForMillis() != null) {
-			cutoffMillis = cutoffMillis + myStorageSettings.getReuseCachedSearchResultsForMillis();
-		}
-		final Date cutoff = new Date((now() - cutoffMillis) - myCutoffSlack);
+		final Date cutoff = getCutoff();
 
-		if (ourNowForUnitTests != null) {
-			ourLog.info(
-					"Searching for searches which are before {} - now is {}",
-					new InstantType(cutoff),
-					new InstantType(new Date(now())));
-		}
+		final DeleteRun run = new DeleteRun(theDeadline, cutoff, theRequestPartitionId);
 
 		ourLog.debug("Searching for searches which are before {}", cutoff);
 
 		// Mark searches as deleted if they should be
-		final Slice<Long> toMarkDeleted = myTransactionService
-				.withSystemRequestOnPartition(theRequestPartitionId)
-				.execute(theStatus -> mySearchDao.findWhereCreatedBefore(
-						cutoff, new Date(), PageRequest.of(0, ourMaximumSearchesToCheckForDeletionCandidacy)));
-		assert toMarkDeleted != null;
-		for (final Long nextSearchToDelete : toMarkDeleted) {
-			ourLog.debug("Deleting search with PID {}", nextSearchToDelete);
-			myTransactionService
-					.withSystemRequest()
-					.withRequestPartitionId(theRequestPartitionId)
-					.execute(t -> {
-						mySearchDao.updateDeleted(nextSearchToDelete, true);
-						return null;
-					});
-		}
+		myTransactionService.withSystemRequestOnPartition(theRequestPartitionId).execute(theStatus -> {
+			final Iterable<Long> toMarkDeleted = mySearchDao.findWhereCreatedBefore(cutoff, new Date(now()));
+
+			run.markDeleted(toMarkDeleted);
+			return null;
+		});
 
 		// Delete searches that are marked as deleted
 		final Slice<Long> toDelete = myTransactionService
@@ -236,6 +283,23 @@ public class DatabaseSearchCacheSvcImpl implements ISearchCacheSvc {
 				ourLog.debug("Deleted {} searches, {} remaining", count, total);
 			}
 		}
+	}
+
+	@Nonnull
+	private Date getCutoff() {
+		long cutoffMillis = myStorageSettings.getExpireSearchResultsAfterMillis();
+		if (myStorageSettings.getReuseCachedSearchResultsForMillis() != null) {
+			cutoffMillis = cutoffMillis + myStorageSettings.getReuseCachedSearchResultsForMillis();
+		}
+		final Date cutoff = new Date((now() - cutoffMillis) - myCutoffSlack);
+
+		if (ourNowForUnitTests != null) {
+			ourLog.info(
+					"Searching for searches which are before {} - now is {}",
+					new InstantType(cutoff),
+					new InstantType(new Date(now())));
+		}
+		return cutoff;
 	}
 
 	private void deleteSearch(final Long theSearchPid) {

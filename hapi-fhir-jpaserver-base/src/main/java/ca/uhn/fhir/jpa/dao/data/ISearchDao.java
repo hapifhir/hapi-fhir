@@ -30,6 +30,7 @@ import org.springframework.data.repository.query.Param;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Optional;
+import java.util.Set;
 
 public interface ISearchDao extends JpaRepository<Search, Long>, IHapiFhirJpaRepository {
 
@@ -38,7 +39,7 @@ public interface ISearchDao extends JpaRepository<Search, Long>, IHapiFhirJpaRep
 
 	@Query(
 			"SELECT s.myId FROM Search s WHERE (s.myCreated < :cutoff) AND (s.myExpiryOrNull IS NULL OR s.myExpiryOrNull < :now) AND (s.myDeleted IS NULL OR s.myDeleted = FALSE)")
-	Slice<Long> findWhereCreatedBefore(@Param("cutoff") Date theCutoff, @Param("now") Date theNow, Pageable thePage);
+	Iterable<Long> findWhereCreatedBefore(@Param("cutoff") Date theCutoff, @Param("now") Date theNow);
 
 	@Query("SELECT s.myId FROM Search s WHERE s.myDeleted = TRUE")
 	Slice<Long> findDeleted(Pageable thePage);
@@ -54,8 +55,8 @@ public interface ISearchDao extends JpaRepository<Search, Long>, IHapiFhirJpaRep
 	int countDeleted();
 
 	@Modifying
-	@Query("UPDATE Search s SET s.myDeleted = :deleted WHERE s.myId = :pid")
-	void updateDeleted(@Param("pid") Long thePid, @Param("deleted") boolean theDeleted);
+	@Query("UPDATE Search s SET s.myDeleted = :deleted WHERE s.myId in (:pids)")
+	void updateDeleted(@Param("pids") Set<Long> thePid, @Param("deleted") boolean theDeleted);
 
 	@Modifying
 	@Query("DELETE FROM Search s WHERE s.myId = :pid")
