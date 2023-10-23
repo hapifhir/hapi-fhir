@@ -277,13 +277,13 @@ public class DatabaseSearchCacheSvcImpl implements ISearchCacheSvc {
 		}
 
 		private void deleteSearchAndResults(long theSearchPid, int theNumberOfResults) {
-			// fixme check for oversize.
+			// wipmb check for oversize.
 
 			mySearchPidsToDeleteResults.add(theSearchPid);
 			mySearchPidsToDelete.add(theSearchPid);
 			myPendingSearchResultCount += theNumberOfResults;
 
-			// fixme constant?
+			// wipmb constant?
 			if (myPendingSearchResultCount > 50000) {
 				flushSearchResultDeletes();
 			}
