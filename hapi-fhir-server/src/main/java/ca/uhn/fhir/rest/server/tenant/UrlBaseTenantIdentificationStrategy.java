@@ -102,4 +102,12 @@ public class UrlBaseTenantIdentificationStrategy implements ITenantIdentificatio
 		}
 		return result;
 	}
+
+	@Override
+	public String resolveRelativeUrl(String theRelativeUrl, RequestDetails theRequestDetails) {
+		if (theRequestDetails.getTenantId() != null && !theRelativeUrl.startsWith(theRequestDetails.getTenantId())) {
+			return theRequestDetails.getTenantId() + "/" + theRelativeUrl;
+		}
+		return theRelativeUrl;
+	}
 }

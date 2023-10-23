@@ -47,6 +47,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
@@ -452,8 +454,9 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 		assertEquals("Family", patient1.getName().get(0).getFamily());
 	}
 
-	@Test
-	public void testTransactionGet_withSearchNarrowingInterceptor_retrievesPatient() {
+	@ParameterizedTest
+	@ValueSource(strings = {"Patient/1234a", "TENANT-B/Patient/1234a"})
+	public void testTransactionGet_withSearchNarrowingInterceptor_retrievesPatient(String theEntryUrl) {
 		// setup
 		createPatient(withTenant(TENANT_B), withActiveTrue(), withId("1234a"),
 			withFamily("Family"), withGiven("Given"));
@@ -461,7 +464,7 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 		Bundle transactioBundle = new Bundle();
 		transactioBundle.setType(Bundle.BundleType.TRANSACTION);
 		transactioBundle.addEntry()
-			.getRequest().setUrl("Patient/1234a").setMethod(Bundle.HTTPVerb.GET);
+			.getRequest().setUrl(theEntryUrl).setMethod(Bundle.HTTPVerb.GET);
 
 		myServer.registerInterceptor(new SearchNarrowingInterceptor());
 
