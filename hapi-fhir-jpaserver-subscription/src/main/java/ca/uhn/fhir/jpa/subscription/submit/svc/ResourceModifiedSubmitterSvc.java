@@ -145,8 +145,8 @@ public class ResourceModifiedSubmitterSvc implements IResourceModifiedConsumer, 
 		return theStatus -> {
 			boolean processed = true;
 			ResourceModifiedMessage resourceModifiedMessage = null;
-			try {
 
+			try {
 				// delete the entry to lock the row to ensure unique processing
 				boolean wasDeleted = deletePersistedResourceModifiedMessage(
 						thePersistedResourceModifiedMessage.getPersistedResourceModifiedMessagePk());
@@ -159,15 +159,27 @@ public class ResourceModifiedSubmitterSvc implements IResourceModifiedConsumer, 
 					resourceModifiedMessage = optionalResourceModifiedMessage.get();
 					submitResourceModified(resourceModifiedMessage);
 				}
-
 			} catch (MessageDeliveryException exception) {
 				// we encountered an issue when trying to send the message so mark the transaction for rollback
+				String payloadId = "[unknown]";
+				String subscriptionId = "[unknown]";
+				if (resourceModifiedMessage != null) {
+					payloadId = resourceModifiedMessage.getPayloadId();
+					subscriptionId = resourceModifiedMessage.getSubscriptionId();
+				}
 				ourLog.error(
 						"Channel submission failed for resource with id {} matching subscription with id {}.  Further attempts will be performed at later time.",
-						resourceModifiedMessage.getPayloadId(),
-						resourceModifiedMessage.getSubscriptionId());
+						payloadId,
+						subscriptionId,
+						exception);
 				processed = false;
 				theStatus.setRollbackOnly();
+			} catch (Exception ex) {
+				// catch other errors
+				ourLog.error(
+						"Unexpected error encountered while processing resource modified message. Marking as processed to prevent further errors.",
+						ex);
+				processed = true;
 			}
 
 			return processed;
@@ -179,7 +191,6 @@ public class ResourceModifiedSubmitterSvc implements IResourceModifiedConsumer, 
 		ResourceModifiedMessage resourceModifiedMessage = null;
 
 		try {
-
 			resourceModifiedMessage = myResourceModifiedMessagePersistenceSvc.inflatePersistedResourceModifiedMessage(
 					thePersistedResourceModifiedMessage);
 
@@ -193,14 +204,17 @@ public class ResourceModifiedSubmitterSvc implements IResourceModifiedConsumer, 
 					persistedResourceModifiedMessagePk.getResourceVersion());
 
 			ourLog.warn(
-					"Scheduled submission will be ignored since resource {} cannot be found", idType.asStringValue());
+					"Scheduled submission will be ignored since resource {} cannot be found",
+					idType.asStringValue(),
+					e);
+		} catch (Exception ex) {
+			ourLog.error("Unknown error encountered on inflation of resources.", ex);
 		}
 
 		return Optional.ofNullable(resourceModifiedMessage);
 	}
 
 	private boolean deletePersistedResourceModifiedMessage(IPersistedResourceModifiedMessagePK theResourceModifiedPK) {
-
 		try {
 			// delete the entry to lock the row to ensure unique processing
 			return myResourceModifiedMessagePersistenceSvc.deleteByPK(theResourceModifiedPK);
@@ -213,6 +227,9 @@ public class ResourceModifiedSubmitterSvc implements IResourceModifiedConsumer, 
 			// the message
 			// successfully before we did.
 
+			return false;
+		} catch (Exception ex) {
+			ourLog.error("Unknown exception when deleting persisted resource modified message. Returning false.", ex);
 			return false;
 		}
 	}

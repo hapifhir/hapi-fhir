@@ -224,7 +224,7 @@ class ITermReadSvcTest {
 
 		@Test
 		void getNoneReturnsOptionalEmpty() {
-			when(myEntityManager.createQuery(anyString()).getResultList())
+			when(myEntityManager.createQuery(anyString()).setParameter(anyString(), any()).getResultList())
 				.thenReturn(Collections.emptyList());
 
 			Optional<IBaseResource> result = testedClass.readCodeSystemByForcedId("a-cs-id");
@@ -233,7 +233,7 @@ class ITermReadSvcTest {
 
 		@Test
 		void getMultipleThrows() {
-			when(myEntityManager.createQuery(anyString()).getResultList())
+			when(myEntityManager.createQuery(anyString()).setParameter(anyString(), any()).getResultList())
 				.thenReturn(Lists.newArrayList(resource1, resource2));
 
 			NonUniqueResultException thrown = assertThrows(
@@ -247,7 +247,7 @@ class ITermReadSvcTest {
 		void getOneConvertToResource() {
 			ReflectionTestUtils.setField(testedClass, "myDaoRegistry", myDaoRegistry);
 
-			when(myEntityManager.createQuery(anyString()).getResultList())
+			when(myEntityManager.createQuery(anyString()).setParameter(anyString(), any()).getResultList())
 				.thenReturn(Lists.newArrayList(resource1));
 			when(myDaoRegistry.getResourceDao("CodeSystem")).thenReturn(myFhirResourceDao);
 			when(myJpaStorageResourceParser.toResource(resource1, false)).thenReturn(myCodeSystemResource);

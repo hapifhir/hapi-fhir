@@ -277,12 +277,7 @@ public class ResourceHistoryTable extends BaseHasResource implements Serializabl
 		if (getTransientForcedId() != null) {
 			resourceIdPart = getTransientForcedId();
 		} else {
-			if (getResourceTable().getForcedId() == null) {
-				Long id = getResourceId();
-				resourceIdPart = id.toString();
-			} else {
-				resourceIdPart = getResourceTable().getForcedId().getForcedId();
-			}
+			resourceIdPart = getResourceTable().getFhirId();
 		}
 		return new IdDt(getResourceType() + '/' + resourceIdPart + '/' + Constants.PARAM_HISTORY + '/' + getVersion());
 	}
