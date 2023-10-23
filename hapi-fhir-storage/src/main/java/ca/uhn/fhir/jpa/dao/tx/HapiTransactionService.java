@@ -51,16 +51,16 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.support.DefaultTransactionDefinition;
+import org.springframework.transaction.interceptor.TransactionAspectSupport;
 import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import java.util.Objects;
-import java.util.concurrent.Callable;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.Objects;
+import java.util.concurrent.Callable;
 
 /**
  * @see IHapiTransactionService for an explanation of this class
@@ -243,9 +243,9 @@ public class HapiTransactionService implements IHapiTransactionService {
 				 * If we're already in an active transaction, and it's for the right partition,
 				 * and it's not a read-only transaction, we don't need to open a new transaction
 				 * so let's just add a method to the stack trace that makes this obvious.
+				 * Some callbacks want the tx handle, so look it up from our txManager.
 				 */
-				TransactionStatus transaction = myTransactionManager.getTransaction(new DefaultTransactionDefinition());
-				return executeInExistingTransaction(theCallback, transaction);
+				return executeInExistingTransaction(theCallback);
 			}
 		} else if (myTransactionPropagationWhenChangingPartitions == Propagation.REQUIRES_NEW) {
 			return executeInNewTransactionForPartitionChange(
@@ -516,9 +516,10 @@ public class HapiTransactionService implements IHapiTransactionService {
 	}
 
 	@Nullable
-	private static <T> T executeInExistingTransaction(
-			TransactionCallback<T> theCallback, TransactionStatus theTransaction) {
-		return theCallback.doInTransaction(theTransaction);
+	private static <T> T executeInExistingTransaction(TransactionCallback<T> theCallback) {
+		// lookup the current tx handle.
+		TransactionStatus existingTransaction = TransactionAspectSupport.currentTransactionStatus();
+		return theCallback.doInTransaction(existingTransaction);
 	}
 
 	/**

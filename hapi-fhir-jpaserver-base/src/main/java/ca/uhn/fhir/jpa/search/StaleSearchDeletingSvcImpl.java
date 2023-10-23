@@ -25,6 +25,7 @@ import ca.uhn.fhir.jpa.model.sched.HapiJob;
 import ca.uhn.fhir.jpa.model.sched.IHasScheduledJobs;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
+import ca.uhn.fhir.jpa.search.cache.DatabaseSearchCacheSvcImpl;
 import ca.uhn.fhir.jpa.search.cache.ISearchCacheSvc;
 import org.quartz.JobExecutionContext;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,7 +46,6 @@ import static ca.uhn.fhir.jpa.search.cache.DatabaseSearchCacheSvcImpl.SEARCH_CLE
 // in Smile.
 //
 public class StaleSearchDeletingSvcImpl implements IStaleSearchDeletingSvc, IHasScheduledJobs {
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(StaleSearchDeletingSvcImpl.class);
 
 	@Autowired
 	private JpaStorageSettings myStorageSettings;
@@ -63,8 +63,9 @@ public class StaleSearchDeletingSvcImpl implements IStaleSearchDeletingSvc, IHas
 	 * Calculate a deadline to finish before the next scheduled run.
 	 */
 	protected Instant getDeadline() {
-		// target a 90% duty-cycle to avoid confusing quartz
-		return Instant.now().plus((long) (SEARCH_CLEANUP_JOB_INTERVAL_MILLIS * 0.90), ChronoUnit.MILLIS);
+		return Instant.ofEpochMilli(DatabaseSearchCacheSvcImpl.now())
+			// target a 90% duty-cycle to avoid confusing quartz
+			.plus((long) (SEARCH_CLEANUP_JOB_INTERVAL_MILLIS * 0.90), ChronoUnit.MILLIS);
 	}
 
 	@Override

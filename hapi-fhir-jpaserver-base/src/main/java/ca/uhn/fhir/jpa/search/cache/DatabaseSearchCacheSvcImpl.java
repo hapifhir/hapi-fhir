@@ -29,7 +29,6 @@ import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
-import ca.uhn.fhir.system.HapiSystemProperties;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Lists;
 import org.apache.commons.lang3.Validate;
@@ -40,13 +39,22 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
+import org.springframework.jdbc.core.ConnectionCallback;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.Instant;
-import java.util.*;
 import javax.annotation.Nonnull;
+import javax.sql.DataSource;
+import java.time.Instant;
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
 public class DatabaseSearchCacheSvcImpl implements ISearchCacheSvc {
 	/*
@@ -81,6 +89,9 @@ public class DatabaseSearchCacheSvcImpl implements ISearchCacheSvc {
 
 	@Autowired
 	private PlatformTransactionManager myPlatformTransactionManager;
+
+	@Autowired
+	private DataSource myDataSource;
 
 	@Autowired
 	private IHapiTransactionService myTransactionService;
@@ -174,6 +185,7 @@ public class DatabaseSearchCacheSvcImpl implements ISearchCacheSvc {
 	class DeleteRun {
 		final RequestPartitionId myRequestPartitionId;
 		final Instant myDeadline;
+		boolean myDeadlineLogged = false;
 		final Date myCutoffForDeletion;
 		final Set<Long> mySearchesToMarkForDeletion = new HashSet<>();
 
@@ -186,49 +198,50 @@ public class DatabaseSearchCacheSvcImpl implements ISearchCacheSvc {
 		/**
 		 * Iterate over all theMarkDeletedTargets ids and mark them as deleted in batches of size ourMaximumSearchesToCheckForDeletionCandidacy
 		 */
-		public void markDeleted(@Nonnull Iterable<Long> theMarkDeletedTargets) {
+		public void markDeleted(@Nonnull Iterable<Long> theMarkDeletedTargets, TransactionStatus theStatus) {
 			assert theMarkDeletedTargets != null;
 
 			for (final Long nextSearchToDelete : theMarkDeletedTargets) {
-				ourLog.debug("Deleting search with PID {}", nextSearchToDelete);
+				ourLog.debug("Marking search with PID {} as ready for deletion", nextSearchToDelete);
 				mySearchesToMarkForDeletion.add(nextSearchToDelete);
 
 				if (mySearchesToMarkForDeletion.size() >= ourMaximumSearchesToCheckForDeletionCandidacy) {
-					flushDeleteMarks();
+					flushDeleteMarks(theStatus);
 				}
 				if (isPastDeadline()) {
 					break;
 				}
 			}
-			flushDeleteMarks();
+			flushDeleteMarks(theStatus);
 		}
 
 		/**
 		 * Mark all ids in the mySearchesToMarkForDeletion buffer as deleted, and clear the buffer.
 		 */
-		public void flushDeleteMarks() {
+		public void flushDeleteMarks(TransactionStatus theStatus) {
 			if (mySearchesToMarkForDeletion.isEmpty()) {
 				return;
 			}
 
-			myTransactionService
-					.withSystemRequest()
-					.withRequestPartitionId(myRequestPartitionId)
-					.withPropagation(Propagation.REQUIRED)
-					.execute(t -> {
-						ourLog.debug("Marking {} searches as deleted", mySearchesToMarkForDeletion.size());
-						mySearchDao.updateDeleted(mySearchesToMarkForDeletion, true);
-						myPlatformTransactionManager.commit(t);
-						return null;
-					});
+			ourLog.debug("Marking {} searches as deleted", mySearchesToMarkForDeletion.size());
+			// we commit these as a batch.
+			mySearchDao.updateDeleted(mySearchesToMarkForDeletion, true);
+			// flush to force Hibernate to actually get a connection from the pool
+			mySearchDao.flush();
+			// goofy hack to get the underlying connection and commit
+			new JdbcTemplate(myDataSource).execute((ConnectionCallback<?>) con->{
+				con.commit();
+				return null;
+			});
 
 			mySearchesToMarkForDeletion.clear();
 		}
 
 		boolean isPastDeadline() {
 			boolean result = Instant.ofEpochMilli(now()).isAfter(myDeadline);
-			if (result) {
+			if (result && !myDeadlineLogged) {
 				ourLog.warn("Search cache cleaner did not finish all work before deadline.");
+				myDeadlineLogged = true;
 			}
 			return result;
 		}
@@ -252,37 +265,43 @@ public class DatabaseSearchCacheSvcImpl implements ISearchCacheSvc {
 		myTransactionService.withSystemRequestOnPartition(theRequestPartitionId).execute(theStatus -> {
 			final Iterable<Long> toMarkDeleted = mySearchDao.findWhereCreatedBefore(cutoff, new Date(now()));
 
-			run.markDeleted(toMarkDeleted);
+			run.markDeleted(toMarkDeleted, theStatus);
 			return null;
 		});
 
+		if (run.isPastDeadline()) {
+			return;
+		}
 		// Delete searches that are marked as deleted
-		final Slice<Long> toDelete = myTransactionService
+		final Iterable<Object[]> toDelete = myTransactionService
 				.withSystemRequestOnPartition(theRequestPartitionId)
 				.execute(theStatus ->
-						mySearchDao.findDeleted(PageRequest.of(0, ourMaximumSearchesToCheckForDeletionCandidacy)));
+						mySearchDao.findDeleted());
 		assert toDelete != null;
-		for (final Long nextSearchToDelete : toDelete) {
-			ourLog.debug("Deleting search with PID {}", nextSearchToDelete);
+		for (final Object[] nextSearchToDelete : toDelete) {
+			long id = (long) nextSearchToDelete[0];
+			Integer max = (Integer) nextSearchToDelete[1];
+			ourLog.debug("Deleting search with PID {}", id);
 			myTransactionService
 					.withSystemRequest()
 					.withRequestPartitionId(theRequestPartitionId)
 					.execute(t -> {
-						deleteSearch(nextSearchToDelete);
+						deleteSearch(id);
 						return null;
 					});
 		}
 
-		int count = toDelete.getContent().size();
-		if (count > 0) {
-			if (ourLog.isDebugEnabled() || HapiSystemProperties.isTestModeEnabled()) {
-				Long total = myTransactionService
-						.withSystemRequest()
-						.withRequestPartitionId(theRequestPartitionId)
-						.execute(t -> mySearchDao.count());
-				ourLog.debug("Deleted {} searches, {} remaining", count, total);
-			}
-		}
+		// wipmb broken
+		//int count = toDelete.getContent().size();
+//		if (count > 0) {
+//			if (ourLog.isDebugEnabled() || HapiSystemProperties.isTestModeEnabled()) {
+//				Long total = myTransactionService
+//						.withSystemRequest()
+//						.withRequestPartitionId(theRequestPartitionId)
+//						.execute(t -> mySearchDao.count());
+//				ourLog.debug("Deleted {} searches, {} remaining", count, total);
+//			}
+//		}
 	}
 
 	@Nonnull
@@ -366,7 +385,7 @@ public class DatabaseSearchCacheSvcImpl implements ISearchCacheSvc {
 		ourNowForUnitTests = theNowForUnitTests;
 	}
 
-	private static long now() {
+	public static long now() {
 		if (ourNowForUnitTests != null) {
 			return ourNowForUnitTests;
 		}

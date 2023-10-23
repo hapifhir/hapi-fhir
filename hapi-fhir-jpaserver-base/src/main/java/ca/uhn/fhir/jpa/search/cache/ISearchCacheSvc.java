@@ -23,6 +23,7 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.entity.Search;
 
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.Optional;
 
 public interface ISearchCacheSvc {
@@ -87,4 +88,9 @@ public interface ISearchCacheSvc {
 	 * and deleting them.
 	 */
 	void pollForStaleSearchesAndDeleteThem(RequestPartitionId theRequestPartitionId, Instant theDeadline);
+
+	@Deprecated(since = "6.10", forRemoval = true) // wipmb delete once cdr merges
+	default void pollForStaleSearchesAndDeleteThem(RequestPartitionId theRequestPartitionId) {
+		pollForStaleSearchesAndDeleteThem(theRequestPartitionId, Instant.now().plus(1, ChronoUnit.MINUTES));
+	}
 }

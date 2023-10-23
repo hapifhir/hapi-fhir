@@ -20,8 +20,6 @@
 package ca.uhn.fhir.jpa.dao.data;
 
 import ca.uhn.fhir.jpa.entity.Search;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -41,8 +39,8 @@ public interface ISearchDao extends JpaRepository<Search, Long>, IHapiFhirJpaRep
 			"SELECT s.myId FROM Search s WHERE (s.myCreated < :cutoff) AND (s.myExpiryOrNull IS NULL OR s.myExpiryOrNull < :now) AND (s.myDeleted IS NULL OR s.myDeleted = FALSE)")
 	Iterable<Long> findWhereCreatedBefore(@Param("cutoff") Date theCutoff, @Param("now") Date theNow);
 
-	@Query("SELECT s.myId FROM Search s WHERE s.myDeleted = TRUE")
-	Slice<Long> findDeleted(Pageable thePage);
+	@Query("SELECT s.myId, (select max(sr.myOrder) as maxOrder from SearchResult sr where sr.mySearchPid = s.myId) FROM Search s WHERE s.myDeleted = TRUE")
+	Iterable<Object[]> findDeleted();
 
 	@Query(
 			"SELECT s FROM Search s WHERE s.myResourceType = :type AND s.mySearchQueryStringHash = :hash AND (s.myCreated > :cutoff) AND s.myDeleted = FALSE AND s.myStatus <> 'FAILED'")

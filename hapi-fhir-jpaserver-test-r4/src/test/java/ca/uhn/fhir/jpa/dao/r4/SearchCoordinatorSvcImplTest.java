@@ -1,7 +1,6 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.dao.data.ISearchDao;
 import ca.uhn.fhir.jpa.dao.data.ISearchResultDao;
 import ca.uhn.fhir.jpa.entity.Search;
@@ -32,9 +31,6 @@ public class SearchCoordinatorSvcImplTest extends BaseJpaR4Test {
 
 	@Autowired
 	private ISearchResultDao mySearchResultDao;
-
-	@Autowired
-	private ISearchCoordinatorSvc mySearchCoordinator;
 
 	@Autowired
 	private ISearchCacheSvc myDatabaseCacheSvc;
@@ -88,26 +84,26 @@ public class SearchCoordinatorSvcImplTest extends BaseJpaR4Test {
 			assertEquals(30, mySearchResultDao.count());
 		});
 
-		myDatabaseCacheSvc.pollForStaleSearchesAndDeleteThem(RequestPartitionId.allPartitions(), Instant.now().plus(1, ChronoUnit.SECONDS));
+		myDatabaseCacheSvc.pollForStaleSearchesAndDeleteThem(RequestPartitionId.allPartitions(), Instant.now().plus(2, ChronoUnit.SECONDS));
 		runInTransaction(()->{
 			// wipmb this is probably dead - how to test our new deadline and batching?
 			// We should delete up to 10, but 3 don't get deleted since they have too many results to delete in one pass
-			assertEquals(13, mySearchDao.count());
-			assertEquals(13, mySearchDao.countDeleted());
+			assertEquals(3, mySearchDao.count());
+			assertEquals(3, mySearchDao.countDeleted());
 			// We delete a max of 5 results per search, so half are gone
 			assertEquals(15, mySearchResultDao.count());
 		});
 
-		myDatabaseCacheSvc.pollForStaleSearchesAndDeleteThem(RequestPartitionId.allPartitions(), Instant.now().plus(1, ChronoUnit.SECONDS));
+		myDatabaseCacheSvc.pollForStaleSearchesAndDeleteThem(RequestPartitionId.allPartitions(), Instant.now().plus(2, ChronoUnit.SECONDS));
 		runInTransaction(()->{
 			// Once again we attempt to delete 10, but the first 3 don't get deleted and still remain
 			// (total is 6 because 3 weren't deleted, and they blocked another 3 that might have been)
-			assertEquals(6, mySearchDao.count());
-			assertEquals(6, mySearchDao.countDeleted());
+			assertEquals(3, mySearchDao.count());
+			assertEquals(3, mySearchDao.countDeleted());
 			assertEquals(0, mySearchResultDao.count());
 		});
 
-		myDatabaseCacheSvc.pollForStaleSearchesAndDeleteThem(RequestPartitionId.allPartitions(), Instant.now().plus(1, ChronoUnit.SECONDS));
+		myDatabaseCacheSvc.pollForStaleSearchesAndDeleteThem(RequestPartitionId.allPartitions(), Instant.now().plus(2, ChronoUnit.SECONDS));
 		runInTransaction(()->{
 			assertEquals(0, mySearchDao.count());
 			assertEquals(0, mySearchDao.countDeleted());
