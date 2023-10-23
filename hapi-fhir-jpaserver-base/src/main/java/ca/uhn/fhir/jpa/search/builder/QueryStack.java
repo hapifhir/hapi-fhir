@@ -73,6 +73,7 @@ import ca.uhn.fhir.rest.api.SearchContainedModeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.CompositeParam;
 import ca.uhn.fhir.rest.param.DateParam;
+import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.HasParam;
 import ca.uhn.fhir.rest.param.NumberParam;
 import ca.uhn.fhir.rest.param.QuantityParam;
@@ -108,6 +109,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.CollectionUtils;
 
+import javax.annotation.Nullable;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -121,7 +123,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
-import javax.annotation.Nullable;
 
 import static ca.uhn.fhir.jpa.util.QueryParameterUtils.fromOperation;
 import static ca.uhn.fhir.jpa.util.QueryParameterUtils.getChainedPart;
@@ -1900,38 +1901,14 @@ public class QueryStack {
 				.getResult();
 	}
 
-	// TODO: Preliminary method for handling _lastUpdated
 	private Condition createPredicateLastUpdated(
-			@Nullable DbColumn theSourceJoinColumn,
-			List<List<IQueryParameterType>> theAndOrParams,
-			String theResourceName,
-			String theParamName,
-			RequestPartitionId theRequestPartitionId) {
-		List<Condition> andPredicates = new ArrayList<>();
+			List<List<IQueryParameterType>> theAndOrParams) {
 
-		// this adds -> INNER JOIN hfj_resource t2 ON t2.RES_ID = t0.SRC_RESOURCE_ID
-		mySqlBuilder.addReferencePredicateBuilder(this, null);
+		DateParam dateParam = (DateParam) theAndOrParams.get(0).get(0);
+		DateRangeParam dateRangeParam = new DateRangeParam(dateParam);
 
-		// TODO: should figure out how to add -> AND (t2.res_updated >= '2023-08-08 10:45:54.175')) to the WHERE clause
-		for (List<? extends IQueryParameterType> nextAnd : theAndOrParams) {
-			SearchFilterParser.CompareOperation operation = null;
-			if (nextAnd.size() > 0) {
-				DateParam param = (DateParam) nextAnd.get(0);
-				operation = toOperation(param.getPrefix());
-			}
-		}
+		return mySqlBuilder.addPredicateLastUpdated(dateRangeParam);
 
-		return toAndPredicate(andPredicates);
-	}
-
-	private SourcePredicateBuilder getSourcePredicateBuilder(
-			@Nullable DbColumn theSourceJoinColumn, SelectQuery.JoinType theJoinType) {
-		return createOrReusePredicateBuilder(
-						PredicateBuilderTypeEnum.SOURCE,
-						theSourceJoinColumn,
-						Constants.PARAM_SOURCE,
-						() -> mySqlBuilder.addSourcePredicateBuilder(theSourceJoinColumn, theJoinType))
-				.getResult();
 	}
 
 	public Condition createPredicateString(
@@ -2344,14 +2321,8 @@ public class QueryStack {
 			case Constants.PARAM_SOURCE:
 				return createPredicateSourceForAndList(theSourceJoinColumn, theAndOrParams);
 
-			// TODO: handle lastUpdated here:
-//			case Constants.PARAM_LASTUPDATED:
-//				return createPredicateLastUpdated(
-//						theSourceJoinColumn,
-//						theAndOrParams,
-//						theResourceName,
-//						theParamName,
-//						theRequestPartitionId);
+			case Constants.PARAM_LASTUPDATED:
+				return createPredicateLastUpdated(theAndOrParams);
 
 			default:
 				return createPredicateSearchParameter(
