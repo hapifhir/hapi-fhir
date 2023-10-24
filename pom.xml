@@ -1091,7 +1091,7 @@
 			<dependency>
 				<groupId>com.graphql-java</groupId>
 				<artifactId>graphql-java</artifactId>
-				<version>21.0</version>
+				<version>21.3</version>
 			</dependency>
 			<!-- mail start -->
 			<dependency>
