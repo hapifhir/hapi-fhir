@@ -1,3 +1,13 @@
+### Major Database Change - Zero Downtime
+
+This release makes performance changes the database definition in a way that is incompatible with releases before 2023.02.
+If you wish to upgrade with zero-downtime, you must first upgrade to 2023.02, or 2023.05.
+If you are running an offline upgrade, you can upgrade from any prior version.
+On large systems, the database migration may take substantial time.
+For a zero-downtime upgrade, we recommend running the migration via the [`smileutil ` command](../../smileutil/migrate_database.html)
+before upgrading the running servers.
+
+### Change Tracking and Subscriptions
 This release introduces significant a change to the mechanism performing submission of resource modification events
 to the message broker.  Previously, an event would be submitted as part of the synchronous transaction
 modifying a resource.  Synchronous submission yielded responsive publishing with the caveat that events would be dropped
@@ -8,6 +18,7 @@ database upon completion of the transaction and subsequently submitted to the br
 This new asynchronous submission mechanism will introduce a slight delay in event publishing.  It is our view that such
 delay is largely compensated by the capability to retry submission upon failure which will eliminate event losses.
 
+### Tag, Security Label, and Profile changes
 
 There are some potentially breaking changes: 
 * On resource retrieval and before storage, tags, security label and profile collections in resource meta will be 
