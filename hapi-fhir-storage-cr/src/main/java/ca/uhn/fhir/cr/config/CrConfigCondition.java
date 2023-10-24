@@ -28,6 +28,9 @@ import org.springframework.context.annotation.Condition;
 import org.springframework.context.annotation.ConditionContext;
 import org.springframework.core.type.AnnotatedTypeMetadata;
 
+/**
+ * The purpose of this Condition is to verify that the CR dependent beans RestfulServer and EvaluationSettings exist.
+ */
 public class CrConfigCondition implements Condition {
 	private static final Logger ourLog = LoggerFactory.getLogger(CrConfigCondition.class);
 
