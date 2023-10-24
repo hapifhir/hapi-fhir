@@ -120,24 +120,21 @@ public class StaleSearchDeletingSvcR4Test extends BaseResourceProviderR4Test {
 			search.setResourceType("Patient");
 			search = mySearchEntityDao.save(search);
 
-			for (int i = 0; i < 15; i++) {
-				ResourceTable resource = new ResourceTable();
-				resource.setPublished(new Date());
-				resource.setUpdated(new Date());
-				resource.setResourceType("Patient");
-				resource = myResourceTableDao.saveAndFlush(resource);
+			ResourceTable resource = new ResourceTable();
+			resource.setPublished(new Date());
+			resource.setUpdated(new Date());
+			resource.setResourceType("Patient");
+			resource = myResourceTableDao.saveAndFlush(resource);
 
+			for (int i = 0; i < 50; i++) {
 				SearchResult sr = new SearchResult(search);
 				sr.setOrder(i);
 				sr.setResourcePid(resource.getId());
 				mySearchResultDao.save(sr);
 			}
-
 		});
 
-		// It should take two passes to delete the search fully
-		runInTransaction(() -> assertEquals(1, mySearchEntityDao.count()));
-		myStaleSearchDeletingSvc.pollForStaleSearchesAndDeleteThem();
+		// we are able to delete this in one pass.
 		runInTransaction(() -> assertEquals(1, mySearchEntityDao.count()));
 		myStaleSearchDeletingSvc.pollForStaleSearchesAndDeleteThem();
 		runInTransaction(() -> assertEquals(0, mySearchEntityDao.count()));
@@ -148,7 +145,7 @@ public class StaleSearchDeletingSvcR4Test extends BaseResourceProviderR4Test {
 	public void testDeleteVerySmallSearch() {
 		DatabaseSearchCacheSvcImpl.setMaximumResultsToDeleteForUnitTest(10);
 
-		runInTransaction(() -> {
+        runInTransaction(() -> {
 			Search search = new Search();
 			search.setStatus(SearchStatusEnum.FINISHED);
 			search.setUuid(UUID.randomUUID().toString());
@@ -174,7 +171,7 @@ public class StaleSearchDeletingSvcR4Test extends BaseResourceProviderR4Test {
 	public void testDontDeleteSearchBeforeExpiry() {
 		DatabaseSearchCacheSvcImpl.setMaximumResultsToDeleteForUnitTest(10);
 
-		runInTransaction(() -> {
+        runInTransaction(() -> {
 			Search search = new Search();
 
 			// Expires in one second, so it should not be deleted right away,
@@ -186,7 +183,7 @@ public class StaleSearchDeletingSvcR4Test extends BaseResourceProviderR4Test {
 			search.setCreated(DateUtils.addDays(new Date(), -10000));
 			search.setSearchType(SearchTypeEnum.SEARCH);
 			search.setResourceType("Patient");
-			search = mySearchEntityDao.save(search);
+			mySearchEntityDao.save(search);
 
 		});
 

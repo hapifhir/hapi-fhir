@@ -34,24 +34,23 @@ import ca.uhn.fhir.system.HapiSystemProperties;
 import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.time.DateUtils;
+import org.hibernate.Session;
 import org.hl7.fhir.dstu3.model.InstantType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.ConnectionCallback;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.Nonnull;
+import javax.persistence.EntityManager;
+import java.sql.Connection;
 import java.time.Instant;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
-import javax.annotation.Nonnull;
-import javax.sql.DataSource;
 
 public class DatabaseSearchCacheSvcImpl implements ISearchCacheSvc {
 	/*
@@ -60,13 +59,13 @@ public class DatabaseSearchCacheSvcImpl implements ISearchCacheSvc {
 	 * type query and this can fail if we have 1000s of params
 	 */
 	public static final int DEFAULT_MAX_RESULTS_TO_DELETE_IN_ONE_STMT = 500;
-	public static final int DEFAULT_MAX_RESULTS_TO_DELETE_IN_ONE_PAS = 20000;
+	public static final int DEFAULT_MAX_RESULTS_TO_DELETE_IN_ONE_PAS = 50000;
 	public static final long SEARCH_CLEANUP_JOB_INTERVAL_MILLIS = DateUtils.MILLIS_PER_MINUTE;
 	public static final int DEFAULT_MAX_DELETE_CANDIDATES_TO_FIND = 2000;
 	private static final Logger ourLog = LoggerFactory.getLogger(DatabaseSearchCacheSvcImpl.class);
 	private static int ourMaximumResultsToDeleteInOneStatement = DEFAULT_MAX_RESULTS_TO_DELETE_IN_ONE_STMT;
-	private static int ourMaximumResultsToDeleteInOnePass = DEFAULT_MAX_RESULTS_TO_DELETE_IN_ONE_PAS;
-	private static int ourMaximumSearchesToCheckForDeletionCandidacy = 2;
+	private static int ourMaximumResultsToDeleteInOneCommit = DEFAULT_MAX_RESULTS_TO_DELETE_IN_ONE_PAS;
+	private static int ourMaximumSearchesToCheckForDeletionCandidacy = DEFAULT_MAX_DELETE_CANDIDATES_TO_FIND;
 	private static Long ourNowForUnitTests;
 	/*
 	 * We give a bit of extra leeway just to avoid race conditions where a query result
@@ -79,16 +78,13 @@ public class DatabaseSearchCacheSvcImpl implements ISearchCacheSvc {
 	private ISearchDao mySearchDao;
 
 	@Autowired
+	private EntityManager myEntityManager;
+
+	@Autowired
 	private ISearchResultDao mySearchResultDao;
 
 	@Autowired
 	private ISearchIncludeDao mySearchIncludeDao;
-
-	@Autowired
-	private PlatformTransactionManager myPlatformTransactionManager;
-
-	@Autowired
-	private DataSource myDataSource;
 
 	@Autowired
 	private IHapiTransactionService myTransactionService;
@@ -209,7 +205,7 @@ public class DatabaseSearchCacheSvcImpl implements ISearchCacheSvc {
 				if (isPastDeadline()) {
 					break;
 				}
-				if (mySearchesToMarkForDeletion.size() >= ourMaximumSearchesToCheckForDeletionCandidacy) {
+				if (mySearchesToMarkForDeletion.size() >= ourMaximumResultsToDeleteInOneStatement) {
 					flushDeleteMarks();
 				}
 				ourLog.debug("Marking search with PID {} as ready for deletion", nextSearchToDelete);
@@ -236,12 +232,10 @@ public class DatabaseSearchCacheSvcImpl implements ISearchCacheSvc {
 		 */
 		private void commitOpenChanges() {
 			// flush to force Hibernate to actually get a connection from the pool
-			mySearchDao.flush();
-			// goofy hack to get the underlying connection and commit
-			new JdbcTemplate(myDataSource).execute((ConnectionCallback<?>) con -> {
-				con.commit();
-				return null;
-			});
+			myEntityManager.flush();
+			// get our connection from the underlying Hibernate session, and commit
+			//noinspection resource
+			myEntityManager.unwrap(Session.class).doWork(Connection::commit);
 		}
 
 		boolean isPastDeadline() {
@@ -277,20 +271,39 @@ public class DatabaseSearchCacheSvcImpl implements ISearchCacheSvc {
 		}
 
 		private void deleteSearchAndResults(long theSearchPid, int theNumberOfResults) {
-			// wipmb check for oversize.
-
-			mySearchPidsToDeleteResults.add(theSearchPid);
 			mySearchPidsToDelete.add(theSearchPid);
+
+			if (theNumberOfResults > ourMaximumResultsToDeleteInOneCommit) {
+				// don't buffer this one - do it inline
+				deleteSearchResultsByChunk(theSearchPid, theNumberOfResults);
+				return;
+			}
+			mySearchPidsToDeleteResults.add(theSearchPid);
 			myPendingSearchResultCount += theNumberOfResults;
 
-			// wipmb constant?
-			if (myPendingSearchResultCount > 50000) {
+			if (myPendingSearchResultCount > ourMaximumResultsToDeleteInOneCommit) {
 				flushSearchResultDeletes();
 			}
 
-			if (mySearchPidsToDelete.size() > 1000) {
+			if (mySearchPidsToDelete.size() > ourMaximumResultsToDeleteInOneStatement) {
 				flushSearchResultDeletes();
 				flushSearchDeletes();
+			}
+		}
+
+		/**
+		 * If this Search has more results than our max delete size,
+		 * delete in by itself in range chunks.
+		 * @param theSearchPid the target Search pid
+		 * @param theNumberOfResults the number of search results present
+		 */
+		private void deleteSearchResultsByChunk(long theSearchPid, int theNumberOfResults) {
+			ourLog.debug("Search {} is large: has {} results.  Deleting results in chunks.", theSearchPid, theNumberOfResults);
+			for(int rangeEnd = theNumberOfResults; rangeEnd > 0 ; rangeEnd -= ourMaximumResultsToDeleteInOneCommit) {
+				int rangeStart = rangeEnd - ourMaximumResultsToDeleteInOneCommit;
+				ourLog.trace("Deleting results for search {}: {} - {}", theSearchPid, rangeStart, rangeEnd);
+				mySearchResultDao.deleteBySearchIdInRange(theSearchPid, rangeStart, rangeEnd);
+				commitOpenChanges();
 			}
 		}
 
@@ -309,7 +322,7 @@ public class DatabaseSearchCacheSvcImpl implements ISearchCacheSvc {
 			if (mySearchPidsToDeleteResults.isEmpty()) {
 				return;
 			}
-			ourLog.debug("Deleting {} Search Results", mySearchPidsToDeleteResults.size());
+			ourLog.debug("Deleting {} Search Results from {} searches", myPendingSearchResultCount, mySearchPidsToDeleteResults.size());
 			mySearchResultDao.deleteBySearchIds(mySearchPidsToDeleteResults);
 			commitOpenChanges();
 			mySearchPidsToDeleteResults.clear();
@@ -381,7 +394,7 @@ public class DatabaseSearchCacheSvcImpl implements ISearchCacheSvc {
 
 	@VisibleForTesting
 	public static void setMaximumResultsToDeleteInOnePassForUnitTest(int theMaximumResultsToDeleteInOnePass) {
-		ourMaximumResultsToDeleteInOnePass = theMaximumResultsToDeleteInOnePass;
+		ourMaximumResultsToDeleteInOneCommit = theMaximumResultsToDeleteInOnePass;
 	}
 
 	@VisibleForTesting

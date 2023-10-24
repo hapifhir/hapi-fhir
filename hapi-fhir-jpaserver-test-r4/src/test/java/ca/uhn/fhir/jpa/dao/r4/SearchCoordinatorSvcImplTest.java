@@ -84,7 +84,7 @@ public class SearchCoordinatorSvcImplTest extends BaseJpaR4Test {
 			assertEquals(30, mySearchResultDao.count());
 		});
 
-		myDatabaseCacheSvc.pollForStaleSearchesAndDeleteThem(RequestPartitionId.allPartitions(), Instant.now().plus(2, ChronoUnit.SECONDS));
+		myDatabaseCacheSvc.pollForStaleSearchesAndDeleteThem(RequestPartitionId.allPartitions(), Instant.now().plus(10, ChronoUnit.SECONDS));
 		runInTransaction(()->{
 			// wipmb this is probably dead - how to test our new deadline and batching?
 			// We should delete up to 10, but 3 don't get deleted since they have too many results to delete in one pass
@@ -94,7 +94,7 @@ public class SearchCoordinatorSvcImplTest extends BaseJpaR4Test {
 			assertEquals(0, mySearchResultDao.count());
 		});
 
-		myDatabaseCacheSvc.pollForStaleSearchesAndDeleteThem(RequestPartitionId.allPartitions(), Instant.now().plus(2, ChronoUnit.SECONDS));
+		myDatabaseCacheSvc.pollForStaleSearchesAndDeleteThem(RequestPartitionId.allPartitions(), Instant.now().plus(10, ChronoUnit.SECONDS));
 		runInTransaction(()->{
 			// Once again we attempt to delete 10, but the first 3 don't get deleted and still remain
 			// (total is 6 because 3 weren't deleted, and they blocked another 3 that might have been)

@@ -49,6 +49,10 @@ public interface ISearchResultDao extends JpaRepository<SearchResult, Long>, IHa
 	@Query("DELETE FROM SearchResult s WHERE s.mySearchPid IN :searchIds")
 	void deleteBySearchIds(@Param("searchIds") Collection<Long> theSearchIds);
 
+	@Modifying
+	@Query("DELETE FROM SearchResult s WHERE s.mySearchPid = :searchId and s.myOrder >= :rangeStart and s.myOrder <= :rangeEnd")
+	void deleteBySearchIdInRange(@Param("searchId") Long theSearchId, @Param("rangeStart") int theRangeStart, @Param("rangeEnd") int theRangeEnd);
+
 	@Query("SELECT count(r) FROM SearchResult r WHERE r.mySearchPid = :search")
 	int countForSearch(@Param("search") Long theSearchPid);
 }
