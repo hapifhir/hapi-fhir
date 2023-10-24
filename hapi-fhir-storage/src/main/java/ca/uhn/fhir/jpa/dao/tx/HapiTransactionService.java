@@ -242,7 +242,6 @@ public class HapiTransactionService implements IHapiTransactionService {
 				 * If we're already in an active transaction, and it's for the right partition,
 				 * and it's not a read-only transaction, we don't need to open a new transaction
 				 * so let's just add a method to the stack trace that makes this obvious.
-				 * Some callbacks want the tx handle, so look it up from our txManager.
 				 */
 				return executeInExistingTransaction(theCallback);
 			}
@@ -515,7 +514,7 @@ public class HapiTransactionService implements IHapiTransactionService {
 	}
 
 	@Nullable
-	private <T> T executeInExistingTransaction(@Nonnull TransactionCallback<T> theCallback) {
+	private static <T> T executeInExistingTransaction(@Nonnull TransactionCallback<T> theCallback) {
 		// TODO we could probably track the TransactionStatus we need as a thread local like we do our partition id.
 		return theCallback.doInTransaction(null);
 	}

@@ -29,22 +29,20 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Stream;
 
-public interface ISearchDao extends JpaRepository<Search, Long>
-// wipmb does this work?
-//	, IHapiFhirJpaRepository
-{
+public interface ISearchDao extends JpaRepository<Search, Long>, IHapiFhirJpaRepository {
 
 	@Query("SELECT s FROM Search s LEFT OUTER JOIN FETCH s.myIncludes WHERE s.myUuid = :uuid")
 	Optional<Search> findByUuidAndFetchIncludes(@Param("uuid") String theUuid);
 
 	@Query(
 			"SELECT s.myId FROM Search s WHERE (s.myCreated < :cutoff) AND (s.myExpiryOrNull IS NULL OR s.myExpiryOrNull < :now) AND (s.myDeleted IS NULL OR s.myDeleted = FALSE)")
-	Iterable<Long> findWhereCreatedBefore(@Param("cutoff") Date theCutoff, @Param("now") Date theNow);
+	Stream<Long> findWhereCreatedBefore(@Param("cutoff") Date theCutoff, @Param("now") Date theNow);
 
 	@Query(
 			"SELECT s.myId, (select max(sr.myOrder) as maxOrder from SearchResult sr where sr.mySearchPid = s.myId) FROM Search s WHERE s.myDeleted = TRUE")
-	Iterable<Object[]> findDeleted();
+	Stream<Object[]> findDeleted();
 
 	@Query(
 			"SELECT s FROM Search s WHERE s.myResourceType = :type AND s.mySearchQueryStringHash = :hash AND (s.myCreated > :cutoff) AND s.myDeleted = FALSE AND s.myStatus <> 'FAILED'")

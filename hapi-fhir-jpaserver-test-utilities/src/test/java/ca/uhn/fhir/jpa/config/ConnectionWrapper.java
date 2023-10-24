@@ -46,7 +46,7 @@ public class ConnectionWrapper implements Connection {
 
 	@Override
 	public void commit() throws SQLException {
-		ourLog.trace("Commit: {}", myWrap.hashCode());
+		if (ourLog.isTraceEnabled()) { ourLog.trace("Commit: {}", myWrap.hashCode()); }
 		myWrap.commit();
 	}
 

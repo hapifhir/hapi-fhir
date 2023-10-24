@@ -1,4 +1,5 @@
 ---
-type: fix
+type: perf
 issue: 5395
-title: "Stale search results are now cleaned faster.  Busy servers should no longer accumulate dead stale search results."
+title: "The background activity that clears stale search results now has higher throughput.
+  Busy servers should no longer accumulate dead stale search results."

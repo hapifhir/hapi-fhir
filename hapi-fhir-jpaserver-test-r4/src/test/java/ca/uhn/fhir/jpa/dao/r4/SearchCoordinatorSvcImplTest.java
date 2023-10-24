@@ -41,6 +41,9 @@ public class SearchCoordinatorSvcImplTest extends BaseJpaR4Test {
 		DatabaseSearchCacheSvcImpl.setMaximumSearchesToCheckForDeletionCandidacyForUnitTest(DEFAULT_MAX_DELETE_CANDIDATES_TO_FIND);
 	}
 
+	/**
+	 * Semi-obsolete test.  This used to test incremental deletion, but we now work until done or a timeout.
+	 */
 	@Test
 	public void testDeleteDontMarkPreviouslyMarkedSearchesAsDeleted() {
 		DatabaseSearchCacheSvcImpl.setMaximumResultsToDeleteInOnePassForUnitTest(5);
@@ -86,27 +89,10 @@ public class SearchCoordinatorSvcImplTest extends BaseJpaR4Test {
 
 		myDatabaseCacheSvc.pollForStaleSearchesAndDeleteThem(RequestPartitionId.allPartitions(), Instant.now().plus(10, ChronoUnit.SECONDS));
 		runInTransaction(()->{
-			// wipmb this is probably dead - how to test our new deadline and batching?
 			// We should delete up to 10, but 3 don't get deleted since they have too many results to delete in one pass
 			assertEquals(0, mySearchDao.count());
 			assertEquals(0, mySearchDao.countDeleted());
 			// We delete a max of 5 results per search, so half are gone
-			assertEquals(0, mySearchResultDao.count());
-		});
-
-		myDatabaseCacheSvc.pollForStaleSearchesAndDeleteThem(RequestPartitionId.allPartitions(), Instant.now().plus(10, ChronoUnit.SECONDS));
-		runInTransaction(()->{
-			// Once again we attempt to delete 10, but the first 3 don't get deleted and still remain
-			// (total is 6 because 3 weren't deleted, and they blocked another 3 that might have been)
-			assertEquals(0, mySearchDao.count());
-			assertEquals(0, mySearchDao.countDeleted());
-			assertEquals(0, mySearchResultDao.count());
-		});
-
-		myDatabaseCacheSvc.pollForStaleSearchesAndDeleteThem(RequestPartitionId.allPartitions(), Instant.now().plus(2, ChronoUnit.SECONDS));
-		runInTransaction(()->{
-			assertEquals(0, mySearchDao.count());
-			assertEquals(0, mySearchDao.countDeleted());
 			assertEquals(0, mySearchResultDao.count());
 		});
 	}
