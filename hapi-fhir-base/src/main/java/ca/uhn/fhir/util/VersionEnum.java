@@ -125,6 +125,10 @@ public enum VersionEnum {
 	V6_8_2,
 	V6_9_0,
 
+	V6_10_0,
+
+	V6_11_0,
+
 	V7_0_0;
 
 	public static VersionEnum latestVersion() {

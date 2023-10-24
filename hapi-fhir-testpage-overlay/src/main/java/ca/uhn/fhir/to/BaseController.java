@@ -583,7 +583,7 @@ public class BaseController {
 			theModelMap.put("resultBodyIsLong", resultBodyText.length() > 1000);
 			theModelMap.put("requestHeaders", requestHeaders);
 			theModelMap.put("responseHeaders", responseHeaders);
-			theModelMap.put("narrative", NarrativeUtil.sanitize(narrativeString));
+			theModelMap.put("narrative", NarrativeUtil.sanitizeHtmlFragment(narrativeString));
 			theModelMap.put("latencyMs", theLatency);
 
 			theModelMap.put("config", myConfig);

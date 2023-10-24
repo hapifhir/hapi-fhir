@@ -32,6 +32,7 @@ import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.MeasureReport;
+import org.opencds.cqf.fhir.utility.monad.Eithers;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public class MeasureOperationsProvider {
@@ -77,16 +78,18 @@ public class MeasureOperationsProvider {
 			throws InternalErrorException, FHIRException {
 		return myR4MeasureServiceFactory
 				.create(theRequestDetails)
-				.evaluateMeasure(
-						theId,
+				.evaluate(
+						Eithers.forMiddle3(theId),
 						thePeriodStart,
 						thePeriodEnd,
 						theReportType,
 						theSubject,
-						thePractitioner,
 						theLastReceivedOn,
-						theProductLine,
+						null,
+						theTerminologyEndpoint,
+						null,
 						theAdditionalData,
-						theTerminologyEndpoint);
+						theProductLine,
+						thePractitioner);
 	}
 }

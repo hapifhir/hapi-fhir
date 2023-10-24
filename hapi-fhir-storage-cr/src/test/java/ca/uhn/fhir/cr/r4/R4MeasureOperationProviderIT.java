@@ -1,6 +1,5 @@
 package ca.uhn.fhir.cr.r4;
 
-import ca.uhn.fhir.cr.r4.measure.MeasureOperationsProvider;
 import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.MeasureReport;
@@ -9,7 +8,7 @@ import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Resource;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.springframework.beans.factory.annotation.Autowired;
+
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.Optional;
@@ -20,8 +19,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(SpringExtension.class)
 class R4MeasureOperationProviderIT extends BaseCrR4TestServer {
-	@Autowired
-	MeasureOperationsProvider myMeasureOperationsProvider;
 
 	public MeasureReport runEvaluateMeasure(String periodStart, String periodEnd, String subject, String measureId, String reportType, String practitioner){
 
@@ -44,7 +41,7 @@ class R4MeasureOperationProviderIT extends BaseCrR4TestServer {
 	}
 
 	@Test
-	void testMeasureEvaluate_EXM130()  {
+	void testMeasureEvaluate_EXM130() throws InterruptedException {
 		loadBundle("ColorectalCancerScreeningsFHIR-bundle.json");
 		runEvaluateMeasure("2019-01-01", "2019-12-31", "Patient/numer-EXM130", "ColorectalCancerScreeningsFHIR", "Individual", null);
 	}
@@ -168,5 +165,6 @@ class R4MeasureOperationProviderIT extends BaseCrR4TestServer {
 			String.format("expected count for population \"%s\" did not match", populationName));
 
 	}
+
 
 }

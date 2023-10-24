@@ -408,14 +408,24 @@ public class Search implements ICachedSearchDetails, Serializable {
 		myLastUpdatedHigh = theUpperBound;
 	}
 
-	private Set<Include> toIncList(boolean theWantReverse) {
+	private Set<Include> toIncList(boolean theWantReverse, boolean theIncludeAll, boolean theWantIterate) {
 		HashSet<Include> retVal = new HashSet<>();
 		for (SearchInclude next : getIncludes()) {
 			if (theWantReverse == next.isReverse()) {
-				retVal.add(new Include(next.getInclude(), next.isRecurse()));
+				if (theIncludeAll) {
+					retVal.add(new Include(next.getInclude(), next.isRecurse()));
+				} else {
+					if (theWantIterate == next.isRecurse()) {
+						retVal.add(new Include(next.getInclude(), next.isRecurse()));
+					}
+				}
 			}
 		}
 		return Collections.unmodifiableSet(retVal);
+	}
+
+	private Set<Include> toIncList(boolean theWantReverse) {
+		return toIncList(theWantReverse, true, true);
 	}
 
 	public Set<Include> toIncludesList() {
@@ -424,6 +434,14 @@ public class Search implements ICachedSearchDetails, Serializable {
 
 	public Set<Include> toRevIncludesList() {
 		return toIncList(true);
+	}
+
+	public Set<Include> toIncludesList(boolean iterate) {
+		return toIncList(false, false, iterate);
+	}
+
+	public Set<Include> toRevIncludesList(boolean iterate) {
+		return toIncList(true, false, iterate);
 	}
 
 	public void addInclude(SearchInclude theInclude) {

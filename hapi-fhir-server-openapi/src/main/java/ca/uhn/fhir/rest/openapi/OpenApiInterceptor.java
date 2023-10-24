@@ -67,6 +67,7 @@ import org.hl7.fhir.convertors.factory.VersionConvertorFactory_43_50;
 import org.hl7.fhir.instance.model.api.IBaseConformance;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.CapabilityStatement;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
@@ -111,7 +112,9 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
+import javax.annotation.Nonnull;
 
+import static ca.uhn.fhir.rest.server.util.NarrativeUtil.sanitizeHtmlFragment;
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -356,7 +359,7 @@ public class OpenApiInterceptor {
 
 		String copyright = cs.getCopyright();
 		if (isNotBlank(copyright)) {
-			copyright = myFlexmarkRenderer.render(myFlexmarkParser.parse(copyright));
+			copyright = renderMarkdown(copyright);
 			context.setVariable("COPYRIGHT_HTML", copyright);
 		}
 
@@ -409,6 +412,11 @@ public class OpenApiInterceptor {
 
 		theResponse.getWriter().write(outcome);
 		theResponse.getWriter().close();
+	}
+
+	@Nonnull
+	private String renderMarkdown(String copyright) {
+		return myFlexmarkRenderer.render(myFlexmarkParser.parse(copyright));
 	}
 
 	protected void populateOIDCVariables(ServletRequestDetails theRequestDetails, WebContext theContext) {
@@ -515,7 +523,7 @@ public class OpenApiInterceptor {
 
 			Tag resourceTag = new Tag();
 			resourceTag.setName(resourceType);
-			resourceTag.setDescription("The " + resourceType + " FHIR resource type");
+			resourceTag.setDescription(createResourceDescription(nextResource));
 			openApi.addTagsItem(resourceTag);
 
 			// Instance Read
@@ -622,6 +630,36 @@ public class OpenApiInterceptor {
 		}
 
 		return openApi;
+	}
+
+	@Nonnull
+	protected String createResourceDescription(
+			CapabilityStatement.CapabilityStatementRestResourceComponent theResource) {
+		StringBuilder b = new StringBuilder();
+		b.append("The ").append(theResource.getType()).append(" FHIR resource type");
+
+		String documentation = theResource.getDocumentation();
+		if (isNotBlank(documentation)) {
+			b.append("<br/>");
+			b.append(sanitizeHtmlFragment(renderMarkdown(documentation)));
+		}
+
+		if (isNotBlank(theResource.getProfile())) {
+			b.append("<br/>");
+			b.append("Base profile: ");
+			b.append(sanitizeHtmlFragment(theResource.getProfile()));
+		}
+
+		for (CanonicalType next : theResource.getSupportedProfile()) {
+			String nextSupportedProfile = next.getValueAsString();
+			if (isNotBlank(nextSupportedProfile)) {
+				b.append("<br/>");
+				b.append("Supported profile: ");
+				b.append(sanitizeHtmlFragment(nextSupportedProfile));
+			}
+		}
+
+		return b.toString();
 	}
 
 	protected void addSearchOperation(

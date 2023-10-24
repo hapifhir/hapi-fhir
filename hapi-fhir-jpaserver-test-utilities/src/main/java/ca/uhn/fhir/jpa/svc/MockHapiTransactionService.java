@@ -40,7 +40,7 @@ public class MockHapiTransactionService extends HapiTransactionService {
 
 	@Nullable
 	@Override
-	protected <T> T doExecute(ExecutionBuilder theExecutionBuilder, TransactionCallback<T> theCallback) {
+	public <T> T doExecute(ExecutionBuilder theExecutionBuilder, TransactionCallback<T> theCallback) {
 		return theCallback.doInTransaction(myTransactionStatus);
 	}
 }
