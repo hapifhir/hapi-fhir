@@ -131,6 +131,7 @@ import javax.persistence.criteria.CriteriaBuilder;
 
 import static ca.uhn.fhir.jpa.model.util.JpaConstants.UNDESIRED_RESOURCE_LINKAGES_FOR_EVERYTHING_ON_PATIENT_INSTANCE;
 import static ca.uhn.fhir.jpa.search.builder.QueryStack.LOCATION_POSITION;
+import static ca.uhn.fhir.jpa.search.builder.QueryStack.SearchForIdsParams.with;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -282,13 +283,12 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			}
 			List<List<IQueryParameterType>> andOrParams = myParams.get(nextParamName);
 			Condition predicate = theQueryStack.searchForIdsWithAndOr(
-					null,
-					myResourceName,
-					nextParamName,
-					andOrParams,
-					theRequest,
-					myRequestPartitionId,
-					searchContainedMode);
+					with()
+					.setResourceName(myResourceName)
+					.setParamName(nextParamName)
+					.setAndOrParams(andOrParams)
+					.setRequest(theRequest)
+					.setRequestPartitionId(myRequestPartitionId));
 			if (predicate != null) {
 				theSearchSqlBuilder.addPredicate(predicate);
 			}
@@ -695,7 +695,6 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			sqlBuilder.addResourceIdsPredicate(thePidList);
 		}
 
-		// TODO: move this into searchForIdsWithAndOr
 		// Last updated
 		DateRangeParam lu = myParams.getLastUpdated();
 		if (lu != null && !lu.isEmpty()) {
