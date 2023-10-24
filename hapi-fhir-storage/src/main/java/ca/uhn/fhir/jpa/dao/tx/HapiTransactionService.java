@@ -219,6 +219,11 @@ public class HapiTransactionService implements IHapiTransactionService {
 		myTransactionManager = theTransactionManager;
 	}
 
+	@VisibleForTesting
+	public void setPartitionSettingsForUnitTest(PartitionSettings thePartitionSettings) {
+		myPartitionSettings = thePartitionSettings;
+	}
+
 	@Nullable
 	protected <T> T doExecute(ExecutionBuilder theExecutionBuilder, TransactionCallback<T> theCallback) {
 		final RequestPartitionId requestPartitionId;

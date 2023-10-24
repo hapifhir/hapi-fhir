@@ -181,6 +181,7 @@ public class GiantTransactionPerfTest {
 		myHapiTransactionService.setTransactionManager(myTransactionManager);
 		myHapiTransactionService.setInterceptorBroadcaster(myInterceptorSvc);
 		myHapiTransactionService.setRequestPartitionSvcForUnitTest(myRequestPartitionHelperSvc);
+		myHapiTransactionService.setPartitionSettingsForUnitTest(new PartitionSettings());
 
 		myTransactionProcessor = new TransactionProcessor();
 		myTransactionProcessor.setContext(ourFhirContext);
