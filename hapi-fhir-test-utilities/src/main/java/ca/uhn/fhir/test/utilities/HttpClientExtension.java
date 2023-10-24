@@ -36,6 +36,12 @@ import java.util.concurrent.TimeUnit;
 // TODO KHS merge with HttpClientHelper
 public class HttpClientExtension implements BeforeEachCallback, AfterEachCallback {
 	private CloseableHttpClient myClient;
+	private boolean myDontFollowRedirects;
+
+	public HttpClientExtension dontFollowRedirects() {
+		myDontFollowRedirects = true;
+		return this;
+	}
 
 	public CloseableHttpClient getClient() {
 		return myClient;
@@ -58,10 +64,16 @@ public class HttpClientExtension implements BeforeEachCallback, AfterEachCallbac
 			.build();
 		connectionManager.setDefaultSocketConfig(socketConfig);
 
-		myClient = HttpClientBuilder
+		HttpClientBuilder builder = HttpClientBuilder
 			.create()
 			.setConnectionManager(connectionManager)
-			.setMaxConnPerRoute(99)
+			.setMaxConnPerRoute(99);
+
+		if (myDontFollowRedirects) {
+			builder.disableRedirectHandling();
+		}
+
+		myClient = builder
 			.build();
 	}
 

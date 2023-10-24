@@ -236,7 +236,8 @@ public class HapiTransactionService implements IHapiTransactionService {
 			ourRequestPartitionThreadLocal.set(requestPartitionId);
 		}
 
-		if (!myPartitionSettings.isPartitioningEnabled() || Objects.equals(previousRequestPartitionId, requestPartitionId)) {
+		if (!myPartitionSettings.isPartitioningEnabled()
+				|| Objects.equals(previousRequestPartitionId, requestPartitionId)) {
 			if (canReuseExistingTransaction(theExecutionBuilder)) {
 				/*
 				 * If we're already in an active transaction, and it's for the right partition,

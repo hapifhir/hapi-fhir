@@ -34,6 +34,7 @@ import org.eclipse.jetty.io.Connection.Listener;
 import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.HttpConnectionFactory;
+import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
 import org.junit.jupiter.api.extension.AfterAllCallback;
@@ -64,6 +65,7 @@ import java.util.Enumeration;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.Consumer;
 
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -83,6 +85,7 @@ public abstract class BaseJettyServerExtension<T extends BaseJettyServerExtensio
 	private Class<? extends WebSocketConfigurer> myEnableSpringWebsocketSupport;
 	private String myEnableSpringWebsocketContextPath;
 	private long myIdleTimeoutMillis = 30000;
+	private final List<Consumer<Server>> myBeforeStartServerConsumers = new ArrayList<>();
 
 	/**
 	 * Sets the Jetty server "idle timeout" in millis. This is the amount of time that
@@ -93,19 +96,30 @@ public abstract class BaseJettyServerExtension<T extends BaseJettyServerExtensio
 	 * 30000.
 	 */
 	public T withIdleTimeout(long theIdleTimeoutMillis) {
+		Validate.isTrue(myServer == null, "Server is already started");
 		myIdleTimeoutMillis = theIdleTimeoutMillis;
 		return (T) this;
 	}
 
 	@SuppressWarnings("unchecked")
 	public T withContextPath(String theContextPath) {
+		Validate.isTrue(myServer == null, "Server is already started");
 		myContextPath = defaultString(theContextPath);
 		return (T) this;
 	}
 
 	public T withServletFilter(Filter theFilter) {
+		Validate.isTrue(myServer == null, "Server is already started");
 		Validate.notNull(theFilter, "theFilter must not be null");
 		myServletFilters.add(theFilter);
+		return (T) this;
+	}
+
+	@SuppressWarnings("unchecked")
+	public T withServerBeforeStarted(Consumer<Server> theConsumer) {
+		Validate.isTrue(myServer == null, "Server is already started");
+		Validate.notNull(theConsumer, "theConsumer must not be null");
+		myBeforeStartServerConsumers.add(theConsumer);
 		return (T) this;
 	}
 
@@ -209,6 +223,11 @@ public abstract class BaseJettyServerExtension<T extends BaseJettyServerExtensio
 		}
 
 		myServer.setHandler(new Handler.Sequence(handlerList));
+
+		for (Consumer<Server> next : myBeforeStartServerConsumers) {
+			next.accept(myServer);
+		}
+
 		myServer.start();
 
 		myPort = JettyUtil.getPortForStartedServer(myServer);
