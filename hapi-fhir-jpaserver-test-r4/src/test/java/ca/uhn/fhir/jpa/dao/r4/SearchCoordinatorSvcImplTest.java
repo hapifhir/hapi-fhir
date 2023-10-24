@@ -38,7 +38,6 @@ public class SearchCoordinatorSvcImplTest extends BaseJpaR4Test {
 	@AfterEach
 	public void after() {
 		DatabaseSearchCacheSvcImpl.setMaximumResultsToDeleteInOnePassForUnitTest(DatabaseSearchCacheSvcImpl.DEFAULT_MAX_RESULTS_TO_DELETE_IN_ONE_PAS);
-		DatabaseSearchCacheSvcImpl.setMaximumSearchesToCheckForDeletionCandidacyForUnitTest(DEFAULT_MAX_DELETE_CANDIDATES_TO_FIND);
 	}
 
 	/**
@@ -47,7 +46,6 @@ public class SearchCoordinatorSvcImplTest extends BaseJpaR4Test {
 	@Test
 	public void testDeleteDontMarkPreviouslyMarkedSearchesAsDeleted() {
 		DatabaseSearchCacheSvcImpl.setMaximumResultsToDeleteInOnePassForUnitTest(5);
-		DatabaseSearchCacheSvcImpl.setMaximumSearchesToCheckForDeletionCandidacyForUnitTest(10);
 
 		runInTransaction(()->{
 			mySearchResultDao.deleteAll();

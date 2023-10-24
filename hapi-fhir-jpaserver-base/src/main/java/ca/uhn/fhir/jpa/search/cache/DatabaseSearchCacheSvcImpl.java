@@ -443,7 +443,7 @@ public class DatabaseSearchCacheSvcImpl implements ISearchCacheSvc {
 	}
 
 	@VisibleForTesting
-	public static void setMaximumResultsToDeleteForUnitTest(int theMaximumResultsToDelete) {
+	public static void setMaximumResultsToDeleteInOneStatement(int theMaximumResultsToDelete) {
 		ourMaximumResultsToDeleteInOneStatement = theMaximumResultsToDelete;
 	}
 
