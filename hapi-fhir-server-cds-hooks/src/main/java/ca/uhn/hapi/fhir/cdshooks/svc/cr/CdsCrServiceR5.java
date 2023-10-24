@@ -124,8 +124,9 @@ public class CdsCrServiceR5 implements ICdsCrService {
 						tokenType, theJson.getServiceRequestAuthorizationJson().getAccessToken()));
 				if (theJson.getServiceRequestAuthorizationJson().getSubject() != null) {
 					endpoint.addHeader(String.format(
-						"%s: %s", myCdsConfigService.getCdsCrSettings().getClientIdHeaderName(),
-						theJson.getServiceRequestAuthorizationJson().getSubject()));
+							"%s: %s",
+							myCdsConfigService.getCdsCrSettings().getClientIdHeaderName(),
+							theJson.getServiceRequestAuthorizationJson().getSubject()));
 				}
 			}
 			parameters.addParameter(part(APPLY_PARAMETER_DATA_ENDPOINT, endpoint));
