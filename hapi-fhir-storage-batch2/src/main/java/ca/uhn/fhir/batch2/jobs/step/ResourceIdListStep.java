@@ -90,25 +90,26 @@ public class ResourceIdListStep<PT extends PartitionedJobParameters, IT extends 
 
 		if (nextChunk.isEmpty()) {
 			ourLog.info("No data returned");
+		} else {
+			ourLog.debug("Found {} IDs from {} to {}", nextChunk.size(), start, nextChunk.getLastDate());
+
+			final Set<TypedPidJson> idBuffer = nextChunk.getTypedResourcePids().stream()
+					.map(TypedPidJson::new)
+					.collect(Collectors.toCollection(LinkedHashSet::new));
+
+			final UnmodifiableIterator<List<TypedPidJson>> partition =
+					Iterators.partition(idBuffer.iterator(), maxBatchId);
+
+			while (partition.hasNext()) {
+				final List<TypedPidJson> submissionIds = partition.next();
+
+				totalIdsFound += submissionIds.size();
+				chunkCount++;
+				submitWorkChunk(submissionIds, nextChunk.getRequestPartitionId(), theDataSink);
+			}
+
+			ourLog.info("Submitted {} chunks with {} resource IDs", chunkCount, totalIdsFound);
 		}
-
-		ourLog.debug("Found {} IDs from {} to {}", nextChunk.size(), start, nextChunk.getLastDate());
-
-		final Set<TypedPidJson> idBuffer = nextChunk.getTypedResourcePids().stream()
-				.map(TypedPidJson::new)
-				.collect(Collectors.toCollection(LinkedHashSet::new));
-
-		final UnmodifiableIterator<List<TypedPidJson>> partition = Iterators.partition(idBuffer.iterator(), maxBatchId);
-
-		while (partition.hasNext()) {
-			final List<TypedPidJson> submissionIds = partition.next();
-
-			totalIdsFound += submissionIds.size();
-			chunkCount++;
-			submitWorkChunk(submissionIds, nextChunk.getRequestPartitionId(), theDataSink);
-		}
-
-		ourLog.info("Submitted {} chunks with {} resource IDs", chunkCount, totalIdsFound);
 		return RunOutcome.SUCCESS;
 	}
 

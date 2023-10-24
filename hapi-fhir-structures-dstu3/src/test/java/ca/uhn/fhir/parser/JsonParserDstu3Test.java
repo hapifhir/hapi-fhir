@@ -8,6 +8,7 @@ import ca.uhn.fhir.parser.PatientWithExtendedContactDstu3.CustomContactComponent
 import ca.uhn.fhir.parser.XmlParserDstu3Test.TestPatientFor327;
 import ca.uhn.fhir.parser.json.BaseJsonLikeValue.ScalarType;
 import ca.uhn.fhir.parser.json.BaseJsonLikeValue.ValueType;
+import ca.uhn.fhir.util.ClasspathUtil;
 import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ValidationResult;
@@ -147,7 +148,7 @@ public class JsonParserDstu3Test {
 	 */
 	@Test
 	public void testBadMessageForUnknownElement() throws IOException {
-		String input = IOUtils.toString(JsonParserDstu3Test.class.getResourceAsStream("/bad_parse_bundle_1.json"), StandardCharsets.UTF_8);
+		String input = ClasspathUtil.loadResource("/bad_parse_bundle_1.json");
 
 		IParser p = ourCtx.newJsonParser();
 		p.setParserErrorHandler(new StrictErrorHandler());
@@ -165,7 +166,7 @@ public class JsonParserDstu3Test {
 	 */
 	@Test
 	public void testBadMessageForUnknownElement2() throws IOException {
-		String input = IOUtils.toString(JsonParserDstu3Test.class.getResourceAsStream("/bad_parse_bundle_2.json"), StandardCharsets.UTF_8);
+		String input = ClasspathUtil.loadResource("/bad_parse_bundle_2.json");
 
 		IParser p = ourCtx.newJsonParser();
 		p.setParserErrorHandler(new StrictErrorHandler());
@@ -1730,7 +1731,7 @@ public class JsonParserDstu3Test {
 	@Test
 	@Disabled
 	public void testParseAndEncodeBundle() throws Exception {
-		String content = IOUtils.toString(JsonParserDstu3Test.class.getResourceAsStream("/bundle-example.json"), StandardCharsets.UTF_8);
+		String content = ClasspathUtil.loadResource("/bundle-example.json");
 
 		Bundle parsed = ourCtx.newXmlParser().parseResource(Bundle.class, content);
 		assertEquals("Bundle/example/_history/1", parsed.getIdElement().getValue());
@@ -1779,7 +1780,7 @@ public class JsonParserDstu3Test {
 	@Test
 	@Disabled
 	public void testParseAndEncodeBundleFromXmlToJson() throws Exception {
-		String content = IOUtils.toString(JsonParserDstu3Test.class.getResourceAsStream("/bundle-example2.xml"), StandardCharsets.UTF_8);
+		String content = ClasspathUtil.loadResource("/bundle-example2.xml");
 
 		Bundle parsed = ourCtx.newXmlParser().parseResource(Bundle.class, content);
 
@@ -1954,7 +1955,7 @@ public class JsonParserDstu3Test {
 	 */
 	@Test
 	public void testParseCommunicationWithThreeTypes() throws IOException {
-		String content = IOUtils.toString(JsonParserDstu3Test.class.getResourceAsStream("/tara-test.json"), StandardCharsets.UTF_8);
+		String content = ClasspathUtil.loadResource("/tara-test.json");
 		Communication comm = ourCtx.newJsonParser().parseResource(Communication.class, content);
 
 		assertEquals(3, comm.getPayload().size());
@@ -2199,7 +2200,7 @@ public class JsonParserDstu3Test {
 
 		// We're lenient so we accept it. Maybe this could change, or be a warning in future though
 
-		String input = IOUtils.toString(JsonParserDstu3Test.class.getResourceAsStream("/missing_array.json"), StandardCharsets.UTF_8);
+		String input = ClasspathUtil.loadResource("/missing_array.json");
 		RelatedPerson rp = ourCtx.newJsonParser().parseResource(RelatedPerson.class, input);
 		assertEquals(1, rp.getName().size());
 		assertEquals("Doe", rp.getName().get(0).getFamily());
@@ -2424,7 +2425,7 @@ public class JsonParserDstu3Test {
 	 */
 	@Test
 	public void testUnexpectedElementsWithUnderscoreAtStartOfName() throws Exception {
-		String input = IOUtils.toString(JsonParserDstu3Test.class.getResourceAsStream("/bug477.json"), StandardCharsets.UTF_8);
+		String input = ClasspathUtil.loadResource("/bug477.json");
 
 		IParserErrorHandler errorHandler = mock(IParserErrorHandler.class);
 

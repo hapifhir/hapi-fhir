@@ -13,6 +13,7 @@ import ca.uhn.fhir.mdm.api.IMdmLinkCreateSvc;
 import ca.uhn.fhir.mdm.api.IMdmLinkUpdaterSvc;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.mdm.model.CanonicalEID;
+import ca.uhn.fhir.mdm.model.MdmCreateOrUpdateParams;
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
 import ca.uhn.fhir.mdm.rules.config.MdmSettings;
 import ca.uhn.fhir.rest.api.Constants;
@@ -192,8 +193,12 @@ public class MdmStorageInterceptorIT extends BaseMdmR4Test {
 		paulPatientPossibleMatch.setActive(true);
 		paulPatientPossibleMatch.getNameFirstRep().setFamily("DifferentName");
 		myMdmHelper.createWithLatch(paulPatientPossibleMatch);
-
-		myMdmLinkUpdaterSvc.updateLink(getOnlyGoldenPatient(), paulPatientPossibleMatch, MdmMatchResultEnum.NO_MATCH, getPatientUpdateLinkContext());
+		MdmCreateOrUpdateParams params = new MdmCreateOrUpdateParams();
+		params.setMdmContext(getPatientUpdateLinkContext());
+		params.setGoldenResource(getOnlyGoldenPatient());
+		params.setSourceResource(paulPatientPossibleMatch);
+		params.setMatchResult(MdmMatchResultEnum.NO_MATCH);
+		myMdmLinkUpdaterSvc.updateLink(params);
 
 		Patient paulPatientPossibleMatch2 = buildPaulPatient();
 		paulPatientPossibleMatch2.setActive(true);
@@ -230,7 +235,12 @@ public class MdmStorageInterceptorIT extends BaseMdmR4Test {
 		paulPatientPossibleMatch.getNameFirstRep().setFamily("DifferentName");
 		myMdmHelper.createWithLatch(paulPatientPossibleMatch);
 
-		myMdmLinkUpdaterSvc.updateLink(getOnlyGoldenPatient(), paulPatientPossibleMatch, MdmMatchResultEnum.NO_MATCH, getPatientUpdateLinkContext());
+		MdmCreateOrUpdateParams params = new MdmCreateOrUpdateParams();
+		params.setGoldenResource(getOnlyGoldenPatient());
+		params.setSourceResource(paulPatientPossibleMatch);
+		params.setMdmContext(getPatientUpdateLinkContext());
+		params.setMatchResult(MdmMatchResultEnum.NO_MATCH);
+		myMdmLinkUpdaterSvc.updateLink(params);
 
 		Patient paulPatientPossibleMatch2 = buildPaulPatient();
 		paulPatientPossibleMatch2.setActive(true);

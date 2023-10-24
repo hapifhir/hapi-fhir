@@ -544,6 +544,7 @@ public class MethodUtil {
 		}
 
 		MethodOutcome retVal = new MethodOutcome();
+		retVal.setResponseStatusCode(theResponseStatusCode);
 		if (locationHeaders.size() > 0) {
 			String locationHeader = locationHeaders.get(0);
 			BaseOutcomeReturningMethodBinding.parseContentLocation(theContext, retVal, locationHeader);

@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 5230
+title: "batch2 jobs on MS SQL Server were failing to transition to FAILED state after max retrials
+   for the job are exhausted. This is now fixed."
+   

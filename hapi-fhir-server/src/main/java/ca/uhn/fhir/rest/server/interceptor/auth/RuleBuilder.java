@@ -778,6 +778,14 @@ public class RuleBuilder implements IAuthRuleBuilder {
 					}
 
 					@Override
+					public IAuthRuleBuilderRuleOpClassifierFinished andAllowAllResponsesWithAllResourcesAccess() {
+						myRule.allowAllResponses();
+						myRule.allowAllResourcesAccess();
+						myRules.add(myRule);
+						return new RuleBuilderFinished(myRule);
+					}
+
+					@Override
 					public IAuthRuleBuilderRuleOpClassifierFinished andRequireExplicitResponseAuthorization() {
 						myRules.add(myRule);
 						return new RuleBuilderFinished(myRule);

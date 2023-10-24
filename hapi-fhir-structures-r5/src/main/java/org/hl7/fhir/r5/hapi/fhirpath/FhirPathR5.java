@@ -16,6 +16,7 @@ import org.hl7.fhir.r5.model.IdType;
 import org.hl7.fhir.r5.model.TypeDetails;
 import org.hl7.fhir.r5.model.ValueSet;
 import org.hl7.fhir.r5.utils.FHIRPathEngine;
+import org.hl7.fhir.r5.utils.FHIRPathUtilityClasses;
 
 import java.util.List;
 import java.util.Optional;
@@ -107,7 +108,7 @@ public class FhirPathR5 implements IFhirPath {
 			}
 
 			@Override
-			public FunctionDetails resolveFunction(String functionName) {
+			public FHIRPathUtilityClasses.FunctionDetails resolveFunction(String functionName) {
 				return null;
 			}
 

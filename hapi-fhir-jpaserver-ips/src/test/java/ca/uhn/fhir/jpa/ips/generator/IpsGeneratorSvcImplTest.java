@@ -9,6 +9,7 @@ import ca.uhn.fhir.jpa.ips.strategy.DefaultIpsGenerationStrategy;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.valueset.BundleEntrySearchModeEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.SimpleBundleProvider;
@@ -20,7 +21,6 @@ import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import com.gargoylesoftware.htmlunit.html.HtmlTable;
 import com.gargoylesoftware.htmlunit.html.HtmlTableRow;
 import com.google.common.collect.Lists;
-import org.hamcrest.Matchers;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.AllergyIntolerance;
 import org.hl7.fhir.r4.model.Bundle;
@@ -48,6 +48,7 @@ import org.hl7.fhir.r4.model.PositiveIntType;
 import org.hl7.fhir.r4.model.Procedure;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
+import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -58,12 +59,15 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static ca.uhn.fhir.jpa.ips.generator.IpsGenerationTest.findEntryResource;
+import static ca.uhn.fhir.jpa.ips.generator.IpsGenerationR4Test.findEntryResource;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.startsWith;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
@@ -72,6 +76,10 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+/**
+ * This test verifies various IPS generation logic without using a full
+ * JPA backend.
+ */
 @ExtendWith(MockitoExtension.class)
 public class IpsGeneratorSvcImplTest {
 
@@ -124,7 +132,7 @@ public class IpsGeneratorSvcImplTest {
 
 		List<String> contentResourceTypes = toEntryResourceTypeStrings(outcome);
 		assertThat(contentResourceTypes.toString(), contentResourceTypes,
-			Matchers.contains("Composition", "Patient", "AllergyIntolerance", "MedicationStatement", "MedicationStatement", "MedicationStatement", "Condition", "Condition", "Condition", "Organization"));
+			contains("Composition", "Patient", "AllergyIntolerance", "MedicationStatement", "MedicationStatement", "MedicationStatement", "Condition", "Condition", "Condition", "Organization"));
 
 		Composition composition = (Composition) outcome.getEntry().get(0).getResource();
 		Composition.SectionComponent section;
@@ -145,8 +153,85 @@ public class IpsGeneratorSvcImplTest {
 		String compositionNarrative = composition.getText().getDivAsString();
 		ourLog.info("Composition narrative: {}", compositionNarrative);
 		assertThat(compositionNarrative, containsString("Allergies and Intolerances"));
-		assertThat(compositionNarrative, containsString("Pregnancy"));
+		assertThat(compositionNarrative, not(containsString("Pregnancy")));
 
+	}
+
+	@Test
+	public void testAllergyIntolerance_OnsetTypes() throws IOException {
+		// Setup Patient
+		registerPatientDaoWithRead();
+
+		AllergyIntolerance allergy1 = new AllergyIntolerance();
+		ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.put(allergy1, BundleEntrySearchModeEnum.MATCH);
+		allergy1.setId("AllergyIntolerance/1");
+		allergy1.getCode().addCoding().setCode("123").setDisplay("Some Code");
+		allergy1.addReaction().addNote().setTime(new Date());
+		allergy1.setOnset(new DateTimeType("2020-02-03T11:22:33Z"));
+		AllergyIntolerance allergy2 = new AllergyIntolerance();
+		ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.put(allergy2, BundleEntrySearchModeEnum.MATCH);
+		allergy2.setId("AllergyIntolerance/2");
+		allergy2.getCode().addCoding().setCode("123").setDisplay("Some Code");
+		allergy2.addReaction().addNote().setTime(new Date());
+		allergy2.setOnset(new StringType("Some Onset"));
+		AllergyIntolerance allergy3 = new AllergyIntolerance();
+		ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.put(allergy3, BundleEntrySearchModeEnum.MATCH);
+		allergy3.setId("AllergyIntolerance/3");
+		allergy3.getCode().addCoding().setCode("123").setDisplay("Some Code");
+		allergy3.addReaction().addNote().setTime(new Date());
+		allergy3.setOnset(null);
+		IFhirResourceDao<AllergyIntolerance> allergyDao = registerResourceDaoWithNoData(AllergyIntolerance.class);
+		when(allergyDao.search(any(), any())).thenReturn(new SimpleBundleProvider(Lists.newArrayList(allergy1, allergy2, allergy3)));
+
+		registerRemainingResourceDaos();
+
+		// Test
+		Bundle outcome = (Bundle) mySvc.generateIps(new SystemRequestDetails(), new IdType(PATIENT_ID));
+
+		// Verify
+		Composition compositions = (Composition) outcome.getEntry().get(0).getResource();
+		Composition.SectionComponent section = findSection(compositions, IpsSectionEnum.ALLERGY_INTOLERANCE);
+
+		HtmlPage narrativeHtml = HtmlUtil.parseAsHtml(section.getText().getDivAsString());
+		ourLog.info("Narrative:\n{}", narrativeHtml.asXml());
+
+		DomNodeList<DomElement> tables = narrativeHtml.getElementsByTagName("table");
+		assertEquals(1, tables.size());
+		HtmlTable table = (HtmlTable) tables.get(0);
+		int onsetIndex = 6;
+		assertEquals("Onset", table.getHeader().getRows().get(0).getCell(onsetIndex).asNormalizedText());
+		assertEquals(new DateTimeType("2020-02-03T11:22:33Z").getValue().toString(), table.getBodies().get(0).getRows().get(0).getCell(onsetIndex).asNormalizedText());
+		assertEquals("Some Onset", table.getBodies().get(0).getRows().get(1).getCell(onsetIndex).asNormalizedText());
+		assertEquals("", table.getBodies().get(0).getRows().get(2).getCell(onsetIndex).asNormalizedText());
+	}
+
+	@Test
+	public void testAllergyIntolerance_MissingElements() throws IOException {
+		// Setup Patient
+		registerPatientDaoWithRead();
+
+		AllergyIntolerance allergy = new AllergyIntolerance();
+		ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.put(allergy, BundleEntrySearchModeEnum.MATCH);
+		allergy.setId("AllergyIntolerance/1");
+		allergy.getCode().addCoding().setCode("123").setDisplay("Some Code");
+		allergy.addReaction().addNote().setTime(new Date());
+		IFhirResourceDao<AllergyIntolerance> allergyDao = registerResourceDaoWithNoData(AllergyIntolerance.class);
+		when(allergyDao.search(any(), any())).thenReturn(new SimpleBundleProvider(Lists.newArrayList(allergy)));
+
+		registerRemainingResourceDaos();
+
+		// Test
+		Bundle outcome = (Bundle) mySvc.generateIps(new SystemRequestDetails(), new IdType(PATIENT_ID));
+
+		// Verify
+		Composition compositions = (Composition) outcome.getEntry().get(0).getResource();
+		Composition.SectionComponent section = findSection(compositions, IpsSectionEnum.ALLERGY_INTOLERANCE);
+
+		HtmlPage narrativeHtml = HtmlUtil.parseAsHtml(section.getText().getDivAsString());
+		ourLog.info("Narrative:\n{}", narrativeHtml.asXml());
+
+		DomNodeList<DomElement> tables = narrativeHtml.getElementsByTagName("table");
+		assertEquals(1, tables.size());
 	}
 
 	@Test
@@ -168,7 +253,7 @@ public class IpsGeneratorSvcImplTest {
 		// Verify Bundle Contents
 		List<String> contentResourceTypes = toEntryResourceTypeStrings(outcome);
 		assertThat(contentResourceTypes.toString(), contentResourceTypes,
-			Matchers.contains("Composition", "Patient", "AllergyIntolerance", "MedicationStatement", "Medication", "Condition", "Organization"));
+			contains("Composition", "Patient", "AllergyIntolerance", "MedicationStatement", "Medication", "Condition", "Organization"));
 		MedicationStatement actualMedicationStatement = (MedicationStatement) outcome.getEntry().get(3).getResource();
 		Medication actualMedication = (Medication) outcome.getEntry().get(4).getResource();
 		assertThat(actualMedication.getId(), startsWith("urn:uuid:"));
@@ -190,6 +275,41 @@ public class IpsGeneratorSvcImplTest {
 		assertEquals("Oral", row.getCell(2).asNormalizedText());
 		assertEquals("DAW", row.getCell(3).asNormalizedText());
 		assertThat(row.getCell(4).asNormalizedText(), containsString("2023"));
+	}
+
+	@Test
+	public void testMedicationSummary_MedicationRequestWithNoMedication() throws IOException {
+		// Setup Patient
+		registerPatientDaoWithRead();
+
+		// Setup Medication + MedicationStatement
+		MedicationRequest medicationRequest = new MedicationRequest();
+		ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.put(medicationRequest, BundleEntrySearchModeEnum.MATCH);
+		medicationRequest.setId(MEDICATION_STATEMENT_ID);
+		medicationRequest.setStatus(MedicationRequest.MedicationRequestStatus.ACTIVE);
+		IFhirResourceDao<MedicationRequest> medicationRequestDao = registerResourceDaoWithNoData(MedicationRequest.class);
+		when(medicationRequestDao.search(any(), any())).thenReturn(new SimpleBundleProvider(Lists.newArrayList(medicationRequest)));
+
+		registerRemainingResourceDaos();
+
+		// Test
+		Bundle outcome = (Bundle) mySvc.generateIps(new SystemRequestDetails(), new IdType(PATIENT_ID));
+
+		// Verify
+		Composition compositions = (Composition) outcome.getEntry().get(0).getResource();
+		Composition.SectionComponent section = findSection(compositions, IpsSectionEnum.MEDICATION_SUMMARY);
+
+		HtmlPage narrativeHtml = HtmlUtil.parseAsHtml(section.getText().getDivAsString());
+		ourLog.info("Narrative:\n{}", narrativeHtml.asXml());
+
+		DomNodeList<DomElement> tables = narrativeHtml.getElementsByTagName("table");
+		assertEquals(2, tables.size());
+		HtmlTable table = (HtmlTable) tables.get(0);
+		HtmlTableRow row = table.getBodies().get(0).getRows().get(0);
+		assertEquals("", row.getCell(0).asNormalizedText());
+		assertEquals("Active", row.getCell(1).asNormalizedText());
+		assertEquals("", row.getCell(2).asNormalizedText());
+		assertEquals("", row.getCell(3).asNormalizedText());
 	}
 
 	@Nonnull
@@ -226,7 +346,7 @@ public class IpsGeneratorSvcImplTest {
 		// Verify Bundle Contents
 		List<String> contentResourceTypes = toEntryResourceTypeStrings(outcome);
 		assertThat(contentResourceTypes.toString(), contentResourceTypes,
-			Matchers.contains(
+			contains(
 				"Composition",
 				"Patient",
 				"MedicationStatement",
@@ -265,7 +385,7 @@ public class IpsGeneratorSvcImplTest {
 		// Verify Bundle Contents
 		List<String> contentResourceTypes = toEntryResourceTypeStrings(outcome);
 		assertThat(contentResourceTypes.toString(), contentResourceTypes,
-			Matchers.contains(
+			contains(
 				"Composition",
 				"Patient",
 				"MedicationStatement",
@@ -337,7 +457,7 @@ public class IpsGeneratorSvcImplTest {
 		// Setup Medication + MedicationStatement
 		Organization org = new Organization();
 		org.setId(new IdType("Organization/pfizer"));
-		org.setName("Pfizer");
+		org.setName("Pfizer Inc");
 		ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.put(org, BundleEntrySearchModeEnum.INCLUDE);
 
 		Immunization immunization = new Immunization();
@@ -374,12 +494,11 @@ public class IpsGeneratorSvcImplTest {
 		assertEquals("SpikeVax", row.getCell(0).asNormalizedText());
 		assertEquals("COMPLETED", row.getCell(1).asNormalizedText());
 		assertEquals("2 , 4", row.getCell(2).asNormalizedText());
-		assertEquals("Pfizer", row.getCell(3).asNormalizedText());
+		assertEquals("Pfizer Inc", row.getCell(3).asNormalizedText());
 		assertEquals("35", row.getCell(4).asNormalizedText());
 		assertEquals("Hello World", row.getCell(5).asNormalizedText());
 		assertThat(row.getCell(6).asNormalizedText(), containsString("2023"));
 	}
-
 
 	@Test
 	public void testReferencesUpdatedInSecondaryInclusions() {
@@ -422,6 +541,7 @@ public class IpsGeneratorSvcImplTest {
 
 		// Test
 		Bundle outcome = (Bundle) mySvc.generateIps(new SystemRequestDetails(), new IdType(PATIENT_ID));
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
 
 		// Verify cross-references
 		Patient addedPatient = findEntryResource(outcome, Patient.class, 0, 1);
@@ -452,11 +572,51 @@ public class IpsGeneratorSvcImplTest {
 		assertEquals(1, illnessHistorySection.getEntry().size());
 	}
 
+	@Test
+	public void testPatientIsReturnedAsAnIncludeResource() {
+		// Setup Patient
+		registerPatientDaoWithRead();
+
+		// Setup Condition
+		Condition conditionActive = new Condition();
+		conditionActive.setId("Condition/conditionActive");
+		conditionActive.getClinicalStatus().addCoding()
+			.setSystem("http://terminology.hl7.org/CodeSystem/condition-clinical")
+			.setCode("active");
+		conditionActive.setSubject(new Reference(PATIENT_ID));
+		conditionActive.setEncounter(new Reference(ENCOUNTER_ID));
+		ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.put(conditionActive, BundleEntrySearchModeEnum.MATCH);
+
+		Patient patient = new Patient();
+		patient.setId(PATIENT_ID);
+		ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.put(patient, BundleEntrySearchModeEnum.INCLUDE);
+
+		IFhirResourceDao<Condition> conditionDao = registerResourceDaoWithNoData(Condition.class);
+		when(conditionDao.search(any(), any())).thenReturn(
+			new SimpleBundleProvider(Lists.newArrayList(conditionActive, patient)),
+			new SimpleBundleProvider()
+		);
+
+		registerRemainingResourceDaos();
+
+		// Test
+		Bundle outcome = (Bundle) mySvc.generateIps(new SystemRequestDetails(), new IdType(PATIENT_ID));
+
+		List<String> resources = outcome
+			.getEntry()
+			.stream()
+			.map(t -> t.getResource().getResourceType().name())
+			.collect(Collectors.toList());
+		assertThat(resources.toString(), resources, contains(
+			"Composition", "Patient", "AllergyIntolerance", "MedicationStatement", "Condition", "Organization"
+		));
+	}
+
 	private void registerPatientDaoWithRead() {
 		IFhirResourceDao<Patient> patientDao = registerResourceDaoWithNoData(Patient.class);
 		Patient patient = new Patient();
 		patient.setId(PATIENT_ID);
-		when(patientDao.read(any(), any())).thenReturn(patient);
+		when(patientDao.read(any(), any(RequestDetails.class))).thenReturn(patient);
 	}
 
 	private void registerRemainingResourceDaos() {

@@ -330,6 +330,27 @@ public class JpaStorageSettings extends StorageSettings {
 	 * Applies to MDM links.
 	 */
 	private boolean myNonResourceDbHistoryEnabled = true;
+	/**
+	 * Since 7.0.0
+	 */
+	private boolean myResourceHistoryDbEnabled = true;
+
+	/**
+	 * @since 7.0.0
+	 */
+	@Nonnull
+	private IValidationSupport.IssueSeverity myIssueSeverityForCodeDisplayMismatch =
+			IValidationSupport.IssueSeverity.WARNING;
+
+	/**
+	 * This setting allows preventing a conditional update to invalidate the match criteria.
+	 * <p/>
+	 * By default, this is disabled unless explicitly enabled.
+	 *
+	 * @since 6.8.2
+	 */
+	private boolean myPreventInvalidatingConditionalMatchCriteria =
+			DEFAULT_PREVENT_INVALIDATING_CONDITIONAL_MATCH_CRITERIA;
 
 	/**
 	 * @since 7.0.0
@@ -370,6 +391,9 @@ public class JpaStorageSettings extends StorageSettings {
 		}
 		if (HapiSystemProperties.isUnitTestModeEnabled()) {
 			setJobFastTrackingEnabled(true);
+		}
+		if (HapiSystemProperties.isPreventInvalidatingConditionalMatchCriteria()) {
+			setPreventInvalidatingConditionalMatchCriteria(true);
 		}
 	}
 
@@ -2324,8 +2348,49 @@ public class JpaStorageSettings extends StorageSettings {
 	}
 
 	/**
+	 * If set to {@literal false} (default is {@literal true}), the server will not
+	 * preserve resource history and will delete previous versions of resources when
+	 * a resource is updated.
+	 * <p>
+	 * Note that this does not make the server completely version-less. Resources will
+	 * still have a version number which increases every time a resource is modified,
+	 * operations such as vread and history will still be supported, and features
+	 * such as ETags and ETag-aware updates will still work. Disabling this setting
+	 * simply means that when a resource is updated, the previous version of the
+	 * resource will be expunged. This could be done in order to conserve space, or
+	 * in cases where there is no business value to storing previous versions of
+	 * resources.
+	 * </p>
+	 *
+	 * @since 7.0.0
+	 */
+	public boolean isResourceDbHistoryEnabled() {
+		return myResourceHistoryDbEnabled;
+	}
+
+	/**
+	 * If set to {@literal false} (default is {@literal true}), the server will not
+	 * preserve resource history and will delete previous versions of resources when
+	 * a resource is updated.
+	 * <p>
+	 * Note that this does not make the server completely version-less. Resources will
+	 * still have a version number which increases every time a resource is modified,
+	 * operations such as vread and history will still be supported, and features
+	 * such as ETags and ETag-aware updates will still work. Disabling this setting
+	 * simply means that when a resource is updated, the previous version of the
+	 * resource will be expunged. This could be done in order to conserve space, or
+	 * in cases where there is no business value to storing previous versions of
+	 * resources.
+	 * </p>
+	 *
+	 * @since 7.0.0
+	 */
+	public void setResourceDbHistoryEnabled(boolean theResourceHistoryEnabled) {
+		myResourceHistoryDbEnabled = theResourceHistoryEnabled;
+	}
+
+	/**
 	 * This setting controls whether MdmLink and other non-resource DB history is enabled.
-	 * This setting controls whether non-resource DB history is enabled
 	 * <p/>
 	 * By default, this is enabled unless explicitly disabled.
 	 *
@@ -2381,6 +2446,14 @@ public class JpaStorageSettings extends StorageSettings {
 	 */
 	public void setNonResourceDbHistoryEnabled(boolean theNonResourceDbHistoryEnabled) {
 		myNonResourceDbHistoryEnabled = theNonResourceDbHistoryEnabled;
+	}
+
+	public void setPreventInvalidatingConditionalMatchCriteria(boolean theCriteria) {
+		myPreventInvalidatingConditionalMatchCriteria = theCriteria;
+	}
+
+	public boolean isPreventInvalidatingConditionalMatchCriteria() {
+		return myPreventInvalidatingConditionalMatchCriteria;
 	}
 
 	public enum StoreMetaSourceInformationEnum {

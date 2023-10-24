@@ -183,6 +183,12 @@ public class MemoryCacheService {
 		return getCache(theCache).estimatedSize();
 	}
 
+	public void invalidateCaches(CacheEnum... theCaches) {
+		for (CacheEnum next : theCaches) {
+			getCache(next).invalidateAll();
+		}
+	}
+
 	public enum CacheEnum {
 		TAG_DEFINITION(TagDefinitionCacheKey.class),
 		RESOURCE_LOOKUP(String.class),
@@ -196,7 +202,9 @@ public class MemoryCacheService {
 		MATCH_URL(String.class),
 		CONCEPT_TRANSLATION_REVERSE(TranslationQuery.class),
 		RESOURCE_CONDITIONAL_CREATE_VERSION(Long.class),
-		HISTORY_COUNT(HistoryCountKey.class);
+		HISTORY_COUNT(HistoryCountKey.class),
+		NAME_TO_PARTITION(String.class),
+		ID_TO_PARTITION(Integer.class);
 
 		public Class<?> getKeyType() {
 			return myKeyType;

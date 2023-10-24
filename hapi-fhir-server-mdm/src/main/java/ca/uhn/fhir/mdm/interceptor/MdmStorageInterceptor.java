@@ -39,6 +39,7 @@ import ca.uhn.fhir.mdm.api.MdmConstants;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.mdm.dao.IMdmLinkDao;
 import ca.uhn.fhir.mdm.model.CanonicalEID;
+import ca.uhn.fhir.mdm.model.MdmCreateOrUpdateParams;
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
 import ca.uhn.fhir.mdm.svc.MdmLinkDeleteSvc;
 import ca.uhn.fhir.mdm.util.EIDHelper;
@@ -218,7 +219,7 @@ public class MdmStorageInterceptor implements IMdmStorageInterceptor {
 				IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(theResource);
 				IResourcePersistentId goldenPid = extractGoldenPid(theResource, matches.get(0));
 
-				cleanUpPossibleMatches(possibleMatches, dao, goldenPid);
+				cleanUpPossibleMatches(possibleMatches, dao, goldenPid, theRequest);
 
 				IAnyResource goldenResource = (IAnyResource) dao.readByPid(goldenPid);
 				myMdmLinkDeleteSvc.deleteWithAnyReferenceTo(goldenResource);
@@ -260,17 +261,24 @@ public class MdmStorageInterceptor implements IMdmStorageInterceptor {
 	 *  Possible match resources are resubmitted for matching
 	 */
 	private void cleanUpPossibleMatches(
-			List<IMdmLink> possibleMatches, IFhirResourceDao<?> theDao, IResourcePersistentId theGoldenPid) {
+			List<IMdmLink> possibleMatches,
+			IFhirResourceDao<?> theDao,
+			IResourcePersistentId theGoldenPid,
+			RequestDetails theRequestDetails) {
 		IAnyResource goldenResource = (IAnyResource) theDao.readByPid(theGoldenPid);
 		for (IMdmLink possibleMatch : possibleMatches) {
 			if (possibleMatch.getGoldenResourcePersistenceId().equals(theGoldenPid)) {
 				IBaseResource sourceResource = theDao.readByPid(possibleMatch.getSourcePersistenceId());
+				MdmCreateOrUpdateParams params = new MdmCreateOrUpdateParams();
+				params.setGoldenResource(goldenResource);
+				params.setSourceResource((IAnyResource) sourceResource);
+				params.setMatchResult(NO_MATCH);
+				MdmTransactionContext mdmContext =
+						createMdmContext(MdmTransactionContext.OperationType.UPDATE_LINK, sourceResource.fhirType());
+				params.setMdmContext(mdmContext);
+				params.setRequestDetails(theRequestDetails);
 
-				mdmLinkUpdaterSvc.updateLink(
-						goldenResource,
-						(IAnyResource) sourceResource,
-						NO_MATCH,
-						createMdmContext(MdmTransactionContext.OperationType.UPDATE_LINK, sourceResource.fhirType()));
+				mdmLinkUpdaterSvc.updateLink(params);
 			}
 		}
 	}
