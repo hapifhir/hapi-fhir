@@ -702,16 +702,21 @@ public class SearchQueryBuilder {
 		return addPredicateLastUpdated(theDateRange, resourceTableRoot);
 	}
 
-	public ComboCondition addPredicateLastUpdated(DateRangeParam theDateRange, ResourceTablePredicateBuilder theResourceTablePredicateBuilder) {
+	public ComboCondition addPredicateLastUpdated(
+			DateRangeParam theDateRange, ResourceTablePredicateBuilder theResourceTablePredicateBuilder) {
 		List<Condition> conditions = new ArrayList<>(2);
 		BinaryCondition condition;
 
 		if (isNotEqualsComparator(theDateRange)) {
 			condition = createConditionForValueWithComparator(
-					LESSTHAN, theResourceTablePredicateBuilder.getLastUpdatedColumn(), theDateRange.getLowerBoundAsInstant());
+					LESSTHAN,
+					theResourceTablePredicateBuilder.getLastUpdatedColumn(),
+					theDateRange.getLowerBoundAsInstant());
 			conditions.add(condition);
 			condition = createConditionForValueWithComparator(
-					GREATERTHAN, theResourceTablePredicateBuilder.getLastUpdatedColumn(), theDateRange.getUpperBoundAsInstant());
+					GREATERTHAN,
+					theResourceTablePredicateBuilder.getLastUpdatedColumn(),
+					theDateRange.getUpperBoundAsInstant());
 			conditions.add(condition);
 			return ComboCondition.or(conditions.toArray(new Condition[0]));
 		}

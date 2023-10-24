@@ -74,8 +74,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -85,6 +83,8 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Set;
 import java.util.stream.Collectors;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 import static ca.uhn.fhir.jpa.search.builder.QueryStack.SearchForIdsParams.with;
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -456,14 +456,13 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder im
 			List<Condition> andPredicates = new ArrayList<>();
 
 			List<List<IQueryParameterType>> chainParamValues = Collections.singletonList(orValues);
-			andPredicates.add(childQueryFactory.searchForIdsWithAndOr(
-				with()
-					.setSourceJoinColumn(myColumnTargetResourceId)
-					.setResourceName(subResourceName)
-					.setParamName(chain)
-					.setAndOrParams(chainParamValues)
-					.setRequest(theRequest)
-					.setRequestPartitionId(theRequestPartitionId)));
+			andPredicates.add(
+					childQueryFactory.searchForIdsWithAndOr(with().setSourceJoinColumn(myColumnTargetResourceId)
+							.setResourceName(subResourceName)
+							.setParamName(chain)
+							.setAndOrParams(chainParamValues)
+							.setRequest(theRequest)
+							.setRequestPartitionId(theRequestPartitionId)));
 
 			orPredicates.add(QueryParameterUtils.toAndPredicate(andPredicates));
 		}

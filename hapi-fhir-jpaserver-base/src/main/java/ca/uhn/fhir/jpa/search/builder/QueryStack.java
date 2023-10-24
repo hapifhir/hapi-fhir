@@ -108,7 +108,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.CollectionUtils;
 
-import javax.annotation.Nullable;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -122,6 +121,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
+import javax.annotation.Nullable;
 
 import static ca.uhn.fhir.jpa.search.builder.QueryStack.SearchForIdsParams.with;
 import static ca.uhn.fhir.jpa.util.QueryParameterUtils.fromOperation;
@@ -1165,24 +1165,25 @@ public class QueryStack {
 					mySqlBuilder.addReferencePredicateBuilderReversed(this, theSourceJoinColumn);
 			Condition partitionPredicate = resourceLinkTableJoin.createPartitionIdPredicate(theRequestPartitionId);
 
-			List<String> paths = resourceLinkTableJoin.createResourceLinkPaths(targetResourceType, paramReference, new ArrayList<>());
+			List<String> paths = resourceLinkTableJoin.createResourceLinkPaths(
+					targetResourceType, paramReference, new ArrayList<>());
 			if (CollectionUtils.isEmpty(paths)) {
 				throw new InvalidRequestException(Msg.code(2305) + "Reference field does not exist: " + paramReference);
 			}
 
 			Condition typePredicate = BinaryCondition.equalTo(
-					resourceLinkTableJoin.getColumnTargetResourceType(), mySqlBuilder.generatePlaceholder(theResourceType));
-			Condition pathPredicate =
-					toEqualToOrInPredicate(resourceLinkTableJoin.getColumnSourcePath(), mySqlBuilder.generatePlaceholders(paths));
+					resourceLinkTableJoin.getColumnTargetResourceType(),
+					mySqlBuilder.generatePlaceholder(theResourceType));
+			Condition pathPredicate = toEqualToOrInPredicate(
+					resourceLinkTableJoin.getColumnSourcePath(), mySqlBuilder.generatePlaceholders(paths));
 
-			Condition linkedPredicate = searchForIdsWithAndOr(
-					with()
-					.setSourceJoinColumn(resourceLinkTableJoin.getColumnSrcResourceId())
-					.setResourceName(targetResourceType)
-					.setParamName(parameterName)
-					.setAndOrParams(Collections.singletonList(orValues))
-					.setRequest(theRequest)
-					.setRequestPartitionId(theRequestPartitionId));
+			Condition linkedPredicate =
+					searchForIdsWithAndOr(with().setSourceJoinColumn(resourceLinkTableJoin.getColumnSrcResourceId())
+							.setResourceName(targetResourceType)
+							.setParamName(parameterName)
+							.setAndOrParams(Collections.singletonList(orValues))
+							.setRequest(theRequest)
+							.setRequestPartitionId(theRequestPartitionId));
 
 			andPredicates.add(toAndPredicate(partitionPredicate, pathPredicate, typePredicate, linkedPredicate));
 		}
@@ -2274,8 +2275,7 @@ public class QueryStack {
 	}
 
 	@Nullable
-	public Condition searchForIdsWithAndOr(
-			SearchForIdsParams theSearchForIdsParams) {
+	public Condition searchForIdsWithAndOr(SearchForIdsParams theSearchForIdsParams) {
 
 		if (theSearchForIdsParams.myAndOrParams.isEmpty()) {
 			return null;
@@ -2284,43 +2284,42 @@ public class QueryStack {
 		switch (theSearchForIdsParams.myParamName) {
 			case IAnyResource.SP_RES_ID:
 				return createPredicateResourceId(
-					theSearchForIdsParams.mySourceJoinColumn,
-					theSearchForIdsParams.myAndOrParams,
-					theSearchForIdsParams.myResourceName,
-					null,
-					theSearchForIdsParams.myRequestPartitionId);
+						theSearchForIdsParams.mySourceJoinColumn,
+						theSearchForIdsParams.myAndOrParams,
+						theSearchForIdsParams.myResourceName,
+						null,
+						theSearchForIdsParams.myRequestPartitionId);
 
 			case PARAM_HAS:
 				return createPredicateHas(
-					theSearchForIdsParams.mySourceJoinColumn,
-					theSearchForIdsParams.myResourceName,
-					theSearchForIdsParams.myAndOrParams,
-					theSearchForIdsParams.myRequest,
-					theSearchForIdsParams.myRequestPartitionId);
+						theSearchForIdsParams.mySourceJoinColumn,
+						theSearchForIdsParams.myResourceName,
+						theSearchForIdsParams.myAndOrParams,
+						theSearchForIdsParams.myRequest,
+						theSearchForIdsParams.myRequestPartitionId);
 
 			case Constants.PARAM_TAG:
 			case Constants.PARAM_PROFILE:
 			case Constants.PARAM_SECURITY:
 				if (myStorageSettings.getTagStorageMode() == JpaStorageSettings.TagStorageModeEnum.INLINE) {
 					return createPredicateSearchParameter(
-						theSearchForIdsParams.mySourceJoinColumn,
-						theSearchForIdsParams.myResourceName,
-						theSearchForIdsParams.myParamName,
-						theSearchForIdsParams.myAndOrParams,
-						theSearchForIdsParams.myRequest,
-						theSearchForIdsParams.myRequestPartitionId);
+							theSearchForIdsParams.mySourceJoinColumn,
+							theSearchForIdsParams.myResourceName,
+							theSearchForIdsParams.myParamName,
+							theSearchForIdsParams.myAndOrParams,
+							theSearchForIdsParams.myRequest,
+							theSearchForIdsParams.myRequestPartitionId);
 				} else {
 					return createPredicateTag(
-						theSearchForIdsParams.mySourceJoinColumn,
-						theSearchForIdsParams.myAndOrParams,
-						theSearchForIdsParams.myParamName,
-						theSearchForIdsParams.myRequestPartitionId);
+							theSearchForIdsParams.mySourceJoinColumn,
+							theSearchForIdsParams.myAndOrParams,
+							theSearchForIdsParams.myParamName,
+							theSearchForIdsParams.myRequestPartitionId);
 				}
 
 			case Constants.PARAM_SOURCE:
 				return createPredicateSourceForAndList(
-					theSearchForIdsParams.mySourceJoinColumn,
-					theSearchForIdsParams.myAndOrParams);
+						theSearchForIdsParams.mySourceJoinColumn, theSearchForIdsParams.myAndOrParams);
 
 			case Constants.PARAM_LASTUPDATED:
 				// this case statement handles a _lastUpdated query as part of a reverse search
@@ -2328,34 +2327,34 @@ public class QueryStack {
 				// performing a _lastUpdated query on a resource (/Patient?_lastUpdated=eq2023-10-24)
 				// is handled in {@link SearchBuilder#createChunkedQuery}.
 				return createReverseSearchPredicateLastUpdated(
-					theSearchForIdsParams.myAndOrParams,
-					theSearchForIdsParams.mySourceJoinColumn);
+						theSearchForIdsParams.myAndOrParams, theSearchForIdsParams.mySourceJoinColumn);
 
 			default:
 				return createPredicateSearchParameter(
-					theSearchForIdsParams.mySourceJoinColumn,
-					theSearchForIdsParams.myResourceName,
-					theSearchForIdsParams.myParamName,
-					theSearchForIdsParams.myAndOrParams,
-					theSearchForIdsParams.myRequest,
-					theSearchForIdsParams.myRequestPartitionId);
+						theSearchForIdsParams.mySourceJoinColumn,
+						theSearchForIdsParams.myResourceName,
+						theSearchForIdsParams.myParamName,
+						theSearchForIdsParams.myAndOrParams,
+						theSearchForIdsParams.myRequest,
+						theSearchForIdsParams.myRequestPartitionId);
 		}
 	}
 
-	private Condition createReverseSearchPredicateLastUpdated(List<List<IQueryParameterType>> theAndOrParams, DbColumn theSourceColumn ){
+	private Condition createReverseSearchPredicateLastUpdated(
+			List<List<IQueryParameterType>> theAndOrParams, DbColumn theSourceColumn) {
 
-		ResourceTablePredicateBuilder resourceTableJoin = mySqlBuilder.addResourceTablePredicateBuilder(theSourceColumn);
+		ResourceTablePredicateBuilder resourceTableJoin =
+				mySqlBuilder.addResourceTablePredicateBuilder(theSourceColumn);
 
 		List<Condition> andPredicates = new ArrayList<>(theAndOrParams.size());
 
-		for ( List<IQueryParameterType> aList: theAndOrParams) {
-			if(!aList.isEmpty()) {
+		for (List<IQueryParameterType> aList : theAndOrParams) {
+			if (!aList.isEmpty()) {
 				DateParam dateParam = (DateParam) aList.get(0);
 				DateRangeParam dateRangeParam = new DateRangeParam(dateParam);
 				Condition aCondition = mySqlBuilder.addPredicateLastUpdated(dateRangeParam, resourceTableJoin);
 				andPredicates.add(aCondition);
 			}
-
 		}
 
 		return toAndPredicate(andPredicates);
@@ -3061,7 +3060,7 @@ public class QueryStack {
 		}
 	}
 
-	public static class SearchForIdsParams{
+	public static class SearchForIdsParams {
 		DbColumn mySourceJoinColumn;
 		String myResourceName;
 		String myParamName;
@@ -3070,7 +3069,7 @@ public class QueryStack {
 		RequestPartitionId myRequestPartitionId;
 		ResourceTablePredicateBuilder myResourceTablePredicateBuilder;
 
-		public static SearchForIdsParams with(){
+		public static SearchForIdsParams with() {
 			return new SearchForIdsParams();
 		}
 
@@ -3132,7 +3131,8 @@ public class QueryStack {
 			return myResourceTablePredicateBuilder;
 		}
 
-		public SearchForIdsParams setResourceTablePredicateBuilder(ResourceTablePredicateBuilder theResourceTablePredicateBuilder) {
+		public SearchForIdsParams setResourceTablePredicateBuilder(
+				ResourceTablePredicateBuilder theResourceTablePredicateBuilder) {
 			myResourceTablePredicateBuilder = theResourceTablePredicateBuilder;
 			return this;
 		}
