@@ -11,7 +11,6 @@ import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.entity.TermConceptProperty;
 import ca.uhn.fhir.jpa.entity.TermValueSet;
-import ca.uhn.fhir.jpa.model.entity.ForcedId;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider;
 import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
@@ -599,12 +598,9 @@ public class LoincFullLoadR4SandboxIT extends BaseJpaTest {
 	 */
 	private void queryForSpecificValueSet() {
 		runInTransaction(() -> {
-			Query q = myEntityManager.createQuery("from ForcedId where myForcedId like 'LG8749-6%'");
-			@SuppressWarnings("unchecked")
-			List<ForcedId> fIds = (List<ForcedId>) q.getResultList();
-			long res_id = fIds.stream().map(ForcedId::getId).sorted().findFirst().orElse(fail("ForcedId not found"));
-
-			Query q1 = myEntityManager.createQuery("from ResourceTable where id = " + res_id);
+			Query q1 = myEntityManager
+				.createQuery("from ResourceTable where myFhirId like :fhir_id")
+				.setParameter("fhir_id", "LG8749-6%");
 			@SuppressWarnings("unchecked")
 			List<ResourceTable> vsList = (List<ResourceTable>) q1.getResultList();
 			assertEquals(1, vsList.size());

@@ -60,7 +60,7 @@ public class BulkExportCollectionFileEntity implements Serializable {
 			foreignKey = @ForeignKey(name = "FK_BLKEXCOLFILE_COLLECT"))
 	private BulkExportCollectionEntity myCollection;
 
-	@Column(name = "RES_ID", length = ForcedId.MAX_FORCED_ID_LENGTH, nullable = false)
+	@Column(name = "RES_ID", length = ResourceTable.MAX_FORCED_ID_LENGTH, nullable = false)
 	private String myResourceId;
 
 	public void setCollection(BulkExportCollectionEntity theCollection) {

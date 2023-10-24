@@ -181,8 +181,8 @@ public class PatientIdPartitionInterceptorTest extends BaseJpaR4SystemTest {
 		assertTrue(patient.getActive());
 		myCaptureQueriesListener.logSelectQueries();
 		assertEquals(3, myCaptureQueriesListener.getSelectQueries().size());
-		assertThat(myCaptureQueriesListener.getSelectQueries().get(0).getSql(false, false), containsString("f1_0.PARTITION_ID in (?)"));
-		assertThat(myCaptureQueriesListener.getSelectQueries().get(1).getSql(false, false), containsString("where r1_0.PARTITION_ID=? and r1_0.RES_ID=?"));
+		assertThat(myCaptureQueriesListener.getSelectQueries().get(0).getSql(false, false), containsString("resourceta0_.PARTITION_ID in (?)"));
+		assertThat(myCaptureQueriesListener.getSelectQueries().get(1).getSql(false, false), containsString("where resourceta0_.PARTITION_ID=? and resourceta0_.RES_ID=?"));
 	}
 
 	@Test
@@ -229,7 +229,7 @@ public class PatientIdPartitionInterceptorTest extends BaseJpaR4SystemTest {
 		assertEquals(1, outcome.size());
 		myCaptureQueriesListener.logSelectQueries();
 		assertEquals(3, myCaptureQueriesListener.getSelectQueries().size());
-		assertThat(myCaptureQueriesListener.getSelectQueries().get(0).getSql(false, false), containsString("f1_0.PARTITION_ID in (?)"));
+		assertThat(myCaptureQueriesListener.getSelectQueries().get(0).getSql(false, false), containsString("resourceta0_.PARTITION_ID in (?)"));
 		assertThat(myCaptureQueriesListener.getSelectQueries().get(1).getSql(false, false), containsString("t0.PARTITION_ID = ?"));
 	}
 

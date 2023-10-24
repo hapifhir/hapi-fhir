@@ -257,7 +257,7 @@ public abstract class BaseJpaTest extends BaseTest {
 	@Autowired
 	private IResourceHistoryTableDao myResourceHistoryTableDao;
 	@Autowired
-	private IForcedIdDao myForcedIdDao;
+	protected IForcedIdDao myForcedIdDao;
 	@Autowired
 	private DaoRegistry myDaoRegistry;
 	private final List<Object> myRegisteredInterceptors = new ArrayList<>(1);

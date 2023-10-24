@@ -633,4 +633,8 @@ public class Builder {
 			return this;
 		}
 	}
+
+	public String getRelease() {
+		return myRelease;
+	}
 }
