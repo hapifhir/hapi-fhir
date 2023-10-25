@@ -20,6 +20,7 @@
 package ca.uhn.fhir.jpa.dao.data;
 
 import ca.uhn.fhir.jpa.entity.Search;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -56,6 +57,7 @@ public interface ISearchDao extends JpaRepository<Search, Long>, IHapiFhirJpaRep
 
 	@Modifying
 	@Query("UPDATE Search s SET s.myDeleted = :deleted WHERE s.myId in (:pids)")
+	@CanIgnoreReturnValue
 	int updateDeleted(@Param("pids") Set<Long> thePid, @Param("deleted") boolean theDeleted);
 
 	@Modifying
