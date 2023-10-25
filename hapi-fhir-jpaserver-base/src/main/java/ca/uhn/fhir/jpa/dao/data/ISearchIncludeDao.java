@@ -20,6 +20,7 @@
 package ca.uhn.fhir.jpa.dao.data;
 
 import ca.uhn.fhir.jpa.entity.SearchInclude;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -30,10 +31,7 @@ import java.util.Collection;
 public interface ISearchIncludeDao extends JpaRepository<SearchInclude, Long>, IHapiFhirJpaRepository {
 
 	@Modifying
-	@Query(value = "DELETE FROM SearchInclude r WHERE r.mySearchPid = :search")
-	void deleteForSearch(@Param("search") Long theSearchPid);
-
-	@Modifying
 	@Query(value = "DELETE FROM SearchInclude r WHERE r.mySearchPid in (:search)")
-	void deleteForSearch(@Param("search") Collection<Long> theSearchPid);
+	@CanIgnoreReturnValue
+	int deleteForSearch(@Param("search") Collection<Long> theSearchPid);
 }
