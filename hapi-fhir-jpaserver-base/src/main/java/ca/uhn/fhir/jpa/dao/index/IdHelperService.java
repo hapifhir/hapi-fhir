@@ -377,10 +377,7 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 		 * Only PG, and MSSql support INCLUDE COLUMNS.
 		 * @see AddIndexTask.generateSql
 		 */
-		criteriaQuery.multiselect(
-				from.get("myId").as(Long.class),
-				from.get("myResourceType").as(String.class),
-				from.get("myFhirId").as(String.class));
+		criteriaQuery.multiselect(from.get("myId"), from.get("myResourceType"), from.get("myFhirId"));
 
 		// one create one clause per id.
 		List<Predicate> predicates = new ArrayList<>(theIds.size());
@@ -393,7 +390,7 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 				andPredicates.add(typeCriteria);
 			}
 
-			Predicate idCriteria = cb.equal(from.get("myFhirId").as(String.class), next.getIdPart());
+			Predicate idCriteria = cb.equal(from.get("myFhirId"), next.getIdPart());
 			andPredicates.add(idCriteria);
 			getOptionalPartitionPredicate(theRequestPartitionId, cb, from).ifPresent(andPredicates::add);
 			predicates.add(cb.and(andPredicates.toArray(EMPTY_PREDICATE_ARRAY)));
