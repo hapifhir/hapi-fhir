@@ -1,6 +1,6 @@
 ### Major Database Change - Zero Downtime
 
-This release makes performance changes the database definition in a way that is incompatible with releases before 2023.02.
+This release makes performance changes to the database definition in a way that is incompatible with releases before 2023.02.
 If you wish to upgrade with zero-downtime, you must first upgrade to 2023.02, or 2023.05.
 If you are running an offline upgrade, you can upgrade from any prior version.
 On large systems, the database migration may take substantial time.
