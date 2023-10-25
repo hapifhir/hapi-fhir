@@ -13,6 +13,7 @@ import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.PrimitiveType;
+import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.Test;
 
 import java.util.Date;
@@ -570,6 +571,16 @@ class TerserUtilTest {
 		address.setCity("CITY");
 
 		TerserUtil.setFieldByFhirPath(ourFhirContext, "address", p1, address);
+
+		assertEquals(1, p1.getAddress().size());
+		assertEquals("CITY", p1.getAddress().get(0).getCity());
+	}
+
+	@Test
+	public void testSetFieldByCompositeFhirPath() {
+		Patient p1 = new Patient();
+
+		TerserUtil.setFieldByFhirPath(ourFhirContext, "address.city", p1, new StringType("CITY"));
 
 		assertEquals(1, p1.getAddress().size());
 		assertEquals("CITY", p1.getAddress().get(0).getCity());
