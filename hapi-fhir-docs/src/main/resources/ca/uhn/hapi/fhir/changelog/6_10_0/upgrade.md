@@ -2,7 +2,7 @@
 
 This release makes performance changes to the database definition in a way that is incompatible with releases before 2023.02.
 Attempting to run version 2022.11 or older simultaneosly as 2023.11 may experience errors when saving new resources.
-If you wish to upgrade with zero-downtime, you must first upgrade to 2023.02, 2023.05, or 2023.08 before upgrading to 2023.11 using the procedure descibed in the [upgrade documentation](../../installation/upgrading.html#upgrading-a-cluster-of-servers-with-zero-downtime).
+If you wish to upgrade with zero-downtime, you must first upgrade to 2023.02, 2023.05, or 2023.08 before upgrading to 2023.11 using the procedure described in the [upgrade documentation](../../installation/upgrading.html#upgrading-a-cluster-of-servers-with-zero-downtime).
 If you are running an offline upgrade, you can upgrade from any prior version.
 On large systems, the database migration may take substantial time.
 
