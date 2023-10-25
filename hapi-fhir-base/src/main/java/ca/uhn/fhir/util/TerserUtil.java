@@ -351,6 +351,14 @@ public final class TerserUtil {
 		clear(childDefinition.getAccessor().getValues(theResource));
 	}
 
+	/**
+	 * Clears the specified field on the resource provided by the FHIRPath.  If more than one value matches
+	 * the FHIRPath, all values will be cleared.
+	 *
+	 * @param theFhirContext
+	 * @param theResource
+	 * @param theFhirPath
+	 */
 	public static void clearFieldByFhirPath(FhirContext theFhirContext, IBaseResource theResource, String theFhirPath) {
 
 		if (theFhirPath.contains(".")) {
