@@ -20,6 +20,7 @@
 package ca.uhn.fhir.jpa.dao.data;
 
 import ca.uhn.fhir.jpa.entity.SearchResult;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -38,21 +39,15 @@ public interface ISearchResultDao extends JpaRepository<SearchResult, Long>, IHa
 	@Query(value = "SELECT r.myResourcePid FROM SearchResult r WHERE r.mySearchPid = :search")
 	List<Long> findWithSearchPidOrderIndependent(@Param("search") Long theSearchPid);
 
-	@Query(value = "SELECT r.myId FROM SearchResult r WHERE r.mySearchPid = :search")
-	Slice<Long> findForSearch(Pageable thePage, @Param("search") Long theSearchPid);
-
-	@Modifying
-	@Query("DELETE FROM SearchResult s WHERE s.myId IN :ids")
-	void deleteByIds(@Param("ids") List<Long> theContent);
-
 	@Modifying
 	@Query("DELETE FROM SearchResult s WHERE s.mySearchPid IN :searchIds")
-	void deleteBySearchIds(@Param("searchIds") Collection<Long> theSearchIds);
+	@CanIgnoreReturnValue
+	int deleteBySearchIds(@Param("searchIds") Collection<Long> theSearchIds);
 
 	@Modifying
-	@Query(
-			"DELETE FROM SearchResult s WHERE s.mySearchPid = :searchId and s.myOrder >= :rangeStart and s.myOrder <= :rangeEnd")
-	void deleteBySearchIdInRange(
+	@Query("DELETE FROM SearchResult s WHERE s.mySearchPid = :searchId and s.myOrder >= :rangeStart and s.myOrder <= :rangeEnd")
+	@CanIgnoreReturnValue
+	int deleteBySearchIdInRange(
 			@Param("searchId") Long theSearchId,
 			@Param("rangeStart") int theRangeStart,
 			@Param("rangeEnd") int theRangeEnd);
