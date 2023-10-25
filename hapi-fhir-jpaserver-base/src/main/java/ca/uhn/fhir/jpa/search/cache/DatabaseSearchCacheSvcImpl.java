@@ -228,7 +228,8 @@ public class DatabaseSearchCacheSvcImpl implements ISearchCacheSvc {
 		void throwIfDeadlineExpired() {
 			boolean result = Instant.ofEpochMilli(now()).isAfter(myDeadline);
 			if (result) {
-				throw new DeadlineException(Msg.code(2443) + "Deadline expired while cleaning Search cache - " + myDeadline);
+				throw new DeadlineException(
+						Msg.code(2443) + "Deadline expired while cleaning Search cache - " + myDeadline);
 			}
 		}
 
