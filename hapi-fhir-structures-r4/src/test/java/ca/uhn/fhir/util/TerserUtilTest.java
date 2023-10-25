@@ -507,6 +507,7 @@ class TerserUtilTest {
 		{
 			Patient p1 = new Patient();
 			p1.addName().setFamily("Doe");
+			assertEquals(1, p1.getName().size());
 
 			TerserUtil.clearField(ourFhirContext, p1, "name");
 
@@ -517,12 +518,35 @@ class TerserUtilTest {
 			Address a1 = new Address();
 			a1.addLine("Line 1");
 			a1.addLine("Line 2");
+			assertEquals(2, a1.getLine().size());
 			a1.setCity("Test");
 			TerserUtil.clearField(ourFhirContext, "line", a1);
 
 			assertEquals(0, a1.getLine().size());
 			assertEquals("Test", a1.getCity());
 		}
+	}
+
+	@Test
+	public void testClearFieldByFhirPath() {
+			Patient p1 = new Patient();
+			p1.addName().setFamily("Doe");
+			assertEquals(1, p1.getName().size());
+
+			TerserUtil.clearFieldByFhirPath(ourFhirContext, p1, "name");
+
+			assertEquals(0, p1.getName().size());
+
+			Address a1 = new Address();
+			a1.addLine("Line 1");
+			a1.addLine("Line 2");
+			assertEquals(2, a1.getLine().size());
+			a1.setCity("Test");
+			p1.addAddress(a1);
+			TerserUtil.clearFieldByFhirPath(ourFhirContext, p1,"address.line");
+
+			assertEquals(0, p1.getAddressFirstRep().getLine().size());
+			assertEquals("Test", p1.getAddressFirstRep().getCity());
 	}
 
 	@Test

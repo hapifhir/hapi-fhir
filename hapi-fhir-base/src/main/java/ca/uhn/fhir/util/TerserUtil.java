@@ -351,6 +351,11 @@ public final class TerserUtil {
 		clear(childDefinition.getAccessor().getValues(theResource));
 	}
 
+
+	public static void clearFieldByFhirPath(FhirContext theFhirContext, IBaseResource theResource, String theFhirPath) {
+	}
+
+
 	/**
 	 * Clears the specified field on the element provided
 	 *
