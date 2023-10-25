@@ -39,7 +39,6 @@ import ca.uhn.fhir.model.api.ISupportsUndeclaredExtensions;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.api.Tag;
 import ca.uhn.fhir.model.api.TagList;
-import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.base.composite.BaseCodingDt;
 import ca.uhn.fhir.model.base.composite.BaseContainedDt;
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -660,8 +659,7 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 					}
 					BaseRuntimeChildDefinition replacedParentDefinition = nextChild.getReplacedParentDefinition();
 					if (nextChild.isMultipleCardinality()
-							|| (replacedParentDefinition != null
-									&& replacedParentDefinition.isMultipleCardinality())) {
+							|| (replacedParentDefinition != null && replacedParentDefinition.isMultipleCardinality())) {
 						beginArray(theEventWriter, nextChildSpecificName);
 						inArray = true;
 						encodeChildElementToStreamWriter(
@@ -915,7 +913,7 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 					theResourceId, extensions, modifierExtensions, null, null, theEncodeContext, theContainedResource);
 			boolean haveExtension = !extensions.isEmpty();
 
-            if (theResourceId.hasFormatComment() || haveExtension) {
+			if (theResourceId.hasFormatComment() || haveExtension) {
 				beginObject(theEventWriter, "_id");
 				if (theResourceId.hasFormatComment()) {
 					writeCommentsPreAndPost(theResourceId, theEventWriter);
