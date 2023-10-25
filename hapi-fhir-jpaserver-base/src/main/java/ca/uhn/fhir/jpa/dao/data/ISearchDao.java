@@ -41,9 +41,10 @@ public interface ISearchDao extends JpaRepository<Search, Long>, IHapiFhirJpaRep
 			"SELECT s.myId FROM Search s WHERE (s.myCreated < :cutoff) AND (s.myExpiryOrNull IS NULL OR s.myExpiryOrNull < :now) AND (s.myDeleted IS NULL OR s.myDeleted = FALSE)")
 	Stream<Long> findWhereCreatedBefore(@Param("cutoff") Date theCutoff, @Param("now") Date theNow);
 
-	@Query(
-			"SELECT s.myId, (select max(sr.myOrder) as maxOrder from SearchResult sr where sr.mySearchPid = s.myId) FROM Search s WHERE s.myDeleted = TRUE")
-	Stream<Object[]> findDeleted();
+	@Query("SELECT new ca.uhn.fhir.jpa.dao.data.SearchIdAndResultSize(" + "s.myId, "
+			+ "(select max(sr.myOrder) as maxOrder from SearchResult sr where sr.mySearchPid = s.myId)) "
+			+ "FROM Search s WHERE s.myDeleted = TRUE")
+	Stream<SearchIdAndResultSize> findDeleted();
 
 	@Query(
 			"SELECT s FROM Search s WHERE s.myResourceType = :type AND s.mySearchQueryStringHash = :hash AND (s.myCreated > :cutoff) AND s.myDeleted = FALSE AND s.myStatus <> 'FAILED'")

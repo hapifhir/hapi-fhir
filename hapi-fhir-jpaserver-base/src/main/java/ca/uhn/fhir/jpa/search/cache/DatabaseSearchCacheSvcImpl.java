@@ -25,6 +25,7 @@ import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.dao.data.ISearchDao;
 import ca.uhn.fhir.jpa.dao.data.ISearchIncludeDao;
 import ca.uhn.fhir.jpa.dao.data.ISearchResultDao;
+import ca.uhn.fhir.jpa.dao.data.SearchIdAndResultSize;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService.IExecutionBuilder;
@@ -53,8 +54,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 import javax.annotation.Nonnull;
 import javax.persistence.EntityManager;
-
-import static java.util.Objects.requireNonNullElse;
 
 public class DatabaseSearchCacheSvcImpl implements ISearchCacheSvc {
 	/*
@@ -236,23 +235,21 @@ public class DatabaseSearchCacheSvcImpl implements ISearchCacheSvc {
 		private int deleteMarkedSearchesInBatches() {
 			AtomicInteger deletedCounter = new AtomicInteger(0);
 
-			try (final Stream<Object[]> toDelete = mySearchDao.findDeleted()) {
+			try (final Stream<SearchIdAndResultSize> toDelete = mySearchDao.findDeleted()) {
 				assert toDelete != null;
 
 				toDelete.forEach(nextSearchToDelete -> {
 					throwIfDeadlineExpired();
 
-					long searchPid = (long) nextSearchToDelete[0];
-					Integer numberOfResults = requireNonNullElse((Integer) nextSearchToDelete[1], 0);
-
-					deleteSearchAndResults(searchPid, numberOfResults);
+					deleteSearchAndResults(nextSearchToDelete.searchId, nextSearchToDelete.size);
 
 					deletedCounter.incrementAndGet();
 				});
 			}
 
+			// flush anything left in the buffers
 			flushSearchResultDeletes();
-			flushSearchDeletes();
+			flushSearchAndIncludeDeletes();
 
 			int deletedCount = deletedCounter.get();
 
@@ -291,7 +288,7 @@ public class DatabaseSearchCacheSvcImpl implements ISearchCacheSvc {
 				// flush the results to make sure we don't have any references.
 				flushSearchResultDeletes();
 
-				flushSearchDeletes();
+				flushSearchAndIncludeDeletes();
 			}
 		}
 
@@ -306,7 +303,7 @@ public class DatabaseSearchCacheSvcImpl implements ISearchCacheSvc {
 					"Search {} is large: has {} results.  Deleting results in chunks.",
 					theSearchPid,
 					theNumberOfResults);
-			for (int rangeEnd = theNumberOfResults; rangeEnd > 0; rangeEnd -= ourMaximumResultsToDeleteInOneCommit) {
+			for (int rangeEnd = theNumberOfResults; rangeEnd >= 0; rangeEnd -= ourMaximumResultsToDeleteInOneCommit) {
 				int rangeStart = rangeEnd - ourMaximumResultsToDeleteInOneCommit;
 				ourLog.trace("Deleting results for search {}: {} - {}", theSearchPid, rangeStart, rangeEnd);
 				mySearchResultDao.deleteBySearchIdInRange(theSearchPid, rangeStart, rangeEnd);
@@ -314,7 +311,7 @@ public class DatabaseSearchCacheSvcImpl implements ISearchCacheSvc {
 			}
 		}
 
-		private void flushSearchDeletes() {
+		private void flushSearchAndIncludeDeletes() {
 			if (myDeleteSearchBatch.isEmpty()) {
 				return;
 			}
@@ -366,7 +363,7 @@ public class DatabaseSearchCacheSvcImpl implements ISearchCacheSvc {
 						ourLog.debug("Deleted {} searches, {} remaining", deletedCount, total);
 					}
 				} catch (DeadlineException theTimeoutException) {
-					ourLog.warn("Search cache cleaner did not finish all work before deadline.");
+					ourLog.warn(theTimeoutException.getMessage());
 				}
 
 				return null;
@@ -400,7 +397,7 @@ public class DatabaseSearchCacheSvcImpl implements ISearchCacheSvc {
 	/**
 	 * Marker to abandon our delete run when we are over time.
 	 */
-	static class DeadlineException extends RuntimeException {
+	private static class DeadlineException extends RuntimeException {
 		public DeadlineException(String message) {
 			super(message);
 		}
