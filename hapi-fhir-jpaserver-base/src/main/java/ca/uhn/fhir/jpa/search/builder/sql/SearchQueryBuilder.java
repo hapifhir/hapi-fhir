@@ -699,15 +699,24 @@ public class SearchQueryBuilder {
 
 	public ComboCondition addPredicateLastUpdated(DateRangeParam theDateRange) {
 		ResourceTablePredicateBuilder resourceTableRoot = getOrCreateResourceTablePredicateBuilder(false);
+		return addPredicateLastUpdated(theDateRange, resourceTableRoot);
+	}
+
+	public ComboCondition addPredicateLastUpdated(
+			DateRangeParam theDateRange, ResourceTablePredicateBuilder theResourceTablePredicateBuilder) {
 		List<Condition> conditions = new ArrayList<>(2);
 		BinaryCondition condition;
 
 		if (isNotEqualsComparator(theDateRange)) {
 			condition = createConditionForValueWithComparator(
-					LESSTHAN, resourceTableRoot.getLastUpdatedColumn(), theDateRange.getLowerBoundAsInstant());
+					LESSTHAN,
+					theResourceTablePredicateBuilder.getLastUpdatedColumn(),
+					theDateRange.getLowerBoundAsInstant());
 			conditions.add(condition);
 			condition = createConditionForValueWithComparator(
-					GREATERTHAN, resourceTableRoot.getLastUpdatedColumn(), theDateRange.getUpperBoundAsInstant());
+					GREATERTHAN,
+					theResourceTablePredicateBuilder.getLastUpdatedColumn(),
+					theDateRange.getUpperBoundAsInstant());
 			conditions.add(condition);
 			return ComboCondition.or(conditions.toArray(new Condition[0]));
 		}
@@ -715,7 +724,7 @@ public class SearchQueryBuilder {
 		if (theDateRange.getLowerBoundAsInstant() != null) {
 			condition = createConditionForValueWithComparator(
 					GREATERTHAN_OR_EQUALS,
-					resourceTableRoot.getLastUpdatedColumn(),
+					theResourceTablePredicateBuilder.getLastUpdatedColumn(),
 					theDateRange.getLowerBoundAsInstant());
 			conditions.add(condition);
 		}
@@ -723,7 +732,7 @@ public class SearchQueryBuilder {
 		if (theDateRange.getUpperBoundAsInstant() != null) {
 			condition = createConditionForValueWithComparator(
 					LESSTHAN_OR_EQUALS,
-					resourceTableRoot.getLastUpdatedColumn(),
+					theResourceTablePredicateBuilder.getLastUpdatedColumn(),
 					theDateRange.getUpperBoundAsInstant());
 			conditions.add(condition);
 		}

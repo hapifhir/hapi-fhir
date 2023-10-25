@@ -69,10 +69,10 @@ import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.QualifiedParamList;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
-import ca.uhn.fhir.rest.api.SearchContainedModeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.CompositeParam;
 import ca.uhn.fhir.rest.param.DateParam;
+import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.HasParam;
 import ca.uhn.fhir.rest.param.NumberParam;
 import ca.uhn.fhir.rest.param.QuantityParam;
@@ -123,6 +123,7 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 
+import static ca.uhn.fhir.jpa.search.builder.QueryStack.SearchForIdsParams.with;
 import static ca.uhn.fhir.jpa.util.QueryParameterUtils.fromOperation;
 import static ca.uhn.fhir.jpa.util.QueryParameterUtils.getChainedPart;
 import static ca.uhn.fhir.jpa.util.QueryParameterUtils.getParamNameWithPrefix;
@@ -1107,7 +1108,7 @@ public class QueryStack {
 
 			if (paramName.startsWith("_has:")) {
 
-				ourLog.trace("Handing double _has query: {}", paramName);
+				ourLog.trace("Handling double _has query: {}", paramName);
 
 				String qualifier = paramName.substring(4);
 				for (IQueryParameterType next : nextOrList) {
@@ -1160,26 +1161,30 @@ public class QueryStack {
 				parameterName = parameterName.substring(0, colonIndex);
 			}
 
-			ResourceLinkPredicateBuilder join =
+			ResourceLinkPredicateBuilder resourceLinkTableJoin =
 					mySqlBuilder.addReferencePredicateBuilderReversed(this, theSourceJoinColumn);
-			Condition partitionPredicate = join.createPartitionIdPredicate(theRequestPartitionId);
+			Condition partitionPredicate = resourceLinkTableJoin.createPartitionIdPredicate(theRequestPartitionId);
 
-			List<String> paths = join.createResourceLinkPaths(targetResourceType, paramReference, new ArrayList<>());
+			List<String> paths = resourceLinkTableJoin.createResourceLinkPaths(
+					targetResourceType, paramReference, new ArrayList<>());
 			if (CollectionUtils.isEmpty(paths)) {
 				throw new InvalidRequestException(Msg.code(2305) + "Reference field does not exist: " + paramReference);
 			}
+
 			Condition typePredicate = BinaryCondition.equalTo(
-					join.getColumnTargetResourceType(), mySqlBuilder.generatePlaceholder(theResourceType));
-			Condition pathPredicate =
-					toEqualToOrInPredicate(join.getColumnSourcePath(), mySqlBuilder.generatePlaceholders(paths));
-			Condition linkedPredicate = searchForIdsWithAndOr(
-					join.getColumnSrcResourceId(),
-					targetResourceType,
-					parameterName,
-					Collections.singletonList(orValues),
-					theRequest,
-					theRequestPartitionId,
-					SearchContainedModeEnum.FALSE);
+					resourceLinkTableJoin.getColumnTargetResourceType(),
+					mySqlBuilder.generatePlaceholder(theResourceType));
+			Condition pathPredicate = toEqualToOrInPredicate(
+					resourceLinkTableJoin.getColumnSourcePath(), mySqlBuilder.generatePlaceholders(paths));
+
+			Condition linkedPredicate =
+					searchForIdsWithAndOr(with().setSourceJoinColumn(resourceLinkTableJoin.getColumnSrcResourceId())
+							.setResourceName(targetResourceType)
+							.setParamName(parameterName)
+							.setAndOrParams(Collections.singletonList(orValues))
+							.setRequest(theRequest)
+							.setRequestPartitionId(theRequestPartitionId));
+
 			andPredicates.add(toAndPredicate(partitionPredicate, pathPredicate, typePredicate, linkedPredicate));
 		}
 
@@ -2270,55 +2275,89 @@ public class QueryStack {
 	}
 
 	@Nullable
-	public Condition searchForIdsWithAndOr(
-			@Nullable DbColumn theSourceJoinColumn,
-			String theResourceName,
-			String theParamName,
-			List<List<IQueryParameterType>> theAndOrParams,
-			RequestDetails theRequest,
-			RequestPartitionId theRequestPartitionId,
-			SearchContainedModeEnum theSearchContainedMode) {
+	public Condition searchForIdsWithAndOr(SearchForIdsParams theSearchForIdsParams) {
 
-		if (theAndOrParams.isEmpty()) {
+		if (theSearchForIdsParams.myAndOrParams.isEmpty()) {
 			return null;
 		}
 
-		switch (theParamName) {
+		switch (theSearchForIdsParams.myParamName) {
 			case IAnyResource.SP_RES_ID:
 				return createPredicateResourceId(
-						theSourceJoinColumn, theAndOrParams, theResourceName, null, theRequestPartitionId);
+						theSearchForIdsParams.mySourceJoinColumn,
+						theSearchForIdsParams.myAndOrParams,
+						theSearchForIdsParams.myResourceName,
+						null,
+						theSearchForIdsParams.myRequestPartitionId);
 
 			case PARAM_HAS:
 				return createPredicateHas(
-						theSourceJoinColumn, theResourceName, theAndOrParams, theRequest, theRequestPartitionId);
+						theSearchForIdsParams.mySourceJoinColumn,
+						theSearchForIdsParams.myResourceName,
+						theSearchForIdsParams.myAndOrParams,
+						theSearchForIdsParams.myRequest,
+						theSearchForIdsParams.myRequestPartitionId);
 
 			case Constants.PARAM_TAG:
 			case Constants.PARAM_PROFILE:
 			case Constants.PARAM_SECURITY:
 				if (myStorageSettings.getTagStorageMode() == JpaStorageSettings.TagStorageModeEnum.INLINE) {
 					return createPredicateSearchParameter(
-							theSourceJoinColumn,
-							theResourceName,
-							theParamName,
-							theAndOrParams,
-							theRequest,
-							theRequestPartitionId);
+							theSearchForIdsParams.mySourceJoinColumn,
+							theSearchForIdsParams.myResourceName,
+							theSearchForIdsParams.myParamName,
+							theSearchForIdsParams.myAndOrParams,
+							theSearchForIdsParams.myRequest,
+							theSearchForIdsParams.myRequestPartitionId);
 				} else {
-					return createPredicateTag(theSourceJoinColumn, theAndOrParams, theParamName, theRequestPartitionId);
+					return createPredicateTag(
+							theSearchForIdsParams.mySourceJoinColumn,
+							theSearchForIdsParams.myAndOrParams,
+							theSearchForIdsParams.myParamName,
+							theSearchForIdsParams.myRequestPartitionId);
 				}
 
 			case Constants.PARAM_SOURCE:
-				return createPredicateSourceForAndList(theSourceJoinColumn, theAndOrParams);
+				return createPredicateSourceForAndList(
+						theSearchForIdsParams.mySourceJoinColumn, theSearchForIdsParams.myAndOrParams);
+
+			case Constants.PARAM_LASTUPDATED:
+				// this case statement handles a _lastUpdated query as part of a reverse search
+				// only (/Patient?_has:Encounter:patient:_lastUpdated=ge2023-10-24).
+				// performing a _lastUpdated query on a resource (/Patient?_lastUpdated=eq2023-10-24)
+				// is handled in {@link SearchBuilder#createChunkedQuery}.
+				return createReverseSearchPredicateLastUpdated(
+						theSearchForIdsParams.myAndOrParams, theSearchForIdsParams.mySourceJoinColumn);
 
 			default:
 				return createPredicateSearchParameter(
-						theSourceJoinColumn,
-						theResourceName,
-						theParamName,
-						theAndOrParams,
-						theRequest,
-						theRequestPartitionId);
+						theSearchForIdsParams.mySourceJoinColumn,
+						theSearchForIdsParams.myResourceName,
+						theSearchForIdsParams.myParamName,
+						theSearchForIdsParams.myAndOrParams,
+						theSearchForIdsParams.myRequest,
+						theSearchForIdsParams.myRequestPartitionId);
 		}
+	}
+
+	private Condition createReverseSearchPredicateLastUpdated(
+			List<List<IQueryParameterType>> theAndOrParams, DbColumn theSourceColumn) {
+
+		ResourceTablePredicateBuilder resourceTableJoin =
+				mySqlBuilder.addResourceTablePredicateBuilder(theSourceColumn);
+
+		List<Condition> andPredicates = new ArrayList<>(theAndOrParams.size());
+
+		for (List<IQueryParameterType> aList : theAndOrParams) {
+			if (!aList.isEmpty()) {
+				DateParam dateParam = (DateParam) aList.get(0);
+				DateRangeParam dateRangeParam = new DateRangeParam(dateParam);
+				Condition aCondition = mySqlBuilder.addPredicateLastUpdated(dateRangeParam, resourceTableJoin);
+				andPredicates.add(aCondition);
+			}
+		}
+
+		return toAndPredicate(andPredicates);
 	}
 
 	@Nullable
@@ -3018,6 +3057,84 @@ public class QueryStack {
 		public LeafNodeDefinition withParam(RuntimeSearchParam theParamDefinition) {
 			return new LeafNodeDefinition(
 					theParamDefinition, myOrValues, myLeafTarget, myLeafParamName, myLeafPathPrefix, myQualifiers);
+		}
+	}
+
+	public static class SearchForIdsParams {
+		DbColumn mySourceJoinColumn;
+		String myResourceName;
+		String myParamName;
+		List<List<IQueryParameterType>> myAndOrParams;
+		RequestDetails myRequest;
+		RequestPartitionId myRequestPartitionId;
+		ResourceTablePredicateBuilder myResourceTablePredicateBuilder;
+
+		public static SearchForIdsParams with() {
+			return new SearchForIdsParams();
+		}
+
+		public DbColumn getSourceJoinColumn() {
+			return mySourceJoinColumn;
+		}
+
+		public SearchForIdsParams setSourceJoinColumn(DbColumn theSourceJoinColumn) {
+			mySourceJoinColumn = theSourceJoinColumn;
+			return this;
+		}
+
+		public String getResourceName() {
+			return myResourceName;
+		}
+
+		public SearchForIdsParams setResourceName(String theResourceName) {
+			myResourceName = theResourceName;
+			return this;
+		}
+
+		public String getParamName() {
+			return myParamName;
+		}
+
+		public SearchForIdsParams setParamName(String theParamName) {
+			myParamName = theParamName;
+			return this;
+		}
+
+		public List<List<IQueryParameterType>> getAndOrParams() {
+			return myAndOrParams;
+		}
+
+		public SearchForIdsParams setAndOrParams(List<List<IQueryParameterType>> theAndOrParams) {
+			myAndOrParams = theAndOrParams;
+			return this;
+		}
+
+		public RequestDetails getRequest() {
+			return myRequest;
+		}
+
+		public SearchForIdsParams setRequest(RequestDetails theRequest) {
+			myRequest = theRequest;
+			return this;
+		}
+
+		public RequestPartitionId getRequestPartitionId() {
+			return myRequestPartitionId;
+		}
+
+		public SearchForIdsParams setRequestPartitionId(RequestPartitionId theRequestPartitionId) {
+			myRequestPartitionId = theRequestPartitionId;
+			return this;
+		}
+
+		public ResourceTablePredicateBuilder getResourceTablePredicateBuilder() {
+			return myResourceTablePredicateBuilder;
+		}
+
+		public SearchForIdsParams setResourceTablePredicateBuilder(
+				ResourceTablePredicateBuilder theResourceTablePredicateBuilder) {
+			myResourceTablePredicateBuilder = theResourceTablePredicateBuilder;
+			return this;
 		}
 	}
 }
