@@ -169,8 +169,20 @@ public class MdmSubscriptionLoader {
 
 	private SubscriptionTopic buildMdmSubscriptionTopicR5(List<String> theMdmResourceTypes) {
 		SubscriptionTopic subscriptionTopic = new SubscriptionTopic();
-		theMdmResourceTypes.forEach(resourceType -> subscriptionTopic.addResourceTrigger().setResource(resourceType));
+		subscriptionTopic.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		theMdmResourceTypes.forEach(resourceType -> getSubscriptionTopicResourceTriggerComponent(resourceType, subscriptionTopic));
 		return subscriptionTopic;
+	}
+
+	private static void getSubscriptionTopicResourceTriggerComponent(String theResourceType, SubscriptionTopic theSubscriptionTopic) {
+		SubscriptionTopic.SubscriptionTopicResourceTriggerComponent trigger = theSubscriptionTopic.addResourceTrigger();
+		trigger.setResource(theResourceType);
+		trigger.addSupportedInteraction(SubscriptionTopic.InteractionTrigger.CREATE);
+		trigger.addSupportedInteraction(SubscriptionTopic.InteractionTrigger.UPDATE);
+		SubscriptionTopic.SubscriptionTopicResourceTriggerQueryCriteriaComponent queryCriteria = trigger.getQueryCriteria();
+		queryCriteria.setCurrent(theResourceType + "?");
+		queryCriteria.setRequireBoth(false);
+		theSubscriptionTopic.addResourceTrigger(trigger);
 	}
 
 	private org.hl7.fhir.r5.model.Subscription buildMdmSubscriptionR5(SubscriptionTopic theSubscriptionTopic) {
@@ -185,6 +197,7 @@ public class MdmSubscriptionLoader {
 		retVal.setStatus(Enumerations.SubscriptionStatusCodes.REQUESTED);
 
 //		fixme jm: this way?
+		retVal.setTopic(theSubscriptionTopic.getUrl());
 		retVal.setTopicElement(new CanonicalType(theSubscriptionTopic.getUrl()));
 		retVal.getMeta()
 			.addTag()
