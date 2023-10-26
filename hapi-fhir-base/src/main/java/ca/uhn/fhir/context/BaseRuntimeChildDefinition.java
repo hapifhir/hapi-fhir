@@ -20,6 +20,7 @@
 package ca.uhn.fhir.context;
 
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.model.api.annotation.Child;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 
@@ -76,6 +77,10 @@ public abstract class BaseRuntimeChildDefinition {
 
 	public void setReplacedParentDefinition(BaseRuntimeChildDefinition myReplacedParentDefinition) {
 		this.myReplacedParentDefinition = myReplacedParentDefinition;
+	}
+
+	public boolean isMultipleCardinality() {
+		return this.getMax() > 1 || this.getMax() == Child.MAX_UNLIMITED;
 	}
 
 	public interface IAccessor {
