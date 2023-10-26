@@ -390,7 +390,8 @@ public final class TerserUtil {
 		List<IBase> newValue = accessor.getValues(theBase);
 
 		if (newValue != null && !newValue.isEmpty()) {
-			// Our clear failed, probably because it was an immutable SingletonList returned by a FieldPlainAccessor that cannot be cleared.
+			// Our clear failed, probably because it was an immutable SingletonList returned by a FieldPlainAccessor
+			// that cannot be cleared.
 			// Let's just null it out instead.
 			childDefinition.getMutator().setValue(theBase, null);
 		}
