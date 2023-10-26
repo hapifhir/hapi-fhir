@@ -36,7 +36,7 @@ import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.param.DateRangeParam;
-import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.util.DateRangeUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
@@ -82,9 +82,11 @@ public class GoldenResourceSearchSvcImpl implements IGoldenResourceSearchSvc {
 		DateRangeParam chunkDateRange =
 				DateRangeUtil.narrowDateRange(searchParamMap.getLastUpdated(), theStart, theEnd);
 		searchParamMap.setLastUpdated(chunkDateRange);
-		searchParamMap.setCount(thePageSize); // request this many pids
-		searchParamMap.add(
-				"_tag", new TokenParam(MdmConstants.SYSTEM_GOLDEN_RECORD_STATUS, MdmConstants.CODE_GOLDEN_RECORD));
+
+		TokenOrListParam goldenRecordStatusToken = new TokenOrListParam()
+				.add(MdmConstants.SYSTEM_GOLDEN_RECORD_STATUS, MdmConstants.CODE_GOLDEN_RECORD_REDIRECTED)
+				.add(MdmConstants.SYSTEM_GOLDEN_RECORD_STATUS, MdmConstants.CODE_GOLDEN_RECORD);
+		searchParamMap.add(Constants.PARAM_TAG, goldenRecordStatusToken);
 
 		IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(theResourceType);
 		SystemRequestDetails request = new SystemRequestDetails();

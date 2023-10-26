@@ -48,6 +48,7 @@ import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicStatusLine;
+import org.hamcrest.CoreMatchers;
 import org.hamcrest.Matchers;
 import org.hamcrest.core.StringContains;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
@@ -1022,6 +1023,40 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 
 		assertEquals("http://example.com/fhir/$opname", capt.getAllValues().get(0).getURI().toASCIIString());
 	}
+
+	@Test
+	public void testOperationReturningArbitraryBinaryContentTextual_ReturnResourceType() throws Exception {
+		IParser p = ourCtx.newXmlParser();
+
+		Parameters inputParams = new Parameters();
+		inputParams.addParameter().setName("name").setValue(new BooleanType(true));
+
+		final String respString = "<html>VALUE</html>";
+		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
+		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
+		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", "text/html"));
+		when(myHttpResponse.getEntity().getContent()).thenAnswer(t -> new ReaderInputStream(new StringReader(respString), StandardCharsets.UTF_8));
+		when(myHttpResponse.getAllHeaders()).thenReturn(new Header[]{
+			new BasicHeader("content-type", "text/html")
+		});
+
+		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
+
+		Binary binary = client
+			.operation()
+			.onServer()
+			.named("opname")
+			.withParameters(inputParams)
+			.returnResourceType(Binary.class)
+			.execute();
+
+		assertEquals(respString, new String(binary.getContent(), Charsets.UTF_8));
+		assertEquals("text/html", binary.getContentType());
+
+		assertEquals("http://example.com/fhir/$opname", capt.getAllValues().get(0).getURI().toASCIIString());
+	}
+
 
 	/**
 	 * Invoke an operation that returns HTML

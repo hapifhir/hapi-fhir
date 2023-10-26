@@ -19,9 +19,6 @@
  */
 package ca.uhn.fhir.rest.client.impl;
 
-import ca.uhn.fhir.rest.client.api.IBasicClient;
-import ca.uhn.fhir.rest.client.api.IClientInterceptor;
-import ca.uhn.fhir.rest.client.api.IGenericClient;
 import org.apache.http.HttpException;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpRequestInterceptor;
@@ -35,9 +32,10 @@ import org.apache.http.protocol.HttpContext;
 import java.io.IOException;
 
 /**
- * @deprecated Use {@link ca.uhn.fhir.rest.client.interceptor.BasicAuthInterceptor} instead. Note that BasicAuthInterceptor class is a HAPI client interceptor instead of being a commons-httpclient interceptor, so you register it to your client instance once it's created using {@link IGenericClient#registerInterceptor(IClientInterceptor)} or {@link IBasicClient#registerInterceptor(IClientInterceptor)} instead
+ * Apache HTTPClient interceptor which adds basic auth
+ *
+ * @see ca.uhn.fhir.rest.client.interceptor.BasicAuthInterceptor A HAPI FHIR interceptor that is generally easier to use
  */
-@Deprecated
 public class HttpBasicAuthInterceptor implements HttpRequestInterceptor {
 
 	private String myUsername;

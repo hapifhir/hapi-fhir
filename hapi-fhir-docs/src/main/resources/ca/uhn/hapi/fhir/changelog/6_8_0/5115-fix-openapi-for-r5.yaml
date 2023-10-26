@@ -1,0 +1,4 @@
+---
+type: add
+issue: 5115
+title: "OpenAPI definitions were not working for R5 JPA servers. This has been corrected."

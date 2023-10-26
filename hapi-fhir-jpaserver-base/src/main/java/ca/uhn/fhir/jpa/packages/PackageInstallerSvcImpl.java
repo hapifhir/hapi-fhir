@@ -44,6 +44,7 @@ import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.UriParam;
+import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.SearchParameterUtil;
 import com.google.common.annotations.VisibleForTesting;
@@ -53,6 +54,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.Identifier;
+import org.hl7.fhir.r4.model.MetadataResource;
 import org.hl7.fhir.utilities.json.model.JsonObject;
 import org.hl7.fhir.utilities.npm.IPackageCacheManager;
 import org.hl7.fhir.utilities.npm.NpmPackage;
@@ -342,7 +344,8 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 	/**
 	 * ============================= Utility methods ===============================
 	 */
-	private void create(
+	@VisibleForTesting
+	void create(
 			IBaseResource theResource,
 			PackageInstallationSpec theInstallationSpec,
 			PackageInstallOutcomeJson theOutcome) {
@@ -365,8 +368,30 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 						String newIdPart = "npm-" + id.getIdPart();
 						id.setParts(id.getBaseUrl(), id.getResourceType(), newIdPart, id.getVersionIdPart());
 					}
-					updateResource(dao, theResource);
-					ourLog.info("Created resource with existing id");
+
+					try {
+						updateResource(dao, theResource);
+
+						ourLog.info("Created resource with existing id");
+					} catch (ResourceVersionConflictException exception) {
+						final Optional<IBaseResource> optResource = readResourceById(dao, id);
+
+						final String existingResourceUrlOrNull = optResource
+								.filter(MetadataResource.class::isInstance)
+								.map(MetadataResource.class::cast)
+								.map(MetadataResource::getUrl)
+								.orElse(null);
+						final String newResourceUrlOrNull = (theResource instanceof MetadataResource)
+								? ((MetadataResource) theResource).getUrl()
+								: null;
+
+						ourLog.error(
+								"Version conflict error:  This is possibly due to a collision between ValueSets from different IGs that are coincidentally using the same resource ID: [{}] and new resource URL: [{}], with the exisitng resource having URL: [{}].  Ignoring this update and continuing:  The first IG wins.  ",
+								id.getIdPart(),
+								newResourceUrlOrNull,
+								existingResourceUrlOrNull,
+								exception);
+					}
 				}
 			} else {
 				if (theInstallationSpec.isReloadExisting()) {
@@ -392,6 +417,18 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 					theResource.fhirType(),
 					theResource.getIdElement().getValue());
 		}
+	}
+
+	private Optional<IBaseResource> readResourceById(IFhirResourceDao dao, IIdType id) {
+		try {
+			return Optional.ofNullable(dao.read(id.toUnqualifiedVersionless(), newSystemRequestDetails()));
+
+		} catch (Exception exception) {
+			// ignore because we're running this query to help build the log
+			ourLog.warn("Exception when trying to read resource with ID: {}, message: {}", id, exception.getMessage());
+		}
+
+		return Optional.empty();
 	}
 
 	private IBundleProvider searchResource(IFhirResourceDao theDao, SearchParameterMap theMap) {

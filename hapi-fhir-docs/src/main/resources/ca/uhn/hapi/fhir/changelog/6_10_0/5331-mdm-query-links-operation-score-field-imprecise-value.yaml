@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 5331
+title: "Previously, the score field returned by $mdm-query-links operation would contain imprecise decimal values. This 
+is now fixed and rounded to 4 decimal places."

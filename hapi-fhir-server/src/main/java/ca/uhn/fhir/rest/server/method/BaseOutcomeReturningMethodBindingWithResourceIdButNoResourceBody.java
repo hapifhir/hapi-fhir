@@ -28,6 +28,8 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import java.lang.reflect.Method;
 
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+
 public abstract class BaseOutcomeReturningMethodBindingWithResourceIdButNoResourceBody
 		extends BaseOutcomeReturningMethodBinding {
 
@@ -39,13 +41,16 @@ public abstract class BaseOutcomeReturningMethodBindingWithResourceIdButNoResour
 			FhirContext theContext,
 			Object theProvider,
 			Class<?> theMethodAnnotationType,
-			Class<? extends IBaseResource> theResourceTypeFromAnnotation) {
+			Class<? extends IBaseResource> theResourceTypeFromAnnotation,
+			String theResourceTypeNameFromAnnotation) {
 		super(theMethod, theContext, theMethodAnnotationType, theProvider);
 
 		Class<? extends IBaseResource> resourceType = theResourceTypeFromAnnotation;
 		if (resourceType != IBaseResource.class) {
 			RuntimeResourceDefinition def = theContext.getResourceDefinition(resourceType);
 			myResourceName = def.getName();
+		} else if (isNotBlank(theResourceTypeNameFromAnnotation)) {
+			myResourceName = theResourceTypeNameFromAnnotation;
 		} else {
 			if (theProvider != null && theProvider instanceof IResourceProvider) {
 				RuntimeResourceDefinition def =
@@ -56,7 +61,7 @@ public abstract class BaseOutcomeReturningMethodBindingWithResourceIdButNoResour
 						Msg.code(457) + "Can not determine resource type for method '" + theMethod.getName()
 								+ "' on type " + theMethod.getDeclaringClass().getCanonicalName()
 								+ " - Did you forget to include the resourceType() value on the @"
-								+ Delete.class.getSimpleName() + " method annotation?");
+								+ theMethodAnnotationType.getSimpleName() + " method annotation?");
 			}
 		}
 

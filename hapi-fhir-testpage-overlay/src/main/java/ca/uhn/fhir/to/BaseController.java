@@ -101,7 +101,7 @@ public class BaseController {
 		return retVal.toArray(new Header[retVal.size()]);
 	}
 
-	private String format(String theResultBody, EncodingEnum theEncodingEnum) {
+	private static String format(String theResultBody, EncodingEnum theEncodingEnum) {
 		String str = StringEscapeUtils.escapeHtml4(theResultBody);
 		if (str == null || theEncodingEnum == null) {
 			return str;
@@ -402,6 +402,11 @@ public class BaseController {
 		theModel.put("requiredParamExtension", ExtensionConstants.PARAM_IS_REQUIRED);
 
 		theModel.put("conf", capabilityStatement);
+
+		boolean supportsHfql = capabilityStatement.getRestFirstRep().getOperation().stream()
+				.anyMatch(t -> "hfql-execute".equals(t.getName()));
+		theModel.put("supportsHfql", supportsHfql);
+
 		return capabilityStatement;
 	}
 
@@ -578,7 +583,7 @@ public class BaseController {
 			theModelMap.put("resultBodyIsLong", resultBodyText.length() > 1000);
 			theModelMap.put("requestHeaders", requestHeaders);
 			theModelMap.put("responseHeaders", responseHeaders);
-			theModelMap.put("narrative", NarrativeUtil.sanitize(narrativeString));
+			theModelMap.put("narrative", NarrativeUtil.sanitizeHtmlFragment(narrativeString));
 			theModelMap.put("latencyMs", theLatency);
 
 			theModelMap.put("config", myConfig);
@@ -695,5 +700,9 @@ public class BaseController {
 			}
 		}
 		return retVal;
+	}
+
+	public static String formatAsJson(String theInput) {
+		return format(defaultString(theInput), EncodingEnum.JSON);
 	}
 }

@@ -28,6 +28,7 @@ import ca.uhn.fhir.jpa.migrate.taskdef.ArbitrarySqlTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.CalculateHashesTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.CalculateOrdinalDatesTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.ColumnTypeEnum;
+import ca.uhn.fhir.jpa.migrate.taskdef.ForceIdMigrationCopyTask;
 import ca.uhn.fhir.jpa.migrate.tasks.api.BaseMigrationTasks;
 import ca.uhn.fhir.jpa.migrate.tasks.api.Builder;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
@@ -93,6 +94,36 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		init640_after_20230126();
 		init660();
 		init680();
+		init700();
+	}
+
+	protected void init700() {
+		Builder version = forVersion(VersionEnum.V7_0_0);
+
+		// new indices on MdmLink
+		Builder.BuilderWithTableName mdmLinkTable = version.onTable("MPI_LINK");
+
+		mdmLinkTable
+				.addIndex("20230911.1", "IDX_EMPI_TGT_MR_LS")
+				.unique(false)
+				.withColumns("TARGET_TYPE", "MATCH_RESULT", "LINK_SOURCE");
+		mdmLinkTable
+				.addIndex("20230911.2", "IDX_EMPi_TGT_MR_SCore")
+				.unique(false)
+				.withColumns("TARGET_TYPE", "MATCH_RESULT", "SCORE");
+
+		// Move forced_id constraints to hfj_resource and the new fhir_id column
+		// Note: we leave the HFJ_FORCED_ID.IDX_FORCEDID_TYPE_FID index in place to support old writers for a while.
+		version.addTask(new ForceIdMigrationCopyTask(version.getRelease(), "20231018.1"));
+
+		Builder.BuilderWithTableName hfjResource = version.onTable("HFJ_RESOURCE");
+		hfjResource.modifyColumn("20231018.2", "FHIR_ID").nonNullable();
+		hfjResource
+				.addIndex("20231018.3", "IDX_RES_FHIR_ID")
+				.unique(true)
+				.online(true)
+				.includeColumns("RES_ID")
+				.withColumns("FHIR_ID", "RES_TYPE");
 	}
 
 	protected void init680() {
@@ -126,8 +157,13 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 				.withColumns("RES_VER_PID")
 				.failureAllowed();
 
+		// drop the index for any database that has RES_PID column already indexed from previous migrations
 		version.onTable("HFJ_RES_VER_PROV")
-				.addIndex("20230510.2", "IDX_RESVERPROV_RES_PID")
+				.dropIndex("20230510.2", "FK_RESVERPROV_RES_PID")
+				.failureAllowed();
+
+		version.onTable("HFJ_RES_VER_PROV")
+				.addIndex("20230510.3", "IDX_RESVERPROV_RES_PID")
 				.unique(false)
 				.withColumns("RES_PID");
 
@@ -430,6 +466,16 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			empiLink.addForeignKey("20230306.7", "FKAOW7NXNCLOEC419ARS0FPP58M")
 					.toColumn(revColumnName)
 					.references(enversRevisionTable, revColumnName);
+		}
+
+		{
+			Builder.BuilderAddTableByColumns resourceModifiedTable =
+					version.addTableByColumns("20230315.1", "HFJ_RESOURCE_MODIFIED", "RES_ID", "RES_VER");
+			resourceModifiedTable.addColumn("RES_ID").nonNullable().type(ColumnTypeEnum.STRING, 256);
+			resourceModifiedTable.addColumn("RES_VER").nonNullable().type(ColumnTypeEnum.STRING, 8);
+			resourceModifiedTable.addColumn("CREATED_TIME").nonNullable().type(ColumnTypeEnum.DATE_TIMESTAMP);
+			resourceModifiedTable.addColumn("SUMMARY_MESSAGE").nonNullable().type(ColumnTypeEnum.STRING, 4000);
+			resourceModifiedTable.addColumn("RESOURCE_TYPE").nonNullable().type(ColumnTypeEnum.STRING, 40);
 		}
 
 		{

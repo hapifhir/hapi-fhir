@@ -1,0 +1,7 @@
+---
+type: add
+issue: 5080
+title: "Extended the existing MDM similarity algorithms to numeric values such that the input is normalized 
+by removing all non-numeric characters from the string before the similarity algorithm is applied. This can 
+be useful when wanting to measure similarity between identifying numbers or phone numbers where dashes or 
+other special separating characters may be used."

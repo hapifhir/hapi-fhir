@@ -54,7 +54,8 @@ public class PatchMethodBinding extends BaseOutcomeReturningMethodBindingWithRes
 				theContext,
 				theProvider,
 				Patch.class,
-				theMethod.getAnnotation(Patch.class).type());
+				theMethod.getAnnotation(Patch.class).type(),
+				theMethod.getAnnotation(Patch.class).typeName());
 
 		for (ListIterator<Class<?>> iter =
 						Arrays.asList(theMethod.getParameterTypes()).listIterator();

@@ -21,10 +21,13 @@ package ca.uhn.fhir.jpa.mdm.svc;
 
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.mdm.api.IMdmLink;
-import ca.uhn.fhir.mdm.api.MdmLinkJson;
 import ca.uhn.fhir.mdm.api.MdmLinkWithRevision;
-import ca.uhn.fhir.mdm.api.MdmLinkWithRevisionJson;
+import ca.uhn.fhir.mdm.model.mdmevents.MdmLinkJson;
+import ca.uhn.fhir.mdm.model.mdmevents.MdmLinkWithRevisionJson;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 
 public class MdmModelConverterSvcImpl implements IMdmModelConverterSvc {
 
@@ -49,9 +52,13 @@ public class MdmModelConverterSvcImpl implements IMdmModelConverterSvc {
 		retVal.setLinkSource(theLink.getLinkSource());
 		retVal.setMatchResult(theLink.getMatchResult());
 		retVal.setLinkCreatedNewResource(theLink.getHadToCreateNewGoldenResource());
-		retVal.setScore(theLink.getScore());
+		Double score = theLink.getScore() == null
+				? null
+				: BigDecimal.valueOf(theLink.getScore())
+						.setScale(4, RoundingMode.HALF_UP)
+						.doubleValue();
+		retVal.setScore(score);
 		retVal.setUpdated(theLink.getUpdated());
-		retVal.setVector(theLink.getVector());
 		retVal.setVersion(theLink.getVersion());
 		retVal.setRuleCount(theLink.getRuleCount());
 		return retVal;

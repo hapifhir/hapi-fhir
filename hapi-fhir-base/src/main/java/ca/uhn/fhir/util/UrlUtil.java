@@ -40,6 +40,8 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLDecoder;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -577,8 +579,8 @@ public class UrlUtil {
 			matchUrl = matchUrl.substring(questionMarkIndex + 1);
 		}
 
-		final String[] searchList = new String[] {"+", "|", "=>=", "=<=", "=>", "=<"};
-		final String[] replacementList = new String[] {"%2B", "%7C", "=%3E%3D", "=%3C%3D", "=%3E", "=%3C"};
+		final String[] searchList = new String[] {"|", "=>=", "=<=", "=>", "=<"};
+		final String[] replacementList = new String[] {"%7C", "=%3E%3D", "=%3C%3D", "=%3E", "=%3C"};
 		matchUrl = StringUtils.replaceEach(matchUrl, searchList, replacementList);
 		if (matchUrl.contains(" ")) {
 			throw new InvalidRequestException(Msg.code(1744) + "Failed to parse match URL[" + theMatchUrl
@@ -600,6 +602,39 @@ public class UrlUtil {
 		}
 
 		return parameters;
+	}
+
+	/**
+	 * Creates list of sub URIs candidates for search with :above modifier
+	 * Example input: http://[host]/[pathPart1]/[pathPart2]
+	 * Example output: http://[host], http://[host]/[pathPart1], http://[host]/[pathPart1]/[pathPart2]
+	 *
+	 * @param theUri String URI parameter
+	 * @return List of URI candidates
+	 */
+	public static List<String> getAboveUriCandidates(String theUri) {
+		try {
+			URI uri = new URI(theUri);
+			if (uri.getScheme() == null || uri.getHost() == null) {
+				throwInvalidRequestExceptionForNotValidUri(theUri, null);
+			}
+		} catch (URISyntaxException theCause) {
+			throwInvalidRequestExceptionForNotValidUri(theUri, theCause);
+		}
+
+		List<String> candidates = new ArrayList<>();
+		Path path = Paths.get(theUri);
+		candidates.add(path.toString().replace(":/", "://"));
+		while (path.getParent() != null && path.getParent().toString().contains("/")) {
+			candidates.add(path.getParent().toString().replace(":/", "://"));
+			path = path.getParent();
+		}
+		return candidates;
+	}
+
+	private static void throwInvalidRequestExceptionForNotValidUri(String theUri, Exception theCause) {
+		throw new InvalidRequestException(
+				Msg.code(2419) + String.format("Provided URI is not valid: %s", theUri), theCause);
 	}
 
 	public static class UrlParts {

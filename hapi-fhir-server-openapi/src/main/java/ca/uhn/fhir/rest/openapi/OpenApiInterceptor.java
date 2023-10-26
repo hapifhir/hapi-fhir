@@ -64,6 +64,7 @@ import org.hl7.fhir.convertors.factory.VersionConvertorFactory_43_50;
 import org.hl7.fhir.instance.model.api.IBaseConformance;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.CapabilityStatement;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
@@ -91,13 +92,14 @@ import org.thymeleaf.templatemode.TemplateMode;
 import org.thymeleaf.templateresolver.ITemplateResolver;
 import org.thymeleaf.templateresolver.TemplateResolution;
 import org.thymeleaf.templateresource.ClassLoaderTemplateResource;
+import org.thymeleaf.web.servlet.IServletWebExchange;
+import org.thymeleaf.web.servlet.JavaxServletWebApplication;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -107,10 +109,12 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
+import javax.annotation.Nonnull;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import static ca.uhn.fhir.rest.server.util.NarrativeUtil.sanitizeHtmlFragment;
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -335,7 +339,10 @@ public class OpenApiInterceptor {
 
 		HttpServletRequest servletRequest = theRequestDetails.getServletRequest();
 		ServletContext servletContext = servletRequest.getServletContext();
-		WebContext context = new WebContext(servletRequest, theResponse, servletContext);
+
+		JavaxServletWebApplication application = JavaxServletWebApplication.buildApplication(servletContext);
+		IServletWebExchange exchange = application.buildExchange(servletRequest, theResponse);
+		WebContext context = new WebContext(exchange);
 		context.setVariable(REQUEST_DETAILS, theRequestDetails);
 		context.setVariable("DESCRIPTION", cs.getImplementation().getDescription());
 		context.setVariable("SERVER_NAME", cs.getSoftware().getName());
@@ -352,7 +359,7 @@ public class OpenApiInterceptor {
 
 		String copyright = cs.getCopyright();
 		if (isNotBlank(copyright)) {
-			copyright = myFlexmarkRenderer.render(myFlexmarkParser.parse(copyright));
+			copyright = renderMarkdown(copyright);
 			context.setVariable("COPYRIGHT_HTML", copyright);
 		}
 
@@ -405,6 +412,11 @@ public class OpenApiInterceptor {
 
 		theResponse.getWriter().write(outcome);
 		theResponse.getWriter().close();
+	}
+
+	@Nonnull
+	private String renderMarkdown(String copyright) {
+		return myFlexmarkRenderer.render(myFlexmarkParser.parse(copyright));
 	}
 
 	protected void populateOIDCVariables(ServletRequestDetails theRequestDetails, WebContext theContext) {
@@ -511,7 +523,7 @@ public class OpenApiInterceptor {
 
 			Tag resourceTag = new Tag();
 			resourceTag.setName(resourceType);
-			resourceTag.setDescription("The " + resourceType + " FHIR resource type");
+			resourceTag.setDescription(createResourceDescription(nextResource));
 			openApi.addTagsItem(resourceTag);
 
 			// Instance Read
@@ -618,6 +630,36 @@ public class OpenApiInterceptor {
 		}
 
 		return openApi;
+	}
+
+	@Nonnull
+	protected String createResourceDescription(
+			CapabilityStatement.CapabilityStatementRestResourceComponent theResource) {
+		StringBuilder b = new StringBuilder();
+		b.append("The ").append(theResource.getType()).append(" FHIR resource type");
+
+		String documentation = theResource.getDocumentation();
+		if (isNotBlank(documentation)) {
+			b.append("<br/>");
+			b.append(sanitizeHtmlFragment(renderMarkdown(documentation)));
+		}
+
+		if (isNotBlank(theResource.getProfile())) {
+			b.append("<br/>");
+			b.append("Base profile: ");
+			b.append(sanitizeHtmlFragment(theResource.getProfile()));
+		}
+
+		for (CanonicalType next : theResource.getSupportedProfile()) {
+			String nextSupportedProfile = next.getValueAsString();
+			if (isNotBlank(nextSupportedProfile)) {
+				b.append("<br/>");
+				b.append("Supported profile: ");
+				b.append(sanitizeHtmlFragment(nextSupportedProfile));
+			}
+		}
+
+		return b.toString();
 	}
 
 	protected void addSearchOperation(
@@ -772,7 +814,7 @@ public class OpenApiInterceptor {
 		}
 	}
 
-	private static List<String> primitiveTypes = Arrays.asList(
+	private static final List<String> primitiveTypes = List.of(
 			DataTypes.BOOLEAN.toCode(),
 			DataTypes.INTEGER.toCode(),
 			DataTypes.STRING.toCode(),
@@ -796,7 +838,7 @@ public class OpenApiInterceptor {
 			DataTypes.UUID.toCode());
 
 	private static boolean isPrimitive(OperationDefinitionParameterComponent parameter) {
-		return primitiveTypes.contains(parameter.getType());
+		return parameter.getType() != null && primitiveTypes.contains(parameter.getType());
 	}
 
 	private void populateOperation(
@@ -907,11 +949,13 @@ public class OpenApiInterceptor {
 						break;
 					case "Resource":
 						if (theResourceType != null) {
-							IBaseResource resource = FHIR_CONTEXT_CANONICAL
-									.getResourceDefinition(theResourceType)
-									.newInstance();
-							resource.setId("1");
-							param.setResource((Resource) resource);
+							if (FHIR_CONTEXT_CANONICAL.getResourceTypes().contains(theResourceType)) {
+								IBaseResource resource = FHIR_CONTEXT_CANONICAL
+										.getResourceDefinition(theResourceType)
+										.newInstance();
+								resource.setId("1");
+								param.setResource((Resource) resource);
+							}
 						}
 						break;
 				}
@@ -1001,7 +1045,7 @@ public class OpenApiInterceptor {
 		}
 		return () -> {
 			IBaseResource example = null;
-			if (theResourceType != null) {
+			if (theResourceType != null && theFhirContext.getResourceTypes().contains(theResourceType)) {
 				example = theFhirContext.getResourceDefinition(theResourceType).newInstance();
 			}
 			return example;

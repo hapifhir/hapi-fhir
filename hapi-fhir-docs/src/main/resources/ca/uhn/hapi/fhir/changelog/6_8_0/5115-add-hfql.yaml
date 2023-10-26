@@ -1,0 +1,5 @@
+---
+type: add
+issue: 5115
+title: "A new experimental SQL-like query syntax called HFQL (HAPI FHIR Query Language)
+   has been added."

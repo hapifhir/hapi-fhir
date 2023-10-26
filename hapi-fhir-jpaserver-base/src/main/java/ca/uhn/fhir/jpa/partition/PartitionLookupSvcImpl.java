@@ -29,18 +29,14 @@ import ca.uhn.fhir.jpa.dao.data.IPartitionDao;
 import ca.uhn.fhir.jpa.entity.PartitionEntity;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
+import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
-import ca.uhn.fhir.sl.cache.CacheFactory;
-import ca.uhn.fhir.sl.cache.CacheLoader;
-import ca.uhn.fhir.sl.cache.LoadingCache;
 import ca.uhn.fhir.util.ICallable;
 import org.apache.commons.lang3.Validate;
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,8 +47,8 @@ import org.springframework.transaction.support.TransactionTemplate;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
-import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 import javax.annotation.PostConstruct;
 
@@ -72,8 +68,8 @@ public class PartitionLookupSvcImpl implements IPartitionLookupSvc {
 	@Autowired
 	private IPartitionDao myPartitionDao;
 
-	private LoadingCache<String, PartitionEntity> myNameToPartitionCache;
-	private LoadingCache<Integer, PartitionEntity> myIdToPartitionCache;
+	@Autowired
+	private MemoryCacheService myMemoryCacheService;
 
 	@Autowired
 	private FhirContext myFhirCtx;
@@ -93,8 +89,6 @@ public class PartitionLookupSvcImpl implements IPartitionLookupSvc {
 	@Override
 	@PostConstruct
 	public void start() {
-		myNameToPartitionCache = CacheFactory.build(TimeUnit.MINUTES.toMillis(1), new NameToPartitionCacheLoader());
-		myIdToPartitionCache = CacheFactory.build(TimeUnit.MINUTES.toMillis(1), new IdToPartitionCacheLoader());
 		myTxTemplate = new TransactionTemplate(myTxManager);
 	}
 
@@ -105,7 +99,8 @@ public class PartitionLookupSvcImpl implements IPartitionLookupSvc {
 		if (JpaConstants.DEFAULT_PARTITION_NAME.equals(theName)) {
 			return null;
 		}
-		return myNameToPartitionCache.get(theName);
+		return myMemoryCacheService.get(
+				MemoryCacheService.CacheEnum.NAME_TO_PARTITION, theName, this::lookupPartitionByName);
 	}
 
 	@Override
@@ -118,13 +113,14 @@ public class PartitionLookupSvcImpl implements IPartitionLookupSvc {
 				&& myPartitionSettings.getDefaultPartitionId().equals(thePartitionId)) {
 			return new PartitionEntity().setId(thePartitionId).setName(JpaConstants.DEFAULT_PARTITION_NAME);
 		}
-		return myIdToPartitionCache.get(thePartitionId);
+		return myMemoryCacheService.get(
+				MemoryCacheService.CacheEnum.ID_TO_PARTITION, thePartitionId, this::lookupPartitionById);
 	}
 
 	@Override
-	public void clearCaches() {
-		myNameToPartitionCache.invalidateAll();
-		myIdToPartitionCache.invalidateAll();
+	public void invalidateCaches() {
+		myMemoryCacheService.invalidateCaches(
+				MemoryCacheService.CacheEnum.NAME_TO_PARTITION, MemoryCacheService.CacheEnum.ID_TO_PARTITION);
 	}
 
 	/**
@@ -187,7 +183,7 @@ public class PartitionLookupSvcImpl implements IPartitionLookupSvc {
 		existingPartition.setName(thePartition.getName());
 		existingPartition.setDescription(thePartition.getDescription());
 		myPartitionDao.save(existingPartition);
-		clearCaches();
+		invalidateCaches();
 		return existingPartition;
 	}
 
@@ -207,7 +203,7 @@ public class PartitionLookupSvcImpl implements IPartitionLookupSvc {
 
 		myPartitionDao.delete(partition.get());
 
-		clearCaches();
+		invalidateCaches();
 	}
 
 	@Override
@@ -270,32 +266,25 @@ public class PartitionLookupSvcImpl implements IPartitionLookupSvc {
 	}
 
 	private PartitionEntity lookupPartitionById(@Nonnull Integer theId) {
-		return executeInTransaction(() -> myPartitionDao.findById(theId)).orElseThrow(() -> {
-			String msg = myFhirCtx
-					.getLocalizer()
-					.getMessageSanitized(PartitionLookupSvcImpl.class, "unknownPartitionId", theId);
-			return new ResourceNotFoundException(msg);
-		});
+		try {
+			return executeInTransaction(() -> myPartitionDao.findById(theId)).orElseThrow(() -> {
+				String msg = myFhirCtx
+						.getLocalizer()
+						.getMessageSanitized(PartitionLookupSvcImpl.class, "unknownPartitionId", theId);
+				return new ResourceNotFoundException(msg);
+			});
+		} catch (ResourceNotFoundException e) {
+			List<PartitionEntity> allPartitions = executeInTransaction(() -> myPartitionDao.findAll());
+			String allPartitionsString = allPartitions.stream()
+					.map(t -> t.getId() + "/" + t.getName())
+					.collect(Collectors.joining(", "));
+			ourLog.warn("Failed to find partition with ID {}.  Current partitions: {}", theId, allPartitionsString);
+			throw e;
+		}
 	}
 
 	protected <T> T executeInTransaction(ICallable<T> theCallable) {
 		return myTxTemplate.execute(tx -> theCallable.call());
-	}
-
-	private class NameToPartitionCacheLoader implements @NonNull CacheLoader<String, PartitionEntity> {
-		@Nullable
-		@Override
-		public PartitionEntity load(@NonNull String theName) {
-			return lookupPartitionByName(theName);
-		}
-	}
-
-	private class IdToPartitionCacheLoader implements @NonNull CacheLoader<Integer, PartitionEntity> {
-		@Nullable
-		@Override
-		public PartitionEntity load(@NonNull Integer theId) {
-			return lookupPartitionById(theId);
-		}
 	}
 
 	public static void validatePartitionIdSupplied(FhirContext theFhirContext, Integer thePartitionId) {

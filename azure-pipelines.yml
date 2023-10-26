@@ -59,6 +59,8 @@ stages:
                      module: hapi-fhir-jpaserver-elastic-test-utilities
                   -  name: hapi_fhir_jpaserver_ips
                      module: hapi-fhir-jpaserver-ips
+                  -  name: hapi_fhir_jpaserver_hfql
+                     module: hapi-fhir-jpaserver-hfql
                   -  name: hapi_fhir_jpaserver_mdm
                      module: hapi-fhir-jpaserver-mdm
                   -  name: hapi_fhir_jpaserver_model

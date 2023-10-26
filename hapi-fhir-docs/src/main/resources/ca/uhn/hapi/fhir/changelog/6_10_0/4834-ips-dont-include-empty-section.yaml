@@ -1,0 +1,11 @@
+---
+type: change
+issue: 4834
+title: "Several enhancements were made to the IPS generator:<ul>
+<li>Generated IPS documents will no longer include sections that contain no contents.</li>
+<li>NarrativeLink extensions now use the correct datatype (url instead of uri)</li>
+<li>Section profile URLs have been updated to no longer use an unknown URL</li>
+<li>Some resources added to the generated IPS did not have their FHIR server IDs replaced with a placeholder UUID.</li>
+<li>Immunization manufacturer was not fetched from the server</li>
+</ul>
+Thanks to Rio Bennin for all of the feedback!"

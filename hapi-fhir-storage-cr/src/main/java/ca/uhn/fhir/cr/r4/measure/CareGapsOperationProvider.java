@@ -19,6 +19,8 @@
  */
 package ca.uhn.fhir.cr.r4.measure;
 
+import ca.uhn.fhir.cr.common.IRepositoryFactory;
+import ca.uhn.fhir.cr.r4.ICareGapsServiceFactory;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
@@ -29,19 +31,19 @@ import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.Parameters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Date;
 import java.util.List;
-import java.util.function.Function;
 
 public class CareGapsOperationProvider {
 	private static final Logger ourLog = LoggerFactory.getLogger(CareGapsOperationProvider.class);
 
-	Function<RequestDetails, CareGapsService> myCareGapsServiceFunction;
+	@Autowired
+	IRepositoryFactory myRepositoryFactory;
 
-	public CareGapsOperationProvider(Function<RequestDetails, CareGapsService> theCareGapsServiceFunction) {
-		this.myCareGapsServiceFunction = theCareGapsServiceFunction;
-	}
+	@Autowired
+	ICareGapsServiceFactory myR4CareGapsProcessorFactory;
 
 	/**
 	 * Implements the <a href=
@@ -110,8 +112,8 @@ public class CareGapsOperationProvider {
 			@OperationParam(name = "measureUrl") List<CanonicalType> theMeasureUrl,
 			@OperationParam(name = "program") List<String> theProgram) {
 
-		return myCareGapsServiceFunction
-				.apply(theRequestDetails)
+		return myR4CareGapsProcessorFactory
+				.create(theRequestDetails)
 				.getCareGapsReport(
 						thePeriodStart,
 						thePeriodEnd,

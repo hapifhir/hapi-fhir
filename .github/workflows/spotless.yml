@@ -6,7 +6,7 @@ on:
     types: [opened, reopened, synchronize]
 
 jobs:
-  build:
+  format-check:
     runs-on: ubuntu-latest
     permissions:
        pull-requests: write

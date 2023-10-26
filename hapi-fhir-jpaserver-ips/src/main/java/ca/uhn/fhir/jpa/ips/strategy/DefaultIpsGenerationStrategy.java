@@ -24,6 +24,8 @@ import ca.uhn.fhir.jpa.ips.api.IpsContext;
 import ca.uhn.fhir.jpa.ips.api.SectionRegistry;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.api.Include;
+import ca.uhn.fhir.rest.api.SortOrderEnum;
+import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import com.google.common.collect.Lists;
@@ -109,11 +111,13 @@ public class DefaultIpsGenerationStrategy implements IIpsGenerationStrategy {
 		switch (theIpsSectionContext.getSection()) {
 			case ALLERGY_INTOLERANCE:
 			case PROBLEM_LIST:
-			case IMMUNIZATIONS:
 			case PROCEDURES:
 			case MEDICAL_DEVICES:
 			case ILLNESS_HISTORY:
 			case FUNCTIONAL_STATUS:
+				return;
+			case IMMUNIZATIONS:
+				theSearchParameterMap.setSort(new SortSpec(Immunization.SP_DATE).setOrder(SortOrderEnum.DESC));
 				return;
 			case VITAL_SIGNS:
 				if (theIpsSectionContext.getResourceType().equals(ResourceType.Observation.name())) {
@@ -293,9 +297,13 @@ public class DefaultIpsGenerationStrategy implements IIpsGenerationStrategy {
 					return Sets.newHashSet(DeviceUseStatement.INCLUDE_DEVICE);
 				}
 				break;
+			case IMMUNIZATIONS:
+				if (ResourceType.Immunization.name().equals(theIpsSectionContext.getResourceType())) {
+					return Sets.newHashSet(Immunization.INCLUDE_MANUFACTURER);
+				}
+				break;
 			case ALLERGY_INTOLERANCE:
 			case PROBLEM_LIST:
-			case IMMUNIZATIONS:
 			case PROCEDURES:
 			case DIAGNOSTIC_RESULTS:
 			case VITAL_SIGNS:

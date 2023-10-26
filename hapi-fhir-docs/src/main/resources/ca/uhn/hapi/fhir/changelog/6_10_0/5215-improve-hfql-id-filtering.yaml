@@ -1,0 +1,5 @@
+---
+type: perf
+issue: 5215
+title: "When executing an HFQL search with a FHIRPath filter on the `id` element, this will now
+  be automatically converted into an `_id` search parameter match for better performance."

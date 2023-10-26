@@ -117,6 +117,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -1854,14 +1855,23 @@ public class QueryStack {
 			throw new InvalidRequestException(Msg.code(1216) + msg);
 		}
 
-		SourcePredicateBuilder join = createOrReusePredicateBuilder(
-						PredicateBuilderTypeEnum.SOURCE,
-						theSourceJoinColumn,
-						Constants.PARAM_SOURCE,
-						() -> mySqlBuilder.addSourcePredicateBuilder(theSourceJoinColumn))
-				.getResult();
-
 		List<Condition> orPredicates = new ArrayList<>();
+
+		// :missing=true modifier processing requires "LEFT JOIN" with HFJ_RESOURCE table to return correct results
+		// if both sourceUri and requestId are not populated for the resource
+		Optional<? extends IQueryParameterType> isMissingSourceOptional = theList.stream()
+				.filter(nextParameter -> nextParameter.getMissing() != null && nextParameter.getMissing())
+				.findFirst();
+
+		if (isMissingSourceOptional.isPresent()) {
+			SourcePredicateBuilder join =
+					getSourcePredicateBuilder(theSourceJoinColumn, SelectQuery.JoinType.LEFT_OUTER);
+			orPredicates.add(join.createPredicateMissingSourceUri());
+			return toOrPredicate(orPredicates);
+		}
+		// for all other cases we use "INNER JOIN" to match search parameters
+		SourcePredicateBuilder join = getSourcePredicateBuilder(theSourceJoinColumn, SelectQuery.JoinType.INNER);
+
 		for (IQueryParameterType nextParameter : theList) {
 			SourceParam sourceParameter = new SourceParam(nextParameter.getValueAsQueryToken(myFhirContext));
 			String sourceUri = sourceParameter.getSourceUri();
@@ -1870,13 +1880,24 @@ public class QueryStack {
 				orPredicates.add(toAndPredicate(
 						join.createPredicateSourceUri(sourceUri), join.createPredicateRequestId(requestId)));
 			} else if (isNotBlank(sourceUri)) {
-				orPredicates.add(join.createPredicateSourceUri(sourceUri));
+				orPredicates.add(
+						join.createPredicateSourceUriWithModifiers(nextParameter, myStorageSettings, sourceUri));
 			} else if (isNotBlank(requestId)) {
 				orPredicates.add(join.createPredicateRequestId(requestId));
 			}
 		}
 
 		return toOrPredicate(orPredicates);
+	}
+
+	private SourcePredicateBuilder getSourcePredicateBuilder(
+			@Nullable DbColumn theSourceJoinColumn, SelectQuery.JoinType theJoinType) {
+		return createOrReusePredicateBuilder(
+						PredicateBuilderTypeEnum.SOURCE,
+						theSourceJoinColumn,
+						Constants.PARAM_SOURCE,
+						() -> mySqlBuilder.addSourcePredicateBuilder(theSourceJoinColumn, theJoinType))
+				.getResult();
 	}
 
 	public Condition createPredicateString(
@@ -2559,7 +2580,7 @@ public class QueryStack {
 						mySearchParamRegistry.getActiveSearchParam(theResourceName, fullName);
 				if (fullChainParam != null) {
 					List<IQueryParameterType> swappedParamTypes = nextAnd.stream()
-							.map(t -> toParameterType(fullChainParam, null, t.getValueAsQueryToken(myFhirContext)))
+							.map(t -> newParameterInstance(fullChainParam, null, t.getValueAsQueryToken(myFhirContext)))
 							.collect(Collectors.toList());
 					List<List<IQueryParameterType>> params = List.of(swappedParamTypes);
 					Condition predicate = createPredicateSearchParameter(
@@ -2658,17 +2679,18 @@ public class QueryStack {
 		Condition predicate =
 				table.createEverythingPredicate(theResourceName, theTypeSourceResourceNames, theTargetPids);
 		mySqlBuilder.addPredicate(predicate);
+		mySqlBuilder.getSelect().setIsDistinct(true);
 	}
 
-	public IQueryParameterType toParameterType(
+	public IQueryParameterType newParameterInstance(
 			RuntimeSearchParam theParam, String theQualifier, String theValueAsQueryToken) {
-		IQueryParameterType qp = toParameterType(theParam);
+		IQueryParameterType qp = newParameterInstance(theParam);
 
 		qp.setValueAsQueryToken(myFhirContext, theParam.getName(), theQualifier, theValueAsQueryToken);
 		return qp;
 	}
 
-	private IQueryParameterType toParameterType(RuntimeSearchParam theParam) {
+	private IQueryParameterType newParameterInstance(RuntimeSearchParam theParam) {
 
 		IQueryParameterType qp;
 		switch (theParam.getParamType()) {
@@ -2694,8 +2716,8 @@ public class QueryStack {
 					throw new InternalErrorException(Msg.code(1224) + "Parameter " + theParam.getName() + " has "
 							+ compositeOf.size() + " composite parts. Don't know how handlt this.");
 				}
-				IQueryParameterType leftParam = toParameterType(compositeOf.get(0));
-				IQueryParameterType rightParam = toParameterType(compositeOf.get(1));
+				IQueryParameterType leftParam = newParameterInstance(compositeOf.get(0));
+				IQueryParameterType rightParam = newParameterInstance(compositeOf.get(1));
 				qp = new CompositeParam<>(leftParam, rightParam);
 				break;
 			case URI:
@@ -2787,7 +2809,7 @@ public class QueryStack {
 		private List<String> extractPaths(String theResourceType, RuntimeSearchParam theSearchParam) {
 			List<String> pathsForType = theSearchParam.getPathsSplit().stream()
 					.map(String::trim)
-					.filter(t -> t.startsWith(theResourceType))
+					.filter(t -> (t.startsWith(theResourceType) || t.startsWith("(" + theResourceType)))
 					.collect(Collectors.toList());
 			if (pathsForType.isEmpty()) {
 				ourLog.warn(
@@ -2876,7 +2898,7 @@ public class QueryStack {
 						if (RestSearchParameterTypeEnum.REFERENCE.equals(nextSearchParam.getParamType())) {
 							orValues.add(new ReferenceParam(nextQualifier, "", theTargetValue));
 						} else {
-							IQueryParameterType qp = toParameterType(nextSearchParam);
+							IQueryParameterType qp = newParameterInstance(nextSearchParam);
 							qp.setValueAsQueryToken(myFhirContext, nextSearchParam.getName(), null, theTargetValue);
 							orValues.add(qp);
 						}

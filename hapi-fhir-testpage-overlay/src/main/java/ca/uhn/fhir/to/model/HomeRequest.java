@@ -13,6 +13,7 @@ import ca.uhn.fhir.to.Controller;
 import ca.uhn.fhir.to.TesterConfig;
 import org.springframework.web.bind.annotation.ModelAttribute;
 
+import javax.annotation.Nullable;
 import javax.servlet.http.HttpServletRequest;
 
 import static org.apache.commons.lang3.StringUtils.*;
@@ -122,8 +123,11 @@ public class HomeRequest {
 			HttpServletRequest theRequest,
 			FhirContext theContext,
 			TesterConfig theConfig,
-			Controller.CaptureInterceptor theInterceptor) {
+			@Nullable Controller.CaptureInterceptor theInterceptor) {
 		theContext.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
+		theContext.getRestfulClientFactory().setConnectTimeout(60 * 1000);
+		theContext.getRestfulClientFactory().setConnectionRequestTimeout(60 * 1000);
+		theContext.getRestfulClientFactory().setSocketTimeout(60 * 1000);
 
 		GenericClient retVal;
 		ITestingUiClientFactory clientFactory = theConfig.getClientFactory();
@@ -157,7 +161,9 @@ public class HomeRequest {
 			}
 		}
 
-		retVal.registerInterceptor(theInterceptor);
+		if (theInterceptor != null) {
+			retVal.registerInterceptor(theInterceptor);
+		}
 
 		final String remoteAddr = org.slf4j.MDC.get("req.remoteAddr");
 		retVal.registerInterceptor(new IClientInterceptor() {

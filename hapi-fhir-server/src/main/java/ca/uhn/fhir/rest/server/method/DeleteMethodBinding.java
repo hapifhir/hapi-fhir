@@ -38,7 +38,8 @@ public class DeleteMethodBinding extends BaseOutcomeReturningMethodBindingWithRe
 				theContext,
 				theProvider,
 				Delete.class,
-				theMethod.getAnnotation(Delete.class).type());
+				theMethod.getAnnotation(Delete.class).type(),
+				theMethod.getAnnotation(Delete.class).typeName());
 	}
 
 	@Nonnull

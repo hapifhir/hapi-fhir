@@ -64,9 +64,9 @@ public class ResourceSearchUrlSvc {
 	 * Perform removal of entries older than {@code theCutoffDate} since the create operations are done.
 	 */
 	public void deleteEntriesOlderThan(Date theCutoffDate) {
-		ourLog.info("About to delete SearchUrl which are older than {}", theCutoffDate);
+		ourLog.debug("About to delete SearchUrl which are older than {}", theCutoffDate);
 		int deletedCount = myResourceSearchUrlDao.deleteAllWhereCreatedBefore(theCutoffDate);
-		ourLog.info("Deleted {} SearchUrls", deletedCount);
+		ourLog.debug("Deleted {} SearchUrls", deletedCount);
 	}
 
 	/**

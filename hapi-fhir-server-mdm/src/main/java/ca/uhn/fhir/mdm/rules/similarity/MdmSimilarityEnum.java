@@ -35,7 +35,12 @@ public enum MdmSimilarityEnum {
 	COSINE(new HapiStringSimilarity(new Cosine())),
 	JACCARD(new HapiStringSimilarity(new Jaccard())),
 	LEVENSCHTEIN(new HapiStringSimilarity(new NormalizedLevenshtein())),
-	SORENSEN_DICE(new HapiStringSimilarity(new SorensenDice()));
+	SORENSEN_DICE(new HapiStringSimilarity(new SorensenDice())),
+	NUMERIC_JARO_WINKLER(new HapiNumericSimilarity(new JaroWinkler())),
+	NUMERIC_COSINE(new HapiNumericSimilarity(new Cosine())),
+	NUMERIC_JACCARD(new HapiNumericSimilarity(new Jaccard())),
+	NUMERIC_LEVENSCHTEIN(new HapiNumericSimilarity(new NormalizedLevenshtein())),
+	NUMERIC_SORENSEN_DICE(new HapiNumericSimilarity(new SorensenDice()));
 
 	private final IMdmFieldSimilarity myMdmFieldSimilarity;
 

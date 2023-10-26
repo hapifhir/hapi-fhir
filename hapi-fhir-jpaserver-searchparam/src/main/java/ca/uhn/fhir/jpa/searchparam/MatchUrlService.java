@@ -165,7 +165,7 @@ public class MatchUrlService {
 				IQueryParameterAnd<?> param = JpaParamUtil.parseQueryParams(
 						myFhirContext, RestSearchParameterTypeEnum.TOKEN, nextParamName, paramList);
 				paramMap.add(nextParamName, param);
-			} else if (nextParamName.startsWith("_")) {
+			} else if (nextParamName.startsWith("_") && !Constants.PARAM_LANGUAGE.equals(nextParamName)) {
 				// ignore these since they aren't search params (e.g. _sort)
 			} else {
 				RuntimeSearchParam paramDef =

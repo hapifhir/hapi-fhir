@@ -529,8 +529,8 @@ public class ResourceProviderR4CodeSystemTest extends BaseResourceProviderR4Test
 		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertFalse(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
-		assertEquals("Unable to validate code http://acme.org#8452-5 - Concept Display \"Old Systolic blood pressure.inspiration - expiration\" does not match expected \"Systolic blood pressure.inspiration - expiration\" for CodeSystem: http://acme.org", ((StringType) respParam.getParameter().get(1).getValue()).getValueAsString());
+		assertTrue(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
+		assertEquals("Concept Display \"Old Systolic blood pressure.inspiration - expiration\" does not match expected \"Systolic blood pressure.inspiration - expiration\"", ((StringType) respParam.getParameter().get(1).getValue()).getValueAsString());
 	}
 
 	@Test

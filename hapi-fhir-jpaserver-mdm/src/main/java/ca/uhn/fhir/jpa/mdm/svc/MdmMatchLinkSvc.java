@@ -19,13 +19,18 @@
  */
 package ca.uhn.fhir.jpa.mdm.svc;
 
+import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.mdm.models.FindGoldenResourceCandidatesParams;
 import ca.uhn.fhir.jpa.mdm.svc.candidate.CandidateList;
+import ca.uhn.fhir.jpa.mdm.svc.candidate.CandidateStrategyEnum;
 import ca.uhn.fhir.jpa.mdm.svc.candidate.MatchedGoldenResourceCandidate;
 import ca.uhn.fhir.jpa.mdm.svc.candidate.MdmGoldenResourceFindingSvc;
 import ca.uhn.fhir.mdm.api.IMdmLinkSvc;
+import ca.uhn.fhir.mdm.api.IMdmSurvivorshipService;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
 import ca.uhn.fhir.mdm.api.MdmMatchOutcome;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
+import ca.uhn.fhir.mdm.blocklist.svc.IBlockRuleEvaluationSvc;
 import ca.uhn.fhir.mdm.log.Logs;
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
 import ca.uhn.fhir.mdm.util.GoldenResourceHelper;
@@ -63,6 +68,15 @@ public class MdmMatchLinkSvc {
 	@Autowired
 	private MdmEidUpdateService myEidUpdateService;
 
+	@Autowired
+	private IBlockRuleEvaluationSvc myBlockRuleEvaluationSvc;
+
+	@Autowired
+	private DaoRegistry myDaoRegistry;
+
+	@Autowired
+	private IMdmSurvivorshipService myMdmSurvivorshipService;
+
 	/**
 	 * Given an MDM source (consisting of any supported MDM type), find a suitable Golden Resource candidate for them,
 	 * or create one if one does not exist. Performs matching based on rules defined in mdm-rules.json.
@@ -84,9 +98,28 @@ public class MdmMatchLinkSvc {
 
 	private MdmTransactionContext doMdmUpdate(
 			IAnyResource theResource, MdmTransactionContext theMdmTransactionContext) {
-		CandidateList candidateList = myMdmGoldenResourceFindingSvc.findGoldenResourceCandidates(theResource);
+		// we initialize to an empty list
+		// we require a candidatestrategy, but it doesn't matter
+		// because empty lists are effectively no matches
+		// (and so the candidate strategy doesn't matter)
+		CandidateList candidateList = new CandidateList(CandidateStrategyEnum.ANY);
 
-		if (candidateList.isEmpty()) {
+		/*
+		 * If a resource is blocked, we will not conduct
+		 * MDM matching. But we will still create golden resources
+		 * (so that future resources may match to it).
+		 */
+		boolean isResourceBlocked = myBlockRuleEvaluationSvc.isMdmMatchingBlocked(theResource);
+		// we will mark the golden resource special for this
+		theMdmTransactionContext.setIsBlocked(isResourceBlocked);
+
+		if (!isResourceBlocked) {
+			FindGoldenResourceCandidatesParams params =
+					new FindGoldenResourceCandidatesParams(theResource, theMdmTransactionContext);
+			candidateList = myMdmGoldenResourceFindingSvc.findGoldenResourceCandidates(params);
+		}
+
+		if (isResourceBlocked || candidateList.isEmpty()) {
 			handleMdmWithNoCandidates(theResource, theMdmTransactionContext);
 		} else if (candidateList.exactlyOneMatch()) {
 			handleMdmWithSingleCandidate(theResource, candidateList.getOnlyMatch(), theMdmTransactionContext);
@@ -164,8 +197,8 @@ public class MdmMatchLinkSvc {
 				String.format(
 						"There were no matched candidates for MDM, creating a new %s Golden Resource.",
 						theResource.getIdElement().getResourceType()));
-		IAnyResource newGoldenResource =
-				myGoldenResourceHelper.createGoldenResourceFromMdmSourceResource(theResource, theMdmTransactionContext);
+		IAnyResource newGoldenResource = myGoldenResourceHelper.createGoldenResourceFromMdmSourceResource(
+				theResource, theMdmTransactionContext, myMdmSurvivorshipService);
 		// TODO GGG :)
 		// 1. Get the right helper
 		// 2. Create source resource for the MDM source
@@ -191,7 +224,7 @@ public class MdmMatchLinkSvc {
 					theMdmTransactionContext,
 					"Duplicate detected based on the fact that both resources have different external EIDs.");
 			IAnyResource newGoldenResource = myGoldenResourceHelper.createGoldenResourceFromMdmSourceResource(
-					theTargetResource, theMdmTransactionContext);
+					theTargetResource, theMdmTransactionContext, myMdmSurvivorshipService);
 
 			myMdmLinkSvc.updateLink(
 					newGoldenResource,

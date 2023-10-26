@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.cr.dstu3.measure;
 
+import ca.uhn.fhir.cr.dstu3.IMeasureServiceFactory;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
@@ -34,12 +35,10 @@ import org.hl7.fhir.exceptions.FHIRException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.function.Function;
-
 @Component
 public class MeasureOperationsProvider {
 	@Autowired
-	Function<RequestDetails, MeasureService> myDstu3MeasureServiceFactory;
+	IMeasureServiceFactory myDstu3MeasureProcessorFactory;
 
 	/**
 	 * Implements the <a href=
@@ -79,8 +78,8 @@ public class MeasureOperationsProvider {
 			@OperationParam(name = "terminologyEndpoint") Endpoint theTerminologyEndpoint,
 			RequestDetails theRequestDetails)
 			throws InternalErrorException, FHIRException {
-		return this.myDstu3MeasureServiceFactory
-				.apply(theRequestDetails)
+		return myDstu3MeasureProcessorFactory
+				.create(theRequestDetails)
 				.evaluateMeasure(
 						theId,
 						thePeriodStart,

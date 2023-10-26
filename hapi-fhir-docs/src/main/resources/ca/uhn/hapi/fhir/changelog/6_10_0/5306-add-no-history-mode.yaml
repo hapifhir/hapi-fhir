@@ -1,0 +1,6 @@
+---
+type: add
+issue: 5306
+title: "A new option has been added to the JPA server JpaStorageOptions which prevents the
+   server from maintaining a version history. In this mode, when a new version of a resource
+   is added, the previous version is automatically expunged."

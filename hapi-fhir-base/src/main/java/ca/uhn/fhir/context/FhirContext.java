@@ -1001,9 +1001,9 @@ public class FhirContext {
 	 */
 	public void registerCustomType(final Class<? extends IBase> theType) {
 		Validate.notNull(theType, "theType must not be null");
-
 		ensureCustomTypeList();
 		myCustomTypes.add(theType);
+		myResourceNames = null;
 	}
 
 	/**
@@ -1025,6 +1025,7 @@ public class FhirContext {
 		ensureCustomTypeList();
 
 		myCustomTypes.addAll(theTypes);
+		myResourceNames = null;
 	}
 
 	private BaseRuntimeElementDefinition<?> scanDatatype(final Class<? extends IElement> theResourceType) {
@@ -1177,7 +1178,14 @@ public class FhirContext {
 			synchronized (this) {
 				if (!myInitialized && !myInitializing) {
 					myInitializing = true;
-					scanResourceTypes(toElementList(myResourceTypesToScan));
+					try {
+						scanResourceTypes(toElementList(myResourceTypesToScan));
+					} catch (Exception e) {
+						ourLog.error("Failed to initialize FhirContext", e);
+						throw e;
+					} finally {
+						myInitializing = false;
+					}
 				}
 			}
 		}

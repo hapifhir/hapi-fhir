@@ -163,9 +163,10 @@ public class Builder {
 		addTask(task);
 	}
 
-	public void dropIdGenerator(String theVersion, String theIdGeneratorName) {
+	public DropIdGeneratorTask dropIdGenerator(String theVersion, String theIdGeneratorName) {
 		DropIdGeneratorTask task = new DropIdGeneratorTask(myRelease, theVersion, theIdGeneratorName);
 		addTask(task);
+		return task;
 	}
 
 	public void addNop(String theVersion) {
@@ -631,5 +632,9 @@ public class Builder {
 			myTask.setFailureAllowed(true);
 			return this;
 		}
+	}
+
+	public String getRelease() {
+		return myRelease;
 	}
 }

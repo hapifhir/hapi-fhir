@@ -4,6 +4,11 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.jpa.fql.executor.HfqlDataTypeEnum;
+import ca.uhn.fhir.jpa.fql.executor.IHfqlExecutionResult;
+import ca.uhn.fhir.jpa.fql.jdbc.HfqlRestClient;
+import ca.uhn.fhir.jpa.fql.jdbc.RemoteHfqlExecutionResult;
+import ca.uhn.fhir.jpa.fql.parser.HfqlStatement;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.dstu2.valueset.ResourceTypeEnum;
 import ca.uhn.fhir.model.primitive.BoundCodeDt;
@@ -29,6 +34,7 @@ import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.to.model.HomeRequest;
 import ca.uhn.fhir.to.model.ResourceRequest;
 import ca.uhn.fhir.to.model.TransactionRequest;
+import ca.uhn.fhir.to.util.HfqlRenderingUtil;
 import ca.uhn.fhir.util.StopWatch;
 import com.google.gson.stream.JsonWriter;
 import org.apache.commons.lang3.StringUtils;
@@ -41,9 +47,12 @@ import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseConformance;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.Parameters;
 import org.springframework.ui.ModelMap;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.io.IOException;
 import java.io.StringWriter;
@@ -51,6 +60,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.TreeSet;
+import java.util.stream.Collectors;
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -65,6 +76,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 @org.springframework.stereotype.Controller()
 public class Controller extends BaseController {
 	static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(Controller.class);
+	public static final int ROW_LIMIT = 200;
 
 	@RequestMapping(value = {"/about"})
 	public String actionAbout(
@@ -202,7 +214,7 @@ public class Controller extends BaseController {
 			final BindingResult theBindingResult,
 			final ModelMap theModel) {
 		addCommonParams(theServletRequest, theRequest, theModel);
-		ourLog.info(theServletRequest.toString());
+		theModel.put("page", "home");
 		return "home";
 	}
 
@@ -335,6 +347,97 @@ public class Controller extends BaseController {
 		ourLog.info(logPrefix(theModel) + "Showing resource page: {}", resourceName);
 
 		return "resource";
+	}
+
+	@RequestMapping(
+			value = {"/hfql"},
+			method = RequestMethod.GET)
+	public String actionHfqlHome(
+			HttpServletRequest theServletRequest,
+			@RequestParam(value = "hfql-query", required = false) String theHfqlQuery,
+			final HomeRequest theRequest,
+			final BindingResult theBindingResult,
+			final ModelMap theModel) {
+		addCommonParamsForHfql(theServletRequest, theRequest, theModel);
+
+		String query = theHfqlQuery;
+		if (isBlank(query)) {
+			query = "SELECT\n" + "   id AS ID, meta.versionId AS Version,\n"
+					+ "   name[0].family AS FamilyName, name[0].given[0] AS GivenName,\n"
+					+ "   identifier AS Identifiers\n"
+					+ "FROM\n"
+					+ "   Patient";
+		}
+
+		theModel.put("query", query);
+		return "hfql";
+	}
+
+	@RequestMapping(
+			value = {"/hfql"},
+			method = RequestMethod.POST)
+	public String actionHfqlExecuteQuery(
+			HttpServletRequest theServletRequest,
+			@RequestParam("hfql-query") String theHfqlQuery,
+			final HomeRequest theRequest,
+			final BindingResult theBindingResult,
+			final ModelMap theModel) {
+		addCommonParamsForHfql(theServletRequest, theRequest, theModel);
+
+		ourLog.info("Executing HFQL query: {}", theHfqlQuery.replaceAll("\\s+", " "));
+		StopWatch sw = new StopWatch();
+
+		List<List<String>> rows = new ArrayList<>();
+		try {
+			IHfqlExecutionResult result = executeHfqlStatement(theServletRequest, theHfqlQuery, theRequest, ROW_LIMIT);
+			while (result.hasNext()) {
+				List<Object> nextRowValues = result.getNextRow().getRowValues();
+				if (nextRowValues.size() >= 1) {
+					List<String> nextRow = nextRowValues.stream()
+							.map(t -> t != null ? t.toString() : null)
+							.collect(Collectors.toList());
+					rows.add(nextRow);
+				}
+			}
+
+			List<String> columnNames = result.getStatement().getSelectClauses().stream()
+					.map(HfqlStatement.SelectClause::getAlias)
+					.collect(Collectors.toList());
+			theModel.put("columnNames", columnNames);
+			List<String> columnTypes = result.getStatement().getSelectClauses().stream()
+					.map(t -> t.getDataType().name())
+					.collect(Collectors.toList());
+			theModel.put("columnTypes", columnTypes);
+
+		} catch (IOException e) {
+			ourLog.warn("Failed to execute HFQL query: {}", e.toString());
+			theModel.put("columnNames", List.of("Error"));
+			theModel.put("columnTypes", List.of(HfqlDataTypeEnum.STRING));
+			rows = List.of(List.of(e.getMessage()));
+		}
+
+		theModel.put("HfqlRenderingUtil", new HfqlRenderingUtil());
+		theModel.put("query", theHfqlQuery);
+		theModel.put("resultRows", rows);
+		theModel.put("executionTime", sw.toString());
+
+		return "hfql";
+	}
+
+	@Nonnull
+	protected IHfqlExecutionResult executeHfqlStatement(
+			HttpServletRequest theServletRequest, String theHfqlQuery, HomeRequest theRequest, int theRowLimit)
+			throws IOException {
+		Parameters requestParameters = HfqlRestClient.newQueryRequestParameters(theHfqlQuery, theRowLimit, theRowLimit);
+		GenericClient client = theRequest.newClient(theServletRequest, getContext(theRequest), myConfig, null);
+		return new RemoteHfqlExecutionResult(requestParameters, client);
+	}
+
+	protected org.hl7.fhir.r5.model.CapabilityStatement addCommonParamsForHfql(
+			HttpServletRequest theServletRequest, HomeRequest theRequest, ModelMap theModel) {
+		theModel.put("page", "hfql");
+		theModel.put("rowLimit", ROW_LIMIT);
+		return super.addCommonParams(theServletRequest, theRequest, theModel);
 	}
 
 	private void populateModelForResource(
@@ -739,10 +842,6 @@ public class Controller extends BaseController {
 		return "result";
 	}
 
-	private static ResultType getReturnedTypeBasedOnOperation(@Nullable String operationName) {
-		return DIFF_OPERATION_NAME.equals(operationName) ? ResultType.PARAMETERS : ResultType.BUNDLE;
-	}
-
 	private void doActionHistory(
 			HttpServletRequest theReq,
 			HomeRequest theRequest,
@@ -1101,5 +1200,9 @@ public class Controller extends BaseController {
 		}
 
 		return true;
+	}
+
+	private static ResultType getReturnedTypeBasedOnOperation(@Nullable String operationName) {
+		return DIFF_OPERATION_NAME.equals(operationName) ? ResultType.PARAMETERS : ResultType.BUNDLE;
 	}
 }

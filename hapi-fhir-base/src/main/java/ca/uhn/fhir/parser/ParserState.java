@@ -636,7 +636,7 @@ class ParserState<T> {
 
 			BaseRuntimeElementDefinition<?> target = child.getChildByName(theChildName);
 			if (target == null) {
-				// This is a bug with the structures and shouldn't happen..
+				// This is a bug with the structures and shouldn't happen.
 				throw new DataFormatException(
 						Msg.code(1809) + "Found unexpected element '" + theChildName + "' in parent element '"
 								+ myDefinition.getName() + "'. Valid names are: " + child.getValidChildNames());
@@ -1584,16 +1584,20 @@ class ParserState<T> {
 
 	private class TagState extends BaseState {
 
-		private static final int LABEL = 2;
 		private static final int NONE = 0;
+		private static final int TERM = 1;
+		private static final int LABEL = 2;
 
 		private static final int SCHEME = 3;
-		private static final int TERM = 1;
+		private static final int VERSION = 4;
+		private static final int USER_SELECTED = 5;
 		private String myLabel;
 		private String myScheme;
 		private int mySubState = 0;
 		private TagList myTagList;
 		private String myTerm;
+		private String myVersion;
+		private Boolean myUserSelected;
 
 		public TagState(TagList theTagList) {
 			super(null);
@@ -1614,6 +1618,12 @@ class ParserState<T> {
 				case SCHEME:
 					myScheme = (value);
 					break;
+				case VERSION:
+					myVersion = (value);
+					break;
+				case USER_SELECTED:
+					myUserSelected = Boolean.valueOf(value);
+					break;
 				case NONE:
 					// This handles JSON encoding, which is a bit weird
 					enteringNewElement(null, theName);
@@ -1629,7 +1639,9 @@ class ParserState<T> {
 				mySubState = NONE;
 			} else {
 				if (isNotEmpty(myScheme) || isNotBlank(myTerm) || isNotBlank(myLabel)) {
-					myTagList.addTag(myScheme, myTerm, myLabel);
+					Tag tag = myTagList.addTag(myScheme, myTerm, myLabel);
+					tag.setUserSelectedBoolean(myUserSelected);
+					tag.setVersion(myVersion);
 				}
 				pop();
 			}
@@ -1646,6 +1658,10 @@ class ParserState<T> {
 				mySubState = SCHEME;
 			} else if (Tag.ATTR_LABEL.equals(theLocalPart) || "display".equals(theLocalPart)) {
 				mySubState = LABEL;
+			} else if ("userSelected".equals(theLocalPart)) {
+				mySubState = USER_SELECTED;
+			} else if ("version".equals(theLocalPart)) {
+				mySubState = VERSION;
 			} else {
 				throw new DataFormatException(Msg.code(1818) + "Unexpected element: " + theLocalPart);
 			}
