@@ -349,8 +349,14 @@ public class RestServerR4Helper extends BaseRestServerHelper implements BeforeEa
 
 			Map<String, String> headers = pullOutHeaders(theReq);
 			myRequestHeaders.add(headers);
-			myRequestUrls.add(request.getRequestURI());
 			myRequestVerbs.add(request.getMethod());
+
+			String nextRequestUrl = request.getRequestURI();
+			if (request.getQueryString() != null) {
+				nextRequestUrl += "?" + request.getQueryString();
+			}
+			myRequestUrls.add(nextRequestUrl);
+
 			super.service(theReq, theResp);
 		}
 
