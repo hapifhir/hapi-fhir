@@ -544,15 +544,24 @@ class TerserUtilTest {
 		a1.addLine("Line 2");
 		assertEquals(2, a1.getLine().size());
 		a1.setCity("Test");
+		a1.getPeriod().setStartElement(new DateTimeType("2021-01-01"));
 		p1.addAddress(a1);
+
+		assertEquals("2021-01-01", p1.getAddress().get(0).getPeriod().getStartElement().toHumanDisplay());
+		assertNotNull(p1.getAddress().get(0).getPeriod().getStart());
 
 		Address a2 = new Address();
 		a2.addLine("Line 1");
 		a2.addLine("Line 2");
 		a2.setCity("Test");
+		a2.getPeriod().setStartElement(new DateTimeType("2021-01-01"));
 		p1.addAddress(a2);
 
+
 		TerserUtil.clearFieldByFhirPath(ourFhirContext, p1, "address.line");
+		TerserUtil.clearFieldByFhirPath(ourFhirContext, p1, "address.period.start");
+
+		assertNull(p1.getAddress().get(0).getPeriod().getStart());
 
 		assertEquals(2, p1.getAddress().size());
 		assertEquals(0, p1.getAddress().get(0).getLine().size());
