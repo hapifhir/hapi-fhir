@@ -5,6 +5,7 @@ import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.TestDaoSearch;
 import ca.uhn.fhir.jpa.search.CompositeSearchParameterTestCases;
+import ca.uhn.fhir.jpa.search.IIdSearchTestTemplate;
 import ca.uhn.fhir.jpa.search.QuantitySearchParameterTestCases;
 import ca.uhn.fhir.jpa.search.BaseSourceSearchParameterTestCases;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
@@ -13,6 +14,7 @@ import ca.uhn.fhir.jpa.test.config.TestHSearchAddInConfig;
 import ca.uhn.fhir.jpa.test.config.TestR4Config;
 import ca.uhn.fhir.storage.test.BaseDateSearchDaoTests;
 import ca.uhn.fhir.storage.test.DaoTestDataBuilder;
+import ca.uhn.fhir.test.utilities.ITestDataBuilder;
 import ca.uhn.fhir.test.utilities.ITestDataBuilder.ICreationArgument;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Observation;
@@ -256,10 +258,10 @@ public class FhirResourceDaoR4StandardQueriesNoFTTest extends BaseJpaTest {
 					String idExM = withObservation(myDataBuilder.withObservationCode("http://example.org", "MValue")).getIdPart();
 
 					List<String> allIds = myTestDaoSearch.searchForIds("/Observation?_sort=code");
-					assertThat(allIds, hasItems(idAlphaA, idAlphaM, idAlphaZ, idExA, idExD, idExM));
+					assertThat(allIds, contains(idAlphaA, idAlphaM, idAlphaZ, idExA, idExD, idExM));
 
 					allIds = myTestDaoSearch.searchForIds("/Observation?_sort=code&code=http://example.org|");
-					assertThat(allIds, hasItems(idExA, idExD, idExM));
+					assertThat(allIds, contains(idExA, idExD, idExM));
 				}
 			}
 		}
@@ -495,6 +497,19 @@ public class FhirResourceDaoR4StandardQueriesNoFTTest extends BaseJpaTest {
 			}
 		}
 
+	}
+
+	@Nested
+	public class IdSearch implements IIdSearchTestTemplate {
+		@Override
+		public TestDaoSearch getSearch() {
+			return myTestDaoSearch;
+		}
+
+		@Override
+		public ITestDataBuilder getBuilder() {
+			return myDataBuilder;
+		}
 	}
 
 	// todo mb re-enable this.  Some of these fail!

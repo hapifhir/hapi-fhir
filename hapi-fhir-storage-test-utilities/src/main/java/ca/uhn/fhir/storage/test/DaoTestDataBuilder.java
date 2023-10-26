@@ -75,7 +75,9 @@ public class DaoTestDataBuilder implements ITestDataBuilder.WithSupport, ITestDa
 		//noinspection rawtypes
 		IFhirResourceDao dao = myDaoRegistry.getResourceDao(theResource.getClass());
 		//noinspection unchecked
-		return dao.update(theResource, mySrd).getId().toUnqualifiedVersionless();
+		IIdType id = dao.update(theResource, mySrd).getId().toUnqualifiedVersionless();
+		myIds.put(theResource.fhirType(), id);
+		return id;
 	}
 
 	@Override
