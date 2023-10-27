@@ -11,6 +11,8 @@ import ca.uhn.fhir.util.UrlPathTokenizer;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -19,6 +21,7 @@ import java.util.Collections;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -71,53 +74,22 @@ public class UrlBaseTenantIdentificationStrategyTest {
 		assertEquals(BASE_URL, actual);
 	}
 
-	@Test
-	void resolveRelativeUrl_withEmptyUrl_returnEmptyString() {
-		String actual = ourTenantStrategy.resolveRelativeUrl("", myRequestDetails);
+	@CsvSource(value = {
+			" , ", // empty URL - return input URL
+			"TENANT1/Patient/123, TENANT1/Patient/123", // tenant ID already exists - return input URL
+			"TENANT2/Patient/123, TENANT2/Patient/123", // requestDetails contains different tenant ID - return input URL
+			"Patient/123		, TENANT1/Patient/123", // url starts with resource type - add tenant ID to URL
+			"$export			, TENANT1/$export" // url starts with operation - add tenant ID to URL
+	})
+	@ParameterizedTest
+	void resolveRelativeUrl_urlStartsWithOperation_tenantIdIsAddedToUrl(String theInputUrl, String theExpectedResolvedUrl) {
+		lenient().when(myRequestDetails.getTenantId()).thenReturn("TENANT1");
+		lenient().when(myFHIRContext.getResourceTypes()).thenReturn(Collections.singleton("Patient"));
+		lenient().when(myRequestDetails.getFhirContext()).thenReturn(myFHIRContext);
 
-		assertEquals("", actual);
-	}
+		String actual = ourTenantStrategy.resolveRelativeUrl(theInputUrl, myRequestDetails);
 
-	@Test
-	void resolveRelativeUrl_withNoTenantIdInRequestDetails_returnsInputUrl() {
-		String inputUrl = "Patient/123";
-		String actual = ourTenantStrategy.resolveRelativeUrl(inputUrl, myRequestDetails);
-
-		assertEquals(inputUrl, actual);
-	}
-
-	@Test
-	void resolveRelativeUrl_urlAlreadyContainsTenantId_returnsInputUrl() {
-		when(myRequestDetails.getTenantId()).thenReturn("TENANT1");
-
-		String inputUrl = "TENANT1/Patient/123";
-		String actual = ourTenantStrategy.resolveRelativeUrl(inputUrl, myRequestDetails);
-
-		assertEquals(inputUrl, actual);
-	}
-
-	@Test
-	void resolveRelativeUrl_urlAlreadyContainsDifferentTenantId_returnsInputUrl() {
-		when(myRequestDetails.getTenantId()).thenReturn("TENANT1");
-		when(myFHIRContext.getResourceTypes()).thenReturn(Collections.singleton("Patient"));
-		when(myRequestDetails.getFhirContext()).thenReturn(myFHIRContext);
-
-		String inputUrl = "TENANT2/Patient/123";
-		String actual = ourTenantStrategy.resolveRelativeUrl(inputUrl, myRequestDetails);
-
-		assertEquals(inputUrl, actual);
-	}
-
-	@Test
-	void resolveRelativeUrl_urlStartsWithResourceType_tenantIdIsAddedToUrl() {
-		when(myRequestDetails.getTenantId()).thenReturn("TENANT1");
-		when(myFHIRContext.getResourceTypes()).thenReturn(Collections.singleton("Patient"));
-		when(myRequestDetails.getFhirContext()).thenReturn(myFHIRContext);
-
-		String inputUrl = "Patient/123";
-		String actual = ourTenantStrategy.resolveRelativeUrl(inputUrl, myRequestDetails);
-
-		assertEquals("TENANT1/" + inputUrl, actual);
+		assertEquals(theExpectedResolvedUrl, actual);
 	}
 
 	@Test

@@ -69,7 +69,7 @@ public class UrlBaseTenantIdentificationStrategy implements ITenantIdentificatio
 			tenantId = defaultIfBlank(theUrlPathTokenizer.peek(), null);
 
 			// If it's "metadata" or starts with "$", use DEFAULT partition and don't consume this token:
-			if (tenantId != null && (tenantId.equals("metadata") || tenantId.startsWith("$"))) {
+			if (tenantId != null && (tenantId.equals("metadata") || isOperation(tenantId))) {
 				tenantId = "DEFAULT";
 				theRequestDetails.setTenantId(tenantId);
 				ourLog.trace("No tenant ID found for metadata or system request; using DEFAULT.");
@@ -94,6 +94,10 @@ public class UrlBaseTenantIdentificationStrategy implements ITenantIdentificatio
 		}
 	}
 
+	private boolean isOperation(String theToken) {
+		return theToken.startsWith("$");
+	}
+
 	@Override
 	public String massageServerBaseUrl(String theFhirServerBase, RequestDetails theRequestDetails) {
 		String result = theFhirServerBase;
@@ -116,8 +120,8 @@ public class UrlBaseTenantIdentificationStrategy implements ITenantIdentificatio
 			return theRelativeUrl;
 		}
 
-		// token is Resource type - adding tenant ID from parent request details
-		if (isResourceType(nextToken, theRequestDetails)) {
+		// token is Resource type or operation - adding tenant ID from parent request details
+		if (isResourceType(nextToken, theRequestDetails) || isOperation(nextToken)) {
 			return theRequestDetails.getTenantId() + "/" + theRelativeUrl;
 		} else {
 			return theRelativeUrl;
