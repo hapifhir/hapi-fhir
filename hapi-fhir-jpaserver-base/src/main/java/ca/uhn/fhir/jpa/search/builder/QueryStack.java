@@ -43,7 +43,6 @@ import ca.uhn.fhir.jpa.search.builder.predicate.ComboNonUniqueSearchParameterPre
 import ca.uhn.fhir.jpa.search.builder.predicate.ComboUniqueSearchParameterPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.CoordsPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.DatePredicateBuilder;
-import ca.uhn.fhir.jpa.search.builder.predicate.ForcedIdPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.ICanMakeMissingParamPredicate;
 import ca.uhn.fhir.jpa.search.builder.predicate.NumberPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.ParsedLocationParam;
@@ -95,7 +94,6 @@ import com.healthmarketscience.sqlbuilder.ComboCondition;
 import com.healthmarketscience.sqlbuilder.Condition;
 import com.healthmarketscience.sqlbuilder.Expression;
 import com.healthmarketscience.sqlbuilder.InCondition;
-import com.healthmarketscience.sqlbuilder.OrderObject;
 import com.healthmarketscience.sqlbuilder.SelectQuery;
 import com.healthmarketscience.sqlbuilder.SetOperationQuery;
 import com.healthmarketscience.sqlbuilder.Subquery;
@@ -276,16 +274,15 @@ public class QueryStack {
 	}
 
 	public void addSortOnResourceId(boolean theAscending) {
+		ResourceTablePredicateBuilder resourceTablePredicateBuilder;
 		BaseJoiningPredicateBuilder firstPredicateBuilder = mySqlBuilder.getOrCreateFirstPredicateBuilder();
-		ForcedIdPredicateBuilder sortPredicateBuilder =
-				mySqlBuilder.addForcedIdPredicateBuilder(firstPredicateBuilder.getResourceIdColumn());
-		if (!theAscending) {
-			mySqlBuilder.addSortString(
-					sortPredicateBuilder.getColumnForcedId(), false, OrderObject.NullOrder.FIRST, myUseAggregate);
+		if (firstPredicateBuilder instanceof ResourceTablePredicateBuilder) {
+			resourceTablePredicateBuilder = (ResourceTablePredicateBuilder) firstPredicateBuilder;
 		} else {
-			mySqlBuilder.addSortString(sortPredicateBuilder.getColumnForcedId(), true, myUseAggregate);
+			resourceTablePredicateBuilder =
+					mySqlBuilder.addResourceTablePredicateBuilder(firstPredicateBuilder.getResourceIdColumn());
 		}
-		mySqlBuilder.addSortNumeric(firstPredicateBuilder.getResourceIdColumn(), theAscending, myUseAggregate);
+		mySqlBuilder.addSortString(resourceTablePredicateBuilder.getColumnFhirId(), theAscending, myUseAggregate);
 	}
 
 	public void addSortOnResourceLink(

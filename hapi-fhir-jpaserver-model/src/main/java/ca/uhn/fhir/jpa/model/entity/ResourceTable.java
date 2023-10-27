@@ -100,6 +100,7 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	public static final int RESTYPE_LEN = 40;
 	public static final String HFJ_RESOURCE = "HFJ_RESOURCE";
 	public static final String RES_TYPE = "RES_TYPE";
+	public static final String FHIR_ID = "FHIR_ID";
 	private static final int MAX_LANGUAGE_LENGTH = 20;
 	private static final long serialVersionUID = 1L;
 	public static final int MAX_FORCED_ID_LENGTH = 100;
@@ -381,7 +382,7 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	 * Will be null during insert time until the first read.
 	 */
 	@Column(
-			name = "FHIR_ID",
+			name = FHIR_ID,
 			// [A-Za-z0-9\-\.]{1,64} - https://www.hl7.org/fhir/datatypes.html#id
 			length = 64,
 			// we never update this after insert, and the Generator will otherwise "dirty" the object.

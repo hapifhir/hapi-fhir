@@ -133,7 +133,6 @@ public class TestDaoSearch {
 		assertSearchFindsInOrder(theReason, theQueryUrl, theIds.toArray(EMPTY_STRING_ARRAY));
 	}
 
-
 	public void assertSearchResultIds(String theQueryUrl, String theReason, Matcher<Iterable<String>> matcher) {
 		List<String> ids = searchForIds(theQueryUrl);
 

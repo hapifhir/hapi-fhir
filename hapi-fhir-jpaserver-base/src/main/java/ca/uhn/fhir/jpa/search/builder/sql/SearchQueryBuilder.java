@@ -32,7 +32,6 @@ import ca.uhn.fhir.jpa.search.builder.predicate.ComboNonUniqueSearchParameterPre
 import ca.uhn.fhir.jpa.search.builder.predicate.ComboUniqueSearchParameterPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.CoordsPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.DatePredicateBuilder;
-import ca.uhn.fhir.jpa.search.builder.predicate.ForcedIdPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.NumberPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.QuantityNormalizedPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.QuantityPredicateBuilder;
@@ -62,7 +61,6 @@ import com.healthmarketscience.sqlbuilder.dbspec.basic.DbJoin;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbSchema;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbSpec;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbTable;
-import org.apache.commons.lang3.Validate;
 import org.hibernate.dialect.Dialect;
 import org.hibernate.dialect.SQLServerDialect;
 import org.hibernate.dialect.pagination.AbstractLimitHandler;
@@ -220,18 +218,6 @@ public class SearchQueryBuilder {
 	 */
 	public DatePredicateBuilder createDatePredicateBuilder() {
 		return mySqlBuilderFactory.dateIndexTable(this);
-	}
-
-	/**
-	 * Add and return a predicate builder for selecting a forced ID. This is only intended for use with sorts so it can not
-	 * be the root query.
-	 */
-	public ForcedIdPredicateBuilder addForcedIdPredicateBuilder(@Nonnull DbColumn theSourceJoinColumn) {
-		Validate.isTrue(theSourceJoinColumn != null);
-
-		ForcedIdPredicateBuilder retVal = mySqlBuilderFactory.newForcedIdPredicateBuilder(this);
-		addTableForSorting(retVal, theSourceJoinColumn);
-		return retVal;
 	}
 
 	/**
@@ -415,11 +401,6 @@ public class SearchQueryBuilder {
 	 */
 	private void addTable(BaseJoiningPredicateBuilder thePredicateBuilder, @Nullable DbColumn theSourceJoinColumn) {
 		addTable(thePredicateBuilder, theSourceJoinColumn, SelectQuery.JoinType.INNER);
-	}
-
-	private void addTableForSorting(
-			BaseJoiningPredicateBuilder thePredicateBuilder, @Nullable DbColumn theSourceJoinColumn) {
-		addTable(thePredicateBuilder, theSourceJoinColumn, SelectQuery.JoinType.LEFT_OUTER);
 	}
 
 	private void addTable(
@@ -766,7 +747,7 @@ public class SearchQueryBuilder {
 
 		List<Long> excludePids = JpaPid.toLongList(theExistingPidSetToExclude);
 
-		ourLog.trace("excludePids = " + excludePids);
+		ourLog.trace("excludePids = {}", excludePids);
 
 		DbColumn resourceIdColumn = getOrCreateFirstPredicateBuilder().getResourceIdColumn();
 		InCondition predicate = new InCondition(resourceIdColumn, generatePlaceholders(excludePids));
