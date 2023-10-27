@@ -370,7 +370,7 @@ public class FhirResourceDaoR4StandardQueriesNoFTTest extends BaseJpaTest {
 				String idAlpha5 = withRiskAssessmentWithProbabilty(0.5).getIdPart();
 
 				List<String> allIds = myTestDaoSearch.searchForIds("/RiskAssessment?_sort=probability");
-				assertThat(allIds, hasItems(idAlpha2, idAlpha5, idAlpha7));
+				assertThat(allIds, contains(idAlpha2, idAlpha5, idAlpha7));
 			}
 
 		}
@@ -493,7 +493,7 @@ public class FhirResourceDaoR4StandardQueriesNoFTTest extends BaseJpaTest {
 				String idAlpha5 = withObservationWithValueQuantity(0.5).getIdPart();
 
 				List<String> allIds = myTestDaoSearch.searchForIds("/Observation?_sort=value-quantity");
-				assertThat(allIds, hasItems(idAlpha2, idAlpha5, idAlpha7));
+				assertThat(allIds, contains(idAlpha2, idAlpha5, idAlpha7));
 			}
 		}
 
