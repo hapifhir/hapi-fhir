@@ -105,9 +105,26 @@ public class UrlBaseTenantIdentificationStrategy implements ITenantIdentificatio
 
 	@Override
 	public String resolveRelativeUrl(String theRelativeUrl, RequestDetails theRequestDetails) {
-		if (theRequestDetails.getTenantId() != null && !theRelativeUrl.startsWith(theRequestDetails.getTenantId())) {
-			return theRequestDetails.getTenantId() + "/" + theRelativeUrl;
+		UrlPathTokenizer tokenizer = new UrlPathTokenizer(theRelativeUrl);
+		// there is no more tokens in the URL - skip url resolution
+		if (!tokenizer.hasMoreTokens() || tokenizer.peek() == null) {
+			return theRelativeUrl;
 		}
-		return theRelativeUrl;
+		String nextToken = tokenizer.peek();
+		// there is no tenant ID in parent request details or tenant ID is already present in URL - skip url resolution
+		if (theRequestDetails.getTenantId() == null || nextToken.equals(theRequestDetails.getTenantId())) {
+			return theRelativeUrl;
+		}
+
+		// token is Resource type - adding tenant ID from parent request details
+		if (isResourceType(nextToken, theRequestDetails)) {
+			return theRequestDetails.getTenantId() + "/" + theRelativeUrl;
+		} else {
+			return theRelativeUrl;
+		}
+	}
+
+	private boolean isResourceType(String token, RequestDetails theRequestDetails) {
+		return theRequestDetails.getFhirContext().getResourceTypes().stream().anyMatch(type -> type.equals(token));
 	}
 }
