@@ -98,6 +98,10 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 	}
 
 	protected void init700() {
+		/* ************************************************
+		 * Start of 6.10 migrations
+		 *********************************************** */
+
 		Builder version = forVersion(VersionEnum.V7_0_0);
 
 		// new indices on MdmLink
@@ -124,6 +128,68 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 				.online(true)
 				.includeColumns("RES_ID")
 				.withColumns("FHIR_ID", "RES_TYPE");
+
+		/* ************************************************
+		 * Start of 7.0 migrations
+		 *********************************************** */
+
+		version.onTable("HFJ_RES_VER")
+				.modifyColumn("20231027.1", "RES_TEXT_VC")
+				.nullable()
+				.withType(ColumnTypeEnum.TEXT);
+
+		version.onTable("HFJ_SEARCH")
+				.modifyColumn("20231027.2", "SEARCH_TYPE")
+				.nonNullable()
+				.withType(ColumnTypeEnum.TINYINT);
+
+		version.onTable("HFJ_SPIDX_NUMBER")
+				.modifyColumn("20231027.3", "SP_VALUE")
+				.nullable()
+				.withType(ColumnTypeEnum.BIG_DECIMAL);
+
+		version.onTable("HFJ_TAG_DEF")
+				.modifyColumn("20231027.4", "TAG_TYPE")
+				.nonNullable()
+				.withType(ColumnTypeEnum.TINYINT);
+
+		version.onTable("MPI_LINK")
+				.modifyColumn("20231027.5", "LINK_SOURCE")
+				.nonNullable()
+				.withType(ColumnTypeEnum.TINYINT);
+		version.onTable("MPI_LINK")
+				.modifyColumn("20231027.6", "MATCH_RESULT")
+				.nonNullable()
+				.withType(ColumnTypeEnum.TINYINT);
+
+		version.onTable("MPI_LINK_AUD")
+				.modifyColumn("20231027.7", "LINK_SOURCE")
+				.nullable()
+				.withType(ColumnTypeEnum.TINYINT);
+		version.onTable("MPI_LINK_AUD")
+				.modifyColumn("20231027.8", "MATCH_RESULT")
+				.nullable()
+				.withType(ColumnTypeEnum.TINYINT);
+
+		version.onTable("TRM_CONCEPT_PC_LINK")
+				.modifyColumn("20231027.9", "REL_TYPE")
+				.nullable()
+				.withType(ColumnTypeEnum.TINYINT);
+
+		version.onTable("TRM_CONCEPT_PROPERTY")
+				.modifyColumn("20231027.10", "PROP_TYPE")
+				.nonNullable()
+				.withType(ColumnTypeEnum.TINYINT);
+
+		version.onTable("NPM_PACKAGE_VER")
+				.addIndex("20231027.11", "IDX_NPM_PKVR_RESID_U")
+				.unique(true)
+				.withColumns("BINARY_RES_ID");
+
+		version.onTable("NPM_PACKAGE_VER_RES")
+				.addIndex("20231027.12", "IDX_NPM_PKV_RESID_U")
+				.unique(true)
+				.withColumns("BINARY_RES_ID");
 	}
 
 	protected void init680() {

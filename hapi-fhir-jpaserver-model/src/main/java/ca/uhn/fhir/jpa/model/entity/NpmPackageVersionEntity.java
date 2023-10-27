@@ -38,6 +38,7 @@ import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
+import jakarta.persistence.UniqueConstraint;
 import jakarta.persistence.Version;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
@@ -48,7 +49,7 @@ import java.util.List;
 @Entity()
 @Table(
 		name = "NPM_PACKAGE_VER",
-		uniqueConstraints = {},
+		uniqueConstraints = {@UniqueConstraint(name = "IDX_NPM_PKV_RESID_U", columnNames = "BINARY_RES_ID")},
 		indexes = {
 			@Index(name = "IDX_PACKVER", columnList = "PACKAGE_ID,VERSION_ID", unique = true),
 			@Index(name = "FK_NPM_PKV_PKG", columnList = "PACKAGE_PID"),
