@@ -29,6 +29,10 @@ public interface IIdSearchTestTemplate {
 						"search by client assigned id", "Patient?_id=client-assigned-id", "client-assigned-id");
 	}
 
+	/**
+	 * The _id SP is defined as token, and there is no system.
+	 * So sorting should be string order of the value.
+	 */
 	@Test
 	default void testSortById_treatsIdsAsString() {
 		ITestDataBuilder b = getBuilder();
@@ -38,8 +42,14 @@ public interface IIdSearchTestTemplate {
 
 		getSearch()
 				.assertSearchFindsInOrder(
-						"search by client assigned id",
+						"sort by resource id",
 						"Patient?_sort=_id",
 						List.of("0-sorts-before-other-numbers", serverId.getIdPart(), "client-assigned-id"));
+
+		getSearch()
+				.assertSearchFindsInOrder(
+						"reverse sort by resource id",
+						"Patient?_sort=-_id",
+						List.of("client-assigned-id", serverId.getIdPart(), "0-sorts-before-other-numbers"));
 	}
 }
