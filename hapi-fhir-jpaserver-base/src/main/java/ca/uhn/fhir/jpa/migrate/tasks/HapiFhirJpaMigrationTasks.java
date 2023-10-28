@@ -180,7 +180,6 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 				.modifyColumn("20231027.10", "PROP_TYPE")
 				.nonNullable()
 				.withType(ColumnTypeEnum.TINYINT);
-
 	}
 
 	protected void init680() {
