@@ -225,11 +225,6 @@ public class JpaModelScannerAndVerifier {
 				boolean hasEmbedded = nextField.getAnnotation(Embedded.class) != null;
 				OneToMany oneToMany = nextField.getAnnotation(OneToMany.class);
 				OneToOne oneToOne = nextField.getAnnotation(OneToOne.class);
-				if (oneToOne != null) {
-					// FIXME: assign new code
-					throw new IllegalStateException(Msg.code(0) + "Field has a @OneToOne annotation. These should not be used because they cause unpredictable constraint names: " + nextField);
-				}
-
 				boolean isOtherSideOfOneToManyMapping = oneToMany != null && isNotBlank(oneToMany.mappedBy());
 				boolean isOtherSideOfOneToOneMapping = oneToOne != null && isNotBlank(oneToOne.mappedBy());
 				boolean isField = nextField.getAnnotation(org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextField.class) != null;
