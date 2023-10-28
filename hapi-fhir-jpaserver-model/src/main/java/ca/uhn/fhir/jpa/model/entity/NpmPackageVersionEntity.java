@@ -33,12 +33,10 @@ import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
-import jakarta.persistence.OneToOne;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
-import jakarta.persistence.UniqueConstraint;
 import jakarta.persistence.Version;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
@@ -49,7 +47,7 @@ import java.util.List;
 @Entity()
 @Table(
 		name = "NPM_PACKAGE_VER",
-		uniqueConstraints = {@UniqueConstraint(name = "IDX_NPM_PKV_RESID_U", columnNames = "BINARY_RES_ID")},
+		uniqueConstraints = {},
 		indexes = {
 			@Index(name = "IDX_PACKVER", columnList = "PACKAGE_ID,VERSION_ID", unique = true),
 			@Index(name = "FK_NPM_PKV_PKG", columnList = "PACKAGE_PID"),
@@ -78,7 +76,7 @@ public class NpmPackageVersionEntity {
 	@JoinColumn(name = "PACKAGE_PID", nullable = false, foreignKey = @ForeignKey(name = "FK_NPM_PKV_PKG"))
 	private NpmPackageEntity myPackage;
 
-	@OneToOne
+	@ManyToOne
 	@JoinColumn(
 			name = "BINARY_RES_ID",
 			referencedColumnName = "RES_ID",

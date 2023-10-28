@@ -181,15 +181,6 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 				.nonNullable()
 				.withType(ColumnTypeEnum.TINYINT);
 
-		version.onTable("NPM_PACKAGE_VER")
-				.addIndex("20231027.11", "IDX_NPM_PKVR_RESID_U")
-				.unique(true)
-				.withColumns("BINARY_RES_ID");
-
-		version.onTable("NPM_PACKAGE_VER_RES")
-				.addIndex("20231027.12", "IDX_NPM_PKV_RESID_U")
-				.unique(true)
-				.withColumns("BINARY_RES_ID");
 	}
 
 	protected void init680() {
