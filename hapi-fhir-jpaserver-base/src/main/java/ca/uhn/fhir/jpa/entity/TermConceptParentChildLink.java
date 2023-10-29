@@ -33,7 +33,9 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
+import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextField;
+import org.hibernate.type.SqlTypes;
 
 import java.io.Serializable;
 
@@ -90,6 +92,7 @@ public class TermConceptParentChildLink implements Serializable {
 
 	@Enumerated(EnumType.ORDINAL)
 	@Column(name = "REL_TYPE", length = 5, nullable = true)
+	@JdbcTypeCode(SqlTypes.INTEGER)
 	private RelationshipTypeEnum myRelationshipType;
 
 	@Override

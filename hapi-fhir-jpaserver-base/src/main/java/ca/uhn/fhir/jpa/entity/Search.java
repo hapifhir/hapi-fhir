@@ -49,7 +49,9 @@ import jakarta.persistence.UniqueConstraint;
 import jakarta.persistence.Version;
 import org.apache.commons.lang3.SerializationUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.OptimisticLock;
+import org.hibernate.type.SqlTypes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -152,6 +154,7 @@ public class Search implements ICachedSearchDetails, Serializable {
 
 	@Enumerated(EnumType.ORDINAL)
 	@Column(name = "SEARCH_TYPE", nullable = false)
+	@JdbcTypeCode(SqlTypes.INTEGER)
 	private SearchTypeEnum mySearchType;
 
 	@Enumerated(EnumType.STRING)

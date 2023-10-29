@@ -24,6 +24,11 @@
 	</properties>
 
 	<dependencies>
+<!--		<dependency>-->
+<!--			<groupId>ca.uhn.hapi.fhir</groupId>-->
+<!--			<artifactId>hapi-fhir-jpaserver-model</artifactId>-->
+<!--			<version>${project.version}</version>-->
+<!--		</dependency>-->
 
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>

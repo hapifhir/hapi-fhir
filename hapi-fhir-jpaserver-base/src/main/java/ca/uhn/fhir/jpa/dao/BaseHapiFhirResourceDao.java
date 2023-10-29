@@ -1652,8 +1652,11 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			CURRENTLY_REINDEXING.put(theResource, Boolean.TRUE);
 		}
 
+		SystemRequestDetails request = new SystemRequestDetails();
+		request.getUserData().put(JpaConstants.SKIP_REINDEX_ON_UPDATE, Boolean.TRUE);
+
 		updateEntity(
-				null, theResource, theEntity, theEntity.getDeleted(), true, false, transactionDetails, true, false);
+				request, theResource, theEntity, theEntity.getDeleted(), true, false, transactionDetails, true, false);
 		if (theResource != null) {
 			CURRENTLY_REINDEXING.put(theResource, null);
 		}

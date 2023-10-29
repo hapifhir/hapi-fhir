@@ -133,35 +133,6 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		 * Start of 7.0 migrations
 		 *********************************************** */
 
-		version.onTable("HFJ_RES_VER")
-				.modifyColumn("20231027.1", "RES_TEXT_VC")
-				.nullable()
-				.withType(ColumnTypeEnum.TEXT);
-
-		version.onTable("HFJ_SEARCH")
-				.modifyColumn("20231027.2", "SEARCH_TYPE")
-				.nonNullable()
-				.withType(ColumnTypeEnum.TINYINT);
-
-		version.onTable("HFJ_SPIDX_NUMBER")
-				.modifyColumn("20231027.3", "SP_VALUE")
-				.nullable()
-				.withType(ColumnTypeEnum.BIG_DECIMAL);
-
-		version.onTable("HFJ_TAG_DEF")
-				.modifyColumn("20231027.4", "TAG_TYPE")
-				.nonNullable()
-				.withType(ColumnTypeEnum.TINYINT);
-
-		version.onTable("MPI_LINK")
-				.modifyColumn("20231027.5", "LINK_SOURCE")
-				.nonNullable()
-				.withType(ColumnTypeEnum.TINYINT);
-		version.onTable("MPI_LINK")
-				.modifyColumn("20231027.6", "MATCH_RESULT")
-				.nonNullable()
-				.withType(ColumnTypeEnum.TINYINT);
-
 		version.onTable("MPI_LINK_AUD")
 				.modifyColumn("20231027.7", "LINK_SOURCE")
 				.nullable()
@@ -169,16 +140,6 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		version.onTable("MPI_LINK_AUD")
 				.modifyColumn("20231027.8", "MATCH_RESULT")
 				.nullable()
-				.withType(ColumnTypeEnum.TINYINT);
-
-		version.onTable("TRM_CONCEPT_PC_LINK")
-				.modifyColumn("20231027.9", "REL_TYPE")
-				.nullable()
-				.withType(ColumnTypeEnum.TINYINT);
-
-		version.onTable("TRM_CONCEPT_PROPERTY")
-				.modifyColumn("20231027.10", "PROP_TYPE")
-				.nonNullable()
 				.withType(ColumnTypeEnum.TINYINT);
 	}
 

@@ -22,6 +22,8 @@ package ca.uhn.fhir.jpa.entity;
 import ca.uhn.fhir.util.ValidateUtil;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.ForeignKey;
 import jakarta.persistence.GeneratedValue;
@@ -38,10 +40,12 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
+import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.search.engine.backend.types.Projectable;
 import org.hibernate.search.engine.backend.types.Searchable;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextField;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.GenericField;
+import org.hibernate.type.SqlTypes;
 import org.hibernate.validator.constraints.NotBlank;
 
 import java.io.Serializable;
@@ -106,7 +110,9 @@ public class TermConceptProperty implements Serializable {
 	@Lob()
 	private byte[] myValueLob;
 
+	@Enumerated(EnumType.ORDINAL)
 	@Column(name = "PROP_TYPE", nullable = false, length = MAX_PROPTYPE_ENUM_LENGTH)
+	@JdbcTypeCode(SqlTypes.INTEGER)
 	private TermConceptPropertyTypeEnum myType;
 
 	/**

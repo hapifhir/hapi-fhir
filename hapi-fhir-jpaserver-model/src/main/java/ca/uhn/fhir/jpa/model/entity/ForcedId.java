@@ -43,6 +43,7 @@ import org.hibernate.annotations.ColumnDefault;
 			@UniqueConstraint(
 					name = "IDX_FORCEDID_RESID",
 					columnNames = {"RESOURCE_PID"}),
+
 			/*
 			 * This index is called IDX_FORCEDID_TYPE_FID and guarantees
 			 * uniqueness of RESOURCE_TYPE,FORCED_ID. This doesn't make sense

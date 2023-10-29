@@ -37,6 +37,8 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import java.io.Serializable;
 import java.util.Collection;
@@ -82,6 +84,7 @@ public class TagDefinition implements Serializable {
 
 	@Column(name = "TAG_TYPE", nullable = false)
 	@Enumerated(EnumType.ORDINAL)
+	@JdbcTypeCode(SqlTypes.INTEGER)
 	private TagTypeEnum myTagType;
 
 	@Column(name = "TAG_VERSION", length = 30)

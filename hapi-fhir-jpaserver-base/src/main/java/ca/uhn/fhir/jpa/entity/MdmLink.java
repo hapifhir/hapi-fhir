@@ -44,9 +44,11 @@ import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
 import jakarta.persistence.UniqueConstraint;
 import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.envers.AuditTable;
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
+import org.hibernate.type.SqlTypes;
 
 import java.util.Date;
 
@@ -139,10 +141,12 @@ public class MdmLink extends AuditableBasePartitionable implements IMdmLink<JpaP
 
 	@Column(name = "MATCH_RESULT", nullable = false)
 	@Enumerated(EnumType.ORDINAL)
+	@JdbcTypeCode(SqlTypes.INTEGER)
 	private MdmMatchResultEnum myMatchResult;
 
 	@Column(name = "LINK_SOURCE", nullable = false)
 	@Enumerated(EnumType.ORDINAL)
+	@JdbcTypeCode(SqlTypes.INTEGER)
 	private MdmLinkSourceEnum myLinkSource;
 
 	@Temporal(TemporalType.TIMESTAMP)
