@@ -932,7 +932,7 @@
 		<jaxb_bundle_version>2.2.11_1</jaxb_bundle_version>
 		<jaxb_api_version>2.3.1</jaxb_api_version>
 		<jaxb_core_version>2.3.0.1</jaxb_core_version>
-		<jaxb_runtime_version>4.0.3</jaxb_runtime_version>
+		<jaxb_runtime_version>4.0.4</jaxb_runtime_version>
 		<jena_version>4.8.0</jena_version>
 		<jersey_version>3.0.3</jersey_version>
 		<jetty_version>12.0.2</jetty_version>
@@ -1741,6 +1741,11 @@
 				<groupId>org.glassfish</groupId>
 				<artifactId>javax.json</artifactId>
 				<version>1.0.4</version>
+			</dependency>
+			<dependency>
+				<groupId>org.glassfish.jaxb</groupId>
+				<artifactId>jaxb-core</artifactId>
+				<version>${jaxb_runtime_version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.glassfish.jaxb</groupId>
