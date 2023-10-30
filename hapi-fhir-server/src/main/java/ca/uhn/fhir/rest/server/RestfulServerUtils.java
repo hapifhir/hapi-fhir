@@ -45,6 +45,7 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.hl7.fhir.instance.model.api.*;
+
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.Writer;
@@ -211,9 +212,15 @@ public class RestfulServerUtils {
 				}
 			}
 		}
-		if(nonNull(theRequest.getResource())) {
-			if (nonNull(((org.hl7.fhir.r4.model.Bundle) theRequest.getResource()).getEntry().get(0).getFullUrl()))
-				return ((org.hl7.fhir.r4.model.Bundle) theRequest.getResource()).getEntry().get(0).getFullUrl();
+		if (nonNull(theRequest.getResource())) {
+			if (nonNull(((org.hl7.fhir.r4.model.Bundle) theRequest.getResource())
+					.getEntry()
+					.get(0)
+					.getFullUrl()))
+				return ((org.hl7.fhir.r4.model.Bundle) theRequest.getResource())
+						.getEntry()
+						.get(0)
+						.getFullUrl();
 		}
 		return b.toString();
 	}
