@@ -22,6 +22,9 @@ package ca.uhn.fhir.jpa.term.api;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import org.hl7.fhir.r4.model.ConceptMap;
 
+/**
+ * Represents ConceptMap translation and persistence operations
+ */
 public interface ITermConceptMappingSvc extends ITermConceptClientMappingSvc {
 
 	void deleteConceptMapAndChildren(ResourceTable theResourceTable);
