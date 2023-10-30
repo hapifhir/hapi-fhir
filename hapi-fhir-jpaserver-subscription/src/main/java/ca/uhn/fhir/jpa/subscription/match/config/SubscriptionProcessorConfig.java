@@ -45,6 +45,7 @@ import ca.uhn.fhir.jpa.subscription.model.config.SubscriptionModelConfig;
 import ca.uhn.fhir.jpa.topic.SubscriptionTopicDispatcher;
 import ca.uhn.fhir.jpa.topic.SubscriptionTopicPayloadBuilder;
 import ca.uhn.fhir.jpa.topic.filter.InMemoryTopicFilterMatcher;
+import ca.uhn.fhir.subscription.api.IResourceModifiedMessagePersistenceSvc;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
@@ -60,8 +61,9 @@ import org.springframework.context.annotation.Scope;
 public class SubscriptionProcessorConfig {
 
 	@Bean
-	public SubscriptionMatchingSubscriber subscriptionMatchingSubscriber() {
-		return new SubscriptionMatchingSubscriber();
+	public SubscriptionMatchingSubscriber subscriptionMatchingSubscriber(
+			IResourceModifiedMessagePersistenceSvc theResourceModifiedMessagePersistenceSvc) {
+		return new SubscriptionMatchingSubscriber(theResourceModifiedMessagePersistenceSvc);
 	}
 
 	@Bean

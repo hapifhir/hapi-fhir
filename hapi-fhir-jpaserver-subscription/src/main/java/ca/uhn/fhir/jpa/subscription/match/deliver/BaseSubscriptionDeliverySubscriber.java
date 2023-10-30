@@ -34,6 +34,7 @@ import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionRegistry;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
 import ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryMessage;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.subscription.api.IResourceModifiedMessagePersistenceSvc;
 import ca.uhn.fhir.util.BundleBuilder;
 import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.text.StringSubstitutor;
@@ -59,6 +60,9 @@ public abstract class BaseSubscriptionDeliverySubscriber implements MessageHandl
 
 	@Autowired
 	protected SubscriptionRegistry mySubscriptionRegistry;
+
+	@Autowired
+	protected IResourceModifiedMessagePersistenceSvc myResourceModifiedMessagePersistenceSvc;
 
 	@Autowired
 	private IInterceptorBroadcaster myInterceptorBroadcaster;

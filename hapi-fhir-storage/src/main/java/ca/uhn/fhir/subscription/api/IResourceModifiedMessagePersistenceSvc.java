@@ -58,13 +58,32 @@ public interface IResourceModifiedMessagePersistenceSvc {
 	 */
 	IPersistedResourceModifiedMessage persist(ResourceModifiedMessage theMsg);
 
+//		/**
+//		 * Restore a resourceModifiedMessage to its pre persistence representation.
+//		 *
+//		 * @param thePersistedResourceModifiedMessage The message needing restoration.
+//		 * @return The resourceModifiedMessage in its pre persistence form.
+//		 */
+//		ResourceModifiedMessage inflatePersistedResourceModifiedMessage(
+//				IPersistedResourceModifiedMessage thePersistedResourceModifiedMessage);
+
 	/**
 	 * Restore a resourceModifiedMessage to its pre persistence representation.
 	 *
-	 * @param thePersistedResourceModifiedMessage The message needing restoration.
+	 * @param theResourceModifiedMessage The message needing restoration.
 	 * @return The resourceModifiedMessage in its pre persistence form.
 	 */
 	ResourceModifiedMessage inflatePersistedResourceModifiedMessage(
+			ResourceModifiedMessage theResourceModifiedMessage);
+
+	/**
+	 * Create a ResourceModifiedMessage without its pre persistence representation, i.e. without the resource body in
+	 * payload
+	 *
+	 * @param thePersistedResourceModifiedMessage The message needing creation
+	 * @return The resourceModifiedMessage without its pre persistence form
+	 */
+	ResourceModifiedMessage createResourceModifiedMessageFromEntityWithoutInflation(
 			IPersistedResourceModifiedMessage thePersistedResourceModifiedMessage);
 
 	/**

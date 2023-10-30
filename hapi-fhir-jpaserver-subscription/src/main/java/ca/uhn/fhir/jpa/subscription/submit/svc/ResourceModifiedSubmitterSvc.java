@@ -35,7 +35,6 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.subscription.api.IResourceModifiedConsumerWithRetries;
 import ca.uhn.fhir.subscription.api.IResourceModifiedMessagePersistenceSvc;
 import org.apache.commons.lang3.Validate;
-import org.hl7.fhir.r5.model.IdType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.event.ContextRefreshedEvent;
@@ -44,8 +43,6 @@ import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageDeliveryException;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.support.TransactionCallback;
-
-import java.util.Optional;
 
 import static ca.uhn.fhir.jpa.subscription.match.matcher.subscriber.SubscriptionMatchingSubscriber.SUBSCRIPTION_MATCHING_CHANNEL_NAME;
 
@@ -151,12 +148,20 @@ public class ResourceModifiedSubmitterSvc implements IResourceModifiedConsumer, 
 				boolean wasDeleted = deletePersistedResourceModifiedMessage(
 						thePersistedResourceModifiedMessage.getPersistedResourceModifiedMessagePk());
 
-				Optional<ResourceModifiedMessage> optionalResourceModifiedMessage =
-						inflatePersistedResourceMessage(thePersistedResourceModifiedMessage);
+				//				Optional<ResourceModifiedMessage> optionalResourceModifiedMessage =
+				//						inflatePersistedResourceMessage(thePersistedResourceModifiedMessage);
+				//
+				//				if (wasDeleted && optionalResourceModifiedMessage.isPresent()) {
+				//					// the PK did exist and we were able to deleted it, ie, we are the only one processing the
+				// message
+				//					resourceModifiedMessage = optionalResourceModifiedMessage.get();
+				//					submitResourceModified(resourceModifiedMessage);
+				//				}
 
-				if (wasDeleted && optionalResourceModifiedMessage.isPresent()) {
-					// the PK did exist and we were able to deleted it, ie, we are the only one processing the message
-					resourceModifiedMessage = optionalResourceModifiedMessage.get();
+				resourceModifiedMessage =
+						createResourceModifiedMessageWithoutInflation(thePersistedResourceModifiedMessage);
+
+				if (wasDeleted) {
 					submitResourceModified(resourceModifiedMessage);
 				}
 			} catch (MessageDeliveryException exception) {
@@ -186,32 +191,38 @@ public class ResourceModifiedSubmitterSvc implements IResourceModifiedConsumer, 
 		};
 	}
 
-	private Optional<ResourceModifiedMessage> inflatePersistedResourceMessage(
+	//	private Optional<ResourceModifiedMessage> inflatePersistedResourceMessage(
+	//			IPersistedResourceModifiedMessage thePersistedResourceModifiedMessage) {
+	//		ResourceModifiedMessage resourceModifiedMessage = null;
+	//
+	//		try {
+	//			resourceModifiedMessage = myResourceModifiedMessagePersistenceSvc.inflatePersistedResourceModifiedMessage(
+	//					thePersistedResourceModifiedMessage);
+	//
+	//		} catch (ResourceNotFoundException e) {
+	//			IPersistedResourceModifiedMessagePK persistedResourceModifiedMessagePk =
+	//					thePersistedResourceModifiedMessage.getPersistedResourceModifiedMessagePk();
+	//
+	//			IdType idType = new IdType(
+	//					thePersistedResourceModifiedMessage.getResourceType(),
+	//					persistedResourceModifiedMessagePk.getResourcePid(),
+	//					persistedResourceModifiedMessagePk.getResourceVersion());
+	//
+	//			ourLog.warn(
+	//					"Scheduled submission will be ignored since resource {} cannot be found",
+	//					idType.asStringValue(),
+	//					e);
+	//		} catch (Exception ex) {
+	//			ourLog.error("Unknown error encountered on inflation of resources.", ex);
+	//		}
+	//
+	//		return Optional.ofNullable(resourceModifiedMessage);
+	//	}
+
+	private ResourceModifiedMessage createResourceModifiedMessageWithoutInflation(
 			IPersistedResourceModifiedMessage thePersistedResourceModifiedMessage) {
-		ResourceModifiedMessage resourceModifiedMessage = null;
-
-		try {
-			resourceModifiedMessage = myResourceModifiedMessagePersistenceSvc.inflatePersistedResourceModifiedMessage(
-					thePersistedResourceModifiedMessage);
-
-		} catch (ResourceNotFoundException e) {
-			IPersistedResourceModifiedMessagePK persistedResourceModifiedMessagePk =
-					thePersistedResourceModifiedMessage.getPersistedResourceModifiedMessagePk();
-
-			IdType idType = new IdType(
-					thePersistedResourceModifiedMessage.getResourceType(),
-					persistedResourceModifiedMessagePk.getResourcePid(),
-					persistedResourceModifiedMessagePk.getResourceVersion());
-
-			ourLog.warn(
-					"Scheduled submission will be ignored since resource {} cannot be found",
-					idType.asStringValue(),
-					e);
-		} catch (Exception ex) {
-			ourLog.error("Unknown error encountered on inflation of resources.", ex);
-		}
-
-		return Optional.ofNullable(resourceModifiedMessage);
+		return myResourceModifiedMessagePersistenceSvc.createResourceModifiedMessageFromEntityWithoutInflation(
+				thePersistedResourceModifiedMessage);
 	}
 
 	private boolean deletePersistedResourceModifiedMessage(IPersistedResourceModifiedMessagePK theResourceModifiedPK) {

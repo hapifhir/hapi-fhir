@@ -68,6 +68,12 @@ public abstract class BaseResourceModifiedMessage extends BaseResourceMessage im
 		super();
 	}
 
+	public BaseResourceModifiedMessage(IIdType theIdType, OperationTypeEnum theOperationType) {
+		this();
+		setOperationType(theOperationType);
+		setPayloadId(theIdType);
+	}
+
 	public BaseResourceModifiedMessage(
 			FhirContext theFhirContext, IBaseResource theResource, OperationTypeEnum theOperationType) {
 		this();

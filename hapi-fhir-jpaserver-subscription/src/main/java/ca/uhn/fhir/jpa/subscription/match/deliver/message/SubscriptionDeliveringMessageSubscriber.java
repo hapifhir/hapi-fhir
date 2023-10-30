@@ -30,7 +30,9 @@ import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
 import ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryMessage;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedJsonMessage;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
+import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.EncodingEnum;
+import ca.uhn.fhir.subscription.api.IResourceModifiedMessagePersistenceSvc;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -84,8 +86,14 @@ public class SubscriptionDeliveringMessageSubscriber extends BaseSubscriptionDel
 
 	private ResourceModifiedJsonMessage convertDeliveryMessageToResourceModifiedMessage(
 			ResourceDeliveryMessage theMsg, IBaseResource thePayloadResource) {
-		ResourceModifiedMessage payload =
-				new ResourceModifiedMessage(myFhirContext, thePayloadResource, theMsg.getOperationType());
+		ResourceModifiedMessage payload;
+		if (thePayloadResource == null) {
+			ResourceModifiedMessage payloadLess = new ResourceModifiedMessage(theMsg.getPayloadId(myFhirContext), theMsg.getOperationType());
+			payload = myResourceModifiedMessagePersistenceSvc.inflatePersistedResourceModifiedMessage(payloadLess);
+		} else {
+			payload = new ResourceModifiedMessage(myFhirContext, thePayloadResource, theMsg.getOperationType());
+		}
+
 		payload.setMessageKey(theMsg.getMessageKeyOrDefault());
 		payload.setTransactionId(theMsg.getTransactionId());
 		payload.setPartitionId(theMsg.getRequestPartitionId());

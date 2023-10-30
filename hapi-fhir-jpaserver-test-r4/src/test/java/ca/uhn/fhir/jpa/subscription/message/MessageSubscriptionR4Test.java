@@ -252,27 +252,54 @@ public class MessageSubscriptionR4Test extends BaseSubscriptionsR4Test {
 		assertThat(wasDeleted, is(Boolean.FALSE));
 	}
 
+//	@Test
+//	public void testPersistedResourceModifiedMessage_whenFetchFromDb_willEqualOriginalMessage() throws JsonProcessingException {
+//		mySubscriptionTestUtil.unregisterSubscriptionInterceptor();
+//		// given
+//		TransactionTemplate transactionTemplate = new TransactionTemplate(myTxManager);
+//		Observation obs = sendObservation("zoop", "SNOMED-CT", "theExplicitSource", "theRequestId");
+//
+//		ResourceModifiedMessage originalResourceModifiedMessage = createResourceModifiedMessage(obs);
+//
+//		transactionTemplate.execute(tx -> {
+//
+//				IPersistedResourceModifiedMessage persistedResourceModifiedMessage = myResourceModifiedMessagePersistenceSvc.persist(originalResourceModifiedMessage);
+//
+//				// when
+//				ResourceModifiedMessage restoredResourceModifiedMessage = myResourceModifiedMessagePersistenceSvc.inflatePersistedResourceModifiedMessage(persistedResourceModifiedMessage);
+//
+//				// then
+//				assertEquals(toJson(originalResourceModifiedMessage), toJson(restoredResourceModifiedMessage));
+//				assertEquals(originalResourceModifiedMessage, restoredResourceModifiedMessage);
+//
+//				return null;
+//		});
+//
+//	}
+
 	@Test
-	public void testPersistedResourceModifiedMessage_whenFetchFromDb_willEqualOriginalMessage() throws JsonProcessingException {
+	public void testMethodInflatePersistedResourceModifiedMessage_whenGivenResourceModifiedMessageWithEmptyPayload_willEqualOriginalMessage() {
 		mySubscriptionTestUtil.unregisterSubscriptionInterceptor();
-		// given
+		// setup
 		TransactionTemplate transactionTemplate = new TransactionTemplate(myTxManager);
 		Observation obs = sendObservation("zoop", "SNOMED-CT", "theExplicitSource", "theRequestId");
 
 		ResourceModifiedMessage originalResourceModifiedMessage = createResourceModifiedMessage(obs);
+		ResourceModifiedMessage resourceModifiedMessageWithEmptyPayload = createResourceModifiedMessage(obs);
+		resourceModifiedMessageWithEmptyPayload.setPayloadToNull();
 
 		transactionTemplate.execute(tx -> {
 
-				IPersistedResourceModifiedMessage persistedResourceModifiedMessage = myResourceModifiedMessagePersistenceSvc.persist(originalResourceModifiedMessage);
+			myResourceModifiedMessagePersistenceSvc.persist(originalResourceModifiedMessage);
 
-				// when
-				ResourceModifiedMessage restoredResourceModifiedMessage = myResourceModifiedMessagePersistenceSvc.inflatePersistedResourceModifiedMessage(persistedResourceModifiedMessage);
+			// execute
+			ResourceModifiedMessage restoredResourceModifiedMessage = myResourceModifiedMessagePersistenceSvc.inflatePersistedResourceModifiedMessage(resourceModifiedMessageWithEmptyPayload);
 
-				// then
-				assertEquals(toJson(originalResourceModifiedMessage), toJson(restoredResourceModifiedMessage));
-				assertEquals(originalResourceModifiedMessage, restoredResourceModifiedMessage);
+			// verify
+			assertEquals(toJson(originalResourceModifiedMessage), toJson(restoredResourceModifiedMessage));
+			assertEquals(originalResourceModifiedMessage, restoredResourceModifiedMessage);
 
-				return null;
+			return null;
 		});
 
 	}

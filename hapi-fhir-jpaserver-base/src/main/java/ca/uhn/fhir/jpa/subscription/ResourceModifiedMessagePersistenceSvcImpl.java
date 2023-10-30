@@ -90,11 +90,31 @@ public class ResourceModifiedMessagePersistenceSvcImpl implements IResourceModif
 		return myResourceModifiedDao.save(resourceModifiedEntity);
 	}
 
-	@Override
+
+//	@Override
 	public ResourceModifiedMessage inflatePersistedResourceModifiedMessage(
 			IPersistedResourceModifiedMessage thePersistedResourceModifiedMessage) {
-
+		//FIXME
 		return inflateResourceModifiedMessageFromEntity((ResourceModifiedEntity) thePersistedResourceModifiedMessage);
+	}
+
+	@Override
+	public ResourceModifiedMessage inflatePersistedResourceModifiedMessage(
+			ResourceModifiedMessage theResourceModifiedMessage) {
+
+		return inflateResourceModifiedMessageFromEntity(createEntityFrom(theResourceModifiedMessage));
+	}
+
+	@Override
+	public ResourceModifiedMessage createResourceModifiedMessageFromEntityWithoutInflation(
+			IPersistedResourceModifiedMessage thePersistedResourceModifiedMessage) {
+		ResourceModifiedMessage resourceModifiedMessage = getPayloadLessMessageFromString(
+				((ResourceModifiedEntity) thePersistedResourceModifiedMessage).getSummaryResourceModifiedMessage());
+
+		IdDt resourceId = createIdDtFromResourceModifiedEntity((ResourceModifiedEntity) thePersistedResourceModifiedMessage);
+		resourceModifiedMessage.setPayloadId(resourceId);
+
+		return resourceModifiedMessage;
 	}
 
 	@Override
@@ -112,17 +132,13 @@ public class ResourceModifiedMessagePersistenceSvcImpl implements IResourceModif
 
 	protected ResourceModifiedMessage inflateResourceModifiedMessageFromEntity(
 			ResourceModifiedEntity theResourceModifiedEntity) {
-		String resourcePid =
-				theResourceModifiedEntity.getResourceModifiedEntityPK().getResourcePid();
-		String resourceVersion =
-				theResourceModifiedEntity.getResourceModifiedEntityPK().getResourceVersion();
 		String resourceType = theResourceModifiedEntity.getResourceType();
 		ResourceModifiedMessage retVal =
 				getPayloadLessMessageFromString(theResourceModifiedEntity.getSummaryResourceModifiedMessage());
 		SystemRequestDetails systemRequestDetails =
 				new SystemRequestDetails().setRequestPartitionId(retVal.getPartitionId());
 
-		IdDt resourceIdDt = new IdDt(resourceType, resourcePid, resourceVersion);
+		IdDt resourceIdDt = createIdDtFromResourceModifiedEntity(theResourceModifiedEntity);
 		IFhirResourceDao dao = myDaoRegistry.getResourceDao(resourceType);
 
 		IBaseResource iBaseResource = dao.read(resourceIdDt, systemRequestDetails, true);
@@ -162,6 +178,16 @@ public class ResourceModifiedMessagePersistenceSvcImpl implements IResourceModif
 		} catch (JsonProcessingException e) {
 			throw new ConfigurationException(Msg.code(2335) + "Failed to serialize empty ResourceModifiedMessage", e);
 		}
+	}
+
+	private IdDt createIdDtFromResourceModifiedEntity(ResourceModifiedEntity theResourceModifiedEntity) {
+		String resourcePid =
+				theResourceModifiedEntity.getResourceModifiedEntityPK().getResourcePid();
+		String resourceVersion =
+				theResourceModifiedEntity.getResourceModifiedEntityPK().getResourceVersion();
+		String resourceType = theResourceModifiedEntity.getResourceType();
+
+		return new IdDt(resourceType, resourcePid, resourceVersion);
 	}
 
 	private static class PayloadLessResourceModifiedMessage extends ResourceModifiedMessage {

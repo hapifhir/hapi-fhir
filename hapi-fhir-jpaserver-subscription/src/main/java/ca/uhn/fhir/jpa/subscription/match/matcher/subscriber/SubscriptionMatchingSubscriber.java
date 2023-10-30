@@ -30,8 +30,11 @@ import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionRegistry;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedJsonMessage;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import ca.uhn.fhir.subscription.api.IResourceModifiedMessagePersistenceSvc;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r5.model.IdType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,6 +43,7 @@ import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.MessagingException;
 
 import java.util.Collection;
+import java.util.Optional;
 import javax.annotation.Nonnull;
 
 import static ca.uhn.fhir.rest.server.messaging.BaseResourceMessage.OperationTypeEnum.DELETE;
@@ -64,11 +68,15 @@ public class SubscriptionMatchingSubscriber implements MessageHandler {
 	@Autowired
 	private SubscriptionMatchDeliverer mySubscriptionMatchDeliverer;
 
+	private IResourceModifiedMessagePersistenceSvc myResourceModifiedMessagePersistenceSvc;
+
 	/**
 	 * Constructor
 	 */
-	public SubscriptionMatchingSubscriber() {
+	public SubscriptionMatchingSubscriber(
+			IResourceModifiedMessagePersistenceSvc theResourceModifiedMessagePersistenceSvc) {
 		super();
+		myResourceModifiedMessagePersistenceSvc = theResourceModifiedMessagePersistenceSvc;
 	}
 
 	@Override
@@ -96,6 +104,13 @@ public class SubscriptionMatchingSubscriber implements MessageHandler {
 				// ignore anything else
 				return;
 		}
+
+		Optional<ResourceModifiedMessage> inflatedMsg = inflatePersistedResourceMessage(theMsg);
+		// ignore the message if the resource does not exist
+		if (inflatedMsg.isEmpty()) {
+			return;
+		}
+		theMsg = inflatedMsg.get();
 
 		// Interceptor call: SUBSCRIPTION_BEFORE_PERSISTED_RESOURCE_CHECKED
 		HookParams params = new HookParams().add(ResourceModifiedMessage.class, theMsg);
@@ -224,5 +239,31 @@ public class SubscriptionMatchingSubscriber implements MessageHandler {
 				ourLog.trace("Subscription {} start resource type check: {}", subscriptionId, match);
 				return match;
 		}
+	}
+
+	private Optional<ResourceModifiedMessage> inflatePersistedResourceMessage(
+			ResourceModifiedMessage theResourceModifiedMessage) {
+		ResourceModifiedMessage inflatedResourceModifiedMessage = null;
+
+		try {
+			inflatedResourceModifiedMessage =
+					myResourceModifiedMessagePersistenceSvc.inflatePersistedResourceModifiedMessage(
+							theResourceModifiedMessage);
+
+		} catch (ResourceNotFoundException e) {
+			IdType idType = new IdType(
+					theResourceModifiedMessage.getPayloadType(myFhirContext),
+					theResourceModifiedMessage.getPayloadId(),
+					theResourceModifiedMessage.getPayloadVersion());
+
+			ourLog.warn(
+					"Scheduled submission will be ignored since resource {} cannot be found",
+					idType.asStringValue(),
+					e);
+		} catch (Exception ex) {
+			ourLog.error("Unknown error encountered on inflation of resources.", ex);
+		}
+
+		return Optional.ofNullable(inflatedResourceModifiedMessage);
 	}
 }

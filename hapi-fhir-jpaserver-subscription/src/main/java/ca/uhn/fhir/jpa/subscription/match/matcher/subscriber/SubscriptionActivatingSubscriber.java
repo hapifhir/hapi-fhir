@@ -31,6 +31,7 @@ import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.subscription.SubscriptionConstants;
+import ca.uhn.fhir.subscription.api.IResourceModifiedMessagePersistenceSvc;
 import ca.uhn.fhir.util.SubscriptionUtil;
 import org.hl7.fhir.dstu2.model.Subscription;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -64,6 +65,8 @@ public class SubscriptionActivatingSubscriber implements MessageHandler {
 	@Autowired
 	private StorageSettings myStorageSettings;
 
+	@Autowired
+	private IResourceModifiedMessagePersistenceSvc myResourceModifiedMessagePersistenceSvc;
 	/**
 	 * Constructor
 	 */
@@ -86,6 +89,7 @@ public class SubscriptionActivatingSubscriber implements MessageHandler {
 		switch (payload.getOperationType()) {
 			case CREATE:
 			case UPDATE:
+				payload = myResourceModifiedMessagePersistenceSvc.inflatePersistedResourceModifiedMessage(payload);
 				activateSubscriptionIfRequired(payload.getNewPayload(myFhirContext));
 				break;
 			case TRANSACTION:
