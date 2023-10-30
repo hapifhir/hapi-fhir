@@ -45,7 +45,6 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.hl7.fhir.instance.model.api.*;
-
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.Writer;
@@ -57,6 +56,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.servlet.http.HttpServletRequest;
 
+import static java.util.Objects.nonNull;
 import static org.apache.commons.lang3.StringUtils.*;
 
 public class RestfulServerUtils {
@@ -211,7 +211,10 @@ public class RestfulServerUtils {
 				}
 			}
 		}
-
+		if(nonNull(theRequest.getResource())) {
+			if (nonNull(((org.hl7.fhir.r4.model.Bundle) theRequest.getResource()).getEntry().get(0).getFullUrl()))
+				return ((org.hl7.fhir.r4.model.Bundle) theRequest.getResource()).getEntry().get(0).getFullUrl();
+		}
 		return b.toString();
 	}
 

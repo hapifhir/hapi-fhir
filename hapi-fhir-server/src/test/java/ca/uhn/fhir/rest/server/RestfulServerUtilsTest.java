@@ -1,9 +1,14 @@
 package ca.uhn.fhir.rest.server;
 
-import ca.uhn.fhir.rest.api.*;
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.DeleteCascadeModeEnum;
+import ca.uhn.fhir.rest.api.PreferHandlingEnum;
+import ca.uhn.fhir.rest.api.PreferHeader;
+import ca.uhn.fhir.rest.api.PreferReturnEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import org.hl7.fhir.r4.model.Bundle;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -17,11 +22,15 @@ import java.util.List;
 import java.util.Map;
 
 import static ca.uhn.fhir.rest.api.RequestTypeEnum.GET;
+import static ca.uhn.fhir.rest.api.RequestTypeEnum.POST;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -149,6 +158,35 @@ public class RestfulServerUtilsTest {
 		//Then
 		assertThat(linkSelfWithoutGivenParameters, is(containsString("http://localhost:8000/$my-operation?")));
 		assertThat(linkSelfWithoutGivenParameters, is(containsString("_format=json")));
+	}
 
+	@Test
+	public void testCreateSelfLinks_whenFullUrlIsPresent_willReturnFullUrl(){
+		//Given
+		String baseUrl = "http://localhost:8000";
+		Map<String, String[]> parameters = new HashMap<>();
+		parameters.put("_format", new String[]{"json"});
+		parameters.put("_count", new String[]{"10"});
+		parameters.put("_offset", new String[]{"100"});
+
+		ServletRequestDetails servletRequestDetails = new ServletRequestDetails();
+		servletRequestDetails.setFhirServerBase("http://localhost:8000");
+		servletRequestDetails.setRequestType(POST);
+		servletRequestDetails.setParameters(parameters);
+
+
+		Bundle exampleBundle = new Bundle();
+		exampleBundle.setType(Bundle.BundleType.TRANSACTION);
+		Bundle.BundleEntryComponent entry = new Bundle.BundleEntryComponent();
+		exampleBundle.setEntry(List.of(entry));
+
+		servletRequestDetails.setResource(exampleBundle);
+		((Bundle) servletRequestDetails.getResource()).getEntry().get(0).setFullUrl("http://localhost:8000/Patient/1356");
+
+
+		//When
+		String linkSelfWithoutGivenParameters = RestfulServerUtils.createLinkSelfWithoutGivenParameters(baseUrl, servletRequestDetails, null);
+		//Then
+		assertThat(linkSelfWithoutGivenParameters, is(containsString("http://localhost:8000/Patient/1356")));
 	}
 }
