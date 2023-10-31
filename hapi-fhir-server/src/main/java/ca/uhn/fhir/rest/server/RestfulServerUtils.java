@@ -182,12 +182,12 @@ public class RestfulServerUtils {
 		if (isNotBlank(theRequest.getRequestPath())) {
 			b.append('/');
 			if (isNotBlank(theRequest.getTenantId())
-				&& theRequest.getRequestPath().startsWith(theRequest.getTenantId() + "/")) {
+					&& theRequest.getRequestPath().startsWith(theRequest.getTenantId() + "/")) {
 				// we add tenant id only if it not already present in theServerBase
 				if (!theServerBase.endsWith(theRequest.getTenantId())) {
 					b.append(theRequest
-						.getRequestPath()
-						.substring(theRequest.getTenantId().length() + 1));
+							.getRequestPath()
+							.substring(theRequest.getTenantId().length() + 1));
 				}
 			} else {
 				b.append(theRequest.getRequestPath());
