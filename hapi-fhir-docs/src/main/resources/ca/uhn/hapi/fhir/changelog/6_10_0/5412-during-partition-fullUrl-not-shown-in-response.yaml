@@ -1,5 +1,5 @@
 ---
 type: fix
 issue: 5412
-title: "Previously when partitions were enabled and a resource with a fullUrl provided was posted, the response
-would utilize the server url and would provide an incorrect url in the response."
+title: "Previously when partitions were enabled and a bundle was posted the response.link would display the
+partition name twice, now it only displays once."

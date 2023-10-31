@@ -163,7 +163,7 @@ public class RestfulServerUtilsTest {
 	@Test
 	public void testCreateSelfLinks_whenFullUrlIsPresent_willReturnFullUrl(){
 		//Given
-		String baseUrl = "http://localhost:8000";
+		String baseUrl = "http://localhost:8000/Partition-B";
 		Map<String, String[]> parameters = new HashMap<>();
 		parameters.put("_format", new String[]{"json"});
 		parameters.put("_count", new String[]{"10"});
@@ -173,20 +173,13 @@ public class RestfulServerUtilsTest {
 		servletRequestDetails.setFhirServerBase("http://localhost:8000");
 		servletRequestDetails.setRequestType(POST);
 		servletRequestDetails.setParameters(parameters);
-
-
-		Bundle exampleBundle = new Bundle();
-		exampleBundle.setType(Bundle.BundleType.TRANSACTION);
-		Bundle.BundleEntryComponent entry = new Bundle.BundleEntryComponent();
-		exampleBundle.setEntry(List.of(entry));
-
-		servletRequestDetails.setResource(exampleBundle);
-		((Bundle) servletRequestDetails.getResource()).getEntry().get(0).setFullUrl("http://localhost:8000/Patient/1356");
+		servletRequestDetails.setTenantId("Partition-B");
+		servletRequestDetails.setRequestPath("Partition-B");
 
 
 		//When
 		String linkSelfWithoutGivenParameters = RestfulServerUtils.createLinkSelfWithoutGivenParameters(baseUrl, servletRequestDetails, null);
 		//Then
-		assertThat(linkSelfWithoutGivenParameters, is(containsString("http://localhost:8000/Patient/1356")));
+		assertEquals("http://localhost:8000/Partition-B",linkSelfWithoutGivenParameters);
 	}
 }
