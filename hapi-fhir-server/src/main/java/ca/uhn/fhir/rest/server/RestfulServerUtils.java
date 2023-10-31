@@ -180,8 +180,8 @@ public class RestfulServerUtils {
 		b.append(theServerBase);
 
 		if (isNotBlank(theRequest.getRequestPath())
-			&& isNotEmpty(theRequest.getTenantId())
-			&& !theServerBase.contains(theRequest.getTenantId())) {
+				&& isNotEmpty(theRequest.getTenantId())
+				&& !theServerBase.contains(theRequest.getTenantId())) {
 			b.append('/');
 			if (theRequest.getRequestPath().startsWith(theRequest.getTenantId() + "/")) {
 				b.append(theRequest
