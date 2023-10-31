@@ -24,6 +24,7 @@ import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.subscription.match.deliver.BaseSubscriptionDeliverySubscriber;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
 import ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryMessage;
+import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.StringUtils;
@@ -31,8 +32,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import javax.swing.text.html.Option;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -73,7 +76,7 @@ public class SubscriptionDeliveringEmailSubscriber extends BaseSubscriptionDeliv
 		if (isNotBlank(subscription.getPayloadString())) {
 			EncodingEnum encoding = EncodingEnum.forContentType(subscription.getPayloadString());
 			if (encoding != null) {
-				payload = getPayloadStringFromMessage(theMessage);
+				payload = getPayloadStringFromMessageOrEmptyString(theMessage);
 			}
 		}
 
@@ -116,14 +119,19 @@ public class SubscriptionDeliveringEmailSubscriber extends BaseSubscriptionDeliv
 	/**
 	 * Get the payload string, fetch it from the DB when the payload is null.
 	 */
-	private String getPayloadStringFromMessage(ResourceDeliveryMessage theMessage) {
+	private String getPayloadStringFromMessageOrEmptyString(ResourceDeliveryMessage theMessage) {
 		String payload = theMessage.getPayloadString();
 
 		if (payload != null) {
 			return payload;
 		}
 
-		payload = inflateResourceModifiedMessageFromDeliveryMessage(theMessage).getPayloadString();
+		Optional<ResourceModifiedMessage> inflatedMessage = inflateResourceModifiedMessageFromDeliveryMessage(theMessage);
+		if (inflatedMessage.isEmpty()){
+			return "";
+		}
+
+		payload = inflatedMessage.get().getPayloadString();
 		return payload;
 	}
 }

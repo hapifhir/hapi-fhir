@@ -39,6 +39,7 @@ import org.springframework.messaging.MessagingException;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Optional;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -84,14 +85,8 @@ public class SubscriptionDeliveringMessageSubscriber extends BaseSubscriptionDel
 
 	private ResourceModifiedJsonMessage convertDeliveryMessageToResourceModifiedJsonMessage(
 			ResourceDeliveryMessage theMsg, IBaseResource thePayloadResource) {
-		ResourceModifiedMessage payload;
-		if (thePayloadResource == null) {
-			// fetch the payload from DB
-			payload = inflateResourceModifiedMessageFromDeliveryMessage(theMsg);
-		} else {
-			payload = new ResourceModifiedMessage(myFhirContext, thePayloadResource, theMsg.getOperationType());
-		}
-
+		ResourceModifiedMessage payload =
+			new ResourceModifiedMessage(myFhirContext, thePayloadResource, theMsg.getOperationType());
 		payload.setMessageKey(theMsg.getMessageKeyOrDefault());
 		payload.setTransactionId(theMsg.getTransactionId());
 		payload.setPartitionId(theMsg.getRequestPartitionId());
@@ -102,6 +97,13 @@ public class SubscriptionDeliveringMessageSubscriber extends BaseSubscriptionDel
 	public void handleMessage(ResourceDeliveryMessage theMessage) throws MessagingException, URISyntaxException {
 		CanonicalSubscription subscription = theMessage.getSubscription();
 		IBaseResource payloadResource = theMessage.getPayload(myFhirContext);
+		if (payloadResource == null){
+			Optional<ResourceModifiedMessage> inflatedMsg = inflateResourceModifiedMessageFromDeliveryMessage(theMessage);
+			if (inflatedMsg.isEmpty()){
+				return;
+			}
+		}
+
 		ResourceModifiedJsonMessage messageWrapperToSend =
 				convertDeliveryMessageToResourceModifiedJsonMessage(theMessage, payloadResource);
 

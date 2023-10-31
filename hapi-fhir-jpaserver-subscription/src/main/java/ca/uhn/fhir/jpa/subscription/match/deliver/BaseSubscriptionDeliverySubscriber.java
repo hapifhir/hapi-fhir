@@ -50,6 +50,7 @@ import org.springframework.messaging.MessagingException;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 import static ca.uhn.fhir.jpa.subscription.util.SubscriptionUtil.createRequestDetailForPartitionedRequest;
 
@@ -154,11 +155,11 @@ public abstract class BaseSubscriptionDeliverySubscriber implements MessageHandl
 		return builder.getBundle();
 	}
 
-	protected ResourceModifiedMessage inflateResourceModifiedMessageFromDeliveryMessage(
+	protected Optional<ResourceModifiedMessage> inflateResourceModifiedMessageFromDeliveryMessage(
 			ResourceDeliveryMessage theMsg) {
 		ResourceModifiedMessage payloadLess =
 				new ResourceModifiedMessage(theMsg.getPayloadId(myFhirContext), theMsg.getOperationType());
-		return myResourceModifiedMessagePersistenceSvc.inflatePersistedResourceModifiedMessage(payloadLess);
+		return myResourceModifiedMessagePersistenceSvc.inflatePersistedResourceModifiedMessageOrNull(payloadLess);
 	}
 
 	@VisibleForTesting
