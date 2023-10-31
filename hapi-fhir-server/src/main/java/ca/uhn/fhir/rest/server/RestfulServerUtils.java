@@ -179,14 +179,16 @@ public class RestfulServerUtils {
 		StringBuilder b = new StringBuilder();
 		b.append(theServerBase);
 
-		if (isNotBlank(theRequest.getRequestPath())
-				&& isNotEmpty(theRequest.getTenantId())
-				&& !theServerBase.contains(theRequest.getTenantId())) {
+		if (isNotBlank(theRequest.getRequestPath())) {
 			b.append('/');
-			if (theRequest.getRequestPath().startsWith(theRequest.getTenantId() + "/")) {
-				b.append(theRequest
+			if (isNotBlank(theRequest.getTenantId())
+				&& theRequest.getRequestPath().startsWith(theRequest.getTenantId() + "/")) {
+				// we add tenant id only if it not already present in theServerBase
+				if (!theServerBase.endsWith(theRequest.getTenantId())) {
+					b.append(theRequest
 						.getRequestPath()
 						.substring(theRequest.getTenantId().length() + 1));
+				}
 			} else {
 				b.append(theRequest.getRequestPath());
 			}
