@@ -61,9 +61,8 @@ import org.springframework.context.annotation.Scope;
 public class SubscriptionProcessorConfig {
 
 	@Bean
-	public SubscriptionMatchingSubscriber subscriptionMatchingSubscriber(
-			IResourceModifiedMessagePersistenceSvc theResourceModifiedMessagePersistenceSvc) {
-		return new SubscriptionMatchingSubscriber(theResourceModifiedMessagePersistenceSvc);
+	public SubscriptionMatchingSubscriber subscriptionMatchingSubscriber() {
+		return new SubscriptionMatchingSubscriber();
 	}
 
 	@Bean

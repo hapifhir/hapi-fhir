@@ -66,15 +66,14 @@ public class SubscriptionMatchingSubscriber implements MessageHandler {
 	@Autowired
 	private SubscriptionMatchDeliverer mySubscriptionMatchDeliverer;
 
+	@Autowired
 	private IResourceModifiedMessagePersistenceSvc myResourceModifiedMessagePersistenceSvc;
 
 	/**
 	 * Constructor
 	 */
-	public SubscriptionMatchingSubscriber(
-			IResourceModifiedMessagePersistenceSvc theResourceModifiedMessagePersistenceSvc) {
+	public SubscriptionMatchingSubscriber() {
 		super();
-		myResourceModifiedMessagePersistenceSvc = theResourceModifiedMessagePersistenceSvc;
 	}
 
 	@Override
