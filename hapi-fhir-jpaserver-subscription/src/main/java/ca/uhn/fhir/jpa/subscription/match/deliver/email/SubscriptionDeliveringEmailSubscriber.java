@@ -32,7 +32,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.swing.text.html.Option;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -126,8 +125,9 @@ public class SubscriptionDeliveringEmailSubscriber extends BaseSubscriptionDeliv
 			return payload;
 		}
 
-		Optional<ResourceModifiedMessage> inflatedMessage = inflateResourceModifiedMessageFromDeliveryMessage(theMessage);
-		if (inflatedMessage.isEmpty()){
+		Optional<ResourceModifiedMessage> inflatedMessage =
+				inflateResourceModifiedMessageFromDeliveryMessage(theMessage);
+		if (inflatedMessage.isEmpty()) {
 			return "";
 		}
 

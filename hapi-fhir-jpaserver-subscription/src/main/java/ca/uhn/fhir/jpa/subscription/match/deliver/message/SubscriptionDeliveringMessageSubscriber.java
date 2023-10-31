@@ -86,7 +86,7 @@ public class SubscriptionDeliveringMessageSubscriber extends BaseSubscriptionDel
 	private ResourceModifiedJsonMessage convertDeliveryMessageToResourceModifiedJsonMessage(
 			ResourceDeliveryMessage theMsg, IBaseResource thePayloadResource) {
 		ResourceModifiedMessage payload =
-			new ResourceModifiedMessage(myFhirContext, thePayloadResource, theMsg.getOperationType());
+				new ResourceModifiedMessage(myFhirContext, thePayloadResource, theMsg.getOperationType());
 		payload.setMessageKey(theMsg.getMessageKeyOrDefault());
 		payload.setTransactionId(theMsg.getTransactionId());
 		payload.setPartitionId(theMsg.getRequestPartitionId());
@@ -97,9 +97,10 @@ public class SubscriptionDeliveringMessageSubscriber extends BaseSubscriptionDel
 	public void handleMessage(ResourceDeliveryMessage theMessage) throws MessagingException, URISyntaxException {
 		CanonicalSubscription subscription = theMessage.getSubscription();
 		IBaseResource payloadResource = theMessage.getPayload(myFhirContext);
-		if (payloadResource == null){
-			Optional<ResourceModifiedMessage> inflatedMsg = inflateResourceModifiedMessageFromDeliveryMessage(theMessage);
-			if (inflatedMsg.isEmpty()){
+		if (payloadResource == null) {
+			Optional<ResourceModifiedMessage> inflatedMsg =
+					inflateResourceModifiedMessageFromDeliveryMessage(theMessage);
+			if (inflatedMsg.isEmpty()) {
 				return;
 			}
 		}
