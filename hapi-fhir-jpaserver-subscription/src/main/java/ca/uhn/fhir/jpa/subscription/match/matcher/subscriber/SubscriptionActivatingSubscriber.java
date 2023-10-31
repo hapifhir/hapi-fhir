@@ -42,6 +42,7 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.MessagingException;
 
+import java.util.Optional;
 import javax.annotation.Nonnull;
 
 /**
@@ -89,7 +90,12 @@ public class SubscriptionActivatingSubscriber implements MessageHandler {
 		switch (payload.getOperationType()) {
 			case CREATE:
 			case UPDATE:
-				payload = myResourceModifiedMessagePersistenceSvc.inflatePersistedResourceModifiedMessage(payload);
+				Optional<ResourceModifiedMessage> inflatedMsg =
+						myResourceModifiedMessagePersistenceSvc.inflatePersistedResourceModifiedMessageOrNull(payload);
+				if (inflatedMsg.isEmpty()) {
+					return;
+				}
+				payload = inflatedMsg.get();
 				activateSubscriptionIfRequired(payload.getNewPayload(myFhirContext));
 				break;
 			case TRANSACTION:
@@ -108,7 +114,7 @@ public class SubscriptionActivatingSubscriber implements MessageHandler {
 	 */
 	public synchronized boolean activateSubscriptionIfRequired(final IBaseResource theSubscription) {
 		// Grab the value for "Subscription.channel.type" so we can see if this
-		// subscriber applies..
+		// subscriber applies.
 		CanonicalSubscriptionChannelType subscriptionChannelType =
 				mySubscriptionCanonicalizer.getChannelType(theSubscription);
 

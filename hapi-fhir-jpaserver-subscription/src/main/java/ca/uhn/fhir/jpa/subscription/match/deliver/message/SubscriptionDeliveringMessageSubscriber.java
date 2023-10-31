@@ -30,9 +30,7 @@ import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
 import ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryMessage;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedJsonMessage;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
-import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.EncodingEnum;
-import ca.uhn.fhir.subscription.api.IResourceModifiedMessagePersistenceSvc;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -68,7 +66,7 @@ public class SubscriptionDeliveringMessageSubscriber extends BaseSubscriptionDel
 			IBaseResource payloadResource = createDeliveryBundleForPayloadSearchCriteria(
 					theSubscription, theWrappedMessageToSend.getPayload().getPayload(myFhirContext));
 			ResourceModifiedJsonMessage newWrappedMessageToSend =
-					convertDeliveryMessageToResourceModifiedMessage(theSourceMessage, payloadResource);
+					convertDeliveryMessageToResourceModifiedJsonMessage(theSourceMessage, payloadResource);
 			theWrappedMessageToSend.setPayload(newWrappedMessageToSend.getPayload());
 			payloadId =
 					payloadResource.getIdElement().toUnqualifiedVersionless().getValue();
@@ -84,12 +82,12 @@ public class SubscriptionDeliveringMessageSubscriber extends BaseSubscriptionDel
 						.getValue());
 	}
 
-	private ResourceModifiedJsonMessage convertDeliveryMessageToResourceModifiedMessage(
+	private ResourceModifiedJsonMessage convertDeliveryMessageToResourceModifiedJsonMessage(
 			ResourceDeliveryMessage theMsg, IBaseResource thePayloadResource) {
 		ResourceModifiedMessage payload;
 		if (thePayloadResource == null) {
-			ResourceModifiedMessage payloadLess = new ResourceModifiedMessage(theMsg.getPayloadId(myFhirContext), theMsg.getOperationType());
-			payload = myResourceModifiedMessagePersistenceSvc.inflatePersistedResourceModifiedMessage(payloadLess);
+			// fetch the payload from DB
+			payload = inflateResourceModifiedMessageFromDeliveryMessage(theMsg);
 		} else {
 			payload = new ResourceModifiedMessage(myFhirContext, thePayloadResource, theMsg.getOperationType());
 		}
@@ -105,7 +103,7 @@ public class SubscriptionDeliveringMessageSubscriber extends BaseSubscriptionDel
 		CanonicalSubscription subscription = theMessage.getSubscription();
 		IBaseResource payloadResource = theMessage.getPayload(myFhirContext);
 		ResourceModifiedJsonMessage messageWrapperToSend =
-				convertDeliveryMessageToResourceModifiedMessage(theMessage, payloadResource);
+				convertDeliveryMessageToResourceModifiedJsonMessage(theMessage, payloadResource);
 
 		// Interceptor call: SUBSCRIPTION_BEFORE_MESSAGE_DELIVERY
 		HookParams params = new HookParams()

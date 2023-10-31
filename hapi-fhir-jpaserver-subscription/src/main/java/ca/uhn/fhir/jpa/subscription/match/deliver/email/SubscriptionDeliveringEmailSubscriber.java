@@ -73,7 +73,7 @@ public class SubscriptionDeliveringEmailSubscriber extends BaseSubscriptionDeliv
 		if (isNotBlank(subscription.getPayloadString())) {
 			EncodingEnum encoding = EncodingEnum.forContentType(subscription.getPayloadString());
 			if (encoding != null) {
-				payload = theMessage.getPayloadString();
+				payload = getPayloadStringFromMessage(theMessage);
 			}
 		}
 
@@ -111,5 +111,19 @@ public class SubscriptionDeliveringEmailSubscriber extends BaseSubscriptionDeliv
 	@VisibleForTesting
 	public IEmailSender getEmailSender() {
 		return myEmailSender;
+	}
+
+	/**
+	 * Get the payload string, fetch it from the DB when the payload is null.
+	 */
+	private String getPayloadStringFromMessage(ResourceDeliveryMessage theMessage) {
+		String payload = theMessage.getPayloadString();
+
+		if (payload != null) {
+			return payload;
+		}
+
+		payload = inflateResourceModifiedMessageFromDeliveryMessage(theMessage).getPayloadString();
+		return payload;
 	}
 }

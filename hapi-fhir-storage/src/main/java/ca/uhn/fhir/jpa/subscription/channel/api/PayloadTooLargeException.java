@@ -6,11 +6,11 @@ package ca.uhn.fhir.jpa.subscription.channel.api;
  */
 public class PayloadTooLargeException extends RuntimeException {
 
-    public PayloadTooLargeException(String theMessage){
-        super(theMessage);
-    }
+	public PayloadTooLargeException(String theMessage) {
+		super(theMessage);
+	}
 
-    public PayloadTooLargeException(String theMessage, Throwable theThrowable) {
-        super(theMessage, theThrowable);
-    }
+	public PayloadTooLargeException(String theMessage, Throwable theThrowable) {
+		super(theMessage, theThrowable);
+	}
 }

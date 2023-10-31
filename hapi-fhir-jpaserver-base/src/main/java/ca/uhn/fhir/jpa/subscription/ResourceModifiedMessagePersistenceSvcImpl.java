@@ -35,16 +35,19 @@ import ca.uhn.fhir.jpa.subscription.async.AsyncResourceModifiedSubmitterSvc;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.subscription.api.IResourceModifiedMessagePersistenceSvc;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r5.model.IdType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 import static ca.uhn.fhir.jpa.model.entity.PersistedResourceModifiedMessageEntityPK.with;
 
@@ -90,14 +93,6 @@ public class ResourceModifiedMessagePersistenceSvcImpl implements IResourceModif
 		return myResourceModifiedDao.save(resourceModifiedEntity);
 	}
 
-
-//	@Override
-	public ResourceModifiedMessage inflatePersistedResourceModifiedMessage(
-			IPersistedResourceModifiedMessage thePersistedResourceModifiedMessage) {
-		//FIXME
-		return inflateResourceModifiedMessageFromEntity((ResourceModifiedEntity) thePersistedResourceModifiedMessage);
-	}
-
 	@Override
 	public ResourceModifiedMessage inflatePersistedResourceModifiedMessage(
 			ResourceModifiedMessage theResourceModifiedMessage) {
@@ -106,12 +101,37 @@ public class ResourceModifiedMessagePersistenceSvcImpl implements IResourceModif
 	}
 
 	@Override
+	public Optional<ResourceModifiedMessage> inflatePersistedResourceModifiedMessageOrNull(
+			ResourceModifiedMessage theResourceModifiedMessage) {
+		ResourceModifiedMessage inflatedResourceModifiedMessage = null;
+
+		try {
+			inflatedResourceModifiedMessage = inflatePersistedResourceModifiedMessage(theResourceModifiedMessage);
+		} catch (ResourceNotFoundException e) {
+			IdType idType = new IdType(
+					theResourceModifiedMessage.getPayloadType(myFhirContext),
+					theResourceModifiedMessage.getPayloadId(),
+					theResourceModifiedMessage.getPayloadVersion());
+
+			ourLog.warn(
+					"Scheduled submission will be ignored since resource {} cannot be found",
+					idType.asStringValue(),
+					e);
+		} catch (Exception ex) {
+			ourLog.error("Unknown error encountered on inflation of resources.", ex);
+		}
+
+		return Optional.ofNullable(inflatedResourceModifiedMessage);
+	}
+
+	@Override
 	public ResourceModifiedMessage createResourceModifiedMessageFromEntityWithoutInflation(
 			IPersistedResourceModifiedMessage thePersistedResourceModifiedMessage) {
 		ResourceModifiedMessage resourceModifiedMessage = getPayloadLessMessageFromString(
 				((ResourceModifiedEntity) thePersistedResourceModifiedMessage).getSummaryResourceModifiedMessage());
 
-		IdDt resourceId = createIdDtFromResourceModifiedEntity((ResourceModifiedEntity) thePersistedResourceModifiedMessage);
+		IdDt resourceId =
+				createIdDtFromResourceModifiedEntity((ResourceModifiedEntity) thePersistedResourceModifiedMessage);
 		resourceModifiedMessage.setPayloadId(resourceId);
 
 		return resourceModifiedMessage;

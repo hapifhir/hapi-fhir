@@ -33,6 +33,7 @@ import ca.uhn.fhir.jpa.subscription.match.registry.ActiveSubscription;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionRegistry;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
 import ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryMessage;
+import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.subscription.api.IResourceModifiedMessagePersistenceSvc;
 import ca.uhn.fhir.util.BundleBuilder;
@@ -151,6 +152,13 @@ public abstract class BaseSubscriptionDeliverySubscriber implements MessageHandl
 			builder.addTransactionUpdateEntry(next);
 		}
 		return builder.getBundle();
+	}
+
+	protected ResourceModifiedMessage inflateResourceModifiedMessageFromDeliveryMessage(
+			ResourceDeliveryMessage theMsg) {
+		ResourceModifiedMessage payloadLess =
+				new ResourceModifiedMessage(theMsg.getPayloadId(myFhirContext), theMsg.getOperationType());
+		return myResourceModifiedMessagePersistenceSvc.inflatePersistedResourceModifiedMessage(payloadLess);
 	}
 
 	@VisibleForTesting

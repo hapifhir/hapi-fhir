@@ -37,7 +37,6 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.messaging.MessageChannel;
-import org.springframework.messaging.MessageDeliveryException;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -158,9 +157,9 @@ public class SubscriptionMatchDeliverer {
 				ourLog.warn("Failed to send message to Delivery Channel.");
 			}
 		} catch (RuntimeException e) {
-			if (e.getCause() instanceof PayloadTooLargeException){
-				ourLog.warn("Failed to send message to Delivery Channel because the payload size is larger than broker " +
-						"max message size. Retry is about to be performed without payload");
+			if (e.getCause() instanceof PayloadTooLargeException) {
+				ourLog.warn("Failed to send message to Delivery Channel because the payload size is larger than broker "
+						+ "max message size. Retry is about to be performed without payload.");
 				ResourceDeliveryJsonMessage msgPayloadLess = nullOutPayload(theWrappedMsg);
 				trySendToDeliveryChannel(msgPayloadLess, theDeliveryChannel);
 			} else {
