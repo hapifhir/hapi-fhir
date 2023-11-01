@@ -23,6 +23,7 @@ import java.util.Map;
 import static ca.uhn.fhir.rest.api.RequestTypeEnum.GET;
 import static ca.uhn.fhir.rest.api.RequestTypeEnum.POST;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.http.util.TextUtils.isBlank;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
@@ -159,26 +160,29 @@ public class RestfulServerUtilsTest {
 		assertThat(linkSelfWithoutGivenParameters, is(containsString("_format=json")));
 	}
 
-	@Test
-	public void testCreateSelfLinks_whenRequestPathAndTenantIdAreTheSame_willReturnOne(){
-		//Given
-		String baseUrl = "http://localhost:8000/Partition-B";
-		Map<String, String[]> parameters = new HashMap<>();
-		parameters.put("_format", new String[]{"json"});
-		parameters.put("_count", new String[]{"10"});
-		parameters.put("_offset", new String[]{"100"});
-
-		ServletRequestDetails servletRequestDetails = new ServletRequestDetails();
-		servletRequestDetails.setFhirServerBase("http://localhost:8000");
-		servletRequestDetails.setRequestType(POST);
-		servletRequestDetails.setParameters(parameters);
-		servletRequestDetails.setTenantId("Partition-B");
-		servletRequestDetails.setRequestPath("Partition-B");
+	@CsvSource(value = {
+		"http://localhost:8000/Partition-B ,                          , Partition-B, http://localhost:8000/Partition-B",
+		"http://localhost:8000/Partition-B , Partition-B              , Partition-B, http://localhost:8000/Partition-B",
+		"http://localhost:8000/Partition-B , Partition-B/Patient      , Partition-B, http://localhost:8000/Partition-B/Patient",
+		"http://localhost:8000/Partition-B , Partition-B/$my-operation, Partition-B, http://localhost:8000/Partition-B/$my-operation",
+	})
 
 
+	@ParameterizedTest
+	public void testCreateSelfLinks_withDifferentResourcePathAndTenantId(String theBaseUrl, String theRequestPath,
+	String theTenantId, String theExpectedUrl){
 		//When
-		String linkSelfWithoutGivenParameters = RestfulServerUtils.createLinkSelfWithoutGivenParameters(baseUrl, servletRequestDetails, null);
+		ServletRequestDetails servletRequestDetails = new ServletRequestDetails();
+		servletRequestDetails.setRequestType(POST);
+		servletRequestDetails.setTenantId(theTenantId);
+		if(isBlank(theRequestPath))
+			servletRequestDetails.setRequestPath("");
+		else
+			servletRequestDetails.setRequestPath(theRequestPath);
+
 		//Then
-		assertEquals("http://localhost:8000/Partition-B",linkSelfWithoutGivenParameters);
+		String linkSelfWithoutGivenParameters = RestfulServerUtils.createLinkSelfWithoutGivenParameters(theBaseUrl, servletRequestDetails, null);
+		//Test
+		assertEquals(theExpectedUrl, linkSelfWithoutGivenParameters);
 	}
 }

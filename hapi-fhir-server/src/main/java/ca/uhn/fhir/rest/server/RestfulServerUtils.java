@@ -177,14 +177,16 @@ public class RestfulServerUtils {
 	public static String createLinkSelfWithoutGivenParameters(
 			String theServerBase, RequestDetails theRequest, List<String> excludedParameterNames) {
 		String tenantId = resolveTenantId(theRequest);
-		String requestPath = resolveRequestPath(theRequest);
+		String requestPath = isNotBlank(theRequest.getRequestPath()) ? theRequest.getRequestPath() : "";
 		StringBuilder b = new StringBuilder();
 		if (tenantId != null) {
 			b.append(theServerBase.replaceAll(tenantId, ""));
 			b.append(tenantId);
-			if (!tenantId.equals(requestPath)) b.append(requestPath.replaceAll(tenantId, ""));
-		} else {
-			b.append(theServerBase + "/");
+			b.append(requestPath.replaceAll(tenantId, ""));
+		}else {
+			b.append(theServerBase);
+			if(isNotBlank(requestPath))
+				b.append("/");
 			b.append(requestPath);
 		}
 
@@ -218,15 +220,6 @@ public class RestfulServerUtils {
 			return theRequestDetails.getTenantId();
 		}
 		return null;
-	}
-
-	private static String resolveRequestPath(RequestDetails theRequest) {
-		StringBuilder builder = new StringBuilder();
-		if (isNotBlank(theRequest.getRequestPath())) {
-			//			builder.append('/');
-			builder.append(theRequest.getRequestPath());
-		}
-		return builder.toString();
 	}
 
 	public static String createOffsetPagingLink(
