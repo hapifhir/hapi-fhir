@@ -183,10 +183,9 @@ public class RestfulServerUtils {
 			b.append(theServerBase.replaceAll(tenantId, ""));
 			b.append(tenantId);
 			b.append(requestPath.replaceAll(tenantId, ""));
-		}else {
+		} else {
 			b.append(theServerBase);
-			if(isNotBlank(requestPath))
-				b.append("/");
+			if (isNotBlank(requestPath)) b.append("/");
 			b.append(requestPath);
 		}
 
