@@ -251,7 +251,7 @@ public class BinaryStorageInterceptor<T extends IPrimitiveType<byte[]>> {
 						}
 						if (myBinaryStorageSvc.isValidBlobId(newBlobId)) {
 							List<DeferredBinaryTarget> deferredBinaryTargets =
-									getOrCreateDeferredBinaryStorageMap(theTransactionDetails);
+									getOrCreateDeferredBinaryStorageList(theResource);
 							DeferredBinaryTarget newDeferredBinaryTarget =
 									new DeferredBinaryTarget(newBlobId, nextTarget, data);
 							deferredBinaryTargets.add(newDeferredBinaryTarget);
@@ -289,21 +289,29 @@ public class BinaryStorageInterceptor<T extends IPrimitiveType<byte[]>> {
 	}
 
 	@Nonnull
-	private List<DeferredBinaryTarget> getOrCreateDeferredBinaryStorageMap(TransactionDetails theTransactionDetails) {
-		return theTransactionDetails.getOrCreateUserData(getDeferredListKey(), ArrayList::new);
+	@SuppressWarnings("unchecked")
+	private List<DeferredBinaryTarget> getOrCreateDeferredBinaryStorageList(IBaseResource theResource) {
+		Object deferredBinaryTargetList = theResource.getUserData(getDeferredListKey());
+		if (deferredBinaryTargetList == null) {
+			deferredBinaryTargetList = new ArrayList<>();
+			theResource.setUserData(getDeferredListKey(), deferredBinaryTargetList);
+		}
+		return (List<DeferredBinaryTarget>) deferredBinaryTargetList;
 	}
 
+	@SuppressWarnings("unchecked")
 	@Hook(Pointcut.STORAGE_PRECOMMIT_RESOURCE_CREATED)
 	public void storeLargeBinariesBeforeCreatePersistence(
-			TransactionDetails theTransactionDetails, IBaseResource theResource, Pointcut thePoincut)
+			TransactionDetails theTransactionDetails, IBaseResource theResource, Pointcut thePointcut)
 			throws IOException {
-		if (theTransactionDetails == null) {
+		if (theResource == null) {
 			return;
 		}
-		List<DeferredBinaryTarget> deferredBinaryTargets = theTransactionDetails.getUserData(getDeferredListKey());
-		if (deferredBinaryTargets != null) {
+		Object deferredBinaryTargetList = theResource.getUserData(getDeferredListKey());
+
+		if (deferredBinaryTargetList != null) {
 			IIdType resourceId = theResource.getIdElement();
-			for (DeferredBinaryTarget next : deferredBinaryTargets) {
+			for (DeferredBinaryTarget next : (List<DeferredBinaryTarget>) deferredBinaryTargetList) {
 				String blobId = next.getBlobId();
 				IBinaryTarget target = next.getBinaryTarget();
 				InputStream dataStream = next.getDataStream();
