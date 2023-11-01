@@ -136,10 +136,12 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		version.onTable("MPI_LINK_AUD")
 				.modifyColumn("20231027.7", "LINK_SOURCE")
 				.nullable()
+				.failureAllowed()
 				.withType(ColumnTypeEnum.TINYINT);
 		version.onTable("MPI_LINK_AUD")
 				.modifyColumn("20231027.8", "MATCH_RESULT")
 				.nullable()
+				.failureAllowed()
 				.withType(ColumnTypeEnum.TINYINT);
 	}
 
