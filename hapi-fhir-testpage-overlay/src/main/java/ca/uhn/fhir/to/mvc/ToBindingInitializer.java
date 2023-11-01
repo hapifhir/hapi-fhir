@@ -9,5 +9,4 @@ public class ToBindingInitializer implements WebBindingInitializer {
 	public void initBinder(WebDataBinder theBinder) {
 		theBinder.setFieldMarkerPrefix("__");
 	}
-
 }

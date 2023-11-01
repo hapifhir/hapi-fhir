@@ -18,21 +18,24 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.trim;
 
 @Mojo(
-	name = "generate-ddl",
-	defaultPhase = LifecyclePhase.PROCESS_CLASSES,
-	requiresDependencyCollection = ResolutionScope.COMPILE_PLUS_RUNTIME,
-	requiresDependencyResolution = ResolutionScope.COMPILE_PLUS_RUNTIME,
-	threadSafe = true,
-	requiresProject = true)
+		name = "generate-ddl",
+		defaultPhase = LifecyclePhase.PROCESS_CLASSES,
+		requiresDependencyCollection = ResolutionScope.COMPILE_PLUS_RUNTIME,
+		requiresDependencyResolution = ResolutionScope.COMPILE_PLUS_RUNTIME,
+		threadSafe = true,
+		requiresProject = true)
 public class GenerateDdlMojo extends AbstractMojo {
 	private static final Logger ourLog = LoggerFactory.getLogger(GenerateDdlMojo.class);
 
 	@Parameter
 	private List<String> packageNames;
+
 	@Parameter
 	private List<Dialect> dialects;
+
 	@Parameter
 	private String outputDirectory;
+
 	@Parameter(defaultValue = "${project}", readonly = true)
 	private transient MavenProject project;
 
@@ -104,7 +107,6 @@ public class GenerateDdlMojo extends AbstractMojo {
 		public void setPrependFile(String thePrependFile) {
 			prependFile = thePrependFile;
 		}
-
 	}
 
 	public static void main(String[] args) throws MojoExecutionException, MojoFailureException {
@@ -112,9 +114,8 @@ public class GenerateDdlMojo extends AbstractMojo {
 		m.packageNames = List.of("ca.uhn.fhir.jpa.model.entity");
 		m.outputDirectory = "hapi-tinder-plugin/target";
 		m.dialects = List.of(new Dialect("ca.uhn.fhir.jpa.model.dialect.HapiFhirH2Dialect", "h2.sql"));
-//		m.dialects = List.of(new Dialect("ca.uhn.fhir.jpa.model.dialect.HapiFhirPostgresDialect", "hapifhirpostgres94.sql"));
+		//		m.dialects = List.of(new Dialect("ca.uhn.fhir.jpa.model.dialect.HapiFhirPostgresDialect",
+		// "hapifhirpostgres94.sql"));
 		m.execute();
 	}
-
-
 }

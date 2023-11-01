@@ -12,6 +12,7 @@ import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.util.CurrentThreadCaptureQueriesListener;
 import ca.uhn.fhir.jpa.validation.ValidationSettings;
 import ca.uhn.fhirtest.interceptor.PublicSecurityInterceptor;
+import jakarta.annotation.PostConstruct;
 import jakarta.persistence.EntityManagerFactory;
 import net.ttddyy.dsproxy.support.ProxyDataSourceBuilder;
 import org.apache.commons.dbcp2.BasicDataSource;
@@ -29,7 +30,6 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
-import jakarta.annotation.PostConstruct;
 import javax.sql.DataSource;
 
 @Configuration
@@ -102,7 +102,9 @@ public class TestAuditConfig {
 
 	@Bean
 	public LocalContainerEntityManagerFactoryBean entityManagerFactory(
-			ConfigurableListableBeanFactory theConfigurableListableBeanFactory, FhirContext theFhirContext, JpaStorageSettings theStorageSettings) {
+			ConfigurableListableBeanFactory theConfigurableListableBeanFactory,
+			FhirContext theFhirContext,
+			JpaStorageSettings theStorageSettings) {
 		LocalContainerEntityManagerFactoryBean retVal = HapiEntityManagerFactoryUtil.newEntityManagerFactory(
 				theConfigurableListableBeanFactory, theFhirContext, theStorageSettings);
 		retVal.setPersistenceUnitName("PU_HapiFhirJpaAudit");

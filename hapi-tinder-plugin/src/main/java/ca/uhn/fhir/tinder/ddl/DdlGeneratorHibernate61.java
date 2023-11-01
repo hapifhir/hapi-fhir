@@ -28,7 +28,6 @@ import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.core.type.filter.AnnotationTypeFilter;
 
-import javax.annotation.Nonnull;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -44,6 +43,7 @@ import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import javax.annotation.Nonnull;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -84,11 +84,13 @@ public class DdlGeneratorHibernate61 {
 			String fileName = nextDialect.getTargetFileName();
 			String dialectClassName = nextDialect.getClassName();
 
-			StandardServiceRegistryBuilder registryBuilder = new StandardServiceRegistryBuilder(bootstrapServiceRegistry);
+			StandardServiceRegistryBuilder registryBuilder =
+					new StandardServiceRegistryBuilder(bootstrapServiceRegistry);
 			registryBuilder.applySetting(AvailableSettings.HBM2DDL_AUTO, "create");
 			registryBuilder.applySetting(AvailableSettings.DIALECT, dialectClassName);
 			registryBuilder.addService(ConnectionProvider.class, connectionProvider);
-			registryBuilder.addService(ISequenceValueMassager.class, new ISequenceValueMassager.NoopSequenceValueMassager());
+			registryBuilder.addService(
+					ISequenceValueMassager.class, new ISequenceValueMassager.NoopSequenceValueMassager());
 			StandardServiceRegistry standardRegistry = registryBuilder.build();
 			MetadataSources metadataSources = new MetadataSources(standardRegistry);
 
@@ -156,7 +158,8 @@ public class DdlGeneratorHibernate61 {
 	}
 
 	@Nonnull
-	private Set<Class<?>> scanClasspathForEntityClasses(Set<String> thePackages, ClassLoader theClassLoader) throws MojoFailureException {
+	private Set<Class<?>> scanClasspathForEntityClasses(Set<String> thePackages, ClassLoader theClassLoader)
+			throws MojoFailureException {
 
 		ClassPathScanningCandidateComponentProvider provider = new ClassPathScanningCandidateComponentProvider(false);
 		provider.setResourceLoader(new PathMatchingResourcePatternResolver(theClassLoader));
@@ -188,7 +191,6 @@ public class DdlGeneratorHibernate61 {
 		return entityClassNames;
 	}
 
-
 	/**
 	 * The hibernate bootstrap process insists on having a DB connection even
 	 * if it will never be used. So we just create a placeholder H2 connection
@@ -209,5 +211,4 @@ public class DdlGeneratorHibernate61 {
 			conn.close();
 		}
 	}
-
 }
