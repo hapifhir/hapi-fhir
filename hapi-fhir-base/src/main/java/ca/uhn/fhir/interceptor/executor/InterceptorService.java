@@ -52,6 +52,11 @@ public class InterceptorService extends BaseInterceptorService<Pointcut>
 	}
 
 	@Override
+	protected Class<?> getBooleanReturnType() {
+		return boolean.class;
+	}
+
+	@Override
 	protected Optional<HookDescriptor> scanForHook(Method nextMethod) {
 		return findAnnotation(nextMethod, Hook.class).map(t -> new HookDescriptor(t.value(), t.order()));
 	}
