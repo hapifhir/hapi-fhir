@@ -181,11 +181,10 @@ public class RestfulServerUtils {
 		StringBuilder b = new StringBuilder();
 		if (tenantId != null) {
 			b.append(theServerBase.replaceAll(tenantId, ""));
-			b.append(tenantId+"/");
-			if(!tenantId.equals(requestPath))
-				b.append(requestPath.replaceAll(tenantId + "/", ""));
+			b.append(tenantId + "/");
+			if (!tenantId.equals(requestPath)) b.append(requestPath.replaceAll(tenantId + "/", ""));
 		} else {
-			b.append(theServerBase+ "/");
+			b.append(theServerBase + "/");
 			b.append(requestPath);
 		}
 
@@ -215,7 +214,7 @@ public class RestfulServerUtils {
 
 	private static String resolveTenantId(RequestDetails theRequestDetails) {
 		if (isNotBlank(theRequestDetails.getTenantId())
-			&& theRequestDetails.getRequestPath().startsWith(theRequestDetails.getTenantId())) {
+				&& theRequestDetails.getRequestPath().startsWith(theRequestDetails.getTenantId())) {
 			return theRequestDetails.getTenantId();
 		}
 		return null;
@@ -224,7 +223,7 @@ public class RestfulServerUtils {
 	private static String resolveRequestPath(RequestDetails theRequest) {
 		StringBuilder builder = new StringBuilder();
 		if (isNotBlank(theRequest.getRequestPath())) {
-//			builder.append('/');
+			//			builder.append('/');
 			builder.append(theRequest.getRequestPath());
 		}
 		return builder.toString();
