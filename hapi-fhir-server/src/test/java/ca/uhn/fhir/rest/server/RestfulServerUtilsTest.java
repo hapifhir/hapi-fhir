@@ -166,11 +166,9 @@ public class RestfulServerUtilsTest {
 		"http://localhost:8000/Partition-B , Partition-B/Patient      , Partition-B, http://localhost:8000/Partition-B/Patient",
 		"http://localhost:8000/Partition-B , Partition-B/$my-operation, Partition-B, http://localhost:8000/Partition-B/$my-operation",
 	})
-
-
 	@ParameterizedTest
 	public void testCreateSelfLinks_withDifferentResourcePathAndTenantId(String theBaseUrl, String theRequestPath,
-	String theTenantId, String theExpectedUrl){
+	String theTenantId, String theExpectedUrl) {
 		//When
 		ServletRequestDetails servletRequestDetails = new ServletRequestDetails();
 		servletRequestDetails.setRequestType(POST);
