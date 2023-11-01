@@ -176,23 +176,19 @@ public class RestfulServerUtils {
 	 */
 	public static String createLinkSelfWithoutGivenParameters(
 			String theServerBase, RequestDetails theRequest, List<String> excludedParameterNames) {
+		String tenantId = resolveTenantId(theRequest);
+		String requestPath = resolveRequestPath(theRequest);
 		StringBuilder b = new StringBuilder();
-		b.append(theServerBase);
-
-		if (isNotBlank(theRequest.getRequestPath())) {
-			b.append('/');
-			if (isNotBlank(theRequest.getTenantId())
-					&& theRequest.getRequestPath().startsWith(theRequest.getTenantId() + "/")) {
-				// we add tenant id only if it not already present in theServerBase
-				if (!theServerBase.endsWith(theRequest.getTenantId())) {
-					b.append(theRequest
-							.getRequestPath()
-							.substring(theRequest.getTenantId().length() + 1));
-				}
-			} else {
-				b.append(theRequest.getRequestPath());
-			}
+		if (tenantId != null) {
+			b.append(theServerBase.replaceAll(tenantId, ""));
+			b.append(tenantId+"/");
+			if(!tenantId.equals(requestPath))
+				b.append(requestPath.replaceAll(tenantId + "/", ""));
+		} else {
+			b.append(theServerBase+ "/");
+			b.append(requestPath);
 		}
+
 		// For POST the URL parameters get jumbled with the post body parameters so don't include them, they might be
 		// huge
 		if (theRequest.getRequestType() == RequestTypeEnum.GET) {
@@ -215,6 +211,23 @@ public class RestfulServerUtils {
 			}
 		}
 		return b.toString();
+	}
+
+	private static String resolveTenantId(RequestDetails theRequestDetails) {
+		if (isNotBlank(theRequestDetails.getTenantId())
+			&& theRequestDetails.getRequestPath().startsWith(theRequestDetails.getTenantId())) {
+			return theRequestDetails.getTenantId();
+		}
+		return null;
+	}
+
+	private static String resolveRequestPath(RequestDetails theRequest) {
+		StringBuilder builder = new StringBuilder();
+		if (isNotBlank(theRequest.getRequestPath())) {
+//			builder.append('/');
+			builder.append(theRequest.getRequestPath());
+		}
+		return builder.toString();
 	}
 
 	public static String createOffsetPagingLink(

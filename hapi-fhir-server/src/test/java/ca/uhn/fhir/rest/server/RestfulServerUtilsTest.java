@@ -160,7 +160,7 @@ public class RestfulServerUtilsTest {
 	}
 
 	@Test
-	public void testCreateSelfLinks_whenFullUrlIsPresent_willReturnFullUrl(){
+	public void testCreateSelfLinks_whenRequestPathAndTenantIdAreTheSame_willReturnOne(){
 		//Given
 		String baseUrl = "http://localhost:8000/Partition-B";
 		Map<String, String[]> parameters = new HashMap<>();
