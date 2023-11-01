@@ -489,7 +489,7 @@ public abstract class BaseInterceptorService<POINTCUT extends Enum<POINTCUT> & I
 			Class<?> returnType = theHookMethod.getReturnType();
 			if (myPointcut.getReturnType().equals(getBooleanReturnType())) {
 				Validate.isTrue(
-					getBooleanReturnType().equals(returnType) || void.class.equals(returnType),
+						getBooleanReturnType().equals(returnType) || void.class.equals(returnType),
 						"Method does not return boolean or void: %s",
 						theHookMethod);
 			} else if (myPointcut.getReturnType().equals(void.class)) {
