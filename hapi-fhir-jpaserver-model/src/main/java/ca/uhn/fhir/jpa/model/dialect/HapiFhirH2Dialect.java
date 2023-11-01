@@ -28,6 +28,8 @@ import org.hibernate.dialect.H2Dialect;
  */
 public class HapiFhirH2Dialect extends H2Dialect {
 
+	// FIXME: adjust dialects to not include checks for enums (both string and int)
+
 	/**
 	 * Constructor
 	 */
