@@ -179,6 +179,6 @@ public class RestfulServerUtilsTest {
 		//When
 		String linkSelfWithoutGivenParameters = RestfulServerUtils.createLinkSelfWithoutGivenParameters(baseUrl, servletRequestDetails, null);
 		//Then
-		assertEquals("http://localhost:8000/Partition-B/",linkSelfWithoutGivenParameters);
+		assertEquals("http://localhost:8000/Partition-B",linkSelfWithoutGivenParameters);
 	}
 }

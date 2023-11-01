@@ -181,8 +181,8 @@ public class RestfulServerUtils {
 		StringBuilder b = new StringBuilder();
 		if (tenantId != null) {
 			b.append(theServerBase.replaceAll(tenantId, ""));
-			b.append(tenantId + "/");
-			if (!tenantId.equals(requestPath)) b.append(requestPath.replaceAll(tenantId + "/", ""));
+			b.append(tenantId);
+			if (!tenantId.equals(requestPath)) b.append(requestPath.replaceAll(tenantId, ""));
 		} else {
 			b.append(theServerBase + "/");
 			b.append(requestPath);
