@@ -263,12 +263,10 @@ public abstract class BaseInterceptorService<POINTCUT extends Enum<POINTCUT> & I
 		return myRegisteredPointcuts.contains(thePointcut);
 	}
 
-	protected abstract Class<?> getBooleanReturnType();
-
 	@Override
 	public boolean callHooks(POINTCUT thePointcut, HookParams theParams) {
 		assert haveAppropriateParams(thePointcut, theParams);
-		assert thePointcut.getReturnType() == void.class || thePointcut.getReturnType() == getBooleanReturnType();
+		assert thePointcut.getReturnType() == void.class || thePointcut.getReturnType() == boolean.class;
 
 		Object retValObj = doCallHooks(thePointcut, theParams, true);
 		return (Boolean) retValObj;
@@ -284,14 +282,14 @@ public abstract class BaseInterceptorService<POINTCUT extends Enum<POINTCUT> & I
 		for (BaseInvoker nextInvoker : invokers) {
 			Object nextOutcome = nextInvoker.invoke(theParams);
 			Class<?> pointcutReturnType = thePointcut.getReturnType();
-			if (pointcutReturnType.equals(getBooleanReturnType())) {
+			if (pointcutReturnType.equals(boolean.class)) {
 				Boolean nextOutcomeAsBoolean = (Boolean) nextOutcome;
 				if (Boolean.FALSE.equals(nextOutcomeAsBoolean)) {
 					ourLog.trace("callHooks({}) for invoker({}) returned false", thePointcut, nextInvoker);
 					theRetVal = false;
 					break;
 				}
-			} else if (!pointcutReturnType.equals(void.class)) {
+			} else if (pointcutReturnType.equals(void.class) == false) {
 				if (nextOutcome != null) {
 					theRetVal = nextOutcome;
 					break;
@@ -351,7 +349,7 @@ public abstract class BaseInterceptorService<POINTCUT extends Enum<POINTCUT> & I
 
 		List<BaseInvoker> retVal;
 
-		if (!haveMultiple) {
+		if (haveMultiple == false) {
 
 			// The global list doesn't need to be sorted every time since it's sorted on
 			// insertion each time. Doing so is a waste of cycles..
@@ -487,9 +485,9 @@ public abstract class BaseInterceptorService<POINTCUT extends Enum<POINTCUT> & I
 			myMethod = theHookMethod;
 
 			Class<?> returnType = theHookMethod.getReturnType();
-			if (myPointcut.getReturnType().equals(getBooleanReturnType())) {
+			if (myPointcut.getReturnType().equals(boolean.class)) {
 				Validate.isTrue(
-						getBooleanReturnType().equals(returnType) || void.class.equals(returnType),
+						boolean.class.equals(returnType) || void.class.equals(returnType),
 						"Method does not return boolean or void: %s",
 						theHookMethod);
 			} else if (myPointcut.getReturnType().equals(void.class)) {
