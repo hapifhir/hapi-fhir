@@ -263,7 +263,9 @@ public abstract class BaseInterceptorService<POINTCUT extends Enum<POINTCUT> & I
 		return myRegisteredPointcuts.contains(thePointcut);
 	}
 
-	protected abstract Class<?> getBooleanReturnType();
+	protected Class<?> getBooleanReturnType() {
+		return boolean.class;
+	}
 
 	@Override
 	public boolean callHooks(POINTCUT thePointcut, HookParams theParams) {
@@ -290,6 +292,8 @@ public abstract class BaseInterceptorService<POINTCUT extends Enum<POINTCUT> & I
 					ourLog.trace("callHooks({}) for invoker({}) returned false", thePointcut, nextInvoker);
 					theRetVal = false;
 					break;
+				} else {
+					theRetVal = true;
 				}
 			} else if (!pointcutReturnType.equals(void.class)) {
 				if (nextOutcome != null) {
