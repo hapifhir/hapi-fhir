@@ -23,20 +23,14 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.dao.TolerantJsonParser;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
-import ca.uhn.fhir.jpa.model.util.CodeSystemHash;
 import ca.uhn.fhir.jpa.search.lastn.json.CodeJson;
 import ca.uhn.fhir.jpa.search.lastn.json.ObservationJson;
-import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
-import ca.uhn.fhir.jpa.searchparam.util.LastNParameterHelper;
-import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
-import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
 import co.elastic.clients.elasticsearch._types.FieldValue;
 import co.elastic.clients.elasticsearch._types.Result;
-import co.elastic.clients.elasticsearch._types.query_dsl.BoolQuery;
 import co.elastic.clients.elasticsearch._types.query_dsl.Query;
 import co.elastic.clients.elasticsearch.core.IndexRequest;
 import co.elastic.clients.elasticsearch.core.IndexResponse;
@@ -56,7 +50,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.StringReader;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.function.Function;
@@ -65,38 +58,17 @@ import javax.annotation.Nullable;
 
 public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 
-	private static final Logger ourLog = LoggerFactory.getLogger(ElasticsearchSvcImpl.class);
 
 	// Index Constants
 	public static final String OBSERVATION_INDEX = "observation_index";
 	public static final String OBSERVATION_CODE_INDEX = "code_index";
-	public static final String OBSERVATION_DOCUMENT_TYPE =
-			"ca.uhn.fhir.jpa.model.entity.ObservationIndexedSearchParamLastNEntity";
-	public static final String CODE_DOCUMENT_TYPE =
-			"ca.uhn.fhir.jpa.model.entity.ObservationIndexedCodeCodeableConceptEntity";
 	public static final String OBSERVATION_INDEX_SCHEMA_FILE = "ObservationIndexSchema.json";
 	public static final String OBSERVATION_CODE_INDEX_SCHEMA_FILE = "ObservationCodeIndexSchema.json";
 
 	// Aggregation Constants
-	private static final String GROUP_BY_SUBJECT = "group_by_subject";
-	private static final String GROUP_BY_SYSTEM = "group_by_system";
-	private static final String GROUP_BY_CODE = "group_by_code";
-	private static final String MOST_RECENT_EFFECTIVE = "most_recent_effective";
 
 	// Observation index document element names
 	private static final String OBSERVATION_IDENTIFIER_FIELD_NAME = "identifier";
-	private static final String OBSERVATION_SUBJECT_FIELD_NAME = "subject";
-	private static final String OBSERVATION_CODEVALUE_FIELD_NAME = "codeconceptcodingcode";
-	private static final String OBSERVATION_CODESYSTEM_FIELD_NAME = "codeconceptcodingsystem";
-	private static final String OBSERVATION_CODEHASH_FIELD_NAME = "codeconceptcodingcode_system_hash";
-	private static final String OBSERVATION_CODEDISPLAY_FIELD_NAME = "codeconceptcodingdisplay";
-	private static final String OBSERVATION_CODE_TEXT_FIELD_NAME = "codeconcepttext";
-	private static final String OBSERVATION_EFFECTIVEDTM_FIELD_NAME = "effectivedtm";
-	private static final String OBSERVATION_CATEGORYHASH_FIELD_NAME = "categoryconceptcodingcode_system_hash";
-	private static final String OBSERVATION_CATEGORYVALUE_FIELD_NAME = "categoryconceptcodingcode";
-	private static final String OBSERVATION_CATEGORYSYSTEM_FIELD_NAME = "categoryconceptcodingsystem";
-	private static final String OBSERVATION_CATEGORYDISPLAY_FIELD_NAME = "categoryconceptcodingdisplay";
-	private static final String OBSERVATION_CATEGORYTEXT_FIELD_NAME = "categoryconcepttext";
 
 	// Code index document element names
 	private static final String CODE_HASH = "codingcode_system_hash";
@@ -105,11 +77,6 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 	private static final String OBSERVATION_RESOURCE_NAME = "Observation";
 
 	private final ElasticsearchClient myRestHighLevelClient;
-
-	private final ObjectMapper objectMapper = new ObjectMapper();
-
-	@Autowired
-	private PartitionSettings myPartitionSettings;
 
 	@Autowired
 	private FhirContext myContext;
@@ -122,7 +89,6 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 			@Nullable String theUsername,
 			@Nullable String thePassword) {
 		this(theProtocol, theHostname, theUsername, thePassword);
-		this.myPartitionSettings = thePartitionSetings;
 	}
 
 	public ElasticsearchSvcImpl(
@@ -182,133 +148,6 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 	private boolean indexExists(String theIndexName) throws IOException {
 		ExistsRequest request = new ExistsRequest.Builder().index(theIndexName).build();
 		return myRestHighLevelClient.indices().exists(request).value();
-	}
-
-	private List<FieldValue> getCodingCodeSystemValues(List<? extends IQueryParameterType> codeParams) {
-		ArrayList<FieldValue> codeSystemHashList = new ArrayList<>();
-		for (IQueryParameterType nextOr : codeParams) {
-			if (nextOr instanceof TokenParam) {
-				TokenParam ref = (TokenParam) nextOr;
-				if (ref.getSystem() != null && ref.getValue() != null) {
-					codeSystemHashList.add(FieldValue.of(
-							String.valueOf(CodeSystemHash.hashCodeSystem(ref.getSystem(), ref.getValue()))));
-				}
-			} else {
-				throw new IllegalArgumentException(
-						Msg.code(1181) + "Invalid token type (expecting TokenParam): " + nextOr.getClass());
-			}
-		}
-		return codeSystemHashList;
-	}
-
-	private List<FieldValue> getCodingCodeOnlyValues(List<? extends IQueryParameterType> codeParams) {
-		ArrayList<FieldValue> codeOnlyList = new ArrayList<>();
-		for (IQueryParameterType nextOr : codeParams) {
-
-			if (nextOr instanceof TokenParam) {
-				TokenParam ref = (TokenParam) nextOr;
-				if (ref.getValue() != null && ref.getSystem() == null && !ref.isText()) {
-					codeOnlyList.add(FieldValue.of(ref.getValue()));
-				}
-			} else {
-				throw new IllegalArgumentException(
-						Msg.code(1182) + "Invalid token type (expecting TokenParam): " + nextOr.getClass());
-			}
-		}
-		return codeOnlyList;
-	}
-
-	private List<FieldValue> getCodingSystemOnlyValues(List<? extends IQueryParameterType> codeParams) {
-		ArrayList<FieldValue> systemOnlyList = new ArrayList<>();
-		for (IQueryParameterType nextOr : codeParams) {
-
-			if (nextOr instanceof TokenParam) {
-				TokenParam ref = (TokenParam) nextOr;
-				if (ref.getValue() == null && ref.getSystem() != null) {
-					systemOnlyList.add(FieldValue.of(ref.getSystem()));
-				}
-			} else {
-				throw new IllegalArgumentException(
-						Msg.code(1183) + "Invalid token type (expecting TokenParam): " + nextOr.getClass());
-			}
-		}
-		return systemOnlyList;
-	}
-
-	private List<FieldValue> getCodingTextOnlyValues(List<? extends IQueryParameterType> codeParams) {
-		ArrayList<FieldValue> textOnlyList = new ArrayList<>();
-		for (IQueryParameterType nextOr : codeParams) {
-
-			if (nextOr instanceof TokenParam) {
-				TokenParam ref = (TokenParam) nextOr;
-				if (ref.isText() && ref.getValue() != null) {
-					textOnlyList.add(FieldValue.of(ref.getValue()));
-				}
-			} else {
-				throw new IllegalArgumentException(
-						Msg.code(1184) + "Invalid token type (expecting TokenParam): " + nextOr.getClass());
-			}
-		}
-		return textOnlyList;
-	}
-
-	private void addObservationCodeCriteria(
-			BoolQuery.Builder theBoolQueryBuilder,
-			SearchParameterMap theSearchParameterMap,
-			FhirContext theFhirContext) {
-		String codeParamName = LastNParameterHelper.getCodeParamName(theFhirContext);
-		if (theSearchParameterMap.containsKey(codeParamName)) {
-			ArrayList<FieldValue> codeSystemHashList = new ArrayList<>();
-			ArrayList<FieldValue> codeOnlyList = new ArrayList<>();
-			ArrayList<FieldValue> systemOnlyList = new ArrayList<>();
-			ArrayList<FieldValue> textOnlyList = new ArrayList<>();
-			List<List<IQueryParameterType>> andOrParams = theSearchParameterMap.get(codeParamName);
-			for (List<? extends IQueryParameterType> nextAnd : andOrParams) {
-				codeSystemHashList.addAll(getCodingCodeSystemValues(nextAnd));
-				codeOnlyList.addAll(getCodingCodeOnlyValues(nextAnd));
-				systemOnlyList.addAll(getCodingSystemOnlyValues(nextAnd));
-				textOnlyList.addAll(getCodingTextOnlyValues(nextAnd));
-			}
-			if (!codeSystemHashList.isEmpty()) {
-				theBoolQueryBuilder.must(mf -> mf.terms(
-						tb -> tb.field(OBSERVATION_CODEHASH_FIELD_NAME).terms(tbf -> tbf.value(codeSystemHashList))));
-			}
-			if (!codeOnlyList.isEmpty()) {
-				theBoolQueryBuilder.must(mf -> mf.terms(
-						tb -> tb.field(OBSERVATION_CODEVALUE_FIELD_NAME).terms(tbf -> tbf.value(codeOnlyList))));
-			}
-			if (!systemOnlyList.isEmpty()) {
-				theBoolQueryBuilder.must(mf -> mf.terms(
-						tb -> tb.field(OBSERVATION_CODESYSTEM_FIELD_NAME).terms(tbf -> tbf.value(systemOnlyList))));
-			}
-			if (!textOnlyList.isEmpty()) {
-				theBoolQueryBuilder.must(mf -> {
-					for (FieldValue textOnlyParam : textOnlyList) {
-						mf.bool(bq -> bq.should(
-										sq -> sq.matchPhrasePrefix(mfp -> mfp.field(OBSERVATION_CODEDISPLAY_FIELD_NAME)
-												.query(textOnlyParam.stringValue())))
-								.should(sq -> sq.matchPhrasePrefix(mfp -> mfp.field(OBSERVATION_CODE_TEXT_FIELD_NAME)
-										.query(textOnlyParam.stringValue()))));
-					}
-					return mf;
-				});
-			}
-		}
-	}
-
-	@VisibleForTesting
-	List<CodeJson> queryAllIndexedObservationCodesForTest() throws IOException {
-		return myRestHighLevelClient
-				.search(
-						sb -> sb.index(OBSERVATION_CODE_INDEX)
-								.query(qb -> qb.matchAll(mab -> mab))
-								.size(1000),
-						CodeJson.class)
-				.hits()
-				.hits()
-				.stream()
-				.map(t -> t.source())
-				.collect(Collectors.toList());
 	}
 
 	@Override
@@ -443,14 +282,6 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 		}
 	}
 
-	//	private ObservationJson parseObservationJson(SearchHit theSearchHit) {
-	//		try {
-	//			return objectMapper.readValue(theSearchHit.getSourceAsString(), ObservationJson.class);
-	//		} catch (JsonProcessingException exp) {
-	//			throw new InvalidRequestException(Msg.code(2004) + "Unable to parse the observation resource json", exp);
-	//		}
-	//	}
-
 	private SearchRequest buildObservationResourceSearchRequest(Collection<? extends IResourcePersistentId> thePids) {
 		List<FieldValue> values = thePids.stream()
 				.map(Object::toString)
@@ -474,11 +305,6 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 		} catch (IOException theE) {
 			throw new InvalidRequestException(Msg.code(1191) + "Unable to delete Observation " + theDocumentId);
 		}
-	}
-
-	@VisibleForTesting
-	public void deleteAllDocumentsForTest(String theIndexName) throws IOException {
-		myRestHighLevelClient.deleteByQuery(ob -> ob.index(theIndexName).query(fn -> fn.matchAll(mab -> mab)));
 	}
 
 	@VisibleForTesting

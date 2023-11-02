@@ -22,9 +22,7 @@ package ca.uhn.fhir.jpa.dao;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoObservation;
-import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
-import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.api.IQueryParameterType;
@@ -34,7 +32,6 @@ import ca.uhn.fhir.rest.api.SortOrderEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.param.ReferenceOrListParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import jakarta.persistence.EntityManager;
@@ -47,7 +44,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.TreeMap;
 
@@ -56,9 +52,6 @@ public class JpaResourceDaoObservation<T extends IBaseResource> extends BaseHapi
 
 	@PersistenceContext(type = PersistenceContextType.TRANSACTION)
 	protected EntityManager myEntityManager;
-
-	@Autowired
-	ObservationLastNIndexPersistSvc myObservationLastNIndexPersistSvc;
 
 	@Autowired
 	private IRequestPartitionHelperSvc myRequestPartitionHelperService;
@@ -96,64 +89,6 @@ public class JpaResourceDaoObservation<T extends IBaseResource> extends BaseHapi
 
 	private String getPatientParamName() {
 		return Observation.SP_PATIENT;
-	}
-
-	@Override
-	public ResourceTable updateEntity(
-			RequestDetails theRequest,
-			IBaseResource theResource,
-			IBasePersistedResource theEntity,
-			Date theDeletedTimestampOrNull,
-			boolean thePerformIndexing,
-			boolean theUpdateVersion,
-			TransactionDetails theTransactionDetails,
-			boolean theForceUpdate,
-			boolean theCreateNewHistoryEntry) {
-		return updateObservationEntity(
-				theRequest,
-				theResource,
-				theEntity,
-				theDeletedTimestampOrNull,
-				thePerformIndexing,
-				theUpdateVersion,
-				theTransactionDetails,
-				theForceUpdate,
-				theCreateNewHistoryEntry);
-	}
-
-	protected ResourceTable updateObservationEntity(
-			RequestDetails theRequest,
-			IBaseResource theResource,
-			IBasePersistedResource theEntity,
-			Date theDeletedTimestampOrNull,
-			boolean thePerformIndexing,
-			boolean theUpdateVersion,
-			TransactionDetails theTransactionDetails,
-			boolean theForceUpdate,
-			boolean theCreateNewHistoryEntry) {
-		ResourceTable retVal = super.updateEntity(
-				theRequest,
-				theResource,
-				theEntity,
-				theDeletedTimestampOrNull,
-				thePerformIndexing,
-				theUpdateVersion,
-				theTransactionDetails,
-				theForceUpdate,
-				theCreateNewHistoryEntry);
-
-		if (getStorageSettings().isLastNEnabled()) {
-			if (!retVal.isUnchangedInCurrentOperation()) {
-				if (retVal.getDeleted() == null) {
-					// Update indexes here for LastN operation.
-					myObservationLastNIndexPersistSvc.indexObservation(theResource);
-				} else {
-					myObservationLastNIndexPersistSvc.deleteObservationIndex(theEntity);
-				}
-			}
-		}
-
-		return retVal;
 	}
 
 	protected void updateSearchParamsForLastn(
