@@ -105,7 +105,7 @@ public class ResourceModifiedSubmitterSvcTest {
 		// given
 		// a successful deletion implies that the message did exist.
 		when(myResourceModifiedMessagePersistenceSvc.deleteByPK(any())).thenReturn(true);
-		when(myResourceModifiedMessagePersistenceSvc.inflatePersistedResourceModifiedMessage(any())).thenReturn(new ResourceModifiedMessage());
+		when(myResourceModifiedMessagePersistenceSvc.createResourceModifiedMessageFromEntityWithoutInflation(any())).thenReturn(new ResourceModifiedMessage());
 
 		// when
 		boolean wasProcessed = myResourceModifiedSubmitterSvc.submitPersisedResourceModifiedMessage(new ResourceModifiedEntity());
@@ -134,7 +134,7 @@ public class ResourceModifiedSubmitterSvcTest {
 		// when
 		when(myResourceModifiedMessagePersistenceSvc.deleteByPK(any()))
 			.thenThrow(new RuntimeException(deleteExMsg));
-		when(myResourceModifiedMessagePersistenceSvc.inflatePersistedResourceModifiedMessage(any()))
+		when(myResourceModifiedMessagePersistenceSvc.createResourceModifiedMessageFromEntityWithoutInflation(any()))
 			.thenThrow(new RuntimeException(inflationExMsg));
 
 		// test
@@ -180,7 +180,7 @@ public class ResourceModifiedSubmitterSvcTest {
 		// when
 		when(myResourceModifiedMessagePersistenceSvc.deleteByPK(any()))
 			.thenReturn(true);
-		when(myResourceModifiedMessagePersistenceSvc.inflatePersistedResourceModifiedMessage(any()))
+		when(myResourceModifiedMessagePersistenceSvc.createResourceModifiedMessageFromEntityWithoutInflation(any()))
 			.thenReturn(msg);
 		when(myChannelProducer.send(any()))
 			.thenThrow(new RuntimeException(exceptionString));
@@ -206,7 +206,7 @@ public class ResourceModifiedSubmitterSvcTest {
 		// given
 		// deletion fails, someone else was faster and processed the message
 		when(myResourceModifiedMessagePersistenceSvc.deleteByPK(any())).thenReturn(false);
-		when(myResourceModifiedMessagePersistenceSvc.inflatePersistedResourceModifiedMessage(any())).thenReturn(new ResourceModifiedMessage());
+		when(myResourceModifiedMessagePersistenceSvc.createResourceModifiedMessageFromEntityWithoutInflation(any())).thenReturn(new ResourceModifiedMessage());
 
 		// when
 		boolean wasProcessed = myResourceModifiedSubmitterSvc.submitPersisedResourceModifiedMessage(new ResourceModifiedEntity());
@@ -223,7 +223,7 @@ public class ResourceModifiedSubmitterSvcTest {
 	public void testSubmitPersistedResourceModifiedMessage_whitErrorOnSending_willRollbackDeletion(){
 		// given
 		when(myResourceModifiedMessagePersistenceSvc.deleteByPK(any())).thenReturn(true);
-		when(myResourceModifiedMessagePersistenceSvc.inflatePersistedResourceModifiedMessage(any())).thenReturn(new ResourceModifiedMessage());
+		when(myResourceModifiedMessagePersistenceSvc.createResourceModifiedMessageFromEntityWithoutInflation(any())).thenReturn(new ResourceModifiedMessage());
 
 		// simulate failure writing to the channel
 		when(myChannelProducer.send(any())).thenThrow(new MessageDeliveryException("sendingError"));

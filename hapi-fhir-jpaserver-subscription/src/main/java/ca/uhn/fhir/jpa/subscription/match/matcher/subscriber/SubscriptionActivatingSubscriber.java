@@ -90,12 +90,15 @@ public class SubscriptionActivatingSubscriber implements MessageHandler {
 		switch (payload.getOperationType()) {
 			case CREATE:
 			case UPDATE:
-				Optional<ResourceModifiedMessage> inflatedMsg =
+				if (payload.getPayload(myFhirContext) == null){
+					Optional<ResourceModifiedMessage> inflatedMsg =
 						myResourceModifiedMessagePersistenceSvc.inflatePersistedResourceModifiedMessageOrNull(payload);
-				if (inflatedMsg.isEmpty()) {
-					return;
+					if (inflatedMsg.isEmpty()) {
+						return;
+					}
+					payload = inflatedMsg.get();
 				}
-				payload = inflatedMsg.get();
+
 				activateSubscriptionIfRequired(payload.getNewPayload(myFhirContext));
 				break;
 			case TRANSACTION:
