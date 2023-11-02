@@ -23,27 +23,18 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.dao.TolerantJsonParser;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
-import ca.uhn.fhir.jpa.search.lastn.json.CodeJson;
 import ca.uhn.fhir.jpa.search.lastn.json.ObservationJson;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
 import co.elastic.clients.elasticsearch._types.FieldValue;
-import co.elastic.clients.elasticsearch._types.Result;
-import co.elastic.clients.elasticsearch._types.query_dsl.Query;
-import co.elastic.clients.elasticsearch.core.IndexRequest;
-import co.elastic.clients.elasticsearch.core.IndexResponse;
 import co.elastic.clients.elasticsearch.core.SearchRequest;
 import co.elastic.clients.elasticsearch.core.SearchResponse;
 import co.elastic.clients.elasticsearch.core.search.Hit;
 import co.elastic.clients.elasticsearch.indices.ExistsRequest;
-import co.elastic.clients.util.ObjectBuilder;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.annotations.VisibleForTesting;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.BufferedReader;
@@ -52,12 +43,10 @@ import java.io.InputStreamReader;
 import java.io.StringReader;
 import java.util.Collection;
 import java.util.List;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 
 public class ElasticsearchSvcImpl implements IElasticsearchSvc {
-
 
 	// Index Constants
 	public static final String OBSERVATION_INDEX = "observation_index";
@@ -150,8 +139,6 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 		return myRestHighLevelClient.indices().exists(request).value();
 	}
 
-
-
 	@Override
 	public void close() throws IOException {
 		// nothing
@@ -196,7 +183,6 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 				})))
 				.size(thePids.size()));
 	}
-
 
 	@VisibleForTesting
 	public void refreshIndex(String theIndexName) throws IOException {
