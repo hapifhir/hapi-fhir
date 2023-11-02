@@ -46,6 +46,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 
+import static org.apache.commons.lang3.ArrayUtils.EMPTY_STRING_ARRAY;
+import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.everyItem;
 import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.in;
@@ -105,6 +107,10 @@ public class TestDaoSearch {
 		assertSearchResultIds(theQueryUrl, theReason, hasItems(theIds));
 	}
 
+	public void assertSearchFinds(String theReason, String theQueryUrl, List<String> theIds) {
+		assertSearchFinds(theReason, theQueryUrl, theIds.toArray(EMPTY_STRING_ARRAY));
+	}
+
 	/**
 	 * Assert that the FHIR search has theIds in the search results.
 	 * @param theReason junit reason message
@@ -115,6 +121,16 @@ public class TestDaoSearch {
 		String[] bareIds = idTypeToIdParts(theIds);
 
 		assertSearchResultIds(theQueryUrl, theReason, hasItems(bareIds));
+	}
+
+	public void assertSearchFindsInOrder(String theReason, String theQueryUrl, String... theIds) {
+		List<String> ids = searchForIds(theQueryUrl);
+
+		MatcherAssert.assertThat(theReason, ids, contains(theIds));
+	}
+
+	public void assertSearchFindsInOrder(String theReason, String theQueryUrl, List<String> theIds) {
+		assertSearchFindsInOrder(theReason, theQueryUrl, theIds.toArray(EMPTY_STRING_ARRAY));
 	}
 
 	public void assertSearchResultIds(String theQueryUrl, String theReason, Matcher<Iterable<String>> matcher) {
