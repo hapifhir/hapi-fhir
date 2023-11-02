@@ -121,7 +121,7 @@ public class SubscriptionDeliveringEmailSubscriber extends BaseSubscriptionDeliv
 	private String getPayloadStringFromMessageOrEmptyString(ResourceDeliveryMessage theMessage) {
 		String payload = theMessage.getPayloadString();
 
-		if (payload != null) {
+		if (theMessage.getPayload(myCtx) != null) {
 			return payload;
 		}
 

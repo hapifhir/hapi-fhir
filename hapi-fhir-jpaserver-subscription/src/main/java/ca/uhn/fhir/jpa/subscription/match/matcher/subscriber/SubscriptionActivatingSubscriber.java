@@ -90,9 +90,10 @@ public class SubscriptionActivatingSubscriber implements MessageHandler {
 		switch (payload.getOperationType()) {
 			case CREATE:
 			case UPDATE:
-				if (payload.getPayload(myFhirContext) == null){
+				if (payload.getPayload(myFhirContext) == null) {
 					Optional<ResourceModifiedMessage> inflatedMsg =
-						myResourceModifiedMessagePersistenceSvc.inflatePersistedResourceModifiedMessageOrNull(payload);
+							myResourceModifiedMessagePersistenceSvc.inflatePersistedResourceModifiedMessageOrNull(
+									payload);
 					if (inflatedMsg.isEmpty()) {
 						return;
 					}

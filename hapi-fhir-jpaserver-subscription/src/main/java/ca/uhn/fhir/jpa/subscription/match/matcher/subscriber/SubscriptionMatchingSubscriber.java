@@ -102,10 +102,10 @@ public class SubscriptionMatchingSubscriber implements MessageHandler {
 				return;
 		}
 
-		if (theMsg.getPayload(myFhirContext) == null){
+		if (theMsg.getPayload(myFhirContext) == null) {
 			// inflate the message and ignore any resource that cannot be found.
 			Optional<ResourceModifiedMessage> inflatedMsg =
-				myResourceModifiedMessagePersistenceSvc.inflatePersistedResourceModifiedMessageOrNull(theMsg);
+					myResourceModifiedMessagePersistenceSvc.inflatePersistedResourceModifiedMessageOrNull(theMsg);
 			if (inflatedMsg.isEmpty()) {
 				return;
 			}

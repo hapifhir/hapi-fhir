@@ -187,6 +187,12 @@ public abstract class BaseSubscriptionDeliverySubscriber implements MessageHandl
 		myMatchUrlService = theMatchUrlService;
 	}
 
+	@VisibleForTesting
+	public void setResourceModifiedMessagePersistenceSvcForUnitTest(
+			IResourceModifiedMessagePersistenceSvc theResourceModifiedMessagePersistenceSvc) {
+		myResourceModifiedMessagePersistenceSvc = theResourceModifiedMessagePersistenceSvc;
+	}
+
 	public IInterceptorBroadcaster getInterceptorBroadcaster() {
 		return myInterceptorBroadcaster;
 	}
