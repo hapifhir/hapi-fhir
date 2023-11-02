@@ -150,107 +150,7 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 		return myRestHighLevelClient.indices().exists(request).value();
 	}
 
-	@Override
-	public ObservationJson getObservationDocument(String theDocumentID) {
-		if (theDocumentID == null) {
-			throw new InvalidRequestException(
-					Msg.code(1185) + "Require non-null document ID for observation document query");
-		}
-		SearchRequest theSearchRequest = buildSingleObservationSearchRequest(theDocumentID);
-		ObservationJson observationDocumentJson = null;
-		try {
-			SearchResponse<ObservationJson> observationDocumentResponse =
-					myRestHighLevelClient.search(theSearchRequest, ObservationJson.class);
-			List<Hit<ObservationJson>> observationDocumentHits =
-					observationDocumentResponse.hits().hits();
-			if (!observationDocumentHits.isEmpty()) {
-				// There should be no more than one hit for the identifier
-				observationDocumentJson = observationDocumentHits.get(0).source();
-			}
 
-		} catch (IOException theE) {
-			throw new InvalidRequestException(
-					Msg.code(1186) + "Unable to execute observation document query for ID " + theDocumentID, theE);
-		}
-
-		return observationDocumentJson;
-	}
-
-	private SearchRequest buildSingleObservationSearchRequest(String theObservationIdentifier) {
-		return SearchRequest.of(srb -> srb.query(qb -> qb.bool(bb -> bb.must(mb -> mb.term(
-						tb -> tb.field(OBSERVATION_IDENTIFIER_FIELD_NAME).value(theObservationIdentifier)))))
-				.size(1));
-	}
-
-	@Override
-	public CodeJson getObservationCodeDocument(String theCodeSystemHash, String theText) {
-		if (theCodeSystemHash == null && theText == null) {
-			throw new InvalidRequestException(Msg.code(1187)
-					+ "Require a non-null code system hash value or display value for observation code document query");
-		}
-		SearchRequest theSearchRequest = buildSingleObservationCodeSearchRequest(theCodeSystemHash, theText);
-		CodeJson observationCodeDocumentJson = null;
-		try {
-			SearchResponse<CodeJson> observationCodeDocumentResponse =
-					myRestHighLevelClient.search(theSearchRequest, CodeJson.class);
-			List<Hit<CodeJson>> observationCodeDocumentHits =
-					observationCodeDocumentResponse.hits().hits();
-			if (!observationCodeDocumentHits.isEmpty()) {
-				// There should be no more than one hit for the code lookup.
-				observationCodeDocumentJson = observationCodeDocumentHits.get(0).source();
-			}
-
-		} catch (IOException theE) {
-			throw new InvalidRequestException(
-					Msg.code(1188) + "Unable to execute observation code document query hash code or display", theE);
-		}
-
-		return observationCodeDocumentJson;
-	}
-
-	private SearchRequest buildSingleObservationCodeSearchRequest(String theCodeSystemHash, String theText) {
-		Function<Query.Builder, ObjectBuilder<Query>> qb = i -> {
-			if (theCodeSystemHash != null) {
-				i.term(tq -> tq.field(CODE_HASH).value(theCodeSystemHash));
-			} else {
-				i.matchPhrase(mp -> mp.field(CODE_TEXT).query(theText));
-			}
-			return i;
-		};
-
-		return SearchRequest.of(i -> i.index(OBSERVATION_CODE_INDEX).size(1).query(q -> q.bool(qb2 -> qb2.must(qb))));
-	}
-
-	@Override
-	public Boolean createOrUpdateObservationIndex(String theDocumentId, ObservationJson theObservationDocument) {
-		try {
-			IndexRequest<ObservationJson> request = IndexRequest.of(
-					i -> i.index(OBSERVATION_INDEX).id(theDocumentId).document(theObservationDocument));
-			IndexResponse indexResponse = myRestHighLevelClient.index(request);
-
-			Result result = indexResponse.result();
-			return (result == Result.Created || result == Result.Updated);
-		} catch (IOException e) {
-			throw new InvalidRequestException(
-					Msg.code(1189) + "Unable to persist Observation document " + theDocumentId);
-		}
-	}
-
-	@Override
-	public Boolean createOrUpdateObservationCodeIndex(
-			String theCodeableConceptID, CodeJson theObservationCodeDocument) {
-		try {
-			IndexRequest<CodeJson> request = IndexRequest.of(i ->
-					i.index(OBSERVATION_CODE_INDEX).id(theCodeableConceptID).document(theObservationCodeDocument));
-			IndexResponse indexResponse = myRestHighLevelClient.index(request);
-
-			Result result = indexResponse.result();
-			return (result == Result.Created || result == Result.Updated);
-		} catch (IOException theE) {
-			throw new InvalidRequestException(
-					Msg.code(1190) + "Unable to persist Observation Code document " + theCodeableConceptID);
-		}
-	}
 
 	@Override
 	public void close() throws IOException {
@@ -297,15 +197,6 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 				.size(thePids.size()));
 	}
 
-	@Override
-	public void deleteObservationDocument(String theDocumentId) {
-		try {
-			myRestHighLevelClient.deleteByQuery(qb -> qb.query(ob ->
-					ob.term(tb -> tb.field(OBSERVATION_IDENTIFIER_FIELD_NAME).value(theDocumentId))));
-		} catch (IOException theE) {
-			throw new InvalidRequestException(Msg.code(1191) + "Unable to delete Observation " + theDocumentId);
-		}
-	}
 
 	@VisibleForTesting
 	public void refreshIndex(String theIndexName) throws IOException {

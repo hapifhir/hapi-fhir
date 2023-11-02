@@ -155,8 +155,6 @@ public class MdmOperationPointcutsIT extends BaseProviderR4Test {
 		myInterceptors.clear();
 	}
 
-	@Nested
-	class MdmProviderDstu3PlusTest {
 		@Test
 		public void mergeGoldenResources_withInterceptor_firesHook() {
 			// setup
@@ -535,7 +533,7 @@ public class MdmOperationPointcutsIT extends BaseProviderR4Test {
 				}
 			}
 		}
-	}
+
 
 	private String createUrl(String theResourceType, StringType theCriteria) {
 		String url = theResourceType;
@@ -545,8 +543,6 @@ public class MdmOperationPointcutsIT extends BaseProviderR4Test {
 		return url;
 	}
 
-	@Nested
-	class MdmLinkHistoryProviderDstu3PlusTest {
 
 		@ParameterizedTest
 		@EnumSource(LinkHistoryParameters.class)
@@ -611,6 +607,6 @@ public class MdmOperationPointcutsIT extends BaseProviderR4Test {
 			assertTrue(called.get());
 			assertFalse(retval.isEmpty());
 		}
-	}
+
 
 }
