@@ -49,10 +49,12 @@ public class SynchronousSubscriptionMatcherInterceptor extends SubscriptionMatch
 
 				@Override
 				public void afterCommit() {
+					theResourceModifiedMessage.setPayloadToNull();
 					myResourceModifiedConsumer.submitResourceModified(theResourceModifiedMessage);
 				}
 			});
 		} else {
+			theResourceModifiedMessage.setPayloadToNull();
 			myResourceModifiedConsumer.submitResourceModified(theResourceModifiedMessage);
 		}
 	}

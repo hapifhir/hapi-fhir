@@ -103,6 +103,7 @@ public class SubscriptionDeliveringMessageSubscriber extends BaseSubscriptionDel
 			if (inflatedMsg.isEmpty()) {
 				return;
 			}
+			payloadResource = inflatedMsg.get().getPayload(myFhirContext);
 		}
 
 		ResourceModifiedJsonMessage messageWrapperToSend =
