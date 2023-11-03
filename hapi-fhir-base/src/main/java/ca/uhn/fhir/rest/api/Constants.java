@@ -199,6 +199,8 @@ public class Constants {
 	public static final String PARAM_PRETTY_VALUE_FALSE = "false";
 	public static final String PARAM_PRETTY_VALUE_TRUE = "true";
 	public static final String PARAM_PROFILE = "_profile";
+	public static final String PARAM__PID = "__pid";
+
 	public static final String PARAM_QUERY = "_query";
 	public static final String PARAM_RESPONSE_URL = "response-url"; // Used in messaging
 	public static final String PARAM_REVINCLUDE = "_revinclude";

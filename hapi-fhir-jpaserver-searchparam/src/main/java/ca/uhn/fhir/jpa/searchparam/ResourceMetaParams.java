@@ -51,8 +51,8 @@ public class ResourceMetaParams {
 		Map<String, Class<? extends IQueryParameterAnd<?>>> resourceMetaAndParams = new HashMap<>();
 		resourceMetaParams.put(IAnyResource.SP_RES_ID, StringParam.class);
 		resourceMetaAndParams.put(IAnyResource.SP_RES_ID, StringAndListParam.class);
-		resourceMetaParams.put(IAnyResource.SP_RES_PID, TokenParam.class);
-		resourceMetaAndParams.put(IAnyResource.SP_RES_PID, TokenAndListParam.class);
+		resourceMetaParams.put(Constants.PARAM__PID, TokenParam.class);
+		resourceMetaAndParams.put(Constants.PARAM__PID, TokenAndListParam.class);
 		resourceMetaParams.put(Constants.PARAM_TAG, TokenParam.class);
 		resourceMetaAndParams.put(Constants.PARAM_TAG, TokenAndListParam.class);
 		resourceMetaParams.put(Constants.PARAM_PROFILE, UriParam.class);

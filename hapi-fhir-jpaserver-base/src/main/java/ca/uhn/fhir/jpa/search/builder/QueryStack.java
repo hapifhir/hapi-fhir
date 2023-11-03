@@ -2293,11 +2293,9 @@ public class QueryStack {
 						null,
 						theSearchForIdsParams.myRequestPartitionId);
 
-			case IAnyResource.SP_RES_PID:
+			case Constants.PARAM__PID:
 				return createPredicateResourcePID(
-						theSearchForIdsParams.mySourceJoinColumn,
-						theSearchForIdsParams.myAndOrParams
-				);
+						theSearchForIdsParams.mySourceJoinColumn, theSearchForIdsParams.myAndOrParams);
 
 			case PARAM_HAS:
 				return createPredicateHas(
@@ -2353,8 +2351,7 @@ public class QueryStack {
 	 * Raw match on RES_ID
 	 */
 	private Condition createPredicateResourcePID(
-			DbColumn theSourceJoinColumn,
-			List<List<IQueryParameterType>> theAndOrParams) {
+			DbColumn theSourceJoinColumn, List<List<IQueryParameterType>> theAndOrParams) {
 
 		DbColumn pidColumn = theSourceJoinColumn;
 
