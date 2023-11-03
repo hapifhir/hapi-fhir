@@ -39,7 +39,8 @@ import org.springframework.context.annotation.Configuration;
 
 /**
  * Implements ITestDataBuilder via a live DaoRegistry.
- *
+ * Note: this implements {@link AfterEachCallback} and will delete any resources created when registered
+ * via {@link org.junit.jupiter.api.extension.RegisterExtension}.
  * Add the inner {@link Config} to your spring context to inject this.
  * For convenience, you can still implement ITestDataBuilder on your test class, and delegate the missing methods to this bean.
  */

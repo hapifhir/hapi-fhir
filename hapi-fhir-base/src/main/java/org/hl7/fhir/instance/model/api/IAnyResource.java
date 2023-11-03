@@ -33,6 +33,13 @@ public interface IAnyResource extends IBaseResource {
 	@SearchParamDefinition(name = "_id", path = "", description = "The ID of the resource", type = "token")
 	String SP_RES_ID = "_id";
 
+	@SearchParamDefinition(
+			name = "__pid",
+			path = "",
+			description = "The NON-STANDARD internal server id of the resource",
+			type = "token")
+	String SP_RES_PID = "__pid";
+
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>_id</b>
 	 * <p>

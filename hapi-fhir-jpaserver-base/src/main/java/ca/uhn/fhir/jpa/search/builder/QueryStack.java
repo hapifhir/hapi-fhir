@@ -285,6 +285,12 @@ public class QueryStack {
 		mySqlBuilder.addSortString(resourceTablePredicateBuilder.getColumnFhirId(), theAscending, myUseAggregate);
 	}
 
+	/** Sort on RES_ID -- used to break ties for reliable sort */
+	public void addSortOnResourcePID(boolean theAscending) {
+		BaseJoiningPredicateBuilder predicateBuilder = mySqlBuilder.getOrCreateFirstPredicateBuilder();
+		mySqlBuilder.addSortString(predicateBuilder.getResourceIdColumn(), theAscending);
+	}
+
 	public void addSortOnResourceLink(
 			String theResourceName,
 			String theReferenceTargetType,
@@ -2287,6 +2293,12 @@ public class QueryStack {
 						null,
 						theSearchForIdsParams.myRequestPartitionId);
 
+			case IAnyResource.SP_RES_PID:
+				return createPredicateResourcePID(
+						theSearchForIdsParams.mySourceJoinColumn,
+						theSearchForIdsParams.myAndOrParams
+				);
+
 			case PARAM_HAS:
 				return createPredicateHas(
 						theSearchForIdsParams.mySourceJoinColumn,
@@ -2335,6 +2347,37 @@ public class QueryStack {
 						theSearchForIdsParams.myRequest,
 						theSearchForIdsParams.myRequestPartitionId);
 		}
+	}
+
+	/**
+	 * Raw match on RES_ID
+	 */
+	private Condition createPredicateResourcePID(
+			DbColumn theSourceJoinColumn,
+			List<List<IQueryParameterType>> theAndOrParams) {
+
+		DbColumn pidColumn = theSourceJoinColumn;
+
+		if (pidColumn == null) {
+			BaseJoiningPredicateBuilder predicateBuilder = mySqlBuilder.getOrCreateFirstPredicateBuilder();
+			pidColumn = predicateBuilder.getResourceIdColumn();
+		}
+
+		// we don't support any modifiers for now
+		Set<Long> pids = theAndOrParams.stream()
+				.map(orList -> orList.stream()
+						.map(v -> v.getValueAsQueryToken(myFhirContext))
+						.map(Long::valueOf)
+						.collect(Collectors.toSet()))
+				.reduce(Sets::intersection)
+				.orElse(Set.of());
+
+		if (pids.isEmpty()) {
+			mySqlBuilder.setMatchNothing();
+			return null;
+		}
+
+		return toEqualToOrInPredicate(pidColumn, mySqlBuilder.generatePlaceholders(pids));
 	}
 
 	private Condition createReverseSearchPredicateLastUpdated(

@@ -4,10 +4,10 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.TestDaoSearch;
+import ca.uhn.fhir.jpa.search.BaseSourceSearchParameterTestCases;
 import ca.uhn.fhir.jpa.search.CompositeSearchParameterTestCases;
 import ca.uhn.fhir.jpa.search.IIdSearchTestTemplate;
 import ca.uhn.fhir.jpa.search.QuantitySearchParameterTestCases;
-import ca.uhn.fhir.jpa.search.BaseSourceSearchParameterTestCases;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.test.BaseJpaTest;
 import ca.uhn.fhir.jpa.test.config.TestHSearchAddInConfig;
@@ -38,9 +38,14 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasItem;
-import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.not;
 
+/**
+ * Verify that our query behaviour matches the spec.
+ * Note: we do not extend BaseJpaR4Test here.
+ * That does a full purge in @AfterEach which is a bit slow.
+ * Instead, this test tracks all created resources in DaoTestDataBuilder, and deletes them in teardown.
+ */
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = {
 	TestR4Config.class,
@@ -497,6 +502,32 @@ public class FhirResourceDaoR4StandardQueriesNoFTTest extends BaseJpaTest {
 			}
 		}
 
+	}
+
+	@Test
+	void testQueryByPid() {
+
+		// sentinel for over-match
+		myDataBuilder.createPatient();
+
+		String id = myDataBuilder.createPatient(
+			myDataBuilder.withBirthdate("1971-01-01"),
+			myDataBuilder.withActiveTrue(),
+			myDataBuilder.withFamily("Smith")).getIdPart();
+
+		myTestDaoSearch.assertSearchFindsOnly("search by server assigned id", "Patient?__pid=" + id, id);
+		myTestDaoSearch.assertSearchFindsOnly("search by server assigned id", "Patient?family=smith&__pid=" + id, id);
+	}
+
+	@Test
+	void testSortByPid() {
+
+		String id1 = myDataBuilder.createPatient(myDataBuilder.withFamily("Smithy")).getIdPart();
+		String id2 = myDataBuilder.createPatient(myDataBuilder.withFamily("Smithwick")).getIdPart();
+		String id3 = myDataBuilder.createPatient(myDataBuilder.withFamily("Smith")).getIdPart();
+
+		myTestDaoSearch.assertSearchFindsInOrder("sort by server assigned id", "Patient?family=smith&_sort=__pid", id1,id2,id3);
+		myTestDaoSearch.assertSearchFindsInOrder("reverse sort by server assigned id", "Patient?family=smith&_sort=-__pid", id3,id2,id1);
 	}
 
 	@Nested
