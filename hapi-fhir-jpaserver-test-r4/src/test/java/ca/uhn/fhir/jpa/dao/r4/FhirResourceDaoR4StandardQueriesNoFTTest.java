@@ -515,8 +515,8 @@ public class FhirResourceDaoR4StandardQueriesNoFTTest extends BaseJpaTest {
 			myDataBuilder.withActiveTrue(),
 			myDataBuilder.withFamily("Smith")).getIdPart();
 
-		myTestDaoSearch.assertSearchFindsOnly("search by server assigned id", "Patient?__pid=" + id, id);
-		myTestDaoSearch.assertSearchFindsOnly("search by server assigned id", "Patient?family=smith&__pid=" + id, id);
+		myTestDaoSearch.assertSearchFindsOnly("search by server assigned id", "Patient?_pid=" + id, id);
+		myTestDaoSearch.assertSearchFindsOnly("search by server assigned id", "Patient?family=smith&_pid=" + id, id);
 	}
 
 	@Test
@@ -526,8 +526,8 @@ public class FhirResourceDaoR4StandardQueriesNoFTTest extends BaseJpaTest {
 		String id2 = myDataBuilder.createPatient(myDataBuilder.withFamily("Smithwick")).getIdPart();
 		String id3 = myDataBuilder.createPatient(myDataBuilder.withFamily("Smith")).getIdPart();
 
-		myTestDaoSearch.assertSearchFindsInOrder("sort by server assigned id", "Patient?family=smith&_sort=__pid", id1,id2,id3);
-		myTestDaoSearch.assertSearchFindsInOrder("reverse sort by server assigned id", "Patient?family=smith&_sort=-__pid", id3,id2,id1);
+		myTestDaoSearch.assertSearchFindsInOrder("sort by server assigned id", "Patient?family=smith&_sort=_pid", id1,id2,id3);
+		myTestDaoSearch.assertSearchFindsInOrder("reverse sort by server assigned id", "Patient?family=smith&_sort=-_pid", id3,id2,id1);
 	}
 
 	@Nested

@@ -838,7 +838,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 
 			theQueryStack.addSortOnResourceId(ascending);
 
-		} else if (Constants.PARAM__PID.equals(theSort.getParamName())) {
+		} else if (Constants.PARAM_PID.equals(theSort.getParamName())) {
 
 			theQueryStack.addSortOnResourcePID(ascending);
 
