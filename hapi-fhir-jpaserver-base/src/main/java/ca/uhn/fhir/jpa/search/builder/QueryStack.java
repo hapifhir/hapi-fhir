@@ -2293,7 +2293,7 @@ public class QueryStack {
 						null,
 						theSearchForIdsParams.myRequestPartitionId);
 
-			case Constants.PARAM__PID:
+			case Constants.PARAM_PID:
 				return createPredicateResourcePID(
 						theSearchForIdsParams.mySourceJoinColumn, theSearchForIdsParams.myAndOrParams);
 
