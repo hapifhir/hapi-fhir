@@ -43,6 +43,7 @@ import ca.uhn.fhir.util.DateUtils;
 import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.hl7.fhir.instance.model.api.*;
 
@@ -176,13 +177,15 @@ public class RestfulServerUtils {
 	 */
 	public static String createLinkSelfWithoutGivenParameters(
 			String theServerBase, RequestDetails theRequest, List<String> excludedParameterNames) {
-		String tenantId = resolveTenantId(theRequest);
-		String requestPath = isNotBlank(theRequest.getRequestPath()) ? theRequest.getRequestPath() : "";
+		String tenantId = StringUtils.defaultString(theRequest.getTenantId());
+		String requestPath = StringUtils.defaultString(theRequest.getRequestPath());
+
 		StringBuilder b = new StringBuilder();
-		if (tenantId != null) {
-			b.append(theServerBase.replaceAll(tenantId, ""));
-			b.append(tenantId);
-			b.append(requestPath.replaceAll(tenantId, ""));
+
+		if (isNotBlank(tenantId)) {
+			requestPath = StringUtils.substringAfter(requestPath, tenantId);
+			b.append(theServerBase).append(requestPath);
+
 		} else {
 			b.append(theServerBase);
 			if (isNotBlank(requestPath)) b.append("/");
@@ -211,14 +214,6 @@ public class RestfulServerUtils {
 			}
 		}
 		return b.toString();
-	}
-
-	private static String resolveTenantId(RequestDetails theRequestDetails) {
-		if (isNotBlank(theRequestDetails.getTenantId())
-				&& theRequestDetails.getRequestPath().startsWith(theRequestDetails.getTenantId())) {
-			return theRequestDetails.getTenantId();
-		}
-		return null;
 	}
 
 	public static String createOffsetPagingLink(
