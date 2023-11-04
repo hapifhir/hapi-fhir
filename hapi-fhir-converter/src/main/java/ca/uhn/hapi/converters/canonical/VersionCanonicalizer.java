@@ -65,11 +65,11 @@ import org.hl7.fhir.r5.model.PackageInformation;
 import org.hl7.fhir.r5.model.SearchParameter;
 import org.hl7.fhir.r5.model.StructureDefinition;
 
+import javax.annotation.Nonnull;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
-import javax.annotation.Nonnull;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
@@ -458,7 +458,7 @@ public class VersionCanonicalizer {
 		@Override
 		public IBaseParameters parametersFromCanonical(Parameters theParameters) {
 			Resource converted = VersionConvertorFactory_10_40.convertResource(theParameters, ADVISOR_10_40);
-			return (IBaseParameters) reencodeToHl7Org(converted);
+			return (IBaseParameters) reencodeFromHl7Org(converted);
 		}
 
 		@Override
@@ -470,7 +470,7 @@ public class VersionCanonicalizer {
 		@Override
 		public IBaseResource structureDefinitionFromCanonical(StructureDefinition theResource) {
 			Resource converted = VersionConvertorFactory_10_50.convertResource(theResource, ADVISOR_10_50);
-			return reencodeToHl7Org(converted);
+			return reencodeFromHl7Org(converted);
 		}
 
 		@Override
@@ -514,7 +514,7 @@ public class VersionCanonicalizer {
 		@Override
 		public IBaseConformance capabilityStatementFromCanonical(CapabilityStatement theResource) {
 			Resource converted = VersionConvertorFactory_10_50.convertResource(theResource, ADVISOR_10_50);
-			return (IBaseConformance) reencodeToHl7Org(converted);
+			return (IBaseConformance) reencodeFromHl7Org(converted);
 		}
 
 		private Resource reencodeToHl7Org(IBaseResource theInput) {
