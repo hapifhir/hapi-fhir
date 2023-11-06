@@ -108,14 +108,14 @@ public class ResourceModifiedMessagePersistenceSvcImpl implements IResourceModif
 		try {
 			inflatedResourceModifiedMessage = inflatePersistedResourceModifiedMessage(theResourceModifiedMessage);
 		} catch (ResourceNotFoundException e) {
-			IdType idType = new IdType(
+			IdDt idDt = new IdDt(
 					theResourceModifiedMessage.getPayloadType(myFhirContext),
 					theResourceModifiedMessage.getPayloadId(),
 					theResourceModifiedMessage.getPayloadVersion());
 
 			ourLog.warn(
 					"Scheduled submission will be ignored since resource {} cannot be found",
-					idType.asStringValue(),
+					idDt.getIdPart(),
 					e);
 		} catch (Exception ex) {
 			ourLog.error("Unknown error encountered on inflation of resources.", ex);
