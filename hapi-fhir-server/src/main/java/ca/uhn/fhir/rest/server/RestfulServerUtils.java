@@ -43,6 +43,7 @@ import ca.uhn.fhir.util.DateUtils;
 import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.hl7.fhir.instance.model.api.*;
 
@@ -176,20 +177,19 @@ public class RestfulServerUtils {
 	 */
 	public static String createLinkSelfWithoutGivenParameters(
 			String theServerBase, RequestDetails theRequest, List<String> excludedParameterNames) {
+		String tenantId = StringUtils.defaultString(theRequest.getTenantId());
+		String requestPath = StringUtils.defaultString(theRequest.getRequestPath());
+
 		StringBuilder b = new StringBuilder();
 		b.append(theServerBase);
+		requestPath = StringUtils.substringAfter(requestPath, tenantId);
 
-		if (isNotBlank(theRequest.getRequestPath())) {
-			b.append('/');
-			if (isNotBlank(theRequest.getTenantId())
-					&& theRequest.getRequestPath().startsWith(theRequest.getTenantId() + "/")) {
-				b.append(theRequest
-						.getRequestPath()
-						.substring(theRequest.getTenantId().length() + 1));
-			} else {
-				b.append(theRequest.getRequestPath());
-			}
+		if (isNotBlank(requestPath)) {
+			requestPath = StringUtils.prependIfMissing(requestPath, "/");
 		}
+
+		b.append(requestPath);
+
 		// For POST the URL parameters get jumbled with the post body parameters so don't include them, they might be
 		// huge
 		if (theRequest.getRequestType() == RequestTypeEnum.GET) {
@@ -211,7 +211,6 @@ public class RestfulServerUtils {
 				}
 			}
 		}
-
 		return b.toString();
 	}
 
