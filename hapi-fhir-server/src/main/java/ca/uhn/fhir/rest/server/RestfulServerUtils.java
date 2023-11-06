@@ -184,8 +184,8 @@ public class RestfulServerUtils {
 		b.append(theServerBase);
 		requestPath = StringUtils.substringAfter(requestPath, tenantId);
 
-		if (isNotBlank(requestPath)){
-			requestPath = StringUtils.prependIfMissing(requestPath,"/");
+		if (isNotBlank(requestPath)) {
+			requestPath = StringUtils.prependIfMissing(requestPath, "/");
 		}
 
 		b.append(requestPath);
