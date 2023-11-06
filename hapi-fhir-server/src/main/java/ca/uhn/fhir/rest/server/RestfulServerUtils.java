@@ -181,16 +181,14 @@ public class RestfulServerUtils {
 		String requestPath = StringUtils.defaultString(theRequest.getRequestPath());
 
 		StringBuilder b = new StringBuilder();
+		b.append(theServerBase);
+		requestPath = StringUtils.substringAfter(requestPath, tenantId);
 
-		if (isNotBlank(tenantId)) {
-			requestPath = StringUtils.substringAfter(requestPath, tenantId);
-			b.append(theServerBase).append(requestPath);
-
-		} else {
-			b.append(theServerBase);
-			if (isNotBlank(requestPath)) b.append("/");
-			b.append(requestPath);
+		if (isNotBlank(requestPath)){
+			requestPath = StringUtils.prependIfMissing(requestPath,"/");
 		}
+
+		b.append(requestPath);
 
 		// For POST the URL parameters get jumbled with the post body parameters so don't include them, they might be
 		// huge
