@@ -41,7 +41,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.r5.model.IdType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -113,10 +112,7 @@ public class ResourceModifiedMessagePersistenceSvcImpl implements IResourceModif
 					theResourceModifiedMessage.getPayloadId(),
 					theResourceModifiedMessage.getPayloadVersion());
 
-			ourLog.warn(
-					"Scheduled submission will be ignored since resource {} cannot be found",
-					idDt.getIdPart(),
-					e);
+			ourLog.warn("Scheduled submission will be ignored since resource {} cannot be found", idDt.getIdPart(), e);
 		} catch (Exception ex) {
 			ourLog.error("Unknown error encountered on inflation of resources.", ex);
 		}
