@@ -19,7 +19,6 @@
 
 	<properties>
 		<org.antlr-version>4.10.1</org.antlr-version>
-		<xpp3-version>1.1.6</xpp3-version>
 		<spring-security-core.version>5.7.8</spring-security-core.version>
 	</properties>
 
@@ -84,48 +83,8 @@
 			<groupId>org.opencds.cqf.fhir</groupId>
 			<artifactId>cqf-fhir-jackson</artifactId>
 			<version>${clinical-reasoning.version}</version>
-			<exclusions>
-				<exclusion>
-					<groupId>xpp3</groupId>
-					<artifactId>xpp3_min</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>xmlpull</groupId>
-					<artifactId>xmlpull</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>xmlpull</groupId>
-					<artifactId>xmlpull</artifactId>
-				</exclusion>
-			</exclusions>
 			<type>pom</type>
 		</dependency>
-		<dependency>
-			<groupId>org.opencds.cqf.fhir</groupId>
-			<artifactId>cqf-fhir-cql</artifactId>
-			<version>${clinical-reasoning.version}</version>
-			<exclusions>
-			<exclusion>
-				<groupId>xpp3</groupId>
-				<artifactId>xpp3_min</artifactId>
-			</exclusion>
-			<exclusion>
-				<groupId>xmlpull</groupId>
-				<artifactId>xmlpull</artifactId>
-			</exclusion>
-				<exclusion>
-					<groupId>xmlpull</groupId>
-					<artifactId>xmlpull</artifactId>
-				</exclusion>
-			</exclusions>
-			<type>pom</type>
-		</dependency>
-		<dependency>
-			<groupId>org.ogce</groupId>
-			<artifactId>xpp3</artifactId>
-			<version>${xpp3-version}</version>
-		</dependency>
-
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-storage</artifactId>
@@ -152,6 +111,15 @@
 		</dependency>
 
 		<!-- test -->
+		<!-- This javax dependency was added because the
+		Clinical Reasoning components no longer include it.
+		It needs to be removed as soon as the Jakarta merge
+		hits -->
+		<dependency>
+			<groupId>javax.xml.bind</groupId>
+			<artifactId>jaxb-api</artifactId>
+			<version>2.3.1</version>
+		</dependency>
 		<dependency>
 			<groupId>org.testcontainers</groupId>
 			<artifactId>junit-jupiter</artifactId>
