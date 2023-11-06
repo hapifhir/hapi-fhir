@@ -25,6 +25,7 @@ import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryMatchResult;
+import ca.uhn.fhir.jpa.subscription.channel.api.PayloadTooLargeException;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelRegistry;
 import ca.uhn.fhir.jpa.subscription.match.registry.ActiveSubscription;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
@@ -156,8 +157,21 @@ public class SubscriptionMatchDeliverer {
 				ourLog.warn("Failed to send message to Delivery Channel.");
 			}
 		} catch (RuntimeException e) {
-			ourLog.error("Failed to send message to Delivery Channel", e);
-			throw new RuntimeException(Msg.code(7) + "Failed to send message to Delivery Channel", e);
+			if (e.getCause() instanceof PayloadTooLargeException) {
+				ourLog.warn("Failed to send message to Delivery Channel because the payload size is larger than broker "
+						+ "max message size. Retry is about to be performed without payload.");
+				ResourceDeliveryJsonMessage msgPayloadLess = nullOutPayload(theWrappedMsg);
+				trySendToDeliveryChannel(msgPayloadLess, theDeliveryChannel);
+			} else {
+				ourLog.error("Failed to send message to Delivery Channel", e);
+				throw new RuntimeException(Msg.code(7) + "Failed to send message to Delivery Channel", e);
+			}
 		}
+	}
+
+	private ResourceDeliveryJsonMessage nullOutPayload(ResourceDeliveryJsonMessage theWrappedMsg) {
+		ResourceDeliveryMessage resourceDeliveryMessage = theWrappedMsg.getPayload();
+		resourceDeliveryMessage.setPayloadToNull();
+		return new ResourceDeliveryJsonMessage(resourceDeliveryMessage);
 	}
 }

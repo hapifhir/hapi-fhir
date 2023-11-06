@@ -24,6 +24,7 @@ import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.subscription.match.deliver.BaseSubscriptionDeliverySubscriber;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
 import ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryMessage;
+import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.StringUtils;
@@ -33,6 +34,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -73,7 +75,7 @@ public class SubscriptionDeliveringEmailSubscriber extends BaseSubscriptionDeliv
 		if (isNotBlank(subscription.getPayloadString())) {
 			EncodingEnum encoding = EncodingEnum.forContentType(subscription.getPayloadString());
 			if (encoding != null) {
-				payload = theMessage.getPayloadString();
+				payload = getPayloadStringFromMessageOrEmptyString(theMessage);
 			}
 		}
 
@@ -111,5 +113,25 @@ public class SubscriptionDeliveringEmailSubscriber extends BaseSubscriptionDeliv
 	@VisibleForTesting
 	public IEmailSender getEmailSender() {
 		return myEmailSender;
+	}
+
+	/**
+	 * Get the payload string, fetch it from the DB when the payload is null.
+	 */
+	private String getPayloadStringFromMessageOrEmptyString(ResourceDeliveryMessage theMessage) {
+		String payload = theMessage.getPayloadString();
+
+		if (theMessage.getPayload(myCtx) != null) {
+			return payload;
+		}
+
+		Optional<ResourceModifiedMessage> inflatedMessage =
+				inflateResourceModifiedMessageFromDeliveryMessage(theMessage);
+		if (inflatedMessage.isEmpty()) {
+			return "";
+		}
+
+		payload = inflatedMessage.get().getPayloadString();
+		return payload;
 	}
 }
