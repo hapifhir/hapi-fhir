@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 5437
+jira: SMILE-7588
+title: "Previously, when adding several binary resources in one bundle in a transaction, the EntityExistsException error appeared. This is now fixed."
