@@ -2979,7 +2979,7 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 
 		if (resultList.size() > 1)
 			throw new NonUniqueResultException(Msg.code(911) + "More than one CodeSystem is pointed by forcedId: "
-					+ theForcedId + ". Was constraint " + ResourceTable.IDX_RES_FHIR_ID + " removed?");
+					+ theForcedId + ". Was constraint " + ResourceTable.IDX_RES_TYPE_FHIR_ID + " removed?");
 
 		IFhirResourceDao<CodeSystem> csDao = myDaoRegistry.getResourceDao("CodeSystem");
 		IBaseResource cs = myJpaStorageResourceParser.toResource(resultList.get(0), false);
