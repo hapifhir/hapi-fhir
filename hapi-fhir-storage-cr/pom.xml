@@ -111,6 +111,11 @@
 			<version>${project.version}</version>
 		</dependency>
 
+		<dependency>
+			<groupId>org.apache.poi</groupId>
+			<artifactId>poi</artifactId>
+		</dependency>
+
 		<!-- This is needed for the threaded execution -->
 		<dependency>
 			<groupId>org.springframework.security</groupId>
@@ -124,22 +129,26 @@
 			<version>${spring_boot_version}</version>
 		</dependency>
 
-		<!-- This is needed for the CqlExceptionHandlingInterceptor -->
+
+		<!--
+		START Jakarta CR Swap
+
+		These dependencies are added/swapped because the
+		Clinical Reasoning components no longer include it.
+		These will need to be adjusted / removed as soon as
+		the HAPI Jakarta PR hits -->
 		<dependency>
 			<groupId>javax.servlet</groupId>
 			<artifactId>javax.servlet-api</artifactId>
 		</dependency>
-
-		<!-- test -->
-		<!-- This javax dependency was added because the
-		Clinical Reasoning components no longer include it.
-		It needs to be removed as soon as the Jakarta merge
-		hits -->
 		<dependency>
 			<groupId>javax.xml.bind</groupId>
 			<artifactId>jaxb-api</artifactId>
 			<version>2.3.1</version>
 		</dependency>
+		<!-- END Jakarta CR Swap   -->
+
+		<!-- test -->
 		<dependency>
 			<groupId>org.testcontainers</groupId>
 			<artifactId>junit-jupiter</artifactId>
@@ -185,10 +194,6 @@
 			</exclusions>
 			<scope>test</scope>
 		</dependency>
-        <dependency>
-            <groupId>org.apache.poi</groupId>
-            <artifactId>poi</artifactId>
-        </dependency>
     </dependencies>
 	<profiles>
 		<profile>
