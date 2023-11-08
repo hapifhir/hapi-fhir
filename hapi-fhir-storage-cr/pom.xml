@@ -130,7 +130,7 @@
 		It needs to be removed as soon as the Jakarta merge
 		hits -->
 		<dependency>
-			<groupId>jakarta.xml.bind</groupId>
+			<groupId>javax.xml.bind</groupId>
 			<artifactId>jaxb-api</artifactId>
 			<version>2.3.1</version>
 		</dependency>
