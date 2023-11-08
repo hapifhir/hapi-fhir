@@ -29,7 +29,7 @@ public class Logs {
 			LoggerFactory.getLogger("ca.uhn.fhir.log.narrative_generation_troubleshooting");
 
 	private static final Logger ourTerminologyTroubleshootingLog =
-		LoggerFactory.getLogger("ca.uhn.fhir.log.terminology_troubleshooting");
+			LoggerFactory.getLogger("ca.uhn.fhir.log.terminology_troubleshooting");
 
 	private static final Logger ourSubscriptionTroubleshootingLog =
 			LoggerFactory.getLogger("ca.cdr.log.subscription_troubleshooting");
