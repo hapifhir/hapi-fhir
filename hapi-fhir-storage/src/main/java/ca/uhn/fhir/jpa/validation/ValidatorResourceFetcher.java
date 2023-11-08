@@ -24,7 +24,10 @@ import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.param.UriParam;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.hl7.fhir.common.hapi.validation.validator.VersionSpecificWorkerContextWrapper;
 import org.hl7.fhir.exceptions.DefinitionException;
@@ -37,12 +40,14 @@ import org.hl7.fhir.r5.elementmodel.JsonParser;
 import org.hl7.fhir.r5.model.CanonicalResource;
 import org.hl7.fhir.r5.utils.validation.IResourceValidator;
 import org.hl7.fhir.r5.utils.validation.IValidatorResourceFetcher;
+import org.hl7.fhir.utilities.CanonicalPair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
+import java.util.List;
 import java.util.Locale;
 
 public class ValidatorResourceFetcher implements IValidatorResourceFetcher {
@@ -69,19 +74,45 @@ public class ValidatorResourceFetcher implements IValidatorResourceFetcher {
 		IdType id = new IdType(theUrl);
 		String resourceType = id.getResourceType();
 		IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(resourceType);
-		IBaseResource target;
+		IBaseResource target = null;
 		try {
 			target = dao.read(id, (RequestDetails) appContext);
 		} catch (ResourceNotFoundException e) {
 			ourLog.info("Failed to resolve local reference: {}", theUrl);
+		}
+		if (target == null) {
+			try {
+				target = fetchByUrl(theUrl, dao, (RequestDetails) appContext);
+			} catch (ResourceNotFoundException e) {
+				ourLog.info("Failed to find resource by URL: {}", theUrl);
+			}
+		}
+		if (target == null) {
 			return null;
 		}
-
 		try {
 			return new JsonParser(myVersionSpecificContextWrapper)
 					.parse(myFhirContext.newJsonParser().encodeResourceToString(target), resourceType);
 		} catch (Exception e) {
 			throw new FHIRException(Msg.code(576) + e);
+		}
+	}
+
+	private IBaseResource fetchByUrl(String url, IFhirResourceDao<?> dao, RequestDetails requestDetails)
+			throws ResourceNotFoundException {
+		CanonicalPair pair = new CanonicalPair(url);
+		SearchParameterMap searchParameterMap = new SearchParameterMap();
+		searchParameterMap.add("url", new UriParam(pair.getUrl()));
+		String version = pair.getVersion();
+		if (version != null && !version.isEmpty()) {
+			searchParameterMap.add("version", new TokenParam(version));
+		}
+		List<IBaseResource> results =
+				dao.search(searchParameterMap, requestDetails).getAllResources();
+		if (results.size() > 0) {
+			return results.get(0);
+		} else {
+			throw new ResourceNotFoundException("Failed to find resource by URL: " + url);
 		}
 	}
 
