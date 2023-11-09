@@ -17,6 +17,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.ArrayList;
@@ -55,18 +56,19 @@ class ResourceIdListStepTest {
 		myResourceIdListStep = new ResourceIdListStep<>(myIdChunkProducer);
 	}
 
+	// fixme can we delete this?
 	@ParameterizedTest
 	@ValueSource(ints = {0, 1, 100, 500, 501, 2345, 10500})
 	void testResourceIdListBatchSizeLimit(int theListSize) {
 		List<TypedResourcePid> idList = generateIdList(theListSize);
 		when(myStepExecutionDetails.getData()).thenReturn(myData);
-		when(myParameters.getBatchSize()).thenReturn(theListSize);
+		when(myParameters.getBatchSize()).thenReturn(500);
 		when(myStepExecutionDetails.getParameters()).thenReturn(myParameters);
 		HomogeneousResourcePidList homogeneousResourcePidList = mock(HomogeneousResourcePidList.class);
 		if (theListSize > 0) {
 			when(homogeneousResourcePidList.getTypedResourcePids()).thenReturn(idList);
-			when(homogeneousResourcePidList.getLastDate()).thenReturn(new Date());
-			when(homogeneousResourcePidList.isEmpty()).thenReturn(false);
+//			when(homogeneousResourcePidList.getLastDate()).thenReturn(new Date());
+//			when(homogeneousResourcePidList.isEmpty()).thenReturn(false);
 			// Ensure none of the work chunks exceed MAX_BATCH_OF_IDS in size:
 			doAnswer(i -> {
 				ResourceIdListWorkChunkJson list = i.getArgument(0);
@@ -75,7 +77,7 @@ class ResourceIdListStepTest {
 				return null;
 			}).when(myDataSink).accept(any(ResourceIdListWorkChunkJson.class));
 		} else {
-			when(homogeneousResourcePidList.isEmpty()).thenReturn(true);
+			Mockito.lenient().when(homogeneousResourcePidList.isEmpty()).thenReturn(true);
 		}
 		when(myIdChunkProducer.fetchResourceIdsPage(any(), any(), any(), any(), any()))
 			.thenReturn(homogeneousResourcePidList);

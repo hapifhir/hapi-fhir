@@ -30,18 +30,16 @@ import ca.uhn.fhir.batch2.jobs.chunk.TypedPidJson;
 import ca.uhn.fhir.batch2.jobs.parameters.PartitionedJobParameters;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.pid.IResourcePidList;
+import ca.uhn.fhir.jpa.api.pid.TypedResourcePid;
 import ca.uhn.fhir.util.Logs;
-import com.google.common.collect.Iterators;
-import com.google.common.collect.UnmodifiableIterator;
+import ca.uhn.fhir.util.StreamUtil;
 import org.slf4j.Logger;
 
+import javax.annotation.Nonnull;
 import java.util.Collection;
 import java.util.Date;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
-import javax.annotation.Nonnull;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Stream;
 
 public class ResourceIdListStep<PT extends PartitionedJobParameters, IT extends ChunkRangeJson>
 		implements IJobStepWorker<PT, IT, ResourceIdListWorkChunkJson> {
@@ -76,8 +74,8 @@ public class ResourceIdListStep<PT extends PartitionedJobParameters, IT extends 
 
 		RequestPartitionId requestPartitionId =
 				theStepExecutionDetails.getParameters().getRequestPartitionId();
-		int totalIdsFound = 0;
-		int chunkCount = 0;
+		AtomicInteger totalIdsFound = new AtomicInteger();
+		AtomicInteger chunkCount = new AtomicInteger();
 
 		int maxBatchId = MAX_BATCH_OF_IDS;
 		if (batchSize != null) {
@@ -86,30 +84,22 @@ public class ResourceIdListStep<PT extends PartitionedJobParameters, IT extends 
 		}
 
 		final IResourcePidList nextChunk = myIdChunkProducer.fetchResourceIdsPage(
-				start, end, pageSize, requestPartitionId, theStepExecutionDetails.getData());
+			start, end, pageSize, requestPartitionId, theStepExecutionDetails.getData());
 
-		if (nextChunk.isEmpty()) {
-			ourLog.info("No data returned");
-		} else {
-			ourLog.debug("Found {} IDs from {} to {}", nextChunk.size(), start, nextChunk.getLastDate());
+		// fixme replace with Stream.
+		// todo push stream down
+		// todo force uniqueness upstream
+		Stream<TypedResourcePid> stream = nextChunk.getTypedResourcePids().stream();
 
-			final Set<TypedPidJson> idBuffer = nextChunk.getTypedResourcePids().stream()
-					.map(TypedPidJson::new)
-					.collect(Collectors.toCollection(LinkedHashSet::new));
+		StreamUtil.partition(stream.map(TypedPidJson::new), maxBatchId)
+			.forEach(idBatch->{
+				totalIdsFound.addAndGet(idBatch.size());
+				chunkCount.getAndIncrement();
+				submitWorkChunk(idBatch, nextChunk.getRequestPartitionId(), theDataSink);
 
-			final UnmodifiableIterator<List<TypedPidJson>> partition =
-					Iterators.partition(idBuffer.iterator(), maxBatchId);
+			});
 
-			while (partition.hasNext()) {
-				final List<TypedPidJson> submissionIds = partition.next();
 
-				totalIdsFound += submissionIds.size();
-				chunkCount++;
-				submitWorkChunk(submissionIds, nextChunk.getRequestPartitionId(), theDataSink);
-			}
-
-			ourLog.info("Submitted {} chunks with {} resource IDs", chunkCount, totalIdsFound);
-		}
 		return RunOutcome.SUCCESS;
 	}
 
