@@ -17,8 +17,6 @@ class StreamUtilTest {
 		assertEquals(theOutput, result, theCase);
 	}
 
-	// fixme
-
 	static Object[][] streamPartitionTestCases() {
 		return new Object[][]{
 			{
