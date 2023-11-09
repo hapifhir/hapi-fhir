@@ -65,10 +65,6 @@ public class ResourceIdListStep<PT extends PartitionedJobParameters, IT extends 
 		Date start = data.getStart();
 		Date end = data.getEnd();
 		Integer batchSize = theStepExecutionDetails.getParameters().getBatchSize();
-		int pageSize = DEFAULT_PAGE_SIZE;
-		if (batchSize != null) {
-			pageSize = batchSize.intValue();
-		}
 
 		ourLog.info("Beginning scan for reindex IDs in range {} to {}", start, end);
 
@@ -80,20 +76,19 @@ public class ResourceIdListStep<PT extends PartitionedJobParameters, IT extends 
 		int maxBatchId = MAX_BATCH_OF_IDS;
 		if (batchSize != null) {
 			// we won't go over MAX_BATCH_OF_IDS
-			maxBatchId = Math.min(batchSize.intValue(), maxBatchId);
+			maxBatchId = Math.min(batchSize, maxBatchId);
 		}
 
-		final IResourcePidList nextChunk = myIdChunkProducer.fetchResourceIdsPage(
-				start, end, pageSize, requestPartitionId, theStepExecutionDetails.getData());
-
-		// fixme replace with Stream.
-		// todo push stream down
-		// todo force uniqueness upstream
-		Stream<TypedResourcePid> stream = nextChunk.getTypedResourcePids().stream();
+		// wipmb replace with Stream.
+		// wipmb push stream down
+		// wipmb force uniqueness upstream
+		Stream<TypedResourcePid> stream = myIdChunkProducer.fetchResourceIdsStream(
+			start, end, requestPartitionId, theStepExecutionDetails.getData());
 
 		StreamUtil.partition(stream.map(TypedPidJson::new), maxBatchId).forEach(idBatch -> {
 			totalIdsFound.addAndGet(idBatch.size());
 			chunkCount.getAndIncrement();
+			// wipmb this isn't right - we might have different partitions per url
 			submitWorkChunk(idBatch, requestPartitionId, theDataSink);
 		});
 

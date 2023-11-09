@@ -22,8 +22,10 @@ package ca.uhn.fhir.batch2.jobs.step;
 import ca.uhn.fhir.batch2.jobs.chunk.ChunkRangeJson;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.pid.IResourcePidList;
+import ca.uhn.fhir.jpa.api.pid.TypedResourcePid;
 
 import java.util.Date;
+import java.util.stream.Stream;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
@@ -44,10 +46,27 @@ public interface IIdChunkProducer<IT extends ChunkRangeJson> {
 	 * @param theData defines the query we are using
 	 * @return a list of Resource pids
 	 */
+	// wipmb delete
 	IResourcePidList fetchResourceIdsPage(
 			Date theNextStart,
 			Date theEnd,
 			@Nonnull Integer thePageSize,
 			@Nullable RequestPartitionId theRequestPartitionId,
 			IT theData);
+
+	/**
+	 * Actually fetch the resource pids
+	 * @param theNextStart pids are pulled with lastUpdated >= this date
+	 * @param theEnd pids are pulled with lastUpdate <= this date
+	 * @param theRequestPartitionId partition for operation if rtequired
+	 * @param theData defines the query we are using
+	 * @return a list of Resource pids
+	 */
+	default Stream<TypedResourcePid> fetchResourceIdsStream(
+		Date theNextStart,
+		Date theEnd,
+		@Nullable RequestPartitionId theRequestPartitionId,
+		IT theData) {
+		return fetchResourceIdsPage(theNextStart, theEnd, 10000, theRequestPartitionId, theData).getTypedResourcePids().stream();
+	}
 }

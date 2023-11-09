@@ -56,7 +56,7 @@ class ResourceIdListStepTest {
 		myResourceIdListStep = new ResourceIdListStep<>(myIdChunkProducer);
 	}
 
-	// fixme can we delete this?
+	// wipmb can we delete this?
 	@ParameterizedTest
 	@ValueSource(ints = {0, 1, 100, 500, 501, 2345, 10500})
 	void testResourceIdListBatchSizeLimit(int theListSize) {
@@ -79,6 +79,7 @@ class ResourceIdListStepTest {
 		} else {
 			Mockito.lenient().when(homogeneousResourcePidList.isEmpty()).thenReturn(true);
 		}
+		// wipmb update to stream
 		when(myIdChunkProducer.fetchResourceIdsPage(any(), any(), any(), any(), any()))
 			.thenReturn(homogeneousResourcePidList);
 
