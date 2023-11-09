@@ -9,8 +9,8 @@ import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nonnull;
 import java.io.IOException;
+import javax.annotation.Nonnull;
 
 public class DefaultProfileValidationSupportNpmStrategy extends NpmPackageValidationSupport {
 	private static final Logger ourLog = LoggerFactory.getLogger(DefaultProfileValidationSupportNpmStrategy.class);
