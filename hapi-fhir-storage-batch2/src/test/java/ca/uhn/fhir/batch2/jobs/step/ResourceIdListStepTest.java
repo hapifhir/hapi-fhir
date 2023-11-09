@@ -35,6 +35,7 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class ResourceIdListStepTest {
+	// wipmb review
 	@Mock
 	private IIdChunkProducer<PartitionedUrlChunkRangeJson> myIdChunkProducer;
 	@Mock
@@ -66,7 +67,7 @@ class ResourceIdListStepTest {
 		when(myStepExecutionDetails.getParameters()).thenReturn(myParameters);
 		HomogeneousResourcePidList homogeneousResourcePidList = mock(HomogeneousResourcePidList.class);
 		if (theListSize > 0) {
-			when(homogeneousResourcePidList.getTypedResourcePids()).thenReturn(idList);
+			when(homogeneousResourcePidList.getTypedResourcePidStream()).thenReturn(idList.stream());
 //			when(homogeneousResourcePidList.getLastDate()).thenReturn(new Date());
 //			when(homogeneousResourcePidList.isEmpty()).thenReturn(false);
 			// Ensure none of the work chunks exceed MAX_BATCH_OF_IDS in size:

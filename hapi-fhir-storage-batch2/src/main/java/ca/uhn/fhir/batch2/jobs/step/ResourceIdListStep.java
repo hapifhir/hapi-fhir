@@ -30,16 +30,16 @@ import ca.uhn.fhir.batch2.jobs.chunk.TypedPidJson;
 import ca.uhn.fhir.batch2.jobs.parameters.PartitionedJobParameters;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.pid.IResourcePidList;
-import ca.uhn.fhir.jpa.api.pid.TypedResourcePid;
 import ca.uhn.fhir.util.Logs;
 import ca.uhn.fhir.util.StreamUtil;
 import org.slf4j.Logger;
 
+import javax.annotation.Nonnull;
 import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
-import javax.annotation.Nonnull;
 
 public class ResourceIdListStep<PT extends PartitionedJobParameters, IT extends ChunkRangeJson>
 		implements IJobStepWorker<PT, IT, ResourceIdListWorkChunkJson> {
@@ -66,6 +66,11 @@ public class ResourceIdListStep<PT extends PartitionedJobParameters, IT extends 
 		Date end = data.getEnd();
 		Integer batchSize = theStepExecutionDetails.getParameters().getBatchSize();
 
+		int pageSize = DEFAULT_PAGE_SIZE;
+		if (batchSize != null) {
+			pageSize = batchSize.intValue();
+		}
+
 		ourLog.info("Beginning scan for reindex IDs in range {} to {}", start, end);
 
 		RequestPartitionId requestPartitionId =
@@ -79,17 +84,18 @@ public class ResourceIdListStep<PT extends PartitionedJobParameters, IT extends 
 			maxBatchId = Math.min(batchSize, maxBatchId);
 		}
 
-		// wipmb replace with Stream.
-		// wipmb push stream down
-		// wipmb force uniqueness upstream
-		Stream<TypedResourcePid> stream = myIdChunkProducer.fetchResourceIdsStream(
-			start, end, requestPartitionId, theStepExecutionDetails.getData());
+		final IResourcePidList nextChunk = myIdChunkProducer.fetchResourceIdsPage(
+			start, end, pageSize, requestPartitionId, theStepExecutionDetails.getData());
 
-		StreamUtil.partition(stream.map(TypedPidJson::new), maxBatchId).forEach(idBatch -> {
+		Stream<TypedPidJson> jsonStream = nextChunk.getTypedResourcePidStream().map(TypedPidJson::new);
+
+		// chunk by size maxBatchId
+		Stream<List<TypedPidJson>> chunkStream = StreamUtil.partition(jsonStream, maxBatchId);
+
+		chunkStream.forEach(idBatch -> {
 			totalIdsFound.addAndGet(idBatch.size());
 			chunkCount.getAndIncrement();
-			// wipmb this isn't right - we might have different partitions per url
-			submitWorkChunk(idBatch, requestPartitionId, theDataSink);
+			submitWorkChunk(idBatch, nextChunk.getRequestPartitionId(), theDataSink);
 		});
 
 		return RunOutcome.SUCCESS;
