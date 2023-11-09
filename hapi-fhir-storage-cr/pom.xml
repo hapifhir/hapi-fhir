@@ -77,20 +77,6 @@
 		<dependency>
 			<groupId>org.opencds.cqf.fhir</groupId>
 			<artifactId>cqf-fhir-cr</artifactId>
-			<exclusions>
-				<exclusion>
-					<groupId>xpp3</groupId>
-					<artifactId>xpp3_min</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>xmlpull</groupId>
-					<artifactId>xmlpull</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>xmlpull</groupId>
-					<artifactId>xmlpull</artifactId>
-				</exclusion>
-			</exclusions>
 			<version>${clinical-reasoning.version}</version>
 		</dependency>
 		<dependency>
@@ -102,12 +88,6 @@
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-storage</artifactId>
-			<exclusions>
-				<exclusion>
-					<groupId>com.sun.activation</groupId>
-					<artifactId>jakarta.activation</artifactId>
-				</exclusion>
-			</exclusions>
 			<version>${project.version}</version>
 		</dependency>
 
@@ -186,12 +166,6 @@
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-jpaserver-test-utilities</artifactId>
 			<version>${project.version}</version>
-			<exclusions>
-				<exclusion>
-					<groupId>com.sun.activation</groupId>
-					<artifactId>jakarta.activation</artifactId>
-				</exclusion>
-			</exclusions>
 			<scope>test</scope>
 		</dependency>
     </dependencies>
