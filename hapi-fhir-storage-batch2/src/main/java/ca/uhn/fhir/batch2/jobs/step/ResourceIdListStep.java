@@ -35,11 +35,11 @@ import ca.uhn.fhir.util.Logs;
 import ca.uhn.fhir.util.StreamUtil;
 import org.slf4j.Logger;
 
-import javax.annotation.Nonnull;
 import java.util.Collection;
 import java.util.Date;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
+import javax.annotation.Nonnull;
 
 public class ResourceIdListStep<PT extends PartitionedJobParameters, IT extends ChunkRangeJson>
 		implements IJobStepWorker<PT, IT, ResourceIdListWorkChunkJson> {
@@ -84,21 +84,18 @@ public class ResourceIdListStep<PT extends PartitionedJobParameters, IT extends 
 		}
 
 		final IResourcePidList nextChunk = myIdChunkProducer.fetchResourceIdsPage(
-			start, end, pageSize, requestPartitionId, theStepExecutionDetails.getData());
+				start, end, pageSize, requestPartitionId, theStepExecutionDetails.getData());
 
 		// fixme replace with Stream.
 		// todo push stream down
 		// todo force uniqueness upstream
 		Stream<TypedResourcePid> stream = nextChunk.getTypedResourcePids().stream();
 
-		StreamUtil.partition(stream.map(TypedPidJson::new), maxBatchId)
-			.forEach(idBatch->{
-				totalIdsFound.addAndGet(idBatch.size());
-				chunkCount.getAndIncrement();
-				submitWorkChunk(idBatch, nextChunk.getRequestPartitionId(), theDataSink);
-
-			});
-
+		StreamUtil.partition(stream.map(TypedPidJson::new), maxBatchId).forEach(idBatch -> {
+			totalIdsFound.addAndGet(idBatch.size());
+			chunkCount.getAndIncrement();
+			submitWorkChunk(idBatch, nextChunk.getRequestPartitionId(), theDataSink);
+		});
 
 		return RunOutcome.SUCCESS;
 	}
