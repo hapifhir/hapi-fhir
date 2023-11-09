@@ -23,10 +23,10 @@ import org.hl7.fhir.r4.model.ValueSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.List;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -55,6 +55,11 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 	public RemoteTerminologyServiceValidationSupport(FhirContext theFhirContext, String theBaseUrl) {
 		super(theFhirContext);
 		myBaseUrl = theBaseUrl;
+	}
+
+	@Override
+	public String getName() {
+		return getFhirContext().getVersion().getVersion() + " Remote Terminology Service Validation Support";
 	}
 
 	@Override

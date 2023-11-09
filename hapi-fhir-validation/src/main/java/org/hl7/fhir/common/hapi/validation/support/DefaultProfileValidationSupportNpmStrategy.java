@@ -9,8 +9,8 @@ import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
 import javax.annotation.Nonnull;
+import java.io.IOException;
 
 public class DefaultProfileValidationSupportNpmStrategy extends NpmPackageValidationSupport {
 	private static final Logger ourLog = LoggerFactory.getLogger(DefaultProfileValidationSupportNpmStrategy.class);
@@ -38,5 +38,10 @@ public class DefaultProfileValidationSupportNpmStrategy extends NpmPackageValida
 		}
 
 		ourLog.info("Loaded {} Core+Extension resources in {}", countAll(), sw);
+	}
+
+	@Override
+	public String getName() {
+		return getFhirContext().getVersion().getVersion() + " FHIR Standard Profile NPM Validation Support";
 	}
 }

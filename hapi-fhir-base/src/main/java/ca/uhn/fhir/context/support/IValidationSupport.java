@@ -27,6 +27,7 @@ import ca.uhn.fhir.util.UrlUtil;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
@@ -34,6 +35,8 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -41,8 +44,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -407,6 +408,10 @@ public interface IValidationSupport {
 	@Nullable
 	default TranslateConceptResults translateConcept(TranslateCodeRequest theRequest) {
 		return null;
+	}
+
+	default String getName() {
+		return "Unknown " + getFhirContext().getVersion().getVersion() + " Validation Support";
 	}
 
 	enum IssueSeverity {
@@ -989,6 +994,15 @@ public interface IValidationSupport {
 
 		public boolean isReverse() {
 			return myReverse;
+		}
+
+		@Override
+		public String toString() {
+			return new ToStringBuilder(this)
+				.append("sourceValueSetUrl", mySourceValueSetUrl)
+				.append("targetSystemUrl", myTargetSystemUrl)
+				.append("targetValueSetUrl", myTargetValueSetUrl)
+				.toString();
 		}
 	}
 

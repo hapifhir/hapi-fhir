@@ -37,6 +37,11 @@ public class LoadingValidationSupportDstu2 implements IValidationSupport {
 			org.slf4j.LoggerFactory.getLogger(LoadingValidationSupportDstu2.class);
 
 	@Override
+	public String getName() {
+		return "Dstu2 CLI Loading Validation Support";
+	}
+
+	@Override
 	public <T extends IBaseResource> T fetchResource(Class<T> theClass, String theUri) {
 		String resName = myCtx.getResourceType(theClass);
 		ourLog.info("Attempting to fetch {} at URL: {}", resName, theUri);
