@@ -341,7 +341,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 
 	@SuppressWarnings("ConstantConditions")
 	@Override
-	public IResultIterator createQuery(
+	public IResultIterator<JpaPid> createQuery(
 			SearchParameterMap theParams,
 			SearchRuntimeDetails theSearchRuntimeDetails,
 			RequestDetails theRequest,

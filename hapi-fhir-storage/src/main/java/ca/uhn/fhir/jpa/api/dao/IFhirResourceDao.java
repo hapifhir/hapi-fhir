@@ -51,6 +51,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.servlet.http.HttpServletResponse;
@@ -354,6 +355,23 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 			RequestDetails theRequest,
 			@Nullable IBaseResource theConditionalOperationTargetOrNull) {
 		return searchForIds(theParams, theRequest);
+	}
+
+	/**
+	 * Search results matching theParams.
+	 * The Stream MUST be called within a transaction because the stream wraps an open query ResultSet.
+	 * The Stream MUST be closed to avoid leaking resources.
+	 * @param theParams the search
+	 * @param theRequest for partition target info
+	 * @return a Stream than MUST only be used within the calling transaction.
+	 */
+	// WIPMB make PID a class parameter.
+	default <PID extends IResourcePersistentId<?>> Stream<PID> searchForIdStream(
+			SearchParameterMap theParams,
+			RequestDetails theRequest,
+			@Nullable IBaseResource theConditionalOperationTargetOrNull) {
+		List<PID> iResourcePersistentIds = searchForIds(theParams, theRequest);
+		return iResourcePersistentIds.stream();
 	}
 
 	/**

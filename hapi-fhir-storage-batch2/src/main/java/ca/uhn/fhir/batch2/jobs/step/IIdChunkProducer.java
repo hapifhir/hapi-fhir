@@ -22,10 +22,14 @@ package ca.uhn.fhir.batch2.jobs.step;
 import ca.uhn.fhir.batch2.jobs.chunk.ChunkRangeJson;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.pid.IResourcePidList;
+import ca.uhn.fhir.jpa.api.pid.IResourcePidStream;
+import ca.uhn.fhir.jpa.api.pid.ListWrappingPidStream;
 
+import java.util.Date;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.Date;
+
+import static ca.uhn.fhir.batch2.jobs.step.ResourceIdListStep.DEFAULT_PAGE_SIZE;
 
 /**
  * A service that produces pages of resource pids based on the data provided by a previous batch step.  Typically the
@@ -51,4 +55,12 @@ public interface IIdChunkProducer<IT extends ChunkRangeJson> {
 			@Nullable RequestPartitionId theRequestPartitionId,
 			IT theData);
 
+	default IResourcePidStream fetchResourceIdStream(
+		Date theStart,
+		Date theEnd,
+		@Nullable RequestPartitionId theRequestPartitionId,
+		IT theData) {
+		IResourcePidList list = fetchResourceIdsPage(theStart, theEnd, DEFAULT_PAGE_SIZE, theRequestPartitionId, theData);
+		return new ListWrappingPidStream(list);
+	}
 }

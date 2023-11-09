@@ -29,7 +29,7 @@ import ca.uhn.fhir.batch2.jobs.chunk.ResourceIdListWorkChunkJson;
 import ca.uhn.fhir.batch2.jobs.chunk.TypedPidJson;
 import ca.uhn.fhir.batch2.jobs.parameters.PartitionedJobParameters;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.api.pid.IResourcePidList;
+import ca.uhn.fhir.jpa.api.pid.IResourcePidStream;
 import ca.uhn.fhir.util.Logs;
 import ca.uhn.fhir.util.StreamUtil;
 import org.slf4j.Logger;
@@ -66,11 +66,6 @@ public class ResourceIdListStep<PT extends PartitionedJobParameters, IT extends 
 		Date end = data.getEnd();
 		Integer batchSize = theStepExecutionDetails.getParameters().getBatchSize();
 
-		int pageSize = DEFAULT_PAGE_SIZE;
-		if (batchSize != null) {
-			pageSize = batchSize.intValue();
-		}
-
 		ourLog.info("Beginning scan for reindex IDs in range {} to {}", start, end);
 
 		RequestPartitionId requestPartitionId =
@@ -84,8 +79,10 @@ public class ResourceIdListStep<PT extends PartitionedJobParameters, IT extends 
 			maxBatchId = Math.min(batchSize, maxBatchId);
 		}
 
-		final IResourcePidList nextChunk = myIdChunkProducer.fetchResourceIdsPage(
-			start, end, pageSize, requestPartitionId, theStepExecutionDetails.getData());
+		// wipmb push stream down
+		// wipmb force uniqueness upstream
+		final IResourcePidStream nextChunk = myIdChunkProducer.fetchResourceIdStream(
+				start, end, requestPartitionId, theStepExecutionDetails.getData());
 
 		Stream<TypedPidJson> jsonStream = nextChunk.getTypedResourcePidStream().map(TypedPidJson::new);
 

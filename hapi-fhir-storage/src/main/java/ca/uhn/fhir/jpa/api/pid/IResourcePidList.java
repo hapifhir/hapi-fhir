@@ -22,16 +22,14 @@ package ca.uhn.fhir.jpa.api.pid;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 
+import javax.annotation.Nonnull;
 import java.util.Date;
 import java.util.List;
-import java.util.stream.Stream;
-import javax.annotation.Nonnull;
 
 /**
  * List of IResourcePersistentId along with a resource type each id
  */
 public interface IResourcePidList {
-// wipmb add generics
 
 	RequestPartitionId getRequestPartitionId();
 
@@ -47,11 +45,4 @@ public interface IResourcePidList {
 	List<IResourcePersistentId> getIds();
 
 	boolean isEmpty();
-
-	// wipmb push stream down
-	// wipmb force uniqueness upstream
-
-	default Stream<TypedResourcePid> getTypedResourcePidStream() {
-		return getTypedResourcePids().stream();
-	}
 }
