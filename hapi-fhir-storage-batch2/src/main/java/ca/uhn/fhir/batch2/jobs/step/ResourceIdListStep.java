@@ -94,7 +94,7 @@ public class ResourceIdListStep<PT extends PartitionedJobParameters, IT extends 
 		StreamUtil.partition(stream.map(TypedPidJson::new), maxBatchId).forEach(idBatch -> {
 			totalIdsFound.addAndGet(idBatch.size());
 			chunkCount.getAndIncrement();
-			submitWorkChunk(idBatch, nextChunk.getRequestPartitionId(), theDataSink);
+			submitWorkChunk(idBatch, requestPartitionId, theDataSink);
 		});
 
 		return RunOutcome.SUCCESS;
