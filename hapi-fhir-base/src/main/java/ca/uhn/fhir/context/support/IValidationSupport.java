@@ -999,10 +999,10 @@ public interface IValidationSupport {
 		@Override
 		public String toString() {
 			return new ToStringBuilder(this)
-				.append("sourceValueSetUrl", mySourceValueSetUrl)
-				.append("targetSystemUrl", myTargetSystemUrl)
-				.append("targetValueSetUrl", myTargetValueSetUrl)
-				.toString();
+					.append("sourceValueSetUrl", mySourceValueSetUrl)
+					.append("targetSystemUrl", myTargetSystemUrl)
+					.append("targetValueSetUrl", myTargetValueSetUrl)
+					.toString();
 		}
 	}
 

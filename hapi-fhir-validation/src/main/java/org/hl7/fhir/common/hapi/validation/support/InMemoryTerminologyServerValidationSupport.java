@@ -77,8 +77,6 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 		return myCtx.getVersion().getVersion() + " In-Memory Validation Support";
 	}
 
-
-
 	/**
 	 * This setting controls the validation issue severity to report when a code validation
 	 * finds that the code is present in the given CodeSystem, but the display name being
