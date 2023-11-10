@@ -28,6 +28,7 @@ import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.UriParam;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.hl7.fhir.common.hapi.validation.validator.VersionSpecificWorkerContextWrapper;
 import org.hl7.fhir.exceptions.FHIRException;
@@ -95,9 +96,13 @@ public class ValidatorResourceFetcher implements IValidatorResourceFetcher {
 		if (version != null && !version.isEmpty()) {
 			searchParameterMap.add("version", new TokenParam(version));
 		}
-		List<IBaseResource> results =
-				dao.search(searchParameterMap, requestDetails).getAllResources();
-		if (results.size() > 0) {
+		List<IBaseResource> results = null;
+		try {
+			results = dao.search(searchParameterMap, requestDetails).getAllResources();
+		} catch (InvalidRequestException e) {
+			ourLog.info("Resource does not support 'url' or 'version' Search Parameters");
+		}
+		if (results != null && results.size() > 0) {
 			if (results.size() > 1) {
 				ourLog.warn(
 						String.format("Multiple results found for URL '%s', only the first will be considered.", url));

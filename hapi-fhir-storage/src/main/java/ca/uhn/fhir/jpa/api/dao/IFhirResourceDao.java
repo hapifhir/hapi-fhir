@@ -326,18 +326,27 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 
 	/**
 	 * @deprecated Use {@link #search(SearchParameterMap, RequestDetails)} instead
+	 * @throws InvalidRequestException If a SearchParameter is not known to the server
 	 */
-	IBundleProvider search(SearchParameterMap theParams);
+	IBundleProvider search(SearchParameterMap theParams) throws InvalidRequestException;
 
-	IBundleProvider search(SearchParameterMap theParams, RequestDetails theRequestDetails);
+	/**
+	 * *
+	 * @throws InvalidRequestException If a SearchParameter is not known to the server
+	 */
+	IBundleProvider search(SearchParameterMap theParams, RequestDetails theRequestDetails) throws InvalidRequestException;
 
+	/**
+	 * *
+	 * @throws InvalidRequestException If a SearchParameter is not known to the server
+	 */
 	IBundleProvider search(
-			SearchParameterMap theParams, RequestDetails theRequestDetails, HttpServletResponse theServletResponse);
+			SearchParameterMap theParams, RequestDetails theRequestDetails, HttpServletResponse theServletResponse) throws InvalidRequestException;
 
 	/**
 	 * Search for IDs for processing a match URLs, etc.
 	 */
-	default <T extends IResourcePersistentId> List<T> searchForIds(
+	default <PT extends IResourcePersistentId> List<PT> searchForIds(
 			SearchParameterMap theParams, RequestDetails theRequest) {
 		return searchForIds(theParams, theRequest, null);
 	}
@@ -349,7 +358,7 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 	 *                                            create/update, this is the resource being searched for
 	 * @since 5.5.0
 	 */
-	default <T extends IResourcePersistentId> List<T> searchForIds(
+	default <PT extends IResourcePersistentId> List<PT> searchForIds(
 			SearchParameterMap theParams,
 			RequestDetails theRequest,
 			@Nullable IBaseResource theConditionalOperationTargetOrNull) {
