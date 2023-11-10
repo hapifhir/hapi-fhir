@@ -74,7 +74,7 @@ public class ValidatorResourceFetcher implements IValidatorResourceFetcher {
 		IdType id = new IdType(theUrl);
 		String resourceType = id.getResourceType();
 		IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(resourceType);
-		IBaseResource target = null;
+		IBaseResource target;
 		try {
 			target = dao.read(id, (RequestDetails) appContext);
 		} catch (ResourceNotFoundException e) {
@@ -106,9 +106,13 @@ public class ValidatorResourceFetcher implements IValidatorResourceFetcher {
 		List<IBaseResource> results =
 				dao.search(searchParameterMap, requestDetails).getAllResources();
 		if (results.size() > 0) {
+			if (results.size() > 1) {
+				ourLog.warn(
+						String.format("Multiple results found for URL '%s', only the first will be considered.", url));
+			}
 			return results.get(0);
 		} else {
-			throw new ResourceNotFoundException("Failed to find resource by URL: " + url);
+			throw new ResourceNotFoundException(Msg.code(1995) + "Failed to find resource by URL: " + url);
 		}
 	}
 
