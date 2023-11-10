@@ -70,7 +70,7 @@ public class ValidatorResourceFetcher implements IValidatorResourceFetcher {
 
 	@Override
 	public Element fetch(IResourceValidator iResourceValidator, Object appContext, String theUrl)
-			throws FHIRFormatError, DefinitionException, FHIRException, IOException {
+			throws FHIRFormatError, DefinitionException, FHIRException {
 		IdType id = new IdType(theUrl);
 		String resourceType = id.getResourceType();
 		IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(resourceType);
