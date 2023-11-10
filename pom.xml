@@ -936,7 +936,7 @@
 		<jaxb_runtime_version>3.0.0</jaxb_runtime_version>
 		<jena_version>4.8.0</jena_version>
 		<jersey_version>3.0.3</jersey_version>
-		<jetty_version>10.0.14</jetty_version>
+		<jetty_version>10.0.16</jetty_version>
 		<jsr305_version>3.0.2</jsr305_version>
 		<junit_version>5.9.1</junit_version>
 		<flexmark_version>0.64.8</flexmark_version>
