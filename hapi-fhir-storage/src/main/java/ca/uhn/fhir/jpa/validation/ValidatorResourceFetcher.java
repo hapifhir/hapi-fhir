@@ -79,16 +79,12 @@ public class ValidatorResourceFetcher implements IValidatorResourceFetcher {
 			target = dao.read(id, (RequestDetails) appContext);
 		} catch (ResourceNotFoundException e) {
 			ourLog.info("Failed to resolve local reference: {}", theUrl);
-		}
-		if (target == null) {
 			try {
 				target = fetchByUrl(theUrl, dao, (RequestDetails) appContext);
-			} catch (ResourceNotFoundException e) {
+			} catch (ResourceNotFoundException e2) {
 				ourLog.info("Failed to find resource by URL: {}", theUrl);
+				return null;
 			}
-		}
-		if (target == null) {
-			return null;
 		}
 		try {
 			return new JsonParser(myVersionSpecificContextWrapper)
