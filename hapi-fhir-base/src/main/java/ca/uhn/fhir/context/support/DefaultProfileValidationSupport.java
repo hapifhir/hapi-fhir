@@ -100,6 +100,11 @@ public class DefaultProfileValidationSupport implements IValidationSupport {
 	}
 
 	@Override
+	public String getName() {
+		return myCtx.getVersion().getVersion() + " FHIR Standard Profile Validation Support";
+	}
+
+	@Override
 	public List<IBaseResource> fetchAllConformanceResources() {
 		return myDelegate.fetchAllConformanceResources();
 	}

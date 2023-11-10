@@ -58,6 +58,11 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 	}
 
 	@Override
+	public String getName() {
+		return getFhirContext().getVersion().getVersion() + " Remote Terminology Service Validation Support";
+	}
+
+	@Override
 	public CodeValidationResult validateCode(
 			@Nonnull ValidationSupportContext theValidationSupportContext,
 			@Nonnull ConceptValidationOptions theOptions,
