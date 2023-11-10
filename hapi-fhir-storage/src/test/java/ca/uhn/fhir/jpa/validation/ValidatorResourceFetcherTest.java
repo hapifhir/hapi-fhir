@@ -38,6 +38,12 @@ public class ValidatorResourceFetcherTest extends BaseTest {
 	public void before() {
     mockDaoRegistry = mock(DaoRegistry.class);
     mockResourceDao = mock(IFhirResourceDao.class);
+		fetcher = new ValidatorResourceFetcher(ourCtx, myDefaultValidationSupport, mockDaoRegistry);
+  }
+
+  @Test
+	public void checkFetchByUrl() {
+    // setup mocks
     String resource;
     try {
       resource = loadResource("/q_jon_with_url_version.json");
@@ -49,17 +55,13 @@ public class ValidatorResourceFetcherTest extends BaseTest {
     doReturn(new SimpleBundleProvider(Arrays.asList(
       ourCtx.newJsonParser().parseResource(resource)
     ))).when(mockResourceDao).search(any(),any());
-		fetcher = new ValidatorResourceFetcher(ourCtx, myDefaultValidationSupport, mockDaoRegistry);
-  }
-
-  @Test
-	public void checkFetchByUrl() {
     VersionSpecificWorkerContextWrapper wrappedWorkerContext = VersionSpecificWorkerContextWrapper.newVersionSpecificWorkerContextWrapper(myDefaultValidationSupport);
     InstanceValidator v = new InstanceValidator(
       wrappedWorkerContext,
       new FhirInstanceValidator.NullEvaluationContext(),
       new XVerExtensionManager(null));
     RequestDetails r = new SystemRequestDetails();
+    // test
     Element returnedResource = fetcher.fetch(v, r,"http://www.test-url-for-questionnaire.com/Questionnaire/test-id|1.0.0");
     assertNotNull(returnedResource);
   }
