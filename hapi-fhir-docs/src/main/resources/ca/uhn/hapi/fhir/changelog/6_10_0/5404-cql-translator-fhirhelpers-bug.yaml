@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 5404
+title: "Cql translating bug where FHIRHelpers library function was erroring and blocking clinical reasoning content functionality"

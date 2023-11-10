@@ -53,7 +53,7 @@ public interface IMdmLinkJpaRepository
 	@Modifying
 	@Query(
 			value =
-					"DELETE FROM MPI_LINK_AUD f WHERE GOLDEN_RESOURCE_PID IN (:goldenPids) OR TARGET_PID IN (:goldenPids)",
+					"DELETE FROM MPI_LINK_AUD WHERE GOLDEN_RESOURCE_PID IN (:goldenPids) OR TARGET_PID IN (:goldenPids)",
 			nativeQuery = true)
 	void deleteLinksHistoryWithAnyReferenceToPids(@Param("goldenPids") List<Long> theResourcePids);
 

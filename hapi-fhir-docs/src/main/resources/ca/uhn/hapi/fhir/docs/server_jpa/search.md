@@ -22,6 +22,12 @@ Searching on Location.Position using `near` currently uses a box search, not a r
 
 The special `_filter` is only partially implemented.
 
+### _pid
+
+The JPA server implements a non-standard special `_pid` which matches/sorts on the raw internal database id.
+This sort is useful for imposing tie-breaking sort order in an efficient way.
+
+Note that this is an internal feature that may change or be removed in the future. Use with caution.
 
 <a name="uplifted-refchains"/>
 

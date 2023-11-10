@@ -63,6 +63,7 @@ public class ServletRequestUtil {
 
 		requestDetails.setRequestPath(url);
 		requestDetails.setFhirServerBase(theRequestDetails.getFhirServerBase());
+		requestDetails.setTenantId(theRequestDetails.getTenantId());
 
 		theRequestDetails.getServer().populateRequestDetailsFromRequestPath(requestDetails, url);
 		return requestDetails;
