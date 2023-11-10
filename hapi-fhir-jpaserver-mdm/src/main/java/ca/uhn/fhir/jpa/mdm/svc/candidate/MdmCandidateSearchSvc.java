@@ -159,7 +159,8 @@ public class MdmCandidateSearchSvc {
 				myCandidateSearcher.search(theResourceType, resourceCriteria, theRequestPartitionId);
 		if (!bundleProvider.isPresent()) {
 			throw new TooManyCandidatesException(Msg.code(762) + "More than " + myMdmSettings.getCandidateSearchLimit()
-					+ " candidate matches found for " + resourceCriteria + ".  Aborting mdm matching.");
+					+ " candidate matches found for " + resourceCriteria + ".  Aborting mdm matching. Updating the "
+					+ "candidate search parameters is strongly recommended for better performance of MDM.");
 		}
 		List<IBaseResource> resources = bundleProvider.get().getAllResources();
 
