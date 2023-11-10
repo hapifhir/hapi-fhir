@@ -6,9 +6,12 @@ import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.jobs.chunk.PartitionedUrlChunkRangeJson;
 import ca.uhn.fhir.batch2.jobs.chunk.ResourceIdListWorkChunkJson;
 import ca.uhn.fhir.batch2.jobs.parameters.PartitionedUrlListJobParameters;
+import ca.uhn.fhir.jpa.api.pid.HomogeneousResourcePidList;
 import ca.uhn.fhir.jpa.api.pid.IResourcePidStream;
+import ca.uhn.fhir.jpa.api.pid.ListWrappingPidStream;
 import ca.uhn.fhir.jpa.api.pid.TypedResourcePid;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
+import com.google.common.collect.Lists;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -63,8 +66,9 @@ class ResourceIdListStepTest {
 		when(myStepExecutionDetails.getData()).thenReturn(myData);
 		when(myParameters.getBatchSize()).thenReturn(500);
 		when(myStepExecutionDetails.getParameters()).thenReturn(myParameters);
-		IResourcePidStream mockStream = mock(IResourcePidStream.class);
-		when(mockStream.getTypedResourcePidStream()).thenReturn(idList.stream());
+		// wipmb remove the transform
+		IResourcePidStream mockStream = new ListWrappingPidStream(
+			new HomogeneousResourcePidList("Patient", Lists.transform(idList, tp->tp.id), null, null));
 		if (theListSize > 0) {
 			// Ensure none of the work chunks exceed MAX_BATCH_OF_IDS in size:
 			doAnswer(i -> {

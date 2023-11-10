@@ -2070,22 +2070,24 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	}
 
 	// wipmb PID should be bound to JpaPid here.
-	public <PID extends IResourcePersistentId<?>> Stream<PID> searchForIdStream(SearchParameterMap theParams, RequestDetails theRequest,
-											@Nullable IBaseResource theConditionalOperationTargetOrNull) {
+	public <PID extends IResourcePersistentId<?>> Stream<PID> searchForIdStream(
+			SearchParameterMap theParams,
+			RequestDetails theRequest,
+			@Nullable IBaseResource theConditionalOperationTargetOrNull) {
 		// the Stream is useless outside the bound connection time, so require our caller to have a session.
 		HapiTransactionService.requireTransaction();
 
 		RequestPartitionId requestPartitionId =
-			myRequestPartitionHelperService.determineReadPartitionForRequestForSearchType(
-				theRequest, myResourceName, theParams, theConditionalOperationTargetOrNull);
+				myRequestPartitionHelperService.determineReadPartitionForRequestForSearchType(
+						theRequest, myResourceName, theParams, theConditionalOperationTargetOrNull);
 
-		ISearchBuilder<?> builder =
-			mySearchBuilderFactory.newSearchBuilder(this, getResourceName(), getResourceType());
+		ISearchBuilder<?> builder = mySearchBuilderFactory.newSearchBuilder(this, getResourceName(), getResourceType());
 
 		String uuid = UUID.randomUUID().toString();
 
 		SearchRuntimeDetails searchRuntimeDetails = new SearchRuntimeDetails(theRequest, uuid);
-		IResultIterator<PID> iter = builder.createQuery(theParams, searchRuntimeDetails, theRequest, requestPartitionId);
+		IResultIterator<PID> iter =
+				builder.createQuery(theParams, searchRuntimeDetails, theRequest, requestPartitionId);
 		return Streams.stream(iter);
 	}
 

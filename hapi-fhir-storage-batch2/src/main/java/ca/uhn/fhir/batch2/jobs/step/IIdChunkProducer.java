@@ -56,11 +56,9 @@ public interface IIdChunkProducer<IT extends ChunkRangeJson> {
 			IT theData);
 
 	default IResourcePidStream fetchResourceIdStream(
-		Date theStart,
-		Date theEnd,
-		@Nullable RequestPartitionId theRequestPartitionId,
-		IT theData) {
-		IResourcePidList list = fetchResourceIdsPage(theStart, theEnd, DEFAULT_PAGE_SIZE, theRequestPartitionId, theData);
+			Date theStart, Date theEnd, @Nullable RequestPartitionId theRequestPartitionId, IT theData) {
+		IResourcePidList list =
+				fetchResourceIdsPage(theStart, theEnd, DEFAULT_PAGE_SIZE, theRequestPartitionId, theData);
 		return new ListWrappingPidStream(list);
 	}
 }

@@ -34,12 +34,14 @@ import ca.uhn.fhir.util.Logs;
 import ca.uhn.fhir.util.StreamUtil;
 import org.slf4j.Logger;
 
-import javax.annotation.Nonnull;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
+import javax.annotation.Nonnull;
+
+import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 
 public class ResourceIdListStep<PT extends PartitionedJobParameters, IT extends ChunkRangeJson>
 		implements IJobStepWorker<PT, IT, ResourceIdListWorkChunkJson> {
@@ -70,29 +72,27 @@ public class ResourceIdListStep<PT extends PartitionedJobParameters, IT extends 
 
 		RequestPartitionId requestPartitionId =
 				theStepExecutionDetails.getParameters().getRequestPartitionId();
-		AtomicInteger totalIdsFound = new AtomicInteger();
-		AtomicInteger chunkCount = new AtomicInteger();
 
-		int maxBatchId = MAX_BATCH_OF_IDS;
-		if (batchSize != null) {
-			// we won't go over MAX_BATCH_OF_IDS
-			maxBatchId = Math.min(batchSize, maxBatchId);
-		}
+		int chunkSize = Math.min(defaultIfNull(batchSize, MAX_BATCH_OF_IDS), MAX_BATCH_OF_IDS);
 
-		// wipmb push stream down
 		// wipmb force uniqueness upstream
 		final IResourcePidStream nextChunk = myIdChunkProducer.fetchResourceIdStream(
 				start, end, requestPartitionId, theStepExecutionDetails.getData());
 
-		Stream<TypedPidJson> jsonStream = nextChunk.getTypedResourcePidStream().map(TypedPidJson::new);
+		nextChunk.visitStream(typedResourcePidStream -> {
+			Stream<TypedPidJson> jsonStream = typedResourcePidStream.map(TypedPidJson::new);
 
-		// chunk by size maxBatchId
-		Stream<List<TypedPidJson>> chunkStream = StreamUtil.partition(jsonStream, maxBatchId);
+			// chunk by size maxBatchId
+			Stream<List<TypedPidJson>> chunkStream = StreamUtil.partition(jsonStream, chunkSize);
 
-		chunkStream.forEach(idBatch -> {
-			totalIdsFound.addAndGet(idBatch.size());
-			chunkCount.getAndIncrement();
-			submitWorkChunk(idBatch, nextChunk.getRequestPartitionId(), theDataSink);
+			AtomicInteger totalIdsFound = new AtomicInteger();
+			AtomicInteger chunkCount = new AtomicInteger();
+			chunkStream.forEach(idBatch -> {
+				totalIdsFound.addAndGet(idBatch.size());
+				chunkCount.getAndIncrement();
+				submitWorkChunk(idBatch, nextChunk.getRequestPartitionId(), theDataSink);
+			});
+			ourLog.info("Submitted {} chunks with {} resource IDs", chunkCount, totalIdsFound);
 		});
 
 		return RunOutcome.SUCCESS;
