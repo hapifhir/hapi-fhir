@@ -30,9 +30,7 @@ import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.UriParam;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.hl7.fhir.common.hapi.validation.validator.VersionSpecificWorkerContextWrapper;
-import org.hl7.fhir.exceptions.DefinitionException;
 import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.exceptions.FHIRFormatError;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r5.elementmodel.Element;
@@ -44,9 +42,6 @@ import org.hl7.fhir.utilities.CanonicalPair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Locale;
 
@@ -55,22 +50,19 @@ public class ValidatorResourceFetcher implements IValidatorResourceFetcher {
 	private static final Logger ourLog = LoggerFactory.getLogger(ValidatorResourceFetcher.class);
 
 	private final FhirContext myFhirContext;
-	private final IValidationSupport myValidationSupport;
 	private final DaoRegistry myDaoRegistry;
 	private final VersionSpecificWorkerContextWrapper myVersionSpecificContextWrapper;
 
 	public ValidatorResourceFetcher(
 			FhirContext theFhirContext, IValidationSupport theValidationSupport, DaoRegistry theDaoRegistry) {
 		myFhirContext = theFhirContext;
-		myValidationSupport = theValidationSupport;
 		myDaoRegistry = theDaoRegistry;
 		myVersionSpecificContextWrapper =
-				VersionSpecificWorkerContextWrapper.newVersionSpecificWorkerContextWrapper(myValidationSupport);
+				VersionSpecificWorkerContextWrapper.newVersionSpecificWorkerContextWrapper(theValidationSupport);
 	}
 
 	@Override
-	public Element fetch(IResourceValidator iResourceValidator, Object appContext, String theUrl)
-			throws FHIRFormatError, DefinitionException, FHIRException {
+	public Element fetch(IResourceValidator iResourceValidator, Object appContext, String theUrl) throws FHIRException {
 		IdType id = new IdType(theUrl);
 		String resourceType = id.getResourceType();
 		IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(resourceType);
@@ -118,13 +110,12 @@ public class ValidatorResourceFetcher implements IValidatorResourceFetcher {
 
 	@Override
 	public boolean resolveURL(
-			IResourceValidator iResourceValidator, Object o, String s, String s1, String s2, boolean isCanonical)
-			throws IOException, FHIRException {
+			IResourceValidator iResourceValidator, Object o, String s, String s1, String s2, boolean isCanonical) {
 		return true;
 	}
 
 	@Override
-	public byte[] fetchRaw(IResourceValidator iResourceValidator, String s) throws MalformedURLException, IOException {
+	public byte[] fetchRaw(IResourceValidator iResourceValidator, String s) throws UnsupportedOperationException {
 		throw new UnsupportedOperationException(Msg.code(577));
 	}
 
@@ -135,8 +126,7 @@ public class ValidatorResourceFetcher implements IValidatorResourceFetcher {
 	}
 
 	@Override
-	public CanonicalResource fetchCanonicalResource(IResourceValidator iResourceValidator, String s)
-			throws URISyntaxException {
+	public CanonicalResource fetchCanonicalResource(IResourceValidator iResourceValidator, String s) {
 		return null;
 	}
 
