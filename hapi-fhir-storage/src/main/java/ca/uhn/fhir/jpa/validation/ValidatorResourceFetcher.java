@@ -104,7 +104,7 @@ public class ValidatorResourceFetcher implements IValidatorResourceFetcher {
 			}
 			return results.get(0);
 		} else {
-			throw new ResourceNotFoundException(Msg.code(1995) + "Failed to find resource by URL: " + url);
+			throw new ResourceNotFoundException(Msg.code(2444) + "Failed to find resource by URL: " + url);
 		}
 	}
 
