@@ -410,6 +410,9 @@ public interface IValidationSupport {
 		return null;
 	}
 
+	/**
+	 * This field is used by the Terminology Troubleshooting Log to log which validation support module was used for the operation being logged.
+	 */
 	default String getName() {
 		return "Unknown " + getFhirContext().getVersion().getVersion() + " Validation Support";
 	}
@@ -1002,6 +1005,7 @@ public interface IValidationSupport {
 					.append("sourceValueSetUrl", mySourceValueSetUrl)
 					.append("targetSystemUrl", myTargetSystemUrl)
 					.append("targetValueSetUrl", myTargetValueSetUrl)
+					.append("reverse", myReverse)
 					.toString();
 		}
 	}
