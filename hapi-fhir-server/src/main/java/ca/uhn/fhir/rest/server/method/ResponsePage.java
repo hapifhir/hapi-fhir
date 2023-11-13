@@ -471,6 +471,7 @@ public class ResponsePage {
 				HashSet<String> uniqueIds = new HashSet<>();
 				for (IBaseResource resource : myResources) {
 					uniqueIds.add(resource.getIdElement().getValueAsString());
+					myTotalRequestedResourcesFetched++;
 				}
 				for (IBaseResource resource : theSecondBuilder.myResources) {
 					String id = resource.getIdElement().getValueAsString();
@@ -483,11 +484,15 @@ public class ResponsePage {
 			}
 
 			if (myTotalRequestedResourcesFetched != -1
-					&& theSecondBuilder.myTotalRequestedResourcesFetched != -1
-					&& addedNewResources > 0) {
-				myTotalRequestedResourcesFetched +=
-						addedNewResources; // theSecondBuilder.myTotalRequestedResourcesFetched;
+				&& theSecondBuilder.myTotalRequestedResourcesFetched != -1) {
+				myTotalRequestedResourcesFetched += theSecondBuilder.myTotalRequestedResourcesFetched;
 			}
+//			if (myTotalRequestedResourcesFetched != -1
+//					&& theSecondBuilder.myTotalRequestedResourcesFetched != -1
+//					&& addedNewResources > 0) {
+//				myTotalRequestedResourcesFetched +=
+//						addedNewResources; // theSecondBuilder.myTotalRequestedResourcesFetched;
+//			}
 
 			// primitives can always be added
 			myIncludedResourceCount += theSecondBuilder.myIncludedResourceCount;
