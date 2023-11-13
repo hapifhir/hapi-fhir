@@ -534,9 +534,9 @@ public class BundleUtilTest {
 	@Test
 	public void testGetResourceByReferenceAndResourceTypeReturnsResourceIfFound() {
 		// setup
-		final org.hl7.fhir.r4.model.Patient expected = withPatient("123");
-		final org.hl7.fhir.r4.model.Bundle bundle = withBundle(expected);
-		final org.hl7.fhir.r4.model.Reference reference = new org.hl7.fhir.r4.model.Reference(PATIENT_REFERENCE);
+		final Patient expected = withPatient("123");
+		final Bundle bundle = withBundle(expected);
+		final Reference reference = new Reference(PATIENT_REFERENCE);
 		// execute
 		final IBaseResource actual = BundleUtil.getResourceByReferenceAndResourceType(ourCtx, bundle, reference);
 		// validate
@@ -546,9 +546,9 @@ public class BundleUtilTest {
 	@Test
 	public void testGetResourceByReferenceAndResourceTypeReturnsNullIfResourceNotFound() {
 		// setup
-		final org.hl7.fhir.r4.model.Patient patient = withPatient("ABC");
-		final org.hl7.fhir.r4.model.Bundle bundle = withBundle(patient);
-		final org.hl7.fhir.r4.model.Reference reference = new org.hl7.fhir.r4.model.Reference(PATIENT_REFERENCE);
+		final Patient patient = withPatient("ABC");
+		final Bundle bundle = withBundle(patient);
+		final Reference reference = new Reference(PATIENT_REFERENCE);
 		// execute
 		final IBaseResource actual = BundleUtil.getResourceByReferenceAndResourceType(ourCtx, bundle, reference);
 		// validate
@@ -556,8 +556,8 @@ public class BundleUtilTest {
 	}
 
 	@Nonnull
-	private static org.hl7.fhir.r4.model.Bundle withBundle(Resource theResource) {
-		final org.hl7.fhir.r4.model.Bundle bundle = new org.hl7.fhir.r4.model.Bundle();
+	private static Bundle withBundle(Resource theResource) {
+		final Bundle bundle = new Bundle();
 		bundle.addEntry(withBundleEntryComponent(theResource));
 		bundle.addEntry(withBundleEntryComponent(new Coverage()));
 		bundle.addEntry(withBundleEntryComponent(new Claim()));
@@ -572,8 +572,8 @@ public class BundleUtilTest {
 	}
 
 	@Nonnull
-	private static org.hl7.fhir.r4.model.Patient withPatient(@Nonnull String theResourceId) {
-		final org.hl7.fhir.r4.model.Patient patient = new org.hl7.fhir.r4.model.Patient();
+	private static Patient withPatient(@Nonnull String theResourceId) {
+		final Patient patient = new Patient();
 		patient.setId(theResourceId);
 		return patient;
 	}
