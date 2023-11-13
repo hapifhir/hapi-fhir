@@ -47,7 +47,10 @@ public interface IIdChunkProducer<IT extends ChunkRangeJson> {
 	 * @param theRequestPartitionId partition for operation if rtequired
 	 * @param theData defines the query we are using
 	 * @return a list of Resource pids
+	 *
+	 * @deprecated Use the stream pattern instead
 	 */
+	@Deprecated
 	IResourcePidList fetchResourceIdsPage(
 			Date theNextStart,
 			Date theEnd,
@@ -55,6 +58,7 @@ public interface IIdChunkProducer<IT extends ChunkRangeJson> {
 			@Nullable RequestPartitionId theRequestPartitionId,
 			IT theData);
 
+	// wipmb can delete the deprecated - it is in hapi.  Push this default impl down to the MDM thing.
 	default IResourcePidStream fetchResourceIdStream(
 			Date theStart, Date theEnd, @Nullable RequestPartitionId theRequestPartitionId, IT theData) {
 		IResourcePidList list =

@@ -76,6 +76,7 @@ public class ResourceIdListStep<PT extends PartitionedJobParameters, IT extends 
 		int chunkSize = Math.min(defaultIfNull(batchSize, MAX_BATCH_OF_IDS), MAX_BATCH_OF_IDS);
 
 		// wipmb force uniqueness upstream
+		// wipmb split target partition from payload.  Add default method to chunk producer.
 		final IResourcePidStream nextChunk = myIdChunkProducer.fetchResourceIdStream(
 				start, end, requestPartitionId, theStepExecutionDetails.getData());
 

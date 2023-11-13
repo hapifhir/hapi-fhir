@@ -2,7 +2,7 @@ package ca.uhn.fhir.jpa.api.pid;
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 
-import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.stream.Stream;
 
 public class ListWrappingPidStream implements IResourcePidStream {
@@ -17,8 +17,8 @@ public class ListWrappingPidStream implements IResourcePidStream {
 	}
 
 	@Override
-	public void visitStream(Consumer<Stream<TypedResourcePid>> theCallback) {
-		theCallback.accept(getTypedResourcePidStream());
+	public <T> T visitStream(Function<Stream<TypedResourcePid>, T> theCallback) {
+		return theCallback.apply(getTypedResourcePidStream());
 	}
 
 	@Override

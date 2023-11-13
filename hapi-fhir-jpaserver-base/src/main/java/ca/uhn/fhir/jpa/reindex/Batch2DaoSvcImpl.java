@@ -29,7 +29,11 @@ import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.pid.EmptyResourcePidList;
 import ca.uhn.fhir.jpa.api.pid.HomogeneousResourcePidList;
 import ca.uhn.fhir.jpa.api.pid.IResourcePidList;
+import ca.uhn.fhir.jpa.api.pid.IResourcePidStream;
 import ca.uhn.fhir.jpa.api.pid.MixedResourcePidList;
+import ca.uhn.fhir.jpa.api.pid.StreamTemplate;
+import ca.uhn.fhir.jpa.api.pid.TypedResourcePid;
+import ca.uhn.fhir.jpa.api.pid.TypedResourceStream;
 import ca.uhn.fhir.jpa.api.svc.IBatch2DaoSvc;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
@@ -48,7 +52,9 @@ import org.springframework.data.domain.Slice;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
@@ -88,6 +94,74 @@ public class Batch2DaoSvcImpl implements IBatch2DaoSvc {
 	}
 
 	@Override
+	public IResourcePidStream fetchResourceIdStream(
+			Date theStart, Date theEnd, RequestPartitionId theRequestPartitionId, String theUrl) {
+		if (theUrl == null) {
+			return makeStreamResult(
+					theRequestPartitionId, () -> streamResourceIdsNoUrl(theStart, theEnd, theRequestPartitionId));
+		} else {
+			return makeStreamResult(
+					theRequestPartitionId,
+					() -> streamResourceIdsWithUrl(theStart, theEnd, theUrl, theRequestPartitionId));
+		}
+	}
+
+	private Stream streamResourceIdsWithUrl(
+			Date theStart, Date theEnd, String theUrl, RequestPartitionId theRequestPartitionId) {
+		validateUrl(theUrl);
+
+		SearchParameterMap searchParamMap = parseQuery(theUrl);
+
+		String resourceType = theUrl.substring(0, theUrl.indexOf('?'));
+		IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(resourceType);
+
+		SystemRequestDetails request = new SystemRequestDetails().setRequestPartitionId(theRequestPartitionId);
+
+		return dao.searchForIdStream(searchParamMap, request, null);
+	}
+
+	private static TypedResourcePid typedPidFromQueryArray(Object[] thePidTypeDateArray) {
+		String resourceType = (String) thePidTypeDateArray[1];
+		Long pid = (Long) thePidTypeDateArray[0];
+		return new TypedResourcePid(resourceType, JpaPid.fromId(pid));
+	}
+
+	@Nonnull
+	private TypedResourceStream makeStreamResult(
+			RequestPartitionId theRequestPartitionId, Supplier<Stream<TypedResourcePid>> streamSupplier) {
+
+		IHapiTransactionService.IExecutionBuilder txSettings =
+				myTransactionService.withSystemRequest().withRequestPartitionId(theRequestPartitionId);
+
+		StreamTemplate<TypedResourcePid> streamTemplate =
+				StreamTemplate.fromSupplier(streamSupplier).withTransactionAdvice(txSettings);
+
+		return new TypedResourceStream(theRequestPartitionId, streamTemplate);
+	}
+
+	@Nonnull
+	private Stream<TypedResourcePid> streamResourceIdsNoUrl(
+			Date theStart, Date theEnd, RequestPartitionId theRequestPartitionId) {
+		Stream<Object[]> rowStream;
+		if (theRequestPartitionId == null || theRequestPartitionId.isAllPartitions()) {
+			rowStream = myResourceTableDao.streamIdsTypesAndUpdateTimesOfResourcesWithinUpdatedRangeOrderedFromOldest(
+					theStart, theEnd);
+		} else if (theRequestPartitionId.isDefaultPartition()) {
+			rowStream =
+					myResourceTableDao
+							.streamIdsTypesAndUpdateTimesOfResourcesWithinUpdatedRangeOrderedFromOldestForDefaultPartition(
+									theStart, theEnd);
+		} else {
+			rowStream =
+					myResourceTableDao
+							.streamIdsTypesAndUpdateTimesOfResourcesWithinUpdatedRangeOrderedFromOldestForPartitionIds(
+									theStart, theEnd, theRequestPartitionId.getPartitionIds());
+		}
+
+		return rowStream.map(Batch2DaoSvcImpl::typedPidFromQueryArray);
+	}
+
+	@Override
 	public IResourcePidList fetchResourceIdsPage(
 			Date theStart, Date theEnd, @Nullable RequestPartitionId theRequestPartitionId, @Nullable String theUrl) {
 		return myTransactionService
@@ -105,9 +179,7 @@ public class Batch2DaoSvcImpl implements IBatch2DaoSvc {
 	@Nonnull
 	private HomogeneousResourcePidList fetchResourceIdsPageWithUrl(
 			Date theEnd, @Nonnull String theUrl, @Nullable RequestPartitionId theRequestPartitionId) {
-		if (!theUrl.contains("?")) {
-			throw new InternalErrorException(Msg.code(2422) + "this should never happen: URL is missing a '?'");
-		}
+		validateUrl(theUrl);
 
 		final Integer internalSynchronousSearchSize = myJpaStorageSettings.getInternalSynchronousSearchSize();
 
@@ -135,21 +207,35 @@ public class Batch2DaoSvcImpl implements IBatch2DaoSvc {
 		return new HomogeneousResourcePidList(resourceType, allIds, theEnd, theRequestPartitionId);
 	}
 
+	private static void validateUrl(@Nonnull String theUrl) {
+		if (!theUrl.contains("?")) {
+			throw new InternalErrorException(Msg.code(2422) + "this should never happen: URL is missing a '?'");
+		}
+	}
+
 	private List<IResourcePersistentId> fetchResourceIdsPageWithUrl(
 			int theOffset, String theUrl, RequestPartitionId theRequestPartitionId) {
 		String resourceType = theUrl.substring(0, theUrl.indexOf('?'));
-		RuntimeResourceDefinition def = myFhirContext.getResourceDefinition(resourceType);
 
-		SearchParameterMap searchParamMap = myMatchUrlService.translateMatchUrl(theUrl, def);
-		searchParamMap.setSort(new SortSpec(Constants.PARAM_ID, SortOrderEnum.ASC));
+		SearchParameterMap searchParamMap = parseQuery(theUrl);
 		searchParamMap.setOffset(theOffset);
-		searchParamMap.setLoadSynchronousUpTo(myJpaStorageSettings.getInternalSynchronousSearchSize() + 1);
 
 		IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(resourceType);
 		SystemRequestDetails request = new SystemRequestDetails();
 		request.setRequestPartitionId(theRequestPartitionId);
 
 		return dao.searchForIds(searchParamMap, request);
+	}
+
+	@Nonnull
+	private SearchParameterMap parseQuery(String theUrl) {
+		String resourceType = theUrl.substring(0, theUrl.indexOf('?'));
+		RuntimeResourceDefinition def = myFhirContext.getResourceDefinition(resourceType);
+
+		SearchParameterMap searchParamMap = myMatchUrlService.translateMatchUrl(theUrl, def);
+		searchParamMap.setSort(new SortSpec(Constants.PARAM_ID, SortOrderEnum.ASC));
+		searchParamMap.setLoadSynchronousUpTo(myJpaStorageSettings.getInternalSynchronousSearchSize() + 1);
+		return searchParamMap;
 	}
 
 	@Nonnull

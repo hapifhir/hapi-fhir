@@ -118,6 +118,7 @@ import ca.uhn.fhir.validation.ValidationOptions;
 import ca.uhn.fhir.validation.ValidationResult;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Streams;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseMetaType;
@@ -2088,7 +2089,8 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		SearchRuntimeDetails searchRuntimeDetails = new SearchRuntimeDetails(theRequest, uuid);
 		IResultIterator<PID> iter =
 				builder.createQuery(theParams, searchRuntimeDetails, theRequest, requestPartitionId);
-		return Streams.stream(iter);
+		// Adapt IResultIterator to stream, and connect the close handler.
+		return Streams.stream(iter).onClose(() -> IOUtils.closeQuietly(iter));
 	}
 
 	protected <MT extends IBaseMetaType> MT toMetaDt(Class<MT> theType, Collection<TagDefinition> tagDefinitions) {
