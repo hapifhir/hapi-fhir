@@ -482,9 +482,11 @@ public class ResponsePage {
 				}
 			}
 
-			if (myTotalRequestedResourcesFetched != -1 && theSecondBuilder.myTotalRequestedResourcesFetched != -1
+			if (myTotalRequestedResourcesFetched != -1
+					&& theSecondBuilder.myTotalRequestedResourcesFetched != -1
 					&& addedNewResources > 0) {
-				myTotalRequestedResourcesFetched += addedNewResources; //theSecondBuilder.myTotalRequestedResourcesFetched;
+				myTotalRequestedResourcesFetched +=
+						addedNewResources; // theSecondBuilder.myTotalRequestedResourcesFetched;
 			}
 
 			// primitives can always be added

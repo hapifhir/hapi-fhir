@@ -171,6 +171,8 @@ public class SynchronousSearchSvcImpl implements ISynchronousSearchSvc {
 						throw new InternalErrorException(Msg.code(1164) + e);
 					}
 
+					// TODO - do we want to do this
+					// before or after the STORAGE_PREACCESS_RESOURCES interceptor?
 					// truncate the list we retrieved - if needed
 					int receivedResourceCount = -1;
 					if (hasACount) {
