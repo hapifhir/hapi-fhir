@@ -11,6 +11,8 @@ import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.Claim;
+import org.hl7.fhir.r4.model.Coverage;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.Medication;
 import org.hl7.fhir.r4.model.Observation;
@@ -18,11 +20,13 @@ import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.UriType;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import javax.annotation.Nonnull;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
@@ -48,6 +52,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 public class BundleUtilTest {
 
 	private static final FhirContext ourCtx = FhirContext.forR4Cached();
+	public static final String PATIENT_REFERENCE = "Patient/123";
 
 
 	@Nested
@@ -366,7 +371,7 @@ public class BundleUtilTest {
 	@Test
 	public void testBundleSortsCanHandlesDeletesThatContainNoResources() {
 		Patient p = new Patient();
-		p.setId("Patient/123");
+		p.setId(PATIENT_REFERENCE);
 		BundleBuilder builder = new BundleBuilder(ourCtx);
 		builder.addTransactionDeleteEntry(p);
 		BundleUtil.sortEntriesIntoProcessingOrder(ourCtx, builder.getBundle());
@@ -529,15 +534,11 @@ public class BundleUtilTest {
 	@Test
 	public void testGetResourceByReferenceAndResourceTypeReturnsResourceIfFound() {
 		// setup
-		final Patient expected = new Patient();
-		expected.setId("123");
-		final Bundle bundle = new Bundle();
-		Bundle.BundleEntryComponent bundleEntryComponent = new Bundle.BundleEntryComponent();
-		bundleEntryComponent.setResource(expected);
-		bundle.addEntry(bundleEntryComponent);
-		final Reference reference = new Reference("Patient/123");
+		final org.hl7.fhir.r4.model.Patient expected = withPatient("123");
+		final org.hl7.fhir.r4.model.Bundle bundle = withBundle(expected);
+		final org.hl7.fhir.r4.model.Reference reference = new org.hl7.fhir.r4.model.Reference(PATIENT_REFERENCE);
 		// execute
-		final IBaseResource actual = BundleUtil.getResourceByReferenceAndResourceType(FhirContext.forR4(), bundle, reference);
+		final IBaseResource actual = BundleUtil.getResourceByReferenceAndResourceType(ourCtx, bundle, reference);
 		// validate
 		assertEquals(expected, actual);
 	}
@@ -545,17 +546,36 @@ public class BundleUtilTest {
 	@Test
 	public void testGetResourceByReferenceAndResourceTypeReturnsNullIfResourceNotFound() {
 		// setup
-		final Patient patient = new Patient();
-		patient.setId("ABC");
-		final Bundle bundle = new Bundle();
-		Bundle.BundleEntryComponent bundleEntryComponent = new Bundle.BundleEntryComponent();
-		bundleEntryComponent.setResource(patient);
-		bundle.addEntry(bundleEntryComponent);
-		final Reference reference = new Reference("Patient/123");
+		final org.hl7.fhir.r4.model.Patient patient = withPatient("ABC");
+		final org.hl7.fhir.r4.model.Bundle bundle = withBundle(patient);
+		final org.hl7.fhir.r4.model.Reference reference = new org.hl7.fhir.r4.model.Reference(PATIENT_REFERENCE);
 		// execute
-		final IBaseResource actual = BundleUtil.getResourceByReferenceAndResourceType(FhirContext.forR4(), bundle, reference);
+		final IBaseResource actual = BundleUtil.getResourceByReferenceAndResourceType(ourCtx, bundle, reference);
 		// validate
 		assertNull(actual);
+	}
+
+	@Nonnull
+	private static org.hl7.fhir.r4.model.Bundle withBundle(Resource theResource) {
+		final org.hl7.fhir.r4.model.Bundle bundle = new org.hl7.fhir.r4.model.Bundle();
+		bundle.addEntry(withBundleEntryComponent(theResource));
+		bundle.addEntry(withBundleEntryComponent(new Coverage()));
+		bundle.addEntry(withBundleEntryComponent(new Claim()));
+		return bundle;
+	}
+
+	@Nonnull
+	private static Bundle.BundleEntryComponent withBundleEntryComponent(Resource theResource) {
+		final Bundle.BundleEntryComponent bundleEntryComponent = new Bundle.BundleEntryComponent();
+		bundleEntryComponent.setResource(theResource);
+		return bundleEntryComponent;
+	}
+
+	@Nonnull
+	private static org.hl7.fhir.r4.model.Patient withPatient(@Nonnull String theResourceId) {
+		final org.hl7.fhir.r4.model.Patient patient = new org.hl7.fhir.r4.model.Patient();
+		patient.setId(theResourceId);
+		return patient;
 	}
 
 	@AfterAll
