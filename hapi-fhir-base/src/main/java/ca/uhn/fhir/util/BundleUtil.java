@@ -45,7 +45,6 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
@@ -55,6 +54,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
+import javax.annotation.Nonnull;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.hl7.fhir.instance.model.api.IBaseBundle.LINK_PREV;
@@ -704,17 +704,15 @@ public class BundleUtil {
 	 */
 	@Nonnull
 	public static IBaseResource getResourceByReferenceAndResourceType(
-		@Nonnull FhirContext theContext,
-		@Nonnull IBaseBundle theBundle,
-		@Nonnull IBaseReference theReference) {
-		return toListOfResources(theContext, theBundle)
-			.stream()
-			.filter(theResource -> theReference.getReferenceElement().getIdPart().equals(theResource.getIdElement().getIdPart()))
-			.findFirst()
-			.orElse(null);
+			@Nonnull FhirContext theContext, @Nonnull IBaseBundle theBundle, @Nonnull IBaseReference theReference) {
+		return toListOfResources(theContext, theBundle).stream()
+				.filter(theResource -> theReference
+						.getReferenceElement()
+						.getIdPart()
+						.equals(theResource.getIdElement().getIdPart()))
+				.findFirst()
+				.orElse(null);
 	}
-
-
 
 	private static class SortLegality {
 		private boolean myIsLegal;
