@@ -19,10 +19,10 @@
  */
 package ca.uhn.fhir.cr.r4;
 
-import org.opencds.cqf.cql.evaluator.questionnaireresponse.r4.QuestionnaireResponseProcessor;
-import org.opencds.cqf.fhir.api.Repository;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
+import org.opencds.cqf.fhir.cr.questionnaireresponse.r4.QuestionnaireResponseProcessor;
 
 @FunctionalInterface
 public interface IQuestionnaireResponseProcessorFactory {
-	QuestionnaireResponseProcessor create(Repository theRepository);
+	QuestionnaireResponseProcessor create(RequestDetails theRequestDetails);
 }

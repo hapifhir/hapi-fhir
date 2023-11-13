@@ -12,13 +12,18 @@ import ca.uhn.fhir.jpa.api.model.BulkExportJobResults;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
 import ca.uhn.fhir.rest.client.apache.ResourceEntity;
+import ca.uhn.fhir.rest.param.StringParam;
+import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.test.utilities.HttpClientExtension;
 import ca.uhn.fhir.util.Batch2JobDefinitionConstants;
 import ca.uhn.fhir.util.JsonUtil;
@@ -49,6 +54,7 @@ import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.Provenance;
 import org.hl7.fhir.r4.model.QuestionnaireResponse;
 import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.SearchParameter;
 import org.hl7.fhir.r4.model.ServiceRequest;
 import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.AfterEach;
@@ -148,6 +154,99 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 		verifyBulkExportResults(options, Collections.singletonList("Patient/PF"), Collections.singletonList("Patient/PM"));
 	}
 
+	@Test
+	public void testGroupBulkExportWithMissingObservationSearchParams() {
+		mySearchParameterDao.update(createDisabledObservationPatientSearchParameter(), mySrd);
+		mySearchParamRegistry.forceRefresh();
+
+		// Create some resources
+		Patient patient = new Patient();
+		patient.setId("PF");
+		patient.setGender(Enumerations.AdministrativeGender.FEMALE);
+		patient.setActive(true);
+		myClient.update().resource(patient).execute();
+
+		patient = new Patient();
+		patient.setId("PM");
+		patient.setGender(Enumerations.AdministrativeGender.MALE);
+		patient.setActive(true);
+		myClient.update().resource(patient).execute();
+
+		Group group = new Group();
+		group.setId("Group/G");
+		group.setActive(true);
+		group.addMember().getEntity().setReference("Patient/PF");
+		group.addMember().getEntity().setReference("Patient/PM");
+		myClient.update().resource(group).execute();
+
+		Observation observation = new Observation();
+		observation.setStatus(Observation.ObservationStatus.AMENDED);
+		observation.setSubject(new Reference("Patient/PF"));
+		String obsId = myClient.create().resource(observation).execute().getId().toUnqualifiedVersionless().getValue();
+
+		// set the export options
+		BulkExportJobParameters options = new BulkExportJobParameters();
+		options.setResourceTypes(Sets.newHashSet("Patient", "Observation"));
+		options.setGroupId("Group/G");
+		options.setExportStyle(BulkExportJobParameters.ExportStyle.GROUP);
+		options.setOutputFormat(Constants.CT_FHIR_NDJSON);
+		verifyBulkExportResults(options, List.of("Patient/PF", "Patient/PM"), Collections.singletonList(obsId));
+	}
+
+	@Test
+	public void testGroupBulkExportWithMissingPatientSearchParams() {
+		mySearchParameterDao.update(createDisabledPatientPractitionerSearchParameter(), mySrd);
+		mySearchParamRegistry.forceRefresh();
+
+		Practitioner practitioner = new Practitioner();
+		practitioner.setActive(true);
+		String practId = myClient.create().resource(practitioner).execute().getId().toUnqualifiedVersionless().getValue();
+
+		// Create some resources
+		Patient patient = new Patient();
+		patient.setId("P1");
+		patient.setActive(true);
+		patient.addGeneralPractitioner().setReference(practId);
+		myClient.update().resource(patient).execute();
+
+		Group group = new Group();
+		group.setId("Group/G");
+		group.setActive(true);
+		group.addMember().getEntity().setReference("Patient/P1");
+		myClient.update().resource(group).execute();
+
+		// set the export options
+		BulkExportJobParameters options = new BulkExportJobParameters();
+		options.setResourceTypes(Sets.newHashSet("Patient", "Practitioner"));
+		options.setGroupId("Group/G");
+		options.setExportStyle(BulkExportJobParameters.ExportStyle.GROUP);
+		options.setOutputFormat(Constants.CT_FHIR_NDJSON);
+		verifyBulkExportResults(options, Collections.singletonList("Patient/P1"), Collections.singletonList(practId));
+	}
+
+	private SearchParameter createDisabledObservationPatientSearchParameter() {
+		SearchParameter observation_patient = new SearchParameter();
+		observation_patient.setId("clinical-patient");
+		observation_patient.addBase("Observation");
+		observation_patient.setStatus(Enumerations.PublicationStatus.RETIRED);
+		observation_patient.setCode("patient");
+		observation_patient.setType(Enumerations.SearchParamType.REFERENCE);
+		observation_patient.addTarget("Patient");
+		observation_patient.setExpression("Observation.subject.where(resolve() is Patient)");
+		return observation_patient;
+	}
+
+	private SearchParameter createDisabledPatientPractitionerSearchParameter() {
+		SearchParameter patient_practitioner = new SearchParameter();
+		patient_practitioner.setId("Patient-general-practitioner");
+		patient_practitioner.addBase("Patient");
+		patient_practitioner.setStatus(Enumerations.PublicationStatus.RETIRED);
+		patient_practitioner.setCode("general-practitioner");
+		patient_practitioner.setType(Enumerations.SearchParamType.REFERENCE);
+		patient_practitioner.addTarget("Practitioner");
+		patient_practitioner.setExpression("Patient.generalPractitioner");
+		return patient_practitioner;
+	}
 
 	@Test
 	public void testGroupBulkExportWithTypeFilter_OnTags_InlineTagMode() {
@@ -445,12 +544,12 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 
 		// set the export options
 		BulkExportJobParameters options = new BulkExportJobParameters();
-		options.setResourceTypes(Sets.newHashSet("Patient", "Encounter"));
+		options.setResourceTypes(Sets.newHashSet("Patient", "Encounter", "Practitioner", "Organization"));
 		options.setGroupId("Group/G1");
 		options.setFilters(new HashSet<>());
 		options.setExportStyle(BulkExportJobParameters.ExportStyle.GROUP);
 		options.setOutputFormat(Constants.CT_FHIR_NDJSON);
-		verifyBulkExportResults(options, List.of("Patient/P1", practId, orgId, encId, encId2, locId), List.of("Patient/P2", orgId2, encId3, locId2));
+		verifyBulkExportResults(options, List.of("Patient/P1", practId, orgId, encId, encId2), List.of("Patient/P2", orgId2, encId3));
 	}
 
 	@Test
@@ -486,7 +585,7 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 
 		// set the export options
 		BulkExportJobParameters options = new BulkExportJobParameters();
-		options.setResourceTypes(Sets.newHashSet("Patient", "Encounter", "Observation"));
+		options.setResourceTypes(Sets.newHashSet("Patient", "Encounter", "Observation", "Practitioner"));
 		options.setGroupId("Group/G1");
 		options.setFilters(new HashSet<>());
 		options.setExportStyle(BulkExportJobParameters.ExportStyle.GROUP);
@@ -543,7 +642,7 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 
 		// set the export options
 		BulkExportJobParameters options = new BulkExportJobParameters();
-		options.setResourceTypes(Sets.newHashSet("Patient", "Observation", "Provenance"));
+		options.setResourceTypes(Sets.newHashSet("Patient", "Observation", "Provenance", "Device"));
 		options.setGroupId("Group/G1");
 		options.setFilters(new HashSet<>());
 		options.setExportStyle(BulkExportJobParameters.ExportStyle.GROUP);
@@ -618,11 +717,11 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 		input.addParameter(JpaConstants.PARAM_EXPORT_OUTPUT_FORMAT, new StringType(Constants.CT_FHIR_NDJSON));
 		input.addParameter(JpaConstants.PARAM_EXPORT_TYPE, new StringType("Patient"));
 
-		HttpPost post = new HttpPost(myServer.getBaseUrl() + "/" + JpaConstants.OPERATION_EXPORT);
+		HttpPost post = new HttpPost(myServer.getBaseUrl() + "/" + ProviderConstants.OPERATION_EXPORT);
 		post.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
 		post.setEntity(new ResourceEntity(myCtx, input));
 
-		HttpGet get = new HttpGet(myServer.getBaseUrl() + "/" + JpaConstants.OPERATION_EXPORT + "?_outputFormat=application%2Ffhir%2Bndjson&_type=Patient");
+		HttpGet get = new HttpGet(myServer.getBaseUrl() + "/" + ProviderConstants.OPERATION_EXPORT + "?_outputFormat=application%2Ffhir%2Bndjson&_type=Patient");
 		get.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
 		try(CloseableHttpResponse postResponse = mySender.execute(post)){
 			ourLog.info("Response: {}",postResponse);
@@ -943,10 +1042,7 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 				} catch (IOException e) {
 					fail(e.toString());
 				}
-
 			}
-
-			return jobInstance;
 		}
 
 		for (String containedString : theContainedList) {

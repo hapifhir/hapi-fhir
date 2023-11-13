@@ -57,14 +57,57 @@ import static org.hl7.fhir.common.hapi.validation.support.CommonCodeSystemsTermi
 @SuppressWarnings("EnhancedSwitchMigration")
 public class InMemoryTerminologyServerValidationSupport implements IValidationSupport {
 	private static final String OUR_PIPE_CHARACTER = "|";
-
 	private final FhirContext myCtx;
 	private final VersionCanonicalizer myVersionCanonicalizer;
+	private IssueSeverity myIssueSeverityForCodeDisplayMismatch = IssueSeverity.WARNING;
 
+	/**
+	 * Constructor
+	 *
+	 * @param theCtx A FhirContext for the FHIR version being validated
+	 */
 	public InMemoryTerminologyServerValidationSupport(FhirContext theCtx) {
 		Validate.notNull(theCtx, "theCtx must not be null");
 		myCtx = theCtx;
 		myVersionCanonicalizer = new VersionCanonicalizer(theCtx);
+	}
+
+	@Override
+	public String getName() {
+		return myCtx.getVersion().getVersion() + " In-Memory Validation Support";
+	}
+
+	/**
+	 * This setting controls the validation issue severity to report when a code validation
+	 * finds that the code is present in the given CodeSystem, but the display name being
+	 * validated doesn't match the expected value(s). Defaults to
+	 * {@link ca.uhn.fhir.context.support.IValidationSupport.IssueSeverity#WARNING}. Set this
+	 * value to {@link ca.uhn.fhir.context.support.IValidationSupport.IssueSeverity#INFORMATION}
+	 * if you don't want to see display name validation issues at all in resource validation
+	 * outcomes.
+	 *
+	 * @since 7.0.0
+	 */
+	public IssueSeverity getIssueSeverityForCodeDisplayMismatch() {
+		return myIssueSeverityForCodeDisplayMismatch;
+	}
+
+	/**
+	 * This setting controls the validation issue severity to report when a code validation
+	 * finds that the code is present in the given CodeSystem, but the display name being
+	 * validated doesn't match the expected value(s). Defaults to
+	 * {@link ca.uhn.fhir.context.support.IValidationSupport.IssueSeverity#WARNING}. Set this
+	 * value to {@link ca.uhn.fhir.context.support.IValidationSupport.IssueSeverity#INFORMATION}
+	 * if you don't want to see display name validation issues at all in resource validation
+	 * outcomes.
+	 *
+	 * @param theIssueSeverityForCodeDisplayMismatch The severity. Must not be {@literal null}.
+	 * @since 7.0.0
+	 */
+	public void setIssueSeverityForCodeDisplayMismatch(@Nonnull IssueSeverity theIssueSeverityForCodeDisplayMismatch) {
+		Validate.notNull(
+				theIssueSeverityForCodeDisplayMismatch, "theIssueSeverityForCodeDisplayMismatch must not be null");
+		myIssueSeverityForCodeDisplayMismatch = theIssueSeverityForCodeDisplayMismatch;
 	}
 
 	@Override
@@ -517,22 +560,26 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 								.setCodeSystemName(codeSystemResourceName)
 								.setCodeSystemVersion(csVersion);
 						if (isNotBlank(theValueSetUrl)) {
-							codeValidationResult.setMessage(
-									"Code was validated against in-memory expansion of ValueSet: " + theValueSetUrl);
+							populateSourceDetailsForInMemoryExpansion(theValueSetUrl, codeValidationResult);
 						}
 						return codeValidationResult;
 					} else {
-						String message = "Concept Display \"" + theDisplayToValidate + "\" does not match expected \""
-								+ nextExpansionCode.getDisplay() + "\"";
+						String messageAppend = "";
 						if (isNotBlank(theValueSetUrl)) {
-							message += " for in-memory expansion of ValueSet: " + theValueSetUrl;
+							messageAppend = " for in-memory expansion of ValueSet: " + theValueSetUrl;
 						}
-						return new CodeValidationResult()
-								.setSeverity(IssueSeverity.ERROR)
-								.setDisplay(nextExpansionCode.getDisplay())
-								.setMessage(message)
-								.setCodeSystemName(codeSystemResourceName)
-								.setCodeSystemVersion(csVersion);
+						CodeValidationResult codeValidationResult = createResultForDisplayMismatch(
+								myCtx,
+								theCodeToValidate,
+								theDisplayToValidate,
+								nextExpansionCode.getDisplay(),
+								csVersion,
+								messageAppend,
+								getIssueSeverityForCodeDisplayMismatch());
+						if (isNotBlank(theValueSetUrl)) {
+							populateSourceDetailsForInMemoryExpansion(theValueSetUrl, codeValidationResult);
+						}
+						return codeValidationResult;
 					}
 				}
 			}
@@ -1194,24 +1241,59 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 		return theVersion;
 	}
 
-	public enum FailureType {
-		UNKNOWN_CODE_SYSTEM,
-		OTHER
+	private static void populateSourceDetailsForInMemoryExpansion(
+			String theValueSetUrl, CodeValidationResult codeValidationResult) {
+		codeValidationResult.setSourceDetails(
+				"Code was validated against in-memory expansion of ValueSet: " + theValueSetUrl);
 	}
 
-	public static class ExpansionCouldNotBeCompletedInternallyException extends Exception {
+	public static CodeValidationResult createResultForDisplayMismatch(
+			FhirContext theFhirContext,
+			String theCode,
+			String theDisplay,
+			String theExpectedDisplay,
+			String theCodeSystemVersion,
+			IssueSeverity theIssueSeverityForCodeDisplayMismatch) {
+		return createResultForDisplayMismatch(
+				theFhirContext,
+				theCode,
+				theDisplay,
+				theExpectedDisplay,
+				theCodeSystemVersion,
+				"",
+				theIssueSeverityForCodeDisplayMismatch);
+	}
 
-		private static final long serialVersionUID = -2226561628771483085L;
-		private final FailureType myFailureType;
+	private static CodeValidationResult createResultForDisplayMismatch(
+			FhirContext theFhirContext,
+			String theCode,
+			String theDisplay,
+			String theExpectedDisplay,
+			String theCodeSystemVersion,
+			String theMessageAppend,
+			IssueSeverity theIssueSeverityForCodeDisplayMismatch) {
 
-		public ExpansionCouldNotBeCompletedInternallyException(String theMessage, FailureType theFailureType) {
-			super(theMessage);
-			myFailureType = theFailureType;
+		String message;
+		IssueSeverity issueSeverity = theIssueSeverityForCodeDisplayMismatch;
+		if (issueSeverity == IssueSeverity.INFORMATION) {
+			message = null;
+			issueSeverity = null;
+		} else {
+			message = theFhirContext
+							.getLocalizer()
+							.getMessage(
+									InMemoryTerminologyServerValidationSupport.class,
+									"displayMismatch",
+									theDisplay,
+									theExpectedDisplay)
+					+ theMessageAppend;
 		}
-
-		public FailureType getFailureType() {
-			return myFailureType;
-		}
+		return new CodeValidationResult()
+				.setSeverity(issueSeverity)
+				.setMessage(message)
+				.setCode(theCode)
+				.setCodeSystemVersion(theCodeSystemVersion)
+				.setDisplay(theExpectedDisplay);
 	}
 
 	private static void flattenAndConvertCodesDstu2(
@@ -1271,6 +1353,26 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 			theFhirVersionIndependentConcepts.add(new FhirVersionIndependentConcept(
 					next.getSystem(), next.getCode(), next.getDisplay(), next.getVersion()));
 			flattenAndConvertCodesR5(next.getContains(), theFhirVersionIndependentConcepts);
+		}
+	}
+
+	public enum FailureType {
+		UNKNOWN_CODE_SYSTEM,
+		OTHER
+	}
+
+	public static class ExpansionCouldNotBeCompletedInternallyException extends Exception {
+
+		private static final long serialVersionUID = -2226561628771483085L;
+		private final FailureType myFailureType;
+
+		public ExpansionCouldNotBeCompletedInternallyException(String theMessage, FailureType theFailureType) {
+			super(theMessage);
+			myFailureType = theFailureType;
+		}
+
+		public FailureType getFailureType() {
+			return myFailureType;
 		}
 	}
 }

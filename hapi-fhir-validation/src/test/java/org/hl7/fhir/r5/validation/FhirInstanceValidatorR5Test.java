@@ -874,7 +874,7 @@ public class FhirInstanceValidatorR5Test {
 		logResultsAndReturnAll(output);
 		assertThat(
 			output.getMessages().get(0).getMessage(),
-			containsString("The value provided ('notvalidcode') is not in the value set 'Observation Status' (http://hl7.org/fhir/ValueSet/observation-status|5.0.0), and a code is required from this value set) (error message = Unknown code 'notvalidcode' for in-memory expansion of ValueSet 'http://hl7.org/fhir/ValueSet/observation-status')")
+			containsString("The value provided ('notvalidcode') is not in the value set 'Observation Status' (http://hl7.org/fhir/ValueSet/observation-status|5.0.0), and a code is required from this value set  (error message = Unknown code 'notvalidcode' for in-memory expansion of ValueSet 'http://hl7.org/fhir/ValueSet/observation-status')")
 			);
 	}
 

@@ -39,7 +39,6 @@ import ca.uhn.fhir.model.api.ISupportsUndeclaredExtensions;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.api.Tag;
 import ca.uhn.fhir.model.api.TagList;
-import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.base.composite.BaseCodingDt;
 import ca.uhn.fhir.model.base.composite.BaseContainedDt;
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -659,9 +658,8 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 						theEventWriter.endArray();
 					}
 					BaseRuntimeChildDefinition replacedParentDefinition = nextChild.getReplacedParentDefinition();
-					if (isMultipleCardinality(nextChild.getMax())
-							|| (replacedParentDefinition != null
-									&& isMultipleCardinality(replacedParentDefinition.getMax()))) {
+					if (nextChild.isMultipleCardinality()
+							|| (replacedParentDefinition != null && replacedParentDefinition.isMultipleCardinality())) {
 						beginArray(theEventWriter, nextChildSpecificName);
 						inArray = true;
 						encodeChildElementToStreamWriter(
@@ -728,14 +726,14 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 					List<HeldExtension> heldModExts = Collections.emptyList();
 					if (extensions.size() > i
 							&& extensions.get(i) != null
-							&& extensions.get(i).isEmpty() == false) {
+							&& !extensions.get(i).isEmpty()) {
 						haveContent = true;
 						heldExts = extensions.get(i);
 					}
 
 					if (modifierExtensions.size() > i
 							&& modifierExtensions.get(i) != null
-							&& modifierExtensions.get(i).isEmpty() == false) {
+							&& !modifierExtensions.get(i).isEmpty()) {
 						haveContent = true;
 						heldModExts = modifierExtensions.get(i);
 					}
@@ -746,7 +744,7 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 					} else {
 						nextComments = null;
 					}
-					if (nextComments != null && nextComments.isEmpty() == false) {
+					if (nextComments != null && !nextComments.isEmpty()) {
 						haveContent = true;
 					}
 
@@ -802,10 +800,6 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 			myIsSupportsFhirComment = isFhirVersionLessThanOrEqualTo(FhirVersionEnum.DSTU2_1);
 		}
 		return myIsSupportsFhirComment;
-	}
-
-	private boolean isMultipleCardinality(int maxCardinality) {
-		return maxCardinality > 1 || maxCardinality == Child.MAX_UNLIMITED;
 	}
 
 	private void encodeCompositeElementToStreamWriter(
@@ -917,10 +911,7 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 			// Undeclared extensions
 			extractUndeclaredExtensions(
 					theResourceId, extensions, modifierExtensions, null, null, theEncodeContext, theContainedResource);
-			boolean haveExtension = false;
-			if (!extensions.isEmpty()) {
-				haveExtension = true;
-			}
+			boolean haveExtension = !extensions.isEmpty();
 
 			if (theResourceId.hasFormatComment() || haveExtension) {
 				beginObject(theEventWriter, "_id");
@@ -1033,7 +1024,8 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 					writeOptionalTagWithTextNode(theEventWriter, "system", tag.getScheme());
 					writeOptionalTagWithTextNode(theEventWriter, "code", tag.getTerm());
 					writeOptionalTagWithTextNode(theEventWriter, "display", tag.getLabel());
-					// wipmb should we be writing the new properties here?  There must be another path.
+					writeOptionalTagWithTextNode(theEventWriter, "version", tag.getVersion());
+					write(theEventWriter, "userSelected", tag.getUserSelectedBoolean());
 					theEventWriter.endObject();
 				}
 				theEventWriter.endArray();

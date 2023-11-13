@@ -1,7 +1,5 @@
 package ca.uhn.fhir.cr.r4;
 
-import ca.uhn.fhir.cr.BaseCrR4TestServer;
-import ca.uhn.fhir.cr.r4.measure.MeasureOperationsProvider;
 import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.MeasureReport;
@@ -10,7 +8,7 @@ import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Resource;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.springframework.beans.factory.annotation.Autowired;
+
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.Optional;
@@ -20,10 +18,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(SpringExtension.class)
-class R4MeasureOperationProviderIT extends BaseCrR4TestServer
-{
-	@Autowired
-	MeasureOperationsProvider myMeasureOperationsProvider;
+class R4MeasureOperationProviderIT extends BaseCrR4TestServer {
 
 	public MeasureReport runEvaluateMeasure(String periodStart, String periodEnd, String subject, String measureId, String reportType, String practitioner){
 
@@ -46,9 +41,14 @@ class R4MeasureOperationProviderIT extends BaseCrR4TestServer
 	}
 
 	@Test
-	void testMeasureEvaluate_EXM130()  {
+	void testMeasureEvaluate_EXM130() throws InterruptedException {
 		loadBundle("ColorectalCancerScreeningsFHIR-bundle.json");
 		runEvaluateMeasure("2019-01-01", "2019-12-31", "Patient/numer-EXM130", "ColorectalCancerScreeningsFHIR", "Individual", null);
+	}
+	@Test
+	void testMeasureEvaluate_EXM104() {
+		loadBundle("Exm104FhirR4MeasureBundle.json");
+		runEvaluateMeasure("2019-01-01", "2019-12-31", "Patient/numer-EXM104", "measure-EXM104-8.2.000", "Individual", null);
 	}
 
 	private void runWithPatient(String measureId, String patientId, int initialPopulationCount, int denominatorCount,
@@ -144,6 +144,25 @@ class R4MeasureOperationProviderIT extends BaseCrR4TestServer
 
 		runEvaluateMeasure("2019-01-01", "2020-01-01", "Patient/numer-EXM124", "measure-EXM124-7.0.000", "Individual", null);
 		runEvaluateMeasure("2019-01-01", "2020-01-01", "Patient/numer-EXM124", "measure-EXM124-9.0.000", "Individual", null);
+
+	}
+
+	@Test
+	void testLargeValuesetMeasure() {
+		this.loadBundle("largeValueSetMeasureTest-Bundle.json");
+
+		var returnMeasureReport = runEvaluateMeasure("2023-01-01", "2024-01-01", null, "CMSTest", "population", null);
+
+		String populationName = "numerator";
+		int expectedCount = 1;
+
+		Optional<MeasureReport.MeasureReportGroupPopulationComponent> population = returnMeasureReport.getGroup().get(0)
+			.getPopulation().stream().filter(x -> x.hasCode() && x.getCode().hasCoding()
+				&& x.getCode().getCoding().get(0).getCode().equals(populationName))
+			.findFirst();
+
+		assertEquals(population.get().getCount(), expectedCount,
+			String.format("expected count for population \"%s\" did not match", populationName));
 
 	}
 

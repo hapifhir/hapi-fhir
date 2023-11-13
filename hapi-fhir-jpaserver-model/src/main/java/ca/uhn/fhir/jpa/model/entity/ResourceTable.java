@@ -73,28 +73,40 @@ import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
 import javax.persistence.Table;
 import javax.persistence.Transient;
+import javax.persistence.UniqueConstraint;
 import javax.persistence.Version;
+
+import static ca.uhn.fhir.jpa.model.entity.ResourceTable.IDX_RES_TYPE_FHIR_ID;
 
 @Indexed(routingBinder = @RoutingBinderRef(type = ResourceTableRoutingBinder.class))
 @Entity
 @Table(
 		name = ResourceTable.HFJ_RESOURCE,
-		uniqueConstraints = {},
+		uniqueConstraints = {
+			@UniqueConstraint(
+					name = IDX_RES_TYPE_FHIR_ID,
+					columnNames = {"RES_TYPE", "FHIR_ID"})
+		},
 		indexes = {
 			// Do not reuse previously used index name: IDX_INDEXSTATUS, IDX_RES_TYPE
 			@Index(name = "IDX_RES_DATE", columnList = BaseHasResource.RES_UPDATED),
+			@Index(name = "IDX_RES_FHIR_ID", columnList = "FHIR_ID"),
 			@Index(
 					name = "IDX_RES_TYPE_DEL_UPDATED",
 					columnList = "RES_TYPE,RES_DELETED_AT,RES_UPDATED,PARTITION_ID,RES_ID"),
-			@Index(name = "IDX_RES_RESID_UPDATED", columnList = "RES_ID,RES_UPDATED,PARTITION_ID"),
+			@Index(name = "IDX_RES_RESID_UPDATED", columnList = "RES_ID, RES_UPDATED, PARTITION_ID")
 		})
 @NamedEntityGraph(name = "Resource.noJoins")
 public class ResourceTable extends BaseHasResource implements Serializable, IBasePersistedResource<JpaPid> {
 	public static final int RESTYPE_LEN = 40;
 	public static final String HFJ_RESOURCE = "HFJ_RESOURCE";
 	public static final String RES_TYPE = "RES_TYPE";
+	public static final String FHIR_ID = "FHIR_ID";
 	private static final int MAX_LANGUAGE_LENGTH = 20;
 	private static final long serialVersionUID = 1L;
+	public static final int MAX_FORCED_ID_LENGTH = 100;
+	public static final String IDX_RES_TYPE_FHIR_ID = "IDX_RES_TYPE_FHIR_ID";
+
 	/**
 	 * Holds the narrative text only - Used for Fulltext searching but not directly stored in the DB
 	 * Note the extra config needed in HS6 for indexing transient props:
@@ -371,7 +383,7 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	 * Will be null during insert time until the first read.
 	 */
 	@Column(
-			name = "FHIR_ID",
+			name = FHIR_ID,
 			// [A-Za-z0-9\-\.]{1,64} - https://www.hl7.org/fhir/datatypes.html#id
 			length = 64,
 			// we never update this after insert, and the Generator will otherwise "dirty" the object.
@@ -419,6 +431,9 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 
 	@Transient
 	private volatile String myCreatedByMatchUrl;
+
+	@Transient
+	private volatile String myUpdatedByMatchUrl;
 
 	/**
 	 * Constructor
@@ -874,13 +889,8 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 
 		retVal.setResourceId(myId);
 		retVal.setResourceType(myResourceType);
-		retVal.setVersion(getVersion());
 		retVal.setTransientForcedId(getTransientForcedId());
-
-		retVal.setPublished(getPublishedDate());
-		retVal.setUpdated(getUpdatedDate());
 		retVal.setFhirVersion(getFhirVersion());
-		retVal.setDeleted(getDeleted());
 		retVal.setResourceTable(this);
 		retVal.setForcedId(getForcedId());
 		retVal.setPartitionId(getPartitionId());
@@ -892,7 +902,21 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 			}
 		}
 
+		populateHistoryEntityVersionAndDates(retVal);
+
 		return retVal;
+	}
+
+	/**
+	 * Updates several temporal values in a {@link ResourceHistoryTable} entity which
+	 * are pulled from this entity, including the resource version, and the
+	 * creation, update, and deletion dates.
+	 */
+	public void populateHistoryEntityVersionAndDates(ResourceHistoryTable theResourceHistoryTable) {
+		theResourceHistoryTable.setVersion(getVersion());
+		theResourceHistoryTable.setPublished(getPublishedDate());
+		theResourceHistoryTable.setUpdated(getUpdatedDate());
+		theResourceHistoryTable.setDeleted(getDeleted());
 	}
 
 	@Override
@@ -970,24 +994,18 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	}
 
 	private void populateId(IIdType retVal) {
+		String resourceId;
 		if (myFhirId != null && !myFhirId.isEmpty()) {
-			retVal.setValue(getResourceType() + '/' + myFhirId + '/' + Constants.PARAM_HISTORY + '/' + getVersion());
+			resourceId = myFhirId;
 		} else if (getTransientForcedId() != null) {
-			// Avoid a join query if possible
-			retVal.setValue(getResourceType()
-					+ '/'
-					+ getTransientForcedId()
-					+ '/'
-					+ Constants.PARAM_HISTORY
-					+ '/'
-					+ getVersion());
-		} else if (getForcedId() == null) {
-			Long id = this.getResourceId();
-			retVal.setValue(getResourceType() + '/' + id + '/' + Constants.PARAM_HISTORY + '/' + getVersion());
+			resourceId = getTransientForcedId();
+		} else if (myForcedId != null) {
+			resourceId = myForcedId.getForcedId();
 		} else {
-			String forcedId = getForcedId().getForcedId();
-			retVal.setValue(getResourceType() + '/' + forcedId + '/' + Constants.PARAM_HISTORY + '/' + getVersion());
+			Long id = this.getResourceId();
+			resourceId = Long.toString(id);
 		}
+		retVal.setValue(getResourceType() + '/' + resourceId + '/' + Constants.PARAM_HISTORY + '/' + getVersion());
 	}
 
 	public String getCreatedByMatchUrl() {
@@ -996,6 +1014,18 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 
 	public void setCreatedByMatchUrl(String theCreatedByMatchUrl) {
 		myCreatedByMatchUrl = theCreatedByMatchUrl;
+	}
+
+	public String getUpdatedByMatchUrl() {
+		return myUpdatedByMatchUrl;
+	}
+
+	public void setUpdatedByMatchUrl(String theUpdatedByMatchUrl) {
+		myUpdatedByMatchUrl = theUpdatedByMatchUrl;
+	}
+
+	public boolean isVersionUpdatedInCurrentTransaction() {
+		return myVersionUpdatedInCurrentTransaction;
 	}
 
 	public void setLuceneIndexData(ExtendedHSearchIndexData theLuceneIndexData) {
@@ -1021,6 +1051,10 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 
 	public void setFhirId(String theFhirId) {
 		myFhirId = theFhirId;
+	}
+
+	public String asTypedFhirResourceId() {
+		return getResourceType() + "/" + getFhirId();
 	}
 
 	/**

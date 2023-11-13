@@ -8,7 +8,9 @@ import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.TranslateConceptResults;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.rest.api.SummaryEnum;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.rest.gclient.IQuery;
 import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.ParametersUtil;
 import org.apache.commons.lang3.StringUtils;
@@ -24,6 +26,7 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.List;
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -52,6 +55,11 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 	public RemoteTerminologyServiceValidationSupport(FhirContext theFhirContext, String theBaseUrl) {
 		super(theFhirContext);
 		myBaseUrl = theBaseUrl;
+	}
+
+	@Override
+	public String getName() {
+		return getFhirContext().getVersion().getVersion() + " Remote Terminology Service Validation Support";
 	}
 
 	@Override
@@ -141,16 +149,32 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 
 	@Override
 	public IBaseResource fetchCodeSystem(String theSystem) {
+		// callers of this want the whole resource.
+		return fetchCodeSystem(theSystem, SummaryEnum.FALSE);
+	}
+
+	/**
+	 * Fetch the code system, possibly a summary.
+	 * @param theSystem the canonical url
+	 * @param theSummaryParam to force a summary mode - or null to allow server default.
+	 * @return the CodeSystem
+	 */
+	@Nullable
+	private IBaseResource fetchCodeSystem(String theSystem, @Nullable SummaryEnum theSummaryParam) {
 		IGenericClient client = provideClient();
 		Class<? extends IBaseBundle> bundleType =
 				myCtx.getResourceDefinition("Bundle").getImplementingClass(IBaseBundle.class);
-		IBaseBundle results = client.search()
+		IQuery<IBaseBundle> codeSystemQuery = client.search()
 				.forResource("CodeSystem")
-				.where(CodeSystem.URL.matches().value(theSystem))
-				.returnBundle(bundleType)
-				.execute();
+				.where(CodeSystem.URL.matches().value(theSystem));
+
+		if (theSummaryParam != null) {
+			codeSystemQuery.summaryMode(theSummaryParam);
+		}
+
+		IBaseBundle results = codeSystemQuery.returnBundle(bundleType).execute();
 		List<IBaseResource> resultsList = BundleUtil.toListOfResources(myCtx, results);
-		if (resultsList.size() > 0) {
+		if (!resultsList.isEmpty()) {
 			return resultsList.get(0);
 		}
 
@@ -388,16 +412,36 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 
 	@Override
 	public IBaseResource fetchValueSet(String theValueSetUrl) {
+		// force the remote server to send the whole resource.
+		SummaryEnum summaryParam = SummaryEnum.FALSE;
+		return fetchValueSet(theValueSetUrl, summaryParam);
+	}
+
+	/**
+	 * Search for a ValueSet by canonical url via IGenericClient.
+	 *
+	 * @param theValueSetUrl the canonical url of the ValueSet
+	 * @param theSummaryParam force a summary mode - null allows server default
+	 * @return the ValueSet or null if none match the url
+	 */
+	@Nullable
+	private IBaseResource fetchValueSet(String theValueSetUrl, SummaryEnum theSummaryParam) {
 		IGenericClient client = provideClient();
 		Class<? extends IBaseBundle> bundleType =
 				myCtx.getResourceDefinition("Bundle").getImplementingClass(IBaseBundle.class);
-		IBaseBundle results = client.search()
+
+		IQuery<IBaseBundle> valueSetQuery = client.search()
 				.forResource("ValueSet")
-				.where(CodeSystem.URL.matches().value(theValueSetUrl))
-				.returnBundle(bundleType)
-				.execute();
+				.where(CodeSystem.URL.matches().value(theValueSetUrl));
+
+		if (theSummaryParam != null) {
+			valueSetQuery.summaryMode(theSummaryParam);
+		}
+
+		IBaseBundle results = valueSetQuery.returnBundle(bundleType).execute();
+
 		List<IBaseResource> resultsList = BundleUtil.toListOfResources(myCtx, results);
-		if (resultsList.size() > 0) {
+		if (!resultsList.isEmpty()) {
 			return resultsList.get(0);
 		}
 
@@ -406,12 +450,18 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 
 	@Override
 	public boolean isCodeSystemSupported(ValidationSupportContext theValidationSupportContext, String theSystem) {
-		return fetchCodeSystem(theSystem) != null;
+		// a summary is ok if we are just checking the presence.
+		SummaryEnum summaryParam = null;
+
+		return fetchCodeSystem(theSystem, summaryParam) != null;
 	}
 
 	@Override
 	public boolean isValueSetSupported(ValidationSupportContext theValidationSupportContext, String theValueSetUrl) {
-		return fetchValueSet(theValueSetUrl) != null;
+		// a summary is ok if we are just checking the presence.
+		SummaryEnum summaryParam = null;
+
+		return fetchValueSet(theValueSetUrl, summaryParam) != null;
 	}
 
 	@Override

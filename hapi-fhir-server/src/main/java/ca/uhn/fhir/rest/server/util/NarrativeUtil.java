@@ -47,10 +47,16 @@ public class NarrativeUtil {
 	 *    <li>All other elements and attributes are removed</li>
 	 * </ul>
 	 */
-	public static String sanitize(String theHtml) {
-		XhtmlNode node = new XhtmlNode();
-		node.setValueAsString(theHtml);
-		return sanitize(node).getValueAsString();
+	public static String sanitizeHtmlFragment(String theHtml) {
+		PolicyFactory idPolicy =
+				new HtmlPolicyBuilder().allowAttributes("id").globally().toFactory();
+
+		PolicyFactory policy = Sanitizers.FORMATTING
+				.and(Sanitizers.BLOCKS)
+				.and(Sanitizers.TABLES)
+				.and(Sanitizers.STYLES)
+				.and(idPolicy);
+		return policy.sanitize(theHtml);
 	}
 
 	/**
@@ -70,15 +76,7 @@ public class NarrativeUtil {
 	public static XhtmlNode sanitize(XhtmlNode theNode) {
 		String html = theNode.getValueAsString();
 
-		PolicyFactory idPolicy =
-				new HtmlPolicyBuilder().allowAttributes("id").globally().toFactory();
-
-		PolicyFactory policy = Sanitizers.FORMATTING
-				.and(Sanitizers.BLOCKS)
-				.and(Sanitizers.TABLES)
-				.and(Sanitizers.STYLES)
-				.and(idPolicy);
-		String safeHTML = policy.sanitize(html);
+		String safeHTML = sanitizeHtmlFragment(html);
 
 		XhtmlNode retVal = new XhtmlNode();
 		retVal.setValueAsString(safeHTML);

@@ -10,6 +10,8 @@ import ca.uhn.fhir.jpa.binary.interceptor.BinaryStorageInterceptor;
 import ca.uhn.fhir.jpa.binstore.MemoryBinaryStorageSvcImpl;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
+import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.client.api.IClientInterceptor;
 import ca.uhn.fhir.rest.client.api.IHttpRequest;
@@ -20,14 +22,20 @@ import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Binary;
+import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.DocumentReference;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.Extension;
+import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -57,6 +65,7 @@ public class BinaryStorageInterceptorR4Test extends BaseResourceProviderR4Test {
 	public static final byte[] FEW_BYTES = {4, 3, 2, 1};
 	public static final byte[] SOME_BYTES = {1, 2, 3, 4, 5, 6, 7, 8, 7, 6, 5, 4, 3, 2, 1, 8, 9, 0, 10, 9};
 	public static final byte[] SOME_BYTES_2 = {6, 7, 8, 7, 6, 5, 4, 3, 2, 1, 5, 5, 5, 6};
+	public static final byte[] SOME_BYTES_3 = {5, 5, 5, 6, 6, 7, 7, 7, 8, 8, 8};
 	private static final Logger ourLog = LoggerFactory.getLogger(BinaryStorageInterceptorR4Test.class);
 
 	@Autowired
@@ -103,8 +112,10 @@ public class BinaryStorageInterceptorR4Test extends BaseResourceProviderR4Test {
 			return "prefix-" + extensionValus + "-";
 		}
 	}
-	@Test
-	public void testCreatingExternalizedBinaryTriggersPointcut() {
+
+	@ParameterizedTest
+	@EnumSource(value = RestOperationTypeEnum.class, names = {"CREATE", "UPDATE"})
+	public void testCreatingExternalizedBinaryAppliesPrefix(RestOperationTypeEnum theOperationType) {
 		BinaryFilePrefixingInterceptor interceptor = new BinaryFilePrefixingInterceptor();
 		myInterceptorRegistry.registerInterceptor(interceptor);
 		// Create a resource with two metadata extensions on the binary
@@ -119,15 +130,27 @@ public class BinaryStorageInterceptorR4Test extends BaseResourceProviderR4Test {
 		ext2.setValue(new StringType("bar2"));
 
 		binary.setData(SOME_BYTES);
-		DaoMethodOutcome outcome = myBinaryDao.create(binary, mySrd);
 
-		// Make sure it was externalized
+		DaoMethodOutcome outcome = null;
+
+		//Either CREATE or UPDATE
+		if (theOperationType == RestOperationTypeEnum.CREATE) {
+			outcome = myBinaryDao.create(binary, mySrd);
+		} else if (theOperationType == RestOperationTypeEnum.UPDATE) {
+			binary.setId("my-id");
+			outcome = myBinaryDao.update(binary, mySrd);
+		}
+
+		// Then: Sure it was externalized
 		outcome.getId().toUnqualifiedVersionless();
 		String encoded = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome.getResource());
 		ourLog.info("Encoded: {}", encoded);
 		assertThat(encoded, containsString(HapiExtensions.EXT_EXTERNALIZED_BINARY_ID));
+
+		// Then: Make sure the prefix was applied
 		assertThat(encoded, (containsString("prefix-bar-bar2-")));
 		myInterceptorRegistry.unregisterInterceptor(interceptor);
+
 	}
 
 	private static class BinaryBlobIdPrefixInterceptor {
@@ -362,12 +385,8 @@ public class BinaryStorageInterceptorR4Test extends BaseResourceProviderR4Test {
 
 		// Create a resource with a big enough docRef
 		DocumentReference docRef = new DocumentReference();
-		DocumentReference.DocumentReferenceContentComponent content = docRef.addContent();
-		content.getAttachment().setContentType("application/octet-stream");
-		content.getAttachment().setData(SOME_BYTES);
-		DocumentReference.DocumentReferenceContentComponent content2 = docRef.addContent();
-		content2.getAttachment().setContentType("application/octet-stream");
-		content2.getAttachment().setData(SOME_BYTES_2);
+		addDocumentAttachmentData(docRef, SOME_BYTES);
+		addDocumentAttachmentData(docRef, SOME_BYTES_2);
 		DaoMethodOutcome outcome = myDocumentReferenceDao.create(docRef, mySrd);
 
 		// Make sure it was externalized
@@ -403,18 +422,73 @@ public class BinaryStorageInterceptorR4Test extends BaseResourceProviderR4Test {
 
 	}
 
+	@Test
+	public void testCreateBinaryAttachments_bundleWithMultipleDocumentReferences_createdAndReadBackSuccessfully() {
+		// Create Patient
+		Patient patient = new Patient();
+		patient.addIdentifier().setSystem("urn:system").setValue("001");
+		patient.addName().addGiven("Johnny").setFamily("Walker");
+
+		// Create first DocumentReference with a big enough attachments
+		DocumentReference docRef = new DocumentReference();
+		addDocumentAttachmentData(docRef, SOME_BYTES);
+		addDocumentAttachmentData(docRef, SOME_BYTES_2);
+
+		// Create second DocumentReference with a big enough attachment
+		DocumentReference docRef2 = new DocumentReference();
+		addDocumentAttachmentData(docRef2, SOME_BYTES_3);
+
+		// Create Bundle
+		Bundle bundle = new Bundle();
+		bundle.setType(Bundle.BundleType.TRANSACTION);
+		// Patient entry component
+		addBundleEntry(bundle, patient, "Patient");
+		// First DocumentReference entry component
+		addBundleEntry(bundle, docRef, "DocumentReference");
+		// Second DocumentReference entry component
+		addBundleEntry(bundle, docRef2, "DocumentReference");
+
+		// Execute transaction
+		Bundle output = myClient.transaction().withBundle(bundle).execute();
+		ourLog.debug(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(output));
+
+		// Verify bundle response
+		assertEquals(3, output.getEntry().size());
+		output.getEntry().forEach(entry -> assertEquals("201 Created", entry.getResponse().getStatus()));
+
+		// Read back and verify first DocumentReference and attachments
+		IIdType firstDocRef = new IdType(output.getEntry().get(1).getResponse().getLocation());
+		DocumentReference firstDoc = myDocumentReferenceDao.read(firstDocRef, mySrd);
+		assertEquals("application/octet-stream", firstDoc.getContentFirstRep().getAttachment().getContentType());
+		assertArrayEquals(SOME_BYTES, firstDoc.getContentFirstRep().getAttachment().getData());
+		assertEquals("application/octet-stream", firstDoc.getContent().get(1).getAttachment().getContentType());
+		assertArrayEquals(SOME_BYTES_2, firstDoc.getContent().get(1).getAttachment().getData());
+
+		// Read back and verify second DocumentReference and attachment
+		IIdType secondDocRef = new IdType(output.getEntry().get(2).getResponse().getLocation());
+		DocumentReference secondDoc = myDocumentReferenceDao.read(secondDocRef, mySrd);
+		assertEquals("application/octet-stream", secondDoc.getContentFirstRep().getAttachment().getContentType());
+		assertArrayEquals(SOME_BYTES_3, secondDoc.getContentFirstRep().getAttachment().getData());
+	}
+
+	private void addBundleEntry(Bundle theBundle, Resource theResource, String theUrl) {
+		Bundle.BundleEntryComponent getComponent = new Bundle.BundleEntryComponent();
+		Bundle.BundleEntryRequestComponent requestComponent = new Bundle.BundleEntryRequestComponent();
+		requestComponent.setMethod(Bundle.HTTPVerb.POST);
+		requestComponent.setUrl(theUrl);
+		getComponent.setRequest(requestComponent);
+		getComponent.setResource(theResource);
+		getComponent.setFullUrl(IdDt.newRandomUuid().getValue());
+		theBundle.addEntry(getComponent);
+	}
 
 	@Test
 	public void testUpdateRejectsIncorrectBinary() {
 
 		// Create a resource with a big enough docRef
 		DocumentReference docRef = new DocumentReference();
-		DocumentReference.DocumentReferenceContentComponent content = docRef.addContent();
-		content.getAttachment().setContentType("application/octet-stream");
-		content.getAttachment().setData(SOME_BYTES);
-		DocumentReference.DocumentReferenceContentComponent content2 = docRef.addContent();
-		content2.getAttachment().setContentType("application/octet-stream");
-		content2.getAttachment().setData(SOME_BYTES_2);
+		addDocumentAttachmentData(docRef, SOME_BYTES);
+		addDocumentAttachmentData(docRef, SOME_BYTES_2);
 		DaoMethodOutcome outcome = myDocumentReferenceDao.create(docRef, mySrd);
 
 		// Make sure it was externalized
@@ -430,13 +504,13 @@ public class BinaryStorageInterceptorR4Test extends BaseResourceProviderR4Test {
 		docRef = new DocumentReference();
 		docRef.setId(id.toUnqualifiedVersionless());
 		docRef.setStatus(Enumerations.DocumentReferenceStatus.CURRENT);
-		content = docRef.addContent();
+		DocumentReference.DocumentReferenceContentComponent content = docRef.addContent();
 		content.getAttachment().setContentType("application/octet-stream");
 		content.getAttachment().getDataElement().addExtension(
 			HapiExtensions.EXT_EXTERNALIZED_BINARY_ID,
 			new StringType(binaryId)
 		);
-		content2 = docRef.addContent();
+		DocumentReference.DocumentReferenceContentComponent content2 = docRef.addContent();
 		content2.getAttachment().setContentType("application/octet-stream");
 		content2.getAttachment().getDataElement().addExtension(
 			HapiExtensions.EXT_EXTERNALIZED_BINARY_ID,
@@ -478,5 +552,10 @@ public class BinaryStorageInterceptorR4Test extends BaseResourceProviderR4Test {
 
 	}
 
+	private void addDocumentAttachmentData(DocumentReference theDocumentReference, byte[] theData) {
+		DocumentReference.DocumentReferenceContentComponent content = theDocumentReference.addContent();
+		content.getAttachment().setContentType("application/octet-stream");
+		content.getAttachment().setData(theData);
+	}
 
 }

@@ -27,6 +27,7 @@ import ca.uhn.fhir.util.UrlUtil;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
@@ -409,6 +410,13 @@ public interface IValidationSupport {
 		return null;
 	}
 
+	/**
+	 * This field is used by the Terminology Troubleshooting Log to log which validation support module was used for the operation being logged.
+	 */
+	default String getName() {
+		return "Unknown " + getFhirContext().getVersion().getVersion() + " Validation Support";
+	}
+
 	enum IssueSeverity {
 		/**
 		 * The issue caused the action to fail, and no further checking could be performed.
@@ -553,9 +561,27 @@ public interface IValidationSupport {
 		private String myCodeSystemVersion;
 		private List<BaseConceptProperty> myProperties;
 		private String myDisplay;
+		private String mySourceDetails;
 
 		public CodeValidationResult() {
 			super();
+		}
+
+		/**
+		 * This field may contain information about what the source of the
+		 * validation information was.
+		 */
+		public String getSourceDetails() {
+			return mySourceDetails;
+		}
+
+		/**
+		 * This field may contain information about what the source of the
+		 * validation information was.
+		 */
+		public CodeValidationResult setSourceDetails(String theSourceDetails) {
+			mySourceDetails = theSourceDetails;
+			return this;
 		}
 
 		public String getDisplay() {
@@ -691,8 +717,9 @@ public interface IValidationSupport {
 		private boolean myFound;
 		private String mySearchedForCode;
 		private String mySearchedForSystem;
-		private List<IValidationSupport.BaseConceptProperty> myProperties;
+		private List<BaseConceptProperty> myProperties;
 		private List<ConceptDesignation> myDesignations;
+		private String myErrorMessage;
 
 		/**
 		 * Constructor
@@ -708,7 +735,7 @@ public interface IValidationSupport {
 			return myProperties;
 		}
 
-		public void setProperties(List<IValidationSupport.BaseConceptProperty> theProperties) {
+		public void setProperties(List<BaseConceptProperty> theProperties) {
 			myProperties = theProperties;
 		}
 
@@ -808,7 +835,7 @@ public interface IValidationSupport {
 							.collect(Collectors.toSet());
 				}
 
-				for (IValidationSupport.BaseConceptProperty next : myProperties) {
+				for (BaseConceptProperty next : myProperties) {
 
 					if (!properties.isEmpty()) {
 						if (!properties.contains(next.getPropertyName())) {
@@ -819,11 +846,11 @@ public interface IValidationSupport {
 					IBase property = ParametersUtil.addParameterToParameters(theContext, retVal, "property");
 					ParametersUtil.addPartCode(theContext, property, "code", next.getPropertyName());
 
-					if (next instanceof IValidationSupport.StringConceptProperty) {
-						IValidationSupport.StringConceptProperty prop = (IValidationSupport.StringConceptProperty) next;
+					if (next instanceof StringConceptProperty) {
+						StringConceptProperty prop = (StringConceptProperty) next;
 						ParametersUtil.addPartString(theContext, property, "value", prop.getValue());
-					} else if (next instanceof IValidationSupport.CodingConceptProperty) {
-						IValidationSupport.CodingConceptProperty prop = (IValidationSupport.CodingConceptProperty) next;
+					} else if (next instanceof CodingConceptProperty) {
+						CodingConceptProperty prop = (CodingConceptProperty) next;
 						ParametersUtil.addPartCoding(
 								theContext, property, "value", prop.getCodeSystem(), prop.getCode(), prop.getDisplay());
 					} else {
@@ -844,6 +871,14 @@ public interface IValidationSupport {
 			}
 
 			return retVal;
+		}
+
+		public void setErrorMessage(String theErrorMessage) {
+			myErrorMessage = theErrorMessage;
+		}
+
+		public String getErrorMessage() {
+			return myErrorMessage;
 		}
 
 		public static LookupCodeResult notFound(String theSearchedForSystem, String theSearchedForCode) {
@@ -962,6 +997,16 @@ public interface IValidationSupport {
 
 		public boolean isReverse() {
 			return myReverse;
+		}
+
+		@Override
+		public String toString() {
+			return new ToStringBuilder(this)
+					.append("sourceValueSetUrl", mySourceValueSetUrl)
+					.append("targetSystemUrl", myTargetSystemUrl)
+					.append("targetValueSetUrl", myTargetValueSetUrl)
+					.append("reverse", myReverse)
+					.toString();
 		}
 	}
 

@@ -28,18 +28,19 @@ import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.EnversRevision;
 import ca.uhn.fhir.mdm.api.IMdmLink;
-import ca.uhn.fhir.mdm.api.MdmHistorySearchParameters;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
 import ca.uhn.fhir.mdm.api.MdmLinkWithRevision;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
-import ca.uhn.fhir.mdm.api.MdmQuerySearchParameters;
 import ca.uhn.fhir.mdm.api.paging.MdmPageRequest;
+import ca.uhn.fhir.mdm.api.params.MdmHistorySearchParameters;
+import ca.uhn.fhir.mdm.api.params.MdmQuerySearchParameters;
 import ca.uhn.fhir.mdm.dao.IMdmLinkDao;
 import ca.uhn.fhir.mdm.model.MdmPidTuple;
 import ca.uhn.fhir.rest.api.SortOrderEnum;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.ListUtils;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.Validate;
 import org.hibernate.envers.AuditReader;
 import org.hibernate.envers.RevisionType;
@@ -75,13 +76,13 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.validation.constraints.NotNull;
 
-import static ca.uhn.fhir.mdm.api.MdmQuerySearchParameters.GOLDEN_RESOURCE_NAME;
-import static ca.uhn.fhir.mdm.api.MdmQuerySearchParameters.GOLDEN_RESOURCE_PID_NAME;
-import static ca.uhn.fhir.mdm.api.MdmQuerySearchParameters.LINK_SOURCE_NAME;
-import static ca.uhn.fhir.mdm.api.MdmQuerySearchParameters.MATCH_RESULT_NAME;
-import static ca.uhn.fhir.mdm.api.MdmQuerySearchParameters.PARTITION_ID_NAME;
-import static ca.uhn.fhir.mdm.api.MdmQuerySearchParameters.RESOURCE_TYPE_NAME;
-import static ca.uhn.fhir.mdm.api.MdmQuerySearchParameters.SOURCE_PID_NAME;
+import static ca.uhn.fhir.mdm.api.params.MdmQuerySearchParameters.GOLDEN_RESOURCE_NAME;
+import static ca.uhn.fhir.mdm.api.params.MdmQuerySearchParameters.GOLDEN_RESOURCE_PID_NAME;
+import static ca.uhn.fhir.mdm.api.params.MdmQuerySearchParameters.LINK_SOURCE_NAME;
+import static ca.uhn.fhir.mdm.api.params.MdmQuerySearchParameters.MATCH_RESULT_NAME;
+import static ca.uhn.fhir.mdm.api.params.MdmQuerySearchParameters.PARTITION_ID_NAME;
+import static ca.uhn.fhir.mdm.api.params.MdmQuerySearchParameters.RESOURCE_TYPE_NAME;
+import static ca.uhn.fhir.mdm.api.params.MdmQuerySearchParameters.SOURCE_PID_NAME;
 
 public class MdmLinkDaoJpaImpl implements IMdmLinkDao<JpaPid, MdmLink> {
 	private static final Logger ourLog = LoggerFactory.getLogger(MdmLinkDaoJpaImpl.class);
@@ -350,6 +351,7 @@ public class MdmLinkDaoJpaImpl implements IMdmLinkDao<JpaPid, MdmLink> {
 		List<List<Long>> chunks = ListUtils.partition(goldenResourcePids, 500);
 		for (List<Long> chunk : chunks) {
 			myMdmLinkDao.deleteLinksWithAnyReferenceToPids(chunk);
+			myMdmLinkDao.deleteLinksHistoryWithAnyReferenceToPids(chunk);
 		}
 	}
 
@@ -370,20 +372,39 @@ public class MdmLinkDaoJpaImpl implements IMdmLinkDao<JpaPid, MdmLink> {
 		final AuditQueryCreator auditQueryCreator = myAuditReader.createQuery();
 
 		try {
-			final AuditCriterion goldenResourceIdCriterion = AuditEntity.property(GOLDEN_RESOURCE_PID_NAME)
-					.in(convertToLongIds(theMdmHistorySearchParameters.getGoldenResourceIds()));
-			final AuditCriterion resourceIdCriterion = AuditEntity.property(SOURCE_PID_NAME)
-					.in(convertToLongIds(theMdmHistorySearchParameters.getSourceIds()));
+			final AuditCriterion goldenResourceIdCriterion = buildAuditCriterionOrNull(
+					theMdmHistorySearchParameters.getGoldenResourceIds(), GOLDEN_RESOURCE_PID_NAME);
+
+			final AuditCriterion resourceIdCriterion =
+					buildAuditCriterionOrNull(theMdmHistorySearchParameters.getSourceIds(), SOURCE_PID_NAME);
 
 			final AuditCriterion goldenResourceAndOrResourceIdCriterion;
 
 			if (!theMdmHistorySearchParameters.getGoldenResourceIds().isEmpty()
 					&& !theMdmHistorySearchParameters.getSourceIds().isEmpty()) {
-				goldenResourceAndOrResourceIdCriterion = AuditEntity.or(goldenResourceIdCriterion, resourceIdCriterion);
+
+				// Make sure the criterion does not contain empty IN clause, e.g. id IN (), which postgres (likely other
+				// sql servers) do not like. Directly return empty result instead.
+				if (ObjectUtils.anyNull(goldenResourceIdCriterion, resourceIdCriterion)) {
+					return new ArrayList<>();
+				}
+				goldenResourceAndOrResourceIdCriterion =
+						AuditEntity.and(goldenResourceIdCriterion, resourceIdCriterion);
+
 			} else if (!theMdmHistorySearchParameters.getGoldenResourceIds().isEmpty()) {
+
+				if (ObjectUtils.anyNull(goldenResourceIdCriterion)) {
+					return new ArrayList<>();
+				}
 				goldenResourceAndOrResourceIdCriterion = goldenResourceIdCriterion;
+
 			} else if (!theMdmHistorySearchParameters.getSourceIds().isEmpty()) {
+
+				if (ObjectUtils.anyNull(resourceIdCriterion)) {
+					return new ArrayList<>();
+				}
 				goldenResourceAndOrResourceIdCriterion = resourceIdCriterion;
+
 			} else {
 				throw new IllegalArgumentException(Msg.code(2298)
 						+ "$mdm-link-history Golden resource and source query IDs cannot both be empty.");
@@ -411,10 +432,17 @@ public class MdmLinkDaoJpaImpl implements IMdmLinkDao<JpaPid, MdmLink> {
 
 	@Nonnull
 	private List<Long> convertToLongIds(List<IIdType> theMdmHistorySearchParameters) {
-		return theMdmHistorySearchParameters.stream()
-				.map(id -> myIdHelperService.getPidOrThrowException(RequestPartitionId.allPartitions(), id))
+		return myIdHelperService
+				.getPidsOrThrowException(RequestPartitionId.allPartitions(), theMdmHistorySearchParameters)
+				.stream()
 				.map(JpaPid::getId)
 				.collect(Collectors.toUnmodifiableList());
+	}
+
+	private AuditCriterion buildAuditCriterionOrNull(
+			List<IIdType> theMdmHistorySearchParameterIds, String theProperty) {
+		List<Long> longIds = convertToLongIds(theMdmHistorySearchParameterIds);
+		return longIds.isEmpty() ? null : AuditEntity.property(theProperty).in(longIds);
 	}
 
 	private MdmLinkWithRevision<MdmLink> buildRevisionFromObjectArray(Object[] theArray) {

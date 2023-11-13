@@ -24,12 +24,14 @@ import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.interceptor.auth.AuthorizationInterceptor.Verdict;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import javax.annotation.Nonnull;
 
 class OperationRule extends BaseRule implements IAuthRule {
 	private String myOperationName;
@@ -41,6 +43,7 @@ class OperationRule extends BaseRule implements IAuthRule {
 	private boolean myAppliesToAnyInstance;
 	private boolean myAppliesAtAnyLevel;
 	private boolean myAllowAllResponses;
+	private boolean myAllowAllResourcesAccess;
 
 	OperationRule(String theRuleName) {
 		super(theRuleName);
@@ -52,6 +55,10 @@ class OperationRule extends BaseRule implements IAuthRule {
 
 	public void allowAllResponses() {
 		myAllowAllResponses = true;
+	}
+
+	public void allowAllResourcesAccess() {
+		myAllowAllResourcesAccess = true;
 	}
 
 	void appliesToAnyInstance() {
@@ -93,7 +100,7 @@ class OperationRule extends BaseRule implements IAuthRule {
 		// Operation rules apply to the execution of the operation itself, not to side effects like
 		// loading resources (that will presumably be reflected in the response). Those loads need
 		// to be explicitly authorized
-		if (isResourceAccess(thePointcut)) {
+		if (!myAllowAllResourcesAccess && isResourceAccess(thePointcut)) {
 			return null;
 		}
 
@@ -257,5 +264,26 @@ class OperationRule extends BaseRule implements IAuthRule {
 
 	boolean isAllowAllResponses() {
 		return myAllowAllResponses;
+	}
+
+	boolean isAllowAllResourcesAccess() {
+		return myAllowAllResourcesAccess;
+	}
+
+	@Override
+	@Nonnull
+	protected ToStringBuilder toStringBuilder() {
+		ToStringBuilder builder = super.toStringBuilder();
+		builder.append("op", myOperationName);
+		builder.append("appliesToServer", myAppliesToServer);
+		builder.append("appliesToTypes", myAppliesToTypes);
+		builder.append("appliesToIds", myAppliesToIds);
+		builder.append("appliesToInstancesOfType", myAppliesToInstancesOfType);
+		builder.append("appliesToAnyType", myAppliesToAnyType);
+		builder.append("appliesToAnyInstance", myAppliesToAnyInstance);
+		builder.append("appliesAtAnyLevel", myAppliesAtAnyLevel);
+		builder.append("allowAllResponses", myAllowAllResponses);
+		builder.append("allowAllResourcesAccess", myAllowAllResourcesAccess);
+		return builder;
 	}
 }

@@ -55,9 +55,9 @@ public class RDFParserR4Test {
 			@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
 			   
 			<http://hl7.org/fhir/Patient/123>
-			        rdf:type             fhir:Patient ;
-			        fhir:Patient.active  [ fhir:value  true ] ;
-			        fhir:Resource.id     [ fhir:value  "123" ] ;
+			        rdf:type             fhir:Patient;
+			        fhir:Patient.active  [ fhir:value  true ];
+			        fhir:Resource.id     [ fhir:value  "123" ];
 			        fhir:nodeRole        fhir:treeRoot .
 			""";
 

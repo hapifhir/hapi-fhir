@@ -257,7 +257,7 @@ public abstract class BaseJpaTest extends BaseTest {
 	@Autowired
 	private IResourceHistoryTableDao myResourceHistoryTableDao;
 	@Autowired
-	private IForcedIdDao myForcedIdDao;
+	protected IForcedIdDao myForcedIdDao;
 	@Autowired
 	private DaoRegistry myDaoRegistry;
 	private final List<Object> myRegisteredInterceptors = new ArrayList<>(1);
@@ -366,9 +366,6 @@ public abstract class BaseJpaTest extends BaseTest {
 		if (myCaptureQueriesListener != null) {
 			myCaptureQueriesListener.clear();
 		}
-		if (myPartitionConfigSvc != null) {
-			myPartitionConfigSvc.clearCaches();
-		}
 		if (myMemoryCacheService != null) {
 			myMemoryCacheService.invalidateAllCaches();
 		}
@@ -432,6 +429,11 @@ public abstract class BaseJpaTest extends BaseTest {
 		myRegisteredInterceptors.add(interceptor);
 		myInterceptorRegistry.registerAnonymousInterceptor(theLatchPointcut, Integer.MAX_VALUE, interceptor);
 		return deliveryLatch;
+	}
+
+	protected void registerInterceptor(Object theInterceptor) {
+		myRegisteredInterceptors.add(theInterceptor);
+		myInterceptorRegistry.registerInterceptor(theInterceptor);
 	}
 
 	protected void purgeHibernateSearch(EntityManager theEntityManager) {

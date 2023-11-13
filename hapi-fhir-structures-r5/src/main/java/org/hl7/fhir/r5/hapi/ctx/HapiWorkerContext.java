@@ -163,6 +163,12 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 	}
 
 	@Override
+	public void validateCodeBatchByRef(
+			ValidationOptions validationOptions, List<? extends CodingValidationRequest> list, String s) {
+		throw new UnsupportedOperationException(Msg.code(2430));
+	}
+
+	@Override
 	public ValueSetExpansionOutcome expandVS(
 			ValueSet theValueSet, boolean cacheOk, boolean heiarchical, boolean incompleteOk) {
 		return null;

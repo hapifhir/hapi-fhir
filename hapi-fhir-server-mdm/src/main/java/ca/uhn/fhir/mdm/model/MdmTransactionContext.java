@@ -49,6 +49,12 @@ public class MdmTransactionContext {
 
 	private String myResourceType;
 
+	/**
+	 * Whether or not the currently processed resource is a 'blocked resource'.
+	 * This will only be set on matching.
+	 */
+	private boolean myIsBlockedResource;
+
 	private List<IMdmLink> myMdmLinkEvents = new ArrayList<>();
 
 	public TransactionLogMessages getTransactionLogMessages() {
@@ -110,5 +116,13 @@ public class MdmTransactionContext {
 
 	public void setMdmLinks(List<IMdmLink> theMdmLinkEvents) {
 		myMdmLinkEvents = theMdmLinkEvents;
+	}
+
+	public void setIsBlocked(boolean theIsBlocked) {
+		myIsBlockedResource = theIsBlocked;
+	}
+
+	public boolean getIsBlocked() {
+		return myIsBlockedResource;
 	}
 }

@@ -52,6 +52,9 @@ public abstract class BaseResourceModifiedMessage extends BaseResourceMessage im
 	@JsonProperty(value = "partitionId")
 	protected RequestPartitionId myPartitionId;
 
+	@JsonProperty(value = "payloadVersion")
+	protected String myPayloadVersion;
+
 	@JsonIgnore
 	protected transient IBaseResource myPayloadDecoded;
 
@@ -63,6 +66,12 @@ public abstract class BaseResourceModifiedMessage extends BaseResourceMessage im
 	 */
 	public BaseResourceModifiedMessage() {
 		super();
+	}
+
+	public BaseResourceModifiedMessage(IIdType theIdType, OperationTypeEnum theOperationType) {
+		this();
+		setOperationType(theOperationType);
+		setPayloadId(theIdType);
 	}
 
 	public BaseResourceModifiedMessage(
@@ -101,6 +110,10 @@ public abstract class BaseResourceModifiedMessage extends BaseResourceMessage im
 		return myPayloadId;
 	}
 
+	public String getPayloadVersion() {
+		return myPayloadVersion;
+	}
+
 	/**
 	 * @since 5.6.0
 	 */
@@ -108,6 +121,7 @@ public abstract class BaseResourceModifiedMessage extends BaseResourceMessage im
 		myPayloadId = null;
 		if (thePayloadId != null) {
 			myPayloadId = thePayloadId.toUnqualifiedVersionless().getValue();
+			myPayloadVersion = thePayloadId.getVersionIdPart();
 		}
 	}
 
@@ -138,9 +152,11 @@ public abstract class BaseResourceModifiedMessage extends BaseResourceMessage im
 	 */
 	public IIdType getPayloadId(FhirContext theCtx) {
 		IIdType retVal = null;
+
 		if (myPayloadId != null) {
-			retVal = theCtx.getVersion().newIdType().setValue(myPayloadId);
+			retVal = theCtx.getVersion().newIdType().setValue(myPayloadId).withVersion(myPayloadVersion);
 		}
+
 		return retVal;
 	}
 
@@ -172,7 +188,7 @@ public abstract class BaseResourceModifiedMessage extends BaseResourceMessage im
 		return "";
 	}
 
-	protected void setNewPayload(FhirContext theCtx, IBaseResource thePayload) {
+	public void setNewPayload(FhirContext theCtx, IBaseResource thePayload) {
 		/*
 		 * References with placeholders would be invalid by the time we get here, and
 		 * would be caught before we even get here. This check is basically a last-ditch
@@ -246,7 +262,7 @@ public abstract class BaseResourceModifiedMessage extends BaseResourceMessage im
 	@Nullable
 	@Override
 	public String getMessageKeyOrDefault() {
-		return StringUtils.defaultString(super.getMessageKey(), myPayloadId);
+		return StringUtils.defaultString(super.getMessageKeyOrNull(), myPayloadId);
 	}
 
 	public boolean hasPayloadType(FhirContext theFhirContext, @Nonnull String theResourceName) {

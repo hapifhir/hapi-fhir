@@ -41,6 +41,7 @@ public class SimpleBundleProvider implements IBundleProvider {
 	private IPrimitiveType<Date> myPublished = InstantDt.withCurrentTime();
 	private Integer myCurrentPageOffset;
 	private Integer myCurrentPageSize;
+	private ResponsePage.ResponsePageBuilder myPageBuilder;
 
 	/**
 	 * The actual number of resources we have tried to fetch.

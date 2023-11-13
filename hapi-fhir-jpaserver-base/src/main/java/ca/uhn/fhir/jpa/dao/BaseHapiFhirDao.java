@@ -32,7 +32,6 @@ import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
-import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IDao;
 import ca.uhn.fhir.jpa.api.dao.IJpaDao;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
@@ -137,6 +136,7 @@ import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -226,9 +226,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 
 	@Autowired
 	protected IInterceptorBroadcaster myInterceptorBroadcaster;
-
-	@Autowired
-	protected DaoRegistry myDaoRegistry;
 
 	@Autowired
 	protected InMemoryResourceMatcher myInMemoryResourceMatcher;
@@ -336,8 +333,8 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 						next.getSystemElement().getValue(),
 						next.getCodeElement().getValue(),
 						next.getDisplayElement().getValue(),
-						null,
-						null);
+						next.getVersionElement().getValue(),
+						next.getUserSelectedElement().getValue());
 				if (def != null) {
 					ResourceTag tag = theEntity.addTag(def);
 					allDefs.add(tag);
@@ -566,11 +563,9 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 					}
 				});
 			} catch (Exception ex) {
-				// transaction template can fail if connections to db are exhausted
-				// and/or timeout
-				ourLog.warn("Transaction failed with: "
-						+ ex.getMessage() + ". "
-						+ "Transaction will rollback and be reattempted.");
+				// transaction template can fail if connections to db are exhausted and/or timeout
+				ourLog.warn(
+						"Transaction failed with: {}. Transaction will rollback and be reattempted.", ex.getMessage());
 				retVal = null;
 			}
 			count++;
@@ -700,7 +695,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 					}
 
 					String hashSha256 = hashCode.toString();
-					if (hashSha256.equals(theEntity.getHashSha256()) == false) {
+					if (!hashSha256.equals(theEntity.getHashSha256())) {
 						changed = true;
 					}
 					theEntity.setHashSha256(hashSha256);
@@ -784,7 +779,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		byte[] resourceBinary;
 		switch (encoding) {
 			case JSON:
-				resourceBinary = encodedResource.getBytes(Charsets.UTF_8);
+				resourceBinary = encodedResource.getBytes(StandardCharsets.UTF_8);
 				break;
 			case JSONC:
 				resourceBinary = GZipUtil.compress(encodedResource);
@@ -1041,7 +1036,8 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		myDaoSearchParamSynchronizer = theDaoSearchParamSynchronizer;
 	}
 
-	private void verifyMatchUrlForConditionalCreate(
+	private void verifyMatchUrlForConditionalCreateOrUpdate(
+			CreateOrUpdateByMatch theCreateOrUpdate,
 			IBaseResource theResource,
 			String theIfNoneExist,
 			ResourceIndexedSearchParams theParams,
@@ -1049,11 +1045,17 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		// Make sure that the match URL was actually appropriate for the supplied resource
 		InMemoryMatchResult outcome =
 				myInMemoryResourceMatcher.match(theIfNoneExist, theResource, theParams, theRequestDetails);
+
 		if (outcome.supported() && !outcome.matched()) {
-			throw new InvalidRequestException(
-					Msg.code(929)
-							+ "Failed to process conditional create. The supplied resource did not satisfy the conditional URL.");
+			String errorMsg = getConditionalCreateOrUpdateErrorMsg(theCreateOrUpdate);
+			throw new InvalidRequestException(Msg.code(929) + errorMsg);
 		}
+	}
+
+	private String getConditionalCreateOrUpdateErrorMsg(CreateOrUpdateByMatch theCreateOrUpdate) {
+		return String.format(
+				"Failed to process conditional %s. " + "The supplied resource did not satisfy the conditional URL.",
+				theCreateOrUpdate.name().toLowerCase());
 	}
 
 	@SuppressWarnings("unchecked")
@@ -1178,17 +1180,8 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 				}
 
 				if (changed.isChanged()) {
-
-					// Make sure that the match URL was actually appropriate for the supplied
-					// resource. We only do this for version 1 right now since technically it
-					// is possible (and legal) for someone to be using a conditional update
-					// to match a resource and then update it in a way that it no longer
-					// matches. We could certainly make this configurable though in the
-					// future.
-					if (entity.getVersion() <= 1L && entity.getCreatedByMatchUrl() != null && thePerformIndexing) {
-						verifyMatchUrlForConditionalCreate(
-								theResource, entity.getCreatedByMatchUrl(), newParams, theRequest);
-					}
+					checkConditionalMatch(
+							entity, theUpdateVersion, theResource, thePerformIndexing, newParams, theRequest);
 
 					if (CURRENTLY_REINDEXING.get(theResource) != Boolean.TRUE) {
 						entity.setUpdated(theTransactionDetails.getTransactionDate());
@@ -1338,6 +1331,52 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		return entity;
 	}
 
+	/**
+	 * Make sure that the match URL was actually appropriate for the supplied
+	 * resource, if so configured, or do it only for first version, since technically it
+	 * is possible (and legal) for someone to be using a conditional update
+	 * to match a resource and then update it in a way that it no longer
+	 * matches.
+	 */
+	private void checkConditionalMatch(
+			ResourceTable theEntity,
+			boolean theUpdateVersion,
+			IBaseResource theResource,
+			boolean thePerformIndexing,
+			ResourceIndexedSearchParams theNewParams,
+			RequestDetails theRequest) {
+
+		if (!thePerformIndexing) {
+			return;
+		}
+
+		if (theEntity.getCreatedByMatchUrl() == null && theEntity.getUpdatedByMatchUrl() == null) {
+			return;
+		}
+
+		// version is not updated at this point, but could be pending for update, which we consider here
+		long pendingVersion = theEntity.getVersion();
+		if (theUpdateVersion && !theEntity.isVersionUpdatedInCurrentTransaction()) {
+			pendingVersion++;
+		}
+
+		if (myStorageSettings.isPreventInvalidatingConditionalMatchCriteria() || pendingVersion <= 1L) {
+			String createOrUpdateUrl;
+			CreateOrUpdateByMatch createOrUpdate;
+
+			if (theEntity.getCreatedByMatchUrl() != null) {
+				createOrUpdateUrl = theEntity.getCreatedByMatchUrl();
+				createOrUpdate = CreateOrUpdateByMatch.CREATE;
+			} else {
+				createOrUpdateUrl = theEntity.getUpdatedByMatchUrl();
+				createOrUpdate = CreateOrUpdateByMatch.UPDATE;
+			}
+
+			verifyMatchUrlForConditionalCreateOrUpdate(
+					createOrUpdate, theResource, createOrUpdateUrl, theNewParams, theRequest);
+		}
+	}
+
 	public IBasePersistedResource updateHistoryEntity(
 			RequestDetails theRequest,
 			T theResource,
@@ -1470,12 +1509,43 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		boolean versionedTags =
 				getStorageSettings().getTagStorageMode() == JpaStorageSettings.TagStorageModeEnum.VERSIONED;
 
-		final ResourceHistoryTable historyEntry = theEntity.toHistory(versionedTags);
+		ResourceHistoryTable historyEntry = null;
+		long resourceVersion = theEntity.getVersion();
+		boolean reusingHistoryEntity = false;
+		if (!myStorageSettings.isResourceDbHistoryEnabled() && resourceVersion > 1L) {
+			/*
+			 * If we're not storing history, then just pull the current history
+			 * table row and update it. Note that there is always a chance that
+			 * this could return null if the current resourceVersion has been expunged
+			 * in which case we'll still create a new one
+			 */
+			historyEntry = myResourceHistoryTableDao.findForIdAndVersionAndFetchProvenance(
+					theEntity.getResourceId(), resourceVersion - 1);
+			if (historyEntry != null) {
+				reusingHistoryEntity = true;
+				theEntity.populateHistoryEntityVersionAndDates(historyEntry);
+				if (versionedTags && theEntity.isHasTags()) {
+					for (ResourceTag next : theEntity.getTags()) {
+						historyEntry.addTag(next.getTag());
+					}
+				}
+			}
+		}
+
+		/*
+		 * This should basically always be null unless resource history
+		 * is disabled on this server. In that case, we'll just be reusing
+		 * the previous version entity.
+		 */
+		if (historyEntry == null) {
+			historyEntry = theEntity.toHistory(versionedTags);
+		}
+
 		historyEntry.setEncoding(theChanged.getEncoding());
 		historyEntry.setResource(theChanged.getResourceBinary());
 		historyEntry.setResourceTextVc(theChanged.getResourceText());
 
-		ourLog.debug("Saving history entry {}", historyEntry.getIdDt());
+		ourLog.debug("Saving history entry ID[{}] for RES_ID[{}]", historyEntry.getId(), historyEntry.getResourceId());
 		myResourceHistoryTableDao.save(historyEntry);
 		theEntity.setCurrentVersionEntity(historyEntry);
 
@@ -1508,7 +1578,18 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		boolean haveSource = isNotBlank(source) && shouldStoreSource;
 		boolean haveRequestId = isNotBlank(requestId) && shouldStoreRequestId;
 		if (haveSource || haveRequestId) {
-			ResourceHistoryProvenanceEntity provenance = new ResourceHistoryProvenanceEntity();
+			ResourceHistoryProvenanceEntity provenance = null;
+			if (reusingHistoryEntity) {
+				/*
+				 * If version history is disabled, then we may be reusing
+				 * a previous history entity. If that's the case, let's try
+				 * to reuse the previous provenance entity too.
+				 */
+				provenance = historyEntry.getProvenance();
+			}
+			if (provenance == null) {
+				provenance = historyEntry.toProvenance();
+			}
 			provenance.setResourceHistoryTable(historyEntry);
 			provenance.setResourceTable(theEntity);
 			provenance.setPartitionId(theEntity.getPartitionId());
@@ -1572,6 +1653,8 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		// Notify IServerOperationInterceptors about pre-action call
 		notifyInterceptors(theRequestDetails, theResource, theOldResource, theTransactionDetails, true);
 
+		entity.setUpdatedByMatchUrl(theMatchUrl);
+
 		// Perform update
 		ResourceTable savedEntity = updateEntity(
 				theRequestDetails,
@@ -1592,7 +1675,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		if (!thePerformIndexing
 				&& !savedEntity.isUnchangedInCurrentOperation()
 				&& !ourDisableIncrementOnUpdateForUnitTest) {
-			if (theResourceId.hasVersionIdPart() == false) {
+			if (!theResourceId.hasVersionIdPart()) {
 				theResourceId = theResourceId.withVersion(Long.toString(savedEntity.getVersion()));
 			}
 			incrementId(theResource, savedEntity, theResourceId);
@@ -1673,11 +1756,9 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 
 	protected void addPidToResource(IResourceLookup<JpaPid> theEntity, IBaseResource theResource) {
 		if (theResource instanceof IAnyResource) {
-			IDao.RESOURCE_PID.put(
-					(IAnyResource) theResource, theEntity.getPersistentId().getId());
+			IDao.RESOURCE_PID.put(theResource, theEntity.getPersistentId().getId());
 		} else if (theResource instanceof IResource) {
-			IDao.RESOURCE_PID.put(
-					(IResource) theResource, theEntity.getPersistentId().getId());
+			IDao.RESOURCE_PID.put(theResource, theEntity.getPersistentId().getId());
 		}
 	}
 
@@ -1954,5 +2035,10 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 	@VisibleForTesting
 	public static void setValidationDisabledForUnitTest(boolean theValidationDisabledForUnitTest) {
 		ourValidationDisabledForUnitTest = theValidationDisabledForUnitTest;
+	}
+
+	private enum CreateOrUpdateByMatch {
+		CREATE,
+		UPDATE
 	}
 }

@@ -108,6 +108,10 @@ public class ResourceDeliveryMessage extends BaseResourceMessage implements IRes
 		myPayloadId = thePayload.getIdElement().toUnqualifiedVersionless().getValue();
 	}
 
+	public void setPayloadToNull() {
+		myPayloadString = null;
+	}
+
 	@Override
 	public String getPayloadId() {
 		return myPayloadId;
@@ -158,6 +162,6 @@ public class ResourceDeliveryMessage extends BaseResourceMessage implements IRes
 	@Nullable
 	@Override
 	public String getMessageKeyOrDefault() {
-		return StringUtils.defaultString(super.getMessageKey(), myPayloadId);
+		return StringUtils.defaultString(super.getMessageKeyOrNull(), myPayloadId);
 	}
 }

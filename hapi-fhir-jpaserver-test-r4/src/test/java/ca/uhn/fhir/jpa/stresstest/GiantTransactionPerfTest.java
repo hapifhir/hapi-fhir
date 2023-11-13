@@ -30,8 +30,6 @@ import ca.uhn.fhir.jpa.esr.ExternallyStoredResourceServiceRegistry;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
-import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
-import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.extractor.SearchParamExtractorR4;
@@ -43,6 +41,8 @@ import ca.uhn.fhir.jpa.sp.SearchParamPresenceSvcImpl;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.ClasspathUtil;
+import ca.uhn.fhir.util.IMetaTagSorter;
+import ca.uhn.fhir.util.MetaTagSorterAlphabetical;
 import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.validation.IInstanceValidatorModule;
 import com.google.common.collect.Lists;
@@ -60,7 +60,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Answers;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.quartz.JobKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
@@ -149,6 +148,7 @@ public class GiantTransactionPerfTest {
 	private IIdHelperService myIdHelperService;
 	@Mock
 	private IJpaStorageResourceParser myJpaStorageResourceParser;
+	private IMetaTagSorter myMetaTagSorter;
 
 	@AfterEach
 	public void afterEach() {
@@ -174,6 +174,8 @@ public class GiantTransactionPerfTest {
 		myDaoRegistry = new DaoRegistry(ourFhirContext);
 
 		myPartitionSettings = new PartitionSettings();
+
+		myMetaTagSorter = new MetaTagSorterAlphabetical();
 
 		myHapiTransactionService = new HapiTransactionService();
 		myHapiTransactionService.setTransactionManager(myTransactionManager);
@@ -267,6 +269,7 @@ public class GiantTransactionPerfTest {
 		myEobDao.setPartitionSettingsForUnitTest(myPartitionSettings);
 		myEobDao.setJpaStorageResourceParserForUnitTest(myJpaStorageResourceParser);
 		myEobDao.setExternallyStoredResourceServiceRegistryForUnitTest(new ExternallyStoredResourceServiceRegistry());
+		myEobDao.setMyMetaTagSorter(myMetaTagSorter);
 		myEobDao.start();
 
 		myDaoRegistry.setResourceDaos(Lists.newArrayList(myEobDao));

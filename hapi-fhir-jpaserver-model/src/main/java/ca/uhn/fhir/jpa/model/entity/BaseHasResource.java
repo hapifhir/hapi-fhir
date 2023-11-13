@@ -70,6 +70,7 @@ public abstract class BaseHasResource extends BasePartitionable
 	 * after an update
 	 */
 	@Transient
+	// TODO MB forced_id delete this in step 3
 	private transient String myTransientForcedId;
 
 	public String getTransientForcedId() {

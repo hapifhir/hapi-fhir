@@ -50,6 +50,7 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import ca.uhn.fhir.util.ClasspathUtil;
 import com.google.common.base.Charsets;
 import com.google.common.collect.Lists;
 import org.apache.commons.io.IOUtils;
@@ -814,7 +815,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 		String name = "profiles-resources";
 		ourLog.info("Uploading " + name);
 		String vsContents;
-		vsContents = IOUtils.toString(FhirResourceDaoR4Test.class.getResourceAsStream("/org/hl7/fhir/r4/model/profile/" + name + ".xml"), StandardCharsets.UTF_8);
+		vsContents = ClasspathUtil.loadResource("/org/hl7/fhir/r4/model/profile/" + name + ".xml");
 
 		bundle = myFhirContext.newXmlParser().parseResource(org.hl7.fhir.r4.model.Bundle.class, vsContents);
 		for (BundleEntryComponent i : bundle.getEntry()) {
@@ -3350,63 +3351,6 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 		}
 	}
 
-
-	@Test
-	public void testSortById() {
-		String methodName = "testSortBTyId";
-
-		Patient p = new Patient();
-		p.addIdentifier().setSystem("urn:system").setValue(methodName);
-		IIdType id1 = myPatientDao.create(p, mySrd).getId().toUnqualifiedVersionless();
-
-		p = new Patient();
-		p.addIdentifier().setSystem("urn:system").setValue(methodName);
-		IIdType id2 = myPatientDao.create(p, mySrd).getId().toUnqualifiedVersionless();
-
-		p = new Patient();
-		p.setId(methodName + "1");
-		p.addIdentifier().setSystem("urn:system").setValue(methodName);
-		IIdType idMethodName1 = myPatientDao.update(p, mySrd).getId().toUnqualifiedVersionless();
-		assertEquals(methodName + "1", idMethodName1.getIdPart());
-
-		p = new Patient();
-		p.addIdentifier().setSystem("urn:system").setValue(methodName);
-		IIdType id3 = myPatientDao.create(p, mySrd).getId().toUnqualifiedVersionless();
-
-		p = new Patient();
-		p.setId(methodName + "2");
-		p.addIdentifier().setSystem("urn:system").setValue(methodName);
-		IIdType idMethodName2 = myPatientDao.update(p, mySrd).getId().toUnqualifiedVersionless();
-		assertEquals(methodName + "2", idMethodName2.getIdPart());
-
-		p = new Patient();
-		p.addIdentifier().setSystem("urn:system").setValue(methodName);
-		IIdType id4 = myPatientDao.create(p, mySrd).getId().toUnqualifiedVersionless();
-
-		SearchParameterMap pm;
-		List<IIdType> actual;
-
-		pm = SearchParameterMap.newSynchronous();
-		pm.add(Patient.SP_IDENTIFIER, new TokenParam("urn:system", methodName));
-		pm.setSort(new SortSpec(IAnyResource.SP_RES_ID));
-		actual = toUnqualifiedVersionlessIds(myPatientDao.search(pm));
-		assertEquals(6, actual.size());
-		assertThat(actual, contains(idMethodName1, idMethodName2, id1, id2, id3, id4));
-
-		pm = SearchParameterMap.newSynchronous();
-		pm.add(Patient.SP_IDENTIFIER, new TokenParam("urn:system", methodName));
-		pm.setSort(new SortSpec(IAnyResource.SP_RES_ID).setOrder(SortOrderEnum.ASC));
-		actual = toUnqualifiedVersionlessIds(myPatientDao.search(pm));
-		assertEquals(6, actual.size());
-		assertThat(actual, contains(idMethodName1, idMethodName2, id1, id2, id3, id4));
-
-		pm = SearchParameterMap.newSynchronous();
-		pm.add(Patient.SP_IDENTIFIER, new TokenParam("urn:system", methodName));
-		pm.setSort(new SortSpec(IAnyResource.SP_RES_ID).setOrder(SortOrderEnum.DESC));
-		actual = toUnqualifiedVersionlessIds(myPatientDao.search(pm));
-		assertEquals(6, actual.size());
-		assertThat(actual, contains(id4, id3, id2, id1, idMethodName2, idMethodName1));
-	}
 
 	@ParameterizedTest
 	@ValueSource(booleans = {true, false})

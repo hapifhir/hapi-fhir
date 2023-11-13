@@ -32,8 +32,6 @@ import org.hibernate.ScrollableResults;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.util.Arrays;
 import javax.persistence.EntityManager;
 import javax.persistence.FlushModeType;
@@ -48,14 +46,11 @@ public class SearchQueryExecutor implements ISearchQueryExecutor {
 	private static final Object[] EMPTY_OBJECT_ARRAY = new Object[0];
 	private static final Logger ourLog = LoggerFactory.getLogger(SearchQueryExecutor.class);
 	private final GeneratedSql myGeneratedSql;
-	private final Integer myMaxResultsToFetch;
 
 	@PersistenceContext(type = PersistenceContextType.TRANSACTION)
 	private EntityManager myEntityManager;
 
 	private boolean myQueryInitialized;
-	private Connection myConnection;
-	private PreparedStatement myStatement;
 	private ScrollableResultsIterator<Number> myResultSet;
 	private Long myNext;
 
@@ -66,7 +61,6 @@ public class SearchQueryExecutor implements ISearchQueryExecutor {
 		Validate.notNull(theGeneratedSql, "theGeneratedSql must not be null");
 		myGeneratedSql = theGeneratedSql;
 		myQueryInitialized = false;
-		myMaxResultsToFetch = theMaxResultsToFetch;
 	}
 
 	/**
@@ -76,7 +70,6 @@ public class SearchQueryExecutor implements ISearchQueryExecutor {
 		assert NO_MORE != null;
 
 		myGeneratedSql = null;
-		myMaxResultsToFetch = null;
 		myNext = NO_MORE;
 	}
 

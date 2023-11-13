@@ -1,6 +1,11 @@
 package ca.uhn.fhir.jpa.subscription.message;
 
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
+import ca.uhn.fhir.jpa.dao.data.IResourceModifiedDao;
+import ca.uhn.fhir.jpa.model.entity.IPersistedResourceModifiedMessage;
+import ca.uhn.fhir.jpa.model.entity.IPersistedResourceModifiedMessagePK;
+import ca.uhn.fhir.jpa.model.entity.PersistedResourceModifiedMessageEntityPK;
 import ca.uhn.fhir.jpa.subscription.BaseSubscriptionsR4Test;
 import ca.uhn.fhir.jpa.subscription.channel.api.ChannelConsumerSettings;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelReceiver;
@@ -11,20 +16,28 @@ import ca.uhn.fhir.jpa.test.util.StoppableSubscriptionDeliveringRestHookSubscrib
 import ca.uhn.fhir.rest.client.api.Header;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.interceptor.AdditionalRequestHeadersInterceptor;
+import ca.uhn.fhir.rest.server.messaging.BaseResourceMessage;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Observation;
+import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Subscription;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -50,6 +63,12 @@ public class MessageSubscriptionR4Test extends BaseSubscriptionsR4Test {
 	private TestQueueConsumerHandler<ResourceModifiedJsonMessage> handler;
 
 	@Autowired
+	IResourceModifiedDao myResourceModifiedDao;
+
+	@Autowired
+	private PlatformTransactionManager myTxManager;
+
+	@Autowired
 	StoppableSubscriptionDeliveringRestHookSubscriber myStoppableSubscriptionDeliveringRestHookSubscriber;
 
 	@AfterEach
@@ -60,7 +79,8 @@ public class MessageSubscriptionR4Test extends BaseSubscriptionsR4Test {
 		myStorageSettings.setTagStorageMode(new JpaStorageSettings().getTagStorageMode());
 	}
 
-	@BeforeEach
+	@Override
+    @BeforeEach
 	public void beforeRegisterRestHookListener() {
 		mySubscriptionTestUtil.registerMessageInterceptor();
 
@@ -176,6 +196,111 @@ public class MessageSubscriptionR4Test extends BaseSubscriptionsR4Test {
 
 	}
 
+	@Test
+	public void testMethodFindAllOrdered_willReturnAllPersistedResourceModifiedMessagesOrderedByCreatedTime(){
+		mySubscriptionTestUtil.unregisterSubscriptionInterceptor();
+
+		// given
+		Patient patient = sendPatient();
+		Organization organization = sendOrganization();
+
+		ResourceModifiedMessage patientResourceModifiedMessage = new ResourceModifiedMessage(myFhirContext, patient, BaseResourceMessage.OperationTypeEnum.CREATE);
+		ResourceModifiedMessage organizationResourceModifiedMessage = new ResourceModifiedMessage(myFhirContext, organization, BaseResourceMessage.OperationTypeEnum.CREATE);
+
+		IPersistedResourceModifiedMessage patientPersistedMessage = myResourceModifiedMessagePersistenceSvc.persist(patientResourceModifiedMessage);
+		IPersistedResourceModifiedMessage organizationPersistedMessage = myResourceModifiedMessagePersistenceSvc.persist(organizationResourceModifiedMessage);
+
+		// when
+		List<IPersistedResourceModifiedMessage> allPersisted = myResourceModifiedMessagePersistenceSvc.findAllOrderedByCreatedTime();
+
+		// then
+		assertOnPksAndOrder(allPersisted, List.of(patientPersistedMessage, organizationPersistedMessage));
+
+	}
+
+	@Test
+	public void testMethodDeleteByPK_whenEntityExists_willDeleteTheEntityAndReturnTrue(){
+		mySubscriptionTestUtil.unregisterSubscriptionInterceptor();
+
+		// given
+		TransactionTemplate transactionTemplate = new TransactionTemplate(myTxManager);
+		Patient patient = sendPatient();
+
+		ResourceModifiedMessage patientResourceModifiedMessage = new ResourceModifiedMessage(myFhirContext, patient, BaseResourceMessage.OperationTypeEnum.CREATE);
+		IPersistedResourceModifiedMessage persistedResourceModifiedMessage = myResourceModifiedMessagePersistenceSvc.persist(patientResourceModifiedMessage);
+
+		// when
+		boolean wasDeleted = transactionTemplate.execute(tx -> myResourceModifiedMessagePersistenceSvc.deleteByPK(persistedResourceModifiedMessage.getPersistedResourceModifiedMessagePk()));
+
+		// then
+		assertThat(wasDeleted, is(Boolean.TRUE));
+		assertThat(myResourceModifiedMessagePersistenceSvc.findAllOrderedByCreatedTime(), hasSize(0));
+	}
+
+	@Test
+	public void testMethodDeleteByPK_whenEntityDoesNotExist_willReturnFalse(){
+		mySubscriptionTestUtil.unregisterSubscriptionInterceptor();
+
+		// given
+		TransactionTemplate transactionTemplate = new TransactionTemplate(myTxManager);
+		IPersistedResourceModifiedMessagePK nonExistentResourceWithPk = PersistedResourceModifiedMessageEntityPK.with("one", "one");
+
+		// when
+		boolean wasDeleted = transactionTemplate.execute(tx -> myResourceModifiedMessagePersistenceSvc.deleteByPK(nonExistentResourceWithPk));
+
+		// then
+		assertThat(wasDeleted, is(Boolean.FALSE));
+	}
+
+	@Test
+	public void testMethodInflatePersistedResourceModifiedMessage_whenGivenResourceModifiedMessageWithEmptyPayload_willEqualOriginalMessage() {
+		mySubscriptionTestUtil.unregisterSubscriptionInterceptor();
+		// setup
+		TransactionTemplate transactionTemplate = new TransactionTemplate(myTxManager);
+		Observation obs = sendObservation("zoop", "SNOMED-CT", "theExplicitSource", "theRequestId");
+
+		ResourceModifiedMessage originalResourceModifiedMessage = createResourceModifiedMessage(obs);
+		ResourceModifiedMessage resourceModifiedMessageWithEmptyPayload = createResourceModifiedMessage(obs);
+		resourceModifiedMessageWithEmptyPayload.setPayloadToNull();
+
+		transactionTemplate.execute(tx -> {
+
+			myResourceModifiedMessagePersistenceSvc.persist(originalResourceModifiedMessage);
+
+			// execute
+			ResourceModifiedMessage restoredResourceModifiedMessage = myResourceModifiedMessagePersistenceSvc.inflatePersistedResourceModifiedMessage(resourceModifiedMessageWithEmptyPayload);
+
+			// verify
+			assertEquals(toJson(originalResourceModifiedMessage), toJson(restoredResourceModifiedMessage));
+			assertEquals(originalResourceModifiedMessage, restoredResourceModifiedMessage);
+
+			return null;
+		});
+
+	}
+
+	private ResourceModifiedMessage createResourceModifiedMessage(Observation theObservation){
+		ResourceModifiedMessage retVal = new ResourceModifiedMessage(myFhirContext, theObservation, BaseResourceMessage.OperationTypeEnum.CREATE);
+		retVal.setSubscriptionId("subId");
+		retVal.setTransactionId("txId");
+		retVal.setMessageKey("messageKey");
+		retVal.setMediaType("json");
+		retVal.setAttribute("attKey", "attValue");
+		retVal.setPartitionId(RequestPartitionId.allPartitions());
+		return retVal;
+	}
+
+	private static void assertEquals(ResourceModifiedMessage theMsg, ResourceModifiedMessage theComparedTo){
+		assertThat(theMsg.getPayloadId(), equalTo(theComparedTo.getPayloadId()));
+		assertThat(theMsg.getOperationType(), equalTo(theComparedTo.getOperationType()));
+		assertThat(theMsg.getPayloadString(), equalTo(theComparedTo.getPayloadString()));
+		assertThat(theMsg.getSubscriptionId(), equalTo(theComparedTo.getSubscriptionId()));
+		assertThat(theMsg.getMediaType(), equalTo(theComparedTo.getMediaType()));
+		assertThat(theMsg.getMessageKeyOrNull(), equalTo(theComparedTo.getMessageKeyOrNull()));
+		assertThat(theMsg.getTransactionId(), equalTo(theComparedTo.getTransactionId()));
+		assertThat(theMsg.getAttributes(), equalTo(theComparedTo.getAttributes()));
+	}
+
 	private void maybeAddHeaderInterceptor(IGenericClient theClient, List<Header> theHeaders) {
 		if(theHeaders.isEmpty()){
 			return;
@@ -215,4 +340,32 @@ public class MessageSubscriptionR4Test extends BaseSubscriptionsR4Test {
 		return (T) resource;
 	}
 
+	private static void assertEquals(String theMsg, String theComparedTo){
+		assertThat(theMsg, equalTo(theComparedTo));
+	}
+
+	private static String toJson(Object theRequest) {
+		try {
+			return new ObjectMapper().writer().writeValueAsString(theRequest);
+		} catch (JsonProcessingException theE) {
+			throw new AssertionError("Failure during serialization: " + theE);
+		}
+	}
+
+	private static void assertOnPksAndOrder(List<IPersistedResourceModifiedMessage> theFetchedResourceModifiedMessageList, List<IPersistedResourceModifiedMessage> theCompareToList ){
+		assertThat(theFetchedResourceModifiedMessageList, hasSize(theCompareToList.size()));
+
+		List<IPersistedResourceModifiedMessagePK> fetchedPks = theFetchedResourceModifiedMessageList
+			.stream()
+			.map(IPersistedResourceModifiedMessage::getPersistedResourceModifiedMessagePk)
+			.collect(Collectors.toList());
+
+		List<IPersistedResourceModifiedMessagePK> compareToPks = theCompareToList
+			.stream()
+			.map(IPersistedResourceModifiedMessage::getPersistedResourceModifiedMessagePk)
+			.collect(Collectors.toList());
+
+		Assertions.assertEquals(fetchedPks, compareToPks);
+
+	}
 }

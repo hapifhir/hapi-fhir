@@ -1,0 +1,6 @@
+---
+type: add
+issue: 5274
+title: "Added a service for generating metrics on mdm links and resources.
+        This includes JPA queries and updated indices.
+    "

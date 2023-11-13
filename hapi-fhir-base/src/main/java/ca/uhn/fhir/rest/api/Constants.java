@@ -182,6 +182,11 @@ public class Constants {
 	public static final String PARAM_HAS = "_has";
 	public static final String PARAM_HISTORY = "_history";
 	public static final String PARAM_INCLUDE = "_include";
+	/**
+	 * @since 7.0.0
+	 */
+	public static final String PARAM_LANGUAGE = "_language";
+
 	public static final String PARAM_INCLUDE_QUALIFIER_RECURSE = ":recurse";
 	public static final String PARAM_INCLUDE_RECURSE = "_include" + PARAM_INCLUDE_QUALIFIER_RECURSE;
 	public static final String PARAM_INCLUDE_QUALIFIER_ITERATE = ":iterate";
@@ -194,6 +199,8 @@ public class Constants {
 	public static final String PARAM_PRETTY_VALUE_FALSE = "false";
 	public static final String PARAM_PRETTY_VALUE_TRUE = "true";
 	public static final String PARAM_PROFILE = "_profile";
+	public static final String PARAM_PID = "_pid";
+
 	public static final String PARAM_QUERY = "_query";
 	public static final String PARAM_RESPONSE_URL = "response-url"; // Used in messaging
 	public static final String PARAM_REVINCLUDE = "_revinclude";
@@ -325,6 +332,9 @@ public class Constants {
 	 * The number of characters in a UUID (36)
 	 */
 	public static final int UUID_LENGTH = 36;
+
+	public static final String BULK_DATA_ACCESS_IG_URL =
+			"http://hl7.org/fhir/uv/bulkdata/CapabilityStatement/bulk-data";
 
 	/**
 	 * Application configuration key used to enable or disable Hibernate Envers.
