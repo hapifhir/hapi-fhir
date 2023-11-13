@@ -527,15 +527,35 @@ public class BundleUtilTest {
 	}
 
 	@Test
-	public void testGetResourceByReferenceAndResourceType() {
+	public void testGetResourceByReferenceAndResourceTypeReturnsResourceIfFound() {
 		// setup
 		final Patient expected = new Patient();
+		expected.setId("123");
 		final Bundle bundle = new Bundle();
-		final Reference reference = new Reference();
+		Bundle.BundleEntryComponent bundleEntryComponent = new Bundle.BundleEntryComponent();
+		bundleEntryComponent.setResource(expected);
+		bundle.addEntry(bundleEntryComponent);
+		final Reference reference = new Reference("Patient/123");
 		// execute
-		final IBaseResource actual = BundleUtil.getResourceByReferenceAndResourceType(bundle, Patient.class, reference);
+		final IBaseResource actual = BundleUtil.getResourceByReferenceAndResourceType(FhirContext.forR4(), bundle, reference);
 		// validate
 		assertEquals(expected, actual);
+	}
+
+	@Test
+	public void testGetResourceByReferenceAndResourceTypeReturnsNullIfResourceNotFound() {
+		// setup
+		final Patient patient = new Patient();
+		patient.setId("ABC");
+		final Bundle bundle = new Bundle();
+		Bundle.BundleEntryComponent bundleEntryComponent = new Bundle.BundleEntryComponent();
+		bundleEntryComponent.setResource(patient);
+		bundle.addEntry(bundleEntryComponent);
+		final Reference reference = new Reference("Patient/123");
+		// execute
+		final IBaseResource actual = BundleUtil.getResourceByReferenceAndResourceType(FhirContext.forR4(), bundle, reference);
+		// validate
+		assertNull(actual);
 	}
 
 	@AfterAll

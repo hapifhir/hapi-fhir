@@ -697,17 +697,21 @@ public class BundleUtil {
 
 	/**
 	 * Get resource from bundle by resource type and reference
-	 * @param theBundle       Bundle
-	 * @param theClass<T>     Class
-	 * @param theReference Reference
-	 * @return T where T is IBaseResource
+	 * @param theContext   FhirContext
+	 * @param theBundle    IBaseBundle
+	 * @param theReference IBaseReference
+	 * @return IBaseResource if found and null if not found.
 	 */
 	@Nonnull
-	public static <T extends IBaseResource> T getResourceByReferenceAndResourceType(
+	public static IBaseResource getResourceByReferenceAndResourceType(
+		@Nonnull FhirContext theContext,
 		@Nonnull IBaseBundle theBundle,
-		@Nonnull Class<T> theClass,
 		@Nonnull IBaseReference theReference) {
-		return null;
+		return toListOfResources(theContext, theBundle)
+			.stream()
+			.filter(theResource -> theReference.getReferenceElement().getIdPart().equals(theResource.getIdElement().getIdPart()))
+			.findFirst()
+			.orElse(null);
 	}
 
 
