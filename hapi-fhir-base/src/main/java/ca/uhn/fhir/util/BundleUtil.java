@@ -39,11 +39,13 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBinary;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
+import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
@@ -692,6 +694,23 @@ public class BundleUtil {
 		}
 		return bundleEntry;
 	}
+
+	/**
+	 * Get resource from bundle by resource type and reference
+	 * @param theBundle       Bundle
+	 * @param theClass<T>     Class
+	 * @param theReference Reference
+	 * @return T where T is IBaseResource
+	 */
+	@Nonnull
+	public static <T extends IBaseResource> T getResourceByReferenceAndResourceType(
+		@Nonnull IBaseBundle theBundle,
+		@Nonnull Class<T> theClass,
+		@Nonnull IBaseReference theReference) {
+		return null;
+	}
+
+
 
 	private static class SortLegality {
 		private boolean myIsLegal;

@@ -9,6 +9,7 @@ import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.TestUtil;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.Medication;
@@ -523,6 +524,18 @@ public class BundleUtilTest {
 		}
 		fail("Didn't find resource with ID " + theResourceId);
 		return -1;
+	}
+
+	@Test
+	public void testGetResourceByReferenceAndResourceType() {
+		// setup
+		final Patient expected = new Patient();
+		final Bundle bundle = new Bundle();
+		final Reference reference = new Reference();
+		// execute
+		final IBaseResource actual = BundleUtil.getResourceByReferenceAndResourceType(bundle, Patient.class, reference);
+		// validate
+		assertEquals(expected, actual);
 	}
 
 	@AfterAll
