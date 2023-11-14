@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 5452
+title: "Previously, the $mdm-query-link operation would return values of field linkCreated and linkUpdated in scientific
+notation when the last digits are 0. This is now fixed and always returns in standard notation."
