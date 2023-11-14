@@ -69,7 +69,6 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
-import javax.annotation.Nonnull;
 
 import static ca.uhn.fhir.jpa.packages.util.PackageUtils.DEFAULT_INSTALL_TYPES;
 import static ca.uhn.fhir.util.SearchParameterUtil.getBaseAsStrings;
