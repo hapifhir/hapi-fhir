@@ -158,12 +158,6 @@
 			<version>${spring-security-core.version}</version>
 		</dependency>
 
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-autoconfigure</artifactId>
-			<version>${spring_boot_version}</version>
-		</dependency>
-
 		<!-- This is needed for the CqlExceptionHandlingInterceptor -->
 		<dependency>
 			<groupId>jakarta.servlet</groupId>

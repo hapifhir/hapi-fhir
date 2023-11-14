@@ -104,6 +104,11 @@ public class JpaPersistedResourceValidationSupport implements IValidationSupport
 	}
 
 	@Override
+	public String getName() {
+		return myFhirContext.getVersion().getVersion() + " JPA Validation Support";
+	}
+
+	@Override
 	public IBaseResource fetchCodeSystem(String theSystem) {
 		if (TermReadSvcUtil.isLoincUnversionedCodeSystem(theSystem)) {
 			Optional<IBaseResource> currentCSOpt = getCodeSystemCurrentVersion(new UriType(theSystem));

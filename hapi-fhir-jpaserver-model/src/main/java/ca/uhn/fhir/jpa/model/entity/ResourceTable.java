@@ -76,7 +76,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static ca.uhn.fhir.jpa.model.entity.ResourceTable.IDX_RES_FHIR_ID;
+import static ca.uhn.fhir.jpa.model.entity.ResourceTable.IDX_RES_TYPE_FHIR_ID;
 
 @Indexed(routingBinder = @RoutingBinderRef(type = ResourceTableRoutingBinder.class))
 @Entity
@@ -84,12 +84,13 @@ import static ca.uhn.fhir.jpa.model.entity.ResourceTable.IDX_RES_FHIR_ID;
 		name = ResourceTable.HFJ_RESOURCE,
 		uniqueConstraints = {
 			@UniqueConstraint(
-					name = IDX_RES_FHIR_ID,
-					columnNames = {"FHIR_ID", "RES_TYPE"})
+					name = IDX_RES_TYPE_FHIR_ID,
+					columnNames = {"RES_TYPE", "FHIR_ID"})
 		},
 		indexes = {
 			// Do not reuse previously used index name: IDX_INDEXSTATUS, IDX_RES_TYPE
 			@Index(name = "IDX_RES_DATE", columnList = BaseHasResource.RES_UPDATED),
+			@Index(name = "IDX_RES_FHIR_ID", columnList = "FHIR_ID"),
 			@Index(
 					name = "IDX_RES_TYPE_DEL_UPDATED",
 					columnList = "RES_TYPE,RES_DELETED_AT,RES_UPDATED,PARTITION_ID,RES_ID"),
@@ -100,10 +101,11 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	public static final int RESTYPE_LEN = 40;
 	public static final String HFJ_RESOURCE = "HFJ_RESOURCE";
 	public static final String RES_TYPE = "RES_TYPE";
+	public static final String FHIR_ID = "FHIR_ID";
 	private static final int MAX_LANGUAGE_LENGTH = 20;
 	private static final long serialVersionUID = 1L;
 	public static final int MAX_FORCED_ID_LENGTH = 100;
-	public static final String IDX_RES_FHIR_ID = "IDX_RES_FHIR_ID";
+	public static final String IDX_RES_TYPE_FHIR_ID = "IDX_RES_TYPE_FHIR_ID";
 
 	/**
 	 * Holds the narrative text only - Used for Fulltext searching but not directly stored in the DB
@@ -381,7 +383,7 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	 * Will be null during insert time until the first read.
 	 */
 	@Column(
-			name = "FHIR_ID",
+			name = FHIR_ID,
 			// [A-Za-z0-9\-\.]{1,64} - https://www.hl7.org/fhir/datatypes.html#id
 			length = 64,
 			// we never update this after insert, and the Generator will otherwise "dirty" the object.

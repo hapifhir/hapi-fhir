@@ -54,6 +54,11 @@ public class PrePopulatedValidationSupport extends BaseStaticResourceValidationS
 		this(theContext, new HashMap<>(), new HashMap<>(), new HashMap<>(), new HashMap<>(), new HashMap<>());
 	}
 
+	@Override
+	public String getName() {
+		return getFhirContext().getVersion().getVersion() + " Pre-populated Validation Support";
+	}
+
 	/**
 	 * Constructor
 	 *

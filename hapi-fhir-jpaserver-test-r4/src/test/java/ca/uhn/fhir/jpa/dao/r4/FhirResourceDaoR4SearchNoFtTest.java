@@ -176,6 +176,7 @@ import static ca.uhn.fhir.rest.param.ParamPrefixEnum.LESSTHAN;
 import static ca.uhn.fhir.rest.param.ParamPrefixEnum.LESSTHAN_OR_EQUALS;
 import static ca.uhn.fhir.rest.param.ParamPrefixEnum.NOT_EQUAL;
 import static ca.uhn.fhir.test.utilities.CustomMatchersUtil.assertDoesNotContainAnyOf;
+import static ca.uhn.fhir.util.DateUtils.convertDateToIso8601String;
 import static org.apache.commons.lang3.StringUtils.countMatches;
 import static org.apache.commons.lang3.StringUtils.leftPad;
 import static org.hamcrest.CoreMatchers.is;
@@ -445,6 +446,57 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		IBundleProvider results = myPatientDao.search(map);
 		List<String> ids = toUnqualifiedVersionlessIdValues(results);
 		assertEquals(0, ids.size());
+	}
+
+	@Test
+	public void testHasEncounterAndLastUpdated() {
+		// setup
+		Patient patientA = new Patient();
+		String patientIdA = myPatientDao.create(patientA).getId().toUnqualifiedVersionless().getValue();
+
+		Patient patientB = new Patient();
+		String patientIdB = myPatientDao.create(patientA).getId().toUnqualifiedVersionless().getValue();
+
+		Encounter encounterA = new Encounter();
+		encounterA.getClass_().setSystem("http://snomed.info/sct").setCode("55822004");
+		encounterA.getSubject().setReference(patientIdA);
+
+		// record time between encounter A and B
+		TestUtil.sleepOneClick();
+		Date beforeA = new Date();
+		TestUtil.sleepOneClick();
+
+		myEncounterDao.create(encounterA);
+
+		Encounter encounterB = new Encounter();
+		encounterB.getClass_().setSystem("http://snomed.info/sct").setCode("55822005");
+		encounterB.getSubject().setReference(patientIdB);
+
+		// record time between encounter A and B
+		TestUtil.sleepOneClick();
+		Date beforeB = new Date();
+		TestUtil.sleepOneClick();
+
+		myEncounterDao.create(encounterB);
+
+		// execute
+		String criteriaA = "_has:Encounter:patient:_lastUpdated=ge" + convertDateToIso8601String(beforeA);
+		SearchParameterMap mapA = myMatchUrlService.translateMatchUrl(criteriaA, myFhirContext.getResourceDefinition(Patient.class));
+		mapA.setLoadSynchronous(true);
+		myCaptureQueriesListener.clear();
+		IBundleProvider resultA = myPatientDao.search(mapA);
+		myCaptureQueriesListener.logSelectQueries();
+		List<String> idsBeforeA = toUnqualifiedVersionlessIdValues(resultA);
+
+		String criteriaB = "_has:Encounter:patient:_lastUpdated=ge" + convertDateToIso8601String(beforeB);
+		SearchParameterMap mapB = myMatchUrlService.translateMatchUrl(criteriaB, myFhirContext.getResourceDefinition(Patient.class));
+		mapB.setLoadSynchronous(true);
+		IBundleProvider resultB = myPatientDao.search(mapB);
+		List<String> idsBeforeB = toUnqualifiedVersionlessIdValues(resultB);
+
+		// verify
+		assertEquals(2, idsBeforeA.size());
+		assertEquals(1, idsBeforeB.size());
 	}
 
 	@Test

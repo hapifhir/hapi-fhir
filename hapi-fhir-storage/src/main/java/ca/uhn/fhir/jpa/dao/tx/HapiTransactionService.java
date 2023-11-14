@@ -531,7 +531,8 @@ public class HapiTransactionService implements IHapiTransactionService {
 	}
 
 	@Nullable
-	private static <T> T executeInExistingTransaction(TransactionCallback<T> theCallback) {
+	private static <T> T executeInExistingTransaction(@Nonnull TransactionCallback<T> theCallback) {
+		// TODO we could probably track the TransactionStatus we need as a thread local like we do our partition id.
 		return theCallback.doInTransaction(null);
 	}
 

@@ -1,0 +1,6 @@
+---
+type: perf
+issue: 5387
+title: "Enable the search cache for some requests even when a consent interceptor is active.  
+  If no consent service uses canSeeResource (i.e. shouldProcessCanSeeResource() returns false);
+   or startOperation() returns AUTHORIZED; then the search cache is enabled."

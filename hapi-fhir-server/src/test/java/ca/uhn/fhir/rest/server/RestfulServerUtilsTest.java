@@ -8,10 +8,13 @@ import ca.uhn.fhir.rest.api.PreferReturnEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -19,9 +22,12 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 import static ca.uhn.fhir.rest.api.RequestTypeEnum.GET;
+import static ca.uhn.fhir.rest.api.RequestTypeEnum.POST;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.http.util.TextUtils.isBlank;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
@@ -156,6 +162,33 @@ public class RestfulServerUtilsTest {
 		//Then
 		assertThat(linkSelfWithoutGivenParameters, is(containsString("http://localhost:8000/$my-operation?")));
 		assertThat(linkSelfWithoutGivenParameters, is(containsString("_format=json")));
+	}
 
+	@ParameterizedTest
+	@MethodSource("testParameters")
+	public void testCreateSelfLinks_withDifferentResourcePathAndTenantId(String theServerBaseUrl, String theRequestPath,
+	String theTenantId, String theExpectedUrl) {
+		//When
+		ServletRequestDetails servletRequestDetails = new ServletRequestDetails();
+		servletRequestDetails.setRequestType(POST);
+		servletRequestDetails.setTenantId(StringUtils.defaultString(theTenantId));
+		servletRequestDetails.setRequestPath(StringUtils.defaultString(theRequestPath));
+
+		//Then
+		String linkSelfWithoutGivenParameters = RestfulServerUtils.createLinkSelfWithoutGivenParameters(theServerBaseUrl, servletRequestDetails, null);
+		//Test
+		assertEquals(theExpectedUrl, linkSelfWithoutGivenParameters);
+	}
+	static Stream<Arguments> testParameters(){
+		return Stream.of(
+			Arguments.of("http://localhost:8000/Partition-B","" ,"Partition-B","http://localhost:8000/Partition-B"),
+			Arguments.of("http://localhost:8000/Partition-B","Partition-B" ,"Partition-B","http://localhost:8000/Partition-B"),
+			Arguments.of("http://localhost:8000/Partition-B","Partition-B/Patient" ,"Partition-B","http://localhost:8000/Partition-B/Patient"),
+			Arguments.of("http://localhost:8000/Partition-B","Partition-B/$my-operation" ,"Partition-B","http://localhost:8000/Partition-B/$my-operation"),
+			Arguments.of("http://localhost:8000","","","http://localhost:8000"),
+			Arguments.of("", "","",""),
+			Arguments.of("http://localhost:8000","Patient","","http://localhost:8000/Patient"),
+			Arguments.of("http://localhost:8000/Patient","","","http://localhost:8000/Patient")
+		);
 	}
 }

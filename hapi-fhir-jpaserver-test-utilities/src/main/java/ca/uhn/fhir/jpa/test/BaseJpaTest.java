@@ -431,6 +431,11 @@ public abstract class BaseJpaTest extends BaseTest {
 		return deliveryLatch;
 	}
 
+	protected void registerInterceptor(Object theInterceptor) {
+		myRegisteredInterceptors.add(theInterceptor);
+		myInterceptorRegistry.registerInterceptor(theInterceptor);
+	}
+
 	protected void purgeHibernateSearch(EntityManager theEntityManager) {
 		runInTransaction(() -> {
 			if (myFulltestSearchSvc != null && !myFulltestSearchSvc.isDisabled()) {

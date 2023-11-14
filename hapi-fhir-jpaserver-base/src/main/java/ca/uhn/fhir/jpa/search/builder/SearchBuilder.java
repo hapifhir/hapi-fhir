@@ -131,6 +131,7 @@ import javax.annotation.Nullable;
 
 import static ca.uhn.fhir.jpa.model.util.JpaConstants.UNDESIRED_RESOURCE_LINKAGES_FOR_EVERYTHING_ON_PATIENT_INSTANCE;
 import static ca.uhn.fhir.jpa.search.builder.QueryStack.LOCATION_POSITION;
+import static ca.uhn.fhir.jpa.search.builder.QueryStack.SearchForIdsParams.with;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -281,14 +282,11 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 				continue;
 			}
 			List<List<IQueryParameterType>> andOrParams = myParams.get(nextParamName);
-			Condition predicate = theQueryStack.searchForIdsWithAndOr(
-					null,
-					myResourceName,
-					nextParamName,
-					andOrParams,
-					theRequest,
-					myRequestPartitionId,
-					searchContainedMode);
+			Condition predicate = theQueryStack.searchForIdsWithAndOr(with().setResourceName(myResourceName)
+					.setParamName(nextParamName)
+					.setAndOrParams(andOrParams)
+					.setRequest(theRequest)
+					.setRequestPartitionId(myRequestPartitionId));
 			if (predicate != null) {
 				theSearchSqlBuilder.addPredicate(predicate);
 			}
@@ -832,6 +830,10 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		if (IAnyResource.SP_RES_ID.equals(theSort.getParamName())) {
 
 			theQueryStack.addSortOnResourceId(ascending);
+
+		} else if (Constants.PARAM_PID.equals(theSort.getParamName())) {
+
+			theQueryStack.addSortOnResourcePID(ascending);
 
 		} else if (Constants.PARAM_LASTUPDATED.equals(theSort.getParamName())) {
 

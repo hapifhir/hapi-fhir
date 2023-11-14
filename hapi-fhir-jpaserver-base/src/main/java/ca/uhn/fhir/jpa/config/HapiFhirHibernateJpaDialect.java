@@ -96,7 +96,7 @@ public class HapiFhirHibernateJpaDialect extends HibernateJpaDialect {
 							+ makeErrorMessage(
 									messageToPrepend, "resourceIndexedCompositeStringUniqueConstraintFailure"));
 				}
-				if (constraintName.contains(ResourceTable.IDX_RES_FHIR_ID)) {
+				if (constraintName.contains(ResourceTable.IDX_RES_TYPE_FHIR_ID)) {
 					throw new ResourceVersionConflictException(
 							Msg.code(825) + makeErrorMessage(messageToPrepend, "forcedIdConstraintFailure"));
 				}
