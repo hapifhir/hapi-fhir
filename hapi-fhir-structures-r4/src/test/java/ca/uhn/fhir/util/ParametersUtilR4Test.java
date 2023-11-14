@@ -9,6 +9,7 @@ import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.Test;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
@@ -78,5 +79,21 @@ public class ParametersUtilR4Test {
 		assertThat(values.get(0), is(TEST_PERSON_ID));
 		assertThat(values.get(1), is(TEST_PERSON_ID));
 		assertThat(values.get(2), is(TEST_PERSON_ID));
+	}
+
+	@Test
+	public void testAddPartDecimalNoScientificNotation() {
+		// setup
+		Double decimalValue = Double.valueOf("10000000");
+		IBaseParameters parameters = ParametersUtil.newInstance(ourFhirContext);
+		IBase resultPart = ParametersUtil.addParameterToParameters(ourFhirContext, parameters, "link");
+
+		// execute
+		ParametersUtil.addPartDecimal(ourFhirContext, resultPart, "linkCreated", decimalValue);
+
+		// verify
+		String expected = BigDecimal.valueOf(decimalValue).toPlainString();
+		List<String> results = ParametersUtil.getNamedParameterPartAsString(ourFhirContext, parameters, "link", "linkCreated");
+		assertEquals(expected, results.get(0));
 	}
 }
