@@ -28,7 +28,6 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.HashSet;
 import java.util.List;
 
 /**
@@ -466,33 +465,9 @@ public class ResponsePage {
 		public void combineWith(ResponsePageBuilder theSecondBuilder) {
 			assert theSecondBuilder != this; // don't want to combine with itself
 
-			int addedNewResources = 0;
-			if (myResources != null && theSecondBuilder.myResources != null) {
-				HashSet<String> uniqueIds = new HashSet<>();
-				for (IBaseResource resource : myResources) {
-					uniqueIds.add(resource.getIdElement().getValueAsString());
-					myTotalRequestedResourcesFetched++;
-				}
-				for (IBaseResource resource : theSecondBuilder.myResources) {
-					String id = resource.getIdElement().getValueAsString();
-					if (!uniqueIds.contains(id)) {
-						uniqueIds.add(id);
-						myResources.add(resource);
-						addedNewResources++;
-					}
-				}
-			}
-
-			if (myTotalRequestedResourcesFetched != -1
-				&& theSecondBuilder.myTotalRequestedResourcesFetched != -1) {
+			if (myTotalRequestedResourcesFetched != -1 && theSecondBuilder.myTotalRequestedResourcesFetched != -1) {
 				myTotalRequestedResourcesFetched += theSecondBuilder.myTotalRequestedResourcesFetched;
 			}
-//			if (myTotalRequestedResourcesFetched != -1
-//					&& theSecondBuilder.myTotalRequestedResourcesFetched != -1
-//					&& addedNewResources > 0) {
-//				myTotalRequestedResourcesFetched +=
-//						addedNewResources; // theSecondBuilder.myTotalRequestedResourcesFetched;
-//			}
 
 			// primitives can always be added
 			myIncludedResourceCount += theSecondBuilder.myIncludedResourceCount;
