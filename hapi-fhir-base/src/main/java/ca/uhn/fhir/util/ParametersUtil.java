@@ -403,8 +403,15 @@ public class ParametersUtil {
 	public static void addPartDecimal(FhirContext theContext, IBase theParameter, String theName, Double theValue) {
 		IPrimitiveType<BigDecimal> value = (IPrimitiveType<BigDecimal>)
 				theContext.getElementDefinition("decimal").newInstance();
-		value.setValue(theValue == null ? null : BigDecimal.valueOf(theValue).setScale(0));
-
+		if (theValue == null) {
+			value.setValue(null);
+		} else {
+			BigDecimal decimalValue = BigDecimal.valueOf(theValue);
+			if (decimalValue.scale() < 0) {
+				decimalValue = decimalValue.setScale(0);
+			}
+			value.setValue(decimalValue);
+		}
 		addPart(theContext, theParameter, theName, value);
 	}
 
