@@ -50,12 +50,12 @@ import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import javax.persistence.EntityManager;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
-import javax.persistence.EntityManager;
 
 import static ca.uhn.fhir.jpa.util.SearchParameterMapCalculator.isWantCount;
 import static ca.uhn.fhir.jpa.util.SearchParameterMapCalculator.isWantOnlyCount;
@@ -171,8 +171,6 @@ public class SynchronousSearchSvcImpl implements ISynchronousSearchSvc {
 						throw new InternalErrorException(Msg.code(1164) + e);
 					}
 
-					// TODO - do we want to do this
-					// before or after the STORAGE_PREACCESS_RESOURCES interceptor?
 					// truncate the list we retrieved - if needed
 					int receivedResourceCount = -1;
 					if (hasACount) {
