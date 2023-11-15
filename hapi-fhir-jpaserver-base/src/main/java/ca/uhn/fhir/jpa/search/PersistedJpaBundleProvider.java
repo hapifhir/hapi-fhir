@@ -152,7 +152,7 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 	}
 
 	@VisibleForTesting
-	public Search getSearchEntityForTesting(){
+	public Search getSearchEntityForTesting() {
 		return getSearchEntity();
 	}
 
