@@ -38,14 +38,18 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.TransactionLogMessages;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.messaging.ResourceOperationMessage;
+import ca.uhn.fhir.util.BundleUtil;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r5.model.Bundle;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.MessagingException;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 public class MdmMessageHandler implements MessageHandler {
@@ -82,6 +86,12 @@ public class MdmMessageHandler implements MessageHandler {
 		ResourceModifiedMessage msg = ((ResourceModifiedJsonMessage) theMessage).getPayload();
 		try {
 			IBaseResource sourceResource = msg.getNewPayload(myFhirContext);
+			if (sourceResource instanceof Bundle) {
+				List<IBaseResource> resources = BundleUtil.toListOfResources(myFhirContext, (Bundle) sourceResource);
+				IBaseResource sourceResource2 = resources.get(1);
+				sourceResource2.getMeta();
+				sourceResource = sourceResource2;
+			}
 
 			boolean toProcess = myMdmResourceFilteringSvc.shouldBeProcessed((IAnyResource) sourceResource);
 			if (toProcess) {

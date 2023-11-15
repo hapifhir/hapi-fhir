@@ -78,6 +78,7 @@ public class MdmSubscriptionLoader {
 	private SubscriptionTopicLoader mySubscriptionTopicLoader;
 
 	private IFhirResourceDao<IBaseResource> mySubscriptionDao;
+	private IFhirResourceDao<SubscriptionTopic> mySubscriptionTopicDao;
 
 	public synchronized void daoUpdateMdmSubscriptions() {
 		List<IBaseResource> subscriptions;
@@ -97,7 +98,11 @@ public class MdmSubscriptionLoader {
 				break;
 			case R5:
 				SubscriptionTopic subscriptionTopic = buildMdmSubscriptionTopicR5(mdmResourceTypes);
+				mySubscriptionTopicDao = myDaoRegistry.getResourceDao("SubscriptionTopic");
+				updateIfNotPresent(subscriptionTopic);
+				// After loading subscriptionTopic, sync subscriptionTopic to the registry.
 				mySubscriptionTopicLoader.syncDatabaseToCache();
+
 				org.hl7.fhir.r5.model.Subscription subscriptionR5 = buildMdmSubscriptionR5(subscriptionTopic);
 				subscriptions = Collections.singletonList(subscriptionR5);
 				break;
@@ -122,6 +127,19 @@ public class MdmSubscriptionLoader {
 		} catch (ResourceNotFoundException | ResourceGoneException e) {
 			ourLog.info("Creating subscription " + theSubscription.getIdElement());
 			mySubscriptionDao.update(theSubscription, SystemRequestDetails.forAllPartitions());
+		}
+	}
+
+	synchronized void updateIfNotPresent(SubscriptionTopic theSubscriptionTopic) {
+		try {
+			// TODO: Cross-partition matching is currently only supported for DSTU3 and R4 (i.e. non-topic-based)
+			// Subscriptions - how does it affect MDM ?
+			// TODO: https://smilecdr.com/docs/subscription/topic.html - should we add (later) Cross-partition matching
+			// support to make MDM with R5 work correctly ?
+			mySubscriptionTopicDao.read(theSubscriptionTopic.getIdElement(), SystemRequestDetails.forAllPartitions());
+		} catch (ResourceNotFoundException | ResourceGoneException e) {
+			ourLog.info("Creating subscriptionTopic " + theSubscriptionTopic.getIdElement());
+			mySubscriptionTopicDao.update(theSubscriptionTopic, SystemRequestDetails.forAllPartitions());
 		}
 	}
 
@@ -169,60 +187,61 @@ public class MdmSubscriptionLoader {
 
 	private SubscriptionTopic buildMdmSubscriptionTopicR5(List<String> theMdmResourceTypes) {
 		SubscriptionTopic subscriptionTopic = new SubscriptionTopic();
+		// TODO: what id to set ? mdm-subscription-topic is ok?
+		subscriptionTopic.setId(MDM_SUBSCIPRION_ID_PREFIX + "subscription-topic");
 		subscriptionTopic.setStatus(Enumerations.PublicationStatus.ACTIVE);
-		theMdmResourceTypes.forEach(resourceType -> getSubscriptionTopicResourceTriggerComponent(resourceType, subscriptionTopic));
+		subscriptionTopic.setUrl("http://example.com/topic/test/mdm");
+		theMdmResourceTypes.forEach(
+				resourceType -> getSubscriptionTopicResourceTriggerComponent(resourceType, subscriptionTopic));
 		return subscriptionTopic;
 	}
 
-	private static void getSubscriptionTopicResourceTriggerComponent(String theResourceType, SubscriptionTopic theSubscriptionTopic) {
+	private static void getSubscriptionTopicResourceTriggerComponent(
+			String theResourceType, SubscriptionTopic theSubscriptionTopic) {
 		SubscriptionTopic.SubscriptionTopicResourceTriggerComponent trigger = theSubscriptionTopic.addResourceTrigger();
 		trigger.setResource(theResourceType);
 		trigger.addSupportedInteraction(SubscriptionTopic.InteractionTrigger.CREATE);
 		trigger.addSupportedInteraction(SubscriptionTopic.InteractionTrigger.UPDATE);
-		SubscriptionTopic.SubscriptionTopicResourceTriggerQueryCriteriaComponent queryCriteria = trigger.getQueryCriteria();
+		SubscriptionTopic.SubscriptionTopicResourceTriggerQueryCriteriaComponent queryCriteria =
+				trigger.getQueryCriteria();
 		queryCriteria.setCurrent(theResourceType + "?");
 		queryCriteria.setRequireBoth(false);
-		theSubscriptionTopic.addResourceTrigger(trigger);
+		// theSubscriptionTopic.addResourceTrigger(trigger);
 	}
 
 	private org.hl7.fhir.r5.model.Subscription buildMdmSubscriptionR5(SubscriptionTopic theSubscriptionTopic) {
 		org.hl7.fhir.r5.model.Subscription retVal = new org.hl7.fhir.r5.model.Subscription();
 
 		String resourcesString = theSubscriptionTopic.getResourceTrigger().stream()
-			.map(SubscriptionTopic.SubscriptionTopicResourceTriggerComponent::getResource)
-			.collect(Collectors.joining("-"));
+				.map(SubscriptionTopic.SubscriptionTopicResourceTriggerComponent::getResource)
+				.collect(Collectors.joining("-"));
 		String subscriptionId = MDM_SUBSCIPRION_ID_PREFIX + "-" + resourcesString;
 		retVal.setId(subscriptionId);
 		retVal.setReason("MDM");
 		retVal.setStatus(Enumerations.SubscriptionStatusCodes.REQUESTED);
 
-//		fixme jm: this way?
+		//		fixme jm: this way?
 		retVal.setTopic(theSubscriptionTopic.getUrl());
 		retVal.setTopicElement(new CanonicalType(theSubscriptionTopic.getUrl()));
 		retVal.getMeta()
-			.addTag()
-			.setSystem(MdmConstants.SYSTEM_MDM_MANAGED)
-			.setCode(MdmConstants.CODE_HAPI_MDM_MANAGED);
+				.addTag()
+				.setSystem(MdmConstants.SYSTEM_MDM_MANAGED)
+				.setCode(MdmConstants.CODE_HAPI_MDM_MANAGED);
 		retVal.addExtension()
-			.setUrl(HapiExtensions.EXTENSION_SUBSCRIPTION_CROSS_PARTITION)
-			.setValue(new org.hl7.fhir.r5.model.BooleanType().setValue(true));
+				.setUrl(HapiExtensions.EXTENSION_SUBSCRIPTION_CROSS_PARTITION)
+				.setValue(new org.hl7.fhir.r5.model.BooleanType().setValue(true));
 
 		retVal.setChannelType(new Coding()
-			.setCode(SubscriptionChannelTypeEnum.MESSAGE.getCode())
-			.setSystem(SUBSCRIPTION_CHANNEL_TYPE_SYSTEM_R5));
+				.setCode(SubscriptionChannelTypeEnum.MESSAGE.getCode())
+				.setSystem(SUBSCRIPTION_CHANNEL_TYPE_SYSTEM_R5));
 
 		retVal.setEndpoint("channel:"
-			+ myChannelNamer.getChannelName(IMdmSettings.EMPI_CHANNEL_NAME, new ChannelProducerSettings()));
-
-//		fixme jm: not required anymore. Right?
-//		org.hl7.fhir.r5.model.Subscription.SubscriptionChannelComponent channel = retval.getChannel();
-//		channel.setPayload("application/json");
+				+ myChannelNamer.getChannelName(IMdmSettings.EMPI_CHANNEL_NAME, new ChannelProducerSettings()));
+		retVal.setContentType("application/json");
+		//		fixme jm: not required anymore. Right?
+		//		org.hl7.fhir.r5.model.Subscription.SubscriptionChannelComponent channel = retval.getChannel();
+		//		channel.setPayload("application/json");
 
 		return retVal;
 	}
-
-
-
-
-
 }
