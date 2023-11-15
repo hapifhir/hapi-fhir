@@ -26,6 +26,7 @@ import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.registry.SearchParamRegistryImpl;
 import ca.uhn.fhir.jpa.subscription.match.config.SubscriptionProcessorConfig;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
+import ca.uhn.fhir.jpa.topic.SubscriptionTopicConfig;
 import ca.uhn.fhir.mdm.api.IMdmLink;
 import ca.uhn.fhir.mdm.api.IMdmLinkUpdaterSvc;
 import ca.uhn.fhir.mdm.api.MdmConstants;
@@ -75,7 +76,8 @@ import static org.slf4j.LoggerFactory.getLogger;
 	MdmSubmitterConfig.class,
 	MdmConsumerConfig.class,
 	TestMdmConfigR4.class,
-	SubscriptionProcessorConfig.class
+	SubscriptionProcessorConfig.class,
+	SubscriptionTopicConfig.class
 })
 abstract public class BaseMdmR4Test extends BaseJpaR4Test {
 
