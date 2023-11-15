@@ -8,7 +8,9 @@ import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
 import ca.uhn.fhir.jpa.search.PersistedJpaBundleProvider;
+import ca.uhn.fhir.jpa.search.PersistedJpaSearchFirstPageBundleProvider;
 import ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl;
+import ca.uhn.fhir.jpa.search.builder.tasks.SearchTask;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
@@ -29,7 +31,9 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.test.utilities.ProxyUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.checkerframework.checker.units.qual.A;
 import org.hl7.fhir.instance.model.api.IAnyResource;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.BodyStructure;
 import org.hl7.fhir.r4.model.CodeableConcept;
@@ -51,6 +55,8 @@ import org.hl7.fhir.r4.model.UriType;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.concurrent.ThreadPoolExecutorFactoryBean;
 
@@ -58,6 +64,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.stream.Collectors;
@@ -102,6 +109,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 	public final void after() {
 		mySearchCoordinatorSvcImpl.setLoadingThrottleForUnitTests(null);
 		mySearchCoordinatorSvcImpl.setSyncSizeForUnitTests(QueryParameterUtils.DEFAULT_SYNC_SIZE);
+		mySearchCoordinatorSvcImpl.setIdToSearchTaskMapForUnitTests(new ConcurrentHashMap<>());
 		myStorageSettings.setSearchPreFetchThresholds(new JpaStorageSettings().getSearchPreFetchThresholds());
 		myCaptureQueriesListener.setCaptureQueryStackTrace(false);
 		myStorageSettings.setIndexMissingFields(new JpaStorageSettings().getIndexMissingFields());
@@ -211,6 +219,36 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		ids = toUnqualifiedVersionlessIdValues(results, 0, 10, true);
 		assertThat(ids, empty());
 		assertEquals(201, myDatabaseBackedPagingProvider.retrieveResultList(null, uuid).size().intValue());
+
+	}
+
+	@Test
+	public void testBundleProvider_whenFetchingResources_remainsSynchronizedWithBackingSearchCapabilities(){
+		ArgumentCaptor<String> keyArgumentCaptor = ArgumentCaptor.forClass(String.class);
+		ArgumentCaptor<SearchTask> valueArgumentCaptor = ArgumentCaptor.forClass(SearchTask.class);
+		ConcurrentHashMap<String, SearchTask> spyingIdToSearchTaskMap = Mockito.spy(new ConcurrentHashMap<>());
+		mySearchCoordinatorSvcImpl.setIdToSearchTaskMapForUnitTests(spyingIdToSearchTaskMap);
+		create200Patients();
+
+		SearchParameterMap params;
+		PersistedJpaSearchFirstPageBundleProvider results;
+
+		params = new SearchParameterMap();
+		params.add(Patient.SP_NAME, new StringParam("FAM"));
+		params.setSearchTotalMode(SearchTotalModeEnum.ACCURATE);
+
+		results = (PersistedJpaSearchFirstPageBundleProvider) myPatientDao.search(params);
+
+		Mockito.verify(spyingIdToSearchTaskMap, Mockito.times(1)).put(keyArgumentCaptor.capture(), valueArgumentCaptor.capture());
+
+		Search bundleProviderSearch = results.getSearchEntityForTesting();
+		Search backingSearch = valueArgumentCaptor.getValue().getSearch();
+
+		assertThat(bundleProviderSearch.getUuid(), equalTo(keyArgumentCaptor.getValue()));
+		assertThat(bundleProviderSearch.getUuid(), equalTo(backingSearch.getUuid()));
+
+		assertThat(bundleProviderSearch.getStatus(), equalTo(backingSearch.getStatus()));
+		assertThat(bundleProviderSearch.getId(), equalTo(backingSearch.getId()));
 
 	}
 
