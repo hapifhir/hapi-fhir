@@ -1,0 +1,7 @@
+---
+type: fix
+issue: 4528
+title: "Three database columns have been changed from type TEXT to type OID 
+  when running in Postgres: 
+  BT2_JOB_INSTANCE.PARAMS_JSON_LOB, BT2_JOB_INSTANCE.REPORT, and BT2_WORK_CHUNK.CHUNK_DATA.
+  This prevents VACUUM erasing binary objects that are still in use."

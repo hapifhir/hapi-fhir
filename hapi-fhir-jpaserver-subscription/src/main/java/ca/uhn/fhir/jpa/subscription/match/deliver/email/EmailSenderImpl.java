@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.subscription.match.deliver.email;
-
 /*-
  * #%L
  * HAPI FHIR Subscription Server
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.subscription.match.deliver.email;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.subscription.match.deliver.email;
 
 import ca.uhn.fhir.rest.server.mail.IMailSvc;
 import ca.uhn.fhir.util.StopWatch;
@@ -44,18 +43,30 @@ public class EmailSenderImpl implements IEmailSender {
 	public void send(EmailDetails theDetails) {
 		StopWatch stopWatch = new StopWatch();
 
-		ourLog.info("Sending email for subscription {} from [{}] to recipients: [{}]", theDetails.getSubscriptionId(), theDetails.getFrom(), theDetails.getTo());
+		ourLog.info(
+				"Sending email for subscription {} from [{}] to recipients: [{}]",
+				theDetails.getSubscriptionId(),
+				theDetails.getFrom(),
+				theDetails.getTo());
 
 		Email email = theDetails.toEmail();
 
-		myMailSvc.sendMail(email,
-			() -> ourLog.info("Done sending email for subscription {} from [{}] to recipients: [{}] (took {}ms)",
-				theDetails.getSubscriptionId(), theDetails.getFrom(), theDetails.getTo(), stopWatch.getMillis()),
-			(e) -> {
-				ourLog.error("Error sending email for subscription {} from [{}] to recipients: [{}] (took {}ms)",
-					theDetails.getSubscriptionId(), theDetails.getFrom(), theDetails.getTo(), stopWatch.getMillis());
-				ourLog.error("Error sending email", e);
-			});
+		myMailSvc.sendMail(
+				email,
+				() -> ourLog.info(
+						"Done sending email for subscription {} from [{}] to recipients: [{}] (took {}ms)",
+						theDetails.getSubscriptionId(),
+						theDetails.getFrom(),
+						theDetails.getTo(),
+						stopWatch.getMillis()),
+				(e) -> {
+					ourLog.error(
+							"Error sending email for subscription {} from [{}] to recipients: [{}] (took {}ms)",
+							theDetails.getSubscriptionId(),
+							theDetails.getFrom(),
+							theDetails.getTo(),
+							stopWatch.getMillis());
+					ourLog.error("Error sending email", e);
+				});
 	}
-
 }

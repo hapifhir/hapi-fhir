@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 5000
+title: "Previously, the JPA_PERFTRACE_RAW_SQL was not firing for raw sql that occurred during a `revinclude` or `include`. This has been corrected."

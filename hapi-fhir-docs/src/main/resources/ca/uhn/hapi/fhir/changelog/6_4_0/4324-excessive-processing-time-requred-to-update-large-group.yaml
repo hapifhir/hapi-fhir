@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 4324
+jira: SMILE-5560
+title: "Previously, an excessive amount of time was required to perform update on a large Group. This has been corrected."

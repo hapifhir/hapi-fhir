@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.cache;
-
 /*-
  * #%L
  * HAPI FHIR Search Parameters
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +17,10 @@ package ca.uhn.fhir.jpa.cache;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.cache;
 
 import ca.uhn.fhir.jpa.model.sched.HapiJob;
+import ca.uhn.fhir.jpa.model.sched.IHasScheduledJobs;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -31,9 +31,11 @@ import org.quartz.JobExecutionContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.event.ContextClosedEvent;
+import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -48,7 +50,8 @@ import java.util.List;
  * if any entries in the new cache are different from the last time that cache was loaded.
  */
 @Service
-public class ResourceChangeListenerCacheRefresherImpl implements IResourceChangeListenerCacheRefresher {
+public class ResourceChangeListenerCacheRefresherImpl
+		implements IResourceChangeListenerCacheRefresher, IHasScheduledJobs {
 	private static final Logger ourLog = LoggerFactory.getLogger(ResourceChangeListenerCacheRefresherImpl.class);
 
 	/**
@@ -57,18 +60,19 @@ public class ResourceChangeListenerCacheRefresherImpl implements IResourceChange
 	static long LOCAL_REFRESH_INTERVAL_MS = 10 * DateUtils.MILLIS_PER_SECOND;
 
 	@Autowired
-	private ISchedulerService mySchedulerService;
-	@Autowired
 	private IResourceVersionSvc myResourceVersionSvc;
+
 	@Autowired
 	private ResourceChangeListenerRegistryImpl myResourceChangeListenerRegistry;
 
-	@PostConstruct
-	public void start() {
+	private boolean myStopping = false;
+
+	@Override
+	public void scheduleJobs(ISchedulerService theSchedulerService) {
 		ScheduledJobDefinition jobDetail = new ScheduledJobDefinition();
 		jobDetail.setId(getClass().getName());
 		jobDetail.setJobClass(Job.class);
-		mySchedulerService.scheduleLocalJob(LOCAL_REFRESH_INTERVAL_MS, jobDetail);
+		theSchedulerService.scheduleLocalJob(LOCAL_REFRESH_INTERVAL_MS, jobDetail);
 	}
 
 	public static class Job implements HapiJob {
@@ -104,12 +108,8 @@ public class ResourceChangeListenerCacheRefresherImpl implements IResourceChange
 	}
 
 	@VisibleForTesting
-	public void setSchedulerService(ISchedulerService theSchedulerService) {
-		mySchedulerService = theSchedulerService;
-	}
-
-	@VisibleForTesting
-	public void setResourceChangeListenerRegistry(ResourceChangeListenerRegistryImpl theResourceChangeListenerRegistry) {
+	public void setResourceChangeListenerRegistry(
+			ResourceChangeListenerRegistryImpl theResourceChangeListenerRegistry) {
 		myResourceChangeListenerRegistry = theResourceChangeListenerRegistry;
 	}
 
@@ -118,11 +118,25 @@ public class ResourceChangeListenerCacheRefresherImpl implements IResourceChange
 		myResourceVersionSvc = theResourceVersionSvc;
 	}
 
+	@EventListener(ContextRefreshedEvent.class)
+	public void start() {
+		myStopping = false;
+	}
+
+	@EventListener(ContextClosedEvent.class)
+	public void shutdown() {
+		myStopping = true;
+	}
+
+	public boolean isStopping() {
+		return myStopping;
+	}
+
 	@Override
 	public ResourceChangeResult refreshCacheAndNotifyListener(IResourceChangeListenerCache theCache) {
 		ResourceChangeResult retVal = new ResourceChangeResult();
-		if (mySchedulerService.isStopping()) {
-			ourLog.info("Scheduler service is stopping, aborting cache refresh");
+		if (isStopping()) {
+			ourLog.info("Context is stopping, aborting cache refresh");
 			return retVal;
 		}
 		if (!myResourceChangeListenerRegistry.contains(theCache)) {
@@ -130,7 +144,8 @@ public class ResourceChangeListenerCacheRefresherImpl implements IResourceChange
 			return retVal;
 		}
 		SearchParameterMap searchParamMap = theCache.getSearchParameterMap();
-		ResourceVersionMap newResourceVersionMap = myResourceVersionSvc.getVersionMap(theCache.getResourceName(), searchParamMap);
+		ResourceVersionMap newResourceVersionMap =
+				myResourceVersionSvc.getVersionMap(theCache.getResourceName(), searchParamMap);
 		retVal = retVal.plus(notifyListener(theCache, newResourceVersionMap));
 
 		return retVal;
@@ -143,12 +158,14 @@ public class ResourceChangeListenerCacheRefresherImpl implements IResourceChange
 	 * @param theNewResourceVersionMap the measured new resources
 	 * @return the list of created, updated and deleted ids
 	 */
-	ResourceChangeResult notifyListener(IResourceChangeListenerCache theCache, ResourceVersionMap theNewResourceVersionMap) {
+	ResourceChangeResult notifyListener(
+			IResourceChangeListenerCache theCache, ResourceVersionMap theNewResourceVersionMap) {
 		ResourceChangeResult retval;
 		ResourceChangeListenerCache cache = (ResourceChangeListenerCache) theCache;
 		IResourceChangeListener resourceChangeListener = cache.getResourceChangeListener();
 		if (theCache.isInitialized()) {
-			retval = compareLastVersionMapToNewVersionMapAndNotifyListenerOfChanges(resourceChangeListener, cache.getResourceVersionCache(), theNewResourceVersionMap);
+			retval = compareLastVersionMapToNewVersionMapAndNotifyListenerOfChanges(
+					resourceChangeListener, cache.getResourceVersionCache(), theNewResourceVersionMap);
 		} else {
 			cache.getResourceVersionCache().initialize(theNewResourceVersionMap);
 			resourceChangeListener.handleInit(theNewResourceVersionMap.getSourceIds());
@@ -158,15 +175,17 @@ public class ResourceChangeListenerCacheRefresherImpl implements IResourceChange
 		return retval;
 	}
 
-	private ResourceChangeResult compareLastVersionMapToNewVersionMapAndNotifyListenerOfChanges(IResourceChangeListener theListener, ResourceVersionCache theOldResourceVersionCache, ResourceVersionMap theNewResourceVersionMap) {
+	private ResourceChangeResult compareLastVersionMapToNewVersionMapAndNotifyListenerOfChanges(
+			IResourceChangeListener theListener,
+			ResourceVersionCache theOldResourceVersionCache,
+			ResourceVersionMap theNewResourceVersionMap) {
 		// If the new ResourceVersionMap does not have the old key - delete it
 		List<IIdType> deletedIds = new ArrayList<>();
-		theOldResourceVersionCache.keySet()
-			.forEach(id -> {
-				if (!theNewResourceVersionMap.containsKey(id)) {
-					deletedIds.add(id);
-				}
-			});
+		theOldResourceVersionCache.keySet().forEach(id -> {
+			if (!theNewResourceVersionMap.containsKey(id)) {
+				deletedIds.add(id);
+			}
+		});
 		deletedIds.forEach(theOldResourceVersionCache::removeResourceId);
 
 		List<IIdType> createdIds = new ArrayList<>();
@@ -182,7 +201,8 @@ public class ResourceChangeListenerCacheRefresherImpl implements IResourceChange
 			}
 		}
 
-		IResourceChangeEvent resourceChangeEvent = ResourceChangeEvent.fromCreatedUpdatedDeletedResourceIds(createdIds, updatedIds, deletedIds);
+		IResourceChangeEvent resourceChangeEvent =
+				ResourceChangeEvent.fromCreatedUpdatedDeletedResourceIds(createdIds, updatedIds, deletedIds);
 		if (!resourceChangeEvent.isEmpty()) {
 			theListener.handleChange(resourceChangeEvent);
 		}

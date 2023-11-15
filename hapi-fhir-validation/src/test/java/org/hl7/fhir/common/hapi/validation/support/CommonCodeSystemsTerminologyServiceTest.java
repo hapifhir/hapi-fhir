@@ -33,21 +33,21 @@ public class CommonCodeSystemsTerminologyServiceTest {
 	public void testUcum_LookupCode_Good() {
 		IValidationSupport.LookupCodeResult outcome = mySvc.lookupCode(newSupport(), "http://unitsofmeasure.org", "Cel");
 		assert outcome != null;
-		assertEquals(true, outcome.isFound());
+		assertTrue(outcome.isFound());
 	}
 
 	@Test
 	public void testUcum_LookupCode_Good2() {
 		IValidationSupport.LookupCodeResult outcome = mySvc.lookupCode(newSupport(), "http://unitsofmeasure.org", "kg/m2");
 		assert outcome != null;
-		assertEquals(true, outcome.isFound());
+		assertTrue(outcome.isFound());
 	}
 
 	@Test
 	public void testUcum_LookupCode_Bad() {
 		IValidationSupport.LookupCodeResult outcome = mySvc.lookupCode(newSupport(), "http://unitsofmeasure.org", "AAAAA");
 		assert outcome != null;
-		assertEquals(false, outcome.isFound());
+		assertFalse(outcome.isFound());
 	}
 
 	@Test
@@ -82,7 +82,7 @@ public class CommonCodeSystemsTerminologyServiceTest {
 		vs.setUrl("http://hl7.org/fhir/ValueSet/ucum-units");
 		IValidationSupport.CodeValidationResult outcome = mySvc.validateCodeInValueSet(newSupport(), newOptions(), "http://unitsofmeasure.org", "mg", null, vs);
 		assert outcome != null;
-		assertEquals(true, outcome.isOk());
+		assertTrue(outcome.isOk());
 		assertEquals("(milligram)", outcome.getDisplay());
 	}
 
@@ -92,7 +92,7 @@ public class CommonCodeSystemsTerminologyServiceTest {
 		vs.setUrl("http://hl7.org/fhir/ValueSet/ucum-units");
 		IValidationSupport.CodeValidationResult outcome = mySvc.validateCodeInValueSet(newSupport(), newOptions().setInferSystem(true), null, "mg", null, vs);
 		assert outcome != null;
-		assertEquals(true, outcome.isOk());
+		assertTrue(outcome.isOk());
 		assertEquals("(milligram)", outcome.getDisplay());
 	}
 
@@ -101,7 +101,10 @@ public class CommonCodeSystemsTerminologyServiceTest {
 		ValueSet vs = new ValueSet();
 		vs.setUrl("http://hl7.org/fhir/ValueSet/ucum-units");
 		IValidationSupport.CodeValidationResult outcome = mySvc.validateCodeInValueSet(newSupport(), newOptions(), "http://unitsofmeasure.org", "aaaaa", null, vs);
-		assertNull(outcome);
+		assertNotNull(outcome);
+		assertFalse(outcome.isOk());
+		assertEquals("Error processing unit 'aaaaa': The unit 'aaaaa' is unknown' at position 0", outcome.getMessage());
+		assertEquals("error", outcome.getSeverityCode());
 	}
 
 	@Test
@@ -207,7 +210,7 @@ public class CommonCodeSystemsTerminologyServiceTest {
 	public void testFetchCodeSystemBuiltIn_Iso3166_DSTU2() {
 		CommonCodeSystemsTerminologyService svc = new CommonCodeSystemsTerminologyService(FhirContext.forDstu2Cached());
 		IBaseResource cs = svc.fetchCodeSystem(CommonCodeSystemsTerminologyService.COUNTRIES_CODESYSTEM_URL);
-		assertEquals(null, cs);
+		assertNull(cs);
 	}
 
 	@Test
@@ -220,13 +223,13 @@ public class CommonCodeSystemsTerminologyServiceTest {
 	@Test
 	public void testFetchCodeSystemBuiltIn_Unknown() {
 		CodeSystem cs = (CodeSystem) mySvc.fetchCodeSystem("http://foo");
-		assertEquals(null, cs);
+		assertNull(cs);
 	}
 
 	@Test
 	public void testFetchCodeSystemUrlDstu3() {
 		try {
-			CommonCodeSystemsTerminologyService.getCodeSystemUrl(new org.hl7.fhir.dstu3.model.CodeSystem());
+			CommonCodeSystemsTerminologyService.getCodeSystemUrl(myCtx, new org.hl7.fhir.dstu3.model.CodeSystem());
 
 			fail();
 		} catch (IllegalArgumentException e) {

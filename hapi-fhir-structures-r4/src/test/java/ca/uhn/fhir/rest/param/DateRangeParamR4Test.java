@@ -21,6 +21,7 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
+import org.apache.jena.base.Sys;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
@@ -59,7 +60,7 @@ public class DateRangeParamR4Test {
 	private static final SimpleDateFormat ourFmtUpperForTime;
 	private static final Logger ourLog = LoggerFactory.getLogger(DateRangeParamR4Test.class);
 	private static CloseableHttpClient ourClient;
-	private static FhirContext ourCtx = FhirContext.forR4();
+	private static FhirContext ourCtx = FhirContext.forR4Cached();
 	private static DateRangeParam ourLastDateRange;
 	private static int ourPort;
 	private static Server ourServer;
@@ -315,8 +316,8 @@ public class DateRangeParamR4Test {
 	@Test
 	public void testSetBoundsWithDatesExclusive() {
 		DateRangeParam range = new DateRangeParam();
-		range.setLowerBoundExclusive(new Date());
-		range.setUpperBoundExclusive(new Date());
+		range.setLowerBoundExclusive(new Date(System.currentTimeMillis()));
+		range.setUpperBoundExclusive(new Date(System.currentTimeMillis() + 1000));
 
 		assertEquals(ParamPrefixEnum.GREATERTHAN, range.getLowerBound().getPrefix());
 		assertEquals(ParamPrefixEnum.LESSTHAN, range.getUpperBound().getPrefix());

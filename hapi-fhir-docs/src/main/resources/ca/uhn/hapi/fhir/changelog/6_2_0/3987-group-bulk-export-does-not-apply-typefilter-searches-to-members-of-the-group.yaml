@@ -1,0 +1,7 @@
+---
+type: fix
+issue: 3987
+jira: SMILE-4921
+backport: 6.1.1
+title: "Previously, bulk export for Group type with _typeFilter did not apply the filter if it was for the patients, and returned all members of the group.
+This has now been fixed, and the filter will apply."

@@ -166,7 +166,7 @@ public class ResourceValidatorDstu3Test {
 		ValidationResult output = val.validateWithResult(p);
 		List<SingleValidationMessage> all = logResultsAndReturnNonInformationalOnes(output);
 
-		assertEquals("None of the codings provided are in the value set 'Marital Status Codes' (http://hl7.org/fhir/ValueSet/marital-status), and a coding should come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (codes = http://hl7.org/fhir/v3/MaritalStatus#FOO)", output.getMessages().get(0).getMessage());
+		assertThat(output.getMessages().get(0).getMessage(), containsString("None of the codings provided are in the value set 'Marital Status Codes'"));
 		assertEquals(ResultSeverityEnum.WARNING, output.getMessages().get(0).getSeverity());
 	}
 

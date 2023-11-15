@@ -5,12 +5,11 @@ import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.bulk.export.api.IBulkDataExportJobSchedulingHelper;
+import ca.uhn.fhir.jpa.config.TestR4ConfigWithElasticHSearch;
 import ca.uhn.fhir.jpa.dao.TestDaoSearch;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
 import ca.uhn.fhir.jpa.test.BaseJpaTest;
-import ca.uhn.fhir.jpa.test.config.TestHSearchAddInConfig;
-import ca.uhn.fhir.jpa.test.config.TestR4Config;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 import ca.uhn.fhir.rest.param.QuantityParam;
@@ -39,6 +38,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.ContextHierarchy;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.PlatformTransactionManager;
 
@@ -48,7 +48,7 @@ import java.util.List;
 
 import static ca.uhn.fhir.jpa.model.search.HSearchIndexWriter.NESTED_SEARCH_PARAM_ROOT;
 import static ca.uhn.fhir.jpa.model.search.HSearchIndexWriter.QTY_CODE;
-import static ca.uhn.fhir.jpa.model.search.HSearchIndexWriter.QTY_PARAM_NAME;
+import static ca.uhn.fhir.jpa.model.search.HSearchIndexWriter.INDEX_TYPE_QUANTITY;
 import static ca.uhn.fhir.jpa.model.search.HSearchIndexWriter.QTY_SYSTEM;
 import static ca.uhn.fhir.jpa.model.search.HSearchIndexWriter.QTY_VALUE;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -58,11 +58,12 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  */
 @ExtendWith(SpringExtension.class)
 @RequiresDocker
-@ContextConfiguration(classes = {
-	TestR4Config.class,
-	TestHSearchAddInConfig.Elasticsearch.class,
-	DaoTestDataBuilder.Config.class,
-	TestDaoSearch.Config.class
+@ContextHierarchy({
+	@ContextConfiguration(classes = TestR4ConfigWithElasticHSearch.class),
+	@ContextConfiguration(classes = {
+		DaoTestDataBuilder.Config.class,
+		TestDaoSearch.Config.class
+	})
 })
 @Disabled
 public class HSearchSandboxTest extends BaseJpaTest {
@@ -96,15 +97,11 @@ public class HSearchSandboxTest extends BaseJpaTest {
 	@Qualifier("myObservationDaoR4")
 	private IFhirResourceDao<Observation> myObservationDao;
 
-//	@BeforeEach
-//	public void beforePurgeDatabase() {
-//		purgeDatabase(myDaoConfig, mySystemDao, myResourceReindexingSvc, mySearchCoordinatorSvc, mySearchParamRegistry, myBulkDataScheduleHelper);
-//	}
 
 	@BeforeEach
 	public void enableContainsAndLucene() {
-		myDaoConfig.setAllowContainsSearches(true);
-		myDaoConfig.setAdvancedHSearchIndexing(true);
+		myStorageSettings.setAllowContainsSearches(true);
+		myStorageSettings.setAdvancedHSearchIndexing(true);
 	}
 
 
@@ -471,22 +468,10 @@ public class HSearchSandboxTest extends BaseJpaTest {
 		private void addQuantityOrClauses(BooleanPredicateClausesStep<?> theTopBool, boolean theIsMust,
 				String theSearchParamName, IQueryParameterType theParamType) {
 
-			String fieldPath = NESTED_SEARCH_PARAM_ROOT + "." + theSearchParamName + "." + QTY_PARAM_NAME;
+			String fieldPath = NESTED_SEARCH_PARAM_ROOT + "." + theSearchParamName + "." + INDEX_TYPE_QUANTITY;
 
 			QuantityParam qtyParam = QuantityParam.toQuantityParam(theParamType);
 			ParamPrefixEnum activePrefix = qtyParam.getPrefix() == null ? ParamPrefixEnum.EQUAL : qtyParam.getPrefix();
-
-//			if (myModelConfig.getNormalizedQuantitySearchLevel() == NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_SUPPORTED) {
-//				QuantityParam canonicalQty = UcumServiceUtil.toCanonicalQuantityOrNull(qtyParam);
-//				if (canonicalQty != null) {
-//					String valueFieldPath = fieldPath + "." + QTY_VALUE_NORM;
-//					setPrefixedQuantityPredicate(orQuantityTerms, activePrefix, canonicalQty, valueFieldPath);
-//					orQuantityTerms.must(myPredicateFactory.match()
-//						.field(fieldPath + "." + QTY_CODE_NORM)
-//						.matching(canonicalQty.getUnits()));
-//					return orQuantityTerms;
-//				}
-//			}
 
 			// not NORMALIZED_QUANTITY_SEARCH_SUPPORTED or non-canonicalizable parameter
 			addQuantityTerms(theTopBool, theIsMust, activePrefix, qtyParam, fieldPath);

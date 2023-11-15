@@ -12,6 +12,7 @@ import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.annotation.RequiredParam;
 import ca.uhn.fhir.rest.annotation.Search;
+import ca.uhn.fhir.rest.api.SummaryEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.client.api.IClientInterceptor;
 import ca.uhn.fhir.rest.client.api.IHttpRequest;
@@ -127,8 +128,8 @@ public class RemoteTerminologyServiceValidationSupportTest {
 
 		assertEquals(CODE, myCodeSystemProvider.myLastCode.getCode());
 		assertEquals(CODE_SYSTEM, myCodeSystemProvider.myLastUrl.getValueAsString());
-		assertEquals(CODE_SYSTEM_VERSION_AS_TEXT, myCodeSystemProvider.myNextReturnParams.getParameter("name").toString());
-		assertTrue(Boolean.parseBoolean(myCodeSystemProvider.myNextReturnParams.getParameter("result").primitiveValue()));
+		assertEquals(CODE_SYSTEM_VERSION_AS_TEXT, myCodeSystemProvider.myNextReturnParams.getParameterValue("name").toString());
+		assertTrue(Boolean.parseBoolean(myCodeSystemProvider.myNextReturnParams.getParameterValue("result").primitiveValue()));
 	}
 
 	@Test
@@ -141,11 +142,11 @@ public class RemoteTerminologyServiceValidationSupportTest {
 		assertNotNull(outcome, "Call to lookupCode() should return a non-NULL result!");
 		assertEquals(DISPLAY, outcome.getCodeDisplay());
 		assertEquals(CODE_SYSTEM_VERSION, outcome.getCodeSystemVersion());
-		assertEquals(CODE_SYSTEM_VERSION_AS_TEXT, myCodeSystemProvider.myNextReturnParams.getParameter("name").toString());
+		assertEquals(CODE_SYSTEM_VERSION_AS_TEXT, myCodeSystemProvider.myNextReturnParams.getParameterValue("name").toString());
 
 		assertEquals(CODE, myCodeSystemProvider.myLastCode.getCode());
 		assertEquals(CODE_SYSTEM, myCodeSystemProvider.myLastUrl.getValueAsString());
-		assertTrue(Boolean.parseBoolean(myCodeSystemProvider.myNextReturnParams.getParameter("result").primitiveValue()));
+		assertTrue(Boolean.parseBoolean(myCodeSystemProvider.myNextReturnParams.getParameterValue("result").primitiveValue()));
 
 		validateExtraCodeSystemParams();
 	}
@@ -173,6 +174,18 @@ public class RemoteTerminologyServiceValidationSupportTest {
 		assertEquals(CODE_SYSTEM, myValueSetProvider.myLastSystem.getValue());
 		assertEquals(VALUE_SET_URL, myValueSetProvider.myLastUrl.getValue());
 		assertEquals(null, myValueSetProvider.myLastValueSet);
+	}
+
+	@Test
+	void testFetchValueSet_forcesSummaryFalse() {
+	    // given
+		myValueSetProvider.myNextReturnValueSets = new ArrayList<>();
+
+		// when
+		IBaseResource valueSet = mySvc.fetchValueSet(VALUE_SET_URL);
+
+	    // then
+	    assertEquals(SummaryEnum.FALSE, myValueSetProvider.myLastSummaryParam);
 	}
 
 	@Test
@@ -373,6 +386,19 @@ public class RemoteTerminologyServiceValidationSupportTest {
 		assertNull(myConceptMapProvider.myLastTargetValueSet);
 		assertNull(myConceptMapProvider.myLastReverse);
 	}
+
+	@Test
+	void testFetchCodeSystem_forcesSummaryFalse() {
+		// given
+		myCodeSystemProvider.myNextReturnCodeSystems = new ArrayList<>();
+
+		// when
+		IBaseResource codeSystem = mySvc.fetchCodeSystem("http://loinc.org");
+
+		// then
+		assertEquals(SummaryEnum.FALSE, myCodeSystemProvider.myLastSummaryParam);
+	}
+
 
 	private void addMatchToTranslateRequest(Parameters params) {
 		Parameters.ParametersParameterComponent matchParam = params.addParameter().setName("match");
@@ -626,6 +652,7 @@ public class RemoteTerminologyServiceValidationSupportTest {
 
 	private static class MyCodeSystemProvider implements IResourceProvider {
 
+		private SummaryEnum myLastSummaryParam;
 		private UriParam myLastUrlParam;
 		private List<CodeSystem> myNextReturnCodeSystems;
 		private int myInvocationCount;
@@ -680,8 +707,9 @@ public class RemoteTerminologyServiceValidationSupportTest {
 		}
 
 		@Search
-		public List<CodeSystem> find(@RequiredParam(name = "url") UriParam theUrlParam) {
+		public List<CodeSystem> find(@RequiredParam(name = "url") UriParam theUrlParam, SummaryEnum theSummaryParam) {
 			myLastUrlParam = theUrlParam;
+			myLastSummaryParam = theSummaryParam;
 			assert myNextReturnCodeSystems != null;
 			return myNextReturnCodeSystems;
 		}
@@ -703,6 +731,7 @@ public class RemoteTerminologyServiceValidationSupportTest {
 		private StringType myLastDisplay;
 		private ValueSet myLastValueSet;
 		private UriParam myLastUrlParam;
+		private SummaryEnum myLastSummaryParam;
 
 		@Operation(name = "validate-code", idempotent = true, returnParameters = {
 			@OperationParam(name = "result", type = BooleanType.class, min = 1),
@@ -728,8 +757,9 @@ public class RemoteTerminologyServiceValidationSupportTest {
 		}
 
 		@Search
-		public List<ValueSet> find(@RequiredParam(name = "url") UriParam theUrlParam) {
+		public List<ValueSet> find(@RequiredParam(name = "url") UriParam theUrlParam, SummaryEnum theSummaryParam) {
 			myLastUrlParam = theUrlParam;
+			myLastSummaryParam = theSummaryParam;
 			assert myNextReturnValueSets != null;
 			return myNextReturnValueSets;
 		}

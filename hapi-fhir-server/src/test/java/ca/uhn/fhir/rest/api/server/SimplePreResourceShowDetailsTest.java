@@ -6,6 +6,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.List;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.contains;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -46,4 +50,16 @@ public class SimplePreResourceShowDetailsTest {
 		details.setResource(0, myResource2);
 		assertSame(myResource2, details.iterator().next());
 	}
+
+
+	@Test
+	public void testGetResources() {
+		SimplePreResourceShowDetails details = new SimplePreResourceShowDetails(List.of(myResource1, myResource2));
+		assertThat(details.getAllResources(), contains(myResource1, myResource2));
+
+		details.setResource(0, null);
+
+		assertThat(details.getAllResources(), contains(myResource2));
+	}
+
 }

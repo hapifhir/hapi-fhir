@@ -1,0 +1,5 @@
+---
+type: add
+issue: 4371
+jira: SMILE-5670
+title: "Added resource type parameter to $mdm-query-links"

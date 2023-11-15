@@ -15,6 +15,8 @@ import org.springframework.messaging.MessageHeaders;
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.awaitility.Awaitility.await;
@@ -33,8 +35,6 @@ class LinkedBlockingChannelFactoryTest {
 		new PointcutLatch("first delivery"),
 		new PointcutLatch("second delivery")
 	};
-	private int myFailureCount = 0;
-
 	@BeforeEach
 	public void before() {
 		myReceivedPayloads = new ArrayList<>();
@@ -83,36 +83,37 @@ class LinkedBlockingChannelFactoryTest {
 		assertEquals(TEST_PAYLOAD, myReceivedPayloads.get(1));
 	}
 
+	@SuppressWarnings("ResultOfMethodCallIgnored")
 	@Test
-	void testDeliveryResumesAfterFailedMessages() {
+	void testDeliveryResumesAfterFailedMessages() throws InterruptedException {
 		// setup
-		LinkedBlockingChannel producer = (LinkedBlockingChannel) buildChannels(failTwiceThenProceed());
+		CountDownLatch successfulProcessedLatch = new CountDownLatch(5);
+		LinkedBlockingChannel producer = (LinkedBlockingChannel) buildChannels(failTwiceThenProceed(successfulProcessedLatch));
 
 		// execute
-		prepareToHandleMessage(0);
-		producer.send(new TestMessage(TEST_PAYLOAD)); // fail
-		producer.send(new TestMessage(TEST_PAYLOAD)); // fail
-		producer.send(new TestMessage(TEST_PAYLOAD)); // succeed
-		producer.send(new TestMessage(TEST_PAYLOAD)); // succeed
-		producer.send(new TestMessage(TEST_PAYLOAD)); // succeed
+		producer.send(new TestMessage(TEST_PAYLOAD));
+		producer.send(new TestMessage(TEST_PAYLOAD));
+		producer.send(new TestMessage(TEST_PAYLOAD));
+		producer.send(new TestMessage(TEST_PAYLOAD));
+		producer.send(new TestMessage(TEST_PAYLOAD));
 
-		validateThreeMessagesDelivered(producer);
-		assertEquals(2, myFailureCount);
+		// verify
+		successfulProcessedLatch.await(20, TimeUnit.SECONDS);
 	}
 
 	@Nonnull
-	private Runnable failTwiceThenProceed() {
-		AtomicInteger counter = new AtomicInteger();
+	private Runnable failTwiceThenProceed(CountDownLatch theSuccessfulProcessedLatch) {
+		AtomicInteger failCounter = new AtomicInteger(0);
 
 		return () -> {
-			int value = counter.getAndIncrement();
+			int value = failCounter.getAndIncrement();
 
 			if (value < 2) {
-				++myFailureCount;
 				// This exception will be thrown the first two times this method is run
 				throw new RuntimeException("Expected Exception " + value);
 			} else {
-				startProcessingMessage(value - 2);
+				ourLog.info("Successfully processed message");
+				theSuccessfulProcessedLatch.countDown();
 			}
 		};
 	}

@@ -1,10 +1,8 @@
-package ca.uhn.fhir.rest.server;
-
 /*-
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.rest.server;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.server;
 
 import ca.uhn.fhir.rest.api.Constants;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -34,10 +33,11 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class ServletRequestTracing {
 	private static final Logger ourLog = LoggerFactory.getLogger(ServletRequestTracing.class);
-	public static final String ATTRIBUTE_REQUEST_ID = ServletRequestTracing.class.getName() + '.' + Constants.HEADER_REQUEST_ID;
+	public static final String ATTRIBUTE_REQUEST_ID =
+			ServletRequestTracing.class.getName() + '.' + Constants.HEADER_REQUEST_ID;
 
-	ServletRequestTracing() { }
-	
+	ServletRequestTracing() {}
+
 	/**
 	 * Assign a tracing id to this request, using
 	 * the X-Request-ID if present and compatible.
@@ -83,5 +83,4 @@ public class ServletRequestTracing {
 		}
 		return requestId;
 	}
-
 }

@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.bulk.export.svc;
-
 /*-
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.bulk.export.svc;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.bulk.export.svc;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
@@ -27,15 +26,18 @@ import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static org.slf4j.LoggerFactory.getLogger;
+
 public class BulkExportHelperService {
+	private static final Logger ourLog = getLogger(BulkExportHelperService.class);
 
 	@Autowired
 	private MatchUrlService myMatchUrlService;
@@ -43,26 +45,41 @@ public class BulkExportHelperService {
 	@Autowired
 	private FhirContext myContext;
 
-	public List<SearchParameterMap> createSearchParameterMapsForResourceType(RuntimeResourceDefinition theDef, ExportPIDIteratorParameters theParams) {
+	/**
+	 * Given the parameters, create the search parameter map based on type filters and the _since parameter.
+	 *
+	 * The input boolean theConsiderSince determines whether to consider the lastUpdated date in the search parameter map.
+	 */
+	public List<SearchParameterMap> createSearchParameterMapsForResourceType(
+			RuntimeResourceDefinition theDef, ExportPIDIteratorParameters theParams, boolean theConsiderSince) {
 		String resourceType = theDef.getName();
-		String[] typeFilters = theParams.getFilters().toArray(new String[0]); // lame...
+		List<String> typeFilters = theParams.getFilters();
 		List<SearchParameterMap> spMaps = null;
-		spMaps = Arrays.stream(typeFilters)
-			.filter(typeFilter -> typeFilter.startsWith(resourceType + "?"))
-			.map(filter -> buildSearchParameterMapForTypeFilter(filter, theDef, theParams.getStartDate()))
-			.collect(Collectors.toList());
+		spMaps = typeFilters.stream()
+				.filter(typeFilter -> typeFilter.startsWith(resourceType + "?"))
+				.map(filter -> buildSearchParameterMapForTypeFilter(filter, theDef, theParams.getStartDate()))
+				.collect(Collectors.toList());
 
-		//None of the _typeFilters applied to the current resource type, so just make a simple one.
+		typeFilters.stream().filter(filter -> !filter.contains("?")).forEach(filter -> {
+			ourLog.warn(
+					"Found a strange _typeFilter that we could not process: {}. _typeFilters should follow the format ResourceType?searchparameter=value .",
+					filter);
+		});
+
+		// None of the _typeFilters applied to the current resource type, so just make a simple one.
 		if (spMaps.isEmpty()) {
 			SearchParameterMap defaultMap = new SearchParameterMap();
-			enhanceSearchParameterMapWithCommonParameters(defaultMap, theParams.getStartDate());
+			if (theConsiderSince) {
+				enhanceSearchParameterMapWithCommonParameters(defaultMap, theParams.getStartDate());
+			}
 			spMaps = Collections.singletonList(defaultMap);
 		}
 
 		return spMaps;
 	}
 
-	private SearchParameterMap buildSearchParameterMapForTypeFilter(String theFilter, RuntimeResourceDefinition theDef, Date theSinceDate) {
+	private SearchParameterMap buildSearchParameterMapForTypeFilter(
+			String theFilter, RuntimeResourceDefinition theDef, Date theSinceDate) {
 		SearchParameterMap searchParameterMap = myMatchUrlService.translateMatchUrl(theFilter, theDef);
 		enhanceSearchParameterMapWithCommonParameters(searchParameterMap, theSinceDate);
 		return searchParameterMap;

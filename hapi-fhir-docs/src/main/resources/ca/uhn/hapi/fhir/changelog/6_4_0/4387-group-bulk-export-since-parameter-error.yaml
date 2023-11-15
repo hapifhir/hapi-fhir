@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 4387
+title: "Previously, when use group bulk export, if the group was referenced to a patient resource and the patient has not been updated after the _since parameter of the bulk export, none of their data/sub-resources comes through even if the sub-resources were qualified (By qualified, I mean the sub-resources were upadted/created after _since parameter).
+Now, this issue has been fixed."

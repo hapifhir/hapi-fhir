@@ -1,10 +1,8 @@
-package ca.uhn.fhir.batch2.jobs.termcodesystem.codesystemdelete;
-
 /*-
  * #%L
  * hapi-fhir-storage-batch2-jobs
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.batch2.jobs.termcodesystem.codesystemdelete;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.batch2.jobs.termcodesystem.codesystemdelete;
 
 import ca.uhn.fhir.batch2.api.IFirstJobStepWorker;
 import ca.uhn.fhir.batch2.api.IJobDataSink;
@@ -29,11 +28,12 @@ import ca.uhn.fhir.batch2.api.VoidModel;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemDeleteJobSvc;
 import ca.uhn.fhir.jpa.term.models.CodeSystemVersionPIDResult;
 import ca.uhn.fhir.jpa.term.models.TermCodeSystemDeleteJobParameters;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.Iterator;
+import javax.annotation.Nonnull;
 
-public class ReadTermConceptVersionsStep implements IFirstJobStepWorker<TermCodeSystemDeleteJobParameters, CodeSystemVersionPIDResult> {
+public class ReadTermConceptVersionsStep
+		implements IFirstJobStepWorker<TermCodeSystemDeleteJobParameters, CodeSystemVersionPIDResult> {
 
 	private final ITermCodeSystemDeleteJobSvc myITermCodeSystemSvc;
 
@@ -41,12 +41,12 @@ public class ReadTermConceptVersionsStep implements IFirstJobStepWorker<TermCode
 		myITermCodeSystemSvc = theCodeSystemDeleteJobSvc;
 	}
 
-	@NotNull
+	@Nonnull
 	@Override
 	public RunOutcome run(
-		@NotNull StepExecutionDetails<TermCodeSystemDeleteJobParameters, VoidModel> theStepExecutionDetails,
-		@NotNull IJobDataSink<CodeSystemVersionPIDResult> theDataSink
-	) throws JobExecutionFailedException {
+			@Nonnull StepExecutionDetails<TermCodeSystemDeleteJobParameters, VoidModel> theStepExecutionDetails,
+			@Nonnull IJobDataSink<CodeSystemVersionPIDResult> theDataSink)
+			throws JobExecutionFailedException {
 		TermCodeSystemDeleteJobParameters parameters = theStepExecutionDetails.getParameters();
 
 		long pid = parameters.getTermPid();

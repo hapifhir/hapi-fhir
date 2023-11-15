@@ -1,10 +1,8 @@
-package ca.uhn.fhir.batch2.jobs.termcodesystem.codesystemversiondelete;
-
 /*-
  * #%L
  * hapi-fhir-storage-batch2-jobs
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.batch2.jobs.termcodesystem.codesystemversiondelete;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.batch2.jobs.termcodesystem.codesystemversiondelete;
 
 import ca.uhn.fhir.batch2.api.IFirstJobStepWorker;
 import ca.uhn.fhir.batch2.api.IJobDataSink;
@@ -29,9 +28,11 @@ import ca.uhn.fhir.batch2.api.VoidModel;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemDeleteJobSvc;
 import ca.uhn.fhir.jpa.term.models.CodeSystemVersionPIDResult;
 import ca.uhn.fhir.jpa.term.models.TermCodeSystemDeleteVersionJobParameters;
-import org.jetbrains.annotations.NotNull;
 
-public class DeleteCodeSystemVersionFirstStep implements IFirstJobStepWorker<TermCodeSystemDeleteVersionJobParameters, CodeSystemVersionPIDResult> {
+import javax.annotation.Nonnull;
+
+public class DeleteCodeSystemVersionFirstStep
+		implements IFirstJobStepWorker<TermCodeSystemDeleteVersionJobParameters, CodeSystemVersionPIDResult> {
 
 	private final ITermCodeSystemDeleteJobSvc myTermCodeSystemSvc;
 
@@ -39,12 +40,12 @@ public class DeleteCodeSystemVersionFirstStep implements IFirstJobStepWorker<Ter
 		myTermCodeSystemSvc = theCodeSystemDeleteJobSvc;
 	}
 
-	@NotNull
+	@Nonnull
 	@Override
 	public RunOutcome run(
-		@NotNull StepExecutionDetails<TermCodeSystemDeleteVersionJobParameters, VoidModel> theStepExecutionDetails,
-		@NotNull IJobDataSink<CodeSystemVersionPIDResult> theDataSink
-	) throws JobExecutionFailedException {
+			@Nonnull StepExecutionDetails<TermCodeSystemDeleteVersionJobParameters, VoidModel> theStepExecutionDetails,
+			@Nonnull IJobDataSink<CodeSystemVersionPIDResult> theDataSink)
+			throws JobExecutionFailedException {
 		long versionId = theStepExecutionDetails.getParameters().getCodeSystemVersionPid();
 
 		myTermCodeSystemSvc.deleteCodeSystemConceptsByCodeSystemVersionPid(versionId);

@@ -5,7 +5,8 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-deployable-pom</artifactId>
-		<version>6.2.0-PRE1-SNAPSHOT</version>
+		<version>6.11.0-SNAPSHOT</version>
+
 		<relativePath>../hapi-deployable-pom/pom.xml</relativePath>
 	</parent>
 
@@ -59,6 +60,11 @@
 		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-storage</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-jpaserver-subscription</artifactId>
 			<version>${project.version}</version>
 		</dependency>
@@ -99,6 +105,11 @@
 		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-structures-r4b</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-structures-r5</artifactId>
 			<version>${project.version}</version>
 		</dependency>
@@ -124,12 +135,12 @@
 		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
-			<artifactId>hapi-fhir-validation-resources-r5</artifactId>
+			<artifactId>hapi-fhir-validation-resources-r4b</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
-			<artifactId>hapi-fhir-batch</artifactId>
+			<artifactId>hapi-fhir-validation-resources-r5</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
@@ -152,6 +163,10 @@
 					<artifactId>commons-logging</artifactId>
 				</exclusion>
 			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>net.ttddyy</groupId>
+			<artifactId>datasource-proxy</artifactId>
 		</dependency>
 
 		<dependency>
@@ -243,11 +258,6 @@
 		Dependencies that need to be added since JDK9
 		-->
 		<dependency>
-			<groupId>javax.annotation</groupId>
-			<artifactId>javax.annotation-api</artifactId>
-		</dependency>
-
-		<dependency>
 			<groupId>javax.servlet</groupId>
 			<artifactId>javax.servlet-api</artifactId>
 			<scope>provided</scope>
@@ -305,7 +315,7 @@
 		</dependency>
 		<dependency>
 			<groupId>org.glassfish</groupId>
-			<artifactId>javax.el</artifactId>
+			<artifactId>jakarta.el</artifactId>
 		</dependency>
 
 		<!-- Note that we need this dependency to send log4j logging requests to slf4j -->
@@ -333,6 +343,18 @@
 			<artifactId>hibernate-search-backend-lucene</artifactId>
 		</dependency>
 		<dependency>
+			<groupId>org.hibernate.search</groupId>
+			<artifactId>hibernate-search-backend-elasticsearch-aws</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-envers</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.data</groupId>
+			<artifactId>spring-data-envers</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>org.apache.lucene</groupId>
 			<artifactId>lucene-analyzers-phonetic</artifactId>
 		</dependency>
@@ -345,6 +367,10 @@
 			<groupId>com.google.guava</groupId>
 			<artifactId>guava</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>jakarta.annotation</groupId>
+			<artifactId>jakarta.annotation-api</artifactId>
+		</dependency>
 
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
@@ -354,8 +380,21 @@
 		</dependency>
 
 		<dependency>
-			<groupId>com.github.ben-manes.caffeine</groupId>
-			<artifactId>caffeine</artifactId>
+			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-caching-caffeine</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-caching-testing</artifactId>
+			<version>${project.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-test-utilities</artifactId>
+			<version>${project.version}</version>
+			<scope>test</scope>
 		</dependency>
 
 		<dependency>
@@ -366,6 +405,12 @@
 			<groupId>org.apache.jena</groupId>
 			<artifactId>jena-arq</artifactId>
 			<scope>compile</scope>
+			<exclusions>
+				<exclusion>
+					<groupId>javax.annotation</groupId>
+					<artifactId>javax.annotation-api</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.jena</groupId>
@@ -381,21 +426,20 @@
 			<groupId>com.jayway.jsonpath</groupId>
 			<artifactId>json-path</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>org.exparity</groupId>
+			<artifactId>hamcrest-date</artifactId>
+			<scope>test</scope>
+		</dependency>
 	</dependencies>
-
-
-	<properties>
-		<jackson.version>2.7.1</jackson.version>
-	</properties>
 
 	<build>
 		<plugins>
 			<plugin>
 				<groupId>de.jpdigital</groupId>
-				<artifactId>hibernate54-ddl-maven-plugin</artifactId>
+				<artifactId>hibernate56-ddl-maven-plugin</artifactId>
 				<configuration>
 					<dialects>
-						<param>h2</param>
 						<param>derby_10_7</param>
 						<param>mysql57</param>
 						<param>mariadb</param>
@@ -403,6 +447,7 @@
 						<param>sqlserver2012</param>
 					</dialects>
 					<customDialects>
+						<customDialect>ca.uhn.fhir.jpa.model.dialect.HapiFhirH2Dialect</customDialect>
 						<customDialect>ca.uhn.fhir.jpa.model.dialect.HapiFhirPostgres94Dialect</customDialect>
 						<customDialect>org.hibernate.dialect.CockroachDB201Dialect</customDialect>
 					</customDialects>
@@ -435,20 +480,50 @@
 						<artifactId>hapi-fhir-jpaserver-model</artifactId>
 						<version>${project.version}</version>
 					</dependency>
+					<dependency>
+						<groupId>org.hibernate</groupId>
+						<artifactId>hibernate-core</artifactId>
+						<version>${hibernate_version}</version>
+					</dependency>
+					<dependency>
+						<groupId>org.hibernate</groupId>
+						<artifactId>hibernate-envers</artifactId>
+						<!-- N.B. Maven reacts badly if we omit the version for plugin dependencies, despite being defined in the parent pom's dependencyManagement section -->
+						<version>${hibernate_version}</version>
+					</dependency>
+					<dependency>
+						<groupId>javax.xml.bind</groupId>
+						<artifactId>jaxb-api</artifactId>
+						<version>${jaxb_api_version}</version>
+					</dependency>
+					<dependency>
+						<groupId>com.sun.xml.bind</groupId>
+						<artifactId>jaxb-impl</artifactId>
+						<version>${jaxb_api_version}</version>
+					</dependency>
 				</dependencies>
 			</plugin>
 			<plugin>
-				<groupId>org.jacoco</groupId>
-				<artifactId>jacoco-maven-plugin</artifactId>
-				<configuration>
-					<dumpOnExit>true</dumpOnExit>
-				</configuration>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-antrun-plugin</artifactId>
 				<executions>
 					<execution>
-						<id>default-prepare-agent</id>
+						<phase>process-classes</phase>
 						<goals>
-							<goal>prepare-agent</goal>
+							<goal>run</goal>
 						</goals>
+						<configuration>
+							<target>
+								<concat destfile="${project.basedir}/target/classes/ca/uhn/hapi/fhir/jpa/docs/database/hapifhirpostgres94-complete.sql" force="yes">
+									<fileset dir="${project.basedir}/target/classes/ca/uhn/hapi/fhir/jpa/docs/database">
+										<include name="hapifhirpostgres94.sql"/>
+									</fileset>
+									<fileset dir="${project.basedir}/src/main/resources/ca/uhn/fhir/jpa/docs/database">
+										<include name="hapifhirpostgres94-init01.sql"/>
+									</fileset>
+								</concat>
+							</target>
+						</configuration>
 					</execution>
 				</executions>
 			</plugin>
@@ -500,6 +575,22 @@
 							<configPackageBase>ca.uhn.fhir.jpa.config</configPackageBase>
 							<packageBase>ca.uhn.fhir.jpa.rp.r4</packageBase>
 							<targetResourceSpringBeansFile>hapi-fhir-server-resourceproviders-r4.xml
+							</targetResourceSpringBeansFile>
+							<baseResourceNames></baseResourceNames>
+							<excludeResourceNames>
+							</excludeResourceNames>
+						</configuration>
+					</execution>
+					<execution>
+						<id>build_r4b</id>
+						<goals>
+							<goal>generate-jparest-server</goal>
+						</goals>
+						<configuration>
+							<version>r4b</version>
+							<configPackageBase>ca.uhn.fhir.jpa.config</configPackageBase>
+							<packageBase>ca.uhn.fhir.jpa.rp.r4b</packageBase>
+							<targetResourceSpringBeansFile>hapi-fhir-server-resourceproviders-r4b.xml
 							</targetResourceSpringBeansFile>
 							<baseResourceNames></baseResourceNames>
 							<excludeResourceNames>

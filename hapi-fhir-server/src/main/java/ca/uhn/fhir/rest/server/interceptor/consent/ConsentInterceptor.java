@@ -1,10 +1,8 @@
-package ca.uhn.fhir.rest.server.interceptor.consent;
-
 /*-
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.rest.server.interceptor.consent;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.server.interceptor.consent;
 
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
@@ -54,6 +53,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 import static ca.uhn.fhir.rest.api.Constants.URL_TOKEN_METADATA;
 import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_META;
@@ -70,9 +71,12 @@ import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_META;
 public class ConsentInterceptor {
 	private static final AtomicInteger ourInstanceCount = new AtomicInteger(0);
 	private final int myInstanceIndex = ourInstanceCount.incrementAndGet();
-	private final String myRequestAuthorizedKey = ConsentInterceptor.class.getName() + "_" + myInstanceIndex + "_AUTHORIZED";
-	private final String myRequestCompletedKey = ConsentInterceptor.class.getName() + "_" + myInstanceIndex + "_COMPLETED";
-	private final String myRequestSeenResourcesKey = ConsentInterceptor.class.getName() + "_" + myInstanceIndex + "_SEENRESOURCES";
+	private final String myRequestAuthorizedKey =
+			ConsentInterceptor.class.getName() + "_" + myInstanceIndex + "_AUTHORIZED";
+	private final String myRequestCompletedKey =
+			ConsentInterceptor.class.getName() + "_" + myInstanceIndex + "_COMPLETED";
+	private final String myRequestSeenResourcesKey =
+			ConsentInterceptor.class.getName() + "_" + myInstanceIndex + "_SEENRESOURCES";
 
 	private volatile List<IConsentService> myConsentService = Collections.emptyList();
 	private IConsentContextServices myContextConsentServices = IConsentContextServices.NULL_IMPL;
@@ -145,10 +149,8 @@ public class ConsentInterceptor {
 	 */
 	public ConsentInterceptor unregisterConsentService(IConsentService theConsentService) {
 		Validate.notNull(theConsentService, "theConsentService must not be null");
-		List<IConsentService> newList = myConsentService
-			.stream()
-			.filter(t -> t != theConsentService)
-			.collect(Collectors.toList());
+		List<IConsentService> newList =
+				myConsentService.stream().filter(t -> t != theConsentService).collect(Collectors.toList());
 		myConsentService = newList;
 		return this;
 	}
@@ -178,44 +180,40 @@ public class ConsentInterceptor {
 		}
 	}
 
+	/**
+	 * Check if this request is eligible for cached search results.
+	 * We can't use a cached result if consent may use canSeeResource.
+	 * This checks for AUTHORIZED requests, and the responses from shouldProcessCanSeeResource()
+	 * to see if this holds.
+	 * @return may the request be satisfied from cache.
+	 */
 	@Hook(value = Pointcut.STORAGE_PRECHECK_FOR_CACHED_SEARCH)
-	public boolean interceptPreCheckForCachedSearch(RequestDetails theRequestDetails) {
-		if (isRequestAuthorized(theRequestDetails)) {
-			return true;
-		}
-		return false;
+	public boolean interceptPreCheckForCachedSearch(@Nonnull RequestDetails theRequestDetails) {
+		return !isProcessCanSeeResource(theRequestDetails, null);
 	}
 
+	/**
+	 * Check if the search results from this request might be reused by later searches.
+	 * We can't use a cached result if consent may use canSeeResource.
+	 * This checks for AUTHORIZED requests, and the responses from shouldProcessCanSeeResource()
+	 * to see if this holds.
+	 * If not, marks the result as single-use.
+	 */
 	@Hook(value = Pointcut.STORAGE_PRESEARCH_REGISTERED)
-	public void interceptPreSearchRegistered(RequestDetails theRequestDetails, ICachedSearchDetails theCachedSearchDetails) {
-		if (!isRequestAuthorized(theRequestDetails)) {
+	public void interceptPreSearchRegistered(
+			RequestDetails theRequestDetails, ICachedSearchDetails theCachedSearchDetails) {
+		if (isProcessCanSeeResource(theRequestDetails, null)) {
 			theCachedSearchDetails.setCannotBeReused();
 		}
 	}
 
 	@Hook(value = Pointcut.STORAGE_PREACCESS_RESOURCES)
-	public void interceptPreAccess(RequestDetails theRequestDetails, IPreResourceAccessDetails thePreResourceAccessDetails) {
-		if (isRequestAuthorized(theRequestDetails)) {
-			return;
-		}
-		if (isSkipServiceForRequest(theRequestDetails)) {
-			return;
-		}
-		if (myConsentService.isEmpty()) {
-			return;
-		}
+	public void interceptPreAccess(
+			RequestDetails theRequestDetails, IPreResourceAccessDetails thePreResourceAccessDetails) {
 
-		// First check if we should be calling canSeeResource for the individual
-		// consent services
+		// Flags for each service
 		boolean[] processConsentSvcs = new boolean[myConsentService.size()];
-		boolean processAnyConsentSvcs = false;
-		for (int consentSvcIdx = 0; consentSvcIdx < myConsentService.size(); consentSvcIdx++) {
-			IConsentService nextService = myConsentService.get(consentSvcIdx);
-
-			boolean shouldCallCanSeeResource = nextService.shouldProcessCanSeeResource(theRequestDetails, myContextConsentServices);
-			processAnyConsentSvcs |= shouldCallCanSeeResource;
-			processConsentSvcs[consentSvcIdx] = shouldCallCanSeeResource;
-		}
+		boolean processAnyConsentSvcs = isProcessCanSeeResource(theRequestDetails, processConsentSvcs);
 
 		if (!processAnyConsentSvcs) {
 			return;
@@ -231,9 +229,12 @@ public class ConsentInterceptor {
 					continue;
 				}
 
-				ConsentOutcome outcome = nextService.canSeeResource(theRequestDetails, nextResource, myContextConsentServices);
+				ConsentOutcome outcome =
+						nextService.canSeeResource(theRequestDetails, nextResource, myContextConsentServices);
 				Validate.notNull(outcome, "Consent service returned null outcome");
-				Validate.isTrue(outcome.getResource() == null, "Consent service returned a resource in its outcome. This is not permitted in canSeeResource(..)");
+				Validate.isTrue(
+						outcome.getResource() == null,
+						"Consent service returned a resource in its outcome. This is not permitted in canSeeResource(..)");
 
 				boolean skipSubsequentServices = false;
 				switch (outcome.getStatus()) {
@@ -254,6 +255,39 @@ public class ConsentInterceptor {
 				}
 			}
 		}
+	}
+
+	/**
+	 * Is canSeeResource() active in any services?
+	 * @param theProcessConsentSvcsFlags filled in with the responses from shouldProcessCanSeeResource each service
+	 * @return true of any service responded true to shouldProcessCanSeeResource()
+	 */
+	private boolean isProcessCanSeeResource(
+			@Nonnull RequestDetails theRequestDetails, @Nullable boolean[] theProcessConsentSvcsFlags) {
+		if (isRequestAuthorized(theRequestDetails)) {
+			return false;
+		}
+		if (isSkipServiceForRequest(theRequestDetails)) {
+			return false;
+		}
+		if (myConsentService.isEmpty()) {
+			return false;
+		}
+
+		if (theProcessConsentSvcsFlags == null) {
+			theProcessConsentSvcsFlags = new boolean[myConsentService.size()];
+		}
+		Validate.isTrue(theProcessConsentSvcsFlags.length == myConsentService.size());
+		boolean processAnyConsentSvcs = false;
+		for (int consentSvcIdx = 0; consentSvcIdx < myConsentService.size(); consentSvcIdx++) {
+			IConsentService nextService = myConsentService.get(consentSvcIdx);
+
+			boolean shouldCallCanSeeResource =
+					nextService.shouldProcessCanSeeResource(theRequestDetails, myContextConsentServices);
+			processAnyConsentSvcs |= shouldCallCanSeeResource;
+			theProcessConsentSvcsFlags[consentSvcIdx] = shouldCallCanSeeResource;
+		}
+		return processAnyConsentSvcs;
 	}
 
 	@Hook(value = Pointcut.STORAGE_PRESHOW_RESOURCES)
@@ -281,7 +315,8 @@ public class ConsentInterceptor {
 			}
 
 			for (IConsentService nextService : myConsentService) {
-				ConsentOutcome nextOutcome = nextService.willSeeResource(theRequestDetails, resource, myContextConsentServices);
+				ConsentOutcome nextOutcome =
+						nextService.willSeeResource(theRequestDetails, resource, myContextConsentServices);
 				IBaseResource newResource = nextOutcome.getResource();
 
 				switch (nextOutcome.getStatus()) {
@@ -335,14 +370,16 @@ public class ConsentInterceptor {
 		if (authorizedResources.putIfAbsent(theResource.getResponseResource(), Boolean.TRUE) == null) {
 
 			for (IConsentService next : myConsentService) {
-				final ConsentOutcome outcome = next.willSeeResource(theRequestDetails, theResource.getResponseResource(), myContextConsentServices);
+				final ConsentOutcome outcome = next.willSeeResource(
+						theRequestDetails, theResource.getResponseResource(), myContextConsentServices);
 				if (outcome.getResource() != null) {
 					theResource.setResponseResource(outcome.getResource());
 				}
 
 				// Clear the total
 				if (theResource.getResponseResource() instanceof IBaseBundle) {
-					BundleUtil.setTotal(theRequestDetails.getFhirContext(), (IBaseBundle) theResource.getResponseResource(), null);
+					BundleUtil.setTotal(
+							theRequestDetails.getFhirContext(), (IBaseBundle) theResource.getResponseResource(), null);
 				}
 
 				switch (outcome.getStatus()) {
@@ -370,7 +407,11 @@ public class ConsentInterceptor {
 		FhirContext ctx = theRequestDetails.getServer().getFhirContext();
 		IModelVisitor2 visitor = new IModelVisitor2() {
 			@Override
-			public boolean acceptElement(IBase theElement, List<IBase> theContainingElementPath, List<BaseRuntimeChildDefinition> theChildDefinitionPath, List<BaseRuntimeElementDefinition<?>> theElementDefinitionPath) {
+			public boolean acceptElement(
+					IBase theElement,
+					List<IBase> theContainingElementPath,
+					List<BaseRuntimeChildDefinition> theChildDefinitionPath,
+					List<BaseRuntimeElementDefinition<?>> theElementDefinitionPath) {
 
 				// Clear the total
 				if (theElement instanceof IBaseBundle) {
@@ -388,7 +429,8 @@ public class ConsentInterceptor {
 
 					boolean shouldCheckChildren = true;
 					for (IConsentService next : myConsentService) {
-						ConsentOutcome childOutcome = next.willSeeResource(theRequestDetails, resource, myContextConsentServices);
+						ConsentOutcome childOutcome =
+								next.willSeeResource(theRequestDetails, resource, myContextConsentServices);
 
 						IBaseResource replacementResource = null;
 						boolean shouldReplaceResource = false;
@@ -408,11 +450,11 @@ public class ConsentInterceptor {
 
 						if (shouldReplaceResource) {
 							IBase container = theContainingElementPath.get(theContainingElementPath.size() - 2);
-							BaseRuntimeChildDefinition containerChildElement = theChildDefinitionPath.get(theChildDefinitionPath.size() - 1);
+							BaseRuntimeChildDefinition containerChildElement =
+									theChildDefinitionPath.get(theChildDefinitionPath.size() - 1);
 							containerChildElement.getMutator().setValue(container, replacementResource);
 							resource = replacementResource;
 						}
-
 					}
 
 					return shouldCheckChildren;
@@ -422,12 +464,15 @@ public class ConsentInterceptor {
 			}
 
 			@Override
-			public boolean acceptUndeclaredExtension(IBaseExtension<?, ?> theNextExt, List<IBase> theContainingElementPath, List<BaseRuntimeChildDefinition> theChildDefinitionPath, List<BaseRuntimeElementDefinition<?>> theElementDefinitionPath) {
+			public boolean acceptUndeclaredExtension(
+					IBaseExtension<?, ?> theNextExt,
+					List<IBase> theContainingElementPath,
+					List<BaseRuntimeChildDefinition> theChildDefinitionPath,
+					List<BaseRuntimeElementDefinition<?>> theElementDefinitionPath) {
 				return true;
 			}
 		};
 		ctx.newTerser().visit(outerResource, visitor);
-
 	}
 
 	private IdentityHashMap<IBaseResource, Boolean> getAuthorizedResourcesMap(RequestDetails theRequestDetails) {
@@ -479,18 +524,24 @@ public class ConsentInterceptor {
 
 	private void validateParameter(Map<String, String[]> theParameterMap) {
 		if (theParameterMap != null) {
-			if (theParameterMap.containsKey(Constants.PARAM_SEARCH_TOTAL_MODE) && Arrays.stream(theParameterMap.get("_total")).anyMatch("accurate"::equals)) {
-				throw new InvalidRequestException(Msg.code(2037) + Constants.PARAM_SEARCH_TOTAL_MODE + "=accurate is not permitted on this server");
+			if (theParameterMap.containsKey(Constants.PARAM_SEARCH_TOTAL_MODE)
+					&& Arrays.stream(theParameterMap.get("_total")).anyMatch("accurate"::equals)) {
+				throw new InvalidRequestException(Msg.code(2037) + Constants.PARAM_SEARCH_TOTAL_MODE
+						+ "=accurate is not permitted on this server");
 			}
-			if (theParameterMap.containsKey(Constants.PARAM_SUMMARY) && Arrays.stream(theParameterMap.get("_summary")).anyMatch("count"::equals)) {
-				throw new InvalidRequestException(Msg.code(2038) + Constants.PARAM_SUMMARY + "=count is not permitted on this server");
+			if (theParameterMap.containsKey(Constants.PARAM_SUMMARY)
+					&& Arrays.stream(theParameterMap.get("_summary")).anyMatch("count"::equals)) {
+				throw new InvalidRequestException(
+						Msg.code(2038) + Constants.PARAM_SUMMARY + "=count is not permitted on this server");
 			}
 		}
 	}
 
 	@SuppressWarnings("unchecked")
-	public static IdentityHashMap<IBaseResource, Boolean> getAlreadySeenResourcesMap(RequestDetails theRequestDetails, String theKey) {
-		IdentityHashMap<IBaseResource, Boolean> alreadySeenResources = (IdentityHashMap<IBaseResource, Boolean>) theRequestDetails.getUserData().get(theKey);
+	public static IdentityHashMap<IBaseResource, Boolean> getAlreadySeenResourcesMap(
+			RequestDetails theRequestDetails, String theKey) {
+		IdentityHashMap<IBaseResource, Boolean> alreadySeenResources = (IdentityHashMap<IBaseResource, Boolean>)
+				theRequestDetails.getUserData().get(theKey);
 		if (alreadySeenResources == null) {
 			alreadySeenResources = new IdentityHashMap<>();
 			theRequestDetails.getUserData().put(theKey, alreadySeenResources);

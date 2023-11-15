@@ -62,6 +62,7 @@ import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.parser.IParserErrorHandler.IParseLocation;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.util.ClasspathUtil;
 import ca.uhn.fhir.util.TestUtil;
 import com.google.common.collect.Sets;
 import org.apache.commons.io.IOUtils;
@@ -1057,7 +1058,7 @@ public class XmlParserDstu2Test {
 	public void testEncodeAndParseProfiledDatatypeChoice() throws Exception {
 		IParser xmlParser = ourCtx.newXmlParser();
 
-		String input = IOUtils.toString(XmlParser.class.getResourceAsStream("/medicationstatement_invalidelement.xml"), StandardCharsets.UTF_8);
+		String input = ClasspathUtil.loadResource("/medicationstatement_invalidelement.xml");
 		MedicationStatement ms = xmlParser.parseResource(MedicationStatement.class, input);
 		SimpleQuantityDt q = (SimpleQuantityDt) ms.getDosage().get(0).getQuantity();
 		assertEquals("1", q.getValueElement().getValueAsString());
@@ -2005,7 +2006,7 @@ public class XmlParserDstu2Test {
 
 	@Test
 	public void testParseAndEncodeBundle() throws Exception {
-		String content = IOUtils.toString(XmlParserDstu2Test.class.getResourceAsStream("/bundle-example.xml"), StandardCharsets.UTF_8);
+		String content = ClasspathUtil.loadResource("/bundle-example.xml");
 
 		Bundle parsed = ourCtx.newXmlParser().parseResource(Bundle.class, content);
 		assertEquals("Bundle/example/_history/1", parsed.getId().getValue());
@@ -2039,7 +2040,7 @@ public class XmlParserDstu2Test {
 
 	@Test
 	public void testParseAndEncodeBundleNewStyle() throws Exception {
-		String content = IOUtils.toString(XmlParserDstu2Test.class.getResourceAsStream("/bundle-example.xml"), StandardCharsets.UTF_8);
+		String content = ClasspathUtil.loadResource("/bundle-example.xml");
 
 		IParser newXmlParser = ourCtx.newXmlParser();
 		ca.uhn.fhir.model.dstu2.resource.Bundle parsed = newXmlParser.parseResource(ca.uhn.fhir.model.dstu2.resource.Bundle.class, content);
@@ -2334,7 +2335,7 @@ public class XmlParserDstu2Test {
 		assertEquals(ResourceReferenceDt.class, ext.getValue().getClass());
 		assertEquals("#2179414-cm", ((ResourceReferenceDt) ext.getValue()).getReference().getValue());
 
-		ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(de));
+		ourLog.debug(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(de));
 
 		assertThat(output, containsString("http://hl7.org/fhir/StructureDefinition/11179-permitted-value-valueset"));
 
@@ -2512,7 +2513,7 @@ public class XmlParserDstu2Test {
 	 */
 	@Test
 	public void testParseBundleWithLinksOfUnknownRelation() throws Exception {
-		String input = IOUtils.toString(XmlParserDstu2Test.class.getResourceAsStream("/bundle_orion.xml"), StandardCharsets.UTF_8);
+		String input = ClasspathUtil.loadResource("/bundle_orion.xml");
 		ca.uhn.fhir.model.dstu2.resource.Bundle parsed = ourCtx.newXmlParser().parseResource(ca.uhn.fhir.model.dstu2.resource.Bundle.class, input);
 
 		Link link = parsed.getLink().get(0);

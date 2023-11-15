@@ -6,8 +6,9 @@ import ca.uhn.fhir.narrative.DefaultThymeleafNarrativeGenerator;
 import ca.uhn.fhir.parser.IParserErrorHandler.IParseLocation;
 import ca.uhn.fhir.parser.PatientWithExtendedContactDstu3.CustomContactComponent;
 import ca.uhn.fhir.parser.XmlParserDstu3Test.TestPatientFor327;
-import ca.uhn.fhir.parser.json.JsonLikeValue.ScalarType;
-import ca.uhn.fhir.parser.json.JsonLikeValue.ValueType;
+import ca.uhn.fhir.parser.json.BaseJsonLikeValue.ScalarType;
+import ca.uhn.fhir.parser.json.BaseJsonLikeValue.ValueType;
+import ca.uhn.fhir.util.ClasspathUtil;
 import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ValidationResult;
@@ -51,6 +52,7 @@ import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu3.model.Extension;
 import org.hl7.fhir.dstu3.model.HumanName;
 import org.hl7.fhir.dstu3.model.IdType;
+import org.hl7.fhir.dstu3.model.Identifier;
 import org.hl7.fhir.dstu3.model.Identifier.IdentifierUse;
 import org.hl7.fhir.dstu3.model.Linkage;
 import org.hl7.fhir.dstu3.model.Medication;
@@ -95,6 +97,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.stringContainsInOrder;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -145,7 +148,7 @@ public class JsonParserDstu3Test {
 	 */
 	@Test
 	public void testBadMessageForUnknownElement() throws IOException {
-		String input = IOUtils.toString(JsonParserDstu3Test.class.getResourceAsStream("/bad_parse_bundle_1.json"), StandardCharsets.UTF_8);
+		String input = ClasspathUtil.loadResource("/bad_parse_bundle_1.json");
 
 		IParser p = ourCtx.newJsonParser();
 		p.setParserErrorHandler(new StrictErrorHandler());
@@ -163,7 +166,7 @@ public class JsonParserDstu3Test {
 	 */
 	@Test
 	public void testBadMessageForUnknownElement2() throws IOException {
-		String input = IOUtils.toString(JsonParserDstu3Test.class.getResourceAsStream("/bad_parse_bundle_2.json"), StandardCharsets.UTF_8);
+		String input = ClasspathUtil.loadResource("/bad_parse_bundle_2.json");
 
 		IParser p = ourCtx.newJsonParser();
 		p.setParserErrorHandler(new StrictErrorHandler());
@@ -1162,7 +1165,7 @@ public class JsonParserDstu3Test {
 		patient.addPhoto().setTitle("green");
 		patient.getMaritalStatus().addCoding().setCode("D");
 
-		ourLog.info(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient));
+		ourLog.debug(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient));
 
 		String encoded = ourCtx.newJsonParser().setPrettyPrint(true).setSummaryMode(true).encodeResourceToString(patient);
 		ourLog.info(encoded);
@@ -1728,7 +1731,7 @@ public class JsonParserDstu3Test {
 	@Test
 	@Disabled
 	public void testParseAndEncodeBundle() throws Exception {
-		String content = IOUtils.toString(JsonParserDstu3Test.class.getResourceAsStream("/bundle-example.json"), StandardCharsets.UTF_8);
+		String content = ClasspathUtil.loadResource("/bundle-example.json");
 
 		Bundle parsed = ourCtx.newXmlParser().parseResource(Bundle.class, content);
 		assertEquals("Bundle/example/_history/1", parsed.getIdElement().getValue());
@@ -1777,7 +1780,7 @@ public class JsonParserDstu3Test {
 	@Test
 	@Disabled
 	public void testParseAndEncodeBundleFromXmlToJson() throws Exception {
-		String content = IOUtils.toString(JsonParserDstu3Test.class.getResourceAsStream("/bundle-example2.xml"), StandardCharsets.UTF_8);
+		String content = ClasspathUtil.loadResource("/bundle-example2.xml");
 
 		Bundle parsed = ourCtx.newXmlParser().parseResource(Bundle.class, content);
 
@@ -1920,34 +1923,16 @@ public class JsonParserDstu3Test {
 		assertEquals("654321", res.getIdentifier().get(0).getValue());
 		assertEquals(true, res.getActive());
 
-		assertThat(res.getIdentifier().get(0).getFormatCommentsPre(), contains("identifier comment 1", "identifier comment 2"));
-		assertThat(res.getIdentifier().get(0).getUseElement().getFormatCommentsPre(), contains("use comment 1", "use comment 2"));
+		assertThat(res.getIdentifier().get(0).getFormatCommentsPre(), not(contains("identifier comment 1", "identifier comment 2")));
+		assertThat(res.getIdentifier().get(0).getUseElement().getFormatCommentsPre(), not(contains("use comment 1", "use comment 2")));
 
 		String encoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(res);
 		ourLog.info(encoded);
 
-		//@formatter:off
-		assertThat(encoded, stringContainsInOrder(
-			"\"identifier\": [",
-			"{",
-			"\"fhir_comments\":",
-			"[",
-			"\"identifier comment 1\"",
-			",",
-			"\"identifier comment 2\"",
-			"]",
-			"\"use\": \"usual\",",
-			"\"_use\": {",
-			"\"fhir_comments\":",
-			"[",
-			"\"use comment 1\"",
-			",",
-			"\"use comment 2\"",
-			"]",
-			"},",
-			"\"type\""
-		));
-		//@formatter:off
+		assertThat(encoded, not(containsString("use comment 1")));
+		assertThat(encoded, not(containsString("use comment 2")));
+		assertThat(encoded, not(containsString("identifier comment 1")));
+		assertThat(encoded, not(containsString("identifier comment 2")));
 	}
 
 	@Test
@@ -1970,7 +1955,7 @@ public class JsonParserDstu3Test {
 	 */
 	@Test
 	public void testParseCommunicationWithThreeTypes() throws IOException {
-		String content = IOUtils.toString(JsonParserDstu3Test.class.getResourceAsStream("/tara-test.json"), StandardCharsets.UTF_8);
+		String content = ClasspathUtil.loadResource("/tara-test.json");
 		Communication comm = ourCtx.newJsonParser().parseResource(Communication.class, content);
 
 		assertEquals(3, comm.getPayload().size());
@@ -2029,7 +2014,7 @@ public class JsonParserDstu3Test {
 		assertEquals(Bug720Datatype.class, parsed.getTemplates().get(0).getClass());
 		assertEquals("Mustermann", ((Bug720Datatype) parsed.getTemplates().get(0)).getContact().getNameFirstRep().getFamily());
 
-		ourLog.info(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(parsed));
+		ourLog.debug(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(parsed));
 	}
 
 	/**
@@ -2215,7 +2200,7 @@ public class JsonParserDstu3Test {
 
 		// We're lenient so we accept it. Maybe this could change, or be a warning in future though
 
-		String input = IOUtils.toString(JsonParserDstu3Test.class.getResourceAsStream("/missing_array.json"), StandardCharsets.UTF_8);
+		String input = ClasspathUtil.loadResource("/missing_array.json");
 		RelatedPerson rp = ourCtx.newJsonParser().parseResource(RelatedPerson.class, input);
 		assertEquals(1, rp.getName().size());
 		assertEquals("Doe", rp.getName().get(0).getFamily());
@@ -2229,11 +2214,11 @@ public class JsonParserDstu3Test {
 	public void testParseNarrativeWithEmptyDiv() {
 		String input = "{\"resourceType\":\"Basic\",\"id\":\"1\",\"text\":{\"status\":\"generated\",\"div\":\"<div/>\"}}";
 		Basic basic = ourCtx.newJsonParser().parseResource(Basic.class, input);
-		assertEquals("<div/>", basic.getText().getDivAsString());
+		assertNull(null, basic.getText().getDivAsString());
 
 		input = "{\"resourceType\":\"Basic\",\"id\":\"1\",\"text\":{\"status\":\"generated\",\"div\":\"<div></div>\"}}";
 		basic = ourCtx.newJsonParser().parseResource(Basic.class, input);
-		assertEquals("<div xmlns=\"http://www.w3.org/1999/xhtml\"/>", basic.getText().getDivAsString());
+		assertNull(basic.getText().getDivAsString());
 
 		input = "{\"resourceType\":\"Basic\",\"id\":\"1\",\"text\":{\"status\":\"generated\",\"div\":\"<div> </div>\"}}";
 		basic = ourCtx.newJsonParser().parseResource(Basic.class, input);
@@ -2440,7 +2425,7 @@ public class JsonParserDstu3Test {
 	 */
 	@Test
 	public void testUnexpectedElementsWithUnderscoreAtStartOfName() throws Exception {
-		String input = IOUtils.toString(JsonParserDstu3Test.class.getResourceAsStream("/bug477.json"), StandardCharsets.UTF_8);
+		String input = ClasspathUtil.loadResource("/bug477.json");
 
 		IParserErrorHandler errorHandler = mock(IParserErrorHandler.class);
 
@@ -2494,7 +2479,7 @@ public class JsonParserDstu3Test {
 
 		ValidationResult result = val.validateWithResult(header);
 
-		ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(result.toOperationOutcome()));
+		ourLog.debug(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(result.toOperationOutcome()));
 		assertTrue(result.isSuccessful());
 	}
 
@@ -2535,6 +2520,29 @@ public class JsonParserDstu3Test {
 		assertTrue(containedResource.getMeta().getSecurity().isEmpty());
 		assertEquals(1, containedResource.getMeta().getProfile().size());
 		assertEquals(1, containedResource.getMeta().getTag().size());
+	}
+
+	@Test
+	public void testPreCommentsToFhirComments() {
+		final Patient patient = new Patient();
+
+		final Identifier identifier = new Identifier();
+		identifier.setValue("myId");
+		identifier.getFormatCommentsPre().add("This is a comment");
+		patient.getIdentifier().add(identifier);
+
+		final HumanName humanName1 = new HumanName();
+		humanName1.addGiven("given1");
+		humanName1.getFormatCommentsPre().add("This is another comment");
+		patient.getName().add(humanName1);
+
+		final HumanName humanName2 = new HumanName();
+		humanName2.addGiven("given1");
+		humanName2.getFormatCommentsPre().add("This is yet another comment");
+		patient.getName().add(humanName2);
+
+		final String patientString = ourCtx.newJsonParser().encodeResourceToString(patient);
+		assertThat(patientString, is(not(containsString("fhir_comment"))));
 	}
 
 	@AfterAll

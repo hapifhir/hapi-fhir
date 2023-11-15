@@ -1,0 +1,4 @@
+---
+type: change
+issue: 4693
+title: "Bulk import operations have been enhanced to be fully partition aware."

@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.subscription.submit.config;
-
 /*-
  * #%L
  * HAPI FHIR Subscription Server
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,13 +17,24 @@ package ca.uhn.fhir.jpa.subscription.submit.config;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.subscription.submit.config;
 
+import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
+import ca.uhn.fhir.jpa.model.entity.StorageSettings;
+import ca.uhn.fhir.jpa.subscription.async.AsyncResourceModifiedProcessingSchedulerSvc;
+import ca.uhn.fhir.jpa.subscription.async.AsyncResourceModifiedSubmitterSvc;
+import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelFactory;
+import ca.uhn.fhir.jpa.subscription.match.matcher.matching.SubscriptionStrategyEvaluator;
 import ca.uhn.fhir.jpa.subscription.model.config.SubscriptionModelConfig;
-import ca.uhn.fhir.jpa.subscription.submit.interceptor.SubscriptionMatcherInterceptor;
+import ca.uhn.fhir.jpa.subscription.submit.interceptor.SubscriptionQueryValidator;
 import ca.uhn.fhir.jpa.subscription.submit.interceptor.SubscriptionSubmitInterceptorLoader;
 import ca.uhn.fhir.jpa.subscription.submit.interceptor.SubscriptionValidatingInterceptor;
+import ca.uhn.fhir.jpa.subscription.submit.svc.ResourceModifiedSubmitterSvc;
 import ca.uhn.fhir.jpa.subscription.triggering.ISubscriptionTriggeringSvc;
 import ca.uhn.fhir.jpa.subscription.triggering.SubscriptionTriggeringSvcImpl;
+import ca.uhn.fhir.subscription.api.IResourceModifiedConsumerWithRetries;
+import ca.uhn.fhir.subscription.api.IResourceModifiedMessagePersistenceSvc;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -36,17 +45,18 @@ import org.springframework.context.annotation.Lazy;
  * matching queue for processing
  */
 @Configuration
-@Import(SubscriptionModelConfig.class)
+@Import({SubscriptionModelConfig.class, SubscriptionMatcherInterceptorConfig.class})
 public class SubscriptionSubmitterConfig {
-
-	@Bean
-	public SubscriptionMatcherInterceptor subscriptionMatcherInterceptor() {
-		return new SubscriptionMatcherInterceptor();
-	}
 
 	@Bean
 	public SubscriptionValidatingInterceptor subscriptionValidatingInterceptor() {
 		return new SubscriptionValidatingInterceptor();
+	}
+
+	@Bean
+	public SubscriptionQueryValidator subscriptionQueryValidator(
+			DaoRegistry theDaoRegistry, SubscriptionStrategyEvaluator theSubscriptionStrategyEvaluator) {
+		return new SubscriptionQueryValidator(theDaoRegistry, theSubscriptionStrategyEvaluator);
 	}
 
 	@Bean
@@ -60,5 +70,30 @@ public class SubscriptionSubmitterConfig {
 		return new SubscriptionTriggeringSvcImpl();
 	}
 
+	@Bean
+	public ResourceModifiedSubmitterSvc resourceModifiedSvc(
+			IHapiTransactionService theHapiTransactionService,
+			IResourceModifiedMessagePersistenceSvc theResourceModifiedMessagePersistenceSvc,
+			SubscriptionChannelFactory theSubscriptionChannelFactory,
+			StorageSettings theStorageSettings) {
 
+		return new ResourceModifiedSubmitterSvc(
+				theStorageSettings,
+				theSubscriptionChannelFactory,
+				theResourceModifiedMessagePersistenceSvc,
+				theHapiTransactionService);
+	}
+
+	@Bean
+	public AsyncResourceModifiedProcessingSchedulerSvc asyncResourceModifiedProcessingSchedulerSvc() {
+		return new AsyncResourceModifiedProcessingSchedulerSvc();
+	}
+
+	@Bean
+	public AsyncResourceModifiedSubmitterSvc asyncResourceModifiedSubmitterSvc(
+			IResourceModifiedMessagePersistenceSvc theIResourceModifiedMessagePersistenceSvc,
+			IResourceModifiedConsumerWithRetries theResourceModifiedConsumer) {
+		return new AsyncResourceModifiedSubmitterSvc(
+				theIResourceModifiedMessagePersistenceSvc, theResourceModifiedConsumer);
+	}
 }

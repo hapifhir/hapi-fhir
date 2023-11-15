@@ -1,10 +1,8 @@
-package ca.uhn.fhir.batch2.progress;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server - Batch2 Task Processor
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,56 +17,87 @@ package ca.uhn.fhir.batch2.progress;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.batch2.progress;
 
 import ca.uhn.fhir.batch2.api.IJobPersistence;
+import ca.uhn.fhir.batch2.coordinator.JobDefinitionRegistry;
 import ca.uhn.fhir.batch2.maintenance.JobChunkProgressAccumulator;
-import ca.uhn.fhir.batch2.model.JobInstance;
-import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.model.WorkChunk;
+import ca.uhn.fhir.util.Logs;
+import ca.uhn.fhir.util.StopWatch;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.Iterator;
+import javax.annotation.Nonnull;
 
 public class JobInstanceProgressCalculator {
-	private static final Logger ourLog = LoggerFactory.getLogger(JobInstanceProgressCalculator.class);
+	private static final Logger ourLog = Logs.getBatchTroubleshootingLog();
 	private final IJobPersistence myJobPersistence;
-	private final JobInstance myInstance;
 	private final JobChunkProgressAccumulator myProgressAccumulator;
 	private final JobInstanceStatusUpdater myJobInstanceStatusUpdater;
 
-	public JobInstanceProgressCalculator(IJobPersistence theJobPersistence, JobInstance theInstance, JobChunkProgressAccumulator theProgressAccumulator) {
+	public JobInstanceProgressCalculator(
+			IJobPersistence theJobPersistence,
+			JobChunkProgressAccumulator theProgressAccumulator,
+			JobDefinitionRegistry theJobDefinitionRegistry) {
 		myJobPersistence = theJobPersistence;
-		myInstance = theInstance;
 		myProgressAccumulator = theProgressAccumulator;
-		myJobInstanceStatusUpdater = new JobInstanceStatusUpdater(theJobPersistence);
+		myJobInstanceStatusUpdater = new JobInstanceStatusUpdater(theJobDefinitionRegistry);
 	}
 
-	public void calculateAndStoreInstanceProgress() {
-		InstanceProgress instanceProgress = new InstanceProgress();
+	public void calculateAndStoreInstanceProgress(String theInstanceId) {
+		StopWatch stopWatch = new StopWatch();
+		ourLog.trace("calculating progress: {}", theInstanceId);
 
-		Iterator<WorkChunk> workChunkIterator = myJobPersistence.fetchAllWorkChunksIterator(myInstance.getInstanceId(), false);
+		InstanceProgress instanceProgress = calculateInstanceProgress(theInstanceId);
+
+		myJobPersistence.updateInstance(theInstanceId, currentInstance -> {
+			instanceProgress.updateInstance(currentInstance);
+
+			if (currentInstance.getCombinedRecordsProcessed() > 0) {
+				ourLog.info(
+						"Job {} of type {} has status {} - {} records processed ({}/sec) - ETA: {}",
+						currentInstance.getInstanceId(),
+						currentInstance.getJobDefinitionId(),
+						currentInstance.getStatus(),
+						currentInstance.getCombinedRecordsProcessed(),
+						currentInstance.getCombinedRecordsProcessedPerSecond(),
+						currentInstance.getEstimatedTimeRemaining());
+			} else {
+				ourLog.info(
+						"Job {} of type {} has status {} - {} records processed",
+						currentInstance.getInstanceId(),
+						currentInstance.getJobDefinitionId(),
+						currentInstance.getStatus(),
+						currentInstance.getCombinedRecordsProcessed());
+			}
+			ourLog.debug(instanceProgress.toString());
+
+			if (instanceProgress.hasNewStatus()) {
+				myJobInstanceStatusUpdater.updateInstanceStatus(currentInstance, instanceProgress.getNewStatus());
+			}
+
+			return true;
+		});
+		ourLog.trace("calculating progress: {} - complete in {}", theInstanceId, stopWatch);
+	}
+
+	@Nonnull
+	public InstanceProgress calculateInstanceProgress(String instanceId) {
+		InstanceProgress instanceProgress = new InstanceProgress();
+		Iterator<WorkChunk> workChunkIterator = myJobPersistence.fetchAllWorkChunksIterator(instanceId, false);
 
 		while (workChunkIterator.hasNext()) {
 			WorkChunk next = workChunkIterator.next();
+			// global stats
 			myProgressAccumulator.addChunk(next);
+			// instance stats
 			instanceProgress.addChunk(next);
 		}
 
-		instanceProgress.updateInstance(myInstance);
+		// wipmb separate status update from stats collection in 6.8
+		instanceProgress.calculateNewStatus();
 
-		if (instanceProgress.failed()) {
-			myJobInstanceStatusUpdater.updateInstanceStatus(myInstance, StatusEnum.FAILED);
-			return;
-		}
-
-
-		if (instanceProgress.changed() || myInstance.getStatus() == StatusEnum.IN_PROGRESS) {
-			ourLog.info("Job {} of type {} has status {} - {} records processed ({}/sec) - ETA: {}", myInstance.getInstanceId(), myInstance.getJobDefinitionId(), myInstance.getStatus(), myInstance.getCombinedRecordsProcessed(), myInstance.getCombinedRecordsProcessedPerSecond(), myInstance.getEstimatedTimeRemaining());
-		}
-
-		if (instanceProgress.changed()) {
-			myJobInstanceStatusUpdater.updateInstance(myInstance);
-		}
+		return instanceProgress;
 	}
 }

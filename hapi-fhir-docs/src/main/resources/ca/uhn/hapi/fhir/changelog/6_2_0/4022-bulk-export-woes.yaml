@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 4022
+backport: 6.1.2
+title: "Fixed a bug in Group Bulk Export where the server would crash in oracle due to too many clauses."
+

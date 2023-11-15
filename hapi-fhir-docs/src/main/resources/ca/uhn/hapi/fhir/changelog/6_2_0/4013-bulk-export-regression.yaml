@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 4013
+backport: 6.1.2
+title: "In HAPI-FHIR 6.1.0, a regression was introduced into bulk export causing exports beyond the first one to fail in strange ways. This has been corrected."

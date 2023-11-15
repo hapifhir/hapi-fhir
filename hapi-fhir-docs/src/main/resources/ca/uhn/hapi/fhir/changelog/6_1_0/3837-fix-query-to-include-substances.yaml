@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 3837
+jira: SMILE-4467
+title: "Previously, when doing a GET operation with an _include as a bundle entry could occasionally miss returning some results.
+This has been corrected, and queries like '/Medication?_include=Medication:ingredient' will now correctly include the relevant target resources."

@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.config.util;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.config.util;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.config.util;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.config.HapiFhirHibernateJpaDialect;
@@ -33,16 +32,18 @@ public final class HapiEntityManagerFactoryUtil {
 	 * This method provides a partially completed entity manager
 	 * factory with HAPI FHIR customizations
 	 */
-	public static LocalContainerEntityManagerFactoryBean newEntityManagerFactory(ConfigurableListableBeanFactory myConfigurableListableBeanFactory, FhirContext theFhirContext) {
-		LocalContainerEntityManagerFactoryBean retVal = new HapiFhirLocalContainerEntityManagerFactoryBean(myConfigurableListableBeanFactory);
+	public static LocalContainerEntityManagerFactoryBean newEntityManagerFactory(
+			ConfigurableListableBeanFactory myConfigurableListableBeanFactory, FhirContext theFhirContext) {
+		LocalContainerEntityManagerFactoryBean retVal =
+				new HapiFhirLocalContainerEntityManagerFactoryBean(myConfigurableListableBeanFactory);
 		configureEntityManagerFactory(retVal, theFhirContext);
 		return retVal;
 	}
 
-	public static void configureEntityManagerFactory(LocalContainerEntityManagerFactoryBean theFactory, FhirContext theFhirContext) {
+	public static void configureEntityManagerFactory(
+			LocalContainerEntityManagerFactoryBean theFactory, FhirContext theFhirContext) {
 		theFactory.setJpaDialect(new HapiFhirHibernateJpaDialect(theFhirContext.getLocalizer()));
 		theFactory.setPackagesToScan("ca.uhn.fhir.jpa.model.entity", "ca.uhn.fhir.jpa.entity");
 		theFactory.setPersistenceProvider(new HibernatePersistenceProvider());
 	}
-
 }

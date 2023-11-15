@@ -1,6 +1,6 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.dao.IHSearchEventListener;
 import ca.uhn.fhir.jpa.test.util.TestHSearchEventDispatcher;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -9,6 +9,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
@@ -22,6 +24,7 @@ import java.util.List;
  */
 @ExtendWith(SpringExtension.class)
 public class FhirResourceDaoR4SearchLastNUsingExtendedHSearchIndexIT extends FhirResourceDaoR4SearchLastNIT {
+	private static final Logger ourLog = LoggerFactory.getLogger(FhirResourceDaoR4SearchLastNUsingExtendedHSearchIndexIT.class);
 
 	@Autowired
 	private TestHSearchEventDispatcher myHSearchEventDispatcher;
@@ -32,13 +35,16 @@ public class FhirResourceDaoR4SearchLastNUsingExtendedHSearchIndexIT extends Fhi
 
 	@BeforeEach
 	public void enableAdvancedHSearchIndexing() {
-		myDaoConfig.setAdvancedHSearchIndexing(true);
+		myStorageSettings.setLastNEnabled(true);
+		myStorageSettings.setAdvancedHSearchIndexing(true);
 		myHSearchEventDispatcher.register(mySearchEventListener);
+		ourLog.info("enableAdvancedHSearchIndexing finished.  lastn {} advancedHSearchIndexing {}", myStorageSettings.isLastNEnabled(), myStorageSettings.isAdvancedHSearchIndexing());
+
 	}
 
 	@AfterEach
 	public void disableAdvancedHSearchIndex() {
-		myDaoConfig.setAdvancedHSearchIndexing(new DaoConfig().isAdvancedHSearchIndexing());
+		myStorageSettings.setAdvancedHSearchIndexing(new JpaStorageSettings().isAdvancedHSearchIndexing());
 	}
 
 	/**

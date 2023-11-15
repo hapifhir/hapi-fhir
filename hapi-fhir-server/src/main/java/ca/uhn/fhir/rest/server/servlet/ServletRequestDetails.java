@@ -1,10 +1,8 @@
-package ca.uhn.fhir.rest.server.servlet;
-
 /*
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,20 +17,20 @@ package ca.uhn.fhir.rest.server.servlet;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.server.servlet;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.PreferHeader;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.RestfulServer;
+import ca.uhn.fhir.rest.server.RestfulServerUtils;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.Validate;
 
-import javax.annotation.Nonnull;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -42,11 +40,17 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.StringTokenizer;
 import java.util.zip.GZIPInputStream;
+import javax.annotation.Nonnull;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.trim;
 
 public class ServletRequestDetails extends RequestDetails {
 
@@ -101,7 +105,8 @@ public class ServletRequestDetails extends RequestDetails {
 			return requestContents;
 		} catch (IOException e) {
 			ourLog.error("Could not load request resource", e);
-			throw new InvalidRequestException(Msg.code(308) + String.format("Could not load request resource: %s", e.getMessage()));
+			throw new InvalidRequestException(
+					Msg.code(308) + String.format("Could not load request resource: %s", e.getMessage()));
 		}
 	}
 
@@ -130,7 +135,9 @@ public class ServletRequestDetails extends RequestDetails {
 	@Override
 	public List<String> getHeaders(String name) {
 		Enumeration<String> headers = getServletRequest().getHeaders(name);
-		return headers == null ? Collections.emptyList() : Collections.list(getServletRequest().getHeaders(name));
+		return headers == null
+				? Collections.emptyList()
+				: Collections.list(getServletRequest().getHeaders(name));
 	}
 
 	@Override
@@ -184,7 +191,34 @@ public class ServletRequestDetails extends RequestDetails {
 		if ("true".equals(myServletRequest.getHeader(Constants.HEADER_REWRITE_HISTORY))) {
 			setRewriteHistory(true);
 		}
+		setRetryFields(myServletRequest);
 		return this;
+	}
+
+	private void setRetryFields(HttpServletRequest theRequest) {
+		if (theRequest == null) {
+			return;
+		}
+		Enumeration<String> headers = theRequest.getHeaders(Constants.HEADER_RETRY_ON_VERSION_CONFLICT);
+		if (headers != null) {
+			Iterator<String> headerIterator = headers.asIterator();
+			while (headerIterator.hasNext()) {
+				String headerValue = headerIterator.next();
+				if (isNotBlank(headerValue)) {
+					StringTokenizer tok = new StringTokenizer(headerValue, ";");
+					while (tok.hasMoreTokens()) {
+						String next = trim(tok.nextToken());
+						if (next.equals(Constants.HEADER_RETRY)) {
+							setRetry(true);
+						} else if (next.startsWith(Constants.HEADER_MAX_RETRIES + "=")) {
+							String val = trim(next.substring((Constants.HEADER_MAX_RETRIES + "=").length()));
+							int maxRetries = Integer.parseInt(val);
+							setMaxRetries(maxRetries);
+						}
+					}
+				}
+			}
+		}
 	}
 
 	public void setServletResponse(HttpServletResponse myServletResponse) {
@@ -206,4 +240,12 @@ public class ServletRequestDetails extends RequestDetails {
 		return Collections.unmodifiableMap(retVal);
 	}
 
+	/**
+	 * Returns true if the `Prefer` header contains a value of `respond-async`
+	 */
+	public boolean isPreferRespondAsync() {
+		String preferHeader = getHeader(Constants.HEADER_PREFER);
+		PreferHeader prefer = RestfulServerUtils.parsePreferHeader(null, preferHeader);
+		return prefer.getRespondAsync();
+	}
 }

@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 3875
+title: "Previously, when modifying one of the common search parameters, if the `Mark Resources For Reindexing Upon 
+Search Parameter Change` configuration parameter was enabled, an invalid reindex batch job request would be created.
+This has been fixed, and the batch job request will contain no URL constraints, causing all resources to be reindexed."

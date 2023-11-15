@@ -1,18 +1,17 @@
 package ca.uhn.fhir.tinder.parser;
 
-import ca.uhn.fhir.i18n.Msg;
-import java.io.File;
-import java.util.*;
-import java.util.stream.Collectors;
-
-import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
-import org.apache.commons.lang.WordUtils;
-
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
+import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.tinder.model.Resource;
 import ca.uhn.fhir.tinder.model.SearchParameter;
+import org.apache.commons.lang.WordUtils;
 import org.apache.maven.plugin.MojoFailureException;
+
+import java.io.File;
+import java.util.stream.Collectors;
+import java.util.*;
 
 public class ResourceGeneratorUsingModel extends BaseStructureParser {
 
@@ -62,22 +61,26 @@ public class ResourceGeneratorUsingModel extends BaseStructureParser {
 	public void parse() {
 		for (String nextResourceName : myResourceNames) {
 			RuntimeResourceDefinition def = getCtx().getResourceDefinition(nextResourceName);
-			
+
 			Resource resource = new Resource();
 			resource.setName(def.getName());
 			resource.setElementName(def.getName());
 			addResource(resource);
-			
+
 			for (RuntimeSearchParam nextSearchParam : def.getSearchParams()) {
 				SearchParameter param = new SearchParameter(getVersion(), def.getName());
 
-				List<RuntimeSearchParam> compositeOfParams = nextSearchParam
-					.getComponents()
-					.stream()
-					.map(t -> def.getSearchParams().stream().filter(y -> y.getUri().equals(t.getReference())).findFirst().orElseThrow(() -> new IllegalStateException()))
-					.collect(Collectors.toList());
-				if (nextSearchParam.getParamType() == RestSearchParameterTypeEnum.COMPOSITE && compositeOfParams.size() != 2) {
-					throw new IllegalStateException(Msg.code(163) + "Search param " + nextSearchParam.getName() + " on base " + nextSearchParam.getBase() + " has components: " + nextSearchParam.getComponents());
+				List<RuntimeSearchParam> compositeOfParams = nextSearchParam.getComponents().stream()
+						.map(t -> def.getSearchParams().stream()
+								.filter(y -> y.getUri().equals(t.getReference()))
+								.findFirst()
+								.orElseThrow(() -> new IllegalStateException()))
+						.collect(Collectors.toList());
+				if (nextSearchParam.getParamType() == RestSearchParameterTypeEnum.COMPOSITE
+						&& compositeOfParams.size() != 2) {
+					throw new IllegalStateException(Msg.code(163) + "Search param " + nextSearchParam.getName()
+							+ " on base " + nextSearchParam.getBase() + " has components: "
+							+ nextSearchParam.getComponents());
 				}
 
 				param.setName(nextSearchParam.getName());
@@ -86,7 +89,7 @@ public class ResourceGeneratorUsingModel extends BaseStructureParser {
 				param.setCompositeTypes(toCompositeOfTypes(compositeOfParams));
 				param.setPath(nextSearchParam.getPath());
 				param.setType(nextSearchParam.getParamType().getCode());
-				
+
 				resource.addSearchParameter(param);
 			}
 		}
@@ -115,5 +118,4 @@ public class ResourceGeneratorUsingModel extends BaseStructureParser {
 		}
 		return retVal;
 	}
-
 }

@@ -1,0 +1,4 @@
+---
+type: add
+issue: 4632
+title: "Add support for MdmLink history in the data model.  MdmLink history will be stored in the new mdm_link_aud table."

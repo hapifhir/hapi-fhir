@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.migrate.taskdef;
-
 /*-
  * #%L
  * HAPI FHIR Server - SQL Migration
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.migrate.taskdef;
 
 import ca.uhn.fhir.jpa.migrate.JdbcUtils;
 import ca.uhn.fhir.util.VersionEnum;
@@ -42,7 +41,7 @@ public class ArbitrarySqlTask extends BaseTask {
 	private static final Logger ourLog = LoggerFactory.getLogger(ArbitrarySqlTask.class);
 	private final String myDescription;
 	private final String myTableName;
-	private List<Task> myTask = new ArrayList<>();
+	private List<BaseTask> myTask = new ArrayList<>();
 	private int myBatchSize = 1000;
 	private String myExecuteOnlyIfTableExists;
 	private List<TableAndColumn> myConditionalOnExistenceOf = new ArrayList<>();
@@ -75,17 +74,21 @@ public class ArbitrarySqlTask extends BaseTask {
 		}
 
 		for (TableAndColumn next : myConditionalOnExistenceOf) {
-			JdbcUtils.ColumnType columnType = JdbcUtils.getColumnType(getConnectionProperties(), next.getTable(), next.getColumn());
+			JdbcUtils.ColumnType columnType =
+					JdbcUtils.getColumnType(getConnectionProperties(), next.getTable(), next.getColumn());
 			if (columnType == null) {
-				logInfo(ourLog, "Table {} does not have column {} - No action performed", next.getTable(), next.getColumn());
+				logInfo(
+						ourLog,
+						"Table {} does not have column {} - No action performed",
+						next.getTable(),
+						next.getColumn());
 				return;
 			}
 		}
 
-		for (Task next : myTask) {
+		for (BaseTask next : myTask) {
 			next.execute();
 		}
-
 	}
 
 	public void setBatchSize(int theBatchSize) {
@@ -104,7 +107,7 @@ public class ArbitrarySqlTask extends BaseTask {
 	}
 
 	@Override
-	protected void generateEquals(EqualsBuilder theBuilder, BaseTask theOtherObject) {
+	protected void generateEquals(EqualsBuilder theBuilder, ca.uhn.fhir.jpa.migrate.taskdef.BaseTask theOtherObject) {
 		ArbitrarySqlTask otherObject = (ArbitrarySqlTask) theOtherObject;
 		theBuilder.append(myTableName, otherObject.myTableName);
 	}
@@ -136,11 +139,11 @@ public class ArbitrarySqlTask extends BaseTask {
 		}
 	}
 
-	private abstract class Task {
+	private abstract class BaseTask {
 		public abstract void execute();
 	}
 
-	private class QueryTask extends Task {
+	private class QueryTask extends BaseTask {
 		private final String mySql;
 		private final Consumer<Map<String, Object>> myConsumer;
 
@@ -149,7 +152,6 @@ public class ArbitrarySqlTask extends BaseTask {
 			myConsumer = theConsumer;
 			setDescription("Execute raw sql");
 		}
-
 
 		@Override
 		public void execute() {

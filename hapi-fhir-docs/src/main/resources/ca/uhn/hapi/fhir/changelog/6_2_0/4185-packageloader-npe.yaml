@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 4185
+jira: SMILE-5340
+title: "When DaoConfig UpdateWithHistoryRewriteEnabled is enabled, the package loader throws a NullPointerException.  
+This has been corrected."

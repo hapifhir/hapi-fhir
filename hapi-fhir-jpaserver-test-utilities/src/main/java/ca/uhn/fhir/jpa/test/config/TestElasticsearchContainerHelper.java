@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.test.config;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server Test Utilities
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.test.config;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.test.config;
 
 import org.testcontainers.elasticsearch.ElasticsearchContainer;
 
@@ -35,6 +34,10 @@ public class TestElasticsearchContainerHelper {
 	public static ElasticsearchContainer getEmbeddedElasticSearch() {
 
 		return new ElasticsearchContainer(ELASTICSEARCH_IMAGE)
+			// the default is 4GB which is too much for our little tests
+			.withEnv("ES_JAVA_OPTS", "-Xms512m -Xmx512m")
+			// turn off security warnings
+			.withEnv("xpack.security.enabled", "false")
 			.withStartupTimeout(Duration.of(300, SECONDS));
 	}
 

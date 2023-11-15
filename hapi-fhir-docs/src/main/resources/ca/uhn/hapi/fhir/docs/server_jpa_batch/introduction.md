@@ -12,7 +12,7 @@ HAPI-FHIR 6.0.0 has begun the process of replacing Spring Batch with a custom ba
 
 A HAPI-FHIR batch job definition consists of a job name, version, parameter json input type, and a chain of job steps.  Each step of the chain declares the json output type it produces, which will be the input type for the following step.  The final step in the chain does not declare an output type as the final step will typically do the work of the job, e.g. reindex resources, export data to disk, etc.
 
-<a href="/hapi-fhir/docs/images/job-definition.svg"/>
+<img src="/hapi-fhir/docs/images/job-definition.svg"/>
 
 ### Submitting a Job
 

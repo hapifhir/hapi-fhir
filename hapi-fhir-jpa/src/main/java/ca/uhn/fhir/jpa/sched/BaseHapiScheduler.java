@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.sched;
-
 /*-
  * #%L
  * hapi-fhir-jpa
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,9 +17,10 @@ package ca.uhn.fhir.jpa.sched;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.sched;
 
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.ConfigurationException;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.model.sched.IHapiScheduler;
 import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -44,11 +43,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.quartz.SchedulerFactoryBean;
 
-import javax.annotation.Nonnull;
 import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
+import javax.annotation.Nonnull;
 
 public abstract class BaseHapiScheduler implements IHapiScheduler {
 	private static final Logger ourLog = LoggerFactory.getLogger(BaseHapiScheduler.class);
@@ -68,11 +67,9 @@ public abstract class BaseHapiScheduler implements IHapiScheduler {
 		mySpringBeanJobFactory = theSpringBeanJobFactory;
 	}
 
-
 	void setInstanceName(String theInstanceName) {
 		myInstanceName = theInstanceName;
 	}
-
 
 	int nextSchedulerId() {
 		return ourNextSchedulerId.getAndIncrement();
@@ -103,7 +100,8 @@ public abstract class BaseHapiScheduler implements IHapiScheduler {
 
 	protected void setProperties() {
 		addProperty("org.quartz.threadPool.threadCount", "4");
-		myProperties.setProperty(StdSchedulerFactory.PROP_SCHED_INSTANCE_NAME, myInstanceName + "-" + nextSchedulerId());
+		myProperties.setProperty(
+				StdSchedulerFactory.PROP_SCHED_INSTANCE_NAME, myInstanceName + "-" + nextSchedulerId());
 		addProperty("org.quartz.threadPool.threadNamePrefix", getThreadPrefix());
 	}
 
@@ -178,25 +176,21 @@ public abstract class BaseHapiScheduler implements IHapiScheduler {
 		Validate.notNull(theJobDefinition.getJobClass());
 		Validate.notBlank(theJobDefinition.getId());
 
-		JobKey jobKey = new JobKey(theJobDefinition.getId(), theJobDefinition.getGroup());
-		TriggerKey triggerKey = new TriggerKey(theJobDefinition.getId(), theJobDefinition.getGroup());
-		
-		JobDetailImpl jobDetail = new NonConcurrentJobDetailImpl();
-		jobDetail.setJobClass(theJobDefinition.getJobClass());
-		jobDetail.setKey(jobKey);
-		jobDetail.setJobDataMap(new JobDataMap(theJobDefinition.getJobData()));
+		TriggerKey triggerKey = theJobDefinition.toTriggerKey();
+		JobDetailImpl jobDetail = buildJobDetail(theJobDefinition);
 
-		ScheduleBuilder<? extends Trigger> schedule = SimpleScheduleBuilder
-			.simpleSchedule()
-			.withIntervalInMilliseconds(theIntervalMillis)
-			.repeatForever();
+		ScheduleBuilder<? extends Trigger> schedule = SimpleScheduleBuilder.simpleSchedule()
+				.withIntervalInMilliseconds(theIntervalMillis)
+				.withMisfireHandlingInstructionIgnoreMisfires() // We ignore misfires in cases of multiple JVMs each
+				// trying to fire.
+				.repeatForever();
 
 		Trigger trigger = TriggerBuilder.newTrigger()
-			.forJob(jobDetail)
-			.withIdentity(triggerKey)
-			.startNow()
-			.withSchedule(schedule)
-			.build();
+				.forJob(jobDetail)
+				.withIdentity(triggerKey)
+				.startNow()
+				.withSchedule(schedule)
+				.build();
 
 		Set<? extends Trigger> triggers = Sets.newHashSet(trigger);
 		try {
@@ -205,7 +199,15 @@ public abstract class BaseHapiScheduler implements IHapiScheduler {
 			ourLog.error("Failed to schedule job", e);
 			throw new InternalErrorException(Msg.code(1638) + e);
 		}
+	}
 
+	@Nonnull
+	private JobDetailImpl buildJobDetail(ScheduledJobDefinition theJobDefinition) {
+		JobDetailImpl jobDetail = new NonConcurrentJobDetailImpl();
+		jobDetail.setJobClass(theJobDefinition.getJobClass());
+		jobDetail.setKey(theJobDefinition.toJobKey());
+		jobDetail.setJobDataMap(new JobDataMap(theJobDefinition.getJobData()));
+		return jobDetail;
 	}
 
 	@VisibleForTesting
@@ -221,6 +223,15 @@ public abstract class BaseHapiScheduler implements IHapiScheduler {
 		@Override
 		public boolean isConcurrentExectionDisallowed() {
 			return true;
+		}
+	}
+
+	@Override
+	public void triggerJobImmediately(ScheduledJobDefinition theJobDefinition) {
+		try {
+			myScheduler.triggerJob(theJobDefinition.toJobKey());
+		} catch (SchedulerException e) {
+			ourLog.error("Error triggering scheduled job with key {}", theJobDefinition);
 		}
 	}
 }

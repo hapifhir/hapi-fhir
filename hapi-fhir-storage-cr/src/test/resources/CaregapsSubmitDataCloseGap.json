@@ -1,0 +1,108 @@
+{
+	"resourceType": "Parameters",
+	"id": "EXM130-7.3.000-end-to-end-submit-data-bundle",
+	"parameter": [
+		{
+			"name": "measureReport",
+			"resource": {
+				"resourceType": "MeasureReport",
+				"id": "col-measurereport-submit-data",
+				"meta": {
+					"profile": [
+						"http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/datax-measurereport-deqm"
+					]
+				},
+				"extension": [
+					{
+						"url": "http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/extension-submitDataUpdateType",
+						"valueCode": "incremental"
+					}
+				],
+				"status": "complete",
+				"type": "data-collection",
+				"measure": "http://ecqi.healthit.gov/ecqms/Measure/ColorectalCancerScreeningsFHIR",
+				"subject": {
+					"reference": "Patient/end-to-end-EXM130"
+				},
+				"date": "2021-01-01T16:59:52.404Z",
+				"reporter": {
+					"reference": "Organization/organization03"
+				},
+				"period": {
+					"start": "2019-01-01",
+					"end": "2019-12-31"
+				},
+				"evaluatedResource": [
+					{
+						"reference": "Procedure/end-to-end-EXM130-2"
+					}
+				]
+			}
+		},
+		{
+			"name": "resource",
+			"resource": {
+				"resourceType": "Encounter",
+				"id": "end-to-end-EXM130-2",
+				"meta": {
+					"profile": [
+						"http://hl7.org/fhir/us/core/StructureDefinition/us-core-encounter"
+					]
+				},
+				"status": "finished",
+				"class": {
+					"system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+					"code": "AMB",
+					"display": "ambulatory"
+				},
+				"type": [
+					{
+						"coding": [
+							{
+								"system": "http://www.ama-assn.org/go/cpt",
+								"code": "99201",
+								"display": "Office or other outpatient visit for the evaluation and management of a new patient, which requires these 3 key components: A problem focused history; A problem focused examination; Straightforward medical decision making. Counseling and/or coordination of care with other physicians, other qualified health care professionals, or agencies are provided consistent with the nature of the problem(s) and the patient's and/or family's needs. Usually, the presenting problem(s) are self limited or minor. Typically, 10 minutes are spent face-to-face with the patient and/or family."
+							}
+						]
+					}
+				],
+				"subject": {
+					"reference": "Patient/end-to-end-EXM130"
+				},
+				"period": {
+					"start": "2020-05-01T09:00:00-06:00",
+					"end": "2020-05-01T14:00:00-06:00"
+				}
+			}
+		},
+		{
+			"name": "resource",
+			"resource": {
+				"resourceType": "Procedure",
+				"id": "end-to-end-EXM130-2",
+				"meta": {
+					"profile": [
+						"http://hl7.org/fhir/us/core/StructureDefinition/us-core-procedure"
+					]
+				},
+				"status": "completed",
+				"code": {
+					"coding": [
+						{
+							"system": "http://www.ama-assn.org/go/cpt",
+							"code": "44388",
+							"display": "Colonoscopy through stoma; with ablation of tumor(s), polyp(s), or other lesion(s) not amenable to removal by hot biopsy forceps, bipolar cautery or snare technique"
+						}
+					]
+				},
+				"subject": {
+					"reference": "Patient/end-to-end-EXM130"
+				},
+				"performedPeriod": {
+					"start": "2020-05-01T10:00:00-06:00",
+					"end": "2020-05-01T12:00:00-06:00"
+				}
+			}
+		}
+	]
+}

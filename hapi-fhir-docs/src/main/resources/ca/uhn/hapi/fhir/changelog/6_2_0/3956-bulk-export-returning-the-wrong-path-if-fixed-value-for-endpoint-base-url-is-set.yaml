@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 3956
+title: "Previously, if the Endpoint Base URL is set to something different from the default value, the URL that export-poll-status returned is incorrect.
+After correcting the export-poll-status URL, the binary file URL returned is also incorrect. This error has also been fixed and the URLs that are returned 
+from $export and $export-poll-status will not contain the extra path from 'Fixed Value for Endpoint Base URL'."

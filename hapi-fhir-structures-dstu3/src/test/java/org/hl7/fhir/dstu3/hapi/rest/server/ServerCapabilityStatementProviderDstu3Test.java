@@ -32,6 +32,7 @@ import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.server.HardcodedServerAddressStrategy;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.ResourceBinding;
 import ca.uhn.fhir.rest.server.RestfulServer;
@@ -40,6 +41,8 @@ import ca.uhn.fhir.rest.server.method.BaseMethodBinding;
 import ca.uhn.fhir.rest.server.method.IParameter;
 import ca.uhn.fhir.rest.server.method.SearchMethodBinding;
 import ca.uhn.fhir.rest.server.method.SearchParameter;
+import ca.uhn.fhir.rest.server.provider.BulkDataExportProvider;
+import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.validation.FhirValidator;
@@ -74,7 +77,6 @@ import org.junit.jupiter.api.Test;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
-import javax.tools.Diagnostic;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -82,6 +84,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.containsString;
@@ -153,7 +156,7 @@ public class ServerCapabilityStatementProviderDstu3Test {
 		Collection<ResourceBinding> resourceBindings = rs.getResourceBindings();
 		for (ResourceBinding resourceBinding : resourceBindings) {
 			if (resourceBinding.getResourceName().equals("Patient")) {
-				List<BaseMethodBinding<?>> methodBindings = resourceBinding.getMethodBindings();
+				List<BaseMethodBinding> methodBindings = resourceBinding.getMethodBindings();
 				SearchMethodBinding binding = (SearchMethodBinding) methodBindings.get(0);
 				SearchParameter param = (SearchParameter) binding.getParameters().get(0);
 				assertEquals("The organization at which this person is a patient", param.getDescription());
@@ -304,7 +307,7 @@ public class ServerCapabilityStatementProviderDstu3Test {
 		Collection<ResourceBinding> resourceBindings = rs.getResourceBindings();
 		for (ResourceBinding resourceBinding : resourceBindings) {
 			if (resourceBinding.getResourceName().equals("Patient")) {
-				List<BaseMethodBinding<?>> methodBindings = resourceBinding.getMethodBindings();
+				List<BaseMethodBinding> methodBindings = resourceBinding.getMethodBindings();
 				SearchMethodBinding binding = (SearchMethodBinding) methodBindings.get(0);
 				SearchParameter param = (SearchParameter) binding.getParameters().iterator().next();
 				assertEquals("The patient's identifier", param.getDescription());
@@ -373,7 +376,7 @@ public class ServerCapabilityStatementProviderDstu3Test {
 		{
 			OperationDefinition opDef = sc.readOperationDefinition(new IdType("OperationDefinition/EncounterPatient-i-someOp"), createRequestDetails(rs));
 			validate(opDef);
-			ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(opDef));
+			ourLog.debug(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(opDef));
 			Set<String> types = toStrings(opDef.getResource());
 			assertEquals("someOp", opDef.getCode());
 			assertEquals(true, opDef.getInstance());
@@ -521,7 +524,7 @@ public class ServerCapabilityStatementProviderDstu3Test {
 		Collection<ResourceBinding> resourceBindings = rs.getResourceBindings();
 		for (ResourceBinding resourceBinding : resourceBindings) {
 			if (resourceBinding.getResourceName().equals("Patient")) {
-				List<BaseMethodBinding<?>> methodBindings = resourceBinding.getMethodBindings();
+				List<BaseMethodBinding> methodBindings = resourceBinding.getMethodBindings();
 				SearchMethodBinding binding = (SearchMethodBinding) methodBindings.get(0);
 				for (IParameter next : binding.getParameters()) {
 					SearchParameter param = (SearchParameter) next;
@@ -561,7 +564,7 @@ public class ServerCapabilityStatementProviderDstu3Test {
 		Collection<ResourceBinding> resourceBindings = rs.getResourceBindings();
 		for (ResourceBinding resourceBinding : resourceBindings) {
 			if (resourceBinding.getResourceName().equals("Patient")) {
-				List<BaseMethodBinding<?>> methodBindings = resourceBinding.getMethodBindings();
+				List<BaseMethodBinding> methodBindings = resourceBinding.getMethodBindings();
 				SearchMethodBinding binding = (SearchMethodBinding) methodBindings.get(0);
 				SearchParameter param = (SearchParameter) binding.getParameters().get(25);
 				assertEquals("The organization at which this person is a patient", param.getDescription());
@@ -594,7 +597,7 @@ public class ServerCapabilityStatementProviderDstu3Test {
 		Collection<ResourceBinding> resourceBindings = rs.getResourceBindings();
 		for (ResourceBinding resourceBinding : resourceBindings) {
 			if (resourceBinding.getResourceName().equals("Patient")) {
-				List<BaseMethodBinding<?>> methodBindings = resourceBinding.getMethodBindings();
+				List<BaseMethodBinding> methodBindings = resourceBinding.getMethodBindings();
 				SearchMethodBinding binding = (SearchMethodBinding) methodBindings.get(0);
 				SearchParameter param = (SearchParameter) binding.getParameters().get(0);
 				assertEquals("The organization at which this person is a patient", param.getDescription());
@@ -706,7 +709,7 @@ public class ServerCapabilityStatementProviderDstu3Test {
 		rs.init(createServletConfig());
 
 		CapabilityStatement conformance = sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
-		ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance));
+		ourLog.debug(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance));
 
 		ValidationResult result = ourCtx.newValidator().validateWithResult(conformance);
 		assertTrue(result.isSuccessful(), result.getMessages().toString());
@@ -724,7 +727,7 @@ public class ServerCapabilityStatementProviderDstu3Test {
 		rs.init(createServletConfig());
 
 		CapabilityStatement conformance = sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
-		ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance));
+		ourLog.debug(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance));
 
 		CapabilityStatementRestComponent restComponent = conformance.getRest().get(0);
 		CapabilityStatementRestOperationComponent operationComponent = restComponent.getOperation().get(0);
@@ -734,7 +737,7 @@ public class ServerCapabilityStatementProviderDstu3Test {
 		assertThat(operationReference, not(nullValue()));
 
 		OperationDefinition operationDefinition = sc.readOperationDefinition(new IdType(operationReference), createRequestDetails(rs));
-		ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(operationDefinition));
+		ourLog.debug(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(operationDefinition));
 		validate(operationDefinition);
 		assertThat(operationDefinition.getCode(), is(NamedQueryPlainProvider.QUERY_NAME));
 		assertThat("The operation name should be the description, if a description is set", operationDefinition.getName(), is(NamedQueryPlainProvider.DESCRIPTION));
@@ -768,7 +771,7 @@ public class ServerCapabilityStatementProviderDstu3Test {
 		rs.init(createServletConfig());
 
 		CapabilityStatement conformance = sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
-		ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance));
+		ourLog.debug(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance));
 
 		CapabilityStatementRestComponent restComponent = conformance.getRest().get(0);
 		CapabilityStatementRestOperationComponent operationComponent = restComponent.getOperation().get(0);
@@ -776,7 +779,7 @@ public class ServerCapabilityStatementProviderDstu3Test {
 		assertThat(operationReference, not(nullValue()));
 
 		OperationDefinition operationDefinition = sc.readOperationDefinition(new IdType(operationReference), createRequestDetails(rs));
-		ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(operationDefinition));
+		ourLog.debug(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(operationDefinition));
 		validate(operationDefinition);
 		assertThat("The operation name should be the code if no description is set", operationDefinition.getName(), is(NamedQueryResourceProvider.QUERY_NAME));
 		String patientResourceName = "Patient";
@@ -838,7 +841,7 @@ public class ServerCapabilityStatementProviderDstu3Test {
         rs.init(createServletConfig());
 
         CapabilityStatement conformance = sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
-        ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance));
+        ourLog.debug(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance));
 
         List<CapabilityStatementRestResourceComponent> resources = conformance.getRestFirstRep().getResource();
         CapabilityStatementRestResourceComponent patientResource = resources.stream()
@@ -846,6 +849,24 @@ public class ServerCapabilityStatementProviderDstu3Test {
             .findFirst().get();
         assertThat(patientResource.getProfile().getReference(), containsString(PATIENT_SUB));
     }
+
+	@Test
+	public void testMethodGetServerConformance_whenServerSupportsExportOperation_willIncludeInstantiatesElement() throws Exception {
+		// given
+		RestfulServer rs = new RestfulServer(ourCtx);
+		rs.setProviders(new BulkDataExportProvider());
+		rs.setServerAddressStrategy(new HardcodedServerAddressStrategy("http://localhost/baseR3"));
+		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider();
+		rs.setServerConformanceProvider(sc);
+
+		// when
+		rs.init(createServletConfig());
+		CapabilityStatement conformance = sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
+
+		// then
+		String instantiatesFirstRepValue = conformance.getInstantiates().get(0).getValue();
+		assertThat(instantiatesFirstRepValue, equalTo(Constants.BULK_DATA_ACCESS_IG_URL));
+	}
 
 	private List<String> toOperationIdParts(List<CapabilityStatementRestOperationComponent> theOperation) {
 		ArrayList<String> retVal = Lists.newArrayList();

@@ -1,10 +1,8 @@
-package ca.uhn.fhir.rest.server.interceptor.consent;
-
 /*-
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.rest.server.interceptor.consent;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.server.interceptor.consent;
 
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
@@ -55,9 +54,14 @@ public class ConsentOutcome {
 		this(theStatus, null, theResource);
 	}
 
-	private ConsentOutcome(ConsentOperationStatusEnum theStatus, IBaseOperationOutcome theOperationOutcome, IBaseResource theResource) {
+	private ConsentOutcome(
+			ConsentOperationStatusEnum theStatus,
+			IBaseOperationOutcome theOperationOutcome,
+			IBaseResource theResource) {
 		Validate.notNull(theStatus, "theStatus must not be null");
-		Validate.isTrue(!(theOperationOutcome != null && theResource != null), "theOperationOutcome and theResource must not both be null");
+		Validate.isTrue(
+				!(theOperationOutcome != null && theResource != null),
+				"theOperationOutcome and theResource must not both be null");
 		myStatus = theStatus;
 		myOperationOutcome = theOperationOutcome;
 		myResource = theResource;
@@ -74,5 +78,4 @@ public class ConsentOutcome {
 	public IBaseResource getResource() {
 		return myResource;
 	}
-
 }

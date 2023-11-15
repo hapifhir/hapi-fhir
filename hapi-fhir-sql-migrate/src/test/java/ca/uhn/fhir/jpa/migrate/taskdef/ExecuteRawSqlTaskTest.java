@@ -28,7 +28,7 @@ public class ExecuteRawSqlTaskTest extends BaseTest {
 			.forVersion(VersionEnum.V4_0_0)
 			.executeRawSql("2001.01", "INSERT INTO SOMETABLE (PID, TEXTCOL) VALUES (123, 'abc')");
 
-		getMigrator().addTasks(tasks.getTasks(VersionEnum.V0_1, VersionEnum.V4_0_0));
+		getMigrator().addTasks(tasks.getTaskList(VersionEnum.V0_1, VersionEnum.V4_0_0));
 		getMigrator().migrate();
 
 		List<Map<String, Object>> output = executeQuery("SELECT PID FROM SOMETABLE");
@@ -49,7 +49,7 @@ public class ExecuteRawSqlTaskTest extends BaseTest {
 			.executeRawSql("2001.01", "INSERT INTO SOMETABLE (PID_BAD_COLUMN, TEXTCOL) VALUES (123, 'abc')")
 			.failureAllowed();
 
-		getMigrator().addTasks(tasks.getTasks(VersionEnum.V0_1, VersionEnum.V4_0_0));
+		getMigrator().addTasks(tasks.getTaskList(VersionEnum.V0_1, VersionEnum.V4_0_0));
 		getMigrator().migrate();
 
 		List<Map<String, Object>> output = executeQuery("SELECT PID FROM SOMETABLE");
@@ -70,7 +70,7 @@ public class ExecuteRawSqlTaskTest extends BaseTest {
 			.executeRawSql("2001.01", "INSERT INTO SOMETABLE (PID, TEXTCOL) VALUES (123, 'abc')")
 			.onlyAppliesToPlatforms(DriverTypeEnum.H2_EMBEDDED);
 
-		getMigrator().addTasks(tasks.getTasks(VersionEnum.V0_1, VersionEnum.V4_0_0));
+		getMigrator().addTasks(tasks.getTaskList(VersionEnum.V0_1, VersionEnum.V4_0_0));
 		getMigrator().migrate();
 
 		List<Map<String, Object>> output = executeQuery("SELECT PID FROM SOMETABLE");
@@ -99,7 +99,7 @@ public class ExecuteRawSqlTaskTest extends BaseTest {
 			.forVersion(VersionEnum.V4_0_0)
 			.executeRawSql("2001.01", driverToSql);
 
-		getMigrator().addTasks(tasks.getTasks(VersionEnum.V0_1, VersionEnum.V4_0_0));
+		getMigrator().addTasks(tasks.getTaskList(VersionEnum.V0_1, VersionEnum.V4_0_0));
 		getMigrator().migrate();
 
 		List<Map<String, Object>> output = executeQuery("SELECT PID,TEXTCOL FROM SOMETABLE");
@@ -128,7 +128,7 @@ public class ExecuteRawSqlTaskTest extends BaseTest {
 		tasks.forVersion(VersionEnum.V4_0_0)
 			.executeRawSqlStub("2001.01", "INSERT INTO SOMETABLE (PID, TEXTCOL) VALUES (123, 'abc')");
 
-		getMigrator().addTasks(tasks.getTasks(VersionEnum.V0_1, VersionEnum.V4_0_0));
+		getMigrator().addTasks(tasks.getTaskList(VersionEnum.V0_1, VersionEnum.V4_0_0));
 		getMigrator().migrate();
 
 		List<Map<String, Object>> output = executeQuery("SELECT PID,TEXTCOL FROM SOMETABLE");

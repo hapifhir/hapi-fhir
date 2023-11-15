@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.searchparam.extractor;
-
 /*
  * #%L
  * HAPI FHIR Search Parameters
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,10 +17,11 @@ package ca.uhn.fhir.jpa.searchparam.extractor;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.searchparam.extractor;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
-import ca.uhn.fhir.jpa.model.entity.ModelConfig;
+import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import com.google.common.annotations.VisibleForTesting;
 import org.hl7.fhir.dstu3.context.IWorkerContext;
@@ -30,11 +29,10 @@ import org.hl7.fhir.dstu3.hapi.ctx.HapiWorkerContext;
 import org.hl7.fhir.dstu3.model.Base;
 import org.hl7.fhir.dstu3.utils.FHIRPathEngine;
 import org.hl7.fhir.instance.model.api.IBase;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 
-import javax.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.List;
+import javax.annotation.PostConstruct;
 
 public class SearchParamExtractorDstu3 extends BaseSearchParamExtractor implements ISearchParamExtractor {
 
@@ -49,14 +47,18 @@ public class SearchParamExtractorDstu3 extends BaseSearchParamExtractor implemen
 
 	// This constructor is used by tests
 	@VisibleForTesting
-	public SearchParamExtractorDstu3(ModelConfig theModelConfig, PartitionSettings thePartitionSettings, FhirContext theCtx, ISearchParamRegistry theSearchParamRegistry) {
-		super(theModelConfig, thePartitionSettings, theCtx, theSearchParamRegistry);
+	public SearchParamExtractorDstu3(
+			StorageSettings theStorageSettings,
+			PartitionSettings thePartitionSettings,
+			FhirContext theCtx,
+			ISearchParamRegistry theSearchParamRegistry) {
+		super(theStorageSettings, thePartitionSettings, theCtx, theSearchParamRegistry);
 		initFhirPathEngine();
 		start();
 	}
 
 	@Override
-	public IValueExtractor getPathValueExtractor(IBaseResource theResource, String theSinglePath) {
+	public IValueExtractor getPathValueExtractor(IBase theResource, String theSinglePath) {
 		return () -> {
 			List<IBase> values = new ArrayList<>();
 			List<Base> allValues = myFhirPathEngine.evaluate((Base) theResource, theSinglePath);
@@ -67,7 +69,6 @@ public class SearchParamExtractorDstu3 extends BaseSearchParamExtractor implemen
 			return values;
 		};
 	}
-
 
 	@Override
 	@PostConstruct
@@ -82,5 +83,4 @@ public class SearchParamExtractorDstu3 extends BaseSearchParamExtractor implemen
 		IWorkerContext worker = new HapiWorkerContext(getContext(), getContext().getValidationSupport());
 		myFhirPathEngine = new FHIRPathEngine(worker);
 	}
-
 }

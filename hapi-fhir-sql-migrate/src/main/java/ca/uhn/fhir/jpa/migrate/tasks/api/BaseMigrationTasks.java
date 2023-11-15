@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.migrate.tasks.api;
-
 /*-
  * #%L
  * HAPI FHIR Server - SQL Migration
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +17,10 @@ package ca.uhn.fhir.jpa.migrate.tasks.api;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.migrate.tasks.api;
 
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.jpa.migrate.MigrationTaskList;
 import ca.uhn.fhir.jpa.migrate.taskdef.BaseTask;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.MultimapBuilder;
@@ -28,22 +28,21 @@ import org.apache.commons.lang3.EnumUtils;
 import org.apache.commons.lang3.Validate;
 import org.flywaydb.core.api.MigrationVersion;
 
-import javax.annotation.Nonnull;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
+import javax.annotation.Nonnull;
 
 public class BaseMigrationTasks<T extends Enum> {
 	MigrationVersion lastVersion;
-	private Multimap<T, BaseTask> myTasks = MultimapBuilder.hashKeys().arrayListValues().build();
+	private Multimap<T, BaseTask> myTasks =
+			MultimapBuilder.hashKeys().arrayListValues().build();
 
 	@SuppressWarnings("unchecked")
-	public List<BaseTask> getTasks(@Nonnull T theFrom, @Nonnull T theTo) {
+	public MigrationTaskList getTaskList(@Nonnull T theFrom, @Nonnull T theTo) {
 		Validate.notNull(theFrom);
 		Validate.notNull(theTo);
 		Validate.isTrue(theFrom.ordinal() < theTo.ordinal(), "From version must be lower than to version");
 
-		List<BaseTask> retVal = new ArrayList<>();
+		MigrationTaskList retVal = new MigrationTaskList();
 		for (Object nextVersion : EnumUtils.getEnumList(theFrom.getClass())) {
 			if (((T) nextVersion).ordinal() <= theFrom.ordinal()) {
 				continue;
@@ -53,9 +52,7 @@ public class BaseMigrationTasks<T extends Enum> {
 			}
 
 			Collection<BaseTask> nextValues = myTasks.get((T) nextVersion);
-			if (nextValues != null) {
-				retVal.addAll(nextValues);
-			}
+			retVal.addAll(nextValues);
 		}
 
 		return retVal;
@@ -74,8 +71,8 @@ public class BaseMigrationTasks<T extends Enum> {
 		return theRelease.name();
 	}
 
-	public List<BaseTask> getAllTasks(T[] theVersionEnumValues) {
-		List<BaseTask> retval = new ArrayList<>();
+	public MigrationTaskList getAllTasks(T[] theVersionEnumValues) {
+		MigrationTaskList retval = new MigrationTaskList();
 		for (T nextVersion : theVersionEnumValues) {
 			Collection<BaseTask> nextValues = myTasks.get(nextVersion);
 			if (nextValues != null) {
@@ -87,21 +84,27 @@ public class BaseMigrationTasks<T extends Enum> {
 		return retval;
 	}
 
-	protected BaseTask getTaskWithVersion(String theFlywayVersion) {
+	protected BaseTask getTaskWithVersion(String theMigrationVersion) {
+		// First normalize the version number
+		String expectedVersion =
+				MigrationVersion.fromVersion(theMigrationVersion).getVersion();
+
 		return myTasks.values().stream()
-			.filter(task -> theFlywayVersion.equals(task.getFlywayVersion()))
-			.findFirst()
-			.get();
+				.filter(task -> expectedVersion.equals(task.getMigrationVersion()))
+				.findFirst()
+				.get();
 	}
 
 	void validate(Collection<BaseTask> theTasks) {
 		for (BaseTask task : theTasks) {
 			task.validateVersion();
-			String version = task.getFlywayVersion();
+			String version = task.getMigrationVersion();
 			MigrationVersion migrationVersion = MigrationVersion.fromVersion(version);
 			if (lastVersion != null) {
 				if (migrationVersion.compareTo(lastVersion) <= 0) {
-					throw new IllegalStateException(Msg.code(51) + "Migration version " + migrationVersion + " found after migration version " + lastVersion + ".  Migrations need to be in order by version number.");
+					throw new IllegalStateException(
+							Msg.code(51) + "Migration version " + migrationVersion + " found after migration version "
+									+ lastVersion + ".  Migrations need to be in order by version number.");
 				}
 			}
 			lastVersion = migrationVersion;

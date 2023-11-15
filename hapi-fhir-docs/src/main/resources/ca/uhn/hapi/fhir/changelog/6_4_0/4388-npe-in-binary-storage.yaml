@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 4388
+jira: SMILE-5834
+backport: 6.2.4
+title: "Fixed an edge case during a Read operation where hooks could be invoked with a null resource. This could cause a NullPointerException in some cases."

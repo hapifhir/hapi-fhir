@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.migrate.taskdef;
-
 /*-
  * #%L
  * HAPI FHIR Server - SQL Migration
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.migrate.taskdef;
 
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.EqualsBuilder;
@@ -30,9 +29,10 @@ import java.util.function.Function;
 
 public abstract class BaseTableColumnTask extends BaseTableTask {
 
-	protected Map<String, Function<BaseColumnCalculatorTask.MandatoryKeyMap<String, Object>, Object>> myCalculators = new HashMap<>();
+	protected Map<String, Function<BaseColumnCalculatorTask.MandatoryKeyMap<String, Object>, Object>> myCalculators =
+			new HashMap<>();
 	protected String myColumnName;
-	//If a concrete class decides to, they can define a custom WHERE clause for the task.
+	// If a concrete class decides to, they can define a custom WHERE clause for the task.
 	protected String myWhereClause;
 
 	public BaseTableColumnTask(String theProductVersion, String theSchemaVersion) {
@@ -79,7 +79,9 @@ public abstract class BaseTableColumnTask extends BaseTableTask {
 		theBuilder.append(myColumnName);
 	}
 
-	public BaseTableColumnTask addCalculator(String theColumnName, Function<BaseColumnCalculatorTask.MandatoryKeyMap<String, Object>, Object> theConsumer) {
+	public BaseTableColumnTask addCalculator(
+			String theColumnName,
+			Function<BaseColumnCalculatorTask.MandatoryKeyMap<String, Object>, Object> theConsumer) {
 		Validate.isTrue(myCalculators.containsKey(theColumnName) == false);
 		myCalculators.put(theColumnName, theConsumer);
 		return this;

@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 3887
+jira: SMILE-3975
+title: "Removed a bug with subscriptions that supported sending deletes. Previously, if there was a previously-registered subscription which did not support deletes, that would shortcircuit processing and cause subsequent 
+subscriptions not to fire. This has been corrected."

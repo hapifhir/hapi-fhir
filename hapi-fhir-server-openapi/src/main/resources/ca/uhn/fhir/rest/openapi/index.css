@@ -139,3 +139,8 @@ body
     border-radius: 6px;
     color: #000;
 }
+
+/* Disable the servers dropdown, which is useless here */
+.swagger-ui .scheme-container {
+   display: none;
+}

@@ -1,7 +1,7 @@
 package ca.uhn.fhir.jpa.mdm.interceptor;
 
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
 import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.mdm.BaseMdmR4Test;
@@ -11,6 +11,7 @@ import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.mdm.interceptor.IMdmStorageInterceptor;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -28,15 +29,15 @@ public class MdmExpungeTest extends BaseMdmR4Test {
 	IInterceptorService myInterceptorService;
 	@Autowired
     IMdmStorageInterceptor myMdmStorageInterceptor;
-	@Autowired
-	DaoConfig myDaoConfig;
 	private ResourceTable myTargetEntity;
 	private ResourceTable mySourceEntity;
 	private IdDt myTargetId;
 
+	@Override
 	@BeforeEach
-	public void before() {
-		myDaoConfig.setExpungeEnabled(true);
+	public void before() throws Exception {
+		super.before();
+		myStorageSettings.setExpungeEnabled(true);
 
 		myTargetEntity = (ResourceTable) myPatientDao.create(new Patient()).getEntity();
 		myTargetId = myTargetEntity.getIdDt().toVersionless();
@@ -62,7 +63,7 @@ public class MdmExpungeTest extends BaseMdmR4Test {
 		try {
 			myPatientDao.expunge(myTargetId.toVersionless(), expungeOptions, null);
 			fail();
-		} catch (InternalErrorException e) {
+		} catch (PreconditionFailedException e) {
 			assertThat(e.getMessage(), containsString("ViolationException"));
 			assertThat(e.getMessage(), containsString("FK_EMPI_LINK_TARGET"));
 		}

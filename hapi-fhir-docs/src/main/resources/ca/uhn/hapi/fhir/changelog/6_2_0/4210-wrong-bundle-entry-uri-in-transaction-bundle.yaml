@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 4210
+jira: SMILE-4685
+title: "Generating Bundle with resources was setting `entry.request.url` as absolute url when it should be relative. This has been fixed"

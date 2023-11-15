@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.search.lastn;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,12 +17,13 @@ package ca.uhn.fhir.jpa.search.lastn;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.search.lastn;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.search.lastn.json.CodeJson;
 import ca.uhn.fhir.jpa.search.lastn.json.ObservationJson;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
+import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import java.io.IOException;
@@ -41,7 +40,8 @@ public interface IElasticsearchSvc {
 	 * @param theMaxResultsToFetch  The maximum number of results to return for the purpose of paging.
 	 * @return
 	 */
-	List<String> executeLastN(SearchParameterMap theSearchParameterMap, FhirContext theFhirContext, Integer theMaxResultsToFetch);
+	List<String> executeLastN(
+			SearchParameterMap theSearchParameterMap, FhirContext theFhirContext, Integer theMaxResultsToFetch);
 
 	/**
 	 * Returns index document for a single Observation
@@ -96,6 +96,5 @@ public interface IElasticsearchSvc {
 	 * @param thePids
 	 * @return Resources list or empty if nothing found
 	 */
-	List<IBaseResource> getObservationResources(Collection<ResourcePersistentId> thePids);
-
+	List<IBaseResource> getObservationResources(Collection<? extends IResourcePersistentId> thePids);
 }

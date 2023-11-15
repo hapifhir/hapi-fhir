@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.term;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.term;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.term;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
@@ -86,19 +85,16 @@ public class LoadedFileDescriptors implements Closeable {
 				} else {
 					myUncompressedFileDescriptors.add(next);
 				}
-
 			}
 		} catch (IOException e) {
 			throw new InternalErrorException(Msg.code(861) + e);
 		}
-
 	}
 
 	public boolean hasFile(String theFilename) {
-		return myUncompressedFileDescriptors
-			.stream()
-			.map(t -> t.getFilename().replaceAll(".*[\\\\/]", "")) // Strip the path from the filename
-			.anyMatch(t -> t.equals(theFilename));
+		return myUncompressedFileDescriptors.stream()
+				.map(t -> t.getFilename().replaceAll(".*[\\\\/]", "")) // Strip the path from the filename
+				.anyMatch(t -> t.equals(theFilename));
 	}
 
 	@Override
@@ -132,7 +128,8 @@ public class LoadedFileDescriptors implements Closeable {
 	void verifyMandatoryFilesExist(List<String> theExpectedFilenameFragments) {
 		List<String> notFound = notFound(theExpectedFilenameFragments);
 		if (!notFound.isEmpty()) {
-			throw new UnprocessableEntityException(Msg.code(862) + "Could not find the following mandatory files in input: " + notFound);
+			throw new UnprocessableEntityException(
+					Msg.code(862) + "Could not find the following mandatory files in input: " + notFound);
 		}
 	}
 
@@ -141,6 +138,10 @@ public class LoadedFileDescriptors implements Closeable {
 		if (!notFound.isEmpty()) {
 			ourLog.warn("Could not find the following optional files: " + notFound);
 		}
+	}
+
+	boolean isOptionalFilesExist(List<String> theFileList) {
+		return notFound(theFileList).isEmpty();
 	}
 
 	void verifyPartLinkFilesExist(List<String> theMultiPartLinkFiles, String theSinglePartLinkFile) {
@@ -155,12 +156,13 @@ public class LoadedFileDescriptors implements Closeable {
 			if (!multiPartFilesFound && !singlePartFilesFound) {
 				msg = "Could not find any of the PartLink files: " + notFoundMulti + " nor " + notFoundSingle;
 			} else {
-				msg = "Only either the single PartLink file or the split PartLink files can be present. Found both the single PartLink file, " + theSinglePartLinkFile + ", and the split PartLink files: " + theMultiPartLinkFiles;
+				msg =
+						"Only either the single PartLink file or the split PartLink files can be present. Found both the single PartLink file, "
+								+ theSinglePartLinkFile + ", and the split PartLink files: " + theMultiPartLinkFiles;
 			}
 			throw new UnprocessableEntityException(Msg.code(863) + msg);
 		}
 	}
-
 
 	private static class NonClosableBOMInputStream extends BOMInputStream {
 		NonClosableBOMInputStream(InputStream theWrap) {

@@ -1,10 +1,8 @@
-package ca.uhn.fhir.mdm.rules.json;
-
 /*-
  * #%L
  * HAPI FHIR - Master Data Management
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.mdm.rules.json;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.mdm.rules.json;
 
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.model.api.IModelJson;
@@ -42,12 +41,16 @@ public class MdmRulesJson implements IModelJson {
 
 	@JsonProperty(value = "version", required = true)
 	String myVersion;
+
 	@JsonProperty(value = "candidateSearchParams", required = true)
 	List<MdmResourceSearchParamJson> myCandidateSearchParams = new ArrayList<>();
+
 	@JsonProperty(value = "candidateFilterSearchParams", required = true)
 	List<MdmFilterSearchParamJson> myCandidateFilterSearchParams = new ArrayList<>();
+
 	@JsonProperty(value = "matchFields", required = true)
 	List<MdmFieldMatchJson> myMatchFieldJsonList = new ArrayList<>();
+
 	@JsonProperty(value = "matchResultMap", required = true)
 	Map<String, MdmMatchResultEnum> myMatchResultMap = new HashMap<>();
 
@@ -60,6 +63,7 @@ public class MdmRulesJson implements IModelJson {
 
 	@JsonProperty(value = "eidSystems")
 	Map<String, String> myEnterpriseEidSystems = new HashMap<>();
+
 	@JsonProperty(value = "mdmTypes")
 	List<String> myMdmTypes;
 
@@ -149,15 +153,15 @@ public class MdmRulesJson implements IModelJson {
 	}
 
 	public Map<String, String> getEnterpriseEIDSystems() {
-		//First try the new property.
+		// First try the new property.
 		if (myEnterpriseEidSystems != null && !myEnterpriseEidSystems.isEmpty()) {
 			return myEnterpriseEidSystems;
-		//If that fails, fall back to our deprecated property.
+			// If that fails, fall back to our deprecated property.
 		} else if (!StringUtils.isBlank(myEnterpriseEIDSystem)) {
-			HashMap<String , String> retVal = new HashMap<>();
+			HashMap<String, String> retVal = new HashMap<>();
 			retVal.put(ALL_RESOURCE_SEARCH_PARAM_TYPE, myEnterpriseEIDSystem);
 			return retVal;
-		//Otherwise, return an empty map.
+			// Otherwise, return an empty map.
 		} else {
 			return Collections.emptyMap();
 		}
@@ -186,18 +190,17 @@ public class MdmRulesJson implements IModelJson {
 
 		Map<String, String> enterpriseEIDSystems = getEnterpriseEIDSystems();
 
-		//If we have a * eid system, there should only be one.
+		// If we have a * eid system, there should only be one.
 		if (enterpriseEIDSystems.containsKey(ALL_RESOURCE_SEARCH_PARAM_TYPE)) {
 			Validate.isTrue(enterpriseEIDSystems.size() == 1);
 		}
-
 	}
 
 	public String getSummary() {
-		return myCandidateSearchParams.size() + " Candidate Search Params, " +
-			myCandidateFilterSearchParams.size() + " Filter Search Params, " +
-			myMatchFieldJsonList.size() + " Match Fields, " +
-			myMatchResultMap.size() + " Match Result Entries";
+		return myCandidateSearchParams.size() + " Candidate Search Params, " + myCandidateFilterSearchParams.size()
+				+ " Filter Search Params, " + myMatchFieldJsonList.size()
+				+ " Match Fields, " + myMatchResultMap.size()
+				+ " Match Result Entries";
 	}
 
 	public String getFieldMatchNamesForVector(long theVector) {
@@ -213,7 +216,7 @@ public class MdmRulesJson implements IModelJson {
 				fieldMatchResult.add(myMatchFieldJsonList.get(i).getName() + ": YES");
 			}
 		}
-		return String.join("\n" ,fieldMatchResult);
+		return String.join("\n", fieldMatchResult);
 	}
 
 	@VisibleForTesting
@@ -229,8 +232,7 @@ public class MdmRulesJson implements IModelJson {
 		/**
 		 * This empty constructor is required by Jackson
 		 */
-		public MdmRulesJsonConverter() {
-		}
+		public MdmRulesJsonConverter() {}
 
 		@Override
 		public MdmRulesJson convert(MdmRulesJson theMdmRulesJson) {
@@ -247,5 +249,4 @@ public class MdmRulesJson implements IModelJson {
 	public void setMdmTypes(List<String> theMdmTypes) {
 		myMdmTypes = theMdmTypes;
 	}
-
 }

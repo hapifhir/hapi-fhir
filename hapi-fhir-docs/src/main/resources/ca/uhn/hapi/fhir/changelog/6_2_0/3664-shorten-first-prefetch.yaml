@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 3664
+title: "Initial page loading has been optimized to reduce the number of prefetched resources. This should improve the speed of initial search queries in many cases."

@@ -1,0 +1,4 @@
+type: fix
+issue: 4058
+jira: SMILE-4345
+title: "When enabling validation on a fhir_endpoint module, a bundle with a Measure resource referencing a Library resource or a  MeasureReport resource referencing a Measure, validation will fail with an IllegalArgumentException complaining about the Library or Measure resource, respectively.   The fix ensures that Library and Measure resources are handled correctly and all of validation can proceed with a report of all success and errors."

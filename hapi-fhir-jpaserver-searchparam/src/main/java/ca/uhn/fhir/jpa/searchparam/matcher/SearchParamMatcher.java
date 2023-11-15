@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.searchparam.matcher;
-
 /*-
  * #%L
  * HAPI FHIR Search Parameters
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.searchparam.matcher;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.searchparam.matcher;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
@@ -33,22 +32,25 @@ import org.springframework.stereotype.Service;
 public class SearchParamMatcher {
 	@Autowired
 	private FhirContext myFhirContext;
+
 	@Autowired
 	private IndexedSearchParamExtractor myIndexedSearchParamExtractor;
+
 	@Autowired
 	private InMemoryResourceMatcher myInMemoryResourceMatcher;
 
 	public InMemoryMatchResult match(String theCriteria, IBaseResource theResource, RequestDetails theRequest) {
-		ResourceIndexedSearchParams resourceIndexedSearchParams = myIndexedSearchParamExtractor.extractIndexedSearchParams(theResource, theRequest);
-		return myInMemoryResourceMatcher.match(theCriteria, theResource, resourceIndexedSearchParams);
+		return myInMemoryResourceMatcher.match(theCriteria, theResource, null, theRequest);
 	}
 
 	public InMemoryMatchResult match(SearchParameterMap theSearchParameterMap, IBaseResource theResource) {
 		if (theSearchParameterMap.isEmpty()) {
 			return InMemoryMatchResult.successfulMatch();
 		}
-		ResourceIndexedSearchParams resourceIndexedSearchParams = myIndexedSearchParamExtractor.extractIndexedSearchParams(theResource, null);
+		ResourceIndexedSearchParams resourceIndexedSearchParams =
+				myIndexedSearchParamExtractor.extractIndexedSearchParams(theResource, null);
 		RuntimeResourceDefinition resourceDefinition = myFhirContext.getResourceDefinition(theResource);
-		return myInMemoryResourceMatcher.match(theSearchParameterMap, theResource, resourceDefinition, resourceIndexedSearchParams);
+		return myInMemoryResourceMatcher.match(
+				theSearchParameterMap, theResource, resourceDefinition, resourceIndexedSearchParams);
 	}
 }

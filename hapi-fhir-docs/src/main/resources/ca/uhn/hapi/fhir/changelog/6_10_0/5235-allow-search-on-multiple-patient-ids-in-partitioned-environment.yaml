@@ -1,0 +1,6 @@
+---
+type: add
+issue: 5235
+title: "Changes have been made to allow searching on multiple patient _ids
+        when in a patient_id partitioned environment.
+    "

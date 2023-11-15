@@ -1,0 +1,7 @@
+---
+type: fix
+issue: 4891
+title: "Initiating a bulk export with a _type filter would sometimes return
+   resource types not specified in the filter.
+   This has been fixed.
+   "

@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.model.entity;
-
 /*
  * #%L
  * HAPI FHIR JPA Model
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,17 +17,16 @@ package ca.uhn.fhir.jpa.model.entity;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.model.entity;
 
+import java.io.Serializable;
 import javax.persistence.Column;
-import javax.persistence.Embedded;
-import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.MappedSuperclass;
-import java.io.Serializable;
 
 @MappedSuperclass
-public class BaseTag extends BasePartitionable implements Serializable {
+public abstract class BaseTag extends BasePartitionable implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
@@ -51,5 +48,4 @@ public class BaseTag extends BasePartitionable implements Serializable {
 	public void setTag(TagDefinition theTag) {
 		myTag = theTag;
 	}
-
 }

@@ -1,10 +1,8 @@
-package ca.uhn.fhir.rest.server.method;
-
 /*
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,10 +17,11 @@ package ca.uhn.fhir.rest.server.method;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.server.method;
 
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
@@ -38,11 +37,10 @@ import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.SimpleBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
-import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import ca.uhn.fhir.system.HapiSystemProperties;
 import org.hl7.fhir.instance.model.api.IBaseConformance;
 
-import javax.annotation.Nonnull;
 import java.lang.reflect.Method;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -51,6 +49,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
+import javax.annotation.Nonnull;
 
 public class ConformanceMethodBinding extends BaseResourceReturningMethodBinding {
 	public static final String CACHE_THREAD_PREFIX = "capabilitystatement-cache-";
@@ -69,8 +68,11 @@ public class ConformanceMethodBinding extends BaseResourceReturningMethodBinding
 
 		MethodReturnTypeEnum methodReturnType = getMethodReturnType();
 		Class<?> genericReturnType = (Class<?>) theMethod.getGenericReturnType();
-		if (methodReturnType != MethodReturnTypeEnum.RESOURCE || !IBaseConformance.class.isAssignableFrom(genericReturnType)) {
-			throw new ConfigurationException(Msg.code(387) + "Conformance resource provider method '" + theMethod.getName() + "' should return a Conformance resource class, returns: " + theMethod.getReturnType());
+		if (methodReturnType != MethodReturnTypeEnum.RESOURCE
+				|| !IBaseConformance.class.isAssignableFrom(genericReturnType)) {
+			throw new ConfigurationException(
+					Msg.code(387) + "Conformance resource provider method '" + theMethod.getName()
+							+ "' should return a Conformance resource class, returns: " + theMethod.getReturnType());
 		}
 
 		Metadata metadata = theMethod.getAnnotation(Metadata.class);
@@ -84,11 +86,14 @@ public class ConformanceMethodBinding extends BaseResourceReturningMethodBinding
 			t.setDaemon(false);
 			return t;
 		};
-		myThreadPool = new ThreadPoolExecutor(1, 1,
-			0L, TimeUnit.MILLISECONDS,
-			new LinkedBlockingQueue<>(1),
-			threadFactory,
-			new ThreadPoolExecutor.DiscardOldestPolicy());
+		myThreadPool = new ThreadPoolExecutor(
+				1,
+				1,
+				0L,
+				TimeUnit.MILLISECONDS,
+				new LinkedBlockingQueue<>(1),
+				threadFactory,
+				new ThreadPoolExecutor.DiscardOldestPolicy());
 	}
 
 	/**
@@ -128,16 +133,18 @@ public class ConformanceMethodBinding extends BaseResourceReturningMethodBinding
 	}
 
 	@Override
-	public IBundleProvider invokeServer(IRestfulServer<?> theServer, RequestDetails theRequest, Object[] theMethodParams) throws BaseServerResponseException {
+	public IBundleProvider invokeServer(
+			IRestfulServer<?> theServer, RequestDetails theRequest, Object[] theMethodParams)
+			throws BaseServerResponseException {
 		IBaseConformance conf;
 
-		CacheControlDirective cacheControlDirective = new CacheControlDirective().parse(theRequest.getHeaders(Constants.HEADER_CACHE_CONTROL));
+		CacheControlDirective cacheControlDirective =
+				new CacheControlDirective().parse(theRequest.getHeaders(Constants.HEADER_CACHE_CONTROL));
 
-		if (cacheControlDirective.isNoCache())
-			conf = null;
+		if (cacheControlDirective.isNoCache()) conf = null;
 		else {
 			conf = myCachedResponse.get();
-			if ("true".equals(System.getProperty("test"))) {
+			if (HapiSystemProperties.isTestModeEnabled()) {
 				conf = null;
 			}
 			if (conf != null) {
@@ -152,18 +159,18 @@ public class ConformanceMethodBinding extends BaseResourceReturningMethodBinding
 			// Handle server action interceptors
 			RestOperationTypeEnum operationType = getRestOperationType(theRequest);
 			if (operationType != null) {
-				IServerInterceptor.ActionRequestDetails details = new IServerInterceptor.ActionRequestDetails(theRequest);
-				populateActionRequestDetailsForInterceptor(theRequest, details, theMethodParams);
+
+				populateRequestDetailsForInterceptor(theRequest, theMethodParams);
+
 				// Interceptor hook: SERVER_INCOMING_REQUEST_PRE_HANDLED
 				if (theRequest.getInterceptorBroadcaster() != null) {
 					HookParams preHandledParams = new HookParams();
 					preHandledParams.add(RestOperationTypeEnum.class, theRequest.getRestOperationType());
 					preHandledParams.add(RequestDetails.class, theRequest);
 					preHandledParams.addIfMatchesType(ServletRequestDetails.class, theRequest);
-					preHandledParams.add(IServerInterceptor.ActionRequestDetails.class, details);
 					theRequest
-						.getInterceptorBroadcaster()
-						.callHooks(Pointcut.SERVER_INCOMING_REQUEST_PRE_HANDLED, preHandledParams);
+							.getInterceptorBroadcaster()
+							.callHooks(Pointcut.SERVER_INCOMING_REQUEST_PRE_HANDLED, preHandledParams);
 				}
 			}
 		}
@@ -185,8 +192,8 @@ public class ConformanceMethodBinding extends BaseResourceReturningMethodBinding
 			params.add(RequestDetails.class, theRequest);
 			params.addIfMatchesType(ServletRequestDetails.class, theRequest);
 			IBaseConformance outcome = (IBaseConformance) theRequest
-				.getInterceptorBroadcaster()
-				.callHooksAndReturnObject(Pointcut.SERVER_CAPABILITY_STATEMENT_GENERATED, params);
+					.getInterceptorBroadcaster()
+					.callHooksAndReturnObject(Pointcut.SERVER_CAPABILITY_STATEMENT_GENERATED, params);
 			if (outcome != null) {
 				conf = outcome;
 			}
@@ -196,7 +203,7 @@ public class ConformanceMethodBinding extends BaseResourceReturningMethodBinding
 			myCachedResponse.set(conf);
 			myCachedResponseExpires.set(System.currentTimeMillis() + getCacheMillis());
 		}
-		
+
 		return conf;
 	}
 
@@ -216,7 +223,8 @@ public class ConformanceMethodBinding extends BaseResourceReturningMethodBinding
 			if (theRequest.getRequestType() == RequestTypeEnum.GET) {
 				return MethodMatchEnum.EXACT;
 			}
-			throw new MethodNotAllowedException(Msg.code(388) + "/metadata request must use HTTP GET", RequestTypeEnum.GET);
+			throw new MethodNotAllowedException(
+					Msg.code(388) + "/metadata request must use HTTP GET", RequestTypeEnum.GET);
 		}
 
 		return MethodMatchEnum.NONE;
@@ -239,7 +247,6 @@ public class ConformanceMethodBinding extends BaseResourceReturningMethodBinding
 	public IBaseConformance provideCapabilityStatement(RestfulServer theServer, RequestDetails theRequest) {
 		Object[] params = createMethodParams(theRequest);
 		IBundleProvider resultObj = invokeServer(theServer, theRequest, params);
-		return (IBaseConformance) resultObj.getResources(0,1).get(0);
+		return (IBaseConformance) resultObj.getResources(0, 1).get(0);
 	}
-
 }

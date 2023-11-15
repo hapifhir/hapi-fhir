@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 3914
+title: "Previously, unexpected response status code is not handled by the import-poll-status operation. 
+Now, it is fixed and throwing an error message."

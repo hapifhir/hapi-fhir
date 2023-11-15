@@ -1,0 +1,5 @@
+type: fix
+issue: 4485
+jira:  SMILE-5561
+title: "Cross-partition subscription PUT with a custom interceptor will fail on validation because the read partition ID is used.
+        This has been fixed by skipping validation if the validator invoked during an update operation"

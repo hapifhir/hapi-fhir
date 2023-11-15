@@ -1,10 +1,8 @@
-package ca.uhn.fhir.batch2.api;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server - Batch2 Task Processor
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.batch2.api;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.batch2.api;
 
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.model.api.IModelJson;
@@ -34,10 +33,11 @@ public class StepExecutionDetails<PT extends IModelJson, IT extends IModelJson> 
 	private final IJobInstance myInstance;
 	private final String myChunkId;
 
-	public StepExecutionDetails(@Nonnull PT theParameters,
-										 @Nullable IT theData,
-										 @Nonnull JobInstance theInstance,
-										 @Nonnull String theChunkId) {
+	public StepExecutionDetails(
+			@Nonnull PT theParameters,
+			@Nullable IT theData,
+			@Nonnull JobInstance theInstance,
+			@Nonnull String theChunkId) {
 		Validate.notNull(theParameters);
 		myParameters = theParameters;
 		myData = theData;

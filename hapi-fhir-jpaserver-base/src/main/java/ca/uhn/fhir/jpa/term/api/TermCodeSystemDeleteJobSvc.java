@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.term.api;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.term.api;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.term.api;
 
 import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemDao;
 import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemVersionDao;
@@ -118,10 +117,14 @@ public class TermCodeSystemDeleteJobSvc implements ITermCodeSystemDeleteJobSvc {
 		ourLog.debug("Executing for codeSystemVersionId: {}", theVersionPid);
 
 		// if TermCodeSystemVersion being deleted is current, disconnect it form TermCodeSystem
-		Optional<TermCodeSystem> codeSystemOpt = myCodeSystemDao.findWithCodeSystemVersionAsCurrentVersion(theVersionPid);
+		Optional<TermCodeSystem> codeSystemOpt =
+				myCodeSystemDao.findWithCodeSystemVersionAsCurrentVersion(theVersionPid);
 		if (codeSystemOpt.isPresent()) {
 			TermCodeSystem codeSystem = codeSystemOpt.get();
-			ourLog.info("Removing code system version: {} as current version of code system: {}", theVersionPid, codeSystem.getPid());
+			ourLog.info(
+					"Removing code system version: {} as current version of code system: {}",
+					theVersionPid,
+					codeSystem.getPid());
 			codeSystem.setCurrentVersion(null);
 			myCodeSystemDao.save(codeSystem);
 		}

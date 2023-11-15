@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 3922
+title: "Fixed an issue with $delete-expunge that resulted in SQL errors on large amounts
+      of deleted data"

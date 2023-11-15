@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 3884
+title: "Prevent creating overlapping SearchParameter resources which would lead to random search behaviors."

@@ -1,10 +1,8 @@
-package ca.uhn.fhir.rest.server.interceptor.auth;
-
 /*-
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.rest.server.interceptor.auth;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.server.interceptor.auth;
 
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
@@ -51,9 +50,11 @@ public interface IAuthorizationSearchParamMatcher {
 	class MatchResult {
 		// fake record pattern
 		/** match result */
-		@Nonnull public final Match match;
+		@Nonnull
+		public final Match match;
 		/** the reason for the UNSUPPORTED result */
-		@Nullable public final String unsupportedReason;
+		@Nullable
+		public final String unsupportedReason;
 
 		public static MatchResult buildMatched() {
 			return new MatchResult(Match.MATCH, null);
@@ -71,6 +72,5 @@ public interface IAuthorizationSearchParamMatcher {
 			this.match = myMatch;
 			this.unsupportedReason = myUnsupportedReason;
 		}
-
 	}
 }

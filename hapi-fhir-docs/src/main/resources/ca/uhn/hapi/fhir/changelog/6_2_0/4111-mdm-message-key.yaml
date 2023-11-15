@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 4111
+backport: 6.1.3
+title: "MDM messages were using the resource id as a message key when it should be using the EID as a partition hash key.
+This could lead to duplicate golden resources on systems using Kafka as a message broker."

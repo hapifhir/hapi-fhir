@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.util.ClasspathUtil;
 import ca.uhn.fhir.util.TestUtil;
 import net.sf.json.JSON;
 import net.sf.json.JSONSerializer;
@@ -899,7 +900,7 @@ public class JsonParserHl7OrgDstu2Test {
 		StringReader reader = new StringReader(enc);
 		Patient parsed = newJsonParser.parseResource(Patient.class, reader);
 
-		ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(parsed));
+		ourLog.debug(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(parsed));
 
 		assertEquals(1, parsed.getName().get(0).getExtension().size());
 		Extension ext = parsed.getName().get(0).getExtension().get(0);
@@ -1162,20 +1163,20 @@ public class JsonParserHl7OrgDstu2Test {
   @Test
   public void testSimpleResourceEncode() throws IOException {
 
-    String xmlString = IOUtils.toString(JsonParser.class.getResourceAsStream("/example-patient-general-hl7orgdstu2.xml"), StandardCharsets.UTF_8);
+    String xmlString = ClasspathUtil.loadResource("/example-patient-general-hl7orgdstu2.xml");
     Patient obs = ourCtx.newXmlParser().parseResource(Patient.class, xmlString);
 
     List<Extension> undeclaredExtensions = obs.getContact().get(0).getName().getFamily().get(0).getExtension();
     Extension undeclaredExtension = undeclaredExtensions.get(0);
     assertEquals("http://hl7.org/fhir/Profile/iso-21090#qualifier", undeclaredExtension.getUrl());
 
-    ourLog.info(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+    ourLog.debug(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 
     IParser jsonParser = ourCtx.newJsonParser();
     String encoded = jsonParser.encodeResourceToString(obs);
     ourLog.info(encoded);
 
-    String jsonString = IOUtils.toString(JsonParser.class.getResourceAsStream("/example-patient-general-hl7orgdstu2.json"), StandardCharsets.UTF_8);
+    String jsonString = ClasspathUtil.loadResource("/example-patient-general-hl7orgdstu2.json");
 
     JSON expected = JSONSerializer.toJSON(jsonString);
     JSON actual = JSONSerializer.toJSON(encoded.trim());
@@ -1232,7 +1233,7 @@ public class JsonParserHl7OrgDstu2Test {
 	@Test
 	public void testSimpleResourceEncodeWithCustomType() throws IOException, SAXException {
 
-		String jsonString = IOUtils.toString(JsonParser.class.getResourceAsStream("/example-patient-general-hl7orgdstu2.json"), StandardCharsets.UTF_8);
+		String jsonString = ClasspathUtil.loadResource("/example-patient-general-hl7orgdstu2.json");
 		MyObservationWithExtensions obs = ourCtx.newJsonParser().parseResource(MyObservationWithExtensions.class, jsonString);
 
 		{
@@ -1255,7 +1256,7 @@ public class JsonParserHl7OrgDstu2Test {
 		String encoded = xmlParser.encodeResourceToString(obs);
 		encoded = encoded.replaceAll("<!--.*-->", "").replace("\n", "").replace("\r", "").replaceAll(">\\s+<", "><");
 
-		String xmlString = IOUtils.toString(JsonParser.class.getResourceAsStream("/example-patient-general-hl7orgdstu2.xml"), StandardCharsets.UTF_8);
+		String xmlString = ClasspathUtil.loadResource("/example-patient-general-hl7orgdstu2.xml");
 		xmlString = xmlString.replaceAll("<!--.*-->", "").replace("\n", "").replace("\r", "").replaceAll(">\\s+<", "><");
 
 		ourLog.info("Expected: " + xmlString);

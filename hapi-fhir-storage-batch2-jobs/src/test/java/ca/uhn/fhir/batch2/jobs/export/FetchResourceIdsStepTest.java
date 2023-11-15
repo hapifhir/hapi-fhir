@@ -4,14 +4,15 @@ import ca.uhn.fhir.batch2.api.IJobDataSink;
 import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.api.VoidModel;
-import ca.uhn.fhir.batch2.jobs.export.models.BulkExportIdList;
-import ca.uhn.fhir.batch2.jobs.export.models.BulkExportJobParameters;
-import ca.uhn.fhir.batch2.jobs.models.Id;
+import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
+import ca.uhn.fhir.batch2.jobs.export.models.ResourceIdList;
+import ca.uhn.fhir.batch2.jobs.models.BatchResourceId;
 import ca.uhn.fhir.batch2.model.JobInstance;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.bulk.export.api.IBulkExportProcessor;
 import ca.uhn.fhir.jpa.bulk.export.model.ExportPIDIteratorParameters;
-import ca.uhn.fhir.rest.api.server.bulk.BulkDataExportOptions;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
@@ -20,6 +21,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -32,6 +35,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -41,6 +45,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.hamcrest.Matchers.containsString;
 
 @ExtendWith(MockitoExtension.class)
 public class FetchResourceIdsStepTest {
@@ -50,10 +55,12 @@ public class FetchResourceIdsStepTest {
 	private ListAppender<ILoggingEvent> myAppender;
 
 	@Mock
-	private IBulkExportProcessor myBulkExportProcessor;
+	private IBulkExportProcessor<JpaPid> myBulkExportProcessor;
 
 	@InjectMocks
 	private FetchResourceIdsStep myFirstStep;
+	@Mock
+	private JpaStorageSettings myStorageSettings;
 
 	@BeforeEach
 	public void init() {
@@ -65,47 +72,52 @@ public class FetchResourceIdsStepTest {
 		ourLog.detachAppender(myAppender);
 	}
 
-	private BulkExportJobParameters createParameters() {
+	private BulkExportJobParameters createParameters(boolean thePartitioned) {
 		BulkExportJobParameters jobParameters = new BulkExportJobParameters();
-		jobParameters.setStartDate(new Date());
+		jobParameters.setSince(new Date());
 		jobParameters.setOutputFormat("json");
-		jobParameters.setExportStyle(BulkDataExportOptions.ExportStyle.PATIENT);
+		jobParameters.setExportStyle(BulkExportJobParameters.ExportStyle.PATIENT);
 		jobParameters.setResourceTypes(Arrays.asList("Patient", "Observation"));
+		if (thePartitioned) {
+			jobParameters.setPartitionId(RequestPartitionId.fromPartitionName("Partition-A"));
+		} else {
+			jobParameters.setPartitionId(RequestPartitionId.allPartitions());
+		}
 		return jobParameters;
 	}
 
 	private StepExecutionDetails<BulkExportJobParameters, VoidModel> createInput(BulkExportJobParameters theParameters,
 																										  JobInstance theInstance) {
-		StepExecutionDetails<BulkExportJobParameters, VoidModel> input = new StepExecutionDetails<>(
+		return new StepExecutionDetails<>(
 			theParameters,
 			null,
 			theInstance,
 			"1"
 		);
-		return input;
 	}
 
-	@Test
-	public void run_withValidInputs_succeeds() {
+	@ParameterizedTest
+	@ValueSource(booleans = {true, false})
+	public void run_withValidInputs_succeeds(boolean thePartitioned) {
 		// setup
-		IJobDataSink<BulkExportIdList> sink = mock(IJobDataSink.class);
-		BulkExportJobParameters parameters = createParameters();
+		IJobDataSink<ResourceIdList> sink = mock(IJobDataSink.class);
+		BulkExportJobParameters parameters = createParameters(thePartitioned);
 		JobInstance instance = new JobInstance();
 		instance.setInstanceId("1");
 		StepExecutionDetails<BulkExportJobParameters, VoidModel> input = createInput(parameters, instance);
 		ourLog.setLevel(Level.INFO);
-		List<ResourcePersistentId> patientIds = new ArrayList<>();
-		List<ResourcePersistentId> observationIds = new ArrayList<>();
+		List<JpaPid> patientIds = new ArrayList<>();
+		List<JpaPid> observationIds = new ArrayList<>();
 
 		{
-			ResourcePersistentId id1 = new ResourcePersistentId("Patient/123");
-			ResourcePersistentId id2 = new ResourcePersistentId("Patient/234");
+			JpaPid id1 = JpaPid.fromId(123L);
+			JpaPid id2 = JpaPid.fromId(234L);
 			patientIds.add(id1);
 			patientIds.add(id2);
 		}
 		{
-			ResourcePersistentId id1 = new ResourcePersistentId("Observation/123");
-			ResourcePersistentId id2 = new ResourcePersistentId("Observation/234");
+			JpaPid id1 = JpaPid.fromId(345L);
+			JpaPid id2 = JpaPid.fromId(456L);
 			observationIds.add(id1);
 			observationIds.add(id2);
 		}
@@ -115,21 +127,21 @@ public class FetchResourceIdsStepTest {
 			any(ExportPIDIteratorParameters.class)
 		)).thenReturn(patientIds.iterator())
 			.thenReturn(observationIds.iterator());
+		int maxFileCapacity = 1000;
+		when(myStorageSettings.getBulkExportFileMaximumCapacity()).thenReturn(maxFileCapacity);
 
 		// test
 		RunOutcome outcome = myFirstStep.run(input, sink);
 
 		// verify
 		assertEquals(RunOutcome.SUCCESS, outcome);
-		ArgumentCaptor<BulkExportIdList> resultCaptor = ArgumentCaptor.forClass(BulkExportIdList.class);
+		ArgumentCaptor<ResourceIdList> resultCaptor = ArgumentCaptor.forClass(ResourceIdList.class);
 		verify(sink, times(parameters.getResourceTypes().size()))
 			.accept(resultCaptor.capture());
 
-		List<BulkExportIdList> results = resultCaptor.getAllValues();
+		List<ResourceIdList> results = resultCaptor.getAllValues();
 		assertEquals(parameters.getResourceTypes().size(), results.size());
-		for (int i = 0; i < results.size(); i++) {
-			BulkExportIdList idList = results.get(i);
-
+		for (ResourceIdList idList: results) {
 			String resourceType = idList.getResourceType();
 			assertTrue(parameters.getResourceTypes().contains(resourceType));
 
@@ -148,27 +160,39 @@ public class FetchResourceIdsStepTest {
 		ArgumentCaptor<ILoggingEvent> logCaptor = ArgumentCaptor.forClass(ILoggingEvent.class);
 		verify(myAppender, atLeastOnce()).doAppend(logCaptor.capture());
 		List<ILoggingEvent> events = logCaptor.getAllValues();
-		assertTrue(events.get(0).getMessage().contains("Starting BatchExport job"));
-		assertTrue(events.get(1).getFormattedMessage().contains("Submitted "
+		assertThat(events.get(0).getMessage(), containsString("Fetching resource IDs for bulk export job instance"));
+		assertThat(events.get(1).getMessage(), containsString("Running FetchResource"));
+		assertThat(events.get(2).getMessage(), containsString("Running FetchResource"));
+		assertThat(events.get(3).getFormattedMessage(), containsString("Submitted "
 			+ parameters.getResourceTypes().size()
 			+ " groups of ids for processing"
 		));
+
+		ArgumentCaptor<ExportPIDIteratorParameters> mapppedParamsCaptor = ArgumentCaptor.forClass(ExportPIDIteratorParameters.class);
+		verify(myBulkExportProcessor, times(2)).getResourcePidIterator(mapppedParamsCaptor.capture());
+		List<ExportPIDIteratorParameters> capturedParameters = mapppedParamsCaptor.getAllValues();
+		assertEquals(parameters.getPartitionId(), capturedParameters.get(0).getPartitionIdOrAllPartitions());
+		assertEquals(parameters.getPartitionId(), capturedParameters.get(1).getPartitionIdOrAllPartitions());
 	}
 
 	@Test
-	public void run_moreThanAThousandPatients_hasAtLeastTwoJobs() {
+	public void run_moreThanTheMaxFileCapacityPatients_hasAtLeastTwoJobs() {
 		// setup
-		IJobDataSink<BulkExportIdList> sink = mock(IJobDataSink.class);
+		IJobDataSink<ResourceIdList> sink = mock(IJobDataSink.class);
 		JobInstance instance = new JobInstance();
 		instance.setInstanceId("1");
-		BulkExportJobParameters parameters = createParameters();
+		BulkExportJobParameters parameters = createParameters(false);
 		parameters.setResourceTypes(Collections.singletonList("Patient"));
 		StepExecutionDetails<BulkExportJobParameters, VoidModel> input = createInput(parameters, instance);
 		ourLog.setLevel(Level.INFO);
-		List<ResourcePersistentId> patientIds = new ArrayList<>();
+		List<JpaPid> patientIds = new ArrayList<>();
 
-		for (int i = 0; i < FetchResourceIdsStep.MAX_IDS_TO_BATCH + 1; i++) {
-			ResourcePersistentId id = new ResourcePersistentId("Patient/RED" + i);
+		// when
+		int maxFileCapacity = 5;
+		when(myStorageSettings.getBulkExportFileMaximumCapacity()).thenReturn(maxFileCapacity);
+
+		for (int i = 0; i <= maxFileCapacity; i++) {
+			JpaPid id = JpaPid.fromId((long) i);
 			patientIds.add(id);
 		}
 
@@ -181,19 +205,19 @@ public class FetchResourceIdsStepTest {
 		RunOutcome outcome = myFirstStep.run(input, sink);
 
 		// verify
-		ArgumentCaptor<BulkExportIdList> captor = ArgumentCaptor.forClass(BulkExportIdList.class);
+		ArgumentCaptor<ResourceIdList> captor = ArgumentCaptor.forClass(ResourceIdList.class);
 		assertEquals(RunOutcome.SUCCESS, outcome);
 
 		verify(sink, times(2))
 			.accept(captor.capture());
-		List<BulkExportIdList> listIds = captor.getAllValues();
+		List<ResourceIdList> listIds = captor.getAllValues();
 
 		// verify all submitted ids are there
 		boolean found = false;
-		for (ResourcePersistentId pid : patientIds) {
-			Id id = Id.getIdFromPID(pid, "Patient");
-			for (BulkExportIdList idList : listIds) {
-				found = idList.getIds().contains(id);
+		for (JpaPid pid : patientIds) {
+			BatchResourceId batchResourceId = BatchResourceId.getIdFromPID(pid, "Patient");
+			for (ResourceIdList idList : listIds) {
+				found = idList.getIds().contains(batchResourceId);
 				if (found) {
 					break;
 				}

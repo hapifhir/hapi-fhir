@@ -1,10 +1,8 @@
-package ca.uhn.fhir.cli;
-
 /*-
  * #%L
  * HAPI FHIR - Command Line Client - API
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,10 +17,11 @@ package ca.uhn.fhir.cli;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.cli;
 
-import ca.uhn.fhir.jpa.migrate.BaseMigrator;
+import ca.uhn.fhir.jpa.migrate.HapiMigrator;
+import ca.uhn.fhir.jpa.migrate.MigrationTaskList;
 import ca.uhn.fhir.jpa.migrate.SchemaMigrator;
-import ca.uhn.fhir.jpa.migrate.taskdef.BaseTask;
 import ca.uhn.fhir.jpa.migrate.tasks.HapiFhirJpaMigrationTasks;
 import ca.uhn.fhir.util.VersionEnum;
 import org.apache.commons.cli.CommandLine;
@@ -44,10 +43,10 @@ public class HapiFlywayMigrateDatabaseCommand extends BaseFlywayMigrateDatabaseC
 	}
 
 	@Override
-	protected void addTasks(BaseMigrator theMigrator, String theSkipVersions) {
-		List<BaseTask> tasks = new HapiFhirJpaMigrationTasks(getFlags()).getAllTasks(VersionEnum.values());
-		super.setDoNothingOnSkippedTasks(tasks, theSkipVersions);
-		theMigrator.addTasks(tasks);
+	protected void addTasks(HapiMigrator theMigrator, String theSkipVersions) {
+		MigrationTaskList taskList = new HapiFhirJpaMigrationTasks(getFlags()).getAllTasks(VersionEnum.values());
+		taskList.setDoNothingOnSkippedTasks(theSkipVersions);
+		theMigrator.addTasks(taskList);
 	}
 
 	@Override

@@ -1,10 +1,8 @@
-package ca.uhn.fhir.rest.server.provider;
-
 /*-
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.rest.server.provider;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.server.provider;
 
 public class ProviderConstants {
 	public static final String SUBSCRIPTION_TRIGGERING_PARAM_RESOURCE_ID = "resourceId";
@@ -57,6 +56,7 @@ public class ProviderConstants {
 	 * Operation name: diff
 	 */
 	public static final String DIFF_OPERATION_NAME = "$diff";
+
 	public static final String DIFF_FROM_VERSION_PARAMETER = "fromVersion";
 
 	public static final String DIFF_FROM_PARAMETER = "from";
@@ -67,6 +67,7 @@ public class ProviderConstants {
 	 * EMPI Operations
 	 */
 	public static final String EMPI_MATCH = "$match";
+
 	public static final String MDM_MATCH = "$mdm-match";
 	public static final String MDM_MATCH_RESOURCE = "resource";
 	public static final String MDM_RESOURCE_TYPE = "resourceType";
@@ -86,6 +87,7 @@ public class ProviderConstants {
 	public static final String MDM_CREATE_LINK_MATCH_RESULT = "matchResult";
 
 	public static final String MDM_QUERY_LINKS = "$mdm-query-links";
+	public static final String MDM_LINK_HISTORY = "$mdm-link-history";
 	public static final String MDM_QUERY_LINKS_GOLDEN_RESOURCE_ID = "goldenResourceId";
 	public static final String MDM_QUERY_LINKS_RESOURCE_ID = "resourceId";
 	public static final String MDM_QUERY_PARTITION_IDS = "partitionIds";
@@ -97,14 +99,25 @@ public class ProviderConstants {
 
 	public static final String OPERATION_MDM_CLEAR = "$mdm-clear";
 	public static final String OPERATION_MDM_CLEAR_RESOURCE_NAME = "resourceType";
-	public static final String OPERATION_MDM_CLEAR_BATCH_SIZE = "batchSize";
+	public static final String OPERATION_MDM_BATCH_SIZE = "batchSize";
 	public static final String OPERATION_MDM_SUBMIT = "$mdm-submit";
+	public static final String OPERATION_MDM_SUBMIT_OUT_PARAM_SUBMITTED = "submitted";
 	public static final String MDM_BATCH_RUN_CRITERIA = "criteria";
 	public static final String MDM_BATCH_RUN_RESOURCE_TYPE = "resourceType";
 	/**
 	 * CQL Operations
 	 */
 	public static final String CQL_EVALUATE_MEASURE = "$evaluate-measure";
+	/**
+	 * Clinical Reasoning Operations
+	 */
+	public static final String CR_OPERATION_APPLY = "$apply";
+
+	public static final String CR_OPERATION_R5_APPLY = "$r5.apply";
+	public static final String CR_OPERATION_PREPOPULATE = "$prepopulate";
+	public static final String CR_OPERATION_POPULATE = "$populate";
+	public static final String CR_OPERATION_EXTRACT = "$extract";
+	public static final String CR_OPERATION_PACKAGE = "$package";
 
 	/**
 	 * Operation name for the $meta operation
@@ -151,6 +164,14 @@ public class ProviderConstants {
 	 * Number of resources to delete at a time for the $delete-expunge operation
 	 */
 	public static final String OPERATION_DELETE_BATCH_SIZE = "batchSize";
+	/**
+	 * Should we cascade the $delete-expunge operation
+	 */
+	public static final String OPERATION_DELETE_CASCADE = "cascade";
+	/**
+	 * How many rounds for the $delete-expunge operation
+	 */
+	public static final String OPERATION_DELETE_CASCADE_MAX_ROUNDS = "cascadeMaxRounds";
 
 	/**
 	 * The Spring Batch job id of the delete expunge job created by a $delete-expunge operation
@@ -161,6 +182,11 @@ public class ProviderConstants {
 	 * Operation name for the $reindex operation
 	 */
 	public static final String OPERATION_REINDEX = "$reindex";
+
+	/**
+	 * Operation name for the $reindex operation
+	 */
+	public static final String OPERATION_REINDEX_DRYRUN = "$reindex-dryrun";
 
 	/**
 	 * Operation name for the $invalidate-expansion operation
@@ -205,4 +231,13 @@ public class ProviderConstants {
 	 */
 	@Deprecated
 	public static final String PERFORM_REINDEXING_PASS = "$perform-reindexing-pass";
+
+	/**
+	 * Operation name for the "$export-poll-status" operation
+	 */
+	public static final String OPERATION_EXPORT_POLL_STATUS = "$export-poll-status";
+	/**
+	 * Operation name for the "$export" operation
+	 */
+	public static final String OPERATION_EXPORT = "$export";
 }

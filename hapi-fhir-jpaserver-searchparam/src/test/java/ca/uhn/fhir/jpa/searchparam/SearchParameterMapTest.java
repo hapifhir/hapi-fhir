@@ -40,6 +40,27 @@ class SearchParameterMapTest {
 	}
 
 	@Test
+	void toNormalizedQueryString_IncludeNormal() {
+		SearchParameterMap map = new SearchParameterMap();
+		map.addInclude(new Include("Patient:name"));
+		assertEquals("?_include=Patient:name", map.toNormalizedQueryString(ourFhirContext));
+	}
+
+	@Test
+	void toNormalizedQueryString_IncludeStar() {
+		SearchParameterMap map = new SearchParameterMap();
+		map.addInclude(new Include("*"));
+		assertEquals("?_include=*", map.toNormalizedQueryString(ourFhirContext));
+	}
+
+	@Test
+	void toNormalizedQueryString_IncludeTypedStar() {
+		SearchParameterMap map = new SearchParameterMap();
+		map.addInclude(new Include("Patient:*"));
+		assertEquals("?_include=Patient:*", map.toNormalizedQueryString(ourFhirContext));
+	}
+
+	@Test
 	void toNormalizedQueryStringUpper() {
 		SearchParameterMap map = new SearchParameterMap();
 		DateRangeParam dateRangeParam = new DateRangeParam();

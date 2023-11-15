@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 3987
+title: "Previously, if a FullTextSearchSvcImpl was defined, but was disabled via configuration, there could be data loss when reindexing due to transaction rollbacks. This has been corrected. Thanks to @dyoung-work for the fix!"

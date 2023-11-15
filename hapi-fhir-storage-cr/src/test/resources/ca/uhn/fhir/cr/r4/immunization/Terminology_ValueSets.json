@@ -1,0 +1,612 @@
+{
+	"resourceType": "Bundle",
+	"id": "valuesets-ImmunizationStatus-bundle",
+	"type": "transaction",
+	"entry": [
+		{
+			"resource": {
+				"resourceType": "ValueSet",
+				"id": "2.16.840.1.113883.3.464.1003.196.11.1212",
+				"meta": {
+					"versionId": "27",
+					"lastUpdated": "2021-09-14T01:00:46.000-04:00"
+				},
+				"url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.196.11.1212",
+				"version": "20210914",
+				"name": "DTaP Vaccine",
+				"status": "active",
+				"date": "2021-09-14T01:00:46-04:00",
+				"publisher": "NCQA PHEMUR",
+				"compose": {
+					"include": [
+						{
+							"system": "http://hl7.org/fhir/sid/cvx",
+							"version": "20220615",
+							"concept": [
+								{
+									"code": "106",
+									"display": "diphtheria, tetanus toxoids and acellular pertussis vaccine, 5 pertussis antigens"
+								},
+								{
+									"code": "107",
+									"display": "diphtheria, tetanus toxoids and acellular pertussis vaccine, unspecified formulation"
+								},
+								{
+									"code": "110",
+									"display": "DTaP-hepatitis B and poliovirus vaccine"
+								},
+								{
+									"code": "120",
+									"display": "diphtheria, tetanus toxoids and acellular pertussis vaccine, Haemophilus influenzae type b conjugate, and poliovirus vaccine, inactivated (DTaP-Hib-IPV)"
+								},
+								{
+									"code": "146",
+									"display": "Diphtheria and Tetanus Toxoids and Acellular Pertussis Adsorbed, Inactivated Poliovirus, Haemophilus b Conjugate (Meningococcal Protein Conjugate), and Hepatitis B (Recombinant) Vaccine."
+								},
+								{
+									"code": "20",
+									"display": "diphtheria, tetanus toxoids and acellular pertussis vaccine"
+								},
+								{
+									"code": "50",
+									"display": "DTaP-Haemophilus influenzae type b conjugate vaccine"
+								}
+							]
+						}
+					]
+				}
+			},
+			"request": {
+				"method": "PUT",
+				"url": "ValueSet/2.16.840.1.113883.3.464.1003.196.11.1212"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "ValueSet",
+				"id": "valuesets-HB",
+				"url": "http://hl7.org/fhir/ValueSet/vaccine-HB",
+				"version": "4.0.1",
+				"status": "active",
+				"experimental": false,
+				"date": "2019-11-01T09:29:23+11:00",
+				"compose": {
+					"include": [
+						{
+							"system": "http://hl7.org/fhir/sid/cvx",
+							"concept": [
+								{
+									"code": "08",
+									"display": "hepatitis B vaccine, pediatric or pediatric/adolescent dosage"
+								}
+							]
+						}
+					]
+				}
+			},
+			"request": {
+				"method": "PUT",
+				"url": "ValueSet/valuesets-HB"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "ValueSet",
+				"id": "valuesets-HPV-9",
+				"url": "http://hl7.org/fhir/ValueSet/vaccine-HPV-9",
+				"version": "4.0.1",
+				"status": "active",
+				"experimental": false,
+				"date": "2019-11-01T09:29:23+11:00",
+				"compose": {
+					"include": [
+						{
+							"system": "http://hl7.org/fhir/sid/cvx",
+							"concept": [
+								{
+									"code": "137",
+									"display": "HPV, unspecified formulation"
+								}
+							]
+						}
+					]
+				}
+			},
+			"request": {
+				"method": "PUT",
+				"url": "ValueSet/valuesets-HPV-9"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "ValueSet",
+				"id": "valuesets-HZ",
+				"url": "http://hl7.org/fhir/ValueSet/vaccine-HZ",
+				"version": "4.0.1",
+				"status": "active",
+				"experimental": false,
+				"date": "2019-11-01T09:29:23+11:00",
+				"compose": {
+					"include": [
+						{
+							"system": "http://hl7.org/fhir/sid/cvx",
+							"concept": [
+								{
+									"code": "121",
+									"display": "zoster vaccine, live"
+								}
+							]
+						}
+					]
+				}
+			},
+			"request": {
+				"method": "PUT",
+				"url": "ValueSet/valuesets-HZ"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "ValueSet",
+				"id": "valuesets-Inf",
+				"url": "http://hl7.org/fhir/ValueSet/vaccine-Inf",
+				"version": "4.0.1",
+				"status": "active",
+				"experimental": false,
+				"date": "2019-11-01T09:29:23+11:00",
+				"compose": {
+					"include": [
+						{
+							"system": "http://hl7.org/fhir/sid/cvx",
+							"concept": [
+								{
+									"code": "135",
+									"display": "influenza, high dose seasonal, preservative-free"
+								},
+								{
+									"code": "140",
+									"display": "Influenza, seasonal, injectable, preservative free"
+								},
+								{
+									"code": "141",
+									"display": "Influenza, seasonal, injectable"
+								},
+								{
+									"code": "144",
+									"display": "seasonal influenza, intradermal, preservative free"
+								},
+								{
+									"code": "155",
+									"display": "Seasonal, trivalent, recombinant, injectable influenza vaccine, preservative free"
+								},
+								{
+									"code": "168",
+									"display": "Seasonal trivalent influenza vaccine, adjuvanted, preservative free"
+								},
+								{
+									"code": "185",
+									"display": "Seasonal, quadrivalent, recombinant, injectable influenza vaccine, preservative free"
+								},
+								{
+									"code": "197",
+									"display": "influenza, high-dose seasonal, quadrivalent, .7mL dose, preservative free"
+								},
+								{
+									"code": "205",
+									"display": "influenza, seasonal vaccine, quadrivalent, adjuvanted, .5mL dose, preservative free"
+								}
+							]
+						}
+					]
+				}
+			},
+			"request": {
+				"method": "PUT",
+				"url": "ValueSet/valuesets-Inf"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "ValueSet",
+				"id": "valuesets-Men-C-ACYW",
+				"url": "http://hl7.org/fhir/ValueSet/vaccine-Men-C-ACYW",
+				"version": "4.0.1",
+				"status": "active",
+				"experimental": false,
+				"date": "2019-11-01T09:29:23+11:00",
+				"compose": {
+					"include": [
+						{
+							"system": "http://hl7.org/fhir/sid/cvx",
+							"concept": [
+								{
+									"code": "108",
+									"display": "meningococcal ACWY vaccine, unspecified formulation"
+								}
+							]
+						}
+					]
+				}
+			},
+			"request": {
+				"method": "PUT",
+				"url": "ValueSet/valuesets-Men-C-ACYW"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "ValueSet",
+				"id": "valuesets-Men-C-C",
+				"url": "http://hl7.org/fhir/ValueSet/vaccine-Men-C-C",
+				"version": "4.0.1",
+				"status": "active",
+				"experimental": false,
+				"date": "2019-11-01T09:29:23+11:00",
+				"compose": {
+					"include": [
+						{
+							"system": "http://hl7.org/fhir/sid/cvx",
+							"concept": [
+								{
+									"code": "103",
+									"display": "meningococcal C conjugate vaccine"
+								}
+							]
+						}
+					]
+				}
+			},
+			"request": {
+				"method": "PUT",
+				"url": "ValueSet/valuesets-Men-C-C"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "ValueSet",
+				"id": "2.16.840.1.113883.3.464.1003.196.11.1235",
+				"meta": {
+					"versionId": "17",
+					"lastUpdated": "2021-02-02T15:59:43.000-05:00"
+				},
+				"url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.196.11.1235",
+				"version": "20170504",
+				"name": "Measles, Mumps and Rubella (MMR) Vaccine",
+				"status": "active",
+				"date": "2017-05-04T01:00:13-04:00",
+				"publisher": "NCQA PHEMUR",
+				"compose": {
+					"include": [
+						{
+							"system": "http://hl7.org/fhir/sid/cvx",
+							"version": "20220615",
+							"concept": [
+								{
+									"code": "03",
+									"display": "measles, mumps and rubella virus vaccine"
+								}
+							]
+						}
+					]
+				}
+			},
+			"request": {
+				"method": "PUT",
+				"url": "ValueSet/2.16.840.1.113883.3.464.1003.196.11.1235"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "ValueSet",
+				"id": "valuesets-MMRV",
+				"url": "http://hl7.org/fhir/ValueSet/vaccine-MMRV",
+				"name": "measles, mumps, rubella, and varicella virus vaccine",
+				"status": "active",
+				"date": "2017-05-04T01:00:13-04:00",
+				"publisher": "NCQA PHEMUR",
+				"compose": {
+					"include": [
+						{
+							"system": "http://hl7.org/fhir/sid/cvx",
+							"version": "20220615",
+							"concept": [
+								{
+									"code": "94",
+									"display": "measles, mumps, rubella, and varicella virus vaccine"
+								}
+							]
+						}
+					]
+				}
+			},
+			"request": {
+				"method": "PUT",
+				"url": "ValueSet/vaccine-MMRV"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "ValueSet",
+				"id": "2.16.840.1.113883.3.464.1003.1158",
+				"meta": {
+					"versionId": "5",
+					"lastUpdated": "2022-02-02T01:02:05.000-05:00"
+				},
+				"url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.1158",
+				"version": "20220202",
+				"name": "Adult Pneumococcal Vaccine",
+				"status": "active",
+				"date": "2022-02-02T01:02:05-05:00",
+				"publisher": "NCQA PHEMUR",
+				"compose": {
+					"include": [
+						{
+							"system": "http://hl7.org/fhir/sid/cvx",
+							"version": "20220615",
+							"concept": [
+								{
+									"code": "109",
+									"display": "pneumococcal vaccine, unspecified formulation"
+								},
+								{
+									"code": "133",
+									"display": "pneumococcal conjugate vaccine, 13 valent"
+								},
+								{
+									"code": "152",
+									"display": "Pneumococcal Conjugate, unspecified formulation"
+								},
+								{
+									"code": "215",
+									"display": "Pneumococcal conjugate vaccine 15-valent (PCV15), polysaccharide CRM197 conjugate, adjuvant, preservative free"
+								},
+								{
+									"code": "216",
+									"display": "Pneumococcal conjugate vaccine 20-valent (PCV20), polysaccharide CRM197 conjugate, adjuvant, preservative free"
+								}
+							]
+						}
+					]
+				}
+			},
+			"request": {
+				"method": "PUT",
+				"url": "ValueSet/2.16.840.1.113883.3.464.1003.1158"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "ValueSet",
+				"id": "valuesets-Pneu-P-23",
+				"url": "http://hl7.org/fhir/ValueSet/vaccine-Pneu-P-23",
+				"version": "4.0.1",
+				"status": "active",
+				"experimental": false,
+				"date": "2019-11-01T09:29:23+11:00",
+				"compose": {
+					"include": [
+						{
+							"system": "http://hl7.org/fhir/sid/cvx",
+							"concept": [
+								{
+									"code": "33",
+									"display": "pneumococcal polysaccharide vaccine, 23 valent"
+								}
+							]
+						}
+					]
+				}
+			},
+			"request": {
+				"method": "PUT",
+				"url": "ValueSet/valuesets-Pneu-P-23"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "ValueSet",
+				"id": "valuesets-pregnancy-status",
+				"url": "http://hl7.org/fhir/ValueSet/valuesets-pregnancy-status",
+				"version": "4.0.1",
+				"status": "active",
+				"experimental": false,
+				"date": "2019-11-01T09:29:23+11:00",
+				"compose": {
+					"include": [
+						{
+							"system": "http://loinc.org",
+							"concept": [
+								{
+									"code": "82810-3",
+									"display": "Pregnancy status"
+								}
+							]
+						}
+					]
+				}
+			},
+			"request": {
+				"method": "PUT",
+				"url": "ValueSet/valuesets-pregnancy-status"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "ValueSet",
+				"id": "2.16.840.1.113883.3.464.1003.196.11.1232",
+				"meta": {
+					"versionId": "21",
+					"lastUpdated": "2021-02-02T10:34:28.000-05:00"
+				},
+				"url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.196.11.1232",
+				"version": "20180310",
+				"name": "Rotavirus Vaccine (3 dose schedule)",
+				"status": "active",
+				"date": "2018-03-10T01:00:08-05:00",
+				"publisher": "NCQA PHEMUR",
+				"compose": {
+					"include": [
+						{
+							"system": "http://hl7.org/fhir/sid/cvx",
+							"version": "20220615",
+							"concept": [
+								{
+									"code": "116",
+									"display": "rotavirus, live, pentavalent vaccine"
+								},
+								{
+									"code": "122",
+									"display": "rotavirus vaccine, unspecified formulation"
+								}
+							]
+						}
+					]
+				}
+			},
+			"request": {
+				"method": "PUT",
+				"url": "ValueSet/2.16.840.1.113883.3.464.1003.196.11.1232"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "ValueSet",
+				"id": "valuesets-Tdap",
+				"url": "http://hl7.org/fhir/ValueSet/vaccine-Tdap",
+				"version": "4.0.1",
+				"status": "active",
+				"experimental": false,
+				"date": "2019-11-01T09:29:23+11:00",
+				"compose": {
+					"include": [
+						{
+							"system": "http://hl7.org/fhir/sid/cvx",
+							"concept": [
+								{
+									"code": "115",
+									"display": "tetanus toxoid, reduced diphtheria toxoid, and acellular pertussis vaccine, adsorbed"
+								}
+							]
+						}
+					]
+				}
+			},
+			"request": {
+				"method": "PUT",
+				"url": "ValueSet/valuesets-Tdap"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "ValueSet",
+				"id": "valuesets-Tdap-IPV",
+				"url": "http://hl7.org/fhir/ValueSet/vaccine-Tdap-IPV",
+				"version": "4.0.1",
+				"status": "active",
+				"experimental": false,
+				"date": "2019-11-01T09:29:23+11:00",
+				"compose": {
+					"include": [
+						{
+							"system": "http://hl7.org/fhir/sid/cvx",
+							"concept": [
+								{
+									"code": "115",
+									"display": "tetanus toxoid, reduced diphtheria toxoid, and acellular pertussis vaccine, adsorbed"
+								}
+							]
+						}
+					]
+				}
+			},
+			"request": {
+				"method": "PUT",
+				"url": "ValueSet/valuesets-Tdap-IPV"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "ValueSet",
+				"id": "valuesets-Td",
+				"url": "http://hl7.org/fhir/ValueSet/vaccine-Td",
+				"version": "4.0.1",
+				"status": "active",
+				"experimental": false,
+				"date": "2019-11-01T09:29:23+11:00",
+				"compose": {
+					"include": [
+						{
+							"system": "http://hl7.org/fhir/sid/cvx",
+							"concept": [
+								{
+									"code": "139",
+									"display": "Td(adult) unspecified formulation"
+								}
+							]
+						}
+					]
+				}
+			},
+			"request": {
+				"method": "PUT",
+				"url": "ValueSet/valuesets-Td"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "ValueSet",
+				"id": "valuesets-vaccine-Var",
+				"url": "http://hl7.org/fhir/ValueSet/vaccine-Var",
+				"version": "4.0.1",
+				"status": "active",
+				"experimental": false,
+				"date": "2019-11-01T09:29:23+11:00",
+				"compose": {
+					"include": [
+						{
+							"system": "http://hl7.org/fhir/sid/cvx",
+							"concept": [
+								{
+									"code": "21",
+									"display": "varicella virus vaccine"
+								}
+							]
+						}
+					]
+				}
+			},
+			"request": {
+				"method": "PUT",
+				"url": "ValueSet/valuesets-vaccine-Var"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "ValueSet",
+				"id": "valuesets-weeks-of-gestation",
+				"url": "http://hl7.org/fhir/ValueSet/valuesets-weeks-of-gestation",
+				"version": "4.0.1",
+				"status": "active",
+				"experimental": false,
+				"date": "2019-11-01T09:29:23+11:00",
+				"compose": {
+					"include": [
+						{
+							"system": "http://loinc.org",
+							"concept": [
+								{
+									"code": "49051-6",
+									"display": "Gestational age in weeks"
+								}
+							]
+						}
+					]
+				}
+			},
+			"request": {
+				"method": "PUT",
+				"url": "ValueSet/valuesets-weeks-of-gestation"
+			}
+		}
+	]
+}

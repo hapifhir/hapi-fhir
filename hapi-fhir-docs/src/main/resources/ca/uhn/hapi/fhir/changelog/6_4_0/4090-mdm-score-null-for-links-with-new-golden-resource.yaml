@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 4090
+title: "Previously, mdm links that connected resources and golden resources that were newly created had a link score of null,
+this changes it to 1.0 as the golden resource should be a perfect match with the source resource it was created from."

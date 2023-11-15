@@ -1,10 +1,8 @@
-package ca.uhn.fhir.batch2.jobs.termcodesystem.codesystemdelete;
-
 /*-
  * #%L
  * hapi-fhir-storage-batch2-jobs
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.batch2.jobs.termcodesystem.codesystemdelete;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.batch2.jobs.termcodesystem.codesystemdelete;
 
 import ca.uhn.fhir.batch2.api.ChunkExecutionDetails;
 import ca.uhn.fhir.batch2.api.IJobDataSink;
@@ -31,9 +30,11 @@ import ca.uhn.fhir.batch2.model.ChunkOutcome;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemDeleteJobSvc;
 import ca.uhn.fhir.jpa.term.models.CodeSystemVersionPIDResult;
 import ca.uhn.fhir.jpa.term.models.TermCodeSystemDeleteJobParameters;
-import org.jetbrains.annotations.NotNull;
 
-public class DeleteCodeSystemStep implements IReductionStepWorker<TermCodeSystemDeleteJobParameters, CodeSystemVersionPIDResult, VoidModel> {
+import javax.annotation.Nonnull;
+
+public class DeleteCodeSystemStep
+		implements IReductionStepWorker<TermCodeSystemDeleteJobParameters, CodeSystemVersionPIDResult, VoidModel> {
 
 	private final ITermCodeSystemDeleteJobSvc myITermCodeSystemSvc;
 
@@ -41,12 +42,14 @@ public class DeleteCodeSystemStep implements IReductionStepWorker<TermCodeSystem
 		myITermCodeSystemSvc = theCodeSystemDeleteJobSvc;
 	}
 
-	@NotNull
+	@Nonnull
 	@Override
 	public RunOutcome run(
-		@NotNull StepExecutionDetails<TermCodeSystemDeleteJobParameters, CodeSystemVersionPIDResult> theStepExecutionDetails,
-		@NotNull IJobDataSink<VoidModel> theDataSink
-	) throws JobExecutionFailedException {
+			@Nonnull
+					StepExecutionDetails<TermCodeSystemDeleteJobParameters, CodeSystemVersionPIDResult>
+							theStepExecutionDetails,
+			@Nonnull IJobDataSink<VoidModel> theDataSink)
+			throws JobExecutionFailedException {
 		// final step
 		long codeId = theStepExecutionDetails.getParameters().getTermPid();
 		myITermCodeSystemSvc.deleteCodeSystem(codeId);
@@ -56,9 +59,10 @@ public class DeleteCodeSystemStep implements IReductionStepWorker<TermCodeSystem
 		return RunOutcome.SUCCESS;
 	}
 
-	@NotNull
+	@Nonnull
 	@Override
-	public ChunkOutcome consume(ChunkExecutionDetails<TermCodeSystemDeleteJobParameters, CodeSystemVersionPIDResult> theChunkDetails) {
+	public ChunkOutcome consume(
+			ChunkExecutionDetails<TermCodeSystemDeleteJobParameters, CodeSystemVersionPIDResult> theChunkDetails) {
 		/*
 		 * A single code system can have multiple versions.
 		 * We don't want to call delete on all these systems

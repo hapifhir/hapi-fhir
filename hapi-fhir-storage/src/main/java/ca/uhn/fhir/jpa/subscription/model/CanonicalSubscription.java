@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.subscription.model;
-
 /*-
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.subscription.model;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.subscription.model;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IModelJson;
@@ -31,14 +30,14 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Subscription;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -48,36 +47,59 @@ public class CanonicalSubscription implements Serializable, Cloneable, IModelJso
 
 	@JsonProperty("id")
 	private String myIdElement;
+
 	@JsonProperty("criteria")
 	private String myCriteriaString;
+
 	@JsonProperty("endpointUrl")
 	private String myEndpointUrl;
+
 	@JsonProperty("payload")
 	private String myPayloadString;
+
 	@JsonProperty("headers")
 	private List<String> myHeaders;
+
 	@JsonProperty("channelType")
 	private CanonicalSubscriptionChannelType myChannelType;
+
 	@JsonProperty("status")
 	private Subscription.SubscriptionStatus myStatus;
+
 	@JsonProperty("triggerDefinition")
+	@Deprecated
 	private CanonicalEventDefinition myTrigger;
+
 	@JsonProperty("emailDetails")
 	private EmailDetails myEmailDetails;
+
 	@JsonProperty("restHookDetails")
 	private RestHookDetails myRestHookDetails;
+
 	@JsonProperty("extensions")
 	private Map<String, List<String>> myChannelExtensions;
+
 	@JsonProperty("tags")
 	private Map<String, String> myTags;
+
 	@JsonProperty("payloadSearchCriteria")
 	private String myPayloadSearchCriteria;
+
 	@JsonProperty("partitionId")
 	private Integer myPartitionId;
+
 	@JsonProperty("crossPartitionEnabled")
 	private boolean myCrossPartitionEnabled;
+
 	@JsonProperty("sendDeleteMessages")
 	private boolean mySendDeleteMessages;
+
+	@JsonProperty("isTopicSubscription")
+	private boolean myIsTopicSubscription;
+
+	@JsonProperty("myTopicSubscription")
+	private CanonicalTopicSubscription myTopicSubscription;
+
 	/**
 	 * Constructor
 	 */
@@ -93,10 +115,7 @@ public class CanonicalSubscription implements Serializable, Cloneable, IModelJso
 		myPayloadSearchCriteria = thePayloadSearchCriteria;
 	}
 
-	/**
-	 * For now we're using the R4 TriggerDefinition, but this
-	 * may change in the future when things stabilize
-	 */
+	@Deprecated
 	public void addTrigger(CanonicalEventDefinition theTrigger) {
 		myTrigger = theTrigger;
 	}
@@ -154,6 +173,9 @@ public class CanonicalSubscription implements Serializable, Cloneable, IModelJso
 	}
 
 	public Map<String, String> getTags() {
+		if (myTags == null) {
+			myTags = new HashMap<>();
+		}
 		return myTags;
 	}
 
@@ -247,10 +269,7 @@ public class CanonicalSubscription implements Serializable, Cloneable, IModelJso
 		this.myCrossPartitionEnabled = myCrossPartitionEnabled;
 	}
 
-	/**
-	 * For now we're using the R4 triggerdefinition, but this
-	 * may change in the future when things stabilize
-	 */
+	@Deprecated
 	public CanonicalEventDefinition getTrigger() {
 		return myTrigger;
 	}
@@ -287,24 +306,25 @@ public class CanonicalSubscription implements Serializable, Cloneable, IModelJso
 		b.append(myChannelExtensions, that.myChannelExtensions);
 		b.append(mySendDeleteMessages, that.mySendDeleteMessages);
 		b.append(myPayloadSearchCriteria, that.myPayloadSearchCriteria);
+		b.append(myTopicSubscription, that.myTopicSubscription);
 		return b.isEquals();
 	}
 
 	@Override
 	public int hashCode() {
 		return new HashCodeBuilder(17, 37)
-			.append(myIdElement)
-			.append(myCriteriaString)
-			.append(myEndpointUrl)
-			.append(myPayloadString)
-			.append(myHeaders)
-			.append(myChannelType)
-			.append(myStatus)
-			.append(myTrigger)
-			.append(myEmailDetails)
-			.append(myRestHookDetails)
-			.append(myChannelExtensions)
-			.toHashCode();
+				.append(myIdElement)
+				.append(myCriteriaString)
+				.append(myEndpointUrl)
+				.append(myPayloadString)
+				.append(myHeaders)
+				.append(myChannelType)
+				.append(myStatus)
+				.append(myTrigger)
+				.append(myEmailDetails)
+				.append(myRestHookDetails)
+				.append(myChannelExtensions)
+				.toHashCode();
 	}
 
 	public void setIdElement(IIdType theIdElement) {
@@ -334,25 +354,88 @@ public class CanonicalSubscription implements Serializable, Cloneable, IModelJso
 
 	@Override
 	public String toString() {
-		return new ToStringBuilder(this)
-			.append("myIdElement", myIdElement)
-			.append("myStatus", myStatus)
-			.append("myCriteriaString", myCriteriaString)
-			.append("myEndpointUrl", myEndpointUrl)
-			.append("myPayloadString", myPayloadString)
-//			.append("myHeaders", myHeaders)
-			.append("myChannelType", myChannelType)
-//			.append("myTrigger", myTrigger)
-//			.append("myEmailDetails", myEmailDetails)
-//			.append("myRestHookDetails", myRestHookDetails)
-//			.append("myChannelExtensions", myChannelExtensions)
-			.toString();
+		ToStringBuilder stringBuilder = new ToStringBuilder(this)
+				.append("myIdElement", myIdElement)
+				.append("myStatus", myStatus)
+				.append("myCriteriaString", myCriteriaString);
+		//			.append("myEndpointUrl", myEndpointUrl)
+		//			.append("myPayloadString", myPayloadString)
+		//			.append("myHeaders", myHeaders)
+		//			.append("myChannelType", myChannelType)
+		//			.append("myTrigger", myTrigger)
+		//			.append("myEmailDetails", myEmailDetails)
+		//			.append("myRestHookDetails", myRestHookDetails)
+		//			.append("myChannelExtensions", myChannelExtensions)
+		if (isTopicSubscription()) {
+			stringBuilder.append("topic", myTopicSubscription.getTopic());
+		} else {
+			stringBuilder.append("criteriaString", myCriteriaString);
+		}
+
+		return stringBuilder.toString();
+	}
+
+	public void setTopicSubscription(boolean theTopicSubscription) {
+		myIsTopicSubscription = theTopicSubscription;
+	}
+
+	public boolean isTopicSubscription() {
+		return myIsTopicSubscription;
+	}
+
+	// PayloadString is called ContentType in R5
+	public String getContentType() {
+		assert isTopicSubscription();
+		return getPayloadString();
+	}
+
+	public CanonicalTopicSubscription getTopicSubscription() {
+		assert isTopicSubscription();
+		if (myTopicSubscription == null) {
+			myTopicSubscription = new CanonicalTopicSubscription();
+		}
+		return myTopicSubscription;
+	}
+
+	public void setTopicSubscription(CanonicalTopicSubscription theTopicSubscription) {
+		myTopicSubscription = theTopicSubscription;
+	}
+
+	public org.hl7.fhir.r5.model.Subscription.SubscriptionPayloadContent getContent() {
+		assert isTopicSubscription();
+		return myTopicSubscription.getContent();
+	}
+
+	public String getTopic() {
+		assert isTopicSubscription();
+		return myTopicSubscription.getTopic();
+	}
+
+	public List<CanonicalTopicSubscriptionFilter> getFilters() {
+		assert isTopicSubscription();
+		return myTopicSubscription.getFilters();
+	}
+
+	public int getHeartbeatPeriod() {
+		assert isTopicSubscription();
+		return myTopicSubscription.getHeartbeatPeriod();
+	}
+
+	public int getTimeout() {
+		assert isTopicSubscription();
+		return myTopicSubscription.getTimeout();
+	}
+
+	public int getMaxCount() {
+		assert isTopicSubscription();
+		return myTopicSubscription.getMaxCount();
 	}
 
 	public static class EmailDetails implements IModelJson {
 
 		@JsonProperty("from")
 		private String myFrom;
+
 		@JsonProperty("subjectTemplate")
 		private String mySubjectTemplate;
 
@@ -388,17 +471,17 @@ public class CanonicalSubscription implements Serializable, Cloneable, IModelJso
 			EmailDetails that = (EmailDetails) theO;
 
 			return new EqualsBuilder()
-				.append(myFrom, that.myFrom)
-				.append(mySubjectTemplate, that.mySubjectTemplate)
-				.isEquals();
+					.append(myFrom, that.myFrom)
+					.append(mySubjectTemplate, that.mySubjectTemplate)
+					.isEquals();
 		}
 
 		@Override
 		public int hashCode() {
 			return new HashCodeBuilder(17, 37)
-				.append(myFrom)
-				.append(mySubjectTemplate)
-				.toHashCode();
+					.append(myFrom)
+					.append(mySubjectTemplate)
+					.toHashCode();
 		}
 	}
 
@@ -406,6 +489,7 @@ public class CanonicalSubscription implements Serializable, Cloneable, IModelJso
 
 		@JsonProperty("stripVersionId")
 		private boolean myStripVersionId;
+
 		@JsonProperty("deliverLatestVersion")
 		private boolean myDeliverLatestVersion;
 
@@ -424,7 +508,6 @@ public class CanonicalSubscription implements Serializable, Cloneable, IModelJso
 			myDeliverLatestVersion = theDeliverLatestVersion;
 		}
 
-
 		public boolean isStripVersionId() {
 			return myStripVersionId;
 		}
@@ -442,29 +525,29 @@ public class CanonicalSubscription implements Serializable, Cloneable, IModelJso
 			RestHookDetails that = (RestHookDetails) theO;
 
 			return new EqualsBuilder()
-				.append(myStripVersionId, that.myStripVersionId)
-				.append(myDeliverLatestVersion, that.myDeliverLatestVersion)
-				.isEquals();
+					.append(myStripVersionId, that.myStripVersionId)
+					.append(myDeliverLatestVersion, that.myDeliverLatestVersion)
+					.isEquals();
 		}
 
 		@Override
 		public int hashCode() {
 			return new HashCodeBuilder(17, 37)
-				.append(myStripVersionId)
-				.append(myDeliverLatestVersion)
-				.toHashCode();
+					.append(myStripVersionId)
+					.append(myDeliverLatestVersion)
+					.toHashCode();
 		}
-
 	}
 
+	@Deprecated
 	public static class CanonicalEventDefinition implements IModelJson {
 
 		/**
 		 * Constructor
 		 */
+		@Deprecated
 		public CanonicalEventDefinition() {
 			// nothing yet
 		}
-
 	}
 }

@@ -1,0 +1,7 @@
+---
+type: fix
+issue: 4417
+jira: SMILE-5405
+backport: 6.2.5
+title: "Fixed a bug with batch2 which could cause previously completed chunks to be set back to in-progress. This could cause a batch job to never complete. 
+Now, a safeguard to ensure a job can never return to in-progress once it has completed or failed."

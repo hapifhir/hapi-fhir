@@ -137,7 +137,7 @@ If you wish to update a historical version of a resource without creating a new 
 Update operation. While this operation is not supported by the FHIR specification, it's an enhancement added to
 specifically to HAPI-FHIR.
 
-In order to use this new functionality, you must set the `setUpdateWithHistoryRewriteEnabled` setting in the `DaoConfig`
+In order to use this new functionality, you must set the `setUpdateWithHistoryRewriteEnabled` setting in the `StorageSettings`
 to true.
 
 The following API request shows an example of executing a PUT at the following endpoint.
@@ -285,7 +285,7 @@ Validate methods must be annotated with the [@Validate](/hapi-fhir/apidocs/hapi-
 
 Validate methods may optionally also have a parameter of type IdType annotated with the [@IdParam](/hapi-fhir/apidocs/hapi-fhir-base/ca/uhn/fhir/rest/annotation/IdParam.html) annotation. This parameter contains the resource ID (see the [FHIR specification](http://hl7.org/implement/standards/fhir/http.html#validation) for details on how this is used).
 
-Validate methods must return normally if the resource validates successfully, or throw an [UnprocessableEntityException](/hapi-fhir/apidocs/hapi-fhir-base/ca/uhn/fhir/rest/server/exceptions/UnprocessableEntityException.html) or [InvalidRequestException](/hapi-fhir/apidocs/hapi-fhir-base/ca/uhn/fhir/rest/server/exceptions/InvalidRequestException.html) if the validation fails.
+Validate methods must return normally independent of the validation outcome.  The ResponseStatusCode of the MethodOutcome returned should be 200 irrespective of the validation outcome as required by the [FHIR Specification for the Resource $validate operation](https://www.hl7.org/fhir/R4/resource-operation-validate.html).
 
 Validate methods must return either:
 

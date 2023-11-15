@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 4644
+title: "The %now value for date search parameters did not properly set the time zone of the time being compared to.  This has been corrected."

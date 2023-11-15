@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 4395
+title: "Fixed a bug where the PackageInstallerSvcImpl was not treating FHIR version R4 as being compatible with R4B."

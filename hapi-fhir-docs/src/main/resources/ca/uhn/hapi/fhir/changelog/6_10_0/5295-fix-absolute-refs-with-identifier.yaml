@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 5295
+title: "A regression in the HAPI FHIR 6.6.0 JPA server meant that absolute resource
+    references which also contained an identifier were rejected even if the server
+    was configured to allow absolute references. This has been corrected."

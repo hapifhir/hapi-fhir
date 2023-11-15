@@ -1,15 +1,8 @@
-package ca.uhn.fhir.rest.api.server;
-
-import ca.uhn.fhir.context.api.BundleInclusionRule;
-import ca.uhn.fhir.rest.api.PreferReturnEnum;
-import ca.uhn.fhir.rest.server.IPagingProvider;
-import ca.uhn.fhir.rest.server.IRestfulServerDefaults;
-
 /*
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +17,13 @@ import ca.uhn.fhir.rest.server.IRestfulServerDefaults;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.api.server;
+
+import ca.uhn.fhir.context.api.BundleInclusionRule;
+import ca.uhn.fhir.rest.api.PreferReturnEnum;
+import ca.uhn.fhir.rest.server.IPagingProvider;
+import ca.uhn.fhir.rest.server.IRestfulServerDefaults;
+
 public interface IRestfulServer<T extends RequestDetails> extends IRestfulServerDefaults {
 
 	@Override

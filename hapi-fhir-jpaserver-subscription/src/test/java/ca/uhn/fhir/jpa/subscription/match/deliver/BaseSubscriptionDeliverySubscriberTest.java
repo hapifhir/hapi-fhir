@@ -6,8 +6,15 @@ import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.model.entity.StorageSettings;
+import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelFactory;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelProducer;
+import ca.uhn.fhir.jpa.subscription.match.deliver.email.IEmailSender;
+import ca.uhn.fhir.jpa.subscription.match.deliver.email.SubscriptionDeliveringEmailSubscriber;
 import ca.uhn.fhir.jpa.subscription.match.deliver.message.SubscriptionDeliveringMessageSubscriber;
 import ca.uhn.fhir.jpa.subscription.match.deliver.resthook.SubscriptionDeliveringRestHookSubscriber;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionRegistry;
@@ -17,15 +24,21 @@ import ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryMessage;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedJsonMessage;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 import ca.uhn.fhir.rest.api.EncodingEnum;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.api.IRestfulClientFactory;
+import ca.uhn.fhir.rest.server.SimpleBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.subscription.api.IResourceModifiedMessagePersistenceSvc;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Answers;
 import org.mockito.ArgumentCaptor;
 import org.mockito.ArgumentMatchers;
@@ -48,9 +61,12 @@ import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -62,6 +78,7 @@ public class BaseSubscriptionDeliverySubscriberTest {
 
 	private SubscriptionDeliveringRestHookSubscriber mySubscriber;
 	private SubscriptionDeliveringMessageSubscriber myMessageSubscriber;
+	private SubscriptionDeliveringEmailSubscriber myEmailSubscriber;
 	private final FhirContext myCtx = FhirContext.forR4();
 
 	@Mock
@@ -78,6 +95,21 @@ public class BaseSubscriptionDeliverySubscriberTest {
 	@Mock(answer = Answers.RETURNS_DEEP_STUBS)
 	private IGenericClient myGenericClient;
 
+	@Mock
+	private DaoRegistry myDaoRegistry;
+
+	@Mock
+	private IFhirResourceDao myResourceDao;
+
+	@Mock
+	private MatchUrlService myMatchUrlService;
+
+	@Mock
+	private IResourceModifiedMessagePersistenceSvc myResourceModifiedMessagePersistenceSvc;
+
+	@Mock
+	private IEmailSender myEmailSender;
+
 	@BeforeEach
 	public void before() {
 		mySubscriber = new SubscriptionDeliveringRestHookSubscriber();
@@ -89,9 +121,17 @@ public class BaseSubscriptionDeliverySubscriberTest {
 		myMessageSubscriber.setFhirContextForUnitTest(myCtx);
 		myMessageSubscriber.setInterceptorBroadcasterForUnitTest(myInterceptorBroadcaster);
 		myMessageSubscriber.setSubscriptionRegistryForUnitTest(mySubscriptionRegistry);
-
+		myMessageSubscriber.setDaoRegistryForUnitTest(myDaoRegistry);
+		myMessageSubscriber.setMatchUrlServiceForUnitTest(myMatchUrlService);
+		myMessageSubscriber.setResourceModifiedMessagePersistenceSvcForUnitTest(myResourceModifiedMessagePersistenceSvc);
 		myCtx.setRestfulClientFactory(myRestfulClientFactory);
 		when(myRestfulClientFactory.newGenericClient(any())).thenReturn(myGenericClient);
+
+		myEmailSubscriber = new SubscriptionDeliveringEmailSubscriber(myEmailSender);
+		myEmailSubscriber.setFhirContextForUnitTest(myCtx);
+		myEmailSubscriber.setInterceptorBroadcasterForUnitTest(myInterceptorBroadcaster);
+		myEmailSubscriber.setSubscriptionRegistryForUnitTest(mySubscriptionRegistry);
+		myEmailSubscriber.setResourceModifiedMessagePersistenceSvcForUnitTest(myResourceModifiedMessagePersistenceSvc);
 	}
 
 	@Test
@@ -212,6 +252,45 @@ public class BaseSubscriptionDeliverySubscriberTest {
 	}
 
 	@Test
+	public void testMessageSubscriptionWithPayloadSearchMode() throws URISyntaxException {
+		when(myInterceptorBroadcaster.callHooks(eq(Pointcut.SUBSCRIPTION_BEFORE_MESSAGE_DELIVERY), ArgumentMatchers.any(HookParams.class))).thenReturn(true);
+		when(myInterceptorBroadcaster.callHooks(eq(Pointcut.SUBSCRIPTION_AFTER_MESSAGE_DELIVERY), any())).thenReturn(false);
+		when(myChannelFactory.getOrCreateProducer(any(), any(), any())).thenReturn(myChannelProducer);
+		when(myDaoRegistry.getResourceDao(anyString())).thenReturn(myResourceDao);
+		when(myMatchUrlService.translateMatchUrl(any(), any(), any())).thenReturn(new SearchParameterMap());
+
+		Patient p1 = generatePatient();
+		Patient p2 = generatePatient();
+
+		IBundleProvider bundleProvider = new SimpleBundleProvider(List.of(p1,p2));
+		when(myResourceDao.search(any(), any())).thenReturn(bundleProvider);
+
+		CanonicalSubscription subscription = generateSubscription();
+		subscription.setPayloadSearchCriteria("Patient?_include=*");
+
+		ResourceDeliveryMessage payload = new ResourceDeliveryMessage();
+		payload.setSubscription(subscription);
+		payload.setPayload(myCtx, p1, EncodingEnum.JSON);
+		payload.setOperationType(ResourceModifiedMessage.OperationTypeEnum.CREATE);
+
+		myMessageSubscriber.handleMessage(payload);
+
+		ArgumentCaptor<ResourceModifiedJsonMessage> captor = ArgumentCaptor.forClass(ResourceModifiedJsonMessage.class);
+		verify(myChannelProducer).send(captor.capture());
+		final List<ResourceModifiedJsonMessage> messages = captor.getAllValues();
+		assertThat(messages, hasSize(1));
+
+		ResourceModifiedMessage receivedMessage = messages.get(0).getPayload();
+		assertEquals(receivedMessage.getPayloadId(), "Bundle");
+
+		Bundle receivedBundle = (Bundle) receivedMessage.getPayload(myCtx);
+		assertThat(receivedBundle.getEntry(), hasSize(2));
+		assertEquals(p1.getIdElement().getValue(), receivedBundle.getEntry().get(0).getResource().getIdElement().getValue());
+		assertEquals(p2.getIdElement().getValue(), receivedBundle.getEntry().get(1).getResource().getIdElement().getValue());
+
+	}
+
+	@Test
 	public void testRestHookDeliveryAbortedByInterceptor() {
 		when(myInterceptorBroadcaster.callHooks(eq(Pointcut.SUBSCRIPTION_BEFORE_DELIVERY), any())).thenReturn(true);
 		when(myInterceptorBroadcaster.callHooks(eq(Pointcut.SUBSCRIPTION_BEFORE_REST_HOOK_DELIVERY), any())).thenReturn(false);
@@ -314,6 +393,64 @@ public class BaseSubscriptionDeliverySubscriberTest {
 
 		assertNotNull(jsonMessage.getPayload().getRequestPartitionId());
 		assertEquals(jsonMessage.getPayload().getRequestPartitionId().toJson(), RequestPartitionId.defaultPartition().toJson());
+	}
+
+	@Test
+	public void testRestHookDeliveryFails_raisedExceptionShouldNotIncludeSubmittedResource() {
+		when(myInterceptorBroadcaster.callHooks(any(), any())).thenReturn(true);
+
+		String familyName = "FAMILY";
+
+		Patient patient = generatePatient();
+		patient.addName().setFamily(familyName);
+		CanonicalSubscription subscription = generateSubscription();
+
+		ResourceDeliveryMessage payload = new ResourceDeliveryMessage();
+		payload.setSubscription(subscription);
+		payload.setPayload(myCtx, patient, EncodingEnum.JSON);
+		payload.setOperationType(ResourceModifiedMessage.OperationTypeEnum.CREATE);
+
+		when(myGenericClient.update()).thenThrow(new InternalErrorException("FOO"));
+
+		try {
+			mySubscriber.handleMessage(new ResourceDeliveryJsonMessage(payload));
+			fail();
+		} catch (MessagingException e) {
+			String messageExceptionAsString = e.toString();
+			assertFalse(messageExceptionAsString.contains(familyName));
+		}
+	}
+
+	@ParameterizedTest
+	@ValueSource(strings = {"message", "email"})
+	public void testMessageAndEmailSubscriber_whenPayloadIsNull_shouldTryInflateMessage(String theSubscriber) {
+		// setup
+		when(myInterceptorBroadcaster.callHooks(any(), any())).thenReturn(true);
+
+		Patient patient = generatePatient();
+
+		CanonicalSubscription subscription = generateSubscription();
+
+		ResourceDeliveryMessage payload = new ResourceDeliveryMessage();
+		payload.setSubscription(subscription);
+		payload.setPayload(myCtx, patient, EncodingEnum.JSON);
+		payload.setOperationType(ResourceModifiedMessage.OperationTypeEnum.CREATE);
+
+		// mock the inflated message
+		when(myResourceModifiedMessagePersistenceSvc.inflatePersistedResourceModifiedMessageOrNull(any())).thenReturn(any());
+
+		// this will null out the payload but keep the resource id and version.
+		payload.setPayloadToNull();
+
+		// execute & verify
+        switch (theSubscriber) {
+            case "message" ->
+                    assertThrows(MessagingException.class, () -> myMessageSubscriber.handleMessage(new ResourceDeliveryJsonMessage(payload)));
+            case "email" ->
+                    assertThrows(MessagingException.class, () -> myEmailSubscriber.handleMessage(new ResourceDeliveryJsonMessage(payload)));
+        }
+
+		verify(myResourceModifiedMessagePersistenceSvc, times(1)).inflatePersistedResourceModifiedMessageOrNull(any());
 	}
 
 	@Nonnull

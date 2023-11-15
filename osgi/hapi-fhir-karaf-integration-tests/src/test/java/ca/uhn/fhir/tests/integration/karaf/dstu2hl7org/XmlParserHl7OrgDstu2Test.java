@@ -1085,7 +1085,7 @@ public class XmlParserHl7OrgDstu2Test {
 
 		String encoded = ourCtx.newXmlParser().encodeResourceToString(patient);
 
-		ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(patient));
+		ourLog.debug(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(patient));
 
 		ourLog.info("Expected: {}", msg);
 		ourLog.info("Actual:   {}", encoded);

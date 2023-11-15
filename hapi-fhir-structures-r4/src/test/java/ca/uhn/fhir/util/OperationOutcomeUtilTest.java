@@ -44,4 +44,24 @@ public class OperationOutcomeUtilTest {
 		assertNotNull(oo.getIssueFirstRep().getDetails(), "OO.issue.details is empty");
 	}
 
+	@Test
+	public void hasIssuesOfSeverity_noMatchingIssues() {
+		OperationOutcome oo = new OperationOutcome();
+		oo.addIssue().setSeverity(OperationOutcome.IssueSeverity.WARNING);
+		oo.addIssue().setSeverity(OperationOutcome.IssueSeverity.ERROR);
+		oo.addIssue().setSeverity(OperationOutcome.IssueSeverity.INFORMATION);
+
+		assertFalse(OperationOutcomeUtil.hasIssuesOfSeverity(myCtx, oo, OperationOutcome.IssueSeverity.FATAL.toCode()));
+	}
+
+	@Test
+	public void hasIssuesOfSeverity_withMatchingIssues() {
+		OperationOutcome oo = new OperationOutcome();
+		oo.addIssue().setSeverity(OperationOutcome.IssueSeverity.WARNING);
+		oo.addIssue().setSeverity(OperationOutcome.IssueSeverity.ERROR);
+		oo.addIssue().setSeverity(OperationOutcome.IssueSeverity.FATAL);
+		oo.addIssue().setSeverity(OperationOutcome.IssueSeverity.INFORMATION);
+
+		assertTrue(OperationOutcomeUtil.hasIssuesOfSeverity(myCtx, oo, OperationOutcome.IssueSeverity.FATAL.toCode()));
+	}
 }

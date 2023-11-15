@@ -1,10 +1,8 @@
-package ca.uhn.fhir.rest.server.method;
-
 /*
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,10 +17,11 @@ package ca.uhn.fhir.rest.server.method;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.server.method;
 
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.annotation.IdParam;
@@ -38,14 +37,12 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.ParameterUtil;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
-import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails;
 import ca.uhn.fhir.util.ParametersUtil;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
-import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
@@ -53,6 +50,8 @@ import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
+import javax.annotation.Nonnull;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -61,6 +60,7 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 
 	public static final String WILDCARD_NAME = "$" + Operation.NAME_MATCH_ALL;
 	private final boolean myIdempotent;
+	private final boolean myDeleteEnabled;
 	private final Integer myIdParamIndex;
 	private final String myName;
 	private final RestOperationTypeEnum myOtherOperationType;
@@ -75,27 +75,57 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 	private List<ReturnType> myReturnParams;
 	private boolean myManualRequestMode;
 	private boolean myManualResponseMode;
+	private String myCanonicalUrl;
 
 	/**
 	 * Constructor - This is the constructor that is called when binding a
 	 * standard @Operation method.
 	 */
-	public OperationMethodBinding(Class<?> theReturnResourceType, Class<? extends IBaseResource> theReturnTypeFromRp, Method theMethod, FhirContext theContext, Object theProvider,
-											Operation theAnnotation) {
-		this(theReturnResourceType, theReturnTypeFromRp, theMethod, theContext, theProvider, theAnnotation.idempotent(), theAnnotation.name(), theAnnotation.type(), theAnnotation.typeName(), theAnnotation.returnParameters(),
-			theAnnotation.bundleType(), theAnnotation.global());
-
+	public OperationMethodBinding(
+			Class<?> theReturnResourceType,
+			Class<? extends IBaseResource> theReturnTypeFromRp,
+			Method theMethod,
+			FhirContext theContext,
+			Object theProvider,
+			Operation theAnnotation) {
+		this(
+				theReturnResourceType,
+				theReturnTypeFromRp,
+				theMethod,
+				theContext,
+				theProvider,
+				theAnnotation.idempotent(),
+				theAnnotation.deleteEnabled(),
+				theAnnotation.name(),
+				theAnnotation.type(),
+				theAnnotation.typeName(),
+				theAnnotation.returnParameters(),
+				theAnnotation.bundleType(),
+				theAnnotation.global());
+		myCanonicalUrl = theAnnotation.canonicalUrl();
 		myManualRequestMode = theAnnotation.manualRequest();
 		myManualResponseMode = theAnnotation.manualResponse();
 	}
 
-	protected OperationMethodBinding(Class<?> theReturnResourceType, Class<? extends IBaseResource> theReturnTypeFromRp, Method theMethod, FhirContext theContext, Object theProvider,
-												boolean theIdempotent, String theOperationName, Class<? extends IBaseResource> theOperationType, String theOperationTypeName,
-												OperationParam[] theReturnParams, BundleTypeEnum theBundleType, boolean theGlobal) {
+	protected OperationMethodBinding(
+			Class<?> theReturnResourceType,
+			Class<? extends IBaseResource> theReturnTypeFromRp,
+			Method theMethod,
+			FhirContext theContext,
+			Object theProvider,
+			boolean theIdempotent,
+			boolean theDeleteEnabled,
+			String theOperationName,
+			Class<? extends IBaseResource> theOperationType,
+			String theOperationTypeName,
+			OperationParam[] theReturnParams,
+			BundleTypeEnum theBundleType,
+			boolean theGlobal) {
 		super(theReturnResourceType, theMethod, theContext, theProvider);
 
 		myBundleType = theBundleType;
 		myIdempotent = theIdempotent;
+		myDeleteEnabled = theDeleteEnabled;
 		myDescription = ParametersUtil.extractDescription(theMethod);
 		myShortDescription = ParametersUtil.extractShortDefinition(theMethod);
 		myGlobal = theGlobal;
@@ -103,14 +133,16 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 		for (Annotation[] nextParamAnnotations : theMethod.getParameterAnnotations()) {
 			for (Annotation nextParam : nextParamAnnotations) {
 				if (nextParam instanceof OptionalParam || nextParam instanceof RequiredParam) {
-					throw new ConfigurationException(Msg.code(421) + "Illegal method parameter annotation @" + nextParam.annotationType().getSimpleName() + " on method: " + theMethod.toString());
+					throw new ConfigurationException(Msg.code(421) + "Illegal method parameter annotation @"
+							+ nextParam.annotationType().getSimpleName() + " on method: " + theMethod.toString());
 				}
 			}
 		}
 
 		if (isBlank(theOperationName)) {
-			throw new ConfigurationException(Msg.code(422) + "Method '" + theMethod.getName() + "' on type " + theMethod.getDeclaringClass().getName() + " is annotated with @" + Operation.class.getSimpleName()
-				+ " but this annotation has no name defined");
+			throw new ConfigurationException(Msg.code(422) + "Method '" + theMethod.getName() + "' on type "
+					+ theMethod.getDeclaringClass().getName() + " is annotated with @" + Operation.class.getSimpleName()
+					+ " but this annotation has no name defined");
 		}
 		if (theOperationName.startsWith("$") == false) {
 			theOperationName = "$" + theOperationName;
@@ -128,7 +160,8 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 				setResourceName(null);
 			}
 		} catch (DataFormatException e) {
-			throw new ConfigurationException(Msg.code(423) + "Failed to bind method " + theMethod + " - " + e.getMessage(), e);
+			throw new ConfigurationException(
+					Msg.code(423) + "Failed to bind method " + theMethod + " - " + e.getMessage(), e);
 		}
 
 		if (theMethod.getReturnType().equals(IBundleProvider.class)) {
@@ -171,9 +204,11 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 				Class<? extends IBase> returnType = next.type();
 				if (!returnType.equals(IBase.class)) {
 					if (returnType.isInterface() || Modifier.isAbstract(returnType.getModifiers())) {
-						throw new ConfigurationException(Msg.code(424) + "Invalid value for @OperationParam.type(): " + returnType.getName());
+						throw new ConfigurationException(
+								Msg.code(424) + "Invalid value for @OperationParam.type(): " + returnType.getName());
 					}
-					OperationParameter.validateTypeIsAppropriateVersionForContext(theMethod, returnType, theContext, "return");
+					OperationParameter.validateTypeIsAppropriateVersionForContext(
+							theMethod, returnType, theContext, "return");
 					type.setType(theContext.getElementDefinition(returnType).getName());
 				}
 				myReturnParams.add(type);
@@ -182,9 +217,11 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 
 		// Parameter Validation
 		if (myCanOperateAtInstanceLevel && !isGlobalMethod() && getResourceName() == null) {
-			throw new ConfigurationException(Msg.code(425) + "@" + Operation.class.getSimpleName() + " method is an instance level method (it has an @" + IdParam.class.getSimpleName() + " parameter) but is not marked as global() and is not declared in a resource provider: " + theMethod.getName());
+			throw new ConfigurationException(Msg.code(425) + "@" + Operation.class.getSimpleName()
+					+ " method is an instance level method (it has an @" + IdParam.class.getSimpleName()
+					+ " parameter) but is not marked as global() and is not declared in a resource provider: "
+					+ theMethod.getName());
 		}
-
 	}
 
 	public String getShortDescription() {
@@ -219,6 +256,7 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 	@Nonnull
 	@Override
 	public RestOperationTypeEnum getRestOperationType() {
+		assert myOtherOperationType != null;
 		return myOtherOperationType;
 	}
 
@@ -256,8 +294,10 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 		}
 
 		RequestTypeEnum requestType = theRequest.getRequestType();
-		if (requestType != RequestTypeEnum.GET && requestType != RequestTypeEnum.POST) {
-			// Operations can only be invoked with GET and POST
+		if (requestType != RequestTypeEnum.GET
+				&& requestType != RequestTypeEnum.POST
+				&& requestType != RequestTypeEnum.DELETE) {
+			// Operations can only be invoked with GET, POST and DELETE
 			return MethodMatchEnum.NONE;
 		}
 
@@ -281,7 +321,9 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 			}
 		}
 
-		if (myGlobal && theRequestDetails.getId() != null && theRequestDetails.getId().hasIdPart()) {
+		if (myGlobal
+				&& theRequestDetails.getId() != null
+				&& theRequestDetails.getId().hasIdPart()) {
 			retVal = RestOperationTypeEnum.EXTENDED_OPERATION_INSTANCE;
 		} else if (myGlobal && isNotBlank(theRequestDetails.getResourceName())) {
 			retVal = RestOperationTypeEnum.EXTENDED_OPERATION_TYPE;
@@ -293,16 +335,20 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 	@Override
 	public String toString() {
 		return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
-			.append("name", myName)
-			.append("methodName", getMethod().getDeclaringClass().getSimpleName() + "." + getMethod().getName())
-			.append("serverLevel", myCanOperateAtServerLevel)
-			.append("typeLevel", myCanOperateAtTypeLevel)
-			.append("instanceLevel", myCanOperateAtInstanceLevel)
-			.toString();
+				.append("name", myName)
+				.append(
+						"methodName",
+						getMethod().getDeclaringClass().getSimpleName() + "."
+								+ getMethod().getName())
+				.append("serverLevel", myCanOperateAtServerLevel)
+				.append("typeLevel", myCanOperateAtTypeLevel)
+				.append("instanceLevel", myCanOperateAtInstanceLevel)
+				.toString();
 	}
 
 	@Override
-	public Object invokeServer(IRestfulServer<?> theServer, RequestDetails theRequest) throws BaseServerResponseException, IOException {
+	public Object invokeServer(IRestfulServer<?> theServer, RequestDetails theRequest)
+			throws BaseServerResponseException, IOException {
 		if (theRequest.getRequestType() == RequestTypeEnum.POST && !myManualRequestMode) {
 			IBaseResource requestContents = ResourceParameter.loadResourceFromRequest(theRequest, this, null);
 			theRequest.getUserData().put(OperationParameter.REQUEST_CONTENTS_USERDATA_KEY, requestContents);
@@ -311,21 +357,39 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 	}
 
 	@Override
-	public Object invokeServer(IRestfulServer<?> theServer, RequestDetails theRequest, Object[] theMethodParams) throws BaseServerResponseException {
+	public Object invokeServer(IRestfulServer<?> theServer, RequestDetails theRequest, Object[] theMethodParams)
+			throws BaseServerResponseException {
+		List<RequestTypeEnum> allowedRequestTypes = new ArrayList<>(List.of(RequestTypeEnum.POST));
+		if (myIdempotent) {
+			allowedRequestTypes.add(RequestTypeEnum.GET);
+		}
+		if (myDeleteEnabled) {
+			allowedRequestTypes.add(RequestTypeEnum.DELETE);
+		}
+		String messageParameter =
+				allowedRequestTypes.stream().map(RequestTypeEnum::name).collect(Collectors.joining(", "));
+		String message = getContext()
+				.getLocalizer()
+				.getMessage(
+						OperationMethodBinding.class,
+						"methodNotSupported",
+						theRequest.getRequestType(),
+						messageParameter);
 		if (theRequest.getRequestType() == RequestTypeEnum.POST) {
 			// all good
 		} else if (theRequest.getRequestType() == RequestTypeEnum.GET) {
 			if (!myIdempotent) {
-				String message = getContext().getLocalizer().getMessage(OperationMethodBinding.class, "methodNotSupported", theRequest.getRequestType(), RequestTypeEnum.POST.name());
-				throw new MethodNotAllowedException(Msg.code(426) + message, RequestTypeEnum.POST);
+				throw new MethodNotAllowedException(
+						Msg.code(426) + message, allowedRequestTypes.toArray(RequestTypeEnum[]::new));
+			}
+		} else if (theRequest.getRequestType() == RequestTypeEnum.DELETE) {
+			if (!myDeleteEnabled) {
+				throw new MethodNotAllowedException(
+						Msg.code(427) + message, allowedRequestTypes.toArray(RequestTypeEnum[]::new));
 			}
 		} else {
-			if (!myIdempotent) {
-				String message = getContext().getLocalizer().getMessage(OperationMethodBinding.class, "methodNotSupported", theRequest.getRequestType(), RequestTypeEnum.POST.name());
-				throw new MethodNotAllowedException(Msg.code(427) + message, RequestTypeEnum.POST);
-			}
-			String message = getContext().getLocalizer().getMessage(OperationMethodBinding.class, "methodNotSupported", theRequest.getRequestType(), RequestTypeEnum.GET.name(), RequestTypeEnum.POST.name());
-			throw new MethodNotAllowedException(Msg.code(428) + message, RequestTypeEnum.GET, RequestTypeEnum.POST);
+			throw new MethodNotAllowedException(
+					Msg.code(428) + message, allowedRequestTypes.toArray(RequestTypeEnum[]::new));
 		}
 
 		if (myIdParamIndex != null) {
@@ -357,18 +421,24 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 		return myIdempotent;
 	}
 
+	public boolean isDeleteEnabled() {
+		return myDeleteEnabled;
+	}
+
 	@Override
-	protected void populateActionRequestDetailsForInterceptor(RequestDetails theRequestDetails, ActionRequestDetails theDetails, Object[] theMethodParams) {
-		super.populateActionRequestDetailsForInterceptor(theRequestDetails, theDetails, theMethodParams);
-		IBaseResource resource = (IBaseResource) theRequestDetails.getUserData().get(OperationParameter.REQUEST_CONTENTS_USERDATA_KEY);
+	protected void populateRequestDetailsForInterceptor(RequestDetails theRequestDetails, Object[] theMethodParams) {
+		super.populateRequestDetailsForInterceptor(theRequestDetails, theMethodParams);
+		IBaseResource resource =
+				(IBaseResource) theRequestDetails.getUserData().get(OperationParameter.REQUEST_CONTENTS_USERDATA_KEY);
 		theRequestDetails.setResource(resource);
-		if (theDetails != null) {
-			theDetails.setResource(resource);
-		}
 	}
 
 	public boolean isManualRequestMode() {
 		return myManualRequestMode;
+	}
+
+	public String getCanonicalUrl() {
+		return myCanonicalUrl;
 	}
 
 	public static class ReturnType {
@@ -412,5 +482,4 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 			myType = theType;
 		}
 	}
-
 }

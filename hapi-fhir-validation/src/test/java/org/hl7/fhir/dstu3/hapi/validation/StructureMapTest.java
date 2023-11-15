@@ -291,7 +291,7 @@ public class StructureMapTest {
 
 		assertEquals(1, result.size());
 
-		ourLog.info(myCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(result.get(0)));
+		ourLog.debug(myCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(result.get(0)));
 	}
 
 	public class TargetParam {

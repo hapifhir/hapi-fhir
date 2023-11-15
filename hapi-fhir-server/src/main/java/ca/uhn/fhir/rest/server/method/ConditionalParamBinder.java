@@ -1,10 +1,8 @@
-package ca.uhn.fhir.rest.server.method;
-
 /*
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,35 +17,38 @@ package ca.uhn.fhir.rest.server.method;
  * limitations under the License.
  * #L%
  */
-
-import ca.uhn.fhir.i18n.Msg;
-import java.lang.reflect.Method;
-import java.util.Collection;
-
-import org.apache.commons.lang3.Validate;
+package ca.uhn.fhir.rest.server.method;
 
 import ca.uhn.fhir.context.ConfigurationException;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.annotation.ConditionalUrlParam;
-import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
+import java.lang.reflect.Method;
+import java.util.Collection;
+
 class ConditionalParamBinder implements IParameter {
 
-	private RestOperationTypeEnum myOperationType;
 	private boolean mySupportsMultiple;
 
-	ConditionalParamBinder(RestOperationTypeEnum theOperationType, boolean theSupportsMultiple) {
-		Validate.notNull(theOperationType, "theOperationType can not be null");
-		myOperationType = theOperationType;
+	ConditionalParamBinder(boolean theSupportsMultiple) {
 		mySupportsMultiple = theSupportsMultiple;
 	}
 
 	@Override
-	public void initializeTypes(Method theMethod, Class<? extends Collection<?>> theOuterCollectionType, Class<? extends Collection<?>> theInnerCollectionType, Class<?> theParameterType) {
-		if (theOuterCollectionType != null || theInnerCollectionType != null || theParameterType.equals(String.class) == false) {
-			throw new ConfigurationException(Msg.code(409) + "Parameters annotated with @" + ConditionalUrlParam.class.getSimpleName() + " must be of type String, found incorrect parameter in method \"" + theMethod + "\"");
+	public void initializeTypes(
+			Method theMethod,
+			Class<? extends Collection<?>> theOuterCollectionType,
+			Class<? extends Collection<?>> theInnerCollectionType,
+			Class<?> theParameterType) {
+		if (theOuterCollectionType != null
+				|| theInnerCollectionType != null
+				|| theParameterType.equals(String.class) == false) {
+			throw new ConfigurationException(
+					Msg.code(409) + "Parameters annotated with @" + ConditionalUrlParam.class.getSimpleName()
+							+ " must be of type String, found incorrect parameter in method \"" + theMethod + "\"");
 		}
 	}
 
@@ -56,8 +57,9 @@ class ConditionalParamBinder implements IParameter {
 	}
 
 	@Override
-	public Object translateQueryParametersIntoServerArgument(RequestDetails theRequest, BaseMethodBinding<?> theMethodBinding) throws InternalErrorException, InvalidRequestException {
-		return theRequest.getConditionalUrl(myOperationType);
+	public Object translateQueryParametersIntoServerArgument(
+			RequestDetails theRequest, BaseMethodBinding theMethodBinding)
+			throws InternalErrorException, InvalidRequestException {
+		return theRequest.getConditionalUrl(theMethodBinding.getRestOperationType());
 	}
-
 }

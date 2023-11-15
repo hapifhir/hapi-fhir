@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.mdm.broker;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server - Master Data Management
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.mdm.broker;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.mdm.broker;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
@@ -32,9 +31,9 @@ import ca.uhn.fhir.jpa.mdm.svc.candidate.TooManyCandidatesException;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedJsonMessage;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
-import ca.uhn.fhir.mdm.api.MdmLinkEvent;
 import ca.uhn.fhir.mdm.log.Logs;
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
+import ca.uhn.fhir.mdm.model.mdmevents.MdmLinkEvent;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.TransactionLogMessages;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -55,14 +54,19 @@ public class MdmMessageHandler implements MessageHandler {
 
 	@Autowired
 	private MdmMatchLinkSvc myMdmMatchLinkSvc;
+
 	@Autowired
 	private IInterceptorBroadcaster myInterceptorBroadcaster;
+
 	@Autowired
 	private FhirContext myFhirContext;
+
 	@Autowired
 	private MdmResourceFilteringSvc myMdmResourceFilteringSvc;
+
 	@Autowired
 	private IMdmSettings myMdmSettings;
+
 	@Autowired
 	private IMdmModelConverterSvc myModelConverter;
 
@@ -77,15 +81,12 @@ public class MdmMessageHandler implements MessageHandler {
 
 		ResourceModifiedMessage msg = ((ResourceModifiedJsonMessage) theMessage).getPayload();
 		try {
-
 			IBaseResource sourceResource = msg.getNewPayload(myFhirContext);
 
-			if (myMdmResourceFilteringSvc.shouldBeProcessed((IAnyResource) sourceResource)) {
+			boolean toProcess = myMdmResourceFilteringSvc.shouldBeProcessed((IAnyResource) sourceResource);
+			if (toProcess) {
 				matchMdmAndUpdateLinks(sourceResource, msg);
 			}
-		} catch (TooManyCandidatesException e) {
-			ourLog.error(e.getMessage(), e);
-			// skip this one with an error message and continue processing
 		} catch (Exception e) {
 			ourLog.error("Failed to handle MDM Matching Resource:", e);
 			throw e;
@@ -97,7 +98,7 @@ public class MdmMessageHandler implements MessageHandler {
 		String resourceType = theSourceResource.getIdElement().getResourceType();
 		validateResourceType(resourceType);
 
-		if (myInterceptorBroadcaster.hasHooks(Pointcut.MDM_BEFORE_PERSISTED_RESOURCE_CHECKED)){
+		if (myInterceptorBroadcaster.hasHooks(Pointcut.MDM_BEFORE_PERSISTED_RESOURCE_CHECKED)) {
 			HookParams params = new HookParams().add(IBaseResource.class, theSourceResource);
 			myInterceptorBroadcaster.callHooks(Pointcut.MDM_BEFORE_PERSISTED_RESOURCE_CHECKED, params);
 		}
@@ -119,21 +120,28 @@ public class MdmMessageHandler implements MessageHandler {
 					ourLog.trace("Not processing modified message for {}", theMsg.getOperationType());
 			}
 		} catch (Exception e) {
+			if (e instanceof TooManyCandidatesException) {
+				ourLog.debug(
+						"Failed to handle MDM Matching for resource: {} since candidate matches exceeded the "
+								+ "candidate search limit",
+						theSourceResource.getIdElement());
+			}
 			log(mdmContext, "Failure during MDM processing: " + e.getMessage(), e);
 			mdmContext.addTransactionLogMessage(e.getMessage());
 		} finally {
 			// Interceptor call: MDM_AFTER_PERSISTED_RESOURCE_CHECKED
 			HookParams params = new HookParams()
-				.add(ResourceOperationMessage.class, getOutgoingMessage(theMsg))
-				.add(TransactionLogMessages.class, mdmContext.getTransactionLogMessages())
-				.add(MdmLinkEvent.class, buildLinkChangeEvent(mdmContext));
+					.add(ResourceOperationMessage.class, getOutgoingMessage(theMsg))
+					.add(TransactionLogMessages.class, mdmContext.getTransactionLogMessages())
+					.add(MdmLinkEvent.class, buildLinkChangeEvent(mdmContext));
 
 			myInterceptorBroadcaster.callHooks(Pointcut.MDM_AFTER_PERSISTED_RESOURCE_CHECKED, params);
 		}
 	}
 
 	private MdmTransactionContext createMdmContext(ResourceModifiedMessage theMsg, String theResourceType) {
-		TransactionLogMessages transactionLogMessages = TransactionLogMessages.createFromTransactionGuid(theMsg.getTransactionId());
+		TransactionLogMessages transactionLogMessages =
+				TransactionLogMessages.createFromTransactionGuid(theMsg.getTransactionId());
 		MdmTransactionContext.OperationType mdmOperation;
 		switch (theMsg.getOperationType()) {
 			case CREATE:
@@ -148,23 +156,25 @@ public class MdmMessageHandler implements MessageHandler {
 			case DELETE:
 			default:
 				ourLog.trace("Not creating an MdmTransactionContext for {}", theMsg.getOperationType());
-				throw new InvalidRequestException(Msg.code(734) + "We can't handle non-update/create operations in MDM");
+				throw new InvalidRequestException(
+						Msg.code(734) + "We can't handle non-update/create operations in MDM");
 		}
 		return new MdmTransactionContext(transactionLogMessages, mdmOperation, theResourceType);
 	}
 
 	private void validateResourceType(String theResourceType) {
 		if (!myMdmSettings.isSupportedMdmType(theResourceType)) {
-			throw new IllegalStateException(Msg.code(735) + "Unsupported resource type submitted to MDM matching queue: " + theResourceType);
+			throw new IllegalStateException(
+					Msg.code(735) + "Unsupported resource type submitted to MDM matching queue: " + theResourceType);
 		}
 	}
 
 	private void handleCreateResource(IBaseResource theResource, MdmTransactionContext theMdmTransactionContext) {
-		myMdmMatchLinkSvc.updateMdmLinksForMdmSource((IAnyResource)theResource, theMdmTransactionContext);
+		myMdmMatchLinkSvc.updateMdmLinksForMdmSource((IAnyResource) theResource, theMdmTransactionContext);
 	}
 
 	private void handleUpdateResource(IBaseResource theResource, MdmTransactionContext theMdmTransactionContext) {
-		myMdmMatchLinkSvc.updateMdmLinksForMdmSource((IAnyResource)theResource, theMdmTransactionContext);
+		myMdmMatchLinkSvc.updateMdmLinksForMdmSource((IAnyResource) theResource, theMdmTransactionContext);
 	}
 
 	private void log(MdmTransactionContext theMdmContext, String theMessage, Exception theException) {
@@ -174,21 +184,19 @@ public class MdmMessageHandler implements MessageHandler {
 
 	private MdmLinkEvent buildLinkChangeEvent(MdmTransactionContext theMdmContext) {
 		MdmLinkEvent linkChangeEvent = new MdmLinkEvent();
-		theMdmContext.getMdmLinks()
-			.stream()
-			.forEach(l -> {
-				linkChangeEvent.addMdmLink(myModelConverter.toJson(l));
-			});
+		theMdmContext.getMdmLinks().stream().forEach(l -> {
+			linkChangeEvent.addMdmLink(myModelConverter.toJson(l));
+		});
 
 		return linkChangeEvent;
 	}
 
 	private ResourceOperationMessage getOutgoingMessage(ResourceModifiedMessage theMsg) {
 		IBaseResource targetResource = theMsg.getPayload(myFhirContext);
-		ResourceOperationMessage outgoingMsg = new ResourceOperationMessage(myFhirContext, targetResource, theMsg.getOperationType());
+		ResourceOperationMessage outgoingMsg =
+				new ResourceOperationMessage(myFhirContext, targetResource, theMsg.getOperationType());
 		outgoingMsg.setTransactionId(theMsg.getTransactionId());
 
 		return outgoingMsg;
 	}
-
 }

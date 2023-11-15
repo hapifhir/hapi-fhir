@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.term.api;
-
 /*
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.term.api;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.term.api;
 
 import ca.uhn.fhir.jpa.term.UploadStatistics;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -36,6 +35,7 @@ public interface ITermLoaderSvc {
 	String IMGTHLA_URI = "http://www.ebi.ac.uk/ipd/imgt/hla";
 	String LOINC_URI = "http://loinc.org";
 	String SCT_URI = "http://snomed.info/sct";
+	String ICD10_URI = "http://hl7.org/fhir/sid/icd-10";
 	String ICD10CM_URI = "http://hl7.org/fhir/sid/icd-10-cm";
 	String IEEE_11073_10101_URI = "urn:iso:std:iso:11073:10101";
 
@@ -44,6 +44,10 @@ public interface ITermLoaderSvc {
 	UploadStatistics loadLoinc(List<FileDescriptor> theFiles, RequestDetails theRequestDetails);
 
 	UploadStatistics loadSnomedCt(List<FileDescriptor> theFiles, RequestDetails theRequestDetails);
+
+	default UploadStatistics loadIcd10(List<FileDescriptor> theFiles, RequestDetails theRequestDetails) {
+		return null;
+	}
 
 	UploadStatistics loadIcd10cm(List<FileDescriptor> theFiles, RequestDetails theRequestDetails);
 
@@ -58,7 +62,6 @@ public interface ITermLoaderSvc {
 		String getFilename();
 
 		InputStream getInputStream();
-
 	}
 
 	class ByteArrayFileDescriptor implements FileDescriptor {
@@ -81,5 +84,4 @@ public interface ITermLoaderSvc {
 			return new ByteArrayInputStream(myNextData);
 		}
 	}
-
 }

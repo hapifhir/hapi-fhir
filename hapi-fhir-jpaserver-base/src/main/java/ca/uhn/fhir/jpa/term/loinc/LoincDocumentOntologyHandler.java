@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.term.loinc;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,16 +17,19 @@ package ca.uhn.fhir.jpa.term.loinc;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.term.loinc;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.entity.TermConcept;
-import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
 import ca.uhn.fhir.jpa.term.IZipContentsHandlerCsv;
+import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.apache.commons.csv.CSVRecord;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.ConceptMap;
 import org.hl7.fhir.r4.model.ValueSet;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Map;
@@ -38,15 +39,20 @@ import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_CODESYS
 import static org.apache.commons.lang3.StringUtils.trim;
 
 public class LoincDocumentOntologyHandler extends BaseLoincHandler implements IZipContentsHandlerCsv {
+	private static final Logger ourLog = LoggerFactory.getLogger(LoincDocumentOntologyHandler.class);
 
 	public static final String DOCUMENT_ONTOLOGY_CODES_VS_ID = "loinc-document-ontology";
 	public static final String DOCUMENT_ONTOLOGY_CODES_VS_URI = "http://loinc.org/vs/loinc-document-ontology";
 	public static final String DOCUMENT_ONTOLOGY_CODES_VS_NAME = "LOINC Document Ontology Codes";
 	private final Map<String, TermConcept> myCode2Concept;
 
-	public LoincDocumentOntologyHandler(Map<String, TermConcept> theCode2concept, Map<String,
-			CodeSystem.PropertyType> thePropertyNames, List<ValueSet> theValueSets, List<ConceptMap> theConceptMaps,
-			Properties theUploadProperties, String theCopyrightStatement) {
+	public LoincDocumentOntologyHandler(
+			Map<String, TermConcept> theCode2concept,
+			Map<String, CodeSystem.PropertyType> thePropertyNames,
+			List<ValueSet> theValueSets,
+			List<ConceptMap> theConceptMaps,
+			Properties theUploadProperties,
+			String theCopyrightStatement) {
 		super(theCode2concept, theValueSets, theConceptMaps, theUploadProperties, theCopyrightStatement);
 		myCode2Concept = theCode2concept;
 	}
@@ -96,10 +102,7 @@ public class LoincDocumentOntologyHandler extends BaseLoincHandler implements IZ
 		TermConcept code = myCode2Concept.get(loincNumber);
 		if (code != null) {
 			code.addPropertyCoding(loincCodePropName, ITermLoaderSvc.LOINC_URI, partNumber, partName);
+			ourLog.debug("Adding coding property: {} to concept.code {}", loincCodePropName, partNumber);
 		}
-
 	}
-
-
-
 }

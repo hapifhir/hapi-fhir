@@ -20,6 +20,7 @@ import java.io.IOException;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.params.shadow.com.univocity.parsers.conversions.Conversions.replace;
 
 public class XmlUtilDstu3Test {
 
@@ -82,8 +83,12 @@ public class XmlUtilDstu3Test {
 		String input = "<document><tag id=\"1\"/></document>";
 		Document parsed = XmlUtil.parseDocument(input);
 		String output = XmlUtil.encodeDocument(parsed, true)
-			.replace("\r\n", "\n")
-			.replaceAll("^ *", "");
+			.replace("\r\n", "\n");
+		int initialLen;
+		do {
+			initialLen = output.length();
+			output = output.replace("\n ", "\n");
+		} while (output.length() != initialLen);
 		assertEquals("<document>\n" +
 			"<tag id=\"1\"/>\n" +
 			"</document>\n", output);

@@ -1,0 +1,44 @@
+{
+  "resourceType": "Bundle",
+  "id": "EXM104-8.2.000-bundle",
+  "type": "transaction",
+  "entry": [ {
+    "resource": {
+      "resourceType": "Library",
+      "id": "library-EXM104-8.2.000",
+      "extension": [ {
+        "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-softwaresystem",
+        "valueReference": {
+          "reference": "#cqf-tooling"
+        }
+      } ],
+      "url": "http://fhir.org/guides/dbcg/connectathon/Library/EXM104",
+      "version": "8.2.000",
+      "name": "EXM104",
+      "status": "active",
+      "experimental": true,
+      "type": {
+        "coding": [ {
+          "system": "http://terminology.hl7.org/CodeSystem/library-type",
+          "code": "logic-library"
+        } ]
+      },
+      "relatedArtifact": [ {
+        "type": "depends-on",
+        "resource": "http://hl7.org/fhir/Library/FHIR-ModelInfo|4.0.1"
+      }, {
+      } ],
+      "parameter": [ {
+        "name": "Measurement Period",
+        "use": "in",
+        "min": 0,
+        "max": "1",
+        "type": "Period"
+      } ]
+    },
+    "request": {
+      "method": "PUT",
+      "url": "Library/library-EXM104-8.2.000"
+    }
+  } ]
+}

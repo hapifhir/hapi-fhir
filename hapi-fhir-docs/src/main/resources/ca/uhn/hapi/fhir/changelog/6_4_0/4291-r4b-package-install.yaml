@@ -1,0 +1,6 @@
+---
+type: add
+issue: 4291
+backport: 6.2.2
+title: "The NPM package installer did not support installing on R4B repositories. Thanks to Jens Kristian Villadsen
+   for the pull request!"

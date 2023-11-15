@@ -2,6 +2,7 @@ package ca.uhn.fhir.cli;
 
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import ca.uhn.fhir.jpa.migrate.JdbcUtils;
+import ca.uhn.fhir.system.HapiSystemProperties;
 import com.google.common.base.Charsets;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
@@ -37,7 +38,7 @@ public class HapiFlywayMigrateDatabaseCommandTest {
 	public static final String DB_DIRECTORY = "target/h2_test";
 
 	static {
-		System.setProperty("test", "true");
+		HapiSystemProperties.enableTestMode();
 	}
 
 	@Test
@@ -116,47 +117,6 @@ public class HapiFlywayMigrateDatabaseCommandTest {
 	}
 
 	@Test
-	public void testMigrateFrom340_NoFlyway() throws IOException, SQLException {
-
-		File location = getLocation("migrator_h2_test_340_current_noflyway");
-
-		String url = "jdbc:h2:" + location.getAbsolutePath();
-		DriverTypeEnum.ConnectionProperties connectionProperties = DriverTypeEnum.H2_EMBEDDED.newConnectionProperties(url, "", "");
-
-		String initSql = "/persistence_create_h2_340.sql";
-		executeSqlStatements(connectionProperties, initSql);
-
-		seedDatabase340(connectionProperties);
-
-		ourLog.info("**********************************************");
-		ourLog.info("Done Setup, Starting Migration...");
-		ourLog.info("**********************************************");
-
-		String[] args = new String[]{
-			BaseFlywayMigrateDatabaseCommand.MIGRATE_DATABASE,
-			"-d", "H2_EMBEDDED",
-			"-u", url,
-			"-n", "",
-			"-p", "",
-			"--" + BaseFlywayMigrateDatabaseCommand.DONT_USE_FLYWAY
-		};
-		assertFalse(JdbcUtils.getTableNames(connectionProperties).contains("HFJ_RES_REINDEX_JOB"));
-		App.main(args);
-		assertTrue(JdbcUtils.getTableNames(connectionProperties).contains("HFJ_RES_REINDEX_JOB"));
-
-		connectionProperties.getTxTemplate().execute(t -> {
-			JdbcTemplate jdbcTemplate = connectionProperties.newJdbcTemplate();
-			List<Map<String, Object>> values = jdbcTemplate.queryForList("SELECT * FROM hfj_spidx_token");
-			assertEquals(1, values.size());
-			assertEquals("identifier", values.get(0).get("SP_NAME"));
-			assertEquals("12345678", values.get(0).get("SP_VALUE"));
-			assertTrue(values.get(0).keySet().contains("HASH_IDENTITY"));
-			assertEquals(7001889285610424179L, values.get(0).get("HASH_IDENTITY"));
-			return null;
-		});
-	}
-
-	@Test
 	public void testMigrateFrom340_dryRun() throws IOException, SQLException {
 
 		File location = getLocation("migrator_h2_test_340_dryrun");
@@ -221,8 +181,6 @@ public class HapiFlywayMigrateDatabaseCommandTest {
 		// Verify that foreign key FK_SEARCHRES_RES on HFJ_SEARCH_RESULT still exists
 		foreignKeys = JdbcUtils.getForeignKeys(connectionProperties, "HFJ_RESOURCE", "HFJ_SEARCH_RESULT");
 		assertTrue(foreignKeys.contains("FK_SEARCHRES_RES"));
-
-
 	}
 
 	@Test
@@ -243,34 +201,6 @@ public class HapiFlywayMigrateDatabaseCommandTest {
 			"-u", url,
 			"-n", "SA",
 			"-p", "SA"
-		};
-
-		assertFalse(JdbcUtils.getTableNames(connectionProperties).contains("HFJ_RESOURCE"));
-		assertFalse(JdbcUtils.getTableNames(connectionProperties).contains("HFJ_BLK_EXPORT_JOB"));
-		App.main(args);
-		assertTrue(JdbcUtils.getTableNames(connectionProperties).contains("HFJ_RESOURCE")); // Early table
-		assertTrue(JdbcUtils.getTableNames(connectionProperties).contains("HFJ_BLK_EXPORT_JOB")); // Late table
-	}
-
-	@Test
-	public void testMigrateFromEmptySchema_NoFlyway() throws IOException, SQLException {
-
-		File location = getLocation("migrator_h2_test_empty_current_noflyway");
-
-		String url = "jdbc:h2:" + location.getAbsolutePath();
-		DriverTypeEnum.ConnectionProperties connectionProperties = DriverTypeEnum.H2_EMBEDDED.newConnectionProperties(url, "", "");
-
-		ourLog.info("**********************************************");
-		ourLog.info("Starting Migration...");
-		ourLog.info("**********************************************");
-
-		String[] args = new String[]{
-			BaseFlywayMigrateDatabaseCommand.MIGRATE_DATABASE,
-			"-d", "H2_EMBEDDED",
-			"-u", url,
-			"-n", "",
-			"-p", "",
-			"--" + BaseFlywayMigrateDatabaseCommand.DONT_USE_FLYWAY
 		};
 
 		assertFalse(JdbcUtils.getTableNames(connectionProperties).contains("HFJ_RESOURCE"));

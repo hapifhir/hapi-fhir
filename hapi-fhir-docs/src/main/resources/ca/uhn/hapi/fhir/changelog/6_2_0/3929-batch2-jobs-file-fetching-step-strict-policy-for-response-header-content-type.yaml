@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 3929
+title: "During bulk import, fetching resource files from a client server would fail if the server response specified a
+ `content-type` that was not `application/fhir+json`. Validation has been loosened to accept content-type values of
+ `text/plain` and `application/json`."

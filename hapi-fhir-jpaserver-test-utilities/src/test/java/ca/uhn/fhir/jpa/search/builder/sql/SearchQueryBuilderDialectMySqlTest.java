@@ -70,7 +70,7 @@ public class SearchQueryBuilderDialectMySqlTest extends BaseSearchQueryBuilderDi
 		if (theNullOrder == null) {
 			searchQueryBuilder.addSortString(sortPredicateBuilder.getColumnValueNormalized(), theAscending);
 		} else {
-			searchQueryBuilder.addSortString(sortPredicateBuilder.getColumnValueNormalized(), theAscending, theNullOrder);
+			searchQueryBuilder.addSortString(sortPredicateBuilder.getColumnValueNormalized(), theAscending, theNullOrder, false);
 		}
 
 		return searchQueryBuilder.generate(0,500);
@@ -119,7 +119,7 @@ public class SearchQueryBuilderDialectMySqlTest extends BaseSearchQueryBuilderDi
 		if (theNullOrder == null) {
 			searchQueryBuilder.addSortDate(sortPredicateBuilder.getColumnValueLow(), theAscending);
 		} else {
-			searchQueryBuilder.addSortDate(sortPredicateBuilder.getColumnValueLow(), theAscending, theNullOrder);
+			searchQueryBuilder.addSortDate(sortPredicateBuilder.getColumnValueLow(), theAscending, theNullOrder, false);
 		}
 
 		return searchQueryBuilder.generate(0,500);

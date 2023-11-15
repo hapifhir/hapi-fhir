@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 3745
+jira: SMILE-4543
+title: "Fixed a bug where NPE occurs while updating references for posting a bundle with duplicate resource in 
+conditional create and another conditional verb (delete)."

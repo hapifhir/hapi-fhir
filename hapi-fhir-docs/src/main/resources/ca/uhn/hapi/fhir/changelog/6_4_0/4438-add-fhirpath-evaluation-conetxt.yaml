@@ -1,0 +1,5 @@
+---
+type: add
+issue: 4438
+title: "The FhirPath evaluator framework now allows for an optional evaluation context object
+  which can be used to supply external data such as responses to the `resolve()` function."

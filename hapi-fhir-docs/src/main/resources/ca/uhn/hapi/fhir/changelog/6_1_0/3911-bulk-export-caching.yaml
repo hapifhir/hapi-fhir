@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 3911
+title: "Fixed a bug where repeated calls to the same Bulk Export request would not return the cached result, but would instead start a new Bulk Export job."

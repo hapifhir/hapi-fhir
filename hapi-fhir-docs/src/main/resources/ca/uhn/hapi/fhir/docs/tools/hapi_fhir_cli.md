@@ -74,19 +74,25 @@ Note that the path and exact filename of the terminology files will likely need 
 ###	SNOMED CT
 
 ```
-./hapi-fhir-cli upload-terminology -d Downloads/SnomedCT_RF2Release_INT_20160131.zip -f dstu3 -t http://localhost:8080/baseDstu3 -u http://snomed.info/sct
+./hapi-fhir-cli upload-terminology -d Downloads/SnomedCT_InternationalRF2_PRODUCTION_20220131T120000Z.zip -v r4 -t http://localhost:8080/fhir -u http://snomed.info/sct
 ```
 
 ### LOINC
 
 ```
-./hapi-fhir-cli upload-terminology -d Downloads/LOINC_2.54_MULTI-AXIAL_HIERARCHY.zip -d Downloads/LOINC_2.54_Text.zip -f dstu3 -t http://localhost:8080/baseDstu3 -u http://loinc.org
+./hapi-fhir-cli upload-terminology -d Downloads/LOINC_2.54_MULTI-AXIAL_HIERARCHY.zip -d Downloads/LOINC_2.54_Text.zip -v r4 -t http://localhost:8080/fhir -u http://loinc.org
+```
+
+### ICD-10 (International Version)
+
+```
+./hapi-fhir-cli upload-terminology -d Downloads/icdClaML2019ens.zip -v r4 -t http://localhost:8080/fhir -u http://hl7.org/fhir/sid/icd-10
 ```
 
 ### ICD-10-CM
 
 ```
-./hapi-fhir-cli upload-terminology -d Downloads/LOINC_2.54_MULTI-AXIAL_HIERARCHY.zip -d icd10cm_tabular_2021.xml -f dstu3 -t http://localhost:8080/baseDstu3 -u http://hl7.org/fhir/sid/icd-10-cm
+./hapi-fhir-cli upload-terminology -d Downloads/icd10cm_tabular_2021.xml -v r4 -t http://localhost:8080/fhir -u http://hl7.org/fhir/sid/icd-10-cm
 ```
 
 # Migrate Database
@@ -94,3 +100,29 @@ Note that the path and exact filename of the terminology files will likely need 
 The `migrate-database` command may be used to Migrate a database schema when upgrading a [HAPI FHIR JPA](/docs/server_jpa/introduction.html) project from one version of HAPI	FHIR to another version.
 
 See [Upgrading HAPI FHIR JPA](/docs/server_jpa/upgrading.html) for information on how to use this command.
+
+# Clear Migration lock
+
+the `clear-migration-lock` command should be used if an upgrade to HAPI-FHIR failed during a migration. The migration system creates a lock row when it begins. If the migration is cancelled before it finishes, the system will be left in an inconsistent state. In order to resume the migration, the lock row must be removed. From your migration logs, you will see a line which looks like the following: 
+
+```text
+Migration Lock Row added. [uuid=05931c87-c2a4-49d6-8d82-d8ce09fdd8ef]
+```
+
+In order to clear this migration lock, you can run:
+
+```bash
+clear-migration-lock --lock-uuid 05931c87-c2a4-49d6-8d82-d8ce09fdd8ef
+```
+
+
+
+# Reindex Terminology
+
+The `reindex-terminology` command may be used to recreate freetext indexes for terminology resources.
+
+To execute this command to reindex terminology resources to a local CLI server, issue the following: 
+```
+reindex-terminology -v r4 -t "http://localhost:8000"
+```
+

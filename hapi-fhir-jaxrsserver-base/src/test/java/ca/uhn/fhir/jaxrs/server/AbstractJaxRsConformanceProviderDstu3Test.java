@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jaxrs.server;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jaxrs.server.test.TestJaxRsDummyPatientProviderDstu3;
 import ca.uhn.fhir.jaxrs.server.test.TestJaxRsMockPatientRestProviderDstu3;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.IResourceProvider;
@@ -15,11 +16,10 @@ import java.net.URI;
 import java.util.Arrays;
 import java.util.concurrent.ConcurrentHashMap;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-
-import ca.uhn.fhir.jaxrs.server.test.TestJaxRsDummyPatientProviderDstu3;
 
 public class AbstractJaxRsConformanceProviderDstu3Test {
 
@@ -100,7 +100,7 @@ public class AbstractJaxRsConformanceProviderDstu3Test {
 		when(uriInfo.getRequestUri()).thenReturn(new URI(BASEURI + "/foo"));		
 		result.setUriInfo(uriInfo);
 		result.setHeaders(headers);
-		result.setUpPostConstruct();
+		result.buildCapabilityStatement();
 		return result;
 	}	
 

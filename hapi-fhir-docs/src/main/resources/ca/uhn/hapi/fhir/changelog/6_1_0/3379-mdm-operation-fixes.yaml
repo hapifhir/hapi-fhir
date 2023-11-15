@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 3379
+title: "Fixed an issue where FindCandidateByLinkSvc still uses long to store persistent ids rather than IResourcePersistentId,
+ also fixed an issue where MdmLinkCreateSvc was not setting the resource type of MdmLinks properly"

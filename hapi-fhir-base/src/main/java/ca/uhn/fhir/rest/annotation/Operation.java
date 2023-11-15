@@ -1,10 +1,8 @@
-package ca.uhn.fhir.rest.annotation;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.rest.annotation;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.annotation;
 
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -92,6 +91,17 @@ public @interface Operation {
 	boolean idempotent() default false;
 
 	/**
+	 * To support cancelling of a job,
+	 * this flag should be set to <code>true</code> (default is <code>false</code>).
+	 * <p>
+	 * The server, when setting this to <code>true</code>,
+	 * will allow the operation to be invoked using an <code>HTTP DELETE</code>
+	 * (on top of the standard <code>HTTP POST</code>)
+	 * </p>
+	 */
+	boolean deleteEnabled() default false;
+
+	/**
 	 * This parameter may be used to specify the parts which will be found in the
 	 * response to this operation.
 	 */
@@ -139,4 +149,13 @@ public @interface Operation {
 	 */
 	boolean global() default false;
 
+	/**
+	 * The canonical URL of the operation, e.g. "http://hl7.org/fhir/us/davinci-hrex/OperationDefinition/member-match|1.0.0"
+	 *
+	 * <p>
+	 * This may be specified with or without a version. e.g. @Operation(name = "$everything", canonicalUrl = "http://hl7.org/fhir/OperationDefinition/Patient-everything")
+	 * or @Operation(name = "$member-match", canonicalUrl = "http://hl7.org/fhir/us/davinci-hrex/OperationDefinition/member-match|1.0.0")
+	 * </p>
+	 */
+	String canonicalUrl() default "";
 }

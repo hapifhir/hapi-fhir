@@ -1,0 +1,145 @@
+# HAPI FHIR Build Pipeline
+
+parameters:
+   param: [ ]
+
+jobs:
+   -  job: setup
+      displayName: setup-and-cache-build
+      timeoutInMinutes: 60
+      container: maven:3.8-openjdk-17
+      pool:
+         vmImage: ubuntu-latest
+      steps:
+         -  checkout: self
+            fetchDepth: 1
+         -  task: Cache@2
+            inputs:
+               key: 'maven | "$(Agent.OS)" | "$(Build.SourceVersion)" | ./pom.xml'
+               path: $(MAVEN_CACHE_FOLDER)
+         -  task: Bash@3
+            inputs:
+               targetType: 'inline'
+               script: mkdir -p $(MAVEN_CACHE_FOLDER); pwd; ls -al $(MAVEN_CACHE_FOLDER)
+         -  task: Maven@3
+            env:
+               JAVA_HOME_11_X64: /usr/java/openjdk-17
+            inputs:
+               goals: 'install'
+               # These are Maven CLI options (and show up in the build logs) - "-nsu"=Don't update snapshots. We can remove this when Maven OSS is more healthy
+               options: '-P CI,FASTINSTALL -Dmaven.test.skip -e -B -Dmaven.repo.local=$(MAVEN_CACHE_FOLDER) -Dmaven.javadoc.skip=true -Dmaven.wagon.http.pool=false -Dhttp.keepAlive=false -Dstyle.color=always -Djansi.force=true'
+               # These are JVM options (and don't show up in the build logs)
+               mavenOptions: '-Xmx1024m $(MAVEN_OPTS) -Dorg.slf4j.simpleLogger.showDateTime=true -Dorg.slf4j.simpleLogger.dateTimeFormat=HH:mm:ss,SSS -Duser.timezone=America/Toronto'
+               jdkVersionOption: 1.11
+   -  ${{ each p in parameters.modules }}:
+      -  job: ${{ p.name }}
+         timeoutInMinutes: 60
+         displayName: ${{ p.name }}
+         dependsOn: [ 'setup' ]
+         container: maven:3.8-openjdk-17
+         pool:
+            vmImage: ubuntu-latest
+         steps:
+            -  checkout: self
+               fetchDepth: 1
+            -  script: echo testing module ${{ p.module }}
+            -  script: echo $(SourceBranchName)
+            -  task: DockerInstaller@0.209.0
+               displayName: Docker Installer
+               inputs:
+                  dockerVersion: 17.09.0-ce
+                  releaseType: stable
+            -  task: Cache@2
+               inputs:
+                  key: 'maven | "$(Agent.OS)" | "$(Build.SourceVersion)" | ./pom.xml'
+                  path: $(MAVEN_CACHE_FOLDER)
+            -  task: Maven@3
+               env:
+                  JAVA_HOME_11_X64: /usr/java/openjdk-17
+               inputs:
+                  mavenPomFile: '$(System.DefaultWorkingDirectory)/pom.xml'
+                  goals: 'clean verify jacoco:report -pl ${{ p.module }}'
+                  # These are Maven CLI options (and show up in the build logs) - "-nsu"=Don't update snapshots. We can remove this when Maven OSS is more healthy
+                  options: '-P JACOCO,CI,ERRORPRONE -e -B -Dmaven.repo.local=$(MAVEN_CACHE_FOLDER) -Dmaven.wagon.http.pool=false -Dhttp.keepAlive=false -Dstyle.color=always -Djansi.force=true'
+                  # These are JVM options (and don't show up in the build logs)
+                  mavenOptions: '-Xmx1024m $(MAVEN_OPTS) -Dorg.slf4j.simpleLogger.showDateTime=true -Dorg.slf4j.simpleLogger.dateTimeFormat=HH:mm:ss,SSS -Duser.timezone=America/Toronto'
+                  jdkVersionOption: 1.11
+            # Copy testing log files and publish to pipeline run on Azure.
+            -  task: CopyFiles@2
+               condition: always()
+               inputs:
+                  sourceFolder: '$(System.DefaultWorkingDirectory)/'
+                  contents: '**/target/*-reports/*.txt'
+                  targetFolder: '$(Build.ArtifactStagingDirectory)'
+            -  task: PublishPipelineArtifact@1
+               displayName: 'Publish Full Test Output'
+               condition: always()
+               inputs:
+                  targetPath: '$(Build.ArtifactStagingDirectory)/'
+                  artifactName: '${{p.name}}_full_logs_$(Build.BuildId)_$(Build.BuildNumber)_$(System.JobId).zip'
+            # Publish target directory
+            -  task: PublishBuildArtifacts@1
+               displayName: 'Publish generated build files'
+               continueOnError: true
+               inputs:
+                  pathToPublish: '$(System.DefaultWorkingDirectory)/${{ p.module }}/target/'
+                  parallel: true
+                  artifactName: '${{ p.name }}_target'
+   -  job:
+      pool:
+         vmImage: ubuntu-latest
+      timeoutInMinutes: 60
+      displayName: generate_test_reports
+      container: maven:3.8-openjdk-17
+      dependsOn:
+         -  ${{ each p in parameters.modules }}:
+            - ${{ p.name }}
+      steps:
+         -  checkout: self
+            fetchDepth: 1
+         -  ${{ each p in parameters.modules }}:
+            -  task: Bash@3
+               inputs:
+                  targetType: 'inline'
+                  script: mkdir -p $(System.DefaultWorkingDirectory)/${{ p.module }}/target/
+            -  task: DownloadBuildArtifacts@0
+               displayName: 'Download jacoco test coverage result exec file for ${{ p.name }}'
+               continueOnError: true
+               inputs:
+                  buildType: 'current'
+                  downloadType: 'single'
+                  artifactName: '${{ p.name }}_target'
+                  downloadPath: '$(System.DefaultWorkingDirectory)/'
+            # Copy contents from downloaded artifact directory to final target directory.
+            -  task: CopyFiles@2
+               condition: always()
+               inputs:
+                  sourceFolder: '$(System.DefaultWorkingDirectory)/${{ p.name }}_target/'
+                  contents: '**'
+                  targetFolder: '$(System.DefaultWorkingDirectory)/${{ p.module }}/target/'
+         -  task: Maven@3
+            env:
+               JAVA_HOME_11_X64: /usr/java/openjdk-17
+            inputs:
+               mavenPomFile: '$(System.DefaultWorkingDirectory)/pom.xml'
+               goals: 'jacoco:report-aggregate'
+               # These are Maven CLI options (and show up in the build logs) - "-nsu"=Don't update snapshots. We can remove this when Maven OSS is more healthy
+               options: '-P JACOCO'
+               # These are JVM options (and don't show up in the build logs)
+               mavenOptions: '-Xmx1024m $(MAVEN_OPTS) -Dorg.slf4j.simpleLogger.showDateTime=true -Dorg.slf4j.simpleLogger.dateTimeFormat=HH:mm:ss,SSS -Duser.timezone=America/Toronto'
+               jdkVersionOption: 1.11
+         -  bash: |
+               curl -Os https://uploader.codecov.io/latest/linux/codecov
+               chmod +x codecov
+               ./codecov -t $(CODECOV_TOKEN) -R hapi-fhir-jacoco/target/site/jacoco-aggregate/
+            displayName: 'codecov'
+         -  task: PublishTestResults@2
+            inputs:
+               testResultsFormat: 'JUnit'
+               testResultsFiles: '**/TEST-*.xml'
+         -  task: PublishCodeCoverageResults@1
+            inputs:
+               codeCoverageTool: 'JaCoCo'
+               summaryFileLocation: $(System.DefaultWorkingDirectory)/hapi-fhir-jacoco/target/site/jacoco-aggregate/jacoco.xml
+               reportDirectory: $(System.DefaultWorkingDirectory)/hapi-fhir-jacoco/target/site/jacoco-report/
+               failIfCoverageEmpty: true

@@ -115,7 +115,7 @@ public class OperationServerDstu2Test {
 	public void testOperationDefinition() {
 		OperationDefinition def = myFhirClient.read().resource(OperationDefinition.class).withId("OperationDefinition/Patient-t-OP_TYPE").execute();
 		
-		ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(def));
+		ourLog.debug(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(def));
 		
 //		@OperationParam(name="PARAM1") StringType theParam1,
 //		@OperationParam(name="PARAM2") Patient theParam2,

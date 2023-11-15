@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.validation;
-
 /*
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.validation;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.validation;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
@@ -47,14 +46,21 @@ public class JpaValidationSupportChain extends ValidationSupportChain {
 	@Qualifier("myDefaultProfileValidationSupport")
 	@Autowired
 	private IValidationSupport myDefaultProfileValidationSupport;
+
 	@Autowired
 	private ITermReadSvc myTerminologyService;
+
 	@Autowired
 	private NpmJpaValidationSupport myNpmJpaValidationSupport;
+
 	@Autowired
 	private ITermConceptMappingSvc myConceptMappingSvc;
+
 	@Autowired
 	private UnknownCodeSystemWarningValidationSupport myUnknownCodeSystemWarningValidationSupport;
+
+	@Autowired
+	private InMemoryTerminologyServerValidationSupport myInMemoryTerminologyServerValidationSupport;
 
 	/**
 	 * Constructor
@@ -79,7 +85,7 @@ public class JpaValidationSupportChain extends ValidationSupportChain {
 		addValidationSupport(myJpaValidationSupport);
 		addValidationSupport(myTerminologyService);
 		addValidationSupport(new SnapshotGeneratingValidationSupport(myFhirContext));
-		addValidationSupport(new InMemoryTerminologyServerValidationSupport(myFhirContext));
+		addValidationSupport(myInMemoryTerminologyServerValidationSupport);
 		addValidationSupport(myNpmJpaValidationSupport);
 		addValidationSupport(new CommonCodeSystemsTerminologyService(myFhirContext));
 		addValidationSupport(myConceptMappingSvc);
@@ -87,5 +93,4 @@ public class JpaValidationSupportChain extends ValidationSupportChain {
 		// This needs to be last in the chain, it was designed for that
 		addValidationSupport(myUnknownCodeSystemWarningValidationSupport);
 	}
-
 }

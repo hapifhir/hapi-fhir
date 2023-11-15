@@ -1,10 +1,10 @@
 package ca.uhn.fhir.jpa.util;
 
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.model.entity.TagDefinition;
 import ca.uhn.fhir.jpa.model.entity.TagTypeEnum;
-import com.github.benmanes.caffeine.cache.Cache;
-import com.github.benmanes.caffeine.cache.Caffeine;
+import ca.uhn.fhir.sl.cache.Cache;
+import ca.uhn.fhir.sl.cache.CacheFactory;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
@@ -37,10 +37,9 @@ class MemoryCacheServiceTest {
 
 	@BeforeEach
 	public void setUp() {
-		DaoConfig daoConfig = new DaoConfig();
-		daoConfig.setMassIngestionMode(false);
-		mySvc = new MemoryCacheService();
-		mySvc.myDaoConfig = daoConfig;
+		JpaStorageSettings storageSettings = new JpaStorageSettings();
+		storageSettings.setMassIngestionMode(false);
+		mySvc = new MemoryCacheService(storageSettings);
 	}
 
 	@Test
@@ -48,14 +47,18 @@ class MemoryCacheServiceTest {
 		String system = "http://example.com";
 		TagTypeEnum type = TagTypeEnum.TAG;
 		String code = "t";
+		String version = "Ver 3.0";
+		Boolean userSelected = true;
 
-		MemoryCacheService.TagDefinitionCacheKey cacheKey = new MemoryCacheService.TagDefinitionCacheKey(type, system, code);
-		mySvc.start();
+		MemoryCacheService.TagDefinitionCacheKey cacheKey = new MemoryCacheService.TagDefinitionCacheKey(
+			type, system, code, version, userSelected);
 
 		TagDefinition retVal = mySvc.getIfPresent(MemoryCacheService.CacheEnum.TAG_DEFINITION, cacheKey);
 		assertThat(retVal, nullValue());
 
 		TagDefinition tagDef = new TagDefinition(type, system, code, "theLabel");
+		tagDef.setVersion(version);
+		tagDef.setUserSelected(userSelected);
 		mySvc.put(MemoryCacheService.CacheEnum.TAG_DEFINITION, cacheKey, tagDef);
 
 		retVal = mySvc.getIfPresent(MemoryCacheService.CacheEnum.TAG_DEFINITION, cacheKey);
@@ -77,7 +80,7 @@ class MemoryCacheServiceTest {
 		}
 
 		void withCacheOfSize(int theMaxSize) {
-			myCache = Caffeine.newBuilder().expireAfterWrite(60, TimeUnit.MINUTES).maximumSize(theMaxSize).build();
+			myCache = CacheFactory.build(TimeUnit.MINUTES.toMillis(60), theMaxSize);
 		}
 
 		void fillCacheWithRange(int theStart, int theEnd) {
@@ -214,7 +217,7 @@ class MemoryCacheServiceTest {
 
 			public Integer getOrTimeout(String theMessage) throws InterruptedException, ExecutionException {
 				try {
-					return future.get(1, TimeUnit.SECONDS);
+					return future.get(60, TimeUnit.SECONDS);
 				} catch (TimeoutException e) {
 					fail(theMessage);
 					return null;

@@ -1,20 +1,50 @@
+/*
+ * #%L
+ * HAPI FHIR JPA Server
+ * %%
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
 package ca.uhn.fhir.jpa.entity;
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
-import ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.param.HistorySearchStyleEnum;
 import ca.uhn.fhir.rest.server.util.ICachedSearchDetails;
+import ca.uhn.fhir.system.HapiSystemProperties;
 import org.apache.commons.lang3.SerializationUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.hibernate.annotations.OptimisticLock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
 import javax.annotation.Nonnull;
 import javax.persistence.Basic;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -33,88 +63,80 @@ import javax.persistence.TemporalType;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 import javax.persistence.Version;
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
 
 import static org.apache.commons.lang3.StringUtils.left;
 
-/*
- * #%L
- * HAPI FHIR JPA Server
- * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
-
 @Entity
-@Table(name = Search.HFJ_SEARCH, uniqueConstraints = {
-	@UniqueConstraint(name = "IDX_SEARCH_UUID", columnNames = "SEARCH_UUID")
-}, indexes = {
-	@Index(name = "IDX_SEARCH_RESTYPE_HASHS", columnList = "RESOURCE_TYPE,SEARCH_QUERY_STRING_HASH,CREATED"),
-	@Index(name = "IDX_SEARCH_CREATED", columnList = "CREATED")
-})
+@Table(
+		name = Search.HFJ_SEARCH,
+		uniqueConstraints = {@UniqueConstraint(name = "IDX_SEARCH_UUID", columnNames = "SEARCH_UUID")},
+		indexes = {
+			@Index(name = "IDX_SEARCH_RESTYPE_HASHS", columnList = "RESOURCE_TYPE,SEARCH_QUERY_STRING_HASH,CREATED"),
+			@Index(name = "IDX_SEARCH_CREATED", columnList = "CREATED")
+		})
 public class Search implements ICachedSearchDetails, Serializable {
 
+	/**
+	 * Long enough to accommodate a full UUID (36) with an additional prefix
+	 * used by megascale (12)
+	 */
 	@SuppressWarnings("WeakerAccess")
-	public static final int UUID_COLUMN_LENGTH = 36;
+	public static final int SEARCH_UUID_COLUMN_LENGTH = 48;
+
 	public static final String HFJ_SEARCH = "HFJ_SEARCH";
 	private static final int MAX_SEARCH_QUERY_STRING = 10000;
 	private static final int FAILURE_MESSAGE_LENGTH = 500;
 	private static final long serialVersionUID = 1L;
 	private static final Logger ourLog = LoggerFactory.getLogger(Search.class);
+	public static final String SEARCH_UUID = "SEARCH_UUID";
+
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "CREATED", nullable = false, updatable = false)
 	private Date myCreated;
+
 	@OptimisticLock(excluded = true)
 	@Column(name = "SEARCH_DELETED", nullable = true)
 	private Boolean myDeleted;
+
 	@Column(name = "FAILURE_CODE", nullable = true)
 	private Integer myFailureCode;
+
 	@Column(name = "FAILURE_MESSAGE", length = FAILURE_MESSAGE_LENGTH, nullable = true)
 	private String myFailureMessage;
+
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "EXPIRY_OR_NULL", nullable = true)
 	private Date myExpiryOrNull;
+
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_SEARCH")
 	@SequenceGenerator(name = "SEQ_SEARCH", sequenceName = "SEQ_SEARCH")
 	@Column(name = "PID")
 	private Long myId;
-	@OneToMany(mappedBy = "mySearch")
+
+	@OneToMany(mappedBy = "mySearch", cascade = CascadeType.ALL)
 	private Collection<SearchInclude> myIncludes;
+
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "LAST_UPDATED_HIGH", nullable = true, insertable = true, updatable = false)
 	private Date myLastUpdatedHigh;
+
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "LAST_UPDATED_LOW", nullable = true, insertable = true, updatable = false)
 	private Date myLastUpdatedLow;
+
 	@Column(name = "NUM_FOUND", nullable = false)
 	private int myNumFound;
+
 	@Column(name = "NUM_BLOCKED", nullable = true)
 	private Integer myNumBlocked;
+
 	@Column(name = "PREFERRED_PAGE_SIZE", nullable = true)
 	private Integer myPreferredPageSize;
+
 	@Column(name = "RESOURCE_ID", nullable = true)
 	private Long myResourceId;
+
 	@Column(name = "RESOURCE_TYPE", length = 200, nullable = true)
 	private String myResourceType;
 	/**
@@ -124,25 +146,35 @@ public class Search implements ICachedSearchDetails, Serializable {
 	@Basic(fetch = FetchType.LAZY)
 	@Column(name = "SEARCH_QUERY_STRING", nullable = true, updatable = false, length = MAX_SEARCH_QUERY_STRING)
 	private String mySearchQueryString;
+
 	@Column(name = "SEARCH_QUERY_STRING_HASH", nullable = true, updatable = false)
 	private Integer mySearchQueryStringHash;
+
 	@Enumerated(EnumType.ORDINAL)
 	@Column(name = "SEARCH_TYPE", nullable = false)
 	private SearchTypeEnum mySearchType;
+
 	@Enumerated(EnumType.STRING)
 	@Column(name = "SEARCH_STATUS", nullable = false, length = 10)
 	private SearchStatusEnum myStatus;
+
 	@Column(name = "TOTAL_COUNT", nullable = true)
 	private Integer myTotalCount;
-	@Column(name = "SEARCH_UUID", length = UUID_COLUMN_LENGTH, nullable = false, updatable = false)
+
+	@Column(name = SEARCH_UUID, length = SEARCH_UUID_COLUMN_LENGTH, nullable = false, updatable = false)
 	private String myUuid;
+
 	@SuppressWarnings("unused")
 	@Version
 	@Column(name = "OPTLOCK_VERSION", nullable = true)
 	private Integer myVersion;
+
 	@Lob
 	@Column(name = "SEARCH_PARAM_MAP", nullable = true)
 	private byte[] mySearchParameterMap;
+
+	@Transient
+	private transient SearchParameterMap mySearchParameterMapTransient;
 
 	/**
 	 * This isn't currently persisted in the DB as it's only used for offset mode. We could
@@ -158,6 +190,13 @@ public class Search implements ICachedSearchDetails, Serializable {
 	private Integer mySizeModeSize;
 
 	/**
+	 * This isn't currently persisted in the DB. When there is search criteria defined in the
+	 * search parameter, this is used to keep the search criteria type.
+	 */
+	@Transient
+	private HistorySearchStyleEnum myHistorySearchStyle;
+
+	/**
 	 * Constructor
 	 */
 	public Search() {
@@ -171,15 +210,15 @@ public class Search implements ICachedSearchDetails, Serializable {
 	@Override
 	public String toString() {
 		return new ToStringBuilder(this)
-			.append("myLastUpdatedHigh", myLastUpdatedHigh)
-			.append("myLastUpdatedLow", myLastUpdatedLow)
-			.append("myNumFound", myNumFound)
-			.append("myNumBlocked", myNumBlocked)
-			.append("myStatus", myStatus)
-			.append("myTotalCount", myTotalCount)
-			.append("myUuid", myUuid)
-			.append("myVersion", myVersion)
-			.toString();
+				.append("myLastUpdatedHigh", myLastUpdatedHigh)
+				.append("myLastUpdatedLow", myLastUpdatedLow)
+				.append("myNumFound", myNumFound)
+				.append("myNumBlocked", myNumBlocked)
+				.append("myStatus", myStatus)
+				.append("myTotalCount", myTotalCount)
+				.append("myUuid", myUuid)
+				.append("myVersion", myVersion)
+				.toString();
 	}
 
 	public int getNumBlocked() {
@@ -228,7 +267,7 @@ public class Search implements ICachedSearchDetails, Serializable {
 
 	public void setFailureMessage(String theFailureMessage) {
 		myFailureMessage = left(theFailureMessage, FAILURE_MESSAGE_LENGTH);
-		if (System.getProperty(SearchCoordinatorSvcImpl.UNIT_TEST_CAPTURE_STACK) != null) {
+		if (HapiSystemProperties.isUnitTestCaptureStackEnabled()) {
 			myFailureMessage = theFailureMessage;
 		}
 	}
@@ -354,10 +393,12 @@ public class Search implements ICachedSearchDetails, Serializable {
 		myTotalCount = theTotalCount;
 	}
 
+	@Override
 	public String getUuid() {
 		return myUuid;
 	}
 
+	@Override
 	public void setUuid(String theUuid) {
 		myUuid = theUuid;
 	}
@@ -367,14 +408,24 @@ public class Search implements ICachedSearchDetails, Serializable {
 		myLastUpdatedHigh = theUpperBound;
 	}
 
-	private Set<Include> toIncList(boolean theWantReverse) {
+	private Set<Include> toIncList(boolean theWantReverse, boolean theIncludeAll, boolean theWantIterate) {
 		HashSet<Include> retVal = new HashSet<>();
 		for (SearchInclude next : getIncludes()) {
 			if (theWantReverse == next.isReverse()) {
-				retVal.add(new Include(next.getInclude(), next.isRecurse()));
+				if (theIncludeAll) {
+					retVal.add(new Include(next.getInclude(), next.isRecurse()));
+				} else {
+					if (theWantIterate == next.isRecurse()) {
+						retVal.add(new Include(next.getInclude(), next.isRecurse()));
+					}
+				}
 			}
 		}
 		return Collections.unmodifiableSet(retVal);
+	}
+
+	private Set<Include> toIncList(boolean theWantReverse) {
+		return toIncList(theWantReverse, true, true);
 	}
 
 	public Set<Include> toIncludesList() {
@@ -385,6 +436,14 @@ public class Search implements ICachedSearchDetails, Serializable {
 		return toIncList(true);
 	}
 
+	public Set<Include> toIncludesList(boolean iterate) {
+		return toIncList(false, false, iterate);
+	}
+
+	public Set<Include> toRevIncludesList(boolean iterate) {
+		return toIncList(true, false, iterate);
+	}
+
 	public void addInclude(SearchInclude theInclude) {
 		getIncludes().add(theInclude);
 	}
@@ -393,11 +452,26 @@ public class Search implements ICachedSearchDetails, Serializable {
 		return myVersion;
 	}
 
+	/**
+	 * Note that this is not always set! We set this if we're storing a
+	 * Search in {@link SearchStatusEnum#PASSCMPLET} status since we'll need
+	 * the map in order to restart, but otherwise we save space and time by
+	 * not storing it.
+	 */
 	public Optional<SearchParameterMap> getSearchParameterMap() {
-		return Optional.ofNullable(mySearchParameterMap).map(t -> SerializationUtils.deserialize(mySearchParameterMap));
+		if (mySearchParameterMapTransient != null) {
+			return Optional.of(mySearchParameterMapTransient);
+		}
+		SearchParameterMap searchParameterMap = null;
+		if (mySearchParameterMap != null) {
+			searchParameterMap = SerializationUtils.deserialize(mySearchParameterMap);
+			mySearchParameterMapTransient = searchParameterMap;
+		}
+		return Optional.ofNullable(searchParameterMap);
 	}
 
 	public void setSearchParameterMap(SearchParameterMap theSearchParameterMap) {
+		mySearchParameterMapTransient = theSearchParameterMap;
 		mySearchParameterMap = SerializationUtils.serialize(theSearchParameterMap);
 	}
 
@@ -414,8 +488,17 @@ public class Search implements ICachedSearchDetails, Serializable {
 		myOffset = theOffset;
 	}
 
+	public HistorySearchStyleEnum getHistorySearchStyle() {
+		return myHistorySearchStyle;
+	}
+
+	public void setHistorySearchStyle(HistorySearchStyleEnum theHistorySearchStyle) {
+		this.myHistorySearchStyle = theHistorySearchStyle;
+	}
+
 	@Nonnull
-	public static String createSearchQueryStringForStorage(@Nonnull String theSearchQueryString, @Nonnull RequestPartitionId theRequestPartitionId) {
+	public static String createSearchQueryStringForStorage(
+			@Nonnull String theSearchQueryString, @Nonnull RequestPartitionId theRequestPartitionId) {
 		String searchQueryString = theSearchQueryString;
 		if (!theRequestPartitionId.isAllPartitions()) {
 			searchQueryString = RequestPartitionId.stringifyForKey(theRequestPartitionId) + " " + searchQueryString;

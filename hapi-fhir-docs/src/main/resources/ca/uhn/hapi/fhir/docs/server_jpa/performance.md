@@ -6,7 +6,7 @@ This page contains information for performance optimization. If you are planning
 
 The FHIR history operation allows clients to see a change history for a resource, across all resources of a given type, or even across all resources on a server. This operation includes a total count (in `Bundle.total`) that can be very expensive to calculate on large databases with many resources.
 
-As a result, a setting on the `DaoConfig` object has been added called **History Count Mode**. This setting has 3 possible options:
+As a result, a setting on the `JpaStorageSettings` object has been added called **History Count Mode**. This setting has 3 possible options:
 
 * COUNT_CACHED. This is the new default: A loading cache will be used for history counts without any dates specified, meaning that counts are stored in RAM for up to one minute, and the loading cache blocks all but one client thread per JVM from actually performing the count. This effectively throttles access to the database. History operation invocations that include a `_since` or `_to` parameter will never have a count included in the results.
   
@@ -60,3 +60,11 @@ X-Upsert-Extistence-Check: disabled
 This should improve write performance, so this header can be useful when large amounts of data will be created using client assigned IDs in a controlled fashion.
 
 If this setting is used and a resource already exists with a given client-assigned ID, a database constraint error will prevent any duplicate records from being created, and the operation will fail.
+
+# Disabling Non Resource DB History
+
+This setting controls whether non-resource (ex: Patient is a resource, MdmLink is not) DB history is enabled.  Presently, this only affects the history for MDM links, but the functionality may be extended to other domains.
+
+Clients may want to disable this setting for performance reasons as it populates a new set of database tables when enabled.
+
+Setting this property explicitly to false disables the feature:  [Non Resource DB History](/apidocs/hapi-fhir-storage/ca/uhn/fhir/jpa/api/config/JpaStorageSettings.html#isNonResourceDbHistoryEnabled())

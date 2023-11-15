@@ -15,7 +15,6 @@ import ca.uhn.fhir.test.utilities.ITestDataBuilder;
 import ca.uhn.test.util.LogbackCaptureTestExtension;
 import ch.qos.logback.classic.Level;
 import org.hamcrest.MatcherAssert;
-import org.hamcrest.Matchers;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.jupiter.api.BeforeEach;
@@ -32,13 +31,15 @@ import java.util.HashSet;
 import static ca.uhn.fhir.rest.server.interceptor.auth.IAuthorizationSearchParamMatcher.MatchResult.buildMatched;
 import static ca.uhn.fhir.rest.server.interceptor.auth.IAuthorizationSearchParamMatcher.MatchResult.buildUnmatched;
 import static ca.uhn.fhir.rest.server.interceptor.auth.IAuthorizationSearchParamMatcher.MatchResult.buildUnsupported;
+import static ca.uhn.test.util.LogbackCaptureTestExtension.eventWithLevelAndMessageContains;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.Mockito.when;
 
-// wipjv where should this test live? - It can't live in hapi-fhir-server since we need a real FhirContext for the compartment checks.
+// TODO: Is there a better home for this test? It can't live in hapi-fhir-server since we need a real FhirContext for the compartment checks.
 @MockitoSettings
 class FhirQueryRuleImplTest implements ITestDataBuilder {
 
@@ -258,10 +259,6 @@ class FhirQueryRuleImplTest implements ITestDataBuilder {
 
 	@Nested
 	public class MisconfigurationChecks {
-
-
-		// wipjv check for unsupported params during CdrAuthInterceptor scopes->perms translation.
-
 		/**
 		 * in case an unsupported perm snuck through the front door.
 		 * Each scope provides positive perm, so unsupported means we can't vote yes.  Abstain.
@@ -279,7 +276,7 @@ class FhirQueryRuleImplTest implements ITestDataBuilder {
 			// then
 			assertThat(verdict, nullValue());
 			MatcherAssert.assertThat(myLogCapture.getLogEvents(),
-				Matchers.hasItem(myLogCapture.eventWithLevelAndMessageContains(Level.WARN, "unsupported chain XXX")));
+				hasItem(eventWithLevelAndMessageContains(Level.WARN, "unsupported chain XXX")));
 		}
 
 		@Test
@@ -295,7 +292,7 @@ class FhirQueryRuleImplTest implements ITestDataBuilder {
 			// then
 			assertThat(verdict.getDecision(), equalTo(PolicyEnum.DENY));
 			MatcherAssert.assertThat(myLogCapture.getLogEvents(),
-				Matchers.hasItem(myLogCapture.eventWithLevelAndMessageContains(Level.WARN, "unsupported chain XXX")));
+				hasItem(eventWithLevelAndMessageContains(Level.WARN, "unsupported chain XXX")));
 		}
 
 		/**
@@ -315,11 +312,10 @@ class FhirQueryRuleImplTest implements ITestDataBuilder {
 			// then
 			assertThat(verdict, nullValue());
 			MatcherAssert.assertThat(myLogCapture.getLogEvents(),
-				Matchers.hasItem(myLogCapture.eventWithLevelAndMessageContains(Level.WARN, "No matcher provided")));
+				hasItem(eventWithLevelAndMessageContains(Level.WARN, "No matcher provided")));
 		}
 
 	}
-	// wipjv how to test the difference between patient/*.rs?code=foo and patient/Observation.rs?code=foo?
 	// We need the builder to set AppliesTypeEnum, and the use that to build the matcher expression.
 
 	private AuthorizationInterceptor.Verdict applyRuleToResource(IBaseResource theResource) {

@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 4087
+jira: SMILE-4875
+title: "Filter by range for numeric extension does not work after update.  hfj_spidx_number record deleted after PUT update on SearchParameter value for Resource"
+

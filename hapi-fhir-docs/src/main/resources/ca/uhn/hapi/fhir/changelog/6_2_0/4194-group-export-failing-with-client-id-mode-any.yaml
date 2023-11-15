@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 4194
+title: "Bulk Group export was failing to export Patient resources when Client ID mode was set to: ANY. This has been fixed"

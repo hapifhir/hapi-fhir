@@ -1,10 +1,8 @@
-package ca.uhn.fhir.storage.test;
-
 /*-
  * #%L
  * hapi-fhir-storage-test-utilities
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.storage.test;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.storage.test;
 
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.conformance.DateSearchTestCase;
@@ -32,6 +31,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -95,7 +95,7 @@ public abstract class BaseDateSearchDaoTests {
 	 */
 	@ParameterizedTest
 	// use @CsvSource to debug individual cases.
-	//@CsvSource("2019-12-31T08:00:00,eq2020,false,inline,1")
+//	@CsvSource("2020-01-01,eb2021-01-01, True, eb == ends-before")
 	@MethodSource("dateSearchCases")
 	public void testDateSearchMatching(String theResourceDate, String theQuery, boolean theExpectedMatch, String theFileName, int theLineNumber) {
 		if (isShouldSkip(theResourceDate, theQuery)) {

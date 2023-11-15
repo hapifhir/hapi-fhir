@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 4348
+jira: SMILE-5651
+title: "Previously, if a DSTU3 Resource was updated and no changes were made, the `meta.versionId` value was 
+incremented incorrectly. This has been fixed."

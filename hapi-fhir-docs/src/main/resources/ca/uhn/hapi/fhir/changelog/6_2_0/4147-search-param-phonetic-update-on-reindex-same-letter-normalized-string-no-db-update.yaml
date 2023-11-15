@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 4147
+jira: SMILE-4256
+title: "Previously when updating a phonetic search parameter, any existing resource will not have its search parameter String updated upon reindex if the normalized String is the same letter as under the old algorithm (ex JN to JAN).  Searching on the new normalized String was failing to return results. This has been corrected."

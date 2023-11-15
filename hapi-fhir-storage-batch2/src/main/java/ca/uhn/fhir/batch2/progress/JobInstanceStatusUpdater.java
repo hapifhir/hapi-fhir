@@ -1,10 +1,8 @@
-package ca.uhn.fhir.batch2.progress;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server - Batch2 Task Processor
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,64 +17,83 @@ package ca.uhn.fhir.batch2.progress;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.batch2.progress;
 
 import ca.uhn.fhir.batch2.api.IJobCompletionHandler;
-import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.api.JobCompletionDetails;
+import ca.uhn.fhir.batch2.coordinator.JobDefinitionRegistry;
 import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.model.api.IModelJson;
+import ca.uhn.fhir.util.Logs;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class JobInstanceStatusUpdater {
-	private static final Logger ourLog = LoggerFactory.getLogger(JobInstanceStatusUpdater.class);
-	private final IJobPersistence myJobPersistence;
+	private static final Logger ourLog = Logs.getBatchTroubleshootingLog();
+	private final JobDefinitionRegistry myJobDefinitionRegistry;
 
-	public JobInstanceStatusUpdater(IJobPersistence theJobPersistence) {
-		myJobPersistence = theJobPersistence;
+	public JobInstanceStatusUpdater(JobDefinitionRegistry theJobDefinitionRegistry) {
+		myJobDefinitionRegistry = theJobDefinitionRegistry;
 	}
 
+	/**
+	 * Update the status on the instance, and call any completion handlers when entering a completion state.
+	 * @param theJobInstance the instance to mutate
+	 * @param theNewStatus target status
+	 * @return was the state change allowed?
+	 */
 	public boolean updateInstanceStatus(JobInstance theJobInstance, StatusEnum theNewStatus) {
-		theJobInstance.setStatus(theNewStatus);
-		return updateInstance(theJobInstance);
-	}
-
-	public boolean updateInstance(JobInstance theJobInstance) {
-		boolean statusChanged = myJobPersistence.updateInstance(theJobInstance);
-
-		// This code can be called by both the maintenance service and the fast track work step executor.
-		// We only want to call the completion handler if the status was changed to COMPLETED in this thread.  We use the
-		// record changed count from of a sql update change status to rely on the database to tell us which thread
-		// the status change happened in.
-		if (statusChanged) {
-			ourLog.info("Marking job instance {} of type {} as {}", theJobInstance.getInstanceId(), theJobInstance.getJobDefinitionId(), theJobInstance.getStatus());
-			handleStatusChange(theJobInstance);
+		StatusEnum origStatus = theJobInstance.getStatus();
+		if (origStatus == theNewStatus) {
+			return false;
 		}
-		return statusChanged;
+		if (!StatusEnum.isLegalStateTransition(origStatus, theNewStatus)) {
+			ourLog.error(
+					"Ignoring illegal state transition for job instance {} of type {} from {} to {}",
+					theJobInstance.getInstanceId(),
+					theJobInstance.getJobDefinitionId(),
+					origStatus,
+					theNewStatus);
+			return false;
+		}
+		theJobInstance.setStatus(theNewStatus);
+		ourLog.debug(
+				"Updating job instance {} of type {} from {} to {}",
+				theJobInstance.getInstanceId(),
+				theJobInstance.getJobDefinitionId(),
+				origStatus,
+				theNewStatus);
+		handleStatusChange(theJobInstance);
+
+		return true;
 	}
 
 	private <PT extends IModelJson> void handleStatusChange(JobInstance theJobInstance) {
-		JobDefinition<PT> definition = (JobDefinition<PT>) theJobInstance.getJobDefinition();
+		JobDefinition<PT> definition = myJobDefinitionRegistry.getJobDefinitionOrThrowException(theJobInstance);
+		assert definition != null;
+
 		switch (theJobInstance.getStatus()) {
 			case COMPLETED:
 				invokeCompletionHandler(theJobInstance, definition, definition.getCompletionHandler());
 				break;
 			case FAILED:
-			case ERRORED:
 			case CANCELLED:
 				invokeCompletionHandler(theJobInstance, definition, definition.getErrorHandler());
 				break;
 			case QUEUED:
+			case ERRORED:
 			case IN_PROGRESS:
+			case FINALIZE:
 			default:
 				// do nothing
 		}
 	}
 
-
-	private <PT extends IModelJson> void invokeCompletionHandler(JobInstance theJobInstance, JobDefinition<PT> theJobDefinition, IJobCompletionHandler<PT> theJobCompletionHandler) {
+	private <PT extends IModelJson> void invokeCompletionHandler(
+			JobInstance theJobInstance,
+			JobDefinition<PT> theJobDefinition,
+			IJobCompletionHandler<PT> theJobCompletionHandler) {
 		if (theJobCompletionHandler == null) {
 			return;
 		}

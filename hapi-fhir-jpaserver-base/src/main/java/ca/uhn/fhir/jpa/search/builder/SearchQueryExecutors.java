@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.search.builder;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,13 +17,15 @@ package ca.uhn.fhir.jpa.search.builder;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.search.builder;
 
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
+import ca.uhn.fhir.jpa.search.builder.models.ResolvedSearchQueryExecutor;
 import org.apache.commons.lang3.Validate;
 
-import javax.annotation.Nonnull;
 import java.util.Iterator;
 import java.util.List;
+import javax.annotation.Nonnull;
 
 public class SearchQueryExecutors {
 
@@ -58,24 +58,23 @@ public class SearchQueryExecutors {
 		return new ResolvedSearchQueryExecutor(rawPids);
 	}
 
-	/**
-	 * Adapt bare Iterator to our internal query interface.
-	 */
-	static class ResolvedSearchQueryExecutor implements ISearchQueryExecutor {
-		private final Iterator<Long> myIterator;
+	public static ISearchQueryExecutor from(Iterator<JpaPid> theIterator) {
+		return new JpaPidQueryAdaptor(theIterator);
+	}
 
-		ResolvedSearchQueryExecutor(Iterable<Long> theIterable) {
-			this(theIterable.iterator());
-		}
+	public static ISearchQueryExecutor from(Iterable<JpaPid> theIterable) {
+		return new JpaPidQueryAdaptor(theIterable.iterator());
+	}
 
-		ResolvedSearchQueryExecutor(Iterator<Long> theIterator) {
+	static class JpaPidQueryAdaptor implements ISearchQueryExecutor {
+		final Iterator<JpaPid> myIterator;
+
+		JpaPidQueryAdaptor(Iterator<JpaPid> theIterator) {
 			myIterator = theIterator;
 		}
 
-		@Nonnull
-		public static ResolvedSearchQueryExecutor from(List<Long> rawPids) {
-			return new ResolvedSearchQueryExecutor(rawPids);
-		}
+		@Override
+		public void close() {}
 
 		@Override
 		public boolean hasNext() {
@@ -84,44 +83,8 @@ public class SearchQueryExecutors {
 
 		@Override
 		public Long next() {
-			return myIterator.next();
+			JpaPid next = myIterator.next();
+			return next == null ? null : next.getId();
 		}
-
-		@Override
-		public void close() {
-			// empty
-		}
-	}
-
-	static public ISearchQueryExecutor from(Iterator<ResourcePersistentId> theIterator) {
-		return new ResourcePersistentIdQueryAdaptor(theIterator);
-	}
-
-	static public ISearchQueryExecutor from(Iterable<ResourcePersistentId> theIterable) {
-		return new ResourcePersistentIdQueryAdaptor(theIterable.iterator());
-	}
-
-	static class ResourcePersistentIdQueryAdaptor implements ISearchQueryExecutor {
-		final Iterator<ResourcePersistentId> myIterator;
-
-		ResourcePersistentIdQueryAdaptor(Iterator<ResourcePersistentId> theIterator) {
-			myIterator = theIterator;
-		}
-
-		@Override
-		public void close() {
-		}
-
-		@Override
-		public boolean hasNext() {
-			return myIterator.hasNext();
-		}
-
-		@Override
-		public Long next() {
-			ResourcePersistentId next = myIterator.next();
-			return next==null?null:next.getIdAsLong();
-		}
-
 	}
 }

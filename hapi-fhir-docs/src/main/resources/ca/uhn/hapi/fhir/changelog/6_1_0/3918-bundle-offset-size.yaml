@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 3918
+title: "When offset searches are enforced on the server, not all of the search parameters were loading and this caused a NPE.
+Now an ERROR will be logged instead."

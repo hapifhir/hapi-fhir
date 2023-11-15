@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 3972
+jira: SMILE-4977
+title: "Previously, the `:nickname` qualifier only worked with the predefined `name` and `given` SearchParameters.
+This has been fixed and now the `:nickname` qualifier can be used with any string SearchParameters."

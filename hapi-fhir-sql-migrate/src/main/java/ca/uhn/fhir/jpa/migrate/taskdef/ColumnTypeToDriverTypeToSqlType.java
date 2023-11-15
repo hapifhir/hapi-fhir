@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.migrate.taskdef;
-
 /*-
  * #%L
  * HAPI FHIR Server - SQL Migration
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.migrate.taskdef;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
@@ -26,10 +25,13 @@ import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import java.util.HashMap;
 import java.util.Map;
 
-public class ColumnTypeToDriverTypeToSqlType {
-	Map<ColumnTypeEnum, Map<DriverTypeEnum, String>> myColumnTypeToDriverTypeToSqlType = new HashMap<>();
+public final class ColumnTypeToDriverTypeToSqlType {
 
-	public ColumnTypeToDriverTypeToSqlType() {
+	private ColumnTypeToDriverTypeToSqlType() {}
+
+	static Map<ColumnTypeEnum, Map<DriverTypeEnum, String>> myColumnTypeToDriverTypeToSqlType = new HashMap<>();
+
+	static {
 		setColumnType(ColumnTypeEnum.INT, DriverTypeEnum.H2_EMBEDDED, "integer");
 		setColumnType(ColumnTypeEnum.INT, DriverTypeEnum.DERBY_EMBEDDED, "integer");
 		setColumnType(ColumnTypeEnum.INT, DriverTypeEnum.MARIADB_10_1, "integer");
@@ -37,6 +39,14 @@ public class ColumnTypeToDriverTypeToSqlType {
 		setColumnType(ColumnTypeEnum.INT, DriverTypeEnum.MSSQL_2012, "int");
 		setColumnType(ColumnTypeEnum.INT, DriverTypeEnum.ORACLE_12C, "number(10,0)");
 		setColumnType(ColumnTypeEnum.INT, DriverTypeEnum.POSTGRES_9_4, "int4");
+
+		setColumnType(ColumnTypeEnum.TINYINT, DriverTypeEnum.H2_EMBEDDED, "tinyint");
+		setColumnType(ColumnTypeEnum.TINYINT, DriverTypeEnum.DERBY_EMBEDDED, "smallint");
+		setColumnType(ColumnTypeEnum.TINYINT, DriverTypeEnum.MARIADB_10_1, "tinyint");
+		setColumnType(ColumnTypeEnum.TINYINT, DriverTypeEnum.MYSQL_5_7, "tinyint");
+		setColumnType(ColumnTypeEnum.TINYINT, DriverTypeEnum.MSSQL_2012, "smallint");
+		setColumnType(ColumnTypeEnum.TINYINT, DriverTypeEnum.ORACLE_12C, "number(3,0)");
+		setColumnType(ColumnTypeEnum.TINYINT, DriverTypeEnum.POSTGRES_9_4, "int2");
 
 		setColumnType(ColumnTypeEnum.FLOAT, DriverTypeEnum.H2_EMBEDDED, "float");
 		setColumnType(ColumnTypeEnum.FLOAT, DriverTypeEnum.DERBY_EMBEDDED, "float");
@@ -107,19 +117,43 @@ public class ColumnTypeToDriverTypeToSqlType {
 		setColumnType(ColumnTypeEnum.CLOB, DriverTypeEnum.MARIADB_10_1, "longtext");
 		setColumnType(ColumnTypeEnum.CLOB, DriverTypeEnum.MYSQL_5_7, "longtext");
 		setColumnType(ColumnTypeEnum.CLOB, DriverTypeEnum.ORACLE_12C, "clob");
-		setColumnType(ColumnTypeEnum.CLOB, DriverTypeEnum.POSTGRES_9_4, "text");
+		setColumnType(
+				ColumnTypeEnum.CLOB,
+				DriverTypeEnum.POSTGRES_9_4,
+				"oid"); // the PG driver will write oid into a `text` column
 		setColumnType(ColumnTypeEnum.CLOB, DriverTypeEnum.MSSQL_2012, "varchar(MAX)");
+
+		setColumnType(ColumnTypeEnum.TEXT, DriverTypeEnum.H2_EMBEDDED, "character varying");
+		setColumnType(ColumnTypeEnum.TEXT, DriverTypeEnum.DERBY_EMBEDDED, "long varchar");
+		setColumnType(ColumnTypeEnum.TEXT, DriverTypeEnum.MARIADB_10_1, "longtext");
+		setColumnType(ColumnTypeEnum.TEXT, DriverTypeEnum.MYSQL_5_7, "longtext");
+		setColumnType(ColumnTypeEnum.TEXT, DriverTypeEnum.ORACLE_12C, "long");
+		setColumnType(ColumnTypeEnum.TEXT, DriverTypeEnum.POSTGRES_9_4, "text");
+		setColumnType(ColumnTypeEnum.TEXT, DriverTypeEnum.MSSQL_2012, "varchar(MAX)");
 	}
 
-	public Map<ColumnTypeEnum, Map<DriverTypeEnum, String>> getColumnTypeToDriverTypeToSqlType() {
+	public static Map<ColumnTypeEnum, Map<DriverTypeEnum, String>> getColumnTypeToDriverTypeToSqlType() {
 		return myColumnTypeToDriverTypeToSqlType;
 	}
 
-	private void setColumnType(ColumnTypeEnum theColumnType, DriverTypeEnum theDriverType, String theColumnTypeSql) {
-		Map<DriverTypeEnum, String> columnSqlType = myColumnTypeToDriverTypeToSqlType.computeIfAbsent(theColumnType, k -> new HashMap<>());
+	private static void setColumnType(
+			ColumnTypeEnum theColumnType, DriverTypeEnum theDriverType, String theColumnTypeSql) {
+		Map<DriverTypeEnum, String> columnSqlType =
+				myColumnTypeToDriverTypeToSqlType.computeIfAbsent(theColumnType, k -> new HashMap<>());
 		if (columnSqlType.containsKey(theDriverType)) {
 			throw new IllegalStateException(Msg.code(65) + "Duplicate key: " + theDriverType);
 		}
 		columnSqlType.put(theDriverType, theColumnTypeSql);
+	}
+
+	public static String toBooleanValue(DriverTypeEnum theDriverType, Boolean theBoolean) {
+		switch (theDriverType) {
+			case H2_EMBEDDED:
+			case DERBY_EMBEDDED:
+			case POSTGRES_9_4:
+				return theBoolean.toString();
+			default:
+				return theBoolean ? "1" : "0";
+		}
 	}
 }

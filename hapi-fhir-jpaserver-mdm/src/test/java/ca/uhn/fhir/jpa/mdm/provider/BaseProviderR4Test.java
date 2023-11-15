@@ -1,16 +1,14 @@
 package ca.uhn.fhir.jpa.mdm.provider;
 
-import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.jpa.mdm.BaseMdmR4Test;
-import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.test.Batch2JobHelper;
 import ca.uhn.fhir.mdm.api.IMdmControllerSvc;
 import ca.uhn.fhir.mdm.api.IMdmSubmitSvc;
 import ca.uhn.fhir.mdm.provider.MdmControllerHelper;
 import ca.uhn.fhir.mdm.provider.MdmProviderDstu3Plus;
 import ca.uhn.fhir.mdm.rules.config.MdmSettings;
+import ca.uhn.fhir.mdm.rules.svc.MdmResourceMatcherSvc;
 import ca.uhn.fhir.mdm.util.MessageHelper;
-import ca.uhn.fhir.test.utilities.BatchJobHelper;
 import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
@@ -31,24 +29,20 @@ import java.util.List;
 public abstract class BaseProviderR4Test extends BaseMdmR4Test {
 	protected MdmProviderDstu3Plus myMdmProvider;
 	@Autowired
-	private IMdmControllerSvc myMdmControllerSvc;
+	protected IMdmControllerSvc myMdmControllerSvc;
 	@Autowired
 	private IMdmSubmitSvc myMdmSubmitSvc;
 	@Autowired
-	private MdmSettings myMdmSettings;
+	protected MdmSettings myMdmSettings;
+	@Autowired
+	protected MdmResourceMatcherSvc myMdmResourceMatcherSvc;
 	@Autowired
 	private MdmControllerHelper myMdmHelper;
-	@Autowired
-	BatchJobHelper myBatchJobHelper;
 	@Autowired
 	Batch2JobHelper myBatch2JobHelper;
 	@Autowired
 	MessageHelper myMessageHelper;
 
-	@Autowired
-	private IJobCoordinator myJobCoordinator;
-	@Autowired
-	private IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
 	private String defaultScript;
 
 	protected void setMdmRuleJson(String theString) throws IOException {
@@ -57,13 +51,17 @@ public abstract class BaseProviderR4Test extends BaseMdmR4Test {
 		String json = IOUtils.toString(resource.getInputStream(), Charsets.UTF_8);
 		myMdmSettings.setEnabled(true);
 		myMdmSettings.setScriptText(json);
-		myMdmResourceMatcherSvc.init();
+		myMdmResourceMatcherSvc.setMdmRulesJson(myMdmSettings.getMdmRules());
 	}
 
 	@BeforeEach
 	public void before() throws Exception {
-		myMdmProvider = new MdmProviderDstu3Plus(myFhirContext, myMdmControllerSvc, myMdmHelper, myMdmSubmitSvc, myMdmSettings);
-// FhirContext theFhirContext, IJobCoordinator theJobCoordinator, IRequestPartitionHelperSvc theRequestPartitionHelperSvc
+		myMdmProvider = new MdmProviderDstu3Plus(myFhirContext,
+			myMdmControllerSvc,
+			myMdmHelper,
+			myMdmSubmitSvc,
+			myInterceptorBroadcaster,
+			myMdmSettings);
 		defaultScript = myMdmSettings.getScriptText();
 	}
 
@@ -72,7 +70,7 @@ public abstract class BaseProviderR4Test extends BaseMdmR4Test {
 	public void after() throws IOException {
 		super.after();
 		myMdmSettings.setScriptText(defaultScript);
-		myMdmResourceMatcherSvc.init();// This bugger creates new objects from the beans and then ignores them.
+		myMdmResourceMatcherSvc.setMdmRulesJson(myMdmSettings.getMdmRules());
 	}
 
 	protected void clearMdmLinks() {

@@ -1,10 +1,8 @@
-package ca.uhn.fhir.rest.server.util;
-
 /*-
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.rest.server.util;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.server.util;
 
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
@@ -86,13 +85,15 @@ public class ResourceSearchParams {
 	}
 
 	public void removeInactive() {
-		myMap.entrySet().removeIf(entry -> entry.getValue().getStatus() != RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE);
+		myMap.entrySet()
+				.removeIf(entry ->
+						entry.getValue().getStatus() != RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE);
 	}
 
 	public Stream<String> getReferenceSearchParamNames() {
 		return myMap.entrySet().stream()
-			.filter(entry -> entry.getValue().getParamType() == RestSearchParameterTypeEnum.REFERENCE)
-			.map(Map.Entry::getKey);
+				.filter(entry -> entry.getValue().getParamType() == RestSearchParameterTypeEnum.REFERENCE)
+				.map(Map.Entry::getKey);
 	}
 
 	public ResourceSearchParams makeCopy() {

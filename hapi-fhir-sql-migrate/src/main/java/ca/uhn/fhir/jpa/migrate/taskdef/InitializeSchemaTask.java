@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.migrate.taskdef;
-
 /*-
  * #%L
  * HAPI FHIR Server - SQL Migration
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.migrate.taskdef;
 
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import ca.uhn.fhir.jpa.migrate.JdbcUtils;
@@ -33,12 +32,15 @@ import java.util.List;
 import java.util.Set;
 
 public class InitializeSchemaTask extends BaseTask {
-	public static final String DESCRIPTION_PREFIX = "Initialize schema for ";
+	private static final String DESCRIPTION_PREFIX = "Initialize schema for ";
 	private static final Logger ourLog = LoggerFactory.getLogger(InitializeSchemaTask.class);
 	private final ISchemaInitializationProvider mySchemaInitializationProvider;
 	private boolean myInitializedSchema;
 
-	public InitializeSchemaTask(String theProductVersion, String theSchemaVersion, ISchemaInitializationProvider theSchemaInitializationProvider) {
+	public InitializeSchemaTask(
+			String theProductVersion,
+			String theSchemaVersion,
+			ISchemaInitializationProvider theSchemaInitializationProvider) {
 		super(theProductVersion, theSchemaVersion);
 		mySchemaInitializationProvider = theSchemaInitializationProvider;
 		setDescription(DESCRIPTION_PREFIX + mySchemaInitializationProvider.getSchemaDescription());
@@ -61,11 +63,19 @@ public class InitializeSchemaTask extends BaseTask {
 		Set<String> tableNames = JdbcUtils.getTableNames(getConnectionProperties());
 		String schemaExistsIndicatorTable = mySchemaInitializationProvider.getSchemaExistsIndicatorTable();
 		if (tableNames.contains(schemaExistsIndicatorTable)) {
-			logInfo(ourLog, "The table {} already exists.  Skipping schema initialization for {}", schemaExistsIndicatorTable, driverType);
+			logInfo(
+					ourLog,
+					"The table {} already exists.  Skipping schema initialization for {}",
+					schemaExistsIndicatorTable,
+					driverType);
 			return;
 		}
 
-		logInfo(ourLog, "Initializing {} schema for {}", driverType, mySchemaInitializationProvider.getSchemaDescription());
+		logInfo(
+				ourLog,
+				"Initializing {} schema for {}",
+				driverType,
+				mySchemaInitializationProvider.getSchemaDescription());
 
 		List<String> sqlStatements = mySchemaInitializationProvider.getSqlStatements(driverType);
 
@@ -77,7 +87,11 @@ public class InitializeSchemaTask extends BaseTask {
 			myInitializedSchema = true;
 		}
 
-		logInfo(ourLog, "{} schema for {} initialized successfully", driverType, mySchemaInitializationProvider.getSchemaDescription());
+		logInfo(
+				ourLog,
+				"{} schema for {} initialized successfully",
+				driverType,
+				mySchemaInitializationProvider.getSchemaDescription());
 	}
 
 	@Override

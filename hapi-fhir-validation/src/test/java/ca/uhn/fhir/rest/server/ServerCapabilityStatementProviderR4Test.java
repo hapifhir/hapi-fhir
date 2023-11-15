@@ -96,7 +96,9 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.test.utilities.server.MockServletUtil.createServletConfig;
+import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.empty;
@@ -212,6 +214,24 @@ public class ServerCapabilityStatementProviderR4Test {
 		assertTrue(res.getConditionalUpdate());
 	}
 
+	@Test
+	public void testMethodGetServerConformance_whenServerSupportsExportOperation_willIncludeInstantiatesElement() throws Exception {
+		// given
+		RestfulServer rs = new RestfulServer(myCtx);
+		rs.setProviders(new BulkDataExportProvider());
+		rs.setServerAddressStrategy(new HardcodedServerAddressStrategy("http://localhost/baseR4"));
+		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider(rs);
+		rs.setServerConformanceProvider(sc);
+
+		// when
+		rs.init(createServletConfig());
+		CapabilityStatement conformance = (CapabilityStatement) sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
+
+		// then
+		String instantiatesFirstRepValue = conformance.getInstantiates().get(0).getValue();
+		assertThat(instantiatesFirstRepValue, equalTo(Constants.BULK_DATA_ACCESS_IG_URL));
+	}
+
 	private RequestDetails createRequestDetails(RestfulServer theServer) {
 		ServletRequestDetails retVal = new ServletRequestDetails();
 		retVal.setServer(theServer);
@@ -303,7 +323,7 @@ public class ServerCapabilityStatementProviderR4Test {
 		Collection<ResourceBinding> resourceBindings = rs.getResourceBindings();
 		for (ResourceBinding resourceBinding : resourceBindings) {
 			if (resourceBinding.getResourceName().equals("Patient")) {
-				List<BaseMethodBinding<?>> methodBindings = resourceBinding.getMethodBindings();
+				List<BaseMethodBinding> methodBindings = resourceBinding.getMethodBindings();
 				SearchMethodBinding binding = (SearchMethodBinding) methodBindings.get(0);
 				SearchParameter param = (SearchParameter) binding.getParameters().iterator().next();
 				assertEquals("The patient's identifier", param.getDescription());
@@ -408,7 +428,7 @@ public class ServerCapabilityStatementProviderR4Test {
 		{
 			OperationDefinition opDef = (OperationDefinition) sc.readOperationDefinition(new IdType("OperationDefinition/EncounterPatient-i-someOp"), createRequestDetails(rs));
 			validate(opDef);
-			ourLog.info(myCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(opDef));
+			ourLog.debug(myCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(opDef));
 			Set<String> types = toStrings(opDef.getResource());
 			assertEquals("someOp", opDef.getCode());
 			assertEquals(true, opDef.getInstance());
@@ -423,7 +443,7 @@ public class ServerCapabilityStatementProviderR4Test {
 		{
 			OperationDefinition opDef = (OperationDefinition) sc.readOperationDefinition(new IdType("OperationDefinition/EncounterPatient-i-validate"), createRequestDetails(rs));
 			validate(opDef);
-			ourLog.info(myCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(opDef));
+			ourLog.debug(myCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(opDef));
 			Set<String> types = toStrings(opDef.getResource());
 			assertEquals("validate", opDef.getCode());
 			assertEquals(true, opDef.getInstance());
@@ -537,7 +557,7 @@ public class ServerCapabilityStatementProviderR4Test {
 		Collection<ResourceBinding> resourceBindings = rs.getResourceBindings();
 		for (ResourceBinding resourceBinding : resourceBindings) {
 			if (resourceBinding.getResourceName().equals("Patient")) {
-				List<BaseMethodBinding<?>> methodBindings = resourceBinding.getMethodBindings();
+				List<BaseMethodBinding> methodBindings = resourceBinding.getMethodBindings();
 				SearchMethodBinding binding = (SearchMethodBinding) methodBindings.get(0);
 				for (IParameter next : binding.getParameters()) {
 					SearchParameter param = (SearchParameter) next;
@@ -595,7 +615,7 @@ public class ServerCapabilityStatementProviderR4Test {
 		Collection<ResourceBinding> resourceBindings = rs.getResourceBindings();
 		for (ResourceBinding resourceBinding : resourceBindings) {
 			if (resourceBinding.getResourceName().equals("Patient")) {
-				List<BaseMethodBinding<?>> methodBindings = resourceBinding.getMethodBindings();
+				List<BaseMethodBinding> methodBindings = resourceBinding.getMethodBindings();
 				SearchMethodBinding binding = (SearchMethodBinding) methodBindings.get(0);
 				SearchParameter param = (SearchParameter) binding.getParameters().get(25);
 				assertEquals("The organization at which this person is a patient", param.getDescription());
@@ -627,7 +647,7 @@ public class ServerCapabilityStatementProviderR4Test {
 		Collection<ResourceBinding> resourceBindings = rs.getResourceBindings();
 		for (ResourceBinding resourceBinding : resourceBindings) {
 			if (resourceBinding.getResourceName().equals("Patient")) {
-				List<BaseMethodBinding<?>> methodBindings = resourceBinding.getMethodBindings();
+				List<BaseMethodBinding> methodBindings = resourceBinding.getMethodBindings();
 				SearchMethodBinding binding = (SearchMethodBinding) methodBindings.get(0);
 				SearchParameter param = (SearchParameter) binding.getParameters().get(0);
 				assertEquals("The organization at which this person is a patient", param.getDescription());
@@ -1058,7 +1078,7 @@ public class ServerCapabilityStatementProviderR4Test {
 		assertThat(operationReference, not(nullValue()));
 
 		OperationDefinition operationDefinition = (OperationDefinition) sc.readOperationDefinition(new IdType(operationReference), createRequestDetails(rs));
-		ourLog.info(myCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(operationDefinition));
+		ourLog.debug(myCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(operationDefinition));
 		validate(operationDefinition);
 		assertThat(operationDefinition.getCode(), is(NamedQueryPlainProvider.QUERY_NAME));
 		assertThat(operationDefinition.getName(), is("TestQuery"));
@@ -1101,7 +1121,7 @@ public class ServerCapabilityStatementProviderR4Test {
 		assertThat(operationReference, not(nullValue()));
 
 		OperationDefinition operationDefinition = (OperationDefinition) sc.readOperationDefinition(new IdType(operationReference), createRequestDetails(rs));
-		ourLog.info(myCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(operationDefinition));
+		ourLog.debug(myCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(operationDefinition));
 		validate(operationDefinition);
 		assertThat("The operation name should be the code if no description is set", operationDefinition.getName(), is("TestQuery"));
 		String patientResourceName = "Patient";
@@ -1162,7 +1182,7 @@ public class ServerCapabilityStatementProviderR4Test {
 		rs.init(createServletConfig());
 
 		CapabilityStatement conformance = (CapabilityStatement) sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
-		ourLog.info(myCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance));
+		ourLog.debug(myCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance));
 
 		List<CapabilityStatementRestResourceComponent> resources = conformance.getRestFirstRep().getResource();
 		CapabilityStatementRestResourceComponent patientResource = resources.stream()
@@ -1212,7 +1232,7 @@ public class ServerCapabilityStatementProviderR4Test {
 		rs.init(createServletConfig());
 
 		CapabilityStatement conformance = (CapabilityStatement) sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
-		ourLog.info(myCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance));
+		ourLog.debug(myCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance));
 
 		List<CapabilityStatementRestResourceComponent> resources = conformance.getRestFirstRep().getResource();
 		CapabilityStatementRestResourceComponent patientResource = resources.stream()
@@ -1262,7 +1282,7 @@ public class ServerCapabilityStatementProviderR4Test {
 		rs.init(createServletConfig());
 
 		CapabilityStatement conformance = (CapabilityStatement) sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
-		ourLog.info(myCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance));
+		ourLog.debug(myCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance));
 
 		List<CapabilityStatementRestResourceComponent> resources = conformance.getRestFirstRep().getResource();
 		CapabilityStatementRestResourceComponent patientResource = resources.stream()
@@ -1274,7 +1294,7 @@ public class ServerCapabilityStatementProviderR4Test {
 	@Test
 	public void testBulkDataExport() throws ServletException {
 		RestfulServer rs = new RestfulServer(myCtx);
-		rs.setResourceProviders(new BulkDataExportProvider());
+		rs.setProviders(new BulkDataExportProvider());
 		rs.setServerAddressStrategy(new HardcodedServerAddressStrategy("http://localhost/baseR4"));
 
 		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider(rs);
@@ -1282,14 +1302,37 @@ public class ServerCapabilityStatementProviderR4Test {
 		rs.init(createServletConfig());
 
 		CapabilityStatement conformance = (CapabilityStatement) sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
-		ourLog.info(myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(conformance));
+		ourLog.debug(myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(conformance));
 
 		List<CapabilityStatementRestResourceComponent> resources = conformance.getRestFirstRep().getResource();
 		CapabilityStatementRestResourceComponent groupResource = resources.stream()
 			.filter(resource -> "Group".equals(resource.getType()))
 			.findFirst().get();
 
-		assertThat(toOperationNames(groupResource.getOperation()),containsInAnyOrder("export", "export-poll-status"));
+		boolean hasExportPollStatusOperationAtSystemLevel = conformance.getRestFirstRep().getOperation().stream()
+			.filter(CapabilityStatementRestResourceOperationComponent::hasName)
+			.map(CapabilityStatementRestResourceOperationComponent::getName)
+			.filter("export-poll-status"::equals).findFirst().isPresent();
+
+		assertThat(toOperationNames(groupResource.getOperation()),contains("export"));
+		assertThat(hasExportPollStatusOperationAtSystemLevel, is(true));
+	}
+
+	@Test
+	public void testOperationReturningCanonicalUrl() throws Exception {
+		RestfulServer rs = new RestfulServer(myCtx);
+		rs.setProviders(new ProviderWithOperationReturningCanonicalUrl());
+		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider(rs) {};
+		rs.setServerConformanceProvider(sc);
+		rs.init(createServletConfig());
+
+		CapabilityStatement conformance = (CapabilityStatement) sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
+		assertEquals(2, conformance.getRest().get(0).getResource().size());
+		List<CapabilityStatementRestResourceOperationComponent> res = conformance.getRest().get(0).getResource().get(1).getOperation();
+		assertEquals(1, res.size());
+		CapabilityStatementRestResourceOperationComponent operationComponent = res.get(0);
+		assertEquals("everything", operationComponent.getName());
+		assertEquals("http://hl7.org/fhir/OperationDefinition/Patient-everything", operationComponent.getDefinition());
 	}
 
 	private List<String> toOperationIdParts(List<CapabilityStatementRestResourceOperationComponent> theOperation) {
@@ -1336,8 +1379,8 @@ public class ServerCapabilityStatementProviderR4Test {
 		return myCtx.newXmlParser().setPrettyPrint(false).encodeResourceToString(theResource);
 	}
 
-	public static class BulkDataExportProvider implements IResourceProvider {
-		@Operation(name = JpaConstants.OPERATION_EXPORT, global = false /* set to true once we can handle this */, manualResponse = true, idempotent = true)
+	public static class BulkDataExportProvider {
+		@Operation(name = ProviderConstants.OPERATION_EXPORT, global = false /* set to true once we can handle this */, manualResponse = true, idempotent = true)
 		public void export(
 			@OperationParam(name = JpaConstants.PARAM_EXPORT_OUTPUT_FORMAT, min = 0, max = 1, typeName = "string") IPrimitiveType<String> theOutputFormat,
 			@OperationParam(name = JpaConstants.PARAM_EXPORT_TYPE, min = 0, max = 1, typeName = "string") IPrimitiveType<String> theType,
@@ -1347,7 +1390,7 @@ public class ServerCapabilityStatementProviderR4Test {
 		) {
 		}
 
-		@Operation(name = JpaConstants.OPERATION_EXPORT, manualResponse = true, idempotent = true, typeName = "Group")
+		@Operation(name = ProviderConstants.OPERATION_EXPORT, manualResponse = true, idempotent = true, typeName = "Group")
 		public void groupExport(
 			@IdParam IIdType theIdParam,
 			@OperationParam(name = JpaConstants.PARAM_EXPORT_OUTPUT_FORMAT, min = 0, max = 1, typeName = "string") IPrimitiveType<String> theOutputFormat,
@@ -1359,7 +1402,7 @@ public class ServerCapabilityStatementProviderR4Test {
 		) {
 		}
 
-		@Operation(name = JpaConstants.OPERATION_EXPORT, manualResponse = true, idempotent = true, typeName = "Patient")
+		@Operation(name = ProviderConstants.OPERATION_EXPORT, manualResponse = true, idempotent = true, typeName = "Patient")
 		public void patientExport(
 			@OperationParam(name = JpaConstants.PARAM_EXPORT_OUTPUT_FORMAT, min = 0, max = 1, typeName = "string") IPrimitiveType<String> theOutputFormat,
 			@OperationParam(name = JpaConstants.PARAM_EXPORT_TYPE, min = 0, max = 1, typeName = "string") IPrimitiveType<String> theType,
@@ -1369,17 +1412,13 @@ public class ServerCapabilityStatementProviderR4Test {
 		) {
 		}
 
-		@Operation(name = JpaConstants.OPERATION_EXPORT_POLL_STATUS, manualResponse = true, idempotent = true)
+		@Operation(name = ProviderConstants.OPERATION_EXPORT_POLL_STATUS, manualResponse = true, idempotent = true)
 		public void exportPollStatus(
 			@OperationParam(name = JpaConstants.PARAM_EXPORT_POLL_STATUS_JOB_ID, typeName = "string", min = 0, max = 1) IPrimitiveType<String> theJobId,
 			ServletRequestDetails theRequestDetails
 		) throws IOException {
 		}
 
-		@Override
-		public Class<? extends IBaseResource> getResourceType() {
-			return Group.class;
-		}
 	}
 
 	@SuppressWarnings("unused")
@@ -1532,6 +1571,19 @@ public class ServerCapabilityStatementProviderR4Test {
 			return null;
 		}
 
+	}
+
+	public static class ProviderWithOperationReturningCanonicalUrl implements IResourceProvider {
+		@Operation(name = "everything", canonicalUrl = "http://hl7.org/fhir/OperationDefinition/Patient-everything", idempotent = true)
+		public IBundleProvider everything(HttpServletRequest theServletRequest, @IdParam IdType theId,
+													 @OperationParam(name = "someOpParam1") DateType theStart, @OperationParam(name = "someOpParam2") Encounter theEnd) {
+			return null;
+		}
+
+		@Override
+		public Class<? extends IBaseResource> getResourceType() {
+			return Patient.class;
+		}
 	}
 
 	@SuppressWarnings("unused")

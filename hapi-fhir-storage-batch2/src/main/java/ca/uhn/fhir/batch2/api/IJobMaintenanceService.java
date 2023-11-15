@@ -1,10 +1,8 @@
-package ca.uhn.fhir.batch2.api;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server - Batch2 Task Processor
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,9 +17,23 @@ package ca.uhn.fhir.batch2.api;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.batch2.api;
+
+import com.google.common.annotations.VisibleForTesting;
 
 public interface IJobMaintenanceService {
+	/**
+	 * Do not wait for the next scheduled time for maintenance. Trigger it immediately.
+	 * @return true if a request to run a maintenance pass was fired, false if there was already a trigger request in queue so we can just use that one
+	 */
+	boolean triggerMaintenancePass();
 
 	void runMaintenancePass();
 
+	/**
+	 * Forces a second maintenance run.
+	 * Only to be used in tests to simulate a long running maintenance step
+	 */
+	@VisibleForTesting
+	void forceMaintenancePass();
 }

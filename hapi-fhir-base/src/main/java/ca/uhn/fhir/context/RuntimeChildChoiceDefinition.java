@@ -1,10 +1,8 @@
-package ca.uhn.fhir.context;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.context;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.context;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.annotation.Child;
@@ -50,7 +49,12 @@ public class RuntimeChildChoiceDefinition extends BaseRuntimeDeclaredChildDefini
 	/**
 	 * Constructor
 	 */
-	public RuntimeChildChoiceDefinition(Field theField, String theElementName, Child theChildAnnotation, Description theDescriptionAnnotation, List<Class<? extends IBase>> theChoiceTypes) {
+	public RuntimeChildChoiceDefinition(
+			Field theField,
+			String theElementName,
+			Child theChildAnnotation,
+			Description theDescriptionAnnotation,
+			List<Class<? extends IBase>> theChoiceTypes) {
 		super(theField, theChildAnnotation, theDescriptionAnnotation, theElementName);
 
 		myChoiceTypes = Collections.unmodifiableList(theChoiceTypes);
@@ -58,10 +62,11 @@ public class RuntimeChildChoiceDefinition extends BaseRuntimeDeclaredChildDefini
 
 	/**
 	 * Constructor
-	 * 
+	 *
 	 * For extension, if myChoiceTypes will be set some other way
 	 */
-	RuntimeChildChoiceDefinition(Field theField, String theElementName, Child theChildAnnotation, Description theDescriptionAnnotation) {
+	RuntimeChildChoiceDefinition(
+			Field theField, String theElementName, Child theChildAnnotation, Description theDescriptionAnnotation) {
 		super(theField, theChildAnnotation, theDescriptionAnnotation, theElementName);
 	}
 
@@ -80,14 +85,17 @@ public class RuntimeChildChoiceDefinition extends BaseRuntimeDeclaredChildDefini
 
 	@Override
 	public BaseRuntimeElementDefinition<?> getChildByName(String theName) {
-		assert myNameToChildDefinition.containsKey(theName);
+		assert myNameToChildDefinition.containsKey(theName)
+				: "Can't find child '" + theName + "' in names: " + myNameToChildDefinition.keySet();
 
 		return myNameToChildDefinition.get(theName);
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
-	void sealAndInitialize(FhirContext theContext, Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions) {
+	void sealAndInitialize(
+			FhirContext theContext,
+			Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions) {
 		myNameToChildDefinition = new HashMap<String, BaseRuntimeElementDefinition<?>>();
 		myDatatypeToElementName = new HashMap<Class<? extends IBase>, String>();
 		myDatatypeToElementDefinition = new HashMap<Class<? extends IBase>, BaseRuntimeElementDefinition<?>>();
@@ -106,7 +114,7 @@ public class RuntimeChildChoiceDefinition extends BaseRuntimeDeclaredChildDefini
 
 				myNameToChildDefinition.put(getElementName() + "Reference", nextDef);
 				myNameToChildDefinition.put(getElementName() + "Resource", nextDef);
-				
+
 				myResourceTypes.add((Class<? extends IBaseResource>) next);
 
 			} else {
@@ -119,7 +127,7 @@ public class RuntimeChildChoiceDefinition extends BaseRuntimeDeclaredChildDefini
 				 * unprofiled datatype as the element name. E.g. if foo[x] allows markdown as a datatype, it calls the
 				 * element fooString when encoded, because markdown is a profile of string. This is according to the
 				 * FHIR spec
-				 * 
+				 *
 				 * Note that as of HAPI 1.4 this applies only to non-primitive datatypes after discussion
 				 * with Grahame.
 				 */
@@ -159,7 +167,9 @@ public class RuntimeChildChoiceDefinition extends BaseRuntimeDeclaredChildDefini
 			if (myDatatypeToElementName.containsKey(next)) {
 				String existing = myDatatypeToElementName.get(next);
 				if (!existing.equals(elementName)) {
-					throw new ConfigurationException(Msg.code(1693) + "Already have element name " + existing + " for datatype " + next.getSimpleName() + " in " + getElementName() + ", cannot add " + elementName);
+					throw new ConfigurationException(
+							Msg.code(1693) + "Already have element name " + existing + " for datatype "
+									+ next.getSimpleName() + " in " + getElementName() + ", cannot add " + elementName);
 				}
 			} else {
 				myDatatypeToElementName.put(next, elementName);
@@ -171,7 +181,6 @@ public class RuntimeChildChoiceDefinition extends BaseRuntimeDeclaredChildDefini
 		myDatatypeToElementDefinition = Collections.unmodifiableMap(myDatatypeToElementDefinition);
 		myResourceTypes = Collections.unmodifiableList(myResourceTypes);
 	}
-
 
 	public List<Class<? extends IBaseResource>> getResourceTypes() {
 		return myResourceTypes;
@@ -191,5 +200,4 @@ public class RuntimeChildChoiceDefinition extends BaseRuntimeDeclaredChildDefini
 	public Set<Class<? extends IBase>> getValidChildTypes() {
 		return Collections.unmodifiableSet((myDatatypeToElementDefinition.keySet()));
 	}
-
 }

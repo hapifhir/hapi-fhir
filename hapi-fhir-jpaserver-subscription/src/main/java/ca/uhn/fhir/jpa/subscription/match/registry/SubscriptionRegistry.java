@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.subscription.match.registry;
-
 /*-
  * #%L
  * HAPI FHIR Subscription Server
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.subscription.match.registry;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.subscription.match.registry;
 
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
@@ -36,27 +35,30 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.annotation.PreDestroy;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import javax.annotation.PreDestroy;
 
 /**
  * Cache of active subscriptions.  When a new subscription is added to the cache, a new Spring Channel is created
  * and a new MessageHandler for that subscription is subscribed to that channel.  These subscriptions, channels, and
  * handlers are all caches in this registry so they can be removed it the subscription is deleted.
  */
-
 public class SubscriptionRegistry {
 	private static final Logger ourLog = LoggerFactory.getLogger(SubscriptionRegistry.class);
 	private final ActiveSubscriptionCache myActiveSubscriptionCache = new ActiveSubscriptionCache();
+
 	@Autowired
 	private SubscriptionCanonicalizer mySubscriptionCanonicalizer;
+
 	@Autowired
 	private ISubscriptionDeliveryChannelNamer mySubscriptionDeliveryChannelNamer;
+
 	@Autowired
 	private SubscriptionChannelRegistry mySubscriptionChannelRegistry;
+
 	@Autowired
 	private IInterceptorBroadcaster myInterceptorBroadcaster;
 
@@ -75,10 +77,15 @@ public class SubscriptionRegistry {
 		return myActiveSubscriptionCache.getAll();
 	}
 
+	public synchronized List<ActiveSubscription> getTopicSubscriptionsByTopic(String theTopic) {
+		return myActiveSubscriptionCache.getTopicSubscriptionsForTopic(theTopic);
+	}
+
 	private Optional<CanonicalSubscription> hasSubscription(IIdType theId) {
 		Validate.notNull(theId);
 		Validate.notBlank(theId.getIdPart());
-		Optional<ActiveSubscription> activeSubscription = Optional.ofNullable(myActiveSubscriptionCache.get(theId.getIdPart()));
+		Optional<ActiveSubscription> activeSubscription =
+				Optional.ofNullable(myActiveSubscriptionCache.get(theId.getIdPart()));
 		return activeSubscription.map(ActiveSubscription::getSubscription);
 	}
 
@@ -88,7 +95,8 @@ public class SubscriptionRegistry {
 	 * Returns the configuration, or null, if no retry (or a bad retry value)
 	 * is specified.
 	 */
-	private ChannelRetryConfiguration getRetryConfigurationFromSubscriptionExtensions(CanonicalSubscription theSubscription) {
+	private ChannelRetryConfiguration getRetryConfigurationFromSubscriptionExtensions(
+			CanonicalSubscription theSubscription) {
 		ChannelRetryConfiguration configuration = new ChannelRetryConfiguration();
 
 		List<String> retryCount = theSubscription.getChannelExtensions(HapiExtensions.EX_RETRY_COUNT);
@@ -115,7 +123,8 @@ public class SubscriptionRegistry {
 		String channelName = mySubscriptionDeliveryChannelNamer.nameFromSubscription(theCanonicalSubscription);
 
 		// get the actual retry configuration
-		ChannelRetryConfiguration configuration = getRetryConfigurationFromSubscriptionExtensions(theCanonicalSubscription);
+		ChannelRetryConfiguration configuration =
+				getRetryConfigurationFromSubscriptionExtensions(theCanonicalSubscription);
 
 		ActiveSubscription activeSubscription = new ActiveSubscription(theCanonicalSubscription, channelName);
 		activeSubscription.setRetryConfiguration(configuration);
@@ -124,11 +133,13 @@ public class SubscriptionRegistry {
 		mySubscriptionChannelRegistry.add(activeSubscription);
 		myActiveSubscriptionCache.put(subscriptionId, activeSubscription);
 
-		ourLog.info("Registered active subscription Subscription/{} - Have {} registered", subscriptionId, myActiveSubscriptionCache.size());
+		ourLog.info(
+				"Registered active subscription Subscription/{} - Have {} registered",
+				subscriptionId,
+				myActiveSubscriptionCache.size());
 
 		// Interceptor call: SUBSCRIPTION_AFTER_ACTIVE_SUBSCRIPTION_REGISTERED
-		HookParams params = new HookParams()
-			.add(CanonicalSubscription.class, theCanonicalSubscription);
+		HookParams params = new HookParams().add(CanonicalSubscription.class, theCanonicalSubscription);
 		myInterceptorBroadcaster.callHooks(Pointcut.SUBSCRIPTION_AFTER_ACTIVE_SUBSCRIPTION_REGISTERED, params);
 	}
 
@@ -138,7 +149,10 @@ public class SubscriptionRegistry {
 		ActiveSubscription activeSubscription = myActiveSubscriptionCache.remove(theSubscriptionId);
 		if (activeSubscription != null) {
 			mySubscriptionChannelRegistry.remove(activeSubscription);
-			ourLog.info("Unregistered active subscription {} - Have {} registered", theSubscriptionId, myActiveSubscriptionCache.size());
+			ourLog.info(
+					"Unregistered active subscription {} - Have {} registered",
+					theSubscriptionId,
+					myActiveSubscriptionCache.size());
 
 			// Interceptor call: SUBSCRIPTION_AFTER_ACTIVE_SUBSCRIPTION_UNREGISTERED
 			HookParams params = new HookParams();
@@ -156,7 +170,8 @@ public class SubscriptionRegistry {
 
 	synchronized void unregisterAllSubscriptionsNotInCollection(Collection<String> theAllIds) {
 
-		List<String> idsToDelete = myActiveSubscriptionCache.markAllSubscriptionsNotInCollectionForDeletionAndReturnIdsToDelete(theAllIds);
+		List<String> idsToDelete =
+				myActiveSubscriptionCache.markAllSubscriptionsNotInCollectionForDeletionAndReturnIdsToDelete(theAllIds);
 		for (String id : idsToDelete) {
 			unregisterSubscriptionIfRegistered(id);
 		}
@@ -172,9 +187,12 @@ public class SubscriptionRegistry {
 				// No changes
 				return false;
 			}
-			ourLog.info("Updating already-registered active subscription {}", theSubscription.getIdElement().toUnqualified().getValue());
+			ourLog.info(
+					"Updating already-registered active subscription {}",
+					theSubscription.getIdElement().toUnqualified().getValue());
 			if (channelTypeSame(existingSubscription.get(), newSubscription)) {
-				ourLog.info("Channel type is same.  Updating active subscription and re-using existing channel and handlers.");
+				ourLog.info(
+						"Channel type is same.  Updating active subscription and re-using existing channel and handlers.");
 				updateSubscription(theSubscription);
 				return true;
 			}
@@ -198,16 +216,20 @@ public class SubscriptionRegistry {
 		activeSubscription.setSubscription(canonicalized);
 
 		// Interceptor call: SUBSCRIPTION_AFTER_ACTIVE_SUBSCRIPTION_REGISTERED
-		HookParams params = new HookParams()
-			.add(CanonicalSubscription.class, canonicalized);
+		HookParams params = new HookParams().add(CanonicalSubscription.class, canonicalized);
 		myInterceptorBroadcaster.callHooks(Pointcut.SUBSCRIPTION_AFTER_ACTIVE_SUBSCRIPTION_REGISTERED, params);
 	}
 
-	private boolean channelTypeSame(CanonicalSubscription theExistingSubscription, CanonicalSubscription theNewSubscription) {
+	private boolean channelTypeSame(
+			CanonicalSubscription theExistingSubscription, CanonicalSubscription theNewSubscription) {
 		return theExistingSubscription.getChannelType().equals(theNewSubscription.getChannelType());
 	}
 
 	public int size() {
 		return myActiveSubscriptionCache.size();
+	}
+
+	public synchronized List<ActiveSubscription> getAllNonTopicSubscriptions() {
+		return myActiveSubscriptionCache.getAllNonTopicSubscriptions();
 	}
 }

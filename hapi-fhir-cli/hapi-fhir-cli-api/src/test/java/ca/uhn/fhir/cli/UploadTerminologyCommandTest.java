@@ -1,20 +1,30 @@
 package ca.uhn.fhir.cli;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider;
 import ca.uhn.fhir.jpa.term.UploadStatistics;
 import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
-import ca.uhn.fhir.test.utilities.TlsAuthenticationTestHelper;
+import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
+import ca.uhn.fhir.system.HapiSystemProperties;
 import ca.uhn.fhir.test.utilities.BaseRestServerHelper;
 import ca.uhn.fhir.test.utilities.RestServerDstu3Helper;
 import ca.uhn.fhir.test.utilities.RestServerR4Helper;
+import ca.uhn.fhir.test.utilities.TlsAuthenticationTestHelper;
+import ca.uhn.fhir.validation.FhirValidator;
 import com.google.common.base.Charsets;
+import org.apache.commons.cli.ParseException;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.hamcrest.Matchers;
+import org.hl7.fhir.common.hapi.validation.support.CommonCodeSystemsTerminologyService;
+import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
+import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
+import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.RegisterExtension;
@@ -39,7 +49,9 @@ import java.util.zip.ZipOutputStream;
 
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.greaterThan;
+import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.matchesPattern;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -78,7 +90,7 @@ public class UploadTerminologyCommandTest {
 	protected ArgumentCaptor<List<ITermLoaderSvc.FileDescriptor>> myDescriptorListCaptor;
 
 	static {
-		System.setProperty("test", "true");
+		HapiSystemProperties.enableTestMode();
 	}
 
 	static Stream<Arguments> paramsProvider(){
@@ -92,9 +104,9 @@ public class UploadTerminologyCommandTest {
 	}
 
 	@RegisterExtension
-	public final RestServerR4Helper myRestServerR4Helper = new RestServerR4Helper(true);
+	public final RestServerR4Helper myRestServerR4Helper = RestServerR4Helper.newInitialized();
 	@RegisterExtension
-	public final RestServerDstu3Helper myRestServerDstu3Helper = new RestServerDstu3Helper(true);
+	public final RestServerDstu3Helper myRestServerDstu3Helper = RestServerDstu3Helper.newInitialized();
 	@RegisterExtension
 	public TlsAuthenticationTestHelper myTlsAuthenticationTestHelper = new TlsAuthenticationTestHelper();
 
@@ -124,7 +136,6 @@ public class UploadTerminologyCommandTest {
 		FileUtils.deleteQuietly(myTextFile);
 		FileUtils.deleteQuietly(myArchiveFile);
 		FileUtils.deleteQuietly(myPropertiesFile);
-		UploadTerminologyCommand.setTransferSizeLimitForUnitTest(-1);
 	}
 
 	@ParameterizedTest
@@ -260,6 +271,23 @@ public class UploadTerminologyCommandTest {
 		}
 	}
 
+	@Test
+	public void testModifyingSizeLimitConvertsCorrectlyR4() throws ParseException {
+
+		UploadTerminologyCommand uploadTerminologyCommand = new UploadTerminologyCommand();
+		uploadTerminologyCommand.setTransferSizeLimitHuman("1GB");
+		long bytes = uploadTerminologyCommand.getTransferSizeLimit();
+		assertThat(bytes, is(equalTo(1024L * 1024L * 1024L)));
+
+		uploadTerminologyCommand.setTransferSizeLimitHuman("500KB");
+		bytes = uploadTerminologyCommand.getTransferSizeLimit();
+		assertThat(bytes, is(equalTo(1024L * 500L)));
+
+		uploadTerminologyCommand.setTransferSizeLimitHuman("10MB");
+		bytes = uploadTerminologyCommand.getTransferSizeLimit();
+		assertThat(bytes, is(equalTo(1024L * 1024L * 10L)));
+	}
+
 	@ParameterizedTest
 	@MethodSource("paramsProvider")
 	public void testDeltaAddUsingCompressedFile(String theFhirVersion, boolean theIncludeTls) throws IOException {
@@ -303,7 +331,7 @@ public class UploadTerminologyCommandTest {
 			));
 			fail();
 		} catch (Error e) {
-			assertThat(e.toString(), Matchers.containsString("FileNotFoundException: target/concepts.csv/foo.csv"));
+			assertThat(e.toString().replace('\\', '/'), Matchers.containsString("FileNotFoundException: target/concepts.csv/foo.csv"));
 		}
 	}
 
@@ -360,6 +388,7 @@ public class UploadTerminologyCommandTest {
 			},
 			"-t", theIncludeTls, myBaseRestServerHelper
 		));
+		UploadTerminologyCommand uploadTerminologyCommand = new UploadTerminologyCommand();
 
 		verify(myTermLoaderSvc, times(1)).loadCustom(any(), myDescriptorListCaptor.capture(), any());
 
@@ -406,7 +435,6 @@ public class UploadTerminologyCommandTest {
 	@ParameterizedTest
 	@MethodSource("paramsProvider")
 	public void testSnapshotLargeFile(String theFhirVersion, boolean theIncludeTls) throws IOException {
-		UploadTerminologyCommand.setTransferSizeLimitForUnitTest(10);
 
 		if (FHIR_VERSION_DSTU3.equals(theFhirVersion)) {
 			when(myTermLoaderSvc.loadCustom(any(), anyList(), any())).thenReturn(new UploadStatistics(100, new org.hl7.fhir.dstu3.model.IdType("CodeSystem/101")));
@@ -423,7 +451,8 @@ public class UploadTerminologyCommandTest {
 				"-m", "SNAPSHOT",
 				"-u", "http://foo",
 				"-d", myConceptsFileName,
-				"-d", myHierarchyFileName
+				"-d", myHierarchyFileName,
+				"-s", "10MB"
 			},
 			"-t", theIncludeTls, myBaseRestServerHelper
 		));
@@ -439,6 +468,19 @@ public class UploadTerminologyCommandTest {
 	@ParameterizedTest
 	@MethodSource("paramsProvider")
 	public void testUploadICD10UsingCompressedFile(String theFhirVersion, boolean theIncludeTls) throws IOException {
+		uploadICD10UsingCompressedFile(theFhirVersion, theIncludeTls);
+	}
+
+	@ParameterizedTest
+	@MethodSource("paramsProvider")
+	public void testUploadTerminologyWithEndpointValidation(String theFhirVersion, boolean theIncludeTls) throws IOException {
+		RequestValidatingInterceptor requestValidatingInterceptor = createRequestValidatingInterceptor();
+		myBaseRestServerHelper.registerInterceptor(requestValidatingInterceptor);
+
+		uploadICD10UsingCompressedFile(theFhirVersion, theIncludeTls);
+	}
+
+	private void uploadICD10UsingCompressedFile(String theFhirVersion, boolean theIncludeTls) throws IOException {
 		if (FHIR_VERSION_DSTU3.equals(theFhirVersion)) {
 			when(myTermLoaderSvc.loadIcd10cm(anyList(), any())).thenReturn(new UploadStatistics(100, new org.hl7.fhir.dstu3.model.IdType("CodeSystem/101")));
 		} else if (FHIR_VERSION_R4.equals(theFhirVersion)) {
@@ -463,6 +505,23 @@ public class UploadTerminologyCommandTest {
 		assertEquals(1, listOfDescriptors.size());
 		assertThat(listOfDescriptors.get(0).getFilename(), matchesPattern("^file:.*files.*\\.zip$"));
 		assertThat(IOUtils.toByteArray(listOfDescriptors.get(0).getInputStream()).length, greaterThan(100));
+	}
+
+	private RequestValidatingInterceptor createRequestValidatingInterceptor(){
+		FhirInstanceValidator fhirInstanceValidator = new FhirInstanceValidator(myCtx);
+		ValidationSupportChain validationSupport = new ValidationSupportChain(
+			new DefaultProfileValidationSupport(myCtx),
+			new InMemoryTerminologyServerValidationSupport(myCtx),
+			new CommonCodeSystemsTerminologyService(myCtx)
+		);
+
+		fhirInstanceValidator.setValidationSupport(validationSupport);
+		FhirValidator fhirValidator = myCtx.newValidator();
+		fhirValidator.registerValidatorModule(fhirInstanceValidator);
+
+		RequestValidatingInterceptor requestValidatingInterceptor = new RequestValidatingInterceptor();
+		requestValidatingInterceptor.setValidatorModules(List.of(fhirInstanceValidator));
+		return requestValidatingInterceptor;
 	}
 
 	private synchronized void writeConceptAndHierarchyFiles() throws IOException {

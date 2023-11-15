@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.model.entity;
-
 /*
  * #%L
  * HAPI FHIR JPA Model
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.model.entity;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.model.entity;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
@@ -36,13 +35,13 @@ import org.apache.commons.lang3.StringUtils;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextField;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.GenericField;
 
+import java.util.Date;
+import java.util.List;
 import javax.persistence.Column;
 import javax.persistence.MappedSuperclass;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.Transient;
-import java.util.Date;
-import java.util.List;
 
 @MappedSuperclass
 public abstract class BaseResourceIndexedSearchParam extends BaseResourceIndex {
@@ -56,6 +55,7 @@ public abstract class BaseResourceIndexedSearchParam extends BaseResourceIndex {
 	 * Don't make this public 'cause nobody better be able to modify it!
 	 */
 	private static final byte[] DELIMITER_BYTES = "|".getBytes(Charsets.UTF_8);
+
 	private static final long serialVersionUID = 1L;
 
 	@GenericField
@@ -82,7 +82,7 @@ public abstract class BaseResourceIndexedSearchParam extends BaseResourceIndex {
 	private transient PartitionSettings myPartitionSettings;
 
 	@Transient
-	private transient ModelConfig myModelConfig;
+	private transient StorageSettings myStorageSettings;
 
 	@Override
 	public abstract Long getId();
@@ -103,6 +103,7 @@ public abstract class BaseResourceIndexedSearchParam extends BaseResourceIndex {
 	 * Get the Resource this SP indexes
 	 */
 	public abstract ResourceTable getResource();
+
 	public abstract BaseResourceIndexedSearchParam setResource(ResourceTable theResource);
 
 	@Override
@@ -111,7 +112,7 @@ public abstract class BaseResourceIndexedSearchParam extends BaseResourceIndex {
 		myMissing = source.myMissing;
 		myParamName = source.myParamName;
 		myUpdated = source.myUpdated;
-		myModelConfig = source.myModelConfig;
+		myStorageSettings = source.myStorageSettings;
 		myPartitionSettings = source.myPartitionSettings;
 		setPartitionId(source.getPartitionId());
 	}
@@ -160,25 +161,38 @@ public abstract class BaseResourceIndexedSearchParam extends BaseResourceIndex {
 		return this;
 	}
 
-	public ModelConfig getModelConfig() {
-		return myModelConfig;
+	public StorageSettings getStorageSettings() {
+		return myStorageSettings;
 	}
 
-	public BaseResourceIndexedSearchParam setModelConfig(ModelConfig theModelConfig) {
-		myModelConfig = theModelConfig;
+	public BaseResourceIndexedSearchParam setStorageSettings(StorageSettings theStorageSettings) {
+		myStorageSettings = theStorageSettings;
 		return this;
 	}
 
-	public static long calculateHashIdentity(PartitionSettings thePartitionSettings, PartitionablePartitionId theRequestPartitionId, String theResourceType, String theParamName) {
+	public static long calculateHashIdentity(
+			PartitionSettings thePartitionSettings,
+			PartitionablePartitionId theRequestPartitionId,
+			String theResourceType,
+			String theParamName) {
 		RequestPartitionId requestPartitionId = PartitionablePartitionId.toRequestPartitionId(theRequestPartitionId);
 		return calculateHashIdentity(thePartitionSettings, requestPartitionId, theResourceType, theParamName);
 	}
 
-	public static long calculateHashIdentity(PartitionSettings thePartitionSettings, RequestPartitionId theRequestPartitionId, String theResourceType, String theParamName) {
+	public static long calculateHashIdentity(
+			PartitionSettings thePartitionSettings,
+			RequestPartitionId theRequestPartitionId,
+			String theResourceType,
+			String theParamName) {
 		return hash(thePartitionSettings, theRequestPartitionId, theResourceType, theParamName);
 	}
 
-	public static long calculateHashIdentity(PartitionSettings thePartitionSettings, RequestPartitionId theRequestPartitionId, String theResourceType, String theParamName, List<String> theAdditionalValues) {
+	public static long calculateHashIdentity(
+			PartitionSettings thePartitionSettings,
+			RequestPartitionId theRequestPartitionId,
+			String theResourceType,
+			String theParamName,
+			List<String> theAdditionalValues) {
 		String[] values = new String[theAdditionalValues.size() + 2];
 		values[0] = theResourceType;
 		values[1] = theParamName;
@@ -192,12 +206,16 @@ public abstract class BaseResourceIndexedSearchParam extends BaseResourceIndex {
 	/**
 	 * Applies a fast and consistent hashing algorithm to a set of strings
 	 */
-	static long hash(PartitionSettings thePartitionSettings, RequestPartitionId theRequestPartitionId, String... theValues) {
+	static long hash(
+			PartitionSettings thePartitionSettings, RequestPartitionId theRequestPartitionId, String... theValues) {
 		Hasher hasher = HASH_FUNCTION.newHasher();
 
-		if (thePartitionSettings.isPartitioningEnabled() && thePartitionSettings.isIncludePartitionInSearchHashes() && theRequestPartitionId != null) {
+		if (thePartitionSettings.isPartitioningEnabled()
+				&& thePartitionSettings.isIncludePartitionInSearchHashes()
+				&& theRequestPartitionId != null) {
 			if (theRequestPartitionId.getPartitionIds().size() > 1) {
-				throw new InternalErrorException(Msg.code(1527) + "Can not search multiple partitions when partitions are included in search hashes");
+				throw new InternalErrorException(Msg.code(1527)
+						+ "Can not search multiple partitions when partitions are included in search hashes");
 			}
 			Integer partitionId = theRequestPartitionId.getFirstPartitionIdOrNull();
 			if (partitionId != null) {

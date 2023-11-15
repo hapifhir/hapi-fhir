@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.test.config;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server Test Utilities
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.test.config;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.test.config;
 
 import ca.uhn.fhir.batch2.jobs.config.Batch2JobsConfig;
 import ca.uhn.fhir.context.FhirContext;
@@ -26,12 +25,15 @@ import ca.uhn.fhir.jpa.batch2.JpaBatch2Config;
 import ca.uhn.fhir.jpa.binary.api.IBinaryStorageSvc;
 import ca.uhn.fhir.jpa.binstore.MemoryBinaryStorageSvcImpl;
 import ca.uhn.fhir.jpa.config.HapiJpaConfig;
+import ca.uhn.fhir.jpa.config.PackageLoaderConfig;
 import ca.uhn.fhir.jpa.config.r4.JpaR4Config;
 import ca.uhn.fhir.jpa.config.util.HapiEntityManagerFactoryUtil;
 import ca.uhn.fhir.jpa.model.dialect.HapiFhirH2Dialect;
+import ca.uhn.fhir.jpa.searchparam.config.NicknameServiceConfig;
 import ca.uhn.fhir.jpa.util.CircularQueueCaptureQueriesListener;
 import ca.uhn.fhir.jpa.util.CurrentThreadCaptureQueriesListener;
 import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
+import ca.uhn.fhir.system.HapiTestSystemProperties;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
 import net.ttddyy.dsproxy.listener.SingleQueryCountHolder;
 import net.ttddyy.dsproxy.listener.logging.SLF4JLogLevel;
@@ -62,11 +64,13 @@ import static org.junit.jupiter.api.Assertions.fail;
 @Configuration
 @Import({
 	JpaR4Config.class,
+	PackageLoaderConfig.class,
 	HapiJpaConfig.class,
 	TestJPAConfig.class,
 	TestHSearchAddInConfig.DefaultLuceneHeap.class,
 	JpaBatch2Config.class,
-	Batch2JobsConfig.class
+	Batch2JobsConfig.class,
+	NicknameServiceConfig.class
 })
 public class TestR4Config {
 
@@ -82,13 +86,14 @@ public class TestR4Config {
 		if (ourMaxThreads == null) {
 			ourMaxThreads = (int) (Math.random() * 6.0) + 3;
 
-			if ("true".equals(System.getProperty("single_db_connection"))) {
+			if (HapiTestSystemProperties.isSingleDbConnectionEnabled()) {
 				ourMaxThreads = 1;
 			}
-			if ("true".equals(System.getProperty("unlimited_db_connection"))) {
+			if (HapiTestSystemProperties.isUnlimitedDbConnectionsEnabled()) {
 				ourMaxThreads = 100;
 			}
 		}
+		ourLog.warn("ourMaxThreads={}", ourMaxThreads);
 	}
 
 	private final Deque<Exception> myLastStackTrace = new LinkedList<>();
@@ -163,12 +168,7 @@ public class TestR4Config {
 
 		};
 
-		retVal.setDriver(new org.h2.Driver());
-		retVal.setUrl("jdbc:h2:mem:testdb_r4");
-		retVal.setMaxWaitMillis(30000);
-		retVal.setUsername("");
-		retVal.setPassword("");
-		retVal.setMaxTotal(ourMaxThreads);
+		setConnectionProperties(retVal);
 
 		SLF4JLogLevel level = SLF4JLogLevel.INFO;
 		DataSource dataSource = ProxyDataSourceBuilder
@@ -185,6 +185,17 @@ public class TestR4Config {
 
 		return dataSource;
 	}
+
+
+	public void setConnectionProperties(BasicDataSource theDataSource) {
+		theDataSource.setDriver(new org.h2.Driver());
+		theDataSource.setUrl("jdbc:h2:mem:testdb_r4");
+		theDataSource.setMaxWaitMillis(30000);
+		theDataSource.setUsername("");
+		theDataSource.setPassword("");
+		theDataSource.setMaxTotal(ourMaxThreads);
+	}
+
 
 	@Bean
 	public SingleQueryCountHolder singleQueryCountHolder() {
@@ -211,13 +222,17 @@ public class TestR4Config {
 		extraProperties.put("hibernate.format_sql", "false");
 		extraProperties.put("hibernate.show_sql", "false");
 		extraProperties.put("hibernate.hbm2ddl.auto", "update");
-		extraProperties.put("hibernate.dialect", HapiFhirH2Dialect.class.getName());
+		extraProperties.put("hibernate.dialect", getHibernateDialect());
 
 		hibernateSearchConfigurer.apply(extraProperties);
 
 		ourLog.info("jpaProperties: {}", extraProperties);
 
 		return extraProperties;
+	}
+
+	public String getHibernateDialect() {
+		return HapiFhirH2Dialect.class.getName();
 	}
 
 	/**

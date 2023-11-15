@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.search.cache;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,11 +17,13 @@ package ca.uhn.fhir.jpa.search.cache;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.search.cache;
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.entity.Search;
 
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.Optional;
 
 public interface ISearchCacheSvc {
@@ -35,7 +35,7 @@ public interface ISearchCacheSvc {
 	 * @param theSearch The search to store
 	 * @return Returns a copy of the search as it was saved. Callers should use the returned Search object for any further processing.
 	 */
-	Search save(Search theSearch);
+	Search save(Search theSearch, RequestPartitionId theRequestPartitionId);
 
 	/**
 	 * Fetch a search using its UUID. The search should be fully loaded when it is returned (i.e. includes are fetched, so that access to its
@@ -44,7 +44,7 @@ public interface ISearchCacheSvc {
 	 * @param theUuid The search UUID
 	 * @return The search if it exists
 	 */
-	Optional<Search> fetchByUuid(String theUuid);
+	Optional<Search> fetchByUuid(String theUuid, RequestPartitionId theRequestPartitionId);
 
 	/**
 	 * TODO: this is perhaps an inappropriate responsibility for this service
@@ -60,7 +60,7 @@ public interface ISearchCacheSvc {
 	 * succeeded in marking it). If the search doesn't exist or some other error occurred, an exception will be thrown
 	 * instead of {@link Optional#empty()}
 	 */
-	Optional<Search> tryToMarkSearchAsInProgress(Search theSearch);
+	Optional<Search> tryToMarkSearchAsInProgress(Search theSearch, RequestPartitionId theRequestPartitionId);
 
 	/**
 	 * Look for any existing searches matching the given resource type and query string.
@@ -76,12 +76,21 @@ public interface ISearchCacheSvc {
 	 * @param theRequestPartitionId Search should examine only the requested partitions. Cache MUST not return results matching the given partition IDs
 	 * @return A collection of candidate searches
 	 */
-	Optional<Search> findCandidatesForReuse(String theResourceType, String theQueryString, Instant theCreatedAfter, RequestPartitionId theRequestPartitionId);
+	Optional<Search> findCandidatesForReuse(
+			String theResourceType,
+			String theQueryString,
+			Instant theCreatedAfter,
+			RequestPartitionId theRequestPartitionId);
 
 	/**
 	 * This method will be called periodically to delete stale searches. Implementations are not required to do anything
 	 * if they have some other mechanism for expiring stale results other than manually looking for them
 	 * and deleting them.
 	 */
-	void pollForStaleSearchesAndDeleteThem();
+	void pollForStaleSearchesAndDeleteThem(RequestPartitionId theRequestPartitionId, Instant theDeadline);
+
+	@Deprecated(since = "6.10", forRemoval = true) // wipmb delete once cdr merges
+	default void pollForStaleSearchesAndDeleteThem(RequestPartitionId theRequestPartitionId) {
+		pollForStaleSearchesAndDeleteThem(theRequestPartitionId, Instant.now().plus(1, ChronoUnit.MINUTES));
+	}
 }

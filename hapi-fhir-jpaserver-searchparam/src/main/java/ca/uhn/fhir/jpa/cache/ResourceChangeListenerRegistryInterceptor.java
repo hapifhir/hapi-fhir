@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.cache;
-
 /*-
  * #%L
  * HAPI FHIR Search Parameters
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,15 +17,19 @@ package ca.uhn.fhir.jpa.cache;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.cache;
 
+import ca.uhn.fhir.IHapiBootOrder;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.context.event.EventListener;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
 /**
@@ -39,10 +41,12 @@ import javax.annotation.PreDestroy;
 public class ResourceChangeListenerRegistryInterceptor {
 	@Autowired
 	private IInterceptorService myInterceptorBroadcaster;
+
 	@Autowired
 	private IResourceChangeListenerRegistry myResourceChangeListenerRegistry;
 
-	@PostConstruct
+	@EventListener(classes = {ContextRefreshedEvent.class})
+	@Order(IHapiBootOrder.REGISTER_INTERCEPTORS)
 	public void start() {
 		myInterceptorBroadcaster.registerInterceptor(this);
 	}

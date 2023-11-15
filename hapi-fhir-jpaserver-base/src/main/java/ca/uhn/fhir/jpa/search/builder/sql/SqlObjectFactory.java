@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.search.builder.sql;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,16 +17,16 @@ package ca.uhn.fhir.jpa.search.builder.sql;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.search.builder.sql;
 
 import ca.uhn.fhir.jpa.search.builder.QueryStack;
 import ca.uhn.fhir.jpa.search.builder.predicate.ComboNonUniqueSearchParameterPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.ComboUniqueSearchParameterPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.CoordsPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.DatePredicateBuilder;
-import ca.uhn.fhir.jpa.search.builder.predicate.ForcedIdPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.NumberPredicateBuilder;
-import ca.uhn.fhir.jpa.search.builder.predicate.QuantityPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.QuantityNormalizedPredicateBuilder;
+import ca.uhn.fhir.jpa.search.builder.predicate.QuantityPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.ResourceIdPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.ResourceLinkPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.ResourceTablePredicateBuilder;
@@ -46,14 +44,15 @@ public class SqlObjectFactory {
 	@Autowired
 	private ApplicationContext myApplicationContext;
 
-	public ComboUniqueSearchParameterPredicateBuilder newComboUniqueSearchParameterPredicateBuilder(SearchQueryBuilder theSearchSqlBuilder) {
+	public ComboUniqueSearchParameterPredicateBuilder newComboUniqueSearchParameterPredicateBuilder(
+			SearchQueryBuilder theSearchSqlBuilder) {
 		return myApplicationContext.getBean(ComboUniqueSearchParameterPredicateBuilder.class, theSearchSqlBuilder);
 	}
 
-	public ComboNonUniqueSearchParameterPredicateBuilder newComboNonUniqueSearchParameterPredicateBuilder(SearchQueryBuilder theSearchSqlBuilder) {
+	public ComboNonUniqueSearchParameterPredicateBuilder newComboNonUniqueSearchParameterPredicateBuilder(
+			SearchQueryBuilder theSearchSqlBuilder) {
 		return myApplicationContext.getBean(ComboNonUniqueSearchParameterPredicateBuilder.class, theSearchSqlBuilder);
 	}
-
 
 	public CoordsPredicateBuilder coordsPredicateBuilder(SearchQueryBuilder theSearchSqlBuilder) {
 		return myApplicationContext.getBean(CoordsPredicateBuilder.class, theSearchSqlBuilder);
@@ -61,10 +60,6 @@ public class SqlObjectFactory {
 
 	public DatePredicateBuilder dateIndexTable(SearchQueryBuilder theSearchSqlBuilder) {
 		return myApplicationContext.getBean(DatePredicateBuilder.class, theSearchSqlBuilder);
-	}
-
-	public ForcedIdPredicateBuilder newForcedIdPredicateBuilder(SearchQueryBuilder theSearchSqlBuilder) {
-		return myApplicationContext.getBean(ForcedIdPredicateBuilder.class, theSearchSqlBuilder);
 	}
 
 	public NumberPredicateBuilder numberIndexTable(SearchQueryBuilder theSearchSqlBuilder) {
@@ -78,9 +73,11 @@ public class SqlObjectFactory {
 	public QuantityNormalizedPredicateBuilder quantityNormalizedIndexTable(SearchQueryBuilder theSearchSqlBuilder) {
 		return myApplicationContext.getBean(QuantityNormalizedPredicateBuilder.class, theSearchSqlBuilder);
 	}
-	
-	public ResourceLinkPredicateBuilder referenceIndexTable(QueryStack theQueryStack, SearchQueryBuilder theSearchSqlBuilder, boolean theReversed) {
-		return myApplicationContext.getBean(ResourceLinkPredicateBuilder.class, theQueryStack, theSearchSqlBuilder, theReversed);
+
+	public ResourceLinkPredicateBuilder referenceIndexTable(
+			QueryStack theQueryStack, SearchQueryBuilder theSearchSqlBuilder, boolean theReversed) {
+		return myApplicationContext.getBean(
+				ResourceLinkPredicateBuilder.class, theQueryStack, theSearchSqlBuilder, theReversed);
 	}
 
 	public ResourceTablePredicateBuilder resourceTable(SearchQueryBuilder theSearchSqlBuilder) {
@@ -91,7 +88,8 @@ public class SqlObjectFactory {
 		return myApplicationContext.getBean(ResourceIdPredicateBuilder.class, theSearchSqlBuilder);
 	}
 
-	public SearchParamPresentPredicateBuilder searchParamPresentPredicateBuilder(SearchQueryBuilder theSearchSqlBuilder) {
+	public SearchParamPresentPredicateBuilder searchParamPresentPredicateBuilder(
+			SearchQueryBuilder theSearchSqlBuilder) {
 		return myApplicationContext.getBean(SearchParamPresentPredicateBuilder.class, theSearchSqlBuilder);
 	}
 
@@ -118,5 +116,4 @@ public class SqlObjectFactory {
 	public SearchQueryExecutor newSearchQueryExecutor(GeneratedSql theGeneratedSql, Integer theMaxResultsToFetch) {
 		return myApplicationContext.getBean(SearchQueryExecutor.class, theGeneratedSql, theMaxResultsToFetch);
 	}
-
 }

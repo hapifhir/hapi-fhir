@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.subscription.match.deliver.websocket;
-
 /*
  * #%L
  * HAPI FHIR Subscription Server
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +17,8 @@ package ca.uhn.fhir.jpa.subscription.match.deliver.websocket;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.subscription.match.deliver.websocket;
 
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelRegistry;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelWithHandlers;
@@ -40,14 +38,16 @@ import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 
+import java.io.IOException;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
-import java.io.IOException;
 
 public class SubscriptionWebsocketHandler extends TextWebSocketHandler implements WebSocketHandler {
 	private static Logger ourLog = LoggerFactory.getLogger(SubscriptionWebsocketHandler.class);
+
 	@Autowired
 	protected WebsocketConnectionValidator myWebsocketConnectionValidator;
+
 	@Autowired
 	SubscriptionChannelRegistry mySubscriptionChannelRegistry;
 
@@ -102,13 +102,11 @@ public class SubscriptionWebsocketHandler extends TextWebSocketHandler implement
 		}
 	}
 
-
 	private interface IState {
 
 		void closing();
 
 		void handleTextMessage(WebSocketSession theSession, TextMessage theMessage);
-
 	}
 
 	private class BoundStaticSubscriptionState implements IState, MessageHandler {
@@ -120,13 +118,15 @@ public class SubscriptionWebsocketHandler extends TextWebSocketHandler implement
 			mySession = theSession;
 			myActiveSubscription = theActiveSubscription;
 
-			SubscriptionChannelWithHandlers subscriptionChannelWithHandlers = mySubscriptionChannelRegistry.getDeliveryReceiverChannel(theActiveSubscription.getChannelName());
+			SubscriptionChannelWithHandlers subscriptionChannelWithHandlers =
+					mySubscriptionChannelRegistry.getDeliveryReceiverChannel(theActiveSubscription.getChannelName());
 			subscriptionChannelWithHandlers.addHandler(this);
 		}
 
 		@Override
 		public void closing() {
-			SubscriptionChannelWithHandlers subscriptionChannelWithHandlers = mySubscriptionChannelRegistry.getDeliveryReceiverChannel(myActiveSubscription.getChannelName());
+			SubscriptionChannelWithHandlers subscriptionChannelWithHandlers =
+					mySubscriptionChannelRegistry.getDeliveryReceiverChannel(myActiveSubscription.getChannelName());
 			subscriptionChannelWithHandlers.removeHandler(this);
 		}
 
@@ -209,10 +209,7 @@ public class SubscriptionWebsocketHandler extends TextWebSocketHandler implement
 				} catch (IOException e) {
 					handleFailure(e);
 				}
-
 			}
 		}
-
 	}
-
 }

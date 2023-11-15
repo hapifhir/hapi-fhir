@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 4162
+title: "Loading us-core IG was raising `UnprocessableEntityException: HAPI-2131: Can't process submitted SearchParameter as it is overlapping an existing one`.
+   This problem has been fixed."

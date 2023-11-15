@@ -1,10 +1,8 @@
-package ca.uhn.fhir.batch2.jobs.reindex;
-
 /*-
  * #%L
  * hapi-fhir-storage-batch2-jobs
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,18 +17,17 @@ package ca.uhn.fhir.batch2.jobs.reindex;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.batch2.jobs.reindex;
 
 import ca.uhn.fhir.batch2.api.IJobParametersValidator;
 import ca.uhn.fhir.batch2.jobs.parameters.PartitionedUrl;
 import ca.uhn.fhir.batch2.jobs.parameters.UrlListValidator;
-import ca.uhn.fhir.util.UrlUtil;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 public class ReindexJobParametersValidator implements IJobParametersValidator<ReindexJobParameters> {
 
@@ -42,7 +39,7 @@ public class ReindexJobParametersValidator implements IJobParametersValidator<Re
 
 	@Nullable
 	@Override
-	public List<String> validate(@NotNull ReindexJobParameters theParameters) {
+	public List<String> validate(RequestDetails theRequestDetails, @Nonnull ReindexJobParameters theParameters) {
 		List<String> errors = myUrlListValidator.validatePartitionedUrls(theParameters.getPartitionedUrls());
 
 		if (errors == null || errors.isEmpty()) {

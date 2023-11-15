@@ -49,8 +49,6 @@ class ResourceChangeListenerRegistryImplTest {
 	@Autowired
 	ResourceChangeListenerCacheFactory myResourceChangeListenerCacheFactory;
 	@MockBean
-	private ISchedulerService mySchedulerService;
-	@MockBean
 	private IResourceVersionSvc myResourceVersionSvc;
 	@MockBean
 	private ResourceChangeListenerCacheRefresherImpl myResourceChangeListenerCacheRefresher;

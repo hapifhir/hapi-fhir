@@ -1,10 +1,8 @@
-package ca.uhn.fhir.batch2.coordinator;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server - Batch2 Task Processor
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,120 +17,107 @@ package ca.uhn.fhir.batch2.coordinator;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.batch2.coordinator;
 
+import ca.uhn.fhir.batch2.api.IJobMaintenanceService;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
-import ca.uhn.fhir.batch2.channel.BatchJobSender;
-import ca.uhn.fhir.batch2.maintenance.JobChunkProgressAccumulator;
 import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobWorkCursor;
-import ca.uhn.fhir.batch2.model.JobWorkNotification;
+import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.model.WorkChunk;
-import ca.uhn.fhir.batch2.progress.JobInstanceProgressCalculator;
+import ca.uhn.fhir.batch2.progress.JobInstanceStatusUpdater;
 import ca.uhn.fhir.model.api.IModelJson;
+import ca.uhn.fhir.util.Logs;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
+import java.util.Date;
 import javax.annotation.Nonnull;
-import java.util.Optional;
 
 public class JobStepExecutor<PT extends IModelJson, IT extends IModelJson, OT extends IModelJson> {
-	private static final Logger ourLog = LoggerFactory.getLogger(JobStepExecutor.class);
+	private static final Logger ourLog = Logs.getBatchTroubleshootingLog();
 
 	private final IJobPersistence myJobPersistence;
-	private final BatchJobSender myBatchJobSender;
-	private final StepExecutionSvc myJobExecutorSvc;
+	private final WorkChunkProcessor myJobExecutorSvc;
+	private final IJobMaintenanceService myJobMaintenanceService;
+	private final JobInstanceStatusUpdater myJobInstanceStatusUpdater;
 
 	private final JobDefinition<PT> myDefinition;
 	private final JobInstance myInstance;
 	private final String myInstanceId;
 	private final WorkChunk myWorkChunk;
 	private final JobWorkCursor<PT, IT, OT> myCursor;
-	private final PT myParameters;
 
-	JobStepExecutor(@Nonnull IJobPersistence theJobPersistence,
-						 @Nonnull BatchJobSender theBatchJobSender,
-						 @Nonnull JobInstance theInstance,
-						 @Nonnull WorkChunk theWorkChunk,
-						 @Nonnull JobWorkCursor<PT, IT, OT> theCursor,
-						 @Nonnull StepExecutionSvc theExecutor) {
+	JobStepExecutor(
+			@Nonnull IJobPersistence theJobPersistence,
+			@Nonnull JobInstance theInstance,
+			WorkChunk theWorkChunk,
+			@Nonnull JobWorkCursor<PT, IT, OT> theCursor,
+			@Nonnull WorkChunkProcessor theExecutor,
+			@Nonnull IJobMaintenanceService theJobMaintenanceService,
+			@Nonnull JobDefinitionRegistry theJobDefinitionRegistry) {
 		myJobPersistence = theJobPersistence;
-		myBatchJobSender = theBatchJobSender;
 		myDefinition = theCursor.jobDefinition;
 		myInstance = theInstance;
 		myInstanceId = theInstance.getInstanceId();
-		myParameters = theInstance.getParameters(myDefinition.getParametersType());
 		myWorkChunk = theWorkChunk;
 		myCursor = theCursor;
 		myJobExecutorSvc = theExecutor;
+		myJobMaintenanceService = theJobMaintenanceService;
+		myJobInstanceStatusUpdater = new JobInstanceStatusUpdater(theJobDefinitionRegistry);
 	}
 
-	@SuppressWarnings("unchecked")
-	void executeStep() {
-		JobStepExecutorOutput<PT, IT, OT> stepExecutorOutput = myJobExecutorSvc.doExecution(
-			myCursor,
-			myInstance,
-			myWorkChunk
-		);
+	public void executeStep() {
+		JobStepExecutorOutput<PT, IT, OT> stepExecutorOutput =
+				myJobExecutorSvc.doExecution(myCursor, myInstance, myWorkChunk);
 
 		if (!stepExecutorOutput.isSuccessful()) {
 			return;
 		}
 
 		if (stepExecutorOutput.getDataSink().firstStepProducedNothing()) {
-			ourLog.info("First step of job myInstance {} produced no work chunks, marking as completed", myInstanceId);
-			myJobPersistence.markInstanceAsCompleted(myInstanceId);
+			ourLog.info(
+					"First step of job myInstance {} produced no work chunks, marking as completed and setting end date",
+					myInstanceId);
+			myJobPersistence.updateInstance(myInstance.getInstanceId(), instance -> {
+				instance.setEndTime(new Date());
+				myJobInstanceStatusUpdater.updateInstanceStatus(instance, StatusEnum.COMPLETED);
+				return true;
+			});
 		}
 
-		if (myDefinition.isGatedExecution()) {
-			handleGatedExecution(stepExecutorOutput.getDataSink());
-		}
-	}
-
-	private void handleGatedExecution(BaseDataSink<PT, IT, OT> theDataSink) {
-		JobInstance jobInstance = initializeGatedExecutionIfRequired(theDataSink);
-
-		if (eligibleForFastTracking(theDataSink, jobInstance)) {
-			ourLog.info("Gated job {} step {} produced at most one chunk:  Fast tracking execution.", myDefinition.getJobDefinitionId(), myCursor.currentStep.getStepId());
-			// This job is defined to be gated, but so far every step has produced at most 1 work chunk, so it is
-			// eligible for fast tracking.
-			if (myCursor.isFinalStep()) {
-				// TODO KHS instance factory should set definition instead of setting it explicitly here and there
-				jobInstance.setJobDefinition(myDefinition);
-				JobInstanceProgressCalculator calculator = new JobInstanceProgressCalculator(myJobPersistence, jobInstance, new JobChunkProgressAccumulator());
-				calculator.calculateAndStoreInstanceProgress();
-			} else {
-				JobWorkNotification workNotification = new JobWorkNotification(jobInstance, myCursor.nextStep.getStepId(), ((JobDataSink<PT,IT,OT>) theDataSink).getOnlyChunkId());
-				myBatchJobSender.sendWorkChannelMessage(workNotification);
-			}
+		// This flag could be stale, but checking for fast-track is a safe operation.
+		if (myInstance.isFastTracking()) {
+			handleFastTracking(stepExecutorOutput.getDataSink());
 		}
 	}
 
-	private boolean eligibleForFastTracking(BaseDataSink<PT, IT, OT> theDataSink, JobInstance theJobInstance) {
-		return theJobInstance != null &&
-			!theJobInstance.hasGatedStep() &&
-			theDataSink.getWorkChunkCount() <= 1;
-	}
-
-	private JobInstance initializeGatedExecutionIfRequired(BaseDataSink<PT, IT, OT> theDataSink) {
-		Optional<JobInstance> oJobInstance = myJobPersistence.fetchInstance(myInstanceId);
-		if (oJobInstance.isEmpty()) {
-			return null;
-		}
-
-		JobInstance jobInstance = oJobInstance.get();
-		if (jobInstance.hasGatedStep()) {
-			// Gated execution is already initialized
-			return jobInstance;
-		}
-
+	private void handleFastTracking(BaseDataSink<PT, IT, OT> theDataSink) {
 		if (theDataSink.getWorkChunkCount() <= 1) {
-			// Do not initialize gated execution for steps that produced only one chunk
-			return jobInstance;
+			ourLog.debug(
+					"Gated job {} step {} produced exactly one chunk:  Triggering a maintenance pass.",
+					myDefinition.getJobDefinitionId(),
+					myCursor.currentStep.getStepId());
+			// wipmb 6.8 either delete fast-tracking, or narrow this call to just this instance and step
+			// This runs full maintenance for EVERY job as each chunk completes in a fast tracked job.  That's a LOT of
+			// work.
+			boolean success = myJobMaintenanceService.triggerMaintenancePass();
+			if (!success) {
+				myJobPersistence.updateInstance(myInstance.getInstanceId(), instance -> {
+					instance.setFastTracking(false);
+					return true;
+				});
+			}
+		} else {
+			ourLog.debug(
+					"Gated job {} step {} produced {} chunks:  Disabling fast tracking.",
+					myDefinition.getJobDefinitionId(),
+					myCursor.currentStep.getStepId(),
+					theDataSink.getWorkChunkCount());
+			myJobPersistence.updateInstance(myInstance.getInstanceId(), instance -> {
+				instance.setFastTracking(false);
+				return true;
+			});
 		}
-
-		jobInstance.setCurrentGatedStepId(myCursor.getCurrentStepId());
-		myJobPersistence.updateInstance(jobInstance);
-		return jobInstance;
 	}
 }

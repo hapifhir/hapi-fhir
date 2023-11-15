@@ -1,21 +1,13 @@
 package ca.uhn.fhir.spring.boot.autoconfigure;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.okhttp.client.OkHttpRestfulClientFactory;
 import ca.uhn.fhir.rest.client.apache.ApacheRestfulClientFactory;
 import ca.uhn.fhir.rest.server.RestfulServer;
-import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
-import ca.uhn.fhir.spring.boot.autoconfigure.FhirAutoConfiguration.FhirJpaServerConfiguration.Dstu3;
-import org.assertj.core.util.Arrays;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
-import org.springframework.boot.autoconfigure.jdbc.EmbeddedDataSourceConfiguration;
-import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration;
 import org.springframework.boot.web.servlet.ServletRegistrationBean;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.mock.env.MockEnvironment;
@@ -68,24 +60,21 @@ public class FhirAutoConfigurationTest {
 	}
 
 	@Test
-	@Disabled
 	public void withValidation() {
 		load();
-		assertThat(this.context.getBeansOfType(IServerInterceptor.class)).hasSize(1);
+		assertThat(this.context.getBeansOfType(RequestValidatingInterceptor.class)).hasSize(1);
 	}
 
 	@Test
-	@Disabled
 	public void withValidations() {
 		load("hapi.fhir.validation.request-only:false");
-		assertThat(this.context.getBeansOfType(IServerInterceptor.class)).hasSize(2);
+		assertThat(this.context.getBeansOfType(RequestValidatingInterceptor.class)).hasSize(1);
 	}
 
 	@Test
-	@Disabled
 	public void withCustomValidationSchemaLocation() {
 		load("hapi.fhir.validation.schema-location:custom-schema-location");
-		assertThat(this.context.getBeansOfType(IServerInterceptor.class)).hasSize(1);
+		assertThat(this.context.getBeansOfType(RequestValidatingInterceptor.class)).hasSize(1);
 	}
 
 	@Test

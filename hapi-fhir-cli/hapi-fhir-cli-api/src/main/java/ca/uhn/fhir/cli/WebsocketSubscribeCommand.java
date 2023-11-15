@@ -1,10 +1,8 @@
-package ca.uhn.fhir.cli;
-
 /*-
  * #%L
  * HAPI FHIR - Command Line Client - API
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,15 +17,21 @@ package ca.uhn.fhir.cli;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.cli;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.primitive.IdDt;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
+import org.eclipse.jetty.websocket.api.Frame;
 import org.eclipse.jetty.websocket.api.Session;
-import org.eclipse.jetty.websocket.api.annotations.*;
-import org.eclipse.jetty.websocket.api.extensions.Frame;
+import org.eclipse.jetty.websocket.api.annotations.OnWebSocketClose;
+import org.eclipse.jetty.websocket.api.annotations.OnWebSocketConnect;
+import org.eclipse.jetty.websocket.api.annotations.OnWebSocketError;
+import org.eclipse.jetty.websocket.api.annotations.OnWebSocketFrame;
+import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
+import org.eclipse.jetty.websocket.api.annotations.WebSocket;
 import org.eclipse.jetty.websocket.client.ClientUpgradeRequest;
 import org.eclipse.jetty.websocket.client.WebSocketClient;
 
@@ -65,7 +69,8 @@ public class WebsocketSubscribeCommand extends BaseCommand {
 	public void run(CommandLine theCommandLine) throws ParseException {
 		String target = theCommandLine.getOptionValue("t");
 		if (isBlank(target) || (!target.startsWith("ws://") && !target.startsWith("wss://"))) {
-			throw new ParseException(Msg.code(1536) + "Target (-t) needs to be in the form \"ws://foo\" or \"wss://foo\"");
+			throw new ParseException(
+					Msg.code(1536) + "Target (-t) needs to be in the form \"ws://foo\" or \"wss://foo\"");
 		}
 
 		IdDt subsId = new IdDt(theCommandLine.getOptionValue("i"));
@@ -106,7 +111,6 @@ public class WebsocketSubscribeCommand extends BaseCommand {
 		@SuppressWarnings("unused")
 		private Session session;
 
-
 		public SimpleEchoSocket(String theSubsId) {
 			mySubsId = theSubsId;
 		}
@@ -146,5 +150,4 @@ public class WebsocketSubscribeCommand extends BaseCommand {
 			LOG_RECV.info("{}", theMsg);
 		}
 	}
-
 }

@@ -1,0 +1,13 @@
+---
+type: fix
+issue: 3902
+jira: SMILE-4500
+title: "
+      Fixed bug where creating a new resource in partitioned mode using a PUT operation
+      invoked pointcut STORAGE_PARTITION_IDENTIFY_READ during validation. This caused
+      errors because read interceptors (listing on Pointcut.STORAGE_PARTITION_IDENTIFY_READ)
+      and write interceptors (listening on Pointcut.STORAGE_PARTITION_IDENTIFY_CREATE) could
+      return different partitions (say, all vs default).
+      Now, only the CREATE pointcut will be invoked, and the same partition will be used
+      for any reads during UPDATE.
+   "

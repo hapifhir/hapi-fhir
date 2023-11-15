@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.subscription.model;
-
 /*-
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.subscription.model;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.subscription.model;
 
 import ca.uhn.fhir.i18n.Msg;
 import org.hl7.fhir.dstu2.model.Subscription;
@@ -55,27 +54,33 @@ public enum CanonicalSubscriptionChannelType {
 	 */
 	NULL;
 
-	public static CanonicalSubscriptionChannelType fromCode(@Nullable String theSystem, @Nonnull String codeString) throws FHIRException {
+	public static CanonicalSubscriptionChannelType fromCode(@Nullable String theSystem, @Nonnull String codeString)
+			throws FHIRException {
 		if (isBlank(codeString)) {
 			return null;
 		} else if ("rest-hook".equals(codeString)) {
-			if (theSystem == null || theSystem.equals("http://terminology.hl7.org/CodeSystem/subscription-channel-type")) {
+			if (theSystem == null
+					|| theSystem.equals("http://terminology.hl7.org/CodeSystem/subscription-channel-type")) {
 				return RESTHOOK;
 			}
 		} else if ("websocket".equals(codeString)) {
-			if (theSystem == null || theSystem.equals("http://terminology.hl7.org/CodeSystem/subscription-channel-type")) {
+			if (theSystem == null
+					|| theSystem.equals("http://terminology.hl7.org/CodeSystem/subscription-channel-type")) {
 				return WEBSOCKET;
 			}
 		} else if ("email".equals(codeString)) {
-			if (theSystem == null || theSystem.equals("http://terminology.hl7.org/CodeSystem/subscription-channel-type")) {
+			if (theSystem == null
+					|| theSystem.equals("http://terminology.hl7.org/CodeSystem/subscription-channel-type")) {
 				return EMAIL;
 			}
 		} else if ("sms".equals(codeString)) {
-			if (theSystem == null || theSystem.equals("http://terminology.hl7.org/CodeSystem/subscription-channel-type")) {
+			if (theSystem == null
+					|| theSystem.equals("http://terminology.hl7.org/CodeSystem/subscription-channel-type")) {
 				return SMS;
 			}
 		} else if ("message".equals(codeString)) {
-			if (theSystem == null || theSystem.equals("http://terminology.hl7.org/CodeSystem/subscription-channel-type")) {
+			if (theSystem == null
+					|| theSystem.equals("http://terminology.hl7.org/CodeSystem/subscription-channel-type")) {
 				return MESSAGE;
 			}
 		}

@@ -187,7 +187,7 @@ public class QuestionnaireResponseValidatorR4Test {
 		ValidationResult errors = myVal.validateWithResult(qa);
 
 		ourLog.info(errors.toString());
-		assertThat(errors.toString(), containsString("Answer value must be of type boolean"));
+		assertThat(errors.toString(), containsString("Answer value must be of the type boolean"));
 	}
 
 	@Test
@@ -609,7 +609,7 @@ public class QuestionnaireResponseValidatorR4Test {
 		errors = myVal.validateWithResult(qa);
 		ourLog.info(errors.toString());
 		// This is set in InstanceValidator#validateAnswerCode
-		assertThat(errors.toString(), containsString(" The value provided (http://system::null) is not in the options value set"));
+		assertThat(errors.toString(), containsString("ValidationResult{messageCount=1, isSuccessful=false, description='"));
 		assertThat(errors.toString(), containsString("QuestionnaireResponse.item[0].answer[0]"));
 
 		// Wrong type

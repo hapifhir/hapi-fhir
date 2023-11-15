@@ -1,10 +1,8 @@
-package ca.uhn.fhir.rest.server.mail;
-
 /*-
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.rest.server.mail;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.server.mail;
 
 import org.apache.commons.lang3.Validate;
 import org.simplejavamail.MailException;
@@ -32,9 +31,9 @@ import org.simplejavamail.mailer.MailerBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nonnull;
 import java.util.List;
 import java.util.stream.Collectors;
+import javax.annotation.Nonnull;
 
 public class MailSvc implements IMailSvc {
 	private static final Logger ourLog = LoggerFactory.getLogger(MailSvc.class);
@@ -60,15 +59,13 @@ public class MailSvc implements IMailSvc {
 	}
 
 	@Override
-	public void sendMail(@Nonnull Email theEmail,
-								@Nonnull Runnable theOnSuccess,
-								@Nonnull ExceptionConsumer theErrorHandler) {
+	public void sendMail(
+			@Nonnull Email theEmail, @Nonnull Runnable theOnSuccess, @Nonnull ExceptionConsumer theErrorHandler) {
 		send(theEmail, theOnSuccess, theErrorHandler);
 	}
 
-	private void send(@Nonnull Email theEmail,
-							@Nonnull Runnable theOnSuccess,
-							@Nonnull ExceptionConsumer theErrorHandler) {
+	private void send(
+			@Nonnull Email theEmail, @Nonnull Runnable theOnSuccess, @Nonnull ExceptionConsumer theErrorHandler) {
 		Validate.notNull(theEmail);
 		Validate.notNull(theOnSuccess);
 		Validate.notNull(theErrorHandler);
@@ -85,23 +82,26 @@ public class MailSvc implements IMailSvc {
 
 	@Nonnull
 	private Mailer makeMailer(@Nonnull MailConfig theMailConfig) {
-		ourLog.info("SMTP Mailer config Hostname:[{}] | Port:[{}] | Username:[{}] | TLS:[{}]",
-			theMailConfig.getSmtpHostname(), theMailConfig.getSmtpPort(),
-			theMailConfig.getSmtpUsername(), theMailConfig.isSmtpUseStartTLS());
-		return MailerBuilder
-			.withSMTPServer(
+		ourLog.info(
+				"SMTP Mailer config Hostname:[{}] | Port:[{}] | Username:[{}] | TLS:[{}]",
 				theMailConfig.getSmtpHostname(),
 				theMailConfig.getSmtpPort(),
 				theMailConfig.getSmtpUsername(),
-				theMailConfig.getSmtpPassword())
-			.withTransportStrategy(theMailConfig.isSmtpUseStartTLS() ? TransportStrategy.SMTP_TLS : TransportStrategy.SMTP)
-			.buildMailer();
+				theMailConfig.isSmtpUseStartTLS());
+		return MailerBuilder.withSMTPServer(
+						theMailConfig.getSmtpHostname(),
+						theMailConfig.getSmtpPort(),
+						theMailConfig.getSmtpUsername(),
+						theMailConfig.getSmtpPassword())
+				.withTransportStrategy(
+						theMailConfig.isSmtpUseStartTLS() ? TransportStrategy.SMTP_TLS : TransportStrategy.SMTP)
+				.buildMailer();
 	}
 
 	@Nonnull
 	private String makeMessage(@Nonnull Email theEmail) {
 		return " with subject [" + theEmail.getSubject() + "] and recipients ["
-			+ theEmail.getRecipients().stream().map(Recipient::getAddress).collect(Collectors.joining(",")) + "]";
+				+ theEmail.getRecipients().stream().map(Recipient::getAddress).collect(Collectors.joining(",")) + "]";
 	}
 
 	private class OnSuccess implements Runnable {

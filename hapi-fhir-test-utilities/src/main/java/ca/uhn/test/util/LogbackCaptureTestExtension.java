@@ -1,10 +1,8 @@
-package ca.uhn.test.util;
-
 /*-
  * #%L
  * HAPI FHIR Test Utilities
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,17 +17,23 @@ package ca.uhn.test.util;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.test.util;
 
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender;
-import org.hamcrest.CustomTypeSafeMatcher;
 import org.hamcrest.Matcher;
 import org.junit.jupiter.api.extension.AfterEachCallback;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.slf4j.LoggerFactory;
+
+import javax.annotation.Nonnull;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 /**
  * Test helper to collect logback lines.
@@ -38,13 +42,34 @@ import org.slf4j.LoggerFactory;
  */
 public class LogbackCaptureTestExtension implements BeforeEachCallback, AfterEachCallback {
 	private final Logger myLogger;
-	private final ListAppender<ILoggingEvent> myListAppender = new ListAppender<>();
+	private final Level myLevel;
+	private ListAppender<ILoggingEvent> myListAppender = null;
+	private Level mySavedLevel;
 
 	/**
-	 * @param theLoggerName the log name root to capture
+	 *
+	 * @param theLogger the log to capture
+	 */
+	public LogbackCaptureTestExtension(Logger theLogger) {
+		myLogger = theLogger;
+		myLevel = null;
+	}
+
+	/**
+	 *
+	 * @param theLogger the log to capture
+	 * @param theTestLogLevel the log Level to set on the target logger for the duration of the test
+	 */
+	public LogbackCaptureTestExtension(Logger theLogger, Level theTestLogLevel) {
+		myLogger = theLogger;
+		myLevel = theTestLogLevel;
+	}
+
+	/**
+	 * @param theLoggerName the log name to capture
 	 */
 	public LogbackCaptureTestExtension(String theLoggerName) {
-		myLogger = (Logger) LoggerFactory.getLogger(theLoggerName);
+		this((Logger) LoggerFactory.getLogger(theLoggerName));
 	}
 
 	/**
@@ -54,45 +79,96 @@ public class LogbackCaptureTestExtension implements BeforeEachCallback, AfterEac
 		this(org.slf4j.Logger.ROOT_LOGGER_NAME);
 	}
 
+	public LogbackCaptureTestExtension(String theLoggerName, Level theLevel) {
+		this((Logger) LoggerFactory.getLogger(theLoggerName), theLevel);
+	}
+
 	/**
-	 * Direct reference to the list of events.
-	 * You may clear() it, or whatever.
-	 * @return the modifiable List of events captured so far.
+	 * Returns a copy to avoid concurrent modification errors.
+	 * @return A copy of the log events so far.
 	 */
 	public java.util.List<ILoggingEvent> getLogEvents() {
-		return myListAppender.list;
+		// copy to avoid concurrent mod errors
+		return new ArrayList<>(myListAppender.list);
+	}
+
+	/** Clear accumulated log events. */
+	public void clearEvents() {
+		myListAppender.list.clear();
+	}
+
+	public ListAppender<ILoggingEvent> getAppender() {
+		return myListAppender;
 	}
 
 	@Override
 	public void beforeEach(ExtensionContext context) throws Exception {
-		myListAppender.start(); // 		SecurityContextHolder.getContext().setAuthentication(authResult);
-		myLogger.addAppender(myListAppender);
+		setUp();
+	}
 
+	/**
+	 * Guts of beforeEach exposed for manual lifecycle.
+	 */
+	public void setUp() {
+		setUp(myLevel);
+	}
+
+	/**
+	 * Guts of beforeEach exposed for manual lifecycle.
+	 */
+	public void setUp(Level theLevel) {
+		myListAppender = new ListAppender<>();
+		myListAppender.start();
+		myLogger.addAppender(myListAppender);
+		if (theLevel != null) {
+			mySavedLevel = myLogger.getLevel();
+			myLogger.setLevel(theLevel);
+		}
 	}
 
 	@Override
 	public void afterEach(ExtensionContext context) throws Exception {
 		myLogger.detachAppender(myListAppender);
-	}
-
-	public Matcher<ILoggingEvent> eventWithLevelAndMessageContains(Level theLevel, String thePartialMessage) {
-		return new LogbackEventMatcher("log event", theLevel, thePartialMessage);
-	}
-	public static class LogbackEventMatcher extends CustomTypeSafeMatcher<ILoggingEvent> {
-
-		private Level myLevel;
-		private String myString;
-
-		public LogbackEventMatcher(String description, Level theLevel, String theString) {
-			super(description);
-			myLevel = theLevel;
-			myString = theString;
-		}
-
-		@Override
-		protected boolean matchesSafely(ILoggingEvent item) {
-			return (myLevel == null || item.getLevel().isGreaterOrEqual(myLevel)) &&
-				item.getFormattedMessage().contains(myString);
+		myListAppender.stop();
+		if (myLevel != null) {
+			myLogger.setLevel(mySavedLevel);
 		}
 	}
+
+
+	public List<ILoggingEvent> filterLoggingEventsWithMessageEqualTo(String theMessageText){
+		return filterLoggingEventsWithPredicate(loggingEvent -> loggingEvent.getFormattedMessage().equals(theMessageText));
+	}
+
+	public List<ILoggingEvent> filterLoggingEventsWithMessageContaining(String theMessageText){
+		return filterLoggingEventsWithPredicate(loggingEvent -> loggingEvent.getFormattedMessage().contains(theMessageText));
+	}
+
+	public List<ILoggingEvent> filterLoggingEventsWithPredicate(Predicate<ILoggingEvent> theLoggingEventPredicate){
+		return getLogEvents()
+			.stream()
+			.filter(theLoggingEventPredicate)
+			.collect(Collectors.toList());
+	}
+
+	//  Hamcrest matcher support
+	public static Matcher<ILoggingEvent> eventWithLevelAndMessageContains(@Nonnull Level theLevel, @Nonnull String thePartialMessage) {
+		return new LogbackEventMatcher(theLevel, thePartialMessage);
+	}
+
+	public static Matcher<ILoggingEvent> eventWithLevel(@Nonnull Level theLevel) {
+		return new LogbackEventMatcher(theLevel, null);
+	}
+
+	public static Matcher<ILoggingEvent> eventWithMessageContains(@Nonnull String thePartialMessage) {
+		return new LogbackEventMatcher(null, thePartialMessage);
+	}
+
+	public static Matcher<ILoggingEvent> eventWithLevelAndMessageAndThrew(@Nonnull Level theLevel,
+																								 @Nonnull String thePartialMessage,
+																								 @Nonnull String theThrown)
+	{
+		return new LogbackEventMatcher(theLevel, thePartialMessage, theThrown);
+	}
+
 }

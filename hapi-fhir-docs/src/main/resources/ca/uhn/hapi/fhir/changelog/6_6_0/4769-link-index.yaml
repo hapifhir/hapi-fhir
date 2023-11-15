@@ -1,0 +1,5 @@
+---
+type: perf
+issue: 4769
+title: "Chained and reverse-chained searches will be faster in some scenarios.
+  All required columns are now included in the IDX_RL_TGT_v2 index."

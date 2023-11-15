@@ -1,0 +1,4 @@
+---
+type: add
+issue: 3734
+title: "Added support for loading the International version of ICD-10. Thanks to kaicode for the contribution!"

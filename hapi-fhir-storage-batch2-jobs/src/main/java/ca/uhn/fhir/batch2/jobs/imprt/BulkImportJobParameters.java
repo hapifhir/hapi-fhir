@@ -1,10 +1,8 @@
-package ca.uhn.fhir.batch2.jobs.imprt;
-
 /*-
  * #%L
  * hapi-fhir-storage-batch2-jobs
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,18 +17,20 @@ package ca.uhn.fhir.batch2.jobs.imprt;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.batch2.jobs.imprt;
 
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.model.api.IModelJson;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.commons.lang3.Validate;
 
+import java.util.ArrayList;
+import java.util.List;
 import javax.annotation.Nullable;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * This class is the parameters model object for starting a
@@ -51,6 +51,10 @@ public class BulkImportJobParameters implements IModelJson {
 	@Min(1)
 	@Nullable
 	private Integer myMaxBatchResourceCount;
+
+	@JsonProperty(value = "partitionId", required = false)
+	@Nullable
+	private RequestPartitionId myPartitionId;
 
 	public List<String> getNdJsonUrls() {
 		if (myNdJsonUrls == null) {
@@ -81,6 +85,16 @@ public class BulkImportJobParameters implements IModelJson {
 	public BulkImportJobParameters addNdJsonUrl(String theUrl) {
 		Validate.notBlank(theUrl, "theUrl must not be blank or null");
 		getNdJsonUrls().add(theUrl);
+		return this;
+	}
+
+	@Nullable
+	public RequestPartitionId getPartitionId() {
+		return myPartitionId;
+	}
+
+	public BulkImportJobParameters setPartitionId(@Nullable RequestPartitionId thePartitionId) {
+		myPartitionId = thePartitionId;
 		return this;
 	}
 }

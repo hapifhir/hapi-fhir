@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 4548
+title: "Simultaneous DELETE and $reindex operations could corrupt the search index.  This has been fixed."

@@ -1,12 +1,14 @@
 package org.hl7.fhir.common.hapi.validation.support;
 
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.util.ClasspathUtil;
+import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -15,29 +17,31 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.fhir.ucum.UcumEssenceService;
 import org.fhir.ucum.UcumException;
-import org.hl7.fhir.common.hapi.validation.validator.VersionSpecificWorkerContextWrapper;
 import org.hl7.fhir.convertors.advisors.impl.BaseAdvisor_30_40;
 import org.hl7.fhir.convertors.advisors.impl.BaseAdvisor_40_50;
+import org.hl7.fhir.convertors.advisors.impl.BaseAdvisor_43_50;
 import org.hl7.fhir.convertors.factory.VersionConvertorFactory_30_40;
 import org.hl7.fhir.convertors.factory.VersionConvertorFactory_40_50;
+import org.hl7.fhir.convertors.factory.VersionConvertorFactory_43_50;
 import org.hl7.fhir.dstu2.model.ValueSet;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.CodeSystem;
+import org.hl7.fhir.r5.model.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.io.InputStream;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
+import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
-import static org.hl7.fhir.common.hapi.validation.support.SnapshotGeneratingValidationSupport.newVersionTypeConverter;
 
 /**
  * This {@link IValidationSupport validation support module} can be used to validate codes against common
@@ -48,6 +52,7 @@ import static org.hl7.fhir.common.hapi.validation.support.SnapshotGeneratingVali
  * for details about what is and isn't covered by this class.
  * </p>
  */
+@SuppressWarnings("EnhancedSwitchMigration")
 public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 	public static final String LANGUAGES_VALUESET_URL = "http://hl7.org/fhir/ValueSet/languages";
 	public static final String LANGUAGES_CODESYSTEM_URL = "urn:ietf:bcp:47";
@@ -62,11 +67,11 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 	private static final String USPS_CODESYSTEM_URL = "https://www.usps.com/";
 	private static final String USPS_VALUESET_URL = "http://hl7.org/fhir/us/core/ValueSet/us-core-usps-state";
 	private static final Logger ourLog = LoggerFactory.getLogger(CommonCodeSystemsTerminologyService.class);
-	private static Map<String, String> USPS_CODES = Collections.unmodifiableMap(buildUspsCodes());
-	private static Map<String, String> ISO_4217_CODES = Collections.unmodifiableMap(buildIso4217Codes());
-	private static Map<String, String> ISO_3166_CODES = Collections.unmodifiableMap(buildIso3166Codes());
+	private static final Map<String, String> USPS_CODES = Collections.unmodifiableMap(buildUspsCodes());
+	private static final Map<String, String> ISO_4217_CODES = Collections.unmodifiableMap(buildIso4217Codes());
+	private static final Map<String, String> ISO_3166_CODES = Collections.unmodifiableMap(buildIso3166Codes());
 	private final FhirContext myFhirContext;
-	private final VersionSpecificWorkerContextWrapper.IVersionTypeConverter myVersionConverter;
+	private final VersionCanonicalizer myVersionCanonicalizer;
 	private volatile org.hl7.fhir.r5.model.ValueSet myLanguagesVs;
 	private volatile Map<String, String> myLanguagesLanugageMap;
 	private volatile Map<String, String> myLanguagesRegionMap;
@@ -78,17 +83,34 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 		Validate.notNull(theFhirContext);
 
 		myFhirContext = theFhirContext;
-		myVersionConverter = newVersionTypeConverter(myFhirContext.getVersion().getVersion());
+		myVersionCanonicalizer = new VersionCanonicalizer(theFhirContext);
 	}
 
 	@Override
-	public CodeValidationResult validateCodeInValueSet(ValidationSupportContext theValidationSupportContext, ConceptValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, @Nonnull IBaseResource theValueSet) {
-		String url = getValueSetUrl(theValueSet);
+	public String getName() {
+		return myFhirContext.getVersion().getVersion() + " Common Code Systems Validation Support";
+	}
+
+	@Override
+	public CodeValidationResult validateCodeInValueSet(
+			ValidationSupportContext theValidationSupportContext,
+			ConceptValidationOptions theOptions,
+			String theCodeSystem,
+			String theCode,
+			String theDisplay,
+			@Nonnull IBaseResource theValueSet) {
+		String url = getValueSetUrl(getFhirContext(), theValueSet);
 		return validateCode(theValidationSupportContext, theOptions, theCodeSystem, theCode, theDisplay, url);
 	}
 
 	@Override
-	public CodeValidationResult validateCode(@Nonnull ValidationSupportContext theValidationSupportContext, @Nonnull ConceptValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl) {
+	public CodeValidationResult validateCode(
+			@Nonnull ValidationSupportContext theValidationSupportContext,
+			@Nonnull ConceptValidationOptions theOptions,
+			String theCodeSystem,
+			String theCode,
+			String theDisplay,
+			String theValueSetUrl) {
 		/* **************************************************************************************
 		 * NOTE: Update validation_support_modules.html if any of the support in this module
 		 * changes in any way!
@@ -108,64 +130,66 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 				break;
 
 			case LANGUAGES_VALUESET_URL:
-				if (!LANGUAGES_CODESYSTEM_URL.equals(theCodeSystem) && !(theCodeSystem == null && theOptions.isInferSystem())) {
+				expectSystem = LANGUAGES_CODESYSTEM_URL;
+				if (!expectSystem.equals(theCodeSystem) && !(theCodeSystem == null && theOptions.isInferSystem())) {
 					return new CodeValidationResult()
-						.setSeverity(IssueSeverity.ERROR)
-						.setMessage("Inappropriate CodeSystem URL \"" + theCodeSystem + "\" for ValueSet: " + theValueSetUrl);
+							.setSeverity(IssueSeverity.ERROR)
+							.setMessage("Inappropriate CodeSystem URL \"" + theCodeSystem + "\" for ValueSet: "
+									+ theValueSetUrl);
 				}
 
 				IBaseResource languagesVs = myLanguagesVs;
 				if (languagesVs == null) {
-					languagesVs = theValidationSupportContext.getRootValidationSupport().fetchValueSet("http://hl7.org/fhir/ValueSet/languages");
-					myLanguagesVs = (org.hl7.fhir.r5.model.ValueSet) myVersionConverter.toCanonical(languagesVs);
+					languagesVs = theValidationSupportContext
+							.getRootValidationSupport()
+							.fetchValueSet("http://hl7.org/fhir/ValueSet/languages");
+					myLanguagesVs = myVersionCanonicalizer.valueSetToValidatorCanonical(languagesVs);
 				}
-				Optional<org.hl7.fhir.r5.model.ValueSet.ConceptReferenceComponent> match = myLanguagesVs
-					.getCompose()
-					.getInclude()
-					.stream()
-					.flatMap(t -> t.getConcept().stream())
-					.filter(t -> theCode.equals(t.getCode()))
-					.findFirst();
+				Optional<org.hl7.fhir.r5.model.ValueSet.ConceptReferenceComponent> match =
+						myLanguagesVs.getCompose().getInclude().stream()
+								.flatMap(t -> t.getConcept().stream())
+								.filter(t -> theCode.equals(t.getCode()))
+								.findFirst();
 				if (match.isPresent()) {
 					return new CodeValidationResult()
-						.setCode(theCode)
-						.setDisplay(match.get().getDisplay());
+							.setCode(theCode)
+							.setDisplay(match.get().getDisplay());
 				} else {
 					return new CodeValidationResult()
-						.setSeverity(IssueSeverity.ERROR)
-						.setMessage("Code \"" + theCode + "\" is not in valueset: " + theValueSetUrl);
+							.setSeverity(IssueSeverity.ERROR)
+							.setMessage("Code \"" + theCode + "\" is not in valueset: " + theValueSetUrl);
 				}
 
 			case ALL_LANGUAGES_VALUESET_URL:
-				if (!LANGUAGES_CODESYSTEM_URL.equals(theCodeSystem) && !(theCodeSystem == null && theOptions.isInferSystem())) {
+				expectSystem = LANGUAGES_CODESYSTEM_URL;
+				if (!expectSystem.equals(theCodeSystem) && !(theCodeSystem == null && theOptions.isInferSystem())) {
 					return new CodeValidationResult()
-						.setSeverity(IssueSeverity.ERROR)
-						.setMessage("Inappropriate CodeSystem URL \"" + theCodeSystem + "\" for ValueSet: " + theValueSetUrl);
+							.setSeverity(IssueSeverity.ERROR)
+							.setMessage("Inappropriate CodeSystem URL \"" + theCodeSystem + "\" for ValueSet: "
+									+ theValueSetUrl);
 				}
 
 				LookupCodeResult outcome = lookupLanguageCode(theCode);
 				if (outcome.isFound()) {
-					return new CodeValidationResult()
-						.setCode(theCode)
-						.setDisplay(outcome.getCodeDisplay());
+					return new CodeValidationResult().setCode(theCode).setDisplay(outcome.getCodeDisplay());
 				} else {
 					return new CodeValidationResult()
-						.setSeverity(IssueSeverity.ERROR)
-						.setMessage("Code \"" + theCode + "\" is not in valueset: " + theValueSetUrl);
+							.setSeverity(IssueSeverity.ERROR)
+							.setMessage("Code \"" + theCode + "\" is not in valueset: " + theValueSetUrl);
 				}
 
 			case MIMETYPES_VALUESET_URL:
 				// This is a pretty naive implementation - Should be enhanced in future
-				return new CodeValidationResult()
-					.setCode(theCode)
-					.setDisplay(theDisplay);
+				return new CodeValidationResult().setCode(theCode).setDisplay(theDisplay);
 
 			case UCUM_VALUESET_URL: {
 				String system = theCodeSystem;
+				expectSystem = UCUM_CODESYSTEM_URL;
 				if (system == null && theOptions.isInferSystem()) {
-					system = UCUM_CODESYSTEM_URL;
+					system = expectSystem;
 				}
-				CodeValidationResult validationResult = validateLookupCode(theValidationSupportContext, theCode, system);
+				CodeValidationResult validationResult =
+						validateLookupCode(theValidationSupportContext, theCode, system);
 				if (validationResult != null) {
 					return validationResult;
 				}
@@ -176,43 +200,50 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 			String display = handlerMap.get(theCode);
 			if (display != null) {
 				if (expectSystem.equals(theCodeSystem) || theOptions.isInferSystem()) {
-					return new CodeValidationResult()
-						.setCode(theCode)
-						.setDisplay(display);
+					return new CodeValidationResult().setCode(theCode).setDisplay(display);
 				}
 			}
 
-			return new CodeValidationResult()
-				.setSeverity(IssueSeverity.ERROR)
-				.setMessage("Code \"" + theCode + "\" is not in system: " + USPS_CODESYSTEM_URL);
+			String actualSystem = defaultIfBlank(theCodeSystem, expectSystem);
+			String unknownCodeMessage = myFhirContext
+					.getLocalizer()
+					.getMessage("ca.uhn.fhir.jpa.term.TermReadSvcImpl.unknownCodeInSystem", actualSystem, theCode);
+			return new CodeValidationResult().setSeverity(IssueSeverity.ERROR).setMessage(unknownCodeMessage);
 		}
 
 		if (isBlank(theValueSetUrl)) {
-			CodeValidationResult validationResult = validateLookupCode(theValidationSupportContext, theCode, theCodeSystem);
-			return validationResult;
+			return validateLookupCode(theValidationSupportContext, theCode, theCodeSystem);
 		}
 
 		return null;
 	}
 
 	@Nullable
-	public CodeValidationResult validateLookupCode(ValidationSupportContext theValidationSupportContext, String theCode, String theSystem) {
+	public CodeValidationResult validateLookupCode(
+			ValidationSupportContext theValidationSupportContext, String theCode, String theSystem) {
 		LookupCodeResult lookupResult = lookupCode(theValidationSupportContext, theSystem, theCode);
 		CodeValidationResult validationResult = null;
 		if (lookupResult != null) {
 			if (lookupResult.isFound()) {
 				validationResult = new CodeValidationResult()
-					.setCode(lookupResult.getSearchedForCode())
-					.setDisplay(lookupResult.getCodeDisplay());
+						.setCode(lookupResult.getSearchedForCode())
+						.setDisplay(lookupResult.getCodeDisplay());
+			} else if (lookupResult.getErrorMessage() != null) {
+				validationResult = new CodeValidationResult()
+						.setSeverity(IssueSeverity.ERROR)
+						.setMessage(lookupResult.getErrorMessage());
 			}
 		}
 
 		return validationResult;
 	}
 
-
 	@Override
-	public LookupCodeResult lookupCode(ValidationSupportContext theValidationSupportContext, String theSystem, String theCode, String theDisplayLanguage) {
+	public LookupCodeResult lookupCode(
+			ValidationSupportContext theValidationSupportContext,
+			String theSystem,
+			String theCode,
+			String theDisplayLanguage) {
 		Map<String, String> map;
 		switch (theSystem) {
 			case LANGUAGES_CODESYSTEM_URL:
@@ -249,8 +280,8 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 		retVal.setSearchedForCode(theCode);
 		retVal.setSearchedForSystem(theSystem);
 		retVal.setFound(false);
+		retVal.setErrorMessage("Code '" + theCode + "' is not valid for system: " + theSystem);
 		return retVal;
-
 	}
 
 	private LookupCodeResult lookupLanguageCode(String theCode) {
@@ -266,19 +297,22 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 		if (hasRegionAndCodeSegments) {
 			// we look for languages in lowercase only
 			// this will allow case insensitivity for language portion of code
-			language = myLanguagesLanugageMap.get(theCode.substring(0, langRegionSeparatorIndex).toLowerCase());
-			region = myLanguagesRegionMap.get(theCode.substring(langRegionSeparatorIndex + 1).toUpperCase());
+			language = myLanguagesLanugageMap.get(
+					theCode.substring(0, langRegionSeparatorIndex).toLowerCase());
+			region = myLanguagesRegionMap.get(
+					theCode.substring(langRegionSeparatorIndex + 1).toUpperCase());
 
 			if (language == null || region == null) {
-				//In case the user provides both a language and a region, they must both be valid for the lookup to succeed.
+				// In case the user provides both a language and a region, they must both be valid for the lookup to
+				// succeed.
 				ourLog.warn("Couldn't find a valid bcp47 language-region combination from code: {}", theCode);
 				return buildNotFoundLookupCodeResult(theCode);
 			} else {
 				return buildLookupResultForLanguageAndRegion(theCode, language, region);
 			}
 		} else {
-			//In case user has only provided a language, we build the lookup from only that.
-			//NB: we only use the lowercase version of the language
+			// In case user has only provided a language, we build the lookup from only that.
+			// NB: we only use the lowercase version of the language
 			language = myLanguagesLanugageMap.get(theCode.toLowerCase());
 			if (language == null) {
 				ourLog.warn("Couldn't find a valid bcp47 language from code: {}", theCode);
@@ -288,13 +322,17 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 			}
 		}
 	}
-	private LookupCodeResult buildLookupResultForLanguageAndRegion(@Nonnull String theOriginalCode, @Nonnull String theLanguage, @Nonnull String theRegion) {
+
+	private LookupCodeResult buildLookupResultForLanguageAndRegion(
+			@Nonnull String theOriginalCode, @Nonnull String theLanguage, @Nonnull String theRegion) {
 		LookupCodeResult lookupCodeResult = buildNotFoundLookupCodeResult(theOriginalCode);
 		lookupCodeResult.setCodeDisplay(theLanguage + " " + theRegion);
 		lookupCodeResult.setFound(true);
 		return lookupCodeResult;
 	}
-	private LookupCodeResult buildLookupResultForLanguage(@Nonnull String theOriginalCode, @Nonnull String theLanguage) {
+
+	private LookupCodeResult buildLookupResultForLanguage(
+			@Nonnull String theOriginalCode, @Nonnull String theLanguage) {
 		LookupCodeResult lookupCodeResult = buildNotFoundLookupCodeResult(theOriginalCode);
 		lookupCodeResult.setCodeDisplay(theLanguage);
 		lookupCodeResult.setFound(true);
@@ -329,22 +367,10 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 			ObjectNode next = (ObjectNode) map.get(i);
 			String type = next.get("Type").asText();
 			if ("language".equals(type)) {
-				String language = next.get("Subtag").asText();
-				ArrayNode descriptions = (ArrayNode) next.get("Description");
-				String description = null;
-				if (descriptions.size() > 0) {
-					description = descriptions.get(0).asText();
-				}
-				languagesMap.put(language, description);
+				populateSubTagMap(languagesMap, next);
 			}
 			if ("region".equals(type)) {
-				String region = next.get("Subtag").asText();
-				ArrayNode descriptions = (ArrayNode) next.get("Description");
-				String description = null;
-				if (descriptions.size() > 0) {
-					description = descriptions.get(0).asText();
-				}
-				regionsMap.put(region, description);
+				populateSubTagMap(regionsMap, next);
 			}
 		}
 
@@ -352,6 +378,16 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 
 		myLanguagesLanugageMap = languagesMap;
 		myLanguagesRegionMap = regionsMap;
+	}
+
+	private void populateSubTagMap(Map<String, String> theLanguagesMap, ObjectNode theNext) {
+		String language = theNext.get("Subtag").asText();
+		ArrayNode descriptions = (ArrayNode) theNext.get("Description");
+		String description = null;
+		if (descriptions.size() > 0) {
+			description = descriptions.get(0).asText();
+		}
+		theLanguagesMap.put(language, description);
 	}
 
 	@Nonnull
@@ -368,20 +404,22 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 	private LookupCodeResult lookupUcumCode(String theCode) {
 		InputStream input = ClasspathUtil.loadResourceAsStream("/ucum-essence.xml");
 		String outcome = null;
-		try {
-			UcumEssenceService svc = new UcumEssenceService(input);
-			outcome = svc.analyse(theCode);
-		} catch (UcumException e) {
-			ourLog.warn("Failed parse UCUM code: {}", theCode, e);
-		} finally {
-			ClasspathUtil.close(input);
-		}
 		LookupCodeResult retVal = new LookupCodeResult();
 		retVal.setSearchedForCode(theCode);
 		retVal.setSearchedForSystem(UCUM_CODESYSTEM_URL);
-		if (outcome != null) {
-			retVal.setFound(true);
-			retVal.setCodeDisplay(outcome);
+
+		try {
+			UcumEssenceService svc = new UcumEssenceService(input);
+			outcome = svc.analyse(theCode);
+			if (outcome != null) {
+				retVal.setFound(true);
+				retVal.setCodeDisplay(outcome);
+			}
+		} catch (UcumException e) {
+			ourLog.debug("Failed parse UCUM code: {}", theCode, e);
+			retVal.setErrorMessage(e.getMessage());
+		} finally {
+			ClasspathUtil.close(input);
 		}
 		return retVal;
 	}
@@ -419,6 +457,11 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 				break;
 			case R4:
 				normalized = retVal;
+				break;
+			case R4B:
+				Resource normalized50 =
+						VersionConvertorFactory_40_50.convertResource(retVal, new BaseAdvisor_40_50(false));
+				normalized = VersionConvertorFactory_43_50.convertResource(normalized50, new BaseAdvisor_43_50());
 				break;
 			case R5:
 				normalized = VersionConvertorFactory_40_50.convertResource(retVal, new BaseAdvisor_40_50(false));
@@ -466,9 +509,10 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 		return myFhirContext;
 	}
 
-	public static String getValueSetUrl(@Nonnull IBaseResource theValueSet) {
+	public static String getValueSetUrl(FhirContext theFhirContext, @Nonnull IBaseResource theValueSet) {
 		String url;
-		switch (theValueSet.getStructureFhirVersionEnum()) {
+		FhirVersionEnum structureFhirVersionEnum = getFhirVersionEnum(theFhirContext, theValueSet);
+		switch (structureFhirVersionEnum) {
 			case DSTU2: {
 				url = ((ca.uhn.fhir.model.dstu2.resource.ValueSet) theValueSet).getUrl();
 				break;
@@ -485,22 +529,32 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 				url = ((org.hl7.fhir.r4.model.ValueSet) theValueSet).getUrl();
 				break;
 			}
+			case R4B: {
+				url = ((org.hl7.fhir.r4b.model.ValueSet) theValueSet).getUrl();
+				break;
+			}
 			case R5: {
 				url = ((org.hl7.fhir.r5.model.ValueSet) theValueSet).getUrl();
 				break;
 			}
 			case DSTU2_1:
 			default:
-				throw new IllegalArgumentException(Msg.code(695) + "Can not handle version: " + theValueSet.getStructureFhirVersionEnum());
+				throw new IllegalArgumentException(
+						Msg.code(695) + "Can not handle version: " + structureFhirVersionEnum);
 		}
 		return url;
 	}
 
-	public static String getCodeSystemUrl(@Nonnull IBaseResource theCodeSystem) {
+	public static String getCodeSystemUrl(@Nonnull FhirContext theFhirContext, @Nonnull IBaseResource theCodeSystem) {
 		String url;
-		switch (theCodeSystem.getStructureFhirVersionEnum()) {
+		FhirVersionEnum structureFhirVersionEnum = getFhirVersionEnum(theFhirContext, theCodeSystem);
+		switch (structureFhirVersionEnum) {
 			case R4: {
 				url = ((org.hl7.fhir.r4.model.CodeSystem) theCodeSystem).getUrl();
+				break;
+			}
+			case R4B: {
+				url = ((org.hl7.fhir.r4b.model.CodeSystem) theCodeSystem).getUrl();
 				break;
 			}
 			case R5: {
@@ -509,20 +563,25 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 			}
 			case DSTU3:
 			default:
-				throw new IllegalArgumentException(Msg.code(696) + "Can not handle version: " + theCodeSystem.getStructureFhirVersionEnum());
+				throw new IllegalArgumentException(
+						Msg.code(696) + "Can not handle version: " + structureFhirVersionEnum);
 		}
 		return url;
 	}
 
-	public static String getValueSetVersion(@Nonnull IBaseResource theValueSet) {
+	public static String getValueSetVersion(@Nonnull FhirContext theFhirContext, @Nonnull IBaseResource theValueSet) {
 		String version;
-		switch (theValueSet.getStructureFhirVersionEnum()) {
+		switch (getFhirVersionEnum(theFhirContext, theValueSet)) {
 			case DSTU3: {
 				version = ((org.hl7.fhir.dstu3.model.ValueSet) theValueSet).getVersion();
 				break;
 			}
 			case R4: {
 				version = ((org.hl7.fhir.r4.model.ValueSet) theValueSet).getVersion();
+				break;
+			}
+			case R4B: {
+				version = ((org.hl7.fhir.r4b.model.ValueSet) theValueSet).getVersion();
 				break;
 			}
 			case R5: {
@@ -536,6 +595,22 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 				version = null;
 		}
 		return version;
+	}
+
+	/**
+	 * N.B.:  We are keeping this as a shim due to the upgrade we did to core 5.6.97+
+	 */
+	public static FhirVersionEnum getFhirVersionEnum(
+			@Nonnull FhirContext theFhirContext, @Nonnull IBaseResource theResource) {
+		FhirVersionEnum structureFhirVersionEnum = theResource.getStructureFhirVersionEnum();
+		// TODO: Address this when core lib version is bumped
+		if (theResource.getStructureFhirVersionEnum() == FhirVersionEnum.R5
+				&& theFhirContext.getVersion().getVersion() == FhirVersionEnum.R4B) {
+			if (!(theResource instanceof org.hl7.fhir.r5.model.Resource)) {
+				structureFhirVersionEnum = FhirVersionEnum.R4B;
+			}
+		}
+		return structureFhirVersionEnum;
 	}
 
 	private static HashMap<String, String> buildUspsCodes() {
@@ -789,7 +864,6 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 		iso4217Codes.put("ZWL", "Zimbabwean dollar A/10");
 		return iso4217Codes;
 	}
-
 
 	private static HashMap<String, String> buildIso3166Codes() {
 		HashMap<String, String> codes = new HashMap<>();
@@ -1297,5 +1371,4 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 		codes.put("ZWE", "Zimbabwe");
 		return codes;
 	}
-
 }

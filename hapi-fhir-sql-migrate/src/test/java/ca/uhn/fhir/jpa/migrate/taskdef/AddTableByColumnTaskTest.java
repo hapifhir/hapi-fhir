@@ -24,7 +24,7 @@ public class AddTableByColumnTaskTest extends BaseTest {
 		before(theTestDatabaseDetails);
 
 		MyMigrationTasks migrator = new MyMigrationTasks();
-		getMigrator().addTasks(migrator.getTasks(VersionEnum.V3_3_0, VersionEnum.V3_6_0));
+		getMigrator().addTasks(migrator.getTaskList(VersionEnum.V3_3_0, VersionEnum.V3_6_0));
 		getMigrator().migrate();
 
 		assertThat(JdbcUtils.getTableNames(getConnectionProperties()), containsInAnyOrder("FOO_TABLE", "TGT_TABLE"));

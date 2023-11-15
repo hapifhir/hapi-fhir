@@ -1,10 +1,8 @@
-package ca.uhn.fhir.mdm.api;
-
 /*-
  * #%L
  * HAPI FHIR - Master Data Management
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,9 +17,10 @@ package ca.uhn.fhir.mdm.api;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.mdm.api;
 
 import ca.uhn.fhir.model.primitive.IdDt;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
+import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 
@@ -32,11 +31,11 @@ public interface IMdmLinkExpandSvc {
 
 	Set<String> expandMdmBySourceResourceId(IIdType theId);
 
-	Set<String> expandMdmBySourceResourcePid(ResourcePersistentId theSourceResourcePid);
+	Set<String> expandMdmBySourceResourcePid(IResourcePersistentId theSourceResourcePid);
 
-	Set<String> expandMdmByGoldenResourceId(ResourcePersistentId theGoldenResourcePid);
+	Set<String> expandMdmByGoldenResourceId(IResourcePersistentId theGoldenResourcePid);
 
-	Set<String> expandMdmByGoldenResourcePid(ResourcePersistentId theGoldenResourcePid);
+	Set<String> expandMdmByGoldenResourcePid(IResourcePersistentId theGoldenResourcePid);
 
 	Set<String> expandMdmByGoldenResourceId(IdDt theId);
 }

@@ -11,6 +11,7 @@ import org.elasticsearch.client.RestHighLevelClient;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.testcontainers.elasticsearch.ElasticsearchContainer;
@@ -19,9 +20,12 @@ import java.io.IOException;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
+import static org.springframework.test.annotation.DirtiesContext.ClassMode.AFTER_CLASS;
 
 @RequiresDocker
 @ExtendWith(SpringExtension.class)
+// we don't reuse this context, so discard it and release our elastic container.
+@DirtiesContext(classMode = AFTER_CLASS)
 @ContextConfiguration(classes = {ElasticsearchWithPrefixConfig.class})
 public class ElasticsearchPrefixTest {
 

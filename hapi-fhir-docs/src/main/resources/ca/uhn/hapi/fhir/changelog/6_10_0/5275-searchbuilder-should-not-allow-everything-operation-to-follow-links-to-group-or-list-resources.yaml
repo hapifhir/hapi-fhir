@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 5275
+title: "Previously, when calling `$everything` operation on a Patient instance, it was possible to retrieve data related 
+to another patient via a List or Group resources. This has been fixed."
+

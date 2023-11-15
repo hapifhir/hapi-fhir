@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.dao;
-
 /*-
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.dao;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.dao;
 
 import com.google.common.collect.Multimap;
 import com.google.common.collect.MultimapBuilder;
@@ -33,8 +32,8 @@ import java.util.stream.Collectors;
 public class IdSubstitutionMap {
 
 	private final Map<Entry, Entry> myMap = new HashMap<>();
-	private final Multimap<Entry, Entry> myReverseMap = MultimapBuilder.hashKeys().arrayListValues().build();
-
+	private final Multimap<Entry, Entry> myReverseMap =
+			MultimapBuilder.hashKeys().arrayListValues().build();
 
 	public boolean containsSource(IIdType theId) {
 		if (theId.isLocal()) {
@@ -64,7 +63,6 @@ public class IdSubstitutionMap {
 		return null;
 	}
 
-
 	public IIdType getForSource(String theId) {
 		Entry target = myMap.get(new Entry(theId));
 		if (target != null) {
@@ -75,11 +73,9 @@ public class IdSubstitutionMap {
 	}
 
 	public List<Pair<IIdType, IIdType>> entrySet() {
-		return myMap
-			.entrySet()
-			.stream()
-			.map(t->Pair.of(t.getKey().myId, t.getValue().myId))
-			.collect(Collectors.toList());
+		return myMap.entrySet().stream()
+				.map(t -> Pair.of(t.getKey().myId, t.getValue().myId))
+				.collect(Collectors.toList());
 	}
 
 	public void put(IIdType theSource, IIdType theTarget) {
@@ -90,7 +86,6 @@ public class IdSubstitutionMap {
 	public boolean isEmpty() {
 		return myMap.isEmpty();
 	}
-
 
 	private static class Entry {
 
@@ -123,7 +118,6 @@ public class IdSubstitutionMap {
 		public int hashCode() {
 			return myUnversionedId.hashCode();
 		}
-
 	}
 
 	static String toVersionlessValue(IIdType theId) {

@@ -43,10 +43,10 @@ import ca.uhn.fhir.rest.client.api.IHttpClient;
 import ca.uhn.fhir.rest.client.api.IRestfulClient;
 import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
 import ca.uhn.fhir.rest.client.exceptions.InvalidResponseException;
-import ca.uhn.fhir.rest.client.impl.BaseClient;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.system.HapiSystemProperties;
 import ca.uhn.fhir.util.TestUtil;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.input.ReaderInputStream;
@@ -83,6 +83,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
+import static ca.uhn.fhir.test.utilities.getMethodNameUtil.getTestName;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.either;
@@ -118,7 +119,7 @@ public class GenericClientDstu2Test {
 		myHttpResponse = mock(HttpResponse.class, new ReturnsDeepStubs());
 		myResponseCount = 0;
 
-		System.setProperty(BaseClient.HAPI_CLIENT_KEEPRESPONSES, "true");
+		HapiSystemProperties.enableHapiClientKeepResponses();
 	}
 
 	private String extractBody(ArgumentCaptor<HttpUriRequest> capt, int count) throws IOException {
@@ -191,7 +192,7 @@ public class GenericClientDstu2Test {
 
 	@Test
 	public void testAcceptHeaderPreflightConformance() throws Exception {
-		String methodName = "testAcceptHeaderPreflightConformance";
+		String methodName = getTestName();
 		final IParser p = ourCtx.newXmlParser();
 
 		final Conformance conf = new Conformance();
@@ -234,7 +235,7 @@ public class GenericClientDstu2Test {
 
 	@Test
 	public void testAcceptHeaderPreflightConformancePreferJson() throws Exception {
-		String methodName = "testAcceptHeaderPreflightConformancePreferJson";
+		String methodName = getTestName();
 		final IParser p = ourCtx.newXmlParser();
 
 		final Conformance conf = new Conformance();

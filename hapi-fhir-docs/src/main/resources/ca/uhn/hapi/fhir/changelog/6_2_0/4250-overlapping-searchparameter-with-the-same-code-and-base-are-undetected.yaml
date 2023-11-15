@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 4250
+title: "Previously, SearchParameters with identical codes and bases could be created. This has been corrected. If a SearchParameter is submitted which is a duplicate, it will be rejected."

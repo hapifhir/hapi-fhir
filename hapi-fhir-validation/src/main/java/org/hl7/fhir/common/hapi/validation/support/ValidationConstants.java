@@ -1,5 +1,3 @@
-package org.hl7.fhir.common.hapi.validation.support;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server
@@ -19,6 +17,7 @@ package org.hl7.fhir.common.hapi.validation.support;
  * limitations under the License.
  * #L%
  */
+package org.hl7.fhir.common.hapi.validation.support;
 
 public class ValidationConstants {
 
@@ -29,5 +28,5 @@ public class ValidationConstants {
 	public static final String LOINC_GENERIC_VALUESET_URL_PLUS_SLASH = LOINC_GENERIC_VALUESET_URL + "/";
 
 	// not to be instantiated
-	private ValidationConstants() { }
+	private ValidationConstants() {}
 }

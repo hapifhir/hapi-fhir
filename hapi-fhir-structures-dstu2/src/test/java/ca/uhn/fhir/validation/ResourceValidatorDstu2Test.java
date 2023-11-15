@@ -24,6 +24,7 @@ import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.parser.StrictErrorHandler;
 import ca.uhn.fhir.parser.XmlParserDstu2Test.TestPatientFor327;
+import ca.uhn.fhir.util.ClasspathUtil;
 import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.validation.schematron.SchematronBaseValidator;
 import org.apache.commons.io.IOUtils;
@@ -125,7 +126,7 @@ public class ResourceValidatorDstu2Test {
 
 	@Test
 	public void testSchemaBundleValidatorFails() throws IOException {
-		String res = IOUtils.toString(ResourceValidatorDstu2Test.class.getResourceAsStream("/bundle-example.json"), StandardCharsets.UTF_8);
+		String res = ClasspathUtil.loadResource("/bundle-example.json");
 		Bundle b = ourCtx.newJsonParser().parseResource(Bundle.class, res);
 
 
@@ -140,11 +141,11 @@ public class ResourceValidatorDstu2Test {
 		timing.getRepeat().setDurationUnits((UnitsOfTimeEnum) null);
 		p.getDosageInstructionFirstRep().setTiming(timing);
 
-		ourLog.info(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(b));
+		ourLog.debug(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(b));
 
 		validationResult = val.validateWithResult(b);
 
-		ourLog.info(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(validationResult.toOperationOutcome()));
+		ourLog.debug(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(validationResult.toOperationOutcome()));
 
 		assertFalse(validationResult.isSuccessful());
 
@@ -154,10 +155,10 @@ public class ResourceValidatorDstu2Test {
 
 	@Test
 	public void testSchemaBundleValidatorIsSuccessful() throws IOException {
-		String res = IOUtils.toString(ResourceValidatorDstu2Test.class.getResourceAsStream("/bundle-example.json"), StandardCharsets.UTF_8);
+		String res = ClasspathUtil.loadResource("/bundle-example.json");
 		Bundle b = ourCtx.newJsonParser().parseResource(Bundle.class, res);
 
-		ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(b));
+		ourLog.debug(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(b));
 
 		FhirValidator val = createFhirValidator();
 
@@ -200,7 +201,7 @@ public class ResourceValidatorDstu2Test {
 		String res = IOUtils.toString(ResourceValidatorDstu2Test.class.getResourceAsStream("/patient-example-dicom.json"));
 		Patient p = ourCtx.newJsonParser().parseResource(Patient.class, res);
 
-		ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(p));
+		ourLog.debug(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(p));
 
 		FhirValidator val = ourCtx.newValidator();
 		val.setValidateAgainstStandardSchema(true);
@@ -213,14 +214,14 @@ public class ResourceValidatorDstu2Test {
 		result = val.validateWithResult(p);
 		assertFalse(result.isSuccessful());
 		OperationOutcome operationOutcome = (OperationOutcome) result.getOperationOutcome();
-		ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(operationOutcome));
+		ourLog.debug(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(operationOutcome));
 		assertEquals(1, operationOutcome.getIssue().size());
 		assertThat(operationOutcome.getIssueFirstRep().getDetailsElement().getValue(), containsString("cvc-complex-type"));
 	}
 
 	@Test
 	public void testSchematronResourceValidator() throws IOException {
-		String res = IOUtils.toString(ResourceValidatorDstu2Test.class.getResourceAsStream("/patient-example-dicom.json"), StandardCharsets.UTF_8);
+		String res = ClasspathUtil.loadResource("/patient-example-dicom.json");
 		Patient p = ourCtx.newJsonParser().parseResource(Patient.class, res);
 
 		FhirValidator val = ourCtx.newValidator();
@@ -234,7 +235,7 @@ public class ResourceValidatorDstu2Test {
 		validationResult = val.validateWithResult(p);
 		assertFalse(validationResult.isSuccessful());
 		OperationOutcome operationOutcome = (OperationOutcome) validationResult.toOperationOutcome();
-		ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(operationOutcome));
+		ourLog.debug(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(operationOutcome));
 		assertEquals(1, operationOutcome.getIssue().size());
 		assertThat(operationOutcome.getIssueFirstRep().getDiagnostics(), containsString("cpt-2:"));
 

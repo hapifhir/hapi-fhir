@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.test.config;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server Test Utilities
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.test.config;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.test.config;
 
 import ca.uhn.fhir.jpa.dao.FulltextSearchSvcImpl;
 import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
@@ -28,6 +27,7 @@ import ca.uhn.fhir.jpa.search.HapiHSearchAnalysisConfigurers;
 import ca.uhn.fhir.jpa.search.elastic.ElasticsearchHibernatePropertiesBuilder;
 import ca.uhn.fhir.jpa.search.lastn.ElasticsearchSvcImpl;
 import ca.uhn.fhir.jpa.test.util.TestHSearchEventDispatcher;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.test.utilities.docker.RequiresDocker;
 import org.hibernate.search.backend.elasticsearch.index.IndexStatus;
 import org.hibernate.search.backend.lucene.cfg.LuceneBackendSettings;
@@ -37,8 +37,10 @@ import org.hibernate.search.mapper.orm.cfg.HibernateOrmMapperSettings;
 import org.hibernate.search.mapper.orm.schema.management.SchemaManagementStrategyName;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Primary;
 import org.testcontainers.elasticsearch.ElasticsearchContainer;
 
@@ -96,8 +98,10 @@ public class TestHSearchAddInConfig {
 			luceneProperties.put(BackendSettings.backendKey(LuceneIndexSettings.IO_WRITER_INFOSTREAM), "true");
 			luceneProperties.put(HibernateOrmMapperSettings.ENABLED, "true");
 
-			return (theProperties) ->
+			return (theProperties) -> {
+				ourLog.debug("Configuring Hibernate Search - {}", luceneProperties);
 				theProperties.putAll(luceneProperties);
+			};
 		}
 
 
@@ -131,9 +135,13 @@ public class TestHSearchAddInConfig {
 			luceneHeapProperties.put(BackendSettings.backendKey(LuceneIndexSettings.DIRECTORY_TYPE), "local-heap");
 			luceneHeapProperties.put(BackendSettings.backendKey(LuceneBackendSettings.LUCENE_VERSION), "LUCENE_CURRENT");
 			luceneHeapProperties.put(HibernateOrmMapperSettings.ENABLED, "true");
+			luceneHeapProperties.put(BackendSettings.backendKey(LuceneIndexSettings.IO_WRITER_INFOSTREAM), "true");
+			luceneHeapProperties.put(Constants.HIBERNATE_INTEGRATION_ENVERS_ENABLED, "true");
 
-			return (theProperties) ->
+			return (theProperties) -> {
+				ourLog.info("Configuring Hibernate Search - {}", luceneHeapProperties);
 				theProperties.putAll(luceneHeapProperties);
+			};
 		}
 
 
@@ -177,7 +185,11 @@ public class TestHSearchAddInConfig {
 	 * Make sure you add {@link RequiresDocker} annotation to any uses.
 	 */
 	@Configuration
+	@Import(PooledElasticsearchContainerConfig.class)
 	public static class Elasticsearch {
+		@Autowired
+		ElasticsearchContainer myElasticsearchContainer;
+
 		@Bean
 		@Primary // override the default
 		IHSearchConfigurer hibernateSearchConfigurer(ElasticsearchContainer theContainer) {
@@ -194,7 +206,6 @@ public class TestHSearchAddInConfig {
 					.setIndexManagementWaitTimeoutMillis(10000)
 					.setRequiredIndexStatus(IndexStatus.YELLOW)
 					.setScrollTimeoutSecs(60 * 30) // 30 min for tests
-
 					.setHosts(host + ":" + httpPort)
 					.setProtocol("http")
 					.setUsername("")
@@ -209,32 +220,30 @@ public class TestHSearchAddInConfig {
 		}
 
 		@Bean
-		public ElasticsearchContainer elasticContainer() {
-			ElasticsearchContainer embeddedElasticSearch = TestElasticsearchContainerHelper.getEmbeddedElasticSearch();
-			embeddedElasticSearch.start();
-			return embeddedElasticSearch;
-		}
-
-		@PreDestroy
-		public void stop() {
-			elasticContainer().stop();
-		}
-
-		@Bean
 		public PartitionSettings partitionSettings() {
 			return new PartitionSettings();
 		}
 
 		@Bean()
 		public ElasticsearchSvcImpl myElasticsearchSvc() {
-			int elasticsearchPort = elasticContainer().getMappedPort(9200);
-			String host = elasticContainer().getHost();
+			int elasticsearchPort = myElasticsearchContainer.getMappedPort(9200);
+			String host = myElasticsearchContainer.getHost();
 			return new ElasticsearchSvcImpl("http", host + ":" + elasticsearchPort, null, null);
 		}
 
 		@PreDestroy
 		public void stopEsClient() throws IOException {
 			myElasticsearchSvc().close();
+		}
+	}
+
+	@Configuration
+	public static class PooledElasticsearchContainerConfig {
+		@Bean
+		public ElasticsearchContainer elasticContainer() {
+			ElasticsearchContainer embeddedElasticSearch = TestElasticsearchContainerHelper.getEmbeddedElasticSearch();
+			embeddedElasticSearch.start();
+			return embeddedElasticSearch;
 		}
 
 	}

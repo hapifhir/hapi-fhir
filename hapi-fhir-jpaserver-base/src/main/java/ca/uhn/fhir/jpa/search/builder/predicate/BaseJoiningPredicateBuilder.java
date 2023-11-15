@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.search.builder.predicate;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,10 +17,12 @@ package ca.uhn.fhir.jpa.search.builder.predicate;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.search.builder.predicate;
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
+import ca.uhn.fhir.jpa.util.QueryParameterUtils;
 import com.healthmarketscience.sqlbuilder.Condition;
 import com.healthmarketscience.sqlbuilder.NotCondition;
 import com.healthmarketscience.sqlbuilder.UnaryCondition;
@@ -30,13 +30,9 @@ import com.healthmarketscience.sqlbuilder.dbspec.basic.DbColumn;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbTable;
 import org.apache.commons.lang3.Validate;
 
-import javax.annotation.Nullable;
 import java.util.List;
 import java.util.stream.Collectors;
-
-import static ca.uhn.fhir.jpa.search.builder.QueryStack.toAndPredicate;
-import static ca.uhn.fhir.jpa.search.builder.QueryStack.toEqualToOrInPredicate;
-import static ca.uhn.fhir.jpa.search.builder.QueryStack.toOrPredicate;
+import javax.annotation.Nullable;
 
 public abstract class BaseJoiningPredicateBuilder extends BasePredicateBuilder {
 
@@ -59,18 +55,17 @@ public abstract class BaseJoiningPredicateBuilder extends BasePredicateBuilder {
 		return myColumnPartitionId;
 	}
 
-	public Condition combineWithRequestPartitionIdPredicate(RequestPartitionId theRequestPartitionId, Condition theCondition) {
+	public Condition combineWithRequestPartitionIdPredicate(
+			RequestPartitionId theRequestPartitionId, Condition theCondition) {
 		Condition partitionIdPredicate = createPartitionIdPredicate(theRequestPartitionId);
 		if (partitionIdPredicate == null) {
 			return theCondition;
 		}
-		return toAndPredicate(partitionIdPredicate, theCondition);
+		return QueryParameterUtils.toAndPredicate(partitionIdPredicate, theCondition);
 	}
-
 
 	@Nullable
 	public Condition createPartitionIdPredicate(RequestPartitionId theRequestPartitionId) {
-
 
 		if (theRequestPartitionId != null && !theRequestPartitionId.isAllPartitions()) {
 			Condition condition;
@@ -81,14 +76,15 @@ public abstract class BaseJoiningPredicateBuilder extends BasePredicateBuilder {
 			} else if (theRequestPartitionId.hasDefaultPartitionId() && defaultPartitionIsNull) {
 				List<String> placeholders = generatePlaceholders(theRequestPartitionId.getPartitionIdsWithoutDefault());
 				UnaryCondition partitionNullPredicate = UnaryCondition.isNull(getPartitionIdColumn());
-				Condition partitionIdsPredicate = toEqualToOrInPredicate(getPartitionIdColumn(), placeholders);
-				condition = toOrPredicate(partitionNullPredicate, partitionIdsPredicate);
+				Condition partitionIdsPredicate =
+						QueryParameterUtils.toEqualToOrInPredicate(getPartitionIdColumn(), placeholders);
+				condition = QueryParameterUtils.toOrPredicate(partitionNullPredicate, partitionIdsPredicate);
 			} else {
 				List<Integer> partitionIds = theRequestPartitionId.getPartitionIds();
 				partitionIds = replaceDefaultPartitionIdIfNonNull(getPartitionSettings(), partitionIds);
 
 				List<String> placeholders = generatePlaceholders(partitionIds);
-				condition = toEqualToOrInPredicate(getPartitionIdColumn(), placeholders);
+				condition = QueryParameterUtils.toEqualToOrInPredicate(getPartitionIdColumn(), placeholders);
 			}
 			return condition;
 		} else {
@@ -100,24 +96,22 @@ public abstract class BaseJoiningPredicateBuilder extends BasePredicateBuilder {
 		Validate.notNull(theResourceIds, "theResourceIds must not be null");
 
 		// Handle the _id parameter by adding it to the tail
-		Condition inResourceIds = toEqualToOrInPredicate(getResourceIdColumn(), generatePlaceholders(theResourceIds));
+		Condition inResourceIds =
+				QueryParameterUtils.toEqualToOrInPredicate(getResourceIdColumn(), generatePlaceholders(theResourceIds));
 		if (theInverse) {
 			inResourceIds = new NotCondition(inResourceIds);
 		}
 		return inResourceIds;
-
 	}
 
-	public static List<Integer> replaceDefaultPartitionIdIfNonNull(PartitionSettings thePartitionSettings, List<Integer> thePartitionIds) {
+	public static List<Integer> replaceDefaultPartitionIdIfNonNull(
+			PartitionSettings thePartitionSettings, List<Integer> thePartitionIds) {
 		List<Integer> partitionIds = thePartitionIds;
 		if (thePartitionSettings.getDefaultPartitionId() != null) {
-			partitionIds = partitionIds
-				.stream()
-				.map(t -> t == null ? thePartitionSettings.getDefaultPartitionId() : t)
-				.collect(Collectors.toList());
+			partitionIds = partitionIds.stream()
+					.map(t -> t == null ? thePartitionSettings.getDefaultPartitionId() : t)
+					.collect(Collectors.toList());
 		}
 		return partitionIds;
 	}
-
-
 }

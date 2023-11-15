@@ -1,0 +1,7 @@
+---
+type: add
+issue: 4030
+title: "Previously, Patient Bulk Export only supported endpoint [fhir base]/Patient/$export, which exports all patients. 
+Now, Patient Export can be done at the instance level, following this format: `[fhir base]/Patient/[id]/$export`, which will export only the records for one patient.
+Additionally, added support for the `patient` parameter in Patient Bulk Export, which is another way to get the records of only one patient."
+

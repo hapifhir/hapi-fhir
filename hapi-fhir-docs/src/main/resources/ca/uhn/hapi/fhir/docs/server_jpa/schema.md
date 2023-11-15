@@ -255,11 +255,11 @@ an **HFJ_FORCED_ID** row exists corresponding to the equivalent **HFJ_RESOURCE**
 visible or usable by FHIR clients and it becomes purely an internal ID to the JPA server.
 
 If the server has been configured with
-a [Resource Server ID Strategy](/apidocs/hapi-fhir-storage/undefined/ca/uhn/fhir/jpa/api/config/DaoConfig.html#setResourceServerIdStrategy(ca.uhn.fhir.jpa.api.config.DaoConfig.IdStrategyEnum))
-of [UUID](/apidocs/hapi-fhir-storage/undefined/ca/uhn/fhir/jpa/api/config/DaoConfig.IdStrategyEnum.html#UUID), or the
+a [Resource Server ID Strategy](/apidocs/hapi-fhir-storage/undefined/ca/uhn/fhir/jpa/api/config/JpaStorageSettings.html#setResourceServerIdStrategy(ca.uhn.fhir.jpa.api.config.JpaStorageSettings.IdStrategyEnum))
+of [UUID](/apidocs/hapi-fhir-storage/undefined/ca/uhn/fhir/jpa/api/config/JpaStorageSettings.IdStrategyEnum.html#UUID), or the
 server has been configured with
-a [Resource Client ID Strategy](/apidocs/hapi-fhir-storage/undefined/ca/uhn/fhir/jpa/api/config/DaoConfig.html#setResourceClientIdStrategy(ca.uhn.fhir.jpa.api.config.DaoConfig.ClientIdStrategyEnum))
-of [ANY](/apidocs/hapi-fhir-storage/undefined/ca/uhn/fhir/jpa/api/config/DaoConfig.ClientIdStrategyEnum.html#ANY)
+a [Resource Client ID Strategy](/apidocs/hapi-fhir-storage/undefined/ca/uhn/fhir/jpa/api/config/JpaStorageSettings.html#setResourceClientIdStrategy(ca.uhn.fhir.jpa.api.config.JpaStorageSettings.ClientIdStrategyEnum))
+of [ANY](/apidocs/hapi-fhir-storage/undefined/ca/uhn/fhir/jpa/api/config/JpaStorageSettings.ClientIdStrategyEnum.html#ANY)
 the server will create a Forced ID for all resources (not only resources having textual IDs).
 
 ## Columns

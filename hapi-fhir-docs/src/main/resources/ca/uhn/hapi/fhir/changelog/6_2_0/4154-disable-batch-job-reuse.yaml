@@ -1,0 +1,7 @@
+---
+type: add
+issue: 4154
+jira: SMILE-5389
+title: "By default, if the `$export` operation receives a request that is identical to one that has been recently
+processed, it will attempt to reuse the batch job from the former request. A new configuration parameter has been
+introduced that disables this behavior and forces a new batch job on every call."

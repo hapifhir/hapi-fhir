@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.entity;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.entity;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.entity;
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 
@@ -29,9 +28,13 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
 @Entity
-@Table(name = "HFJ_PARTITION", uniqueConstraints = {
-	@UniqueConstraint(name = "IDX_PART_NAME", columnNames = {"PART_NAME"})
-})
+@Table(
+		name = "HFJ_PARTITION",
+		uniqueConstraints = {
+			@UniqueConstraint(
+					name = "IDX_PART_NAME",
+					columnNames = {"PART_NAME"})
+		})
 public class PartitionEntity {
 
 	public static final int MAX_NAME_LENGTH = 200;
@@ -44,8 +47,10 @@ public class PartitionEntity {
 	@Id
 	@Column(name = "PART_ID", nullable = false)
 	private Integer myId;
+
 	@Column(name = "PART_NAME", length = MAX_NAME_LENGTH, nullable = false)
 	private String myName;
+
 	@Column(name = "PART_DESC", length = MAX_DESC_LENGTH, nullable = true)
 	private String myDescription;
 

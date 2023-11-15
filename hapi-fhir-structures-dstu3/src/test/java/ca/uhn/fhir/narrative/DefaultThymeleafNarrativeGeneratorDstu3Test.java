@@ -163,7 +163,7 @@ public class DefaultThymeleafNarrativeGeneratorDstu3Test {
 
 		ourLog.info(output);
 
-		assertThat(output, containsString("<td><pre>YThis is a warning</pre></td>"));
+		assertThat(output, containsString("<td>YThis is a warning</td>"));
 	}
 
 	@Test

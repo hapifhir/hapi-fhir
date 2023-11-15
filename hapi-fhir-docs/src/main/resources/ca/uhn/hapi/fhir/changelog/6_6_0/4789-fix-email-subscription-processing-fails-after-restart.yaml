@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 4789
+title: "Previously, there was the possibility for a race condition to happen in the initialization 
+of the email subscription processing component that would result in email not being sent out. This 
+issue has been fixed."

@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 3865
+title: "Previously, Celsius and Fahrenheit temperature quantities were not normalized. This is now fixed.
+   This change requires reindexing of resources containing Celsius or Fahrenheit temperature quantities."

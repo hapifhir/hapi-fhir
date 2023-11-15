@@ -1,10 +1,8 @@
-package ca.uhn.fhir.util;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.util;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.util;
 
 import ca.uhn.fhir.i18n.HapiLocalizer;
 import ca.uhn.fhir.i18n.Msg;
@@ -57,7 +56,7 @@ public class TestUtil {
 	 * environment
 	 */
 	public static void doRandomizeLocaleAndTimezone() {
-//		Locale[] availableLocales = {Locale.CANADA, Locale.GERMANY, Locale.TAIWAN};
+		//		Locale[] availableLocales = {Locale.CANADA, Locale.GERMANY, Locale.TAIWAN};
 		Locale[] availableLocales = {Locale.US};
 		Locale.setDefault(availableLocales[(int) (Math.random() * availableLocales.length)]);
 		ourLog.info("Tests are running in locale: " + Locale.getDefault().getDisplayName());
@@ -79,7 +78,6 @@ public class TestUtil {
 
 		ourLog.info("Tests are using time zone: {}", TimeZone.getDefault().getID());
 	}
-
 
 	/**
 	 * <b>THIS IS FOR UNIT TESTS ONLY - DO NOT CALL THIS METHOD FROM USER CODE</b>
@@ -140,7 +138,6 @@ public class TestUtil {
 	public static void sleepAtLeast(long theMillis) {
 		sleepAtLeast(theMillis, true);
 	}
-
 
 	@SuppressWarnings("BusyWait")
 	public static void sleepAtLeast(long theMillis, boolean theLogProgress) {

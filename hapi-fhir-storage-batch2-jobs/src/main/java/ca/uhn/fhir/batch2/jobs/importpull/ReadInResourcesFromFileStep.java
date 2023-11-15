@@ -1,3 +1,22 @@
+/*-
+ * #%L
+ * hapi-fhir-storage-batch2-jobs
+ * %%
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
 package ca.uhn.fhir.batch2.jobs.importpull;
 
 import ca.uhn.fhir.batch2.api.IJobDataSink;
@@ -14,14 +33,15 @@ import ca.uhn.fhir.jpa.bulk.imprt.model.BulkImportJobFileJson;
 import ca.uhn.fhir.jpa.bulk.imprt.model.JobFileRowProcessingModeEnum;
 import ca.uhn.fhir.util.IoUtil;
 import com.google.common.io.LineReader;
-import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.StringReader;
+import javax.annotation.Nonnull;
 
-public class ReadInResourcesFromFileStep implements IJobStepWorker<Batch2BulkImportPullJobParameters, BulkImportFilePartitionResult, BulkImportRecord> {
+public class ReadInResourcesFromFileStep
+		implements IJobStepWorker<Batch2BulkImportPullJobParameters, BulkImportFilePartitionResult, BulkImportRecord> {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(ReadInResourcesFromFileStep.class);
 
@@ -31,14 +51,16 @@ public class ReadInResourcesFromFileStep implements IJobStepWorker<Batch2BulkImp
 		myBulkDataImportSvc = theBulkDataImportSvc;
 	}
 
-	// because we are using an unstable google api
+	// because we are using an unstable Google api
 	@SuppressWarnings("UnstableApiUsage")
-	@NotNull
+	@Nonnull
 	@Override
 	public RunOutcome run(
-		@NotNull StepExecutionDetails<Batch2BulkImportPullJobParameters, BulkImportFilePartitionResult> theStepExecutionDetails,
-		@NotNull IJobDataSink<BulkImportRecord> theDataSink
-	) throws JobExecutionFailedException {
+			@Nonnull
+					StepExecutionDetails<Batch2BulkImportPullJobParameters, BulkImportFilePartitionResult>
+							theStepExecutionDetails,
+			@Nonnull IJobDataSink<BulkImportRecord> theDataSink)
+			throws JobExecutionFailedException {
 		String jobId = theStepExecutionDetails.getParameters().getJobId();
 		int fileIndex = theStepExecutionDetails.getData().getFileIndex();
 		JobFileRowProcessingModeEnum mode = theStepExecutionDetails.getData().getProcessingMode();
@@ -74,9 +96,7 @@ public class ReadInResourcesFromFileStep implements IJobStepWorker<Batch2BulkImp
 		} catch (IOException ex) {
 			ourLog.error("Failed to read file : " + ex.getMessage());
 
-			throw new JobExecutionFailedException(Msg.code(2107)
-				+ " : Could not read file"
-			);
+			throw new JobExecutionFailedException(Msg.code(2107) + " : Could not read file");
 		} finally {
 			IoUtil.closeQuietly(reader);
 		}

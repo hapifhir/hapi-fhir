@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.model.entity;
-
 /*
  * #%L
  * HAPI FHIR JPA Model
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.model.entity;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.model.entity;
 
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.model.api.IQueryParameterType;
@@ -43,22 +42,29 @@ import javax.persistence.Table;
 
 @Embeddable
 @Entity
-@Table(name = "HFJ_SPIDX_COORDS", indexes = {
-	@Index(name = "IDX_SP_COORDS_HASH", columnList = "HASH_IDENTITY,SP_LATITUDE,SP_LONGITUDE"),
-	@Index(name = "IDX_SP_COORDS_UPDATED", columnList = "SP_UPDATED"),
-	@Index(name = "IDX_SP_COORDS_RESID", columnList = "RES_ID")
-})
+@Table(
+		name = "HFJ_SPIDX_COORDS",
+		indexes = {
+			@Index(
+					name = "IDX_SP_COORDS_HASH_V2",
+					columnList = "HASH_IDENTITY,SP_LATITUDE,SP_LONGITUDE,RES_ID,PARTITION_ID"),
+			@Index(name = "IDX_SP_COORDS_UPDATED", columnList = "SP_UPDATED"),
+			@Index(name = "IDX_SP_COORDS_RESID", columnList = "RES_ID")
+		})
 public class ResourceIndexedSearchParamCoords extends BaseResourceIndexedSearchParam {
 
 	public static final int MAX_LENGTH = 100;
 
 	private static final long serialVersionUID = 1L;
+
 	@Column(name = "SP_LATITUDE")
-	//@FullTextField
+	// @FullTextField
 	public double myLatitude;
+
 	@Column(name = "SP_LONGITUDE")
-	//@FullTextField
+	// @FullTextField
 	public double myLongitude;
+
 	@Id
 	@SequenceGenerator(name = "SEQ_SPIDX_COORDS", sequenceName = "SEQ_SPIDX_COORDS")
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_SPIDX_COORDS")
@@ -70,15 +76,25 @@ public class ResourceIndexedSearchParamCoords extends BaseResourceIndexedSearchP
 	@Column(name = "HASH_IDENTITY", nullable = true)
 	private Long myHashIdentity;
 
-	@ManyToOne(optional = false, fetch = FetchType.LAZY, cascade = {})
-	@JoinColumn(foreignKey = @ForeignKey(name = "FKC97MPK37OKWU8QVTCEG2NH9VN"),
-		name = "RES_ID", referencedColumnName = "RES_ID", nullable = false)
+	@ManyToOne(
+			optional = false,
+			fetch = FetchType.LAZY,
+			cascade = {})
+	@JoinColumn(
+			foreignKey = @ForeignKey(name = "FKC97MPK37OKWU8QVTCEG2NH9VN"),
+			name = "RES_ID",
+			referencedColumnName = "RES_ID",
+			nullable = false)
 	private ResourceTable myResource;
 
-	public ResourceIndexedSearchParamCoords() {
-	}
+	public ResourceIndexedSearchParamCoords() {}
 
-	public ResourceIndexedSearchParamCoords(PartitionSettings thePartitionSettings, String theResourceType, String theParamName, double theLatitude, double theLongitude) {
+	public ResourceIndexedSearchParamCoords(
+			PartitionSettings thePartitionSettings,
+			String theResourceType,
+			String theParamName,
+			double theLatitude,
+			double theLongitude) {
 		setPartitionSettings(thePartitionSettings);
 		setResourceType(theResourceType);
 		setParamName(theParamName);
@@ -146,7 +162,6 @@ public class ResourceIndexedSearchParamCoords extends BaseResourceIndexedSearchP
 	public void setId(Long theId) {
 		myId = theId;
 	}
-
 
 	public double getLatitude() {
 		return myLatitude;

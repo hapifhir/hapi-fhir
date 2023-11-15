@@ -1,10 +1,8 @@
-package ca.uhn.fhir.mdm.api;
-
 /*-
  * #%L
  * HAPI FHIR - Master Data Management
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.mdm.api;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.mdm.api;
 
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -47,7 +46,8 @@ public interface IMdmSubmitSvc {
 	 * @param theCriteria The FHIR search critieria for filtering the resources to be submitted for MDM processing..
 	 * @return the number of resources submitted for MDM processing.
 	 */
-	long submitSourceResourceTypeToMdm(String theSourceResourceType, String theCriteria, RequestDetails theRequestDetails);
+	long submitSourceResourceTypeToMdm(
+			String theSourceResourceType, String theCriteria, RequestDetails theRequestDetails);
 
 	/**
 	 * Convenience method that calls {@link #submitSourceResourceTypeToMdm(String, String)} with the type pre-populated.
@@ -55,6 +55,7 @@ public interface IMdmSubmitSvc {
 	 * @param theCriteria The FHIR search critieria for filtering the resources to be submitted for MDM processing.
 	 * @return the number of resources submitted for MDM processing.
 	 */
+	@Deprecated(forRemoval = true, since = "6.8.0")
 	long submitPractitionerTypeToMdm(String theCriteria, RequestDetails theRequestDetails);
 
 	/**
@@ -63,6 +64,7 @@ public interface IMdmSubmitSvc {
 	 * @param theCriteria The FHIR search critieria for filtering the resources to be submitted for MDM processing.
 	 * @return the number of resources submitted for MDM processing.
 	 */
+	@Deprecated(forRemoval = true, since = "6.8.0")
 	long submitPatientTypeToMdm(String theCriteria, RequestDetails theRequestDetails);
 
 	/**
@@ -86,5 +88,4 @@ public interface IMdmSubmitSvc {
 	 * @param theBufferSize
 	 */
 	public void setBufferSize(int theBufferSize);
-
 }

@@ -1,0 +1,5 @@
+---
+type: perf
+issue: 4545
+title: "The InterceptorService now maintains an EnumSet of all registered interceptor Pointcuts,
+   which should improve performance when testing for the existence of specific pointcuts."

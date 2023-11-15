@@ -1,10 +1,8 @@
-package ca.uhn.fhir.batch2.coordinator;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server - Batch2 Task Processor
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.batch2.coordinator;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.batch2.coordinator;
 
 import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
 import ca.uhn.fhir.batch2.api.VoidModel;
@@ -26,18 +25,21 @@ import ca.uhn.fhir.batch2.model.JobWorkCursor;
 import ca.uhn.fhir.batch2.model.WorkChunkData;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.IModelJson;
+import ca.uhn.fhir.util.Logs;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
 
-class FinalStepDataSink<PT extends IModelJson, IT extends IModelJson> extends BaseDataSink<PT,IT,VoidModel> {
-	private static final Logger ourLog = LoggerFactory.getLogger(FinalStepDataSink.class);
+class FinalStepDataSink<PT extends IModelJson, IT extends IModelJson> extends BaseDataSink<PT, IT, VoidModel> {
+	private static final Logger ourLog = Logs.getBatchTroubleshootingLog();
 
 	/**
 	 * Constructor
 	 */
-	FinalStepDataSink(@Nonnull String theJobDefinitionId, @Nonnull String theInstanceId, @Nonnull JobWorkCursor<PT,IT,VoidModel> theJobWorkCursor) {
+	FinalStepDataSink(
+			@Nonnull String theJobDefinitionId,
+			@Nonnull String theInstanceId,
+			@Nonnull JobWorkCursor<PT, IT, VoidModel> theJobWorkCursor) {
 		super(theInstanceId, theJobWorkCursor);
 	}
 

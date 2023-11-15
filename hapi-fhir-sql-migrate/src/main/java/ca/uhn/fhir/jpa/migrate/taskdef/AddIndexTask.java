@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.migrate.taskdef;
-
 /*-
  * #%L
  * HAPI FHIR Server - SQL Migration
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.migrate.taskdef;
 
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import ca.uhn.fhir.jpa.migrate.JdbcUtils;
@@ -28,13 +27,13 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nonnull;
 import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
+import javax.annotation.Nonnull;
 
 public class AddIndexTask extends BaseTableTask {
 
@@ -69,7 +68,9 @@ public class AddIndexTask extends BaseTableTask {
 	public void validate() {
 		super.validate();
 		Validate.notBlank(myIndexName, "Index name not specified");
-		Validate.isTrue(myColumns.size() > 0, "Columns not specified for AddIndexTask " + myIndexName + " on table " + getTableName());
+		Validate.isTrue(
+				myColumns.size() > 0,
+				"Columns not specified for AddIndexTask " + myIndexName + " on table " + getTableName());
 		Validate.notNull(myUnique, "Uniqueness not specified");
 		setDescription("Add " + myIndexName + " index to table " + getTableName());
 	}
@@ -82,7 +83,13 @@ public class AddIndexTask extends BaseTableTask {
 			return;
 		}
 
-		logInfo(ourLog, "Going to add a {} index named {} on table {} for columns {}", (myUnique ? "UNIQUE" : "NON-UNIQUE"), myIndexName, getTableName(), myColumns);
+		logInfo(
+				ourLog,
+				"Going to add a {} index named {} on table {} for columns {}",
+				(myUnique ? "UNIQUE" : "NON-UNIQUE"),
+				myIndexName,
+				getTableName(),
+				myColumns);
 
 		String sql = generateSql();
 		String tableName = getTableName();
@@ -126,32 +133,32 @@ public class AddIndexTask extends BaseTableTask {
 			mssqlWhereClause = buildMSSqlNotNullWhereClause();
 		}
 		// Should we do this non-transactionally?  Avoids a write-lock, but introduces weird failure modes.
-		String postgresOnline = "";
-		String oracleOnlineDeferred = "";
+		String postgresOnlineClause = "";
+		String msSqlOracleOnlineClause = "";
 		if (myOnline) {
 			switch (getDriverType()) {
 				case POSTGRES_9_4:
 				case COCKROACHDB_21_1:
-					postgresOnline = "CONCURRENTLY ";
+					postgresOnlineClause = "CONCURRENTLY ";
 					// This runs without a lock, and can't be done transactionally.
 					setTransactional(false);
 					break;
 				case ORACLE_12C:
-					oracleOnlineDeferred = " ONLINE DEFERRED INVALIDATION";
+					if (myMetadataSource.isOnlineIndexSupported(getConnectionProperties())) {
+						msSqlOracleOnlineClause = " ONLINE DEFERRED INVALIDATION";
+					}
 					break;
 				case MSSQL_2012:
 					if (myMetadataSource.isOnlineIndexSupported(getConnectionProperties())) {
-						oracleOnlineDeferred = " WITH (ONLINE = ON)";
+						msSqlOracleOnlineClause = " WITH (ONLINE = ON)";
 					}
 					break;
 				default:
 			}
 		}
 
-
-		String sql =
-			"create " + unique + "index " + postgresOnline + myIndexName +
-			" on " + getTableName() + "(" + columns + ")" + includeClause +  mssqlWhereClause + oracleOnlineDeferred;
+		String sql = "create " + unique + "index " + postgresOnlineClause + myIndexName + " on " + getTableName() + "("
+				+ columns + ")" + includeClause + mssqlWhereClause + msSqlOracleOnlineClause;
 		return sql;
 	}
 
@@ -188,6 +195,7 @@ public class AddIndexTask extends BaseTableTask {
 	public void setOnline(boolean theFlag) {
 		myOnline = theFlag;
 	}
+
 	@Override
 	protected void generateEquals(EqualsBuilder theBuilder, BaseTask theOtherObject) {
 		super.generateEquals(theBuilder, theOtherObject);
@@ -198,7 +206,6 @@ public class AddIndexTask extends BaseTableTask {
 		theBuilder.append(myUnique, otherObject.myUnique);
 		theBuilder.append(myIncludeColumns, otherObject.myIncludeColumns);
 		theBuilder.append(myOnline, otherObject.myOnline);
-
 	}
 
 	@Override

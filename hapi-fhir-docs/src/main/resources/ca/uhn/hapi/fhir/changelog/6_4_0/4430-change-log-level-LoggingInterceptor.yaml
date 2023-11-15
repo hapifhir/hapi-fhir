@@ -1,0 +1,5 @@
+---
+type: change
+issue: 4430
+title: "The ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor now logs request/response bodies at the DEBUG level.
+   This is changed from INFO level."

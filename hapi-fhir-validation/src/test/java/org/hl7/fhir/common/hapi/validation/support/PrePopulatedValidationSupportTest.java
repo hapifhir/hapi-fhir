@@ -6,6 +6,9 @@ import org.hl7.fhir.r4.model.StructureDefinition;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.jupiter.api.Test;
 
+import java.util.Map;
+
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
 
 public class PrePopulatedValidationSupportTest {
@@ -33,4 +36,19 @@ public class PrePopulatedValidationSupportTest {
 
 	}
 
+	@Test
+	public void testAddBinary() {
+		final Map<String, byte[]> EXPECTED_BINARIES_MAP = Map.of(
+			"dummyBinary1.txt", "myDummyContent1".getBytes(),
+			"dummyBinary2.txt", "myDummyContent2".getBytes()
+		);
+
+		for (Map.Entry<String,byte[]> entry : EXPECTED_BINARIES_MAP.entrySet()) {
+			mySvc.addBinary(entry.getValue(),entry.getKey());
+		}
+
+		for (Map.Entry<String,byte[]> entry : EXPECTED_BINARIES_MAP.entrySet()) {
+			assertArrayEquals(entry.getValue(), mySvc.fetchBinary(entry.getKey()));
+		}
+	}
 }

@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 4734
+title: "Fixed a regression introduced by 4624 that prevented subscriptions from loading into the in-memory
+subscription cache on system startup."
+

@@ -1,0 +1,4 @@
+---
+type: add
+issue: 4133
+title: "Extend $member-match to validate matched patient against family name and birthdate"

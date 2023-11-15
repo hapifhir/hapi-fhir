@@ -39,7 +39,7 @@ public class SnapshotGeneratorR4Test {
 		// Generate the snapshot
 		StructureDefinition snapshot = (StructureDefinition) chain.generateSnapshot(new ValidationSupportContext(chain), differential, "http://foo", null, "THE BEST PROFILE");
 
-		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(snapshot));
+		ourLog.debug(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(snapshot));
 
 		assertEquals(54, snapshot.getSnapshot().getElement().size());
 	}

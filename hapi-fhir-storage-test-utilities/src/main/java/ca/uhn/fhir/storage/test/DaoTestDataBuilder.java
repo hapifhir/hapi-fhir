@@ -1,10 +1,8 @@
-package ca.uhn.fhir.storage.test;
-
 /*-
  * #%L
  * hapi-fhir-storage-test-utilities
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,11 +17,13 @@ package ca.uhn.fhir.storage.test;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.storage.test;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
-import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.test.utilities.ITestDataBuilder;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.SetMultimap;
@@ -39,19 +39,20 @@ import org.springframework.context.annotation.Configuration;
 
 /**
  * Implements ITestDataBuilder via a live DaoRegistry.
- *
+ * Note: this implements {@link AfterEachCallback} and will delete any resources created when registered
+ * via {@link org.junit.jupiter.api.extension.RegisterExtension}.
  * Add the inner {@link Config} to your spring context to inject this.
  * For convenience, you can still implement ITestDataBuilder on your test class, and delegate the missing methods to this bean.
  */
-public class DaoTestDataBuilder implements ITestDataBuilder, AfterEachCallback {
+public class DaoTestDataBuilder implements ITestDataBuilder.WithSupport, ITestDataBuilder.Support, AfterEachCallback {
 	private static final Logger ourLog = LoggerFactory.getLogger(DaoTestDataBuilder.class);
 
 	final FhirContext myFhirCtx;
 	final DaoRegistry myDaoRegistry;
-	SystemRequestDetails mySrd;
+	RequestDetails mySrd;
 	final SetMultimap<String, IIdType> myIds = HashMultimap.create();
 
-	public DaoTestDataBuilder(FhirContext theFhirCtx, DaoRegistry theDaoRegistry, SystemRequestDetails theSrd) {
+	public DaoTestDataBuilder(FhirContext theFhirCtx, DaoRegistry theDaoRegistry, RequestDetails theSrd) {
 		myFhirCtx = theFhirCtx;
 		myDaoRegistry = theDaoRegistry;
 		mySrd = theSrd;
@@ -75,7 +76,19 @@ public class DaoTestDataBuilder implements ITestDataBuilder, AfterEachCallback {
 		//noinspection rawtypes
 		IFhirResourceDao dao = myDaoRegistry.getResourceDao(theResource.getClass());
 		//noinspection unchecked
-		return dao.update(theResource, mySrd).getId().toUnqualifiedVersionless();
+		IIdType id = dao.update(theResource, mySrd).getId().toUnqualifiedVersionless();
+		myIds.put(theResource.fhirType(), id);
+		return id;
+	}
+
+	@Override
+	public Support getTestDataBuilderSupport() {
+		return this;
+	}
+
+	@Override
+	public void setRequestId(String theRequestId) {
+		mySrd.setRequestId(theRequestId);
 	}
 
 	@Override

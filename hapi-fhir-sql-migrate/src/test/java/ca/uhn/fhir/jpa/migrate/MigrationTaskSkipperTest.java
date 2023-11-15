@@ -16,7 +16,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 
 public class MigrationTaskSkipperTest {
-	public static final String RELEASE = "4_1_0";
+	public static final String RELEASE = "4.1.0";
 	public static final String DATE_PREFIX = "20191214.";
 	private static final String VERSION_PREFIX = RELEASE + "." + DATE_PREFIX;
 	private List<BaseTask> myTasks;
@@ -104,7 +104,7 @@ public class MigrationTaskSkipperTest {
 
 	private void assertSkipped(List<BaseTask> theTasks, Integer... theVersions) {
 		Set<String> expectedVersions = integersToVersions(theVersions).collect(Collectors.toSet());
-		Set<String> taskVersions = theTasks.stream().filter(BaseTask::isDoNothing).map(BaseTask::getFlywayVersion).collect(Collectors.toSet());
+		Set<String> taskVersions = theTasks.stream().filter(BaseTask::isDoNothing).map(BaseTask::getMigrationVersion).collect(Collectors.toSet());
 		assertThat(taskVersions, equalTo(expectedVersions));
 	}
 

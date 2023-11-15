@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 4729
+title: "When there is an EID MDM MATCH, the MATCH link has no score. This issue has been fixed."

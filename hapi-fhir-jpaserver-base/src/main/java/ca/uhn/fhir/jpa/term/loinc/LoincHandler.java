@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.term.loinc;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.term.loinc;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.term.loinc;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
@@ -34,7 +33,8 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 
-import static org.apache.commons.lang3.StringUtils.*;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.trim;
 
 public class LoincHandler implements IZipContentsHandlerCsv {
 
@@ -44,7 +44,11 @@ public class LoincHandler implements IZipContentsHandlerCsv {
 	private final Map<String, CodeSystem.PropertyType> myPropertyNames;
 	private final Map<PartTypeAndPartName, String> myPartTypeAndPartNameToPartNumber;
 
-	public LoincHandler(TermCodeSystemVersion theCodeSystemVersion, Map<String, TermConcept> theCode2concept, Map<String, CodeSystem.PropertyType> thePropertyNames, Map<PartTypeAndPartName, String> thePartTypeAndPartNameToPartNumber) {
+	public LoincHandler(
+			TermCodeSystemVersion theCodeSystemVersion,
+			Map<String, TermConcept> theCode2concept,
+			Map<String, CodeSystem.PropertyType> thePropertyNames,
+			Map<PartTypeAndPartName, String> thePartTypeAndPartNameToPartNumber) {
 		myCodeSystemVersion = theCodeSystemVersion;
 		myCode2Concept = theCode2concept;
 		myPropertyNames = thePropertyNames;
@@ -64,10 +68,7 @@ public class LoincHandler implements IZipContentsHandlerCsv {
 			concept.setDisplay(display);
 
 			if (isNotBlank(shortName) && !display.equalsIgnoreCase(shortName)) {
-				concept
-					.addDesignation()
-					.setUseDisplay("ShortName")
-					.setValue(shortName);
+				concept.addDesignation().setUseDisplay("ShortName").setValue(shortName);
 			}
 
 			for (String nextPropertyName : myPropertyNames.keySet()) {
@@ -84,9 +85,15 @@ public class LoincHandler implements IZipContentsHandlerCsv {
 					switch (nextPropertyType) {
 						case STRING:
 							concept.addPropertyString(nextPropertyName, nextPropertyValue);
+							ourLog.trace(
+									"Adding string property: {} to concept.code {}",
+									nextPropertyName,
+									concept.getCode());
 							break;
+
 						case CODING:
-							// These are handles by the LOINC PartLink file
+							// "Coding" property types are handled by loincCodingProperties, partlink, hierarchy,
+							// RsnaPlaybook or DocumentOntology handlers
 							break;
 
 						case DECIMAL:
@@ -95,9 +102,9 @@ public class LoincHandler implements IZipContentsHandlerCsv {
 						case BOOLEAN:
 						case DATETIME:
 						case NULL:
-							throw new InternalErrorException(Msg.code(915) + "Don't know how to handle LOINC property of type: " + nextPropertyType);
+							throw new InternalErrorException(Msg.code(915)
+									+ "Don't know how to handle LOINC property of type: " + nextPropertyType);
 					}
-
 				}
 			}
 

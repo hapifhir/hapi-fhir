@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.model.entity;
-
 /*
  * #%L
  * HAPI FHIR JPA Model
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.model.entity;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.model.entity;
 
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.model.api.IQueryParameterType;
@@ -29,6 +28,8 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.ScaledNumberField;
 
+import java.math.BigDecimal;
+import java.util.Objects;
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
 import javax.persistence.Entity;
@@ -42,19 +43,20 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
-import java.math.BigDecimal;
-import java.util.Objects;
 
 @Embeddable
 @Entity
-@Table(name = "HFJ_SPIDX_NUMBER", indexes = {
-//	We used to have an index with name IDX_SP_NUMBER - Dont reuse
-	@Index(name = "IDX_SP_NUMBER_HASH_VAL_V2", columnList = "HASH_IDENTITY,SP_VALUE,RES_ID,PARTITION_ID"),
-	@Index(name = "IDX_SP_NUMBER_RESID_V2", columnList = "RES_ID, HASH_IDENTITY, SP_VALUE, PARTITION_ID")
-})
+@Table(
+		name = "HFJ_SPIDX_NUMBER",
+		indexes = {
+			//	We used to have an index with name IDX_SP_NUMBER - Dont reuse
+			@Index(name = "IDX_SP_NUMBER_HASH_VAL_V2", columnList = "HASH_IDENTITY,SP_VALUE,RES_ID,PARTITION_ID"),
+			@Index(name = "IDX_SP_NUMBER_RESID_V2", columnList = "RES_ID, HASH_IDENTITY, SP_VALUE, PARTITION_ID")
+		})
 public class ResourceIndexedSearchParamNumber extends BaseResourceIndexedSearchParam {
 
 	private static final long serialVersionUID = 1L;
+
 	@Column(name = "SP_VALUE", nullable = true)
 	@ScaledNumberField
 	public BigDecimal myValue;
@@ -70,15 +72,21 @@ public class ResourceIndexedSearchParamNumber extends BaseResourceIndexedSearchP
 	@Column(name = "HASH_IDENTITY", nullable = true)
 	private Long myHashIdentity;
 
-	@ManyToOne(optional = false, fetch = FetchType.LAZY, cascade = {})
-	@JoinColumn(foreignKey = @ForeignKey(name = "FK_SP_NUMBER_RES"),
-		name = "RES_ID", referencedColumnName = "RES_ID", nullable = false)
+	@ManyToOne(
+			optional = false,
+			fetch = FetchType.LAZY,
+			cascade = {})
+	@JoinColumn(
+			foreignKey = @ForeignKey(name = "FK_SP_NUMBER_RES"),
+			name = "RES_ID",
+			referencedColumnName = "RES_ID",
+			nullable = false)
 	private ResourceTable myResource;
 
-	public ResourceIndexedSearchParamNumber() {
-	}
+	public ResourceIndexedSearchParamNumber() {}
 
-	public ResourceIndexedSearchParamNumber(PartitionSettings thePartitionSettings, String theResourceType, String theParamName, BigDecimal theValue) {
+	public ResourceIndexedSearchParamNumber(
+			PartitionSettings thePartitionSettings, String theResourceType, String theParamName, BigDecimal theValue) {
 		setPartitionSettings(thePartitionSettings);
 		setResourceType(theResourceType);
 		setParamName(theParamName);
@@ -129,8 +137,16 @@ public class ResourceIndexedSearchParamNumber extends BaseResourceIndexedSearchP
 		b.append(getResourceType(), obj.getResourceType());
 		b.append(getParamName(), obj.getParamName());
 		b.append(getHashIdentity(), obj.getHashIdentity());
+		b.append(normalizeForEqualityComparison(getValue()), normalizeForEqualityComparison(obj.getValue()));
 		b.append(isMissing(), obj.isMissing());
 		return b.isEquals();
+	}
+
+	private Double normalizeForEqualityComparison(BigDecimal theValue) {
+		if (theValue == null) {
+			return null;
+		}
+		return theValue.doubleValue();
 	}
 
 	public void setHashIdentity(Long theHashIdentity) {
@@ -160,7 +176,8 @@ public class ResourceIndexedSearchParamNumber extends BaseResourceIndexedSearchP
 		HashCodeBuilder b = new HashCodeBuilder();
 		b.append(getResourceType());
 		b.append(getParamName());
-		b.append(getValue());
+		b.append(getHashIdentity());
+		b.append(normalizeForEqualityComparison(getValue()));
 		b.append(isMissing());
 		return b.toHashCode();
 	}

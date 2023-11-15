@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.model.entity;
-
 /*
  * #%L
  * HAPI FHIR JPA Model
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.model.entity;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.model.entity;
 
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.util.UcumServiceUtil;
@@ -30,6 +29,8 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 import org.fhir.ucum.Pair;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.ScaledNumberField;
 
+import java.math.BigDecimal;
+import java.util.Objects;
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
 import javax.persistence.Entity;
@@ -43,52 +44,72 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
-import java.math.BigDecimal;
-import java.util.Objects;
 
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
-//@formatter:off
+// @formatter:off
 @Embeddable
 @Entity
-@Table(name = "HFJ_SPIDX_QUANTITY_NRML", indexes = {
-	@Index(name = "IDX_SP_QNTY_NRML_HASH_V2", columnList = "HASH_IDENTITY,SP_VALUE,RES_ID,PARTITION_ID"),
-	@Index(name = "IDX_SP_QNTY_NRML_HASH_UN_V2", columnList = "HASH_IDENTITY_AND_UNITS,SP_VALUE,RES_ID,PARTITION_ID"),
-	@Index(name = "IDX_SP_QNTY_NRML_HASH_SYSUN_V2", columnList = "HASH_IDENTITY_SYS_UNITS,SP_VALUE,RES_ID,PARTITION_ID"),
-	@Index(name = "IDX_SP_QNTY_NRML_RESID_V2", columnList = "RES_ID,HASH_IDENTITY,HASH_IDENTITY_SYS_UNITS,HASH_IDENTITY_AND_UNITS,SP_VALUE,PARTITION_ID")
-})
+@Table(
+		name = "HFJ_SPIDX_QUANTITY_NRML",
+		indexes = {
+			@Index(name = "IDX_SP_QNTY_NRML_HASH_V2", columnList = "HASH_IDENTITY,SP_VALUE,RES_ID,PARTITION_ID"),
+			@Index(
+					name = "IDX_SP_QNTY_NRML_HASH_UN_V2",
+					columnList = "HASH_IDENTITY_AND_UNITS,SP_VALUE,RES_ID,PARTITION_ID"),
+			@Index(
+					name = "IDX_SP_QNTY_NRML_HASH_SYSUN_V2",
+					columnList = "HASH_IDENTITY_SYS_UNITS,SP_VALUE,RES_ID,PARTITION_ID"),
+			@Index(
+					name = "IDX_SP_QNTY_NRML_RESID_V2",
+					columnList =
+							"RES_ID,HASH_IDENTITY,HASH_IDENTITY_SYS_UNITS,HASH_IDENTITY_AND_UNITS,SP_VALUE,PARTITION_ID")
+		})
 /**
  * Support UCUM service
- * @since 5.3.0 
+ * @since 5.3.0
  *
  */
-public class ResourceIndexedSearchParamQuantityNormalized extends ResourceIndexedSearchParamBaseQuantity {
+public class ResourceIndexedSearchParamQuantityNormalized extends BaseResourceIndexedSearchParamQuantity {
 
 	private static final long serialVersionUID = 1L;
-	
+
 	@Id
 	@SequenceGenerator(name = "SEQ_SPIDX_QUANTITY_NRML", sequenceName = "SEQ_SPIDX_QUANTITY_NRML")
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_SPIDX_QUANTITY_NRML")
 	@Column(name = "SP_ID")
 	private Long myId;
 
-	// Changed to double here for storing the value after converted to the CanonicalForm due to BigDecimal maps NUMBER(19,2) 
+	// Changed to double here for storing the value after converted to the CanonicalForm due to BigDecimal maps
+	// NUMBER(19,2)
 	// The precision may lost even to store 1.2cm which is 0.012m in the CanonicalForm
 	@Column(name = "SP_VALUE", nullable = true)
 	@ScaledNumberField
 	public Double myValue;
 
-	@ManyToOne(optional = false, fetch = FetchType.LAZY, cascade = {})
-	@JoinColumn(foreignKey = @ForeignKey(name = "FK_SP_QUANTITYNM_RES"),
-		name = "RES_ID", referencedColumnName = "RES_ID", nullable = false)
+	@ManyToOne(
+			optional = false,
+			fetch = FetchType.LAZY,
+			cascade = {})
+	@JoinColumn(
+			foreignKey = @ForeignKey(name = "FK_SP_QUANTITYNM_RES"),
+			name = "RES_ID",
+			referencedColumnName = "RES_ID",
+			nullable = false)
 	private ResourceTable myResource;
 
 	public ResourceIndexedSearchParamQuantityNormalized() {
 		super();
 	}
 
-	public ResourceIndexedSearchParamQuantityNormalized(PartitionSettings thePartitionSettings, String theResourceType, String theParamName, double theValue, String theSystem, String theUnits) {
+	public ResourceIndexedSearchParamQuantityNormalized(
+			PartitionSettings thePartitionSettings,
+			String theResourceType,
+			String theParamName,
+			double theValue,
+			String theSystem,
+			String theUnits) {
 		this();
 		setPartitionSettings(thePartitionSettings);
 		setResourceType(theResourceType);
@@ -110,11 +131,12 @@ public class ResourceIndexedSearchParamQuantityNormalized extends ResourceIndexe
 		setHashIdentityAndUnits(source.getHashIdentityAndUnits());
 		setHashIdentitySystemAndUnits(source.getHashIdentitySystemAndUnits());
 	}
-	
-	//- myValue
+
+	// - myValue
 	public Double getValue() {
 		return myValue;
 	}
+
 	public ResourceIndexedSearchParamQuantityNormalized setValue(Double theValue) {
 		myValue = theValue;
 		return this;
@@ -125,16 +147,17 @@ public class ResourceIndexedSearchParamQuantityNormalized extends ResourceIndexe
 		return this;
 	}
 
-	//-- myId
+	// -- myId
 	@Override
 	public Long getId() {
 		return myId;
 	}
+
 	@Override
 	public void setId(Long theId) {
 		myId = theId;
 	}
-	
+
 	@Override
 	public IQueryParameterType toQueryParameterType() {
 		return new QuantityParam(null, getValue(), getSystem(), getUnits());
@@ -175,10 +198,10 @@ public class ResourceIndexedSearchParamQuantityNormalized extends ResourceIndexe
 		b.append(getValue(), obj.getValue());
 		return b.isEquals();
 	}
-	
+
 	@Override
 	public boolean matches(IQueryParameterType theParam) {
-		
+
 		if (!(theParam instanceof QuantityParam)) {
 			return false;
 		}
@@ -188,17 +211,16 @@ public class ResourceIndexedSearchParamQuantityNormalized extends ResourceIndexe
 		String quantitySystem = quantity.getSystem();
 		BigDecimal quantityValue = quantity.getValue();
 		Double quantityDoubleValue = null;
-		if (quantityValue != null)
-			quantityDoubleValue = quantityValue.doubleValue();
+		if (quantityValue != null) quantityDoubleValue = quantityValue.doubleValue();
 		String quantityUnits = defaultString(quantity.getUnits());
-		
-		//-- convert the value/unit to the canonical form if any, otherwise store the original value/units pair
+
+		// -- convert the value/unit to the canonical form if any, otherwise store the original value/units pair
 		Pair canonicalForm = UcumServiceUtil.getCanonicalForm(quantitySystem, quantityValue, quantityUnits);
 		if (canonicalForm != null) {
 			quantityDoubleValue = Double.parseDouble(canonicalForm.getValue().asDecimal());
 			quantityUnits = canonicalForm.getCode();
-		}  
-		
+		}
+
 		// Only match on system if it wasn't specified
 		if (quantitySystem == null && isBlank(quantityUnits)) {
 			if (Objects.equals(getValue(), quantityDoubleValue)) {
@@ -207,24 +229,22 @@ public class ResourceIndexedSearchParamQuantityNormalized extends ResourceIndexe
 		} else {
 			String unitsString = defaultString(getUnits());
 			if (quantitySystem == null) {
-				if (unitsString.equalsIgnoreCase(quantityUnits) &&
-					Objects.equals(getValue(), quantityDoubleValue)) {
+				if (unitsString.equalsIgnoreCase(quantityUnits) && Objects.equals(getValue(), quantityDoubleValue)) {
 					retval = true;
 				}
 			} else if (isBlank(quantityUnits)) {
-				if (getSystem().equalsIgnoreCase(quantitySystem) &&
-					Objects.equals(getValue(), quantityDoubleValue)) {
+				if (getSystem().equalsIgnoreCase(quantitySystem) && Objects.equals(getValue(), quantityDoubleValue)) {
 					retval = true;
 				}
 			} else {
-				if (getSystem().equalsIgnoreCase(quantitySystem) &&
-					unitsString.equalsIgnoreCase(quantityUnits) &&
-					Objects.equals(getValue(), quantityDoubleValue)) {
+				if (getSystem().equalsIgnoreCase(quantitySystem)
+						&& unitsString.equalsIgnoreCase(quantityUnits)
+						&& Objects.equals(getValue(), quantityDoubleValue)) {
 					retval = true;
 				}
 			}
 		}
-		
+
 		return retval;
 	}
 

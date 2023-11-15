@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.entity;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,12 +17,15 @@ package ca.uhn.fhir.jpa.entity;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.entity;
 
 import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
+import java.io.Serializable;
+import java.util.Date;
 import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -37,17 +38,17 @@ import javax.persistence.Lob;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
-import java.io.Serializable;
-import java.util.Date;
+import javax.persistence.Version;
 
 import static ca.uhn.fhir.batch2.model.JobDefinition.ID_MAX_LENGTH;
 import static ca.uhn.fhir.jpa.entity.Batch2WorkChunkEntity.ERROR_MSG_MAX_LENGTH;
+import static ca.uhn.fhir.jpa.entity.Batch2WorkChunkEntity.WARNING_MSG_MAX_LENGTH;
 import static org.apache.commons.lang3.StringUtils.left;
 
 @Entity
-@Table(name = "BT2_JOB_INSTANCE", indexes = {
-	@Index(name = "IDX_BT2JI_CT", columnList = "CREATE_TIME")
-})
+@Table(
+		name = "BT2_JOB_INSTANCE",
+		indexes = {@Index(name = "IDX_BT2JI_CT", columnList = "CREATE_TIME")})
 public class Batch2JobInstanceEntity implements Serializable {
 
 	public static final int STATUS_MAX_LENGTH = 20;
@@ -71,6 +72,11 @@ public class Batch2JobInstanceEntity implements Serializable {
 	@Temporal(TemporalType.TIMESTAMP)
 	private Date myEndTime;
 
+	@Version
+	@Column(name = "UPDATE_TIME", nullable = true)
+	@Temporal(TemporalType.TIMESTAMP)
+	private Date myUpdateTime;
+
 	@Column(name = "DEFINITION_ID", length = JobDefinition.ID_MAX_LENGTH, nullable = false)
 	private String myDefinitionId;
 
@@ -83,29 +89,46 @@ public class Batch2JobInstanceEntity implements Serializable {
 
 	@Column(name = "JOB_CANCELLED", nullable = false)
 	private boolean myCancelled;
+
+	@Column(name = "FAST_TRACKING", nullable = true)
+	private Boolean myFastTracking;
+
 	@Column(name = "PARAMS_JSON", length = PARAMS_JSON_MAX_LENGTH, nullable = true)
 	private String myParamsJson;
+
 	@Lob
 	@Column(name = "PARAMS_JSON_LOB", nullable = true)
 	private String myParamsJsonLob;
+
 	@Column(name = "CMB_RECS_PROCESSED", nullable = true)
 	private Integer myCombinedRecordsProcessed;
+
 	@Column(name = "CMB_RECS_PER_SEC", nullable = true)
 	private Double myCombinedRecordsProcessedPerSecond;
+
 	@Column(name = "TOT_ELAPSED_MILLIS", nullable = true)
 	private Integer myTotalElapsedMillis;
+
 	@Column(name = "WORK_CHUNKS_PURGED", nullable = false)
 	private boolean myWorkChunksPurged;
+
 	@Column(name = "PROGRESS_PCT")
 	private double myProgress;
+
 	@Column(name = "ERROR_MSG", length = ERROR_MSG_MAX_LENGTH, nullable = true)
 	private String myErrorMessage;
+
 	@Column(name = "ERROR_COUNT")
 	private int myErrorCount;
+
 	@Column(name = "EST_REMAINING", length = TIME_REMAINING_LENGTH, nullable = true)
 	private String myEstimatedTimeRemaining;
+
 	@Column(name = "CUR_GATED_STEP_ID", length = ID_MAX_LENGTH, nullable = true)
 	private String myCurrentGatedStepId;
+
+	@Column(name = "WARNING_MSG", length = WARNING_MSG_MAX_LENGTH, nullable = true)
+	private String myWarningMessages;
 
 	/**
 	 * Any output from the job can be held in this column
@@ -186,6 +209,14 @@ public class Batch2JobInstanceEntity implements Serializable {
 
 	public void setEndTime(Date theEndTime) {
 		myEndTime = theEndTime;
+	}
+
+	public void setUpdateTime(Date theTime) {
+		myUpdateTime = theTime;
+	}
+
+	public Date getUpdateTime() {
+		return myUpdateTime;
 	}
 
 	public String getId() {
@@ -277,26 +308,50 @@ public class Batch2JobInstanceEntity implements Serializable {
 		myReport = theReport;
 	}
 
+	public String getWarningMessages() {
+		return myWarningMessages;
+	}
+
+	public void setWarningMessages(String theWarningMessages) {
+		myWarningMessages = theWarningMessages;
+	}
+
 	@Override
 	public String toString() {
 		return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
-			.append("id", myId)
-			.append("definitionId", myDefinitionId)
-			.append("definitionVersion", myDefinitionVersion)
-			.append("errorCount", myErrorCount)
-			.append("createTime", myCreateTime)
-			.append("startTime", myStartTime)
-			.append("endTime", myEndTime)
-			.append("status", myStatus)
-			.append("cancelled", myCancelled)
-			.append("combinedRecordsProcessed", myCombinedRecordsProcessed)
-			.append("combinedRecordsProcessedPerSecond", myCombinedRecordsProcessedPerSecond)
-			.append("totalElapsedMillis", myTotalElapsedMillis)
-			.append("workChunksPurged", myWorkChunksPurged)
-			.append("progress", myProgress)
-			.append("errorMessage", myErrorMessage)
-			.append("estimatedTimeRemaining", myEstimatedTimeRemaining)
-			.append("report", myReport)
-			.toString();
+				.append("id", myId)
+				.append("definitionId", myDefinitionId)
+				.append("definitionVersion", myDefinitionVersion)
+				.append("errorCount", myErrorCount)
+				.append("createTime", myCreateTime)
+				.append("startTime", myStartTime)
+				.append("endTime", myEndTime)
+				.append("updateTime", myUpdateTime)
+				.append("status", myStatus)
+				.append("cancelled", myCancelled)
+				.append("combinedRecordsProcessed", myCombinedRecordsProcessed)
+				.append("combinedRecordsProcessedPerSecond", myCombinedRecordsProcessedPerSecond)
+				.append("totalElapsedMillis", myTotalElapsedMillis)
+				.append("workChunksPurged", myWorkChunksPurged)
+				.append("progress", myProgress)
+				.append("errorMessage", myErrorMessage)
+				.append("estimatedTimeRemaining", myEstimatedTimeRemaining)
+				.append("report", myReport)
+				.append("warningMessages", myWarningMessages)
+				.toString();
+	}
+
+	/**
+	 * @return true if every step of the job has produced exactly 1 chunk.
+	 */
+	public boolean isFastTracking() {
+		if (myFastTracking == null) {
+			myFastTracking = false;
+		}
+		return myFastTracking;
+	}
+
+	public void setFastTracking(boolean theFastTracking) {
+		myFastTracking = theFastTracking;
 	}
 }

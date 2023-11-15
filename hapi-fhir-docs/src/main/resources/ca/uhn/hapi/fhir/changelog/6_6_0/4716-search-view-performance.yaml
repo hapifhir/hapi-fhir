@@ -1,0 +1,6 @@
+---
+type: perf
+issue: 4716
+title: "The SQL query used to fetch pages of search results resulted in an inefficient use
+   of the database in cases where resources have many different versions stored. Thanks to
+   Primož Delopst for the pull request!"

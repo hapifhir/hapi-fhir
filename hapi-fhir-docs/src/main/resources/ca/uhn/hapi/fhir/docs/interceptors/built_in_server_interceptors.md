@@ -173,11 +173,18 @@ The following example shows how to register this interceptor within a HAPI FHIR 
 
 HAPI FHIR includes an interceptor which can be used to implement CORS support on your server. See [Server CORS Documentation](/docs/security/cors.html#cors_interceptor) for information on how to use this interceptor.
 
+# Security: Audit
+
+HAPI FHIR provides an interceptor that can be used to automatically generate and record AuditEvent resources based on user/client actions on the server. See [BALP Interceptor](../security/balp_interceptor.html) for more information.
+
 
 # Security: Authorization
 
-HAPI FHIR provides a powerful interceptor that can be used to implement user- and system-level authorization rules that are aware of FHIR semantics. See [Authorization](/docs/security/authorization_interceptor.html) for more information.
+HAPI FHIR provides an interceptor that can be used to implement user- and system-level authorization rules that are aware of FHIR semantics. See [Authorization](/docs/security/authorization_interceptor.html) for more information.
 
+# Security: Binary Resources
+
+HAPI FHIR provides an interceptor that can be used to secure access to Binary resources by using the `Binary.securityContext` element. See [Binary Security Interceptor](/docs/security/binary_security_interceptor.html) for more information.
 
 # Security: Consent
 
@@ -199,6 +206,15 @@ Some security audit tools require that servers return an HTTP 405 if an unsuppor
 # Server: OpenAPI / Swagger Support
 
 An interceptor can be registered against your server that enables support for OpenAPI (aka Swagger) automatically. See [OpenAPI](/docs/server_plain/openapi.html) for more information.
+
+
+# Server: Interaction Blocking
+
+The interaction blocking interceptor selectively disables specific interactions that are provided in registered resource providers. 
+
+* [InteractionBlockingInterceptor JavaDoc](/apidocs/hapi-fhir-server/ca/uhn/fhir/rest/server/interceptor/InteractionBlockingInterceptor.html)
+* [InteractionBlockingInterceptor Source](https://github.com/hapifhir/hapi-fhir/blob/master/hapi-fhir-server/src/main/java/ca/uhn/fhir/rest/server/interceptor/InteractionBlockingInterceptor.java)
+
 
 
 # Subscription: Subscription Debug Log Interceptor

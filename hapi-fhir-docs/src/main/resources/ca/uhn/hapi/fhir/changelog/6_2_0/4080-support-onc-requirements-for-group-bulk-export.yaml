@@ -1,0 +1,6 @@
+---
+type: add
+issue: 4080
+jira: SMILE-5197, SMILE-5198
+title: "Previously, Group Bulk Export did not support the inclusion of resources referenced in the resources in the patient compartment. 
+This is now supported."

@@ -1,0 +1,6 @@
+---
+type: perf
+issue: 4007
+title: "Processing for `_include` and `_revinclude` parameters in the JPA server has been streamlined, which should
+   improve performance on systems where includes are heavily used."
+

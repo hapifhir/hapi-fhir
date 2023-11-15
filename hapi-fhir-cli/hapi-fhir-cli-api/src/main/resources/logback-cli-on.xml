@@ -34,7 +34,7 @@
 	<!--
 	It's useful to have this log when uploading big terminologies
 	-->
-	<logger name="ca.uhn.fhir.jpa.term.BaseTermReadSvcImpl" additivity="false" level="info">
+	<logger name="ca.uhn.fhir.jpa.term.TermReadSvcImpl" additivity="false" level="info">
 		<appender-ref ref="STDOUT" />
 	</logger>
 	<logger name="ca.uhn.fhir.jpa.term.TermCodeSystemStorageSvcImpl" additivity="false" level="info">

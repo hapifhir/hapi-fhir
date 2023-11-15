@@ -46,7 +46,7 @@ public class ServletRestfulResponseTest {
 		response.addHeader("Authorization", "Bearer");
 		response.addHeader("Cache-Control", "no-cache, no-store");
 
-		response.getResponseWriter(200, "Status", "text/plain", "UTF-8", false);
+		response.getResponseWriter(200, "text/plain", "UTF-8", false);
 
 		final InOrder orderVerifier = Mockito.inOrder(servletResponse);
 		orderVerifier.verify(servletResponse).setHeader(eq("Authorization"), eq("Basic"));

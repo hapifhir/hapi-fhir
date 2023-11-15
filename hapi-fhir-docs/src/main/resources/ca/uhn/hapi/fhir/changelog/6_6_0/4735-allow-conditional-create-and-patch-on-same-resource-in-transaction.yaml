@@ -1,0 +1,5 @@
+---
+type: add
+issue: 4735
+title: "It is now possible to perform a conditional create and a conditional patch on the
+  same resource (i.e. the same conditional URL) within a FHIR Transaction bundle."

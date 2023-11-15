@@ -1,13 +1,8 @@
-package ca.uhn.fhir.util;
-
-import ca.uhn.fhir.i18n.Msg;
-import org.apache.commons.lang3.StringUtils;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,29 +17,51 @@ import org.apache.commons.lang3.StringUtils;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.util;
+
+import ca.uhn.fhir.i18n.Msg;
+import org.apache.commons.lang3.StringUtils;
+
+import java.util.Objects;
+import java.util.Optional;
 
 public class ObjectUtil {
 
+	// hide
+	private ObjectUtil() {}
+
+	/**
+	 * @deprecated Just use Objects.equals() instead;
+	 */
+	@Deprecated(since = "6.2")
 	public static boolean equals(Object object1, Object object2) {
-		if (object1 == object2) {
-			return true;
-		}
-		if ((object1 == null) || (object2 == null)) {
-			return false;
-		}
-		return object1.equals(object2);
+		return Objects.equals(object1, object2);
 	}
-	
+
 	public static <T> T requireNonNull(T obj, String message) {
-        if (obj == null)
-            throw new NullPointerException(Msg.code(1776) + message);
-        return obj;
-    }
+		if (obj == null) throw new NullPointerException(Msg.code(1776) + message);
+		return obj;
+	}
 
 	public static void requireNotEmpty(String str, String message) {
 		if (StringUtils.isBlank(str)) {
 			throw new IllegalArgumentException(Msg.code(1777) + message);
 		}
 	}
-	
+
+	/**
+	 * Cast the object to the type using Optional.
+	 * Useful for streaming with flatMap.
+	 * @param theObject any object
+	 * @param theClass the class to check instanceof
+	 * @return Optional present if theObject is of type theClass
+	 */
+	@SuppressWarnings("unchecked")
+	public static <T> Optional<T> castIfInstanceof(Object theObject, Class<T> theClass) {
+		if (theClass.isInstance(theObject)) {
+			return Optional.of((T) theObject);
+		} else {
+			return Optional.empty();
+		}
+	}
 }

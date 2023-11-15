@@ -9,8 +9,6 @@ import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.test.utilities.JettyUtil;
 import ca.uhn.fhir.util.TestUtil;
-import ca.uhn.fhir.validation.FhirValidator;
-import ca.uhn.fhir.validation.ValidationResult;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -34,13 +32,12 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
 
 public class SearchR5Test {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SearchR5Test.class);
+	private static final FhirContext ourCtx = FhirContext.forR5Cached();
 	private static CloseableHttpClient ourClient;
-	private static FhirContext ourCtx = FhirContext.forR5();
 	private static TokenAndListParam ourIdentifiers;
 	private static String ourLastMethod;
 	private static int ourPort;
@@ -60,7 +57,6 @@ public class SearchR5Test {
 		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(responseContent);
-//			validate(ourCtx.newJsonParser().parseResource(responseContent));
 			assertEquals(200, status.getStatusLine().getStatusCode());
 
 			assertEquals("search", ourLastMethod);
@@ -69,15 +65,6 @@ public class SearchR5Test {
 			assertEquals("bar", ourIdentifiers.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue());
 		}
 
-	}
-
-
-	private void validate(IBaseResource theResource) {
-		FhirValidator validatorModule = ourCtx.newValidator();
-		ValidationResult result = validatorModule.validateWithResult(theResource);
-		if (!result.isSuccessful()) {
-			fail(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(result.toOperationOutcome()));
-		}
 	}
 
 
@@ -99,7 +86,7 @@ public class SearchR5Test {
 			for (int i = 0; i < 200; i++) {
 				Patient patient = new Patient();
 				patient.getIdElement().setValue("Patient/" + i + "/_history/222");
-				ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.put(patient, BundleEntrySearchModeEnum.INCLUDE.getCode());
+				ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.put(patient, BundleEntrySearchModeEnum.INCLUDE);
 				patient.addName(new HumanName().setFamily("FAMILY"));
 				patient.setActive(true);
 				retVal.add(patient);
@@ -132,7 +119,7 @@ public class SearchR5Test {
 		proxyHandler.addServletWithMapping(servletHolder, "/*");
 		ourServer.setHandler(proxyHandler);
 		JettyUtil.startServer(ourServer);
-        ourPort = JettyUtil.getPortForStartedServer(ourServer);
+		ourPort = JettyUtil.getPortForStartedServer(ourServer);
 
 		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
 		HttpClientBuilder builder = HttpClientBuilder.create();

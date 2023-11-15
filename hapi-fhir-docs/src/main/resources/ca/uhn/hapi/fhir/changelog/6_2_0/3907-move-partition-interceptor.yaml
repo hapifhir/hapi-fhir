@@ -1,0 +1,5 @@
+---
+type: change
+issue: 3907
+title: "The Partition Interceptor has been refactored out of the JPA module in order to facilitate
+  future use in other modules. No functional changes have been made."

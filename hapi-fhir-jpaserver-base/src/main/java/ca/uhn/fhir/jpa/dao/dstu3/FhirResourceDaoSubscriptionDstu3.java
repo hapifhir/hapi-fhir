@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.dao.dstu3;
-
 /*
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.dao.dstu3;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.dao.dstu3;
 
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoSubscription;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirResourceDao;
@@ -35,7 +34,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Date;
 
-public class FhirResourceDaoSubscriptionDstu3 extends BaseHapiFhirResourceDao<Subscription> implements IFhirResourceDaoSubscription<Subscription> {
+public class FhirResourceDaoSubscriptionDstu3 extends BaseHapiFhirResourceDao<Subscription>
+		implements IFhirResourceDaoSubscription<Subscription> {
 
 	@Autowired
 	private ISubscriptionTableDao mySubscriptionTableDao;
@@ -48,7 +48,8 @@ public class FhirResourceDaoSubscriptionDstu3 extends BaseHapiFhirResourceDao<Su
 	}
 
 	@Override
-	public Long getSubscriptionTablePidForSubscriptionResource(IIdType theId, RequestDetails theRequest, TransactionDetails theTransactionDetails) {
+	public Long getSubscriptionTablePidForSubscriptionResource(
+			IIdType theId, RequestDetails theRequest, TransactionDetails theTransactionDetails) {
 		ResourceTable entity = readEntityLatestVersion(theId, theRequest, theTransactionDetails);
 		SubscriptionTable table = mySubscriptionTableDao.findOneByResourcePid(entity.getId());
 		if (table == null) {
@@ -57,25 +58,39 @@ public class FhirResourceDaoSubscriptionDstu3 extends BaseHapiFhirResourceDao<Su
 		return table.getId();
 	}
 
-
 	@Override
-	protected void postPersist(ResourceTable theEntity, Subscription theSubscription, RequestDetails theRequestDetails) {
+	protected void postPersist(
+			ResourceTable theEntity, Subscription theSubscription, RequestDetails theRequestDetails) {
 		super.postPersist(theEntity, theSubscription, theRequestDetails);
 
 		createSubscriptionTable(theEntity, theSubscription);
 	}
 
-
 	@Override
-	public ResourceTable updateEntity(RequestDetails theRequest, IBaseResource theResource, IBasePersistedResource theEntity, Date theDeletedTimestampOrNull, boolean thePerformIndexing, boolean theUpdateVersion,
-												 TransactionDetails theTransactionDetails, boolean theForceUpdate, boolean theCreateNewHistoryEntry) {
-		ResourceTable retVal = super.updateEntity(theRequest, theResource, theEntity, theDeletedTimestampOrNull, thePerformIndexing, theUpdateVersion, theTransactionDetails, theForceUpdate, theCreateNewHistoryEntry);
+	public ResourceTable updateEntity(
+			RequestDetails theRequest,
+			IBaseResource theResource,
+			IBasePersistedResource theEntity,
+			Date theDeletedTimestampOrNull,
+			boolean thePerformIndexing,
+			boolean theUpdateVersion,
+			TransactionDetails theTransactionDetails,
+			boolean theForceUpdate,
+			boolean theCreateNewHistoryEntry) {
+		ResourceTable retVal = super.updateEntity(
+				theRequest,
+				theResource,
+				theEntity,
+				theDeletedTimestampOrNull,
+				thePerformIndexing,
+				theUpdateVersion,
+				theTransactionDetails,
+				theForceUpdate,
+				theCreateNewHistoryEntry);
 
 		if (theDeletedTimestampOrNull != null) {
 			mySubscriptionTableDao.deleteAllForSubscription((ResourceTable) theEntity);
 		}
 		return retVal;
 	}
-
-
 }

@@ -1,0 +1,6 @@
+---
+type: add
+issue: 4227
+title: "In some cases in the JPA server, CodeSystem updating failed and left the server with a hung
+   reindex job that never completes. This has been corrected. Thanks to GitHub user @tyfoni-systematic for
+   the bug report!"

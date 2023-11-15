@@ -1,0 +1,36 @@
+{
+	"resourceType": "Observation",
+	"id": "observationtestmatch",
+	"code": {
+		"coding": [
+			{
+				"system": "http://hl7.org/fhir/sid/icd-10",
+				"code": "B20",
+				"display": "Human immunodeficiency virus [HIV] disease"
+			}
+		],
+		"text": "Human immunodeficiency virus [HIV] disease"
+	},
+	"valueQuantity": {
+		"value": 176,
+		"unit": "g/L",
+		"system": "http://unitsofmeasure.org",
+		"code": "g/L"
+	},
+	"referenceRange": [
+		{
+			"low": {
+				"value": 135,
+				"unit": "g/L",
+				"system": "http://unitsofmeasure.org",
+				"code": "g/L"
+			},
+			"high": {
+				"value": 180,
+				"unit": "g/L",
+				"system": "http://unitsofmeasure.org",
+				"code": "g/L"
+			}
+		}
+	]
+}

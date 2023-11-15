@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 3706
+jira: SMILE-1119
+title: "Codes with the Seventh Character will be dynamically generated while uploading the ICD10-CM diagnosis code file,
+and the corresponding extended description can be extract using the code."

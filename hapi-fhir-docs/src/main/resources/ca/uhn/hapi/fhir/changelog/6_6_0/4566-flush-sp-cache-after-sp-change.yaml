@@ -1,0 +1,6 @@
+---
+type: add
+issue: 4566
+title: "When creating or modifying a SearchParameter in the JPA server, the local SearchParameter cache
+   is now immediately flushed. This should help with situations such as tests where a SearchParameter
+   is created and then used before the scheduled cache refresh typically occurs."

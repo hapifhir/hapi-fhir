@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.search.builder.predicate;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,14 +17,15 @@ package ca.uhn.fhir.jpa.search.builder.predicate;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.search.builder.predicate;
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.dao.predicate.SearchFilterParser;
-import ca.uhn.fhir.jpa.search.builder.QueryStack;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
+import ca.uhn.fhir.jpa.util.QueryParameterUtils;
 import ca.uhn.fhir.model.api.IQueryParameterType;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.TokenParamModifier;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
@@ -37,10 +36,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.annotation.Nullable;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import javax.annotation.Nullable;
 
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -49,7 +48,7 @@ public class ResourceIdPredicateBuilder extends BasePredicateBuilder {
 	private static final Logger ourLog = LoggerFactory.getLogger(ResourceIdPredicateBuilder.class);
 
 	@Autowired
-	private IIdHelperService myIdHelperService;
+	private IIdHelperService<JpaPid> myIdHelperService;
 
 	/**
 	 * Constructor
@@ -58,16 +57,20 @@ public class ResourceIdPredicateBuilder extends BasePredicateBuilder {
 		super(theSearchSqlBuilder);
 	}
 
-
 	@Nullable
-	public Condition createPredicateResourceId(@Nullable DbColumn theSourceJoinColumn, String theResourceName, List<List<IQueryParameterType>> theValues, SearchFilterParser.CompareOperation theOperation, RequestPartitionId theRequestPartitionId) {
+	public Condition createPredicateResourceId(
+			@Nullable DbColumn theSourceJoinColumn,
+			String theResourceName,
+			List<List<IQueryParameterType>> theValues,
+			SearchFilterParser.CompareOperation theOperation,
+			RequestPartitionId theRequestPartitionId) {
 
-		Set<ResourcePersistentId> allOrPids = null;
+		Set<JpaPid> allOrPids = null;
 		SearchFilterParser.CompareOperation defaultOperation = SearchFilterParser.CompareOperation.eq;
 
 		boolean allIdsAreForcedIds = true;
 		for (List<? extends IQueryParameterType> nextValue : theValues) {
-			Set<ResourcePersistentId> orPids = new HashSet<>();
+			Set<JpaPid> orPids = new HashSet<>();
 			boolean haveValue = false;
 			for (IQueryParameterType next : nextValue) {
 				String value = next.getValueAsQueryToken(getFhirContext());
@@ -83,7 +86,8 @@ public class ResourceIdPredicateBuilder extends BasePredicateBuilder {
 					haveValue = true;
 					try {
 						boolean excludeDeleted = true;
-						ResourcePersistentId pid = myIdHelperService.resolveResourcePersistentIds(theRequestPartitionId, theResourceName, valueAsId.getIdPart(), excludeDeleted);
+						JpaPid pid = myIdHelperService.resolveResourcePersistentIds(
+								theRequestPartitionId, theResourceName, valueAsId.getIdPart(), excludeDeleted);
 						orPids.add(pid);
 					} catch (ResourceNotFoundException e) {
 						// This is not an error in a search, it just results in no matches
@@ -96,7 +100,6 @@ public class ResourceIdPredicateBuilder extends BasePredicateBuilder {
 						defaultOperation = SearchFilterParser.CompareOperation.ne;
 					}
 				}
-
 			}
 			if (haveValue) {
 				if (allOrPids == null) {
@@ -104,7 +107,6 @@ public class ResourceIdPredicateBuilder extends BasePredicateBuilder {
 				} else {
 					allOrPids.retainAll(orPids);
 				}
-
 			}
 		}
 
@@ -115,9 +117,10 @@ public class ResourceIdPredicateBuilder extends BasePredicateBuilder {
 		} else if (allOrPids != null) {
 
 			SearchFilterParser.CompareOperation operation = defaultIfNull(theOperation, defaultOperation);
-			assert operation == SearchFilterParser.CompareOperation.eq || operation == SearchFilterParser.CompareOperation.ne;
+			assert operation == SearchFilterParser.CompareOperation.eq
+					|| operation == SearchFilterParser.CompareOperation.ne;
 
-			List<Long> resourceIds = ResourcePersistentId.toLongList(allOrPids);
+			List<Long> resourceIds = JpaPid.toLongList(allOrPids);
 			if (theSourceJoinColumn == null) {
 				BaseJoiningPredicateBuilder queryRootTable = super.getOrCreateQueryRootTable(!allIdsAreForcedIds);
 				Condition predicate;
@@ -131,13 +134,13 @@ public class ResourceIdPredicateBuilder extends BasePredicateBuilder {
 						return queryRootTable.combineWithRequestPartitionIdPredicate(theRequestPartitionId, predicate);
 				}
 			} else {
-				return QueryStack.toEqualToOrInPredicate(theSourceJoinColumn, generatePlaceholders(resourceIds), operation == SearchFilterParser.CompareOperation.ne);
+				return QueryParameterUtils.toEqualToOrInPredicate(
+						theSourceJoinColumn,
+						generatePlaceholders(resourceIds),
+						operation == SearchFilterParser.CompareOperation.ne);
 			}
-
 		}
 
 		return null;
 	}
-
-
 }

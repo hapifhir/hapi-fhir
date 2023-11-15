@@ -1,20 +1,24 @@
 package ca.uhn.fhir.jpa.mdm.provider;
 
-import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.entity.PartitionEntity;
+import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.api.MdmConstants;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.mdm.util.MessageHelper;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.StringType;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.io.IOException;
 import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -30,6 +34,20 @@ public class MdmProviderUpdateLinkR4Test extends BaseLinkR4Test {
 
 	@Autowired
 	private MessageHelper myMessageHelper;
+
+	@Autowired
+	private IMdmSettings myMdmSettings;
+
+
+	@Override
+	@AfterEach
+	public void after() throws IOException {
+		super.after();
+
+		myPartitionSettings.setPartitioningEnabled(false);
+		myMdmSettings.setSearchAllPartitionForMatch(false);
+		myMdmSettings.setGoldenResourcePartitionName("");
+	}
 
 	@Test
 	public void testUpdateLinkNoMatch() {
@@ -59,7 +77,7 @@ public class MdmProviderUpdateLinkR4Test extends BaseLinkR4Test {
 	@Test
 	public void testUpdateLinkMatchOnSamePartition() {
 		myPartitionSettings.setPartitioningEnabled(true);
-		myPartitionLookupSvc.createPartition(new PartitionEntity().setId(1).setName(PARTITION_1));
+		myPartitionLookupSvc.createPartition(new PartitionEntity().setId(1).setName(PARTITION_1), null);
 		RequestPartitionId requestPartitionId = RequestPartitionId.fromPartitionId(1);
 		Patient patient = createPatientAndUpdateLinksOnPartition(buildFrankPatient(), requestPartitionId);
 		StringType patientId = new StringType(patient.getIdElement().getValue());
@@ -84,11 +102,11 @@ public class MdmProviderUpdateLinkR4Test extends BaseLinkR4Test {
 	@Test
 	public void testUpdateLinkMatchOnDifferentPartitions() {
 		myPartitionSettings.setPartitioningEnabled(true);
-		myPartitionLookupSvc.createPartition(new PartitionEntity().setId(1).setName(PARTITION_1));
-		myPartitionLookupSvc.createPartition(new PartitionEntity().setId(2).setName(PARTITION_2));
+		myPartitionLookupSvc.createPartition(new PartitionEntity().setId(1).setName(PARTITION_1), null);
+		myPartitionLookupSvc.createPartition(new PartitionEntity().setId(2).setName(PARTITION_2), null);
 		RequestPartitionId requestPartitionId1 = RequestPartitionId.fromPartitionId(1);
 		RequestPartitionId requestPartitionId2 = RequestPartitionId.fromPartitionId(2);
-		Patient patient = createPatientOnPartition(buildFrankPatient(), true, false, requestPartitionId1);
+		Patient patient = createPatientOnPartition(buildFrankPatient(), false, false, requestPartitionId1);
 		StringType patientId = new StringType(patient.getIdElement().getValue());
 
 		Patient sourcePatient = createPatientOnPartition(buildJanePatient(), true, false, requestPartitionId2);
@@ -130,10 +148,16 @@ public class MdmProviderUpdateLinkR4Test extends BaseLinkR4Test {
 	}
 
 	@Test
-	public void testUnlinkLink() {
-		myMdmProvider.updateLink(mySourcePatientId, myPatientId, NO_MATCH_RESULT, myRequestDetails);
+	public void testUnlinkLink_usingOutOfDateResourceId_throwsResourceVersionConflict() {
+		IBaseResource resultantPatient = myMdmProvider.updateLink(mySourcePatientId, myPatientId, NO_MATCH_RESULT, myRequestDetails);
 
-		materiallyChangeGoldenPatient();
+		/*
+		 * updatating a link to NO_MATCH reruns survivorship rules
+		 * (thus rebuilding the golden resource;
+		 * which in this case is mySourcePatient).
+		 * Thus we don't have to update the patient again to get the
+		 * version out of sync
+		 */
 
 		try {
 			myMdmProvider.updateLink(mySourcePatientId, myPatientId, MATCH_RESULT, myRequestDetails);

@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 4483
+title: "The OverridePathBasedReferentialIntegrityForDeletesInterceptor now works on partitioned
+   servers. Thanks to GitHub user @JorisHeadease for the pull request!"

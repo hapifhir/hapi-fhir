@@ -1,16 +1,17 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.search.builder.SearchBuilder;
 import ca.uhn.fhir.jpa.search.lastn.ElasticsearchSvcImpl;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -33,10 +34,15 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(SpringExtension.class)
 public class FhirResourceDaoR4SearchLastNIT extends BaseR4SearchLastN {
+	@BeforeEach
+	public void enableAdvancedHSearchIndexing() {
+		myStorageSettings.setLastNEnabled(true);
+	}
+
 	@AfterEach
 	public void reset() {
 		SearchBuilder.setMaxPageSize50ForTest(false);
-		myDaoConfig.setStoreResourceInHSearchIndex(new DaoConfig().isStoreResourceInHSearchIndex());
+		myStorageSettings.setStoreResourceInHSearchIndex(new JpaStorageSettings().isStoreResourceInHSearchIndex());
 	}
 
 	@Test
@@ -101,7 +107,7 @@ public class FhirResourceDaoR4SearchLastNIT extends BaseR4SearchLastN {
 	@Test
 	public void testLastN_onEnablingStoringObservationWithIndexMapping_shouldSkipLoadingResourceFromDB() throws IOException {
 		// Enable flag
-		myDaoConfig.setStoreResourceInHSearchIndex(true);
+		myStorageSettings.setStoreResourceInHSearchIndex(true);
 
 		// Create Data
 		Patient pt = new Patient();
@@ -129,10 +135,10 @@ public class FhirResourceDaoR4SearchLastNIT extends BaseR4SearchLastN {
 	}
 
 	void verifyResourcesLoadedFromElastic(List<IIdType> theObservationIds, List<String> theResults) {
-		List<ResourcePersistentId> expectedArgumentPids = ResourcePersistentId.fromLongList(
+		List<JpaPid> expectedArgumentPids = JpaPid.fromLongList(
 			theObservationIds.stream().map(IIdType::getIdPartAsLong).collect(Collectors.toList())
 		);
-		ArgumentCaptor<List<ResourcePersistentId>> actualPids = ArgumentCaptor.forClass(List.class);
+		ArgumentCaptor<List<JpaPid>> actualPids = ArgumentCaptor.forClass(List.class);
 		verify(myElasticsearchSvc, times(1)).getObservationResources(actualPids.capture());
 		assertThat(actualPids.getValue(), is(expectedArgumentPids));
 

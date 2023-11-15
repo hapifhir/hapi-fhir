@@ -2540,7 +2540,7 @@ public class Dstu3XmlParserTest {
 		assertEquals("#2179414-cm", ((Reference) ext.getValue()).getReference());
 		assertEquals(ConceptMap.class, ((Reference) ext.getValue()).getResource().getClass());
 
-		ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(de));
+		ourLog.debug(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(de));
 
 		assertThat(output, containsString("http://hl7.org/fhir/StructureDefinition/11179-permitted-value-valueset"));
 
@@ -2726,7 +2726,7 @@ public class Dstu3XmlParserTest {
 	 */
 	@Test
 	public void testParseBundleWithLinksOfUnknownRelation() throws Exception {
-		String input = IOUtils.toString(Dstu3XmlParserTest.class.getResourceAsStream("/bundle_orion.xml"), StandardCharsets.UTF_8);
+		String input = ClasspathUtil.loadResource("/bundle_orion.xml");
 		Bundle parsed = ourCtx.newXmlParser().parseResource(Bundle.class, input);
 
 		Bundle.BundleLinkComponent link = parsed.getLink().get(0);

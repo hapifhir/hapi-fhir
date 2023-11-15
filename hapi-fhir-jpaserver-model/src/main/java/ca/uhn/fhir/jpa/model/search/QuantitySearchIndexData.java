@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.model.search;
-
 /*-
  * #%L
  * HAPI FHIR JPA Model
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,27 +17,30 @@ package ca.uhn.fhir.jpa.model.search;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.model.search;
 
-import java.math.BigDecimal;
-
-class QuantitySearchIndexData {
+public class QuantitySearchIndexData {
 
 	// unit is also referred as code
 	private final String myCode;
 	private final String mySystem;
 	private final double myValue;
 
-
-	QuantitySearchIndexData(String theCode, String theSystem, double theValue) {
+	public QuantitySearchIndexData(String theCode, String theSystem, double theValue) {
 		myCode = theCode;
 		mySystem = theSystem;
 		myValue = theValue;
 	}
 
+	public String getCode() {
+		return myCode;
+	}
 
-	public String getCode() { return myCode; }
+	public String getSystem() {
+		return mySystem;
+	}
 
-	public String getSystem() { return mySystem; }
-
-	public double getValue() { return myValue; }
+	public double getValue() {
+		return myValue;
+	}
 }

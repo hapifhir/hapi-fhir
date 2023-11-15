@@ -23,7 +23,6 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.test.utilities.JettyUtil;
 import ca.uhn.fhir.util.TestUtil;
@@ -132,7 +131,7 @@ public class InterceptorUserDataMapDstu2Test {
 		}
 
 		@Hook(Pointcut.SERVER_INCOMING_REQUEST_PRE_HANDLED)
-		public void incomingRequestPreHandled(ActionRequestDetails theRequestDetails) {
+		public void incomingRequestPreHandled(RequestDetails theRequestDetails) {
 			updateMapUsing(theRequestDetails.getUserData(), "incomingRequestPreHandled");
 		}
 
@@ -185,7 +184,7 @@ public class InterceptorUserDataMapDstu2Test {
 		}
 
 		public Map<String, Patient> getIdToPatient() {
-			Map<String, Patient> idToPatient = new HashMap<String, Patient>();
+			Map<String, Patient> idToPatient = new HashMap<>();
 			{
 				Patient patient = createPatient1();
 				idToPatient.put("1", patient);

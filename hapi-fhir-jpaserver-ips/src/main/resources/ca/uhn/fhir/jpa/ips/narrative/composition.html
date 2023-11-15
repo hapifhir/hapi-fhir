@@ -1,0 +1,11 @@
+<!--/*
+This template generates a composite narrative for the Composition, incorporating
+all of the section narratives into a single narrative.
+*/-->
+<div xmlns:th="http://www.thymeleaf.org">
+   <div th:each="section : ${resource.section}">
+      <h1 th:text="${section.title}"></h1>
+      <div th:utext="${section.text.getDivAsString()}">
+      </div>
+   </div>
+</div>

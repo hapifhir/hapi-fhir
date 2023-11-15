@@ -13,6 +13,7 @@ import ca.uhn.fhir.batch2.model.JobDefinitionStep;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobWorkCursor;
 import ca.uhn.fhir.batch2.model.JobWorkNotification;
+import ca.uhn.fhir.batch2.model.WorkChunkCreateEvent;
 import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.util.JsonUtil;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -52,7 +53,7 @@ class JobDataSinkTest {
 	@Captor
 	private ArgumentCaptor<JobWorkNotification> myJobWorkNotificationCaptor;
 	@Captor
-	private ArgumentCaptor<BatchWorkChunk> myBatchWorkChunkCaptor;
+	private ArgumentCaptor<WorkChunkCreateEvent> myBatchWorkChunkCaptor;
 
 	@Test
 	public void test_sink_accept() {
@@ -93,7 +94,7 @@ class JobDataSinkTest {
 
 		// execute
 		// Let's test our first step worker by calling run on it:
-		when(myJobPersistence.storeWorkChunk(myBatchWorkChunkCaptor.capture())).thenReturn(CHUNK_ID);
+		when(myJobPersistence.onWorkChunkCreate(myBatchWorkChunkCaptor.capture())).thenReturn(CHUNK_ID);
 		JobInstance instance = JobInstance.fromInstanceId(JOB_INSTANCE_ID);
 		StepExecutionDetails<TestJobParameters, VoidModel> details = new StepExecutionDetails<>(new TestJobParameters().setParam1("" + PID_COUNT), null, instance, CHUNK_ID);
 		JobWorkCursor<TestJobParameters, VoidModel, Step1Output> cursor = new JobWorkCursor<>(job, true, firstStep, lastStep);
@@ -115,7 +116,7 @@ class JobDataSinkTest {
 		assertEquals(JOB_DEF_VERSION, notification.getJobDefinitionVersion());
 		assertEquals(LAST_STEP_ID, notification.getTargetStepId());
 
-		BatchWorkChunk batchWorkChunk = myBatchWorkChunkCaptor.getValue();
+		WorkChunkCreateEvent batchWorkChunk = myBatchWorkChunkCaptor.getValue();
 		assertEquals(JOB_DEF_VERSION, batchWorkChunk.jobDefinitionVersion);
 		assertEquals(0, batchWorkChunk.sequence);
 		assertEquals(JOB_DEF_ID, batchWorkChunk.jobDefinitionId);

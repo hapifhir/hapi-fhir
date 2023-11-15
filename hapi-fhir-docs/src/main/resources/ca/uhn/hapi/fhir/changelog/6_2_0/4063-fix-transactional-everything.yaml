@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 4063
+jira: SMILE-5188
+title: "Fixed a bug where the $everything operation on Patient instances and the Patient type was not correctly propagating the transactional semantics. This was causing callers to not be in a transactional context."

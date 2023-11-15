@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.packages;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +17,7 @@ package ca.uhn.fhir.jpa.packages;
  * limitations under the License.
  * #L%
  */
-
+package ca.uhn.fhir.jpa.packages;
 
 import ca.uhn.fhir.model.api.annotation.ExampleSupplier;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
@@ -33,39 +31,65 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
 
-@Schema(
-	name = "PackageInstallationSpec",
-	description =
-		"Defines a set of instructions for package installation"
-)
+@Schema(name = "PackageInstallationSpec", description = "Defines a set of instructions for package installation")
 @JsonPropertyOrder({
-	"name", "version", "packageUrl", "installMode", "installResourceTypes", "validationMode"
+	"name",
+	"version",
+	"packageUrl",
+	"installMode",
+	"installResourceTypes",
+	"validationMode",
+	"reloadExisting"
 })
 @ExampleSupplier({PackageInstallationSpec.ExampleSupplier.class, PackageInstallationSpec.ExampleSupplier2.class})
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@JsonAutoDetect(creatorVisibility = JsonAutoDetect.Visibility.NONE, fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE, isGetterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE)
+@JsonAutoDetect(
+		creatorVisibility = JsonAutoDetect.Visibility.NONE,
+		fieldVisibility = JsonAutoDetect.Visibility.NONE,
+		getterVisibility = JsonAutoDetect.Visibility.NONE,
+		isGetterVisibility = JsonAutoDetect.Visibility.NONE,
+		setterVisibility = JsonAutoDetect.Visibility.NONE)
 public class PackageInstallationSpec {
 
 	@Schema(description = "The direct package URL")
 	@JsonProperty("packageUrl")
 	private String myPackageUrl;
+
 	@Schema(description = "The NPM package Name")
 	@JsonProperty("name")
 	private String myName;
+
 	@Schema(description = "The direct package version")
 	@JsonProperty("version")
 	private String myVersion;
-	@Schema(description = "Should resources from this package be extracted from the package and installed into the repository individually")
+
+	@Schema(
+			description =
+					"Should resources from this package be extracted from the package and installed into the repository individually")
 	@JsonProperty("installMode")
 	private InstallModeEnum myInstallMode;
-	@Schema(description = "If resources are being installed individually, this is list provides the resource types to install. By default, all conformance resources will be installed.")
+
+	@Schema(
+			description =
+					"If resources are being installed individually, this is list provides the resource types to install. By default, all conformance resources will be installed.")
 	@JsonProperty("installResourceTypes")
 	private List<String> myInstallResourceTypes;
+
 	@Schema(description = "Should dependencies be automatically resolved, fetched and installed with the same settings")
 	@JsonProperty("fetchDependencies")
 	private boolean myFetchDependencies;
-	@Schema(description = "Any values provided here will be interpreted as a regex. Dependencies with an ID matching any regex will be skipped.")
+
+	@Schema(
+			description =
+					"Should existing resources be reloaded. Defaults to true, but can be set to false to avoid re-index operations for existing search parameters")
+	@JsonProperty("reloadExisting")
+	private boolean myReloadExisting = true;
+
+	@Schema(
+			description =
+					"Any values provided here will be interpreted as a regex. Dependencies with an ID matching any regex will be skipped.")
 	private List<String> myDependencyExcludes;
+
 	@JsonIgnore
 	private byte[] myPackageContents;
 
@@ -145,6 +169,14 @@ public class PackageInstallationSpec {
 		return this;
 	}
 
+	public boolean isReloadExisting() {
+		return myReloadExisting;
+	}
+
+	public void setReloadExisting(boolean reloadExisting) {
+		this.myReloadExisting = reloadExisting;
+	}
+
 	public PackageInstallationSpec addDependencyExclude(String theExclude) {
 		getDependencyExcludes().add(theExclude);
 		return this;
@@ -172,10 +204,10 @@ public class PackageInstallationSpec {
 		@Override
 		public PackageInstallationSpec get() {
 			return new PackageInstallationSpec()
-				.setName("hl7.fhir.us.core")
-				.setVersion("3.1.0")
-				.setInstallMode(InstallModeEnum.STORE_ONLY)
-				.setFetchDependencies(true);
+					.setName("hl7.fhir.us.core")
+					.setVersion("3.1.0")
+					.setInstallMode(InstallModeEnum.STORE_ONLY)
+					.setFetchDependencies(true);
 		}
 	}
 
@@ -184,12 +216,11 @@ public class PackageInstallationSpec {
 		@Override
 		public PackageInstallationSpec get() {
 			return new PackageInstallationSpec()
-				.setName("com.example.my-resources")
-				.setVersion("1.0")
-				.setPackageUrl("classpath:/my-resources.tgz")
-				.setInstallMode(InstallModeEnum.STORE_AND_INSTALL)
-				.addInstallResourceTypes("Organization", "Medication", "PlanDefinition", "SearchParameter");
+					.setName("com.example.my-resources")
+					.setVersion("1.0")
+					.setPackageUrl("classpath:/my-resources.tgz")
+					.setInstallMode(InstallModeEnum.STORE_AND_INSTALL)
+					.addInstallResourceTypes("Organization", "Medication", "PlanDefinition", "SearchParameter");
 		}
 	}
-
 }

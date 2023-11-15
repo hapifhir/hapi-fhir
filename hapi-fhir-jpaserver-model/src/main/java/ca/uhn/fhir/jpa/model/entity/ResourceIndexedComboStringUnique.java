@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.model.entity;
-
 /*-
  * #%L
  * HAPI FHIR JPA Model
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.model.entity;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.model.entity;
 
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.CompareToBuilder;
@@ -31,11 +30,20 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import javax.persistence.*;
 
 @Entity()
-@Table(name = "HFJ_IDX_CMP_STRING_UNIQ", indexes = {
-	@Index(name = ResourceIndexedComboStringUnique.IDX_IDXCMPSTRUNIQ_STRING, columnList = "IDX_STRING", unique = true),
-	@Index(name = ResourceIndexedComboStringUnique.IDX_IDXCMPSTRUNIQ_RESOURCE, columnList = "RES_ID", unique = false)
-})
-public class ResourceIndexedComboStringUnique extends BasePartitionable implements Comparable<ResourceIndexedComboStringUnique> {
+@Table(
+		name = "HFJ_IDX_CMP_STRING_UNIQ",
+		indexes = {
+			@Index(
+					name = ResourceIndexedComboStringUnique.IDX_IDXCMPSTRUNIQ_STRING,
+					columnList = "IDX_STRING",
+					unique = true),
+			@Index(
+					name = ResourceIndexedComboStringUnique.IDX_IDXCMPSTRUNIQ_RESOURCE,
+					columnList = "RES_ID",
+					unique = false)
+		})
+public class ResourceIndexedComboStringUnique extends BasePartitionable
+		implements Comparable<ResourceIndexedComboStringUnique>, IResourceIndexComboSearchParameter {
 
 	public static final int MAX_STRING_LENGTH = 500;
 	public static final String IDX_IDXCMPSTRUNIQ_STRING = "IDX_IDXCMPSTRUNIQ_STRING";
@@ -46,11 +54,17 @@ public class ResourceIndexedComboStringUnique extends BasePartitionable implemen
 	@Id
 	@Column(name = "PID")
 	private Long myId;
+
 	@ManyToOne
-	@JoinColumn(name = "RES_ID", referencedColumnName = "RES_ID", foreignKey = @ForeignKey(name = "FK_IDXCMPSTRUNIQ_RES_ID"))
+	@JoinColumn(
+			name = "RES_ID",
+			referencedColumnName = "RES_ID",
+			foreignKey = @ForeignKey(name = "FK_IDXCMPSTRUNIQ_RES_ID"))
 	private ResourceTable myResource;
+
 	@Column(name = "RES_ID", insertable = false, updatable = false)
 	private Long myResourceId;
+
 	@Column(name = "IDX_STRING", nullable = false, length = MAX_STRING_LENGTH)
 	private String myIndexString;
 
@@ -60,6 +74,7 @@ public class ResourceIndexedComboStringUnique extends BasePartitionable implemen
 	@SuppressWarnings("unused")
 	@Column(name = PartitionablePartitionId.PARTITION_ID, insertable = false, updatable = false, nullable = true)
 	private Integer myPartitionIdValue;
+
 	@Transient
 	private IIdType mySearchParameterId;
 
@@ -73,7 +88,8 @@ public class ResourceIndexedComboStringUnique extends BasePartitionable implemen
 	/**
 	 * Constructor
 	 */
-	public ResourceIndexedComboStringUnique(ResourceTable theResource, String theIndexString, IIdType theSearchParameterId) {
+	public ResourceIndexedComboStringUnique(
+			ResourceTable theResource, String theIndexString, IIdType theSearchParameterId) {
 		setResource(theResource);
 		setIndexString(theIndexString);
 		setPartitionId(theResource.getPartitionId());
@@ -97,11 +113,10 @@ public class ResourceIndexedComboStringUnique extends BasePartitionable implemen
 
 		ResourceIndexedComboStringUnique that = (ResourceIndexedComboStringUnique) theO;
 
-		return new EqualsBuilder()
-			.append(myIndexString, that.myIndexString)
-			.isEquals();
+		return new EqualsBuilder().append(myIndexString, that.myIndexString).isEquals();
 	}
 
+	@Override
 	public String getIndexString() {
 		return myIndexString;
 	}
@@ -121,24 +136,23 @@ public class ResourceIndexedComboStringUnique extends BasePartitionable implemen
 
 	@Override
 	public int hashCode() {
-		return new HashCodeBuilder(17, 37)
-			.append(myIndexString)
-			.toHashCode();
+		return new HashCodeBuilder(17, 37).append(myIndexString).toHashCode();
 	}
 
 	@Override
 	public String toString() {
 		return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
-			.append("id", myId)
-			.append("resourceId", myResourceId)
-			.append("indexString", myIndexString)
-			.append("partition", getPartitionId())
-			.toString();
+				.append("id", myId)
+				.append("resourceId", myResourceId)
+				.append("indexString", myIndexString)
+				.append("partition", getPartitionId())
+				.toString();
 	}
 
 	/**
 	 * Note: This field is not persisted, so it will only be populated for new indexes
 	 */
+	@Override
 	public void setSearchParameterId(IIdType theSearchParameterId) {
 		mySearchParameterId = theSearchParameterId;
 	}
@@ -146,6 +160,7 @@ public class ResourceIndexedComboStringUnique extends BasePartitionable implemen
 	/**
 	 * Note: This field is not persisted, so it will only be populated for new indexes
 	 */
+	@Override
 	public IIdType getSearchParameterId() {
 		return mySearchParameterId;
 	}

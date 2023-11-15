@@ -1,8 +1,9 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
+import ca.uhn.fhir.jpa.config.TestR4ConfigWithElasticHSearch;
 import ca.uhn.fhir.jpa.provider.BaseJpaResourceProvider;
-import ca.uhn.fhir.jpa.test.config.TestHSearchAddInConfig;
+import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.test.utilities.docker.RequiresDocker;
 import org.apache.commons.io.IOUtils;
@@ -50,27 +51,24 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(SpringExtension.class)
 @RequiresDocker
-@ContextConfiguration(classes = TestHSearchAddInConfig.Elasticsearch.class)
+@ContextConfiguration(classes = TestR4ConfigWithElasticHSearch.class)
 public class ResourceProviderR4ElasticTest extends BaseResourceProviderR4Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(ResourceProviderR4ElasticTest.class);
-
-	@Autowired
-	private DaoConfig myDaoConfig;
 
 	private BaseJpaResourceProvider<Observation> myObservationResourceProvider;
 
 	@BeforeEach
 	public void beforeEach() {
-		myDaoConfig.setLastNEnabled(true);
-		myDaoConfig.setAdvancedHSearchIndexing(true);
-		myDaoConfig.setStoreResourceInHSearchIndex(true);
+		myStorageSettings.setLastNEnabled(true);
+		myStorageSettings.setAdvancedHSearchIndexing(true);
+		myStorageSettings.setStoreResourceInHSearchIndex(true);
 	}
 
 	@AfterEach
 	public void afterEach() {
-		myDaoConfig.setLastNEnabled(new DaoConfig().isLastNEnabled());
-		myDaoConfig.setAdvancedHSearchIndexing(new DaoConfig().isAdvancedHSearchIndexing());
-		myDaoConfig.setStoreResourceInHSearchIndex(new DaoConfig().isStoreResourceInHSearchIndex());
+		myStorageSettings.setLastNEnabled(new JpaStorageSettings().isLastNEnabled());
+		myStorageSettings.setAdvancedHSearchIndexing(new JpaStorageSettings().isAdvancedHSearchIndexing());
+		myStorageSettings.setStoreResourceInHSearchIndex(new JpaStorageSettings().isStoreResourceInHSearchIndex());
 	}
 
 
@@ -89,7 +87,7 @@ public class ResourceProviderR4ElasticTest extends BaseResourceProviderR4Test {
 		createObservationWithCode(mean_blood_pressure);
 
 		// when
-		HttpGet expandQuery = new HttpGet(BaseResourceProviderR4Test.ourServerBase + "/ValueSet/$expand?contextDirection=existing&context=Observation.code:text&filter=pressure");
+		HttpGet expandQuery = new HttpGet(myServerBase + "/ValueSet/$expand?contextDirection=existing&context=Observation.code:text&filter=pressure");
 		try (CloseableHttpResponse response = BaseResourceProviderR4Test.ourHttpClient.execute(expandQuery)) {
 
 			// then
@@ -166,7 +164,7 @@ public class ResourceProviderR4ElasticTest extends BaseResourceProviderR4Test {
 			Coding blood_count = new Coding("http://loinc.org", "789-8", "Erythrocytes in Blood by Automated count for code: " + (index + 1));
 			createObservationWithCode(blood_count);
 		});
-		HttpGet countQuery = new HttpGet(BaseResourceProviderR4Test.ourServerBase + "/Observation?code=789-8&_count=5");
+		HttpGet countQuery = new HttpGet(myServerBase + "/Observation?code=789-8&_count=5&_total=accurate");
 		myCaptureQueriesListener.clear();
 		try (CloseableHttpResponse response = BaseResourceProviderR4Test.ourHttpClient.execute(countQuery)) {
 			myCaptureQueriesListener.logSelectQueriesForCurrentThread();
@@ -187,7 +185,7 @@ public class ResourceProviderR4ElasticTest extends BaseResourceProviderR4Test {
 			Coding blood_count = new Coding("http://loinc.org", "789-8", "Erythrocytes in Blood by Automated count for code: " + (index + 1));
 			createObservationWithCode(blood_count);
 		});
-		HttpGet countQuery = new HttpGet(BaseResourceProviderR4Test.ourServerBase + "/Observation?code=789-8&_count=0");
+		HttpGet countQuery = new HttpGet(myServerBase + "/Observation?code=789-8&_count=0");
 		myCaptureQueriesListener.clear();
 		try (CloseableHttpResponse response = BaseResourceProviderR4Test.ourHttpClient.execute(countQuery)) {
 			myCaptureQueriesListener.logSelectQueriesForCurrentThread();

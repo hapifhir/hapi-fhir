@@ -30,7 +30,8 @@ Creating your own interceptors is easy. Custom interceptor classes do not need t
 
 * The method must have an appropriate return value for the chosen [Pointcut](/apidocs/hapi-fhir-base/ca/uhn/fhir/interceptor/api/Pointcut.html).
 
-* The method may have any of the parameters specified for the given [Pointcut](/apidocs/hapi-fhir-base/ca/uhn/fhir/interceptor/api/Pointcut.html). 
+* The method may have any of the parameters specified for the given [Pointcut](/apidocs/hapi-fhir-base/ca/uhn/fhir/interceptor/api/Pointcut.html).
+    * A parameter of type [Pointcut](/apidocs/hapi-fhir-base/ca/uhn/fhir/interceptor/api/Pointcut.html) may also be added, and will be passed the actual Pointcut which triggered the invocation.
 
 * The method must be public.
 

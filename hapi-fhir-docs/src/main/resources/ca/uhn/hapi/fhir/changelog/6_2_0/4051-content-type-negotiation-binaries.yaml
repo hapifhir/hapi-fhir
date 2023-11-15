@@ -1,0 +1,7 @@
+---
+type: fix
+issue: 4051
+jira: SMILE-5170
+title: "There was a bug in content-type negotiation when reading Binary resources. Previously, when a client requested a Binary resource and with an `Accept` 
+header that matched the `contentType` of the stored resource, the server would return an XML representation of the Binary resource. This has been fixed, and a request with a matching `Accept` header will receive
+the stored binary data directly as the requested content type."

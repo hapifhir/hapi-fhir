@@ -1,0 +1,20 @@
+---
+- item:
+    type: "add"
+    title: "The version of a few dependencies have been bumped to the latest versions
+(dependent HAPI modules listed in brackets):
+<ul>
+<li>Woodstox (Base): 6.2.5 -> 6.3.1</li>
+<li>Spring (JPA): 5.3.20 -> 5.3.23</li>
+<li>Hibernate-Core (JPA): 5.6.2 -> 5.6.12</li>
+<li>Postgresql JDBC (JPA): 42.4.1 -> 42.5.0</li>
+<li>H2 (JPA): 2.1.212 -> 2.1.214</li>
+<li>Caffeine (JPA): 2.9.1 -> 3.1.1</li>
+<li>Commons-Text (JPA and Testpage Overlay): 1.9.0 -> 1.10.0 (Addresses <a href=\"https://nvd.nist.gov/vuln/detail/CVE-2022-42889\">CVE-2022-42889</a>)</li>
+<li>Spring Boot (Boot): 2.6.7 -> 2.7.4</li>
+<li>Jackson Databind: 2.13.2.2 -> 2.13.4.1</li>
+<li>Snakeyaml : 1.31 -> 1.33</li>
+<li>Graphql-Java : 17.3 -> 17.4</li>
+</ul>
+"
+

@@ -51,6 +51,30 @@ public class RuleBuilderTest {
 	}
 
 	@Test
+	public void testInCompartment_withMultipleReadInstances_collapsesIntoASingleRule() {
+		RuleBuilder builder = new RuleBuilder();
+		builder.allow().read().allResources().inCompartment("Patient", new IdDt("Patient/lob1patient"));
+		builder.allow().read().allResources().inCompartment("Patient", new IdDt("Patient/lob2patient"));
+		List<IAuthRule> list = builder.build();
+
+		assertEquals(1, list.size());
+
+		assertEquals(RuleImplOp.class, list.get(0).getClass());
+	}
+
+	@Test
+	public void testInCompartmentWithFilter_withMultipleReadInstances_doesNotCollapseRules() {
+		RuleBuilder builder = new RuleBuilder();
+		builder.allow().read().allResources().inCompartmentWithFilter("Patient", new IdDt("Patient/lob1patient"), "code=foo");
+		builder.allow().read().allResources().inCompartmentWithFilter("Patient", new IdDt("Patient/lob2patient"), "code=bar");
+		List<IAuthRule> list = builder.build();
+
+		assertEquals(2, list.size());
+
+		assertEquals(RuleImplOp.class, list.get(0).getClass());
+	}
+
+	@Test
 	public void testBulkExportPermitsIfASingleGroupMatches() {
 		RuleBuilder builder = new RuleBuilder();
 		List<String> resourceTypes = new ArrayList<>();

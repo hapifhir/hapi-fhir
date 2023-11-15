@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 4289
+title: "The ConceptMap/$translate operation did not work for transation against
+  a ConceptMap resource ID if the ID was non-numeric. This has been fixed. Thanks to
+  Panayiotis Savva for the report!"

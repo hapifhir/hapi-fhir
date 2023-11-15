@@ -1,13 +1,12 @@
 package ca.uhn.fhirtest.config;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.config.HapiJpaConfig;
 import ca.uhn.fhir.jpa.config.dstu3.JpaDstu3Config;
 import ca.uhn.fhir.jpa.config.util.HapiEntityManagerFactoryUtil;
 import ca.uhn.fhir.jpa.model.dialect.HapiFhirH2Dialect;
 import ca.uhn.fhir.jpa.model.dialect.HapiFhirPostgres94Dialect;
-import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.search.HapiHSearchAnalysisConfigurers;
 import ca.uhn.fhir.jpa.util.CurrentThreadCaptureQueriesListener;
@@ -34,10 +33,10 @@ import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
-import javax.persistence.EntityManagerFactory;
-import javax.sql.DataSource;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
+import javax.persistence.EntityManagerFactory;
+import javax.sql.DataSource;
 
 @Configuration
 @Import({CommonConfig.class, JpaDstu3Config.class, HapiJpaConfig.class})
@@ -50,8 +49,8 @@ public class TestDstu3Config {
 	private String myFhirLuceneLocation = System.getProperty(FHIR_LUCENE_LOCATION_DSTU3);
 
 	@Bean
-	public DaoConfig daoConfig() {
-		DaoConfig retVal = new DaoConfig();
+	public JpaStorageSettings storageSettings() {
+		JpaStorageSettings retVal = new JpaStorageSettings();
 		retVal.addSupportedSubscriptionType(Subscription.SubscriptionChannelType.EMAIL);
 		retVal.addSupportedSubscriptionType(Subscription.SubscriptionChannelType.RESTHOOK);
 		retVal.addSupportedSubscriptionType(Subscription.SubscriptionChannelType.WEBSOCKET);
@@ -65,23 +64,16 @@ public class TestDstu3Config {
 		retVal.getTreatBaseUrlsAsLocal().add("http://fhirtest.uhn.ca/baseDstu3");
 		retVal.getTreatBaseUrlsAsLocal().add("https://fhirtest.uhn.ca/baseDstu3");
 		retVal.setCountSearchResultsUpTo(TestR4Config.COUNT_SEARCH_RESULTS_UP_TO);
-		retVal.setIndexMissingFields(DaoConfig.IndexEnabledEnum.ENABLED);
+		retVal.setIndexMissingFields(JpaStorageSettings.IndexEnabledEnum.ENABLED);
 		retVal.setFetchSizeDefaultMaximum(10000);
 		retVal.setReindexThreadCount(1);
 		retVal.setExpungeEnabled(true);
 		retVal.setFilterParameterEnabled(true);
 		retVal.setDefaultSearchParamsCanBeOverridden(false);
-		retVal.getModelConfig().setIndexOnContainedResources(true);
-		return retVal;
-	}
-
-	@Bean
-	public ModelConfig modelConfig() {
-		ModelConfig retVal = daoConfig().getModelConfig();
+		retVal.setIndexOnContainedResources(true);
 		retVal.setIndexIdentifierOfType(true);
 		return retVal;
 	}
-
 
 	@Bean
 	public ValidationSettings validationSettings() {
@@ -97,7 +89,6 @@ public class TestDstu3Config {
 		retVal.setMaximumPageSize(500);
 		return retVal;
 	}
-
 
 	@Bean
 	public PublicSecurityInterceptor securityInterceptor() {
@@ -115,23 +106,23 @@ public class TestDstu3Config {
 		}
 		retVal.setUsername(myDbUsername);
 		retVal.setPassword(myDbPassword);
-		retVal.setDefaultQueryTimeout(20);
-		retVal.setTestOnBorrow(true);
+		TestR5Config.applyCommonDatasourceParams(retVal);
 
-		DataSource dataSource = ProxyDataSourceBuilder
-			.create(retVal)
-//			.logQueryBySlf4j(SLF4JLogLevel.INFO, "SQL")
-			.logSlowQueryBySlf4j(10000, TimeUnit.MILLISECONDS)
-			.afterQuery(new CurrentThreadCaptureQueriesListener())
-			.countQuery()
-			.build();
+		DataSource dataSource = ProxyDataSourceBuilder.create(retVal)
+				//			.logQueryBySlf4j(SLF4JLogLevel.INFO, "SQL")
+				.logSlowQueryBySlf4j(10000, TimeUnit.MILLISECONDS)
+				.afterQuery(new CurrentThreadCaptureQueriesListener())
+				.countQuery()
+				.build();
 
 		return dataSource;
 	}
 
 	@Bean
-	public LocalContainerEntityManagerFactoryBean entityManagerFactory(ConfigurableListableBeanFactory theConfigurableListableBeanFactory, FhirContext theFhirContext) {
-		LocalContainerEntityManagerFactoryBean retVal = HapiEntityManagerFactoryUtil.newEntityManagerFactory(theConfigurableListableBeanFactory, theFhirContext);
+	public LocalContainerEntityManagerFactoryBean entityManagerFactory(
+			ConfigurableListableBeanFactory theConfigurableListableBeanFactory, FhirContext theFhirContext) {
+		LocalContainerEntityManagerFactoryBean retVal = HapiEntityManagerFactoryUtil.newEntityManagerFactory(
+				theConfigurableListableBeanFactory, theFhirContext);
 		retVal.setPersistenceUnitName("PU_HapiFhirJpaDstu3");
 		retVal.setDataSource(dataSource());
 		retVal.setJpaProperties(jpaProperties());
@@ -155,8 +146,9 @@ public class TestDstu3Config {
 		extraProperties.put("hibernate.cache.use_minimal_puts", "false");
 
 		extraProperties.put(BackendSettings.backendKey(BackendSettings.TYPE), "lucene");
-		extraProperties.put(BackendSettings.backendKey(LuceneBackendSettings.ANALYSIS_CONFIGURER),
-			HapiHSearchAnalysisConfigurers.HapiLuceneAnalysisConfigurer.class.getName());
+		extraProperties.put(
+				BackendSettings.backendKey(LuceneBackendSettings.ANALYSIS_CONFIGURER),
+				HapiHSearchAnalysisConfigurers.HapiLuceneAnalysisConfigurer.class.getName());
 		extraProperties.put(BackendSettings.backendKey(LuceneIndexSettings.DIRECTORY_TYPE), "local-filesystem");
 		extraProperties.put(BackendSettings.backendKey(LuceneIndexSettings.DIRECTORY_ROOT), myFhirLuceneLocation);
 		extraProperties.put(BackendSettings.backendKey(LuceneBackendSettings.LUCENE_VERSION), "LUCENE_CURRENT");
@@ -171,7 +163,8 @@ public class TestDstu3Config {
 	 */
 	@Bean
 	@Lazy
-	public RequestValidatingInterceptor requestValidatingInterceptor(IInstanceValidatorModule theFhirInstanceValidator) {
+	public RequestValidatingInterceptor requestValidatingInterceptor(
+			IInstanceValidatorModule theFhirInstanceValidator) {
 		RequestValidatingInterceptor requestValidator = new RequestValidatingInterceptor();
 		requestValidator.setFailOnSeverity(null);
 		requestValidator.setAddResponseHeaderOnSeverity(null);
@@ -182,14 +175,14 @@ public class TestDstu3Config {
 		return requestValidator;
 	}
 
-//	@Bean
-//	public IServerInterceptor subscriptionSecurityInterceptor() {
-//		return new SubscriptionsRequireManualActivationInterceptorDstu3();
-//	}
+	//	@Bean
+	//	public IServerInterceptor subscriptionSecurityInterceptor() {
+	//		return new SubscriptionsRequireManualActivationInterceptorDstu3();
+	//	}
 
 	@Bean
 	@Primary
-	public JpaTransactionManager hapiTransactionManager(EntityManagerFactory entityManagerFactory) {
+	public JpaTransactionManager transactionManager(EntityManagerFactory entityManagerFactory) {
 		JpaTransactionManager retVal = new JpaTransactionManager();
 		retVal.setEntityManagerFactory(entityManagerFactory);
 		return retVal;

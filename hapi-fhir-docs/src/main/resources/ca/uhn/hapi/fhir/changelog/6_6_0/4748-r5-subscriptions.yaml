@@ -1,0 +1,8 @@
+---
+type: change
+issue: 4748
+title: "Previously, HAPI-FHIR converted R5 Subscriptions into R4 Subscriptions and triggered those subscriptions by 
+resource changes in the same way R4 subscriptions are triggered. Now R5 Subscriptions are triggered based on the topic
+they subscribe to and the resource matching happens via the SubscriptionTopic resource. This also means that
+R5 Subscription endpoints are now delivered a subscription-notification Bundle as opposed to the resource as is the
+case with R4 Subscriptions."

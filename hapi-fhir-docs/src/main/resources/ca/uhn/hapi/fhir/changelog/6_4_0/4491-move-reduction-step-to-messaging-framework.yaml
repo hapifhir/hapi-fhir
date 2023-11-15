@@ -1,0 +1,8 @@
+---
+type: fix
+issue: 4491
+title: "Moved batch2 reduction step logic to the messaging queue.
+      Before it was executed during the maintenance run directly.
+      This resulted in bugs with multiple reduction steps kicking
+      off for long running jobs.
+      "

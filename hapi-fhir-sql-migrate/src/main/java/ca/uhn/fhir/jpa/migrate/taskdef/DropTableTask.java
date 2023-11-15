@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.migrate.taskdef;
-
 /*-
  * #%L
  * HAPI FHIR Server - SQL Migration
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.migrate.taskdef;
 
 import ca.uhn.fhir.jpa.migrate.JdbcUtils;
 import org.intellij.lang.annotations.Language;
@@ -65,14 +64,12 @@ public class DropTableTask extends BaseTableTask {
 
 		DropIndexTask theIndexTask = new DropIndexTask(getProductVersion(), getSchemaVersion());
 		theIndexTask
-			.setTableName(getTableName())
-			.setConnectionProperties(getConnectionProperties())
-			.setDriverType(getDriverType())
-			.setDryRun(isDryRun());
+				.setTableName(getTableName())
+				.setConnectionProperties(getConnectionProperties())
+				.setDriverType(getDriverType())
+				.setDryRun(isDryRun());
 		for (String nextIndex : indexNames) {
-			theIndexTask
-				.setIndexName(nextIndex)
-				.execute();
+			theIndexTask.setIndexName(nextIndex).execute();
 		}
 
 		logInfo(ourLog, "Dropping table: {}", getTableName());
@@ -80,8 +77,5 @@ public class DropTableTask extends BaseTableTask {
 		@Language("SQL")
 		String sql = "DROP TABLE " + getTableName();
 		executeSql(getTableName(), sql);
-
 	}
-
-
 }

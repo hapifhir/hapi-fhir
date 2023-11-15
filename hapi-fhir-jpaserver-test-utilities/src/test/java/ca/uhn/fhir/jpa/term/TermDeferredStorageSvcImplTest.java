@@ -69,9 +69,9 @@ public class TermDeferredStorageSvcImplTest {
 
 		when(myJobCoordinator.getInstance(eq(jobId)))
 			.thenReturn(instance);
-		assertFalse(mySvc.isStorageQueueEmpty());
+		assertFalse(mySvc.isStorageQueueEmpty(true));
 		instance.setStatus(StatusEnum.COMPLETED);
-		assertTrue(mySvc.isStorageQueueEmpty());
+		assertTrue(mySvc.isStorageQueueEmpty(true));
 	}
 
 

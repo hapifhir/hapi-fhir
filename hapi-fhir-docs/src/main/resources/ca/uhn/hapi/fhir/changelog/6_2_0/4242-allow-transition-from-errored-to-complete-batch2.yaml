@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 4242
+title: "Batch2 jobs were incorrectly prevented from transitioning from ERRORED to COMPLETE status."

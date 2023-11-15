@@ -42,8 +42,8 @@ import org.hl7.fhir.r5.model.StringType;
 import org.hl7.fhir.r5.model.StructureDefinition;
 import org.hl7.fhir.r5.model.ValueSet;
 import org.hl7.fhir.r5.model.ValueSet.ValueSetExpansionComponent;
-import org.hl7.fhir.r5.terminologies.ValueSetExpander;
-import org.hl7.fhir.r5.utils.validation.IResourceValidator;
+import org.hl7.fhir.r5.terminologies.expansion.ValueSetExpander;;
+import org.hl7.fhir.r5.terminologies.expansion.ValueSetExpansionOutcome;
 import org.hl7.fhir.r5.utils.validation.IValidationPolicyAdvisor;
 import org.hl7.fhir.r5.utils.validation.IValidatorResourceFetcher;
 import org.hl7.fhir.r5.utils.validation.constants.BestPracticeWarningLevel;
@@ -117,7 +117,8 @@ public class FhirInstanceValidatorR5Test {
 
 		ValidationResult output = myVal.validateWithResult(resource);
 		List<SingleValidationMessage> nonInfo = logResultsAndReturnNonInformationalOnes(output);
-		assertThat(nonInfo, hasSize(2));
+		//TODO JA: This is now 3 since we now validate that there is a questionnaire provided.
+		assertThat(nonInfo, hasSize(3));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -149,7 +150,7 @@ public class FhirInstanceValidatorR5Test {
 
 			ValueSet valueset = new ValueSet();
 			valueset.setExpansion(retVal);
-			return new ValueSetExpander.ValueSetExpansionOutcome(valueset);
+			return new ValueSetExpansionOutcome(valueset);
 		});
 		when(myMockSupport.isCodeSystemSupported(any(), nullable(String.class))).thenAnswer(new Answer<Boolean>() {
 			@Override
@@ -358,7 +359,7 @@ public class FhirInstanceValidatorR5Test {
 		med.getContentFirstRep().getAttachment().setContentType(Constants.CT_OCTET_STREAM);
 		med.getContentFirstRep().getAttachment().setDataElement(value);
 		med.getContentFirstRep().getAttachment().setTitle("bbbb syst");
-		med.setStatus(Enumerations.DocumentReferenceStatus.CURRENT);
+		med.setStatus(DocumentReference.DocumentReferenceStatus.CURRENT);
 		String encoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(med);
 
 		encoded = encoded.replace(value.getValueAsString(), "%%%2@()()");
@@ -380,7 +381,7 @@ public class FhirInstanceValidatorR5Test {
 		med.getContentFirstRep().getAttachment().setContentType(Constants.CT_OCTET_STREAM);
 		med.getContentFirstRep().getAttachment().setDataElement(value);
 		med.getContentFirstRep().getAttachment().setTitle("bbbb syst");
-		med.setStatus(Enumerations.DocumentReferenceStatus.CURRENT);
+		med.setStatus(DocumentReference.DocumentReferenceStatus.CURRENT);
 		String encoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(med);
 
 		ourLog.info("Encoded: {}", encoded);
@@ -504,7 +505,7 @@ public class FhirInstanceValidatorR5Test {
 		ourLog.info(output.getMessages().get(0).getLocationString());
 		ourLog.info(output.getMessages().get(0).getMessage());
 		assertEquals("Patient", output.getMessages().get(0).getLocationString());
-		assertEquals("Unrecognised property '@foo'", output.getMessages().get(0).getMessage());
+		assertEquals("Unrecognized property 'foo'", output.getMessages().get(0).getMessage());
 	}
 
 	@Test
@@ -623,7 +624,7 @@ public class FhirInstanceValidatorR5Test {
 		ourLog.info(output.getMessages().get(0).getLocationString());
 		ourLog.info(output.getMessages().get(0).getMessage());
 		assertEquals("/f:Patient", output.getMessages().get(0).getLocationString());
-		assertEquals("Undefined element 'foo'", output.getMessages().get(0).getMessage());
+		assertEquals("Undefined element 'foo' at /f:Patient", output.getMessages().get(0).getMessage());
 	}
 
 	@Test
@@ -759,9 +760,13 @@ public class FhirInstanceValidatorR5Test {
 		rp.addRelationship().addCoding().setSystem("http://terminology.hl7.org/CodeSystem/v2-0131").setCode("GAGAGAGA");
 
 		results = myVal.validateWithResult(rp);
-		outcome = logResultsAndReturnNonInformationalOnes(results);
-		assertThat(outcome, not(empty()));
+		outcome = logResultsAndReturnAll(results);
 
+		assertThat(outcome.get(0).getMessage(), containsString("None of the codings provided are in the value set 'Patient Relationship Type'"));
+		assertEquals(ResultSeverityEnum.INFORMATION, outcome.get(0).getSeverity());
+		assertThat(outcome.get(1).getMessage(), containsString("Unknown code 'http://terminology.hl7.org/CodeSystem/v2-0131#GAGAGAGA'"));
+		assertEquals(ResultSeverityEnum.ERROR, outcome.get(1).getSeverity());
+		assertEquals(2, outcome.size());
 	}
 
 	@Test
@@ -834,7 +839,7 @@ public class FhirInstanceValidatorR5Test {
 
 		ValidationResult output = myVal.validateWithResult(input);
 		assertThat(output.getMessages().size(), greaterThan(0));
-		assertEquals("Observation.status: minimum required = 1, but only found 0 (from http://hl7.org/fhir/StructureDefinition/Observation)", output.getMessages().get(0).getMessage());
+		assertThat(output.getMessages().get(0).getMessage(), containsString("Observation.status: minimum required = 1, but only found 0"));
 
 	}
 
@@ -846,7 +851,7 @@ public class FhirInstanceValidatorR5Test {
 		input.setStatus(Enumerations.ObservationStatus.FINAL);
 		input.getCode().setText("No code here!");
 
-		ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(input));
+		ourLog.debug(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(input));
 
 		ValidationResult output = myVal.validateWithResult(input);
 		assertEquals(output.getMessages().size(), 0);
@@ -869,7 +874,7 @@ public class FhirInstanceValidatorR5Test {
 		logResultsAndReturnAll(output);
 		assertThat(
 			output.getMessages().get(0).getMessage(),
-			containsString("The value provided ('notvalidcode') is not in the value set 'ObservationStatus' (http://hl7.org/fhir/ValueSet/observation-status|4.6.0), and a code is required from this value set) (error message = Unknown code 'notvalidcode' for in-memory expansion of ValueSet 'http://hl7.org/fhir/ValueSet/observation-status')")
+			containsString("The value provided ('notvalidcode') is not in the value set 'Observation Status' (http://hl7.org/fhir/ValueSet/observation-status|5.0.0), and a code is required from this value set  (error message = Unknown code 'notvalidcode' for in-memory expansion of ValueSet 'http://hl7.org/fhir/ValueSet/observation-status')")
 			);
 	}
 
@@ -971,9 +976,9 @@ public class FhirInstanceValidatorR5Test {
 		List<SingleValidationMessage> all = logResultsAndReturnAll(output);
 		assertEquals(1, all.size());
 		assertEquals("Patient.identifier[0].type", all.get(0).getLocationString());
-		assertEquals(
-			"None of the codings provided are in the value set 'IdentifierType' (http://hl7.org/fhir/ValueSet/identifier-type), and a coding should come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (codes = http://example.com/foo/bar#bar)",
-			all.get(0).getMessage());
+		assertThat(
+			all.get(0).getMessage(),
+			containsString("None of the codings provided are in the value set 'Identifier Type Codes'"));
 		assertEquals(ResultSeverityEnum.WARNING, all.get(0).getSeverity());
 
 	}

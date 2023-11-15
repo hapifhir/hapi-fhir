@@ -47,6 +47,26 @@
 	</servlet>
 
 	<servlet>
+		<servlet-name>fhirServletAudit</servlet-name>
+		<servlet-class>ca.uhn.fhirtest.TestRestfulServer</servlet-class>
+		<init-param>
+			<param-name>FhirVersion</param-name>
+			<param-value>Audit</param-value>
+		</init-param>
+		<load-on-startup>1</load-on-startup>
+	</servlet>
+
+	<servlet>
+		<servlet-name>fhirServletR4B</servlet-name>
+		<servlet-class>ca.uhn.fhirtest.TestRestfulServer</servlet-class>
+		<init-param>
+			<param-name>FhirVersion</param-name>
+			<param-value>R4B</param-value>
+		</init-param>
+		<load-on-startup>1</load-on-startup>
+	</servlet>
+
+	<servlet>
 		<servlet-name>fhirServletR4</servlet-name>
 		<servlet-class>ca.uhn.fhirtest.TestRestfulServer</servlet-class>
 		<init-param>
@@ -81,8 +101,16 @@
 		<url-pattern>/baseR5/*</url-pattern>
 	</servlet-mapping>
 	<servlet-mapping>
+		<servlet-name>fhirServletR4B</servlet-name>
+		<url-pattern>/baseR4B/*</url-pattern>
+	</servlet-mapping>
+	<servlet-mapping>
 		<servlet-name>fhirServletR4</servlet-name>
 		<url-pattern>/baseR4/*</url-pattern>
+	</servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>fhirServletAudit</servlet-name>
+		<url-pattern>/baseAudit/*</url-pattern>
 	</servlet-mapping>
 	<servlet-mapping>
 		<servlet-name>fhirServletDstu2</servlet-name>

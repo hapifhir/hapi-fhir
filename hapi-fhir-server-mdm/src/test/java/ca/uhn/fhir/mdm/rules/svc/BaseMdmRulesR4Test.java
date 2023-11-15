@@ -29,6 +29,7 @@ public abstract class BaseMdmRulesR4Test extends BaseR4Test {
 
 	@BeforeEach
 	public void before() {
+		super.before();
 		myMdmRulesJson = new MdmRulesJson();
 
 		ArrayList<String> myLegalMdmTypes = new ArrayList<>();

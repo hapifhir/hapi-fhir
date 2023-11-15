@@ -1,0 +1,5 @@
+---
+type: fix
+title: "When running RestfulServer under heavy load or a slow network, the server sometimes
+  logged an EOFException or an IOException in the system logs despite the response completing
+  successfully. This has been corrected."

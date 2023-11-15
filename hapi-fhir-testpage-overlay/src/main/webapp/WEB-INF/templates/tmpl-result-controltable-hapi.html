@@ -1,0 +1,112 @@
+<!--/*
+If the response is a bundle, this block will contain a collapsible
+table with a summary of each entry as well as paging buttons and
+controls for viewing/editing/etc results
+
+ca.uhn.hapi Bundle
+*/-->
+<th:block th:fragment="controltable">
+   <div class="panel-group" id="accordion" style="margin-bottom: 0px;">
+      <div class="panel panel-default" style="border: none; border-bottom: 1px solid #ddd; border-radius: 0px;">
+         <div class="panel-heading">
+            <div class="panel-title">
+               <th:block th:if="${#lists.isEmpty(bundle.entries)}">Bundle contains no entries</th:block>
+               <a th:unless="${#lists.isEmpty(bundle.entries)}" data-toggle="collapse" data-parent="#accordion" href="#collapseOne">
+                  <i id="collapseOneIcon" class="far fa-minus-square"></i>
+                  <span th:if="${bundle.totalResults.empty}" th:text="'Bundle contains ' + ${#lists.size(bundle.entries)} + ' entries'"/>
+                  <span th:unless="${bundle.totalResults.empty}" th:text="'Bundle contains ' + ${#lists.size(bundle.entries)} + ' / ' + ${bundle.totalResults.value} + ' entries'"/>
+               </a>
+
+               <th:block th:if="${!bundle.linkNext.empty} or ${!bundle.linkPrevious.empty}">
+
+                  <!-- Prev/Next Page Buttons -->
+                  <button	class="btn btn-success btn-xs" type="button" id="page-prev-btn"
+                            style="margin-left: 15px;">
+                     <i class="fas fa-angle-double-left"></i>
+                     Prev Page
+                  </button>
+                  <script type="text/javascript" th:inline="javascript">
+                     if ([[${bundle.linkPrevious.empty}]]) {
+                        $('#page-prev-btn').prop('disabled', true);
+                     }
+                     $('#page-prev-btn').click(function() {
+                        var btn = $(this);
+                        handleActionButtonClick($(this));
+                        btn.append($('<input />', { type: 'hidden', name: 'page-url', value: [[${bundle.linkPrevious.value}]] }));
+                        $("#outerForm").attr("action", "page").submit();
+
+                     });
+                  </script>
+
+                  <button	class="btn btn-success btn-xs" type="button" id="page-next-btn">
+                     <i class="fas fa-angle-double-right"></i>
+                     Next Page
+                  </button>
+                  <script type="text/javascript" th:inline="javascript">
+                     if ([[${bundle.linkNext.empty}]]) {
+                        $('#page-next-btn').prop('disabled', true);
+                     }
+                     $('#page-next-btn').click(function() {
+                        var btn = $(this);
+                        handleActionButtonClick($(this));
+                        btn.append($('<input />', { type: 'hidden', name: 'page-url', value: [[${bundle.linkNext.value}]] }));
+                        $("#outerForm").attr("action", "page").submit();
+                     });
+                  </script>
+               </th:block>
+            </div>
+         </div>
+         <div id="collapseOne" class="panel-collapse in" th:unless="${#lists.isEmpty(bundle.entries)}">
+            <div class="panel-body" style="padding-bottom: 0px;">
+               <table class="table table-condensed" style="padding-bottom: 0px; margin-bottom: 0px;">
+                  <colgroup>
+                     <col style="width: 100px;"/>
+                     <col/>
+                     <col/>
+                     <col style="width: 100px;"/>
+                  </colgroup>
+                  <thead>
+                  <tr>
+                     <th></th>
+                     <th>ID</th>
+                     <th>Title</th>
+                     <th>Updated</th>
+                  </tr>
+                  </thead>
+                  <tbody>
+                  <tr th:each="entry : ${bundle.entries}">
+                     <td style="white-space: nowrap;">
+                        <th:block th:if="${entry.resource} != null">
+                           <button class="btn btn-primary btn-xs" th:data1="${entry.resource.id.resourceType}" th:data2="${entry.resource.id.idPart}" th:data3="${#strings.defaultString(entry.resource.id.versionIdPart,'')}" onclick="readFromEntriesTable(this, this.getAttribute('data1'), this.getAttribute('data2'), this.getAttribute('data3'));" type="submit" name="action" value="read"><i class="fas fa-book"></i> Read</button>
+                           <button class="btn btn-primary btn-xs" th:data1="${entry.resource.id.resourceType}" th:data2="${entry.resource.id.idPart}" th:data3="${#strings.defaultString(entry.resource.id.versionIdPart,'')}" onclick="updateFromEntriesTable(this, this.getAttribute('data1'), this.getAttribute('data2'), this.getAttribute('data3'));" type="submit" name="action" value="home"><i class="far fa-edit"></i> Update</button>
+                        </th:block>
+                     </td>
+                     <td>
+                        <a th:if="${entry.resource} != null" th:href="${entry.resource.id}" th:text="${entry.resource.id.toUnqualified()}" style="font-size: 0.8em"/>
+                     </td>
+                     <td>
+                        <!-- Title used to go here -->
+                     </td>
+                     <td th:if="${entry.updated.value} == null"></td>
+                     <td th:if="${entry.updated.value} != null and ${entry.updated.today} == true" th:text="${#dates.format(entry.updated.value, 'HH:mm:ss')}"></td>
+                     <td th:if="${entry.updated.value} != null and ${entry.updated.today} == false" th:text="${#dates.format(entry.updated.value, 'yyyy-MM-dd')}"></td>
+                  </tr>
+                  </tbody>
+               </table>
+            </div>
+         </div>
+         <script type="text/javascript">
+            /*
+            $('#collapseOne').on('hidden.bs.collapse', function () {
+               $("#collapseOneIcon").removeClass("fa-minus-square").addClass("fa-plus-square");
+            });
+
+            $('#collapseOne').on('shown.bs.collapse', function () {
+               $("#collapseOneIcon").removeClass("fa-plus-square").addClass("fa-minus-square");
+            });
+             */
+         </script>
+      </div>
+   </div>
+   <!-- END Non-RI Bundle -->
+</th:block>

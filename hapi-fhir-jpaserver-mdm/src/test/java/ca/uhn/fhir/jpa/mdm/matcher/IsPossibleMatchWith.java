@@ -4,7 +4,7 @@ import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.mdm.dao.MdmLinkDaoSvc;
 import ca.uhn.fhir.mdm.api.IMdmLink;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
+import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hl7.fhir.instance.model.api.IAnyResource;
@@ -26,7 +26,7 @@ public class IsPossibleMatchWith extends BaseGoldenResourceMatcher {
 	protected boolean matchesSafely(IAnyResource theIncomingResource) {
 		List<? extends IMdmLink> mdmLinks = getMdmLinksForTarget(theIncomingResource, MdmMatchResultEnum.POSSIBLE_MATCH);
 
-		List<ResourcePersistentId> goldenResourcePidsToMatch = myBaseResources.stream()
+		List<IResourcePersistentId> goldenResourcePidsToMatch = myBaseResources.stream()
 			.map(this::getMatchedResourcePidFromResource)
 			.filter(Objects::nonNull)
 			.collect(Collectors.toList());
@@ -37,7 +37,7 @@ public class IsPossibleMatchWith extends BaseGoldenResourceMatcher {
 				.collect(Collectors.toList());
 		}
 
-		List<ResourcePersistentId> mdmLinkGoldenResourcePids = mdmLinks
+		List<IResourcePersistentId> mdmLinkGoldenResourcePids = mdmLinks
 			.stream().map(IMdmLink::getGoldenResourcePersistenceId)
 			.collect(Collectors.toList());
 

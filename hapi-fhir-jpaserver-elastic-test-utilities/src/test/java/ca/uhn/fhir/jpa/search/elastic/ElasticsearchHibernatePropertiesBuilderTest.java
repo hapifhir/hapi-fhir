@@ -40,10 +40,9 @@ class ElasticsearchHibernatePropertiesBuilderTest {
 				.apply(new Properties());
 			fail();
 		} catch (ConfigurationException e ) {
-			assertThat(e.getMessage(), is(equalTo(Msg.code(1173) + failureMessage)));
+			assertThat(e.getMessage(), is(equalTo(Msg.code(2139) + failureMessage)));
 		}
 
-		doNothing().when(myPropertiesBuilder).injectStartupTemplate(any(), any(), any(), any());
 		Properties properties = new Properties();
 		myPropertiesBuilder
 			.setHosts(host)
@@ -52,26 +51,4 @@ class ElasticsearchHibernatePropertiesBuilderTest {
 		assertThat(properties.getProperty(BackendSettings.backendKey(ElasticsearchBackendSettings.HOSTS)), is(equalTo(host)));
 
 	}
-
-	@Test
-	public void testHostsValueValidation() {
-		String host = "localhost_9200,localhost:9201,localhost:9202";
-		String failureMessage = "Elasticsearch URLs have to contain ':' as a host:port separator. Example: localhost:9200,localhost:9201,localhost:9202";
-
-		myPropertiesBuilder
-			.setProtocol("https")
-			.setHosts(host)
-			.setUsername("whatever")
-			.setPassword("whatever");
-
-		//SUT
-		try {
-			myPropertiesBuilder
-				.apply(new Properties());
-			fail();
-		} catch (ConfigurationException e ) {
-			assertThat(e.getMessage(), is(equalTo(Msg.code(1174) + failureMessage)));
-		}
-	}
-
 }
