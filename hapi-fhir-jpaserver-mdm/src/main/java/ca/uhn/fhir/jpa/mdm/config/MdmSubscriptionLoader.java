@@ -220,9 +220,10 @@ public class MdmSubscriptionLoader {
 		retVal.setReason("MDM");
 		retVal.setStatus(Enumerations.SubscriptionStatusCodes.REQUESTED);
 
-		//		fixme jm: this way?
 		retVal.setTopic(theSubscriptionTopic.getUrl());
+		// remove ?
 		retVal.setTopicElement(new CanonicalType(theSubscriptionTopic.getUrl()));
+		//
 		retVal.getMeta()
 				.addTag()
 				.setSystem(MdmConstants.SYSTEM_MDM_MANAGED)
@@ -238,9 +239,6 @@ public class MdmSubscriptionLoader {
 		retVal.setEndpoint("channel:"
 				+ myChannelNamer.getChannelName(IMdmSettings.EMPI_CHANNEL_NAME, new ChannelProducerSettings()));
 		retVal.setContentType("application/json");
-		//		fixme jm: not required anymore. Right?
-		//		org.hl7.fhir.r5.model.Subscription.SubscriptionChannelComponent channel = retval.getChannel();
-		//		channel.setPayload("application/json");
 
 		return retVal;
 	}
