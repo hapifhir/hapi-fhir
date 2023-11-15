@@ -30,6 +30,7 @@ import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionRegistry;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedJsonMessage;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
+import ca.uhn.fhir.subscription.api.IResourceModifiedMessagePersistenceSvc;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.slf4j.Logger;
@@ -40,6 +41,7 @@ import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.MessagingException;
 
 import java.util.Collection;
+import java.util.Optional;
 import javax.annotation.Nonnull;
 
 import static ca.uhn.fhir.rest.server.messaging.BaseResourceMessage.OperationTypeEnum.DELETE;
@@ -63,6 +65,9 @@ public class SubscriptionMatchingSubscriber implements MessageHandler {
 
 	@Autowired
 	private SubscriptionMatchDeliverer mySubscriptionMatchDeliverer;
+
+	@Autowired
+	private IResourceModifiedMessagePersistenceSvc myResourceModifiedMessagePersistenceSvc;
 
 	/**
 	 * Constructor
@@ -95,6 +100,16 @@ public class SubscriptionMatchingSubscriber implements MessageHandler {
 				ourLog.trace("Not processing modified message for {}", theMsg.getOperationType());
 				// ignore anything else
 				return;
+		}
+
+		if (theMsg.getPayload(myFhirContext) == null) {
+			// inflate the message and ignore any resource that cannot be found.
+			Optional<ResourceModifiedMessage> inflatedMsg =
+					myResourceModifiedMessagePersistenceSvc.inflatePersistedResourceModifiedMessageOrNull(theMsg);
+			if (inflatedMsg.isEmpty()) {
+				return;
+			}
+			theMsg = inflatedMsg.get();
 		}
 
 		// Interceptor call: SUBSCRIPTION_BEFORE_PERSISTED_RESOURCE_CHECKED

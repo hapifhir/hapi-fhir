@@ -17,6 +17,7 @@ import ca.uhn.fhir.jpa.subscription.module.standalone.BaseBlockingQueueSubscriba
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.messaging.BaseResourceModifiedMessage;
+import ca.uhn.fhir.subscription.api.IResourceModifiedMessagePersistenceSvc;
 import ca.uhn.fhir.util.HapiExtensions;
 import com.google.common.collect.Lists;
 import org.hl7.fhir.dstu3.model.BooleanType;
@@ -33,6 +34,7 @@ import org.mockito.Mockito;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import static ca.uhn.fhir.jpa.subscription.match.matcher.subscriber.SubscriptionCriteriaParser.TypeEnum.STARTYPE_EXPRESSION;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -434,6 +436,8 @@ public class SubscriptionMatchingSubscriberTest extends BaseBlockingQueueSubscri
 		SubscriptionCriteriaParser.SubscriptionCriteria mySubscriptionCriteria;
 		@Mock
 		SubscriptionMatchDeliverer mySubscriptionMatchDeliverer;
+		@Mock
+		IResourceModifiedMessagePersistenceSvc myResourceModifiedMessagePersistenceSvc;
 		@InjectMocks
 		SubscriptionMatchingSubscriber subscriber;
 
@@ -445,6 +449,7 @@ public class SubscriptionMatchingSubscriberTest extends BaseBlockingQueueSubscri
 			when(myInterceptorBroadcaster.callHooks(
 				eq(Pointcut.SUBSCRIPTION_BEFORE_PERSISTED_RESOURCE_CHECKED), any(HookParams.class))).thenReturn(true);
 			when(mySubscriptionRegistry.getAll()).thenReturn(Collections.emptyList());
+			when(myResourceModifiedMessagePersistenceSvc.inflatePersistedResourceModifiedMessageOrNull(any())).thenReturn(Optional.ofNullable(message));
 
 			subscriber.matchActiveSubscriptionsAndDeliver(message);
 
@@ -465,6 +470,7 @@ public class SubscriptionMatchingSubscriberTest extends BaseBlockingQueueSubscri
 			when(myActiveSubscription.getCriteria()).thenReturn(mySubscriptionCriteria);
 			when(myActiveSubscription.getId()).thenReturn("Patient/123");
 			when(mySubscriptionCriteria.getType()).thenReturn(STARTYPE_EXPRESSION);
+			when(myResourceModifiedMessagePersistenceSvc.inflatePersistedResourceModifiedMessageOrNull(any())).thenReturn(Optional.ofNullable(message));
 
 			subscriber.matchActiveSubscriptionsAndDeliver(message);
 
@@ -486,6 +492,7 @@ public class SubscriptionMatchingSubscriberTest extends BaseBlockingQueueSubscri
 			when(myNonDeleteSubscription.getCriteria()).thenReturn(mySubscriptionCriteria);
 			when(myNonDeleteSubscription.getId()).thenReturn("Patient/123");
 			when(mySubscriptionCriteria.getType()).thenReturn(STARTYPE_EXPRESSION);
+			when(myResourceModifiedMessagePersistenceSvc.inflatePersistedResourceModifiedMessageOrNull(any())).thenReturn(Optional.ofNullable(message));
 
 			subscriber.matchActiveSubscriptionsAndDeliver(message);
 
@@ -505,6 +512,7 @@ public class SubscriptionMatchingSubscriberTest extends BaseBlockingQueueSubscri
 			when(myActiveSubscription.getId()).thenReturn("Patient/123");
 			when(mySubscriptionCriteria.getType()).thenReturn(STARTYPE_EXPRESSION);
 			when(myCanonicalSubscription.getSendDeleteMessages()).thenReturn(true);
+			when(myResourceModifiedMessagePersistenceSvc.inflatePersistedResourceModifiedMessageOrNull(any())).thenReturn(Optional.ofNullable(message));
 
 			subscriber.matchActiveSubscriptionsAndDeliver(message);
 

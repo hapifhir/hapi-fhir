@@ -118,12 +118,19 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 
 		Builder.BuilderWithTableName hfjResource = version.onTable("HFJ_RESOURCE");
 		hfjResource.modifyColumn("20231018.2", "FHIR_ID").nonNullable();
+
+		hfjResource.dropIndex("20231027.1", "IDX_RES_FHIR_ID");
 		hfjResource
-				.addIndex("20231018.3", "IDX_RES_FHIR_ID")
+				.addIndex("20231027.2", "IDX_RES_TYPE_FHIR_ID")
 				.unique(true)
 				.online(true)
-				.includeColumns("RES_ID")
-				.withColumns("FHIR_ID", "RES_TYPE");
+				// include res_id and our deleted flag so we can satisfy Observation?_sort=_id from the index on
+				// platforms that support it.
+				.includeColumns("RES_ID, RES_DELETED_AT")
+				.withColumns("RES_TYPE", "FHIR_ID");
+
+		// For resolving references that don't supply the type.
+		hfjResource.addIndex("20231027.3", "IDX_RES_FHIR_ID").unique(false).withColumns("FHIR_ID");
 	}
 
 	protected void init680() {

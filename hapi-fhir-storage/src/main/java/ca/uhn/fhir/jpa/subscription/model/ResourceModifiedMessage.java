@@ -26,6 +26,7 @@ import ca.uhn.fhir.rest.server.messaging.BaseResourceModifiedMessage;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 
 /**
  * Most of this class has been moved to ResourceModifiedMessage in the hapi-fhir-server project, for a reusable channel ResourceModifiedMessage
@@ -45,6 +46,11 @@ public class ResourceModifiedMessage extends BaseResourceModifiedMessage {
 	 */
 	public ResourceModifiedMessage() {
 		super();
+	}
+
+	public ResourceModifiedMessage(IIdType theIdType, OperationTypeEnum theOperationType) {
+		super(theIdType, theOperationType);
+		setPartitionId(RequestPartitionId.defaultPartition());
 	}
 
 	public ResourceModifiedMessage(
@@ -77,6 +83,10 @@ public class ResourceModifiedMessage extends BaseResourceModifiedMessage {
 
 	public void setSubscriptionId(String theSubscriptionId) {
 		mySubscriptionId = theSubscriptionId;
+	}
+
+	public void setPayloadToNull() {
+		myPayload = null;
 	}
 
 	@Override

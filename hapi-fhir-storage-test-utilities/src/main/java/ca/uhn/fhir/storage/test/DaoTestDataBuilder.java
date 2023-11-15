@@ -39,7 +39,8 @@ import org.springframework.context.annotation.Configuration;
 
 /**
  * Implements ITestDataBuilder via a live DaoRegistry.
- *
+ * Note: this implements {@link AfterEachCallback} and will delete any resources created when registered
+ * via {@link org.junit.jupiter.api.extension.RegisterExtension}.
  * Add the inner {@link Config} to your spring context to inject this.
  * For convenience, you can still implement ITestDataBuilder on your test class, and delegate the missing methods to this bean.
  */
@@ -75,7 +76,9 @@ public class DaoTestDataBuilder implements ITestDataBuilder.WithSupport, ITestDa
 		//noinspection rawtypes
 		IFhirResourceDao dao = myDaoRegistry.getResourceDao(theResource.getClass());
 		//noinspection unchecked
-		return dao.update(theResource, mySrd).getId().toUnqualifiedVersionless();
+		IIdType id = dao.update(theResource, mySrd).getId().toUnqualifiedVersionless();
+		myIds.put(theResource.fhirType(), id);
+		return id;
 	}
 
 	@Override

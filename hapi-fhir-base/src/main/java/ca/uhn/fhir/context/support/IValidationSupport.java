@@ -27,6 +27,7 @@ import ca.uhn.fhir.util.UrlUtil;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
@@ -407,6 +408,13 @@ public interface IValidationSupport {
 	@Nullable
 	default TranslateConceptResults translateConcept(TranslateCodeRequest theRequest) {
 		return null;
+	}
+
+	/**
+	 * This field is used by the Terminology Troubleshooting Log to log which validation support module was used for the operation being logged.
+	 */
+	default String getName() {
+		return "Unknown " + getFhirContext().getVersion().getVersion() + " Validation Support";
 	}
 
 	enum IssueSeverity {
@@ -989,6 +997,16 @@ public interface IValidationSupport {
 
 		public boolean isReverse() {
 			return myReverse;
+		}
+
+		@Override
+		public String toString() {
+			return new ToStringBuilder(this)
+					.append("sourceValueSetUrl", mySourceValueSetUrl)
+					.append("targetSystemUrl", myTargetSystemUrl)
+					.append("targetValueSetUrl", myTargetValueSetUrl)
+					.append("reverse", myReverse)
+					.toString();
 		}
 	}
 

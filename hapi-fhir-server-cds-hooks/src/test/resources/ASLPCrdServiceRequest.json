@@ -2,6 +2,13 @@
 	"hook" : "order-sign",
 	"hookInstance": "randomGUIDforthehookevent",
 	"fhirServer" : "https://localhost:8000",
+	"fhirAuthorization": {
+		"access_token": "sometoken",
+		"token_type": "Bearer",
+		"expires_in": 300000,
+		"scope": "",
+		"subject": "clientIdHeaderTest"
+	},
 	"context" : {
 		"patientId" : "Patient/123",
 		"draftOrders" : {

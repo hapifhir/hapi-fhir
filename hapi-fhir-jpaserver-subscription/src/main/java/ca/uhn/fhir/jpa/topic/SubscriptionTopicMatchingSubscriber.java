@@ -28,6 +28,7 @@ import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedJsonMessage;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 import ca.uhn.fhir.jpa.topic.filter.InMemoryTopicFilterMatcher;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
+import ca.uhn.fhir.subscription.api.IResourceModifiedMessagePersistenceSvc;
 import ca.uhn.fhir.util.Logs;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r5.model.SubscriptionTopic;
@@ -40,6 +41,7 @@ import org.springframework.messaging.MessagingException;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import javax.annotation.Nonnull;
 
 public class SubscriptionTopicMatchingSubscriber implements MessageHandler {
@@ -62,6 +64,9 @@ public class SubscriptionTopicMatchingSubscriber implements MessageHandler {
 	@Autowired
 	private InMemoryTopicFilterMatcher myInMemoryTopicFilterMatcher;
 
+	@Autowired
+	private IResourceModifiedMessagePersistenceSvc myResourceModifiedMessagePersistenceSvc;
+
 	public SubscriptionTopicMatchingSubscriber(FhirContext theFhirContext) {
 		myFhirContext = theFhirContext;
 	}
@@ -76,6 +81,16 @@ public class SubscriptionTopicMatchingSubscriber implements MessageHandler {
 		}
 
 		ResourceModifiedMessage msg = ((ResourceModifiedJsonMessage) theMessage).getPayload();
+
+		if (msg.getPayload(myFhirContext) == null) {
+			// inflate the message and ignore any resource that cannot be found.
+			Optional<ResourceModifiedMessage> inflatedMsg =
+					myResourceModifiedMessagePersistenceSvc.inflatePersistedResourceModifiedMessageOrNull(msg);
+			if (inflatedMsg.isEmpty()) {
+				return;
+			}
+			msg = inflatedMsg.get();
+		}
 
 		// Interceptor call: SUBSCRIPTION_TOPIC_BEFORE_PERSISTED_RESOURCE_CHECKED
 		HookParams params = new HookParams().add(ResourceModifiedMessage.class, msg);

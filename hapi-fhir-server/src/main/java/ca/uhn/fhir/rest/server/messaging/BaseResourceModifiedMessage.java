@@ -52,20 +52,26 @@ public abstract class BaseResourceModifiedMessage extends BaseResourceMessage im
 	@JsonProperty(value = "partitionId")
 	protected RequestPartitionId myPartitionId;
 
+	@JsonProperty(value = "payloadVersion")
+	protected String myPayloadVersion;
+
 	@JsonIgnore
 	protected transient IBaseResource myPayloadDecoded;
 
 	@JsonIgnore
 	protected transient String myPayloadType;
 
-	@JsonIgnore
-	protected String myPayloadVersion;
-
 	/**
 	 * Constructor
 	 */
 	public BaseResourceModifiedMessage() {
 		super();
+	}
+
+	public BaseResourceModifiedMessage(IIdType theIdType, OperationTypeEnum theOperationType) {
+		this();
+		setOperationType(theOperationType);
+		setPayloadId(theIdType);
 	}
 
 	public BaseResourceModifiedMessage(
