@@ -110,7 +110,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc<JpaPid> {
 	private final SearchStrategyFactory mySearchStrategyFactory;
 	private final ExceptionService myExceptionSvc;
 	private final BeanFactory myBeanFactory;
-	private final ConcurrentHashMap<String, SearchTask> myIdToSearchTask = new ConcurrentHashMap<>();
+	private ConcurrentHashMap<String, SearchTask> myIdToSearchTask = new ConcurrentHashMap<>();
 
 	private final Consumer<String> myOnRemoveSearchTask = myIdToSearchTask::remove;
 
@@ -160,6 +160,11 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc<JpaPid> {
 	@VisibleForTesting
 	Set<String> getActiveSearchIds() {
 		return myIdToSearchTask.keySet();
+	}
+
+	@VisibleForTesting
+	public void setIdToSearchTaskMapForUnitTests(ConcurrentHashMap<String, SearchTask> theIdToSearchTaskMap) {
+		myIdToSearchTask = theIdToSearchTaskMap;
 	}
 
 	@VisibleForTesting
@@ -571,7 +576,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc<JpaPid> {
 		task.call();
 
 		PersistedJpaSearchFirstPageBundleProvider retVal = myPersistedJpaBundleProviderFactory.newInstanceFirstPage(
-				theRequestDetails, theSearch, task, theSb, theRequestPartitionId);
+				theRequestDetails, task, theSb, theRequestPartitionId);
 
 		ourLog.debug("Search initial phase completed in {}ms", w.getMillis());
 		return retVal;

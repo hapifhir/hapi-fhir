@@ -572,12 +572,11 @@ public class JpaConfig {
 	@Scope("prototype")
 	public PersistedJpaSearchFirstPageBundleProvider newPersistedJpaSearchFirstPageBundleProvider(
 			RequestDetails theRequest,
-			Search theSearch,
 			SearchTask theSearchTask,
 			ISearchBuilder theSearchBuilder,
 			RequestPartitionId theRequestPartitionId) {
 		return new PersistedJpaSearchFirstPageBundleProvider(
-				theSearch, theSearchTask, theSearchBuilder, theRequest, theRequestPartitionId);
+				theSearchTask, theSearchBuilder, theRequest, theRequestPartitionId);
 	}
 
 	@Bean(name = RepositoryValidatingRuleBuilder.REPOSITORY_VALIDATING_RULE_BUILDER)
