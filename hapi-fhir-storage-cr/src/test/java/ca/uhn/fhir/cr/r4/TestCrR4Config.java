@@ -13,7 +13,9 @@ import org.hl7.elm.r1.VersionedIdentifier;
 import org.opencds.cqf.cql.engine.execution.CqlEngine;
 import org.opencds.cqf.cql.engine.runtime.Code;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
+import org.opencds.cqf.fhir.cql.engine.retrieve.BaseRetrieveProvider;
 import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings;
+import org.opencds.cqf.fhir.cql.engine.terminology.TerminologySettings;
 import org.opencds.cqf.fhir.cr.measure.CareGapsProperties;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.utility.ValidationProfile;
@@ -64,13 +66,19 @@ public class TestCrR4Config {
 	}
 
 	@Bean
-	public RetrieveSettings retrieveSettings(){
-		var retrieveSettings = new RetrieveSettings();
-		retrieveSettings.setExpandValueSets(true);
-		retrieveSettings.setFilterBySearchParam(true);
-		retrieveSettings.setSearchByTemplate(false);
-		retrieveSettings.setMaxCodesPerQuery(64);
-		retrieveSettings.setSearchStyle(SearchStyleEnum.GET);
+	public TerminologySettings terminologySettings(){
+		var termSettings = new TerminologySettings();
+		termSettings.setExpansionMode(TerminologySettings.EXPANSION_MODE.CQL);
+		termSettings.setMemberShipMode(TerminologySettings.MEMBERSHIP_MODE.CQL);
+		return termSettings;
+	}
+	@Bean
+	public RetrieveSettings retrieveSettings(TerminologySettings terminologySettings){
+		var retrieveSettings = new RetrieveSettings(terminologySettings);
+		retrieveSettings.setSearchParameterMode(RetrieveSettings.SEARCH_PARAMETER_MODE.REPOSITORY);
+		retrieveSettings.setTerminologyParameterMode(RetrieveSettings.TERMINOLOGY_PARAMETER_MODE.CQL);
+		retrieveSettings.setProfileMode(RetrieveSettings.PROFILE_MODE.OFF);
+
 		return retrieveSettings;
 	}
 	@Bean
