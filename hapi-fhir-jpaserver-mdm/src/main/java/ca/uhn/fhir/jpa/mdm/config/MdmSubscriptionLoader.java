@@ -74,7 +74,7 @@ public class MdmSubscriptionLoader {
 	@Autowired
 	private IMdmSettings myMdmSettings;
 
-	@Autowired
+	@Autowired(required = false)
 	private SubscriptionTopicLoader mySubscriptionTopicLoader;
 
 	private IFhirResourceDao<IBaseResource> mySubscriptionDao;
