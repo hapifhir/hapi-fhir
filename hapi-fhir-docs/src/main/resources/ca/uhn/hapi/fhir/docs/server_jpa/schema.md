@@ -565,7 +565,7 @@ The following columns are common to **all HFJ_SPIDX_xxx tables**.
 # HFJ_SPIDX_DATE: Date Search Parameters
 
 For any FHIR Search Parameter of type [*date*](https://www.hl7.org/fhir/search.html#date) that generates a database index, a row in the `HFJ_SPIDX_DATE` table will be created.
-Range queries with Date parameters (e.g. `Observation?date=2020-01-01`) will query the HASH_IDENTITY, SP_VALUE_LOW_DATE_ORDINAL and/or SP_VALUE_HIGH_DATE_ORDINAL columns.
+Range queries with Date parameters (e.g. `Observation?date=ge2020-01-01`) will query the HASH_IDENTITY, SP_VALUE_LOW_DATE_ORDINAL and/or SP_VALUE_HIGH_DATE_ORDINAL columns.
 Range queries with DateTime parameters (e.g. `Observation?date=ge2021-01-01T10:30:00`) will query the HASH_IDENTITY, SP_VALUE_LOW and/or SP_VALUE_HIGH columns.
 Sorting is done by the SP_VALUE_LOW column.
 
@@ -654,7 +654,7 @@ Range queries and sorting use the HASH_IDENTITY and SP_VALUE columns.
         <tr>
             <td>SP_VALUE</td>
             <td></td>
-            <td>Numeric</td>
+            <td>Double</td>
             <td>Not nullable</td>
             <td>
                 This is the value extracted by the SearchParameter expression. 
@@ -725,7 +725,7 @@ Sorting is done via the HASH_IDENTITY and SP_VALUE columns.
         <tr>
             <td>SP_VALUE</td>
             <td></td>
-            <td>Numeric</td>
+            <td>Double</td>
             <td></td>
             <td>
                 This is the value extracted by the SearchParameter expression. 
@@ -737,7 +737,7 @@ Sorting is done via the HASH_IDENTITY and SP_VALUE columns.
 # HFJ_SPIDX_QUANTITY_NRML: Normalized Quantity Search Parameters
 
 Hapi Fhir supports searching by normalized units when enabled (see https://hapifhir.io/hapi-fhir/apidocs/hapi-fhir-jpaserver-model/ca/uhn/fhir/jpa/model/entity/StorageSettings.html#getNormalizedQuantitySearchLevel()).
-Whe active, this causes each row stored in HFJ_SPIDX_QUANTITY to also store a row in HFJ_SPIDX_QUANTITY_NRML in canonical UCUM units.
+When this feature is enabled, each row stored in HFJ_SPIDX_QUANTITY to also store a row in HFJ_SPIDX_QUANTITY_NRML in canonical UCUM units.
 E.g. a weight recorded in an Observation as 
 ```
 "valueQuantity" : {
