@@ -68,15 +68,18 @@ public class TestCrR4Config {
 	@Bean
 	public TerminologySettings terminologySettings(){
 		var termSettings = new TerminologySettings();
-		termSettings.setExpansionMode(TerminologySettings.EXPANSION_MODE.CQL);
-		termSettings.setMemberShipMode(TerminologySettings.MEMBERSHIP_MODE.CQL);
+		termSettings.setCodeLookupMode(TerminologySettings.CODE_LOOKUP_MODE.USE_CODESYSTEM_URL);
+		termSettings.setValuesetExpansionMode(TerminologySettings.VALUESET_EXPANSION_MODE.PERFORM_NAIVE_EXPANSION);
+		termSettings.setValuesetMembershipMode(TerminologySettings.VALUESET_MEMBERSHIP_MODE.USE_EXPANSION);
+		termSettings.setValuesetPreExpansionMode(TerminologySettings.VALUESET_PRE_EXPANSION_MODE.USE_IF_PRESENT);
+
 		return termSettings;
 	}
 	@Bean
-	public RetrieveSettings retrieveSettings(TerminologySettings terminologySettings){
-		var retrieveSettings = new RetrieveSettings(terminologySettings);
-		retrieveSettings.setSearchParameterMode(RetrieveSettings.SEARCH_PARAMETER_MODE.REPOSITORY);
-		retrieveSettings.setTerminologyParameterMode(RetrieveSettings.TERMINOLOGY_PARAMETER_MODE.CQL);
+	public RetrieveSettings retrieveSettings(){
+		var retrieveSettings = new RetrieveSettings();
+		retrieveSettings.setSearchParameterMode(RetrieveSettings.SEARCH_FILTER_MODE.USE_SEARCH_PARAMETERS);
+		retrieveSettings.setTerminologyParameterMode(RetrieveSettings.TERMINOLOGY_FILTER_MODE.FILTER_IN_MEMORY);
 		retrieveSettings.setProfileMode(RetrieveSettings.PROFILE_MODE.OFF);
 
 		return retrieveSettings;
@@ -85,7 +88,8 @@ public class TestCrR4Config {
 	public EvaluationSettings evaluationSettings(TestCqlProperties theCqlProperties, Map<VersionedIdentifier,
 		CompiledLibrary> theGlobalLibraryCache, Map<ModelIdentifier, Model> theGlobalModelCache,
 												 Map<String, List<Code>> theGlobalValueSetCache,
-												 RetrieveSettings theRetrieveSettings) {
+												 RetrieveSettings theRetrieveSettings,
+												 TerminologySettings theTerminologySettings) {
 		var evaluationSettings = EvaluationSettings.getDefault();
 		var cqlOptions = evaluationSettings.getCqlOptions();
 
@@ -150,6 +154,7 @@ public class TestCrR4Config {
 		cqlCompilerOptions.setCollapseDataRequirements(theCqlProperties.isCqlCompilerCollapseDataRequirements());
 
 		cqlOptions.setCqlCompilerOptions(cqlCompilerOptions);
+		evaluationSettings.setTerminologySettings(theTerminologySettings);
 		evaluationSettings.setRetrieveSettings(theRetrieveSettings);
 		evaluationSettings.setLibraryCache(theGlobalLibraryCache);
 		evaluationSettings.setModelCache(theGlobalModelCache);
