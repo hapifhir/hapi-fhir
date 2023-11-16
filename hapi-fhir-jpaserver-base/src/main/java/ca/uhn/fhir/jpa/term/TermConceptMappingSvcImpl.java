@@ -70,6 +70,11 @@ public class TermConceptMappingSvcImpl extends TermConceptClientMappingSvcImpl i
 	protected ITermConceptMapGroupElementTargetDao myConceptMapGroupElementTargetDao;
 
 	@Override
+	public String getName() {
+		return getFhirContext().getVersion().getVersion() + " ConceptMap Validation Support";
+	}
+
+	@Override
 	@Transactional
 	public void deleteConceptMapAndChildren(ResourceTable theResourceTable) {
 		deleteConceptMap(theResourceTable);

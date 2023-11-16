@@ -21,7 +21,6 @@ package ca.uhn.fhir.jpa.search;
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.dao.ISearchBuilder;
-import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.entity.SearchTypeEnum;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
@@ -52,16 +51,14 @@ public class PersistedJpaSearchFirstPageBundleProvider extends PersistedJpaBundl
 	 */
 	@SuppressWarnings("rawtypes")
 	public PersistedJpaSearchFirstPageBundleProvider(
-			Search theSearch,
 			SearchTask theSearchTask,
 			ISearchBuilder theSearchBuilder,
 			RequestDetails theRequest,
 			RequestPartitionId theRequestPartitionId) {
-		super(theRequest, theSearch.getUuid());
+		super(theRequest, theSearchTask.getSearch());
 
-		assert theSearch.getSearchType() != SearchTypeEnum.HISTORY;
+		assert getSearchEntity().getSearchType() != SearchTypeEnum.HISTORY;
 
-		setSearchEntity(theSearch);
 		mySearchTask = theSearchTask;
 		mySearchBuilder = theSearchBuilder;
 		super.setRequestPartitionId(theRequestPartitionId);

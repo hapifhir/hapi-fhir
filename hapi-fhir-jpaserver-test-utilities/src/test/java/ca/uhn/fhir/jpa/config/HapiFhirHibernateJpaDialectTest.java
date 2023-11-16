@@ -36,7 +36,7 @@ public class HapiFhirHibernateJpaDialectTest {
 		assertThat(outcome.getMessage(), containsString("this is a message"));
 
 		try {
-			mySvc.convertHibernateAccessException(new ConstraintViolationException("this is a message", new SQLException("reason"), ResourceTable.IDX_RES_FHIR_ID));
+			mySvc.convertHibernateAccessException(new ConstraintViolationException("this is a message", new SQLException("reason"), ResourceTable.IDX_RES_TYPE_FHIR_ID));
 			fail();
 		} catch (ResourceVersionConflictException e) {
 			assertThat(e.getMessage(), containsString("The operation has failed with a client-assigned ID constraint failure"));
@@ -67,7 +67,7 @@ public class HapiFhirHibernateJpaDialectTest {
 		assertEquals("FOO", outcome.getMessage());
 
 		try {
-			PersistenceException exception = new PersistenceException("a message", new ConstraintViolationException("this is a message", new SQLException("reason"), ResourceTable.IDX_RES_FHIR_ID));
+			PersistenceException exception = new PersistenceException("a message", new ConstraintViolationException("this is a message", new SQLException("reason"), ResourceTable.IDX_RES_TYPE_FHIR_ID));
 			mySvc.translate(exception, "a message");
 			fail();
 		} catch (ResourceVersionConflictException e) {

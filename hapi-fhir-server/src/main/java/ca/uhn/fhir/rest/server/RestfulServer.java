@@ -1598,9 +1598,16 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 		myUncompressIncomingContents = theUncompressIncomingContents;
 	}
 
+	private String resolveRequestPath(RequestDetails theRequestDetails, String theRequestPath) {
+		if (myTenantIdentificationStrategy != null) {
+			theRequestPath = myTenantIdentificationStrategy.resolveRelativeUrl(theRequestPath, theRequestDetails);
+		}
+		return theRequestPath;
+	}
+
 	public void populateRequestDetailsFromRequestPath(RequestDetails theRequestDetails, String theRequestPath) {
-		UrlPathTokenizer tok = new UrlPathTokenizer(theRequestPath);
-		String resourceName = null;
+		String resolvedRequestPath = resolveRequestPath(theRequestDetails, theRequestPath);
+		UrlPathTokenizer tok = new UrlPathTokenizer(resolvedRequestPath);
 
 		if (myTenantIdentificationStrategy != null) {
 			myTenantIdentificationStrategy.extractTenant(tok, theRequestDetails);
@@ -1609,6 +1616,7 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 		IIdType id = null;
 		String operation = null;
 		String compartment = null;
+		String resourceName = null;
 		if (tok.hasMoreTokens()) {
 			resourceName = tok.nextTokenUnescapedAndSanitized();
 			if (partIsOperation(resourceName)) {
@@ -1635,7 +1643,7 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 					String versionString = tok.nextTokenUnescapedAndSanitized();
 					if (id == null) {
 						throw new InvalidRequestException(
-								Msg.code(298) + "Don't know how to handle request path: " + theRequestPath);
+								Msg.code(298) + "Don't know how to handle request path: " + resolvedRequestPath);
 					}
 					id.setParts(null, resourceName, id.getIdPart(), UrlUtil.unescape(versionString));
 				} else {
@@ -1644,7 +1652,7 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 			} else if (partIsOperation(nextString)) {
 				if (operation != null) {
 					throw new InvalidRequestException(
-							Msg.code(299) + "URL Path contains two operations: " + theRequestPath);
+							Msg.code(299) + "URL Path contains two operations: " + resolvedRequestPath);
 				}
 				operation = nextString;
 			} else {
@@ -1663,7 +1671,7 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 				secondaryOperation = nextString;
 			} else {
 				throw new InvalidRequestException(Msg.code(300) + "URL path has unexpected token '" + nextString
-						+ "' at the end: " + theRequestPath);
+						+ "' at the end: " + resolvedRequestPath);
 			}
 		}
 

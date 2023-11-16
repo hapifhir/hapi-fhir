@@ -897,7 +897,7 @@
 	</licenses>
 
 	<properties>
-		<fhir_core_version>6.1.2</fhir_core_version>
+		<fhir_core_version>6.1.2.2</fhir_core_version>
 		<spotless_version>2.37.0</spotless_version>
 		<surefire_jvm_args>-Dfile.encoding=UTF-8 -Xmx2048m</surefire_jvm_args>
 
@@ -934,9 +934,9 @@
 		<jaxb_api_version>2.3.1</jaxb_api_version>
 		<jaxb_core_version>2.3.0.1</jaxb_core_version>
 		<jaxb_runtime_version>3.0.0</jaxb_runtime_version>
-		<jena_version>4.8.0</jena_version>
+		<jena_version>4.9.0</jena_version>
 		<jersey_version>3.0.3</jersey_version>
-		<jetty_version>10.0.14</jetty_version>
+		<jetty_version>10.0.17</jetty_version>
 		<jsr305_version>3.0.2</jsr305_version>
 		<junit_version>5.9.1</junit_version>
 		<flexmark_version>0.64.8</flexmark_version>
@@ -983,7 +983,7 @@
 		<ucum_version>1.0.8</ucum_version>
 
 		<!-- CQL Support -->
-		<clinical-reasoning.version>3.0.0-PRE8</clinical-reasoning.version>
+		<clinical-reasoning.version>3.0.0-PRE9</clinical-reasoning.version>
 
 		<!-- Site properties -->
 		<fontawesomeVersion>5.4.1</fontawesomeVersion>
@@ -1171,7 +1171,7 @@
 			<dependency>
 				<groupId>com.squareup.okio</groupId>
 				<artifactId>okio-jvm</artifactId>
-				<version>3.2.0</version>
+				<version>3.4.0</version>
 			</dependency>
 
 			<dependency>
@@ -1385,7 +1385,7 @@
 			<dependency>
 				<groupId>com.mysql</groupId>
 				<artifactId>mysql-connector-j</artifactId>
-				<version>8.0.32</version>
+				<version>8.2.0</version>
 			</dependency>
 			<dependency>
 				<groupId>org.springdoc</groupId>
@@ -1871,7 +1871,7 @@
 				-->
 				<groupId>org.elasticsearch.client</groupId>
 				<artifactId>elasticsearch-rest-high-level-client</artifactId>
-				<version>7.17.3</version>
+				<version>7.17.13</version>
 				<exclusions>
 					<exclusion>
 						<groupId>com.fasterxml.jackson.dataformat</groupId>

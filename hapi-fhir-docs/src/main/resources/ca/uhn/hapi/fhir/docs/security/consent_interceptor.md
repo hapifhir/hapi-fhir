@@ -24,3 +24,13 @@ The ConsentInterceptor requires a user-supplied instance of the [IConsentService
 ```java
 {{snippet:classpath:/ca/uhn/hapi/fhir/docs/ConsentInterceptors.java|service}}
 ``` 
+
+## Performance and Privacy
+
+Filtering search results in `canSeeResource()` requires inspecting every resource during a search and editing the results.
+This is slower than the normal path, and will prevent the reuse of the results from the search cache.
+The `willSeeResource()` operation supports reusing cached search results, but removed resources may be 'visible' as holes in returned bundles.
+Disabling `canSeeResource()` by returning `false` from `processCanSeeResource()` will enable the search cache.
+
+
+
