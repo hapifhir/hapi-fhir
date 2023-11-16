@@ -746,7 +746,7 @@ E.g. a weight recorded in an Observation as
     "system" : "http://unitsofmeasure.org",
     "code" : "[lb_av]"
   },
-  ```
+```
 would match the search `Observation?valueQuantity=172`, 
 but would also match the search `Observation?valueQuantity=78|http://unitsofmeasure.org|kg`.
 The row in HFJ_SPIDX_QUANTITY would contain the value 172 pounds, while the HFJ_SPIDX_QUANTITY_NRML table would hold the equivalent 78 kg value.
