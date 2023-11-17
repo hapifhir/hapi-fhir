@@ -20,6 +20,7 @@
 package ca.uhn.fhir.jpa.fql.executor;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.fql.parser.HfqlStatement;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -64,6 +65,13 @@ public class LocalHfqlExecutor extends BaseHfqlExecutor {
 	}
 
 	@Override
+	public IHfqlExecutionResult executeInitialSearch(
+			String theStatement, Integer theLimit, RequestDetails theRequestDetails) {
+		throw new UnsupportedOperationException(
+			Msg.code(2445) + "Use LocalHfqlExecutor.executeLocalSearch to search through provided IBaseResource resources");
+	}
+
+	@Override
 	public IHfqlExecutionResult executeContinuation(
 			HfqlStatement theStatement,
 			String theSearchId,
@@ -71,13 +79,6 @@ public class LocalHfqlExecutor extends BaseHfqlExecutor {
 			Integer theLimit,
 			RequestDetails theRequestDetails) {
 		throw new UnsupportedOperationException(
-				"JPA search is not supported on " + this.getClass().getSimpleName());
-	}
-
-	@Override
-	public IHfqlExecutionResult executeInitialSearch(
-			String theStatement, Integer theLimit, RequestDetails theRequestDetails) {
-		throw new UnsupportedOperationException(
-				"JPA search is not supported on " + this.getClass().getSimpleName());
+			Msg.code(2445) + "Use LocalHfqlExecutor.executeLocalSearch to search through provided IBaseResource resources");
 	}
 }
