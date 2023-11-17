@@ -47,6 +47,9 @@ stateDiagram-v2
 title: Batch2 Job Work Chunk state transitions
 ---
 stateDiagram-v2
+    state READY
+    state GATE_WAITING
+    state POLL_WAITING
     state QUEUED
     state on_receive <<choice>>
     state IN_PROGRESS
@@ -55,7 +58,12 @@ stateDiagram-v2
     state FAILED
     state COMPLETED
    direction LR
-   [*]         --> QUEUED        : on create
+   [*]         --> READY        : on create
+   [*]         --> GATE_WAITING : on create
+   [*]         --> POLL_WAITING : on create
+   GATE_WAITING       --> READY       : on step completion
+   POLL_WAITING       --> READY       : on time expired (maint.)
+   READY       --> QUEUED       : placed on kafka (maint.)
   
   %% worker processing states
   QUEUED      --> on_receive : on deque by worker
@@ -65,6 +73,7 @@ stateDiagram-v2
   execute --> ERROR       : on re-triable error
   execute --> COMPLETED   : success\n maybe trigger instance first_step_finished
   execute --> FAILED      : on unrecoverable \n or too many errors
+  execute --> POLL_WAITING: on poll retry
   
   %% temporary error state until retry
   ERROR       --> on_receive : exception rollback\n triggers redelivery
@@ -73,3 +82,8 @@ stateDiagram-v2
   COMPLETED       --> [*]
   FAILED       --> [*]
 ```
+
+Stories
+- New state - READY - create chunks in ready before they are queued. new phase of job maint. queue all READY chunks and move them to QUEUED in a safe way.
+- Polling - new state POLL_WAITING, new column NEXT_POLL_TIMESTAMP, new phase of job maint. update all POLL_WAITING -> READY when NEXT_POLL_TIMESTAMP is null, or <= now()
+- Gated - new state GATE_WAITING for new gated chunks, move to READY as part of step completion tx.  Leave queueing to job maint. phase above.
