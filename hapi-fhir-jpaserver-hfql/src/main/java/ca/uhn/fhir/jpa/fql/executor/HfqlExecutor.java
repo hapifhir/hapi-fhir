@@ -59,18 +59,17 @@ public class HfqlExecutor extends BaseHfqlExecutor {
 			String theStatement, Integer theLimit, RequestDetails theRequestDetails) {
 		try {
 			BundleProviderSupplier theBundleProviderSupplier = (fromResourceName, map) -> {
-                IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(fromResourceName);
-                if (dao == null) {
-                    throw new DataFormatException(
-                            Msg.code(2406) + "Unknown or unsupported FROM type: " + fromResourceName);
-                }
-                return dao.search(map, theRequestDetails);
-            };
+				IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(fromResourceName);
+				if (dao == null) {
+					throw new DataFormatException(
+							Msg.code(2406) + "Unknown or unsupported FROM type: " + fromResourceName);
+				}
+				return dao.search(map, theRequestDetails);
+			};
 			return doExecuteInitialSearch(theStatement, theLimit, theBundleProviderSupplier);
 		} catch (Exception e) {
 			ourLog.warn("Failed to execute HFFQL statement", e);
 			return StaticHfqlExecutionResult.withError(defaultIfNull(e.getMessage(), "(no message)"));
 		}
 	}
-
 }

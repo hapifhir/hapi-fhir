@@ -80,5 +80,4 @@ public class LocalHfqlExecutor extends BaseHfqlExecutor {
 		throw new UnsupportedOperationException(
 				"JPA search is not supported on " + this.getClass().getSimpleName());
 	}
-
 }

@@ -58,8 +58,6 @@ import org.hl7.fhir.r4.model.DateTimeType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.math.BigDecimal;
 import java.sql.Types;
 import java.util.ArrayList;
@@ -76,6 +74,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -105,7 +105,7 @@ public abstract class BaseHfqlExecutor implements IHfqlExecutor {
 
 	@Nonnull
 	protected IHfqlExecutionResult doExecuteInitialSearch(
-		String theStatement, Integer theLimit, BundleProviderSupplier theBundleProviderSupplier) {
+			String theStatement, Integer theLimit, BundleProviderSupplier theBundleProviderSupplier) {
 		HfqlStatementParser parser = new HfqlStatementParser(myFhirContext, theStatement);
 		HfqlStatement statement = parser.parse();
 
@@ -141,7 +141,7 @@ public abstract class BaseHfqlExecutor implements IHfqlExecutor {
 			executionResult = executeCountClause(statement, executionContext, outcome, whereClausePredicate);
 		} else {
 			executionResult = new LocalSearchHfqlExecutionResult(
-				statement, outcome, executionContext, limit, 0, whereClausePredicate, myFhirContext);
+					statement, outcome, executionContext, limit, 0, whereClausePredicate, myFhirContext);
 		}
 
 		if (statement.hasOrderClause()) {
