@@ -47,6 +47,7 @@ stateDiagram-v2
 title: Batch2 Job Work Chunk state transitions
 ---
 stateDiagram-v2
+    [*] : 
     state READY
     state GATE_WAITING
     state POLL_WAITING
@@ -58,29 +59,27 @@ stateDiagram-v2
     state FAILED
     state COMPLETED
    direction LR
-   [*]         --> READY        : on create - normal step
-   [*]         --> GATE_WAITING : on create - gated step
-   [*]         --> POLL_WAITING : on create - polling step
-   GATE_WAITING       --> READY : on prior step completion
-   POLL_WAITING       --> READY : on time expired (maint.)
-   READY       --> QUEUED       : placed on kafka (maint.)
+   [*]          --> READY        : on create - normal or step
+   [*]          --> GATE_WAITING : on create - gated step
+   GATE_WAITING --> READY : on prior step completion
+   POLL_WAITING --> READY : on time expired (maint.)
+   READY        --> QUEUED       : placed on kafka (maint.)
   
   %% worker processing states
-  QUEUED      --> on_receive : on deque by worker
+  QUEUED     --> on_receive : on deque by worker
   on_receive --> IN_PROGRESS : start execution
-  
   IN_PROGRESS --> execute: execute
   execute --> ERROR       : on re-triable error
   execute --> COMPLETED   : success\n maybe trigger instance first_step_finished
   execute --> FAILED      : on unrecoverable \n or too many errors
-  execute --> POLL_WAITING: on poll retry (use named exception?)
+  execute --> POLL_WAITING: on poll retry
   
   %% temporary error state until retry
   ERROR       --> on_receive : exception rollback\n triggers redelivery
   
   %% terminal states 
-  COMPLETED       --> [*]
-  FAILED       --> [*]
+  COMPLETED   --> [*]
+  FAILED      --> [*]
 ```
 
 Work
