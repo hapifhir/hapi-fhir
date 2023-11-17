@@ -19,10 +19,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 public class ValueSetExpansionWithHierarchyR4Test extends BaseTermR4Test {
-   private static final String myCodeSystemId = "CodeSystem-WithHierarchy", myCodeSystemUrl = "http://example/" + myCodeSystemId;
-   private static final String myCodeA = "CodeA", myCodeB = "CodeB", myCodeC = "CodeC", myCodeD = "CodeD";
-   private static final String myValueSetAUrl = "http://example/ValueSetA", myValueSetBUrl = "http://example/ValueSetB", myValueSetUrl = "http://example/ValueSet";
-   private static final int myChildConceptCount = 10;
+   private static final String ourCodeSystemId = "CodeSystem-WithHierarchy", ourCodeSystemUrl = "http://example/" + ourCodeSystemId;
+   private static final String ourCodeA = "CodeA", ourCodeB = "CodeB", ourCodeC = "CodeC", ourCodeD = "CodeD";
+   private static final String ourValueSetAUrl = "http://example/ValueSetA", ourValueSetBUrl = "http://example/ValueSetB", ourValueSetUrl = "http://example/ValueSet";
+   private static final int ourChildConceptCount = 10;
+
    @BeforeAll
    public static void setup() {
       TermReadSvcImpl.setForceDisableHibernateSearchForUnitTest(true);
@@ -36,75 +37,73 @@ public class ValueSetExpansionWithHierarchyR4Test extends BaseTermR4Test {
       myStorageSettings.setPreExpandValueSets(true);
 
       CodeSystem codeSystem = new CodeSystem();
-      codeSystem.setId(myCodeSystemId);
-      codeSystem.setUrl(myCodeSystemUrl);
-      CodeSystem.ConceptDefinitionComponent concept1 = codeSystem.addConcept().setCode(myCodeA);
-      CodeSystem.ConceptDefinitionComponent concept2 = codeSystem.addConcept().setCode(myCodeB);
-      for (int i = 0; i < myChildConceptCount; i++) {
+      codeSystem.setId(ourCodeSystemId);
+      codeSystem.setUrl(ourCodeSystemUrl);
+      CodeSystem.ConceptDefinitionComponent concept1 = codeSystem.addConcept().setCode(ourCodeA);
+      CodeSystem.ConceptDefinitionComponent concept2 = codeSystem.addConcept().setCode(ourCodeB);
+      for (int i = 0; i < ourChildConceptCount; i++) {
          concept1.addConcept().setCode(concept1.getCode() + i);
          concept2.addConcept().setCode(concept2.getCode() + i);
       }
-      codeSystem.addConcept().setCode(myCodeC);
-      codeSystem.addConcept().setCode(myCodeD);
+      codeSystem.addConcept().setCode(ourCodeC);
+      codeSystem.addConcept().setCode(ourCodeD);
       myCodeSystemDao.create(codeSystem, mySrd);
 
       ValueSet valueSetA = new ValueSet();
-      valueSetA.setUrl(myValueSetAUrl);
-      valueSetA.getCompose().addInclude().setSystem(myCodeSystemUrl)
-            .addFilter().setProperty("concept").setOp(ValueSet.FilterOperator.ISA).setValue(myCodeA);
+      valueSetA.setUrl(ourValueSetAUrl);
+      valueSetA.getCompose().addInclude().setSystem(ourCodeSystemUrl)
+            .addFilter().setProperty("concept").setOp(ValueSet.FilterOperator.ISA).setValue(ourCodeA);
       myValueSetDao.create(valueSetA, mySrd);
 
       ValueSet valueSetB = new ValueSet();
-      valueSetB.setUrl(myValueSetBUrl);
-      valueSetA.getCompose().addInclude().setSystem(myCodeSystemUrl)
-            .addFilter().setProperty("concept").setOp(ValueSet.FilterOperator.ISA).setValue(myCodeB);
+      valueSetB.setUrl(ourValueSetBUrl);
+      valueSetA.getCompose().addInclude().setSystem(ourCodeSystemUrl)
+            .addFilter().setProperty("concept").setOp(ValueSet.FilterOperator.ISA).setValue(ourCodeB);
       myValueSetDao.create(valueSetB, mySrd);
    }
 
    static Stream<Arguments> parametersValueSets() {
       ValueSet valueSet0 = new ValueSet();
-      valueSet0.setUrl(myValueSetUrl + "-WithIncludeChildValueSet");
-      valueSet0.getCompose().addInclude().addValueSet(myValueSetAUrl);
+      valueSet0.setUrl(ourValueSetUrl + "-WithIncludeChildValueSet");
+      valueSet0.getCompose().addInclude().addValueSet(ourValueSetAUrl);
 
       ValueSet valueSet1 = new ValueSet();
-      valueSet1.setUrl(myValueSetUrl + "-WithIncludeChildValueSetAndCodeSystem");
-      valueSet1.getCompose().addInclude().addValueSet(myValueSetAUrl);
-      valueSet1.getCompose().addInclude().addValueSet(myValueSetBUrl);
-      valueSet1.getCompose().addInclude().setSystem(myCodeSystemUrl);
+      valueSet1.setUrl(ourValueSetUrl + "-WithIncludeChildValueSetAndCodeSystem");
+      valueSet1.getCompose().addInclude().addValueSet(ourValueSetAUrl);
+      valueSet1.getCompose().addInclude().addValueSet(ourValueSetBUrl);
+      valueSet1.getCompose().addInclude().setSystem(ourCodeSystemUrl);
 
       ValueSet valueSet2 = new ValueSet();
-      valueSet2.setUrl(myValueSetUrl + "-WithIncludeChildValueSetAndCodeSystemConceptSet-NoIntersectionCodes");
-      valueSet2.getCompose().addInclude().addValueSet(myValueSetAUrl);
-      ValueSet.ConceptSetComponent conceptSetWithCodeSystem = valueSet2.getCompose().addInclude().setSystem(myCodeSystemUrl);
-      conceptSetWithCodeSystem.addConcept().setCode(myCodeC);
-      conceptSetWithCodeSystem.addConcept().setCode(myCodeD);
+      valueSet2.setUrl(ourValueSetUrl + "-WithIncludeChildValueSetAndCodeSystemConceptSet-NoIntersectionCodes");
+      valueSet2.getCompose().addInclude().addValueSet(ourValueSetAUrl);
+      ValueSet.ConceptSetComponent conceptSetWithCodeSystem = valueSet2.getCompose().addInclude().setSystem(ourCodeSystemUrl);
+      conceptSetWithCodeSystem.addConcept().setCode(ourCodeC);
+      conceptSetWithCodeSystem.addConcept().setCode(ourCodeD);
 
       ValueSet valueSet3 = new ValueSet();
-      valueSet3.setUrl(myValueSetUrl + "-WithIncludeChildValueSetAndCodeSystemConceptSet-WithIntersectionCodes");
-      valueSet3.getCompose().addInclude().addValueSet(myValueSetAUrl);
-      conceptSetWithCodeSystem = valueSet3.getCompose().addInclude().setSystem(myCodeSystemUrl);
-      conceptSetWithCodeSystem.addConcept().setCode(myCodeA + "1");
-      conceptSetWithCodeSystem.addConcept().setCode(myCodeA + "2");
+      valueSet3.setUrl(ourValueSetUrl + "-WithIncludeChildValueSetAndCodeSystemConceptSet-WithIntersectionCodes");
+      valueSet3.getCompose().addInclude().addValueSet(ourValueSetAUrl);
+      conceptSetWithCodeSystem = valueSet3.getCompose().addInclude().setSystem(ourCodeSystemUrl);
+      conceptSetWithCodeSystem.addConcept().setCode(ourCodeA + "1");
+      conceptSetWithCodeSystem.addConcept().setCode(ourCodeA + "2");
 
       return Stream.of(
-            arguments(valueSet0, myChildConceptCount),
-            arguments(valueSet1, 4 + myChildConceptCount * 2),
-            arguments(valueSet2, 2 + myChildConceptCount),
-            arguments(valueSet3, myChildConceptCount)
+            arguments(valueSet0, ourChildConceptCount),
+            arguments(valueSet1, 4 + ourChildConceptCount * 2),
+            arguments(valueSet2, 2 + ourChildConceptCount),
+            arguments(valueSet3, ourChildConceptCount)
       );
    }
 
    @ParameterizedTest
    @MethodSource(value = "parametersValueSets")
-   public void testExpandValueSet_UsesHierarchicalCodeSystem_ExpandsSuccessfully(ValueSet theValueSet, int theTotalConcepts) {
+   public void testExpandValueSet_whenUsingHierarchicalCodeSystem_willExpandSuccessfully(ValueSet theValueSet, int theExpectedConceptExpensionCount) {
       myValueSetDao.create(theValueSet, mySrd);
       myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
-
-      runInTransaction(() -> {
-         Optional<TermValueSet> optionalTermValueSet = myTermValueSetDao.findTermValueSetByUrlAndNullVersion(theValueSet.getUrl());
-         assertTrue(optionalTermValueSet.isPresent());
-         assertEquals(TermValueSetPreExpansionStatusEnum.EXPANDED, optionalTermValueSet.get().getExpansionStatus());
-         assertEquals(theTotalConcepts, optionalTermValueSet.get().getTotalConcepts());
-      });
+      Optional<TermValueSet> optionalTermValueSet = runInTransaction(() -> myTermValueSetDao.findTermValueSetByUrlAndNullVersion(theValueSet.getUrl()));
+      assertTrue(optionalTermValueSet.isPresent());
+      TermValueSet expandedTermValueSet = optionalTermValueSet.get();
+      assertEquals(TermValueSetPreExpansionStatusEnum.EXPANDED, expandedTermValueSet.getExpansionStatus());
+      assertEquals(theExpectedConceptExpensionCount, expandedTermValueSet.getTotalConcepts());
    }
 }
