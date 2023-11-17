@@ -67,8 +67,8 @@ public class LocalHfqlExecutor extends BaseHfqlExecutor {
 	@Override
 	public IHfqlExecutionResult executeInitialSearch(
 			String theStatement, Integer theLimit, RequestDetails theRequestDetails) {
-		throw new UnsupportedOperationException(
-			Msg.code(2445) + "Use LocalHfqlExecutor.executeLocalSearch to search through provided IBaseResource resources");
+		throw new UnsupportedOperationException(Msg.code(2445)
+				+ "Use LocalHfqlExecutor.executeLocalSearch to search through provided IBaseResource resources");
 	}
 
 	@Override
@@ -78,7 +78,7 @@ public class LocalHfqlExecutor extends BaseHfqlExecutor {
 			int theStartingOffset,
 			Integer theLimit,
 			RequestDetails theRequestDetails) {
-		throw new UnsupportedOperationException(
-			Msg.code(2445) + "Use LocalHfqlExecutor.executeLocalSearch to search through provided IBaseResource resources");
+		throw new UnsupportedOperationException(Msg.code(2445)
+				+ "Use LocalHfqlExecutor.executeLocalSearch to search through provided IBaseResource resources");
 	}
 }
