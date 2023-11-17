@@ -58,11 +58,11 @@ stateDiagram-v2
     state FAILED
     state COMPLETED
    direction LR
-   [*]         --> READY        : on create
-   [*]         --> GATE_WAITING : on create
-   [*]         --> POLL_WAITING : on create
-   GATE_WAITING       --> READY       : on step completion
-   POLL_WAITING       --> READY       : on time expired (maint.)
+   [*]         --> READY        : on create - normal step
+   [*]         --> GATE_WAITING : on create - gated step
+   [*]         --> POLL_WAITING : on create - polling step
+   GATE_WAITING       --> READY : on prior step completion
+   POLL_WAITING       --> READY : on time expired (maint.)
    READY       --> QUEUED       : placed on kafka (maint.)
   
   %% worker processing states
@@ -73,7 +73,7 @@ stateDiagram-v2
   execute --> ERROR       : on re-triable error
   execute --> COMPLETED   : success\n maybe trigger instance first_step_finished
   execute --> FAILED      : on unrecoverable \n or too many errors
-  execute --> POLL_WAITING: on poll retry
+  execute --> POLL_WAITING: on poll retry (use named exception?)
   
   %% temporary error state until retry
   ERROR       --> on_receive : exception rollback\n triggers redelivery
@@ -83,7 +83,24 @@ stateDiagram-v2
   FAILED       --> [*]
 ```
 
-Stories
-- New state - READY - create chunks in ready before they are queued. new phase of job maint. queue all READY chunks and move them to QUEUED in a safe way.
-- Polling - new state POLL_WAITING, new column NEXT_POLL_TIMESTAMP, new phase of job maint. update all POLL_WAITING -> READY when NEXT_POLL_TIMESTAMP is null, or <= now()
-- Gated - new state GATE_WAITING for new gated chunks, move to READY as part of step completion tx.  Leave queueing to job maint. phase above.
+Work
+### New state - READY
+- create chunks in ready before they are queued
+- new phase of job maint. : queue all READY chunks and move them to QUEUED in a safe way. (ca.uhn.fhir.batch2.maintenance.JobMaintenanceServiceImpl.doMaintenancePass)
+
+### New step type POLLING
+- Add a new field to WorkChunk: nextPollTimestamp (hapi + Mongo)
+- A polling step function will throw a new named exception - RetryChunkLaterException.
+- The chunk worker will catch RetryChunkLaterException, and move state from IN_PROGRESS->POLL_WAITING 
+  and update nextPollTimestamp to now()+1 min
+- Eat the ChunkRetryLaterException so the message is consumed from the queue.
+  The chunk must not be re-queued by Spring.
+- Add a new phase in the Batch Job Maintenance to update all chunks in POLL_WAITING->READY where nextPollTimestamp<=now()
+  via query loop.
+  (ca.uhn.fhir.batch2.maintenance.JobMaintenanceServiceImpl.doMaintenancePass) 
+
+### New GATE_WAITING chunk state
+- Add a new work chunk state GATE_WAITING
+- Change our gated step advance - ca.uhn.fhir.batch2.maintenance.JobInstanceProcessor.triggerGatedExecutions 
+  to transactionally update the gated chunks from GATE_WAITING->READY in the same tx we update the step of the job.
+- Leave queueing to job maint. phase
