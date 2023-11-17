@@ -78,7 +78,7 @@ public class LocalHfqlExecutor extends BaseHfqlExecutor {
 			int theStartingOffset,
 			Integer theLimit,
 			RequestDetails theRequestDetails) {
-		throw new UnsupportedOperationException(Msg.code(2445)
+		throw new UnsupportedOperationException(Msg.code(2446)
 				+ "Use LocalHfqlExecutor.executeLocalSearch to search through provided IBaseResource resources");
 	}
 }
