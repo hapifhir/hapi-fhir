@@ -2396,7 +2396,8 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 						sw);
 
 			} catch (Exception e) {
-				ourLog.error("Failed to pre-expand ValueSet: " + e.getMessage(), e);
+				ourLog.error(
+						"Failed to pre-expand ValueSet with URL[{}]: {}", valueSetToExpand.getUrl(), e.getMessage(), e);
 				txTemplate.executeWithoutResult(t -> {
 					valueSetToExpand.setExpansionStatus(TermValueSetPreExpansionStatusEnum.FAILED_TO_EXPAND);
 					myTermValueSetDao.saveAndFlush(valueSetToExpand);
