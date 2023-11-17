@@ -35,6 +35,7 @@ import ca.uhn.fhir.jpa.subscription.async.AsyncResourceModifiedSubmitterSvc;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.subscription.api.IResourceModifiedMessagePersistenceSvc;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -45,6 +46,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 import static ca.uhn.fhir.jpa.model.entity.PersistedResourceModifiedMessageEntityPK.with;
 
@@ -92,9 +94,43 @@ public class ResourceModifiedMessagePersistenceSvcImpl implements IResourceModif
 
 	@Override
 	public ResourceModifiedMessage inflatePersistedResourceModifiedMessage(
-			IPersistedResourceModifiedMessage thePersistedResourceModifiedMessage) {
+			ResourceModifiedMessage theResourceModifiedMessage) {
 
-		return inflateResourceModifiedMessageFromEntity((ResourceModifiedEntity) thePersistedResourceModifiedMessage);
+		return inflateResourceModifiedMessageFromEntity(createEntityFrom(theResourceModifiedMessage));
+	}
+
+	@Override
+	public Optional<ResourceModifiedMessage> inflatePersistedResourceModifiedMessageOrNull(
+			ResourceModifiedMessage theResourceModifiedMessage) {
+		ResourceModifiedMessage inflatedResourceModifiedMessage = null;
+
+		try {
+			inflatedResourceModifiedMessage = inflatePersistedResourceModifiedMessage(theResourceModifiedMessage);
+		} catch (ResourceNotFoundException e) {
+			IdDt idDt = new IdDt(
+					theResourceModifiedMessage.getPayloadType(myFhirContext),
+					theResourceModifiedMessage.getPayloadId(),
+					theResourceModifiedMessage.getPayloadVersion());
+
+			ourLog.warn("Scheduled submission will be ignored since resource {} cannot be found", idDt.getIdPart(), e);
+		} catch (Exception ex) {
+			ourLog.error("Unknown error encountered on inflation of resources.", ex);
+		}
+
+		return Optional.ofNullable(inflatedResourceModifiedMessage);
+	}
+
+	@Override
+	public ResourceModifiedMessage createResourceModifiedMessageFromEntityWithoutInflation(
+			IPersistedResourceModifiedMessage thePersistedResourceModifiedMessage) {
+		ResourceModifiedMessage resourceModifiedMessage = getPayloadLessMessageFromString(
+				((ResourceModifiedEntity) thePersistedResourceModifiedMessage).getSummaryResourceModifiedMessage());
+
+		IdDt resourceId =
+				createIdDtFromResourceModifiedEntity((ResourceModifiedEntity) thePersistedResourceModifiedMessage);
+		resourceModifiedMessage.setPayloadId(resourceId);
+
+		return resourceModifiedMessage;
 	}
 
 	@Override
@@ -112,17 +148,13 @@ public class ResourceModifiedMessagePersistenceSvcImpl implements IResourceModif
 
 	protected ResourceModifiedMessage inflateResourceModifiedMessageFromEntity(
 			ResourceModifiedEntity theResourceModifiedEntity) {
-		String resourcePid =
-				theResourceModifiedEntity.getResourceModifiedEntityPK().getResourcePid();
-		String resourceVersion =
-				theResourceModifiedEntity.getResourceModifiedEntityPK().getResourceVersion();
 		String resourceType = theResourceModifiedEntity.getResourceType();
 		ResourceModifiedMessage retVal =
 				getPayloadLessMessageFromString(theResourceModifiedEntity.getSummaryResourceModifiedMessage());
 		SystemRequestDetails systemRequestDetails =
 				new SystemRequestDetails().setRequestPartitionId(retVal.getPartitionId());
 
-		IdDt resourceIdDt = new IdDt(resourceType, resourcePid, resourceVersion);
+		IdDt resourceIdDt = createIdDtFromResourceModifiedEntity(theResourceModifiedEntity);
 		IFhirResourceDao dao = myDaoRegistry.getResourceDao(resourceType);
 
 		IBaseResource iBaseResource = dao.read(resourceIdDt, systemRequestDetails, true);
@@ -162,6 +194,16 @@ public class ResourceModifiedMessagePersistenceSvcImpl implements IResourceModif
 		} catch (JsonProcessingException e) {
 			throw new ConfigurationException(Msg.code(2335) + "Failed to serialize empty ResourceModifiedMessage", e);
 		}
+	}
+
+	private IdDt createIdDtFromResourceModifiedEntity(ResourceModifiedEntity theResourceModifiedEntity) {
+		String resourcePid =
+				theResourceModifiedEntity.getResourceModifiedEntityPK().getResourcePid();
+		String resourceVersion =
+				theResourceModifiedEntity.getResourceModifiedEntityPK().getResourceVersion();
+		String resourceType = theResourceModifiedEntity.getResourceType();
+
+		return new IdDt(resourceType, resourcePid, resourceVersion);
 	}
 
 	private static class PayloadLessResourceModifiedMessage extends ResourceModifiedMessage {

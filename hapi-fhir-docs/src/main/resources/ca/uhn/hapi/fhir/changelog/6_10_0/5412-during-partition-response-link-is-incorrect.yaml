@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 5412
+title: "Previously, with Partitioning enabled, submitting a bundle request would return a response with the partition name displayed twice in `response.link` property. This has been fixed."

@@ -22,7 +22,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -53,7 +52,7 @@ public class PackageInstallerSvcImplCreateTest extends BaseJpaR4Test {
 		final NamingSystem namingSystem = new NamingSystem();
 		namingSystem.getUniqueId().add(new NamingSystem.NamingSystemUniqueIdComponent().setValue("123"));
 
-		create(namingSystem);
+		install(namingSystem);
 
 		assertEquals(1, myNamingSystemDao.search(SearchParameterMap.newSynchronous(), REQUEST_DETAILS).getAllResources().size());
 	}
@@ -184,7 +183,7 @@ public class PackageInstallerSvcImplCreateTest extends BaseJpaR4Test {
 	}
 
 	private void createValueSetAndCallCreate(String theOid, String theResourceVersion, String theValueSetVersion, String theUrl, String theCopyright) throws IOException {
-		create(createValueSet(theOid, theResourceVersion, theValueSetVersion, theUrl, theCopyright));
+		install(createValueSet(theOid, theResourceVersion, theValueSetVersion, theUrl, theCopyright));
 	}
 
 	@Nonnull
@@ -199,8 +198,8 @@ public class PackageInstallerSvcImplCreateTest extends BaseJpaR4Test {
 		return valueSetFromFirstIg;
 	}
 
-	private void create(IBaseResource theResource) throws IOException {
-		mySvc.create(theResource, createInstallationSpec(packageToBytes()), new PackageInstallOutcomeJson());
+	private void install(IBaseResource theResource) throws IOException {
+		mySvc.install(theResource, createInstallationSpec(packageToBytes()), new PackageInstallOutcomeJson());
 	}
 
 	@Nonnull

@@ -89,12 +89,12 @@ public class FhirResourceDaoR4SortTest extends BaseJpaR4Test {
 		map = new SearchParameterMap();
 		map.setSort(new SortSpec("_id", SortOrderEnum.ASC));
 		ids = toUnqualifiedVersionlessIdValues(myPatientDao.search(map));
-		assertThat(ids, contains("Patient/AA", "Patient/AB", id1, id2));
+		assertThat(ids, contains(id1, id2, "Patient/AA", "Patient/AB"));
 
 		map = new SearchParameterMap();
 		map.setSort(new SortSpec("_id", SortOrderEnum.DESC));
 		ids = toUnqualifiedVersionlessIdValues(myPatientDao.search(map));
-		assertThat(ids, contains(id2, id1, "Patient/AB", "Patient/AA"));
+		assertThat(ids, contains("Patient/AB", "Patient/AA", id2, id1));
 	}
 
 	@Test

@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -72,9 +73,9 @@ public class FhirResourceDaoR4SearchLastNAsyncIT extends BaseR4SearchLastN {
 	public void testLastNChunking() {
 
 		runInTransaction(() -> {
-			for (Search search : mySearchDao.findAll()) {
-				mySearchDao.updateDeleted(search.getId(), true);
-			}
+			Set<Long> all = mySearchDao.findAll().stream().map(Search::getId).collect(Collectors.toSet());
+
+			mySearchDao.updateDeleted(all, true);
 		});
 
 		// Set up search parameters that will return 75 Observations.

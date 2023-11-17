@@ -151,6 +151,11 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 		myRequestPartitionHelperSvc = theRequestPartitionHelperSvc;
 	}
 
+	@VisibleForTesting
+	public Search getSearchEntityForTesting() {
+		return getSearchEntity();
+	}
+
 	protected Search getSearchEntity() {
 		return mySearchEntity;
 	}
