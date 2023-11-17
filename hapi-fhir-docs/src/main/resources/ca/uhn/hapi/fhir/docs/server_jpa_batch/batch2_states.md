@@ -84,7 +84,7 @@ stateDiagram-v2
 
 Work
 ### New state - READY
-- create chunks in ready before they are queued
+- create chunks in READY before they are queued
 - new phase of job maint. : queue all READY chunks and move them to QUEUED in a safe way. (ca.uhn.fhir.batch2.maintenance.JobMaintenanceServiceImpl.doMaintenancePass)
 
 ### New step type POLLING
