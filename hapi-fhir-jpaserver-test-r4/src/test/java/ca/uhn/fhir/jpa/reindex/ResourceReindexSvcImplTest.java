@@ -1,10 +1,9 @@
 package ca.uhn.fhir.jpa.reindex;
 
-import ca.uhn.fhir.jpa.api.pid.IResourcePidList;
+import ca.uhn.fhir.jpa.api.pid.IResourcePidStream;
 import ca.uhn.fhir.jpa.api.pid.TypedResourcePid;
 import ca.uhn.fhir.jpa.api.svc.IBatch2DaoSvc;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
-import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
@@ -12,15 +11,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Stream;
 
-import static ca.uhn.fhir.batch2.jobs.step.ResourceIdListStep.DEFAULT_PAGE_SIZE;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@SuppressWarnings("unchecked")
 @TestMethodOrder(value = MethodOrderer.MethodName.class)
 public class ResourceReindexSvcImplTest extends BaseJpaR4Test {
 
@@ -55,14 +52,12 @@ public class ResourceReindexSvcImplTest extends BaseJpaR4Test {
 		// Execute
 
 		myCaptureQueriesListener.clear();
-		IResourcePidList page = mySvc.fetchResourceIdsPage(start, end, DEFAULT_PAGE_SIZE, null, null);
+		IResourcePidStream queryStream = mySvc.fetchResourceIdStream(start, end, null, null);
 
 		// Verify
-
-		assertEquals(3, page.size());
-		assertThat(page.getTypedResourcePids(), contains(new TypedResourcePid("Patient", id0), new TypedResourcePid("Patient", id1), new TypedResourcePid("Observation", id2)));
-		assertTrue(page.getLastDate().after(beforeLastInRange));
-		assertTrue(page.getLastDate().before(end));
+		List<TypedResourcePid> typedPids = queryStream.visitStream(Stream::toList);
+		assertEquals(3, typedPids.size());
+		assertThat(typedPids, contains(new TypedResourcePid("Patient", id0), new TypedResourcePid("Patient", id1), new TypedResourcePid("Observation", id2)));
 
 		assertEquals(1, myCaptureQueriesListener.logSelectQueries().size());
 		assertEquals(0, myCaptureQueriesListener.countInsertQueries());
@@ -85,13 +80,12 @@ public class ResourceReindexSvcImplTest extends BaseJpaR4Test {
 		// Execute
 
 		myCaptureQueriesListener.clear();
-		IResourcePidList page = mySvc.fetchResourceIdsPage(start, end, DEFAULT_PAGE_SIZE, null, null);
+		IResourcePidStream queryStream = mySvc.fetchResourceIdStream(start, end, null, null);
 
 		// Verify
+		List<TypedResourcePid> typedPids = queryStream.visitStream(Stream::toList);
 
-		assertTrue(page.isEmpty());
-		assertEquals(0, page.size());
-		assertNull(page.getLastDate());
+		assertTrue(typedPids.isEmpty());
 
 		assertEquals(1, myCaptureQueriesListener.logSelectQueries().size());
 		assertEquals(0, myCaptureQueriesListener.countInsertQueries());
@@ -133,19 +127,17 @@ public class ResourceReindexSvcImplTest extends BaseJpaR4Test {
 		// Execute
 
 		myCaptureQueriesListener.clear();
-		IResourcePidList page = mySvc.fetchResourceIdsPage(start, end, DEFAULT_PAGE_SIZE, null, "Patient?active=false");
+		IResourcePidStream queryStream = mySvc.fetchResourceIdStream(start, end, null, "Patient?active=false");
 
 		// Verify
+		List<TypedResourcePid> typedResourcePids = queryStream.visitStream(Stream::toList);
 
-		assertEquals(4, page.size());
-		List<TypedResourcePid> typedResourcePids = page.getTypedResourcePids();
-		assertThat(page.getTypedResourcePids(),
+		assertEquals(4, typedResourcePids.size());
+		assertThat(typedResourcePids,
 			contains(new TypedResourcePid("Patient", patientId0),
 				new TypedResourcePid("Patient", patientId1),
 				new TypedResourcePid("Patient", patientId2),
 				new TypedResourcePid("Patient", patientId3)));
-		assertTrue(page.getLastDate().after(beforeLastInRange));
-		assertTrue(page.getLastDate().before(end) || page.getLastDate().equals(end));
 
 		assertEquals(1, myCaptureQueriesListener.logSelectQueries().size());
 		assertEquals(0, myCaptureQueriesListener.countInsertQueries());

@@ -1,11 +1,12 @@
 package ca.uhn.fhir.jpa.api.pid;
 
-import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService.IExecutionBuilder;
+import org.springframework.transaction.support.TransactionOperations;
 
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 /**
  * A template for stream queries, like JDBCTemplate and friends.
@@ -14,8 +15,8 @@ import javax.annotation.Nonnull;
  * @param <T> The stream content type
  */
 public interface StreamTemplate<T> {
-	@Nonnull
-	<R> R call(Function<Stream<T>, R> theCallback);
+	@Nullable
+	<R> R call(@Nonnull Function<Stream<T>, R> theCallback);
 
 	/**
 	 * Wrap this template with a transaction boundary.
@@ -25,7 +26,7 @@ public interface StreamTemplate<T> {
 	 * @param theTxBuilder the transaction and partition settings
 	 * @return the wrapped template
 	 */
-	default StreamTemplate<T> withTransactionAdvice(IExecutionBuilder theTxBuilder) {
+	default StreamTemplate<T> withTransactionAdvice(TransactionOperations theTxBuilder) {
 		return new TransactionWrappingStreamTemplate<>(theTxBuilder, this);
 	}
 

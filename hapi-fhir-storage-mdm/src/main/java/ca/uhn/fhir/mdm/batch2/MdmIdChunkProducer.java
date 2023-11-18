@@ -22,12 +22,17 @@ package ca.uhn.fhir.mdm.batch2;
 import ca.uhn.fhir.batch2.jobs.step.IIdChunkProducer;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.pid.IResourcePidList;
+import ca.uhn.fhir.jpa.api.pid.IResourcePidStream;
+import ca.uhn.fhir.jpa.api.pid.ListWrappingPidStream;
 import ca.uhn.fhir.jpa.api.svc.IGoldenResourceSearchSvc;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Date;
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
+import static ca.uhn.fhir.batch2.jobs.step.ResourceIdListStep.DEFAULT_PAGE_SIZE;
 
 public class MdmIdChunkProducer implements IIdChunkProducer<MdmChunkRangeJson> {
 	private static final Logger ourLog = LoggerFactory.getLogger(MdmIdChunkProducer.class);
@@ -37,8 +42,8 @@ public class MdmIdChunkProducer implements IIdChunkProducer<MdmChunkRangeJson> {
 		myGoldenResourceSearchSvc = theGoldenResourceSearchSvc;
 	}
 
-	@Override
-	public IResourcePidList fetchResourceIdsPage(
+	// wipmb replace with stream
+	IResourcePidList fetchResourceIdsPage(
 			Date theNextStart,
 			Date theEnd,
 			@Nonnull Integer thePageSize,
@@ -54,5 +59,14 @@ public class MdmIdChunkProducer implements IIdChunkProducer<MdmChunkRangeJson> {
 
 		return myGoldenResourceSearchSvc.fetchGoldenResourceIdsPage(
 				theNextStart, theEnd, thePageSize, theRequestPartitionId, resourceType);
+	}
+
+	// wipmb shim for non stream impl.
+	@Override
+	public IResourcePidStream fetchResourceIdStream(
+			Date theStart, Date theEnd, @Nullable RequestPartitionId theRequestPartitionId, MdmChunkRangeJson theData) {
+		IResourcePidList list =
+				fetchResourceIdsPage(theStart, theEnd, DEFAULT_PAGE_SIZE, theRequestPartitionId, theData);
+		return new ListWrappingPidStream(list);
 	}
 }

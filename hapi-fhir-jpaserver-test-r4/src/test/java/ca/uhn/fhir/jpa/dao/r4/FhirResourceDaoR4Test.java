@@ -5,9 +5,11 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.HistoryCountModeEnum;
+import ca.uhn.fhir.jpa.api.pid.StreamTemplate;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.dao.BaseStorageDao;
 import ca.uhn.fhir.jpa.dao.JpaResourceDao;
+import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.NormalizedQuantitySearchLevel;
@@ -33,6 +35,7 @@ import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.SortOrderEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
@@ -119,24 +122,27 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import static ca.uhn.fhir.batch2.jobs.termcodesystem.TermCodeSystemJobConfig.TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME;
 import static ca.uhn.fhir.rest.api.Constants.PARAM_HAS;
@@ -164,6 +170,9 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 @SuppressWarnings({"unchecked", "deprecation", "Duplicates"})
 public class FhirResourceDaoR4Test extends BaseJpaR4Test {
+
+	@Autowired
+	IHapiTransactionService myHapiTransactionService;
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoR4Test.class);
 
@@ -4315,6 +4324,30 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 
 		assertEquals(amountOfPatients, actual.size());
 		assertThat(actualNameList, contains(namesInAlpha));
+	}
+
+
+	@Test
+	void testSearchForStream_carriesTxContext() {
+		// given
+		Set<String> createdIds = IntStream.range(1, 5)
+			.mapToObj(i -> createObservation().getIdPart())
+			.collect(Collectors.toSet());
+
+		SystemRequestDetails request = new SystemRequestDetails();
+
+		// call within a tx, but carry the tx definition in the StreamTemplate
+		StreamTemplate<IResourcePersistentId<?>> streamTemplate =
+			StreamTemplate.fromSupplier(() -> myObservationDao.searchForIdStream(new SearchParameterMap(), request, null))
+				.withTransactionAdvice(newTxTemplate());
+
+
+		// does the stream work?
+		Set<String> ids = streamTemplate.call(stream->
+			stream.map(typedId->typedId.getId().toString())
+				.collect(Collectors.toSet()));
+
+		assertEquals(ids, createdIds);
 	}
 
 	public static void assertConflictException(String theResourceType, ResourceVersionConflictException e) {

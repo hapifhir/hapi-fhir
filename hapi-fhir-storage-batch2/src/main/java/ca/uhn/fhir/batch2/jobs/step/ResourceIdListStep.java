@@ -31,16 +31,15 @@ import ca.uhn.fhir.batch2.jobs.parameters.PartitionedJobParameters;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.pid.IResourcePidStream;
 import ca.uhn.fhir.util.Logs;
-import ca.uhn.fhir.util.StreamUtil;
 import org.slf4j.Logger;
 
+import javax.annotation.Nonnull;
 import java.util.Collection;
 import java.util.Date;
-import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
-import javax.annotation.Nonnull;
 
+import static ca.uhn.fhir.util.StreamUtil.partition;
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 
 public class ResourceIdListStep<PT extends PartitionedJobParameters, IT extends ChunkRangeJson>
@@ -77,21 +76,20 @@ public class ResourceIdListStep<PT extends PartitionedJobParameters, IT extends 
 
 		// wipmb force uniqueness upstream
 		// wipmb split target partition from payload.  Add default method to chunk producer.
-		final IResourcePidStream nextChunk = myIdChunkProducer.fetchResourceIdStream(
+		final IResourcePidStream searchResult = myIdChunkProducer.fetchResourceIdStream(
 				start, end, requestPartitionId, theStepExecutionDetails.getData());
 
-		nextChunk.visitStream(typedResourcePidStream -> {
-			Stream<TypedPidJson> jsonStream = typedResourcePidStream.map(TypedPidJson::new);
-
-			// chunk by size maxBatchId
-			Stream<List<TypedPidJson>> chunkStream = StreamUtil.partition(jsonStream, chunkSize);
-
+		searchResult.visitStreamNoResult(typedResourcePidStream -> {
 			AtomicInteger totalIdsFound = new AtomicInteger();
 			AtomicInteger chunkCount = new AtomicInteger();
-			chunkStream.forEach(idBatch -> {
+
+			Stream<TypedPidJson> jsonStream = typedResourcePidStream.map(TypedPidJson::new);
+
+			// chunk by size maxBatchId and submit the batches
+			partition(jsonStream, chunkSize).forEach(idBatch -> {
 				totalIdsFound.addAndGet(idBatch.size());
 				chunkCount.getAndIncrement();
-				submitWorkChunk(idBatch, nextChunk.getRequestPartitionId(), theDataSink);
+				submitWorkChunk(idBatch, searchResult.getRequestPartitionId(), theDataSink);
 			});
 			ourLog.info("Submitted {} chunks with {} resource IDs", chunkCount, totalIdsFound);
 		});
