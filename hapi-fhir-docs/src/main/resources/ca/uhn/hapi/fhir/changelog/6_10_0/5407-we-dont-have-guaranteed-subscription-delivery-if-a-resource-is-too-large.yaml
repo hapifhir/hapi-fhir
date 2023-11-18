@@ -1,0 +1,7 @@
+---
+type: add
+issue: 5407
+title: "Previously, when the payload of a subscription message exceeds the broker maximum message size, exception would 
+be thrown and retry will be performed indefinitely until the maximum message size is adjusted. Now, the message will be
+successfully delivered for rest-hook and email subscriptions, while message subscriptions remains the same behavior as
+before."

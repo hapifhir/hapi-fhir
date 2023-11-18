@@ -18,7 +18,7 @@ import javax.annotation.Nonnull;
 
 /**
  * This interceptor loads and parses FHIR NPM Conformance Packages, and makes the
- * artifacts foudn within them available to the FHIR validator.
+ * artifacts found within them available to the FHIR validator.
  *
  * @since 5.5.0
  */

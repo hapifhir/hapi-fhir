@@ -87,6 +87,11 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 	}
 
 	@Override
+	public String getName() {
+		return myFhirContext.getVersion().getVersion() + " Common Code Systems Validation Support";
+	}
+
+	@Override
 	public CodeValidationResult validateCodeInValueSet(
 			ValidationSupportContext theValidationSupportContext,
 			ConceptValidationOptions theOptions,

@@ -35,6 +35,7 @@ import ca.uhn.hapi.fhir.cdshooks.svc.CdsConfigServiceImpl;
 import ca.uhn.hapi.fhir.cdshooks.svc.CdsHooksContextBooter;
 import ca.uhn.hapi.fhir.cdshooks.svc.CdsServiceRegistryImpl;
 import ca.uhn.hapi.fhir.cdshooks.svc.cr.CdsCrServiceRegistry;
+import ca.uhn.hapi.fhir.cdshooks.svc.cr.CdsCrSettings;
 import ca.uhn.hapi.fhir.cdshooks.svc.cr.CdsServiceInterceptor;
 import ca.uhn.hapi.fhir.cdshooks.svc.cr.ICdsCrService;
 import ca.uhn.hapi.fhir.cdshooks.svc.cr.ICdsCrServiceFactory;
@@ -56,12 +57,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Optional;
 
 @Configuration
+@Import(CdsCrConfig.class)
 public class CdsHooksConfig {
 	private static final Logger ourLog = LoggerFactory.getLogger(CdsHooksConfig.class);
 
@@ -128,8 +131,8 @@ public class CdsHooksConfig {
 			}
 			try {
 				Constructor<? extends ICdsCrService> constructor =
-						clazz.get().getConstructor(RequestDetails.class, Repository.class);
-				return constructor.newInstance(rd, repository);
+						clazz.get().getConstructor(RequestDetails.class, Repository.class, ICdsConfigService.class);
+				return constructor.newInstance(rd, repository, theCdsConfigService);
 			} catch (NoSuchMethodException
 					| InvocationTargetException
 					| InstantiationException
@@ -189,9 +192,11 @@ public class CdsHooksConfig {
 
 	@Bean
 	public ICdsConfigService cdsConfigService(
-			FhirContext theFhirContext, @Qualifier(CDS_HOOKS_OBJECT_MAPPER_FACTORY) ObjectMapper theObjectMapper) {
+			FhirContext theFhirContext,
+			@Qualifier(CDS_HOOKS_OBJECT_MAPPER_FACTORY) ObjectMapper theObjectMapper,
+			CdsCrSettings theCdsCrSettings) {
 		return new CdsConfigServiceImpl(
-				theFhirContext, theObjectMapper, myDaoRegistry, myRepositoryFactory, myRestfulServer);
+				theFhirContext, theObjectMapper, theCdsCrSettings, myDaoRegistry, myRepositoryFactory, myRestfulServer);
 	}
 
 	@Bean
