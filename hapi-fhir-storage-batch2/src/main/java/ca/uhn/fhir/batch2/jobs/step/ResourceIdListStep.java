@@ -33,11 +33,11 @@ import ca.uhn.fhir.jpa.api.pid.IResourcePidStream;
 import ca.uhn.fhir.util.Logs;
 import org.slf4j.Logger;
 
-import javax.annotation.Nonnull;
 import java.util.Collection;
 import java.util.Date;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
+import javax.annotation.Nonnull;
 
 import static ca.uhn.fhir.util.StreamUtil.partition;
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;

@@ -44,11 +44,11 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.DateRangeUtil;
 import org.apache.commons.lang3.Validate;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.Date;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 public class Batch2DaoSvcImpl implements IBatch2DaoSvc {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(Batch2DaoSvcImpl.class);
@@ -62,7 +62,6 @@ public class Batch2DaoSvcImpl implements IBatch2DaoSvc {
 	private final FhirContext myFhirContext;
 
 	private final IHapiTransactionService myTransactionService;
-
 
 	@Override
 	public boolean isAllResourceTypeSupported() {
@@ -154,7 +153,6 @@ public class Batch2DaoSvcImpl implements IBatch2DaoSvc {
 		return rowStream.map(Batch2DaoSvcImpl::typedPidFromQueryArray);
 	}
 
-
 	@Deprecated(since = "6.11", forRemoval = true) // delete once the default method in the interface is gone.
 	@Override
 	public IResourcePidList fetchResourceIdsPage(
@@ -168,7 +166,6 @@ public class Batch2DaoSvcImpl implements IBatch2DaoSvc {
 			throw new InternalErrorException(Msg.code(2422) + "this should never happen: URL is missing a '?'");
 		}
 	}
-
 
 	@Nonnull
 	private SearchParameterMap parseQuery(String theUrl) {
