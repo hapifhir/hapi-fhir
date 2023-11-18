@@ -17,6 +17,7 @@ public class StreamUtil {
 	/**
 	 * Chunk the stream into Lists of size theChunkSize.
 	 * The last chunk will be smaller unless the stream size is evenly divisible.
+	 * Closes the underlying stream when done.
 	 *
 	 * @param theStream the input stream
 	 * @param theChunkSize the chunk size.
@@ -26,7 +27,12 @@ public class StreamUtil {
 		Spliterator<T> spliterator = theStream.spliterator();
 		Iterator<T> iterator = Spliterators.iterator(spliterator);
 		UnmodifiableIterator<List<T>> partition = Iterators.partition(iterator, theChunkSize);
+
 		// we could be fancier here and support parallel, and sizes; but serial-only is fine for now.
-		return StreamSupport.stream(Spliterators.spliteratorUnknownSize(partition, 0), false);
+		Spliterator<List<T>> partitionedSpliterator = Spliterators.spliteratorUnknownSize(partition, 0);
+		Stream<List<T>> result = StreamSupport.stream(partitionedSpliterator, false);
+
+		// we lose close() via the Iterator.  Add it back.
+		return result.onClose(theStream::close);
 	}
 }

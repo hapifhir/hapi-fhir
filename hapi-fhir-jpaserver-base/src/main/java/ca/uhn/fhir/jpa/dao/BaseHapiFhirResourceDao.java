@@ -2070,7 +2070,6 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				});
 	}
 
-	// wipmb PID should be bound to JpaPid here.
 	public <PID extends IResourcePersistentId<?>> Stream<PID> searchForIdStream(
 			SearchParameterMap theParams,
 			RequestDetails theRequest,

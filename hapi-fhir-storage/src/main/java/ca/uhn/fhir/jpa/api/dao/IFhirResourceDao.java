@@ -365,7 +365,6 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 	 * @param theRequest for partition target info
 	 * @return a Stream than MUST only be used within the calling transaction.
 	 */
-	// WIPMB make PID a class parameter.
 	default <PID extends IResourcePersistentId<?>> Stream<PID> searchForIdStream(
 			SearchParameterMap theParams,
 			RequestDetails theRequest,

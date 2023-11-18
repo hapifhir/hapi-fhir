@@ -42,7 +42,6 @@ public class MdmIdChunkProducer implements IIdChunkProducer<MdmChunkRangeJson> {
 		myGoldenResourceSearchSvc = theGoldenResourceSearchSvc;
 	}
 
-	// wipmb replace with stream
 	IResourcePidList fetchResourceIdsPage(
 			Date theNextStart,
 			Date theEnd,
@@ -61,7 +60,7 @@ public class MdmIdChunkProducer implements IIdChunkProducer<MdmChunkRangeJson> {
 				theNextStart, theEnd, thePageSize, theRequestPartitionId, resourceType);
 	}
 
-	// wipmb shim for non stream impl.
+	// wipmb convert this to native stream. Maybe just call batch2Daosvcimpl with Resource?_tag=blah,blah
 	@Override
 	public IResourcePidStream fetchResourceIdStream(
 			Date theStart, Date theEnd, @Nullable RequestPartitionId theRequestPartitionId, MdmChunkRangeJson theData) {

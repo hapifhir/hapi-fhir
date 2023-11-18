@@ -66,15 +66,6 @@ public interface IResourceTableDao
 	Slice<Long> findIdsOfResourcesWithinUpdatedRangeOrderedFromOldest(
 			Pageable thePage, @Param("low") Date theLow, @Param("high") Date theHigh);
 
-	// wipmb drop the find - streaming!
-	/**
-	 * @return List of arrays containing [PID, resourceType, lastUpdated]
-	 */
-	@Query(
-			"SELECT t.myId, t.myResourceType, t.myUpdated FROM ResourceTable t WHERE t.myUpdated >= :low AND t.myUpdated <= :high ORDER BY t.myUpdated ASC")
-	Slice<Object[]> findIdsTypesAndUpdateTimesOfResourcesWithinUpdatedRangeOrderedFromOldest(
-			Pageable thePage, @Param("low") Date theLow, @Param("high") Date theHigh);
-
 	@Query(
 			"SELECT t.myId, t.myResourceType, t.myUpdated FROM ResourceTable t WHERE t.myUpdated >= :low AND t.myUpdated <= :high ORDER BY t.myUpdated ASC")
 	Stream<Object[]> streamIdsTypesAndUpdateTimesOfResourcesWithinUpdatedRangeOrderedFromOldest(

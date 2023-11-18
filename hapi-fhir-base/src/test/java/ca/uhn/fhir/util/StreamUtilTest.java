@@ -1,11 +1,17 @@
 package ca.uhn.fhir.util;
 
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 class StreamUtilTest {
 
@@ -40,6 +46,20 @@ class StreamUtilTest {
 				List.of(List.of(1, 2, 3,4), List.of(5,6,7,8))
 			},
 		};
+	}
+
+	@Test
+	void testStreamPartitionClosesOriginalStream() {
+	    // given
+		AtomicBoolean closed = new AtomicBoolean(false);
+		Stream<Integer> baseStream = Stream.of(1, 2, 3);
+		baseStream.onClose(()->closed.set(true));
+
+		// when
+		StreamUtil.partition(baseStream, 2).close();
+
+		// then
+	    assertThat("partition closed underlying stream", closed.get());
 	}
 
 

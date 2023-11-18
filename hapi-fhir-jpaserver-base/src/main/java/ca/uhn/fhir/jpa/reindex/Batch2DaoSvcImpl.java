@@ -37,7 +37,6 @@ import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.api.SortOrderEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -173,8 +172,9 @@ public class Batch2DaoSvcImpl implements IBatch2DaoSvc {
 		RuntimeResourceDefinition def = myFhirContext.getResourceDefinition(resourceType);
 
 		SearchParameterMap searchParamMap = myMatchUrlService.translateMatchUrl(theUrl, def);
-		// wipmb change to _pid sort
-		searchParamMap.setSort(new SortSpec(Constants.PARAM_ID, SortOrderEnum.ASC));
+		// this matches idx_res_type_del_updated
+		searchParamMap.setSort(new SortSpec(Constants.PARAM_LASTUPDATED).setChain(new SortSpec(Constants.PARAM_PID)));
+		// TODO this limits us to 2G resources.
 		searchParamMap.setLoadSynchronousUpTo(Integer.MAX_VALUE);
 		return searchParamMap;
 	}
