@@ -1,0 +1,4 @@
+---
+type: change
+issue: 5444
+title: "The reindexing batch job now streams results internally for more reliable operation."
