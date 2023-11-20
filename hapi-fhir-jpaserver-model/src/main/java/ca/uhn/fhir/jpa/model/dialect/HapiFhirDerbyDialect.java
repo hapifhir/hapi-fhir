@@ -39,5 +39,4 @@ public class HapiFhirDerbyDialect extends DerbyDialect {
 	public boolean supportsColumnCheck() {
 		return false;
 	}
-
 }

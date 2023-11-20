@@ -62,5 +62,4 @@ public class HapiFhirH2Dialect extends H2Dialect {
 	public boolean supportsColumnCheck() {
 		return false;
 	}
-
 }

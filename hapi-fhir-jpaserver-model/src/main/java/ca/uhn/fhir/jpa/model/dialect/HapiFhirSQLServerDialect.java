@@ -39,5 +39,4 @@ public class HapiFhirSQLServerDialect extends SQLServerDialect {
 	public boolean supportsColumnCheck() {
 		return false;
 	}
-
 }

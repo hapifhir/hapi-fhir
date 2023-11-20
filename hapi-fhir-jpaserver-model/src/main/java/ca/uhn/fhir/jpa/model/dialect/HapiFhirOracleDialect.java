@@ -39,5 +39,4 @@ public class HapiFhirOracleDialect extends OracleDialect {
 	public boolean supportsColumnCheck() {
 		return false;
 	}
-
 }
