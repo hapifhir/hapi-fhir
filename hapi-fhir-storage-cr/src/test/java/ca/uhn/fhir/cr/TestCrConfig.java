@@ -84,7 +84,6 @@ public class TestCrConfig {
 		storageSettings.setAllowExternalReferences(true);
 		storageSettings.setEnforceReferentialIntegrityOnWrite(false);
 		storageSettings.setEnforceReferenceTargetTypes(false);
-		storageSettings.setMaximumExpansionSize(1000);
 		storageSettings.setResourceClientIdStrategy(JpaStorageSettings.ClientIdStrategyEnum.ANY);
 		return storageSettings;
 	}
