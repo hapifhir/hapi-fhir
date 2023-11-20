@@ -48,7 +48,7 @@ public class MdmIdChunkProducer implements IIdChunkProducer<MdmChunkRangeJson> {
 				theStart,
 				theEnd);
 
-		return myGoldenResourceSearchSvc.fetchGoldenResourceIdsPage(
+		return myGoldenResourceSearchSvc.fetchGoldenResourceIdStream(
 				theStart, theEnd, theRequestPartitionId, resourceType);
 	}
 }
