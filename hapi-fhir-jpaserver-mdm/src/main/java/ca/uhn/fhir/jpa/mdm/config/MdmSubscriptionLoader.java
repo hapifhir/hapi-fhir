@@ -84,8 +84,8 @@ public class MdmSubscriptionLoader {
 		switch (myFhirContext.getVersion().getVersion()) {
 			case DSTU3:
 				subscriptions = mdmResourceTypes.stream()
-						.map(resourceType ->
-								buildMdmSubscriptionDstu3(MDM_SUBSCRIPTION_ID_PREFIX + resourceType, resourceType + "?"))
+						.map(resourceType -> buildMdmSubscriptionDstu3(
+								MDM_SUBSCRIPTION_ID_PREFIX + resourceType, resourceType + "?"))
 						.collect(Collectors.toList());
 				break;
 			case R4:
