@@ -110,6 +110,15 @@ public class GenerateDdlMojo extends AbstractMojo {
 	}
 
 	public static void main(String[] args) throws MojoExecutionException, MojoFailureException {
+		/*
+		 * Note, to execute this, add the following snippet to this module's POM. The whole project won't work with
+		 * that added, but you can add it temporarily in order to debug this in IJ:
+		 * 		<dependency>
+		 * 			<groupId>ca.uhn.hapi.fhir</groupId>
+		 * 			<artifactId>hapi-fhir-jpaserver-model</artifactId>
+		 * 			<version>${project.version}</version>
+		 * 		</dependency>
+		 */
 		GenerateDdlMojo m = new GenerateDdlMojo();
 		m.packageNames = List.of("ca.uhn.fhir.jpa.model.entity");
 		m.outputDirectory = "hapi-tinder-plugin/target";
