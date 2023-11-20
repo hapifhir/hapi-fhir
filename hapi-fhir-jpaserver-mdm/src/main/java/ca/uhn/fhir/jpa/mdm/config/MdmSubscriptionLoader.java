@@ -54,7 +54,7 @@ import java.util.stream.Collectors;
 @Service
 public class MdmSubscriptionLoader {
 
-	public static final String MDM_SUBSCIPRION_ID_PREFIX = "mdm-";
+	public static final String MDM_SUBSCRIPTION_ID_PREFIX = "mdm-";
 	private static final Logger ourLog = Logs.getMdmTroubleshootingLog();
 
 	@Autowired
@@ -85,13 +85,13 @@ public class MdmSubscriptionLoader {
 			case DSTU3:
 				subscriptions = mdmResourceTypes.stream()
 						.map(resourceType ->
-								buildMdmSubscriptionDstu3(MDM_SUBSCIPRION_ID_PREFIX + resourceType, resourceType + "?"))
+								buildMdmSubscriptionDstu3(MDM_SUBSCRIPTION_ID_PREFIX + resourceType, resourceType + "?"))
 						.collect(Collectors.toList());
 				break;
 			case R4:
 				subscriptions = mdmResourceTypes.stream()
 						.map(resourceType ->
-								buildMdmSubscriptionR4(MDM_SUBSCIPRION_ID_PREFIX + resourceType, resourceType + "?"))
+								buildMdmSubscriptionR4(MDM_SUBSCRIPTION_ID_PREFIX + resourceType, resourceType + "?"))
 						.collect(Collectors.toList());
 				break;
 			case R5:
@@ -153,7 +153,7 @@ public class MdmSubscriptionLoader {
 		channel.setType(org.hl7.fhir.dstu3.model.Subscription.SubscriptionChannelType.MESSAGE);
 		channel.setEndpoint("channel:"
 				+ myChannelNamer.getChannelName(IMdmSettings.EMPI_CHANNEL_NAME, new ChannelProducerSettings()));
-		channel.setPayload("application/json");
+		channel.setPayload(Constants.CT_JSON);
 		return retval;
 	}
 
@@ -174,15 +174,15 @@ public class MdmSubscriptionLoader {
 		channel.setType(Subscription.SubscriptionChannelType.MESSAGE);
 		channel.setEndpoint("channel:"
 				+ myChannelNamer.getChannelName(IMdmSettings.EMPI_CHANNEL_NAME, new ChannelProducerSettings()));
-		channel.setPayload("application/json");
+		channel.setPayload(Constants.CT_JSON);
 		return retval;
 	}
 
 	private SubscriptionTopic buildMdmSubscriptionTopicR5(List<String> theMdmResourceTypes) {
 		SubscriptionTopic subscriptionTopic = new SubscriptionTopic();
-		subscriptionTopic.setId(MDM_SUBSCIPRION_ID_PREFIX + "subscription-topic");
+		subscriptionTopic.setId(MDM_SUBSCRIPTION_ID_PREFIX + "subscription-topic");
 		subscriptionTopic.setStatus(Enumerations.PublicationStatus.ACTIVE);
-		subscriptionTopic.setUrl("http://example.com/topic/test/mdm");
+		subscriptionTopic.setUrl(MdmConstants.SUBSCRIPTION_TOPIC_URL);
 		theMdmResourceTypes.forEach(
 				resourceType -> getSubscriptionTopicResourceTriggerComponent(resourceType, subscriptionTopic));
 		return subscriptionTopic;
@@ -204,7 +204,7 @@ public class MdmSubscriptionLoader {
 				.map(SubscriptionTopic.SubscriptionTopicResourceTriggerComponent::getResource)
 				.collect(Collectors.joining("-"));
 
-		subscription.setId(MDM_SUBSCIPRION_ID_PREFIX + resourcesString);
+		subscription.setId(MDM_SUBSCRIPTION_ID_PREFIX + resourcesString);
 		subscription.setReason("MDM");
 		subscription.setStatus(Enumerations.SubscriptionStatusCodes.REQUESTED);
 
@@ -225,7 +225,7 @@ public class MdmSubscriptionLoader {
 
 		subscription.setEndpoint("channel:"
 				+ myChannelNamer.getChannelName(IMdmSettings.EMPI_CHANNEL_NAME, new ChannelProducerSettings()));
-		subscription.setContentType(Constants.CT_FHIR_JSON_NEW);
+		subscription.setContentType(Constants.CT_JSON);
 
 		return Collections.singletonList(subscription);
 	}
