@@ -27,11 +27,12 @@ import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.subscription.channel.api.ChannelProducerSettings;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.IChannelNamer;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionLoader;
+import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscriptionChannelType;
 import ca.uhn.fhir.jpa.topic.SubscriptionTopicLoader;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.api.MdmConstants;
 import ca.uhn.fhir.mdm.log.Logs;
-import ca.uhn.fhir.model.dstu2.valueset.SubscriptionChannelTypeEnum;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
@@ -39,7 +40,6 @@ import ca.uhn.fhir.util.HapiExtensions;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Subscription;
-import org.hl7.fhir.r5.model.CanonicalType;
 import org.hl7.fhir.r5.model.Coding;
 import org.hl7.fhir.r5.model.Enumerations;
 import org.hl7.fhir.r5.model.SubscriptionTopic;
@@ -50,8 +50,6 @@ import org.springframework.stereotype.Service;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
-
-import static ca.uhn.fhir.subscription.SubscriptionConstants.SUBSCRIPTION_CHANNEL_TYPE_SYSTEM_R5;
 
 @Service
 public class MdmSubscriptionLoader {
@@ -98,13 +96,11 @@ public class MdmSubscriptionLoader {
 				break;
 			case R5:
 				SubscriptionTopic subscriptionTopic = buildMdmSubscriptionTopicR5(mdmResourceTypes);
-				mySubscriptionTopicDao = myDaoRegistry.getResourceDao("SubscriptionTopic");
 				updateIfNotPresent(subscriptionTopic);
 				// After loading subscriptionTopic, sync subscriptionTopic to the registry.
 				mySubscriptionTopicLoader.syncDatabaseToCache();
 
-				org.hl7.fhir.r5.model.Subscription subscriptionR5 = buildMdmSubscriptionR5(subscriptionTopic);
-				subscriptions = Collections.singletonList(subscriptionR5);
+				subscriptions = buildMdmSubscriptionR5(subscriptionTopic);
 				break;
 			default:
 				throw new ConfigurationException(Msg.code(736) + "MDM not supported for FHIR version "
@@ -132,10 +128,7 @@ public class MdmSubscriptionLoader {
 
 	synchronized void updateIfNotPresent(SubscriptionTopic theSubscriptionTopic) {
 		try {
-			// TODO: Cross-partition matching is currently only supported for DSTU3 and R4 (i.e. non-topic-based)
-			// Subscriptions - how does it affect MDM ?
-			// TODO: https://smilecdr.com/docs/subscription/topic.html - should we add (later) Cross-partition matching
-			// support to make MDM with R5 work correctly ?
+			mySubscriptionTopicDao = myDaoRegistry.getResourceDao("SubscriptionTopic");
 			mySubscriptionTopicDao.read(theSubscriptionTopic.getIdElement(), SystemRequestDetails.forAllPartitions());
 		} catch (ResourceNotFoundException | ResourceGoneException e) {
 			ourLog.info("Creating subscriptionTopic " + theSubscriptionTopic.getIdElement());
@@ -187,7 +180,6 @@ public class MdmSubscriptionLoader {
 
 	private SubscriptionTopic buildMdmSubscriptionTopicR5(List<String> theMdmResourceTypes) {
 		SubscriptionTopic subscriptionTopic = new SubscriptionTopic();
-		// TODO: what id to set ? mdm-subscription-topic is ok?
 		subscriptionTopic.setId(MDM_SUBSCIPRION_ID_PREFIX + "subscription-topic");
 		subscriptionTopic.setStatus(Enumerations.PublicationStatus.ACTIVE);
 		subscriptionTopic.setUrl("http://example.com/topic/test/mdm");
@@ -198,48 +190,43 @@ public class MdmSubscriptionLoader {
 
 	private static void getSubscriptionTopicResourceTriggerComponent(
 			String theResourceType, SubscriptionTopic theSubscriptionTopic) {
-		SubscriptionTopic.SubscriptionTopicResourceTriggerComponent trigger = theSubscriptionTopic.addResourceTrigger();
-		trigger.setResource(theResourceType);
-		trigger.addSupportedInteraction(SubscriptionTopic.InteractionTrigger.CREATE);
-		trigger.addSupportedInteraction(SubscriptionTopic.InteractionTrigger.UPDATE);
-		SubscriptionTopic.SubscriptionTopicResourceTriggerQueryCriteriaComponent queryCriteria =
-				trigger.getQueryCriteria();
-		queryCriteria.setCurrent(theResourceType + "?");
-		queryCriteria.setRequireBoth(false);
-		// theSubscriptionTopic.addResourceTrigger(trigger);
+		SubscriptionTopic.SubscriptionTopicResourceTriggerComponent triggerComponent =
+				theSubscriptionTopic.addResourceTrigger();
+		triggerComponent.setResource(theResourceType);
+		triggerComponent.addSupportedInteraction(SubscriptionTopic.InteractionTrigger.CREATE);
+		triggerComponent.addSupportedInteraction(SubscriptionTopic.InteractionTrigger.UPDATE);
 	}
 
-	private org.hl7.fhir.r5.model.Subscription buildMdmSubscriptionR5(SubscriptionTopic theSubscriptionTopic) {
-		org.hl7.fhir.r5.model.Subscription retVal = new org.hl7.fhir.r5.model.Subscription();
+	private List<IBaseResource> buildMdmSubscriptionR5(SubscriptionTopic theSubscriptionTopic) {
+		org.hl7.fhir.r5.model.Subscription subscription = new org.hl7.fhir.r5.model.Subscription();
 
 		String resourcesString = theSubscriptionTopic.getResourceTrigger().stream()
 				.map(SubscriptionTopic.SubscriptionTopicResourceTriggerComponent::getResource)
 				.collect(Collectors.joining("-"));
-		String subscriptionId = MDM_SUBSCIPRION_ID_PREFIX + "-" + resourcesString;
-		retVal.setId(subscriptionId);
-		retVal.setReason("MDM");
-		retVal.setStatus(Enumerations.SubscriptionStatusCodes.REQUESTED);
 
-		retVal.setTopic(theSubscriptionTopic.getUrl());
-		// remove ?
-		retVal.setTopicElement(new CanonicalType(theSubscriptionTopic.getUrl()));
-		//
-		retVal.getMeta()
+		subscription.setId(MDM_SUBSCIPRION_ID_PREFIX + resourcesString);
+		subscription.setReason("MDM");
+		subscription.setStatus(Enumerations.SubscriptionStatusCodes.REQUESTED);
+
+		subscription.setTopic(theSubscriptionTopic.getUrl());
+		subscription
+				.getMeta()
 				.addTag()
 				.setSystem(MdmConstants.SYSTEM_MDM_MANAGED)
 				.setCode(MdmConstants.CODE_HAPI_MDM_MANAGED);
-		retVal.addExtension()
+		subscription
+				.addExtension()
 				.setUrl(HapiExtensions.EXTENSION_SUBSCRIPTION_CROSS_PARTITION)
 				.setValue(new org.hl7.fhir.r5.model.BooleanType().setValue(true));
 
-		retVal.setChannelType(new Coding()
-				.setCode(SubscriptionChannelTypeEnum.MESSAGE.getCode())
-				.setSystem(SUBSCRIPTION_CHANNEL_TYPE_SYSTEM_R5));
+		subscription.setChannelType(new Coding()
+				.setCode(CanonicalSubscriptionChannelType.MESSAGE.toCode())
+				.setSystem(CanonicalSubscriptionChannelType.MESSAGE.getSystem()));
 
-		retVal.setEndpoint("channel:"
+		subscription.setEndpoint("channel:"
 				+ myChannelNamer.getChannelName(IMdmSettings.EMPI_CHANNEL_NAME, new ChannelProducerSettings()));
-		retVal.setContentType("application/json");
+		subscription.setContentType(Constants.CT_FHIR_JSON_NEW);
 
-		return retVal;
+		return Collections.singletonList(subscription);
 	}
 }
