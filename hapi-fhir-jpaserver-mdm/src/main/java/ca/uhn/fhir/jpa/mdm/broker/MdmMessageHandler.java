@@ -20,6 +20,7 @@
 package ca.uhn.fhir.jpa.mdm.broker;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
@@ -30,6 +31,7 @@ import ca.uhn.fhir.jpa.mdm.svc.MdmResourceFilteringSvc;
 import ca.uhn.fhir.jpa.mdm.svc.candidate.TooManyCandidatesException;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedJsonMessage;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
+import ca.uhn.fhir.jpa.topic.SubscriptionTopicUtil;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.log.Logs;
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
@@ -38,18 +40,15 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.TransactionLogMessages;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.messaging.ResourceOperationMessage;
-import ca.uhn.fhir.util.BundleUtil;
 import org.hl7.fhir.instance.model.api.IAnyResource;
+import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r5.model.Bundle;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.MessagingException;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 @Service
 public class MdmMessageHandler implements MessageHandler {
@@ -85,13 +84,7 @@ public class MdmMessageHandler implements MessageHandler {
 
 		ResourceModifiedMessage msg = ((ResourceModifiedJsonMessage) theMessage).getPayload();
 		try {
-			IBaseResource sourceResource = msg.getNewPayload(myFhirContext);
-			if (sourceResource instanceof Bundle) {
-				List<IBaseResource> resources = BundleUtil.toListOfResources(myFhirContext, (Bundle) sourceResource);
-				IBaseResource sourceResource2 = resources.get(1);
-				sourceResource2.getMeta();
-				sourceResource = sourceResource2;
-			}
+			IBaseResource sourceResource = extractSourceResource(msg);
 
 			boolean toProcess = myMdmResourceFilteringSvc.shouldBeProcessed((IAnyResource) sourceResource);
 			if (toProcess) {
@@ -100,6 +93,15 @@ public class MdmMessageHandler implements MessageHandler {
 		} catch (Exception e) {
 			ourLog.error("Failed to handle MDM Matching Resource:", e);
 			throw e;
+		}
+	}
+
+	private IBaseResource extractSourceResource(ResourceModifiedMessage theResourceModifiedMessage) {
+		IBaseResource sourceResource = theResourceModifiedMessage.getNewPayload(myFhirContext);
+		if (myFhirContext.getVersion().getVersion() == FhirVersionEnum.R5 && sourceResource instanceof IBaseBundle) {
+			return SubscriptionTopicUtil.extractResourceFromBundle(myFhirContext, (IBaseBundle) sourceResource);
+		} else {
+			return sourceResource;
 		}
 	}
 
