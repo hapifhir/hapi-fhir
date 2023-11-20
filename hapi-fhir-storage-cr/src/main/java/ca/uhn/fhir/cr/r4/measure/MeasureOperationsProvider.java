@@ -78,11 +78,10 @@ public class MeasureOperationsProvider {
 			@OperationParam(name = "terminologyEndpoint") Endpoint theTerminologyEndpoint,
 			RequestDetails theRequestDetails)
 			throws InternalErrorException, FHIRException {
-		Either3<CanonicalType, IdType, Measure> objectIdTypeObjectEither3 = Eithers.forMiddle3(theId);
 		return myR4MeasureServiceFactory
 				.create(theRequestDetails)
 				.evaluate(
-					objectIdTypeObjectEither3,
+					Eithers.forMiddle3(theId),
 						thePeriodStart,
 						thePeriodEnd,
 						theReportType,
