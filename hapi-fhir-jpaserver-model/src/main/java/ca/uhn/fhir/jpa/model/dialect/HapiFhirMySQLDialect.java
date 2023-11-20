@@ -39,5 +39,4 @@ public class HapiFhirMySQLDialect extends MySQLDialect {
 	public boolean supportsColumnCheck() {
 		return false;
 	}
-
 }

@@ -39,6 +39,4 @@ public class HapiFhirCockroachDialect extends CockroachDialect {
 	public boolean supportsColumnCheck() {
 		return false;
 	}
-
-
 }

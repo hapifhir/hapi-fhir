@@ -39,5 +39,4 @@ public class HapiFhirMariaDBDialect extends MariaDBDialect {
 	public boolean supportsColumnCheck() {
 		return false;
 	}
-
 }
