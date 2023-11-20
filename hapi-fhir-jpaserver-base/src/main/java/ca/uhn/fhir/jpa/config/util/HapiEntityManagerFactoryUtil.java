@@ -71,13 +71,24 @@ public final class HapiEntityManagerFactoryUtil {
 			myStorageSettings = theStorageSettings;
 		}
 
+		/**
+		 * @see MyEntityManagerFactoryBuilderImpl for an explanation of why we do this
+		 */
 		@Override
 		protected EntityManagerFactoryBuilder getEntityManagerFactoryBuilder(
 				PersistenceUnitInfo info, Map<?, ?> integration) {
-			EntityManagerFactoryBuilder retVal = new MyEntityManagerFactoryBuilderImpl(info, integration);
-			return retVal;
+			return new MyEntityManagerFactoryBuilderImpl(info, integration);
 		}
 
+		/**
+		 * This class extends the default hibernate EntityManagerFactoryBuilder in order to
+		 * register a custom service (the {@link ISequenceValueMassager}, which is used in
+		 * {@link ca.uhn.fhir.jpa.model.dialect.HapiSequenceStyleGenerator}.
+		 * <p>
+		 * In Hibernate 5 we didn't need to do this, since we could just register
+		 * the service with Spring and Hibernate would ask Spring for it. This no longer
+		 * seems to work in Hibernate 6, so we now have to manually register it.
+		 */
 		private class MyEntityManagerFactoryBuilderImpl extends EntityManagerFactoryBuilderImpl {
 			public MyEntityManagerFactoryBuilderImpl(PersistenceUnitInfo theInfo, Map<?, ?> theIntegration) {
 				super(new PersistenceUnitInfoDescriptor(theInfo), (Map) theIntegration);

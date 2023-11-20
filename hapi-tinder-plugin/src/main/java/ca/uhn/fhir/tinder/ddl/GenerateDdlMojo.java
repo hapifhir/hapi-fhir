@@ -114,8 +114,6 @@ public class GenerateDdlMojo extends AbstractMojo {
 		m.packageNames = List.of("ca.uhn.fhir.jpa.model.entity");
 		m.outputDirectory = "hapi-tinder-plugin/target";
 		m.dialects = List.of(new Dialect("ca.uhn.fhir.jpa.model.dialect.HapiFhirH2Dialect", "h2.sql"));
-		//		m.dialects = List.of(new Dialect("ca.uhn.fhir.jpa.model.dialect.HapiFhirPostgresDialect",
-		// "hapifhirpostgres94.sql"));
 		m.execute();
 	}
 }

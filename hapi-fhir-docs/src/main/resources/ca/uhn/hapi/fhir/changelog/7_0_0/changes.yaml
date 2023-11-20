@@ -21,5 +21,5 @@
 - item:
       type: "remove"
       title: "The legacy `$lastn` support has been removed, and only the redesigned 'advanced' version is now
-        supported. The advanced version requires ElasticSearch."
+        supported. The advanced version requires Elasticsearch."
 

@@ -979,6 +979,7 @@
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 		<ebay_cors_filter_version>1.0.1</ebay_cors_filter_version>
 		<elastic_apm_version>1.28.4</elastic_apm_version>
+		<elasticsearch_version>8.9.2</elasticsearch_version>
 		<ucum_version>1.0.8</ucum_version>
 
 		<!-- CQL Support -->
@@ -1336,10 +1337,15 @@
 				<artifactId>jakarta.validation-api</artifactId>
 				<version>3.0.2</version>
 			</dependency>
-		<dependency>
-				<groupId>javax.json</groupId>
-				<artifactId>javax.json-api</artifactId>
-				<version>1.1</version>
+			<dependency>
+					<groupId>javax.json</groupId>
+					<artifactId>javax.json-api</artifactId>
+					<version>1.1</version>
+				</dependency>
+			<dependency>
+				<groupId>co.elastic.clients</groupId>
+				<artifactId>elasticsearch-java</artifactId>
+				<version>${elasticsearch_version}</version>
 			</dependency>
 			<dependency>
 				<groupId>com.google.code.gson</groupId>
@@ -1865,12 +1871,6 @@
 						<artifactId>log4j-api</artifactId>
 					</exclusion>
 				</exclusions>
-			</dependency>
-			<!-- FIXME: move to the right spot and use a variable -->
-			<dependency>
-				<groupId>co.elastic.clients</groupId>
-				<artifactId>elasticsearch-java</artifactId>
-				<version>8.9.2</version>
 			</dependency>
 			<dependency>
 				<groupId>org.elasticsearch</groupId>

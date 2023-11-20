@@ -3859,33 +3859,6 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		assertEquals(2, countMatches(searchQuery.toUpperCase(), "RES_UPDATED"), searchQuery);
 	}
 
-	@Disabled
-	@Test
-	public void testSearchWithContext() {
-
-
-		String url = "Procedure?_count=300&_format=json&_include%3Arecurse=*&category=CANN&encounter.identifier=A1057852019&status%3Anot=entered-in-error";
-		RuntimeResourceDefinition def = myFhirContext.getResourceDefinition("Procedure");
-		SearchParameterMap sp = myMatchUrlService.translateMatchUrl(url, def);
-
-
-		myCaptureQueriesListener.clear();
-		sp.setLoadSynchronous(true);
-		myProcedureDao.search(sp);
-
-		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
-//		List<String> queries = myCaptureQueriesListener
-//			.getSelectQueriesForCurrentThread()
-//			.stream()
-//			.map(t -> t.getSql(true, true))
-//			.collect(Collectors.toList());
-//
-//		String searchQuery = queries.get(0);
-//		assertEquals(searchQuery, 1, StringUtils.countMatches(searchQuery.toUpperCase(), "HFJ_SPIDX_TOKEN"));
-//		assertEquals(searchQuery, 1, StringUtils.countMatches(searchQuery.toUpperCase(), "LEFT OUTER JOIN"));
-//		assertEquals(searchQuery, 2, StringUtils.countMatches(searchQuery.toUpperCase(), "AND r1_0.RES_UPDATED"));
-	}
-
 	@Test
 	public void testSearchTokenParam() {
 		Patient patient = new Patient();

@@ -63,11 +63,13 @@ public class HapiEmbeddedDatabasesExtension implements AfterAllCallback {
 						"Cannot add OracleEmbeddedDatabase. If you are using a Mac you must configure the TestContainers API to run using Colima (https://www.testcontainers.org/supported_docker_environment#using-colima)";
 				ourLog.warn(message);
 			}
+		} else {
+			ourLog.warn("Docker is not available! Not going to start any embedded databases.");
 		}
 	}
 
 	@Override
-	public void afterAll(ExtensionContext theExtensionContext) throws Exception {
+	public void afterAll(ExtensionContext theExtensionContext) {
 		for (JpaEmbeddedDatabase database : getAllEmbeddedDatabases()) {
 			database.stop();
 		}

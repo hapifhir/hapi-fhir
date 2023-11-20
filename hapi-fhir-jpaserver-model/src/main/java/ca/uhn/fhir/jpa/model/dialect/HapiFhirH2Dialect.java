@@ -35,15 +35,10 @@ public class HapiFhirH2Dialect extends H2Dialect {
 	 */
 	public HapiFhirH2Dialect() {
 		super(DatabaseVersion.make(2, 2, 220));
+	}
 
-		/*
-		 * These mappings are already defined in the super() constructor, but they
-		 * will only happen if the dialect can connect to the database and
-		 * determine that it's a recent enough version of H2 to support this. This
-		 * means that the Maven plugin that does schema generation doesn't add it.
-		 * So this dialect forces the use of the right defs.
-		 */
-		//		registerColumnType(Types.LONGVARCHAR, "character varying");
-		//		registerColumnType(Types.BINARY, "binary($l)");
+	@Override
+	public boolean supportsColumnCheck() {
+		return super.supportsColumnCheck();
 	}
 }
