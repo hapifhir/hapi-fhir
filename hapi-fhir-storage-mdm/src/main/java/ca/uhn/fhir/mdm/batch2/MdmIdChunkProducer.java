@@ -21,18 +21,13 @@ package ca.uhn.fhir.mdm.batch2;
 
 import ca.uhn.fhir.batch2.jobs.step.IIdChunkProducer;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.api.pid.IResourcePidList;
 import ca.uhn.fhir.jpa.api.pid.IResourcePidStream;
-import ca.uhn.fhir.jpa.api.pid.ListWrappingPidStream;
 import ca.uhn.fhir.jpa.api.svc.IGoldenResourceSearchSvc;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Date;
-import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-
-import static ca.uhn.fhir.batch2.jobs.step.ResourceIdListStep.DEFAULT_PAGE_SIZE;
 
 public class MdmIdChunkProducer implements IIdChunkProducer<MdmChunkRangeJson> {
 	private static final Logger ourLog = LoggerFactory.getLogger(MdmIdChunkProducer.class);
@@ -42,30 +37,18 @@ public class MdmIdChunkProducer implements IIdChunkProducer<MdmChunkRangeJson> {
 		myGoldenResourceSearchSvc = theGoldenResourceSearchSvc;
 	}
 
-	IResourcePidList fetchResourceIdsPage(
-			Date theNextStart,
-			Date theEnd,
-			@Nonnull Integer thePageSize,
-			RequestPartitionId theRequestPartitionId,
-			MdmChunkRangeJson theData) {
+	@Override
+	public IResourcePidStream fetchResourceIdStream(
+			Date theStart, Date theEnd, @Nullable RequestPartitionId theRequestPartitionId, MdmChunkRangeJson theData) {
 		String resourceType = theData.getResourceType();
 
 		ourLog.info(
 				"Fetching golden resource ID chunk for resource type {} - Range {} - {}",
 				resourceType,
-				theNextStart,
+				theStart,
 				theEnd);
 
 		return myGoldenResourceSearchSvc.fetchGoldenResourceIdsPage(
-				theNextStart, theEnd, thePageSize, theRequestPartitionId, resourceType);
-	}
-
-	// wipmb convert this to native stream. Maybe just call batch2Daosvcimpl with Resource?_tag=blah,blah
-	@Override
-	public IResourcePidStream fetchResourceIdStream(
-			Date theStart, Date theEnd, @Nullable RequestPartitionId theRequestPartitionId, MdmChunkRangeJson theData) {
-		IResourcePidList list =
-				fetchResourceIdsPage(theStart, theEnd, DEFAULT_PAGE_SIZE, theRequestPartitionId, theData);
-		return new ListWrappingPidStream(list);
+				theStart, theEnd, theRequestPartitionId, resourceType);
 	}
 }

@@ -17,17 +17,17 @@ class TransactionWrappingStreamTemplate<T> implements StreamTemplate<T> {
 	final TransactionOperations myTransaction;
 
 	@Nonnull
-	final StreamTemplate<T> theWrappedStreamTemplate;
+	final StreamTemplate<T> myWrappedStreamTemplate;
 
 	TransactionWrappingStreamTemplate(
-			@Nonnull TransactionOperations theTransaction, @Nonnull StreamTemplate<T> theTheWrappedStreamTemplate) {
+			@Nonnull TransactionOperations theTransaction, @Nonnull StreamTemplate<T> theWrappedStreamTemplate) {
 		myTransaction = theTransaction;
-		theWrappedStreamTemplate = theTheWrappedStreamTemplate;
+		this.myWrappedStreamTemplate = theWrappedStreamTemplate;
 	}
 
 	@Nullable
 	@Override
 	public <R> R call(@Nonnull Function<Stream<T>, R> theCallback) {
-		return myTransaction.execute(unusedTxStatus -> theWrappedStreamTemplate.call(theCallback));
+		return myTransaction.execute(unusedTxStatus -> myWrappedStreamTemplate.call(theCallback));
 	}
 }

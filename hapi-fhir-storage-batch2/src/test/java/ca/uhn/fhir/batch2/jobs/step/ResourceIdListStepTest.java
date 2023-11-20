@@ -9,9 +9,7 @@ import ca.uhn.fhir.batch2.jobs.parameters.PartitionedUrlListJobParameters;
 import ca.uhn.fhir.jpa.api.pid.HomogeneousResourcePidList;
 import ca.uhn.fhir.jpa.api.pid.IResourcePidStream;
 import ca.uhn.fhir.jpa.api.pid.ListWrappingPidStream;
-import ca.uhn.fhir.jpa.api.pid.TypedResourcePid;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
-import com.google.common.collect.Lists;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -36,7 +34,6 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class ResourceIdListStepTest {
-	// wipmb review
 	@Mock
 	private IIdChunkProducer<PartitionedUrlChunkRangeJson> myIdChunkProducer;
 	@Mock
@@ -58,17 +55,15 @@ class ResourceIdListStepTest {
 		myResourceIdListStep = new ResourceIdListStep<>(myIdChunkProducer);
 	}
 
-	// wipmb can we delete this?
 	@ParameterizedTest
 	@ValueSource(ints = {0, 1, 100, 500, 501, 2345, 10500})
 	void testResourceIdListBatchSizeLimit(int theListSize) {
-		List<TypedResourcePid> idList = generateIdList(theListSize);
+		List<IResourcePersistentId> idList = generateIdList(theListSize);
 		when(myStepExecutionDetails.getData()).thenReturn(myData);
 		when(myParameters.getBatchSize()).thenReturn(500);
 		when(myStepExecutionDetails.getParameters()).thenReturn(myParameters);
-		// wipmb remove the transform
 		IResourcePidStream mockStream = new ListWrappingPidStream(
-			new HomogeneousResourcePidList("Patient", Lists.transform(idList, tp->tp.id), null, null));
+			new HomogeneousResourcePidList("Patient", idList, null, null));
 		if (theListSize > 0) {
 			// Ensure none of the work chunks exceed MAX_BATCH_OF_IDS in size:
 			doAnswer(i -> {
@@ -78,7 +73,6 @@ class ResourceIdListStepTest {
 				return null;
 			}).when(myDataSink).accept(any(ResourceIdListWorkChunkJson.class));
 		}
-		// wipmb update to stream
 		when(myIdChunkProducer.fetchResourceIdStream(any(), any(), any(), any()))
 			.thenReturn(mockStream);
 
@@ -104,13 +98,12 @@ class ResourceIdListStepTest {
 		}
 	}
 
-	private List<TypedResourcePid> generateIdList(int theListSize) {
-		List<TypedResourcePid> idList = new ArrayList<>();
+	private List<IResourcePersistentId> generateIdList(int theListSize) {
+		List<IResourcePersistentId> idList = new ArrayList<>();
 		for (int id = 0; id < theListSize; id++) {
 			IResourcePersistentId<?> theId = mock(IResourcePersistentId.class);
 			when(theId.toString()).thenReturn(Integer.toString(id + 1));
-			TypedResourcePid typedId = new TypedResourcePid("Patient", theId);
-			idList.add(typedId);
+			idList.add(theId);
 		}
 		return idList;
 	}
