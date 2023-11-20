@@ -20,31 +20,28 @@
 package ca.uhn.fhir.jpa.api.pid;
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
-import javax.annotation.Nonnull;
+import java.util.function.Function;
+import java.util.stream.Stream;
 
-/**
- * A resource pid list where the pids can have different resource types
- */
-public class MixedResourcePidList extends BaseResourcePidList {
-	@Nonnull
-	final List<String> myResourceTypes;
+public class TypedResourceStream implements IResourcePidStream {
 
-	public MixedResourcePidList(
-			List<String> theResourceTypes,
-			Collection<? extends IResourcePersistentId> theIds,
-			Date theLastDate,
-			RequestPartitionId theRequestPartitionId) {
-		super(theIds, theLastDate, theRequestPartitionId);
-		myResourceTypes = theResourceTypes;
+	private final RequestPartitionId myRequestPartitionId;
+	private final StreamTemplate<TypedResourcePid> myStreamSupplier;
+
+	public TypedResourceStream(
+			RequestPartitionId theRequestPartitionId, StreamTemplate<TypedResourcePid> theStreamSupplier) {
+		myRequestPartitionId = theRequestPartitionId;
+		myStreamSupplier = theStreamSupplier;
 	}
 
 	@Override
-	public String getResourceType(int i) {
-		return myResourceTypes.get(i);
+	public <T> T visitStream(Function<Stream<TypedResourcePid>, T> theCallback) {
+		return myStreamSupplier.call(theCallback);
+	}
+
+	@Override
+	public RequestPartitionId getRequestPartitionId() {
+		return myRequestPartitionId;
 	}
 }

@@ -19,32 +19,27 @@
  */
 package ca.uhn.fhir.jpa.api.pid;
 
-import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
-
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
+import java.util.function.Function;
+import java.util.function.Supplier;
+import java.util.stream.Stream;
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 /**
- * A resource pid list where the pids can have different resource types
+ * Template for wrapping access to stream supplier in a try-with-resources block.
  */
-public class MixedResourcePidList extends BaseResourcePidList {
-	@Nonnull
-	final List<String> myResourceTypes;
+class AutoClosingStreamTemplate<T> implements StreamTemplate<T> {
+	private final Supplier<Stream<T>> myStreamQuery;
 
-	public MixedResourcePidList(
-			List<String> theResourceTypes,
-			Collection<? extends IResourcePersistentId> theIds,
-			Date theLastDate,
-			RequestPartitionId theRequestPartitionId) {
-		super(theIds, theLastDate, theRequestPartitionId);
-		myResourceTypes = theResourceTypes;
+	AutoClosingStreamTemplate(Supplier<Stream<T>> theStreamQuery) {
+		myStreamQuery = theStreamQuery;
 	}
 
+	@Nullable
 	@Override
-	public String getResourceType(int i) {
-		return myResourceTypes.get(i);
+	public <R> R call(@Nonnull Function<Stream<T>, R> theCallback) {
+		try (Stream<T> stream = myStreamQuery.get()) {
+			return theCallback.apply(stream);
+		}
 	}
 }

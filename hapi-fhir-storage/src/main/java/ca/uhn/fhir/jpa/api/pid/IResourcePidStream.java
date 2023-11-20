@@ -20,31 +20,26 @@
 package ca.uhn.fhir.jpa.api.pid;
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
-import javax.annotation.Nonnull;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.stream.Stream;
 
 /**
- * A resource pid list where the pids can have different resource types
+ * Wrapper for a query result stream.
  */
-public class MixedResourcePidList extends BaseResourcePidList {
-	@Nonnull
-	final List<String> myResourceTypes;
+public interface IResourcePidStream {
+	<T> T visitStream(Function<Stream<TypedResourcePid>, T> theCallback);
 
-	public MixedResourcePidList(
-			List<String> theResourceTypes,
-			Collection<? extends IResourcePersistentId> theIds,
-			Date theLastDate,
-			RequestPartitionId theRequestPartitionId) {
-		super(theIds, theLastDate, theRequestPartitionId);
-		myResourceTypes = theResourceTypes;
+	default void visitStreamNoResult(Consumer<Stream<TypedResourcePid>> theCallback) {
+		visitStream(theStream -> {
+			theCallback.accept(theStream);
+			return null;
+		});
 	}
 
-	@Override
-	public String getResourceType(int i) {
-		return myResourceTypes.get(i);
-	}
+	/**
+	 * The partition info for the query.
+	 */
+	RequestPartitionId getRequestPartitionId();
 }

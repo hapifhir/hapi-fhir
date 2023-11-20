@@ -29,19 +29,18 @@ import ca.uhn.fhir.batch2.jobs.chunk.ResourceIdListWorkChunkJson;
 import ca.uhn.fhir.batch2.jobs.chunk.TypedPidJson;
 import ca.uhn.fhir.batch2.jobs.parameters.PartitionedJobParameters;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.api.pid.IResourcePidList;
+import ca.uhn.fhir.jpa.api.pid.IResourcePidStream;
 import ca.uhn.fhir.util.Logs;
-import com.google.common.collect.Iterators;
-import com.google.common.collect.UnmodifiableIterator;
 import org.slf4j.Logger;
 
 import java.util.Collection;
 import java.util.Date;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Stream;
 import javax.annotation.Nonnull;
+
+import static ca.uhn.fhir.util.StreamUtil.partition;
+import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 
 public class ResourceIdListStep<PT extends PartitionedJobParameters, IT extends ChunkRangeJson>
 		implements IJobStepWorker<PT, IT, ResourceIdListWorkChunkJson> {
@@ -67,49 +66,32 @@ public class ResourceIdListStep<PT extends PartitionedJobParameters, IT extends 
 		Date start = data.getStart();
 		Date end = data.getEnd();
 		Integer batchSize = theStepExecutionDetails.getParameters().getBatchSize();
-		int pageSize = DEFAULT_PAGE_SIZE;
-		if (batchSize != null) {
-			pageSize = batchSize.intValue();
-		}
 
 		ourLog.info("Beginning scan for reindex IDs in range {} to {}", start, end);
 
 		RequestPartitionId requestPartitionId =
 				theStepExecutionDetails.getParameters().getRequestPartitionId();
-		int totalIdsFound = 0;
-		int chunkCount = 0;
 
-		int maxBatchId = MAX_BATCH_OF_IDS;
-		if (batchSize != null) {
-			// we won't go over MAX_BATCH_OF_IDS
-			maxBatchId = Math.min(batchSize.intValue(), maxBatchId);
-		}
+		int chunkSize = Math.min(defaultIfNull(batchSize, MAX_BATCH_OF_IDS), MAX_BATCH_OF_IDS);
 
-		final IResourcePidList nextChunk = myIdChunkProducer.fetchResourceIdsPage(
-				start, end, pageSize, requestPartitionId, theStepExecutionDetails.getData());
+		final IResourcePidStream searchResult = myIdChunkProducer.fetchResourceIdStream(
+				start, end, requestPartitionId, theStepExecutionDetails.getData());
 
-		if (nextChunk.isEmpty()) {
-			ourLog.info("No data returned");
-		} else {
-			ourLog.debug("Found {} IDs from {} to {}", nextChunk.size(), start, nextChunk.getLastDate());
+		searchResult.visitStreamNoResult(typedResourcePidStream -> {
+			AtomicInteger totalIdsFound = new AtomicInteger();
+			AtomicInteger chunkCount = new AtomicInteger();
 
-			final Set<TypedPidJson> idBuffer = nextChunk.getTypedResourcePids().stream()
-					.map(TypedPidJson::new)
-					.collect(Collectors.toCollection(LinkedHashSet::new));
+			Stream<TypedPidJson> jsonStream = typedResourcePidStream.map(TypedPidJson::new);
 
-			final UnmodifiableIterator<List<TypedPidJson>> partition =
-					Iterators.partition(idBuffer.iterator(), maxBatchId);
-
-			while (partition.hasNext()) {
-				final List<TypedPidJson> submissionIds = partition.next();
-
-				totalIdsFound += submissionIds.size();
-				chunkCount++;
-				submitWorkChunk(submissionIds, nextChunk.getRequestPartitionId(), theDataSink);
-			}
-
+			// chunk by size maxBatchId and submit the batches
+			partition(jsonStream, chunkSize).forEach(idBatch -> {
+				totalIdsFound.addAndGet(idBatch.size());
+				chunkCount.getAndIncrement();
+				submitWorkChunk(idBatch, searchResult.getRequestPartitionId(), theDataSink);
+			});
 			ourLog.info("Submitted {} chunks with {} resource IDs", chunkCount, totalIdsFound);
-		}
+		});
+
 		return RunOutcome.SUCCESS;
 	}
 
