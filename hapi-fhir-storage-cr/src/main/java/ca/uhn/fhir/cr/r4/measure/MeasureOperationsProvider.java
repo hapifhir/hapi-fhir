@@ -28,10 +28,12 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.MeasureReport;
+import org.opencds.cqf.fhir.utility.monad.Either3;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -76,10 +78,11 @@ public class MeasureOperationsProvider {
 			@OperationParam(name = "terminologyEndpoint") Endpoint theTerminologyEndpoint,
 			RequestDetails theRequestDetails)
 			throws InternalErrorException, FHIRException {
+		Either3<CanonicalType, IdType, Measure> objectIdTypeObjectEither3 = Eithers.forMiddle3(theId);
 		return myR4MeasureServiceFactory
 				.create(theRequestDetails)
 				.evaluate(
-						Eithers.forMiddle3(theId),
+					objectIdTypeObjectEither3,
 						thePeriodStart,
 						thePeriodEnd,
 						theReportType,
@@ -89,7 +92,8 @@ public class MeasureOperationsProvider {
 						theTerminologyEndpoint,
 						null,
 						theAdditionalData,
-						theProductLine,
+					null,
+					theProductLine,
 						thePractitioner);
 	}
 }

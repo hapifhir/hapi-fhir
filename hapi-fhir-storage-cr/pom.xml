@@ -80,7 +80,6 @@
 			<artifactId>hapi-fhir-converter</artifactId>
 			<version>${project.version}</version>
 		</dependency>
-		<!--
 		<dependency>
 			<groupId>org.opencds.cqf.fhir</groupId>
 			<artifactId>cqf-fhir-cr</artifactId>
@@ -91,12 +90,6 @@
 					<artifactId>jackson-module-jaxb-annotations</artifactId>
 				</exclusion>
 			</exclusions>
-		</dependency>
-		-->
-		<dependency>
-			<groupId>org.opencds.cqf.fhir</groupId>
-			<artifactId>cqf-fhir-cr</artifactId>
-			<version>3.0.0-PRE12</version>
 		</dependency>
 
 		<dependency>
