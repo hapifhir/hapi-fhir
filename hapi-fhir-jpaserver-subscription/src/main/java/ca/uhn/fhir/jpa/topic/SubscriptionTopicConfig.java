@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.topic;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.searchparam.matcher.SearchParamMatcher;
+import ca.uhn.fhir.jpa.subscription.match.matcher.matching.SubscriptionStrategyEvaluator;
 import ca.uhn.fhir.jpa.subscription.submit.interceptor.SubscriptionQueryValidator;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Lazy;
@@ -71,6 +72,13 @@ public class SubscriptionTopicConfig {
 			default:
 				return null;
 		}
+	}
+
+	@Bean
+	@Lazy
+	public SubscriptionQueryValidator subscriptionQueryValidator(
+			DaoRegistry theDaoRegistry, SubscriptionStrategyEvaluator theSubscriptionStrategyEvaluator) {
+		return new SubscriptionQueryValidator(theDaoRegistry, theSubscriptionStrategyEvaluator);
 	}
 
 	@Bean
