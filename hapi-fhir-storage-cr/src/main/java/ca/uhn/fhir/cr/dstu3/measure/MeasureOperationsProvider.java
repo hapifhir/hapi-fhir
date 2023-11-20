@@ -90,7 +90,7 @@ public class MeasureOperationsProvider {
 						theLastReceivedOn,
 						theProductLine,
 						theAdditionalData,
-					null,
-					theTerminologyEndpoint);
+						null,
+						theTerminologyEndpoint);
 	}
 }

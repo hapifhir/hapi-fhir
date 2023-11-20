@@ -82,7 +82,7 @@ public class MeasureOperationsProvider {
 		return myR4MeasureServiceFactory
 				.create(theRequestDetails)
 				.evaluate(
-					objectIdTypeObjectEither3,
+						objectIdTypeObjectEither3,
 						thePeriodStart,
 						thePeriodEnd,
 						theReportType,
@@ -92,8 +92,8 @@ public class MeasureOperationsProvider {
 						theTerminologyEndpoint,
 						null,
 						theAdditionalData,
-					null,
-					theProductLine,
+						null,
+						theProductLine,
 						thePractitioner);
 	}
 }
