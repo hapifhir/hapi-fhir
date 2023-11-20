@@ -131,7 +131,9 @@ public class MdmOperationPointcutsIT extends BaseProviderR4Test {
 	@Override
 	@AfterEach
 	public void afterPurgeDatabase() {
-		myExpungeEverythingService.expungeEverythingMdmLinks();
+		runInTransaction(()->{
+			myExpungeEverythingService.expungeEverythingMdmLinks();
+		});
 		super.afterPurgeDatabase();
 	}
 
