@@ -132,12 +132,11 @@ public class ResourceReindexSvcImplTest extends BaseJpaR4Test {
 		// Verify
 		List<TypedResourcePid> typedResourcePids = queryStream.visitStream(Stream::toList);
 
-		assertEquals(4, typedResourcePids.size());
+		assertEquals(2, typedResourcePids.size());
 		assertThat(typedResourcePids,
-			contains(new TypedResourcePid("Patient", patientId0),
+			contains(
 				new TypedResourcePid("Patient", patientId1),
-				new TypedResourcePid("Patient", patientId2),
-				new TypedResourcePid("Patient", patientId3)));
+				new TypedResourcePid("Patient", patientId2)));
 
 		assertEquals(1, myCaptureQueriesListener.logSelectQueries().size());
 		assertEquals(0, myCaptureQueriesListener.countInsertQueries());

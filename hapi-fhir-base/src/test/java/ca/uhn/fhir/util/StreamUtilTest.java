@@ -52,8 +52,7 @@ class StreamUtilTest {
 	void testStreamPartitionClosesOriginalStream() {
 	    // given
 		AtomicBoolean closed = new AtomicBoolean(false);
-		Stream<Integer> baseStream = Stream.of(1, 2, 3);
-		baseStream.onClose(()->closed.set(true));
+		Stream<Integer> baseStream = Stream.of(1, 2, 3).onClose(()->closed.set(true));
 
 		// when
 		StreamUtil.partition(baseStream, 2).close();
