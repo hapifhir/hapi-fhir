@@ -31,4 +31,13 @@ public class HapiFhirMySQLDialect extends MySQLDialect {
 	public HapiFhirMySQLDialect() {
 		super(DatabaseVersion.make(5, 7));
 	}
+
+	/**
+	 * @see HapiFhirH2Dialect#supportsColumnCheck() for an explanation of why we disable this
+	 */
+	@Override
+	public boolean supportsColumnCheck() {
+		return false;
+	}
+
 }

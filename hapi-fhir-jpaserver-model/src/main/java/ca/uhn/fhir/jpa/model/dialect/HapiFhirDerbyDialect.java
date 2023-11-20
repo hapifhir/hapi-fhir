@@ -31,4 +31,13 @@ public class HapiFhirDerbyDialect extends DerbyDialect {
 	public HapiFhirDerbyDialect() {
 		super(DatabaseVersion.make(10, 14, 2));
 	}
+
+	/**
+	 * @see HapiFhirH2Dialect#supportsColumnCheck() for an explanation of why we disable this
+	 */
+	@Override
+	public boolean supportsColumnCheck() {
+		return false;
+	}
+
 }

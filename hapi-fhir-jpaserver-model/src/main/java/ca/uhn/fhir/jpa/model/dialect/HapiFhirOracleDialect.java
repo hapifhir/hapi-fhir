@@ -31,4 +31,13 @@ public class HapiFhirOracleDialect extends OracleDialect {
 	public HapiFhirOracleDialect() {
 		super(DatabaseVersion.make(12, 2));
 	}
+
+	/**
+	 * @see HapiFhirH2Dialect#supportsColumnCheck() for an explanation of why we disable this
+	 */
+	@Override
+	public boolean supportsColumnCheck() {
+		return false;
+	}
+
 }

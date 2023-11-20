@@ -31,4 +31,13 @@ public class HapiFhirMariaDBDialect extends MariaDBDialect {
 	public HapiFhirMariaDBDialect() {
 		super(DatabaseVersion.make(10, 11, 5));
 	}
+
+	/**
+	 * @see HapiFhirH2Dialect#supportsColumnCheck() for an explanation of why we disable this
+	 */
+	@Override
+	public boolean supportsColumnCheck() {
+		return false;
+	}
+
 }

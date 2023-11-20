@@ -31,4 +31,14 @@ public class HapiFhirCockroachDialect extends CockroachDialect {
 	public HapiFhirCockroachDialect() {
 		super(DatabaseVersion.make(21, 1));
 	}
+
+	/**
+	 * @see HapiFhirH2Dialect#supportsColumnCheck() for an explanation of why we disable this
+	 */
+	@Override
+	public boolean supportsColumnCheck() {
+		return false;
+	}
+
+
 }
