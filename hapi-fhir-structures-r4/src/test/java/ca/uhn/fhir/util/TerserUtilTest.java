@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.r4.model.Address;
+import org.hl7.fhir.r4.model.Claim;
 import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.Enumerations;
@@ -13,6 +14,7 @@ import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.PrimitiveType;
+import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.Test;
 
@@ -568,6 +570,26 @@ class TerserUtilTest {
 		assertEquals(0, p1.getAddress().get(1).getLine().size());
 		assertEquals("Test", p1.getAddress().get(0).getCity());
 		assertEquals("Test", p1.getAddress().get(1).getCity());
+	}
+
+	@Test
+	void testRemoveByFhirPath() {
+		// arrange
+		FhirContext fhirContext = FhirContext.forR4();
+		Claim claimWithReferences = createClaim();
+		claimWithReferences.setPatient(new Reference("Patient/123"));
+		String fhirPath = "patient";
+		assertTrue(claimWithReferences.hasPatient());
+		//act
+		TerserUtil.clearFieldByFhirPath(fhirContext, claimWithReferences, fhirPath);
+		//assert
+		assertFalse(claimWithReferences.hasPatient());
+	}
+
+	public static Claim createClaim() {
+		Claim claim = new Claim();
+		claim.setStatus(Claim.ClaimStatus.ACTIVE);
+		return claim;
 	}
 
 	@Test
