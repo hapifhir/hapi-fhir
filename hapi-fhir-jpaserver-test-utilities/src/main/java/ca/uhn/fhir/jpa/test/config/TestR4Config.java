@@ -96,8 +96,6 @@ public class TestR4Config {
 		 */
 		if (ourMaxThreads == null) {
 			ourMaxThreads = (int) (Math.random() * 6.0) + 3;
-			// FIXME: remove
-			ourMaxThreads = 2;
 
 			if (HapiTestSystemProperties.isSingleDbConnectionEnabled()) {
 				ourMaxThreads = 1;
