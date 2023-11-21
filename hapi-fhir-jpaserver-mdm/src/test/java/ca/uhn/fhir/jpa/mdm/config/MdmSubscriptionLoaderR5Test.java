@@ -10,18 +10,12 @@ import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.rules.json.MdmRulesJson;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
-import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r5.model.IdType;
 import org.hl7.fhir.r5.model.Subscription;
 import org.hl7.fhir.r5.model.SubscriptionTopic;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -29,13 +23,11 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Arrays;
-import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -62,43 +54,9 @@ class MdmSubscriptionLoaderR5Test {
     @InjectMocks
     MdmSubscriptionLoader mySvc = new MdmSubscriptionLoader();
 
-    private SubscriptionTopic subscriptionTopic;
-    private IdType topicId;
-
-    @BeforeEach
-    public void before() {
-        subscriptionTopic = new SubscriptionTopic();
-        topicId = new IdType("2401");
-        subscriptionTopic.setIdElement(topicId);
-
-        when(myDaoRegistry.getResourceDao(eq("SubscriptionTopic"))).thenReturn(mySubscriptionTopicDao);
-    }
-
     @AfterEach
     public void after() {
         verifyNoMoreInteractions(mySubscriptionTopicDao);
-    }
-
-    @ParameterizedTest
-    @MethodSource("paramsProvider")
-    public void testUpdateIfNotPresent_withSubscriptionTopicDeleted_createsNewSubscriptionTopic(Exception theException) {
-        when(mySubscriptionTopicDao.read(eq(topicId), any(RequestDetails.class))).thenThrow(theException);
-        mySvc.updateIfNotPresent(subscriptionTopic);
-        verify(mySubscriptionTopicDao).update(eq(subscriptionTopic), any(RequestDetails.class));
-    }
-
-    protected static Stream<Arguments> paramsProvider() {
-        return Stream.of(
-                Arguments.arguments(new ResourceGoneException("")),
-                Arguments.arguments(new ResourceNotFoundException(""))
-        );
-    }
-
-    @Test
-    public void testUpdateIfNotPresent_withSubscriptionTopicCreated_doesNotCreateSubscriptionTopic() {
-        when(mySubscriptionTopicDao.read(eq(topicId), any(RequestDetails.class))).thenReturn(subscriptionTopic);
-        mySvc.updateIfNotPresent(subscriptionTopic);
-        verify(mySubscriptionTopicDao, never()).update(any(), any(RequestDetails.class));
     }
 
 	@Test
@@ -109,8 +67,8 @@ class MdmSubscriptionLoaderR5Test {
 		when(myMdmSettings.getMdmRules()).thenReturn(mdmRulesJson);
 		when(myChannelNamer.getChannelName(any(), any())).thenReturn("Test");
 		when(myDaoRegistry.getResourceDao(eq("Subscription"))).thenReturn(mySubscriptionDao);
+        when(myDaoRegistry.getResourceDao(eq("SubscriptionTopic"))).thenReturn(mySubscriptionTopicDao);
 		when(mySubscriptionDao.read(any(), any(RequestDetails.class))).thenThrow(new ResourceGoneException(""));
-		when(mySubscriptionTopicDao.read(any(), any(RequestDetails.class))).thenThrow(new ResourceGoneException(""));
 
 		// execute
 		mySvc.daoUpdateMdmSubscriptions();
@@ -119,8 +77,9 @@ class MdmSubscriptionLoaderR5Test {
 		ArgumentCaptor<SubscriptionTopic> subscriptionTopicCaptor = ArgumentCaptor.forClass(SubscriptionTopic.class);
 		verify(mySubscriptionTopicDao).update(subscriptionTopicCaptor.capture(), any(RequestDetails.class));
 
-		subscriptionTopic = subscriptionTopicCaptor.getValue();
+        SubscriptionTopic subscriptionTopic = subscriptionTopicCaptor.getValue();
 		assertNotNull(subscriptionTopic);
+        assertEquals("mdm-subscription-topic", subscriptionTopic.getId());
 		assertEquals(1, subscriptionTopic.getResourceTrigger().size());
 		SubscriptionTopic.SubscriptionTopicResourceTriggerComponent triggerComponent = subscriptionTopic.getResourceTrigger().get(0);
 		assertEquals("Patient", triggerComponent.getResource());
@@ -131,5 +90,6 @@ class MdmSubscriptionLoaderR5Test {
 
         Subscription subscription = subscriptionCaptor.getValue();
 		assertNotNull(subscription);
+        assertEquals("mdm-subscription", subscription.getId());
 	}
 }

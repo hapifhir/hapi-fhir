@@ -96,7 +96,7 @@ public class MdmSubscriptionLoader {
 				break;
 			case R5:
 				SubscriptionTopic subscriptionTopic = buildMdmSubscriptionTopicR5(mdmResourceTypes);
-				updateIfNotPresent(subscriptionTopic);
+				updateSubscriptionTopic(subscriptionTopic);
 				// After loading subscriptionTopic, sync subscriptionTopic to the registry.
 				mySubscriptionTopicLoader.syncDatabaseToCache();
 
@@ -126,14 +126,9 @@ public class MdmSubscriptionLoader {
 		}
 	}
 
-	synchronized void updateIfNotPresent(SubscriptionTopic theSubscriptionTopic) {
-		try {
-			mySubscriptionTopicDao = myDaoRegistry.getResourceDao("SubscriptionTopic");
-			mySubscriptionTopicDao.read(theSubscriptionTopic.getIdElement(), SystemRequestDetails.forAllPartitions());
-		} catch (ResourceNotFoundException | ResourceGoneException e) {
-			ourLog.info("Creating subscriptionTopic " + theSubscriptionTopic.getIdElement());
-			mySubscriptionTopicDao.update(theSubscriptionTopic, SystemRequestDetails.forAllPartitions());
-		}
+	synchronized void updateSubscriptionTopic(SubscriptionTopic theSubscriptionTopic) {
+		mySubscriptionTopicDao = myDaoRegistry.getResourceDao("SubscriptionTopic");
+		mySubscriptionTopicDao.update(theSubscriptionTopic, SystemRequestDetails.forAllPartitions());
 	}
 
 	private org.hl7.fhir.dstu3.model.Subscription buildMdmSubscriptionDstu3(String theId, String theCriteria) {
@@ -205,11 +200,7 @@ public class MdmSubscriptionLoader {
 	private List<IBaseResource> buildMdmSubscriptionR5(SubscriptionTopic theSubscriptionTopic) {
 		org.hl7.fhir.r5.model.Subscription subscription = new org.hl7.fhir.r5.model.Subscription();
 
-		String resourcesString = theSubscriptionTopic.getResourceTrigger().stream()
-				.map(SubscriptionTopic.SubscriptionTopicResourceTriggerComponent::getResource)
-				.collect(Collectors.joining("-"));
-
-		subscription.setId(MDM_SUBSCRIPTION_ID_PREFIX + resourcesString);
+		subscription.setId(MDM_SUBSCRIPTION_ID_PREFIX + "subscription");
 		subscription.setReason("MDM");
 		subscription.setStatus(Enumerations.SubscriptionStatusCodes.REQUESTED);
 
