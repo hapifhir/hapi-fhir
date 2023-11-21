@@ -447,7 +447,6 @@ public class SearchTask implements Callable<Void> {
 			myTxService
 					.withRequest(myRequest)
 					.withRequestPartitionId(myRequestPartitionId)
-					.withIsolation(Isolation.READ_COMMITTED)
 					.execute(() -> doSearch());
 
 			mySearchRuntimeDetails.setSearchStatus(mySearch.getStatus());
