@@ -181,6 +181,11 @@ public class MdmSubscriptionLoader {
 	private SubscriptionTopic buildMdmSubscriptionTopicR5(List<String> theMdmResourceTypes) {
 		SubscriptionTopic subscriptionTopic = new SubscriptionTopic();
 		subscriptionTopic.setId(MDM_SUBSCRIPTION_ID_PREFIX + "subscription-topic");
+		subscriptionTopic
+				.getMeta()
+				.addTag()
+				.setSystem(MdmConstants.SYSTEM_MDM_MANAGED)
+				.setCode(MdmConstants.CODE_HAPI_MDM_MANAGED);
 		subscriptionTopic.setStatus(Enumerations.PublicationStatus.ACTIVE);
 		subscriptionTopic.setUrl(MdmConstants.SUBSCRIPTION_TOPIC_URL);
 		theMdmResourceTypes.forEach(
@@ -214,10 +219,6 @@ public class MdmSubscriptionLoader {
 				.addTag()
 				.setSystem(MdmConstants.SYSTEM_MDM_MANAGED)
 				.setCode(MdmConstants.CODE_HAPI_MDM_MANAGED);
-		subscription
-				.addExtension()
-				.setUrl(HapiExtensions.EXTENSION_SUBSCRIPTION_CROSS_PARTITION)
-				.setValue(new org.hl7.fhir.r5.model.BooleanType().setValue(true));
 
 		subscription.setChannelType(new Coding()
 				.setCode(CanonicalSubscriptionChannelType.MESSAGE.toCode())
