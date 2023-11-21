@@ -34,6 +34,11 @@ public class UnknownCodeSystemWarningValidationSupport extends BaseValidationSup
 	}
 
 	@Override
+	public String getName() {
+		return getFhirContext().getVersion().getVersion() + " Unknown Code System Warning Validation Support";
+	}
+
+	@Override
 	public boolean isValueSetSupported(ValidationSupportContext theValidationSupportContext, String theValueSetUrl) {
 		return true;
 	}

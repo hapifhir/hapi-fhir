@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 5454
+jira: SMILE-7295
+title: "Previously, searching with parameter '_total' could influence chunked query resultsets and subsequently, paged results. This is now fixed."

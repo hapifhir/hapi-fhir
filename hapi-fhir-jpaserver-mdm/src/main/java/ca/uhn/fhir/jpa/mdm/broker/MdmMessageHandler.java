@@ -87,9 +87,6 @@ public class MdmMessageHandler implements MessageHandler {
 			if (toProcess) {
 				matchMdmAndUpdateLinks(sourceResource, msg);
 			}
-		} catch (TooManyCandidatesException e) {
-			ourLog.error(e.getMessage(), e);
-			// skip this one with an error message and continue processing
 		} catch (Exception e) {
 			ourLog.error("Failed to handle MDM Matching Resource:", e);
 			throw e;
@@ -123,6 +120,12 @@ public class MdmMessageHandler implements MessageHandler {
 					ourLog.trace("Not processing modified message for {}", theMsg.getOperationType());
 			}
 		} catch (Exception e) {
+			if (e instanceof TooManyCandidatesException) {
+				ourLog.debug(
+						"Failed to handle MDM Matching for resource: {} since candidate matches exceeded the "
+								+ "candidate search limit",
+						theSourceResource.getIdElement());
+			}
 			log(mdmContext, "Failure during MDM processing: " + e.getMessage(), e);
 			mdmContext.addTransactionLogMessage(e.getMessage());
 		} finally {

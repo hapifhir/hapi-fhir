@@ -39,4 +39,9 @@ public class DefaultProfileValidationSupportNpmStrategy extends NpmPackageValida
 
 		ourLog.info("Loaded {} Core+Extension resources in {}", countAll(), sw);
 	}
+
+	@Override
+	public String getName() {
+		return getFhirContext().getVersion().getVersion() + " FHIR Standard Profile NPM Validation Support";
+	}
 }

@@ -136,7 +136,10 @@ public class MdmRuleValidator implements IMdmRuleValidator {
 
 	private void validateSearchParams(MdmRulesJson theMdmRulesJson) {
 		ourLog.info("Validating search parameters {}", theMdmRulesJson.getCandidateSearchParams());
-
+		if (theMdmRulesJson.getCandidateSearchParams().isEmpty()) {
+			ourLog.warn("No candidate search parameter was found. Defining candidate search parameter is strongly "
+					+ "recommended for better performance of MDM");
+		}
 		for (MdmResourceSearchParamJson searchParams : theMdmRulesJson.getCandidateSearchParams()) {
 			searchParams
 					.iterator()
