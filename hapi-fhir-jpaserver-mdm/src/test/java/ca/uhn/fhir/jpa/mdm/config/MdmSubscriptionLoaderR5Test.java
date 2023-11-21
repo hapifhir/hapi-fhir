@@ -102,7 +102,7 @@ class MdmSubscriptionLoaderR5Test {
     }
 
 	@Test
-	public void testDaoUpdateMdmSubscriptions() {
+	public void testDaoUpdateMdmSubscriptions_withR5FhirContext_createsCorrectSubscriptions() {
 		// setup
 		MdmRulesJson mdmRulesJson = new MdmRulesJson();
 		mdmRulesJson.setMdmTypes(Arrays.asList("Patient"));
