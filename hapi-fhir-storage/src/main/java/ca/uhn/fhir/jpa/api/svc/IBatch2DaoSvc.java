@@ -22,6 +22,8 @@ package ca.uhn.fhir.jpa.api.svc;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.pid.IResourcePidList;
+import ca.uhn.fhir.jpa.api.pid.IResourcePidStream;
+import ca.uhn.fhir.jpa.api.pid.ListWrappingPidStream;
 
 import java.util.Date;
 import javax.annotation.Nonnull;
@@ -67,5 +69,11 @@ public interface IBatch2DaoSvc {
 			@Nullable RequestPartitionId theRequestPartitionId,
 			@Nullable String theUrl) {
 		return fetchResourceIdsPage(theStart, theEnd, theRequestPartitionId, theUrl);
+	}
+
+	default IResourcePidStream fetchResourceIdStream(
+			Date theStart, Date theEnd, RequestPartitionId theTargetPartitionId, String theUrl) {
+		return new ListWrappingPidStream(fetchResourceIdsPage(
+				theStart, theEnd, 20000 /* ResourceIdListStep.DEFAULT_PAGE_SIZE */, theTargetPartitionId, theUrl));
 	}
 }
