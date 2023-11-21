@@ -54,11 +54,18 @@ import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadInfo;
 import java.lang.management.ThreadMXBean;
 import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Deque;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
+import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static ca.uhn.fhir.jpa.test.config.TestR5Config.SELECT_QUERY_INCLUSION_CRITERIA_EXCLUDING_SEQUENCE_QUERIES;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -78,6 +85,8 @@ public class TestR4Config {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(TestR4Config.class);
 	public static Integer ourMaxThreads;
+	private final AtomicInteger myBorrowedConnectionCount = new AtomicInteger(0);
+	private final AtomicInteger myReturnedConnectionCount = new AtomicInteger(0);
 
 	static {
 		/*
@@ -87,6 +96,8 @@ public class TestR4Config {
 		 */
 		if (ourMaxThreads == null) {
 			ourMaxThreads = (int) (Math.random() * 6.0) + 3;
+			// FIXME: remove
+			ourMaxThreads = 2;
 
 			if (HapiTestSystemProperties.isSingleDbConnectionEnabled()) {
 				ourMaxThreads = 1;
@@ -98,7 +109,8 @@ public class TestR4Config {
 		ourLog.warn("ourMaxThreads={}", ourMaxThreads);
 	}
 
-	private final Deque<Exception> myLastStackTrace = new LinkedList<>();
+	private Map<Connection, Exception> myConnectionRequestStackTraces = Collections.synchronizedMap(new LinkedHashMap<>());
+
 	@Autowired
 	TestHSearchAddInConfig.IHSearchConfigurer hibernateSearchConfigurer;
 	private boolean myHaveDumpedThreads;
@@ -122,6 +134,7 @@ public class TestR4Config {
 					retVal = new ConnectionWrapper(super.getConnection());
 				} catch (Exception e) {
 					ourLog.error("Exceeded maximum wait for connection (" + ourMaxThreads + " max)", e);
+					ourLog.info("Have {} outstanding - {} borrowed {} returned", (myBorrowedConnectionCount.get() - myReturnedConnectionCount.get()), myBorrowedConnectionCount.get(), myReturnedConnectionCount.get());
 					logGetConnectionStackTrace();
 					fail("Exceeded maximum wait for connection (" + ourMaxThreads + " max): " + e);
 					retVal = null;
@@ -130,38 +143,42 @@ public class TestR4Config {
 				try {
 					throw new Exception();
 				} catch (Exception e) {
-					synchronized (myLastStackTrace) {
-						myLastStackTrace.add(e);
-						while (myLastStackTrace.size() > ourMaxThreads) {
-							myLastStackTrace.removeFirst();
-						}
-					}
+					myConnectionRequestStackTraces.put(retVal, e);
 				}
 
-				return retVal;
+				myBorrowedConnectionCount.incrementAndGet();
+				ConnectionWrapper finalRetVal = retVal;
+				return new ConnectionWrapper(finalRetVal){
+					@Override
+					public void close() throws SQLException {
+						myConnectionRequestStackTraces.remove(finalRetVal);
+						myReturnedConnectionCount.incrementAndGet();
+						super.close();
+					}
+				};
 			}
 
 			private void logGetConnectionStackTrace() {
 				StringBuilder b = new StringBuilder();
-				int i = 0;
-				synchronized (myLastStackTrace) {
-					for (Iterator<Exception> iter = myLastStackTrace.descendingIterator(); iter.hasNext(); ) {
-						Exception nextStack = iter.next();
-						b.append("\n\nPrevious request stack trace ");
-						b.append(i++);
+				ArrayList<Exception> stackTraces = new ArrayList<>(myConnectionRequestStackTraces.values());
+
+				for (int i = 0; i < stackTraces.size(); i++) {
+					Exception nextStack = stackTraces.get(i);
+					b.append("\nPrevious request stack trace ");
+					b.append(i);
+					b.append(":");
+					for (StackTraceElement next : nextStack.getStackTrace()) {
+						b.append("\n   ");
+						b.append(next.getClassName());
+						b.append(".");
+						b.append(next.getMethodName());
+						b.append("(");
+						b.append(next.getFileName());
 						b.append(":");
-						for (StackTraceElement next : nextStack.getStackTrace()) {
-							b.append("\n   ");
-							b.append(next.getClassName());
-							b.append(".");
-							b.append(next.getMethodName());
-							b.append("(");
-							b.append(next.getFileName());
-							b.append(":");
-							b.append(next.getLineNumber());
-							b.append(")");
-						}
+						b.append(next.getLineNumber());
+						b.append(")");
 					}
+					b.append("\n");
 				}
 				ourLog.info(b.toString());
 

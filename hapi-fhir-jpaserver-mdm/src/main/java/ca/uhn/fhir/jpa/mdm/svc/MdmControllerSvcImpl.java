@@ -28,6 +28,7 @@ import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
+import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.mdm.api.IGoldenResourceMergerSvc;
 import ca.uhn.fhir.mdm.api.IMdmControllerSvc;
@@ -102,6 +103,9 @@ public class MdmControllerSvcImpl implements IMdmControllerSvc {
 
 	@Autowired
 	IInterceptorBroadcaster myInterceptorBroadcaster;
+
+	@Autowired
+	private HapiTransactionService myTxService;
 
 	public MdmControllerSvcImpl() {}
 
@@ -194,7 +198,9 @@ public class MdmControllerSvcImpl implements IMdmControllerSvc {
 	@Override
 	public List<MdmLinkWithRevisionJson> queryLinkHistory(
 			MdmHistorySearchParameters theMdmHistorySearchParameters, RequestDetails theRequestDetails) {
-		return myMdmLinkQuerySvc.queryLinkHistory(theMdmHistorySearchParameters);
+		return myTxService
+			.withRequest(theRequestDetails)
+			.execute(()->myMdmLinkQuerySvc.queryLinkHistory(theMdmHistorySearchParameters));
 	}
 
 	@Override
