@@ -35,9 +35,9 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.MessagingException;
 
-import javax.annotation.Nonnull;
 import java.util.Optional;
 import java.util.function.Supplier;
+import javax.annotation.Nonnull;
 
 /**
  * This handler receives batch work request messages and performs the batch work requested by the message

@@ -54,11 +54,6 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import javax.persistence.EntityManager;
-import javax.persistence.LockModeType;
-import javax.persistence.Query;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -69,6 +64,11 @@ import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import javax.persistence.EntityManager;
+import javax.persistence.LockModeType;
+import javax.persistence.Query;
 
 import static ca.uhn.fhir.batch2.coordinator.WorkChunkProcessor.MAX_CHUNK_ERROR_COUNT;
 import static ca.uhn.fhir.jpa.entity.Batch2WorkChunkEntity.ERROR_MSG_MAX_LENGTH;
@@ -115,9 +115,7 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 		ourLog.debug("Create work chunk {}/{}/{}", entity.getInstanceId(), entity.getId(), entity.getTargetStepId());
 		ourLog.trace(
 				"Create work chunk data {}/{}: {}", entity.getInstanceId(), entity.getId(), entity.getSerializedData());
-		myTransactionService
-				.withSystemRequestOnDefaultPartition()
-				.execute(() -> myWorkChunkRepository.save(entity));
+		myTransactionService.withSystemRequestOnDefaultPartition().execute(() -> myWorkChunkRepository.save(entity));
 		return entity.getId();
 	}
 
@@ -211,7 +209,7 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	@Nonnull
 	public Optional<JobInstance> fetchInstance(String theInstanceId) {
 		return myTransactionService
-				.withSystemRequest()
+				.withSystemRequestOnDefaultPartition()
 				.execute(() -> myJobInstanceRepository.findById(theInstanceId).map(this::toInstance));
 	}
 
@@ -270,18 +268,22 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	public List<JobInstance> fetchInstances(int thePageSize, int thePageIndex) {
 		// default sort is myCreateTime Asc
 		PageRequest pageRequest = PageRequest.of(thePageIndex, thePageSize, Sort.Direction.ASC, CREATE_TIME);
-		return myJobInstanceRepository.findAll(pageRequest).stream()
-				.map(this::toInstance)
-				.collect(Collectors.toList());
+		return myTransactionService
+				.withSystemRequestOnDefaultPartition()
+				.execute(() -> myJobInstanceRepository.findAll(pageRequest).stream()
+						.map(this::toInstance)
+						.collect(Collectors.toList()));
 	}
 
 	@Override
 	@Transactional(propagation = Propagation.REQUIRES_NEW)
 	public List<JobInstance> fetchRecentInstances(int thePageSize, int thePageIndex) {
 		PageRequest pageRequest = PageRequest.of(thePageIndex, thePageSize, Sort.Direction.DESC, CREATE_TIME);
-		return myJobInstanceRepository.findAll(pageRequest).stream()
-				.map(this::toInstance)
-				.collect(Collectors.toList());
+		return myTransactionService
+				.withSystemRequestOnDefaultPartition()
+				.execute(() -> myJobInstanceRepository.findAll(pageRequest).stream()
+						.map(this::toInstance)
+						.collect(Collectors.toList()));
 	}
 
 	private WorkChunk toChunk(Batch2WorkChunkEntity theEntity) {
@@ -297,44 +299,49 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	public WorkChunkStatusEnum onWorkChunkError(WorkChunkErrorEvent theParameters) {
 		String chunkId = theParameters.getChunkId();
 		String errorMessage = truncateErrorMessage(theParameters.getErrorMsg());
-		int changeCount = myWorkChunkRepository.updateChunkStatusAndIncrementErrorCountForEndError(
-				chunkId, new Date(), errorMessage, WorkChunkStatusEnum.ERRORED);
-		Validate.isTrue(changeCount > 0, "changed chunk matching %s", chunkId);
 
-		Query query = myEntityManager.createQuery("update Batch2WorkChunkEntity " + "set myStatus = :failed "
-				+ ",myErrorMessage = CONCAT('Too many errors: ', CAST(myErrorCount as string), '. Last error msg was ', myErrorMessage) "
-				+ "where myId = :chunkId and myErrorCount > :maxCount");
-		query.setParameter("chunkId", chunkId);
-		query.setParameter("failed", WorkChunkStatusEnum.FAILED);
-		query.setParameter("maxCount", MAX_CHUNK_ERROR_COUNT);
-		int failChangeCount = query.executeUpdate();
+		return myTransactionService.withSystemRequestOnDefaultPartition().execute(() -> {
+			int changeCount = myWorkChunkRepository.updateChunkStatusAndIncrementErrorCountForEndError(
+					chunkId, new Date(), errorMessage, WorkChunkStatusEnum.ERRORED);
+			Validate.isTrue(changeCount > 0, "changed chunk matching %s", chunkId);
 
-		if (failChangeCount > 0) {
-			return WorkChunkStatusEnum.FAILED;
-		} else {
-			return WorkChunkStatusEnum.ERRORED;
-		}
+			Query query = myEntityManager.createQuery("update Batch2WorkChunkEntity " + "set myStatus = :failed "
+					+ ",myErrorMessage = CONCAT('Too many errors: ', CAST(myErrorCount as string), '. Last error msg was ', myErrorMessage) "
+					+ "where myId = :chunkId and myErrorCount > :maxCount");
+			query.setParameter("chunkId", chunkId);
+			query.setParameter("failed", WorkChunkStatusEnum.FAILED);
+			query.setParameter("maxCount", MAX_CHUNK_ERROR_COUNT);
+			int failChangeCount = query.executeUpdate();
+
+			if (failChangeCount > 0) {
+				return WorkChunkStatusEnum.FAILED;
+			} else {
+				return WorkChunkStatusEnum.ERRORED;
+			}
+		});
 	}
 
 	@Override
-	@Transactional
 	public void onWorkChunkFailed(String theChunkId, String theErrorMessage) {
 		ourLog.info("Marking chunk {} as failed with message: {}", theChunkId, theErrorMessage);
 		String errorMessage = truncateErrorMessage(theErrorMessage);
-		myWorkChunkRepository.updateChunkStatusAndIncrementErrorCountForEndError(
-				theChunkId, new Date(), errorMessage, WorkChunkStatusEnum.FAILED);
+		myTransactionService
+				.withSystemRequestOnDefaultPartition()
+				.execute(() -> myWorkChunkRepository.updateChunkStatusAndIncrementErrorCountForEndError(
+						theChunkId, new Date(), errorMessage, WorkChunkStatusEnum.FAILED));
 	}
 
 	@Override
-	@Transactional
 	public void onWorkChunkCompletion(WorkChunkCompletionEvent theEvent) {
-		myWorkChunkRepository.updateChunkStatusAndClearDataForEndSuccess(
-				theEvent.getChunkId(),
-				new Date(),
-				theEvent.getRecordsProcessed(),
-				theEvent.getRecoveredErrorCount(),
-				WorkChunkStatusEnum.COMPLETED,
-				theEvent.getRecoveredWarningMessage());
+		myTransactionService
+				.withSystemRequestOnDefaultPartition()
+				.execute(() -> myWorkChunkRepository.updateChunkStatusAndClearDataForEndSuccess(
+						theEvent.getChunkId(),
+						new Date(),
+						theEvent.getRecordsProcessed(),
+						theEvent.getRecoveredErrorCount(),
+						WorkChunkStatusEnum.COMPLETED,
+						theEvent.getRecoveredWarningMessage()));
 	}
 
 	@Nullable
@@ -391,7 +398,7 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 			int thePageIndex,
 			Consumer<WorkChunk> theConsumer) {
 		myTransactionService
-				.withSystemRequest()
+				.withSystemRequestOnDefaultPartition()
 				.withPropagation(Propagation.REQUIRES_NEW)
 				.execute(() -> {
 					List<Batch2WorkChunkEntity> chunks;

@@ -77,7 +77,6 @@ public interface IHapiTransactionService {
 		return withSystemRequestOnPartition(RequestPartitionId.defaultPartition());
 	}
 
-
 	/**
 	 * @deprecated It is highly recommended to use {@link #withRequest(RequestDetails)} instead of this method, for increased visibility.
 	 */
