@@ -27,10 +27,10 @@ import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
-import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.util.TestUtil;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.params.provider.Arguments;
@@ -52,6 +52,7 @@ public class PatientReindexTestHelper {
 	private final Batch2JobHelper myBatch2JobHelper;
 	private final IFhirResourceDao<Patient> myPatientDao;
 	private final boolean myIncrementVersionOnReindex;
+	private final RequestDetails myRequestDetails = new SystemRequestDetails();
 
 	public static Stream<Arguments> numResourcesParams(){
 		return Stream.of(
@@ -79,7 +80,7 @@ public class PatientReindexTestHelper {
 
 		// Reindex 1
 		JobInstanceStartRequest reindexRequest1 = createPatientReindexRequest(theNumResources);
-		Batch2JobStartResponse reindexResponse1 = myJobCoordinator.startInstance(reindexRequest1);
+		Batch2JobStartResponse reindexResponse1 = myJobCoordinator.startInstance(myRequestDetails, reindexRequest1);
 		JobInstance instance1 = myBatch2JobHelper.awaitJobHasStatus(reindexResponse1.getInstanceId(), JOB_WAIT_TIME, StatusEnum.COMPLETED);
 
 		validateReindexJob(instance1, theNumResources);
@@ -95,7 +96,7 @@ public class PatientReindexTestHelper {
 
 		// Reindex 1
 		JobInstanceStartRequest reindexRequest1 = createPatientReindexRequest(theNumResources);
-		Batch2JobStartResponse reindexResponse1 = myJobCoordinator.startInstance(reindexRequest1);
+		Batch2JobStartResponse reindexResponse1 = myJobCoordinator.startInstance(myRequestDetails, reindexRequest1);
 		JobInstance instance1 = myBatch2JobHelper.awaitJobHasStatus(reindexResponse1.getInstanceId(), JOB_WAIT_TIME, StatusEnum.COMPLETED);
 
 		validateReindexJob(instance1, theNumResources);
@@ -104,7 +105,7 @@ public class PatientReindexTestHelper {
 
 		// Reindex 2
 		JobInstanceStartRequest reindexRequest2 = createPatientReindexRequest(theNumResources);
-		Batch2JobStartResponse reindexResponse2 = myJobCoordinator.startInstance(reindexRequest2);
+		Batch2JobStartResponse reindexResponse2 = myJobCoordinator.startInstance(myRequestDetails, reindexRequest2);
 		JobInstance instance2 = myBatch2JobHelper.awaitJobHasStatus(reindexResponse2.getInstanceId(), JOB_WAIT_TIME, StatusEnum.COMPLETED);
 
 		validateReindexJob(instance2, theNumResources);
@@ -119,11 +120,11 @@ public class PatientReindexTestHelper {
 
 		// Reindex 1
 		JobInstanceStartRequest reindexRequest1 = createPatientReindexRequest(theNumResources);
-		Batch2JobStartResponse reindexResponse1 = myJobCoordinator.startInstance(reindexRequest1);
+		Batch2JobStartResponse reindexResponse1 = myJobCoordinator.startInstance(myRequestDetails, reindexRequest1);
 
 		// Reindex 2
 		JobInstanceStartRequest reindexRequest2 = createPatientReindexRequest(theNumResources);
-		Batch2JobStartResponse reindexResponse2 = myJobCoordinator.startInstance(reindexRequest2);
+		Batch2JobStartResponse reindexResponse2 = myJobCoordinator.startInstance(myRequestDetails, reindexRequest2);
 
 		// Wait for jobs to finish
 		JobInstance instance1 = myBatch2JobHelper.awaitJobHasStatus(reindexResponse1.getInstanceId(), JOB_WAIT_TIME, StatusEnum.COMPLETED);
@@ -170,7 +171,7 @@ public class PatientReindexTestHelper {
 		startRequest.setJobDefinitionId(ReindexAppCtx.JOB_REINDEX);
 
 		ReindexJobParameters reindexJobParameters = new ReindexJobParameters();
-		reindexJobParameters.setBatchSize(theBatchSize);
+		reindexJobParameters.setBatchSize(Math.max(theBatchSize,1));
 		reindexJobParameters.addUrl("Patient?");
 
 		startRequest.setParameters(reindexJobParameters);

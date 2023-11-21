@@ -43,17 +43,17 @@ import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
 import org.springframework.data.domain.Page;
 import org.springframework.messaging.MessageHandler;
-import org.springframework.transaction.support.TransactionSynchronizationAdapter;
+import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
@@ -143,7 +143,7 @@ public class JobCoordinatorImpl implements IJobCoordinator {
 		myJobParameterJsonValidator.validateJobParameters(theRequestDetails, theStartRequest, jobDefinition);
 
 		IJobPersistence.CreateResult instanceAndFirstChunk = myTransactionService
-				.withSystemRequest()
+				.withSystemRequestOnDefaultPartition()
 				.execute(() -> myJobPersistence.onCreateWithFirstChunk(jobDefinition, theStartRequest.getParameters()));
 
 		JobWorkNotification workNotification = JobWorkNotification.firstStepNotification(
@@ -163,7 +163,7 @@ public class JobCoordinatorImpl implements IJobCoordinator {
 	 */
 	private void sendBatchJobWorkNotificationAfterCommit(final JobWorkNotification theJobWorkNotification) {
 		if (TransactionSynchronizationManager.isSynchronizationActive()) {
-			TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
+			TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
 				@Override
 				public int getOrder() {
 					return 0;

@@ -35,9 +35,9 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.MessagingException;
 
+import javax.annotation.Nonnull;
 import java.util.Optional;
 import java.util.function.Supplier;
-import javax.annotation.Nonnull;
 
 /**
  * This handler receives batch work request messages and performs the batch work requested by the message
@@ -258,19 +258,22 @@ class WorkChannelMessageHandler implements MessageHandler {
 	 * Run theCallback in TX, rolling back if the supplied Optional is empty.
 	 */
 	<T> Optional<T> executeInTxRollbackWhenEmpty(Supplier<Optional<T>> theCallback) {
-		return myHapiTransactionService.withSystemRequest().execute(theTransactionStatus -> {
+		return myHapiTransactionService
+				// batch storage is not partitioned.
+				.withSystemRequestOnDefaultPartition()
+				.execute(theTransactionStatus -> {
 
-			// run the processing
-			Optional<T> setupProcessing = theCallback.get();
+					// run the processing
+					Optional<T> setupProcessing = theCallback.get();
 
-			if (setupProcessing.isEmpty()) {
-				// If any setup failed, roll back the chunk and instance status changes.
-				ourLog.debug("WorkChunk setup failed - rollback tx");
-				theTransactionStatus.setRollbackOnly();
-			}
-			// else COMMIT the work.
+					if (setupProcessing.isEmpty()) {
+						// If any setup failed, roll back the chunk and instance status changes.
+						ourLog.debug("WorkChunk setup failed - rollback tx");
+						theTransactionStatus.setRollbackOnly();
+					}
+					// else COMMIT the work.
 
-			return setupProcessing;
-		});
+					return setupProcessing;
+				});
 	}
 }
