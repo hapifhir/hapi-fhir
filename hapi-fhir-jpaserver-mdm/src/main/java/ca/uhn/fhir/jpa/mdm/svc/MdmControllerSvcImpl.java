@@ -199,8 +199,8 @@ public class MdmControllerSvcImpl implements IMdmControllerSvc {
 	public List<MdmLinkWithRevisionJson> queryLinkHistory(
 			MdmHistorySearchParameters theMdmHistorySearchParameters, RequestDetails theRequestDetails) {
 		return myTxService
-			.withRequest(theRequestDetails)
-			.execute(()->myMdmLinkQuerySvc.queryLinkHistory(theMdmHistorySearchParameters));
+				.withRequest(theRequestDetails)
+				.execute(() -> myMdmLinkQuerySvc.queryLinkHistory(theMdmHistorySearchParameters));
 	}
 
 	@Override
