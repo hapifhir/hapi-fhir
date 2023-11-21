@@ -56,9 +56,6 @@ public class HapiFhirLocalContainerEntityManagerFactoryBean extends LocalContain
 		}
 
 		if (!retVal.containsKey(AvailableSettings.CONNECTION_HANDLING)) {
-			// FIXME: restore?
-			//			retVal.put(
-			//					AvailableSettings.CONNECTION_HANDLING, PhysicalConnectionHandlingMode.DELAYED_ACQUISITION_AND_HOLD);
 			retVal.put(
 					AvailableSettings.CONNECTION_HANDLING,
 					PhysicalConnectionHandlingMode.DELAYED_ACQUISITION_AND_RELEASE_AFTER_TRANSACTION);
