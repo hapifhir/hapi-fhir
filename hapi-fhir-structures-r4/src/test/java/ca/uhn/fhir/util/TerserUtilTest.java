@@ -575,18 +575,17 @@ class TerserUtilTest {
 	@Test
 	void testRemoveByFhirPath() {
 		// arrange
-		FhirContext fhirContext = FhirContext.forR4();
 		Claim claimWithReferences = createClaim();
 		claimWithReferences.setPatient(new Reference("Patient/123"));
 		String fhirPath = "patient";
 		assertTrue(claimWithReferences.hasPatient());
 		//act
-		TerserUtil.clearFieldByFhirPath(fhirContext, claimWithReferences, fhirPath);
+		TerserUtil.clearFieldByFhirPath(ourFhirContext, claimWithReferences, fhirPath);
 		//assert
 		assertFalse(claimWithReferences.hasPatient());
 	}
 
-	public static Claim createClaim() {
+	static Claim createClaim() {
 		Claim claim = new Claim();
 		claim.setStatus(Claim.ClaimStatus.ACTIVE);
 		return claim;
