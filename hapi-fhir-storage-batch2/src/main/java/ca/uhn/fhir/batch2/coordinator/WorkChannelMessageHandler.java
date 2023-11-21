@@ -231,27 +231,28 @@ class WorkChannelMessageHandler implements MessageHandler {
 		// We use Optional chaining here to simplify all the cases where we short-circuit exit.
 		// A step that returns an empty Optional means discard the chunk.
 		//
-		executeInTxRollbackWhenEmpty(() ->
-						(
-						// Use a chain of Optional flatMap to handle all the setup short-circuit exits cleanly.
-						Optional.of(new MessageProcess(workNotification))
-								// validate and load info
-								.flatMap(MessageProcess::validateChunkId)
-								// no job definition should be retried - we must be a stale process encountering a new
-								// job definition.
-								.flatMap(MessageProcess::loadJobDefinitionOrThrow)
-								.flatMap(MessageProcess::loadJobInstance)
-								// update statuses now in the db: QUEUED->IN_PROGRESS
-								.flatMap(MessageProcess::updateChunkStatusAndValidate)
-								.flatMap(MessageProcess::updateAndValidateJobStatus)
-								// ready to execute
-								.flatMap(MessageProcess::buildCursor)
-								.flatMap(MessageProcess::buildStepExecutor)))
-				.ifPresentOrElse(
-						// all the setup is happy and committed.  Do the work.
-						process -> process.myStepExector.executeStep(),
-						// discard the chunk
-						() -> ourLog.debug("Discarding chunk notification {}", workNotification));
+		Optional<MessageProcess> processingPreparation = executeInTxRollbackWhenEmpty(() ->
+
+				// Use a chain of Optional flatMap to handle all the setup short-circuit exits cleanly.
+				Optional.of(new MessageProcess(workNotification))
+						// validate and load info
+						.flatMap(MessageProcess::validateChunkId)
+						// no job definition should be retried - we must be a stale process encountering a new
+						// job definition.
+						.flatMap(MessageProcess::loadJobDefinitionOrThrow)
+						.flatMap(MessageProcess::loadJobInstance)
+						// update statuses now in the db: QUEUED->IN_PROGRESS
+						.flatMap(MessageProcess::updateChunkStatusAndValidate)
+						.flatMap(MessageProcess::updateAndValidateJobStatus)
+						// ready to execute
+						.flatMap(MessageProcess::buildCursor)
+						.flatMap(MessageProcess::buildStepExecutor));
+
+		processingPreparation.ifPresentOrElse(
+				// all the setup is happy and committed.  Do the work.
+				process -> process.myStepExector.executeStep(),
+				// discard the chunk
+				() -> ourLog.debug("Discarding chunk notification {}", workNotification));
 	}
 
 	/**
