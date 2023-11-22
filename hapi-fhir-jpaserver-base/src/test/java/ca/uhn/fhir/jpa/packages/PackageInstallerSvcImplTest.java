@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.packages;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.data.INpmPackageVersionDao;
@@ -26,9 +27,11 @@ import org.hl7.fhir.r4.model.SearchParameter;
 import org.hl7.fhir.r4.model.Subscription;
 import org.hl7.fhir.utilities.npm.NpmPackage;
 import org.hl7.fhir.utilities.npm.PackageGenerator;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
@@ -46,10 +49,10 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -78,6 +81,8 @@ public class PackageInstallerSvcImplTest {
 	private SearchParameterHelper mySearchParameterHelper;
 	@Mock
 	private SearchParameterMap mySearchParameterMap;
+	@Mock
+	private JpaStorageSettings myStorageSettings;
 	@Spy
 	private FhirContext myCtx = FhirContext.forR4Cached();
 	@Spy
@@ -103,111 +108,66 @@ public class PackageInstallerSvcImplTest {
 		mySvc.assertFhirVersionsAreCompatible("R4", "R4B");
 	}
 
-	@Test
-	public void testValidForUpload_SearchParameterWithMetaParam() {
-		SearchParameter sp = new SearchParameter();
-		sp.setCode("_id");
-		assertFalse(mySvc.validForUpload(sp));
-	}
+	@Nested
+	class ValidForUploadTest {
+		public static Stream<Arguments> parametersIsValidForUpload() {
+			SearchParameter sp1 = new SearchParameter();
+			sp1.setCode("_id");
 
-	@Test
-	public void testValidForUpload_SearchParameterWithNoBase() {
-		SearchParameter sp = new SearchParameter();
-		sp.setCode("name");
-		sp.setExpression("Patient.name");
-		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
-		assertFalse(mySvc.validForUpload(sp));
-	}
+			SearchParameter sp2 = new SearchParameter();
+			sp2.setCode("name");
+			sp2.setExpression("Patient.name");
+			sp2.setStatus(Enumerations.PublicationStatus.ACTIVE);
 
-	@Test
-	public void testValidForUpload_SearchParameterWithNoExpression() {
-		SearchParameter sp = new SearchParameter();
-		sp.setCode("name");
-		sp.addBase("Patient");
-		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
-		assertFalse(mySvc.validForUpload(sp));
-	}
+			SearchParameter sp3 = new SearchParameter();
+			sp3.setCode("name");
+			sp3.addBase("Patient");
+			sp3.setStatus(Enumerations.PublicationStatus.ACTIVE);
 
+			SearchParameter sp4 = new SearchParameter();
+			sp4.setCode("name");
+			sp4.addBase("Patient");
+			sp4.setExpression("Patient.name");
+			sp4.setStatus(Enumerations.PublicationStatus.ACTIVE);
 
-	@Test
-	public void testValidForUpload_GoodSearchParameter() {
-		SearchParameter sp = new SearchParameter();
-		sp.setCode("name");
-		sp.addBase("Patient");
-		sp.setExpression("Patient.name");
-		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
-		assertTrue(mySvc.validForUpload(sp));
-	}
+			SearchParameter sp5 = new SearchParameter();
+			sp5.setCode("name");
+			sp5.addBase("Patient");
+			sp5.setExpression("Patient.name");
+			sp5.setStatus(Enumerations.PublicationStatus.DRAFT);
 
-	@Test
-	public void testValidForUpload_RequestedSubscription() {
-		Subscription.SubscriptionChannelComponent subscriptionChannelComponent =
-			new Subscription.SubscriptionChannelComponent()
-				.setType(Subscription.SubscriptionChannelType.RESTHOOK)
-				.setEndpoint("https://tinyurl.com/2p95e27r");
-		Subscription subscription = new Subscription();
-		subscription.setCriteria("Patient?name=smith");
-		subscription.setChannel(subscriptionChannelComponent);
-		subscription.setStatus(Subscription.SubscriptionStatus.REQUESTED);
-		assertTrue(mySvc.validForUpload(subscription));
-	}
+			return Stream.of(
+					arguments(sp1, false, false),
+					arguments(sp2, false, true),
+					arguments(sp3, false, true),
+					arguments(sp4, true, true),
+					arguments(sp5, true, false),
+					arguments(createSubscription(Subscription.SubscriptionStatus.REQUESTED), true, true),
+					arguments(createSubscription(Subscription.SubscriptionStatus.ERROR), true, false),
+					arguments(createSubscription(Subscription.SubscriptionStatus.ACTIVE), true, false),
+					arguments(createDocumentReference(Enumerations.DocumentReferenceStatus.ENTEREDINERROR), true, true),
+					arguments(createDocumentReference(Enumerations.DocumentReferenceStatus.NULL), true, false),
+					arguments(createDocumentReference(null), true, false),
+					arguments(createCommunication(Communication.CommunicationStatus.NOTDONE), true, true),
+					arguments(createCommunication(Communication.CommunicationStatus.NULL), true, false),
+					arguments(createCommunication(null), true, false));
+		}
 
-	@Test
-	public void testValidForUpload_ErrorSubscription() {
-		Subscription.SubscriptionChannelComponent subscriptionChannelComponent =
-			new Subscription.SubscriptionChannelComponent()
-				.setType(Subscription.SubscriptionChannelType.RESTHOOK)
-				.setEndpoint("https://tinyurl.com/2p95e27r");
-		Subscription subscription = new Subscription();
-		subscription.setCriteria("Patient?name=smith");
-		subscription.setChannel(subscriptionChannelComponent);
-		subscription.setStatus(Subscription.SubscriptionStatus.ERROR);
-		assertFalse(mySvc.validForUpload(subscription));
-	}
+		@ParameterizedTest
+		@MethodSource(value = "parametersIsValidForUpload")
+		public void testValidForUpload_withResource(IBaseResource theResource,
+																  boolean theTheMeetsOtherFilterCriteria,
+																  boolean theMeetsStatusFilterCriteria) {
+			if (theTheMeetsOtherFilterCriteria) {
+				when(myStorageSettings.isValidateResourceStatusForPackageUpload()).thenReturn(true);
+			}
+			assertEquals(theTheMeetsOtherFilterCriteria && theMeetsStatusFilterCriteria, mySvc.validForUpload(theResource));
 
-	@Test
-	public void testValidForUpload_ActiveSubscription() {
-		Subscription.SubscriptionChannelComponent subscriptionChannelComponent =
-			new Subscription.SubscriptionChannelComponent()
-				.setType(Subscription.SubscriptionChannelType.RESTHOOK)
-				.setEndpoint("https://tinyurl.com/2p95e27r");
-		Subscription subscription = new Subscription();
-		subscription.setCriteria("Patient?name=smith");
-		subscription.setChannel(subscriptionChannelComponent);
-		subscription.setStatus(Subscription.SubscriptionStatus.ACTIVE);
-		assertFalse(mySvc.validForUpload(subscription));
-	}
-
-	@Test
-	public void testValidForUpload_DocumentRefStatusValuePresent() {
-		DocumentReference documentReference = new DocumentReference();
-		documentReference.setStatus(Enumerations.DocumentReferenceStatus.ENTEREDINERROR);
-		assertTrue(mySvc.validForUpload(documentReference));
-	}
-
-	@Test
-	public void testValidForUpload_DocumentRefStatusValueNull() {
-		DocumentReference documentReference = new DocumentReference();
-		documentReference.setStatus(Enumerations.DocumentReferenceStatus.NULL);
-		assertFalse(mySvc.validForUpload(documentReference));
-		documentReference.setStatus(null);
-		assertFalse(mySvc.validForUpload(documentReference));
-	}
-
-	@Test
-	public void testValidForUpload_CommunicationStatusValuePresent() {
-		Communication communication = new Communication();
-		communication.setStatus(Communication.CommunicationStatus.NOTDONE);
-		assertTrue(mySvc.validForUpload(communication));
-	}
-
-	@Test
-	public void testValidForUpload_CommunicationStatusValueNull() {
-		Communication communication = new Communication();
-		communication.setStatus(Communication.CommunicationStatus.NULL);
-		assertFalse(mySvc.validForUpload(communication));
-		communication.setStatus(null);
-		assertFalse(mySvc.validForUpload(communication));
+			if (theTheMeetsOtherFilterCriteria) {
+				when(myStorageSettings.isValidateResourceStatusForPackageUpload()).thenReturn(false);
+			}
+			assertEquals(theTheMeetsOtherFilterCriteria, mySvc.validForUpload(theResource));
+		}
 	}
 
 	@Test
@@ -345,5 +305,29 @@ public class PackageInstallerSvcImplTest {
 		theBase.forEach(base -> searchParameter.getBase().add(new CodeType(base)));
 		searchParameter.setExpression("someExpression");
 		return searchParameter;
+	}
+
+	private static Subscription createSubscription(Subscription.SubscriptionStatus theSubscriptionStatus) {
+		Subscription.SubscriptionChannelComponent subscriptionChannelComponent =
+				new Subscription.SubscriptionChannelComponent()
+						.setType(Subscription.SubscriptionChannelType.RESTHOOK)
+						.setEndpoint("https://tinyurl.com/2p95e27r");
+		Subscription subscription = new Subscription();
+		subscription.setCriteria("Patient?name=smith");
+		subscription.setChannel(subscriptionChannelComponent);
+		subscription.setStatus(theSubscriptionStatus);
+		return subscription;
+	}
+
+	private static DocumentReference createDocumentReference(Enumerations.DocumentReferenceStatus theDocumentStatus) {
+		DocumentReference documentReference = new DocumentReference();
+		documentReference.setStatus(theDocumentStatus);
+		return documentReference;
+	}
+
+	private static Communication createCommunication(Communication.CommunicationStatus theCommunicationStatus) {
+		Communication communication = new Communication();
+		communication.setStatus(theCommunicationStatus);
+		return communication;
 	}
 }
