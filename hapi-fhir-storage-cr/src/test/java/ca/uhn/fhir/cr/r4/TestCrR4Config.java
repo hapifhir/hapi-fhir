@@ -3,11 +3,8 @@ package ca.uhn.fhir.cr.r4;
 import ca.uhn.fhir.cr.TestCqlProperties;
 import ca.uhn.fhir.cr.TestCrConfig;
 import ca.uhn.fhir.cr.common.CqlThreadFactory;
-import ca.uhn.fhir.cr.config.r4.ApplyOperationConfig;
-import ca.uhn.fhir.cr.config.r4.ExtractOperationConfig;
-import ca.uhn.fhir.cr.config.r4.PackageOperationConfig;
-import ca.uhn.fhir.cr.config.r4.PopulateOperationConfig;
 import ca.uhn.fhir.cr.config.r4.CrR4Config;
+import ca.uhn.fhir.rest.api.SearchStyleEnum;
 import org.cqframework.cql.cql2elm.CqlCompilerOptions;
 import org.cqframework.cql.cql2elm.model.CompiledLibrary;
 import org.cqframework.cql.cql2elm.model.Model;
@@ -16,6 +13,9 @@ import org.hl7.elm.r1.VersionedIdentifier;
 import org.opencds.cqf.cql.engine.execution.CqlEngine;
 import org.opencds.cqf.cql.engine.runtime.Code;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
+import org.opencds.cqf.fhir.cql.engine.retrieve.BaseRetrieveProvider;
+import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings;
+import org.opencds.cqf.fhir.cql.engine.terminology.TerminologySettings;
 import org.opencds.cqf.fhir.cr.measure.CareGapsProperties;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.utility.ValidationProfile;
@@ -64,10 +64,32 @@ public class TestCrR4Config {
 		}
 		return measureEvalOptions;
 	}
+
+	@Bean
+	public TerminologySettings terminologySettings(){
+		var termSettings = new TerminologySettings();
+		termSettings.setCodeLookupMode(TerminologySettings.CODE_LOOKUP_MODE.USE_CODESYSTEM_URL);
+		termSettings.setValuesetExpansionMode(TerminologySettings.VALUESET_EXPANSION_MODE.PERFORM_NAIVE_EXPANSION);
+		termSettings.setValuesetMembershipMode(TerminologySettings.VALUESET_MEMBERSHIP_MODE.USE_EXPANSION);
+		termSettings.setValuesetPreExpansionMode(TerminologySettings.VALUESET_PRE_EXPANSION_MODE.USE_IF_PRESENT);
+
+		return termSettings;
+	}
+	@Bean
+	public RetrieveSettings retrieveSettings(){
+		var retrieveSettings = new RetrieveSettings();
+		retrieveSettings.setSearchParameterMode(RetrieveSettings.SEARCH_FILTER_MODE.USE_SEARCH_PARAMETERS);
+		retrieveSettings.setTerminologyParameterMode(RetrieveSettings.TERMINOLOGY_FILTER_MODE.FILTER_IN_MEMORY);
+		retrieveSettings.setProfileMode(RetrieveSettings.PROFILE_MODE.OFF);
+
+		return retrieveSettings;
+	}
 	@Bean
 	public EvaluationSettings evaluationSettings(TestCqlProperties theCqlProperties, Map<VersionedIdentifier,
 		CompiledLibrary> theGlobalLibraryCache, Map<ModelIdentifier, Model> theGlobalModelCache,
-												 Map<String, List<Code>> theGlobalValueSetCache) {
+												 Map<String, List<Code>> theGlobalValueSetCache,
+												 RetrieveSettings theRetrieveSettings,
+												 TerminologySettings theTerminologySettings) {
 		var evaluationSettings = EvaluationSettings.getDefault();
 		var cqlOptions = evaluationSettings.getCqlOptions();
 
@@ -132,6 +154,8 @@ public class TestCrR4Config {
 		cqlCompilerOptions.setCollapseDataRequirements(theCqlProperties.isCqlCompilerCollapseDataRequirements());
 
 		cqlOptions.setCqlCompilerOptions(cqlCompilerOptions);
+		evaluationSettings.setTerminologySettings(theTerminologySettings);
+		evaluationSettings.setRetrieveSettings(theRetrieveSettings);
 		evaluationSettings.setLibraryCache(theGlobalLibraryCache);
 		evaluationSettings.setModelCache(theGlobalModelCache);
 		evaluationSettings.setValueSetCache(theGlobalValueSetCache);
