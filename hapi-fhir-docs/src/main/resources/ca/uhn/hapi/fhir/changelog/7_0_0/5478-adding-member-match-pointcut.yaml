@@ -1,0 +1,10 @@
+---
+type: add
+issue: 5478
+title: "Added a pointcut (P2P_MEMBER_MATCH_PRE_HOOK) that is invoked
+        after basic parameter validation, but before persisted member-match
+        operations have occurred.
+        This pointcut takes RequestDetails and a MemberMatchPreHookEvent
+        (which contains the patient, coverages, and consent resources)
+        object.
+    "

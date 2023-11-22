@@ -38,8 +38,8 @@ import org.hl7.fhir.r4.model.Coverage;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
 
-import javax.annotation.Nullable;
 import java.util.Optional;
+import javax.annotation.Nullable;
 
 public class MemberMatchR4ResourceProvider {
 
@@ -48,10 +48,9 @@ public class MemberMatchR4ResourceProvider {
 	private final IInterceptorBroadcaster myInterceptorBroadcaster;
 
 	public MemberMatchR4ResourceProvider(
-		FhirContext theFhirContext,
-		MemberMatcherR4Helper theMemberMatcherR4Helper,
-		IInterceptorBroadcaster theIInterceptorBroadcaster
-	) {
+			FhirContext theFhirContext,
+			MemberMatcherR4Helper theMemberMatcherR4Helper,
+			IInterceptorBroadcaster theIInterceptorBroadcaster) {
 		myFhirContext = theFhirContext;
 		myMemberMatcherR4Helper = theMemberMatcherR4Helper;
 		myInterceptorBroadcaster = theIInterceptorBroadcaster;
@@ -138,7 +137,8 @@ public class MemberMatchR4ResourceProvider {
 			throw new UnprocessableEntityException(Msg.code(2147) + i18nMessage);
 		}
 
-		if (CompositeInterceptorBroadcaster.hasHooks(Pointcut.P2P_MEMBER_MATCH_PRE_HOOK, myInterceptorBroadcaster, theRequestDetails)) {
+		if (CompositeInterceptorBroadcaster.hasHooks(
+				Pointcut.P2P_MEMBER_MATCH_PRE_HOOK, myInterceptorBroadcaster, theRequestDetails)) {
 			MemberMatchPreHookEvent preHookParams = new MemberMatchPreHookEvent();
 			preHookParams.setConsent(theConsent);
 			preHookParams.setPatient(theMemberPatient);
@@ -149,11 +149,7 @@ public class MemberMatchR4ResourceProvider {
 			params.add(MemberMatchPreHookEvent.class, preHookParams);
 			params.add(RequestDetails.class, theRequestDetails);
 			CompositeInterceptorBroadcaster.doCallHooks(
-				myInterceptorBroadcaster,
-				theRequestDetails,
-				Pointcut.P2P_MEMBER_MATCH_PRE_HOOK,
-				params
-			);
+					myInterceptorBroadcaster, theRequestDetails, Pointcut.P2P_MEMBER_MATCH_PRE_HOOK, params);
 		}
 
 		myMemberMatcherR4Helper.addMemberIdentifierToMemberPatient(theMemberPatient, patient.getIdentifierFirstRep());

@@ -119,9 +119,9 @@ public class JpaR4Config {
 
 	@Bean
 	public MemberMatchR4ResourceProvider memberMatchR4ResourceProvider(
-		FhirContext theFhirContext, IInterceptorBroadcaster theIInterceptorBroadcaster, MemberMatcherR4Helper theMemberMatchR4Helper) {
-		return new MemberMatchR4ResourceProvider(theFhirContext,
-			theMemberMatchR4Helper,
-			theIInterceptorBroadcaster);
+			FhirContext theFhirContext,
+			IInterceptorBroadcaster theIInterceptorBroadcaster,
+			MemberMatcherR4Helper theMemberMatchR4Helper) {
+		return new MemberMatchR4ResourceProvider(theFhirContext, theMemberMatchR4Helper, theIInterceptorBroadcaster);
 	}
 }
