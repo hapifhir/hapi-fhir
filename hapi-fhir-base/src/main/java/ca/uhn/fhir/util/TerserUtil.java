@@ -348,7 +348,7 @@ public final class TerserUtil {
 	public static void clearField(FhirContext theFhirContext, IBaseResource theResource, String theFieldName) {
 		BaseRuntimeChildDefinition childDefinition =
 				getBaseRuntimeChildDefinition(theFhirContext, theFieldName, theResource);
-		clear(childDefinition.getAccessor().getValues(theResource));
+		childDefinition.getMutator().setValue(theResource, null);
 	}
 
 	/**

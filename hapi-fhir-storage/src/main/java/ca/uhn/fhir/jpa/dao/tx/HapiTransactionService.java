@@ -53,6 +53,7 @@ import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
+import org.springframework.transaction.support.TransactionOperations;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
@@ -402,7 +403,7 @@ public class HapiTransactionService implements IHapiTransactionService {
 		}
 	}
 
-	protected class ExecutionBuilder implements IExecutionBuilder {
+	protected class ExecutionBuilder implements IExecutionBuilder, TransactionOperations {
 
 		private final RequestDetails myRequestDetails;
 		private Isolation myIsolation;
@@ -473,7 +474,7 @@ public class HapiTransactionService implements IHapiTransactionService {
 		}
 
 		@Override
-		public <T> T execute(TransactionCallback<T> callback) {
+		public <T> T execute(@Nonnull TransactionCallback<T> callback) {
 			assert callback != null;
 
 			return doExecute(this, callback);
