@@ -52,6 +52,7 @@ import org.hl7.fhir.r4.model.Coding;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import javax.annotation.Nonnull;
@@ -124,6 +125,18 @@ public class JpaResourceDaoCodeSystem<T extends IBaseResource> extends BaseHapiF
 			IPrimitiveType<String> theSystem,
 			IBaseCoding theCoding,
 			IPrimitiveType<String> theDisplayLanguage,
+			RequestDetails theRequestDetails) {
+		return lookupCode(theCode, theSystem, theCoding, theDisplayLanguage, null, theRequestDetails);
+	}
+
+	@Nonnull
+	@Override
+	public IValidationSupport.LookupCodeResult lookupCode(
+			IPrimitiveType<String> theCode,
+			IPrimitiveType<String> theSystem,
+			IBaseCoding theCoding,
+			IPrimitiveType<String> theDisplayLanguage,
+			Collection<IPrimitiveType<String>> theProperties,
 			RequestDetails theRequestDetails) {
 		return doLookupCode(
 				myFhirContext, myTerser, myValidationSupport, theCode, theSystem, theCoding, theDisplayLanguage);

@@ -48,8 +48,11 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.lessThan;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -138,7 +141,7 @@ public class RemoteTerminologyServiceValidationSupportTest {
 			DISPLAY, null);
 		addAdditionalReturnParameters();
 
-		IValidationSupport.LookupCodeResult outcome = mySvc.lookupCode(null, CODE_SYSTEM, CODE);
+		IValidationSupport.LookupCodeResult outcome = mySvc.lookupCode(null, CODE_SYSTEM, CODE, null, Set.of("birthDate"));
 		assertNotNull(outcome, "Call to lookupCode() should return a non-NULL result!");
 		assertEquals(DISPLAY, outcome.getCodeDisplay());
 		assertEquals(CODE_SYSTEM_VERSION, outcome.getCodeSystemVersion());
@@ -147,6 +150,8 @@ public class RemoteTerminologyServiceValidationSupportTest {
 		assertEquals(CODE, myCodeSystemProvider.myLastCode.getCode());
 		assertEquals(CODE_SYSTEM, myCodeSystemProvider.myLastUrl.getValueAsString());
 		assertTrue(Boolean.parseBoolean(myCodeSystemProvider.myNextReturnParams.getParameterValue("result").primitiveValue()));
+		assertNotNull(outcome.getProperties());
+		assertThat(outcome.getProperties().stream().map(IValidationSupport.BaseConceptProperty::getPropertyName).collect(Collectors.toList()), containsInAnyOrder("birthDate"));
 
 		validateExtraCodeSystemParams();
 	}
@@ -687,6 +692,7 @@ public class RemoteTerminologyServiceValidationSupportTest {
 			@OperationParam(name="version", type=StringType.class, min=0),
 			@OperationParam(name="display", type=StringType.class, min=1),
 			@OperationParam(name="abstract", type=BooleanType.class, min=1),
+			@OperationParam(name="property", min = 0, max = OperationParam.MAX_UNLIMITED)
 		})
 		public Parameters lookup(
 			HttpServletRequest theServletRequest,
@@ -703,7 +709,30 @@ public class RemoteTerminologyServiceValidationSupportTest {
 			myLastUrl = theSystem;
 			myLastCoding = theCoding;
 			myLastVersion = theVersion;
-			return myNextReturnParams;
+
+			Set<String> propertiesNames = theProperties != null ? theProperties.stream().map(CodeType::getCode).collect(Collectors.toSet()) : Collections.emptySet();
+
+			Parameters retVal = new Parameters();
+			for (Parameters.ParametersParameterComponent parameterComponent : myNextReturnParams.getParameter()) {
+				if ("property".equals(parameterComponent.getName())) {
+					boolean found = false;
+					for (Parameters.ParametersParameterComponent parametersPartComponent : parameterComponent.getPart()) {
+						String name = parametersPartComponent.getName();
+						String propertyValue = parametersPartComponent.getValue().primitiveValue();
+						if ("name".equals(name) && propertiesNames.contains(propertyValue)) {
+							found = true;
+							break;
+						}
+					}
+					if (found) {
+						retVal.addParameter(parameterComponent);
+					}
+				} else {
+					retVal.addParameter(parameterComponent);
+				}
+			}
+
+			return retVal;
 		}
 
 		@Search

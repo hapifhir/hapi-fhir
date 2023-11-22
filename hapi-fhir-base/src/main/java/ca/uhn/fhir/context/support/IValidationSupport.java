@@ -37,6 +37,7 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -328,6 +329,16 @@ public interface IValidationSupport {
 		return null;
 	}
 
+	@Nullable
+	default LookupCodeResult lookupCode(
+			ValidationSupportContext theValidationSupportContext,
+			String theSystem,
+			String theCode,
+			String theDisplayLanguage,
+			Collection<String> thePropertyNames) {
+		return null;
+	}
+
 	/**
 	 * Look up a code using the system and code value
 	 *
@@ -343,7 +354,7 @@ public interface IValidationSupport {
 			String theSystem,
 			String theCode,
 			String theDisplayLanguage) {
-		return null;
+		return lookupCode(theValidationSupportContext, theSystem, theCode, theDisplayLanguage, Collections.emptySet());
 	}
 
 	/**

@@ -43,6 +43,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
 
 import static ca.uhn.fhir.jpa.provider.ValueSetOperationProvider.toValidateCodeResult;
@@ -65,6 +66,7 @@ public abstract class BaseJpaResourceProviderCodeSystem<T extends IBaseResource>
 				@OperationParam(name = "version", typeName = "string", min = 0),
 				@OperationParam(name = "display", typeName = "string", min = 1),
 				@OperationParam(name = "abstract", typeName = "boolean", min = 1),
+				@OperationParam(name = "property", typeName = "code", min = 0, max = OperationParam.MAX_UNLIMITED),
 			})
 	public IBaseParameters lookup(
 			HttpServletRequest theServletRequest,
@@ -83,7 +85,13 @@ public abstract class BaseJpaResourceProviderCodeSystem<T extends IBaseResource>
 			IFhirResourceDaoCodeSystem dao = (IFhirResourceDaoCodeSystem) getDao();
 			IValidationSupport.LookupCodeResult result;
 			applyVersionToSystem(theSystem, theVersion);
-			result = dao.lookupCode(theCode, theSystem, theCoding, theDisplayLanguage, theRequestDetails);
+			result = dao.lookupCode(
+					theCode,
+					theSystem,
+					theCoding,
+					theDisplayLanguage,
+					theProperties.stream().map(IPrimitiveType::getValueAsString).collect(Collectors.toSet()),
+					theRequestDetails);
 			result.throwNotFoundIfAppropriate();
 			return result.toParameters(theRequestDetails.getFhirContext(), theProperties);
 		} finally {

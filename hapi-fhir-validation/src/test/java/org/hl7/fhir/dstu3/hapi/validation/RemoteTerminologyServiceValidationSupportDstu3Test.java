@@ -25,8 +25,13 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.Collections;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
@@ -86,13 +91,54 @@ public class RemoteTerminologyServiceValidationSupportDstu3Test {
 		createNextCodeSystemLookupReturnParameters(true, CODE_SYSTEM_VERSION, CODE_SYSTEM_VERSION_AS_TEXT, DISPLAY, LANGUAGE);
 		addAdditionalCodeSystemLookupReturnParameters();
 
-		IValidationSupport.LookupCodeResult outcome = mySvc.lookupCode(null, CODE_SYSTEM, CODE, LANGUAGE);
+		IValidationSupport.LookupCodeResult outcome = mySvc.lookupCode(null, CODE_SYSTEM, CODE, LANGUAGE, Set.of("birthDate"));
 		assertNotNull(outcome, "Call to lookupCode() should return a non-NULL result!");
 		assertEquals(DISPLAY, outcome.getCodeDisplay());
 		assertEquals(CODE_SYSTEM_VERSION, outcome.getCodeSystemVersion());
 
 		assertEquals(CODE, myCodeSystemProvider.myLastCode.asStringValue());
 		assertEquals(CODE_SYSTEM, myCodeSystemProvider.myLastUrl.getValueAsString());
+		assertNotNull(outcome.getProperties());
+		assertThat(outcome.getProperties().stream().map(IValidationSupport.BaseConceptProperty::getPropertyName).collect(Collectors.toList()), containsInAnyOrder("birthDate"));
+
+		validateExtraCodeSystemParams();
+	}
+
+	private void createNextCodeSystemLookupReturnParameters(boolean theResult, String theVersion, String theVersionAsText,
+																			  String theDisplay) {
+		createNextCodeSystemLookupReturnParameters(theResult, theVersion, theVersionAsText, theDisplay, null);
+	}
+
+	private void createNextCodeSystemLookupReturnParameters(boolean theResult, String theVersion, String theVersionAsText,
+																			  String theDisplay, String theLanguage) {
+		myCodeSystemProvider.myNextReturnParams = new Parameters();
+		myCodeSystemProvider.myNextReturnParams.addParameter().setName("result").setValue(new BooleanType(theResult));
+		myCodeSystemProvider.myNextReturnParams.addParameter().setName("version").setValue(new StringType(theVersion));
+		myCodeSystemProvider.myNextReturnParams.addParameter().setName("name").setValue(new StringType(theVersionAsText));
+		myCodeSystemProvider.myNextReturnParams.addParameter().setName("display").setValue(new StringType(theDisplay));
+		if (!StringUtils.isBlank(theLanguage)) {
+			myCodeSystemProvider.myNextReturnParams.addParameter().setName("language").setValue(new StringType(theLanguage));
+		}
+	}
+
+	private void addAdditionalCodeSystemLookupReturnParameters() {
+		// property
+		Parameters.ParametersParameterComponent param = myCodeSystemProvider.myNextReturnParams.addParameter().setName("property");
+		param.addPart().setName("name").setValue(new StringType("birthDate"));
+		param.addPart().setName("value").setValue(new DateType("1930-01-01"));
+		// designation
+		param = myCodeSystemProvider.myNextReturnParams.addParameter().setName("designation");
+		param.addPart().setName("language").setValue(new CodeType("en"));
+		Parameters.ParametersParameterComponent codingParam = param.addPart().setName("use");
+		Coding coding = new Coding();
+		coding.setCode("code");
+		coding.setSystem("system");
+		coding.setDisplay("display");
+		codingParam.setValue(coding);
+		param.addPart().setName("value").setValue(new StringType("some value"));
+	}
+
+	private void validateExtraCodeSystemParams() {
 		for (Parameters.ParametersParameterComponent param : myCodeSystemProvider.myNextReturnParams.getParameter()) {
 			String paramName = param.getName();
 			if (paramName.equals("result")) {
@@ -138,40 +184,6 @@ public class RemoteTerminologyServiceValidationSupportDstu3Test {
 		}
 	}
 
-	private void createNextCodeSystemLookupReturnParameters(boolean theResult, String theVersion, String theVersionAsText,
-																			  String theDisplay) {
-		createNextCodeSystemLookupReturnParameters(theResult, theVersion, theVersionAsText, theDisplay, null);
-	}
-
-	private void createNextCodeSystemLookupReturnParameters(boolean theResult, String theVersion, String theVersionAsText,
-																			  String theDisplay, String theLanguage) {
-		myCodeSystemProvider.myNextReturnParams = new Parameters();
-		myCodeSystemProvider.myNextReturnParams.addParameter().setName("result").setValue(new BooleanType(theResult));
-		myCodeSystemProvider.myNextReturnParams.addParameter().setName("version").setValue(new StringType(theVersion));
-		myCodeSystemProvider.myNextReturnParams.addParameter().setName("name").setValue(new StringType(theVersionAsText));
-		myCodeSystemProvider.myNextReturnParams.addParameter().setName("display").setValue(new StringType(theDisplay));
-		if (!StringUtils.isBlank(theLanguage)) {
-			myCodeSystemProvider.myNextReturnParams.addParameter().setName("language").setValue(new StringType(theLanguage));
-		}
-	}
-
-	private void addAdditionalCodeSystemLookupReturnParameters() {
-		// property
-		Parameters.ParametersParameterComponent param = myCodeSystemProvider.myNextReturnParams.addParameter().setName("property");
-		param.addPart().setName("name").setValue(new StringType("birthDate"));
-		param.addPart().setName("value").setValue(new DateType("1930-01-01"));
-		// designation
-		param = myCodeSystemProvider.myNextReturnParams.addParameter().setName("designation");
-		param.addPart().setName("language").setValue(new CodeType("en"));
-		Parameters.ParametersParameterComponent codingParam = param.addPart().setName("use");
-		Coding coding = new Coding();
-		coding.setCode("code");
-		coding.setSystem("system");
-		coding.setDisplay("display");
-		codingParam.setValue(coding);
-		param.addPart().setName("value").setValue(new StringType("some value"));
-	}
-
 	private static class MyCodeSystemProvider implements IResourceProvider {
 		private int myInvocationCount;
 		private UriType myLastUrl;
@@ -186,6 +198,7 @@ public class RemoteTerminologyServiceValidationSupportDstu3Test {
 			@OperationParam(name="version", type=StringType.class, min=0),
 			@OperationParam(name="display", type=StringType.class, min=1),
 			@OperationParam(name="abstract", type=BooleanType.class, min=1),
+			@OperationParam(name="property", min = 0, max = OperationParam.MAX_UNLIMITED)
 		})
 		public Parameters lookup(
 			HttpServletRequest theServletRequest,
@@ -203,7 +216,30 @@ public class RemoteTerminologyServiceValidationSupportDstu3Test {
 			myLastCoding = theCoding;
 			myLastVersion = theVersion;
 			myLastDisplayLanguage = theDisplayLanguage;
-			return myNextReturnParams;
+
+			Set<String> propertiesNames = theProperties != null ? theProperties.stream().map(CodeType::getValueAsString).collect(Collectors.toSet()) : Collections.emptySet();
+
+			Parameters retVal = new Parameters();
+			for (Parameters.ParametersParameterComponent parameterComponent : myNextReturnParams.getParameter()) {
+				if ("property".equals(parameterComponent.getName())) {
+					boolean found = false;
+					for (Parameters.ParametersParameterComponent parametersPartComponent : parameterComponent.getPart()) {
+						String name = parametersPartComponent.getName();
+						String propertyValue = parametersPartComponent.getValue().primitiveValue();
+						if ("name".equals(name) && propertiesNames.contains(propertyValue)) {
+							found = true;
+							break;
+						}
+					}
+					if (found) {
+						retVal.addParameter(parameterComponent);
+					}
+				} else {
+					retVal.addParameter(parameterComponent);
+				}
+			}
+
+			return retVal;
 		}
 
 		@Override

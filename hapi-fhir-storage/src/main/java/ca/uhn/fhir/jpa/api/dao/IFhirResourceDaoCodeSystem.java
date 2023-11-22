@@ -32,6 +32,7 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.codesystems.ConceptSubsumptionOutcome;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collection;
 import java.util.List;
 import javax.annotation.Nonnull;
 
@@ -53,6 +54,15 @@ public interface IFhirResourceDaoCodeSystem<T extends IBaseResource> extends IFh
 			IPrimitiveType<String> theSystem,
 			IBaseCoding theCoding,
 			IPrimitiveType<String> theDisplayLanguage,
+			RequestDetails theRequestDetails);
+
+	@Nonnull
+	IValidationSupport.LookupCodeResult lookupCode(
+			IPrimitiveType<String> theCode,
+			IPrimitiveType<String> theSystem,
+			IBaseCoding theCoding,
+			IPrimitiveType<String> theDisplayLanguage,
+			Collection<IPrimitiveType<String>> theProperties,
 			RequestDetails theRequestDetails);
 
 	SubsumesResult subsumes(

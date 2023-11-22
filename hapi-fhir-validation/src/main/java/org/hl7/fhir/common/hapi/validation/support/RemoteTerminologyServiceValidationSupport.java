@@ -24,6 +24,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -186,7 +187,8 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 			ValidationSupportContext theValidationSupportContext,
 			String theSystem,
 			String theCode,
-			String theDisplayLanguage) {
+			String theDisplayLanguage,
+			Collection<String> thePropertyNames) {
 		Validate.notBlank(theCode, "theCode must be provided");
 
 		IGenericClient client = provideClient();
@@ -203,6 +205,9 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 				}
 				if (!StringUtils.isEmpty(theDisplayLanguage)) {
 					ParametersUtil.addParameterToParametersString(fhirContext, params, "language", theDisplayLanguage);
+				}
+				for (String propertyName : thePropertyNames) {
+					ParametersUtil.addParameterToParametersString(fhirContext, params, "property", propertyName);
 				}
 				Class<?> codeSystemClass =
 						myCtx.getResourceDefinition("CodeSystem").getImplementingClass();

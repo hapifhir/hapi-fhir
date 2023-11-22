@@ -1,0 +1,4 @@
+---
+type: add
+issue: 5476
+title: "Pass properties through to Remote Terminology Service on CodeSystem $lookup operation."
