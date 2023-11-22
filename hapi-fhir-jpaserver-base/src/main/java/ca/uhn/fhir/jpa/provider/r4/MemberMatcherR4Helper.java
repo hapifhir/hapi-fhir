@@ -136,7 +136,6 @@ public class MemberMatcherR4Helper {
 
 	public void updateConsentForMemberMatch(
 			Consent theConsent, Patient thePatient, Patient theMemberPatient, RequestDetails theRequestDetails) {
-		addIdentifierToConsent(theConsent, theMemberPatient);
 		updateConsentPatientAndPerformer(theConsent, thePatient);
 		myConsentModifier.accept(theConsent);
 
@@ -275,13 +274,6 @@ public class MemberMatcherR4Helper {
 			return true;
 		}
 		return policyTypes.equals(CONSENT_POLICY_REGULAR_TYPE) && myRegularFilterSupported;
-	}
-
-	private void addIdentifierToConsent(Consent theConsent, Patient thePatient) {
-		String consentId = getIdentifier(thePatient).getValue();
-		Identifier consentIdentifier =
-				new Identifier().setSystem(CONSENT_IDENTIFIER_CODE_SYSTEM).setValue(consentId);
-		theConsent.addIdentifier(consentIdentifier);
 	}
 
 	public void setRegularFilterSupported(boolean theRegularFilterSupported) {
