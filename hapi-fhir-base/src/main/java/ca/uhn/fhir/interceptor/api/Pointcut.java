@@ -46,6 +46,7 @@ import javax.annotation.Nonnull;
  * <li>SUBSCRIPTION_xxx: Hooks on the HAPI FHIR Subscription framework</li>
  * <li>STORAGE_xxx: Hooks on the storage engine</li>
  * <li>VALIDATION_xxx: Hooks on the HAPI FHIR Validation framework</li>
+ * <li>MDM_XXX: Hooks on Master Data Management framework</li>
  * <li>JPA_PERFTRACE_xxx: Performance tracing hooks on the JPA server</li>
  * </ul>
  * </p>
@@ -2460,6 +2461,28 @@ public enum Pointcut implements IPointcut {
 	 */
 	MDM_SUBMIT(
 			void.class, "ca.uhn.fhir.rest.api.server.RequestDetails", "ca.uhn.fhir.mdm.model.mdmevents.MdmSubmitEvent"),
+
+	/**
+	 * <b>P2P MemberMatch Pre Hook:</b>
+	 * This hook is invoked whenever a $member-match call is made.
+	 * It is invoked after basic parameter validation, but before the
+	 * database operations of MemberMatch are performed and results returned.
+	 * </p>
+	 * <p>
+	 * This hook will take the following parameters:
+	 * </p>
+	 * <ul>
+	 * <li>
+	 * ca.uhn.fhir.rest.api.server.RequestDetails - An object containing details about the request that is about to be processed.
+	 * </li>
+	 * <li>
+	 * ca.uhn.fhir.jpa.model.MemberMatchPreHookEvent - An event with the member-match
+	 * parameters, including the Patient, CoverageToMatch, CoverateToLink, and Consent objects.
+	 * </li>
+	 * </ul>
+	 */
+	P2P_MEMBER_MATCH_PRE_HOOK(
+		void.class, "ca.uhn.fhir.rest.api.server.RequestDetails", "ca.uhn.fhir.jpa.model.MemberMatchPreHookEvent"),
 
 	/**
 	 * <b>JPA Hook:</b>

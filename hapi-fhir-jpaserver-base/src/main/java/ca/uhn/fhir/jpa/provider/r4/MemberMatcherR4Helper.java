@@ -46,10 +46,10 @@ import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Reference;
 
+import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
-import javax.annotation.Nullable;
 
 import static ca.uhn.fhir.rest.api.Constants.PARAM_CONSENT;
 import static ca.uhn.fhir.rest.api.Constants.PARAM_MEMBER_IDENTIFIER;
