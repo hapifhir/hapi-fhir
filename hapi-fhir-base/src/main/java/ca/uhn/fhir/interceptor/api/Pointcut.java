@@ -47,6 +47,7 @@ import javax.annotation.Nonnull;
  * <li>STORAGE_xxx: Hooks on the storage engine</li>
  * <li>VALIDATION_xxx: Hooks on the HAPI FHIR Validation framework</li>
  * <li>MDM_XXX: Hooks on Master Data Management framework</li>
+ * <li>P2P_XXX: Hooks on Payer to Payer actions.</li>
  * <li>JPA_PERFTRACE_xxx: Performance tracing hooks on the JPA server</li>
  * </ul>
  * </p>

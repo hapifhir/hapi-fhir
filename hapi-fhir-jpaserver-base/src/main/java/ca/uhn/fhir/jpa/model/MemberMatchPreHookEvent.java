@@ -5,12 +5,25 @@ import org.hl7.fhir.r4.model.Coverage;
 import org.hl7.fhir.r4.model.Patient;
 
 public class MemberMatchPreHookEvent {
+	/**
+	 * The patient that is the focus of the member-match action.
+	 */
 	private Patient myPatient;
 
+	/**
+	 * The old/existing coverage.
+	 */
 	private Coverage myCoverageToMatch;
 
+	/**
+	 * The new coverage.
+	 */
 	private Coverage myCoverageToLink;
 
+	/**
+	 * The consent object that will be stored and checked
+	 * on the future $export request.
+	 */
 	private Consent myConsent;
 
 	public Patient getPatient() {

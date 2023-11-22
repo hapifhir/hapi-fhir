@@ -137,6 +137,7 @@ public class MemberMatchR4ResourceProvider {
 			throw new UnprocessableEntityException(Msg.code(2147) + i18nMessage);
 		}
 
+		// invoke hooks if needed (before persisting changes to db)
 		if (CompositeInterceptorBroadcaster.hasHooks(
 				Pointcut.P2P_MEMBER_MATCH_PRE_HOOK, myInterceptorBroadcaster, theRequestDetails)) {
 			MemberMatchPreHookEvent preHookParams = new MemberMatchPreHookEvent();
