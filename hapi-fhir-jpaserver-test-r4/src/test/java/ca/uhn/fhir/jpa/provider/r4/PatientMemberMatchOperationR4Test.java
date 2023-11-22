@@ -39,8 +39,8 @@ import static ca.uhn.fhir.rest.api.Constants.PARAM_CONSENT_PERFORMER_REFERENCE;
 import static ca.uhn.fhir.rest.api.Constants.PARAM_MEMBER_PATIENT;
 import static ca.uhn.fhir.rest.api.Constants.PARAM_MEMBER_PATIENT_BIRTHDATE;
 import static ca.uhn.fhir.rest.api.Constants.PARAM_MEMBER_PATIENT_NAME;
-import static ca.uhn.fhir.rest.api.Constants.PARAM_NEW_COVERAGE;
-import static ca.uhn.fhir.rest.api.Constants.PARAM_OLD_COVERAGE;
+import static ca.uhn.fhir.rest.api.Constants.COVERAGE_TO_LINK;
+import static ca.uhn.fhir.rest.api.Constants.COVERAGE_TO_MATCH;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -263,7 +263,7 @@ public class PatientMemberMatchOperationR4Test extends BaseResourceProviderR4Tes
 	 * Validates that second resource from the response is same as the received coverage
 	 */
 	private void validateNewCoverage(Parameters theResponse, Coverage theOriginalCoverage) {
-		List<IBase> patientList = ParametersUtil.getNamedParameters(this.getFhirContext(), theResponse, PARAM_NEW_COVERAGE);
+		List<IBase> patientList = ParametersUtil.getNamedParameters(this.getFhirContext(), theResponse, COVERAGE_TO_LINK);
 		assertEquals(1, patientList.size());
 		Coverage respCoverage = (Coverage) theResponse.getParameter().get(1).getResource();
 
@@ -330,8 +330,8 @@ public class PatientMemberMatchOperationR4Test extends BaseResourceProviderR4Tes
 	private Parameters buildInputParameters(Patient thePatient, Coverage theOldCoverage, Coverage theNewCoverage, Consent theConsent) {
 		Parameters p = new Parameters();
 		ParametersUtil.addParameterToParameters(this.getFhirContext(), p, PARAM_MEMBER_PATIENT, thePatient);
-		ParametersUtil.addParameterToParameters(this.getFhirContext(), p, PARAM_OLD_COVERAGE, theOldCoverage);
-		ParametersUtil.addParameterToParameters(this.getFhirContext(), p, PARAM_NEW_COVERAGE, theNewCoverage);
+		ParametersUtil.addParameterToParameters(this.getFhirContext(), p, COVERAGE_TO_MATCH, theOldCoverage);
+		ParametersUtil.addParameterToParameters(this.getFhirContext(), p, COVERAGE_TO_LINK, theNewCoverage);
 		ParametersUtil.addParameterToParameters(this.getFhirContext(), p, PARAM_CONSENT, theConsent);
 		return p;
 	}
@@ -434,14 +434,14 @@ public class PatientMemberMatchOperationR4Test extends BaseResourceProviderR4Tes
 		public void testInvalidOldCoverage() throws Exception {
 			Parameters inputParameters = buildInputParameters(ourPatient, new Coverage(), ourNewCoverage, ourConsent);
 			performOperationExpecting422(myServerBase + ourQuery, EncodingEnum.JSON, inputParameters,
-				"Parameter \\\"" + PARAM_OLD_COVERAGE + "\\\" is required.");
+				"Parameter \\\"" + COVERAGE_TO_MATCH + "\\\" is required.");
 		}
 
 		@Test
 		public void testInvalidNewCoverage() throws Exception {
 			Parameters inputParameters = buildInputParameters(ourPatient, ourOldCoverage, new Coverage(), ourConsent);
 			performOperationExpecting422(myServerBase + ourQuery, EncodingEnum.JSON, inputParameters,
-				"Parameter \\\"" + PARAM_NEW_COVERAGE + "\\\" is required.");
+				"Parameter \\\"" + COVERAGE_TO_LINK + "\\\" is required.");
 		}
 
 		@Test
