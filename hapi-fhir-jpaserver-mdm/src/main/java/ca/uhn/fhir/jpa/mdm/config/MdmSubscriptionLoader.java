@@ -184,11 +184,11 @@ public class MdmSubscriptionLoader {
 		subscriptionTopic.setStatus(Enumerations.PublicationStatus.ACTIVE);
 		subscriptionTopic.setUrl(MdmConstants.SUBSCRIPTION_TOPIC_URL);
 		theMdmResourceTypes.forEach(
-				resourceType -> getSubscriptionTopicResourceTriggerComponent(resourceType, subscriptionTopic));
+				resourceType -> buildSubscriptionTopicResourceTriggerComponent(resourceType, subscriptionTopic));
 		return subscriptionTopic;
 	}
 
-	private static void getSubscriptionTopicResourceTriggerComponent(
+	private static void buildSubscriptionTopicResourceTriggerComponent(
 			String theResourceType, SubscriptionTopic theSubscriptionTopic) {
 		SubscriptionTopic.SubscriptionTopicResourceTriggerComponent triggerComponent =
 				theSubscriptionTopic.addResourceTrigger();
