@@ -28,6 +28,7 @@ import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
@@ -112,6 +113,9 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 
 	@Autowired
 	private PackageResourceParsingSvc myPackageResourceParsingSvc;
+
+	@Autowired
+	private JpaStorageSettings myStorageSettings;
 
 	/**
 	 * Constructor
@@ -505,7 +509,7 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 		if ("SearchParameter".equals(resourceType)) {
 
 			String code = SearchParameterUtil.getCode(myFhirContext, theResource);
-			if (defaultString(code).startsWith("_")) {
+			if (!isBlank(code) && code.startsWith("_")) {
 				ourLog.warn(
 						"Failed to validate resource of type {} with url {} - Error: Resource code starts with \"_\"",
 						theResource.fhirType(),
@@ -547,7 +551,7 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 	 * and {@link org.hl7.fhir.r4.model.Communication}, the status field doesn't necessarily need to be set to 'active'
 	 * for that resource to be eligible for upload via packages. For example, all {@link org.hl7.fhir.r4.model.Subscription}
 	 * have a status of {@link org.hl7.fhir.r4.model.Subscription.SubscriptionStatus#REQUESTED} when they are originally
-	 * inserted into the database, so we accept that value for {@link org.hl7.fhir.r4.model.Subscription} isntead.
+	 * inserted into the database, so we accept that value for {@link org.hl7.fhir.r4.model.Subscription} instead.
 	 * Furthermore, {@link org.hl7.fhir.r4.model.DocumentReference} and {@link org.hl7.fhir.r4.model.Communication} can
 	 * exist with a wide variety of values for status that include ones such as
 	 * {@link org.hl7.fhir.r4.model.Communication.CommunicationStatus#ENTEREDINERROR},
@@ -559,6 +563,9 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 	 * @return {@link Boolean#TRUE} if the status value of this resource is acceptable for package upload.
 	 */
 	private boolean isValidResourceStatusForPackageUpload(IBaseResource theResource) {
+		if (!myStorageSettings.isValidateResourceStatusForPackageUpload()) {
+			return true;
+		}
 		List<IPrimitiveType> statusTypes =
 				myFhirContext.newFhirPath().evaluate(theResource, "status", IPrimitiveType.class);
 		// Resource does not have a status field
