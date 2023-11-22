@@ -71,9 +71,16 @@ public interface IHapiTransactionService {
 	}
 
 	/**
+	 * Convenience for TX working with non-partitioned entities.
+	 */
+	default IExecutionBuilder withSystemRequestOnDefaultPartition() {
+		return withSystemRequestOnPartition(RequestPartitionId.defaultPartition());
+	}
+
+	/**
 	 * @deprecated It is highly recommended to use {@link #withRequest(RequestDetails)} instead of this method, for increased visibility.
 	 */
-	@Deprecated
+	@Deprecated(since = "6.10")
 	<T> T withRequest(
 			@Nullable RequestDetails theRequestDetails,
 			@Nullable TransactionDetails theTransactionDetails,
