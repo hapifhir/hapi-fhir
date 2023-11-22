@@ -160,6 +160,12 @@
 			<groupId>org.springframework.data</groupId>
 			<artifactId>spring-data-commons</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-caching-caffeine</artifactId>
+			<version>${project.version}</version>
+			<scope>test</scope>
+		</dependency>
 
 	</dependencies>
 	<build>
