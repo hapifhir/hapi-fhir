@@ -387,7 +387,7 @@ public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 			final Observation obs1 = new Observation();
 			obs1.setStatus(Observation.ObservationStatus.FINAL);
 			obs1.addIdentifier().setSystem("urn:system").setValue("I" + leftPad("" + i, 5, '0'));
-			IIdType obs1id = myObservationDao.create(obs1).getId();//.toUnqualifiedVersionless();
+			IIdType obs1id = myObservationDao.create(obs1).getId();
 			myObservationIds.add(obs1id.toUnqualifiedVersionless().getValue());
 			myObservationIdsWithoutVersions.add(obs1id.toUnqualifiedVersionless().getValue());
 
@@ -503,8 +503,6 @@ public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 			retVal.addAll(next);
 		}
 		retVal.sort((o0, o1) -> {
-//			long i0 = Long.parseLong(o0.substring(o0.indexOf('/') + 1));
-//			long i1 = Long.parseLong(o1.substring(o1.indexOf('/') + 1));
 			long i0 = theParser.apply(o0);
 			long i1 = theParser.apply(o1);
 			return (int) (i0 - i1);
