@@ -1,10 +1,15 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
+import ca.uhn.fhir.interceptor.api.Hook;
+import ca.uhn.fhir.interceptor.api.IInterceptorService;
+import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
+import ca.uhn.fhir.jpa.model.MemberMatchPreHookEvent;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.parser.StrictErrorHandler;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.client.apache.ResourceEntity;
 import ca.uhn.fhir.util.ParametersUtil;
 import com.google.common.collect.Lists;
@@ -32,6 +37,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static ca.uhn.fhir.rest.api.Constants.PARAM_CONSENT;
 import static ca.uhn.fhir.rest.api.Constants.PARAM_CONSENT_PATIENT_REFERENCE;
@@ -46,6 +52,7 @@ import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SuppressWarnings("Duplicates")
 public class PatientMemberMatchOperationR4Test extends BaseResourceProviderR4Test {
@@ -71,6 +78,9 @@ public class PatientMemberMatchOperationR4Test extends BaseResourceProviderR4Tes
 
 	@Autowired
 	MemberMatchR4ResourceProvider theMemberMatchR4ResourceProvider;
+
+	@Autowired
+	IInterceptorService myInterceptorService;
 
 	@BeforeEach
 	public void beforeDisableResultReuse() {
@@ -151,6 +161,48 @@ public class PatientMemberMatchOperationR4Test extends BaseResourceProviderR4Tes
 	}
 
 	@Test
+	public void testMemberMatch_invokesPreMemberMatchHook() throws Exception {
+		// setup
+		AtomicBoolean setter = new AtomicBoolean();
+		createCoverageWithBeneficiary(true, true);
+		Parameters inputParameters = buildInputParameters(myPatient, oldCoverage, newCoverage, myConsent);
+
+		Object interceptor = new Object() {
+			@Hook(Pointcut.P2P_MEMBER_MATCH_PRE_HOOK)
+			void validateConsent(RequestDetails theRequestDetails, MemberMatchPreHookEvent theEvent) {
+				assertNotNull(theRequestDetails);
+				assertNotNull(theEvent);
+				assertNotNull(theEvent.getConsent());
+				assertNotNull(theEvent.getCoverageToMatch());
+				assertNotNull(theEvent.getCoverageToLink());
+				assertNotNull(theEvent.getPatient());
+
+				assertEquals(myPatient.getId(), theEvent.getPatient().getId());
+				assertEquals(oldCoverage.getId(), theEvent.getCoverageToMatch().getIdElement().getIdPart());
+				assertEquals(newCoverage.getId(), theEvent.getCoverageToLink().getIdElement().getIdPart());
+				assertEquals(myConsent.getId(), theEvent.getConsent().getId());
+
+				setter.getAndSet(true);
+			}
+		};
+
+		try {
+			myInterceptorService.registerInterceptor(interceptor);
+
+			// test
+			Parameters parametersResponse = performOperation(myServerBase + ourQuery,
+				EncodingEnum.JSON, inputParameters);
+
+			validateMemberPatient(parametersResponse);
+			validateNewCoverage(parametersResponse, newCoverage);
+		} finally {
+			myInterceptorService.unregisterInterceptor(interceptor);
+		}
+
+		assertTrue(setter.get());
+	}
+
+	@Test
 	public void testMemberMatchByCoverageId() throws Exception {
 		createCoverageWithBeneficiary(true, true);
 
@@ -161,7 +213,6 @@ public class PatientMemberMatchOperationR4Test extends BaseResourceProviderR4Tes
 		validateMemberPatient(parametersResponse);
 		validateNewCoverage(parametersResponse, newCoverage);
 	}
-
 
 	@Test
 	public void testCoverageNoBeneficiaryReturns422() throws Exception {

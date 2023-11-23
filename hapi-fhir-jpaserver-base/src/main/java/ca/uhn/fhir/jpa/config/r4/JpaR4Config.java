@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.config.r4;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.jpa.api.IDaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
@@ -118,7 +119,9 @@ public class JpaR4Config {
 
 	@Bean
 	public MemberMatchR4ResourceProvider memberMatchR4ResourceProvider(
-			FhirContext theFhirContext, MemberMatcherR4Helper theMemberMatchR4Helper) {
-		return new MemberMatchR4ResourceProvider(theFhirContext, theMemberMatchR4Helper);
+			FhirContext theFhirContext,
+			IInterceptorBroadcaster theIInterceptorBroadcaster,
+			MemberMatcherR4Helper theMemberMatchR4Helper) {
+		return new MemberMatchR4ResourceProvider(theFhirContext, theMemberMatchR4Helper, theIInterceptorBroadcaster);
 	}
 }
