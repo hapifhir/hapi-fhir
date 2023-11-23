@@ -36,6 +36,7 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.RequestFormatParamStyleEnum;
 import ca.uhn.fhir.rest.api.SummaryEnum;
+import ca.uhn.fhir.rest.client.api.ClientResponseContext;
 import ca.uhn.fhir.rest.client.api.IHttpClient;
 import ca.uhn.fhir.rest.client.api.IHttpRequest;
 import ca.uhn.fhir.rest.client.api.IHttpResponse;
@@ -352,11 +353,20 @@ public abstract class BaseClient implements IRestfulClient {
 
 			response = httpRequest.execute();
 
+			final ClientResponseContext clientResponseContext = new ClientResponseContext(httpRequest, response, this);
 			HookParams responseParams = new HookParams();
 			responseParams.add(IHttpRequest.class, httpRequest);
 			responseParams.add(IHttpResponse.class, response);
 			responseParams.add(IRestfulClient.class, this);
+			responseParams.add(ClientResponseContext.class, clientResponseContext);
+			// LUKETODO:  add new holder object with client, response, and request
+			// keep the old params but add the new
+			// holder object would allow  them to mutate the holder with a new response
 			getInterceptorService().callHooks(Pointcut.CLIENT_RESPONSE, responseParams);
+			// replace the local response variable with the holder's mutated response
+			// LUKETODO:  documentation to the buffer the inputstream
+			// LUKETODO:  documentation DO NOT CHAIN THESE HOOKS!!!!
+			response = clientResponseContext.getHttpResponse();
 
 			String mimeType;
 			if (Constants.STATUS_HTTP_204_NO_CONTENT == response.getStatus()) {
