@@ -158,7 +158,7 @@ public class MemberMatcherR4HelperTest {
 		identifierType.addCoding(new Coding("", "MB", ""));
 		identifier.setType(identifierType);
 		Patient patient = new Patient();
-		patient.setId("testPatient");
+		patient.setId("Patient/test123");
 		patient.addIdentifier(identifier);
 
 		Parameters result = myHelper.buildSuccessReturnParameters(patient);

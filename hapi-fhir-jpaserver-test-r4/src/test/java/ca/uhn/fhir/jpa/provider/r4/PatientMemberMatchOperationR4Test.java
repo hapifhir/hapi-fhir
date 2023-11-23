@@ -258,9 +258,9 @@ public class PatientMemberMatchOperationR4Test extends BaseResourceProviderR4Tes
 	/**
 	 * validates that the returned patient ID is correct
 	 */
-	private void validateMemberIdentifier(Parameters response){
-		assertTrue(response.hasParameter(PARAM_MEMBER_IDENTIFIER));
-		Optional<IBase> memberIdentifierOptional = ParametersUtil.getNamedParameter(this.getFhirContext(), response, PARAM_MEMBER_IDENTIFIER);
+	private void validateMemberIdentifier(Parameters theResponse){
+		assertTrue(theResponse.hasParameter(PARAM_MEMBER_IDENTIFIER));
+		Optional<IBase> memberIdentifierOptional = ParametersUtil.getNamedParameter(this.getFhirContext(), theResponse, PARAM_MEMBER_IDENTIFIER);
 		assertTrue(memberIdentifierOptional.isPresent());
 		IdType memberIdentifier = (IdType) ((Parameters.ParametersParameterComponent) memberIdentifierOptional.get()).getValue();
 		assertEquals(PATIENT_ID, memberIdentifier.getValue());
