@@ -102,6 +102,7 @@ import ca.uhn.fhir.jpa.test.config.TestR4Config;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.jpa.util.ResourceCountCache;
 import ca.uhn.fhir.jpa.validation.ValidationSettings;
+import ca.uhn.fhir.mdm.interceptor.MdmStorageInterceptor;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.parser.StrictErrorHandler;
 import ca.uhn.fhir.rest.api.Constants;
@@ -538,6 +539,10 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 	private IBulkDataExportJobSchedulingHelper myBulkDataScheduleHelper;
 	@Autowired
 	protected IResourceSearchUrlDao myResourceSearchUrlDao;
+	@Autowired
+	private IInterceptorService myInterceptorService;
+	@Autowired
+	private MdmStorageInterceptor myMdmStorageInterceptor;
 
 	@RegisterExtension
 	private final PreventDanglingInterceptorsExtension myPreventDanglingInterceptorsExtension = new PreventDanglingInterceptorsExtension(()-> myInterceptorRegistry);
@@ -599,17 +604,28 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 
 	@AfterEach
 	public void afterPurgeDatabase() {
-		runInTransaction(() -> {
-			myMdmLinkHistoryDao.deleteAll();
-			myMdmLinkDao.deleteAll();
-		});
-		purgeDatabase(myStorageSettings, mySystemDao, myResourceReindexingSvc, mySearchCoordinatorSvc, mySearchParamRegistry, myBulkDataScheduleHelper);
+		boolean registeredStorageInterceptor = false;
+		if (!myInterceptorService.getAllRegisteredInterceptors().contains(myMdmStorageInterceptor)) {
+			myInterceptorService.registerInterceptor(myMdmStorageInterceptor);
+			registeredStorageInterceptor = true;
+		}
+		try {
+			runInTransaction(() -> {
+				myMdmLinkHistoryDao.deleteAll();
+				myMdmLinkDao.deleteAll();
+			});
+			purgeDatabase(myStorageSettings, mySystemDao, myResourceReindexingSvc, mySearchCoordinatorSvc, mySearchParamRegistry, myBulkDataScheduleHelper);
 
-		myBatch2JobHelper.cancelAllJobsAndAwaitCancellation();
-		runInTransaction(()->{
-			myWorkChunkRepository.deleteAll();
-			myJobInstanceRepository.deleteAll();
-		});
+			myBatch2JobHelper.cancelAllJobsAndAwaitCancellation();
+			runInTransaction(() -> {
+				myWorkChunkRepository.deleteAll();
+				myJobInstanceRepository.deleteAll();
+			});
+		} finally {
+			if (registeredStorageInterceptor) {
+				myInterceptorService.unregisterInterceptor(myMdmStorageInterceptor);
+			}
+		}
 	}
 
 	@BeforeEach

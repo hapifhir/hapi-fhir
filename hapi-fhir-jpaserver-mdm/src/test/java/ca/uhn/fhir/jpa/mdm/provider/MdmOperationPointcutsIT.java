@@ -121,8 +121,6 @@ public class MdmOperationPointcutsIT extends BaseProviderR4Test {
 	@SpyBean
 	private IMdmSubmitSvc myMdmSubmitSvc;
 
-	@Autowired
-	private MdmStorageInterceptor myMdmStorageInterceptor;
 
 	private MdmLinkHistoryProviderDstu3Plus myLinkHistoryProvider;
 
@@ -131,9 +129,6 @@ public class MdmOperationPointcutsIT extends BaseProviderR4Test {
 	@Override
 	@AfterEach
 	public void afterPurgeDatabase() {
-		if (!myInterceptorService.getAllRegisteredInterceptors().contains(myMdmStorageInterceptor)) {
-			myInterceptorService.registerInterceptor(myMdmStorageInterceptor);
-		}
 		super.afterPurgeDatabase();
 	}
 
