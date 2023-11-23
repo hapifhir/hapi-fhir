@@ -122,7 +122,7 @@ public class MdmOperationPointcutsIT extends BaseProviderR4Test {
 	private IMdmSubmitSvc myMdmSubmitSvc;
 
 	@Autowired
-	private ExpungeEverythingService myExpungeEverythingService;
+	private MdmStorageInterceptor myMdmStorageInterceptor;
 
 	private MdmLinkHistoryProviderDstu3Plus myLinkHistoryProvider;
 
@@ -131,13 +131,10 @@ public class MdmOperationPointcutsIT extends BaseProviderR4Test {
 	@Override
 	@AfterEach
 	public void afterPurgeDatabase() {
-		MdmStorageInterceptor interceptor = new MdmStorageInterceptor();
-		myInterceptorService.registerInterceptor(interceptor);
-		try {
-			super.afterPurgeDatabase();
-		} finally {
-			myInterceptorService.unregisterInterceptor(interceptor);
+		if (!myInterceptorService.getAllRegisteredInterceptors().contains(myMdmStorageInterceptor)) {
+			myInterceptorService.registerInterceptor(myMdmStorageInterceptor);
 		}
+		super.afterPurgeDatabase();
 	}
 
 	@Override
