@@ -131,8 +131,13 @@ public class MdmOperationPointcutsIT extends BaseProviderR4Test {
 	@Override
 	@AfterEach
 	public void afterPurgeDatabase() {
-		myExpungeEverythingService.expungeEverythingMdmLinks();
-		super.afterPurgeDatabase();
+		MdmStorageInterceptor interceptor = new MdmStorageInterceptor();
+		myInterceptorService.registerInterceptor(interceptor);
+		try {
+			super.afterPurgeDatabase();
+		} finally {
+			myInterceptorService.unregisterInterceptor(interceptor);
+		}
 	}
 
 	@Override
