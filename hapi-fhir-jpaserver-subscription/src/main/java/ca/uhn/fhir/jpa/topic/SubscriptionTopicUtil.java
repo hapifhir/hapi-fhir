@@ -19,11 +19,19 @@
  */
 package ca.uhn.fhir.jpa.topic;
 
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedJsonMessage;
 import ca.uhn.fhir.rest.server.messaging.BaseResourceMessage;
+import ca.uhn.fhir.util.BundleUtil;
+import org.hl7.fhir.instance.model.api.IBaseBundle;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r5.model.BaseReference;
 import org.hl7.fhir.r5.model.Enumeration;
+import org.hl7.fhir.r5.model.SubscriptionStatus;
 import org.hl7.fhir.r5.model.SubscriptionTopic;
 
 import java.util.List;
+import java.util.Objects;
 
 public class SubscriptionTopicUtil {
 	public static boolean matches(
@@ -44,5 +52,24 @@ public class SubscriptionTopicUtil {
 			}
 		}
 		return false;
+	}
+
+	/**
+	 * Extracts source resource from bundle contained in {@link ResourceModifiedJsonMessage} payload.
+	 * Used for R5 resource modified message handling.
+	 */
+	public static IBaseResource extractResourceFromBundle(FhirContext myFhirContext, IBaseBundle theBundle) {
+		List<IBaseResource> resources = BundleUtil.toListOfResources(myFhirContext, theBundle);
+
+		return resources.stream()
+				.filter(SubscriptionStatus.class::isInstance)
+				.map(SubscriptionStatus.class::cast)
+				.flatMap(subscriptionStatus -> subscriptionStatus.getNotificationEvent().stream())
+				.filter(SubscriptionStatus.SubscriptionStatusNotificationEventComponent::hasFocus)
+				.map(SubscriptionStatus.SubscriptionStatusNotificationEventComponent::getFocus)
+				.map(BaseReference::getResource)
+				.filter(Objects::nonNull)
+				.findFirst()
+				.orElse(null);
 	}
 }
