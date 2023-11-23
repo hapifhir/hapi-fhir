@@ -30,12 +30,12 @@ import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nonnull;
+import javax.sql.DataSource;
 import java.sql.SQLException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
-import javax.annotation.Nonnull;
-import javax.sql.DataSource;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
@@ -188,7 +188,9 @@ public class HapiMigrator {
 	}
 
 	private void postExecute(BaseTask theNext, StopWatch theStopWatch, boolean theSuccess) {
-		myHapiMigrationStorageSvc.saveTask(theNext, Math.toIntExact(theStopWatch.getMillis()), theSuccess);
+		if(!theNext.isDryRun()){
+			myHapiMigrationStorageSvc.saveTask(theNext, Math.toIntExact(theStopWatch.getMillis()), theSuccess);
+		}
 	}
 
 	public void addTasks(Iterable<BaseTask> theMigrationTasks) {
