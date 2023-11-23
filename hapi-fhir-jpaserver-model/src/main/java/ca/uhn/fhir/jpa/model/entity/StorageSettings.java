@@ -147,6 +147,14 @@ public class StorageSettings {
 	private boolean myLanguageSearchParameterEnabled = false;
 
 	/**
+	 * If set to false, all resource types will be installed via package installer, regardless of their status.
+	 * Otherwise, resources will be filtered based on status according to some criteria which can be found in
+	 * <code>PackageInstallerSvcImpl#isValidResourceStatusForPackageUpload<code>
+	 * @since 7.0.0
+	 */
+	private boolean myValidateResourceStatusForPackageUpload = true;
+
+	/**
 	 * If set to true, the server will prevent the creation of Subscriptions which cannot be evaluated IN-MEMORY. This can improve
 	 * overall server performance.
 	 *
@@ -1317,6 +1325,22 @@ public class StorageSettings {
 	 */
 	public void setLanguageSearchParameterEnabled(boolean theLanguageSearchParameterEnabled) {
 		myLanguageSearchParameterEnabled = theLanguageSearchParameterEnabled;
+	}
+
+	/**
+	 * @return true if the filter is enabled for resources installed via package installer, false otherwise
+	 * @since 7.0.0
+	 */
+	public boolean isValidateResourceStatusForPackageUpload() {
+		return myValidateResourceStatusForPackageUpload;
+	}
+
+	/**
+	 * Should resources being installed via package installer be filtered.
+	 * @since 7.0.0
+	 */
+	public void setValidateResourceStatusForPackageUpload(boolean theValidateResourceStatusForPackageUpload) {
+		myValidateResourceStatusForPackageUpload = theValidateResourceStatusForPackageUpload;
 	}
 
 	private static void validateTreatBaseUrlsAsLocal(String theUrl) {

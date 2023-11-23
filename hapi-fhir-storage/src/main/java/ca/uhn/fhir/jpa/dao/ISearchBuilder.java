@@ -36,7 +36,7 @@ import java.util.List;
 import java.util.Set;
 import javax.annotation.Nonnull;
 
-public interface ISearchBuilder<T extends IResourcePersistentId> {
+public interface ISearchBuilder<T extends IResourcePersistentId<?>> {
 	String SEARCH_BUILDER_BEAN_NAME = "SearchBuilder";
 
 	IResultIterator createQuery(

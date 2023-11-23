@@ -9,7 +9,7 @@
 	<groupId>ca.uhn.hapi.fhir</groupId>
 	<artifactId>hapi-fhir</artifactId>
 	<packaging>pom</packaging>
-	<version>6.11.0-SNAPSHOT</version>
+	<version>6.11.1-SNAPSHOT</version>
 
 	<name>HAPI-FHIR</name>
 	<description>An open-source implementation of the FHIR specification in Java.</description>
@@ -949,8 +949,8 @@
 		<hibernate_validator_version>8.0.0.Final</hibernate_validator_version>
 		<httpcore_version>4.4.13</httpcore_version>
 		<httpclient_version>4.5.13</httpclient_version>
-		<jackson_version>2.15.2</jackson_version>
-		<jackson_databind_version>2.15.2</jackson_databind_version>
+		<jackson_version>2.15.3</jackson_version>
+		<jackson_databind_version>2.15.3</jackson_databind_version>
 		<maven_assembly_plugin_version>3.3.0</maven_assembly_plugin_version>
 		<maven_license_plugin_version>1.8</maven_license_plugin_version>
 		<okhttp_version>4.10.0</okhttp_version>
@@ -1757,6 +1757,13 @@
 				<groupId>org.glassfish.jaxb</groupId>
 				<artifactId>jaxb-runtime</artifactId>
 				<version>${jaxb_runtime_version}</version>
+				<!-- Excluded in favor of jakarta.activation:jakarta.activation-api -->
+				<exclusions>
+					<exclusion>
+						<groupId>com.sun.activation</groupId>
+						<artifactId>jakarta.activation</artifactId>
+					</exclusion>
+				</exclusions>
 			</dependency>
 			<dependency>
 				<groupId>org.glassfish.jersey.core</groupId>
@@ -2186,6 +2193,12 @@
 				<groupId>org.ogce</groupId>
 				<artifactId>xpp3</artifactId>
 				<version>1.1.6</version>
+				<exclusions>
+					<exclusion>
+						<groupId>junit</groupId>
+						<artifactId>junt</artifactId>
+					</exclusion>
+				</exclusions>
 			</dependency>
 			<dependency>
 				<groupId>org.flywaydb</groupId>

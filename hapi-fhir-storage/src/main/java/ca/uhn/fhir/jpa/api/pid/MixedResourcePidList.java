@@ -36,7 +36,7 @@ public class MixedResourcePidList extends BaseResourcePidList {
 
 	public MixedResourcePidList(
 			List<String> theResourceTypes,
-			Collection<IResourcePersistentId> theIds,
+			Collection<? extends IResourcePersistentId> theIds,
 			Date theLastDate,
 			RequestPartitionId theRequestPartitionId) {
 		super(theIds, theLastDate, theRequestPartitionId);

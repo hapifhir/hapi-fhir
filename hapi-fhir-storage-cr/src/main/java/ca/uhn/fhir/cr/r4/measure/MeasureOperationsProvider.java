@@ -32,6 +32,7 @@ import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.MeasureReport;
+import org.hl7.fhir.r4.model.Parameters;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -74,6 +75,7 @@ public class MeasureOperationsProvider {
 			@OperationParam(name = "productLine") String theProductLine,
 			@OperationParam(name = "additionalData") Bundle theAdditionalData,
 			@OperationParam(name = "terminologyEndpoint") Endpoint theTerminologyEndpoint,
+			@OperationParam(name = "parameters") Parameters theParameters,
 			RequestDetails theRequestDetails)
 			throws InternalErrorException, FHIRException {
 		return myR4MeasureServiceFactory
@@ -89,7 +91,7 @@ public class MeasureOperationsProvider {
 						theTerminologyEndpoint,
 						null,
 						theAdditionalData,
-						null,
+						theParameters,
 						theProductLine,
 						thePractitioner);
 	}

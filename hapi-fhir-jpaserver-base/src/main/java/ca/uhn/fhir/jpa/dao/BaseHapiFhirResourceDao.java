@@ -117,11 +117,13 @@ import ca.uhn.fhir.validation.IValidatorModule;
 import ca.uhn.fhir.validation.ValidationOptions;
 import ca.uhn.fhir.validation.ValidationResult;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.Streams;
 import jakarta.annotation.PostConstruct;
 import jakarta.persistence.LockModeType;
 import jakarta.persistence.NoResultException;
 import jakarta.persistence.TypedQuery;
 import jakarta.servlet.http.HttpServletResponse;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseMetaType;
@@ -154,6 +156,7 @@ import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
@@ -2066,6 +2069,28 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 					return ids;
 				});
+	}
+
+	public <PID extends IResourcePersistentId<?>> Stream<PID> searchForIdStream(
+			SearchParameterMap theParams,
+			RequestDetails theRequest,
+			@Nullable IBaseResource theConditionalOperationTargetOrNull) {
+		// the Stream is useless outside the bound connection time, so require our caller to have a session.
+		HapiTransactionService.requireTransaction();
+
+		RequestPartitionId requestPartitionId =
+				myRequestPartitionHelperService.determineReadPartitionForRequestForSearchType(
+						theRequest, myResourceName, theParams, theConditionalOperationTargetOrNull);
+
+		ISearchBuilder<?> builder = mySearchBuilderFactory.newSearchBuilder(this, getResourceName(), getResourceType());
+
+		String uuid = UUID.randomUUID().toString();
+
+		SearchRuntimeDetails searchRuntimeDetails = new SearchRuntimeDetails(theRequest, uuid);
+		IResultIterator<PID> iter =
+				builder.createQuery(theParams, searchRuntimeDetails, theRequest, requestPartitionId);
+		// Adapt IResultIterator to stream, and connect the close handler.
+		return Streams.stream(iter).onClose(() -> IOUtils.closeQuietly(iter));
 	}
 
 	protected <MT extends IBaseMetaType> MT toMetaDt(Class<MT> theType, Collection<TagDefinition> tagDefinitions) {
