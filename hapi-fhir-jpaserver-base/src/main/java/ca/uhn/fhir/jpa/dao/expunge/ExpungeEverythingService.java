@@ -81,9 +81,10 @@ import ca.uhn.fhir.util.StopWatch;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.PersistenceContextType;
-import jakarta.persistence.TypedQuery;
-import jakarta.persistence.criteria.CriteriaBuilder;
-import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.Query;
+import jakarta.persistence.metamodel.EntityType;
+import jakarta.persistence.metamodel.Metamodel;
+import jakarta.persistence.metamodel.SingularAttribute;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -91,6 +92,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import javax.annotation.Nullable;
 
@@ -258,8 +260,10 @@ public class ExpungeEverythingService implements IExpungeEverythingService {
 		myMemoryCacheService.invalidateAllCaches();
 	}
 
-	private int expungeEverythingByTypeWithoutPurging(
-			RequestDetails theRequest, Class<?> theEntityType, RequestPartitionId theRequestPartitionId) {
+	private <T> int expungeEverythingByTypeWithoutPurging(
+			RequestDetails theRequest, Class<T> theEntityType, RequestPartitionId theRequestPartitionId) {
+		HapiTransactionService.noTransactionAllowed();
+
 		int outcome = 0;
 		while (true) {
 			StopWatch sw = new StopWatch();
@@ -269,16 +273,27 @@ public class ExpungeEverythingService implements IExpungeEverythingService {
 					.withPropagation(Propagation.REQUIRES_NEW)
 					.withRequestPartitionId(theRequestPartitionId)
 					.execute(() -> {
-						CriteriaBuilder cb = myEntityManager.getCriteriaBuilder();
-						CriteriaQuery<?> cq = cb.createQuery(theEntityType);
-						cq.from(theEntityType);
-						TypedQuery<?> query = myEntityManager.createQuery(cq);
-						query.setMaxResults(1000);
-						List<?> results = query.getResultList();
-						for (Object result : results) {
-							myEntityManager.remove(result);
+						Metamodel metamodel = myEntityManager.getMetamodel();
+						EntityType<T> entity = metamodel.entity(theEntityType);
+						Set<SingularAttribute<? super T, ?>> singularAttributes = entity.getSingularAttributes();
+						String idProperty = null;
+						for (SingularAttribute<? super T, ?> singularAttribute : singularAttributes) {
+							if (singularAttribute.isId()) {
+								idProperty = singularAttribute.getName();
+								break;
+							}
 						}
-						return results.size();
+
+						Query nativeQuery = myEntityManager.createQuery(
+								"SELECT " + idProperty + " FROM " + theEntityType.getSimpleName());
+						nativeQuery.setMaxResults(800);
+						List pids = nativeQuery.getResultList();
+
+						nativeQuery = myEntityManager.createQuery("DELETE FROM " + theEntityType.getSimpleName()
+								+ " WHERE " + idProperty + " IN (:pids)");
+						nativeQuery.setParameter("pids", pids);
+						nativeQuery.executeUpdate();
+						return pids.size();
 					});
 
 			outcome += count;
