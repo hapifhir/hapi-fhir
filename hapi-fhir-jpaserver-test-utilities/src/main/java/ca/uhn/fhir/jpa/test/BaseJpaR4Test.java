@@ -541,7 +541,7 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 	protected IResourceSearchUrlDao myResourceSearchUrlDao;
 	@Autowired
 	private IInterceptorService myInterceptorService;
-	@Autowired
+	@Autowired(required = false)
 	private MdmStorageInterceptor myMdmStorageInterceptor;
 
 	@RegisterExtension
@@ -605,7 +605,7 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 	@AfterEach
 	public void afterPurgeDatabase() {
 		boolean registeredStorageInterceptor = false;
-		if (!myInterceptorService.getAllRegisteredInterceptors().contains(myMdmStorageInterceptor)) {
+		if (myMdmStorageInterceptor != null && !myInterceptorService.getAllRegisteredInterceptors().contains(myMdmStorageInterceptor)) {
 			myInterceptorService.registerInterceptor(myMdmStorageInterceptor);
 			registeredStorageInterceptor = true;
 		}
