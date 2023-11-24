@@ -479,7 +479,7 @@ public class MemberMatcherR4HelperTest {
 		private ArgumentCaptor<Consent> myDaoCaptor;
 
 		@Test
-		public void updateConsentForMemberMatch_noProvider_addsIdentifierUpdatePatientButNotExtensionAndSaves() {
+		public void updateConsentForMemberMatch_noProvider_UpdatePatientButNotExtensionAndSaves() {
 			// setup
 			Consent consent = getConsent();
 			consent.addPolicy(constructConsentPolicyComponent("#sensitive"));
@@ -493,11 +493,6 @@ public class MemberMatcherR4HelperTest {
 
 			verify(myConsentDao).create(myDaoCaptor.capture(), same(myRequestDetails));
 			Consent saved = myDaoCaptor.getValue();
-			// check consent identifier
-			assertEquals(1, saved.getIdentifier().size());
-			assertEquals(MemberMatcherR4Helper.CONSENT_IDENTIFIER_CODE_SYSTEM, saved.getIdentifier().get(0).getSystem());
-			assertNotNull(saved.getIdentifier().get(0).getValue());
-			assertEquals(saved.getIdentifier().get(0).getValue(), memberPatient.getIdentifier().get(0).getValue());
 
 			// check consent patient info
 			String patientRef = patient.getIdElement().toUnqualifiedVersionless().getValue();
