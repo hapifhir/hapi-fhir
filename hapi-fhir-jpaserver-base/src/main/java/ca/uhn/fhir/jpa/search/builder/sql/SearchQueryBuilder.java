@@ -64,7 +64,9 @@ import com.healthmarketscience.sqlbuilder.dbspec.basic.DbTable;
 import org.hibernate.dialect.Dialect;
 import org.hibernate.dialect.SQLServerDialect;
 import org.hibernate.dialect.pagination.AbstractLimitHandler;
+import org.hibernate.query.internal.QueryOptionsImpl;
 import org.hibernate.query.spi.Limit;
+import org.hibernate.query.spi.QueryOptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -504,7 +506,8 @@ public class SearchQueryBuilder {
 			Limit selection = new Limit();
 			selection.setFirstRow(offset);
 			selection.setMaxRows(maxResultsToFetch);
-			sql = limitHandler.processSql(sql, selection);
+			QueryOptions queryOptions = new QueryOptionsImpl();
+			sql = limitHandler.processSql(sql, selection, queryOptions);
 
 			int startOfQueryParameterIndex = 0;
 

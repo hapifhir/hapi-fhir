@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.search.builder.sql;
 
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.dao.predicate.SearchFilterParser;
+import ca.uhn.fhir.jpa.model.dialect.HapiFhirPostgresDialect;
 import ca.uhn.fhir.jpa.search.builder.predicate.DatePredicateBuilder;
 import ca.uhn.fhir.rest.param.DateParam;
 import com.healthmarketscience.sqlbuilder.Condition;
@@ -58,6 +59,6 @@ public class SearchQueryBuilderDialectPostgresTest extends BaseSearchQueryBuilde
 	@Nonnull
 	@Override
 	protected Dialect createDialect() {
-		return new PostgreSQLDialect();
+		return new HapiFhirPostgresDialect();
 	}
 }

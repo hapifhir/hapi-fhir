@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.search.builder.sql;
 
+import ca.uhn.fhir.jpa.model.dialect.HapiFhirSQLServerDialect;
 import ca.uhn.fhir.jpa.search.builder.predicate.ResourceTablePredicateBuilder;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.dialect.Dialect;
@@ -73,6 +74,6 @@ public class SearchQueryBuilderDialectSqlServerTest extends BaseSearchQueryBuild
 	@Nonnull
 	@Override
 	protected Dialect createDialect() {
-		return new SQLServer2012Dialect();
+		return new HapiFhirSQLServerDialect();
 	}
 }
