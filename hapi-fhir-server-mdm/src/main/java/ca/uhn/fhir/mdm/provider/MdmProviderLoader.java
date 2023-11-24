@@ -66,6 +66,7 @@ public class MdmProviderLoader {
 		switch (myFhirContext.getVersion().getVersion()) {
 			case DSTU3:
 			case R4:
+			case R5:
 				myResourceProviderFactory.addSupplier(() -> new MdmProviderDstu3Plus(
 						myFhirContext,
 						myMdmControllerSvc,
