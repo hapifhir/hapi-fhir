@@ -573,6 +573,11 @@ public interface IValidationSupport {
 	}
 
 	class CodeValidationResult {
+		public static final String SOURCE_DETAILS = "sourceDetails";
+		public static final String RESULT = "result";
+		public static final String MESSAGE = "message";
+		public static final String DISPLAY = "display";
+
 		private String myCode;
 		private String myMessage;
 		private IssueSeverity mySeverity;
@@ -700,6 +705,23 @@ public interface IValidationSupport {
 		public CodeValidationResult setSeverityCode(@Nonnull String theIssueSeverity) {
 			setSeverity(IssueSeverity.valueOf(theIssueSeverity.toUpperCase()));
 			return this;
+		}
+
+		public IBaseParameters toParameters(FhirContext theContext) {
+			IBaseParameters retVal = ParametersUtil.newInstance(theContext);
+
+			ParametersUtil.addParameterToParametersBoolean(theContext, retVal, RESULT, isOk());
+			if (isNotBlank(getMessage())) {
+				ParametersUtil.addParameterToParametersString(theContext, retVal, MESSAGE, getMessage());
+			}
+			if (isNotBlank(getDisplay())) {
+				ParametersUtil.addParameterToParametersString(theContext, retVal, DISPLAY, getDisplay());
+			}
+			if (isNotBlank(getSourceDetails())) {
+				ParametersUtil.addParameterToParametersString(theContext, retVal, SOURCE_DETAILS, getSourceDetails());
+			}
+
+			return retVal;
 		}
 	}
 
@@ -833,7 +855,7 @@ public interface IValidationSupport {
 		}
 
 		public IBaseParameters toParameters(
-				FhirContext theContext, List<? extends IPrimitiveType<String>> theProperties) {
+				FhirContext theContext, List<? extends IPrimitiveType<String>> thePropertyNames) {
 
 			IBaseParameters retVal = ParametersUtil.newInstance(theContext);
 			if (isNotBlank(getCodeSystemDisplayName())) {
@@ -848,8 +870,8 @@ public interface IValidationSupport {
 			if (myProperties != null) {
 
 				Set<String> properties = Collections.emptySet();
-				if (theProperties != null) {
-					properties = theProperties.stream()
+				if (thePropertyNames != null) {
+					properties = thePropertyNames.stream()
 							.map(IPrimitiveType::getValueAsString)
 							.collect(Collectors.toSet());
 				}

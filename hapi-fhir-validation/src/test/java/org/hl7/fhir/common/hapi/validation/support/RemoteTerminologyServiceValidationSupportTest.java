@@ -25,6 +25,7 @@ import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.ParametersUtil;
 import com.google.common.collect.Lists;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
+import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.CodeSystem;
@@ -48,14 +49,14 @@ import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.lessThan;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -64,8 +65,7 @@ public class RemoteTerminologyServiceValidationSupportTest {
 	private static final String DISPLAY = "DISPLAY";
 	private static final String LANGUAGE = "en";
 	private static final String CODE_SYSTEM = "CODE_SYS";
-	private static final String CODE_SYSTEM_VERSION = "2.1";
-	private static final String CODE_SYSTEM_VERSION_AS_TEXT = "v2.1.12";
+	private static final String CODE_SYSTEM_NAME = "Code System";
 	private static final String CODE = "CODE";
 	private static final String VALUE_SET_URL = "http://value.set/url";
 	private static final String TARGET_SYSTEM = "http://target.system/url";
@@ -81,10 +81,10 @@ public class RemoteTerminologyServiceValidationSupportTest {
 	private static final String ERROR_MESSAGE = "This is an error message";
 	private static final String SUCCESS_MESSAGE = "This is a success message";
 
-	private static FhirContext ourCtx = FhirContext.forR4Cached();
+	private static final FhirContext ourCtx = FhirContext.forR4Cached();
 
 	@RegisterExtension
-	public RestfulServerExtension myRestfulServerExtension = new RestfulServerExtension(ourCtx);
+	public static RestfulServerExtension ourRestfulServerExtension = new RestfulServerExtension(ourCtx);
 
 	private MyValueSetProvider myValueSetProvider;
 	private RemoteTerminologyServiceValidationSupport mySvc;
@@ -94,15 +94,15 @@ public class RemoteTerminologyServiceValidationSupportTest {
 	@BeforeEach
 	public void before() {
 		myValueSetProvider = new MyValueSetProvider();
-		myRestfulServerExtension.getRestfulServer().registerProvider(myValueSetProvider);
+		ourRestfulServerExtension.getRestfulServer().registerProvider(myValueSetProvider);
 
 		myCodeSystemProvider = new MyCodeSystemProvider();
-		myRestfulServerExtension.getRestfulServer().registerProvider(myCodeSystemProvider);
+		ourRestfulServerExtension.getRestfulServer().registerProvider(myCodeSystemProvider);
 
 		myConceptMapProvider = new MyConceptMapProvider();
-		myRestfulServerExtension.getRestfulServer().registerProvider(myConceptMapProvider);
+		ourRestfulServerExtension.getRestfulServer().registerProvider(myConceptMapProvider);
 
-		String baseUrl = "http://localhost:" + myRestfulServerExtension.getPort();
+		String baseUrl = "http://localhost:" + ourRestfulServerExtension.getPort();
 
 		mySvc = new RemoteTerminologyServiceValidationSupport(ourCtx);
 		mySvc.setBaseUrl(baseUrl);
@@ -115,70 +115,98 @@ public class RemoteTerminologyServiceValidationSupportTest {
 	}
 
 	@Test
-	public void testValidateCode_SystemCodeDisplayUrl_BlankCode() {
+	public void testValidateCode_withBlankCode_returnsNull() {
 		IValidationSupport.CodeValidationResult outcome = mySvc.validateCode(null, null, CODE_SYSTEM, "", DISPLAY, VALUE_SET_URL);
-		assertEquals(null, outcome);
+      assertNull(outcome);
 	}
 
-	@Test
-	public void testLookupOperation_CodeSystem_Success() {
-		createNextCodeSystemLookupReturnParameters(true, CODE_SYSTEM_VERSION, CODE_SYSTEM_VERSION_AS_TEXT,
-			DISPLAY, null);
-
-		IValidationSupport.LookupCodeResult outcome = mySvc.lookupCode(null, new ValidationSupportParameterObject(CODE_SYSTEM, CODE));
-		assertNotNull(outcome, "Call to lookupCode() should return a non-NULL result!");
-		assertEquals(DISPLAY, outcome.getCodeDisplay());
-		assertEquals(CODE_SYSTEM_VERSION, outcome.getCodeSystemVersion());
-
-		assertEquals(CODE, myCodeSystemProvider.myLastCode.getCode());
-		assertEquals(CODE_SYSTEM, myCodeSystemProvider.myLastUrl.getValueAsString());
-		assertEquals(CODE_SYSTEM_VERSION_AS_TEXT, myCodeSystemProvider.myNextReturnParams.getParameterValue("name").toString());
-		assertTrue(Boolean.parseBoolean(myCodeSystemProvider.myNextReturnParams.getParameterValue("result").primitiveValue()));
-	}
 
 	@Test
-	public void testLookupOperationWithAllParams_CodeSystem_Success() {
-		createNextCodeSystemLookupReturnParameters(true, CODE_SYSTEM_VERSION, CODE_SYSTEM_VERSION_AS_TEXT,
-			DISPLAY, null);
-		addAdditionalReturnParameters();
+	public void testLookupCode_forCodeSystemWithAllParams_returnsCorrectParameters() {
+		myCodeSystemProvider.myNextLookupCodeResult = new IValidationSupport.LookupCodeResult();
+		myCodeSystemProvider.myNextLookupCodeResult.setFound(true);
+		myCodeSystemProvider.myNextLookupCodeResult.setCodeSystemVersion(CODE_SYSTEM);
+		myCodeSystemProvider.myNextLookupCodeResult.setSearchedForCode(CODE);
+		myCodeSystemProvider.myNextLookupCodeResult.setCodeSystemDisplayName(CODE_SYSTEM_NAME);
+		myCodeSystemProvider.myNextLookupCodeResult.setCodeDisplay(DISPLAY);
+
+		// property
+		String propertyName = "birthDate";
+		String propertyValue = "1930-01-01";
+		IValidationSupport.BaseConceptProperty property = new IValidationSupport.StringConceptProperty(propertyName, propertyValue);
+		myCodeSystemProvider.myNextLookupCodeResult.getProperties().add(property);
+
+		// designation
+		IValidationSupport.ConceptDesignation designation = new IValidationSupport.ConceptDesignation();
+		designation.setLanguage("en");
+		designation.setUseCode("code");
+		designation.setUseSystem("system");
+		designation.setUseDisplay("display");
+		designation.setValue("some value");
+		myCodeSystemProvider.myNextLookupCodeResult.getDesignations().add(designation);
 
 		IValidationSupport.LookupCodeResult outcome = mySvc.lookupCode(null, new ValidationSupportParameterObject(CODE_SYSTEM, CODE, null, Set.of("birthDate")));
 		assertNotNull(outcome, "Call to lookupCode() should return a non-NULL result!");
 		assertEquals(DISPLAY, outcome.getCodeDisplay());
-		assertEquals(CODE_SYSTEM_VERSION, outcome.getCodeSystemVersion());
-		assertEquals(CODE_SYSTEM_VERSION_AS_TEXT, myCodeSystemProvider.myNextReturnParams.getParameterValue("name").toString());
+		assertEquals(CODE_SYSTEM, outcome.getCodeSystemVersion());
+		assertEquals(CODE_SYSTEM_NAME, myCodeSystemProvider.myNextReturnParams.getParameterValue("name").toString());
 
 		assertEquals(CODE, myCodeSystemProvider.myLastCode.getCode());
 		assertEquals(CODE_SYSTEM, myCodeSystemProvider.myLastUrl.getValueAsString());
-		assertTrue(Boolean.parseBoolean(myCodeSystemProvider.myNextReturnParams.getParameterValue("result").primitiveValue()));
-		assertNotNull(outcome.getProperties());
-		assertThat(outcome.getProperties().stream().map(IValidationSupport.BaseConceptProperty::getPropertyName).collect(Collectors.toList()), containsInAnyOrder("birthDate"));
 
-		validateExtraCodeSystemParams();
+		Parameters.ParametersParameterComponent propertyComponent = myCodeSystemProvider.myNextReturnParams.getParameter("property");
+		assertNotNull(propertyComponent);
+
+		Iterator<Parameters.ParametersParameterComponent> propertyComponentIterator = propertyComponent.getPart().iterator();
+		propertyComponent = propertyComponentIterator.next();
+		assertEquals("code", propertyComponent.getName());
+		assertEquals(propertyName, ((StringType)propertyComponent.getValue()).getValue());
+
+		propertyComponent = propertyComponentIterator.next();
+		assertEquals("value", propertyComponent.getName());
+		assertEquals(propertyValue, ((StringType)propertyComponent.getValue()).getValue());
+
+		Parameters.ParametersParameterComponent designationComponent = myCodeSystemProvider.myNextReturnParams.getParameter("designation");
+		Iterator<Parameters.ParametersParameterComponent> partParameter = designationComponent.getPart().iterator();
+		designationComponent = partParameter.next();
+		assertEquals("language", designationComponent.getName());
+		assertEquals(LANGUAGE, designationComponent.getValue().toString());
+
+		designationComponent = partParameter.next();
+		assertEquals("use", designationComponent.getName());
+		Coding coding = (Coding)designationComponent.getValue();
+		assertNotNull(coding, "Coding value returned via designation use should NOT be NULL!");
+		assertEquals("code", coding.getCode());
+		assertEquals("system", coding.getSystem());
+		assertEquals("display", coding.getDisplay());
+
+		designationComponent = partParameter.next();
+		assertEquals("value", designationComponent.getName());
+		assertEquals("some value", designationComponent.getValue().toString());
 	}
 
 	@Test
-	public void testLookupCode_BlankCode_ThrowsException() {
-		Assertions.assertThrows(IllegalArgumentException.class, () -> {
-			IValidationSupport.LookupCodeResult outcome = mySvc.lookupCode(null, new ValidationSupportParameterObject(CODE_SYSTEM, ""));
-		});
+	public void testLookupCode_forCodeSystemWithBlankCode_throwsException() {
+		Assertions.assertThrows(IllegalArgumentException.class,
+				() -> mySvc.lookupCode(null, new ValidationSupportParameterObject(CODE_SYSTEM, "")));
 	}
 
 	@Test
-	public void testValidateCode_ValueSet_Success() {
+	public void testValidateCode_forValueSet_returnsCorrectly() {
 		createNextValueSetReturnParameters(true, DISPLAY, null);
 
 		IValidationSupport.CodeValidationResult outcome = mySvc.validateCode(null, null, CODE_SYSTEM, CODE, DISPLAY, VALUE_SET_URL);
+		assertNotNull(outcome);
 		assertEquals(CODE, outcome.getCode());
 		assertEquals(DISPLAY, outcome.getDisplay());
-		assertEquals(null, outcome.getSeverity());
-		assertEquals(null, outcome.getMessage());
+      assertNull(outcome.getSeverity());
+      assertNull(outcome.getMessage());
 
 		assertEquals(CODE, myValueSetProvider.myLastCode.getCode());
 		assertEquals(DISPLAY, myValueSetProvider.myLastDisplay.getValue());
 		assertEquals(CODE_SYSTEM, myValueSetProvider.myLastSystem.getValue());
 		assertEquals(VALUE_SET_URL, myValueSetProvider.myLastUrl.getValue());
-		assertEquals(null, myValueSetProvider.myLastValueSet);
+      assertNull(myValueSetProvider.myLastValueSet);
 	}
 
 	@Test
@@ -187,75 +215,20 @@ public class RemoteTerminologyServiceValidationSupportTest {
 		myValueSetProvider.myNextReturnValueSets = new ArrayList<>();
 
 		// when
-		IBaseResource valueSet = mySvc.fetchValueSet(VALUE_SET_URL);
+		mySvc.fetchValueSet(VALUE_SET_URL);
 
 	    // then
 	    assertEquals(SummaryEnum.FALSE, myValueSetProvider.myLastSummaryParam);
 	}
 
 	@Test
-	public void testValidateCodeWithAllParams_CodeSystem_Success() {
-		createNextCodeSystemReturnParameters(true, DISPLAY, null);
-		addAdditionalReturnParameters();
-
-		IValidationSupport.CodeValidationResult outcome = mySvc.validateCode(null, null, CODE_SYSTEM, CODE, DISPLAY, null);
-		assertEquals(CODE, outcome.getCode());
-		assertEquals(DISPLAY, outcome.getDisplay());
-		assertEquals(null, outcome.getSeverity());
-		assertEquals(null, outcome.getMessage());
-
-		validateExtraCodeSystemParams();
-	}
-
-	private void validateExtraCodeSystemParams() {
-		assertEquals(CODE, myCodeSystemProvider.myLastCode.getCode());
-		assertEquals(CODE_SYSTEM, myCodeSystemProvider.myLastUrl.getValueAsString());
-		for (Parameters.ParametersParameterComponent param : myCodeSystemProvider.myNextReturnParams.getParameter()) {
-			String paramName = param.getName();
-			if (paramName.equals("result")) {
-				assertEquals(true, ((BooleanType)param.getValue()).booleanValue());
-			} else if (paramName.equals("display")) {
-				assertEquals(DISPLAY, param.getValue().toString());
-			} else if (paramName.equals("property")) {
-				for (Parameters.ParametersParameterComponent propertyComponent : param.getPart()) {
-					switch(propertyComponent.getName()) {
-						case "name":
-							assertEquals("birthDate", propertyComponent.getValue().toString());
-							break;
-						case "value":
-							assertEquals("1930-01-01", propertyComponent.getValue().toString());
-							break;
-					}
-				}
-			} else if (paramName.equals("designation")) {
-				for (Parameters.ParametersParameterComponent designationComponent : param.getPart()) {
-					switch(designationComponent.getName()) {
-						case "language":
-							assertEquals(LANGUAGE, designationComponent.getValue().toString());
-							break;
-						case "use":
-							Coding coding = (Coding)designationComponent.getValue();
-							assertNotNull(coding, "Coding value returned via designation use should NOT be NULL!");
-							assertEquals("code", coding.getCode());
-							assertEquals("system", coding.getSystem());
-							assertEquals("display", coding.getDisplay());
-							break;
-						case "value":
-							assertEquals("some value", designationComponent.getValue().toString());
-							break;
-					}
-				}
-			}
-		}
-	}
-
-	@Test
-	public void testValidateCode_SystemCodeDisplayUrl_Error() {
+	public void testValidateCode_forSystemCodeWithError_returnsCorrectly() {
 		createNextValueSetReturnParameters(false, null, ERROR_MESSAGE);
 
 		IValidationSupport.CodeValidationResult outcome = mySvc.validateCode(null, null, CODE_SYSTEM, CODE, DISPLAY, VALUE_SET_URL);
-		assertEquals(null, outcome.getCode());
-		assertEquals(null, outcome.getDisplay());
+		assertNotNull(outcome);
+      assertNull(outcome.getCode());
+      assertNull(outcome.getDisplay());
 		assertEquals(IValidationSupport.IssueSeverity.ERROR, outcome.getSeverity());
 		assertEquals(ERROR_MESSAGE, outcome.getMessage());
 
@@ -263,18 +236,24 @@ public class RemoteTerminologyServiceValidationSupportTest {
 		assertEquals(DISPLAY, myValueSetProvider.myLastDisplay.getValue());
 		assertEquals(CODE_SYSTEM, myValueSetProvider.myLastSystem.getValue());
 		assertEquals(VALUE_SET_URL, myValueSetProvider.myLastUrl.getValue());
-		assertEquals(null, myValueSetProvider.myLastValueSet);
+      assertNull(myValueSetProvider.myLastValueSet);
 	}
 
 	@Test
-	public void testValidateCodeInCodeSystem_Good() {
-		createNextCodeSystemReturnParameters(true, DISPLAY, null);
+	public void testValidateCode_forCodeSystem_returnsCorrectly() {
+		myCodeSystemProvider.myNextValidationResult = new IValidationSupport.CodeValidationResult();
+		myCodeSystemProvider.myNextValidationResult.setCodeSystemVersion(CODE_SYSTEM);
+		myCodeSystemProvider.myNextValidationResult.setCode(CODE);
+		myCodeSystemProvider.myNextValidationResult.setCodeSystemName(CODE_SYSTEM_NAME);
+		myCodeSystemProvider.myNextValidationResult.setDisplay(DISPLAY);
+		myCodeSystemProvider.myNextValidationResult.setMessage(SUCCESS_MESSAGE);
 
 		IValidationSupport.CodeValidationResult outcome = mySvc.validateCode(null, null, CODE_SYSTEM, CODE, DISPLAY, null);
+		assertNotNull(outcome);
 		assertEquals(CODE, outcome.getCode());
 		assertEquals(DISPLAY, outcome.getDisplay());
-		assertEquals(null, outcome.getSeverity());
-		assertEquals(null, outcome.getMessage());
+      assertNull(outcome.getSeverity());
+      assertNull(outcome.getMessage());
 
 		assertEquals(CODE, myCodeSystemProvider.myLastCode.getCode());
 		assertEquals(CODE_SYSTEM, myCodeSystemProvider.myLastUrl.getValueAsString());
@@ -289,16 +268,17 @@ public class RemoteTerminologyServiceValidationSupportTest {
 		valueSet.setUrl(VALUE_SET_URL);
 
 		IValidationSupport.CodeValidationResult outcome = mySvc.validateCodeInValueSet(null, new ConceptValidationOptions(), CODE_SYSTEM, CODE, DISPLAY, valueSet);
+		assertNotNull(outcome);
 		assertEquals(CODE, outcome.getCode());
 		assertEquals(DISPLAY, outcome.getDisplay());
-		assertEquals(null, outcome.getSeverity());
-		assertEquals(null, outcome.getMessage());
+      assertNull(outcome.getSeverity());
+      assertNull(outcome.getMessage());
 
 		assertEquals(CODE, myValueSetProvider.myLastCode.getCode());
 		assertEquals(DISPLAY, myValueSetProvider.myLastDisplay.getValue());
 		assertEquals(CODE_SYSTEM, myValueSetProvider.myLastSystem.getValue());
 		assertEquals(VALUE_SET_URL, myValueSetProvider.myLastUrl.getValueAsString());
-		assertEquals(null, myValueSetProvider.myLastValueSet);
+      assertNull(myValueSetProvider.myLastValueSet);
 	}
 
 	/**
@@ -312,7 +292,7 @@ public class RemoteTerminologyServiceValidationSupportTest {
 		valueSet.setUrl(VALUE_SET_URL);
 
 		IValidationSupport.CodeValidationResult outcome = mySvc.validateCodeInValueSet(null, new ConceptValidationOptions().setInferSystem(true), null, CODE, DISPLAY, valueSet);
-		assertEquals(null, outcome);
+      assertNull(outcome);
 	}
 
 	@Test
@@ -355,7 +335,8 @@ public class RemoteTerminologyServiceValidationSupportTest {
 
 		TranslateConceptResults results = mySvc.translateConcept(request);
 
-		assertEquals(results.getResult(), true);
+		assertNotNull(results);
+      assertTrue(results.getResult());
 		assertEquals(results.getResults().size(), 2);
 		for(TranslateConceptResult result : results.getResults()) {
 			assertEquals(singleResult, result);
@@ -379,8 +360,8 @@ public class RemoteTerminologyServiceValidationSupportTest {
 		IValidationSupport.TranslateCodeRequest request = new IValidationSupport.TranslateCodeRequest(codings, null);
 
 		TranslateConceptResults results = mySvc.translateConcept(request);
-
-		assertEquals(results.getResult(), false);
+		assertNotNull(results);
+      assertFalse(results.getResult());
 		assertEquals(results.getResults().size(), 0);
 
 		assertNull(myConceptMapProvider.myLastCodeableConcept);
@@ -398,7 +379,7 @@ public class RemoteTerminologyServiceValidationSupportTest {
 		myCodeSystemProvider.myNextReturnCodeSystems = new ArrayList<>();
 
 		// when
-		IBaseResource codeSystem = mySvc.fetchCodeSystem("http://loinc.org");
+		mySvc.fetchCodeSystem("http://loinc.org");
 
 		// then
 		assertEquals(SummaryEnum.FALSE, myCodeSystemProvider.myLastSummaryParam);
@@ -540,7 +521,7 @@ public class RemoteTerminologyServiceValidationSupportTest {
 		/**
 		 * Captures the system parameter of the request
 		 */
-		private class TestClientInterceptor implements IClientInterceptor {
+		private static class TestClientInterceptor implements IClientInterceptor {
 
 			private String capturedSystemParameter;
 
@@ -557,12 +538,12 @@ public class RemoteTerminologyServiceValidationSupportTest {
 						capturedSystemParameter = systemValues.get(0);
 					}
 				} catch (IOException theE) {
-					theE.printStackTrace();
+					// ignore
 				}
 			}
 
 			@Override
-			public void interceptResponse(IHttpResponse theResponse) throws IOException { }
+			public void interceptResponse(IHttpResponse theResponse) { }
 
 			public String getCapturedSystemParameter() { return capturedSystemParameter; }
 		}
@@ -575,7 +556,7 @@ public class RemoteTerminologyServiceValidationSupportTest {
 		myValueSetProvider.myNextReturnValueSets = new ArrayList<>();
 
 		boolean outcome = mySvc.isValueSetSupported(null, "http://loinc.org/VS");
-		assertEquals(false, outcome);
+      assertFalse(outcome);
 		assertEquals("http://loinc.org/VS", myValueSetProvider.myLastUrlParam.getValue());
 	}
 
@@ -585,7 +566,7 @@ public class RemoteTerminologyServiceValidationSupportTest {
 		myValueSetProvider.myNextReturnValueSets.add((ValueSet) new ValueSet().setId("ValueSet/123"));
 
 		boolean outcome = mySvc.isValueSetSupported(null, "http://loinc.org/VS");
-		assertEquals(true, outcome);
+      assertTrue(outcome);
 		assertEquals("http://loinc.org/VS", myValueSetProvider.myLastUrlParam.getValue());
 	}
 
@@ -594,7 +575,7 @@ public class RemoteTerminologyServiceValidationSupportTest {
 		myCodeSystemProvider.myNextReturnCodeSystems = new ArrayList<>();
 
 		boolean outcome = mySvc.isCodeSystemSupported(null, "http://loinc.org");
-		assertEquals(false, outcome);
+      assertFalse(outcome);
 		assertEquals("http://loinc.org", myCodeSystemProvider.myLastUrlParam.getValue());
 	}
 
@@ -604,29 +585,8 @@ public class RemoteTerminologyServiceValidationSupportTest {
 		myCodeSystemProvider.myNextReturnCodeSystems.add((CodeSystem) new CodeSystem().setId("CodeSystem/123"));
 
 		boolean outcome = mySvc.isCodeSystemSupported(null, "http://loinc.org");
-		assertEquals(true, outcome);
+      assertTrue(outcome);
 		assertEquals("http://loinc.org", myCodeSystemProvider.myLastUrlParam.getValue());
-	}
-
-	private void createNextCodeSystemReturnParameters(boolean theResult, String theDisplay, String theMessage) {
-		myCodeSystemProvider.myNextReturnParams = new Parameters();
-		myCodeSystemProvider.myNextReturnParams.addParameter("result", theResult);
-		myCodeSystemProvider.myNextReturnParams.addParameter("display", theDisplay);
-		if (theMessage != null) {
-			myCodeSystemProvider.myNextReturnParams.addParameter("message", theMessage);
-		}
-	}
-
-	private void createNextCodeSystemLookupReturnParameters(boolean theResult, String theVersion, String theVersionAsText,
-																			  String theDisplay, String theMessage) {
-		myCodeSystemProvider.myNextReturnParams = new Parameters();
-		myCodeSystemProvider.myNextReturnParams.addParameter("result", theResult);
-		myCodeSystemProvider.myNextReturnParams.addParameter("version", theVersion);
-		myCodeSystemProvider.myNextReturnParams.addParameter("name", theVersionAsText);
-		myCodeSystemProvider.myNextReturnParams.addParameter("display", theDisplay);
-		if (theMessage != null) {
-			myCodeSystemProvider.myNextReturnParams.addParameter("message", theMessage);
-		}
 	}
 
 	private void createNextValueSetReturnParameters(boolean theResult, String theDisplay, String theMessage) {
@@ -638,53 +598,33 @@ public class RemoteTerminologyServiceValidationSupportTest {
 		}
 	}
 
-	private void addAdditionalReturnParameters() {
-		// property
-		Parameters.ParametersParameterComponent param = myCodeSystemProvider.myNextReturnParams.addParameter().setName("property");
-		param.addPart().setName("name").setValue(new StringType("birthDate"));
-		param.addPart().setName("value").setValue(new StringType("1930-01-01"));
-		// designation
-		param = myCodeSystemProvider.myNextReturnParams.addParameter().setName("designation");
-		param.addPart().setName("language").setValue(new CodeType("en"));
-		Parameters.ParametersParameterComponent codingParam = param.addPart().setName("use");
-		Coding coding = new Coding();
-		coding.setCode("code");
-		coding.setSystem("system");
-		coding.setDisplay("display");
-		codingParam.setValue(coding);
-		param.addPart().setName("value").setValue(new StringType("some value"));
-	}
-
 	private static class MyCodeSystemProvider implements IResourceProvider {
 
 		private SummaryEnum myLastSummaryParam;
 		private UriParam myLastUrlParam;
 		private List<CodeSystem> myNextReturnCodeSystems;
-		private int myInvocationCount;
 		private UriType myLastUrl;
 		private CodeType myLastCode;
-		private Coding myLastCoding;
-		private StringType myLastVersion;
 		private Parameters myNextReturnParams;
 		private IValidationSupport.LookupCodeResult myNextLookupCodeResult;
+		private IValidationSupport.CodeValidationResult myNextValidationResult;
 
 		@Operation(name = "validate-code", idempotent = true, returnParameters = {
 			@OperationParam(name = "result", type = BooleanType.class, min = 1),
 			@OperationParam(name = "message", type = StringType.class),
 			@OperationParam(name = "display", type = StringType.class)
 		})
-		public Parameters validateCode(
+		public IBaseParameters validateCode(
 			HttpServletRequest theServletRequest,
 			@IdParam(optional = true) IdType theId,
 			@OperationParam(name = "url", min = 0, max = 1) UriType theCodeSystemUrl,
 			@OperationParam(name = "code", min = 0, max = 1) CodeType theCode,
 			@OperationParam(name = "display", min = 0, max = 1) StringType theDisplay
 		) {
-			myInvocationCount++;
 			myLastUrl = theCodeSystemUrl;
 			myLastCode = theCode;
+			myNextReturnParams = (Parameters)myNextValidationResult.toParameters(ourCtx);
 			return myNextReturnParams;
-
 		}
 
 		@Operation(name = JpaConstants.OPERATION_LOOKUP, idempotent = true, returnParameters= {
@@ -694,45 +634,20 @@ public class RemoteTerminologyServiceValidationSupportTest {
 			@OperationParam(name="abstract", type=BooleanType.class, min=1),
 			@OperationParam(name="property", min = 0, max = OperationParam.MAX_UNLIMITED)
 		})
-		public Parameters lookup(
+		public IBaseParameters lookup(
 			HttpServletRequest theServletRequest,
 			@OperationParam(name="code", min=0, max=1) CodeType theCode,
 			@OperationParam(name="system", min=0, max=1) UriType theSystem,
 			@OperationParam(name="coding", min=0, max=1) Coding theCoding,
 			@OperationParam(name="version", min=0, max=1) StringType theVersion,
 			@OperationParam(name="displayLanguage", min=0, max=1) CodeType theDisplayLanguage,
-			@OperationParam(name="property", min = 0, max = OperationParam.MAX_UNLIMITED) List<CodeType> theProperties,
+			@OperationParam(name="property", min = 0, max = OperationParam.MAX_UNLIMITED) List<CodeType> thePropertyNames,
 			RequestDetails theRequestDetails
 		) {
-			myInvocationCount++;
 			myLastCode = theCode;
 			myLastUrl = theSystem;
-			myLastCoding = theCoding;
-			myLastVersion = theVersion;
-
-			Set<String> propertiesNames = theProperties != null ? theProperties.stream().map(CodeType::getCode).collect(Collectors.toSet()) : Collections.emptySet();
-
-			Parameters retVal = new Parameters();
-			for (Parameters.ParametersParameterComponent parameterComponent : myNextReturnParams.getParameter()) {
-				if ("property".equals(parameterComponent.getName())) {
-					boolean found = false;
-					for (Parameters.ParametersParameterComponent parametersPartComponent : parameterComponent.getPart()) {
-						String name = parametersPartComponent.getName();
-						String propertyValue = parametersPartComponent.getValue().primitiveValue();
-						if ("name".equals(name) && propertiesNames.contains(propertyValue)) {
-							found = true;
-							break;
-						}
-					}
-					if (found) {
-						retVal.addParameter(parameterComponent);
-					}
-				} else {
-					retVal.addParameter(parameterComponent);
-				}
-			}
-
-			return retVal;
+			myNextReturnParams = (Parameters)myNextLookupCodeResult.toParameters(theRequestDetails.getFhirContext(), thePropertyNames);
+			return myNextReturnParams;
 		}
 
 		@Search
@@ -808,8 +723,6 @@ public class RemoteTerminologyServiceValidationSupportTest {
 		private UriType myLastTargetValueSet;
 		private UriType myLastTargetCodeSystem;
 		private BooleanType myLastReverse;
-
-		private int myInvocationCount;
 		private Parameters myNextReturnParams;
 
 		@Operation(name = JpaConstants.OPERATION_TRANSLATE, idempotent = true, returnParameters = {
@@ -828,7 +741,6 @@ public class RemoteTerminologyServiceValidationSupportTest {
 			@OperationParam(name = "reverse", min = 0, max = 1) BooleanType theReverse,
 			RequestDetails theRequestDetails
 		) {
-			myInvocationCount++;
 			myLastConceptMapUrl = theConceptMapUrl;
 			myLastConceptMapVersion = theConceptMapVersion;
 			myLastCodeableConcept = theSourceCodeableConcept;

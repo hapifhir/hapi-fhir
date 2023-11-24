@@ -10,8 +10,8 @@ public class ValidationSupportParameterObject {
 	private Collection<String> myPropertyNames;
 
 	/**
-	 * @param theSystem							The CodeSystem URL
-	 * @param theCode								The code
+	 * @param theSystem                    The CodeSystem URL
+	 * @param theCode                      The code
 	 */
 	public ValidationSupportParameterObject(String theSystem, String theCode) {
 		mySystem = theSystem;
@@ -19,10 +19,10 @@ public class ValidationSupportParameterObject {
 	}
 
 	/**
-	 * @param theSystem							The CodeSystem URL
-	 * @param theCode								The code
-	 * @param theDisplayLanguage				Used to filter out the designation by the display language. To return all designation, set this value to <code>null</code>.
-	 * @param thePropertyNames					The collection of properties to be returned in the output. If no properties are specified, the implementor chooses what to return.
+	 * @param theSystem                    The CodeSystem URL
+	 * @param theCode                      The code
+	 * @param theDisplayLanguage           Used to filter out the designation by the display language. To return all designation, set this value to <code>null</code>.
+	 * @param thePropertyNames             The collection of properties to be returned in the output. If no properties are specified, the implementor chooses what to return.
 	 */
 	public ValidationSupportParameterObject(
 			String theSystem, String theCode, String theDisplayLanguage, Collection<String> thePropertyNames) {
