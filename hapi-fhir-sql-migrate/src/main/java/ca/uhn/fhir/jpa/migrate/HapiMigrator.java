@@ -221,6 +221,8 @@ public class HapiMigrator {
 	}
 
 	public void createMigrationTableIfRequired() {
-		myHapiMigrationStorageSvc.createMigrationTableIfRequired();
+		if (!myDryRun) {
+			myHapiMigrationStorageSvc.createMigrationTableIfRequired();
+		}
 	}
 }

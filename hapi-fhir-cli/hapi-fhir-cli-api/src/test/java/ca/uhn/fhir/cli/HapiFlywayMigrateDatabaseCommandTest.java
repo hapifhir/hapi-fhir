@@ -191,18 +191,6 @@ public class HapiFlywayMigrateDatabaseCommandTest {
 
 	}
 
-	private void seedDatabaseMigration340(HapiMigrationDao theHapiMigrationDao) {
-		theHapiMigrationDao.createMigrationTableIfRequired();
-		HapiMigrationEntity hapiMigrationEntity = new HapiMigrationEntity();
-		hapiMigrationEntity.setPid(1);
-		hapiMigrationEntity.setVersion("3.4.0.20180401.1");
-		hapiMigrationEntity.setDescription("some sql statement");
-		hapiMigrationEntity.setExecutionTime(25);
-		hapiMigrationEntity.setSuccess(true);
-
-		theHapiMigrationDao.save(hapiMigrationEntity);
-	}
-
 	@Test
 	public void testMigrateFromEmptySchema() throws IOException, SQLException {
 
@@ -228,6 +216,38 @@ public class HapiFlywayMigrateDatabaseCommandTest {
 		App.main(args);
 		assertTrue(JdbcUtils.getTableNames(connectionProperties).contains("HFJ_RESOURCE")); // Early table
 		assertTrue(JdbcUtils.getTableNames(connectionProperties).contains("HFJ_BLK_EXPORT_JOB")); // Late table
+	}
+
+	@Test
+	public void testMigrateFrom340_dryRun_whenNoMigrationTableExists() throws IOException, SQLException {
+
+		File location = getLocation("migrator_h2_test_340_dryrun");
+
+		String url = "jdbc:h2:" + location.getAbsolutePath();
+		DriverTypeEnum.ConnectionProperties connectionProperties = DriverTypeEnum.H2_EMBEDDED.newConnectionProperties(url, "", "");
+		HapiMigrationDao hapiMigrationDao = new HapiMigrationDao(connectionProperties.getDataSource(), connectionProperties.getDriverType(), SchemaMigrator.HAPI_FHIR_MIGRATION_TABLENAME);
+
+		String initSql = "/persistence_create_h2_340.sql";
+		executeSqlStatements(connectionProperties, initSql);
+
+		seedDatabase340(connectionProperties);
+
+		ourLog.info("**********************************************");
+		ourLog.info("Done Setup, Starting Migration...");
+		ourLog.info("**********************************************");
+
+		String[] args = new String[]{
+			BaseFlywayMigrateDatabaseCommand.MIGRATE_DATABASE,
+			"-d", "H2_EMBEDDED",
+			"-u", url,
+			"-n", "",
+			"-p", "",
+			"-r"
+		};
+
+		App.main(args);
+
+		assertFalse(JdbcUtils.getTableNames(connectionProperties).contains("FLY_HFJ_MIGRATION"));
 	}
 
 	@Nonnull
@@ -378,6 +398,18 @@ public class HapiFlywayMigrateDatabaseCommandTest {
 			return null;
 		});
 
+	}
+
+	private void seedDatabaseMigration340(HapiMigrationDao theHapiMigrationDao) {
+		theHapiMigrationDao.createMigrationTableIfRequired();
+		HapiMigrationEntity hapiMigrationEntity = new HapiMigrationEntity();
+		hapiMigrationEntity.setPid(1);
+		hapiMigrationEntity.setVersion("3.4.0.20180401.1");
+		hapiMigrationEntity.setDescription("some sql statement");
+		hapiMigrationEntity.setExecutionTime(25);
+		hapiMigrationEntity.setSuccess(true);
+
+		theHapiMigrationDao.save(hapiMigrationEntity);
 	}
 
 }
