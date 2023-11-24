@@ -26,7 +26,6 @@ import java.sql.Timestamp;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -133,6 +132,7 @@ public class HapiFlywayMigrateDatabaseCommandTest {
 		executeSqlStatements(connectionProperties, initSql);
 
 		seedDatabase340(connectionProperties);
+		seedDatabaseMigration340(hapiMigrationDao);
 
 		ourLog.info("**********************************************");
 		ourLog.info("Done Setup, Starting Migration...");
@@ -189,6 +189,18 @@ public class HapiFlywayMigrateDatabaseCommandTest {
 		assertTrue(foreignKeys.contains("FK_SEARCHRES_RES"));
 		assertTrue(expectedMigrationEntities == hapiMigrationDao.findAll().size());
 
+	}
+
+	private void seedDatabaseMigration340(HapiMigrationDao theHapiMigrationDao) {
+		theHapiMigrationDao.createMigrationTableIfRequired();
+		HapiMigrationEntity hapiMigrationEntity = new HapiMigrationEntity();
+		hapiMigrationEntity.setPid(1);
+		hapiMigrationEntity.setVersion("3.4.0.20180401.1");
+		hapiMigrationEntity.setDescription("some sql statement");
+		hapiMigrationEntity.setExecutionTime(25);
+		hapiMigrationEntity.setSuccess(true);
+
+		theHapiMigrationDao.save(hapiMigrationEntity);
 	}
 
 	@Test
@@ -335,59 +347,9 @@ public class HapiFlywayMigrateDatabaseCommandTest {
 				}
 			);
 
-			jdbcTemplate.execute(
-				"insert into FLY_HFJ_MIGRATION (\"installed_rank\", \"version\", \"description\", \"type\", \"script\", \"checksum\", \"installed_by\", \"installed_on\", \"execution_time\", \"success\") values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-				new AbstractLobCreatingPreparedStatementCallback(new DefaultLobHandler()) {
-					@Override
-					protected void setValues(PreparedStatement thePs, LobCreator theLobCreator) throws SQLException {
-						thePs.setInt(1, -1);
-						thePs.setNull(2, Types.VARCHAR);
-						thePs.setString(3, "<< HAPI FHIR Schema History table created >>");
-						thePs.setString(4, "TABLE");
-						thePs.setString(5, "HAPI FHIR");
-						thePs.setNull(6, Types.INTEGER);
-						thePs.setString(7, "V7_0_0");
-						thePs.setTimestamp(8, new Timestamp(System.currentTimeMillis()));
-						thePs.setInt(9, 0);
-						thePs.setBoolean(10, true);
-					}
-				}
-			);
-
-			jdbcTemplate.execute(
-				"insert into FLY_HFJ_MIGRATION (\"installed_rank\", \"version\", \"description\", \"type\", \"script\", \"checksum\", \"installed_by\", \"installed_on\", \"execution_time\", \"success\") values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-				new AbstractLobCreatingPreparedStatementCallback(new DefaultLobHandler()) {
-					@Override
-					protected void setValues(PreparedStatement thePs, LobCreator theLobCreator) throws SQLException {
-						thePs.setInt(1, 1);
-						thePs.setString(2, "3.4.0.20180401.1");
-						thePs.setString(3, "Drop index IDX_CSV_RESOURCEPID_AND_VER from table TRM_CODESYSTEM_VER");
-						thePs.setString(4, "JDBC");
-						thePs.setString(5, "HAPI FHIR");
-						thePs.setInt(6, -725398508);
-						thePs.setString(7, "V7_0_0");
-						thePs.setTimestamp(8, new Timestamp(System.currentTimeMillis()));
-						thePs.setInt(9, 4);
-						thePs.setBoolean(10, true);
-					}
-				}
-			);
-
 			return null;
 		});
 
-	}
-
-	private List<HapiMigrationEntity> getMigrationEntities(DriverTypeEnum.ConnectionProperties theConnectionProperties){
-
-		List<HapiMigrationEntity> entities = theConnectionProperties.getTxTemplate().execute(t -> {
-
-			List<HapiMigrationEntity> hapiMigrationEntities = theConnectionProperties.newJdbcTemplate().query("SELECT * FROM FLY_HFJ_MIGRATION", HapiMigrationEntity.rowMapper());
-
-			return hapiMigrationEntities;
-		});
-
-		return entities;
 	}
 
 	private void executeSqlStatements(DriverTypeEnum.ConnectionProperties theConnectionProperties, String theInitSql) throws

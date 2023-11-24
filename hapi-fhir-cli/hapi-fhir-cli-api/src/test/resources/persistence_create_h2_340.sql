@@ -29,7 +29,6 @@ create sequence SEQ_SPIDX_TOKEN start with 1 increment by 50;
 create sequence SEQ_SPIDX_URI start with 1 increment by 50;
 create sequence SEQ_SUBSCRIPTION_ID start with 1 increment by 50;
 create sequence SEQ_TAGDEF_ID start with 1 increment by 50;
-create sequence SEQ_FLY_HFJ_MIGRATION start with 1 increment by 50;
 create table HFJ_FORCED_ID (PID bigint not null, FORCED_ID varchar(100) not null, RESOURCE_PID bigint not null, RESOURCE_TYPE varchar(100) default '', primary key (PID));
 create table HFJ_HISTORY_TAG (PID bigint not null, TAG_ID bigint, RES_ID bigint not null, RES_TYPE varchar(30) not null, RES_VER_PID bigint not null, primary key (PID));
 create table HFJ_IDX_CMP_STRING_UNIQ (PID bigint not null, IDX_STRING varchar(150) not null, RES_ID bigint, primary key (PID));
@@ -61,8 +60,6 @@ create table TRM_CONCEPT_MAP_GRP_ELEMENT (PID bigint not null, SOURCE_CODE varch
 create table TRM_CONCEPT_MAP_GRP_ELM_TGT (PID bigint not null, TARGET_CODE varchar(50) not null, myConceptMapUrl varchar(255), TARGET_DISPLAY varchar(400), TARGET_EQUIVALENCE varchar(50), mySystem varchar(255), mySystemVersion varchar(255), myValueSet varchar(255), CONCEPT_MAP_GRP_ELM_PID bigint not null, primary key (PID));
 create table TRM_CONCEPT_PC_LINK (PID bigint not null, CHILD_PID bigint, PARENT_PID bigint, REL_TYPE integer, CODESYSTEM_PID bigint not null, primary key (PID));
 create table TRM_CONCEPT_PROPERTY (PID bigint not null, PROP_CODESYSTEM varchar(500), PROP_DISPLAY varchar(500), PROP_KEY varchar(500) not null, PROP_TYPE integer not null, PROP_VAL varchar(500), CONCEPT_PID bigint, primary key (PID));
-CREATE TABLE "FLY_HFJ_MIGRATION" ("installed_rank" INTEGER NOT NULL,"version" VARCHAR(50),"description" VARCHAR(200) NOT NULL,"type" VARCHAR(20) NOT NULL,"script" VARCHAR(1000) NOT NULL,"checksum" INTEGER,"installed_by" VARCHAR(100) NOT NULL,"installed_on" DATE NOT NULL,"execution_time" INTEGER NOT NULL,"success" boolean NOT NULL)
-CREATE UNIQUE INDEX FLY_HFJ_MIGRATION_PK_INDEX ON "FLY_HFJ_MIGRATION" ("installed_rank")
 create index IDX_FORCEDID_TYPE_FORCEDID on HFJ_FORCED_ID (RESOURCE_TYPE, FORCED_ID);
 create unique index IDX_FORCEDID_RESID on HFJ_FORCED_ID (RESOURCE_PID);
 create unique index IDX_FORCEDID_TYPE_RESID on HFJ_FORCED_ID (RESOURCE_TYPE, RESOURCE_PID);
