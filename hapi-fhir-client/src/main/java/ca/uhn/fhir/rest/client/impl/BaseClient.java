@@ -353,7 +353,7 @@ public abstract class BaseClient implements IRestfulClient {
 
 			response = httpRequest.execute();
 
-			final ClientResponseContext clientResponseContext = new ClientResponseContext(httpRequest, response, this);
+			final ClientResponseContext clientResponseContext = new ClientResponseContext(httpRequest, response, this, getFhirContext());
 			HookParams responseParams = new HookParams();
 			responseParams.add(IHttpRequest.class, httpRequest);
 			responseParams.add(IHttpResponse.class, response);
