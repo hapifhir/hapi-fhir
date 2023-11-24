@@ -664,7 +664,7 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 	}
 
 	private boolean isOracleDialect() {
-		return myHibernatePropertiesProvider.getDialect() instanceof org.hibernate.dialect.Oracle12cDialect;
+		return myHibernatePropertiesProvider.getDialect() instanceof org.hibernate.dialect.OracleDialect;
 	}
 
 	private void expandConcepts(
