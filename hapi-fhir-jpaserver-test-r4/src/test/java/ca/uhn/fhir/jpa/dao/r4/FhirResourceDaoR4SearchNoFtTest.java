@@ -4592,7 +4592,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		assertNull(values.size());
 		assertEquals(5, values.getResources(0, 1000).size());
 
-		String sql = myCaptureQueriesListener.logSelectQueriesForCurrentThread(0);
+		String sql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false);
 		assertEquals(1, countMatches(sql, "fetch first '5'"), sql);
 	}
 

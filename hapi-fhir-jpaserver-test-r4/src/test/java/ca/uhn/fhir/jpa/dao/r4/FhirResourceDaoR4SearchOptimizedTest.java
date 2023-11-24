@@ -896,12 +896,12 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 			myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 
 			String selectQuery = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false);
-			assertEquals(1, StringUtils.countMatches(selectQuery.toLowerCase(), "r1_0.res_type='observation'"), selectQuery);
-			assertEquals(1, StringUtils.countMatches(selectQuery.toLowerCase(), "r1_0.fhir_id in ('a')"), selectQuery);
+			assertEquals(1, StringUtils.countMatches(selectQuery.toLowerCase(), "rt1_0.res_type='observation'"), selectQuery);
+			assertEquals(1, StringUtils.countMatches(selectQuery.toLowerCase(), "rt1_0.fhir_id in ('a')"), selectQuery);
 
 			selectQuery = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(1).getSql(true, false);
 			assertEquals(1, StringUtils.countMatches(selectQuery.toLowerCase(), "select t1.res_id from hfj_resource t1"), selectQuery);
-			assertEquals(0, StringUtils.countMatches(selectQuery.toLowerCase(), "t1.res_type = 'observation'"), selectQuery);
+			assertEquals(0, StringUtils.countMatches(selectQuery.toLowerCase(), "t1.res_type='observation'"), selectQuery);
 			assertEquals(0, StringUtils.countMatches(selectQuery.toLowerCase(), "t1.res_deleted_at is null"), selectQuery);
 		}
 
@@ -938,8 +938,8 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 
 			assertEquals(1, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
 			String selectQuery = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false);
-			assertEquals(1, StringUtils.countMatches(selectQuery.toLowerCase(), "r1_0.res_type='observation'"), selectQuery);
-			assertEquals(1, StringUtils.countMatches(selectQuery.toLowerCase(), "r1_0.fhir_id in ('a')"), selectQuery);
+			assertEquals(1, StringUtils.countMatches(selectQuery.toLowerCase(), "rt1_0.res_type='observation'"), selectQuery);
+			assertEquals(1, StringUtils.countMatches(selectQuery.toLowerCase(), "rt1_0.fhir_id in ('a')"), selectQuery);
 		}
 
 		// Search by ID where at least one ID is a numeric ID
@@ -1548,7 +1548,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		// Forced ID resolution
 		resultingQueryNotFormatted = queries.get(0);
 		assertThat(resultingQueryNotFormatted, containsString("RES_TYPE='Organization'"));
-		assertThat(resultingQueryNotFormatted, containsString("r1_0.RES_TYPE='Organization' and r1_0.FHIR_ID='ORG1' or r1_0.RES_TYPE='Organization' and r1_0.FHIR_ID='ORG2'"));
+		assertThat(resultingQueryNotFormatted, containsString("rt1_0.RES_TYPE='Organization' and rt1_0.FHIR_ID='ORG1' or rt1_0.RES_TYPE='Organization' and rt1_0.FHIR_ID='ORG2'"));
 
 		// The search itself
 		resultingQueryNotFormatted = queries.get(1);
