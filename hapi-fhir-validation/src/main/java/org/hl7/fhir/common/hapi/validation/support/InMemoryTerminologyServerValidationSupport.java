@@ -5,6 +5,7 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
+import ca.uhn.fhir.context.support.ValidationSupportParameterObject;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.parser.IParser;
@@ -612,15 +613,15 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 	@Override
 	public LookupCodeResult lookupCode(
 			ValidationSupportContext theValidationSupportContext,
-			String theSystem,
-			String theCode,
-			String theDisplayLanguage) {
-		CodeValidationResult codeValidationResult = validateCode(
-				theValidationSupportContext, new ConceptValidationOptions(), theSystem, theCode, null, null);
+			ValidationSupportParameterObject validationSupportParameterObject) {
+		final String code = validationSupportParameterObject.getCode();
+		final String system = validationSupportParameterObject.getSystem();
+		CodeValidationResult codeValidationResult =
+				validateCode(theValidationSupportContext, new ConceptValidationOptions(), code, system, null, null);
 		if (codeValidationResult == null) {
 			return null;
 		}
-		return codeValidationResult.asLookupCodeResult(theSystem, theCode);
+		return codeValidationResult.asLookupCodeResult(system, code);
 	}
 
 	@Nullable
@@ -927,9 +928,8 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 								.getRootValidationSupport()
 								.lookupCode(
 										theValidationSupportContext,
-										includeOrExcludeConceptSystemUrl,
-										theWantCode,
-										null);
+										new ValidationSupportParameterObject(
+												includeOrExcludeConceptSystemUrl, theWantCode));
 						if (lookup != null) {
 							ableToHandleCode = true;
 							if (lookup.isFound()) {

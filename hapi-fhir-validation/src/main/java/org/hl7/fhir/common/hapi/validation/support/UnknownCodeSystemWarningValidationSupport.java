@@ -3,6 +3,7 @@ package org.hl7.fhir.common.hapi.validation.support;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
+import ca.uhn.fhir.context.support.ValidationSupportParameterObject;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
@@ -52,11 +53,9 @@ public class UnknownCodeSystemWarningValidationSupport extends BaseValidationSup
 	@Override
 	public LookupCodeResult lookupCode(
 			ValidationSupportContext theValidationSupportContext,
-			String theSystem,
-			String theCode,
-			String theDisplayLanguage) {
+			ValidationSupportParameterObject validationSupportParameterObject) {
 		// filters out error/fatal
-		if (canValidateCodeSystem(theValidationSupportContext, theSystem)) {
+		if (canValidateCodeSystem(theValidationSupportContext, validationSupportParameterObject.getSystem())) {
 			return new LookupCodeResult().setFound(true);
 		}
 

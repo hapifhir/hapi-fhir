@@ -5,6 +5,7 @@ import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.TranslateConceptResult;
 import ca.uhn.fhir.context.support.TranslateConceptResults;
+import ca.uhn.fhir.context.support.ValidationSupportParameterObject;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.parser.IJsonLikeParser;
 import ca.uhn.fhir.rest.annotation.IdParam;
@@ -124,7 +125,7 @@ public class RemoteTerminologyServiceValidationSupportTest {
 		createNextCodeSystemLookupReturnParameters(true, CODE_SYSTEM_VERSION, CODE_SYSTEM_VERSION_AS_TEXT,
 			DISPLAY, null);
 
-		IValidationSupport.LookupCodeResult outcome = mySvc.lookupCode(null, CODE_SYSTEM, CODE);
+		IValidationSupport.LookupCodeResult outcome = mySvc.lookupCode(null, new ValidationSupportParameterObject(CODE_SYSTEM, CODE));
 		assertNotNull(outcome, "Call to lookupCode() should return a non-NULL result!");
 		assertEquals(DISPLAY, outcome.getCodeDisplay());
 		assertEquals(CODE_SYSTEM_VERSION, outcome.getCodeSystemVersion());
@@ -141,7 +142,7 @@ public class RemoteTerminologyServiceValidationSupportTest {
 			DISPLAY, null);
 		addAdditionalReturnParameters();
 
-		IValidationSupport.LookupCodeResult outcome = mySvc.lookupCode(null, CODE_SYSTEM, CODE, null, Set.of("birthDate"));
+		IValidationSupport.LookupCodeResult outcome = mySvc.lookupCode(null, new ValidationSupportParameterObject(CODE_SYSTEM, CODE, null, Set.of("birthDate")));
 		assertNotNull(outcome, "Call to lookupCode() should return a non-NULL result!");
 		assertEquals(DISPLAY, outcome.getCodeDisplay());
 		assertEquals(CODE_SYSTEM_VERSION, outcome.getCodeSystemVersion());
@@ -159,8 +160,7 @@ public class RemoteTerminologyServiceValidationSupportTest {
 	@Test
 	public void testLookupCode_BlankCode_ThrowsException() {
 		Assertions.assertThrows(IllegalArgumentException.class, () -> {
-			IValidationSupport.LookupCodeResult outcome = mySvc.lookupCode(null, CODE_SYSTEM,
-				"", null);
+			IValidationSupport.LookupCodeResult outcome = mySvc.lookupCode(null, new ValidationSupportParameterObject(CODE_SYSTEM, ""));
 		});
 	}
 

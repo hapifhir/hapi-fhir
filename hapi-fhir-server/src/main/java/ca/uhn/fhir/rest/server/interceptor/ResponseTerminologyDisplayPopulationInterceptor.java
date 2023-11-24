@@ -25,6 +25,7 @@ import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.RuntimePrimitiveDatatypeDefinition;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
+import ca.uhn.fhir.context.support.ValidationSupportParameterObject;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -122,8 +123,8 @@ public class ResponseTerminologyDisplayPopulationInterceptor extends BaseRespons
 				ValidationSupportContext validationSupportContext = new ValidationSupportContext(myValidationSupport);
 				if (myValidationSupport.isCodeSystemSupported(validationSupportContext, system)) {
 
-					IValidationSupport.LookupCodeResult lookupCodeResult =
-							myValidationSupport.lookupCode(validationSupportContext, system, code);
+					IValidationSupport.LookupCodeResult lookupCodeResult = myValidationSupport.lookupCode(
+							validationSupportContext, new ValidationSupportParameterObject(system, code));
 					if (lookupCodeResult != null && lookupCodeResult.isFound()) {
 						String newDisplay = lookupCodeResult.getCodeDisplay();
 						IPrimitiveType<?> newString = myStringDefinition.newInstance(newDisplay);

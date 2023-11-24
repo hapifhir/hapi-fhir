@@ -6,6 +6,7 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
+import ca.uhn.fhir.context.support.ValidationSupportParameterObject;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.util.ClasspathUtil;
 import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
@@ -221,7 +222,8 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 	@Nullable
 	public CodeValidationResult validateLookupCode(
 			ValidationSupportContext theValidationSupportContext, String theCode, String theSystem) {
-		LookupCodeResult lookupResult = lookupCode(theValidationSupportContext, theSystem, theCode);
+		LookupCodeResult lookupResult =
+				lookupCode(theValidationSupportContext, new ValidationSupportParameterObject(theSystem, theCode));
 		CodeValidationResult validationResult = null;
 		if (lookupResult != null) {
 			if (lookupResult.isFound()) {
@@ -241,17 +243,18 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 	@Override
 	public LookupCodeResult lookupCode(
 			ValidationSupportContext theValidationSupportContext,
-			String theSystem,
-			String theCode,
-			String theDisplayLanguage) {
+			ValidationSupportParameterObject validationSupportParameterObject) {
+		final String code = validationSupportParameterObject.getCode();
+		final String system = validationSupportParameterObject.getSystem();
+
 		Map<String, String> map;
-		switch (theSystem) {
+		switch (system) {
 			case LANGUAGES_CODESYSTEM_URL:
-				return lookupLanguageCode(theCode);
+				return lookupLanguageCode(code);
 			case UCUM_CODESYSTEM_URL:
-				return lookupUcumCode(theCode);
+				return lookupUcumCode(code);
 			case MIMETYPES_CODESYSTEM_URL:
-				return lookupMimetypeCode(theCode);
+				return lookupMimetypeCode(code);
 			case COUNTRIES_CODESYSTEM_URL:
 				map = ISO_3166_CODES;
 				break;
@@ -265,11 +268,11 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 				return null;
 		}
 
-		String display = map.get(theCode);
+		String display = map.get(code);
 		if (isNotBlank(display)) {
 			LookupCodeResult retVal = new LookupCodeResult();
-			retVal.setSearchedForCode(theCode);
-			retVal.setSearchedForSystem(theSystem);
+			retVal.setSearchedForCode(code);
+			retVal.setSearchedForSystem(system);
 			retVal.setFound(true);
 			retVal.setCodeDisplay(display);
 			return retVal;
@@ -277,10 +280,10 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 
 		// If we get here it means we know the codesystem but the code was bad
 		LookupCodeResult retVal = new LookupCodeResult();
-		retVal.setSearchedForCode(theCode);
-		retVal.setSearchedForSystem(theSystem);
+		retVal.setSearchedForCode(code);
+		retVal.setSearchedForSystem(system);
 		retVal.setFound(false);
-		retVal.setErrorMessage("Code '" + theCode + "' is not valid for system: " + theSystem);
+		retVal.setErrorMessage("Code '" + code + "' is not valid for system: " + system);
 		return retVal;
 	}
 
@@ -384,7 +387,7 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 		String language = theNext.get("Subtag").asText();
 		ArrayNode descriptions = (ArrayNode) theNext.get("Description");
 		String description = null;
-		if (descriptions.size() > 0) {
+		if (!descriptions.isEmpty()) {
 			description = descriptions.get(0).asText();
 		}
 		theLanguagesMap.put(language, description);
@@ -403,7 +406,7 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 	@Nonnull
 	private LookupCodeResult lookupUcumCode(String theCode) {
 		InputStream input = ClasspathUtil.loadResourceAsStream("/ucum-essence.xml");
-		String outcome = null;
+		String outcome;
 		LookupCodeResult retVal = new LookupCodeResult();
 		retVal.setSearchedForCode(theCode);
 		retVal.setSearchedForSystem(UCUM_CODESYSTEM_URL);

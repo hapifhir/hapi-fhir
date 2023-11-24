@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
+import ca.uhn.fhir.context.support.ValidationSupportParameterObject;
 import ca.uhn.fhir.i18n.Msg;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.CodeSystem;
@@ -31,35 +32,35 @@ public class CommonCodeSystemsTerminologyServiceTest {
 
 	@Test
 	public void testUcum_LookupCode_Good() {
-		IValidationSupport.LookupCodeResult outcome = mySvc.lookupCode(newSupport(), "http://unitsofmeasure.org", "Cel");
+		IValidationSupport.LookupCodeResult outcome = mySvc.lookupCode(newSupport(), new ValidationSupportParameterObject("http://unitsofmeasure.org", "Cel"));
 		assert outcome != null;
 		assertTrue(outcome.isFound());
 	}
 
 	@Test
 	public void testUcum_LookupCode_Good2() {
-		IValidationSupport.LookupCodeResult outcome = mySvc.lookupCode(newSupport(), "http://unitsofmeasure.org", "kg/m2");
+		IValidationSupport.LookupCodeResult outcome = mySvc.lookupCode(newSupport(), new ValidationSupportParameterObject("http://unitsofmeasure.org", "kg/m2"));
 		assert outcome != null;
 		assertTrue(outcome.isFound());
 	}
 
 	@Test
 	public void testUcum_LookupCode_Bad() {
-		IValidationSupport.LookupCodeResult outcome = mySvc.lookupCode(newSupport(), "http://unitsofmeasure.org", "AAAAA");
+		IValidationSupport.LookupCodeResult outcome = mySvc.lookupCode(newSupport(), new ValidationSupportParameterObject("http://unitsofmeasure.org", "AAAAA"));
 		assert outcome != null;
 		assertFalse(outcome.isFound());
 	}
 
 	@Test
 	public void testUcum_LookupCode_UnknownSystem() {
-		IValidationSupport.LookupCodeResult outcome = mySvc.lookupCode(newSupport(), "http://foo", "AAAAA", null);
+		IValidationSupport.LookupCodeResult outcome = mySvc.lookupCode(newSupport(), new ValidationSupportParameterObject("http://foo", "AAAAA"));
 		assertNull(outcome);
 	}
 
 	@Test
 	public void lookupCode_languageOnlyLookup_isCaseInsensitive() {
-		IValidationSupport.LookupCodeResult outcomeUpper = mySvc.lookupCode(newSupport(), "urn:ietf:bcp:47", "SGN", "Sign Languages");
-		IValidationSupport.LookupCodeResult outcomeLower = mySvc.lookupCode(newSupport(), "urn:ietf:bcp:47", "sgn", "Sign Languages");
+		IValidationSupport.LookupCodeResult outcomeUpper = mySvc.lookupCode(newSupport(), new ValidationSupportParameterObject("urn:ietf:bcp:47", "SGN", "Sign Languages", null));
+		IValidationSupport.LookupCodeResult outcomeLower = mySvc.lookupCode(newSupport(), new ValidationSupportParameterObject("urn:ietf:bcp:47", "sgn", "Sign Languages", null));
 		assertNotNull(outcomeUpper);
 		assertNotNull(outcomeLower);
 		assertTrue(outcomeLower.isFound());
@@ -68,8 +69,8 @@ public class CommonCodeSystemsTerminologyServiceTest {
 
 	@Test
 	public void lookupCode_languageAndRegionLookup_isCaseInsensitive() {
-		IValidationSupport.LookupCodeResult outcomeUpper = mySvc.lookupCode(newSupport(), "urn:ietf:bcp:47", "EN-US", "English");
-		IValidationSupport.LookupCodeResult outcomeLower = mySvc.lookupCode(newSupport(), "urn:ietf:bcp:47", "en-us", "English");
+		IValidationSupport.LookupCodeResult outcomeUpper = mySvc.lookupCode(newSupport(), new ValidationSupportParameterObject("urn:ietf:bcp:47", "EN-US", "English", null));
+		IValidationSupport.LookupCodeResult outcomeLower = mySvc.lookupCode(newSupport(), new ValidationSupportParameterObject("urn:ietf:bcp:47", "en-us", "English", null));
 		assertNotNull(outcomeUpper);
 		assertNotNull(outcomeLower);
 		assertTrue(outcomeLower.isFound());
@@ -131,14 +132,14 @@ public class CommonCodeSystemsTerminologyServiceTest {
 
 	@Test
 	public void testLanguages_CommonLanguagesVs_OnlyLanguage_NoRegion() {
-		IValidationSupport.LookupCodeResult nl = mySvc.lookupCode(newSupport(), "urn:ietf:bcp:47", "nl");
+		IValidationSupport.LookupCodeResult nl = mySvc.lookupCode(newSupport(), new ValidationSupportParameterObject("urn:ietf:bcp:47", "nl"));
 		assertTrue(nl.isFound());
 		assertEquals("Dutch", nl.getCodeDisplay());
 	}
 
 	@Test
 	public void testLanguages_CommonLanguagesVs_LanguageAndRegion() {
-		IValidationSupport.LookupCodeResult nl = mySvc.lookupCode(newSupport(), "urn:ietf:bcp:47", "nl-NL");
+		IValidationSupport.LookupCodeResult nl = mySvc.lookupCode(newSupport(), new ValidationSupportParameterObject("urn:ietf:bcp:47", "nl-NL"));
 		assertTrue(nl.isFound());
 		assertEquals("Dutch Netherlands", nl.getCodeDisplay());
 	}

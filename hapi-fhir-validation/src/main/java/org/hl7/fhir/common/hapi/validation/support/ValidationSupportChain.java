@@ -7,6 +7,7 @@ import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.TranslateConceptResults;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
+import ca.uhn.fhir.context.support.ValidationSupportParameterObject;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.util.Logs;
@@ -417,19 +418,19 @@ public class ValidationSupportChain implements IValidationSupport {
 	@Override
 	public LookupCodeResult lookupCode(
 			ValidationSupportContext theValidationSupportContext,
-			String theSystem,
-			String theCode,
-			String theDisplayLanguage) {
+			ValidationSupportParameterObject validationSupportParameterObject) {
 		for (IValidationSupport next : myChain) {
-			if (next.isCodeSystemSupported(theValidationSupportContext, theSystem)) {
+			if (next.isCodeSystemSupported(theValidationSupportContext, validationSupportParameterObject.getSystem())) {
 				LookupCodeResult lookupCodeResult =
-						next.lookupCode(theValidationSupportContext, theSystem, theCode, theDisplayLanguage);
+						next.lookupCode(theValidationSupportContext, validationSupportParameterObject);
 				if (ourLog.isDebugEnabled()) {
 					ourLog.debug(
 							"Code {}|{}{} {} by {}",
-							theSystem,
-							theCode,
-							isBlank(theDisplayLanguage) ? "" : " (" + theDisplayLanguage + ")",
+							validationSupportParameterObject.getSystem(),
+							validationSupportParameterObject.getCode(),
+							isBlank(validationSupportParameterObject.getDisplayLanguage())
+									? ""
+									: " (" + validationSupportParameterObject.getDisplayLanguage() + ")",
 							lookupCodeResult != null && lookupCodeResult.isFound() ? "found" : "not found",
 							next.getName());
 				}

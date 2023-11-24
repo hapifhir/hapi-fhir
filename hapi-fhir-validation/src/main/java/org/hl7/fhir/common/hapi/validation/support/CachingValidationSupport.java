@@ -5,6 +5,7 @@ import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.TranslateConceptResults;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
+import ca.uhn.fhir.context.support.ValidationSupportParameterObject;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import ca.uhn.fhir.sl.cache.Cache;
 import ca.uhn.fhir.sl.cache.CacheFactory;
@@ -196,14 +197,15 @@ public class CachingValidationSupport extends BaseValidationSupportWrapper imple
 	@Override
 	public LookupCodeResult lookupCode(
 			ValidationSupportContext theValidationSupportContext,
-			String theSystem,
-			String theCode,
-			String theDisplayLanguage) {
-		String key = "lookupCode " + theSystem + " " + theCode + " " + defaultIfBlank(theDisplayLanguage, "NO_LANG");
+			ValidationSupportParameterObject validationSupportParameterObject) {
+		String key = "lookupCode " + validationSupportParameterObject.getSystem() + " "
+				+ validationSupportParameterObject.getCode()
+				+ " " + defaultIfBlank(validationSupportParameterObject.getDisplayLanguage(), "NO_LANG")
+				+ " " + validationSupportParameterObject.getPropertyNames().toString();
 		return loadFromCache(
 				myLookupCodeCache,
 				key,
-				t -> super.lookupCode(theValidationSupportContext, theSystem, theCode, theDisplayLanguage));
+				t -> super.lookupCode(theValidationSupportContext, validationSupportParameterObject));
 	}
 
 	@Override

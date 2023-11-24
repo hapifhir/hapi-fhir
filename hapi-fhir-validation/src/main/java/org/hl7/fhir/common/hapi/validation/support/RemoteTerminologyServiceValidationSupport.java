@@ -7,6 +7,7 @@ import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.TranslateConceptResults;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
+import ca.uhn.fhir.context.support.ValidationSupportParameterObject;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.api.SummaryEnum;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
@@ -24,7 +25,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -185,11 +185,11 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 	@Override
 	public LookupCodeResult lookupCode(
 			ValidationSupportContext theValidationSupportContext,
-			String theSystem,
-			String theCode,
-			String theDisplayLanguage,
-			Collection<String> thePropertyNames) {
-		Validate.notBlank(theCode, "theCode must be provided");
+			ValidationSupportParameterObject validationSupportParameterObject) {
+		final String code = validationSupportParameterObject.getCode();
+		final String system = validationSupportParameterObject.getSystem();
+		final String displayLanguage = validationSupportParameterObject.getDisplayLanguage();
+		Validate.notBlank(code, "theCode must be provided");
 
 		IGenericClient client = provideClient();
 		FhirContext fhirContext = client.getFhirContext();
@@ -199,20 +199,20 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 			case DSTU3:
 			case R4:
 				IBaseParameters params = ParametersUtil.newInstance(fhirContext);
-				ParametersUtil.addParameterToParametersString(fhirContext, params, "code", theCode);
-				if (!StringUtils.isEmpty(theSystem)) {
-					ParametersUtil.addParameterToParametersString(fhirContext, params, "system", theSystem);
+				ParametersUtil.addParameterToParametersString(fhirContext, params, "code", code);
+				if (!StringUtils.isEmpty(system)) {
+					ParametersUtil.addParameterToParametersString(fhirContext, params, "system", system);
 				}
-				if (!StringUtils.isEmpty(theDisplayLanguage)) {
-					ParametersUtil.addParameterToParametersString(fhirContext, params, "language", theDisplayLanguage);
+				if (!StringUtils.isEmpty(displayLanguage)) {
+					ParametersUtil.addParameterToParametersString(fhirContext, params, "language", displayLanguage);
 				}
-				for (String propertyName : thePropertyNames) {
+				for (String propertyName : validationSupportParameterObject.getPropertyNames()) {
 					ParametersUtil.addParameterToParametersString(fhirContext, params, "property", propertyName);
 				}
-				Class<?> codeSystemClass =
+				Class<? extends IBaseResource> codeSystemClass =
 						myCtx.getResourceDefinition("CodeSystem").getImplementingClass();
 				IBaseParameters outcome = client.operation()
-						.onType((Class<? extends IBaseResource>) codeSystemClass)
+						.onType(codeSystemClass)
 						.named("$lookup")
 						.withParameters(params)
 						.useHttpGet()
@@ -221,10 +221,9 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 					switch (fhirVersion) {
 						case DSTU3:
 							return generateLookupCodeResultDSTU3(
-									theCode, theSystem, (org.hl7.fhir.dstu3.model.Parameters) outcome);
+									code, system, (org.hl7.fhir.dstu3.model.Parameters) outcome);
 						case R4:
-							return generateLookupCodeResultR4(
-									theCode, theSystem, (org.hl7.fhir.r4.model.Parameters) outcome);
+							return generateLookupCodeResultR4(code, system, (org.hl7.fhir.r4.model.Parameters) outcome);
 					}
 				}
 				break;

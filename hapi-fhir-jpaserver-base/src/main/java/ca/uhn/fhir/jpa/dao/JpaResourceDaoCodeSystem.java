@@ -25,6 +25,7 @@ import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport.CodeValidationResult;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
+import ca.uhn.fhir.context.support.ValidationSupportParameterObject;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoCodeSystem;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
@@ -41,6 +42,7 @@ import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
+import org.apache.commons.collections4.CollectionUtils;
 import org.hl7.fhir.common.hapi.validation.support.CommonCodeSystemsTerminologyService;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
@@ -55,6 +57,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 import javax.annotation.PostConstruct;
 
@@ -126,7 +129,13 @@ public class JpaResourceDaoCodeSystem<T extends IBaseResource> extends BaseHapiF
 			IBaseCoding theCoding,
 			IPrimitiveType<String> theDisplayLanguage,
 			RequestDetails theRequestDetails) {
-		return lookupCode(theCode, theSystem, theCoding, theDisplayLanguage, null, theRequestDetails);
+		return lookupCode(
+				theCode,
+				theSystem,
+				theCoding,
+				theDisplayLanguage,
+				CollectionUtils.emptyCollection(),
+				theRequestDetails);
 	}
 
 	@Nonnull
@@ -136,10 +145,17 @@ public class JpaResourceDaoCodeSystem<T extends IBaseResource> extends BaseHapiF
 			IPrimitiveType<String> theSystem,
 			IBaseCoding theCoding,
 			IPrimitiveType<String> theDisplayLanguage,
-			Collection<IPrimitiveType<String>> theProperties,
+			Collection<IPrimitiveType<String>> thePropertyNames,
 			RequestDetails theRequestDetails) {
 		return doLookupCode(
-				myFhirContext, myTerser, myValidationSupport, theCode, theSystem, theCoding, theDisplayLanguage);
+				myFhirContext,
+				myTerser,
+				myValidationSupport,
+				theCode,
+				theSystem,
+				theCoding,
+				theDisplayLanguage,
+				thePropertyNames);
 	}
 
 	@Override
@@ -298,7 +314,8 @@ public class JpaResourceDaoCodeSystem<T extends IBaseResource> extends BaseHapiF
 			IPrimitiveType<String> theCode,
 			IPrimitiveType<String> theSystem,
 			IBaseCoding theCoding,
-			IPrimitiveType<String> theDisplayLanguage) {
+			IPrimitiveType<String> theDisplayLanguage,
+			Collection<IPrimitiveType<String>> thePropertyNames) {
 		boolean haveCoding = theCoding != null
 				&& isNotBlank(extractCodingSystem(theCoding))
 				&& isNotBlank(extractCodingCode(theCoding));
@@ -336,11 +353,16 @@ public class JpaResourceDaoCodeSystem<T extends IBaseResource> extends BaseHapiF
 
 		ourLog.info("Looking up {} / {}", system, code);
 
+		Collection<String> propertyNames = CollectionUtils.emptyIfNull(thePropertyNames).stream()
+				.map(IPrimitiveType::getValueAsString)
+				.collect(Collectors.toSet());
+
 		if (theValidationSupport.isCodeSystemSupported(new ValidationSupportContext(theValidationSupport), system)) {
 
 			ourLog.info("Code system {} is supported", system);
 			IValidationSupport.LookupCodeResult retVal = theValidationSupport.lookupCode(
-					new ValidationSupportContext(theValidationSupport), system, code, displayLanguage);
+					new ValidationSupportContext(theValidationSupport),
+					new ValidationSupportParameterObject(system, code, displayLanguage, propertyNames));
 			if (retVal != null) {
 				return retVal;
 			}

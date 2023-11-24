@@ -62,7 +62,7 @@ public interface IFhirResourceDaoCodeSystem<T extends IBaseResource> extends IFh
 			IPrimitiveType<String> theSystem,
 			IBaseCoding theCoding,
 			IPrimitiveType<String> theDisplayLanguage,
-			Collection<IPrimitiveType<String>> theProperties,
+			Collection<IPrimitiveType<String>> thePropertyNames,
 			RequestDetails theRequestDetails);
 
 	SubsumesResult subsumes(

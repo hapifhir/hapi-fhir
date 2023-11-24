@@ -37,7 +37,6 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -329,16 +328,6 @@ public interface IValidationSupport {
 		return null;
 	}
 
-	@Nullable
-	default LookupCodeResult lookupCode(
-			ValidationSupportContext theValidationSupportContext,
-			String theSystem,
-			String theCode,
-			String theDisplayLanguage,
-			Collection<String> thePropertyNames) {
-		return null;
-	}
-
 	/**
 	 * Look up a code using the system and code value
 	 *
@@ -346,15 +335,18 @@ public interface IValidationSupport {
 	 *                                    other method in the support chain, so that they can be passed through the entire chain. Implementations of this interface may always safely ignore this parameter.
 	 * @param theSystem                   The CodeSystem URL
 	 * @param theCode                     The code
-	 * @param theDisplayLanguage          to filter out the designation by the display language. To return all designation, set this value to <code>null</code>.
+	 * @param theDisplayLanguage          Used to filter out the designation by the display language. To return all designation, set this value to <code>null</code>.
 	 */
+	@Deprecated
 	@Nullable
 	default LookupCodeResult lookupCode(
 			ValidationSupportContext theValidationSupportContext,
 			String theSystem,
 			String theCode,
 			String theDisplayLanguage) {
-		return lookupCode(theValidationSupportContext, theSystem, theCode, theDisplayLanguage, Collections.emptySet());
+		return lookupCode(
+				theValidationSupportContext,
+				new ValidationSupportParameterObject(theSystem, theCode, theDisplayLanguage, Collections.emptyList()));
 	}
 
 	/**
@@ -365,10 +357,26 @@ public interface IValidationSupport {
 	 * @param theSystem                   The CodeSystem URL
 	 * @param theCode                     The code
 	 */
+	@Deprecated
 	@Nullable
 	default LookupCodeResult lookupCode(
 			ValidationSupportContext theValidationSupportContext, String theSystem, String theCode) {
 		return lookupCode(theValidationSupportContext, theSystem, theCode, null);
+	}
+
+	/**
+	 * Look up a code using the system, code and other parameters.
+	 * @see ValidationSupportParameterObject
+	 *
+	 * @param theValidationSupportContext      The validation support module will be passed in to this method. This is convenient in cases where the operation needs to make calls to
+	 *                                         other method in the support chain, so that they can be passed through the entire chain. Implementations of this interface may always safely ignore this parameter.
+	 * @param validationSupportParameterObject The parameters used to perform the lookup, including system and code.
+	 */
+	@Nullable
+	default LookupCodeResult lookupCode(
+			ValidationSupportContext theValidationSupportContext,
+			ValidationSupportParameterObject validationSupportParameterObject) {
+		return null;
 	}
 
 	/**

@@ -2,6 +2,7 @@ package org.hl7.fhir.dstu3.hapi.validation;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.context.support.ValidationSupportParameterObject;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
@@ -65,7 +66,7 @@ public class RemoteTerminologyServiceValidationSupportDstu3Test {
 	public void testLookupOperation_CodeSystem_Success() {
 		createNextCodeSystemLookupReturnParameters(true, CODE_SYSTEM_VERSION, CODE_SYSTEM_VERSION_AS_TEXT, DISPLAY);
 
-		IValidationSupport.LookupCodeResult outcome = mySvc.lookupCode(null, CODE_SYSTEM, CODE);
+		IValidationSupport.LookupCodeResult outcome = mySvc.lookupCode(null, new ValidationSupportParameterObject(CODE_SYSTEM, CODE, null, null));
 		assertNotNull(outcome, "Call to lookupCode() should return a non-NULL result!");
 		assertEquals(DISPLAY, outcome.getCodeDisplay());
 		assertEquals(CODE_SYSTEM_VERSION, outcome.getCodeSystemVersion());
@@ -91,7 +92,7 @@ public class RemoteTerminologyServiceValidationSupportDstu3Test {
 		createNextCodeSystemLookupReturnParameters(true, CODE_SYSTEM_VERSION, CODE_SYSTEM_VERSION_AS_TEXT, DISPLAY, LANGUAGE);
 		addAdditionalCodeSystemLookupReturnParameters();
 
-		IValidationSupport.LookupCodeResult outcome = mySvc.lookupCode(null, CODE_SYSTEM, CODE, LANGUAGE, Set.of("birthDate"));
+		IValidationSupport.LookupCodeResult outcome = mySvc.lookupCode(null, new ValidationSupportParameterObject(CODE_SYSTEM, CODE, LANGUAGE, Set.of("birthDate")));
 		assertNotNull(outcome, "Call to lookupCode() should return a non-NULL result!");
 		assertEquals(DISPLAY, outcome.getCodeDisplay());
 		assertEquals(CODE_SYSTEM_VERSION, outcome.getCodeSystemVersion());

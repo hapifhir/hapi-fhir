@@ -90,6 +90,7 @@ import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.ArrayListMultimap;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -147,7 +148,6 @@ import org.springframework.transaction.interceptor.NoRollbackRuleAttribute;
 import org.springframework.transaction.interceptor.RuleBasedTransactionAttribute;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.transaction.support.TransactionTemplate;
-import org.springframework.util.CollectionUtils;
 import org.springframework.util.comparator.Comparators;
 
 import java.util.ArrayList;
@@ -2576,7 +2576,7 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 	}
 
 	protected IValidationSupport.LookupCodeResult lookupCode(
-			String theSystem, String theCode, String theDisplayLanguage) {
+			String theSystem, String theCode, String theDisplayLanguage, Collection<String> propertyNames) {
 		TransactionTemplate txTemplate = new TransactionTemplate(myTransactionManager);
 		return txTemplate.execute(t -> {
 			Optional<TermConcept> codeOpt = findCode(theSystem, theCode);
@@ -3115,15 +3115,6 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 		ValidateUtil.isNotNullOrThrowUnprocessableEntity(theValueSet, "ValueSet must not be null");
 		org.hl7.fhir.r4.model.ValueSet valueSetR4 = myVersionCanonicalizer.valueSetToCanonical(theValueSet);
 		return isValueSetPreExpandedForCodeValidation(valueSetR4);
-	}
-
-	@Override
-	public LookupCodeResult lookupCode(
-			ValidationSupportContext theValidationSupportContext,
-			String theSystem,
-			String theCode,
-			String theDisplayLanguage) {
-		return lookupCode(theSystem, theCode, theDisplayLanguage);
 	}
 
 	private static class TermCodeSystemVersionDetails {
