@@ -188,7 +188,9 @@ public class HapiMigrator {
 	}
 
 	private void postExecute(BaseTask theNext, StopWatch theStopWatch, boolean theSuccess) {
-		myHapiMigrationStorageSvc.saveTask(theNext, Math.toIntExact(theStopWatch.getMillis()), theSuccess);
+		if (!theNext.isDryRun()) {
+			myHapiMigrationStorageSvc.saveTask(theNext, Math.toIntExact(theStopWatch.getMillis()), theSuccess);
+		}
 	}
 
 	public void addTasks(Iterable<BaseTask> theMigrationTasks) {
@@ -219,6 +221,8 @@ public class HapiMigrator {
 	}
 
 	public void createMigrationTableIfRequired() {
-		myHapiMigrationStorageSvc.createMigrationTableIfRequired();
+		if (!myDryRun) {
+			myHapiMigrationStorageSvc.createMigrationTableIfRequired();
+		}
 	}
 }
