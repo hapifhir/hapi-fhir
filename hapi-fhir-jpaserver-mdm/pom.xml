@@ -100,6 +100,9 @@
 							<goal>integration-test</goal>
 							<goal>verify</goal>
 						</goals>
+						<configuration>
+							<reuseForks>false</reuseForks>
+						</configuration>
 					</execution>
 				</executions>
 				<dependencies>
