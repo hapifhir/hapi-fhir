@@ -5,9 +5,9 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.context.support.LookupCodeRequest;
 import ca.uhn.fhir.context.support.TranslateConceptResults;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
-import ca.uhn.fhir.context.support.ValidationSupportParameterObject;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.util.Logs;
@@ -417,20 +417,26 @@ public class ValidationSupportChain implements IValidationSupport {
 
 	@Override
 	public LookupCodeResult lookupCode(
-			ValidationSupportContext theValidationSupportContext,
-			ValidationSupportParameterObject validationSupportParameterObject) {
+			ValidationSupportContext theValidationSupportContext, @Nonnull LookupCodeRequest theLookupCodeRequest) {
 		for (IValidationSupport next : myChain) {
-			if (next.isCodeSystemSupported(theValidationSupportContext, validationSupportParameterObject.getSystem())) {
-				LookupCodeResult lookupCodeResult =
-						next.lookupCode(theValidationSupportContext, validationSupportParameterObject);
+			final String system = theLookupCodeRequest.getSystem();
+			final String code = theLookupCodeRequest.getCode();
+			final String displayLanguage = theLookupCodeRequest.getDisplayLanguage();
+			if (next.isCodeSystemSupported(theValidationSupportContext, system)) {
+				LookupCodeResult lookupCodeResult = next.lookupCode(theValidationSupportContext, theLookupCodeRequest);
+				if (lookupCodeResult == null || !lookupCodeResult.isFound()) {
+					/*
+					This branch has been added as a fall-back mechanism for supporting lookupCode
+					methods marked as deprecated in interface IValidationSupport.
+					*/
+					lookupCodeResult = next.lookupCode(theValidationSupportContext, system, code, displayLanguage);
+				}
 				if (ourLog.isDebugEnabled()) {
 					ourLog.debug(
 							"Code {}|{}{} {} by {}",
-							validationSupportParameterObject.getSystem(),
-							validationSupportParameterObject.getCode(),
-							isBlank(validationSupportParameterObject.getDisplayLanguage())
-									? ""
-									: " (" + validationSupportParameterObject.getDisplayLanguage() + ")",
+							system,
+							code,
+							isBlank(displayLanguage) ? "" : " (" + theLookupCodeRequest.getDisplayLanguage() + ")",
 							lookupCodeResult != null && lookupCodeResult.isFound() ? "found" : "not found",
 							next.getName());
 				}

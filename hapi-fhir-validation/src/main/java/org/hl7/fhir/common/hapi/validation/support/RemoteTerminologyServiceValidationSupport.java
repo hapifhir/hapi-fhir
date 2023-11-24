@@ -5,9 +5,9 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.context.support.LookupCodeRequest;
 import ca.uhn.fhir.context.support.TranslateConceptResults;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
-import ca.uhn.fhir.context.support.ValidationSupportParameterObject;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.api.SummaryEnum;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
@@ -184,11 +184,10 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 
 	@Override
 	public LookupCodeResult lookupCode(
-			ValidationSupportContext theValidationSupportContext,
-			ValidationSupportParameterObject validationSupportParameterObject) {
-		final String code = validationSupportParameterObject.getCode();
-		final String system = validationSupportParameterObject.getSystem();
-		final String displayLanguage = validationSupportParameterObject.getDisplayLanguage();
+			ValidationSupportContext theValidationSupportContext, @Nonnull LookupCodeRequest theLookupCodeRequest) {
+		final String code = theLookupCodeRequest.getCode();
+		final String system = theLookupCodeRequest.getSystem();
+		final String displayLanguage = theLookupCodeRequest.getDisplayLanguage();
 		Validate.notBlank(code, "theCode must be provided");
 
 		IGenericClient client = provideClient();
@@ -206,7 +205,7 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 				if (!StringUtils.isEmpty(displayLanguage)) {
 					ParametersUtil.addParameterToParametersString(fhirContext, params, "language", displayLanguage);
 				}
-				for (String propertyName : validationSupportParameterObject.getPropertyNames()) {
+				for (String propertyName : theLookupCodeRequest.getPropertyNames()) {
 					ParametersUtil.addParameterToParametersString(fhirContext, params, "property", propertyName);
 				}
 				Class<? extends IBaseResource> codeSystemClass =

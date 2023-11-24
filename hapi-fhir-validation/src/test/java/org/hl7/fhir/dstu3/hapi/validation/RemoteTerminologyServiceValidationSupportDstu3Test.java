@@ -2,7 +2,7 @@ package org.hl7.fhir.dstu3.hapi.validation;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
-import ca.uhn.fhir.context.support.ValidationSupportParameterObject;
+import ca.uhn.fhir.context.support.LookupCodeRequest;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
@@ -80,7 +80,7 @@ public class RemoteTerminologyServiceValidationSupportDstu3Test {
 		designation.setValue("some value");
 		myCodeSystemProvider.myNextLookupCodeResult.getDesignations().add(designation);
 
-		IValidationSupport.LookupCodeResult outcome = mySvc.lookupCode(null, new ValidationSupportParameterObject(CODE_SYSTEM, CODE, LANGUAGE, Set.of("birthDate")));
+		IValidationSupport.LookupCodeResult outcome = mySvc.lookupCode(null, new LookupCodeRequest(CODE_SYSTEM, CODE, LANGUAGE, Set.of("birthDate")));
 		assertNotNull(outcome, "Call to lookupCode() should return a non-NULL result!");
 		assertEquals(DISPLAY, outcome.getCodeDisplay());
 		assertEquals(CODE_SYSTEM, outcome.getCodeSystemVersion());

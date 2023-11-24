@@ -3,7 +3,11 @@ package ca.uhn.fhir.context.support;
 import java.util.Collection;
 import java.util.Collections;
 
-public class ValidationSupportParameterObject {
+/**
+ * Represents parameters which can be passed to the $lookup operation for codes.
+ * @since 7.0.0
+ */
+public class LookupCodeRequest {
 	private final String mySystem;
 	private final String myCode;
 	private String myDisplayLanguage;
@@ -13,7 +17,7 @@ public class ValidationSupportParameterObject {
 	 * @param theSystem                    The CodeSystem URL
 	 * @param theCode                      The code
 	 */
-	public ValidationSupportParameterObject(String theSystem, String theCode) {
+	public LookupCodeRequest(String theSystem, String theCode) {
 		mySystem = theSystem;
 		myCode = theCode;
 	}
@@ -24,7 +28,7 @@ public class ValidationSupportParameterObject {
 	 * @param theDisplayLanguage           Used to filter out the designation by the display language. To return all designation, set this value to <code>null</code>.
 	 * @param thePropertyNames             The collection of properties to be returned in the output. If no properties are specified, the implementor chooses what to return.
 	 */
-	public ValidationSupportParameterObject(
+	public LookupCodeRequest(
 			String theSystem, String theCode, String theDisplayLanguage, Collection<String> thePropertyNames) {
 		this(theSystem, theCode);
 		myDisplayLanguage = theDisplayLanguage;

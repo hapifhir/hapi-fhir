@@ -5,7 +5,7 @@ import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.TranslateConceptResult;
 import ca.uhn.fhir.context.support.TranslateConceptResults;
-import ca.uhn.fhir.context.support.ValidationSupportParameterObject;
+import ca.uhn.fhir.context.support.LookupCodeRequest;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.parser.IJsonLikeParser;
 import ca.uhn.fhir.rest.annotation.IdParam;
@@ -145,7 +145,7 @@ public class RemoteTerminologyServiceValidationSupportTest {
 		designation.setValue("some value");
 		myCodeSystemProvider.myNextLookupCodeResult.getDesignations().add(designation);
 
-		IValidationSupport.LookupCodeResult outcome = mySvc.lookupCode(null, new ValidationSupportParameterObject(CODE_SYSTEM, CODE, null, Set.of("birthDate")));
+		IValidationSupport.LookupCodeResult outcome = mySvc.lookupCode(null, new LookupCodeRequest(CODE_SYSTEM, CODE, null, Set.of("birthDate")));
 		assertNotNull(outcome, "Call to lookupCode() should return a non-NULL result!");
 		assertEquals(DISPLAY, outcome.getCodeDisplay());
 		assertEquals(CODE_SYSTEM, outcome.getCodeSystemVersion());
@@ -188,7 +188,7 @@ public class RemoteTerminologyServiceValidationSupportTest {
 	@Test
 	public void testLookupCode_forCodeSystemWithBlankCode_throwsException() {
 		Assertions.assertThrows(IllegalArgumentException.class,
-				() -> mySvc.lookupCode(null, new ValidationSupportParameterObject(CODE_SYSTEM, "")));
+				() -> mySvc.lookupCode(null, new LookupCodeRequest(CODE_SYSTEM, "")));
 	}
 
 	@Test

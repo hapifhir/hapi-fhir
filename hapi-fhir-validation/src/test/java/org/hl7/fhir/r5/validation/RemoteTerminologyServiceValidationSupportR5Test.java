@@ -2,7 +2,7 @@ package org.hl7.fhir.r5.validation;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
-import ca.uhn.fhir.context.support.ValidationSupportParameterObject;
+import ca.uhn.fhir.context.support.LookupCodeRequest;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import org.hl7.fhir.common.hapi.validation.support.RemoteTerminologyServiceValidationSupport;
 import org.junit.jupiter.api.Assertions;
@@ -30,6 +30,6 @@ public class RemoteTerminologyServiceValidationSupportR5Test {
 		Assertions.assertThrows(UnsupportedOperationException.class,
 				() -> mySvc.lookupCode(
 						new ValidationSupportContext(ourCtx.getValidationSupport()),
-						new ValidationSupportParameterObject(ANY_NONBLANK_VALUE, ANY_NONBLANK_VALUE)));
+						new LookupCodeRequest(ANY_NONBLANK_VALUE, ANY_NONBLANK_VALUE)));
 	}
 }

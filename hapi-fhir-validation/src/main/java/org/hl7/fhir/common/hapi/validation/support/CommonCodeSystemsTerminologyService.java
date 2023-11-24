@@ -5,8 +5,8 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.context.support.LookupCodeRequest;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
-import ca.uhn.fhir.context.support.ValidationSupportParameterObject;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.util.ClasspathUtil;
 import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
@@ -223,7 +223,7 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 	public CodeValidationResult validateLookupCode(
 			ValidationSupportContext theValidationSupportContext, String theCode, String theSystem) {
 		LookupCodeResult lookupResult =
-				lookupCode(theValidationSupportContext, new ValidationSupportParameterObject(theSystem, theCode));
+				lookupCode(theValidationSupportContext, new LookupCodeRequest(theSystem, theCode));
 		CodeValidationResult validationResult = null;
 		if (lookupResult != null) {
 			if (lookupResult.isFound()) {
@@ -242,10 +242,9 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 
 	@Override
 	public LookupCodeResult lookupCode(
-			ValidationSupportContext theValidationSupportContext,
-			ValidationSupportParameterObject validationSupportParameterObject) {
-		final String code = validationSupportParameterObject.getCode();
-		final String system = validationSupportParameterObject.getSystem();
+			ValidationSupportContext theValidationSupportContext, @Nonnull LookupCodeRequest theLookupCodeRequest) {
+		final String code = theLookupCodeRequest.getCode();
+		final String system = theLookupCodeRequest.getSystem();
 
 		Map<String, String> map;
 		switch (system) {

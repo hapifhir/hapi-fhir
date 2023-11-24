@@ -4,8 +4,8 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.context.support.LookupCodeRequest;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
-import ca.uhn.fhir.context.support.ValidationSupportParameterObject;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.parser.IParser;
@@ -612,12 +612,16 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 
 	@Override
 	public LookupCodeResult lookupCode(
-			ValidationSupportContext theValidationSupportContext,
-			ValidationSupportParameterObject validationSupportParameterObject) {
-		final String code = validationSupportParameterObject.getCode();
-		final String system = validationSupportParameterObject.getSystem();
-		CodeValidationResult codeValidationResult =
-				validateCode(theValidationSupportContext, new ConceptValidationOptions(), code, system, null, null);
+			ValidationSupportContext theValidationSupportContext, @Nonnull LookupCodeRequest theLookupCodeRequest) {
+		final String code = theLookupCodeRequest.getCode();
+		final String system = theLookupCodeRequest.getSystem();
+		CodeValidationResult codeValidationResult = validateCode(
+				theValidationSupportContext,
+				new ConceptValidationOptions(),
+				system,
+				code,
+				theLookupCodeRequest.getDisplayLanguage(),
+				null);
 		if (codeValidationResult == null) {
 			return null;
 		}
@@ -928,8 +932,7 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 								.getRootValidationSupport()
 								.lookupCode(
 										theValidationSupportContext,
-										new ValidationSupportParameterObject(
-												includeOrExcludeConceptSystemUrl, theWantCode));
+										new LookupCodeRequest(includeOrExcludeConceptSystemUrl, theWantCode));
 						if (lookup != null) {
 							ableToHandleCode = true;
 							if (lookup.isFound()) {

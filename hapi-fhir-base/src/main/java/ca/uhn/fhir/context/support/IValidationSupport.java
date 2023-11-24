@@ -329,7 +329,8 @@ public interface IValidationSupport {
 	}
 
 	/**
-	 * Look up a code using the system and code value
+	 * Look up a code using the system and code value.
+	 * @deprecated This method has been deprecated in HAPI FHIR 7.0.0. Use {@link IValidationSupport#lookupCode(ValidationSupportContext, LookupCodeRequest)} instead.
 	 *
 	 * @param theValidationSupportContext The validation support module will be passed in to this method. This is convenient in cases where the operation needs to make calls to
 	 *                                    other method in the support chain, so that they can be passed through the entire chain. Implementations of this interface may always safely ignore this parameter.
@@ -346,11 +347,12 @@ public interface IValidationSupport {
 			String theDisplayLanguage) {
 		return lookupCode(
 				theValidationSupportContext,
-				new ValidationSupportParameterObject(theSystem, theCode, theDisplayLanguage, Collections.emptyList()));
+				new LookupCodeRequest(theSystem, theCode, theDisplayLanguage, Collections.emptyList()));
 	}
 
 	/**
 	 * Look up a code using the system and code value
+	 * @deprecated This method has been deprecated in HAPI FHIR 7.0.0. Use {@link IValidationSupport#lookupCode(ValidationSupportContext, LookupCodeRequest)} instead.
 	 *
 	 * @param theValidationSupportContext The validation support module will be passed in to this method. This is convenient in cases where the operation needs to make calls to
 	 *                                    other method in the support chain, so that they can be passed through the entire chain. Implementations of this interface may always safely ignore this parameter.
@@ -365,22 +367,21 @@ public interface IValidationSupport {
 	}
 
 	/**
-	 * Look up a code using the system, code and other parameters.
-	 * @see ValidationSupportParameterObject
+	 * Look up a code using the system, code and other parameters captured in {@link LookupCodeRequest}.
+	 * @since 7.0.0
 	 *
 	 * @param theValidationSupportContext      The validation support module will be passed in to this method. This is convenient in cases where the operation needs to make calls to
 	 *                                         other method in the support chain, so that they can be passed through the entire chain. Implementations of this interface may always safely ignore this parameter.
-	 * @param validationSupportParameterObject The parameters used to perform the lookup, including system and code.
+	 * @param theLookupCodeRequest             The parameters used to perform the lookup, including system and code.
 	 */
 	@Nullable
 	default LookupCodeResult lookupCode(
-			ValidationSupportContext theValidationSupportContext,
-			ValidationSupportParameterObject validationSupportParameterObject) {
+			ValidationSupportContext theValidationSupportContext, @Nonnull LookupCodeRequest theLookupCodeRequest) {
 		return null;
 	}
 
 	/**
-	 * Returns <code>true</code> if the given valueset can be validated by the given
+	 * Returns <code>true</code> if the given ValueSet can be validated by the given
 	 * validation support module
 	 *
 	 * @param theValidationSupportContext The validation support module will be passed in to this method. This is convenient in cases where the operation needs to make calls to

@@ -23,6 +23,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.context.support.LookupCodeRequest;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import ca.uhn.fhir.i18n.Msg;
@@ -2575,10 +2576,13 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 		return new IFhirResourceDaoCodeSystem.SubsumesResult(subsumes);
 	}
 
-	protected IValidationSupport.LookupCodeResult lookupCode(
-			String theSystem, String theCode, String theDisplayLanguage, Collection<String> propertyNames) {
+	@Override
+	public IValidationSupport.LookupCodeResult lookupCode(
+			ValidationSupportContext theValidationSupportContext, @Nonnull LookupCodeRequest theLookupCodeRequest) {
 		TransactionTemplate txTemplate = new TransactionTemplate(myTransactionManager);
 		return txTemplate.execute(t -> {
+			final String theSystem = theLookupCodeRequest.getSystem();
+			final String theCode = theLookupCodeRequest.getCode();
 			Optional<TermConcept> codeOpt = findCode(theSystem, theCode);
 			if (codeOpt.isPresent()) {
 				TermConcept code = codeOpt.get();
@@ -2593,7 +2597,7 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 
 				for (TermConceptDesignation next : code.getDesignations()) {
 					// filter out the designation based on displayLanguage if any
-					if (isDisplayLanguageMatch(theDisplayLanguage, next.getLanguage())) {
+					if (isDisplayLanguageMatch(theLookupCodeRequest.getDisplayLanguage(), next.getLanguage())) {
 						IValidationSupport.ConceptDesignation designation = new IValidationSupport.ConceptDesignation();
 						designation.setLanguage(next.getLanguage());
 						designation.setUseSystem(next.getUseSystem());
@@ -2604,7 +2608,11 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 					}
 				}
 
+				final Collection<String> propertyNames = theLookupCodeRequest.getPropertyNames();
 				for (TermConceptProperty next : code.getProperties()) {
+					if (ObjectUtils.isNotEmpty(propertyNames) && !propertyNames.contains(next.getKey())) {
+						continue;
+					}
 					if (next.getType() == TermConceptPropertyTypeEnum.CODING) {
 						IValidationSupport.CodingConceptProperty property =
 								new IValidationSupport.CodingConceptProperty(

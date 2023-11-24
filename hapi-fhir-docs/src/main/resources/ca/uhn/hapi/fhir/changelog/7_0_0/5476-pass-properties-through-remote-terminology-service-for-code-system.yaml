@@ -1,4 +1,5 @@
 ---
 type: add
 issue: 5476
-title: "Pass properties through to Remote Terminology Service on CodeSystem $lookup operation."
+title: "A new method on the IValidationSupport interface called lookupCode(LookupCodeRequest) has been added. 
+This method will replace the existing lookupCode methods, which are now deprecated."
