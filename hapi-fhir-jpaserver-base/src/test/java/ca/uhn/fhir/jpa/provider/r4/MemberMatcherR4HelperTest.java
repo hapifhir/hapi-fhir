@@ -1,7 +1,6 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.api.IQueryParameterType;
@@ -20,6 +19,7 @@ import org.hl7.fhir.r4.model.Consent;
 import org.hl7.fhir.r4.model.Coverage;
 import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.HumanName;
+import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
@@ -40,13 +40,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-import static ca.uhn.fhir.rest.api.Constants.PARAM_CONSENT;
 import static ca.uhn.fhir.rest.api.Constants.PARAM_MEMBER_IDENTIFIER;
-import static ca.uhn.fhir.rest.api.Constants.PARAM_MEMBER_PATIENT;
-import static ca.uhn.fhir.rest.api.Constants.PARAM_NEW_COVERAGE;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.startsWith;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -162,38 +158,13 @@ public class MemberMatcherR4HelperTest {
 		identifierType.addCoding(new Coding("", "MB", ""));
 		identifier.setType(identifierType);
 		Patient patient = new Patient();
-		Coverage coverage = new Coverage();
-		Consent consent = new Consent();
+		patient.setId("Patient/test123");
 		patient.addIdentifier(identifier);
 
-		Parameters result = myHelper.buildSuccessReturnParameters(patient, coverage, consent);
+		Parameters result = myHelper.buildSuccessReturnParameters(patient);
 
-		assertEquals(PARAM_MEMBER_PATIENT, result.getParameter().get(0).getName());
-		assertEquals(patient, result.getParameter().get(0).getResource());
-
-		assertEquals(PARAM_NEW_COVERAGE, result.getParameter().get(1).getName());
-		assertEquals(coverage, result.getParameter().get(1).getResource());
-
-		assertEquals(PARAM_CONSENT, result.getParameter().get(2).getName());
-		assertEquals(consent, result.getParameter().get(2).getResource());
-
-		assertEquals(PARAM_MEMBER_IDENTIFIER, result.getParameter().get(3).getName());
-		assertEquals(identifier, result.getParameter().get(3).getValue());
-	}
-
-	@Test
-	void buildNotSuccessReturnParameters_IncorrectPatientIdentifier() {
-		Identifier identifier = new Identifier();
-		Patient patient = new Patient();
-		Coverage coverage = new Coverage();
-		Consent consent = new Consent();
-		patient.addIdentifier(identifier);
-
-		try {
-			myHelper.buildSuccessReturnParameters(patient, coverage, consent);
-		} catch (Exception e) {
-			assertThat(e.getMessage(), startsWith(Msg.code(2219)));
-		}
+		assertEquals(PARAM_MEMBER_IDENTIFIER, result.getParameter().get(0).getName());
+		assertEquals(patient.getId(), ((IdType)(result.getParameter().get(0).getValue())).getValue());
 	}
 
 	@Test

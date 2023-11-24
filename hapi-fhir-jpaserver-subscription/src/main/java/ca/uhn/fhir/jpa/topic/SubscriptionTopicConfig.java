@@ -22,39 +22,74 @@ package ca.uhn.fhir.jpa.topic;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.searchparam.matcher.SearchParamMatcher;
+import ca.uhn.fhir.jpa.subscription.match.matcher.matching.SubscriptionStrategyEvaluator;
 import ca.uhn.fhir.jpa.subscription.submit.interceptor.SubscriptionQueryValidator;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Lazy;
 
 public class SubscriptionTopicConfig {
 	@Bean
 	SubscriptionTopicMatchingSubscriber subscriptionTopicMatchingSubscriber(FhirContext theFhirContext) {
-		return new SubscriptionTopicMatchingSubscriber(theFhirContext);
+		switch (theFhirContext.getVersion().getVersion()) {
+			case R5:
+			case R4B:
+				return new SubscriptionTopicMatchingSubscriber(theFhirContext);
+			default:
+				return null;
+		}
 	}
 
 	@Bean
+	@Lazy
 	SubscriptionTopicRegistry subscriptionTopicRegistry() {
 		return new SubscriptionTopicRegistry();
 	}
 
 	@Bean
+	@Lazy
 	SubscriptionTopicSupport subscriptionTopicSupport(
 			FhirContext theFhirContext, DaoRegistry theDaoRegistry, SearchParamMatcher theSearchParamMatcher) {
 		return new SubscriptionTopicSupport(theFhirContext, theDaoRegistry, theSearchParamMatcher);
 	}
 
 	@Bean
-	SubscriptionTopicLoader subscriptionTopicLoader() {
-		return new SubscriptionTopicLoader();
+	SubscriptionTopicLoader subscriptionTopicLoader(FhirContext theFhirContext) {
+		switch (theFhirContext.getVersion().getVersion()) {
+			case R5:
+			case R4B:
+				return new SubscriptionTopicLoader();
+			default:
+				return null;
+		}
 	}
 
 	@Bean
-	SubscriptionTopicRegisteringSubscriber subscriptionTopicRegisteringSubscriber() {
-		return new SubscriptionTopicRegisteringSubscriber();
+	SubscriptionTopicRegisteringSubscriber subscriptionTopicRegisteringSubscriber(FhirContext theFhirContext) {
+		switch (theFhirContext.getVersion().getVersion()) {
+			case R5:
+			case R4B:
+				return new SubscriptionTopicRegisteringSubscriber();
+			default:
+				return null;
+		}
+	}
+
+	@Bean
+	@Lazy
+	public SubscriptionQueryValidator subscriptionQueryValidator(
+			DaoRegistry theDaoRegistry, SubscriptionStrategyEvaluator theSubscriptionStrategyEvaluator) {
+		return new SubscriptionQueryValidator(theDaoRegistry, theSubscriptionStrategyEvaluator);
 	}
 
 	@Bean
 	SubscriptionTopicValidatingInterceptor subscriptionTopicValidatingInterceptor(
 			FhirContext theFhirContext, SubscriptionQueryValidator theSubscriptionQueryValidator) {
-		return new SubscriptionTopicValidatingInterceptor(theFhirContext, theSubscriptionQueryValidator);
+		switch (theFhirContext.getVersion().getVersion()) {
+			case R5:
+			case R4B:
+				return new SubscriptionTopicValidatingInterceptor(theFhirContext, theSubscriptionQueryValidator);
+			default:
+				return null;
+		}
 	}
 }
