@@ -102,7 +102,7 @@ public class FhirResourceDaoR4SearchSqlTest extends BaseJpaR4Test {
 		assertThat(sql, containsString("where rsv1_0.RES_ID in (?)"));
 		// Query 3 - Load tags and defintions
 		sql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(2).getSql(false, false);
-		assertThat(sql, containsString("from HFJ_RES_TAG r1_0 join HFJ_TAG_DEF"));
+		assertThat(sql, containsString("from HFJ_RES_TAG rt1_0 join HFJ_TAG_DEF"));
 
 		assertThat(toUnqualifiedVersionlessIds(outcome), Matchers.contains(id));
 
