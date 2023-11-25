@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.context.support.LookupCodeRequest;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import ca.uhn.fhir.rest.api.Constants;
@@ -265,8 +266,9 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 			}
 		});
 		when(myMockSupport.lookupCode(any(), any())).thenAnswer(t -> {
-			String system = t.getArgument(1, String.class);
-			String code = t.getArgument(2, String.class);
+			LookupCodeRequest request = t.getArgument(1, LookupCodeRequest.class);
+			String system = request.getSystem();
+			String code = request.getCode();
 			if (myValidConcepts.contains(system + "___" + code)) {
 				return new IValidationSupport.LookupCodeResult().setFound(true);
 			} else {
