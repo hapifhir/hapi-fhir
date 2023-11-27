@@ -345,9 +345,7 @@ public interface IValidationSupport {
 			String theSystem,
 			String theCode,
 			String theDisplayLanguage) {
-		return lookupCode(
-				theValidationSupportContext,
-				new LookupCodeRequest(theSystem, theCode, theDisplayLanguage, Collections.emptyList()));
+		return null;
 	}
 
 	/**
@@ -377,7 +375,8 @@ public interface IValidationSupport {
 	@Nullable
 	default LookupCodeResult lookupCode(
 			ValidationSupportContext theValidationSupportContext, @Nonnull LookupCodeRequest theLookupCodeRequest) {
-		return null;
+		// TODO: can change to return null once the deprecated methods are removed
+		return lookupCode(theValidationSupportContext, theLookupCodeRequest.getSystem(), theLookupCodeRequest.getCode(), theLookupCodeRequest.getDisplayLanguage());
 	}
 
 	/**
