@@ -257,8 +257,8 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 		// we request 1 more resource than we need
 		// this is so we can be sure of when we hit the last page
 		// (when doing offset searches)
-		final List<JpaPid> pidsSubList =
-				mySearchCoordinatorSvc.getResources(myUuid, theFromIndex, theToIndex + 1, myRequest, requestPartitionId);
+		final List<JpaPid> pidsSubList = mySearchCoordinatorSvc.getResources(
+				myUuid, theFromIndex, theToIndex + 1, myRequest, requestPartitionId);
 		// max list size should be either the entire list, or from - to length
 		int maxSize = Math.min(theToIndex - theFromIndex, pidsSubList.size());
 		theResponsePageBuilder.setTotalRequestedResourcesFetched(pidsSubList.size());
