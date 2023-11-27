@@ -32,6 +32,7 @@ import org.hl7.fhir.r4.model.Consent;
 import org.hl7.fhir.r4.model.Coverage;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
 import javax.annotation.Nullable;
@@ -90,6 +91,39 @@ public class MemberMatchR4ResourceProvider {
 
 		validateParams(theMemberPatient, theCoverageToMatch, theCoverageToLink, theConsent);
 
+
+		Patient patient;
+		patient = customMemberMatch(theMemberPatient, theCoverageToMatch, theRequestDetails);
+		if (patient == null){
+			patient = defaultMemberMatch(theMemberPatient, theCoverageToMatch, theRequestDetails);
+		}
+
+		if (patient.getIdentifier().isEmpty()) {
+			String i18nMessage = myFhirContext
+					.getLocalizer()
+					.getMessage("operation.member.match.error.beneficiary.without.identifier");
+			throw new UnprocessableEntityException(Msg.code(1157) + i18nMessage);
+		}
+
+		if (!myMemberMatcherR4Helper.validConsentDataAccess(theConsent)) {
+			String i18nMessage = myFhirContext
+					.getLocalizer()
+					.getMessage("operation.member.match.error.consent.release.data.mismatch");
+			throw new UnprocessableEntityException(Msg.code(2147) + i18nMessage);
+		}
+
+		myMemberMatcherR4Helper.addMemberIdentifierToMemberPatient(theMemberPatient, patient.getIdentifierFirstRep());
+		myMemberMatcherR4Helper.updateConsentForMemberMatch(theConsent, patient, theMemberPatient, theRequestDetails);
+		return myMemberMatcherR4Helper.buildSuccessReturnParameters(patient);
+	}
+
+	private Patient customMemberMatch(Patient theMemberPatient, Coverage theCoverageToMatch, RequestDetails theRequestDetails) {
+		// TODO: Call pointcut MEMBER_MATCH once moved into CDR
+		return null;
+	}
+
+	@NotNull
+	private Patient defaultMemberMatch(Patient theMemberPatient, Coverage theCoverageToMatch, RequestDetails theRequestDetails) {
 		Optional<Coverage> coverageOpt =
 				myMemberMatcherR4Helper.findMatchingCoverage(theCoverageToMatch, theRequestDetails);
 		if (coverageOpt.isEmpty()) {
@@ -112,24 +146,7 @@ public class MemberMatchR4ResourceProvider {
 					myFhirContext.getLocalizer().getMessage("operation.member.match.error.patient.not.found");
 			throw new UnprocessableEntityException(Msg.code(2146) + i18nMessage);
 		}
-
-		if (patient.getIdentifier().isEmpty()) {
-			String i18nMessage = myFhirContext
-					.getLocalizer()
-					.getMessage("operation.member.match.error.beneficiary.without.identifier");
-			throw new UnprocessableEntityException(Msg.code(1157) + i18nMessage);
-		}
-
-		if (!myMemberMatcherR4Helper.validConsentDataAccess(theConsent)) {
-			String i18nMessage = myFhirContext
-					.getLocalizer()
-					.getMessage("operation.member.match.error.consent.release.data.mismatch");
-			throw new UnprocessableEntityException(Msg.code(2147) + i18nMessage);
-		}
-
-		myMemberMatcherR4Helper.addMemberIdentifierToMemberPatient(theMemberPatient, patient.getIdentifierFirstRep());
-		myMemberMatcherR4Helper.updateConsentForMemberMatch(theConsent, patient, theMemberPatient, theRequestDetails);
-		return myMemberMatcherR4Helper.buildSuccessReturnParameters(patient);
+		return patient;
 	}
 
 	private void validateParams(
