@@ -63,7 +63,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -212,7 +211,8 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 
 		Map<String, JpaPid> retVals = new HashMap<>();
 		RequestPartitionId partitionId = myPartitionSettings.isAllowUnqualifiedCrossPartitionReference()
-				? RequestPartitionId.allPartitions() : theRequestPartitionId;
+				? RequestPartitionId.allPartitions()
+				: theRequestPartitionId;
 		for (String id : theIds) {
 			JpaPid retVal;
 			if (!idRequiresForcedId(id)) {
@@ -233,8 +233,7 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 							MemoryCacheService.CacheEnum.FORCED_ID_TO_PID, key, t -> {
 								List<IIdType> ids = Collections.singletonList(new IdType(theResourceType, id));
 								// fetches from cache using a function that checks cache first...
-								List<JpaPid> resolvedIds =
-										resolveResourcePersistentIdsWithCache(partitionId, ids);
+								List<JpaPid> resolvedIds = resolveResourcePersistentIdsWithCache(partitionId, ids);
 								if (resolvedIds.isEmpty()) {
 									throw new ResourceNotFoundException(Msg.code(1100) + ids.get(0));
 								}
