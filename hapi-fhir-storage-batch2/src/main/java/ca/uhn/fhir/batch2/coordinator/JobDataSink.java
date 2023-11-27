@@ -28,10 +28,12 @@ import ca.uhn.fhir.batch2.model.JobWorkNotification;
 import ca.uhn.fhir.batch2.model.WorkChunkCreateEvent;
 import ca.uhn.fhir.batch2.model.WorkChunkData;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.util.JsonUtil;
 import ca.uhn.fhir.util.Logs;
 import org.slf4j.Logger;
+import org.springframework.transaction.annotation.Propagation;
 
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
@@ -49,13 +51,15 @@ class JobDataSink<PT extends IModelJson, IT extends IModelJson, OT extends IMode
 	private final AtomicInteger myChunkCounter = new AtomicInteger(0);
 	private final AtomicReference<String> myLastChunkId = new AtomicReference<>();
 	private final boolean myGatedExecution;
+	private final IHapiTransactionService myHapiTransactionService;
 
 	JobDataSink(
 			@Nonnull BatchJobSender theBatchJobSender,
 			@Nonnull IJobPersistence theJobPersistence,
 			@Nonnull JobDefinition<?> theDefinition,
 			@Nonnull String theInstanceId,
-			@Nonnull JobWorkCursor<PT, IT, OT> theJobWorkCursor) {
+			@Nonnull JobWorkCursor<PT, IT, OT> theJobWorkCursor,
+			IHapiTransactionService theHapiTransactionService) {
 		super(theInstanceId, theJobWorkCursor);
 		myBatchJobSender = theBatchJobSender;
 		myJobPersistence = theJobPersistence;
@@ -63,6 +67,7 @@ class JobDataSink<PT extends IModelJson, IT extends IModelJson, OT extends IMode
 		myJobDefinitionVersion = theDefinition.getJobDefinitionVersion();
 		myTargetStep = theJobWorkCursor.nextStep;
 		myGatedExecution = theDefinition.isGatedExecution();
+		myHapiTransactionService = theHapiTransactionService;
 	}
 
 	@Override
@@ -76,7 +81,11 @@ class JobDataSink<PT extends IModelJson, IT extends IModelJson, OT extends IMode
 
 		WorkChunkCreateEvent batchWorkChunk = new WorkChunkCreateEvent(
 				myJobDefinitionId, myJobDefinitionVersion, targetStepId, instanceId, sequence, dataValueString);
-		String chunkId = myJobPersistence.onWorkChunkCreate(batchWorkChunk);
+		String chunkId = myHapiTransactionService
+				.withSystemRequestOnDefaultPartition()
+				.withPropagation(Propagation.REQUIRES_NEW)
+				.execute(() -> myJobPersistence.onWorkChunkCreate(batchWorkChunk));
+
 		myLastChunkId.set(chunkId);
 
 		if (!myGatedExecution) {
