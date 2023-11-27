@@ -43,7 +43,7 @@ public class CrProcessorConfig {
 	@Bean
 	ca.uhn.fhir.cr.dstu3.IQuestionnaireProcessorFactory dstu3QuestionnaireProcessorFactory(
 			IRepositoryFactory theRepositoryFactory, EvaluationSettings theEvaluationSettings) {
-		return rd -> new org.opencds.cqf.fhir.cr.questionnaire.dstu3.QuestionnaireProcessor(
+		return rd -> new org.opencds.cqf.fhir.cr.questionnaire.dstu3.processor.QuestionnaireProcessor(
 				theRepositoryFactory.create(rd), theEvaluationSettings);
 	}
 
