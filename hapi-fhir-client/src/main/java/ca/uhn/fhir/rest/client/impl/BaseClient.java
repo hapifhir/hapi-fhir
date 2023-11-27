@@ -353,17 +353,16 @@ public abstract class BaseClient implements IRestfulClient {
 
 			response = httpRequest.execute();
 
-			final ClientResponseContext clientResponseContext = new ClientResponseContext(httpRequest, response, this, getFhirContext());
+			final ClientResponseContext clientResponseContext =
+					new ClientResponseContext(httpRequest, response, this, getFhirContext());
 			HookParams responseParams = new HookParams();
 			responseParams.add(IHttpRequest.class, httpRequest);
 			responseParams.add(IHttpResponse.class, response);
 			responseParams.add(IRestfulClient.class, this);
 			responseParams.add(ClientResponseContext.class, clientResponseContext);
-			// LUKETODO:  add new holder object with client, response, and request
-			// keep the old params but add the new
-			// holder object would allow  them to mutate the holder with a new response
+
 			getInterceptorService().callHooks(Pointcut.CLIENT_RESPONSE, responseParams);
-			// replace the local response variable with the holder's mutated response
+
 			// LUKETODO:  documentation to the buffer the inputstream
 			// LUKETODO:  documentation DO NOT CHAIN THESE HOOKS!!!!
 			response = clientResponseContext.getHttpResponse();
@@ -390,6 +389,7 @@ public abstract class BaseClient implements IRestfulClient {
 				if (Constants.CT_TEXT.equals(mimeType)) {
 					message = message + ": " + body;
 				} else {
+					// LUKETODO:  this is where the pattern comes from
 					EncodingEnum enc = EncodingEnum.forContentType(mimeType);
 					if (enc != null) {
 						IParser p = enc.newParser(theContext);

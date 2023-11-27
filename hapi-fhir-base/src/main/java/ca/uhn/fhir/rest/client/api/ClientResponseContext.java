@@ -12,7 +12,11 @@ public class ClientResponseContext {
 	private final IRestfulClient myRestfulClient;
 	private final FhirContext myFhirContext;
 
-	public ClientResponseContext(IHttpRequest myHttpRequest, IHttpResponse theHttpResponse, IRestfulClient myRestfulClient, FhirContext theFhirContext) {
+	public ClientResponseContext(
+			IHttpRequest myHttpRequest,
+			IHttpResponse theHttpResponse,
+			IRestfulClient myRestfulClient,
+			FhirContext theFhirContext) {
 		this.myHttpRequest = myHttpRequest;
 		this.myHttpResponse = theHttpResponse;
 		this.myRestfulClient = myRestfulClient;
@@ -44,7 +48,10 @@ public class ClientResponseContext {
 		if (this == o) return true;
 		if (o == null || getClass() != o.getClass()) return false;
 		ClientResponseContext that = (ClientResponseContext) o;
-		return Objects.equals(myHttpRequest, that.myHttpRequest) && Objects.equals(myHttpResponse, that.myHttpResponse) && Objects.equals(myRestfulClient, that.myRestfulClient) && Objects.equals(myFhirContext, that.myFhirContext);
+		return Objects.equals(myHttpRequest, that.myHttpRequest)
+				&& Objects.equals(myHttpResponse, that.myHttpResponse)
+				&& Objects.equals(myRestfulClient, that.myRestfulClient)
+				&& Objects.equals(myFhirContext, that.myFhirContext);
 	}
 
 	@Override
@@ -55,10 +62,10 @@ public class ClientResponseContext {
 	@Override
 	public String toString() {
 		return new StringJoiner(", ", ClientResponseContext.class.getSimpleName() + "[", "]")
-			.add("myHttpRequest=" + myHttpRequest)
-			.add("myHttpResponse=" + myHttpResponse)
-			.add("myRestfulClient=" + myRestfulClient)
-			.add("myFhirContext=" + myFhirContext)
-			.toString();
+				.add("myHttpRequest=" + myHttpRequest)
+				.add("myHttpResponse=" + myHttpResponse)
+				.add("myRestfulClient=" + myRestfulClient)
+				.add("myFhirContext=" + myFhirContext)
+				.toString();
 	}
 }
