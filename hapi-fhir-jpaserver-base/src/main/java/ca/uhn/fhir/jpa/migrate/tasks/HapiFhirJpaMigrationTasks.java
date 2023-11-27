@@ -136,20 +136,6 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		// For resolving references that don't supply the type.
 		hfjResource.addIndex("20231027.3", "IDX_RES_FHIR_ID").unique(false).withColumns("FHIR_ID");
 
-		/* ************************************************
-		 * Start of 7.0 migrations
-		 *********************************************** */
-
-		version.onTable("MPI_LINK_AUD")
-				.modifyColumn("20231027.7", "LINK_SOURCE")
-				.nullable()
-				.failureAllowed()
-				.withType(ColumnTypeEnum.TINYINT);
-		version.onTable("MPI_LINK_AUD")
-				.modifyColumn("20231027.8", "MATCH_RESULT")
-				.nullable()
-				.failureAllowed()
-				.withType(ColumnTypeEnum.TINYINT);
 	}
 
 	protected void init680() {
