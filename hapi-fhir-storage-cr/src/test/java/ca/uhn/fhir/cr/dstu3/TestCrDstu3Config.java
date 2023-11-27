@@ -16,6 +16,8 @@ import org.opencds.cqf.cql.engine.execution.CqlEngine;
 
 import org.opencds.cqf.cql.engine.runtime.Code;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
+import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings;
+import org.opencds.cqf.fhir.cql.engine.terminology.TerminologySettings;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.utility.ValidationProfile;
 import org.springframework.context.annotation.Bean;
@@ -43,11 +45,31 @@ public class TestCrDstu3Config {
 		}
 		return measureEvalOptions;
 	}
+	@Bean
+	public TerminologySettings terminologySettings(){
+		var termSettings = new TerminologySettings();
+		termSettings.setCodeLookupMode(TerminologySettings.CODE_LOOKUP_MODE.USE_CODESYSTEM_URL);
+		termSettings.setValuesetExpansionMode(TerminologySettings.VALUESET_EXPANSION_MODE.PERFORM_NAIVE_EXPANSION);
+		termSettings.setValuesetMembershipMode(TerminologySettings.VALUESET_MEMBERSHIP_MODE.USE_EXPANSION);
+		termSettings.setValuesetPreExpansionMode(TerminologySettings.VALUESET_PRE_EXPANSION_MODE.USE_IF_PRESENT);
 
+		return termSettings;
+	}
+	@Bean
+	public RetrieveSettings retrieveSettings(){
+		var retrieveSettings = new RetrieveSettings();
+		retrieveSettings.setSearchParameterMode(RetrieveSettings.SEARCH_FILTER_MODE.USE_SEARCH_PARAMETERS);
+		retrieveSettings.setTerminologyParameterMode(RetrieveSettings.TERMINOLOGY_FILTER_MODE.FILTER_IN_MEMORY);
+		retrieveSettings.setProfileMode(RetrieveSettings.PROFILE_MODE.OFF);
+
+		return retrieveSettings;
+	}
 	@Bean
 	public EvaluationSettings evaluationSettings(TestCqlProperties theCqlProperties, Map<VersionedIdentifier,
 		CompiledLibrary> theGlobalLibraryCache, Map<ModelIdentifier, Model> theGlobalModelCache,
-												 Map<String, List<Code>> theGlobalValueSetCache) {
+												 Map<String, List<Code>> theGlobalValueSetCache,
+												 RetrieveSettings theRetrieveSettings,
+												 TerminologySettings theTerminologySettings) {
 		var evaluationSettings = EvaluationSettings.getDefault();
 		var cqlOptions = evaluationSettings.getCqlOptions();
 
@@ -112,6 +134,8 @@ public class TestCrDstu3Config {
 		cqlCompilerOptions.setCollapseDataRequirements(theCqlProperties.isCqlCompilerCollapseDataRequirements());
 
 		cqlOptions.setCqlCompilerOptions(cqlCompilerOptions);
+		evaluationSettings.setTerminologySettings(theTerminologySettings);
+		evaluationSettings.setRetrieveSettings(theRetrieveSettings);
 		evaluationSettings.setLibraryCache(theGlobalLibraryCache);
 		evaluationSettings.setModelCache(theGlobalModelCache);
 		evaluationSettings.setValueSetCache(theGlobalValueSetCache);

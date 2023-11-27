@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-deployable-pom</artifactId>
-		<version>6.11.0-SNAPSHOT</version>
+		<version>6.11.2-SNAPSHOT</version>
 
 		<relativePath>../hapi-deployable-pom/pom.xml</relativePath>
 	</parent>
@@ -26,15 +26,9 @@
 			<artifactId>hapi-fhir-converter</artifactId>
 			<version>${project.version}</version>
 		</dependency>
-
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-caching-api</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>ca.uhn.hapi.fhir</groupId>
-			<artifactId>hapi-fhir-caching-caffeine</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 
@@ -82,16 +76,13 @@
 
 			</exclusions>
 		</dependency>
-
-
-
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>org.hl7.fhir.utilities</artifactId>
 			<version>${fhir_core_version}</version>
 		</dependency>
 
-        <dependency>
+      <dependency>
             <groupId>org.fhir</groupId>
             <artifactId>ucum</artifactId>
 			  <exclusions>
@@ -101,11 +92,6 @@
 				  </exclusion>
 			  </exclusions>
         </dependency>
-
-        <dependency>
-			<groupId>com.github.ben-manes.caffeine</groupId>
-			<artifactId>caffeine</artifactId>
-		</dependency>
 
 		<dependency>
 			<groupId>com.google.code.findbugs</groupId>
@@ -351,6 +337,12 @@
 			<version>${project.version}</version>
 			<scope>test</scope>
 	  </dependency>
+		<dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-caching-caffeine</artifactId>
+			<version>${project.version}</version>
+			<scope>test</scope>
+		</dependency>
 
     </dependencies>
 

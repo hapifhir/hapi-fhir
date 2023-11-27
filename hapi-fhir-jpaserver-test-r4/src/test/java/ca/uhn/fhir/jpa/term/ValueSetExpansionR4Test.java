@@ -36,7 +36,6 @@ import org.hl7.fhir.r4.model.codesystems.HttpVerb;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Pageable;
@@ -72,9 +71,6 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(ValueSetExpansionR4Test.class);
 
 	private final ValueSetTestUtil myValueSetTestUtil = new ValueSetTestUtil(FhirVersionEnum.R4);
-
-	@Mock
-	private IValueSetConceptAccumulator myValueSetCodeAccumulator;
 
 	@AfterEach
 	public void afterEach() {
@@ -280,8 +276,9 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 
 		//Ensure that the subsequent expansion with offset returns the same slice we are anticipating.
 		assertThat(myValueSetTestUtil.toCodes(expandedValueSet).toString(), myValueSetTestUtil.toCodes(expandedValueSet), is(equalTo(expandedConceptCodes.subList(offset, offset + count))));
-		Assertions.assertEquals(4, expandedValueSet.getExpansion().getContains().size(), myValueSetTestUtil.toCodes(expandedValueSet).toString());
-		assertEquals(11, expandedValueSet.getExpansion().getTotal());
+		Assertions.assertEquals(count, expandedValueSet.getExpansion().getContains().size(), myValueSetTestUtil.toCodes(expandedValueSet).toString());
+		assertEquals(offset + count, expandedValueSet.getExpansion().getTotal());
+		assertEquals(count, expandedValueSet.getExpansion().getContains().size());
 
 		// Make sure we used the pre-expanded version
 		List<SqlQuery> selectQueries = myCaptureQueriesListener.getSelectQueries();

@@ -59,18 +59,18 @@ public class MemberMatchR4ResourceProvider {
 			returnParameters = {@OperationParam(name = "MemberIdentifier", typeName = "string")})
 	public Parameters patientMemberMatch(
 			javax.servlet.http.HttpServletRequest theServletRequest,
-			@Description(
-							shortDefinition =
-									"The target of the operation. Will be returned with Identifier for matched coverage added.")
+			@Description(shortDefinition = "The target of the operation. Contain member Patient demographics.")
 					@OperationParam(name = Constants.PARAM_MEMBER_PATIENT, min = 1, max = 1)
 					Patient theMemberPatient,
-			@Description(shortDefinition = "Old coverage information as extracted from beneficiary's card.")
-					@OperationParam(name = Constants.PARAM_OLD_COVERAGE, min = 1, max = 1)
+			@Description(
+							shortDefinition =
+									"Old coverage information as extracted from beneficiary's card. Identifies the coverage to be matched by the receiving payer.")
+					@OperationParam(name = Constants.COVERAGE_TO_MATCH, min = 1, max = 1)
 					Coverage oldCoverage,
 			@Description(
 							shortDefinition =
-									"New Coverage information. Provided as a reference. Optionally returned unmodified.")
-					@OperationParam(name = Constants.PARAM_NEW_COVERAGE, min = 1, max = 1)
+									"New Coverage information. Identifies the coverage information of the member as they are known by the requesting payer. Provided as a reference.")
+					@OperationParam(name = Constants.COVERAGE_TO_LINK, min = 1, max = 1)
 					Coverage newCoverage,
 			@Description(
 							shortDefinition =
@@ -129,14 +129,14 @@ public class MemberMatchR4ResourceProvider {
 
 		myMemberMatcherR4Helper.addMemberIdentifierToMemberPatient(theMemberPatient, patient.getIdentifierFirstRep());
 		myMemberMatcherR4Helper.updateConsentForMemberMatch(theConsent, patient, theMemberPatient, theRequestDetails);
-		return myMemberMatcherR4Helper.buildSuccessReturnParameters(theMemberPatient, theCoverageToLink, theConsent);
+		return myMemberMatcherR4Helper.buildSuccessReturnParameters(patient);
 	}
 
 	private void validateParams(
 			Patient theMemberPatient, Coverage theOldCoverage, Coverage theNewCoverage, Consent theConsent) {
 		validateParam(theMemberPatient, Constants.PARAM_MEMBER_PATIENT);
-		validateParam(theOldCoverage, Constants.PARAM_OLD_COVERAGE);
-		validateParam(theNewCoverage, Constants.PARAM_NEW_COVERAGE);
+		validateParam(theOldCoverage, Constants.COVERAGE_TO_MATCH);
+		validateParam(theNewCoverage, Constants.COVERAGE_TO_LINK);
 		validateParam(theConsent, Constants.PARAM_CONSENT);
 		validateMemberPatientParam(theMemberPatient);
 		validateConsentParam(theConsent);

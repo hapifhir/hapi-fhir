@@ -51,10 +51,7 @@ import java.util.Optional;
 import java.util.function.Consumer;
 import javax.annotation.Nullable;
 
-import static ca.uhn.fhir.rest.api.Constants.PARAM_CONSENT;
 import static ca.uhn.fhir.rest.api.Constants.PARAM_MEMBER_IDENTIFIER;
-import static ca.uhn.fhir.rest.api.Constants.PARAM_MEMBER_PATIENT;
-import static ca.uhn.fhir.rest.api.Constants.PARAM_NEW_COVERAGE;
 
 public class MemberMatcherR4Helper {
 	static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(MemberMatcherR4Helper.class);
@@ -136,7 +133,6 @@ public class MemberMatcherR4Helper {
 
 	public void updateConsentForMemberMatch(
 			Consent theConsent, Patient thePatient, Patient theMemberPatient, RequestDetails theRequestDetails) {
-		addIdentifierToConsent(theConsent, theMemberPatient);
 		updateConsentPatientAndPerformer(theConsent, thePatient);
 		myConsentModifier.accept(theConsent);
 
@@ -144,13 +140,13 @@ public class MemberMatcherR4Helper {
 		myConsentDao.create(theConsent, theRequestDetails);
 	}
 
-	public Parameters buildSuccessReturnParameters(Patient theMemberPatient, Coverage theCoverage, Consent theConsent) {
+	public Parameters buildSuccessReturnParameters(Patient thePatient) {
 		IBaseParameters parameters = ParametersUtil.newInstance(myFhirContext);
-		ParametersUtil.addParameterToParameters(myFhirContext, parameters, PARAM_MEMBER_PATIENT, theMemberPatient);
-		ParametersUtil.addParameterToParameters(myFhirContext, parameters, PARAM_NEW_COVERAGE, theCoverage);
-		ParametersUtil.addParameterToParameters(myFhirContext, parameters, PARAM_CONSENT, theConsent);
 		ParametersUtil.addParameterToParameters(
-				myFhirContext, parameters, PARAM_MEMBER_IDENTIFIER, getIdentifier(theMemberPatient));
+				myFhirContext,
+				parameters,
+				PARAM_MEMBER_IDENTIFIER,
+				thePatient.getIdElement().toUnqualifiedVersionless());
 		return (Parameters) parameters;
 	}
 
@@ -275,13 +271,6 @@ public class MemberMatcherR4Helper {
 			return true;
 		}
 		return policyTypes.equals(CONSENT_POLICY_REGULAR_TYPE) && myRegularFilterSupported;
-	}
-
-	private void addIdentifierToConsent(Consent theConsent, Patient thePatient) {
-		String consentId = getIdentifier(thePatient).getValue();
-		Identifier consentIdentifier =
-				new Identifier().setSystem(CONSENT_IDENTIFIER_CODE_SYSTEM).setValue(consentId);
-		theConsent.addIdentifier(consentIdentifier);
 	}
 
 	public void setRegularFilterSupported(boolean theRegularFilterSupported) {

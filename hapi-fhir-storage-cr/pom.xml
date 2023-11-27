@@ -7,7 +7,7 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-deployable-pom</artifactId>
-		<version>6.11.0-SNAPSHOT</version>
+		<version>6.11.2-SNAPSHOT</version>
 
 		<relativePath>../hapi-deployable-pom/pom.xml</relativePath>
 	</parent>
@@ -19,7 +19,6 @@
 
 	<properties>
 		<org.antlr-version>4.10.1</org.antlr-version>
-		<xpp3-version>1.1.6</xpp3-version>
 		<spring-security-core.version>5.7.8</spring-security-core.version>
 	</properties>
 
@@ -66,6 +65,31 @@
 				<artifactId>hapi-fhir-base</artifactId>
 				<version>${project.version}</version>
 			</dependency>
+			<dependency>
+				<groupId>com.icegreen</groupId>
+				<artifactId>greenmail</artifactId>
+				<version>1.6.4</version>
+				<scope>compile</scope>
+				<!-- Excluded in favor of jakarta.activation:jakarta.activation-api -->
+				<exclusions>
+					<exclusion>
+						<groupId>com.sun.activation</groupId>
+						<artifactId>jakarta.activation</artifactId>
+					</exclusion>
+				</exclusions>
+			</dependency>
+			<dependency>
+				<groupId>org.simplejavamail</groupId>
+				<artifactId>simple-java-mail</artifactId>
+				<version>6.6.1</version>
+				<!-- Excluded in favor of jakarta.activation:jakarta.activation-api -->
+				<exclusions>
+					<exclusion>
+						<groupId>com.sun.activation</groupId>
+						<artifactId>jakarta.activation</artifactId>
+					</exclusion>
+				</exclusions>
+			</dependency>
 		</dependencies>
 	</dependencyManagement>
 
@@ -84,52 +108,23 @@
 			<groupId>org.opencds.cqf.fhir</groupId>
 			<artifactId>cqf-fhir-jackson</artifactId>
 			<version>${clinical-reasoning.version}</version>
-			<exclusions>
-				<exclusion>
-					<groupId>xpp3</groupId>
-					<artifactId>xpp3_min</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>xmlpull</groupId>
-					<artifactId>xmlpull</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>xmlpull</groupId>
-					<artifactId>xmlpull</artifactId>
-				</exclusion>
-			</exclusions>
 			<type>pom</type>
 		</dependency>
-		<dependency>
-			<groupId>org.opencds.cqf.fhir</groupId>
-			<artifactId>cqf-fhir-cql</artifactId>
-			<version>${clinical-reasoning.version}</version>
-			<exclusions>
-			<exclusion>
-				<groupId>xpp3</groupId>
-				<artifactId>xpp3_min</artifactId>
-			</exclusion>
-			<exclusion>
-				<groupId>xmlpull</groupId>
-				<artifactId>xmlpull</artifactId>
-			</exclusion>
-				<exclusion>
-					<groupId>xmlpull</groupId>
-					<artifactId>xmlpull</artifactId>
-				</exclusion>
-			</exclusions>
-			<type>pom</type>
-		</dependency>
-		<dependency>
-			<groupId>org.ogce</groupId>
-			<artifactId>xpp3</artifactId>
-			<version>${xpp3-version}</version>
-		</dependency>
-
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-storage</artifactId>
 			<version>${project.version}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>com.sun.activation</groupId>
+					<artifactId>jakarta.activation</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.poi</groupId>
+			<artifactId>poi</artifactId>
 		</dependency>
 
 		<!-- This is needed for the threaded execution -->
@@ -139,11 +134,23 @@
 			<version>${spring-security-core.version}</version>
 		</dependency>
 
-		<!-- This is needed for the CqlExceptionHandlingInterceptor -->
+		<!--
+		START Jakarta CR Swap
+
+		These dependencies are added/swapped because the
+		Clinical Reasoning components no longer include it.
+		These will need to be adjusted / removed as soon as
+		the HAPI Jakarta PR hits -->
 		<dependency>
 			<groupId>javax.servlet</groupId>
 			<artifactId>javax.servlet-api</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>javax.xml.bind</groupId>
+			<artifactId>jaxb-api</artifactId>
+			<version>2.3.1</version>
+		</dependency>
+		<!-- END Jakarta CR Swap   -->
 
 		<!-- test -->
 		<dependency>
@@ -185,10 +192,6 @@
 			<version>${project.version}</version>
 			<scope>test</scope>
 		</dependency>
-        <dependency>
-            <groupId>org.apache.poi</groupId>
-            <artifactId>poi</artifactId>
-        </dependency>
     </dependencies>
 	<profiles>
 		<profile>
