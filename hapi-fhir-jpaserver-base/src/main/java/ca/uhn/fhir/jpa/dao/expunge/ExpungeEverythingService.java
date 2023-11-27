@@ -82,6 +82,9 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.PersistenceContextType;
 import jakarta.persistence.Query;
+import jakarta.persistence.TypedQuery;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.metamodel.EntityType;
 import jakarta.persistence.metamodel.Metamodel;
 import jakarta.persistence.metamodel.SingularAttribute;
@@ -273,6 +276,28 @@ public class ExpungeEverythingService implements IExpungeEverythingService {
 					.withPropagation(Propagation.REQUIRES_NEW)
 					.withRequestPartitionId(theRequestPartitionId)
 					.execute(() -> {
+
+						/*
+						 * This method uses a nice efficient mechanism where we figure out the PID datatype
+						 * and load only the PIDs and delete by PID for all resource types except ResourceTable.
+						 * We delete ResourceTable using the entitymanager so that Hibernate Search knows to
+						 * delete the corresponding records it manages in ElasticSearch. See
+						 * FhirResourceDaoR4SearchWithElasticSearchIT for a test that fails without the
+						 * block below.
+						 */
+						if (ResourceTable.class.equals(theEntityType)) {
+							CriteriaBuilder cb = myEntityManager.getCriteriaBuilder();
+							CriteriaQuery<?> cq = cb.createQuery(theEntityType);
+							cq.from(theEntityType);
+							TypedQuery<?> query = myEntityManager.createQuery(cq);
+							query.setMaxResults(800);
+							List<?> results = query.getResultList();
+							for (Object result : results) {
+								myEntityManager.remove(result);
+							}
+							return results.size();
+						}
+
 						Metamodel metamodel = myEntityManager.getMetamodel();
 						EntityType<T> entity = metamodel.entity(theEntityType);
 						Set<SingularAttribute<? super T, ?>> singularAttributes = entity.getSingularAttributes();
