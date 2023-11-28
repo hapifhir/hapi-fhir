@@ -1,11 +1,14 @@
 package ca.uhn.fhir.rest.client.api;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.interceptor.api.Pointcut;
 
 import java.util.Objects;
 import java.util.StringJoiner;
 
-// LUKETODO:  javadoc
+/**
+ * Used to pass context to {@link Pointcut#CLIENT_RESPONSE}, including a mutable {@link IHttpResponse}
+ */
 public class ClientResponseContext {
 	private final IHttpRequest myHttpRequest;
 	private IHttpResponse myHttpResponse;

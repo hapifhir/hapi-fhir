@@ -363,8 +363,7 @@ public abstract class BaseClient implements IRestfulClient {
 
 			getInterceptorService().callHooks(Pointcut.CLIENT_RESPONSE, responseParams);
 
-			// LUKETODO:  documentation to the buffer the inputstream
-			// LUKETODO:  documentation DO NOT CHAIN THESE HOOKS!!!!
+			// Replace the contents of the response with whatever the hook returned, or the same response as before if it no-op'd
 			response = clientResponseContext.getHttpResponse();
 
 			String mimeType;
@@ -389,7 +388,6 @@ public abstract class BaseClient implements IRestfulClient {
 				if (Constants.CT_TEXT.equals(mimeType)) {
 					message = message + ": " + body;
 				} else {
-					// LUKETODO:  this is where the pattern comes from
 					EncodingEnum enc = EncodingEnum.forContentType(mimeType);
 					if (enc != null) {
 						IParser p = enc.newParser(theContext);
