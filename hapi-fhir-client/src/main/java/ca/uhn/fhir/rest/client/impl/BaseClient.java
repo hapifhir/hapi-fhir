@@ -363,7 +363,8 @@ public abstract class BaseClient implements IRestfulClient {
 
 			getInterceptorService().callHooks(Pointcut.CLIENT_RESPONSE, responseParams);
 
-			// Replace the contents of the response with whatever the hook returned, or the same response as before if it no-op'd
+			// Replace the contents of the response with whatever the hook returned, or the same response as before if
+			// it no-op'd
 			response = clientResponseContext.getHttpResponse();
 
 			String mimeType;
