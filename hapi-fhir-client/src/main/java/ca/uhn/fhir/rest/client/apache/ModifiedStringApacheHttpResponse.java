@@ -66,8 +66,8 @@ public class ModifiedStringApacheHttpResponse extends BaseHttpResponse implement
 				this.myEntityBuffered = true;
 				try {
 					this.myEntityBytes = IOUtils.toByteArray(respEntity);
-				} catch (IllegalStateException e) {
-					throw new InternalErrorException(Msg.code(1478) + e);
+				} catch (IllegalStateException exception) {
+					throw new InternalErrorException(Msg.code(2447) + exception);
 				}
 			}
 		}
@@ -78,8 +78,8 @@ public class ModifiedStringApacheHttpResponse extends BaseHttpResponse implement
 		if (myOrigHttpResponse instanceof CloseableHttpResponse) {
 			try {
 				((CloseableHttpResponse) myOrigHttpResponse).close();
-			} catch (IOException e) {
-				ourLog.debug("Failed to close response", e);
+			} catch (IOException exception) {
+				ourLog.debug("Failed to close response", exception);
 			}
 		}
 	}
