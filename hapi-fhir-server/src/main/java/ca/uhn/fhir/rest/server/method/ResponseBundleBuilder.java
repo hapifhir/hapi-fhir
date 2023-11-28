@@ -105,8 +105,11 @@ public class ResponseBundleBuilder {
 			pageSize = pagingCalculatePageSize(requestedPage, server.getPagingProvider());
 
 			Integer size = bundleProvider.size();
-			numToReturn =
-					(size == null) ? pageSize : Math.min(pageSize, size.intValue() - theResponseBundleRequest.offset);
+			if (size == null) {
+				numToReturn = pageSize;
+			} else {
+				numToReturn = Math.min(pageSize, size.intValue() - theResponseBundleRequest.offset);
+			}
 
 			resourceList =
 					pagingBuildResourceList(theResponseBundleRequest, bundleProvider, numToReturn, responsePageBuilder);
@@ -252,6 +255,7 @@ public class ResponseBundleBuilder {
 				RestfulServerUtils.prettyPrintResponse(server, theResponseBundleRequest.requestDetails),
 				theResponseBundleRequest.bundleType);
 
+		// set self link
 		retval.setSelf(theResponseBundleRequest.linkSelf);
 
 		// determine if we are using offset / uncached pages
