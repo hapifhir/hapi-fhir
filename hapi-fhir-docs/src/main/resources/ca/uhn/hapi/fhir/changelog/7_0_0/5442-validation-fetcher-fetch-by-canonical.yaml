@@ -1,0 +1,4 @@
+---
+type: add
+issue: 5442
+title: "The ValidatorResourceFetcher will now resolve canonical URL references as well as simple local references."
