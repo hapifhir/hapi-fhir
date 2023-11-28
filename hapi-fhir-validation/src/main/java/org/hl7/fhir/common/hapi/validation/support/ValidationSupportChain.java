@@ -424,7 +424,7 @@ public class ValidationSupportChain implements IValidationSupport {
 			final String displayLanguage = theLookupCodeRequest.getDisplayLanguage();
 			if (next.isCodeSystemSupported(theValidationSupportContext, system)) {
 				LookupCodeResult lookupCodeResult = next.lookupCode(theValidationSupportContext, theLookupCodeRequest);
-				if (lookupCodeResult == null || !lookupCodeResult.isFound()) {
+				if (lookupCodeResult == null) {
 					/*
 					This branch has been added as a fall-back mechanism for supporting lookupCode
 					methods marked as deprecated in interface IValidationSupport.
