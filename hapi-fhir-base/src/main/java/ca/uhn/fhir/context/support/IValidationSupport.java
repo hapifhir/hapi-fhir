@@ -376,7 +376,11 @@ public interface IValidationSupport {
 	default LookupCodeResult lookupCode(
 			ValidationSupportContext theValidationSupportContext, @Nonnull LookupCodeRequest theLookupCodeRequest) {
 		// TODO: can change to return null once the deprecated methods are removed
-		return lookupCode(theValidationSupportContext, theLookupCodeRequest.getSystem(), theLookupCodeRequest.getCode(), theLookupCodeRequest.getDisplayLanguage());
+		return lookupCode(
+				theValidationSupportContext,
+				theLookupCodeRequest.getSystem(),
+				theLookupCodeRequest.getCode(),
+				theLookupCodeRequest.getDisplayLanguage());
 	}
 
 	/**
