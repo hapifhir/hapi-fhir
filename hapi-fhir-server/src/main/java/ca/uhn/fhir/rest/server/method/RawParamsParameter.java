@@ -20,6 +20,7 @@
 package ca.uhn.fhir.rest.server.method;
 
 import ca.uhn.fhir.rest.annotation.RawParam;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.QualifierDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -48,7 +49,7 @@ public class RawParamsParameter implements IParameter {
 		HashMap<String, List<String>> retVal = null;
 
 		for (String nextName : theRequest.getParameters().keySet()) {
-			if (nextName.startsWith("_")) {
+			if (nextName.startsWith("_") && !Constants.PARAM_LANGUAGE.equals(nextName)) {
 				continue;
 			}
 
