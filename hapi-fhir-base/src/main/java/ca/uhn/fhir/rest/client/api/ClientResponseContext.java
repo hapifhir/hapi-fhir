@@ -21,6 +21,7 @@ package ca.uhn.fhir.rest.client.api;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import java.util.Objects;
 import java.util.StringJoiner;
@@ -33,16 +34,19 @@ public class ClientResponseContext {
 	private IHttpResponse myHttpResponse;
 	private final IRestfulClient myRestfulClient;
 	private final FhirContext myFhirContext;
+	private final Class<? extends IBaseResource> myReturnType;
 
 	public ClientResponseContext(
 			IHttpRequest myHttpRequest,
 			IHttpResponse theHttpResponse,
 			IRestfulClient myRestfulClient,
-			FhirContext theFhirContext) {
+			FhirContext theFhirContext,
+			Class<? extends IBaseResource> theReturnType) {
 		this.myHttpRequest = myHttpRequest;
 		this.myHttpResponse = theHttpResponse;
 		this.myRestfulClient = myRestfulClient;
 		this.myFhirContext = theFhirContext;
+		this.myReturnType = theReturnType;
 	}
 
 	public IHttpRequest getHttpRequest() {
@@ -59,6 +63,10 @@ public class ClientResponseContext {
 
 	public FhirContext getFhirContext() {
 		return myFhirContext;
+	}
+
+	public Class<? extends IBaseResource> getReturnType() {
+		return myReturnType;
 	}
 
 	public void setHttpResponse(IHttpResponse theHttpResponse) {

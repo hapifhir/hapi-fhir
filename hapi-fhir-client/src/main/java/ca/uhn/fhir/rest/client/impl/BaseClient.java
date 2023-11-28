@@ -353,8 +353,13 @@ public abstract class BaseClient implements IRestfulClient {
 
 			response = httpRequest.execute();
 
+            final Class<? extends IBaseResource> returnType =
+				(binding instanceof ResourceResponseHandler)
+					? ((ResourceResponseHandler<? extends IBaseResource>)binding).getReturnType()
+					: null;
+
 			final ClientResponseContext clientResponseContext =
-					new ClientResponseContext(httpRequest, response, this, getFhirContext());
+					new ClientResponseContext(httpRequest, response, this, getFhirContext(), returnType);
 			HookParams responseParams = new HookParams();
 			responseParams.add(IHttpRequest.class, httpRequest);
 			responseParams.add(IHttpResponse.class, response);
@@ -652,6 +657,10 @@ public abstract class BaseClient implements IRestfulClient {
 			myId = theId;
 			myPreferResponseTypes = thePreferResponseTypes;
 			myAllowHtmlResponse = theAllowHtmlResponse;
+		}
+
+		public Class<T> getReturnType() {
+			return myReturnType;
 		}
 
 		@Override
