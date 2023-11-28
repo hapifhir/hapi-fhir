@@ -353,9 +353,8 @@ public abstract class BaseClient implements IRestfulClient {
 
 			response = httpRequest.execute();
 
-            final Class<? extends IBaseResource> returnType =
-				(binding instanceof ResourceResponseHandler)
-					? ((ResourceResponseHandler<? extends IBaseResource>)binding).getReturnType()
+			final Class<? extends IBaseResource> returnType = (binding instanceof ResourceResponseHandler)
+					? ((ResourceResponseHandler<? extends IBaseResource>) binding).getReturnType()
 					: null;
 
 			final ClientResponseContext clientResponseContext =
