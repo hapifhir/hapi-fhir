@@ -45,7 +45,6 @@ import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 import ca.uhn.fhir.rest.param.ParameterUtil;
 import ca.uhn.fhir.rest.param.QualifierDetails;
-import ca.uhn.fhir.rest.param.QuantityParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.server.IPagingProvider;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -64,8 +63,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.math.BigDecimal;
 import java.sql.Types;
 import java.util.ArrayList;
@@ -82,10 +79,11 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.apache.commons.lang3.StringUtils.join;
 
 /**
  * This class could be considered the main entrypoint into the HFQL executor.
@@ -125,7 +123,7 @@ public class HfqlExecutor implements IHfqlExecutor {
 
 	@Override
 	public IHfqlExecutionResult executeInitialSearch(
-		String theStatement, Integer theLimit, RequestDetails theRequestDetails) {
+			String theStatement, Integer theLimit, RequestDetails theRequestDetails) {
 		try {
 			return doExecuteInitialSearch(theStatement, theLimit, theRequestDetails);
 		} catch (Exception e) {
@@ -136,13 +134,13 @@ public class HfqlExecutor implements IHfqlExecutor {
 
 	@Nonnull
 	private IHfqlExecutionResult doExecuteInitialSearch(
-		String theStatement, Integer theLimit, RequestDetails theRequestDetails) {
+			String theStatement, Integer theLimit, RequestDetails theRequestDetails) {
 		HfqlStatementParser parser = new HfqlStatementParser(myFhirContext, theStatement);
 		HfqlStatement statement = parser.parse();
 		IFhirResourceDao dao = myDaoRegistry.getResourceDao(statement.getFromResourceName());
 		if (dao == null) {
 			throw new DataFormatException(
-				Msg.code(2406) + "Unknown or unsupported FROM type: " + statement.getFromResourceName());
+					Msg.code(2406) + "Unknown or unsupported FROM type: " + statement.getFromResourceName());
 		}
 
 		massageSelectColumnNames(statement);
@@ -176,7 +174,7 @@ public class HfqlExecutor implements IHfqlExecutor {
 			executionResult = executeCountClause(statement, executionContext, outcome, whereClausePredicate);
 		} else {
 			executionResult = new LocalSearchHfqlExecutionResult(
-				statement, outcome, executionContext, limit, 0, whereClausePredicate, myFhirContext);
+					statement, outcome, executionContext, limit, 0, whereClausePredicate, myFhirContext);
 		}
 
 		if (statement.hasOrderClause()) {
@@ -191,11 +189,11 @@ public class HfqlExecutor implements IHfqlExecutor {
 			if (isDataValueWhereClause(next)) {
 				if (next.getLeft().matches("^[a-zA-Z]+$")) {
 					RuntimeResourceDefinition resDef =
-						myFhirContext.getResourceDefinition(theStatement.getFromResourceName());
+							myFhirContext.getResourceDefinition(theStatement.getFromResourceName());
 					if (resDef.getChildByName(next.getLeft()) == null) {
 						throw new InvalidRequestException(
-							Msg.code(2429) + "Resource type " + theStatement.getFromResourceName()
-								+ " does not have a root element named '" + next.getLeft() + "'");
+								Msg.code(2429) + "Resource type " + theStatement.getFromResourceName()
+										+ " does not have a root element named '" + next.getLeft() + "'");
 					}
 				}
 			}
@@ -209,8 +207,7 @@ public class HfqlExecutor implements IHfqlExecutor {
 	 */
 	private void massageWhereClauses(HfqlStatement theStatement) {
 		String fromResourceName = theStatement.getFromResourceName();
-		ResourceSearchParams activeSearchParams =
-			mySearchParamRegistry.getActiveSearchParams(fromResourceName);
+		ResourceSearchParams activeSearchParams = mySearchParamRegistry.getActiveSearchParams(fromResourceName);
 
 		for (HfqlStatement.WhereClause nextWhereClause : theStatement.getWhereClauses()) {
 
@@ -221,9 +218,12 @@ public class HfqlExecutor implements IHfqlExecutor {
 				left = nextWhereClause.getLeft();
 				comparator = "";
 				rightValues = nextWhereClause.getRightAsStrings();
-			} else if (nextWhereClause.getOperator() == HfqlStatement.WhereClauseOperatorEnum.UNARY_BOOLEAN && nextWhereClause.getRightAsStrings().size() > 1) {
+			} else if (nextWhereClause.getOperator() == HfqlStatement.WhereClauseOperatorEnum.UNARY_BOOLEAN
+					&& nextWhereClause.getRightAsStrings().size() > 1) {
 				left = nextWhereClause.getLeft();
-				rightValues = nextWhereClause.getRightAsStrings().subList(1, nextWhereClause.getRightAsStrings().size());
+				rightValues = nextWhereClause
+						.getRightAsStrings()
+						.subList(1, nextWhereClause.getRightAsStrings().size());
 				switch (nextWhereClause.getRightAsStrings().get(0)) {
 					case "=":
 						comparator = "";
@@ -260,17 +260,16 @@ public class HfqlExecutor implements IHfqlExecutor {
 					// This is an expression for Resource.id
 					nextWhereClause.setLeft("id");
 					nextWhereClause.setOperator(HfqlStatement.WhereClauseOperatorEnum.SEARCH_MATCH);
-					String joinedParamValues = rightValues.stream()
-						.map(ParameterUtil::escape)
-						.collect(Collectors.joining(","));
+					String joinedParamValues =
+							rightValues.stream().map(ParameterUtil::escape).collect(Collectors.joining(","));
 					nextWhereClause.setRight(Constants.PARAM_ID, joinedParamValues);
 				} else if (isFhirPathExpressionEquivalent("meta.lastUpdated", left, fromResourceName)) {
 					// This is an expression for Resource.meta.lastUpdated
 					nextWhereClause.setLeft("id");
 					nextWhereClause.setOperator(HfqlStatement.WhereClauseOperatorEnum.SEARCH_MATCH);
 					String joinedParamValues = rightValues.stream()
-						.map(value -> comparator + ParameterUtil.escape(value))
-						.collect(Collectors.joining(","));
+							.map(value -> comparator + ParameterUtil.escape(value))
+							.collect(Collectors.joining(","));
 					nextWhereClause.setRight(Constants.PARAM_LASTUPDATED, joinedParamValues);
 				}
 			}
@@ -286,7 +285,7 @@ public class HfqlExecutor implements IHfqlExecutor {
 
 			if (!"id".equals(nextSearchClause.getLeft())) {
 				throw new InvalidRequestException(
-					Msg.code(2412) + "search_match function can only be applied to the id element");
+						Msg.code(2412) + "search_match function can only be applied to the id element");
 			}
 
 			if (nextSearchClause.getRight().size() != 2) {
@@ -312,7 +311,7 @@ public class HfqlExecutor implements IHfqlExecutor {
 				QualifierDetails qualifiedParamName = QualifierDetails.extractQualifiersFromParameterName(paramName);
 
 				RuntimeSearchParam searchParam = mySearchParamRegistry.getActiveSearchParam(
-					statement.getFromResourceName(), qualifiedParamName.getParamName());
+						statement.getFromResourceName(), qualifiedParamName.getParamName());
 				if (searchParam == null) {
 					throw newInvalidRequestExceptionUnknownSearchParameter(paramName);
 				}
@@ -321,46 +320,46 @@ public class HfqlExecutor implements IHfqlExecutor {
 				values.setQualifier(qualifiedParamName.getWholeQualifier());
 				values.addAll(paramValues);
 				IQueryParameterAnd<?> andParam = JpaParamUtil.parseQueryParams(
-					myFhirContext, searchParam.getParamType(), paramName, List.of(values));
+						myFhirContext, searchParam.getParamType(), paramName, List.of(values));
 				map.add(qualifiedParamName.getParamName(), andParam);
 			}
 		}
 	}
 
 	private IHfqlExecutionResult createOrderedResult(
-		HfqlStatement theStatement, IHfqlExecutionResult theExecutionResult) {
+			HfqlStatement theStatement, IHfqlExecutionResult theExecutionResult) {
 		List<IHfqlExecutionResult.Row> rows = new ArrayList<>();
 		while (theExecutionResult.hasNext()) {
 			IHfqlExecutionResult.Row nextRow = theExecutionResult.getNextRow();
 			rows.add(nextRow);
 			Validate.isTrue(
-				rows.size() <= HfqlConstants.ORDER_AND_GROUP_LIMIT,
-				"Can not ORDER BY result sets over %d results",
-				HfqlConstants.ORDER_AND_GROUP_LIMIT);
+					rows.size() <= HfqlConstants.ORDER_AND_GROUP_LIMIT,
+					"Can not ORDER BY result sets over %d results",
+					HfqlConstants.ORDER_AND_GROUP_LIMIT);
 		}
 
 		List<Integer> orderColumnIndexes = theStatement.getOrderByClauses().stream()
-			.map(t -> {
-				int index = theStatement.findSelectClauseIndex(t.getClause());
-				if (index == -1) {
-					throw new InvalidRequestException(
-						Msg.code(2407) + "Invalid/unknown ORDER BY clause: " + t.getClause());
-				}
-				return index;
-			})
-			.collect(Collectors.toList());
+				.map(t -> {
+					int index = theStatement.findSelectClauseIndex(t.getClause());
+					if (index == -1) {
+						throw new InvalidRequestException(
+								Msg.code(2407) + "Invalid/unknown ORDER BY clause: " + t.getClause());
+					}
+					return index;
+				})
+				.collect(Collectors.toList());
 		List<Boolean> orderAscending = theStatement.getOrderByClauses().stream()
-			.map(HfqlStatement.OrderByClause::isAscending)
-			.collect(Collectors.toList());
+				.map(HfqlStatement.OrderByClause::isAscending)
+				.collect(Collectors.toList());
 
 		Comparator<IHfqlExecutionResult.Row> comparator = null;
 		for (int i = 0; i < orderColumnIndexes.size(); i++) {
 			int columnIndex = orderColumnIndexes.get(i);
 			HfqlDataTypeEnum dataType = theExecutionResult
-				.getStatement()
-				.getSelectClauses()
-				.get(columnIndex)
-				.getDataType();
+					.getStatement()
+					.getSelectClauses()
+					.get(columnIndex)
+					.getDataType();
 			Comparator<IHfqlExecutionResult.Row> nextComparator = newRowComparator(columnIndex, dataType);
 			if (!orderAscending.get(i)) {
 				nextComparator = nextComparator.reversed();
@@ -378,49 +377,49 @@ public class HfqlExecutor implements IHfqlExecutor {
 		}
 
 		List<List<Object>> rowData =
-			rows.stream().map(IHfqlExecutionResult.Row::getRowValues).collect(Collectors.toList());
+				rows.stream().map(IHfqlExecutionResult.Row::getRowValues).collect(Collectors.toList());
 		return new StaticHfqlExecutionResult(null, theStatement, rowData);
 	}
 
 	@Override
 	public IHfqlExecutionResult executeContinuation(
-		HfqlStatement theStatement,
-		String theSearchId,
-		int theStartingOffset,
-		Integer theLimit,
-		RequestDetails theRequestDetails) {
+			HfqlStatement theStatement,
+			String theSearchId,
+			int theStartingOffset,
+			Integer theLimit,
+			RequestDetails theRequestDetails) {
 		IBundleProvider resultList = myPagingProvider.retrieveResultList(theRequestDetails, theSearchId);
 		HfqlExecutionContext executionContext = new HfqlExecutionContext(myFhirContext.newFhirPath());
 		Predicate<IBaseResource> whereClausePredicate = newWhereClausePredicate(executionContext, theStatement);
 		return new LocalSearchHfqlExecutionResult(
-			theStatement,
-			resultList,
-			executionContext,
-			theLimit,
-			theStartingOffset,
-			whereClausePredicate,
-			myFhirContext);
+				theStatement,
+				resultList,
+				executionContext,
+				theLimit,
+				theStartingOffset,
+				whereClausePredicate,
+				myFhirContext);
 	}
 
 	private IHfqlExecutionResult executeCountClause(
-		HfqlStatement theStatement,
-		HfqlExecutionContext theExecutionContext,
-		IBundleProvider theOutcome,
-		Predicate<IBaseResource> theWhereClausePredicate) {
+			HfqlStatement theStatement,
+			HfqlExecutionContext theExecutionContext,
+			IBundleProvider theOutcome,
+			Predicate<IBaseResource> theWhereClausePredicate) {
 
 		Set<String> selectClauses = theStatement.getSelectClauses().stream()
-			.filter(t -> t.getOperator() == HfqlStatement.SelectClauseOperator.SELECT)
-			.map(HfqlStatement.SelectClause::getClause)
-			.collect(Collectors.toSet());
+				.filter(t -> t.getOperator() == HfqlStatement.SelectClauseOperator.SELECT)
+				.map(HfqlStatement.SelectClause::getClause)
+				.collect(Collectors.toSet());
 		for (String next : selectClauses) {
 			if (!theStatement.getGroupByClauses().contains(next)) {
 				throw newInvalidRequestCountWithSelectOnNonGroupedClause(next);
 			}
 		}
 		Set<String> countClauses = theStatement.getSelectClauses().stream()
-			.filter(t -> t.getOperator() == HfqlStatement.SelectClauseOperator.COUNT)
-			.map(HfqlStatement.SelectClause::getClause)
-			.collect(Collectors.toSet());
+				.filter(t -> t.getOperator() == HfqlStatement.SelectClauseOperator.COUNT)
+				.map(HfqlStatement.SelectClause::getClause)
+				.collect(Collectors.toSet());
 
 		Map<GroupByKey, Map<String, AtomicInteger>> keyCounter = new HashMap<>();
 
@@ -437,9 +436,9 @@ public class HfqlExecutor implements IHfqlExecutor {
 
 					for (String nextClause : theStatement.getGroupByClauses()) {
 						List<String> nextClauseValues =
-							theExecutionContext.evaluate(nextResource, nextClause, IPrimitiveType.class).stream()
-								.map(IPrimitiveType::getValueAsString)
-								.collect(Collectors.toList());
+								theExecutionContext.evaluate(nextResource, nextClause, IPrimitiveType.class).stream()
+										.map(IPrimitiveType::getValueAsString)
+										.collect(Collectors.toList());
 						if (nextClauseValues.isEmpty()) {
 							nextClauseValues.add(null);
 						}
@@ -452,18 +451,18 @@ public class HfqlExecutor implements IHfqlExecutor {
 						Map<String, AtomicInteger> counts = keyCounter.computeIfAbsent(nextKey, t -> new HashMap<>());
 						if (keyCounter.size() >= HfqlConstants.ORDER_AND_GROUP_LIMIT) {
 							throw new InvalidRequestException(Msg.code(2402) + "Can not group on > "
-								+ HfqlConstants.ORDER_AND_GROUP_LIMIT + " terms");
+									+ HfqlConstants.ORDER_AND_GROUP_LIMIT + " terms");
 						}
 						for (String nextCountClause : countClauses) {
 							if (!nextCountClause.equals("*")) {
 								if (theExecutionContext
-									.evaluateFirst(nextResource, nextCountClause, IBase.class)
-									.isEmpty()) {
+										.evaluateFirst(nextResource, nextCountClause, IBase.class)
+										.isEmpty()) {
 									continue;
 								}
 							}
 							counts.computeIfAbsent(nextCountClause, k -> new AtomicInteger())
-								.incrementAndGet();
+									.incrementAndGet();
 						}
 					}
 				}
@@ -507,9 +506,9 @@ public class HfqlExecutor implements IHfqlExecutor {
 	}
 
 	private void createCrossProductRecurse(
-		List<List<String>> theGroupByClauseValues,
-		Set<GroupByKey> theGroupsSetToPopulate,
-		List<String> theCurrentValueChain) {
+			List<List<String>> theGroupByClauseValues,
+			Set<GroupByKey> theGroupsSetToPopulate,
+			List<String> theCurrentValueChain) {
 		List<String> nextOptions = theGroupByClauseValues.get(0);
 		for (String nextOption : nextOptions) {
 			theCurrentValueChain.add(nextOption);
@@ -518,9 +517,9 @@ public class HfqlExecutor implements IHfqlExecutor {
 				theGroupsSetToPopulate.add(new GroupByKey(theCurrentValueChain));
 			} else {
 				createCrossProductRecurse(
-					theGroupByClauseValues.subList(1, theGroupByClauseValues.size()),
-					theGroupsSetToPopulate,
-					theCurrentValueChain);
+						theGroupByClauseValues.subList(1, theGroupByClauseValues.size()),
+						theGroupsSetToPopulate,
+						theCurrentValueChain);
 			}
 
 			theCurrentValueChain.remove(theCurrentValueChain.size() - 1);
@@ -528,7 +527,7 @@ public class HfqlExecutor implements IHfqlExecutor {
 	}
 
 	private Predicate<IBaseResource> newWhereClausePredicate(
-		HfqlExecutionContext theExecutionContext, HfqlStatement theStatement) {
+			HfqlExecutionContext theExecutionContext, HfqlStatement theStatement) {
 		return r -> {
 			for (HfqlStatement.WhereClause nextWhereClause : theStatement.getWhereClauses()) {
 
@@ -551,9 +550,12 @@ public class HfqlExecutor implements IHfqlExecutor {
 						}
 					}
 				} catch (FhirPathExecutionException e) {
-					String expression = nextWhereClause.getOperator() == HfqlStatement.WhereClauseOperatorEnum.UNARY_BOOLEAN ? nextWhereClause.asUnaryExpression() : nextWhereClause.getLeft();
+					String expression =
+							nextWhereClause.getOperator() == HfqlStatement.WhereClauseOperatorEnum.UNARY_BOOLEAN
+									? nextWhereClause.asUnaryExpression()
+									: nextWhereClause.getLeft();
 					throw new InvalidRequestException(Msg.code(2403) + "Unable to evaluate FHIRPath expression \""
-						+ expression + "\". Error: " + e.getMessage());
+							+ expression + "\". Error: " + e.getMessage());
 				}
 
 				if (!haveMatch) {
@@ -604,7 +606,7 @@ public class HfqlExecutor implements IHfqlExecutor {
 	}
 
 	private void resolveAndReplaceStarInSelectClauseAtIndex(
-		HfqlStatement theHfqlStatement, List<HfqlStatement.SelectClause> theSelectClauses, int theIndex) {
+			HfqlStatement theHfqlStatement, List<HfqlStatement.SelectClause> theSelectClauses, int theIndex) {
 		String resourceName = theHfqlStatement.getFromResourceName();
 		TreeSet<String> allLeafPaths = findLeafPaths(resourceName);
 
@@ -651,27 +653,27 @@ public class HfqlExecutor implements IHfqlExecutor {
 	@Override
 	public IHfqlExecutionResult introspectTables() {
 		List<String> columns = List.of(
-			"TABLE_CAT",
-			"TABLE_SCHEM",
-			"TABLE_NAME",
-			"TABLE_TYPE",
-			"REMARKS",
-			"TYPE_CAT",
-			"TYPE_SCHEM",
-			"TYPE_NAME",
-			"SELF_REFERENCING_COL_NAME",
-			"REF_GENERATION");
+				"TABLE_CAT",
+				"TABLE_SCHEM",
+				"TABLE_NAME",
+				"TABLE_TYPE",
+				"REMARKS",
+				"TYPE_CAT",
+				"TYPE_SCHEM",
+				"TYPE_NAME",
+				"SELF_REFERENCING_COL_NAME",
+				"REF_GENERATION");
 		List<HfqlDataTypeEnum> dataTypes = List.of(
-			HfqlDataTypeEnum.STRING,
-			HfqlDataTypeEnum.STRING,
-			HfqlDataTypeEnum.STRING,
-			HfqlDataTypeEnum.STRING,
-			HfqlDataTypeEnum.STRING,
-			HfqlDataTypeEnum.STRING,
-			HfqlDataTypeEnum.STRING,
-			HfqlDataTypeEnum.STRING,
-			HfqlDataTypeEnum.STRING,
-			HfqlDataTypeEnum.STRING);
+				HfqlDataTypeEnum.STRING,
+				HfqlDataTypeEnum.STRING,
+				HfqlDataTypeEnum.STRING,
+				HfqlDataTypeEnum.STRING,
+				HfqlDataTypeEnum.STRING,
+				HfqlDataTypeEnum.STRING,
+				HfqlDataTypeEnum.STRING,
+				HfqlDataTypeEnum.STRING,
+				HfqlDataTypeEnum.STRING,
+				HfqlDataTypeEnum.STRING);
 		List<List<Object>> rows = new ArrayList<>();
 
 		TreeSet<String> resourceTypes = new TreeSet<>(myFhirContext.getResourceTypes());
@@ -748,56 +750,56 @@ public class HfqlExecutor implements IHfqlExecutor {
 	@Override
 	public IHfqlExecutionResult introspectColumns(@Nullable String theTableName, @Nullable String theColumnName) {
 		List<String> columns = List.of(
-			"TABLE_CAT",
-			"TABLE_SCHEM",
-			"TABLE_NAME",
-			"COLUMN_NAME",
-			"DATA_TYPE",
-			"TYPE_NAME",
-			"COLUMN_SIZE",
-			"BUFFER_LENGTH",
-			"DECIMAL_DIGITS",
-			"NUM_PREC_RADIX",
-			"NULLABLE",
-			"REMARKS",
-			"COLUMN_DEF",
-			"SQL_DATA_TYPE",
-			"SQL_DATETIME_SUB",
-			"CHAR_OCTET_LENGTH",
-			"ORDINAL_POSITION",
-			"IS_NULLABLE",
-			"SCOPE_CATALOG",
-			"SCOPE_SCHEMA",
-			"SCOPE_TABLE",
-			"SOURCE_DATA_TYPE",
-			"IS_AUTOINCREMENT",
-			"IS_GENERATEDCOLUMN");
+				"TABLE_CAT",
+				"TABLE_SCHEM",
+				"TABLE_NAME",
+				"COLUMN_NAME",
+				"DATA_TYPE",
+				"TYPE_NAME",
+				"COLUMN_SIZE",
+				"BUFFER_LENGTH",
+				"DECIMAL_DIGITS",
+				"NUM_PREC_RADIX",
+				"NULLABLE",
+				"REMARKS",
+				"COLUMN_DEF",
+				"SQL_DATA_TYPE",
+				"SQL_DATETIME_SUB",
+				"CHAR_OCTET_LENGTH",
+				"ORDINAL_POSITION",
+				"IS_NULLABLE",
+				"SCOPE_CATALOG",
+				"SCOPE_SCHEMA",
+				"SCOPE_TABLE",
+				"SOURCE_DATA_TYPE",
+				"IS_AUTOINCREMENT",
+				"IS_GENERATEDCOLUMN");
 		List<HfqlDataTypeEnum> dataTypes = List.of(
-			HfqlDataTypeEnum.STRING, // TABLE_CAT
-			HfqlDataTypeEnum.STRING, // TABLE_SCHEM
-			HfqlDataTypeEnum.STRING, // TABLE_NAME
-			HfqlDataTypeEnum.STRING, // COLUMN_NAME
-			HfqlDataTypeEnum.INTEGER, // DATA_TYPE
-			HfqlDataTypeEnum.STRING, // TYPE_NAME
-			HfqlDataTypeEnum.INTEGER, // COLUMN_SIZE
-			HfqlDataTypeEnum.STRING, // BUFFER_LENGTH
-			HfqlDataTypeEnum.INTEGER, // DECIMAL_DIGITS
-			HfqlDataTypeEnum.INTEGER, // NUM_PREC_RADIX
-			HfqlDataTypeEnum.INTEGER, // NULLABLE
-			HfqlDataTypeEnum.STRING, // REMARKS
-			HfqlDataTypeEnum.STRING, // COLUMN_DEF
-			HfqlDataTypeEnum.INTEGER, // SQL_DATA_TYPE
-			HfqlDataTypeEnum.INTEGER, // SQL_DATETIME_SUB
-			HfqlDataTypeEnum.INTEGER, // CHAR_OCTET_LENGTH
-			HfqlDataTypeEnum.INTEGER, // ORDINAL_POSITION
-			HfqlDataTypeEnum.STRING, // IS_NULLABLE
-			HfqlDataTypeEnum.STRING, // SCOPE_CATALOG
-			HfqlDataTypeEnum.STRING, // SCOPE_SCHEMA
-			HfqlDataTypeEnum.STRING, // SCOPE_TABLE
-			HfqlDataTypeEnum.STRING, // SOURCE_DATA_TYPE
-			HfqlDataTypeEnum.STRING, // IS_AUTOINCREMENT
-			HfqlDataTypeEnum.STRING // IS_GENERATEDCOLUMN
-		);
+				HfqlDataTypeEnum.STRING, // TABLE_CAT
+				HfqlDataTypeEnum.STRING, // TABLE_SCHEM
+				HfqlDataTypeEnum.STRING, // TABLE_NAME
+				HfqlDataTypeEnum.STRING, // COLUMN_NAME
+				HfqlDataTypeEnum.INTEGER, // DATA_TYPE
+				HfqlDataTypeEnum.STRING, // TYPE_NAME
+				HfqlDataTypeEnum.INTEGER, // COLUMN_SIZE
+				HfqlDataTypeEnum.STRING, // BUFFER_LENGTH
+				HfqlDataTypeEnum.INTEGER, // DECIMAL_DIGITS
+				HfqlDataTypeEnum.INTEGER, // NUM_PREC_RADIX
+				HfqlDataTypeEnum.INTEGER, // NULLABLE
+				HfqlDataTypeEnum.STRING, // REMARKS
+				HfqlDataTypeEnum.STRING, // COLUMN_DEF
+				HfqlDataTypeEnum.INTEGER, // SQL_DATA_TYPE
+				HfqlDataTypeEnum.INTEGER, // SQL_DATETIME_SUB
+				HfqlDataTypeEnum.INTEGER, // CHAR_OCTET_LENGTH
+				HfqlDataTypeEnum.INTEGER, // ORDINAL_POSITION
+				HfqlDataTypeEnum.STRING, // IS_NULLABLE
+				HfqlDataTypeEnum.STRING, // SCOPE_CATALOG
+				HfqlDataTypeEnum.STRING, // SCOPE_SCHEMA
+				HfqlDataTypeEnum.STRING, // SCOPE_TABLE
+				HfqlDataTypeEnum.STRING, // SOURCE_DATA_TYPE
+				HfqlDataTypeEnum.STRING, // IS_AUTOINCREMENT
+				HfqlDataTypeEnum.STRING // IS_GENERATEDCOLUMN
+				);
 
 		List<List<Object>> rows = new ArrayList<>();
 		for (String nextResourceType : new TreeSet<>(myFhirContext.getResourceTypes())) {
@@ -807,30 +809,30 @@ public class HfqlExecutor implements IHfqlExecutor {
 				for (String nextLeafPath : leafPaths) {
 					if (isBlank(theColumnName) || theColumnName.equals(nextLeafPath)) {
 						rows.add(Lists.newArrayList(
-							null,
-							null,
-							nextResourceType,
-							nextLeafPath,
-							Types.VARCHAR,
-							"string",
-							-1,
-							null,
-							null,
-							null,
-							1, // nullable
-							null,
-							null,
-							null,
-							null,
-							null,
-							position++,
-							"YES",
-							null,
-							null,
-							null,
-							null,
-							"NO",
-							"NO"));
+								null,
+								null,
+								nextResourceType,
+								nextLeafPath,
+								Types.VARCHAR,
+								"string",
+								-1,
+								null,
+								null,
+								null,
+								1, // nullable
+								null,
+								null,
+								null,
+								null,
+								null,
+								position++,
+								"YES",
+								null,
+								null,
+								null,
+								null,
+								"NO",
+								"NO"));
 					}
 				}
 			}
@@ -839,15 +841,16 @@ public class HfqlExecutor implements IHfqlExecutor {
 		return new StaticHfqlExecutionResult(null, columns, dataTypes, rows);
 	}
 
-	private static boolean isFhirPathExpressionEquivalent(String wantedExpression, String actualExpression, String fromResourceName) {
+	private static boolean isFhirPathExpressionEquivalent(
+			String wantedExpression, String actualExpression, String fromResourceName) {
 		if (wantedExpression.equals(actualExpression)) {
 			return true;
 		}
 		if (("Resource." + wantedExpression).equals(actualExpression)) {
 			return true;
 		}
-        return (fromResourceName + "." + wantedExpression).equals(actualExpression);
-    }
+		return (fromResourceName + "." + wantedExpression).equals(actualExpression);
+	}
 
 	/**
 	 * Returns {@literal true} if a where clause has an operator of
@@ -857,7 +860,7 @@ public class HfqlExecutor implements IHfqlExecutor {
 	 */
 	private static boolean isDataValueWhereClause(HfqlStatement.WhereClause next) {
 		return next.getOperator() == HfqlStatement.WhereClauseOperatorEnum.EQUALS
-			|| next.getOperator() == HfqlStatement.WhereClauseOperatorEnum.IN;
+				|| next.getOperator() == HfqlStatement.WhereClauseOperatorEnum.IN;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -866,13 +869,12 @@ public class HfqlExecutor implements IHfqlExecutor {
 	}
 
 	private static boolean evaluateWhereClauseUnaryBoolean(
-		HfqlExecutionContext theExecutionContext, IBaseResource r, HfqlStatement.WhereClause theNextWhereClause) {
+			HfqlExecutionContext theExecutionContext, IBaseResource r, HfqlStatement.WhereClause theNextWhereClause) {
 		boolean haveMatch = false;
 
 		String fullExpression = theNextWhereClause.asUnaryExpression();
 
-		List<IPrimitiveType> values =
-			theExecutionContext.evaluate(r, fullExpression, IPrimitiveType.class);
+		List<IPrimitiveType> values = theExecutionContext.evaluate(r, fullExpression, IPrimitiveType.class);
 		for (IPrimitiveType<?> nextValue : values) {
 			if (Boolean.TRUE.equals(nextValue.getValue())) {
 				haveMatch = true;
@@ -883,15 +885,15 @@ public class HfqlExecutor implements IHfqlExecutor {
 	}
 
 	private static boolean evaluateWhereClauseBinaryEqualsOrIn(
-		HfqlExecutionContext theExecutionContext, IBaseResource r, HfqlStatement.WhereClause theNextWhereClause) {
+			HfqlExecutionContext theExecutionContext, IBaseResource r, HfqlStatement.WhereClause theNextWhereClause) {
 		boolean haveMatch = false;
 		List<IBase> values = theExecutionContext.evaluate(r, theNextWhereClause.getLeft(), IBase.class);
 		for (IBase nextValue : values) {
 			for (String nextRight : theNextWhereClause.getRight()) {
 				String expression = "$this = " + nextRight;
 				IPrimitiveType outcome = theExecutionContext
-					.evaluateFirst(nextValue, expression, IPrimitiveType.class)
-					.orElseThrow(IllegalStateException::new);
+						.evaluateFirst(nextValue, expression, IPrimitiveType.class)
+						.orElseThrow(IllegalStateException::new);
 				Boolean value = (Boolean) outcome.getValue();
 				haveMatch = value;
 				if (haveMatch) {
@@ -908,13 +910,13 @@ public class HfqlExecutor implements IHfqlExecutor {
 	@Nonnull
 	private static InvalidRequestException newInvalidRequestExceptionUnknownSearchParameter(String theParamName) {
 		return new InvalidRequestException(
-			"Unknown/unsupported search parameter: " + UrlUtil.sanitizeUrlPart(theParamName));
+				"Unknown/unsupported search parameter: " + UrlUtil.sanitizeUrlPart(theParamName));
 	}
 
 	@Nonnull
 	private static InvalidRequestException newInvalidRequestCountWithSelectOnNonGroupedClause(String theClause) {
 		return new InvalidRequestException(
-			"Unable to select on non-grouped column in a count expression: " + UrlUtil.sanitizeUrlPart(theClause));
+				"Unable to select on non-grouped column in a count expression: " + UrlUtil.sanitizeUrlPart(theClause));
 	}
 
 	private static class RowValueExtractor implements Function<IHfqlExecutionResult.Row, Comparable> {

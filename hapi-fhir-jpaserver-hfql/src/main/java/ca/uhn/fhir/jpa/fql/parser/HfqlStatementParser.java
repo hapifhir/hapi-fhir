@@ -347,7 +347,6 @@ public class HfqlStatementParser {
 							break;
 						}
 					}
-
 				}
 
 				if (nextToken != null) {

@@ -29,54 +29,54 @@ public enum HfqlLexerOptions {
 	 * more specialized.
 	 */
 	HFQL_TOKEN(
-		List.of(">=", "<=", "!="),
-		Set.of(
-			'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't',
-			'u', 'v', 'w', 'x', 'y', 'z', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N',
-			'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', '0', '1', '2', '3', '4', '5', '6', '7',
-			'8', '9', '.', '[', ']', '_', '~'),
-		Set.of(',', '=', '(', ')', '|', ':', '*', '<', '>', '!'),
-		false),
+			List.of(">=", "<=", "!="),
+			Set.of(
+					'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't',
+					'u', 'v', 'w', 'x', 'y', 'z', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N',
+					'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', '0', '1', '2', '3', '4', '5', '6', '7',
+					'8', '9', '.', '[', ']', '_', '~'),
+			Set.of(',', '=', '(', ')', '|', ':', '*', '<', '>', '!'),
+			false),
 
 	/**
 	 * A FHIR search parameter name.
 	 */
 	SEARCH_PARAMETER_NAME(
-		List.of(),
-		Set.of(
-			'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't',
-			'u', 'v', 'w', 'x', 'y', 'z', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N',
-			'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', '0', '1', '2', '3', '4', '5', '6', '7',
-			'8', '9', '_', ':', '.', '-'),
-		Set.of(),
-		false),
+			List.of(),
+			Set.of(
+					'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't',
+					'u', 'v', 'w', 'x', 'y', 'z', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N',
+					'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', '0', '1', '2', '3', '4', '5', '6', '7',
+					'8', '9', '_', ':', '.', '-'),
+			Set.of(),
+			false),
 
 	/**
 	 * A complete FHIRPath expression.
 	 */
 	FHIRPATH_EXPRESSION(
-		List.of(">=", "<=", "!="),
-		Set.of(
-			'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't',
-			'u', 'v', 'w', 'x', 'y', 'z', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N',
-			'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', '0', '1', '2', '3', '4', '5', '6', '7',
-			'8', '9', '.', '[', ']', '_', '(', ')', '+', '-'),
-		Set.of(',', '|', ':', '*', '=', '<', '>', '!', '~'),
-		true),
+			List.of(">=", "<=", "!="),
+			Set.of(
+					'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't',
+					'u', 'v', 'w', 'x', 'y', 'z', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N',
+					'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', '0', '1', '2', '3', '4', '5', '6', '7',
+					'8', '9', '.', '[', ']', '_', '(', ')', '+', '-'),
+			Set.of(',', '|', ':', '*', '=', '<', '>', '!', '~'),
+			true),
 
 	/**
 	 * Returns individual dot-parts of a FHIRPath expression as individual tokens, and also returns
 	 * dots as separate tokens.
 	 */
 	FHIRPATH_EXPRESSION_PART(
-		List.of(">=", "<=", "!="),
-		Set.of(
-			'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't',
-			'u', 'v', 'w', 'x', 'y', 'z', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N',
-			'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', '0', '1', '2', '3', '4', '5', '6', '7',
-			'8', '9', '[', ']', '_', '(', ')', '+', '-'),
-		Set.of(',', '=', '|', ':', '*', '<', '>', '!', '~', '.'),
-		true);
+			List.of(">=", "<=", "!="),
+			Set.of(
+					'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't',
+					'u', 'v', 'w', 'x', 'y', 'z', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N',
+					'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', '0', '1', '2', '3', '4', '5', '6', '7',
+					'8', '9', '[', ']', '_', '(', ')', '+', '-'),
+			Set.of(',', '=', '|', ':', '*', '<', '>', '!', '~', '.'),
+			true);
 
 	private final Set<Character> myMultiCharTokenCharacters;
 	private final boolean mySlurpParens;
@@ -84,10 +84,10 @@ public enum HfqlLexerOptions {
 	private final List<String> myMultiCharTokens;
 
 	HfqlLexerOptions(
-		List<String> theMultiCharTokens,
-		Set<Character> theMultiCharTokenCharacters,
-		Set<Character> theSingleCharTokenCharacters,
-		boolean theSlurpParens) {
+			List<String> theMultiCharTokens,
+			Set<Character> theMultiCharTokenCharacters,
+			Set<Character> theSingleCharTokenCharacters,
+			boolean theSlurpParens) {
 		myMultiCharTokens = theMultiCharTokens;
 		myMultiCharTokenCharacters = theMultiCharTokenCharacters;
 		mySingleCharTokenCharacters = theSingleCharTokenCharacters;
