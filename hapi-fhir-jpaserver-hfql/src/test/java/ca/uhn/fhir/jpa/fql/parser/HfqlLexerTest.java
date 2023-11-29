@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -143,6 +144,76 @@ public class HfqlLexerTest {
 		assertEquals("(", lexer.peekNextToken(HfqlLexerOptions.HFQL_TOKEN).getToken());
 		assertEquals("( Observation.value.ofType ( Quantity ) ).unit", lexer.getNextToken(HfqlLexerOptions.FHIRPATH_EXPRESSION).getToken());
 	}
+
+	@ParameterizedTest
+	@CsvSource(textBlock = """
+		>= , false , HFQL_TOKEN
+		<= , false , HFQL_TOKEN
+		!= , false , HFQL_TOKEN
+		=  , false , HFQL_TOKEN
+		>= , true  , HFQL_TOKEN
+		<= , true  , HFQL_TOKEN
+		!= , true  , HFQL_TOKEN
+		~  , true  , HFQL_TOKEN
+		=  , true  , HFQL_TOKEN
+		>= , false , FHIRPATH_EXPRESSION
+		<= , false , FHIRPATH_EXPRESSION
+		!= , false , FHIRPATH_EXPRESSION
+		=  , false , FHIRPATH_EXPRESSION
+		>= , true  , FHIRPATH_EXPRESSION
+		<= , true  , FHIRPATH_EXPRESSION
+		!= , true  , FHIRPATH_EXPRESSION
+		~  , true  , FHIRPATH_EXPRESSION
+		=  , true  , FHIRPATH_EXPRESSION
+		>= , false , FHIRPATH_EXPRESSION_PART
+		<= , false , FHIRPATH_EXPRESSION_PART
+		!= , false , FHIRPATH_EXPRESSION_PART
+		=  , false , FHIRPATH_EXPRESSION_PART
+		>= , true  , FHIRPATH_EXPRESSION_PART
+		<= , true  , FHIRPATH_EXPRESSION_PART
+		!= , true  , FHIRPATH_EXPRESSION_PART
+		~  , true  , FHIRPATH_EXPRESSION_PART
+		=  , true  , FHIRPATH_EXPRESSION_PART
+		"""
+	)
+	void testComparators(String theComparator, boolean thePad, HfqlLexerOptions theOptions) {
+		String input = """
+			SELECT
+			   id
+			FROM
+			   Patient
+			WHERE
+			   meta.lastUpdated >= '2023-10-09'
+			""";
+
+		String comparator = theComparator.trim();
+		if (thePad) {
+			input = input.replace(" >= ", " " + comparator + " ");
+		} else {
+			input = input.replace(" >= ", comparator);
+		}
+
+		List<String> allTokens = new HfqlLexer(input).allTokens(theOptions);
+
+		List<String> expectedItems = new ArrayList<>();
+		expectedItems.add("SELECT");
+		expectedItems.add("id");
+		expectedItems.add("FROM");
+		expectedItems.add("Patient");
+		expectedItems.add("WHERE");
+		if (theOptions == HfqlLexerOptions.FHIRPATH_EXPRESSION_PART) {
+			expectedItems.add("meta");
+			expectedItems.add(".");
+			expectedItems.add("lastUpdated");
+		} else {
+			expectedItems.add("meta.lastUpdated");
+		}
+		expectedItems.add(comparator);
+		expectedItems.add("'2023-10-09'");
+
+		assertThat(allTokens.toString(), allTokens, contains(expectedItems.toArray(new String[0])));
+	}
+
 
 	@ParameterizedTest
 	@CsvSource({
