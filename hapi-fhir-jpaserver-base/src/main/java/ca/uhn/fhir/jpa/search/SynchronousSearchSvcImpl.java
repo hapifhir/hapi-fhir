@@ -115,7 +115,7 @@ public class SynchronousSearchSvcImpl implements ISynchronousSearchSvc {
 				.execute(() -> {
 
 					// Load the results synchronously
-					final List<JpaPid> pids = new ArrayList<>();
+					List<JpaPid> pids = new ArrayList<>();
 
 					Long count = 0L;
 					if (wantCount) {
@@ -145,8 +145,17 @@ public class SynchronousSearchSvcImpl implements ISynchronousSearchSvc {
 						return bundleProvider;
 					}
 
+					// if we have a count, we'll want to request
+					// additional resources
+					SearchParameterMap clonedParams = theParams.clone();
+					Integer requestedCount = clonedParams.getCount();
+					boolean hasACount = requestedCount != null;
+					if (hasACount) {
+						clonedParams.setCount(requestedCount.intValue() + 1);
+					}
+
 					try (IResultIterator<JpaPid> resultIter = theSb.createQuery(
-							theParams, searchRuntimeDetails, theRequestDetails, theRequestPartitionId)) {
+							clonedParams, searchRuntimeDetails, theRequestDetails, theRequestPartitionId)) {
 						while (resultIter.hasNext()) {
 							pids.add(resultIter.next());
 							if (theLoadSynchronousUpTo != null && pids.size() >= theLoadSynchronousUpTo) {
@@ -160,6 +169,15 @@ public class SynchronousSearchSvcImpl implements ISynchronousSearchSvc {
 					} catch (IOException e) {
 						ourLog.error("IO failure during database access", e);
 						throw new InternalErrorException(Msg.code(1164) + e);
+					}
+
+					// truncate the list we retrieved - if needed
+					int receivedResourceCount = -1;
+					if (hasACount) {
+						// we want the accurate received resource count
+						receivedResourceCount = pids.size();
+						int resourcesToReturn = Math.min(theParams.getCount(), pids.size());
+						pids = pids.subList(0, resourcesToReturn);
 					}
 
 					JpaPreResourceAccessDetails accessDetails = new JpaPreResourceAccessDetails(pids, () -> theSb);
@@ -228,6 +246,9 @@ public class SynchronousSearchSvcImpl implements ISynchronousSearchSvc {
 							resources, theRequestDetails, myInterceptorBroadcaster);
 
 					SimpleBundleProvider bundleProvider = new SimpleBundleProvider(resources);
+					if (hasACount) {
+						bundleProvider.setTotalResourcesRequestedReturned(receivedResourceCount);
+					}
 					if (theParams.isOffsetQuery()) {
 						bundleProvider.setCurrentPageOffset(theParams.getOffset());
 						bundleProvider.setCurrentPageSize(theParams.getCount());

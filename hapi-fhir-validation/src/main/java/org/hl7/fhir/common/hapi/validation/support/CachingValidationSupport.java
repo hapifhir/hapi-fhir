@@ -3,6 +3,7 @@ package org.hl7.fhir.common.hapi.validation.support;
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.context.support.LookupCodeRequest;
 import ca.uhn.fhir.context.support.TranslateConceptResults;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
@@ -195,15 +196,13 @@ public class CachingValidationSupport extends BaseValidationSupportWrapper imple
 
 	@Override
 	public LookupCodeResult lookupCode(
-			ValidationSupportContext theValidationSupportContext,
-			String theSystem,
-			String theCode,
-			String theDisplayLanguage) {
-		String key = "lookupCode " + theSystem + " " + theCode + " " + defaultIfBlank(theDisplayLanguage, "NO_LANG");
+			ValidationSupportContext theValidationSupportContext, @Nonnull LookupCodeRequest theLookupCodeRequest) {
+		String key = "lookupCode " + theLookupCodeRequest.getSystem() + " "
+				+ theLookupCodeRequest.getCode()
+				+ " " + defaultIfBlank(theLookupCodeRequest.getDisplayLanguage(), "NO_LANG")
+				+ " " + theLookupCodeRequest.getPropertyNames().toString();
 		return loadFromCache(
-				myLookupCodeCache,
-				key,
-				t -> super.lookupCode(theValidationSupportContext, theSystem, theCode, theDisplayLanguage));
+				myLookupCodeCache, key, t -> super.lookupCode(theValidationSupportContext, theLookupCodeRequest));
 	}
 
 	@Override
