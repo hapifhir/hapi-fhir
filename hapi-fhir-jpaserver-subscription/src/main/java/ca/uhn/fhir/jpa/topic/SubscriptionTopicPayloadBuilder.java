@@ -94,8 +94,8 @@ public class SubscriptionTopicPayloadBuilder {
 			RestOperationTypeEnum theRestOperationType,
 			BundleBuilder theBundleBuilder) {
 
-		if (theActiveSubscription.getSubscription().isTopicSubscription() &&
-			Objects.nonNull(theActiveSubscription.getSubscription().getContent())) {
+		if (theActiveSubscription.getSubscription().isTopicSubscription()
+				&& Objects.nonNull(theActiveSubscription.getSubscription().getContent())) {
 
 			switch (theActiveSubscription.getSubscription().getContent()) {
 				case EMPTY:
