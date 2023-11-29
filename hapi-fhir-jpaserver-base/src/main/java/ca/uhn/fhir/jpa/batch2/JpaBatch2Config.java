@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.batch2;
 
 import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.config.BaseBatch2Config;
+import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.jpa.bulk.export.job.BulkExportJobConfig;
 import ca.uhn.fhir.jpa.dao.data.IBatch2JobInstanceRepository;
 import ca.uhn.fhir.jpa.dao.data.IBatch2WorkChunkRepository;
@@ -41,28 +42,10 @@ public class JpaBatch2Config extends BaseBatch2Config {
 			IBatch2JobInstanceRepository theJobInstanceRepository,
 			IBatch2WorkChunkRepository theWorkChunkRepository,
 			IHapiTransactionService theTransactionService,
-			EntityManager theEntityManager) {
+			EntityManager theEntityManager,
+			IInterceptorBroadcaster theInterceptorBroadcaster) {
 		return new JpaJobPersistenceImpl(
-				theJobInstanceRepository, theWorkChunkRepository, theTransactionService, theEntityManager);
+				theJobInstanceRepository, theWorkChunkRepository, theTransactionService, theEntityManager, theInterceptorBroadcaster);
 	}
 
-	@Primary
-	@Bean
-	public IJobPersistence batch2JobInstancePersisterWrapper(
-			IBatch2JobInstanceRepository theJobInstanceRepository,
-			IBatch2WorkChunkRepository theWorkChunkRepository,
-			IHapiTransactionService theTransactionService,
-			EntityManager theEntityManager) {
-		IJobPersistence retVal = batch2JobInstancePersister(
-				theJobInstanceRepository, theWorkChunkRepository, theTransactionService, theEntityManager);
-		// Avoid H2 synchronization issues caused by
-		// https://github.com/h2database/h2database/issues/1808
-		// TODO: Update 2023-03-14 - The bug above appears to be fixed. I'm going to try
-		// disabing this and see if we can get away without it. If so, we can delete
-		// this entirely
-		//		if (HapiSystemProperties.isUnitTestModeEnabled()) {
-		//			retVal = ProxyUtil.synchronizedProxy(IJobPersistence.class, retVal);
-		//		}
-		return retVal;
-	}
 }

@@ -30,6 +30,9 @@ import ca.uhn.fhir.batch2.model.WorkChunkCreateEvent;
 import ca.uhn.fhir.batch2.model.WorkChunkErrorEvent;
 import ca.uhn.fhir.batch2.model.WorkChunkStatusEnum;
 import ca.uhn.fhir.batch2.models.JobInstanceFetchRequest;
+import ca.uhn.fhir.interceptor.api.HookParams;
+import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
+import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.dao.data.IBatch2JobInstanceRepository;
 import ca.uhn.fhir.jpa.dao.data.IBatch2WorkChunkRepository;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
@@ -82,21 +85,24 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	private final IBatch2WorkChunkRepository myWorkChunkRepository;
 	private final EntityManager myEntityManager;
 	private final IHapiTransactionService myTransactionService;
+	private final IInterceptorBroadcaster myInterceptorBroadcaster;
 
 	/**
 	 * Constructor
 	 */
 	public JpaJobPersistenceImpl(
-			IBatch2JobInstanceRepository theJobInstanceRepository,
-			IBatch2WorkChunkRepository theWorkChunkRepository,
-			IHapiTransactionService theTransactionService,
-			EntityManager theEntityManager) {
+		IBatch2JobInstanceRepository theJobInstanceRepository,
+		IBatch2WorkChunkRepository theWorkChunkRepository,
+		IHapiTransactionService theTransactionService,
+		EntityManager theEntityManager,
+		IInterceptorBroadcaster theInterceptorBroadcaster) {
 		Validate.notNull(theJobInstanceRepository);
 		Validate.notNull(theWorkChunkRepository);
 		myJobInstanceRepository = theJobInstanceRepository;
 		myWorkChunkRepository = theWorkChunkRepository;
 		myTransactionService = theTransactionService;
 		myEntityManager = theEntityManager;
+		myInterceptorBroadcaster = theInterceptorBroadcaster;
 	}
 
 	@Override
@@ -143,6 +149,8 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	public String storeNewInstance(JobInstance theInstance) {
 		Validate.isTrue(isBlank(theInstance.getInstanceId()));
 
+		invokePrestorageBatchHooks(theInstance);
+
 		Batch2JobInstanceEntity entity = new Batch2JobInstanceEntity();
 		entity.setId(UUID.randomUUID().toString());
 		entity.setDefinitionId(theInstance.getJobDefinitionId());
@@ -154,6 +162,8 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 		entity.setCreateTime(new Date());
 		entity.setStartTime(new Date());
 		entity.setReport(theInstance.getReport());
+		entity.setTriggeringUsername(theInstance.getTriggeringUsername());
+		entity.setTriggeringClientId(theInstance.getTriggeringClientId());
 
 		entity = myJobInstanceRepository.save(entity);
 		return entity.getId();
@@ -520,5 +530,14 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 				return JobOperationResultJson.newFailure(operationString, messagePrefix + " not found.");
 			}
 		}
+	}
+	private void invokePrestorageBatchHooks(JobInstance theJobInstance) {
+		if (myInterceptorBroadcaster.hasHooks(Pointcut.STORAGE_PRESTORAGE_BATCH_JOB_CREATE)) {
+			HookParams params = new HookParams().add(JobInstance.class, theJobInstance);
+
+			myInterceptorBroadcaster
+				.callHooks(Pointcut.STORAGE_PRESTORAGE_BATCH_JOB_CREATE, params);
+		}
+
 	}
 }
