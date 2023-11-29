@@ -12,10 +12,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.annotation.PostConstruct;
-import javax.sql.DataSource;
 import java.util.Properties;
 import java.util.Set;
+import javax.annotation.PostConstruct;
+import javax.sql.DataSource;
 
 public class FhirTestAutoMigrator {
 
@@ -34,22 +34,13 @@ public class FhirTestAutoMigrator {
 			driver = DriverTypeEnum.POSTGRES_9_4;
 		}
 
-
-		HapiMigrationDao hapiMigrationDao = new HapiMigrationDao(
-			myDataSource,
-			driver,
-			MIGRATION_TABLENAME);
+		HapiMigrationDao hapiMigrationDao = new HapiMigrationDao(myDataSource, driver, MIGRATION_TABLENAME);
 		HapiMigrationStorageSvc hapiMigrationStorageSvc = new HapiMigrationStorageSvc(hapiMigrationDao);
 
 		MigrationTaskList tasks = new HapiFhirJpaMigrationTasks(Set.of()).getAllTasks(VersionEnum.values());
 
 		SchemaMigrator schemaMigrator = new SchemaMigrator(
-			"HAPI FHIR",
-			MIGRATION_TABLENAME,
-			myDataSource,
-			new Properties(),
-			tasks,
-			hapiMigrationStorageSvc);
+				"HAPI FHIR", MIGRATION_TABLENAME, myDataSource, new Properties(), tasks, hapiMigrationStorageSvc);
 		schemaMigrator.setDriverType(driver);
 
 		ourLog.info("About to run migration...");
