@@ -45,7 +45,6 @@ import java.util.Optional;
 import java.util.function.Supplier;
 import javax.servlet.http.HttpServletRequest;
 
-import static ca.uhn.fhir.jpa.provider.ValueSetOperationProvider.toValidateCodeResult;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public abstract class BaseJpaResourceProviderCodeSystem<T extends IBaseResource> extends BaseJpaResourceProvider<T> {
@@ -65,6 +64,7 @@ public abstract class BaseJpaResourceProviderCodeSystem<T extends IBaseResource>
 				@OperationParam(name = "version", typeName = "string", min = 0),
 				@OperationParam(name = "display", typeName = "string", min = 1),
 				@OperationParam(name = "abstract", typeName = "boolean", min = 1),
+				@OperationParam(name = "property", min = 0, max = OperationParam.MAX_UNLIMITED, typeName = "code")
 			})
 	public IBaseParameters lookup(
 			HttpServletRequest theServletRequest,
@@ -75,7 +75,7 @@ public abstract class BaseJpaResourceProviderCodeSystem<T extends IBaseResource>
 			@OperationParam(name = "displayLanguage", min = 0, max = 1, typeName = "code")
 					IPrimitiveType<String> theDisplayLanguage,
 			@OperationParam(name = "property", min = 0, max = OperationParam.MAX_UNLIMITED, typeName = "code")
-					List<IPrimitiveType<String>> theProperties,
+					List<IPrimitiveType<String>> thePropertyNames,
 			RequestDetails theRequestDetails) {
 
 		startRequest(theServletRequest);
@@ -83,9 +83,10 @@ public abstract class BaseJpaResourceProviderCodeSystem<T extends IBaseResource>
 			IFhirResourceDaoCodeSystem dao = (IFhirResourceDaoCodeSystem) getDao();
 			IValidationSupport.LookupCodeResult result;
 			applyVersionToSystem(theSystem, theVersion);
-			result = dao.lookupCode(theCode, theSystem, theCoding, theDisplayLanguage, theRequestDetails);
+			result = dao.lookupCode(
+					theCode, theSystem, theCoding, theDisplayLanguage, thePropertyNames, theRequestDetails);
 			result.throwNotFoundIfAppropriate();
-			return result.toParameters(theRequestDetails.getFhirContext(), theProperties);
+			return result.toParameters(theRequestDetails.getFhirContext(), thePropertyNames);
 		} finally {
 			endRequest(theServletRequest);
 		}
@@ -191,7 +192,7 @@ public abstract class BaseJpaResourceProviderCodeSystem<T extends IBaseResource>
 						theCodeableConcept,
 						theRequestDetails);
 			}
-			return toValidateCodeResult(getContext(), result);
+			return result.toParameters(getContext());
 		} finally {
 			endRequest(theServletRequest);
 		}

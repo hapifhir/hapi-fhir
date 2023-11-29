@@ -48,10 +48,13 @@ public abstract class BaseBatch2Config {
 	public static final String CHANNEL_NAME = "batch2-work-notification";
 
 	@Autowired
-	private IJobPersistence myPersistence;
+	IJobPersistence myPersistence;
 
 	@Autowired
-	private IChannelFactory myChannelFactory;
+	IChannelFactory myChannelFactory;
+
+	@Autowired
+	IHapiTransactionService myHapiTransactionService;
 
 	@Bean
 	public JobDefinitionRegistry batch2JobDefinitionRegistry() {
@@ -60,7 +63,7 @@ public abstract class BaseBatch2Config {
 
 	@Bean
 	public WorkChunkProcessor jobStepExecutorService(BatchJobSender theBatchJobSender) {
-		return new WorkChunkProcessor(myPersistence, theBatchJobSender);
+		return new WorkChunkProcessor(myPersistence, theBatchJobSender, myHapiTransactionService);
 	}
 
 	@Bean

@@ -161,17 +161,24 @@ public class ResponsePageTest {
 	 */
 	@ParameterizedTest
 	@CsvSource({
-		"true,false,true",
-		"true,true,true",
-		"false,false,false",
-		"false,true,false",
-		"false,false,true",
-		"false,true,true"
+		"true,false,true,true",
+		"true,true,true,true",
+		"false,false,false,true",
+		"false,true,false,true",
+		"false,false,true,true",
+		"false,true,true,true",
+		"true,false,true,false",
+		"true,true,true,false",
+		"false,false,false,false",
+		"false,true,false,false",
+		"false,false,true,false",
+		"false,true,true,false"
 	})
 	public void nonCachedOffsetPaging_setsNextPreviousLinks_test(
 		boolean theNumTotalResultsIsNull,
 		boolean theHasPreviousBoolean,
-		boolean theHasNextBoolean
+		boolean theHasNextBoolean,
+		boolean theHasTotalRequestedCountBool
 	) {
 		// setup
 		myBundleBuilder
@@ -193,6 +200,11 @@ public class ResponsePageTest {
 		} else {
 			when(myBundleProvider.size())
 				.thenReturn(null);
+			if (theHasTotalRequestedCountBool) {
+				myBundleBuilder.setTotalRequestedResourcesFetched(11); // 1 more than pagesize
+			} else {
+				myBundleBuilder.setPageSize(10);
+			}
 		}
 
 		RequestedPage requestedPage = new RequestedPage(
@@ -215,19 +227,28 @@ public class ResponsePageTest {
 
 	@ParameterizedTest
 	@CsvSource({
-		"true,false,false",
-		"true,true,false",
-		"true,false,true",
-		"true,true,true",
-		"false,false,false",
-		"false,true,false",
-		"false,false,true",
-		"false,true,true"
+		"true,false,false,true",
+		"true,true,false,true",
+		"true,false,true,true",
+		"true,true,true,true",
+		"false,false,false,true",
+		"false,true,false,true",
+		"false,false,true,true",
+		"false,true,true,true",
+		"true,false,false,false",
+		"true,true,false,false",
+		"true,false,true,false",
+		"true,true,true,false",
+		"false,false,false,false",
+		"false,true,false,false",
+		"false,false,true,false",
+		"false,true,true,false"
 	})
 	public void savedSearch_setsNextPreviousLinks_test(
 		boolean theNumTotalResultsIsNull,
 		boolean theHasPreviousBoolean,
-		boolean theHasNextBoolean
+		boolean theHasNextBoolean,
+		boolean theHasTotalRequestedFetched
 	) {
 		// setup
 		int pageSize = myList.size();
@@ -254,6 +275,12 @@ public class ResponsePageTest {
 		if (!theNumTotalResultsIsNull) {
 			if (!theHasNextBoolean) {
 				myBundleBuilder.setNumToReturn(pageSize + offset + includeResourceCount);
+			}
+		} else if (theHasTotalRequestedFetched) {
+			if (theHasNextBoolean) {
+				myBundleBuilder.setTotalRequestedResourcesFetched(pageSize + 1); // 1 more than page size
+			} else {
+				myBundleBuilder.setTotalRequestedResourcesFetched(pageSize);
 			}
 		}
 
