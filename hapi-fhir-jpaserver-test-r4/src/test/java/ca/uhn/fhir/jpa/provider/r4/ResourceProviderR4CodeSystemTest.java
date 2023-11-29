@@ -139,6 +139,29 @@ public class ResourceProviderR4CodeSystemTest extends BaseResourceProviderR4Test
 	}
 
 	@Test
+	public void testLookupOperationByCodeAndSystemWithPropertiesBuiltInCode() {
+		Parameters respParam = myClient
+				.operation()
+				.onType(CodeSystem.class)
+				.named("lookup")
+				.withParameter(Parameters.class, "code", new CodeType("ACSN"))
+				.andParameter("system", new UriType("http://terminology.hl7.org/CodeSystem/v2-0203"))
+				.execute();
+
+		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
+		ourLog.info(resp);
+
+		assertEquals("name", respParam.getParameter().get(0).getName());
+		assertEquals("v2.0203", ((StringType) respParam.getParameter().get(0).getValue()).getValue());
+		assertEquals("version", respParam.getParameter().get(1).getName());
+		assertEquals("2.9", ((StringType) respParam.getParameter().get(1).getValue()).getValue());
+		assertEquals("display", respParam.getParameter().get(2).getName());
+		assertEquals("Accession ID", ((StringType) respParam.getParameter().get(2).getValue()).getValue());
+		assertEquals("abstract", respParam.getParameter().get(3).getName());
+		assertEquals(false, ((BooleanType) respParam.getParameter().get(3).getValue()).getValue());
+	}
+
+	@Test
 	public void testLookupOperationByCodeAndSystemBuiltInNonexistantCode() {
 		try {
 			myClient
