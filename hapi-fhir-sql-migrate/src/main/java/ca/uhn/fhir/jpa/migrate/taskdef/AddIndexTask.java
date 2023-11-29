@@ -98,11 +98,13 @@ public class AddIndexTask extends BaseTableTask {
 			executeSql(tableName, sql);
 		} catch (Exception e) {
 			String message = e.toString();
-			if (message.contains("already exists") ||
-				// The Oracle message is ORA-01408: such column list already indexed
-				// TODO KHS consider db-specific handling here that uses the error code instead of the message so this is language independent
-				//  e.g. if the db is Oracle than checking e.getErrorCode() == 1408 should detect this case
-				message.contains("already indexed")) {
+			if (message.contains("already exists")
+					||
+					// The Oracle message is ORA-01408: such column list already indexed
+					// TODO KHS consider db-specific handling here that uses the error code instead of the message so
+					// this is language independent
+					//  e.g. if the db is Oracle than checking e.getErrorCode() == 1408 should detect this case
+					message.contains("already indexed")) {
 				ourLog.warn("Index {} already exists: {}", myIndexName, e.getMessage());
 			} else {
 				throw e;
