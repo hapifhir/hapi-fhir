@@ -36,6 +36,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
+import java.util.Objects;
 
 public class SubscriptionTopicPayloadBuilder {
 	private static final Logger ourLog = LoggerFactory.getLogger(SubscriptionTopicPayloadBuilder.class);
@@ -73,7 +74,7 @@ public class SubscriptionTopicPayloadBuilder {
 				myNotificationStatusBuilder.buildNotificationStatus(theResources, theActiveSubscription, theTopicUrl);
 		bundleBuilder.addCollectionEntry(notificationStatus);
 
-		addResources(bundleBuilder, theResources, theRestOperationType);
+		addResources(theResources, theActiveSubscription, theRestOperationType, bundleBuilder);
 		// WIP STR5 add support for notificationShape include, revinclude
 
 		// Note we need to set the bundle type after we add the resources since adding the resources automatically sets
@@ -87,7 +88,49 @@ public class SubscriptionTopicPayloadBuilder {
 		return retval;
 	}
 
-	private static void addResources(
+	private void addResources(
+			List<IBaseResource> theResources,
+			ActiveSubscription theActiveSubscription,
+			RestOperationTypeEnum theRestOperationType,
+			BundleBuilder theBundleBuilder) {
+
+		if (theActiveSubscription.getSubscription().isTopicSubscription() &&
+			Objects.nonNull(theActiveSubscription.getSubscription().getContent())) {
+
+			switch (theActiveSubscription.getSubscription().getContent()) {
+				case EMPTY:
+					// skip adding resource to the Bundle
+					break;
+				case IDONLY:
+					addIdOnly(theBundleBuilder, theResources, theRestOperationType);
+					break;
+				case FULLRESOURCE:
+					addFullResources(theBundleBuilder, theResources, theRestOperationType);
+					break;
+			}
+		} else {
+			addFullResources(theBundleBuilder, theResources, theRestOperationType);
+		}
+	}
+
+	private void addIdOnly(
+			BundleBuilder bundleBuilder, List<IBaseResource> theResources, RestOperationTypeEnum theRestOperationType) {
+		for (IBaseResource resource : theResources) {
+			switch (theRestOperationType) {
+				case CREATE:
+					bundleBuilder.addTransactionCreateEntryIdOnly(resource);
+					break;
+				case UPDATE:
+					bundleBuilder.addTransactionUpdateIdOnlyEntry(resource);
+					break;
+				case DELETE:
+					bundleBuilder.addTransactionDeleteEntry(resource);
+					break;
+			}
+		}
+	}
+
+	private void addFullResources(
 			BundleBuilder bundleBuilder, List<IBaseResource> theResources, RestOperationTypeEnum theRestOperationType) {
 		for (IBaseResource resource : theResources) {
 			switch (theRestOperationType) {

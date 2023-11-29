@@ -24,6 +24,7 @@ import ca.uhn.fhir.jpa.subscription.match.registry.ActiveSubscription;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r5.model.Enumerations;
 import org.hl7.fhir.r5.model.Reference;
+import org.hl7.fhir.r5.model.Subscription;
 import org.hl7.fhir.r5.model.SubscriptionStatus;
 
 import java.util.List;
@@ -50,12 +51,21 @@ public class R5NotificationStatusBuilder implements INotificationStatusBuilder<S
 		SubscriptionStatus.SubscriptionStatusNotificationEventComponent event =
 				subscriptionStatus.addNotificationEvent();
 		event.setEventNumber(eventNumber);
-		if (theResources.size() > 0) {
+		if (!theResources.isEmpty() && !isEmptyContentTopicSubscription(theActiveSubscription)) {
 			event.setFocus(new Reference(theResources.get(0).getIdElement()));
 		}
 		subscriptionStatus.setSubscription(
 				new Reference(theActiveSubscription.getSubscription().getIdElement(myFhirContext)));
 		subscriptionStatus.setTopic(theTopicUrl);
 		return subscriptionStatus;
+	}
+
+	private boolean isEmptyContentTopicSubscription(ActiveSubscription theActiveSubscription) {
+		return theActiveSubscription.getSubscription().isTopicSubscription()
+				&& Subscription.SubscriptionPayloadContent.EMPTY
+						== theActiveSubscription
+								.getSubscription()
+								.getTopicSubscription()
+								.getContent();
 	}
 }
