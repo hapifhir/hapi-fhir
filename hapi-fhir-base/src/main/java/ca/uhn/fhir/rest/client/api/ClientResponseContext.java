@@ -78,7 +78,11 @@ public class ClientResponseContext {
 		if (this == o) return true;
 		if (o == null || getClass() != o.getClass()) return false;
 		ClientResponseContext that = (ClientResponseContext) o;
-		return Objects.equals(myHttpRequest, that.myHttpRequest) && Objects.equals(myHttpResponse, that.myHttpResponse) && Objects.equals(myRestfulClient, that.myRestfulClient) && Objects.equals(myFhirContext, that.myFhirContext) && Objects.equals(myReturnType, that.myReturnType);
+		return Objects.equals(myHttpRequest, that.myHttpRequest)
+				&& Objects.equals(myHttpResponse, that.myHttpResponse)
+				&& Objects.equals(myRestfulClient, that.myRestfulClient)
+				&& Objects.equals(myFhirContext, that.myFhirContext)
+				&& Objects.equals(myReturnType, that.myReturnType);
 	}
 
 	@Override
@@ -87,14 +91,13 @@ public class ClientResponseContext {
 	}
 
 	@Override
-	public String
-	toString() {
+	public String toString() {
 		return new StringJoiner(", ", ClientResponseContext.class.getSimpleName() + "[", "]")
-			.add("myHttpRequest=" + myHttpRequest)
-			.add("myHttpResponse=" + myHttpResponse)
-			.add("myRestfulClient=" + myRestfulClient)
-			.add("myFhirContext=" + myFhirContext)
-			.add("myReturnType=" + myReturnType)
-			.toString();
+				.add("myHttpRequest=" + myHttpRequest)
+				.add("myHttpResponse=" + myHttpResponse)
+				.add("myRestfulClient=" + myRestfulClient)
+				.add("myFhirContext=" + myFhirContext)
+				.add("myReturnType=" + myReturnType)
+				.toString();
 	}
 }
