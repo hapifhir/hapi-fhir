@@ -63,12 +63,12 @@ public class ModifiedStringApacheHttpResponse extends BaseHttpResponse implement
 		}
 		try (InputStream respEntity = readEntity()) {
 			if (respEntity != null) {
-				this.myEntityBuffered = true;
 				try {
-					this.myEntityBytes = IOUtils.toByteArray(respEntity);
+					myEntityBytes = IOUtils.toByteArray(respEntity);
 				} catch (IllegalStateException exception) {
 					throw new InternalErrorException(Msg.code(2447) + exception);
 				}
+				myEntityBuffered = true;
 			}
 		}
 	}
@@ -126,7 +126,7 @@ public class ModifiedStringApacheHttpResponse extends BaseHttpResponse implement
 
 	@Override
 	public InputStream readEntity() {
-		if (this.myEntityBuffered) {
+		if (myEntityBuffered) {
 			return new ByteArrayInputStream(myEntityBytes);
 		} else {
 			return new ByteArrayInputStream(myNewContent.getBytes());
