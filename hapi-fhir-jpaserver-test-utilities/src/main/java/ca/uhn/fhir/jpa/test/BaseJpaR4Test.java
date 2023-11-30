@@ -215,7 +215,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
 @ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = {TestR4Config.class})
+@ContextConfiguration(classes = {
+	TestR4Config.class
+})
 public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuilder {
 	public static final String MY_VALUE_SET = "my-value-set";
 	public static final String URL_MY_VALUE_SET = "http://example.com/my_value_set";
@@ -398,6 +400,7 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 	@Autowired
 	@Qualifier("myOrganizationAffiliationDaoR4")
 	protected IFhirResourceDao<OrganizationAffiliation> myOrganizationAffiliationDao;
+
 	@Autowired
 	protected DatabaseBackedPagingProvider myPagingProvider;
 	@Autowired
