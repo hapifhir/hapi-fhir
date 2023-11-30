@@ -177,6 +177,7 @@ public class JpaPackageCacheTest extends BaseJpaR4Test {
 
 		// The package has the ID in lower-case, so for the test we input the first parameter in upper-case & check that no error is thrown
 		assertDoesNotThrow(() -> myPackageCacheManager.addPackageToCache(packageNameUppercase, "0.2.0", stream, "hl7.fhir.us.davinci-cdex"));
+		assertDoesNotThrow(() -> myPackageCacheManager.uninstallPackage(packageNameUppercase, "0.2.0"));
 	}
 
 	@Test
