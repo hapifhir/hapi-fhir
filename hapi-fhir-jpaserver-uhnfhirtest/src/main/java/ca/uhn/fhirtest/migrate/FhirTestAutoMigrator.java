@@ -8,14 +8,14 @@ import ca.uhn.fhir.jpa.migrate.dao.HapiMigrationDao;
 import ca.uhn.fhir.jpa.migrate.tasks.HapiFhirJpaMigrationTasks;
 import ca.uhn.fhir.util.VersionEnum;
 import ca.uhn.fhirtest.config.CommonConfig;
+import jakarta.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import javax.sql.DataSource;
 import java.util.Properties;
 import java.util.Set;
-import javax.annotation.PostConstruct;
-import javax.sql.DataSource;
 
 public class FhirTestAutoMigrator {
 
