@@ -78,9 +78,7 @@ public class JpaHapiTransactionServiceTest extends BaseJpaTest {
 			myHapiTransactionService.withSystemRequest().withPropagation(Propagation.REQUIRED).execute(()->{
 				myObservationId.set(myObservationDao.create(new Observation(), myRequestDetails).getId());
 
-				myHapiTransactionService.withSystemRequest().withPropagation(Propagation.REQUIRED).execute(()->{
-					myPatientId.set(myPatientDao.create(new Patient(), myRequestDetails).getId());
-				});
+				myHapiTransactionService.withSystemRequest().withPropagation(Propagation.REQUIRED).execute(()-> myPatientId.set(myPatientDao.create(new Patient(), myRequestDetails).getId()));
 				throw new RuntimeException("roll back both.");
 			});
 		} catch (RuntimeException e) {
