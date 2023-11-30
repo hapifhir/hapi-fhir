@@ -4,8 +4,12 @@ import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.provider.CodeSystemLookupWithPropertiesUtil;
 import ca.uhn.fhir.rest.gclient.IOperationUntypedWithInputAndPartialOutput;
 import org.hl7.fhir.dstu3.model.CodeSystem;
+import org.hl7.fhir.dstu3.model.CodeSystem.ConceptDefinitionComponent;
+import org.hl7.fhir.dstu3.model.CodeSystem.ConceptPropertyComponent;
 import org.hl7.fhir.dstu3.model.CodeType;
+import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.Parameters;
+import org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent;
 import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.dstu3.model.UriType;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -21,8 +25,12 @@ import static ca.uhn.fhir.jpa.provider.CodeSystemLookupWithPropertiesUtil.ourCod
 import static ca.uhn.fhir.jpa.provider.CodeSystemLookupWithPropertiesUtil.ourCodeSystemUrl;
 import static ca.uhn.fhir.jpa.provider.CodeSystemLookupWithPropertiesUtil.ourPropertyA;
 import static ca.uhn.fhir.jpa.provider.CodeSystemLookupWithPropertiesUtil.ourPropertyB;
+import static ca.uhn.fhir.jpa.provider.CodeSystemLookupWithPropertiesUtil.ourPropertyC;
 import static ca.uhn.fhir.jpa.provider.CodeSystemLookupWithPropertiesUtil.ourPropertyValueA;
 import static ca.uhn.fhir.jpa.provider.CodeSystemLookupWithPropertiesUtil.ourPropertyValueB;
+import static ca.uhn.fhir.jpa.provider.CodeSystemLookupWithPropertiesUtil.propertyCode;
+import static ca.uhn.fhir.jpa.provider.CodeSystemLookupWithPropertiesUtil.propertyCodeSystem;
+import static ca.uhn.fhir.jpa.provider.CodeSystemLookupWithPropertiesUtil.propertyDisplay;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -41,13 +49,10 @@ public class ResourceProviderDstu3CodeSystemPropertiesTest extends BaseResourceP
       CodeSystem codeSystem = new CodeSystem();
       codeSystem.setId(ourCodeSystemId);
       codeSystem.setUrl(ourCodeSystemUrl);
-      CodeSystem.ConceptDefinitionComponent concept = codeSystem.addConcept().setCode(ourCode);
-      CodeSystem.ConceptPropertyComponent propertyComponent = new CodeSystem.ConceptPropertyComponent()
-            .setCode(ourPropertyA).setValue(new StringType(ourPropertyValueA));
-      concept.addProperty(propertyComponent);
-      propertyComponent = new CodeSystem.ConceptPropertyComponent()
-            .setCode(ourPropertyB).setValue(new StringType(ourPropertyValueB));
-      concept.addProperty(propertyComponent);
+      ConceptDefinitionComponent concept = codeSystem.addConcept().setCode(ourCode)
+            .addProperty(new ConceptPropertyComponent().setCode(ourPropertyA).setValue(new StringType(ourPropertyValueA)))
+            .addProperty(new ConceptPropertyComponent().setCode(ourPropertyB).setValue(new StringType(ourPropertyValueB)))
+            .addProperty(new ConceptPropertyComponent().setCode(ourPropertyC).setValue(new Coding(propertyCodeSystem, propertyCode, propertyDisplay)));
       myCodeSystemDao.create(codeSystem, mySrd);
 
       // test
@@ -61,10 +66,10 @@ public class ResourceProviderDstu3CodeSystemPropertiesTest extends BaseResourceP
       theLookupProperties.forEach(p -> respParam.andParameter("property", new CodeType(p)));
       Parameters parameters = respParam.execute();
 
-      Iterator<Parameters.ParametersParameterComponent> paramIterator = parameters.getParameter().iterator();
-      Parameters.ParametersParameterComponent parameter = null;
+      Iterator<ParametersParameterComponent> paramIterator = parameters.getParameter().iterator();
+      ParametersParameterComponent parameter = null;
       while (paramIterator.hasNext()) {
-         Parameters.ParametersParameterComponent currentParameter = paramIterator.next();
+         ParametersParameterComponent currentParameter = paramIterator.next();
          if (currentParameter.getName().equals("property")) {
             parameter = currentParameter;
             break;
@@ -76,18 +81,18 @@ public class ResourceProviderDstu3CodeSystemPropertiesTest extends BaseResourceP
          return;
       }
 
-      Iterator<CodeSystem.ConceptPropertyComponent> propertyIterator = concept.getProperty().stream()
+      Iterator<ConceptPropertyComponent> propertyIterator = concept.getProperty().stream()
             .filter(property -> theExpectedReturnedProperties.contains(property.getCode())).iterator();
 
       while (propertyIterator.hasNext()) {
-         CodeSystem.ConceptPropertyComponent property = propertyIterator.next();
+         ConceptPropertyComponent property = propertyIterator.next();
          assertNotNull(parameter);
 
-         Iterator<Parameters.ParametersParameterComponent> parameterPartIterator = parameter.getPart().iterator();
+         Iterator<ParametersParameterComponent> parameterPartIterator = parameter.getPart().iterator();
 
          parameter = parameterPartIterator.next();
-         assertEquals("code", parameter.getName());
-         assertEquals(property.getCode(), ((CodeType)parameter.getValue()).getValue());
+         assertEquals(property.getCode().equals(ourPropertyC) ? "code" : "string", parameter.getName());
+         assertEquals(property.getCode(), ((StringType)parameter.getValue()).getValue());
 
          parameter = parameterPartIterator.next();
          assertEquals("value", parameter.getName());

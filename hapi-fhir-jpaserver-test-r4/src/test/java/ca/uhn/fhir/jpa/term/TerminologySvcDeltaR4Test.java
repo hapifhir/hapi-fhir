@@ -509,8 +509,8 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 		assertEquals("Je mange une pomme", ((StringType) designations.get(0).getPart().get(2).getValue()).getValueAsString());
 
 		List<Parameters.ParametersParameterComponent> properties = output.getParameter().stream().filter(t -> t.getName().equals("property")).collect(Collectors.toList());
-		assertEquals("code", properties.get(0).getPart().get(0).getName());
-		assertEquals("flavour", ((CodeType) properties.get(0).getPart().get(0).getValue()).getValueAsString());
+		assertEquals("string", properties.get(0).getPart().get(0).getName());
+		assertEquals("flavour", ((StringType) properties.get(0).getPart().get(0).getValue()).getValueAsString());
 		assertEquals("value", properties.get(0).getPart().get(1).getName());
 		assertEquals("Hints of lime", ((StringType) properties.get(0).getPart().get(1).getValue()).getValueAsString());
 

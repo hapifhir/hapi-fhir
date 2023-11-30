@@ -159,7 +159,7 @@ public class RemoteTerminologyServiceValidationSupportTest {
 
 		Iterator<Parameters.ParametersParameterComponent> propertyComponentIterator = propertyComponent.getPart().iterator();
 		propertyComponent = propertyComponentIterator.next();
-		assertEquals("code", propertyComponent.getName());
+		assertEquals("string", propertyComponent.getName());
 		assertEquals(propertyName, ((StringType)propertyComponent.getValue()).getValue());
 
 		propertyComponent = propertyComponentIterator.next();

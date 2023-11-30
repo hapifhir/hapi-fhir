@@ -295,8 +295,8 @@ public interface IValidationSupport {
 	 */
 	@Nullable
 	default CodeValidationResult validateCode(
-			@Nonnull ValidationSupportContext theValidationSupportContext,
-			@Nonnull ConceptValidationOptions theOptions,
+			ValidationSupportContext theValidationSupportContext,
+			ConceptValidationOptions theOptions,
 			String theCodeSystem,
 			String theCode,
 			String theDisplay,
@@ -889,13 +889,13 @@ public interface IValidationSupport {
 					}
 
 					IBase property = ParametersUtil.addParameterToParameters(theContext, retVal, "property");
-					ParametersUtil.addPartCode(theContext, property, "code", next.getPropertyName());
-
 					if (next instanceof StringConceptProperty) {
 						StringConceptProperty prop = (StringConceptProperty) next;
+						ParametersUtil.addPartString(theContext, property, "string", next.getPropertyName());
 						ParametersUtil.addPartString(theContext, property, "value", prop.getValue());
 					} else if (next instanceof CodingConceptProperty) {
 						CodingConceptProperty prop = (CodingConceptProperty) next;
+						ParametersUtil.addPartCode(theContext, property, "code", next.getPropertyName());
 						ParametersUtil.addPartCoding(
 								theContext, property, "value", prop.getCodeSystem(), prop.getCode(), prop.getDisplay());
 					} else {
