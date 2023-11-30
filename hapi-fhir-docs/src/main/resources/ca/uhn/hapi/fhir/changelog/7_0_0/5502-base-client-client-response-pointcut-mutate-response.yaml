@@ -1,0 +1,6 @@
+---
+type: add
+issue: 5502
+jira: SMILE-7262
+title: "It is now possible to mutate an HTTP response from the CLIENT_RESPONSE Pointcut, and pass this mutated response
+        to downstream processing."
