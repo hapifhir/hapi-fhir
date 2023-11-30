@@ -5,7 +5,6 @@ import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.subscription.BaseSubscriptionsR4Test;
 import ca.uhn.fhir.jpa.subscription.submit.svc.ResourceModifiedSubmitterSvc;
 import ca.uhn.fhir.jpa.test.util.StoppableSubscriptionDeliveringRestHookSubscriber;
-import ca.uhn.fhir.jpa.test.util.SubscriptionTestUtil;
 import ca.uhn.fhir.jpa.topic.SubscriptionTopicDispatcher;
 import ca.uhn.fhir.jpa.topic.SubscriptionTopicRegistry;
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -15,6 +14,7 @@ import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.subscription.SubscriptionTestDataHelper;
+import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.HapiExtensions;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -29,11 +29,12 @@ import org.hl7.fhir.r4.model.Meta;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.SearchParameter;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.Subscription;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -42,6 +43,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -66,6 +68,8 @@ import static org.junit.jupiter.api.Assertions.fail;
  */
 public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(RestHookTestR4Test.class);
+	public static final String TEST_PATIENT_ID = "topic-test-patient-id";
+	public static final String PATIENT_REFERENCE = "Patient/" + TEST_PATIENT_ID;
 
 	@Autowired
 	ResourceModifiedSubmitterSvc myResourceModifiedSubmitterSvc;
@@ -1306,8 +1310,73 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 	}
 
 	@Test
-	public void testTopicSubscription() throws Exception {
-		Subscription subscription = SubscriptionTestDataHelper.buildR4TopicSubscription();
+	public void testRestHoodTopicSubscription_withEmptyPayloadContent_generateCorrectPayload() throws Exception {
+		String payloadContent = "empty";
+
+		// execute
+		Bundle bundle = createAndDispatchTopicSubscription(payloadContent);
+
+		// verify Bundle size
+		assertEquals(1, bundle.getEntry().size());
+		List<Resource> resources = BundleUtil.toListOfResourcesOfType(myFhirContext, bundle, Resource.class);
+		assertEquals(1, resources.size());
+
+		// verify SubscriptionStatus.notificationEvent.focus
+		Optional<Parameters.ParametersParameterComponent> focus = getNotificationEventFocus(resources);
+		assertFalse(focus.isPresent());
+	}
+
+	@Test
+	public void testRestHoodTopicSubscription_withIdOnlyPayloadContent_generateCorrectPayload() throws Exception {
+		String payloadContent = "id-only";
+
+		// execute
+		Bundle bundle = createAndDispatchTopicSubscription(payloadContent);
+
+		// verify Bundle size
+		assertEquals(2, bundle.getEntry().size());
+		List<Resource> resources = BundleUtil.toListOfResourcesOfType(myFhirContext, bundle, Resource.class);
+		assertEquals(1, resources.size());
+
+		// verify SubscriptionStatus.notificationEvent.focus
+		Optional<Parameters.ParametersParameterComponent> focus = getNotificationEventFocus(resources);
+		assertTrue(focus.isPresent());
+		assertEquals(PATIENT_REFERENCE, ((Reference) focus.get().getValue()).getReference());
+
+		// verify Patient Entry
+		Bundle.BundleEntryComponent patientEntry = bundle.getEntry().get(1);
+		validateRequestParameters(patientEntry);
+		Patient bundlePatient = (Patient) patientEntry.getResource();
+		assertNull(bundlePatient);
+	}
+
+	@Test
+	public void testRestHoodTopicSubscription_withFullResourcePayloadContent_generateCorrectPayload() throws Exception {
+		String payloadContent = "full-resource";
+
+		// execute
+		Bundle bundle = createAndDispatchTopicSubscription(payloadContent);
+
+		// verify Bundle size
+		assertEquals(2, bundle.getEntry().size());
+		List<Resource> resources = BundleUtil.toListOfResourcesOfType(myFhirContext, bundle, Resource.class);
+		assertEquals(2, resources.size());
+
+		// verify SubscriptionStatus.notificationEvent.focus
+		Optional<Parameters.ParametersParameterComponent> focus = getNotificationEventFocus(resources);
+		assertTrue(focus.isPresent());
+		assertEquals(PATIENT_REFERENCE, ((Reference) focus.get().getValue()).getReference());
+
+		// verify Patient Entry
+		Bundle.BundleEntryComponent patientEntry = bundle.getEntry().get(1);
+		validateRequestParameters(patientEntry);
+		Patient bundlePatient = (Patient) patientEntry.getResource();
+		assertTrue(bundlePatient.getActive());
+		assertEquals(Enumerations.AdministrativeGender.FEMALE, bundlePatient.getGender());
+	}
+
+	private Bundle createAndDispatchTopicSubscription(String thePayloadContent) throws Exception {
+		Subscription subscription = SubscriptionTestDataHelper.buildR4TopicSubscriptionWithContent(thePayloadContent);
 		subscription.setIdElement(null);
 		subscription.setStatus(Subscription.SubscriptionStatus.REQUESTED);
 		Subscription.SubscriptionChannelComponent channel = subscription.getChannel();
@@ -1319,9 +1388,8 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		mySubscriptionIds.add(methodOutcome.getId());
 		waitForActivatedSubscriptionCount(1);
 
-		String patientId = "topic-test-patient-id";
 		Patient patient = new Patient();
-		patient.setId(patientId);
+		patient.setId(TEST_PATIENT_ID);
 		patient.setActive(true);
 		patient.setGender(Enumerations.AdministrativeGender.FEMALE);
 
@@ -1332,12 +1400,22 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 
 		ourTransactionProvider.waitForTransactionCount(1);
 
-		Bundle bundle = ourTransactionProvider.getTransactions().get(0);
-		assertEquals(2, bundle.getEntry().size());
-		Parameters parameters = (Parameters) bundle.getEntry().get(0).getResource();
-		// WIP STR5 assert parameters contents
-		Patient bundlePatient = (Patient) bundle.getEntry().get(1).getResource();
-		assertTrue(bundlePatient.getActive());
-		assertEquals(Enumerations.AdministrativeGender.FEMALE, bundlePatient.getGender());
+		return ourTransactionProvider.getTransactions().get(0);
+	}
+
+	private Optional<Parameters.ParametersParameterComponent> getNotificationEventFocus(List<Resource> theResources) {
+		assertEquals("Parameters", theResources.get(0).getResourceType().name());
+		Parameters parameters = (Parameters) theResources.get(0);
+		Parameters.ParametersParameterComponent notificationEvent = parameters.getParameter("notification-event");
+		assertNotNull(notificationEvent);
+		return notificationEvent.getPart().stream()
+				.filter(part -> part.getName().equals("focus"))
+				.findFirst();
+	}
+
+	private void validateRequestParameters(Bundle.BundleEntryComponent thePatientEntry) {
+		assertNotNull(thePatientEntry.getRequest());
+		assertEquals("POST", thePatientEntry.getRequest().getMethod().name());
+		assertEquals("Patient", thePatientEntry.getRequest().getUrl());
 	}
 }

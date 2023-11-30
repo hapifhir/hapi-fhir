@@ -14,6 +14,8 @@ import org.hl7.fhir.r5.model.Coding;
 import org.hl7.fhir.r5.model.Enumerations;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import static ca.uhn.fhir.rest.api.Constants.CT_FHIR_JSON_NEW;
 import static ca.uhn.fhir.util.HapiExtensions.EX_SEND_DELETE_MESSAGES;
@@ -131,16 +133,17 @@ class SubscriptionCanonicalizerTest {
 		assertEquals(456, canonical.getMaxCount());
 	}
 
-	@Test
-	void testR4Backport() {
+	@ParameterizedTest
+	@ValueSource(strings = {"full-resource", "id-only", "empty"})
+	void testR4Backport(String thePayloadContent) {
 		// Example drawn from http://build.fhir.org/ig/HL7/fhir-subscription-backport-ig/Subscription-subscription-zulip.json.html
 
 		// setup
 		SubscriptionCanonicalizer r4Canonicalizer = new SubscriptionCanonicalizer(FhirContext.forR4Cached());
 
 		// execute
-
-		CanonicalSubscription canonical = r4Canonicalizer.canonicalize(SubscriptionTestDataHelper.buildR4TopicSubscription());
+		Subscription subscription = SubscriptionTestDataHelper.buildR4TopicSubscriptionWithContent(thePayloadContent);
+		CanonicalSubscription canonical = r4Canonicalizer.canonicalize(subscription);
 
 		// verify
 
@@ -158,7 +161,7 @@ class SubscriptionCanonicalizerTest {
 		assertEquals(Subscription.SubscriptionStatus.ACTIVE, canonical.getStatus());
 
 		assertEquals(CT_FHIR_JSON_NEW, canonical.getContentType());
-		assertEquals(org.hl7.fhir.r5.model.Subscription.SubscriptionPayloadContent.FULLRESOURCE, canonical.getContent());
+		assertEquals(thePayloadContent, canonical.getContent().toCode());
 		assertEquals(SubscriptionTestDataHelper.TEST_ENDPOINT, canonical.getEndpointUrl());
 		assertEquals(SubscriptionTestDataHelper.TEST_TOPIC, canonical.getTopic());
 		assertEquals(CanonicalSubscriptionChannelType.RESTHOOK, canonical.getChannelType());
