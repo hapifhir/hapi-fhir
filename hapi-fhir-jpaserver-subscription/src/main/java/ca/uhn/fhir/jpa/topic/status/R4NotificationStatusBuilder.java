@@ -66,14 +66,23 @@ public class R4NotificationStatusBuilder implements INotificationStatusBuilder<P
 		notificationEvent.setName("notification-event");
 		notificationEvent.addPart().setName("event-number").setValue(new StringType(eventNumber.toString()));
 		notificationEvent.addPart().setName("timestamp").setValue(new DateType(new Date()));
-		if (theResources.size() > 0) {
+		if (!theResources.isEmpty() && !isEmptyContentTopicSubscription(theActiveSubscription)) {
 			IBaseResource firstResource = theResources.get(0);
-			notificationEvent
-					.addPart()
-					.setName("focus")
-					.setValue(new Reference(firstResource.getIdElement().toUnqualifiedVersionless()));
+			Reference resourceReference = new Reference(firstResource.fhirType() + "/"
+					+ firstResource.getIdElement().toUnqualifiedVersionless());
+
+			notificationEvent.addPart().setName("focus").setValue(resourceReference);
 		}
 
 		return parameters;
+	}
+
+	private boolean isEmptyContentTopicSubscription(ActiveSubscription theActiveSubscription) {
+		return theActiveSubscription.getSubscription().isTopicSubscription()
+				&& org.hl7.fhir.r5.model.Subscription.SubscriptionPayloadContent.EMPTY
+						== theActiveSubscription
+								.getSubscription()
+								.getTopicSubscription()
+								.getContent();
 	}
 }
