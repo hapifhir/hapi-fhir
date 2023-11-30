@@ -45,6 +45,7 @@ import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
 import org.springframework.data.domain.Page;
 import org.springframework.messaging.MessageHandler;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
@@ -144,6 +145,7 @@ public class JobCoordinatorImpl implements IJobCoordinator {
 
 		IJobPersistence.CreateResult instanceAndFirstChunk = myTransactionService
 				.withSystemRequestOnDefaultPartition()
+				.withPropagation(Propagation.REQUIRES_NEW)
 				.execute(() -> myJobPersistence.onCreateWithFirstChunk(jobDefinition, theStartRequest.getParameters()));
 
 		JobWorkNotification workNotification = JobWorkNotification.firstStepNotification(

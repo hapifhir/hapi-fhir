@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
+import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
@@ -14,7 +15,6 @@ import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
-import ca.uhn.fhir.jpa.provider.ValueSetOperationProvider;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
@@ -1295,13 +1295,13 @@ public class ResourceProviderR4ValueSetNoVerCSNoVerTest extends BaseResourceProv
 		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertEquals(ValueSetOperationProvider.RESULT, respParam.getParameter().get(0).getName());
+		assertEquals(IValidationSupport.CodeValidationResult.RESULT, respParam.getParameter().get(0).getName());
 		assertEquals(true, ((BooleanType) respParam.getParameter().get(0).getValue()).getValue());
 
-		assertEquals(ValueSetOperationProvider.DISPLAY, respParam.getParameter().get(1).getName());
+		assertEquals(IValidationSupport.CodeValidationResult.DISPLAY, respParam.getParameter().get(1).getName());
 		assertEquals("Male", ((StringType) respParam.getParameter().get(1).getValue()).getValue());
 
-		assertEquals(ValueSetOperationProvider.SOURCE_DETAILS, respParam.getParameter().get(2).getName());
+		assertEquals(IValidationSupport.CodeValidationResult.SOURCE_DETAILS, respParam.getParameter().get(2).getName());
 		assertEquals("Code was validated against in-memory expansion of ValueSet: http://hl7.org/fhir/ValueSet/administrative-gender", ((StringType) respParam.getParameter().get(2).getValue()).getValue());
 	}
 

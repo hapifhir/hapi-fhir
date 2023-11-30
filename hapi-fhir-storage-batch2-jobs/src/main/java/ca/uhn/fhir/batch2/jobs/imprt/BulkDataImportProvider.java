@@ -76,13 +76,10 @@ public class BulkDataImportProvider {
 	public static final String PARAM_INPUT_TYPE = "type";
 	private static final Logger ourLog = LoggerFactory.getLogger(BulkDataImportProvider.class);
 
-	@Autowired
 	private IJobCoordinator myJobCoordinator;
 
-	@Autowired
 	private FhirContext myFhirCtx;
 
-	@Autowired
 	private IRequestPartitionHelperSvc myRequestPartitionHelperService;
 
 	private volatile List<String> myResourceTypeOrder;
@@ -94,14 +91,17 @@ public class BulkDataImportProvider {
 		super();
 	}
 
+	@Autowired
 	public void setJobCoordinator(IJobCoordinator theJobCoordinator) {
 		myJobCoordinator = theJobCoordinator;
 	}
 
+	@Autowired
 	public void setFhirContext(FhirContext theCtx) {
 		myFhirCtx = theCtx;
 	}
 
+	@Autowired
 	public void setRequestPartitionHelperService(IRequestPartitionHelperSvc theRequestPartitionHelperSvc) {
 		myRequestPartitionHelperService = theRequestPartitionHelperSvc;
 	}

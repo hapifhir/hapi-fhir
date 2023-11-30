@@ -25,7 +25,6 @@ import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.batch2.JpaBatch2Config;
 import ca.uhn.fhir.jpa.binary.api.IBinaryStorageSvc;
 import ca.uhn.fhir.jpa.binstore.MemoryBinaryStorageSvcImpl;
-import ca.uhn.fhir.jpa.config.HapiJpaConfig;
 import ca.uhn.fhir.jpa.config.PackageLoaderConfig;
 import ca.uhn.fhir.jpa.config.r4.JpaR4Config;
 import ca.uhn.fhir.jpa.config.util.HapiEntityManagerFactoryUtil;
@@ -74,7 +73,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 @Import({
 	JpaR4Config.class,
 	PackageLoaderConfig.class,
-	HapiJpaConfig.class,
+	TestHapiJpaConfig.class,
 	TestJPAConfig.class,
 	TestHSearchAddInConfig.DefaultLuceneHeap.class,
 	JpaBatch2Config.class,

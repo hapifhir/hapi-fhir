@@ -23,6 +23,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.context.support.LookupCodeRequest;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.parser.IParser;
@@ -308,9 +309,7 @@ public class ValidatorExamples {
 			@Override
 			public LookupCodeResult lookupCode(
 					ValidationSupportContext theValidationSupportContext,
-					String theSystem,
-					String theCode,
-					String theDisplayLanguage) {
+					@Nonnull LookupCodeRequest validationSupportParameterObject) {
 				// TODO: implement (or return null if your implementation does not support this function)
 				return null;
 			}

@@ -487,7 +487,6 @@ public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProvide
 	 */
 	@Test
 	public void testCustomParameterMatchingManyValues() {
-
 		List<String> found = new ArrayList<>();
 
 		class Interceptor {
@@ -499,7 +498,6 @@ public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProvide
 		Interceptor interceptor = new Interceptor();
 		myInterceptorRegistry.registerInterceptor(interceptor);
 		try {
-
 			int textIndex = 0;
 			List<Long> ids = new ArrayList<>();
 			for (int i = 0; i < 200; i++) {

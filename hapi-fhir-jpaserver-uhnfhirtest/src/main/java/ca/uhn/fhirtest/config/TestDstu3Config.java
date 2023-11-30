@@ -140,7 +140,7 @@ public class TestDstu3Config {
 		}
 		extraProperties.put("hibernate.format_sql", "false");
 		extraProperties.put("hibernate.show_sql", "false");
-		extraProperties.put("hibernate.hbm2ddl.auto", "update");
+		extraProperties.put("hibernate.hbm2ddl.auto", "none");
 		extraProperties.put("hibernate.jdbc.batch_size", "20");
 		extraProperties.put("hibernate.cache.use_query_cache", "false");
 		extraProperties.put("hibernate.cache.use_second_level_cache", "false");

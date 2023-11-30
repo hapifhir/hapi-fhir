@@ -116,6 +116,7 @@ import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.contains;
@@ -1232,6 +1233,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 			nextChunk.forEach(t -> foundIds.add(t.getIdElement().toUnqualifiedVersionless().getValue()));
 		}
 
+		assertEquals(ids.size(), foundIds.size());
 		ids.sort(new ComparableComparator<>());
 		foundIds.sort(new ComparableComparator<>());
 		assertEquals(ids, foundIds);
@@ -1330,7 +1332,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		myCaptureQueriesListener.logSelectQueries();
 		assertEquals(2, myCaptureQueriesListener.countSelectQueries());
 		assertThat(myCaptureQueriesListener.getSelectQueries().get(0).getSql(true, false), containsString("SELECT t0.RES_ID FROM HFJ_SPIDX_TOKEN t0"));
-		assertThat(myCaptureQueriesListener.getSelectQueries().get(0).getSql(true, false), containsString("fetch first '5'"));
+		assertThat(myCaptureQueriesListener.getSelectQueries().get(0).getSql(true, false), containsString("fetch first '6'"));
 		assertEquals(0, myCaptureQueriesListener.countInsertQueries());
 		assertEquals(0, myCaptureQueriesListener.countUpdateQueries());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
@@ -1346,7 +1348,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		myCaptureQueriesListener.logSelectQueries();
 		assertEquals(2, myCaptureQueriesListener.countSelectQueries());
 		assertThat(myCaptureQueriesListener.getSelectQueries().get(0).getSql(true, false), containsString("SELECT t0.RES_ID FROM HFJ_SPIDX_TOKEN t0"));
-		assertThat(myCaptureQueriesListener.getSelectQueries().get(0).getSql(true, false), containsString("fetch next '5'"));
+		assertThat(myCaptureQueriesListener.getSelectQueries().get(0).getSql(true, false), containsString("fetch next '6'"));
 		assertThat(myCaptureQueriesListener.getSelectQueries().get(0).getSql(true, false), containsString("offset '5'"));
 		assertEquals(0, myCaptureQueriesListener.countInsertQueries());
 		assertEquals(0, myCaptureQueriesListener.countUpdateQueries());
@@ -1354,22 +1356,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		assertEquals(1, myCaptureQueriesListener.countCommits());
 		assertEquals(0, myCaptureQueriesListener.countRollbacks());
 
-		assertThat(outcome.getLink("next").getUrl(), containsString("Patient?_count=5&_offset=10&active=true"));
-
-		// Third page (no results)
-
-		myCaptureQueriesListener.clear();
-		outcome = myClient.search().forResource("Patient").where(Patient.ACTIVE.exactly().code("true")).offset(10).count(5).returnBundle(Bundle.class).execute();
-		assertThat(toUnqualifiedVersionlessIdValues(outcome).toString(), toUnqualifiedVersionlessIdValues(outcome), empty());
-		myCaptureQueriesListener.logSelectQueries();
-		assertEquals(1, myCaptureQueriesListener.countSelectQueries());
-		assertThat(myCaptureQueriesListener.getSelectQueries().get(0).getSql(true, false), containsString("SELECT t0.RES_ID FROM HFJ_SPIDX_TOKEN t0"));
-		assertThat(myCaptureQueriesListener.getSelectQueries().get(0).getSql(true, false), containsString("fetch next '5'"));
-		assertThat(myCaptureQueriesListener.getSelectQueries().get(0).getSql(true, false), containsString("offset '10'"));
-		assertEquals(0, myCaptureQueriesListener.countInsertQueries());
-		assertEquals(0, myCaptureQueriesListener.countUpdateQueries());
-		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
-
+		assertNull(outcome.getLink("next"));
 	}
 
 

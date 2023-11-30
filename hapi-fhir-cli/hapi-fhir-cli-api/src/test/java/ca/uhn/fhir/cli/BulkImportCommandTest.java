@@ -9,6 +9,7 @@ import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.system.HapiSystemProperties;
@@ -67,20 +68,20 @@ public class BulkImportCommandTest {
 	private IJobCoordinator myJobCoordinator;
 	private final BulkDataImportProvider myProvider = new BulkDataImportProvider();
 	private final FhirContext myCtx = FhirContext.forR4Cached();
+	@Mock
+	private IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
 	@RegisterExtension
 	public RestfulServerExtension myRestfulServerExtension = new RestfulServerExtension(myCtx, myProvider)
 		.registerInterceptor(new LoggingInterceptor());
 	private Path myTempDir;
 	@Captor
 	private ArgumentCaptor<JobInstanceStartRequest> myStartCaptor;
-	@Mock
-	private IRequestPartitionHelperSvc myRequestPartitionService;
 
 	@BeforeEach
 	public void beforeEach() throws IOException {
 		myProvider.setFhirContext(myCtx);
 		myProvider.setJobCoordinator(myJobCoordinator);
-		myProvider.setRequestPartitionHelperService(myRequestPartitionService);
+		myProvider.setRequestPartitionHelperService(myRequestPartitionHelperSvc);
 		myTempDir = Files.createTempDirectory("hapifhir");
 		ourLog.info("Created temp directory: {}", myTempDir);
 	}
@@ -120,7 +121,7 @@ public class BulkImportCommandTest {
 		await().until(() -> myRestfulServerExtension.getRequestContentTypes().size(), equalTo(2));
 		ourLog.info("Initiation requests complete");
 
-		verify(myJobCoordinator, timeout(10000).times(1)).startInstance(any(), myStartCaptor.capture());
+		verify(myJobCoordinator, timeout(10000).times(1)).startInstance(any(RequestDetails.class), myStartCaptor.capture());
 
 		JobInstanceStartRequest startRequest = myStartCaptor.getValue();
 		BulkImportJobParameters jobParameters = startRequest.getParameters(BulkImportJobParameters.class);
@@ -162,7 +163,7 @@ public class BulkImportCommandTest {
 		await().until(() -> myRestfulServerExtension.getRequestContentTypes().size(), equalTo(2));
 		ourLog.info("Initiation requests complete");
 
-		verify(myJobCoordinator, timeout(10000).times(1)).startInstance(any(), myStartCaptor.capture());
+		verify(myJobCoordinator, timeout(10000).times(1)).startInstance(any(RequestDetails.class), myStartCaptor.capture());
 
 		JobInstanceStartRequest startRequest = myStartCaptor.getValue();
 		BulkImportJobParameters jobParameters = startRequest.getParameters(BulkImportJobParameters.class);
@@ -203,7 +204,7 @@ public class BulkImportCommandTest {
 		await().until(() -> myRestfulServerExtension.getRequestContentTypes().size(), equalTo(2));
 		ourLog.info("Initiation requests complete");
 
-		verify(myJobCoordinator, timeout(10000).times(1)).startInstance(any(), myStartCaptor.capture());
+		verify(myJobCoordinator, timeout(10000).times(1)).startInstance(any(RequestDetails.class), myStartCaptor.capture());
 
 		try{
 			JobInstanceStartRequest startRequest = myStartCaptor.getValue();

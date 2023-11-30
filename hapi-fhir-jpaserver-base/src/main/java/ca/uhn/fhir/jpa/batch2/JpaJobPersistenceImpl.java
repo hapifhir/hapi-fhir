@@ -100,6 +100,7 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	}
 
 	@Override
+	@Transactional(propagation = Propagation.REQUIRED)
 	public String onWorkChunkCreate(WorkChunkCreateEvent theBatchWorkChunk) {
 		Batch2WorkChunkEntity entity = new Batch2WorkChunkEntity();
 		entity.setId(UUID.randomUUID().toString());

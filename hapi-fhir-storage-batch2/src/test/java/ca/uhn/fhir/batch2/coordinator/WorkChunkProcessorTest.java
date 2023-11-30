@@ -21,6 +21,7 @@ import ca.uhn.fhir.batch2.model.WorkChunkCompletionEvent;
 import ca.uhn.fhir.batch2.model.WorkChunkData;
 import ca.uhn.fhir.batch2.model.WorkChunkErrorEvent;
 import ca.uhn.fhir.batch2.model.WorkChunkStatusEnum;
+import ca.uhn.fhir.jpa.dao.tx.NonTransactionalHapiTransactionService;
 import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.util.JsonUtil;
 import org.junit.jupiter.api.BeforeEach;
@@ -428,7 +429,7 @@ public class WorkChunkProcessorTest {
 	private class TestWorkChunkProcessor extends WorkChunkProcessor {
 
 		public TestWorkChunkProcessor(IJobPersistence thePersistence, BatchJobSender theSender) {
-			super(thePersistence, theSender);
+			super(thePersistence, theSender, new NonTransactionalHapiTransactionService());
 		}
 
 		@Override

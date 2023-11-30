@@ -94,7 +94,7 @@ public class JobCoordinatorImplTest extends BaseBatch2Test {
 	public void beforeEach() {
 		// The code refactored to keep the same functionality,
 		// but in this service (so it's a real service here!)
-		WorkChunkProcessor jobStepExecutorSvc = new WorkChunkProcessor(myJobInstancePersister, myBatchJobSender);
+		WorkChunkProcessor jobStepExecutorSvc = new WorkChunkProcessor(myJobInstancePersister, myBatchJobSender, new NonTransactionalHapiTransactionService());
 		mySvc = new JobCoordinatorImpl(myBatchJobSender, myWorkChannelReceiver, myJobInstancePersister, myJobDefinitionRegistry, jobStepExecutorSvc, myJobMaintenanceService, myTransactionService);
 	}
 
