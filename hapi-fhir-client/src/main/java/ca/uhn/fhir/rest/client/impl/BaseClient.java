@@ -358,7 +358,7 @@ public abstract class BaseClient implements IRestfulClient {
 			responseParams.add(IRestfulClient.class, this);
 
 			getInterceptorService().callHooks(Pointcut.CLIENT_RESPONSE, responseParams);
-			//some change
+			// some change
 
 			String mimeType;
 			if (Constants.STATUS_HTTP_204_NO_CONTENT == response.getStatus()) {
