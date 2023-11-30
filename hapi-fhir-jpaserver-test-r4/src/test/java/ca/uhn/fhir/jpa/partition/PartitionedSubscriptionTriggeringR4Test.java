@@ -15,12 +15,17 @@ import ca.uhn.fhir.jpa.subscription.resthook.RestHookTestR4Test;
 import ca.uhn.fhir.jpa.subscription.triggering.ISubscriptionTriggeringSvc;
 import ca.uhn.fhir.jpa.test.util.StoppableSubscriptionDeliveringRestHookSubscriber;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import org.awaitility.core.ConditionTimeoutException;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.hl7.fhir.r4.model.BooleanType;
+import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.Subscription;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
@@ -30,11 +35,20 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+<<<<<<< Updated upstream
 import javax.servlet.ServletException;
+=======
+import jakarta.servlet.ServletException;
+import org.springframework.cache.annotation.EnableCaching;
+
+import java.awt.*;
+>>>>>>> Stashed changes
 import java.time.LocalDate;
 import java.time.Month;
 import java.util.ArrayList;
 
+import static ca.uhn.fhir.util.HapiExtensions.EXTENSION_SUBSCRIPTION_CROSS_PARTITION;
+import static ca.uhn.fhir.util.HapiExtensions.EXT_SUBSCRIPTION_PAYLOAD_SEARCH_CRITERIA;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -129,6 +143,42 @@ public class PartitionedSubscriptionTriggeringR4Test extends BaseSubscriptionsR4
 		Assertions.assertEquals(Constants.CT_FHIR_JSON_NEW, BaseSubscriptionsR4Test.ourRestfulServer.getRequestContentTypes().get(0));
 	}
 
+
+	@Test
+	public void testTriggerSubscriptionOnExistingEncountersWorks() throws Exception {
+
+
+		Patient patient = new Patient();
+		patient.setId("my-patient");
+		Encounter encounter = new Encounter();
+		encounter.setId("my-encounter");
+		encounter.setSubject(new Reference("Patient/my-patient"));
+		myDaoRegistry.getResourceDao("Patient")
+			.update(patient, new SystemRequestDetails().setRequestPartitionId(RequestPartitionId.fromPartitionId(2)));
+		myDaoRegistry.getResourceDao("Encounter")
+			.update(encounter, new SystemRequestDetails().setRequestPartitionId(RequestPartitionId.fromPartitionId(2)));
+
+		Subscription subscription = newSubscription("Encounter?", "application/fhir+json");
+		subscription.addExtension().setUrl(EXTENSION_SUBSCRIPTION_CROSS_PARTITION).setValue(new BooleanType(false));
+		subscription.addExtension().setUrl(EXT_SUBSCRIPTION_PAYLOAD_SEARCH_CRITERIA).setValue(new StringType("Encounter?_id=${matched_resource_id}&_include=Encounter:subject"));
+			Assertions.assertEquals(mySrdInterceptorService.getAllRegisteredInterceptors().size(), 1);
+
+		myDaoRegistry.getResourceDao("Subscription")
+			.create(subscription, new SystemRequestDetails().setRequestPartitionId(RequestPartitionId.fromPartitionId(2)));
+
+		waitForActivatedSubscriptionCount(1);
+
+		String triggerBody = "{\"resourceType\":\"Parameters\",\"parameter\":[{\"name\":\"searchUrl\",\"valueString\":\"Encounter?\"}]}";
+		Parameters parameters = myFhirContext.newJsonParser().parseResource(Parameters.class, triggerBody);
+		Parameters triggerResult = myClient.operation()
+			.onInstance("PART-2/Subscription/member-lob-enrichment-by-encounter")
+			.named("$trigger-subscription")
+			.withParameters(parameters).execute();
+
+		waitForQueueToDrain();
+
+		BaseSubscriptionsR4Test.ourEncounterProvider.waitForUpdateCount(1);
+	}
 	@Test
 	public void testCreateSubscriptionInPartitionAndResourceInDifferentPartition() throws Exception {
 		String payload = "application/fhir+json";

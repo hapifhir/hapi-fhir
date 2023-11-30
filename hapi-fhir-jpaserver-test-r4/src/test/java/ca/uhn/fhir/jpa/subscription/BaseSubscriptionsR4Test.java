@@ -22,6 +22,7 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Organization;
@@ -50,6 +51,9 @@ public abstract class BaseSubscriptionsR4Test extends BaseResourceProviderR4Test
 	@Order(1)
 	@RegisterExtension
 	protected static HashMapResourceProviderExtension<Patient> ourPatientProvider = new HashMapResourceProviderExtension<>(ourRestfulServer, Patient.class);
+	@Order(1)
+	@RegisterExtension
+	protected static HashMapResourceProviderExtension<Encounter> ourEncounterProvider= new HashMapResourceProviderExtension<>(ourRestfulServer, Encounter.class);
 	@Order(1)
 	@RegisterExtension
 	protected static HashMapResourceProviderExtension<Observation> ourObservationProvider = new HashMapResourceProviderExtension<>(ourRestfulServer, Observation.class);
