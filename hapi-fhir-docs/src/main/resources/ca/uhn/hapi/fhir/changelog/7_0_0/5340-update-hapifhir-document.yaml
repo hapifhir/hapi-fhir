@@ -1,0 +1,4 @@
+---
+type: add
+issue: 5340
+title: "Updated documentation specifying the correct status (CANCELLED) to set the job status to if a job is cancelled."
