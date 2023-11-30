@@ -489,6 +489,10 @@ public class HapiTransactionService implements IHapiTransactionService {
 		public RequestDetails getRequestDetailsForTesting() {
 			return myRequestDetails;
 		}
+
+		public Propagation getPropagation() {
+			return myPropagation;
+		}
 	}
 
 	/**
