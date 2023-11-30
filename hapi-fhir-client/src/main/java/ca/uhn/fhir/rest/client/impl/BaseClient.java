@@ -353,23 +353,12 @@ public abstract class BaseClient implements IRestfulClient {
 
 			response = httpRequest.execute();
 
-			final Class<? extends IBaseResource> returnType = (binding instanceof ResourceResponseHandler)
-					? ((ResourceResponseHandler<? extends IBaseResource>) binding).getReturnType()
-					: null;
-
-			final ClientResponseContext clientResponseContext =
-					new ClientResponseContext(httpRequest, response, this, getFhirContext(), returnType);
 			HookParams responseParams = new HookParams();
 			responseParams.add(IHttpRequest.class, httpRequest);
 			responseParams.add(IHttpResponse.class, response);
 			responseParams.add(IRestfulClient.class, this);
-			responseParams.add(ClientResponseContext.class, clientResponseContext);
 
 			getInterceptorService().callHooks(Pointcut.CLIENT_RESPONSE, responseParams);
-
-			// Replace the contents of the response with whatever the hook returned, or the same response as before if
-			// it no-op'd
-			response = clientResponseContext.getHttpResponse();
 
 			String mimeType;
 			if (Constants.STATUS_HTTP_204_NO_CONTENT == response.getStatus()) {
