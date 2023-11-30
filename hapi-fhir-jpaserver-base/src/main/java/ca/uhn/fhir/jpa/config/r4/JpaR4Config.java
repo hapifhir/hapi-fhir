@@ -96,5 +96,4 @@ public class JpaR4Config {
 			ITermDeferredStorageSvc theDeferredStorageSvc, ITermCodeSystemStorageSvc theCodeSystemStorageSvc) {
 		return new TermLoaderSvcImpl(theDeferredStorageSvc, theCodeSystemStorageSvc);
 	}
-
 }
