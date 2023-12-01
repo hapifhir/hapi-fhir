@@ -59,7 +59,7 @@
 			</exclusions>
 		</dependency>
 
-		<!-- 
+		<!--
 		Optional dependencies from RI codebase
 		-->
 		<dependency>
@@ -85,7 +85,7 @@
 
 
 		<!--
-		Test dependencies on other optional parts of HAPI 
+		Test dependencies on other optional parts of HAPI
 		-->
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
@@ -98,6 +98,7 @@
 			<artifactId>hapi-fhir-client</artifactId>
 			<version>${project.version}</version>
 			<optional>true</optional>
+			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
@@ -109,6 +110,7 @@
 			<groupId>javax.servlet</groupId>
 			<artifactId>javax.servlet-api</artifactId>
 			<optional>true</optional>
+			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.jena</groupId>
@@ -146,6 +148,11 @@
 		We include these here to get the aggregate JavaDoc to work
 		-->
 		<dependency>
+			<groupId>com.squareup.okhttp3</groupId>
+			<artifactId>okhttp</artifactId>
+			<optional>true</optional>
+		</dependency>
+		<dependency>
 			<groupId>org.apache.poi</groupId>
 			<artifactId>ooxml-schemas</artifactId>
 			<optional>true</optional>
@@ -165,7 +172,11 @@
 			<artifactId>poi-ooxml-schemas</artifactId>
 			<optional>true</optional>
 		</dependency>
-
+		<dependency>
+			<groupId>org.apache.httpcomponents</groupId>
+			<artifactId>httpclient</artifactId>
+			<optional>true</optional>
+		</dependency>
 
 		<dependency>
 			<groupId>com.google.code.gson</groupId>
