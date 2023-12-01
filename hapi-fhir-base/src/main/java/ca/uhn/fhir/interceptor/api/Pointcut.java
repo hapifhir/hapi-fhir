@@ -93,6 +93,10 @@ public enum Pointcut implements IPointcut {
 	 * <li>
 	 *    ca.uhn.fhir.rest.client.api.IRestfulClient - The client object making the request
 	 * </li>
+	 * <li>
+	 *    ca.uhn.fhir.rest.client.api.ClientResponseContext - Contains an IHttpRequest, an IHttpResponse, and an IRestfulClient
+	 *    and also allows the client to mutate the contained IHttpResponse
+	 * </li>
 	 * </ul>
 	 * </p>
 	 * Hook methods must return <code>void</code>.
@@ -101,7 +105,8 @@ public enum Pointcut implements IPointcut {
 			void.class,
 			"ca.uhn.fhir.rest.client.api.IHttpRequest",
 			"ca.uhn.fhir.rest.client.api.IHttpResponse",
-			"ca.uhn.fhir.rest.client.api.IRestfulClient"),
+			"ca.uhn.fhir.rest.client.api.IRestfulClient",
+			"ca.uhn.fhir.rest.client.api.ClientResponseContext"),
 
 	/**
 	 * <b>Server Hook:</b>
