@@ -29,11 +29,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import javax.servlet.ServletException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.leftPad;
@@ -54,7 +54,7 @@ public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 	private List<String> myPatientIds;
 	private List<String> myObservationIdsOddOnly;
 	private List<String> myObservationIdsEvenOnly;
-	private List<String> myObservationIdsWithVersions;
+	private List<String> myObservationIdsWithoutVersions;
 	private List<String> myPatientIdsEvenOnly;
 
 	@AfterEach
@@ -64,13 +64,16 @@ public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 	}
 
 	@BeforeEach
-	public void before() throws ServletException {
+	@Override
+	public void beforeInitMocks() throws Exception {
+		super.beforeInitMocks();
 		RestfulServer restfulServer = new RestfulServer();
 		restfulServer.setPagingProvider(myPagingProvider);
 
 		when(mySrd.getServer()).thenReturn(restfulServer);
 
 		myStorageSettings.setSearchPreFetchThresholds(Arrays.asList(20, 50, 190));
+		restfulServer.setDefaultPageSize(null);
 	}
 
 	@Test
@@ -147,6 +150,7 @@ public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 
 	@Test
 	public void testSearchAndBlockSome_LoadSynchronous() {
+		// setup
 		create50Observations();
 
 		AtomicInteger hitCount = new AtomicInteger(0);
@@ -281,6 +285,7 @@ public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 
 	@Test
 	public void testSearchAndBlockSomeOnIncludes_LoadSynchronous() {
+		// setup
 		create50Observations();
 
 		AtomicInteger hitCount = new AtomicInteger(0);
@@ -328,9 +333,8 @@ public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 		 * returned results because we create it then update it in create50Observations()
 		 */
 		assertEquals(1, hitCount.get());
-		assertEquals(myObservationIdsWithVersions.subList(90, myObservationIdsWithVersions.size()), sort(interceptedResourceIds));
+		assertEquals(sort(myObservationIdsWithoutVersions.subList(90, myObservationIdsWithoutVersions.size())), sort(interceptedResourceIds));
 		returnedIdValues.forEach(t -> assertTrue(new IdType(t).getIdPartAsLong() % 2 == 0));
-
 	}
 
 	@Test
@@ -363,7 +367,7 @@ public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 	private void create50Observations() {
 		myPatientIds = new ArrayList<>();
 		myObservationIds = new ArrayList<>();
-		myObservationIdsWithVersions = new ArrayList<>();
+		myObservationIdsWithoutVersions = new ArrayList<>();
 
 		Patient p = new Patient();
 		p.setActive(true);
@@ -383,9 +387,9 @@ public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 			final Observation obs1 = new Observation();
 			obs1.setStatus(Observation.ObservationStatus.FINAL);
 			obs1.addIdentifier().setSystem("urn:system").setValue("I" + leftPad("" + i, 5, '0'));
-			IIdType obs1id = myObservationDao.create(obs1).getId().toUnqualifiedVersionless();
+			IIdType obs1id = myObservationDao.create(obs1).getId();
 			myObservationIds.add(obs1id.toUnqualifiedVersionless().getValue());
-			myObservationIdsWithVersions.add(obs1id.toUnqualifiedVersionless().getValue());
+			myObservationIdsWithoutVersions.add(obs1id.toUnqualifiedVersionless().getValue());
 
 			obs1.setId(obs1id);
 			if (obs1id.getIdPartAsLong() % 2 == 0) {
@@ -394,7 +398,7 @@ public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 				obs1.getSubject().setReference(oddPid);
 			}
 			myObservationDao.update(obs1);
-			myObservationIdsWithVersions.add(obs1id.toUnqualifiedVersionless().getValue());
+			myObservationIdsWithoutVersions.add(obs1id.toUnqualifiedVersionless().getValue());
 
 		}
 
@@ -483,14 +487,24 @@ public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 		}
 	}
 
-	private static List<String> sort(List<String>... theLists) {
+	private List<String> sort(List<String>... theLists) {
+		return sort(id -> {
+			String idParsed = id.substring(id.indexOf("/") + 1);
+			if (idParsed.contains("/_history")) {
+				idParsed = idParsed.substring(0, idParsed.indexOf("/"));
+			}
+			return Long.parseLong(idParsed);
+		}, theLists);
+	}
+
+	private List<String> sort(Function<String, Long> theParser, List<String>... theLists) {
 		ArrayList<String> retVal = new ArrayList<>();
 		for (List<String> next : theLists) {
 			retVal.addAll(next);
 		}
 		retVal.sort((o0, o1) -> {
-			long i0 = Long.parseLong(o0.substring(o0.indexOf('/') + 1));
-			long i1 = Long.parseLong(o1.substring(o1.indexOf('/') + 1));
+			long i0 = theParser.apply(o0);
+			long i1 = theParser.apply(o1);
 			return (int) (i0 - i1);
 		});
 		return retVal;

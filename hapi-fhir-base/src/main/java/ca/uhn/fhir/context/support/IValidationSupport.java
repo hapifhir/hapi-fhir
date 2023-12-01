@@ -329,14 +329,16 @@ public interface IValidationSupport {
 	}
 
 	/**
-	 * Look up a code using the system and code value
+	 * Look up a code using the system and code value.
+	 * @deprecated This method has been deprecated in HAPI FHIR 7.0.0. Use {@link IValidationSupport#lookupCode(ValidationSupportContext, LookupCodeRequest)} instead.
 	 *
 	 * @param theValidationSupportContext The validation support module will be passed in to this method. This is convenient in cases where the operation needs to make calls to
 	 *                                    other method in the support chain, so that they can be passed through the entire chain. Implementations of this interface may always safely ignore this parameter.
 	 * @param theSystem                   The CodeSystem URL
 	 * @param theCode                     The code
-	 * @param theDisplayLanguage          to filter out the designation by the display language. To return all designation, set this value to <code>null</code>.
+	 * @param theDisplayLanguage          Used to filter out the designation by the display language. To return all designation, set this value to <code>null</code>.
 	 */
+	@Deprecated
 	@Nullable
 	default LookupCodeResult lookupCode(
 			ValidationSupportContext theValidationSupportContext,
@@ -348,12 +350,14 @@ public interface IValidationSupport {
 
 	/**
 	 * Look up a code using the system and code value
+	 * @deprecated This method has been deprecated in HAPI FHIR 7.0.0. Use {@link IValidationSupport#lookupCode(ValidationSupportContext, LookupCodeRequest)} instead.
 	 *
 	 * @param theValidationSupportContext The validation support module will be passed in to this method. This is convenient in cases where the operation needs to make calls to
 	 *                                    other method in the support chain, so that they can be passed through the entire chain. Implementations of this interface may always safely ignore this parameter.
 	 * @param theSystem                   The CodeSystem URL
 	 * @param theCode                     The code
 	 */
+	@Deprecated
 	@Nullable
 	default LookupCodeResult lookupCode(
 			ValidationSupportContext theValidationSupportContext, String theSystem, String theCode) {
@@ -361,7 +365,26 @@ public interface IValidationSupport {
 	}
 
 	/**
-	 * Returns <code>true</code> if the given valueset can be validated by the given
+	 * Look up a code using the system, code and other parameters captured in {@link LookupCodeRequest}.
+	 * @since 7.0.0
+	 *
+	 * @param theValidationSupportContext      The validation support module will be passed in to this method. This is convenient in cases where the operation needs to make calls to
+	 *                                         other method in the support chain, so that they can be passed through the entire chain. Implementations of this interface may always safely ignore this parameter.
+	 * @param theLookupCodeRequest             The parameters used to perform the lookup, including system and code.
+	 */
+	@Nullable
+	default LookupCodeResult lookupCode(
+			ValidationSupportContext theValidationSupportContext, @Nonnull LookupCodeRequest theLookupCodeRequest) {
+		// TODO: can change to return null once the deprecated methods are removed
+		return lookupCode(
+				theValidationSupportContext,
+				theLookupCodeRequest.getSystem(),
+				theLookupCodeRequest.getCode(),
+				theLookupCodeRequest.getDisplayLanguage());
+	}
+
+	/**
+	 * Returns <code>true</code> if the given ValueSet can be validated by the given
 	 * validation support module
 	 *
 	 * @param theValidationSupportContext The validation support module will be passed in to this method. This is convenient in cases where the operation needs to make calls to
@@ -554,6 +577,11 @@ public interface IValidationSupport {
 	}
 
 	class CodeValidationResult {
+		public static final String SOURCE_DETAILS = "sourceDetails";
+		public static final String RESULT = "result";
+		public static final String MESSAGE = "message";
+		public static final String DISPLAY = "display";
+
 		private String myCode;
 		private String myMessage;
 		private IssueSeverity mySeverity;
@@ -681,6 +709,23 @@ public interface IValidationSupport {
 		public CodeValidationResult setSeverityCode(@Nonnull String theIssueSeverity) {
 			setSeverity(IssueSeverity.valueOf(theIssueSeverity.toUpperCase()));
 			return this;
+		}
+
+		public IBaseParameters toParameters(FhirContext theContext) {
+			IBaseParameters retVal = ParametersUtil.newInstance(theContext);
+
+			ParametersUtil.addParameterToParametersBoolean(theContext, retVal, RESULT, isOk());
+			if (isNotBlank(getMessage())) {
+				ParametersUtil.addParameterToParametersString(theContext, retVal, MESSAGE, getMessage());
+			}
+			if (isNotBlank(getDisplay())) {
+				ParametersUtil.addParameterToParametersString(theContext, retVal, DISPLAY, getDisplay());
+			}
+			if (isNotBlank(getSourceDetails())) {
+				ParametersUtil.addParameterToParametersString(theContext, retVal, SOURCE_DETAILS, getSourceDetails());
+			}
+
+			return retVal;
 		}
 	}
 
@@ -814,7 +859,7 @@ public interface IValidationSupport {
 		}
 
 		public IBaseParameters toParameters(
-				FhirContext theContext, List<? extends IPrimitiveType<String>> theProperties) {
+				FhirContext theContext, List<? extends IPrimitiveType<String>> thePropertyNames) {
 
 			IBaseParameters retVal = ParametersUtil.newInstance(theContext);
 			if (isNotBlank(getCodeSystemDisplayName())) {
@@ -829,8 +874,8 @@ public interface IValidationSupport {
 			if (myProperties != null) {
 
 				Set<String> properties = Collections.emptySet();
-				if (theProperties != null) {
-					properties = theProperties.stream()
+				if (thePropertyNames != null) {
+					properties = thePropertyNames.stream()
 							.map(IPrimitiveType::getValueAsString)
 							.collect(Collectors.toSet());
 				}
