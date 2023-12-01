@@ -437,6 +437,17 @@
 			"lat": 18.483402,
 			"lon": -69.929611,
 			"added": "2022-08-15"
+		}, {
+			"title": "OpenSRP",
+			"description": "OpenSRP is an open source Electronic Health Record Platform designed for use by frontline health workers in low connectivity environments on basic Android devices. Ona Systems leads the development of the platform.",
+			"company": "Ona Systems",
+			"contactName": "Peter Lubell-Doughtie",
+			"contactEmail": "biz@ona.io",
+			"link": "https://ona.io/home/products/opensrp/features/",
+			"city": "Nairobi, Kenya",
+			"lat": -1.286389,
+			"lon": 36.817223,
+			"added": "2023-12-01"
 		}
 	]
 }
