@@ -15,7 +15,6 @@ import ca.uhn.fhir.jpa.subscription.resthook.RestHookTestR4Test;
 import ca.uhn.fhir.jpa.subscription.triggering.ISubscriptionTriggeringSvc;
 import ca.uhn.fhir.jpa.test.util.StoppableSubscriptionDeliveringRestHookSubscriber;
 import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import org.awaitility.core.ConditionTimeoutException;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
@@ -35,14 +34,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-<<<<<<< Updated upstream
 import javax.servlet.ServletException;
-=======
-import jakarta.servlet.ServletException;
-import org.springframework.cache.annotation.EnableCaching;
-
-import java.awt.*;
->>>>>>> Stashed changes
 import java.time.LocalDate;
 import java.time.Month;
 import java.util.ArrayList;
