@@ -63,6 +63,7 @@ import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.hl7.fhir.r4.model.IdType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 
@@ -2010,17 +2011,27 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 		 * references within a Bundle
 		 */
 		if (theAppContext instanceof IBaseBundle && isNotBlank(theUrl) && !theUrl.startsWith("#")) {
+			String unqualifiedVersionlessReference;
+			boolean isPlaceholderReference;
+			if (theUrl.startsWith("urn:")) {
+				isPlaceholderReference = true;
+				unqualifiedVersionlessReference = null;
+			} else {
+				isPlaceholderReference = false;
+				unqualifiedVersionlessReference = new IdType(theUrl).toUnqualifiedVersionless().getValue();
+			}
+
 			List<BundleEntryParts> entries = BundleUtil.toListOfEntries(getContext(), (IBaseBundle) theAppContext);
 			for (BundleEntryParts next : entries) {
 				if (next.getResource() != null) {
-					if (theUrl.startsWith("urn:uuid:")) {
+					if (isPlaceholderReference) {
 						if (theUrl.equals(next.getUrl())
 								|| theUrl.equals(
 										next.getResource().getIdElement().getValue())) {
 							return (T) next.getResource();
 						}
 					} else {
-						if (theUrl.equals(next.getResource().getIdElement().getValue())) {
+						if (unqualifiedVersionlessReference.equals(next.getResource().getIdElement().toUnqualifiedVersionless().getValue())) {
 							return (T) next.getResource();
 						}
 					}

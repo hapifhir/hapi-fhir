@@ -5793,8 +5793,15 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 	 *   [base]/Bundle?composition.patient.identifier=foo
 	 */
 	@ParameterizedTest
-	@CsvSource({"urn:uuid:5c34dc2c-9b5d-4ec1-b30b-3e2d4371508b", "Patient/ABC"})
-	public void testCreateAndSearchForFullyChainedSearchParameter(String thePatientId) {
+	@CsvSource({
+		"true , urn:uuid:5c34dc2c-9b5d-4ec1-b30b-3e2d4371508b , urn:uuid:5c34dc2c-9b5d-4ec1-b30b-3e2d4371508b",
+		"false, urn:uuid:5c34dc2c-9b5d-4ec1-b30b-3e2d4371508b , urn:uuid:5c34dc2c-9b5d-4ec1-b30b-3e2d4371508b",
+		"true , Patient/ABC                                   , Patient/ABC ",
+		"false, Patient/ABC                                   , Patient/ABC ",
+		"true , Patient/ABC                                   , http://example.com/fhir/Patient/ABC ",
+		"false, Patient/ABC                                   , http://example.com/fhir/Patient/ABC ",
+	})
+	public void testCreateAndSearchForFullyChainedSearchParameter(boolean theUseFullChainInName, String thePatientId, String theFullUrl) {
 		// Setup 1
 
 		myStorageSettings.setIndexMissingFields(JpaStorageSettings.IndexEnabledEnum.DISABLED);
@@ -5819,13 +5826,18 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		composition.setSubject(new Reference(thePatientId));
 
 		Patient patient = new Patient();
-		patient.setId(new IdType(thePatientId));
+		patient.setId(new IdType(theFullUrl));
 		patient.addIdentifier().setSystem("http://foo").setValue("bar");
 
 		Bundle bundle = new Bundle();
 		bundle.setType(Bundle.BundleType.DOCUMENT);
-		bundle.addEntry().setResource(composition);
-		bundle.addEntry().setResource(patient);
+		bundle
+			.addEntry()
+			.setResource(composition);
+		bundle
+			.addEntry()
+			.setFullUrl(theFullUrl)
+			.setResource(patient);
 
 		myBundleDao.create(bundle, mySrd);
 
@@ -5833,34 +5845,39 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		bundle2.setType(Bundle.BundleType.DOCUMENT);
 		myBundleDao.create(bundle2, mySrd);
 
-		// Verify 1
-		runInTransaction(() -> {
+		// Test
+
+		SearchParameterMap map;
+		if (theUseFullChainInName) {
+			map = SearchParameterMap.newSynchronous("composition.patient.identifier", new TokenParam("http://foo", "bar"));
+		} else {
+			map = SearchParameterMap.newSynchronous("composition", new ReferenceParam("patient.identifier", "http://foo|bar"));
+		}
+		IBundleProvider outcome = myBundleDao.search(map, mySrd);
+
+		// Verify
+
+		List<String> params = extractAllTokenIndexes();
+		assertThat(params.toString(), params, containsInAnyOrder(
+			"composition.patient.identifier http://foo|bar"
+		));
+		assertEquals(1, outcome.size());
+	}
+
+	private List<String> extractAllTokenIndexes() {
+		List<String> params = runInTransaction(() -> {
 			logAllTokenIndexes();
 
-			List<String> params = myResourceIndexedSearchParamTokenDao
+			return myResourceIndexedSearchParamTokenDao
 				.findAll()
 				.stream()
 				.filter(t -> t.getParamName().contains("."))
 				.map(t -> t.getParamName() + " " + t.getSystem() + "|" + t.getValue())
 				.toList();
-			assertThat(params.toString(), params, containsInAnyOrder(
-				"composition.patient.identifier http://foo|bar"
-			));
 		});
-
-		// Test 2
-		IBundleProvider outcome;
-
-		SearchParameterMap map = SearchParameterMap
-			.newSynchronous("composition.patient.identifier", new TokenParam("http://foo", "bar"));
-		outcome = myBundleDao.search(map, mySrd);
-		assertEquals(1, outcome.size());
-
-		map = SearchParameterMap
-			.newSynchronous("composition", new ReferenceParam("patient.identifier", "http://foo|bar"));
-		outcome = myBundleDao.search(map, mySrd);
-		assertEquals(1, outcome.size());
+		return params;
 	}
+
 
 	@Nested
 	public class TagBelowTests {
