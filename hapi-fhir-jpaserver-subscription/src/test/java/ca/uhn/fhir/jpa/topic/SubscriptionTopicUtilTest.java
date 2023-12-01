@@ -1,6 +1,9 @@
 package ca.uhn.fhir.jpa.topic;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.subscription.match.registry.ActiveSubscription;
+import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
+import ca.uhn.fhir.jpa.subscription.model.CanonicalTopicSubscription;
 import ca.uhn.fhir.rest.server.messaging.BaseResourceMessage;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r5.model.Bundle;
@@ -8,9 +11,12 @@ import org.hl7.fhir.r5.model.Enumeration;
 import org.hl7.fhir.r5.model.Patient;
 import org.hl7.fhir.r5.model.Reference;
 import org.hl7.fhir.r5.model.Resource;
+import org.hl7.fhir.r5.model.Subscription;
 import org.hl7.fhir.r5.model.SubscriptionStatus;
 import org.hl7.fhir.r5.model.SubscriptionTopic;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
 import java.util.List;
 
@@ -20,6 +26,8 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class SubscriptionTopicUtilTest {
+
+	private static final String TEST_CHANNEL_NAME = "TEST_CHANNEL";
 
 	private final FhirContext myContext = FhirContext.forR5Cached();
 
@@ -85,5 +93,34 @@ class SubscriptionTopicUtilTest {
 	public void testExtractResourceFromBundle_withEmptyBundle_returnsNull() {
 		IBaseResource extractionResult = SubscriptionTopicUtil.extractResourceFromBundle(myContext, new Bundle());
 		assertNull(extractionResult);
+	}
+
+	@Test
+	public void testIsEmptyContentTopicSubscription_withEmptySubscription_returnsFalse() {
+		ActiveSubscription activeSubscription = new ActiveSubscription(new CanonicalSubscription(), TEST_CHANNEL_NAME);
+		boolean result = SubscriptionTopicUtil.isEmptyContentTopicSubscription(activeSubscription);
+
+		assertFalse(result);
+	}
+
+	@ParameterizedTest
+	@CsvSource({
+			"full-resource, false",
+			"id-only	  , false",
+			"empty        , true",
+			"             , false",
+	})
+	public void testIsEmptyContentTopicSubscription_withContentPayload_returnsExpectedResult(String thePayloadContent,
+																							 boolean theExpectedResult) {
+		CanonicalTopicSubscription canonicalTopicSubscription = new CanonicalTopicSubscription();
+		canonicalTopicSubscription.setContent(Subscription.SubscriptionPayloadContent.fromCode(thePayloadContent));
+		CanonicalSubscription canonicalSubscription = new CanonicalSubscription();
+		canonicalSubscription.setTopicSubscription(canonicalTopicSubscription);
+		canonicalSubscription.setTopicSubscription(true);
+		ActiveSubscription activeSubscription = new ActiveSubscription(canonicalSubscription, TEST_CHANNEL_NAME);
+
+		boolean actualResult = SubscriptionTopicUtil.isEmptyContentTopicSubscription(activeSubscription);
+
+		assertEquals(theExpectedResult, actualResult);
 	}
 }

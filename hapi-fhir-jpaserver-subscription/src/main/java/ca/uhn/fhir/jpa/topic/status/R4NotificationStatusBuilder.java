@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.topic.status;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.subscription.match.registry.ActiveSubscription;
+import ca.uhn.fhir.jpa.topic.SubscriptionTopicUtil;
 import ca.uhn.fhir.subscription.SubscriptionConstants;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.CanonicalType;
@@ -66,7 +67,7 @@ public class R4NotificationStatusBuilder implements INotificationStatusBuilder<P
 		notificationEvent.setName("notification-event");
 		notificationEvent.addPart().setName("event-number").setValue(new StringType(eventNumber.toString()));
 		notificationEvent.addPart().setName("timestamp").setValue(new DateType(new Date()));
-		if (!theResources.isEmpty() && !isEmptyContentTopicSubscription(theActiveSubscription)) {
+		if (!theResources.isEmpty() && !SubscriptionTopicUtil.isEmptyContentTopicSubscription(theActiveSubscription)) {
 			IBaseResource firstResource = theResources.get(0);
 			Reference resourceReference =
 					new Reference(firstResource.getIdElement().toUnqualifiedVersionless());
@@ -75,14 +76,5 @@ public class R4NotificationStatusBuilder implements INotificationStatusBuilder<P
 		}
 
 		return parameters;
-	}
-
-	private boolean isEmptyContentTopicSubscription(ActiveSubscription theActiveSubscription) {
-		return theActiveSubscription.getSubscription().isTopicSubscription()
-				&& org.hl7.fhir.r5.model.Subscription.SubscriptionPayloadContent.EMPTY
-						== theActiveSubscription
-								.getSubscription()
-								.getTopicSubscription()
-								.getContent();
 	}
 }
