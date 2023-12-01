@@ -68,8 +68,8 @@ public class R4NotificationStatusBuilder implements INotificationStatusBuilder<P
 		notificationEvent.addPart().setName("timestamp").setValue(new DateType(new Date()));
 		if (!theResources.isEmpty() && !isEmptyContentTopicSubscription(theActiveSubscription)) {
 			IBaseResource firstResource = theResources.get(0);
-			Reference resourceReference = new Reference(firstResource.fhirType() + "/"
-					+ firstResource.getIdElement().toUnqualifiedVersionless());
+			Reference resourceReference =
+					new Reference(firstResource.getIdElement().toUnqualifiedVersionless());
 
 			notificationEvent.addPart().setName("focus").setValue(resourceReference);
 		}

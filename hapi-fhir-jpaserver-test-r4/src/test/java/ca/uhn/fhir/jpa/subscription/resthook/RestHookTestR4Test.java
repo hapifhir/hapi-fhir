@@ -1341,7 +1341,7 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		// verify SubscriptionStatus.notificationEvent.focus
 		Optional<Parameters.ParametersParameterComponent> focus = getNotificationEventFocus(resources);
 		assertTrue(focus.isPresent());
-		assertEquals(PATIENT_REFERENCE, ((Reference) focus.get().getValue()).getReference());
+		assertEquals(TEST_PATIENT_ID, ((Reference) focus.get().getValue()).getReference());
 
 		// verify Patient Entry
 		Bundle.BundleEntryComponent patientEntry = bundle.getEntry().get(1);
