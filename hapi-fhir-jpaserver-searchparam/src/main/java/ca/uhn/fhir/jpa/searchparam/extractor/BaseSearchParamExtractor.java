@@ -2018,7 +2018,8 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 				unqualifiedVersionlessReference = null;
 			} else {
 				isPlaceholderReference = false;
-				unqualifiedVersionlessReference = new IdType(theUrl).toUnqualifiedVersionless().getValue();
+				unqualifiedVersionlessReference =
+						new IdType(theUrl).toUnqualifiedVersionless().getValue();
 			}
 
 			List<BundleEntryParts> entries = BundleUtil.toListOfEntries(getContext(), (IBaseBundle) theAppContext);
@@ -2031,7 +2032,10 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 							return (T) next.getResource();
 						}
 					} else {
-						if (unqualifiedVersionlessReference.equals(next.getResource().getIdElement().toUnqualifiedVersionless().getValue())) {
+						if (unqualifiedVersionlessReference.equals(next.getResource()
+								.getIdElement()
+								.toUnqualifiedVersionless()
+								.getValue())) {
 							return (T) next.getResource();
 						}
 					}
