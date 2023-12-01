@@ -2953,9 +2953,7 @@ public enum Pointcut implements IPointcut {
 	 * </p>
 	 */
 	STORAGE_PRESTORAGE_BATCH_JOB_CREATE(
-		void.class,
-		"ca.uhn.fhir.batch2.model.JobInstance",
-		"ca.uhn.fhir.rest.api.server.RequestDetails"),
+			void.class, "ca.uhn.fhir.batch2.model.JobInstance", "ca.uhn.fhir.rest.api.server.RequestDetails"),
 
 	/**
 	 * This pointcut is used only for unit tests. Do not use in production code as it may be changed or

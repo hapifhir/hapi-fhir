@@ -537,8 +537,8 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	private void invokePreStorageBatchHooks(JobInstance theJobInstance) {
 		if (myInterceptorBroadcaster.hasHooks(Pointcut.STORAGE_PRESTORAGE_BATCH_JOB_CREATE)) {
 			HookParams params = new HookParams()
-				.add(JobInstance.class, theJobInstance)
-				.add(RequestDetails.class, new SystemRequestDetails());
+					.add(JobInstance.class, theJobInstance)
+					.add(RequestDetails.class, new SystemRequestDetails());
 
 			myInterceptorBroadcaster.callHooks(Pointcut.STORAGE_PRESTORAGE_BATCH_JOB_CREATE, params);
 		}
