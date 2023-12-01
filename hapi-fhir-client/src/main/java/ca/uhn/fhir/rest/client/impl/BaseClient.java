@@ -36,6 +36,7 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.RequestFormatParamStyleEnum;
 import ca.uhn.fhir.rest.api.SummaryEnum;
+import ca.uhn.fhir.rest.client.api.ClientResponseContext;
 import ca.uhn.fhir.rest.client.api.IHttpClient;
 import ca.uhn.fhir.rest.client.api.IHttpRequest;
 import ca.uhn.fhir.rest.client.api.IHttpResponse;
@@ -356,12 +357,19 @@ public abstract class BaseClient implements IRestfulClient {
 					? ((ResourceResponseHandler<? extends IBaseResource>) binding).getReturnType()
 					: null;
 
+			final ClientResponseContext clientResponseContext =
+				new ClientResponseContext(httpRequest, response, this, getFhirContext(), returnType);
 			HookParams responseParams = new HookParams();
 			responseParams.add(IHttpRequest.class, httpRequest);
 			responseParams.add(IHttpResponse.class, response);
 			responseParams.add(IRestfulClient.class, this);
+			responseParams.add(ClientResponseContext.class, clientResponseContext);
 
 			getInterceptorService().callHooks(Pointcut.CLIENT_RESPONSE, responseParams);
+
+			// Replace the contents of the response with whatever the hook returned, or the same response as before if
+			// it no-op'd
+			response = clientResponseContext.getHttpResponse();
 
 			String mimeType;
 			if (Constants.STATUS_HTTP_204_NO_CONTENT == response.getStatus()) {
