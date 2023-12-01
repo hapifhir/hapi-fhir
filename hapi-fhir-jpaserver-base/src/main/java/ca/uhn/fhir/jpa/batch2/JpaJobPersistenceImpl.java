@@ -91,11 +91,11 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	 * Constructor
 	 */
 	public JpaJobPersistenceImpl(
-		IBatch2JobInstanceRepository theJobInstanceRepository,
-		IBatch2WorkChunkRepository theWorkChunkRepository,
-		IHapiTransactionService theTransactionService,
-		EntityManager theEntityManager,
-		IInterceptorBroadcaster theInterceptorBroadcaster) {
+			IBatch2JobInstanceRepository theJobInstanceRepository,
+			IBatch2WorkChunkRepository theWorkChunkRepository,
+			IHapiTransactionService theTransactionService,
+			EntityManager theEntityManager,
+			IInterceptorBroadcaster theInterceptorBroadcaster) {
 		Validate.notNull(theJobInstanceRepository);
 		Validate.notNull(theWorkChunkRepository);
 		myJobInstanceRepository = theJobInstanceRepository;
@@ -531,13 +531,12 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 			}
 		}
 	}
+
 	private void invokePrestorageBatchHooks(JobInstance theJobInstance) {
 		if (myInterceptorBroadcaster.hasHooks(Pointcut.STORAGE_PRESTORAGE_BATCH_JOB_CREATE)) {
 			HookParams params = new HookParams().add(JobInstance.class, theJobInstance);
 
-			myInterceptorBroadcaster
-				.callHooks(Pointcut.STORAGE_PRESTORAGE_BATCH_JOB_CREATE, params);
+			myInterceptorBroadcaster.callHooks(Pointcut.STORAGE_PRESTORAGE_BATCH_JOB_CREATE, params);
 		}
-
 	}
 }

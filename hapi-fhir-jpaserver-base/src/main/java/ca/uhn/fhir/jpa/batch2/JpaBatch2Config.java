@@ -29,7 +29,6 @@ import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-import org.springframework.context.annotation.Primary;
 
 import javax.persistence.EntityManager;
 
@@ -45,7 +44,10 @@ public class JpaBatch2Config extends BaseBatch2Config {
 			EntityManager theEntityManager,
 			IInterceptorBroadcaster theInterceptorBroadcaster) {
 		return new JpaJobPersistenceImpl(
-				theJobInstanceRepository, theWorkChunkRepository, theTransactionService, theEntityManager, theInterceptorBroadcaster);
+				theJobInstanceRepository,
+				theWorkChunkRepository,
+				theTransactionService,
+				theEntityManager,
+				theInterceptorBroadcaster);
 	}
-
 }

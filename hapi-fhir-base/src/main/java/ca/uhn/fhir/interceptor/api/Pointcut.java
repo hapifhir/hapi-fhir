@@ -2946,10 +2946,7 @@ public enum Pointcut implements IPointcut {
 	 * Hooks should return <code>void</code>.
 	 * </p>
 	 */
-	STORAGE_PRESTORAGE_BATCH_JOB_CREATE(
-		void.class,
-		"ca.uhn.fhir.batch2.model.JobInstance"
-	),
+	STORAGE_PRESTORAGE_BATCH_JOB_CREATE(void.class, "ca.uhn.fhir.batch2.model.JobInstance"),
 
 	/**
 	 * This pointcut is used only for unit tests. Do not use in production code as it may be changed or
