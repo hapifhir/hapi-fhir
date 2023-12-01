@@ -305,8 +305,6 @@ public class SubscriptionCanonicalizer {
 			CanonicalTopicSubscription topicSubscription = retVal.getTopicSubscription();
 			topicSubscription.setTopic(getCriteria(theSubscription));
 
-			// WIP STR5 support other content types
-			topicSubscription.setContent(org.hl7.fhir.r5.model.Subscription.SubscriptionPayloadContent.FULLRESOURCE);
 			retVal.setEndpointUrl(channel.getEndpoint());
 			retVal.setChannelType(getChannelType(subscription));
 
@@ -320,29 +318,33 @@ public class SubscriptionCanonicalizer {
 			}
 
 			if (channel.hasExtension(SubscriptionConstants.SUBSCRIPTION_TOPIC_CHANNEL_HEARTBEAT_PERIOD_URL)) {
-				org.hl7.fhir.r4.model.Extension timeoutExtension = channel.getExtensionByUrl(
+				org.hl7.fhir.r4.model.Extension channelHertbeatPeriotUrlExtension = channel.getExtensionByUrl(
 						SubscriptionConstants.SUBSCRIPTION_TOPIC_CHANNEL_HEARTBEAT_PERIOD_URL);
-				topicSubscription.setHeartbeatPeriod(
-						Integer.valueOf(timeoutExtension.getValue().primitiveValue()));
+				topicSubscription.setHeartbeatPeriod(Integer.valueOf(
+						channelHertbeatPeriotUrlExtension.getValue().primitiveValue()));
 			}
 			if (channel.hasExtension(SubscriptionConstants.SUBSCRIPTION_TOPIC_CHANNEL_TIMEOUT_URL)) {
-				org.hl7.fhir.r4.model.Extension timeoutExtension =
+				org.hl7.fhir.r4.model.Extension channelTimeoutUrlExtension =
 						channel.getExtensionByUrl(SubscriptionConstants.SUBSCRIPTION_TOPIC_CHANNEL_TIMEOUT_URL);
 				topicSubscription.setTimeout(
-						Integer.valueOf(timeoutExtension.getValue().primitiveValue()));
+						Integer.valueOf(channelTimeoutUrlExtension.getValue().primitiveValue()));
 			}
 			if (channel.hasExtension(SubscriptionConstants.SUBSCRIPTION_TOPIC_CHANNEL_MAX_COUNT)) {
-				org.hl7.fhir.r4.model.Extension timeoutExtension =
+				org.hl7.fhir.r4.model.Extension channelMaxCountExtension =
 						channel.getExtensionByUrl(SubscriptionConstants.SUBSCRIPTION_TOPIC_CHANNEL_MAX_COUNT);
 				topicSubscription.setMaxCount(
-						Integer.valueOf(timeoutExtension.getValue().primitiveValue()));
+						Integer.valueOf(channelMaxCountExtension.getValue().primitiveValue()));
 			}
 			if (channel.getPayloadElement()
 					.hasExtension(SubscriptionConstants.SUBSCRIPTION_TOPIC_CHANNEL_PAYLOAD_CONTENT)) {
-				org.hl7.fhir.r4.model.Extension timeoutExtension = channel.getPayloadElement()
+				org.hl7.fhir.r4.model.Extension channelPayloadContentExtension = channel.getPayloadElement()
 						.getExtensionByUrl(SubscriptionConstants.SUBSCRIPTION_TOPIC_CHANNEL_PAYLOAD_CONTENT);
 				topicSubscription.setContent(org.hl7.fhir.r5.model.Subscription.SubscriptionPayloadContent.fromCode(
-						timeoutExtension.getValue().primitiveValue()));
+						channelPayloadContentExtension.getValue().primitiveValue()));
+			} else {
+				// setting full-resource PayloadContent if backport-payload-content is not provided
+				topicSubscription.setContent(
+						org.hl7.fhir.r5.model.Subscription.SubscriptionPayloadContent.FULLRESOURCE);
 			}
 
 		} else {
@@ -423,13 +425,23 @@ public class SubscriptionCanonicalizer {
 		}
 
 		if (retVal.isTopicSubscription()) {
-			retVal.getTopicSubscription().setTopic(getCriteria(theSubscription));
+			CanonicalTopicSubscription topicSubscription = retVal.getTopicSubscription();
+			topicSubscription.setTopic(getCriteria(theSubscription));
 
-			// WIP STR5 support other content types
-			retVal.getTopicSubscription()
-					.setContent(org.hl7.fhir.r5.model.Subscription.SubscriptionPayloadContent.FULLRESOURCE);
 			retVal.setEndpointUrl(channel.getEndpoint());
 			retVal.setChannelType(getChannelType(subscription));
+
+			if (channel.getPayloadElement()
+					.hasExtension(SubscriptionConstants.SUBSCRIPTION_TOPIC_CHANNEL_PAYLOAD_CONTENT)) {
+				org.hl7.fhir.r4b.model.Extension channelPayloadContentExtension = channel.getPayloadElement()
+						.getExtensionByUrl(SubscriptionConstants.SUBSCRIPTION_TOPIC_CHANNEL_PAYLOAD_CONTENT);
+				topicSubscription.setContent(org.hl7.fhir.r5.model.Subscription.SubscriptionPayloadContent.fromCode(
+						channelPayloadContentExtension.getValue().primitiveValue()));
+			} else {
+				// setting full-resource PayloadContent if backport-payload-content is not provided
+				topicSubscription.setContent(
+						org.hl7.fhir.r5.model.Subscription.SubscriptionPayloadContent.FULLRESOURCE);
+			}
 		} else {
 			retVal.setCriteriaString(getCriteria(theSubscription));
 			retVal.setEndpointUrl(channel.getEndpoint());
