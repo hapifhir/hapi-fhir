@@ -73,16 +73,23 @@ public class PersistedJpaSearchFirstPageBundleProvider extends PersistedJpaBundl
 
 		mySearchTask.awaitInitialSync();
 
+		// request 1 more than we need to, in order to know if there are extra values
 		ourLog.trace("Fetching search resource PIDs from task: {}", mySearchTask.getClass());
-		final List<JpaPid> pids = mySearchTask.getResourcePids(theFromIndex, theToIndex);
+		final List<JpaPid> pids = mySearchTask.getResourcePids(theFromIndex, theToIndex + 1);
 		ourLog.trace("Done fetching search resource PIDs");
+
+		int countOfPids = pids.size();
+		;
+		int maxSize = Math.min(theToIndex - theFromIndex, countOfPids);
+		thePageBuilder.setTotalRequestedResourcesFetched(countOfPids);
 
 		RequestPartitionId requestPartitionId = getRequestPartitionId();
 
+		List<JpaPid> firstBatch = pids.subList(0, maxSize);
 		List<IBaseResource> retVal = myTxService
 				.withRequest(myRequest)
 				.withRequestPartitionId(requestPartitionId)
-				.execute(() -> toResourceList(mySearchBuilder, pids, thePageBuilder));
+				.execute(() -> toResourceList(mySearchBuilder, firstBatch, thePageBuilder));
 
 		long totalCountWanted = theToIndex - theFromIndex;
 		long totalCountMatch = (int) retVal.stream().filter(t -> !isInclude(t)).count();
@@ -103,12 +110,15 @@ public class PersistedJpaSearchFirstPageBundleProvider extends PersistedJpaBundl
 
 				long remainingWanted = totalCountWanted - totalCountMatch;
 				long fromIndex = theToIndex - remainingWanted;
-				List<IBaseResource> remaining = super.getResources((int) fromIndex, theToIndex, thePageBuilder);
+				ResponsePage.ResponsePageBuilder pageBuilder = new ResponsePage.ResponsePageBuilder();
+				pageBuilder.setBundleProvider(this);
+				List<IBaseResource> remaining = super.getResources((int) fromIndex, theToIndex, pageBuilder);
 				remaining.forEach(t -> {
 					if (!existingIds.contains(t.getIdElement().getValue())) {
 						retVal.add(t);
 					}
 				});
+				thePageBuilder.combineWith(pageBuilder);
 			}
 		}
 		ourLog.trace("Loaded resources to return");

@@ -125,7 +125,7 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 	 * of this class, since it's a prototype
 	 */
 	private Search mySearchEntity;
-	private String myUuid;
+	private final String myUuid;
 	private SearchCacheStatusEnum myCacheStatus;
 	private RequestPartitionId myRequestPartitionId;
 
@@ -259,13 +259,21 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 		final ISearchBuilder sb = mySearchBuilderFactory.newSearchBuilder(dao, resourceName, resourceType);
 
 		RequestPartitionId requestPartitionId = getRequestPartitionId();
-		final List<JpaPid> pidsSubList =
-				mySearchCoordinatorSvc.getResources(myUuid, theFromIndex, theToIndex, myRequest, requestPartitionId);
+		// we request 1 more resource than we need
+		// this is so we can be sure of when we hit the last page
+		// (when doing offset searches)
+		final List<JpaPid> pidsSubList = mySearchCoordinatorSvc.getResources(
+				myUuid, theFromIndex, theToIndex + 1, myRequest, requestPartitionId);
+		// max list size should be either the entire list, or from - to length
+		int maxSize = Math.min(theToIndex - theFromIndex, pidsSubList.size());
+		theResponsePageBuilder.setTotalRequestedResourcesFetched(pidsSubList.size());
+
+		List<JpaPid> firstBatchOfPids = pidsSubList.subList(0, maxSize);
 		List<IBaseResource> resources = myTxService
 				.withRequest(myRequest)
 				.withRequestPartitionId(requestPartitionId)
 				.execute(() -> {
-					return toResourceList(sb, pidsSubList, theResponsePageBuilder);
+					return toResourceList(sb, firstBatchOfPids, theResponsePageBuilder);
 				});
 
 		return resources;
@@ -541,8 +549,8 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 		// this can (potentially) change the results being returned.
 		int precount = resources.size();
 		resources = ServerInterceptorUtil.fireStoragePreshowResource(resources, myRequest, myInterceptorBroadcaster);
-		// we only care about omitted results from *this* page
-		theResponsePageBuilder.setToOmittedResourceCount(precount - resources.size());
+		// we only care about omitted results from this page
+		theResponsePageBuilder.setOmittedResourceCount(precount - resources.size());
 		theResponsePageBuilder.setResources(resources);
 		theResponsePageBuilder.setIncludedResourceCount(includedPidList.size());
 
