@@ -13,9 +13,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.sql.DataSource;
 import java.util.Properties;
 import java.util.Set;
+import javax.sql.DataSource;
 
 public class FhirTestAutoMigrator {
 
