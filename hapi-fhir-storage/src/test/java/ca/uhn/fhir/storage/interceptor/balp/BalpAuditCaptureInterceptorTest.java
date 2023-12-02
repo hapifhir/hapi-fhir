@@ -34,9 +34,14 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.storage.interceptor.balp.BalpConstants.*;
@@ -588,7 +593,7 @@ public class BalpAuditCaptureInterceptorTest implements ITestDataBuilder {
 	}
 
 	@Test
-	public void testSearch_ResponseIncludesSinglePatientCompartment_LoadPageTwo() {
+	public void testSearch_ResponseIncludesSinglePatientCompartment_LoadPageTwo() throws ExecutionException, InterruptedException {
 		// Setup
 
 		create10Observations("Patient/P1");
@@ -601,7 +606,7 @@ public class BalpAuditCaptureInterceptorTest implements ITestDataBuilder {
 			.execute();
 
 		// Test
-
+		
 		outcome = myClient
 			.loadPage()
 			.next(outcome)
