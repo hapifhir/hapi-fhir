@@ -29,7 +29,6 @@ import ca.uhn.fhir.rest.api.server.IPreResourceShowDetails;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.UrlUtil;
-import jakarta.servlet.http.HttpServletRequest;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.AuditEvent;
@@ -37,8 +36,6 @@ import org.hl7.fhir.r4.model.AuditEvent;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import javax.annotation.Nonnull;
-
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /**
  * The IHE Basic Audit Logging Pattern (BALP) interceptor can be used to autopmatically generate
