@@ -47,6 +47,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.ColumnMapRowMapper;
 import org.springframework.transaction.support.TransactionTemplate;
+import org.springframework.util.LinkedCaseInsensitiveMap;
 
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
@@ -360,7 +361,7 @@ public class JdbcUtils {
 							massageIdentifier(metadata, theTableName),
 							null);
 
-					Set<String> columnNames = new HashSet<>();
+					LinkedCaseInsensitiveMap<String> columnNames = new LinkedCaseInsensitiveMap<>();
 					while (indexes.next()) {
 						String tableName = indexes.getString("TABLE_NAME").toUpperCase(Locale.US);
 						if (!theTableName.equalsIgnoreCase(tableName)) {
@@ -369,10 +370,10 @@ public class JdbcUtils {
 
 						String columnName = indexes.getString("COLUMN_NAME");
 						columnName = columnName.toUpperCase(Locale.US);
-						columnNames.add(columnName);
+						columnNames.put(columnName, columnName);
 					}
 
-					return columnNames;
+					return columnNames.keySet();
 				} catch (SQLException e) {
 					throw new InternalErrorException(Msg.code(38) + e);
 				}
