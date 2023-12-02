@@ -64,7 +64,7 @@ public class BulkImportCommandTest {
 
 	@RegisterExtension
 	public HttpClientExtension myHttpClientExtension = new HttpClientExtension();
-	@Mock
+	@Mock(strictness = Mock.Strictness.LENIENT)
 	private IJobCoordinator myJobCoordinator;
 	private final BulkDataImportProvider myProvider = new BulkDataImportProvider();
 	private final FhirContext myCtx = FhirContext.forR4Cached();

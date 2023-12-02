@@ -319,7 +319,7 @@ public class BalpAuditCaptureInterceptor {
 		auditEvent.setOutcome(AuditEvent.AuditEventOutcome._0);
 		auditEvent.setRecorded(new Date());
 
-		auditEvent.getSource().getObserver().setDisplay(theRequestDetails.getServerBaseForRequest());
+		auditEvent.getSource().getObserver().setDisplay(theRequestDetails.getFhirServerBase());
 
 		AuditEvent.AuditEventAgentComponent clientAgent = auditEvent.addAgent();
 		clientAgent.setWho(myContextServices.getAgentClientWho(theRequestDetails));
@@ -333,8 +333,8 @@ public class BalpAuditCaptureInterceptor {
 
 		AuditEvent.AuditEventAgentComponent serverAgent = auditEvent.addAgent();
 		serverAgent.getType().addCoding(theProfile.getAgentServerTypeCoding());
-		serverAgent.getWho().setDisplay(theRequestDetails.getServerBaseForRequest());
-		serverAgent.getNetwork().setAddress(theRequestDetails.getServerBaseForRequest());
+		serverAgent.getWho().setDisplay(theRequestDetails.getFhirServerBase());
+		serverAgent.getNetwork().setAddress(theRequestDetails.getFhirServerBase());
 		serverAgent.setRequestor(false);
 
 		AuditEvent.AuditEventAgentComponent userAgent = auditEvent.addAgent();
@@ -374,19 +374,14 @@ public class BalpAuditCaptureInterceptor {
 
 		// Description
 		StringBuilder description = new StringBuilder();
-		HttpServletRequest servletRequest = theRequestDetails.getServletRequest();
-		description.append(servletRequest.getMethod());
+		description.append(theRequestDetails.getRequestType().name());
 		description.append(" ");
-		description.append(servletRequest.getRequestURI());
-		if (isNotBlank(servletRequest.getQueryString())) {
-			description.append("?");
-			description.append(servletRequest.getQueryString());
-		}
+		description.append(theRequestDetails.getCompleteUrl());
 		queryEntity.setDescription(description.toString());
 
 		// Query String
 		StringBuilder queryString = new StringBuilder();
-		queryString.append(theRequestDetails.getServerBaseForRequest());
+		queryString.append(theRequestDetails.getFhirServerBase());
 		queryString.append("/");
 		queryString.append(theRequestDetails.getRequestPath());
 		boolean first = true;

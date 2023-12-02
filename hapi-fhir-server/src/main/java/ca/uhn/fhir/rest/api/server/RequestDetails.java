@@ -397,7 +397,10 @@ public abstract class RequestDetails {
 
 	/**
 	 * Returns the server base URL (with no trailing '/') for a given request
+	 *
+	 * @deprecated Use {@link #getFhirServerBase()} instead. Deprecated in HAPI FHIR 7.0.0
 	 */
+	@Deprecated
 	public abstract String getServerBaseForRequest();
 
 	/**

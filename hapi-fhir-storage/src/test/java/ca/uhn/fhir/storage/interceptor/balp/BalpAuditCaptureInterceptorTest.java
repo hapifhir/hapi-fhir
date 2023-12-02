@@ -552,7 +552,7 @@ public class BalpAuditCaptureInterceptorTest implements ITestDataBuilder {
 		assertEquals(AuditEvent.AuditEventOutcome._0, auditEvent.getOutcome());
 		assertHasPatientEntities(auditEvent, "Patient/P1");
 		assertQuery(auditEvent, ourServer.getBaseUrl() + "/Observation?subject=Patient%2FP1");
-		assertQueryDescription(auditEvent, "GET /Observation?subject=Patient%2FP1");
+		assertQueryDescription(auditEvent, "GET " + ourServer.getBaseUrl() + "/Observation?subject=Patient%2FP1");
 	}
 
 	@Test
@@ -589,7 +589,7 @@ public class BalpAuditCaptureInterceptorTest implements ITestDataBuilder {
 		assertEquals(AuditEvent.AuditEventOutcome._0, auditEvent.getOutcome());
 		assertHasPatientEntities(auditEvent);
 		assertQuery(auditEvent, ourServer.getBaseUrl() + "/CodeSystem");
-		assertQueryDescription(auditEvent, "GET /CodeSystem");
+		assertQueryDescription(auditEvent, "GET " + ourServer.getBaseUrl() + "/CodeSystem");
 	}
 
 	@Test
@@ -606,7 +606,7 @@ public class BalpAuditCaptureInterceptorTest implements ITestDataBuilder {
 			.execute();
 
 		// Test
-		
+
 		outcome = myClient
 			.loadPage()
 			.next(outcome)
@@ -629,7 +629,7 @@ public class BalpAuditCaptureInterceptorTest implements ITestDataBuilder {
 		assertEquals(AuditEvent.AuditEventOutcome._0, auditEvent.getOutcome());
 		assertHasPatientEntities(auditEvent, "Patient/P1");
 		assertQuery(auditEvent, ourServer.getBaseUrl() + "/Observation?_count=5&subject=Patient%2FP1");
-		assertQueryDescription(auditEvent, "GET /Observation?subject=Patient%2FP1&_count=5");
+		assertQueryDescription(auditEvent, "GET " + ourServer.getBaseUrl() + "/Observation?subject=Patient%2FP1&_count=5");
 
 		auditEvent = myAuditEventCaptor.getAllValues().get(1);
 		ourLog.info("Audit Event: {}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(auditEvent));
@@ -674,7 +674,7 @@ public class BalpAuditCaptureInterceptorTest implements ITestDataBuilder {
 		assertEquals(AuditEvent.AuditEventOutcome._0, auditEvent.getOutcome());
 		assertHasPatientEntities(auditEvent, "Patient/P1");
 		assertQuery(auditEvent, ourServer.getBaseUrl() + "/Observation/_search?subject=Patient%2FP1");
-		assertQueryDescription(auditEvent, "POST /Observation/_search");
+		assertQueryDescription(auditEvent, "POST " + ourServer.getBaseUrl() + "/Observation/_search");
 	}
 
 	@Test
@@ -709,7 +709,7 @@ public class BalpAuditCaptureInterceptorTest implements ITestDataBuilder {
 		assertEquals(AuditEvent.AuditEventOutcome._0, auditEvent.getOutcome());
 		assertHasPatientEntities(auditEvent, "Patient/P1");
 		assertQuery(auditEvent, ourServer.getBaseUrl() + "/Observation/_search?subject=Patient%2FP1");
-		assertQueryDescription(auditEvent, "GET /Observation/_search?subject=Patient%2FP1");
+		assertQueryDescription(auditEvent, "GET " + ourServer.getBaseUrl() + "/Observation/_search?subject=Patient%2FP1");
 	}
 
 	@Test
