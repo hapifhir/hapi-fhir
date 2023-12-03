@@ -123,13 +123,21 @@ public final class ColumnTypeToDriverTypeToSqlType {
 				"oid"); // the PG driver will write oid into a `text` column
 		setColumnType(ColumnTypeEnum.CLOB, DriverTypeEnum.MSSQL_2012, "varchar(MAX)");
 
-		setColumnType(ColumnTypeEnum.TEXT, DriverTypeEnum.H2_EMBEDDED, "character varying");
-		setColumnType(ColumnTypeEnum.TEXT, DriverTypeEnum.DERBY_EMBEDDED, "long varchar");
+		setColumnType(ColumnTypeEnum.TEXT, DriverTypeEnum.H2_EMBEDDED, "character large object");
+		setColumnType(ColumnTypeEnum.TEXT, DriverTypeEnum.DERBY_EMBEDDED, "clob");
 		setColumnType(ColumnTypeEnum.TEXT, DriverTypeEnum.MARIADB_10_1, "longtext");
 		setColumnType(ColumnTypeEnum.TEXT, DriverTypeEnum.MYSQL_5_7, "longtext");
-		setColumnType(ColumnTypeEnum.TEXT, DriverTypeEnum.ORACLE_12C, "long");
+		setColumnType(ColumnTypeEnum.TEXT, DriverTypeEnum.ORACLE_12C, "clob");
 		setColumnType(ColumnTypeEnum.TEXT, DriverTypeEnum.POSTGRES_9_4, "text");
 		setColumnType(ColumnTypeEnum.TEXT, DriverTypeEnum.MSSQL_2012, "varchar(MAX)");
+
+		setColumnType(ColumnTypeEnum.BIG_DECIMAL, DriverTypeEnum.H2_EMBEDDED, "numeric(38,2)");
+		setColumnType(ColumnTypeEnum.BIG_DECIMAL, DriverTypeEnum.DERBY_EMBEDDED, "decimal(31,2)");
+		setColumnType(ColumnTypeEnum.BIG_DECIMAL, DriverTypeEnum.MARIADB_10_1, "decimal(38,2)");
+		setColumnType(ColumnTypeEnum.BIG_DECIMAL, DriverTypeEnum.MYSQL_5_7, "decimal(38,2)");
+		setColumnType(ColumnTypeEnum.BIG_DECIMAL, DriverTypeEnum.ORACLE_12C, "number(38,2)");
+		setColumnType(ColumnTypeEnum.BIG_DECIMAL, DriverTypeEnum.POSTGRES_9_4, "numeric(38,2)");
+		setColumnType(ColumnTypeEnum.BIG_DECIMAL, DriverTypeEnum.MSSQL_2012, "numeric(38,2)");
 	}
 
 	public static Map<ColumnTypeEnum, Map<DriverTypeEnum, String>> getColumnTypeToDriverTypeToSqlType() {

@@ -15,7 +15,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
-import javax.servlet.ServletRequest;
+import jakarta.servlet.ServletRequest;
 
 import static ca.uhn.fhir.rest.api.Constants.STATUS_HTTP_202_ACCEPTED;
 import static org.junit.jupiter.api.Assertions.assertEquals;

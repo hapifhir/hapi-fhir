@@ -28,13 +28,13 @@ import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.param.DateRangeParam;
+import jakarta.persistence.EntityManager;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import javax.annotation.Nonnull;
-import javax.persistence.EntityManager;
 
 public interface ISearchBuilder<T extends IResourcePersistentId<?>> {
 	String SEARCH_BUILDER_BEAN_NAME = "SearchBuilder";

@@ -39,6 +39,7 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.util.ParametersUtil;
 import com.google.common.annotations.VisibleForTesting;
+import jakarta.servlet.http.HttpServletRequest;
 import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
@@ -53,7 +54,6 @@ import org.springframework.beans.factory.annotation.Qualifier;
 
 import java.util.Optional;
 import java.util.function.Supplier;
-import javax.servlet.http.HttpServletRequest;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 

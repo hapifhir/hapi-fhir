@@ -40,9 +40,10 @@ public class LastNProviderTest extends BaseR4ServerTest {
 		MyProvider provider = new MyProvider();
 		startServer(provider);
 
-		Bundle response = myClient
+		Bundle response = ourServer
+			 .getFhirClient()
 			.search()
-			.byUrl(myBaseUrl + "/Observation/$lastn?subject=Patient/123&category=http://terminology.hl7.org/CodeSystem/observation-category|laboratory,http://terminology.hl7.org/CodeSystem/observation-category|vital-signs&code=http://loinc.org|1111-1,http://loinc.org|2222-2&max=15")
+			.byUrl(ourServer.getBaseUrl() + "/Observation/$lastn?subject=Patient/123&category=http://terminology.hl7.org/CodeSystem/observation-category|laboratory,http://terminology.hl7.org/CodeSystem/observation-category|vital-signs&code=http://loinc.org|1111-1,http://loinc.org|2222-2&max=15")
 			.returnBundle(Bundle.class)
 			.execute();
 		assertEquals("abc123", response.getIdElement().getIdPart());

@@ -4,32 +4,26 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
-import ca.uhn.fhir.narrative.DefaultThymeleafNarrativeGenerator;
 import ca.uhn.fhir.rest.annotation.RequiredParam;
 import ca.uhn.fhir.rest.annotation.Search;
+import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.QualifiedParamList;
+import ca.uhn.fhir.rest.server.FifoMemoryPagingProvider;
 import ca.uhn.fhir.rest.server.IResourceProvider;
-import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import ca.uhn.fhir.test.utilities.JettyUtil;
+import ca.uhn.fhir.test.utilities.HttpClientExtension;
+import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.TestUtil;
 import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
-import org.apache.jena.base.Sys;
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.servlet.ServletHandler;
-import org.eclipse.jetty.servlet.ServletHolder;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,7 +35,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
-import java.util.concurrent.TimeUnit;
 
 import static ca.uhn.fhir.rest.param.ParamPrefixEnum.EQUAL;
 import static ca.uhn.fhir.rest.param.ParamPrefixEnum.GREATERTHAN_OR_EQUALS;
@@ -59,12 +52,8 @@ public class DateRangeParamR4Test {
 	private static final SimpleDateFormat ourFmtLowerForTime;
 	private static final SimpleDateFormat ourFmtUpperForTime;
 	private static final Logger ourLog = LoggerFactory.getLogger(DateRangeParamR4Test.class);
-	private static CloseableHttpClient ourClient;
-	private static FhirContext ourCtx = FhirContext.forR4Cached();
+	private static final FhirContext ourCtx = FhirContext.forR4Cached();
 	private static DateRangeParam ourLastDateRange;
-	private static int ourPort;
-	private static Server ourServer;
-	private static String ourBaseUrl;
 
 	static {
 		ourFmtLower = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSSS");
@@ -77,6 +66,17 @@ public class DateRangeParamR4Test {
 		ourFmtUpperForTime = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSSS");
 	}
 
+	@RegisterExtension
+	private RestfulServerExtension ourServer  = new RestfulServerExtension(ourCtx)
+		 .setDefaultResponseEncoding(EncodingEnum.XML)
+		 .registerProvider(new DummyPatientResourceProvider())
+		 .withPagingProvider(new FifoMemoryPagingProvider(100))
+		 .setDefaultPrettyPrint(false);
+
+	@RegisterExtension
+	private HttpClientExtension ourClient = new HttpClientExtension();
+
+
 	@BeforeEach
 	public void before() {
 		ourLastDateRange = null;
@@ -84,7 +84,7 @@ public class DateRangeParamR4Test {
 
 	@Test
 	public void testSearchForMultipleUnqualifiedDate() throws Exception {
-		String baseUrl = "http://localhost:" + ourPort + "/Patient?" + Patient.SP_BIRTHDATE + "=";
+		String baseUrl = ourServer.getBaseUrl() + "/Patient?" + Patient.SP_BIRTHDATE + "=";
 		HttpGet httpGet = new HttpGet(baseUrl + "2012-01-01&" + Patient.SP_BIRTHDATE + "=2012-02-03");
 		CloseableHttpResponse status = ourClient.execute(httpGet);
 		consumeResponse(status);
@@ -102,7 +102,7 @@ public class DateRangeParamR4Test {
 
 	@Test
 	public void testSearchForOneUnqualifiedDate() throws Exception {
-		HttpGet httpGet = new HttpGet(ourBaseUrl + "?birthdate=2012-01-01");
+		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?birthdate=2012-01-01");
 		CloseableHttpResponse status = ourClient.execute(httpGet);
 		consumeResponse(status);
 		assertEquals(200, status.getStatusLine().getStatusCode());
@@ -118,7 +118,7 @@ public class DateRangeParamR4Test {
 
 	@Test
 	public void testSearchForOneQualifiedDateEq() throws Exception {
-		HttpGet httpGet = new HttpGet(ourBaseUrl + "?birthdate=eq2012-01-01");
+		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?birthdate=eq2012-01-01");
 		CloseableHttpResponse status = ourClient.execute(httpGet);
 		consumeResponse(status);
 		assertEquals(200, status.getStatusLine().getStatusCode());
@@ -134,7 +134,7 @@ public class DateRangeParamR4Test {
 
 	@Test
 	public void testSearchForOneQualifiedDateGt() throws Exception {
-		HttpGet httpGet = new HttpGet(ourBaseUrl + "?birthdate=gt2012-01-01");
+		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?birthdate=gt2012-01-01");
 		CloseableHttpResponse status = ourClient.execute(httpGet);
 		consumeResponse(status);
 		assertEquals(200, status.getStatusLine().getStatusCode());
@@ -150,7 +150,7 @@ public class DateRangeParamR4Test {
 
 	@Test
 	public void testSearchForOneQualifiedDateLt() throws Exception {
-		HttpGet httpGet = new HttpGet(ourBaseUrl + "?birthdate=lt2012-01-01");
+		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?birthdate=lt2012-01-01");
 		CloseableHttpResponse status = ourClient.execute(httpGet);
 		consumeResponse(status);
 		assertEquals(200, status.getStatusLine().getStatusCode());
@@ -166,7 +166,7 @@ public class DateRangeParamR4Test {
 
 	@Test
 	public void testSearchForOneQualifiedDateGe() throws Exception {
-		HttpGet httpGet = new HttpGet(ourBaseUrl + "?birthdate=ge2012-01-01");
+		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?birthdate=ge2012-01-01");
 		CloseableHttpResponse status = ourClient.execute(httpGet);
 		consumeResponse(status);
 		assertEquals(200, status.getStatusLine().getStatusCode());
@@ -182,7 +182,7 @@ public class DateRangeParamR4Test {
 
 	@Test
 	public void testSearchForOneQualifiedDateLe() throws Exception {
-		HttpGet httpGet = new HttpGet(ourBaseUrl + "?birthdate=le2012-01-01");
+		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?birthdate=le2012-01-01");
 		CloseableHttpResponse status = ourClient.execute(httpGet);
 		consumeResponse(status);
 		assertEquals(200, status.getStatusLine().getStatusCode());
@@ -198,7 +198,7 @@ public class DateRangeParamR4Test {
 
 	@Test
 	public void testSearchForOneQualifiedDateNe() throws Exception {
-		HttpGet httpGet = new HttpGet(ourBaseUrl + "?birthdate=ne2012-01-01");
+		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?birthdate=ne2012-01-01");
 		CloseableHttpResponse status = ourClient.execute(httpGet);
 		consumeResponse(status);
 		assertEquals(200, status.getStatusLine().getStatusCode());
@@ -212,7 +212,7 @@ public class DateRangeParamR4Test {
 
 	@Test
 	public void testRangeWithDatePrecision() throws Exception {
-		HttpGet httpGet = new HttpGet(ourBaseUrl + "?birthdate=gt2012-01-01&birthdate=lt2012-01-03");
+		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?birthdate=gt2012-01-01&birthdate=lt2012-01-03");
 		CloseableHttpResponse status = ourClient.execute(httpGet);
 		consumeResponse(status);
 		assertEquals(200, status.getStatusLine().getStatusCode());
@@ -412,7 +412,7 @@ public class DateRangeParamR4Test {
 		assertEquals(new DateRangeParam(null, upperBound), new DateRangeParam(null, new DateParam(LESSTHAN_OR_EQUALS, upperBound)));
 	}
 
-	public static class DummyPatientResourceProvider implements IResourceProvider {
+	private static class DummyPatientResourceProvider implements IResourceProvider {
 
 		@Override
 		public Class<Patient> getResourceType() {
@@ -466,33 +466,7 @@ public class DateRangeParamR4Test {
 
 	@AfterAll
 	public static void afterClassClearContext() throws Exception {
-		JettyUtil.closeServer(ourServer);
 		TestUtil.randomizeLocaleAndTimezone();
-	}
-
-	@BeforeAll
-	public static void beforeClass() throws Exception {
-		ourServer = new Server(0);
-
-		DummyPatientResourceProvider patientProvider = new DummyPatientResourceProvider();
-
-		ServletHandler proxyHandler = new ServletHandler();
-		RestfulServer servlet = new RestfulServer(ourCtx);
-		servlet.getFhirContext().setNarrativeGenerator(new DefaultThymeleafNarrativeGenerator());
-
-		servlet.setResourceProviders(patientProvider);
-		ServletHolder servletHolder = new ServletHolder(servlet);
-		proxyHandler.addServletWithMapping(servletHolder, "/*");
-		ourServer.setHandler(proxyHandler);
-		JettyUtil.startServer(ourServer);
-		ourPort = JettyUtil.getPortForStartedServer(ourServer);
-
-		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
-		HttpClientBuilder builder = HttpClientBuilder.create();
-		builder.setConnectionManager(connectionManager);
-		ourClient = builder.build();
-
-		ourBaseUrl = "http://localhost:" + ourPort + "/Patient";
 	}
 
 }

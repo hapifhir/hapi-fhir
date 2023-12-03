@@ -20,6 +20,8 @@
 package ca.uhn.fhir.jpa.test;
 
 import ca.uhn.fhir.batch2.jobs.export.BulkDataExportProvider;
+import ca.uhn.fhir.batch2.jobs.reindex.ReindexAppCtx;
+import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
@@ -39,6 +41,8 @@ import ca.uhn.fhir.jpa.binary.interceptor.BinaryStorageInterceptor;
 import ca.uhn.fhir.jpa.binary.provider.BinaryAccessProvider;
 import ca.uhn.fhir.jpa.bulk.export.api.IBulkDataExportJobSchedulingHelper;
 import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
+import ca.uhn.fhir.jpa.dao.data.IBatch2JobInstanceRepository;
+import ca.uhn.fhir.jpa.dao.data.IBatch2WorkChunkRepository;
 import ca.uhn.fhir.jpa.dao.data.IForcedIdDao;
 import ca.uhn.fhir.jpa.dao.data.IMdmLinkJpaRepository;
 import ca.uhn.fhir.jpa.dao.data.IPartitionDao;
@@ -98,6 +102,7 @@ import ca.uhn.fhir.jpa.test.config.TestR4Config;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.jpa.util.ResourceCountCache;
 import ca.uhn.fhir.jpa.validation.ValidationSettings;
+import ca.uhn.fhir.mdm.interceptor.MdmStorageInterceptor;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.parser.StrictErrorHandler;
 import ca.uhn.fhir.rest.api.Constants;
@@ -199,7 +204,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.util.AopTestUtils;
 import org.springframework.transaction.PlatformTransactionManager;
 
-import javax.persistence.EntityManager;
+import jakarta.persistence.EntityManager;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -240,6 +245,10 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 	protected ITermCodeSystemStorageSvc myTermCodeSystemStorageSvc;
 	@Autowired
 	protected ISearchDao mySearchEntityDao;
+	@Autowired
+	private IBatch2JobInstanceRepository myJobInstanceRepository;
+	@Autowired
+	private IBatch2WorkChunkRepository myWorkChunkRepository;
 
 	@Autowired
 	protected ISearchIncludeDao mySearchIncludeEntityDao;
@@ -533,6 +542,10 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 	private IBulkDataExportJobSchedulingHelper myBulkDataScheduleHelper;
 	@Autowired
 	protected IResourceSearchUrlDao myResourceSearchUrlDao;
+	@Autowired
+	private IInterceptorService myInterceptorService;
+	@Autowired(required = false)
+	private MdmStorageInterceptor myMdmStorageInterceptor;
 
 	@RegisterExtension
 	private final PreventDanglingInterceptorsExtension myPreventDanglingInterceptorsExtension = new PreventDanglingInterceptorsExtension(()-> myInterceptorRegistry);
@@ -594,11 +607,28 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 
 	@AfterEach
 	public void afterPurgeDatabase() {
-		runInTransaction(() -> {
-			myMdmLinkHistoryDao.deleteAll();
-			myMdmLinkDao.deleteAll();
-		});
-		purgeDatabase(myStorageSettings, mySystemDao, myResourceReindexingSvc, mySearchCoordinatorSvc, mySearchParamRegistry, myBulkDataScheduleHelper);
+		boolean registeredStorageInterceptor = false;
+		if (myMdmStorageInterceptor != null && !myInterceptorService.getAllRegisteredInterceptors().contains(myMdmStorageInterceptor)) {
+			myInterceptorService.registerInterceptor(myMdmStorageInterceptor);
+			registeredStorageInterceptor = true;
+		}
+		try {
+			runInTransaction(() -> {
+				myMdmLinkHistoryDao.deleteAll();
+				myMdmLinkDao.deleteAll();
+			});
+			purgeDatabase(myStorageSettings, mySystemDao, myResourceReindexingSvc, mySearchCoordinatorSvc, mySearchParamRegistry, myBulkDataScheduleHelper);
+
+			myBatch2JobHelper.cancelAllJobsAndAwaitCancellation();
+			runInTransaction(() -> {
+				myWorkChunkRepository.deleteAll();
+				myJobInstanceRepository.deleteAll();
+			});
+		} finally {
+			if (registeredStorageInterceptor) {
+				myInterceptorService.unregisterInterceptor(myMdmStorageInterceptor);
+			}
+		}
 	}
 
 	@BeforeEach

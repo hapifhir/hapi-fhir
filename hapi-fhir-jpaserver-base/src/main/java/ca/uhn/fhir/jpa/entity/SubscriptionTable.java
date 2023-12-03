@@ -20,9 +20,9 @@
 package ca.uhn.fhir.jpa.entity;
 
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import jakarta.persistence.*;
 
 import java.util.Date;
-import javax.persistence.*;
 
 @Entity
 @Table(

@@ -8,10 +8,10 @@ import ca.uhn.fhir.rest.annotation.OptionalParam
 import ca.uhn.fhir.rest.annotation.Search
 import ca.uhn.fhir.rest.api.Constants
 import ca.uhn.fhir.rest.param.StringParam
-import javax.ejb.Stateless
-import javax.ws.rs.Path
-import javax.ws.rs.Produces
-import javax.ws.rs.core.MediaType
+import jakarta.ejb.Stateless
+import jakarta.ws.rs.Path
+import jakarta.ws.rs.Produces
+import jakarta.ws.rs.core.MediaType
 
 @Path("Organization")
 @Stateless

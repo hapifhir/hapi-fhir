@@ -24,9 +24,9 @@ import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
+import jakarta.servlet.ServletException;
 
 import java.util.Collection;
-import javax.servlet.ServletException;
 
 @SuppressWarnings("serial")
 public class Dstu2Examples {

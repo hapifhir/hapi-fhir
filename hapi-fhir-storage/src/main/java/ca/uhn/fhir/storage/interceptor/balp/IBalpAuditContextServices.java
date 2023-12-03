@@ -95,7 +95,7 @@ public interface IBalpAuditContextServices {
 			@Nonnull RequestDetails theRequestDetails,
 			@Nonnull IBaseResource theResource,
 			@Nonnull IIdType theResourceId) {
-		String serverBaseUrl = theRequestDetails.getServerBaseForRequest();
+		String serverBaseUrl = theRequestDetails.getFhirServerBase();
 		String resourceName = theResourceId.getResourceType();
 		return theResourceId.withServerBase(serverBaseUrl, resourceName).getValue();
 	}

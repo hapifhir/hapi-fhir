@@ -42,6 +42,7 @@ import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
+import jakarta.annotation.PostConstruct;
 import org.apache.commons.collections4.CollectionUtils;
 import org.hl7.fhir.common.hapi.validation.support.CommonCodeSystemsTerminologyService;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
@@ -59,7 +60,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
-import javax.annotation.PostConstruct;
 
 import static ca.uhn.fhir.util.DatatypeUtil.toStringValue;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;

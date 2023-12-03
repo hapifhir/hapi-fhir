@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
+import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.i18n.HapiLocalizer;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
@@ -369,15 +370,20 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		IFhirResourceDao<SearchParameter> searchParameterDao = myDaoRegistry.getResourceDao(SearchParameter.class);
 		searchParameterDao.create(searchParameter, (RequestDetails) null);
 
+		RuntimeSearchParam sp = mySearchParamRegistry.getActiveSearchParam("Organization", "_profile");
+		assertNotNull(sp);
+
 		IFhirResourceDao<Organization> organizationDao = myDaoRegistry.getResourceDao(Organization.class);
 		Organization organizationWithNoProfile = new Organization();
 		organizationWithNoProfile.setName("noProfile");
-		organizationDao.create(organizationWithNoProfile);
+		organizationDao.create(organizationWithNoProfile, mySrd);
 
+		myCaptureQueriesListener.clear();
 		Organization organizationWithProfile = new Organization();
 		organizationWithProfile.setName("withProfile");
 		organizationWithProfile.getMeta().addProfile("http://foo");
-		organizationDao.create(organizationWithProfile);
+		organizationDao.create(organizationWithProfile, mySrd);
+		myCaptureQueriesListener.logInsertQueries();
 
 		runInTransaction(() -> {
 			List<ResourceIndexedSearchParamUri> matched = myResourceIndexedSearchParamUriDao.findAll().stream()
@@ -942,12 +948,14 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 		ourLog.info("About to perform search for: {}", theUri);
 
+		myCaptureQueriesListener.clear();
 		try (CloseableHttpResponse response = ourHttpClient.execute(get)) {
 			String resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(resp);
 			Bundle bundle = myFhirContext.newXmlParser().parseResource(Bundle.class, resp);
 			ids = toUnqualifiedIdValues(bundle);
 		}
+		myCaptureQueriesListener.logSelectQueries(true, true);
 		return ids;
 	}
 

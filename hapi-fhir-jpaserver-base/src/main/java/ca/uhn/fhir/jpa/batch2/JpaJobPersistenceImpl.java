@@ -42,6 +42,9 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.LockModeType;
+import jakarta.persistence.Query;
 import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
@@ -66,9 +69,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import javax.persistence.EntityManager;
-import javax.persistence.LockModeType;
-import javax.persistence.Query;
 
 import static ca.uhn.fhir.batch2.coordinator.WorkChunkProcessor.MAX_CHUNK_ERROR_COUNT;
 import static ca.uhn.fhir.jpa.entity.Batch2WorkChunkEntity.ERROR_MSG_MAX_LENGTH;
@@ -296,7 +296,6 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	}
 
 	@Override
-	@Transactional(propagation = Propagation.REQUIRES_NEW)
 	public WorkChunkStatusEnum onWorkChunkError(WorkChunkErrorEvent theParameters) {
 		String chunkId = theParameters.getChunkId();
 		String errorMessage = truncateErrorMessage(theParameters.getErrorMsg());

@@ -36,12 +36,12 @@ import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.lessThan;
 import static org.junit.jupiter.api.Assertions.fail;
 
-@ContextConfiguration(classes = SchedulerServiceImplIT.TestConfiguration.class)
+@ContextConfiguration(classes = SchedulerServiceImplTest.TestConfiguration.class)
 @ExtendWith(SpringExtension.class)
 @DirtiesContext
-public class SchedulerServiceImplIT {
+public class SchedulerServiceImplTest {
 
-	private static final Logger ourLog = LoggerFactory.getLogger(SchedulerServiceImplIT.class);
+	private static final Logger ourLog = LoggerFactory.getLogger(SchedulerServiceImplTest.class);
 	public static final String SCHEDULED_JOB_ID = CountingJob.class.getName();
 	private static final AtomicInteger ourNameCounter = new AtomicInteger();
 	private static long ourTaskDelay;

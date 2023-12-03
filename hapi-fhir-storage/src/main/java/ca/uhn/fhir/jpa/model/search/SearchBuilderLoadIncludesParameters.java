@@ -24,11 +24,11 @@ import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.param.DateRangeParam;
+import jakarta.persistence.EntityManager;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import javax.persistence.EntityManager;
 
 public class SearchBuilderLoadIncludesParameters<T extends IResourcePersistentId> {
 

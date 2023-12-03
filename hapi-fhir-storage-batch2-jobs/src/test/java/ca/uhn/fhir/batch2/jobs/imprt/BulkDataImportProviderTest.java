@@ -279,7 +279,7 @@ public class BulkDataImportProviderTest {
 			assertEquals(202, response.getStatusLine().getStatusCode());
 			assertEquals("Accepted", response.getStatusLine().getReasonPhrase());
 			assertEquals("120", response.getFirstHeader(Constants.HEADER_RETRY_AFTER).getValue());
-			assertThat(response.getFirstHeader(Constants.HEADER_X_PROGRESS).getValue(), containsString("Job was created at 2022-01-01"));
+			assertThat(response.getFirstHeader(Constants.HEADER_X_PROGRESS).getValue(), containsString("Job was created at 2022-01"));
 		}
 	}
 

@@ -37,14 +37,14 @@ import ca.uhn.fhir.rest.server.interceptor.ResponseValidatingInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.SearchPreferHandlingInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.StaticCapabilityStatementInterceptor;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
 import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.hl7.fhir.r4.model.CapabilityStatement;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.springframework.web.cors.CorsConfiguration;
 
 import java.util.Arrays;
-import javax.servlet.ServletException;
-import javax.servlet.annotation.WebServlet;
 
 @SuppressWarnings({"serial", "RedundantThrows", "InnerClassMayBeStatic"})
 public class ServletExamples {

@@ -84,26 +84,26 @@ public enum DriverTypeEnum {
 		String retval;
 		switch (this) {
 			case H2_EMBEDDED:
-				retval = "hapifhirh2.sql";
+				retval = "h2.sql";
 				break;
 			case DERBY_EMBEDDED:
-				retval = "derbytenseven.sql";
+				retval = "derby.sql";
 				break;
 			case MYSQL_5_7:
 			case MARIADB_10_1:
-				retval = "mysql57.sql";
+				retval = "mysql.sql";
 				break;
 			case POSTGRES_9_4:
-				retval = "hapifhirpostgres94-complete.sql";
+				retval = "postgres.sql";
 				break;
 			case ORACLE_12C:
-				retval = "oracle12c.sql";
+				retval = "oracle.sql";
 				break;
 			case MSSQL_2012:
-				retval = "sqlserver2012.sql";
+				retval = "sqlserver.sql";
 				break;
 			case COCKROACHDB_21_1:
-				retval = "cockroachdb201.sql";
+				retval = "cockroachdb.sql";
 				break;
 			default:
 				throw new ConfigurationException(

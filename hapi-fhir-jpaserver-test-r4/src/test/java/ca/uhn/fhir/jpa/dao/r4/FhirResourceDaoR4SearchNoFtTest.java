@@ -151,7 +151,7 @@ import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
@@ -3859,33 +3859,6 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		assertEquals(2, countMatches(searchQuery.toUpperCase(), "RES_UPDATED"), searchQuery);
 	}
 
-	@Disabled
-	@Test
-	public void testSearchWithContext() {
-
-
-		String url = "Procedure?_count=300&_format=json&_include%3Arecurse=*&category=CANN&encounter.identifier=A1057852019&status%3Anot=entered-in-error";
-		RuntimeResourceDefinition def = myFhirContext.getResourceDefinition("Procedure");
-		SearchParameterMap sp = myMatchUrlService.translateMatchUrl(url, def);
-
-
-		myCaptureQueriesListener.clear();
-		sp.setLoadSynchronous(true);
-		myProcedureDao.search(sp);
-
-		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
-//		List<String> queries = myCaptureQueriesListener
-//			.getSelectQueriesForCurrentThread()
-//			.stream()
-//			.map(t -> t.getSql(true, true))
-//			.collect(Collectors.toList());
-//
-//		String searchQuery = queries.get(0);
-//		assertEquals(searchQuery, 1, StringUtils.countMatches(searchQuery.toUpperCase(), "HFJ_SPIDX_TOKEN"));
-//		assertEquals(searchQuery, 1, StringUtils.countMatches(searchQuery.toUpperCase(), "LEFT OUTER JOIN"));
-//		assertEquals(searchQuery, 2, StringUtils.countMatches(searchQuery.toUpperCase(), "AND RESOURCETA0_.RES_UPDATED"));
-	}
-
 	@Test
 	public void testSearchTokenParam() {
 		Patient patient = new Patient();
@@ -4619,8 +4592,8 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		assertNull(values.size());
 		assertEquals(5, values.getResources(0, 1000).size());
 
-		String sql = myCaptureQueriesListener.logSelectQueriesForCurrentThread(0);
-		assertEquals(1, countMatches(sql, "limit '5'"), sql);
+		String sql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false);
+		assertEquals(1, countMatches(sql, "fetch first '5'"), sql);
 	}
 
 	@Test

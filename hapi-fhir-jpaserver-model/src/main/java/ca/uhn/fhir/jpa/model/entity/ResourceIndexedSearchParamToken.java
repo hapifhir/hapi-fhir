@@ -24,27 +24,26 @@ import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.param.TokenParam;
+import jakarta.persistence.Column;
+import jakarta.persistence.Embeddable;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.ForeignKey;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Index;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.SequenceGenerator;
+import jakarta.persistence.Table;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextField;
-
-import javax.persistence.Column;
-import javax.persistence.Embeddable;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.ForeignKey;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Index;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.PrePersist;
-import javax.persistence.SequenceGenerator;
-import javax.persistence.Table;
 
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.trim;
@@ -299,6 +298,7 @@ public class ResourceIndexedSearchParamToken extends BaseResourceIndexedSearchPa
 	@Override
 	public String toString() {
 		ToStringBuilder b = new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE);
+		b.append("id", getId());
 		if (getPartitionId() != null) {
 			b.append("partitionId", getPartitionId().getPartitionId());
 		}
@@ -424,11 +424,11 @@ public class ResourceIndexedSearchParamToken extends BaseResourceIndexedSearchPa
 		return this;
 	}
 
-	@PrePersist
 	/**
 	 * We truncate the fields at the last moment because the tables have limited size.
 	 * We don't truncate earlier in the flow because the index hashes MUST be calculated on the full string.
 	 */
+	@PrePersist
 	public void truncateFieldsForDB() {
 		mySystem = StringUtils.truncate(mySystem, MAX_LENGTH);
 		myValue = StringUtils.truncate(myValue, MAX_LENGTH);

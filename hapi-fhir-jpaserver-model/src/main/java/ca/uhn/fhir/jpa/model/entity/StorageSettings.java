@@ -21,7 +21,7 @@ package ca.uhn.fhir.jpa.model.entity;
 
 import ca.uhn.fhir.context.ParserOptions;
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.jpa.model.dialect.ISequenceValueMassager;
+import ca.uhn.fhir.jpa.util.ISequenceValueMassager;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.rest.server.interceptor.ResponseTerminologyTranslationSvc;
 import ca.uhn.fhir.util.HapiExtensions;

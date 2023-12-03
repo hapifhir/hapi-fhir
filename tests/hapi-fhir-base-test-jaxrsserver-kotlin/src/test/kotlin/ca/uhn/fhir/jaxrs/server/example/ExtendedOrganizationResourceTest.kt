@@ -4,8 +4,8 @@ import ca.uhn.fhir.test.utilities.JettyUtil
 import ca.uhn.fhir.util.TestUtil
 import cn.uhn.fhir.jaxrs.server.example.ExtendedOrganizationResource
 import org.apache.commons.lang3.StringUtils
+import org.eclipse.jetty.ee10.servlet.ServletContextHandler
 import org.eclipse.jetty.server.Server
-import org.eclipse.jetty.servlet.ServletContextHandler
 import org.hamcrest.CoreMatchers.`is`
 import org.hamcrest.MatcherAssert.assertThat
 import org.jboss.resteasy.plugins.server.servlet.HttpServletDispatcher

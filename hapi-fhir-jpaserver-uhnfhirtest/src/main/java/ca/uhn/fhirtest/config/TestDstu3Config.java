@@ -15,6 +15,7 @@ import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
 import ca.uhn.fhir.validation.IInstanceValidatorModule;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
 import ca.uhn.fhirtest.interceptor.PublicSecurityInterceptor;
+import jakarta.persistence.EntityManagerFactory;
 import net.ttddyy.dsproxy.support.ProxyDataSourceBuilder;
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.hibernate.search.backend.lucene.cfg.LuceneBackendSettings;
@@ -35,7 +36,6 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
-import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
 
 @Configuration
@@ -120,9 +120,11 @@ public class TestDstu3Config {
 
 	@Bean
 	public LocalContainerEntityManagerFactoryBean entityManagerFactory(
-			ConfigurableListableBeanFactory theConfigurableListableBeanFactory, FhirContext theFhirContext) {
+			ConfigurableListableBeanFactory theConfigurableListableBeanFactory,
+			FhirContext theFhirContext,
+			JpaStorageSettings theStorageSettings) {
 		LocalContainerEntityManagerFactoryBean retVal = HapiEntityManagerFactoryUtil.newEntityManagerFactory(
-				theConfigurableListableBeanFactory, theFhirContext);
+				theConfigurableListableBeanFactory, theFhirContext, theStorageSettings);
 		retVal.setPersistenceUnitName("PU_HapiFhirJpaDstu3");
 		retVal.setDataSource(dataSource());
 		retVal.setJpaProperties(jpaProperties());

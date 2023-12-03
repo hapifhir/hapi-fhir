@@ -19,10 +19,15 @@
  */
 package ca.uhn.fhir.model.api;
 
-import ca.uhn.fhir.context.*;
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.fhirpath.IFhirPath;
 import ca.uhn.fhir.rest.api.IVersionSpecificBundleFactory;
-import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 import java.io.InputStream;
 import java.util.Date;

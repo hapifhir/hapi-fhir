@@ -20,7 +20,9 @@
 package ca.uhn.fhir.rest.client.apache;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.rest.api.*;
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.EncodingEnum;
+import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.client.api.Header;
 import ca.uhn.fhir.rest.client.api.HttpClientUtil;
 import ca.uhn.fhir.rest.client.api.IHttpClient;

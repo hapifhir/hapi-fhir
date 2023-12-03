@@ -44,30 +44,30 @@ public interface IResourceHistoryTableDao extends JpaRepository<ResourceHistoryT
 			@Param("id") long theId, @Param("version") long theVersion);
 
 	@Query(
-			"SELECT t.myId FROM ResourceHistoryTable t WHERE t.myResourceId = :resId AND t.myResourceVersion != :dontWantVersion")
+			"SELECT t.myId FROM ResourceHistoryTable t WHERE t.myResourceId = :resId AND t.myResourceVersion <> :dontWantVersion")
 	Slice<Long> findForResourceId(
 			Pageable thePage, @Param("resId") Long theId, @Param("dontWantVersion") Long theDontWantVersion);
 
 	@Query(
-			"SELECT t FROM ResourceHistoryTable t LEFT OUTER JOIN FETCH t.myProvenance WHERE t.myResourceId = :resId AND t.myResourceVersion != :dontWantVersion")
+			"SELECT t FROM ResourceHistoryTable t LEFT OUTER JOIN FETCH t.myProvenance WHERE t.myResourceId = :resId AND t.myResourceVersion <> :dontWantVersion")
 	Slice<ResourceHistoryTable> findForResourceIdAndReturnEntitiesAndFetchProvenance(
 			Pageable thePage, @Param("resId") Long theId, @Param("dontWantVersion") Long theDontWantVersion);
 
 	@Query("" + "SELECT v.myId FROM ResourceHistoryTable v "
 			+ "LEFT OUTER JOIN ResourceTable t ON (v.myResourceId = t.myId) "
-			+ "WHERE v.myResourceVersion != t.myVersion AND "
+			+ "WHERE v.myResourceVersion <> t.myVersion AND "
 			+ "t.myId = :resId")
 	Slice<Long> findIdsOfPreviousVersionsOfResourceId(Pageable thePage, @Param("resId") Long theResourceId);
 
 	@Query("" + "SELECT v.myId FROM ResourceHistoryTable v "
 			+ "LEFT OUTER JOIN ResourceTable t ON (v.myResourceId = t.myId) "
-			+ "WHERE v.myResourceVersion != t.myVersion AND "
+			+ "WHERE v.myResourceVersion <> t.myVersion AND "
 			+ "t.myResourceType = :restype")
 	Slice<Long> findIdsOfPreviousVersionsOfResources(Pageable thePage, @Param("restype") String theResourceName);
 
 	@Query("" + "SELECT v.myId FROM ResourceHistoryTable v "
 			+ "LEFT OUTER JOIN ResourceTable t ON (v.myResourceId = t.myId) "
-			+ "WHERE v.myResourceVersion != t.myVersion")
+			+ "WHERE v.myResourceVersion <> t.myVersion")
 	Slice<Long> findIdsOfPreviousVersionsOfResources(Pageable thePage);
 
 	@Modifying

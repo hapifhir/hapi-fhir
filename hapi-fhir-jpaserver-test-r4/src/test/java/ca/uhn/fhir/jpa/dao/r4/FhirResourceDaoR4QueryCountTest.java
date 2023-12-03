@@ -26,6 +26,8 @@ import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.search.PersistedJpaSearchFirstPageBundleProvider;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.jpa.searchparam.submit.interceptor.SearchParamValidatingInterceptor;
+import ca.uhn.fhir.jpa.subscription.submit.interceptor.SubscriptionValidatingInterceptor;
 import ca.uhn.fhir.jpa.subscription.submit.svc.ResourceModifiedSubmitterSvc;
 import ca.uhn.fhir.jpa.subscription.triggering.ISubscriptionTriggeringSvc;
 import ca.uhn.fhir.jpa.subscription.triggering.SubscriptionTriggeringSvcImpl;
@@ -117,6 +119,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.mockito.ArgumentMatchers.contains;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -592,7 +595,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 			fail(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(e.getOperationOutcome()));
 		}
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
-		assertEquals(11, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
+		assertEquals(12, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
 		assertEquals(0, myCaptureQueriesListener.getUpdateQueriesForCurrentThread().size());
 		assertEquals(0, myCaptureQueriesListener.getInsertQueriesForCurrentThread().size());
 		assertEquals(0, myCaptureQueriesListener.getDeleteQueriesForCurrentThread().size());
@@ -1329,7 +1332,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		myCaptureQueriesListener.logSelectQueries();
 		assertEquals(2, myCaptureQueriesListener.countSelectQueries());
 		assertThat(myCaptureQueriesListener.getSelectQueries().get(0).getSql(true, false), containsString("SELECT t0.RES_ID FROM HFJ_SPIDX_TOKEN t0"));
-		assertThat(myCaptureQueriesListener.getSelectQueries().get(0).getSql(true, false), containsString("limit '6'"));
+		assertThat(myCaptureQueriesListener.getSelectQueries().get(0).getSql(true, false), containsString("fetch first '6'"));
 		assertEquals(0, myCaptureQueriesListener.countInsertQueries());
 		assertEquals(0, myCaptureQueriesListener.countUpdateQueries());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
@@ -1345,7 +1348,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		myCaptureQueriesListener.logSelectQueries();
 		assertEquals(2, myCaptureQueriesListener.countSelectQueries());
 		assertThat(myCaptureQueriesListener.getSelectQueries().get(0).getSql(true, false), containsString("SELECT t0.RES_ID FROM HFJ_SPIDX_TOKEN t0"));
-		assertThat(myCaptureQueriesListener.getSelectQueries().get(0).getSql(true, false), containsString("limit '6'"));
+		assertThat(myCaptureQueriesListener.getSelectQueries().get(0).getSql(true, false), containsString("fetch next '6'"));
 		assertThat(myCaptureQueriesListener.getSelectQueries().get(0).getSql(true, false), containsString("offset '5'"));
 		assertEquals(0, myCaptureQueriesListener.countInsertQueries());
 		assertEquals(0, myCaptureQueriesListener.countUpdateQueries());
@@ -2405,9 +2408,9 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
 
 		// Make sure the match URL query uses a small limit
-		String matchUrlQuery = myCaptureQueriesListener.getSelectQueries().get(0).getSql(true, true);
-		assertThat(matchUrlQuery, containsString("HASH_SYS_AND_VALUE='-4132452001562191669'"));
-		assertThat(matchUrlQuery, containsString("limit '2'"));
+		String matchUrlQuery = myCaptureQueriesListener.getSelectQueries().get(0).getSql(true, false);
+		assertThat(matchUrlQuery, containsString("rispt1_0.HASH_SYS_AND_VALUE='-4132452001562191669'"));
+		assertThat(matchUrlQuery, containsString("fetch first '2'"));
 
 		runInTransaction(() -> {
 			List<String> types = myResourceTableDao.findAll().stream().map(t -> t.getResourceType()).collect(Collectors.toList());
@@ -3206,7 +3209,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		assertEquals(7, expansion.getExpansion().getContains().size());
 		assertEquals(1, expansion.getExpansion().getContains().stream().filter(t -> t.getCode().equals("A")).findFirst().orElseThrow(() -> new IllegalArgumentException()).getDesignation().size());
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
-		assertEquals(5, myCaptureQueriesListener.countSelectQueries());
+		assertEquals(6, myCaptureQueriesListener.countSelectQueries(), ()->"\n *" + myCaptureQueriesListener.getSelectQueries().stream().map(t->t.getSql(true, false)).collect(Collectors.joining("\n * ")));
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
 		assertEquals(0, myCaptureQueriesListener.countUpdateQueries());
 		assertEquals(0, myCaptureQueriesListener.countInsertQueries());
@@ -3249,7 +3252,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		assertEquals(7, expansion.getExpansion().getContains().size());
 		assertEquals(1, expansion.getExpansion().getContains().stream().filter(t -> t.getCode().equals("A")).findFirst().orElseThrow(() -> new IllegalArgumentException()).getDesignation().size());
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
-		assertEquals(5, myCaptureQueriesListener.countSelectQueries());
+		assertEquals(6, myCaptureQueriesListener.countSelectQueries());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
 		assertEquals(0, myCaptureQueriesListener.countUpdateQueries());
 		assertEquals(0, myCaptureQueriesListener.countInsertQueries());
