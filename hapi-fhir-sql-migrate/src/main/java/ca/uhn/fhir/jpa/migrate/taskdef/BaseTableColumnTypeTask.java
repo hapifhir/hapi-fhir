@@ -37,6 +37,10 @@ public abstract class BaseTableColumnTypeTask extends BaseTableColumnTask {
 		super(theProductVersion, theSchemaVersion);
 	}
 
+	BaseTableColumnTypeTask(String theProductVersion, String theSchemaVersion, ColumnNameCase theColumnNameCase) {
+		super(theProductVersion, theSchemaVersion, theColumnNameCase);
+	}
+
 	public ColumnTypeEnum getColumnType() {
 		return myColumnType;
 	}

@@ -35,8 +35,15 @@ public abstract class BaseTableColumnTask extends BaseTableTask {
 	// If a concrete class decides to, they can define a custom WHERE clause for the task.
 	protected String myWhereClause;
 
+	private final ColumnNameCase myColumnNameCase;
+
 	public BaseTableColumnTask(String theProductVersion, String theSchemaVersion) {
+		this(theProductVersion, theSchemaVersion, ColumnNameCase.ALL_UPPER);
+	}
+
+	BaseTableColumnTask(String theProductVersion, String theSchemaVersion, ColumnNameCase theColumnNameCase) {
 		super(theProductVersion, theSchemaVersion);
+		myColumnNameCase = theColumnNameCase;
 	}
 
 	public String getColumnName() {
@@ -44,7 +51,16 @@ public abstract class BaseTableColumnTask extends BaseTableTask {
 	}
 
 	public BaseTableColumnTask setColumnName(String theColumnName) {
-		myColumnName = theColumnName.toUpperCase();
+		switch (myColumnNameCase) {
+			case ALL_UPPER:
+				 myColumnName = theColumnName.toUpperCase();
+				break;
+			case ALL_LOWER:
+				myColumnName = theColumnName.toLowerCase();
+				break;
+			default:
+				throw new IllegalArgumentException("Unknown ColumnNameCase: " + myColumnNameCase);
+		}
 		return this;
 	}
 
