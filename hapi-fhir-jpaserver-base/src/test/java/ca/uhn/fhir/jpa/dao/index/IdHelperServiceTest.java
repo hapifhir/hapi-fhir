@@ -30,8 +30,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
@@ -65,9 +64,14 @@ public class IdHelperServiceTest {
     @Mock
     private ArgumentCaptor<String> jpaKeyCaptor;
 
+    @SuppressWarnings("unchecked")
+    private TypedQuery<Tuple> query = (TypedQuery<Tuple>) mock(TypedQuery.class);
+
+    @SuppressWarnings("unchecked")
+    private CriteriaQuery<Tuple> cq = mock(CriteriaQuery.class);
+
     @BeforeEach
     void setUp() {
-
         subject.setDontCheckActiveTransactionForUnitTest(true);
 
         when(myStorageSettings.isDeleteEnabled()).thenReturn(true);
@@ -99,7 +103,7 @@ public class IdHelperServiceTest {
         Map<String, JpaPid> actualIds = subject.resolveResourcePersistentIds(requestPartitionId, resourceType, ids, theExcludeDeleted);
 
         //verify results
-        assertTrue(actualIds.size() > 0);
+        assertFalse(actualIds.isEmpty());
         assertEquals(id, actualIds.get(ids.get(0)).getId());
     }
 
@@ -126,7 +130,7 @@ public class IdHelperServiceTest {
         Map<String, JpaPid> actualIds = subject.resolveResourcePersistentIds(requestPartitionId, resourceType, ids, theExcludeDeleted);
 
         //verifyResult
-        assertTrue(actualIds.size() > 0);
+        assertFalse(actualIds.isEmpty());
         assertEquals(id, actualIds.get(ids.get(0)).getId());
     }
 
@@ -139,8 +143,6 @@ public class IdHelperServiceTest {
     private void configureEntityManagerBehaviour(Long idNumber, String resourceType, String id) {
         List<Tuple> mockedTupleList = getMockedTupleList(idNumber, resourceType, id);
         CriteriaBuilder builder = getMockedCriteriaBuilder();
-        TypedQuery<Tuple> query = mock(TypedQuery.class);
-        CriteriaQuery<Tuple> cq = mock(CriteriaQuery.class);
         Root<ResourceTable> from = getMockedFrom();
 
         when(builder.createTupleQuery()).thenReturn(cq);
