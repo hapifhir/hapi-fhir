@@ -7,40 +7,34 @@ import ca.uhn.fhir.jpa.fql.executor.StaticHfqlExecutionResult;
 import ca.uhn.fhir.jpa.fql.provider.HfqlRestProvider;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
-import ca.uhn.fhir.rest.annotation.Validate;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
-import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.test.utilities.JettyUtil;
+import ca.uhn.fhir.test.utilities.MockMvcWebConnectionForHtmlUnit3;
 import ca.uhn.fhir.test.utilities.server.HashMapResourceProviderExtension;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
-import com.gargoylesoftware.css.parser.CSSErrorHandler;
-import org.htmlunit.Page;
-import org.htmlunit.SilentCssErrorHandler;
-import org.htmlunit.WebClient;
-import org.htmlunit.html.HtmlAnchor;
-import org.htmlunit.html.HtmlButton;
-import org.htmlunit.html.HtmlPage;
-import org.htmlunit.html.HtmlTable;
-import org.htmlunit.html.HtmlTableCell;
-import org.htmlunit.html.HtmlTableRow;
-import org.htmlunit.html.HtmlTextArea;
-import org.htmlunit.html.XHtmlPage;
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.server.handler.ContextHandler;
 import org.eclipse.jetty.ee10.servlet.ServletContextHandler;
 import org.eclipse.jetty.ee10.servlet.ServletHandler;
 import org.eclipse.jetty.ee10.servlet.ServletHolder;
+import org.eclipse.jetty.server.Server;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Composition;
-import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.InstantType;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
+import org.htmlunit.SilentCssErrorHandler;
+import org.htmlunit.WebClient;
+import org.htmlunit.cssparser.parser.CSSErrorHandler;
+import org.htmlunit.html.HtmlAnchor;
+import org.htmlunit.html.HtmlButton;
+import org.htmlunit.html.HtmlPage;
+import org.htmlunit.html.HtmlTable;
+import org.htmlunit.html.HtmlTableCell;
+import org.htmlunit.html.HtmlTableRow;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Order;
@@ -119,7 +113,7 @@ public class WebTest {
 		}
 
 		myWebClient = new WebClient();
-		myWebClient.setWebConnection(new MockMvcWebConnection(ourMockMvc, myWebClient));
+		myWebClient.setWebConnection(new MockMvcWebConnectionForHtmlUnit3(ourMockMvc, myWebClient));
 		myWebClient.getOptions().setJavaScriptEnabled(true);
 		myWebClient.getOptions().setCssEnabled(false);
 		CSSErrorHandler errorHandler = new SilentCssErrorHandler();
@@ -215,7 +209,7 @@ public class WebTest {
 			.orElseThrow()
 			.click();
 
-		assertThat(summaryPage.asNormalizedText(), containsString("\"diagnostics\": \"VALIDATION FAILURE\""));
+		assertThat(summaryPage.asNormalizedText(), containsString("\"diagnostics\" : \"VALIDATION FAILURE\""));
 	}
 
 	@Test
@@ -235,7 +229,7 @@ public class WebTest {
 			.orElseThrow()
 			.click();
 
-		assertThat(diffPage.asNormalizedText(), containsString("\"resourceType\": \"Parameters\""));
+		assertThat(diffPage.asNormalizedText(), containsString("\"resourceType\" : \"Parameters\""));
 	}
 
 
