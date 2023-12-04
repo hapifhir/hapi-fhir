@@ -42,8 +42,6 @@ public class AddTableByColumnTask extends BaseTableTask {
 	private final List<ForeignKeyContainer> myFKColumns = new ArrayList<>();
 	private final Comparator<AddColumnTask> myColumnSortingRules;
 
-	// LUKETODO:  deprecation message
-	@Deprecated
 	public AddTableByColumnTask() {
 		this(null);
 	}

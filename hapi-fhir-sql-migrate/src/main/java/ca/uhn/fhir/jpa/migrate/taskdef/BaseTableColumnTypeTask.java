@@ -23,6 +23,7 @@ import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
+import java.util.Set;
 import javax.annotation.Nullable;
 
 public abstract class BaseTableColumnTypeTask extends BaseTableColumnTask {
@@ -37,8 +38,12 @@ public abstract class BaseTableColumnTypeTask extends BaseTableColumnTask {
 		super(theProductVersion, theSchemaVersion);
 	}
 
-	BaseTableColumnTypeTask(String theProductVersion, String theSchemaVersion, ColumnNameCase theColumnNameCase) {
-		super(theProductVersion, theSchemaVersion, theColumnNameCase);
+	BaseTableColumnTypeTask(
+			String theProductVersion,
+			String theSchemaVersion,
+			ColumnNameCase theColumnNameCase,
+			Set<ColumnDriverMappingOverride> theColumnDriverMappingOverrides) {
+		super(theProductVersion, theSchemaVersion, theColumnNameCase, theColumnDriverMappingOverrides);
 	}
 
 	public ColumnTypeEnum getColumnType() {

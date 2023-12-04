@@ -19,7 +19,9 @@
  */
 package ca.uhn.fhir.jpa.migrate.taskdef;
 
-// LUKETODO:  javadoc
+/**
+ * Determine whether to display column names in upper case, lower case, or eventually some form of mixed case.
+ */
 public enum ColumnNameCase {
 	ALL_UPPER,
 	ALL_LOWER

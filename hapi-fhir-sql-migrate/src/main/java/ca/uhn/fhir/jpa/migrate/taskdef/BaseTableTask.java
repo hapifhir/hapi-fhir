@@ -22,14 +22,32 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public abstract class BaseTableTask extends BaseTask {
+	private static final Logger ourLog = LoggerFactory.getLogger(BaseTableTask.class);
 	private String myTableName;
 
+	private final List<ColumnDriverMappingOverride> myColumnDriverMappingOverrides;
+
 	public BaseTableTask(String theProductVersion, String theSchemaVersion) {
+		this(theProductVersion, theSchemaVersion, Collections.emptySet());
+	}
+
+	public BaseTableTask(
+			String theProductVersion,
+			String theSchemaVersion,
+			Set<ColumnDriverMappingOverride> theColumnDriverMappingOverrides) {
 		super(theProductVersion, theSchemaVersion);
+		myColumnDriverMappingOverrides = new ArrayList<>(theColumnDriverMappingOverrides);
 	}
 
 	public String getTableName() {
@@ -54,6 +72,23 @@ public abstract class BaseTableTask extends BaseTask {
 	}
 
 	protected String getSqlType(ColumnTypeEnum theColumnType, Long theColumnLength) {
+		// LUKETODO:  refactor this to maximize code reuse
+		final List<ColumnDriverMappingOverride> eligibleOverrides = myColumnDriverMappingOverrides.stream()
+				.filter(override -> override.getColumnType() == theColumnType)
+				.filter(override -> override.getDriverType() == getDriverType())
+				.collect(Collectors.toUnmodifiableList());
+
+		if (eligibleOverrides.size() > 1) {
+			ourLog.info("There is more than one override.  Picking the first one");
+		}
+
+		if (eligibleOverrides.size() == 1) {
+			final String retVal = eligibleOverrides.get(0).getColumnTypeSql();
+			if (theColumnType == ColumnTypeEnum.STRING) {
+				return retVal.replace("?", Long.toString(theColumnLength));
+			}
+		}
+
 		String retVal = ColumnTypeToDriverTypeToSqlType.getColumnTypeToDriverTypeToSqlType()
 				.get(theColumnType)
 				.get(getDriverType());

@@ -31,8 +31,8 @@ public class AddColumnTask extends BaseTableColumnTypeTask {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(AddColumnTask.class);
 
-	public static AddColumnTask lowerCase() {
-		return new AddColumnTask(null, null, ColumnNameCase.ALL_LOWER);
+	public static AddColumnTask lowerCase(Set<ColumnDriverMappingOverride> theColumnDriverMappingOverrides) {
+		return new AddColumnTask(null, null, ColumnNameCase.ALL_LOWER, theColumnDriverMappingOverrides);
 	}
 
 	public AddColumnTask() {
@@ -45,8 +45,12 @@ public class AddColumnTask extends BaseTableColumnTypeTask {
 		super(theProductVersion, theSchemaVersion);
 	}
 
-	private AddColumnTask(String theProductVersion, String theSchemaVersion, ColumnNameCase theColumnNameCase) {
-		super(theProductVersion, theSchemaVersion, theColumnNameCase);
+	private AddColumnTask(
+			String theProductVersion,
+			String theSchemaVersion,
+			ColumnNameCase theColumnNameCase,
+			Set<ColumnDriverMappingOverride> theColumnDriverMappingOverrides) {
+		super(theProductVersion, theSchemaVersion, theColumnNameCase, theColumnDriverMappingOverrides);
 	}
 
 	@Override

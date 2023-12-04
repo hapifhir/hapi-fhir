@@ -24,8 +24,10 @@ import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 
 public abstract class BaseTableColumnTask extends BaseTableTask {
@@ -39,11 +41,15 @@ public abstract class BaseTableColumnTask extends BaseTableTask {
 	private final ColumnNameCase myColumnNameCase;
 
 	public BaseTableColumnTask(String theProductVersion, String theSchemaVersion) {
-		this(theProductVersion, theSchemaVersion, ColumnNameCase.ALL_UPPER);
+		this(theProductVersion, theSchemaVersion, ColumnNameCase.ALL_UPPER, Collections.emptySet());
 	}
 
-	BaseTableColumnTask(String theProductVersion, String theSchemaVersion, ColumnNameCase theColumnNameCase) {
-		super(theProductVersion, theSchemaVersion);
+	BaseTableColumnTask(
+			String theProductVersion,
+			String theSchemaVersion,
+			ColumnNameCase theColumnNameCase,
+			Set<ColumnDriverMappingOverride> theColumnDriverMappingOverrides) {
+		super(theProductVersion, theSchemaVersion, theColumnDriverMappingOverrides);
 		myColumnNameCase = theColumnNameCase;
 	}
 
