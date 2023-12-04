@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.search.builder.sql;
 
+import ca.uhn.fhir.jpa.model.dialect.HapiFhirMySQLDialect;
 import ca.uhn.fhir.jpa.search.builder.predicate.BaseJoiningPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.DatePredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.ResourceTablePredicateBuilder;
@@ -147,6 +148,6 @@ public class SearchQueryBuilderDialectMySqlTest extends BaseSearchQueryBuilderDi
 	@Nonnull
 	@Override
 	protected Dialect createDialect() {
-		return new org.hibernate.dialect.MySQL57Dialect();
+		return new HapiFhirMySQLDialect();
 	}
 }

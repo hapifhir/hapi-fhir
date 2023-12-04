@@ -172,8 +172,12 @@ public class MdmStorageInterceptorIT extends BaseMdmR4Test {
 
 		assertLinksMatchResult(MdmMatchResultEnum.MATCH, MdmMatchResultEnum.POSSIBLE_MATCH, MdmMatchResultEnum.POSSIBLE_MATCH);
 
+		logAllTokenIndexes();
+
 		// When
-		myPatientDao.delete(paulPatient.getIdElement());
+		myPatientDao.delete(paulPatient.getIdElement(), new SystemRequestDetails());
+
+		logAllTokenIndexes();
 
 		// Then
 		List<IBaseResource> resources = myPatientDao.search(new SearchParameterMap(), SystemRequestDetails.forAllPartitions()).getAllResources();

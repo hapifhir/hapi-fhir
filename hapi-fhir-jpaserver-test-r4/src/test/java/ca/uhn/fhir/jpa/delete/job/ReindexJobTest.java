@@ -30,8 +30,8 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.annotation.PostConstruct;
-import javax.persistence.Query;
+import jakarta.annotation.PostConstruct;
+import jakarta.persistence.Query;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Stream;
@@ -448,6 +448,9 @@ public class ReindexJobTest extends BaseJpaR4Test {
 
 	@Test
 	public void testReindex_withReindexingUponSearchParameterChangeEnabled_reindexJobCompleted() {
+		List<JobInstance> jobInstances = myJobPersistence.fetchInstancesByJobDefinitionId(ReindexAppCtx.JOB_REINDEX, 10, 0);
+		assertEquals(0, jobInstances.size());
+
 		// make sure the resources auto-reindex after the search parameter update is enabled
 		myStorageSettings.setMarkResourcesForReindexingUponSearchParameterChange(true);
 
@@ -456,7 +459,7 @@ public class ReindexJobTest extends BaseJpaR4Test {
 		myReindexTestHelper.createCodeSearchParameter();
 
 		// check that reindex job was created
-		List<JobInstance> jobInstances = myJobPersistence.fetchInstancesByJobDefinitionId(ReindexAppCtx.JOB_REINDEX, 10, 0);
+		jobInstances = myJobPersistence.fetchInstancesByJobDefinitionId(ReindexAppCtx.JOB_REINDEX, 10, 0);
 		assertEquals(1, jobInstances.size());
 
 		// check that the job is completed (not stuck in QUEUED status)

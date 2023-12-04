@@ -19,10 +19,9 @@
  */
 package ca.uhn.fhir.rest.server;
 
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.http.HttpServletRequest;
 import org.apache.commons.lang3.Validate;
-
-import javax.servlet.ServletContext;
-import javax.servlet.http.HttpServletRequest;
 
 /**
  * Server address strategy which simply returns a hardcoded URL

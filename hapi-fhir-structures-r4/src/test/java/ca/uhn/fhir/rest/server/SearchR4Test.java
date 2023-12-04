@@ -38,6 +38,7 @@ import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Reference;
 import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -79,6 +80,11 @@ public class SearchR4Test {
 		ourIdentifiers = null;
 		myPort = myRestfulServerExtension.getPort();
 		myCtx.setNarrativeGenerator(new DefaultThymeleafNarrativeGenerator());
+	}
+
+	@AfterEach
+	public void after() {
+		myCtx.setNarrativeGenerator(null);
 	}
 
 	private Bundle executeSearchAndValidateHasLinkNext(HttpGet httpGet, EncodingEnum theExpectEncoding) throws IOException {

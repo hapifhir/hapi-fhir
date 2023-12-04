@@ -98,6 +98,10 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 	}
 
 	protected void init700() {
+		/* ************************************************
+		 * Start of 6.10 migrations
+		 *********************************************** */
+
 		Builder version = forVersion(VersionEnum.V7_0_0);
 
 		// new indices on MdmLink

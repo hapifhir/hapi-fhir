@@ -26,11 +26,11 @@ import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.storage.interceptor.balp.AsyncMemoryQueueBackedFhirClientBalpSink;
 import ca.uhn.fhir.storage.interceptor.balp.IBalpAuditContextServices;
 import ca.uhn.fhir.storage.interceptor.balp.IBalpAuditEventSink;
+import jakarta.servlet.ServletException;
 import org.hl7.fhir.r4.model.Reference;
 
 import java.util.List;
 import javax.annotation.Nonnull;
-import javax.servlet.ServletException;
 
 public class BalpExample {
 

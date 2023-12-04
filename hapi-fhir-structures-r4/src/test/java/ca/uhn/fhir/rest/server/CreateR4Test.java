@@ -8,10 +8,13 @@ import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.PreferReturnEnum;
 import ca.uhn.fhir.rest.client.MyPatientWithExtensions;
+import ca.uhn.fhir.test.utilities.HttpClientExtension;
 import ca.uhn.fhir.test.utilities.JettyUtil;
+import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.TestUtil;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
@@ -24,8 +27,8 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.servlet.ServletHandler;
-import org.eclipse.jetty.servlet.ServletHolder;
+import org.eclipse.jetty.ee10.servlet.ServletHandler;
+import org.eclipse.jetty.ee10.servlet.ServletHolder;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.IdType;
@@ -37,6 +40,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -54,17 +58,21 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 public class CreateR4Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(CreateR4Test.class);
 	public static OperationOutcome ourReturnOo;
-	private static CloseableHttpClient ourClient;
-	private static FhirContext ourCtx = FhirContext.forR4();
-	private static int ourPort;
-	private static Server ourServer;
-	private static RestfulServer ourServlet;
+	private static final FhirContext ourCtx = FhirContext.forR4Cached();
 
-	@AfterEach
-	public void after() {
-		ourServlet.setDefaultPreferReturn(RestfulServer.DEFAULT_PREFER_RETURN);
-	}
+	@RegisterExtension
+	public RestfulServerExtension ourServer = new RestfulServerExtension(ourCtx)
+		 .registerProvider(new PatientProviderCreate())
+		 .registerProvider(new PatientProviderRead())
+		 .registerProvider(new PatientProviderSearch())
+		 .withPagingProvider(new FifoMemoryPagingProvider(100))
+		 .setDefaultResponseEncoding(EncodingEnum.JSON)
+		 .withServer(s->s.setDefaultPreferReturn(RestfulServer.DEFAULT_PREFER_RETURN))
+		 .setDefaultPrettyPrint(false);
 
+	@RegisterExtension
+	private HttpClientExtension ourClient = new HttpClientExtension();
+	
 	@BeforeEach
 	public void before() {
 		ourReturnOo = null;
@@ -73,7 +81,7 @@ public class CreateR4Test {
 	@Test
 	public void testCreateIgnoresIdInResourceBody() throws Exception {
 
-		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient");
+		HttpPost httpPost = new HttpPost(ourServer.getBaseUrl() + "/Patient");
 		httpPost.setEntity(new StringEntity("{\"resourceType\":\"Patient\", \"id\":\"999\", \"status\":\"active\"}", ContentType.parse("application/fhir+json; charset=utf-8")));
 		HttpResponse status = ourClient.execute(httpPost);
 
@@ -86,14 +94,14 @@ public class CreateR4Test {
 
 		assertEquals(1, status.getHeaders("Location").length);
 		assertEquals(1, status.getHeaders("Content-Location").length);
-		assertEquals("http://localhost:" + ourPort + "/Patient/1", status.getFirstHeader("Location").getValue());
+		assertEquals(ourServer.getBaseUrl() + "/Patient/1", status.getFirstHeader("Location").getValue());
 
 	}
 
 	@Test
 	public void testCreateFailsIfNoContentTypeProvided() throws Exception {
 
-		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient");
+		HttpPost httpPost = new HttpPost(ourServer.getBaseUrl() + "/Patient");
 		httpPost.setEntity(new StringEntity("{\"resourceType\":\"Patient\", \"id\":\"999\", \"status\":\"active\"}", (ContentType) null));
 		try (CloseableHttpResponse status = ourClient.execute(httpPost)) {
 
@@ -113,7 +121,7 @@ public class CreateR4Test {
 	@Test
 	public void testCreateReturnsLocationHeader() throws Exception {
 
-		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient");
+		HttpPost httpPost = new HttpPost(ourServer.getBaseUrl() + "/Patient");
 		httpPost.setEntity(new StringEntity("{\"resourceType\":\"Patient\", \"status\":\"active\"}", ContentType.parse("application/fhir+json; charset=utf-8")));
 		HttpResponse status = ourClient.execute(httpPost);
 
@@ -126,7 +134,7 @@ public class CreateR4Test {
 
 		assertEquals(1, status.getHeaders("Location").length);
 		assertEquals(1, status.getHeaders("Content-Location").length);
-		assertEquals("http://localhost:" + ourPort + "/Patient/1", status.getFirstHeader("Location").getValue());
+		assertEquals(ourServer.getBaseUrl() + "/Patient/1", status.getFirstHeader("Location").getValue());
 
 	}
 
@@ -134,7 +142,7 @@ public class CreateR4Test {
 	public void testCreateReturnsOperationOutcome() throws Exception {
 		ourReturnOo = new OperationOutcome().addIssue(new OperationOutcomeIssueComponent().setDiagnostics("DIAG"));
 
-		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient");
+		HttpPost httpPost = new HttpPost(ourServer.getBaseUrl() + "/Patient");
 		httpPost.setEntity(new StringEntity("{\"resourceType\":\"Patient\", \"status\":\"active\"}", ContentType.parse("application/fhir+json; charset=utf-8")));
 		httpPost.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + "=" + Constants.HEADER_PREFER_RETURN_OPERATION_OUTCOME);
 		HttpResponse status = ourClient.execute(httpPost);
@@ -154,7 +162,7 @@ public class CreateR4Test {
 		ourReturnOo = new OperationOutcome().addIssue(new OperationOutcomeIssueComponent().setDiagnostics("DIAG"));
 		String expectedResponseContent = "{\"resourceType\":\"Patient\",\"id\":\"1\",\"meta\":{\"versionId\":\"1\"},\"gender\":\"male\"}";
 
-		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient");
+		HttpPost httpPost = new HttpPost(ourServer.getBaseUrl() + "/Patient");
 		httpPost.setEntity(new StringEntity("{\"resourceType\":\"Patient\", \"gender\":\"male\"}", ContentType.parse("application/fhir+json; charset=utf-8")));
 		HttpResponse status = ourClient.execute(httpPost);
 
@@ -170,7 +178,7 @@ public class CreateR4Test {
 	@Test
 	public void testCreateWithIncorrectContent1() throws Exception {
 
-		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient");
+		HttpPost httpPost = new HttpPost(ourServer.getBaseUrl() + "/Patient");
 		httpPost.setEntity(new StringEntity("{\"foo\":\"bar\"}", ContentType.parse("application/xml+fhir; charset=utf-8")));
 		HttpResponse status = ourClient.execute(httpPost);
 
@@ -189,7 +197,7 @@ public class CreateR4Test {
 	@Test
 	public void testCreateWithIncorrectContent2() throws Exception {
 
-		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient");
+		HttpPost httpPost = new HttpPost(ourServer.getBaseUrl() + "/Patient");
 		httpPost.setEntity(new StringEntity("{\"foo\":\"bar\"}", ContentType.parse("application/fhir+xml; charset=utf-8")));
 		HttpResponse status = ourClient.execute(httpPost);
 
@@ -208,7 +216,7 @@ public class CreateR4Test {
 	@Test
 	public void testCreateWithIncorrectContent3() throws Exception {
 
-		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient");
+		HttpPost httpPost = new HttpPost(ourServer.getBaseUrl() + "/Patient");
 		httpPost.setEntity(new StringEntity("{\"foo\":\"bar\"}", ContentType.parse("application/fhir+json; charset=utf-8")));
 		HttpResponse status = ourClient.execute(httpPost);
 
@@ -229,7 +237,7 @@ public class CreateR4Test {
 	@Test
 	public void testCreateWithInvalidContent() throws Exception {
 
-		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient");
+		HttpPost httpPost = new HttpPost(ourServer.getBaseUrl() + "/Patient");
 		httpPost.setEntity(new StringEntity("FOO", ContentType.parse("application/xml+fhir; charset=utf-8")));
 		HttpResponse status = ourClient.execute(httpPost);
 
@@ -256,7 +264,7 @@ public class CreateR4Test {
 		String body = ourCtx.newJsonParser().encodeResourceToString(p);
 		HttpPost httpPost;
 
-		httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient");
+		httpPost = new HttpPost(ourServer.getBaseUrl() + "/Patient");
 		httpPost.setEntity(new StringEntity(body, ContentType.parse("application/fhir+json; charset=utf-8")));
 		try (CloseableHttpResponse status = ourClient.execute(httpPost)) {
 
@@ -279,9 +287,9 @@ public class CreateR4Test {
 		p.setActive(true);
 		String body = ourCtx.newJsonParser().encodeResourceToString(p);
 
-		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient");
+		HttpPost httpPost = new HttpPost(ourServer.getBaseUrl() + "/Patient");
 		httpPost.setEntity(new StringEntity(body, ContentType.parse("application/fhir+json; charset=utf-8")));
-		ourServlet.setDefaultPreferReturn(PreferReturnEnum.OPERATION_OUTCOME);
+		ourServer.getRestfulServer().setDefaultPreferReturn(PreferReturnEnum.OPERATION_OUTCOME);
 		try (CloseableHttpResponse status = ourClient.execute(httpPost)) {
 
 			assertEquals(201, status.getStatusLine().getStatusCode());
@@ -304,9 +312,9 @@ public class CreateR4Test {
 		p.setActive(true);
 		String body = ourCtx.newJsonParser().encodeResourceToString(p);
 
-		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient");
+		HttpPost httpPost = new HttpPost(ourServer.getBaseUrl() + "/Patient");
 		httpPost.setEntity(new StringEntity(body, ContentType.parse("application/fhir+json; charset=utf-8")));
-		ourServlet.setDefaultPreferReturn(PreferReturnEnum.MINIMAL);
+		ourServer.getRestfulServer().setDefaultPreferReturn(PreferReturnEnum.MINIMAL);
 		try (CloseableHttpResponse status = ourClient.execute(httpPost)) {
 
 			assertEquals(201, status.getStatusLine().getStatusCode());
@@ -321,7 +329,7 @@ public class CreateR4Test {
 	@Test
 	public void testSearch() throws Exception {
 
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_format=xml&_pretty=true");
+		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?_format=xml&_pretty=true");
 		HttpResponse status = ourClient.execute(httpGet);
 
 		String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
@@ -389,7 +397,7 @@ public class CreateR4Test {
 
 		@Search
 		public List<IBaseResource> search() {
-			ArrayList<IBaseResource> retVal = new ArrayList<IBaseResource>();
+			ArrayList<IBaseResource> retVal = new ArrayList<>();
 
 			MyPatientWithExtensions p0 = new MyPatientWithExtensions();
 			p0.setId(new IdType("Patient/0"));
@@ -408,33 +416,7 @@ public class CreateR4Test {
 
 	@AfterAll
 	public static void afterClassClearContext() throws Exception {
-		JettyUtil.closeServer(ourServer);
 		TestUtil.randomizeLocaleAndTimezone();
-	}
-
-	@BeforeAll
-	public static void beforeClass() throws Exception {
-		ourServer = new Server(0);
-
-		PatientProviderCreate patientProviderCreate = new PatientProviderCreate();
-		PatientProviderRead patientProviderRead = new PatientProviderRead();
-		PatientProviderSearch patientProviderSearch = new PatientProviderSearch();
-
-		ServletHandler proxyHandler = new ServletHandler();
-		ourServlet = new RestfulServer(ourCtx);
-
-		ourServlet.setResourceProviders(patientProviderCreate, patientProviderRead, patientProviderSearch);
-		ServletHolder servletHolder = new ServletHolder(ourServlet);
-		proxyHandler.addServletWithMapping(servletHolder, "/*");
-		ourServer.setHandler(proxyHandler);
-		JettyUtil.startServer(ourServer);
-        ourPort = JettyUtil.getPortForStartedServer(ourServer);
-
-		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
-		HttpClientBuilder builder = HttpClientBuilder.create();
-		builder.setConnectionManager(connectionManager);
-		ourClient = builder.build();
-
 	}
 
 }
