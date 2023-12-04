@@ -20,10 +20,11 @@ package ca.uhn.fhir.jpa.model.entity;
  * #L%
  */
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Embeddable;
+
 import java.io.Serializable;
 import java.util.Objects;
-import javax.persistence.Column;
-import javax.persistence.Embeddable;
 
 @Embeddable
 public class PersistedResourceModifiedMessageEntityPK implements IPersistedResourceModifiedMessagePK, Serializable {

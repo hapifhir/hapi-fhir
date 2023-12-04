@@ -19,9 +19,12 @@
  */
 package ca.uhn.fhir.rest.client.method;
 
-import ca.uhn.fhir.context.*;
+import ca.uhn.fhir.context.ConfigurationException;
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.rest.annotation.*;
+import ca.uhn.fhir.rest.annotation.Delete;
+import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.param.ParameterUtil;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 

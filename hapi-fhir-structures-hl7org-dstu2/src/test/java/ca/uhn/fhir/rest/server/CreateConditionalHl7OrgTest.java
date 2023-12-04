@@ -10,8 +10,12 @@ import ca.uhn.fhir.rest.annotation.OptionalParam;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.test.utilities.HttpClientExtension;
 import ca.uhn.fhir.test.utilities.JettyUtil;
+import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
+import ca.uhn.fhir.util.TestUtil;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -22,14 +26,15 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.servlet.ServletHandler;
-import org.eclipse.jetty.servlet.ServletHolder;
+import org.eclipse.jetty.ee10.servlet.ServletHandler;
+import org.eclipse.jetty.ee10.servlet.ServletHolder;
 import org.hl7.fhir.dstu2.model.IdType;
 import org.hl7.fhir.dstu2.model.Patient;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -43,18 +48,23 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * Created by dsotnikov on 2/25/2014.
  */
 public class CreateConditionalHl7OrgTest {
-	private static CloseableHttpClient ourClient;
-	
 	private static String ourLastConditionalUrl;
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(CreateConditionalHl7OrgTest.class);
-	private static int ourPort;
-	private static Server ourServer;
 	private static IdType ourLastId;
 	private static IdType ourLastIdParam;
 	private static boolean ourLastRequestWasSearch;
-	private static FhirContext ourCtx = FhirContext.forDstu2Hl7Org();
-	
-	
+	private static final FhirContext ourCtx = FhirContext.forDstu2Hl7OrgCached();
+
+  @RegisterExtension
+  public static RestfulServerExtension ourServer = new RestfulServerExtension(ourCtx)
+      .registerProvider(new PatientProvider())
+      .withPagingProvider(new FifoMemoryPagingProvider(100))
+      .setDefaultResponseEncoding(EncodingEnum.JSON)
+      .setDefaultPrettyPrint(false);
+
+  @RegisterExtension
+  public static HttpClientExtension ourClient = new HttpClientExtension();
+
 	
 	@BeforeEach
 	public void before() {
@@ -70,7 +80,7 @@ public class CreateConditionalHl7OrgTest {
 		Patient patient = new Patient();
 		patient.addIdentifier().setValue("002");
 
-		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient");
+		HttpPost httpPost = new HttpPost(ourServer.getBaseUrl() + "/Patient");
 		httpPost.addHeader(Constants.HEADER_IF_NONE_EXIST, "Patient?identifier=system%7C001");
 		httpPost.setEntity(new StringEntity(ourCtx.newXmlParser().encodeResourceToString(patient), ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 
@@ -82,8 +92,8 @@ public class CreateConditionalHl7OrgTest {
 		ourLog.info("Response was:\n{}", responseContent);
 
 		assertEquals(201, status.getStatusLine().getStatusCode());
-		assertEquals("http://localhost:" + ourPort + "/Patient/001/_history/002", status.getFirstHeader("location").getValue());
-		assertEquals("http://localhost:" + ourPort + "/Patient/001/_history/002", status.getFirstHeader("content-location").getValue());
+		assertEquals(ourServer.getBaseUrl() + "/Patient/001/_history/002", status.getFirstHeader("location").getValue());
+		assertEquals(ourServer.getBaseUrl() + "/Patient/001/_history/002", status.getFirstHeader("content-location").getValue());
 		
 		assertNull(ourLastId.getValue());
 		assertNull(ourLastIdParam);
@@ -97,7 +107,7 @@ public class CreateConditionalHl7OrgTest {
 		Patient patient = new Patient();
 		patient.addIdentifier().setValue("002");
 
-		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient?_format=true&_pretty=true");
+		HttpPost httpPost = new HttpPost(ourServer.getBaseUrl() + "/Patient?_format=true&_pretty=true");
 		httpPost.setEntity(new StringEntity(ourCtx.newXmlParser().encodeResourceToString(patient), ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 
 		HttpResponse status = ourClient.execute(httpPost);
@@ -108,8 +118,8 @@ public class CreateConditionalHl7OrgTest {
 		ourLog.info("Response was:\n{}", responseContent);
 
 		assertEquals(201, status.getStatusLine().getStatusCode());
-		assertEquals("http://localhost:" + ourPort + "/Patient/001/_history/002", status.getFirstHeader("location").getValue());
-		assertEquals("http://localhost:" + ourPort + "/Patient/001/_history/002", status.getFirstHeader("content-location").getValue());
+		assertEquals(ourServer.getBaseUrl() + "/Patient/001/_history/002", status.getFirstHeader("location").getValue());
+		assertEquals(ourServer.getBaseUrl() + "/Patient/001/_history/002", status.getFirstHeader("content-location").getValue());
 		
 		assertNull(ourLastId.getValue());
 		assertNull(ourLastIdParam);
@@ -123,7 +133,7 @@ public class CreateConditionalHl7OrgTest {
 		Patient patient = new Patient();
 		patient.addIdentifier().setValue("002");
 
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_pretty=true");
+		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?_pretty=true");
 
 		HttpResponse status = ourClient.execute(httpGet);
 
@@ -142,31 +152,9 @@ public class CreateConditionalHl7OrgTest {
 	
 	@AfterAll
 	public static void afterClass() throws Exception {
-		JettyUtil.closeServer(ourServer);
+    TestUtil.randomizeLocaleAndTimezone();
 	}
 		
-	
-	@BeforeAll
-	public static void beforeClass() throws Exception {
-		ourServer = new Server(0);
-
-		PatientProvider patientProvider = new PatientProvider();
-
-		ServletHandler proxyHandler = new ServletHandler();
-		RestfulServer servlet = new RestfulServer(ourCtx);
-		servlet.setResourceProviders(patientProvider);
-		ServletHolder servletHolder = new ServletHolder(servlet);
-		proxyHandler.addServletWithMapping(servletHolder, "/*");
-		ourServer.setHandler(proxyHandler);
-		JettyUtil.startServer(ourServer);
-        ourPort = JettyUtil.getPortForStartedServer(ourServer);
-
-		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
-		HttpClientBuilder builder = HttpClientBuilder.create();
-		builder.setConnectionManager(connectionManager);
-		ourClient = builder.build();
-
-	}
 	
 	public static class PatientProvider implements IResourceProvider {
 

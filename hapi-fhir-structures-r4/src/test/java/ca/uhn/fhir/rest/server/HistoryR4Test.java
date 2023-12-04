@@ -9,7 +9,9 @@ import ca.uhn.fhir.rest.annotation.Since;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ParamPrefixEnum;
+import ca.uhn.fhir.test.utilities.HttpClientExtension;
 import ca.uhn.fhir.test.utilities.JettyUtil;
+import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.TestUtil;
 import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
@@ -19,8 +21,8 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.servlet.ServletHandler;
-import org.eclipse.jetty.servlet.ServletHolder;
+import org.eclipse.jetty.ee10.servlet.ServletHandler;
+import org.eclipse.jetty.ee10.servlet.ServletHolder;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.DateTimeType;
@@ -32,6 +34,7 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,15 +50,22 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class HistoryR4Test {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(HistoryR4Test.class);
-	private static CloseableHttpClient ourClient;
-	private static FhirContext ourCtx = FhirContext.forR4();
+	private static final FhirContext ourCtx = FhirContext.forR4Cached();
 	private static DateRangeParam ourLastAt;
 	private static InstantType ourLastSince;
 	private static IPrimitiveType<Date> ourLastSince2;
 	private static IPrimitiveType<String> ourLastSince3;
 	private static IPrimitiveType<?> ourLastSince4;
-	private static int ourPort;
-	private static Server ourServer;
+
+	@RegisterExtension
+	public RestfulServerExtension ourServer = new RestfulServerExtension(ourCtx)
+		 .registerProvider(new DummyPlainProvider())
+		 .registerProvider(new DummyResourceProvider())
+		 .withPagingProvider(new FifoMemoryPagingProvider(100))
+		 .setDefaultResponseEncoding(EncodingEnum.XML);
+
+	@RegisterExtension
+	private HttpClientExtension ourClient = new HttpClientExtension();
 
 	@BeforeEach
 	public void before() {
@@ -69,7 +79,7 @@ public class HistoryR4Test {
 	@Test
 	public void testAt() throws Exception {
 		{
-			HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/_history?_at=gt2001&_at=lt2005");
+			HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/_history?_at=gt2001&_at=lt2005");
 			try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
 				String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 				ourLog.info(responseContent);
@@ -86,7 +96,7 @@ public class HistoryR4Test {
 	@Test
 	public void testInstanceHistory() throws Exception {
 		{
-			HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/123/_history?_pretty=true");
+			HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/123/_history?_pretty=true");
 			String responseContent;
 			try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
 				responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
@@ -96,8 +106,8 @@ public class HistoryR4Test {
 
 			Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
 			assertEquals(2, bundle.getEntry().size());
-			assertEquals("http://localhost:" + ourPort + "/Patient/ih1/_history/1", bundle.getEntry().get(0).getResource().getId());
-			assertEquals("http://localhost:" + ourPort + "/Patient/ih1/_history/2", bundle.getEntry().get(1).getResource().getId());
+			assertEquals(ourServer.getBaseUrl() + "/Patient/ih1/_history/1", bundle.getEntry().get(0).getResource().getId());
+			assertEquals(ourServer.getBaseUrl() + "/Patient/ih1/_history/2", bundle.getEntry().get(1).getResource().getId());
 
 		}
 	}
@@ -105,7 +115,7 @@ public class HistoryR4Test {
 	@Test
 	public void testServerHistory() throws Exception {
 		{
-			HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/_history");
+			HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/_history");
 			String responseContent;
 			try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
 				responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
@@ -115,8 +125,8 @@ public class HistoryR4Test {
 
 			Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
 			assertEquals(2, bundle.getEntry().size());
-			assertEquals("http://localhost:" + ourPort + "/Patient/h1/_history/1", bundle.getEntry().get(0).getResource().getId());
-			assertEquals("http://localhost:" + ourPort + "/Patient/h1/_history/2", bundle.getEntry().get(1).getResource().getId());
+			assertEquals(ourServer.getBaseUrl() + "/Patient/h1/_history/1", bundle.getEntry().get(0).getResource().getId());
+			assertEquals(ourServer.getBaseUrl() + "/Patient/h1/_history/2", bundle.getEntry().get(1).getResource().getId());
 
 		}
 	}
@@ -124,7 +134,7 @@ public class HistoryR4Test {
 	@Test
 	public void testSince() throws Exception {
 		{
-			HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/_history?_since=2005");
+			HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/_history?_since=2005");
 			String responseContent;
 			try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
 				responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
@@ -146,7 +156,7 @@ public class HistoryR4Test {
 	@Test
 	public void testTypeHistory() throws Exception {
 		{
-			HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/_history");
+			HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/_history");
 			String responseContent;
 			try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
 				responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
@@ -158,8 +168,8 @@ public class HistoryR4Test {
 
 			Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
 			assertEquals(2, bundle.getEntry().size());
-			assertEquals("http://localhost:" + ourPort + "/Patient/th1/_history/1", bundle.getEntry().get(0).getResource().getId());
-			assertEquals("http://localhost:" + ourPort + "/Patient/th1/_history/2", bundle.getEntry().get(1).getResource().getId());
+			assertEquals(ourServer.getBaseUrl() + "/Patient/th1/_history/1", bundle.getEntry().get(0).getResource().getId());
+			assertEquals(ourServer.getBaseUrl() + "/Patient/th1/_history/2", bundle.getEntry().get(1).getResource().getId());
 
 		}
 	}
@@ -170,7 +180,7 @@ public class HistoryR4Test {
 	@Test
 	public void testVread() throws Exception {
 		{
-			HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/123/_history/456");
+			HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/123/_history/456");
 			String responseContent;
 			try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
 				responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
@@ -185,32 +195,7 @@ public class HistoryR4Test {
 
 	@AfterAll
 	public static void afterClassClearContext() throws Exception {
-		JettyUtil.closeServer(ourServer);
 		TestUtil.randomizeLocaleAndTimezone();
-	}
-
-	@BeforeAll
-	public static void beforeClass() throws Exception {
-		ourServer = new Server(0);
-
-		DummyPlainProvider plainProvider = new DummyPlainProvider();
-		DummyResourceProvider patientProvider = new DummyResourceProvider();
-
-		ServletHandler proxyHandler = new ServletHandler();
-		RestfulServer servlet = new RestfulServer(ourCtx);
-		servlet.setDefaultResponseEncoding(EncodingEnum.XML);
-		servlet.registerProviders(plainProvider, patientProvider);
-		ServletHolder servletHolder = new ServletHolder(servlet);
-		proxyHandler.addServletWithMapping(servletHolder, "/*");
-		ourServer.setHandler(proxyHandler);
-		JettyUtil.startServer(ourServer);
-        ourPort = JettyUtil.getPortForStartedServer(ourServer);
-
-		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
-		HttpClientBuilder builder = HttpClientBuilder.create();
-		builder.setConnectionManager(connectionManager);
-		ourClient = builder.build();
-
 	}
 
 	public static class DummyPlainProvider {

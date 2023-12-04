@@ -258,8 +258,9 @@ public class HapiFlywayMigrateDatabaseCommandTest {
 	private File getLocation(String theDatabaseName) throws IOException {
 		File directory = new File(myDbDirectory);
 		if (directory.exists()) {
-			FileUtils.deleteDirectory(directory);
+			FileUtils.forceDelete(directory);
 		}
+		assertFalse(directory.exists());
 
 		return new File(myDbDirectory + "/" + theDatabaseName);
 	}

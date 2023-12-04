@@ -39,7 +39,7 @@ public class ScrollableResultsIterator<T extends Object> extends BaseIterator<T>
 		if (myNext == null) {
 			if (myScroll.next()) {
 				hasNext = true;
-				myNext = (T) myScroll.get(0);
+				myNext = (T) myScroll.get();
 			} else {
 				hasNext = false;
 			}

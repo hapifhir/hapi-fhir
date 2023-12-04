@@ -1,6 +1,6 @@
 /*
  * #%L
- * HAPI FHIR Search Parameters
+ * HAPI FHIR JPA - Search Parameters
  * %%
  * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
@@ -49,6 +49,7 @@ import ca.uhn.fhir.util.UrlUtil;
 import ca.uhn.fhir.util.bundle.BundleEntryParts;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Sets;
+import jakarta.annotation.PostConstruct;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
@@ -82,7 +83,6 @@ import java.util.TreeSet;
 import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import javax.annotation.PostConstruct;
 import javax.measure.quantity.Quantity;
 import javax.measure.unit.NonSI;
 import javax.measure.unit.Unit;

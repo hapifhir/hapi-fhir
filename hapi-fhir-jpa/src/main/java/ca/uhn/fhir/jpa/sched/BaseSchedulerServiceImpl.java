@@ -27,6 +27,7 @@ import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
 import ca.uhn.fhir.util.StopWatch;
 import com.google.common.annotations.VisibleForTesting;
+import jakarta.annotation.PostConstruct;
 import org.quartz.JobKey;
 import org.quartz.SchedulerException;
 import org.slf4j.Logger;
@@ -41,7 +42,6 @@ import org.springframework.core.env.Environment;
 import java.util.Collection;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
-import javax.annotation.PostConstruct;
 
 /**
  * This class provides task scheduling for the entire module using the Quartz library.

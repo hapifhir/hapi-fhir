@@ -54,9 +54,9 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class BulkImportCommandIT {
+public class BulkImportCommandTest {
 
-	private static final Logger ourLog = LoggerFactory.getLogger(BulkImportCommandIT.class);
+	private static final Logger ourLog = LoggerFactory.getLogger(BulkImportCommandTest.class);
 
 	static {
 		HapiSystemProperties.enableTestMode();
@@ -64,7 +64,7 @@ public class BulkImportCommandIT {
 
 	@RegisterExtension
 	public HttpClientExtension myHttpClientExtension = new HttpClientExtension();
-	@Mock
+	@Mock(strictness = Mock.Strictness.LENIENT)
 	private IJobCoordinator myJobCoordinator;
 	private final BulkDataImportProvider myProvider = new BulkDataImportProvider();
 	private final FhirContext myCtx = FhirContext.forR4Cached();
@@ -101,19 +101,12 @@ public class BulkImportCommandIT {
 	@Test
 	public void testBulkImport() throws IOException {
 
-		JobInstance jobInfo = new JobInstance()
-			.setStatus(StatusEnum.COMPLETED)
-			.setCreateTime(parseDate("2022-01-01T12:00:00-04:00"))
-			.setStartTime(parseDate("2022-01-01T12:10:00-04:00"));
-
-		when(myJobCoordinator.getInstance(eq("THE-JOB-ID"))).thenReturn(jobInfo);
-
 		String fileContents1 = "{\"resourceType\":\"Observation\"}\n{\"resourceType\":\"Observation\"}";
 		String fileContents2 = "{\"resourceType\":\"Patient\"}\n{\"resourceType\":\"Patient\"}";
 		writeNdJsonFileToTempDirectory(fileContents1, "file1.json");
 		writeNdJsonFileToTempDirectory(fileContents2, "file2.json");
 
-		when(myJobCoordinator.startInstance(any())).thenReturn(createJobStartResponse("THE-JOB-ID"));
+		when(myJobCoordinator.startInstance(any(), any())).thenReturn(createJobStartResponse("THE-JOB-ID"));
 
 		// Start the command in a separate thread
 		new Thread(() -> App.main(new String[]{
@@ -154,7 +147,7 @@ public class BulkImportCommandIT {
 		writeNdJsonFileToTempDirectory(fileContents1, "file1.json.gz");
 		writeNdJsonFileToTempDirectory(fileContents2, "file2.json.gz");
 
-		when(myJobCoordinator.startInstance(any()))
+		when(myJobCoordinator.startInstance(any(), any()))
 			.thenReturn(createJobStartResponse("THE-JOB-ID"));
 
 		// Start the command in a separate thread
@@ -196,7 +189,7 @@ public class BulkImportCommandIT {
 		writeNdJsonFileToTempDirectory(fileContents1, "file1.json");
 		writeNdJsonFileToTempDirectory(fileContents2, "file2.json");
 
-		when(myJobCoordinator.startInstance(any())).thenReturn(createJobStartResponse("THE-JOB-ID"));
+		when(myJobCoordinator.startInstance(any(), any())).thenReturn(createJobStartResponse("THE-JOB-ID"));
 
 		// Start the command in a separate thread
 		new Thread(() -> App.main(new String[]{

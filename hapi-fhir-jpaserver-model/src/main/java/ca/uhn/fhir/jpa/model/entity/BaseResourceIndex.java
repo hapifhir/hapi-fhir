@@ -19,10 +19,10 @@
  */
 package ca.uhn.fhir.jpa.model.entity;
 
+import jakarta.persistence.MappedSuperclass;
 import org.apache.commons.lang3.ObjectUtils;
 
 import java.io.Serializable;
-import javax.persistence.MappedSuperclass;
 
 @MappedSuperclass
 public abstract class BaseResourceIndex extends BasePartitionable implements Serializable {

@@ -44,9 +44,7 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationContext;
 
-import javax.persistence.EntityManager;
-import java.util.ArrayList;
-import java.util.Collection;
+import jakarta.persistence.EntityManager;
 import java.util.List;
 import java.util.stream.Stream;
 

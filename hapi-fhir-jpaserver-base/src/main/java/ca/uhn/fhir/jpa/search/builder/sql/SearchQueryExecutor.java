@@ -25,6 +25,11 @@ import ca.uhn.fhir.jpa.search.builder.ISearchQueryExecutor;
 import ca.uhn.fhir.jpa.util.ScrollableResultsIterator;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.IoUtil;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.FlushModeType;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.PersistenceContextType;
+import jakarta.persistence.Query;
 import org.apache.commons.lang3.Validate;
 import org.hibernate.CacheMode;
 import org.hibernate.ScrollMode;
@@ -33,11 +38,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
-import javax.persistence.EntityManager;
-import javax.persistence.FlushModeType;
-import javax.persistence.PersistenceContext;
-import javax.persistence.PersistenceContextType;
-import javax.persistence.Query;
+import java.util.Objects;
 
 public class SearchQueryExecutor implements ISearchQueryExecutor {
 
@@ -51,7 +52,7 @@ public class SearchQueryExecutor implements ISearchQueryExecutor {
 	private EntityManager myEntityManager;
 
 	private boolean myQueryInitialized;
-	private ScrollableResultsIterator<Number> myResultSet;
+	private ScrollableResultsIterator<Object> myResultSet;
 	private Long myNext;
 
 	/**
@@ -144,7 +145,13 @@ public class SearchQueryExecutor implements ISearchQueryExecutor {
 				if (myResultSet == null || !myResultSet.hasNext()) {
 					myNext = NO_MORE;
 				} else {
-					Number next = myResultSet.next();
+					Object nextRow = Objects.requireNonNull(myResultSet.next());
+					Number next;
+					if (nextRow instanceof Number) {
+						next = (Number) nextRow;
+					} else {
+						next = (Number) ((Object[]) nextRow)[0];
+					}
 					myNext = next.longValue();
 				}
 

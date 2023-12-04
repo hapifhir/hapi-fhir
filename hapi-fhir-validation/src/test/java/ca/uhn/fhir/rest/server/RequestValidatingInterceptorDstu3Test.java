@@ -11,15 +11,19 @@ import ca.uhn.fhir.rest.annotation.OptionalParam;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
+import ca.uhn.fhir.test.utilities.HttpClientExtension;
 import ca.uhn.fhir.test.utilities.JettyUtil;
+import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.validation.IValidationContext;
 import ca.uhn.fhir.validation.IValidatorModule;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
+import ca.uhn.hapi.converters.server.VersionedApiConverterInterceptor;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -32,8 +36,8 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.servlet.ServletHandler;
-import org.eclipse.jetty.servlet.ServletHolder;
+import org.eclipse.jetty.ee10.servlet.ServletHandler;
+import org.eclipse.jetty.ee10.servlet.ServletHolder;
 import org.hamcrest.Matchers;
 import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.hl7.fhir.dstu3.model.Enumerations.AdministrativeGender;
@@ -44,6 +48,7 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.mockito.Mockito;
 
 import java.util.ArrayList;
@@ -55,23 +60,25 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 
 public class RequestValidatingInterceptorDstu3Test {
-	private static CloseableHttpClient ourClient;
 
-	private static FhirContext ourCtx = FhirContext.forDstu3();
+	private static final FhirContext ourCtx = FhirContext.forDstu3Cached();
 	private static boolean ourLastRequestWasSearch;
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(RequestValidatingInterceptorDstu3Test.class);
-	private static int ourPort;
-
-	private static Server ourServer;
-
-	private static RestfulServer ourServlet;
-
 	private RequestValidatingInterceptor myInterceptor;
+
+	@RegisterExtension
+	public static final RestfulServerExtension ourServer = new RestfulServerExtension(ourCtx)
+		.registerProvider(new PatientProvider())
+		.setDefaultResponseEncoding(EncodingEnum.JSON)
+		.setDefaultPrettyPrint(false);
+
+	@RegisterExtension
+	public static final HttpClientExtension ourClient = new HttpClientExtension();
 
 	@BeforeEach
 	public void before() {
 		ourLastRequestWasSearch = false;
-		ourServlet.getInterceptorService().unregisterAllInterceptors();
+		ourServer.getInterceptorService().unregisterAllInterceptors();
 
 		myInterceptor = new RequestValidatingInterceptor();
 		//		myInterceptor.setFailOnSeverity(ResultSeverityEnum.ERROR);
@@ -79,7 +86,7 @@ public class RequestValidatingInterceptorDstu3Test {
 		//		myInterceptor.setResponseHeaderName("X-RESP");
 		//		myInterceptor.setResponseHeaderValue(RequestValidatingInterceptor.DEFAULT_RESPONSE_HEADER_VALUE);
 
-		ourServlet.registerInterceptor(myInterceptor);
+		ourServer.registerInterceptor(myInterceptor);
 	}
 
 	@Test
@@ -93,7 +100,7 @@ public class RequestValidatingInterceptorDstu3Test {
 		patient.addContact().addRelationship().setText("FOO");
 		String encoded = ourCtx.newJsonParser().encodeResourceToString(patient);
 
-		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient");
+		HttpPost httpPost = new HttpPost(ourServer.getBaseUrl() + "/Patient");
 		httpPost.setEntity(new StringEntity(encoded, ContentType.create(Constants.CT_FHIR_JSON, "UTF-8")));
 
 		HttpResponse status = ourClient.execute(httpPost);
@@ -119,7 +126,7 @@ public class RequestValidatingInterceptorDstu3Test {
 		patient.addContact().addRelationship().setText("FOO");
 		String encoded = ourCtx.newJsonParser().encodeResourceToString(patient);
 
-		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient");
+		HttpPost httpPost = new HttpPost(ourServer.getBaseUrl() + "/Patient");
 		httpPost.setEntity(new StringEntity(encoded, ContentType.create(Constants.CT_FHIR_JSON, "UTF-8")));
 
 		HttpResponse status = ourClient.execute(httpPost);
@@ -142,7 +149,7 @@ public class RequestValidatingInterceptorDstu3Test {
 		patient.setGender(AdministrativeGender.MALE);
 		String encoded = ourCtx.newJsonParser().encodeResourceToString(patient);
 
-		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient");
+		HttpPost httpPost = new HttpPost(ourServer.getBaseUrl() + "/Patient");
 		httpPost.setEntity(new StringEntity(encoded, ContentType.create(Constants.CT_FHIR_JSON, "UTF-8")));
 
 		HttpResponse status = ourClient.execute(httpPost);
@@ -167,7 +174,7 @@ public class RequestValidatingInterceptorDstu3Test {
 		patient.setGender(AdministrativeGender.MALE);
 		String encoded = ourCtx.newJsonParser().encodeResourceToString(patient);
 
-		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient");
+		HttpPost httpPost = new HttpPost(ourServer.getBaseUrl() + "/Patient");
 		httpPost.setEntity(new StringEntity(encoded, ContentType.create(Constants.CT_FHIR_JSON, "UTF-8")));
 
 		HttpResponse status = ourClient.execute(httpPost);
@@ -195,7 +202,7 @@ public class RequestValidatingInterceptorDstu3Test {
 		patient.addContact().addRelationship().setText("FOO");
 		String encoded = ourCtx.newXmlParser().encodeResourceToString(patient);
 
-		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient");
+		HttpPost httpPost = new HttpPost(ourServer.getBaseUrl() + "/Patient");
 		httpPost.setEntity(new StringEntity(encoded, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 
 		HttpResponse status = ourClient.execute(httpPost);
@@ -220,7 +227,7 @@ public class RequestValidatingInterceptorDstu3Test {
 		patient.addContact().addRelationship().setText("FOO");
 		String encoded = ourCtx.newXmlParser().encodeResourceToString(patient);
 
-		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient");
+		HttpPost httpPost = new HttpPost(ourServer.getBaseUrl() + "/Patient");
 		httpPost.setEntity(new StringEntity(encoded, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 
 		HttpResponse status = ourClient.execute(httpPost);
@@ -247,7 +254,7 @@ public class RequestValidatingInterceptorDstu3Test {
 		patient.addContact().addRelationship().setText("FOO");
 		String encoded = ourCtx.newXmlParser().encodeResourceToString(patient);
 
-		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient");
+		HttpPost httpPost = new HttpPost(ourServer.getBaseUrl() + "/Patient");
 		httpPost.setEntity(new StringEntity(encoded, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 
 		HttpResponse status = ourClient.execute(httpPost);
@@ -279,7 +286,7 @@ public class RequestValidatingInterceptorDstu3Test {
 		patient.addIdentifier().setValue("002");
 		String encoded = ourCtx.newXmlParser().encodeResourceToString(patient);
 
-		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient");
+		HttpPost httpPost = new HttpPost(ourServer.getBaseUrl() + "/Patient");
 		httpPost.setEntity(new StringEntity(encoded, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 		HttpResponse status = ourClient.execute(httpPost);
 
@@ -309,7 +316,7 @@ public class RequestValidatingInterceptorDstu3Test {
 		patient.addIdentifier().setValue("002");
 		String encoded = ourCtx.newXmlParser().encodeResourceToString(patient);
 
-		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient");
+		HttpPost httpPost = new HttpPost(ourServer.getBaseUrl() + "/Patient");
 		httpPost.setEntity(new StringEntity(encoded, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 		HttpResponse status = ourClient.execute(httpPost);
 
@@ -339,7 +346,7 @@ public class RequestValidatingInterceptorDstu3Test {
 		patient.addIdentifier().setValue("002");
 		String encoded = ourCtx.newXmlParser().encodeResourceToString(patient);
 
-		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient");
+		HttpPost httpPost = new HttpPost(ourServer.getBaseUrl() + "/Patient");
 		httpPost.setEntity(new StringEntity(encoded, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 		HttpResponse status = ourClient.execute(httpPost);
 
@@ -369,7 +376,7 @@ public class RequestValidatingInterceptorDstu3Test {
 		patient.addIdentifier().setValue("002");
 		String encoded = ourCtx.newXmlParser().encodeResourceToString(patient);
 
-		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient");
+		HttpPost httpPost = new HttpPost(ourServer.getBaseUrl() + "/Patient");
 		httpPost.setEntity(new StringEntity(encoded, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 		HttpResponse status = ourClient.execute(httpPost);
 
@@ -390,7 +397,7 @@ public class RequestValidatingInterceptorDstu3Test {
 		patient.setGender(AdministrativeGender.MALE);
 		String encoded = ourCtx.newXmlParser().encodeResourceToString(patient);
 
-		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient");
+		HttpPost httpPost = new HttpPost(ourServer.getBaseUrl() + "/Patient");
 		httpPost.setEntity(new StringEntity(encoded, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 
 		HttpResponse status = ourClient.execute(httpPost);
@@ -413,7 +420,7 @@ public class RequestValidatingInterceptorDstu3Test {
 		myInterceptor.setFailOnSeverity(null);
 		myInterceptor.setAddResponseHeaderOnSeverity(ResultSeverityEnum.INFORMATION);
 
-		HttpDelete httpDelete = new HttpDelete("http://localhost:" + ourPort + "/Patient/123");
+		HttpDelete httpDelete = new HttpDelete(ourServer.getBaseUrl() + "/Patient/123");
 
 		CloseableHttpResponse status = ourClient.execute(httpDelete);
 		try {
@@ -430,7 +437,7 @@ public class RequestValidatingInterceptorDstu3Test {
 	public void testFetchMetadata() throws Exception {
 		myInterceptor.setAddResponseHeaderOnSeverity(ResultSeverityEnum.INFORMATION);
 
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/metadata");
+		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/metadata");
 
 		// This header caused a crash
 		httpGet.addHeader("Content-Type", "application/xml+fhir");
@@ -449,7 +456,7 @@ public class RequestValidatingInterceptorDstu3Test {
 
 	@Test
 	public void testSearch() throws Exception {
-		HttpGet httpPost = new HttpGet("http://localhost:" + ourPort + "/Patient?foo=bar");
+		HttpGet httpPost = new HttpGet(ourServer.getBaseUrl() + "/Patient?foo=bar");
 
 		HttpResponse status = ourClient.execute(httpPost);
 
@@ -466,30 +473,7 @@ public class RequestValidatingInterceptorDstu3Test {
 
 	@AfterAll
 	public static void afterClassClearContext() throws Exception {
-		JettyUtil.closeServer(ourServer);
 		TestUtil.randomizeLocaleAndTimezone();
-	}
-
-	@BeforeAll
-	public static void beforeClass() throws Exception {
-		ourServer = new Server(0);
-
-		PatientProvider patientProvider = new PatientProvider();
-
-		ServletHandler proxyHandler = new ServletHandler();
-		ourServlet = new RestfulServer(ourCtx);
-		ourServlet.setResourceProviders(patientProvider);
-		ServletHolder servletHolder = new ServletHolder(ourServlet);
-		proxyHandler.addServletWithMapping(servletHolder, "/*");
-		ourServer.setHandler(proxyHandler);
-		JettyUtil.startServer(ourServer);
-        ourPort = JettyUtil.getPortForStartedServer(ourServer);
-
-		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
-		HttpClientBuilder builder = HttpClientBuilder.create();
-		builder.setConnectionManager(connectionManager);
-		ourClient = builder.build();
-
 	}
 
 	public static class PatientProvider implements IResourceProvider {

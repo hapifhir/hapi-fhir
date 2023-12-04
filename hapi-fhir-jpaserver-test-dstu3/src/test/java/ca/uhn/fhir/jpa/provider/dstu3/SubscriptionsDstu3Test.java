@@ -5,8 +5,8 @@ import ca.uhn.fhir.jpa.util.SubscriptionsRequireManualActivationInterceptorDstu3
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import org.eclipse.jetty.websocket.api.Session;
-import org.eclipse.jetty.websocket.api.annotations.OnWebSocketConnect;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
+import org.eclipse.jetty.websocket.api.annotations.OnWebSocketOpen;
 import org.eclipse.jetty.websocket.api.annotations.WebSocket;
 import org.hl7.fhir.dstu3.model.Subscription;
 import org.hl7.fhir.dstu3.model.Subscription.SubscriptionChannelType;
@@ -179,7 +179,7 @@ public class SubscriptionsDstu3Test extends BaseResourceProviderDstu3Test {
 	/**
 	 * Basic Echo Client Socket
 	 */
-	@WebSocket(maxTextMessageSize = 64 * 1024)
+	@WebSocket
 	public class DynamicEchoSocket extends BaseSocket {
 
 		private String myCriteria;
@@ -193,14 +193,14 @@ public class SubscriptionsDstu3Test extends BaseResourceProviderDstu3Test {
 			myEncoding = theEncoding;
 		}
 
-		@OnWebSocketConnect
+		@OnWebSocketOpen
 		public void onConnect(Session session) {
 			ourLog.info("Got connect: {}", session);
 			this.session = session;
 			try {
 				String sending = "bind " + myCriteria;
 				ourLog.info("Sending: {}", sending);
-				session.getRemote().sendString(sending);
+				session.sendText(sending, null);
 			} catch (Throwable t) {
 				ourLog.error("Failure", t);
 			}
@@ -227,7 +227,7 @@ public class SubscriptionsDstu3Test extends BaseResourceProviderDstu3Test {
 	/**
 	 * Basic Echo Client Socket
 	 */
-	@WebSocket(maxTextMessageSize = 64 * 1024)
+	@WebSocket
 	public class SimpleEchoSocket extends BaseSocket {
 
 		@SuppressWarnings("unused")
@@ -237,14 +237,14 @@ public class SubscriptionsDstu3Test extends BaseResourceProviderDstu3Test {
 			mySubsId = theSubsId;
 		}
 
-		@OnWebSocketConnect
+		@OnWebSocketOpen
 		public void onConnect(Session session) {
 			ourLog.info("Got connect: {}", session);
 			this.session = session;
 			try {
 				String sending = "bind " + mySubsId;
 				ourLog.info("Sending: {}", sending);
-				session.getRemote().sendString(sending);
+				session.sendText(sending, null);
 			} catch (Throwable t) {
 				ourLog.error("Failure", t);
 			}
