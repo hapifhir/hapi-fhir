@@ -31,6 +31,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class AddTableByColumnTask extends BaseTableTask {
 
@@ -214,6 +215,6 @@ public class AddTableByColumnTask extends BaseTableTask {
 			return myAddColumnTasks;
 		}
 
-		return myAddColumnTasks.stream().sorted(myColumnSortingRules).toList();
+		return myAddColumnTasks.stream().sorted(myColumnSortingRules).collect(Collectors.toUnmodifiableList());
 	}
 }
