@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.jpa.migrate.taskdef;
 
+import ca.uhn.fhir.i18n.Msg;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -59,7 +60,8 @@ public abstract class BaseTableColumnTask extends BaseTableTask {
 				myColumnName = theColumnName.toLowerCase();
 				break;
 			default:
-				throw new IllegalArgumentException("Unknown ColumnNameCase: " + myColumnNameCase);
+				// LUKETODO:  reserve message code
+				throw new IllegalArgumentException(Msg.code(9999) + " Unknown ColumnNameCase: " + myColumnNameCase);
 		}
 		return this;
 	}
