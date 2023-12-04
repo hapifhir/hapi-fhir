@@ -45,6 +45,8 @@ import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.ResponseValidatingInterceptor;
+import jakarta.persistence.EntityManagerFactory;
+import jakarta.servlet.ServletException;
 import okhttp3.OkHttpClient;
 import org.apache.http.client.HttpClient;
 import org.springframework.beans.factory.ObjectProvider;
@@ -75,8 +77,6 @@ import org.springframework.util.CollectionUtils;
 
 import java.util.List;
 import java.util.concurrent.ScheduledExecutorService;
-import javax.persistence.EntityManagerFactory;
-import javax.servlet.ServletException;
 import javax.sql.DataSource;
 
 /**

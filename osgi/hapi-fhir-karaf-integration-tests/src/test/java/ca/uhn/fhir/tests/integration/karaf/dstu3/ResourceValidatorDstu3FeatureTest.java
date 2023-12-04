@@ -7,11 +7,9 @@ import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.parser.StrictErrorHandler;
 import ca.uhn.fhir.tests.integration.karaf.ValidationConstants;
-import ca.uhn.fhir.validation.*;
 import ca.uhn.fhir.validation.schematron.SchematronBaseValidator;
 import org.hamcrest.core.StringContains;
 import org.hl7.fhir.r5.hapi.validation.FhirInstanceValidator;
-import org.hl7.fhir.dstu3.model.*;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.ops4j.pax.exam.Configuration;
@@ -26,10 +24,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
-import static ca.uhn.fhir.tests.integration.karaf.PaxExamOptions.*;
-import static org.hamcrest.Matchers.*;
-import static org.junit.jupiter.api.Assertions.*;
-import static org.ops4j.pax.exam.CoreOptions.*;
+
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.debugConfiguration;
 
 /**

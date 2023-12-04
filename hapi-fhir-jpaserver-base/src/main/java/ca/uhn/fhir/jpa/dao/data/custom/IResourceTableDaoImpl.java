@@ -19,12 +19,12 @@
  */
 package ca.uhn.fhir.jpa.dao.data.custom;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import org.springframework.stereotype.Component;
 
 import java.util.Collection;
 import java.util.List;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 
 @Component
 /**

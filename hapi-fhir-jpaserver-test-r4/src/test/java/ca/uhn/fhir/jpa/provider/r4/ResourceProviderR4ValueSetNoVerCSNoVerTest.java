@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
+import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
@@ -14,7 +15,6 @@ import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
-import ca.uhn.fhir.jpa.provider.ValueSetOperationProvider;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
@@ -1075,7 +1075,7 @@ public class ResourceProviderR4ValueSetNoVerCSNoVerTest extends BaseResourceProv
 			.execute();
 		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(expansion));
 		assertThat(toDirectCodes(expansion.getExpansion().getContains()), containsInAnyOrder("A", "AA", "AB", "AAA"));
-		assertEquals(12, myCaptureQueriesListener.getSelectQueries().size());
+		assertEquals(14, myCaptureQueriesListener.getSelectQueries().size(), ()->myCaptureQueriesListener.logSelectQueries().stream().map(t->t.getSql(true, false)).collect(Collectors.joining("\n * ")));
 		assertEquals("ValueSet \"ValueSet.url[http://example.com/my_value_set]\" has not yet been pre-expanded. Performing in-memory expansion without parameters. Current status: NOT_EXPANDED | The ValueSet is waiting to be picked up and pre-expanded by a scheduled task.", expansion.getMeta().getExtensionString(EXT_VALUESET_EXPANSION_MESSAGE));
 
 		// Hierarchical
@@ -1092,7 +1092,7 @@ public class ResourceProviderR4ValueSetNoVerCSNoVerTest extends BaseResourceProv
 		assertThat(toDirectCodes(expansion.getExpansion().getContains()), containsInAnyOrder("A"));
 		assertThat(toDirectCodes(expansion.getExpansion().getContains().get(0).getContains()), containsInAnyOrder("AA", "AB"));
 		assertThat(toDirectCodes(expansion.getExpansion().getContains().get(0).getContains().stream().filter(t -> t.getCode().equals("AA")).findFirst().orElseThrow(() -> new IllegalArgumentException()).getContains()), containsInAnyOrder("AAA"));
-		assertEquals(13, myCaptureQueriesListener.getSelectQueries().size());
+		assertEquals(15, myCaptureQueriesListener.getSelectQueries().size());
 
 	}
 
@@ -1115,7 +1115,7 @@ public class ResourceProviderR4ValueSetNoVerCSNoVerTest extends BaseResourceProv
 			.execute();
 		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(expansion));
 		assertThat(toDirectCodes(expansion.getExpansion().getContains()), containsInAnyOrder("A", "AA", "AB", "AAA"));
-		assertEquals(8, myCaptureQueriesListener.getSelectQueries().size());
+		assertEquals(10, myCaptureQueriesListener.getSelectQueries().size(), ()->myCaptureQueriesListener.logSelectQueries().stream().map(t->t.getSql(true, false)).collect(Collectors.joining("\n * ")));
 		assertEquals("ValueSet with URL \"Unidentified ValueSet\" was expanded using an in-memory expansion", expansion.getMeta().getExtensionString(EXT_VALUESET_EXPANSION_MESSAGE));
 
 		// Hierarchical
@@ -1132,7 +1132,7 @@ public class ResourceProviderR4ValueSetNoVerCSNoVerTest extends BaseResourceProv
 		assertThat(toDirectCodes(expansion.getExpansion().getContains()), containsInAnyOrder("A"));
 		assertThat(toDirectCodes(expansion.getExpansion().getContains().get(0).getContains()), containsInAnyOrder("AA", "AB"));
 		assertThat(toDirectCodes(expansion.getExpansion().getContains().get(0).getContains().stream().filter(t -> t.getCode().equals("AA")).findFirst().orElseThrow(() -> new IllegalArgumentException()).getContains()), containsInAnyOrder("AAA"));
-		assertEquals(11, myCaptureQueriesListener.getSelectQueries().size());
+		assertEquals(13, myCaptureQueriesListener.getSelectQueries().size());
 
 	}
 
@@ -1295,13 +1295,13 @@ public class ResourceProviderR4ValueSetNoVerCSNoVerTest extends BaseResourceProv
 		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertEquals(ValueSetOperationProvider.RESULT, respParam.getParameter().get(0).getName());
+		assertEquals(IValidationSupport.CodeValidationResult.RESULT, respParam.getParameter().get(0).getName());
 		assertEquals(true, ((BooleanType) respParam.getParameter().get(0).getValue()).getValue());
 
-		assertEquals(ValueSetOperationProvider.DISPLAY, respParam.getParameter().get(1).getName());
+		assertEquals(IValidationSupport.CodeValidationResult.DISPLAY, respParam.getParameter().get(1).getName());
 		assertEquals("Male", ((StringType) respParam.getParameter().get(1).getValue()).getValue());
 
-		assertEquals(ValueSetOperationProvider.SOURCE_DETAILS, respParam.getParameter().get(2).getName());
+		assertEquals(IValidationSupport.CodeValidationResult.SOURCE_DETAILS, respParam.getParameter().get(2).getName());
 		assertEquals("Code was validated against in-memory expansion of ValueSet: http://hl7.org/fhir/ValueSet/administrative-gender", ((StringType) respParam.getParameter().get(2).getValue()).getValue());
 	}
 

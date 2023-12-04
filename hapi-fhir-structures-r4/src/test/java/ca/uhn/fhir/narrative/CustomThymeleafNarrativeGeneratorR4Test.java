@@ -15,9 +15,6 @@ public class CustomThymeleafNarrativeGeneratorR4Test {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(CustomThymeleafNarrativeGeneratorR4Test.class);
 
-	/**
-	 * Don't use cached here since we modify the context
-	 */
 	private final FhirContext myCtx = FhirContext.forR4Cached();
 
 	@AfterEach
@@ -30,7 +27,6 @@ public class CustomThymeleafNarrativeGeneratorR4Test {
 	 */
 	@Test
 	public void testStandardType() {
-
 		CustomThymeleafNarrativeGenerator gen = new CustomThymeleafNarrativeGenerator("classpath:narrative/standardtypes_r4.properties");
 		myCtx.setNarrativeGenerator(gen);
 
@@ -51,6 +47,7 @@ public class CustomThymeleafNarrativeGeneratorR4Test {
 
 	@Test
 	public void testCustomType() {
+		myCtx.setNarrativeGenerator(null);
 
 		CustomPatient patient = new CustomPatient();
 		patient.setActive(true);

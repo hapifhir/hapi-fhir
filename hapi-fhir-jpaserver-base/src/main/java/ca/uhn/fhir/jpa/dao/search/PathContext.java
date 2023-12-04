@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.jpa.dao.search;
 
+import org.hibernate.search.engine.search.predicate.SearchPredicate;
 import org.hibernate.search.engine.search.predicate.dsl.*;
 import org.hibernate.search.util.common.annotation.Incubating;
 
@@ -108,80 +109,153 @@ class PathContext implements SearchPredicateFactory {
 
 	// implement SearchPredicateFactory
 
+	@Override
 	public MatchAllPredicateOptionsStep<?> matchAll() {
 		return myPredicateFactory.matchAll();
 	}
 
+	@Override
+	public MatchNonePredicateFinalStep matchNone() {
+		return myPredicateFactory.matchNone();
+	}
+
+	@Override
 	public MatchIdPredicateMatchingStep<?> id() {
 		return myPredicateFactory.id();
 	}
 
+	@Override
 	public BooleanPredicateClausesStep<?> bool() {
 		return myPredicateFactory.bool();
 	}
 
+	@Override
 	public PredicateFinalStep bool(Consumer<? super BooleanPredicateClausesStep<?>> clauseContributor) {
 		return myPredicateFactory.bool(clauseContributor);
 	}
 
+	@Override
+	public SimpleBooleanPredicateClausesStep<?> and() {
+		return myPredicateFactory.and();
+	}
+
+	@Override
+	public SimpleBooleanPredicateOptionsStep<?> and(
+			SearchPredicate theSearchPredicate, SearchPredicate... theSearchPredicates) {
+		return myPredicateFactory.and(theSearchPredicate, theSearchPredicates);
+	}
+
+	@Override
+	public SimpleBooleanPredicateOptionsStep<?> and(
+			PredicateFinalStep thePredicateFinalStep, PredicateFinalStep... thePredicateFinalSteps) {
+		return myPredicateFactory.and(thePredicateFinalStep, thePredicateFinalSteps);
+	}
+
+	@Override
+	public SimpleBooleanPredicateClausesStep<?> or() {
+		return myPredicateFactory.or();
+	}
+
+	@Override
+	public SimpleBooleanPredicateOptionsStep<?> or(
+			SearchPredicate theSearchPredicate, SearchPredicate... theSearchPredicates) {
+		return myPredicateFactory.or(theSearchPredicate, theSearchPredicates);
+	}
+
+	@Override
+	public SimpleBooleanPredicateOptionsStep<?> or(
+			PredicateFinalStep thePredicateFinalStep, PredicateFinalStep... thePredicateFinalSteps) {
+		return myPredicateFactory.or(thePredicateFinalStep, thePredicateFinalSteps);
+	}
+
+	@Override
+	public NotPredicateFinalStep not(SearchPredicate theSearchPredicate) {
+		return myPredicateFactory.not(theSearchPredicate);
+	}
+
+	@Override
+	public NotPredicateFinalStep not(PredicateFinalStep thePredicateFinalStep) {
+		return myPredicateFactory.not(thePredicateFinalStep);
+	}
+
+	@Override
 	public MatchPredicateFieldStep<?> match() {
 		return myPredicateFactory.match();
 	}
 
+	@Override
 	public RangePredicateFieldStep<?> range() {
 		return myPredicateFactory.range();
 	}
 
+	@Override
 	public PhrasePredicateFieldStep<?> phrase() {
 		return myPredicateFactory.phrase();
 	}
 
+	@Override
 	public WildcardPredicateFieldStep<?> wildcard() {
 		return myPredicateFactory.wildcard();
 	}
 
+	@Override
 	public RegexpPredicateFieldStep<?> regexp() {
 		return myPredicateFactory.regexp();
 	}
 
+	@Override
 	public TermsPredicateFieldStep<?> terms() {
 		return myPredicateFactory.terms();
 	}
 
+	@Override
 	public NestedPredicateFieldStep<?> nested() {
 		return myPredicateFactory.nested();
 	}
 
+	@Override
+	public NestedPredicateClausesStep<?> nested(String theObjectFieldPath) {
+		return myPredicateFactory.nested(theObjectFieldPath);
+	}
+
+	@Override
 	public SimpleQueryStringPredicateFieldStep<?> simpleQueryString() {
 		return myPredicateFactory.simpleQueryString();
 	}
 
+	@Override
 	public ExistsPredicateFieldStep<?> exists() {
 		return myPredicateFactory.exists();
 	}
 
+	@Override
 	public SpatialPredicateInitialStep spatial() {
 		return myPredicateFactory.spatial();
 	}
 
+	@Override
 	@Incubating
 	public NamedPredicateOptionsStep named(String path) {
 		return myPredicateFactory.named(path);
 	}
 
+	@Override
 	public <T> T extension(SearchPredicateFactoryExtension<T> extension) {
 		return myPredicateFactory.extension(extension);
 	}
 
+	@Override
 	public SearchPredicateFactoryExtensionIfSupportedStep extension() {
 		return myPredicateFactory.extension();
 	}
 
+	@Override
 	@Incubating
 	public SearchPredicateFactory withRoot(String objectFieldPath) {
 		return myPredicateFactory.withRoot(objectFieldPath);
 	}
 
+	@Override
 	@Incubating
 	public String toAbsolutePath(String relativeFieldPath) {
 		return myPredicateFactory.toAbsolutePath(relativeFieldPath);

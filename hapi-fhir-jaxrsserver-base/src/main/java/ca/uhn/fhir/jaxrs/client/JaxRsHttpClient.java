@@ -29,20 +29,20 @@ import ca.uhn.fhir.rest.client.api.IHttpClient;
 import ca.uhn.fhir.rest.client.api.IHttpRequest;
 import ca.uhn.fhir.rest.client.impl.BaseHttpClientInvocation;
 import ca.uhn.fhir.rest.client.method.MethodUtil;
+import jakarta.ws.rs.client.Client;
+import jakarta.ws.rs.client.Entity;
+import jakarta.ws.rs.client.Invocation.Builder;
+import jakarta.ws.rs.core.Form;
+import jakarta.ws.rs.core.MultivaluedHashMap;
+import jakarta.ws.rs.core.MultivaluedMap;
 import org.hl7.fhir.instance.model.api.IBaseBinary;
 
 import java.util.List;
 import java.util.Map;
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.client.Invocation.Builder;
-import javax.ws.rs.core.Form;
-import javax.ws.rs.core.MultivaluedHashMap;
-import javax.ws.rs.core.MultivaluedMap;
 
 /**
  * A Http Request based on JaxRs. This is an adapter around the class
- * {@link javax.ws.rs.client.Client Client}
+ * {@link jakarta.ws.rs.client.Client Client}
  *
  * @author Peter Van Houte | peter.vanhoute@agfa.com | Agfa Healthcare
  */

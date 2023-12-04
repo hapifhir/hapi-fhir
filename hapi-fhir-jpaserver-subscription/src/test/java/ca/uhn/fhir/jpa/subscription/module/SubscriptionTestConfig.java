@@ -46,7 +46,7 @@ public class SubscriptionTestConfig {
 	private IChannelNamer myChannelNamer;
 
 	@Primary
-	@Bean(autowire = Autowire.BY_NAME, name = "myJpaValidationSupportChain")
+	@Bean(name = "myJpaValidationSupportChain")
 	public IValidationSupport validationSupportChainR4() {
 		return myFhirContext.getValidationSupport();
 	}

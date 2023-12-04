@@ -32,6 +32,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.Queue;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
@@ -50,17 +51,32 @@ import javax.annotation.Nonnull;
  */
 public class CircularQueueCaptureQueriesListener extends BaseCaptureQueriesListener {
 
+	public static final Predicate<String> DEFAULT_SELECT_INCLUSION_CRITERIA =
+			t -> t.toLowerCase(Locale.US).startsWith("select");
 	private static final int CAPACITY = 1000;
 	private static final Logger ourLog = LoggerFactory.getLogger(CircularQueueCaptureQueriesListener.class);
 	private Queue<SqlQuery> myQueries;
 	private AtomicInteger myCommitCounter;
 	private AtomicInteger myRollbackCounter;
 
+	@Nonnull
+	private Predicate<String> mySelectQueryInclusionCriteria = DEFAULT_SELECT_INCLUSION_CRITERIA;
+
 	/**
 	 * Constructor
 	 */
 	public CircularQueueCaptureQueriesListener() {
 		startCollecting();
+	}
+
+	/**
+	 * Sets an alternate inclusion criteria for select queries. This can be used to add
+	 * additional criteria beyond the default value of {@link #DEFAULT_SELECT_INCLUSION_CRITERIA}.
+	 */
+	public CircularQueueCaptureQueriesListener setSelectQueryInclusionCriteria(
+			@Nonnull Predicate<String> theSelectQueryInclusionCriteria) {
+		mySelectQueryInclusionCriteria = theSelectQueryInclusionCriteria;
+		return this;
 	}
 
 	@Override
@@ -133,6 +149,22 @@ public class CircularQueueCaptureQueriesListener extends BaseCaptureQueriesListe
 		return getQueriesStartingWith(theStart, null);
 	}
 
+	private List<SqlQuery> getQueriesMatching(Predicate<String> thePredicate, String theThreadName) {
+		return getCapturedQueries().stream()
+				.filter(t -> theThreadName == null || t.getThreadName().equals(theThreadName))
+				.filter(t -> thePredicate.test(t.getSql(false, false)))
+				.collect(Collectors.toList());
+	}
+
+	private List<SqlQuery> getQueriesMatching(Predicate<String> thePredicate) {
+		return getQueriesMatching(thePredicate, null);
+	}
+
+	private List<SqlQuery> getQueriesForCurrentThreadMatching(Predicate<String> thePredicate) {
+		String threadName = Thread.currentThread().getName();
+		return getQueriesMatching(thePredicate, threadName);
+	}
+
 	public int getCommitCount() {
 		return myCommitCounter.get();
 	}
@@ -145,7 +177,7 @@ public class CircularQueueCaptureQueriesListener extends BaseCaptureQueriesListe
 	 * Returns all SELECT queries executed on the current thread - Index 0 is oldest
 	 */
 	public List<SqlQuery> getSelectQueries() {
-		return getQueriesStartingWith("select");
+		return getQueriesMatching(mySelectQueryInclusionCriteria);
 	}
 
 	/**
@@ -173,7 +205,7 @@ public class CircularQueueCaptureQueriesListener extends BaseCaptureQueriesListe
 	 * Returns all SELECT queries executed on the current thread - Index 0 is oldest
 	 */
 	public List<SqlQuery> getSelectQueriesForCurrentThread() {
-		return getQueriesForCurrentThreadStartingWith("select");
+		return getQueriesForCurrentThreadMatching(mySelectQueryInclusionCriteria);
 	}
 
 	/**

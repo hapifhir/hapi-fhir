@@ -60,9 +60,9 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
 
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.ServletConfig;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -731,7 +731,7 @@ public class ServerConformanceProviderDstu2Test {
 	public static class MultiTypeEncounterProvider implements IResourceProvider {
 
 		@Operation(name = "someOp")
-		public IBundleProvider everything(javax.servlet.http.HttpServletRequest theServletRequest, @IdParam IdDt theId,
+		public IBundleProvider everything(jakarta.servlet.http.HttpServletRequest theServletRequest, @IdParam IdDt theId,
 													 @OperationParam(name = "someOpParam1") DateDt theStart, @OperationParam(name = "someOpParam2") Encounter theEnd) {
 			return null;
 		}
@@ -742,7 +742,7 @@ public class ServerConformanceProviderDstu2Test {
 		}
 
 		@Validate
-		public IBundleProvider validate(javax.servlet.http.HttpServletRequest theServletRequest, @IdParam IdDt theId, @ResourceParam Encounter thePatient) {
+		public IBundleProvider validate(jakarta.servlet.http.HttpServletRequest theServletRequest, @IdParam IdDt theId, @ResourceParam Encounter thePatient) {
 			return null;
 		}
 
@@ -751,7 +751,7 @@ public class ServerConformanceProviderDstu2Test {
 	public static class MultiTypePatientProvider implements IResourceProvider {
 
 		@Operation(name = "someOp")
-		public IBundleProvider everything(javax.servlet.http.HttpServletRequest theServletRequest, @IdParam IdDt theId,
+		public IBundleProvider everything(jakarta.servlet.http.HttpServletRequest theServletRequest, @IdParam IdDt theId,
 													 @OperationParam(name = "someOpParam1") DateDt theStart, @OperationParam(name = "someOpParam2") Patient theEnd) {
 			return null;
 		}
@@ -762,7 +762,7 @@ public class ServerConformanceProviderDstu2Test {
 		}
 
 		@Validate
-		public IBundleProvider validate(javax.servlet.http.HttpServletRequest theServletRequest, @IdParam IdDt theId, @ResourceParam Patient thePatient) {
+		public IBundleProvider validate(jakarta.servlet.http.HttpServletRequest theServletRequest, @IdParam IdDt theId, @ResourceParam Patient thePatient) {
 			return null;
 		}
 
@@ -795,7 +795,7 @@ public class ServerConformanceProviderDstu2Test {
 	public static class PlainProviderWithExtendedOperationOnNoType {
 
 		@Operation(name = "plain", idempotent = true, returnParameters = {@OperationParam(min = 1, max = 2, name = "out1", type = StringDt.class)})
-		public IBundleProvider everything(javax.servlet.http.HttpServletRequest theServletRequest, @IdParam ca.uhn.fhir.model.primitive.IdDt theId, @OperationParam(name = "start") DateDt theStart, @OperationParam(name = "end") DateDt theEnd) {
+		public IBundleProvider everything(jakarta.servlet.http.HttpServletRequest theServletRequest, @IdParam ca.uhn.fhir.model.primitive.IdDt theId, @OperationParam(name = "start") DateDt theStart, @OperationParam(name = "end") DateDt theEnd) {
 			return null;
 		}
 
@@ -804,7 +804,7 @@ public class ServerConformanceProviderDstu2Test {
 	public static class ProviderWithExtendedOperationReturningBundle implements IResourceProvider {
 
 		@Operation(name = "everything", idempotent = true)
-		public IBundleProvider everything(javax.servlet.http.HttpServletRequest theServletRequest, @IdParam ca.uhn.fhir.model.primitive.IdDt theId, @OperationParam(name = "start") DateDt theStart, @OperationParam(name = "end") DateDt theEnd) {
+		public IBundleProvider everything(jakarta.servlet.http.HttpServletRequest theServletRequest, @IdParam ca.uhn.fhir.model.primitive.IdDt theId, @OperationParam(name = "start") DateDt theStart, @OperationParam(name = "end") DateDt theEnd) {
 			return null;
 		}
 

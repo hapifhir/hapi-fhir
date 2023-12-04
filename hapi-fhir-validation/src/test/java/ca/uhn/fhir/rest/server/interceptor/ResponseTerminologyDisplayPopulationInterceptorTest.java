@@ -138,16 +138,6 @@ public class ResponseTerminologyDisplayPopulationInterceptorTest {
 		public boolean isCodeSystemSupported(ValidationSupportContext theValidationSupportContext, String theSystem) {
 			return true;
 		}
-
-		@Override
-		public LookupCodeResult lookupCode(ValidationSupportContext theValidationSupportContext, String theSystem, String theCode, String theDisplayLanguage) {
-			return null;
-		}
-		
-		@Override
-		public LookupCodeResult lookupCode(ValidationSupportContext theValidationSupportContext, String theSystem, String theCode) {
-			return lookupCode(theValidationSupportContext, theSystem, theCode, null);
-		}
 	}
 
 }

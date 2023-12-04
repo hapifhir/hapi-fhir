@@ -11,17 +11,13 @@ import ca.uhn.fhir.rest.annotation.IncludeParam;
 import ca.uhn.fhir.rest.annotation.RequiredParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.api.EncodingEnum;
-import ca.uhn.fhir.test.utilities.JettyUtil;
+import ca.uhn.fhir.test.utilities.HttpClientExtension;
+import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.ElementUtil;
+import ca.uhn.fhir.util.TestUtil;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.servlet.ServletHandler;
-import org.eclipse.jetty.servlet.ServletHolder;
 import org.hl7.fhir.dstu2.model.Bundle;
 import org.hl7.fhir.dstu2.model.Bundle.SearchEntryMode;
 import org.hl7.fhir.dstu2.model.DiagnosticReport;
@@ -31,9 +27,9 @@ import org.hl7.fhir.dstu2.model.Organization;
 import org.hl7.fhir.dstu2.model.Patient;
 import org.hl7.fhir.dstu2.model.Practitioner;
 import org.hl7.fhir.dstu2.model.Reference;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -41,7 +37,6 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
@@ -50,14 +45,22 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class IncludeHl7OrgDstu2Test {
 
   private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(IncludeHl7OrgDstu2Test.class);
-  private static CloseableHttpClient ourClient;
-  private static int ourPort;
-  private static Server ourServer;
-  private static FhirContext ourCtx;
+  private static final FhirContext ourCtx = FhirContext.forDstu2Hl7OrgCached();
+
+  @RegisterExtension
+  public static RestfulServerExtension ourServer = new RestfulServerExtension(ourCtx)
+      .registerProvider(new DummyPatientResourceProvider())
+      .withPagingProvider(new FifoMemoryPagingProvider(100))
+      .setDefaultResponseEncoding(EncodingEnum.XML)
+      .setDefaultPrettyPrint(false)
+      .withServer(s->s.setBundleInclusionRule(BundleInclusionRule.BASED_ON_RESOURCE_PRESENCE));
+
+  @RegisterExtension
+  public static HttpClientExtension ourClient = new HttpClientExtension();
 
   @Test
   public void testNoIncludes() throws Exception {
-    HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?name=Hello");
+    HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?name=Hello");
     HttpResponse status = ourClient.execute(httpGet);
     String responseContent = IOUtils.toString(status.getEntity().getContent());
     IOUtils.closeQuietly(status.getEntity().getContent());
@@ -73,7 +76,7 @@ public class IncludeHl7OrgDstu2Test {
 
   @Test
   public void testOneIncludeXml() throws Exception {
-    HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?name=Hello&_include=foo");
+    HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?name=Hello&_include=foo");
     HttpResponse status = ourClient.execute(httpGet);
     String responseContent = IOUtils.toString(status.getEntity().getContent());
     IOUtils.closeQuietly(status.getEntity().getContent());
@@ -93,7 +96,7 @@ public class IncludeHl7OrgDstu2Test {
 
   @Test
   public void testOneIncludeJson() throws Exception {
-    HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?name=Hello&_include=foo&_format=json");
+    HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?name=Hello&_include=foo&_format=json");
     HttpResponse status = ourClient.execute(httpGet);
     String responseContent = IOUtils.toString(status.getEntity().getContent());
     IOUtils.closeQuietly(status.getEntity().getContent());
@@ -113,7 +116,7 @@ public class IncludeHl7OrgDstu2Test {
 
   @Test
   public void testIIncludedResourcesNonContained() throws Exception {
-    HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_query=normalInclude&_pretty=true");
+    HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?_query=normalInclude&_pretty=true");
     HttpResponse status = ourClient.execute(httpGet);
     String responseContent = IOUtils.toString(status.getEntity().getContent());
     IOUtils.closeQuietly(status.getEntity().getContent());
@@ -139,7 +142,7 @@ public class IncludeHl7OrgDstu2Test {
 
   @Test
   public void testIIncludedResourcesNonContainedInExtension() throws Exception {
-    HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_query=extInclude&_pretty=true");
+    HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?_query=extInclude&_pretty=true");
     HttpResponse status = ourClient.execute(httpGet);
     String responseContent = IOUtils.toString(status.getEntity().getContent());
     IOUtils.closeQuietly(status.getEntity().getContent());
@@ -165,7 +168,7 @@ public class IncludeHl7OrgDstu2Test {
 
   @Test
   public void testIIncludedResourcesNonContainedInExtensionJson() throws Exception {
-    HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_query=extInclude&_pretty=true&_format=json");
+    HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?_query=extInclude&_pretty=true&_format=json");
     HttpResponse status = ourClient.execute(httpGet);
     String responseContent = IOUtils.toString(status.getEntity().getContent());
     IOUtils.closeQuietly(status.getEntity().getContent());
@@ -191,7 +194,7 @@ public class IncludeHl7OrgDstu2Test {
 
   @Test
   public void testIIncludedResourcesNonContainedInDeclaredExtension() throws Exception {
-    HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_query=declaredExtInclude&_pretty=true");
+    HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?_query=declaredExtInclude&_pretty=true");
     HttpResponse status = ourClient.execute(httpGet);
     String responseContent = IOUtils.toString(status.getEntity().getContent());
     IOUtils.closeQuietly(status.getEntity().getContent());
@@ -219,7 +222,7 @@ public class IncludeHl7OrgDstu2Test {
 
   @Test
   public void testTwoInclude() throws Exception {
-    HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?name=Hello&_include=foo&_include=bar&_pretty=true");
+    HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?name=Hello&_include=foo&_include=bar&_pretty=true");
     HttpResponse status = ourClient.execute(httpGet);
     String responseContent = IOUtils.toString(status.getEntity().getContent());
     IOUtils.closeQuietly(status.getEntity().getContent());
@@ -243,7 +246,7 @@ public class IncludeHl7OrgDstu2Test {
 
   @Test
   public void testBadInclude() throws Exception {
-    HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?name=Hello&_include=foo&_include=baz");
+    HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?name=Hello&_include=foo&_include=baz");
     HttpResponse status = ourClient.execute(httpGet);
     assertEquals(400, status.getStatusLine().getStatusCode());
   }
@@ -435,33 +438,7 @@ public class IncludeHl7OrgDstu2Test {
 
   @AfterAll
   public static void afterClass() throws Exception {
-    JettyUtil.closeServer(ourServer);
-  }
-
-  @BeforeAll
-  public static void beforeClass() throws Exception {
-
-    ourCtx = FhirContext.forDstu2Hl7Org();
-    ourServer = new Server(0);
-
-    DummyPatientResourceProvider patientProvider = new DummyPatientResourceProvider();
-
-    ServletHandler proxyHandler = new ServletHandler();
-    RestfulServer servlet = new RestfulServer(ourCtx);
-    servlet.setResourceProviders(patientProvider, new DummyDiagnosticReportResourceProvider());
-    servlet.setBundleInclusionRule(BundleInclusionRule.BASED_ON_RESOURCE_PRESENCE);
-    servlet.setDefaultResponseEncoding(EncodingEnum.XML);
-    ServletHolder servletHolder = new ServletHolder(servlet);
-    proxyHandler.addServletWithMapping(servletHolder, "/*");
-    ourServer.setHandler(proxyHandler);
-    JettyUtil.startServer(ourServer);
-    ourPort = JettyUtil.getPortForStartedServer(ourServer);
-
-    PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
-    HttpClientBuilder builder = HttpClientBuilder.create();
-    builder.setConnectionManager(connectionManager);
-    ourClient = builder.build();
-
+    TestUtil.randomizeLocaleAndTimezone();
   }
 
 }

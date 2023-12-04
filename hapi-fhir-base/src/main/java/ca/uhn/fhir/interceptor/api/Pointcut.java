@@ -93,6 +93,10 @@ public enum Pointcut implements IPointcut {
 	 * <li>
 	 *    ca.uhn.fhir.rest.client.api.IRestfulClient - The client object making the request
 	 * </li>
+	 * <li>
+	 *    ca.uhn.fhir.rest.client.api.ClientResponseContext - Contains an IHttpRequest, an IHttpResponse, and an IRestfulClient
+	 *    and also allows the client to mutate the contained IHttpResponse
+	 * </li>
 	 * </ul>
 	 * </p>
 	 * Hook methods must return <code>void</code>.
@@ -101,7 +105,8 @@ public enum Pointcut implements IPointcut {
 			void.class,
 			"ca.uhn.fhir.rest.client.api.IHttpRequest",
 			"ca.uhn.fhir.rest.client.api.IHttpResponse",
-			"ca.uhn.fhir.rest.client.api.IRestfulClient"),
+			"ca.uhn.fhir.rest.client.api.IRestfulClient",
+			"ca.uhn.fhir.rest.client.api.ClientResponseContext"),
 
 	/**
 	 * <b>Server Hook:</b>
@@ -153,10 +158,10 @@ public enum Pointcut implements IPointcut {
 	 * Hooks may accept the following parameters:
 	 * <ul>
 	 * <li>
-	 * javax.servlet.http.HttpServletRequest - The servlet request, when running in a servlet environment
+	 * jakarta.servlet.http.HttpServletRequest - The servlet request, when running in a servlet environment
 	 * </li>
 	 * <li>
-	 * javax.servlet.http.HttpServletResponse - The servlet response, when running in a servlet environment
+	 * jakarta.servlet.http.HttpServletResponse - The servlet response, when running in a servlet environment
 	 * </li>
 	 * </ul>
 	 * </p>
@@ -166,7 +171,7 @@ public enum Pointcut implements IPointcut {
 	 * no further processing will occur and no further interceptors will be called.
 	 */
 	SERVER_INCOMING_REQUEST_PRE_PROCESSED(
-			boolean.class, "javax.servlet.http.HttpServletRequest", "javax.servlet.http.HttpServletResponse"),
+			boolean.class, "jakarta.servlet.http.HttpServletRequest", "jakarta.servlet.http.HttpServletResponse"),
 
 	/**
 	 * <b>Server Hook:</b>
@@ -193,10 +198,10 @@ public enum Pointcut implements IPointcut {
 	 * only be populated when operating in a RestfulServer implementation. It is provided as a convenience.
 	 * </li>
 	 * <li>
-	 * javax.servlet.http.HttpServletRequest - The servlet request, when running in a servlet environment
+	 * jakarta.servlet.http.HttpServletRequest - The servlet request, when running in a servlet environment
 	 * </li>
 	 * <li>
-	 * javax.servlet.http.HttpServletResponse - The servlet response, when running in a servlet environment
+	 * jakarta.servlet.http.HttpServletResponse - The servlet response, when running in a servlet environment
 	 * </li>
 	 * <li>
 	 * ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException - The exception that was thrown
@@ -215,8 +220,8 @@ public enum Pointcut implements IPointcut {
 			boolean.class,
 			"ca.uhn.fhir.rest.api.server.RequestDetails",
 			"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails",
-			"javax.servlet.http.HttpServletRequest",
-			"javax.servlet.http.HttpServletResponse",
+			"jakarta.servlet.http.HttpServletRequest",
+			"jakarta.servlet.http.HttpServletResponse",
 			"ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException"),
 
 	/**
@@ -239,10 +244,10 @@ public enum Pointcut implements IPointcut {
 	 * only be populated when operating in a RestfulServer implementation. It is provided as a convenience.
 	 * </li>
 	 * <li>
-	 * javax.servlet.http.HttpServletRequest - The servlet request, when running in a servlet environment
+	 * jakarta.servlet.http.HttpServletRequest - The servlet request, when running in a servlet environment
 	 * </li>
 	 * <li>
-	 * javax.servlet.http.HttpServletResponse - The servlet response, when running in a servlet environment
+	 * jakarta.servlet.http.HttpServletResponse - The servlet response, when running in a servlet environment
 	 * </li>
 	 * </ul>
 	 * <p>
@@ -263,8 +268,8 @@ public enum Pointcut implements IPointcut {
 			boolean.class,
 			"ca.uhn.fhir.rest.api.server.RequestDetails",
 			"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails",
-			"javax.servlet.http.HttpServletRequest",
-			"javax.servlet.http.HttpServletResponse"),
+			"jakarta.servlet.http.HttpServletRequest",
+			"jakarta.servlet.http.HttpServletResponse"),
 
 	/**
 	 * <b>Server Hook:</b>
@@ -286,10 +291,10 @@ public enum Pointcut implements IPointcut {
 	 * only be populated when operating in a RestfulServer implementation. It is provided as a convenience.
 	 * </li>
 	 * <li>
-	 * javax.servlet.http.HttpServletRequest - The servlet request, when running in a servlet environment
+	 * jakarta.servlet.http.HttpServletRequest - The servlet request, when running in a servlet environment
 	 * </li>
 	 * <li>
-	 * javax.servlet.http.HttpServletResponse - The servlet response, when running in a servlet environment
+	 * jakarta.servlet.http.HttpServletResponse - The servlet response, when running in a servlet environment
 	 * </li>
 	 * </ul>
 	 * <p>
@@ -308,8 +313,8 @@ public enum Pointcut implements IPointcut {
 			boolean.class,
 			"ca.uhn.fhir.rest.api.server.RequestDetails",
 			"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails",
-			"javax.servlet.http.HttpServletRequest",
-			"javax.servlet.http.HttpServletResponse"),
+			"jakarta.servlet.http.HttpServletRequest",
+			"jakarta.servlet.http.HttpServletResponse"),
 
 	/**
 	 * <b>Server Hook:</b>
@@ -411,10 +416,10 @@ public enum Pointcut implements IPointcut {
 	 * {@link NullPointerException} in the case of a bug being triggered.
 	 * </li>
 	 * <li>
-	 * javax.servlet.http.HttpServletRequest - The servlet request, when running in a servlet environment
+	 * jakarta.servlet.http.HttpServletRequest - The servlet request, when running in a servlet environment
 	 * </li>
 	 * <li>
-	 * javax.servlet.http.HttpServletResponse - The servlet response, when running in a servlet environment
+	 * jakarta.servlet.http.HttpServletResponse - The servlet response, when running in a servlet environment
 	 * </li>
 	 * </ul>
 	 * <p>
@@ -429,8 +434,8 @@ public enum Pointcut implements IPointcut {
 			"ca.uhn.fhir.rest.api.server.RequestDetails",
 			"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails",
 			"java.lang.Throwable",
-			"javax.servlet.http.HttpServletRequest",
-			"javax.servlet.http.HttpServletResponse"),
+			"jakarta.servlet.http.HttpServletRequest",
+			"jakarta.servlet.http.HttpServletResponse"),
 
 	/**
 	 * <b>Server Hook:</b>
@@ -458,10 +463,10 @@ public enum Pointcut implements IPointcut {
 	 * ca.uhn.fhir.rest.api.server.ResponseDetails - This object contains details about the response, including the contents. Hook methods may modify this object to change or replace the response.
 	 * </li>
 	 * <li>
-	 * javax.servlet.http.HttpServletRequest - The servlet request, when running in a servlet environment
+	 * jakarta.servlet.http.HttpServletRequest - The servlet request, when running in a servlet environment
 	 * </li>
 	 * <li>
-	 * javax.servlet.http.HttpServletResponse - The servlet response, when running in a servlet environment
+	 * jakarta.servlet.http.HttpServletResponse - The servlet response, when running in a servlet environment
 	 * </li>
 	 * </ul>
 	 * </p>
@@ -482,8 +487,8 @@ public enum Pointcut implements IPointcut {
 			"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails",
 			"org.hl7.fhir.instance.model.api.IBaseResource",
 			"ca.uhn.fhir.rest.api.server.ResponseDetails",
-			"javax.servlet.http.HttpServletRequest",
-			"javax.servlet.http.HttpServletResponse"),
+			"jakarta.servlet.http.HttpServletRequest",
+			"jakarta.servlet.http.HttpServletResponse"),
 
 	/**
 	 * <b>Server Hook:</b>
@@ -549,10 +554,10 @@ public enum Pointcut implements IPointcut {
 	 * java.lang.String - The GraphQL response
 	 * </li>
 	 * <li>
-	 * javax.servlet.http.HttpServletRequest - The servlet request, when running in a servlet environment
+	 * jakarta.servlet.http.HttpServletRequest - The servlet request, when running in a servlet environment
 	 * </li>
 	 * <li>
-	 * javax.servlet.http.HttpServletResponse - The servlet response, when running in a servlet environment
+	 * jakarta.servlet.http.HttpServletResponse - The servlet response, when running in a servlet environment
 	 * </li>
 	 * </ul>
 	 * </p>
@@ -573,8 +578,8 @@ public enum Pointcut implements IPointcut {
 			"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails",
 			"java.lang.String",
 			"java.lang.String",
-			"javax.servlet.http.HttpServletRequest",
-			"javax.servlet.http.HttpServletResponse"),
+			"jakarta.servlet.http.HttpServletRequest",
+			"jakarta.servlet.http.HttpServletResponse"),
 
 	/**
 	 * <b>Server Hook:</b>

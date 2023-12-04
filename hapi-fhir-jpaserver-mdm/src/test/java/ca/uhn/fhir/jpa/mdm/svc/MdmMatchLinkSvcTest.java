@@ -119,7 +119,6 @@ public class MdmMatchLinkSvcTest {
 			assertLinksMatchVector((Long) null);
 		}
 
-		@Test
 		@RepeatedTest(20)
 		public void testUpdatingAResourceToMatchACurrentlyUnmatchedResource_resultsInUpdatedLinksForBoth() {
 			// setup

@@ -7,7 +7,7 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-deployable-pom</artifactId>
-		<version>6.11.2-SNAPSHOT</version>
+		<version>6.11.5-SNAPSHOT</version>
 
 		<relativePath>../hapi-deployable-pom/pom.xml</relativePath>
 	</parent>
@@ -95,6 +95,11 @@
 
 	<dependencies>
 		<dependency>
+			<groupId>com.fasterxml.jackson.module</groupId>
+			<artifactId>jackson-module-jakarta-xmlbind-annotations</artifactId>
+		</dependency>
+
+		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-converter</artifactId>
 			<version>${project.version}</version>
@@ -134,23 +139,16 @@
 			<version>${spring-security-core.version}</version>
 		</dependency>
 
-		<!--
-		START Jakarta CR Swap
+		<!-- This is needed for the CqlExceptionHandlingInterceptor -->
+		<dependency>
+			<groupId>jakarta.servlet</groupId>
+			<artifactId>jakarta.servlet-api</artifactId>
+		</dependency>
 
-		These dependencies are added/swapped because the
-		Clinical Reasoning components no longer include it.
-		These will need to be adjusted / removed as soon as
-		the HAPI Jakarta PR hits -->
 		<dependency>
-			<groupId>javax.servlet</groupId>
-			<artifactId>javax.servlet-api</artifactId>
+			<groupId>jakarta.xml.bind</groupId>
+			<artifactId>jakarta.xml.bind-api</artifactId>
 		</dependency>
-		<dependency>
-			<groupId>javax.xml.bind</groupId>
-			<artifactId>jaxb-api</artifactId>
-			<version>2.3.1</version>
-		</dependency>
-		<!-- END Jakarta CR Swap   -->
 
 		<!-- test -->
 		<dependency>

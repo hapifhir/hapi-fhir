@@ -8,7 +8,9 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.ValidationModeEnum;
+import ca.uhn.fhir.test.utilities.HttpClientExtension;
 import ca.uhn.fhir.test.utilities.JettyUtil;
+import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.TestUtil;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
@@ -20,8 +22,8 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.servlet.ServletHandler;
-import org.eclipse.jetty.servlet.ServletHolder;
+import org.eclipse.jetty.ee10.servlet.ServletHandler;
+import org.eclipse.jetty.ee10.servlet.ServletHolder;
 import org.hl7.fhir.dstu3.model.CodeType;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.OperationOutcome;
@@ -33,6 +35,7 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
 import java.util.concurrent.TimeUnit;
 
@@ -41,8 +44,7 @@ import static org.hamcrest.Matchers.stringContainsInOrder;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ValidateDstu3Test {
-	private static CloseableHttpClient ourClient;
-	private static FhirContext ourCtx = FhirContext.forDstu3();
+	private static final FhirContext ourCtx = FhirContext.forDstu3Cached();
 	private static EncodingEnum ourLastEncoding;
 	private static IdType ourLastId;
 	private static ValidationModeEnum ourLastMode;
@@ -51,9 +53,17 @@ public class ValidateDstu3Test {
 	private static String ourLastResourceBody;
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ValidateDstu3Test.class);
 	private static OperationOutcome ourOutcomeToReturn;
-	private static int ourPort;
 
-	private static Server ourServer;
+	@RegisterExtension
+	private RestfulServerExtension ourServer  = new RestfulServerExtension(ourCtx)
+		 .setDefaultResponseEncoding(EncodingEnum.XML)
+		 .registerProvider(new PatientProvider())
+		 .registerProvider(new OrganizationProvider())
+		 .withPagingProvider(new FifoMemoryPagingProvider(100))
+		 .setDefaultPrettyPrint(false);
+
+	@RegisterExtension
+	private HttpClientExtension ourClient = new HttpClientExtension();
 
 	@BeforeEach()
 	public void before() {
@@ -74,7 +84,7 @@ public class ValidateDstu3Test {
 		Parameters params = new Parameters();
 		params.addParameter().setName("resource").setResource(patient);
 
-		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient/$validate");
+		HttpPost httpPost = new HttpPost(ourServer.getBaseUrl() + "/Patient/$validate");
 		httpPost.setEntity(new StringEntity(ourCtx.newXmlParser().encodeResourceToString(params), ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 
 		HttpResponse status = ourClient.execute(httpPost);
@@ -97,7 +107,7 @@ public class ValidateDstu3Test {
 		params.addParameter().setName("resource").setResource(patient);
 		params.addParameter().setName("mode").setValue(new CodeType(" "));
 
-		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient/$validate");
+		HttpPost httpPost = new HttpPost(ourServer.getBaseUrl() + "/Patient/$validate");
 		httpPost.setEntity(new StringEntity(ourCtx.newXmlParser().encodeResourceToString(params), ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 
 		HttpResponse status = ourClient.execute(httpPost);
@@ -118,7 +128,7 @@ public class ValidateDstu3Test {
 		params.addParameter().setName("resource").setResource(patient);
 		params.addParameter().setName("mode").setValue(new CodeType("AAA"));
 
-		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient/$validate");
+		HttpPost httpPost = new HttpPost(ourServer.getBaseUrl() + "/Patient/$validate");
 		httpPost.setEntity(new StringEntity(ourCtx.newXmlParser().encodeResourceToString(params), ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 
 		HttpResponse status = ourClient.execute(httpPost);
@@ -140,7 +150,7 @@ public class ValidateDstu3Test {
 		Parameters params = new Parameters();
 		params.addParameter().setName("mode").setValue(new CodeType("create"));
 
-		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient/$validate");
+		HttpPost httpPost = new HttpPost(ourServer.getBaseUrl() + "/Patient/$validate");
 		httpPost.setEntity(new StringEntity(ourCtx.newXmlParser().encodeResourceToString(params), ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 
 		HttpResponse status = ourClient.execute(httpPost);
@@ -156,7 +166,7 @@ public class ValidateDstu3Test {
 		ourOutcomeToReturn = new OperationOutcome();
 		ourOutcomeToReturn.addIssue().setDiagnostics("FOOBAR");
 
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/123/$validate");
+		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/123/$validate");
 
 		HttpResponse status = ourClient.execute(httpGet);
 		String resp = IOUtils.toString(status.getEntity().getContent());
@@ -180,7 +190,7 @@ public class ValidateDstu3Test {
 		Parameters params = new Parameters();
 		params.addParameter().setName("resource").setResource(org);
 
-		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Organization/$validate");
+		HttpPost httpPost = new HttpPost(ourServer.getBaseUrl() + "/Organization/$validate");
 		httpPost.setEntity(new StringEntity(ourCtx.newJsonParser().encodeResourceToString(params), ContentType.create(Constants.CT_FHIR_JSON, "UTF-8")));
 
 		HttpResponse status = ourClient.execute(httpPost);
@@ -203,7 +213,7 @@ public class ValidateDstu3Test {
 		params.addParameter().setName("profile").setValue(new StringType("http://foo"));
 		params.addParameter().setName("mode").setValue(new StringType(ValidationModeEnum.CREATE.getCode()));
 
-		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient/$validate");
+		HttpPost httpPost = new HttpPost(ourServer.getBaseUrl() + "/Patient/$validate");
 		httpPost.setEntity(new StringEntity(ourCtx.newXmlParser().encodeResourceToString(params), ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 
 		HttpResponse status = ourClient.execute(httpPost);
@@ -231,7 +241,7 @@ public class ValidateDstu3Test {
 		Parameters params = new Parameters();
 		params.addParameter().setName("resource").setResource(patient);
 
-		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient/$validate");
+		HttpPost httpPost = new HttpPost(ourServer.getBaseUrl() + "/Patient/$validate");
 		httpPost.setEntity(new StringEntity(ourCtx.newXmlParser().encodeResourceToString(params), ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 
 		HttpResponse status = ourClient.execute(httpPost);
@@ -245,32 +255,9 @@ public class ValidateDstu3Test {
 
 	@AfterAll
 	public static void afterClassClearContext() throws Exception {
-		JettyUtil.closeServer(ourServer);
 		TestUtil.randomizeLocaleAndTimezone();
 	}
 
-	@BeforeAll
-	public static void beforeClass() throws Exception {
-		ourServer = new Server(0);
-
-		PatientProvider patientProvider = new PatientProvider();
-
-		ServletHandler proxyHandler = new ServletHandler();
-		RestfulServer servlet = new RestfulServer(ourCtx);
-		servlet.setResourceProviders(patientProvider, new OrganizationProvider());
-		servlet.setDefaultResponseEncoding(EncodingEnum.XML);
-		ServletHolder servletHolder = new ServletHolder(servlet);
-		proxyHandler.addServletWithMapping(servletHolder, "/*");
-		ourServer.setHandler(proxyHandler);
-		JettyUtil.startServer(ourServer);
-        ourPort = JettyUtil.getPortForStartedServer(ourServer);
-
-		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
-		HttpClientBuilder builder = HttpClientBuilder.create();
-		builder.setConnectionManager(connectionManager);
-		ourClient = builder.build();
-
-	}
 
 	public static class OrganizationProvider implements IResourceProvider {
 

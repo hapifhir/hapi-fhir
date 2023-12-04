@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.term;
 
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
+import ca.uhn.fhir.context.support.LookupCodeRequest;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.config.JpaConfig;
 import ca.uhn.fhir.jpa.entity.TermCodeSystem;
@@ -38,8 +39,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.io.ClassPathResource;
 
-import javax.persistence.EntityManager;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.persistence.EntityManager;
+import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -214,13 +215,13 @@ public class TerminologySvcImplCurrentVersionR4Test extends BaseJpaR4Test {
 
 	private void validateValueLookup(String theCurrentVersion, Collection<String> allVersions) {
 		IValidationSupport.LookupCodeResult resultNoVer = myValidationSupport.lookupCode(
-			new ValidationSupportContext(myValidationSupport), BASE_LOINC_URL, VS_NO_VERSIONED_ON_UPLOAD_FIRST_CODE, null);
+			new ValidationSupportContext(myValidationSupport), new LookupCodeRequest(BASE_LOINC_URL, VS_NO_VERSIONED_ON_UPLOAD_FIRST_CODE));
 		assertNotNull(resultNoVer);
 		String expectedNoVer = prefixWithVersion(theCurrentVersion, VS_NO_VERSIONED_ON_UPLOAD_FIRST_DISPLAY);
 		assertEquals(expectedNoVer, resultNoVer.getCodeDisplay());
 
 		IValidationSupport.LookupCodeResult resultWithVer = myValidationSupport.lookupCode(
-			new ValidationSupportContext(myValidationSupport), BASE_LOINC_URL, VS_VERSIONED_ON_UPLOAD_FIRST_CODE, null);
+			new ValidationSupportContext(myValidationSupport), new LookupCodeRequest(BASE_LOINC_URL, VS_VERSIONED_ON_UPLOAD_FIRST_CODE));
 		assertNotNull(resultWithVer);
 		String expectedWithVer = prefixWithVersion(theCurrentVersion, VS_VERSIONED_ON_UPLOAD_FIRST_DISPLAY);
 		assertEquals(expectedWithVer, resultWithVer.getCodeDisplay());
@@ -231,15 +232,15 @@ public class TerminologySvcImplCurrentVersionR4Test extends BaseJpaR4Test {
 
 	private void lookupForVersion(String theVersion) {
 		IValidationSupport.LookupCodeResult resultNoVer = myValidationSupport.lookupCode(
-			new ValidationSupportContext(myValidationSupport), BASE_LOINC_URL + "|" + theVersion,
-			VS_NO_VERSIONED_ON_UPLOAD_FIRST_CODE, null);
+			new ValidationSupportContext(myValidationSupport),
+            new LookupCodeRequest(BASE_LOINC_URL + "|" + theVersion, VS_NO_VERSIONED_ON_UPLOAD_FIRST_CODE));
 		assertNotNull(resultNoVer);
 		String expectedNoVer = prefixWithVersion(theVersion, VS_NO_VERSIONED_ON_UPLOAD_FIRST_DISPLAY);
 		assertEquals(expectedNoVer, resultNoVer.getCodeDisplay());
 
 		IValidationSupport.LookupCodeResult resultWithVer = myValidationSupport.lookupCode(
-			new ValidationSupportContext(myValidationSupport), BASE_LOINC_URL + "|" + theVersion,
-			VS_VERSIONED_ON_UPLOAD_FIRST_CODE, null);
+			new ValidationSupportContext(myValidationSupport),
+            new LookupCodeRequest(BASE_LOINC_URL + "|" + theVersion, VS_VERSIONED_ON_UPLOAD_FIRST_CODE));
 		assertNotNull(resultWithVer);
 		String expectedWithVer = prefixWithVersion(theVersion, VS_VERSIONED_ON_UPLOAD_FIRST_DISPLAY);
 		assertEquals(expectedWithVer, resultWithVer.getCodeDisplay());

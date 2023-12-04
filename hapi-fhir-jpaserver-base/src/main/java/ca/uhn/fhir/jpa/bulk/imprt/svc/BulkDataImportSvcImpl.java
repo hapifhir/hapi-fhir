@@ -40,6 +40,7 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.Logs;
 import ca.uhn.fhir.util.ValidateUtil;
 import com.apicatalog.jsonld.StringUtils;
+import jakarta.annotation.PostConstruct;
 import org.apache.commons.lang3.time.DateUtils;
 import org.quartz.JobExecutionContext;
 import org.slf4j.Logger;
@@ -59,7 +60,6 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.Semaphore;
 import javax.annotation.Nonnull;
-import javax.annotation.PostConstruct;
 
 import static ca.uhn.fhir.batch2.jobs.importpull.BulkImportPullConfig.BULK_IMPORT_JOB_NAME;
 

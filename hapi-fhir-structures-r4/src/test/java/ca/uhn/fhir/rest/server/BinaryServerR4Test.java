@@ -7,8 +7,10 @@ import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.annotation.Update;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.MethodOutcome;
-import ca.uhn.fhir.test.utilities.JettyUtil;
+import ca.uhn.fhir.test.utilities.HttpClientExtension;
+import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.TestUtil;
 import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
@@ -18,38 +20,37 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.servlet.ServletHandler;
-import org.eclipse.jetty.servlet.ServletHolder;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Binary;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Reference;
 import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
-import java.util.concurrent.TimeUnit;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
-public class BinaryServerR4Test {
-	private static CloseableHttpClient ourClient;
-	private static FhirContext ourCtx = FhirContext.forR4();
+public class 	BinaryServerR4Test {
+	private static final FhirContext ourCtx = FhirContext.forR4Cached();
 	private static Binary ourLastBinary;
 	private static byte[] ourLastBinaryBytes;
 	private static String ourLastBinaryString;
-	private static int ourPort;
-	private static Server ourServer;
 	private static IdType ourLastId;
 	private static Binary ourNextBinary;
+
+	@RegisterExtension
+	public static final RestfulServerExtension ourServer = new RestfulServerExtension(ourCtx)
+		 .registerProvider(new BinaryProvider())
+		 .withPagingProvider(new FifoMemoryPagingProvider(100))
+		 .setDefaultResponseEncoding(EncodingEnum.XML)
+		 .setDefaultPrettyPrint(false);
+
+	@RegisterExtension
+	public static final HttpClientExtension ourClient = new HttpClientExtension();
 
 	@BeforeEach
 	public void before() {
@@ -69,7 +70,7 @@ public class BinaryServerR4Test {
 		ourNextBinary.setSecurityContext(new Reference("Patient/1"));
 		ourNextBinary.setContentType("application/foo");
 
-		HttpGet get = new HttpGet("http://localhost:" + ourPort + "/Binary/A");
+		HttpGet get = new HttpGet(ourServer.getBaseUrl() + "/Binary/A");
 		get.addHeader("Content-Type", "application/foo");
 		CloseableHttpResponse status = ourClient.execute(get);
 		try {
@@ -77,7 +78,7 @@ public class BinaryServerR4Test {
 			assertEquals("application/foo", status.getEntity().getContentType().getValue());
 			assertEquals("Patient/1", status.getFirstHeader(Constants.HEADER_X_SECURITY_CONTEXT).getValue());
 			assertEquals("W/\"222\"", status.getFirstHeader(Constants.HEADER_ETAG).getValue());
-			assertEquals("http://localhost:" + ourPort + "/Binary/A/_history/222", status.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue());
+			assertEquals(ourServer.getBaseUrl() + "/Binary/A/_history/222", status.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue());
 			assertEquals(null, status.getFirstHeader(Constants.HEADER_LOCATION));
 
 			byte[] content = IOUtils.toByteArray(status.getEntity().getContent());
@@ -97,7 +98,7 @@ public class BinaryServerR4Test {
 		ourNextBinary.setSecurityContext(new Reference("Patient/1"));
 		ourNextBinary.setContentType("application/foo");
 
-		HttpGet get = new HttpGet("http://localhost:" + ourPort + "/Binary/A");
+		HttpGet get = new HttpGet(ourServer.getBaseUrl() + "/Binary/A");
 		get.addHeader("Content-Type", "application/foo");
 		get.addHeader("Accept", Constants.CT_FHIR_JSON);
 		CloseableHttpResponse status = ourClient.execute(get);
@@ -106,7 +107,7 @@ public class BinaryServerR4Test {
 			assertEquals("application/json+fhir;charset=utf-8", status.getEntity().getContentType().getValue());
 			assertEquals("Patient/1", status.getFirstHeader(Constants.HEADER_X_SECURITY_CONTEXT).getValue());
 			assertEquals("W/\"222\"", status.getFirstHeader(Constants.HEADER_ETAG).getValue());
-			assertEquals("http://localhost:" + ourPort + "/Binary/A/_history/222", status.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue());
+			assertEquals(ourServer.getBaseUrl() + "/Binary/A/_history/222", status.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue());
 			assertEquals(null, status.getFirstHeader(Constants.HEADER_LOCATION));
 
 			String content = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
@@ -118,7 +119,7 @@ public class BinaryServerR4Test {
 
 	@Test
 	public void testPostBinaryWithSecurityContext() throws Exception {
-		HttpPost post = new HttpPost("http://localhost:" + ourPort + "/Binary");
+		HttpPost post = new HttpPost(ourServer.getBaseUrl() + "/Binary");
 		post.setEntity(new ByteArrayEntity(new byte[]{0, 1, 2, 3, 4}));
 		post.addHeader("Content-Type", "application/foo");
 		post.addHeader(Constants.HEADER_X_SECURITY_CONTEXT, "Encounter/2");
@@ -136,7 +137,7 @@ public class BinaryServerR4Test {
 
 	@Test
 	public void testPostRawBytesBinaryContentType() throws Exception {
-		HttpPost post = new HttpPost("http://localhost:" + ourPort + "/Binary");
+		HttpPost post = new HttpPost(ourServer.getBaseUrl() + "/Binary");
 		post.setEntity(new ByteArrayEntity(new byte[]{0, 1, 2, 3, 4}));
 		post.addHeader("Content-Type", "application/foo");
 		CloseableHttpResponse status = ourClient.execute(post);
@@ -161,7 +162,7 @@ public class BinaryServerR4Test {
 		b.setContent(new byte[]{0, 1, 2, 3, 4});
 		String encoded = ourCtx.newJsonParser().encodeResourceToString(b);
 
-		HttpPost post = new HttpPost("http://localhost:" + ourPort + "/Binary");
+		HttpPost post = new HttpPost(ourServer.getBaseUrl() + "/Binary");
 		post.setEntity(new StringEntity(encoded));
 		post.addHeader("Content-Type", Constants.CT_FHIR_JSON);
 		CloseableHttpResponse status = ourClient.execute(post);
@@ -184,7 +185,7 @@ public class BinaryServerR4Test {
 		b.setContent(ourCtx.newXmlParser().encodeResourceToString(p).getBytes("UTF-8"));
 		String encoded = ourCtx.newJsonParser().encodeResourceToString(b);
 
-		HttpPost post = new HttpPost("http://localhost:" + ourPort + "/Binary");
+		HttpPost post = new HttpPost(ourServer.getBaseUrl() + "/Binary");
 		post.setEntity(new StringEntity(encoded));
 		post.addHeader("Content-Type", Constants.CT_FHIR_JSON);
 		CloseableHttpResponse status = ourClient.execute(post);
@@ -200,7 +201,7 @@ public class BinaryServerR4Test {
 
 	@Test
 	public void testPostRawBytesNoContentType() throws Exception {
-		HttpPost post = new HttpPost("http://localhost:" + ourPort + "/Binary");
+		HttpPost post = new HttpPost(ourServer.getBaseUrl() + "/Binary");
 		post.setEntity(new ByteArrayEntity(new byte[]{0, 1, 2, 3, 4}));
 		CloseableHttpResponse status = ourClient.execute(post);
 		try {
@@ -213,7 +214,7 @@ public class BinaryServerR4Test {
 
 	@Test
 	public void testPutBinaryWithSecurityContext() throws Exception {
-		HttpPut post = new HttpPut("http://localhost:" + ourPort + "/Binary/A");
+		HttpPut post = new HttpPut(ourServer.getBaseUrl() + "/Binary/A");
 		post.setEntity(new ByteArrayEntity(new byte[]{0, 1, 2, 3, 4}));
 		post.addHeader("Content-Type", "application/foo");
 		post.addHeader(Constants.HEADER_X_SECURITY_CONTEXT, "Encounter/2");
@@ -232,29 +233,7 @@ public class BinaryServerR4Test {
 
 	@AfterAll
 	public static void afterClassClearContext() throws Exception {
-		JettyUtil.closeServer(ourServer);
 		TestUtil.randomizeLocaleAndTimezone();
-	}
-
-	@BeforeAll
-	public static void beforeClass() throws Exception {
-		ourServer = new Server(0);
-
-		BinaryProvider binaryProvider = new BinaryProvider();
-
-		ServletHandler proxyHandler = new ServletHandler();
-		RestfulServer servlet = new RestfulServer(ourCtx);
-		servlet.setResourceProviders(binaryProvider);
-		ServletHolder servletHolder = new ServletHolder(servlet);
-		proxyHandler.addServletWithMapping(servletHolder, "/*");
-		ourServer.setHandler(proxyHandler);
-		JettyUtil.startServer(ourServer);
-        ourPort = JettyUtil.getPortForStartedServer(ourServer);
-
-		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
-		HttpClientBuilder builder = HttpClientBuilder.create();
-		builder.setConnectionManager(connectionManager);
-		ourClient = builder.build();
 	}
 
 	public static class BinaryProvider implements IResourceProvider {

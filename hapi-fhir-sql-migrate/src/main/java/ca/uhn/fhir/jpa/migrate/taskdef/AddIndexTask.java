@@ -37,7 +37,7 @@ import javax.annotation.Nonnull;
 
 public class AddIndexTask extends BaseTableTask {
 
-	private static final Logger ourLog = LoggerFactory.getLogger(AddIndexTask.class);
+	static final Logger ourLog = LoggerFactory.getLogger(AddIndexTask.class);
 
 	private String myIndexName;
 	private List<String> myColumns;
@@ -97,8 +97,15 @@ public class AddIndexTask extends BaseTableTask {
 		try {
 			executeSql(tableName, sql);
 		} catch (Exception e) {
-			if (e.toString().contains("already exists")) {
-				ourLog.warn("Index {} already exists", myIndexName);
+			String message = e.toString();
+			if (message.contains("already exists")
+					||
+					// The Oracle message is ORA-01408: such column list already indexed
+					// TODO KHS consider db-specific handling here that uses the error code instead of the message so
+					// this is language independent
+					//  e.g. if the db is Oracle than checking e.getErrorCode() == 1408 should detect this case
+					message.contains("already indexed")) {
+				ourLog.warn("Index {} already exists: {}", myIndexName, e.getMessage());
 			} else {
 				throw e;
 			}

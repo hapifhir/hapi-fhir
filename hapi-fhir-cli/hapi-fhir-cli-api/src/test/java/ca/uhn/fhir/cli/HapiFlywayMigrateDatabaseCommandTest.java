@@ -5,11 +5,14 @@ import ca.uhn.fhir.jpa.migrate.JdbcUtils;
 import ca.uhn.fhir.jpa.migrate.SchemaMigrator;
 import ca.uhn.fhir.jpa.migrate.dao.HapiMigrationDao;
 import ca.uhn.fhir.jpa.migrate.entity.HapiMigrationEntity;
+import ca.uhn.fhir.jpa.util.RandomTextUtils;
 import ca.uhn.fhir.system.HapiSystemProperties;
 import com.google.common.base.Charsets;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -35,10 +38,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+@TestMethodOrder(MethodOrderer.MethodName.class)
 public class HapiFlywayMigrateDatabaseCommandTest {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(HapiFlywayMigrateDatabaseCommandTest.class);
-	public static final String DB_DIRECTORY = "target/h2_test";
+	private final String myDbDirectory = "target/h2_test/" + RandomTextUtils.newSecureRandomAlphaNumericString(5);
 
 	static {
 		HapiSystemProperties.enableTestMode();
@@ -252,12 +256,13 @@ public class HapiFlywayMigrateDatabaseCommandTest {
 
 	@Nonnull
 	private File getLocation(String theDatabaseName) throws IOException {
-		File directory = new File(DB_DIRECTORY);
+		File directory = new File(myDbDirectory);
 		if (directory.exists()) {
-			FileUtils.deleteDirectory(directory);
+			FileUtils.forceDelete(directory);
 		}
+		assertFalse(directory.exists());
 
-		return new File(DB_DIRECTORY + "/" + theDatabaseName);
+		return new File(myDbDirectory + "/" + theDatabaseName);
 	}
 
 	private void seedDatabase340(DriverTypeEnum.ConnectionProperties theConnectionProperties) {

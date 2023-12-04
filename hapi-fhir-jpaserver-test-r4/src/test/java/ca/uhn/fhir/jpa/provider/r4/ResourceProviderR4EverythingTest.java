@@ -1012,7 +1012,6 @@ public class ResourceProviderR4EverythingTest extends BaseResourceProviderR4Test
 		assertThat(ids, containsInAnyOrder("Patient/FOO", "Observation/BAZ"));
 	}
 
-
 	@Test
 	public void testPagingOverEverythingSet() throws InterruptedException {
 		Patient p = new Patient();

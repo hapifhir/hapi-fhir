@@ -22,6 +22,8 @@ package ca.uhn.fhir.rest.server.servlet;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.BaseRestfulResponse;
 import ca.uhn.fhir.util.IoUtil;
+import jakarta.servlet.ServletOutputStream;
+import jakarta.servlet.http.HttpServletResponse;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 
@@ -35,8 +37,6 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.zip.GZIPOutputStream;
 import javax.annotation.Nonnull;
-import javax.servlet.ServletOutputStream;
-import javax.servlet.http.HttpServletResponse;
 
 public class ServletRestfulResponse extends BaseRestfulResponse<ServletRequestDetails> {
 

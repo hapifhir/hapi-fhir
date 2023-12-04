@@ -47,6 +47,9 @@ import ca.uhn.fhirtest.config.TestR4BConfig;
 import ca.uhn.fhirtest.config.TestR4Config;
 import ca.uhn.fhirtest.config.TestR5Config;
 import ca.uhn.hapi.converters.server.VersionedApiConverterInterceptor;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.springframework.web.context.ContextLoaderListener;
@@ -55,9 +58,6 @@ import org.springframework.web.context.support.AnnotationConfigWebApplicationCon
 
 import java.util.ArrayList;
 import java.util.List;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
 
 public class TestRestfulServer extends RestfulServer {
 
@@ -80,7 +80,7 @@ public class TestRestfulServer extends RestfulServer {
 	public void destroy() {
 		super.destroy();
 		ourLog.info("Server is shutting down");
-		myAppCtx.destroy();
+		myAppCtx.close();
 	}
 
 	@SuppressWarnings("unchecked")

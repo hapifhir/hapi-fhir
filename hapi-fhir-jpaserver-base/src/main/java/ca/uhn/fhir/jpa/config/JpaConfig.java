@@ -51,7 +51,6 @@ import ca.uhn.fhir.jpa.dao.IJpaStorageResourceParser;
 import ca.uhn.fhir.jpa.dao.ISearchBuilder;
 import ca.uhn.fhir.jpa.dao.JpaStorageResourceParser;
 import ca.uhn.fhir.jpa.dao.MatchResourceUrlService;
-import ca.uhn.fhir.jpa.dao.ObservationLastNIndexPersistSvc;
 import ca.uhn.fhir.jpa.dao.SearchBuilderFactory;
 import ca.uhn.fhir.jpa.dao.TransactionProcessor;
 import ca.uhn.fhir.jpa.dao.data.IResourceModifiedDao;
@@ -223,7 +222,6 @@ public class JpaConfig {
 	public static final String PERSISTED_JPA_BUNDLE_PROVIDER_BY_SEARCH = "PersistedJpaBundleProvider_BySearch";
 	public static final String PERSISTED_JPA_SEARCH_FIRST_PAGE_BUNDLE_PROVIDER =
 			"PersistedJpaSearchFirstPageBundleProvider";
-	public static final String SEARCH_BUILDER = "SearchBuilder";
 	public static final String HISTORY_BUILDER = "HistoryBuilder";
 	private static final String HAPI_DEFAULT_SCHEDULER_GROUP = "HAPI";
 
@@ -564,7 +562,8 @@ public class JpaConfig {
 
 	@Bean(name = PERSISTED_JPA_BUNDLE_PROVIDER_BY_SEARCH)
 	@Scope("prototype")
-	public PersistedJpaBundleProvider newPersistedJpaBundleProvider(RequestDetails theRequest, Search theSearch) {
+	public PersistedJpaBundleProvider newPersistedJpaBundleProviderBySearch(
+			RequestDetails theRequest, Search theSearch) {
 		return new PersistedJpaBundleProvider(theRequest, theSearch);
 	}
 
@@ -694,7 +693,7 @@ public class JpaConfig {
 
 	@Bean(name = HISTORY_BUILDER)
 	@Scope("prototype")
-	public HistoryBuilder newPersistedJpaSearchFirstPageBundleProvider(
+	public HistoryBuilder newHistoryBuilder(
 			@Nullable String theResourceType,
 			@Nullable Long theResourceId,
 			@Nullable Date theRangeStartInclusive,
@@ -830,11 +829,6 @@ public class JpaConfig {
 	@Bean
 	public ITermReindexingSvc termReindexingSvc() {
 		return new TermReindexingSvcImpl();
-	}
-
-	@Bean
-	public ObservationLastNIndexPersistSvc baseObservationLastNIndexpersistSvc() {
-		return new ObservationLastNIndexPersistSvc();
 	}
 
 	@Bean

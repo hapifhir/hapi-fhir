@@ -34,7 +34,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.util.ResourceUtils;
 
-import javax.persistence.EntityManager;
+import jakarta.persistence.EntityManager;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;

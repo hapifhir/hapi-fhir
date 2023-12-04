@@ -19,8 +19,8 @@
  */
 package ca.uhn.fhir.jpa.util;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 
 /**
  * Utility class that provides a proxied entityManager.  It can be directly injected or
