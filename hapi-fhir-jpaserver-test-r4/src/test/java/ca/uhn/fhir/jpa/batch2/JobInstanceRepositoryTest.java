@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Set;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 
 public class JobInstanceRepositoryTest extends BaseJpaR4Test {
@@ -29,6 +30,9 @@ public class JobInstanceRepositoryTest extends BaseJpaR4Test {
 	private static final String PARAMS = "{\"param1\":\"value1\"}";
 	private static final String JOB_DEFINITION_ID = "my-job-def-id";
 	private static final String INSTANCE_ID = "abc-123";
+
+	private static final String TRIGGERING_USER_NAME = "triggeringUser";
+	private static final String TRIGGERING_CLIENT_ID = "clientId";
 
 	@Test
 	public void testSearchByJobParamsAndStatuses_SingleStatus() {
@@ -69,6 +73,16 @@ public class JobInstanceRepositoryTest extends BaseJpaR4Test {
 		assertThat(jobInstances, hasSize(2));
 	}
 
+	@Test
+	public void testPersistInitiatingUsernameAndClientId() {
+		Set<StatusEnum> statuses = Set.of(StatusEnum.IN_PROGRESS);
+		List<Batch2JobInstanceEntity> instancesByJobIdParamsAndStatus = runInTransaction(()->myJobInstanceRepository.findInstancesByJobIdParamsAndStatus(JOB_DEFINITION_ID, PARAMS, statuses, PageRequest.of(0, 10)));
+		assertThat(instancesByJobIdParamsAndStatus, hasSize(1));
+		Batch2JobInstanceEntity batch2JobInstanceEntity = instancesByJobIdParamsAndStatus.get(0);
+		assertThat(TRIGGERING_USER_NAME, equalTo(batch2JobInstanceEntity.getTriggeringUsername()));
+		assertThat(TRIGGERING_CLIENT_ID, equalTo(batch2JobInstanceEntity.getTriggeringClientId()));
+	}
+
 	@BeforeEach
 	public void beforeEach() {
 		//Create in-progress job.
@@ -78,6 +92,8 @@ public class JobInstanceRepositoryTest extends BaseJpaR4Test {
 		instance.setCreateTime(new Date());
 		instance.setDefinitionId(JOB_DEFINITION_ID);
 		instance.setParams(PARAMS);
+		instance.setTriggeringUsername(TRIGGERING_USER_NAME);
+		instance.setTriggeringClientId(TRIGGERING_CLIENT_ID);
 		myJobInstanceRepository.save(instance);
 
 		Batch2JobInstanceEntity completedInstance = new Batch2JobInstanceEntity();
