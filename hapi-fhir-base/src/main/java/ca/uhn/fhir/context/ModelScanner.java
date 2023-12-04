@@ -498,7 +498,7 @@ class ModelScanner {
 			nextElementType = ReflectionUtil.getGenericCollectionTypeOfField(next);
 		} else if (Collection.class.isAssignableFrom(nextElementType)) {
 			throw new ConfigurationException(Msg.code(1722) + "Field '" + next.getName() + "' in type '"
-					+ next.getClass().getCanonicalName()
+					+ nextElementType.getCanonicalName()
 					+ "' is a Collection - Only java.util.List curently supported");
 		}
 		return nextElementType;
