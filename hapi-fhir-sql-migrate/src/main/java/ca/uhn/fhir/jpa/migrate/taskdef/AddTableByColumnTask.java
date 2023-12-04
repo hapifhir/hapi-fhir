@@ -55,7 +55,8 @@ public class AddTableByColumnTask extends BaseTableTask {
 		this(theProductVersion, theSchemaVersion, null);
 	}
 
-	private AddTableByColumnTask(String theProductVersion, String theSchemaVersion, Comparator<AddColumnTask> theColumnSortingRules) {
+	private AddTableByColumnTask(
+			String theProductVersion, String theSchemaVersion, Comparator<AddColumnTask> theColumnSortingRules) {
 		super(theProductVersion, theSchemaVersion);
 		myColumnSortingRules = theColumnSortingRules;
 	}
@@ -211,8 +212,6 @@ public class AddTableByColumnTask extends BaseTableTask {
 			return myAddColumnTasks;
 		}
 
-		return myAddColumnTasks.stream()
-			.sorted(myColumnSortingRules)
-			.toList();
+		return myAddColumnTasks.stream().sorted(myColumnSortingRules).toList();
 	}
 }

@@ -53,7 +53,7 @@ public abstract class BaseTableColumnTask extends BaseTableTask {
 	public BaseTableColumnTask setColumnName(String theColumnName) {
 		switch (myColumnNameCase) {
 			case ALL_UPPER:
-				 myColumnName = theColumnName.toUpperCase();
+				myColumnName = theColumnName.toUpperCase();
 				break;
 			case ALL_LOWER:
 				myColumnName = theColumnName.toLowerCase();
