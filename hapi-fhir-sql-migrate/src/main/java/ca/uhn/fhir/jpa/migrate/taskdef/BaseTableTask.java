@@ -107,7 +107,7 @@ public abstract class BaseTableTask extends BaseTask {
 
 		if (!ColumnTypeToDriverTypeToSqlType.getColumnTypeToDriverTypeToSqlType()
 				.containsKey(theColumnType)) {
-			throw new IllegalArgumentException(Msg.code(2448) + "Column type does not exist: " + theColumnType);
+			throw new IllegalArgumentException(Msg.code(2449) + "Column type does not exist: " + theColumnType);
 		}
 
 		return ColumnTypeToDriverTypeToSqlType.getColumnTypeToDriverTypeToSqlType()
