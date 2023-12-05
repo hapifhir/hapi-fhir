@@ -2,7 +2,7 @@ package ca.uhn.fhir.jpa.provider.r4;
 
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
-import ca.uhn.fhir.test.utilities.LookupCodeTestUtil;
+import ca.uhn.fhir.jpa.provider.CodeSystemLookupWithPropertiesUtil;
 import ca.uhn.fhir.rest.gclient.IOperationUntypedWithInputAndPartialOutput;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.CodeSystem.ConceptDefinitionComponent;
@@ -21,24 +21,24 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Stream;
 
-import static ca.uhn.fhir.test.utilities.LookupCodeTestUtil.ourCode;
-import static ca.uhn.fhir.test.utilities.LookupCodeTestUtil.ourCodeSystemId;
-import static ca.uhn.fhir.test.utilities.LookupCodeTestUtil.ourCodeSystemUrl;
-import static ca.uhn.fhir.test.utilities.LookupCodeTestUtil.ourPropertyA;
-import static ca.uhn.fhir.test.utilities.LookupCodeTestUtil.ourPropertyB;
-import static ca.uhn.fhir.test.utilities.LookupCodeTestUtil.ourPropertyC;
-import static ca.uhn.fhir.test.utilities.LookupCodeTestUtil.ourPropertyValueA;
-import static ca.uhn.fhir.test.utilities.LookupCodeTestUtil.ourPropertyValueB;
-import static ca.uhn.fhir.test.utilities.LookupCodeTestUtil.propertyCode;
-import static ca.uhn.fhir.test.utilities.LookupCodeTestUtil.propertyCodeSystem;
-import static ca.uhn.fhir.test.utilities.LookupCodeTestUtil.propertyDisplay;
+import static ca.uhn.fhir.jpa.provider.CodeSystemLookupWithPropertiesUtil.ourCode;
+import static ca.uhn.fhir.jpa.provider.CodeSystemLookupWithPropertiesUtil.ourCodeSystemId;
+import static ca.uhn.fhir.jpa.provider.CodeSystemLookupWithPropertiesUtil.ourCodeSystemUrl;
+import static ca.uhn.fhir.jpa.provider.CodeSystemLookupWithPropertiesUtil.ourPropertyA;
+import static ca.uhn.fhir.jpa.provider.CodeSystemLookupWithPropertiesUtil.ourPropertyB;
+import static ca.uhn.fhir.jpa.provider.CodeSystemLookupWithPropertiesUtil.ourPropertyC;
+import static ca.uhn.fhir.jpa.provider.CodeSystemLookupWithPropertiesUtil.ourPropertyValueA;
+import static ca.uhn.fhir.jpa.provider.CodeSystemLookupWithPropertiesUtil.ourPropertyValueB;
+import static ca.uhn.fhir.jpa.provider.CodeSystemLookupWithPropertiesUtil.propertyCode;
+import static ca.uhn.fhir.jpa.provider.CodeSystemLookupWithPropertiesUtil.propertyCodeSystem;
+import static ca.uhn.fhir.jpa.provider.CodeSystemLookupWithPropertiesUtil.propertyDisplay;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class ResourceProviderR4CodeSystemPropertiesTest extends BaseResourceProviderR4Test {
    public static Stream<Arguments> parametersLookup() {
-      return LookupCodeTestUtil.parametersLookupWithProperties();
+      return CodeSystemLookupWithPropertiesUtil.parametersLookupWithProperties();
    }
 
    @ParameterizedTest

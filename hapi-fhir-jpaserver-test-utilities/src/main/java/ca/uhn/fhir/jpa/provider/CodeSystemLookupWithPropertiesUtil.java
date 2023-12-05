@@ -17,7 +17,7 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.test.utilities;
+package ca.uhn.fhir.jpa.provider;
 
 import org.junit.jupiter.params.provider.Arguments;
 
@@ -27,7 +27,7 @@ import java.util.stream.Stream;
 
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 
-public class LookupCodeTestUtil {
+public class CodeSystemLookupWithPropertiesUtil {
 	public static final String ourCodeSystemId = "CodeSystem-Example",
 			ourCodeSystemUrl = "http://example/" + ourCodeSystemId;
 	public static final String ourCode = "Code-WithProperties";
