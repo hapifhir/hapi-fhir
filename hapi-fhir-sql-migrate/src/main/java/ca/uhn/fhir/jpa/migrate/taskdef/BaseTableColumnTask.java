@@ -66,8 +66,8 @@ public abstract class BaseTableColumnTask extends BaseTableTask {
 				myColumnName = theColumnName.toLowerCase();
 				break;
 			default:
-				// LUKETODO:  reserve message code
-				throw new IllegalArgumentException(Msg.code(9999) + " Unknown ColumnNameCase: " + myColumnNameCase);
+				throw new IllegalArgumentException(Msg.code(2448)
+						+ " Unknown ColumnNameCase was passed when setting column name case: " + myColumnNameCase);
 		}
 		return this;
 	}

@@ -31,6 +31,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
+import javax.annotation.Nonnull;
 
 public abstract class BaseTableTask extends BaseTask {
 	private static final Logger ourLog = LoggerFactory.getLogger(BaseTableTask.class);
@@ -72,30 +73,12 @@ public abstract class BaseTableTask extends BaseTask {
 	}
 
 	protected String getSqlType(ColumnTypeEnum theColumnType, Long theColumnLength) {
-		// LUKETODO:  refactor this to maximize code reuse
-		final List<ColumnDriverMappingOverride> eligibleOverrides = myColumnDriverMappingOverrides.stream()
-				.filter(override -> override.getColumnType() == theColumnType)
-				.filter(override -> override.getDriverType() == getDriverType())
-				.collect(Collectors.toUnmodifiableList());
+		final String retVal = getColumnSqlWithToken(theColumnType);
 
-		if (eligibleOverrides.size() > 1) {
-			ourLog.info("There is more than one override.  Picking the first one");
-		}
-
-		if (eligibleOverrides.size() == 1) {
-			final String retVal = eligibleOverrides.get(0).getColumnTypeSql();
-			if (theColumnType == ColumnTypeEnum.STRING) {
-				return retVal.replace("?", Long.toString(theColumnLength));
-			}
-		}
-
-		String retVal = ColumnTypeToDriverTypeToSqlType.getColumnTypeToDriverTypeToSqlType()
-				.get(theColumnType)
-				.get(getDriverType());
 		Objects.requireNonNull(retVal);
 
 		if (theColumnType == ColumnTypeEnum.STRING) {
-			retVal = retVal.replace("?", Long.toString(theColumnLength));
+			return retVal.replace("?", Long.toString(theColumnLength));
 		}
 
 		return retVal;
@@ -104,5 +87,25 @@ public abstract class BaseTableTask extends BaseTask {
 	@Override
 	protected void generateHashCode(HashCodeBuilder theBuilder) {
 		theBuilder.append(myTableName);
+	}
+
+	@Nonnull
+	private String getColumnSqlWithToken(ColumnTypeEnum theColumnType) {
+		final List<ColumnDriverMappingOverride> eligibleOverrides = myColumnDriverMappingOverrides.stream()
+				.filter(override -> override.getColumnType() == theColumnType)
+				.filter(override -> override.getDriverType() == getDriverType())
+				.collect(Collectors.toUnmodifiableList());
+
+		if (eligibleOverrides.size() > 1) {
+			ourLog.info("There is more than one eligible override: {}.  Picking the first one", eligibleOverrides);
+		}
+
+		if (eligibleOverrides.size() == 1) {
+			return eligibleOverrides.get(0).getColumnTypeSql();
+		}
+
+		return ColumnTypeToDriverTypeToSqlType.getColumnTypeToDriverTypeToSqlType()
+				.get(theColumnType)
+				.get(getDriverType());
 	}
 }

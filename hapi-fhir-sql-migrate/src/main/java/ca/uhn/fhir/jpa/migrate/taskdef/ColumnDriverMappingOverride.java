@@ -23,6 +23,7 @@ import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 
 import java.util.Objects;
 import java.util.StringJoiner;
+import javax.annotation.Nonnull;
 
 /**
  * Capture a single SQL column type text override to the logic in {@link ColumnDriverMappingOverride}, namely,
@@ -37,7 +38,9 @@ public class ColumnDriverMappingOverride {
 	private final String myColumnTypeSql;
 
 	public ColumnDriverMappingOverride(
-			ColumnTypeEnum theColumnType, DriverTypeEnum theDriverType, String theColumnTypeSql) {
+			@Nonnull ColumnTypeEnum theColumnType,
+			@Nonnull DriverTypeEnum theDriverType,
+			@Nonnull String theColumnTypeSql) {
 		myColumnType = theColumnType;
 		myDriverType = theDriverType;
 		myColumnTypeSql = theColumnTypeSql;
