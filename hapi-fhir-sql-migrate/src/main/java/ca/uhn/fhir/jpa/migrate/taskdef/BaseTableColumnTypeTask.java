@@ -24,7 +24,7 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import java.util.Set;
-import javax.annotation.Nullable;
+import jakarta.annotation.Nullable;
 
 public abstract class BaseTableColumnTypeTask extends BaseTableColumnTask {
 	private ColumnTypeEnum myColumnType;

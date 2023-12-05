@@ -31,7 +31,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
-import javax.annotation.Nonnull;
+import jakarta.annotation.Nonnull;
 
 public abstract class BaseTableTask extends BaseTask {
 	private static final Logger ourLog = LoggerFactory.getLogger(BaseTableTask.class);
