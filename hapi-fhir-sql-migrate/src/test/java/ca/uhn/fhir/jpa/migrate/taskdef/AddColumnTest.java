@@ -79,6 +79,7 @@ public class AddColumnTest extends BaseTest {
 	@MethodSource("data")
 	public void testAddColumnToNonExistantTable_Failing(Supplier<TestDatabaseDetails> theTestDatabaseDetails) {
 		before(theTestDatabaseDetails);
+		// cosmetic change
 
 		BaseMigrationTasks<VersionEnum> tasks = new BaseMigrationTasks<>();
 		tasks
