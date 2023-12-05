@@ -36,6 +36,8 @@ import javax.annotation.Nonnull;
 
 public class JsonUtil {
 
+	public static final String JACKSON_REDACTED_MESSAGE =
+			"REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled)";
 	private static final ObjectMapper ourMapperPrettyPrint;
 	private static final ObjectMapper ourMapperNonPrettyPrint;
 

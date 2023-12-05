@@ -9,6 +9,7 @@ import ca.uhn.fhir.parser.XmlParserDstu3Test.TestPatientFor327;
 import ca.uhn.fhir.parser.json.BaseJsonLikeValue.ScalarType;
 import ca.uhn.fhir.parser.json.BaseJsonLikeValue.ValueType;
 import ca.uhn.fhir.util.ClasspathUtil;
+import ca.uhn.fhir.util.JsonUtil;
 import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ValidationResult;
@@ -157,7 +158,7 @@ public class JsonParserDstu3Test {
 			fail();
 		} catch (DataFormatException e) {
 			assertEquals(Msg.code(1861) + "Failed to parse JSON encoded FHIR content: Unexpected character ('=' (code 61)): was expecting a colon to separate field name and value\n" +
-				" at [Source: UNKNOWN; line: 4, column: 18]", e.getMessage());
+				" at [Source: " + JsonUtil.JACKSON_REDACTED_MESSAGE + "; line: 4, column: 18]", e.getMessage());
 		}
 	}
 
@@ -2324,8 +2325,8 @@ public class JsonParserDstu3Test {
 			ourCtx.newJsonParser().parseResource(Bundle.class, bundle);
 			fail();
 		} catch (DataFormatException e) {
-			assertEquals(Msg.code(1861) + "Failed to parse JSON encoded FHIR content: Unexpected close marker '}': expected ']' (for root starting at [Source: UNKNOWN; line: 1])\n" +
-				" at [Source: UNKNOWN; line: 4, column: 3]", e.getMessage());
+			assertEquals(Msg.code(1861) + "Failed to parse JSON encoded FHIR content: Unexpected close marker '}': expected ']' (for root starting at [Source: " + JsonUtil.JACKSON_REDACTED_MESSAGE+ "; line: 1])\n" +
+				" at [Source: " + JsonUtil.JACKSON_REDACTED_MESSAGE + "; line: 4, column: 3]", e.getMessage());
 		}
 	}
 
