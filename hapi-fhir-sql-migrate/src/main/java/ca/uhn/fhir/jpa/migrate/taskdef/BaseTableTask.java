@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.jpa.migrate.taskdef;
 
+import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -31,7 +32,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
-import jakarta.annotation.Nonnull;
 
 public abstract class BaseTableTask extends BaseTask {
 	private static final Logger ourLog = LoggerFactory.getLogger(BaseTableTask.class);
