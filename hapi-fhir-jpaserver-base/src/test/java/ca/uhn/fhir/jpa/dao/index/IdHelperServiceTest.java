@@ -14,7 +14,6 @@ import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -28,7 +27,6 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
@@ -58,12 +56,6 @@ public class IdHelperServiceTest {
     @Mock
     private PartitionSettings myPartitionSettings;
 
-    @Mock
-    private ArgumentCaptor<Function<String, JpaPid>> pidResolveFunctionCaptor;
-
-    @Mock
-    private ArgumentCaptor<String> jpaKeyCaptor;
-
     @SuppressWarnings("unchecked")
     private TypedQuery<Tuple> query = (TypedQuery<Tuple>) mock(TypedQuery.class);
 
@@ -77,7 +69,6 @@ public class IdHelperServiceTest {
         when(myStorageSettings.isDeleteEnabled()).thenReturn(true);
         when(myStorageSettings.getResourceClientIdStrategy()).thenReturn(JpaStorageSettings.ClientIdStrategyEnum.ANY);
         when(myPartitionSettings.isAllowUnqualifiedCrossPartitionReference()).thenReturn(true);
-
     }
 
     @Test
