@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.jpa.migrate.taskdef;
 
+import ca.uhn.fhir.i18n.Msg;
 import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.EqualsBuilder;
@@ -102,6 +103,10 @@ public abstract class BaseTableTask extends BaseTask {
 
 		if (eligibleOverrides.size() == 1) {
 			return eligibleOverrides.get(0).getColumnTypeSql();
+		}
+
+		if (! ColumnTypeToDriverTypeToSqlType.getColumnTypeToDriverTypeToSqlType().containsKey(theColumnType)) {
+			throw new IllegalArgumentException(Msg.code(2448) + "Column type does not exist: " + theColumnType);
 		}
 
 		return ColumnTypeToDriverTypeToSqlType.getColumnTypeToDriverTypeToSqlType()

@@ -46,15 +46,15 @@ public class ColumnDriverMappingOverride {
 		myColumnTypeSql = theColumnTypeSql;
 	}
 
-	ColumnTypeEnum getColumnType() {
+	public ColumnTypeEnum getColumnType() {
 		return myColumnType;
 	}
 
-	DriverTypeEnum getDriverType() {
+	public DriverTypeEnum getDriverType() {
 		return myDriverType;
 	}
 
-	String getColumnTypeSql() {
+	public String getColumnTypeSql() {
 		return myColumnTypeSql;
 	}
 
