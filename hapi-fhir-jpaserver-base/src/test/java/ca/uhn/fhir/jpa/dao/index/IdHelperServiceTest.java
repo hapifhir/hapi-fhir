@@ -8,7 +8,10 @@ import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
-import org.hibernate.jpa.spi.TupleBuilderTransformer;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.Tuple;
+import jakarta.persistence.TypedQuery;
+import jakarta.persistence.criteria.*;
 import org.hl7.fhir.r4.hapi.ctx.FhirR4;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.BeforeEach;
@@ -19,10 +22,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import javax.persistence.EntityManager;
-import javax.persistence.Tuple;
-import javax.persistence.TypedQuery;
-import javax.persistence.criteria.*;
 import java.time.Instant;
 import java.util.Collections;
 import java.util.Date;
@@ -160,7 +159,7 @@ public class IdHelperServiceTest {
     }
 
     private List<Tuple> getMockedTupleList(Long idNumber, String resourceType, String id) {
-        Tuple tuple = mock(TupleBuilderTransformer.HqlTupleImpl.class);
+        Tuple tuple = mock(Tuple.class);
         when(tuple.get(eq(0), eq(Long.class))).thenReturn(idNumber);
         when(tuple.get(eq(1), eq(String.class))).thenReturn(resourceType);
         when(tuple.get(eq(2), eq(String.class))).thenReturn(id);
