@@ -10,6 +10,7 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
+import jakarta.servlet.http.HttpServletRequest;
 import org.hl7.fhir.common.hapi.validation.support.RemoteTerminologyServiceValidationSupport;
 import org.hl7.fhir.dstu3.model.BooleanType;
 import org.hl7.fhir.dstu3.model.CodeSystem;
@@ -20,13 +21,15 @@ import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.dstu3.model.UriType;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
-import jakarta.servlet.http.HttpServletRequest;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -56,8 +59,23 @@ public class RemoteTerminologyServiceValidationSupportDstu3Test {
 		mySvc.addClientInterceptor(new LoggingInterceptor(true));
 	}
 
-	@Test
-	public void testLookupOperationWithAllParams_CodeSystem_Success() {
+	public static Stream<Arguments> parametersPropertiesAndDesignations() {
+		return Stream.of(
+				Arguments.arguments(
+						new IValidationSupport.StringConceptProperty("birthDate", "1930-01-01"),
+						new IValidationSupport.ConceptDesignation().setLanguage("en").setUseCode("code1").setUseSystem("system-1").setUseDisplay("display").setValue("some value")
+				),
+				Arguments.arguments(
+						new IValidationSupport.CodingConceptProperty("propertyCode", "code", "system", "display"),
+						new IValidationSupport.ConceptDesignation().setLanguage("en").setUseCode("code1").setUseSystem("system-1").setUseDisplay("display").setValue("some value")
+				)
+		);
+	}
+
+	@ParameterizedTest
+	@MethodSource(value = "parametersPropertiesAndDesignations")
+	public void testLookupCode_forCodeSystemWithAllParams_returnsCorrectParameters(IValidationSupport.BaseConceptProperty theConceptProperty,
+																				   IValidationSupport.ConceptDesignation theConceptDesignation) {
 		myCodeSystemProvider.myNextLookupCodeResult = new IValidationSupport.LookupCodeResult();
 		myCodeSystemProvider.myNextLookupCodeResult.setFound(true);
 		myCodeSystemProvider.myNextLookupCodeResult.setCodeSystemVersion(CODE_SYSTEM);
@@ -66,21 +84,12 @@ public class RemoteTerminologyServiceValidationSupportDstu3Test {
 		myCodeSystemProvider.myNextLookupCodeResult.setCodeDisplay(DISPLAY);
 
 		// property
-		String propertyName = "birthDate";
-		String propertyValue = "1930-01-01";
-		IValidationSupport.BaseConceptProperty property = new IValidationSupport.StringConceptProperty(propertyName, propertyValue);
-		myCodeSystemProvider.myNextLookupCodeResult.getProperties().add(property);
+		myCodeSystemProvider.myNextLookupCodeResult.getProperties().add(theConceptProperty);
 
 		// designation
-		IValidationSupport.ConceptDesignation designation = new IValidationSupport.ConceptDesignation();
-		designation.setLanguage("en");
-		designation.setUseCode("code");
-		designation.setUseSystem("system");
-		designation.setUseDisplay("display");
-		designation.setValue("some value");
-		myCodeSystemProvider.myNextLookupCodeResult.getDesignations().add(designation);
+		myCodeSystemProvider.myNextLookupCodeResult.getDesignations().add(theConceptDesignation);
 
-		IValidationSupport.LookupCodeResult outcome = mySvc.lookupCode(null, new LookupCodeRequest(CODE_SYSTEM, CODE, LANGUAGE, Set.of("birthDate")));
+		IValidationSupport.LookupCodeResult outcome = mySvc.lookupCode(null, new LookupCodeRequest(CODE_SYSTEM, CODE, LANGUAGE, Set.of(theConceptProperty.getPropertyName())));
 		assertNotNull(outcome, "Call to lookupCode() should return a non-NULL result!");
 		assertEquals(DISPLAY, outcome.getCodeDisplay());
 		assertEquals(CODE_SYSTEM, outcome.getCodeSystemVersion());
@@ -101,32 +110,40 @@ public class RemoteTerminologyServiceValidationSupportDstu3Test {
 
 		assertNotNull(propertyComponent);
 
-		Iterator<Parameters.ParametersParameterComponent> propertyComponentIterator = propertyComponent.getPart().iterator();
-		propertyComponent = propertyComponentIterator.next();
-		assertEquals("code", propertyComponent.getName());
-		assertEquals(propertyName, ((StringType)propertyComponent.getValue()).getValue());
+		final Iterator<Parameters.ParametersParameterComponent> propertyPartIterator = propertyComponent.getPart().iterator();
+		final Parameters.ParametersParameterComponent propertyName = propertyPartIterator.next();
+		final Parameters.ParametersParameterComponent propertyValue = propertyPartIterator.next();
 
-		propertyComponent = propertyComponentIterator.next();
-		assertEquals("value", propertyComponent.getName());
-		assertEquals(propertyValue, ((StringType)propertyComponent.getValue()).getValue());
+		String propertyType = propertyComponent.getName();
+		String propertyNameAsString = ((StringType) propertyName.getValue()).getValue();
+		if ("string".equals(propertyType)) {
+			IValidationSupport.StringConceptProperty stringConceptProperty = (IValidationSupport.StringConceptProperty) theConceptProperty;
+			assertEquals(stringConceptProperty.getPropertyName(), propertyNameAsString);
+			assertEquals(stringConceptProperty.getValue(), ((StringType)propertyValue.getValue()).getValueAsString());
+		} else if ("code".equals(propertyType)) {
+			IValidationSupport.CodingConceptProperty codingConceptProperty = (IValidationSupport.CodingConceptProperty)theConceptProperty;
+			Coding coding = (Coding)propertyValue.getValue();
+			assertEquals(codingConceptProperty.getCodeSystem(), coding.getSystem());
+			assertEquals(codingConceptProperty.getCode(), coding.getCode());
+			assertEquals(codingConceptProperty.getDisplay(), coding.getDisplay());
+		}
 
 		assertNotNull(designationComponent);
-		Iterator<Parameters.ParametersParameterComponent> partParameter = designationComponent.getPart().iterator();
-		designationComponent = partParameter.next();
-		assertEquals("language", designationComponent.getName());
-		assertEquals(LANGUAGE, designationComponent.getValue().toString());
 
-		designationComponent = partParameter.next();
-		assertEquals("use", designationComponent.getName());
-		Coding coding = (Coding)designationComponent.getValue();
+		final Iterator<Parameters.ParametersParameterComponent> designationPartIterator = designationComponent.getPart().iterator();
+		final Parameters.ParametersParameterComponent designationLanguage = designationPartIterator.next();
+		final Parameters.ParametersParameterComponent designationUse = designationPartIterator.next();
+		final Parameters.ParametersParameterComponent designationValue = designationPartIterator.next();
+
+		assertEquals("use", designationUse.getName());
+		Coding coding = (Coding) designationUse.getValue();
 		assertNotNull(coding, "Coding value returned via designation use should NOT be NULL!");
-		assertEquals("code", coding.getCode());
-		assertEquals("system", coding.getSystem());
-		assertEquals("display", coding.getDisplay());
 
-		designationComponent = partParameter.next();
-		assertEquals("value", designationComponent.getName());
-		assertEquals("some value", designationComponent.getValue().toString());
+		assertEquals("language", designationLanguage.getName());
+		assertEquals(theConceptDesignation.getLanguage(), designationLanguage.getValue().toString());
+
+		assertEquals("value", designationValue.getName());
+		assertEquals(theConceptDesignation.getValue(), designationValue.getValue().toString());
 	}
 
 	private static class MyCodeSystemProvider implements IResourceProvider {
