@@ -28,6 +28,8 @@ import ca.uhn.fhir.rest.server.IRestfulServerDefaults;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.UrlUtil;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -43,8 +45,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
@@ -325,7 +325,7 @@ public abstract class RequestDetails {
 	 * @throws UnsupportedEncodingException if the character set encoding used is not supported and the text cannot be decoded
 	 * @throws IllegalStateException        if {@link #getInputStream} method has been called on this request
 	 * @throws IOException                  if an input or output exception occurred
-	 * @see javax.servlet.http.HttpServletRequest#getInputStream
+	 * @see jakarta.servlet.http.HttpServletRequest#getInputStream
 	 */
 	public abstract Reader getReader() throws IOException;
 
@@ -397,7 +397,10 @@ public abstract class RequestDetails {
 
 	/**
 	 * Returns the server base URL (with no trailing '/') for a given request
+	 *
+	 * @deprecated Use {@link #getFhirServerBase()} instead. Deprecated in HAPI FHIR 7.0.0
 	 */
+	@Deprecated
 	public abstract String getServerBaseForRequest();
 
 	/**

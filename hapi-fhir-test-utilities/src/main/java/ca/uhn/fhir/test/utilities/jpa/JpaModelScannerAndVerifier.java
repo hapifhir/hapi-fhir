@@ -36,25 +36,25 @@ import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Subselect;
 import org.hibernate.validator.constraints.Length;
 
-import javax.persistence.Column;
-import javax.persistence.Embeddable;
-import javax.persistence.Embedded;
-import javax.persistence.EmbeddedId;
-import javax.persistence.Entity;
-import javax.persistence.ForeignKey;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Index;
-import javax.persistence.JoinColumn;
-import javax.persistence.Lob;
-import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
-import javax.persistence.SequenceGenerator;
-import javax.persistence.Table;
-import javax.persistence.Transient;
-import javax.persistence.UniqueConstraint;
-import javax.validation.constraints.Size;
+import jakarta.persistence.Column;
+import jakarta.persistence.Embeddable;
+import jakarta.persistence.Embedded;
+import jakarta.persistence.EmbeddedId;
+import jakarta.persistence.Entity;
+import jakarta.persistence.ForeignKey;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Index;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.Lob;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.SequenceGenerator;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
+import jakarta.persistence.UniqueConstraint;
+import jakarta.validation.constraints.Size;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.AnnotatedElement;
@@ -197,19 +197,20 @@ public class JpaModelScannerAndVerifier {
 					if (generatedValue != null) {
 						Validate.notBlank(generatedValue.generator(), "Field has no @GeneratedValue.generator(): %s", nextField);
 						assertNotADuplicateName(generatedValue.generator(), theNames);
-						assertEquals(generatedValue.strategy(), GenerationType.AUTO);
+						assertEqualsForIdGenerator(nextField, generatedValue.strategy(), GenerationType.AUTO);
 
 						GenericGenerator genericGenerator = nextField.getAnnotation(GenericGenerator.class);
 						SequenceGenerator sequenceGenerator = nextField.getAnnotation(SequenceGenerator.class);
 						Validate.isTrue(sequenceGenerator != null ^ genericGenerator != null);
 
 						if (genericGenerator != null) {
-							assertEquals("ca.uhn.fhir.jpa.model.dialect.HapiSequenceStyleGenerator", genericGenerator.strategy());
-							assertEquals(generatedValue.generator(), genericGenerator.name());
+							assertEqualsForIdGenerator(nextField, "ca.uhn.fhir.jpa.model.dialect.HapiSequenceStyleGenerator", genericGenerator.type().getName());
+							assertEqualsForIdGenerator(nextField, "native", genericGenerator.strategy());
+							assertEqualsForIdGenerator(nextField, generatedValue.generator(), genericGenerator.name());
 						} else {
 							Validate.notNull(sequenceGenerator);
-							assertEquals(generatedValue.generator(), sequenceGenerator.name());
-							assertEquals(generatedValue.generator(), sequenceGenerator.sequenceName());
+							assertEqualsForIdGenerator(nextField, generatedValue.generator(), sequenceGenerator.name());
+							assertEqualsForIdGenerator(nextField, generatedValue.generator(), sequenceGenerator.sequenceName());
 						}
 					}
 				}
@@ -408,8 +409,8 @@ public class JpaModelScannerAndVerifier {
 		return retVal;
 	}
 
-	private static void assertEquals(Object theGenerator, Object theName) {
-		Validate.isTrue(theGenerator.equals(theName));
+	private static void assertEqualsForIdGenerator(Field theSource, Object theExpectedGenerator, Object theActualGenerator) {
+		Validate.isTrue(theExpectedGenerator.equals(theActualGenerator), "Value " + theActualGenerator + " doesn't match expected " + theExpectedGenerator + " for ID generator on " + theSource);
 	}
 
 	private static void assertNotADuplicateName(String theName, Set<String> theNames) {

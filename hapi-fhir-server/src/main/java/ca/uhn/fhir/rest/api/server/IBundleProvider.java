@@ -119,6 +119,7 @@ public interface IBundleProvider {
 	 * server's processing rules (e.g. _include'd resources, OperationOutcome, etc.). For example,
 	 * if the method is invoked with index 0,10 the method might return 10 search results, plus an
 	 * additional 20 resources which matched a client's _include specification.
+	 * </p>
 	 * <p>
 	 * Note that if this bundle provider was loaded using a
 	 * page ID (i.e. via {@link ca.uhn.fhir.rest.server.IPagingProvider#retrieveResultList(RequestDetails, String, String)}

@@ -38,6 +38,8 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Base;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.parallel.Execution;
+import org.junit.jupiter.api.parallel.ExecutionMode;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.core.io.Resource;
@@ -88,6 +90,7 @@ public class RDFParserTest extends BaseTest {
 	 */
 	@ParameterizedTest
 	@MethodSource("getInputFiles")
+	@Execution(ExecutionMode.CONCURRENT)
 	public void testRDFRoundTrip(String referenceFilePath) throws IOException {
 		String referenceFileName = referenceFilePath.substring(referenceFilePath.lastIndexOf("/")+1);
 		IBaseResource referenceResource = parseJson(new FileInputStream(referenceFilePath));

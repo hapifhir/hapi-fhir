@@ -58,7 +58,7 @@ public class MemberMatchR4ResourceProvider {
 			idempotent = false,
 			returnParameters = {@OperationParam(name = "MemberIdentifier", typeName = "string")})
 	public Parameters patientMemberMatch(
-			javax.servlet.http.HttpServletRequest theServletRequest,
+			jakarta.servlet.http.HttpServletRequest theServletRequest,
 			@Description(shortDefinition = "The target of the operation. Contain member Patient demographics.")
 					@OperationParam(name = Constants.PARAM_MEMBER_PATIENT, min = 1, max = 1)
 					Patient theMemberPatient,

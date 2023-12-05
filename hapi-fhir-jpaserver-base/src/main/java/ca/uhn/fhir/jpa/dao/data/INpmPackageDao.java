@@ -28,6 +28,6 @@ import java.util.Optional;
 
 public interface INpmPackageDao extends JpaRepository<NpmPackageEntity, Long>, IHapiFhirJpaRepository {
 
-	@Query("SELECT p FROM NpmPackageEntity p WHERE p.myPackageId = :id")
+	@Query("SELECT p FROM NpmPackageEntity p WHERE lower(p.myPackageId) = lower(:id)")
 	Optional<NpmPackageEntity> findByPackageId(@Param("id") String thePackageId);
 }

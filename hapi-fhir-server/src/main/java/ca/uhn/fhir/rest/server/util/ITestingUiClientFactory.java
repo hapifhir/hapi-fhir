@@ -21,8 +21,7 @@ package ca.uhn.fhir.rest.server.util;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
-
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 /**
  * This interface isn't used by hapi-fhir-base, but is used by the

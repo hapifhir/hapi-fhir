@@ -6,31 +6,26 @@ import ca.uhn.fhir.rest.annotation.OptionalParam;
 import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.server.FifoMemoryPagingProvider;
 import ca.uhn.fhir.rest.server.IResourceProvider;
-import ca.uhn.fhir.rest.server.RestfulServer;
-import ca.uhn.fhir.test.utilities.JettyUtil;
+import ca.uhn.fhir.test.utilities.HttpClientExtension;
+import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.servlet.ServletHandler;
-import org.eclipse.jetty.servlet.ServletHolder;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
@@ -39,17 +34,21 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class InjectionAttackTest {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(InjectionAttackTest.class);
-	private static CloseableHttpClient ourClient;
-	private static FhirContext ourCtx = FhirContext.forR4();
-	private static int ourPort;
-	private static Server ourServer;
-	private static RestfulServer ourServlet;
+	private static final FhirContext ourCtx = FhirContext.forR4Cached();
+
+	@RegisterExtension
+	public RestfulServerExtension ourServer = new RestfulServerExtension(ourCtx)
+		 .registerProvider(new DummyPatientResourceProvider())
+		 .withPagingProvider(new FifoMemoryPagingProvider(100))
+		 .registerInterceptor(new ResponseHighlighterInterceptor())
+		 .setDefaultResponseEncoding(EncodingEnum.JSON);
+
+	@RegisterExtension
+	private HttpClientExtension ourClient = new HttpClientExtension();
 
 	@Test
 	public void testPreventHtmlInjectionViaInvalidContentType() throws Exception {
-		String requestUrl = "http://localhost:" +
-			ourPort +
-			"/Patient/123";
+		String requestUrl = ourServer.getBaseUrl() + "/Patient/123";
 
 		// XML HTML
 		HttpGet httpGet = new HttpGet(requestUrl);
@@ -65,8 +64,7 @@ public class InjectionAttackTest {
 
 	@Test
 	public void testPreventHtmlInjectionViaInvalidParameterName() throws Exception {
-		String requestUrl = "http://localhost:" +
-			ourPort +
+		String requestUrl = ourServer.getBaseUrl() +
 			"/Patient?a" +
 			UrlUtil.escapeUrlParam("<script>") +
 			"=123";
@@ -122,8 +120,7 @@ public class InjectionAttackTest {
 
 	@Test
 	public void testPreventHtmlInjectionViaInvalidResourceType() throws Exception {
-		String requestUrl = "http://localhost:" +
-			ourPort +
+		String requestUrl = ourServer.getBaseUrl() +
 			"/AA" +
 			UrlUtil.escapeUrlParam("<script>");
 
@@ -178,8 +175,7 @@ public class InjectionAttackTest {
 
 	@Test
 	public void testPreventHtmlInjectionViaInvalidTokenParamModifier() throws Exception {
-		String requestUrl = "http://localhost:" +
-			ourPort +
+		String requestUrl = ourServer.getBaseUrl() +
 			"/Patient?identifier:" +
 			UrlUtil.escapeUrlParam("<script>") +
 			"=123";
@@ -197,32 +193,7 @@ public class InjectionAttackTest {
 
 	@AfterAll
 	public static void afterClassClearContext() throws Exception {
-		JettyUtil.closeServer(ourServer);
 		TestUtil.randomizeLocaleAndTimezone();
-	}
-
-	@BeforeAll
-	public static void beforeClass() throws Exception {
-		ourServer = new Server(0);
-
-		DummyPatientResourceProvider patientProvider = new DummyPatientResourceProvider();
-
-		ServletHandler proxyHandler = new ServletHandler();
-		ourServlet = new RestfulServer(ourCtx);
-		ourServlet.setFhirContext(ourCtx);
-		ourServlet.setResourceProviders(patientProvider);
-		ourServlet.registerInterceptor(new ResponseHighlighterInterceptor());
-		ServletHolder servletHolder = new ServletHolder(ourServlet);
-		proxyHandler.addServletWithMapping(servletHolder, "/*");
-		ourServer.setHandler(proxyHandler);
-		JettyUtil.startServer(ourServer);
-        ourPort = JettyUtil.getPortForStartedServer(ourServer);
-
-		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
-		HttpClientBuilder builder = HttpClientBuilder.create();
-		builder.setConnectionManager(connectionManager);
-		ourClient = builder.build();
-
 	}
 
 	public static class DummyPatientResourceProvider implements IResourceProvider {

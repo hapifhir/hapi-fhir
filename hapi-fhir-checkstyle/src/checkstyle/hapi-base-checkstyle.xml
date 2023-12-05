@@ -18,6 +18,13 @@
 			<property name="format" value="(?i)FIXME"/>
 		</module>
 
+		<!-- Ban star imports - TODO: enable this -->
+		<!--
+		<module name="RegexpSinglelineJava">
+			<property name="format" value="^import .*\*;"/>
+		</module>
+		-->
+
 		<module name="RegexpSinglelineJava">
 			<property name="format" value="System\.out\.println"/>
 			<property name="ignoreComments" value="true"/>

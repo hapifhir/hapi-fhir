@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 5523
+jira: SMILE-7729
+title: "Previously, it was possible to store NPM Packages where the package name's case did not match the package ID's case, e.g. `my-package` was different than `MY-PACKAGE`. Names are now normalized to lower case before queries occur."

@@ -24,7 +24,7 @@ import ca.uhn.fhir.model.api.annotation.PasswordField;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.hibernate.validator.constraints.Length;
 
-import javax.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotBlank;
 
 public class TestJobParameters implements IModelJson {
 
