@@ -14,6 +14,7 @@ import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentMatchers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -55,12 +56,6 @@ public class IdHelperServiceTest {
 
     @Mock
     private PartitionSettings myPartitionSettings;
-
-    @SuppressWarnings("unchecked")
-    private TypedQuery<Tuple> query = (TypedQuery<Tuple>) mock(TypedQuery.class);
-
-    @SuppressWarnings("unchecked")
-    private CriteriaQuery<Tuple> cq = mock(CriteriaQuery.class);
 
     @BeforeEach
     void setUp() {
@@ -136,12 +131,17 @@ public class IdHelperServiceTest {
         CriteriaBuilder builder = getMockedCriteriaBuilder();
         Root<ResourceTable> from = getMockedFrom();
 
+        @SuppressWarnings("unchecked")
+        TypedQuery<Tuple> query = (TypedQuery<Tuple>) mock(TypedQuery.class);
+        @SuppressWarnings("unchecked")
+        CriteriaQuery<Tuple> cq = mock(CriteriaQuery.class);
+
         when(builder.createTupleQuery()).thenReturn(cq);
-        when(cq.from(any(Class.class))).thenReturn(from);
+        when(cq.from(ArgumentMatchers.<Class<ResourceTable>>any())).thenReturn(from);
         when(query.getResultList()).thenReturn(mockedTupleList);
 
         when(myEntityManager.getCriteriaBuilder()).thenReturn(builder);
-        when(myEntityManager.createQuery(any(CriteriaQuery.class))).thenReturn(query);
+        when(myEntityManager.createQuery(ArgumentMatchers.<CriteriaQuery<Tuple>>any())).thenReturn(query);
     }
 
     private CriteriaBuilder getMockedCriteriaBuilder() {
@@ -151,7 +151,9 @@ public class IdHelperServiceTest {
         return builder;
     }
     private Root<ResourceTable> getMockedFrom() {
-        Path path = mock(Path.class);
+        @SuppressWarnings("unchecked")
+        Path<Object> path = mock(Path.class);
+        @SuppressWarnings("unchecked")
         Root<ResourceTable> from = mock(Root.class);
         lenient().when(from.get(anyString())).thenReturn(path);
         return from;
