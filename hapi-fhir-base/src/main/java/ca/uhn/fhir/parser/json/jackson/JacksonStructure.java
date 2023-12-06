@@ -28,6 +28,7 @@ import ca.uhn.fhir.parser.json.BaseJsonLikeWriter;
 import ca.uhn.fhir.parser.json.JsonLikeStructure;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.StreamReadConstraints;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -114,14 +115,29 @@ public class JacksonStructure implements JsonLikeStructure {
 				setNativeArray((ArrayNode) OBJECT_MAPPER.readTree(pbr));
 			}
 		} catch (Exception e) {
-			if (e.getMessage().startsWith("Unexpected char 39")) {
+			String message;
+			if (e instanceof JsonProcessingException) {
+				JsonProcessingException jpe = (JsonProcessingException) e;
+				StringBuilder messageBuilder = new StringBuilder();
+				messageBuilder.append(jpe.getOriginalMessage());
+				if (jpe.getLocation() != null) {
+					messageBuilder.append("\n at [");
+					jpe.getLocation().appendOffsetDescription(messageBuilder);
+					messageBuilder.append("]");
+				}
+				message = messageBuilder.toString();
+			} else {
+				message = e.getMessage();
+			}
+
+			if (message.startsWith("Unexpected char 39")) {
 				throw new DataFormatException(
-						Msg.code(1860) + "Failed to parse JSON encoded FHIR content: " + e.getMessage() + " - "
+						Msg.code(1860) + "Failed to parse JSON encoded FHIR content: " + message + " - "
 								+ "This may indicate that single quotes are being used as JSON escapes where double quotes are required",
 						e);
 			}
 			throw new DataFormatException(
-					Msg.code(1861) + "Failed to parse JSON encoded FHIR content: " + e.getMessage(), e);
+					Msg.code(1861) + "Failed to parse JSON encoded FHIR content: " + message, e);
 		}
 	}
 
