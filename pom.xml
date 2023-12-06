@@ -963,7 +963,7 @@
 		<reflections_version>0.9.11</reflections_version>
 		<servicemix_saxon_version>9.8.0-15</servicemix_saxon_version>
 		<servicemix_xmlresolver_version>1.2_5</servicemix_xmlresolver_version>
-		<swagger_version>2.1.12</swagger_version>
+		<swagger_version>2.2.19</swagger_version>
 		<slf4j_version>2.0.3</slf4j_version>
 		<log4j_to_slf4j_version>2.19.0</log4j_to_slf4j_version>
 		<spring_version>6.0.12</spring_version>
