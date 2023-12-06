@@ -26,6 +26,7 @@ import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.batch2.model.WorkChunkCreateEvent;
 import ca.uhn.fhir.batch2.models.JobInstanceFetchRequest;
+import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,7 +42,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
-import javax.annotation.Nonnull;
 
 /**
  *

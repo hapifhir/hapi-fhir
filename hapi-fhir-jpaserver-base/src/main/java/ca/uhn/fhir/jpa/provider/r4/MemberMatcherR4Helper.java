@@ -32,6 +32,7 @@ import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.ParametersUtil;
 import com.google.common.collect.Lists;
+import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -49,7 +50,6 @@ import org.hl7.fhir.r4.model.Reference;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
-import javax.annotation.Nullable;
 
 import static ca.uhn.fhir.rest.api.Constants.PARAM_MEMBER_IDENTIFIER;
 

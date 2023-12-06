@@ -51,7 +51,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ResourceUtils;
 
-import javax.annotation.Nonnull;
+import jakarta.annotation.Nonnull;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Query;
 import java.io.File;

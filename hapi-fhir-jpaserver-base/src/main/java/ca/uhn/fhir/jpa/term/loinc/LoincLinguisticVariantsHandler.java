@@ -20,10 +20,10 @@
 package ca.uhn.fhir.jpa.term.loinc;
 
 import ca.uhn.fhir.jpa.term.IZipContentsHandlerCsv;
+import jakarta.annotation.Nonnull;
 import org.apache.commons.csv.CSVRecord;
 
 import java.util.List;
-import javax.annotation.Nonnull;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.trim;

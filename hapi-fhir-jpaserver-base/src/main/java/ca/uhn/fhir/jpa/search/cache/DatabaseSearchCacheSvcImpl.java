@@ -33,6 +33,7 @@ import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
 import ca.uhn.fhir.system.HapiSystemProperties;
 import com.google.common.annotations.VisibleForTesting;
+import jakarta.annotation.Nonnull;
 import jakarta.persistence.EntityManager;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.time.DateUtils;
@@ -53,7 +54,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
-import javax.annotation.Nonnull;
 
 public class DatabaseSearchCacheSvcImpl implements ISearchCacheSvc {
 	/*

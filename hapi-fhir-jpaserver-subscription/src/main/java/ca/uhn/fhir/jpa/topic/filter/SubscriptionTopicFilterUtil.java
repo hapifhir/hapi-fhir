@@ -22,10 +22,9 @@ package ca.uhn.fhir.jpa.topic.filter;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalTopicSubscription;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalTopicSubscriptionFilter;
 import ca.uhn.fhir.util.Logs;
+import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
-
-import javax.annotation.Nonnull;
 
 public final class SubscriptionTopicFilterUtil {
 	private static final Logger ourLog = Logs.getSubscriptionTopicLog();

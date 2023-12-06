@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.migrate;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.migrate.taskdef.ColumnTypeEnum;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -62,7 +63,6 @@ import java.util.Locale;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
-import javax.annotation.Nullable;
 import javax.sql.DataSource;
 
 public class JdbcUtils {

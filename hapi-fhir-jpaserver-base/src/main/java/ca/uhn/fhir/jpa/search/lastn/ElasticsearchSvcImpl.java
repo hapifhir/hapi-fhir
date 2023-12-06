@@ -34,6 +34,7 @@ import co.elastic.clients.elasticsearch.core.SearchResponse;
 import co.elastic.clients.elasticsearch.core.search.Hit;
 import co.elastic.clients.elasticsearch.indices.ExistsRequest;
 import com.google.common.annotations.VisibleForTesting;
+import jakarta.annotation.Nullable;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -44,7 +45,6 @@ import java.io.StringReader;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
-import javax.annotation.Nullable;
 
 public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 

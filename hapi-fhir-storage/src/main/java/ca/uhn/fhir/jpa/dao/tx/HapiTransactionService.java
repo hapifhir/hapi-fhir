@@ -38,6 +38,8 @@ import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
 import ca.uhn.fhir.util.ICallable;
 import ca.uhn.fhir.util.TestUtil;
 import com.google.common.annotations.VisibleForTesting;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.hibernate.exception.ConstraintViolationException;
@@ -59,8 +61,6 @@ import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.Objects;
 import java.util.concurrent.Callable;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 /**
  * @see IHapiTransactionService for an explanation of this class

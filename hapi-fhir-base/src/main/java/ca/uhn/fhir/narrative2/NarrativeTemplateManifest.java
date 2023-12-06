@@ -28,6 +28,7 @@ import com.google.common.base.Charsets;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Multimaps;
+import jakarta.annotation.Nonnull;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
@@ -53,7 +54,6 @@ import java.util.Objects;
 import java.util.Properties;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
-import javax.annotation.Nonnull;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 

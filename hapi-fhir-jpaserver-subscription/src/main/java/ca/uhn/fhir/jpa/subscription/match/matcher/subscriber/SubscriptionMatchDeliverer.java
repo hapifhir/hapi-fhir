@@ -33,13 +33,12 @@ import ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryJsonMessage;
 import ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryMessage;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 import ca.uhn.fhir.rest.api.EncodingEnum;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.messaging.MessageChannel;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 

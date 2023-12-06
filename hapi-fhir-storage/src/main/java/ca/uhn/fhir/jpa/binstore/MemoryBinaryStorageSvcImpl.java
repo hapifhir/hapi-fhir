@@ -24,6 +24,7 @@ import ca.uhn.fhir.jpa.binary.api.StoredDetails;
 import ca.uhn.fhir.jpa.binary.svc.BaseBinaryStorageSvcImpl;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import com.google.common.hash.HashingInputStream;
+import jakarta.annotation.Nonnull;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.input.CountingInputStream;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -33,7 +34,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Date;
 import java.util.concurrent.ConcurrentHashMap;
-import javax.annotation.Nonnull;
 
 /**
  * Purely in-memory implementation of binary storage service. This is really

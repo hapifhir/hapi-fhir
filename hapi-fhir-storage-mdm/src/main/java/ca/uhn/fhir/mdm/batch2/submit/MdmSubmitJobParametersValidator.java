@@ -27,10 +27,10 @@ import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import jakarta.annotation.Nonnull;
 
 import java.util.ArrayList;
 import java.util.List;
-import javax.annotation.Nonnull;
 
 public class MdmSubmitJobParametersValidator implements IJobParametersValidator<MdmSubmitJobParameters> {
 

@@ -24,6 +24,7 @@ import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.interceptor.auth.AuthorizationInterceptor.Verdict;
+import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -31,7 +32,6 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import javax.annotation.Nonnull;
 
 class OperationRule extends BaseRule implements IAuthRule {
 	private String myOperationName;

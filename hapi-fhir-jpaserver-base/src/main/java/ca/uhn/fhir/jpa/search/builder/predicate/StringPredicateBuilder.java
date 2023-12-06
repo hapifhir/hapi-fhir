@@ -37,9 +37,8 @@ import com.healthmarketscience.sqlbuilder.BinaryCondition;
 import com.healthmarketscience.sqlbuilder.ComboCondition;
 import com.healthmarketscience.sqlbuilder.Condition;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbColumn;
+import jakarta.annotation.Nonnull;
 import org.springframework.beans.factory.annotation.Autowired;
-
-import javax.annotation.Nonnull;
 
 public class StringPredicateBuilder extends BaseSearchParamPredicateBuilder {
 

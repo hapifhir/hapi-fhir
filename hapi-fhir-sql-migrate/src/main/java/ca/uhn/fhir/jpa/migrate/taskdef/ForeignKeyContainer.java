@@ -21,8 +21,7 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
-
-import javax.annotation.Nonnull;
+import jakarta.annotation.Nonnull;
 
 public class ForeignKeyContainer {
 

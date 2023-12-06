@@ -31,6 +31,7 @@ import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
 import ca.uhn.fhir.validation.SingleValidationMessage;
 import ca.uhn.fhir.validation.ValidationResult;
+import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
@@ -41,7 +42,6 @@ import org.hl7.fhir.r5.utils.validation.constants.BestPracticeWarningLevel;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import javax.annotation.Nonnull;
 
 class RequireValidationRule extends BaseTypedRule {
 	private final FhirInstanceValidator myValidator;

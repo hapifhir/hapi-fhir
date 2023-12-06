@@ -27,12 +27,12 @@ import ca.uhn.fhir.model.api.IQueryParameterOr;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
+import jakarta.annotation.Nonnull;
 
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import javax.annotation.Nonnull;
 
 /**
  * The IGenericClient API represents searches with OrLists, while the FhirRepository API uses nested

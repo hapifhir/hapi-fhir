@@ -38,6 +38,7 @@ import ca.uhn.fhir.util.OperationOutcomeUtil;
 import ca.uhn.fhir.util.ParametersUtil;
 import ca.uhn.fhir.util.UrlUtil;
 import ca.uhn.fhir.util.ValidateUtil;
+import jakarta.annotation.Nonnull;
 import jakarta.servlet.http.HttpServletResponse;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -57,7 +58,6 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
-import javax.annotation.Nonnull;
 
 import static ca.uhn.fhir.batch2.jobs.export.BulkDataExportProvider.validatePreferAsyncHeader;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;

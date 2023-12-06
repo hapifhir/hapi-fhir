@@ -25,6 +25,7 @@ import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.validation.ValidationResult;
+import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IBaseConformance;
 
 import java.io.Writer;
@@ -33,7 +34,6 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import javax.annotation.Nonnull;
 
 /**
  * Value for {@link Hook#value()}

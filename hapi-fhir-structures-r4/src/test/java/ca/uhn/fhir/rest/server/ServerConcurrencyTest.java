@@ -23,7 +23,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.Assert;
 
-import javax.annotation.Nonnull;
+import jakarta.annotation.Nonnull;
 import jakarta.servlet.ReadListener;
 import jakarta.servlet.ServletInputStream;
 import jakarta.servlet.http.HttpServletRequest;

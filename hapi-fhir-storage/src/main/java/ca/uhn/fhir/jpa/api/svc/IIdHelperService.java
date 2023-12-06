@@ -26,6 +26,8 @@ import ca.uhn.fhir.jpa.api.model.PersistentIdToForcedIdMap;
 import ca.uhn.fhir.jpa.model.cross.IResourceLookup;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -35,8 +37,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 /**
  * This interface is used to translate between {@link IResourcePersistentId}

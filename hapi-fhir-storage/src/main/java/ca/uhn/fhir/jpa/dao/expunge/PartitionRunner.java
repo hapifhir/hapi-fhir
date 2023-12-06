@@ -27,6 +27,7 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.util.StopWatch;
 import com.google.common.collect.Lists;
+import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.concurrent.BasicThreadFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,7 +45,6 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
-import javax.annotation.Nullable;
 
 public class PartitionRunner {
 	private static final Logger ourLog = LoggerFactory.getLogger(PartitionRunner.class);

@@ -20,11 +20,11 @@
 package ca.uhn.fhir.rest.api;
 
 import ca.uhn.fhir.util.CoverageIgnore;
+import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.Validate;
 
 import java.util.HashMap;
 import java.util.Map;
-import javax.annotation.Nonnull;
 
 @CoverageIgnore
 public enum RestOperationTypeEnum {

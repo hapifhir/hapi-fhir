@@ -24,12 +24,12 @@ import ca.uhn.fhir.jpa.migrate.MigrationTaskList;
 import ca.uhn.fhir.jpa.migrate.taskdef.BaseTask;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.MultimapBuilder;
+import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.EnumUtils;
 import org.apache.commons.lang3.Validate;
 import org.flywaydb.core.api.MigrationVersion;
 
 import java.util.Collection;
-import javax.annotation.Nonnull;
 
 public class BaseMigrationTasks<T extends Enum> {
 	MigrationVersion lastVersion;

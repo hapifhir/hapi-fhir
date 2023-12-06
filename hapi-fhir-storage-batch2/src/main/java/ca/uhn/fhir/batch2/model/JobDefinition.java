@@ -28,6 +28,8 @@ import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.util.Logs;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
 
@@ -35,8 +37,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 public class JobDefinition<PT extends IModelJson> {
 	private static final Logger ourLog = Logs.getBatchTroubleshootingLog();

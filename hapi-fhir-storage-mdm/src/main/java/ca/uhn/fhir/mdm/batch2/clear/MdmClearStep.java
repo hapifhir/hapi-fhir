@@ -38,6 +38,7 @@ import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.util.StopWatch;
 import com.google.common.annotations.VisibleForTesting;
+import jakarta.annotation.Nonnull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,7 +47,6 @@ import org.springframework.transaction.support.TransactionCallback;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-import javax.annotation.Nonnull;
 
 @SuppressWarnings("rawtypes")
 public class MdmClearStep implements IJobStepWorker<MdmClearJobParameters, ResourceIdListWorkChunkJson, VoidModel> {

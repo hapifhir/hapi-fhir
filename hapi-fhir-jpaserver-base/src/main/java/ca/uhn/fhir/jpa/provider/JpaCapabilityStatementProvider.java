@@ -31,6 +31,7 @@ import ca.uhn.fhir.util.CoverageIgnore;
 import ca.uhn.fhir.util.ExtensionConstants;
 import ca.uhn.fhir.util.ExtensionUtil;
 import ca.uhn.fhir.util.FhirTerser;
+import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseConformance;
@@ -40,7 +41,6 @@ import org.hl7.fhir.r4.model.CapabilityStatement.ResourceVersionPolicy;
 import org.hl7.fhir.r4.model.Meta;
 
 import java.util.Map;
-import javax.annotation.Nonnull;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 

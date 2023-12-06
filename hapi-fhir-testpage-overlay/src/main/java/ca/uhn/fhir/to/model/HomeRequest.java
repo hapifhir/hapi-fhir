@@ -14,10 +14,9 @@ import ca.uhn.fhir.rest.server.IncomingRequestAddressStrategy;
 import ca.uhn.fhir.rest.server.util.ITestingUiClientFactory;
 import ca.uhn.fhir.to.Controller;
 import ca.uhn.fhir.to.TesterConfig;
+import jakarta.annotation.Nullable;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.web.bind.annotation.ModelAttribute;
-
-import javax.annotation.Nullable;
 
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isBlank;

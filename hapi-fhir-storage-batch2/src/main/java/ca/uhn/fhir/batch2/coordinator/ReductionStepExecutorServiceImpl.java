@@ -38,6 +38,7 @@ import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
 import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import com.google.common.annotations.VisibleForTesting;
+import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.time.DateUtils;
 import org.quartz.JobExecutionContext;
 import org.slf4j.Logger;
@@ -61,7 +62,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Stream;
-import javax.annotation.Nonnull;
 
 import static ca.uhn.fhir.batch2.model.StatusEnum.ERRORED;
 import static ca.uhn.fhir.batch2.model.StatusEnum.FINALIZE;

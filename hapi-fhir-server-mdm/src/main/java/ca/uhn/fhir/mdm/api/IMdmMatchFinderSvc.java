@@ -20,10 +20,10 @@
 package ca.uhn.fhir.mdm.api;
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 
 import java.util.List;
-import javax.annotation.Nonnull;
 
 public interface IMdmMatchFinderSvc {
 

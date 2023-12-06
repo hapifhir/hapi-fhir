@@ -21,9 +21,9 @@ package ca.uhn.fhir.jpa.dao.expunge;
 
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import jakarta.annotation.Nonnull;
 
 import java.util.function.Supplier;
-import javax.annotation.Nonnull;
 
 /**
  * Utility class wrapping a supplier in a transaction with the purpose of performing the supply operation with a
