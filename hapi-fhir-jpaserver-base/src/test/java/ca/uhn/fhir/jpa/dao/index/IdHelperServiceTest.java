@@ -121,7 +121,7 @@ public class IdHelperServiceTest {
 
     private void configureCacheBehaviour(String resourceUrl) {
         when(myMemoryCacheService.getThenPutAfterCommit(eq(MemoryCacheService.CacheEnum.FORCED_ID_TO_PID), eq(resourceUrl), any())).thenCallRealMethod();
-        doNothing().when(myMemoryCacheService).putAfterCommit(eq(MemoryCacheService.CacheEnum.FORCED_ID_TO_PID), eq(resourceUrl), any(JpaPid.class));
+        doNothing().when(myMemoryCacheService).putAfterCommit(eq(MemoryCacheService.CacheEnum.FORCED_ID_TO_PID), eq(resourceUrl), ArgumentMatchers.<JpaPid>any());
         when(myMemoryCacheService.getIfPresent(eq(MemoryCacheService.CacheEnum.FORCED_ID_TO_PID), eq(resourceUrl))).thenReturn(null);
     }
 
@@ -154,7 +154,7 @@ public class IdHelperServiceTest {
         Path<Object> path = mock(Path.class);
         @SuppressWarnings("unchecked")
         Root<ResourceTable> from = mock(Root.class);
-        lenient().when(from.get(anyString())).thenReturn(path);
+        lenient().when(from.get(ArgumentMatchers.<String>any())).thenReturn(path);
         return from;
     }
 
