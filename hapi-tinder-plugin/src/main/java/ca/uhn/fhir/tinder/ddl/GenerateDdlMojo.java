@@ -18,12 +18,12 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.trim;
 
 @Mojo(
-		name = "generate-ddl",
-		defaultPhase = LifecyclePhase.PROCESS_CLASSES,
-		requiresDependencyCollection = ResolutionScope.COMPILE_PLUS_RUNTIME,
-		requiresDependencyResolution = ResolutionScope.COMPILE_PLUS_RUNTIME,
-		threadSafe = true,
-		requiresProject = true)
+	name = "generate-ddl",
+	defaultPhase = LifecyclePhase.PROCESS_CLASSES,
+	requiresDependencyCollection = ResolutionScope.COMPILE_PLUS_RUNTIME,
+	requiresDependencyResolution = ResolutionScope.COMPILE_PLUS_RUNTIME,
+	threadSafe = true,
+	requiresProject = true)
 public class GenerateDdlMojo extends AbstractMojo {
 	private static final Logger ourLog = LoggerFactory.getLogger(GenerateDdlMojo.class);
 
@@ -68,11 +68,29 @@ public class GenerateDdlMojo extends AbstractMojo {
 		generator.generateDdl();
 	}
 
+	public static void main(String[] args) throws MojoExecutionException, MojoFailureException {
+		/*
+		 * Note, to execute this, add the following snippet to this module's POM. The whole project won't work with
+		 * that added, but you can add it temporarily in order to debug this in IJ:
+		 * 		<dependency>
+		 * 			<groupId>ca.uhn.hapi.fhir</groupId>
+		 * 			<artifactId>hapi-fhir-jpaserver-model</artifactId>
+		 * 			<version>${project.version}</version>
+		 * 		</dependency>
+		 */
+		GenerateDdlMojo m = new GenerateDdlMojo();
+		m.packageNames = List.of("ca.uhn.fhir.jpa.model.entity");
+		m.outputDirectory = "hapi-tinder-plugin/target";
+		m.dialects = List.of(new Dialect("ca.uhn.fhir.jpa.model.dialect.HapiFhirH2Dialect", "h2.sql"));
+		m.execute();
+	}
+
 	public static class Dialect {
 
 		private String className;
 		private String targetFileName;
 		private String prependFile;
+		private String appendFile;
 
 		public Dialect() {
 			super();
@@ -82,6 +100,14 @@ public class GenerateDdlMojo extends AbstractMojo {
 			super();
 			setClassName(theClassName);
 			setTargetFileName(theTargetFileName);
+		}
+
+		public String getAppendFile() {
+			return appendFile;
+		}
+
+		public void setAppendFile(String theAppendFile) {
+			appendFile = theAppendFile;
 		}
 
 		public String getClassName() {
@@ -107,22 +133,5 @@ public class GenerateDdlMojo extends AbstractMojo {
 		public void setPrependFile(String thePrependFile) {
 			prependFile = thePrependFile;
 		}
-	}
-
-	public static void main(String[] args) throws MojoExecutionException, MojoFailureException {
-		/*
-		 * Note, to execute this, add the following snippet to this module's POM. The whole project won't work with
-		 * that added, but you can add it temporarily in order to debug this in IJ:
-		 * 		<dependency>
-		 * 			<groupId>ca.uhn.hapi.fhir</groupId>
-		 * 			<artifactId>hapi-fhir-jpaserver-model</artifactId>
-		 * 			<version>${project.version}</version>
-		 * 		</dependency>
-		 */
-		GenerateDdlMojo m = new GenerateDdlMojo();
-		m.packageNames = List.of("ca.uhn.fhir.jpa.model.entity");
-		m.outputDirectory = "hapi-tinder-plugin/target";
-		m.dialects = List.of(new Dialect("ca.uhn.fhir.jpa.model.dialect.HapiFhirH2Dialect", "h2.sql"));
-		m.execute();
 	}
 }
