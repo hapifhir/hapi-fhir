@@ -19,8 +19,13 @@
  */
 package ca.uhn.fhir.jpa.fql.provider;
 
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.fql.executor.HfqlExecutor;
 import ca.uhn.fhir.jpa.fql.executor.IHfqlExecutor;
+import ca.uhn.fhir.rest.server.IPagingProvider;
+import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
@@ -30,8 +35,12 @@ public class HfqlRestProviderCtxConfig {
 
 	@Bean
 	@Lazy
-	public IHfqlExecutor fqlExecutor() {
-		return new HfqlExecutor();
+	public IHfqlExecutor fqlExecutor(
+			@Autowired FhirContext myFhirContext,
+			@Autowired IPagingProvider myPagingProvider,
+			@Autowired ISearchParamRegistry mySearchParamRegistry,
+			@Autowired DaoRegistry myDaoRegistry) {
+		return new HfqlExecutor(myFhirContext, myPagingProvider, mySearchParamRegistry, myDaoRegistry);
 	}
 
 	@Bean

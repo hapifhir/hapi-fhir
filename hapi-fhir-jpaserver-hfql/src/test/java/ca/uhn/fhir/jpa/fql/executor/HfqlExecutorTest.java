@@ -72,7 +72,7 @@ public class HfqlExecutorTest {
 	@Spy
 	private ISearchParamRegistry mySearchParamRegistry = new FhirContextSearchParamRegistry(myCtx);
 	@InjectMocks
-	private HfqlExecutor myHfqlExecutor = new HfqlExecutor();
+	private HfqlExecutor myHfqlExecutor = new HfqlExecutor(null, null, null, null);
 	@Captor
 	private ArgumentCaptor<SearchParameterMap> mySearchParameterMapCaptor;
 
@@ -655,8 +655,7 @@ public class HfqlExecutorTest {
 	}
 
 	/**
-	 * This should work but the FHIRPath evaluator doesn't seem to be
-	 * doing the right thing
+	 * This only works with parentheses
 	 */
 	@Test
 	@Disabled
@@ -670,9 +669,9 @@ public class HfqlExecutorTest {
 
 		String statement = """
 			SELECT
-			   COL1: identifier[0].system + '|' + identifier[0].value,
-			   identifier[0].system + '|' + identifier[0].value AS COL2,
-			   identifier[0].system + '|' + identifier[0].value
+			   COL1: (identifier[0].system) + '|' + (identifier[0].value),
+			   (identifier[0].system) + '|' + (identifier[0].value) AS COL2,
+			   (identifier[0].system) + '|' + (identifier[0].value)
 			FROM
 			   Patient
 			""";
@@ -680,12 +679,10 @@ public class HfqlExecutorTest {
 		IHfqlExecutionResult.Row nextRow;
 		IHfqlExecutionResult result = myHfqlExecutor.executeInitialSearch(statement, null, mySrd);
 		assertThat(result.getStatement().toSelectedColumnAliases().toString(), result.getStatement().toSelectedColumnAliases(), hasItems(
-			"COL1", "COL2", "identifier[0].system + '|' + identifier[0].value"
+			"COL1", "COL2", "(identifier[0].system) + '|' + (identifier[0].value)"
 		));
 		nextRow = result.getNextRow();
-		assertThat(nextRow.getRowValues().toString(), nextRow.getRowValues(), contains(
-			""
-		));
+		assertThat(nextRow.getRowValues().toString(), nextRow.getRowValues(), contains("http://foo|123", "http://foo|123", "http://foo|123"));
 		assertFalse(result.hasNext());
 	}
 
@@ -1262,7 +1259,7 @@ public class HfqlExecutorTest {
 	}
 
 	@Nonnull
-	private static List<List<Object>> readAllRowValues(IHfqlExecutionResult result) {
+	static List<List<Object>> readAllRowValues(IHfqlExecutionResult result) {
 		List<List<Object>> rowValues = new ArrayList<>();
 		while (result.hasNext()) {
 			rowValues.add(new ArrayList<>(result.getNextRow().getRowValues()));
@@ -1271,7 +1268,7 @@ public class HfqlExecutorTest {
 	}
 
 	@Nonnull
-	private static Observation createCardiologyNoteObservation(String id, String noteText) {
+	static Observation createCardiologyNoteObservation(String id, String noteText) {
 		Observation obs = new Observation();
 		obs.setId(id);
 		obs.getCode().addCoding()
@@ -1282,7 +1279,7 @@ public class HfqlExecutorTest {
 	}
 
 	@Nonnull
-	private static Observation createWeightObservationWithKilos(String obsId, long kg) {
+	static Observation createWeightObservationWithKilos(String obsId, long kg) {
 		Observation obs = new Observation();
 		obs.setId(obsId);
 		obs.getCode().addCoding()
@@ -1293,7 +1290,7 @@ public class HfqlExecutorTest {
 	}
 
 	@Nonnull
-	private static SimpleBundleProvider createProviderWithSparseNames() {
+	static SimpleBundleProvider createProviderWithSparseNames() {
 		Patient patientNoValues = new Patient();
 		patientNoValues.setActive(true);
 		Patient patientFamilyNameOnly = new Patient();
@@ -1307,7 +1304,7 @@ public class HfqlExecutorTest {
 	}
 
 	@Nonnull
-	private static SimpleBundleProvider createProviderWithSomeSimpsonsAndFlanders() {
+	static SimpleBundleProvider createProviderWithSomeSimpsonsAndFlanders() {
 		return new SimpleBundleProvider(
 			createPatientHomerSimpson(),
 			createPatientNedFlanders(),
@@ -1318,7 +1315,7 @@ public class HfqlExecutorTest {
 	}
 
 	@Nonnull
-	private static SimpleBundleProvider createProviderWithSomeSimpsonsAndFlandersWithSomeDuplicates() {
+	static SimpleBundleProvider createProviderWithSomeSimpsonsAndFlandersWithSomeDuplicates() {
 		return new SimpleBundleProvider(
 			createPatientHomerSimpson(),
 			createPatientHomerSimpson(),
@@ -1330,7 +1327,7 @@ public class HfqlExecutorTest {
 	}
 
 	@Nonnull
-	private static Patient createPatientMaggieSimpson() {
+	static Patient createPatientMaggieSimpson() {
 		Patient maggie = new Patient();
 		maggie.addName().setFamily("Simpson").addGiven("Maggie").addGiven("Evelyn");
 		maggie.addIdentifier().setSystem("http://system").setValue("value4");
@@ -1338,7 +1335,7 @@ public class HfqlExecutorTest {
 	}
 
 	@Nonnull
-	private static Patient createPatientLisaSimpson() {
+	static Patient createPatientLisaSimpson() {
 		Patient lisa = new Patient();
 		lisa.getMeta().setVersionId("1");
 		lisa.addName().setFamily("Simpson").addGiven("Lisa").addGiven("Marie");
@@ -1347,7 +1344,7 @@ public class HfqlExecutorTest {
 	}
 
 	@Nonnull
-	private static Patient createPatientBartSimpson() {
+	static Patient createPatientBartSimpson() {
 		Patient bart = new Patient();
 		bart.getMeta().setVersionId("3");
 		bart.addName().setFamily("Simpson").addGiven("Bart").addGiven("El Barto");
@@ -1356,7 +1353,7 @@ public class HfqlExecutorTest {
 	}
 
 	@Nonnull
-	private static Patient createPatientNedFlanders() {
+	static Patient createPatientNedFlanders() {
 		Patient nedFlanders = new Patient();
 		nedFlanders.getMeta().setVersionId("1");
 		nedFlanders.addName().setFamily("Flanders").addGiven("Ned");
@@ -1365,7 +1362,7 @@ public class HfqlExecutorTest {
 	}
 
 	@Nonnull
-	private static Patient createPatientHomerSimpson() {
+	static Patient createPatientHomerSimpson() {
 		Patient homer = new Patient();
 		homer.setId("HOMER0");
 		homer.getMeta().setVersionId("2");
