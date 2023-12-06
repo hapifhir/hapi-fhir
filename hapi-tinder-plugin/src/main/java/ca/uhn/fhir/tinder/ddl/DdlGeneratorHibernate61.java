@@ -112,15 +112,7 @@ public class DdlGeneratorHibernate61 {
 				}
 			}
 
-			if (isNotBlank(nextDialect.getPrependFile())) {
-				ResourceLoader loader = new DefaultResourceLoader(classLoader);
-				Resource resource = loader.getResource(nextDialect.getPrependFile());
-				try (Writer w = new FileWriter(outputFile, false)) {
-					w.append(resource.getContentAsString(StandardCharsets.UTF_8));
-				} catch (IOException e) {
-					throw new MojoFailureException("Failed to write to file " + outputFile + ": " + e.getMessage(), e);
-				}
-			}
+			writeContentsToFile(nextDialect.getPrependFile(), classLoader, outputFile);
 
 			String outputFileName = outputFile.getAbsolutePath();
 			ourLog.info("Writing to file: {}", outputFileName);
@@ -130,6 +122,21 @@ public class DdlGeneratorHibernate61 {
 			schemaExport.setDelimiter(";");
 			schemaExport.setOutputFile(outputFileName);
 			schemaExport.execute(targetTypes, action, metadata, standardRegistry);
+
+			writeContentsToFile(nextDialect.getAppendFile(), classLoader, outputFile);
+		}
+	}
+
+	private static void writeContentsToFile(String prependFile, ClassLoader classLoader, File outputFile)
+			throws MojoFailureException {
+		if (isNotBlank(prependFile)) {
+			ResourceLoader loader = new DefaultResourceLoader(classLoader);
+			Resource resource = loader.getResource(prependFile);
+			try (Writer w = new FileWriter(outputFile, true)) {
+				w.append(resource.getContentAsString(StandardCharsets.UTF_8));
+			} catch (IOException e) {
+				throw new MojoFailureException("Failed to write to file " + outputFile + ": " + e.getMessage(), e);
+			}
 		}
 	}
 
