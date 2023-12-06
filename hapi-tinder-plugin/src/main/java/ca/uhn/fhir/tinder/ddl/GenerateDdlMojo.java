@@ -18,12 +18,12 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.trim;
 
 @Mojo(
-	name = "generate-ddl",
-	defaultPhase = LifecyclePhase.PROCESS_CLASSES,
-	requiresDependencyCollection = ResolutionScope.COMPILE_PLUS_RUNTIME,
-	requiresDependencyResolution = ResolutionScope.COMPILE_PLUS_RUNTIME,
-	threadSafe = true,
-	requiresProject = true)
+		name = "generate-ddl",
+		defaultPhase = LifecyclePhase.PROCESS_CLASSES,
+		requiresDependencyCollection = ResolutionScope.COMPILE_PLUS_RUNTIME,
+		requiresDependencyResolution = ResolutionScope.COMPILE_PLUS_RUNTIME,
+		threadSafe = true,
+		requiresProject = true)
 public class GenerateDdlMojo extends AbstractMojo {
 	private static final Logger ourLog = LoggerFactory.getLogger(GenerateDdlMojo.class);
 

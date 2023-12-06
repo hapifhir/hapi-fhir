@@ -127,7 +127,8 @@ public class DdlGeneratorHibernate61 {
 		}
 	}
 
-	private static void writeContentsToFile(String prependFile, ClassLoader classLoader, File outputFile) throws MojoFailureException {
+	private static void writeContentsToFile(String prependFile, ClassLoader classLoader, File outputFile)
+			throws MojoFailureException {
 		if (isNotBlank(prependFile)) {
 			ResourceLoader loader = new DefaultResourceLoader(classLoader);
 			Resource resource = loader.getResource(prependFile);
