@@ -20,7 +20,7 @@
 package ca.uhn.fhir.rest.api.server.bulk;
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.model.api.IModelJson;
+import ca.uhn.fhir.model.api.BaseBatchJobParameters;
 import ca.uhn.fhir.rest.server.util.JsonDateDeserializer;
 import ca.uhn.fhir.rest.server.util.JsonDateSerializer;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -32,7 +32,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
-public class BulkExportJobParameters implements IModelJson {
+public class BulkExportJobParameters extends BaseBatchJobParameters {
 
 	/**
 	 * List of resource types to export.
