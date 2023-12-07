@@ -513,11 +513,6 @@ public interface IValidationSupport {
 		}
 	}
 
-	enum ConceptPropertyTypeEnum {
-		STRING,
-		CODING
-	}
-
 	abstract class BaseConceptProperty {
 		private final String myPropertyName;
 
@@ -532,7 +527,7 @@ public interface IValidationSupport {
 			return myPropertyName;
 		}
 
-		public abstract ConceptPropertyTypeEnum getType();
+		public abstract String getType();
 	}
 
 	class StringConceptProperty extends BaseConceptProperty {
@@ -552,8 +547,8 @@ public interface IValidationSupport {
 			return myValue;
 		}
 
-		public ConceptPropertyTypeEnum getType() {
-			return ConceptPropertyTypeEnum.STRING;
+		public String getType() {
+			return "string";
 		}
 	}
 
@@ -586,8 +581,8 @@ public interface IValidationSupport {
 			return myDisplay;
 		}
 
-		public ConceptPropertyTypeEnum getType() {
-			return ConceptPropertyTypeEnum.CODING;
+		public String getType() {
+			return "Coding";
 		}
 	}
 
@@ -896,22 +891,26 @@ public interface IValidationSupport {
 				}
 
 				for (BaseConceptProperty next : myProperties) {
+					String propertyName = next.getPropertyName();
 
-					if (!properties.isEmpty() && !properties.contains(next.getPropertyName())) {
+					if (!properties.isEmpty() && !properties.contains(propertyName)) {
 						continue;
 					}
 
 					IBase property = ParametersUtil.addParameterToParameters(theContext, retVal, "property");
-					ParametersUtil.addPartCode(theContext, property, "code", next.getPropertyName());
+					ParametersUtil.addPartCode(theContext, property, "code", propertyName);
 
-					ConceptPropertyTypeEnum propertyType = next.getType();
+					String propertyType = next.getType();
+					if (propertyType == null) {
+						throw new IllegalStateException(Msg.code(2450) + "Type is required for property " + propertyName);
+					}
 					switch (propertyType) {
-						case STRING:
+						case "string":
 							StringConceptProperty stringConceptProperty = (StringConceptProperty) next;
 							ParametersUtil.addPartString(
 									theContext, property, "value", stringConceptProperty.getValue());
 							break;
-						case CODING:
+						case "Coding":
 							CodingConceptProperty codingConceptProperty = (CodingConceptProperty) next;
 							ParametersUtil.addPartCoding(
 									theContext,

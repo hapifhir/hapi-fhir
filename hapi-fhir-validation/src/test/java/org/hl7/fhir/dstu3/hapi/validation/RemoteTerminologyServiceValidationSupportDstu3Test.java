@@ -8,6 +8,7 @@ import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.server.IResourceProvider;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.test.utilities.LookupCodeUtil;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import jakarta.servlet.http.HttpServletRequest;
@@ -17,9 +18,11 @@ import org.hl7.fhir.dstu3.model.CodeSystem;
 import org.hl7.fhir.dstu3.model.CodeType;
 import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.Parameters;
+import org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent;
 import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.dstu3.model.Type;
 import org.hl7.fhir.dstu3.model.UriType;
+import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.RegisterExtension;
@@ -28,6 +31,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -38,11 +42,11 @@ import java.util.stream.Stream;
 import static ca.uhn.fhir.context.support.IValidationSupport.BaseConceptProperty;
 import static ca.uhn.fhir.context.support.IValidationSupport.CodingConceptProperty;
 import static ca.uhn.fhir.context.support.IValidationSupport.ConceptDesignation;
-import static ca.uhn.fhir.context.support.IValidationSupport.ConceptPropertyTypeEnum;
 import static ca.uhn.fhir.context.support.IValidationSupport.LookupCodeResult;
 import static ca.uhn.fhir.context.support.IValidationSupport.StringConceptProperty;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class RemoteTerminologyServiceValidationSupportDstu3Test {
@@ -70,6 +74,31 @@ public class RemoteTerminologyServiceValidationSupportDstu3Test {
 		mySvc = new RemoteTerminologyServiceValidationSupport(ourCtx);
 		mySvc.setBaseUrl(baseUrl);
 		mySvc.addClientInterceptor(new LoggingInterceptor(true));
+	}
+
+	public static Stream<Arguments> parametersPropertyWithInvalidValue() {
+		final String propertyName = "someInvalidProperty";
+		return Stream.of(
+			Arguments.arguments(propertyName, null, "HAPI-2451: Type is required for property " + propertyName),
+			Arguments.arguments(propertyName, new CodeType("theCode"), "HAPI-2452: Property type code is not supported.")
+		);
+	}
+
+	@ParameterizedTest
+	@MethodSource(value = "parametersPropertyWithInvalidValue")
+	public void testLookupCode_forCodeSystemWithPropertyInvalidValue_throwsException(String thePropertyName, Type thePropertyValue, String theErrorMessage) {
+		// setup
+		ourRestfulServerExtension.getRestfulServer().unregisterProvider(myCodeSystemProvider);
+		MySimplePropertyCodeSystemProvider myMySimplePropertyCodeSystemProvider = new MySimplePropertyCodeSystemProvider();
+		ourRestfulServerExtension.getRestfulServer().registerProvider(myMySimplePropertyCodeSystemProvider);
+
+		myMySimplePropertyCodeSystemProvider.propertyName = thePropertyName;
+		myMySimplePropertyCodeSystemProvider.propertyValue = thePropertyValue;
+
+		// test and verify
+		InternalErrorException exception = assertThrows(InternalErrorException.class, () -> mySvc.lookupCode(null,
+			new LookupCodeRequest(CODE_SYSTEM, CODE, LANGUAGE, Collections.emptyList())));
+		assertTrue(exception.getMessage().contains(theErrorMessage));
 	}
 
 	public static Stream<Arguments> parametersPropertiesAndDesignations() {
@@ -106,7 +135,7 @@ public class RemoteTerminologyServiceValidationSupportDstu3Test {
 		Map<String, ConceptDesignation> theConceptDesignationMap = theConceptDesignations.stream().collect(
 			Collectors.toMap(c -> c.getUseSystem() + "|" + c.getUseCode(), Function.identity()));
 
-		for (Parameters.ParametersParameterComponent parameterComponent : myCodeSystemProvider.myNextReturnParams.getParameter()) {
+		for (ParametersParameterComponent parameterComponent : myCodeSystemProvider.myNextReturnParams.getParameter()) {
 			String parameterName = parameterComponent.getName();
 			Type parameterValue = parameterComponent.getValue();
 			switch (parameterName) {
@@ -119,19 +148,19 @@ public class RemoteTerminologyServiceValidationSupportDstu3Test {
 				case "abstract" ->
 					assertEquals(((BooleanType) parameterValue).getValue(), myCodeSystemProvider.myNextLookupCodeResult.isCodeIsAbstract());
 				case "property" -> {
-					final Iterator<Parameters.ParametersParameterComponent> propertyPartIterator = parameterComponent.getPart().iterator();
-					final Parameters.ParametersParameterComponent propertyName = propertyPartIterator.next();
-					final Parameters.ParametersParameterComponent propertyValue = propertyPartIterator.next();
+					final Iterator<ParametersParameterComponent> propertyPartIterator = parameterComponent.getPart().iterator();
+					final ParametersParameterComponent propertyName = propertyPartIterator.next();
+					final ParametersParameterComponent propertyValue = propertyPartIterator.next();
 					String propertyNameAsString = ((CodeType) propertyName.getValue()).getValue();
 					BaseConceptProperty conceptProperty = conceptPropertyMap.remove(propertyNameAsString);
-					ConceptPropertyTypeEnum propertyType = conceptProperty.getType();
+					String propertyType = conceptProperty.getType();
 					switch (propertyType) {
-						case STRING -> {
+						case "string" -> {
 							StringConceptProperty stringConceptProperty = (StringConceptProperty) conceptProperty;
 							assertEquals(stringConceptProperty.getPropertyName(), propertyNameAsString);
 							assertEquals(stringConceptProperty.getValue(), ((StringType) propertyValue.getValue()).getValueAsString());
 						}
-						case CODING -> {
+						case "Coding" -> {
 							CodingConceptProperty codingConceptProperty = (CodingConceptProperty) conceptProperty;
 							Coding coding = (Coding) propertyValue.getValue();
 							assertEquals(codingConceptProperty.getCodeSystem(), coding.getSystem());
@@ -141,10 +170,10 @@ public class RemoteTerminologyServiceValidationSupportDstu3Test {
 					}
 				}
 				case "designation" -> {
-					final Iterator<Parameters.ParametersParameterComponent> designationPartIterator = parameterComponent.getPart().iterator();
-					final Parameters.ParametersParameterComponent designationLanguage = designationPartIterator.next();
-					final Parameters.ParametersParameterComponent designationUse = designationPartIterator.next();
-					final Parameters.ParametersParameterComponent designationValue = designationPartIterator.next();
+					final Iterator<ParametersParameterComponent> designationPartIterator = parameterComponent.getPart().iterator();
+					final ParametersParameterComponent designationLanguage = designationPartIterator.next();
+					final ParametersParameterComponent designationUse = designationPartIterator.next();
+					final ParametersParameterComponent designationValue = designationPartIterator.next();
 					assertEquals("use", designationUse.getName());
 					Coding coding = (Coding) designationUse.getValue();
 					assertNotNull(coding, "Coding value returned via designation use should NOT be NULL!");
@@ -160,6 +189,40 @@ public class RemoteTerminologyServiceValidationSupportDstu3Test {
 
 		assertTrue(conceptPropertyMap.isEmpty());
 		assertTrue(theConceptDesignationMap.isEmpty());
+	}
+
+	private static class MySimplePropertyCodeSystemProvider implements IResourceProvider {
+		String propertyName;
+		Type propertyValue;
+
+		@Override
+		public Class<? extends IBaseResource> getResourceType() {
+			return CodeSystem.class;
+		}
+
+		@Operation(name = JpaConstants.OPERATION_LOOKUP, idempotent = true, returnParameters = {
+			@OperationParam(name = "name", type = StringType.class, min = 1),
+			@OperationParam(name = "version", type = StringType.class, min = 0),
+			@OperationParam(name = "display", type = StringType.class, min = 1),
+			@OperationParam(name = "abstract", type = BooleanType.class, min = 1),
+			@OperationParam(name = "property", type = StringType.class, min = 0, max = OperationParam.MAX_UNLIMITED)
+		})
+		public IBaseParameters lookup(
+			HttpServletRequest theServletRequest,
+			@OperationParam(name = "code", min = 0, max = 1) CodeType theCode,
+			@OperationParam(name = "system", min = 0, max = 1) UriType theSystem,
+			@OperationParam(name = "coding", min = 0, max = 1) Coding theCoding,
+			@OperationParam(name = "version", min = 0, max = 1) StringType theVersion,
+			@OperationParam(name = "displayLanguage", min = 0, max = 1) CodeType theDisplayLanguage,
+			@OperationParam(name = "property", min = 0, max = OperationParam.MAX_UNLIMITED) List<StringType> thePropertyNames,
+			RequestDetails theRequestDetails
+		) {
+			ParametersParameterComponent component = new ParametersParameterComponent();
+			component.setName("property");
+			component.addPart(new ParametersParameterComponent().setName("code").setValue(new CodeType(propertyName)));
+			component.addPart(new Parameters.ParametersParameterComponent().setName("value").setValue(propertyValue));
+			return new Parameters().addParameter(component);
+		}
 	}
 
 	private static class MyCodeSystemProvider implements IResourceProvider {

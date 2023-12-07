@@ -68,18 +68,24 @@ public class LookupCodeUtil {
 			new ConceptDesignation().setUseCode("code4").setUseSystem("system1"));
 
 		return Stream.of(
-			Arguments.arguments(properties, Collections.emptyList(), designations),
-			Arguments.arguments(properties, Collections.emptyList(), designations),
-			Arguments.arguments(properties, List.of(
-				new IValidationSupport.StringConceptProperty("birthDate", "1930-01-01")), designations),
-			Arguments.arguments(properties, List.of(
-				new IValidationSupport.StringConceptProperty("birthDate", "1930-01-01"))),
-			Arguments.arguments(properties, List.of(
-				new CodingConceptProperty("propertyCode", "code", "system", "display"))),
-			Arguments.arguments(properties, List.of(
-				new IValidationSupport.StringConceptProperty("birthDate", "1930-01-01"),
-				new IValidationSupport.StringConceptProperty("propertyString", "value"),
-				new CodingConceptProperty("propertyCode", "code", "system", "display")))
-		);
+			Arguments.arguments(List.of(new IValidationSupport.BaseConceptProperty("a") {
+									@Override
+									public String getType() {
+										return "code";
+									}
+								}), Collections.emptyList(), Collections.emptyList()),
+				Arguments.arguments(properties, Collections.emptyList(), designations),
+				Arguments.arguments(properties, Collections.emptyList(), designations),
+				Arguments.arguments(properties, List.of(
+					new IValidationSupport.StringConceptProperty("birthDate", "1930-01-01")), designations),
+				Arguments.arguments(properties, List.of(
+					new IValidationSupport.StringConceptProperty("birthDate", "1930-01-01"))),
+				Arguments.arguments(properties, List.of(
+					new CodingConceptProperty("propertyCode", "code", "system", "display"))),
+				Arguments.arguments(properties, List.of(
+					new IValidationSupport.StringConceptProperty("birthDate", "1930-01-01"),
+					new IValidationSupport.StringConceptProperty("propertyString", "value"),
+					new CodingConceptProperty("propertyCode", "code", "system", "display")))
+			);
 	}
 }
