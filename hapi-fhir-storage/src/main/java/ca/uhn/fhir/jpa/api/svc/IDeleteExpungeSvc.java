@@ -28,10 +28,11 @@ public interface IDeleteExpungeSvc<T extends IResourcePersistentId<?>> {
 
 	int deleteExpungeSingleResource(T thePersistentId, boolean theCascade, Integer theCascadeMaxRounds);
 
-	int deleteExpungeBatch(List<T> thePersistentIds, boolean theCascade, Integer theCascadeMaxRounds,
-						   RequestDetails theRequestDetails);
+	int deleteExpungeBatch(
+			List<T> thePersistentIds,
+			boolean theCascade,
+			Integer theCascadeMaxRounds,
+			RequestDetails theRequestDetails);
 
 	boolean isCascadeSupported();
-
-
 }

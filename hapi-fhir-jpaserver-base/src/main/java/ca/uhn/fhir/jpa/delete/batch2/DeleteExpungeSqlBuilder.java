@@ -72,7 +72,8 @@ public class DeleteExpungeSqlBuilder {
 		}
 
 		ResourceForeignKey resourceTablePk = new ResourceForeignKey("HFJ_RESOURCE", "RES_ID");
-		List<String> rawSqlToDeleteResources= Collections.singletonList(deleteRecordsByColumnSql(pidListString, resourceTablePk));
+		List<String> rawSqlToDeleteResources =
+				Collections.singletonList(deleteRecordsByColumnSql(pidListString, resourceTablePk));
 
 		return new DeleteExpungeSqlResult(rawSqlToDeleteReferences, rawSqlToDeleteResources, pids.size());
 	}
@@ -183,9 +184,10 @@ public class DeleteExpungeSqlBuilder {
 		private final List<String> mySqlStatementsToDeleteResources;
 		private final int myRecordCount;
 
-		public DeleteExpungeSqlResult(List<String> theSqlStatementsToDeleteReferences,
-									  List<String> theSqlStatementsToDeleteResources,
-									  int theRecordCount) {
+		public DeleteExpungeSqlResult(
+				List<String> theSqlStatementsToDeleteReferences,
+				List<String> theSqlStatementsToDeleteResources,
+				int theRecordCount) {
 			mySqlStatementsToDeleteReferences = theSqlStatementsToDeleteReferences;
 			mySqlStatementsToDeleteResources = theSqlStatementsToDeleteResources;
 			myRecordCount = theRecordCount;
@@ -195,10 +197,10 @@ public class DeleteExpungeSqlBuilder {
 			return mySqlStatementsToDeleteReferences;
 		}
 
-
 		public List<String> getSqlStatementsToDeleteResources() {
 			return mySqlStatementsToDeleteResources;
 		}
+
 		public int getRecordCount() {
 			return myRecordCount;
 		}

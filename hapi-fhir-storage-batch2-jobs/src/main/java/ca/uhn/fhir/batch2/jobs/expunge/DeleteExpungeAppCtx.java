@@ -67,9 +67,7 @@ public class DeleteExpungeAppCtx {
 						ResourceIdListWorkChunkJson.class,
 						new LoadIdsStep(theBatch2DaoSvc))
 				.addLastStep(
-						"expunge",
-						"Perform the resource expunge",
-						expungeStep(theDeleteExpungeSvc, theIdHelperService))
+						"expunge", "Perform the resource expunge", expungeStep(theDeleteExpungeSvc, theIdHelperService))
 				.build();
 	}
 
@@ -85,9 +83,7 @@ public class DeleteExpungeAppCtx {
 	}
 
 	@Bean
-	public DeleteExpungeStep expungeStep(
-			IDeleteExpungeSvc theDeleteExpungeSvc,
-			IIdHelperService theIdHelperService) {
+	public DeleteExpungeStep expungeStep(IDeleteExpungeSvc theDeleteExpungeSvc, IIdHelperService theIdHelperService) {
 		return new DeleteExpungeStep(theDeleteExpungeSvc, theIdHelperService);
 	}
 

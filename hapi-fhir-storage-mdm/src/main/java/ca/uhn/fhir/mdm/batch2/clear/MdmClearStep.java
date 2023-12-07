@@ -40,9 +40,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.annotation.Nonnull;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import javax.annotation.Nonnull;
 
 @SuppressWarnings("rawtypes")
 public class MdmClearStep implements IJobStepWorker<MdmClearJobParameters, ResourceIdListWorkChunkJson, VoidModel> {
@@ -65,9 +65,9 @@ public class MdmClearStep implements IJobStepWorker<MdmClearJobParameters, Resou
 	@Nonnull
 	@Override
 	public RunOutcome run(
-		@Nonnull StepExecutionDetails<MdmClearJobParameters, ResourceIdListWorkChunkJson> theStepExecutionDetails,
-		@Nonnull IJobDataSink<VoidModel> theDataSink)
-		throws JobExecutionFailedException {
+			@Nonnull StepExecutionDetails<MdmClearJobParameters, ResourceIdListWorkChunkJson> theStepExecutionDetails,
+			@Nonnull IJobDataSink<VoidModel> theDataSink)
+			throws JobExecutionFailedException {
 
 		try {
 			// avoid double deletion of mdm links
@@ -82,10 +82,11 @@ public class MdmClearStep implements IJobStepWorker<MdmClearJobParameters, Resou
 	}
 
 	@SuppressWarnings("unchecked")
-	private void runMmdClear(StepExecutionDetails<MdmClearJobParameters, ResourceIdListWorkChunkJson> theStepExecutionDetails) {
+	private void runMmdClear(
+			StepExecutionDetails<MdmClearJobParameters, ResourceIdListWorkChunkJson> theStepExecutionDetails) {
 
 		List<? extends IResourcePersistentId> persistentIds =
-			theStepExecutionDetails.getData().getResourcePersistentIds(myIdHelperService);
+				theStepExecutionDetails.getData().getResourcePersistentIds(myIdHelperService);
 
 		if (persistentIds.isEmpty()) {
 			return;
@@ -95,57 +96,47 @@ public class MdmClearStep implements IJobStepWorker<MdmClearJobParameters, Resou
 		requestDetails.setRetry(true);
 		requestDetails.setMaxRetries(100);
 		requestDetails.setRequestPartitionId(
-			theStepExecutionDetails.getParameters().getRequestPartitionId());
+				theStepExecutionDetails.getParameters().getRequestPartitionId());
 
 		String instanceId = theStepExecutionDetails.getInstance().getInstanceId();
 
 		String chunkId = theStepExecutionDetails.getChunkId();
 
-
-
-
 		ourLog.info(
-			"Starting mdm clear work chunk with {} resources - Instance[{}] Chunk[{}]",
-			persistentIds.size(),
-			instanceId,
-			chunkId);
+				"Starting mdm clear work chunk with {} resources - Instance[{}] Chunk[{}]",
+				persistentIds.size(),
+				instanceId,
+				chunkId);
 
 		StopWatch sw = new StopWatch();
 
-		myHapiTransactionService
-			.withRequest(requestDetails)
-			.execute(() ->
-				{
-					myMdmLinkSvc.deleteLinksWithAnyReferenceToPids(persistentIds);
-					ourLog.trace("Deleted {} mdm links in {}", persistentIds.size(),
-						StopWatch.formatMillis(sw.getMillis()));
-				}
-			);
-
+		myHapiTransactionService.withRequest(requestDetails).execute(() -> {
+			myMdmLinkSvc.deleteLinksWithAnyReferenceToPids(persistentIds);
+			ourLog.trace("Deleted {} mdm links in {}", persistentIds.size(), StopWatch.formatMillis(sw.getMillis()));
+		});
 
 		// use the expunge service to delete multiple resources at once efficiently
 		IDeleteExpungeSvc deleteExpungeSvc = myIMdmClearHelperSvc.getDeleteExpungeSvc();
 		int deletedRecords = deleteExpungeSvc.deleteExpungeBatch(persistentIds, false, null, requestDetails);
 		ourLog.trace(
-			"Deleted {} of {} golden resources in {}",
-			deletedRecords,
-			persistentIds.size(),
-			StopWatch.formatMillis(sw.getMillis()));
+				"Deleted {} of {} golden resources in {}",
+				deletedRecords,
+				persistentIds.size(),
+				StopWatch.formatMillis(sw.getMillis()));
 
 		ourLog.info(
-			"Finished removing {} of {} golden resources in {} - {}/sec - Instance[{}] Chunk[{}]",
-			deletedRecords,
-			persistentIds.size(),
-			sw,
-			sw.formatThroughput(persistentIds.size(), TimeUnit.SECONDS),
-			instanceId,
-			chunkId);
+				"Finished removing {} of {} golden resources in {} - {}/sec - Instance[{}] Chunk[{}]",
+				deletedRecords,
+				persistentIds.size(),
+				sw,
+				sw.formatThroughput(persistentIds.size(), TimeUnit.SECONDS),
+				instanceId,
+				chunkId);
 
 		if (ourClearCompletionCallbackForUnitTest != null) {
 			ourClearCompletionCallbackForUnitTest.run();
 		}
 	}
-
 
 	@VisibleForTesting
 	public static void setClearCompletionCallbackForUnitTest(Runnable theClearCompletionCallbackForUnitTest) {

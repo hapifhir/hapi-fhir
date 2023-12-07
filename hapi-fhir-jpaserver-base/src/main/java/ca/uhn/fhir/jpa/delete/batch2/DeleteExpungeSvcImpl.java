@@ -30,7 +30,6 @@ import ca.uhn.fhir.util.StopWatch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.transaction.support.TransactionOperations;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.util.Collections;
@@ -47,23 +46,22 @@ public class DeleteExpungeSvcImpl implements IDeleteExpungeSvc<JpaPid> {
 	private final IFulltextSearchSvc myFullTextSearchSvc;
 
 	public DeleteExpungeSvcImpl(
-		EntityManager theEntityManager,
-		DeleteExpungeSqlBuilder theDeleteExpungeSqlBuilder,
-		@Autowired(required = false) IFulltextSearchSvc theFullTextSearchSvc,
-		IHapiTransactionService theHapiTransactionService) {
+			EntityManager theEntityManager,
+			DeleteExpungeSqlBuilder theDeleteExpungeSqlBuilder,
+			@Autowired(required = false) IFulltextSearchSvc theFullTextSearchSvc,
+			IHapiTransactionService theHapiTransactionService) {
 		myEntityManager = theEntityManager;
 		myDeleteExpungeSqlBuilder = theDeleteExpungeSqlBuilder;
 		myFullTextSearchSvc = theFullTextSearchSvc;
 		myHapiTransactionService = theHapiTransactionService;
 	}
 
-	public int deleteExpungeSingleResource(JpaPid theJpaPid,
-										   boolean theCascade,
-										   Integer theCascadeMaxRounds) {
+	public int deleteExpungeSingleResource(JpaPid theJpaPid, boolean theCascade, Integer theCascadeMaxRounds) {
 		assert TransactionSynchronizationManager.isActualTransactionActive();
 		Long pid = theJpaPid.getId();
 		DeleteExpungeSqlBuilder.DeleteExpungeSqlResult sqlResult =
-			myDeleteExpungeSqlBuilder.convertPidsToDeleteExpungeSql(Collections.singleton(pid), theCascade, theCascadeMaxRounds);
+				myDeleteExpungeSqlBuilder.convertPidsToDeleteExpungeSql(
+						Collections.singleton(pid), theCascade, theCascadeMaxRounds);
 
 		executeSqlList(sqlResult.getSqlStatementsToDeleteReferences());
 		executeSqlList(sqlResult.getSqlStatementsToDeleteResources());
@@ -72,36 +70,35 @@ public class DeleteExpungeSvcImpl implements IDeleteExpungeSvc<JpaPid> {
 	}
 
 	@Override
-	public int deleteExpungeBatch(List<JpaPid> theJpaPids,
-								  boolean theCascade,
-								  Integer theCascadeMaxRounds,
-								  RequestDetails theRequestDetails) {
+	public int deleteExpungeBatch(
+			List<JpaPid> theJpaPids,
+			boolean theCascade,
+			Integer theCascadeMaxRounds,
+			RequestDetails theRequestDetails) {
 
-		//assert there is no active transaction
+		// assert there is no active transaction
 		assert !TransactionSynchronizationManager.isActualTransactionActive();
 		Set<Long> pids = JpaPid.toLongSet(theJpaPids);
 		DeleteExpungeSqlBuilder.DeleteExpungeSqlResult sqlResult =
-			myDeleteExpungeSqlBuilder.convertPidsToDeleteExpungeSql(pids, theCascade, theCascadeMaxRounds);
+				myDeleteExpungeSqlBuilder.convertPidsToDeleteExpungeSql(pids, theCascade, theCascadeMaxRounds);
 
 		IHapiTransactionService.IExecutionBuilder executionBuilder = myHapiTransactionService
-			.withRequest(theRequestDetails)
-			.withTransactionDetails(new TransactionDetails());
+				.withRequest(theRequestDetails)
+				.withTransactionDetails(new TransactionDetails());
 
 		executionBuilder.execute(() -> {
-			executeSqlList(sqlResult.getSqlStatementsToDeleteReferences())
+			executeSqlList(sqlResult.getSqlStatementsToDeleteReferences());
 		});
 
 		executionBuilder.execute(() -> {
 			executeSqlList(sqlResult.getSqlStatementsToDeleteResources());
 		});
 
-
 		return sqlResult.getRecordCount();
 	}
-
 
 	private int executeSqlList(List<String> sqlList) {
-		long totalDeleted = 0;
+		int totalDeleted = 0;
 
 		StopWatch sw = new StopWatch();
 		for (String sql : sqlList) {
@@ -114,44 +111,7 @@ public class DeleteExpungeSvcImpl implements IDeleteExpungeSvc<JpaPid> {
 		}
 
 		ourLog.info("{} records deleted", totalDeleted);
-	}
-
-	private int deleteExpungeReferencesToResources(
-		List<JpaPid> theJpaPids) {
-
-
-		ourLog.info("Executing {} delete expunge sql commands to delete references ", sqlList.size());
-
-
-		// TODO KHS instead of logging progress, produce result chunks that get aggregated into a delete expunge report
-
-	}
-
-	@Override
-	public int deleteExpungeResources(List<JpaPid> theJpaPids, boolean theCascade, Integer theCascadeMaxRounds) {
-		Set<Long> pids = JpaPid.toLongSet(theJpaPids);
-		DeleteExpungeSqlBuilder.DeleteExpungeSqlResult sqlResult =
-			myDeleteExpungeSqlBuilder.convertPidsToDeleteExpungeResourcesSql(pids);
-		List<String> sqlList = sqlResult.getSqlStatementsToDeleteReferences();
-
-		ourLog.info("Executing {} delete expunge sql commands", sqlList.size());
-		long totalDeleted = 0;
-
-		StopWatch sw = new StopWatch();
-		for (String sql : sqlList) {
-			sw.restart();
-			ourLog.info("Executing sql " + sql);
-			int deleted = myEntityManager.createNativeQuery(sql).executeUpdate();
-			ourLog.info("sql took " + StopWatch.formatMillis(sw.getMillis()));
-			ourLog.info("#deleted records:" + deleted);
-			totalDeleted += deleted;
-		}
-
-		ourLog.info("{} records deleted", totalDeleted);
-		clearHibernateSearchIndex(theJpaPids);
-
-		// TODO KHS instead of logging progress, produce result chunks that get aggregated into a delete expunge report
-		return sqlResult.getRecordCount();
+		return totalDeleted;
 	}
 
 	@Override
@@ -166,7 +126,7 @@ public class DeleteExpungeSvcImpl implements IDeleteExpungeSvc<JpaPid> {
 	private void clearHibernateSearchIndex(List<JpaPid> thePersistentIds) {
 		if (myFullTextSearchSvc != null && !myFullTextSearchSvc.isDisabled()) {
 			List<Object> objectIds =
-				thePersistentIds.stream().map(JpaPid::getId).collect(Collectors.toList());
+					thePersistentIds.stream().map(JpaPid::getId).collect(Collectors.toList());
 			myFullTextSearchSvc.deleteIndexedDocumentsByTypeAndId(ResourceTable.class, objectIds);
 			ourLog.info("Cleared Hibernate Search indexes.");
 		}
