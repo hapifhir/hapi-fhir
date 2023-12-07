@@ -30,6 +30,7 @@ import ca.uhn.fhir.util.DatatypeUtil;
 import ca.uhn.fhir.util.JsonUtil;
 import ca.uhn.fhir.util.ValidateUtil;
 import ca.uhn.fhir.util.VersionUtil;
+import jakarta.annotation.Nullable;
 import jakarta.servlet.ServletOutputStream;
 import jakarta.servlet.http.HttpServletResponse;
 import org.apache.commons.csv.CSVPrinter;
@@ -38,7 +39,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
 import java.io.OutputStreamWriter;
-import javax.annotation.Nullable;
 
 import static ca.uhn.fhir.jpa.fql.jdbc.HfqlRestClient.CSV_FORMAT;
 import static ca.uhn.fhir.rest.api.Constants.CHARSET_UTF8_CTSUFFIX;

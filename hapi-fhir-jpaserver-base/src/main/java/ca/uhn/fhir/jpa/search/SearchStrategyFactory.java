@@ -25,12 +25,12 @@ import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.SimpleBundleProvider;
+import jakarta.annotation.Nullable;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Supplier;
-import javax.annotation.Nullable;
 
 /**
  * Figure out how we're going to run the query up front, and build a branchless strategy object.

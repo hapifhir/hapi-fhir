@@ -19,13 +19,13 @@
  */
 package ca.uhn.fhir.jpa.api.pid;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import org.springframework.transaction.support.TransactionOperations;
 
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 /**
  * A template for stream queries, like JDBCTemplate and friends.

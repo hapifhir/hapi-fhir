@@ -14,7 +14,7 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import javax.annotation.Nonnull;
+import jakarta.annotation.Nonnull;
 import java.util.function.Function;
 
 import static ca.uhn.test.util.LogbackCaptureTestExtension.eventWithLevelAndMessageContains;

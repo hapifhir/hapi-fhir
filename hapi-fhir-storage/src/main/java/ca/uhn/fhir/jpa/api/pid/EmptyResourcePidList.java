@@ -22,11 +22,11 @@ package ca.uhn.fhir.jpa.api.pid;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
+import jakarta.annotation.Nonnull;
 
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-import javax.annotation.Nonnull;
 
 /**
  * An empty resource pid list

@@ -20,11 +20,11 @@
 package ca.uhn.hapi.fhir.cdshooks.svc.cr.discovery;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
+import jakarta.annotation.Nonnull;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-import javax.annotation.Nonnull;
 
 public class CdsCrDiscoveryServiceRegistry implements ICdsCrDiscoveryServiceRegistry {
 	private final Map<FhirVersionEnum, Class<? extends ICrDiscoveryService>> myCrDiscoveryServices;

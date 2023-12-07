@@ -32,12 +32,12 @@ import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.util.JsonUtil;
 import ca.uhn.fhir.util.Logs;
+import jakarta.annotation.Nonnull;
 import org.slf4j.Logger;
 import org.springframework.transaction.annotation.Propagation;
 
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
-import javax.annotation.Nonnull;
 
 class JobDataSink<PT extends IModelJson, IT extends IModelJson, OT extends IModelJson>
 		extends BaseDataSink<PT, IT, OT> {

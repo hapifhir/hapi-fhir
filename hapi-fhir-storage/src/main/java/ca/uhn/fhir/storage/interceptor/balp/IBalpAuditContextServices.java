@@ -21,12 +21,11 @@ package ca.uhn.fhir.storage.interceptor.balp;
 
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.AuditEvent;
 import org.hl7.fhir.r4.model.Reference;
-
-import javax.annotation.Nonnull;
 
 /**
  * This interface is intended to be implemented in order to supply implementation

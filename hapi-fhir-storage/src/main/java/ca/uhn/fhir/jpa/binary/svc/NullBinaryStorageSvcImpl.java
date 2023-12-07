@@ -23,12 +23,12 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.binary.api.IBinaryStorageSvc;
 import ca.uhn.fhir.jpa.binary.api.StoredDetails;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IBaseBinary;
 import org.hl7.fhir.instance.model.api.IIdType;
 
 import java.io.InputStream;
 import java.io.OutputStream;
-import javax.annotation.Nonnull;
 
 public class NullBinaryStorageSvcImpl implements IBinaryStorageSvc {
 

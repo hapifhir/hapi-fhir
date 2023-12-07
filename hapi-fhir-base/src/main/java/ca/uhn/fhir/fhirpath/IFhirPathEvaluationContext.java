@@ -19,11 +19,10 @@
  */
 package ca.uhn.fhir.fhirpath;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IIdType;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 public interface IFhirPathEvaluationContext {
 

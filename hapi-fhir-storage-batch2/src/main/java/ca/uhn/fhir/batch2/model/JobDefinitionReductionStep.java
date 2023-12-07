@@ -22,8 +22,7 @@ package ca.uhn.fhir.batch2.model;
 import ca.uhn.fhir.batch2.api.IJobStepWorker;
 import ca.uhn.fhir.batch2.api.IReductionStepWorker;
 import ca.uhn.fhir.model.api.IModelJson;
-
-import javax.annotation.Nonnull;
+import jakarta.annotation.Nonnull;
 
 public class JobDefinitionReductionStep<PT extends IModelJson, IT extends IModelJson, OT extends IModelJson>
 		extends JobDefinitionStep<PT, IT, OT> {

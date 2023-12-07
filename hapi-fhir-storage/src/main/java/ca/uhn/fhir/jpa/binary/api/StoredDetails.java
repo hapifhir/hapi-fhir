@@ -26,10 +26,10 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.google.common.hash.HashingInputStream;
+import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
 import java.util.Date;
-import javax.annotation.Nonnull;
 
 public class StoredDetails implements IModelJson {
 

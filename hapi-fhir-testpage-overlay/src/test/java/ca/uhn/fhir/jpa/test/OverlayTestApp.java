@@ -29,7 +29,7 @@ import org.hl7.fhir.r4.model.DiagnosticReport;
 import org.hl7.fhir.r4.model.Patient;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
-import javax.annotation.Nonnull;
+import jakarta.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.EventListener;
 import java.util.List;

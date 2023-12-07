@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.migrate;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import jakarta.annotation.Nonnull;
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
@@ -35,7 +36,6 @@ import org.springframework.transaction.support.TransactionTemplate;
 import java.lang.reflect.InvocationTargetException;
 import java.sql.Connection;
 import java.sql.SQLException;
-import javax.annotation.Nonnull;
 import javax.sql.DataSource;
 
 public enum DriverTypeEnum {
