@@ -58,24 +58,24 @@ public class DeleteExpungeSqlBuilder {
 
 	@Nonnull
 	DeleteExpungeSqlResult convertPidsToDeleteExpungeSql(
-			List<JpaPid> theJpaPids, boolean theCascade, Integer theCascadeMaxRounds) {
+			Set<Long> pids, boolean theCascade, Integer theCascadeMaxRounds) {
 
-		Set<Long> pids = JpaPid.toLongSet(theJpaPids);
 		validateOkToDeleteAndExpunge(pids, theCascade, theCascadeMaxRounds);
 
-		List<String> rawSql = new ArrayList<>();
+		List<String> rawSqlToDeleteReferences = new ArrayList<>();
 
 		String pidListString = pids.toString().replace("[", "(").replace("]", ")");
 		List<ResourceForeignKey> resourceForeignKeys = myResourceTableFKProvider.getResourceForeignKeys();
 
 		for (ResourceForeignKey resourceForeignKey : resourceForeignKeys) {
-			rawSql.add(deleteRecordsByColumnSql(pidListString, resourceForeignKey));
+			rawSqlToDeleteReferences.add(deleteRecordsByColumnSql(pidListString, resourceForeignKey));
 		}
 
-		// Lastly we need to delete records from the resource table all of these other tables link to:
 		ResourceForeignKey resourceTablePk = new ResourceForeignKey("HFJ_RESOURCE", "RES_ID");
-		rawSql.add(deleteRecordsByColumnSql(pidListString, resourceTablePk));
-		return new DeleteExpungeSqlResult(rawSql, pids.size());
+		List<String> rawSqlToDeleteResources =
+				Collections.singletonList(deleteRecordsByColumnSql(pidListString, resourceTablePk));
+
+		return new DeleteExpungeSqlResult(rawSqlToDeleteReferences, rawSqlToDeleteResources, pids.size());
 	}
 
 	public void validateOkToDeleteAndExpunge(Set<Long> thePids, boolean theCascade, Integer theCascadeMaxRounds) {
@@ -179,21 +179,37 @@ public class DeleteExpungeSqlBuilder {
 	}
 
 	public static class DeleteExpungeSqlResult {
+		private List<String> mySqlStatementsToDeleteReferences;
+		private List<String> mySqlStatementsToDeleteResources;
+		private int myRecordCount;
 
-		private final List<String> mySqlStatements;
-		private final int myRecordCount;
+		public DeleteExpungeSqlResult() {}
 
-		public DeleteExpungeSqlResult(List<String> theSqlStatments, int theRecordCount) {
-			mySqlStatements = theSqlStatments;
+		public DeleteExpungeSqlResult(
+				List<String> theSqlStatementsToDeleteReferences,
+				List<String> theSqlStatementsToDeleteResources,
+				int theRecordCount) {
+			mySqlStatementsToDeleteReferences = theSqlStatementsToDeleteReferences;
+			mySqlStatementsToDeleteResources = theSqlStatementsToDeleteResources;
 			myRecordCount = theRecordCount;
 		}
 
-		public List<String> getSqlStatements() {
-			return mySqlStatements;
+		public List<String> getSqlStatementsToDeleteReferences() {
+			return mySqlStatementsToDeleteReferences;
+		}
+
+		public List<String> getSqlStatementsToDeleteResources() {
+			return mySqlStatementsToDeleteResources;
 		}
 
 		public int getRecordCount() {
 			return myRecordCount;
+		}
+
+		public void setFieldsFromOther(DeleteExpungeSqlResult theOtherResult) {
+			this.mySqlStatementsToDeleteReferences = theOtherResult.mySqlStatementsToDeleteReferences;
+			this.mySqlStatementsToDeleteResources = theOtherResult.mySqlStatementsToDeleteResources;
+			this.myRecordCount = theOtherResult.myRecordCount;
 		}
 	}
 }

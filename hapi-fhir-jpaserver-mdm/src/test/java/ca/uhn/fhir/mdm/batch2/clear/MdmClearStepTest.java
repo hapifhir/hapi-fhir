@@ -1,5 +1,6 @@
 package ca.uhn.fhir.mdm.batch2.clear;
 
+import ca.uhn.fhir.batch2.api.IJobDataSink;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.jobs.chunk.ResourceIdListWorkChunkJson;
 import ca.uhn.fhir.batch2.model.JobInstance;
@@ -10,15 +11,13 @@ import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
-import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
-import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Reference;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import jakarta.annotation.Nonnull;
@@ -110,11 +109,9 @@ class MdmClearStepTest extends BaseMdmR4Test {
 		ResourceIdListWorkChunkJson chunk = new ResourceIdListWorkChunkJson();
 		chunk.addTypedPid("Patient", myGoldenPid);
 
-		RequestDetails requestDetails = new SystemRequestDetails();
-		TransactionDetails transactionDetails = new TransactionDetails();
 		StepExecutionDetails<MdmClearJobParameters, ResourceIdListWorkChunkJson> stepExecutionDetails = buildStepExecutionDetails(chunk);
 
-		myMdmClearStep.myHapiTransactionService.execute(requestDetails, transactionDetails, myMdmClearStep.buildJob(requestDetails, transactionDetails, stepExecutionDetails));
+		myMdmClearStep.run(stepExecutionDetails, Mockito.mock(IJobDataSink.class));
 	}
 
 	@Nonnull

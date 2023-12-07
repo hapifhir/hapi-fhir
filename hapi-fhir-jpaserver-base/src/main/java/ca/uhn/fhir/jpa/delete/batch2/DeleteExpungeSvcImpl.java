@@ -21,19 +21,26 @@ package ca.uhn.fhir.jpa.delete.batch2;
 
 import ca.uhn.fhir.jpa.api.svc.IDeleteExpungeSvc;
 import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
+import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import jakarta.persistence.EntityManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public class DeleteExpungeSvcImpl implements IDeleteExpungeSvc<JpaPid> {
 	private static final Logger ourLog = LoggerFactory.getLogger(DeleteExpungeSvcImpl.class);
-
+	private final IHapiTransactionService myHapiTransactionService;
 	private final EntityManager myEntityManager;
 	private final DeleteExpungeSqlBuilder myDeleteExpungeSqlBuilder;
 	private final IFulltextSearchSvc myFullTextSearchSvc;
@@ -41,30 +48,74 @@ public class DeleteExpungeSvcImpl implements IDeleteExpungeSvc<JpaPid> {
 	public DeleteExpungeSvcImpl(
 			EntityManager theEntityManager,
 			DeleteExpungeSqlBuilder theDeleteExpungeSqlBuilder,
-			@Autowired(required = false) IFulltextSearchSvc theFullTextSearchSvc) {
+			@Autowired(required = false) IFulltextSearchSvc theFullTextSearchSvc,
+			IHapiTransactionService theHapiTransactionService) {
 		myEntityManager = theEntityManager;
 		myDeleteExpungeSqlBuilder = theDeleteExpungeSqlBuilder;
 		myFullTextSearchSvc = theFullTextSearchSvc;
+		myHapiTransactionService = theHapiTransactionService;
+	}
+
+	@Transactional
+	public int deleteExpungeSingleResource(JpaPid theJpaPid, boolean theCascade, Integer theCascadeMaxRounds) {
+		Long pid = theJpaPid.getId();
+
+		DeleteExpungeSqlBuilder.DeleteExpungeSqlResult sqlResult =
+				myDeleteExpungeSqlBuilder.convertPidsToDeleteExpungeSql(
+						Collections.singleton(pid), theCascade, theCascadeMaxRounds);
+
+		executeSqlList(sqlResult.getSqlStatementsToDeleteReferences());
+		executeSqlList(sqlResult.getSqlStatementsToDeleteResources());
+
+		clearHibernateSearchIndex(Collections.singletonList(theJpaPid));
+		return sqlResult.getRecordCount();
 	}
 
 	@Override
-	public int deleteExpunge(List<JpaPid> theJpaPids, boolean theCascade, Integer theCascadeMaxRounds) {
-		DeleteExpungeSqlBuilder.DeleteExpungeSqlResult sqlResult =
-				myDeleteExpungeSqlBuilder.convertPidsToDeleteExpungeSql(theJpaPids, theCascade, theCascadeMaxRounds);
-		List<String> sqlList = sqlResult.getSqlStatements();
+	public int deleteExpungeBatch(
+			List<JpaPid> theJpaPids,
+			boolean theCascade,
+			Integer theCascadeMaxRounds,
+			RequestDetails theRequestDetails) {
 
-		ourLog.debug("Executing {} delete expunge sql commands", sqlList.size());
-		long totalDeleted = 0;
+		// assert there is no active transaction
+		assert !TransactionSynchronizationManager.isActualTransactionActive();
+		Set<Long> pids = JpaPid.toLongSet(theJpaPids);
+
+		DeleteExpungeSqlBuilder.DeleteExpungeSqlResult sqlResultOutsideLambda =
+				new DeleteExpungeSqlBuilder.DeleteExpungeSqlResult();
+
+		myHapiTransactionService
+				.withRequest(theRequestDetails)
+				.withTransactionDetails(new TransactionDetails())
+				.execute(() -> {
+					DeleteExpungeSqlBuilder.DeleteExpungeSqlResult sqlResult =
+							myDeleteExpungeSqlBuilder.convertPidsToDeleteExpungeSql(
+									pids, theCascade, theCascadeMaxRounds);
+					executeSqlList(sqlResult.getSqlStatementsToDeleteReferences());
+					sqlResultOutsideLambda.setFieldsFromOther(sqlResult);
+				});
+
+		myHapiTransactionService
+				.withRequest(theRequestDetails)
+				.withTransactionDetails(new TransactionDetails())
+				.execute(() -> {
+					executeSqlList(sqlResultOutsideLambda.getSqlStatementsToDeleteResources());
+					clearHibernateSearchIndex(theJpaPids);
+				});
+
+		return sqlResultOutsideLambda.getRecordCount();
+	}
+
+	private int executeSqlList(List<String> sqlList) {
+		int totalDeleted = 0;
+
 		for (String sql : sqlList) {
-			ourLog.trace("Executing sql " + sql);
 			totalDeleted += myEntityManager.createNativeQuery(sql).executeUpdate();
 		}
 
 		ourLog.info("{} records deleted", totalDeleted);
-		clearHibernateSearchIndex(theJpaPids);
-
-		// TODO KHS instead of logging progress, produce result chunks that get aggregated into a delete expunge report
-		return sqlResult.getRecordCount();
+		return totalDeleted;
 	}
 
 	@Override
