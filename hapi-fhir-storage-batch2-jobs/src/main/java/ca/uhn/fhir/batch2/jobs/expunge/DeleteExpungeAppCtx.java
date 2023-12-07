@@ -69,7 +69,7 @@ public class DeleteExpungeAppCtx {
 				.addLastStep(
 						"expunge",
 						"Perform the resource expunge",
-						expungeStep(theHapiTransactionService, theDeleteExpungeSvc, theIdHelperService))
+						expungeStep(theDeleteExpungeSvc, theIdHelperService))
 				.build();
 	}
 
@@ -86,10 +86,9 @@ public class DeleteExpungeAppCtx {
 
 	@Bean
 	public DeleteExpungeStep expungeStep(
-			HapiTransactionService theHapiTransactionService,
 			IDeleteExpungeSvc theDeleteExpungeSvc,
 			IIdHelperService theIdHelperService) {
-		return new DeleteExpungeStep(theHapiTransactionService, theDeleteExpungeSvc, theIdHelperService);
+		return new DeleteExpungeStep(theDeleteExpungeSvc, theIdHelperService);
 	}
 
 	@Bean

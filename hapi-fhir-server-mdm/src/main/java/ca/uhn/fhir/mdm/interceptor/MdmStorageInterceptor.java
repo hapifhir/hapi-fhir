@@ -304,7 +304,7 @@ public class MdmStorageInterceptor implements IMdmStorageInterceptor {
 
 	private int deleteExpungeGoldenResource(IResourcePersistentId theGoldenPid) {
 		IDeleteExpungeSvc deleteExpungeSvc = myIMdmClearHelperSvc.getDeleteExpungeSvc();
-		return deleteExpungeSvc.deleteExpunge(new ArrayList<>(Collections.singleton(theGoldenPid)), false, null);
+		return deleteExpungeSvc.deleteExpungeSingleResource(theGoldenPid, false, null);
 	}
 
 	private void forbidIfModifyingExternalEidOnTarget(IBaseResource theNewResource, IBaseResource theOldResource) {

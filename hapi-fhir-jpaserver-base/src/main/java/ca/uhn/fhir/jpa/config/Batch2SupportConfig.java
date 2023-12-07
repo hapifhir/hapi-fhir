@@ -56,8 +56,9 @@ public class Batch2SupportConfig {
 	public IDeleteExpungeSvc deleteExpungeSvc(
 			EntityManager theEntityManager,
 			DeleteExpungeSqlBuilder theDeleteExpungeSqlBuilder,
-			@Autowired(required = false) IFulltextSearchSvc theFullTextSearchSvc) {
-		return new DeleteExpungeSvcImpl(theEntityManager, theDeleteExpungeSqlBuilder, theFullTextSearchSvc);
+			@Autowired(required = false) IFulltextSearchSvc theFullTextSearchSvc,
+			IHapiTransactionService theTransactionService) {
+		return new DeleteExpungeSvcImpl(theEntityManager, theDeleteExpungeSqlBuilder, theFullTextSearchSvc, theTransactionService);
 	}
 
 	@Bean
