@@ -19,9 +19,8 @@
  */
 package ca.uhn.fhir.jpa.util;
 
+import jakarta.annotation.Nullable;
 import org.hibernate.service.Service;
-
-import javax.annotation.Nullable;
 
 /**
  * This is an internal API and may change or disappear without notice

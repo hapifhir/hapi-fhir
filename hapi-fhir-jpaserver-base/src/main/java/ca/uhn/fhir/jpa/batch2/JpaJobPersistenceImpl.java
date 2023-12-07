@@ -30,18 +30,25 @@ import ca.uhn.fhir.batch2.model.WorkChunkCreateEvent;
 import ca.uhn.fhir.batch2.model.WorkChunkErrorEvent;
 import ca.uhn.fhir.batch2.model.WorkChunkStatusEnum;
 import ca.uhn.fhir.batch2.models.JobInstanceFetchRequest;
+import ca.uhn.fhir.interceptor.api.HookParams;
+import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
+import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.dao.data.IBatch2JobInstanceRepository;
 import ca.uhn.fhir.jpa.dao.data.IBatch2WorkChunkRepository;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.entity.Batch2JobInstanceEntity;
 import ca.uhn.fhir.jpa.entity.Batch2WorkChunkEntity;
 import ca.uhn.fhir.model.api.PagingIterator;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.util.Batch2JobDefinitionConstants;
 import ca.uhn.fhir.util.Logs;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.LockModeType;
 import jakarta.persistence.Query;
@@ -67,8 +74,6 @@ import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 import static ca.uhn.fhir.batch2.coordinator.WorkChunkProcessor.MAX_CHUNK_ERROR_COUNT;
 import static ca.uhn.fhir.jpa.entity.Batch2WorkChunkEntity.ERROR_MSG_MAX_LENGTH;
@@ -82,6 +87,7 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	private final IBatch2WorkChunkRepository myWorkChunkRepository;
 	private final EntityManager myEntityManager;
 	private final IHapiTransactionService myTransactionService;
+	private final IInterceptorBroadcaster myInterceptorBroadcaster;
 
 	/**
 	 * Constructor
@@ -90,13 +96,15 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 			IBatch2JobInstanceRepository theJobInstanceRepository,
 			IBatch2WorkChunkRepository theWorkChunkRepository,
 			IHapiTransactionService theTransactionService,
-			EntityManager theEntityManager) {
+			EntityManager theEntityManager,
+			IInterceptorBroadcaster theInterceptorBroadcaster) {
 		Validate.notNull(theJobInstanceRepository);
 		Validate.notNull(theWorkChunkRepository);
 		myJobInstanceRepository = theJobInstanceRepository;
 		myWorkChunkRepository = theWorkChunkRepository;
 		myTransactionService = theTransactionService;
 		myEntityManager = theEntityManager;
+		myInterceptorBroadcaster = theInterceptorBroadcaster;
 	}
 
 	@Override
@@ -143,6 +151,8 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	public String storeNewInstance(JobInstance theInstance) {
 		Validate.isTrue(isBlank(theInstance.getInstanceId()));
 
+		invokePreStorageBatchHooks(theInstance);
+
 		Batch2JobInstanceEntity entity = new Batch2JobInstanceEntity();
 		entity.setId(UUID.randomUUID().toString());
 		entity.setDefinitionId(theInstance.getJobDefinitionId());
@@ -154,6 +164,8 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 		entity.setCreateTime(new Date());
 		entity.setStartTime(new Date());
 		entity.setReport(theInstance.getReport());
+		entity.setTriggeringUsername(theInstance.getTriggeringUsername());
+		entity.setTriggeringClientId(theInstance.getTriggeringClientId());
 
 		entity = myJobInstanceRepository.save(entity);
 		return entity.getId();
@@ -518,6 +530,16 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 			} else {
 				return JobOperationResultJson.newFailure(operationString, messagePrefix + " not found.");
 			}
+		}
+	}
+
+	private void invokePreStorageBatchHooks(JobInstance theJobInstance) {
+		if (myInterceptorBroadcaster.hasHooks(Pointcut.STORAGE_PRESTORAGE_BATCH_JOB_CREATE)) {
+			HookParams params = new HookParams()
+					.add(JobInstance.class, theJobInstance)
+					.add(RequestDetails.class, new SystemRequestDetails());
+
+			myInterceptorBroadcaster.callHooks(Pointcut.STORAGE_PRESTORAGE_BATCH_JOB_CREATE, params);
 		}
 	}
 }

@@ -21,10 +21,10 @@ package ca.uhn.fhir.jpa.fql.parser;
 
 import ca.uhn.fhir.context.*;
 import ca.uhn.fhir.jpa.fql.executor.HfqlDataTypeEnum;
+import jakarta.annotation.Nullable;
 import org.apache.commons.text.WordUtils;
 
 import java.util.Map;
-import javax.annotation.Nullable;
 
 import static java.util.Map.entry;
 

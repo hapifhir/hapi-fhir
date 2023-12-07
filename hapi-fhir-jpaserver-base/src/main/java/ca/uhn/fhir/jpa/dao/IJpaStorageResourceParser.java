@@ -22,10 +22,10 @@ package ca.uhn.fhir.jpa.dao;
 import ca.uhn.fhir.jpa.model.entity.BaseTag;
 import ca.uhn.fhir.jpa.model.entity.IBaseResourceEntity;
 import ca.uhn.fhir.jpa.model.entity.ResourceTag;
+import jakarta.annotation.Nullable;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import java.util.Collection;
-import javax.annotation.Nullable;
 
 public interface IJpaStorageResourceParser extends IStorageResourceParser {
 

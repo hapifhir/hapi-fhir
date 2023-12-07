@@ -21,6 +21,8 @@ package ca.uhn.fhir.rest.api.server;
 
 import ca.uhn.fhir.rest.server.BaseRestfulResponse;
 import ca.uhn.fhir.util.IoUtil;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.Validate;
 
 import java.io.ByteArrayOutputStream;
@@ -29,8 +31,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.StringWriter;
 import java.io.Writer;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 /**
  * A default RestfulResponse that returns the body as an IBaseResource and ignores everything else.

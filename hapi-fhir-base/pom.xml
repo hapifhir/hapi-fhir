@@ -116,9 +116,15 @@
 		</dependency>
 
 		<!-- @Nonnull annotation -->
+
+		<!-- We need to leave this in because otherwise hapi-fhir-structures-dstu3: will fail to generate javadoc -->
 		<dependency>
 			<groupId>com.google.code.findbugs</groupId>
 			<artifactId>jsr305</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>jakarta.annotation</groupId>
+			<artifactId>jakarta.annotation-api</artifactId>
 		</dependency>
 
 		<dependency>

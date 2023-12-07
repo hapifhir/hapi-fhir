@@ -24,10 +24,10 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.pid.IResourcePidList;
 import ca.uhn.fhir.jpa.api.pid.IResourcePidStream;
 import ca.uhn.fhir.jpa.api.pid.ListWrappingPidStream;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 import java.util.Date;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 public interface IBatch2DaoSvc {
 

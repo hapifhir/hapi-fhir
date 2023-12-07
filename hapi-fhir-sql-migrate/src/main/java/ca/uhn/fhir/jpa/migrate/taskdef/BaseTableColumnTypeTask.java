@@ -19,11 +19,12 @@
  */
 package ca.uhn.fhir.jpa.migrate.taskdef;
 
+import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
-import javax.annotation.Nullable;
+import java.util.Set;
 
 public abstract class BaseTableColumnTypeTask extends BaseTableColumnTask {
 	private ColumnTypeEnum myColumnType;
@@ -35,6 +36,14 @@ public abstract class BaseTableColumnTypeTask extends BaseTableColumnTask {
 	 */
 	public BaseTableColumnTypeTask(String theProductVersion, String theSchemaVersion) {
 		super(theProductVersion, theSchemaVersion);
+	}
+
+	BaseTableColumnTypeTask(
+			String theProductVersion,
+			String theSchemaVersion,
+			ColumnNameCase theColumnNameCase,
+			Set<ColumnDriverMappingOverride> theColumnDriverMappingOverrides) {
+		super(theProductVersion, theSchemaVersion, theColumnNameCase, theColumnDriverMappingOverrides);
 	}
 
 	public ColumnTypeEnum getColumnType() {

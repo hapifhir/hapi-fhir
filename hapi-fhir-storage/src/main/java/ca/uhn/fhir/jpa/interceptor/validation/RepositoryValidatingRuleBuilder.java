@@ -26,6 +26,7 @@ import ca.uhn.fhir.jpa.validation.ValidatorPolicyAdvisor;
 import ca.uhn.fhir.jpa.validation.ValidatorResourceFetcher;
 import ca.uhn.fhir.rest.server.interceptor.ValidationResultEnrichingInterceptor;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
+import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.text.WordUtils;
 import org.hl7.fhir.r5.utils.validation.constants.BestPracticeWarningLevel;
@@ -35,7 +36,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
-import javax.annotation.Nonnull;
 
 import static com.google.common.base.Ascii.toLowerCase;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;

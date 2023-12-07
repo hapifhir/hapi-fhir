@@ -32,6 +32,7 @@ import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.subscription.SubscriptionConstants;
 import com.google.common.annotations.VisibleForTesting;
+import jakarta.annotation.Nonnull;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import org.apache.commons.lang3.time.DateUtils;
@@ -48,7 +49,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.Semaphore;
 import java.util.stream.Collectors;
-import javax.annotation.Nonnull;
 
 public abstract class BaseResourceCacheSynchronizer implements IResourceChangeListener {
 	private static final Logger ourLog = LoggerFactory.getLogger(BaseResourceCacheSynchronizer.class);

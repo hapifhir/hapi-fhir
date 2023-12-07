@@ -28,7 +28,7 @@ import org.hamcrest.TypeSafeMatcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nonnull;
+import jakarta.annotation.Nonnull;
 import java.beans.BeanInfo;
 import java.beans.FeatureDescriptor;
 import java.beans.IntrospectionException;

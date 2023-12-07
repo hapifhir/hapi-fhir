@@ -19,7 +19,7 @@
  */
 package ca.uhn.fhir.jpa.bulk.imprt.model;
 
-import javax.annotation.Nullable;
+import jakarta.annotation.Nullable;
 
 public class ActivateJobResult {
 

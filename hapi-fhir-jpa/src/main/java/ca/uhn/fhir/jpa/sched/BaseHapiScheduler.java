@@ -26,6 +26,7 @@ import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Sets;
+import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.Validate;
 import org.quartz.JobDataMap;
 import org.quartz.JobKey;
@@ -47,7 +48,6 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
-import javax.annotation.Nonnull;
 
 public abstract class BaseHapiScheduler implements IHapiScheduler {
 	private static final Logger ourLog = LoggerFactory.getLogger(BaseHapiScheduler.class);

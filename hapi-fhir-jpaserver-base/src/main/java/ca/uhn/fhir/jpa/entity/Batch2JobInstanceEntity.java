@@ -55,6 +55,8 @@ public class Batch2JobInstanceEntity implements Serializable {
 	public static final int TIME_REMAINING_LENGTH = 100;
 	public static final int PARAMS_JSON_MAX_LENGTH = 2000;
 	private static final long serialVersionUID = 8187134261799095422L;
+	public static final int INITIATING_USER_NAME_MAX_LENGTH = 200;
+	public static final int INITIATING_CLIENT_ID_MAX_LENGTH = 200;
 
 	@Id
 	@Column(name = "ID", length = JobDefinition.ID_MAX_LENGTH, nullable = false)
@@ -129,6 +131,12 @@ public class Batch2JobInstanceEntity implements Serializable {
 
 	@Column(name = "WARNING_MSG", length = WARNING_MSG_MAX_LENGTH, nullable = true)
 	private String myWarningMessages;
+
+	@Column(name = "USER_NAME", length = INITIATING_USER_NAME_MAX_LENGTH, nullable = true)
+	private String myTriggeringUsername;
+
+	@Column(name = "CLIENT_ID", length = INITIATING_CLIENT_ID_MAX_LENGTH, nullable = true)
+	private String myTriggeringClientId;
 
 	/**
 	 * Any output from the job can be held in this column
@@ -316,6 +324,24 @@ public class Batch2JobInstanceEntity implements Serializable {
 		myWarningMessages = theWarningMessages;
 	}
 
+	public String getTriggeringUsername() {
+		return myTriggeringUsername;
+	}
+
+	public Batch2JobInstanceEntity setTriggeringUsername(String theTriggeringUsername) {
+		myTriggeringUsername = theTriggeringUsername;
+		return this;
+	}
+
+	public String getTriggeringClientId() {
+		return myTriggeringClientId;
+	}
+
+	public Batch2JobInstanceEntity setTriggeringClientId(String theTriggeringClientId) {
+		myTriggeringClientId = theTriggeringClientId;
+		return this;
+	}
+
 	@Override
 	public String toString() {
 		return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
@@ -338,6 +364,8 @@ public class Batch2JobInstanceEntity implements Serializable {
 				.append("estimatedTimeRemaining", myEstimatedTimeRemaining)
 				.append("report", myReport)
 				.append("warningMessages", myWarningMessages)
+				.append("initiatingUsername", myTriggeringUsername)
+				.append("initiatingclientId", myTriggeringClientId)
 				.toString();
 	}
 

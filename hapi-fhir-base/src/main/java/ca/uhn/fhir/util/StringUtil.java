@@ -19,11 +19,12 @@
  */
 package ca.uhn.fhir.util;
 
+import jakarta.annotation.Nonnull;
+
 import java.io.CharArrayWriter;
 import java.nio.charset.StandardCharsets;
 import java.text.Normalizer;
 import java.util.Arrays;
-import javax.annotation.Nonnull;
 
 public class StringUtil {
 

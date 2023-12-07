@@ -12,7 +12,7 @@ import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Subscription;
 
-import javax.annotation.Nullable;
+import jakarta.annotation.Nullable;
 
 public class FhirR4Util {
 
