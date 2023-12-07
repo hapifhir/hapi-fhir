@@ -26,11 +26,10 @@ import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 import ca.uhn.fhir.jpa.topic.SubscriptionTopicDispatchRequest;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.server.messaging.BaseResourceModifiedMessage;
+import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-
-import javax.annotation.Nonnull;
 
 public class SubscriptionDeliveryRequest {
 	// One of these two will be populated

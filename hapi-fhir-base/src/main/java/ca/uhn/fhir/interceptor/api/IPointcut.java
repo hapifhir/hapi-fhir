@@ -19,8 +19,9 @@
  */
 package ca.uhn.fhir.interceptor.api;
 
+import jakarta.annotation.Nonnull;
+
 import java.util.List;
-import javax.annotation.Nonnull;
 
 public interface IPointcut {
 	@Nonnull

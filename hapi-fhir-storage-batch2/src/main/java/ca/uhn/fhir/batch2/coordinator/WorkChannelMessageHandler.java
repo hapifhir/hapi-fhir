@@ -30,6 +30,7 @@ import ca.uhn.fhir.batch2.model.JobWorkNotificationJsonMessage;
 import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.util.Logs;
+import jakarta.annotation.Nonnull;
 import org.slf4j.Logger;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHandler;
@@ -37,7 +38,6 @@ import org.springframework.messaging.MessagingException;
 
 import java.util.Optional;
 import java.util.function.Supplier;
-import javax.annotation.Nonnull;
 
 /**
  * This handler receives batch work request messages and performs the batch work requested by the message

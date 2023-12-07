@@ -22,11 +22,11 @@ package ca.uhn.fhir.batch2.jobs.termcodesystem.codesystemversiondelete;
 import ca.uhn.fhir.batch2.api.IJobParametersValidator;
 import ca.uhn.fhir.jpa.term.models.TermCodeSystemDeleteVersionJobParameters;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 public class DeleteCodeSystemVersionParameterValidator
 		implements IJobParametersValidator<TermCodeSystemDeleteVersionJobParameters> {

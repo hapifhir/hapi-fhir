@@ -1,6 +1,7 @@
 package ca.uhn.fhir.tinder.ddl;
 
 import ca.uhn.fhir.jpa.util.ISequenceValueMassager;
+import jakarta.annotation.Nonnull;
 import jakarta.persistence.Entity;
 import jakarta.persistence.MappedSuperclass;
 import org.apache.commons.io.FileUtils;
@@ -43,7 +44,6 @@ import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import javax.annotation.Nonnull;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 

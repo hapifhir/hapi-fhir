@@ -20,8 +20,7 @@
 package ca.uhn.fhir.jpa.dao.expunge;
 
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-
-import javax.annotation.Nullable;
+import jakarta.annotation.Nullable;
 
 public interface IExpungeEverythingService {
 	void expungeEverything(@Nullable RequestDetails theRequest);

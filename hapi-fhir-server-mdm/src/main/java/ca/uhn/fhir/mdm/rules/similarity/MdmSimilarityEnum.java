@@ -26,9 +26,8 @@ import info.debatty.java.stringsimilarity.Jaccard;
 import info.debatty.java.stringsimilarity.JaroWinkler;
 import info.debatty.java.stringsimilarity.NormalizedLevenshtein;
 import info.debatty.java.stringsimilarity.SorensenDice;
+import jakarta.annotation.Nullable;
 import org.hl7.fhir.instance.model.api.IBase;
-
-import javax.annotation.Nullable;
 
 public enum MdmSimilarityEnum {
 	JARO_WINKLER(new HapiStringSimilarity(new JaroWinkler())),

@@ -30,6 +30,7 @@ import ca.uhn.fhir.jpa.topic.filter.InMemoryTopicFilterMatcher;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.subscription.api.IResourceModifiedMessagePersistenceSvc;
 import ca.uhn.fhir.util.Logs;
+import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r5.model.SubscriptionTopic;
 import org.slf4j.Logger;
@@ -42,7 +43,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import javax.annotation.Nonnull;
 
 public class SubscriptionTopicMatchingSubscriber implements MessageHandler {
 	private static final Logger ourLog = Logs.getSubscriptionTopicLog();

@@ -27,11 +27,11 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.annotation.Nonnull;
 
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import javax.annotation.Nonnull;
 
 @Schema(description = "Represents an NPM package metadata response")
 @JsonInclude(JsonInclude.Include.NON_NULL)

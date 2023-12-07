@@ -19,10 +19,10 @@
  */
 package ca.uhn.fhir.rest.server.interceptor.auth;
 
+import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IIdType;
 
 import java.util.Collection;
-import javax.annotation.Nonnull;
 
 public interface IAuthRuleBuilderRuleOpClassifier {
 

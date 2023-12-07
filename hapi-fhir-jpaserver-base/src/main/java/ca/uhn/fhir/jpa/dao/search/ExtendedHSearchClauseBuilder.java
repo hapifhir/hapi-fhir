@@ -42,6 +42,7 @@ import ca.uhn.fhir.rest.param.UriParam;
 import ca.uhn.fhir.util.DateUtils;
 import ca.uhn.fhir.util.NumericParamRangeUtil;
 import ca.uhn.fhir.util.StringUtil;
+import jakarta.annotation.Nonnull;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -66,7 +67,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-import javax.annotation.Nonnull;
 
 import static ca.uhn.fhir.jpa.dao.search.PathContext.joinPath;
 import static ca.uhn.fhir.jpa.model.search.HSearchIndexWriter.IDX_STRING_EXACT;

@@ -21,9 +21,9 @@ package ca.uhn.fhir.validation;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.EncodingEnum;
+import jakarta.annotation.Nonnull;
 
 import java.util.List;
-import javax.annotation.Nonnull;
 
 public interface IValidationContext<T> {
 

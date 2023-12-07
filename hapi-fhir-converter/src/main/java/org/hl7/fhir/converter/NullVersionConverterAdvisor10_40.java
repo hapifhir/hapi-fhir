@@ -19,12 +19,11 @@
  */
 package org.hl7.fhir.converter;
 
+import jakarta.annotation.Nullable;
 import org.hl7.fhir.convertors.advisors.impl.BaseAdvisor_10_40;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.ValueSet;
-
-import javax.annotation.Nullable;
 
 public class NullVersionConverterAdvisor10_40 extends BaseAdvisor_10_40 {
 

@@ -26,10 +26,10 @@ import ca.uhn.fhir.rest.api.CacheControlDirective;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
+import jakarta.annotation.Nullable;
 
 import java.util.List;
 import java.util.Optional;
-import javax.annotation.Nullable;
 
 public interface ISearchCoordinatorSvc<T extends IResourcePersistentId> {
 

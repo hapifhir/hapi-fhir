@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.jpa.model.search;
 
+import jakarta.annotation.Nonnull;
 import org.hibernate.search.engine.backend.document.DocumentElement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,7 +28,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import javax.annotation.Nonnull;
 
 /**
  * Provide a lookup of created Hibernate Search DocumentElement entries.

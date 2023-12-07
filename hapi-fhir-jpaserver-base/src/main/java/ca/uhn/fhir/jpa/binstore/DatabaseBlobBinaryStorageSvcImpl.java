@@ -28,6 +28,7 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import com.google.common.hash.HashingInputStream;
 import com.google.common.io.ByteStreams;
+import jakarta.annotation.Nonnull;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.PersistenceContextType;
@@ -47,7 +48,6 @@ import java.sql.Blob;
 import java.sql.SQLException;
 import java.util.Date;
 import java.util.Optional;
-import javax.annotation.Nonnull;
 
 @Transactional
 public class DatabaseBlobBinaryStorageSvcImpl extends BaseBinaryStorageSvcImpl {

@@ -19,11 +19,11 @@
  */
 package ca.uhn.fhir.rest.server.mail;
 
+import jakarta.annotation.Nonnull;
 import org.simplejavamail.api.email.Email;
 import org.simplejavamail.api.mailer.AsyncResponse;
 
 import java.util.List;
-import javax.annotation.Nonnull;
 
 public interface IMailSvc {
 	void sendMail(@Nonnull List<Email> theEmails);
