@@ -209,7 +209,7 @@ public class WebTest {
 			.orElseThrow()
 			.click();
 
-		assertThat(summaryPage.asNormalizedText(), containsString("\"diagnostics\" : \"VALIDATION FAILURE\""));
+		assertThat(summaryPage.asNormalizedText(), containsString("\"diagnostics\": \"VALIDATION FAILURE\""));
 	}
 
 	@Test
@@ -229,7 +229,7 @@ public class WebTest {
 			.orElseThrow()
 			.click();
 
-		assertThat(diffPage.asNormalizedText(), containsString("\"resourceType\" : \"Parameters\""));
+		assertThat(diffPage.asNormalizedText(), containsString("\"resourceType\": \"Parameters\""));
 	}
 
 

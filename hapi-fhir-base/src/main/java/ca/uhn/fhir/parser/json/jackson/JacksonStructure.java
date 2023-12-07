@@ -117,9 +117,18 @@ public class JacksonStructure implements JsonLikeStructure {
 		} catch (Exception e) {
 			String message;
 			if (e instanceof JsonProcessingException) {
+				/*
+				 * Currently there is no way of preventing Jackson from adding this
+				 * annoying REDACTED message from certain messages we get back from
+				 * the parser, so we just manually strip them. Hopefully Jackson
+				 * will accept this request at some point:
+				 * https://github.com/FasterXML/jackson-core/issues/1158
+				 */
 				JsonProcessingException jpe = (JsonProcessingException) e;
 				StringBuilder messageBuilder = new StringBuilder();
-				messageBuilder.append(jpe.getOriginalMessage());
+				String originalMessage = jpe.getOriginalMessage();
+				originalMessage = originalMessage.replace("Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); ", "");
+				messageBuilder.append(originalMessage);
 				if (jpe.getLocation() != null) {
 					messageBuilder.append("\n at [");
 					jpe.getLocation().appendOffsetDescription(messageBuilder);
