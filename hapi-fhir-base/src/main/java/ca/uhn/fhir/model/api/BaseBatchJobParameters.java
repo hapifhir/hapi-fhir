@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.HashMap;
 import java.util.Map;
 
-public class BaseBatchJobParameters implements IModelJson {
+public abstract class BaseBatchJobParameters implements IModelJson {
 	/**
 	 * A serializable map of key-value pairs that can be
 	 * added to any extending job.
