@@ -5,16 +5,20 @@ import ca.uhn.fhir.jpa.migrate.JdbcUtils;
 import ca.uhn.fhir.jpa.migrate.tasks.api.BaseMigrationTasks;
 import ca.uhn.fhir.jpa.migrate.tasks.api.Builder;
 import ca.uhn.fhir.util.VersionEnum;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import java.sql.SQLException;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.is;
 
 public class AddTableByColumnTaskTest extends BaseTest {
 
@@ -40,6 +44,96 @@ public class AddTableByColumnTaskTest extends BaseTest {
 		}
 
 		assertThat(indexes.toString(), indexes, containsInAnyOrder("IDX_BONJOUR"));
+	}
+
+	@Test
+	public void testLowercaseColumnsNoOverridesDefaultSorting() {
+		final String tableName = "table_3_columns";
+		final String columnName1 = "a_column";
+		final String columnName3 = "z_column";
+		final String columnNameId = "id";
+		final DriverTypeEnum driverType = DriverTypeEnum.MSSQL_2012;
+		final ColumnTypeEnum columnType = ColumnTypeEnum.STRING;
+
+		final AddTableByColumnTask addTableByColumnTask = new AddTableByColumnTask();
+		addTableByColumnTask.setTableName(tableName);
+		addTableByColumnTask.setDriverType(driverType);
+		addTableByColumnTask.setPkColumns(Collections.singletonList(columnNameId));
+
+		addTableByColumnTask.addAddColumnTask(buildAddColumnTask(driverType, columnType, tableName, columnName3, true, 10, Collections.emptySet()));
+		addTableByColumnTask.addAddColumnTask(buildAddColumnTask(driverType, columnType, tableName, columnNameId, false, 25, Collections.emptySet()));
+		addTableByColumnTask.addAddColumnTask(buildAddColumnTask(driverType, columnType, tableName, columnName1, true, 20, Collections.emptySet()));
+
+		final String actualCreateTableSql = addTableByColumnTask.generateSQLCreateScript();
+		assertThat("CREATE TABLE table_3_columns ( z_column varchar(10), id varchar(25)  not null, a_column varchar(20),  PRIMARY KEY (id) )", is(actualCreateTableSql));;
+	}
+
+	@Test
+	public void testLowercaseColumnsNvarcharOverrideDefaultSorting() {
+		final String tableName = "table_3_columns";
+		final String columnName1 = "a_column";
+		final String columnName3 = "z_column";
+		final String columnNameId = "id";
+		final DriverTypeEnum driverType = DriverTypeEnum.MSSQL_2012;
+		final ColumnTypeEnum columnType = ColumnTypeEnum.STRING;
+		final ColumnDriverMappingOverride override = new ColumnDriverMappingOverride(columnType, driverType, "nvarchar(?)");
+
+		final AddTableByColumnTask addTableByColumnTask = new AddTableByColumnTask();
+		addTableByColumnTask.setTableName(tableName);
+		addTableByColumnTask.setDriverType(driverType);
+		addTableByColumnTask.setPkColumns(Collections.singletonList(columnNameId));
+
+		addTableByColumnTask.addAddColumnTask(buildAddColumnTask(driverType, columnType, tableName, columnName3, true, 10, Collections.singleton(override)));
+		addTableByColumnTask.addAddColumnTask(buildAddColumnTask(driverType, columnType, tableName, columnNameId, false, 25, Collections.singleton(override)));
+		addTableByColumnTask.addAddColumnTask(buildAddColumnTask(driverType, columnType, tableName, columnName1, true, 20, Collections.singleton(override)));
+
+		final String actualCreateTableSql = addTableByColumnTask.generateSQLCreateScript();
+		assertThat("CREATE TABLE table_3_columns ( z_column nvarchar(10), id nvarchar(25)  not null, a_column nvarchar(20),  PRIMARY KEY (id) )", is(actualCreateTableSql));;
+	}
+
+	@Test
+	public void testLowercaseColumnsNoOverridesCustomSorting() {
+		final String tableName = "table_4_columns";
+		final String columnName1 = "a_column";
+		final String columnName2 = "b_column";
+		final String columnName3 = "z_column";
+		final String columnNameId = "id";
+		final DriverTypeEnum driverType = DriverTypeEnum.MSSQL_2012;
+		final ColumnTypeEnum columnType = ColumnTypeEnum.STRING;
+		final ColumnDriverMappingOverride override = new ColumnDriverMappingOverride(columnType, driverType, "nvarchar(?)");
+		final Comparator<AddColumnTask> comparator = (theTask1, theTask2) -> {
+			if (columnNameId.equals(theTask1.getColumnName())) {
+				return -1;
+			}
+
+			return theTask1.getColumnName().compareTo(theTask2.getColumnName());
+		};
+
+		final AddTableByColumnTask addTableByColumnTask = new AddTableByColumnTask(comparator);
+		addTableByColumnTask.setTableName(tableName);
+		addTableByColumnTask.setDriverType(driverType);
+		addTableByColumnTask.setPkColumns(Collections.singletonList(columnNameId));
+
+		addTableByColumnTask.addAddColumnTask(buildAddColumnTask(driverType, columnType, tableName, columnName3, true, 10, Collections.singleton(override)));
+		addTableByColumnTask.addAddColumnTask(buildAddColumnTask(driverType, columnType, tableName, columnName2, false, 15, Collections.singleton(override)));
+		addTableByColumnTask.addAddColumnTask(buildAddColumnTask(driverType, columnType, tableName, columnName1, true, 20, Collections.singleton(override)));
+		addTableByColumnTask.addAddColumnTask(buildAddColumnTask(driverType, columnType, tableName, columnNameId, false, 25, Collections.singleton(override)));
+
+		final String actualCreateTableSql = addTableByColumnTask.generateSQLCreateScript();
+		assertThat("CREATE TABLE table_4_columns ( id nvarchar(25)  not null, a_column nvarchar(20), b_column nvarchar(15)  not null, z_column nvarchar(10),  PRIMARY KEY (id) )", is(actualCreateTableSql));;
+	}
+
+	private static AddColumnTask buildAddColumnTask(DriverTypeEnum theDriverTypeEnum, ColumnTypeEnum theColumnTypeEnum, String theTableName, String theColumnName, boolean theNullable, int theColumnLength, Set<ColumnDriverMappingOverride> theColumnDriverMappingOverrides) {
+		final AddColumnTask task = AddColumnTask.lowerCase(theColumnDriverMappingOverrides);
+
+		task.setTableName(theTableName);
+		task.setColumnName(theColumnName);
+		task.setColumnType(theColumnTypeEnum);
+		task.setDriverType(theDriverTypeEnum);
+		task.setNullable(theNullable);
+		task.setColumnLength(theColumnLength);
+
+		return task;
 	}
 
 	private static class MyMigrationTasks extends BaseMigrationTasks<VersionEnum> {
