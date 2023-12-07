@@ -169,7 +169,6 @@ public class RemoteTerminologyServiceValidationSupportTest {
 			Arguments.arguments(propertyName, new CodeType("theCode"), "HAPI-2454: Property type code is not supported.")
 		);
 	}
-
 	@ParameterizedTest
 	@MethodSource(value = "parametersPropertyWithInvalidValue")
 	public void testLookupCode_forCodeSystemWithPropertyInvalidValue_throwsException(String thePropertyName, Type thePropertyValue, String theErrorMessage) {
@@ -185,6 +184,9 @@ public class RemoteTerminologyServiceValidationSupportTest {
 		InternalErrorException exception = assertThrows(InternalErrorException.class, () -> mySvc.lookupCode(null,
 			new LookupCodeRequest(CODE_SYSTEM, CODE, LANGUAGE, Collections.emptyList())));
 		assertTrue(exception.getMessage().contains(theErrorMessage));
+
+		ourRestfulServerExtension.getRestfulServer().unregisterProvider(myMySimplePropertyCodeSystemProvider);
+		ourRestfulServerExtension.getRestfulServer().registerProvider(myCodeSystemProvider);
 	}
 
 	public static Stream<Arguments> parametersPropertiesAndDesignations() {
