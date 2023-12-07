@@ -40,11 +40,12 @@ import org.apache.commons.io.file.PathUtils;
 import org.apache.commons.io.filefilter.FileFileFilter;
 import org.apache.commons.io.filefilter.IOFileFilter;
 import org.apache.commons.io.filefilter.SuffixFileFilter;
+import org.apache.commons.lang3.time.DateUtils;
+import org.eclipse.jetty.ee10.servlet.ServletContextHandler;
+import org.eclipse.jetty.ee10.servlet.ServletHolder;
 import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
-import org.eclipse.jetty.servlet.ServletContextHandler;
-import org.eclipse.jetty.servlet.ServletHolder;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -234,7 +235,12 @@ public class BulkImportCommand extends BaseCommand {
 
 	private List<String> startServer(int thePort, List<File> files) {
 		List<String> indexes = new ArrayList<>();
-		myServer = new Server(thePort);
+
+		myServer = new Server();
+		ServerConnector connector = new ServerConnector(myServer);
+		connector.setIdleTimeout(DateUtils.MILLIS_PER_MINUTE);
+		connector.setPort(myPort);
+		myServer.setConnectors(new Connector[] {connector});
 
 		myServlet = new BulkImportFileServlet();
 		for (File t : files) {

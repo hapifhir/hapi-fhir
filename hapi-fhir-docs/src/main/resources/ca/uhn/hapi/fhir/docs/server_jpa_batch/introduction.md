@@ -31,7 +31,7 @@ HAPI-FHIR Batch Jobs run based on job notification messages.  The process is kic
 The handler then does the following:
 1. Change the work chunk status from QUEUED to IN_PROGRESS
 2. Change the Job Instance status from QUEUED to IN_PROGRESS
-3. If the Job Instance is cancelled, change the status to COMPLETED and abort processing.
+3. If the Job Instance is cancelled, change the status to CANCELLED and abort processing.
 4. The first step of the job definition is executed with the job parameters
 5. This step creates new work chunks.  For each work chunk it creates, it json serializes the work chunk data, stores it in the database, and publishes a new message to the Batch Notification Message Channel to notify worker threads that there are new work chunks waiting to be processed.
 6. If the step succeeded, the work chunk status is changed from IN_PROGRESS to COMPLETED, and the data it contained is deleted.

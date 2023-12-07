@@ -11,6 +11,8 @@ import ca.uhn.fhir.batch2.model.WorkChunkCreateEvent;
 import ca.uhn.fhir.batch2.model.WorkChunkErrorEvent;
 import ca.uhn.fhir.batch2.model.WorkChunkStatusEnum;
 import ca.uhn.fhir.batch2.models.JobInstanceFetchRequest;
+import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
+import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.dao.data.IBatch2JobInstanceRepository;
 import ca.uhn.fhir.jpa.dao.data.IBatch2WorkChunkRepository;
 import ca.uhn.fhir.jpa.entity.Batch2JobInstanceEntity;
@@ -631,6 +633,30 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 			assertTrue(chunkIds.contains(reducedChunk.getId()));
 			assertEquals(WorkChunkStatusEnum.COMPLETED, reducedChunk.getStatus());
 		}
+	}
+
+	@Test
+	public void testPrestorageInterceptor_whenModifyingJobInstance_modifiedJobInstanceIsPersisted(){
+		String expectedTriggeringUserName = "bobTheUncle";
+
+		IAnonymousInterceptor prestorageBatchJobCreateInterceptor = (pointcut, params) -> {
+			JobInstance jobInstance = params.get(JobInstance.class);
+			jobInstance.setTriggeringUsername(expectedTriggeringUserName);
+		};
+
+		try{
+			myInterceptorRegistry.registerAnonymousInterceptor(Pointcut.STORAGE_PRESTORAGE_BATCH_JOB_CREATE, prestorageBatchJobCreateInterceptor);
+			JobInstance instance = createInstance();
+			String instanceId = mySvc.storeNewInstance(instance);
+
+			JobInstance foundInstance = mySvc.fetchInstance(instanceId).orElseThrow(IllegalStateException::new);
+
+			assertEquals(expectedTriggeringUserName, foundInstance.getTriggeringUsername());
+
+		} finally {
+			myInterceptorRegistry.unregisterInterceptor(prestorageBatchJobCreateInterceptor);
+		}
+
 	}
 
 	private WorkChunk freshFetchWorkChunk(String chunkId) {

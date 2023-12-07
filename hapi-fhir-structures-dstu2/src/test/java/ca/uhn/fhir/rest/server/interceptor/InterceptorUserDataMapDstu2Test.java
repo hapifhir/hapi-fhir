@@ -19,12 +19,17 @@ import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.RequiredParam;
 import ca.uhn.fhir.rest.annotation.Search;
+import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.server.FifoMemoryPagingProvider;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
+import ca.uhn.fhir.rest.server.SummaryParamDstu2Test;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import ca.uhn.fhir.test.utilities.HttpClientExtension;
 import ca.uhn.fhir.test.utilities.JettyUtil;
+import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.TestUtil;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -33,12 +38,13 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.servlet.ServletHandler;
-import org.eclipse.jetty.servlet.ServletHolder;
+import org.eclipse.jetty.ee10.servlet.ServletHandler;
+import org.eclipse.jetty.ee10.servlet.ServletHolder;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
@@ -60,20 +66,27 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 public class InterceptorUserDataMapDstu2Test {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(InterceptorUserDataMapDstu2Test.class);
-	private static CloseableHttpClient ourClient;
-	private static FhirContext ourCtx = FhirContext.forDstu2();
-	private static int ourPort;
-	private static Server ourServer;
-	private static RestfulServer servlet;
+	private static final FhirContext ourCtx = FhirContext.forDstu2Cached();
 	private final Object myKey = "KEY";
 	private final Object myValue = "VALUE";
 	private Map<Object, Object> myMap;
 	private Set<String> myMapCheckMethods;
 
+	@RegisterExtension
+	public static final RestfulServerExtension ourServer  = new RestfulServerExtension(ourCtx)
+		.setDefaultResponseEncoding(EncodingEnum.JSON)
+		.registerProvider(new DummyPatientResourceProvider())
+		.registerProvider(new PlainProvider())
+		.withPagingProvider(new FifoMemoryPagingProvider(100))
+		.setDefaultPrettyPrint(false);
+
+	@RegisterExtension
+	public static final HttpClientExtension ourClient = new HttpClientExtension();
+
 	@BeforeEach
 	public void before() {
-		servlet.getInterceptorService().unregisterAllInterceptors();
-		servlet.getInterceptorService().registerInterceptor(new MyInterceptor());
+		ourServer.getInterceptorService().unregisterAllInterceptors();
+		ourServer.getInterceptorService().registerInterceptor(new MyInterceptor());
 	}
 
 
@@ -87,7 +100,7 @@ public class InterceptorUserDataMapDstu2Test {
 	@Test
 	public void testException() throws Exception {
 
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_id=foo");
+		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?_id=foo");
 		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
 			assertEquals(400, status.getStatusLine().getStatusCode());
 		}
@@ -98,7 +111,7 @@ public class InterceptorUserDataMapDstu2Test {
 	@Test
 	public void testRead() throws Exception {
 
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1");
+		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/1");
 
 		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
 
@@ -269,31 +282,7 @@ public class InterceptorUserDataMapDstu2Test {
 
 	@AfterAll
 	public static void afterClassClearContext() throws Exception {
-		JettyUtil.closeServer(ourServer);
 		TestUtil.randomizeLocaleAndTimezone();
-	}
-
-	@BeforeAll
-	public static void beforeClass() throws Exception {
-		ourServer = new Server(0);
-
-		ServletHandler proxyHandler = new ServletHandler();
-		servlet = new RestfulServer(ourCtx);
-
-		servlet.setResourceProviders(new DummyPatientResourceProvider());
-		servlet.setPlainProviders(new PlainProvider());
-
-		ServletHolder servletHolder = new ServletHolder(servlet);
-		proxyHandler.addServletWithMapping(servletHolder, "/*");
-		ourServer.setHandler(proxyHandler);
-		JettyUtil.startServer(ourServer);
-		ourPort = JettyUtil.getPortForStartedServer(ourServer);
-
-		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
-		HttpClientBuilder builder = HttpClientBuilder.create();
-		builder.setConnectionManager(connectionManager);
-		ourClient = builder.build();
-
 	}
 
 }

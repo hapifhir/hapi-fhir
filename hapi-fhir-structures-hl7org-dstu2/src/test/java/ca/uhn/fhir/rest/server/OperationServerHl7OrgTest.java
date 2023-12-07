@@ -8,7 +8,10 @@ import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.test.utilities.HttpClientExtension;
 import ca.uhn.fhir.test.utilities.JettyUtil;
+import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
+import ca.uhn.fhir.util.TestUtil;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -20,8 +23,8 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.servlet.ServletHandler;
-import org.eclipse.jetty.servlet.ServletHolder;
+import org.eclipse.jetty.ee10.servlet.ServletHandler;
+import org.eclipse.jetty.ee10.servlet.ServletHolder;
 import org.hl7.fhir.dstu2.model.Bundle;
 import org.hl7.fhir.dstu2.model.IdType;
 import org.hl7.fhir.dstu2.model.IntegerType;
@@ -33,6 +36,7 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -47,15 +51,23 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 
 public class OperationServerHl7OrgTest {
   private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(OperationServerHl7OrgTest.class);
-  private static CloseableHttpClient ourClient;
-  private static FhirContext ourCtx;
+  private static final FhirContext ourCtx = FhirContext.forDstu2Hl7OrgCached();
   private static StringType ourLastParam1;
   private static Patient ourLastParam2;
-  private static int ourPort;
   private static IdType ourLastId;
-  private static Server ourServer;
   private static String ourLastMethod;
   private static List<StringType> ourLastParam3;
+
+  @RegisterExtension
+  public static RestfulServerExtension ourServer = new RestfulServerExtension(ourCtx)
+      .registerProvider(new PatientProvider())
+      .registerProvider(new PlainProvider())
+      .withPagingProvider(new FifoMemoryPagingProvider(10).setDefaultPageSize(2))
+      .setDefaultResponseEncoding(EncodingEnum.XML)
+      .setDefaultPrettyPrint(false);
+
+  @RegisterExtension
+  public static HttpClientExtension ourClient = new HttpClientExtension();
 
   @BeforeEach
   public void before() {
@@ -73,7 +85,7 @@ public class OperationServerHl7OrgTest {
     p.addParameter().setName("PARAM2").setResource(new Patient().setActive(true));
     String inParamsStr = ourCtx.newXmlParser().encodeResourceToString(p);
 
-    HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient/$OP_TYPE");
+    HttpPost httpPost = new HttpPost(ourServer.getBaseUrl() + "/Patient/$OP_TYPE");
     httpPost.setEntity(new StringEntity(inParamsStr, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
     HttpResponse status = ourClient.execute(httpPost);
 
@@ -91,7 +103,7 @@ public class OperationServerHl7OrgTest {
 
   @Test
   public void testOperationWithGetUsingParams() throws Exception {
-    HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/$OP_TYPE?PARAM1=PARAM1val");
+    HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/$OP_TYPE?PARAM1=PARAM1val");
     HttpResponse status = ourClient.execute(httpGet);
 
     assertEquals(200, status.getStatusLine().getStatusCode());
@@ -108,7 +120,7 @@ public class OperationServerHl7OrgTest {
 
   @Test
   public void testOperationWithGetUsingParamsFailsWithNonPrimitive() throws Exception {
-    HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/$OP_TYPE?PARAM1=PARAM1val&PARAM2=foo");
+    HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/$OP_TYPE?PARAM1=PARAM1val&PARAM2=foo");
     HttpResponse status = ourClient.execute(httpGet);
 
     assertEquals(405, status.getStatusLine().getStatusCode());
@@ -126,7 +138,7 @@ public class OperationServerHl7OrgTest {
     p.addParameter().setName("PARAM2").setResource(new Patient().setActive(true));
     String inParamsStr = ourCtx.newXmlParser().encodeResourceToString(p);
 
-    HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient/$OP_TYPE_RET_BUNDLE");
+    HttpPost httpPost = new HttpPost(ourServer.getBaseUrl() + "/Patient/$OP_TYPE_RET_BUNDLE");
     httpPost.setEntity(new StringEntity(inParamsStr, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
     HttpResponse status = ourClient.execute(httpPost);
 
@@ -149,7 +161,7 @@ public class OperationServerHl7OrgTest {
     p.addParameter().setName("PARAM2").setResource(new Patient().setActive(true));
     String inParamsStr = ourCtx.newXmlParser().encodeResourceToString(p);
 
-    HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/$OP_SERVER");
+    HttpPost httpPost = new HttpPost(ourServer.getBaseUrl() + "/$OP_SERVER");
     httpPost.setEntity(new StringEntity(inParamsStr, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
     HttpResponse status = ourClient.execute(httpPost);
 
@@ -167,7 +179,7 @@ public class OperationServerHl7OrgTest {
 
   @Test
   public void testOperationWithBundleProviderResponse() throws Exception {
-    HttpGet httpPost = new HttpGet("http://localhost:" + ourPort + "/$OP_INSTANCE_BUNDLE_PROVIDER?_pretty=true");
+    HttpGet httpPost = new HttpGet(ourServer.getBaseUrl() + "/$OP_INSTANCE_BUNDLE_PROVIDER?_pretty=true");
     HttpResponse status = ourClient.execute(httpPost);
 
     assertEquals(200, status.getStatusLine().getStatusCode());
@@ -187,7 +199,7 @@ public class OperationServerHl7OrgTest {
     p.addParameter().setName("PARAM3").setValue(new StringType("PARAM3val2"));
     String inParamsStr = ourCtx.newXmlParser().encodeResourceToString(p);
 
-    HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/$OP_SERVER_LIST_PARAM");
+    HttpPost httpPost = new HttpPost(ourServer.getBaseUrl() + "/$OP_SERVER_LIST_PARAM");
     httpPost.setEntity(new StringEntity(inParamsStr, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
     HttpResponse status = ourClient.execute(httpPost);
 
@@ -213,7 +225,7 @@ public class OperationServerHl7OrgTest {
     p.addParameter().setName("PARAM2").setResource(new Patient().setActive(true));
     String inParamsStr = ourCtx.newXmlParser().encodeResourceToString(p);
 
-    HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient/123/$OP_INSTANCE");
+    HttpPost httpPost = new HttpPost(ourServer.getBaseUrl() + "/Patient/123/$OP_INSTANCE");
     httpPost.setEntity(new StringEntity(inParamsStr, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
     HttpResponse status = ourClient.execute(httpPost);
 
@@ -232,7 +244,7 @@ public class OperationServerHl7OrgTest {
 
   @Test
   public void testOperationCantUseGetIfItIsntIdempotent() throws Exception {
-    HttpGet httpPost = new HttpGet("http://localhost:" + ourPort + "/Patient/123/$OP_INSTANCE");
+    HttpGet httpPost = new HttpGet(ourServer.getBaseUrl() + "/Patient/123/$OP_INSTANCE");
     HttpResponse status = ourClient.execute(httpPost);
 
     assertEquals(Constants.STATUS_HTTP_405_METHOD_NOT_ALLOWED, status.getStatusLine().getStatusCode());
@@ -250,7 +262,7 @@ public class OperationServerHl7OrgTest {
     p.addParameter().setName("PARAM2").setResource(new Patient().setActive(true));
     String inParamsStr = ourCtx.newXmlParser().encodeResourceToString(p);
 
-    HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient/$OP_TYPE");
+    HttpPost httpPost = new HttpPost(ourServer.getBaseUrl() + "/Patient/$OP_TYPE");
     httpPost.setEntity(new StringEntity(inParamsStr, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
     HttpResponse status = ourClient.execute(httpPost);
 
@@ -266,7 +278,7 @@ public class OperationServerHl7OrgTest {
 
   @Test
   public void testReadWithOperations() throws Exception {
-    HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/123");
+    HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/123");
     HttpResponse status = ourClient.execute(httpGet);
 
     assertEquals(200, status.getStatusLine().getStatusCode());
@@ -280,7 +292,7 @@ public class OperationServerHl7OrgTest {
     String inParamsStr = ourCtx.newXmlParser().encodeResourceToString(new Parameters());
 
     // Try with a POST
-    HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient/123/$everything");
+    HttpPost httpPost = new HttpPost(ourServer.getBaseUrl() + "/Patient/123/$everything");
     httpPost.setEntity(new StringEntity(inParamsStr, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
     HttpResponse status = ourClient.execute(httpPost);
 
@@ -296,7 +308,7 @@ public class OperationServerHl7OrgTest {
 
   @Test
   public void testInstanceEverythingHapiClient() throws Exception {
-    Parameters p = ourCtx.newRestfulGenericClient("http://localhost:" + ourPort).operation().onInstance(new IdType("Patient/123")).named("$everything").withParameters(new Parameters()).execute();
+    Parameters p = ourCtx.newRestfulGenericClient(ourServer.getBaseUrl()).operation().onInstance(new IdType("Patient/123")).named("$everything").withParameters(new Parameters()).execute();
     Bundle b = (Bundle) p.getParameter().get(0).getResource();
     assertNotNull(b);
 
@@ -309,7 +321,7 @@ public class OperationServerHl7OrgTest {
   public void testInstanceEverythingGet() throws Exception {
 
     // Try with a GET
-    HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/123/$everything");
+    HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/123/$everything");
     CloseableHttpResponse status = ourClient.execute(httpGet);
 
     assertEquals(200, status.getStatusLine().getStatusCode());
@@ -473,34 +485,8 @@ public class OperationServerHl7OrgTest {
 
   @AfterAll
   public static void afterClass() throws Exception {
-    JettyUtil.closeServer(ourServer);
+    TestUtil.randomizeLocaleAndTimezone();
   }
 
-  @BeforeAll
-  public static void beforeClass() throws Exception {
-    ourCtx = FhirContext.forDstu2Hl7Org();
-    ourServer = new Server(0);
-
-    ServletHandler proxyHandler = new ServletHandler();
-    RestfulServer servlet = new RestfulServer(ourCtx);
-
-    servlet.setPagingProvider(new FifoMemoryPagingProvider(10).setDefaultPageSize(2));
-    servlet.setFhirContext(ourCtx);
-    servlet.setResourceProviders(new PatientProvider());
-    servlet.setPlainProviders(new PlainProvider());
-    servlet.setDefaultResponseEncoding(EncodingEnum.XML);
-
-    ServletHolder servletHolder = new ServletHolder(servlet);
-    proxyHandler.addServletWithMapping(servletHolder, "/*");
-    ourServer.setHandler(proxyHandler);
-    JettyUtil.startServer(ourServer);
-    ourPort = JettyUtil.getPortForStartedServer(ourServer);
-
-    PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
-    HttpClientBuilder builder = HttpClientBuilder.create();
-    builder.setConnectionManager(connectionManager);
-    ourClient = builder.build();
-
-  }
 
 }

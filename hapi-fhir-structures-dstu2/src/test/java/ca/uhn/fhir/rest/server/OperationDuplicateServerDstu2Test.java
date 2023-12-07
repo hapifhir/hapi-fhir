@@ -10,7 +10,9 @@ import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.api.EncodingEnum;
+import ca.uhn.fhir.test.utilities.HttpClientExtension;
 import ca.uhn.fhir.test.utilities.JettyUtil;
+import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.TestUtil;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
@@ -19,29 +21,39 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.servlet.ServletHandler;
-import org.eclipse.jetty.servlet.ServletHolder;
+import org.eclipse.jetty.ee10.servlet.ServletHandler;
+import org.eclipse.jetty.ee10.servlet.ServletHolder;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
 import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class OperationDuplicateServerDstu2Test {
-	private static CloseableHttpClient ourClient;
-	private static FhirContext ourCtx;
+	private static final FhirContext ourCtx = FhirContext.forDstu2Cached();
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(OperationDuplicateServerDstu2Test.class);
-	private static int ourPort;
-	private static Server ourServer;
+
+	@RegisterExtension
+	public static final RestfulServerExtension ourServer  = new RestfulServerExtension(ourCtx)
+		.setDefaultResponseEncoding(EncodingEnum.XML)
+		.registerProvider(new PatientProvider())
+		.registerProvider(new OrganizationProvider())
+		.registerProvider(new PlainProvider())
+		.withPagingProvider(new FifoMemoryPagingProvider(10).setDefaultPageSize(2))
+		.setDefaultPrettyPrint(false);
+
+	@RegisterExtension
+	public static final HttpClientExtension ourClient = new HttpClientExtension();
 
 	@Test
 	public void testOperationsAreCollapsed() throws Exception {
 		// Metadata
 		{
-			HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/metadata?_pretty=true");
+			HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/metadata?_pretty=true");
 			HttpResponse status = ourClient.execute(httpGet);
 
 			assertEquals(200, status.getStatusLine().getStatusCode());
@@ -57,7 +69,7 @@ public class OperationDuplicateServerDstu2Test {
 
 		// OperationDefinition
 		{
-			HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/OperationDefinition/OrganizationPatient-ts-myoperation?_pretty=true");
+			HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/OperationDefinition/OrganizationPatient-ts-myoperation?_pretty=true");
 			HttpResponse status = ourClient.execute(httpGet);
 
 			assertEquals(200, status.getStatusLine().getStatusCode());
@@ -78,35 +90,7 @@ public class OperationDuplicateServerDstu2Test {
 
 	@AfterAll
 	public static void afterClassClearContext() throws Exception {
-		JettyUtil.closeServer(ourServer);
 		TestUtil.randomizeLocaleAndTimezone();
-	}
-
-	@BeforeAll
-	public static void beforeClass() throws Exception {
-		ourCtx = FhirContext.forDstu2();
-		ourServer = new Server(0);
-
-		ServletHandler proxyHandler = new ServletHandler();
-		RestfulServer servlet = new RestfulServer(ourCtx);
-
-		servlet.setPagingProvider(new FifoMemoryPagingProvider(10).setDefaultPageSize(2));
-
-		servlet.setDefaultResponseEncoding(EncodingEnum.XML);
-		servlet.setFhirContext(ourCtx);
-		servlet.setResourceProviders(new PatientProvider(), new OrganizationProvider());
-		servlet.setPlainProviders(new PlainProvider());
-		ServletHolder servletHolder = new ServletHolder(servlet);
-		proxyHandler.addServletWithMapping(servletHolder, "/*");
-		ourServer.setHandler(proxyHandler);
-		JettyUtil.startServer(ourServer);
-        ourPort = JettyUtil.getPortForStartedServer(ourServer);
-
-		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
-		HttpClientBuilder builder = HttpClientBuilder.create();
-		builder.setConnectionManager(connectionManager);
-		ourClient = builder.build();
-
 	}
 
 	public static class BaseProvider {

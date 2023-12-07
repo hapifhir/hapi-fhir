@@ -61,6 +61,8 @@ class JobInstanceUtil {
 		retVal.setReport(theEntity.getReport());
 		retVal.setEstimatedTimeRemaining(theEntity.getEstimatedTimeRemaining());
 		retVal.setWarningMessages(theEntity.getWarningMessages());
+		retVal.setTriggeringUsername(theEntity.getTriggeringUsername());
+		retVal.setTriggeringClientId(theEntity.getTriggeringClientId());
 		return retVal;
 	}
 
@@ -95,6 +97,8 @@ class JobInstanceUtil {
 		theJobInstanceEntity.setReport(theJobInstance.getReport());
 		theJobInstanceEntity.setEstimatedTimeRemaining(theJobInstance.getEstimatedTimeRemaining());
 		theJobInstanceEntity.setWarningMessages(theJobInstance.getWarningMessages());
+		theJobInstanceEntity.setTriggeringUsername(theJobInstance.getTriggeringUsername());
+		theJobInstanceEntity.setTriggeringClientId(theJobInstance.getTriggeringClientId());
 	}
 
 	/**

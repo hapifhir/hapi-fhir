@@ -19,12 +19,13 @@
  */
 package ca.uhn.fhir.jpa.model.dialect;
 
+import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import org.hibernate.dialect.DatabaseVersion;
 import org.hibernate.dialect.H2Dialect;
 
-import java.sql.Types;
-
 /**
- * HAPI FHIR dialect for H2 database
+ * Dialect for H2 database.
+ * Minimum version: 2.2.220
  */
 public class HapiFhirH2Dialect extends H2Dialect {
 
@@ -32,25 +33,33 @@ public class HapiFhirH2Dialect extends H2Dialect {
 	 * Constructor
 	 */
 	public HapiFhirH2Dialect() {
-		super();
-
-		/*
-		 * These mappings are already defined in the super() constructor, but they
-		 * will only happen if the dialect can connect to the database and
-		 * determine that it's a recent enough version of H2 to support this. This
-		 * means that the Maven plugin that does schema generation doesn't add it.
-		 * So this dialect forces the use of the right defs.
-		 */
-		registerColumnType(Types.LONGVARCHAR, "character varying");
-		registerColumnType(Types.BINARY, "binary($l)");
+		super(DatabaseVersion.make(2, 2, 220));
 	}
 
 	/**
-	 * Workaround until this bug is fixed:
-	 * https://hibernate.atlassian.net/browse/HHH-15002
+	 * As of Hibernate 6, generated schemas include a column level check constraint that enforces valid values
+	 * for columns that back an Enum type. For example, the column definition for {@link ResourceTable#getFhirVersion()}
+	 * would look like:
+	 * <pre>
+	 *  RES_VERSION varchar(7) check (RES_VERSION in ('DSTU2','DSTU2_HL7ORG','DSTU2_1','DSTU3','R4','R4B','R5')),
+	 * </pre>
+	 * <p>
+	 * This is a nice addition since it enforces the values that the Enum allows, but it's problematic for us because these
+	 * constraints are invisible to the JDBC metadata API on most databases, which means that our schema migration
+	 * checker isn't able to catch problems if we add a value to an Enum and don't add a corresponding database
+	 * migration. Rather than risk having inconsistent behaviour between annotated and migrated schemas, we just
+	 * disable these checks on all of our dialects.
+	 * </p><p>
+	 * See this discussion from the author of SchemaCrawler discussing this limitation:
+	 * <a href="https://stackoverflow.com/questions/63346650/schemacrawler-java-api-retrieve-check-column-constraints">https://stackoverflow.com/questions/63346650/schemacrawler-java-api-retrieve-check-column-constraints</a>.
+	 * With this change in place, the definition above becomes simply:
+	 * <pre>
+	 *  RES_VERSION varchar(7),
+	 * </pre>
+	 * </p>
 	 */
 	@Override
-	public String toBooleanValueString(boolean bool) {
-		return bool ? "true" : "false";
+	public boolean supportsColumnCheck() {
+		return false;
 	}
 }

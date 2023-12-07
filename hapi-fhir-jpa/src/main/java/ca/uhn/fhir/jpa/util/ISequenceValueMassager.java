@@ -1,6 +1,6 @@
 /*-
  * #%L
- * HAPI FHIR JPA Model
+ * hapi-fhir-jpa
  * %%
  * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
@@ -17,16 +17,18 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.jpa.model.dialect;
+package ca.uhn.fhir.jpa.util;
+
+import org.hibernate.service.Service;
 
 import javax.annotation.Nullable;
 
 /**
  * This is an internal API and may change or disappear without notice
  *
- * Implementations of this interface can modify the automatically generated sequence values created by hibernate seuqnece generator
+ * Implementations of this interface can modify the automatically generated sequence values created by hibernate sequence generator
  */
-public interface ISequenceValueMassager {
+public interface ISequenceValueMassager extends Service {
 
 	Long massage(String theGeneratorName, Long theId);
 

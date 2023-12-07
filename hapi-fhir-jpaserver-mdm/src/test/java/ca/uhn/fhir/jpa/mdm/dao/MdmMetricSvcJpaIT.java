@@ -19,6 +19,7 @@ import ca.uhn.fhir.mdm.model.MdmMetrics;
 import ca.uhn.fhir.mdm.util.MdmResourceUtil;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.persistence.EntityManagerFactory;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.BeforeEach;
@@ -30,7 +31,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
 
-import javax.persistence.EntityManagerFactory;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.fail;
@@ -78,6 +78,7 @@ public class MdmMetricSvcJpaIT extends BaseMdmR4Test implements IMdmMetricSvcTes
 	@Autowired
 	private IMdmMetricSvc mySvc;
 
+	@Override
 	@BeforeEach
 	public void before() throws Exception {
 		super.before();

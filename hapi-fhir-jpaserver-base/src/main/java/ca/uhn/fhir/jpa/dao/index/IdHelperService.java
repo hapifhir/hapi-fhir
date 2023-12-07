@@ -42,6 +42,15 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.MultimapBuilder;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.PersistenceContextType;
+import jakarta.persistence.Tuple;
+import jakarta.persistence.TypedQuery;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IAnyResource;
@@ -66,15 +75,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import javax.persistence.PersistenceContextType;
-import javax.persistence.Tuple;
-import javax.persistence.TypedQuery;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
 
 import static ca.uhn.fhir.jpa.search.builder.predicate.BaseJoiningPredicateBuilder.replaceDefaultPartitionIdIfNonNull;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -210,7 +210,9 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 		Validate.isTrue(!theIds.isEmpty(), "theIds must not be empty");
 
 		Map<String, JpaPid> retVals = new HashMap<>();
-
+		RequestPartitionId partitionId = myPartitionSettings.isAllowUnqualifiedCrossPartitionReference()
+				? RequestPartitionId.allPartitions()
+				: theRequestPartitionId;
 		for (String id : theIds) {
 			JpaPid retVal;
 			if (!idRequiresForcedId(id)) {
@@ -221,18 +223,17 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 				// is a forced id
 				// we must resolve!
 				if (myStorageSettings.isDeleteEnabled()) {
-					retVal = resolveResourceIdentity(theRequestPartitionId, theResourceType, id, theExcludeDeleted)
+					retVal = resolveResourceIdentity(partitionId, theResourceType, id, theExcludeDeleted)
 							.getPersistentId();
 					retVals.put(id, retVal);
 				} else {
 					// fetch from cache... adding to cache if not available
-					String key = toForcedIdToPidKey(theRequestPartitionId, theResourceType, id);
+					String key = toForcedIdToPidKey(partitionId, theResourceType, id);
 					retVal = myMemoryCacheService.getThenPutAfterCommit(
 							MemoryCacheService.CacheEnum.FORCED_ID_TO_PID, key, t -> {
 								List<IIdType> ids = Collections.singletonList(new IdType(theResourceType, id));
 								// fetches from cache using a function that checks cache first...
-								List<JpaPid> resolvedIds =
-										resolveResourcePersistentIdsWithCache(theRequestPartitionId, ids);
+								List<JpaPid> resolvedIds = resolveResourcePersistentIdsWithCache(partitionId, ids);
 								if (resolvedIds.isEmpty()) {
 									throw new ResourceNotFoundException(Msg.code(1100) + ids.get(0));
 								}
@@ -377,10 +378,7 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 		 * Only PG, and MSSql support INCLUDE COLUMNS.
 		 * @see AddIndexTask.generateSql
 		 */
-		criteriaQuery.multiselect(
-				from.get("myId").as(Long.class),
-				from.get("myResourceType").as(String.class),
-				from.get("myFhirId").as(String.class));
+		criteriaQuery.multiselect(from.get("myId"), from.get("myResourceType"), from.get("myFhirId"));
 
 		// one create one clause per id.
 		List<Predicate> predicates = new ArrayList<>(theIds.size());
@@ -389,11 +387,11 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 			List<Predicate> andPredicates = new ArrayList<>(3);
 
 			if (isNotBlank(next.getResourceType())) {
-				Predicate typeCriteria = cb.equal(from.get("myResourceType").as(String.class), next.getResourceType());
+				Predicate typeCriteria = cb.equal(from.get("myResourceType"), next.getResourceType());
 				andPredicates.add(typeCriteria);
 			}
 
-			Predicate idCriteria = cb.equal(from.get("myFhirId").as(String.class), next.getIdPart());
+			Predicate idCriteria = cb.equal(from.get("myFhirId"), next.getIdPart());
 			andPredicates.add(idCriteria);
 			getOptionalPartitionPredicate(theRequestPartitionId, cb, from).ifPresent(andPredicates::add);
 			predicates.add(cb.and(andPredicates.toArray(EMPTY_PREDICATE_ARRAY)));
@@ -431,19 +429,16 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 		if (myPartitionSettings.isAllowUnqualifiedCrossPartitionReference()) {
 			return Optional.empty();
 		} else if (theRequestPartitionId.isDefaultPartition() && myPartitionSettings.getDefaultPartitionId() == null) {
-			Predicate partitionIdCriteria =
-					cb.isNull(from.get("myPartitionIdValue").as(Integer.class));
+			Predicate partitionIdCriteria = cb.isNull(from.get("myPartitionIdValue"));
 			return Optional.of(partitionIdCriteria);
 		} else if (!theRequestPartitionId.isAllPartitions()) {
 			List<Integer> partitionIds = theRequestPartitionId.getPartitionIds();
 			partitionIds = replaceDefaultPartitionIdIfNonNull(myPartitionSettings, partitionIds);
 			if (partitionIds.size() > 1) {
-				Predicate partitionIdCriteria =
-						from.get("myPartitionIdValue").as(Integer.class).in(partitionIds);
+				Predicate partitionIdCriteria = from.get("myPartitionIdValue").in(partitionIds);
 				return Optional.of(partitionIdCriteria);
 			} else if (partitionIds.size() == 1) {
-				Predicate partitionIdCriteria =
-						cb.equal(from.get("myPartitionIdValue").as(Integer.class), partitionIds.get(0));
+				Predicate partitionIdCriteria = cb.equal(from.get("myPartitionIdValue"), partitionIds.get(0));
 				return Optional.of(partitionIdCriteria);
 			}
 		}

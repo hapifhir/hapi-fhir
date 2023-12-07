@@ -45,14 +45,14 @@ import ca.uhn.fhir.rest.server.method.OperationMethodBinding.ReturnType;
 import ca.uhn.fhir.rest.server.*;
 import ca.uhn.fhir.rest.server.method.*;
 import ca.uhn.fhir.rest.server.util.BaseServerCapabilityStatementProvider;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.http.HttpServletRequest;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 import java.util.Map.Entry;
 import java.util.*;
-import javax.servlet.ServletContext;
-import javax.servlet.http.HttpServletRequest;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;

@@ -19,17 +19,21 @@
  */
 package ca.uhn.fhir.jpa.model.dialect;
 
-import org.hibernate.dialect.PostgreSQL94Dialect;
-
-import java.sql.Types;
+import org.hibernate.dialect.PostgreSQLDialect;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This dialect is recommended when using HAPI FHIR JPA on Postgresql database.
+ *
+ * @deprecated Use {@link HapiFhirPostgresDialect} instead
  */
-public class HapiFhirPostgres94Dialect extends PostgreSQL94Dialect {
+public class HapiFhirPostgres94Dialect extends PostgreSQLDialect {
+	private static final Logger ourLog = LoggerFactory.getLogger(HapiFhirPostgres94Dialect.class);
 
 	public HapiFhirPostgres94Dialect() {
 		super();
-		registerColumnType(Types.CLOB, "oid");
+		ourLog.warn("The " + getClass() + " dialect is deprecated and will be removed in a future release. Use "
+				+ HapiFhirPostgresDialect.class.getName() + " instead");
 	}
 }

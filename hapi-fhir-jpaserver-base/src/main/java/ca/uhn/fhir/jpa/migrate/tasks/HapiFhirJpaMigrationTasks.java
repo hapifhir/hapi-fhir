@@ -98,6 +98,10 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 	}
 
 	protected void init700() {
+		/* ************************************************
+		 * Start of 6.10 migrations
+		 *********************************************** */
+
 		Builder version = forVersion(VersionEnum.V7_0_0);
 
 		// new indices on MdmLink
@@ -131,6 +135,12 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 
 		// For resolving references that don't supply the type.
 		hfjResource.addIndex("20231027.3", "IDX_RES_FHIR_ID").unique(false).withColumns("FHIR_ID");
+
+		Builder.BuilderWithTableName batch2JobInstanceTable = version.onTable("BT2_JOB_INSTANCE");
+
+		batch2JobInstanceTable.addColumn("20231128.1", "USER_NAME").nullable().type(ColumnTypeEnum.STRING, 200);
+
+		batch2JobInstanceTable.addColumn("20231128.2", "CLIENT_ID").nullable().type(ColumnTypeEnum.STRING, 200);
 	}
 
 	protected void init680() {
