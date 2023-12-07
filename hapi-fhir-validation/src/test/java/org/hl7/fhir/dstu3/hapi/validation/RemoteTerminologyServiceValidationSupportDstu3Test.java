@@ -1,7 +1,6 @@
 package org.hl7.fhir.dstu3.hapi.validation;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.LookupCodeRequest;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.rest.annotation.Operation;
@@ -9,6 +8,7 @@ import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.server.IResourceProvider;
+import ca.uhn.fhir.test.utilities.LookupCodeUtil;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import jakarta.servlet.http.HttpServletRequest;
 import org.hl7.fhir.common.hapi.validation.support.RemoteTerminologyServiceValidationSupport;
@@ -18,6 +18,7 @@ import org.hl7.fhir.dstu3.model.CodeType;
 import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.dstu3.model.StringType;
+import org.hl7.fhir.dstu3.model.Type;
 import org.hl7.fhir.dstu3.model.UriType;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.jupiter.api.BeforeEach;
@@ -26,18 +27,30 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static ca.uhn.fhir.context.support.IValidationSupport.BaseConceptProperty;
+import static ca.uhn.fhir.context.support.IValidationSupport.CodingConceptProperty;
+import static ca.uhn.fhir.context.support.IValidationSupport.ConceptDesignation;
+import static ca.uhn.fhir.context.support.IValidationSupport.ConceptPropertyTypeEnum;
+import static ca.uhn.fhir.context.support.IValidationSupport.LookupCodeResult;
+import static ca.uhn.fhir.context.support.IValidationSupport.StringConceptProperty;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class RemoteTerminologyServiceValidationSupportDstu3Test {
 	private static final String DISPLAY = "DISPLAY";
 	private static final String LANGUAGE = "en";
 	private static final String CODE_SYSTEM = "CODE_SYS";
+
+	private static final String CODE_SYSTEM_VERSION = "CODE_SYS_VERSION";
 	private static final String CODE_SYSTEM_NAME = "Code System";
 	private static final String CODE = "CODE";
 
@@ -60,97 +73,100 @@ public class RemoteTerminologyServiceValidationSupportDstu3Test {
 	}
 
 	public static Stream<Arguments> parametersPropertiesAndDesignations() {
-		return Stream.of(
-				Arguments.arguments(
-						new IValidationSupport.StringConceptProperty("birthDate", "1930-01-01"),
-						new IValidationSupport.ConceptDesignation().setLanguage("en").setUseCode("code1").setUseSystem("system-1").setUseDisplay("display").setValue("some value")
-				),
-				Arguments.arguments(
-						new IValidationSupport.CodingConceptProperty("propertyCode", "code", "system", "display"),
-						new IValidationSupport.ConceptDesignation().setLanguage("en").setUseCode("code1").setUseSystem("system-1").setUseDisplay("display").setValue("some value")
-				)
-		);
+		return LookupCodeUtil.parametersPropertiesAndDesignations();
 	}
 
 	@ParameterizedTest
 	@MethodSource(value = "parametersPropertiesAndDesignations")
-	public void testLookupCode_forCodeSystemWithAllParams_returnsCorrectParameters(IValidationSupport.BaseConceptProperty theConceptProperty,
-																				   IValidationSupport.ConceptDesignation theConceptDesignation) {
-		myCodeSystemProvider.myNextLookupCodeResult = new IValidationSupport.LookupCodeResult();
-		myCodeSystemProvider.myNextLookupCodeResult.setFound(true);
-		myCodeSystemProvider.myNextLookupCodeResult.setCodeSystemVersion(CODE_SYSTEM);
-		myCodeSystemProvider.myNextLookupCodeResult.setSearchedForCode(CODE);
+	public void testLookupCode_forCodeSystemWithAllParams_returnsCorrectParameters(
+			Collection<BaseConceptProperty> theConceptProperties,
+			Collection<BaseConceptProperty> theConceptPropertiesForLookup,
+			Collection<ConceptDesignation> theConceptDesignations) {
+		myCodeSystemProvider.myNextLookupCodeResult = new LookupCodeResult()
+			.setFound(true).setSearchedForCode(CODE).setSearchedForSystem(CODE_SYSTEM);
+		myCodeSystemProvider.myNextLookupCodeResult.setCodeIsAbstract(false);
+		myCodeSystemProvider.myNextLookupCodeResult.setCodeSystemVersion(CODE_SYSTEM_VERSION);
 		myCodeSystemProvider.myNextLookupCodeResult.setCodeSystemDisplayName(CODE_SYSTEM_NAME);
 		myCodeSystemProvider.myNextLookupCodeResult.setCodeDisplay(DISPLAY);
 
-		// property
-		myCodeSystemProvider.myNextLookupCodeResult.getProperties().add(theConceptProperty);
+		theConceptProperties.forEach(p -> myCodeSystemProvider.myNextLookupCodeResult.getProperties().add(p));
+		theConceptDesignations.forEach(d -> myCodeSystemProvider.myNextLookupCodeResult.getDesignations().add(d));
 
-		// designation
-		myCodeSystemProvider.myNextLookupCodeResult.getDesignations().add(theConceptDesignation);
-
-		IValidationSupport.LookupCodeResult outcome = mySvc.lookupCode(null, new LookupCodeRequest(CODE_SYSTEM, CODE, LANGUAGE, Set.of(theConceptProperty.getPropertyName())));
+		LookupCodeResult outcome = mySvc.lookupCode(null,
+			new LookupCodeRequest(CODE_SYSTEM, CODE, LANGUAGE,
+				theConceptPropertiesForLookup.stream().map(BaseConceptProperty::getPropertyName).collect(Collectors.toList())));
 		assertNotNull(outcome, "Call to lookupCode() should return a non-NULL result!");
-		assertEquals(DISPLAY, outcome.getCodeDisplay());
-		assertEquals(CODE_SYSTEM, outcome.getCodeSystemVersion());
 
 		assertEquals(CODE, myCodeSystemProvider.myLastCode.asStringValue());
 		assertEquals(CODE_SYSTEM, myCodeSystemProvider.myLastUrl.getValueAsString());
 
-		Parameters.ParametersParameterComponent propertyComponent = null;
-		Parameters.ParametersParameterComponent designationComponent = null;
+		Map<String, BaseConceptProperty> conceptPropertyMap =
+			(theConceptPropertiesForLookup.isEmpty() ? theConceptProperties : theConceptPropertiesForLookup)
+				.stream().collect(Collectors.toMap(BaseConceptProperty::getPropertyName, Function.identity()));
+		Map<String, ConceptDesignation> theConceptDesignationMap = theConceptDesignations.stream().collect(
+			Collectors.toMap(c -> c.getUseSystem() + "|" + c.getUseCode(), Function.identity()));
+
 		for (Parameters.ParametersParameterComponent parameterComponent : myCodeSystemProvider.myNextReturnParams.getParameter()) {
-			if ("property".equals(parameterComponent.getName())) {
-				propertyComponent = parameterComponent;
-			}
-			if ("designation".equals(parameterComponent.getName())) {
-				designationComponent = parameterComponent;
+			String parameterName = parameterComponent.getName();
+			Type parameterValue = parameterComponent.getValue();
+			switch (parameterName) {
+				case "name" ->
+					assertEquals(parameterValue.toString(), myCodeSystemProvider.myNextLookupCodeResult.getCodeSystemDisplayName());
+				case "display" ->
+					assertEquals(parameterValue.toString(), myCodeSystemProvider.myNextLookupCodeResult.getCodeDisplay());
+				case "version" ->
+					assertEquals(parameterValue.toString(), myCodeSystemProvider.myNextLookupCodeResult.getCodeSystemVersion());
+				case "abstract" ->
+					assertEquals(((BooleanType) parameterValue).getValue(), myCodeSystemProvider.myNextLookupCodeResult.isCodeIsAbstract());
+				case "property" -> {
+					final Iterator<Parameters.ParametersParameterComponent> propertyPartIterator = parameterComponent.getPart().iterator();
+					final Parameters.ParametersParameterComponent propertyName = propertyPartIterator.next();
+					final Parameters.ParametersParameterComponent propertyValue = propertyPartIterator.next();
+					String propertyNameAsString = ((CodeType) propertyName.getValue()).getValue();
+					BaseConceptProperty conceptProperty = conceptPropertyMap.remove(propertyNameAsString);
+					ConceptPropertyTypeEnum propertyType = conceptProperty.getType();
+					switch (propertyType) {
+						case STRING -> {
+							StringConceptProperty stringConceptProperty = (StringConceptProperty) conceptProperty;
+							assertEquals(stringConceptProperty.getPropertyName(), propertyNameAsString);
+							assertEquals(stringConceptProperty.getValue(), ((StringType) propertyValue.getValue()).getValueAsString());
+						}
+						case CODING -> {
+							CodingConceptProperty codingConceptProperty = (CodingConceptProperty) conceptProperty;
+							Coding coding = (Coding) propertyValue.getValue();
+							assertEquals(codingConceptProperty.getCodeSystem(), coding.getSystem());
+							assertEquals(codingConceptProperty.getCode(), coding.getCode());
+							assertEquals(codingConceptProperty.getDisplay(), coding.getDisplay());
+						}
+					}
+				}
+				case "designation" -> {
+					final Iterator<Parameters.ParametersParameterComponent> designationPartIterator = parameterComponent.getPart().iterator();
+					final Parameters.ParametersParameterComponent designationLanguage = designationPartIterator.next();
+					final Parameters.ParametersParameterComponent designationUse = designationPartIterator.next();
+					final Parameters.ParametersParameterComponent designationValue = designationPartIterator.next();
+					assertEquals("use", designationUse.getName());
+					Coding coding = (Coding) designationUse.getValue();
+					assertNotNull(coding, "Coding value returned via designation use should NOT be NULL!");
+					String key = coding.getSystem() + "|" + coding.getCode();
+					ConceptDesignation conceptDesignation = theConceptDesignationMap.remove(key);
+					assertEquals("language", designationLanguage.getName());
+					assertEquals(conceptDesignation.getLanguage(), designationLanguage.getValue().toString());
+					assertEquals("value", designationValue.getName());
+					assertEquals(conceptDesignation.getValue(), designationValue.getValue().toString());
+				}
 			}
 		}
 
-		assertNotNull(propertyComponent);
-
-		final Iterator<Parameters.ParametersParameterComponent> propertyPartIterator = propertyComponent.getPart().iterator();
-		final Parameters.ParametersParameterComponent propertyName = propertyPartIterator.next();
-		final Parameters.ParametersParameterComponent propertyValue = propertyPartIterator.next();
-
-		String propertyType = propertyComponent.getName();
-		String propertyNameAsString = ((StringType) propertyName.getValue()).getValue();
-		if ("string".equals(propertyType)) {
-			IValidationSupport.StringConceptProperty stringConceptProperty = (IValidationSupport.StringConceptProperty) theConceptProperty;
-			assertEquals(stringConceptProperty.getPropertyName(), propertyNameAsString);
-			assertEquals(stringConceptProperty.getValue(), ((StringType)propertyValue.getValue()).getValueAsString());
-		} else if ("code".equals(propertyType)) {
-			IValidationSupport.CodingConceptProperty codingConceptProperty = (IValidationSupport.CodingConceptProperty)theConceptProperty;
-			Coding coding = (Coding)propertyValue.getValue();
-			assertEquals(codingConceptProperty.getCodeSystem(), coding.getSystem());
-			assertEquals(codingConceptProperty.getCode(), coding.getCode());
-			assertEquals(codingConceptProperty.getDisplay(), coding.getDisplay());
-		}
-
-		assertNotNull(designationComponent);
-
-		final Iterator<Parameters.ParametersParameterComponent> designationPartIterator = designationComponent.getPart().iterator();
-		final Parameters.ParametersParameterComponent designationLanguage = designationPartIterator.next();
-		final Parameters.ParametersParameterComponent designationUse = designationPartIterator.next();
-		final Parameters.ParametersParameterComponent designationValue = designationPartIterator.next();
-
-		assertEquals("use", designationUse.getName());
-		Coding coding = (Coding) designationUse.getValue();
-		assertNotNull(coding, "Coding value returned via designation use should NOT be NULL!");
-
-		assertEquals("language", designationLanguage.getName());
-		assertEquals(theConceptDesignation.getLanguage(), designationLanguage.getValue().toString());
-
-		assertEquals("value", designationValue.getName());
-		assertEquals(theConceptDesignation.getValue(), designationValue.getValue().toString());
+		assertTrue(conceptPropertyMap.isEmpty());
+		assertTrue(theConceptDesignationMap.isEmpty());
 	}
 
 	private static class MyCodeSystemProvider implements IResourceProvider {
 		private UriType myLastUrl;
 		private CodeType myLastCode;
 		private Parameters myNextReturnParams;
-		private IValidationSupport.LookupCodeResult myNextLookupCodeResult;
+		private LookupCodeResult myNextLookupCodeResult;
 
 		@Operation(name = JpaConstants.OPERATION_LOOKUP, idempotent = true, returnParameters= {
 			@OperationParam(name="name", type=StringType.class, min=1),

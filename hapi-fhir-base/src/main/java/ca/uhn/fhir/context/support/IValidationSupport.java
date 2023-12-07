@@ -35,6 +35,8 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -42,8 +44,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -513,6 +513,11 @@ public interface IValidationSupport {
 		}
 	}
 
+	enum ConceptPropertyTypeEnum {
+		STRING,
+		CODING
+	}
+
 	abstract class BaseConceptProperty {
 		private final String myPropertyName;
 
@@ -526,6 +531,8 @@ public interface IValidationSupport {
 		public String getPropertyName() {
 			return myPropertyName;
 		}
+
+		public abstract ConceptPropertyTypeEnum getType();
 	}
 
 	class StringConceptProperty extends BaseConceptProperty {
@@ -543,6 +550,10 @@ public interface IValidationSupport {
 
 		public String getValue() {
 			return myValue;
+		}
+
+		public ConceptPropertyTypeEnum getType() {
+			return ConceptPropertyTypeEnum.STRING;
 		}
 	}
 
@@ -573,6 +584,10 @@ public interface IValidationSupport {
 
 		public String getDisplay() {
 			return myDisplay;
+		}
+
+		public ConceptPropertyTypeEnum getType() {
+			return ConceptPropertyTypeEnum.CODING;
 		}
 	}
 
@@ -882,24 +897,33 @@ public interface IValidationSupport {
 
 				for (BaseConceptProperty next : myProperties) {
 
-					if (!properties.isEmpty()) {
-						if (!properties.contains(next.getPropertyName())) {
-							continue;
-						}
+					if (!properties.isEmpty() && !properties.contains(next.getPropertyName())) {
+						continue;
 					}
 
 					IBase property = ParametersUtil.addParameterToParameters(theContext, retVal, "property");
-					if (next instanceof StringConceptProperty) {
-						StringConceptProperty prop = (StringConceptProperty) next;
-						ParametersUtil.addPartString(theContext, property, "string", next.getPropertyName());
-						ParametersUtil.addPartString(theContext, property, "value", prop.getValue());
-					} else if (next instanceof CodingConceptProperty) {
-						CodingConceptProperty prop = (CodingConceptProperty) next;
-						ParametersUtil.addPartCode(theContext, property, "code", next.getPropertyName());
-						ParametersUtil.addPartCoding(
-								theContext, property, "value", prop.getCodeSystem(), prop.getCode(), prop.getDisplay());
-					} else {
-						throw new IllegalStateException(Msg.code(1739) + "Don't know how to handle " + next.getClass());
+					ParametersUtil.addPartCode(theContext, property, "code", next.getPropertyName());
+
+					ConceptPropertyTypeEnum propertyType = next.getType();
+					switch (propertyType) {
+						case STRING:
+							StringConceptProperty stringConceptProperty = (StringConceptProperty) next;
+							ParametersUtil.addPartString(
+									theContext, property, "value", stringConceptProperty.getValue());
+							break;
+						case CODING:
+							CodingConceptProperty codingConceptProperty = (CodingConceptProperty) next;
+							ParametersUtil.addPartCoding(
+									theContext,
+									property,
+									"value",
+									codingConceptProperty.getCodeSystem(),
+									codingConceptProperty.getCode(),
+									codingConceptProperty.getDisplay());
+							break;
+						default:
+							throw new IllegalStateException(
+									Msg.code(1739) + "Don't know how to handle " + next.getClass());
 					}
 				}
 			}

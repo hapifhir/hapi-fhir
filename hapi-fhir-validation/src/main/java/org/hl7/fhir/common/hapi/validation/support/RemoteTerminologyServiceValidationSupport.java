@@ -21,8 +21,10 @@ import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Base;
 import org.hl7.fhir.r4.model.CodeSystem;
+import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Parameters;
+import org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent;
 import org.hl7.fhir.r4.model.Property;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.Type;
@@ -307,22 +309,29 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 		return result;
 	}
 
-	private static BaseConceptProperty getBaseConceptPropertyDSTU3(List<org.hl7.fhir.dstu3.model.Base> values) {
+	private static BaseConceptProperty getBaseConceptPropertyDSTU3(List<org.hl7.fhir.dstu3.model.Base> theValues) {
 		org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent part1 =
-				(org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent) values.get(0);
-		String propertyTypeName = part1.getName();
-		String propertyName = ((org.hl7.fhir.dstu3.model.StringType) part1.getValue()).getValue();
+				(org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent) theValues.get(0);
+		String propertyName = ((org.hl7.fhir.dstu3.model.CodeType) part1.getValue()).getValue();
 
-		BaseConceptProperty conceptProperty = null;
+		BaseConceptProperty conceptProperty;
 		org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent part2 =
-				(org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent) values.get(1);
-		if ("code".equals(propertyTypeName)) {
-			org.hl7.fhir.dstu3.model.Coding coding = (org.hl7.fhir.dstu3.model.Coding) part2.getValue();
-			conceptProperty =
-					new CodingConceptProperty(propertyName, coding.getSystem(), coding.getCode(), coding.getDisplay());
-		} else if ("string".equals(propertyTypeName)) {
-			org.hl7.fhir.dstu3.model.StringType stringType = (org.hl7.fhir.dstu3.model.StringType) part2.getValue();
-			conceptProperty = new StringConceptProperty(propertyName, stringType.getValue());
+				(org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent) theValues.get(1);
+
+		org.hl7.fhir.dstu3.model.Type value = part2.getValue();
+		String fhirType = value.fhirType();
+		switch (fhirType) {
+			case "string":
+				org.hl7.fhir.dstu3.model.StringType stringType = (org.hl7.fhir.dstu3.model.StringType) part2.getValue();
+				conceptProperty = new StringConceptProperty(propertyName, stringType.getValue());
+				break;
+			case "Coding":
+				org.hl7.fhir.dstu3.model.Coding coding = (org.hl7.fhir.dstu3.model.Coding) part2.getValue();
+				conceptProperty = new CodingConceptProperty(
+						propertyName, coding.getSystem(), coding.getCode(), coding.getDisplay());
+				break;
+			default:
+				throw new IllegalArgumentException("Property value type " + fhirType + " is not supported.");
 		}
 		return conceptProperty;
 	}
@@ -335,7 +344,7 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 		result.setSearchedForCode(theCode);
 		result.setSearchedForSystem(theSystem);
 		result.setFound(true);
-		for (Parameters.ParametersParameterComponent parameterComponent : outcomeR4.getParameter()) {
+		for (ParametersParameterComponent parameterComponent : outcomeR4.getParameter()) {
 			String parameterTypeAsString = Objects.toString(parameterComponent.getValue(), null);
 			switch (parameterComponent.getName()) {
 				case "property":
@@ -351,7 +360,7 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 				case "designation":
 					ConceptDesignation conceptDesignation = new ConceptDesignation();
 					result.getDesignations().add(conceptDesignation);
-					for (Parameters.ParametersParameterComponent designationComponent : parameterComponent.getPart()) {
+					for (ParametersParameterComponent designationComponent : parameterComponent.getPart()) {
 						Type designationComponentValue = designationComponent.getValue();
 						if (designationComponentValue == null) {
 							continue;
@@ -391,19 +400,26 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 	}
 
 	private static BaseConceptProperty getBaseConceptPropertyR4(List<Base> values) {
-		Parameters.ParametersParameterComponent part1 = (Parameters.ParametersParameterComponent) values.get(0);
-		String propertyTypeName = part1.getName();
-		String propertyName = ((StringType) part1.getValue()).getValue();
+		ParametersParameterComponent part1 = (ParametersParameterComponent) values.get(0);
+		String propertyName = ((CodeType) part1.getValue()).getValue();
 
-		BaseConceptProperty conceptProperty = null;
-		Parameters.ParametersParameterComponent part2 = (Parameters.ParametersParameterComponent) values.get(1);
-		if ("code".equals(propertyTypeName)) {
-			Coding coding = (Coding) part2.getValue();
-			conceptProperty =
-					new CodingConceptProperty(propertyName, coding.getSystem(), coding.getCode(), coding.getDisplay());
-		} else if ("string".equals(propertyTypeName)) {
-			StringType stringType = (StringType) part2.getValue();
-			conceptProperty = new StringConceptProperty(propertyName, stringType.getValue());
+		BaseConceptProperty conceptProperty;
+		ParametersParameterComponent part2 = (ParametersParameterComponent) values.get(1);
+
+		Type value = part2.getValue();
+		String fhirType = value.fhirType();
+		switch (fhirType) {
+			case "string":
+				StringType stringType = (StringType) part2.getValue();
+				conceptProperty = new StringConceptProperty(propertyName, stringType.getValue());
+				break;
+			case "Coding":
+				Coding coding = (Coding) part2.getValue();
+				conceptProperty = new CodingConceptProperty(
+						propertyName, coding.getSystem(), coding.getCode(), coding.getDisplay());
+				break;
+			default:
+				throw new IllegalArgumentException("Property value type " + fhirType + " is not supported.");
 		}
 		return conceptProperty;
 	}
