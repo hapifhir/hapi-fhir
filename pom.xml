@@ -2351,14 +2351,14 @@
 							<arg>-J--add-opens=jdk.compiler/com.sun.tools.javac.code=ALL-UNNAMED</arg>
 							<arg>-J--add-opens=jdk.compiler/com.sun.tools.javac.comp=ALL-UNNAMED</arg>
 						</compilerArgs>
+						<annotationProcessorPaths>
+							<path>
+								<groupId>com.google.errorprone</groupId>
+								<artifactId>error_prone_core</artifactId>
+								<version>${error_prone_core_version}</version>
+							</path>
+						</annotationProcessorPaths>
 					</configuration>
-					<annotationProcessorPaths>
-						<path>
-							<groupId>com.google.errorprone</groupId>
-							<artifactId>error_prone_core</artifactId>
-							<version>${error_prone_core_version}</version>
-						</path>
-					</annotationProcessorPaths>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>

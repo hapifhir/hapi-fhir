@@ -127,7 +127,8 @@ public class JacksonStructure implements JsonLikeStructure {
 				JsonProcessingException jpe = (JsonProcessingException) e;
 				StringBuilder messageBuilder = new StringBuilder();
 				String originalMessage = jpe.getOriginalMessage();
-				originalMessage = originalMessage.replace("Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); ", "");
+				originalMessage = originalMessage.replace(
+						"Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); ", "");
 				messageBuilder.append(originalMessage);
 				if (jpe.getLocation() != null) {
 					messageBuilder.append("\n at [");
@@ -145,8 +146,7 @@ public class JacksonStructure implements JsonLikeStructure {
 								+ "This may indicate that single quotes are being used as JSON escapes where double quotes are required",
 						e);
 			}
-			throw new DataFormatException(
-					Msg.code(1861) + "Failed to parse JSON encoded FHIR content: " + message, e);
+			throw new DataFormatException(Msg.code(1861) + "Failed to parse JSON encoded FHIR content: " + message, e);
 		}
 	}
 
