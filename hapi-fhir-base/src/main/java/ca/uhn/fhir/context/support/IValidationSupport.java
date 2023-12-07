@@ -902,7 +902,8 @@ public interface IValidationSupport {
 
 					String propertyType = next.getType();
 					if (propertyType == null) {
-						throw new IllegalStateException(Msg.code(2450) + "Type is required for property " + propertyName);
+						throw new IllegalStateException(
+								Msg.code(2450) + "Type is required for property " + propertyName);
 					}
 					switch (propertyType) {
 						case "string":
