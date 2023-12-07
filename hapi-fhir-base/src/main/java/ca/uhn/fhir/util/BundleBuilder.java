@@ -227,10 +227,13 @@ public class BundleBuilder {
 
 	/**
 	 * Adds an entry containing an update (UPDATE) request without the body of the resource.
+	 * Also sets the Bundle.type value to "transaction" if it is not already set.
 	 *
 	 * @param theResource The resource to update.
 	 */
 	public void addTransactionUpdateIdOnlyEntry(IBaseResource theResource) {
+		setBundleField("type", "transaction");
+
 		Validate.notNull(theResource, "theResource must not be null");
 
 		IIdType id = getIdTypeForUpdate(theResource);

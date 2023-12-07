@@ -144,7 +144,7 @@ class SubscriptionCanonicalizerTest {
 
 	@ParameterizedTest
 	@ValueSource(strings = {"full-resource", "id-only", "empty"})
-	void testR4BCanonicalize_withBackPortedSubscription_returnsCorrectCanonicalSubscription(String thePayloadContent) {
+	void testR4BCanonicalize_returnsCorrectCanonicalSubscription(String thePayloadContent) {
 		// Example drawn from http://build.fhir.org/ig/HL7/fhir-subscription-backport-ig/Subscription-subscription-zulip.json.html
 
 		// setup

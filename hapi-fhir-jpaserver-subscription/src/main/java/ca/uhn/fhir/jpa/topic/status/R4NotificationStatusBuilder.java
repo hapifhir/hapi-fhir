@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.topic.status;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.subscription.match.registry.ActiveSubscription;
+import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
 import ca.uhn.fhir.jpa.topic.SubscriptionTopicUtil;
 import ca.uhn.fhir.subscription.SubscriptionConstants;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -47,6 +48,7 @@ public class R4NotificationStatusBuilder implements INotificationStatusBuilder<P
 	public Parameters buildNotificationStatus(
 			List<IBaseResource> theResources, ActiveSubscription theActiveSubscription, String theTopicUrl) {
 		Long eventNumber = theActiveSubscription.getDeliveriesCount();
+		CanonicalSubscription canonicalSubscription = theActiveSubscription.getSubscription();
 
 		// See http://build.fhir.org/ig/HL7/fhir-subscription-backport-ig/Parameters-r4-notification-status.json.html
 		// and
@@ -67,7 +69,7 @@ public class R4NotificationStatusBuilder implements INotificationStatusBuilder<P
 		notificationEvent.setName("notification-event");
 		notificationEvent.addPart().setName("event-number").setValue(new StringType(eventNumber.toString()));
 		notificationEvent.addPart().setName("timestamp").setValue(new DateType(new Date()));
-		if (!theResources.isEmpty() && !SubscriptionTopicUtil.isEmptyContentTopicSubscription(theActiveSubscription)) {
+		if (!theResources.isEmpty() && !SubscriptionTopicUtil.isEmptyContentTopicSubscription(canonicalSubscription)) {
 			IBaseResource firstResource = theResources.get(0);
 			Reference resourceReference =
 					new Reference(firstResource.getIdElement().toUnqualifiedVersionless());

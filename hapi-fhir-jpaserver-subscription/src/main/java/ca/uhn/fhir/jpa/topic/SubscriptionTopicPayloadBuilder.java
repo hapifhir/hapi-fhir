@@ -23,12 +23,14 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.subscription.match.registry.ActiveSubscription;
+import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
 import ca.uhn.fhir.jpa.topic.status.INotificationStatusBuilder;
 import ca.uhn.fhir.jpa.topic.status.R4BNotificationStatusBuilder;
 import ca.uhn.fhir.jpa.topic.status.R4NotificationStatusBuilder;
 import ca.uhn.fhir.jpa.topic.status.R5NotificationStatusBuilder;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.util.BundleBuilder;
+import org.apache.commons.lang3.ObjectUtils;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r5.model.Bundle;
@@ -36,7 +38,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
-import java.util.Objects;
+
+import static org.hl7.fhir.r5.model.Subscription.SubscriptionPayloadContent.FULLRESOURCE;
 
 public class SubscriptionTopicPayloadBuilder {
 	private static final Logger ourLog = LoggerFactory.getLogger(SubscriptionTopicPayloadBuilder.class);
@@ -74,7 +77,7 @@ public class SubscriptionTopicPayloadBuilder {
 				myNotificationStatusBuilder.buildNotificationStatus(theResources, theActiveSubscription, theTopicUrl);
 		bundleBuilder.addCollectionEntry(notificationStatus);
 
-		addResources(theResources, theActiveSubscription, theRestOperationType, bundleBuilder);
+		addResources(theResources, theActiveSubscription.getSubscription(), theRestOperationType, bundleBuilder);
 		// WIP STR5 add support for notificationShape include, revinclude
 
 		// Note we need to set the bundle type after we add the resources since adding the resources automatically sets
@@ -90,26 +93,23 @@ public class SubscriptionTopicPayloadBuilder {
 
 	private void addResources(
 			List<IBaseResource> theResources,
-			ActiveSubscription theActiveSubscription,
+			CanonicalSubscription theCanonicalSubscription,
 			RestOperationTypeEnum theRestOperationType,
 			BundleBuilder theBundleBuilder) {
 
-		if (theActiveSubscription.getSubscription().isTopicSubscription()
-				&& Objects.nonNull(theActiveSubscription.getSubscription().getContent())) {
+		org.hl7.fhir.r5.model.Subscription.SubscriptionPayloadContent content =
+				ObjectUtils.defaultIfNull(theCanonicalSubscription.getContent(), FULLRESOURCE);
 
-			switch (theActiveSubscription.getSubscription().getContent()) {
-				case EMPTY:
-					// skip adding resource to the Bundle
-					break;
-				case IDONLY:
-					addIdOnly(theBundleBuilder, theResources, theRestOperationType);
-					break;
-				case FULLRESOURCE:
-					addFullResources(theBundleBuilder, theResources, theRestOperationType);
-					break;
-			}
-		} else {
-			addFullResources(theBundleBuilder, theResources, theRestOperationType);
+		switch (content) {
+			case EMPTY:
+				// skip adding resource to the Bundle
+				break;
+			case IDONLY:
+				addIdOnly(theBundleBuilder, theResources, theRestOperationType);
+				break;
+			case FULLRESOURCE:
+				addFullResources(theBundleBuilder, theResources, theRestOperationType);
+				break;
 		}
 	}
 

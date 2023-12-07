@@ -60,6 +60,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import static ca.uhn.fhir.util.HapiExtensions.EX_SEND_DELETE_MESSAGES;
+import static java.util.Objects.nonNull;
 import static java.util.stream.Collectors.mapping;
 import static java.util.stream.Collectors.toList;
 
@@ -318,10 +319,10 @@ public class SubscriptionCanonicalizer {
 			}
 
 			if (channel.hasExtension(SubscriptionConstants.SUBSCRIPTION_TOPIC_CHANNEL_HEARTBEAT_PERIOD_URL)) {
-				org.hl7.fhir.r4.model.Extension channelHertbeatPeriotUrlExtension = channel.getExtensionByUrl(
+				org.hl7.fhir.r4.model.Extension channelHeartbeatPeriotUrlExtension = channel.getExtensionByUrl(
 						SubscriptionConstants.SUBSCRIPTION_TOPIC_CHANNEL_HEARTBEAT_PERIOD_URL);
 				topicSubscription.setHeartbeatPeriod(Integer.valueOf(
-						channelHertbeatPeriotUrlExtension.getValue().primitiveValue()));
+						channelHeartbeatPeriotUrlExtension.getValue().primitiveValue()));
 			}
 			if (channel.hasExtension(SubscriptionConstants.SUBSCRIPTION_TOPIC_CHANNEL_TIMEOUT_URL)) {
 				org.hl7.fhir.r4.model.Extension channelTimeoutUrlExtension =
@@ -335,18 +336,20 @@ public class SubscriptionCanonicalizer {
 				topicSubscription.setMaxCount(
 						Integer.valueOf(channelMaxCountExtension.getValue().primitiveValue()));
 			}
-			if (channel.getPayloadElement()
-					.hasExtension(SubscriptionConstants.SUBSCRIPTION_TOPIC_CHANNEL_PAYLOAD_CONTENT)) {
-				org.hl7.fhir.r4.model.Extension channelPayloadContentExtension = channel.getPayloadElement()
-						.getExtensionByUrl(SubscriptionConstants.SUBSCRIPTION_TOPIC_CHANNEL_PAYLOAD_CONTENT);
-				topicSubscription.setContent(org.hl7.fhir.r5.model.Subscription.SubscriptionPayloadContent.fromCode(
-						channelPayloadContentExtension.getValue().primitiveValue()));
-			} else {
-				// setting full-resource PayloadContent if backport-payload-content is not provided
-				topicSubscription.setContent(
-						org.hl7.fhir.r5.model.Subscription.SubscriptionPayloadContent.FULLRESOURCE);
+
+			// setting full-resource PayloadContent if backport-payload-content is not provided
+			org.hl7.fhir.r5.model.Subscription.SubscriptionPayloadContent payloadContent =
+					org.hl7.fhir.r5.model.Subscription.SubscriptionPayloadContent.FULLRESOURCE;
+
+			org.hl7.fhir.r4.model.Extension channelPayloadContentExtension = channel.getPayloadElement()
+					.getExtensionByUrl(SubscriptionConstants.SUBSCRIPTION_TOPIC_CHANNEL_PAYLOAD_CONTENT);
+
+			if (nonNull(channelPayloadContentExtension)) {
+				payloadContent = org.hl7.fhir.r5.model.Subscription.SubscriptionPayloadContent.fromCode(
+						channelPayloadContentExtension.getValue().primitiveValue());
 			}
 
+			topicSubscription.setContent(payloadContent);
 		} else {
 			retVal.setCriteriaString(getCriteria(theSubscription));
 			retVal.setEndpointUrl(channel.getEndpoint());
@@ -431,17 +434,19 @@ public class SubscriptionCanonicalizer {
 			retVal.setEndpointUrl(channel.getEndpoint());
 			retVal.setChannelType(getChannelType(subscription));
 
-			if (channel.getPayloadElement()
-					.hasExtension(SubscriptionConstants.SUBSCRIPTION_TOPIC_CHANNEL_PAYLOAD_CONTENT)) {
-				org.hl7.fhir.r4b.model.Extension channelPayloadContentExtension = channel.getPayloadElement()
-						.getExtensionByUrl(SubscriptionConstants.SUBSCRIPTION_TOPIC_CHANNEL_PAYLOAD_CONTENT);
-				topicSubscription.setContent(org.hl7.fhir.r5.model.Subscription.SubscriptionPayloadContent.fromCode(
-						channelPayloadContentExtension.getValue().primitiveValue()));
-			} else {
-				// setting full-resource PayloadContent if backport-payload-content is not provided
-				topicSubscription.setContent(
-						org.hl7.fhir.r5.model.Subscription.SubscriptionPayloadContent.FULLRESOURCE);
+			// setting full-resource PayloadContent if backport-payload-content is not provided
+			org.hl7.fhir.r5.model.Subscription.SubscriptionPayloadContent payloadContent =
+					org.hl7.fhir.r5.model.Subscription.SubscriptionPayloadContent.FULLRESOURCE;
+
+			org.hl7.fhir.r4b.model.Extension channelPayloadContentExtension = channel.getPayloadElement()
+					.getExtensionByUrl(SubscriptionConstants.SUBSCRIPTION_TOPIC_CHANNEL_PAYLOAD_CONTENT);
+
+			if (nonNull(channelPayloadContentExtension)) {
+				payloadContent = org.hl7.fhir.r5.model.Subscription.SubscriptionPayloadContent.fromCode(
+						channelPayloadContentExtension.getValue().primitiveValue());
 			}
+
+			topicSubscription.setContent(payloadContent);
 		} else {
 			retVal.setCriteriaString(getCriteria(theSubscription));
 			retVal.setEndpointUrl(channel.getEndpoint());

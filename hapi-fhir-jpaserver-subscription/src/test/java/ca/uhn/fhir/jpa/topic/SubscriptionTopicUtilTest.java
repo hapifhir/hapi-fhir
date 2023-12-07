@@ -97,8 +97,8 @@ class SubscriptionTopicUtilTest {
 
 	@Test
 	public void testIsEmptyContentTopicSubscription_withEmptySubscription_returnsFalse() {
-		ActiveSubscription activeSubscription = new ActiveSubscription(new CanonicalSubscription(), TEST_CHANNEL_NAME);
-		boolean result = SubscriptionTopicUtil.isEmptyContentTopicSubscription(activeSubscription);
+		CanonicalSubscription canonicalSubscription = new CanonicalSubscription();
+		boolean result = SubscriptionTopicUtil.isEmptyContentTopicSubscription(canonicalSubscription);
 
 		assertFalse(result);
 	}
@@ -117,9 +117,8 @@ class SubscriptionTopicUtilTest {
 		CanonicalSubscription canonicalSubscription = new CanonicalSubscription();
 		canonicalSubscription.setTopicSubscription(canonicalTopicSubscription);
 		canonicalSubscription.setTopicSubscription(true);
-		ActiveSubscription activeSubscription = new ActiveSubscription(canonicalSubscription, TEST_CHANNEL_NAME);
 
-		boolean actualResult = SubscriptionTopicUtil.isEmptyContentTopicSubscription(activeSubscription);
+		boolean actualResult = SubscriptionTopicUtil.isEmptyContentTopicSubscription(canonicalSubscription);
 
 		assertEquals(theExpectedResult, actualResult);
 	}
