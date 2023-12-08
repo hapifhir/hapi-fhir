@@ -3,9 +3,8 @@ package ca.uhn.fhirtest.config;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.storage.interceptor.balp.IBalpAuditContextServices;
+import jakarta.annotation.Nonnull;
 import org.hl7.fhir.r4.model.Reference;
-
-import javax.annotation.Nonnull;
 
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isBlank;

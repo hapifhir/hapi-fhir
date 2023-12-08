@@ -20,10 +20,10 @@
 package ca.uhn.fhir.jpa.migrate.taskdef;
 
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
+import jakarta.annotation.Nonnull;
 
 import java.util.Objects;
 import java.util.StringJoiner;
-import javax.annotation.Nonnull;
 
 /**
  * Capture a single SQL column type text override to the logic in {@link ColumnDriverMappingOverride}, namely,

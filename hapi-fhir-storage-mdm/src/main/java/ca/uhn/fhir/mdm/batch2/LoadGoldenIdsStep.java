@@ -29,8 +29,7 @@ import ca.uhn.fhir.batch2.jobs.step.IIdChunkProducer;
 import ca.uhn.fhir.batch2.jobs.step.ResourceIdListStep;
 import ca.uhn.fhir.jpa.api.svc.IGoldenResourceSearchSvc;
 import ca.uhn.fhir.mdm.batch2.clear.MdmClearJobParameters;
-
-import javax.annotation.Nonnull;
+import jakarta.annotation.Nonnull;
 
 public class LoadGoldenIdsStep
 		implements IJobStepWorker<MdmClearJobParameters, MdmChunkRangeJson, ResourceIdListWorkChunkJson> {

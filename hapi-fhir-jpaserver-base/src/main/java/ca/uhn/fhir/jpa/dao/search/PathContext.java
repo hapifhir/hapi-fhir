@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.jpa.dao.search;
 
+import jakarta.annotation.Nonnull;
 import org.hibernate.search.engine.search.predicate.SearchPredicate;
 import org.hibernate.search.engine.search.predicate.dsl.*;
 import org.hibernate.search.util.common.annotation.Incubating;
@@ -26,7 +27,6 @@ import org.hibernate.search.util.common.annotation.Incubating;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import javax.annotation.Nonnull;
 
 import static ca.uhn.fhir.jpa.dao.search.ExtendedHSearchClauseBuilder.PATH_JOINER;
 import static ca.uhn.fhir.jpa.model.search.HSearchIndexWriter.NESTED_SEARCH_PARAM_ROOT;

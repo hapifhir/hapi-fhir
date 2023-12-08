@@ -20,11 +20,10 @@
 package ca.uhn.fhir.jpa.subscription.model;
 
 import ca.uhn.fhir.i18n.Msg;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import org.hl7.fhir.dstu2.model.Subscription;
 import org.hl7.fhir.exceptions.FHIRException;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 

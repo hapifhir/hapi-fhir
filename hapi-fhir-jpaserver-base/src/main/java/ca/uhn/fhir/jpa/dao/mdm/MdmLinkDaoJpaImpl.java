@@ -38,6 +38,7 @@ import ca.uhn.fhir.mdm.dao.IMdmLinkDao;
 import ca.uhn.fhir.mdm.model.MdmPidTuple;
 import ca.uhn.fhir.rest.api.SortOrderEnum;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import jakarta.annotation.Nonnull;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
 import jakarta.persistence.criteria.CriteriaBuilder;
@@ -74,7 +75,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import javax.annotation.Nonnull;
 
 import static ca.uhn.fhir.mdm.api.params.MdmQuerySearchParameters.GOLDEN_RESOURCE_NAME;
 import static ca.uhn.fhir.mdm.api.params.MdmQuerySearchParameters.GOLDEN_RESOURCE_PID_NAME;

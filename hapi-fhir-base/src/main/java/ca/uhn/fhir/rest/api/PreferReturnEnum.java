@@ -19,8 +19,9 @@
  */
 package ca.uhn.fhir.rest.api;
 
+import jakarta.annotation.Nullable;
+
 import java.util.HashMap;
-import javax.annotation.Nullable;
 
 /**
  * Represents values for "return" value as provided in the the <a href="https://tools.ietf.org/html/rfc7240#section-4.2">HTTP Prefer header</a>.

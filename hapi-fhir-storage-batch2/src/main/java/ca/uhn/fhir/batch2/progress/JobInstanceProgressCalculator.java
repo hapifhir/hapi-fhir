@@ -25,10 +25,10 @@ import ca.uhn.fhir.batch2.maintenance.JobChunkProgressAccumulator;
 import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.util.Logs;
 import ca.uhn.fhir.util.StopWatch;
+import jakarta.annotation.Nonnull;
 import org.slf4j.Logger;
 
 import java.util.Iterator;
-import javax.annotation.Nonnull;
 
 public class JobInstanceProgressCalculator {
 	private static final Logger ourLog = Logs.getBatchTroubleshootingLog();

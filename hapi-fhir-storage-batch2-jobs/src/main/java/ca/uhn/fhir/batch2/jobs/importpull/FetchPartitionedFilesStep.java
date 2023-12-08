@@ -29,9 +29,8 @@ import ca.uhn.fhir.batch2.importpull.models.Batch2BulkImportPullJobParameters;
 import ca.uhn.fhir.batch2.importpull.models.BulkImportFilePartitionResult;
 import ca.uhn.fhir.jpa.bulk.imprt.api.IBulkDataImportSvc;
 import ca.uhn.fhir.jpa.bulk.imprt.model.BulkImportJobJson;
+import jakarta.annotation.Nonnull;
 import org.slf4j.Logger;
-
-import javax.annotation.Nonnull;
 
 import static org.slf4j.LoggerFactory.getLogger;
 

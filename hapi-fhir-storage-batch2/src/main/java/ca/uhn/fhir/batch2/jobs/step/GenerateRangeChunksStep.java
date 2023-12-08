@@ -29,10 +29,10 @@ import ca.uhn.fhir.batch2.jobs.chunk.PartitionedUrlChunkRangeJson;
 import ca.uhn.fhir.batch2.jobs.parameters.PartitionedUrl;
 import ca.uhn.fhir.batch2.jobs.parameters.PartitionedUrlListJobParameters;
 import ca.uhn.fhir.util.Logs;
+import jakarta.annotation.Nonnull;
 import org.slf4j.Logger;
 
 import java.util.Date;
-import javax.annotation.Nonnull;
 
 import static ca.uhn.fhir.batch2.util.Batch2Constants.BATCH_START_DATE;
 

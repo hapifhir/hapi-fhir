@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.model.entity;
  * #L%
  */
 
+import jakarta.annotation.Nullable;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.MappedSuperclass;
@@ -27,7 +28,6 @@ import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
 
 import java.io.Serializable;
-import javax.annotation.Nullable;
 
 /**
  * This is a copy of (@link {@link BasePartitionable} used ONLY for entities that are audited by Hibernate Envers.

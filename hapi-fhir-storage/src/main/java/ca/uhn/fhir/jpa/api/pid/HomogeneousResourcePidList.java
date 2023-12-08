@@ -21,10 +21,10 @@ package ca.uhn.fhir.jpa.api.pid;
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
+import jakarta.annotation.Nonnull;
 
 import java.util.Collection;
 import java.util.Date;
-import javax.annotation.Nonnull;
 
 /**
  * A resource pid list where all pids have the same resource type

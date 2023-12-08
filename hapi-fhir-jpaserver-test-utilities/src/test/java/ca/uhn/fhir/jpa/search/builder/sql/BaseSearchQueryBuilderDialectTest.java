@@ -17,7 +17,7 @@ import org.mockito.Mock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nonnull;
+import jakarta.annotation.Nonnull;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;

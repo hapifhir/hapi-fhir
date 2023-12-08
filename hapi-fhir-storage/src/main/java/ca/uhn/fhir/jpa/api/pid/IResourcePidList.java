@@ -21,10 +21,10 @@ package ca.uhn.fhir.jpa.api.pid;
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
+import jakarta.annotation.Nonnull;
 
 import java.util.Date;
 import java.util.List;
-import javax.annotation.Nonnull;
 
 /**
  * List of IResourcePersistentId along with a resource type each id

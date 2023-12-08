@@ -21,8 +21,7 @@ package ca.uhn.fhir.jpa.fql.executor;
 
 import ca.uhn.fhir.jpa.fql.parser.HfqlStatement;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-
-import javax.annotation.Nullable;
+import jakarta.annotation.Nullable;
 
 public interface IHfqlExecutor {
 

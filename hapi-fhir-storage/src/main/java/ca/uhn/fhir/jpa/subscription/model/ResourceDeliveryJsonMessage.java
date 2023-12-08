@@ -23,9 +23,8 @@ import ca.uhn.fhir.rest.server.messaging.json.BaseJsonMessage;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.builder.ToStringBuilder;
-
-import javax.annotation.Nullable;
 
 public class ResourceDeliveryJsonMessage extends BaseJsonMessage<ResourceDeliveryMessage> {
 	private static final ObjectMapper ourObjectMapper =

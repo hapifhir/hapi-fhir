@@ -19,7 +19,7 @@
  */
 package ca.uhn.fhir.rest.server.interceptor.auth;
 
-import javax.annotation.Nonnull;
+import jakarta.annotation.Nonnull;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
