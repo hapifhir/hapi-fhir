@@ -264,16 +264,14 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 					if (part == null || part.getValues().size() < 2) {
 						continue;
 					}
-					BaseConceptProperty conceptProperty = createBaseConceptPropertyDSTU3(part.getValues());
+					BaseConceptProperty conceptProperty = createBaseConceptPropertyDstu3(part.getValues());
 					if (conceptProperty != null) {
 						result.getProperties().add(conceptProperty);
 					}
 					break;
 				case "designation":
 					ConceptDesignation conceptDesignation = createConceptDesignationDstu3(parameterComponent);
-					if (conceptDesignation != null) {
-						result.getDesignations().add(conceptDesignation);
-					}
+					result.getDesignations().add(conceptDesignation);
 					break;
 				case "name":
 					result.setCodeSystemDisplayName(parameterTypeAsString);
@@ -292,7 +290,7 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 		return result;
 	}
 
-	private static BaseConceptProperty createBaseConceptPropertyDSTU3(List<org.hl7.fhir.dstu3.model.Base> theValues) {
+	private static BaseConceptProperty createBaseConceptPropertyDstu3(List<org.hl7.fhir.dstu3.model.Base> theValues) {
 		org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent part1 =
 				(org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent) theValues.get(0);
 		String propertyName = ((org.hl7.fhir.dstu3.model.CodeType) part1.getValue()).getValue();
@@ -332,7 +330,7 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 		return null;
 	}
 
-	public static BaseConceptProperty createConceptPropertyDstu3(
+	private static BaseConceptProperty createConceptPropertyDstu3(
 			final String theName, final org.hl7.fhir.dstu3.model.Type theValue) {
 		if (theValue == null) {
 			return null;
@@ -408,9 +406,7 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 					break;
 				case "designation":
 					ConceptDesignation conceptDesignation = createConceptDesignationR4(parameterComponent);
-					if (conceptDesignation != null) {
-						result.getDesignations().add(conceptDesignation);
-					}
+					result.getDesignations().add(conceptDesignation);
 					break;
 				case "name":
 					result.setCodeSystemDisplayName(parameterTypeAsString);
@@ -457,8 +453,8 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 		return conceptProperty;
 	}
 
-	public static BaseConceptProperty createConceptPropertyR4(final String theName, final Type theValue) {
-		BaseConceptProperty conceptProperty = null;
+	private static BaseConceptProperty createConceptPropertyR4(final String theName, final Type theValue) {
+		BaseConceptProperty conceptProperty;
 
 		String fhirType = theValue.fhirType();
 		switch (fhirType) {
