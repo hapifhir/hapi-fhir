@@ -178,11 +178,29 @@ public interface IConsentService {
 	}
 
 	/**
-	 *
+	 * This method is called during an $export operation (be it on system, type, or instance).
+	 * <p>
+	 * This method will be invoked during bulk export jobs to allow
+	 * Implementers to determine if the provided resource should be included or not in the
+	 * exported data.
+	 * </p>
+	 * <p>
+	 * The {@link ConsentOutcome} must return one of the following
+	 * statuses:
+	 * </p>
+	 * <ul>
+	 * <li>{@link ConsentOperationStatusEnum#AUTHORIZED}: The resource will be included in the export.</li>
+	 * <li>{@link ConsentOperationStatusEnum#PROCEED}: The resource will be included in the export.</li>
+	 * <li>{@link ConsentOperationStatusEnum#REJECT}: The resource will not be included in the export.</li>
+	 * </ul>
 	 * @param theBulkExportJobParameters
+	 * 					The Bulk Export parameters that were used to invoke the job.
 	 * @param theResource
-	 * @param theContextServices
-	 * @return
+	 * 					The resource being considered for inclusion in the export results.
+	 * @param theContextServices An object passed in by the consent framework that
+	 *                           provides utility functions relevant to acting on
+	 *                           consent directives.
+	 * @return An outcome object. See method documentation for a description.
 	 */
 	default ConsentOutcome shouldIncludeResourceInExport(BulkExportJobParameters theBulkExportJobParameters, IBaseResource theResource, IConsentContextServices theContextServices) {
 		return ConsentOutcome.PROCEED;
