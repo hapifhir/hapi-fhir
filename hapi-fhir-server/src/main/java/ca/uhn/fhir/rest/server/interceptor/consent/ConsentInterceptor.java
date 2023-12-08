@@ -31,6 +31,7 @@ import ca.uhn.fhir.rest.api.server.IPreResourceAccessDetails;
 import ca.uhn.fhir.rest.api.server.IPreResourceShowDetails;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.ResponseDetails;
+import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -495,6 +496,28 @@ public class ConsentInterceptor {
 		for (IConsentService next : myConsentService) {
 			next.completeOperationSuccess(theRequest, myContextConsentServices);
 		}
+	}
+
+	@Hook(value = Pointcut.STORAGE_BULK_EXPORT_RESOURCE_INCLUSION)
+	public boolean shouldBulkExportIncludeResource(BulkExportJobParameters theParameters, IBaseResource theResource) {
+		for (IConsentService next : myConsentService) {
+			ConsentOutcome nextOutcome = next.shouldIncludeResourceInExport(theParameters, theResource, myContextConsentServices);
+
+			ConsentOperationStatusEnum status = nextOutcome.getStatus();
+			switch (status) {
+				case AUTHORIZED:
+				case PROCEED:
+					// go to the next
+					break;
+				case REJECT:
+					// if any consent service rejects,
+					// reject the resource
+					return false;
+			}
+		}
+
+		// default is to include the resource
+		return true;
 	}
 
 	private boolean isRequestAuthorized(RequestDetails theRequestDetails) {

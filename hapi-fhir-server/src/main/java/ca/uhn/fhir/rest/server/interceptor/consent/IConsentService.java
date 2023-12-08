@@ -20,6 +20,7 @@
 package ca.uhn.fhir.rest.server.interceptor.consent;
 
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
@@ -173,6 +174,17 @@ public interface IConsentService {
 	 */
 	default ConsentOutcome willSeeResource(
 			RequestDetails theRequestDetails, IBaseResource theResource, IConsentContextServices theContextServices) {
+		return ConsentOutcome.PROCEED;
+	}
+
+	/**
+	 *
+	 * @param theBulkExportJobParameters
+	 * @param theResource
+	 * @param theContextServices
+	 * @return
+	 */
+	default ConsentOutcome shouldIncludeResourceInExport(BulkExportJobParameters theBulkExportJobParameters, IBaseResource theResource, IConsentContextServices theContextServices) {
 		return ConsentOutcome.PROCEED;
 	}
 
