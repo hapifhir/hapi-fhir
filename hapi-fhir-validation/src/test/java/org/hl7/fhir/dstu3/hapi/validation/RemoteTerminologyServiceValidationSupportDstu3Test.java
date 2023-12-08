@@ -1,17 +1,22 @@
 package org.hl7.fhir.dstu3.hapi.validation;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.support.LookupCodeRequest;
+import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.context.support.IValidationSupport.ConceptDesignation;
+import ca.uhn.fhir.context.support.IValidationSupport.LookupCodeResult;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
-import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
-import ca.uhn.fhir.test.utilities.LookupCodeUtil;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import jakarta.servlet.http.HttpServletRequest;
+import org.hl7.fhir.common.hapi.validation.IRemoteTerminologyServiceValidationSupportTest.ILookupCodeTest;
+import org.hl7.fhir.common.hapi.validation.IRemoteTerminologyServiceValidationSupportTest.ILookupCodeUnsupportedPropertyTypeTest;
+import org.hl7.fhir.common.hapi.validation.IRemoteTerminologyServiceValidationSupportTest.IMyCodeSystemProvider;
+import org.hl7.fhir.common.hapi.validation.IRemoteTerminologyServiceValidationSupportTest.IMySimpleCodeSystemProvider;
 import org.hl7.fhir.common.hapi.validation.support.RemoteTerminologyServiceValidationSupport;
 import org.hl7.fhir.dstu3.model.BooleanType;
 import org.hl7.fhir.dstu3.model.CodeSystem;
@@ -22,242 +27,231 @@ import org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent;
 import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.dstu3.model.Type;
 import org.hl7.fhir.dstu3.model.UriType;
-import org.hl7.fhir.instance.model.api.IBaseParameters;
+import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.extension.RegisterExtension;
-import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static ca.uhn.fhir.context.support.IValidationSupport.BaseConceptProperty;
 import static ca.uhn.fhir.context.support.IValidationSupport.CodingConceptProperty;
-import static ca.uhn.fhir.context.support.IValidationSupport.ConceptDesignation;
-import static ca.uhn.fhir.context.support.IValidationSupport.LookupCodeResult;
 import static ca.uhn.fhir.context.support.IValidationSupport.StringConceptProperty;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class RemoteTerminologyServiceValidationSupportDstu3Test {
-	private static final String DISPLAY = "DISPLAY";
-	private static final String LANGUAGE = "en";
-	private static final String CODE_SYSTEM = "CODE_SYS";
-
-	private static final String CODE_SYSTEM_VERSION = "CODE_SYS_VERSION";
-	private static final String CODE_SYSTEM_NAME = "Code System";
-	private static final String CODE = "CODE";
-
-	private static final FhirContext ourCtx = FhirContext.forDstu3();
+	private static final FhirContext ourCtx = FhirContext.forDstu3Cached();
 
 	@RegisterExtension
 	public static RestfulServerExtension ourRestfulServerExtension = new RestfulServerExtension(ourCtx);
 
+	private MyCodeSystemProviderDstu3 myCodeSystemProvider;
 	private RemoteTerminologyServiceValidationSupport mySvc;
-	private MyCodeSystemProvider myCodeSystemProvider;
 
 	@BeforeEach
 	public void before() {
-		myCodeSystemProvider = new MyCodeSystemProvider();
+		myCodeSystemProvider = new MyCodeSystemProviderDstu3();
 		ourRestfulServerExtension.getRestfulServer().registerProvider(myCodeSystemProvider);
+
 		String baseUrl = "http://localhost:" + ourRestfulServerExtension.getPort();
 		mySvc = new RemoteTerminologyServiceValidationSupport(ourCtx);
 		mySvc.setBaseUrl(baseUrl);
 		mySvc.addClientInterceptor(new LoggingInterceptor(true));
 	}
 
-	public static Stream<Arguments> parametersPropertyWithInvalidValue() {
-		final String propertyName = "someInvalidProperty";
-		return Stream.of(
-			Arguments.arguments(propertyName, null, "HAPI-2451: Type is required for property " + propertyName),
-			Arguments.arguments(propertyName, new CodeType("theCode"), "HAPI-2452: Property type code is not supported.")
-		);
+	@Nested
+	public class LookupCodeUnsupportedPropertyTypeDstu3Test implements ILookupCodeUnsupportedPropertyTypeTest {
+		private MySimplePropertyCodeSystemProviderDstu3 myMySimplePropertyCodeSystemProvider;
+
+		@Override
+		public IMySimpleCodeSystemProvider getSimpleCodeSystemProvider() {
+			return myMySimplePropertyCodeSystemProvider;
+		}
+
+		@Override
+		public RemoteTerminologyServiceValidationSupport getService() {
+			return mySvc;
+		}
+
+		@Override
+		public String getInvalidValueErrorCode() {
+			return "HAPI-2450";
+		}
+
+		@BeforeEach
+		public void before() {
+			// TODO: use another type when "code" is added to the supported types
+			final CodeType unsupportedValue = new CodeType("someCode");
+			final String propertyName = "somePropertyName";
+			myMySimplePropertyCodeSystemProvider = new MySimplePropertyCodeSystemProviderDstu3();
+			myMySimplePropertyCodeSystemProvider.myPropertyName = propertyName;
+			myMySimplePropertyCodeSystemProvider.myPropertyValue = unsupportedValue;
+			ourRestfulServerExtension.getRestfulServer().registerProvider(myMySimplePropertyCodeSystemProvider);
+		}
 	}
 
-	@ParameterizedTest
-	@MethodSource(value = "parametersPropertyWithInvalidValue")
-	public void testLookupCode_forCodeSystemWithPropertyInvalidValue_throwsException(String thePropertyName, Type thePropertyValue, String theErrorMessage) {
-		// setup
-		ourRestfulServerExtension.getRestfulServer().unregisterProvider(myCodeSystemProvider);
-		MySimplePropertyCodeSystemProvider myMySimplePropertyCodeSystemProvider = new MySimplePropertyCodeSystemProvider();
-		ourRestfulServerExtension.getRestfulServer().registerProvider(myMySimplePropertyCodeSystemProvider);
+	@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+	@Nested
+	public class LookupCodeDstu3Test implements ILookupCodeTest {
 
-		myMySimplePropertyCodeSystemProvider.propertyName = thePropertyName;
-		myMySimplePropertyCodeSystemProvider.propertyValue = thePropertyValue;
+		@Override
+		public IMyCodeSystemProvider getCodeSystemProvider() {
+			return myCodeSystemProvider;
+		}
 
-		// test and verify
-		InternalErrorException exception = assertThrows(InternalErrorException.class, () -> mySvc.lookupCode(null,
-			new LookupCodeRequest(CODE_SYSTEM, CODE, LANGUAGE, Collections.emptyList())));
-		assertTrue(exception.getMessage().contains(theErrorMessage));
-	}
+		@Override
+		public RemoteTerminologyServiceValidationSupport getService() {
+			return mySvc;
+		}
 
-	public static Stream<Arguments> parametersPropertiesAndDesignations() {
-		return LookupCodeUtil.parametersPropertiesAndDesignations();
-	}
-
-	@ParameterizedTest
-	@MethodSource(value = "parametersPropertiesAndDesignations")
-	public void testLookupCode_forCodeSystemWithAllParams_returnsCorrectParameters(
-			Collection<BaseConceptProperty> theConceptProperties,
-			Collection<BaseConceptProperty> theConceptPropertiesForLookup,
-			Collection<ConceptDesignation> theConceptDesignations) {
-		myCodeSystemProvider.myNextLookupCodeResult = new LookupCodeResult()
-			.setFound(true).setSearchedForCode(CODE).setSearchedForSystem(CODE_SYSTEM);
-		myCodeSystemProvider.myNextLookupCodeResult.setCodeIsAbstract(false);
-		myCodeSystemProvider.myNextLookupCodeResult.setCodeSystemVersion(CODE_SYSTEM_VERSION);
-		myCodeSystemProvider.myNextLookupCodeResult.setCodeSystemDisplayName(CODE_SYSTEM_NAME);
-		myCodeSystemProvider.myNextLookupCodeResult.setCodeDisplay(DISPLAY);
-
-		theConceptProperties.forEach(p -> myCodeSystemProvider.myNextLookupCodeResult.getProperties().add(p));
-		theConceptDesignations.forEach(d -> myCodeSystemProvider.myNextLookupCodeResult.getDesignations().add(d));
-
-		LookupCodeResult outcome = mySvc.lookupCode(null,
-			new LookupCodeRequest(CODE_SYSTEM, CODE, LANGUAGE,
-				theConceptPropertiesForLookup.stream().map(BaseConceptProperty::getPropertyName).collect(Collectors.toList())));
-		assertNotNull(outcome, "Call to lookupCode() should return a non-NULL result!");
-
-		assertEquals(CODE, myCodeSystemProvider.myLastCode.asStringValue());
-		assertEquals(CODE_SYSTEM, myCodeSystemProvider.myLastUrl.getValueAsString());
-
-		Map<String, BaseConceptProperty> conceptPropertyMap =
-			(theConceptPropertiesForLookup.isEmpty() ? theConceptProperties : theConceptPropertiesForLookup)
-				.stream().collect(Collectors.toMap(BaseConceptProperty::getPropertyName, Function.identity()));
-		Map<String, ConceptDesignation> theConceptDesignationMap = theConceptDesignations.stream().collect(
-			Collectors.toMap(c -> c.getUseSystem() + "|" + c.getUseCode(), Function.identity()));
-
-		for (ParametersParameterComponent parameterComponent : myCodeSystemProvider.myNextReturnParams.getParameter()) {
-			String parameterName = parameterComponent.getName();
-			Type parameterValue = parameterComponent.getValue();
-			switch (parameterName) {
-				case "name" ->
-					assertEquals(parameterValue.toString(), myCodeSystemProvider.myNextLookupCodeResult.getCodeSystemDisplayName());
-				case "display" ->
-					assertEquals(parameterValue.toString(), myCodeSystemProvider.myNextLookupCodeResult.getCodeDisplay());
-				case "version" ->
-					assertEquals(parameterValue.toString(), myCodeSystemProvider.myNextLookupCodeResult.getCodeSystemVersion());
-				case "abstract" ->
-					assertEquals(((BooleanType) parameterValue).getValue(), myCodeSystemProvider.myNextLookupCodeResult.isCodeIsAbstract());
-				case "property" -> {
-					final Iterator<ParametersParameterComponent> propertyPartIterator = parameterComponent.getPart().iterator();
-					final ParametersParameterComponent propertyName = propertyPartIterator.next();
-					final ParametersParameterComponent propertyValue = propertyPartIterator.next();
-					String propertyNameAsString = ((CodeType) propertyName.getValue()).getValue();
-					BaseConceptProperty conceptProperty = conceptPropertyMap.remove(propertyNameAsString);
-					String propertyType = conceptProperty.getType();
-					switch (propertyType) {
-						case "string" -> {
-							StringConceptProperty stringConceptProperty = (StringConceptProperty) conceptProperty;
-							assertEquals(stringConceptProperty.getPropertyName(), propertyNameAsString);
-							assertEquals(stringConceptProperty.getValue(), ((StringType) propertyValue.getValue()).getValueAsString());
-						}
-						case "Coding" -> {
-							CodingConceptProperty codingConceptProperty = (CodingConceptProperty) conceptProperty;
-							Coding coding = (Coding) propertyValue.getValue();
-							assertEquals(codingConceptProperty.getCodeSystem(), coding.getSystem());
-							assertEquals(codingConceptProperty.getCode(), coding.getCode());
-							assertEquals(codingConceptProperty.getDisplay(), coding.getDisplay());
-						}
-					}
+		public void verifyProperty(BaseConceptProperty theConceptProperty, String theExpectedPropertName, IBaseDatatype theExpectedValue) {
+			assertEquals(theExpectedPropertName, theConceptProperty.getPropertyName());
+			String type = theConceptProperty.getType();
+			switch (type) {
+				case IValidationSupport.TYPE_STRING -> {
+					assertTrue(theExpectedValue instanceof StringType);
+					StringType stringValue = (StringType) theExpectedValue;
+					assertTrue(theConceptProperty instanceof StringConceptProperty);
+					StringConceptProperty stringConceptProperty = (StringConceptProperty) theConceptProperty;
+					assertEquals(stringValue.getValue(), stringConceptProperty.getValue());
 				}
-				case "designation" -> {
-					final Iterator<ParametersParameterComponent> designationPartIterator = parameterComponent.getPart().iterator();
-					final ParametersParameterComponent designationLanguage = designationPartIterator.next();
-					final ParametersParameterComponent designationUse = designationPartIterator.next();
-					final ParametersParameterComponent designationValue = designationPartIterator.next();
-					assertEquals("use", designationUse.getName());
-					Coding coding = (Coding) designationUse.getValue();
-					assertNotNull(coding, "Coding value returned via designation use should NOT be NULL!");
-					String key = coding.getSystem() + "|" + coding.getCode();
-					ConceptDesignation conceptDesignation = theConceptDesignationMap.remove(key);
-					assertEquals("language", designationLanguage.getName());
-					assertEquals(conceptDesignation.getLanguage(), designationLanguage.getValue().toString());
-					assertEquals("value", designationValue.getName());
-					assertEquals(conceptDesignation.getValue(), designationValue.getValue().toString());
+				case IValidationSupport.TYPE_CODING -> {
+					assertTrue(theExpectedValue instanceof Coding);
+					Coding coding = (Coding) theExpectedValue;
+					assertTrue(theConceptProperty instanceof CodingConceptProperty);
+					CodingConceptProperty codingConceptProperty = (CodingConceptProperty) theConceptProperty;
+					assertEquals(coding.getCode(), codingConceptProperty.getCode());
+					assertEquals(coding.getSystem(), codingConceptProperty.getCodeSystem());
+					assertEquals(coding.getDisplay(), codingConceptProperty.getDisplay());
 				}
+				default ->
+					throw new InternalErrorException(Msg.code(2451) + "Property type " + type + " is not supported.");
 			}
 		}
 
-		assertTrue(conceptPropertyMap.isEmpty());
-		assertTrue(theConceptDesignationMap.isEmpty());
+		public Stream<Arguments> getEmptyPropertyValues() {
+			return Stream.of(
+				Arguments.arguments(new StringType()),
+				Arguments.arguments(new StringType("")),
+				Arguments.arguments(new Coding()),
+				Arguments.arguments(new Coding("", null, null)),
+				Arguments.arguments(new Coding("", "", null)),
+				Arguments.arguments(new Coding(null, "", null))
+			);
+		}
+
+		public Stream<Arguments> getPropertyValues() {
+			return Stream.of(
+				Arguments.arguments(new StringType("value")),
+				Arguments.arguments(new Coding("code", "system", "display"))
+			);
+		}
+
+		public Stream<Arguments> getDesignations() {
+			return Stream.of(
+				Arguments.arguments(new ConceptDesignation().setLanguage("en").setUseCode("code1").setUseSystem("system-1").setUseDisplay("display").setValue("some value")),
+				Arguments.arguments(new ConceptDesignation().setUseCode("code2").setUseSystem("system1").setUseDisplay("display").setValue("someValue")),
+				Arguments.arguments(new ConceptDesignation().setUseCode("code2").setUseSystem("system1").setValue("someValue")),
+				Arguments.arguments(new ConceptDesignation().setUseCode("code2").setUseSystem("system1")),
+				Arguments.arguments(new ConceptDesignation().setUseCode("code2"))
+			);
+		}
 	}
 
-	private static class MySimplePropertyCodeSystemProvider implements IResourceProvider {
-		String propertyName;
-		Type propertyValue;
+
+	static class MySimplePropertyCodeSystemProviderDstu3 implements IMySimpleCodeSystemProvider {
+		String myPropertyName;
+		Type myPropertyValue;
+
+		@Override
+		public String getPropertyValueType() {
+			return myPropertyValue != null ? myPropertyValue.fhirType() : "";
+		}
 
 		@Override
 		public Class<? extends IBaseResource> getResourceType() {
 			return CodeSystem.class;
 		}
 
-		@Operation(name = JpaConstants.OPERATION_LOOKUP, idempotent = true, returnParameters = {
+		@Operation(name = JpaConstants.OPERATION_LOOKUP, idempotent = true, returnParameters= {
 			@OperationParam(name = "name", type = StringType.class, min = 1),
 			@OperationParam(name = "version", type = StringType.class, min = 0),
 			@OperationParam(name = "display", type = StringType.class, min = 1),
 			@OperationParam(name = "abstract", type = BooleanType.class, min = 1),
-			@OperationParam(name = "property", type = StringType.class, min = 0, max = OperationParam.MAX_UNLIMITED)
+			@OperationParam(name = "property", min = 0, max = OperationParam.MAX_UNLIMITED)
 		})
-		public IBaseParameters lookup(
+		public Parameters lookup(
 			HttpServletRequest theServletRequest,
-			@OperationParam(name = "code", min = 0, max = 1) CodeType theCode,
-			@OperationParam(name = "system", min = 0, max = 1) UriType theSystem,
-			@OperationParam(name = "coding", min = 0, max = 1) Coding theCoding,
-			@OperationParam(name = "version", min = 0, max = 1) StringType theVersion,
-			@OperationParam(name = "displayLanguage", min = 0, max = 1) CodeType theDisplayLanguage,
-			@OperationParam(name = "property", min = 0, max = OperationParam.MAX_UNLIMITED) List<StringType> thePropertyNames,
+			@OperationParam(name = "code", max = 1) CodeType theCode,
+			@OperationParam(name = "system", max = 1) UriType theSystem,
+			@OperationParam(name = "coding", max = 1) Coding theCoding,
+			@OperationParam(name = "version", max = 1) StringType theVersion,
+			@OperationParam(name = "displayLanguage", max = 1) CodeType theDisplayLanguage,
+			@OperationParam(name= " property", max = OperationParam.MAX_UNLIMITED) List<CodeType> thePropertyNames,
 			RequestDetails theRequestDetails
 		) {
 			ParametersParameterComponent component = new ParametersParameterComponent();
 			component.setName("property");
-			component.addPart(new ParametersParameterComponent().setName("code").setValue(new CodeType(propertyName)));
-			component.addPart(new Parameters.ParametersParameterComponent().setName("value").setValue(propertyValue));
+			component.addPart(new ParametersParameterComponent().setName("code").setValue(new CodeType(myPropertyName)));
+			component.addPart(new ParametersParameterComponent().setName("value").setValue(myPropertyValue));
 			return new Parameters().addParameter(component);
 		}
+
 	}
 
-	private static class MyCodeSystemProvider implements IResourceProvider {
-		private UriType myLastUrl;
-		private CodeType myLastCode;
-		private Parameters myNextReturnParams;
-		private LookupCodeResult myNextLookupCodeResult;
-
-		@Operation(name = JpaConstants.OPERATION_LOOKUP, idempotent = true, returnParameters= {
-			@OperationParam(name="name", type=StringType.class, min=1),
-			@OperationParam(name="version", type=StringType.class, min=0),
-			@OperationParam(name="display", type=StringType.class, min=1),
-			@OperationParam(name="abstract", type=BooleanType.class, min=1),
-			@OperationParam(name="property", min = 0, max = OperationParam.MAX_UNLIMITED)
-		})
-		public Parameters lookup(
-			HttpServletRequest theServletRequest,
-			@OperationParam(name="code", min=0, max=1) CodeType theCode,
-			@OperationParam(name="system", min=0, max=1) UriType theSystem,
-			@OperationParam(name="coding", min=0, max=1) Coding theCoding,
-			@OperationParam(name="version", min=0, max=1) StringType theVersion,
-			@OperationParam(name="displayLanguage", min=0, max=1) CodeType theDisplayLanguage,
-			@OperationParam(name="property", min = 0, max = OperationParam.MAX_UNLIMITED) List<CodeType> thePropertyNames,
-			RequestDetails theRequestDetails
-		) {
-			myLastCode = theCode;
-			myLastUrl = theSystem;
-
-			myNextReturnParams = (Parameters)myNextLookupCodeResult.toParameters(theRequestDetails.getFhirContext(), thePropertyNames);
-			return myNextReturnParams;
-		}
+	static class MyCodeSystemProviderDstu3 implements IMyCodeSystemProvider {
+		private UriType mySystemUrl;
+		private CodeType myCode;
+		private LookupCodeResult myLookupCodeResult;
 
 		@Override
 		public Class<? extends IBaseResource> getResourceType() {
 			return CodeSystem.class;
+		}
+
+		@Override
+		public String getCode() {
+			return myCode != null ? myCode.getValueAsString() : null;
+		}
+
+		@Override
+		public String getSystem() {
+			return mySystemUrl != null ? mySystemUrl.getValueAsString() : null;
+		}
+
+		@Override
+		public void setLookupCodeResult(LookupCodeResult theLookupCodeResult) {
+			myLookupCodeResult = theLookupCodeResult;
+		}
+
+		@Operation(name = JpaConstants.OPERATION_LOOKUP, idempotent = true, returnParameters= {
+			@OperationParam(name = "name", type = StringType.class, min = 1),
+			@OperationParam(name = "version", type = StringType.class, min = 0),
+			@OperationParam(name = "display", type = StringType.class, min = 1),
+			@OperationParam(name = "abstract", type = BooleanType.class, min = 1),
+			@OperationParam(name = "property", min = 0, max = OperationParam.MAX_UNLIMITED)
+		})
+		public Parameters lookup(
+			HttpServletRequest theServletRequest,
+			@OperationParam(name = "code", max = 1) CodeType theCode,
+			@OperationParam(name = "system", max = 1) UriType theSystem,
+			@OperationParam(name = "coding", max = 1) Coding theCoding,
+			@OperationParam(name = "version", max = 1) StringType theVersion,
+			@OperationParam(name = "displayLanguage", max = 1) CodeType theDisplayLanguage,
+			@OperationParam(name= " property", max = OperationParam.MAX_UNLIMITED) List<CodeType> thePropertyNames,
+			RequestDetails theRequestDetails
+		) {
+			myCode = theCode;
+			mySystemUrl = theSystem;
+
+			return (Parameters)myLookupCodeResult.toParameters(theRequestDetails.getFhirContext(), thePropertyNames);
 		}
 	}
 }

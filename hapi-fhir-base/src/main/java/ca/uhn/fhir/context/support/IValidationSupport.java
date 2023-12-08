@@ -530,6 +530,9 @@ public interface IValidationSupport {
 		public abstract String getType();
 	}
 
+	String TYPE_STRING = "string";
+	String TYPE_CODING = "Coding";
+
 	class StringConceptProperty extends BaseConceptProperty {
 		private final String myValue;
 
@@ -548,7 +551,7 @@ public interface IValidationSupport {
 		}
 
 		public String getType() {
-			return "string";
+			return TYPE_STRING;
 		}
 	}
 
@@ -582,7 +585,7 @@ public interface IValidationSupport {
 		}
 
 		public String getType() {
-			return "Coding";
+			return TYPE_CODING;
 		}
 	}
 
@@ -901,17 +904,13 @@ public interface IValidationSupport {
 					ParametersUtil.addPartCode(theContext, property, "code", propertyName);
 
 					String propertyType = next.getType();
-					if (propertyType == null) {
-						throw new IllegalStateException(
-								Msg.code(2450) + "Type is required for property " + propertyName);
-					}
 					switch (propertyType) {
-						case "string":
+						case TYPE_STRING:
 							StringConceptProperty stringConceptProperty = (StringConceptProperty) next;
 							ParametersUtil.addPartString(
 									theContext, property, "value", stringConceptProperty.getValue());
 							break;
-						case "Coding":
+						case TYPE_CODING:
 							CodingConceptProperty codingConceptProperty = (CodingConceptProperty) next;
 							ParametersUtil.addPartCoding(
 									theContext,
