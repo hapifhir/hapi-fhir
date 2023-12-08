@@ -37,7 +37,7 @@ public class CodeSystemLookupWithPropertiesUtil {
 			propertyCode = "Code-C",
 			propertyDisplay = "Display-C";
 
-	public static Stream<Arguments> parametersPropertyNames() {
+	public static Stream<Arguments> parametersLookupWithProperties() {
 		return Stream.of(
 				arguments(Collections.emptyList(), List.of(ourPropertyA, ourPropertyB, ourPropertyC)),
 				arguments(List.of(ourPropertyB), List.of(ourPropertyB)),

@@ -36,7 +36,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class ResourceProviderR5CodeSystemPropertiesTest extends BaseResourceProviderR5Test {
 	public static Stream<Arguments> parametersLookup() {
-		return CodeSystemLookupWithPropertiesUtil.parametersPropertyNames();
+		return CodeSystemLookupWithPropertiesUtil.parametersLookupWithProperties();
 	}
 
 	@ParameterizedTest
@@ -84,7 +84,7 @@ public class ResourceProviderR5CodeSystemPropertiesTest extends BaseResourceProv
 
 			parameter = parameterPartIterator.next();
 			assertEquals("code", parameter.getName());
-			assertEquals(property.getCode(), ((StringType) parameter.getValue()).getValue());
+			assertEquals(property.getCode(), ((CodeType) parameter.getValue()).getValue());
 
 			parameter = parameterPartIterator.next();
 			assertEquals("value", parameter.getName());

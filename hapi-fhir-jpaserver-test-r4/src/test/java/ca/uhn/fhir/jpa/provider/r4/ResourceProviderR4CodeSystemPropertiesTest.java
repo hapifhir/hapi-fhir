@@ -2,8 +2,8 @@ package ca.uhn.fhir.jpa.provider.r4;
 
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
-import ca.uhn.fhir.rest.gclient.IOperationUntypedWithInputAndPartialOutput;
 import ca.uhn.fhir.jpa.provider.CodeSystemLookupWithPropertiesUtil;
+import ca.uhn.fhir.rest.gclient.IOperationUntypedWithInputAndPartialOutput;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.CodeSystem.ConceptDefinitionComponent;
 import org.hl7.fhir.r4.model.CodeSystem.ConceptPropertyComponent;
@@ -38,7 +38,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class ResourceProviderR4CodeSystemPropertiesTest extends BaseResourceProviderR4Test {
 	public static Stream<Arguments> parametersLookup() {
-		return CodeSystemLookupWithPropertiesUtil.parametersPropertyNames();
+		return CodeSystemLookupWithPropertiesUtil.parametersLookupWithProperties();
 	}
 
 	@ParameterizedTest
@@ -87,7 +87,7 @@ public class ResourceProviderR4CodeSystemPropertiesTest extends BaseResourceProv
 
 			parameter = parameterPartIterator.next();
 			assertEquals("code", parameter.getName());
-			assertEquals(property.getCode(), ((StringType) parameter.getValue()).getValue());
+			assertEquals(property.getCode(), ((CodeType) parameter.getValue()).getValue());
 
 			parameter = parameterPartIterator.next();
 			assertEquals("value", parameter.getName());
