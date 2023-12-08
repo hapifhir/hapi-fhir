@@ -31,8 +31,8 @@ import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.ParametersUtil;
 import com.google.common.collect.Lists;
 import jakarta.servlet.http.HttpServletRequest;
-import org.hl7.fhir.common.hapi.validation.IRemoteTerminologyServiceValidationSupportTest;
 import org.hl7.fhir.common.hapi.validation.IRemoteTerminologyServiceValidationSupportTest.ILookupCodeTest;
+import org.hl7.fhir.common.hapi.validation.IRemoteTerminologyServiceValidationSupportTest.ILookupCodeUnsupportedPropertyTypeTest;
 import org.hl7.fhir.common.hapi.validation.IRemoteTerminologyServiceValidationSupportTest.IMyCodeSystemProvider;
 import org.hl7.fhir.common.hapi.validation.IRemoteTerminologyServiceValidationSupportTest.IMySimpleCodeSystemProvider;
 import org.hl7.fhir.common.hapi.validation.support.RemoteTerminologyServiceValidationSupport;
@@ -126,7 +126,7 @@ public class RemoteTerminologyServiceValidationSupportR4Test {
 	}
 
 	@Nested
-	public class SimpleLookupCodeDstu3Test implements IRemoteTerminologyServiceValidationSupportTest.ILookupCodeUnsupportedPropertyTypeTest {
+	public class LookupCodeUnsupportedPropertyTypeR4Test implements ILookupCodeUnsupportedPropertyTypeTest {
 		private MySimplePropertyCodeSystemProviderR4 myMySimplePropertyCodeSystemProvider;
 
 		@Override
@@ -141,7 +141,13 @@ public class RemoteTerminologyServiceValidationSupportR4Test {
 
 		@Override
 		public String getInvalidValueErrorCode() {
-			return "HAPI-2451";
+			return "HAPI-2452";
+		}
+
+
+		@Override
+		public String getInvalidValueErrorCodeForConvert() {
+			return "HAPI-2453";
 		}
 
 		@BeforeEach
@@ -643,8 +649,8 @@ public class RemoteTerminologyServiceValidationSupportR4Test {
 		Type myPropertyValue;
 
 		@Override
-		public String getPropertyValueType() {
-			return myPropertyValue != null ? myPropertyValue.fhirType() : "";
+		public IBaseDatatype getPropertyValue() {
+			return myPropertyValue;
 		}
 
 		@Override

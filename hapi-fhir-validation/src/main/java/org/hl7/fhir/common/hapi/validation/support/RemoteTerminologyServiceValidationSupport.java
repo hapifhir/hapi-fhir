@@ -448,7 +448,7 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 						propertyName, coding.getSystem(), coding.getCode(), coding.getDisplay());
 				break;
 			default:
-				throw new InternalErrorException(Msg.code(2451) + "Property type " + fhirType + " is not supported.");
+				throw new InternalErrorException(Msg.code(2452) + "Property type " + fhirType + " is not supported.");
 		}
 		return conceptProperty;
 	}
@@ -468,7 +468,7 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 						new CodingConceptProperty(theName, coding.getSystem(), coding.getCode(), coding.getDisplay());
 				break;
 			default:
-				throw new InternalErrorException(Msg.code(2451) + "Property type " + fhirType + " is not supported.");
+				throw new InternalErrorException(Msg.code(2453) + "Property type " + fhirType + " is not supported.");
 		}
 		return conceptProperty;
 	}

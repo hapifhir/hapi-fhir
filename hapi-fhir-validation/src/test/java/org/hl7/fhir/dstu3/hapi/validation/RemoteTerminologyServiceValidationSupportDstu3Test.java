@@ -85,6 +85,11 @@ public class RemoteTerminologyServiceValidationSupportDstu3Test {
 			return "HAPI-2450";
 		}
 
+		@Override
+		public String getInvalidValueErrorCodeForConvert() {
+			return "HAPI-2451";
+		}
+
 		@BeforeEach
 		public void before() {
 			// TODO: use another type when "code" is added to the supported types
@@ -171,8 +176,8 @@ public class RemoteTerminologyServiceValidationSupportDstu3Test {
 		Type myPropertyValue;
 
 		@Override
-		public String getPropertyValueType() {
-			return myPropertyValue != null ? myPropertyValue.fhirType() : "";
+		public IBaseDatatype getPropertyValue() {
+			return myPropertyValue;
 		}
 
 		@Override

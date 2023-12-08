@@ -58,6 +58,8 @@ public interface IRemoteTerminologyServiceValidationSupportTest {
 
 		String getInvalidValueErrorCode();
 
+		String getInvalidValueErrorCodeForConvert();
+
 		@Test
 		default void testLookupCode_forCodeSystemWithPropertyInvalidValue_throwsException() {
 			// test and verify
@@ -65,7 +67,18 @@ public interface IRemoteTerminologyServiceValidationSupportTest {
 				getService().lookupCode(null, new LookupCodeRequest(CODE_SYSTEM, CODE, LANGUAGE, null));
 				fail();
 			} catch (InternalErrorException e) {
-				assertTrue(e.getMessage().contains(getInvalidValueErrorCode() + ": Property type " + getSimpleCodeSystemProvider().getPropertyValueType() + " is not supported"));
+				assertTrue(e.getMessage().contains(getInvalidValueErrorCode() + ": Property type " + getSimpleCodeSystemProvider().getPropertyValue().fhirType() + " is not supported"));
+			}
+		}
+
+		@Test
+		default void testCreateConceptProperty_forCodeSystemWithPropertyInvalidValue_throwsException() {
+			// test and verify
+			try {
+				RemoteTerminologyServiceValidationSupport.createConceptProperty("property", getSimpleCodeSystemProvider().getPropertyValue());
+				fail();
+			} catch (InternalErrorException e) {
+				assertTrue(e.getMessage().contains(getInvalidValueErrorCodeForConvert() + ": Property type " + getSimpleCodeSystemProvider().getPropertyValue().fhirType() + " is not supported"));
 			}
 		}
 	}
@@ -254,6 +267,6 @@ public interface IRemoteTerminologyServiceValidationSupportTest {
 	}
 
 	interface IMySimpleCodeSystemProvider extends IResourceProvider {
-		String getPropertyValueType();
+		IBaseDatatype getPropertyValue();
 	}
 }
