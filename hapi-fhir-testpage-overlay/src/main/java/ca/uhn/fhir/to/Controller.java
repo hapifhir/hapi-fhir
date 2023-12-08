@@ -37,6 +37,8 @@ import ca.uhn.fhir.to.model.TransactionRequest;
 import ca.uhn.fhir.to.util.HfqlRenderingUtil;
 import ca.uhn.fhir.util.StopWatch;
 import com.google.gson.stream.JsonWriter;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.apache.commons.lang3.StringUtils;
@@ -63,8 +65,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 import static ca.uhn.fhir.rest.server.provider.ProviderConstants.DIFF_OPERATION_NAME;
 import static ca.uhn.fhir.util.UrlUtil.sanitizeUrlPart;

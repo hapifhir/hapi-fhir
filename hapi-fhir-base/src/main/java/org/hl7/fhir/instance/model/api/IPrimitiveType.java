@@ -19,7 +19,7 @@
  */
 package org.hl7.fhir.instance.model.api;
 
-import javax.annotation.Nullable;
+import jakarta.annotation.Nullable;
 
 public interface IPrimitiveType<T> extends IBaseDatatype {
 

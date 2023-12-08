@@ -9,7 +9,7 @@
 	<groupId>ca.uhn.hapi.fhir</groupId>
 	<artifactId>hapi-fhir</artifactId>
 	<packaging>pom</packaging>
-	<version>6.11.5-SNAPSHOT</version>
+	<version>6.11.6-SNAPSHOT</version>
 
 	<name>HAPI-FHIR</name>
 	<description>An open-source implementation of the FHIR specification in Java.</description>
@@ -993,6 +993,7 @@
 		<maven.compiler.testSource>17</maven.compiler.testSource>
 		<maven.compiler.testTarget>17</maven.compiler.testTarget>
 		<maven.compiler.testRelease>17</maven.compiler.testRelease>
+		<maven_checkstyle_version>3.3.1</maven_checkstyle_version>
 
 		<!-- Jacoco -->
 		<argLine></argLine>
@@ -2311,7 +2312,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-checkstyle-plugin</artifactId>
-					<version>3.3.0</version>
+					<version>${maven_checkstyle_version}</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>

@@ -28,13 +28,13 @@ import ca.uhn.fhir.mdm.blocklist.json.BlockedFieldJson;
 import ca.uhn.fhir.mdm.blocklist.svc.IBlockListRuleProvider;
 import ca.uhn.fhir.mdm.blocklist.svc.IBlockRuleEvaluationSvc;
 import ca.uhn.fhir.util.FhirTypeUtil;
+import jakarta.annotation.Nullable;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.slf4j.Logger;
 
 import java.util.List;
-import javax.annotation.Nullable;
 
 import static org.slf4j.LoggerFactory.getLogger;
 

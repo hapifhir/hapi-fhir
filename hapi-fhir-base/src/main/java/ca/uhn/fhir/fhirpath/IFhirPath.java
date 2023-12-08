@@ -19,11 +19,11 @@
  */
 package ca.uhn.fhir.fhirpath;
 
+import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IBase;
 
 import java.util.List;
 import java.util.Optional;
-import javax.annotation.Nonnull;
 
 public interface IFhirPath {
 

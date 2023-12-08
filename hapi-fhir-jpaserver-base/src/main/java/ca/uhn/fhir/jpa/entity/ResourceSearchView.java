@@ -28,6 +28,7 @@ import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.rest.api.Constants;
+import jakarta.annotation.Nullable;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -41,7 +42,6 @@ import org.hibernate.annotations.Subselect;
 
 import java.io.Serializable;
 import java.util.Date;
-import javax.annotation.Nullable;
 
 @SuppressWarnings("SqlDialectInspection")
 @Entity

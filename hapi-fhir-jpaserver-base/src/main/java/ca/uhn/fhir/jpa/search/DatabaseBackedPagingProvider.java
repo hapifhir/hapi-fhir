@@ -25,9 +25,8 @@ import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.BasePagingProvider;
+import jakarta.annotation.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
-
-import javax.annotation.Nullable;
 
 // Note: this class is not annotated with @Service because we want to
 // explicitly define it in BaseConfig.java. This is done so that

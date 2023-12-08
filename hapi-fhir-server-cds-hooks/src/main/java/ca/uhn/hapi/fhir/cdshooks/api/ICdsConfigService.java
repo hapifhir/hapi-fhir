@@ -28,10 +28,9 @@ import ca.uhn.fhir.rest.api.server.SystemRestfulResponse;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.hapi.fhir.cdshooks.svc.cr.CdsCrSettings;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import org.opencds.cqf.fhir.utility.Ids;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 public interface ICdsConfigService {
 	@Nonnull

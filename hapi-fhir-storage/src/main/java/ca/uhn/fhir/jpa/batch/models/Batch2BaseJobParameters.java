@@ -19,7 +19,7 @@
  */
 package ca.uhn.fhir.jpa.batch.models;
 
-import javax.annotation.Nonnull;
+import jakarta.annotation.Nonnull;
 
 /**
  * Base parameters for StartJob as well as other requests

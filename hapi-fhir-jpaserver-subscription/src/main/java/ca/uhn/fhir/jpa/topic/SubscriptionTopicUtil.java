@@ -20,6 +20,7 @@
 package ca.uhn.fhir.jpa.topic;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedJsonMessage;
 import ca.uhn.fhir.rest.server.messaging.BaseResourceMessage;
 import ca.uhn.fhir.util.BundleUtil;
@@ -71,5 +72,15 @@ public class SubscriptionTopicUtil {
 				.filter(Objects::nonNull)
 				.findFirst()
 				.orElse(null);
+	}
+
+	/**
+	 * Checks if {@link CanonicalSubscription} has EMPTY {@link org.hl7.fhir.r5.model.Subscription.SubscriptionPayloadContent}
+	 * Used for R5/R4B/R4 Notification Status object building.
+	 */
+	public static boolean isEmptyContentTopicSubscription(CanonicalSubscription theCanonicalSubscription) {
+		return theCanonicalSubscription.isTopicSubscription()
+				&& org.hl7.fhir.r5.model.Subscription.SubscriptionPayloadContent.EMPTY
+						== theCanonicalSubscription.getTopicSubscription().getContent();
 	}
 }
