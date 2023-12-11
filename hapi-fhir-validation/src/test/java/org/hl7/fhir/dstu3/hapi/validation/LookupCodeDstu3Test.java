@@ -13,10 +13,10 @@ import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import jakarta.servlet.http.HttpServletRequest;
-import org.hl7.fhir.common.hapi.validation.IRemoteTerminologyServiceValidationSupportTest.ILookupCodeTest;
-import org.hl7.fhir.common.hapi.validation.IRemoteTerminologyServiceValidationSupportTest.ILookupCodeUnsupportedPropertyTypeTest;
-import org.hl7.fhir.common.hapi.validation.IRemoteTerminologyServiceValidationSupportTest.IMyCodeSystemProvider;
-import org.hl7.fhir.common.hapi.validation.IRemoteTerminologyServiceValidationSupportTest.IMySimpleCodeSystemProvider;
+import org.hl7.fhir.common.hapi.validation.ILookupCodeTest.ILookupCodeSupportedPropertyTest;
+import org.hl7.fhir.common.hapi.validation.ILookupCodeTest.ILookupCodeUnsupportedPropertyTypeTest;
+import org.hl7.fhir.common.hapi.validation.ILookupCodeTest.IMyCodeSystemProvider;
+import org.hl7.fhir.common.hapi.validation.ILookupCodeTest.IMySimpleCodeSystemProvider;
 import org.hl7.fhir.common.hapi.validation.support.RemoteTerminologyServiceValidationSupport;
 import org.hl7.fhir.dstu3.model.BooleanType;
 import org.hl7.fhir.dstu3.model.CodeSystem;
@@ -44,34 +44,26 @@ import static ca.uhn.fhir.context.support.IValidationSupport.StringConceptProper
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
-public class RemoteTerminologyServiceValidationSupportDstu3Test {
+public class LookupCodeDstu3Test {
 	private static final FhirContext ourCtx = FhirContext.forDstu3Cached();
-
 	@RegisterExtension
 	public static RestfulServerExtension ourRestfulServerExtension = new RestfulServerExtension(ourCtx);
-
-	private MyCodeSystemProviderDstu3 myCodeSystemProvider;
-	private RemoteTerminologyServiceValidationSupport mySvc;
+	private final RemoteTerminologyServiceValidationSupport mySvc = new RemoteTerminologyServiceValidationSupport(ourCtx);
 
 	@BeforeEach
 	public void before() {
-		myCodeSystemProvider = new MyCodeSystemProviderDstu3();
-		ourRestfulServerExtension.getRestfulServer().registerProvider(myCodeSystemProvider);
-
 		String baseUrl = "http://localhost:" + ourRestfulServerExtension.getPort();
-		mySvc = new RemoteTerminologyServiceValidationSupport(ourCtx);
 		mySvc.setBaseUrl(baseUrl);
 		mySvc.addClientInterceptor(new LoggingInterceptor(true));
 	}
 
+	@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 	@Nested
-	public class LookupCodeUnsupportedPropertyTypeDstu3Test implements ILookupCodeUnsupportedPropertyTypeTest {
-		private MySimplePropertyCodeSystemProviderDstu3 myMySimplePropertyCodeSystemProvider;
+	class LookupCodeUnsupportedPropertyTypeDstu3Test implements ILookupCodeUnsupportedPropertyTypeTest {
+		private final MySimplePropertyCodeSystemProviderDstu3 myMySimplePropertyCodeSystemProvider = new MySimplePropertyCodeSystemProviderDstu3();
 
 		@Override
-		public IMySimpleCodeSystemProvider getSimpleCodeSystemProvider() {
+		public IMySimpleCodeSystemProvider getCodeSystemProvider() {
 			return myMySimplePropertyCodeSystemProvider;
 		}
 
@@ -93,18 +85,16 @@ public class RemoteTerminologyServiceValidationSupportDstu3Test {
 		@BeforeEach
 		public void before() {
 			// TODO: use another type when "code" is added to the supported types
-			final CodeType unsupportedValue = new CodeType("someCode");
-			final String propertyName = "somePropertyName";
-			myMySimplePropertyCodeSystemProvider = new MySimplePropertyCodeSystemProviderDstu3();
-			myMySimplePropertyCodeSystemProvider.myPropertyName = propertyName;
-			myMySimplePropertyCodeSystemProvider.myPropertyValue = unsupportedValue;
+			myMySimplePropertyCodeSystemProvider.myPropertyName = "somePropertyName";
+			myMySimplePropertyCodeSystemProvider.myPropertyValue = new CodeType("someCode");
 			ourRestfulServerExtension.getRestfulServer().registerProvider(myMySimplePropertyCodeSystemProvider);
 		}
 	}
 
 	@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 	@Nested
-	public class LookupCodeDstu3Test implements ILookupCodeTest {
+	class ILookupCodeSupportedPropertyDstu3Test implements ILookupCodeSupportedPropertyTest {
+		private final MyCodeSystemProviderDstu3 myCodeSystemProvider = new MyCodeSystemProviderDstu3();
 
 		@Override
 		public IMyCodeSystemProvider getCodeSystemProvider() {
@@ -114,6 +104,11 @@ public class RemoteTerminologyServiceValidationSupportDstu3Test {
 		@Override
 		public RemoteTerminologyServiceValidationSupport getService() {
 			return mySvc;
+		}
+
+		@BeforeEach
+		public void before() {
+			ourRestfulServerExtension.getRestfulServer().registerProvider(myCodeSystemProvider);
 		}
 
 		public void verifyProperty(BaseConceptProperty theConceptProperty, String theExpectedPropertName, IBaseDatatype theExpectedValue) {
@@ -170,8 +165,8 @@ public class RemoteTerminologyServiceValidationSupportDstu3Test {
 		}
 	}
 
-
 	static class MySimplePropertyCodeSystemProviderDstu3 implements IMySimpleCodeSystemProvider {
+
 		String myPropertyName;
 		Type myPropertyValue;
 

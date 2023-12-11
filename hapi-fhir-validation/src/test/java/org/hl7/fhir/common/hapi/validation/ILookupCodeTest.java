@@ -9,7 +9,6 @@ import org.hl7.fhir.common.hapi.validation.support.RemoteTerminologyServiceValid
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -26,39 +25,29 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
-public interface IRemoteTerminologyServiceValidationSupportTest {
+public interface ILookupCodeTest {
 	String DISPLAY = "DISPLAY";
 	String LANGUAGE = "en";
 	String CODE_SYSTEM = "CODE_SYS";
 	String CODE_SYSTEM_VERSION = "CODE_SYS_VERSION";
 	String CODE_SYSTEM_NAME = "Code System";
 	String CODE = "CODE";
-	String VALUE_SET_URL = "http://value.set/url";
-	String TARGET_SYSTEM = "http://target.system/url";
-	String CONCEPT_MAP_URL = "http://concept.map/url";
-	String CONCEPT_MAP_VERSION = "2.1";
-	String SOURCE_VALUE_SET_URL = "http://source.vs.system/url";
-	String TARGET_VALUE_SET_URL = "http://target.vs.system/url";
-	String TARGET_CODE = "CODE";
-	String TARGET_CODE_DISPLAY = "code";
-	boolean REVERSE = true;
-	String EQUIVALENCE_CODE = "equivalent";
-
-	String ERROR_MESSAGE = "This is an error message";
-	String SUCCESS_MESSAGE = "This is a success message";
 
 	interface IValidationTest {
 
 		RemoteTerminologyServiceValidationSupport getService();
+		IResourceProvider getCodeSystemProvider();
 	}
 
 	@Nested
 	interface ILookupCodeUnsupportedPropertyTypeTest extends IValidationTest {
-		IMySimpleCodeSystemProvider getSimpleCodeSystemProvider();
 
 		String getInvalidValueErrorCode();
 
 		String getInvalidValueErrorCodeForConvert();
+
+		@Override
+		IMySimpleCodeSystemProvider getCodeSystemProvider();
 
 		@Test
 		default void testLookupCode_forCodeSystemWithPropertyInvalidValue_throwsException() {
@@ -67,7 +56,7 @@ public interface IRemoteTerminologyServiceValidationSupportTest {
 				getService().lookupCode(null, new LookupCodeRequest(CODE_SYSTEM, CODE, LANGUAGE, null));
 				fail();
 			} catch (InternalErrorException e) {
-				assertTrue(e.getMessage().contains(getInvalidValueErrorCode() + ": Property type " + getSimpleCodeSystemProvider().getPropertyValue().fhirType() + " is not supported"));
+				assertTrue(e.getMessage().contains(getInvalidValueErrorCode() + ": Property type " + getCodeSystemProvider().getPropertyValue().fhirType() + " is not supported"));
 			}
 		}
 
@@ -75,17 +64,16 @@ public interface IRemoteTerminologyServiceValidationSupportTest {
 		default void testCreateConceptProperty_forCodeSystemWithPropertyInvalidValue_throwsException() {
 			// test and verify
 			try {
-				RemoteTerminologyServiceValidationSupport.createConceptProperty("property", getSimpleCodeSystemProvider().getPropertyValue());
+				RemoteTerminologyServiceValidationSupport.createConceptProperty("property", getCodeSystemProvider().getPropertyValue());
 				fail();
 			} catch (InternalErrorException e) {
-				assertTrue(e.getMessage().contains(getInvalidValueErrorCodeForConvert() + ": Property type " + getSimpleCodeSystemProvider().getPropertyValue().fhirType() + " is not supported"));
+				assertTrue(e.getMessage().contains(getInvalidValueErrorCodeForConvert() + ": Property type " + getCodeSystemProvider().getPropertyValue().fhirType() + " is not supported"));
 			}
 		}
 	}
 
-	@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 	@Nested
-	interface ILookupCodeTest extends IValidationTest {
+	interface ILookupCodeSupportedPropertyTest extends IValidationTest {
 		IMyCodeSystemProvider getCodeSystemProvider();
 
 		 Stream<Arguments> getEmptyPropertyValues();
