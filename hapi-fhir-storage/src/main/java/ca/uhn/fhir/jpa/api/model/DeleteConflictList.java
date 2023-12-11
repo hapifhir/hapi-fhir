@@ -114,7 +114,7 @@ public class DeleteConflictList implements Iterable<DeleteConflict> {
 
 			@Override
 			public void remove() {
-				Assert.isTrue(myLastOperationWasNext);
+				Assert.isTrue(myLastOperationWasNext, "myLastOperationWasNext is not true");
 				myNextIndex--;
 				myList.remove(myNextIndex);
 				myLastOperationWasNext = false;

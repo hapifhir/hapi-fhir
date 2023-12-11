@@ -140,6 +140,18 @@ public class ExpungeEverythingService implements IExpungeEverythingService {
 		RequestPartitionId requestPartitionId =
 				myRequestPartitionHelperSvc.determineReadPartitionForRequest(theRequest, details);
 
+		deleteAll(theRequest, propagation, requestPartitionId, counter);
+
+		purgeAllCaches();
+
+		ourLog.info("COMPLETED GLOBAL $expunge - Deleted {} rows", counter.get());
+	}
+
+	protected void deleteAll(
+			@Nullable RequestDetails theRequest,
+			Propagation propagation,
+			RequestPartitionId requestPartitionId,
+			AtomicInteger counter) {
 		myTxService
 				.withRequest(theRequest)
 				.withPropagation(propagation)
@@ -248,10 +260,6 @@ public class ExpungeEverythingService implements IExpungeEverythingService {
 				.execute(() -> {
 					counter.addAndGet(doExpungeEverythingQuery("DELETE from " + Search.class.getSimpleName() + " d"));
 				});
-
-		purgeAllCaches();
-
-		ourLog.info("COMPLETED GLOBAL $expunge - Deleted {} rows", counter.get());
 	}
 
 	@Override
@@ -263,7 +271,7 @@ public class ExpungeEverythingService implements IExpungeEverythingService {
 		myMemoryCacheService.invalidateAllCaches();
 	}
 
-	private <T> int expungeEverythingByTypeWithoutPurging(
+	protected <T> int expungeEverythingByTypeWithoutPurging(
 			RequestDetails theRequest, Class<T> theEntityType, RequestPartitionId theRequestPartitionId) {
 		HapiTransactionService.noTransactionAllowed();
 

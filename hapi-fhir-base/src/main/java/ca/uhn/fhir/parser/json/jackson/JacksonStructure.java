@@ -28,6 +28,7 @@ import ca.uhn.fhir.parser.json.BaseJsonLikeWriter;
 import ca.uhn.fhir.parser.json.JsonLikeStructure;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.StreamReadConstraints;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -114,14 +115,38 @@ public class JacksonStructure implements JsonLikeStructure {
 				setNativeArray((ArrayNode) OBJECT_MAPPER.readTree(pbr));
 			}
 		} catch (Exception e) {
-			if (e.getMessage().startsWith("Unexpected char 39")) {
+			String message;
+			if (e instanceof JsonProcessingException) {
+				/*
+				 * Currently there is no way of preventing Jackson from adding this
+				 * annoying REDACTED message from certain messages we get back from
+				 * the parser, so we just manually strip them. Hopefully Jackson
+				 * will accept this request at some point:
+				 * https://github.com/FasterXML/jackson-core/issues/1158
+				 */
+				JsonProcessingException jpe = (JsonProcessingException) e;
+				StringBuilder messageBuilder = new StringBuilder();
+				String originalMessage = jpe.getOriginalMessage();
+				originalMessage = originalMessage.replace(
+						"Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); ", "");
+				messageBuilder.append(originalMessage);
+				if (jpe.getLocation() != null) {
+					messageBuilder.append("\n at [");
+					jpe.getLocation().appendOffsetDescription(messageBuilder);
+					messageBuilder.append("]");
+				}
+				message = messageBuilder.toString();
+			} else {
+				message = e.getMessage();
+			}
+
+			if (message.startsWith("Unexpected char 39")) {
 				throw new DataFormatException(
-						Msg.code(1860) + "Failed to parse JSON encoded FHIR content: " + e.getMessage() + " - "
+						Msg.code(1860) + "Failed to parse JSON encoded FHIR content: " + message + " - "
 								+ "This may indicate that single quotes are being used as JSON escapes where double quotes are required",
 						e);
 			}
-			throw new DataFormatException(
-					Msg.code(1861) + "Failed to parse JSON encoded FHIR content: " + e.getMessage(), e);
+			throw new DataFormatException(Msg.code(1861) + "Failed to parse JSON encoded FHIR content: " + message, e);
 		}
 	}
 
