@@ -1431,6 +1431,12 @@
 				<version>4.0.8</version>
 			</dependency>
 			<dependency>
+				<!--
+				Note if you bump the version here - The commons-dbcp2 2.11.0 version
+				explicitly depends on commons-pool2 2.12.0, so we explicitly specify that
+				version below as well. If you bump this, make sure you're bumping the
+				pool2 version appropriately too.
+				-->
 				<groupId>org.apache.commons</groupId>
 				<artifactId>commons-dbcp2</artifactId>
 				<version>2.11.0</version>
@@ -1439,6 +1445,12 @@
 				<groupId>org.apache.commons</groupId>
 				<artifactId>commons-lang3</artifactId>
 				<version>${commons_lang3_version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.commons</groupId>
+				<artifactId>commons-pool2</artifactId>
+				<!-- See the note above about commons-dbcp2 before bumping versions here -->
+				<version>2.12.0</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.commons</groupId>
