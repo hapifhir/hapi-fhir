@@ -59,23 +59,23 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class RemoteTerminologyServiceValidationSupportR4Test {
-	String DISPLAY = "DISPLAY";
-	String CODE_SYSTEM = "CODE_SYS";
-	String CODE_SYSTEM_NAME = "Code System";
-	String CODE = "CODE";
-	String VALUE_SET_URL = "http://value.set/url";
-	String TARGET_SYSTEM = "http://target.system/url";
-	String CONCEPT_MAP_URL = "http://concept.map/url";
-	String CONCEPT_MAP_VERSION = "2.1";
-	String SOURCE_VALUE_SET_URL = "http://source.vs.system/url";
-	String TARGET_VALUE_SET_URL = "http://target.vs.system/url";
-	String TARGET_CODE = "CODE";
-	String TARGET_CODE_DISPLAY = "code";
-	boolean REVERSE = true;
-	String EQUIVALENCE_CODE = "equivalent";
+	private static final String DISPLAY = "DISPLAY";
+	private static final String CODE_SYSTEM = "CODE_SYS";
+	private static final String CODE_SYSTEM_NAME = "Code System";
+	private static final String CODE = "CODE";
+	private static final String VALUE_SET_URL = "http://value.set/url";
+	private static final String TARGET_SYSTEM = "http://target.system/url";
+	private static final String CONCEPT_MAP_URL = "http://concept.map/url";
+	private static final String CONCEPT_MAP_VERSION = "2.1";
+	private static final String SOURCE_VALUE_SET_URL = "http://source.vs.system/url";
+	private static final String TARGET_VALUE_SET_URL = "http://target.vs.system/url";
+	private static final String TARGET_CODE = "CODE";
+	private static final String TARGET_CODE_DISPLAY = "code";
+	private static final boolean REVERSE = true;
+	private static final String EQUIVALENCE_CODE = "equivalent";
 
-	String ERROR_MESSAGE = "This is an error message";
-	String SUCCESS_MESSAGE = "This is a success message";
+	private static final String ERROR_MESSAGE = "This is an error message";
+	private static final String SUCCESS_MESSAGE = "This is a success message";
 
 	private static final FhirContext ourCtx = FhirContext.forR4Cached();
 
