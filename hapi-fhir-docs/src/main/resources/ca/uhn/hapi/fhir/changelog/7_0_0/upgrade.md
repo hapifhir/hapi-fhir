@@ -1,0 +1,1 @@
+This release contains a large breaking change for authors of interceptors. Internally, HAPI-FHIR has swapped from using `javax.*` to `jakarta.*` packages. Please see [the migration guide](/docs/interceptors/jakarta_upgrade.md) for more information.  Without manual intervention, the majority of interceptors will fail at runtime unless they are upgraded.
