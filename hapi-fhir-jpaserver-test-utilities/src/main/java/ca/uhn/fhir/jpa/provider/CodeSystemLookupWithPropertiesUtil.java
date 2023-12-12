@@ -31,13 +31,19 @@ public class CodeSystemLookupWithPropertiesUtil {
 	public static final String ourCodeSystemId = "CodeSystem-Example",
 			ourCodeSystemUrl = "http://example/" + ourCodeSystemId;
 	public static final String ourCode = "Code-WithProperties";
-	public static final String ourPropertyA = "Property-A", ourPropertyB = "Property-B";
+	public static final String ourPropertyA = "Property-A", ourPropertyB = "Property-B", ourPropertyC = "Property-C";
 	public static final String ourPropertyValueA = "Value-A", ourPropertyValueB = "Value-B";
+	public static final String propertyCodeSystem = "CodeSystem-C",
+			propertyCode = "Code-C",
+			propertyDisplay = "Display-C";
 
 	public static Stream<Arguments> parametersLookupWithProperties() {
 		return Stream.of(
+				arguments(Collections.emptyList(), List.of(ourPropertyA, ourPropertyB, ourPropertyC)),
 				arguments(List.of(ourPropertyB), List.of(ourPropertyB)),
-				arguments(List.of(ourPropertyA, ourPropertyB), List.of(ourPropertyA, ourPropertyB)),
+				arguments(
+						List.of(ourPropertyA, ourPropertyB, ourPropertyC),
+						List.of(ourPropertyA, ourPropertyB, ourPropertyC)),
 				arguments(List.of(ourPropertyB, ourPropertyA), List.of(ourPropertyB, ourPropertyA)),
 				arguments(List.of(ourPropertyA, ourPropertyA), List.of(ourPropertyA, ourPropertyA)),
 				arguments(List.of(ourPropertyB, "ABC"), List.of(ourPropertyB)),

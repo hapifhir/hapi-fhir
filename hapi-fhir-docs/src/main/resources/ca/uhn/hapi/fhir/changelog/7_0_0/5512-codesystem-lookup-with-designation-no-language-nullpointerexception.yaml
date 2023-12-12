@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 5511
+title: 'Previously, CodeSystem `$lookup` with Remote Terminology Service enabled would throw NullPointerException 
+when the CodeSystem included designations with no language value. Also, there was an inconsistency between 
+input and output type `string` vs. `code` for property parameters. These issues have been fixed.'

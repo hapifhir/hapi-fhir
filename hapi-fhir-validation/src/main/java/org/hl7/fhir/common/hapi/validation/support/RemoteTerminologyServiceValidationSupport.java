@@ -12,6 +12,7 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.api.SummaryEnum;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.gclient.IQuery;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.ParametersUtil;
 import jakarta.annotation.Nonnull;
@@ -19,15 +20,25 @@ import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
+import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.Base;
 import org.hl7.fhir.r4.model.CodeSystem;
+import org.hl7.fhir.r4.model.CodeType;
+import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.Parameters;
+import org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent;
+import org.hl7.fhir.r4.model.Property;
+import org.hl7.fhir.r4.model.StringType;
+import org.hl7.fhir.r4.model.Type;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -42,7 +53,7 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 	private static final Logger ourLog = LoggerFactory.getLogger(RemoteTerminologyServiceValidationSupport.class);
 
 	private String myBaseUrl;
-	private List<Object> myClientInterceptors = new ArrayList<>();
+	private final List<Object> myClientInterceptors = new ArrayList<>();
 
 	/**
 	 * Constructor
@@ -65,8 +76,8 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 
 	@Override
 	public CodeValidationResult validateCode(
-			@Nonnull ValidationSupportContext theValidationSupportContext,
-			@Nonnull ConceptValidationOptions theOptions,
+			ValidationSupportContext theValidationSupportContext,
+			ConceptValidationOptions theOptions,
 			String theCodeSystem,
 			String theCode,
 			String theDisplay,
@@ -86,7 +97,7 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 		IBaseResource valueSet = theValueSet;
 
 		// some external validators require the system when the code is passed
-		// so let's try to get it from the VS if is is not present
+		// so let's try to get it from the VS if is not present
 		String codeSystem = theCodeSystem;
 		if (isNotBlank(theCode) && isBlank(codeSystem)) {
 			codeSystem = extractCodeSystemForCode((ValueSet) theValueSet, theCode);
@@ -123,7 +134,7 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 		}
 
 		// when component has more than one include, their codeSystem(s) could be different, so we need to make sure
-		// that we are picking up the system for the include to which the code corresponds
+		// that we are picking up the system for the include filter to which the code corresponds
 		for (ValueSet.ConceptSetComponent include : theValueSet.getCompose().getInclude()) {
 			if (include.hasSystem()) {
 				for (ValueSet.ConceptReferenceComponent concept : include.getConcept()) {
@@ -222,7 +233,7 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 							return generateLookupCodeResultDSTU3(
 									code, system, (org.hl7.fhir.dstu3.model.Parameters) outcome);
 						case R4:
-							return generateLookupCodeResultR4(code, system, (org.hl7.fhir.r4.model.Parameters) outcome);
+							return generateLookupCodeResultR4(code, system, (Parameters) outcome);
 					}
 				}
 				break;
@@ -244,87 +255,133 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 		result.setFound(true);
 		for (org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent parameterComponent :
 				outcomeDSTU3.getParameter()) {
+			String parameterTypeAsString = Objects.toString(parameterComponent.getValue(), null);
 			switch (parameterComponent.getName()) {
 				case "property":
 					org.hl7.fhir.dstu3.model.Property part = parameterComponent.getChildByName("part");
 					// The assumption here is that we may only have 2 elements in this part, and if so, these 2 will be
 					// saved
-					if (part != null && part.hasValues() && part.getValues().size() >= 2) {
-						String key = ((org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent)
-										part.getValues().get(0))
-								.getValue()
-								.toString();
-						String value = ((org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent)
-										part.getValues().get(1))
-								.getValue()
-								.toString();
-						if (!StringUtils.isEmpty(key) && !StringUtils.isEmpty(value)) {
-							result.getProperties().add(new StringConceptProperty(key, value));
-						}
+					if (part == null || part.getValues().size() < 2) {
+						continue;
+					}
+					BaseConceptProperty conceptProperty = createBaseConceptPropertyDstu3(part.getValues());
+					if (conceptProperty != null) {
+						result.getProperties().add(conceptProperty);
 					}
 					break;
 				case "designation":
-					ConceptDesignation conceptDesignation = new ConceptDesignation();
-					for (org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent designationComponent :
-							parameterComponent.getPart()) {
-						switch (designationComponent.getName()) {
-							case "language":
-								conceptDesignation.setLanguage(
-										designationComponent.getValue().toString());
-								break;
-							case "use":
-								org.hl7.fhir.dstu3.model.Coding coding =
-										(org.hl7.fhir.dstu3.model.Coding) designationComponent.getValue();
-								if (coding != null) {
-									conceptDesignation.setUseSystem(coding.getSystem());
-									conceptDesignation.setUseCode(coding.getCode());
-									conceptDesignation.setUseDisplay(coding.getDisplay());
-								}
-								break;
-							case "value":
-								conceptDesignation.setValue(
-										((designationComponent.getValue() == null)
-												? null
-												: designationComponent
-														.getValue()
-														.toString()));
-								break;
-						}
-					}
+					ConceptDesignation conceptDesignation = createConceptDesignationDstu3(parameterComponent);
 					result.getDesignations().add(conceptDesignation);
 					break;
 				case "name":
-					result.setCodeSystemDisplayName(
-							((parameterComponent.getValue() == null)
-									? null
-									: parameterComponent.getValue().toString()));
+					result.setCodeSystemDisplayName(parameterTypeAsString);
 					break;
 				case "version":
-					result.setCodeSystemVersion(
-							((parameterComponent.getValue() == null)
-									? null
-									: parameterComponent.getValue().toString()));
+					result.setCodeSystemVersion(parameterTypeAsString);
 					break;
 				case "display":
-					result.setCodeDisplay(
-							((parameterComponent.getValue() == null)
-									? null
-									: parameterComponent.getValue().toString()));
+					result.setCodeDisplay(parameterTypeAsString);
 					break;
 				case "abstract":
-					result.setCodeIsAbstract(
-							((parameterComponent.getValue() == null)
-									? false
-									: Boolean.parseBoolean(
-											parameterComponent.getValue().toString())));
+					result.setCodeIsAbstract(Boolean.parseBoolean(parameterTypeAsString));
 					break;
 			}
 		}
 		return result;
 	}
 
-	private LookupCodeResult generateLookupCodeResultR4(
-			String theCode, String theSystem, org.hl7.fhir.r4.model.Parameters outcomeR4) {
+	private static BaseConceptProperty createBaseConceptPropertyDstu3(List<org.hl7.fhir.dstu3.model.Base> theValues) {
+		org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent part1 =
+				(org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent) theValues.get(0);
+		String propertyName = ((org.hl7.fhir.dstu3.model.CodeType) part1.getValue()).getValue();
+
+		BaseConceptProperty conceptProperty = null;
+		org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent part2 =
+				(org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent) theValues.get(1);
+
+		org.hl7.fhir.dstu3.model.Type value = part2.getValue();
+		if (value == null) {
+			return conceptProperty;
+		}
+		String fhirType = value.fhirType();
+		switch (fhirType) {
+			case TYPE_STRING:
+				org.hl7.fhir.dstu3.model.StringType stringType = (org.hl7.fhir.dstu3.model.StringType) part2.getValue();
+				conceptProperty = new StringConceptProperty(propertyName, stringType.getValue());
+				break;
+			case TYPE_CODING:
+				org.hl7.fhir.dstu3.model.Coding coding = (org.hl7.fhir.dstu3.model.Coding) part2.getValue();
+				conceptProperty = new CodingConceptProperty(
+						propertyName, coding.getSystem(), coding.getCode(), coding.getDisplay());
+				break;
+			default:
+				throw new InternalErrorException(Msg.code(2450) + "Property type " + fhirType + " is not supported.");
+		}
+		return conceptProperty;
+	}
+
+	public static BaseConceptProperty createConceptProperty(final String theName, final IBaseDatatype theValue) {
+		if (theValue instanceof Type) {
+			return createConceptPropertyR4(theName, (Type) theValue);
+		}
+		if (theValue instanceof org.hl7.fhir.dstu3.model.Type) {
+			return createConceptPropertyDstu3(theName, (org.hl7.fhir.dstu3.model.Type) theValue);
+		}
+		return null;
+	}
+
+	private static BaseConceptProperty createConceptPropertyDstu3(
+			final String theName, final org.hl7.fhir.dstu3.model.Type theValue) {
+		if (theValue == null) {
+			return null;
+		}
+		BaseConceptProperty conceptProperty;
+		String fhirType = theValue.fhirType();
+		switch (fhirType) {
+			case IValidationSupport.TYPE_STRING:
+				org.hl7.fhir.dstu3.model.StringType stringType = (org.hl7.fhir.dstu3.model.StringType) theValue;
+				conceptProperty = new StringConceptProperty(theName, stringType.getValue());
+				break;
+			case IValidationSupport.TYPE_CODING:
+				org.hl7.fhir.dstu3.model.Coding coding = (org.hl7.fhir.dstu3.model.Coding) theValue;
+				conceptProperty =
+						new CodingConceptProperty(theName, coding.getSystem(), coding.getCode(), coding.getDisplay());
+				break;
+			default:
+				throw new InternalErrorException(Msg.code(2451) + "Property type " + fhirType + " is not supported.");
+		}
+		return conceptProperty;
+	}
+
+	private ConceptDesignation createConceptDesignationDstu3(
+			org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent theParameterComponent) {
+		ConceptDesignation conceptDesignation = new ConceptDesignation();
+		for (org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent designationComponent :
+				theParameterComponent.getPart()) {
+			org.hl7.fhir.dstu3.model.Type designationComponentValue = designationComponent.getValue();
+			if (designationComponentValue == null) {
+				continue;
+			}
+			switch (designationComponent.getName()) {
+				case "language":
+					conceptDesignation.setLanguage(designationComponentValue.toString());
+					break;
+				case "use":
+					org.hl7.fhir.dstu3.model.Coding coding =
+							(org.hl7.fhir.dstu3.model.Coding) designationComponentValue;
+					conceptDesignation.setUseSystem(coding.getSystem());
+					conceptDesignation.setUseCode(coding.getCode());
+					conceptDesignation.setUseDisplay(coding.getDisplay());
+					break;
+				case "value":
+					conceptDesignation.setValue(designationComponent.getValue().toString());
+					break;
+			}
+		}
+		return conceptDesignation;
+	}
+
+	private LookupCodeResult generateLookupCodeResultR4(String theCode, String theSystem, Parameters outcomeR4) {
 		// NOTE: I wanted to put all of this logic into the IValidationSupport Class, but it would've required adding
 		//       several new dependencies on version-specific libraries and that is explicitly forbidden (see comment in
 		// POM).
@@ -332,85 +389,113 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 		result.setSearchedForCode(theCode);
 		result.setSearchedForSystem(theSystem);
 		result.setFound(true);
-		for (org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent parameterComponent :
-				outcomeR4.getParameter()) {
+		for (ParametersParameterComponent parameterComponent : outcomeR4.getParameter()) {
+			String parameterTypeAsString = Objects.toString(parameterComponent.getValue(), null);
 			switch (parameterComponent.getName()) {
 				case "property":
-					org.hl7.fhir.r4.model.Property part = parameterComponent.getChildByName("part");
+					Property part = parameterComponent.getChildByName("part");
 					// The assumption here is that we may only have 2 elements in this part, and if so, these 2 will be
 					// saved
-					if (part != null && part.hasValues() && part.getValues().size() >= 2) {
-						String key = ((org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent)
-										part.getValues().get(0))
-								.getValue()
-								.toString();
-						String value = ((org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent)
-										part.getValues().get(1))
-								.getValue()
-								.toString();
-						if (!StringUtils.isEmpty(key) && !StringUtils.isEmpty(value)) {
-							result.getProperties().add(new StringConceptProperty(key, value));
-						}
+					if (part == null || part.getValues().size() < 2) {
+						continue;
+					}
+					BaseConceptProperty conceptProperty = createBaseConceptPropertyR4(part.getValues());
+					if (conceptProperty != null) {
+						result.getProperties().add(conceptProperty);
 					}
 					break;
 				case "designation":
-					ConceptDesignation conceptDesignation = new ConceptDesignation();
-					for (org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent designationComponent :
-							parameterComponent.getPart()) {
-						switch (designationComponent.getName()) {
-							case "language":
-								conceptDesignation.setLanguage(
-										designationComponent.getValue().toString());
-								break;
-							case "use":
-								org.hl7.fhir.r4.model.Coding coding =
-										(org.hl7.fhir.r4.model.Coding) designationComponent.getValue();
-								if (coding != null) {
-									conceptDesignation.setUseSystem(coding.getSystem());
-									conceptDesignation.setUseCode(coding.getCode());
-									conceptDesignation.setUseDisplay(coding.getDisplay());
-								}
-								break;
-							case "value":
-								conceptDesignation.setValue(
-										((designationComponent.getValue() == null)
-												? null
-												: designationComponent
-														.getValue()
-														.toString()));
-								break;
-						}
-					}
+					ConceptDesignation conceptDesignation = createConceptDesignationR4(parameterComponent);
 					result.getDesignations().add(conceptDesignation);
 					break;
 				case "name":
-					result.setCodeSystemDisplayName(
-							((parameterComponent.getValue() == null)
-									? null
-									: parameterComponent.getValue().toString()));
+					result.setCodeSystemDisplayName(parameterTypeAsString);
 					break;
 				case "version":
-					result.setCodeSystemVersion(
-							((parameterComponent.getValue() == null)
-									? null
-									: parameterComponent.getValue().toString()));
+					result.setCodeSystemVersion(parameterTypeAsString);
 					break;
 				case "display":
-					result.setCodeDisplay(
-							((parameterComponent.getValue() == null)
-									? null
-									: parameterComponent.getValue().toString()));
+					result.setCodeDisplay(parameterTypeAsString);
 					break;
 				case "abstract":
-					result.setCodeIsAbstract(
-							((parameterComponent.getValue() == null)
-									? false
-									: Boolean.parseBoolean(
-											parameterComponent.getValue().toString())));
+					result.setCodeIsAbstract(Boolean.parseBoolean(parameterTypeAsString));
 					break;
 			}
 		}
 		return result;
+	}
+
+	private static BaseConceptProperty createBaseConceptPropertyR4(List<Base> values) {
+		ParametersParameterComponent part1 = (ParametersParameterComponent) values.get(0);
+		String propertyName = ((CodeType) part1.getValue()).getValue();
+
+		ParametersParameterComponent part2 = (ParametersParameterComponent) values.get(1);
+
+		Type value = part2.getValue();
+		if (value == null) {
+			return null;
+		}
+		BaseConceptProperty conceptProperty;
+		String fhirType = value.fhirType();
+		switch (fhirType) {
+			case IValidationSupport.TYPE_STRING:
+				StringType stringType = (StringType) part2.getValue();
+				conceptProperty = new StringConceptProperty(propertyName, stringType.getValue());
+				break;
+			case IValidationSupport.TYPE_CODING:
+				Coding coding = (Coding) part2.getValue();
+				conceptProperty = new CodingConceptProperty(
+						propertyName, coding.getSystem(), coding.getCode(), coding.getDisplay());
+				break;
+			default:
+				throw new InternalErrorException(Msg.code(2452) + "Property type " + fhirType + " is not supported.");
+		}
+		return conceptProperty;
+	}
+
+	private static BaseConceptProperty createConceptPropertyR4(final String theName, final Type theValue) {
+		BaseConceptProperty conceptProperty;
+
+		String fhirType = theValue.fhirType();
+		switch (fhirType) {
+			case IValidationSupport.TYPE_STRING:
+				StringType stringType = (StringType) theValue;
+				conceptProperty = new StringConceptProperty(theName, stringType.getValue());
+				break;
+			case IValidationSupport.TYPE_CODING:
+				Coding coding = (Coding) theValue;
+				conceptProperty =
+						new CodingConceptProperty(theName, coding.getSystem(), coding.getCode(), coding.getDisplay());
+				break;
+			default:
+				throw new InternalErrorException(Msg.code(2453) + "Property type " + fhirType + " is not supported.");
+		}
+		return conceptProperty;
+	}
+
+	private ConceptDesignation createConceptDesignationR4(ParametersParameterComponent theParameterComponent) {
+		ConceptDesignation conceptDesignation = new ConceptDesignation();
+		for (ParametersParameterComponent designationComponent : theParameterComponent.getPart()) {
+			Type designationComponentValue = designationComponent.getValue();
+			if (designationComponentValue == null) {
+				continue;
+			}
+			switch (designationComponent.getName()) {
+				case "language":
+					conceptDesignation.setLanguage(designationComponentValue.toString());
+					break;
+				case "use":
+					Coding coding = (Coding) designationComponentValue;
+					conceptDesignation.setUseSystem(coding.getSystem());
+					conceptDesignation.setUseCode(coding.getCode());
+					conceptDesignation.setUseDisplay(coding.getDisplay());
+					break;
+				case "value":
+					conceptDesignation.setValue(designationComponentValue.toString());
+					break;
+			}
+		}
+		return conceptDesignation;
 	}
 
 	@Override
@@ -514,7 +599,7 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 				.execute();
 
 		List<String> resultValues = ParametersUtil.getNamedParameterValuesAsString(getFhirContext(), output, "result");
-		if (resultValues.size() < 1 || isBlank(resultValues.get(0))) {
+		if (resultValues.isEmpty() || isBlank(resultValues.get(0))) {
 			return null;
 		}
 		Validate.isTrue(resultValues.size() == 1, "Response contained %d 'result' values", resultValues.size());
@@ -527,7 +612,7 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 			retVal.setCode(theCode);
 			List<String> displayValues =
 					ParametersUtil.getNamedParameterValuesAsString(getFhirContext(), output, "display");
-			if (displayValues.size() > 0) {
+			if (!displayValues.isEmpty()) {
 				retVal.setDisplay(displayValues.get(0));
 			}
 
@@ -536,7 +621,7 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 			retVal.setSeverity(IssueSeverity.ERROR);
 			List<String> messageValues =
 					ParametersUtil.getNamedParameterValuesAsString(getFhirContext(), output, "message");
-			if (messageValues.size() > 0) {
+			if (!messageValues.isEmpty()) {
 				retVal.setMessage(messageValues.get(0));
 			}
 		}
@@ -575,7 +660,7 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 	/**
 	 * Sets the FHIR Terminology Server base URL
 	 *
-	 * @param theBaseUrl The base URL, e.g. "https://hapi.fhir.org/baseR4"
+	 * @param theBaseUrl The base URL, e.g. "<a href="https://hapi.fhir.org/baseR4">...</a>"
 	 */
 	public void setBaseUrl(String theBaseUrl) {
 		Validate.notBlank(theBaseUrl, "theBaseUrl must be provided");
