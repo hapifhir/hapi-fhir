@@ -73,7 +73,8 @@ public final class HapiErrorCodeCheck extends AbstractCheck {
 				} else {
 					String location = getFilePath() + ":" + instantiation.getLineNo() + ":"
 							+ instantiation.getColumnNo() + "(" + code + ")";
-					//Ignore errors thrown in test for duplicates, as some fake implementations are throwing the same codes for test purpsoes.
+					// Ignore errors thrown in test for duplicates, as some fake implementations are throwing the same
+					// codes for test purpsoes.
 					if (!location.contains("/test/")) {
 						ourCache.put(code, location);
 					}
