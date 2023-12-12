@@ -20,11 +20,10 @@
 package ca.uhn.fhir.util;
 
 import ca.uhn.fhir.jpa.search.reindex.BlockPolicy;
+import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.Validate;
 import org.springframework.core.task.TaskDecorator;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
-
-import javax.annotation.Nonnull;
 
 public final class ThreadPoolUtil {
 	private ThreadPoolUtil() {}

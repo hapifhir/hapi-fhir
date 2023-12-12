@@ -1,6 +1,6 @@
 /*-
  * #%L
- * HAPI FHIR JPA Server
+ * HAPI FHIR Server - SQL Migration
  * %%
  * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
@@ -17,13 +17,12 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.jpa.provider.r4;
-
-import org.hl7.fhir.instance.model.api.IBaseResource;
-
-import java.util.function.Consumer;
+package ca.uhn.fhir.jpa.migrate.taskdef;
 
 /**
- * Pre-save hook for Consent saved during $member-match.
+ * Determine whether to display column names in upper case, lower case, or eventually some form of mixed case.
  */
-public interface IMemberMatchConsentHook extends Consumer<IBaseResource> {}
+public enum ColumnNameCase {
+	ALL_UPPER,
+	ALL_LOWER
+}

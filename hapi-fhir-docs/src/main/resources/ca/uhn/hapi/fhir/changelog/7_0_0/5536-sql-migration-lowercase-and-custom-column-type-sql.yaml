@@ -1,0 +1,4 @@
+---
+type: add
+issue: 5536
+title: "In code: Support lowercase for SQL columns and overridden column type/driver type SQL type string rules"

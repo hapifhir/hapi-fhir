@@ -863,17 +863,19 @@ public class FhirTerserDstu2Test {
 	/**
 	 * See http://stackoverflow.com/questions/182636/how-to-determine-the-class-of-a-generic-type
 	 */
+	@SuppressWarnings({"UnnecessaryLocalVariable", "unchecked"})
 	private static <T> Class<List<T>> getListClass(Class<T> theClass) {
-		return new ClassGetter<List<T>>() {
-		}.get();
+		Class listClass = List.class;
+		return listClass;
 	}
 
 	/**
 	 * See http://stackoverflow.com/questions/182636/how-to-determine-the-class-of-a-generic-type
 	 */
+	@SuppressWarnings({"UnnecessaryLocalVariable", "unchecked"})
 	private static Class<List<BaseRuntimeElementDefinition<?>>> getListClass2() {
-		return new ClassGetter<List<BaseRuntimeElementDefinition<?>>>() {
-		}.get();
+		Class listClass = List.class;
+		return listClass;
 	}
 
 	/**

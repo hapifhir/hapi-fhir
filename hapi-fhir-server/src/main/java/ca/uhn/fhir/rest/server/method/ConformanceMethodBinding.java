@@ -39,6 +39,7 @@ import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.system.HapiSystemProperties;
+import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IBaseConformance;
 
 import java.lang.reflect.Method;
@@ -49,7 +50,6 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
-import javax.annotation.Nonnull;
 
 public class ConformanceMethodBinding extends BaseResourceReturningMethodBinding {
 	public static final String CACHE_THREAD_PREFIX = "capabilitystatement-cache-";

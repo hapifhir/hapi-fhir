@@ -78,6 +78,7 @@ import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
 import ca.uhn.fhir.util.StopWatch;
+import jakarta.annotation.Nullable;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.PersistenceContextType;
@@ -97,7 +98,6 @@ import org.springframework.transaction.annotation.Propagation;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
-import javax.annotation.Nullable;
 
 @Service
 public class ExpungeEverythingService implements IExpungeEverythingService {
@@ -140,6 +140,18 @@ public class ExpungeEverythingService implements IExpungeEverythingService {
 		RequestPartitionId requestPartitionId =
 				myRequestPartitionHelperSvc.determineReadPartitionForRequest(theRequest, details);
 
+		deleteAll(theRequest, propagation, requestPartitionId, counter);
+
+		purgeAllCaches();
+
+		ourLog.info("COMPLETED GLOBAL $expunge - Deleted {} rows", counter.get());
+	}
+
+	protected void deleteAll(
+			@Nullable RequestDetails theRequest,
+			Propagation propagation,
+			RequestPartitionId requestPartitionId,
+			AtomicInteger counter) {
 		myTxService
 				.withRequest(theRequest)
 				.withPropagation(propagation)
@@ -248,10 +260,6 @@ public class ExpungeEverythingService implements IExpungeEverythingService {
 				.execute(() -> {
 					counter.addAndGet(doExpungeEverythingQuery("DELETE from " + Search.class.getSimpleName() + " d"));
 				});
-
-		purgeAllCaches();
-
-		ourLog.info("COMPLETED GLOBAL $expunge - Deleted {} rows", counter.get());
 	}
 
 	@Override
@@ -263,7 +271,7 @@ public class ExpungeEverythingService implements IExpungeEverythingService {
 		myMemoryCacheService.invalidateAllCaches();
 	}
 
-	private <T> int expungeEverythingByTypeWithoutPurging(
+	protected <T> int expungeEverythingByTypeWithoutPurging(
 			RequestDetails theRequest, Class<T> theEntityType, RequestPartitionId theRequestPartitionId) {
 		HapiTransactionService.noTransactionAllowed();
 

@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-deployable-pom</artifactId>
-		<version>6.11.5-SNAPSHOT</version>
+		<version>6.11.7-SNAPSHOT</version>
 
 		<relativePath>../hapi-deployable-pom/pom.xml</relativePath>
 	</parent>
@@ -578,8 +578,8 @@
 						</dialect>
 						<dialect>
 							<className>ca.uhn.fhir.jpa.model.dialect.HapiFhirPostgresDialect</className>
-							<prependFile>classpath:ca/uhn/fhir/jpa/docs/database/hapifhirpostgres94-init01.sql</prependFile>
 							<targetFileName>postgres.sql</targetFileName>
+							<appendFile>classpath:ca/uhn/fhir/jpa/docs/database/hapifhirpostgres94-init01.sql</appendFile>
 						</dialect>
 					</dialects>
 					<outputDirectory>${project.build.directory}/classes/ca/uhn/hapi/fhir/jpa/docs/database</outputDirectory>

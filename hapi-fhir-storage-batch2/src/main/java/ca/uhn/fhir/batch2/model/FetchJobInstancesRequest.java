@@ -19,9 +19,10 @@
  */
 package ca.uhn.fhir.batch2.model;
 
+import jakarta.annotation.Nonnull;
+
 import java.util.HashSet;
 import java.util.Set;
-import javax.annotation.Nonnull;
 
 public class FetchJobInstancesRequest {
 

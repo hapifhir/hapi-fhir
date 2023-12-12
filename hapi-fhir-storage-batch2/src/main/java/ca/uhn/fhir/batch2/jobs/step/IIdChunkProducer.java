@@ -22,9 +22,9 @@ package ca.uhn.fhir.batch2.jobs.step;
 import ca.uhn.fhir.batch2.jobs.chunk.ChunkRangeJson;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.pid.IResourcePidStream;
+import jakarta.annotation.Nullable;
 
 import java.util.Date;
-import javax.annotation.Nullable;
 
 /**
  * A service that produces pages of resource pids based on the data provided by a previous batch step.  Typically the

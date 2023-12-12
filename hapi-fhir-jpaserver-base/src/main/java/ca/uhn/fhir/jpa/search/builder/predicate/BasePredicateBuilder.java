@@ -28,10 +28,10 @@ import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 import com.healthmarketscience.sqlbuilder.BinaryCondition;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbColumn;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbTable;
+import jakarta.annotation.Nonnull;
 
 import java.util.Collection;
 import java.util.List;
-import javax.annotation.Nonnull;
 
 public abstract class BasePredicateBuilder {
 

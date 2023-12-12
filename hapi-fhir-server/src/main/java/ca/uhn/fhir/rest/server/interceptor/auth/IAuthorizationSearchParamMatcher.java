@@ -19,10 +19,9 @@
  */
 package ca.uhn.fhir.rest.server.interceptor.auth;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 /**
  * Adapt the InMemoryMatcher to support authorization filters in {@link FhirQueryRuleTester}.

@@ -9,7 +9,7 @@
 	<groupId>ca.uhn.hapi.fhir</groupId>
 	<artifactId>hapi-fhir</artifactId>
 	<packaging>pom</packaging>
-	<version>6.11.5-SNAPSHOT</version>
+	<version>6.11.7-SNAPSHOT</version>
 
 	<name>HAPI-FHIR</name>
 	<description>An open-source implementation of the FHIR specification in Java.</description>
@@ -898,7 +898,7 @@
 
 	<properties>
 		<fhir_core_version>6.1.2.2</fhir_core_version>
-		<spotless_version>2.37.0</spotless_version>
+		<spotless_version>2.41.1</spotless_version>
 		<surefire_jvm_args>-Dfile.encoding=UTF-8 -Xmx2048m</surefire_jvm_args>
 
 
@@ -914,7 +914,7 @@
 		<activation_api_version>1.2.0</activation_api_version>
 		<apache_karaf_version>4.2.5</apache_karaf_version>
 		<aries_spifly_version>1.2</aries_spifly_version>
-		<caffeine_version>3.1.1</caffeine_version>
+		<caffeine_version>3.1.8</caffeine_version>
 		<checkstyle_version>10.6.0</checkstyle_version>
 		<maven_changes_version>2.12.1</maven_changes_version>
 		<commons_codec_version>1.15</commons_codec_version>
@@ -924,7 +924,7 @@
 		<commons_lang3_version>3.12.0</commons_lang3_version>
 		<com_jamesmurty_utils_version>1.2</com_jamesmurty_utils_version>
 		<derby_version>10.14.2.0</derby_version>
-		<error_prone_core_version>2.10.0</error_prone_core_version>
+		<error_prone_core_version>2.23.0</error_prone_core_version>
 		<mockito_version>4.8.1</mockito_version>
 		<nullaway_version>0.7.9</nullaway_version>
 		<guava_version>32.1.1-jre</guava_version>
@@ -937,20 +937,20 @@
 		<jersey_version>3.0.3</jersey_version>
 		<jetty_version>12.0.3</jetty_version>
 		<jsr305_version>3.0.2</jsr305_version>
-		<junit_version>5.9.1</junit_version>
+		<junit_version>5.10.1</junit_version>
 		<flexmark_version>0.64.8</flexmark_version>
 		<flyway_version>9.4.0</flyway_version>
 		<hibernate_version>6.4.0.Final</hibernate_version>
 		<hibernate_search_version>6.2.2.Final</hibernate_search_version>
-		<logback_version>1.4.7</logback_version>
+		<logback_version>1.4.14</logback_version>
 	 	<!-- Update lucene version when you update hibernate-search version -->
 		<lucene_version>8.11.2</lucene_version>
 		<hamcrest_version>2.2</hamcrest_version>
 		<hibernate_validator_version>8.0.0.Final</hibernate_validator_version>
 		<httpcore_version>4.4.13</httpcore_version>
 		<httpclient_version>4.5.13</httpclient_version>
-		<jackson_version>2.15.3</jackson_version>
-		<jackson_databind_version>2.15.3</jackson_databind_version>
+		<jackson_version>2.16.0</jackson_version>
+		<jackson_databind_version>2.16.0</jackson_databind_version>
 		<maven_assembly_plugin_version>3.3.0</maven_assembly_plugin_version>
 		<maven_license_plugin_version>1.8</maven_license_plugin_version>
 		<okhttp_version>4.10.0</okhttp_version>
@@ -959,27 +959,27 @@
 		<resteasy_version>6.2.5.Final</resteasy_version>
 		<ph_schematron_version>7.1.2</ph_schematron_version>
 		<ph_commons_version>9.5.4</ph_commons_version>
-		<plexus_compiler_api_version>2.9.0</plexus_compiler_api_version>
+		<plexus_compiler_api_version>2.13.0</plexus_compiler_api_version>
 		<reflections_version>0.9.11</reflections_version>
 		<servicemix_saxon_version>9.8.0-15</servicemix_saxon_version>
 		<servicemix_xmlresolver_version>1.2_5</servicemix_xmlresolver_version>
-		<swagger_version>2.1.12</swagger_version>
-		<slf4j_version>2.0.3</slf4j_version>
+		<swagger_version>2.2.19</swagger_version>
+		<slf4j_version>2.0.9</slf4j_version>
 		<log4j_to_slf4j_version>2.19.0</log4j_to_slf4j_version>
-		<spring_version>6.0.12</spring_version>
-		<spring_data_bom_version>2023.0.4</spring_data_bom_version>
+		<spring_version>6.1.1</spring_version>
+		<spring_data_bom_version>2023.1.0</spring_data_bom_version>
 		<spring_batch_version>4.3.3</spring_batch_version>
-		<spring_boot_version>3.1.4</spring_boot_version>
-		<spring_retry_version>1.2.2.RELEASE</spring_retry_version>
+		<spring_boot_version>3.2.0</spring_boot_version>
+		<spring_retry_version>2.0.4</spring_retry_version>
 
 		<stax2_api_version>3.1.4</stax2_api_version>
-		<testcontainers_version>1.19.0</testcontainers_version>
+		<testcontainers_version>1.19.3</testcontainers_version>
 		<thymeleaf-version>3.1.2.RELEASE</thymeleaf-version>
 		<woodstox_core_asl_version>4.4.1</woodstox_core_asl_version>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 		<ebay_cors_filter_version>1.0.1</ebay_cors_filter_version>
-		<elastic_apm_version>1.28.4</elastic_apm_version>
-		<elasticsearch_version>8.9.2</elasticsearch_version>
+		<elastic_apm_version>1.44.0</elastic_apm_version>
+		<elasticsearch_version>8.11.1</elasticsearch_version>
 		<ucum_version>1.0.8</ucum_version>
 
 		<!-- CQL Support -->
@@ -993,6 +993,7 @@
 		<maven.compiler.testSource>17</maven.compiler.testSource>
 		<maven.compiler.testTarget>17</maven.compiler.testTarget>
 		<maven.compiler.testRelease>17</maven.compiler.testRelease>
+		<maven_checkstyle_version>3.3.1</maven_checkstyle_version>
 
 		<!-- Jacoco -->
 		<argLine></argLine>
@@ -1365,7 +1366,7 @@
 			<dependency>
 				<groupId>com.microsoft.sqlserver</groupId>
 				<artifactId>mssql-jdbc</artifactId>
-				<version>12.2.0.jre11</version>
+				<version>12.4.2.jre11</version>
 			</dependency>
 			<dependency>
 				<!--
@@ -1402,18 +1403,6 @@
 				<version>2.2.0</version>
 			</dependency>
 			<dependency>
-				<groupId>net.sourceforge.htmlunit</groupId>
-				<artifactId>htmlunit</artifactId>
-				<version>2.70.0</version>
-				<exclusions>
-					<exclusion>
-						<!-- Don't let HTMLUnit bring in Jetty 9 -->
-						<groupId>org.eclipse.jetty.websocket</groupId>
-						<artifactId>websocket-client</artifactId>
-					</exclusion>
-				</exclusions>
-			</dependency>
-			<dependency>
 				<groupId>net.sf.json-lib</groupId>
 				<artifactId>json-lib</artifactId>
 				<version>2.4</version>
@@ -1434,7 +1423,7 @@
 			<dependency>
 				<groupId>net.ttddyy</groupId>
 				<artifactId>datasource-proxy</artifactId>
-				<version>1.7</version>
+				<version>1.9</version>
 			</dependency>
 			<dependency>
 				<groupId>org.antlr</groupId>
@@ -1442,14 +1431,26 @@
 				<version>4.0.8</version>
 			</dependency>
 			<dependency>
+				<!--
+				Note if you bump the version here - The commons-dbcp2 2.11.0 version
+				explicitly depends on commons-pool2 2.12.0, so we explicitly specify that
+				version below as well. If you bump this, make sure you're bumping the
+				pool2 version appropriately too.
+				-->
 				<groupId>org.apache.commons</groupId>
 				<artifactId>commons-dbcp2</artifactId>
-				<version>2.9.0</version>
+				<version>2.11.0</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.commons</groupId>
 				<artifactId>commons-lang3</artifactId>
 				<version>${commons_lang3_version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.commons</groupId>
+				<artifactId>commons-pool2</artifactId>
+				<!-- See the note above about commons-dbcp2 before bumping versions here -->
+				<version>2.12.0</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.commons</groupId>
@@ -1736,7 +1737,7 @@
 			<dependency>
 				<groupId>org.fusesource.jansi</groupId>
 				<artifactId>jansi</artifactId>
-				<version>2.4.0</version>
+				<version>2.4.1</version>
 			</dependency>
 			<dependency>
 				<groupId>org.glassfish</groupId>
@@ -1804,6 +1805,26 @@
 				<groupId>org.hamcrest</groupId>
 				<artifactId>hamcrest</artifactId>
 				<version>${hamcrest_version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.htmlunit</groupId>
+				<artifactId>htmlunit</artifactId>
+				<version>3.9.0</version>
+				<exclusions>
+					<exclusion>
+						<groupId>xml-apis</groupId>
+						<artifactId>xml-apis</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>xerces</groupId>
+						<artifactId>xercesImpl</artifactId>
+					</exclusion>
+					<exclusion>
+						<!-- Don't let HTMLUnit bring in Jetty 9 -->
+						<groupId>org.eclipse.jetty.websocket</groupId>
+						<artifactId>websocket-client</artifactId>
+					</exclusion>
+				</exclusions>
 			</dependency>
 			<dependency>
 				<groupId>org.exparity</groupId>
@@ -1958,12 +1979,12 @@
 			<dependency>
 				<groupId>org.postgresql</groupId>
 				<artifactId>postgresql</artifactId>
-				<version>42.5.1</version>
+				<version>42.7.1</version>
 			</dependency>
 			<dependency>
 				<groupId>com.oracle.database.jdbc</groupId>
 				<artifactId>ojdbc11</artifactId>
-				<version>21.5.0.0</version>
+				<version>23.3.0.23.09</version>
 			</dependency>
 			<dependency>
 				<groupId>org.quartz-scheduler</groupId>
@@ -2311,7 +2332,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-checkstyle-plugin</artifactId>
-					<version>3.3.0</version>
+					<version>${maven_checkstyle_version}</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -2328,6 +2349,27 @@
 						<fork>true</fork>
 						<meminitial>500m</meminitial>
 						<maxmem>2000m</maxmem>
+						<compilerArgs>
+							<arg>-XDcompilePolicy=simple</arg>
+							<arg>-Xplugin:ErrorProne -Xep:MissingSummary:OFF</arg>
+							<arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED</arg>
+							<arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.file=ALL-UNNAMED</arg>
+							<arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.main=ALL-UNNAMED</arg>
+							<arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.model=ALL-UNNAMED</arg>
+							<arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.parser=ALL-UNNAMED</arg>
+							<arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.processing=ALL-UNNAMED</arg>
+							<arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.tree=ALL-UNNAMED</arg>
+							<arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED</arg>
+							<arg>-J--add-opens=jdk.compiler/com.sun.tools.javac.code=ALL-UNNAMED</arg>
+							<arg>-J--add-opens=jdk.compiler/com.sun.tools.javac.comp=ALL-UNNAMED</arg>
+						</compilerArgs>
+						<annotationProcessorPaths>
+							<path>
+								<groupId>com.google.errorprone</groupId>
+								<artifactId>error_prone_core</artifactId>
+								<version>${error_prone_core_version}</version>
+							</path>
+						</annotationProcessorPaths>
 					</configuration>
 				</plugin>
 				<plugin>
@@ -2348,7 +2390,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-javadoc-plugin</artifactId>
-					<version>3.2.0</version>
+					<version>3.6.3</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -3048,41 +3090,6 @@
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-surefire-plugin</artifactId>
-					</plugin>
-				</plugins>
-			</build>
-		</profile>
-		<profile>
-			<id>ERRORPRONE</id>
-			<build>
-				<plugins>
-					<plugin>
-						<groupId>org.apache.maven.plugins</groupId>
-						<artifactId>maven-compiler-plugin</artifactId>
-						<configuration>
-							<fork>true</fork>
-							<compilerArgs>
-								<arg>-XDcompilePolicy=simple</arg>
-								<arg>-Xplugin:ErrorProne</arg>
-								<arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED</arg>
-								<arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.file=ALL-UNNAMED</arg>
-								<arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.main=ALL-UNNAMED</arg>
-								<arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.model=ALL-UNNAMED</arg>
-								<arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.parser=ALL-UNNAMED</arg>
-								<arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.processing=ALL-UNNAMED</arg>
-								<arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.tree=ALL-UNNAMED</arg>
-								<arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED</arg>
-								<arg>-J--add-opens=jdk.compiler/com.sun.tools.javac.code=ALL-UNNAMED</arg>
-								<arg>-J--add-opens=jdk.compiler/com.sun.tools.javac.comp=ALL-UNNAMED</arg>
-							</compilerArgs>
-							<annotationProcessorPaths>
-								<path>
-									<groupId>com.google.errorprone</groupId>
-									<artifactId>error_prone_core</artifactId>
-									<version>${error_prone_core_version}</version>
-								</path>
-							</annotationProcessorPaths>
-						</configuration>
 					</plugin>
 				</plugins>
 			</build>

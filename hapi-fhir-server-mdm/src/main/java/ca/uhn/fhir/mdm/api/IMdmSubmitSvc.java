@@ -20,9 +20,8 @@
 package ca.uhn.fhir.mdm.api;
 
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import jakarta.annotation.Nullable;
 import org.hl7.fhir.instance.model.api.IIdType;
-
-import javax.annotation.Nullable;
 
 public interface IMdmSubmitSvc {
 
