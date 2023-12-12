@@ -65,7 +65,7 @@ class BaseHapiFhirResourceDaoTest {
 	private IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
 
 	@Mock
-	private IIdHelperService myIdHelperService;
+	private IIdHelperService<JpaPid> myIdHelperService;
 
 	@Mock
 	private EntityManager myEntityManager;
@@ -86,10 +86,10 @@ class BaseHapiFhirResourceDaoTest {
 	private ISearchParamRegistry mySearchParamRegistry;
 
 	@Mock
-	private SearchBuilderFactory mySearchBuilderFactory;
+	private SearchBuilderFactory<JpaPid> mySearchBuilderFactory;
 
 	@Mock
-	private ISearchBuilder myISearchBuilder;
+	private ISearchBuilder<JpaPid> myISearchBuilder;
 
 	@Captor
 	private ArgumentCaptor<SearchParameterMap> mySearchParameterMapCaptor;
