@@ -202,7 +202,10 @@ public interface IConsentService {
 	 *                           consent directives.
 	 * @return An outcome object. See method documentation for a description.
 	 */
-	default ConsentOutcome shouldIncludeResourceInExport(BulkExportJobParameters theBulkExportJobParameters, IBaseResource theResource, IConsentContextServices theContextServices) {
+	default ConsentOutcome shouldIncludeResourceInExport(
+			BulkExportJobParameters theBulkExportJobParameters,
+			IBaseResource theResource,
+			IConsentContextServices theContextServices) {
 		return ConsentOutcome.PROCEED;
 	}
 

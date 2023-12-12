@@ -501,7 +501,8 @@ public class ConsentInterceptor {
 	@Hook(value = Pointcut.STORAGE_BULK_EXPORT_RESOURCE_INCLUSION)
 	public boolean shouldBulkExportIncludeResource(BulkExportJobParameters theParameters, IBaseResource theResource) {
 		for (IConsentService next : myConsentService) {
-			ConsentOutcome nextOutcome = next.shouldIncludeResourceInExport(theParameters, theResource, myContextConsentServices);
+			ConsentOutcome nextOutcome =
+					next.shouldIncludeResourceInExport(theParameters, theResource, myContextConsentServices);
 
 			ConsentOperationStatusEnum status = nextOutcome.getStatus();
 			switch (status) {
