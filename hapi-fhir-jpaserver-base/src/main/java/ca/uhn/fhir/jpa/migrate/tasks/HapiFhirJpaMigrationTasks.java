@@ -143,7 +143,6 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		batch2JobInstanceTable.addColumn("20231128.2", "CLIENT_ID").nullable().type(ColumnTypeEnum.STRING, 200);
 
 		{
-			// LUKETODO: why am I getting more than one result?
 			final String queryForColumnCollationTemplate = "WITH defcoll AS (\n"
 					+ "	SELECT datcollate AS coll\n"
 					+ "	FROM pg_database\n"

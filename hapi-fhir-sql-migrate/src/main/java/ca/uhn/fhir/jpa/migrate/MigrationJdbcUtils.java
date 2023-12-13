@@ -42,15 +42,13 @@ public class MigrationJdbcUtils {
 			String theSql, JdbcTemplate theJdbcTemplate, RowMapper<T> theRowMapper) {
 		final List<T> results = queryForMultiple(theSql, theJdbcTemplate, theRowMapper);
 
-		ourLog.info("5258: result: {}", results);
-
 		if (results.isEmpty()) {
 			return Optional.empty();
 		}
 
 		if (results.size() == 1) {
 			ourLog.warn(
-					"5258: Query returned more than one result: {} for SQL: {}.  Returning the first result",
+					"Query returned more than one result: {} for SQL: {}.  Returning the first result",
 					results,
 					theSql);
 		}

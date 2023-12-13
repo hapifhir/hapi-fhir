@@ -23,7 +23,12 @@ import java.util.Objects;
 import java.util.StringJoiner;
 import java.util.function.Supplier;
 
-// LUKETODO: javadoc
+/**
+ * Contains a pre-built precondition to evaluate once {@link BaseTask#execute()} is called.
+ * <p/>
+ * Includes both a {@link Supplier} containing the logic to determine if the precondition evaluates to true or false and
+ * a reason String to output to the logs if the precondition evaluates to false and halts execution of the task.
+ */
 public class ExecuteTaskPrecondition {
 	private final Supplier<Boolean> myPreconditionRunner;
 	private final String myPreconditionReason;

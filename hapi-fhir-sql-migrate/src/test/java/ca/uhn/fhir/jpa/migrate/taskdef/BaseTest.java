@@ -27,8 +27,32 @@ import java.util.stream.Stream;
 public abstract class BaseTest {
 
 	private static final String DATABASE_NAME = "DATABASE";
+	static final String H2 = "H2";
+	static final String DERBY = "Derby";
 	private static final Logger ourLog = LoggerFactory.getLogger(BaseTest.class);
 	private static int ourDatabaseUrl = 0;
+	private static final Supplier<TestDatabaseDetails> TEST_DATABASE_DETAILS_DERBY_SUPPLIER = new Supplier<>() {
+		@Override
+		public TestDatabaseDetails get() {
+			ourLog.info("Derby: {}", DriverTypeEnum.DERBY_EMBEDDED.getDriverClassName());
+
+			String url = "jdbc:derby:memory:" + DATABASE_NAME + ourDatabaseUrl++ + ";create=true";
+			DriverTypeEnum.ConnectionProperties connectionProperties = DriverTypeEnum.DERBY_EMBEDDED.newConnectionProperties(url, "SA", "SA");
+			BasicDataSource dataSource = new BasicDataSource();
+			dataSource.setUrl(url);
+			dataSource.setUsername("SA");
+			dataSource.setPassword("SA");
+			dataSource.setDriverClassName(DriverTypeEnum.DERBY_EMBEDDED.getDriverClassName());
+			HapiMigrator migrator = new HapiMigrator(SchemaMigrator.HAPI_FHIR_MIGRATION_TABLENAME, dataSource, DriverTypeEnum.DERBY_EMBEDDED);
+			return new TestDatabaseDetails(url, connectionProperties, dataSource, migrator);
+		}
+
+		@Override
+		public String toString() {
+			return DERBY;
+		}
+	};
+
 	private static final Supplier<TestDatabaseDetails> TEST_DATABASE_DETAILS_H2_SUPPLIER = new Supplier<>() {
 		@Override
 		public TestDatabaseDetails get() {
@@ -46,7 +70,7 @@ public abstract class BaseTest {
 
 		@Override
 		public String toString() {
-			return "H2";
+			return H2;
 		}
 	};
 
@@ -57,10 +81,13 @@ public abstract class BaseTest {
 	protected HapiMigrationDao myHapiMigrationDao;
 	protected HapiMigrationStorageSvc myHapiMigrationStorageSvc;
 
-	public static Stream<Arguments> dataH2Only() {
+	public static Stream<Arguments> dataWithEvaluationResult() {
 		return Stream.of(
 			Arguments.of(TEST_DATABASE_DETAILS_H2_SUPPLIER, true),
-			Arguments.of(TEST_DATABASE_DETAILS_H2_SUPPLIER, false));
+			Arguments.of(TEST_DATABASE_DETAILS_H2_SUPPLIER, false),
+			Arguments.of(TEST_DATABASE_DETAILS_DERBY_SUPPLIER, true),
+			Arguments.of(TEST_DATABASE_DETAILS_DERBY_SUPPLIER, false)
+		);
 	}
 
 	public static Stream<Supplier<TestDatabaseDetails>> data() {
@@ -71,27 +98,7 @@ public abstract class BaseTest {
 		retVal.add(TEST_DATABASE_DETAILS_H2_SUPPLIER);
 
 		// Derby
-		retVal.add(new Supplier<TestDatabaseDetails>() {
-			@Override
-			public TestDatabaseDetails get() {
-				ourLog.info("Derby: {}", DriverTypeEnum.DERBY_EMBEDDED.getDriverClassName());
-
-				String url = "jdbc:derby:memory:" + DATABASE_NAME + ourDatabaseUrl++ + ";create=true";
-				DriverTypeEnum.ConnectionProperties connectionProperties = DriverTypeEnum.DERBY_EMBEDDED.newConnectionProperties(url, "SA", "SA");
-				BasicDataSource dataSource = new BasicDataSource();
-				dataSource.setUrl(url);
-				dataSource.setUsername("SA");
-				dataSource.setPassword("SA");
-				dataSource.setDriverClassName(DriverTypeEnum.DERBY_EMBEDDED.getDriverClassName());
-				HapiMigrator migrator = new HapiMigrator(SchemaMigrator.HAPI_FHIR_MIGRATION_TABLENAME, dataSource, DriverTypeEnum.DERBY_EMBEDDED);
-				return new TestDatabaseDetails(url, connectionProperties, dataSource, migrator);
-			}
-
-			@Override
-			public String toString() {
-				return "Derby";
-			}
-		});
+		retVal.add(TEST_DATABASE_DETAILS_DERBY_SUPPLIER);
 
 		return retVal.stream();
 	}

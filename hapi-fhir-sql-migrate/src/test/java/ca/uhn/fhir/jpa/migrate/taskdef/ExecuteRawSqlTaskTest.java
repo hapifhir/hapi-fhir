@@ -16,6 +16,7 @@ import java.util.function.Supplier;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class ExecuteRawSqlTaskTest extends BaseTest {
 	private static final Logger ourLog = LoggerFactory.getLogger(ExecuteRawSqlTaskTest.class);
@@ -141,7 +142,7 @@ public class ExecuteRawSqlTaskTest extends BaseTest {
 	}
 
 	@ParameterizedTest()
-	@MethodSource("dataH2Only")
+	@MethodSource("dataWithEvaluationResult")
 	public void testExecuteRawSqlTaskWithPrecondition(Supplier<TestDatabaseDetails> theTestDatabaseDetails, boolean theIsExecutionExpected) {
 		before(theTestDatabaseDetails);
 		executeSql("create table SOMETABLE (PID bigint not null, TEXTCOL varchar(255))");
@@ -151,8 +152,9 @@ public class ExecuteRawSqlTaskTest extends BaseTest {
 		assertTrue(outputPreMigrate.isEmpty());
 
 		final String someFakeUpdateSql = "INSERT INTO SOMETABLE (PID, TEXTCOL) VALUES (123, 'abc')";
-		// LUKETODO:  Derby and fake table
-		final String someFakeSelectSql = String.format("SELECT %s", theIsExecutionExpected);
+		final String someFakeSelectSql =
+			String.format("SELECT %s %s", theIsExecutionExpected,
+				(BaseTest.DERBY.equals(theTestDatabaseDetails.toString())) ? "FROM SYSIBM.SYSDUMMY1" : "");
 		final String someReason = "I don''t feel like it!";
 
 		final BaseMigrationTasks<VersionEnum> tasks = new BaseMigrationTasks<>();
@@ -171,6 +173,32 @@ public class ExecuteRawSqlTaskTest extends BaseTest {
 			assertEquals("abc", outputPostMigrate.get(0).get("TEXTCOL"));
 		} else {
 			assertTrue(outputPreMigrate.isEmpty());
+		}
+	}
+
+	@ParameterizedTest()
+	@MethodSource("data")
+	public void testExecuteRawSqlTaskWithPreconditionInvalidPreconditionSql(Supplier<TestDatabaseDetails> theTestDatabaseDetails) {
+		before(theTestDatabaseDetails);
+		executeSql("create table SOMETABLE (PID bigint not null, TEXTCOL varchar(255))");
+
+		final List<Map<String, Object>> outputPreMigrate = executeQuery("SELECT PID,TEXTCOL FROM SOMETABLE");
+
+		assertTrue(outputPreMigrate.isEmpty());
+
+		final String someFakeUpdateSql = "INSERT INTO SOMETABLE (PID, TEXTCOL) VALUES (123, 'abc')";
+		final String someFakeSelectSql = "UPDATE SOMETABLE SET PID = 1";
+		final String someReason = "I don''t feel like it!";
+
+		try {
+			final BaseMigrationTasks<VersionEnum> tasks = new BaseMigrationTasks<>();
+			tasks.forVersion(VersionEnum.V4_0_0)
+				 .executeRawSql("2024.02", someFakeUpdateSql)
+				 .onlyIf(someFakeSelectSql, someReason);
+
+			fail();
+		} catch (IllegalArgumentException exception) {
+			assertEquals("HAPI-2455: Only SELECT statements (including CTEs) are allowed here.  Please check your SQL: [UPDATE SOMETABLE SET PID = 1]", exception.getMessage());
 		}
 	}
 }

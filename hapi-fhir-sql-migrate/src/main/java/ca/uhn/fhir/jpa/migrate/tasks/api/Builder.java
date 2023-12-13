@@ -592,15 +592,12 @@ public class Builder {
 		 * @return The BuilderCompleteTask in order to chain further method calls on this builder.
 		 */
 		public BuilderCompleteTask onlyIf(@Language("SQL") String theSql, String reason) {
-			if (theSql.toUpperCase().startsWith("WITH") && theSql.toUpperCase().startsWith("SELECT")) {
-				// LUKETODO: new Msg.code()
-				throw new IllegalArgumentException(Msg.code(9999)
-						+ "Only SELECT statements (including CTEs) are allowed here.  Please check your SQL: "
-						+ theSql);
+			if (! theSql.toUpperCase().startsWith("WITH") && ! theSql.toUpperCase().startsWith("SELECT")) {
+				throw new IllegalArgumentException(Msg.code(2455)
+						+ String.format("Only SELECT statements (including CTEs) are allowed here.  Please check your SQL: [%s]", theSql));
 			}
 
-			// LUKETODO:  changelog
-			ourLog.info("5258: Evaluating onlyIf for SQL: {}", theSql);
+			ourLog.info("Evaluating onlyIf for SQL: {}", theSql);
 
 			myTask.addPrecondition(new ExecuteTaskPrecondition(
 					() -> MigrationJdbcUtils.queryForSingleBooleanResult(theSql, myTask.newJdbcTemplate()), reason));
@@ -626,18 +623,12 @@ public class Builder {
 				return false;
 			}
 
-			if (results.size() == 1) {
+			if (results.size() > 1) {
 				ourLog.warn(
 						"5258: Query returned more than one result for SQL: {}.  Returning the first result", theSql);
 			}
 
 			return results.get(0);
-			//					final ResultSetExtractor<Boolean> rowCallbackHandler = theResultSet ->
-			// theResultSet.getBoolean(1);
-			//
-			//					return myTask.newJdbcTemplate()
-			//						.query(theSql, rowCallbackHandler);
-
 		}
 	}
 

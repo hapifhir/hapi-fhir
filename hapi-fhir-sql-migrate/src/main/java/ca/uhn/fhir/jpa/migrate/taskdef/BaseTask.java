@@ -267,7 +267,6 @@ public abstract class BaseTask {
 		for (ExecuteTaskPrecondition precondition : myPreconditions) {
 			ourLog.info("5258:  precondition: {}", precondition);
 			if (!precondition.getPreconditionRunner().get()) {
-				// LUKETODO:  add a reason to the precondition
 				ourLog.info(
 						"Skipping task since one of the preconditions was not met: {}",
 						precondition.getPreconditionReason());
