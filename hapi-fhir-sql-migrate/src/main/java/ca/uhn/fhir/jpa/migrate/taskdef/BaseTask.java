@@ -41,6 +41,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Supplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -250,6 +251,12 @@ public abstract class BaseTask {
 		return getConnectionProperties().newJdbcTemplate();
 	}
 
+	// LUKETODO:  unit test?
+	// LUKETODO: some other object than Supplier<Boolean> with a String reason
+	private final List<Supplier<Boolean>> myPreconditions = new ArrayList<>();
+
+	// LUKETODO:  add a set of preconditions, such as callbacks
+	// add enough context to call JDBC
 	public void execute() throws SQLException {
 		if (myDoNothing) {
 			ourLog.info("Skipping stubbed task: {}", getDescription());
@@ -257,10 +264,20 @@ public abstract class BaseTask {
 		}
 		if (!myOnlyAppliesToPlatforms.isEmpty()) {
 			if (!myOnlyAppliesToPlatforms.contains(getDriverType())) {
-				ourLog.debug("Skipping task {} as it does not apply to {}", getDescription(), getDriverType());
+				ourLog.info("Skipping task {} as it does not apply to {}", getDescription(), getDriverType());
 				return;
 			}
 		}
+
+		for (Supplier<Boolean> precondition : myPreconditions) {
+			ourLog.info("5258:  precondition: {}", precondition);
+			if (!precondition.get()) {
+				// LUKETODO:  add a reason to the precondition
+				ourLog.info("Skipping task since one of the preconditions was not met");
+				return;
+			}
+		}
+
 		doExecute();
 	}
 
@@ -303,6 +320,10 @@ public abstract class BaseTask {
 	public BaseTask setDoNothing(boolean theDoNothing) {
 		myDoNothing = theDoNothing;
 		return this;
+	}
+
+	public void addPrecondition(Supplier<Boolean> thePrecondition) {
+		myPreconditions.add(thePrecondition);
 	}
 
 	@Override

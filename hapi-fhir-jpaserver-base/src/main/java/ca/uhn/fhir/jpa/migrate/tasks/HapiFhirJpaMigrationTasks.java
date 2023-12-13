@@ -97,6 +97,8 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		init700();
 	}
 
+	// LUKETODO: ConditionalTaskWrapper: compose the underlying task
+
 	protected void init700() {
 		/* ************************************************
 		 * Start of 6.10 migrations
@@ -118,6 +120,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 
 		// Move forced_id constraints to hfj_resource and the new fhir_id column
 		// Note: we leave the HFJ_FORCED_ID.IDX_FORCEDID_TYPE_FID index in place to support old writers for a while.
+		// LUKETODO:
 		version.addTask(new ForceIdMigrationCopyTask(version.getRelease(), "20231018.1"));
 
 		Builder.BuilderWithTableName hfjResource = version.onTable("HFJ_RESOURCE");
@@ -141,7 +144,142 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		batch2JobInstanceTable.addColumn("20231128.1", "USER_NAME").nullable().type(ColumnTypeEnum.STRING, 200);
 
 		batch2JobInstanceTable.addColumn("20231128.2", "CLIENT_ID").nullable().type(ColumnTypeEnum.STRING, 200);
+
+		{
+			final String queryForColumnCollationTemplate = "WITH defcoll AS (\n" + "	SELECT datcollate AS coll\n"
+					+ "	FROM pg_database\n"
+					+ "	WHERE datname = current_database())\n"
+					+ ", collation_by_column AS (\n"
+					+ "	SELECT a.attname,\n"
+					+ "		CASE WHEN c.collname = 'default'\n"
+					+ "			THEN defcoll.coll\n"
+					+ "			ELSE c.collname\n"
+					+ "		END AS my_collation\n"
+					+ "	FROM pg_attribute AS a\n"
+					+ "		CROSS JOIN defcoll\n"
+					+ "		LEFT JOIN pg_collation AS c ON a.attcollation = c.oid\n"
+					+ "	WHERE a.attrelid = '%s'::regclass\n"
+					+ "		AND a.attnum > 0\n"
+					+ "		AND attname = '%s'\n"
+					+ ")\n"
+					+ "SELECT TRUE as result\n"
+					+ "FROM collation_by_column\n"
+					+ "WHERE EXISTS (SELECT 1\n"
+					+ "	FROM collation_by_column\n"
+					+ "	WHERE my_collation != '%s')";
+
+			version.executeRawSql(
+							"20231212.1",
+					"CREATE INDEX idx_sp_string_hash_nrm_pattern_ops ON public.hfj_spidx_string USING btree (hash_norm_prefix, sp_value_normalized varchar_pattern_ops, res_id, partition_id)")
+					.onlyAppliesToPlatforms(DriverTypeEnum.POSTGRES_9_4)
+					.onlyIf(String.format(
+							queryForColumnCollationTemplate, "HFJ_SPIDX_STRING".toLowerCase(), "SP_VALUE_NORMALIZED".toLowerCase(), "C"));
+
+			version.executeRawSql(
+							"20231212.2",
+					  "CREATE UNIQUE INDEX idx_sp_uri_hash_identity_pattern_ops ON public.hfj_spidx_uri USING btree (hash_identity, sp_uri varchar_pattern_ops, res_id, partition_id)")
+					.onlyAppliesToPlatforms(DriverTypeEnum.POSTGRES_9_4)
+					.onlyIf(String.format(queryForColumnCollationTemplate, "HFJ_SPIDX_URI".toLowerCase(), "SP_URI".toLowerCase(), "C"));
+		}
+
+		//		{
+		//			if (1 != 1) {
+		//				version.onTable("HFJ_SPIDX_STRING")
+		//					.addIndex("20231211.1", "HFJ_SPIDX_STRING_PTRN_OPS")
+		//					.unique(false)
+		//					.withColumns("SP_VALUE_NORMALIZED")
+		//					.onlyAppliesToPlatforms(DriverTypeEnum.POSTGRES_9_4);
+		//
+		//				final Builder.BuilderWithTableName hfjSpidxString = version.onTable("HFJ_SPIDX_STRING");
+		//
+		//				// LUKETODO: conditional logic to decide whether or not the column is the correct collation
+		//
+		/*
+		* 1. For Postgres and possibly MSSQL and Oracle
+		* 2. Detect if the column is utf8
+		* 3. If so, add a new index
+		*
+		* CREATE INDEX idx_sp_string_hash_nrm_v3 ON public.hfj_spidx_string USING btree (hash_norm_prefix, sp_value_normalized varchar_pattern_ops, res_id, partition_id);
+		* CREATE UNIQUE INDEX idx_sp_uri_hash_identity_v3 ON public.hfj_spidx_uri USING btree (hash_identity, sp_uri varchar_pattern_ops, res_id, partition_id);
+		*
+		* Detect column:
+		* WITH defcoll AS (
+			SELECT datcollate AS coll
+			FROM pg_database
+			WHERE datname = current_database()
+		)
+		SELECT a.attname,
+				CASE WHEN c.collname = 'default'
+							THEN defcoll.coll
+						ELSE c.collname
+					END AS collation
+		FROM pg_attribute AS a
+					CROSS JOIN defcoll
+					LEFT JOIN pg_collation AS c ON a.attcollation = c.oid
+		WHERE a.attrelid = 'hfj_spidx_string'::regclass
+		AND a.attnum > 0
+		ORDER BY attnum;
+		*/
+
+		//				final Map<DriverTypeEnum, String> fixCollationSpidxString = new HashMap<>();
+		//				fixCollationSpidxString.put(
+		//					DriverTypeEnum.POSTGRES_9_4,
+		//					"ALTER TABLE HFJ_SPIDX_STRING ALTER COLUMN SP_VALUE_NORMALIZED SET DATA TYPE character varying(255)
+		// COLLATE \"C\"");
+		//
+		//				version.executeRawSql("20231211.1", fixCollationSpidxString);
+		//
+		//				final Map<DriverTypeEnum, String> rebuildIndexSpidxString = new HashMap<>();
+		//				rebuildIndexSpidxString.put(
+		//					DriverTypeEnum.POSTGRES_9_4,
+		//					"REINDEX INDEX IDX_SP_STRING_HASH_NRM_V2");
+		//
+		//				final String x = "CREATE INDEX CONCURRENTLY HFJ_SPIDX_STRING_PTRN_OPS ON HFJ_SPIDX_STRING
+		// (SP_VALUE_NORMALIZED varchar_pattern_ops)";
+		//				final String y = "CREATE INDEX CONCURRENTLY HFJ_SPIDX_URI_PTRN_OPS ON HFJ_SPIDX_URI (SP_URI
+		// varchar_pattern_ops)";
+		//
+		//				version.executeRawSql("20231211.2", rebuildIndexSpidxString);
+		//
+		//				final 	Builder.BuilderWithTableName hfjSpidxUri = version.onTable("HFJ_SPIDX_URI");
+		//
+		//				final Map<DriverTypeEnum, String> fixCollationSpidxUri = new HashMap<>();
+		//				fixCollationSpidxUri.put(
+		//					DriverTypeEnum.POSTGRES_9_4,
+		//					"ALTER TABLE HFJ_SPIDX_URI ALTER COLUMN SP_URI SET DATA TYPE character varying(255) COLLATE \"C\"");
+		//
+		//				version.executeRawSql("20231211.3", fixCollationSpidxUri);
+		//
+		//				final Map<DriverTypeEnum, String> rebuildIndexSpidxUri = new HashMap<>();
+		//				rebuildIndexSpidxUri.put(
+		//					DriverTypeEnum.POSTGRES_9_4,
+		//					"REINDEX INDEX IDX_SP_URI_HASH_IDENTITY_V2");
+		//
+		//				version.executeRawSql("20231211.4", rebuildIndexSpidxUri);
+
+		// LUKETODO:  consider logic like this:
+
+		// add res_id, and partition_id so queries are covered without row-reads.
+		//			tokenTable
+		//				.addIndex("20220428.1", "IDX_SP_STRING_HASH_NRM_V2")
+		//				.unique(false)
+		//				.online(true)
+		//				.withColumns("HASH_NORM_PREFIX", "SP_VALUE_NORMALIZED", "RES_ID", "PARTITION_ID");
+		//			tokenTable.dropIndexOnline("20220428.2", "IDX_SP_STRING_HASH_NRM");
+
+		//			}
+		//		}
 	}
+
+	//	private void doExecute() throws SQLException {
+	//		// LUKETODO: respect dryRun settings
+	//		// LUKETODO: take into consideration DBRMS (ex Postgres)
+	//		// LUKETO
+	//		BaseTask child  = null;
+	//		if (1 ==1 ) {
+	//			child.execute();
+	//		}
+	//	}
 
 	protected void init680() {
 		Builder version = forVersion(VersionEnum.V6_8_0);

@@ -44,16 +44,24 @@ import ca.uhn.fhir.jpa.migrate.taskdef.RenameColumnTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.RenameIndexTask;
 import org.apache.commons.lang3.Validate;
 import org.intellij.lang.annotations.Language;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.jdbc.core.ResultSetExtractor;
+import org.springframework.jdbc.core.RowMapper;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 public class Builder {
+	private static final Logger ourLog = LoggerFactory.getLogger(Builder.class);
 
 	private final String myRelease;
 	private final BaseMigrationTasks.IAcceptsTasks mySink;
@@ -568,6 +576,97 @@ public class Builder {
 		public BuilderCompleteTask onlyAppliesToPlatforms(DriverTypeEnum... theTypes) {
 			Set<DriverTypeEnum> typesSet = Arrays.stream(theTypes).collect(Collectors.toSet());
 			myTask.setOnlyAppliesToPlatforms(typesSet);
+			return this;
+		}
+
+		// LUKETODO: doOnlyIf() >>> pass it custom conditioonal column has collation
+		// could pass in the whole task
+		// at a minimum, the connection properties
+		// >> pass in the BaseTask:  call JDBC code from public task
+		// LUKETODO:  javadoc
+		// LUKETODO:  unit test?
+		public BuilderCompleteTask onlyIf(String theSql, Object... theParams) {
+			// LUKETODO:  some sort of base class with utlity methods
+			ourLog.info("Evaluating onlyIf for SQL: {}, and params: {}", theSql, Arrays.toString(theParams));
+
+			final Supplier<Boolean> supplier = new Supplier<>() {
+				@Override
+				public Boolean get() {
+					final ResultSetExtractor<Boolean> rowCallbackHandler = theResultSet -> {
+						if (theResultSet.next()) {
+							return theResultSet.getBoolean(1);
+						}
+						return false;
+					};
+
+					//					final PreparedStatementSetter preparedStatementSetter = thePreparedStatement -> {
+					//						for (int index = 0; index < theParams.length; index++) {
+					//							thePreparedStatement.setObject(index + 1, theParams[index]);
+					//						}
+					//					};
+
+					//					final Boolean result = myTask.newJdbcTemplate()
+					//						.query(theSql, rowCallbackHandler);
+
+					//					final List<Boolean> result = myTask.newJdbcTemplate().query(theSql, new RowMapper<Boolean>()
+					// {
+					//						@Override
+					//						public Boolean mapRow(ResultSet theResultSet, int theRowNum) throws SQLException {
+					//							return theResultSet.getBoolean("result");
+					//						}
+					//					});
+
+					final Boolean result = myTask.newJdbcTemplate().queryForObject(theSql, Boolean.class);
+
+					ourLog.info("5258: result: {}", result);
+
+					return result;
+				}
+			};
+
+			myTask.addPrecondition(supplier);
+
+			return this;
+		}
+
+		public BuilderCompleteTask onlyIf(String theSql) {
+			// LUKETODO:  some sort of base class with utlity methods
+			// LUKETODO:  changelog
+			ourLog.info("5258: Evaluating onlyIf for SQL: {}", theSql);
+
+			final Supplier<Boolean> supplier = new Supplier<>() {
+				@Override
+				public Boolean get() {
+					ourLog.info("5258: calling get()");
+					final List<Boolean> results = myTask.newJdbcTemplate().query(theSql, new RowMapper<Boolean>() {
+						@Override
+						public Boolean mapRow(ResultSet theResultSet, int theRowNumber) throws SQLException {
+							return theResultSet.getBoolean("result");
+						}
+					});
+
+					ourLog.info("5258: result: {}", results);
+
+					if (results.isEmpty()) {
+						return false;
+					}
+
+					if (results.size() == 1) {
+						ourLog.warn(
+								"5258: Query returned more than one result for SQL: {}.  Returning the first result", theSql);
+					}
+
+					return results.get(0);
+					//					final ResultSetExtractor<Boolean> rowCallbackHandler = theResultSet ->
+					// theResultSet.getBoolean(1);
+					//
+					//					return myTask.newJdbcTemplate()
+					//						.query(theSql, rowCallbackHandler);
+				}
+			};
+
+			myTask.addPrecondition(supplier);
+
 			return this;
 		}
 

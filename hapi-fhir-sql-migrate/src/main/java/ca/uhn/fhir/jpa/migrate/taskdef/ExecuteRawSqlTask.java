@@ -26,11 +26,14 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.intellij.lang.annotations.Language;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.jdbc.core.PreparedStatementSetter;
+import org.springframework.jdbc.core.ResultSetExtractor;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Supplier;
 
 import static org.apache.commons.lang3.StringUtils.trim;
 
@@ -39,6 +42,8 @@ public class ExecuteRawSqlTask extends BaseTask {
 	private static final Logger ourLog = LoggerFactory.getLogger(ExecuteRawSqlTask.class);
 	private Map<DriverTypeEnum, List<String>> myDriverToSqls = new HashMap<>();
 	private List<String> myDriverNeutralSqls = new ArrayList<>();
+	// LUKETODO:  consider getting rid of this
+	private List<Supplier<Boolean>> myExecuteConditions = new ArrayList<>();
 
 	public ExecuteRawSqlTask(String theProductVersion, String theSchemaVersion) {
 		super(theProductVersion, theSchemaVersion);
@@ -68,6 +73,38 @@ public class ExecuteRawSqlTask extends BaseTask {
 		return this;
 	}
 
+	String queryForColumnCollationTemplate = "WITH defcoll AS (\n" + "	SELECT datcollate AS coll\n"
+			+ "	FROM pg_database\n"
+			+ "	WHERE datname = current_database()\n"
+			+ ")\n"
+			+ "SELECT a.attname,\n"
+			+ "	CASE WHEN c.collname = 'default'\n"
+			+ "		THEN defcoll.coll\n"
+			+ "		ELSE c.collname\n"
+			+ "	END AS collation\n"
+			+ "FROM pg_attribute AS a\n"
+			+ "	CROSS JOIN defcoll\n"
+			+ "	LEFT JOIN pg_collation AS c ON a.attcollation = c.oid\n"
+			+ "WHERE a.attrelid = '?'::regclass\n"
+			+ "	AND a.attnum > 0\n"
+			+ "ORDER BY attnum";
+
+	// LUKETODO:  assume Boolean here?
+	public ExecuteRawSqlTask onlyIf(String sql, Object[] theParams) {
+		myExecuteConditions.add(() -> {
+			final ResultSetExtractor<Boolean> rowCallbackHandler = theResultSet -> theResultSet.getBoolean(1);
+			final PreparedStatementSetter preparedStatementSetter = thePreparedStatement -> {
+				for (int index = 0; index < theParams.length; index++) {
+					thePreparedStatement.setObject(index + 1, theParams[index]);
+				}
+			};
+
+			return newJdbcTemplate().query(sql, preparedStatementSetter, rowCallbackHandler);
+		});
+
+		return this;
+	}
+
 	@Override
 	public void validate() {
 		// nothing
@@ -77,6 +114,19 @@ public class ExecuteRawSqlTask extends BaseTask {
 	public void doExecute() {
 		List<String> sqlStatements = myDriverToSqls.computeIfAbsent(getDriverType(), t -> new ArrayList<>());
 		sqlStatements.addAll(myDriverNeutralSqls);
+
+		ourLog.info("Evaluating Preconditions for executing SQL, if any exist");
+
+		// LUKETODO: figure out how to unit test this
+		// LUKETODO: consider adding a reason to this result
+		for (Supplier<Boolean> executeCondition : myExecuteConditions) {
+			final Boolean evalResult = executeCondition.get();
+
+			if (!evalResult) {
+				ourLog.info("Evaluation test is false.  Not executing SQL statements");
+				return;
+			}
+		}
 
 		logInfo(ourLog, "Going to execute {} SQL statements", sqlStatements.size());
 
