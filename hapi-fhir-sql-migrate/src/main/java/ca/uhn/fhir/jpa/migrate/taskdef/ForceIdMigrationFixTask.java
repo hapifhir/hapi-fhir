@@ -28,10 +28,14 @@ import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.sql.SQLException;
 
-public class ForceIdMigrationCopyTask extends BaseTask {
-	private static final Logger ourLog = LoggerFactory.getLogger(ForceIdMigrationCopyTask.class);
+/**
+ * Fix for bad version of {@link ForceIdMigrationCopyTask}
+ * The earlier migration had used at cast to char instead of varchar, which is space-padded on Oracle.
+ */
+public class ForceIdMigrationFixTask extends BaseTask {
+	private static final Logger ourLog = LoggerFactory.getLogger(ForceIdMigrationFixTask.class);
 
-	public ForceIdMigrationCopyTask(String theProductVersion, String theSchemaVersion) {
+	public ForceIdMigrationFixTask(String theProductVersion, String theSchemaVersion) {
 		super(theProductVersion, theSchemaVersion);
 	}
 
@@ -62,17 +66,9 @@ public class ForceIdMigrationCopyTask extends BaseTask {
 			long batchEnd = batchStart + batchSize;
 			ourLog.info("Migrating client-assigned ids for pids: {}-{}", batchStart, batchEnd);
 
-			// This should be fast-ish since fhir_id isn't indexed yet,
-			// and we're walking both hfj_resource and hfj_forced_id in insertion order.
 			executeSql(
 					"hfj_resource",
-					"update hfj_resource " + "set fhir_id = coalesce( "
-							+ // use first non-null value: forced_id if present, otherwise res_id
-							"   (select f.forced_id from hfj_forced_id f where f.resource_pid = res_id), "
-							+ "   cast(res_id as varchar(64)) "
-							+ "  ) "
-							+ "where fhir_id is null "
-							+ "and res_id >= ? and res_id < ?",
+					"update hfj_resource set fhir_id = trim(fhir_id) where res_id >= ? and res_id < ?",
 					batchStart,
 					batchEnd);
 		}
