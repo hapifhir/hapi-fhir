@@ -134,7 +134,6 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		hfjResource.addIndex("20231027.3", "IDX_RES_FHIR_ID").unique(false).withColumns("FHIR_ID");
 
 		version.addTask(new ForceIdMigrationFixTask(version.getRelease(), "20231213.1"));
-
 	}
 
 	protected void init680() {
