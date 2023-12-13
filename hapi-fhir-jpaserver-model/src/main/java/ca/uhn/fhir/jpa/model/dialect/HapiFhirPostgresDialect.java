@@ -35,4 +35,8 @@ public class HapiFhirPostgresDialect extends PostgreSQLDialect {
 	public boolean supportsColumnCheck() {
 		return false;
 	}
+
+
+
+
 }

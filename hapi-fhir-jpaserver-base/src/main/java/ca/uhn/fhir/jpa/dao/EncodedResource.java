@@ -24,7 +24,6 @@ import ca.uhn.fhir.jpa.model.entity.ResourceEncodingEnum;
 class EncodedResource {
 
 	private boolean myChanged;
-	private byte[] myResource;
 	private ResourceEncodingEnum myEncoding;
 	private String myResourceText;
 
@@ -34,14 +33,6 @@ class EncodedResource {
 
 	public void setEncoding(ResourceEncodingEnum theEncoding) {
 		myEncoding = theEncoding;
-	}
-
-	public byte[] getResourceBinary() {
-		return myResource;
-	}
-
-	public void setResourceBinary(byte[] theResource) {
-		myResource = theResource;
 	}
 
 	public boolean isChanged() {
@@ -57,6 +48,7 @@ class EncodedResource {
 	}
 
 	public void setResourceText(String theResourceText) {
+		assert theResourceText != null;
 		myResourceText = theResourceText;
 	}
 }

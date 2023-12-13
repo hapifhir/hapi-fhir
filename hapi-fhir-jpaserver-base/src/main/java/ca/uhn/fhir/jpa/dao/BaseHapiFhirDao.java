@@ -645,7 +645,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 			theEntity.setResourceType(toResourceName(theResource));
 		}
 
-		byte[] resourceBinary;
+		@Nonnull
 		String resourceText;
 		ResourceEncodingEnum encoding;
 		boolean changed = false;
@@ -662,7 +662,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 				if (address != null) {
 
 					encoding = ResourceEncodingEnum.ESR;
-					resourceBinary = null;
 					resourceText = address.getProviderId() + ":" + address.getLocation();
 					changed = true;
 
@@ -680,19 +679,10 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 					theEntity.setFhirVersion(myContext.getVersion().getVersion());
 
 					HashFunction sha256 = Hashing.sha256();
-					HashCode hashCode;
 					String encodedResource = encodeResource(theResource, encoding, excludeElements, myContext);
-					if (myStorageSettings.getInlineResourceTextBelowSize() > 0
-							&& encodedResource.length() < myStorageSettings.getInlineResourceTextBelowSize()) {
-						resourceText = encodedResource;
-						resourceBinary = null;
-						encoding = ResourceEncodingEnum.JSON;
-						hashCode = sha256.hashUnencodedChars(encodedResource);
-					} else {
-						resourceText = null;
-						resourceBinary = getResourceBinary(encoding, encodedResource);
-						hashCode = sha256.hashBytes(resourceBinary);
-					}
+					resourceText = encodedResource;
+					encoding = ResourceEncodingEnum.JSON;
+					HashCode hashCode = sha256.hashUnencodedChars(encodedResource);
 
 					String hashSha256 = hashCode.toString();
 					if (!hashSha256.equals(theEntity.getHashSha256())) {
@@ -710,8 +700,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 			} else {
 
 				encoding = null;
-				resourceBinary = null;
-				resourceText = null;
+				resourceText = "";
 			}
 
 			boolean skipUpdatingTags = myStorageSettings.isMassIngestionMode() && theEntity.isHasTags();
@@ -728,8 +717,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 				changed = true;
 			}
 
-			resourceBinary = null;
-			resourceText = null;
+			resourceText = "";
 			encoding = ResourceEncodingEnum.DEL;
 		}
 
@@ -753,44 +741,17 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 				if (currentHistoryVersion == null || !currentHistoryVersion.hasResource()) {
 					changed = true;
 				} else {
-					changed = !Arrays.equals(currentHistoryVersion.getResource(), resourceBinary);
+					changed = !StringUtils.equals(currentHistoryVersion.getResourceTextVc(), resourceText);
 				}
 			}
 		}
 
 		EncodedResource retVal = new EncodedResource();
 		retVal.setEncoding(encoding);
-		retVal.setResourceBinary(resourceBinary);
 		retVal.setResourceText(resourceText);
 		retVal.setChanged(changed);
 
 		return retVal;
-	}
-
-	/**
-	 * helper for returning the encoded byte array of the input resource string based on the encoding.
-	 *
-	 * @param encoding        the encoding to used
-	 * @param encodedResource the resource to encode
-	 * @return byte array of the resource
-	 */
-	@Nonnull
-	private byte[] getResourceBinary(ResourceEncodingEnum encoding, String encodedResource) {
-		byte[] resourceBinary;
-		switch (encoding) {
-			case JSON:
-				resourceBinary = encodedResource.getBytes(StandardCharsets.UTF_8);
-				break;
-			case JSONC:
-				resourceBinary = GZipUtil.compress(encodedResource);
-				break;
-			default:
-			case DEL:
-			case ESR:
-				resourceBinary = new byte[0];
-				break;
-		}
-		return resourceBinary;
 	}
 
 	/**
@@ -1437,8 +1398,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 			List<String> excludeElements = new ArrayList<>(8);
 			getExcludedElements(historyEntity.getResourceType(), excludeElements, theResource.getMeta());
 			String encodedResourceString = encodeResource(theResource, encoding, excludeElements, myContext);
-			byte[] resourceBinary = getResourceBinary(encoding, encodedResourceString);
-			boolean changed = !Arrays.equals(historyEntity.getResource(), resourceBinary);
+			boolean changed = !StringUtils.equals(historyEntity.getResourceTextVc(), encodedResourceString);
 
 			historyEntity.setUpdated(theTransactionDetails.getTransactionDate());
 
@@ -1450,19 +1410,14 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 				return historyEntity;
 			}
 
-			if (getStorageSettings().getInlineResourceTextBelowSize() > 0
-					&& encodedResourceString.length() < getStorageSettings().getInlineResourceTextBelowSize()) {
-				populateEncodedResource(encodedResource, encodedResourceString, null, ResourceEncodingEnum.JSON);
-			} else {
-				populateEncodedResource(encodedResource, null, resourceBinary, encoding);
-			}
+			populateEncodedResource(encodedResource, encodedResourceString, ResourceEncodingEnum.JSON);
 		}
+
 		/*
 		 * Save the resource itself to the resourceHistoryTable
 		 */
 		historyEntity = myEntityManager.merge(historyEntity);
 		historyEntity.setEncoding(encodedResource.getEncoding());
-		historyEntity.setResource(encodedResource.getResourceBinary());
 		historyEntity.setResourceTextVc(encodedResource.getResourceText());
 		myResourceHistoryTableDao.save(historyEntity);
 
@@ -1474,10 +1429,8 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 	private void populateEncodedResource(
 			EncodedResource encodedResource,
 			String encodedResourceString,
-			byte[] theResourceBinary,
 			ResourceEncodingEnum theEncoding) {
 		encodedResource.setResourceText(encodedResourceString);
-		encodedResource.setResourceBinary(theResourceBinary);
 		encodedResource.setEncoding(theEncoding);
 	}
 
@@ -1542,7 +1495,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		}
 
 		historyEntry.setEncoding(theChanged.getEncoding());
-		historyEntry.setResource(theChanged.getResourceBinary());
 		historyEntry.setResourceTextVc(theChanged.getResourceText());
 
 		ourLog.debug("Saving history entry ID[{}] for RES_ID[{}]", historyEntry.getId(), historyEntry.getResourceId());

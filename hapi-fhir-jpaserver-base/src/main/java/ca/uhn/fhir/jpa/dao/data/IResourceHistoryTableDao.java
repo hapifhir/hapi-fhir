@@ -79,4 +79,12 @@ public interface IResourceHistoryTableDao extends JpaRepository<ResourceHistoryT
 	@Modifying
 	@Query("DELETE FROM ResourceHistoryTable t WHERE t.myId = :pid")
 	void deleteByPid(@Param("pid") Long theId);
+
+
+	@Modifying
+	@Query(
+		"UPDATE ResourceHistoryTable r SET r.myResourceTextVc = null, r.myResource = :text, r.myEncoding = 'JSONC' WHERE r.myId = :pid")
+	void updateNonInlinedContents(
+		@Param("text") byte[] theText, @Param("pid") long thePid);
+
 }
