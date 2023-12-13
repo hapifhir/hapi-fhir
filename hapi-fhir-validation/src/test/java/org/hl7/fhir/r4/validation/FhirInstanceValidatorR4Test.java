@@ -68,7 +68,7 @@ import org.hl7.fhir.r4.model.StructureDefinition.StructureDefinitionKind;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.hl7.fhir.r4.model.ValueSet.ValueSetExpansionComponent;
 import org.hl7.fhir.r4.terminologies.ValueSetExpander;
-import org.hl7.fhir.r4.utils.FHIRPathEngine;
+import org.hl7.fhir.r4.fhirpath.FHIRPathEngine;
 import org.hl7.fhir.r5.elementmodel.JsonParser;
 import org.hl7.fhir.r5.test.utils.ClassesLoadedFlags;
 import org.hl7.fhir.r5.utils.validation.IValidationPolicyAdvisor;

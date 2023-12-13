@@ -61,7 +61,7 @@ import org.hl7.fhir.r4b.model.StructureDefinition.StructureDefinitionKind;
 import org.hl7.fhir.r4b.model.ValueSet;
 import org.hl7.fhir.r4b.model.ValueSet.ValueSetExpansionComponent;
 import org.hl7.fhir.r4b.terminologies.ValueSetExpander;
-import org.hl7.fhir.r4b.utils.FHIRPathEngine;
+import org.hl7.fhir.r4b.fhirpath.FHIRPathEngine;
 import org.hl7.fhir.r5.test.utils.ClassesLoadedFlags;
 import org.hl7.fhir.r5.utils.validation.IValidationPolicyAdvisor;
 import org.hl7.fhir.r5.utils.validation.IValidatorResourceFetcher;

@@ -19,6 +19,8 @@ import org.fhir.ucum.UcumService;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.exceptions.TerminologyServiceException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r5.context.IContextResourceLoader;
+import org.hl7.fhir.r5.context.ILoggingService;
 import org.hl7.fhir.r5.context.IWorkerContext;
 import org.hl7.fhir.r5.context.IWorkerContextManager;
 import org.hl7.fhir.r5.model.CodeSystem;
@@ -30,9 +32,12 @@ import org.hl7.fhir.r5.model.StructureDefinition;
 import org.hl7.fhir.r5.model.ValueSet;
 import org.hl7.fhir.r5.profilemodel.PEBuilder;
 import org.hl7.fhir.r5.terminologies.expansion.ValueSetExpansionOutcome;
+import org.hl7.fhir.r5.terminologies.utilities.CodingValidationRequest;
 import org.hl7.fhir.r5.terminologies.utilities.TerminologyServiceErrorClass;
+import org.hl7.fhir.r5.terminologies.utilities.ValidationResult;
 import org.hl7.fhir.r5.utils.validation.IResourceValidator;
 import org.hl7.fhir.r5.utils.validation.ValidationContextCarrier;
+import org.hl7.fhir.utilities.FhirPublication;
 import org.hl7.fhir.utilities.TimeTracker;
 import org.hl7.fhir.utilities.TranslationServices;
 import org.hl7.fhir.utilities.i18n.I18nBase;
@@ -313,7 +318,7 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 		String error = expanded.getError();
 		TerminologyServiceErrorClass result = null;
 
-		return new ValueSetExpansionOutcome(convertedResult, error, result);
+		return new ValueSetExpansionOutcome(convertedResult, error, result, expanded.getErrorIsFromServer());
 	}
 
 	@Override
@@ -374,12 +379,32 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 	}
 
 	@Override
+	public CodeSystem fetchCodeSystem(String system, FhirPublication fhirVersion) {
+		return null;
+	}
+
+	@Override
+	public CodeSystem fetchCodeSystem(String system, String version, FhirPublication fhirVersion) {
+		return null;
+	}
+
+	@Override
 	public CodeSystem fetchSupplementedCodeSystem(String system) {
 		return null;
 	}
 
 	@Override
 	public CodeSystem fetchSupplementedCodeSystem(String system, String version) {
+		return null;
+	}
+
+	@Override
+	public CodeSystem fetchSupplementedCodeSystem(String system, FhirPublication fhirVersion) {
+		return null;
+	}
+
+	@Override
+	public CodeSystem fetchSupplementedCodeSystem(String system, String version, FhirPublication fhirVersion) {
 		return null;
 	}
 
@@ -408,6 +433,11 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 	}
 
 	@Override
+	public Resource fetchResourceById(String type, String uri, FhirPublication fhirVersion) {
+		return null;
+	}
+
+	@Override
 	public <T extends Resource> T fetchResourceWithException(Class<T> class_, String uri) throws FHIRException {
 		T retVal = fetchResource(class_, uri);
 		if (retVal == null) {
@@ -423,8 +453,24 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 	}
 
 	@Override
+	public <T extends Resource> T fetchResource(Class<T> class_, String uri, FhirPublication fhirVersion) {
+		return null;
+	}
+
+	@Override
+	public <T extends Resource> T fetchResource(
+			Class<T> class_, String uri, String version, FhirPublication fhirVersion) {
+		return null;
+	}
+
+	@Override
 	public <T extends Resource> T fetchResource(Class<T> class_, String uri, Resource canonicalForSource) {
 		return fetchResource(class_, uri);
+	}
+
+	@Override
+	public <T extends Resource> List<T> fetchResourcesByType(Class<T> class_, FhirPublication fhirVersion) {
+		return null;
 	}
 
 	@Override
@@ -442,6 +488,11 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 	}
 
 	@Override
+	public List<String> getResourceNames(FhirPublication fhirVersion) {
+		return null;
+	}
+
+	@Override
 	public Set<String> getResourceNamesAsSet() {
 		return myValidationSupportContext
 				.getRootValidationSupport()
@@ -450,8 +501,18 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 	}
 
 	@Override
+	public Set<String> getResourceNamesAsSet(FhirPublication fhirVersion) {
+		return null;
+	}
+
+	@Override
 	public StructureDefinition fetchTypeDefinition(String typeName) {
 		return fetchResource(StructureDefinition.class, "http://hl7.org/fhir/StructureDefinition/" + typeName);
+	}
+
+	@Override
+	public StructureDefinition fetchTypeDefinition(String typeName, FhirPublication fhirVersion) {
+		return null;
 	}
 
 	@Override
@@ -459,6 +520,29 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 		List<StructureDefinition> allStructures = new ArrayList<>(allStructures());
 		allStructures.removeIf(sd -> !sd.hasType() || !sd.getType().equals(typeName));
 		return allStructures;
+	}
+
+	@Override
+	public List<StructureDefinition> fetchTypeDefinitions(String n, FhirPublication fhirVersion) {
+		return null;
+	}
+
+	@Override
+	public boolean isPrimitiveType(String s) {
+		List<StructureDefinition> allStructures = new ArrayList<>(allStructures());
+		return allStructures.stream()
+				.filter(structureDefinition ->
+						structureDefinition.getKind() == StructureDefinition.StructureDefinitionKind.PRIMITIVETYPE)
+				.anyMatch(structureDefinition -> s.equals(structureDefinition.getType()));
+	}
+
+	@Override
+	public boolean isDataType(String s) {
+		List<StructureDefinition> allStructures = new ArrayList<>(allStructures());
+		return allStructures.stream()
+				.filter(structureDefinition ->
+						structureDefinition.getKind() == StructureDefinition.StructureDefinitionKind.COMPLEXTYPE)
+				.anyMatch(structureDefinition -> s.equals(structureDefinition.getType()));
 	}
 
 	@Override
@@ -484,6 +568,16 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 	@Override
 	public <T extends Resource> boolean hasResource(Class<T> class_, String uri) {
 		throw new UnsupportedOperationException(Msg.code(680));
+	}
+
+	@Override
+	public <T extends Resource> boolean hasResource(Class<T> class_, String uri, Resource sourceOfReference) {
+		return false;
+	}
+
+	@Override
+	public <T extends Resource> boolean hasResource(Class<T> class_, String uri, FhirPublication fhirVersion) {
+		return false;
 	}
 
 	@Override
@@ -521,6 +615,11 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 		return myValidationSupportContext
 				.getRootValidationSupport()
 				.isCodeSystemSupported(myValidationSupportContext, system);
+	}
+
+	@Override
+	public boolean supportsSystem(String system, FhirPublication fhirVersion) throws TerminologyServiceException {
+		return false;
 	}
 
 	@Override
@@ -699,6 +798,11 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 	@Override
 	public void setForPublication(boolean b) {
 		throw new UnsupportedOperationException(Msg.code(2351));
+	}
+
+	@Override
+	public Set<String> urlsForOid(boolean codeSystem, String oid) {
+		return null;
 	}
 
 	public static ConceptValidationOptions convertConceptValidationOptions(ValidationOptions theOptions) {

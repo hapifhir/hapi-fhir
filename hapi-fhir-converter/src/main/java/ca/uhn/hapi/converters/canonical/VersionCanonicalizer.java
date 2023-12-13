@@ -250,7 +250,8 @@ public class VersionCanonicalizer {
 		String packageUserData = (String) theResource.getUserData("package");
 		if (packageUserData != null) {
 			retVal.setUserData("package", packageUserData);
-			retVal.setSourcePackage(new PackageInformation(packageUserData, new Date()));
+			retVal.setSourcePackage(new PackageInformation(
+					packageUserData, theResource.getStructureFhirVersionEnum().getFhirVersionString(), new Date()));
 		}
 		return retVal;
 	}

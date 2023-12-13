@@ -897,7 +897,7 @@
 	</licenses>
 
 	<properties>
-		<fhir_core_version>6.1.2.2</fhir_core_version>
+		<fhir_core_version>6.2.6</fhir_core_version>
 		<spotless_version>2.41.1</spotless_version>
 		<surefire_jvm_args>-Dfile.encoding=UTF-8 -Xmx2048m</surefire_jvm_args>
 
