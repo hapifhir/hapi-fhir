@@ -1812,14 +1812,6 @@
 				<version>3.9.0</version>
 				<exclusions>
 					<exclusion>
-						<groupId>xml-apis</groupId>
-						<artifactId>xml-apis</artifactId>
-					</exclusion>
-					<exclusion>
-						<groupId>xerces</groupId>
-						<artifactId>xercesImpl</artifactId>
-					</exclusion>
-					<exclusion>
 						<!-- Don't let HTMLUnit bring in Jetty 9 -->
 						<groupId>org.eclipse.jetty.websocket</groupId>
 						<artifactId>websocket-client</artifactId>
