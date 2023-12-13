@@ -44,12 +44,10 @@ import ca.uhn.fhir.jpa.migrate.taskdef.ModifyColumnTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.NopTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.RenameColumnTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.RenameIndexTask;
-import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.Validate;
 import org.intellij.lang.annotations.Language;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.jdbc.core.RowMapper;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -592,15 +590,21 @@ public class Builder {
 		 * @return The BuilderCompleteTask in order to chain further method calls on this builder.
 		 */
 		public BuilderCompleteTask onlyIf(@Language("SQL") String theSql, String reason) {
-			if (! theSql.toUpperCase().startsWith("WITH") && ! theSql.toUpperCase().startsWith("SELECT")) {
+			if (!theSql.toUpperCase().startsWith("WITH")
+					&& !theSql.toUpperCase().startsWith("SELECT")) {
 				throw new IllegalArgumentException(Msg.code(2455)
-						+ String.format("Only SELECT statements (including CTEs) are allowed here.  Please check your SQL: [%s]", theSql));
+						+ String.format(
+								"Only SELECT statements (including CTEs) are allowed here.  Please check your SQL: [%s]",
+								theSql));
 			}
-
-			ourLog.info("Evaluating onlyIf for SQL: {}", theSql);
+			ourLog.info("SQL to evaluate: {}", theSql);
 
 			myTask.addPrecondition(new ExecuteTaskPrecondition(
-					() -> MigrationJdbcUtils.queryForSingleBooleanResult(theSql, myTask.newJdbcTemplate()), reason));
+					() -> {
+						ourLog.info("Checking precondition for SQL: {}", theSql);
+						return MigrationJdbcUtils.queryForSingleBooleanResult(theSql, myTask.newJdbcTemplate());
+					},
+					reason));
 
 			return this;
 		}
@@ -608,27 +612,6 @@ public class Builder {
 		public BuilderCompleteTask runEvenDuringSchemaInitialization() {
 			myTask.setRunDuringSchemaInitialization(true);
 			return this;
-		}
-
-		private Boolean getIt(String theSql) {
-			ourLog.info("5258: calling get()");
-
-			final RowMapper<Boolean> booleanRowMapper = (theResultSet, theRowNumber) -> theResultSet.getBoolean(1);
-
-			final List<Boolean> results = myTask.newJdbcTemplate().query(theSql, booleanRowMapper);
-
-			ourLog.info("5258: result: {}", results);
-
-			if (results.isEmpty()) {
-				return false;
-			}
-
-			if (results.size() > 1) {
-				ourLog.warn(
-						"5258: Query returned more than one result for SQL: {}.  Returning the first result", theSql);
-			}
-
-			return results.get(0);
 		}
 	}
 

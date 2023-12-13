@@ -46,7 +46,7 @@ public class MigrationJdbcUtils {
 			return Optional.empty();
 		}
 
-		if (results.size() == 1) {
+		if (results.size() > 1) {
 			ourLog.warn(
 					"Query returned more than one result: {} for SQL: {}.  Returning the first result",
 					results,

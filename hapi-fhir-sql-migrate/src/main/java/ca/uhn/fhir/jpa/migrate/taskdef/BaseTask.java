@@ -265,7 +265,7 @@ public abstract class BaseTask {
 		}
 
 		for (ExecuteTaskPrecondition precondition : myPreconditions) {
-			ourLog.info("5258:  precondition: {}", precondition);
+			ourLog.debug("precondition to evaluate: {}", precondition);
 			if (!precondition.getPreconditionRunner().get()) {
 				ourLog.info(
 						"Skipping task since one of the preconditions was not met: {}",
@@ -273,7 +273,6 @@ public abstract class BaseTask {
 				return;
 			}
 		}
-
 		doExecute();
 	}
 
