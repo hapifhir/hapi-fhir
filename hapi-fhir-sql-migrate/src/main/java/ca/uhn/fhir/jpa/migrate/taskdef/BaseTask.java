@@ -41,7 +41,6 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.function.Supplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -251,12 +250,8 @@ public abstract class BaseTask {
 		return getConnectionProperties().newJdbcTemplate();
 	}
 
-	// LUKETODO:  unit test?
-	// LUKETODO: some other object than Supplier<Boolean> with a String reason
-	private final List<Supplier<Boolean>> myPreconditions = new ArrayList<>();
+	private final List<ExecuteTaskPrecondition> myPreconditions = new ArrayList<>();
 
-	// LUKETODO:  add a set of preconditions, such as callbacks
-	// add enough context to call JDBC
 	public void execute() throws SQLException {
 		if (myDoNothing) {
 			ourLog.info("Skipping stubbed task: {}", getDescription());
@@ -269,11 +264,13 @@ public abstract class BaseTask {
 			}
 		}
 
-		for (Supplier<Boolean> precondition : myPreconditions) {
+		for (ExecuteTaskPrecondition precondition : myPreconditions) {
 			ourLog.info("5258:  precondition: {}", precondition);
-			if (!precondition.get()) {
+			if (!precondition.getPreconditionRunner().get()) {
 				// LUKETODO:  add a reason to the precondition
-				ourLog.info("Skipping task since one of the preconditions was not met");
+				ourLog.info(
+						"Skipping task since one of the preconditions was not met: {}",
+						precondition.getPreconditionReason());
 				return;
 			}
 		}
@@ -322,7 +319,7 @@ public abstract class BaseTask {
 		return this;
 	}
 
-	public void addPrecondition(Supplier<Boolean> thePrecondition) {
+	public void addPrecondition(ExecuteTaskPrecondition thePrecondition) {
 		myPreconditions.add(thePrecondition);
 	}
 

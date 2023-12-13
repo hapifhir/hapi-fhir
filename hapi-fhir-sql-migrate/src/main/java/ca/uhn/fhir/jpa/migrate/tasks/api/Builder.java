@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.migrate.tasks.api;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
+import ca.uhn.fhir.jpa.migrate.MigrationJdbcUtils;
 import ca.uhn.fhir.jpa.migrate.taskdef.AddColumnTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.AddForeignKeyTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.AddIdGeneratorTask;
@@ -36,28 +37,26 @@ import ca.uhn.fhir.jpa.migrate.taskdef.DropIdGeneratorTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.DropIndexTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.DropTableTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.ExecuteRawSqlTask;
+import ca.uhn.fhir.jpa.migrate.taskdef.ExecuteTaskPrecondition;
 import ca.uhn.fhir.jpa.migrate.taskdef.InitializeSchemaTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.MigratePostgresTextClobToBinaryClobTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.ModifyColumnTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.NopTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.RenameColumnTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.RenameIndexTask;
+import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.Validate;
 import org.intellij.lang.annotations.Language;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.jdbc.core.RowMapper;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 public class Builder {
@@ -579,93 +578,32 @@ public class Builder {
 			return this;
 		}
 
-		// LUKETODO: doOnlyIf() >>> pass it custom conditioonal column has collation
-		// could pass in the whole task
-		// at a minimum, the connection properties
-		// >> pass in the BaseTask:  call JDBC code from public task
-		// LUKETODO:  javadoc
-		// LUKETODO:  unit test?
-		public BuilderCompleteTask onlyIf(String theSql, Object... theParams) {
-			// LUKETODO:  some sort of base class with utlity methods
-			ourLog.info("Evaluating onlyIf for SQL: {}, and params: {}", theSql, Arrays.toString(theParams));
+		/**
+		 * Introduce precondition checking logic into the execution of the enclosed task.  This conditional logic will
+		 * be implemented by running an SQL SELECT (including CTEs) to obtain a boolean indicating whether a certain
+		 * condition has been met.
+		 * One example is to check for a specific collation on a column to decide whether to create a new index.
+		 * <p/>
+		 * This method may be called multiple times to add multiple preconditions.  The precondition that evaluates to
+		 * false will stop execution of the task irrespective of any or all other tasks evaluating to true.
+		 *
+		 * @param theSql The SELECT or CTE used to determine if the precondition is valid.
+		 * @param reason A String to indicate the text that is logged if the precondition is not met.
+		 * @return The BuilderCompleteTask in order to chain further method calls on this builder.
+		 */
+		public BuilderCompleteTask onlyIf(@Language("SQL") String theSql, String reason) {
+			if (theSql.toUpperCase().startsWith("WITH") && theSql.toUpperCase().startsWith("SELECT")) {
+				// LUKETODO: new Msg.code()
+				throw new IllegalArgumentException(Msg.code(9999)
+						+ "Only SELECT statements (including CTEs) are allowed here.  Please check your SQL: "
+						+ theSql);
+			}
 
-			final Supplier<Boolean> supplier = new Supplier<>() {
-				@Override
-				public Boolean get() {
-					final ResultSetExtractor<Boolean> rowCallbackHandler = theResultSet -> {
-						if (theResultSet.next()) {
-							return theResultSet.getBoolean(1);
-						}
-						return false;
-					};
-
-					//					final PreparedStatementSetter preparedStatementSetter = thePreparedStatement -> {
-					//						for (int index = 0; index < theParams.length; index++) {
-					//							thePreparedStatement.setObject(index + 1, theParams[index]);
-					//						}
-					//					};
-
-					//					final Boolean result = myTask.newJdbcTemplate()
-					//						.query(theSql, rowCallbackHandler);
-
-					//					final List<Boolean> result = myTask.newJdbcTemplate().query(theSql, new RowMapper<Boolean>()
-					// {
-					//						@Override
-					//						public Boolean mapRow(ResultSet theResultSet, int theRowNum) throws SQLException {
-					//							return theResultSet.getBoolean("result");
-					//						}
-					//					});
-
-					final Boolean result = myTask.newJdbcTemplate().queryForObject(theSql, Boolean.class);
-
-					ourLog.info("5258: result: {}", result);
-
-					return result;
-				}
-			};
-
-			myTask.addPrecondition(supplier);
-
-			return this;
-		}
-
-		public BuilderCompleteTask onlyIf(String theSql) {
-			// LUKETODO:  some sort of base class with utlity methods
 			// LUKETODO:  changelog
 			ourLog.info("5258: Evaluating onlyIf for SQL: {}", theSql);
 
-			final Supplier<Boolean> supplier = new Supplier<>() {
-				@Override
-				public Boolean get() {
-					ourLog.info("5258: calling get()");
-					final List<Boolean> results = myTask.newJdbcTemplate().query(theSql, new RowMapper<Boolean>() {
-						@Override
-						public Boolean mapRow(ResultSet theResultSet, int theRowNumber) throws SQLException {
-							return theResultSet.getBoolean("result");
-						}
-					});
-
-					ourLog.info("5258: result: {}", results);
-
-					if (results.isEmpty()) {
-						return false;
-					}
-
-					if (results.size() == 1) {
-						ourLog.warn(
-								"5258: Query returned more than one result for SQL: {}.  Returning the first result", theSql);
-					}
-
-					return results.get(0);
-					//					final ResultSetExtractor<Boolean> rowCallbackHandler = theResultSet ->
-					// theResultSet.getBoolean(1);
-					//
-					//					return myTask.newJdbcTemplate()
-					//						.query(theSql, rowCallbackHandler);
-				}
-			};
-
-			myTask.addPrecondition(supplier);
+			myTask.addPrecondition(new ExecuteTaskPrecondition(
+					() -> MigrationJdbcUtils.queryForSingleBooleanResult(theSql, myTask.newJdbcTemplate()), reason));
 
 			return this;
 		}
@@ -673,6 +611,33 @@ public class Builder {
 		public BuilderCompleteTask runEvenDuringSchemaInitialization() {
 			myTask.setRunDuringSchemaInitialization(true);
 			return this;
+		}
+
+		private Boolean getIt(String theSql) {
+			ourLog.info("5258: calling get()");
+
+			final RowMapper<Boolean> booleanRowMapper = (theResultSet, theRowNumber) -> theResultSet.getBoolean(1);
+
+			final List<Boolean> results = myTask.newJdbcTemplate().query(theSql, booleanRowMapper);
+
+			ourLog.info("5258: result: {}", results);
+
+			if (results.isEmpty()) {
+				return false;
+			}
+
+			if (results.size() == 1) {
+				ourLog.warn(
+						"5258: Query returned more than one result for SQL: {}.  Returning the first result", theSql);
+			}
+
+			return results.get(0);
+			//					final ResultSetExtractor<Boolean> rowCallbackHandler = theResultSet ->
+			// theResultSet.getBoolean(1);
+			//
+			//					return myTask.newJdbcTemplate()
+			//						.query(theSql, rowCallbackHandler);
+
 		}
 	}
 

@@ -2,9 +2,12 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
 
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import ca.uhn.fhir.jpa.migrate.tasks.api.BaseMigrationTasks;
+import ca.uhn.fhir.jpa.migrate.tasks.api.Builder;
 import ca.uhn.fhir.util.VersionEnum;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.List;
@@ -12,9 +15,10 @@ import java.util.Map;
 import java.util.function.Supplier;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class ExecuteRawSqlTaskTest extends BaseTest {
-
+	private static final Logger ourLog = LoggerFactory.getLogger(ExecuteRawSqlTaskTest.class);
 
 	@ParameterizedTest(name = "{index}: {0}")
 	@MethodSource("data")
@@ -134,5 +138,39 @@ public class ExecuteRawSqlTaskTest extends BaseTest {
 		List<Map<String, Object>> output = executeQuery("SELECT PID,TEXTCOL FROM SOMETABLE");
 
 		assertEquals(0, output.size());
+	}
+
+	@ParameterizedTest()
+	@MethodSource("dataH2Only")
+	public void testExecuteRawSqlTaskWithPrecondition(Supplier<TestDatabaseDetails> theTestDatabaseDetails, boolean theIsExecutionExpected) {
+		before(theTestDatabaseDetails);
+		executeSql("create table SOMETABLE (PID bigint not null, TEXTCOL varchar(255))");
+
+		final List<Map<String, Object>> outputPreMigrate = executeQuery("SELECT PID,TEXTCOL FROM SOMETABLE");
+
+		assertTrue(outputPreMigrate.isEmpty());
+
+		final String someFakeUpdateSql = "INSERT INTO SOMETABLE (PID, TEXTCOL) VALUES (123, 'abc')";
+		// LUKETODO:  Derby and fake table
+		final String someFakeSelectSql = String.format("SELECT %s", theIsExecutionExpected);
+		final String someReason = "I don''t feel like it!";
+
+		final BaseMigrationTasks<VersionEnum> tasks = new BaseMigrationTasks<>();
+		tasks.forVersion(VersionEnum.V4_0_0)
+			.executeRawSql("2024.02", someFakeUpdateSql)
+			.onlyIf(someFakeSelectSql, someReason);
+
+		getMigrator().addTasks(tasks.getTaskList(VersionEnum.V0_1, VersionEnum.V4_0_0));
+		getMigrator().migrate();
+
+		final List<Map<String, Object>> outputPostMigrate = executeQuery("SELECT PID,TEXTCOL FROM SOMETABLE");
+
+		if (theIsExecutionExpected) {
+			assertEquals(1, outputPostMigrate.size());
+			assertEquals(123L, outputPostMigrate.get(0).get("PID"));
+			assertEquals("abc", outputPostMigrate.get(0).get("TEXTCOL"));
+		} else {
+			assertTrue(outputPreMigrate.isEmpty());
+		}
 	}
 }

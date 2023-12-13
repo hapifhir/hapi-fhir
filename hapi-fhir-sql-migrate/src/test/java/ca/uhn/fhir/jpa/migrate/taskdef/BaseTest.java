@@ -7,8 +7,10 @@ import ca.uhn.fhir.jpa.migrate.JdbcUtils;
 import ca.uhn.fhir.jpa.migrate.SchemaMigrator;
 import ca.uhn.fhir.jpa.migrate.dao.HapiMigrationDao;
 import org.apache.commons.dbcp2.BasicDataSource;
+import org.h2.Driver;
 import org.intellij.lang.annotations.Language;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.params.provider.Arguments;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.ColumnMapRowMapper;
@@ -27,6 +29,27 @@ public abstract class BaseTest {
 	private static final String DATABASE_NAME = "DATABASE";
 	private static final Logger ourLog = LoggerFactory.getLogger(BaseTest.class);
 	private static int ourDatabaseUrl = 0;
+	private static final Supplier<TestDatabaseDetails> TEST_DATABASE_DETAILS_H2_SUPPLIER = new Supplier<>() {
+		@Override
+		public TestDatabaseDetails get() {
+			ourLog.info("H2: {}", Driver.class);
+			String url = "jdbc:h2:mem:" + DATABASE_NAME + ourDatabaseUrl++;
+			DriverTypeEnum.ConnectionProperties connectionProperties = DriverTypeEnum.H2_EMBEDDED.newConnectionProperties(url, "SA", "SA");
+			BasicDataSource dataSource = new BasicDataSource();
+			dataSource.setUrl(url);
+			dataSource.setUsername("SA");
+			dataSource.setPassword("SA");
+			dataSource.setDriverClassName(DriverTypeEnum.H2_EMBEDDED.getDriverClassName());
+			HapiMigrator migrator = new HapiMigrator(SchemaMigrator.HAPI_FHIR_MIGRATION_TABLENAME, dataSource, DriverTypeEnum.H2_EMBEDDED);
+			return new TestDatabaseDetails(url, connectionProperties, dataSource, migrator);
+		}
+
+		@Override
+		public String toString() {
+			return "H2";
+		}
+	};
+
 	private BasicDataSource myDataSource;
 	private String myUrl;
 	private HapiMigrator myMigrator;
@@ -34,31 +57,18 @@ public abstract class BaseTest {
 	protected HapiMigrationDao myHapiMigrationDao;
 	protected HapiMigrationStorageSvc myHapiMigrationStorageSvc;
 
+	public static Stream<Arguments> dataH2Only() {
+		return Stream.of(
+			Arguments.of(TEST_DATABASE_DETAILS_H2_SUPPLIER, true),
+			Arguments.of(TEST_DATABASE_DETAILS_H2_SUPPLIER, false));
+	}
+
 	public static Stream<Supplier<TestDatabaseDetails>> data() {
 
 		ArrayList<Supplier<TestDatabaseDetails>> retVal = new ArrayList<>();
 
 		// H2
-		retVal.add(new Supplier<TestDatabaseDetails>() {
-			@Override
-			public TestDatabaseDetails get() {
-				ourLog.info("H2: {}", org.h2.Driver.class.toString());
-				String url = "jdbc:h2:mem:" + DATABASE_NAME + ourDatabaseUrl++;
-				DriverTypeEnum.ConnectionProperties connectionProperties = DriverTypeEnum.H2_EMBEDDED.newConnectionProperties(url, "SA", "SA");
-				BasicDataSource dataSource = new BasicDataSource();
-				dataSource.setUrl(url);
-				dataSource.setUsername("SA");
-				dataSource.setPassword("SA");
-				dataSource.setDriverClassName(DriverTypeEnum.H2_EMBEDDED.getDriverClassName());
-				HapiMigrator migrator = new HapiMigrator(SchemaMigrator.HAPI_FHIR_MIGRATION_TABLENAME, dataSource, DriverTypeEnum.H2_EMBEDDED);
-				return new TestDatabaseDetails(url, connectionProperties, dataSource, migrator);
-			}
-
-			@Override
-			public String toString() {
-				return "H2";
-			}
-		});
+		retVal.add(TEST_DATABASE_DETAILS_H2_SUPPLIER);
 
 		// Derby
 		retVal.add(new Supplier<TestDatabaseDetails>() {
