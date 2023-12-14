@@ -1038,10 +1038,6 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 
 		theRequest.setAttribute(SERVLET_CONTEXT_ATTRIBUTE, getServletContext());
 
-		// add the request to the context
-		//		RequestContextHolder.setRequestAttributes(
-		//			new ServletRequestAttributes(theRequest, theResponse)
-		//		);
 		try {
 
 			/* ***********************************
