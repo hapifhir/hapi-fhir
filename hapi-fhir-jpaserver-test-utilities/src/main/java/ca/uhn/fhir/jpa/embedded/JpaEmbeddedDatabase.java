@@ -20,6 +20,7 @@
 package ca.uhn.fhir.jpa.embedded;
 
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
+import jakarta.annotation.PreDestroy;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,6 +54,7 @@ public abstract class JpaEmbeddedDatabase {
 	private JdbcTemplate myJdbcTemplate;
 	private Connection myConnection;
 
+	@PreDestroy
 	public abstract void stop();
 
 	public abstract void disableConstraints();
