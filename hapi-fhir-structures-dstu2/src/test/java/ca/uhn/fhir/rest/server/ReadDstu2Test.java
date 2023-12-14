@@ -12,7 +12,9 @@ import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
+import ca.uhn.fhir.test.utilities.HttpClientExtension;
 import ca.uhn.fhir.test.utilities.JettyUtil;
+import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.DateUtils;
 import ca.uhn.fhir.util.TestUtil;
 import org.apache.commons.io.IOUtils;
@@ -23,12 +25,13 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.servlet.ServletHandler;
-import org.eclipse.jetty.servlet.ServletHolder;
+import org.eclipse.jetty.ee10.servlet.ServletHandler;
+import org.eclipse.jetty.ee10.servlet.ServletHolder;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -41,13 +44,20 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class ReadDstu2Test {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ReadDstu2Test.class);
-	private static CloseableHttpClient ourClient;
-	private static FhirContext ourCtx = FhirContext.forDstu2();
+	private static final FhirContext ourCtx = FhirContext.forDstu2Cached();
 	private static boolean ourInitializeProfileList;
 	private static IdDt ourLastId;
-	private static int ourPort;
-	private static Server ourServer;
-	private static RestfulServer ourServlet;
+
+
+	@RegisterExtension
+	public static final RestfulServerExtension ourServer  = new RestfulServerExtension(ourCtx)
+		.setDefaultResponseEncoding(EncodingEnum.XML)
+		.registerProvider(new DummyPatientResourceProvider())
+		.withPagingProvider(new FifoMemoryPagingProvider(100))
+		.setDefaultPrettyPrint(false);
+
+	@RegisterExtension
+	public static final HttpClientExtension ourClient = new HttpClientExtension();
 
 	@BeforeEach
 	public void before() {
@@ -65,7 +75,7 @@ public class ReadDstu2Test {
 		// Fixture was last modified at 2012-01-01T12:12:12Z
 		// thus it has changed before the later time of 2012-01-01T13:00:00Z
 		// so we expect a 304
-		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/2");
+		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/2");
 		httpGet.addHeader(Constants.HEADER_IF_MODIFIED_SINCE, DateUtils.formatDate(new InstantDt("2012-01-01T13:00:00Z").getValue()));
 		status = ourClient.execute(httpGet);
 		try {
@@ -77,7 +87,7 @@ public class ReadDstu2Test {
 		// Fixture was last modified at 2012-01-01T12:12:12Z
 		// thus it has changed at the same time of 2012-01-01T12:12:12Z
 		// so we expect a 304
-		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/2");
+		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/2");
 		httpGet.addHeader(Constants.HEADER_IF_MODIFIED_SINCE, DateUtils.formatDate(new InstantDt("2012-01-01T12:12:12Z").getValue()));
 		status = ourClient.execute(httpGet);
 		try {
@@ -89,7 +99,7 @@ public class ReadDstu2Test {
 		// Fixture was last modified at 2012-01-01T12:12:12Z
 		// thus it has changed after the earlier time of 2012-01-01T10:00:00Z
 		// so we expect a 200
-		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/2");
+		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/2");
 		httpGet.addHeader(Constants.HEADER_IF_MODIFIED_SINCE, DateUtils.formatDate(new InstantDt("2012-01-01T10:00:00Z").getValue()));
 		status = ourClient.execute(httpGet);
 		try {
@@ -107,7 +117,7 @@ public class ReadDstu2Test {
 	public void testAddProfile() throws Exception {
 		ourCtx.setAddProfileTagWhenEncoding(AddProfileTagEnum.ONLY_FOR_CUSTOM);
 
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/123?_format=xml");
+		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/123?_format=xml");
 		HttpResponse status = ourClient.execute(httpGet);
 		String responseContent = IOUtils.toString(status.getEntity().getContent(), Constants.CHARSET_UTF8);
 		IOUtils.closeQuietly(status.getEntity().getContent());
@@ -130,7 +140,7 @@ public class ReadDstu2Test {
 		ourInitializeProfileList = true;
 		ourCtx.setAddProfileTagWhenEncoding(AddProfileTagEnum.ONLY_FOR_CUSTOM);
 
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/123&_format=xml");
+		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/123&_format=xml");
 		HttpResponse status = ourClient.execute(httpGet);
 		String responseContent = IOUtils.toString(status.getEntity().getContent(), Constants.CHARSET_UTF8);
 		IOUtils.closeQuietly(status.getEntity().getContent());
@@ -150,7 +160,7 @@ public class ReadDstu2Test {
 	public void testReadJson() throws Exception {
 		ourCtx.setAddProfileTagWhenEncoding(AddProfileTagEnum.ONLY_FOR_CUSTOM);
 
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/123?_format=json");
+		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/123?_format=json");
 		HttpResponse status = ourClient.execute(httpGet);
 		String responseContent = IOUtils.toString(status.getEntity().getContent(), Constants.CHARSET_UTF8);
 		ourLog.info(responseContent);
@@ -167,7 +177,7 @@ public class ReadDstu2Test {
 	 */
 	@Test
 	public void testReadXml() throws Exception {
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/123&_format=xml");
+		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/123&_format=xml");
 		HttpResponse status = ourClient.execute(httpGet);
 		String responseContent = IOUtils.toString(status.getEntity().getContent(), Constants.CHARSET_UTF8);
 		IOUtils.closeQuietly(status.getEntity().getContent());
@@ -183,7 +193,7 @@ public class ReadDstu2Test {
 	public void testVread() throws Exception {
 		ourCtx.setAddProfileTagWhenEncoding(AddProfileTagEnum.ONLY_FOR_CUSTOM);
 
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/123/_history/1");
+		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/123/_history/1");
 		HttpResponse status = ourClient.execute(httpGet);
 		String responseContent = IOUtils.toString(status.getEntity().getContent(), Constants.CHARSET_UTF8);
 		IOUtils.closeQuietly(status.getEntity().getContent());
@@ -234,33 +244,7 @@ public class ReadDstu2Test {
 
 	@AfterAll
 	public static void afterClassClearContext() throws Exception {
-		JettyUtil.closeServer(ourServer);
 		TestUtil.randomizeLocaleAndTimezone();
-	}
-
-	@BeforeAll
-	public static void beforeClass() throws Exception {
-		ourServer = new Server(0);
-
-		DummyPatientResourceProvider patientProvider = new DummyPatientResourceProvider();
-
-		ServletHandler proxyHandler = new ServletHandler();
-		ourServlet = new RestfulServer(ourCtx);
-		ourServlet.setFhirContext(ourCtx);
-		ourServlet.setResourceProviders(patientProvider);
-		ourServlet.setDefaultResponseEncoding(EncodingEnum.XML);
-
-		ServletHolder servletHolder = new ServletHolder(ourServlet);
-		proxyHandler.addServletWithMapping(servletHolder, "/*");
-		ourServer.setHandler(proxyHandler);
-		JettyUtil.startServer(ourServer);
-		ourPort = JettyUtil.getPortForStartedServer(ourServer);
-
-		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
-		HttpClientBuilder builder = HttpClientBuilder.create();
-		builder.setConnectionManager(connectionManager);
-		ourClient = builder.build();
-
 	}
 
 }

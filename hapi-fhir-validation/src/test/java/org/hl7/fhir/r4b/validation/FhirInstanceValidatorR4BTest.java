@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.context.support.LookupCodeRequest;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import ca.uhn.fhir.rest.api.Constants;
@@ -31,9 +32,33 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4b.conformance.ProfileUtilities;
 import org.hl7.fhir.r4b.context.IWorkerContext;
 import org.hl7.fhir.r4b.hapi.ctx.HapiWorkerContext;
-import org.hl7.fhir.r4b.model.*;
+import org.hl7.fhir.r4b.model.AllergyIntolerance;
+import org.hl7.fhir.r4b.model.Base;
+import org.hl7.fhir.r4b.model.Base64BinaryType;
+import org.hl7.fhir.r4b.model.BooleanType;
+import org.hl7.fhir.r4b.model.Bundle;
 import org.hl7.fhir.r4b.model.Bundle.BundleEntryComponent;
+import org.hl7.fhir.r4b.model.CodeSystem;
+import org.hl7.fhir.r4b.model.CodeType;
+import org.hl7.fhir.r4b.model.Consent;
+import org.hl7.fhir.r4b.model.ContactPoint;
+import org.hl7.fhir.r4b.model.DateTimeType;
+import org.hl7.fhir.r4b.model.Enumerations;
+import org.hl7.fhir.r4b.model.Extension;
+import org.hl7.fhir.r4b.model.Media;
+import org.hl7.fhir.r4b.model.Narrative;
+import org.hl7.fhir.r4b.model.Observation;
+import org.hl7.fhir.r4b.model.OperationOutcome;
+import org.hl7.fhir.r4b.model.Patient;
+import org.hl7.fhir.r4b.model.Period;
+import org.hl7.fhir.r4b.model.Practitioner;
+import org.hl7.fhir.r4b.model.Procedure;
+import org.hl7.fhir.r4b.model.QuestionnaireResponse;
+import org.hl7.fhir.r4b.model.Reference;
+import org.hl7.fhir.r4b.model.StringType;
+import org.hl7.fhir.r4b.model.StructureDefinition;
 import org.hl7.fhir.r4b.model.StructureDefinition.StructureDefinitionKind;
+import org.hl7.fhir.r4b.model.ValueSet;
 import org.hl7.fhir.r4b.model.ValueSet.ValueSetExpansionComponent;
 import org.hl7.fhir.r4b.terminologies.ValueSetExpander;
 import org.hl7.fhir.r4b.utils.FHIRPathEngine;
@@ -72,7 +97,6 @@ import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.lessThan;
 import static org.hamcrest.Matchers.not;
-import static org.hamcrest.Matchers.startsWith;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -230,9 +254,10 @@ public class FhirInstanceValidatorR4BTest extends BaseTest {
 				return retVal;
 			}
 		});
-		when(myMockSupport.lookupCode(any(), any(), any(), any())).thenAnswer(t -> {
-			String system = t.getArgument(1, String.class);
-			String code = t.getArgument(2, String.class);
+		when(myMockSupport.lookupCode(any(), any())).thenAnswer(t -> {
+			LookupCodeRequest request = t.getArgument(1, LookupCodeRequest.class);
+			String system = request.getSystem();
+			String code = request.getCode();
 			if (myValidConcepts.contains(system + "___" + code)) {
 				return new IValidationSupport.LookupCodeResult().setFound(true);
 			} else {

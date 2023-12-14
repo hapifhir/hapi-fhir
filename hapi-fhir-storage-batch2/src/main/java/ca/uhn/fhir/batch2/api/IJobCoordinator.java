@@ -27,12 +27,12 @@ import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import org.springframework.data.domain.Page;
 
 import java.util.List;
 import java.util.Set;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 public interface IJobCoordinator {
 

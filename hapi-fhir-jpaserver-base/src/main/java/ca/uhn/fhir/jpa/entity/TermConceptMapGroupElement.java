@@ -20,6 +20,8 @@
 package ca.uhn.fhir.jpa.entity;
 
 import ca.uhn.fhir.util.ValidateUtil;
+import jakarta.annotation.Nonnull;
+import jakarta.persistence.*;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -28,8 +30,6 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
-import javax.annotation.Nonnull;
-import javax.persistence.*;
 
 import static org.apache.commons.lang3.StringUtils.left;
 import static org.apache.commons.lang3.StringUtils.length;

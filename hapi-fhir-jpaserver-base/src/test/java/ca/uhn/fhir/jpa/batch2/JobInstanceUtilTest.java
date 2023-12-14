@@ -24,7 +24,6 @@ class JobInstanceUtilTest {
 
 		assertTrue(EqualsBuilder.reflectionEquals(instance, instanceCopyBack));
 
-
 	}
 
 }

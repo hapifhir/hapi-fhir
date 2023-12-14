@@ -19,7 +19,9 @@
  */
 package ca.uhn.fhir.rest.param;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Comparator/qualifier for values used in REST params, such as {@link DateParam}, {@link NumberParam}, and

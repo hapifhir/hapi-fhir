@@ -3,10 +3,15 @@ package ca.uhn.fhir.rest.server.interceptor;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Read;
+import ca.uhn.fhir.rest.api.EncodingEnum;
+import ca.uhn.fhir.rest.server.CreateDstu3Test;
+import ca.uhn.fhir.rest.server.FifoMemoryPagingProvider;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.test.utilities.HttpClientExtension;
 import ca.uhn.fhir.test.utilities.JettyUtil;
+import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.TestUtil;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
@@ -19,13 +24,14 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.servlet.ServletHandler;
-import org.eclipse.jetty.servlet.ServletHolder;
+import org.eclipse.jetty.ee10.servlet.ServletHandler;
+import org.eclipse.jetty.ee10.servlet.ServletHolder;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
 import java.net.URI;
 import java.util.HashMap;
@@ -38,17 +44,22 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class BanUnsupprtedHttpMethodsInterceptorDstu3Test {
 
-	private static CloseableHttpClient ourClient;
-	private static FhirContext ourCtx = FhirContext.forDstu3();
+	private static final FhirContext ourCtx = FhirContext.forDstu3Cached();
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BanUnsupprtedHttpMethodsInterceptorDstu3Test.class);
-	private static int ourPort;
-	private static Server ourServer;
+	@RegisterExtension
+	private RestfulServerExtension ourServer  = new RestfulServerExtension(ourCtx)
+		 .setDefaultResponseEncoding(EncodingEnum.XML)
+		 .registerProvider(new DummyPatientResourceProvider())
+		 .registerInterceptor(new BanUnsupportedHttpMethodsInterceptor())
+		 .withPagingProvider(new FifoMemoryPagingProvider(100))
+		 .setDefaultPrettyPrint(false);
 
-	private static RestfulServer servlet;
+	@RegisterExtension
+	private HttpClientExtension ourClient = new HttpClientExtension();
 
 	@Test
 	public void testHttpTraceNotEnabled() throws Exception {
-		HttpTrace req = new HttpTrace("http://localhost:" + ourPort + "/Patient");
+		HttpTrace req = new HttpTrace(ourServer.getBaseUrl() + "/Patient");
 		CloseableHttpResponse status = ourClient.execute(req);
 		try {
 			ourLog.info(status.toString());
@@ -60,7 +71,7 @@ public class BanUnsupprtedHttpMethodsInterceptorDstu3Test {
 	
 	@Test	
 	public void testHeadJsonWithInvalidPatient() throws Exception {	
-		HttpHead httpGet = new HttpHead("http://localhost:" + ourPort + "/Patient/123");	
+		HttpHead httpGet = new HttpHead(ourServer.getBaseUrl() + "/Patient/123");	
 		HttpResponse status = ourClient.execute(httpGet);	
 		assertEquals(null, status.getEntity());	
  		ourLog.info(status.toString());	
@@ -71,7 +82,7 @@ public class BanUnsupprtedHttpMethodsInterceptorDstu3Test {
 	
 	@Test	
 	public void testHeadJsonWithValidPatient() throws Exception {	
-		HttpHead httpGet = new HttpHead("http://localhost:" + ourPort + "/Patient/1");	
+		HttpHead httpGet = new HttpHead(ourServer.getBaseUrl() + "/Patient/1");	
 		HttpResponse status = ourClient.execute(httpGet);	
 		assertEquals(null, status.getEntity());	
  		ourLog.info(status.toString());	
@@ -88,7 +99,7 @@ public class BanUnsupprtedHttpMethodsInterceptorDstu3Test {
 				return "TRACK";
 			}
 		};
-		req.setURI(new URI("http://localhost:" + ourPort + "/Patient"));
+		req.setURI(new URI(ourServer.getBaseUrl() + "/Patient"));
 
 		CloseableHttpResponse status = ourClient.execute(req);
 		try {
@@ -107,7 +118,7 @@ public class BanUnsupprtedHttpMethodsInterceptorDstu3Test {
 				return "FOO";
 			}
 		};
-		req.setURI(new URI("http://localhost:" + ourPort + "/Patient"));
+		req.setURI(new URI(ourServer.getBaseUrl() + "/Patient"));
 
 		CloseableHttpResponse status = ourClient.execute(req);
 		try {
@@ -121,7 +132,7 @@ public class BanUnsupprtedHttpMethodsInterceptorDstu3Test {
 	@Test
 	public void testRead() throws Exception {
 
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1");
+		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/1");
 		HttpResponse status = ourClient.execute(httpGet);
 		IOUtils.closeQuietly(status.getEntity().getContent());
 		
@@ -130,31 +141,7 @@ public class BanUnsupprtedHttpMethodsInterceptorDstu3Test {
 	
 	@AfterAll
 	public static void afterClassClearContext() throws Exception {
-		JettyUtil.closeServer(ourServer);
 		TestUtil.randomizeLocaleAndTimezone();
-	}
-
-	@BeforeAll
-	public static void beforeClass() throws Exception {
-		ourServer = new Server(0);
-
-		ServletHandler proxyHandler = new ServletHandler();
-		servlet = new RestfulServer(ourCtx);
-
-		servlet.setResourceProviders(new DummyPatientResourceProvider());
-		servlet.registerInterceptor(new BanUnsupportedHttpMethodsInterceptor());
-
-		ServletHolder servletHolder = new ServletHolder(servlet);
-		proxyHandler.addServletWithMapping(servletHolder, "/*");
-		ourServer.setHandler(proxyHandler);
-		JettyUtil.startServer(ourServer);
-        ourPort = JettyUtil.getPortForStartedServer(ourServer);
-
-		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
-		HttpClientBuilder builder = HttpClientBuilder.create();
-		builder.setConnectionManager(connectionManager);
-		ourClient = builder.build();
-
 	}
 
 	public static class DummyPatientResourceProvider implements IResourceProvider {

@@ -20,11 +20,11 @@
 package ca.uhn.fhir.rest.server;
 
 import ca.uhn.fhir.rest.server.method.ResponsePage;
+import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import java.util.List;
-import javax.annotation.Nonnull;
 
 /**
  * Bundle provider that uses named pages instead of counts

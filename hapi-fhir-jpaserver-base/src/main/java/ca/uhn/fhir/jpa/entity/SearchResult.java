@@ -19,11 +19,11 @@
  */
 package ca.uhn.fhir.jpa.entity;
 
+import jakarta.persistence.*;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
 import java.io.Serializable;
-import javax.persistence.*;
 
 @Entity
 @Table(

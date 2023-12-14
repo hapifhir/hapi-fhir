@@ -151,7 +151,7 @@ import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
@@ -3859,33 +3859,6 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		assertEquals(2, countMatches(searchQuery.toUpperCase(), "RES_UPDATED"), searchQuery);
 	}
 
-	@Disabled
-	@Test
-	public void testSearchWithContext() {
-
-
-		String url = "Procedure?_count=300&_format=json&_include%3Arecurse=*&category=CANN&encounter.identifier=A1057852019&status%3Anot=entered-in-error";
-		RuntimeResourceDefinition def = myFhirContext.getResourceDefinition("Procedure");
-		SearchParameterMap sp = myMatchUrlService.translateMatchUrl(url, def);
-
-
-		myCaptureQueriesListener.clear();
-		sp.setLoadSynchronous(true);
-		myProcedureDao.search(sp);
-
-		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
-//		List<String> queries = myCaptureQueriesListener
-//			.getSelectQueriesForCurrentThread()
-//			.stream()
-//			.map(t -> t.getSql(true, true))
-//			.collect(Collectors.toList());
-//
-//		String searchQuery = queries.get(0);
-//		assertEquals(searchQuery, 1, StringUtils.countMatches(searchQuery.toUpperCase(), "HFJ_SPIDX_TOKEN"));
-//		assertEquals(searchQuery, 1, StringUtils.countMatches(searchQuery.toUpperCase(), "LEFT OUTER JOIN"));
-//		assertEquals(searchQuery, 2, StringUtils.countMatches(searchQuery.toUpperCase(), "AND RESOURCETA0_.RES_UPDATED"));
-	}
-
 	@Test
 	public void testSearchTokenParam() {
 		Patient patient = new Patient();
@@ -4619,8 +4592,8 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		assertNull(values.size());
 		assertEquals(5, values.getResources(0, 1000).size());
 
-		String sql = myCaptureQueriesListener.logSelectQueriesForCurrentThread(0);
-		assertEquals(1, countMatches(sql, "limit '5'"), sql);
+		String sql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false);
+		assertEquals(1, countMatches(sql, "fetch first '5'"), sql);
 	}
 
 	@Test
@@ -5793,8 +5766,15 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 	 *   [base]/Bundle?composition.patient.identifier=foo
 	 */
 	@ParameterizedTest
-	@CsvSource({"urn:uuid:5c34dc2c-9b5d-4ec1-b30b-3e2d4371508b", "Patient/ABC"})
-	public void testCreateAndSearchForFullyChainedSearchParameter(String thePatientId) {
+	@CsvSource({
+		"true , urn:uuid:5c34dc2c-9b5d-4ec1-b30b-3e2d4371508b , urn:uuid:5c34dc2c-9b5d-4ec1-b30b-3e2d4371508b",
+		"false, urn:uuid:5c34dc2c-9b5d-4ec1-b30b-3e2d4371508b , urn:uuid:5c34dc2c-9b5d-4ec1-b30b-3e2d4371508b",
+		"true , Patient/ABC                                   , Patient/ABC ",
+		"false, Patient/ABC                                   , Patient/ABC ",
+		"true , Patient/ABC                                   , http://example.com/fhir/Patient/ABC ",
+		"false, Patient/ABC                                   , http://example.com/fhir/Patient/ABC ",
+	})
+	public void testCreateAndSearchForFullyChainedSearchParameter(boolean theUseFullChainInName, String thePatientId, String theFullUrl) {
 		// Setup 1
 
 		myStorageSettings.setIndexMissingFields(JpaStorageSettings.IndexEnabledEnum.DISABLED);
@@ -5819,13 +5799,18 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		composition.setSubject(new Reference(thePatientId));
 
 		Patient patient = new Patient();
-		patient.setId(new IdType(thePatientId));
+		patient.setId(new IdType(theFullUrl));
 		patient.addIdentifier().setSystem("http://foo").setValue("bar");
 
 		Bundle bundle = new Bundle();
 		bundle.setType(Bundle.BundleType.DOCUMENT);
-		bundle.addEntry().setResource(composition);
-		bundle.addEntry().setResource(patient);
+		bundle
+			.addEntry()
+			.setResource(composition);
+		bundle
+			.addEntry()
+			.setFullUrl(theFullUrl)
+			.setResource(patient);
 
 		myBundleDao.create(bundle, mySrd);
 
@@ -5833,34 +5818,39 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		bundle2.setType(Bundle.BundleType.DOCUMENT);
 		myBundleDao.create(bundle2, mySrd);
 
-		// Verify 1
-		runInTransaction(() -> {
+		// Test
+
+		SearchParameterMap map;
+		if (theUseFullChainInName) {
+			map = SearchParameterMap.newSynchronous("composition.patient.identifier", new TokenParam("http://foo", "bar"));
+		} else {
+			map = SearchParameterMap.newSynchronous("composition", new ReferenceParam("patient.identifier", "http://foo|bar"));
+		}
+		IBundleProvider outcome = myBundleDao.search(map, mySrd);
+
+		// Verify
+
+		List<String> params = extractAllTokenIndexes();
+		assertThat(params.toString(), params, containsInAnyOrder(
+			"composition.patient.identifier http://foo|bar"
+		));
+		assertEquals(1, outcome.size());
+	}
+
+	private List<String> extractAllTokenIndexes() {
+		List<String> params = runInTransaction(() -> {
 			logAllTokenIndexes();
 
-			List<String> params = myResourceIndexedSearchParamTokenDao
+			return myResourceIndexedSearchParamTokenDao
 				.findAll()
 				.stream()
 				.filter(t -> t.getParamName().contains("."))
 				.map(t -> t.getParamName() + " " + t.getSystem() + "|" + t.getValue())
 				.toList();
-			assertThat(params.toString(), params, containsInAnyOrder(
-				"composition.patient.identifier http://foo|bar"
-			));
 		});
-
-		// Test 2
-		IBundleProvider outcome;
-
-		SearchParameterMap map = SearchParameterMap
-			.newSynchronous("composition.patient.identifier", new TokenParam("http://foo", "bar"));
-		outcome = myBundleDao.search(map, mySrd);
-		assertEquals(1, outcome.size());
-
-		map = SearchParameterMap
-			.newSynchronous("composition", new ReferenceParam("patient.identifier", "http://foo|bar"));
-		outcome = myBundleDao.search(map, mySrd);
-		assertEquals(1, outcome.size());
+		return params;
 	}
+
 
 	@Nested
 	public class TagBelowTests {

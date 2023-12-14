@@ -45,29 +45,15 @@ public class JacksonWriter extends BaseJsonLikeWriter {
 	@Override
 	public BaseJsonLikeWriter init() {
 		if (isPrettyPrint()) {
-			DefaultPrettyPrinter prettyPrinter = new DefaultPrettyPrinter() {
-
-				/**
-				 * Objects should serialize as
-				 * <pre>
-				 * {
-				 *    "key": "value"
-				 * }
-				 * </pre>
-				 * in order to be consistent with Gson behaviour, instead of the jackson default
-				 * <pre>
-				 * {
-				 *    "key" : "value"
-				 * }
-				 * </pre>
-				 */
-				@Override
-				public DefaultPrettyPrinter withSeparators(Separators separators) {
-					_separators = separators;
-					_objectFieldValueSeparatorWithSpaces = separators.getObjectFieldValueSeparator() + " ";
-					return this;
-				}
-			};
+			DefaultPrettyPrinter prettyPrinter = new DefaultPrettyPrinter()
+					.withSeparators(new Separators(
+							Separators.DEFAULT_ROOT_VALUE_SEPARATOR,
+							':',
+							Separators.Spacing.AFTER,
+							',',
+							Separators.Spacing.NONE,
+							',',
+							Separators.Spacing.NONE));
 			prettyPrinter = prettyPrinter.withObjectIndenter(new DefaultIndenter("  ", "\n"));
 
 			myJsonGenerator.setPrettyPrinter(prettyPrinter);

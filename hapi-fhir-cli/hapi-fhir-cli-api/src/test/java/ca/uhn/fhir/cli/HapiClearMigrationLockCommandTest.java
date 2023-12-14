@@ -14,21 +14,26 @@ import org.springframework.jdbc.core.support.AbstractLobCreatingPreparedStatemen
 import org.springframework.jdbc.support.lob.DefaultLobHandler;
 import org.springframework.jdbc.support.lob.LobCreator;
 
-import javax.annotation.Nonnull;
+import jakarta.annotation.Nonnull;
 import java.io.File;
 import java.io.IOException;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.sql.Types;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
+import java.util.UUID;
 
 import static ca.uhn.fhir.jpa.migrate.HapiMigrationLock.LOCK_PID;
 import static ca.uhn.fhir.jpa.migrate.HapiMigrationStorageSvc.LOCK_TYPE;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.slf4j.LoggerFactory.getLogger;
 
 public class HapiClearMigrationLockCommandTest extends ConsoleOutputCapturingBaseTest {

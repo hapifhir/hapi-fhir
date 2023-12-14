@@ -95,6 +95,15 @@ import ca.uhn.fhir.util.StringUtil;
 import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.collect.Streams;
 import com.healthmarketscience.sqlbuilder.Condition;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.PersistenceContextType;
+import jakarta.persistence.Query;
+import jakarta.persistence.Tuple;
+import jakarta.persistence.TypedQuery;
+import jakarta.persistence.criteria.CriteriaBuilder;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.math.NumberUtils;
@@ -119,15 +128,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import javax.persistence.PersistenceContextType;
-import javax.persistence.Query;
-import javax.persistence.Tuple;
-import javax.persistence.TypedQuery;
-import javax.persistence.criteria.CriteriaBuilder;
 
 import static ca.uhn.fhir.jpa.model.util.JpaConstants.UNDESIRED_RESOURCE_LINKAGES_FOR_EVERYTHING_ON_PATIENT_INSTANCE;
 import static ca.uhn.fhir.jpa.search.builder.QueryStack.LOCATION_POSITION;
@@ -495,15 +495,8 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 							myRequestPartitionId, myResourceName, String.valueOf(lastNResourceId)))
 					.collect(Collectors.toList());
 		} else {
-			if (myIElasticsearchSvc == null) {
-				throw new InvalidRequestException(Msg.code(2033)
-						+ "LastN operation is not enabled on this service, can not process this request");
-			}
-			// use the dedicated observation ES/Lucene index to support lastN query
-			return myIElasticsearchSvc.executeLastN(myParams, myContext, theMaximumResults).stream()
-					.map(lastnResourceId -> myIdHelperService.resolveResourcePersistentIds(
-							myRequestPartitionId, myResourceName, lastnResourceId))
-					.collect(Collectors.toList());
+			throw new InvalidRequestException(
+					Msg.code(2033) + "LastN operation is not enabled on this service, can not process this request");
 		}
 	}
 

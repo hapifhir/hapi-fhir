@@ -19,8 +19,9 @@
  */
 package ca.uhn.fhir.rest.server.provider;
 
+import jakarta.annotation.Nonnull;
+
 import java.util.function.Supplier;
-import javax.annotation.Nonnull;
 
 public interface IResourceProviderFactoryObserver {
 	void update(@Nonnull Supplier<Object> theSupplier);

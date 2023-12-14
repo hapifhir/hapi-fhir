@@ -27,7 +27,7 @@ public class PatientResourceProvider implements IResourceProvider
 
 	@Search()
 	public IBundleProvider search(
-			javax.servlet.http.HttpServletRequest theServletRequest,
+			jakarta.servlet.http.HttpServletRequest theServletRequest,
 	
 			@Description(shortDefinition="The resource identity")
 			@OptionalParam(name="_id")

@@ -31,6 +31,8 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.IVersionSpecificBundleFactory;
 import ca.uhn.fhir.rest.server.RestfulServerUtils;
 import ca.uhn.fhir.util.ResourceReferenceInfo;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -49,8 +51,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 

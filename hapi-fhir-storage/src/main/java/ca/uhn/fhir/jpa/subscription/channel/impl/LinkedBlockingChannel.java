@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.subscription.channel.impl;
 
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelProducer;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelReceiver;
+import jakarta.annotation.Nonnull;
 import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.support.ExecutorSubscribableChannel;
 
@@ -28,7 +29,6 @@ import java.util.ArrayList;
 import java.util.Optional;
 import java.util.concurrent.Executor;
 import java.util.function.Supplier;
-import javax.annotation.Nonnull;
 
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 

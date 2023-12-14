@@ -38,12 +38,12 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.ReflectionUtil;
+import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import java.lang.reflect.Method;
 import java.util.HashSet;
 import java.util.Set;
-import javax.annotation.Nonnull;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;

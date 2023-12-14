@@ -61,10 +61,14 @@ import com.healthmarketscience.sqlbuilder.dbspec.basic.DbJoin;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbSchema;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbSpec;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbTable;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import org.hibernate.dialect.Dialect;
 import org.hibernate.dialect.SQLServerDialect;
 import org.hibernate.dialect.pagination.AbstractLimitHandler;
-import org.hibernate.engine.spi.RowSelection;
+import org.hibernate.query.internal.QueryOptionsImpl;
+import org.hibernate.query.spi.Limit;
+import org.hibernate.query.spi.QueryOptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -74,8 +78,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 import static ca.uhn.fhir.rest.param.ParamPrefixEnum.GREATERTHAN;
 import static ca.uhn.fhir.rest.param.ParamPrefixEnum.GREATERTHAN_OR_EQUALS;
@@ -501,10 +503,11 @@ public class SearchQueryBuilder {
 			maxResultsToFetch = defaultIfNull(maxResultsToFetch, 10000);
 
 			AbstractLimitHandler limitHandler = (AbstractLimitHandler) myDialect.getLimitHandler();
-			RowSelection selection = new RowSelection();
+			Limit selection = new Limit();
 			selection.setFirstRow(offset);
 			selection.setMaxRows(maxResultsToFetch);
-			sql = limitHandler.processSql(sql, selection);
+			QueryOptions queryOptions = new QueryOptionsImpl();
+			sql = limitHandler.processSql(sql, selection, queryOptions);
 
 			int startOfQueryParameterIndex = 0;
 
@@ -517,14 +520,14 @@ public class SearchQueryBuilder {
 				if (sql.contains("top(?)")) {
 					bindVariables.add(0, maxResultsToFetch);
 				}
-				if (sql.contains("offset 0 rows fetch next ? rows only")) {
+				if (sql.contains("offset 0 rows fetch first ? rows only")) {
 					bindVariables.add(maxResultsToFetch);
 				}
 				if (sql.contains("offset ? rows fetch next ? rows only")) {
 					bindVariables.add(theOffset);
 					bindVariables.add(maxResultsToFetch);
 				}
-				if (offset != null && sql.contains("__row__")) {
+				if (offset != null && sql.contains("rownumber_")) {
 					bindVariables.add(theOffset + 1);
 					bindVariables.add(theOffset + maxResultsToFetch + 1);
 				}

@@ -25,6 +25,7 @@ import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import ca.uhn.fhir.jpa.migrate.tasks.api.ISchemaInitializationProvider;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Charsets;
+import jakarta.annotation.Nonnull;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
@@ -33,7 +34,6 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import javax.annotation.Nonnull;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.trim;

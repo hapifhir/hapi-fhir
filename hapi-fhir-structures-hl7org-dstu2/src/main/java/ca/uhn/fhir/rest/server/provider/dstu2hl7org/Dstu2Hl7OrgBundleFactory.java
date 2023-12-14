@@ -31,6 +31,7 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.IVersionSpecificBundleFactory;
 import ca.uhn.fhir.rest.server.RestfulServerUtils;
 import ca.uhn.fhir.util.ResourceReferenceInfo;
+import jakarta.annotation.Nonnull;
 import org.hl7.fhir.dstu2.model.Bundle;
 import org.hl7.fhir.dstu2.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.dstu2.model.Bundle.BundleLinkComponent;
@@ -50,7 +51,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
-import javax.annotation.Nonnull;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;

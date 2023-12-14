@@ -6,7 +6,9 @@ import ca.uhn.fhir.rest.annotation.OptionalParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.test.utilities.HttpClientExtension;
 import ca.uhn.fhir.test.utilities.JettyUtil;
+import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.TestUtil;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -15,8 +17,8 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.servlet.ServletHandler;
-import org.eclipse.jetty.servlet.ServletHolder;
+import org.eclipse.jetty.ee10.servlet.ServletHandler;
+import org.eclipse.jetty.ee10.servlet.ServletHolder;
 import org.hl7.fhir.dstu3.model.HumanName;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -24,6 +26,7 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,12 +41,19 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class SearchCountParamDstu3Test {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SearchCountParamDstu3Test.class);
-	private static CloseableHttpClient ourClient;
-	private static FhirContext ourCtx = FhirContext.forDstu3();
-	private static int ourPort;
-	private static Server ourServer;
+	private static final FhirContext ourCtx = FhirContext.forDstu3Cached();
 	private static String ourLastMethod;
 	private static Integer ourLastParam;
+
+	@RegisterExtension
+	private RestfulServerExtension ourServer  = new RestfulServerExtension(ourCtx)
+		 .registerProvider(new DummyPatientResourceProvider())
+		 .setDefaultResponseEncoding(EncodingEnum.XML)
+		 .withPagingProvider(new FifoMemoryPagingProvider(100))
+		 .setDefaultPrettyPrint(false);
+
+	@RegisterExtension
+	private HttpClientExtension ourClient = new HttpClientExtension();
 
 	@BeforeEach
 	public void before() {
@@ -53,7 +63,7 @@ public class SearchCountParamDstu3Test {
 
 	@Test
 	public void testSearch() throws Exception {
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_count=2");
+		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?_count=2");
 
 		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
 			String responseContent = IOUtils.toString(status.getEntity().getContent());
@@ -65,11 +75,11 @@ public class SearchCountParamDstu3Test {
 			assertThat(responseContent, stringContainsInOrder(
 				"<link>",
 				"<relation value=\"self\"/>",
-				"<url value=\"http://localhost:" + ourPort + "/Patient?_count=2\"/>",
+				"<url value=\"" + ourServer.getBaseUrl() + "/Patient?_count=2\"/>",
 				"</link>",
 				"<link>",
 				"<relation value=\"next\"/>",
-				"<url value=\"http://localhost:" + ourPort + "?_getpages=", "&amp;_getpagesoffset=2&amp;_count=2&amp;_bundletype=searchset\"/>",
+				"<url value=\"" + ourServer.getBaseUrl() + "?_getpages=", "&amp;_getpagesoffset=2&amp;_count=2&amp;_bundletype=searchset\"/>",
 				"</link>"));
 
 		}
@@ -79,7 +89,7 @@ public class SearchCountParamDstu3Test {
 
 	@Test
 	public void testSearchCount0() throws Exception {
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_count=0&_pretty=true");
+		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?_count=0&_pretty=true");
 
 		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
 			String responseContent = IOUtils.toString(status.getEntity().getContent());
@@ -103,7 +113,7 @@ public class SearchCountParamDstu3Test {
 	 */
 	@Test
 	public void testSearchWithNoCountParam() throws Exception {
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_query=searchWithNoCountParam&_count=2");
+		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?_query=searchWithNoCountParam&_count=2");
 		CloseableHttpResponse status = ourClient.execute(httpGet);
 		try {
 			String responseContent = IOUtils.toString(status.getEntity().getContent());
@@ -115,11 +125,11 @@ public class SearchCountParamDstu3Test {
 			assertThat(responseContent, stringContainsInOrder(
 				"<link>",
 				"<relation value=\"self\"/>",
-				"<url value=\"http://localhost:" + ourPort + "/Patient?_count=2&amp;_query=searchWithNoCountParam\"/>",
+				"<url value=\"" + ourServer.getBaseUrl() + "/Patient?_count=2&amp;_query=searchWithNoCountParam\"/>",
 				"</link>",
 				"<link>",
 				"<relation value=\"next\"/>",
-				"<url value=\"http://localhost:" + ourPort + "?_getpages=", "&amp;_getpagesoffset=2&amp;_count=2&amp;_bundletype=searchset\"/>",
+				"<url value=\"" + ourServer.getBaseUrl() + "?_getpages=", "&amp;_getpagesoffset=2&amp;_count=2&amp;_bundletype=searchset\"/>",
 				"</link>"));
 
 		} finally {
@@ -170,33 +180,7 @@ public class SearchCountParamDstu3Test {
 
 	@AfterAll
 	public static void afterClassClearContext() throws Exception {
-		JettyUtil.closeServer(ourServer);
 		TestUtil.randomizeLocaleAndTimezone();
-	}
-
-	@BeforeAll
-	public static void beforeClass() throws Exception {
-		ourServer = new Server(0);
-
-		DummyPatientResourceProvider patientProvider = new DummyPatientResourceProvider();
-
-		ServletHandler proxyHandler = new ServletHandler();
-		RestfulServer servlet = new RestfulServer(ourCtx);
-		servlet.setPagingProvider(new FifoMemoryPagingProvider(10));
-		servlet.setResourceProviders(patientProvider);
-		servlet.setDefaultResponseEncoding(EncodingEnum.XML);
-
-		ServletHolder servletHolder = new ServletHolder(servlet);
-		proxyHandler.addServletWithMapping(servletHolder, "/*");
-		ourServer.setHandler(proxyHandler);
-		JettyUtil.startServer(ourServer);
-		ourPort = JettyUtil.getPortForStartedServer(ourServer);
-
-		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
-		HttpClientBuilder builder = HttpClientBuilder.create();
-		builder.setConnectionManager(connectionManager);
-		ourClient = builder.build();
-
 	}
 
 }

@@ -29,6 +29,8 @@ import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.term.IValueSetConceptAccumulator;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.util.FhirVersionIndependentConcept;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -41,8 +43,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 /**
  * This interface is the "read" interface for the terminology service. It handles things like

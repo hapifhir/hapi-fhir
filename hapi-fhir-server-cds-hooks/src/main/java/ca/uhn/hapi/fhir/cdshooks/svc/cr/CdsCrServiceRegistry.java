@@ -20,11 +20,11 @@
 package ca.uhn.hapi.fhir.cdshooks.svc.cr;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
+import jakarta.annotation.Nonnull;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-import javax.annotation.Nonnull;
 
 public class CdsCrServiceRegistry implements ICdsCrServiceRegistry {
 	private final Map<FhirVersionEnum, Class<? extends ICdsCrService>> myCdsCrServices;

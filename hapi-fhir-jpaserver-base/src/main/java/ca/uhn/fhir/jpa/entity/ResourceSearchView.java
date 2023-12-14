@@ -28,20 +28,20 @@ import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.rest.api.Constants;
+import jakarta.annotation.Nullable;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.Id;
+import jakarta.persistence.Lob;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
 import org.hibernate.annotations.Immutable;
 import org.hibernate.annotations.Subselect;
 
 import java.io.Serializable;
 import java.util.Date;
-import javax.annotation.Nullable;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.Id;
-import javax.persistence.Lob;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
 
 @SuppressWarnings("SqlDialectInspection")
 @Entity

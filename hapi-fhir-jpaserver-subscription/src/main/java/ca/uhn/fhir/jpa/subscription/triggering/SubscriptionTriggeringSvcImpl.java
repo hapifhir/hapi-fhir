@@ -52,6 +52,8 @@ import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.UrlUtil;
 import ca.uhn.fhir.util.ValidateUtil;
 import com.google.common.collect.Lists;
+import jakarta.annotation.Nullable;
+import jakarta.annotation.PostConstruct;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.concurrent.BasicThreadFactory;
@@ -79,8 +81,6 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
-import javax.annotation.Nullable;
-import javax.annotation.PostConstruct;
 
 import static ca.uhn.fhir.rest.server.provider.ProviderConstants.SUBSCRIPTION_TRIGGERING_PARAM_RESOURCE_ID;
 import static java.util.Objects.isNull;

@@ -27,6 +27,7 @@ import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.primitive.StringDt;
+import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
@@ -45,7 +46,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import javax.annotation.Nullable;
 
 import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
 import static org.apache.commons.lang3.StringUtils.isBlank;

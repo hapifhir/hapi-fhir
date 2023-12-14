@@ -28,6 +28,7 @@ import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.util.ParametersUtil;
+import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
@@ -36,7 +37,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
-import javax.annotation.Nonnull;
 
 import static ca.uhn.fhir.jpa.partition.PartitionLookupSvcImpl.validatePartitionIdSupplied;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;

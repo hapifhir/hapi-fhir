@@ -23,14 +23,14 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.util.ICallable;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionOperations;
 
 import java.util.concurrent.Callable;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 /**
  * This class is used to execute code within the context of a database transaction,
@@ -71,9 +71,16 @@ public interface IHapiTransactionService {
 	}
 
 	/**
+	 * Convenience for TX working with non-partitioned entities.
+	 */
+	default IExecutionBuilder withSystemRequestOnDefaultPartition() {
+		return withSystemRequestOnPartition(RequestPartitionId.defaultPartition());
+	}
+
+	/**
 	 * @deprecated It is highly recommended to use {@link #withRequest(RequestDetails)} instead of this method, for increased visibility.
 	 */
-	@Deprecated
+	@Deprecated(since = "6.10")
 	<T> T withRequest(
 			@Nullable RequestDetails theRequestDetails,
 			@Nullable TransactionDetails theTransactionDetails,

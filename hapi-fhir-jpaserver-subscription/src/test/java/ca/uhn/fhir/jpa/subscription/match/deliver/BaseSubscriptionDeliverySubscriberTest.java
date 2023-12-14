@@ -50,7 +50,7 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.MessagingException;
 import org.springframework.messaging.support.GenericMessage;
 
-import javax.annotation.Nonnull;
+import jakarta.annotation.Nonnull;
 import java.net.URISyntaxException;
 import java.time.LocalDate;
 import java.util.Collection;
@@ -79,7 +79,7 @@ public class BaseSubscriptionDeliverySubscriberTest {
 	private SubscriptionDeliveringRestHookSubscriber mySubscriber;
 	private SubscriptionDeliveringMessageSubscriber myMessageSubscriber;
 	private SubscriptionDeliveringEmailSubscriber myEmailSubscriber;
-	private final FhirContext myCtx = FhirContext.forR4();
+	private final FhirContext myCtx = FhirContext.forR4Cached();
 
 	@Mock
 	private IInterceptorBroadcaster myInterceptorBroadcaster;
@@ -187,7 +187,7 @@ public class BaseSubscriptionDeliverySubscriberTest {
 			mySubscriber.handleMessage(new ResourceDeliveryJsonMessage(payload));
 			fail();
 		} catch (MessagingException e) {
-			assertEquals(Msg.code(2) + "Failure handling subscription payload for subscription: Subscription/123; nested exception is ca.uhn.fhir.rest.server.exceptions.InternalErrorException: FOO", e.getMessage());
+			assertEquals(Msg.code(2) + "Failure handling subscription payload for subscription: Subscription/123", e.getMessage());
 		}
 
 		verify(myGenericClient, times(1)).update();

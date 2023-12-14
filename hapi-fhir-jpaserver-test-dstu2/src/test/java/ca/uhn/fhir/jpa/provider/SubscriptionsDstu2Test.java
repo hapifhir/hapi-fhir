@@ -8,8 +8,8 @@ import ca.uhn.fhir.model.dstu2.valueset.SubscriptionStatusEnum;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import org.eclipse.jetty.websocket.api.Session;
-import org.eclipse.jetty.websocket.api.annotations.OnWebSocketConnect;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
+import org.eclipse.jetty.websocket.api.annotations.OnWebSocketOpen;
 import org.eclipse.jetty.websocket.api.annotations.WebSocket;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -190,7 +190,7 @@ public class SubscriptionsDstu2Test extends BaseResourceProviderDstu2Test {
 	/**
 	 * Basic Echo Client Socket
 	 */
-	@WebSocket(maxTextMessageSize = 64 * 1024)
+	@WebSocket()
 	public class SimpleEchoSocket extends BaseSocket {
 
 		@SuppressWarnings("unused")
@@ -200,14 +200,14 @@ public class SubscriptionsDstu2Test extends BaseResourceProviderDstu2Test {
 			mySubsId = theSubsId;
 		}
 
-		@OnWebSocketConnect
+		@OnWebSocketOpen
 		public void onConnect(Session session) {
 			ourLog.info("Got connect: {}", session);
 			this.session = session;
 			try {
 				String sending = "bind " + mySubsId;
 				ourLog.info("Sending: {}", sending);
-				session.getRemote().sendString(sending);
+				session.sendText(sending, null);
 			} catch (Throwable t) {
 				ourLog.error("Failure", t);
 			}
@@ -229,7 +229,7 @@ public class SubscriptionsDstu2Test extends BaseResourceProviderDstu2Test {
 	/**
 	 * Basic Echo Client Socket
 	 */
-	@WebSocket(maxTextMessageSize = 64 * 1024)
+	@WebSocket()
 	public class DynamicEchoSocket extends BaseSocket {
 
 		private List<IBaseResource> myReceived = new ArrayList<IBaseResource>();
@@ -243,14 +243,14 @@ public class SubscriptionsDstu2Test extends BaseResourceProviderDstu2Test {
 			myEncoding = theEncoding;
 		}
 
-		@OnWebSocketConnect
+		@OnWebSocketOpen
 		public void onConnect(Session session) {
 			ourLog.info("Got connect: {}", session);
 			this.session = session;
 			try {
 				String sending = "bind " + myCriteria;
 				ourLog.info("Sending: {}", sending);
-				session.getRemote().sendString(sending);
+				session.sendText(sending, null);
 			} catch (Throwable t) {
 				ourLog.error("Failure", t);
 			}

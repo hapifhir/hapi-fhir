@@ -25,21 +25,25 @@ import ca.uhn.fhir.jaxrs.server.interceptor.JaxRsExceptionInterceptor;
 import ca.uhn.fhir.jaxrs.server.util.JaxRsMethodBindings;
 import ca.uhn.fhir.jaxrs.server.util.JaxRsRequest;
 import ca.uhn.fhir.jaxrs.server.util.JaxRsRequest.Builder;
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.RequestTypeEnum;
+import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.IRestfulServer;
-import ca.uhn.fhir.rest.api.*;
 import ca.uhn.fhir.rest.server.IPagingProvider;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.rest.server.method.BaseMethodBinding;
+import jakarta.interceptor.Interceptors;
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
-import javax.interceptor.Interceptors;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.*;
 
 /**
  * This server is the abstract superclass for all bundle providers. It exposes

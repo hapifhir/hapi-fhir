@@ -1,13 +1,16 @@
 package ca.uhn.fhir.rest.server;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.api.BundleInclusionRule;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.valueset.BundleEntrySearchModeEnum;
 import ca.uhn.fhir.rest.annotation.RequiredParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
+import ca.uhn.fhir.test.utilities.HttpClientExtension;
 import ca.uhn.fhir.test.utilities.JettyUtil;
+import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.TestUtil;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -16,8 +19,8 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.servlet.ServletHandler;
-import org.eclipse.jetty.servlet.ServletHolder;
+import org.eclipse.jetty.ee10.servlet.ServletHandler;
+import org.eclipse.jetty.ee10.servlet.ServletHolder;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r5.model.HumanName;
 import org.hl7.fhir.r5.model.Patient;
@@ -25,6 +28,7 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -37,12 +41,18 @@ public class SearchR5Test {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SearchR5Test.class);
 	private static final FhirContext ourCtx = FhirContext.forR5Cached();
-	private static CloseableHttpClient ourClient;
 	private static TokenAndListParam ourIdentifiers;
 	private static String ourLastMethod;
-	private static int ourPort;
 
-	private static Server ourServer;
+	@RegisterExtension
+	public static RestfulServerExtension ourServer = new RestfulServerExtension(ourCtx)
+		.registerProvider(new DummyPatientResourceProvider())
+		.withPagingProvider(new FifoMemoryPagingProvider(100))
+		.setDefaultResponseEncoding(EncodingEnum.JSON)
+		.setDefaultPrettyPrint(false);
+
+	@RegisterExtension
+	public static HttpClientExtension ourClient = new HttpClientExtension();
 
 	@BeforeEach
 	public void before() {
@@ -53,7 +63,7 @@ public class SearchR5Test {
 
 	@Test
 	public void testSearch() throws Exception {
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?identifier=foo%7Cbar&_pretty=true");
+		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?identifier=foo%7Cbar&_pretty=true");
 		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(responseContent);
@@ -99,33 +109,7 @@ public class SearchR5Test {
 
 	@AfterAll
 	public static void afterClassClearContext() throws Exception {
-		JettyUtil.closeServer(ourServer);
 		TestUtil.randomizeLocaleAndTimezone();
-	}
-
-	@BeforeAll
-	public static void beforeClass() throws Exception {
-		ourServer = new Server(0);
-
-		DummyPatientResourceProvider patientProvider = new DummyPatientResourceProvider();
-
-		ServletHandler proxyHandler = new ServletHandler();
-		RestfulServer servlet = new RestfulServer(ourCtx);
-		servlet.setDefaultResponseEncoding(EncodingEnum.JSON);
-		servlet.setPagingProvider(new FifoMemoryPagingProvider(10));
-
-		servlet.setResourceProviders(patientProvider);
-		ServletHolder servletHolder = new ServletHolder(servlet);
-		proxyHandler.addServletWithMapping(servletHolder, "/*");
-		ourServer.setHandler(proxyHandler);
-		JettyUtil.startServer(ourServer);
-		ourPort = JettyUtil.getPortForStartedServer(ourServer);
-
-		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
-		HttpClientBuilder builder = HttpClientBuilder.create();
-		builder.setConnectionManager(connectionManager);
-		ourClient = builder.build();
-
 	}
 
 }

@@ -23,11 +23,11 @@ import ca.uhn.fhir.batch2.jobs.step.IIdChunkProducer;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.pid.IResourcePidStream;
 import ca.uhn.fhir.jpa.api.svc.IGoldenResourceSearchSvc;
+import jakarta.annotation.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Date;
-import javax.annotation.Nullable;
 
 public class MdmIdChunkProducer implements IIdChunkProducer<MdmChunkRangeJson> {
 	private static final Logger ourLog = LoggerFactory.getLogger(MdmIdChunkProducer.class);

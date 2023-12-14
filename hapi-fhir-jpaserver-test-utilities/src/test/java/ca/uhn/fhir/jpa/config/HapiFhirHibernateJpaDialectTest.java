@@ -13,7 +13,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataIntegrityViolationException;
 
-import javax.persistence.PersistenceException;
+import jakarta.persistence.PersistenceException;
 import java.sql.SQLException;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -57,7 +57,7 @@ public class HapiFhirHibernateJpaDialectTest {
 		}
 
 		outcome = mySvc.convertHibernateAccessException(new HibernateException("this is a message"));
-		assertThat(outcome.getMessage(), containsString("HibernateException: this is a message"));
+		assertThat(outcome.getMessage(), containsString("this is a message"));
 
 	}
 

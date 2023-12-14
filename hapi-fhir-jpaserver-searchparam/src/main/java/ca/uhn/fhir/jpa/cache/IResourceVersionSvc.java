@@ -1,6 +1,6 @@
 /*-
  * #%L
- * HAPI FHIR Search Parameters
+ * HAPI FHIR JPA - Search Parameters
  * %%
  * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
@@ -21,10 +21,10 @@ package ca.uhn.fhir.jpa.cache;
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IIdType;
 
 import java.util.List;
-import javax.annotation.Nonnull;
 
 /**
  * This interface is used by the {@literal IResourceChangeListenerCacheRefresher} to read resources matching the provided

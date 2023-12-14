@@ -30,14 +30,14 @@ import ca.uhn.fhir.rest.api.*;
 import ca.uhn.fhir.rest.server.IPagingProvider;
 import ca.uhn.fhir.rest.server.PageProvider;
 import ca.uhn.fhir.rest.server.method.PageMethodBinding;
+import jakarta.interceptor.Interceptors;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.QueryParam;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 
 import java.io.IOException;
-import javax.interceptor.Interceptors;
-import javax.ws.rs.GET;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 
 /**
  * Base class for a provider to provide the <code>[baseUrl]?_getpages=foo</code> request, which is a request to the

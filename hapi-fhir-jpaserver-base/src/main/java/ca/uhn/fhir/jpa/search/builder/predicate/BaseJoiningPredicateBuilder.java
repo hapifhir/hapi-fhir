@@ -28,11 +28,11 @@ import com.healthmarketscience.sqlbuilder.NotCondition;
 import com.healthmarketscience.sqlbuilder.UnaryCondition;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbColumn;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbTable;
+import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.Validate;
 
 import java.util.List;
 import java.util.stream.Collectors;
-import javax.annotation.Nullable;
 
 public abstract class BaseJoiningPredicateBuilder extends BasePredicateBuilder {
 

@@ -37,6 +37,8 @@ import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.slf4j.Logger;
@@ -49,8 +51,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 public class MdmSubmitSvcImpl implements IMdmSubmitSvc {
 

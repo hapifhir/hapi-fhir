@@ -19,12 +19,12 @@
  */
 package ca.uhn.fhir.jpa.subscription.triggering;
 
+import jakarta.annotation.Nullable;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 import java.util.List;
-import javax.annotation.Nullable;
 
 public interface ISubscriptionTriggeringSvc {
 

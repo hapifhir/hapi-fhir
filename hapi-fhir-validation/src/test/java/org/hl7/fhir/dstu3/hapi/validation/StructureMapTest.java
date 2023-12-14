@@ -11,7 +11,7 @@ import org.hl7.fhir.dstu3.utils.StructureMapUtilities;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import javax.annotation.Nullable;
+import jakarta.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;

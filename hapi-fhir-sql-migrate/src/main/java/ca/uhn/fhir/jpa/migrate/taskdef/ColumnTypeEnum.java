@@ -31,5 +31,11 @@ public enum ColumnTypeEnum {
 	BLOB,
 	CLOB,
 	DOUBLE,
-	TEXT;
+
+	/**
+	 * Unlimited length text, with a column definition containing the annotation:
+	 * <code>@JdbcTypeCode(SqlTypes.LONG32VARCHAR)</code>
+	 */
+	TEXT,
+	BIG_DECIMAL;
 }

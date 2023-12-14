@@ -23,8 +23,7 @@ import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-
-import javax.annotation.Nullable;
+import jakarta.annotation.Nullable;
 
 public class CompositeInterceptorBroadcaster {
 

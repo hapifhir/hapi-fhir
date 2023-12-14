@@ -118,6 +118,13 @@ import ca.uhn.fhir.validation.ValidationOptions;
 import ca.uhn.fhir.validation.ValidationResult;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Streams;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+import jakarta.annotation.PostConstruct;
+import jakarta.persistence.LockModeType;
+import jakarta.persistence.NoResultException;
+import jakarta.persistence.TypedQuery;
+import jakarta.servlet.http.HttpServletResponse;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
@@ -129,7 +136,6 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Required;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -153,13 +159,6 @@ import java.util.concurrent.Callable;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import javax.annotation.PostConstruct;
-import javax.persistence.LockModeType;
-import javax.persistence.NoResultException;
-import javax.persistence.TypedQuery;
-import javax.servlet.http.HttpServletResponse;
 
 import static java.util.Objects.isNull;
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -1224,7 +1223,6 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	}
 
 	@SuppressWarnings("unchecked")
-	@Required
 	public void setResourceType(Class<? extends IBaseResource> theTableType) {
 		myResourceType = (Class<T>) theTableType;
 	}
@@ -1657,8 +1655,11 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			CURRENTLY_REINDEXING.put(theResource, Boolean.TRUE);
 		}
 
+		SystemRequestDetails request = new SystemRequestDetails();
+		request.getUserData().put(JpaConstants.SKIP_REINDEX_ON_UPDATE, Boolean.TRUE);
+
 		updateEntity(
-				null, theResource, theEntity, theEntity.getDeleted(), true, false, transactionDetails, true, false);
+				request, theResource, theEntity, theEntity.getDeleted(), true, false, transactionDetails, true, false);
 		if (theResource != null) {
 			CURRENTLY_REINDEXING.put(theResource, null);
 		}

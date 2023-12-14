@@ -6,6 +6,7 @@ import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.validation.IInstanceValidatorModule;
 import ca.uhn.fhir.validation.IValidationContext;
+import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.exceptions.PathEngineException;
@@ -22,7 +23,6 @@ import org.hl7.fhir.utilities.validation.ValidationMessage;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import javax.annotation.Nonnull;
 
 @SuppressWarnings({"PackageAccessibility", "Duplicates"})
 public class FhirInstanceValidator extends BaseValidatorBridge implements IInstanceValidatorModule {

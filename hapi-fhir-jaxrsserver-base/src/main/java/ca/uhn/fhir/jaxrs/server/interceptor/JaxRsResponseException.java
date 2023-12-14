@@ -20,8 +20,7 @@
 package ca.uhn.fhir.jaxrs.server.interceptor;
 
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
-
-import javax.ejb.ApplicationException;
+import jakarta.ejb.ApplicationException;
 
 /**
  * A JEE wrapper exception that will not force a rollback.

@@ -28,8 +28,7 @@ import ca.uhn.fhir.batch2.api.VoidModel;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemDeleteJobSvc;
 import ca.uhn.fhir.jpa.term.models.CodeSystemVersionPIDResult;
 import ca.uhn.fhir.jpa.term.models.TermCodeSystemDeleteVersionJobParameters;
-
-import javax.annotation.Nonnull;
+import jakarta.annotation.Nonnull;
 
 public class DeleteCodeSystemVersionFirstStep
 		implements IFirstJobStepWorker<TermCodeSystemDeleteVersionJobParameters, CodeSystemVersionPIDResult> {

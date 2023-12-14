@@ -20,7 +20,9 @@
 package ca.uhn.fhir.rest.client.apache;
 
 import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.client.api.*;
+import ca.uhn.fhir.rest.client.api.IClientInterceptor;
+import ca.uhn.fhir.rest.client.api.IHttpRequest;
+import ca.uhn.fhir.rest.client.api.IHttpResponse;
 import org.apache.http.Header;
 import org.apache.http.HttpEntityEnclosingRequest;
 import org.apache.http.client.methods.HttpRequestBase;

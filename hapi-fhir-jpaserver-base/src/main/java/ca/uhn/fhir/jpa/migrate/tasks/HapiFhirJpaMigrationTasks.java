@@ -98,6 +98,10 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 	}
 
 	protected void init700() {
+		/* ************************************************
+		 * Start of 6.10 migrations
+		 *********************************************** */
+
 		Builder version = forVersion(VersionEnum.V7_0_0);
 
 		// new indices on MdmLink
@@ -131,6 +135,12 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 
 		// For resolving references that don't supply the type.
 		hfjResource.addIndex("20231027.3", "IDX_RES_FHIR_ID").unique(false).withColumns("FHIR_ID");
+
+		Builder.BuilderWithTableName batch2JobInstanceTable = version.onTable("BT2_JOB_INSTANCE");
+
+		batch2JobInstanceTable.addColumn("20231128.1", "USER_NAME").nullable().type(ColumnTypeEnum.STRING, 200);
+
+		batch2JobInstanceTable.addColumn("20231128.2", "CLIENT_ID").nullable().type(ColumnTypeEnum.STRING, 200);
 	}
 
 	protected void init680() {
@@ -977,27 +987,34 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			// Ugh.  Only oracle supports using IDX_TAG_DEF_TP_CD_SYS to enforce this constraint.  The others will
 			// create another index.
 			// For Sql Server, should change the index to be unique with include columns.  Do this in 6.1
-			tagTable.dropIndex("20220429.8", "IDX_TAGDEF_TYPESYSCODE");
-			Map<DriverTypeEnum, String> addTagDefConstraint = new HashMap<>();
-			addTagDefConstraint.put(
-					DriverTypeEnum.H2_EMBEDDED,
-					"ALTER TABLE HFJ_TAG_DEF ADD CONSTRAINT IDX_TAGDEF_TYPESYSCODE UNIQUE (TAG_TYPE, TAG_CODE, TAG_SYSTEM)");
-			addTagDefConstraint.put(
-					DriverTypeEnum.MARIADB_10_1,
-					"ALTER TABLE HFJ_TAG_DEF ADD CONSTRAINT IDX_TAGDEF_TYPESYSCODE UNIQUE (TAG_TYPE, TAG_CODE, TAG_SYSTEM)");
-			addTagDefConstraint.put(
-					DriverTypeEnum.MSSQL_2012,
-					"ALTER TABLE HFJ_TAG_DEF ADD CONSTRAINT IDX_TAGDEF_TYPESYSCODE UNIQUE (TAG_TYPE, TAG_CODE, TAG_SYSTEM)");
-			addTagDefConstraint.put(
-					DriverTypeEnum.MYSQL_5_7,
-					"ALTER TABLE HFJ_TAG_DEF ADD CONSTRAINT IDX_TAGDEF_TYPESYSCODE UNIQUE (TAG_TYPE, TAG_CODE, TAG_SYSTEM)");
-			addTagDefConstraint.put(
-					DriverTypeEnum.ORACLE_12C,
-					"ALTER TABLE HFJ_TAG_DEF ADD CONSTRAINT IDX_TAGDEF_TYPESYSCODE UNIQUE (TAG_TYPE, TAG_CODE, TAG_SYSTEM)");
-			addTagDefConstraint.put(
-					DriverTypeEnum.POSTGRES_9_4,
-					"ALTER TABLE HFJ_TAG_DEF ADD CONSTRAINT IDX_TAGDEF_TYPESYSCODE UNIQUE (TAG_TYPE, TAG_CODE, TAG_SYSTEM)");
-			version.executeRawSql("20220429.9", addTagDefConstraint);
+			//			tagTable.dropIndex("20220429.8", "IDX_TAGDEF_TYPESYSCODE");
+			//			Map<DriverTypeEnum, String> addTagDefConstraint = new HashMap<>();
+			//			addTagDefConstraint.put(
+			//					DriverTypeEnum.H2_EMBEDDED,
+			//					"ALTER TABLE HFJ_TAG_DEF ADD CONSTRAINT IDX_TAGDEF_TYPESYSCODE UNIQUE (TAG_TYPE, TAG_CODE,
+			// TAG_SYSTEM)");
+			//			addTagDefConstraint.put(
+			//					DriverTypeEnum.MARIADB_10_1,
+			//					"ALTER TABLE HFJ_TAG_DEF ADD CONSTRAINT IDX_TAGDEF_TYPESYSCODE UNIQUE (TAG_TYPE, TAG_CODE,
+			// TAG_SYSTEM)");
+			//			addTagDefConstraint.put(
+			//					DriverTypeEnum.MSSQL_2012,
+			//					"ALTER TABLE HFJ_TAG_DEF ADD CONSTRAINT IDX_TAGDEF_TYPESYSCODE UNIQUE (TAG_TYPE, TAG_CODE,
+			// TAG_SYSTEM)");
+			//			addTagDefConstraint.put(
+			//					DriverTypeEnum.MYSQL_5_7,
+			//					"ALTER TABLE HFJ_TAG_DEF ADD CONSTRAINT IDX_TAGDEF_TYPESYSCODE UNIQUE (TAG_TYPE, TAG_CODE,
+			// TAG_SYSTEM)");
+			//			addTagDefConstraint.put(
+			//					DriverTypeEnum.ORACLE_12C,
+			//					"ALTER TABLE HFJ_TAG_DEF ADD CONSTRAINT IDX_TAGDEF_TYPESYSCODE UNIQUE (TAG_TYPE, TAG_CODE,
+			// TAG_SYSTEM)");
+			//			addTagDefConstraint.put(
+			//					DriverTypeEnum.POSTGRES_9_4,
+			//					"ALTER TABLE HFJ_TAG_DEF ADD CONSTRAINT IDX_TAGDEF_TYPESYSCODE UNIQUE (TAG_TYPE, TAG_CODE,
+			// TAG_SYSTEM)");
+			//			version.executeRawSql("20220429.9", addTagDefConstraint);
+			version.addNop("20220429.9");
 		}
 
 		// Fix for https://github.com/hapifhir/hapi-fhir-jpaserver-starter/issues/328

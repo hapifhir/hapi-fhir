@@ -21,13 +21,13 @@ package ca.uhn.fhir.jpa.term;
 
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.util.FhirVersionIndependentConcept;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.r4.model.ValueSet;
 
 import java.util.Collections;
 import java.util.List;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 import static org.apache.commons.lang3.StringUtils.isNoneBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;

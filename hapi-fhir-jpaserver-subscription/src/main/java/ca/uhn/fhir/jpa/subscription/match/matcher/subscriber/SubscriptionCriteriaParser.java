@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.subscription.match.matcher.subscriber;
 import ca.uhn.fhir.jpa.searchparam.extractor.StringTrimmingTrimmerMatcher;
 import ca.uhn.fhir.rest.api.Constants;
 import com.google.common.collect.Sets;
+import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.apache.commons.text.StringTokenizer;
@@ -29,7 +30,6 @@ import org.apache.commons.text.StringTokenizer;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
-import javax.annotation.Nullable;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;

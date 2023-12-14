@@ -59,7 +59,7 @@ public abstract class BaseJpaResourceProviderPatient<T extends IBaseResource> ex
 			idempotent = true,
 			bundleType = BundleTypeEnum.SEARCHSET)
 	public IBundleProvider patientInstanceEverything(
-			javax.servlet.http.HttpServletRequest theServletRequest,
+			jakarta.servlet.http.HttpServletRequest theServletRequest,
 			@IdParam IIdType theId,
 			@Description(
 							shortDefinition =
@@ -143,7 +143,7 @@ public abstract class BaseJpaResourceProviderPatient<T extends IBaseResource> ex
 			idempotent = true,
 			bundleType = BundleTypeEnum.SEARCHSET)
 	public IBundleProvider patientTypeEverything(
-			javax.servlet.http.HttpServletRequest theServletRequest,
+			jakarta.servlet.http.HttpServletRequest theServletRequest,
 			@Description(
 							shortDefinition =
 									"Results from this method are returned across multiple pages. This parameter controls the size of those pages.")

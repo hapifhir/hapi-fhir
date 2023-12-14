@@ -40,14 +40,14 @@ import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.util.DateRangeUtil;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 public class GoldenResourceSearchSvcImpl implements IGoldenResourceSearchSvc {
 	@Autowired

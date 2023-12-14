@@ -24,6 +24,8 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.ParametersUtil;
 import ca.uhn.fhir.util.UrlUtil;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -42,8 +44,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -295,8 +295,8 @@ public interface IValidationSupport {
 	 */
 	@Nullable
 	default CodeValidationResult validateCode(
-			@Nonnull ValidationSupportContext theValidationSupportContext,
-			@Nonnull ConceptValidationOptions theOptions,
+			ValidationSupportContext theValidationSupportContext,
+			ConceptValidationOptions theOptions,
 			String theCodeSystem,
 			String theCode,
 			String theDisplay,
@@ -329,14 +329,16 @@ public interface IValidationSupport {
 	}
 
 	/**
-	 * Look up a code using the system and code value
+	 * Look up a code using the system and code value.
+	 * @deprecated This method has been deprecated in HAPI FHIR 7.0.0. Use {@link IValidationSupport#lookupCode(ValidationSupportContext, LookupCodeRequest)} instead.
 	 *
 	 * @param theValidationSupportContext The validation support module will be passed in to this method. This is convenient in cases where the operation needs to make calls to
 	 *                                    other method in the support chain, so that they can be passed through the entire chain. Implementations of this interface may always safely ignore this parameter.
 	 * @param theSystem                   The CodeSystem URL
 	 * @param theCode                     The code
-	 * @param theDisplayLanguage          to filter out the designation by the display language. To return all designation, set this value to <code>null</code>.
+	 * @param theDisplayLanguage          Used to filter out the designation by the display language. To return all designation, set this value to <code>null</code>.
 	 */
+	@Deprecated
 	@Nullable
 	default LookupCodeResult lookupCode(
 			ValidationSupportContext theValidationSupportContext,
@@ -348,12 +350,14 @@ public interface IValidationSupport {
 
 	/**
 	 * Look up a code using the system and code value
+	 * @deprecated This method has been deprecated in HAPI FHIR 7.0.0. Use {@link IValidationSupport#lookupCode(ValidationSupportContext, LookupCodeRequest)} instead.
 	 *
 	 * @param theValidationSupportContext The validation support module will be passed in to this method. This is convenient in cases where the operation needs to make calls to
 	 *                                    other method in the support chain, so that they can be passed through the entire chain. Implementations of this interface may always safely ignore this parameter.
 	 * @param theSystem                   The CodeSystem URL
 	 * @param theCode                     The code
 	 */
+	@Deprecated
 	@Nullable
 	default LookupCodeResult lookupCode(
 			ValidationSupportContext theValidationSupportContext, String theSystem, String theCode) {
@@ -361,7 +365,26 @@ public interface IValidationSupport {
 	}
 
 	/**
-	 * Returns <code>true</code> if the given valueset can be validated by the given
+	 * Look up a code using the system, code and other parameters captured in {@link LookupCodeRequest}.
+	 * @since 7.0.0
+	 *
+	 * @param theValidationSupportContext      The validation support module will be passed in to this method. This is convenient in cases where the operation needs to make calls to
+	 *                                         other method in the support chain, so that they can be passed through the entire chain. Implementations of this interface may always safely ignore this parameter.
+	 * @param theLookupCodeRequest             The parameters used to perform the lookup, including system and code.
+	 */
+	@Nullable
+	default LookupCodeResult lookupCode(
+			ValidationSupportContext theValidationSupportContext, @Nonnull LookupCodeRequest theLookupCodeRequest) {
+		// TODO: can change to return null once the deprecated methods are removed
+		return lookupCode(
+				theValidationSupportContext,
+				theLookupCodeRequest.getSystem(),
+				theLookupCodeRequest.getCode(),
+				theLookupCodeRequest.getDisplayLanguage());
+	}
+
+	/**
+	 * Returns <code>true</code> if the given ValueSet can be validated by the given
 	 * validation support module
 	 *
 	 * @param theValidationSupportContext The validation support module will be passed in to this method. This is convenient in cases where the operation needs to make calls to
@@ -503,7 +526,12 @@ public interface IValidationSupport {
 		public String getPropertyName() {
 			return myPropertyName;
 		}
+
+		public abstract String getType();
 	}
+
+	String TYPE_STRING = "string";
+	String TYPE_CODING = "Coding";
 
 	class StringConceptProperty extends BaseConceptProperty {
 		private final String myValue;
@@ -520,6 +548,10 @@ public interface IValidationSupport {
 
 		public String getValue() {
 			return myValue;
+		}
+
+		public String getType() {
+			return TYPE_STRING;
 		}
 	}
 
@@ -551,9 +583,18 @@ public interface IValidationSupport {
 		public String getDisplay() {
 			return myDisplay;
 		}
+
+		public String getType() {
+			return TYPE_CODING;
+		}
 	}
 
 	class CodeValidationResult {
+		public static final String SOURCE_DETAILS = "sourceDetails";
+		public static final String RESULT = "result";
+		public static final String MESSAGE = "message";
+		public static final String DISPLAY = "display";
+
 		private String myCode;
 		private String myMessage;
 		private IssueSeverity mySeverity;
@@ -681,6 +722,23 @@ public interface IValidationSupport {
 		public CodeValidationResult setSeverityCode(@Nonnull String theIssueSeverity) {
 			setSeverity(IssueSeverity.valueOf(theIssueSeverity.toUpperCase()));
 			return this;
+		}
+
+		public IBaseParameters toParameters(FhirContext theContext) {
+			IBaseParameters retVal = ParametersUtil.newInstance(theContext);
+
+			ParametersUtil.addParameterToParametersBoolean(theContext, retVal, RESULT, isOk());
+			if (isNotBlank(getMessage())) {
+				ParametersUtil.addParameterToParametersString(theContext, retVal, MESSAGE, getMessage());
+			}
+			if (isNotBlank(getDisplay())) {
+				ParametersUtil.addParameterToParametersString(theContext, retVal, DISPLAY, getDisplay());
+			}
+			if (isNotBlank(getSourceDetails())) {
+				ParametersUtil.addParameterToParametersString(theContext, retVal, SOURCE_DETAILS, getSourceDetails());
+			}
+
+			return retVal;
 		}
 	}
 
@@ -814,7 +872,7 @@ public interface IValidationSupport {
 		}
 
 		public IBaseParameters toParameters(
-				FhirContext theContext, List<? extends IPrimitiveType<String>> theProperties) {
+				FhirContext theContext, List<? extends IPrimitiveType<String>> thePropertyNames) {
 
 			IBaseParameters retVal = ParametersUtil.newInstance(theContext);
 			if (isNotBlank(getCodeSystemDisplayName())) {
@@ -829,32 +887,42 @@ public interface IValidationSupport {
 			if (myProperties != null) {
 
 				Set<String> properties = Collections.emptySet();
-				if (theProperties != null) {
-					properties = theProperties.stream()
+				if (thePropertyNames != null) {
+					properties = thePropertyNames.stream()
 							.map(IPrimitiveType::getValueAsString)
 							.collect(Collectors.toSet());
 				}
 
 				for (BaseConceptProperty next : myProperties) {
+					String propertyName = next.getPropertyName();
 
-					if (!properties.isEmpty()) {
-						if (!properties.contains(next.getPropertyName())) {
-							continue;
-						}
+					if (!properties.isEmpty() && !properties.contains(propertyName)) {
+						continue;
 					}
 
 					IBase property = ParametersUtil.addParameterToParameters(theContext, retVal, "property");
-					ParametersUtil.addPartCode(theContext, property, "code", next.getPropertyName());
+					ParametersUtil.addPartCode(theContext, property, "code", propertyName);
 
-					if (next instanceof StringConceptProperty) {
-						StringConceptProperty prop = (StringConceptProperty) next;
-						ParametersUtil.addPartString(theContext, property, "value", prop.getValue());
-					} else if (next instanceof CodingConceptProperty) {
-						CodingConceptProperty prop = (CodingConceptProperty) next;
-						ParametersUtil.addPartCoding(
-								theContext, property, "value", prop.getCodeSystem(), prop.getCode(), prop.getDisplay());
-					} else {
-						throw new IllegalStateException(Msg.code(1739) + "Don't know how to handle " + next.getClass());
+					String propertyType = next.getType();
+					switch (propertyType) {
+						case TYPE_STRING:
+							StringConceptProperty stringConceptProperty = (StringConceptProperty) next;
+							ParametersUtil.addPartString(
+									theContext, property, "value", stringConceptProperty.getValue());
+							break;
+						case TYPE_CODING:
+							CodingConceptProperty codingConceptProperty = (CodingConceptProperty) next;
+							ParametersUtil.addPartCoding(
+									theContext,
+									property,
+									"value",
+									codingConceptProperty.getCodeSystem(),
+									codingConceptProperty.getCode(),
+									codingConceptProperty.getDisplay());
+							break;
+						default:
+							throw new IllegalStateException(
+									Msg.code(1739) + "Don't know how to handle " + next.getClass());
 					}
 				}
 			}

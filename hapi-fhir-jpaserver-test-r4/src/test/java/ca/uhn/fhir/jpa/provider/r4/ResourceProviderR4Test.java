@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
+import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.i18n.HapiLocalizer;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
@@ -25,11 +26,13 @@ import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.primitive.UriDt;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.parser.StrictErrorHandler;
+import ca.uhn.fhir.rest.api.CacheControlDirective;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.PreferReturnEnum;
 import ca.uhn.fhir.rest.api.SearchTotalModeEnum;
 import ca.uhn.fhir.rest.api.SummaryEnum;
+import ca.uhn.fhir.rest.api.server.IRestfulServer;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.client.apache.ResourceEntity;
 import ca.uhn.fhir.rest.client.api.IClientInterceptor;
@@ -42,6 +45,7 @@ import ca.uhn.fhir.rest.gclient.NumberClientParam;
 import ca.uhn.fhir.rest.gclient.StringClientParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ParamPrefixEnum;
+import ca.uhn.fhir.rest.server.IPagingProvider;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
@@ -159,15 +163,17 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.mockito.Spy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.util.AopTestUtils;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import javax.annotation.Nonnull;
+import jakarta.annotation.Nonnull;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -220,6 +226,9 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.when;
 
 @SuppressWarnings("Duplicates")
 public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
@@ -255,6 +264,8 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		myStorageSettings.setUpdateWithHistoryRewriteEnabled(false);
 		myStorageSettings.setPreserveRequestIdInResourceBody(false);
 
+		when(myPagingProvider.canStoreSearchResults())
+			.thenCallRealMethod();
 	}
 
 	@BeforeEach
@@ -359,15 +370,20 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		IFhirResourceDao<SearchParameter> searchParameterDao = myDaoRegistry.getResourceDao(SearchParameter.class);
 		searchParameterDao.create(searchParameter, (RequestDetails) null);
 
+		RuntimeSearchParam sp = mySearchParamRegistry.getActiveSearchParam("Organization", "_profile");
+		assertNotNull(sp);
+
 		IFhirResourceDao<Organization> organizationDao = myDaoRegistry.getResourceDao(Organization.class);
 		Organization organizationWithNoProfile = new Organization();
 		organizationWithNoProfile.setName("noProfile");
-		organizationDao.create(organizationWithNoProfile);
+		organizationDao.create(organizationWithNoProfile, mySrd);
 
+		myCaptureQueriesListener.clear();
 		Organization organizationWithProfile = new Organization();
 		organizationWithProfile.setName("withProfile");
 		organizationWithProfile.getMeta().addProfile("http://foo");
-		organizationDao.create(organizationWithProfile);
+		organizationDao.create(organizationWithProfile, mySrd);
+		myCaptureQueriesListener.logInsertQueries();
 
 		runInTransaction(() -> {
 			List<ResourceIndexedSearchParamUri> matched = myResourceIndexedSearchParamUriDao.findAll().stream()
@@ -932,12 +948,14 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 		ourLog.info("About to perform search for: {}", theUri);
 
+		myCaptureQueriesListener.clear();
 		try (CloseableHttpResponse response = ourHttpClient.execute(get)) {
 			String resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(resp);
 			Bundle bundle = myFhirContext.newXmlParser().parseResource(Bundle.class, resp);
 			ids = toUnqualifiedIdValues(bundle);
 		}
+		myCaptureQueriesListener.logSelectQueries(true, true);
 		return ids;
 	}
 
@@ -2718,6 +2736,90 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		assertEquals(total + 1, ids.size());
 	}
 
+
+	@ParameterizedTest
+	@CsvSource({
+		"true,19,10",
+		"false,19,10",
+		"true,20,0",
+		"false,20,0"
+	})
+	public void testPagingWithIncludesReturnsConsistentValues(
+		boolean theAllowStoringSearchResults,
+		int theResourceCount,
+		int theOrgCount
+	) {
+		// setup
+
+		// create resources
+		{
+			Coding tagCode = new Coding();
+			tagCode.setCode("test");
+			tagCode.setSystem("http://example.com");
+			int orgCount = theOrgCount;
+			for (int i = 0; i < theResourceCount; i++) {
+				Task t = new Task();
+				t.getMeta()
+					.addTag(tagCode);
+				t.setStatus(Task.TaskStatus.REQUESTED);
+				if (orgCount > 0) {
+					Organization org = new Organization();
+					org.setName("ORG");
+					IIdType orgId = myOrganizationDao.create(org).getId().toUnqualifiedVersionless();
+
+					orgCount--;
+					t.getOwner().setReference(orgId.getValue());
+				}
+				myTaskDao.create(t);
+			}
+		}
+
+		// when
+		if (!theAllowStoringSearchResults) {
+			// we don't actually allow this in our current
+			// pagingProvider implementations (except for history).
+			// But we will test with it because our ResponsePage
+			// is what's under test here
+			when(myPagingProvider.canStoreSearchResults())
+				.thenReturn(false);
+		}
+
+		int requestedAmount = 10;
+		Bundle bundle = myClient
+			.search()
+			.byUrl("Task?_count=10&_tag=test&status=requested&_include=Task%3Aowner&_sort=status")
+			.returnBundle(Bundle.class)
+			.execute();
+		int count = bundle.getEntry().size();
+		assertFalse(bundle.getEntry().isEmpty());
+
+		String nextUrl = null;
+		do {
+			Bundle.BundleLinkComponent nextLink = bundle.getLink("next");
+			if (nextLink != null) {
+				nextUrl = nextLink.getUrl();
+
+				// make sure we're always requesting 10
+				assertTrue(nextUrl.contains(String.format("_count=%d", requestedAmount)));
+
+				// get next batch
+				bundle = myClient.fetchResourceFromUrl(Bundle.class, nextUrl);
+				int received = bundle.getEntry().size();
+
+				// every next result should produce results
+				assertFalse(bundle.getEntry().isEmpty());
+				count += received;
+			} else {
+				nextUrl = null;
+			}
+		} while (nextUrl != null);
+
+		// verify
+		// we should receive all resources and linked resources
+		assertEquals(theResourceCount + theOrgCount, count);
+	}
+
+
 	@Test
 	public void testPagingWithIncludesReturnsConsistentValues() {
 		// setup
@@ -3204,7 +3306,11 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		});
 		myCaptureQueriesListener.logAllQueriesForCurrentThread();
 
-		Bundle bundle = myClient.search().forResource("Patient").returnBundle(Bundle.class).execute();
+		Bundle bundle = myClient
+			.search()
+			.forResource("Patient")
+			.returnBundle(Bundle.class)
+			.execute();
 		ourLog.debug("Result: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
 		assertEquals(2, bundle.getTotal());
 		assertEquals(1, bundle.getEntry().size());

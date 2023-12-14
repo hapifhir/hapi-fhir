@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.test.config;
 
 import ca.uhn.fhir.batch2.jobs.config.Batch2JobsConfig;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.batch2.JpaBatch2Config;
 import ca.uhn.fhir.jpa.config.HapiJpaConfig;
 import ca.uhn.fhir.jpa.config.PackageLoaderConfig;
@@ -61,6 +62,7 @@ import java.sql.Connection;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
+import static ca.uhn.fhir.jpa.test.config.TestR5Config.SELECT_QUERY_INCLUSION_CRITERIA_EXCLUDING_SEQUENCE_QUERIES;
 import static org.junit.jupiter.api.Assertions.fail;
 
 @Configuration
@@ -82,7 +84,8 @@ public class TestDstu3Config {
 
 	@Bean
 	public CircularQueueCaptureQueriesListener captureQueriesListener() {
-		return new CircularQueueCaptureQueriesListener();
+		return new CircularQueueCaptureQueriesListener()
+				.setSelectQueryInclusionCriteria(SELECT_QUERY_INCLUSION_CRITERIA_EXCLUDING_SEQUENCE_QUERIES);
 	}
 
 	@Bean
@@ -180,8 +183,8 @@ public class TestDstu3Config {
 	}
 
 	@Bean
-	public LocalContainerEntityManagerFactoryBean entityManagerFactory(ConfigurableListableBeanFactory theConfigurableListableBeanFactory, FhirContext theFhirContext) {
-		LocalContainerEntityManagerFactoryBean retVal = HapiEntityManagerFactoryUtil.newEntityManagerFactory(theConfigurableListableBeanFactory, theFhirContext);
+	public LocalContainerEntityManagerFactoryBean entityManagerFactory(ConfigurableListableBeanFactory theConfigurableListableBeanFactory, FhirContext theFhirContext, JpaStorageSettings theStorageSettings) {
+		LocalContainerEntityManagerFactoryBean retVal = HapiEntityManagerFactoryUtil.newEntityManagerFactory(theConfigurableListableBeanFactory, theFhirContext, theStorageSettings);
 		retVal.setPersistenceUnitName("PU_HapiFhirJpaDstu3");
 		retVal.setDataSource(dataSource());
 		retVal.setJpaProperties(jpaProperties());

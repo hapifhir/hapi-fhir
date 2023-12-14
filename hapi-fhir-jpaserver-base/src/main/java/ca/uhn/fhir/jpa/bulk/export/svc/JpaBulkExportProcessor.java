@@ -58,6 +58,8 @@ import ca.uhn.fhir.util.ExtensionUtil;
 import ca.uhn.fhir.util.HapiExtensions;
 import ca.uhn.fhir.util.Logs;
 import ca.uhn.fhir.util.SearchParameterUtil;
+import jakarta.annotation.Nonnull;
+import jakarta.persistence.EntityManager;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseReference;
@@ -78,8 +80,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-import javax.annotation.Nonnull;
-import javax.persistence.EntityManager;
 
 import static ca.uhn.fhir.rest.api.Constants.PARAM_HAS;
 import static ca.uhn.fhir.rest.api.Constants.PARAM_ID;

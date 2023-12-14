@@ -77,7 +77,7 @@ public class AddColumnTest extends BaseTest {
 
 	@ParameterizedTest(name = "{index}: {0}")
 	@MethodSource("data")
-	public void testAddColumnToNonExistantTable_Failing(Supplier<TestDatabaseDetails> theTestDatabaseDetails) {
+	public void testAddColumnToNonExistentTable_Failing(Supplier<TestDatabaseDetails> theTestDatabaseDetails) {
 		before(theTestDatabaseDetails);
 
 		BaseMigrationTasks<VersionEnum> tasks = new BaseMigrationTasks<>();

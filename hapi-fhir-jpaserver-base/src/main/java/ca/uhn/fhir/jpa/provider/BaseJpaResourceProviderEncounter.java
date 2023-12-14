@@ -42,7 +42,7 @@ public abstract class BaseJpaResourceProviderEncounter<T extends IBaseResource> 
 	 */
 	@Operation(name = JpaConstants.OPERATION_EVERYTHING, idempotent = true, bundleType = BundleTypeEnum.SEARCHSET)
 	public IBundleProvider EncounterInstanceEverything(
-			javax.servlet.http.HttpServletRequest theServletRequest,
+			jakarta.servlet.http.HttpServletRequest theServletRequest,
 			@IdParam IIdType theId,
 			@Description(
 							formalDefinition =
@@ -76,7 +76,7 @@ public abstract class BaseJpaResourceProviderEncounter<T extends IBaseResource> 
 	 */
 	@Operation(name = JpaConstants.OPERATION_EVERYTHING, idempotent = true, bundleType = BundleTypeEnum.SEARCHSET)
 	public IBundleProvider EncounterTypeEverything(
-			javax.servlet.http.HttpServletRequest theServletRequest,
+			jakarta.servlet.http.HttpServletRequest theServletRequest,
 			@Description(
 							formalDefinition =
 									"Results from this method are returned across multiple pages. This parameter controls the size of those pages.")

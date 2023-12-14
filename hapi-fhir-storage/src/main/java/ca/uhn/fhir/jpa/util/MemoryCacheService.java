@@ -24,6 +24,7 @@ import ca.uhn.fhir.jpa.api.model.TranslationQuery;
 import ca.uhn.fhir.jpa.model.entity.TagTypeEnum;
 import ca.uhn.fhir.sl.cache.Cache;
 import ca.uhn.fhir.sl.cache.CacheFactory;
+import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.springframework.transaction.support.TransactionSynchronization;
@@ -33,7 +34,6 @@ import java.util.Collection;
 import java.util.EnumMap;
 import java.util.Map;
 import java.util.function.Function;
-import javax.annotation.Nonnull;
 
 import static java.util.concurrent.TimeUnit.MINUTES;
 import static java.util.concurrent.TimeUnit.SECONDS;

@@ -129,8 +129,8 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import javax.annotation.Nonnull;
-import javax.persistence.EntityManager;
+import jakarta.annotation.Nonnull;
+import jakarta.persistence.EntityManager;
 import java.io.IOException;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
