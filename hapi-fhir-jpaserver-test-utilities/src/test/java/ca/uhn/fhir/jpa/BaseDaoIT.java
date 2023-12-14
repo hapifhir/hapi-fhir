@@ -30,7 +30,6 @@ import java.util.Properties;
 @EnableJpaRepositories(repositoryFactoryBeanClass = EnversRevisionRepositoryFactoryBean.class)
 @ContextConfiguration(classes = {BaseDaoIT.TestConfig.class})
 public class BaseDaoIT {
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseDaoIT.class);
 
 	@Autowired
 	EntityManagerFactory myEntityManagerFactory;
@@ -95,8 +94,6 @@ public class BaseDaoIT {
 				BackendSettings.backendKey(LuceneBackendSettings.ANALYSIS_CONFIGURER),
 				HapiHSearchAnalysisConfigurers.HapiLuceneAnalysisConfigurer.class.getName());
 			extraProperties.put(BackendSettings.backendKey(LuceneBackendSettings.LUCENE_VERSION), "LUCENE_CURRENT");
-
-			ourLog.info("jpaProperties: {}", extraProperties);
 
 			return extraProperties;
 		}

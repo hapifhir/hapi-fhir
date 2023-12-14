@@ -118,7 +118,7 @@ public abstract class JpaEmbeddedDatabase {
 			for (String sql : theStatements) {
 				if (!StringUtils.isBlank(sql)) {
 					statement.addBatch(sql);
-					ourLog.info("Added to batch: {}", sql);
+					ourLog.debug("Added to batch: {}", sql);
 				}
 			}
 			statement.executeBatch();

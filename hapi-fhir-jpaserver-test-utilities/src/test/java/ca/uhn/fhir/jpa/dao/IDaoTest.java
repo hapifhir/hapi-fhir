@@ -9,6 +9,7 @@ import java.util.Date;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
+import static org.junit.Assert.fail;
 
 public interface IDaoTest {
 
@@ -22,11 +23,15 @@ public interface IDaoTest {
 		populateResourceHistoryEntity(resourceHistoryTableEntity);
 		entityManager.getTransaction().begin();
 		// when
-
-		entityManager.persist(resourceHistoryTableEntity);
-
-		entityManager.flush();
-		getEntityManager().getTransaction().rollback();
+		try {
+			entityManager.persist(resourceHistoryTableEntity);
+			entityManager.flush();
+		} catch (Exception e){
+			getLogger().info(e.getMessage());
+			fail();
+		} finally {
+			getEntityManager().getTransaction().rollback();
+		}
 
 		ResourceHistoryTable persistedResourceHistoryEntity = entityManager.find(ResourceHistoryTable.class, resourceHistoryTableEntity.getId());
 
@@ -55,5 +60,6 @@ public interface IDaoTest {
 	void disableConstraints();
 	void enableConstraints();
 
+	org.slf4j.Logger getLogger();
 	EntityManager getEntityManager();
 }
