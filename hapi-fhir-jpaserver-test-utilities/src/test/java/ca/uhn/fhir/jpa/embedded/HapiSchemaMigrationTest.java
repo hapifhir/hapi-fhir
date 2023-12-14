@@ -22,8 +22,8 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import javax.sql.DataSource;
 import java.sql.SQLException;
 import java.util.Collections;
+import java.util.List;
 import java.util.Properties;
-import java.util.Set;
 
 import static ca.uhn.fhir.jpa.embedded.HapiEmbeddedDatabasesExtension.FIRST_TESTED_VERSION;
 import static ca.uhn.fhir.jpa.migrate.SchemaMigrator.HAPI_FHIR_MIGRATION_TABLENAME;
@@ -73,7 +73,7 @@ public class HapiSchemaMigrationTest {
 
 		VersionEnum[] allVersions =  VersionEnum.values();
 
-		Set<VersionEnum> dataVersions = Set.of(
+		List<VersionEnum> dataVersions = List.of(
 			VersionEnum.V5_2_0,
 			VersionEnum.V5_3_0,
 			VersionEnum.V5_4_0,
@@ -129,8 +129,10 @@ public class HapiSchemaMigrationTest {
 	private void verifyForcedIdMigration(DataSource theDataSource) throws SQLException {
 		JdbcTemplate jdbcTemplate = new JdbcTemplate(theDataSource);
 		@SuppressWarnings("DataFlowIssue")
-		int count = jdbcTemplate.queryForObject("select count(1) from hfj_resource where fhir_id <> trim(fhir_id)", Integer.class);
-		assertEquals(0, count, "no fhir_id should contain a space");
+		int nullCount = jdbcTemplate.queryForObject("select count(1) from hfj_resource where fhir_id is null", Integer.class);
+		assertEquals(0, nullCount, "no fhir_id should be null");
+		int trailingSpaceCount = jdbcTemplate.queryForObject("select count(1) from hfj_resource where fhir_id <> trim(fhir_id)", Integer.class);
+		assertEquals(0, trailingSpaceCount, "no fhir_id should contain a space");
 	}
 
 
