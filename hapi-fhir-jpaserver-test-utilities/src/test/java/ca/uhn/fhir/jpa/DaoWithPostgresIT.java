@@ -9,11 +9,11 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
 
 @ContextConfiguration(classes = {
-	DaoWithPostgresDaoIT.TestConfig.class
+	DaoWithPostgresIT.TestConfig.class
 })
-public class DaoWithPostgresDaoIT extends BaseDaoIT implements IDaoTest {
+public class DaoWithPostgresIT extends BaseDaoIT implements IDaoTest {
 
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(DaoWithPostgresDaoIT.class);
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(DaoWithPostgresIT.class);
 
 	@Override
 	public Logger getLogger() {
