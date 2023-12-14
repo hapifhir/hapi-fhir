@@ -1,29 +1,20 @@
-package ca.uhn.fhir.jpa;
+package ca.uhn.fhir.jpa.dao.r5.database;
 
-import ca.uhn.fhir.jpa.dao.IDaoTest;
 import ca.uhn.fhir.jpa.embedded.PostgresEmbeddedDatabase;
 import ca.uhn.fhir.jpa.model.dialect.HapiFhirPostgresDialect;
-import org.slf4j.Logger;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
 
 @ContextConfiguration(classes = {
-	DaoWithPostgresIT.TestConfig.class
+	DatabaseVerificationWithPostgresIT.TestConfig.class
 })
-public class DaoWithPostgresIT extends BaseDaoIT implements IDaoTest {
-
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(DaoWithPostgresIT.class);
-
-	@Override
-	public Logger getLogger() {
-		return ourLog;
-	}
+public class DatabaseVerificationWithPostgresIT extends BaseDatabaseVerificationIT {
 
 	@Configuration
 	public static class TestConfig {
 		@Bean
-		public JpaDatabaseContextConfigParamObject jpaDatabaseParamObject(){
+		public JpaDatabaseContextConfigParamObject jpaDatabaseParamObject() {
 			return new JpaDatabaseContextConfigParamObject(
 				new PostgresEmbeddedDatabase(),
 				HapiFhirPostgresDialect.class.getName()

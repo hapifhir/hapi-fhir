@@ -62,7 +62,7 @@ public final class ColumnTypeToDriverTypeToSqlType {
 		setColumnType(ColumnTypeEnum.DOUBLE, DriverTypeEnum.MYSQL_5_7, "double precision");
 		setColumnType(ColumnTypeEnum.DOUBLE, DriverTypeEnum.MSSQL_2012, "double precision");
 		setColumnType(ColumnTypeEnum.DOUBLE, DriverTypeEnum.ORACLE_12C, "double precision");
-		setColumnType(ColumnTypeEnum.DOUBLE, DriverTypeEnum.POSTGRES_9_4, "float8");
+		setColumnType(ColumnTypeEnum.DOUBLE, DriverTypeEnum.POSTGRES_9_4, "double precision");
 
 		setColumnType(ColumnTypeEnum.LONG, DriverTypeEnum.H2_EMBEDDED, "bigint");
 		setColumnType(ColumnTypeEnum.LONG, DriverTypeEnum.DERBY_EMBEDDED, "bigint");
