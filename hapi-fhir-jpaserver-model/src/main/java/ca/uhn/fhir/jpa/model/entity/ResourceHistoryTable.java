@@ -25,6 +25,7 @@ import ca.uhn.fhir.rest.api.Constants;
 import jakarta.persistence.*;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
+import org.hibernate.Length;
 import org.hibernate.annotations.OptimisticLock;
 
 import java.io.Serializable;
@@ -57,7 +58,6 @@ public class ResourceHistoryTable extends BaseHasResource implements Serializabl
 	public static final int ENCODING_COL_LENGTH = 5;
 
 	public static final String HFJ_RES_VER = "HFJ_RES_VER";
-	public static final int RES_TEXT_VC_MAX_LENGTH = 4000;
 	private static final long serialVersionUID = 1L;
 
 	@Id
@@ -94,7 +94,7 @@ public class ResourceHistoryTable extends BaseHasResource implements Serializabl
 	@OptimisticLock(excluded = true)
 	private byte[] myResource;
 
-	@Column(name = "RES_TEXT_VC", nullable = true, length = Integer.MAX_VALUE)
+	@Column(name = "RES_TEXT_VC", nullable = true, length = Length.LONG32)
 	@OptimisticLock(excluded = true)
 	private String myResourceTextVc;
 

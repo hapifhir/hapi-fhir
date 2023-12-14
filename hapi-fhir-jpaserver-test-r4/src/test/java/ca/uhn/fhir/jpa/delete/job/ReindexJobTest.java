@@ -88,7 +88,7 @@ public class ReindexJobTest extends BaseJpaR4Test {
 		}
 
 		// Move resource text to compressed storage, which we don't write to anymore but legacy
-		// data may exist that was previously sotred there, so we're simulating that.
+		// data may exist that was previously stored there, so we're simulating that.
 		List<ResourceHistoryTable> allHistoryEntities = runInTransaction(() -> myResourceHistoryTableDao.findAll());
 		allHistoryEntities.forEach(t->relocateResourceTextToCompressedColumn(t.getResourceId(), t.getVersion()));
 
@@ -147,7 +147,7 @@ public class ReindexJobTest extends BaseJpaR4Test {
 		}
 
 		// Move resource text to compressed storage, which we don't write to anymore but legacy
-		// data may exist that was previously sotred there, so we're simulating that.
+		// data may exist that was previously stored there, so we're simulating that.
 		List<ResourceHistoryTable> allHistoryEntities = runInTransaction(() -> myResourceHistoryTableDao.findAll());
 		allHistoryEntities.forEach(t->relocateResourceTextToCompressedColumn(t.getResourceId(), t.getVersion()));
 

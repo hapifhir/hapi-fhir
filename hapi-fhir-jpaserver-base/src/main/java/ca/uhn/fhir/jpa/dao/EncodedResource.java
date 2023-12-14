@@ -48,7 +48,6 @@ class EncodedResource {
 	}
 
 	public void setResourceText(String theResourceText) {
-		assert theResourceText != null;
 		myResourceText = theResourceText;
 	}
 }

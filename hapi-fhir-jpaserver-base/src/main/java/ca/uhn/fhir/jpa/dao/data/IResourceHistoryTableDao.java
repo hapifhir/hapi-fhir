@@ -80,6 +80,13 @@ public interface IResourceHistoryTableDao extends JpaRepository<ResourceHistoryT
 	@Query("DELETE FROM ResourceHistoryTable t WHERE t.myId = :pid")
 	void deleteByPid(@Param("pid") Long theId);
 
+	/**
+	 * This method is only for use in unit tests - It is used to move the stored resource body contents from the new
+	 * <code>RES_TEXT_VC</code> column to the legacy <code>RES_TEXT</code> column, which is where data may have
+	 * been stored by versions of HAPI FHIR prior to 7.0.0
+	 *
+	 * @since 7.0.0
+	 */
 	@Modifying
 	@Query(
 			"UPDATE ResourceHistoryTable r SET r.myResourceTextVc = null, r.myResource = :text, r.myEncoding = 'JSONC' WHERE r.myId = :pid")

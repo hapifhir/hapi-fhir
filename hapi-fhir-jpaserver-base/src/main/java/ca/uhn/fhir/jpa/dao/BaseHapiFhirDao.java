@@ -643,7 +643,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 			theEntity.setResourceType(toResourceName(theResource));
 		}
 
-		@Nonnull String resourceText;
+		String resourceText;
 		ResourceEncodingEnum encoding;
 		boolean changed = false;
 
@@ -676,10 +676,9 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 					theEntity.setFhirVersion(myContext.getVersion().getVersion());
 
 					HashFunction sha256 = Hashing.sha256();
-					String encodedResource = encodeResource(theResource, encoding, excludeElements, myContext);
-					resourceText = encodedResource;
+					resourceText = encodeResource(theResource, encoding, excludeElements, myContext);
 					encoding = ResourceEncodingEnum.JSON;
-					HashCode hashCode = sha256.hashUnencodedChars(encodedResource);
+					HashCode hashCode = sha256.hashUnencodedChars(resourceText);
 
 					String hashSha256 = hashCode.toString();
 					if (!hashSha256.equals(theEntity.getHashSha256())) {
@@ -697,7 +696,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 			} else {
 
 				encoding = null;
-				resourceText = "";
+				resourceText = null;
 			}
 
 			boolean skipUpdatingTags = myStorageSettings.isMassIngestionMode() && theEntity.isHasTags();
@@ -714,7 +713,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 				changed = true;
 			}
 
-			resourceText = "";
+			resourceText = null;
 			encoding = ResourceEncodingEnum.DEL;
 		}
 
