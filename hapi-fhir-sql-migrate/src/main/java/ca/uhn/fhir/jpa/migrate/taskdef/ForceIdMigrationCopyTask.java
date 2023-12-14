@@ -69,7 +69,7 @@ public class ForceIdMigrationCopyTask extends BaseTask {
 					"update hfj_resource " + "set fhir_id = coalesce( "
 							+ // use first non-null value: forced_id if present, otherwise res_id
 							"   (select f.forced_id from hfj_forced_id f where f.resource_pid = res_id), "
-							+ "   cast(res_id as varchar(64)) "
+							+ "   cast(res_id as char(64)) "
 							+ "  ) "
 							+ "where fhir_id is null "
 							+ "and res_id >= ? and res_id < ?",

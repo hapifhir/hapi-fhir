@@ -66,9 +66,34 @@ public class ForceIdMigrationFixTask extends BaseTask {
 			long batchEnd = batchStart + batchSize;
 			ourLog.info("Migrating client-assigned ids for pids: {}-{}", batchStart, batchEnd);
 
+			/*
+			We have several cases.  Two require no action:
+			1. client-assigned id, with correct value in fhir_id and row in hfj_forced_id
+			2. server-assigned id, with correct value in fhir_id, no row in hfj_forced_id
+			And three require action:
+			3. client-assigned id, no value in fhir_id, but row in hfj_forced_id
+			4. server-assigned id, no value in fhir_id, and row in hfj_forced_id
+			5. bad migration - server-assigned id, with wrong space-padded value in fhir_id, no row in hfj_forced_id
+			 */
+
 			executeSql(
 					"hfj_resource",
-					"update hfj_resource set fhir_id = trim(fhir_id) where res_id >= ? and res_id < ?",
+
+					"update hfj_resource " +
+						// coalesce is varargs and chooses the first non-null value, like ||
+						" set fhir_id = coalesce( " +
+						// case 5.
+						" trim(fhir_id), " +
+						// case 3
+						" (select f.forced_id from hfj_forced_id f where f.resource_pid = res_id), " +
+						// case 4 - use pid as fhir_id
+						"   cast(res_id as varchar(64)) " +
+						"  ) " +
+						// avoid useless updates on engines that don't check
+						// skip case 1, 2.  Only check 3,4,5
+						" where (fhir_id is null or fhir_id <> trim(fhir_id)) " +
+						// chunk range.
+						" and res_id >= ? and res_id < ?",
 					batchStart,
 					batchEnd);
 		}

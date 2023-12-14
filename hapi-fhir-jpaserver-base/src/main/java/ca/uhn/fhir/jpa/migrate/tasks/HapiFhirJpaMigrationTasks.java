@@ -115,10 +115,18 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 
 		// Move forced_id constraints to hfj_resource and the new fhir_id column
 		// Note: we leave the HFJ_FORCED_ID.IDX_FORCEDID_TYPE_FID index in place to support old writers for a while.
+		//version.addTask(new ForceIdMigrationCopyTask(version.getRelease(), "20231018.1").setDoNothing(true));
 		version.addTask(new ForceIdMigrationCopyTask(version.getRelease(), "20231018.1"));
 
 		Builder.BuilderWithTableName hfjResource = version.onTable("HFJ_RESOURCE");
-		hfjResource.modifyColumn("20231018.2", "FHIR_ID").nonNullable();
+		// commented out to make space for the fix task below.
+		// hfjResource.modifyColumn("20231018.2", "FHIR_ID").nonNullable();
+
+		// this was inserted after the release.
+		version.addTask(new ForceIdMigrationFixTask(version.getRelease(), "20231018.3"));
+
+		// added back in place of 20231018.2
+		hfjResource.modifyColumn("20231018.4", "FHIR_ID").nonNullable();
 
 		hfjResource.dropIndex("20231027.1", "IDX_RES_FHIR_ID");
 		hfjResource
@@ -133,7 +141,6 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		// For resolving references that don't supply the type.
 		hfjResource.addIndex("20231027.3", "IDX_RES_FHIR_ID").unique(false).withColumns("FHIR_ID");
 
-		version.addTask(new ForceIdMigrationFixTask(version.getRelease(), "20231213.1"));
 	}
 
 	protected void init680() {
