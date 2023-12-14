@@ -19,6 +19,8 @@ import org.hl7.fhir.r4.model.StructureDefinition;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
+import java.util.Iterator;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -88,6 +90,27 @@ public class ResourceValidationR4Test extends BaseJpaR4Test {
 		SingleValidationMessage message = validationResult.getMessages().iterator().next();
 		assertTrue(message.getMessage().contains(PATIENT_STRUCTURE_DEFINITION_URL + "|2"));
 	}
+
+	@Test
+	public void testValidatePatient_withMultipleProfilesDifferentUrls_validatesAgainstAllProfiles() {
+		final String sdIdentifier =  PATIENT_STRUCTURE_DEFINITION_URL + "-identifier";
+		final String sdName = PATIENT_STRUCTURE_DEFINITION_URL + "-name";
+		createPatientStructureDefinitionWithMandatoryField(sdIdentifier, "1", "Patient.identifier");
+		createPatientStructureDefinitionWithMandatoryField(sdName, "1", "Patient.name");
+
+		Patient patient = new Patient();
+		patient.getMeta().addProfile(sdIdentifier).addProfile(sdName);
+		myPatientDao.create(patient, mySrd);
+
+		ValidationResult validationResult = myFhirValidator.validateWithResult(patient);
+		assertFalse(validationResult.isSuccessful());
+		assertEquals(2, validationResult.getMessages().size());
+
+		Iterator<SingleValidationMessage> messageIterator = validationResult.getMessages().iterator();
+		assertTrue(messageIterator.next().getMessage().contains(sdIdentifier));
+		assertTrue(messageIterator.next().getMessage().contains(sdName));
+	}
+
 
 	@Test
 	public void testStructureDefinition_createResourceWithMultipleProfilesSameStructureDefinition_usesFirstVersion() {
