@@ -567,7 +567,12 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 
 	@Override
 	public <T extends Resource> boolean hasResource(Class<T> class_, String uri) {
-		throw new UnsupportedOperationException(Msg.code(680));
+		if (isBlank(uri)) {
+			return false;
+		}
+
+		ResourceKey key = new ResourceKey(class_.getSimpleName(), uri);
+		return myFetchResourceCache.get(key) != null;
 	}
 
 	@Override
