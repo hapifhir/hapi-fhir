@@ -31,6 +31,7 @@ import java.sql.SQLException;
 /**
  * Fix for bad version of {@link ForceIdMigrationCopyTask}
  * The earlier migration had used at cast to char instead of varchar, which is space-padded on Oracle.
+ * This migration includes the copy action, but also adds a trim() call to fixup the bad server-assigned ids.
  */
 public class ForceIdMigrationFixTask extends BaseTask {
 	private static final Logger ourLog = LoggerFactory.getLogger(ForceIdMigrationFixTask.class);
