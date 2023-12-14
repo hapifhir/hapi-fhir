@@ -115,17 +115,17 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 
 		// Move forced_id constraints to hfj_resource and the new fhir_id column
 		// Note: we leave the HFJ_FORCED_ID.IDX_FORCEDID_TYPE_FID index in place to support old writers for a while.
-		// version.addTask(new ForceIdMigrationCopyTask(version.getRelease(), "20231018.1").setDoNothing(true));
-		version.addTask(new ForceIdMigrationCopyTask(version.getRelease(), "20231018.1"));
+		version.addTask(new ForceIdMigrationCopyTask(version.getRelease(), "20231018.1").setDoNothing(true));
 
 		Builder.BuilderWithTableName hfjResource = version.onTable("HFJ_RESOURCE");
-		// commented out to make space for the fix task below.
+		// commented out to make numeric space for the fix task below.
+		// This constraint can't be enabled until the column is fully populated, and the shipped version of 20231018.1 was broken.
 		// hfjResource.modifyColumn("20231018.2", "FHIR_ID").nonNullable();
 
 		// this was inserted after the release.
 		version.addTask(new ForceIdMigrationFixTask(version.getRelease(), "20231018.3"));
 
-		// added back in place of 20231018.2
+		// added back in place of 20231018.2.  If 20231018.2 already ran, this is a no-op.
 		hfjResource.modifyColumn("20231018.4", "FHIR_ID").nonNullable();
 
 		hfjResource.dropIndex("20231027.1", "IDX_RES_FHIR_ID");
