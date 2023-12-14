@@ -63,7 +63,11 @@ public class ForceIdMigrationFixTask extends BaseTask {
 		// run update in batches.
 		int rowsPerBlock = 50; // hfj_resource has roughly 50 rows per 8k block.
 		int batchSize = rowsPerBlock * 2000; // a few thousand IOPS gives a batch size around a second.
-		ourLog.info("About to migrate ids from {} to {} in batches of size {}", range.getLeft(), range.getRight(), batchSize);
+		ourLog.info(
+				"About to migrate ids from {} to {} in batches of size {}",
+				range.getLeft(),
+				range.getRight(),
+				batchSize);
 		for (long batchStart = range.getLeft(); batchStart <= range.getRight(); batchStart = batchStart + batchSize) {
 			long batchEnd = batchStart + batchSize;
 			ourLog.info("Migrating client-assigned ids for pids: {}-{}", batchStart, batchEnd);
