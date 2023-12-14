@@ -23,22 +23,15 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class FhirResourceDaoR4InlineResourceModeTest extends BaseJpaR4Test {
 
-	@Autowired
-	private IResourceHistoryTableDao myResourceHistoryTableDao;
-
 	@Test
 	public void testRetrieveNonInlinedResource() {
 		IIdType id = createPatient(withActiveTrue());
-		Long idAsLong = id.getIdPartAsLong();
+		Long pid = id.getIdPartAsLong();
+
+		relocateResourceTextToCompressedColumn(pid, 1L);
 
 		runInTransaction(()->{
-			ResourceHistoryTable historyEntity = myResourceHistoryTableDao.findForIdAndVersionAndFetchProvenance(idAsLong, 1);
-			byte[] contents = GZipUtil.compress(historyEntity.getResourceTextVc());
-			myResourceHistoryTableDao.updateNonInlinedContents(contents, historyEntity.getId());
-		});
-
-		runInTransaction(()->{
-			ResourceHistoryTable historyEntity = myResourceHistoryTableDao.findForIdAndVersionAndFetchProvenance(idAsLong, 1);
+			ResourceHistoryTable historyEntity = myResourceHistoryTableDao.findForIdAndVersionAndFetchProvenance(pid, 1);
 			assertNotNull(historyEntity.getResource());
 			assertNull(historyEntity.getResourceTextVc());
 			assertEquals(ResourceEncodingEnum.JSONC, historyEntity.getEncoding());
@@ -59,6 +52,7 @@ public class FhirResourceDaoR4InlineResourceModeTest extends BaseJpaR4Test {
 		// History
 		validatePatient(myPatientDao.history(id, new HistorySearchDateRangeParam(new HashMap<>(), new DateRangeParam(), 0), mySrd).getResources(0, 1).get(0));
 	}
+
 
 	private void validatePatient(IBaseResource theRead) {
 		assertTrue(((Patient)theRead).getActive());

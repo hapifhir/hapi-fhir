@@ -1031,25 +1031,14 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 
 	@ParameterizedTest
 	@CsvSource({
-		// NoOp    OptimisticLock  OptimizeMode      ExpectedSelect  ExpectedUpdate
-		"  false,  false,          CURRENT_VERSION,  2,              1",
-		"  true,   false,          CURRENT_VERSION,  2,              0",
-		"  false,  true,           CURRENT_VERSION,  12,             1",
-		"  true,   true,           CURRENT_VERSION,  12,             0",
-		"  false,  false,          ALL_VERSIONS,     12,             10",
-		"  true,   false,          ALL_VERSIONS,     12,             0",
-		"  false,  true,           ALL_VERSIONS,     22,             10",
-		"  true,   true,           ALL_VERSIONS,     22,             0",
+		// OptimisticLock  OptimizeMode      ExpectedSelect  ExpectedUpdate
+		"  false,          CURRENT_VERSION,  2,              0",
+		"  true,           CURRENT_VERSION,  12,             0",
+		"  false,          ALL_VERSIONS,     12,             0",
+		"  true,           ALL_VERSIONS,     22,             0",
 	})
-	public void testReindexJob_OptimizeStorage(boolean theNoOp, boolean theOptimisticLock, ReindexParameters.OptimizeStorageModeEnum theOptimizeStorageModeEnum, int theExpectedSelectCount, int theExpectedUpdateCount) {
+	public void testReindexJob_OptimizeStorage(boolean theOptimisticLock, ReindexParameters.OptimizeStorageModeEnum theOptimizeStorageModeEnum, int theExpectedSelectCount, int theExpectedUpdateCount) {
 		// Setup
-
-		// In no-op mode, the inlining is already in the state it needs to be in
-		if (theNoOp) {
-			myStorageSettings.setInlineResourceTextBelowSize(10000);
-		} else {
-			myStorageSettings.setInlineResourceTextBelowSize(0);
-		}
 
 		ResourceIdListWorkChunkJson data = new ResourceIdListWorkChunkJson();
 		IIdType patientId = createPatient(withActiveTrue());

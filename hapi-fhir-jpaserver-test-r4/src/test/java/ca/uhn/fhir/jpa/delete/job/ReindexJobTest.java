@@ -87,6 +87,11 @@ public class ReindexJobTest extends BaseJpaR4Test {
 			createPatient(withActiveTrue());
 		}
 
+		// Move resource text to compressed storage, which we don't write to anymore but legacy
+		// data may exist that was previously sotred there, so we're simulating that.
+		List<ResourceHistoryTable> allHistoryEntities = runInTransaction(() -> myResourceHistoryTableDao.findAll());
+		allHistoryEntities.forEach(t->relocateResourceTextToCompressedColumn(t.getResourceId(), t.getVersion()));
+
 		runInTransaction(()->{
 			assertEquals(20, myResourceHistoryTableDao.count());
 			for (ResourceHistoryTable history : myResourceHistoryTableDao.findAll()) {
@@ -141,6 +146,11 @@ public class ReindexJobTest extends BaseJpaR4Test {
 			createPatient(withActiveTrue());
 		}
 
+		// Move resource text to compressed storage, which we don't write to anymore but legacy
+		// data may exist that was previously sotred there, so we're simulating that.
+		List<ResourceHistoryTable> allHistoryEntities = runInTransaction(() -> myResourceHistoryTableDao.findAll());
+		allHistoryEntities.forEach(t->relocateResourceTextToCompressedColumn(t.getResourceId(), t.getVersion()));
+
 		runInTransaction(()->{
 			assertEquals(20, myResourceHistoryTableDao.count());
 			for (ResourceHistoryTable history : myResourceHistoryTableDao.findAll()) {
@@ -148,8 +158,6 @@ public class ReindexJobTest extends BaseJpaR4Test {
 				assertNotNull(history.getResource());
 			}
 		});
-
-		myStorageSettings.setInlineResourceTextBelowSize(10000);
 
 		// execute
 		JobInstanceStartRequest startRequest = new JobInstanceStartRequest();

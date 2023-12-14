@@ -148,9 +148,7 @@ import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -645,8 +643,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 			theEntity.setResourceType(toResourceName(theResource));
 		}
 
-		@Nonnull
-		String resourceText;
+		@Nonnull String resourceText;
 		ResourceEncodingEnum encoding;
 		boolean changed = false;
 
@@ -1427,9 +1424,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 	}
 
 	private void populateEncodedResource(
-			EncodedResource encodedResource,
-			String encodedResourceString,
-			ResourceEncodingEnum theEncoding) {
+			EncodedResource encodedResource, String encodedResourceString, ResourceEncodingEnum theEncoding) {
 		encodedResource.setResourceText(encodedResourceString);
 		encodedResource.setEncoding(theEncoding);
 	}
