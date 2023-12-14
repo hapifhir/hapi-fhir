@@ -602,7 +602,8 @@ public class Builder {
 			myTask.addPrecondition(new ExecuteTaskPrecondition(
 					() -> {
 						ourLog.info("Checking precondition for SQL: {}", theSql);
-						return MigrationJdbcUtils.queryForSingleBooleanResultMultipleThrowsException(theSql, myTask.newJdbcTemplate());
+						return MigrationJdbcUtils.queryForSingleBooleanResultMultipleThrowsException(
+								theSql, myTask.newJdbcTemplate());
 					},
 					reason));
 

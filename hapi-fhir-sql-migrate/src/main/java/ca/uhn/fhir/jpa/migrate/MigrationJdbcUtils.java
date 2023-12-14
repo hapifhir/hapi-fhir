@@ -34,10 +34,10 @@ import java.util.Optional;
 public class MigrationJdbcUtils {
 	private static final Logger ourLog = LoggerFactory.getLogger(MigrationJdbcUtils.class);
 
-	public static boolean queryForSingleBooleanResultMultipleThrowsException(String theSql, JdbcTemplate theJdbcTemplate) {
+	public static boolean queryForSingleBooleanResultMultipleThrowsException(
+			String theSql, JdbcTemplate theJdbcTemplate) {
 		final RowMapper<Boolean> booleanRowMapper = (theResultSet, theRowNumber) -> theResultSet.getBoolean(1);
-		return queryForSingle(theSql, theJdbcTemplate, booleanRowMapper)
-			.orElse(false);
+		return queryForSingle(theSql, theJdbcTemplate, booleanRowMapper).orElse(false);
 	}
 
 	private static <T> Optional<T> queryForSingle(
@@ -51,7 +51,9 @@ public class MigrationJdbcUtils {
 		if (results.size() > 1) {
 			// Presumably other callers may want different behaviour but in this case more than one result should be
 			// considered a hard failure distinct from an empty result, which is one expected outcome.
-			throw new IllegalArgumentException(Msg.code(2474)+String.format("Failure due to query returning more than one result: %s for SQL: [%s].", results, theSql));
+			throw new IllegalArgumentException(Msg.code(2474)
+					+ String.format(
+							"Failure due to query returning more than one result: %s for SQL: [%s].", results, theSql));
 		}
 
 		return Optional.ofNullable(results.get(0));

@@ -171,7 +171,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 					.onlyAppliesToPlatforms(DriverTypeEnum.POSTGRES_9_4)
 					.onlyIf(
 							String.format(
-								QUERY_FOR_COLUMN_COLLATION_TEMPLATE,
+									QUERY_FOR_COLUMN_COLLATION_TEMPLATE,
 									"HFJ_SPIDX_STRING".toLowerCase(),
 									"SP_VALUE_NORMALIZED".toLowerCase()),
 							"Column HFJ_SPIDX_STRING.SP_VALUE_NORMALIZED already has a collation of 'C' so doing nothing");
@@ -182,7 +182,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 					.onlyAppliesToPlatforms(DriverTypeEnum.POSTGRES_9_4)
 					.onlyIf(
 							String.format(
-								QUERY_FOR_COLUMN_COLLATION_TEMPLATE,
+									QUERY_FOR_COLUMN_COLLATION_TEMPLATE,
 									"HFJ_SPIDX_URI".toLowerCase(),
 									"SP_URI".toLowerCase()),
 							"Column HFJ_SPIDX_STRING.SP_VALUE_NORMALIZED already has a collation of 'C' so doing nothing");
