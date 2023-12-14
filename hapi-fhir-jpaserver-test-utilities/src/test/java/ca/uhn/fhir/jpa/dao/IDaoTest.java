@@ -43,7 +43,6 @@ public interface IDaoTest {
 	}
 
 	default void populateResourceHistoryEntity(ResourceHistoryTable theResourceHistoryTable){
-//		theResourceHistoryTable.setMyId(1L);
 		theResourceHistoryTable.setResourceId(1L);
 		theResourceHistoryTable.setResourceType("Patient");
 		theResourceHistoryTable.setVersion(1L);
