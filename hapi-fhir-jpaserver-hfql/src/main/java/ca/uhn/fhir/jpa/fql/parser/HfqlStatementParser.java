@@ -331,10 +331,9 @@ public class HfqlStatementParser {
 
 				HfqlLexerToken nextToken = theToken;
 				if (!KEYWORD_AND.equals(nextToken.asKeyword()) && !DIRECTIVE_KEYWORDS.contains(nextToken.asKeyword())) {
-					StringBuilder expression = new StringBuilder(myWhereClause.getLeft());
-					while (true) {
-						expression.append(' ').append(nextToken.getToken());
+					myWhereClause.addRight(nextToken.getToken());
 
+					while (true) {
 						if (myLexer.hasNextToken(HfqlLexerOptions.FHIRPATH_EXPRESSION)) {
 							nextToken = myLexer.getNextToken(HfqlLexerOptions.FHIRPATH_EXPRESSION);
 							String nextTokenAsKeyword = nextToken.asKeyword();
@@ -342,13 +341,12 @@ public class HfqlStatementParser {
 									|| DIRECTIVE_KEYWORDS.contains(nextTokenAsKeyword)) {
 								break;
 							}
+							myWhereClause.addRight(nextToken.getToken());
 						} else {
 							nextToken = null;
 							break;
 						}
 					}
-
-					myWhereClause.setLeft(expression.toString());
 				}
 
 				if (nextToken != null) {
