@@ -29,6 +29,7 @@ import ca.uhn.fhir.jpa.migrate.taskdef.CalculateHashesTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.CalculateOrdinalDatesTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.ColumnTypeEnum;
 import ca.uhn.fhir.jpa.migrate.taskdef.ForceIdMigrationCopyTask;
+import ca.uhn.fhir.jpa.migrate.taskdef.ForceIdMigrationFixTask;
 import ca.uhn.fhir.jpa.migrate.tasks.api.BaseMigrationTasks;
 import ca.uhn.fhir.jpa.migrate.tasks.api.Builder;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
@@ -131,6 +132,8 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 
 		// For resolving references that don't supply the type.
 		hfjResource.addIndex("20231027.3", "IDX_RES_FHIR_ID").unique(false).withColumns("FHIR_ID");
+
+		version.addTask(new ForceIdMigrationFixTask(version.getRelease(), "20231213.1"));
 	}
 
 	protected void init680() {

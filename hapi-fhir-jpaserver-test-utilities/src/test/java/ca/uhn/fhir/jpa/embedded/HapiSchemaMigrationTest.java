@@ -17,6 +17,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ArgumentsSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 import javax.sql.DataSource;
 import java.sql.SQLException;
@@ -26,6 +27,7 @@ import java.util.Set;
 
 import static ca.uhn.fhir.jpa.embedded.HapiEmbeddedDatabasesExtension.FIRST_TESTED_VERSION;
 import static ca.uhn.fhir.jpa.migrate.SchemaMigrator.HAPI_FHIR_MIGRATION_TABLENAME;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -101,6 +103,8 @@ public class HapiSchemaMigrationTest {
 			new HapiForeignKeyIndexHelper()
 				.ensureAllForeignKeysAreIndexed(dataSource);
 		}
+
+		verifyForcedIdMigration(dataSource);
 	}
 
 	private static void migrate(DriverTypeEnum theDriverType, DataSource dataSource, HapiMigrationStorageSvc hapiMigrationStorageSvc, VersionEnum from, VersionEnum to) throws SQLException {
@@ -118,6 +122,17 @@ public class HapiSchemaMigrationTest {
 		schemaMigrator.createMigrationTableIfRequired();
 		schemaMigrator.migrate();
 	}
+
+	/**
+	 * For bug https://github.com/hapifhir/hapi-fhir/issues/5546
+	 */
+	private void verifyForcedIdMigration(DataSource theDataSource) throws SQLException {
+		JdbcTemplate jdbcTemplate = new JdbcTemplate(theDataSource);
+		@SuppressWarnings("DataFlowIssue")
+		int count = jdbcTemplate.queryForObject("select count(1) from hfj_resource where fhir_id <> trim(fhir_id)", Integer.class);
+		assertEquals(0, count, "no fhir_id should contain a space");
+	}
+
 
 	@Test
 	public void testCreateMigrationTableIfRequired() throws SQLException {
