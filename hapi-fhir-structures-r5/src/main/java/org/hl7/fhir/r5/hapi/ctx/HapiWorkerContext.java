@@ -97,12 +97,12 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 
 	@Override
 	public CodeSystem fetchCodeSystem(String system, FhirPublication fhirVersion) {
-		throw new UnsupportedOperationException(Msg.code(2462));
+		throw new UnsupportedOperationException(Msg.code(2456));
 	}
 
 	@Override
 	public CodeSystem fetchCodeSystem(String system, String version, FhirPublication fhirVersion) {
-		throw new UnsupportedOperationException(Msg.code(2463));
+		throw new UnsupportedOperationException(Msg.code(2457));
 	}
 
 	@Override
@@ -117,12 +117,12 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 
 	@Override
 	public CodeSystem fetchSupplementedCodeSystem(String system, FhirPublication fhirVersion) {
-		throw new UnsupportedOperationException(Msg.code(2464));
+		throw new UnsupportedOperationException(Msg.code(2458));
 	}
 
 	@Override
 	public CodeSystem fetchSupplementedCodeSystem(String system, String version, FhirPublication fhirVersion) {
-		throw new UnsupportedOperationException(Msg.code(2465));
+		throw new UnsupportedOperationException(Msg.code(2459));
 	}
 
 	@Override
@@ -137,7 +137,7 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 
 	@Override
 	public List<String> getResourceNames(FhirPublication fhirVersion) {
-		throw new UnsupportedOperationException(Msg.code(2466));
+		throw new UnsupportedOperationException(Msg.code(2460));
 	}
 
 	@Override
@@ -162,7 +162,7 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 
 	@Override
 	public boolean supportsSystem(String system, FhirPublication fhirVersion) throws TerminologyServiceException {
-		throw new UnsupportedOperationException(Msg.code(2467));
+		throw new UnsupportedOperationException(Msg.code(2461));
 	}
 
 	@Override
@@ -360,17 +360,17 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 
 	@Override
 	public boolean isPrimitiveType(String s) {
-		throw new UnsupportedOperationException(Msg.code(2456));
+		throw new UnsupportedOperationException(Msg.code(2462));
 	}
 
 	@Override
 	public boolean isDataType(String s) {
-		throw new UnsupportedOperationException(Msg.code(2457));
+		throw new UnsupportedOperationException(Msg.code(2463));
 	}
 
 	@Override
 	public StructureDefinition fetchTypeDefinition(String typeName, FhirPublication fhirVersion) {
-		throw new UnsupportedOperationException(Msg.code(2458));
+		throw new UnsupportedOperationException(Msg.code(2464));
 	}
 
 	@Override
@@ -380,7 +380,7 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 
 	@Override
 	public List<StructureDefinition> fetchTypeDefinitions(String n, FhirPublication fhirPublication) {
-		throw new UnsupportedOperationException(Msg.code(2459));
+		throw new UnsupportedOperationException(Msg.code(2465));
 	}
 
 	@Override
@@ -400,7 +400,7 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 	}
 
 	public <T extends Resource> T fetchResource(Class<T> class_, String uri, FhirPublication fhirVersion) {
-		throw new UnsupportedOperationException(Msg.code(2460));
+		throw new UnsupportedOperationException(Msg.code(2466));
 	}
 
 	@Override
@@ -427,7 +427,7 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 	@Override
 	public <T extends Resource> T fetchResource(
 			Class<T> class_, String uri, String version, FhirPublication fhirVersion) {
-		throw new UnsupportedOperationException(Msg.code(2461));
+		throw new UnsupportedOperationException(Msg.code(2467));
 	}
 
 	@Override
