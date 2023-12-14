@@ -81,12 +81,16 @@ public abstract class BaseTest {
 	protected HapiMigrationDao myHapiMigrationDao;
 	protected HapiMigrationStorageSvc myHapiMigrationStorageSvc;
 
-	public static Stream<Arguments> dataWithEvaluationResult() {
+	public static Stream<Arguments> dataWithEvaluationResults() {
 		return Stream.of(
-			Arguments.of(TEST_DATABASE_DETAILS_H2_SUPPLIER, true),
-			Arguments.of(TEST_DATABASE_DETAILS_H2_SUPPLIER, false),
-			Arguments.of(TEST_DATABASE_DETAILS_DERBY_SUPPLIER, true),
-			Arguments.of(TEST_DATABASE_DETAILS_DERBY_SUPPLIER, false)
+			Arguments.of(TEST_DATABASE_DETAILS_H2_SUPPLIER, List.of(true, true), true),
+			Arguments.of(TEST_DATABASE_DETAILS_H2_SUPPLIER, List.of(false, true), false),
+			Arguments.of(TEST_DATABASE_DETAILS_H2_SUPPLIER, List.of(true, false), false),
+			Arguments.of(TEST_DATABASE_DETAILS_H2_SUPPLIER, List.of(false, false), false),
+			Arguments.of(TEST_DATABASE_DETAILS_DERBY_SUPPLIER, List.of(true, true), true),
+			Arguments.of(TEST_DATABASE_DETAILS_DERBY_SUPPLIER, List.of(false, true), false),
+			Arguments.of(TEST_DATABASE_DETAILS_DERBY_SUPPLIER, List.of(true, false), false),
+			Arguments.of(TEST_DATABASE_DETAILS_DERBY_SUPPLIER, List.of(false, false), false)
 		);
 	}
 

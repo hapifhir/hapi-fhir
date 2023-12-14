@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
 
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import ca.uhn.fhir.jpa.migrate.tasks.api.BaseMigrationTasks;
+import ca.uhn.fhir.jpa.migrate.tasks.api.Builder;
 import ca.uhn.fhir.util.VersionEnum;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -141,8 +142,8 @@ public class ExecuteRawSqlTaskTest extends BaseTest {
 	}
 
 	@ParameterizedTest()
-	@MethodSource("dataWithEvaluationResult")
-	public void testExecuteRawSqlTaskWithPrecondition(Supplier<TestDatabaseDetails> theTestDatabaseDetails, boolean theIsExecutionExpected) {
+	@MethodSource("dataWithEvaluationResults")
+	public void testExecuteRawSqlTaskWithPrecondition(Supplier<TestDatabaseDetails> theTestDatabaseDetails, List<Boolean> thePreconditionOutcomes, boolean theIsExecutionExpected) {
 		before(theTestDatabaseDetails);
 		executeSql("create table SOMETABLE (PID bigint not null, TEXTCOL varchar(255))");
 
@@ -151,15 +152,19 @@ public class ExecuteRawSqlTaskTest extends BaseTest {
 		assertTrue(outputPreMigrate.isEmpty());
 
 		final String someFakeUpdateSql = "INSERT INTO SOMETABLE (PID, TEXTCOL) VALUES (123, 'abc')";
-		final String someFakeSelectSql =
-			String.format("SELECT %s %s", theIsExecutionExpected,
-				(BaseTest.DERBY.equals(theTestDatabaseDetails.toString())) ? "FROM SYSIBM.SYSDUMMY1" : "");
-		final String someReason = "I don''t feel like it!";
+		final String someReason = "I dont feel like it!";
 
 		final BaseMigrationTasks<VersionEnum> tasks = new BaseMigrationTasks<>();
-		tasks.forVersion(VersionEnum.V4_0_0)
-			.executeRawSql("2024.02", someFakeUpdateSql)
-			.onlyIf(someFakeSelectSql, someReason);
+
+		final Builder.BuilderCompleteTask builderCompleteTask = tasks.forVersion(VersionEnum.V4_0_0)
+			.executeRawSql("2024.02", someFakeUpdateSql);
+
+		for (boolean preconditionOutcome: thePreconditionOutcomes) {
+			final String someFakeSelectSql =
+				String.format("SELECT %s %s", preconditionOutcome,
+					(BaseTest.DERBY.equals(theTestDatabaseDetails.toString())) ? "FROM SYSIBM.SYSDUMMY1" : "");
+			builderCompleteTask.onlyIf(someFakeSelectSql, someReason);
+		}
 
 		getMigrator().addTasks(tasks.getTaskList(VersionEnum.V0_1, VersionEnum.V4_0_0));
 		getMigrator().migrate();
@@ -187,7 +192,7 @@ public class ExecuteRawSqlTaskTest extends BaseTest {
 
 		final String someFakeUpdateSql = "INSERT INTO SOMETABLE (PID, TEXTCOL) VALUES (123, 'abc')";
 		final String someFakeSelectSql = "UPDATE SOMETABLE SET PID = 1";
-		final String someReason = "I don''t feel like it!";
+		final String someReason = "I dont feel like it!";
 
 		try {
 			final BaseMigrationTasks<VersionEnum> tasks = new BaseMigrationTasks<>();
@@ -198,6 +203,37 @@ public class ExecuteRawSqlTaskTest extends BaseTest {
 			fail();
 		} catch (IllegalArgumentException exception) {
 			assertEquals("HAPI-2455: Only SELECT statements (including CTEs) are allowed here.  Please check your SQL: [UPDATE SOMETABLE SET PID = 1]", exception.getMessage());
+		}
+	}
+
+	@ParameterizedTest()
+	@MethodSource("data")
+	public void testExecuteRawSqlTaskWithPreconditionPreconditionSqlReturnsMultiple(Supplier<TestDatabaseDetails> theTestDatabaseDetails) {
+		before(theTestDatabaseDetails);
+		executeSql("create table SOMETABLE (PID bigint not null, TEXTCOL varchar(255))");
+		executeSql("INSERT INTO SOMETABLE (PID, TEXTCOL) VALUES (123, 'abc')");
+		executeSql("INSERT INTO SOMETABLE (PID, TEXTCOL) VALUES (456, 'def')");
+
+		final List<Map<String, Object>> outputPreMigrate = executeQuery("SELECT PID,TEXTCOL FROM SOMETABLE");
+
+		assertEquals(2, outputPreMigrate.size());
+
+		final String someFakeUpdateSql = "INSERT INTO SOMETABLE (PID, TEXTCOL) VALUES (789, 'xyz')";
+		final String someFakeSelectSql = "SELECT PID != 0 FROM SOMETABLE";
+		final String someReason = "I dont feel like it!";
+
+		final BaseMigrationTasks<VersionEnum> tasks = new BaseMigrationTasks<>();
+
+		final Builder.BuilderCompleteTask builderCompleteTask = tasks.forVersion(VersionEnum.V4_0_0)
+			.executeRawSql("2024.02", someFakeUpdateSql);
+		 builderCompleteTask.onlyIf(someFakeSelectSql, someReason);
+
+		getMigrator().addTasks(tasks.getTaskList(VersionEnum.V0_1, VersionEnum.V4_0_0));
+		try {
+			getMigrator().migrate();
+			fail();
+		} catch (IllegalArgumentException exception) {
+			assertEquals("HAPI-2474: Failure due to query returning more than one result: [true, true] for SQL: [SELECT PID != 0 FROM SOMETABLE].", exception.getMessage());
 		}
 	}
 }

@@ -2,6 +2,6 @@
 type: fix
 issue: 5547
 title: "Previously LIKE queries against resources would perform poorly on PostgreSQL if the database locale/collation was not 'C'.
-        This has been resolving by checking hfj_spidx_string.sp_value_normalized and hfj_spidx_uri.sp_uri column
+        This has been resolved by checking hfj_spidx_string.sp_value_normalized and hfj_spidx_uri.sp_uri column
         collations during migration and if either or both are non C, create a new btree varchar_pattern_ops on the
         hash values.  If both column collations are 'C', do not create any new indexes."
