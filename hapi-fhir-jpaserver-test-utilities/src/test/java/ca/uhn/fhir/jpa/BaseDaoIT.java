@@ -7,11 +7,8 @@ import ca.uhn.fhir.jpa.embedded.JpaEmbeddedDatabase;
 import ca.uhn.fhir.jpa.search.HapiHSearchAnalysisConfigurers;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
-import jakarta.persistence.PersistenceContext;
-import jakarta.persistence.PersistenceContextType;
 import org.hibernate.search.backend.lucene.cfg.LuceneBackendSettings;
 import org.hibernate.search.engine.cfg.BackendSettings;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
@@ -47,11 +44,6 @@ public class BaseDaoIT {
 
 	public void enableConstraints() {
 		myJpaEmbeddedDatabase.enableConstraints();
-	}
-
-	@AfterEach
-	public void doAfterEach() {
-//		myJpaEmbeddedDatabase.clearDatabase();
 	}
 
 	@Configuration

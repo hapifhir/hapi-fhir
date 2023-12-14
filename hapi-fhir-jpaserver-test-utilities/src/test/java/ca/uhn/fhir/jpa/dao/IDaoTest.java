@@ -22,6 +22,7 @@ public interface IDaoTest {
 
 		populateResourceHistoryEntity(resourceHistoryTableEntity);
 		entityManager.getTransaction().begin();
+
 		// when
 		try {
 			entityManager.persist(resourceHistoryTableEntity);
@@ -36,14 +37,15 @@ public interface IDaoTest {
 		ResourceHistoryTable persistedResourceHistoryEntity = entityManager.find(ResourceHistoryTable.class, resourceHistoryTableEntity.getId());
 
 		// then
-		assertThat(persistedResourceHistoryEntity.getResourceId(), equalTo(resourceHistoryTableEntity.getResourceId()));
-		assertThat(persistedResourceHistoryEntity.getResourceType(), equalTo(resourceHistoryTableEntity.getResourceType()));
-		assertThat(persistedResourceHistoryEntity.getVersion(), equalTo(resourceHistoryTableEntity.getVersion()));
-		assertThat(persistedResourceHistoryEntity.getEncoding(), equalTo(resourceHistoryTableEntity.getEncoding()));
-		assertThat(persistedResourceHistoryEntity.isHasTags(), equalTo(resourceHistoryTableEntity.isHasTags()));
-		assertThat(persistedResourceHistoryEntity.getPublishedDate(), equalTo(resourceHistoryTableEntity.getPublishedDate()));
-		assertThat(persistedResourceHistoryEntity.getUpdatedDate(), equalTo(resourceHistoryTableEntity.getUpdatedDate()));
-
+		{
+			assertThat(persistedResourceHistoryEntity.getResourceId(), equalTo(resourceHistoryTableEntity.getResourceId()));
+			assertThat(persistedResourceHistoryEntity.getResourceType(), equalTo(resourceHistoryTableEntity.getResourceType()));
+			assertThat(persistedResourceHistoryEntity.getVersion(), equalTo(resourceHistoryTableEntity.getVersion()));
+			assertThat(persistedResourceHistoryEntity.getEncoding(), equalTo(resourceHistoryTableEntity.getEncoding()));
+			assertThat(persistedResourceHistoryEntity.isHasTags(), equalTo(resourceHistoryTableEntity.isHasTags()));
+			assertThat(persistedResourceHistoryEntity.getPublishedDate(), equalTo(resourceHistoryTableEntity.getPublishedDate()));
+			assertThat(persistedResourceHistoryEntity.getUpdatedDate(), equalTo(resourceHistoryTableEntity.getUpdatedDate()));
+		}
 		enableConstraints();
 	}
 
