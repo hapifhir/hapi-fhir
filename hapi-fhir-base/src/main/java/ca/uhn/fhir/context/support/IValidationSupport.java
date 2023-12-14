@@ -295,8 +295,8 @@ public interface IValidationSupport {
 	 */
 	@Nullable
 	default CodeValidationResult validateCode(
-			@Nonnull ValidationSupportContext theValidationSupportContext,
-			@Nonnull ConceptValidationOptions theOptions,
+			ValidationSupportContext theValidationSupportContext,
+			ConceptValidationOptions theOptions,
 			String theCodeSystem,
 			String theCode,
 			String theDisplay,
@@ -526,7 +526,12 @@ public interface IValidationSupport {
 		public String getPropertyName() {
 			return myPropertyName;
 		}
+
+		public abstract String getType();
 	}
+
+	String TYPE_STRING = "string";
+	String TYPE_CODING = "Coding";
 
 	class StringConceptProperty extends BaseConceptProperty {
 		private final String myValue;
@@ -543,6 +548,10 @@ public interface IValidationSupport {
 
 		public String getValue() {
 			return myValue;
+		}
+
+		public String getType() {
+			return TYPE_STRING;
 		}
 	}
 
@@ -573,6 +582,10 @@ public interface IValidationSupport {
 
 		public String getDisplay() {
 			return myDisplay;
+		}
+
+		public String getType() {
+			return TYPE_CODING;
 		}
 	}
 
@@ -881,25 +894,35 @@ public interface IValidationSupport {
 				}
 
 				for (BaseConceptProperty next : myProperties) {
+					String propertyName = next.getPropertyName();
 
-					if (!properties.isEmpty()) {
-						if (!properties.contains(next.getPropertyName())) {
-							continue;
-						}
+					if (!properties.isEmpty() && !properties.contains(propertyName)) {
+						continue;
 					}
 
 					IBase property = ParametersUtil.addParameterToParameters(theContext, retVal, "property");
-					ParametersUtil.addPartCode(theContext, property, "code", next.getPropertyName());
+					ParametersUtil.addPartCode(theContext, property, "code", propertyName);
 
-					if (next instanceof StringConceptProperty) {
-						StringConceptProperty prop = (StringConceptProperty) next;
-						ParametersUtil.addPartString(theContext, property, "value", prop.getValue());
-					} else if (next instanceof CodingConceptProperty) {
-						CodingConceptProperty prop = (CodingConceptProperty) next;
-						ParametersUtil.addPartCoding(
-								theContext, property, "value", prop.getCodeSystem(), prop.getCode(), prop.getDisplay());
-					} else {
-						throw new IllegalStateException(Msg.code(1739) + "Don't know how to handle " + next.getClass());
+					String propertyType = next.getType();
+					switch (propertyType) {
+						case TYPE_STRING:
+							StringConceptProperty stringConceptProperty = (StringConceptProperty) next;
+							ParametersUtil.addPartString(
+									theContext, property, "value", stringConceptProperty.getValue());
+							break;
+						case TYPE_CODING:
+							CodingConceptProperty codingConceptProperty = (CodingConceptProperty) next;
+							ParametersUtil.addPartCoding(
+									theContext,
+									property,
+									"value",
+									codingConceptProperty.getCodeSystem(),
+									codingConceptProperty.getCode(),
+									codingConceptProperty.getDisplay());
+							break;
+						default:
+							throw new IllegalStateException(
+									Msg.code(1739) + "Don't know how to handle " + next.getClass());
 					}
 				}
 			}
