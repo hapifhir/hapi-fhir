@@ -78,22 +78,26 @@ public class ForceIdMigrationFixTask extends BaseTask {
 
 			executeSql(
 					"hfj_resource",
-
 					"update hfj_resource " +
-						// coalesce is varargs and chooses the first non-null value, like ||
-						" set fhir_id = coalesce( " +
-						// case 5.
-						" trim(fhir_id), " +
-						// case 3
-						" (select f.forced_id from hfj_forced_id f where f.resource_pid = res_id), " +
-						// case 4 - use pid as fhir_id
-						"   cast(res_id as varchar(64)) " +
-						"  ) " +
-						// avoid useless updates on engines that don't check
-						// skip case 1, 2.  Only check 3,4,5
-						" where (fhir_id is null or fhir_id <> trim(fhir_id)) " +
-						// chunk range.
-						" and res_id >= ? and res_id < ?",
+							// coalesce is varargs and chooses the first non-null value, like ||
+							" set fhir_id = coalesce( "
+							+
+							// case 5.
+							" trim(fhir_id), "
+							+
+							// case 3
+							" (select f.forced_id from hfj_forced_id f where f.resource_pid = res_id), "
+							+
+							// case 4 - use pid as fhir_id
+							"   cast(res_id as varchar(64)) "
+							+ "  ) "
+							+
+							// avoid useless updates on engines that don't check
+							// skip case 1, 2.  Only check 3,4,5
+							" where (fhir_id is null or fhir_id <> trim(fhir_id)) "
+							+
+							// chunk range.
+							" and res_id >= ? and res_id < ?",
 					batchStart,
 					batchEnd);
 		}
