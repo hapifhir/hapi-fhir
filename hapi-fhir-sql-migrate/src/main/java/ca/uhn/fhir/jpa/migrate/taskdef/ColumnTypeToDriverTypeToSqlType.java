@@ -123,7 +123,7 @@ public final class ColumnTypeToDriverTypeToSqlType {
 				"oid"); // the PG driver will write oid into a `text` column
 		setColumnType(ColumnTypeEnum.CLOB, DriverTypeEnum.MSSQL_2012, "varchar(MAX)");
 
-		setColumnType(ColumnTypeEnum.TEXT, DriverTypeEnum.H2_EMBEDDED, "character large object");
+		setColumnType(ColumnTypeEnum.TEXT, DriverTypeEnum.H2_EMBEDDED, "clob");
 		setColumnType(ColumnTypeEnum.TEXT, DriverTypeEnum.DERBY_EMBEDDED, "clob");
 		setColumnType(ColumnTypeEnum.TEXT, DriverTypeEnum.MARIADB_10_1, "longtext");
 		setColumnType(ColumnTypeEnum.TEXT, DriverTypeEnum.MYSQL_5_7, "longtext");
