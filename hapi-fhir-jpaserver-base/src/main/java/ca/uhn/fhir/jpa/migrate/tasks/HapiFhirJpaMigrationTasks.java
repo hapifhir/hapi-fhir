@@ -119,7 +119,8 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 
 		Builder.BuilderWithTableName hfjResource = version.onTable("HFJ_RESOURCE");
 		// commented out to make numeric space for the fix task below.
-		// This constraint can't be enabled until the column is fully populated, and the shipped version of 20231018.1 was broken.
+		// This constraint can't be enabled until the column is fully populated, and the shipped version of 20231018.1
+		// was broken.
 		// hfjResource.modifyColumn("20231018.2", "FHIR_ID").nonNullable();
 
 		// this was inserted after the release.
