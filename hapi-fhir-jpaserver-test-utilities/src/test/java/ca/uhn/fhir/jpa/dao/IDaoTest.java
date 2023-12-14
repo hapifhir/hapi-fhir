@@ -9,6 +9,7 @@ import java.util.Date;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
+
 public interface IDaoTest {
 
 	@Test
@@ -21,7 +22,9 @@ public interface IDaoTest {
 		populateResourceHistoryEntity(resourceHistoryTableEntity);
 		entityManager.getTransaction().begin();
 		// when
+
 		entityManager.persist(resourceHistoryTableEntity);
+
 		entityManager.flush();
 		getEntityManager().getTransaction().rollback();
 
@@ -40,7 +43,7 @@ public interface IDaoTest {
 	}
 
 	default void populateResourceHistoryEntity(ResourceHistoryTable theResourceHistoryTable){
-		theResourceHistoryTable.setMyId(1L);
+//		theResourceHistoryTable.setMyId(1L);
 		theResourceHistoryTable.setResourceId(1L);
 		theResourceHistoryTable.setResourceType("Patient");
 		theResourceHistoryTable.setVersion(1L);

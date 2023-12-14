@@ -6,6 +6,9 @@ import ca.uhn.fhir.jpa.config.util.HapiEntityManagerFactoryUtil;
 import ca.uhn.fhir.jpa.embedded.JpaEmbeddedDatabase;
 import ca.uhn.fhir.jpa.search.HapiHSearchAnalysisConfigurers;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityManagerFactory;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.PersistenceContextType;
 import org.hibernate.search.backend.lucene.cfg.LuceneBackendSettings;
 import org.hibernate.search.engine.cfg.BackendSettings;
 import org.junit.jupiter.api.AfterEach;
@@ -30,13 +33,13 @@ public class BaseDaoIT {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseDaoIT.class);
 
 	@Autowired
-	EntityManager myEntityManager;
+	EntityManagerFactory myEntityManagerFactory;
 
 	@Autowired
 	JpaEmbeddedDatabase myJpaEmbeddedDatabase;
 
 	public EntityManager getEntityManager() {
-		return myEntityManager;
+		return myEntityManagerFactory.createEntityManager();
 	}
 
 	public void disableConstraints(){
@@ -49,7 +52,7 @@ public class BaseDaoIT {
 
 	@AfterEach
 	public void doAfterEach() {
-		myJpaEmbeddedDatabase.clearDatabase();
+//		myJpaEmbeddedDatabase.clearDatabase();
 	}
 
 	@Configuration
