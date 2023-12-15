@@ -1419,7 +1419,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 
 	@Test
 	public void testValidateResourceWithExampleBindingCodeValidationPassingLoincWithExpansion() {
-		Observation input = new Observation();
+		Observation input = createObservationWithDefaultSubjectPerfomerEffective();
 		input.getText().setDiv(new XhtmlNode().setValue("<div>AA</div>")).setStatus(Narrative.NarrativeStatus.GENERATED);
 
 		ValueSetExpansionComponent expansionComponent = new ValueSetExpansionComponent();
@@ -1440,7 +1440,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 
 	@Test
 	public void testValidateResourceWithExampleBindingCodeValidationPassingNonLoinc() {
-		Observation input = new Observation();
+		Observation input = createObservationWithDefaultSubjectPerfomerEffective();
 		input.getText().setDiv(new XhtmlNode().setValue("<div>AA</div>")).setStatus(Narrative.NarrativeStatus.GENERATED);
 
 		myInstanceVal.setValidationSupport(myValidationSupport);
@@ -1486,7 +1486,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 		all = logResultsAndReturnNonInformationalOnes(output);
 		assertEquals(2, all.size());
 		assertThat(all.get(0).getMessage(), containsString("The unit 'Heck' is unknown' at position 0 for 'http://unitsofmeasure.org#Heck'"));
-		assertThat(all.get(1).getMessage(), containsString("The value provided ('Heck') is not in the value set 'Body Temperature Units'"));
+		assertThat(all.get(1).getMessage(), containsString("The value provided ('Heck') was not found in the value set 'Body Temperature Units'"));
 
 	}
 
@@ -1748,12 +1748,12 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 
 		assertEquals("Unknown code 'urn:iso:std:iso:4217#blah' for 'urn:iso:std:iso:4217#blah'", result.getMessages().get(0).getMessage());
 		assertEquals(ResultSeverityEnum.ERROR, result.getMessages().get(0).getSeverity());
-		assertEquals(15, result.getMessages().get(0).getLocationLine());
+		assertEquals(22, result.getMessages().get(0).getLocationLine());
 		assertEquals(4, result.getMessages().get(0).getLocationCol());
 		assertEquals("Observation.value.ofType(Quantity)", result.getMessages().get(0).getLocationString());
 		assertEquals("Terminology_PassThrough_TX_Message", result.getMessages().get(0).getMessageId());
 
-		assertEquals(15, ((IntegerType) oo.getIssue().get(0).getExtensionByUrl("http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line").getValue()).getValue());
+		assertEquals(22, ((IntegerType) oo.getIssue().get(0).getExtensionByUrl("http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line").getValue()).getValue());
 		assertEquals(4, ((IntegerType) oo.getIssue().get(0).getExtensionByUrl("http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col").getValue()).getValue());
 		assertEquals("Terminology_PassThrough_TX_Message", ((StringType) oo.getIssue().get(0).getExtensionByUrl("http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id").getValue()).getValue());
 		assertEquals("Unknown code 'urn:iso:std:iso:4217#blah' for 'urn:iso:std:iso:4217#blah'", oo.getIssue().get(0).getDiagnostics());
@@ -1761,7 +1761,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 		assertEquals(OperationOutcome.IssueSeverity.ERROR, oo.getIssue().get(0).getSeverity());
 		assertEquals(2, oo.getIssue().get(0).getLocation().size());
 		assertEquals("Observation.value.ofType(Quantity)", oo.getIssue().get(0).getLocation().get(0).getValue());
-		assertEquals("Line[15] Col[4]", oo.getIssue().get(0).getLocation().get(1).getValue());
+		assertEquals("Line[22] Col[4]", oo.getIssue().get(0).getLocation().get(1).getValue());
 	}
 
 

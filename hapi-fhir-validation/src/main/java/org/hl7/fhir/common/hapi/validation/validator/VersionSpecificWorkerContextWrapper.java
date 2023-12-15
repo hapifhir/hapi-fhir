@@ -624,7 +624,7 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 
 	@Override
 	public boolean supportsSystem(String system, FhirPublication fhirVersion) throws TerminologyServiceException {
-		return false;
+		return supportsSystem(system);
 	}
 
 	@Override

@@ -162,7 +162,10 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 
 	@Override
 	public boolean supportsSystem(String system, FhirPublication fhirVersion) throws TerminologyServiceException {
-		throw new UnsupportedOperationException(Msg.code(2461));
+		if (!fhirVersion.equals(FhirPublication.R5)) {
+			throw new UnsupportedOperationException(Msg.code(2461));
+		}
+		return supportsSystem(system);
 	}
 
 	@Override

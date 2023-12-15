@@ -6,6 +6,10 @@
 			"http://hl7.org/fhir/StructureDefinition/bodytemp"
 		]
 	},
+	"text": {
+		"status" : "generated",
+		"div" : "<div xmlns=\"http://www.w3.org/1999/xhtml\">Dummy text</div>"
+	},
 	"status": "final",
 	"category": [
 		{
@@ -28,6 +32,10 @@
 	"subject": {
 		"reference": "Patient/1"
 	},
+	"performer" : [{
+		"reference" : "Practitioner/2",
+		"display" : "A. Langeveld"
+	}],
 	"effectiveDateTime": "2020-04-30T12:00:00+01:00",
 	"valueQuantity": {
 		"value": 37.5,
