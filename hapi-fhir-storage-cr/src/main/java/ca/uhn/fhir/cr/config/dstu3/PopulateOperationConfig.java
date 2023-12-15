@@ -21,25 +21,20 @@ package ca.uhn.fhir.cr.config.dstu3;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.cr.common.IRepositoryFactory;
 import ca.uhn.fhir.cr.config.ProviderLoader;
 import ca.uhn.fhir.cr.config.ProviderSelector;
 import ca.uhn.fhir.rest.server.RestfulServer;
-import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 
 import java.util.Arrays;
 import java.util.Map;
 
+@Configuration
+@Import(CrProcessorConfig.class)
 public class PopulateOperationConfig {
-	@Bean
-	ca.uhn.fhir.cr.dstu3.IQuestionnaireProcessorFactory dstu3QuestionnaireProcessorFactory(
-			IRepositoryFactory theRepositoryFactory, EvaluationSettings theEvaluationSettings) {
-		return rd -> new org.opencds.cqf.fhir.cr.questionnaire.dstu3.QuestionnaireProcessor(
-				theRepositoryFactory.create(rd), theEvaluationSettings);
-	}
-
 	@Bean
 	ca.uhn.fhir.cr.dstu3.questionnaire.QuestionnairePopulateProvider dstu3QuestionnairePopulateProvider() {
 		return new ca.uhn.fhir.cr.dstu3.questionnaire.QuestionnairePopulateProvider();
@@ -48,7 +43,6 @@ public class PopulateOperationConfig {
 	@Bean(name = "populateOperationLoader")
 	public ProviderLoader populateOperationLoader(
 			ApplicationContext theApplicationContext, FhirContext theFhirContext, RestfulServer theRestfulServer) {
-
 		var selector = new ProviderSelector(
 				theFhirContext,
 				Map.of(

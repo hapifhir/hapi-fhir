@@ -38,6 +38,8 @@ import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
 import ca.uhn.fhir.util.ICallable;
 import ca.uhn.fhir.util.TestUtil;
 import com.google.common.annotations.VisibleForTesting;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.hibernate.exception.ConstraintViolationException;
@@ -53,13 +55,12 @@ import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
+import org.springframework.transaction.support.TransactionOperations;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.Objects;
 import java.util.concurrent.Callable;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 /**
  * @see IHapiTransactionService for an explanation of this class
@@ -72,6 +73,7 @@ public class HapiTransactionService implements IHapiTransactionService {
 			HapiTransactionService.class.getName() + "_EXISTING_SEARCH_PARAMS";
 	private static final Logger ourLog = LoggerFactory.getLogger(HapiTransactionService.class);
 	private static final ThreadLocal<RequestPartitionId> ourRequestPartitionThreadLocal = new ThreadLocal<>();
+	private static final ThreadLocal<HapiTransactionService> ourExistingTransaction = new ThreadLocal<>();
 
 	@Autowired
 	protected IInterceptorBroadcaster myInterceptorBroadcaster;
@@ -219,6 +221,11 @@ public class HapiTransactionService implements IHapiTransactionService {
 		myTransactionManager = theTransactionManager;
 	}
 
+	@VisibleForTesting
+	public void setPartitionSettingsForUnitTest(PartitionSettings thePartitionSettings) {
+		myPartitionSettings = thePartitionSettings;
+	}
+
 	@Nullable
 	protected <T> T doExecute(ExecutionBuilder theExecutionBuilder, TransactionCallback<T> theCallback) {
 		final RequestPartitionId requestPartitionId;
@@ -236,8 +243,9 @@ public class HapiTransactionService implements IHapiTransactionService {
 			ourRequestPartitionThreadLocal.set(requestPartitionId);
 		}
 
-		if (Objects.equals(previousRequestPartitionId, requestPartitionId)) {
-			if (canReuseExistingTransaction(theExecutionBuilder)) {
+		if (!myPartitionSettings.isPartitioningEnabled()
+				|| Objects.equals(previousRequestPartitionId, requestPartitionId)) {
+			if (ourExistingTransaction.get() == this && canReuseExistingTransaction(theExecutionBuilder)) {
 				/*
 				 * If we're already in an active transaction, and it's for the right partition,
 				 * and it's not a read-only transaction, we don't need to open a new transaction
@@ -245,12 +253,22 @@ public class HapiTransactionService implements IHapiTransactionService {
 				 */
 				return executeInExistingTransaction(theCallback);
 			}
-		} else if (myTransactionPropagationWhenChangingPartitions == Propagation.REQUIRES_NEW) {
-			return executeInNewTransactionForPartitionChange(
-					theExecutionBuilder, theCallback, requestPartitionId, previousRequestPartitionId);
 		}
 
-		return doExecuteInTransaction(theExecutionBuilder, theCallback, requestPartitionId, previousRequestPartitionId);
+		HapiTransactionService previousExistingTransaction = ourExistingTransaction.get();
+		try {
+			ourExistingTransaction.set(this);
+
+			if (myTransactionPropagationWhenChangingPartitions == Propagation.REQUIRES_NEW) {
+				return executeInNewTransactionForPartitionChange(
+						theExecutionBuilder, theCallback, requestPartitionId, previousRequestPartitionId);
+			} else {
+				return doExecuteInTransaction(
+						theExecutionBuilder, theCallback, requestPartitionId, previousRequestPartitionId);
+			}
+		} finally {
+			ourExistingTransaction.set(previousExistingTransaction);
+		}
 	}
 
 	@Nullable
@@ -402,7 +420,7 @@ public class HapiTransactionService implements IHapiTransactionService {
 		}
 	}
 
-	protected class ExecutionBuilder implements IExecutionBuilder {
+	protected class ExecutionBuilder implements IExecutionBuilder, TransactionOperations {
 
 		private final RequestDetails myRequestDetails;
 		private Isolation myIsolation;
@@ -473,7 +491,7 @@ public class HapiTransactionService implements IHapiTransactionService {
 		}
 
 		@Override
-		public <T> T execute(TransactionCallback<T> callback) {
+		public <T> T execute(@Nonnull TransactionCallback<T> callback) {
 			assert callback != null;
 
 			return doExecute(this, callback);
@@ -482,6 +500,15 @@ public class HapiTransactionService implements IHapiTransactionService {
 		@VisibleForTesting
 		public RequestPartitionId getRequestPartitionIdForTesting() {
 			return myRequestPartitionId;
+		}
+
+		@VisibleForTesting
+		public RequestDetails getRequestDetailsForTesting() {
+			return myRequestDetails;
+		}
+
+		public Propagation getPropagation() {
+			return myPropagation;
 		}
 	}
 
@@ -509,7 +536,8 @@ public class HapiTransactionService implements IHapiTransactionService {
 	}
 
 	@Nullable
-	private static <T> T executeInExistingTransaction(TransactionCallback<T> theCallback) {
+	private static <T> T executeInExistingTransaction(@Nonnull TransactionCallback<T> theCallback) {
+		// TODO we could probably track the TransactionStatus we need as a thread local like we do our partition id.
 		return theCallback.doInTransaction(null);
 	}
 

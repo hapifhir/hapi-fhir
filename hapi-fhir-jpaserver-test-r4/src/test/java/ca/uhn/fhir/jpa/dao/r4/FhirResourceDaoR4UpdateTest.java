@@ -45,7 +45,7 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import javax.persistence.Id;
+import jakarta.persistence.Id;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;

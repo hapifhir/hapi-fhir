@@ -48,7 +48,7 @@ public class StaleSearchDeletingSvcR4Test extends BaseResourceProviderR4Test {
 		super.after();
 		DatabaseSearchCacheSvcImpl staleSearchDeletingSvc = AopTestUtils.getTargetObject(mySearchCacheSvc);
 		staleSearchDeletingSvc.setCutoffSlackForUnitTest(DatabaseSearchCacheSvcImpl.SEARCH_CLEANUP_JOB_INTERVAL_MILLIS);
-		DatabaseSearchCacheSvcImpl.setMaximumResultsToDeleteForUnitTest(DatabaseSearchCacheSvcImpl.DEFAULT_MAX_RESULTS_TO_DELETE_IN_ONE_STMT);
+		DatabaseSearchCacheSvcImpl.setMaximumResultsToDeleteInOneStatement(DatabaseSearchCacheSvcImpl.DEFAULT_MAX_RESULTS_TO_DELETE_IN_ONE_STMT);
 		DatabaseSearchCacheSvcImpl.setMaximumResultsToDeleteInOnePassForUnitTest(DatabaseSearchCacheSvcImpl.DEFAULT_MAX_RESULTS_TO_DELETE_IN_ONE_PAS);
 	}
 
@@ -108,7 +108,7 @@ public class StaleSearchDeletingSvcR4Test extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testDeleteVeryLargeSearch() {
-		DatabaseSearchCacheSvcImpl.setMaximumResultsToDeleteForUnitTest(10);
+		DatabaseSearchCacheSvcImpl.setMaximumResultsToDeleteInOneStatement(10);
 		DatabaseSearchCacheSvcImpl.setMaximumResultsToDeleteInOnePassForUnitTest(10);
 
 		runInTransaction(() -> {
@@ -120,24 +120,21 @@ public class StaleSearchDeletingSvcR4Test extends BaseResourceProviderR4Test {
 			search.setResourceType("Patient");
 			search = mySearchEntityDao.save(search);
 
-			for (int i = 0; i < 15; i++) {
-				ResourceTable resource = new ResourceTable();
-				resource.setPublished(new Date());
-				resource.setUpdated(new Date());
-				resource.setResourceType("Patient");
-				resource = myResourceTableDao.saveAndFlush(resource);
+			ResourceTable resource = new ResourceTable();
+			resource.setPublished(new Date());
+			resource.setUpdated(new Date());
+			resource.setResourceType("Patient");
+			resource = myResourceTableDao.saveAndFlush(resource);
 
+			for (int i = 0; i < 50; i++) {
 				SearchResult sr = new SearchResult(search);
 				sr.setOrder(i);
 				sr.setResourcePid(resource.getId());
 				mySearchResultDao.save(sr);
 			}
-
 		});
 
-		// It should take two passes to delete the search fully
-		runInTransaction(() -> assertEquals(1, mySearchEntityDao.count()));
-		myStaleSearchDeletingSvc.pollForStaleSearchesAndDeleteThem();
+		// we are able to delete this in one pass.
 		runInTransaction(() -> assertEquals(1, mySearchEntityDao.count()));
 		myStaleSearchDeletingSvc.pollForStaleSearchesAndDeleteThem();
 		runInTransaction(() -> assertEquals(0, mySearchEntityDao.count()));
@@ -146,9 +143,9 @@ public class StaleSearchDeletingSvcR4Test extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testDeleteVerySmallSearch() {
-		DatabaseSearchCacheSvcImpl.setMaximumResultsToDeleteForUnitTest(10);
+		DatabaseSearchCacheSvcImpl.setMaximumResultsToDeleteInOneStatement(10);
 
-		runInTransaction(() -> {
+        runInTransaction(() -> {
 			Search search = new Search();
 			search.setStatus(SearchStatusEnum.FINISHED);
 			search.setUuid(UUID.randomUUID().toString());
@@ -172,9 +169,9 @@ public class StaleSearchDeletingSvcR4Test extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testDontDeleteSearchBeforeExpiry() {
-		DatabaseSearchCacheSvcImpl.setMaximumResultsToDeleteForUnitTest(10);
+		DatabaseSearchCacheSvcImpl.setMaximumResultsToDeleteInOneStatement(10);
 
-		runInTransaction(() -> {
+        runInTransaction(() -> {
 			Search search = new Search();
 
 			// Expires in one second, so it should not be deleted right away,
@@ -186,7 +183,7 @@ public class StaleSearchDeletingSvcR4Test extends BaseResourceProviderR4Test {
 			search.setCreated(DateUtils.addDays(new Date(), -10000));
 			search.setSearchType(SearchTypeEnum.SEARCH);
 			search.setResourceType("Patient");
-			search = mySearchEntityDao.save(search);
+			mySearchEntityDao.save(search);
 
 		});
 

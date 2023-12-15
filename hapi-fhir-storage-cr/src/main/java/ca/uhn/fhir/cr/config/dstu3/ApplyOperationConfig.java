@@ -21,33 +21,20 @@ package ca.uhn.fhir.cr.config.dstu3;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.cr.common.IRepositoryFactory;
 import ca.uhn.fhir.cr.config.ProviderLoader;
 import ca.uhn.fhir.cr.config.ProviderSelector;
 import ca.uhn.fhir.rest.server.RestfulServer;
-import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 
 import java.util.Arrays;
 import java.util.Map;
 
+@Configuration
+@Import(CrProcessorConfig.class)
 public class ApplyOperationConfig {
-
-	@Bean
-	ca.uhn.fhir.cr.dstu3.IActivityDefinitionProcessorFactory dstu3ActivityDefinitionProcessorFactory(
-			IRepositoryFactory theRepositoryFactory, EvaluationSettings theEvaluationSettings) {
-		return rd -> new org.opencds.cqf.fhir.cr.activitydefinition.dstu3.ActivityDefinitionProcessor(
-				theRepositoryFactory.create(rd), theEvaluationSettings);
-	}
-
-	@Bean
-	ca.uhn.fhir.cr.dstu3.IPlanDefinitionProcessorFactory dstu3PlanDefinitionProcessorFactory(
-			IRepositoryFactory theRepositoryFactory, EvaluationSettings theEvaluationSettings) {
-		return rd -> new org.opencds.cqf.fhir.cr.plandefinition.dstu3.PlanDefinitionProcessor(
-				theRepositoryFactory.create(rd), theEvaluationSettings);
-	}
-
 	@Bean
 	ca.uhn.fhir.cr.dstu3.activitydefinition.ActivityDefinitionApplyProvider dstu3ActivityDefinitionApplyProvider() {
 		return new ca.uhn.fhir.cr.dstu3.activitydefinition.ActivityDefinitionApplyProvider();
@@ -61,7 +48,6 @@ public class ApplyOperationConfig {
 	@Bean(name = "applyOperationLoader")
 	public ProviderLoader applyOperationLoader(
 			ApplicationContext theApplicationContext, FhirContext theFhirContext, RestfulServer theRestfulServer) {
-
 		var selector = new ProviderSelector(
 				theFhirContext,
 				Map.of(

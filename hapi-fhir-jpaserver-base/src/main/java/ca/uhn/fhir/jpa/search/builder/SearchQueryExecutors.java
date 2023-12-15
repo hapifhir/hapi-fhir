@@ -21,11 +21,11 @@ package ca.uhn.fhir.jpa.search.builder;
 
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.search.builder.models.ResolvedSearchQueryExecutor;
+import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.Validate;
 
 import java.util.Iterator;
 import java.util.List;
-import javax.annotation.Nonnull;
 
 public class SearchQueryExecutors {
 

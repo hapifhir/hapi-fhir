@@ -35,10 +35,12 @@ import ca.uhn.fhir.util.bundle.EntryListAccumulator;
 import ca.uhn.fhir.util.bundle.ModifiableBundleEntry;
 import ca.uhn.fhir.util.bundle.SearchBundleEntryParts;
 import com.google.common.collect.Sets;
+import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.tuple.Pair;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBinary;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
+import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.slf4j.Logger;
@@ -691,6 +693,25 @@ public class BundleUtil {
 			}
 		}
 		return bundleEntry;
+	}
+
+	/**
+	 * Get resource from bundle by resource type and reference
+	 * @param theContext   FhirContext
+	 * @param theBundle    IBaseBundle
+	 * @param theReference IBaseReference
+	 * @return IBaseResource if found and null if not found.
+	 */
+	@Nonnull
+	public static IBaseResource getResourceByReferenceAndResourceType(
+			@Nonnull FhirContext theContext, @Nonnull IBaseBundle theBundle, @Nonnull IBaseReference theReference) {
+		return toListOfResources(theContext, theBundle).stream()
+				.filter(theResource -> theReference
+						.getReferenceElement()
+						.getIdPart()
+						.equals(theResource.getIdElement().getIdPart()))
+				.findFirst()
+				.orElse(null);
 	}
 
 	private static class SortLegality {

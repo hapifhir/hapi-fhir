@@ -43,7 +43,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Pageable;
 
-import javax.annotation.Nonnull;
+import jakarta.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
@@ -293,12 +293,11 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 	}
 
 	private void initAsyncSearches() {
-		when(myPersistedJpaBundleProviderFactory.newInstanceFirstPage(nullable(RequestDetails.class), nullable(Search.class), nullable(SearchTask.class), nullable(ISearchBuilder.class), nullable(RequestPartitionId.class))).thenAnswer(t -> {
+		when(myPersistedJpaBundleProviderFactory.newInstanceFirstPage(nullable(RequestDetails.class), nullable(SearchTask.class), nullable(ISearchBuilder.class), nullable(RequestPartitionId.class))).thenAnswer(t -> {
 			RequestDetails requestDetails = t.getArgument(0, RequestDetails.class);
-			Search search = t.getArgument(1, Search.class);
-			SearchTask searchTask = t.getArgument(2, SearchTask.class);
-			ISearchBuilder<JpaPid> searchBuilder = t.getArgument(3, ISearchBuilder.class);
-			PersistedJpaSearchFirstPageBundleProvider retVal = new PersistedJpaSearchFirstPageBundleProvider(search, searchTask, searchBuilder, requestDetails, null);
+			SearchTask searchTask = t.getArgument(1, SearchTask.class);
+			ISearchBuilder<JpaPid> searchBuilder = t.getArgument(2, ISearchBuilder.class);
+			PersistedJpaSearchFirstPageBundleProvider retVal = new PersistedJpaSearchFirstPageBundleProvider(searchTask, searchBuilder, requestDetails, null);
 			retVal.setStorageSettingsForUnitTest(new JpaStorageSettings());
 			retVal.setTxServiceForUnitTest(myTransactionService);
 			retVal.setSearchCoordinatorSvcForUnitTest(mySvc);

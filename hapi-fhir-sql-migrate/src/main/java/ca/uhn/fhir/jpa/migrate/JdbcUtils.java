@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.migrate;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.migrate.taskdef.ColumnTypeEnum;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -39,6 +40,7 @@ import org.hibernate.engine.jdbc.env.spi.NameQualifierSupport;
 import org.hibernate.engine.jdbc.env.spi.QualifiedObjectNameFormatter;
 import org.hibernate.engine.jdbc.spi.SqlExceptionHelper;
 import org.hibernate.service.ServiceRegistry;
+import org.hibernate.sql.ast.SqlAstTranslatorFactory;
 import org.hibernate.tool.schema.extract.spi.ExtractionContext;
 import org.hibernate.tool.schema.extract.spi.SequenceInformation;
 import org.hibernate.tool.schema.extract.spi.SequenceInformationExtractor;
@@ -46,6 +48,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.ColumnMapRowMapper;
 import org.springframework.transaction.support.TransactionTemplate;
+import org.springframework.util.LinkedCaseInsensitiveMap;
 
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
@@ -60,7 +63,6 @@ import java.util.Locale;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
-import javax.annotation.Nullable;
 import javax.sql.DataSource;
 
 public class JdbcUtils {
@@ -230,6 +232,8 @@ public class JdbcUtils {
 								return new ColumnType(ColumnTypeEnum.DOUBLE, length);
 							case Types.FLOAT:
 								return new ColumnType(ColumnTypeEnum.FLOAT, length);
+							case Types.TINYINT:
+								return new ColumnType(ColumnTypeEnum.TINYINT, length);
 							default:
 								throw new IllegalArgumentException(Msg.code(34) + "Don't know how to handle datatype "
 										+ dataType + " for column " + theColumnName + " on table " + theTableName);
@@ -357,7 +361,7 @@ public class JdbcUtils {
 							massageIdentifier(metadata, theTableName),
 							null);
 
-					Set<String> columnNames = new HashSet<>();
+					LinkedCaseInsensitiveMap<String> columnNames = new LinkedCaseInsensitiveMap<>();
 					while (indexes.next()) {
 						String tableName = indexes.getString("TABLE_NAME").toUpperCase(Locale.US);
 						if (!theTableName.equalsIgnoreCase(tableName)) {
@@ -366,10 +370,10 @@ public class JdbcUtils {
 
 						String columnName = indexes.getString("COLUMN_NAME");
 						columnName = columnName.toUpperCase(Locale.US);
-						columnNames.add(columnName);
+						columnNames.put(columnName, columnName);
 					}
 
-					return columnNames;
+					return columnNames.keySet();
 				} catch (SQLException e) {
 					throw new InternalErrorException(Msg.code(38) + e);
 				}
@@ -388,7 +392,7 @@ public class JdbcUtils {
 							new DatabaseMetaDataDialectResolutionInfoAdapter(connection.getMetaData()));
 
 					Set<String> sequenceNames = new HashSet<>();
-					if (dialect.supportsSequences()) {
+					if (dialect.getSequenceSupport().supportsSequences()) {
 
 						// Use Hibernate to get a list of current sequences
 						SequenceInformationExtractor sequenceInformationExtractor =
@@ -410,6 +414,11 @@ public class JdbcUtils {
 									@Override
 									public Dialect getDialect() {
 										return dialect;
+									}
+
+									@Override
+									public SqlAstTranslatorFactory getSqlAstTranslatorFactory() {
+										return null;
 									}
 
 									@Override
@@ -435,7 +444,7 @@ public class JdbcUtils {
 									@Override
 									public IdentifierHelper getIdentifierHelper() {
 										return new NormalizingIdentifierHelperImpl(
-												this, null, true, true, true, null, null, null);
+												this, null, true, true, true, true, null, null, null);
 									}
 
 									@Override

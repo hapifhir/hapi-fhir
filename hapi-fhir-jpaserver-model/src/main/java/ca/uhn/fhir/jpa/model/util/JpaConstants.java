@@ -167,14 +167,6 @@ public class JpaConstants {
 	 */
 	public static final String OPERATION_IMPORT_POLL_STATUS = "$import-poll-status";
 	/**
-	 * Operation name for the "$export" operation
-	 */
-	public static final String OPERATION_EXPORT = "$export";
-	/**
-	 * Operation name for the "$export-poll-status" operation
-	 */
-	public static final String OPERATION_EXPORT_POLL_STATUS = "$export-poll-status";
-	/**
 	 * Operation name for the "$lastn" operation
 	 */
 	public static final String OPERATION_LASTN = "$lastn";
@@ -302,7 +294,6 @@ public class JpaConstants {
 	 */
 	public static final String SUMMARY_OPERATION_URL = "http://hl7.org/fhir/uv/ips/OperationDefinition/summary";
 
-	public static final String ORG_HIBERNATE_TYPE_TEXT_TYPE = "org.hibernate.type.TextType";
 	public static final String BULK_META_EXTENSION_EXPORT_IDENTIFIER =
 			"https://hapifhir.org/NamingSystem/bulk-export-identifier";
 	public static final String BULK_META_EXTENSION_JOB_ID = "https://hapifhir.org/NamingSystem/bulk-export-job-id";
@@ -310,6 +301,7 @@ public class JpaConstants {
 			"https://hapifhir.org/NamingSystem/bulk-export-binary-resource-type";
 	public static final Set<String> UNDESIRED_RESOURCE_LINKAGES_FOR_EVERYTHING_ON_PATIENT_INSTANCE =
 			Set.of("Provenance", "List", "Group");
+
 	/**
 	 * Non-instantiable
 	 */

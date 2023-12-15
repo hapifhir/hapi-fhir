@@ -10,7 +10,9 @@ import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.api.EncodingEnum;
+import ca.uhn.fhir.test.utilities.HttpClientExtension;
 import ca.uhn.fhir.test.utilities.JettyUtil;
+import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.TestUtil;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
@@ -19,12 +21,13 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.servlet.ServletHandler;
-import org.eclipse.jetty.servlet.ServletHolder;
+import org.eclipse.jetty.ee10.servlet.ServletHandler;
+import org.eclipse.jetty.ee10.servlet.ServletHolder;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,14 +42,20 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  * Created by dsotnikov on 2/25/2014.
  */
 public class CompartmentDstu2Test {
-	private static CloseableHttpClient ourClient;
-
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(CompartmentDstu2Test.class);
-	private static int ourPort;
-	private static Server ourServer;
 	private static String ourLastMethod;
-	private static FhirContext ourCtx = FhirContext.forDstu2();
+	private static final FhirContext ourCtx = FhirContext.forDstu2Cached();
 	private static IdDt ourLastId;
+
+	@RegisterExtension
+	public static final RestfulServerExtension ourServer  = new RestfulServerExtension(ourCtx)
+		.setDefaultResponseEncoding(EncodingEnum.XML)
+		.registerProvider(new TempPatientResourceProvider())
+		.withPagingProvider(new FifoMemoryPagingProvider(100))
+		.setDefaultPrettyPrint(false);
+
+	@RegisterExtension
+	public static final HttpClientExtension ourClient = new HttpClientExtension();
 
 	@AfterAll
 	public static void afterClassClearContext() {
@@ -63,9 +72,7 @@ public class CompartmentDstu2Test {
 
 	@Test
 	public void testReadFirst() throws Exception {
-		init(new TempPatientResourceProvider());
-		
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/123");
+		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/123");
 		HttpResponse status = ourClient.execute(httpGet);
 		String responseContent = IOUtils.toString(status.getEntity().getContent());
 		IOUtils.closeQuietly(status.getEntity().getContent());
@@ -78,9 +85,7 @@ public class CompartmentDstu2Test {
 
 	@Test
 	public void testCompartmentSecond() throws Exception {
-		init(new TempPatientResourceProvider());
-		
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/123/Encounter");
+		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/123/Encounter");
 		HttpResponse status = ourClient.execute(httpGet);
 		String responseContent = IOUtils.toString(status.getEntity().getContent());
 		IOUtils.closeQuietly(status.getEntity().getContent());
@@ -94,9 +99,7 @@ public class CompartmentDstu2Test {
 
 	@Test
 	public void testCompartmentSecond2() throws Exception {
-		init(new TempPatientResourceProvider());
-		
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/123/Observation");
+		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/123/Observation");
 		HttpResponse status = ourClient.execute(httpGet);
 		String responseContent = IOUtils.toString(status.getEntity().getContent());
 		IOUtils.closeQuietly(status.getEntity().getContent());
@@ -106,33 +109,6 @@ public class CompartmentDstu2Test {
 		assertEquals("123", ourLastId.getIdPart());
 		assertThat(responseContent, startsWith("<Bundle"));
 		assertThat(responseContent, containsString("<Observation"));
-	}
-
-	@AfterEach
-	public void after() throws Exception {
-		JettyUtil.closeServer(ourServer);
-		ourClient.close();
-	}
-
-	public void init(IResourceProvider... theProviders) throws Exception {
-		ourServer = new Server(0);
-
-		RestfulServer servlet = new RestfulServer(ourCtx);
-		servlet.setResourceProviders(theProviders);
-		servlet.setDefaultResponseEncoding(EncodingEnum.XML);
-
-		ServletHandler proxyHandler = new ServletHandler();
-		ServletHolder servletHolder = new ServletHolder(servlet);
-		proxyHandler.addServletWithMapping(servletHolder, "/*");
-		ourServer.setHandler(proxyHandler);
-		JettyUtil.startServer(ourServer);
-        ourPort = JettyUtil.getPortForStartedServer(ourServer);
-
-		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
-		HttpClientBuilder builder = HttpClientBuilder.create();
-		builder.setConnectionManager(connectionManager);
-		ourClient = builder.build();
-
 	}
 
 	public static class TempPatientResourceProvider implements IResourceProvider {
@@ -177,5 +153,6 @@ public class CompartmentDstu2Test {
 		}
 
 	}
+
 
 }

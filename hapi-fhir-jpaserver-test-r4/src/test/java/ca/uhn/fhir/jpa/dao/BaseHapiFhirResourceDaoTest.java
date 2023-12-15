@@ -44,9 +44,7 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationContext;
 
-import javax.persistence.EntityManager;
-import java.util.ArrayList;
-import java.util.Collection;
+import jakarta.persistence.EntityManager;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -67,7 +65,7 @@ class BaseHapiFhirResourceDaoTest {
 	private IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
 
 	@Mock
-	private IIdHelperService myIdHelperService;
+	private IIdHelperService<JpaPid> myIdHelperService;
 
 	@Mock
 	private EntityManager myEntityManager;
@@ -88,10 +86,10 @@ class BaseHapiFhirResourceDaoTest {
 	private ISearchParamRegistry mySearchParamRegistry;
 
 	@Mock
-	private SearchBuilderFactory mySearchBuilderFactory;
+	private SearchBuilderFactory<JpaPid> mySearchBuilderFactory;
 
 	@Mock
-	private ISearchBuilder myISearchBuilder;
+	private ISearchBuilder<JpaPid> myISearchBuilder;
 
 	@Captor
 	private ArgumentCaptor<SearchParameterMap> mySearchParameterMapCaptor;

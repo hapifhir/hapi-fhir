@@ -21,8 +21,7 @@ package ca.uhn.fhir.batch2.model;
 
 import ca.uhn.fhir.model.api.IModelJson;
 import com.fasterxml.jackson.annotation.JsonProperty;
-
-import javax.annotation.Nonnull;
+import jakarta.annotation.Nonnull;
 
 public class JobWorkNotification implements IModelJson {
 

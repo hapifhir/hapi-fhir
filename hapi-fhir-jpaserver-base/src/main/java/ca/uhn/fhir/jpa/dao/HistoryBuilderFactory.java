@@ -20,11 +20,11 @@
 package ca.uhn.fhir.jpa.dao;
 
 import ca.uhn.fhir.jpa.config.JpaConfig;
+import jakarta.annotation.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 
 import java.util.Date;
-import javax.annotation.Nullable;
 
 public class HistoryBuilderFactory {
 

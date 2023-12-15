@@ -19,17 +19,13 @@
  */
 package ca.uhn.fhir.jpa.term.api;
 
-import ca.uhn.fhir.context.support.IValidationSupport;
-import ca.uhn.fhir.context.support.TranslateConceptResults;
-import ca.uhn.fhir.jpa.api.model.TranslationRequest;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import org.hl7.fhir.r4.model.ConceptMap;
 
-public interface ITermConceptMappingSvc extends IValidationSupport {
-
-	TranslateConceptResults translate(TranslationRequest theTranslationRequest);
-
-	TranslateConceptResults translateWithReverse(TranslationRequest theTranslationRequest);
+/**
+ * Represents ConceptMap translation and persistence operations
+ */
+public interface ITermConceptMappingSvc extends ITermConceptClientMappingSvc {
 
 	void deleteConceptMapAndChildren(ResourceTable theResourceTable);
 

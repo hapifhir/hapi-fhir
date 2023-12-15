@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.r4.model.Address;
+import org.hl7.fhir.r4.model.Claim;
 import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.Enumerations;
@@ -13,6 +14,8 @@ import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.PrimitiveType;
+import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.Test;
 
 import java.util.Date;
@@ -30,88 +33,88 @@ class TerserUtilTest {
 
 	private FhirContext ourFhirContext = FhirContext.forR4();
 	private static final String SAMPLE_PERSON =
-		"""
-			{
-			      "resourceType": "Patient",
-			      "extension": [
-			        {
-			          "url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race",
-			          "valueCoding": {
-			            "system": "MyInternalRace",
-			            "code": "X",
-			            "display": "Eks"
+		 """
+			  {
+			        "resourceType": "Patient",
+			        "extension": [
+			          {
+			            "url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race",
+			            "valueCoding": {
+			              "system": "MyInternalRace",
+			              "code": "X",
+			              "display": "Eks"
+			            }
+			          },
+			          {
+			            "url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-ethnicity'",
+			            "valueCoding": {
+			              "system": "MyInternalEthnicity",
+			              "display": "NNN"
+			            }
 			          }
-			        },
-			        {
-			          "url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-ethnicity'",
-			          "valueCoding": {
-			            "system": "MyInternalEthnicity",
-			            "display": "NNN"
+			        ],
+			        "identifier": [
+			          {
+			            "system": "http://example.org/member_id",
+			            "value": "123123"
+			          },
+			          {
+			            "system": "http://example.org/medicaid_id",
+			            "value": "12312323123Z"
+			          },
+			          {
+			            "system": "http://example.org/CDNS_id",
+			            "value": "123123123E"
+			          },
+			          {
+			            "system": "http://example.org/SSN"
 			          }
-			        }
-			      ],
-			      "identifier": [
-			        {
-			          "system": "http://example.org/member_id",
-			          "value": "123123"
-			        },
-			        {
-			          "system": "http://example.org/medicaid_id",
-			          "value": "12312323123Z"
-			        },
-			        {
-			          "system": "http://example.org/CDNS_id",
-			          "value": "123123123E"
-			        },
-			        {
-			          "system": "http://example.org/SSN"
-			        }
-			      ],
-			      "active": true,
-			      "name": [
-			        {
-			          "family": "TestFamily",
-			          "given": [
-			            "Given"
-			          ]
-			        }
-			      ],
-			      "telecom": [
-			        {
-			          "system": "email",
-			          "value": "email@email.io"
-			        },
-			        {
-			          "system": "phone",
-			          "value": "123123231"
-			        },
-			        {
-			          "system": "phone",
-			          "value": "1231232312"
-			        },
-			        {
-			          "system": "phone",
-			          "value": "1231232314"
-			        }
-			      ],
-			      "gender": "male",
-			      "birthDate": "1900-01-01",
-			      "deceasedBoolean": true,
-			       "contained": [
-			              {
-			                  "id": "1",
-			                  "identifier": [
-			                      {
-			                          "system": "urn:hssc:srhs:contact:organizationId",
-			                          "value": "1000"
-			                      }
-			                  ],
-			                  "name": "BUILDERS FIRST SOURCE",
-			                  "resourceType": "Organization"
-			              }
-			          ]
-			    }
-				""";
+			        ],
+			        "active": true,
+			        "name": [
+			          {
+			            "family": "TestFamily",
+			            "given": [
+			              "Given"
+			            ]
+			          }
+			        ],
+			        "telecom": [
+			          {
+			            "system": "email",
+			            "value": "email@email.io"
+			          },
+			          {
+			            "system": "phone",
+			            "value": "123123231"
+			          },
+			          {
+			            "system": "phone",
+			            "value": "1231232312"
+			          },
+			          {
+			            "system": "phone",
+			            "value": "1231232314"
+			          }
+			        ],
+			        "gender": "male",
+			        "birthDate": "1900-01-01",
+			        "deceasedBoolean": true,
+			         "contained": [
+			                {
+			                    "id": "1",
+			                    "identifier": [
+			                        {
+			                            "system": "urn:hssc:srhs:contact:organizationId",
+			                            "value": "1000"
+			                        }
+			                    ],
+			                    "name": "BUILDERS FIRST SOURCE",
+			                    "resourceType": "Organization"
+			                }
+			            ]
+			      }
+			  	""";
 
 	@Test
 	void testCloneEidIntoResource() {
@@ -180,7 +183,7 @@ class TerserUtilTest {
 		RuntimeResourceDefinition definition = p1Helper.getResourceDefinition();
 
 		TerserUtil.cloneEidIntoResource(ourFhirContext, definition.getChildByName("identifier"),
-			p1.getIdentifier().get(0), p2Helper.getResource());
+			 p1.getIdentifier().get(0), p2Helper.getResource());
 
 		assertEquals(1, p2Helper.getFieldValues("identifier").size());
 
@@ -291,12 +294,12 @@ class TerserUtilTest {
 
 		Patient p1 = new Patient();
 		p1.addAddress()
-			.addLine("10 Main Street")
-			.setCity("Hamilton")
-			.setState("ON")
-			.setPostalCode("Z0Z0Z0")
-			.setCountry("Canada")
-			.addExtension(ext);
+			 .addLine("10 Main Street")
+			 .setCity("Hamilton")
+			 .setState("ON")
+			 .setPostalCode("Z0Z0Z0")
+			 .setCountry("Canada")
+			 .addExtension(ext);
 
 		Patient p2 = new Patient();
 		p2.addAddress().addLine("10 Lenin Street").setCity("Severodvinsk").setCountry("Russia");
@@ -328,12 +331,12 @@ class TerserUtilTest {
 
 		Patient p1 = new Patient();
 		p1.addAddress()
-			.addLine("10 Main Street")
-			.setCity("Hamilton")
-			.setState("ON")
-			.setPostalCode("Z0Z0Z0")
-			.setCountry("Canada")
-			.addExtension(ext);
+			 .addLine("10 Main Street")
+			 .setCity("Hamilton")
+			 .setState("ON")
+			 .setPostalCode("Z0Z0Z0")
+			 .setCountry("Canada")
+			 .addExtension(ext);
 
 		Patient p2 = new Patient();
 		p2.addAddress().addLine("10 Lenin Street").setCity("Severodvinsk").setCountry("Russia");
@@ -353,21 +356,21 @@ class TerserUtilTest {
 
 		Patient p1 = new Patient();
 		p1.addAddress()
-			.addLine("10 Main Street")
-			.setCity("Hamilton")
-			.setState("ON")
-			.setPostalCode("Z0Z0Z0")
-			.setCountry("Canada")
-			.addExtension(ext);
+			 .addLine("10 Main Street")
+			 .setCity("Hamilton")
+			 .setState("ON")
+			 .setPostalCode("Z0Z0Z0")
+			 .setCountry("Canada")
+			 .addExtension(ext);
 
 		Patient p2 = new Patient();
 		p2.addAddress()
-			.addLine("10 Main Street")
-			.setCity("Hamilton")
-			.setState("ON")
-			.setPostalCode("Z0Z0Z1")
-			.setCountry("Canada")
-			.addExtension(ext);
+			 .addLine("10 Main Street")
+			 .setCity("Hamilton")
+			 .setState("ON")
+			 .setPostalCode("Z0Z0Z1")
+			 .setCountry("Canada")
+			 .addExtension(ext);
 
 		TerserUtil.mergeField(ourFhirContext, "address", p1, p2);
 
@@ -469,7 +472,8 @@ class TerserUtilTest {
 		assertEquals(1, p2.getName().size());
 		assertEquals("Doe", p2.getName().get(0).getFamily());
 	}
-		@Test
+
+	@Test
 	public void testReplaceFieldByEmptyValue() {
 		Patient p1 = new Patient();
 		Patient p2 = new Patient();
@@ -507,6 +511,7 @@ class TerserUtilTest {
 		{
 			Patient p1 = new Patient();
 			p1.addName().setFamily("Doe");
+			assertEquals(1, p1.getName().size());
 
 			TerserUtil.clearField(ourFhirContext, p1, "name");
 
@@ -517,12 +522,73 @@ class TerserUtilTest {
 			Address a1 = new Address();
 			a1.addLine("Line 1");
 			a1.addLine("Line 2");
+			assertEquals(2, a1.getLine().size());
 			a1.setCity("Test");
 			TerserUtil.clearField(ourFhirContext, "line", a1);
 
 			assertEquals(0, a1.getLine().size());
 			assertEquals("Test", a1.getCity());
 		}
+	}
+
+	@Test
+	public void testClearFieldByFhirPath() {
+		Patient p1 = new Patient();
+		p1.addName().setFamily("Doe");
+		assertEquals(1, p1.getName().size());
+
+		TerserUtil.clearFieldByFhirPath(ourFhirContext, p1, "name");
+
+		assertEquals(0, p1.getName().size());
+
+		Address a1 = new Address();
+		a1.addLine("Line 1");
+		a1.addLine("Line 2");
+		assertEquals(2, a1.getLine().size());
+		a1.setCity("Test");
+		a1.getPeriod().setStartElement(new DateTimeType("2021-01-01"));
+		p1.addAddress(a1);
+
+		assertEquals("2021-01-01", p1.getAddress().get(0).getPeriod().getStartElement().toHumanDisplay());
+		assertNotNull(p1.getAddress().get(0).getPeriod().getStart());
+
+		Address a2 = new Address();
+		a2.addLine("Line 1");
+		a2.addLine("Line 2");
+		a2.setCity("Test");
+		a2.getPeriod().setStartElement(new DateTimeType("2021-01-01"));
+		p1.addAddress(a2);
+
+
+		TerserUtil.clearFieldByFhirPath(ourFhirContext, p1, "address.line");
+		TerserUtil.clearFieldByFhirPath(ourFhirContext, p1, "address.period.start");
+
+		assertNull(p1.getAddress().get(0).getPeriod().getStart());
+
+		assertEquals(2, p1.getAddress().size());
+		assertEquals(0, p1.getAddress().get(0).getLine().size());
+		assertEquals(0, p1.getAddress().get(1).getLine().size());
+		assertEquals("Test", p1.getAddress().get(0).getCity());
+		assertEquals("Test", p1.getAddress().get(1).getCity());
+	}
+
+	@Test
+	void testRemoveByFhirPath() {
+		// arrange
+		Claim claimWithReferences = createClaim();
+		claimWithReferences.setPatient(new Reference("Patient/123"));
+		String fhirPath = "patient";
+		assertTrue(claimWithReferences.hasPatient());
+		//act
+		TerserUtil.clearFieldByFhirPath(ourFhirContext, claimWithReferences, fhirPath);
+		//assert
+		assertFalse(claimWithReferences.hasPatient());
+	}
+
+	static Claim createClaim() {
+		Claim claim = new Claim();
+		claim.setStatus(Claim.ClaimStatus.ACTIVE);
+		return claim;
 	}
 
 	@Test
@@ -546,6 +612,16 @@ class TerserUtilTest {
 		address.setCity("CITY");
 
 		TerserUtil.setFieldByFhirPath(ourFhirContext, "address", p1, address);
+
+		assertEquals(1, p1.getAddress().size());
+		assertEquals("CITY", p1.getAddress().get(0).getCity());
+	}
+
+	@Test
+	public void testSetFieldByCompositeFhirPath() {
+		Patient p1 = new Patient();
+
+		TerserUtil.setFieldByFhirPath(ourFhirContext, "address.city", p1, new StringType("CITY"));
 
 		assertEquals(1, p1.getAddress().size());
 		assertEquals("CITY", p1.getAddress().get(0).getCity());

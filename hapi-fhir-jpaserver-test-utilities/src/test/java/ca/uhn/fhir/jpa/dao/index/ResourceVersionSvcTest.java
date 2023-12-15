@@ -9,6 +9,7 @@ import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.ForcedId;
+import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -20,11 +21,11 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import javax.persistence.TypedQuery;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Path;
-import javax.persistence.criteria.Root;
+import jakarta.persistence.TypedQuery;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Path;
+import jakarta.persistence.criteria.Root;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -33,6 +34,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -73,8 +75,8 @@ public class ResourceVersionSvcTest {
 	 */
 	private void mock_resolveResourcePersistentIdsWithCache_toReturnNothing() {
 		CriteriaBuilder cb = Mockito.mock(CriteriaBuilder.class);
-		CriteriaQuery<ForcedId> criteriaQuery = Mockito.mock(CriteriaQuery.class);
-		Root<ForcedId> from = Mockito.mock(Root.class);
+		CriteriaQuery<ResourceTable> criteriaQuery = Mockito.mock(CriteriaQuery.class);
+		Root<ResourceTable> from = Mockito.mock(Root.class);
 		Path path = Mockito.mock(Path.class);
 
 		TypedQuery<ForcedId> queryMock = Mockito.mock(TypedQuery.class);

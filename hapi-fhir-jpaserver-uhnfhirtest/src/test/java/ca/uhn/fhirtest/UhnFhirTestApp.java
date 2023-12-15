@@ -3,8 +3,8 @@ package ca.uhn.fhirtest;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
+import org.eclipse.jetty.ee10.webapp.WebAppContext;
 import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.webapp.WebAppContext;
 import org.hl7.fhir.dstu3.model.Organization;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.Subscription;
@@ -63,7 +63,7 @@ public class UhnFhirTestApp {
 
 		root.setContextPath("/");
 		root.setDescriptor("hapi-fhir-jpaserver-uhnfhirtest/src/main/webapp/WEB-INF/web.xml");
-		root.setResourceBase("hapi-fhir-jpaserver-uhnfhirtest/target/hapi-fhir-jpaserver");
+		root.setBaseResourceAsString("hapi-fhir-jpaserver-uhnfhirtest/target/hapi-fhir-jpaserver");
 
 		root.setParentLoaderPriority(true);
 

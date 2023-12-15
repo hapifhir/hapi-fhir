@@ -23,8 +23,8 @@ import ca.uhn.fhir.test.utilities.JettyUtil;
 import ca.uhn.fhir.test.utilities.ProxyUtil;
 import com.google.common.collect.Lists;
 import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.servlet.ServletContextHandler;
-import org.eclipse.jetty.servlet.ServletHolder;
+import org.eclipse.jetty.ee10.servlet.ServletContextHandler;
+import org.eclipse.jetty.ee10.servlet.ServletHolder;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.IdType;
@@ -44,9 +44,11 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -499,14 +501,18 @@ public class SubscriptionTriggeringDstu3Test extends BaseResourceProviderDstu3Te
 			myInterceptorService.unregisterInterceptor(forceSynchronousSearchInterceptor);
 		}
 
-		@Test
-		public void testTriggerSubscriptionInSynchronousQueryMode() throws Exception {
-			((SubscriptionTriggeringSvcImpl)mySubscriptionTriggeringSvc).setMaxSubmitPerPass(10);
+		@ParameterizedTest
+		@CsvSource({
+			"10",
+			"10000"
+		})
+		public void testTriggerSubscriptionInSynchronousQueryMode(int theMaxSubmitPerpass) throws Exception {
+			((SubscriptionTriggeringSvcImpl)mySubscriptionTriggeringSvc).setMaxSubmitPerPass(theMaxSubmitPerpass);
 
 			String payload = "application/fhir+json";
 			IdType sub2id = createSubscription("Patient?", payload, ourListenerServerBase).getIdElement();
 
-			int numberOfPatient = 15;
+			int numberOfPatient = 200;
 
 			// Create lots
 			createPatientsAndWait(numberOfPatient);
@@ -522,9 +528,9 @@ public class SubscriptionTriggeringDstu3Test extends BaseResourceProviderDstu3Te
 				.withParameter(Parameters.class, ProviderConstants.SUBSCRIPTION_TRIGGERING_PARAM_SEARCH_URL, new StringType("Patient?"))
 				.execute();
 
-			mySubscriptionTriggeringSvc.runDeliveryPass();
-			mySubscriptionTriggeringSvc.runDeliveryPass();
-			mySubscriptionTriggeringSvc.runDeliveryPass();
+			for (int i = 0; i < 20; i++) {
+				mySubscriptionTriggeringSvc.runDeliveryPass();
+			}
 
 			waitForSize(0, ourCreatedPatients);
 			waitForSize(numberOfPatient, ourUpdatedPatients);

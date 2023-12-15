@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.migrate.tasks.api;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
+import ca.uhn.fhir.jpa.migrate.MigrationJdbcUtils;
 import ca.uhn.fhir.jpa.migrate.taskdef.AddColumnTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.AddForeignKeyTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.AddIdGeneratorTask;
@@ -36,6 +37,7 @@ import ca.uhn.fhir.jpa.migrate.taskdef.DropIdGeneratorTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.DropIndexTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.DropTableTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.ExecuteRawSqlTask;
+import ca.uhn.fhir.jpa.migrate.taskdef.ExecuteTaskPrecondition;
 import ca.uhn.fhir.jpa.migrate.taskdef.InitializeSchemaTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.MigratePostgresTextClobToBinaryClobTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.ModifyColumnTask;
@@ -44,6 +46,8 @@ import ca.uhn.fhir.jpa.migrate.taskdef.RenameColumnTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.RenameIndexTask;
 import org.apache.commons.lang3.Validate;
 import org.intellij.lang.annotations.Language;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -54,6 +58,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 public class Builder {
+	private static final Logger ourLog = LoggerFactory.getLogger(Builder.class);
 
 	private final String myRelease;
 	private final BaseMigrationTasks.IAcceptsTasks mySink;
@@ -571,6 +576,40 @@ public class Builder {
 			return this;
 		}
 
+		/**
+		 * Introduce precondition checking logic into the execution of the enclosed task.  This conditional logic will
+		 * be implemented by running an SQL SELECT (including CTEs) to obtain a boolean indicating whether a certain
+		 * condition has been met.
+		 * One example is to check for a specific collation on a column to decide whether to create a new index.
+		 * <p/>
+		 * This method may be called multiple times to add multiple preconditions.  The precondition that evaluates to
+		 * false will stop execution of the task irrespective of any or all other tasks evaluating to true.
+		 *
+		 * @param theSql The SELECT or CTE used to determine if the precondition is valid.
+		 * @param reason A String to indicate the text that is logged if the precondition is not met.
+		 * @return The BuilderCompleteTask in order to chain further method calls on this builder.
+		 */
+		public BuilderCompleteTask onlyIf(@Language("SQL") String theSql, String reason) {
+			if (!theSql.toUpperCase().startsWith("WITH")
+					&& !theSql.toUpperCase().startsWith("SELECT")) {
+				throw new IllegalArgumentException(Msg.code(2455)
+						+ String.format(
+								"Only SELECT statements (including CTEs) are allowed here.  Please check your SQL: [%s]",
+								theSql));
+			}
+			ourLog.info("SQL to evaluate: {}", theSql);
+
+			myTask.addPrecondition(new ExecuteTaskPrecondition(
+					() -> {
+						ourLog.info("Checking precondition for SQL: {}", theSql);
+						return MigrationJdbcUtils.queryForSingleBooleanResultMultipleThrowsException(
+								theSql, myTask.newJdbcTemplate());
+					},
+					reason));
+
+			return this;
+		}
+
 		public BuilderCompleteTask runEvenDuringSchemaInitialization() {
 			myTask.setRunDuringSchemaInitialization(true);
 			return this;
@@ -632,5 +671,9 @@ public class Builder {
 			myTask.setFailureAllowed(true);
 			return this;
 		}
+	}
+
+	public String getRelease() {
+		return myRelease;
 	}
 }

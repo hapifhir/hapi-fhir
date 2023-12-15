@@ -19,11 +19,10 @@
  */
 package ca.uhn.fhir.batch2.model;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 /**
  * The data required for the create transition.

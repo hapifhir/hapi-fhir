@@ -19,10 +19,10 @@
  */
 package ca.uhn.fhir.jpa.fql.parser;
 
+import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.Locale;
-import javax.annotation.Nonnull;
 
 class HfqlLexerToken {
 

@@ -22,7 +22,9 @@ import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 import ca.uhn.fhir.rest.param.QuantityParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.StringParam;
+import ca.uhn.fhir.test.utilities.HttpClientExtension;
 import ca.uhn.fhir.test.utilities.JettyUtil;
+import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.TestUtil;
 import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
@@ -40,15 +42,16 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.message.BasicNameValuePair;
 import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.servlet.ServletHandler;
-import org.eclipse.jetty.servlet.ServletHolder;
+import org.eclipse.jetty.ee10.servlet.ServletHandler;
+import org.eclipse.jetty.ee10.servlet.ServletHolder;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
-import javax.annotation.Nonnull;
+import jakarta.annotation.Nonnull;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -66,17 +69,24 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 
 public class SearchDstu2Test {
 
-	private static CloseableHttpClient ourClient;
-	private static FhirContext ourCtx = FhirContext.forDstu2();
+	private static final FhirContext ourCtx = FhirContext.forDstu2Cached();
 	private static DateAndListParam ourLastDateAndList;
 	private static String ourLastMethod;
 	private static QuantityParam ourLastQuantity;
 	private static ReferenceParam ourLastRef;
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SearchDstu2Test.class);
-	private static int ourPort;
 	private static InstantDt ourReturnPublished;
-	private static Server ourServer;
-	private static RestfulServer ourServlet;
+
+	@RegisterExtension
+	public static final RestfulServerExtension ourServer  = new RestfulServerExtension(ourCtx)
+		.setDefaultResponseEncoding(EncodingEnum.XML)
+		.registerProvider(new DummyPatientResourceProvider())
+		.registerProvider(new DummyPatientResourceNoIdProvider())
+		.withPagingProvider(new FifoMemoryPagingProvider(100))
+		.setDefaultPrettyPrint(false);
+
+	@RegisterExtension
+	public static final HttpClientExtension ourClient = new HttpClientExtension();
 
 	@BeforeEach
 	public void before() {
@@ -84,13 +94,13 @@ public class SearchDstu2Test {
 		ourLastDateAndList = null;
 		ourLastRef = null;
 		ourLastQuantity = null;
-		ourServlet.setIgnoreServerParsedRequestParameters(true);
+		ourServer.getRestfulServer().setIgnoreServerParsedRequestParameters(true);
 	}
 
 	@Test
 	public void testSearchWithInvalidPostUrl() throws Exception {
 		// should end with _search
-		HttpPost filePost = new HttpPost("http://localhost:" + ourPort + "/Patient?name=Central"); 
+		HttpPost filePost = new HttpPost(ourServer.getBaseUrl() + "/Patient?name=Central"); 
 
 		// add parameters to the post method
 		List<NameValuePair> parameters = new ArrayList<NameValuePair>();
@@ -110,7 +120,7 @@ public class SearchDstu2Test {
 
 	@Test
 	public void testEncodeConvertsReferencesToRelative() throws Exception {
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_query=searchWithRef");
+		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?_query=searchWithRef");
 		HttpResponse status = ourClient.execute(httpGet);
 		String responseContent = IOUtils.toString(status.getEntity().getContent());
 		IOUtils.closeQuietly(status.getEntity().getContent());
@@ -127,7 +137,7 @@ public class SearchDstu2Test {
 
 	@Test
 	public void testEncodeConvertsReferencesToRelativeJson() throws Exception {
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_query=searchWithRef&_format=json");
+		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?_query=searchWithRef&_format=json");
 		HttpResponse status = ourClient.execute(httpGet);
 		String responseContent = IOUtils.toString(status.getEntity().getContent());
 		IOUtils.closeQuietly(status.getEntity().getContent());
@@ -146,7 +156,7 @@ public class SearchDstu2Test {
 	public void testResultBundleHasUpdateTime() throws Exception {
 		ourReturnPublished = new InstantDt("2011-02-03T11:22:33Z");
 
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_query=searchWithBundleProvider&_pretty=true");
+		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?_query=searchWithBundleProvider&_pretty=true");
 		HttpResponse status = ourClient.execute(httpGet);
 		String responseContent = IOUtils.toString(status.getEntity().getContent());
 		IOUtils.closeQuietly(status.getEntity().getContent());
@@ -157,7 +167,7 @@ public class SearchDstu2Test {
 
 	@Test
 	public void testResultBundleHasUuid() throws Exception {
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_query=searchWithRef");
+		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?_query=searchWithRef");
 		HttpResponse status = ourClient.execute(httpGet);
 		String responseContent = IOUtils.toString(status.getEntity().getContent());
 		IOUtils.closeQuietly(status.getEntity().getContent());
@@ -169,7 +179,7 @@ public class SearchDstu2Test {
 
 	@Test
 	public void testSearchBlacklist01Failing() throws Exception {
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_query=searchBlacklist01&ref.black1=value");
+		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?_query=searchBlacklist01&ref.black1=value");
 		HttpResponse status = ourClient.execute(httpGet);
 		String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 		IOUtils.closeQuietly(status.getEntity().getContent());
@@ -179,7 +189,7 @@ public class SearchDstu2Test {
 
 	@Test
 	public void testSearchBlacklist01Passing() throws Exception {
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_query=searchBlacklist01&ref.white1=value");
+		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?_query=searchBlacklist01&ref.white1=value");
 		HttpResponse status = ourClient.execute(httpGet);
 		String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 		IOUtils.closeQuietly(status.getEntity().getContent());
@@ -190,7 +200,7 @@ public class SearchDstu2Test {
 
 	@Test
 	public void testSearchByPost() throws Exception {
-		HttpPost httpGet = new HttpPost("http://localhost:" + ourPort + "/Patient/_search");
+		HttpPost httpGet = new HttpPost(ourServer.getBaseUrl() + "/Patient/_search");
 		StringEntity entity = new StringEntity("searchDateAndList=2001,2002&searchDateAndList=2003,2004", ContentType.APPLICATION_FORM_URLENCODED);
 		httpGet.setEntity(entity);
 
@@ -209,7 +219,7 @@ public class SearchDstu2Test {
 
 	@Test
 	public void testSearchMethodReturnsNull() throws Exception {
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_query=searchReturnNull");
+		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?_query=searchReturnNull");
 
 		HttpResponse status = ourClient.execute(httpGet);
 		String responseContent = IOUtils.toString(status.getEntity().getContent());
@@ -221,7 +231,7 @@ public class SearchDstu2Test {
 
 	@Test
 	public void testSearchByPostWithBodyAndUrlParams() throws Exception {
-		HttpPost httpGet = new HttpPost("http://localhost:" + ourPort + "/Patient/_search?_format=json");
+		HttpPost httpGet = new HttpPost(ourServer.getBaseUrl() + "/Patient/_search?_format=json");
 		StringEntity entity = new StringEntity("searchDateAndList=2001,2002&searchDateAndList=2003,2004", ContentType.APPLICATION_FORM_URLENCODED);
 		httpGet.setEntity(entity);
 
@@ -241,9 +251,9 @@ public class SearchDstu2Test {
 
 	@Test
 	public void testSearchByPostWithBodyAndUrlParamsNoManual() throws Exception {
-		ourServlet.setIgnoreServerParsedRequestParameters(false);
+		ourServer.getRestfulServer().setIgnoreServerParsedRequestParameters(false);
 
-		HttpPost httpGet = new HttpPost("http://localhost:" + ourPort + "/Patient/_search?_format=json");
+		HttpPost httpGet = new HttpPost(ourServer.getBaseUrl() + "/Patient/_search?_format=json");
 		StringEntity entity = new StringEntity("searchDateAndList=2001,2002&searchDateAndList=2003,2004", ContentType.APPLICATION_FORM_URLENCODED);
 		httpGet.setEntity(entity);
 
@@ -263,7 +273,7 @@ public class SearchDstu2Test {
 
 	@Test
 	public void testSearchByPut() throws Exception {
-		HttpPut httpGet = new HttpPut("http://localhost:" + ourPort + "/Patient/_search");
+		HttpPut httpGet = new HttpPut(ourServer.getBaseUrl() + "/Patient/_search");
 		StringEntity entity = new StringEntity("searchDateAndList=2001,2002&searchDateAndList=2003,2004", ContentType.APPLICATION_FORM_URLENCODED);
 		httpGet.setEntity(entity);
 
@@ -276,7 +286,7 @@ public class SearchDstu2Test {
 
 	@Test
 	public void testSearchDateAndList() throws Exception {
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?searchDateAndList=2001,2002&searchDateAndList=2003,2004");
+		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?searchDateAndList=2001,2002&searchDateAndList=2003,2004");
 		HttpResponse status = ourClient.execute(httpGet);
 		String responseContent = IOUtils.toString(status.getEntity().getContent());
 		IOUtils.closeQuietly(status.getEntity().getContent());
@@ -296,7 +306,7 @@ public class SearchDstu2Test {
 	public void testSearchPagesAllHaveCorrectBundleType() throws Exception {
 		Bundle resp;
 		{
-			HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?searchHugeResults=yes&_count=10&_pretty=true");
+			HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?searchHugeResults=yes&_count=10&_pretty=true");
 			HttpResponse status = ourClient.execute(httpGet);
 			String responseContent = IOUtils.toString(status.getEntity().getContent());
 			IOUtils.closeQuietly(status.getEntity().getContent());
@@ -341,7 +351,7 @@ public class SearchDstu2Test {
 	 */
 	@Test
 	public void testSearchQuantityMissingTrue() throws Exception {
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?quantity:missing=true");
+		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?quantity:missing=true");
 		HttpResponse status = ourClient.execute(httpGet);
 		String responseContent = IOUtils.toString(status.getEntity().getContent());
 		IOUtils.closeQuietly(status.getEntity().getContent());
@@ -355,7 +365,7 @@ public class SearchDstu2Test {
 	 */
 	@Test
 	public void testSearchQuantityValue() throws Exception {
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?quantity=gt100");
+		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?quantity=gt100");
 		HttpResponse status = ourClient.execute(httpGet);
 		String responseContent = IOUtils.toString(status.getEntity().getContent());
 		IOUtils.closeQuietly(status.getEntity().getContent());
@@ -368,7 +378,7 @@ public class SearchDstu2Test {
 
 	@Test
 	public void testSearchReferenceParams01() throws Exception {
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_query=searchNoList&ref=123");
+		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?_query=searchNoList&ref=123");
 		HttpResponse status = ourClient.execute(httpGet);
 		String responseContent = IOUtils.toString(status.getEntity().getContent());
 		IOUtils.closeQuietly(status.getEntity().getContent());
@@ -381,7 +391,7 @@ public class SearchDstu2Test {
 
 	@Test
 	public void testSearchReferenceParams02() throws Exception {
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_query=searchNoList&ref=Patient/123");
+		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?_query=searchNoList&ref=Patient/123");
 		HttpResponse status = ourClient.execute(httpGet);
 		String responseContent = IOUtils.toString(status.getEntity().getContent());
 		IOUtils.closeQuietly(status.getEntity().getContent());
@@ -394,7 +404,7 @@ public class SearchDstu2Test {
 
 	@Test
 	public void testSearchReferenceParams03() throws Exception {
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_query=searchNoList&ref:Patient=Patient/123");
+		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?_query=searchNoList&ref:Patient=Patient/123");
 		HttpResponse status = ourClient.execute(httpGet);
 		String responseContent = IOUtils.toString(status.getEntity().getContent());
 		IOUtils.closeQuietly(status.getEntity().getContent());
@@ -407,7 +417,7 @@ public class SearchDstu2Test {
 
 	@Test
 	public void testSearchReferenceParams04() throws Exception {
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_query=searchNoList&ref:Patient=123");
+		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?_query=searchNoList&ref:Patient=123");
 		HttpResponse status = ourClient.execute(httpGet);
 		String responseContent = IOUtils.toString(status.getEntity().getContent());
 		IOUtils.closeQuietly(status.getEntity().getContent());
@@ -423,7 +433,7 @@ public class SearchDstu2Test {
 	 */
 	@Test
 	public void testSearchByIdExact() throws Exception {
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_id:exact=aaa&reference=value");
+		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?_id:exact=aaa&reference=value");
 		HttpResponse status = ourClient.execute(httpGet);
 		String responseContent = IOUtils.toString(status.getEntity().getContent(), Charset.defaultCharset());
 		IOUtils.closeQuietly(status.getEntity().getContent());
@@ -435,7 +445,7 @@ public class SearchDstu2Test {
 
 	@Test
 	public void testSearchByQualifiedIdQualifiedString() throws Exception {
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_id:exact=aaa&stringParam:exact=value");
+		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?_id:exact=aaa&stringParam:exact=value");
 		HttpResponse status = ourClient.execute(httpGet);
 		String responseContent = IOUtils.toString(status.getEntity().getContent(), Charset.defaultCharset());
 		IOUtils.closeQuietly(status.getEntity().getContent());
@@ -447,7 +457,7 @@ public class SearchDstu2Test {
 
 	@Test
 	public void testSearchByQualifiedString() throws Exception {
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_id=aaa&stringParam:exact=value");
+		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?_id=aaa&stringParam:exact=value");
 		HttpResponse status = ourClient.execute(httpGet);
 		String responseContent = IOUtils.toString(status.getEntity().getContent(), Charset.defaultCharset());
 		IOUtils.closeQuietly(status.getEntity().getContent());
@@ -459,7 +469,7 @@ public class SearchDstu2Test {
 
 	@Test
 	public void testSearchByQualifiedIdString() throws Exception {
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_id:exact=aaa&stringParam=value");
+		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?_id:exact=aaa&stringParam=value");
 		HttpResponse status = ourClient.execute(httpGet);
 		String responseContent = IOUtils.toString(status.getEntity().getContent(), Charset.defaultCharset());
 		IOUtils.closeQuietly(status.getEntity().getContent());
@@ -471,7 +481,7 @@ public class SearchDstu2Test {
 
 	@Test
 	public void testSearchByIdString() throws Exception {
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_id=aaa&stringParam=value");
+		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?_id=aaa&stringParam=value");
 		HttpResponse status = ourClient.execute(httpGet);
 		String responseContent = IOUtils.toString(status.getEntity().getContent(), Charset.defaultCharset());
 		IOUtils.closeQuietly(status.getEntity().getContent());
@@ -484,7 +494,7 @@ public class SearchDstu2Test {
 
 	@Test
 	public void testSearchWhitelist01Failing() throws Exception {
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_query=searchWhitelist01&ref=value");
+		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?_query=searchWhitelist01&ref=value");
 		HttpResponse status = ourClient.execute(httpGet);
 		String responseContent = IOUtils.toString(status.getEntity().getContent());
 		IOUtils.closeQuietly(status.getEntity().getContent());
@@ -494,7 +504,7 @@ public class SearchDstu2Test {
 
 	@Test
 	public void testSearchWhitelist01Passing() throws Exception {
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_query=searchWhitelist01&ref.white1=value");
+		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?_query=searchWhitelist01&ref.white1=value");
 		HttpResponse status = ourClient.execute(httpGet);
 		String responseContent = IOUtils.toString(status.getEntity().getContent());
 		IOUtils.closeQuietly(status.getEntity().getContent());
@@ -505,34 +515,7 @@ public class SearchDstu2Test {
 
 	@AfterAll
 	public static void afterClassClearContext() throws Exception {
-		JettyUtil.closeServer(ourServer);
 		TestUtil.randomizeLocaleAndTimezone();
-	}
-
-	@BeforeAll
-	public static void beforeClass() throws Exception {
-		ourServer = new Server(0);
-
-		DummyPatientResourceProvider patientProvider = new DummyPatientResourceProvider();
-		DummyPatientResourceNoIdProvider patientResourceNoIdProviderProvider = new DummyPatientResourceNoIdProvider();
-
-		ServletHandler proxyHandler = new ServletHandler();
-		ourServlet = new RestfulServer(ourCtx);
-		ourServlet.setPagingProvider(new FifoMemoryPagingProvider(10));
-		ourServlet.setDefaultResponseEncoding(EncodingEnum.XML);
-		ourServlet.setResourceProviders(patientResourceNoIdProviderProvider, patientProvider);
-
-		ServletHolder servletHolder = new ServletHolder(ourServlet);
-		proxyHandler.addServletWithMapping(servletHolder, "/*");
-		ourServer.setHandler(proxyHandler);
-		JettyUtil.startServer(ourServer);
-        ourPort = JettyUtil.getPortForStartedServer(ourServer);
-
-		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
-		HttpClientBuilder builder = HttpClientBuilder.create();
-		builder.setConnectionManager(connectionManager);
-		ourClient = builder.build();
-
 	}
 
 	public static class DummyPatientResourceNoIdProvider implements IResourceProvider {
@@ -698,7 +681,7 @@ public class SearchDstu2Test {
 		public Patient searchWithRef() {
 			Patient patient = new Patient();
 			patient.setId("Patient/1/_history/1");
-			patient.getManagingOrganization().setReference("http://localhost:" + ourPort + "/Organization/555/_history/666");
+			patient.getManagingOrganization().setReference(ourServer.getBaseUrl() + "/Organization/555/_history/666");
 			return patient;
 		}
 

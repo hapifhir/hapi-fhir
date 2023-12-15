@@ -51,7 +51,6 @@ import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
-import ca.uhn.fhir.rest.api.SearchContainedModeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenParam;
@@ -69,6 +68,8 @@ import com.healthmarketscience.sqlbuilder.NotCondition;
 import com.healthmarketscience.sqlbuilder.SelectQuery;
 import com.healthmarketscience.sqlbuilder.UnaryCondition;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbColumn;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.slf4j.Logger;
@@ -84,9 +85,8 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Set;
 import java.util.stream.Collectors;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
+import static ca.uhn.fhir.jpa.search.builder.QueryStack.SearchForIdsParams.with;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.trim;
 
@@ -456,14 +456,13 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder im
 			List<Condition> andPredicates = new ArrayList<>();
 
 			List<List<IQueryParameterType>> chainParamValues = Collections.singletonList(orValues);
-			andPredicates.add(childQueryFactory.searchForIdsWithAndOr(
-					myColumnTargetResourceId,
-					subResourceName,
-					chain,
-					chainParamValues,
-					theRequest,
-					theRequestPartitionId,
-					SearchContainedModeEnum.FALSE));
+			andPredicates.add(
+					childQueryFactory.searchForIdsWithAndOr(with().setSourceJoinColumn(myColumnTargetResourceId)
+							.setResourceName(subResourceName)
+							.setParamName(chain)
+							.setAndOrParams(chainParamValues)
+							.setRequest(theRequest)
+							.setRequestPartitionId(theRequestPartitionId)));
 
 			orPredicates.add(QueryParameterUtils.toAndPredicate(andPredicates));
 		}

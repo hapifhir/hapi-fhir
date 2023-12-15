@@ -28,6 +28,7 @@ import ca.uhn.fhir.jpa.migrate.taskdef.ArbitrarySqlTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.CalculateHashesTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.CalculateOrdinalDatesTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.ColumnTypeEnum;
+import ca.uhn.fhir.jpa.migrate.taskdef.ForceIdMigrationCopyTask;
 import ca.uhn.fhir.jpa.migrate.tasks.api.BaseMigrationTasks;
 import ca.uhn.fhir.jpa.migrate.tasks.api.Builder;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
@@ -61,6 +62,28 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 	// H2, Derby, MariaDB, and MySql automatically add indexes to foreign keys
 	public static final DriverTypeEnum[] NON_AUTOMATIC_FK_INDEX_PLATFORMS =
 			new DriverTypeEnum[] {DriverTypeEnum.POSTGRES_9_4, DriverTypeEnum.ORACLE_12C, DriverTypeEnum.MSSQL_2012};
+	private static final String QUERY_FOR_COLUMN_COLLATION_TEMPLATE = "WITH defcoll AS (\n"
+			+ "	SELECT datcollate AS coll\n"
+			+ "	FROM pg_database\n"
+			+ "	WHERE datname = current_database())\n"
+			+ ", collation_by_column AS (\n"
+			+ "	SELECT a.attname,\n"
+			+ "		CASE WHEN c.collname = 'default'\n"
+			+ "			THEN defcoll.coll\n"
+			+ "			ELSE c.collname\n"
+			+ "		END AS my_collation\n"
+			+ "	FROM pg_attribute AS a\n"
+			+ "		CROSS JOIN defcoll\n"
+			+ "		LEFT JOIN pg_collation AS c ON a.attcollation = c.oid\n"
+			+ "	WHERE a.attrelid = '%s'::regclass\n"
+			+ "		AND a.attnum > 0\n"
+			+ "		AND attname = '%s'\n"
+			+ ")\n"
+			+ "SELECT TRUE as result\n"
+			+ "FROM collation_by_column\n"
+			+ "WHERE EXISTS (SELECT 1\n"
+			+ "	FROM collation_by_column\n"
+			+ "	WHERE my_collation != 'C')";
 	private final Set<FlagEnum> myFlags;
 
 	/**
@@ -93,6 +116,77 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		init640_after_20230126();
 		init660();
 		init680();
+		init700();
+	}
+
+	protected void init700() {
+		/* ************************************************
+		 * Start of 6.10 migrations
+		 *********************************************** */
+
+		Builder version = forVersion(VersionEnum.V7_0_0);
+
+		// new indices on MdmLink
+		Builder.BuilderWithTableName mdmLinkTable = version.onTable("MPI_LINK");
+
+		mdmLinkTable
+				.addIndex("20230911.1", "IDX_EMPI_TGT_MR_LS")
+				.unique(false)
+				.withColumns("TARGET_TYPE", "MATCH_RESULT", "LINK_SOURCE");
+		mdmLinkTable
+				.addIndex("20230911.2", "IDX_EMPi_TGT_MR_SCore")
+				.unique(false)
+				.withColumns("TARGET_TYPE", "MATCH_RESULT", "SCORE");
+
+		// Move forced_id constraints to hfj_resource and the new fhir_id column
+		// Note: we leave the HFJ_FORCED_ID.IDX_FORCEDID_TYPE_FID index in place to support old writers for a while.
+		version.addTask(new ForceIdMigrationCopyTask(version.getRelease(), "20231018.1"));
+
+		Builder.BuilderWithTableName hfjResource = version.onTable("HFJ_RESOURCE");
+		hfjResource.modifyColumn("20231018.2", "FHIR_ID").nonNullable();
+
+		hfjResource.dropIndex("20231027.1", "IDX_RES_FHIR_ID");
+		hfjResource
+				.addIndex("20231027.2", "IDX_RES_TYPE_FHIR_ID")
+				.unique(true)
+				.online(true)
+				// include res_id and our deleted flag so we can satisfy Observation?_sort=_id from the index on
+				// platforms that support it.
+				.includeColumns("RES_ID, RES_DELETED_AT")
+				.withColumns("RES_TYPE", "FHIR_ID");
+
+		// For resolving references that don't supply the type.
+		hfjResource.addIndex("20231027.3", "IDX_RES_FHIR_ID").unique(false).withColumns("FHIR_ID");
+
+		Builder.BuilderWithTableName batch2JobInstanceTable = version.onTable("BT2_JOB_INSTANCE");
+
+		batch2JobInstanceTable.addColumn("20231128.1", "USER_NAME").nullable().type(ColumnTypeEnum.STRING, 200);
+
+		batch2JobInstanceTable.addColumn("20231128.2", "CLIENT_ID").nullable().type(ColumnTypeEnum.STRING, 200);
+
+		{
+			version.executeRawSql(
+							"20231212.1",
+							"CREATE INDEX idx_sp_string_hash_nrm_pattern_ops ON public.hfj_spidx_string USING btree (hash_norm_prefix, sp_value_normalized varchar_pattern_ops, res_id, partition_id)")
+					.onlyAppliesToPlatforms(DriverTypeEnum.POSTGRES_9_4)
+					.onlyIf(
+							String.format(
+									QUERY_FOR_COLUMN_COLLATION_TEMPLATE,
+									"HFJ_SPIDX_STRING".toLowerCase(),
+									"SP_VALUE_NORMALIZED".toLowerCase()),
+							"Column HFJ_SPIDX_STRING.SP_VALUE_NORMALIZED already has a collation of 'C' so doing nothing");
+
+			version.executeRawSql(
+							"20231212.2",
+							"CREATE UNIQUE INDEX idx_sp_uri_hash_identity_pattern_ops ON public.hfj_spidx_uri USING btree (hash_identity, sp_uri varchar_pattern_ops, res_id, partition_id)")
+					.onlyAppliesToPlatforms(DriverTypeEnum.POSTGRES_9_4)
+					.onlyIf(
+							String.format(
+									QUERY_FOR_COLUMN_COLLATION_TEMPLATE,
+									"HFJ_SPIDX_URI".toLowerCase(),
+									"SP_URI".toLowerCase()),
+							"Column HFJ_SPIDX_STRING.SP_VALUE_NORMALIZED already has a collation of 'C' so doing nothing");
+		}
 	}
 
 	protected void init680() {
@@ -939,27 +1033,34 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			// Ugh.  Only oracle supports using IDX_TAG_DEF_TP_CD_SYS to enforce this constraint.  The others will
 			// create another index.
 			// For Sql Server, should change the index to be unique with include columns.  Do this in 6.1
-			tagTable.dropIndex("20220429.8", "IDX_TAGDEF_TYPESYSCODE");
-			Map<DriverTypeEnum, String> addTagDefConstraint = new HashMap<>();
-			addTagDefConstraint.put(
-					DriverTypeEnum.H2_EMBEDDED,
-					"ALTER TABLE HFJ_TAG_DEF ADD CONSTRAINT IDX_TAGDEF_TYPESYSCODE UNIQUE (TAG_TYPE, TAG_CODE, TAG_SYSTEM)");
-			addTagDefConstraint.put(
-					DriverTypeEnum.MARIADB_10_1,
-					"ALTER TABLE HFJ_TAG_DEF ADD CONSTRAINT IDX_TAGDEF_TYPESYSCODE UNIQUE (TAG_TYPE, TAG_CODE, TAG_SYSTEM)");
-			addTagDefConstraint.put(
-					DriverTypeEnum.MSSQL_2012,
-					"ALTER TABLE HFJ_TAG_DEF ADD CONSTRAINT IDX_TAGDEF_TYPESYSCODE UNIQUE (TAG_TYPE, TAG_CODE, TAG_SYSTEM)");
-			addTagDefConstraint.put(
-					DriverTypeEnum.MYSQL_5_7,
-					"ALTER TABLE HFJ_TAG_DEF ADD CONSTRAINT IDX_TAGDEF_TYPESYSCODE UNIQUE (TAG_TYPE, TAG_CODE, TAG_SYSTEM)");
-			addTagDefConstraint.put(
-					DriverTypeEnum.ORACLE_12C,
-					"ALTER TABLE HFJ_TAG_DEF ADD CONSTRAINT IDX_TAGDEF_TYPESYSCODE UNIQUE (TAG_TYPE, TAG_CODE, TAG_SYSTEM)");
-			addTagDefConstraint.put(
-					DriverTypeEnum.POSTGRES_9_4,
-					"ALTER TABLE HFJ_TAG_DEF ADD CONSTRAINT IDX_TAGDEF_TYPESYSCODE UNIQUE (TAG_TYPE, TAG_CODE, TAG_SYSTEM)");
-			version.executeRawSql("20220429.9", addTagDefConstraint);
+			//			tagTable.dropIndex("20220429.8", "IDX_TAGDEF_TYPESYSCODE");
+			//			Map<DriverTypeEnum, String> addTagDefConstraint = new HashMap<>();
+			//			addTagDefConstraint.put(
+			//					DriverTypeEnum.H2_EMBEDDED,
+			//					"ALTER TABLE HFJ_TAG_DEF ADD CONSTRAINT IDX_TAGDEF_TYPESYSCODE UNIQUE (TAG_TYPE, TAG_CODE,
+			// TAG_SYSTEM)");
+			//			addTagDefConstraint.put(
+			//					DriverTypeEnum.MARIADB_10_1,
+			//					"ALTER TABLE HFJ_TAG_DEF ADD CONSTRAINT IDX_TAGDEF_TYPESYSCODE UNIQUE (TAG_TYPE, TAG_CODE,
+			// TAG_SYSTEM)");
+			//			addTagDefConstraint.put(
+			//					DriverTypeEnum.MSSQL_2012,
+			//					"ALTER TABLE HFJ_TAG_DEF ADD CONSTRAINT IDX_TAGDEF_TYPESYSCODE UNIQUE (TAG_TYPE, TAG_CODE,
+			// TAG_SYSTEM)");
+			//			addTagDefConstraint.put(
+			//					DriverTypeEnum.MYSQL_5_7,
+			//					"ALTER TABLE HFJ_TAG_DEF ADD CONSTRAINT IDX_TAGDEF_TYPESYSCODE UNIQUE (TAG_TYPE, TAG_CODE,
+			// TAG_SYSTEM)");
+			//			addTagDefConstraint.put(
+			//					DriverTypeEnum.ORACLE_12C,
+			//					"ALTER TABLE HFJ_TAG_DEF ADD CONSTRAINT IDX_TAGDEF_TYPESYSCODE UNIQUE (TAG_TYPE, TAG_CODE,
+			// TAG_SYSTEM)");
+			//			addTagDefConstraint.put(
+			//					DriverTypeEnum.POSTGRES_9_4,
+			//					"ALTER TABLE HFJ_TAG_DEF ADD CONSTRAINT IDX_TAGDEF_TYPESYSCODE UNIQUE (TAG_TYPE, TAG_CODE,
+			// TAG_SYSTEM)");
+			//			version.executeRawSql("20220429.9", addTagDefConstraint);
+			version.addNop("20220429.9");
 		}
 
 		// Fix for https://github.com/hapifhir/hapi-fhir-jpaserver-starter/issues/328
@@ -1454,11 +1555,12 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		Builder.BuilderWithTableName nrmlTable = version.onTable("HFJ_SPIDX_QUANTITY_NRML");
 		nrmlTable.addColumn("20210111.1", "PARTITION_ID").nullable().type(ColumnTypeEnum.INT);
 		nrmlTable.addColumn("20210111.2", "PARTITION_DATE").nullable().type(ColumnTypeEnum.DATE_ONLY);
-		// - The fk name is generated from Hibernate, have to use this name here
+		// Disabled - superceded by 20220304.33
 		nrmlTable
 				.addForeignKey("20210111.3", "FKRCJOVMUH5KC0O6FVBLE319PYV")
 				.toColumn("RES_ID")
-				.references("HFJ_RESOURCE", "RES_ID");
+				.references("HFJ_RESOURCE", "RES_ID")
+				.doNothing();
 
 		Builder.BuilderWithTableName quantityTable = version.onTable("HFJ_SPIDX_QUANTITY");
 		quantityTable

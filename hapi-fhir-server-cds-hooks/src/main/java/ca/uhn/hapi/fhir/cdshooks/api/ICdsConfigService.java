@@ -20,11 +20,17 @@
 package ca.uhn.hapi.fhir.cdshooks.api;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.cr.common.IRepositoryFactory;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
+import ca.uhn.fhir.rest.api.server.SystemRestfulResponse;
+import ca.uhn.fhir.rest.server.RestfulServer;
+import ca.uhn.hapi.fhir.cdshooks.svc.cr.CdsCrSettings;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+import org.opencds.cqf.fhir.utility.Ids;
 
 public interface ICdsConfigService {
 	@Nonnull
@@ -33,8 +39,29 @@ public interface ICdsConfigService {
 	@Nonnull
 	ObjectMapper getObjectMapper();
 
+	@Nonnull
+	CdsCrSettings getCdsCrSettings();
+
 	@Nullable
 	default DaoRegistry getDaoRegistry() {
 		return null;
+	}
+
+	@Nullable
+	default IRepositoryFactory getRepositoryFactory() {
+		return null;
+	}
+
+	@Nullable
+	default RestfulServer getRestfulServer() {
+		return null;
+	}
+
+	default RequestDetails createRequestDetails(FhirContext theFhirContext, String theId, String theResourceType) {
+		SystemRequestDetails rd = new SystemRequestDetails();
+		rd.setServer(getRestfulServer());
+		rd.setResponse(new SystemRestfulResponse(rd));
+		rd.setId(Ids.newId(theFhirContext.getVersion().getVersion(), theResourceType, theId));
+		return rd;
 	}
 }

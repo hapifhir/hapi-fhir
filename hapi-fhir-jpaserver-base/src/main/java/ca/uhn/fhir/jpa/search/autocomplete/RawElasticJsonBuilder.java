@@ -20,9 +20,8 @@
 package ca.uhn.fhir.jpa.search.autocomplete;
 
 import com.google.gson.JsonObject;
+import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.Validate;
-
-import javax.annotation.Nonnull;
 
 public class RawElasticJsonBuilder {
 	@Nonnull

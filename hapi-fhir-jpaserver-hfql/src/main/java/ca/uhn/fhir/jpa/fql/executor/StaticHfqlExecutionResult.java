@@ -20,11 +20,11 @@
 package ca.uhn.fhir.jpa.fql.executor;
 
 import ca.uhn.fhir.jpa.fql.parser.HfqlStatement;
+import jakarta.annotation.Nullable;
 
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
-import javax.annotation.Nullable;
 
 /**
  * @see IHfqlExecutionResult for information about the purpose of this class

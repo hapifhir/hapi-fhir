@@ -214,11 +214,6 @@ public class ProviderConstants {
 	public static final String OPERATION_REINDEX_RESPONSE_JOB_ID = "jobId";
 
 	/**
-	 * Operation name for the $member-match operation
-	 */
-	public static final String OPERATION_MEMBER_MATCH = "$member-match";
-
-	/**
 	 * Operation name for the $reindex-terminology operation
 	 */
 	public static final String OPERATION_REINDEX_TERMINOLOGY = "$reindex-terminology";
@@ -231,4 +226,13 @@ public class ProviderConstants {
 	 */
 	@Deprecated
 	public static final String PERFORM_REINDEXING_PASS = "$perform-reindexing-pass";
+
+	/**
+	 * Operation name for the "$export-poll-status" operation
+	 */
+	public static final String OPERATION_EXPORT_POLL_STATUS = "$export-poll-status";
+	/**
+	 * Operation name for the "$export" operation
+	 */
+	public static final String OPERATION_EXPORT = "$export";
 }

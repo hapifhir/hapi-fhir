@@ -58,7 +58,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import javax.annotation.Nonnull;
+import jakarta.annotation.Nonnull;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.Date;
@@ -97,8 +97,6 @@ abstract public class BaseMdmR4Test extends BaseJpaR4Test {
 		.setSystem(ContactPoint.ContactPointSystem.PHONE)
 		.setValue("555-555-5555");
 	private static final String NAME_GIVEN_FRANK = "Frank";
-
-
 
 	@Autowired
 	protected IFhirResourceDao<Patient> myPatientDao;

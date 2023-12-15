@@ -2,8 +2,15 @@ package ca.uhn.fhir.cr.r4;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.cr.IResourceLoader;
+import ca.uhn.fhir.cr.config.r4.ApplyOperationConfig;
+import ca.uhn.fhir.cr.config.r4.ExtractOperationConfig;
+import ca.uhn.fhir.cr.config.r4.PackageOperationConfig;
+import ca.uhn.fhir.cr.config.r4.PopulateOperationConfig;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.cache.IResourceChangeListenerCache;
+import ca.uhn.fhir.jpa.cache.IResourceChangeListenerRegistry;
+import ca.uhn.fhir.jpa.cache.ResourceChangeListenerRegistryImpl;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.parser.IParser;
@@ -19,8 +26,8 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 
 import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.servlet.ServletContextHandler;
-import org.eclipse.jetty.servlet.ServletHolder;
+import org.eclipse.jetty.ee10.servlet.ServletContextHandler;
+import org.eclipse.jetty.ee10.servlet.ServletHolder;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Resource;
 import org.junit.jupiter.api.AfterEach;
@@ -31,11 +38,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.test.context.ContextConfiguration;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 
-@ContextConfiguration(classes = {TestCrR4Config.class})
+@ContextConfiguration(classes = {
+	TestCrR4Config.class,
+	ApplyOperationConfig.class,
+	ExtractOperationConfig.class,
+	PackageOperationConfig.class,
+	PopulateOperationConfig.class
+})
 public abstract class BaseCrR4TestServer extends BaseJpaR4Test implements IResourceLoader {
 
 	public static IGenericClient ourClient;
@@ -60,6 +75,7 @@ public abstract class BaseCrR4TestServer extends BaseJpaR4Test implements IResou
 		ourClient.unregisterInterceptor(mySimpleHeaderInterceptor);
 		myStorageSettings.setIndexMissingFields(new JpaStorageSettings().getIndexMissingFields());
 		myEvaluationSettings.getLibraryCache().clear();
+		myEvaluationSettings.getValueSetCache().clear();
 	}
 	@Autowired
 	RestfulServer ourRestfulServer;

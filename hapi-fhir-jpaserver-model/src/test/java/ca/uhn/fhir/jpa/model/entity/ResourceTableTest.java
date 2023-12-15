@@ -43,6 +43,6 @@ public class ResourceTableTest {
 		IdDt actual = t.getIdDt();
 
 		// Then
-		assertTrue(actual.equals(theExpected));
+		assertEquals(theExpected, actual.getValueAsString());
 	}
 }

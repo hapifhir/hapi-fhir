@@ -42,6 +42,9 @@ import ca.uhn.fhir.rest.param.HistorySearchDateRangeParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+import jakarta.servlet.http.HttpServletResponse;
 import org.hl7.fhir.instance.model.api.IBaseMetaType;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -51,9 +54,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import javax.servlet.http.HttpServletResponse;
+import java.util.stream.Stream;
 
 /**
  * Note that this interface is not considered a stable interface. While it is possible to build applications
@@ -326,18 +327,29 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 
 	/**
 	 * @deprecated Use {@link #search(SearchParameterMap, RequestDetails)} instead
+	 * @throws InvalidRequestException If a SearchParameter is not known to the server
 	 */
-	IBundleProvider search(SearchParameterMap theParams);
+	IBundleProvider search(SearchParameterMap theParams) throws InvalidRequestException;
 
-	IBundleProvider search(SearchParameterMap theParams, RequestDetails theRequestDetails);
+	/**
+	 * *
+	 * @throws InvalidRequestException If a SearchParameter is not known to the server
+	 */
+	IBundleProvider search(SearchParameterMap theParams, RequestDetails theRequestDetails)
+			throws InvalidRequestException;
 
+	/**
+	 * *
+	 * @throws InvalidRequestException If a SearchParameter is not known to the server
+	 */
 	IBundleProvider search(
-			SearchParameterMap theParams, RequestDetails theRequestDetails, HttpServletResponse theServletResponse);
+			SearchParameterMap theParams, RequestDetails theRequestDetails, HttpServletResponse theServletResponse)
+			throws InvalidRequestException;
 
 	/**
 	 * Search for IDs for processing a match URLs, etc.
 	 */
-	default <T extends IResourcePersistentId> List<T> searchForIds(
+	default <PT extends IResourcePersistentId> List<PT> searchForIds(
 			SearchParameterMap theParams, RequestDetails theRequest) {
 		return searchForIds(theParams, theRequest, null);
 	}
@@ -349,11 +361,27 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 	 *                                            create/update, this is the resource being searched for
 	 * @since 5.5.0
 	 */
-	default <T extends IResourcePersistentId> List<T> searchForIds(
+	default <PT extends IResourcePersistentId> List<PT> searchForIds(
 			SearchParameterMap theParams,
 			RequestDetails theRequest,
 			@Nullable IBaseResource theConditionalOperationTargetOrNull) {
 		return searchForIds(theParams, theRequest);
+	}
+
+	/**
+	 * Search results matching theParams.
+	 * The Stream MUST be called within a transaction because the stream wraps an open query ResultSet.
+	 * The Stream MUST be closed to avoid leaking resources.
+	 * @param theParams the search
+	 * @param theRequest for partition target info
+	 * @return a Stream than MUST only be used within the calling transaction.
+	 */
+	default <PID extends IResourcePersistentId<?>> Stream<PID> searchForIdStream(
+			SearchParameterMap theParams,
+			RequestDetails theRequest,
+			@Nullable IBaseResource theConditionalOperationTargetOrNull) {
+		List<PID> iResourcePersistentIds = searchForIds(theParams, theRequest);
+		return iResourcePersistentIds.stream();
 	}
 
 	/**

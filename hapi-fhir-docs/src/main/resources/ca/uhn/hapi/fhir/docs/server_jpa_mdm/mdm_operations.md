@@ -816,13 +816,13 @@ Content-Type: application/fhir+json; charset=UTF-8
         {
             "name":"resource",
             "resource": {
-                "resourceType":"Orgaization",
+                "resourceType":"Organization",
                 "name": "McMaster Family Practice"
             }
         },
         {
             "name":"resourceType",
-            "valueString": "Orgaization"
+            "valueString": "Organization"
         }
     ]
 }

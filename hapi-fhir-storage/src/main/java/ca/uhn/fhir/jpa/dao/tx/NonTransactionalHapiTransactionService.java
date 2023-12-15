@@ -19,10 +19,9 @@
  */
 package ca.uhn.fhir.jpa.dao.tx;
 
+import jakarta.annotation.Nullable;
 import org.springframework.transaction.support.SimpleTransactionStatus;
 import org.springframework.transaction.support.TransactionCallback;
-
-import javax.annotation.Nullable;
 
 /**
  * A transaction service implementation that does not actually

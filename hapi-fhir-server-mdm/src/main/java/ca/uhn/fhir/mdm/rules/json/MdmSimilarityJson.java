@@ -24,9 +24,8 @@ import ca.uhn.fhir.mdm.api.MdmMatchEvaluation;
 import ca.uhn.fhir.mdm.rules.similarity.MdmSimilarityEnum;
 import ca.uhn.fhir.model.api.IModelJson;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.annotation.Nullable;
 import org.hl7.fhir.instance.model.api.IBase;
-
-import javax.annotation.Nullable;
 
 public class MdmSimilarityJson implements IModelJson {
 	@JsonProperty(value = "algorithm", required = true)

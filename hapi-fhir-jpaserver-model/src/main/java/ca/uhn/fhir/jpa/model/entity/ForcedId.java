@@ -19,23 +19,22 @@
  */
 package ca.uhn.fhir.jpa.model.entity;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.ForeignKey;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Index;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.SequenceGenerator;
+import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hibernate.annotations.ColumnDefault;
-
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.ForeignKey;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Index;
-import javax.persistence.JoinColumn;
-import javax.persistence.OneToOne;
-import javax.persistence.SequenceGenerator;
-import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
 
 @Entity()
 @Table(
@@ -44,6 +43,7 @@ import javax.persistence.UniqueConstraint;
 			@UniqueConstraint(
 					name = "IDX_FORCEDID_RESID",
 					columnNames = {"RESOURCE_PID"}),
+
 			/*
 			 * This index is called IDX_FORCEDID_TYPE_FID and guarantees
 			 * uniqueness of RESOURCE_TYPE,FORCED_ID. This doesn't make sense
@@ -64,7 +64,6 @@ import javax.persistence.UniqueConstraint;
 			 */
 			@Index(name = "IDX_FORCEID_FID", columnList = "FORCED_ID"),
 			// @Index(name = "IDX_FORCEID_RESID", columnList = "RESOURCE_PID"),
-			// TODO GGG potentiall add a type + res_id index here, specifically for deletion?
 		})
 public class ForcedId extends BasePartitionable {
 

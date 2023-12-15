@@ -31,5 +31,11 @@ public enum ColumnTypeEnum {
 	BLOB,
 	CLOB,
 	DOUBLE,
-	TEXT;
+
+	/**
+	 * Unlimited length text, with a column definition containing the annotation:
+	 * <code>@Column(length=Integer.MAX_VALUE)</code>
+	 */
+	TEXT,
+	BIG_DECIMAL;
 }

@@ -34,6 +34,11 @@ public class LocalFileValidationSupport extends PrePopulatedValidationSupport {
 	}
 
 	@Override
+	public String getName() {
+		return getFhirContext().getVersion().getVersion() + " Local File Validation Support";
+	}
+
+	@Override
 	public FhirContext getFhirContext() {
 		return myCtx;
 	}

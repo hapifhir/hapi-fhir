@@ -27,7 +27,7 @@ class BroadcastingSubscribableChannelWrapperTest {
 		try {
 			svc.send(new ResourceModifiedJsonMessage(new ResourceModifiedMessage()));
 		} catch (MessageDeliveryException e) {
-			assertThat(e.getMessage(), containsString("Channel has zero subscribers"));
+			assertThat(e.getCause().getMessage(), containsString("Channel has zero subscribers"));
 		}
 	}
 

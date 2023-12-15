@@ -32,7 +32,6 @@ import ca.uhn.fhir.jpa.search.builder.predicate.ComboNonUniqueSearchParameterPre
 import ca.uhn.fhir.jpa.search.builder.predicate.ComboUniqueSearchParameterPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.CoordsPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.DatePredicateBuilder;
-import ca.uhn.fhir.jpa.search.builder.predicate.ForcedIdPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.NumberPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.QuantityNormalizedPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.QuantityPredicateBuilder;
@@ -62,11 +61,14 @@ import com.healthmarketscience.sqlbuilder.dbspec.basic.DbJoin;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbSchema;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbSpec;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbTable;
-import org.apache.commons.lang3.Validate;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import org.hibernate.dialect.Dialect;
 import org.hibernate.dialect.SQLServerDialect;
 import org.hibernate.dialect.pagination.AbstractLimitHandler;
-import org.hibernate.engine.spi.RowSelection;
+import org.hibernate.query.internal.QueryOptionsImpl;
+import org.hibernate.query.spi.Limit;
+import org.hibernate.query.spi.QueryOptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -76,8 +78,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 import static ca.uhn.fhir.rest.param.ParamPrefixEnum.GREATERTHAN;
 import static ca.uhn.fhir.rest.param.ParamPrefixEnum.GREATERTHAN_OR_EQUALS;
@@ -220,18 +220,6 @@ public class SearchQueryBuilder {
 	 */
 	public DatePredicateBuilder createDatePredicateBuilder() {
 		return mySqlBuilderFactory.dateIndexTable(this);
-	}
-
-	/**
-	 * Add and return a predicate builder for selecting a forced ID. This is only intended for use with sorts so it can not
-	 * be the root query.
-	 */
-	public ForcedIdPredicateBuilder addForcedIdPredicateBuilder(@Nonnull DbColumn theSourceJoinColumn) {
-		Validate.isTrue(theSourceJoinColumn != null);
-
-		ForcedIdPredicateBuilder retVal = mySqlBuilderFactory.newForcedIdPredicateBuilder(this);
-		addTableForSorting(retVal, theSourceJoinColumn);
-		return retVal;
 	}
 
 	/**
@@ -417,11 +405,6 @@ public class SearchQueryBuilder {
 		addTable(thePredicateBuilder, theSourceJoinColumn, SelectQuery.JoinType.INNER);
 	}
 
-	private void addTableForSorting(
-			BaseJoiningPredicateBuilder thePredicateBuilder, @Nullable DbColumn theSourceJoinColumn) {
-		addTable(thePredicateBuilder, theSourceJoinColumn, SelectQuery.JoinType.LEFT_OUTER);
-	}
-
 	private void addTable(
 			BaseJoiningPredicateBuilder thePredicateBuilder,
 			@Nullable DbColumn theSourceJoinColumn,
@@ -520,10 +503,11 @@ public class SearchQueryBuilder {
 			maxResultsToFetch = defaultIfNull(maxResultsToFetch, 10000);
 
 			AbstractLimitHandler limitHandler = (AbstractLimitHandler) myDialect.getLimitHandler();
-			RowSelection selection = new RowSelection();
+			Limit selection = new Limit();
 			selection.setFirstRow(offset);
 			selection.setMaxRows(maxResultsToFetch);
-			sql = limitHandler.processSql(sql, selection);
+			QueryOptions queryOptions = new QueryOptionsImpl();
+			sql = limitHandler.processSql(sql, selection, queryOptions);
 
 			int startOfQueryParameterIndex = 0;
 
@@ -536,14 +520,14 @@ public class SearchQueryBuilder {
 				if (sql.contains("top(?)")) {
 					bindVariables.add(0, maxResultsToFetch);
 				}
-				if (sql.contains("offset 0 rows fetch next ? rows only")) {
+				if (sql.contains("offset 0 rows fetch first ? rows only")) {
 					bindVariables.add(maxResultsToFetch);
 				}
 				if (sql.contains("offset ? rows fetch next ? rows only")) {
 					bindVariables.add(theOffset);
 					bindVariables.add(maxResultsToFetch);
 				}
-				if (offset != null && sql.contains("__row__")) {
+				if (offset != null && sql.contains("rownumber_")) {
 					bindVariables.add(theOffset + 1);
 					bindVariables.add(theOffset + maxResultsToFetch + 1);
 				}
@@ -699,15 +683,24 @@ public class SearchQueryBuilder {
 
 	public ComboCondition addPredicateLastUpdated(DateRangeParam theDateRange) {
 		ResourceTablePredicateBuilder resourceTableRoot = getOrCreateResourceTablePredicateBuilder(false);
+		return addPredicateLastUpdated(theDateRange, resourceTableRoot);
+	}
+
+	public ComboCondition addPredicateLastUpdated(
+			DateRangeParam theDateRange, ResourceTablePredicateBuilder theResourceTablePredicateBuilder) {
 		List<Condition> conditions = new ArrayList<>(2);
 		BinaryCondition condition;
 
 		if (isNotEqualsComparator(theDateRange)) {
 			condition = createConditionForValueWithComparator(
-					LESSTHAN, resourceTableRoot.getLastUpdatedColumn(), theDateRange.getLowerBoundAsInstant());
+					LESSTHAN,
+					theResourceTablePredicateBuilder.getLastUpdatedColumn(),
+					theDateRange.getLowerBoundAsInstant());
 			conditions.add(condition);
 			condition = createConditionForValueWithComparator(
-					GREATERTHAN, resourceTableRoot.getLastUpdatedColumn(), theDateRange.getUpperBoundAsInstant());
+					GREATERTHAN,
+					theResourceTablePredicateBuilder.getLastUpdatedColumn(),
+					theDateRange.getUpperBoundAsInstant());
 			conditions.add(condition);
 			return ComboCondition.or(conditions.toArray(new Condition[0]));
 		}
@@ -715,7 +708,7 @@ public class SearchQueryBuilder {
 		if (theDateRange.getLowerBoundAsInstant() != null) {
 			condition = createConditionForValueWithComparator(
 					GREATERTHAN_OR_EQUALS,
-					resourceTableRoot.getLastUpdatedColumn(),
+					theResourceTablePredicateBuilder.getLastUpdatedColumn(),
 					theDateRange.getLowerBoundAsInstant());
 			conditions.add(condition);
 		}
@@ -723,7 +716,7 @@ public class SearchQueryBuilder {
 		if (theDateRange.getUpperBoundAsInstant() != null) {
 			condition = createConditionForValueWithComparator(
 					LESSTHAN_OR_EQUALS,
-					resourceTableRoot.getLastUpdatedColumn(),
+					theResourceTablePredicateBuilder.getLastUpdatedColumn(),
 					theDateRange.getUpperBoundAsInstant());
 			conditions.add(condition);
 		}
@@ -757,7 +750,7 @@ public class SearchQueryBuilder {
 
 		List<Long> excludePids = JpaPid.toLongList(theExistingPidSetToExclude);
 
-		ourLog.trace("excludePids = " + excludePids);
+		ourLog.trace("excludePids = {}", excludePids);
 
 		DbColumn resourceIdColumn = getOrCreateFirstPredicateBuilder().getResourceIdColumn();
 		InCondition predicate = new InCondition(resourceIdColumn, generatePlaceholders(excludePids));

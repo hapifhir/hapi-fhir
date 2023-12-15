@@ -2,9 +2,16 @@ package ca.uhn.fhir.rest.openapi;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.Hook;
+import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.model.api.annotation.Description;
-import ca.uhn.fhir.rest.annotation.*;
+import ca.uhn.fhir.rest.annotation.ConditionalUrlParam;
+import ca.uhn.fhir.rest.annotation.IdParam;
+import ca.uhn.fhir.rest.annotation.Operation;
+import ca.uhn.fhir.rest.annotation.OperationParam;
+import ca.uhn.fhir.rest.annotation.Patch;
+import ca.uhn.fhir.rest.annotation.ResourceParam;
+import ca.uhn.fhir.rest.annotation.Validate;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.MethodOutcome;
@@ -19,35 +26,47 @@ import ca.uhn.fhir.test.utilities.HtmlUtil;
 import ca.uhn.fhir.test.utilities.HttpClientExtension;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.ExtensionConstants;
-import com.gargoylesoftware.htmlunit.html.DomElement;
-import com.gargoylesoftware.htmlunit.html.HtmlDivision;
-import com.gargoylesoftware.htmlunit.html.HtmlPage;
+import org.htmlunit.html.DomElement;
+import org.htmlunit.html.HtmlDivision;
+import org.htmlunit.html.HtmlPage;
 import io.swagger.v3.core.util.Yaml;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.PathItem;
+import jakarta.servlet.http.HttpServletRequest;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.hamcrest.Matchers;
-import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.instance.model.api.IBaseBundle;
+import org.hl7.fhir.instance.model.api.IBaseCoding;
+import org.hl7.fhir.instance.model.api.IBaseConformance;
+import org.hl7.fhir.instance.model.api.IBaseParameters;
+import org.hl7.fhir.instance.model.api.IBaseReference;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r5.model.ActorDefinition;
+import org.hl7.fhir.r5.model.CapabilityStatement;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.annotation.Nonnull;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.function.Consumer;
 
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.empty;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 public class OpenApiInterceptorTest {
 
@@ -83,6 +102,28 @@ public class OpenApiInterceptorTest {
 			assertThat(buttonTexts.toString(), buttonTexts, Matchers.contains("All", "System Level Operations", "OperationDefinition 1", "Observation", "Patient"));
 		}
 
+
+		@Test
+		public void testResourceDocsCopied() throws IOException {
+			myServer.getRestfulServer().registerInterceptor(new AddResourceCountsInterceptor("OperationDefinition"));
+			myServer.getRestfulServer().registerInterceptor(new OpenApiInterceptor());
+			myServer.registerInterceptor(new CapabilityStatementEnhancingInterceptor(cs->{
+				org.hl7.fhir.r4.model.CapabilityStatement.CapabilityStatementRestResourceComponent patientResource = findPatientResource(cs);
+				patientResource.setProfile("http://baseProfile");
+				patientResource.addSupportedProfile("http://foo");
+				patientResource.addSupportedProfile("http://bar");
+				patientResource.setDocumentation("This is **bolded** documentation");
+			}));
+
+			org.hl7.fhir.r4.model.CapabilityStatement cs = myServer.getFhirClient().capabilities().ofType(org.hl7.fhir.r4.model.CapabilityStatement.class).execute();
+			org.hl7.fhir.r4.model.CapabilityStatement.CapabilityStatementRestResourceComponent patientResource = findPatientResource(cs);
+			assertEquals("This is **bolded** documentation", patientResource.getDocumentation());
+
+			String url = "http://localhost:" + myServer.getPort() + "/fhir/swagger-ui/";
+			String resp = fetchSwaggerUi(url);
+		}
+
+
 	}
 
 	@Nested
@@ -109,6 +150,35 @@ public class OpenApiInterceptorTest {
 		FhirContext getContext() {
 			return FhirContext.forR5Cached();
 		}
+	}
+
+	@Interceptor
+	private static class CapabilityStatementEnhancingInterceptor {
+
+		private final Consumer<org.hl7.fhir.r4.model.CapabilityStatement> myConsumer;
+
+		public CapabilityStatementEnhancingInterceptor(Consumer<org.hl7.fhir.r4.model.CapabilityStatement> theConsumer) {
+			myConsumer = theConsumer;
+		}
+
+		@Hook(Pointcut.SERVER_CAPABILITY_STATEMENT_GENERATED)
+		public void massageCapabilityStatement(IBaseConformance theCs) {
+			myConsumer.accept((org.hl7.fhir.r4.model.CapabilityStatement) theCs);
+		}
+
+	}
+
+	@Nonnull
+	private static org.hl7.fhir.r4.model.CapabilityStatement.CapabilityStatementRestResourceComponent findPatientResource(org.hl7.fhir.r4.model.CapabilityStatement theCs) {
+		org.hl7.fhir.r4.model.CapabilityStatement.CapabilityStatementRestResourceComponent patientResource = theCs
+			.getRest()
+			.get(0)
+			.getResource()
+			.stream()
+			.filter(t -> "Patient".equals(t.getType()))
+			.findFirst()
+			.orElseThrow();
+		return patientResource;
 	}
 
 

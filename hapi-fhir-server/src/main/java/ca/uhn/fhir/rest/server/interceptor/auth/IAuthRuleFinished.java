@@ -19,8 +19,9 @@
  */
 package ca.uhn.fhir.rest.server.interceptor.auth;
 
+import jakarta.annotation.Nullable;
+
 import java.util.List;
-import javax.annotation.Nullable;
 
 public interface IAuthRuleFinished {
 

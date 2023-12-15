@@ -34,10 +34,9 @@ import ca.uhn.fhir.jpa.delete.batch2.DeleteExpungeSqlBuilder;
 import ca.uhn.fhir.jpa.delete.batch2.DeleteExpungeSvcImpl;
 import ca.uhn.fhir.jpa.reindex.Batch2DaoSvcImpl;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
+import jakarta.persistence.EntityManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
-
-import javax.persistence.EntityManager;
 
 public class Batch2SupportConfig {
 
@@ -47,15 +46,9 @@ public class Batch2SupportConfig {
 			MatchUrlService theMatchUrlService,
 			DaoRegistry theDaoRegistry,
 			FhirContext theFhirContext,
-			IHapiTransactionService theTransactionService,
-			JpaStorageSettings theJpaStorageSettings) {
+			IHapiTransactionService theTransactionService) {
 		return new Batch2DaoSvcImpl(
-				theResourceTableDao,
-				theMatchUrlService,
-				theDaoRegistry,
-				theFhirContext,
-				theTransactionService,
-				theJpaStorageSettings);
+				theResourceTableDao, theMatchUrlService, theDaoRegistry, theFhirContext, theTransactionService);
 	}
 
 	@Bean

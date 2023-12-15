@@ -28,6 +28,7 @@ import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
+import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.mdm.api.IGoldenResourceMergerSvc;
 import ca.uhn.fhir.mdm.api.IMdmControllerSvc;
@@ -56,6 +57,8 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.ParametersUtil;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
@@ -67,8 +70,6 @@ import java.math.BigDecimal;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 /**
  * This class acts as a layer between MdmProviders and MDM services to support a REST API that's not a FHIR Operation API.
@@ -102,6 +103,9 @@ public class MdmControllerSvcImpl implements IMdmControllerSvc {
 
 	@Autowired
 	IInterceptorBroadcaster myInterceptorBroadcaster;
+
+	@Autowired
+	private HapiTransactionService myTxService;
 
 	public MdmControllerSvcImpl() {}
 
@@ -194,7 +198,9 @@ public class MdmControllerSvcImpl implements IMdmControllerSvc {
 	@Override
 	public List<MdmLinkWithRevisionJson> queryLinkHistory(
 			MdmHistorySearchParameters theMdmHistorySearchParameters, RequestDetails theRequestDetails) {
-		return myMdmLinkQuerySvc.queryLinkHistory(theMdmHistorySearchParameters);
+		return myTxService
+				.withRequest(theRequestDetails)
+				.execute(() -> myMdmLinkQuerySvc.queryLinkHistory(theMdmHistorySearchParameters));
 	}
 
 	@Override

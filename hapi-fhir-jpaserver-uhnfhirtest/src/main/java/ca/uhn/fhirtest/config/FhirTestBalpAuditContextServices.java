@@ -3,10 +3,8 @@ package ca.uhn.fhirtest.config;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.storage.interceptor.balp.IBalpAuditContextServices;
-import joptsimple.internal.Strings;
+import jakarta.annotation.Nonnull;
 import org.hl7.fhir.r4.model.Reference;
-
-import javax.annotation.Nonnull;
 
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -73,6 +71,6 @@ public class FhirTestBalpAuditContextServices implements IBalpAuditContextServic
 			parts[2] = "X";
 			parts[3] = "X";
 		}
-		return Strings.join(parts, ".");
+		return String.join(".", parts);
 	}
 }

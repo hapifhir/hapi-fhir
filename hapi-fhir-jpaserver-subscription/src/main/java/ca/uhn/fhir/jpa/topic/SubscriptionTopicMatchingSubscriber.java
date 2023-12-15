@@ -24,13 +24,13 @@ import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryMatchResult;
-import ca.uhn.fhir.jpa.subscription.match.matcher.subscriber.SubscriptionMatchDeliverer;
-import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionRegistry;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedJsonMessage;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 import ca.uhn.fhir.jpa.topic.filter.InMemoryTopicFilterMatcher;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
+import ca.uhn.fhir.subscription.api.IResourceModifiedMessagePersistenceSvc;
 import ca.uhn.fhir.util.Logs;
+import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r5.model.SubscriptionTopic;
 import org.slf4j.Logger;
@@ -42,7 +42,7 @@ import org.springframework.messaging.MessagingException;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import javax.annotation.Nonnull;
+import java.util.Optional;
 
 public class SubscriptionTopicMatchingSubscriber implements MessageHandler {
 	private static final Logger ourLog = Logs.getSubscriptionTopicLog();
@@ -56,15 +56,6 @@ public class SubscriptionTopicMatchingSubscriber implements MessageHandler {
 	SubscriptionTopicRegistry mySubscriptionTopicRegistry;
 
 	@Autowired
-	SubscriptionRegistry mySubscriptionRegistry;
-
-	@Autowired
-	SubscriptionMatchDeliverer mySubscriptionMatchDeliverer;
-
-	@Autowired
-	SubscriptionTopicPayloadBuilder mySubscriptionTopicPayloadBuilder;
-
-	@Autowired
 	private IInterceptorBroadcaster myInterceptorBroadcaster;
 
 	@Autowired
@@ -72,6 +63,9 @@ public class SubscriptionTopicMatchingSubscriber implements MessageHandler {
 
 	@Autowired
 	private InMemoryTopicFilterMatcher myInMemoryTopicFilterMatcher;
+
+	@Autowired
+	private IResourceModifiedMessagePersistenceSvc myResourceModifiedMessagePersistenceSvc;
 
 	public SubscriptionTopicMatchingSubscriber(FhirContext theFhirContext) {
 		myFhirContext = theFhirContext;
@@ -87,6 +81,16 @@ public class SubscriptionTopicMatchingSubscriber implements MessageHandler {
 		}
 
 		ResourceModifiedMessage msg = ((ResourceModifiedJsonMessage) theMessage).getPayload();
+
+		if (msg.getPayload(myFhirContext) == null) {
+			// inflate the message and ignore any resource that cannot be found.
+			Optional<ResourceModifiedMessage> inflatedMsg =
+					myResourceModifiedMessagePersistenceSvc.inflatePersistedResourceModifiedMessageOrNull(msg);
+			if (inflatedMsg.isEmpty()) {
+				return;
+			}
+			msg = inflatedMsg.get();
+		}
 
 		// Interceptor call: SUBSCRIPTION_TOPIC_BEFORE_PERSISTED_RESOURCE_CHECKED
 		HookParams params = new HookParams().add(ResourceModifiedMessage.class, msg);

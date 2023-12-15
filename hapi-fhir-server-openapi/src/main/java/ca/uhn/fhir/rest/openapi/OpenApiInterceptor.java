@@ -56,6 +56,10 @@ import io.swagger.v3.oas.models.responses.ApiResponse;
 import io.swagger.v3.oas.models.responses.ApiResponses;
 import io.swagger.v3.oas.models.servers.Server;
 import io.swagger.v3.oas.models.tags.Tag;
+import jakarta.annotation.Nonnull;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.convertors.factory.VersionConvertorFactory_30_40;
@@ -64,6 +68,7 @@ import org.hl7.fhir.convertors.factory.VersionConvertorFactory_43_50;
 import org.hl7.fhir.instance.model.api.IBaseConformance;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.CapabilityStatement;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
@@ -92,7 +97,7 @@ import org.thymeleaf.templateresolver.ITemplateResolver;
 import org.thymeleaf.templateresolver.TemplateResolution;
 import org.thymeleaf.templateresource.ClassLoaderTemplateResource;
 import org.thymeleaf.web.servlet.IServletWebExchange;
-import org.thymeleaf.web.servlet.JavaxServletWebApplication;
+import org.thymeleaf.web.servlet.JakartaServletWebApplication;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -108,10 +113,8 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
-import javax.servlet.ServletContext;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
+import static ca.uhn.fhir.rest.server.util.NarrativeUtil.sanitizeHtmlFragment;
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -337,7 +340,7 @@ public class OpenApiInterceptor {
 		HttpServletRequest servletRequest = theRequestDetails.getServletRequest();
 		ServletContext servletContext = servletRequest.getServletContext();
 
-		JavaxServletWebApplication application = JavaxServletWebApplication.buildApplication(servletContext);
+		JakartaServletWebApplication application = JakartaServletWebApplication.buildApplication(servletContext);
 		IServletWebExchange exchange = application.buildExchange(servletRequest, theResponse);
 		WebContext context = new WebContext(exchange);
 		context.setVariable(REQUEST_DETAILS, theRequestDetails);
@@ -356,7 +359,7 @@ public class OpenApiInterceptor {
 
 		String copyright = cs.getCopyright();
 		if (isNotBlank(copyright)) {
-			copyright = myFlexmarkRenderer.render(myFlexmarkParser.parse(copyright));
+			copyright = renderMarkdown(copyright);
 			context.setVariable("COPYRIGHT_HTML", copyright);
 		}
 
@@ -409,6 +412,11 @@ public class OpenApiInterceptor {
 
 		theResponse.getWriter().write(outcome);
 		theResponse.getWriter().close();
+	}
+
+	@Nonnull
+	private String renderMarkdown(String copyright) {
+		return myFlexmarkRenderer.render(myFlexmarkParser.parse(copyright));
 	}
 
 	protected void populateOIDCVariables(ServletRequestDetails theRequestDetails, WebContext theContext) {
@@ -515,7 +523,7 @@ public class OpenApiInterceptor {
 
 			Tag resourceTag = new Tag();
 			resourceTag.setName(resourceType);
-			resourceTag.setDescription("The " + resourceType + " FHIR resource type");
+			resourceTag.setDescription(createResourceDescription(nextResource));
 			openApi.addTagsItem(resourceTag);
 
 			// Instance Read
@@ -622,6 +630,36 @@ public class OpenApiInterceptor {
 		}
 
 		return openApi;
+	}
+
+	@Nonnull
+	protected String createResourceDescription(
+			CapabilityStatement.CapabilityStatementRestResourceComponent theResource) {
+		StringBuilder b = new StringBuilder();
+		b.append("The ").append(theResource.getType()).append(" FHIR resource type");
+
+		String documentation = theResource.getDocumentation();
+		if (isNotBlank(documentation)) {
+			b.append("<br/>");
+			b.append(sanitizeHtmlFragment(renderMarkdown(documentation)));
+		}
+
+		if (isNotBlank(theResource.getProfile())) {
+			b.append("<br/>");
+			b.append("Base profile: ");
+			b.append(sanitizeHtmlFragment(theResource.getProfile()));
+		}
+
+		for (CanonicalType next : theResource.getSupportedProfile()) {
+			String nextSupportedProfile = next.getValueAsString();
+			if (isNotBlank(nextSupportedProfile)) {
+				b.append("<br/>");
+				b.append("Supported profile: ");
+				b.append(sanitizeHtmlFragment(nextSupportedProfile));
+			}
+		}
+
+		return b.toString();
 	}
 
 	protected void addSearchOperation(

@@ -21,10 +21,10 @@ package ca.uhn.fhir.jpa.test.config;
 
 import ca.uhn.fhir.batch2.jobs.config.Batch2JobsConfig;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.batch2.JpaBatch2Config;
 import ca.uhn.fhir.jpa.binary.api.IBinaryStorageSvc;
 import ca.uhn.fhir.jpa.binstore.MemoryBinaryStorageSvcImpl;
-import ca.uhn.fhir.jpa.config.HapiJpaConfig;
 import ca.uhn.fhir.jpa.config.PackageLoaderConfig;
 import ca.uhn.fhir.jpa.config.r4.JpaR4Config;
 import ca.uhn.fhir.jpa.config.util.HapiEntityManagerFactoryUtil;
@@ -53,19 +53,27 @@ import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadInfo;
 import java.lang.management.ThreadMXBean;
 import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Deque;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
+import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
+import static ca.uhn.fhir.jpa.test.config.TestR5Config.SELECT_QUERY_INCLUSION_CRITERIA_EXCLUDING_SEQUENCE_QUERIES;
 import static org.junit.jupiter.api.Assertions.fail;
 
 @Configuration
 @Import({
 	JpaR4Config.class,
 	PackageLoaderConfig.class,
-	HapiJpaConfig.class,
+	TestHapiJpaConfig.class,
 	TestJPAConfig.class,
 	TestHSearchAddInConfig.DefaultLuceneHeap.class,
 	JpaBatch2Config.class,
@@ -76,6 +84,8 @@ public class TestR4Config {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(TestR4Config.class);
 	public static Integer ourMaxThreads;
+	private final AtomicInteger myBorrowedConnectionCount = new AtomicInteger(0);
+	private final AtomicInteger myReturnedConnectionCount = new AtomicInteger(0);
 
 	static {
 		/*
@@ -96,14 +106,18 @@ public class TestR4Config {
 		ourLog.warn("ourMaxThreads={}", ourMaxThreads);
 	}
 
-	private final Deque<Exception> myLastStackTrace = new LinkedList<>();
+	private Map<Connection, Exception> myConnectionRequestStackTraces = Collections.synchronizedMap(new LinkedHashMap<>());
+
 	@Autowired
 	TestHSearchAddInConfig.IHSearchConfigurer hibernateSearchConfigurer;
 	private boolean myHaveDumpedThreads;
+	@Autowired
+	private JpaStorageSettings myStorageSettings;
 
 	@Bean
 	public CircularQueueCaptureQueriesListener captureQueriesListener() {
-		return new CircularQueueCaptureQueriesListener();
+		return new CircularQueueCaptureQueriesListener()
+				.setSelectQueryInclusionCriteria(SELECT_QUERY_INCLUSION_CRITERIA_EXCLUDING_SEQUENCE_QUERIES);
 	}
 
 	@Bean
@@ -117,6 +131,7 @@ public class TestR4Config {
 					retVal = new ConnectionWrapper(super.getConnection());
 				} catch (Exception e) {
 					ourLog.error("Exceeded maximum wait for connection (" + ourMaxThreads + " max)", e);
+					ourLog.info("Have {} outstanding - {} borrowed {} returned", (myBorrowedConnectionCount.get() - myReturnedConnectionCount.get()), myBorrowedConnectionCount.get(), myReturnedConnectionCount.get());
 					logGetConnectionStackTrace();
 					fail("Exceeded maximum wait for connection (" + ourMaxThreads + " max): " + e);
 					retVal = null;
@@ -125,38 +140,42 @@ public class TestR4Config {
 				try {
 					throw new Exception();
 				} catch (Exception e) {
-					synchronized (myLastStackTrace) {
-						myLastStackTrace.add(e);
-						while (myLastStackTrace.size() > ourMaxThreads) {
-							myLastStackTrace.removeFirst();
-						}
-					}
+					myConnectionRequestStackTraces.put(retVal, e);
 				}
 
-				return retVal;
+				myBorrowedConnectionCount.incrementAndGet();
+				ConnectionWrapper finalRetVal = retVal;
+				return new ConnectionWrapper(finalRetVal){
+					@Override
+					public void close() throws SQLException {
+						myConnectionRequestStackTraces.remove(finalRetVal);
+						myReturnedConnectionCount.incrementAndGet();
+						super.close();
+					}
+				};
 			}
 
 			private void logGetConnectionStackTrace() {
 				StringBuilder b = new StringBuilder();
-				int i = 0;
-				synchronized (myLastStackTrace) {
-					for (Iterator<Exception> iter = myLastStackTrace.descendingIterator(); iter.hasNext(); ) {
-						Exception nextStack = iter.next();
-						b.append("\n\nPrevious request stack trace ");
-						b.append(i++);
+				ArrayList<Exception> stackTraces = new ArrayList<>(myConnectionRequestStackTraces.values());
+
+				for (int i = 0; i < stackTraces.size(); i++) {
+					Exception nextStack = stackTraces.get(i);
+					b.append("\nPrevious request stack trace ");
+					b.append(i);
+					b.append(":");
+					for (StackTraceElement next : nextStack.getStackTrace()) {
+						b.append("\n   ");
+						b.append(next.getClassName());
+						b.append(".");
+						b.append(next.getMethodName());
+						b.append("(");
+						b.append(next.getFileName());
 						b.append(":");
-						for (StackTraceElement next : nextStack.getStackTrace()) {
-							b.append("\n   ");
-							b.append(next.getClassName());
-							b.append(".");
-							b.append(next.getMethodName());
-							b.append("(");
-							b.append(next.getFileName());
-							b.append(":");
-							b.append(next.getLineNumber());
-							b.append(")");
-						}
+						b.append(next.getLineNumber());
+						b.append(")");
 					}
+					b.append("\n");
 				}
 				ourLog.info(b.toString());
 
@@ -209,8 +228,8 @@ public class TestR4Config {
 
 
 	@Bean
-	public LocalContainerEntityManagerFactoryBean entityManagerFactory(ConfigurableListableBeanFactory theConfigurableListableBeanFactory, FhirContext theFhirContext) {
-		LocalContainerEntityManagerFactoryBean retVal = HapiEntityManagerFactoryUtil.newEntityManagerFactory(theConfigurableListableBeanFactory, theFhirContext);
+	public LocalContainerEntityManagerFactoryBean entityManagerFactory(ConfigurableListableBeanFactory theConfigurableListableBeanFactory, FhirContext theFhirContext, JpaStorageSettings theStorageSettings) {
+		LocalContainerEntityManagerFactoryBean retVal = HapiEntityManagerFactoryUtil.newEntityManagerFactory(theConfigurableListableBeanFactory, theFhirContext, theStorageSettings);
 		retVal.setPersistenceUnitName("PU_HapiFhirJpaR4");
 		retVal.setDataSource(dataSource());
 		retVal.setJpaProperties(jpaProperties());

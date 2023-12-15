@@ -27,9 +27,32 @@ import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.HistorySearchStyleEnum;
 import ca.uhn.fhir.rest.server.util.ICachedSearchDetails;
 import ca.uhn.fhir.system.HapiSystemProperties;
+import jakarta.annotation.Nonnull;
+import jakarta.persistence.Basic;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Index;
+import jakarta.persistence.Lob;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.SequenceGenerator;
+import jakarta.persistence.Table;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
+import jakarta.persistence.Transient;
+import jakarta.persistence.UniqueConstraint;
+import jakarta.persistence.Version;
 import org.apache.commons.lang3.SerializationUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.OptimisticLock;
+import org.hibernate.type.SqlTypes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,27 +65,6 @@ import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
-import javax.annotation.Nonnull;
-import javax.persistence.Basic;
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Index;
-import javax.persistence.Lob;
-import javax.persistence.OneToMany;
-import javax.persistence.SequenceGenerator;
-import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
-import javax.persistence.Transient;
-import javax.persistence.UniqueConstraint;
-import javax.persistence.Version;
 
 import static org.apache.commons.lang3.StringUtils.left;
 
@@ -152,6 +154,7 @@ public class Search implements ICachedSearchDetails, Serializable {
 
 	@Enumerated(EnumType.ORDINAL)
 	@Column(name = "SEARCH_TYPE", nullable = false)
+	@JdbcTypeCode(SqlTypes.INTEGER)
 	private SearchTypeEnum mySearchType;
 
 	@Enumerated(EnumType.STRING)
@@ -408,14 +411,24 @@ public class Search implements ICachedSearchDetails, Serializable {
 		myLastUpdatedHigh = theUpperBound;
 	}
 
-	private Set<Include> toIncList(boolean theWantReverse) {
+	private Set<Include> toIncList(boolean theWantReverse, boolean theIncludeAll, boolean theWantIterate) {
 		HashSet<Include> retVal = new HashSet<>();
 		for (SearchInclude next : getIncludes()) {
 			if (theWantReverse == next.isReverse()) {
-				retVal.add(new Include(next.getInclude(), next.isRecurse()));
+				if (theIncludeAll) {
+					retVal.add(new Include(next.getInclude(), next.isRecurse()));
+				} else {
+					if (theWantIterate == next.isRecurse()) {
+						retVal.add(new Include(next.getInclude(), next.isRecurse()));
+					}
+				}
 			}
 		}
 		return Collections.unmodifiableSet(retVal);
+	}
+
+	private Set<Include> toIncList(boolean theWantReverse) {
+		return toIncList(theWantReverse, true, true);
 	}
 
 	public Set<Include> toIncludesList() {
@@ -424,6 +437,14 @@ public class Search implements ICachedSearchDetails, Serializable {
 
 	public Set<Include> toRevIncludesList() {
 		return toIncList(true);
+	}
+
+	public Set<Include> toIncludesList(boolean iterate) {
+		return toIncList(false, false, iterate);
+	}
+
+	public Set<Include> toRevIncludesList(boolean iterate) {
+		return toIncList(true, false, iterate);
 	}
 
 	public void addInclude(SearchInclude theInclude) {

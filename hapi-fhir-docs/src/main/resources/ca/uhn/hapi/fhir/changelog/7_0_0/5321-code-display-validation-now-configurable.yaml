@@ -1,6 +1,7 @@
 ---
 type: add
 issue: 5321
+backport: 6.8.3
 title: "It is now possible to configure the strictness of concept display name validation
    using a new flag on the InMemoryTerminologyServerValidationSupport (for non-JPA validation)
    and JpaStorageSettings (for JPA validation). In addition, the error messages emitted by

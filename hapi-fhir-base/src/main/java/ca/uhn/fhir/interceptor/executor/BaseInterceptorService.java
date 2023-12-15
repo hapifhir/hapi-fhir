@@ -31,6 +31,8 @@ import ca.uhn.fhir.util.ReflectionUtil;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
@@ -57,8 +59,6 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 public abstract class BaseInterceptorService<POINTCUT extends Enum<POINTCUT> & IPointcut>
 		implements IBaseInterceptorService<POINTCUT>, IBaseInterceptorBroadcaster<POINTCUT> {
@@ -263,10 +263,14 @@ public abstract class BaseInterceptorService<POINTCUT extends Enum<POINTCUT> & I
 		return myRegisteredPointcuts.contains(thePointcut);
 	}
 
+	protected Class<?> getBooleanReturnType() {
+		return boolean.class;
+	}
+
 	@Override
 	public boolean callHooks(POINTCUT thePointcut, HookParams theParams) {
 		assert haveAppropriateParams(thePointcut, theParams);
-		assert thePointcut.getReturnType() == void.class || thePointcut.getReturnType() == boolean.class;
+		assert thePointcut.getReturnType() == void.class || thePointcut.getReturnType() == getBooleanReturnType();
 
 		Object retValObj = doCallHooks(thePointcut, theParams, true);
 		return (Boolean) retValObj;
@@ -282,14 +286,16 @@ public abstract class BaseInterceptorService<POINTCUT extends Enum<POINTCUT> & I
 		for (BaseInvoker nextInvoker : invokers) {
 			Object nextOutcome = nextInvoker.invoke(theParams);
 			Class<?> pointcutReturnType = thePointcut.getReturnType();
-			if (pointcutReturnType.equals(boolean.class)) {
+			if (pointcutReturnType.equals(getBooleanReturnType())) {
 				Boolean nextOutcomeAsBoolean = (Boolean) nextOutcome;
 				if (Boolean.FALSE.equals(nextOutcomeAsBoolean)) {
 					ourLog.trace("callHooks({}) for invoker({}) returned false", thePointcut, nextInvoker);
 					theRetVal = false;
 					break;
+				} else {
+					theRetVal = true;
 				}
-			} else if (pointcutReturnType.equals(void.class) == false) {
+			} else if (!pointcutReturnType.equals(void.class)) {
 				if (nextOutcome != null) {
 					theRetVal = nextOutcome;
 					break;
@@ -349,7 +355,7 @@ public abstract class BaseInterceptorService<POINTCUT extends Enum<POINTCUT> & I
 
 		List<BaseInvoker> retVal;
 
-		if (haveMultiple == false) {
+		if (!haveMultiple) {
 
 			// The global list doesn't need to be sorted every time since it's sorted on
 			// insertion each time. Doing so is a waste of cycles..
@@ -485,9 +491,9 @@ public abstract class BaseInterceptorService<POINTCUT extends Enum<POINTCUT> & I
 			myMethod = theHookMethod;
 
 			Class<?> returnType = theHookMethod.getReturnType();
-			if (myPointcut.getReturnType().equals(boolean.class)) {
+			if (myPointcut.getReturnType().equals(getBooleanReturnType())) {
 				Validate.isTrue(
-						boolean.class.equals(returnType) || void.class.equals(returnType),
+						getBooleanReturnType().equals(returnType) || void.class.equals(returnType),
 						"Method does not return boolean or void: %s",
 						theHookMethod);
 			} else if (myPointcut.getReturnType().equals(void.class)) {

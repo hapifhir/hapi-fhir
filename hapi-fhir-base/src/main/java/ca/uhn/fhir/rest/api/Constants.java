@@ -199,6 +199,8 @@ public class Constants {
 	public static final String PARAM_PRETTY_VALUE_FALSE = "false";
 	public static final String PARAM_PRETTY_VALUE_TRUE = "true";
 	public static final String PARAM_PROFILE = "_profile";
+	public static final String PARAM_PID = "_pid";
+
 	public static final String PARAM_QUERY = "_query";
 	public static final String PARAM_RESPONSE_URL = "response-url"; // Used in messaging
 	public static final String PARAM_REVINCLUDE = "_revinclude";
@@ -217,21 +219,6 @@ public class Constants {
 	public static final String PARAM_TAGS = "_tags";
 	public static final String PARAM_TEXT = "_text";
 	public static final String PARAM_VALIDATE = "_validate";
-
-	/**
-	 * $member-match operation
-	 */
-	public static final String PARAM_MEMBER_PATIENT = "MemberPatient";
-
-	public static final String PARAM_MEMBER_IDENTIFIER = "MemberIdentifier";
-
-	public static final String PARAM_OLD_COVERAGE = "OldCoverage";
-	public static final String PARAM_NEW_COVERAGE = "NewCoverage";
-	public static final String PARAM_CONSENT = "Consent";
-	public static final String PARAM_MEMBER_PATIENT_NAME = PARAM_MEMBER_PATIENT + " Name";
-	public static final String PARAM_MEMBER_PATIENT_BIRTHDATE = PARAM_MEMBER_PATIENT + " Birthdate";
-	public static final String PARAM_CONSENT_PATIENT_REFERENCE = PARAM_CONSENT + "'s Patient Reference";
-	public static final String PARAM_CONSENT_PERFORMER_REFERENCE = PARAM_CONSENT + "'s Performer Reference";
 
 	public static final String PARAMQUALIFIER_MISSING = ":missing";
 	public static final String PARAMQUALIFIER_MISSING_FALSE = "false";
@@ -330,6 +317,9 @@ public class Constants {
 	 * The number of characters in a UUID (36)
 	 */
 	public static final int UUID_LENGTH = 36;
+
+	public static final String BULK_DATA_ACCESS_IG_URL =
+			"http://hl7.org/fhir/uv/bulkdata/CapabilityStatement/bulk-data";
 
 	/**
 	 * Application configuration key used to enable or disable Hibernate Envers.

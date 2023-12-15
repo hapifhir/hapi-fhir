@@ -23,8 +23,7 @@ import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.jpa.entity.Batch2JobInstanceEntity;
 import ca.uhn.fhir.jpa.entity.Batch2WorkChunkEntity;
-
-import javax.annotation.Nonnull;
+import jakarta.annotation.Nonnull;
 
 class JobInstanceUtil {
 
@@ -61,6 +60,8 @@ class JobInstanceUtil {
 		retVal.setReport(theEntity.getReport());
 		retVal.setEstimatedTimeRemaining(theEntity.getEstimatedTimeRemaining());
 		retVal.setWarningMessages(theEntity.getWarningMessages());
+		retVal.setTriggeringUsername(theEntity.getTriggeringUsername());
+		retVal.setTriggeringClientId(theEntity.getTriggeringClientId());
 		return retVal;
 	}
 
@@ -95,6 +96,8 @@ class JobInstanceUtil {
 		theJobInstanceEntity.setReport(theJobInstance.getReport());
 		theJobInstanceEntity.setEstimatedTimeRemaining(theJobInstance.getEstimatedTimeRemaining());
 		theJobInstanceEntity.setWarningMessages(theJobInstance.getWarningMessages());
+		theJobInstanceEntity.setTriggeringUsername(theJobInstance.getTriggeringUsername());
+		theJobInstanceEntity.setTriggeringClientId(theJobInstance.getTriggeringClientId());
 	}
 
 	/**

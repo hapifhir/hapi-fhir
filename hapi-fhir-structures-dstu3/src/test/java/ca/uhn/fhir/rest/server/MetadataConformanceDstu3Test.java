@@ -9,7 +9,8 @@ import ca.uhn.fhir.rest.annotation.Validate;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.param.StringParam;
-import ca.uhn.fhir.test.utilities.JettyUtil;
+import ca.uhn.fhir.test.utilities.HttpClientExtension;
+import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.util.VersionUtil;
 import org.apache.commons.io.IOUtils;
@@ -18,21 +19,13 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpOptions;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpRequestBase;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.servlet.ServletHandler;
-import org.eclipse.jetty.servlet.ServletHolder;
-import org.hl7.fhir.dstu3.hapi.rest.server.ServerCapabilityStatementProvider;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
 import java.nio.charset.StandardCharsets;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
@@ -43,18 +36,24 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class MetadataConformanceDstu3Test {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(MetadataConformanceDstu3Test.class);
-	private static CloseableHttpClient ourClient;
-	private static FhirContext ourCtx = FhirContext.forDstu3();
-	private static int ourPort;
-	private static Server ourServer;
-	private static RestfulServer ourServlet;
+	private static final FhirContext ourCtx = FhirContext.forDstu3Cached();
+
+	@RegisterExtension
+	private RestfulServerExtension ourServer  = new RestfulServerExtension(ourCtx)
+		 .setDefaultResponseEncoding(EncodingEnum.XML)
+		 .registerProvider(new DummyPatientResourceProvider())
+		 .withPagingProvider(new FifoMemoryPagingProvider(100))
+		 .setDefaultPrettyPrint(false);
+
+	@RegisterExtension
+	private HttpClientExtension ourClient = new HttpClientExtension();
 
 	@Test
 	public void testSummary() throws Exception {
 		String output;
 
 		// With
-		HttpRequestBase httpPost = new HttpGet("http://localhost:" + ourPort + "/metadata?_summary=true&_pretty=true");
+		HttpRequestBase httpPost = new HttpGet(ourServer.getBaseUrl() + "/metadata?_summary=true&_pretty=true");
 		CloseableHttpResponse status = ourClient.execute(httpPost);
 		try {
 			output = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
@@ -68,7 +67,7 @@ public class MetadataConformanceDstu3Test {
 		}
 
 		// Without
-		httpPost = new HttpGet("http://localhost:" + ourPort + "/metadata?_pretty=true");
+		httpPost = new HttpGet(ourServer.getBaseUrl() + "/metadata?_pretty=true");
 		status = ourClient.execute(httpPost);
 		try {
 			output = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
@@ -86,7 +85,7 @@ public class MetadataConformanceDstu3Test {
 	public void testElements() throws Exception {
 		String output;
 
-		HttpRequestBase httpPost = new HttpGet("http://localhost:" + ourPort + "/metadata?_elements=fhirVersion&_pretty=true");
+		HttpRequestBase httpPost = new HttpGet(ourServer.getBaseUrl() + "/metadata?_elements=fhirVersion&_pretty=true");
 		CloseableHttpResponse status = ourClient.execute(httpPost);
 		try {
 			output = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
@@ -103,7 +102,7 @@ public class MetadataConformanceDstu3Test {
 	public void testHttpMethods() throws Exception {
 		String output;
 
-		HttpRequestBase httpOperation = new HttpGet("http://localhost:" + ourPort + "/metadata");
+		HttpRequestBase httpOperation = new HttpGet(ourServer.getBaseUrl() + "/metadata");
 		try (CloseableHttpResponse status = ourClient.execute(httpOperation)) {
 			output = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			assertEquals(200, status.getStatusLine().getStatusCode());
@@ -112,7 +111,7 @@ public class MetadataConformanceDstu3Test {
 			assertThat(status.getFirstHeader("X-Powered-By").getValue(), containsString("REST Server (FHIR Server; FHIR " + ourCtx.getVersion().getVersion().getFhirVersionString() + "/" + ourCtx.getVersion().getVersion().name() + ")"));
 		}
 
-		httpOperation = new HttpOptions("http://localhost:" + ourPort);
+		httpOperation = new HttpOptions(ourServer.getBaseUrl());
 		try (CloseableHttpResponse status = ourClient.execute(httpOperation)) {
 			output = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			assertEquals(200, status.getStatusLine().getStatusCode());
@@ -121,7 +120,7 @@ public class MetadataConformanceDstu3Test {
 			assertThat(status.getFirstHeader("X-Powered-By").getValue(), containsString("REST Server (FHIR Server; FHIR " + ourCtx.getVersion().getVersion().getFhirVersionString() + "/" + ourCtx.getVersion().getVersion().name() + ")"));
 		}
 
-		httpOperation = new HttpPost("http://localhost:" + ourPort + "/metadata");
+		httpOperation = new HttpPost(ourServer.getBaseUrl() + "/metadata");
 		try (CloseableHttpResponse status = ourClient.execute(httpOperation)) {
 			output = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			assertEquals(405, status.getStatusLine().getStatusCode());
@@ -132,7 +131,7 @@ public class MetadataConformanceDstu3Test {
 		 * There is no @read on the RP below, so this should fail. Otherwise it
 		 * would be interpreted as a read on ID "metadata"
 		 */
-		httpOperation = new HttpGet("http://localhost:" + ourPort + "/Patient/metadata");
+		httpOperation = new HttpGet(ourServer.getBaseUrl() + "/Patient/metadata");
 		try (CloseableHttpResponse status = ourClient.execute(httpOperation)) {
 			assertEquals(400, status.getStatusLine().getStatusCode());
 		}
@@ -159,32 +158,7 @@ public class MetadataConformanceDstu3Test {
 
 	@AfterAll
 	public static void afterClassClearContext() throws Exception {
-		JettyUtil.closeServer(ourServer);
 		TestUtil.randomizeLocaleAndTimezone();
-	}
-
-	@BeforeAll
-	public static void beforeClass() throws Exception {
-		ourServer = new Server(0);
-
-		DummyPatientResourceProvider patientProvider = new DummyPatientResourceProvider();
-
-		ServletHandler proxyHandler = new ServletHandler();
-		ourServlet = new RestfulServer(ourCtx);
-		ourServlet.setServerConformanceProvider(new ServerCapabilityStatementProvider(ourServlet));
-		ourServlet.setResourceProviders(patientProvider);
-		ourServlet.setDefaultResponseEncoding(EncodingEnum.XML);
-		ServletHolder servletHolder = new ServletHolder(ourServlet);
-		proxyHandler.addServletWithMapping(servletHolder, "/*");
-		ourServer.setHandler(proxyHandler);
-		JettyUtil.startServer(ourServer);
-		ourPort = JettyUtil.getPortForStartedServer(ourServer);
-
-		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
-		HttpClientBuilder builder = HttpClientBuilder.create();
-		builder.setConnectionManager(connectionManager);
-		ourClient = builder.build();
-
 	}
 
 }

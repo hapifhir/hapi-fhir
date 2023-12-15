@@ -20,10 +20,12 @@ import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nonnull;
+import jakarta.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -274,6 +276,179 @@ public class MdmLinkDaoSvcTest extends BaseMdmR4Test {
 
 		// verify
 		assertEquals(2, actualMdmLinkRevisions.size(), "Both Patient/p123 and Practitioner/p123 should be returned");
+	}
+
+	@ParameterizedTest
+	@ValueSource(strings = {"allUnknown", "someUnknown"})
+	public void testHistoryForUnknownIdsSourceIdOnly(String mode) {
+		// setup
+		final List<MdmLink> mdmLinksWithLinkedPatients1 = createMdmLinksWithLinkedPatients(MdmMatchResultEnum.MATCH, 3);
+		final List<MdmLink> mdmLinksWithLinkedPatients2 = createMdmLinksWithLinkedPatients(MdmMatchResultEnum.MATCH, 4);
+
+		MdmHistorySearchParameters mdmHistorySearchParameters = null;
+		List<MdmLinkWithRevision<MdmLink>> expectedMdLinkRevisions = null;
+		switch (mode) {
+			// $mdm-link-history?resourceId=Patient/unknown
+			case "allUnknown" -> {
+				mdmHistorySearchParameters = new MdmHistorySearchParameters().setSourceIds(List.of("unknown"));
+				expectedMdLinkRevisions = new ArrayList<>();
+			}
+			// $mdm-link-history?resourceId=Patient/1,Patient/2,Patient/unknown
+			case "someUnknown" -> {
+				List<String> resourceIdsWithSomeUnknown = new ArrayList<>(getIdsFromMdmLinks(MdmLink::getSourcePersistenceId, mdmLinksWithLinkedPatients1.get(0), mdmLinksWithLinkedPatients2.get(0)));
+				resourceIdsWithSomeUnknown.add("unknown");
+				mdmHistorySearchParameters = new MdmHistorySearchParameters().setSourceIds(resourceIdsWithSomeUnknown);
+
+				final JpaPid goldenResourceId1 = mdmLinksWithLinkedPatients1.get(0).getGoldenResourcePersistenceId();
+				final JpaPid goldenResourceId2 = mdmLinksWithLinkedPatients2.get(0).getGoldenResourcePersistenceId();
+				final JpaPid sourceId1_1 = mdmLinksWithLinkedPatients1.get(0).getSourcePersistenceId();
+				final JpaPid sourceId2_1 = mdmLinksWithLinkedPatients2.get(0).getSourcePersistenceId();
+				expectedMdLinkRevisions = List.of(
+					buildMdmLinkWithRevision(1, RevisionType.ADD, MdmMatchResultEnum.MATCH, goldenResourceId1, sourceId1_1),
+					buildMdmLinkWithRevision(4, RevisionType.ADD, MdmMatchResultEnum.MATCH, goldenResourceId2, sourceId2_1)
+				);
+			}
+		}
+
+		// execute
+		final List<MdmLinkWithRevision<MdmLink>> actualMdmLinkRevisions = myMdmLinkDaoSvc.findMdmLinkHistory(mdmHistorySearchParameters);
+
+		// verify
+		assert expectedMdLinkRevisions != null;
+		assertMdmRevisionsEqual(expectedMdLinkRevisions, actualMdmLinkRevisions);
+	}
+
+	@ParameterizedTest
+	@ValueSource(strings = {"allUnknown", "someUnknown"})
+	public void testHistoryForUnknownIdsGoldenResourceIdOnly(String mode) {
+		// setup
+		final List<MdmLink> mdmLinksWithLinkedPatients1 = createMdmLinksWithLinkedPatients(MdmMatchResultEnum.MATCH, 3);
+		final List<MdmLink> mdmLinksWithLinkedPatients2 = createMdmLinksWithLinkedPatients(MdmMatchResultEnum.MATCH, 4);
+
+		MdmHistorySearchParameters mdmHistorySearchParameters = null;
+		List<MdmLinkWithRevision<MdmLink>> expectedMdLinkRevisions = null;
+		switch (mode) {
+			// $mdm-link-history?goldenResourceId=Patient/unknown
+			case "allUnknown" -> {
+				mdmHistorySearchParameters = new MdmHistorySearchParameters().setGoldenResourceIds(List.of("unknown"));
+				expectedMdLinkRevisions = new ArrayList<>();
+			}
+			// $mdm-link-history?goldenResourceId=Patient/1,Patient/2,Patient/unknown
+			case "someUnknown" -> {
+				List<String> resourceIdsWithSomeUnknown = new ArrayList<>(getIdsFromMdmLinks(MdmLink::getGoldenResourcePersistenceId, mdmLinksWithLinkedPatients1.get(0), mdmLinksWithLinkedPatients2.get(0)));
+				resourceIdsWithSomeUnknown.add("unknown");
+				mdmHistorySearchParameters = new MdmHistorySearchParameters().setGoldenResourceIds(resourceIdsWithSomeUnknown);
+
+				final JpaPid goldenResourceId1 = mdmLinksWithLinkedPatients1.get(0).getGoldenResourcePersistenceId();
+				final JpaPid goldenResourceId2 = mdmLinksWithLinkedPatients2.get(0).getGoldenResourcePersistenceId();
+				final JpaPid sourceId1_1 = mdmLinksWithLinkedPatients1.get(0).getSourcePersistenceId();
+				final JpaPid sourceId1_2 = mdmLinksWithLinkedPatients1.get(1).getSourcePersistenceId();
+				final JpaPid sourceId1_3 = mdmLinksWithLinkedPatients1.get(2).getSourcePersistenceId();
+				final JpaPid sourceId2_1 = mdmLinksWithLinkedPatients2.get(0).getSourcePersistenceId();
+				final JpaPid sourceId2_2 = mdmLinksWithLinkedPatients2.get(1).getSourcePersistenceId();
+				final JpaPid sourceId2_3 = mdmLinksWithLinkedPatients2.get(2).getSourcePersistenceId();
+				final JpaPid sourceId2_4 = mdmLinksWithLinkedPatients2.get(3).getSourcePersistenceId();
+				expectedMdLinkRevisions = List.of(
+					buildMdmLinkWithRevision(1, RevisionType.ADD, MdmMatchResultEnum.MATCH, goldenResourceId1, sourceId1_1),
+					buildMdmLinkWithRevision(2, RevisionType.ADD, MdmMatchResultEnum.MATCH, goldenResourceId1, sourceId1_2),
+					buildMdmLinkWithRevision(3, RevisionType.ADD, MdmMatchResultEnum.MATCH, goldenResourceId1, sourceId1_3),
+					buildMdmLinkWithRevision(4, RevisionType.ADD, MdmMatchResultEnum.MATCH, goldenResourceId2, sourceId2_1),
+					buildMdmLinkWithRevision(5, RevisionType.ADD, MdmMatchResultEnum.MATCH, goldenResourceId2, sourceId2_2),
+					buildMdmLinkWithRevision(6, RevisionType.ADD, MdmMatchResultEnum.MATCH, goldenResourceId2, sourceId2_3),
+					buildMdmLinkWithRevision(7, RevisionType.ADD, MdmMatchResultEnum.MATCH, goldenResourceId2, sourceId2_4)
+				);
+			}
+		}
+
+		// execute
+		final List<MdmLinkWithRevision<MdmLink>> actualMdmLinkRevisions = myMdmLinkDaoSvc.findMdmLinkHistory(mdmHistorySearchParameters);
+
+		// verify
+		assert expectedMdLinkRevisions != null;
+		assertMdmRevisionsEqual(expectedMdLinkRevisions, actualMdmLinkRevisions);
+	}
+
+	@ParameterizedTest
+	@ValueSource(strings = {
+		"allUnknownSourceId",
+		"allUnknownGoldenId",
+		"allUnknownBoth",
+		"someUnknownSourceId",
+		"someUnknownGoldenId",
+		"someUnknownBoth"
+	})
+	public void testHistoryForUnknownIdsBothSourceAndGoldenResourceId(String mode) {
+		// setup
+		final List<MdmLink> mdmLinksWithLinkedPatients1 = createMdmLinksWithLinkedPatients(MdmMatchResultEnum.MATCH, 3);
+		final List<MdmLink> mdmLinksWithLinkedPatients2 = createMdmLinksWithLinkedPatients(MdmMatchResultEnum.MATCH, 4);
+
+		MdmHistorySearchParameters mdmHistorySearchParameters = null;
+		final JpaPid goldenResourceId1 = mdmLinksWithLinkedPatients1.get(0).getGoldenResourcePersistenceId();
+		final JpaPid goldenResourceId2 = mdmLinksWithLinkedPatients2.get(0).getGoldenResourcePersistenceId();
+		final JpaPid sourceId1_1 = mdmLinksWithLinkedPatients1.get(0).getSourcePersistenceId();
+		final JpaPid sourceId2_1 = mdmLinksWithLinkedPatients2.get(0).getSourcePersistenceId();
+		List<MdmLinkWithRevision<MdmLink>> expectedMdLinkRevisions = List.of(
+			buildMdmLinkWithRevision(1, RevisionType.ADD, MdmMatchResultEnum.MATCH, goldenResourceId1, sourceId1_1),
+			buildMdmLinkWithRevision(4, RevisionType.ADD, MdmMatchResultEnum.MATCH, goldenResourceId2, sourceId2_1)
+		);
+		switch (mode) {
+			// $mdm-link-history?resourceId=Patient/unknown&goldenResourceId=Patient/1,Patient/2
+			case "allUnknownSourceId" -> {
+				mdmHistorySearchParameters = new MdmHistorySearchParameters()
+					.setSourceIds(List.of("unknown"))
+					.setGoldenResourceIds(new ArrayList<>(getIdsFromMdmLinks(MdmLink::getGoldenResourcePersistenceId, mdmLinksWithLinkedPatients1.get(0), mdmLinksWithLinkedPatients2.get(0))));
+				expectedMdLinkRevisions = new ArrayList<>();
+			}
+			// $mdm-link-history?resourceId=Patient/1,Patient/2&goldenResourceId=Patient/unknown
+			case "allUnknownGoldenId" -> {
+				mdmHistorySearchParameters = new MdmHistorySearchParameters()
+					.setSourceIds(new ArrayList<>(getIdsFromMdmLinks(MdmLink::getSourcePersistenceId, mdmLinksWithLinkedPatients1.get(0), mdmLinksWithLinkedPatients2.get(0))))
+					.setGoldenResourceIds(List.of("unknown"));
+				expectedMdLinkRevisions = new ArrayList<>();
+			}
+			// $mdm-link-history?resourceId=Patient/unknown&goldenResourceId=Patient/unknownGolden
+			case "allUnknownBoth" -> {
+				mdmHistorySearchParameters = new MdmHistorySearchParameters()
+					.setSourceIds(List.of("unknown"))
+					.setGoldenResourceIds(List.of("unknownGolden"));
+				expectedMdLinkRevisions = new ArrayList<>();
+			}
+			// $mdm-link-history?resourceId=Patient/1,Patient/2,Patient/unknown&goldenResourceId=Patient/3,Patient/4
+			case "someUnknownSourceId" -> {
+				List<String> sourceIdsWithSomeUnknown = new ArrayList<>(getIdsFromMdmLinks(MdmLink::getSourcePersistenceId, mdmLinksWithLinkedPatients1.get(0), mdmLinksWithLinkedPatients2.get(0)));
+				sourceIdsWithSomeUnknown.add("unknown");
+				List<String> goldenResourceIds = new ArrayList<>(getIdsFromMdmLinks(MdmLink::getGoldenResourcePersistenceId, mdmLinksWithLinkedPatients1.get(0), mdmLinksWithLinkedPatients2.get(0)));
+				mdmHistorySearchParameters = new MdmHistorySearchParameters()
+					.setSourceIds(sourceIdsWithSomeUnknown)
+					.setGoldenResourceIds(goldenResourceIds);
+			}
+			// $mdm-link-history?resourceId=Patient/1,Patient/2&goldenResourceId=Patient/3,Patient/4,Patient/unknown
+			case "someUnknownGoldenId" -> {
+				List<String> sourceIds = new ArrayList<>(getIdsFromMdmLinks(MdmLink::getSourcePersistenceId, mdmLinksWithLinkedPatients1.get(0), mdmLinksWithLinkedPatients2.get(0)));
+				List<String> goldenResourceIdsSomeUnknown = new ArrayList<>(getIdsFromMdmLinks(MdmLink::getGoldenResourcePersistenceId, mdmLinksWithLinkedPatients1.get(0), mdmLinksWithLinkedPatients2.get(0)));
+				goldenResourceIdsSomeUnknown.add("unknown");
+				mdmHistorySearchParameters = new MdmHistorySearchParameters()
+					.setSourceIds(sourceIds)
+					.setGoldenResourceIds(goldenResourceIdsSomeUnknown);
+			}
+			// $mdm-link-history?resourceId=Patient/1,Patient/2,Patient/unknown&goldenResourceId=Patient/3,Patient/4,Patient/unknownGolden
+			case "someUnknownBoth" -> {
+				List<String> sourceIdsSomeUnknown = new ArrayList<>(getIdsFromMdmLinks(MdmLink::getSourcePersistenceId, mdmLinksWithLinkedPatients1.get(0), mdmLinksWithLinkedPatients2.get(0)));
+				sourceIdsSomeUnknown.add("unknown");
+				List<String> goldenResourceIdsSomeUnknown = new ArrayList<>(getIdsFromMdmLinks(MdmLink::getGoldenResourcePersistenceId, mdmLinksWithLinkedPatients1.get(0), mdmLinksWithLinkedPatients2.get(0)));
+				goldenResourceIdsSomeUnknown.add("unknownGolden");
+				mdmHistorySearchParameters = new MdmHistorySearchParameters()
+					.setSourceIds(sourceIdsSomeUnknown)
+					.setGoldenResourceIds(goldenResourceIdsSomeUnknown);
+			}
+		}
+
+		// execute
+		final List<MdmLinkWithRevision<MdmLink>> actualMdmLinkRevisions = myMdmLinkDaoSvc.findMdmLinkHistory(mdmHistorySearchParameters);
+
+		// verify
+		assert expectedMdLinkRevisions != null;
+		assertMdmRevisionsEqual(expectedMdLinkRevisions, actualMdmLinkRevisions);
 	}
 
 	@Nonnull

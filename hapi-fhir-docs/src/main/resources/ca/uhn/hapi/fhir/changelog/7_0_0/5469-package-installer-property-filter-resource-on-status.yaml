@@ -1,0 +1,6 @@
+---
+type: add
+issue: 5469
+jira: SMILE-7594
+title: "There is a programmatic filter enabled which skips installation for certain resources based on their status 
+in PackageInstallerSvcImpl. The filter can now be controlled via StorageSettings."

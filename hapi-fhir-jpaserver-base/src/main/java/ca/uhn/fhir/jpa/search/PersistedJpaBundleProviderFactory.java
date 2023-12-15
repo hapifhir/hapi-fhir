@@ -55,14 +55,12 @@ public class PersistedJpaBundleProviderFactory {
 
 	public PersistedJpaSearchFirstPageBundleProvider newInstanceFirstPage(
 			RequestDetails theRequestDetails,
-			Search theSearch,
 			SearchTask theTask,
 			ISearchBuilder theSearchBuilder,
 			RequestPartitionId theRequestPartitionId) {
 		return (PersistedJpaSearchFirstPageBundleProvider) myApplicationContext.getBean(
 				JpaConfig.PERSISTED_JPA_SEARCH_FIRST_PAGE_BUNDLE_PROVIDER,
 				theRequestDetails,
-				theSearch,
 				theTask,
 				theSearchBuilder,
 				theRequestPartitionId);

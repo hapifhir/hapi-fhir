@@ -65,6 +65,13 @@ import ca.uhn.fhir.util.UrlPathTokenizer;
 import ca.uhn.fhir.util.UrlUtil;
 import ca.uhn.fhir.util.VersionUtil;
 import com.google.common.collect.Lists;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.UnavailableException;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
@@ -97,13 +104,6 @@ import java.util.Set;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.jar.Manifest;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import javax.servlet.ServletException;
-import javax.servlet.UnavailableException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 import static ca.uhn.fhir.util.StringUtil.toUtf8String;
 import static java.util.stream.Collectors.toList;
@@ -367,6 +367,10 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 				.forEach(t -> t.close());
 		myGlobalBinding.getMethodBindings().forEach(t -> t.close());
 		myServerBinding.getMethodBindings().forEach(t -> t.close());
+
+		myResourceNameToBinding.clear();
+		myGlobalBinding.getMethodBindings().clear();
+		myServerBinding.getMethodBindings().clear();
 	}
 
 	/**
@@ -964,6 +968,10 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 	 */
 	public void setServerConformanceProvider(@Nonnull Object theServerConformanceProvider) {
 		Validate.notNull(theServerConformanceProvider, "theServerConformanceProvider must not be null");
+
+		if (myServerConformanceProvider != null) {
+			unregisterProvider(myServerConformanceProvider);
+		}
 
 		// call the setRestfulServer() method to point the Conformance
 		// Provider to this server instance. This is done to avoid
@@ -1598,9 +1606,16 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 		myUncompressIncomingContents = theUncompressIncomingContents;
 	}
 
+	private String resolveRequestPath(RequestDetails theRequestDetails, String theRequestPath) {
+		if (myTenantIdentificationStrategy != null) {
+			theRequestPath = myTenantIdentificationStrategy.resolveRelativeUrl(theRequestPath, theRequestDetails);
+		}
+		return theRequestPath;
+	}
+
 	public void populateRequestDetailsFromRequestPath(RequestDetails theRequestDetails, String theRequestPath) {
-		UrlPathTokenizer tok = new UrlPathTokenizer(theRequestPath);
-		String resourceName = null;
+		String resolvedRequestPath = resolveRequestPath(theRequestDetails, theRequestPath);
+		UrlPathTokenizer tok = new UrlPathTokenizer(resolvedRequestPath);
 
 		if (myTenantIdentificationStrategy != null) {
 			myTenantIdentificationStrategy.extractTenant(tok, theRequestDetails);
@@ -1609,6 +1624,7 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 		IIdType id = null;
 		String operation = null;
 		String compartment = null;
+		String resourceName = null;
 		if (tok.hasMoreTokens()) {
 			resourceName = tok.nextTokenUnescapedAndSanitized();
 			if (partIsOperation(resourceName)) {
@@ -1635,7 +1651,7 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 					String versionString = tok.nextTokenUnescapedAndSanitized();
 					if (id == null) {
 						throw new InvalidRequestException(
-								Msg.code(298) + "Don't know how to handle request path: " + theRequestPath);
+								Msg.code(298) + "Don't know how to handle request path: " + resolvedRequestPath);
 					}
 					id.setParts(null, resourceName, id.getIdPart(), UrlUtil.unescape(versionString));
 				} else {
@@ -1644,7 +1660,7 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 			} else if (partIsOperation(nextString)) {
 				if (operation != null) {
 					throw new InvalidRequestException(
-							Msg.code(299) + "URL Path contains two operations: " + theRequestPath);
+							Msg.code(299) + "URL Path contains two operations: " + resolvedRequestPath);
 				}
 				operation = nextString;
 			} else {
@@ -1663,7 +1679,7 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 				secondaryOperation = nextString;
 			} else {
 				throw new InvalidRequestException(Msg.code(300) + "URL path has unexpected token '" + nextString
-						+ "' at the end: " + theRequestPath);
+						+ "' at the end: " + resolvedRequestPath);
 			}
 		}
 

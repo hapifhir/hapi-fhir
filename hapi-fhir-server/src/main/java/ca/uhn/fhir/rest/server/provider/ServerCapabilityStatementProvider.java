@@ -52,6 +52,9 @@ import ca.uhn.fhir.util.ExtensionUtil;
 import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.HapiExtensions;
 import com.google.common.collect.TreeMultimap;
+import jakarta.annotation.Nonnull;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.http.HttpServletRequest;
 import org.apache.commons.text.WordUtils;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseConformance;
@@ -74,9 +77,6 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.UUID;
 import java.util.stream.Collectors;
-import javax.annotation.Nonnull;
-import javax.servlet.ServletContext;
-import javax.servlet.http.HttpServletRequest;
 
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -536,10 +536,25 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 			}
 		}
 
+		maybeAddBulkDataDeclarationToConformingToIg(terser, retVal, configuration.getServerBindings());
+
 		postProcessRest(terser, rest);
 		postProcess(terser, retVal);
 
 		return retVal;
+	}
+
+	private void maybeAddBulkDataDeclarationToConformingToIg(
+			FhirTerser theTerser, IBaseConformance theBaseConformance, List<BaseMethodBinding> theServerBindings) {
+		boolean bulkExportEnabled = theServerBindings.stream()
+				.filter(OperationMethodBinding.class::isInstance)
+				.map(OperationMethodBinding.class::cast)
+				.map(OperationMethodBinding::getName)
+				.anyMatch(ProviderConstants.OPERATION_EXPORT::equals);
+
+		if (bulkExportEnabled) {
+			theTerser.addElement(theBaseConformance, "instantiates", Constants.BULK_DATA_ACCESS_IG_URL);
+		}
 	}
 
 	/**

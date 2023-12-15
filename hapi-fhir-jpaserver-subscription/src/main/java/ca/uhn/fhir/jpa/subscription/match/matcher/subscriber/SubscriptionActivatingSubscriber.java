@@ -31,7 +31,9 @@ import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.subscription.SubscriptionConstants;
+import ca.uhn.fhir.subscription.api.IResourceModifiedMessagePersistenceSvc;
 import ca.uhn.fhir.util.SubscriptionUtil;
+import jakarta.annotation.Nonnull;
 import org.hl7.fhir.dstu2.model.Subscription;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
@@ -41,7 +43,7 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.MessagingException;
 
-import javax.annotation.Nonnull;
+import java.util.Optional;
 
 /**
  * Responsible for transitioning subscription resources from REQUESTED to ACTIVE
@@ -64,6 +66,8 @@ public class SubscriptionActivatingSubscriber implements MessageHandler {
 	@Autowired
 	private StorageSettings myStorageSettings;
 
+	@Autowired
+	private IResourceModifiedMessagePersistenceSvc myResourceModifiedMessagePersistenceSvc;
 	/**
 	 * Constructor
 	 */
@@ -86,6 +90,16 @@ public class SubscriptionActivatingSubscriber implements MessageHandler {
 		switch (payload.getOperationType()) {
 			case CREATE:
 			case UPDATE:
+				if (payload.getPayload(myFhirContext) == null) {
+					Optional<ResourceModifiedMessage> inflatedMsg =
+							myResourceModifiedMessagePersistenceSvc.inflatePersistedResourceModifiedMessageOrNull(
+									payload);
+					if (inflatedMsg.isEmpty()) {
+						return;
+					}
+					payload = inflatedMsg.get();
+				}
+
 				activateSubscriptionIfRequired(payload.getNewPayload(myFhirContext));
 				break;
 			case TRANSACTION:
@@ -104,7 +118,7 @@ public class SubscriptionActivatingSubscriber implements MessageHandler {
 	 */
 	public synchronized boolean activateSubscriptionIfRequired(final IBaseResource theSubscription) {
 		// Grab the value for "Subscription.channel.type" so we can see if this
-		// subscriber applies..
+		// subscriber applies.
 		CanonicalSubscriptionChannelType subscriptionChannelType =
 				mySubscriptionCanonicalizer.getChannelType(theSubscription);
 

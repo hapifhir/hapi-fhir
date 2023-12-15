@@ -117,6 +117,15 @@ import ca.uhn.fhir.validation.IValidatorModule;
 import ca.uhn.fhir.validation.ValidationOptions;
 import ca.uhn.fhir.validation.ValidationResult;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.Streams;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+import jakarta.annotation.PostConstruct;
+import jakarta.persistence.LockModeType;
+import jakarta.persistence.NoResultException;
+import jakarta.persistence.TypedQuery;
+import jakarta.servlet.http.HttpServletResponse;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseMetaType;
@@ -127,7 +136,6 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Required;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -150,13 +158,7 @@ import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import javax.annotation.PostConstruct;
-import javax.persistence.LockModeType;
-import javax.persistence.NoResultException;
-import javax.persistence.TypedQuery;
-import javax.servlet.http.HttpServletResponse;
+import java.util.stream.Stream;
 
 import static java.util.Objects.isNull;
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -644,6 +646,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 	private void createForcedIdIfNeeded(
 			ResourceTable theEntity, String theResourceId, boolean theCreateForPureNumericIds) {
+		// TODO MB delete this in step 3
 		if (isNotBlank(theResourceId) && theEntity.getForcedId() == null) {
 			if (theCreateForPureNumericIds || !IdHelperService.isValidPid(theResourceId)) {
 				ForcedId forcedId = new ForcedId();
@@ -1220,7 +1223,6 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	}
 
 	@SuppressWarnings("unchecked")
-	@Required
 	public void setResourceType(Class<? extends IBaseResource> theTableType) {
 		myResourceType = (Class<T>) theTableType;
 	}
@@ -1653,8 +1655,11 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			CURRENTLY_REINDEXING.put(theResource, Boolean.TRUE);
 		}
 
+		SystemRequestDetails request = new SystemRequestDetails();
+		request.getUserData().put(JpaConstants.SKIP_REINDEX_ON_UPDATE, Boolean.TRUE);
+
 		updateEntity(
-				null, theResource, theEntity, theEntity.getDeleted(), true, false, transactionDetails, true, false);
+				request, theResource, theEntity, theEntity.getDeleted(), true, false, transactionDetails, true, false);
 		if (theResource != null) {
 			CURRENTLY_REINDEXING.put(theResource, null);
 		}
@@ -1684,19 +1689,17 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		if (historyEntity.getEncoding() == ResourceEncodingEnum.JSONC
 				|| historyEntity.getEncoding() == ResourceEncodingEnum.JSON) {
 			byte[] resourceBytes = historyEntity.getResource();
+
+			// Always migrate data out of the bytes column
 			if (resourceBytes != null) {
 				String resourceText = decodeResource(resourceBytes, historyEntity.getEncoding());
-				if (myStorageSettings.getInlineResourceTextBelowSize() > 0
-						&& resourceText.length() < myStorageSettings.getInlineResourceTextBelowSize()) {
-					ourLog.debug(
-							"Storing text of resource {} version {} as inline VARCHAR",
-							entity.getResourceId(),
-							historyEntity.getVersion());
-					historyEntity.setResourceTextVc(resourceText);
-					historyEntity.setResource(null);
-					historyEntity.setEncoding(ResourceEncodingEnum.JSON);
-					changed = true;
-				}
+				ourLog.debug(
+						"Storing text of resource {} version {} as inline VARCHAR",
+						entity.getResourceId(),
+						historyEntity.getVersion());
+				historyEntity.setResourceTextVc(resourceText);
+				historyEntity.setEncoding(ResourceEncodingEnum.JSON);
+				changed = true;
 			}
 		}
 		if (isBlank(historyEntity.getSourceUri()) && isBlank(historyEntity.getRequestId())) {
@@ -2064,6 +2067,29 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 					return ids;
 				});
+	}
+
+	@Override
+	public <PID extends IResourcePersistentId<?>> Stream<PID> searchForIdStream(
+			SearchParameterMap theParams,
+			RequestDetails theRequest,
+			@Nullable IBaseResource theConditionalOperationTargetOrNull) {
+		// the Stream is useless outside the bound connection time, so require our caller to have a session.
+		HapiTransactionService.requireTransaction();
+
+		RequestPartitionId requestPartitionId =
+				myRequestPartitionHelperService.determineReadPartitionForRequestForSearchType(
+						theRequest, myResourceName, theParams, theConditionalOperationTargetOrNull);
+
+		ISearchBuilder<?> builder = mySearchBuilderFactory.newSearchBuilder(this, getResourceName(), getResourceType());
+
+		String uuid = UUID.randomUUID().toString();
+
+		SearchRuntimeDetails searchRuntimeDetails = new SearchRuntimeDetails(theRequest, uuid);
+		IResultIterator<PID> iter =
+				builder.createQuery(theParams, searchRuntimeDetails, theRequest, requestPartitionId);
+		// Adapt IResultIterator to stream, and connect the close handler.
+		return Streams.stream(iter).onClose(() -> IOUtils.closeQuietly(iter));
 	}
 
 	protected <MT extends IBaseMetaType> MT toMetaDt(Class<MT> theType, Collection<TagDefinition> tagDefinitions) {

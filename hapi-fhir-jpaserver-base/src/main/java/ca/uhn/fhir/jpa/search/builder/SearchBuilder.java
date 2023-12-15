@@ -95,6 +95,15 @@ import ca.uhn.fhir.util.StringUtil;
 import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.collect.Streams;
 import com.healthmarketscience.sqlbuilder.Condition;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.PersistenceContextType;
+import jakarta.persistence.Query;
+import jakarta.persistence.Tuple;
+import jakarta.persistence.TypedQuery;
+import jakarta.persistence.criteria.CriteriaBuilder;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.math.NumberUtils;
@@ -119,18 +128,10 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import javax.persistence.PersistenceContextType;
-import javax.persistence.Query;
-import javax.persistence.Tuple;
-import javax.persistence.TypedQuery;
-import javax.persistence.criteria.CriteriaBuilder;
 
 import static ca.uhn.fhir.jpa.model.util.JpaConstants.UNDESIRED_RESOURCE_LINKAGES_FOR_EVERYTHING_ON_PATIENT_INSTANCE;
 import static ca.uhn.fhir.jpa.search.builder.QueryStack.LOCATION_POSITION;
+import static ca.uhn.fhir.jpa.search.builder.QueryStack.SearchForIdsParams.with;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -281,14 +282,11 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 				continue;
 			}
 			List<List<IQueryParameterType>> andOrParams = myParams.get(nextParamName);
-			Condition predicate = theQueryStack.searchForIdsWithAndOr(
-					null,
-					myResourceName,
-					nextParamName,
-					andOrParams,
-					theRequest,
-					myRequestPartitionId,
-					searchContainedMode);
+			Condition predicate = theQueryStack.searchForIdsWithAndOr(with().setResourceName(myResourceName)
+					.setParamName(nextParamName)
+					.setAndOrParams(andOrParams)
+					.setRequest(theRequest)
+					.setRequestPartitionId(myRequestPartitionId));
 			if (predicate != null) {
 				theSearchSqlBuilder.addPredicate(predicate);
 			}
@@ -341,7 +339,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 
 	@SuppressWarnings("ConstantConditions")
 	@Override
-	public IResultIterator createQuery(
+	public IResultIterator<JpaPid> createQuery(
 			SearchParameterMap theParams,
 			SearchRuntimeDetails theSearchRuntimeDetails,
 			RequestDetails theRequest,
@@ -497,15 +495,8 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 							myRequestPartitionId, myResourceName, String.valueOf(lastNResourceId)))
 					.collect(Collectors.toList());
 		} else {
-			if (myIElasticsearchSvc == null) {
-				throw new InvalidRequestException(Msg.code(2033)
-						+ "LastN operation is not enabled on this service, can not process this request");
-			}
-			// use the dedicated observation ES/Lucene index to support lastN query
-			return myIElasticsearchSvc.executeLastN(myParams, myContext, theMaximumResults).stream()
-					.map(lastnResourceId -> myIdHelperService.resolveResourcePersistentIds(
-							myRequestPartitionId, myResourceName, lastnResourceId))
-					.collect(Collectors.toList());
+			throw new InvalidRequestException(
+					Msg.code(2033) + "LastN operation is not enabled on this service, can not process this request");
 		}
 	}
 
@@ -839,6 +830,10 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		if (IAnyResource.SP_RES_ID.equals(theSort.getParamName())) {
 
 			theQueryStack.addSortOnResourceId(ascending);
+
+		} else if (Constants.PARAM_PID.equals(theSort.getParamName())) {
+
+			theQueryStack.addSortOnResourcePID(ascending);
 
 		} else if (Constants.PARAM_LASTUPDATED.equals(theSort.getParamName())) {
 
@@ -1400,7 +1395,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 							q.setMaxResults(maxCount);
 						}
 						if (hasDesiredResourceTypes) {
-							q.setParameter("desired_target_resource_types", String.join(", ", desiredResourceTypes));
+							q.setParameter("desired_target_resource_types", desiredResourceTypes);
 						}
 						List<?> results = q.getResultList();
 						for (Object nextRow : results) {

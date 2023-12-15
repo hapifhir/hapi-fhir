@@ -5,9 +5,11 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.HistoryCountModeEnum;
+import ca.uhn.fhir.jpa.api.pid.StreamTemplate;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.dao.BaseStorageDao;
 import ca.uhn.fhir.jpa.dao.JpaResourceDao;
+import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.NormalizedQuantitySearchLevel;
@@ -33,6 +35,7 @@ import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.SortOrderEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
@@ -119,24 +122,27 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import static ca.uhn.fhir.batch2.jobs.termcodesystem.TermCodeSystemJobConfig.TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME;
 import static ca.uhn.fhir.rest.api.Constants.PARAM_HAS;
@@ -164,6 +170,9 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 @SuppressWarnings({"unchecked", "deprecation", "Duplicates"})
 public class FhirResourceDaoR4Test extends BaseJpaR4Test {
+
+	@Autowired
+	IHapiTransactionService myHapiTransactionService;
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoR4Test.class);
 
@@ -265,7 +274,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 			ResourceHistoryTable newHistory = table.toHistory(true);
 			ResourceHistoryTable currentHistory = myResourceHistoryTableDao.findForIdAndVersionAndFetchProvenance(table.getId(), 1L);
 			newHistory.setEncoding(currentHistory.getEncoding());
-			newHistory.setResource(currentHistory.getResource());
+			newHistory.setResourceTextVc(currentHistory.getResourceTextVc());
 			myResourceHistoryTableDao.save(newHistory);
 		});
 
@@ -2919,7 +2928,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 				ResourceHistoryTable table = myResourceHistoryTableDao.findForIdAndVersionAndFetchProvenance(id.getIdPartAsLong(), 1L);
 				String newContent = myFhirContext.newJsonParser().encodeResourceToString(p);
 				newContent = newContent.replace("male", "foo");
-				table.setResource(newContent.getBytes(Charsets.UTF_8));
+				table.setResourceTextVc(newContent);
 				table.setEncoding(ResourceEncodingEnum.JSON);
 				myResourceHistoryTableDao.save(table);
 			}
@@ -3351,63 +3360,6 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 		}
 	}
 
-
-	@Test
-	public void testSortById() {
-		String methodName = "testSortBTyId";
-
-		Patient p = new Patient();
-		p.addIdentifier().setSystem("urn:system").setValue(methodName);
-		IIdType id1 = myPatientDao.create(p, mySrd).getId().toUnqualifiedVersionless();
-
-		p = new Patient();
-		p.addIdentifier().setSystem("urn:system").setValue(methodName);
-		IIdType id2 = myPatientDao.create(p, mySrd).getId().toUnqualifiedVersionless();
-
-		p = new Patient();
-		p.setId(methodName + "1");
-		p.addIdentifier().setSystem("urn:system").setValue(methodName);
-		IIdType idMethodName1 = myPatientDao.update(p, mySrd).getId().toUnqualifiedVersionless();
-		assertEquals(methodName + "1", idMethodName1.getIdPart());
-
-		p = new Patient();
-		p.addIdentifier().setSystem("urn:system").setValue(methodName);
-		IIdType id3 = myPatientDao.create(p, mySrd).getId().toUnqualifiedVersionless();
-
-		p = new Patient();
-		p.setId(methodName + "2");
-		p.addIdentifier().setSystem("urn:system").setValue(methodName);
-		IIdType idMethodName2 = myPatientDao.update(p, mySrd).getId().toUnqualifiedVersionless();
-		assertEquals(methodName + "2", idMethodName2.getIdPart());
-
-		p = new Patient();
-		p.addIdentifier().setSystem("urn:system").setValue(methodName);
-		IIdType id4 = myPatientDao.create(p, mySrd).getId().toUnqualifiedVersionless();
-
-		SearchParameterMap pm;
-		List<IIdType> actual;
-
-		pm = SearchParameterMap.newSynchronous();
-		pm.add(Patient.SP_IDENTIFIER, new TokenParam("urn:system", methodName));
-		pm.setSort(new SortSpec(IAnyResource.SP_RES_ID));
-		actual = toUnqualifiedVersionlessIds(myPatientDao.search(pm));
-		assertEquals(6, actual.size());
-		assertThat(actual, contains(idMethodName1, idMethodName2, id1, id2, id3, id4));
-
-		pm = SearchParameterMap.newSynchronous();
-		pm.add(Patient.SP_IDENTIFIER, new TokenParam("urn:system", methodName));
-		pm.setSort(new SortSpec(IAnyResource.SP_RES_ID).setOrder(SortOrderEnum.ASC));
-		actual = toUnqualifiedVersionlessIds(myPatientDao.search(pm));
-		assertEquals(6, actual.size());
-		assertThat(actual, contains(idMethodName1, idMethodName2, id1, id2, id3, id4));
-
-		pm = SearchParameterMap.newSynchronous();
-		pm.add(Patient.SP_IDENTIFIER, new TokenParam("urn:system", methodName));
-		pm.setSort(new SortSpec(IAnyResource.SP_RES_ID).setOrder(SortOrderEnum.DESC));
-		actual = toUnqualifiedVersionlessIds(myPatientDao.search(pm));
-		assertEquals(6, actual.size());
-		assertThat(actual, contains(id4, id3, id2, id1, idMethodName2, idMethodName1));
-	}
 
 	@ParameterizedTest
 	@ValueSource(booleans = {true, false})
@@ -4315,6 +4267,30 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 
 		assertEquals(amountOfPatients, actual.size());
 		assertThat(actualNameList, contains(namesInAlpha));
+	}
+
+
+	@Test
+	void testSearchForStream_carriesTxContext() {
+		// given
+		Set<String> createdIds = IntStream.range(1, 5)
+			.mapToObj(i -> createObservation().getIdPart())
+			.collect(Collectors.toSet());
+
+		SystemRequestDetails request = new SystemRequestDetails();
+
+		// call within a tx, but carry the tx definition in the StreamTemplate
+		StreamTemplate<IResourcePersistentId<?>> streamTemplate =
+			StreamTemplate.fromSupplier(() -> myObservationDao.searchForIdStream(new SearchParameterMap(), request, null))
+				.withTransactionAdvice(newTxTemplate());
+
+
+		// does the stream work?
+		Set<String> ids = streamTemplate.call(stream->
+			stream.map(typedId->typedId.getId().toString())
+				.collect(Collectors.toSet()));
+
+		assertEquals(ids, createdIds);
 	}
 
 	public static void assertConflictException(String theResourceType, ResourceVersionConflictException e) {

@@ -86,5 +86,5 @@ public interface ISearchCacheSvc {
 	 * if they have some other mechanism for expiring stale results other than manually looking for them
 	 * and deleting them.
 	 */
-	void pollForStaleSearchesAndDeleteThem(RequestPartitionId theRequestPartitionId);
+	void pollForStaleSearchesAndDeleteThem(RequestPartitionId theRequestPartitionId, Instant theDeadline);
 }

@@ -19,11 +19,11 @@
  */
 package ca.uhn.fhir.jpa.entity;
 
+import jakarta.persistence.*;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
 import java.io.Serializable;
-import javax.persistence.*;
 
 @Entity
 @Table(
@@ -37,20 +37,21 @@ public class SearchResult implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
+	@Deprecated(since = "6.10", forRemoval = true) // migrating to composite PK on searchPid,Order
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_SEARCH_RES")
 	@SequenceGenerator(name = "SEQ_SEARCH_RES", sequenceName = "SEQ_SEARCH_RES")
 	@Id
 	@Column(name = "PID")
 	private Long myId;
 
-	@Column(name = "SEARCH_ORDER", nullable = false, insertable = true, updatable = false)
+	@Column(name = "SEARCH_PID", insertable = true, updatable = false, nullable = false)
+	private Long mySearchPid;
+
+	@Column(name = "SEARCH_ORDER", insertable = true, updatable = false, nullable = false)
 	private int myOrder;
 
 	@Column(name = "RESOURCE_PID", insertable = true, updatable = false, nullable = false)
 	private Long myResourcePid;
-
-	@Column(name = "SEARCH_PID", insertable = true, updatable = false, nullable = false)
-	private Long mySearchPid;
 
 	/**
 	 * Constructor

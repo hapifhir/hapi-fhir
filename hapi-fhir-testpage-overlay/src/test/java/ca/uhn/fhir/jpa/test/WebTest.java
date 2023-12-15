@@ -7,40 +7,34 @@ import ca.uhn.fhir.jpa.fql.executor.StaticHfqlExecutionResult;
 import ca.uhn.fhir.jpa.fql.provider.HfqlRestProvider;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
-import ca.uhn.fhir.rest.annotation.Validate;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
-import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.test.utilities.JettyUtil;
+import ca.uhn.fhir.test.utilities.MockMvcWebConnectionForHtmlUnit3;
 import ca.uhn.fhir.test.utilities.server.HashMapResourceProviderExtension;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
-import com.gargoylesoftware.css.parser.CSSErrorHandler;
-import com.gargoylesoftware.htmlunit.Page;
-import com.gargoylesoftware.htmlunit.SilentCssErrorHandler;
-import com.gargoylesoftware.htmlunit.WebClient;
-import com.gargoylesoftware.htmlunit.html.HtmlAnchor;
-import com.gargoylesoftware.htmlunit.html.HtmlButton;
-import com.gargoylesoftware.htmlunit.html.HtmlPage;
-import com.gargoylesoftware.htmlunit.html.HtmlTable;
-import com.gargoylesoftware.htmlunit.html.HtmlTableCell;
-import com.gargoylesoftware.htmlunit.html.HtmlTableRow;
-import com.gargoylesoftware.htmlunit.html.HtmlTextArea;
-import com.gargoylesoftware.htmlunit.html.XHtmlPage;
+import org.eclipse.jetty.ee10.servlet.ServletContextHandler;
+import org.eclipse.jetty.ee10.servlet.ServletHandler;
+import org.eclipse.jetty.ee10.servlet.ServletHolder;
 import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.server.handler.ContextHandler;
-import org.eclipse.jetty.servlet.ServletContextHandler;
-import org.eclipse.jetty.servlet.ServletHandler;
-import org.eclipse.jetty.servlet.ServletHolder;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Composition;
-import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.InstantType;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
+import org.htmlunit.SilentCssErrorHandler;
+import org.htmlunit.WebClient;
+import org.htmlunit.cssparser.parser.CSSErrorHandler;
+import org.htmlunit.html.HtmlAnchor;
+import org.htmlunit.html.HtmlButton;
+import org.htmlunit.html.HtmlPage;
+import org.htmlunit.html.HtmlTable;
+import org.htmlunit.html.HtmlTableCell;
+import org.htmlunit.html.HtmlTableRow;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Order;
@@ -59,6 +53,7 @@ import org.springframework.web.servlet.DispatcherServlet;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.List;
@@ -106,9 +101,9 @@ public class WebTest {
 			servletHandler.addServletWithMapping(holder, "/*");
 
 			ServletContextHandler contextHandler = new MyServletContextHandler();
-			contextHandler.setAllowNullPathInfo(true);
+			contextHandler.setAllowNullPathInContext(true);
 			contextHandler.setServletHandler(servletHandler);
-			contextHandler.setResourceBase("hapi-fhir-testpage-overlay/src/main/webapp");
+			contextHandler.setBaseResourceAsString("hapi-fhir-testpage-overlay/src/main/webapp");
 
 			ourOverlayServer = new Server(0);
 			ourOverlayServer.setHandler(contextHandler);
@@ -118,7 +113,7 @@ public class WebTest {
 		}
 
 		myWebClient = new WebClient();
-		myWebClient.setWebConnection(new MockMvcWebConnection(ourMockMvc, myWebClient));
+		myWebClient.setWebConnection(new MockMvcWebConnectionForHtmlUnit3(ourMockMvc, myWebClient));
 		myWebClient.getOptions().setJavaScriptEnabled(true);
 		myWebClient.getOptions().setCssEnabled(false);
 		CSSErrorHandler errorHandler = new SilentCssErrorHandler();
@@ -336,14 +331,30 @@ public class WebTest {
 
 		public MyServletContextHandler() {
 			super();
-			_scontext = new ContextHandler.Context() {
+		}
+
+		@Override
+		public ServletContextApi newServletContextApi() {
+			return new ServletContextApi(){
 				@Override
-				public URL getResource(String thePath) {
+				public InputStream getResourceAsStream(String thePath) {
+					try {
+						URL url = getResource(thePath);
+						return url.openStream();
+					} catch (IOException e) {
+						throw new InternalErrorException(e);
+					}
+				}
+
+
+				@Override
+				public URL getResource(String thePath) throws MalformedURLException {
 					File parent = new File("hapi-fhir-testpage-overlay/src/main/webapp").getAbsoluteFile();
 					if (!parent.exists()) {
 						parent = new File("src/main/webapp").getAbsoluteFile();
 					}
 					File file = new File(parent, thePath);
+					URL url = null;
 					try {
 						return file.toURI().toURL();
 					} catch (MalformedURLException e) {
@@ -352,6 +363,8 @@ public class WebTest {
 				}
 			};
 		}
+
+
 	}
 
 	@AfterAll

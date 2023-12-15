@@ -7,7 +7,8 @@ import ca.uhn.fhir.batch2.jobs.chunk.PartitionedUrlChunkRangeJson;
 import ca.uhn.fhir.batch2.jobs.chunk.ResourceIdListWorkChunkJson;
 import ca.uhn.fhir.batch2.jobs.parameters.PartitionedUrlListJobParameters;
 import ca.uhn.fhir.jpa.api.pid.HomogeneousResourcePidList;
-import ca.uhn.fhir.jpa.api.pid.TypedResourcePid;
+import ca.uhn.fhir.jpa.api.pid.IResourcePidStream;
+import ca.uhn.fhir.jpa.api.pid.ListWrappingPidStream;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -20,7 +21,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -58,15 +58,13 @@ class ResourceIdListStepTest {
 	@ParameterizedTest
 	@ValueSource(ints = {0, 1, 100, 500, 501, 2345, 10500})
 	void testResourceIdListBatchSizeLimit(int theListSize) {
-		List<TypedResourcePid> idList = generateIdList(theListSize);
+		List<IResourcePersistentId> idList = generateIdList(theListSize);
 		when(myStepExecutionDetails.getData()).thenReturn(myData);
-		when(myParameters.getBatchSize()).thenReturn(theListSize);
+		when(myParameters.getBatchSize()).thenReturn(500);
 		when(myStepExecutionDetails.getParameters()).thenReturn(myParameters);
-		HomogeneousResourcePidList homogeneousResourcePidList = mock(HomogeneousResourcePidList.class);
+		IResourcePidStream mockStream = new ListWrappingPidStream(
+			new HomogeneousResourcePidList("Patient", idList, null, null));
 		if (theListSize > 0) {
-			when(homogeneousResourcePidList.getTypedResourcePids()).thenReturn(idList);
-			when(homogeneousResourcePidList.getLastDate()).thenReturn(new Date());
-			when(homogeneousResourcePidList.isEmpty()).thenReturn(false);
 			// Ensure none of the work chunks exceed MAX_BATCH_OF_IDS in size:
 			doAnswer(i -> {
 				ResourceIdListWorkChunkJson list = i.getArgument(0);
@@ -74,12 +72,9 @@ class ResourceIdListStepTest {
 					"Id batch size should never exceed " + ResourceIdListStep.MAX_BATCH_OF_IDS);
 				return null;
 			}).when(myDataSink).accept(any(ResourceIdListWorkChunkJson.class));
-		} else {
-			when(homogeneousResourcePidList.isEmpty()).thenReturn(true);
 		}
-		when(myIdChunkProducer.fetchResourceIdsPage(any(), any(), any(), any(), any()))
-			.thenReturn(homogeneousResourcePidList);
-
+		when(myIdChunkProducer.fetchResourceIdStream(any(), any(), any(), any()))
+			.thenReturn(mockStream);
 
 		final RunOutcome run = myResourceIdListStep.run(myStepExecutionDetails, myDataSink);
 		assertNotEquals(null, run);
@@ -103,13 +98,12 @@ class ResourceIdListStepTest {
 		}
 	}
 
-	private List<TypedResourcePid> generateIdList(int theListSize) {
-		List<TypedResourcePid> idList = new ArrayList<>();
+	private List<IResourcePersistentId> generateIdList(int theListSize) {
+		List<IResourcePersistentId> idList = new ArrayList<>();
 		for (int id = 0; id < theListSize; id++) {
-			IResourcePersistentId theId = mock(IResourcePersistentId.class);
+			IResourcePersistentId<?> theId = mock(IResourcePersistentId.class);
 			when(theId.toString()).thenReturn(Integer.toString(id + 1));
-			TypedResourcePid typedId = new TypedResourcePid("Patient", theId);
-			idList.add(typedId);
+			idList.add(theId);
 		}
 		return idList;
 	}

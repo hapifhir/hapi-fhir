@@ -27,12 +27,11 @@ import ca.uhn.fhir.rest.server.messaging.BaseResourceMessage;
 import ca.uhn.fhir.rest.server.messaging.IResourceMessage;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-
-import javax.annotation.Nullable;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -106,6 +105,10 @@ public class ResourceDeliveryMessage extends BaseResourceMessage implements IRes
 		 */
 		myPayloadString = theEncoding.newParser(theCtx).encodeResourceToString(thePayload);
 		myPayloadId = thePayload.getIdElement().toUnqualifiedVersionless().getValue();
+	}
+
+	public void setPayloadToNull() {
+		myPayloadString = null;
 	}
 
 	@Override

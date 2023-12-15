@@ -37,7 +37,8 @@ public class MdmProviderCrossPartitionR4Test extends BaseProviderR4Test{
 
 	private static final String PARTITION_GOLDEN_RESOURCE = "PARTITION-GOLDEN";
 
-	@BeforeEach
+	@Override
+    @BeforeEach
 	public void before() throws Exception {
 		super.before();
 
