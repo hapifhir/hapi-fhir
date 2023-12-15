@@ -25,8 +25,8 @@ public class DaoWithH2EmbeddedIT implements IDaoTest {
 	public DaoTestSupport myDaoTestSupport;
 
 	@Override
-	public Logger getLogger() {
-		return ourLog;
+	public DaoTestSupport getSupport() {
+		return myDaoTestSupport;
 	}
 
 	@Configuration

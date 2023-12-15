@@ -22,13 +22,12 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 import javax.sql.DataSource;
 import java.util.Properties;
 
-@ExtendWith(SpringExtension.class)
-@EnableJpaRepositories(repositoryFactoryBeanClass = EnversRevisionRepositoryFactoryBean.class)
-@ContextConfiguration(classes = {BaseDaoIT.TestConfig.class})
 public class BaseDaoIT {
 
 	@Configuration
-	public static class TestConfig {
+	@EnableTransactionManagement
+	@EnableJpaRepositories(repositoryFactoryBeanClass = EnversRevisionRepositoryFactoryBean.class)
+	public static class BaseConfigForDaoTest {
 
 		@Bean
 		public DataSource dataSource(JpaDatabaseContextConfigParamObject theJpaDatabaseContextConfigParamObject){

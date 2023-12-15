@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.dao;
 import ca.uhn.fhir.jpa.BaseDaoIT;
 import ca.uhn.fhir.jpa.model.entity.ResourceEncodingEnum;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
+import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.Test;
 
@@ -17,12 +18,13 @@ public interface IDaoTest {
 	@Test
 	default void testReadWriteResourceHistoryTable(){
 		// given
-		disableConstraints();
-		EntityManager entityManager = getEntityManager();
+		EntityManager entityManager = getSupport().getEntityManager();
 		ResourceHistoryTable resourceHistoryTableEntity = new ResourceHistoryTable();
 
 		populateResourceHistoryEntity(resourceHistoryTableEntity);
 		entityManager.getTransaction().begin();
+
+		Date now = new Date();
 
 		// when
 		try {
@@ -42,7 +44,7 @@ public interface IDaoTest {
 			getSupport().getLogger().error(e.getMessage());
 			fail();
 		} finally {
-			getEntityManager().getTransaction().rollback();
+			getSupport().getEntityManager().getTransaction().rollback();
 		}
 
 		ResourceHistoryTable persistedResourceHistoryEntity = entityManager.find(ResourceHistoryTable.class, resourceHistoryTableEntity.getId());
@@ -57,7 +59,7 @@ public interface IDaoTest {
 			assertThat(persistedResourceHistoryEntity.getPublishedDate(), equalTo(resourceHistoryTableEntity.getPublishedDate()));
 			assertThat(persistedResourceHistoryEntity.getUpdatedDate(), equalTo(resourceHistoryTableEntity.getUpdatedDate()));
 		}
-		enableConstraints();
+		getSupport().enableConstraints();
 	}
 
 	default void populateResourceHistoryEntity(ResourceHistoryTable theResourceHistoryTable){
@@ -71,9 +73,7 @@ public interface IDaoTest {
 		theResourceHistoryTable.setUpdated(new Date());
 	}
 
-	void disableConstraints();
-	void enableConstraints();
+	BaseDaoIT.DaoTestSupport getSupport();
 
-	org.slf4j.Logger getLogger();
-	EntityManager getEntityManager();
+
 }
