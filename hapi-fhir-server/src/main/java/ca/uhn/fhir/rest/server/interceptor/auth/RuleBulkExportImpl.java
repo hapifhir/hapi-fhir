@@ -27,6 +27,7 @@ import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
@@ -40,13 +41,14 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 public class RuleBulkExportImpl extends BaseRule {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(RuleBulkExportImpl.class);
 	private String myGroupId;
-	private String myPatientId;
+	private final Collection<String> myPatientIds;
 	private BulkExportJobParameters.ExportStyle myWantExportStyle;
 	private Collection<String> myResourceTypes;
 	private boolean myWantAnyStyle;
 
 	RuleBulkExportImpl(String theRuleName) {
 		super(theRuleName);
+		myPatientIds = new ArrayList<>();
 	}
 
 	@Override
@@ -115,15 +117,23 @@ public class RuleBulkExportImpl extends BaseRule {
 		// 1. If a claimed resource ID is present in the parameters, and the permission contains one, check for
 		// membership
 		// 2. If not a member, Deny.
-		if (myWantExportStyle == BulkExportJobParameters.ExportStyle.PATIENT && isNotBlank(myPatientId)) {
-			final String expectedPatientId =
-					new IdDt(myPatientId).toUnqualifiedVersionless().getValue();
+		if (myWantExportStyle == BulkExportJobParameters.ExportStyle.PATIENT && isNotEmpty(myPatientIds)) {
+			List<String> permittedPatientIds = myPatientIds.stream()
+					.map(id -> new IdDt(id).toUnqualifiedVersionless().getValue())
+					.collect(Collectors.toList());
 			if (!options.getPatientIds().isEmpty()) {
 				ourLog.debug("options.getPatientIds() != null");
-				final String actualPatientIds = options.getPatientIds().stream()
+				List<String> requestedPatientIdds = options.getPatientIds().stream()
 						.map(t -> new IdDt(t).toUnqualifiedVersionless().getValue())
-						.collect(Collectors.joining(","));
-				if (actualPatientIds.contains(expectedPatientId)) {
+						.collect(Collectors.toList());
+				boolean requestedPatientsPermitted = true;
+				for (String requestedPatientId : requestedPatientIdds) {
+					if (!permittedPatientIds.contains(requestedPatientId)) {
+						requestedPatientsPermitted = false;
+						break;
+					}
+				}
+				if (requestedPatientsPermitted) {
 					return newVerdict(
 							theOperation,
 							theRequestDetails,
@@ -147,7 +157,15 @@ public class RuleBulkExportImpl extends BaseRule {
 						.map(filter -> filter.replace("?_id=", "/"))
 						.collect(Collectors.toUnmodifiableSet());
 
-				if (patientIdsInFilters.contains(expectedPatientId)) {
+				boolean filteredPatientIdsPermitted = true;
+				for (String patientIdInFilters : patientIdsInFilters) {
+					if (!permittedPatientIds.contains(patientIdInFilters)) {
+						filteredPatientIdsPermitted = false;
+						break;
+					}
+				}
+
+				if (filteredPatientIdsPermitted) {
 					return newVerdict(
 							theOperation,
 							theRequestDetails,
@@ -176,7 +194,7 @@ public class RuleBulkExportImpl extends BaseRule {
 
 	public void setAppliesToPatientExport(String thePatientId) {
 		myWantExportStyle = BulkExportJobParameters.ExportStyle.PATIENT;
-		myPatientId = thePatientId;
+		myPatientIds.add(thePatientId);
 	}
 
 	public void setAppliesToSystem() {

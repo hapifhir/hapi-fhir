@@ -1,0 +1,18 @@
+---
+type: fix
+issue: 4634
+title: "Previously, rule builder could not effectively handle Patient Type-Level Exports. It would over-permit requests
+    in certain scenarios.
+    
+    GIVEN a user has the following value for the permission:
+    FHIR_OP_INITIATE_BULK_EXPORT_PATIENT - Patient/1 Patient Observation
+    
+    WHEN they submit a patient bulk export request which specifies these patients to export:
+    Patient/1
+    Patient/2
+    
+    THEN the bulk export request would be accepted, based on the fact that the user has permission for Patient/1, 
+    despite the fact they they did not have permission for Patient/2
+    
+    This fix allows for accumulation of ids on a Patient Type-Level Bulk export to enable us to properly match the
+    requested Patient IDs against the users permitted Patient IDs."
