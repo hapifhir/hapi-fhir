@@ -274,7 +274,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 			ResourceHistoryTable newHistory = table.toHistory(true);
 			ResourceHistoryTable currentHistory = myResourceHistoryTableDao.findForIdAndVersionAndFetchProvenance(table.getId(), 1L);
 			newHistory.setEncoding(currentHistory.getEncoding());
-			newHistory.setResource(currentHistory.getResource());
+			newHistory.setResourceTextVc(currentHistory.getResourceTextVc());
 			myResourceHistoryTableDao.save(newHistory);
 		});
 
@@ -2928,7 +2928,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 				ResourceHistoryTable table = myResourceHistoryTableDao.findForIdAndVersionAndFetchProvenance(id.getIdPartAsLong(), 1L);
 				String newContent = myFhirContext.newJsonParser().encodeResourceToString(p);
 				newContent = newContent.replace("male", "foo");
-				table.setResource(newContent.getBytes(Charsets.UTF_8));
+				table.setResourceTextVc(newContent);
 				table.setEncoding(ResourceEncodingEnum.JSON);
 				myResourceHistoryTableDao.save(table);
 			}
