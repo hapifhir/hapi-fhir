@@ -9,7 +9,7 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import org.hibernate.search.backend.lucene.cfg.LuceneBackendSettings;
 import org.hibernate.search.engine.cfg.BackendSettings;
-import org.junit.jupiter.api.extension.ExtendWith;
+import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.context.annotation.Bean;
@@ -17,8 +17,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.data.envers.repository.support.EnversRevisionRepositoryFactoryBean;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import javax.sql.DataSource;
 import java.util.Properties;
@@ -27,24 +26,6 @@ import java.util.Properties;
 @EnableJpaRepositories(repositoryFactoryBeanClass = EnversRevisionRepositoryFactoryBean.class)
 @ContextConfiguration(classes = {BaseDaoIT.TestConfig.class})
 public class BaseDaoIT {
-
-	@Autowired
-	EntityManagerFactory myEntityManagerFactory;
-
-	@Autowired
-	JpaEmbeddedDatabase myJpaEmbeddedDatabase;
-
-	public EntityManager getEntityManager() {
-		return myEntityManagerFactory.createEntityManager();
-	}
-
-	public void disableConstraints(){
-		myJpaEmbeddedDatabase.disableConstraints();
-	}
-
-	public void enableConstraints() {
-		myJpaEmbeddedDatabase.enableConstraints();
-	}
 
 	@Configuration
 	public static class TestConfig {
@@ -96,6 +77,10 @@ public class BaseDaoIT {
 		private JpaEmbeddedDatabase myJpaEmbeddedDatabase;
 		private String myDialect;
 
+		public static JpaDatabaseContextConfigParamObject of(JpaEmbeddedDatabase theJpaEmbeddedDatabase, String theDialect){
+			return new JpaDatabaseContextConfigParamObject(theJpaEmbeddedDatabase, theDialect);
+		}
+
 		public JpaDatabaseContextConfigParamObject(JpaEmbeddedDatabase theJpaEmbeddedDatabase, String theDialect) {
 			myJpaEmbeddedDatabase = theJpaEmbeddedDatabase;
 			myDialect = theDialect;
@@ -110,8 +95,34 @@ public class BaseDaoIT {
 		}
 	}
 
+	public static class DaoTestSupport  {
+		Logger myLogger;
+		@Autowired
+		EntityManagerFactory myEntityManagerFactory;
+		@Autowired
+		JpaEmbeddedDatabase myJpaEmbeddedDatabase;
+
+		public DaoTestSupport(Logger theLogger) {
+			myLogger = theLogger;
+		}
+
+		public void disableConstraints() {
+			myJpaEmbeddedDatabase.disableConstraints();
+		}
+
+		public void enableConstraints() {
+			myJpaEmbeddedDatabase.enableConstraints();
+		}
+
+		public Logger getLogger() {
+			return myLogger;
+		}
 
 
+		public EntityManager getEntityManager() {
+			return myEntityManagerFactory.createEntityManager();
+		}
+	}
 }
 
 

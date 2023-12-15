@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao;
 
+import ca.uhn.fhir.jpa.BaseDaoIT;
 import ca.uhn.fhir.jpa.model.entity.ResourceEncodingEnum;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import jakarta.persistence.EntityManager;
@@ -25,10 +26,20 @@ public interface IDaoTest {
 
 		// when
 		try {
+			ResourceTable resource = new ResourceTable();
+			resource.setResourceType("Patient");
+			resource.setPublished(now);
+			resource.setUpdated(now);
+
+			resourceHistoryTableEntity.setResourceTable(resource);
+
+			entityManager.persist(resource);
 			entityManager.persist(resourceHistoryTableEntity);
+
 			entityManager.flush();
+
 		} catch (Exception e){
-			getLogger().info(e.getMessage());
+			getSupport().getLogger().error(e.getMessage());
 			fail();
 		} finally {
 			getEntityManager().getTransaction().rollback();
@@ -50,6 +61,7 @@ public interface IDaoTest {
 	}
 
 	default void populateResourceHistoryEntity(ResourceHistoryTable theResourceHistoryTable){
+
 		theResourceHistoryTable.setResourceId(1L);
 		theResourceHistoryTable.setResourceType("Patient");
 		theResourceHistoryTable.setVersion(1L);

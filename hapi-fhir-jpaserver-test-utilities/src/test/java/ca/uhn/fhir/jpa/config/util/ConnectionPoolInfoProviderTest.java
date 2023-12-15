@@ -90,7 +90,7 @@ class ConnectionPoolInfoProviderTest {
 	}
 
 	@Nested
-	public class TestConfig {
+	public class MsqlTailoredConfigForDaoTest {
 
 		@Mock DataSource unknownDataSource;
 
