@@ -28,7 +28,10 @@ public abstract class BaseBatchJobParameters implements IModelJson {
 		if (theValue == null) {
 			getUserData().remove(theKey);
 		} else {
-			Validate.isTrue(validateValue(theValue), String.format("Invalid data type provided %s", theValue.getClass().getName()));
+			Validate.isTrue(
+					validateValue(theValue),
+					String.format(
+							"Invalid data type provided %s", theValue.getClass().getName()));
 			getUserData().put(theKey, theValue);
 		}
 	}
