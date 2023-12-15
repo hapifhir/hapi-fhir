@@ -444,14 +444,14 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 
 		String key = "counter";
 		String value = "value_";
-		options.setAdditionalData(key, value);
+		options.setUserData(key, value);
 
 		List<String> valueSet = new ArrayList<>();
 		Object interceptor = new Object() {
 			@Hook(Pointcut.STORAGE_BULK_EXPORT_RESOURCE_INCLUSION)
 			public void onExpandResources(IBaseResource theBaseResource, BulkExportJobParameters theParams) {
 				// this will be called once per every resource
-				String value = (String) theParams.getAdditionalData().get(key);
+				String value = (String) theParams.getUserData().get(key);
 				valueSet.add(value + theBaseResource.getIdElement().toUnqualifiedVersionless().getValue());
 			}
 		};
