@@ -1509,11 +1509,12 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		Builder.BuilderWithTableName nrmlTable = version.onTable("HFJ_SPIDX_QUANTITY_NRML");
 		nrmlTable.addColumn("20210111.1", "PARTITION_ID").nullable().type(ColumnTypeEnum.INT);
 		nrmlTable.addColumn("20210111.2", "PARTITION_DATE").nullable().type(ColumnTypeEnum.DATE_ONLY);
-		// - The fk name is generated from Hibernate, have to use this name here
+		// Disabled - superceded by 20220304.33
 		nrmlTable
 				.addForeignKey("20210111.3", "FKRCJOVMUH5KC0O6FVBLE319PYV")
 				.toColumn("RES_ID")
-				.references("HFJ_RESOURCE", "RES_ID");
+				.references("HFJ_RESOURCE", "RES_ID")
+				.doNothing();
 
 		Builder.BuilderWithTableName quantityTable = version.onTable("HFJ_SPIDX_QUANTITY");
 		quantityTable

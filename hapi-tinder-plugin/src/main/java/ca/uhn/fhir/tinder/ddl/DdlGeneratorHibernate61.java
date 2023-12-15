@@ -15,8 +15,6 @@ import org.hibernate.boot.registry.BootstrapServiceRegistryBuilder;
 import org.hibernate.boot.registry.StandardServiceRegistry;
 import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
 import org.hibernate.cfg.AvailableSettings;
-import org.hibernate.engine.jdbc.connections.internal.UserSuppliedConnectionProviderImpl;
-import org.hibernate.engine.jdbc.connections.spi.ConnectionProvider;
 import org.hibernate.tool.hbm2ddl.SchemaExport;
 import org.hibernate.tool.schema.TargetType;
 import org.slf4j.Logger;
@@ -36,9 +34,6 @@ import java.io.Writer;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.charset.StandardCharsets;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.HashSet;
@@ -72,7 +67,6 @@ public class DdlGeneratorHibernate61 {
 
 	public void generateDdl() throws MojoFailureException {
 		ClassLoader classLoader = getClassLoader(myProject);
-		FakeConnectionConnectionProvider connectionProvider = new FakeConnectionConnectionProvider();
 		Set<Class<?>> entityClasses = scanClasspathForEntityClasses(myPackages, classLoader);
 
 		BootstrapServiceRegistryBuilder bootstrapServiceRegistryBuilder = new BootstrapServiceRegistryBuilder();
@@ -88,7 +82,6 @@ public class DdlGeneratorHibernate61 {
 					new StandardServiceRegistryBuilder(bootstrapServiceRegistry);
 			registryBuilder.applySetting(AvailableSettings.HBM2DDL_AUTO, "create");
 			registryBuilder.applySetting(AvailableSettings.DIALECT, dialectClassName);
-			registryBuilder.addService(ConnectionProvider.class, connectionProvider);
 			registryBuilder.addService(
 					ISequenceValueMassager.class, new ISequenceValueMassager.NoopSequenceValueMassager());
 			StandardServiceRegistry standardRegistry = registryBuilder.build();
@@ -198,24 +191,4 @@ public class DdlGeneratorHibernate61 {
 		return entityClassNames;
 	}
 
-	/**
-	 * The hibernate bootstrap process insists on having a DB connection even
-	 * if it will never be used. So we just create a placeholder H2 connection
-	 * here. The schema export doesn't actually touch this DB, so it doesn't
-	 * matter that it doesn't correlate to the specified dialect.
-	 */
-	private static class FakeConnectionConnectionProvider extends UserSuppliedConnectionProviderImpl {
-		private static final long serialVersionUID = 4147495169899817244L;
-
-		@Override
-		public Connection getConnection() throws SQLException {
-			ourLog.trace("Using internal driver: {}", org.h2.Driver.class);
-			return DriverManager.getConnection("jdbc:h2:mem:tmp", "sa", "sa");
-		}
-
-		@Override
-		public void closeConnection(Connection conn) throws SQLException {
-			conn.close();
-		}
-	}
 }
