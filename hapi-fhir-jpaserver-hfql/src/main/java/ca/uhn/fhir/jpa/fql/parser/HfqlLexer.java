@@ -139,6 +139,22 @@ class HfqlLexer {
 					return;
 				}
 
+				for (String nextMultiCharToken : theOptions.getMultiCharTokens()) {
+					boolean haveStringStartingHere = true;
+					for (int i = 0; i < nextMultiCharToken.length(); i++) {
+						if (myInput.length <= myPosition + 1
+								|| nextMultiCharToken.charAt(i) != myInput[myPosition + i]) {
+							haveStringStartingHere = false;
+							break;
+						}
+					}
+					if (haveStringStartingHere) {
+						setNextToken(theOptions, nextMultiCharToken);
+						myPosition += nextMultiCharToken.length();
+						return;
+					}
+				}
+
 				if (theNextChar == '\'') {
 					myNextTokenLine = myLine;
 					myNextTokenColumn = myColumn;

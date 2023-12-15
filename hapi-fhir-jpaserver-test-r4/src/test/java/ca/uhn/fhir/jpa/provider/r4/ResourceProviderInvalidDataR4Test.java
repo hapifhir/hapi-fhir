@@ -38,11 +38,9 @@ public class ResourceProviderInvalidDataR4Test extends BaseResourceProviderR4Tes
 		// Manually set the value to be an invalid decimal number
 		runInTransaction(() -> {
 			ResourceHistoryTable resVer = myResourceHistoryTableDao.findForIdAndVersionAndFetchProvenance(id, 1);
-			byte[] bytesCompressed = resVer.getResource();
-			String resourceText = GZipUtil.decompress(bytesCompressed);
+			String resourceText = resVer.getResourceTextVc();
 			resourceText = resourceText.replace("100", "-.100");
-			bytesCompressed = GZipUtil.compress(resourceText);
-			resVer.setResource(bytesCompressed);
+			resVer.setResourceTextVc(resourceText);
 			myResourceHistoryTableDao.save(resVer);
 		});
 

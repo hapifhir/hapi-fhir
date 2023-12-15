@@ -32,6 +32,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static org.apache.commons.lang3.StringUtils.join;
+
 /**
  * This class represents a parsed HFQL expression tree. It is useful for
  * passing over the wire, but it should not be considered a stable model (in
@@ -326,6 +328,15 @@ public class HfqlStatement implements IModelJson {
 				retVal.add(next);
 			}
 			return retVal;
+		}
+
+		/**
+		 * Returns a concatenation of the {@link #getLeft() left} and all of the {@link #getRight() right} expressions,
+		 * each joined by a single string. This is useful for obtaining expressions of
+		 * type {@link WhereClauseOperatorEnum#UNARY_BOOLEAN}.
+		 */
+		public String asUnaryExpression() {
+			return getLeft() + " " + join(getRight(), ' ');
 		}
 	}
 }

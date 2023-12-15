@@ -34,7 +34,7 @@ public enum ColumnTypeEnum {
 
 	/**
 	 * Unlimited length text, with a column definition containing the annotation:
-	 * <code>@JdbcTypeCode(SqlTypes.LONG32VARCHAR)</code>
+	 * <code>@Column(length=Integer.MAX_VALUE)</code>
 	 */
 	TEXT,
 	BIG_DECIMAL;
