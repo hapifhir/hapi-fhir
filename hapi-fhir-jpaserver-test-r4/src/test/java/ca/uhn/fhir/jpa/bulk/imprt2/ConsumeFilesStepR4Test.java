@@ -41,14 +41,12 @@ public class ConsumeFilesStepR4Test extends BasePartitioningR4Test {
 	public void before() throws Exception {
 		super.before();
 		myPartitionSettings.setPartitioningEnabled(false);
-		myStorageSettings.setInlineResourceTextBelowSize(10000);
 	}
 
 	@AfterEach
 	@Override
 	public void after() {
 		super.after();
-		myStorageSettings.setInlineResourceTextBelowSize(new JpaStorageSettings().getInlineResourceTextBelowSize());
 	}
 
 	@Test

@@ -186,7 +186,7 @@ public class TestR5Config {
 		return retVal;
 	}
 
-	private Properties jpaProperties() {
+	protected Properties jpaProperties() {
 		Properties extraProperties = new Properties();
 		extraProperties.put("hibernate.format_sql", "false");
 		extraProperties.put("hibernate.show_sql", "false");

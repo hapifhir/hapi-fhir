@@ -1689,19 +1689,17 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		if (historyEntity.getEncoding() == ResourceEncodingEnum.JSONC
 				|| historyEntity.getEncoding() == ResourceEncodingEnum.JSON) {
 			byte[] resourceBytes = historyEntity.getResource();
+
+			// Always migrate data out of the bytes column
 			if (resourceBytes != null) {
 				String resourceText = decodeResource(resourceBytes, historyEntity.getEncoding());
-				if (myStorageSettings.getInlineResourceTextBelowSize() > 0
-						&& resourceText.length() < myStorageSettings.getInlineResourceTextBelowSize()) {
-					ourLog.debug(
-							"Storing text of resource {} version {} as inline VARCHAR",
-							entity.getResourceId(),
-							historyEntity.getVersion());
-					historyEntity.setResourceTextVc(resourceText);
-					historyEntity.setResource(null);
-					historyEntity.setEncoding(ResourceEncodingEnum.JSON);
-					changed = true;
-				}
+				ourLog.debug(
+						"Storing text of resource {} version {} as inline VARCHAR",
+						entity.getResourceId(),
+						historyEntity.getVersion());
+				historyEntity.setResourceTextVc(resourceText);
+				historyEntity.setEncoding(ResourceEncodingEnum.JSON);
+				changed = true;
 			}
 		}
 		if (isBlank(historyEntity.getSourceUri()) && isBlank(historyEntity.getRequestId())) {
@@ -2071,6 +2069,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				});
 	}
 
+	@Override
 	public <PID extends IResourcePersistentId<?>> Stream<PID> searchForIdStream(
 			SearchParameterMap theParams,
 			RequestDetails theRequest,

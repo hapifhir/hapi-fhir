@@ -48,8 +48,10 @@ public final class HapiEntityManagerFactoryUtil {
 			ConfigurableListableBeanFactory myConfigurableListableBeanFactory,
 			FhirContext theFhirContext,
 			JpaStorageSettings theStorageSettings) {
+
 		LocalContainerEntityManagerFactoryBean retVal =
 				new HapiFhirLocalContainerEntityManagerFactoryBean(myConfigurableListableBeanFactory);
+
 		configureEntityManagerFactory(retVal, theFhirContext, theStorageSettings);
 		return retVal;
 	}

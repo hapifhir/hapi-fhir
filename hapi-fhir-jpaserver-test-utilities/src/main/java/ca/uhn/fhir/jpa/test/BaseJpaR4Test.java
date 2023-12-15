@@ -40,6 +40,7 @@ import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.binary.interceptor.BinaryStorageInterceptor;
 import ca.uhn.fhir.jpa.binary.provider.BinaryAccessProvider;
 import ca.uhn.fhir.jpa.bulk.export.api.IBulkDataExportJobSchedulingHelper;
+import ca.uhn.fhir.jpa.dao.GZipUtil;
 import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
 import ca.uhn.fhir.jpa.dao.data.IBatch2JobInstanceRepository;
 import ca.uhn.fhir.jpa.dao.data.IBatch2WorkChunkRepository;
@@ -82,6 +83,7 @@ import ca.uhn.fhir.jpa.entity.TermValueSet;
 import ca.uhn.fhir.jpa.entity.TermValueSetConcept;
 import ca.uhn.fhir.jpa.interceptor.PerformanceTracingLoggingInterceptor;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
+import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.packages.IPackageInstallerSvc;
 import ca.uhn.fhir.jpa.partition.IPartitionLookupSvc;
 import ca.uhn.fhir.jpa.provider.JpaSystemProvider;
@@ -661,6 +663,14 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 	@Override
 	protected PlatformTransactionManager getTxManager() {
 		return myTxManager;
+	}
+
+	protected void relocateResourceTextToCompressedColumn(Long theResourcePid, Long theVersion) {
+		runInTransaction(()->{
+			ResourceHistoryTable historyEntity = myResourceHistoryTableDao.findForIdAndVersionAndFetchProvenance(theResourcePid, theVersion);
+			byte[] contents = GZipUtil.compress(historyEntity.getResourceTextVc());
+			myResourceHistoryTableDao.updateNonInlinedContents(contents, historyEntity.getId());
+		});
 	}
 
 	protected ValidationResult validateWithResult(IBaseResource theResource) {

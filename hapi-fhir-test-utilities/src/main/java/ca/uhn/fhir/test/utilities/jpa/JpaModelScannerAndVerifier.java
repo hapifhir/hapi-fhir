@@ -361,9 +361,6 @@ public class JpaModelScannerAndVerifier {
 					if (!theIsView && column.length() == 255) {
 						throw new IllegalStateException(Msg.code(1626) + "Field does not have an explicit maximum length specified: " + field);
 					}
-					if (column.length() > MAX_COL_LENGTH) {
-						throw new IllegalStateException(Msg.code(1627) + "Field is too long: " + field);
-					}
 				}
 
 				Size size = theAnnotatedElement.getAnnotation(Size.class);
