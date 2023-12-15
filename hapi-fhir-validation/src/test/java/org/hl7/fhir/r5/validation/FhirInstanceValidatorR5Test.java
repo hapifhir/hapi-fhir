@@ -288,6 +288,9 @@ public class FhirInstanceValidatorR5Test {
 	@Test
 	public void testValidateDoesntEnforceBestPracticesByDefault() {
 		Observation input = new Observation();
+		input.addPerformer(new Reference("Practitioner/124"));
+		input.setEffective(new DateTimeType("2023-01-01T11:22:33Z"));
+
 		input.getText().setDiv(new XhtmlNode().setValue("<div>AA</div>")).setStatus(Narrative.NarrativeStatus.GENERATED);
 		input.setStatus(Enumerations.ObservationStatus.AMENDED);
 		input.getCode().addCoding().setSystem("http://loinc.org").setCode("1234").setDisplay("FOO");
@@ -304,7 +307,9 @@ public class FhirInstanceValidatorR5Test {
 		result = val.validateWithResult(input);
 		all = logResultsAndReturnAll(result);
 		assertTrue(result.isSuccessful());
-		assertThat(all, empty());
+		assertThat(all, hasSize(1));
+		assertEquals("Best Practice Recommendation: In general, all observations should have a subject", all.get(0).getMessage());
+		assertEquals(ResultSeverityEnum.WARNING, all.get(0).getSeverity());
 
 		// With BPs enabled
 		val = ourCtx.newValidator();
@@ -315,7 +320,7 @@ public class FhirInstanceValidatorR5Test {
 		result = val.validateWithResult(input);
 		all = logResultsAndReturnAll(result);
 		assertFalse(result.isSuccessful());
-		assertEquals("All observations should have a subject", all.get(0).getMessage());
+		assertEquals("Best Practice Recommendation: In general, all observations should have a subject", all.get(0).getMessage());
 	}
 
 
@@ -460,7 +465,7 @@ public class FhirInstanceValidatorR5Test {
 		myVal.validateWithResult(input);
 
 		//verify(resourceFetcher, times(13)).resolveURL(any(), any(), anyString(), anyString(), anyString());
-		verify(policyAdvisor, times(4)).policyForReference(any(), any(), anyString(), anyString());
+		verify(policyAdvisor, times(8)).policyForReference(any(), any(), anyString(), anyString());
 		//verify(resourceFetcher, times(3)).fetch(any(), any(), anyString());
 	}
 
@@ -589,7 +594,7 @@ public class FhirInstanceValidatorR5Test {
 		ValidationResult output = myVal.validateWithResult(encoded);
 		assertEquals( 1, output.getMessages().size(), output.toString());
 
-		assertEquals("The extension http://hl7.org/fhir/v3/ethnicity is unknown, and not allowed here", output.getMessages().get(0).getMessage());
+		assertEquals("The extension http://hl7.org/fhir/v3/ethnicity could not be found so is not allowed here", output.getMessages().get(0).getMessage());
 		assertEquals(ResultSeverityEnum.ERROR, output.getMessages().get(0).getSeverity());
 	}
 
@@ -678,13 +683,12 @@ public class FhirInstanceValidatorR5Test {
 		ValidationResult output = myVal.validateWithResult(input);
 		List<SingleValidationMessage> res = logResultsAndReturnNonInformationalOnes(output);
 		assertEquals(1, res.size(), output.toString());
-		assertEquals("A code with no system has no defined meaning. A system should be provided", res.get(0).getMessage());
+		assertEquals("A code with no system has no defined meaning, and it cannot be validated. A system should be provided", res.get(0).getMessage());
 	}
 
 	@Test
 	public void testValidateRawXmlWithMissingRootNamespace() {
-		String input = ""
-			+ "<Patient>"
+		String input = "<Patient>"
 			+ "    <text>"
 			+ "        <status value=\"generated\"/>"
 			+ "        <div xmlns=\"http://www.w3.org/1999/xhtml\">Some narrative</div>"
@@ -700,7 +704,7 @@ public class FhirInstanceValidatorR5Test {
 
 		ValidationResult output = myVal.validateWithResult(input);
 		assertEquals(1, output.getMessages().size(), output.toString());
-		assertEquals("This does not appear to be a FHIR resource (unknown namespace/name 'noNamespace::Patient')", output.getMessages().get(0).getMessage());
+		assertEquals("This content cannot be parsed (unknown or unrecognized XML Root element namespace/name 'noNamespace::Patient')", output.getMessages().get(0).getMessage());
 		ourLog.info(output.getMessages().get(0).getLocationString());
 	}
 
@@ -756,6 +760,7 @@ public class FhirInstanceValidatorR5Test {
 		 * Now a bad code
 		 */
 		rp = new RelatedPerson();
+		rp.getText().setDiv(new XhtmlNode().setValue("<div>AA</div>")).setStatus(Narrative.NarrativeStatus.GENERATED);
 		rp.getPatient().setReference("Patient/1");
 		rp.addRelationship().addCoding().setSystem("http://terminology.hl7.org/CodeSystem/v2-0131").setCode("GAGAGAGA");
 
@@ -815,7 +820,7 @@ public class FhirInstanceValidatorR5Test {
 	public void testValidateResourceContainingProfileDeclarationDoesntResolve() {
 		addValidConcept("http://loinc.org", "12345");
 
-		Observation input = new Observation();
+		Observation input = createObservationWithDefaultSubjectPerfomerEffective();
 		input.getText().setDiv(new XhtmlNode().setValue("<div>AA</div>")).setStatus(Narrative.NarrativeStatus.GENERATED);
 		input.getMeta().addProfile("http://foo/structuredefinition/myprofile");
 
@@ -825,7 +830,7 @@ public class FhirInstanceValidatorR5Test {
 		myInstanceVal.setValidationSupport(myValidationSupport);
 		ValidationResult output = myVal.validateWithResult(input);
 		List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
-		assertThat(errors.toString(), containsString("Profile reference 'http://foo/structuredefinition/myprofile' has not been checked because it is unknown"));
+		assertThat(errors.toString(), containsString("Profile reference 'http://foo/structuredefinition/myprofile' has not been checked because it could not be found"));
 	}
 
 	@Test
@@ -845,7 +850,7 @@ public class FhirInstanceValidatorR5Test {
 
 	@Test
 	public void testValidateResourceWithDefaultValueset() {
-		Observation input = new Observation();
+		Observation input = createObservationWithDefaultSubjectPerfomerEffective();
 
 		input.getText().setDiv(new XhtmlNode().setValue("<div>AA</div>")).setStatus(Narrative.NarrativeStatus.GENERATED);
 		input.setStatus(Enumerations.ObservationStatus.FINAL);
@@ -854,7 +859,7 @@ public class FhirInstanceValidatorR5Test {
 		ourLog.debug(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(input));
 
 		ValidationResult output = myVal.validateWithResult(input);
-		assertEquals(output.getMessages().size(), 0);
+		assertEquals( 0, output.getMessages().size());
 	}
 
 	@Test
@@ -874,13 +879,21 @@ public class FhirInstanceValidatorR5Test {
 		logResultsAndReturnAll(output);
 		assertThat(
 			output.getMessages().get(0).getMessage(),
-			containsString("The value provided ('notvalidcode') is not in the value set 'Observation Status' (http://hl7.org/fhir/ValueSet/observation-status|5.0.0), and a code is required from this value set  (error message = Unknown code 'notvalidcode' for in-memory expansion of ValueSet 'http://hl7.org/fhir/ValueSet/observation-status')")
+			containsString("The value provided ('notvalidcode') was not found in the value set 'Observation Status' (http://hl7.org/fhir/ValueSet/observation-status|5.0.0), and a code is required from this value set  (error message = Unknown code 'notvalidcode' for in-memory expansion of ValueSet 'http://hl7.org/fhir/ValueSet/observation-status')")
 			);
 	}
 
+
+	private Observation createObservationWithDefaultSubjectPerfomerEffective() {
+		Observation observation = new Observation();
+		observation.setSubject(new Reference("Patient/123"));
+		observation.addPerformer(new Reference("Practitioner/124"));
+		observation.setEffective(new DateTimeType("2023-01-01T11:22:33Z"));
+		return observation;
+	}
 	@Test
 	public void testValidateResourceWithExampleBindingCodeValidationFailing() {
-		Observation input = new Observation();
+		Observation input = createObservationWithDefaultSubjectPerfomerEffective();
 		input.getText().setDiv(new XhtmlNode().setValue("<div>AA</div>")).setStatus(Narrative.NarrativeStatus.GENERATED);
 
 		myInstanceVal.setValidationSupport(myValidationSupport);
@@ -914,7 +927,7 @@ public class FhirInstanceValidatorR5Test {
 
 	@Test
 	public void testValidateResourceWithExampleBindingCodeValidationPassingLoinc() {
-		Observation input = new Observation();
+		Observation input = createObservationWithDefaultSubjectPerfomerEffective();
 		input.getText().setDiv(new XhtmlNode().setValue("<div>AA</div>")).setStatus(Narrative.NarrativeStatus.GENERATED);
 
 		myInstanceVal.setValidationSupport(myValidationSupport);
@@ -930,7 +943,7 @@ public class FhirInstanceValidatorR5Test {
 
 	@Test
 	public void testValidateResourceWithExampleBindingCodeValidationPassingLoincWithExpansion() {
-		Observation input = new Observation();
+		Observation input = createObservationWithDefaultSubjectPerfomerEffective();
 		input.getText().setDiv(new XhtmlNode().setValue("<div>AA</div>")).setStatus(Narrative.NarrativeStatus.GENERATED);
 
 		ValueSetExpansionComponent expansionComponent = new ValueSetExpansionComponent();
@@ -951,7 +964,7 @@ public class FhirInstanceValidatorR5Test {
 
 	@Test
 	public void testValidateResourceWithExampleBindingCodeValidationPassingNonLoinc() {
-		Observation input = new Observation();
+		Observation input = createObservationWithDefaultSubjectPerfomerEffective();
 		input.getText().setDiv(new XhtmlNode().setValue("<div>AA</div>")).setStatus(Narrative.NarrativeStatus.GENERATED);
 
 		myInstanceVal.setValidationSupport(myValidationSupport);
