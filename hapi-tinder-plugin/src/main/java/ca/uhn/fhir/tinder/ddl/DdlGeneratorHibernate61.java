@@ -190,5 +190,4 @@ public class DdlGeneratorHibernate61 {
 		}
 		return entityClassNames;
 	}
-
 }
