@@ -251,6 +251,64 @@ public class RuleBulkExportImplTest {
 	}
 
 	@Test
+	public void testPatientExportRulesOnTypeLevelExportUnpermittedPatient() {
+		//Given
+		final RuleBulkExportImpl myRule = new RuleBulkExportImpl("b");
+		myRule.setAppliesToPatientExport("Patient/123");
+		myRule.setMode(PolicyEnum.ALLOW);
+		final BulkExportJobParameters options = new BulkExportJobParameters();
+		options.setExportStyle(BulkExportJobParameters.ExportStyle.PATIENT);
+		options.setPatientIds(Set.of("Patient/456"));
+		options.setResourceTypes(Set.of("Patient"));
+		when(myRequestDetails.getAttribute(any())).thenReturn(options);
+
+		//When
+		final AuthorizationInterceptor.Verdict verdict = myRule.applyRule(myOperation, myRequestDetails, null, null, null, myRuleApplier, myFlags, myPointcut);
+
+		//Then: We do not have permissions on the requested patient so this is not permitted.
+		assertEquals(PolicyEnum.DENY, verdict.getDecision());
+	}
+
+	@Test
+	public void testPatientExportRulesOnTypeLevelExportPermittedPatient() {
+		//Given
+		final RuleBulkExportImpl myRule = new RuleBulkExportImpl("b");
+		myRule.setAppliesToPatientExport("Patient/123");
+		myRule.setMode(PolicyEnum.ALLOW);
+		final BulkExportJobParameters options = new BulkExportJobParameters();
+		options.setExportStyle(BulkExportJobParameters.ExportStyle.PATIENT);
+		options.setPatientIds(Set.of("Patient/123"));
+		options.setResourceTypes(Set.of("Patient"));
+		when(myRequestDetails.getAttribute(any())).thenReturn(options);
+
+		//When
+		final AuthorizationInterceptor.Verdict verdict = myRule.applyRule(myOperation, myRequestDetails, null, null, null, myRuleApplier, myFlags, myPointcut);
+
+		//Then: We have permissions on the requested patient so this is permitted.
+		assertEquals(PolicyEnum.ALLOW, verdict.getDecision());
+	}
+
+	@Test
+	public void testPatientExportRulesOnTypeLevelExportPermittedPatients() {
+		//Given
+		final RuleBulkExportImpl myRule = new RuleBulkExportImpl("b");
+		myRule.setAppliesToPatientExport("Patient/123");
+		myRule.setAppliesToPatientExport("Patient/456");
+		myRule.setMode(PolicyEnum.ALLOW);
+		final BulkExportJobParameters options = new BulkExportJobParameters();
+		options.setExportStyle(BulkExportJobParameters.ExportStyle.PATIENT);
+		options.setPatientIds(Set.of("Patient/123", "Patient/456"));
+		options.setResourceTypes(Set.of("Patient"));
+		when(myRequestDetails.getAttribute(any())).thenReturn(options);
+
+		//When
+		final AuthorizationInterceptor.Verdict verdict = myRule.applyRule(myOperation, myRequestDetails, null, null, null, myRuleApplier, myFlags, myPointcut);
+
+		//Then: We have permissions on both requested patients so this is permitted.
+		assertEquals(PolicyEnum.ALLOW, verdict.getDecision());
+	}
+
+	@Test
 	public void testPatientExportRulesOnTypeLevelExportWithPermittedAndUnpermittedPatients() {
 		//Given
 		final RuleBulkExportImpl myRule = new RuleBulkExportImpl("b");
