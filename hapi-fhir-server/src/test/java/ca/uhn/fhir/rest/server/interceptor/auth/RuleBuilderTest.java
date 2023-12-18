@@ -10,6 +10,7 @@ import java.util.List;
 import static org.hamcrest.Matchers.contains;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 
 public class RuleBuilderTest {
@@ -85,6 +86,19 @@ public class RuleBuilderTest {
 		builder.allow().bulkExport().groupExportOnGroup("group2").withResourceTypes(resourceTypes);
 		List<IAuthRule> build = builder.build();
 
+	}
+
+	@Test
+	public void testBulkExport_PatientExportOnPatient_MultiplePatientsSingleRule() {
+		RuleBuilder builder = new RuleBuilder();
+		List<String> resourceTypes = new ArrayList<>();
+		resourceTypes.add("Patient");
+
+		builder.allow().bulkExport().patientExportOnPatient("Patient/pat1").withResourceTypes(resourceTypes);
+		builder.allow().bulkExport().patientExportOnPatient("Patient/pat2").withResourceTypes(resourceTypes);
+		List<IAuthRule> rules = builder.build();
+		assertEquals(rules.size(),1);
+		assertTrue(rules.get(0) instanceof RuleBulkExportImpl);
 	}
 
 	@Test
