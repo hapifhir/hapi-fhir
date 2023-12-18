@@ -174,8 +174,6 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 
 		batch2JobInstanceTable.addColumn("20231128.2", "CLIENT_ID").nullable().type(ColumnTypeEnum.STRING, 200);
 
-
-
 		{
 			version.executeRawSql(
 							"20231212.1",
@@ -199,10 +197,8 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 									"SP_URI".toLowerCase()),
 							"Column HFJ_SPIDX_STRING.SP_VALUE_NORMALIZED already has a collation of 'C' so doing nothing");
 		}
-    
-    version.addTask(new ForceIdMigrationFixTask(version.getRelease(), "20231213.1"));
 
-
+		version.addTask(new ForceIdMigrationFixTask(version.getRelease(), "20231213.1"));
 	}
 
 	protected void init680() {
