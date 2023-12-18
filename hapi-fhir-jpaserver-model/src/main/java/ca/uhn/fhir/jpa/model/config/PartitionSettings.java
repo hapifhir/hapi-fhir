@@ -176,4 +176,22 @@ public class PartitionSettings {
 		 */
 		ALLOWED_UNQUALIFIED,
 	}
+
+	public enum BlockPatientCompartmentUpdateMode {
+		/**
+		 * Resource updates which change resource's patient compartment are blocked.
+		 */
+		ALWAYS,
+
+		/**
+		 * Resource updates which change resource's patient compartment are blocked
+		 * when Partition Selection Mode is PATIENT_ID
+		 */
+		DEFAULT,
+
+		/**
+		 * Resource updates which change resource's patient compartment are allowed.
+		 */
+		NEVER,
+	}
 }
