@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 5546
+backport: 6.10.1
+title: "A database migration added trailing spaces to server-assigned resource ids.
+  This fix removes the bad migration, and adds another migration to fix the errors."

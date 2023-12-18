@@ -28,10 +28,15 @@ import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.sql.SQLException;
 
-public class ForceIdMigrationCopyTask extends BaseTask {
-	private static final Logger ourLog = LoggerFactory.getLogger(ForceIdMigrationCopyTask.class);
+/**
+ * Fix for bad version of {@link ForceIdMigrationCopyTask}
+ * The earlier migration had used at cast to char instead of varchar, which is space-padded on Oracle.
+ * This migration includes the copy action, but also adds a trim() call to fixup the bad server-assigned ids.
+ */
+public class ForceIdMigrationFixTask extends BaseTask {
+	private static final Logger ourLog = LoggerFactory.getLogger(ForceIdMigrationFixTask.class);
 
-	public ForceIdMigrationCopyTask(String theProductVersion, String theSchemaVersion) {
+	public ForceIdMigrationFixTask(String theProductVersion, String theSchemaVersion) {
 		super(theProductVersion, theSchemaVersion);
 	}
 
@@ -58,21 +63,47 @@ public class ForceIdMigrationCopyTask extends BaseTask {
 		// run update in batches.
 		int rowsPerBlock = 50; // hfj_resource has roughly 50 rows per 8k block.
 		int batchSize = rowsPerBlock * 2000; // a few thousand IOPS gives a batch size around a second.
+		ourLog.info(
+				"About to migrate ids from {} to {} in batches of size {}",
+				range.getLeft(),
+				range.getRight(),
+				batchSize);
 		for (long batchStart = range.getLeft(); batchStart <= range.getRight(); batchStart = batchStart + batchSize) {
 			long batchEnd = batchStart + batchSize;
 			ourLog.info("Migrating client-assigned ids for pids: {}-{}", batchStart, batchEnd);
 
-			// This should be fast-ish since fhir_id isn't indexed yet,
-			// and we're walking both hfj_resource and hfj_forced_id in insertion order.
+			/*
+			We have several cases.  Two require no action:
+			1. client-assigned id, with correct value in fhir_id and row in hfj_forced_id
+			2. server-assigned id, with correct value in fhir_id, no row in hfj_forced_id
+			And three require action:
+			3. client-assigned id, no value in fhir_id, but row in hfj_forced_id
+			4. server-assigned id, no value in fhir_id, and row in hfj_forced_id
+			5. bad migration - server-assigned id, with wrong space-padded value in fhir_id, no row in hfj_forced_id
+			 */
+
 			executeSql(
 					"hfj_resource",
-					"update hfj_resource " + "set fhir_id = coalesce( "
-							+ // use first non-null value: forced_id if present, otherwise res_id
-							"   (select f.forced_id from hfj_forced_id f where f.resource_pid = res_id), "
-							+ "   cast(res_id as varchar(64)) "
+					"update hfj_resource " +
+							// coalesce is varargs and chooses the first non-null value, like ||
+							" set fhir_id = coalesce( "
+							+
+							// case 5.
+							" trim(fhir_id), "
+							+
+							// case 3
+							" (select f.forced_id from hfj_forced_id f where f.resource_pid = res_id), "
+							+
+							// case 4 - use pid as fhir_id
+							"   cast(res_id as varchar(64)) "
 							+ "  ) "
-							+ "where fhir_id is null "
-							+ "and res_id >= ? and res_id < ?",
+							+
+							// avoid useless updates on engines that don't check
+							// skip case 1, 2.  Only check 3,4,5
+							" where (fhir_id is null or fhir_id <> trim(fhir_id)) "
+							+
+							// chunk range.
+							" and res_id >= ? and res_id < ?",
 					batchStart,
 					batchEnd);
 		}
