@@ -19,7 +19,6 @@
  */
 package ca.uhn.fhir.jpa.model.dialect;
 
-import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import org.hibernate.dialect.DatabaseVersion;
 import org.hibernate.dialect.H2Dialect;
 
@@ -38,7 +37,7 @@ public class HapiFhirH2Dialect extends H2Dialect {
 
 	/**
 	 * As of Hibernate 6, generated schemas include a column level check constraint that enforces valid values
-	 * for columns that back an Enum type. For example, the column definition for {@link ResourceTable#getFhirVersion()}
+	 * for columns that back an Enum type. For example, the column definition for <code>ResourceTable#getFhirVersion()</code>
 	 * would look like:
 	 * <pre>
 	 *  RES_VERSION varchar(7) check (RES_VERSION in ('DSTU2','DSTU2_HL7ORG','DSTU2_1','DSTU3','R4','R4B','R5')),

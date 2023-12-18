@@ -36,7 +36,7 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
 import ca.uhn.fhir.util.ICallable;
-import ca.uhn.fhir.util.TestUtil;
+import ca.uhn.fhir.util.SleepUtil;
 import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
@@ -48,6 +48,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.PessimisticLockingFailureException;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionStatus;
@@ -89,9 +90,16 @@ public class HapiTransactionService implements IHapiTransactionService {
 
 	private Propagation myTransactionPropagationWhenChangingPartitions = Propagation.REQUIRED;
 
+	private SleepUtil mySleepUtil = new SleepUtil();
+
 	@VisibleForTesting
 	public void setInterceptorBroadcaster(IInterceptorBroadcaster theInterceptorBroadcaster) {
 		myInterceptorBroadcaster = theInterceptorBroadcaster;
+	}
+
+	@VisibleForTesting
+	public void setSleepUtil(SleepUtil theSleepUtil) {
+		mySleepUtil = theSleepUtil;
 	}
 
 	@Override
@@ -281,6 +289,25 @@ public class HapiTransactionService implements IHapiTransactionService {
 		return doExecuteInTransaction(theExecutionBuilder, theCallback, requestPartitionId, previousRequestPartitionId);
 	}
 
+	private boolean isThrowableOrItsSubclassPresent(Throwable theThrowable, Class<? extends Throwable> theClass) {
+		return ExceptionUtils.indexOfType(theThrowable, theClass) != -1;
+	}
+
+	private boolean isThrowablePresent(Throwable theThrowable, Class<? extends Throwable> theClass) {
+		return ExceptionUtils.indexOfThrowable(theThrowable, theClass) != -1;
+	}
+
+	private boolean isRetriable(Throwable theThrowable) {
+		return isThrowablePresent(theThrowable, ResourceVersionConflictException.class)
+				|| isThrowablePresent(theThrowable, DataIntegrityViolationException.class)
+				|| isThrowablePresent(theThrowable, ConstraintViolationException.class)
+				|| isThrowablePresent(theThrowable, ObjectOptimisticLockingFailureException.class)
+				// calling isThrowableOrItsSubclassPresent instead of isThrowablePresent for
+				// PessimisticLockingFailureException, because we want to retry on its subclasses as well,  especially
+				// CannotAcquireLockException, which is thrown in some deadlock situations which we want to retry
+				|| isThrowableOrItsSubclassPresent(theThrowable, PessimisticLockingFailureException.class);
+	}
+
 	@Nullable
 	private <T> T doExecuteInTransaction(
 			ExecutionBuilder theExecutionBuilder,
@@ -294,11 +321,7 @@ public class HapiTransactionService implements IHapiTransactionService {
 					return doExecuteCallback(theExecutionBuilder, theCallback);
 
 				} catch (Exception e) {
-					if (!(ExceptionUtils.indexOfThrowable(e, ResourceVersionConflictException.class) != -1
-							|| ExceptionUtils.indexOfThrowable(e, DataIntegrityViolationException.class) != -1
-							|| ExceptionUtils.indexOfThrowable(e, ConstraintViolationException.class) != -1
-							|| ExceptionUtils.indexOfThrowable(e, ObjectOptimisticLockingFailureException.class)
-									!= -1)) {
+					if (!isRetriable(e)) {
 						ourLog.debug("Unexpected transaction exception. Will not be retried.", e);
 						throw e;
 					} else {
@@ -354,7 +377,7 @@ public class HapiTransactionService implements IHapiTransactionService {
 							}
 							double sleepAmount = (250.0d * i) * Math.random();
 							long sleepAmountLong = (long) sleepAmount;
-							TestUtil.sleepAtLeast(sleepAmountLong, false);
+							mySleepUtil.sleepAtLeast(sleepAmountLong, false);
 
 							ourLog.info(
 									"About to start a transaction retry due to conflict or constraint error. Sleeping {}ms first.",
