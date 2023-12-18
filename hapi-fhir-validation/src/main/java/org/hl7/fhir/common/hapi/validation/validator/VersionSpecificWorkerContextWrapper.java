@@ -533,16 +533,13 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 		return allStructures.stream()
 				.filter(structureDefinition ->
 						structureDefinition.getKind() == StructureDefinition.StructureDefinitionKind.PRIMITIVETYPE)
-				.anyMatch(structureDefinition -> s.equals(structureDefinition.getType()));
+				.anyMatch(structureDefinition -> s.equals(structureDefinition.getName()));
 	}
 
 	@Override
 	public boolean isDataType(String s) {
-		List<StructureDefinition> allStructures = new ArrayList<>(allStructures());
-		return allStructures.stream()
-				.filter(structureDefinition ->
-						structureDefinition.getKind() == StructureDefinition.StructureDefinitionKind.COMPLEXTYPE)
-				.anyMatch(structureDefinition -> s.equals(structureDefinition.getType()));
+		// List<StructureDefinition> allStructures = new ArrayList<>(allStructures());
+		return !isPrimitiveType(s);
 	}
 
 	@Override
