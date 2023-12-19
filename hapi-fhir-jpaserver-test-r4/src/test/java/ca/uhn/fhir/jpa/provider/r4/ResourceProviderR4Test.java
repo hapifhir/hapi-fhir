@@ -2160,7 +2160,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			String respString = IOUtils.toString(resp.getEntity().getContent(), Charsets.UTF_8);
 			ourLog.debug(respString);
 			assertEquals(200, resp.getStatusLine().getStatusCode());
-			assertThat(respString, containsString("Profile reference 'http://foo/structuredefinition/myprofile' has not been checked because it is unknown"));
+			assertThat(respString, containsString("Profile reference 'http://foo/structuredefinition/myprofile' has not been checked because it could not be found"));
 		}
 	}
 
