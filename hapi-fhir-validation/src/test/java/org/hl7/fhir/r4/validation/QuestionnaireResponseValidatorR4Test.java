@@ -310,10 +310,13 @@ public class QuestionnaireResponseValidatorR4Test {
 	public void testMissingRequiredQuestion() {
 
 		Questionnaire q = new Questionnaire();
+		q.getText().setDiv(new XhtmlNode().setValue("<div>AA</div>")).setStatus(Narrative.NarrativeStatus.GENERATED);
 		q.addItem().setLinkId("link0").setRequired(true).setType(QuestionnaireItemType.STRING);
 		q.addItem().setLinkId("link1").setRequired(true).setType(QuestionnaireItemType.STRING);
 
 		QuestionnaireResponse qa = new QuestionnaireResponse();
+		qa.getText().setDiv(new XhtmlNode().setValue("<div>AA</div>")).setStatus(Narrative.NarrativeStatus.GENERATED);
+
 		qa.setStatus(QuestionnaireResponseStatus.COMPLETED);
 		qa.getQuestionnaireElement().setValue("http://example.com/Questionnaire/q1");
 		qa.addItem().setLinkId("link1").addAnswer().setValue(new StringType("FOO"));
@@ -713,9 +716,13 @@ public class QuestionnaireResponseValidatorR4Test {
 	@Test
 	public void testUnexpectedAnswer() {
 		Questionnaire q = new Questionnaire();
+		q.getText().setDiv(new XhtmlNode().setValue("<div>AA</div>")).setStatus(Narrative.NarrativeStatus.GENERATED);
+
 		q.addItem().setLinkId("link0").setRequired(false).setType(QuestionnaireItemType.BOOLEAN);
 
 		QuestionnaireResponse qa = new QuestionnaireResponse();
+		qa.getText().setDiv(new XhtmlNode().setValue("<div>AA</div>")).setStatus(Narrative.NarrativeStatus.GENERATED);
+
 		qa.setStatus(QuestionnaireResponseStatus.COMPLETED);
 		qa.getQuestionnaireElement().setValue("http://example.com/Questionnaire/q1");
 		qa.addItem().setLinkId("link1").addAnswer().setValue(new StringType("FOO"));
@@ -731,9 +738,13 @@ public class QuestionnaireResponseValidatorR4Test {
 	@Test
 	public void testUnexpectedGroup() {
 		Questionnaire q = new Questionnaire();
+		q.getText().setDiv(new XhtmlNode().setValue("<div>AA</div>")).setStatus(Narrative.NarrativeStatus.GENERATED);
+
 		q.addItem().setLinkId("link0").setRequired(false).setType(QuestionnaireItemType.BOOLEAN);
 
 		QuestionnaireResponse qa = new QuestionnaireResponse();
+		qa.getText().setDiv(new XhtmlNode().setValue("<div>AA</div>")).setStatus(Narrative.NarrativeStatus.GENERATED);
+
 		qa.setStatus(QuestionnaireResponseStatus.COMPLETED);
 		qa.getQuestionnaireElement().setValue("http://example.com/Questionnaire/q1");
 		qa.addItem().setLinkId("link1").addItem().setLinkId("link2");
