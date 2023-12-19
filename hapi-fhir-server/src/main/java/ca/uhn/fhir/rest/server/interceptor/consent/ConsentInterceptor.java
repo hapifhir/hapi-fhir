@@ -31,6 +31,7 @@ import ca.uhn.fhir.rest.api.server.IPreResourceAccessDetails;
 import ca.uhn.fhir.rest.api.server.IPreResourceShowDetails;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.ResponseDetails;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
@@ -498,11 +499,19 @@ public class ConsentInterceptor {
 		}
 	}
 
+	protected RequestDetails getRequestDetailsForCurrentExportOperation(
+			BulkExportJobParameters theParameters, IBaseResource theBaseResource) {
+		// bulk exports are system operations
+		SystemRequestDetails details = new SystemRequestDetails();
+		return details;
+	}
+
 	@Hook(value = Pointcut.STORAGE_BULK_EXPORT_RESOURCE_INCLUSION)
 	public boolean shouldBulkExportIncludeResource(BulkExportJobParameters theParameters, IBaseResource theResource) {
+		RequestDetails requestDetails = getRequestDetailsForCurrentExportOperation(theParameters, theResource);
+
 		for (IConsentService next : myConsentService) {
-			ConsentOutcome nextOutcome =
-					next.shouldIncludeResourceInExport(theParameters, theResource, myContextConsentServices);
+			ConsentOutcome nextOutcome = next.willSeeResource(requestDetails, theResource, myContextConsentServices);
 
 			ConsentOperationStatusEnum status = nextOutcome.getStatus();
 			switch (status) {
