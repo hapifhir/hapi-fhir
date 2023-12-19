@@ -29,8 +29,8 @@ public class PatientCompartmentEnforcingInterceptor {
 	private final FhirContext myFhirContext;
 	private final ISearchParamExtractor mySearchParamExtractor;
 
-	public PatientCompartmentEnforcingInterceptor(FhirContext theFhirContext,
-												  ISearchParamExtractor theSearchParamExtractor) {
+	public PatientCompartmentEnforcingInterceptor(
+			FhirContext theFhirContext, ISearchParamExtractor theSearchParamExtractor) {
 		if (theFhirContext.getVersion().getVersion().isOlderThan(FhirVersionEnum.R4)) {
 			throw new InternalErrorException(Msg.code(2475) + "Interceptor requires Fhir version R4 or later.");
 		}
@@ -59,8 +59,8 @@ public class PatientCompartmentEnforcingInterceptor {
 
 			if (!oPatientCompartmentOld.get().equals(oPatientCompartmentCurrent.get())) {
 				// Avoid disclosing compartments in message, which could have security implications
-				throw new InternalErrorException(Msg.code(2476) +
-					"Resource compartment changed. Was a referenced Patient changed?");
+				throw new InternalErrorException(
+						Msg.code(2476) + "Resource compartment changed. Was a referenced Patient changed?");
 			}
 
 		} finally {
@@ -71,7 +71,7 @@ public class PatientCompartmentEnforcingInterceptor {
 	private Optional<String> getPatientCompartmentIdentity(IBaseResource theResource) {
 		RuntimeResourceDefinition resourceDef = myFhirContext.getResourceDefinition(theResource);
 		List<RuntimeSearchParam> patientCompartmentSps =
-			ResourceCompartmentUtil.getPatientCompartmentSearchParams(resourceDef);
+				ResourceCompartmentUtil.getPatientCompartmentSearchParams(resourceDef);
 		if (patientCompartmentSps.isEmpty()) {
 			return Optional.empty();
 		}
@@ -79,13 +79,13 @@ public class PatientCompartmentEnforcingInterceptor {
 		if (resourceDef.getName().equals("Patient")) {
 			String compartmentIdentity = theResource.getIdElement().getIdPart();
 			if (isBlank(compartmentIdentity)) {
-				throw new MethodNotAllowedException(Msg.code(2477) +
-					"Patient resource IDs must be client-assigned in patient compartment mode");
+				throw new MethodNotAllowedException(
+						Msg.code(2477) + "Patient resource IDs must be client-assigned in patient compartment mode");
 			}
 			return Optional.of(compartmentIdentity);
 		}
 
-		return ResourceCompartmentUtil.getResourceCompartment(theResource, patientCompartmentSps, mySearchParamExtractor);
+		return ResourceCompartmentUtil.getResourceCompartment(
+				theResource, patientCompartmentSps, mySearchParamExtractor);
 	}
-
 }

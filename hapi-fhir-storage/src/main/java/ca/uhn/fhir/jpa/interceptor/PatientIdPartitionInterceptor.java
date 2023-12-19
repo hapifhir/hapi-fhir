@@ -88,25 +88,28 @@ public class PatientIdPartitionInterceptor {
 	@Hook(Pointcut.STORAGE_PARTITION_IDENTIFY_CREATE)
 	public RequestPartitionId identifyForCreate(IBaseResource theResource, RequestDetails theRequestDetails) {
 		RuntimeResourceDefinition resourceDef = myFhirContext.getResourceDefinition(theResource);
-		List<RuntimeSearchParam> compartmentSps = ResourceCompartmentUtil.getPatientCompartmentSearchParams(resourceDef);
+		List<RuntimeSearchParam> compartmentSps =
+				ResourceCompartmentUtil.getPatientCompartmentSearchParams(resourceDef);
 		if (compartmentSps.isEmpty()) {
 			return provideNonCompartmentMemberTypeResponse(theResource);
 		}
 
 		Optional<String> oCompartmentIdentity;
 		if (resourceDef.getName().equals("Patient")) {
-			oCompartmentIdentity = Optional.ofNullable(theResource.getIdElement().getIdPart());
+			oCompartmentIdentity =
+					Optional.ofNullable(theResource.getIdElement().getIdPart());
 			if (oCompartmentIdentity.isEmpty()) {
 				throw new MethodNotAllowedException(
 						Msg.code(1321) + "Patient resource IDs must be client-assigned in patient compartment mode");
 			}
 		} else {
-			oCompartmentIdentity = ResourceCompartmentUtil.getResourceCompartment(
-				theResource, compartmentSps, mySearchParamExtractor);
+			oCompartmentIdentity =
+					ResourceCompartmentUtil.getResourceCompartment(theResource, compartmentSps, mySearchParamExtractor);
 		}
 
-        return oCompartmentIdentity.map(ci -> provideCompartmentMemberInstanceResponse(theRequestDetails, ci))
-			.orElseGet(() -> provideNonCompartmentMemberInstanceResponse(theResource));
+		return oCompartmentIdentity
+				.map(ci -> provideCompartmentMemberInstanceResponse(theRequestDetails, ci))
+				.orElseGet(() -> provideNonCompartmentMemberInstanceResponse(theResource));
 	}
 
 	@Hook(Pointcut.STORAGE_PARTITION_IDENTIFY_READ)
@@ -116,7 +119,8 @@ public class PatientIdPartitionInterceptor {
 			return provideNonCompartmentMemberTypeResponse(null);
 		}
 		RuntimeResourceDefinition resourceDef = myFhirContext.getResourceDefinition(theReadDetails.getResourceType());
-		List<RuntimeSearchParam> compartmentSps = ResourceCompartmentUtil.getPatientCompartmentSearchParams(resourceDef);
+		List<RuntimeSearchParam> compartmentSps =
+				ResourceCompartmentUtil.getPatientCompartmentSearchParams(resourceDef);
 		if (compartmentSps.isEmpty()) {
 			return provideNonCompartmentMemberTypeResponse(null);
 		}

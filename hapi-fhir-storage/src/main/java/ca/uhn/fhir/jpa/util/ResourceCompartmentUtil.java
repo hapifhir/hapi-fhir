@@ -25,23 +25,24 @@ public class ResourceCompartmentUtil {
 	 * @param mySearchParamExtractor the ISearchParamExtractor to be used to extract the parameter values
 	 * @return optional compartment of the received resource
 	 */
-	public static Optional<String> getResourceCompartment(IBaseResource theResource,
-														  List<RuntimeSearchParam> theCompartmentSps,
-														  ISearchParamExtractor mySearchParamExtractor) {
+	public static Optional<String> getResourceCompartment(
+			IBaseResource theResource,
+			List<RuntimeSearchParam> theCompartmentSps,
+			ISearchParamExtractor mySearchParamExtractor) {
 		return theCompartmentSps.stream()
-			.flatMap(param -> Arrays.stream(BaseSearchParamExtractor.splitPathsR4(param.getPath())))
-			.filter(StringUtils::isNotBlank)
-			.map(path -> mySearchParamExtractor
-				.getPathValueExtractor(theResource, path)
-				.get())
-			.filter(t -> !t.isEmpty())
-			.map(t -> t.get(0))
-			.filter(t -> t instanceof IBaseReference)
-			.map(t -> (IBaseReference) t)
-			.map(t -> t.getReferenceElement().getValue())
-			.map(t -> new IdType(t).getIdPart())
-			.filter(StringUtils::isNotBlank)
-			.findFirst();
+				.flatMap(param -> Arrays.stream(BaseSearchParamExtractor.splitPathsR4(param.getPath())))
+				.filter(StringUtils::isNotBlank)
+				.map(path -> mySearchParamExtractor
+						.getPathValueExtractor(theResource, path)
+						.get())
+				.filter(t -> !t.isEmpty())
+				.map(t -> t.get(0))
+				.filter(t -> t instanceof IBaseReference)
+				.map(t -> (IBaseReference) t)
+				.map(t -> t.getReferenceElement().getValue())
+				.map(t -> new IdType(t).getIdPart())
+				.filter(StringUtils::isNotBlank)
+				.findFirst();
 	}
 
 	/**
@@ -54,11 +55,9 @@ public class ResourceCompartmentUtil {
 	@Nonnull
 	public static List<RuntimeSearchParam> getPatientCompartmentSearchParams(RuntimeResourceDefinition resourceDef) {
 		return resourceDef.getSearchParams().stream()
-			.filter(param -> param.getParamType() == RestSearchParameterTypeEnum.REFERENCE)
-			.filter(param -> param.getProvidesMembershipInCompartments() != null
-				&& param.getProvidesMembershipInCompartments().contains("Patient"))
-			.collect(Collectors.toList());
+				.filter(param -> param.getParamType() == RestSearchParameterTypeEnum.REFERENCE)
+				.filter(param -> param.getProvidesMembershipInCompartments() != null
+						&& param.getProvidesMembershipInCompartments().contains("Patient"))
+				.collect(Collectors.toList());
 	}
-
-
 }
