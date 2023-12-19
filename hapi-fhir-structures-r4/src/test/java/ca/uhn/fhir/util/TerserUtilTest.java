@@ -117,7 +117,7 @@ class TerserUtilTest {
 			  	""";
 
 	@Test
-	void testCloneEidIntoResource() {
+	void cloneIdentifierIntoResource() {
 		Identifier identifier = new Identifier().setSystem("http://org.com/sys").setValue("123");
 
 		Patient p1 = new Patient();
@@ -125,7 +125,24 @@ class TerserUtilTest {
 
 		Patient p2 = new Patient();
 		RuntimeResourceDefinition definition = ourFhirContext.getResourceDefinition(p1);
-		TerserUtil.cloneEidIntoResource(ourFhirContext, definition.getChildByName("identifier"), identifier, p2);
+		TerserUtil.cloneIdentifierIntoResource(ourFhirContext, definition.getChildByName("identifier"), identifier, p2);
+
+		assertEquals(1, p2.getIdentifier().size());
+		assertEquals(p1.getIdentifier().get(0).getSystem(), p2.getIdentifier().get(0).getSystem());
+		assertEquals(p1.getIdentifier().get(0).getValue(), p2.getIdentifier().get(0).getValue());
+	}
+
+	@Test
+	void cloneIdentifierIntoResourceNoDuplicates() {
+		Identifier identifier = new Identifier().setSystem("http://org.com/sys").setValue("123");
+
+		Patient p1 = new Patient();
+		p1.addIdentifier(identifier);
+
+		Patient p2 = new Patient();
+		p2.addIdentifier(identifier);
+		RuntimeResourceDefinition definition = ourFhirContext.getResourceDefinition(p1);
+		TerserUtil.cloneIdentifierIntoResource(ourFhirContext, definition.getChildByName("identifier"), identifier, p2);
 
 		assertEquals(1, p2.getIdentifier().size());
 		assertEquals(p1.getIdentifier().get(0).getSystem(), p2.getIdentifier().get(0).getSystem());
@@ -171,7 +188,7 @@ class TerserUtilTest {
 	}
 
 	@Test
-	void testCloneEidIntoResourceViaHelper() {
+	void cloneIdentifierIntoResourceViaHelper() {
 		TerserUtilHelper p1Helper = TerserUtilHelper.newHelper(ourFhirContext, "Patient");
 		p1Helper.setField("identifier.system", "http://org.com/sys");
 		p1Helper.setField("identifier.value", "123");
@@ -182,7 +199,7 @@ class TerserUtilTest {
 		TerserUtilHelper p2Helper = TerserUtilHelper.newHelper(ourFhirContext, "Patient");
 		RuntimeResourceDefinition definition = p1Helper.getResourceDefinition();
 
-		TerserUtil.cloneEidIntoResource(ourFhirContext, definition.getChildByName("identifier"),
+		TerserUtil.cloneIdentifierIntoResource(ourFhirContext, definition.getChildByName("identifier"),
 			 p1.getIdentifier().get(0), p2Helper.getResource());
 
 		assertEquals(1, p2Helper.getFieldValues("identifier").size());
