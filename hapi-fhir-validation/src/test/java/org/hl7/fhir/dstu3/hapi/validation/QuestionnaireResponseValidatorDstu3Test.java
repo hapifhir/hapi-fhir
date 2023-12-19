@@ -1096,7 +1096,7 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		errors = myVal.validateWithResult(qa);
 		errors = stripBindingHasNoSourceMessage(errors);
 		assertEquals(2, errors.getMessages().size());
-		assertThat(errors.getMessages().get(0).getMessage(), containsString("A code with no system has no defined meaning. A system should be provided"));
+		assertThat(errors.getMessages().get(0).getMessage(), containsString("A code with no system has no defined meaning, and it cannot be validated. A system should be provided"));
 		assertThat(errors.getMessages().get(0).getLocationString(), containsString("QuestionnaireResponse.item[0].answer[0]"));
 		assertThat(errors.getMessages().get(1).getMessage(), containsString("The code provided code1 in the system null) is not in the options value set (ValueSet[http://somevalueset]) in the questionnaire: Validation failed"));
 		assertThat(errors.getMessages().get(1).getLocationString(), containsString("QuestionnaireResponse.item[0].answer[0]"));
@@ -1109,7 +1109,7 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		errors = stripBindingHasNoSourceMessage(errors);
 		ourLog.info(errors.toString());
 		assertEquals(2, errors.getMessages().size());
-		assertThat(errors.getMessages().get(0).getMessage(), containsString("A code with no system has no defined meaning. A system should be provided"));
+		assertThat(errors.getMessages().get(0).getMessage(), containsString("A code with no system has no defined meaning, and it cannot be validated. A system should be provided"));
 		assertThat(errors.getMessages().get(0).getLocationString(), containsString("QuestionnaireResponse.item[0].answer[0]"));
 		assertThat(errors.getMessages().get(1).getMessage(), containsString("The code provided code1 in the system null) is not in the options value set (ValueSet[http://somevalueset]) in the questionnaire: Validation failed"));
 		assertThat(errors.getMessages().get(1).getLocationString(), containsString("QuestionnaireResponse.item[0].answer[0]"));
