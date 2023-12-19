@@ -140,7 +140,8 @@ class TerserUtilTest {
 		p1.addIdentifier(identifier);
 
 		Patient p2 = new Patient();
-		p2.addIdentifier(identifier);
+		Identifier dupIdentifier = new Identifier().setSystem("http://org.com/sys").setValue("123");
+		p2.addIdentifier(dupIdentifier);
 		RuntimeResourceDefinition definition = ourFhirContext.getResourceDefinition(p1);
 		TerserUtil.cloneIdentifierIntoResource(ourFhirContext, definition.getChildByName("identifier"), identifier, p2);
 

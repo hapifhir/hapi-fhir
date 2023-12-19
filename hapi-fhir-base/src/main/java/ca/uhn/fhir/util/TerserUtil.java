@@ -52,7 +52,7 @@ public final class TerserUtil {
 	 * Exclude for id, identifier and meta fields of a resource.
 	 */
 	public static final Collection<String> IDS_AND_META_EXCLUDES =
-		Collections.unmodifiableSet(Stream.of("id", "identifier", "meta").collect(Collectors.toSet()));
+			Collections.unmodifiableSet(Stream.of("id", "identifier", "meta").collect(Collectors.toSet()));
 	/**
 	 * Exclusion predicate for id, identifier, meta fields.
 	 */
@@ -67,20 +67,20 @@ public final class TerserUtil {
 	 * empty source fields will not results in erasure of target fields.
 	 */
 	public static final Predicate<Triple<BaseRuntimeChildDefinition, IBase, IBase>> EXCLUDE_IDS_META_AND_EMPTY =
-		new Predicate<Triple<BaseRuntimeChildDefinition, IBase, IBase>>() {
-			@Override
-			public boolean test(Triple<BaseRuntimeChildDefinition, IBase, IBase> theTriple) {
-				if (!EXCLUDE_IDS_AND_META.test(theTriple.getLeft().getElementName())) {
-					return false;
+			new Predicate<Triple<BaseRuntimeChildDefinition, IBase, IBase>>() {
+				@Override
+				public boolean test(Triple<BaseRuntimeChildDefinition, IBase, IBase> theTriple) {
+					if (!EXCLUDE_IDS_AND_META.test(theTriple.getLeft().getElementName())) {
+						return false;
+					}
+					BaseRuntimeChildDefinition childDefinition = theTriple.getLeft();
+					boolean isSourceFieldEmpty = childDefinition
+							.getAccessor()
+							.getValues(theTriple.getMiddle())
+							.isEmpty();
+					return !isSourceFieldEmpty;
 				}
-				BaseRuntimeChildDefinition childDefinition = theTriple.getLeft();
-				boolean isSourceFieldEmpty = childDefinition
-					.getAccessor()
-					.getValues(theTriple.getMiddle())
-					.isEmpty();
-				return !isSourceFieldEmpty;
-			}
-		};
+			};
 	/**
 	 * Exclusion predicate for keeping all fields.
 	 */
@@ -94,26 +94,27 @@ public final class TerserUtil {
 	private static final Logger ourLog = getLogger(TerserUtil.class);
 	private static final String EQUALS_DEEP = "equalsDeep";
 
-	private TerserUtil() {
-	}
+	private TerserUtil() {}
 
 	/**
 	 * Given an Child Definition of `identifier`, a R4/DSTU3 Identifier, and a new resource, clone the identifier into that resources' identifier list if it is not already present.
 	 */
 	public static void cloneIdentifierIntoResource(
-		FhirContext theFhirContext,
-		BaseRuntimeChildDefinition theIdentifierDefinition,
-		IBase theNewIdentifier,
-		IBaseResource theResourceToCloneInto) {
+			FhirContext theFhirContext,
+			BaseRuntimeChildDefinition theIdentifierDefinition,
+			IBase theNewIdentifier,
+			IBaseResource theResourceToCloneInto) {
 		// FHIR choice types - fields within fhir where we have a choice of ids
-		BaseRuntimeElementCompositeDefinition<?> childIdentifierElementDefinition = (BaseRuntimeElementCompositeDefinition<?>)
-			theIdentifierDefinition.getChildByName(FIELD_NAME_IDENTIFIER);
+		BaseRuntimeElementCompositeDefinition<?> childIdentifierElementDefinition =
+				(BaseRuntimeElementCompositeDefinition<?>)
+						theIdentifierDefinition.getChildByName(FIELD_NAME_IDENTIFIER);
 
 		List<IBase> existingIdentifiers = getValues(theFhirContext, theResourceToCloneInto, FIELD_NAME_IDENTIFIER);
 		if (existingIdentifiers != null) {
 			for (IBase existingIdentifier : existingIdentifiers) {
 				if (equals(existingIdentifier, theNewIdentifier)) {
-					ourLog.trace("Identifier {} already exists in resource {}", theNewIdentifier, theResourceToCloneInto);
+					ourLog.trace(
+							"Identifier {} already exists in resource {}", theNewIdentifier, theResourceToCloneInto);
 					return;
 				}
 			}
@@ -187,7 +188,7 @@ public final class TerserUtil {
 	 * @param theField Field name to be copied
 	 */
 	public static void cloneCompositeField(
-		FhirContext theFhirContext, IBaseResource theFrom, IBaseResource theTo, String theField) {
+			FhirContext theFhirContext, IBaseResource theFrom, IBaseResource theTo, String theField) {
 		FhirTerser terser = theFhirContext.newTerser();
 
 		RuntimeResourceDefinition definition = theFhirContext.getResourceDefinition(theFrom);
@@ -254,7 +255,7 @@ public final class TerserUtil {
 				return (Boolean) theMethod.invoke(theItem1, theItem2);
 			} catch (Exception e) {
 				throw new RuntimeException(
-					Msg.code(1746) + String.format("Unable to compare equality via %s", EQUALS_DEEP), e);
+						Msg.code(1746) + String.format("Unable to compare equality via %s", EQUALS_DEEP), e);
 			}
 		}
 		return theItem1.equals(theItem2);
@@ -287,12 +288,12 @@ public final class TerserUtil {
 	 * @param theFieldNameInclusion Inclusion strategy that checks if a given field should be replaced
 	 */
 	public static void replaceFields(
-		FhirContext theFhirContext,
-		IBaseResource theFrom,
-		IBaseResource theTo,
-		Predicate<String> theFieldNameInclusion) {
+			FhirContext theFhirContext,
+			IBaseResource theFrom,
+			IBaseResource theTo,
+			Predicate<String> theFieldNameInclusion) {
 		Predicate<Triple<BaseRuntimeChildDefinition, IBase, IBase>> predicate =
-			(t) -> theFieldNameInclusion.test(t.getLeft().getElementName());
+				(t) -> theFieldNameInclusion.test(t.getLeft().getElementName());
 		replaceFieldsByPredicate(theFhirContext, theFrom, theTo, predicate);
 	}
 
@@ -306,10 +307,10 @@ public final class TerserUtil {
 	 * @param thePredicate   Predicate that checks if a given field should be replaced
 	 */
 	public static void replaceFieldsByPredicate(
-		FhirContext theFhirContext,
-		IBaseResource theFrom,
-		IBaseResource theTo,
-		Predicate<Triple<BaseRuntimeChildDefinition, IBase, IBase>> thePredicate) {
+			FhirContext theFhirContext,
+			IBaseResource theFrom,
+			IBaseResource theTo,
+			Predicate<Triple<BaseRuntimeChildDefinition, IBase, IBase>> thePredicate) {
 		RuntimeResourceDefinition definition = theFhirContext.getResourceDefinition(theFrom);
 		FhirTerser terser = theFhirContext.newTerser();
 		for (BaseRuntimeChildDefinition childDefinition : definition.getChildrenAndExtension()) {
@@ -340,14 +341,14 @@ public final class TerserUtil {
 	 * @param theTo          The resource to replace the field on
 	 */
 	public static void replaceField(
-		FhirContext theFhirContext, String theFieldName, IBaseResource theFrom, IBaseResource theTo) {
+			FhirContext theFhirContext, String theFieldName, IBaseResource theFrom, IBaseResource theTo) {
 		RuntimeResourceDefinition definition = theFhirContext.getResourceDefinition(theFrom);
 		Validate.notNull(definition);
 		replaceField(
-			theFhirContext.newTerser(),
-			theFrom,
-			theTo,
-			theFhirContext.getResourceDefinition(theFrom).getChildByName(theFieldName));
+				theFhirContext.newTerser(),
+				theFrom,
+				theTo,
+				theFhirContext.getResourceDefinition(theFrom).getChildByName(theFieldName));
 	}
 
 	/**
@@ -359,7 +360,7 @@ public final class TerserUtil {
 	 */
 	public static void clearField(FhirContext theFhirContext, IBaseResource theResource, String theFieldName) {
 		BaseRuntimeChildDefinition childDefinition =
-			getBaseRuntimeChildDefinition(theFhirContext, theFieldName, theResource);
+				getBaseRuntimeChildDefinition(theFhirContext, theFieldName, theResource);
 		childDefinition.getMutator().setValue(theResource, null);
 	}
 
@@ -420,7 +421,7 @@ public final class TerserUtil {
 	 * @param theValues      The values to set on the resource child field name
 	 */
 	public static void setField(
-		FhirContext theFhirContext, String theFieldName, IBaseResource theResource, IBase... theValues) {
+			FhirContext theFhirContext, String theFieldName, IBaseResource theResource, IBase... theValues) {
 		setField(theFhirContext, theFhirContext.newTerser(), theFieldName, theResource, theValues);
 	}
 
@@ -436,13 +437,13 @@ public final class TerserUtil {
 	 * @param theValues      The values to set on the resource child field name
 	 */
 	public static void setField(
-		FhirContext theFhirContext,
-		FhirTerser theTerser,
-		String theFieldName,
-		IBaseResource theResource,
-		IBase... theValues) {
+			FhirContext theFhirContext,
+			FhirTerser theTerser,
+			String theFieldName,
+			IBaseResource theResource,
+			IBase... theValues) {
 		BaseRuntimeChildDefinition childDefinition =
-			getBaseRuntimeChildDefinition(theFhirContext, theFieldName, theResource);
+				getBaseRuntimeChildDefinition(theFhirContext, theFieldName, theResource);
 		List<IBase> theFromFieldValues = childDefinition.getAccessor().getValues(theResource);
 		if (theFromFieldValues.isEmpty()) {
 			for (IBase value : theValues) {
@@ -450,9 +451,9 @@ public final class TerserUtil {
 					childDefinition.getMutator().addValue(theResource, value);
 				} catch (UnsupportedOperationException e) {
 					ourLog.warn(
-						"Resource {} does not support multiple values, but an attempt to set {} was made. Setting the first item only",
-						theResource,
-						theValues);
+							"Resource {} does not support multiple values, but an attempt to set {} was made. Setting the first item only",
+							theResource,
+							theValues);
 					childDefinition.getMutator().setValue(theResource, value);
 					break;
 				}
@@ -472,7 +473,7 @@ public final class TerserUtil {
 	 * @param theValue    The value to set
 	 */
 	public static void setFieldByFhirPath(
-		FhirTerser theTerser, String theFhirPath, IBaseResource theResource, IBase theValue) {
+			FhirTerser theTerser, String theFhirPath, IBaseResource theResource, IBase theValue) {
 		List<IBase> theFromFieldValues = theTerser.getValues(theResource, theFhirPath, true, false);
 		for (IBase theFromFieldValue : theFromFieldValues) {
 			theTerser.cloneInto(theValue, theFromFieldValue, true);
@@ -488,7 +489,7 @@ public final class TerserUtil {
 	 * @param theValue       The value to set
 	 */
 	public static void setFieldByFhirPath(
-		FhirContext theFhirContext, String theFhirPath, IBaseResource theResource, IBase theValue) {
+			FhirContext theFhirContext, String theFhirPath, IBaseResource theResource, IBase theValue) {
 		setFieldByFhirPath(theFhirContext.newTerser(), theFhirPath, theResource, theValue);
 	}
 
@@ -521,10 +522,10 @@ public final class TerserUtil {
 	}
 
 	private static void replaceField(
-		FhirTerser theTerser,
-		IBaseResource theFrom,
-		IBaseResource theTo,
-		BaseRuntimeChildDefinition childDefinition) {
+			FhirTerser theTerser,
+			IBaseResource theFrom,
+			IBaseResource theTo,
+			BaseRuntimeChildDefinition childDefinition) {
 		List<IBase> fromValues = childDefinition.getAccessor().getValues(theFrom);
 		List<IBase> toValues = childDefinition.getAccessor().getValues(theTo);
 
@@ -547,7 +548,7 @@ public final class TerserUtil {
 	 * @param theTo          Resource to merge the specified field into
 	 */
 	public static void mergeFieldsExceptIdAndMeta(
-		FhirContext theFhirContext, IBaseResource theFrom, IBaseResource theTo) {
+			FhirContext theFhirContext, IBaseResource theFrom, IBaseResource theTo) {
 		mergeFields(theFhirContext, theFrom, theTo, EXCLUDE_IDS_AND_META);
 	}
 
@@ -561,10 +562,10 @@ public final class TerserUtil {
 	 * @param inclusionStrategy Predicate to test which fields should be merged
 	 */
 	public static void mergeFields(
-		FhirContext theFhirContext,
-		IBaseResource theFrom,
-		IBaseResource theTo,
-		Predicate<String> inclusionStrategy) {
+			FhirContext theFhirContext,
+			IBaseResource theFrom,
+			IBaseResource theTo,
+			Predicate<String> inclusionStrategy) {
 		FhirTerser terser = theFhirContext.newTerser();
 
 		RuntimeResourceDefinition definition = theFhirContext.getResourceDefinition(theFrom);
@@ -590,7 +591,7 @@ public final class TerserUtil {
 	 * @param theTo          Resource to merge the specified field into
 	 */
 	public static void mergeField(
-		FhirContext theFhirContext, String theFieldName, IBaseResource theFrom, IBaseResource theTo) {
+			FhirContext theFhirContext, String theFieldName, IBaseResource theFrom, IBaseResource theTo) {
 		mergeField(theFhirContext, theFhirContext.newTerser(), theFieldName, theFrom, theTo);
 	}
 
@@ -605,13 +606,13 @@ public final class TerserUtil {
 	 * @param theTo          Resource to merge the specified field into
 	 */
 	public static void mergeField(
-		FhirContext theFhirContext,
-		FhirTerser theTerser,
-		String theFieldName,
-		IBaseResource theFrom,
-		IBaseResource theTo) {
+			FhirContext theFhirContext,
+			FhirTerser theTerser,
+			String theFieldName,
+			IBaseResource theFrom,
+			IBaseResource theTo) {
 		BaseRuntimeChildDefinition childDefinition =
-			getBaseRuntimeChildDefinition(theFhirContext, theFieldName, theFrom);
+				getBaseRuntimeChildDefinition(theFhirContext, theFieldName, theFrom);
 
 		List<IBase> theFromFieldValues = childDefinition.getAccessor().getValues(theFrom);
 		List<IBase> theToFieldValues = childDefinition.getAccessor().getValues(theTo);
@@ -620,7 +621,7 @@ public final class TerserUtil {
 	}
 
 	private static BaseRuntimeChildDefinition getBaseRuntimeChildDefinition(
-		FhirContext theFhirContext, String theFieldName, IBaseResource theFrom) {
+			FhirContext theFhirContext, String theFieldName, IBaseResource theFrom) {
 		RuntimeResourceDefinition definition = theFhirContext.getResourceDefinition(theFrom);
 		BaseRuntimeChildDefinition childDefinition = definition.getChildByName(theFieldName);
 		Validate.notNull(childDefinition);
@@ -638,14 +639,14 @@ public final class TerserUtil {
 	 * @return Returns the new element with the given value if configured
 	 */
 	private static IBase newElement(
-		FhirTerser theFhirTerser,
-		BaseRuntimeChildDefinition theChildDefinition,
-		IBase theFromFieldValue,
-		Object theConstructorParam) {
+			FhirTerser theFhirTerser,
+			BaseRuntimeChildDefinition theChildDefinition,
+			IBase theFromFieldValue,
+			Object theConstructorParam) {
 		BaseRuntimeElementDefinition runtimeElementDefinition;
 		if (theChildDefinition instanceof RuntimeChildChoiceDefinition) {
 			runtimeElementDefinition =
-				theChildDefinition.getChildElementDefinitionByDatatype(theFromFieldValue.getClass());
+					theChildDefinition.getChildElementDefinitionByDatatype(theFromFieldValue.getClass());
 		} else {
 			runtimeElementDefinition = theChildDefinition.getChildByName(theChildDefinition.getElementName());
 		}
@@ -660,11 +661,11 @@ public final class TerserUtil {
 	}
 
 	private static void mergeFields(
-		FhirTerser theTerser,
-		IBaseResource theTo,
-		BaseRuntimeChildDefinition childDefinition,
-		List<IBase> theFromFieldValues,
-		List<IBase> theToFieldValues) {
+			FhirTerser theTerser,
+			IBaseResource theTo,
+			BaseRuntimeChildDefinition childDefinition,
+			List<IBase> theFromFieldValues,
+			List<IBase> theToFieldValues) {
 		for (IBase theFromFieldValue : theFromFieldValues) {
 			if (contains(theFromFieldValue, theToFieldValues)) {
 				continue;
@@ -675,11 +676,11 @@ public final class TerserUtil {
 				try {
 					Method copyMethod = getMethod(theFromFieldValue, "copy");
 					if (copyMethod != null) {
-						newFieldValue = (IBase) copyMethod.invoke(theFromFieldValue, new Object[]{});
+						newFieldValue = (IBase) copyMethod.invoke(theFromFieldValue, new Object[] {});
 					}
 				} catch (Throwable t) {
 					((IPrimitiveType) newFieldValue)
-						.setValueAsString(((IPrimitiveType) theFromFieldValue).getValueAsString());
+							.setValueAsString(((IPrimitiveType) theFromFieldValue).getValueAsString());
 				}
 			} else {
 				theTerser.cloneInto(theFromFieldValue, newFieldValue, true);
@@ -734,7 +735,7 @@ public final class TerserUtil {
 	 * @return Returns a new instance of the element with the specified initial value
 	 */
 	public static <T extends IBase> T newElement(
-		FhirContext theFhirContext, String theElementType, Object theConstructorParam) {
+			FhirContext theFhirContext, String theElementType, Object theConstructorParam) {
 		BaseRuntimeElementDefinition def = theFhirContext.getElementDefinition(theElementType);
 		Validate.notNull(def);
 		return (T) def.newInstance(theConstructorParam);
@@ -763,7 +764,7 @@ public final class TerserUtil {
 	 * @return Returns a new instance of the resource
 	 */
 	public static <T extends IBase> T newResource(
-		FhirContext theFhirContext, String theResourceName, Object theConstructorParam) {
+			FhirContext theFhirContext, String theResourceName, Object theConstructorParam) {
 		RuntimeResourceDefinition def = theFhirContext.getResourceDefinition(theResourceName);
 		return (T) def.newInstance(theConstructorParam);
 	}
@@ -777,12 +778,12 @@ public final class TerserUtil {
 	 * @return Returns a new instance of the element
 	 */
 	public static IBaseBackboneElement instantiateBackboneElement(
-		FhirContext theFhirContext, String theTargetResourceName, String theTargetFieldName) {
+			FhirContext theFhirContext, String theTargetResourceName, String theTargetFieldName) {
 		BaseRuntimeElementDefinition<?> targetParentElementDefinition =
-			theFhirContext.getResourceDefinition(theTargetResourceName);
+				theFhirContext.getResourceDefinition(theTargetResourceName);
 		BaseRuntimeChildDefinition childDefinition = targetParentElementDefinition.getChildByName(theTargetFieldName);
 		return (IBaseBackboneElement)
-			childDefinition.getChildByName(theTargetFieldName).newInstance();
+				childDefinition.getChildByName(theTargetFieldName).newInstance();
 	}
 
 	private static void clear(List<IBase> values) {
