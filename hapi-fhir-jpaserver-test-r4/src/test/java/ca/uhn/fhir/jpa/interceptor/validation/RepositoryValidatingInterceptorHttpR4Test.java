@@ -69,7 +69,7 @@ public class RepositoryValidatingInterceptorHttpR4Test extends BaseJpaR4Test {
 
 		String operationOutcomeEncoded = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome.getOperationOutcome());
 		ourLog.info("Outcome: {}", operationOutcomeEncoded);
-		assertThat(operationOutcomeEncoded, containsString("All observations should have a subject"));
+		assertThat(operationOutcomeEncoded, containsString("In general, all observations should have a subject"));
 
 	}
 	@Test
@@ -94,7 +94,7 @@ public class RepositoryValidatingInterceptorHttpR4Test extends BaseJpaR4Test {
 
 		String operationOutcomeEncoded = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome.getOperationOutcome());
 		ourLog.info("Outcome: {}", operationOutcomeEncoded);
-		assertThat(operationOutcomeEncoded, containsString("All observations should have a subject"));
+		assertThat(operationOutcomeEncoded, containsString("In general, all observations should have a subject"));
 
 	}
 
