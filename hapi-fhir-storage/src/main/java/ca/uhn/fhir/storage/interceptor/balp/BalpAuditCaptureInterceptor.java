@@ -33,6 +33,7 @@ import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.AuditEvent;
+import org.hl7.fhir.utilities.xhtml.XhtmlNode;
 
 import java.nio.charset.StandardCharsets;
 import java.util.*;
@@ -302,6 +303,10 @@ public class BalpAuditCaptureInterceptor {
 
 		AuditEvent auditEvent = new AuditEvent();
 		auditEvent.getMeta().addProfile(theProfile.getProfileUrl());
+		auditEvent
+				.getText()
+				.setDiv(new XhtmlNode().setValue("<div>Audit Event</div>"))
+				.setStatus(org.hl7.fhir.r4.model.Narrative.NarrativeStatus.GENERATED);
 		auditEvent
 				.getType()
 				.setSystem(BalpConstants.CS_AUDIT_EVENT_TYPE)
