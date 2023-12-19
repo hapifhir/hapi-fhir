@@ -22,6 +22,11 @@ import java.util.Optional;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
+/**
+ * This interceptor can be used to block resource updates which would make resource patient compartment change.
+ * <p/>
+ * This could be used when the JPA server has partitioning enabled, and Tenant Identification Strategy is PATIENT_ID.
+ */
 @Interceptor
 public class PatientCompartmentEnforcingInterceptor {
 	private static final Logger ourLog = LoggerFactory.getLogger(PatientCompartmentEnforcingInterceptor.class);

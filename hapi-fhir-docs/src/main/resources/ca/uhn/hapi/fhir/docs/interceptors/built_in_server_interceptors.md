@@ -308,8 +308,8 @@ This interceptor uses FHIRPath expressions to indicate the resource paths that s
 
 # JPA Server: Block Resource Updates Changing Patient Compartment   
 
-* [PatientCompartmentEnforcingInterceptor JavaDoc](/apidocs/hapi-fhir-jpaserver-base/ca/uhn/fhir/jpa/interceptor/PatientCompartmentEnforcingInterceptor.html)
-* [PatientCompartmentEnforcingInterceptor Source](https://github.com/hapifhir/hapi-fhir/blob/master/hapi-fhir-jpaserver-base/src/main/java/ca/uhn/fhir/jpa/interceptor/PatientCompartmentEnforcingInterceptor.java)
+* [PatientCompartmentEnforcingInterceptor JavaDoc](/apidocs/hapi-fhir-storage/ca/uhn/fhir/jpa/interceptor/PatientCompartmentEnforcingInterceptor.html)
+* [PatientCompartmentEnforcingInterceptor Source](https://github.com/hapifhir/hapi-fhir/blob/master/hapi-fhir-storage/src/main/java/ca/uhn/fhir/jpa/interceptor/PatientCompartmentEnforcingInterceptor.java)
 
 The PatientCompartmentEnforcingInterceptor can be registered to block resource updates which change the resource's patient compartment. This interceptor requires FHIR version R4 or later.
 
