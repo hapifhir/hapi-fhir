@@ -276,6 +276,8 @@ public class SearchTask implements Callable<Void> {
 	}
 
 	public void saveSearch() {
+		// wipmb MegaScale search - cross-shard search probably needs to live on default partition.
+		//  Do we need to save that to restart the query after prefetch?
 		myTxService
 				.withRequest(myRequest)
 				.withRequestPartitionId(myRequestPartitionId)
@@ -287,6 +289,7 @@ public class SearchTask implements Callable<Void> {
 	private void saveUnsynced(final IResultIterator theResultIter) {
 		myTxService
 				.withRequest(myRequest)
+				// wipmb MegaScale search - cross-shard search probably needs to live on default partition.
 				.withRequestPartitionId(myRequestPartitionId)
 				.execute(() -> {
 					if (mySearch.getId() == null) {
