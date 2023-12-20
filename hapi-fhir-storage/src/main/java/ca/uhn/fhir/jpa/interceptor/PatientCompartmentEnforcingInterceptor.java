@@ -51,9 +51,11 @@ public class PatientCompartmentEnforcingInterceptor {
 		StopWatch stopWatch = new StopWatch();
 		try {
 			String patientCompartmentOld = ResourceCompartmentUtil.getPatientCompartmentIdentity(
-				theOldResource, myFhirContext, mySearchParamExtractor).orElse(EMPTY);
+							theOldResource, myFhirContext, mySearchParamExtractor)
+					.orElse(EMPTY);
 			String patientCompartmentCurrent = ResourceCompartmentUtil.getPatientCompartmentIdentity(
-				theResource, myFhirContext, mySearchParamExtractor).orElse(EMPTY);
+							theResource, myFhirContext, mySearchParamExtractor)
+					.orElse(EMPTY);
 
 			if (!StringUtils.equals(patientCompartmentOld, patientCompartmentCurrent)) {
 				// Avoid disclosing compartments in message, which could have security implications
@@ -65,6 +67,4 @@ public class PatientCompartmentEnforcingInterceptor {
 			ourLog.info("Interceptor STORAGE_PRESTORAGE_RESOURCE_UPDATED - ended, execution took {}", stopWatch);
 		}
 	}
-
-
 }

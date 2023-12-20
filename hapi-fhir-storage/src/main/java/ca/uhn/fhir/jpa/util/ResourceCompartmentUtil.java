@@ -32,12 +32,11 @@ public class ResourceCompartmentUtil {
 	 * @return the optional patient compartment identifier
 	 * @throws MethodNotAllowedException if received resource is of type "Patient" and ID is not assigned.
 	 */
-	public static Optional<String> getPatientCompartmentIdentity(IBaseResource theResource,
-																 FhirContext theFhirContext,
-																 ISearchParamExtractor theSearchParamExtractor) {
+	public static Optional<String> getPatientCompartmentIdentity(
+			IBaseResource theResource, FhirContext theFhirContext, ISearchParamExtractor theSearchParamExtractor) {
 		RuntimeResourceDefinition resourceDef = theFhirContext.getResourceDefinition(theResource);
 		List<RuntimeSearchParam> patientCompartmentSps =
-			ResourceCompartmentUtil.getPatientCompartmentSearchParams(resourceDef);
+				ResourceCompartmentUtil.getPatientCompartmentSearchParams(resourceDef);
 		if (patientCompartmentSps.isEmpty()) {
 			return Optional.empty();
 		}
@@ -46,7 +45,7 @@ public class ResourceCompartmentUtil {
 			String compartmentIdentity = theResource.getIdElement().getIdPart();
 			if (isBlank(compartmentIdentity)) {
 				throw new MethodNotAllowedException(
-					Msg.code(2477) + "Patient resource IDs must be client-assigned in patient compartment mode");
+						Msg.code(2477) + "Patient resource IDs must be client-assigned in patient compartment mode");
 			}
 			return Optional.of(compartmentIdentity);
 		}
@@ -62,23 +61,23 @@ public class ResourceCompartmentUtil {
 	 * @return optional compartment of the received resource
 	 */
 	public static Optional<String> getResourceCompartment(
-		IBaseResource theResource,
-		List<RuntimeSearchParam> theCompartmentSps,
-		ISearchParamExtractor mySearchParamExtractor) {
+			IBaseResource theResource,
+			List<RuntimeSearchParam> theCompartmentSps,
+			ISearchParamExtractor mySearchParamExtractor) {
 		return theCompartmentSps.stream()
-			.flatMap(param -> Arrays.stream(BaseSearchParamExtractor.splitPathsR4(param.getPath())))
-			.filter(StringUtils::isNotBlank)
-			.map(path -> mySearchParamExtractor
-				.getPathValueExtractor(theResource, path)
-				.get())
-			.filter(t -> !t.isEmpty())
-			.map(t -> t.get(0))
-			.filter(t -> t instanceof IBaseReference)
-			.map(t -> (IBaseReference) t)
-			.map(t -> t.getReferenceElement().getValue())
-			.map(t -> new IdType(t).getIdPart())
-			.filter(StringUtils::isNotBlank)
-			.findFirst();
+				.flatMap(param -> Arrays.stream(BaseSearchParamExtractor.splitPathsR4(param.getPath())))
+				.filter(StringUtils::isNotBlank)
+				.map(path -> mySearchParamExtractor
+						.getPathValueExtractor(theResource, path)
+						.get())
+				.filter(t -> !t.isEmpty())
+				.map(t -> t.get(0))
+				.filter(t -> t instanceof IBaseReference)
+				.map(t -> (IBaseReference) t)
+				.map(t -> t.getReferenceElement().getValue())
+				.map(t -> new IdType(t).getIdPart())
+				.filter(StringUtils::isNotBlank)
+				.findFirst();
 	}
 
 	/**

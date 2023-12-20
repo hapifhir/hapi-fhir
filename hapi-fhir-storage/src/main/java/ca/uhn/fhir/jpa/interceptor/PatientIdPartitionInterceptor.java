@@ -88,7 +88,7 @@ public class PatientIdPartitionInterceptor {
 	@Hook(Pointcut.STORAGE_PARTITION_IDENTIFY_CREATE)
 	public RequestPartitionId identifyForCreate(IBaseResource theResource, RequestDetails theRequestDetails) {
 		Optional<String> oPatientCompartmentIdentity = ResourceCompartmentUtil.getPatientCompartmentIdentity(
-			theResource, myFhirContext, mySearchParamExtractor);
+				theResource, myFhirContext, mySearchParamExtractor);
 
 		return oPatientCompartmentIdentity
 				.map(ci -> provideCompartmentMemberInstanceResponse(theRequestDetails, ci))
