@@ -63,7 +63,7 @@ public class PatientCompartmentEnforcingInterceptorTest extends BaseJpaR4Test {
 
 		Observation obs = new Observation();
 		obs.getSubject().setReference("Patient/A");
-		myObservationDao.create(obs, new SystemRequestDetails()).getId().getIdPartAsLong();
+		myObservationDao.create(obs, new SystemRequestDetails());
 
 		// try updating observation's patient, which would cross partition boundaries
 		obs.getSubject().setReference("Patient/B");
@@ -78,7 +78,7 @@ public class PatientCompartmentEnforcingInterceptorTest extends BaseJpaR4Test {
 
 		Observation obs = new Observation();
 		obs.getSubject().setReference("Patient/A");
-		myObservationDao.create(obs, new SystemRequestDetails()).getId().getIdPartAsLong();
+		myObservationDao.create(obs, new SystemRequestDetails());
 
 		obs.getNote().add(new Annotation().setText("some text"));
 		obs.setStatus(Observation.ObservationStatus.CORRECTED);
