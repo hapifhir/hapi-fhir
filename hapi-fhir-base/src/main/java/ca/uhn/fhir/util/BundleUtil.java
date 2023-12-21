@@ -25,6 +25,7 @@ import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.PatchTypeEnum;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -36,6 +37,7 @@ import ca.uhn.fhir.util.bundle.ModifiableBundleEntry;
 import ca.uhn.fhir.util.bundle.SearchBundleEntryParts;
 import com.google.common.collect.Sets;
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.tuple.Pair;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBinary;
@@ -640,6 +642,48 @@ public class BundleUtil {
 			}
 		}
 		return retVal;
+	}
+
+	public static IBase getReferenceInBundle(
+			@Nonnull FhirContext theFhirContext, @Nonnull String theUrl, @Nullable IBase theAppContext) {
+		/*
+		 * If this is a reference that is a UUID, we must be looking for local
+		 * references within a Bundle
+		 */
+		if (theAppContext instanceof IBaseBundle && isNotBlank(theUrl) && !theUrl.startsWith("#")) {
+			String unqualifiedVersionlessReference;
+			boolean isPlaceholderReference;
+			if (theUrl.startsWith("urn:")) {
+				isPlaceholderReference = true;
+				unqualifiedVersionlessReference = null;
+			} else {
+				isPlaceholderReference = false;
+				unqualifiedVersionlessReference =
+						new IdDt(theUrl).toUnqualifiedVersionless().getValue();
+			}
+
+			List<BundleEntryParts> entries = BundleUtil.toListOfEntries(theFhirContext, (IBaseBundle) theAppContext);
+			for (BundleEntryParts next : entries) {
+				IBaseResource nextResource = next.getResource();
+				if (nextResource == null) {
+					continue;
+				}
+				if (isPlaceholderReference) {
+					if (theUrl.equals(next.getUrl())
+							|| theUrl.equals(nextResource.getIdElement().getValue())) {
+						return nextResource;
+					}
+				} else {
+					if (unqualifiedVersionlessReference.equals(nextResource
+							.getIdElement()
+							.toUnqualifiedVersionless()
+							.getValue())) {
+						return nextResource;
+					}
+				}
+			}
+		}
+		return null;
 	}
 
 	/**
