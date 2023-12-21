@@ -88,7 +88,7 @@ class ResourceCompartmentUtilTest {
 			MethodNotAllowedException thrown = assertThrows(MethodNotAllowedException.class,
 				() -> ResourceCompartmentUtil.getPatientCompartmentIdentity(myResource, myFhirContext, mySearchParamExtractor));
 
-			assertEquals(Msg.code(2477) + "Patient resource IDs must be client-assigned in patient compartment mode", thrown.getMessage());
+			assertEquals(Msg.code(1321) + "Patient resource IDs must be client-assigned in patient compartment mode", thrown.getMessage());
 		}
 
 		@Test
