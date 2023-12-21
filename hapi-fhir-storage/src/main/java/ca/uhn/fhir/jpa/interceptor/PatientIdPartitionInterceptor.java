@@ -33,6 +33,7 @@ import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
 import ca.uhn.fhir.jpa.util.ResourceCompartmentUtil;
 import ca.uhn.fhir.model.api.IQueryParameterType;
+import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
@@ -44,6 +45,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -87,12 +89,28 @@ public class PatientIdPartitionInterceptor {
 
 	@Hook(Pointcut.STORAGE_PARTITION_IDENTIFY_CREATE)
 	public RequestPartitionId identifyForCreate(IBaseResource theResource, RequestDetails theRequestDetails) {
-		Optional<String> oPatientCompartmentIdentity = ResourceCompartmentUtil.getPatientCompartmentIdentity(
-				theResource, myFhirContext, mySearchParamExtractor);
+		RuntimeResourceDefinition resourceDef = myFhirContext.getResourceDefinition(theResource);
+		List<RuntimeSearchParam> compartmentSps =
+			ResourceCompartmentUtil.getPatientCompartmentSearchParams(resourceDef);
+		if (compartmentSps.isEmpty()) {
+			return provideNonCompartmentMemberTypeResponse(theResource);
+		}
 
-		return oPatientCompartmentIdentity
-				.map(ci -> provideCompartmentMemberInstanceResponse(theRequestDetails, ci))
-				.orElseGet(() -> provideNonCompartmentMemberInstanceResponse(theResource));
+		Optional<String> oCompartmentIdentity;
+		if (resourceDef.getName().equals("Patient")) {
+			oCompartmentIdentity = Optional.ofNullable(theResource.getIdElement().getIdPart());
+			if (oCompartmentIdentity.isEmpty()) {
+				throw new MethodNotAllowedException(
+					Msg.code(1321) + "Patient resource IDs must be client-assigned in patient compartment mode");
+			}
+		} else {
+			oCompartmentIdentity =
+				ResourceCompartmentUtil.getResourceCompartment(theResource, compartmentSps, mySearchParamExtractor);
+		}
+
+		return oCompartmentIdentity
+			.map(ci -> provideCompartmentMemberInstanceResponse(theRequestDetails, ci))
+			.orElseGet(() -> provideNonCompartmentMemberInstanceResponse(theResource));
 	}
 
 	@Hook(Pointcut.STORAGE_PARTITION_IDENTIFY_READ)
@@ -151,6 +169,15 @@ public class PatientIdPartitionInterceptor {
 		}
 
 		return provideNonPatientSpecificQueryResponse(theReadDetails);
+	}
+
+	@Nonnull
+	private List<RuntimeSearchParam> getCompartmentSearchParams(RuntimeResourceDefinition resourceDef) {
+		return resourceDef.getSearchParams().stream()
+				.filter(param -> param.getParamType() == RestSearchParameterTypeEnum.REFERENCE)
+				.filter(param -> param.getProvidesMembershipInCompartments() != null
+						&& param.getProvidesMembershipInCompartments().contains("Patient"))
+				.collect(Collectors.toList());
 	}
 
 	private List<String> getResourceIdList(
