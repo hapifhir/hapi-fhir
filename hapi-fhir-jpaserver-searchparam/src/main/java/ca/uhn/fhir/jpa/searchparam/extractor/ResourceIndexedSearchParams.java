@@ -21,8 +21,22 @@ package ca.uhn.fhir.jpa.searchparam.extractor;
 
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
+import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
+import ca.uhn.fhir.jpa.model.entity.NormalizedQuantitySearchLevel;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedComboStringUnique;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedComboTokenNonUnique;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamCoords;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamDate;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamNumber;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamQuantity;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamQuantityNormalized;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamUri;
+import ca.uhn.fhir.jpa.model.entity.ResourceLink;
+import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import ca.uhn.fhir.jpa.model.entity.SearchParamPresentEntity;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
-import ca.uhn.fhir.jpa.model.entity.*;
 import ca.uhn.fhir.jpa.model.util.UcumServiceUtil;
 import ca.uhn.fhir.jpa.searchparam.util.RuntimeSearchParamHelper;
 import ca.uhn.fhir.model.api.IQueryParameterType;
@@ -47,28 +61,40 @@ import static org.apache.commons.lang3.StringUtils.compare;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public final class ResourceIndexedSearchParams {
-	public final Collection<ResourceIndexedSearchParamString> myStringParams = new ArrayList<>();
-	public final Collection<ResourceIndexedSearchParamToken> myTokenParams = new HashSet<>();
-	public final Collection<ResourceIndexedSearchParamNumber> myNumberParams = new ArrayList<>();
-	public final Collection<ResourceIndexedSearchParamQuantity> myQuantityParams = new ArrayList<>();
-	public final Collection<ResourceIndexedSearchParamQuantityNormalized> myQuantityNormalizedParams =
-			new ArrayList<>();
-	public final Collection<ResourceIndexedSearchParamDate> myDateParams = new ArrayList<>();
-	public final Collection<ResourceIndexedSearchParamUri> myUriParams = new ArrayList<>();
-	public final Collection<ResourceIndexedSearchParamCoords> myCoordsParams = new ArrayList<>();
-
-	public final Collection<ResourceIndexedComboStringUnique> myComboStringUniques = new HashSet<>();
-	public final Collection<ResourceIndexedComboTokenNonUnique> myComboTokenNonUnique = new HashSet<>();
-	public final Collection<ResourceLink> myLinks = new HashSet<>();
-	public final Set<String> myPopulatedResourceLinkParameters = new HashSet<>();
-	public final Collection<SearchParamPresentEntity> mySearchParamPresentEntities = new HashSet<>();
-	public final Collection<ResourceIndexedSearchParamComposite> myCompositeParams = new HashSet<>();
-
 	private static final Set<String> myIgnoredParams = Set.of(Constants.PARAM_TEXT, Constants.PARAM_CONTENT);
+	public final Collection<ResourceIndexedSearchParamString> myStringParams;
+	public final Collection<ResourceIndexedSearchParamToken> myTokenParams;
+	public final Collection<ResourceIndexedSearchParamNumber> myNumberParams;
+	public final Collection<ResourceIndexedSearchParamQuantity> myQuantityParams;
+	public final Collection<ResourceIndexedSearchParamQuantityNormalized> myQuantityNormalizedParams;
+	public final Collection<ResourceIndexedSearchParamDate> myDateParams;
+	public final Collection<ResourceIndexedSearchParamUri> myUriParams;
+	public final Collection<ResourceIndexedSearchParamCoords> myCoordsParams;
+	public final Collection<ResourceIndexedComboStringUnique> myComboStringUniques;
+	public final Collection<ResourceIndexedComboTokenNonUnique> myComboTokenNonUnique;
+	public final Collection<ResourceLink> myLinks;
+	public final Collection<SearchParamPresentEntity> mySearchParamPresentEntities;
+	public final Collection<ResourceIndexedSearchParamComposite> myCompositeParams;
+	public final Set<String> myPopulatedResourceLinkParameters = new HashSet<>();
 
-	public ResourceIndexedSearchParams() {}
+	private ResourceIndexedSearchParams(Mode theMode) {
+		myStringParams = theMode.newCollection();
+		myTokenParams = theMode.newCollection();
+		myNumberParams = theMode.newCollection();
+		myQuantityParams = theMode.newCollection();
+		myQuantityNormalizedParams = theMode.newCollection();
+		myDateParams = theMode.newCollection();
+		myUriParams = theMode.newCollection();
+		myCoordsParams = theMode.newCollection();
+		myComboStringUniques = theMode.newCollection();
+		myComboTokenNonUnique = theMode.newCollection();
+		myLinks = theMode.newCollection();
+		mySearchParamPresentEntities = theMode.newCollection();
+		myCompositeParams = theMode.newCollection();
+	}
 
-	public ResourceIndexedSearchParams(ResourceTable theEntity) {
+	private ResourceIndexedSearchParams(ResourceTable theEntity, Mode theMode) {
+		this(theMode);
 		if (theEntity.isParamsStringPopulated()) {
 			myStringParams.addAll(theEntity.getParamsString());
 		}
@@ -179,9 +205,9 @@ public final class ResourceIndexedSearchParams {
 	}
 
 	private void updateSpnamePrefixForIndexOnUpliftedChain(
-			String theContainingType,
-			Collection<? extends BaseResourceIndexedSearchParam> theParams,
-			@Nonnull String theSpnamePrefix) {
+		String theContainingType,
+		Collection<? extends BaseResourceIndexedSearchParam> theParams,
+		@Nonnull String theSpnamePrefix) {
 
 		for (BaseResourceIndexedSearchParam param : theParams) {
 			param.setResourceType(theContainingType);
@@ -197,11 +223,11 @@ public final class ResourceIndexedSearchParams {
 	}
 
 	public boolean matchParam(
-			StorageSettings theStorageSettings,
-			String theResourceName,
-			String theParamName,
-			RuntimeSearchParam theParamDef,
-			IQueryParameterType theValue) {
+		StorageSettings theStorageSettings,
+		String theResourceName,
+		String theParamName,
+		RuntimeSearchParam theParamDef,
+		IQueryParameterType theValue) {
 
 		if (theParamDef == null) {
 			return false;
@@ -214,8 +240,8 @@ public final class ResourceIndexedSearchParams {
 				break;
 			case QUANTITY:
 				if (theStorageSettings
-						.getNormalizedQuantitySearchLevel()
-						.equals(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_SUPPORTED)) {
+					.getNormalizedQuantitySearchLevel()
+					.equals(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_SUPPORTED)) {
 					QuantityParam quantity = QuantityParam.toQuantityParam(theValue);
 					QuantityParam normalized = UcumServiceUtil.toCanonicalQuantityOrNull(quantity);
 					if (normalized != null) {
@@ -242,11 +268,11 @@ public final class ResourceIndexedSearchParams {
 				break;
 			case REFERENCE:
 				return matchResourceLinks(
-						theStorageSettings,
-						theResourceName,
-						theParamName,
-						value,
-						theParamDef.getPathsSplitForResourceType(theResourceName));
+					theStorageSettings,
+					theResourceName,
+					theParamName,
+					value,
+					theParamDef.getPathsSplitForResourceType(theResourceName));
 			case COMPOSITE:
 			case HAS:
 			case SPECIAL:
@@ -274,16 +300,16 @@ public final class ResourceIndexedSearchParams {
 	// KHS This needs to be public as libraries outside of hapi call it directly
 	@Deprecated
 	public boolean matchResourceLinks(
-			String theResourceName, String theParamName, IQueryParameterType theParam, String theParamPath) {
+		String theResourceName, String theParamName, IQueryParameterType theParam, String theParamPath) {
 		return matchResourceLinks(new StorageSettings(), theResourceName, theParamName, theParam, theParamPath);
 	}
 
 	public boolean matchResourceLinks(
-			StorageSettings theStorageSettings,
-			String theResourceName,
-			String theParamName,
-			IQueryParameterType theParam,
-			List<String> theParamPaths) {
+		StorageSettings theStorageSettings,
+		String theResourceName,
+		String theParamName,
+		IQueryParameterType theParam,
+		List<String> theParamPaths) {
 		for (String nextPath : theParamPaths) {
 			if (matchResourceLinks(theStorageSettings, theResourceName, theParamName, theParam, nextPath)) {
 				return true;
@@ -294,22 +320,22 @@ public final class ResourceIndexedSearchParams {
 
 	// KHS This needs to be public as libraries outside of hapi call it directly
 	public boolean matchResourceLinks(
-			StorageSettings theStorageSettings,
-			String theResourceName,
-			String theParamName,
-			IQueryParameterType theParam,
-			String theParamPath) {
+		StorageSettings theStorageSettings,
+		String theResourceName,
+		String theParamName,
+		IQueryParameterType theParam,
+		String theParamPath) {
 		ReferenceParam reference = (ReferenceParam) theParam;
 
 		Predicate<ResourceLink> namedParamPredicate =
-				resourceLink -> searchParameterPathMatches(theResourceName, resourceLink, theParamName, theParamPath)
-						&& resourceIdMatches(theStorageSettings, resourceLink, reference);
+			resourceLink -> searchParameterPathMatches(theResourceName, resourceLink, theParamName, theParamPath)
+				&& resourceIdMatches(theStorageSettings, resourceLink, reference);
 
 		return myLinks.stream().anyMatch(namedParamPredicate);
 	}
 
 	private boolean resourceIdMatches(
-			StorageSettings theStorageSettings, ResourceLink theResourceLink, ReferenceParam theReference) {
+		StorageSettings theStorageSettings, ResourceLink theResourceLink, ReferenceParam theReference) {
 		String baseUrl = theReference.getBaseUrl();
 		if (isNotBlank(baseUrl)) {
 			if (!theStorageSettings.getTreatBaseUrlsAsLocal().contains(baseUrl)) {
@@ -337,7 +363,7 @@ public final class ResourceIndexedSearchParams {
 	}
 
 	private boolean searchParameterPathMatches(
-			String theResourceName, ResourceLink theResourceLink, String theParamName, String theParamPath) {
+		String theResourceName, ResourceLink theResourceLink, String theParamName, String theParamPath) {
 		String sourcePath = theResourceLink.getSourcePath();
 		return sourcePath.equalsIgnoreCase(theParamPath);
 	}
@@ -345,83 +371,83 @@ public final class ResourceIndexedSearchParams {
 	@Override
 	public String toString() {
 		return "ResourceIndexedSearchParams{" + "stringParams="
-				+ myStringParams + ", tokenParams="
-				+ myTokenParams + ", numberParams="
-				+ myNumberParams + ", quantityParams="
-				+ myQuantityParams + ", quantityNormalizedParams="
-				+ myQuantityNormalizedParams + ", dateParams="
-				+ myDateParams + ", uriParams="
-				+ myUriParams + ", coordsParams="
-				+ myCoordsParams + ", comboStringUniques="
-				+ myComboStringUniques + ", comboTokenNonUniques="
-				+ myComboTokenNonUnique + ", links="
-				+ myLinks + '}';
+			+ myStringParams + ", tokenParams="
+			+ myTokenParams + ", numberParams="
+			+ myNumberParams + ", quantityParams="
+			+ myQuantityParams + ", quantityNormalizedParams="
+			+ myQuantityNormalizedParams + ", dateParams="
+			+ myDateParams + ", uriParams="
+			+ myUriParams + ", coordsParams="
+			+ myCoordsParams + ", comboStringUniques="
+			+ myComboStringUniques + ", comboTokenNonUniques="
+			+ myComboTokenNonUnique + ", links="
+			+ myLinks + '}';
 	}
 
 	public void findMissingSearchParams(
-			PartitionSettings thePartitionSettings,
-			StorageSettings theStorageSettings,
-			ResourceTable theEntity,
-			ResourceSearchParams theActiveSearchParams) {
+		PartitionSettings thePartitionSettings,
+		StorageSettings theStorageSettings,
+		ResourceTable theEntity,
+		ResourceSearchParams theActiveSearchParams) {
 		findMissingSearchParams(
-				thePartitionSettings,
-				theStorageSettings,
-				theEntity,
-				theActiveSearchParams,
-				RestSearchParameterTypeEnum.STRING,
-				myStringParams);
+			thePartitionSettings,
+			theStorageSettings,
+			theEntity,
+			theActiveSearchParams,
+			RestSearchParameterTypeEnum.STRING,
+			myStringParams);
 		findMissingSearchParams(
-				thePartitionSettings,
-				theStorageSettings,
-				theEntity,
-				theActiveSearchParams,
-				RestSearchParameterTypeEnum.NUMBER,
-				myNumberParams);
+			thePartitionSettings,
+			theStorageSettings,
+			theEntity,
+			theActiveSearchParams,
+			RestSearchParameterTypeEnum.NUMBER,
+			myNumberParams);
 		findMissingSearchParams(
-				thePartitionSettings,
-				theStorageSettings,
-				theEntity,
-				theActiveSearchParams,
-				RestSearchParameterTypeEnum.QUANTITY,
-				myQuantityParams);
+			thePartitionSettings,
+			theStorageSettings,
+			theEntity,
+			theActiveSearchParams,
+			RestSearchParameterTypeEnum.QUANTITY,
+			myQuantityParams);
 		findMissingSearchParams(
-				thePartitionSettings,
-				theStorageSettings,
-				theEntity,
-				theActiveSearchParams,
-				RestSearchParameterTypeEnum.DATE,
-				myDateParams);
+			thePartitionSettings,
+			theStorageSettings,
+			theEntity,
+			theActiveSearchParams,
+			RestSearchParameterTypeEnum.DATE,
+			myDateParams);
 		findMissingSearchParams(
-				thePartitionSettings,
-				theStorageSettings,
-				theEntity,
-				theActiveSearchParams,
-				RestSearchParameterTypeEnum.URI,
-				myUriParams);
+			thePartitionSettings,
+			theStorageSettings,
+			theEntity,
+			theActiveSearchParams,
+			RestSearchParameterTypeEnum.URI,
+			myUriParams);
 		findMissingSearchParams(
-				thePartitionSettings,
-				theStorageSettings,
-				theEntity,
-				theActiveSearchParams,
-				RestSearchParameterTypeEnum.TOKEN,
-				myTokenParams);
+			thePartitionSettings,
+			theStorageSettings,
+			theEntity,
+			theActiveSearchParams,
+			RestSearchParameterTypeEnum.TOKEN,
+			myTokenParams);
 		findMissingSearchParams(
-				thePartitionSettings,
-				theStorageSettings,
-				theEntity,
-				theActiveSearchParams,
-				RestSearchParameterTypeEnum.SPECIAL,
-				myCoordsParams);
+			thePartitionSettings,
+			theStorageSettings,
+			theEntity,
+			theActiveSearchParams,
+			RestSearchParameterTypeEnum.SPECIAL,
+			myCoordsParams);
 	}
 
 	@SuppressWarnings("unchecked")
 	private <RT extends BaseResourceIndexedSearchParam> void findMissingSearchParams(
-			PartitionSettings thePartitionSettings,
-			StorageSettings theStorageSettings,
-			ResourceTable theEntity,
-			ResourceSearchParams activeSearchParams,
-			RestSearchParameterTypeEnum type,
-			Collection<RT> paramCollection) {
+		PartitionSettings thePartitionSettings,
+		StorageSettings theStorageSettings,
+		ResourceTable theEntity,
+		ResourceSearchParams activeSearchParams,
+		RestSearchParameterTypeEnum type,
+		Collection<RT> paramCollection) {
 		for (String nextParamName : activeSearchParams.getSearchParamNames()) {
 			if (nextParamName == null || myIgnoredParams.contains(nextParamName)) {
 				continue;
@@ -510,7 +536,7 @@ public final class ResourceIndexedSearchParams {
 	 * @param thePartsChoices E.g. <code>[[gender=male], [name=SMITH, name=JOHN]]</code>
 	 */
 	public static Set<String> extractCompositeStringUniquesValueChains(
-			String theResourceType, List<List<String>> thePartsChoices) {
+		String theResourceType, List<List<String>> thePartsChoices) {
 
 		for (List<String> next : thePartsChoices) {
 			next.removeIf(StringUtils::isBlank);
@@ -545,20 +571,20 @@ public final class ResourceIndexedSearchParams {
 	}
 
 	private static void extractCompositeStringUniquesValueChains(
-			String theResourceType,
-			List<List<String>> thePartsChoices,
-			List<String> theValues,
-			Set<String> theQueryStringsToPopulate) {
+		String theResourceType,
+		List<List<String>> thePartsChoices,
+		List<String> theValues,
+		Set<String> theQueryStringsToPopulate) {
 		if (thePartsChoices.size() > 0) {
 			List<String> nextList = thePartsChoices.get(0);
 			Collections.sort(nextList);
 			for (String nextChoice : nextList) {
 				theValues.add(nextChoice);
 				extractCompositeStringUniquesValueChains(
-						theResourceType,
-						thePartsChoices.subList(1, thePartsChoices.size()),
-						theValues,
-						theQueryStringsToPopulate);
+					theResourceType,
+					thePartsChoices.subList(1, thePartsChoices.size()),
+					theValues,
+					theQueryStringsToPopulate);
 				theValues.remove(theValues.size() - 1);
 			}
 		} else {
@@ -575,4 +601,53 @@ public final class ResourceIndexedSearchParams {
 			}
 		}
 	}
+
+	/**
+	 * Create a new instance that uses Sets as the internal collection
+	 * type in order to defend against duplicates. This should be used
+	 * when calculating the set of indexes for a resource that is
+	 * about to be stored.
+	 */
+	public static ResourceIndexedSearchParams withSets() {
+		return new ResourceIndexedSearchParams(Mode.SET);
+	}
+
+	/**
+	 * Create an empty and immutable structure.
+	 */
+	public static ResourceIndexedSearchParams empty() {
+		return new ResourceIndexedSearchParams(Mode.EMPTY);
+	}
+
+	/**
+	 * Create a new instance that holds all the existing indexes
+	 * in lists so that any duplicates are preserved.
+	 */
+	public static ResourceIndexedSearchParams withLists(ResourceTable theResourceTable) {
+		return new ResourceIndexedSearchParams(theResourceTable, Mode.LIST);
+	}
+
+	public enum Mode {
+		LIST {
+			@Override
+			public <T> Collection<T> newCollection() {
+				return new ArrayList<>();
+			}
+		},
+		SET {
+			@Override
+			public <T> Collection<T> newCollection() {
+				return new HashSet<>();
+			}
+		},
+		EMPTY {
+			@Override
+			public <T> Collection<T> newCollection() {
+				return List.of();
+			}
+		};
+
+		public abstract <T> Collection<T> newCollection();
+	}
+
 }

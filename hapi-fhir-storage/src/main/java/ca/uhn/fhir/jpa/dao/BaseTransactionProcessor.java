@@ -1836,7 +1836,7 @@ public abstract class BaseTransactionProcessor {
 				.filter(t -> t.getEntity().getDeleted() == null)
 				.filter(t -> t.getResource() != null)
 				.forEach(t -> resourceToIndexedParams.put(
-						t.getResource(), new ResourceIndexedSearchParams((ResourceTable) t.getEntity())));
+						t.getResource(), ResourceIndexedSearchParams.withLists((ResourceTable) t.getEntity())));
 
 		for (Map.Entry<String, Class<? extends IBaseResource>> nextEntry : conditionalRequestUrls.entrySet()) {
 			String matchUrl = nextEntry.getKey();

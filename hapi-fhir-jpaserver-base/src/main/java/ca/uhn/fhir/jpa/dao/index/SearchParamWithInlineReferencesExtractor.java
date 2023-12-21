@@ -121,15 +121,16 @@ public class SearchParamWithInlineReferencesExtractor extends BaseSearchParamWit
 		/*
 		 * If the existing resource already has links and those match links we still want, use them instead of removing them and re adding them
 		 */
-		for (Iterator<ResourceLink> existingLinkIter =
-						theExistingParams.getResourceLinks().iterator();
-				existingLinkIter.hasNext(); ) {
-			ResourceLink nextExisting = existingLinkIter.next();
-			if (theParams.myLinks.remove(nextExisting)) {
-				existingLinkIter.remove();
-				theParams.myLinks.add(nextExisting);
-			}
-		}
+		// FIXME: remove
+//		for (Iterator<ResourceLink> existingLinkIter =
+//						theExistingParams.getResourceLinks().iterator();
+//				existingLinkIter.hasNext(); ) {
+//			ResourceLink nextExisting = existingLinkIter.next();
+//			if (theParams.myLinks.remove(nextExisting)) {
+//				existingLinkIter.remove();
+//				theParams.myLinks.add(nextExisting);
+//			}
+//		}
 	}
 
 	@Nullable
