@@ -1,7 +1,6 @@
 package ca.uhn.fhir.jpa.interceptor;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Interceptor;
@@ -31,10 +30,6 @@ public class PatientCompartmentEnforcingInterceptor {
 
 	public PatientCompartmentEnforcingInterceptor(
 			FhirContext theFhirContext, ISearchParamExtractor theSearchParamExtractor) {
-		if (theFhirContext.getVersion().getVersion().isOlderThan(FhirVersionEnum.R4)) {
-			throw new InternalErrorException(Msg.code(2475) + "Interceptor requires Fhir version R4 or later.");
-		}
-
 		myFhirContext = theFhirContext;
 		mySearchParamExtractor = theSearchParamExtractor;
 	}
