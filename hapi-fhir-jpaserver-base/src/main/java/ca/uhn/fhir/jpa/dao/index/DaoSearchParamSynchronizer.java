@@ -98,13 +98,13 @@ public class DaoSearchParamSynchronizer {
 		 * remove them.
 		 */
 		Set<T> existingParamsAsSet = new HashSet<>(theExistingParams.size());
-        for (Iterator<T> iterator = theExistingParams.iterator(); iterator.hasNext(); ) {
-            T next = iterator.next();
-            if (!existingParamsAsSet.add(next)) {
+		for (Iterator<T> iterator = theExistingParams.iterator(); iterator.hasNext(); ) {
+			T next = iterator.next();
+			if (!existingParamsAsSet.add(next)) {
 				iterator.remove();
 				myEntityManager.remove(next);
-            }
-        }
+			}
+		}
 
 		/*
 		 * HashCodes may have changed as a result of setting the partition ID, so

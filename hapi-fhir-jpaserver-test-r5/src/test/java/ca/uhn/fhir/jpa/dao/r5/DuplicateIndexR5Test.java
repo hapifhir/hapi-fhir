@@ -121,7 +121,8 @@ public class DuplicateIndexR5Test extends BaseJpaR5Test {
 		// Test
 		Patient pt = new Patient();
 		pt.setId(id);
-		pt.getNameFirstRep().setFamily("FAMILY2");
+		pt.getNameFirstRep().setFamily("FAMILY2").addGiven("GIVEN");
+		pt.setGender(Enumerations.AdministrativeGender.MALE);
 		myPatientDao.update(pt, mySrd);
 
 		// Verify
@@ -156,7 +157,7 @@ public class DuplicateIndexR5Test extends BaseJpaR5Test {
 		createNamesAndGenderSp();
 		IIdType id1 = createPatient(withFamily("FAMILY"), withGiven("GIVEN"), withGender("male"));
 		runInTransaction(()->{
-			assertEquals(2, myResourceTableDao.count());
+			assertEquals(5, myResourceTableDao.count());
 			ResourceTable table = myResourceTableDao.findAll().stream().filter(t1 -> t1.getResourceType().equals("Patient")).findFirst().orElseThrow();
 			assertEquals(1, table.getmyParamsComboTokensNonUnique().size());
 			ResourceIndexedComboTokenNonUnique param = table.getmyParamsComboTokensNonUnique().iterator().next();

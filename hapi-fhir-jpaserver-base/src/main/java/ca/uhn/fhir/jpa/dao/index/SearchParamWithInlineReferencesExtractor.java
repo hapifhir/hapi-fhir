@@ -28,7 +28,6 @@ import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedComboStringUnique;
-import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.searchparam.extractor.BaseSearchParamWithInlineReferencesExtractor;
 import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
@@ -50,7 +49,6 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.stream.Collectors;
 
 @Service
@@ -122,15 +120,15 @@ public class SearchParamWithInlineReferencesExtractor extends BaseSearchParamWit
 		 * If the existing resource already has links and those match links we still want, use them instead of removing them and re adding them
 		 */
 		// FIXME: remove
-//		for (Iterator<ResourceLink> existingLinkIter =
-//						theExistingParams.getResourceLinks().iterator();
-//				existingLinkIter.hasNext(); ) {
-//			ResourceLink nextExisting = existingLinkIter.next();
-//			if (theParams.myLinks.remove(nextExisting)) {
-//				existingLinkIter.remove();
-//				theParams.myLinks.add(nextExisting);
-//			}
-//		}
+		//		for (Iterator<ResourceLink> existingLinkIter =
+		//						theExistingParams.getResourceLinks().iterator();
+		//				existingLinkIter.hasNext(); ) {
+		//			ResourceLink nextExisting = existingLinkIter.next();
+		//			if (theParams.myLinks.remove(nextExisting)) {
+		//				existingLinkIter.remove();
+		//				theParams.myLinks.add(nextExisting);
+		//			}
+		//		}
 	}
 
 	@Nullable
