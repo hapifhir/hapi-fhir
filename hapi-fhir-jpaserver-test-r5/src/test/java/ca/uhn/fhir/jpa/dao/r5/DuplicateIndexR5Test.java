@@ -149,8 +149,7 @@ public class DuplicateIndexR5Test extends BaseJpaR5Test {
 		startRequest.setJobDefinitionId(ReindexAppCtx.JOB_REINDEX);
 		startRequest.setParameters(parameters);
 		Batch2JobStartResponse res = myJobCoordinator.startInstance(mySrd, startRequest);
-		// FIXME: remove 9999
-		myBatch2JobHelper.awaitJobCompletion(res.getInstanceId(), 9999);
+		myBatch2JobHelper.awaitJobCompletion(res.getInstanceId());
 	}
 
 	private IIdType createPatientWithDuplicateNonUniqueComboParams() {
