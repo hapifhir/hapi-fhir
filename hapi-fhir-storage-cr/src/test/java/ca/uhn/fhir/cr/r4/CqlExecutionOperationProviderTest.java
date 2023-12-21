@@ -1,7 +1,7 @@
 package ca.uhn.fhir.cr.r4;
 
 
-import ca.uhn.fhir.cr.r4.cqlexecution.CqlExecutionOperationProvider;
+import ca.uhn.fhir.cr.r4.cpg.CqlExecutionOperationProvider;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Condition;
