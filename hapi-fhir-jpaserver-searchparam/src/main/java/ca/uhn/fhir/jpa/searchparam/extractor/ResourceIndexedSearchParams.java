@@ -627,7 +627,7 @@ public final class ResourceIndexedSearchParams {
 		return new ResourceIndexedSearchParams(theResourceTable, Mode.LIST);
 	}
 
-	public enum Mode {
+	private enum Mode {
 		LIST {
 			@Override
 			public <T> Collection<T> newCollection() {

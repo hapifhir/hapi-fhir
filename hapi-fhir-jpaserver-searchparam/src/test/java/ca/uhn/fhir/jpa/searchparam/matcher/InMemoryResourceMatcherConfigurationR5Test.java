@@ -103,7 +103,7 @@ public class InMemoryResourceMatcherConfigurationR5Test {
 	}
 
 	private ResourceIndexedSearchParams extractSearchParams(Observation theObservation) {
-		ResourceIndexedSearchParams retval = new ResourceIndexedSearchParams();
+		ResourceIndexedSearchParams retval = ResourceIndexedSearchParams.withSets();
 		retval.myTokenParams.add(extractCodeTokenParam(theObservation));
 		return retval;
 	}
