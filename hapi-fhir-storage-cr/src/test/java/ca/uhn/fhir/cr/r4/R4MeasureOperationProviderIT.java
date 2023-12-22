@@ -153,13 +153,12 @@ class R4MeasureOperationProviderIT extends BaseCrR4TestServer {
 			.getPopulation().stream().filter(x -> x.hasCode() && x.getCode().hasCoding()
 				&& x.getCode().getCoding().get(0).getCode().equals(populationName))
 			.findFirst();
-		if(population.isPresent()) {
-			assertEquals(population.get().getCount(),
-				expectedCount,
-				String.format("expected count for population \"%s\" did not match", populationName));
-		} else {
-			throw new NoSuchElementException("no population found in report");
-		}
+		assertTrue(population.isPresent(), String.format("population \"%s\" not found in report", populationName));
+		assertEquals(
+			expectedCount,
+			population.get().getCount(),
+			String.format("expected count for population \"%s\" did not match", populationName)
+		);
 	}
 
 

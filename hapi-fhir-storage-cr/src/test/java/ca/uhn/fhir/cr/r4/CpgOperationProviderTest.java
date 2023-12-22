@@ -55,7 +55,7 @@ public class CpgOperationProviderTest extends BaseCrR4TestServer{
 	}
 
 	@Test
-	void EvaluateLibraryProvider_testLibraryWithSubject() {
+	void evaluateLibraryProvider_testLibraryWithSubject() {
 		// evaluate library resource for a subject
 		var params = new Parameters();
 		params.addParameter("subject", new StringType("Patient/SimplePatient"));
@@ -72,7 +72,7 @@ public class CpgOperationProviderTest extends BaseCrR4TestServer{
 	}
 
 	@Test
-	void EvaluateLibraryProvider_testSimpleExpression() {
+	void evaluateLibraryProvider_testSimpleExpression() {
 		// evaluate expression for subject from specified library resource
 		var params = new Parameters();
 		params.addParameter("subject", new StringType("Patient/SimplePatient"));

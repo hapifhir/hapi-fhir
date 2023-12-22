@@ -43,18 +43,6 @@ public class LibraryEvaluationOperationProvider {
 	 *                            represented with a List in the input CQL. If a
 	 *                            parameter has parts, it is represented as a Tuple
 	 *                            in the input CQL
-	 * theUseServerData       ***Not Yet Implemented*** Whether to use data from the server performing the
-	 *                            evaluation. If this parameter is true (the
-	 *                            default), then the operation will use data first
-	 *                            from any bundles provided as parameters (through
-	 *                            the data and prefetch parameters), second data
-	 *                            from the server performing the operation, and
-	 *                            third, data from the dataEndpoint parameter (if
-	 *                            provided). If this parameter is false, the
-	 *                            operation will use data first from the bundles
-	 *                            provided in the data or prefetch parameters, and
-	 *                            second from the dataEndpoint parameter (if
-	 *                            provided)
 	 * @param theData                Data to be made available to the library
 	 *                            evaluation. This parameter is exclusive with the
 	 *                            prefetchData parameter (i.e. either provide all
