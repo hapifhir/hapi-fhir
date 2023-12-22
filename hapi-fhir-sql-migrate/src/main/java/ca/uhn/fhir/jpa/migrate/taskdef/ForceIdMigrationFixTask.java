@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.tuple.Pair;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -100,12 +101,22 @@ public class ForceIdMigrationFixTask extends BaseTask {
 							+
 							// avoid useless updates on engines that don't check
 							// skip case 1, 2.  Only check 3,4,5
-							" where (fhir_id is null or fhir_id <> trim(fhir_id)) "
+							getWhereClauseByDBType()
 							+
 							// chunk range.
 							" and res_id >= ? and res_id < ?",
 					batchStart,
 					batchEnd);
+		}
+	}
+
+	@NotNull
+	private String getWhereClauseByDBType() {
+		switch (getDriverType()) {
+			case MSSQL_2012:
+				return " where (DATALENGTH(fhir_id) > LEN(fhir_id)) ";
+			default:
+				return " where (fhir_id is null or fhir_id <> trim(fhir_id)) ";
 		}
 	}
 
