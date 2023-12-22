@@ -166,7 +166,7 @@ public class InMemoryResourceMatcherR5Test {
 	public void testMatch_sourceWithModifiers_matchesSuccessfully(String theSourceValue, String theSearchCriteria, boolean theShouldMatch) {
 		myObservation.getMeta().setSource(theSourceValue);
 
-		ResourceIndexedSearchParams searchParams = new ResourceIndexedSearchParams();
+		ResourceIndexedSearchParams searchParams = ResourceIndexedSearchParams.withSets();
 		searchParams.myUriParams.add(extractSourceUriParam(myObservation));
 
 		InMemoryMatchResult resultInsidePeriod = myInMemoryResourceMatcher.match(theSearchCriteria, myObservation, searchParams, newRequest());
@@ -408,7 +408,7 @@ public class InMemoryResourceMatcherR5Test {
 
 
 	private ResourceIndexedSearchParams extractSearchParams(Observation theObservation) {
-		ResourceIndexedSearchParams retval = new ResourceIndexedSearchParams();
+		ResourceIndexedSearchParams retval = ResourceIndexedSearchParams.withSets();
 		retval.myDateParams.add(extractEffectiveDateParam(theObservation));
 		retval.myTokenParams.add(extractCodeTokenParam(theObservation));
 		return retval;

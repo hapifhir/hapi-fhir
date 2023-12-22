@@ -1083,7 +1083,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 							() -> new IdentityHashMap<>());
 			existingParams = existingSearchParams.get(entity);
 			if (existingParams == null) {
-				existingParams = new ResourceIndexedSearchParams(entity);
+				existingParams = ResourceIndexedSearchParams.withLists(entity);
 				/*
 				 * If we have lots of resource links, this proactively fetches the targets so
 				 * that we don't look them up one-by-one when comparing the new set to the
@@ -1105,7 +1105,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 			// TODO: is this IF statement always true? Try removing it
 			if (thePerformIndexing || theEntity.getVersion() == 1) {
 
-				newParams = new ResourceIndexedSearchParams();
+				newParams = ResourceIndexedSearchParams.withSets();
 
 				RequestPartitionId requestPartitionId;
 				if (!myPartitionSettings.isPartitioningEnabled()) {

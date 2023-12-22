@@ -34,7 +34,9 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 @Service
 public class DaoSearchParamSynchronizer {
@@ -80,6 +82,28 @@ public class DaoSearchParamSynchronizer {
 		for (T next : newParams) {
 			next.setPartitionId(theEntity.getPartitionId());
 			next.calculateHashes();
+		}
+
+		/*
+		 * It's technically possible that the existing index collection
+		 * contains duplicates. Duplicates don't actually cause any
+		 * issues for searching since we always deduplicate the PIDs we
+		 * get back from the search, but they are wasteful. We don't
+		 * enforce uniqueness in the DB for the index tables for
+		 * performance reasons (no sense adding a constraint that slows
+		 * down writes when dupes don't actually hurt anything other than
+		 * a bit of wasted space).
+		 *
+		 * So we check if there are any dupes, and if we find any we
+		 * remove them.
+		 */
+		Set<T> existingParamsAsSet = new HashSet<>(theExistingParams.size());
+		for (Iterator<T> iterator = theExistingParams.iterator(); iterator.hasNext(); ) {
+			T next = iterator.next();
+			if (!existingParamsAsSet.add(next)) {
+				iterator.remove();
+				myEntityManager.remove(next);
+			}
 		}
 
 		/*
