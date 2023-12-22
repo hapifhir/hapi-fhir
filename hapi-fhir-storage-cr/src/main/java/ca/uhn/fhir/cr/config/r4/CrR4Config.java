@@ -77,7 +77,7 @@ public class CrR4Config {
 
 	@Bean
 	ILibraryEvaluationServiceFactory r4LibraryEvaluationServiceFactory(
-		IRepositoryFactory theRepositoryFactory, EvaluationSettings theEvaluationSettings) {
+			IRepositoryFactory theRepositoryFactory, EvaluationSettings theEvaluationSettings) {
 		return rd -> new R4LibraryEvaluationService(theRepositoryFactory.create(rd), theEvaluationSettings);
 	}
 
@@ -90,6 +90,7 @@ public class CrR4Config {
 	LibraryEvaluationOperationProvider r4LibraryEvaluationOperationProvider() {
 		return new LibraryEvaluationOperationProvider();
 	}
+
 	@Bean
 	ICareGapsServiceFactory careGapsServiceFactory(
 			IRepositoryFactory theRepositoryFactory,

@@ -104,13 +104,16 @@ public class ProviderConstants {
 	public static final String OPERATION_MDM_SUBMIT_OUT_PARAM_SUBMITTED = "submitted";
 	public static final String MDM_BATCH_RUN_CRITERIA = "criteria";
 	public static final String MDM_BATCH_RUN_RESOURCE_TYPE = "resourceType";
-	/**
-	 * CQL Operations
-	 */
-	public static final String CQL_EVALUATE_MEASURE = "$evaluate-measure";
+
 	/**
 	 * Clinical Reasoning Operations
 	 */
+	public static final String CR_OPERATION_EVALUATE_MEASURE = "$evaluate-measure";
+
+	public static final String CR_OPERATION_CARE_GAPS = "$care-gaps";
+	public static final String CR_OPERATION_SUBMIT_DATA = "$submit-data";
+	public static final String CR_OPERATION_EVALUATE = "$evaluate";
+	public static final String CR_OPERATION_CQL = "$cql";
 	public static final String CR_OPERATION_APPLY = "$apply";
 
 	public static final String CR_OPERATION_R5_APPLY = "$r5.apply";

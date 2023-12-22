@@ -63,7 +63,7 @@ public class MeasureOperationsProvider {
 	 *                          autopopulated HAPI.
 	 * @return the calculated MeasureReport
 	 */
-	@Operation(name = ProviderConstants.CQL_EVALUATE_MEASURE, idempotent = true, type = Measure.class)
+	@Operation(name = ProviderConstants.CR_OPERATION_EVALUATE_MEASURE, idempotent = true, type = Measure.class)
 	public MeasureReport evaluateMeasure(
 			@IdParam IdType theId,
 			@OperationParam(name = "periodStart") String thePeriodStart,
