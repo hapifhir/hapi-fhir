@@ -77,6 +77,16 @@ public final class ResourceIndexedSearchParams {
 	public final Collection<ResourceIndexedSearchParamComposite> myCompositeParams;
 	public final Set<String> myPopulatedResourceLinkParameters = new HashSet<>();
 
+	/**
+	 * TODO: Remove this - Currently used by CDR though
+	 *
+	 * @deprecated Use a factory constructor instead
+	 */
+	@Deprecated
+	public ResourceIndexedSearchParams() {
+		this(Mode.SET);
+	}
+
 	private ResourceIndexedSearchParams(Mode theMode) {
 		myStringParams = theMode.newCollection();
 		myTokenParams = theMode.newCollection();
