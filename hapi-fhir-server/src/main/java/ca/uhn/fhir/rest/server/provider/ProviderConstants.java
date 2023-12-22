@@ -109,6 +109,7 @@ public class ProviderConstants {
 	 * Clinical Reasoning Operations
 	 */
 	public static final String CR_OPERATION_EVALUATE_MEASURE = "$evaluate-measure";
+
 	public static final String CR_OPERATION_CARE_GAPS = "$care-gaps";
 	public static final String CR_OPERATION_SUBMIT_DATA = "$submit-data";
 	public static final String CR_OPERATION_EVALUATE = "$evaluate";
