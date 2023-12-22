@@ -22,7 +22,6 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.tuple.Pair;
-import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -110,7 +109,6 @@ public class ForceIdMigrationFixTask extends BaseTask {
 		}
 	}
 
-	@NotNull
 	private String getWhereClauseByDBType() {
 		switch (getDriverType()) {
 			case MSSQL_2012:
