@@ -112,7 +112,7 @@ public class ForceIdMigrationFixTask extends BaseTask {
 	private String getWhereClauseByDBType() {
 		switch (getDriverType()) {
 			case MSSQL_2012:
-				return " where (DATALENGTH(fhir_id) > LEN(fhir_id)) ";
+				return " where (fhir_id is null or DATALENGTH(fhir_id) > LEN(fhir_id)) ";
 			default:
 				return " where (fhir_id is null or fhir_id <> trim(fhir_id)) ";
 		}
