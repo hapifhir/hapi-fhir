@@ -140,11 +140,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 				.withColumns("RES_TYPE", "FHIR_ID");
 
 		// For resolving references that don't supply the type.
-		hfjResource
-				.addIndex("20231027.3", "IDX_RES_FHIR_ID")
-				.unique(false)
-				.withColumns("FHIR_ID")
-				.doNothing();
+		hfjResource.addIndex("20231027.3", "IDX_RES_FHIR_ID").unique(false).withColumns("FHIR_ID");
 
 		// This fix was bad for MSSQL, it has been set to do nothing.
 		version.addTask(new ForceIdMigrationFixTask(version.getRelease(), "20231213.1").setDoNothing(true));
