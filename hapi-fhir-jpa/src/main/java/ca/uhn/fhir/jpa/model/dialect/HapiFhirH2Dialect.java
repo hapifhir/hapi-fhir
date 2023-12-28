@@ -28,9 +28,10 @@ import org.hibernate.dialect.H2Dialect;
  */
 public class HapiFhirH2Dialect extends H2Dialect {
 
-	/**
-	 * Constructor
-	 */
+	public HapiFhirH2Dialect(DatabaseVersion theDatabaseVersion) {
+		super(theDatabaseVersion);
+	}
+
 	public HapiFhirH2Dialect() {
 		super(DatabaseVersion.make(2, 2, 220));
 	}

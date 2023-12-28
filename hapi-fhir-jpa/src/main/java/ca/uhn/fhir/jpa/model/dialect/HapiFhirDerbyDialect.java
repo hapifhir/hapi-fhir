@@ -23,10 +23,14 @@ import org.hibernate.dialect.DatabaseVersion;
 import org.hibernate.dialect.DerbyDialect;
 
 /**
- * Dialect for Oracle database.
+ * Dialect for Derby database.
  * Minimum version: 10.14.2
  */
 public class HapiFhirDerbyDialect extends DerbyDialect {
+
+	public HapiFhirDerbyDialect(DatabaseVersion theDatabaseVersion) {
+		super(theDatabaseVersion);
+	}
 
 	public HapiFhirDerbyDialect() {
 		super(DatabaseVersion.make(10, 14, 2));

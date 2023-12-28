@@ -28,6 +28,10 @@ import org.hibernate.dialect.MySQLDialect;
  */
 public class HapiFhirMySQLDialect extends MySQLDialect {
 
+	public HapiFhirMySQLDialect(DatabaseVersion theDatabaseVersion) {
+		super(theDatabaseVersion);
+	}
+
 	public HapiFhirMySQLDialect() {
 		super(DatabaseVersion.make(5, 7));
 	}
