@@ -24,6 +24,10 @@ import org.hibernate.dialect.PostgreSQLDialect;
 
 public class HapiFhirPostgresDialect extends PostgreSQLDialect {
 
+	public HapiFhirPostgresDialect(DatabaseVersion theDatabaseVersion) {
+		super(theDatabaseVersion);
+	}
+
 	public HapiFhirPostgresDialect() {
 		super(DatabaseVersion.make(10, 0, 0));
 	}

@@ -219,54 +219,53 @@ public abstract class BaseRequestPartitionHelperSvc implements IRequestPartition
 			@Nullable RequestDetails theRequest, @Nonnull IBaseResource theResource, @Nonnull String theResourceType) {
 		RequestPartitionId requestPartitionId;
 
-		if (myPartitionSettings.isPartitioningEnabled()) {
-			boolean nonPartitionableResource = myNonPartitionableResourceNames.contains(theResourceType);
-
-			// TODO GGG eventually, theRequest will not be allowed to be null here, and we will pass through
-			// SystemRequestDetails instead.
-			if ((theRequest == null || theRequest instanceof SystemRequestDetails) && nonPartitionableResource) {
-				return RequestPartitionId.defaultPartition();
-			}
-
-			if (theRequest instanceof SystemRequestDetails
-					&& systemRequestHasExplicitPartition((SystemRequestDetails) theRequest)) {
-				requestPartitionId =
-						getSystemRequestPartitionId((SystemRequestDetails) theRequest, nonPartitionableResource);
-			} else {
-				if (hasHooks(Pointcut.STORAGE_PARTITION_IDENTIFY_ANY, myInterceptorBroadcaster, theRequest)) {
-					// Interceptor call: STORAGE_PARTITION_IDENTIFY_ANY
-					HookParams params = new HookParams()
-							.add(RequestDetails.class, theRequest)
-							.addIfMatchesType(ServletRequestDetails.class, theRequest);
-					requestPartitionId = (RequestPartitionId) doCallHooksAndReturnObject(
-							myInterceptorBroadcaster, theRequest, Pointcut.STORAGE_PARTITION_IDENTIFY_ANY, params);
-				} else {
-					// This is an external Request (e.g. ServletRequestDetails) so we want to figure out the partition
-					// via interceptor.
-					// Interceptor call: STORAGE_PARTITION_IDENTIFY_CREATE
-					HookParams params = new HookParams()
-							.add(IBaseResource.class, theResource)
-							.add(RequestDetails.class, theRequest)
-							.addIfMatchesType(ServletRequestDetails.class, theRequest);
-					requestPartitionId = (RequestPartitionId) doCallHooksAndReturnObject(
-							myInterceptorBroadcaster, theRequest, Pointcut.STORAGE_PARTITION_IDENTIFY_CREATE, params);
-				}
-
-				// If the interceptors haven't selected a partition, and its a non-partitionable resource anyhow, send
-				// to DEFAULT
-				if (nonPartitionableResource && requestPartitionId == null) {
-					requestPartitionId = RequestPartitionId.defaultPartition();
-				}
-			}
-
-			String resourceName = myFhirContext.getResourceType(theResource);
-			validateSinglePartitionForCreate(
-					requestPartitionId, resourceName, Pointcut.STORAGE_PARTITION_IDENTIFY_CREATE);
-
-			return validateNormalizeAndNotifyHooksForRead(requestPartitionId, theRequest, theResourceType);
+		if (!myPartitionSettings.isPartitioningEnabled()) {
+			return RequestPartitionId.allPartitions();
 		}
 
-		return RequestPartitionId.allPartitions();
+		boolean nonPartitionableResource = myNonPartitionableResourceNames.contains(theResourceType);
+
+		// TODO GGG eventually, theRequest will not be allowed to be null here, and we will pass through
+		// SystemRequestDetails instead.
+		if ((theRequest == null || theRequest instanceof SystemRequestDetails) && nonPartitionableResource) {
+			return RequestPartitionId.defaultPartition();
+		}
+
+		if (theRequest instanceof SystemRequestDetails
+				&& systemRequestHasExplicitPartition((SystemRequestDetails) theRequest)) {
+			requestPartitionId =
+					getSystemRequestPartitionId((SystemRequestDetails) theRequest, nonPartitionableResource);
+		} else {
+			if (hasHooks(Pointcut.STORAGE_PARTITION_IDENTIFY_ANY, myInterceptorBroadcaster, theRequest)) {
+				// Interceptor call: STORAGE_PARTITION_IDENTIFY_ANY
+				HookParams params = new HookParams()
+						.add(RequestDetails.class, theRequest)
+						.addIfMatchesType(ServletRequestDetails.class, theRequest);
+				requestPartitionId = (RequestPartitionId) doCallHooksAndReturnObject(
+						myInterceptorBroadcaster, theRequest, Pointcut.STORAGE_PARTITION_IDENTIFY_ANY, params);
+			} else {
+				// This is an external Request (e.g. ServletRequestDetails) so we want to figure out the partition
+				// via interceptor.
+				// Interceptor call: STORAGE_PARTITION_IDENTIFY_CREATE
+				HookParams params = new HookParams()
+						.add(IBaseResource.class, theResource)
+						.add(RequestDetails.class, theRequest)
+						.addIfMatchesType(ServletRequestDetails.class, theRequest);
+				requestPartitionId = (RequestPartitionId) doCallHooksAndReturnObject(
+						myInterceptorBroadcaster, theRequest, Pointcut.STORAGE_PARTITION_IDENTIFY_CREATE, params);
+			}
+
+			// If the interceptors haven't selected a partition, and its a non-partitionable resource anyhow, send
+			// to DEFAULT
+			if (nonPartitionableResource && requestPartitionId == null) {
+				requestPartitionId = RequestPartitionId.defaultPartition();
+			}
+		}
+
+		String resourceName = myFhirContext.getResourceType(theResource);
+		validateSinglePartitionForCreate(requestPartitionId, resourceName, Pointcut.STORAGE_PARTITION_IDENTIFY_CREATE);
+
+		return validateNormalizeAndNotifyHooksForRead(requestPartitionId, theRequest, theResourceType);
 	}
 
 	private boolean systemRequestHasExplicitPartition(@Nonnull SystemRequestDetails theRequest) {

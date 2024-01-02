@@ -28,6 +28,10 @@ import org.hibernate.dialect.MariaDBDialect;
  */
 public class HapiFhirMariaDBDialect extends MariaDBDialect {
 
+	public HapiFhirMariaDBDialect(DatabaseVersion theDatabaseVersion) {
+		super(theDatabaseVersion);
+	}
+
 	public HapiFhirMariaDBDialect() {
 		super(DatabaseVersion.make(10, 11, 5));
 	}

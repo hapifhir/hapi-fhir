@@ -28,6 +28,10 @@ import org.hibernate.dialect.SQLServerDialect;
  */
 public class HapiFhirSQLServerDialect extends SQLServerDialect {
 
+	public HapiFhirSQLServerDialect(DatabaseVersion theDatabaseVersion) {
+		super(theDatabaseVersion);
+	}
+
 	public HapiFhirSQLServerDialect() {
 		super(DatabaseVersion.make(11));
 	}

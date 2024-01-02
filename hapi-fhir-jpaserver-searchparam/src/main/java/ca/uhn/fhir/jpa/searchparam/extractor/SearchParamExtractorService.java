@@ -124,7 +124,7 @@ public class SearchParamExtractorService {
 				theRequestPartitionId,
 				theRequestDetails,
 				theParams,
-				new ResourceIndexedSearchParams(),
+				ResourceIndexedSearchParams.withSets(),
 				theEntity,
 				theResource,
 				theTransactionDetails,
@@ -149,7 +149,7 @@ public class SearchParamExtractorService {
 			boolean theFailOnInvalidReference,
 			@Nonnull ISearchParamExtractor.ISearchParamFilter theSearchParamFilter) {
 		// All search parameter types except Reference
-		ResourceIndexedSearchParams normalParams = new ResourceIndexedSearchParams();
+		ResourceIndexedSearchParams normalParams = ResourceIndexedSearchParams.withSets();
 		extractSearchIndexParameters(theRequestDetails, normalParams, theResource, theSearchParamFilter);
 		mergeParams(normalParams, theNewParams);
 
@@ -159,14 +159,14 @@ public class SearchParamExtractorService {
 		SearchParamExtractorService.handleWarnings(theRequestDetails, myInterceptorBroadcaster, indexedReferences);
 
 		if (indexOnContainedResources) {
-			ResourceIndexedSearchParams containedParams = new ResourceIndexedSearchParams();
+			ResourceIndexedSearchParams containedParams = ResourceIndexedSearchParams.withSets();
 			extractSearchIndexParametersForContainedResources(
 					theRequestDetails, containedParams, theResource, theEntity, indexedReferences);
 			mergeParams(containedParams, theNewParams);
 		}
 
 		if (myStorageSettings.isIndexOnUpliftedRefchains()) {
-			ResourceIndexedSearchParams containedParams = new ResourceIndexedSearchParams();
+			ResourceIndexedSearchParams containedParams = ResourceIndexedSearchParams.withSets();
 			extractSearchIndexParametersForUpliftedRefchains(
 					theRequestDetails,
 					containedParams,
@@ -427,7 +427,7 @@ public class SearchParamExtractorService {
 				continue;
 			}
 
-			ResourceIndexedSearchParams currParams = new ResourceIndexedSearchParams();
+			ResourceIndexedSearchParams currParams = ResourceIndexedSearchParams.withSets();
 
 			// 3.3 create indexes for the current contained resource
 			extractSearchIndexParameters(theRequestDetails, currParams, targetResource, searchParamsToIndex);
@@ -599,7 +599,7 @@ public class SearchParamExtractorService {
 			ISearchParamExtractor.SearchParamSet<PathAndRef> theIndexedReferences) {
 		extractResourceLinks(
 				theRequestPartitionId,
-				new ResourceIndexedSearchParams(),
+				ResourceIndexedSearchParams.withSets(),
 				theParams,
 				theEntity,
 				theResource,
@@ -937,7 +937,7 @@ public class SearchParamExtractorService {
 				continue;
 			}
 
-			currParams = new ResourceIndexedSearchParams();
+			currParams = ResourceIndexedSearchParams.withSets();
 
 			// 3.3 create indexes for the current contained resource
 			ISearchParamExtractor.SearchParamSet<PathAndRef> indexedReferences =

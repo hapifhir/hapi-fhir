@@ -160,7 +160,7 @@ public class InstanceReindexServiceImpl implements IInstanceReindexService {
 				myInterceptorService, theRequestDetails, theResourceId, resource);
 		BaseHapiFhirResourceDao.invokeStoragePreShowResources(myInterceptorService, theRequestDetails, resource);
 
-		ResourceIndexedSearchParams existingParamsToPopulate = new ResourceIndexedSearchParams(entity);
+		ResourceIndexedSearchParams existingParamsToPopulate = ResourceIndexedSearchParams.withLists(entity);
 		existingParamsToPopulate.mySearchParamPresentEntities.addAll(entity.getSearchParamPresents());
 
 		List<String> messages = new ArrayList<>();
@@ -173,7 +173,7 @@ public class InstanceReindexServiceImpl implements IInstanceReindexService {
 			messages.add("WARNING: " + next);
 		}
 
-		ResourceIndexedSearchParams newParamsToPopulate = new ResourceIndexedSearchParams(entity);
+		ResourceIndexedSearchParams newParamsToPopulate = ResourceIndexedSearchParams.withLists(entity);
 		newParamsToPopulate.mySearchParamPresentEntities.addAll(entity.getSearchParamPresents());
 
 		return buildIndexResponse(existingParamsToPopulate, newParamsToPopulate, true, messages);
@@ -205,12 +205,12 @@ public class InstanceReindexServiceImpl implements IInstanceReindexService {
 					.collect(Collectors.toSet());
 		}
 
-		ResourceIndexedSearchParams newParamsToPopulate = new ResourceIndexedSearchParams();
+		ResourceIndexedSearchParams newParamsToPopulate = ResourceIndexedSearchParams.withSets();
 		mySearchParamExtractorService.extractFromResource(
 				theRequestPartitionId,
 				theRequestDetails,
 				newParamsToPopulate,
-				new ResourceIndexedSearchParams(),
+				ResourceIndexedSearchParams.empty(),
 				entity,
 				resource,
 				theTransactionDetails,
@@ -220,13 +220,13 @@ public class InstanceReindexServiceImpl implements IInstanceReindexService {
 		ResourceIndexedSearchParams existingParamsToPopulate;
 		boolean showAction;
 		if (theParameters == null) {
-			existingParamsToPopulate = new ResourceIndexedSearchParams(entity);
+			existingParamsToPopulate = ResourceIndexedSearchParams.withLists(entity);
 			existingParamsToPopulate.mySearchParamPresentEntities.addAll(entity.getSearchParamPresents());
 			fillInParamNames(
 					entity, existingParamsToPopulate.mySearchParamPresentEntities, theResourceId.getResourceType());
 			showAction = true;
 		} else {
-			existingParamsToPopulate = new ResourceIndexedSearchParams();
+			existingParamsToPopulate = ResourceIndexedSearchParams.withSets();
 			showAction = false;
 		}
 

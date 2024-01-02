@@ -50,12 +50,12 @@ public class IndexedSearchParamExtractor {
 		TransactionDetails transactionDetails = new TransactionDetails();
 		String resourceType = myContext.getResourceType(theResource);
 		entity.setResourceType(resourceType);
-		ResourceIndexedSearchParams resourceIndexedSearchParams = new ResourceIndexedSearchParams();
+		ResourceIndexedSearchParams resourceIndexedSearchParams = ResourceIndexedSearchParams.withSets();
 		mySearchParamExtractorService.extractFromResource(
 				null,
 				theRequest,
 				resourceIndexedSearchParams,
-				new ResourceIndexedSearchParams(),
+				ResourceIndexedSearchParams.empty(),
 				entity,
 				theResource,
 				transactionDetails,

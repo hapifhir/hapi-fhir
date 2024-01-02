@@ -28,6 +28,10 @@ import org.hibernate.dialect.OracleDialect;
  */
 public class HapiFhirOracleDialect extends OracleDialect {
 
+	public HapiFhirOracleDialect(DatabaseVersion theDatabaseVersion) {
+		super(theDatabaseVersion);
+	}
+
 	public HapiFhirOracleDialect() {
 		super(DatabaseVersion.make(12, 2));
 	}
