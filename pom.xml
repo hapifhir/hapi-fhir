@@ -950,10 +950,11 @@
 		<flexmark_version>0.64.8</flexmark_version>
 		<flyway_version>9.4.0</flyway_version>
 		<hibernate_version>6.4.1.Final</hibernate_version>
-		<hibernate_search_version>7.0.0.Final</hibernate_search_version>
 		<logback_version>1.4.14</logback_version>
-	 	<!-- Update lucene version when you update hibernate-search version -->
-		<lucene_version>8.11.2</lucene_version>
+	 	<!-- Update lucene version when you update hibernate-search version - These go together! -->
+		<hibernate_search_version>7.0.0.Final</hibernate_search_version>
+		<!-- Update lucene version when you update hibernate-search version - These go together! -->
+		<lucene_version>9.8.0</lucene_version>
 		<hamcrest_version>2.2</hamcrest_version>
 		<hibernate_validator_version>8.0.0.Final</hibernate_validator_version>
 		<httpcore_version>4.4.13</httpcore_version>
@@ -1547,6 +1548,7 @@
 				<artifactId>jena-arq</artifactId>
 				<version>${jena_version}</version>
 			</dependency>
+			<!-- FIXME: remove?
 			<dependency>
 				<groupId>org.apache.lucene</groupId>
 				<artifactId>lucene-analyzers-phonetic</artifactId>
@@ -1555,6 +1557,12 @@
 			<dependency>
 				<groupId>org.apache.lucene</groupId>
 				<artifactId>lucene-backward-codecs</artifactId>
+				<version>${lucene_version}</version>
+			</dependency>
+			-->
+			<dependency>
+				<groupId>org.apache.lucene</groupId>
+				<artifactId>lucene-analysis-phonetic</artifactId>
 				<version>${lucene_version}</version>
 			</dependency>
 			<dependency>
