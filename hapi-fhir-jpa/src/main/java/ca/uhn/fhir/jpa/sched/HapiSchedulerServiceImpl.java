@@ -1,6 +1,6 @@
 /*-
  * #%L
- * hapi-fhir-jpa
+ * HAPI FHIR JPA Model
  * %%
  * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
