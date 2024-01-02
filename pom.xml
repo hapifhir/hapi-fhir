@@ -930,9 +930,9 @@
 		<commons_pool2_version>2.12.0</commons_pool2_version>
 		<commons_text_version>1.10.0</commons_text_version>
 		<commons_io_version>2.11.0</commons_io_version>
-		<commons_lang3_version>3.12.0</commons_lang3_version>
+		<commons_lang3_version>3.14.0</commons_lang3_version>
 		<com_jamesmurty_utils_version>1.2</com_jamesmurty_utils_version>
-		<derby_version>10.14.2.0</derby_version>
+		<derby_version>10.17.1.0</derby_version>
 		<error_prone_core_version>2.23.0</error_prone_core_version>
 		<mockito_version>4.8.1</mockito_version>
 		<nullaway_version>0.7.9</nullaway_version>
@@ -949,8 +949,8 @@
 		<junit_version>5.10.1</junit_version>
 		<flexmark_version>0.64.8</flexmark_version>
 		<flyway_version>9.4.0</flyway_version>
-		<hibernate_version>6.4.0.Final</hibernate_version>
-		<hibernate_search_version>6.2.2.Final</hibernate_search_version>
+		<hibernate_version>6.4.1.Final</hibernate_version>
+		<hibernate_search_version>7.0.0.Final</hibernate_search_version>
 		<logback_version>1.4.14</logback_version>
 	 	<!-- Update lucene version when you update hibernate-search version -->
 		<lucene_version>8.11.2</lucene_version>
@@ -958,7 +958,7 @@
 		<hibernate_validator_version>8.0.0.Final</hibernate_validator_version>
 		<httpcore_version>4.4.13</httpcore_version>
 		<httpclient_version>4.5.13</httpclient_version>
-		<jackson_version>2.16.0</jackson_version>
+		<jackson_version>2.16.1</jackson_version>
 		<jackson_databind_version>2.16.0</jackson_databind_version>
 		<maven_assembly_plugin_version>3.3.0</maven_assembly_plugin_version>
 		<maven_license_plugin_version>1.8</maven_license_plugin_version>
@@ -1253,7 +1253,7 @@
 			<dependency>
 				<groupId>org.apache.commons</groupId>
 				<artifactId>commons-csv</artifactId>
-				<version>1.8</version>
+				<version>1.10.0</version>
 			</dependency>
 			<dependency>
 				<groupId>org.aspectj</groupId>
@@ -1432,7 +1432,7 @@
 			<dependency>
 				<groupId>net.ttddyy</groupId>
 				<artifactId>datasource-proxy</artifactId>
-				<version>1.9</version>
+				<version>1.10</version>
 			</dependency>
 			<dependency>
 				<groupId>org.antlr</groupId>
