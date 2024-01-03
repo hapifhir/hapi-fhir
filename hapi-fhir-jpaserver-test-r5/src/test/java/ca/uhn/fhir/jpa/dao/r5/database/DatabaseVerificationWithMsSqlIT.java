@@ -1,11 +1,11 @@
 package ca.uhn.fhir.jpa.dao.r5.database;
 
 import ca.uhn.fhir.jpa.embedded.MsSqlEmbeddedDatabase;
-import ca.uhn.fhir.jpa.model.dialect.HapiFhirPostgresDialect;
 import ca.uhn.fhir.jpa.model.dialect.HapiFhirSQLServerDialect;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.transaction.PlatformTransactionManager;
 
 @ContextConfiguration(classes = {
 	DatabaseVerificationWithMsSqlIT.TestConfig.class
