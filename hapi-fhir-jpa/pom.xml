@@ -15,6 +15,8 @@
 	<description>This project contains utility classes for working with spring-hibernate jpa and the Quartz Scheduler.
 	</description>
 
+	<name>HAPI FHIR JPA Model</name>
+
 	<dependencies>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>

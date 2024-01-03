@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Model
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,10 @@ import org.hibernate.dialect.MySQLDialect;
  * Minimum version: 5.7
  */
 public class HapiFhirMySQLDialect extends MySQLDialect {
+
+	public HapiFhirMySQLDialect(DatabaseVersion theDatabaseVersion) {
+		super(theDatabaseVersion);
+	}
 
 	public HapiFhirMySQLDialect() {
 		super(DatabaseVersion.make(5, 7));

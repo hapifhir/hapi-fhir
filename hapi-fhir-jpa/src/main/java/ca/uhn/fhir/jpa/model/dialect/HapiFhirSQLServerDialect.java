@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Model
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,10 @@ import org.hibernate.dialect.SQLServerDialect;
  * Minimum version: 12.0 (SQL Server 2014 and Azure SQL Database)
  */
 public class HapiFhirSQLServerDialect extends SQLServerDialect {
+
+	public HapiFhirSQLServerDialect(DatabaseVersion theDatabaseVersion) {
+		super(theDatabaseVersion);
+	}
 
 	public HapiFhirSQLServerDialect() {
 		super(DatabaseVersion.make(11));
