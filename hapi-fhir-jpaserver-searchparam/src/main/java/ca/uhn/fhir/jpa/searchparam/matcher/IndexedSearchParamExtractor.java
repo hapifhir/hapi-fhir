@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA - Search Parameters
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,12 +50,12 @@ public class IndexedSearchParamExtractor {
 		TransactionDetails transactionDetails = new TransactionDetails();
 		String resourceType = myContext.getResourceType(theResource);
 		entity.setResourceType(resourceType);
-		ResourceIndexedSearchParams resourceIndexedSearchParams = new ResourceIndexedSearchParams();
+		ResourceIndexedSearchParams resourceIndexedSearchParams = ResourceIndexedSearchParams.withSets();
 		mySearchParamExtractorService.extractFromResource(
 				null,
 				theRequest,
 				resourceIndexedSearchParams,
-				new ResourceIndexedSearchParams(),
+				ResourceIndexedSearchParams.empty(),
 				entity,
 				theResource,
 				transactionDetails,

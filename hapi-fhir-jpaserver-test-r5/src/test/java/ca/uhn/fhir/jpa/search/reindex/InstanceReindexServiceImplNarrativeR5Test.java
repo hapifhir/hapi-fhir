@@ -307,7 +307,7 @@ public class InstanceReindexServiceImplNarrativeR5Test {
 
 	@Nonnull
 	private static ResourceIndexedSearchParams newParams() {
-		return new ResourceIndexedSearchParams();
+		return ResourceIndexedSearchParams.withSets();
 	}
 
 }

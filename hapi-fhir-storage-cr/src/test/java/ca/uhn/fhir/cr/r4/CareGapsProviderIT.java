@@ -1,5 +1,6 @@
 package ca.uhn.fhir.cr.r4;
 
+import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
@@ -69,7 +70,7 @@ class CareGapsProviderIT extends BaseCrR4TestServer
 		parameters.addParameter("measureId", "ColorectalCancerScreeningsFHIR");
 
 		var result = ourClient.operation().onType(Measure.class)
-			.named("$care-gaps")
+			.named(ProviderConstants.CR_OPERATION_CARE_GAPS)
 			.withParameters(parameters)
 			.returnResourceType(Parameters.class)
 			.execute();
@@ -84,7 +85,7 @@ class CareGapsProviderIT extends BaseCrR4TestServer
 
 		// 7. Provider runs care-gaps again
 		result = ourClient.operation().onType("Measure")
-			.named("care-gaps")
+			.named(ProviderConstants.CR_OPERATION_CARE_GAPS)
 			.withParameters(parameters)
 			.execute();
 
