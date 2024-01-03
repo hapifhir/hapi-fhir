@@ -3,6 +3,7 @@ package org.hl7.fhir.dstu2.hapi.validation;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.fhirpath.BaseValidationTestWithInlineMocks;
 import ca.uhn.fhir.model.dstu2.composite.PeriodDt;
 import ca.uhn.fhir.model.dstu2.resource.Parameters;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
@@ -39,7 +40,7 @@ import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class FhirInstanceValidatorDstu2Test {
+public class FhirInstanceValidatorDstu2Test extends BaseValidationTestWithInlineMocks {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirInstanceValidatorDstu2Test.class);
 	private static FhirContext ourCtxDstu2 = FhirContext.forDstu2();

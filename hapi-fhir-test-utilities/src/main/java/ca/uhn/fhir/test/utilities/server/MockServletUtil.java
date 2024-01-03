@@ -20,9 +20,11 @@
 package ca.uhn.fhir.test.utilities.server;
 
 import jakarta.servlet.ServletConfig;
+import org.mockito.quality.Strictness;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.withSettings;
 
 public class MockServletUtil {
 
@@ -34,7 +36,7 @@ public class MockServletUtil {
 	}
 
 	public static ServletConfig createServletConfig() {
-		ServletConfig sc = mock(ServletConfig.class);
+		ServletConfig sc = mock(ServletConfig.class, withSettings().strictness(Strictness.LENIENT));
 		when(sc.getServletContext()).thenReturn(null);
 		return sc;
 	}

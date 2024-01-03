@@ -3,6 +3,7 @@ package org.hl7.fhir.dstu3.hapi.validation;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.fhirpath.BaseValidationTestWithInlineMocks;
 import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
@@ -32,7 +33,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-public class QuestionnaireValidatorDstu3Test {
+public class QuestionnaireValidatorDstu3Test extends BaseValidationTestWithInlineMocks {
 	private static final Logger ourLog = LoggerFactory.getLogger(QuestionnaireValidatorDstu3Test.class);
 	private static FhirContext ourCtx = FhirContext.forDstu3();
 	private static DefaultProfileValidationSupport myDefaultValidationSupport = new DefaultProfileValidationSupport(ourCtx);

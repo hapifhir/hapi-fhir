@@ -2,6 +2,7 @@ package org.hl7.fhir.dstu3.elementmodel;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
+import ca.uhn.fhir.fhirpath.BaseValidationTestWithInlineMocks;
 import ca.uhn.fhir.parser.IParser;
 import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.dstu3.hapi.ctx.HapiWorkerContext;
@@ -22,7 +23,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 /**
  * Created by axemj on 14/07/2017.
  */
-public class PropertyDstu3Test {
+public class PropertyDstu3Test extends BaseValidationTestWithInlineMocks {
 
     private static final FhirContext ourCtx = FhirContext.forDstu3();
     private Property property;

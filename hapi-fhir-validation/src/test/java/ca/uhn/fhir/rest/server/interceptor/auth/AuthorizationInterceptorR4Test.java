@@ -2,6 +2,7 @@ package ca.uhn.fhir.rest.server.interceptor.auth;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.api.AddProfileTagEnum;
+import ca.uhn.fhir.fhirpath.BaseValidationTestWithInlineMocks;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
@@ -109,7 +110,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
-public class AuthorizationInterceptorR4Test {
+public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInlineMocks {
 
 	private static final String ERR403 = "{\"resourceType\":\"OperationOutcome\",\"issue\":[{\"severity\":\"error\",\"code\":\"processing\",\"diagnostics\":\"" + Msg.code(334) + "Access denied by default policy (no applicable rules)\"}]}";
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(AuthorizationInterceptorR4Test.class);

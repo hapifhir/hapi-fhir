@@ -2,11 +2,11 @@ package org.hl7.fhir.dstu3.utils;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
+import ca.uhn.fhir.fhirpath.BaseValidationTestWithInlineMocks;
 import ca.uhn.fhir.util.TestUtil;
 import org.hl7.fhir.dstu3.hapi.ctx.HapiWorkerContext;
 import org.hl7.fhir.dstu3.model.Base;
 import org.hl7.fhir.dstu3.model.BooleanType;
-import org.hl7.fhir.dstu3.model.ContactPoint;
 import org.hl7.fhir.dstu3.model.DateTimeType;
 import org.hl7.fhir.dstu3.model.Observation;
 import org.hl7.fhir.dstu3.model.Patient;
@@ -24,7 +24,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class FhirPathEngineTest {
+public class FhirPathEngineTest extends BaseValidationTestWithInlineMocks {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirPathEngineTest.class);
 	private static FhirContext ourCtx = FhirContext.forDstu3();
