@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Model
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,20 +19,21 @@
  */
 package ca.uhn.fhir.jpa.model.dialect;
 
-import org.hibernate.dialect.DatabaseVersion;
 import org.hibernate.dialect.PostgreSQLDialect;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-public class HapiFhirPostgresDialect extends PostgreSQLDialect {
+/**
+ * This dialect is recommended when using HAPI FHIR JPA on Postgresql database.
+ *
+ * @deprecated Use {@link HapiFhirPostgresDialect} instead
+ */
+public class HapiFhirPostgres94Dialect extends PostgreSQLDialect {
+	private static final Logger ourLog = LoggerFactory.getLogger(HapiFhirPostgres94Dialect.class);
 
-	public HapiFhirPostgresDialect() {
-		super(DatabaseVersion.make(10, 0, 0));
-	}
-
-	/**
-	 * @see HapiFhirH2Dialect#supportsColumnCheck() for an explanation of why we disable this
-	 */
-	@Override
-	public boolean supportsColumnCheck() {
-		return false;
+	public HapiFhirPostgres94Dialect() {
+		super();
+		ourLog.warn("The " + getClass() + " dialect is deprecated and will be removed in a future release. Use "
+				+ HapiFhirPostgresDialect.class.getName() + " instead");
 	}
 }

@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Model
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,17 +19,21 @@
  */
 package ca.uhn.fhir.jpa.model.dialect;
 
-import org.hibernate.dialect.CockroachDialect;
 import org.hibernate.dialect.DatabaseVersion;
+import org.hibernate.dialect.SQLServerDialect;
 
 /**
- * Dialect for CockroachDB database.
- * Minimum version: 21.1
+ * Dialect for MS SQL Server database.
+ * Minimum version: 12.0 (SQL Server 2014 and Azure SQL Database)
  */
-public class HapiFhirCockroachDialect extends CockroachDialect {
+public class HapiFhirSQLServerDialect extends SQLServerDialect {
 
-	public HapiFhirCockroachDialect() {
-		super(DatabaseVersion.make(21, 1));
+	public HapiFhirSQLServerDialect(DatabaseVersion theDatabaseVersion) {
+		super(theDatabaseVersion);
+	}
+
+	public HapiFhirSQLServerDialect() {
+		super(DatabaseVersion.make(11));
 	}
 
 	/**

@@ -5,8 +5,6 @@ import ca.uhn.fhir.batch2.jobs.export.BulkDataExportProvider;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails;
-import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.model.BulkExportJobResults;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.bulk.export.model.BulkExportResponseJson;
@@ -14,7 +12,6 @@ import ca.uhn.fhir.jpa.entity.PartitionEntity;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
-import ca.uhn.fhir.jpa.partition.RequestPartitionHelperSvc;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
@@ -29,12 +26,12 @@ import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.test.utilities.ITestDataBuilder;
 import ca.uhn.fhir.util.JsonUtil;
 import com.google.common.collect.Sets;
+import jakarta.servlet.http.HttpServletResponse;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CapabilityStatement;
 import org.hl7.fhir.r4.model.Condition;
@@ -42,7 +39,6 @@ import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Resource;
-import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -51,13 +47,10 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Spy;
 import org.springframework.mock.web.MockHttpServletRequest;
 
-import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
@@ -109,9 +102,10 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 		createPatient(withTenant(TENANT_B), withActiveFalse());
 
 		runInTransaction(() -> {
-			PartitionEntity partition = myPartitionDao.findForName(TENANT_A).orElseThrow(() -> new IllegalStateException());
-			ResourceTable resourceTable = myResourceTableDao.findById(idA.getIdPartAsLong()).orElseThrow(() -> new IllegalStateException());
-			assertEquals(partition.getId(), resourceTable.getPartitionId().getPartitionId());
+			PartitionEntity partition = myPartitionDao.findForName(TENANT_A).orElseThrow(IllegalStateException::new);
+			ResourceTable resourceTable = myResourceTableDao.findById(idA.getIdPartAsLong()).orElseThrow(IllegalStateException::new);
+            assert resourceTable.getPartitionId() != null;
+            assertEquals(partition.getId(), resourceTable.getPartitionId().getPartitionId());
 		});
 
 		// Now read back
@@ -147,7 +141,7 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 		createPatient(withTenant(TENANT_B), withActiveFalse());
 
 		runInTransaction(() -> {
-			ResourceTable resourceTable = myResourceTableDao.findById(idA.getIdPartAsLong()).orElseThrow(() -> new IllegalStateException());
+			ResourceTable resourceTable = myResourceTableDao.findById(idA.getIdPartAsLong()).orElseThrow(IllegalStateException::new);
 			assertNull(resourceTable.getPartitionId());
 		});
 
@@ -187,7 +181,7 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 		// Search and include deleted
 		runInTransaction(() -> {
 			Collection<Object[]> forcedIds = myResourceTableDao.findAndResolveByForcedIdWithNoTypeIncludeDeleted(
-				"Patient", Arrays.asList(patientId)
+				"Patient", List.of(patientId)
 			);
 			assertContainsSingleForcedId(forcedIds, patientId);
 		});
@@ -195,7 +189,7 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 		// Search and filter deleted
 		runInTransaction(() -> {
 			Collection<Object[]> forcedIds = myResourceTableDao.findAndResolveByForcedIdWithNoType(
-				"Patient", Arrays.asList(patientId), true
+				"Patient", List.of(patientId), true
 			);
 			assertContainsSingleForcedId(forcedIds, patientId);
 		});
@@ -206,7 +200,7 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 		// Search and include deleted
 		runInTransaction(() -> {
 			Collection<Object[]> forcedIds = myResourceTableDao.findAndResolveByForcedIdWithNoTypeIncludeDeleted(
-				"Patient", Arrays.asList(patientId)
+				"Patient", List.of(patientId)
 			);
 			assertContainsSingleForcedId(forcedIds, patientId);
 		});
@@ -214,7 +208,7 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 		// Search and filter deleted
 		runInTransaction(() -> {
 			Collection<Object[]> forcedIds = myResourceTableDao.findAndResolveByForcedIdWithNoType(
-				"Patient", Arrays.asList(patientId), true
+				"Patient", List.of(patientId), true
 			);
 			assertThat(forcedIds, hasSize(0));
 		});
@@ -229,7 +223,7 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 		// Search and include deleted
 		runInTransaction(() -> {
 			Collection<Object[]> forcedIds = myResourceTableDao.findAndResolveByForcedIdWithNoTypeInPartitionNull(
-				"Patient", Arrays.asList(patientId), false
+				"Patient", List.of(patientId), false
 			);
 			assertContainsSingleForcedId(forcedIds, patientId);
 		});
@@ -237,7 +231,7 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 		// Search and filter deleted
 		runInTransaction(() -> {
 			Collection<Object[]> forcedIds = myResourceTableDao.findAndResolveByForcedIdWithNoTypeInPartitionNull(
-				"Patient", Arrays.asList(patientId), true
+				"Patient", List.of(patientId), true
 			);
 			assertContainsSingleForcedId(forcedIds, patientId);
 		});
@@ -248,7 +242,7 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 		// Search and include deleted
 		runInTransaction(() -> {
 			Collection<Object[]> forcedIds = myResourceTableDao.findAndResolveByForcedIdWithNoTypeInPartitionNull(
-				"Patient", Arrays.asList(patientId), false
+				"Patient", List.of(patientId), false
 			);
 			assertContainsSingleForcedId(forcedIds, patientId);
 		});
@@ -256,7 +250,7 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 		// Search and filter deleted
 		runInTransaction(() -> {
 			Collection<Object[]> forcedIds = myResourceTableDao.findAndResolveByForcedIdWithNoTypeInPartitionNull(
-				"Patient", Arrays.asList(patientId), true
+				"Patient", List.of(patientId), true
 			);
 			assertEquals(0, forcedIds.size());
 		});
@@ -273,7 +267,7 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 		// Search and include deleted
 		runInTransaction(() -> {
 			Collection<Object[]> forcedIds = myResourceTableDao.findAndResolveByForcedIdWithNoTypeInPartitionIdOrNullPartitionId(
-				"Patient", Arrays.asList(patientId), Arrays.asList(TENANT_A_ID), false
+				"Patient", List.of(patientId), List.of(TENANT_A_ID), false
 			);
 			assertContainsSingleForcedId(forcedIds, patientId);
 		});
@@ -281,7 +275,7 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 		// Search and filter deleted
 		runInTransaction(() -> {
 			Collection<Object[]> forcedIds = myResourceTableDao.findAndResolveByForcedIdWithNoTypeInPartitionIdOrNullPartitionId(
-				"Patient", Arrays.asList(patientId), Arrays.asList(TENANT_A_ID), true
+				"Patient", List.of(patientId), List.of(TENANT_A_ID), true
 			);
 			assertContainsSingleForcedId(forcedIds, patientId);
 		});
@@ -291,7 +285,7 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 		// Search and include deleted
 		runInTransaction(() -> {
 			Collection<Object[]> forcedIds = myResourceTableDao.findAndResolveByForcedIdWithNoTypeInPartitionIdOrNullPartitionId(
-				"Patient", Arrays.asList(patientId), Arrays.asList(TENANT_A_ID), false
+				"Patient", List.of(patientId), List.of(TENANT_A_ID), false
 			);
 			assertContainsSingleForcedId(forcedIds, patientId);
 		});
@@ -299,14 +293,14 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 		// Search and filter deleted
 		runInTransaction(() -> {
 			Collection<Object[]> forcedIds = myResourceTableDao.findAndResolveByForcedIdWithNoTypeInPartitionIdOrNullPartitionId(
-				"Patient", Arrays.asList(patientId), Arrays.asList(TENANT_A_ID), true
+				"Patient", List.of(patientId), List.of(TENANT_A_ID), true
 			);
 			assertEquals(0, forcedIds.size());
 		});
 	}
 
 	@Test
-	public void testFindAndResolveByForcedIdWithNoTypeInPartition() throws IOException {
+	public void testFindAndResolveByForcedIdWithNoTypeInPartition() {
 		// Create patients
 		String patientId = "AAA";
 		IIdType idA = createPatient(withTenant(TENANT_A), withId(patientId));
@@ -316,7 +310,7 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 		// Search and include deleted
 		runInTransaction(() -> {
 			Collection<Object[]> forcedIds = myResourceTableDao.findAndResolveByForcedIdWithNoTypeInPartition(
-				"Patient", Arrays.asList(patientId), Arrays.asList(TENANT_A_ID, TENANT_B_ID), false
+				"Patient", List.of(patientId), Arrays.asList(TENANT_A_ID, TENANT_B_ID), false
 			);
 			assertContainsSingleForcedId(forcedIds, patientId);
 		});
@@ -324,7 +318,7 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 		// Search and filter deleted
 		runInTransaction(() -> {
 			Collection<Object[]> forcedIds = myResourceTableDao.findAndResolveByForcedIdWithNoTypeInPartition(
-				"Patient", Arrays.asList(patientId), Arrays.asList(TENANT_A_ID, TENANT_B_ID), true
+				"Patient", List.of(patientId), Arrays.asList(TENANT_A_ID, TENANT_B_ID), true
 			);
 			assertContainsSingleForcedId(forcedIds, patientId);
 		});
@@ -334,7 +328,7 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 		// Search and include deleted
 		runInTransaction(() -> {
 			Collection<Object[]> forcedIds = myResourceTableDao.findAndResolveByForcedIdWithNoTypeInPartition(
-				"Patient", Arrays.asList(patientId), Arrays.asList(TENANT_A_ID, TENANT_B_ID), false
+				"Patient", List.of(patientId), Arrays.asList(TENANT_A_ID, TENANT_B_ID), false
 			);
 			assertContainsSingleForcedId(forcedIds, patientId);
 		});
@@ -342,7 +336,7 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 		// Search and filter deleted
 		runInTransaction(() -> {
 			Collection<Object[]> forcedIds = myResourceTableDao.findAndResolveByForcedIdWithNoTypeInPartition(
-				"Patient", Arrays.asList(patientId), Arrays.asList(TENANT_A_ID, TENANT_B_ID), true
+				"Patient", List.of(patientId), Arrays.asList(TENANT_A_ID, TENANT_B_ID), true
 			);
 			assertEquals(0, forcedIds.size());
 		});
@@ -367,7 +361,7 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 		IIdType idA = createResource("NamingSystem", withTenant(JpaConstants.DEFAULT_PARTITION_NAME), withStatus("draft"));
 
 		runInTransaction(() -> {
-			ResourceTable resourceTable = myResourceTableDao.findById(idA.getIdPartAsLong()).orElseThrow(() -> new IllegalStateException());
+			ResourceTable resourceTable = myResourceTableDao.findById(idA.getIdPartAsLong()).orElseThrow(IllegalStateException::new);
 			assertNull(resourceTable.getPartitionId());
 		});
 
@@ -421,10 +415,12 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 		IdType idB = new IdType(response.getEntry().get(1).getResponse().getLocation());
 
 		runInTransaction(() -> {
-			ResourceTable resourceTable = myResourceTableDao.findById(idA.getIdPartAsLong()).orElseThrow(() -> new IllegalStateException());
-			assertEquals(1, resourceTable.getPartitionId().getPartitionId());
-			resourceTable = myResourceTableDao.findById(idB.getIdPartAsLong()).orElseThrow(() -> new IllegalStateException());
-			assertEquals(1, resourceTable.getPartitionId().getPartitionId());
+			ResourceTable resourceTable = myResourceTableDao.findById(idA.getIdPartAsLong()).orElseThrow(IllegalStateException::new);
+            assert resourceTable.getPartitionId() != null;
+            assertEquals(1, resourceTable.getPartitionId().getPartitionId());
+			resourceTable = myResourceTableDao.findById(idB.getIdPartAsLong()).orElseThrow(IllegalStateException::new);
+            assert resourceTable.getPartitionId() != null;
+            assertEquals(1, resourceTable.getPartitionId().getPartitionId());
 		});
 
 	}
@@ -493,10 +489,11 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 		IIdType idB = myPatientDao.create((Patient) patientB, requestDetails).getId();
 
 		runInTransaction(() -> {
-			ResourceTable resourceTable = myResourceTableDao.findById(idA.getIdPartAsLong()).orElseThrow(() -> new IllegalStateException());
+			ResourceTable resourceTable = myResourceTableDao.findById(idA.getIdPartAsLong()).orElseThrow(IllegalStateException::new);
 			assertNull(resourceTable.getPartitionId());
-			resourceTable = myResourceTableDao.findById(idB.getIdPartAsLong()).orElseThrow(() -> new IllegalStateException());
-			assertEquals(2, resourceTable.getPartitionId().getPartitionId());
+			resourceTable = myResourceTableDao.findById(idB.getIdPartAsLong()).orElseThrow(IllegalStateException::new);
+            assert resourceTable.getPartitionId() != null;
+            assertEquals(2, resourceTable.getPartitionId().getPartitionId());
 		});
 
 
@@ -556,10 +553,11 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 		myPatientDao.update((Patient) patientB, requestDetails);
 
 		runInTransaction(() -> {
-			ResourceTable resourceTable = myResourceTableDao.findById(idA.getIdPartAsLong()).orElseThrow(() -> new IllegalStateException());
+			ResourceTable resourceTable = myResourceTableDao.findById(idA.getIdPartAsLong()).orElseThrow(IllegalStateException::new);
 			assertNull(resourceTable.getPartitionId());
-			resourceTable = myResourceTableDao.findById(idB.getIdPartAsLong()).orElseThrow(() -> new IllegalStateException());
-			assertEquals(2, resourceTable.getPartitionId().getPartitionId());
+			resourceTable = myResourceTableDao.findById(idB.getIdPartAsLong()).orElseThrow(IllegalStateException::new);
+            assert resourceTable.getPartitionId() != null;
+            assertEquals(2, resourceTable.getPartitionId().getPartitionId());
 		});
 
 
@@ -619,10 +617,12 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 		IdType idB = new IdType(response.getEntry().get(1).getResponse().getLocation());
 
 		runInTransaction(() -> {
-			ResourceTable resourceTable = myResourceTableDao.findById(idA.getIdPartAsLong()).orElseThrow(() -> new IllegalStateException());
-			assertEquals(1, resourceTable.getPartitionId().getPartitionId());
-			resourceTable = myResourceTableDao.findById(idB.getIdPartAsLong()).orElseThrow(() -> new IllegalStateException());
-			assertEquals(1, resourceTable.getPartitionId().getPartitionId());
+			ResourceTable resourceTable = myResourceTableDao.findById(idA.getIdPartAsLong()).orElseThrow(IllegalStateException::new);
+            assert resourceTable.getPartitionId() != null;
+            assertEquals(1, resourceTable.getPartitionId().getPartitionId());
+			resourceTable = myResourceTableDao.findById(idB.getIdPartAsLong()).orElseThrow(IllegalStateException::new);
+            assert resourceTable.getPartitionId() != null;
+            assertEquals(1, resourceTable.getPartitionId().getPartitionId());
 		});
 
 	}
@@ -646,7 +646,7 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 	}
 
 	@Test
-	public void testIncludeInTenantWithAssignedID() throws Exception {
+	public void testIncludeInTenantWithAssignedID() {
 		IIdType idA = createResource("Patient", withTenant(JpaConstants.DEFAULT_PARTITION_NAME), withId("test"), withFamily("Smith"), withActiveTrue());
 		createConditionWithAllowedUnqualified(idA);
 		Bundle response = myClient.search().byUrl(myClient.getServerBase() + "/" + TENANT_A + "/Condition?subject=Patient/" + idA.getIdPart() + "&_include=Condition:subject").returnBundle(Bundle.class).execute();
@@ -654,7 +654,7 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 	}
 
 	@Test
-	public void testIncludeInTenantWithAutoGeneratedID() throws Exception {
+	public void testIncludeInTenantWithAutoGeneratedID() {
 		IIdType idA = createResource("Patient", withTenant(JpaConstants.DEFAULT_PARTITION_NAME), withFamily("Smith"), withActiveTrue());
 		createConditionWithAllowedUnqualified(idA);
 		Bundle response = myClient.search().byUrl(myClient.getServerBase() + "/" + TENANT_A + "/Condition?subject=Patient/" + idA.getIdPart() + "&_include=Condition:subject").returnBundle(Bundle.class).execute();
@@ -678,24 +678,7 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 		@Mock
 		private IJobCoordinator myJobCoordinator;
 
-		@Spy
-		private RequestPartitionHelperSvc myRequestPartitionHelperSvc = new MultitenantServerR4Test.PartitionTesting.MyRequestPartitionHelperSvc();
-
 		String myTenantName = null;
-
-		private class MyRequestPartitionHelperSvc extends RequestPartitionHelperSvc {
-
-			@Override
-			public RequestPartitionId determineReadPartitionForRequest(RequestDetails theRequest, ReadPartitionIdRequestDetails theDetails) {
-				return RequestPartitionId.fromPartitionName(myTenantName);
-			}
-
-			@Override
-			public void validateHasPartitionPermissions(RequestDetails theRequest, String theResourceType, RequestPartitionId theRequestPartitionId) {
-				return;
-			}
-
-		}
 
 		@Test
 		public void testBulkExportForDifferentPartitions() throws IOException {
@@ -744,13 +727,6 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 				.thenReturn(mockServer);
 			when(servletRequestDetails.getServletResponse())
 				.thenReturn(mockResponse);
-
-			List<IPrimitiveType<String>> filters = new ArrayList<>();
-			if (options.getFilters() != null) {
-				for (String v : options.getFilters()) {
-					filters.add(new StringType(v));
-				}
-			}
 
 			//perform export-poll-status
 			myTenantName = createInPartition;

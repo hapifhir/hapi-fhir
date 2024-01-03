@@ -54,6 +54,7 @@ import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
 import ca.uhn.fhir.util.ClasspathUtil;
 import ca.uhn.fhir.util.StopWatch;
+import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.base.Charsets;
 import com.google.common.collect.Lists;
@@ -6723,7 +6724,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 		// Update Patient after delay
 		int delayInMs = 1000;
-		TimeUnit.MILLISECONDS.sleep(delayInMs);
+		TestUtil.sleepAtLeast(delayInMs + 100);
 		patient.getNameFirstRep().addGiven("Bob");
 		myClient.update().resource(patient).execute();
 

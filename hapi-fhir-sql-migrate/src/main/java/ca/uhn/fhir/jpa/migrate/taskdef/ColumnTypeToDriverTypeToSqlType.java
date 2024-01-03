@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Server - SQL Migration
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -62,7 +62,7 @@ public final class ColumnTypeToDriverTypeToSqlType {
 		setColumnType(ColumnTypeEnum.DOUBLE, DriverTypeEnum.MYSQL_5_7, "double precision");
 		setColumnType(ColumnTypeEnum.DOUBLE, DriverTypeEnum.MSSQL_2012, "double precision");
 		setColumnType(ColumnTypeEnum.DOUBLE, DriverTypeEnum.ORACLE_12C, "double precision");
-		setColumnType(ColumnTypeEnum.DOUBLE, DriverTypeEnum.POSTGRES_9_4, "float8");
+		setColumnType(ColumnTypeEnum.DOUBLE, DriverTypeEnum.POSTGRES_9_4, "double precision");
 
 		setColumnType(ColumnTypeEnum.LONG, DriverTypeEnum.H2_EMBEDDED, "bigint");
 		setColumnType(ColumnTypeEnum.LONG, DriverTypeEnum.DERBY_EMBEDDED, "bigint");
@@ -123,7 +123,7 @@ public final class ColumnTypeToDriverTypeToSqlType {
 				"oid"); // the PG driver will write oid into a `text` column
 		setColumnType(ColumnTypeEnum.CLOB, DriverTypeEnum.MSSQL_2012, "varchar(MAX)");
 
-		setColumnType(ColumnTypeEnum.TEXT, DriverTypeEnum.H2_EMBEDDED, "character large object");
+		setColumnType(ColumnTypeEnum.TEXT, DriverTypeEnum.H2_EMBEDDED, "clob");
 		setColumnType(ColumnTypeEnum.TEXT, DriverTypeEnum.DERBY_EMBEDDED, "clob");
 		setColumnType(ColumnTypeEnum.TEXT, DriverTypeEnum.MARIADB_10_1, "longtext");
 		setColumnType(ColumnTypeEnum.TEXT, DriverTypeEnum.MYSQL_5_7, "longtext");

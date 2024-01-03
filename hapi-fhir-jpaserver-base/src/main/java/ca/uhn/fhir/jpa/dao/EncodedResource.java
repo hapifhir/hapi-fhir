@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,6 @@ import ca.uhn.fhir.jpa.model.entity.ResourceEncodingEnum;
 class EncodedResource {
 
 	private boolean myChanged;
-	private byte[] myResource;
 	private ResourceEncodingEnum myEncoding;
 	private String myResourceText;
 
@@ -34,14 +33,6 @@ class EncodedResource {
 
 	public void setEncoding(ResourceEncodingEnum theEncoding) {
 		myEncoding = theEncoding;
-	}
-
-	public byte[] getResourceBinary() {
-		return myResource;
-	}
-
-	public void setResourceBinary(byte[] theResource) {
-		myResource = theResource;
 	}
 
 	public boolean isChanged() {

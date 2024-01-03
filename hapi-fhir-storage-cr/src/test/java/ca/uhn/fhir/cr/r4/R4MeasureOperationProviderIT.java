@@ -1,5 +1,6 @@
 package ca.uhn.fhir.cr.r4;
 
+import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.MeasureReport;
@@ -11,6 +12,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import java.util.NoSuchElementException;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -30,7 +32,7 @@ class R4MeasureOperationProviderIT extends BaseCrR4TestServer {
 		parametersEval.addParameter("subject", subject);
 
 		var report = ourClient.operation().onInstance("Measure/" + measureId)
-			.named("$evaluate-measure")
+			.named(ProviderConstants.CR_OPERATION_EVALUATE_MEASURE)
 			.withParameters(parametersEval)
 			.returnResourceType(MeasureReport.class)
 			.execute();
@@ -41,7 +43,7 @@ class R4MeasureOperationProviderIT extends BaseCrR4TestServer {
 	}
 
 	@Test
-	void testMeasureEvaluate_EXM130() throws InterruptedException {
+	void testMeasureEvaluate_EXM130() {
 		loadBundle("ColorectalCancerScreeningsFHIR-bundle.json");
 		runEvaluateMeasure("2019-01-01", "2019-12-31", "Patient/numer-EXM130", "ColorectalCancerScreeningsFHIR", "Individual", null);
 	}
@@ -59,22 +61,13 @@ class R4MeasureOperationProviderIT extends BaseCrR4TestServer {
 		var returnMeasureReport = runEvaluateMeasure("2022-01-01", "2022-12-31", patientId, measureId, "Individual", null);
 
 		for (MeasureReport.MeasureReportGroupPopulationComponent population : returnMeasureReport.getGroupFirstRep()
-			.getPopulation()) {
-			switch (population.getCode().getCodingFirstRep().getCode()) {
-				case "initial-population":
-					assertEquals(initialPopulationCount, population.getCount());
-					break;
-				case "denominator":
-					assertEquals(denominatorCount, population.getCount());
-					break;
-				case "denominator-exclusion":
-					assertEquals(denominatorExclusionCount, population.getCount());
-					break;
-				case "numerator":
-					assertEquals(numeratorCount, population.getCount());
-					break;
-			}
-		}
+			.getPopulation())
+            switch (population.getCode().getCodingFirstRep().getCode()) {
+                case "initial-population" -> assertEquals(initialPopulationCount, population.getCount());
+                case "denominator" -> assertEquals(denominatorCount, population.getCount());
+                case "denominator-exclusion" -> assertEquals(denominatorExclusionCount, population.getCount());
+                case "numerator" -> assertEquals(numeratorCount, population.getCount());
+            }
 
 		Observation enrolledDuringParticipationPeriodObs = null;
 		Observation participationPeriodObs = null;
@@ -148,7 +141,7 @@ class R4MeasureOperationProviderIT extends BaseCrR4TestServer {
 	}
 
 	@Test
-	void testLargeValuesetMeasure() {
+	void testLargeValuesetMeasure() throws NoSuchElementException {
 		this.loadBundle("largeValueSetMeasureTest-Bundle.json");
 
 		var returnMeasureReport = runEvaluateMeasure("2023-01-01", "2024-01-01", null, "CMSTest", "population", null);
@@ -160,10 +153,12 @@ class R4MeasureOperationProviderIT extends BaseCrR4TestServer {
 			.getPopulation().stream().filter(x -> x.hasCode() && x.getCode().hasCoding()
 				&& x.getCode().getCoding().get(0).getCode().equals(populationName))
 			.findFirst();
-
-		assertEquals(population.get().getCount(), expectedCount,
-			String.format("expected count for population \"%s\" did not match", populationName));
-
+		assertTrue(population.isPresent(), String.format("population \"%s\" not found in report", populationName));
+		assertEquals(
+			expectedCount,
+			population.get().getCount(),
+			String.format("expected count for population \"%s\" did not match", populationName)
+		);
 	}
 
 
