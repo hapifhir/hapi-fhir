@@ -530,7 +530,8 @@ public class SearchQueryBuilder {
 				if (sql.startsWith("SELECT DISTINCT ")) {
 					if (sql.contains("order by @@version")) {
 						if (mySelectedResourceIdColumn != null) {
-							sql = sql.replace("order by @@version", "order by " + mySelectedResourceIdColumn.getColumnNameSQL());
+							sql = sql.replace(
+									"order by @@version", "order by " + mySelectedResourceIdColumn.getColumnNameSQL());
 						}
 					}
 				}
