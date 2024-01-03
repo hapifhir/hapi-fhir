@@ -620,11 +620,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		template.execute((TransactionCallback<ResourceTable>) t -> {
 			ResourceHistoryTable resourceHistoryTable = myResourceHistoryTableDao.findForIdAndVersionAndFetchProvenance(id.getIdPartAsLong(), id.getVersionIdPartAsLong());
 			resourceHistoryTable.setEncoding(ResourceEncodingEnum.JSON);
-			try {
-				resourceHistoryTable.setResource("{\"resourceType\":\"FOO\"}".getBytes("UTF-8"));
-			} catch (UnsupportedEncodingException e) {
-				throw new Error(e);
-			}
+			resourceHistoryTable.setResourceTextVc("{\"resourceType\":\"FOO\"}");
 			myResourceHistoryTableDao.save(resourceHistoryTable);
 
 			ResourceTable table = myResourceTableDao.findById(id.getIdPartAsLong()).orElseThrow(IllegalStateException::new);
@@ -1917,11 +1913,11 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 
 		Patient p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue(methodName);
-		myPatientDao.create(p, mySrd).getId();
+		myPatientDao.create(p, mySrd);
 
 		p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue(methodName);
-		myPatientDao.create(p, mySrd).getId();
+		myPatientDao.create(p, mySrd);
 
 		Observation o = new Observation();
 		o.getCode().setText("Some Observation");

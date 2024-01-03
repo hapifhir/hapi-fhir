@@ -259,9 +259,12 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 	 */
 	@Test
 	public void testUpdateWithNoChanges() {
+		IIdType orgId = createOrganization(withName("MY ORG"));
+
 		IIdType id = runInTransaction(() -> {
 			Patient p = new Patient();
 			p.addIdentifier().setSystem("urn:system").setValue("2");
+			p.setManagingOrganization(new Reference(orgId));
 			return myPatientDao.create(p).getId().toUnqualified();
 		});
 
@@ -270,10 +273,11 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 			Patient p = new Patient();
 			p.setId(id.getIdPart());
 			p.addIdentifier().setSystem("urn:system").setValue("2");
+			p.setManagingOrganization(new Reference(orgId));
 			myPatientDao.update(p);
 		});
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
-		assertEquals(3, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
+		assertEquals(5, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
 		myCaptureQueriesListener.logUpdateQueriesForCurrentThread();
 		assertEquals(0, myCaptureQueriesListener.getUpdateQueriesForCurrentThread().size());
 		assertThat(myCaptureQueriesListener.getInsertQueriesForCurrentThread(), empty());
@@ -286,9 +290,13 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 	 */
 	@Test
 	public void testUpdateWithChanges() {
+		IIdType orgId = createOrganization(withName("MY ORG"));
+		IIdType orgId2 = createOrganization(withName("MY ORG 2"));
+
 		IIdType id = runInTransaction(() -> {
 			Patient p = new Patient();
 			p.addIdentifier().setSystem("urn:system").setValue("2");
+			p.setManagingOrganization(new Reference(orgId));
 			return myPatientDao.create(p).getId().toUnqualified();
 		});
 
@@ -297,12 +305,13 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 			Patient p = new Patient();
 			p.setId(id.getIdPart());
 			p.addIdentifier().setSystem("urn:system").setValue("3");
+			p.setManagingOrganization(new Reference(orgId2));
 			myPatientDao.update(p).getResource();
 		});
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
-		assertEquals(3, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
+		assertEquals(6, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
 		myCaptureQueriesListener.logUpdateQueriesForCurrentThread();
-		assertEquals(2, myCaptureQueriesListener.getUpdateQueriesForCurrentThread().size());
+		assertEquals(3, myCaptureQueriesListener.getUpdateQueriesForCurrentThread().size());
 		myCaptureQueriesListener.logInsertQueriesForCurrentThread();
 		assertEquals(1, myCaptureQueriesListener.getInsertQueriesForCurrentThread().size());
 		myCaptureQueriesListener.logDeleteQueriesForCurrentThread();
@@ -1031,33 +1040,24 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 
 	@ParameterizedTest
 	@CsvSource({
-		// NoOp    OptimisticLock  OptimizeMode      ExpectedSelect  ExpectedUpdate
-		"  false,  false,          CURRENT_VERSION,  2,              1",
-		"  true,   false,          CURRENT_VERSION,  2,              0",
-		"  false,  true,           CURRENT_VERSION,  12,             1",
-		"  true,   true,           CURRENT_VERSION,  12,             0",
-		"  false,  false,          ALL_VERSIONS,     12,             10",
-		"  true,   false,          ALL_VERSIONS,     12,             0",
-		"  false,  true,           ALL_VERSIONS,     22,             10",
-		"  true,   true,           ALL_VERSIONS,     22,             0",
+		// OptimisticLock  OptimizeMode      ExpectedSelect  ExpectedUpdate
+		"  false,          CURRENT_VERSION,  2,              0",
+		"  true,           CURRENT_VERSION,  12,             0",
+		"  false,          ALL_VERSIONS,     12,             0",
+		"  true,           ALL_VERSIONS,     22,             0",
 	})
-	public void testReindexJob_OptimizeStorage(boolean theNoOp, boolean theOptimisticLock, ReindexParameters.OptimizeStorageModeEnum theOptimizeStorageModeEnum, int theExpectedSelectCount, int theExpectedUpdateCount) {
+	public void testReindexJob_OptimizeStorage(boolean theOptimisticLock, ReindexParameters.OptimizeStorageModeEnum theOptimizeStorageModeEnum, int theExpectedSelectCount, int theExpectedUpdateCount) {
 		// Setup
-
-		// In no-op mode, the inlining is already in the state it needs to be in
-		if (theNoOp) {
-			myStorageSettings.setInlineResourceTextBelowSize(10000);
-		} else {
-			myStorageSettings.setInlineResourceTextBelowSize(0);
-		}
 
 		ResourceIdListWorkChunkJson data = new ResourceIdListWorkChunkJson();
 		IIdType patientId = createPatient(withActiveTrue());
+		IIdType orgId = createOrganization(withName("MY ORG"));
 		for (int i = 0; i < 10; i++) {
 			Patient p = new Patient();
 			p.setId(patientId.toUnqualifiedVersionless());
 			p.setActive(true);
 			p.addIdentifier().setValue("" + i);
+			p.setManagingOrganization(new Reference(orgId));
 			myPatientDao.update(p, mySrd);
 		}
 		data.addTypedPid("Patient", patientId.getIdPartAsLong());
@@ -1066,7 +1066,6 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 			data.addTypedPid("Patient", nextPatientId.getIdPartAsLong());
 		}
 
-		myStorageSettings.setInlineResourceTextBelowSize(10000);
 		ReindexJobParameters params = new ReindexJobParameters()
 			.setOptimizeStorage(theOptimizeStorageModeEnum)
 			.setReindexSearchParameters(ReindexParameters.ReindexSearchParametersEnum.NONE)

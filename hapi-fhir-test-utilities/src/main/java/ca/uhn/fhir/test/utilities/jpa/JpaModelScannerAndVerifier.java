@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Test Utilities
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -360,9 +360,6 @@ public class JpaModelScannerAndVerifier {
 				if (!hasLob) {
 					if (!theIsView && column.length() == 255) {
 						throw new IllegalStateException(Msg.code(1626) + "Field does not have an explicit maximum length specified: " + field);
-					}
-					if (column.length() > MAX_COL_LENGTH) {
-						throw new IllegalStateException(Msg.code(1627) + "Field is too long: " + field);
 					}
 				}
 

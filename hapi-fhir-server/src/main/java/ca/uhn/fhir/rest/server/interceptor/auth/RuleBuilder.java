@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -252,6 +252,7 @@ public class RuleBuilder implements IAuthRuleBuilder {
 		private final String myRuleName;
 		private RuleBuilderRuleOp myReadRuleBuilder;
 		private RuleBuilderRuleOp myWriteRuleBuilder;
+		private RuleBuilderBulkExport ruleBuilderBulkExport;
 
 		RuleBuilderRule(PolicyEnum theRuleMode, String theRuleName) {
 			myRuleMode = theRuleMode;
@@ -333,7 +334,10 @@ public class RuleBuilder implements IAuthRuleBuilder {
 
 		@Override
 		public IAuthRuleBuilderRuleBulkExport bulkExport() {
-			return new RuleBuilderBulkExport();
+			if (ruleBuilderBulkExport == null) {
+				ruleBuilderBulkExport = new RuleBuilderBulkExport();
+			}
+			return ruleBuilderBulkExport;
 		}
 
 		@Override
@@ -859,6 +863,7 @@ public class RuleBuilder implements IAuthRuleBuilder {
 		}
 
 		private class RuleBuilderBulkExport implements IAuthRuleBuilderRuleBulkExport {
+			private RuleBulkExportImpl ruleBulkExport;
 
 			@Override
 			public IAuthRuleBuilderRuleBulkExportWithTarget groupExportOnGroup(@Nonnull String theFocusResourceId) {
@@ -872,12 +877,21 @@ public class RuleBuilder implements IAuthRuleBuilder {
 
 			@Override
 			public IAuthRuleBuilderRuleBulkExportWithTarget patientExportOnPatient(@Nonnull String theFocusResourceId) {
-				RuleBulkExportImpl rule = new RuleBulkExportImpl(myRuleName);
-				rule.setAppliesToPatientExport(theFocusResourceId);
-				rule.setMode(myRuleMode);
-				myRules.add(rule);
+				if (ruleBulkExport == null) {
+					RuleBulkExportImpl rule = new RuleBulkExportImpl(myRuleName);
+					rule.setAppliesToPatientExport(theFocusResourceId);
+					rule.setMode(myRuleMode);
+					ruleBulkExport = rule;
+				} else {
+					ruleBulkExport.setAppliesToPatientExport(theFocusResourceId);
+				}
 
-				return new RuleBuilderBulkExportWithTarget(rule);
+				// prevent duplicate rules being added
+				if (!myRules.contains(ruleBulkExport)) {
+					myRules.add(ruleBulkExport);
+				}
+
+				return new RuleBuilderBulkExportWithTarget(ruleBulkExport);
 			}
 
 			@Override
