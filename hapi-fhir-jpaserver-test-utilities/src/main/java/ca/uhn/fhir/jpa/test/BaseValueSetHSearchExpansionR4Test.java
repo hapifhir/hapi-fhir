@@ -52,6 +52,7 @@ import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import org.apache.commons.collections4.ListUtils;
 import org.apache.lucene.search.BooleanQuery;
+import org.apache.lucene.search.IndexSearcher;
 import org.hibernate.search.engine.search.predicate.dsl.PredicateFinalStep;
 import org.hibernate.search.engine.search.predicate.dsl.SearchPredicateFactory;
 import org.hibernate.search.engine.search.query.SearchQuery;
@@ -1935,7 +1936,7 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 
 		@BeforeEach
 		void generateLongSearchedCodesList() {
-			int codesQueriedCount = (int) (BooleanQuery.getMaxClauseCount() * 1.5);
+			int codesQueriedCount = 1500;
 			allCodesNotIncludingSearched = generateCodes(codesQueriedCount);
 
 			termCsId = createLoincSystemWithSomeCodes();
@@ -1952,7 +1953,7 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 
 		@Test
 		public void testHitsInFirstSublist() {
-			int insertIndex = BooleanQuery.getMaxClauseCount() / 2;
+			int insertIndex = IndexSearcher.getMaxClauseCount() / 2;
 
 			// insert existing codes into list of codes searched
 			allCodesNotIncludingSearched.addAll(insertIndex, existingCodes);

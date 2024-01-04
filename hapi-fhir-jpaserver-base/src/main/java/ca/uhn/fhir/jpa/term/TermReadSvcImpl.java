@@ -106,6 +106,7 @@ import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.time.DateUtils;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.search.BooleanQuery;
+import org.apache.lucene.search.IndexSearcher;
 import org.hibernate.CacheMode;
 import org.hibernate.search.engine.search.predicate.dsl.BooleanPredicateClausesStep;
 import org.hibernate.search.engine.search.predicate.dsl.PredicateFinalStep;
@@ -1293,7 +1294,6 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 
 		// BooleanQuery.setMaxClauseCount(SearchBuilder.getMaximumPageSize());
 		// TODO GGG HS looks like we can't set max clause count, but it can be set server side.
-		// BooleanQuery.setMaxClauseCount(10000);
 		// JM 22-02-15 - Hopefully increasing maxClauseCount should be not needed anymore
 
 		SearchQuery<EntityReference> termConceptsQuery = searchSession
@@ -1323,16 +1323,27 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 			return Optional.empty();
 		}
 
-		if (theCodes.size() < BooleanQuery.getMaxClauseCount()) {
+		if (theCodes.size() < IndexSearcher.getMaxClauseCount()) {
 			return Optional.of(thePredicate.simpleQueryString().field("myCode").matching(String.join(" | ", theCodes)));
+		} else if (IndexSearcher.getMaxClauseCount() < 10000){
+			/*
+			 * JA: Until Hibernate Search 7 (Lucene 9), it was good enough to
+			 * just split up the clauses into multiple should blocks as shown
+			 * below. But this doesn't work on Lucene 9 any longer. So we are
+			 * back to increasing the max clause count here. This only
+			 * affects Lucene, the fix below does still seem to work
+			 * for ElasticSearch which is what matters more anyhow since
+			 * it's what people should be using for real deployments.
+			 */
+			IndexSearcher.setMaxClauseCount(10000);
 		}
 
 		// Number of codes is larger than maxClauseCount, so we split the query in several clauses
 
 		// partition codes in lists of BooleanQuery.getMaxClauseCount() size
-		List<List<String>> listOfLists = ListUtils.partition(theCodes, BooleanQuery.getMaxClauseCount());
+		List<List<String>> listOfLists = ListUtils.partition(theCodes, IndexSearcher.getMaxClauseCount() - 1);
 
-		PredicateFinalStep step = thePredicate.bool(b -> {
+		PredicateFinalStep step = thePredicate.bool().with(b -> {
 			b.minimumShouldMatchNumber(1);
 			for (List<String> codeList : listOfLists) {
 				b.should(p -> p.simpleQueryString().field("myCode").matching(String.join(" | ", codeList)));
