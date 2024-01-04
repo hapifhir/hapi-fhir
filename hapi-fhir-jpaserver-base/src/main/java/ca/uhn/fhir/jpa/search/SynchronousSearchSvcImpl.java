@@ -71,7 +71,7 @@ public class SynchronousSearchSvcImpl implements ISynchronousSearchSvc {
 	private JpaStorageSettings myStorageSettings;
 
 	@Autowired
-	private SearchBuilderFactory mySearchBuilderFactory;
+	protected SearchBuilderFactory mySearchBuilderFactory;
 
 	@Autowired
 	private DaoRegistry myDaoRegistry;
