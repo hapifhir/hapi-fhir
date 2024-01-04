@@ -58,6 +58,7 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.interceptor.ResponseTerminologyTranslationSvc;
 import ca.uhn.fhir.util.BinaryUtil;
 import ca.uhn.fhir.util.FhirTerser;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
 import jakarta.annotation.Nonnull;
@@ -455,5 +456,10 @@ public class ExpandResourceAndWriteBinaryStep
 	 */
 	protected OutputStreamWriter getStreamWriter(ByteArrayOutputStream theOutputStream) {
 		return new OutputStreamWriter(theOutputStream, Constants.CHARSET_UTF8);
+	}
+
+	@VisibleForTesting
+	public void setIdHelperServiceForUnitTest(IIdHelperService theIdHelperService) {
+		myIdHelperService = theIdHelperService;
 	}
 }

@@ -48,6 +48,7 @@ import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.server.interceptor.ResponseTerminologyTranslationSvc;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
 import jakarta.annotation.Nonnull;
@@ -286,5 +287,10 @@ public class ExpandResourcesStep
 		// (but for now, only ndjson is supported
 		// see WriteBinaryStep as well
 		return myFhirContext.newJsonParser().setPrettyPrint(false);
+	}
+
+	@VisibleForTesting
+	public void setIdHelperServiceForUnitTest(IIdHelperService theIdHelperService) {
+		myIdHelperService = theIdHelperService;
 	}
 }
