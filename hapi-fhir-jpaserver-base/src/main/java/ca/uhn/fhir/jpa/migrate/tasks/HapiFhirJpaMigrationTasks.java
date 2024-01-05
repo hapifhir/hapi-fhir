@@ -168,7 +168,6 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		// For resolving references that don't supply the type.
 		hfjResource.addIndex("20231027.3", "IDX_RES_FHIR_ID").unique(false).withColumns("FHIR_ID");
 
-
 		Builder.BuilderWithTableName batch2JobInstanceTable = version.onTable("BT2_JOB_INSTANCE");
 
 		batch2JobInstanceTable.addColumn("20231128.1", "USER_NAME").nullable().type(ColumnTypeEnum.STRING, 200);
