@@ -102,42 +102,21 @@ public class MdmLinkExpandSvc implements IMdmLinkExpandSvc {
 					myMdmLinkDao.expandPidsBySourcePidAndMatchResult(theSourceResourcePid, MdmMatchResultEnum.MATCH);
 		} else {
 			if (theRequestPartitionId.isDefaultPartition()) {
-				goldenPidSourcePidTuples =
-					myMdmLinkDao.expandPidsBySourcePidAndMatchResultInPartitionNull(theSourceResourcePid, MdmMatchResultEnum.MATCH);
+				goldenPidSourcePidTuples = myMdmLinkDao.expandPidsBySourcePidAndMatchResultInPartitionNull(
+						theSourceResourcePid, MdmMatchResultEnum.MATCH);
 			} else if (theRequestPartitionId.hasDefaultPartitionId()) {
 				goldenPidSourcePidTuples =
-					myMdmLinkDao.expandPidsBySourcePidAndMatchResultInPartitionIdsOrNullPartition(theRequestPartitionId.getPartitionIdsWithoutDefault(), theSourceResourcePid, MdmMatchResultEnum.MATCH);
+						myMdmLinkDao.expandPidsBySourcePidAndMatchResultInPartitionIdsOrNullPartition(
+								theRequestPartitionId.getPartitionIdsWithoutDefault(),
+								theSourceResourcePid,
+								MdmMatchResultEnum.MATCH);
 			} else {
-				goldenPidSourcePidTuples =
-					myMdmLinkDao.expandPidsBySourcePidAndMatchResultInPartitionIds(theRequestPartitionId.getPartitionIds(), theSourceResourcePid, MdmMatchResultEnum.MATCH);
+				goldenPidSourcePidTuples = myMdmLinkDao.expandPidsBySourcePidAndMatchResultInPartitionIds(
+						theRequestPartitionId.getPartitionIds(), theSourceResourcePid, MdmMatchResultEnum.MATCH);
 			}
 		}
 
 		return flattenPidTuplesToSet(theSourceResourcePid, goldenPidSourcePidTuples);
-
-		// LUKETODO:  is this mutually exclusive with isAllPartitions()?
-		// LUKETODO:  extract isNull OK
-		/*
-		if (theRequestPartitionId.isAllPartitions()) {
-			lookup = myResourceTableDao.findLookupFieldsByResourcePid(thePidsToResolve);
-		} else {
-			// LUKETODO:  try to farm/replicate these patterns
-			if (theRequestPartitionId.isDefaultPartition()) {
-				lookup = myResourceTableDao.findLookupFieldsByResourcePidInPartitionNull(thePidsToResolve);
-			} else if (theRequestPartitionId.hasDefaultPartitionId()) {
-				lookup = myResourceTableDao.findLookupFieldsByResourcePidInPartitionIdsOrNullPartition(
-					thePidsToResolve, theRequestPartitionId.getPartitionIdsWithoutDefault());
-			} else {
-				lookup = myResourceTableDao.findLookupFieldsByResourcePidInPartitionIds(
-					thePidsToResolve, theRequestPartitionId.getPartitionIds());
-			}
-		}
-		 */
-
-		//		List<MdmPidTuple> goldenPidSourcePidTuples =
-		//			myMdmLinkDao.expandPidsBySourcePidAndMatchResultPartitionAware(theSourceResourcePid,
-		// MdmMatchResultEnum.MATCH);
-		//		return flattenPidTuplesToSet(theSourceResourcePid, goldenPidSourcePidTuples);
 	}
 
 	/**
@@ -163,10 +142,28 @@ public class MdmLinkExpandSvc implements IMdmLinkExpandSvc {
 	 * @return A set of strings representing the FHIR ids of the expanded resources.
 	 */
 	@Override
-	public Set<String> expandMdmByGoldenResourcePid(IResourcePersistentId theGoldenResourcePid) {
+	public Set<String> expandMdmByGoldenResourcePid(
+			RequestPartitionId theRequestPartitionId, IResourcePersistentId theGoldenResourcePid) {
 		ourLog.debug("About to expand golden resource with PID {}", theGoldenResourcePid);
-		List<MdmPidTuple> goldenPidSourcePidTuples = myMdmLinkDao.expandPidsByGoldenResourcePidAndMatchResult(
-				theGoldenResourcePid, MdmMatchResultEnum.MATCH);
+		List<MdmPidTuple> goldenPidSourcePidTuples = null;
+		if (theRequestPartitionId.isAllPartitions()) {
+			goldenPidSourcePidTuples = myMdmLinkDao.expandPidsByGoldenResourcePidAndMatchResult(
+					theGoldenResourcePid, MdmMatchResultEnum.MATCH);
+		} else {
+			if (theRequestPartitionId.isDefaultPartition()) {
+				goldenPidSourcePidTuples = myMdmLinkDao.expandPidsByGoldenPidAndMatchResultInPartitionNull(
+						theGoldenResourcePid, MdmMatchResultEnum.MATCH);
+			} else if (theRequestPartitionId.hasDefaultPartitionId()) {
+				goldenPidSourcePidTuples =
+						myMdmLinkDao.expandPidsByGoldenResourcePidAndMatchResultInPartitionIdsOrNullPartition(
+								theRequestPartitionId.getPartitionIdsWithoutDefault(),
+								theGoldenResourcePid,
+								MdmMatchResultEnum.MATCH);
+			} else {
+				goldenPidSourcePidTuples = myMdmLinkDao.expandPidsByGoldenResourcePidAndMatchResultInPartitionIds(
+						theRequestPartitionId.getPartitionIds(), theGoldenResourcePid, MdmMatchResultEnum.MATCH);
+			}
+		}
 		return flattenPidTuplesToSet(theGoldenResourcePid, goldenPidSourcePidTuples);
 	}
 
@@ -175,7 +172,7 @@ public class MdmLinkExpandSvc implements IMdmLinkExpandSvc {
 		ourLog.debug("About to expand golden resource with golden resource id {}", theId);
 		IResourcePersistentId pidOrThrowException =
 				myIdHelperService.getPidOrThrowException(RequestPartitionId.allPartitions(), theId);
-		return expandMdmByGoldenResourcePid(pidOrThrowException);
+		return expandMdmByGoldenResourcePid(theRequestPartitionId, pidOrThrowException);
 	}
 
 	// LUKETODO:  make this partition aware

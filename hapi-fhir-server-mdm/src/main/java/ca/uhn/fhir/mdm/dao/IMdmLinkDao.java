@@ -112,11 +112,38 @@ public interface IMdmLinkDao<P extends IResourcePersistentId, M extends IMdmLink
 	}
 
 	// LUKETODO:  javadoc
-	List<MdmPidTuple<P>> expandPidsBySourcePidAndMatchResultInPartitionNull(P theSourceResourcePid, MdmMatchResultEnum mdmMatchResultEnum);
+	default List<MdmPidTuple<P>> expandPidsBySourcePidAndMatchResultInPartitionNull(
+			P theSourcePid, MdmMatchResultEnum theMdmMatchResultEnum) {
+		throw new UnsupportedOperationException("Method not supported on platform");
+	}
 
 	// LUKETODO:  javadoc
-	List<MdmPidTuple<P>> expandPidsBySourcePidAndMatchResultInPartitionIdsOrNullPartition(List<Integer> partitionIdsWithoutDefault, P theSourceResourcePid, MdmMatchResultEnum mdmMatchResultEnum);
+	default List<MdmPidTuple<P>> expandPidsBySourcePidAndMatchResultInPartitionIdsOrNullPartition(
+			List<Integer> thePartitionIdsWithoutDefault, P theSourcePid, MdmMatchResultEnum theMdmMatchResultEnum) {
+		throw new UnsupportedOperationException("Method not supported on platform");
+	}
 
 	// LUKETODO:  javadoc
-	List<MdmPidTuple<P>> expandPidsBySourcePidAndMatchResultInPartitionIds(List<Integer> partitionIds, P theSourceResourcePid, MdmMatchResultEnum mdmMatchResultEnum);
+	default List<MdmPidTuple<P>> expandPidsBySourcePidAndMatchResultInPartitionIds(
+			List<Integer> thePartitionIds, P theSourceResourcePid, MdmMatchResultEnum theMdmMatchResultEnum) {
+		throw new UnsupportedOperationException("Method not supported on platform");
+	}
+
+	// LUKETODO:  javadoc
+	default List<MdmPidTuple<P>> expandPidsByGoldenPidAndMatchResultInPartitionNull(
+			P theGoldenResourcePid, MdmMatchResultEnum mdmMatchResultEnum) {
+		throw new UnsupportedOperationException("Method not supported on platform");
+	}
+
+	// LUKETODO:  javadoc
+	default List<MdmPidTuple<P>> expandPidsByGoldenResourcePidAndMatchResultInPartitionIdsOrNullPartition(
+			List<Integer> partitionIdsWithoutDefault, P theGoldenResourcePid, MdmMatchResultEnum mdmMatchResultEnum) {
+		throw new UnsupportedOperationException("Method not supported on platform");
+	}
+
+	// LUKETODO:  javadoc
+	default List<MdmPidTuple<P>> expandPidsByGoldenResourcePidAndMatchResultInPartitionIds(
+			List<Integer> partitionIds, P theGoldenResourcePid, MdmMatchResultEnum mdmMatchResultEnum) {
+		throw new UnsupportedOperationException("Method not supported on platform");
+	}
 }

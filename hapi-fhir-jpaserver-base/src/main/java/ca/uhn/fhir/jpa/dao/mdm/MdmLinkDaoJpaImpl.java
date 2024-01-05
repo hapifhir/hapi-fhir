@@ -149,21 +149,70 @@ public class MdmLinkDaoJpaImpl implements IMdmLinkDao<JpaPid, MdmLink> {
 	}
 
 	@Override
-	public List<MdmPidTuple<JpaPid>> expandPidsBySourcePidAndMatchResultInPartitionIds(List<Integer> partitionIds, JpaPid theSourceResourcePid, MdmMatchResultEnum mdmMatchResultEnum) {
-		// LUKETODO:  implement
-		return null;
+	public List<MdmPidTuple<JpaPid>> expandPidsByGoldenPidAndMatchResultInPartitionNull(
+			JpaPid theGoldenResourcePid, MdmMatchResultEnum theMdmMatchResultEnum) {
+		return myMdmLinkDao
+				.expandPidsByGoldenPidAndMatchResultInPartitionNull(
+						(theGoldenResourcePid).getId(), theMdmMatchResultEnum)
+				.stream()
+				.map(this::daoTupleToMdmTuple)
+				.collect(Collectors.toList());
 	}
 
 	@Override
-	public List<MdmPidTuple<JpaPid>> expandPidsBySourcePidAndMatchResultInPartitionIdsOrNullPartition(List<Integer> partitionIdsWithoutDefault, JpaPid theSourceResourcePid, MdmMatchResultEnum mdmMatchResultEnum) {
-		// LUKETODO:  implement
-		return null;
+	public List<MdmPidTuple<JpaPid>> expandPidsByGoldenResourcePidAndMatchResultInPartitionIds(
+			List<Integer> thePartitionIds, JpaPid theGoldenResourcePid, MdmMatchResultEnum theMdmMatchResultEnum) {
+		return myMdmLinkDao
+				.expandPidsByGoldenResourcePidAndMatchResultInPartitionIds(
+						thePartitionIds, (theGoldenResourcePid).getId(), theMdmMatchResultEnum)
+				.stream()
+				.map(this::daoTupleToMdmTuple)
+				.collect(Collectors.toList());
 	}
 
 	@Override
-	public List<MdmPidTuple<JpaPid>> expandPidsBySourcePidAndMatchResultInPartitionNull(JpaPid theSourceResourcePid, MdmMatchResultEnum mdmMatchResultEnum) {
-		// LUKETODO:  implement
-		return null;
+	public List<MdmPidTuple<JpaPid>> expandPidsByGoldenResourcePidAndMatchResultInPartitionIdsOrNullPartition(
+			List<Integer> thePartitionIds, JpaPid theGoldenResourcePid, MdmMatchResultEnum theMdmMatchResultEnum) {
+		return myMdmLinkDao
+				.expandPidsByGoldenResourcePidAndMatchResultInPartitionIdsOrNullPartition(
+						thePartitionIds, (theGoldenResourcePid).getId(), theMdmMatchResultEnum)
+				.stream()
+				.map(this::daoTupleToMdmTuple)
+				.collect(Collectors.toList());
+	}
+
+	@Override
+	public List<MdmPidTuple<JpaPid>> expandPidsBySourcePidAndMatchResultInPartitionIds(
+			List<Integer> thePartitionIds, JpaPid theSourcePid, MdmMatchResultEnum theMdmMatchResultEnum) {
+		return myMdmLinkDao
+				.expandPidsBySourcePidAndMatchResultInPartitionIds(
+						thePartitionIds, (theSourcePid).getId(), theMdmMatchResultEnum)
+				.stream()
+				.map(this::daoTupleToMdmTuple)
+				.collect(Collectors.toList());
+	}
+
+	@Override
+	public List<MdmPidTuple<JpaPid>> expandPidsBySourcePidAndMatchResultInPartitionIdsOrNullPartition(
+			List<Integer> thePartitionIdsWithoutDefault,
+			JpaPid theSourcePid,
+			MdmMatchResultEnum theMdmMatchResultEnum) {
+		return myMdmLinkDao
+				.expandPidsBySourcePidAndMatchResultInPartitionIdsOrNullPartition(
+						thePartitionIdsWithoutDefault, (theSourcePid).getId(), theMdmMatchResultEnum)
+				.stream()
+				.map(this::daoTupleToMdmTuple)
+				.collect(Collectors.toList());
+	}
+
+	@Override
+	public List<MdmPidTuple<JpaPid>> expandPidsBySourcePidAndMatchResultInPartitionNull(
+			JpaPid theSourcePid, MdmMatchResultEnum theMdmMatchResultEnum) {
+		return myMdmLinkDao
+				.expandPidsBySourcePidAndMatchResultInPartitionNull((theSourcePid).getId(), theMdmMatchResultEnum)
+				.stream()
+				.map(this::daoTupleToMdmTuple)
+				.collect(Collectors.toList());
 	}
 
 	@Override

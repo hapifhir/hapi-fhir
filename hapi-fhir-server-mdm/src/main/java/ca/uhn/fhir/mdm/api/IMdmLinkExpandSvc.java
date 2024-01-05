@@ -37,7 +37,8 @@ public interface IMdmLinkExpandSvc {
 
 	Set<String> expandMdmByGoldenResourceId(IResourcePersistentId theGoldenResourcePid);
 
-	Set<String> expandMdmByGoldenResourcePid(IResourcePersistentId theGoldenResourcePid);
+	Set<String> expandMdmByGoldenResourcePid(
+			RequestPartitionId theRequestPartitionId, IResourcePersistentId theGoldenResourcePid);
 
 	Set<String> expandMdmByGoldenResourceId(RequestPartitionId theRequestPartitionId, IdDt theId);
 }

@@ -69,9 +69,11 @@ public class MdmSearchExpandingInterceptor {
 	public void hook(RequestDetails theRequestDetails, SearchParameterMap theSearchParameterMap) {
 		if (myStorageSettings.isAllowMdmExpansion()) {
 			// LUKETODO:  is this right?  should we really be passing null?
-			final RequestDetails requestDetailsToUse = theRequestDetails == null ? new SystemRequestDetails() : theRequestDetails;
-			final RequestPartitionId requestPartitionId = myRequestPartitionHelperSvc.determineReadPartitionForRequestForSearchType(
-						requestDetailsToUse , requestDetailsToUse.getResourceName(), theSearchParameterMap, null);
+			final RequestDetails requestDetailsToUse =
+					theRequestDetails == null ? new SystemRequestDetails() : theRequestDetails;
+			final RequestPartitionId requestPartitionId =
+					myRequestPartitionHelperSvc.determineReadPartitionForRequestForSearchType(
+							requestDetailsToUse, requestDetailsToUse.getResourceName(), theSearchParameterMap, null);
 			for (Map.Entry<String, List<List<IQueryParameterType>>> set : theSearchParameterMap.entrySet()) {
 				String paramName = set.getKey();
 				List<List<IQueryParameterType>> andList = set.getValue();

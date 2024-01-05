@@ -29,7 +29,6 @@ import org.springframework.data.repository.history.RevisionRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -81,9 +80,8 @@ public interface IMdmLinkJpaRepository
 		Long getSourcePid();
 	}
 
-	// LUKETODO:  new query that joins to Resource and filters on partition/tenant ID  each of these
-	// LUKETODO:  Mongo?
-	@Query("SELECT ml.myGoldenResourcePid as goldenPid, ml.mySourcePid as sourcePid " + "FROM MdmLink ml "
+	@Query("SELECT ml.myGoldenResourcePid as goldenPid, ml.mySourcePid as sourcePid "
+			+ "FROM MdmLink ml "
 			+ "INNER JOIN MdmLink ml2 "
 			+ "on ml.myGoldenResourcePid=ml2.myGoldenResourcePid "
 			+ "WHERE ml2.mySourcePid=:sourcePid "
@@ -92,23 +90,46 @@ public interface IMdmLinkJpaRepository
 	List<MdmPidTuple> expandPidsBySourcePidAndMatchResult(
 			@Param("sourcePid") Long theSourcePid, @Param("matchResult") MdmMatchResultEnum theMdmMatchResultEnum);
 
-	// LUKETODO:  join null friendly default partition ID is null friendly
+	@Query("SELECT ml.myGoldenResourcePid as goldenPid, ml.mySourcePid as sourcePid "
+			+ "FROM MdmLink ml "
+			+ "INNER JOIN MdmLink ml2 "
+			+ "on ml.myGoldenResourcePid=ml2.myGoldenResourcePid "
+			+ "WHERE ml2.mySourcePid=:sourcePid "
+			+ "AND ml2.myMatchResult=:matchResult "
+			+ "AND ml2.myPartitionId IN :partitionIds "
+			+ "AND ml.myMatchResult=:matchResult "
+			+ "AND ml.myPartitionId IN :partitionIds")
+	List<MdmPidTuple> expandPidsBySourcePidAndMatchResultInPartitionIds(
+			@Param("partitionIds") List<Integer> thePartitionIds,
+			@Param("sourcePid") Long id,
+			@Param("matchResult") MdmMatchResultEnum theMdmMatchResultEnum);
+
+	@Query("SELECT ml.myGoldenResourcePid as goldenPid, ml.mySourcePid as sourcePid "
+			+ "FROM MdmLink ml "
+			+ "INNER JOIN MdmLink ml2 "
+			+ "on ml.myGoldenResourcePid=ml2.myGoldenResourcePid "
+			+ "WHERE ml2.mySourcePid=:sourcePid "
+			+ "AND ml2.myMatchResult=:matchResult "
+			+ "AND ( ml2.myPartitionId IN :partitionIds "
+			+ "OR ml2.myPartitionId IS NULL )"
+			+ "AND ml.myMatchResult=:matchResult "
+			+ "AND ( ml.myPartitionId IN :partitionIds "
+			+ "OR ml.myPartitionId IS NULL )")
+	List<MdmPidTuple> expandPidsBySourcePidAndMatchResultInPartitionIdsOrNullPartition(
+			@Param("partitionIds") List<Integer> thePartitionIds,
+			@Param("sourcePid") Long id,
+			@Param("matchResult") MdmMatchResultEnum theMdmMatchResultEnum);
+
 	@Query("SELECT ml.myGoldenResourcePid as goldenPid, ml.mySourcePid as sourcePid " + "FROM MdmLink ml "
 			+ "INNER JOIN MdmLink ml2 "
 			+ "on ml.myGoldenResourcePid=ml2.myGoldenResourcePid "
 			+ "WHERE ml2.mySourcePid=:sourcePid "
 			+ "AND ml2.myMatchResult=:matchResult "
-			+ "AND ml.myMatchResult=:matchResult")
-	List<MdmPidTuple> expandPidsBySourcePidAndMatchResultPartitionAware(
-			@Param("sourcePid") Long theSourcePid, @Param("matchResult") MdmMatchResultEnum theMdmMatchResultEnum);
-
-	// LUKETODO:  this is just an example
-	@Query(
-			"SELECT t.myResourceType, t.myId, t.myDeleted FROM ResourceTable t WHERE t.myId IN (:pid) AND ((t.myPartitionIdValue IS NULL AND :allowNullPartition = true) OR t.myPartitionIdValue IN :partition_id)")
-	Collection<Object[]> something(
-			@Param("pid") List<Long> thePids,
-			@Param("allowNullPartition") boolean theAllowNullPartition,
-			@Param("partition_id") Collection<Integer> thePartitionId);
+			+ "AND ml2.myPartitionId IS NULL "
+			+ "AND ml.myMatchResult=:matchResult "
+			+ "AND ml.myPartitionId IS NULL")
+	List<MdmPidTuple> expandPidsBySourcePidAndMatchResultInPartitionNull(
+			@Param("sourcePid") Long id, @Param("matchResult") MdmMatchResultEnum theMdmMatchResultEnum);
 
 	@Query("SELECT ml " + "FROM MdmLink ml "
 			+ "INNER JOIN MdmLink ml2 "
@@ -123,6 +144,25 @@ public interface IMdmLinkJpaRepository
 			"SELECT ml.myGoldenResourcePid as goldenPid, ml.mySourcePid as sourcePid FROM MdmLink ml WHERE ml.myGoldenResourcePid = :goldenPid and ml.myMatchResult = :matchResult")
 	List<MdmPidTuple> expandPidsByGoldenResourcePidAndMatchResult(
 			@Param("goldenPid") Long theSourcePid, @Param("matchResult") MdmMatchResultEnum theMdmMatchResultEnum);
+
+	@Query(
+			"SELECT ml.myGoldenResourcePid AS goldenPid, ml.mySourcePid AS sourcePid FROM MdmLink ml WHERE ml.myGoldenResourcePid = :goldenPid AND ml.myMatchResult = :matchResult AND ml.myPartitionId IN :partitionIds")
+	List<MdmPidTuple> expandPidsByGoldenResourcePidAndMatchResultInPartitionIds(
+			@Param("partitionIds") List<Integer> thePartitionIds,
+			@Param("goldenPid") Long id,
+			@Param("matchResult") MdmMatchResultEnum theMdmMatchResultEnum);
+
+	@Query(
+			"SELECT ml.myGoldenResourcePid AS goldenPid, ml.mySourcePid AS sourcePid FROM MdmLink ml WHERE ml.myGoldenResourcePid = :goldenPid AND ml.myMatchResult = :matchResult AND (ml.myPartitionIdValue IS NULL OR ml.myPartitionIdValue IN :partitionIds)")
+	List<MdmPidTuple> expandPidsByGoldenResourcePidAndMatchResultInPartitionIdsOrNullPartition(
+			@Param("partitionIds") List<Integer> thePartitionIds,
+			@Param("goldenPid") Long id,
+			@Param("matchResult") MdmMatchResultEnum theMdmMatchResultEnum);
+
+	@Query(
+			"SELECT ml.myGoldenResourcePid AS goldenPid, ml.mySourcePid AS sourcePid FROM MdmLink ml WHERE ml.myGoldenResourcePid = :goldenPid AND ml.myMatchResult = :matchResult AND ml.myPartitionIdValue IS NULL")
+	List<MdmPidTuple> expandPidsByGoldenPidAndMatchResultInPartitionNull(
+			@Param("goldenPid") Long id, @Param("matchResult") MdmMatchResultEnum theMdmMatchResultEnum);
 
 	@Query(
 			"SELECT ml.myId FROM MdmLink ml WHERE ml.myMdmSourceType = :resourceName AND ml.myCreated <= :highThreshold ORDER BY ml.myCreated DESC")
