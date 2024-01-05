@@ -1936,7 +1936,7 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 
 		@BeforeEach
 		void generateLongSearchedCodesList() {
-			int codesQueriedCount = 1500;
+			int codesQueriedCount = (int) (BooleanQuery.getMaxClauseCount() * 1.5);
 			allCodesNotIncludingSearched = generateCodes(codesQueriedCount);
 
 			termCsId = createLoincSystemWithSomeCodes();

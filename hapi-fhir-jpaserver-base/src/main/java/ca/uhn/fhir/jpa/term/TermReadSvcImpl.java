@@ -1294,6 +1294,7 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 
 		// BooleanQuery.setMaxClauseCount(SearchBuilder.getMaximumPageSize());
 		// TODO GGG HS looks like we can't set max clause count, but it can be set server side.
+		// BooleanQuery.setMaxClauseCount(10000);
 		// JM 22-02-15 - Hopefully increasing maxClauseCount should be not needed anymore
 
 		SearchQuery<EntityReference> termConceptsQuery = searchSession
@@ -1325,17 +1326,6 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 
 		if (theCodes.size() < IndexSearcher.getMaxClauseCount()) {
 			return Optional.of(thePredicate.simpleQueryString().field("myCode").matching(String.join(" | ", theCodes)));
-		} else if (IndexSearcher.getMaxClauseCount() < 10000){
-			/*
-			 * JA: Until Hibernate Search 7 (Lucene 9), it was good enough to
-			 * just split up the clauses into multiple should blocks as shown
-			 * below. But this doesn't work on Lucene 9 any longer. So we are
-			 * back to increasing the max clause count here. This only
-			 * affects Lucene, the fix below does still seem to work
-			 * for ElasticSearch which is what matters more anyhow since
-			 * it's what people should be using for real deployments.
-			 */
-			IndexSearcher.setMaxClauseCount(10000);
 		}
 
 		// Number of codes is larger than maxClauseCount, so we split the query in several clauses
