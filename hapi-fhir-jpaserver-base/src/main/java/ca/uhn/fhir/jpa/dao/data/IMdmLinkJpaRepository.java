@@ -29,6 +29,7 @@ import org.springframework.data.repository.history.RevisionRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -80,6 +81,8 @@ public interface IMdmLinkJpaRepository
 		Long getSourcePid();
 	}
 
+	// LUKETODO:  new query that joins to Resource and filters on partition/tenant ID  each of these
+	// LUKETODO:  Mongo?
 	@Query("SELECT ml.myGoldenResourcePid as goldenPid, ml.mySourcePid as sourcePid " + "FROM MdmLink ml "
 			+ "INNER JOIN MdmLink ml2 "
 			+ "on ml.myGoldenResourcePid=ml2.myGoldenResourcePid "
@@ -88,6 +91,24 @@ public interface IMdmLinkJpaRepository
 			+ "AND ml.myMatchResult=:matchResult")
 	List<MdmPidTuple> expandPidsBySourcePidAndMatchResult(
 			@Param("sourcePid") Long theSourcePid, @Param("matchResult") MdmMatchResultEnum theMdmMatchResultEnum);
+
+	// LUKETODO:  join null friendly default partition ID is null friendly
+	@Query("SELECT ml.myGoldenResourcePid as goldenPid, ml.mySourcePid as sourcePid " + "FROM MdmLink ml "
+			+ "INNER JOIN MdmLink ml2 "
+			+ "on ml.myGoldenResourcePid=ml2.myGoldenResourcePid "
+			+ "WHERE ml2.mySourcePid=:sourcePid "
+			+ "AND ml2.myMatchResult=:matchResult "
+			+ "AND ml.myMatchResult=:matchResult")
+	List<MdmPidTuple> expandPidsBySourcePidAndMatchResultPartitionAware(
+			@Param("sourcePid") Long theSourcePid, @Param("matchResult") MdmMatchResultEnum theMdmMatchResultEnum);
+
+	// LUKETODO:  this is just an example
+	@Query(
+			"SELECT t.myResourceType, t.myId, t.myDeleted FROM ResourceTable t WHERE t.myId IN (:pid) AND ((t.myPartitionIdValue IS NULL AND :allowNullPartition = true) OR t.myPartitionIdValue IN :partition_id)")
+	Collection<Object[]> something(
+			@Param("pid") List<Long> thePids,
+			@Param("allowNullPartition") boolean theAllowNullPartition,
+			@Param("partition_id") Collection<Integer> thePartitionId);
 
 	@Query("SELECT ml " + "FROM MdmLink ml "
 			+ "INNER JOIN MdmLink ml2 "

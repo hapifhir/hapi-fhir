@@ -13,6 +13,7 @@ import ca.uhn.fhir.mdm.api.MdmConstants;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.param.ReferenceOrListParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
@@ -135,12 +136,14 @@ public class MdmSearchExpandingInterceptorIT extends BaseMdmR4Test {
 
 		//With MDM Expansion disabled, this should return 1 result.
 		myStorageSettings.setAllowMdmExpansion(false);
-		IBundleProvider search = myObservationDao.search(searchParameterMap);
+		// LUKETODO: anything else I need in SystemRequestDetails?
+		IBundleProvider search = myObservationDao.search(searchParameterMap, new SystemRequestDetails());
 		assertThat(search.size(), is(equalTo(1)));
 
 		//Once MDM Expansion is allowed, this should now return 4 resourecs.
 		myStorageSettings.setAllowMdmExpansion(true);
-		search = myObservationDao.search(searchParameterMap);
+		// LUKETODO: anything else I need in SystemRequestDetails?
+		search = myObservationDao.search(searchParameterMap, new SystemRequestDetails());
 		assertThat(search.size(), is(equalTo(4)));
 		List<MdmLink> all = myMdmLinkDao.findAll();
 		Long goldenPid = all.get(0).getGoldenResourcePid();
@@ -153,7 +156,8 @@ public class MdmSearchExpandingInterceptorIT extends BaseMdmR4Test {
 		goldenReferenceOrListParam.addOr(new ReferenceParam(goldenId).setMdmExpand(true));
 		goldenSpMap.add(Observation.SP_SUBJECT, goldenReferenceOrListParam);
 
-		search = myObservationDao.search(goldenSpMap);
+		// LUKETODO: anything else I need in SystemRequestDetails?
+		search = myObservationDao.search(goldenSpMap, new SystemRequestDetails());
 		assertThat(search.size(), is(equalTo(resourceCount)));
 	}
 
@@ -171,12 +175,14 @@ public class MdmSearchExpandingInterceptorIT extends BaseMdmR4Test {
 
 		//With MDM Expansion disabled, this should return 1 result.
 		myStorageSettings.setAllowMdmExpansion(false);
-		IBundleProvider search = myObservationDao.search(searchParameterMap);
+		// LUKETODO: anything else I need in SystemRequestDetails?
+		IBundleProvider search = myObservationDao.search(searchParameterMap, new SystemRequestDetails());
 		assertThat(search.size(), is(equalTo(1)));
 
 		//Once MDM Expansion is allowed, this should now return 4 resourecs.
 		myStorageSettings.setAllowMdmExpansion(true);
-		search = myObservationDao.search(searchParameterMap);
+		// LUKETODO: anything else I need in SystemRequestDetails?
+		search = myObservationDao.search(searchParameterMap, new SystemRequestDetails());
 		assertThat(search.size(), is(equalTo(4)));
 		List<MdmLink> all = myMdmLinkDao.findAll();
 		Long goldenPid = all.get(0).getGoldenResourcePid();
@@ -189,7 +195,8 @@ public class MdmSearchExpandingInterceptorIT extends BaseMdmR4Test {
 		goldenReferenceOrListParam.addOr(new ReferenceParam(goldenId).setMdmExpand(true));
 		goldenSpMap.add(Observation.SP_SUBJECT, goldenReferenceOrListParam);
 
-		search = myObservationDao.search(goldenSpMap);
+		// LUKETODO: anything else I need in SystemRequestDetails?
+		search = myObservationDao.search(goldenSpMap, new SystemRequestDetails());
 		assertThat(search.size(), is(equalTo(resourceCount)));
 	}
 
@@ -209,7 +216,8 @@ public class MdmSearchExpandingInterceptorIT extends BaseMdmR4Test {
 		orListParam.add(patientIdParam);
 		map.add("_id", orListParam);
 
-		IBundleProvider outcome = myPatientDao.search(map);
+		// LUKETODO: anything else I need in SystemRequestDetails?
+		IBundleProvider outcome = myPatientDao.search(map, new SystemRequestDetails());
 
 		Assertions.assertNotNull(outcome);
 		// we know 4 cause that's how many patients are created
@@ -267,15 +275,47 @@ public class MdmSearchExpandingInterceptorIT extends BaseMdmR4Test {
 		//Even though the user has NO mdm links, that should not cause a request failure.
 		SearchParameterMap map = new SearchParameterMap();
 		map.add(Observation.SP_SUBJECT, new ReferenceParam("Patient/" + id).setMdmExpand(true));
-		IBundleProvider search = myObservationDao.search(map);
+		// LUKETODO: anything else I need in SystemRequestDetails?
+		IBundleProvider search = myObservationDao.search(map, new SystemRequestDetails());
 		assertThat(search.size(), is(equalTo(1)));
+	}
+
+	@Test
+	public void testMdmMultitenant() throws InterruptedException {
+		int resourceCount = 4;
+		List<String> expectedIds = createAndLinkNewResources(resourceCount);
+		String patientId = expectedIds.get(0);
+
+		myStorageSettings.setAllowMdmExpansion(true);
+
+		SearchParameterMap map = new SearchParameterMap();
+		TokenOrListParam orListParam = new TokenOrListParam();
+		TokenParam patientIdParam = new TokenParam();
+		patientIdParam.setValue(patientId);
+		patientIdParam.setMdmExpand(true);
+		orListParam.add(patientIdParam);
+		map.add("_id", orListParam);
+
+		// LUKETODO: anything else I need in SystemRequestDetails?
+		IBundleProvider outcome = myPatientDao.search(map, new SystemRequestDetails());
+
+		Assertions.assertNotNull(outcome);
+		// we know 4 cause that's how many patients are created
+		// plus one golden resource
+		Assertions.assertEquals(resourceCount + 1, outcome.size());
+		List<String> resourceIds = outcome.getAllResourceIds();
+		// check the patients - first 4 ids
+		for (int i = 0; i < resourceIds.size() - 1; i++) {
+			Assertions.assertTrue(resourceIds.contains(expectedIds.get(i)));
+		}
 	}
 
 	private Observation createObservationWithSubject(String thePatientId) {
 		Observation observation = new Observation();
 		observation.setSubject(new Reference("Patient/" + thePatientId));
 		observation.setCode(new CodeableConcept().setText("Made for Patient/" + thePatientId));
-		DaoMethodOutcome daoMethodOutcome = myObservationDao.create(observation);
+		// LUKETODO: anything else I need in SystemRequestDetails?
+		DaoMethodOutcome daoMethodOutcome = myObservationDao.create(observation, new SystemRequestDetails());
 		return (Observation) daoMethodOutcome.getResource();
 	}
 }

@@ -149,6 +149,24 @@ public class MdmLinkDaoJpaImpl implements IMdmLinkDao<JpaPid, MdmLink> {
 	}
 
 	@Override
+	public List<MdmPidTuple<JpaPid>> expandPidsBySourcePidAndMatchResultInPartitionIds(List<Integer> partitionIds, JpaPid theSourceResourcePid, MdmMatchResultEnum mdmMatchResultEnum) {
+		// LUKETODO:  implement
+		return null;
+	}
+
+	@Override
+	public List<MdmPidTuple<JpaPid>> expandPidsBySourcePidAndMatchResultInPartitionIdsOrNullPartition(List<Integer> partitionIdsWithoutDefault, JpaPid theSourceResourcePid, MdmMatchResultEnum mdmMatchResultEnum) {
+		// LUKETODO:  implement
+		return null;
+	}
+
+	@Override
+	public List<MdmPidTuple<JpaPid>> expandPidsBySourcePidAndMatchResultInPartitionNull(JpaPid theSourceResourcePid, MdmMatchResultEnum mdmMatchResultEnum) {
+		// LUKETODO:  implement
+		return null;
+	}
+
+	@Override
 	public List<JpaPid> findPidByResourceNameAndThreshold(
 			String theResourceName, Date theHighThreshold, Pageable thePageable) {
 		return myMdmLinkDao.findPidByResourceNameAndThreshold(theResourceName, theHighThreshold, thePageable).stream()

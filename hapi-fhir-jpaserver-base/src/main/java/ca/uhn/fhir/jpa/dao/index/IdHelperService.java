@@ -230,7 +230,8 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 							MemoryCacheService.CacheEnum.FORCED_ID_TO_PID, key, t -> {
 								List<IIdType> ids = Collections.singletonList(new IdType(theResourceType, id));
 								// fetches from cache using a function that checks cache first...
-								List<JpaPid> resolvedIds = resolveResourcePersistentIdsWithCache(theRequestPartitionId, ids);
+								List<JpaPid> resolvedIds =
+										resolveResourcePersistentIdsWithCache(theRequestPartitionId, ids);
 								if (resolvedIds.isEmpty()) {
 									throw new ResourceNotFoundException(Msg.code(1100) + ids.get(0));
 								}
@@ -612,6 +613,7 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 			if (theRequestPartitionId.isAllPartitions()) {
 				lookup = myResourceTableDao.findLookupFieldsByResourcePid(thePidsToResolve);
 			} else {
+				// LUKETODO:  try to farm/replicate these patterns
 				if (theRequestPartitionId.isDefaultPartition()) {
 					lookup = myResourceTableDao.findLookupFieldsByResourcePidInPartitionNull(thePidsToResolve);
 				} else if (theRequestPartitionId.hasDefaultPartitionId()) {

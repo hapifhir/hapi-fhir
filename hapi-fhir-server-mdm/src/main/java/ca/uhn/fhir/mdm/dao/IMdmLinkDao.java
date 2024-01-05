@@ -110,4 +110,13 @@ public interface IMdmLinkDao<P extends IResourcePersistentId, M extends IMdmLink
 	default List<MdmLinkWithRevision<M>> getHistoryForIds(MdmHistorySearchParameters theMdmHistorySearchParameters) {
 		throw new UnsupportedOperationException(Msg.code(2299) + "not yet implemented");
 	}
+
+	// LUKETODO:  javadoc
+	List<MdmPidTuple<P>> expandPidsBySourcePidAndMatchResultInPartitionNull(P theSourceResourcePid, MdmMatchResultEnum mdmMatchResultEnum);
+
+	// LUKETODO:  javadoc
+	List<MdmPidTuple<P>> expandPidsBySourcePidAndMatchResultInPartitionIdsOrNullPartition(List<Integer> partitionIdsWithoutDefault, P theSourceResourcePid, MdmMatchResultEnum mdmMatchResultEnum);
+
+	// LUKETODO:  javadoc
+	List<MdmPidTuple<P>> expandPidsBySourcePidAndMatchResultInPartitionIds(List<Integer> partitionIds, P theSourceResourcePid, MdmMatchResultEnum mdmMatchResultEnum);
 }

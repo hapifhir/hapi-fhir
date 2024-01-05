@@ -61,38 +61,83 @@ public class MdmLinkExpandSvc implements IMdmLinkExpandSvc {
 	 * @return A set of strings representing the FHIR IDs of the expanded resources.
 	 */
 	@Override
-	public Set<String> expandMdmBySourceResource(IBaseResource theResource) {
+	public Set<String> expandMdmBySourceResource(RequestPartitionId theRequestPartitionId, IBaseResource theResource) {
 		ourLog.debug("About to MDM-expand source resource {}", theResource);
-		return expandMdmBySourceResourceId(theResource.getIdElement());
+		return expandMdmBySourceResourceId(theRequestPartitionId, theResource.getIdElement());
 	}
 
 	/**
-	 *  Given a resource ID of a source resource, perform MDM expansion and return all the resource IDs of all resources that are
-	 *  MDM-Matched to this resource.
+	 * Given a resource ID of a source resource, perform MDM expansion and return all the resource IDs of all resources that are
+	 * MDM-Matched to this resource.
 	 *
-	 * @param theId The Resource ID of the resource to MDM-Expand
+	 * @param theRequestPartitionId The partition ID associated with the request.
+	 * @param theId                 The Resource ID of the resource to MDM-Expand
 	 * @return A set of strings representing the FHIR ids of the expanded resources.
 	 */
 	@Override
-	public Set<String> expandMdmBySourceResourceId(IIdType theId) {
+	public Set<String> expandMdmBySourceResourceId(RequestPartitionId theRequestPartitionId, IIdType theId) {
 		ourLog.debug("About to expand source resource with resource id {}", theId);
 		return expandMdmBySourceResourcePid(
+				theRequestPartitionId,
 				myIdHelperService.getPidOrThrowException(RequestPartitionId.allPartitions(), theId));
 	}
 
 	/**
-	 *  Given a PID of a source resource, perform MDM expansion and return all the resource IDs of all resources that are
-	 *  MDM-Matched to this resource.
+	 * Given a partition ID and a PID of a source resource, perform MDM expansion and return all the resource IDs of all resources that are
+	 * MDM-Matched to this resource.
 	 *
-	 * @param theSourceResourcePid The PID of the resource to MDM-Expand
+	 * @param theRequestPartitionId The partition ID associated with the request.
+	 * @param theSourceResourcePid  The PID of the resource to MDM-Expand
 	 * @return A set of strings representing the FHIR ids of the expanded resources.
 	 */
 	@Override
-	public Set<String> expandMdmBySourceResourcePid(IResourcePersistentId theSourceResourcePid) {
+	public Set<String> expandMdmBySourceResourcePid(
+			RequestPartitionId theRequestPartitionId, IResourcePersistentId theSourceResourcePid) {
 		ourLog.debug("About to expand source resource with PID {}", theSourceResourcePid);
-		List<MdmPidTuple> goldenPidSourcePidTuples =
-				myMdmLinkDao.expandPidsBySourcePidAndMatchResult(theSourceResourcePid, MdmMatchResultEnum.MATCH);
+		// LUKETODO:  think carefully about conditional logic for different partition ID types
+		// LUKETODO: isAllPartitions then status quo
+		List<MdmPidTuple> goldenPidSourcePidTuples = null;
+		if (theRequestPartitionId.isAllPartitions()) {
+			goldenPidSourcePidTuples =
+					myMdmLinkDao.expandPidsBySourcePidAndMatchResult(theSourceResourcePid, MdmMatchResultEnum.MATCH);
+		} else {
+			if (theRequestPartitionId.isDefaultPartition()) {
+				goldenPidSourcePidTuples =
+					myMdmLinkDao.expandPidsBySourcePidAndMatchResultInPartitionNull(theSourceResourcePid, MdmMatchResultEnum.MATCH);
+			} else if (theRequestPartitionId.hasDefaultPartitionId()) {
+				goldenPidSourcePidTuples =
+					myMdmLinkDao.expandPidsBySourcePidAndMatchResultInPartitionIdsOrNullPartition(theRequestPartitionId.getPartitionIdsWithoutDefault(), theSourceResourcePid, MdmMatchResultEnum.MATCH);
+			} else {
+				goldenPidSourcePidTuples =
+					myMdmLinkDao.expandPidsBySourcePidAndMatchResultInPartitionIds(theRequestPartitionId.getPartitionIds(), theSourceResourcePid, MdmMatchResultEnum.MATCH);
+			}
+		}
+
 		return flattenPidTuplesToSet(theSourceResourcePid, goldenPidSourcePidTuples);
+
+		// LUKETODO:  is this mutually exclusive with isAllPartitions()?
+		// LUKETODO:  extract isNull OK
+		/*
+		if (theRequestPartitionId.isAllPartitions()) {
+			lookup = myResourceTableDao.findLookupFieldsByResourcePid(thePidsToResolve);
+		} else {
+			// LUKETODO:  try to farm/replicate these patterns
+			if (theRequestPartitionId.isDefaultPartition()) {
+				lookup = myResourceTableDao.findLookupFieldsByResourcePidInPartitionNull(thePidsToResolve);
+			} else if (theRequestPartitionId.hasDefaultPartitionId()) {
+				lookup = myResourceTableDao.findLookupFieldsByResourcePidInPartitionIdsOrNullPartition(
+					thePidsToResolve, theRequestPartitionId.getPartitionIdsWithoutDefault());
+			} else {
+				lookup = myResourceTableDao.findLookupFieldsByResourcePidInPartitionIds(
+					thePidsToResolve, theRequestPartitionId.getPartitionIds());
+			}
+		}
+		 */
+
+		//		List<MdmPidTuple> goldenPidSourcePidTuples =
+		//			myMdmLinkDao.expandPidsBySourcePidAndMatchResultPartitionAware(theSourceResourcePid,
+		// MdmMatchResultEnum.MATCH);
+		//		return flattenPidTuplesToSet(theSourceResourcePid, goldenPidSourcePidTuples);
 	}
 
 	/**
@@ -126,12 +171,14 @@ public class MdmLinkExpandSvc implements IMdmLinkExpandSvc {
 	}
 
 	@Override
-	public Set<String> expandMdmByGoldenResourceId(IdDt theId) {
+	public Set<String> expandMdmByGoldenResourceId(RequestPartitionId theRequestPartitionId, IdDt theId) {
 		ourLog.debug("About to expand golden resource with golden resource id {}", theId);
 		IResourcePersistentId pidOrThrowException =
 				myIdHelperService.getPidOrThrowException(RequestPartitionId.allPartitions(), theId);
 		return expandMdmByGoldenResourcePid(pidOrThrowException);
 	}
+
+	// LUKETODO:  make this partition aware
 
 	@Nonnull
 	public Set<String> flattenPidTuplesToSet(
