@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -110,6 +110,7 @@ public class SearchQueryBuilder {
 	private boolean dialectIsMySql;
 	private boolean myNeedResourceTableRoot;
 	private int myNextNearnessColumnId = 0;
+	private DbColumn mySelectedResourceIdColumn;
 
 	/**
 	 * Constructor
@@ -432,7 +433,8 @@ public class SearchQueryBuilder {
 					mySelect.addCustomColumns(
 							FunctionCall.count().setIsDistinct(true).addColumnParams(root.getResourceIdColumn()));
 				} else {
-					mySelect.addColumns(root.getResourceIdColumn());
+					mySelectedResourceIdColumn = root.getResourceIdColumn();
+					mySelect.addColumns(mySelectedResourceIdColumn);
 				}
 				mySelect.addFromTable(root.getTable());
 				myFirstPredicateBuilder = root;
@@ -513,6 +515,26 @@ public class SearchQueryBuilder {
 
 			boolean isSqlServer = (myDialect instanceof SQLServerDialect);
 			if (isSqlServer) {
+
+				/*
+				 * SQL server requires an ORDER BY clause to be present in the SQL if there is
+				 * an OFFSET/FETCH FIRST clause, so if there isn't already an ORDER BY clause,
+				 * the dialect will automatically add an order by with a pseudo-column name. This
+				 * happens in SQLServer2012LimitHandler.
+				 *
+				 * But, SQL Server also pukes if you include an ORDER BY on a column that you
+				 * aren't also SELECTing, if the select statement is DISTINCT. Who knows why SQL
+				 * Server is so picky.. but anyhow, this causes an issue, so we manually replace
+				 * the pseudo-column with an actual selected column.
+				 */
+				if (sql.startsWith("SELECT DISTINCT ")) {
+					if (sql.contains("order by @@version")) {
+						if (mySelectedResourceIdColumn != null) {
+							sql = sql.replace(
+									"order by @@version", "order by " + mySelectedResourceIdColumn.getColumnNameSQL());
+						}
+					}
+				}
 
 				// The SQLServerDialect has a bunch of one-off processing to deal with rules on when
 				// a limit can be used, so we can't rely on the flags that the limithandler exposes since
