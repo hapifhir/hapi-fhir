@@ -98,14 +98,12 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.NonUniqueResultException;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.PersistenceContextType;
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.time.DateUtils;
 import org.apache.lucene.index.Term;
-import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.IndexSearcher;
 import org.hibernate.CacheMode;
 import org.hibernate.search.engine.search.predicate.dsl.BooleanPredicateClausesStep;
@@ -1150,13 +1148,16 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 			try (SearchScroll<EntityReference> scroll = next.get()) {
 
 				ourLog.debug(
-					"Beginning batch expansion for {} with max results per batch: {}",
-					(theAdd ? "inclusion" : "exclusion"),
-					chunkSize);
-				for (SearchScrollResult<EntityReference> chunk = scroll.next(); chunk.hasHits(); chunk = scroll.next()) {
+						"Beginning batch expansion for {} with max results per batch: {}",
+						(theAdd ? "inclusion" : "exclusion"),
+						chunkSize);
+				for (SearchScrollResult<EntityReference> chunk = scroll.next();
+						chunk.hasHits();
+						chunk = scroll.next()) {
 					int countForBatch = 0;
 
-					List<Long> pids = chunk.hits().stream().map(t -> (Long) t.id()).collect(Collectors.toList());
+					List<Long> pids =
+							chunk.hits().stream().map(t -> (Long) t.id()).collect(Collectors.toList());
 
 					List<TermConcept> termConcepts = myTermConceptDao.fetchConceptsAndDesignationsByPid(pids);
 
@@ -1172,29 +1173,29 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 						countForBatch++;
 						if (theAdd && searchProps.hasIncludeOrExcludeCodes()) {
 							ValueSet.ConceptReferenceComponent theIncludeConcept =
-								getMatchedConceptIncludedInValueSet(theIncludeOrExclude, concept);
+									getMatchedConceptIncludedInValueSet(theIncludeOrExclude, concept);
 							if (theIncludeConcept != null && isNotBlank(theIncludeConcept.getDisplay())) {
 								concept.setDisplay(theIncludeConcept.getDisplay());
 							}
 						}
 						boolean added = addCodeIfNotAlreadyAdded(
-							theExpansionOptions,
-							theValueSetCodeAccumulator,
-							theAddedCodes,
-							concept,
-							theAdd,
-							includeOrExcludeVersion);
+								theExpansionOptions,
+								theValueSetCodeAccumulator,
+								theAddedCodes,
+								concept,
+								theAdd,
+								includeOrExcludeVersion);
 						if (added) {
 							delta++;
 						}
 					}
 
 					ourLog.debug(
-						"Batch expansion scroll for {} with offset {} produced {} results in {}ms",
-						(theAdd ? "inclusion" : "exclusion"),
-						accumulatedBatchesSoFar,
-						chunk.hits().size(),
-						chunk.took().toMillis());
+							"Batch expansion scroll for {} with offset {} produced {} results in {}ms",
+							(theAdd ? "inclusion" : "exclusion"),
+							accumulatedBatchesSoFar,
+							chunk.hits().size(),
+							chunk.took().toMillis());
 
 					theValueSetCodeAccumulator.incrementOrDecrementTotalConcepts(theAdd, delta);
 					accumulatedBatchesSoFar += countForBatch;
@@ -1205,10 +1206,10 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 				}
 
 				ourLog.debug(
-					"Expansion for {} produced {} results in {}ms",
-					(theAdd ? "inclusion" : "exclusion"),
-					count,
-					fullOperationSw.getMillis());
+						"Expansion for {} produced {} results in {}ms",
+						(theAdd ? "inclusion" : "exclusion"),
+						count,
+						fullOperationSw.getMillis());
 			}
 		}
 	}
@@ -1281,13 +1282,17 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 			Supplier<SearchScroll<EntityReference>> nextScroll = () -> {
 				// Build the top-level expansion on filters.
 				PredicateFinalStep step = predicate.bool(b -> {
-					b.must(predicate.match().field("myCodeSystemVersionPid").matching(theTermCodeSystemVersion.getPid()));
+					b.must(predicate
+							.match()
+							.field("myCodeSystemVersionPid")
+							.matching(theTermCodeSystemVersion.getPid()));
 
 					if (theExpansionFilter.hasCode()) {
 						b.must(predicate.match().field("myCode").matching(theExpansionFilter.getCode()));
 					}
 
-					String codeSystemUrlAndVersion = buildCodeSystemUrlAndVersion(theSystem, theIncludeOrExcludeVersion);
+					String codeSystemUrlAndVersion =
+							buildCodeSystemUrlAndVersion(theSystem, theIncludeOrExcludeVersion);
 					for (ValueSet.ConceptSetFilterComponent nextFilter : theIncludeOrExclude.getFilter()) {
 						handleFilter(codeSystemUrlAndVersion, predicate, b, nextFilter);
 					}
@@ -1316,12 +1321,12 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 				// JM 22-02-15 - Hopefully increasing maxClauseCount should be not needed anymore
 
 				SearchQuery<EntityReference> termConceptsQuery = searchSession
-					.search(TermConcept.class)
-					.selectEntityReference()
-					.where(f -> finishedQuery)
-					.toQuery();
+						.search(TermConcept.class)
+						.selectEntityReference()
+						.where(f -> finishedQuery)
+						.toQuery();
 
-                return termConceptsQuery.scroll(theScrollChunkSize);
+				return termConceptsQuery.scroll(theScrollChunkSize);
 			};
 
 			returnProps.addSearchScroll(nextScroll);
@@ -1341,8 +1346,7 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 	/**
 	 * Helper method which builds a predicate for the expansion
 	 */
-	private PredicateFinalStep buildExpansionPredicate(
-			List<String> theCodes, SearchPredicateFactory thePredicate) {
+	private PredicateFinalStep buildExpansionPredicate(List<String> theCodes, SearchPredicateFactory thePredicate) {
 		return thePredicate.simpleQueryString().field("myCode").matching(String.join(" | ", theCodes));
 	}
 
