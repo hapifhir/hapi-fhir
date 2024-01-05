@@ -7,7 +7,7 @@ jobs:
    -  job: setup
       displayName: setup-and-cache-build
       timeoutInMinutes: 60
-      container: maven:3.8-openjdk-17
+      container: maven:3-amazoncorretto-21
       pool:
          vmImage: ubuntu-latest
       steps:
@@ -36,7 +36,7 @@ jobs:
          timeoutInMinutes: 60
          displayName: ${{ p.name }}
          dependsOn: [ 'setup' ]
-         container: maven:3.8-openjdk-17
+         container: maven:3-amazoncorretto-21
          pool:
             vmImage: ubuntu-latest
          steps:
@@ -90,7 +90,7 @@ jobs:
          vmImage: ubuntu-latest
       timeoutInMinutes: 60
       displayName: generate_test_reports
-      container: maven:3.8-openjdk-17
+      container: maven:3-amazoncorretto-21
       dependsOn:
          -  ${{ each p in parameters.modules }}:
             - ${{ p.name }}

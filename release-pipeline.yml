@@ -140,7 +140,7 @@ jobs:
       # want to fail fast if there is an issue, and avoid running the tests more than once so it doesn't take all day.
      timeoutInMinutes: 360
      dependsOn: ['get_release_version', 'get_branch_id']
-     container: maven:3.8-openjdk-17
+     container: maven:3-amazoncorretto-21
      steps:
         - task: Cache@2
           inputs:
