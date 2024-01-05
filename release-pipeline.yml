@@ -36,7 +36,7 @@ jobs:
           displayName: Print out pom version.
         - task: Bash@3
            # Determines the new release tag label. For existing release branches, this is straightforward,
-           # as we just take the current project pom version (ie. 5.7.1). However, for the current master
+           # as we just take the current project pom version (i.e. 5.7.1). However, for the current master
            # branch we often have a branch name like "6.1.5-PRE2-SNAPSHOT", in which case, we need to normalize
            # the release label from that project version to get the "maj.min.patch" version we will release.
           inputs:
@@ -134,10 +134,10 @@ jobs:
              PathtoPublish: '$(build.artifactstagingdirectory)'
 
    - job: buildaroni
-      # We're going to do a full build, including all unit and intergration tests. We do this here, before any
-      # actual release pipeilne kicks off, and we don't do it again at any point in the release pipeline. The assumption here
+      # We're going to do a full build, including all unit and integration tests. We do this here, before any
+      # actual release pipeline kicks off, and we don't do it again at any point in the release pipeline. The assumption here
       # is that once we pull the code, it won't change again on this branch until the release is complete. We
-      # want to fail fast if there is an issue, and avoid running the tests more than once so it doesn't take all day.
+      # want to fail fast if there is an issue, and avoid running the tests more than once, so it doesn't take all day.
      timeoutInMinutes: 360
      dependsOn: ['get_release_version', 'get_branch_id']
      container: maven:3-amazoncorretto-21
