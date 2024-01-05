@@ -168,11 +168,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		// For resolving references that don't supply the type.
 		hfjResource.addIndex("20231027.3", "IDX_RES_FHIR_ID").unique(false).withColumns("FHIR_ID");
 
-		// This fix was bad for MSSQL, it has been set to do nothing.
-		version.addTask(new ForceIdMigrationFixTask(version.getRelease(), "20231213.1").setDoNothing(true));
 
-		// This fix will work for MSSQL or Oracle.
-		version.addTask(new ForceIdMigrationFixTask(version.getRelease(), "20231222.1"));
 		Builder.BuilderWithTableName batch2JobInstanceTable = version.onTable("BT2_JOB_INSTANCE");
 
 		batch2JobInstanceTable.addColumn("20231128.1", "USER_NAME").nullable().type(ColumnTypeEnum.STRING, 200);
@@ -203,7 +199,11 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 							"Column HFJ_SPIDX_STRING.SP_VALUE_NORMALIZED already has a collation of 'C' so doing nothing");
 		}
 
-		version.addTask(new ForceIdMigrationFixTask(version.getRelease(), "20231213.1"));
+		// This fix was bad for MSSQL, it has been set to do nothing.
+		version.addTask(new ForceIdMigrationFixTask(version.getRelease(), "20231213.1").setDoNothing(true));
+
+		// This fix will work for MSSQL or Oracle.
+		version.addTask(new ForceIdMigrationFixTask(version.getRelease(), "20231222.1"));
 	}
 
 	protected void init680() {
