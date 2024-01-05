@@ -1,0 +1,4 @@
+---
+type: add
+issue: 5569
+title: "Upgrade Clinical Reasoning version for latest bug fixes and available operations. Add $evaluate library operation."

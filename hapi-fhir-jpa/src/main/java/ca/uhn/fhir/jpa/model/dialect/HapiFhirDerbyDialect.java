@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Model
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,10 +23,14 @@ import org.hibernate.dialect.DatabaseVersion;
 import org.hibernate.dialect.DerbyDialect;
 
 /**
- * Dialect for Oracle database.
+ * Dialect for Derby database.
  * Minimum version: 10.14.2
  */
 public class HapiFhirDerbyDialect extends DerbyDialect {
+
+	public HapiFhirDerbyDialect(DatabaseVersion theDatabaseVersion) {
+		super(theDatabaseVersion);
+	}
 
 	public HapiFhirDerbyDialect() {
 		super(DatabaseVersion.make(10, 14, 2));

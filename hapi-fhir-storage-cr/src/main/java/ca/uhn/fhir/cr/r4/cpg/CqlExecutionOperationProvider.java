@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Clinical Reasoning
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,13 +17,14 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.cr.r4.cqlexecution;
+package ca.uhn.fhir.cr.r4.cpg;
 
 import ca.uhn.fhir.cr.r4.ICqlExecutionServiceFactory;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Endpoint;
@@ -112,7 +113,7 @@ public class CqlExecutionOperationProvider {
 	 *         is a CQL system-defined or FHIR-defined type, the result is returned
 	 *         as a {@link Parameters} Parameters resource
 	 */
-	@Operation(name = "$cql")
+	@Operation(name = ProviderConstants.CR_OPERATION_CQL)
 	@Description(
 			shortDefinition = "$cql",
 			value =

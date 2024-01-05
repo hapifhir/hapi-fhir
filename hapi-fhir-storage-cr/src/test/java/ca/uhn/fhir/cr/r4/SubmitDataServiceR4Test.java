@@ -19,8 +19,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 public class SubmitDataServiceR4Test extends BaseCrR4TestServer {
-	@Autowired
-	IRepositoryFactory myRepositoryFactory;
 
 	@Autowired
 	ISubmitDataProcessorFactory myR4SubmitDataProcessorFactory;

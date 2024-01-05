@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Model
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,10 @@ import org.hibernate.dialect.OracleDialect;
  * Minimum version: 12.2 (Oracle 12c R2)
  */
 public class HapiFhirOracleDialect extends OracleDialect {
+
+	public HapiFhirOracleDialect(DatabaseVersion theDatabaseVersion) {
+		super(theDatabaseVersion);
+	}
 
 	public HapiFhirOracleDialect() {
 		super(DatabaseVersion.make(12, 2));
