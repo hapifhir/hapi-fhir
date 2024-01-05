@@ -209,7 +209,7 @@ public class GenericClientDstu3IT {
 	@Test
 	public void testClientFailures() {
 		ResponseBody body = mock(ResponseBody.class);
-		when(body.source()).thenThrow(IllegalStateException.class, RuntimeException.class);
+		when(body.byteStream()).thenThrow(IllegalStateException.class, RuntimeException.class);
 		
 		myHttpResponse = new Response.Builder()
 				.request(myRequest)

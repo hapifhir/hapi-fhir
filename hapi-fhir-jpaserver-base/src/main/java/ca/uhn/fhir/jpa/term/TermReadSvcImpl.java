@@ -98,14 +98,12 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.NonUniqueResultException;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.PersistenceContextType;
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.time.DateUtils;
 import org.apache.lucene.index.Term;
-import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.IndexSearcher;
 import org.hibernate.CacheMode;
 import org.hibernate.search.engine.search.predicate.dsl.BooleanPredicateClausesStep;
@@ -1137,14 +1135,22 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 		}
 		int chunkSize = chunkSizeOpt.get();
 
-		SearchProperties searchProps = buildSearchScroll(
+		/*
+		 * Turn the filter into one or more Hibernate Search queries. Ideally we want it
+		 * to be handled by a single query, but Lucene/ES don't like it when we exceed
+		 * 1024 different terms in a single query. So if we have that many terms (which
+		 * can happen if a ValueSet has a lot of explicitly enumerated codes that it's
+		 * including) we split this into multiple searches. The method below builds these
+		 * searches lazily, returning a Supplier that creates and executes the search
+		 * when it's actually time to.
+		 */
+		SearchProperties searchProps = buildSearchScrolls(
 				theTermCodeSystemVersion,
 				theExpansionFilter,
 				theSystem,
 				theIncludeOrExclude,
 				chunkSize,
 				includeOrExcludeVersion);
-
 		int accumulatedBatchesSoFar = 0;
 		for (var next : searchProps.getSearchScroll()) {
 			try (SearchScroll<EntityReference> scroll = next.get()) {
@@ -1247,7 +1253,7 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 		return maxResultsPerBatch > 0 ? Optional.of(maxResultsPerBatch) : Optional.empty();
 	}
 
-	private SearchProperties buildSearchScroll(
+	private SearchProperties buildSearchScrolls(
 			TermCodeSystemVersion theTermCodeSystemVersion,
 			ExpansionFilter theExpansionFilter,
 			String theSystem,
@@ -1305,16 +1311,6 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 					finishedQuery = predicate.bool().must(step).must(expansionStep);
 				}
 
-				/*
-				 * DM 2019-08-21 - Processing slows after any ValueSets with many allCodes explicitly identified. This might
-				 * be due to the dark arts that is memory management. Will monitor but not do anything about this right now.
-				 */
-
-				// BooleanQuery.setMaxClauseCount(SearchBuilder.getMaximumPageSize());
-				// TODO GGG HS looks like we can't set max clause count, but it can be set server side.
-				// BooleanQuery.setMaxClauseCount(10000);
-				// JM 22-02-15 - Hopefully increasing maxClauseCount should be not needed anymore
-
 				SearchQuery<EntityReference> termConceptsQuery = searchSession
 					.search(TermConcept.class)
 					.selectEntityReference()
@@ -1343,6 +1339,7 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 	 */
 	private PredicateFinalStep buildExpansionPredicate(
 			List<String> theCodes, SearchPredicateFactory thePredicate) {
+		assert !theCodes.isEmpty();
 		return thePredicate.simpleQueryString().field("myCode").matching(String.join(" | ", theCodes));
 	}
 
