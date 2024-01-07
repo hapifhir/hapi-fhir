@@ -338,16 +338,6 @@
 			<groupId>org.springframework.data</groupId>
 			<artifactId>spring-data-envers</artifactId>
 		</dependency>
-		<!-- FIXME: remove?
-		<dependency>
-			<groupId>org.apache.lucene</groupId>
-			<artifactId>lucene-analyzers-phonetic</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.lucene</groupId>
-			<artifactId>lucene-backward-codecs</artifactId>
-		</dependency>
-		-->
 		<dependency>
 			<groupId>org.apache.lucene</groupId>
 			<artifactId>lucene-analysis-phonetic</artifactId>

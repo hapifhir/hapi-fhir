@@ -1344,8 +1344,7 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 	/**
 	 * Helper method which builds a predicate for the expansion
 	 */
-	private PredicateFinalStep buildExpansionPredicate(
-			List<String> theCodes, SearchPredicateFactory thePredicate) {
+	private PredicateFinalStep buildExpansionPredicate(List<String> theCodes, SearchPredicateFactory thePredicate) {
 		assert !theCodes.isEmpty();
 		return thePredicate.simpleQueryString().field("myCode").matching(String.join(" | ", theCodes));
 	}
