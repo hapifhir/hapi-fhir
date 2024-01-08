@@ -94,8 +94,6 @@ public class MdmLinkExpandSvc implements IMdmLinkExpandSvc {
 	public Set<String> expandMdmBySourceResourcePid(
 			RequestPartitionId theRequestPartitionId, IResourcePersistentId theSourceResourcePid) {
 		ourLog.debug("About to expand source resource with PID {}", theSourceResourcePid);
-		// LUKETODO:  think carefully about conditional logic for different partition ID types
-		// LUKETODO: isAllPartitions then status quo
 		List<MdmPidTuple> goldenPidSourcePidTuples = null;
 		if (theRequestPartitionId.isAllPartitions()) {
 			goldenPidSourcePidTuples =
@@ -111,8 +109,13 @@ public class MdmLinkExpandSvc implements IMdmLinkExpandSvc {
 								theSourceResourcePid,
 								MdmMatchResultEnum.MATCH);
 			} else {
-				goldenPidSourcePidTuples = myMdmLinkDao.expandPidsBySourcePidAndMatchResultInPartitionIds(
-						theRequestPartitionId.getPartitionIds(), theSourceResourcePid, MdmMatchResultEnum.MATCH);
+				try {
+					goldenPidSourcePidTuples = myMdmLinkDao.expandPidsBySourcePidAndMatchResultInPartitionIds(
+							theRequestPartitionId.getPartitionIds(), theSourceResourcePid, MdmMatchResultEnum.MATCH);
+				} catch (Throwable exception) {
+					ourLog.error("The exception: " + exception.getMessage(), exception);
+					throw exception;
+				}
 			}
 		}
 
@@ -174,8 +177,6 @@ public class MdmLinkExpandSvc implements IMdmLinkExpandSvc {
 				myIdHelperService.getPidOrThrowException(RequestPartitionId.allPartitions(), theId);
 		return expandMdmByGoldenResourcePid(theRequestPartitionId, pidOrThrowException);
 	}
-
-	// LUKETODO:  make this partition aware
 
 	@Nonnull
 	public Set<String> flattenPidTuplesToSet(

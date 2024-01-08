@@ -613,7 +613,6 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 			if (theRequestPartitionId.isAllPartitions()) {
 				lookup = myResourceTableDao.findLookupFieldsByResourcePid(thePidsToResolve);
 			} else {
-				// LUKETODO:  try to farm/replicate these patterns
 				if (theRequestPartitionId.isDefaultPartition()) {
 					lookup = myResourceTableDao.findLookupFieldsByResourcePidInPartitionNull(thePidsToResolve);
 				} else if (theRequestPartitionId.hasDefaultPartitionId()) {

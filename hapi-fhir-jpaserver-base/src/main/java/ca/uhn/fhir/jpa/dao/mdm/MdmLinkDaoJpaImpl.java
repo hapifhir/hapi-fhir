@@ -194,12 +194,10 @@ public class MdmLinkDaoJpaImpl implements IMdmLinkDao<JpaPid, MdmLink> {
 
 	@Override
 	public List<MdmPidTuple<JpaPid>> expandPidsBySourcePidAndMatchResultInPartitionIdsOrNullPartition(
-			List<Integer> thePartitionIdsWithoutDefault,
-			JpaPid theSourcePid,
-			MdmMatchResultEnum theMdmMatchResultEnum) {
+			List<Integer> thePartitionIds, JpaPid theSourcePid, MdmMatchResultEnum theMdmMatchResultEnum) {
 		return myMdmLinkDao
 				.expandPidsBySourcePidAndMatchResultInPartitionIdsOrNullPartition(
-						thePartitionIdsWithoutDefault, (theSourcePid).getId(), theMdmMatchResultEnum)
+						thePartitionIds, (theSourcePid).getId(), theMdmMatchResultEnum)
 				.stream()
 				.map(this::daoTupleToMdmTuple)
 				.collect(Collectors.toList());

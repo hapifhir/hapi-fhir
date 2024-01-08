@@ -96,9 +96,9 @@ public interface IMdmLinkJpaRepository
 			+ "on ml.myGoldenResourcePid=ml2.myGoldenResourcePid "
 			+ "WHERE ml2.mySourcePid=:sourcePid "
 			+ "AND ml2.myMatchResult=:matchResult "
-			+ "AND ml2.myPartitionId IN :partitionIds "
+			+ "AND ml2.myPartitionIdValue IN :partitionIds "
 			+ "AND ml.myMatchResult=:matchResult "
-			+ "AND ml.myPartitionId IN :partitionIds")
+			+ "AND ml.myPartitionIdValue IN :partitionIds")
 	List<MdmPidTuple> expandPidsBySourcePidAndMatchResultInPartitionIds(
 			@Param("partitionIds") List<Integer> thePartitionIds,
 			@Param("sourcePid") Long id,
@@ -110,24 +110,25 @@ public interface IMdmLinkJpaRepository
 			+ "on ml.myGoldenResourcePid=ml2.myGoldenResourcePid "
 			+ "WHERE ml2.mySourcePid=:sourcePid "
 			+ "AND ml2.myMatchResult=:matchResult "
-			+ "AND ( ml2.myPartitionId IN :partitionIds "
-			+ "OR ml2.myPartitionId IS NULL )"
+			+ "AND ( ml2.myPartitionIdValue IN :partitionIds "
+			+ "OR ml2.myPartitionIdValue IS NULL ) "
 			+ "AND ml.myMatchResult=:matchResult "
-			+ "AND ( ml.myPartitionId IN :partitionIds "
-			+ "OR ml.myPartitionId IS NULL )")
+			+ "AND (ml.myPartitionIdValue IN :partitionIds "
+			+ "OR ml.myPartitionIdValue IS NULL )")
 	List<MdmPidTuple> expandPidsBySourcePidAndMatchResultInPartitionIdsOrNullPartition(
 			@Param("partitionIds") List<Integer> thePartitionIds,
 			@Param("sourcePid") Long id,
 			@Param("matchResult") MdmMatchResultEnum theMdmMatchResultEnum);
 
-	@Query("SELECT ml.myGoldenResourcePid as goldenPid, ml.mySourcePid as sourcePid " + "FROM MdmLink ml "
+	@Query("SELECT ml.myGoldenResourcePid as goldenPid, ml.mySourcePid as sourcePid "
+			+ "FROM MdmLink ml "
 			+ "INNER JOIN MdmLink ml2 "
 			+ "on ml.myGoldenResourcePid=ml2.myGoldenResourcePid "
 			+ "WHERE ml2.mySourcePid=:sourcePid "
 			+ "AND ml2.myMatchResult=:matchResult "
 			+ "AND ml2.myPartitionId IS NULL "
 			+ "AND ml.myMatchResult=:matchResult "
-			+ "AND ml.myPartitionId IS NULL")
+			+ "AND ml.myPartitionIdValue IS NULL")
 	List<MdmPidTuple> expandPidsBySourcePidAndMatchResultInPartitionNull(
 			@Param("sourcePid") Long id, @Param("matchResult") MdmMatchResultEnum theMdmMatchResultEnum);
 
@@ -145,22 +146,32 @@ public interface IMdmLinkJpaRepository
 	List<MdmPidTuple> expandPidsByGoldenResourcePidAndMatchResult(
 			@Param("goldenPid") Long theSourcePid, @Param("matchResult") MdmMatchResultEnum theMdmMatchResultEnum);
 
-	@Query(
-			"SELECT ml.myGoldenResourcePid AS goldenPid, ml.mySourcePid AS sourcePid FROM MdmLink ml WHERE ml.myGoldenResourcePid = :goldenPid AND ml.myMatchResult = :matchResult AND ml.myPartitionId IN :partitionIds")
+	@Query("SELECT ml.myGoldenResourcePid AS goldenPid, ml.mySourcePid AS sourcePid "
+			+ "FROM MdmLink ml "
+			+ "WHERE ml.myGoldenResourcePid = :goldenPid "
+			+ "AND ml.myMatchResult = :matchResult "
+			+ "AND ml.myPartitionIdValue IN :partitionIds")
 	List<MdmPidTuple> expandPidsByGoldenResourcePidAndMatchResultInPartitionIds(
 			@Param("partitionIds") List<Integer> thePartitionIds,
 			@Param("goldenPid") Long id,
 			@Param("matchResult") MdmMatchResultEnum theMdmMatchResultEnum);
 
-	@Query(
-			"SELECT ml.myGoldenResourcePid AS goldenPid, ml.mySourcePid AS sourcePid FROM MdmLink ml WHERE ml.myGoldenResourcePid = :goldenPid AND ml.myMatchResult = :matchResult AND (ml.myPartitionIdValue IS NULL OR ml.myPartitionIdValue IN :partitionIds)")
+	@Query("SELECT ml.myGoldenResourcePid AS goldenPid, ml.mySourcePid AS sourcePid "
+			+ "FROM MdmLink ml "
+			+ "WHERE ml.myGoldenResourcePid = :goldenPid "
+			+ "AND ml.myMatchResult = :matchResult "
+			+ "AND (ml.myPartitionIdValue IS NULL "
+			+ "OR ml.myPartitionIdValue IN :partitionIds)")
 	List<MdmPidTuple> expandPidsByGoldenResourcePidAndMatchResultInPartitionIdsOrNullPartition(
 			@Param("partitionIds") List<Integer> thePartitionIds,
 			@Param("goldenPid") Long id,
 			@Param("matchResult") MdmMatchResultEnum theMdmMatchResultEnum);
 
-	@Query(
-			"SELECT ml.myGoldenResourcePid AS goldenPid, ml.mySourcePid AS sourcePid FROM MdmLink ml WHERE ml.myGoldenResourcePid = :goldenPid AND ml.myMatchResult = :matchResult AND ml.myPartitionIdValue IS NULL")
+	@Query("SELECT ml.myGoldenResourcePid AS goldenPid, ml.mySourcePid AS sourcePid "
+			+ "FROM MdmLink ml "
+			+ "WHERE ml.myGoldenResourcePid = :goldenPid "
+			+ "AND ml.myMatchResult = :matchResult "
+			+ "AND ml.myPartitionIdValue IS NULL")
 	List<MdmPidTuple> expandPidsByGoldenPidAndMatchResultInPartitionNull(
 			@Param("goldenPid") Long id, @Param("matchResult") MdmMatchResultEnum theMdmMatchResultEnum);
 
