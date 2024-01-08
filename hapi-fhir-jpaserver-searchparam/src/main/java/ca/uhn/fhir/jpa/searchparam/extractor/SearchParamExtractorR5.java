@@ -137,12 +137,9 @@ public class SearchParamExtractorR5 extends BaseSearchParamExtractor implements 
 
 		@Override
 		public Base resolveReference(Object appContext, String theUrl, Base refContext) throws FHIRException {
-			Base retVal = null;
-			if (appContext instanceof IBase) {
-				retVal = (Base) BundleUtil.getReferenceInBundle(getContext(), theUrl, (IBase) appContext);
-				if (retVal != null) {
-					return retVal;
-				}
+			Base retVal = (Base) BundleUtil.getReferenceInBundle(getContext(), theUrl, appContext);
+			if (retVal != null) {
+				return retVal;
 			}
 
 			/*

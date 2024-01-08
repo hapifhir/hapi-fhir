@@ -58,6 +58,7 @@ import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
+import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.hl7.fhir.instance.model.api.IBaseBundle.LINK_PREV;
 
@@ -645,41 +646,36 @@ public class BundleUtil {
 	}
 
 	public static IBase getReferenceInBundle(
-			@Nonnull FhirContext theFhirContext, @Nonnull String theUrl, @Nullable IBase theAppContext) {
-		/*
-		 * If this is a reference that is a UUID, we must be looking for local
-		 * references within a Bundle
-		 */
-		if (theAppContext instanceof IBaseBundle && isNotBlank(theUrl) && !theUrl.startsWith("#")) {
-			String unqualifiedVersionlessReference;
-			boolean isPlaceholderReference;
-			if (theUrl.startsWith("urn:")) {
-				isPlaceholderReference = true;
-				unqualifiedVersionlessReference = null;
-			} else {
-				isPlaceholderReference = false;
-				unqualifiedVersionlessReference =
-						new IdDt(theUrl).toUnqualifiedVersionless().getValue();
-			}
+		@Nonnull FhirContext theFhirContext, @Nonnull String theUrl, @Nullable Object theAppContext) {
+		if (!(theAppContext instanceof IBaseBundle) || isBlank(theUrl) || theUrl.startsWith("#")) {
+			return null;
+		}
 
-			List<BundleEntryParts> entries = BundleUtil.toListOfEntries(theFhirContext, (IBaseBundle) theAppContext);
-			for (BundleEntryParts next : entries) {
-				IBaseResource nextResource = next.getResource();
-				if (nextResource == null) {
-					continue;
+		/*
+		 * If this is a reference that is a UUID, we must be looking for local references within a Bundle
+		 */
+		IBaseBundle bundle = (IBaseBundle) theAppContext;
+
+		final boolean isPlaceholderReference = theUrl.startsWith("urn:");
+		final String unqualifiedVersionlessReference =
+			new IdDt(theUrl).toUnqualifiedVersionless().getValue();
+
+		for (BundleEntryParts next : BundleUtil.toListOfEntries(theFhirContext, bundle)) {
+			IBaseResource nextResource = next.getResource();
+			if (nextResource == null) {
+				continue;
+			}
+			if (isPlaceholderReference) {
+				if (theUrl.equals(next.getUrl())
+					|| theUrl.equals(nextResource.getIdElement().getValue())) {
+					return nextResource;
 				}
-				if (isPlaceholderReference) {
-					if (theUrl.equals(next.getUrl())
-							|| theUrl.equals(nextResource.getIdElement().getValue())) {
-						return nextResource;
-					}
-				} else {
-					if (unqualifiedVersionlessReference.equals(nextResource
-							.getIdElement()
-							.toUnqualifiedVersionless()
-							.getValue())) {
-						return nextResource;
-					}
+			} else {
+				if (unqualifiedVersionlessReference.equals(nextResource
+					.getIdElement()
+					.toUnqualifiedVersionless()
+					.getValue())) {
+					return nextResource;
 				}
 			}
 		}
