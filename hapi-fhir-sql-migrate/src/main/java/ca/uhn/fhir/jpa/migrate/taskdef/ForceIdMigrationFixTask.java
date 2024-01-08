@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Server - SQL Migration
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -100,12 +100,21 @@ public class ForceIdMigrationFixTask extends BaseTask {
 							+
 							// avoid useless updates on engines that don't check
 							// skip case 1, 2.  Only check 3,4,5
-							" where (fhir_id is null or fhir_id <> trim(fhir_id)) "
+							getWhereClauseByDBType()
 							+
 							// chunk range.
 							" and res_id >= ? and res_id < ?",
 					batchStart,
 					batchEnd);
+		}
+	}
+
+	private String getWhereClauseByDBType() {
+		switch (getDriverType()) {
+			case MSSQL_2012:
+				return " where (fhir_id is null or DATALENGTH(fhir_id) > LEN(fhir_id)) ";
+			default:
+				return " where (fhir_id is null or fhir_id <> trim(fhir_id)) ";
 		}
 	}
 

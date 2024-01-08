@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -198,7 +198,11 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 							"Column HFJ_SPIDX_STRING.SP_VALUE_NORMALIZED already has a collation of 'C' so doing nothing");
 		}
 
-		version.addTask(new ForceIdMigrationFixTask(version.getRelease(), "20231213.1"));
+		// This fix was bad for MSSQL, it has been set to do nothing.
+		version.addTask(new ForceIdMigrationFixTask(version.getRelease(), "20231213.1").setDoNothing(true));
+
+		// This fix will work for MSSQL or Oracle.
+		version.addTask(new ForceIdMigrationFixTask(version.getRelease(), "20231222.1"));
 	}
 
 	protected void init680() {

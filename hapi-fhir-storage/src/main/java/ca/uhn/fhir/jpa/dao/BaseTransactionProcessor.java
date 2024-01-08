@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -1836,7 +1836,7 @@ public abstract class BaseTransactionProcessor {
 				.filter(t -> t.getEntity().getDeleted() == null)
 				.filter(t -> t.getResource() != null)
 				.forEach(t -> resourceToIndexedParams.put(
-						t.getResource(), new ResourceIndexedSearchParams((ResourceTable) t.getEntity())));
+						t.getResource(), ResourceIndexedSearchParams.withLists((ResourceTable) t.getEntity())));
 
 		for (Map.Entry<String, Class<? extends IBaseResource>> nextEntry : conditionalRequestUrls.entrySet()) {
 			String matchUrl = nextEntry.getKey();
