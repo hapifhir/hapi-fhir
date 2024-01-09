@@ -33,12 +33,12 @@ public interface IMdmLinkExpandSvc {
 	Set<String> expandMdmBySourceResourceId(RequestPartitionId theRequestPartitionId, IIdType theId);
 
 	Set<String> expandMdmBySourceResourcePid(
-			RequestPartitionId theRequestPartitionId, IResourcePersistentId theSourceResourcePid);
+			RequestPartitionId theRequestPartitionId, IResourcePersistentId<?> theSourceResourcePid);
 
-	Set<String> expandMdmByGoldenResourceId(IResourcePersistentId theGoldenResourcePid);
+	Set<String> expandMdmByGoldenResourceId(RequestPartitionId theRequestPartitionId, IResourcePersistentId<?> theGoldenResourcePid);
 
 	Set<String> expandMdmByGoldenResourcePid(
-			RequestPartitionId theRequestPartitionId, IResourcePersistentId theGoldenResourcePid);
+			RequestPartitionId theRequestPartitionId, IResourcePersistentId<?> theGoldenResourcePid);
 
 	Set<String> expandMdmByGoldenResourceId(RequestPartitionId theRequestPartitionId, IdDt theId);
 }

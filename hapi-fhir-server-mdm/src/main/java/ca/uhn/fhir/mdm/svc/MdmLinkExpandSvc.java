@@ -36,9 +36,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashSet;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -92,102 +94,85 @@ public class MdmLinkExpandSvc implements IMdmLinkExpandSvc {
 	 */
 	@Override
 	public Set<String> expandMdmBySourceResourcePid(
-			RequestPartitionId theRequestPartitionId, IResourcePersistentId theSourceResourcePid) {
+			RequestPartitionId theRequestPartitionId, IResourcePersistentId<?> theSourceResourcePid) {
 		ourLog.debug("About to expand source resource with PID {}", theSourceResourcePid);
-		List<MdmPidTuple> goldenPidSourcePidTuples = null;
-		if (theRequestPartitionId.isAllPartitions()) {
-			goldenPidSourcePidTuples =
-					myMdmLinkDao.expandPidsBySourcePidAndMatchResult(theSourceResourcePid, MdmMatchResultEnum.MATCH);
-		} else {
-			if (theRequestPartitionId.isDefaultPartition()) {
-				goldenPidSourcePidTuples = myMdmLinkDao.expandPidsBySourcePidAndMatchResultInPartitionNull(
-						theSourceResourcePid, MdmMatchResultEnum.MATCH);
-			} else if (theRequestPartitionId.hasDefaultPartitionId()) {
-				goldenPidSourcePidTuples =
-						myMdmLinkDao.expandPidsBySourcePidAndMatchResultInPartitionIdsOrNullPartition(
-								theRequestPartitionId.getPartitionIdsWithoutDefault(),
-								theSourceResourcePid,
-								MdmMatchResultEnum.MATCH);
-			} else {
-				try {
-					goldenPidSourcePidTuples = myMdmLinkDao.expandPidsBySourcePidAndMatchResultInPartitionIds(
-							theRequestPartitionId.getPartitionIds(), theSourceResourcePid, MdmMatchResultEnum.MATCH);
-				} catch (Throwable exception) {
-					ourLog.error("The exception: " + exception.getMessage(), exception);
-					throw exception;
-				}
-			}
-		}
+		final List<MdmPidTuple<?>> goldenPidSourcePidTuples =
+			myMdmLinkDao.expandPidsBySourcePidAndMatchResult(theSourceResourcePid, MdmMatchResultEnum.MATCH);
 
-		return flattenPidTuplesToSet(theSourceResourcePid, goldenPidSourcePidTuples);
+		return flattenPidTuplesToSet(theRequestPartitionId, theSourceResourcePid, goldenPidSourcePidTuples);
 	}
 
 	/**
 	 *  Given a PID of a golden resource, perform MDM expansion and return all the resource IDs of all resources that are
 	 *  MDM-Matched to this golden resource.
 	 *
+	 * @param theRequestPartitionId Partition information from the request
 	 * @param theGoldenResourcePid The PID of the golden resource to MDM-Expand.
 	 * @return A set of strings representing the FHIR ids of the expanded resources.
 	 */
 	@Override
-	public Set<String> expandMdmByGoldenResourceId(IResourcePersistentId theGoldenResourcePid) {
+	public Set<String> expandMdmByGoldenResourceId(RequestPartitionId theRequestPartitionId, IResourcePersistentId<?> theGoldenResourcePid) {
 		ourLog.debug("About to expand golden resource with PID {}", theGoldenResourcePid);
-		List<MdmPidTuple> goldenPidSourcePidTuples = myMdmLinkDao.expandPidsByGoldenResourcePidAndMatchResult(
+		final List<MdmPidTuple<?>> goldenPidSourcePidTuples = myMdmLinkDao.expandPidsByGoldenResourcePidAndMatchResult(
 				theGoldenResourcePid, MdmMatchResultEnum.MATCH);
-		return flattenPidTuplesToSet(theGoldenResourcePid, goldenPidSourcePidTuples);
+		return flattenPidTuplesToSet(theRequestPartitionId, theGoldenResourcePid, goldenPidSourcePidTuples);
 	}
 
 	/**
 	 *  Given a resource ID of a golden resource, perform MDM expansion and return all the resource IDs of all resources that are
 	 *  MDM-Matched to this golden resource.
 	 *
+	 * @param theRequestPartitionId Partition information from the request
 	 * @param theGoldenResourcePid The resource ID of the golden resource to MDM-Expand.
 	 * @return A set of strings representing the FHIR ids of the expanded resources.
 	 */
 	@Override
 	public Set<String> expandMdmByGoldenResourcePid(
-			RequestPartitionId theRequestPartitionId, IResourcePersistentId theGoldenResourcePid) {
+			RequestPartitionId theRequestPartitionId, IResourcePersistentId<?> theGoldenResourcePid) {
 		ourLog.debug("About to expand golden resource with PID {}", theGoldenResourcePid);
-		List<MdmPidTuple> goldenPidSourcePidTuples = null;
-		if (theRequestPartitionId.isAllPartitions()) {
-			goldenPidSourcePidTuples = myMdmLinkDao.expandPidsByGoldenResourcePidAndMatchResult(
-					theGoldenResourcePid, MdmMatchResultEnum.MATCH);
-		} else {
-			if (theRequestPartitionId.isDefaultPartition()) {
-				goldenPidSourcePidTuples = myMdmLinkDao.expandPidsByGoldenPidAndMatchResultInPartitionNull(
-						theGoldenResourcePid, MdmMatchResultEnum.MATCH);
-			} else if (theRequestPartitionId.hasDefaultPartitionId()) {
-				goldenPidSourcePidTuples =
-						myMdmLinkDao.expandPidsByGoldenResourcePidAndMatchResultInPartitionIdsOrNullPartition(
-								theRequestPartitionId.getPartitionIdsWithoutDefault(),
-								theGoldenResourcePid,
-								MdmMatchResultEnum.MATCH);
-			} else {
-				goldenPidSourcePidTuples = myMdmLinkDao.expandPidsByGoldenResourcePidAndMatchResultInPartitionIds(
-						theRequestPartitionId.getPartitionIds(), theGoldenResourcePid, MdmMatchResultEnum.MATCH);
-			}
-		}
-		return flattenPidTuplesToSet(theGoldenResourcePid, goldenPidSourcePidTuples);
+		final List<MdmPidTuple<?>> goldenPidSourcePidTuples = myMdmLinkDao.expandPidsByGoldenResourcePidAndMatchResult(
+			theGoldenResourcePid, MdmMatchResultEnum.MATCH);
+		return flattenPidTuplesToSet(theRequestPartitionId, theGoldenResourcePid, goldenPidSourcePidTuples);
 	}
 
 	@Override
 	public Set<String> expandMdmByGoldenResourceId(RequestPartitionId theRequestPartitionId, IdDt theId) {
 		ourLog.debug("About to expand golden resource with golden resource id {}", theId);
-		IResourcePersistentId pidOrThrowException =
+		IResourcePersistentId<?> pidOrThrowException =
 				myIdHelperService.getPidOrThrowException(RequestPartitionId.allPartitions(), theId);
 		return expandMdmByGoldenResourcePid(theRequestPartitionId, pidOrThrowException);
 	}
 
 	@Nonnull
 	public Set<String> flattenPidTuplesToSet(
-			IResourcePersistentId initialPid, List<MdmPidTuple> goldenPidSourcePidTuples) {
-		Set<IResourcePersistentId> flattenedPids = new HashSet<>();
-		goldenPidSourcePidTuples.forEach(tuple -> {
-			flattenedPids.add(tuple.getSourcePid());
-			flattenedPids.add(tuple.getGoldenPid());
-		});
-		Set<String> resourceIds = myIdHelperService.translatePidsToFhirResourceIds(flattenedPids);
-		ourLog.debug("Pid {} has been expanded to [{}]", initialPid, String.join(",", resourceIds));
-		return resourceIds;
+		RequestPartitionId theRequestPartitionId, IResourcePersistentId<?> theInitialPid, List<MdmPidTuple<?>> theGoldenPidSourcePidTuples) {
+		// LUKETODO:  should conditional logic be here?
+		// LUKETODO:  filter out golden partition ID vs. request partition ID
+		final Set<IResourcePersistentId> flattenedPids = theGoldenPidSourcePidTuples.stream()
+			.map(tuple -> flattenTuple(theRequestPartitionId, tuple))
+			.flatMap(Collection::stream)
+			.collect(Collectors.toUnmodifiableSet());
+		 final Set<String> resourceIds = myIdHelperService.translatePidsToFhirResourceIds(flattenedPids);
+		 ourLog.debug("Pid {} has been expanded to [{}]", theInitialPid, String.join(",", resourceIds));
+		 return resourceIds;
+	}
+
+	@Nonnull
+	private Set<IResourcePersistentId> flattenTuple(RequestPartitionId theRequestPartitionId, MdmPidTuple<?> theTuple) {
+		if (theRequestPartitionId.isAllPartitions()) {
+			return Set.of(theTuple.getSourcePid(), theTuple.getGoldenPid());
+		}
+		if (theRequestPartitionId.getPartitionIds().contains(theTuple.getGoldenPartitionId()) &&
+			theRequestPartitionId.getPartitionIds().contains(theTuple.getSourcePartitionId())) {
+			return Set.of(theTuple.getSourcePid(), theTuple.getGoldenPid());
+		}
+		if (theRequestPartitionId.getPartitionIds().contains(theTuple.getGoldenPartitionId())) {
+			return Set.of(theTuple.getGoldenPid());
+		}
+
+		if (theRequestPartitionId.getPartitionIds().contains(theTuple.getSourcePartitionId())) {
+			return Set.of(theTuple.getSourcePid());
+		}
+		return Collections.emptySet();
 	}
 }

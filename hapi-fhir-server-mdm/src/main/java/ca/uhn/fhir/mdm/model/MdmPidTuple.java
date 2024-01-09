@@ -20,18 +20,31 @@
 package ca.uhn.fhir.mdm.model;
 
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
+import jakarta.annotation.Nullable;
+import jakarta.persistence.criteria.CriteriaBuilder;
 
 public class MdmPidTuple<T extends IResourcePersistentId> {
+	// LUKETODO: add the source partition ID and the golden partition ID
 	private final T myGoldenPid;
 	private final T mySourcePid;
+	@Nullable
+	private Integer myGoldenPartitionId;
+	@Nullable
+	private Integer mySourcePartitionId;
 
-	private MdmPidTuple(T theGoldenPid, T theSourcePid) {
+	private MdmPidTuple(T theGoldenPid, T theSourcePid, @Nullable Integer theGoldenPartitionId, @Nullable Integer theSourcePartitionId) {
 		myGoldenPid = theGoldenPid;
 		mySourcePid = theSourcePid;
+		myGoldenPartitionId = theGoldenPartitionId;
+		mySourcePartitionId = theSourcePartitionId;
 	}
 
 	public static <P extends IResourcePersistentId> MdmPidTuple<P> fromGoldenAndSource(P theGoldenPid, P theSourcePid) {
-		return new MdmPidTuple<>(theGoldenPid, theSourcePid);
+		return new MdmPidTuple<>(theGoldenPid, theSourcePid, null, null);
+	}
+
+	public static <P extends IResourcePersistentId> MdmPidTuple<P> fromGoldenAndSourceAndPartitionIds(P theGoldenPid, P theSourcePid, Integer theGoldenPartitionId, Integer theSourcePartitionId) {
+		return new MdmPidTuple<>(theGoldenPid, theSourcePid, theGoldenPartitionId, theSourcePartitionId);
 	}
 
 	public T getGoldenPid() {
@@ -40,5 +53,16 @@ public class MdmPidTuple<T extends IResourcePersistentId> {
 
 	public T getSourcePid() {
 		return mySourcePid;
+	}
+
+
+	@Nullable
+	public Integer getGoldenPartitionId() {
+		return myGoldenPartitionId;
+	}
+
+	@Nullable
+	public Integer getSourcePartitionId() {
+		return mySourcePartitionId;
 	}
 }

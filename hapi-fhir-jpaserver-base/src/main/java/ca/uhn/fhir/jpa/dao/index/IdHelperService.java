@@ -26,6 +26,7 @@ import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.model.PersistentIdToForcedIdMap;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
+import ca.uhn.fhir.jpa.dao.mdm.MdmLinkDaoJpaImpl;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.cross.IResourceLookup;
 import ca.uhn.fhir.jpa.model.cross.JpaResourceLookup;
@@ -34,6 +35,7 @@ import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.search.builder.SearchBuilder;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.jpa.util.QueryChunker;
+import ca.uhn.fhir.mdm.log.Logs;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.server.storage.BaseResourcePersistentId;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -59,6 +61,8 @@ import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.IdType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
@@ -98,6 +102,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  */
 @Service
 public class IdHelperService implements IIdHelperService<JpaPid> {
+	private static final Logger ourLog = LoggerFactory.getLogger(IdHelperService.class);
 	public static final Predicate[] EMPTY_PREDICATE_ARRAY = new Predicate[0];
 	public static final String RESOURCE_PID = "RESOURCE_PID";
 
@@ -211,6 +216,7 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 
 		Map<String, JpaPid> retVals = new HashMap<>();
 		for (String id : theIds) {
+			ourLog.info("5498: IdHelperService id to resolve: {}", id);
 			JpaPid retVal;
 			if (!idRequiresForcedId(id)) {
 				// is already a PID
@@ -220,6 +226,9 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 				// is a forced id
 				// we must resolve!
 				if (myStorageSettings.isDeleteEnabled()) {
+					// LUKETODO:  if we use the OLD interceptor code, we get 1327, 1328, 1329, so, Patient tenant A, tenant B, and GOLDEN
+					// LUKETODO:  if we use the NEW interceptor code, we get 1327, 1329, so, Patient tenant A, and GOLDEN
+					// LUKETODO:  in both cases, we fail on ID 1329, the GOLDEN patient
 					retVal = resolveResourceIdentity(theRequestPartitionId, theResourceType, id, theExcludeDeleted)
 							.getPersistentId();
 					retVals.put(id, retVal);
@@ -554,6 +563,13 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 								requestPartitionId.getPartitionIdsWithoutDefault(),
 								theExcludeDeleted);
 					} else {
+						// LUKETODO:  this query returns NOTHING
+						/*
+						 SELECT t.RES_TYPE, t.RES_ID, t.FHIR_ID, t.RES_DELETED_AT
+						 FROM HFJ_RESOURCE t
+						 WHERE t.RES_TYPE = 'Patient' AND t.FHIR_ID IN ( 1329 ) AND
+								 t.PARTITION_ID IN ( 123 );
+						 */
 						views = myResourceTableDao.findAndResolveByForcedIdWithNoTypeInPartition(
 								nextResourceType, nextIds, requestPartitionId.getPartitionIds(), theExcludeDeleted);
 					}
