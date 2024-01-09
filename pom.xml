@@ -1548,18 +1548,6 @@
 				<artifactId>jena-arq</artifactId>
 				<version>${jena_version}</version>
 			</dependency>
-			<!-- FIXME: remove?
-			<dependency>
-				<groupId>org.apache.lucene</groupId>
-				<artifactId>lucene-analyzers-phonetic</artifactId>
-				<version>${lucene_version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.apache.lucene</groupId>
-				<artifactId>lucene-backward-codecs</artifactId>
-				<version>${lucene_version}</version>
-			</dependency>
-			-->
 			<dependency>
 				<groupId>org.apache.lucene</groupId>
 				<artifactId>lucene-analysis-phonetic</artifactId>
