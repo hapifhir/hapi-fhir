@@ -1006,6 +1006,14 @@ public abstract class BaseParser implements IParser {
 	}
 
 	protected void containResourcesInReferences(IBaseResource theResource) {
+
+		/*
+		 * If a UUID is present in Bundle.entry.fullUrl but no value is present
+		 * in Bundle.entry.resource.id, the resource has a discrete identity which
+		 * should be copied into the resource ID. It will not be serialized in
+		 * Resource.id because it's a placeholder/UUID value, but its presence there
+		 * informs the serializer that we don't need to contain this resource.
+		 */
 		if (theResource instanceof IBaseBundle) {
 			List<Pair<String, IBaseResource>> entries = BundleUtil.getBundleEntryFullUrlsAndResources(getContext(), (IBaseBundle) theResource);
 			for (Pair<String, IBaseResource> nextEntry : entries) {
