@@ -646,7 +646,7 @@ public class BundleUtil {
 	}
 
 	public static IBase getReferenceInBundle(
-		@Nonnull FhirContext theFhirContext, @Nonnull String theUrl, @Nullable Object theAppContext) {
+			@Nonnull FhirContext theFhirContext, @Nonnull String theUrl, @Nullable Object theAppContext) {
 		if (!(theAppContext instanceof IBaseBundle) || isBlank(theUrl) || theUrl.startsWith("#")) {
 			return null;
 		}
@@ -658,7 +658,7 @@ public class BundleUtil {
 
 		final boolean isPlaceholderReference = theUrl.startsWith("urn:");
 		final String unqualifiedVersionlessReference =
-			new IdDt(theUrl).toUnqualifiedVersionless().getValue();
+				new IdDt(theUrl).toUnqualifiedVersionless().getValue();
 
 		for (BundleEntryParts next : BundleUtil.toListOfEntries(theFhirContext, bundle)) {
 			IBaseResource nextResource = next.getResource();
@@ -667,14 +667,12 @@ public class BundleUtil {
 			}
 			if (isPlaceholderReference) {
 				if (theUrl.equals(next.getUrl())
-					|| theUrl.equals(nextResource.getIdElement().getValue())) {
+						|| theUrl.equals(nextResource.getIdElement().getValue())) {
 					return nextResource;
 				}
 			} else {
-				if (unqualifiedVersionlessReference.equals(nextResource
-					.getIdElement()
-					.toUnqualifiedVersionless()
-					.getValue())) {
+				if (unqualifiedVersionlessReference.equals(
+						nextResource.getIdElement().toUnqualifiedVersionless().getValue())) {
 					return nextResource;
 				}
 			}

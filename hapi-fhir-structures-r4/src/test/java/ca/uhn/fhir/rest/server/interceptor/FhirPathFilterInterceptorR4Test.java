@@ -12,6 +12,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CodeableConcept;
@@ -19,6 +20,7 @@ import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Composition;
 import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.MedicationAdministration;
+import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Period;
 import org.hl7.fhir.r4.model.Reference;
@@ -39,6 +41,8 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class FhirPathFilterInterceptorR4Test {
 
@@ -210,8 +214,15 @@ public class FhirPathFilterInterceptorR4Test {
 		try (CloseableHttpResponse response = myHttpClient.execute(request)) {
 			String responseText = IOUtils.toString(response.getEntity().getContent(), Charsets.UTF_8);
 			ourLog.info("Response:\n{}", responseText);
-			assertThat(responseText, containsString("      \"name\": \"result\",\n" +
-					"      \"" + expectedResult + "\""));
+			IBaseResource resource = ourCtx.newJsonParser().parseResource(responseText);
+			assertTrue(resource instanceof Parameters);
+			Parameters parameters = (Parameters)resource;
+			Parameters.ParametersParameterComponent parameterComponent = parameters.getParameter("result");
+			assertNotNull(parameterComponent);
+			assertEquals(2, parameterComponent.getPart().size());
+			Parameters.ParametersParameterComponent resultComponent = parameterComponent.getPart().get(1);
+			assertEquals("result", resultComponent.getName());
+			assertThat(responseText, containsString(expectedResult));
 		}
 
 	}
