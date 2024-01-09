@@ -7,7 +7,9 @@ import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.SummaryEnum;
+import ca.uhn.fhir.test.utilities.HttpClientExtension;
 import ca.uhn.fhir.test.utilities.JettyUtil;
+import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.TestUtil;
 import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
@@ -17,8 +19,8 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.servlet.ServletHandler;
-import org.eclipse.jetty.servlet.ServletHolder;
+import org.eclipse.jetty.ee10.servlet.ServletHandler;
+import org.eclipse.jetty.ee10.servlet.ServletHolder;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.IdType;
@@ -29,6 +31,7 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
 import java.io.IOException;
 import java.util.Collections;
@@ -46,13 +49,19 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class SummaryParamR4Test {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SummaryParamR4Test.class);
-	private static CloseableHttpClient ourClient;
-	private static FhirContext ourCtx = FhirContext.forR4();
+	private static final FhirContext ourCtx = FhirContext.forR4Cached();
 	private static SummaryEnum ourLastSummary;
 	private static List<SummaryEnum> ourLastSummaryList;
-	private static int ourPort;
 
-	private static Server ourServer;
+	@RegisterExtension
+	public RestfulServerExtension ourServer = new RestfulServerExtension(ourCtx)
+		 .registerProvider(new DummyPatientResourceProvider())
+		 .registerProvider(new DummyMedicationRequestProvider())
+		 .withPagingProvider(new FifoMemoryPagingProvider(100))
+		 .setDefaultResponseEncoding(EncodingEnum.XML);
+
+	@RegisterExtension
+	private HttpClientExtension ourClient = new HttpClientExtension();
 
 	@BeforeEach
 	public void before() {
@@ -63,7 +72,7 @@ public class SummaryParamR4Test {
 	@Test
 	public void testReadSummaryData() throws Exception {
 		verifyXmlAndJson(
-			"http://localhost:" + ourPort + "/Patient/1?_summary=" + SummaryEnum.DATA.getCode(),
+			ourServer.getBaseUrl() + "/Patient/1?_summary=" + SummaryEnum.DATA.getCode(),
 			Patient.class,
 			patient -> {
 				String responseContent = ourCtx.newXmlParser().encodeResourceToString(patient);
@@ -80,7 +89,7 @@ public class SummaryParamR4Test {
 
 	@Test
 	public void testReadSummaryText() throws Exception {
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1?_summary=" + SummaryEnum.TEXT.getCode());
+		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/1?_summary=" + SummaryEnum.TEXT.getCode());
 		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 			ourLog.info(responseContent);
@@ -97,7 +106,7 @@ public class SummaryParamR4Test {
 
 	@Test
 	public void testReadSummaryTextWithMandatory() throws Exception {
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/MedicationRequest/1?_summary=" + SummaryEnum.TEXT.getCode());
+		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/MedicationRequest/1?_summary=" + SummaryEnum.TEXT.getCode());
 		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 			ourLog.info(responseContent);
@@ -114,7 +123,7 @@ public class SummaryParamR4Test {
 
 	@Test
 	public void testReadSummaryTrue() throws Exception {
-		String url = "http://localhost:" + ourPort + "/Patient/1?_summary=" + SummaryEnum.TRUE.getCode();
+		String url = ourServer.getBaseUrl() + "/Patient/1?_summary=" + SummaryEnum.TRUE.getCode();
 		verifyXmlAndJson(
 			url,
 			Patient.class,
@@ -133,7 +142,7 @@ public class SummaryParamR4Test {
 
 	@Test
 	public void testSearchSummaryCount() throws Exception {
-		String url = "http://localhost:" + ourPort + "/Patient?_pretty=true&_summary=" + SummaryEnum.COUNT.getCode();
+		String url = ourServer.getBaseUrl() + "/Patient?_pretty=true&_summary=" + SummaryEnum.COUNT.getCode();
 		verifyXmlAndJson(
 			url,
 			bundle -> {
@@ -150,7 +159,7 @@ public class SummaryParamR4Test {
 
 	@Test
 	public void testSearchSummaryCountAndData() throws Exception {
-		String url = "http://localhost:" + ourPort + "/Patient?_pretty=true&_summary=" + SummaryEnum.COUNT.getCode() + "," + SummaryEnum.DATA.getCode();
+		String url = ourServer.getBaseUrl() + "/Patient?_pretty=true&_summary=" + SummaryEnum.COUNT.getCode() + "," + SummaryEnum.DATA.getCode();
 		verifyXmlAndJson(
 			url,
 			bundle -> {
@@ -166,7 +175,7 @@ public class SummaryParamR4Test {
 
 	@Test
 	public void testSearchSummaryData() throws Exception {
-		String url = "http://localhost:" + ourPort + "/Patient?_summary=" + SummaryEnum.DATA.getCode();
+		String url = ourServer.getBaseUrl() + "/Patient?_summary=" + SummaryEnum.DATA.getCode();
 		verifyXmlAndJson(
 			url,
 			bundle -> {
@@ -183,7 +192,7 @@ public class SummaryParamR4Test {
 
 	@Test
 	public void testSearchSummaryFalse() throws Exception {
-		String url = "http://localhost:" + ourPort + "/Patient?_summary=false";
+		String url = ourServer.getBaseUrl() + "/Patient?_summary=false";
 		verifyXmlAndJson(
 			url,
 			bundle -> {
@@ -199,7 +208,7 @@ public class SummaryParamR4Test {
 
 	@Test
 	public void testSearchSummaryText() throws Exception {
-		String url = "http://localhost:" + ourPort + "/Patient?_summary=" + SummaryEnum.TEXT.getCode();
+		String url = ourServer.getBaseUrl() + "/Patient?_summary=" + SummaryEnum.TEXT.getCode();
 		verifyXmlAndJson(
 			url,
 			bundle -> {
@@ -216,7 +225,7 @@ public class SummaryParamR4Test {
 
 	@Test
 	public void testSearchSummaryTextWithMandatory() throws Exception {
-		String url = "http://localhost:" + ourPort + "/MedicationRequest?_summary=" + SummaryEnum.TEXT.getCode() + "&_pretty=true";
+		String url = ourServer.getBaseUrl() + "/MedicationRequest?_summary=" + SummaryEnum.TEXT.getCode() + "&_pretty=true";
 		verifyXmlAndJson(
 			url,
 			bundle -> {
@@ -234,7 +243,7 @@ public class SummaryParamR4Test {
 
 	@Test
 	public void testSearchSummaryTextMulti() throws Exception {
-		String url = "http://localhost:" + ourPort + "/Patient?_query=multi&_summary=" + SummaryEnum.TEXT.getCode();
+		String url = ourServer.getBaseUrl() + "/Patient?_query=multi&_summary=" + SummaryEnum.TEXT.getCode();
 		verifyXmlAndJson(
 			url,
 			bundle -> {
@@ -251,7 +260,7 @@ public class SummaryParamR4Test {
 
 	@Test
 	public void testSearchSummaryTrue() throws Exception {
-		String url = "http://localhost:" + ourPort + "/Patient?_summary=" + SummaryEnum.TRUE.getCode();
+		String url = ourServer.getBaseUrl() + "/Patient?_summary=" + SummaryEnum.TRUE.getCode();
 		verifyXmlAndJson(
 			url,
 			bundle -> {
@@ -268,7 +277,7 @@ public class SummaryParamR4Test {
 
 	@Test
 	public void testSearchSummaryWithTextAndOthers() throws Exception {
-		String url = "http://localhost:" + ourPort + "/Patient?_summary=text&_summary=data";
+		String url = ourServer.getBaseUrl() + "/Patient?_summary=text&_summary=data";
 		try (CloseableHttpResponse status = ourClient.execute(new HttpGet(url))) {
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 			ourLog.info(responseContent);
@@ -373,29 +382,7 @@ public class SummaryParamR4Test {
 
 	@AfterAll
 	public static void afterClassClearContext() throws Exception {
-		JettyUtil.closeServer(ourServer);
 		TestUtil.randomizeLocaleAndTimezone();
-	}
-
-	@BeforeAll
-	public static void beforeClass() throws Exception {
-		ourServer = new Server(0);
-
-		ServletHandler proxyHandler = new ServletHandler();
-		RestfulServer servlet = new RestfulServer(ourCtx);
-
-		servlet.setResourceProviders(new DummyPatientResourceProvider(), new DummyMedicationRequestProvider());
-		ServletHolder servletHolder = new ServletHolder(servlet);
-		proxyHandler.addServletWithMapping(servletHolder, "/*");
-		ourServer.setHandler(proxyHandler);
-		JettyUtil.startServer(ourServer);
-        ourPort = JettyUtil.getPortForStartedServer(ourServer);
-
-		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
-		HttpClientBuilder builder = HttpClientBuilder.create();
-		builder.setConnectionManager(connectionManager);
-		ourClient = builder.build();
-
 	}
 
 }

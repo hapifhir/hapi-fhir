@@ -19,7 +19,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
-import javax.annotation.Nonnull;
+import jakarta.annotation.Nonnull;
 import java.io.IOException;
 import java.util.UUID;
 
@@ -92,7 +92,7 @@ public class FhirSystemDaoTransactionR5Test extends BaseJpaR5Test {
 		// One select to resolve the 3 match URLs
 		assertEquals(1, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
 		String firstSelectQuery = myCaptureQueriesListener.getSelectQueries().get(0).getSql(false, false);
-		assertEquals(1, countMatches(firstSelectQuery, "HASH_SYS_AND_VALUE in (? , ? , ? , ?)"), firstSelectQuery);
+		assertEquals(1, countMatches(firstSelectQuery, "rispt1_0.HASH_SYS_AND_VALUE in (?,?,?,?)"), firstSelectQuery);
 		assertEquals(23, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
 		assertEquals(3, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());

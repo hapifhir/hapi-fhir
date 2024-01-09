@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Test Utilities
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@
  */
 package ca.uhn.fhir.test.utilities.server;
 
-import javax.servlet.ServletConfig;
+import jakarta.servlet.ServletConfig;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;

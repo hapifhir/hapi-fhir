@@ -36,7 +36,7 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import javax.annotation.Nonnull;
+import jakarta.annotation.Nonnull;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
@@ -59,22 +59,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-@ExtendWith(MockitoExtension.class)
-public class HfqlExecutorTest {
-
-	private final RequestDetails mySrd = new SystemRequestDetails();
-	@Spy
-	private FhirContext myCtx = FhirContext.forR4Cached();
-	@Mock
-	private DaoRegistry myDaoRegistry;
-	@Mock
-	private IPagingProvider myPagingProvider;
-	@Spy
-	private ISearchParamRegistry mySearchParamRegistry = new FhirContextSearchParamRegistry(myCtx);
-	@InjectMocks
-	private HfqlExecutor myHfqlExecutor = new HfqlExecutor();
-	@Captor
-	private ArgumentCaptor<SearchParameterMap> mySearchParameterMapCaptor;
+public class HfqlExecutorTest extends BaseHfqlExecutorTest {
 
 	@Test
 	public void testContinuation() {
@@ -1251,128 +1236,6 @@ public class HfqlExecutorTest {
 
 		IHfqlExecutionResult result = myHfqlExecutor.executeInitialSearch(input, null, mySrd);
 		assertErrorMessage(result, "HAPI-2429: Resource type Patient does not have a root element named 'Blah'");
-	}
-
-	@SuppressWarnings("unchecked")
-	private <T extends IBaseResource> IFhirResourceDao<T> initDao(Class<T> theType) {
-		IFhirResourceDao<T> retVal = mock(IFhirResourceDao.class);
-		String type = myCtx.getResourceType(theType);
-		when(myDaoRegistry.getResourceDao(type)).thenReturn(retVal);
-		return retVal;
-	}
-
-	@Nonnull
-	private static List<List<Object>> readAllRowValues(IHfqlExecutionResult result) {
-		List<List<Object>> rowValues = new ArrayList<>();
-		while (result.hasNext()) {
-			rowValues.add(new ArrayList<>(result.getNextRow().getRowValues()));
-		}
-		return rowValues;
-	}
-
-	@Nonnull
-	private static Observation createCardiologyNoteObservation(String id, String noteText) {
-		Observation obs = new Observation();
-		obs.setId(id);
-		obs.getCode().addCoding()
-			.setSystem("http://loinc.org")
-			.setCode("34752-6");
-		obs.setValue(new StringType(noteText));
-		return obs;
-	}
-
-	@Nonnull
-	private static Observation createWeightObservationWithKilos(String obsId, long kg) {
-		Observation obs = new Observation();
-		obs.setId(obsId);
-		obs.getCode().addCoding()
-			.setSystem("http://loinc.org")
-			.setCode("29463-7");
-		obs.setValue(new Quantity(null, kg, "http://unitsofmeasure.org", "kg", "kg"));
-		return obs;
-	}
-
-	@Nonnull
-	private static SimpleBundleProvider createProviderWithSparseNames() {
-		Patient patientNoValues = new Patient();
-		patientNoValues.setActive(true);
-		Patient patientFamilyNameOnly = new Patient();
-		patientFamilyNameOnly.addName().setFamily("Simpson");
-		Patient patientGivenNameOnly = new Patient();
-		patientGivenNameOnly.addName().addGiven("Homer");
-		Patient patientBothNames = new Patient();
-		patientBothNames.addName().setFamily("Simpson").addGiven("Homer");
-		return new SimpleBundleProvider(List.of(
-			patientNoValues, patientFamilyNameOnly, patientGivenNameOnly, patientBothNames));
-	}
-
-	@Nonnull
-	private static SimpleBundleProvider createProviderWithSomeSimpsonsAndFlanders() {
-		return new SimpleBundleProvider(
-			createPatientHomerSimpson(),
-			createPatientNedFlanders(),
-			createPatientBartSimpson(),
-			createPatientLisaSimpson(),
-			createPatientMaggieSimpson()
-		);
-	}
-
-	@Nonnull
-	private static SimpleBundleProvider createProviderWithSomeSimpsonsAndFlandersWithSomeDuplicates() {
-		return new SimpleBundleProvider(
-			createPatientHomerSimpson(),
-			createPatientHomerSimpson(),
-			createPatientNedFlanders(),
-			createPatientNedFlanders(),
-			createPatientBartSimpson(),
-			createPatientLisaSimpson(),
-			createPatientMaggieSimpson());
-	}
-
-	@Nonnull
-	private static Patient createPatientMaggieSimpson() {
-		Patient maggie = new Patient();
-		maggie.addName().setFamily("Simpson").addGiven("Maggie").addGiven("Evelyn");
-		maggie.addIdentifier().setSystem("http://system").setValue("value4");
-		return maggie;
-	}
-
-	@Nonnull
-	private static Patient createPatientLisaSimpson() {
-		Patient lisa = new Patient();
-		lisa.getMeta().setVersionId("1");
-		lisa.addName().setFamily("Simpson").addGiven("Lisa").addGiven("Marie");
-		lisa.addIdentifier().setSystem("http://system").setValue("value3");
-		return lisa;
-	}
-
-	@Nonnull
-	private static Patient createPatientBartSimpson() {
-		Patient bart = new Patient();
-		bart.getMeta().setVersionId("3");
-		bart.addName().setFamily("Simpson").addGiven("Bart").addGiven("El Barto");
-		bart.addIdentifier().setSystem("http://system").setValue("value2");
-		return bart;
-	}
-
-	@Nonnull
-	private static Patient createPatientNedFlanders() {
-		Patient nedFlanders = new Patient();
-		nedFlanders.getMeta().setVersionId("1");
-		nedFlanders.addName().setFamily("Flanders").addGiven("Ned");
-		nedFlanders.addIdentifier().setSystem("http://system").setValue("value1");
-		return nedFlanders;
-	}
-
-	@Nonnull
-	private static Patient createPatientHomerSimpson() {
-		Patient homer = new Patient();
-		homer.setId("HOMER0");
-		homer.getMeta().setVersionId("2");
-		homer.addName().setFamily("Simpson").addGiven("Homer").addGiven("Jay");
-		homer.addIdentifier().setSystem("http://system").setValue("value0");
-		homer.setBirthDateElement(new DateType("1950-01-01"));
-		return homer;
 	}
 
 }

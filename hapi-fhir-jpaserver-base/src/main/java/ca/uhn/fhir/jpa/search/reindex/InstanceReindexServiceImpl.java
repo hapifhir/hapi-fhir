@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,6 +46,8 @@ import ca.uhn.fhir.rest.server.util.ResourceSearchParams;
 import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
 import com.google.common.annotations.VisibleForTesting;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -66,8 +68,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 import static ca.uhn.fhir.jpa.dao.index.DaoSearchParamSynchronizer.subtract;
 import static java.util.Comparator.comparing;
@@ -160,7 +160,7 @@ public class InstanceReindexServiceImpl implements IInstanceReindexService {
 				myInterceptorService, theRequestDetails, theResourceId, resource);
 		BaseHapiFhirResourceDao.invokeStoragePreShowResources(myInterceptorService, theRequestDetails, resource);
 
-		ResourceIndexedSearchParams existingParamsToPopulate = new ResourceIndexedSearchParams(entity);
+		ResourceIndexedSearchParams existingParamsToPopulate = ResourceIndexedSearchParams.withLists(entity);
 		existingParamsToPopulate.mySearchParamPresentEntities.addAll(entity.getSearchParamPresents());
 
 		List<String> messages = new ArrayList<>();
@@ -173,7 +173,7 @@ public class InstanceReindexServiceImpl implements IInstanceReindexService {
 			messages.add("WARNING: " + next);
 		}
 
-		ResourceIndexedSearchParams newParamsToPopulate = new ResourceIndexedSearchParams(entity);
+		ResourceIndexedSearchParams newParamsToPopulate = ResourceIndexedSearchParams.withLists(entity);
 		newParamsToPopulate.mySearchParamPresentEntities.addAll(entity.getSearchParamPresents());
 
 		return buildIndexResponse(existingParamsToPopulate, newParamsToPopulate, true, messages);
@@ -205,12 +205,12 @@ public class InstanceReindexServiceImpl implements IInstanceReindexService {
 					.collect(Collectors.toSet());
 		}
 
-		ResourceIndexedSearchParams newParamsToPopulate = new ResourceIndexedSearchParams();
+		ResourceIndexedSearchParams newParamsToPopulate = ResourceIndexedSearchParams.withSets();
 		mySearchParamExtractorService.extractFromResource(
 				theRequestPartitionId,
 				theRequestDetails,
 				newParamsToPopulate,
-				new ResourceIndexedSearchParams(),
+				ResourceIndexedSearchParams.empty(),
 				entity,
 				resource,
 				theTransactionDetails,
@@ -220,13 +220,13 @@ public class InstanceReindexServiceImpl implements IInstanceReindexService {
 		ResourceIndexedSearchParams existingParamsToPopulate;
 		boolean showAction;
 		if (theParameters == null) {
-			existingParamsToPopulate = new ResourceIndexedSearchParams(entity);
+			existingParamsToPopulate = ResourceIndexedSearchParams.withLists(entity);
 			existingParamsToPopulate.mySearchParamPresentEntities.addAll(entity.getSearchParamPresents());
 			fillInParamNames(
 					entity, existingParamsToPopulate.mySearchParamPresentEntities, theResourceId.getResourceType());
 			showAction = true;
 		} else {
-			existingParamsToPopulate = new ResourceIndexedSearchParams();
+			existingParamsToPopulate = ResourceIndexedSearchParams.withSets();
 			showAction = false;
 		}
 

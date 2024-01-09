@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-deployable-pom</artifactId>
-		<version>6.11.0-SNAPSHOT</version>
+		<version>6.11.8-SNAPSHOT</version>
 
 		<relativePath>../hapi-deployable-pom/pom.xml</relativePath>
 	</parent>
@@ -14,6 +14,8 @@
 	<artifactId>hapi-fhir-jpa</artifactId>
 	<description>This project contains utility classes for working with spring-hibernate jpa and the Quartz Scheduler.
 	</description>
+
+	<name>HAPI FHIR JPA Model</name>
 
 	<dependencies>
 		<dependency>
@@ -36,14 +38,6 @@
 
 		<!-- Hibernate -->
 		<dependency>
-			<groupId>org.hibernate</groupId>
-			<artifactId>hibernate-entitymanager</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.hibernate</groupId>
-			<artifactId>hibernate-java8</artifactId>
-		</dependency>
-		<dependency>
 			<groupId>org.hibernate.validator</groupId>
 			<artifactId>hibernate-validator</artifactId>
 			<exclusions>
@@ -59,7 +53,7 @@
 		</dependency>
 		<dependency>
 			<groupId>org.hibernate.search</groupId>
-			<artifactId>hibernate-search-mapper-orm</artifactId>
+			<artifactId>hibernate-search-mapper-orm-orm6</artifactId>
 			<exclusions>
 				<exclusion>
 					<groupId>org.apache.logging.log4j</groupId>

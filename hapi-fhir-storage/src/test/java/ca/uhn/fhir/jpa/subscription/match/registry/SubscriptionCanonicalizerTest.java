@@ -6,6 +6,7 @@ import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscriptionChannelType;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalTopicSubscriptionFilter;
 import ca.uhn.fhir.model.api.ExtensionDt;
 import ca.uhn.fhir.model.primitive.BooleanDt;
+import ca.uhn.fhir.subscription.SubscriptionConstants;
 import ca.uhn.fhir.subscription.SubscriptionTestDataHelper;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Extension;
@@ -14,6 +15,8 @@ import org.hl7.fhir.r5.model.Coding;
 import org.hl7.fhir.r5.model.Enumerations;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import static ca.uhn.fhir.rest.api.Constants.CT_FHIR_JSON_NEW;
 import static ca.uhn.fhir.util.HapiExtensions.EX_SEND_DELETE_MESSAGES;
@@ -83,16 +86,12 @@ class SubscriptionCanonicalizerTest {
 		assertTrue(canonicalize.getSendDeleteMessages());
 	}
 
-	@Test
-	public void testR5() {
-		// setup
-		SubscriptionCanonicalizer r5Canonicalizer = new SubscriptionCanonicalizer(FhirContext.forR5Cached());
+	private org.hl7.fhir.r5.model.Subscription buildR5Subscription(org.hl7.fhir.r5.model.Subscription.SubscriptionPayloadContent thePayloadContent) {
 		org.hl7.fhir.r5.model.Subscription subscription = new org.hl7.fhir.r5.model.Subscription();
 
 		subscription.setStatus(Enumerations.SubscriptionStatusCodes.ACTIVE);
 		subscription.setContentType(CT_FHIR_JSON_NEW);
-		// WIP STR5 support different content types
-		subscription.setContent(org.hl7.fhir.r5.model.Subscription.SubscriptionPayloadContent.FULLRESOURCE);
+		subscription.setContent(thePayloadContent);
 		subscription.setEndpoint("http://foo");
 		subscription.setTopic(SubscriptionTestDataHelper.TEST_TOPIC);
 		Coding channelType = new Coding().setSystem("http://terminology.hl7.org/CodeSystem/subscription-channel-type").setCode("rest-hook");
@@ -102,13 +101,25 @@ class SubscriptionCanonicalizerTest {
 		subscription.setHeartbeatPeriod(123);
 		subscription.setMaxCount(456);
 
+		return subscription;
+	}
+
+	@ParameterizedTest
+	@ValueSource(strings = {"full-resource", "id-only", "empty"})
+	public void testR5Canonicalize_returnsCorrectCanonicalSubscription(String thePayloadContent) {
+		// setup
+		SubscriptionCanonicalizer r5Canonicalizer = new SubscriptionCanonicalizer(FhirContext.forR5Cached());
+		org.hl7.fhir.r5.model.Subscription.SubscriptionPayloadContent payloadContent =
+				org.hl7.fhir.r5.model.Subscription.SubscriptionPayloadContent.fromCode(thePayloadContent);
+		org.hl7.fhir.r5.model.Subscription subscription = buildR5Subscription(payloadContent);
+
 		// execute
 		CanonicalSubscription canonical = r5Canonicalizer.canonicalize(subscription);
 
 		// verify
 		assertEquals(Subscription.SubscriptionStatus.ACTIVE, canonical.getStatus());
 		assertEquals(CT_FHIR_JSON_NEW, canonical.getContentType());
-		assertEquals(org.hl7.fhir.r5.model.Subscription.SubscriptionPayloadContent.FULLRESOURCE, canonical.getContent());
+		assertEquals(payloadContent, canonical.getContent());
 		assertEquals("http://foo", canonical.getEndpointUrl());
 		assertEquals(SubscriptionTestDataHelper.TEST_TOPIC, canonical.getTopic());
 		assertEquals(CanonicalSubscriptionChannelType.RESTHOOK, canonical.getChannelType());
@@ -131,37 +142,72 @@ class SubscriptionCanonicalizerTest {
 		assertEquals(456, canonical.getMaxCount());
 	}
 
-	@Test
-	void testR4Backport() {
+	@ParameterizedTest
+	@ValueSource(strings = {"full-resource", "id-only", "empty"})
+	void testR4BCanonicalize_returnsCorrectCanonicalSubscription(String thePayloadContent) {
+		// Example drawn from http://build.fhir.org/ig/HL7/fhir-subscription-backport-ig/Subscription-subscription-zulip.json.html
+
+		// setup
+		SubscriptionCanonicalizer r4bCanonicalizer = new SubscriptionCanonicalizer(FhirContext.forR4BCached());
+		org.hl7.fhir.r4b.model.Subscription subscription = buildR4BSubscription(thePayloadContent);
+
+		// execute
+		CanonicalSubscription canonical = r4bCanonicalizer.canonicalize(subscription);
+
+		// verify
+		assertEquals(Subscription.SubscriptionStatus.ACTIVE, canonical.getStatus());
+		verifyStandardSubscriptionParameters(canonical);
+		verifyChannelParameters(canonical, thePayloadContent);
+	}
+
+	private org.hl7.fhir.r4b.model.Subscription buildR4BSubscription(String thePayloadContent) {
+		org.hl7.fhir.r4b.model.Subscription subscription = new org.hl7.fhir.r4b.model.Subscription();
+
+		subscription.setId("testId");
+		subscription.getMeta().addTag("http://a", "b", "c");
+		subscription.getMeta().addTag("http://d", "e", "f");
+		subscription.setStatus(org.hl7.fhir.r4b.model.Enumerations.SubscriptionStatus.ACTIVE);
+		subscription.getChannel().setPayload(CT_FHIR_JSON_NEW);
+		subscription.getChannel().setType(org.hl7.fhir.r4b.model.Subscription.SubscriptionChannelType.RESTHOOK);
+		subscription.getChannel().setEndpoint(SubscriptionTestDataHelper.TEST_ENDPOINT);
+
+		subscription.getMeta().addProfile(SubscriptionConstants.SUBSCRIPTION_TOPIC_PROFILE_URL);
+		subscription.setCriteria(SubscriptionTestDataHelper.TEST_TOPIC);
+
+		subscription.getChannel().setPayload(CT_FHIR_JSON_NEW);
+		subscription.getChannel().addHeader(SubscriptionTestDataHelper.TEST_HEADER1);
+		subscription.getChannel().addHeader(SubscriptionTestDataHelper.TEST_HEADER2);
+		subscription.setStatus(org.hl7.fhir.r4b.model.Enumerations.SubscriptionStatus.ACTIVE);
+
+		subscription
+				.getChannel()
+				.getPayloadElement()
+				.addExtension(
+						SubscriptionConstants.SUBSCRIPTION_TOPIC_CHANNEL_PAYLOAD_CONTENT,
+						new org.hl7.fhir.r4b.model.CodeType(thePayloadContent));
+
+		return subscription;
+	}
+
+	@ParameterizedTest
+	@ValueSource(strings = {"full-resource", "id-only", "empty"})
+	void testR4canonicalize_withBackPortedSubscription_returnsCorrectCanonicalSubscription(String thePayloadContent) {
 		// Example drawn from http://build.fhir.org/ig/HL7/fhir-subscription-backport-ig/Subscription-subscription-zulip.json.html
 
 		// setup
 		SubscriptionCanonicalizer r4Canonicalizer = new SubscriptionCanonicalizer(FhirContext.forR4Cached());
 
 		// execute
-
-		CanonicalSubscription canonical = r4Canonicalizer.canonicalize(SubscriptionTestDataHelper.buildR4TopicSubscription());
+		Subscription subscription = SubscriptionTestDataHelper.buildR4TopicSubscriptionWithContent(thePayloadContent);
+		CanonicalSubscription canonical = r4Canonicalizer.canonicalize(subscription);
 
 		// verify
 
 		// Standard R4 stuff
-		assertEquals(2, canonical.getTags().size());
-		assertEquals("b", canonical.getTags().get("http://a"));
-		assertEquals("e", canonical.getTags().get("http://d"));
-		assertEquals("testId", canonical.getIdPart());
-		assertEquals("testId", canonical.getIdElementString());
-		assertEquals(SubscriptionTestDataHelper.TEST_ENDPOINT, canonical.getEndpointUrl());
-		assertEquals(CT_FHIR_JSON_NEW, canonical.getContentType());
-		assertThat(canonical.getHeaders(), hasSize(2));
-		assertEquals(SubscriptionTestDataHelper.TEST_HEADER1, canonical.getHeaders().get(0));
-		assertEquals(SubscriptionTestDataHelper.TEST_HEADER2, canonical.getHeaders().get(1));
+		verifyStandardSubscriptionParameters(canonical);
 		assertEquals(Subscription.SubscriptionStatus.ACTIVE, canonical.getStatus());
+		verifyChannelParameters(canonical, thePayloadContent);
 
-		assertEquals(CT_FHIR_JSON_NEW, canonical.getContentType());
-		assertEquals(org.hl7.fhir.r5.model.Subscription.SubscriptionPayloadContent.FULLRESOURCE, canonical.getContent());
-		assertEquals(SubscriptionTestDataHelper.TEST_ENDPOINT, canonical.getEndpointUrl());
-		assertEquals(SubscriptionTestDataHelper.TEST_TOPIC, canonical.getTopic());
-		assertEquals(CanonicalSubscriptionChannelType.RESTHOOK, canonical.getChannelType());
 		assertThat(canonical.getFilters(), hasSize(2));
 
 		CanonicalTopicSubscriptionFilter filter1 = canonical.getFilters().get(0);
@@ -181,6 +227,26 @@ class SubscriptionCanonicalizerTest {
 		assertEquals(86400, canonical.getHeartbeatPeriod());
 		assertEquals(60, canonical.getTimeout());
 		assertEquals(20, canonical.getMaxCount());
+	}
+
+	private void verifyChannelParameters(CanonicalSubscription theCanonicalSubscriptions, String thePayloadContent) {
+		assertThat(theCanonicalSubscriptions.getHeaders(), hasSize(2));
+		assertEquals(SubscriptionTestDataHelper.TEST_HEADER1, theCanonicalSubscriptions.getHeaders().get(0));
+		assertEquals(SubscriptionTestDataHelper.TEST_HEADER2, theCanonicalSubscriptions.getHeaders().get(1));
+
+		assertEquals(CT_FHIR_JSON_NEW, theCanonicalSubscriptions.getContentType());
+		assertEquals(thePayloadContent, theCanonicalSubscriptions.getContent().toCode());
+		assertEquals(SubscriptionTestDataHelper.TEST_ENDPOINT, theCanonicalSubscriptions.getEndpointUrl());
+		assertEquals(SubscriptionTestDataHelper.TEST_TOPIC, theCanonicalSubscriptions.getTopic());
+		assertEquals(CanonicalSubscriptionChannelType.RESTHOOK, theCanonicalSubscriptions.getChannelType());
+	}
+
+	private void verifyStandardSubscriptionParameters(CanonicalSubscription theCanonicalSubscription) {
+		assertEquals(2, theCanonicalSubscription.getTags().size());
+		assertEquals("b", theCanonicalSubscription.getTags().get("http://a"));
+		assertEquals("e", theCanonicalSubscription.getTags().get("http://d"));
+		assertEquals("testId", theCanonicalSubscription.getIdPart());
+		assertEquals("testId", theCanonicalSubscription.getIdElementString());
 	}
 
 	@NotNull

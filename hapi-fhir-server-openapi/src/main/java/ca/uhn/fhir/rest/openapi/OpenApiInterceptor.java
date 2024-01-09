@@ -2,7 +2,7 @@
  * #%L
  * hapi-fhir-server-openapi
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -61,6 +61,10 @@ import io.swagger.v3.oas.models.responses.ApiResponse;
 import io.swagger.v3.oas.models.responses.ApiResponses;
 import io.swagger.v3.oas.models.servers.Server;
 import io.swagger.v3.oas.models.tags.Tag;
+import jakarta.annotation.Nonnull;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.convertors.factory.VersionConvertorFactory_30_40;
@@ -99,7 +103,7 @@ import org.thymeleaf.templateresolver.ITemplateResolver;
 import org.thymeleaf.templateresolver.TemplateResolution;
 import org.thymeleaf.templateresource.ClassLoaderTemplateResource;
 import org.thymeleaf.web.servlet.IServletWebExchange;
-import org.thymeleaf.web.servlet.JavaxServletWebApplication;
+import org.thymeleaf.web.servlet.JakartaServletWebApplication;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -116,10 +120,6 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
-import javax.annotation.Nonnull;
-import javax.servlet.ServletContext;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 import static ca.uhn.fhir.rest.server.util.NarrativeUtil.sanitizeHtmlFragment;
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
@@ -347,7 +347,7 @@ public class OpenApiInterceptor {
 		HttpServletRequest servletRequest = theRequestDetails.getServletRequest();
 		ServletContext servletContext = servletRequest.getServletContext();
 
-		JavaxServletWebApplication application = JavaxServletWebApplication.buildApplication(servletContext);
+		JakartaServletWebApplication application = JakartaServletWebApplication.buildApplication(servletContext);
 		IServletWebExchange exchange = application.buildExchange(servletRequest, theResponse);
 		WebContext context = new WebContext(exchange);
 		context.setVariable(REQUEST_DETAILS, theRequestDetails);

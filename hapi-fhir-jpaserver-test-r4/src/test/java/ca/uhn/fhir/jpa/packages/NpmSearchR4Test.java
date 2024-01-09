@@ -36,8 +36,10 @@ public class NpmSearchR4Test extends BaseJpaR4Test {
 	@Autowired
 	private INpmPackageVersionResourceDao myPackageVersionResourceDao;
 
+	@Override
 	@BeforeEach
 	public void before() throws Exception {
+		super.before();
 		JpaPackageCache jpaPackageCache = ProxyUtil.getSingletonTarget(myPackageCacheManager, JpaPackageCache.class);
 		jpaPackageCache.getPackageServers().clear();
 	}
@@ -155,7 +157,7 @@ public class NpmSearchR4Test extends BaseJpaR4Test {
 		search = myPackageCacheManager.search(searchSpec);
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 
-		ourLog.info("Search rersults:\r{}", JsonUtil.serialize(search));
+		ourLog.info("Search results:\r{}", JsonUtil.serialize(search));
 		assertEquals(1, search.getTotal());
 		assertEquals("hl7.fhir.uv.shorthand", search.getObjects().get(0).getPackage().getName());
 		assertEquals("4.0.1", search.getObjects().get(0).getPackage().getFhirVersion().get(0));

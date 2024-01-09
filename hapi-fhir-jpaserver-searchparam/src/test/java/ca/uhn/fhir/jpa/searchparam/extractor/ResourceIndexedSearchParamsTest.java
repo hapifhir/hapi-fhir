@@ -31,7 +31,7 @@ public class ResourceIndexedSearchParamsTest {
 		mySource = new ResourceTable();
 		mySource.setResourceType("Patient");
 
-		myParams = new ResourceIndexedSearchParams(mySource);
+		myParams = ResourceIndexedSearchParams.withLists(mySource);
 	}
 
 	@Test

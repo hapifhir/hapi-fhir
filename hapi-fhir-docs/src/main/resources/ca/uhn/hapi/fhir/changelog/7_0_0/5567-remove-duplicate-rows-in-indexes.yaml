@@ -1,0 +1,9 @@
+---
+type: fix
+issue: 5567
+jira: SMILE-7819
+title: "When updating or reindexing a resource in the JPA server, if duplicate rows are
+   present in the indexing tables, the duplicate rows may fail to be removed. Duplicates
+   are not typically present in these tables, but can happen if an indexing job fails in
+   some circumstances. The impact of these rows not being cleaned up is that resources
+   may appear in search results that they should no longer appear in."

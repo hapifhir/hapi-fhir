@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,6 @@ import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedComboStringUnique;
-import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.searchparam.extractor.BaseSearchParamWithInlineReferencesExtractor;
 import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
@@ -40,18 +39,17 @@ import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import com.google.common.annotations.VisibleForTesting;
+import jakarta.annotation.Nullable;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.PersistenceContextType;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.stream.Collectors;
-import javax.annotation.Nullable;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import javax.persistence.PersistenceContextType;
 
 @Service
 @Lazy
@@ -117,19 +115,6 @@ public class SearchParamWithInlineReferencesExtractor extends BaseSearchParamWit
 				theTransactionDetails,
 				thePerformIndexing,
 				ISearchParamExtractor.ALL_PARAMS);
-
-		/*
-		 * If the existing resource already has links and those match links we still want, use them instead of removing them and re adding them
-		 */
-		for (Iterator<ResourceLink> existingLinkIter =
-						theExistingParams.getResourceLinks().iterator();
-				existingLinkIter.hasNext(); ) {
-			ResourceLink nextExisting = existingLinkIter.next();
-			if (theParams.myLinks.remove(nextExisting)) {
-				existingLinkIter.remove();
-				theParams.myLinks.add(nextExisting);
-			}
-		}
 	}
 
 	@Nullable

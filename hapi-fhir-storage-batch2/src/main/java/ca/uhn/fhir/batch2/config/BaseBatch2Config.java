@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server - Batch2 Task Processor
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,10 +48,13 @@ public abstract class BaseBatch2Config {
 	public static final String CHANNEL_NAME = "batch2-work-notification";
 
 	@Autowired
-	private IJobPersistence myPersistence;
+	IJobPersistence myPersistence;
 
 	@Autowired
-	private IChannelFactory myChannelFactory;
+	IChannelFactory myChannelFactory;
+
+	@Autowired
+	IHapiTransactionService myHapiTransactionService;
 
 	@Bean
 	public JobDefinitionRegistry batch2JobDefinitionRegistry() {
@@ -60,7 +63,7 @@ public abstract class BaseBatch2Config {
 
 	@Bean
 	public WorkChunkProcessor jobStepExecutorService(BatchJobSender theBatchJobSender) {
-		return new WorkChunkProcessor(myPersistence, theBatchJobSender);
+		return new WorkChunkProcessor(myPersistence, theBatchJobSender, myHapiTransactionService);
 	}
 
 	@Bean

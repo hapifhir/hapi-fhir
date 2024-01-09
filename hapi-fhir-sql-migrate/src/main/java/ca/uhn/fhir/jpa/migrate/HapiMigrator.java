@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Server - SQL Migration
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import ca.uhn.fhir.jpa.migrate.taskdef.InitializeSchemaTask;
 import ca.uhn.fhir.system.HapiSystemProperties;
 import ca.uhn.fhir.util.StopWatch;
 import com.google.common.annotations.VisibleForTesting;
+import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,7 +35,6 @@ import java.sql.SQLException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
-import javax.annotation.Nonnull;
 import javax.sql.DataSource;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -188,7 +188,9 @@ public class HapiMigrator {
 	}
 
 	private void postExecute(BaseTask theNext, StopWatch theStopWatch, boolean theSuccess) {
-		myHapiMigrationStorageSvc.saveTask(theNext, Math.toIntExact(theStopWatch.getMillis()), theSuccess);
+		if (!theNext.isDryRun()) {
+			myHapiMigrationStorageSvc.saveTask(theNext, Math.toIntExact(theStopWatch.getMillis()), theSuccess);
+		}
 	}
 
 	public void addTasks(Iterable<BaseTask> theMigrationTasks) {
@@ -219,6 +221,8 @@ public class HapiMigrator {
 	}
 
 	public void createMigrationTableIfRequired() {
-		myHapiMigrationStorageSvc.createMigrationTableIfRequired();
+		if (!myDryRun) {
+			myHapiMigrationStorageSvc.createMigrationTableIfRequired();
+		}
 	}
 }

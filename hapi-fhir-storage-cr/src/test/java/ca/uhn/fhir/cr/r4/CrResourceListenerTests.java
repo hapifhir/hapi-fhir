@@ -59,7 +59,7 @@ public class CrResourceListenerTests extends BaseCrR4TestServer {
 		myResourceChangeListenerCacheRefresher.refreshExpiredCachesAndNotifyListeners();
 
 		//cached valueSets
-		assertEquals(11, myEvaluationSettings.getValueSetCache().size());
+		assertEquals(7, myEvaluationSettings.getValueSetCache().size());
 
 		//remove valueset from server
 		var id = new IdType("ValueSet/2.16.840.1.113883.3.464.1003.101.12.1001");
@@ -158,7 +158,7 @@ public class CrResourceListenerTests extends BaseCrR4TestServer {
 		runEvaluateMeasure("2019-01-01", "2019-12-31", "Patient/numer-EXM130", "ColorectalCancerScreeningsFHIR", "Individual", null);
 
 		//cached valueset from bundle
-		assertEquals(11, myEvaluationSettings.getValueSetCache().size());
+		assertEquals(8, myEvaluationSettings.getValueSetCache().size());
 
 		// manually refresh cache
 		myResourceChangeListenerCacheRefresher.refreshExpiredCachesAndNotifyListeners();
@@ -170,7 +170,7 @@ public class CrResourceListenerTests extends BaseCrR4TestServer {
 		myResourceChangeListenerCacheRefresher.refreshExpiredCachesAndNotifyListeners();
 
 		//cache should be invalidated for valueset url and removed
-		assertEquals(10, myEvaluationSettings.getValueSetCache().size());
+		assertEquals(7, myEvaluationSettings.getValueSetCache().size());
 	}
 
 }

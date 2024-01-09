@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -97,21 +97,34 @@ public final class TerserUtil {
 	private TerserUtil() {}
 
 	/**
-	 * Given an Child Definition of `identifier`, a R4/DSTU3 EID Identifier, and a new resource, clone the EID into that resources' identifier list.
+	 * Given an Child Definition of `identifier`, a R4/DSTU3 Identifier, and a new resource, clone the identifier into that resources' identifier list if it is not already present.
 	 */
-	public static void cloneEidIntoResource(
+	public static void cloneIdentifierIntoResource(
 			FhirContext theFhirContext,
 			BaseRuntimeChildDefinition theIdentifierDefinition,
-			IBase theEid,
-			IBase theResourceToCloneEidInto) {
+			IBase theNewIdentifier,
+			IBaseResource theResourceToCloneInto) {
 		// FHIR choice types - fields within fhir where we have a choice of ids
-		BaseRuntimeElementCompositeDefinition<?> childIdentifier = (BaseRuntimeElementCompositeDefinition<?>)
-				theIdentifierDefinition.getChildByName(FIELD_NAME_IDENTIFIER);
-		IBase resourceNewIdentifier = childIdentifier.newInstance();
+		BaseRuntimeElementCompositeDefinition<?> childIdentifierElementDefinition =
+				(BaseRuntimeElementCompositeDefinition<?>)
+						theIdentifierDefinition.getChildByName(FIELD_NAME_IDENTIFIER);
+
+		List<IBase> existingIdentifiers = getValues(theFhirContext, theResourceToCloneInto, FIELD_NAME_IDENTIFIER);
+		if (existingIdentifiers != null) {
+			for (IBase existingIdentifier : existingIdentifiers) {
+				if (equals(existingIdentifier, theNewIdentifier)) {
+					ourLog.trace(
+							"Identifier {} already exists in resource {}", theNewIdentifier, theResourceToCloneInto);
+					return;
+				}
+			}
+		}
+
+		IBase newIdentifierBase = childIdentifierElementDefinition.newInstance();
 
 		FhirTerser terser = theFhirContext.newTerser();
-		terser.cloneInto(theEid, resourceNewIdentifier, true);
-		theIdentifierDefinition.getMutator().addValue(theResourceToCloneEidInto, resourceNewIdentifier);
+		terser.cloneInto(theNewIdentifier, newIdentifierBase, true);
+		theIdentifierDefinition.getMutator().addValue(theResourceToCloneInto, newIdentifierBase);
 	}
 
 	/**
@@ -348,7 +361,7 @@ public final class TerserUtil {
 	public static void clearField(FhirContext theFhirContext, IBaseResource theResource, String theFieldName) {
 		BaseRuntimeChildDefinition childDefinition =
 				getBaseRuntimeChildDefinition(theFhirContext, theFieldName, theResource);
-		clear(childDefinition.getAccessor().getValues(theResource));
+		childDefinition.getMutator().setValue(theResource, null);
 	}
 
 	/**

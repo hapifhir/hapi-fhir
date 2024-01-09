@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,18 +30,28 @@ import ca.uhn.fhir.batch2.model.WorkChunkCreateEvent;
 import ca.uhn.fhir.batch2.model.WorkChunkErrorEvent;
 import ca.uhn.fhir.batch2.model.WorkChunkStatusEnum;
 import ca.uhn.fhir.batch2.models.JobInstanceFetchRequest;
+import ca.uhn.fhir.interceptor.api.HookParams;
+import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
+import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.dao.data.IBatch2JobInstanceRepository;
 import ca.uhn.fhir.jpa.dao.data.IBatch2WorkChunkRepository;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.entity.Batch2JobInstanceEntity;
 import ca.uhn.fhir.jpa.entity.Batch2WorkChunkEntity;
 import ca.uhn.fhir.model.api.PagingIterator;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.util.Batch2JobDefinitionConstants;
 import ca.uhn.fhir.util.Logs;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.LockModeType;
+import jakarta.persistence.Query;
 import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
@@ -64,11 +74,6 @@ import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import javax.persistence.EntityManager;
-import javax.persistence.LockModeType;
-import javax.persistence.Query;
 
 import static ca.uhn.fhir.batch2.coordinator.WorkChunkProcessor.MAX_CHUNK_ERROR_COUNT;
 import static ca.uhn.fhir.jpa.entity.Batch2WorkChunkEntity.ERROR_MSG_MAX_LENGTH;
@@ -82,6 +87,7 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	private final IBatch2WorkChunkRepository myWorkChunkRepository;
 	private final EntityManager myEntityManager;
 	private final IHapiTransactionService myTransactionService;
+	private final IInterceptorBroadcaster myInterceptorBroadcaster;
 
 	/**
 	 * Constructor
@@ -90,16 +96,19 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 			IBatch2JobInstanceRepository theJobInstanceRepository,
 			IBatch2WorkChunkRepository theWorkChunkRepository,
 			IHapiTransactionService theTransactionService,
-			EntityManager theEntityManager) {
+			EntityManager theEntityManager,
+			IInterceptorBroadcaster theInterceptorBroadcaster) {
 		Validate.notNull(theJobInstanceRepository);
 		Validate.notNull(theWorkChunkRepository);
 		myJobInstanceRepository = theJobInstanceRepository;
 		myWorkChunkRepository = theWorkChunkRepository;
 		myTransactionService = theTransactionService;
 		myEntityManager = theEntityManager;
+		myInterceptorBroadcaster = theInterceptorBroadcaster;
 	}
 
 	@Override
+	@Transactional(propagation = Propagation.REQUIRED)
 	public String onWorkChunkCreate(WorkChunkCreateEvent theBatchWorkChunk) {
 		Batch2WorkChunkEntity entity = new Batch2WorkChunkEntity();
 		entity.setId(UUID.randomUUID().toString());
@@ -115,7 +124,7 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 		ourLog.debug("Create work chunk {}/{}/{}", entity.getInstanceId(), entity.getId(), entity.getTargetStepId());
 		ourLog.trace(
 				"Create work chunk data {}/{}: {}", entity.getInstanceId(), entity.getId(), entity.getSerializedData());
-		myWorkChunkRepository.save(entity);
+		myTransactionService.withSystemRequestOnDefaultPartition().execute(() -> myWorkChunkRepository.save(entity));
 		return entity.getId();
 	}
 
@@ -142,6 +151,8 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	public String storeNewInstance(JobInstance theInstance) {
 		Validate.isTrue(isBlank(theInstance.getInstanceId()));
 
+		invokePreStorageBatchHooks(theInstance);
+
 		Batch2JobInstanceEntity entity = new Batch2JobInstanceEntity();
 		entity.setId(UUID.randomUUID().toString());
 		entity.setDefinitionId(theInstance.getJobDefinitionId());
@@ -153,6 +164,8 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 		entity.setCreateTime(new Date());
 		entity.setStartTime(new Date());
 		entity.setReport(theInstance.getReport());
+		entity.setTriggeringUsername(theInstance.getTriggeringUsername());
+		entity.setTriggeringClientId(theInstance.getTriggeringClientId());
 
 		entity = myJobInstanceRepository.save(entity);
 		return entity.getId();
@@ -209,7 +222,7 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	@Nonnull
 	public Optional<JobInstance> fetchInstance(String theInstanceId) {
 		return myTransactionService
-				.withSystemRequest()
+				.withSystemRequestOnDefaultPartition()
 				.execute(() -> myJobInstanceRepository.findById(theInstanceId).map(this::toInstance));
 	}
 
@@ -225,7 +238,7 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 		List<Batch2JobInstanceEntity> instanceEntities;
 
 		if (statuses != null && !statuses.isEmpty()) {
-			if (definitionId.equals(Batch2JobDefinitionConstants.BULK_EXPORT)) {
+			if (Batch2JobDefinitionConstants.BULK_EXPORT.equals(definitionId)) {
 				if (originalRequestUrlTruncation(params) != null) {
 					params = originalRequestUrlTruncation(params);
 				}
@@ -268,18 +281,22 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	public List<JobInstance> fetchInstances(int thePageSize, int thePageIndex) {
 		// default sort is myCreateTime Asc
 		PageRequest pageRequest = PageRequest.of(thePageIndex, thePageSize, Sort.Direction.ASC, CREATE_TIME);
-		return myJobInstanceRepository.findAll(pageRequest).stream()
-				.map(this::toInstance)
-				.collect(Collectors.toList());
+		return myTransactionService
+				.withSystemRequestOnDefaultPartition()
+				.execute(() -> myJobInstanceRepository.findAll(pageRequest).stream()
+						.map(this::toInstance)
+						.collect(Collectors.toList()));
 	}
 
 	@Override
 	@Transactional(propagation = Propagation.REQUIRES_NEW)
 	public List<JobInstance> fetchRecentInstances(int thePageSize, int thePageIndex) {
 		PageRequest pageRequest = PageRequest.of(thePageIndex, thePageSize, Sort.Direction.DESC, CREATE_TIME);
-		return myJobInstanceRepository.findAll(pageRequest).stream()
-				.map(this::toInstance)
-				.collect(Collectors.toList());
+		return myTransactionService
+				.withSystemRequestOnDefaultPartition()
+				.execute(() -> myJobInstanceRepository.findAll(pageRequest).stream()
+						.map(this::toInstance)
+						.collect(Collectors.toList()));
 	}
 
 	private WorkChunk toChunk(Batch2WorkChunkEntity theEntity) {
@@ -291,48 +308,52 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	}
 
 	@Override
-	@Transactional(propagation = Propagation.REQUIRES_NEW)
 	public WorkChunkStatusEnum onWorkChunkError(WorkChunkErrorEvent theParameters) {
 		String chunkId = theParameters.getChunkId();
 		String errorMessage = truncateErrorMessage(theParameters.getErrorMsg());
-		int changeCount = myWorkChunkRepository.updateChunkStatusAndIncrementErrorCountForEndError(
-				chunkId, new Date(), errorMessage, WorkChunkStatusEnum.ERRORED);
-		Validate.isTrue(changeCount > 0, "changed chunk matching %s", chunkId);
 
-		Query query = myEntityManager.createQuery("update Batch2WorkChunkEntity " + "set myStatus = :failed "
-				+ ",myErrorMessage = CONCAT('Too many errors: ', CAST(myErrorCount as string), '. Last error msg was ', myErrorMessage) "
-				+ "where myId = :chunkId and myErrorCount > :maxCount");
-		query.setParameter("chunkId", chunkId);
-		query.setParameter("failed", WorkChunkStatusEnum.FAILED);
-		query.setParameter("maxCount", MAX_CHUNK_ERROR_COUNT);
-		int failChangeCount = query.executeUpdate();
+		return myTransactionService.withSystemRequestOnDefaultPartition().execute(() -> {
+			int changeCount = myWorkChunkRepository.updateChunkStatusAndIncrementErrorCountForEndError(
+					chunkId, new Date(), errorMessage, WorkChunkStatusEnum.ERRORED);
+			Validate.isTrue(changeCount > 0, "changed chunk matching %s", chunkId);
 
-		if (failChangeCount > 0) {
-			return WorkChunkStatusEnum.FAILED;
-		} else {
-			return WorkChunkStatusEnum.ERRORED;
-		}
+			Query query = myEntityManager.createQuery("update Batch2WorkChunkEntity " + "set myStatus = :failed "
+					+ ",myErrorMessage = CONCAT('Too many errors: ', CAST(myErrorCount as string), '. Last error msg was ', myErrorMessage) "
+					+ "where myId = :chunkId and myErrorCount > :maxCount");
+			query.setParameter("chunkId", chunkId);
+			query.setParameter("failed", WorkChunkStatusEnum.FAILED);
+			query.setParameter("maxCount", MAX_CHUNK_ERROR_COUNT);
+			int failChangeCount = query.executeUpdate();
+
+			if (failChangeCount > 0) {
+				return WorkChunkStatusEnum.FAILED;
+			} else {
+				return WorkChunkStatusEnum.ERRORED;
+			}
+		});
 	}
 
 	@Override
-	@Transactional
 	public void onWorkChunkFailed(String theChunkId, String theErrorMessage) {
 		ourLog.info("Marking chunk {} as failed with message: {}", theChunkId, theErrorMessage);
 		String errorMessage = truncateErrorMessage(theErrorMessage);
-		myWorkChunkRepository.updateChunkStatusAndIncrementErrorCountForEndError(
-				theChunkId, new Date(), errorMessage, WorkChunkStatusEnum.FAILED);
+		myTransactionService
+				.withSystemRequestOnDefaultPartition()
+				.execute(() -> myWorkChunkRepository.updateChunkStatusAndIncrementErrorCountForEndError(
+						theChunkId, new Date(), errorMessage, WorkChunkStatusEnum.FAILED));
 	}
 
 	@Override
-	@Transactional
 	public void onWorkChunkCompletion(WorkChunkCompletionEvent theEvent) {
-		myWorkChunkRepository.updateChunkStatusAndClearDataForEndSuccess(
-				theEvent.getChunkId(),
-				new Date(),
-				theEvent.getRecordsProcessed(),
-				theEvent.getRecoveredErrorCount(),
-				WorkChunkStatusEnum.COMPLETED,
-				theEvent.getRecoveredWarningMessage());
+		myTransactionService
+				.withSystemRequestOnDefaultPartition()
+				.execute(() -> myWorkChunkRepository.updateChunkStatusAndClearDataForEndSuccess(
+						theEvent.getChunkId(),
+						new Date(),
+						theEvent.getRecordsProcessed(),
+						theEvent.getRecoveredErrorCount(),
+						WorkChunkStatusEnum.COMPLETED,
+						theEvent.getRecoveredWarningMessage()));
 	}
 
 	@Nullable
@@ -389,7 +410,7 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 			int thePageIndex,
 			Consumer<WorkChunk> theConsumer) {
 		myTransactionService
-				.withSystemRequest()
+				.withSystemRequestOnDefaultPartition()
 				.withPropagation(Propagation.REQUIRES_NEW)
 				.execute(() -> {
 					List<Batch2WorkChunkEntity> chunks;
@@ -509,6 +530,16 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 			} else {
 				return JobOperationResultJson.newFailure(operationString, messagePrefix + " not found.");
 			}
+		}
+	}
+
+	private void invokePreStorageBatchHooks(JobInstance theJobInstance) {
+		if (myInterceptorBroadcaster.hasHooks(Pointcut.STORAGE_PRESTORAGE_BATCH_JOB_CREATE)) {
+			HookParams params = new HookParams()
+					.add(JobInstance.class, theJobInstance)
+					.add(RequestDetails.class, new SystemRequestDetails());
+
+			myInterceptorBroadcaster.callHooks(Pointcut.STORAGE_PRESTORAGE_BATCH_JOB_CREATE, params);
 		}
 	}
 }

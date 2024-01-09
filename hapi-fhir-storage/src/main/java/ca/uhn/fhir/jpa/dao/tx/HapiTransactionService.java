@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,8 +36,10 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
 import ca.uhn.fhir.util.ICallable;
-import ca.uhn.fhir.util.TestUtil;
+import ca.uhn.fhir.util.SleepUtil;
 import com.google.common.annotations.VisibleForTesting;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.hibernate.exception.ConstraintViolationException;
@@ -46,6 +48,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.PessimisticLockingFailureException;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionStatus;
@@ -53,13 +56,12 @@ import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
+import org.springframework.transaction.support.TransactionOperations;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.Objects;
 import java.util.concurrent.Callable;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 /**
  * @see IHapiTransactionService for an explanation of this class
@@ -72,6 +74,7 @@ public class HapiTransactionService implements IHapiTransactionService {
 			HapiTransactionService.class.getName() + "_EXISTING_SEARCH_PARAMS";
 	private static final Logger ourLog = LoggerFactory.getLogger(HapiTransactionService.class);
 	private static final ThreadLocal<RequestPartitionId> ourRequestPartitionThreadLocal = new ThreadLocal<>();
+	private static final ThreadLocal<HapiTransactionService> ourExistingTransaction = new ThreadLocal<>();
 
 	@Autowired
 	protected IInterceptorBroadcaster myInterceptorBroadcaster;
@@ -87,9 +90,16 @@ public class HapiTransactionService implements IHapiTransactionService {
 
 	private Propagation myTransactionPropagationWhenChangingPartitions = Propagation.REQUIRED;
 
+	private SleepUtil mySleepUtil = new SleepUtil();
+
 	@VisibleForTesting
 	public void setInterceptorBroadcaster(IInterceptorBroadcaster theInterceptorBroadcaster) {
 		myInterceptorBroadcaster = theInterceptorBroadcaster;
+	}
+
+	@VisibleForTesting
+	public void setSleepUtil(SleepUtil theSleepUtil) {
+		mySleepUtil = theSleepUtil;
 	}
 
 	@Override
@@ -219,6 +229,11 @@ public class HapiTransactionService implements IHapiTransactionService {
 		myTransactionManager = theTransactionManager;
 	}
 
+	@VisibleForTesting
+	public void setPartitionSettingsForUnitTest(PartitionSettings thePartitionSettings) {
+		myPartitionSettings = thePartitionSettings;
+	}
+
 	@Nullable
 	protected <T> T doExecute(ExecutionBuilder theExecutionBuilder, TransactionCallback<T> theCallback) {
 		final RequestPartitionId requestPartitionId;
@@ -236,8 +251,9 @@ public class HapiTransactionService implements IHapiTransactionService {
 			ourRequestPartitionThreadLocal.set(requestPartitionId);
 		}
 
-		if (Objects.equals(previousRequestPartitionId, requestPartitionId)) {
-			if (canReuseExistingTransaction(theExecutionBuilder)) {
+		if (!myPartitionSettings.isPartitioningEnabled()
+				|| Objects.equals(previousRequestPartitionId, requestPartitionId)) {
+			if (ourExistingTransaction.get() == this && canReuseExistingTransaction(theExecutionBuilder)) {
 				/*
 				 * If we're already in an active transaction, and it's for the right partition,
 				 * and it's not a read-only transaction, we don't need to open a new transaction
@@ -245,12 +261,22 @@ public class HapiTransactionService implements IHapiTransactionService {
 				 */
 				return executeInExistingTransaction(theCallback);
 			}
-		} else if (myTransactionPropagationWhenChangingPartitions == Propagation.REQUIRES_NEW) {
-			return executeInNewTransactionForPartitionChange(
-					theExecutionBuilder, theCallback, requestPartitionId, previousRequestPartitionId);
 		}
 
-		return doExecuteInTransaction(theExecutionBuilder, theCallback, requestPartitionId, previousRequestPartitionId);
+		HapiTransactionService previousExistingTransaction = ourExistingTransaction.get();
+		try {
+			ourExistingTransaction.set(this);
+
+			if (myTransactionPropagationWhenChangingPartitions == Propagation.REQUIRES_NEW) {
+				return executeInNewTransactionForPartitionChange(
+						theExecutionBuilder, theCallback, requestPartitionId, previousRequestPartitionId);
+			} else {
+				return doExecuteInTransaction(
+						theExecutionBuilder, theCallback, requestPartitionId, previousRequestPartitionId);
+			}
+		} finally {
+			ourExistingTransaction.set(previousExistingTransaction);
+		}
 	}
 
 	@Nullable
@@ -261,6 +287,25 @@ public class HapiTransactionService implements IHapiTransactionService {
 			RequestPartitionId previousRequestPartitionId) {
 		theExecutionBuilder.myPropagation = myTransactionPropagationWhenChangingPartitions;
 		return doExecuteInTransaction(theExecutionBuilder, theCallback, requestPartitionId, previousRequestPartitionId);
+	}
+
+	private boolean isThrowableOrItsSubclassPresent(Throwable theThrowable, Class<? extends Throwable> theClass) {
+		return ExceptionUtils.indexOfType(theThrowable, theClass) != -1;
+	}
+
+	private boolean isThrowablePresent(Throwable theThrowable, Class<? extends Throwable> theClass) {
+		return ExceptionUtils.indexOfThrowable(theThrowable, theClass) != -1;
+	}
+
+	private boolean isRetriable(Throwable theThrowable) {
+		return isThrowablePresent(theThrowable, ResourceVersionConflictException.class)
+				|| isThrowablePresent(theThrowable, DataIntegrityViolationException.class)
+				|| isThrowablePresent(theThrowable, ConstraintViolationException.class)
+				|| isThrowablePresent(theThrowable, ObjectOptimisticLockingFailureException.class)
+				// calling isThrowableOrItsSubclassPresent instead of isThrowablePresent for
+				// PessimisticLockingFailureException, because we want to retry on its subclasses as well,  especially
+				// CannotAcquireLockException, which is thrown in some deadlock situations which we want to retry
+				|| isThrowableOrItsSubclassPresent(theThrowable, PessimisticLockingFailureException.class);
 	}
 
 	@Nullable
@@ -276,11 +321,7 @@ public class HapiTransactionService implements IHapiTransactionService {
 					return doExecuteCallback(theExecutionBuilder, theCallback);
 
 				} catch (Exception e) {
-					if (!(ExceptionUtils.indexOfThrowable(e, ResourceVersionConflictException.class) != -1
-							|| ExceptionUtils.indexOfThrowable(e, DataIntegrityViolationException.class) != -1
-							|| ExceptionUtils.indexOfThrowable(e, ConstraintViolationException.class) != -1
-							|| ExceptionUtils.indexOfThrowable(e, ObjectOptimisticLockingFailureException.class)
-									!= -1)) {
+					if (!isRetriable(e)) {
 						ourLog.debug("Unexpected transaction exception. Will not be retried.", e);
 						throw e;
 					} else {
@@ -336,7 +377,7 @@ public class HapiTransactionService implements IHapiTransactionService {
 							}
 							double sleepAmount = (250.0d * i) * Math.random();
 							long sleepAmountLong = (long) sleepAmount;
-							TestUtil.sleepAtLeast(sleepAmountLong, false);
+							mySleepUtil.sleepAtLeast(sleepAmountLong, false);
 
 							ourLog.info(
 									"About to start a transaction retry due to conflict or constraint error. Sleeping {}ms first.",
@@ -402,7 +443,7 @@ public class HapiTransactionService implements IHapiTransactionService {
 		}
 	}
 
-	protected class ExecutionBuilder implements IExecutionBuilder {
+	protected class ExecutionBuilder implements IExecutionBuilder, TransactionOperations {
 
 		private final RequestDetails myRequestDetails;
 		private Isolation myIsolation;
@@ -473,7 +514,7 @@ public class HapiTransactionService implements IHapiTransactionService {
 		}
 
 		@Override
-		public <T> T execute(TransactionCallback<T> callback) {
+		public <T> T execute(@Nonnull TransactionCallback<T> callback) {
 			assert callback != null;
 
 			return doExecute(this, callback);
@@ -487,6 +528,10 @@ public class HapiTransactionService implements IHapiTransactionService {
 		@VisibleForTesting
 		public RequestDetails getRequestDetailsForTesting() {
 			return myRequestDetails;
+		}
+
+		public Propagation getPropagation() {
+			return myPropagation;
 		}
 	}
 

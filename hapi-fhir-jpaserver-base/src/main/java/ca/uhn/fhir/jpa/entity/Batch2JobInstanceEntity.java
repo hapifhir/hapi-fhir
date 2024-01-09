@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,24 +21,24 @@ package ca.uhn.fhir.jpa.entity;
 
 import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.StatusEnum;
+import jakarta.persistence.Basic;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Index;
+import jakarta.persistence.Lob;
+import jakarta.persistence.Table;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
+import jakarta.persistence.Version;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
 import java.io.Serializable;
 import java.util.Date;
-import javax.persistence.Basic;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
-import javax.persistence.Id;
-import javax.persistence.Index;
-import javax.persistence.Lob;
-import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
-import javax.persistence.Version;
 
 import static ca.uhn.fhir.batch2.model.JobDefinition.ID_MAX_LENGTH;
 import static ca.uhn.fhir.jpa.entity.Batch2WorkChunkEntity.ERROR_MSG_MAX_LENGTH;
@@ -55,6 +55,8 @@ public class Batch2JobInstanceEntity implements Serializable {
 	public static final int TIME_REMAINING_LENGTH = 100;
 	public static final int PARAMS_JSON_MAX_LENGTH = 2000;
 	private static final long serialVersionUID = 8187134261799095422L;
+	public static final int INITIATING_USER_NAME_MAX_LENGTH = 200;
+	public static final int INITIATING_CLIENT_ID_MAX_LENGTH = 200;
 
 	@Id
 	@Column(name = "ID", length = JobDefinition.ID_MAX_LENGTH, nullable = false)
@@ -129,6 +131,12 @@ public class Batch2JobInstanceEntity implements Serializable {
 
 	@Column(name = "WARNING_MSG", length = WARNING_MSG_MAX_LENGTH, nullable = true)
 	private String myWarningMessages;
+
+	@Column(name = "USER_NAME", length = INITIATING_USER_NAME_MAX_LENGTH, nullable = true)
+	private String myTriggeringUsername;
+
+	@Column(name = "CLIENT_ID", length = INITIATING_CLIENT_ID_MAX_LENGTH, nullable = true)
+	private String myTriggeringClientId;
 
 	/**
 	 * Any output from the job can be held in this column
@@ -316,6 +324,24 @@ public class Batch2JobInstanceEntity implements Serializable {
 		myWarningMessages = theWarningMessages;
 	}
 
+	public String getTriggeringUsername() {
+		return myTriggeringUsername;
+	}
+
+	public Batch2JobInstanceEntity setTriggeringUsername(String theTriggeringUsername) {
+		myTriggeringUsername = theTriggeringUsername;
+		return this;
+	}
+
+	public String getTriggeringClientId() {
+		return myTriggeringClientId;
+	}
+
+	public Batch2JobInstanceEntity setTriggeringClientId(String theTriggeringClientId) {
+		myTriggeringClientId = theTriggeringClientId;
+		return this;
+	}
+
 	@Override
 	public String toString() {
 		return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
@@ -338,6 +364,8 @@ public class Batch2JobInstanceEntity implements Serializable {
 				.append("estimatedTimeRemaining", myEstimatedTimeRemaining)
 				.append("report", myReport)
 				.append("warningMessages", myWarningMessages)
+				.append("initiatingUsername", myTriggeringUsername)
+				.append("initiatingclientId", myTriggeringClientId)
 				.toString();
 	}
 

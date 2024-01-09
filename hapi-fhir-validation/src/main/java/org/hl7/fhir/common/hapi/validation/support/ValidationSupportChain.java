@@ -5,11 +5,13 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.context.support.LookupCodeRequest;
 import ca.uhn.fhir.context.support.TranslateConceptResults;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.util.Logs;
+import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
@@ -21,7 +23,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
-import javax.annotation.Nonnull;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -416,20 +417,26 @@ public class ValidationSupportChain implements IValidationSupport {
 
 	@Override
 	public LookupCodeResult lookupCode(
-			ValidationSupportContext theValidationSupportContext,
-			String theSystem,
-			String theCode,
-			String theDisplayLanguage) {
+			ValidationSupportContext theValidationSupportContext, @Nonnull LookupCodeRequest theLookupCodeRequest) {
 		for (IValidationSupport next : myChain) {
-			if (next.isCodeSystemSupported(theValidationSupportContext, theSystem)) {
-				LookupCodeResult lookupCodeResult =
-						next.lookupCode(theValidationSupportContext, theSystem, theCode, theDisplayLanguage);
+			final String system = theLookupCodeRequest.getSystem();
+			final String code = theLookupCodeRequest.getCode();
+			final String displayLanguage = theLookupCodeRequest.getDisplayLanguage();
+			if (next.isCodeSystemSupported(theValidationSupportContext, system)) {
+				LookupCodeResult lookupCodeResult = next.lookupCode(theValidationSupportContext, theLookupCodeRequest);
+				if (lookupCodeResult == null) {
+					/*
+					This branch has been added as a fall-back mechanism for supporting lookupCode
+					methods marked as deprecated in interface IValidationSupport.
+					*/
+					lookupCodeResult = next.lookupCode(theValidationSupportContext, system, code, displayLanguage);
+				}
 				if (ourLog.isDebugEnabled()) {
 					ourLog.debug(
 							"Code {}|{}{} {} by {}",
-							theSystem,
-							theCode,
-							isBlank(theDisplayLanguage) ? "" : " (" + theDisplayLanguage + ")",
+							system,
+							code,
+							isBlank(displayLanguage) ? "" : " (" + theLookupCodeRequest.getDisplayLanguage() + ")",
 							lookupCodeResult != null && lookupCodeResult.isFound() ? "found" : "not found",
 							next.getName());
 				}

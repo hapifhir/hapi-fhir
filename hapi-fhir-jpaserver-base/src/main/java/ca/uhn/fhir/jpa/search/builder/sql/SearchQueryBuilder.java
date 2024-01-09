@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -61,10 +61,14 @@ import com.healthmarketscience.sqlbuilder.dbspec.basic.DbJoin;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbSchema;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbSpec;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbTable;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import org.hibernate.dialect.Dialect;
 import org.hibernate.dialect.SQLServerDialect;
 import org.hibernate.dialect.pagination.AbstractLimitHandler;
-import org.hibernate.engine.spi.RowSelection;
+import org.hibernate.query.internal.QueryOptionsImpl;
+import org.hibernate.query.spi.Limit;
+import org.hibernate.query.spi.QueryOptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -74,8 +78,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 import static ca.uhn.fhir.rest.param.ParamPrefixEnum.GREATERTHAN;
 import static ca.uhn.fhir.rest.param.ParamPrefixEnum.GREATERTHAN_OR_EQUALS;
@@ -108,6 +110,7 @@ public class SearchQueryBuilder {
 	private boolean dialectIsMySql;
 	private boolean myNeedResourceTableRoot;
 	private int myNextNearnessColumnId = 0;
+	private DbColumn mySelectedResourceIdColumn;
 
 	/**
 	 * Constructor
@@ -430,7 +433,8 @@ public class SearchQueryBuilder {
 					mySelect.addCustomColumns(
 							FunctionCall.count().setIsDistinct(true).addColumnParams(root.getResourceIdColumn()));
 				} else {
-					mySelect.addColumns(root.getResourceIdColumn());
+					mySelectedResourceIdColumn = root.getResourceIdColumn();
+					mySelect.addColumns(mySelectedResourceIdColumn);
 				}
 				mySelect.addFromTable(root.getTable());
 				myFirstPredicateBuilder = root;
@@ -501,15 +505,36 @@ public class SearchQueryBuilder {
 			maxResultsToFetch = defaultIfNull(maxResultsToFetch, 10000);
 
 			AbstractLimitHandler limitHandler = (AbstractLimitHandler) myDialect.getLimitHandler();
-			RowSelection selection = new RowSelection();
+			Limit selection = new Limit();
 			selection.setFirstRow(offset);
 			selection.setMaxRows(maxResultsToFetch);
-			sql = limitHandler.processSql(sql, selection);
+			QueryOptions queryOptions = new QueryOptionsImpl();
+			sql = limitHandler.processSql(sql, selection, queryOptions);
 
 			int startOfQueryParameterIndex = 0;
 
 			boolean isSqlServer = (myDialect instanceof SQLServerDialect);
 			if (isSqlServer) {
+
+				/*
+				 * SQL server requires an ORDER BY clause to be present in the SQL if there is
+				 * an OFFSET/FETCH FIRST clause, so if there isn't already an ORDER BY clause,
+				 * the dialect will automatically add an order by with a pseudo-column name. This
+				 * happens in SQLServer2012LimitHandler.
+				 *
+				 * But, SQL Server also pukes if you include an ORDER BY on a column that you
+				 * aren't also SELECTing, if the select statement is DISTINCT. Who knows why SQL
+				 * Server is so picky.. but anyhow, this causes an issue, so we manually replace
+				 * the pseudo-column with an actual selected column.
+				 */
+				if (sql.startsWith("SELECT DISTINCT ")) {
+					if (sql.contains("order by @@version")) {
+						if (mySelectedResourceIdColumn != null) {
+							sql = sql.replace(
+									"order by @@version", "order by " + mySelectedResourceIdColumn.getColumnNameSQL());
+						}
+					}
+				}
 
 				// The SQLServerDialect has a bunch of one-off processing to deal with rules on when
 				// a limit can be used, so we can't rely on the flags that the limithandler exposes since
@@ -517,14 +542,14 @@ public class SearchQueryBuilder {
 				if (sql.contains("top(?)")) {
 					bindVariables.add(0, maxResultsToFetch);
 				}
-				if (sql.contains("offset 0 rows fetch next ? rows only")) {
+				if (sql.contains("offset 0 rows fetch first ? rows only")) {
 					bindVariables.add(maxResultsToFetch);
 				}
 				if (sql.contains("offset ? rows fetch next ? rows only")) {
 					bindVariables.add(theOffset);
 					bindVariables.add(maxResultsToFetch);
 				}
-				if (offset != null && sql.contains("__row__")) {
+				if (offset != null && sql.contains("rownumber_")) {
 					bindVariables.add(theOffset + 1);
 					bindVariables.add(theOffset + maxResultsToFetch + 1);
 				}

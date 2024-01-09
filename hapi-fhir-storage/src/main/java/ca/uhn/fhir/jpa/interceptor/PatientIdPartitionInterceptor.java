@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,24 +30,22 @@ import ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
-import ca.uhn.fhir.jpa.searchparam.extractor.BaseSearchParamExtractor;
 import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
+import ca.uhn.fhir.jpa.util.ResourceCompartmentUtil;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
-import org.apache.commons.lang3.StringUtils;
-import org.hl7.fhir.instance.model.api.IBaseReference;
+import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.IdType;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
-import javax.annotation.Nonnull;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -92,40 +90,28 @@ public class PatientIdPartitionInterceptor {
 	@Hook(Pointcut.STORAGE_PARTITION_IDENTIFY_CREATE)
 	public RequestPartitionId identifyForCreate(IBaseResource theResource, RequestDetails theRequestDetails) {
 		RuntimeResourceDefinition resourceDef = myFhirContext.getResourceDefinition(theResource);
-		List<RuntimeSearchParam> compartmentSps = getCompartmentSearchParams(resourceDef);
+		List<RuntimeSearchParam> compartmentSps =
+				ResourceCompartmentUtil.getPatientCompartmentSearchParams(resourceDef);
 		if (compartmentSps.isEmpty()) {
 			return provideNonCompartmentMemberTypeResponse(theResource);
 		}
 
-		String compartmentIdentity;
+		Optional<String> oCompartmentIdentity;
 		if (resourceDef.getName().equals("Patient")) {
-			compartmentIdentity = theResource.getIdElement().getIdPart();
-			if (isBlank(compartmentIdentity)) {
+			oCompartmentIdentity =
+					Optional.ofNullable(theResource.getIdElement().getIdPart());
+			if (oCompartmentIdentity.isEmpty()) {
 				throw new MethodNotAllowedException(
 						Msg.code(1321) + "Patient resource IDs must be client-assigned in patient compartment mode");
 			}
 		} else {
-			compartmentIdentity = compartmentSps.stream()
-					.flatMap(param -> Arrays.stream(BaseSearchParamExtractor.splitPathsR4(param.getPath())))
-					.filter(StringUtils::isNotBlank)
-					.map(path -> mySearchParamExtractor
-							.getPathValueExtractor(theResource, path)
-							.get())
-					.filter(t -> !t.isEmpty())
-					.map(t -> t.get(0))
-					.filter(t -> t instanceof IBaseReference)
-					.map(t -> (IBaseReference) t)
-					.map(t -> t.getReferenceElement().getValue())
-					.map(t -> new IdType(t).getIdPart())
-					.filter(StringUtils::isNotBlank)
-					.findFirst()
-					.orElse(null);
-			if (isBlank(compartmentIdentity)) {
-				return provideNonCompartmentMemberInstanceResponse(theResource);
-			}
+			oCompartmentIdentity =
+					ResourceCompartmentUtil.getResourceCompartment(theResource, compartmentSps, mySearchParamExtractor);
 		}
 
-		return provideCompartmentMemberInstanceResponse(theRequestDetails, compartmentIdentity);
+		return oCompartmentIdentity
+				.map(ci -> provideCompartmentMemberInstanceResponse(theRequestDetails, ci))
+				.orElseGet(() -> provideNonCompartmentMemberInstanceResponse(theResource));
 	}
 
 	@Hook(Pointcut.STORAGE_PARTITION_IDENTIFY_READ)
@@ -135,7 +121,8 @@ public class PatientIdPartitionInterceptor {
 			return provideNonCompartmentMemberTypeResponse(null);
 		}
 		RuntimeResourceDefinition resourceDef = myFhirContext.getResourceDefinition(theReadDetails.getResourceType());
-		List<RuntimeSearchParam> compartmentSps = getCompartmentSearchParams(resourceDef);
+		List<RuntimeSearchParam> compartmentSps =
+				ResourceCompartmentUtil.getPatientCompartmentSearchParams(resourceDef);
 		if (compartmentSps.isEmpty()) {
 			return provideNonCompartmentMemberTypeResponse(null);
 		}

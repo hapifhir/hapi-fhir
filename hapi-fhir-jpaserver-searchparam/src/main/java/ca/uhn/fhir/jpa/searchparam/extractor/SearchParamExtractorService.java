@@ -1,8 +1,8 @@
 /*-
  * #%L
- * HAPI FHIR Search Parameters
+ * HAPI FHIR JPA - Search Parameters
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,6 +60,8 @@ import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.rest.server.util.ResourceSearchParams;
 import ca.uhn.fhir.util.FhirTerser;
 import com.google.common.annotations.VisibleForTesting;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -77,8 +79,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -124,7 +124,7 @@ public class SearchParamExtractorService {
 				theRequestPartitionId,
 				theRequestDetails,
 				theParams,
-				new ResourceIndexedSearchParams(),
+				ResourceIndexedSearchParams.withSets(),
 				theEntity,
 				theResource,
 				theTransactionDetails,
@@ -149,7 +149,7 @@ public class SearchParamExtractorService {
 			boolean theFailOnInvalidReference,
 			@Nonnull ISearchParamExtractor.ISearchParamFilter theSearchParamFilter) {
 		// All search parameter types except Reference
-		ResourceIndexedSearchParams normalParams = new ResourceIndexedSearchParams();
+		ResourceIndexedSearchParams normalParams = ResourceIndexedSearchParams.withSets();
 		extractSearchIndexParameters(theRequestDetails, normalParams, theResource, theSearchParamFilter);
 		mergeParams(normalParams, theNewParams);
 
@@ -159,14 +159,14 @@ public class SearchParamExtractorService {
 		SearchParamExtractorService.handleWarnings(theRequestDetails, myInterceptorBroadcaster, indexedReferences);
 
 		if (indexOnContainedResources) {
-			ResourceIndexedSearchParams containedParams = new ResourceIndexedSearchParams();
+			ResourceIndexedSearchParams containedParams = ResourceIndexedSearchParams.withSets();
 			extractSearchIndexParametersForContainedResources(
 					theRequestDetails, containedParams, theResource, theEntity, indexedReferences);
 			mergeParams(containedParams, theNewParams);
 		}
 
 		if (myStorageSettings.isIndexOnUpliftedRefchains()) {
-			ResourceIndexedSearchParams containedParams = new ResourceIndexedSearchParams();
+			ResourceIndexedSearchParams containedParams = ResourceIndexedSearchParams.withSets();
 			extractSearchIndexParametersForUpliftedRefchains(
 					theRequestDetails,
 					containedParams,
@@ -427,7 +427,7 @@ public class SearchParamExtractorService {
 				continue;
 			}
 
-			ResourceIndexedSearchParams currParams = new ResourceIndexedSearchParams();
+			ResourceIndexedSearchParams currParams = ResourceIndexedSearchParams.withSets();
 
 			// 3.3 create indexes for the current contained resource
 			extractSearchIndexParameters(theRequestDetails, currParams, targetResource, searchParamsToIndex);
@@ -599,7 +599,7 @@ public class SearchParamExtractorService {
 			ISearchParamExtractor.SearchParamSet<PathAndRef> theIndexedReferences) {
 		extractResourceLinks(
 				theRequestPartitionId,
-				new ResourceIndexedSearchParams(),
+				ResourceIndexedSearchParams.withSets(),
 				theParams,
 				theEntity,
 				theResource,
@@ -937,7 +937,7 @@ public class SearchParamExtractorService {
 				continue;
 			}
 
-			currParams = new ResourceIndexedSearchParams();
+			currParams = ResourceIndexedSearchParams.withSets();
 
 			// 3.3 create indexes for the current contained resource
 			ISearchParamExtractor.SearchParamSet<PathAndRef> indexedReferences =

@@ -9,11 +9,14 @@ import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.rest.annotation.Create;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.annotation.Search;
+import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import ca.uhn.fhir.test.utilities.HttpClientExtension;
 import ca.uhn.fhir.test.utilities.JettyUtil;
+import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.TestUtil;
 import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
@@ -25,8 +28,8 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.servlet.ServletHandler;
-import org.eclipse.jetty.servlet.ServletHolder;
+import org.eclipse.jetty.ee10.servlet.ServletHandler;
+import org.eclipse.jetty.ee10.servlet.ServletHolder;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.OperationOutcome;
 import org.hl7.fhir.dstu3.model.OperationOutcome.IssueType;
@@ -36,6 +39,7 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -51,11 +55,17 @@ public class ServerExceptionDstu3Test {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ServerExceptionDstu3Test.class);
 	public static Exception ourException;
-	private static CloseableHttpClient ourClient;
-	private static FhirContext ourCtx = FhirContext.forDstu3();
-	private static int ourPort;
-	private static Server ourServer;
-	private static RestfulServer ourServlet;
+	private static final FhirContext ourCtx = FhirContext.forDstu3Cached();
+
+	@RegisterExtension
+	private RestfulServerExtension ourServer  = new RestfulServerExtension(ourCtx)
+		 .setDefaultResponseEncoding(EncodingEnum.XML)
+		 .registerProvider(new DummyPatientResourceProvider())
+		 .withPagingProvider(new FifoMemoryPagingProvider(100))
+		 .setDefaultPrettyPrint(false);
+
+	@RegisterExtension
+	private HttpClientExtension ourClient = new HttpClientExtension();
 
 	@AfterEach
 	public void after() {
@@ -72,7 +82,7 @@ public class ServerExceptionDstu3Test {
 			.addResponseHeader("X-Foo", "BAR BAR");
 
 
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient");
+		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient");
 		CloseableHttpResponse status = ourClient.execute(httpGet);
 		try {
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
@@ -100,7 +110,7 @@ public class ServerExceptionDstu3Test {
 
 		ourException = new InternalErrorException("Error", operationOutcome);
 
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_format=json");
+		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?_format=json");
 		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
 			byte[] responseContentBytes = IOUtils.toByteArray(status.getEntity().getContent());
 			String responseContent = new String(responseContentBytes, Charsets.UTF_8);
@@ -116,7 +126,7 @@ public class ServerExceptionDstu3Test {
 
 		ourException = new NullPointerException("Hello");
 
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_format=json");
+		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?_format=json");
 		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
 			assertEquals(500, status.getStatusLine().getStatusCode());
 			byte[] responseContentBytes = IOUtils.toByteArray(status.getEntity().getContent());
@@ -133,7 +143,7 @@ public class ServerExceptionDstu3Test {
 
 		ourException = new IOException("Hello");
 
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_format=json");
+		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?_format=json");
 		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
 			assertEquals(500, status.getStatusLine().getStatusCode());
 			byte[] responseContentBytes = IOUtils.toByteArray(status.getEntity().getContent());
@@ -148,14 +158,14 @@ public class ServerExceptionDstu3Test {
 	@Test
 	public void testInterceptorThrowsNonHapiUncheckedExceptionHandledCleanly() throws Exception {
 
-		ourServlet.getInterceptorService().registerAnonymousInterceptor(Pointcut.SERVER_INCOMING_REQUEST_PRE_HANDLED, new IAnonymousInterceptor() {
+		ourServer.getInterceptorService().registerAnonymousInterceptor(Pointcut.SERVER_INCOMING_REQUEST_PRE_HANDLED, new IAnonymousInterceptor() {
 			@Override
 			public void invoke(IPointcut thePointcut, HookParams theArgs) {
 				throw new NullPointerException("Hello");
 			}
 		});
 
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_format=json");
+		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?_format=json");
 		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
 			assertEquals(500, status.getStatusLine().getStatusCode());
 			byte[] responseContentBytes = IOUtils.toByteArray(status.getEntity().getContent());
@@ -165,7 +175,7 @@ public class ServerExceptionDstu3Test {
 			assertThat(responseContent, containsString("\"diagnostics\":\"Hello\""));
 		}
 
-		ourServlet.getInterceptorService().unregisterAllInterceptors();
+		ourServer.getInterceptorService().unregisterAllInterceptors();
 
 	}
 
@@ -173,7 +183,7 @@ public class ServerExceptionDstu3Test {
 	@Test
 	public void testPostWithNoBody() throws IOException {
 
-		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient");
+		HttpPost httpPost = new HttpPost(ourServer.getBaseUrl() + "/Patient");
 		try (CloseableHttpResponse status = ourClient.execute(httpPost)) {
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(status.getStatusLine().toString());
@@ -194,7 +204,7 @@ public class ServerExceptionDstu3Test {
 
 		ourException = new AuthenticationException().addAuthenticateHeaderForRealm("REALM");
 
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient");
+		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient");
 		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(status.getStatusLine().toString());
@@ -231,32 +241,8 @@ public class ServerExceptionDstu3Test {
 
 	@AfterAll
 	public static void afterClassClearContext() throws Exception {
-		JettyUtil.closeServer(ourServer);
 		TestUtil.randomizeLocaleAndTimezone();
 	}
 
-	@BeforeAll
-	public static void beforeClass() throws Exception {
-		ourServer = new Server(0);
-
-		DummyPatientResourceProvider patientProvider = new DummyPatientResourceProvider();
-
-		ServletHandler proxyHandler = new ServletHandler();
-		ourServlet = new RestfulServer(ourCtx);
-		ourServlet.setPagingProvider(new FifoMemoryPagingProvider(10));
-
-		ourServlet.setResourceProviders(patientProvider);
-		ServletHolder servletHolder = new ServletHolder(ourServlet);
-		proxyHandler.addServletWithMapping(servletHolder, "/*");
-		ourServer.setHandler(proxyHandler);
-		JettyUtil.startServer(ourServer);
-		ourPort = JettyUtil.getPortForStartedServer(ourServer);
-
-		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
-		HttpClientBuilder builder = HttpClientBuilder.create();
-		builder.setConnectionManager(connectionManager);
-		ourClient = builder.build();
-
-	}
 
 }

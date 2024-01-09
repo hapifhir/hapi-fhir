@@ -2,7 +2,7 @@
  * #%L
  * hapi-fhir-storage-mdm
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,13 +21,13 @@ package ca.uhn.fhir.mdm.batch2;
 
 import ca.uhn.fhir.batch2.jobs.step.IIdChunkProducer;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.api.pid.IResourcePidList;
+import ca.uhn.fhir.jpa.api.pid.IResourcePidStream;
 import ca.uhn.fhir.jpa.api.svc.IGoldenResourceSearchSvc;
+import jakarta.annotation.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Date;
-import javax.annotation.Nonnull;
 
 public class MdmIdChunkProducer implements IIdChunkProducer<MdmChunkRangeJson> {
 	private static final Logger ourLog = LoggerFactory.getLogger(MdmIdChunkProducer.class);
@@ -38,21 +38,17 @@ public class MdmIdChunkProducer implements IIdChunkProducer<MdmChunkRangeJson> {
 	}
 
 	@Override
-	public IResourcePidList fetchResourceIdsPage(
-			Date theNextStart,
-			Date theEnd,
-			@Nonnull Integer thePageSize,
-			RequestPartitionId theRequestPartitionId,
-			MdmChunkRangeJson theData) {
+	public IResourcePidStream fetchResourceIdStream(
+			Date theStart, Date theEnd, @Nullable RequestPartitionId theRequestPartitionId, MdmChunkRangeJson theData) {
 		String resourceType = theData.getResourceType();
 
 		ourLog.info(
 				"Fetching golden resource ID chunk for resource type {} - Range {} - {}",
 				resourceType,
-				theNextStart,
+				theStart,
 				theEnd);
 
-		return myGoldenResourceSearchSvc.fetchGoldenResourceIdsPage(
-				theNextStart, theEnd, thePageSize, theRequestPartitionId, resourceType);
+		return myGoldenResourceSearchSvc.fetchGoldenResourceIdStream(
+				theStart, theEnd, theRequestPartitionId, resourceType);
 	}
 }

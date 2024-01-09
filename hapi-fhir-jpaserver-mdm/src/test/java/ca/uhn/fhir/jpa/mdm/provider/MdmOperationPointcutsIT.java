@@ -7,6 +7,7 @@ import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
+import ca.uhn.fhir.jpa.dao.expunge.ExpungeEverythingService;
 import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.mdm.helper.MdmLinkHelper;
 import ca.uhn.fhir.jpa.mdm.helper.testmodels.MDMState;
@@ -14,6 +15,7 @@ import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.mdm.api.IMdmSubmitSvc;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
+import ca.uhn.fhir.mdm.interceptor.MdmStorageInterceptor;
 import ca.uhn.fhir.mdm.model.mdmevents.MdmClearEvent;
 import ca.uhn.fhir.mdm.model.mdmevents.MdmHistoryEvent;
 import ca.uhn.fhir.mdm.model.mdmevents.MdmLinkEvent;
@@ -119,10 +121,18 @@ public class MdmOperationPointcutsIT extends BaseProviderR4Test {
 	@SpyBean
 	private IMdmSubmitSvc myMdmSubmitSvc;
 
+
 	private MdmLinkHistoryProviderDstu3Plus myLinkHistoryProvider;
 
 	private final List<Object> myInterceptors = new ArrayList<>();
 
+	@Override
+	@AfterEach
+	public void afterPurgeDatabase() {
+		super.afterPurgeDatabase();
+	}
+
+	@Override
 	@BeforeEach
 	public void before() throws Exception {
 		super.before();
@@ -134,6 +144,7 @@ public class MdmOperationPointcutsIT extends BaseProviderR4Test {
 		);
 	}
 
+	@Override
 	@AfterEach
 	public void after() throws IOException {
 		super.after();
@@ -141,8 +152,6 @@ public class MdmOperationPointcutsIT extends BaseProviderR4Test {
 		myInterceptors.clear();
 	}
 
-	@Nested
-	class MdmProviderDstu3PlusTest {
 		@Test
 		public void mergeGoldenResources_withInterceptor_firesHook() {
 			// setup
@@ -521,7 +530,7 @@ public class MdmOperationPointcutsIT extends BaseProviderR4Test {
 				}
 			}
 		}
-	}
+
 
 	private String createUrl(String theResourceType, StringType theCriteria) {
 		String url = theResourceType;
@@ -531,8 +540,6 @@ public class MdmOperationPointcutsIT extends BaseProviderR4Test {
 		return url;
 	}
 
-	@Nested
-	class MdmLinkHistoryProviderDstu3PlusTest {
 
 		@ParameterizedTest
 		@EnumSource(LinkHistoryParameters.class)
@@ -597,6 +604,6 @@ public class MdmOperationPointcutsIT extends BaseProviderR4Test {
 			assertTrue(called.get());
 			assertFalse(retval.isEmpty());
 		}
-	}
+
 
 }

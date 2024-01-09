@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,15 +29,15 @@ import ca.uhn.fhir.mdm.model.MdmLinkMetrics;
 import ca.uhn.fhir.mdm.model.MdmLinkScoreMetrics;
 import ca.uhn.fhir.mdm.model.MdmMetrics;
 import ca.uhn.fhir.mdm.model.MdmResourceMetrics;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityManagerFactory;
+import jakarta.persistence.Query;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.Query;
 
 public class MdmMetricSvcJpaImpl extends BaseMdmMetricSvc {
 
@@ -128,7 +128,7 @@ public class MdmMetricSvcJpaImpl extends BaseMdmMetricSvc {
 		int length = row.length;
 		for (int i = 0; i < length; i++) {
 			// if there's nothing in the db, these values will all be null
-			BigInteger bi = row[i] != null ? (BigInteger) row[i] : BigInteger.valueOf(0);
+			Number bi = row[i] != null ? (Number) row[i] : BigInteger.valueOf(0);
 			double bucket = getBucket(i);
 			if (i == 0) {
 				metrics.addScore(NULL_VALUE, bi.longValue());

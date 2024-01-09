@@ -10,7 +10,7 @@ import java.net.URISyntaxException;
 import java.util.Collections;
 import java.util.Set;
 
-import javax.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response;
 
 import org.hamcrest.Matchers;
 import org.hl7.fhir.instance.model.api.IBaseBinary;

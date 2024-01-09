@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,8 @@ import ca.uhn.fhir.system.HapiSystemProperties;
 import ca.uhn.fhir.util.HapiExtensions;
 import ca.uhn.fhir.validation.FhirValidator;
 import com.google.common.collect.Sets;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
@@ -43,8 +45,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 @SuppressWarnings("JavadocLinkAsPlainText")
 public class JpaStorageSettings extends StorageSettings {
@@ -267,14 +267,6 @@ public class JpaStorageSettings extends StorageSettings {
 	 * @since 5.6.0
 	 */
 	private boolean myAdvancedHSearchIndexing = false;
-	/**
-	 * If set to a positive number, any resources with a character length at or below the given number
-	 * of characters will be stored inline in the <code>HFJ_RES_VER</code> table instead of using a
-	 * separate LOB column.
-	 *
-	 * @since 5.7.0
-	 */
-	private int myInlineResourceTextBelowSize = 0;
 
 	/**
 	 * @since 5.7.0
@@ -381,25 +373,21 @@ public class JpaStorageSettings extends StorageSettings {
 	}
 
 	/**
-	 * If set to a positive number, any resources with a character length at or below the given number
-	 * of characters will be stored inline in the <code>HFJ_RES_VER</code> table instead of using a
-	 * separate LOB column.
-	 *
 	 * @since 5.7.0
+	 * @deprecated This setting no longer does anything as of HAPI FHIR 7.0.0
 	 */
+	@Deprecated
 	public int getInlineResourceTextBelowSize() {
-		return myInlineResourceTextBelowSize;
+		return 0;
 	}
 
 	/**
-	 * If set to a positive number, any resources with a character length at or below the given number
-	 * of characters will be stored inline in the <code>HFJ_RES_VER</code> table instead of using a
-	 * separate LOB column.
-	 *
 	 * @since 5.7.0
+	 * @deprecated This setting no longer does anything as of HAPI FHIR 7.0.0
 	 */
+	@Deprecated
 	public void setInlineResourceTextBelowSize(int theInlineResourceTextBelowSize) {
-		myInlineResourceTextBelowSize = theInlineResourceTextBelowSize;
+		// ignored
 	}
 
 	/**

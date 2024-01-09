@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server - Batch2 Task Processor
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,8 @@ import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.util.Logs;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
 
@@ -35,8 +37,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 public class JobDefinition<PT extends IModelJson> {
 	private static final Logger ourLog = Logs.getBatchTroubleshootingLog();
@@ -345,8 +345,8 @@ public class JobDefinition<PT extends IModelJson> {
 		 * <p>
 		 * <b>Validation:</b>
 		 * Fields should be annotated with
-		 * any appropriate <code>javax.validation</code> (JSR 380) annotations (e.g.
-		 * {@link javax.validation.constraints.Min} or {@link javax.validation.constraints.Pattern}).
+		 * any appropriate <code>jakarta.validation</code> (JSR 380) annotations (e.g.
+		 * {@link jakarta.validation.constraints.Min} or {@link jakarta.validation.constraints.Pattern}).
 		 * In addition, if there are validation rules that are too complex to express using
 		 * JSR 380, you can also specify a programmatic validator using {@link #setParametersValidator(IJobParametersValidator)}.
 		 * </p>
@@ -357,7 +357,7 @@ public class JobDefinition<PT extends IModelJson> {
 		 * </p>
 		 *
 		 * @see ca.uhn.fhir.model.api.annotation.PasswordField
-		 * @see javax.validation.constraints
+		 * @see jakarta.validation.constraints
 		 * @see JobDefinition.Builder#setParametersValidator(IJobParametersValidator)
 		 */
 		@SuppressWarnings("unchecked")

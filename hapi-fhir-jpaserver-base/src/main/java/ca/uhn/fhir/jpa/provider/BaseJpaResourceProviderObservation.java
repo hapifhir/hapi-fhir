@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,8 +45,8 @@ public abstract class BaseJpaResourceProviderObservation<T extends IBaseResource
 	 */
 	@Operation(name = JpaConstants.OPERATION_LASTN, idempotent = true, bundleType = BundleTypeEnum.SEARCHSET)
 	public IBundleProvider observationLastN(
-			javax.servlet.http.HttpServletRequest theServletRequest,
-			javax.servlet.http.HttpServletResponse theServletResponse,
+			jakarta.servlet.http.HttpServletRequest theServletRequest,
+			jakarta.servlet.http.HttpServletResponse theServletResponse,
 			ca.uhn.fhir.rest.api.server.RequestDetails theRequestDetails,
 			@Description(
 							formalDefinition =

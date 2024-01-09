@@ -246,9 +246,9 @@ public class HfqlStatementParserTest {
 
 		HfqlStatement statement = parse(input);
 		assertEquals(1, statement.getWhereClauses().size());
-		assertEquals("value.ofType(Quantity).value > 100", statement.getWhereClauses().get(0).getLeft());
+		assertEquals("value.ofType(Quantity).value", statement.getWhereClauses().get(0).getLeft());
+		assertThat(statement.getWhereClauses().get(0).getRightAsStrings(), contains(">", "100"));
 		assertEquals(HfqlStatement.WhereClauseOperatorEnum.UNARY_BOOLEAN, statement.getWhereClauses().get(0).getOperator());
-		assertEquals(0, statement.getWhereClauses().get(0).getRight().size());
 	}
 
 	@Test

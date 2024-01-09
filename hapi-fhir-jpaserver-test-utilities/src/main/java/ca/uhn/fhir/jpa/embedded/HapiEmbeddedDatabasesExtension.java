@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server Test Utilities
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@
 package ca.uhn.fhir.jpa.embedded;
 
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
+import ca.uhn.fhir.test.utilities.docker.DockerRequiredCondition;
 import ca.uhn.fhir.util.VersionEnum;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.SystemUtils;
@@ -51,20 +52,24 @@ public class HapiEmbeddedDatabasesExtension implements AfterAllCallback {
 	private final DatabaseInitializerHelper myDatabaseInitializerHelper = new DatabaseInitializerHelper();
 
 	public HapiEmbeddedDatabasesExtension() {
-		myEmbeddedDatabases.add(new H2EmbeddedDatabase());
-		myEmbeddedDatabases.add(new PostgresEmbeddedDatabase());
-		myEmbeddedDatabases.add(new MsSqlEmbeddedDatabase());
-		if (canUseOracle()) {
-			myEmbeddedDatabases.add(new OracleEmbeddedDatabase());
+		if (DockerRequiredCondition.isDockerAvailable()) {
+			myEmbeddedDatabases.add(new H2EmbeddedDatabase());
+			myEmbeddedDatabases.add(new PostgresEmbeddedDatabase());
+			myEmbeddedDatabases.add(new MsSqlEmbeddedDatabase());
+			if (canUseOracle()) {
+				myEmbeddedDatabases.add(new OracleEmbeddedDatabase());
+			} else {
+				String message =
+						"Cannot add OracleEmbeddedDatabase. If you are using a Mac you must configure the TestContainers API to run using Colima (https://www.testcontainers.org/supported_docker_environment#using-colima)";
+				ourLog.warn(message);
+			}
 		} else {
-			String message =
-					"Cannot add OracleEmbeddedDatabase. If you are using a Mac you must configure the TestContainers API to run using Colima (https://www.testcontainers.org/supported_docker_environment#using-colima)";
-			ourLog.warn(message);
+			ourLog.warn("Docker is not available! Not going to start any embedded databases.");
 		}
 	}
 
 	@Override
-	public void afterAll(ExtensionContext theExtensionContext) throws Exception {
+	public void afterAll(ExtensionContext theExtensionContext) {
 		for (JpaEmbeddedDatabase database : getAllEmbeddedDatabases()) {
 			database.stop();
 		}

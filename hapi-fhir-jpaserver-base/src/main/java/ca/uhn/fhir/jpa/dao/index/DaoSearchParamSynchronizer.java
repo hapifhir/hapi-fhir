@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,18 +24,24 @@ import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
 import ca.uhn.fhir.jpa.util.AddRemoveCount;
 import com.google.common.annotations.VisibleForTesting;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.PersistenceContextType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import javax.persistence.PersistenceContextType;
+import java.util.Set;
 
 @Service
 public class DaoSearchParamSynchronizer {
+	private static final Logger ourLog = LoggerFactory.getLogger(DaoSearchParamSynchronizer.class);
+
 	@PersistenceContext(type = PersistenceContextType.TRANSACTION)
 	protected EntityManager myEntityManager;
 
@@ -79,6 +85,28 @@ public class DaoSearchParamSynchronizer {
 		}
 
 		/*
+		 * It's technically possible that the existing index collection
+		 * contains duplicates. Duplicates don't actually cause any
+		 * issues for searching since we always deduplicate the PIDs we
+		 * get back from the search, but they are wasteful. We don't
+		 * enforce uniqueness in the DB for the index tables for
+		 * performance reasons (no sense adding a constraint that slows
+		 * down writes when dupes don't actually hurt anything other than
+		 * a bit of wasted space).
+		 *
+		 * So we check if there are any dupes, and if we find any we
+		 * remove them.
+		 */
+		Set<T> existingParamsAsSet = new HashSet<>(theExistingParams.size());
+		for (Iterator<T> iterator = theExistingParams.iterator(); iterator.hasNext(); ) {
+			T next = iterator.next();
+			if (!existingParamsAsSet.add(next)) {
+				iterator.remove();
+				myEntityManager.remove(next);
+			}
+		}
+
+		/*
 		 * HashCodes may have changed as a result of setting the partition ID, so
 		 * create a new set that will reflect the new hashcodes
 		 */
@@ -89,9 +117,13 @@ public class DaoSearchParamSynchronizer {
 		tryToReuseIndexEntities(paramsToRemove, paramsToAdd);
 
 		for (T next : paramsToRemove) {
+			if (!myEntityManager.contains(next)) {
+				// If a resource is created and deleted in the same transaction, we can end up
+				// in a state where we're deleting entities that don't actually exist. Hibernate
+				// 6 is stricter about this, so we skip here.
+				continue;
+			}
 			myEntityManager.remove(next);
-			theEntity.getParamsQuantity().remove(next);
-			theEntity.getParamsQuantityNormalized().remove(next);
 		}
 		for (T next : paramsToAdd) {
 			myEntityManager.merge(next);

@@ -8,28 +8,34 @@ import ca.uhn.fhir.jpa.migrate.SchemaMigrator;
 import ca.uhn.fhir.jpa.migrate.dao.HapiMigrationDao;
 import ca.uhn.fhir.jpa.migrate.tasks.HapiFhirJpaMigrationTasks;
 import ca.uhn.fhir.system.HapiSystemProperties;
+import ca.uhn.fhir.test.utilities.docker.RequiresDocker;
 import ca.uhn.fhir.util.VersionEnum;
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.DisabledIf;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ArgumentsSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.testcontainers.junit.jupiter.Testcontainers;
 
 import javax.sql.DataSource;
 import java.sql.SQLException;
 import java.util.Collections;
+import java.util.List;
 import java.util.Properties;
-import java.util.Set;
 
 import static ca.uhn.fhir.jpa.embedded.HapiEmbeddedDatabasesExtension.FIRST_TESTED_VERSION;
 import static ca.uhn.fhir.jpa.migrate.SchemaMigrator.HAPI_FHIR_MIGRATION_TABLENAME;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 
+@RequiresDocker
 public class HapiSchemaMigrationTest {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(HapiSchemaMigrationTest.class);
@@ -71,7 +77,7 @@ public class HapiSchemaMigrationTest {
 
 		VersionEnum[] allVersions =  VersionEnum.values();
 
-		Set<VersionEnum> dataVersions = Set.of(
+		List<VersionEnum> dataVersions = List.of(
 			VersionEnum.V5_2_0,
 			VersionEnum.V5_3_0,
 			VersionEnum.V5_4_0,
@@ -101,6 +107,8 @@ public class HapiSchemaMigrationTest {
 			new HapiForeignKeyIndexHelper()
 				.ensureAllForeignKeysAreIndexed(dataSource);
 		}
+
+		verifyForcedIdMigration(dataSource);
 	}
 
 	private static void migrate(DriverTypeEnum theDriverType, DataSource dataSource, HapiMigrationStorageSvc hapiMigrationStorageSvc, VersionEnum from, VersionEnum to) throws SQLException {
@@ -118,6 +126,19 @@ public class HapiSchemaMigrationTest {
 		schemaMigrator.createMigrationTableIfRequired();
 		schemaMigrator.migrate();
 	}
+
+	/**
+	 * For bug https://github.com/hapifhir/hapi-fhir/issues/5546
+	 */
+	private void verifyForcedIdMigration(DataSource theDataSource) throws SQLException {
+		JdbcTemplate jdbcTemplate = new JdbcTemplate(theDataSource);
+		@SuppressWarnings("DataFlowIssue")
+		int nullCount = jdbcTemplate.queryForObject("select count(1) from hfj_resource where fhir_id is null", Integer.class);
+		assertEquals(0, nullCount, "no fhir_id should be null");
+		int trailingSpaceCount = jdbcTemplate.queryForObject("select count(1) from hfj_resource where fhir_id <> trim(fhir_id)", Integer.class);
+		assertEquals(0, trailingSpaceCount, "no fhir_id should contain a space");
+	}
+
 
 	@Test
 	public void testCreateMigrationTableIfRequired() throws SQLException {

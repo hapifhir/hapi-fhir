@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.validation.ValidationResult;
+import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IBaseConformance;
 
 import java.io.Writer;
@@ -33,7 +34,6 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import javax.annotation.Nonnull;
 
 /**
  * Value for {@link Hook#value()}
@@ -93,6 +93,10 @@ public enum Pointcut implements IPointcut {
 	 * <li>
 	 *    ca.uhn.fhir.rest.client.api.IRestfulClient - The client object making the request
 	 * </li>
+	 * <li>
+	 *    ca.uhn.fhir.rest.client.api.ClientResponseContext - Contains an IHttpRequest, an IHttpResponse, and an IRestfulClient
+	 *    and also allows the client to mutate the contained IHttpResponse
+	 * </li>
 	 * </ul>
 	 * </p>
 	 * Hook methods must return <code>void</code>.
@@ -101,7 +105,8 @@ public enum Pointcut implements IPointcut {
 			void.class,
 			"ca.uhn.fhir.rest.client.api.IHttpRequest",
 			"ca.uhn.fhir.rest.client.api.IHttpResponse",
-			"ca.uhn.fhir.rest.client.api.IRestfulClient"),
+			"ca.uhn.fhir.rest.client.api.IRestfulClient",
+			"ca.uhn.fhir.rest.client.api.ClientResponseContext"),
 
 	/**
 	 * <b>Server Hook:</b>
@@ -153,10 +158,10 @@ public enum Pointcut implements IPointcut {
 	 * Hooks may accept the following parameters:
 	 * <ul>
 	 * <li>
-	 * javax.servlet.http.HttpServletRequest - The servlet request, when running in a servlet environment
+	 * jakarta.servlet.http.HttpServletRequest - The servlet request, when running in a servlet environment
 	 * </li>
 	 * <li>
-	 * javax.servlet.http.HttpServletResponse - The servlet response, when running in a servlet environment
+	 * jakarta.servlet.http.HttpServletResponse - The servlet response, when running in a servlet environment
 	 * </li>
 	 * </ul>
 	 * </p>
@@ -166,7 +171,7 @@ public enum Pointcut implements IPointcut {
 	 * no further processing will occur and no further interceptors will be called.
 	 */
 	SERVER_INCOMING_REQUEST_PRE_PROCESSED(
-			boolean.class, "javax.servlet.http.HttpServletRequest", "javax.servlet.http.HttpServletResponse"),
+			boolean.class, "jakarta.servlet.http.HttpServletRequest", "jakarta.servlet.http.HttpServletResponse"),
 
 	/**
 	 * <b>Server Hook:</b>
@@ -193,10 +198,10 @@ public enum Pointcut implements IPointcut {
 	 * only be populated when operating in a RestfulServer implementation. It is provided as a convenience.
 	 * </li>
 	 * <li>
-	 * javax.servlet.http.HttpServletRequest - The servlet request, when running in a servlet environment
+	 * jakarta.servlet.http.HttpServletRequest - The servlet request, when running in a servlet environment
 	 * </li>
 	 * <li>
-	 * javax.servlet.http.HttpServletResponse - The servlet response, when running in a servlet environment
+	 * jakarta.servlet.http.HttpServletResponse - The servlet response, when running in a servlet environment
 	 * </li>
 	 * <li>
 	 * ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException - The exception that was thrown
@@ -215,8 +220,8 @@ public enum Pointcut implements IPointcut {
 			boolean.class,
 			"ca.uhn.fhir.rest.api.server.RequestDetails",
 			"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails",
-			"javax.servlet.http.HttpServletRequest",
-			"javax.servlet.http.HttpServletResponse",
+			"jakarta.servlet.http.HttpServletRequest",
+			"jakarta.servlet.http.HttpServletResponse",
 			"ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException"),
 
 	/**
@@ -239,10 +244,10 @@ public enum Pointcut implements IPointcut {
 	 * only be populated when operating in a RestfulServer implementation. It is provided as a convenience.
 	 * </li>
 	 * <li>
-	 * javax.servlet.http.HttpServletRequest - The servlet request, when running in a servlet environment
+	 * jakarta.servlet.http.HttpServletRequest - The servlet request, when running in a servlet environment
 	 * </li>
 	 * <li>
-	 * javax.servlet.http.HttpServletResponse - The servlet response, when running in a servlet environment
+	 * jakarta.servlet.http.HttpServletResponse - The servlet response, when running in a servlet environment
 	 * </li>
 	 * </ul>
 	 * <p>
@@ -263,8 +268,8 @@ public enum Pointcut implements IPointcut {
 			boolean.class,
 			"ca.uhn.fhir.rest.api.server.RequestDetails",
 			"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails",
-			"javax.servlet.http.HttpServletRequest",
-			"javax.servlet.http.HttpServletResponse"),
+			"jakarta.servlet.http.HttpServletRequest",
+			"jakarta.servlet.http.HttpServletResponse"),
 
 	/**
 	 * <b>Server Hook:</b>
@@ -286,10 +291,10 @@ public enum Pointcut implements IPointcut {
 	 * only be populated when operating in a RestfulServer implementation. It is provided as a convenience.
 	 * </li>
 	 * <li>
-	 * javax.servlet.http.HttpServletRequest - The servlet request, when running in a servlet environment
+	 * jakarta.servlet.http.HttpServletRequest - The servlet request, when running in a servlet environment
 	 * </li>
 	 * <li>
-	 * javax.servlet.http.HttpServletResponse - The servlet response, when running in a servlet environment
+	 * jakarta.servlet.http.HttpServletResponse - The servlet response, when running in a servlet environment
 	 * </li>
 	 * </ul>
 	 * <p>
@@ -308,8 +313,8 @@ public enum Pointcut implements IPointcut {
 			boolean.class,
 			"ca.uhn.fhir.rest.api.server.RequestDetails",
 			"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails",
-			"javax.servlet.http.HttpServletRequest",
-			"javax.servlet.http.HttpServletResponse"),
+			"jakarta.servlet.http.HttpServletRequest",
+			"jakarta.servlet.http.HttpServletResponse"),
 
 	/**
 	 * <b>Server Hook:</b>
@@ -411,10 +416,10 @@ public enum Pointcut implements IPointcut {
 	 * {@link NullPointerException} in the case of a bug being triggered.
 	 * </li>
 	 * <li>
-	 * javax.servlet.http.HttpServletRequest - The servlet request, when running in a servlet environment
+	 * jakarta.servlet.http.HttpServletRequest - The servlet request, when running in a servlet environment
 	 * </li>
 	 * <li>
-	 * javax.servlet.http.HttpServletResponse - The servlet response, when running in a servlet environment
+	 * jakarta.servlet.http.HttpServletResponse - The servlet response, when running in a servlet environment
 	 * </li>
 	 * </ul>
 	 * <p>
@@ -429,8 +434,8 @@ public enum Pointcut implements IPointcut {
 			"ca.uhn.fhir.rest.api.server.RequestDetails",
 			"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails",
 			"java.lang.Throwable",
-			"javax.servlet.http.HttpServletRequest",
-			"javax.servlet.http.HttpServletResponse"),
+			"jakarta.servlet.http.HttpServletRequest",
+			"jakarta.servlet.http.HttpServletResponse"),
 
 	/**
 	 * <b>Server Hook:</b>
@@ -458,10 +463,10 @@ public enum Pointcut implements IPointcut {
 	 * ca.uhn.fhir.rest.api.server.ResponseDetails - This object contains details about the response, including the contents. Hook methods may modify this object to change or replace the response.
 	 * </li>
 	 * <li>
-	 * javax.servlet.http.HttpServletRequest - The servlet request, when running in a servlet environment
+	 * jakarta.servlet.http.HttpServletRequest - The servlet request, when running in a servlet environment
 	 * </li>
 	 * <li>
-	 * javax.servlet.http.HttpServletResponse - The servlet response, when running in a servlet environment
+	 * jakarta.servlet.http.HttpServletResponse - The servlet response, when running in a servlet environment
 	 * </li>
 	 * </ul>
 	 * </p>
@@ -482,8 +487,8 @@ public enum Pointcut implements IPointcut {
 			"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails",
 			"org.hl7.fhir.instance.model.api.IBaseResource",
 			"ca.uhn.fhir.rest.api.server.ResponseDetails",
-			"javax.servlet.http.HttpServletRequest",
-			"javax.servlet.http.HttpServletResponse"),
+			"jakarta.servlet.http.HttpServletRequest",
+			"jakarta.servlet.http.HttpServletResponse"),
 
 	/**
 	 * <b>Server Hook:</b>
@@ -549,10 +554,10 @@ public enum Pointcut implements IPointcut {
 	 * java.lang.String - The GraphQL response
 	 * </li>
 	 * <li>
-	 * javax.servlet.http.HttpServletRequest - The servlet request, when running in a servlet environment
+	 * jakarta.servlet.http.HttpServletRequest - The servlet request, when running in a servlet environment
 	 * </li>
 	 * <li>
-	 * javax.servlet.http.HttpServletResponse - The servlet response, when running in a servlet environment
+	 * jakarta.servlet.http.HttpServletResponse - The servlet response, when running in a servlet environment
 	 * </li>
 	 * </ul>
 	 * </p>
@@ -573,8 +578,8 @@ public enum Pointcut implements IPointcut {
 			"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails",
 			"java.lang.String",
 			"java.lang.String",
-			"javax.servlet.http.HttpServletRequest",
-			"javax.servlet.http.HttpServletResponse"),
+			"jakarta.servlet.http.HttpServletRequest",
+			"jakarta.servlet.http.HttpServletResponse"),
 
 	/**
 	 * <b>Server Hook:</b>
@@ -2929,6 +2934,31 @@ public enum Pointcut implements IPointcut {
 			String.class,
 			"ca.uhn.fhir.rest.api.server.RequestDetails",
 			"org.hl7.fhir.instance.model.api.IBaseResource"),
+
+	/**
+	 * <b>Storage Hook:</b>
+	 * Invoked before a batch job is persisted to the database.
+	 * <p>
+	 * Hooks will have access to the content of the job being created
+	 * and may choose to make modifications to it. These changes will be
+	 * reflected in permanent storage.
+	 * </p>
+	 * Hooks may accept the following parameters:
+	 * <ul>
+	 * <li>
+	 * ca.uhn.fhir.batch2.model.JobInstance
+	 * </li>
+	 * <li>
+	 * ca.uhn.fhir.rest.api.server.RequestDetails - A bean containing details about the request that lead to the creation
+	 * of the jobInstance.
+	 * </li>
+	 * </ul>
+	 * <p>
+	 * Hooks should return <code>void</code>.
+	 * </p>
+	 */
+	STORAGE_PRESTORAGE_BATCH_JOB_CREATE(
+			void.class, "ca.uhn.fhir.batch2.model.JobInstance", "ca.uhn.fhir.rest.api.server.RequestDetails"),
 
 	/**
 	 * This pointcut is used only for unit tests. Do not use in production code as it may be changed or
