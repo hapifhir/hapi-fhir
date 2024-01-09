@@ -330,8 +330,7 @@ public abstract class BaseParser implements IParser {
 		Validate.notNull(theWriter, "theWriter can not be null");
 		Validate.notNull(theEncodeContext, "theEncodeContext can not be null");
 
-		if (theResource.getStructureFhirVersionEnum()
-				!= myContext.getVersion().getVersion()) {
+		if (theResource.getStructureFhirVersionEnum() != myContext.getVersion().getVersion()) {
 			throw new IllegalArgumentException(Msg.code(1829) + "This parser is for FHIR version "
 					+ myContext.getVersion().getVersion() + " - Can not encode a structure for version "
 					+ theResource.getStructureFhirVersionEnum());
@@ -1015,7 +1014,8 @@ public abstract class BaseParser implements IParser {
 		 * informs the serializer that we don't need to contain this resource.
 		 */
 		if (theResource instanceof IBaseBundle) {
-			List<Pair<String, IBaseResource>> entries = BundleUtil.getBundleEntryFullUrlsAndResources(getContext(), (IBaseBundle) theResource);
+			List<Pair<String, IBaseResource>> entries =
+					BundleUtil.getBundleEntryFullUrlsAndResources(getContext(), (IBaseBundle) theResource);
 			for (Pair<String, IBaseResource> nextEntry : entries) {
 				String fullUrl = nextEntry.getKey();
 				IBaseResource resource = nextEntry.getValue();
@@ -1027,7 +1027,7 @@ public abstract class BaseParser implements IParser {
 			}
 		}
 
-        myContainedResources = getContext().newTerser().containResources(theResource);
+		myContainedResources = getContext().newTerser().containResources(theResource);
 	}
 
 	class ChildNameAndDef {
