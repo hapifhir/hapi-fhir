@@ -49,6 +49,7 @@ import jakarta.annotation.Nullable;
 import org.apache.commons.io.output.StringBuilderWriter;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang3.tuple.Pair;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
@@ -82,6 +83,7 @@ import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.startsWith;
 
 @SuppressWarnings("WeakerAccess")
 public abstract class BaseParser implements IParser {
@@ -328,10 +330,7 @@ public abstract class BaseParser implements IParser {
 		Validate.notNull(theWriter, "theWriter can not be null");
 		Validate.notNull(theEncodeContext, "theEncodeContext can not be null");
 
-		if (myContext.getVersion().getVersion() == FhirVersionEnum.R4B
-				&& theResource.getStructureFhirVersionEnum() == FhirVersionEnum.R5) {
-			// TODO: remove once we've bumped the core lib version
-		} else if (theResource.getStructureFhirVersionEnum()
+		if (theResource.getStructureFhirVersionEnum()
 				!= myContext.getVersion().getVersion()) {
 			throw new IllegalArgumentException(Msg.code(1829) + "This parser is for FHIR version "
 					+ myContext.getVersion().getVersion() + " - Can not encode a structure for version "
@@ -442,10 +441,6 @@ public abstract class BaseParser implements IParser {
 
 	FhirTerser.ContainedResources getContainedResources() {
 		return myContainedResources;
-	}
-
-	void setContainedResources(FhirTerser.ContainedResources theContainedResources) {
-		myContainedResources = theContainedResources;
 	}
 
 	@Override
@@ -1008,6 +1003,23 @@ public abstract class BaseParser implements IParser {
 	protected boolean isFhirVersionLessThanOrEqualTo(FhirVersionEnum theFhirVersionEnum) {
 		final FhirVersionEnum apiFhirVersion = myContext.getVersion().getVersion();
 		return theFhirVersionEnum == apiFhirVersion || apiFhirVersion.isOlderThan(theFhirVersionEnum);
+	}
+
+	protected void containResourcesInReferences(IBaseResource theResource) {
+		if (theResource instanceof IBaseBundle) {
+			List<Pair<String, IBaseResource>> entries = BundleUtil.getBundleEntryFullUrlsAndResources(getContext(), (IBaseBundle) theResource);
+			for (Pair<String, IBaseResource> nextEntry : entries) {
+				String fullUrl = nextEntry.getKey();
+				IBaseResource resource = nextEntry.getValue();
+				if (startsWith(fullUrl, "urn:")) {
+					if (resource != null && resource.getIdElement().getValue() == null) {
+						resource.getIdElement().setValue(fullUrl);
+					}
+				}
+			}
+		}
+
+        myContainedResources = getContext().newTerser().containResources(theResource);
 	}
 
 	class ChildNameAndDef {

@@ -191,7 +191,7 @@ public class RDFParser extends BaseParser {
 		}
 
 		if (!containedResource) {
-			setContainedResources(getContext().newTerser().containResources(resource));
+			containResourcesInReferences(resource);
 		}
 
 		if (!(resource instanceof IAnyResource)) {
