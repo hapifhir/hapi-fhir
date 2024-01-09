@@ -11,6 +11,7 @@ import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.BundleBuilder;
+import ca.uhn.fhir.util.HapiExtensions;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.BooleanType;
@@ -18,11 +19,15 @@ import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Condition;
 import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
+import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Location;
+import org.hl7.fhir.r4.model.MessageHeader;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.Task;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
@@ -39,6 +44,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+import static ca.uhn.fhir.util.HapiExtensions.EXTENSION_AUTO_VERSION_REFERENCES_AT_PATH;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
@@ -346,14 +352,7 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 
 		{
 			// Create patient
-			Patient patient = new Patient();
-			patient.setId(IdType.newRandomUuid());
-			patient.setActive(true);
-			myPatientDao.create(patient).getId();
-
-			// Update patient to make a second version
-			patient.setActive(false);
-			myPatientDao.update(patient);
+			createAndUpdatePatient(IdType.newRandomUuid().getId());
 
 			// Create encounter
 			Encounter encounter = new Encounter();
@@ -408,17 +407,7 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 		myStorageSettings.setDeleteEnabled(false);
 		myStorageSettings.setAutoVersionReferenceAtPaths("Observation.subject");
 
-		{
-			// Create patient
-			Patient patient = new Patient();
-			patient.setId("PATIENT");
-			patient.setActive(true);
-			myPatientDao.update(patient).getId();
-
-			// Update patient to make a second version
-			patient.setActive(false);
-			myPatientDao.update(patient);
-		}
+		createAndUpdatePatient("PATIENT");
 
 		BundleBuilder builder = new BundleBuilder(myFhirContext);
 
@@ -456,17 +445,7 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 		myFhirContext.getParserOptions().setStripVersionsFromReferences(false);
 		myStorageSettings.setAutoVersionReferenceAtPaths("Observation.subject");
 
-		{
-			// Create patient
-			Patient patient = new Patient();
-			patient.setId(IdType.newRandomUuid());
-			patient.setActive(true);
-			myPatientDao.create(patient).getId();
-
-			// Update patient to make a second version
-			patient.setActive(false);
-			myPatientDao.update(patient);
-		}
+		createAndUpdatePatient(IdType.newRandomUuid().getId());
 
 		BundleBuilder builder = new BundleBuilder(myFhirContext);
 
@@ -499,6 +478,79 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 		// Read back and verify that reference is now versioned
 		observation = myObservationDao.read(observationId);
 		assertEquals(patientId.getValue(), observation.getSubject().getReference());
+	}
+
+	@Test
+	public void testInsertVersionedReferencesByPath_withExtensionInResourceMeta_addsVersionToTheReferences() {
+		Patient patient = createAndUpdatePatient(IdType.newRandomUuid().getId());
+
+		// create Location
+		Location location = new Location();
+		location.setId(IdType.newRandomUuid());
+		location.setStatus(Location.LocationStatus.ACTIVE);
+		myLocationDao.create(location);
+
+		// Update Location to make a second version
+		location.setStatus(Location.LocationStatus.INACTIVE);
+		IIdType locationId = myLocationDao.update(location).getId();
+
+		// update Patient
+		patient.setDeceased(new BooleanType(true));
+		patient.setActive(false);
+
+		// create Encounter
+		Encounter encounter = new Encounter();
+		encounter.setId(IdType.newRandomUuid());
+		encounter.setStatus(Encounter.EncounterStatus.PLANNED);
+
+		// create MessageHeader
+		MessageHeader messageHeader = new MessageHeader();
+		// add extension to MessageHeader.meta
+		Extension autoVersionExtension = new Extension(HapiExtensions.EXTENSION_AUTO_VERSION_REFERENCES_AT_PATH_LIST);
+		autoVersionExtension.addExtension(EXTENSION_AUTO_VERSION_REFERENCES_AT_PATH, new StringType("focus"));
+		messageHeader.getMeta().setExtension(List.of(autoVersionExtension));
+		// add references
+		messageHeader.addFocus().setReference(patient.getIdElement().toVersionless().getValue());
+		messageHeader.addFocus().setReference(encounter.getId());
+		messageHeader.addFocus().setReference(locationId.toVersionless().getValue());
+
+		BundleBuilder builder = new BundleBuilder(myFhirContext);
+		builder.addTransactionUpdateEntry(patient);
+		builder.addTransactionCreateEntry(encounter);
+		builder.addTransactionCreateEntry(messageHeader);
+
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(builder.getBundle()));
+		Bundle outcome = mySystemDao.transaction(mySrd, (Bundle) builder.getBundle());
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
+		assertEquals("200 OK", outcome.getEntry().get(0).getResponse().getStatus());
+		assertEquals("201 Created", outcome.getEntry().get(1).getResponse().getStatus());
+		assertEquals("201 Created", outcome.getEntry().get(2).getResponse().getStatus());
+
+		IdType patientId = new IdType(outcome.getEntry().get(0).getResponse().getLocation());
+		IdType encounterId = new IdType(outcome.getEntry().get(1).getResponse().getLocation());
+		IdType messageHeaderId = new IdType(outcome.getEntry().get(2).getResponse().getLocation());
+		assertEquals("3", patientId.getVersionIdPart());
+		assertEquals("1", encounterId.getVersionIdPart());
+		assertEquals("2", locationId.getVersionIdPart());
+		assertEquals("1", messageHeaderId.getVersionIdPart());
+
+		// read back and verify that references are versioned
+		messageHeader = myMessageHeaderDao.read(messageHeaderId);
+		assertEquals(patientId.getValue(), messageHeader.getFocus().get(0).getReference());
+		assertEquals(encounterId.getValue(), messageHeader.getFocus().get(1).getReference());
+		assertEquals(locationId.getValue(), messageHeader.getFocus().get(2).getReference());
+	}
+
+	private Patient createAndUpdatePatient(String thePatientId) {
+		Patient patient = new Patient();
+		patient.setId(thePatientId);
+		patient.setActive(true);
+		myPatientDao.create(patient).getId();
+
+		// update patient to make a second version
+		patient.setActive(false);
+        myPatientDao.update(patient);
+		return patient;
 	}
 
 	@Test

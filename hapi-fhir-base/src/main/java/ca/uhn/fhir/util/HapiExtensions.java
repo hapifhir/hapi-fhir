@@ -162,6 +162,13 @@ public class HapiExtensions {
 	 */
 	public static final String EXTENSION_SEARCHPARAM_UPLIFT_REFCHAIN =
 			"https://smilecdr.com/fhir/ns/StructureDefinition/searchparameter-uplift-refchain";
+
+	public static final String EXTENSION_AUTO_VERSION_REFERENCES_AT_PATH_LIST =
+			"https://smilecdr.com/fhir/ns/StructureDefinition/auto-version-references-at-path-list";
+
+	public static final String EXTENSION_AUTO_VERSION_REFERENCES_AT_PATH =
+			"https://smilecdr.com/fhir/ns/StructureDefinition/auto-version-references-at-path";
+
 	/**
 	 * This extension is used for "uplifted refchains" on search parameters. See the
 	 * HAPI FHIR documentation for an explanation of how these work.
