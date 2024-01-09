@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@ import ca.uhn.fhir.jpa.migrate.taskdef.CalculateHashesTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.CalculateOrdinalDatesTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.ColumnTypeEnum;
 import ca.uhn.fhir.jpa.migrate.taskdef.ForceIdMigrationCopyTask;
+import ca.uhn.fhir.jpa.migrate.taskdef.ForceIdMigrationFixTask;
 import ca.uhn.fhir.jpa.migrate.tasks.api.BaseMigrationTasks;
 import ca.uhn.fhir.jpa.migrate.tasks.api.Builder;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
@@ -62,6 +63,28 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 	// H2, Derby, MariaDB, and MySql automatically add indexes to foreign keys
 	public static final DriverTypeEnum[] NON_AUTOMATIC_FK_INDEX_PLATFORMS =
 			new DriverTypeEnum[] {DriverTypeEnum.POSTGRES_9_4, DriverTypeEnum.ORACLE_12C, DriverTypeEnum.MSSQL_2012};
+	private static final String QUERY_FOR_COLUMN_COLLATION_TEMPLATE = "WITH defcoll AS (\n"
+			+ "	SELECT datcollate AS coll\n"
+			+ "	FROM pg_database\n"
+			+ "	WHERE datname = current_database())\n"
+			+ ", collation_by_column AS (\n"
+			+ "	SELECT a.attname,\n"
+			+ "		CASE WHEN c.collname = 'default'\n"
+			+ "			THEN defcoll.coll\n"
+			+ "			ELSE c.collname\n"
+			+ "		END AS my_collation\n"
+			+ "	FROM pg_attribute AS a\n"
+			+ "		CROSS JOIN defcoll\n"
+			+ "		LEFT JOIN pg_collation AS c ON a.attcollation = c.oid\n"
+			+ "	WHERE a.attrelid = '%s'::regclass\n"
+			+ "		AND a.attnum > 0\n"
+			+ "		AND attname = '%s'\n"
+			+ ")\n"
+			+ "SELECT TRUE as result\n"
+			+ "FROM collation_by_column\n"
+			+ "WHERE EXISTS (SELECT 1\n"
+			+ "	FROM collation_by_column\n"
+			+ "	WHERE my_collation != 'C')";
 	private final Set<FlagEnum> myFlags;
 
 	/**
@@ -118,10 +141,19 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 
 		// Move forced_id constraints to hfj_resource and the new fhir_id column
 		// Note: we leave the HFJ_FORCED_ID.IDX_FORCEDID_TYPE_FID index in place to support old writers for a while.
-		version.addTask(new ForceIdMigrationCopyTask(version.getRelease(), "20231018.1"));
+		version.addTask(new ForceIdMigrationCopyTask(version.getRelease(), "20231018.1").setDoNothing(true));
 
 		Builder.BuilderWithTableName hfjResource = version.onTable("HFJ_RESOURCE");
-		hfjResource.modifyColumn("20231018.2", "FHIR_ID").nonNullable();
+		// commented out to make numeric space for the fix task below.
+		// This constraint can't be enabled until the column is fully populated, and the shipped version of 20231018.1
+		// was broken.
+		// hfjResource.modifyColumn("20231018.2", "FHIR_ID").nonNullable();
+
+		// this was inserted after the release.
+		version.addTask(new ForceIdMigrationFixTask(version.getRelease(), "20231018.3"));
+
+		// added back in place of 20231018.2.  If 20231018.2 already ran, this is a no-op.
+		hfjResource.modifyColumn("20231018.4", "FHIR_ID").nonNullable();
 
 		hfjResource.dropIndex("20231027.1", "IDX_RES_FHIR_ID");
 		hfjResource
@@ -141,6 +173,36 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		batch2JobInstanceTable.addColumn("20231128.1", "USER_NAME").nullable().type(ColumnTypeEnum.STRING, 200);
 
 		batch2JobInstanceTable.addColumn("20231128.2", "CLIENT_ID").nullable().type(ColumnTypeEnum.STRING, 200);
+
+		{
+			version.executeRawSql(
+							"20231212.1",
+							"CREATE INDEX idx_sp_string_hash_nrm_pattern_ops ON public.hfj_spidx_string USING btree (hash_norm_prefix, sp_value_normalized varchar_pattern_ops, res_id, partition_id)")
+					.onlyAppliesToPlatforms(DriverTypeEnum.POSTGRES_9_4)
+					.onlyIf(
+							String.format(
+									QUERY_FOR_COLUMN_COLLATION_TEMPLATE,
+									"HFJ_SPIDX_STRING".toLowerCase(),
+									"SP_VALUE_NORMALIZED".toLowerCase()),
+							"Column HFJ_SPIDX_STRING.SP_VALUE_NORMALIZED already has a collation of 'C' so doing nothing");
+
+			version.executeRawSql(
+							"20231212.2",
+							"CREATE UNIQUE INDEX idx_sp_uri_hash_identity_pattern_ops ON public.hfj_spidx_uri USING btree (hash_identity, sp_uri varchar_pattern_ops, res_id, partition_id)")
+					.onlyAppliesToPlatforms(DriverTypeEnum.POSTGRES_9_4)
+					.onlyIf(
+							String.format(
+									QUERY_FOR_COLUMN_COLLATION_TEMPLATE,
+									"HFJ_SPIDX_URI".toLowerCase(),
+									"SP_URI".toLowerCase()),
+							"Column HFJ_SPIDX_STRING.SP_VALUE_NORMALIZED already has a collation of 'C' so doing nothing");
+		}
+
+		// This fix was bad for MSSQL, it has been set to do nothing.
+		version.addTask(new ForceIdMigrationFixTask(version.getRelease(), "20231213.1").setDoNothing(true));
+
+		// This fix will work for MSSQL or Oracle.
+		version.addTask(new ForceIdMigrationFixTask(version.getRelease(), "20231222.1"));
 	}
 
 	protected void init680() {
@@ -1509,11 +1571,12 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		Builder.BuilderWithTableName nrmlTable = version.onTable("HFJ_SPIDX_QUANTITY_NRML");
 		nrmlTable.addColumn("20210111.1", "PARTITION_ID").nullable().type(ColumnTypeEnum.INT);
 		nrmlTable.addColumn("20210111.2", "PARTITION_DATE").nullable().type(ColumnTypeEnum.DATE_ONLY);
-		// - The fk name is generated from Hibernate, have to use this name here
+		// Disabled - superceded by 20220304.33
 		nrmlTable
 				.addForeignKey("20210111.3", "FKRCJOVMUH5KC0O6FVBLE319PYV")
 				.toColumn("RES_ID")
-				.references("HFJ_RESOURCE", "RES_ID");
+				.references("HFJ_RESOURCE", "RES_ID")
+				.doNothing();
 
 		Builder.BuilderWithTableName quantityTable = version.onTable("HFJ_SPIDX_QUANTITY");
 		quantityTable

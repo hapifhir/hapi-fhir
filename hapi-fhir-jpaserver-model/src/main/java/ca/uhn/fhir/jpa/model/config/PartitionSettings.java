@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Model
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -175,5 +175,23 @@ public class PartitionSettings {
 		 * will be managed by the database.
 		 */
 		ALLOWED_UNQUALIFIED,
+	}
+
+	public enum BlockPatientCompartmentUpdateMode {
+		/**
+		 * Resource updates which would change resource's patient compartment are blocked.
+		 */
+		ALWAYS,
+
+		/**
+		 * Resource updates which would change resource's patient compartment are blocked
+		 * when Partition Selection Mode is PATIENT_ID
+		 */
+		DEFAULT,
+
+		/**
+		 * Resource updates which would change resource's patient compartment are allowed.
+		 */
+		NEVER,
 	}
 }

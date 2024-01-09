@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Server - SQL Migration
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -250,6 +250,8 @@ public abstract class BaseTask {
 		return getConnectionProperties().newJdbcTemplate();
 	}
 
+	private final List<ExecuteTaskPrecondition> myPreconditions = new ArrayList<>();
+
 	public void execute() throws SQLException {
 		if (myDoNothing) {
 			ourLog.info("Skipping stubbed task: {}", getDescription());
@@ -257,7 +259,17 @@ public abstract class BaseTask {
 		}
 		if (!myOnlyAppliesToPlatforms.isEmpty()) {
 			if (!myOnlyAppliesToPlatforms.contains(getDriverType())) {
-				ourLog.debug("Skipping task {} as it does not apply to {}", getDescription(), getDriverType());
+				ourLog.info("Skipping task {} as it does not apply to {}", getDescription(), getDriverType());
+				return;
+			}
+		}
+
+		for (ExecuteTaskPrecondition precondition : myPreconditions) {
+			ourLog.debug("precondition to evaluate: {}", precondition);
+			if (!precondition.getPreconditionRunner().get()) {
+				ourLog.info(
+						"Skipping task since one of the preconditions was not met: {}",
+						precondition.getPreconditionReason());
 				return;
 			}
 		}
@@ -303,6 +315,10 @@ public abstract class BaseTask {
 	public BaseTask setDoNothing(boolean theDoNothing) {
 		myDoNothing = theDoNothing;
 		return this;
+	}
+
+	public void addPrecondition(ExecuteTaskPrecondition thePrecondition) {
+		myPreconditions.add(thePrecondition);
 	}
 
 	@Override

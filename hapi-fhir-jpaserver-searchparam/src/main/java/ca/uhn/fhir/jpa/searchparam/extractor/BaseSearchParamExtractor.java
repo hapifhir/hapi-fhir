@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA - Search Parameters
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,12 +41,10 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
-import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.HapiExtensions;
 import ca.uhn.fhir.util.StringUtil;
 import ca.uhn.fhir.util.UrlUtil;
-import ca.uhn.fhir.util.bundle.BundleEntryParts;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Sets;
 import jakarta.annotation.Nonnull;
@@ -59,14 +57,12 @@ import org.apache.commons.text.StringTokenizer;
 import org.fhir.ucum.Pair;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBase;
-import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseEnumeration;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.hl7.fhir.r4.model.IdType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 
@@ -2002,47 +1998,6 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 			myCodeableReferenceConcept = codeableReferenceDef.getChildByName("concept");
 			myCodeableReferenceReference = codeableReferenceDef.getChildByName("reference");
 		}
-	}
-
-	@SuppressWarnings("unchecked")
-	protected final <T extends IBase> T resolveResourceInBundleWithPlaceholderId(Object theAppContext, String theUrl) {
-		/*
-		 * If this is a reference that is a UUID, we must be looking for local
-		 * references within a Bundle
-		 */
-		if (theAppContext instanceof IBaseBundle && isNotBlank(theUrl) && !theUrl.startsWith("#")) {
-			String unqualifiedVersionlessReference;
-			boolean isPlaceholderReference;
-			if (theUrl.startsWith("urn:")) {
-				isPlaceholderReference = true;
-				unqualifiedVersionlessReference = null;
-			} else {
-				isPlaceholderReference = false;
-				unqualifiedVersionlessReference =
-						new IdType(theUrl).toUnqualifiedVersionless().getValue();
-			}
-
-			List<BundleEntryParts> entries = BundleUtil.toListOfEntries(getContext(), (IBaseBundle) theAppContext);
-			for (BundleEntryParts next : entries) {
-				if (next.getResource() != null) {
-					if (isPlaceholderReference) {
-						if (theUrl.equals(next.getUrl())
-								|| theUrl.equals(
-										next.getResource().getIdElement().getValue())) {
-							return (T) next.getResource();
-						}
-					} else {
-						if (unqualifiedVersionlessReference.equals(next.getResource()
-								.getIdElement()
-								.toUnqualifiedVersionless()
-								.getValue())) {
-							return (T) next.getResource();
-						}
-					}
-				}
-			}
-		}
-		return null;
 	}
 
 	@FunctionalInterface

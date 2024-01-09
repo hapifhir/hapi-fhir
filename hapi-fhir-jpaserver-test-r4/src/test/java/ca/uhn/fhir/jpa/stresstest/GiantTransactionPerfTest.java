@@ -397,6 +397,11 @@ public class GiantTransactionPerfTest {
 			throw new UnsupportedOperationException();
 		}
 
+		@Override
+		public void updateNonInlinedContents(byte[] theText, long thePid) {
+			throw new UnsupportedOperationException();
+		}
+
 		@Nonnull
 		@Override
 		public List<ResourceHistoryTable> findAll() {

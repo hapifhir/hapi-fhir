@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -130,6 +130,8 @@ public enum VersionEnum {
 
 	V6_10_0,
 	V6_10_1,
+	V6_10_2,
+	V6_10_3,
 	V6_11_0,
 
 	V7_0_0;

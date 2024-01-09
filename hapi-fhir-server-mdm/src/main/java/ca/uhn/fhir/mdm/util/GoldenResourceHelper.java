@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Master Data Management
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -159,7 +159,7 @@ public class GoldenResourceHelper {
 	private void cloneMDMEidsIntoNewGoldenResource(
 			BaseRuntimeChildDefinition theGoldenResourceIdentifier,
 			IAnyResource theIncomingResource,
-			IBase theNewGoldenResource) {
+			IBaseResource theNewGoldenResource) {
 		String incomingResourceType = myFhirContext.getResourceType(theIncomingResource);
 		String mdmEIDSystem = myMdmSettings.getMdmRules().getEnterpriseEIDSystemForResourceType(incomingResourceType);
 
@@ -182,7 +182,7 @@ public class GoldenResourceHelper {
 					ourLog.debug(
 							"Incoming resource EID System {} matches EID system in the MDM rules.  Copying to Golden Resource.",
 							incomingIdentifierSystemString);
-					ca.uhn.fhir.util.TerserUtil.cloneEidIntoResource(
+					ca.uhn.fhir.util.TerserUtil.cloneIdentifierIntoResource(
 							myFhirContext,
 							theGoldenResourceIdentifier,
 							incomingResourceIdentifier,
@@ -382,7 +382,7 @@ public class GoldenResourceHelper {
 		RuntimeResourceDefinition resourceDefinition = theFhirContext.getResourceDefinition(theResourceToCloneInto);
 		// hapi has 2 metamodels: for children and types
 		BaseRuntimeChildDefinition resourceIdentifier = resourceDefinition.getChildByName(FIELD_NAME_IDENTIFIER);
-		ca.uhn.fhir.util.TerserUtil.cloneEidIntoResource(
+		ca.uhn.fhir.util.TerserUtil.cloneIdentifierIntoResource(
 				theFhirContext,
 				resourceIdentifier,
 				IdentifierUtil.toId(theFhirContext, theEid),

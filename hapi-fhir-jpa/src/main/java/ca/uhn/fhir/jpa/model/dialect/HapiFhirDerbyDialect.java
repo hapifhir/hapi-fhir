@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Model
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,16 +20,20 @@
 package ca.uhn.fhir.jpa.model.dialect;
 
 import org.hibernate.dialect.DatabaseVersion;
-import org.hibernate.dialect.SQLServerDialect;
+import org.hibernate.dialect.DerbyDialect;
 
 /**
- * Dialect for MS SQL Server database.
- * Minimum version: 12.0 (SQL Server 2014 and Azure SQL Database)
+ * Dialect for Derby database.
+ * Minimum version: 10.14.2
  */
-public class HapiFhirSQLServerDialect extends SQLServerDialect {
+public class HapiFhirDerbyDialect extends DerbyDialect {
 
-	public HapiFhirSQLServerDialect() {
-		super(DatabaseVersion.make(11));
+	public HapiFhirDerbyDialect(DatabaseVersion theDatabaseVersion) {
+		super(theDatabaseVersion);
+	}
+
+	public HapiFhirDerbyDialect() {
+		super(DatabaseVersion.make(10, 14, 2));
 	}
 
 	/**

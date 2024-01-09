@@ -1,6 +1,7 @@
 package ca.uhn.fhir.tinder.ddl;
 
 import ca.uhn.fhir.jpa.util.ISequenceValueMassager;
+import ca.uhn.fhir.util.IoUtil;
 import jakarta.annotation.Nonnull;
 import jakarta.persistence.Entity;
 import jakarta.persistence.MappedSuperclass;
@@ -29,6 +30,7 @@ import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.core.type.filter.AnnotationTypeFilter;
 
+import java.io.Closeable;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -125,19 +127,8 @@ public class DdlGeneratorHibernate61 {
 
 			writeContentsToFile(nextDialect.getAppendFile(), classLoader, outputFile);
 		}
-	}
 
-	private static void writeContentsToFile(String prependFile, ClassLoader classLoader, File outputFile)
-			throws MojoFailureException {
-		if (isNotBlank(prependFile)) {
-			ResourceLoader loader = new DefaultResourceLoader(classLoader);
-			Resource resource = loader.getResource(prependFile);
-			try (Writer w = new FileWriter(outputFile, true)) {
-				w.append(resource.getContentAsString(StandardCharsets.UTF_8));
-			} catch (IOException e) {
-				throw new MojoFailureException("Failed to write to file " + outputFile + ": " + e.getMessage(), e);
-			}
-		}
+		IoUtil.closeQuietly(connectionProvider);
 	}
 
 	public void setProject(MavenProject theProject) {
@@ -204,18 +195,64 @@ public class DdlGeneratorHibernate61 {
 	 * here. The schema export doesn't actually touch this DB, so it doesn't
 	 * matter that it doesn't correlate to the specified dialect.
 	 */
-	private static class FakeConnectionConnectionProvider extends UserSuppliedConnectionProviderImpl {
+	private static class FakeConnectionConnectionProvider extends UserSuppliedConnectionProviderImpl
+			implements Closeable {
 		private static final long serialVersionUID = 4147495169899817244L;
+		private Connection connection;
 
-		@Override
-		public Connection getConnection() throws SQLException {
-			ourLog.trace("Using internal driver: {}", org.h2.Driver.class);
-			return DriverManager.getConnection("jdbc:h2:mem:tmp", "sa", "sa");
+		public FakeConnectionConnectionProvider() {
+			try {
+				connection = DriverManager.getConnection("jdbc:h2:mem:tmp", "sa", "sa");
+			} catch (SQLException e) {
+				connection = null;
+				return;
+			}
+
+			/*
+			 * The Oracle Dialect tries to query for any existing sequences, so we need to supply
+			 * a fake empty table to answer that query.
+			 */
+			try {
+				connection.setAutoCommit(true);
+				connection
+						.prepareStatement("create table all_sequences (PID bigint not null, primary key (PID))")
+						.execute();
+			} catch (SQLException e) {
+				ourLog.error("Failed to create sequences table", e);
+			}
 		}
 
 		@Override
-		public void closeConnection(Connection conn) throws SQLException {
-			conn.close();
+		public Connection getConnection() {
+			ourLog.trace("Using internal driver: {}", org.h2.Driver.class);
+			return connection;
+		}
+
+		@Override
+		public void closeConnection(Connection conn) {
+			// ignore
+		}
+
+		@Override
+		public void close() throws IOException {
+			try {
+				connection.close();
+			} catch (SQLException e) {
+				throw new IOException(e);
+			}
+		}
+	}
+
+	private static void writeContentsToFile(String prependFile, ClassLoader classLoader, File outputFile)
+			throws MojoFailureException {
+		if (isNotBlank(prependFile)) {
+			ResourceLoader loader = new DefaultResourceLoader(classLoader);
+			Resource resource = loader.getResource(prependFile);
+			try (Writer w = new FileWriter(outputFile, true)) {
+				w.append(resource.getContentAsString(StandardCharsets.UTF_8));
+			} catch (IOException e) {
+				throw new MojoFailureException("Failed to write to file " + outputFile + ": " + e.getMessage(), e);
+			}
 		}
 	}
 }

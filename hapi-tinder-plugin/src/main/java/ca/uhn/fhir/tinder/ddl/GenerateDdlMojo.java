@@ -28,13 +28,13 @@ public class GenerateDdlMojo extends AbstractMojo {
 	private static final Logger ourLog = LoggerFactory.getLogger(GenerateDdlMojo.class);
 
 	@Parameter
-	private List<String> packageNames;
+	List<String> packageNames;
 
 	@Parameter
-	private List<Dialect> dialects;
+	List<Dialect> dialects;
 
 	@Parameter
-	private String outputDirectory;
+	String outputDirectory;
 
 	@Parameter(defaultValue = "${project}", readonly = true)
 	private transient MavenProject project;
@@ -70,18 +70,20 @@ public class GenerateDdlMojo extends AbstractMojo {
 
 	public static void main(String[] args) throws MojoExecutionException, MojoFailureException {
 		/*
-		 * Note, to execute this, add the following snippet to this module's POM. The whole project won't work with
+		 * Note, to execute this for real entities, add the following snippet to this module's POM. The whole project won't work with
 		 * that added, but you can add it temporarily in order to debug this in IJ:
 		 * 		<dependency>
 		 * 			<groupId>ca.uhn.hapi.fhir</groupId>
 		 * 			<artifactId>hapi-fhir-jpaserver-model</artifactId>
 		 * 			<version>${project.version}</version>
 		 * 		</dependency>
+		 *
+		 * Alternately, there is a unit test with fake entities that also runs this class.
 		 */
 		GenerateDdlMojo m = new GenerateDdlMojo();
 		m.packageNames = List.of("ca.uhn.fhir.jpa.model.entity");
 		m.outputDirectory = "hapi-tinder-plugin/target";
-		m.dialects = List.of(new Dialect("ca.uhn.fhir.jpa.model.dialect.HapiFhirH2Dialect", "h2.sql"));
+		m.dialects = List.of(new Dialect("ca.uhn.fhir.jpa.model.dialect.HapiFhirPostgresDialect", "postgres.sql"));
 		m.execute();
 	}
 

@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Model
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,16 +20,20 @@
 package ca.uhn.fhir.jpa.model.dialect;
 
 import org.hibernate.dialect.DatabaseVersion;
-import org.hibernate.dialect.MySQLDialect;
+import org.hibernate.dialect.OracleDialect;
 
 /**
- * Dialect for MySQL database.
- * Minimum version: 5.7
+ * Dialect for Oracle database.
+ * Minimum version: 12.2 (Oracle 12c R2)
  */
-public class HapiFhirMySQLDialect extends MySQLDialect {
+public class HapiFhirOracleDialect extends OracleDialect {
 
-	public HapiFhirMySQLDialect() {
-		super(DatabaseVersion.make(5, 7));
+	public HapiFhirOracleDialect(DatabaseVersion theDatabaseVersion) {
+		super(theDatabaseVersion);
+	}
+
+	public HapiFhirOracleDialect() {
+		super(DatabaseVersion.make(12, 2));
 	}
 
 	/**
