@@ -9,10 +9,8 @@ import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.provider.HashMapResourceProvider;
 import ca.uhn.fhir.test.utilities.HttpClientExtension;
-import ca.uhn.fhir.test.utilities.JettyUtil;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.TestUtil;
 import org.apache.commons.io.IOUtils;
@@ -21,35 +19,30 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.ee10.servlet.ServletHandler;
-import org.eclipse.jetty.ee10.servlet.ServletHolder;
+import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.Consent;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.MolecularSequence;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.StringType;
+import org.hl7.fhir.r4.model.Type;
 import org.hl7.fhir.r4.model.UriType;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import jakarta.servlet.ServletException;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
 import java.nio.charset.StandardCharsets;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -59,11 +52,27 @@ import static org.junit.jupiter.api.Assertions.fail;
 public class OperationGenericServer2R4Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(OperationGenericServer2R4Test.class);
 	private static final FhirContext ourCtx = FhirContext.forR4Cached();
+	private static final String TEST_OPERATION_NAME = "operation-with-nested-resources";
+	private static final String REQUESTED_PATIENT_ID = "requested-patient-id";
+	private static final String REQUESTED_CONSENT_ID = "requested-consent-id";
+	public static final String EXPORT_PARAM_NAME = "export";
+	public static final String MATCH_PARAM_NAME = "match";
+	public static final String SERVER_ID_PARAM_NAME = "serverId";
+	public static final String PATIENT_SUB_PARAM_NAME = "patient";
+	public static final String CONSENT_SUB_PARAM_NAME = "Consent";
+	private static final String EXPORTED_PATIENT_ID = "exported-patient-id";
+	private static final String EXPORTED_CONSENT_ID = "exported-consent-id";
+	private static final String MATCH_SUB_PARAM_NAME = "match-sub-param-name";
+	private static final String MATCH_SUB_PARAM_VALUE = "match-sub-param-value";
+	private static final String SERVER_ID_PARAM_VALUE = "server-id-param-value";
 	private static IdType ourLastId;
 	private static Object ourLastParam1;
 	private static Object ourLastParam2;
 	private static Object ourLastParam3;
 	private static Parameters ourLastResourceParam;
+	private static Parameters ourExportParameters;
+	private static Parameters ourMatchParameters;
+	private static String ourServerId;
 
 	@RegisterExtension
 	public RestfulServerExtension ourServer = new RestfulServerExtension(ourCtx)
@@ -74,7 +83,6 @@ public class OperationGenericServer2R4Test {
 
 	@RegisterExtension
 	private HttpClientExtension ourClient = new HttpClientExtension();
-
 
 	@BeforeEach
 	public void before() {
@@ -140,6 +148,90 @@ public class OperationGenericServer2R4Test {
 			assertEquals("sys", param2.getSystem());
 			assertEquals("val", param2.getCode());
 			assertEquals("dis", param2.getDisplay());
+		}
+
+	}
+
+	@Test
+	public void testResourceWithinParameters() throws Exception {
+
+		@SuppressWarnings("unused")
+		class NestedPatientProvider implements IResourceProvider {
+
+			@Override
+			public Class<Patient> getResourceType() {
+				return Patient.class;
+			}
+
+			@Operation(name = TEST_OPERATION_NAME)
+			public Parameters testOperation(
+				 @OperationParam(name = EXPORT_PARAM_NAME, typeName = "Parameters") IAnyResource theExportParameters,
+				 @OperationParam(name = MATCH_PARAM_NAME, typeName = "Parameters") IAnyResource theMatchParameters,
+				 @OperationParam(name = SERVER_ID_PARAM_NAME, typeName = "string") IPrimitiveType<String> theServerId
+			) {
+
+				ourExportParameters = (Parameters) theExportParameters;
+				ourMatchParameters = (Parameters) theMatchParameters;
+				ourServerId = theServerId.getValueAsString();
+
+				Patient requestExportPatient = (Patient)ourExportParameters.getParameter(PATIENT_SUB_PARAM_NAME).getResource();
+				Consent requestMatchConsent = (Consent) ourExportParameters.getParameter(CONSENT_SUB_PARAM_NAME).getResource();
+
+				Parameters retVal = new Parameters();
+				retVal.addParameter().setName(REQUESTED_PATIENT_ID).setValue(new StringType(requestExportPatient.getId()));
+				retVal.addParameter().setName(REQUESTED_CONSENT_ID).setValue(new StringType(requestMatchConsent.getId()));
+				return retVal;
+			}
+
+		}
+
+		NestedPatientProvider provider = new NestedPatientProvider();
+		ourServer.registerProvider(provider);
+
+		Parameters exportParameters = new Parameters();
+		Patient exportedPatient = new Patient();
+		exportedPatient.setId(EXPORTED_PATIENT_ID);
+		Consent exportedConsent = new Consent();
+		exportedConsent.setId(EXPORTED_CONSENT_ID);
+		exportParameters.addParameter().setName(PATIENT_SUB_PARAM_NAME).setResource(exportedPatient);
+		exportParameters.addParameter().setName(CONSENT_SUB_PARAM_NAME).setResource(exportedConsent);
+
+		Parameters matchParameters = new Parameters();
+		matchParameters.addParameter().setName(MATCH_SUB_PARAM_NAME).setValue(new CodeType(MATCH_SUB_PARAM_VALUE));
+
+		Parameters topParameters = new Parameters();
+		topParameters.addParameter().setName(EXPORT_PARAM_NAME).setResource(exportParameters);
+		topParameters.addParameter().setName(MATCH_PARAM_NAME).setResource(matchParameters);
+		topParameters.addParameter().setName(SERVER_ID_PARAM_NAME).setValue(new StringType(SERVER_ID_PARAM_VALUE));
+
+		String requestString = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(topParameters);
+		ourLog.info("REQUEST: {}", requestString);
+
+		HttpPost httpPost = new HttpPost(ourServer.getBaseUrl() + "/Patient/$" + TEST_OPERATION_NAME);
+		httpPost.setEntity(new StringEntity(requestString, ContentType.create(Constants.CT_FHIR_JSON, "UTF-8")));
+		try (CloseableHttpResponse status = ourClient.execute(httpPost)) {
+			assertEquals(200, status.getStatusLine().getStatusCode());
+			String responseString = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
+			ourLog.info("RESPONSE: {}", responseString);
+			status.getEntity().getContent().close();
+
+			// test response
+			Parameters responseParameters = ourCtx.newJsonParser().parseResource(Parameters.class, responseString);
+
+			Parameters.ParametersParameterComponent patientParameter = responseParameters.getParameter().get(0);
+			assertEquals(REQUESTED_PATIENT_ID, patientParameter.getName());
+			assertEquals("Patient/" + EXPORTED_PATIENT_ID, patientParameter.getValue().primitiveValue());
+			Parameters.ParametersParameterComponent consentParameter = responseParameters.getParameter().get(1);
+			assertEquals(REQUESTED_CONSENT_ID, consentParameter.getName());
+			assertEquals("Consent/" + EXPORTED_CONSENT_ID, consentParameter.getValue().primitiveValue());
+
+			// test captured statics
+
+			Patient capturedPatientSubParam = (Patient) ourExportParameters.getParameter(PATIENT_SUB_PARAM_NAME).getResource();
+			assertEquals("Patient/" + EXPORTED_PATIENT_ID, capturedPatientSubParam.getId());
+			Consent capturedConsentSubParam = (Consent) ourExportParameters.getParameter(CONSENT_SUB_PARAM_NAME).getResource();
+			assertEquals("Consent/" + EXPORTED_CONSENT_ID, capturedConsentSubParam.getId());
+			assertEquals(MATCH_SUB_PARAM_VALUE, ourMatchParameters.getParameter(MATCH_SUB_PARAM_NAME).getValue().primitiveValue());
 		}
 
 	}
