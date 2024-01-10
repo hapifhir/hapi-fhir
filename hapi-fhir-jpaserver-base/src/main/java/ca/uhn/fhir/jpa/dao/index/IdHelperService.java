@@ -26,7 +26,6 @@ import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.model.PersistentIdToForcedIdMap;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
-import ca.uhn.fhir.jpa.dao.mdm.MdmLinkDaoJpaImpl;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.cross.IResourceLookup;
 import ca.uhn.fhir.jpa.model.cross.JpaResourceLookup;
@@ -35,7 +34,6 @@ import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.search.builder.SearchBuilder;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.jpa.util.QueryChunker;
-import ca.uhn.fhir.mdm.log.Logs;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.server.storage.BaseResourcePersistentId;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -226,8 +224,10 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 				// is a forced id
 				// we must resolve!
 				if (myStorageSettings.isDeleteEnabled()) {
-					// LUKETODO:  if we use the OLD interceptor code, we get 1327, 1328, 1329, so, Patient tenant A, tenant B, and GOLDEN
-					// LUKETODO:  if we use the NEW interceptor code, we get 1327, 1329, so, Patient tenant A, and GOLDEN
+					// LUKETODO:  if we use the OLD interceptor code, we get 1327, 1328, 1329, so, Patient tenant A,
+					// tenant B, and GOLDEN
+					// LUKETODO:  if we use the NEW interceptor code, we get 1327, 1329, so, Patient tenant A, and
+					// GOLDEN
 					// LUKETODO:  in both cases, we fail on ID 1329, the GOLDEN patient
 					retVal = resolveResourceIdentity(theRequestPartitionId, theResourceType, id, theExcludeDeleted)
 							.getPersistentId();
@@ -565,11 +565,11 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 					} else {
 						// LUKETODO:  this query returns NOTHING
 						/*
-						 SELECT t.RES_TYPE, t.RES_ID, t.FHIR_ID, t.RES_DELETED_AT
-						 FROM HFJ_RESOURCE t
-						 WHERE t.RES_TYPE = 'Patient' AND t.FHIR_ID IN ( 1329 ) AND
-								 t.PARTITION_ID IN ( 123 );
-						 */
+						SELECT t.RES_TYPE, t.RES_ID, t.FHIR_ID, t.RES_DELETED_AT
+						FROM HFJ_RESOURCE t
+						WHERE t.RES_TYPE = 'Patient' AND t.FHIR_ID IN ( 1329 ) AND
+							t.PARTITION_ID IN ( 123 );
+						*/
 						views = myResourceTableDao.findAndResolveByForcedIdWithNoTypeInPartition(
 								nextResourceType, nextIds, requestPartitionId.getPartitionIds(), theExcludeDeleted);
 					}

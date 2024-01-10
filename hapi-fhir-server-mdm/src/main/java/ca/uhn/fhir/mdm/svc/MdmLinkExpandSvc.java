@@ -97,7 +97,7 @@ public class MdmLinkExpandSvc implements IMdmLinkExpandSvc {
 			RequestPartitionId theRequestPartitionId, IResourcePersistentId<?> theSourceResourcePid) {
 		ourLog.debug("About to expand source resource with PID {}", theSourceResourcePid);
 		final List<MdmPidTuple<?>> goldenPidSourcePidTuples =
-			myMdmLinkDao.expandPidsBySourcePidAndMatchResult(theSourceResourcePid, MdmMatchResultEnum.MATCH);
+				myMdmLinkDao.expandPidsBySourcePidAndMatchResult(theSourceResourcePid, MdmMatchResultEnum.MATCH);
 
 		return flattenPidTuplesToSet(theRequestPartitionId, theSourceResourcePid, goldenPidSourcePidTuples);
 	}
@@ -111,7 +111,8 @@ public class MdmLinkExpandSvc implements IMdmLinkExpandSvc {
 	 * @return A set of strings representing the FHIR ids of the expanded resources.
 	 */
 	@Override
-	public Set<String> expandMdmByGoldenResourceId(RequestPartitionId theRequestPartitionId, IResourcePersistentId<?> theGoldenResourcePid) {
+	public Set<String> expandMdmByGoldenResourceId(
+			RequestPartitionId theRequestPartitionId, IResourcePersistentId<?> theGoldenResourcePid) {
 		ourLog.debug("About to expand golden resource with PID {}", theGoldenResourcePid);
 		final List<MdmPidTuple<?>> goldenPidSourcePidTuples = myMdmLinkDao.expandPidsByGoldenResourcePidAndMatchResult(
 				theGoldenResourcePid, MdmMatchResultEnum.MATCH);
@@ -131,7 +132,7 @@ public class MdmLinkExpandSvc implements IMdmLinkExpandSvc {
 			RequestPartitionId theRequestPartitionId, IResourcePersistentId<?> theGoldenResourcePid) {
 		ourLog.debug("About to expand golden resource with PID {}", theGoldenResourcePid);
 		final List<MdmPidTuple<?>> goldenPidSourcePidTuples = myMdmLinkDao.expandPidsByGoldenResourcePidAndMatchResult(
-			theGoldenResourcePid, MdmMatchResultEnum.MATCH);
+				theGoldenResourcePid, MdmMatchResultEnum.MATCH);
 		return flattenPidTuplesToSet(theRequestPartitionId, theGoldenResourcePid, goldenPidSourcePidTuples);
 	}
 
@@ -145,16 +146,18 @@ public class MdmLinkExpandSvc implements IMdmLinkExpandSvc {
 
 	@Nonnull
 	public Set<String> flattenPidTuplesToSet(
-		RequestPartitionId theRequestPartitionId, IResourcePersistentId<?> theInitialPid, List<MdmPidTuple<?>> theGoldenPidSourcePidTuples) {
+			RequestPartitionId theRequestPartitionId,
+			IResourcePersistentId<?> theInitialPid,
+			List<MdmPidTuple<?>> theGoldenPidSourcePidTuples) {
 		// LUKETODO:  should conditional logic be here?
 		// LUKETODO:  filter out golden partition ID vs. request partition ID
 		final Set<IResourcePersistentId> flattenedPids = theGoldenPidSourcePidTuples.stream()
-			.map(tuple -> flattenTuple(theRequestPartitionId, tuple))
-			.flatMap(Collection::stream)
-			.collect(Collectors.toUnmodifiableSet());
-		 final Set<String> resourceIds = myIdHelperService.translatePidsToFhirResourceIds(flattenedPids);
-		 ourLog.debug("Pid {} has been expanded to [{}]", theInitialPid, String.join(",", resourceIds));
-		 return resourceIds;
+				.map(tuple -> flattenTuple(theRequestPartitionId, tuple))
+				.flatMap(Collection::stream)
+				.collect(Collectors.toUnmodifiableSet());
+		final Set<String> resourceIds = myIdHelperService.translatePidsToFhirResourceIds(flattenedPids);
+		ourLog.debug("Pid {} has been expanded to [{}]", theInitialPid, String.join(",", resourceIds));
+		return resourceIds;
 	}
 
 	@Nonnull
@@ -162,8 +165,8 @@ public class MdmLinkExpandSvc implements IMdmLinkExpandSvc {
 		if (theRequestPartitionId.isAllPartitions()) {
 			return Set.of(theTuple.getSourcePid(), theTuple.getGoldenPid());
 		}
-		if (theRequestPartitionId.getPartitionIds().contains(theTuple.getGoldenPartitionId()) &&
-			theRequestPartitionId.getPartitionIds().contains(theTuple.getSourcePartitionId())) {
+		if (theRequestPartitionId.getPartitionIds().contains(theTuple.getGoldenPartitionId())
+				&& theRequestPartitionId.getPartitionIds().contains(theTuple.getSourcePartitionId())) {
 			return Set.of(theTuple.getSourcePid(), theTuple.getGoldenPid());
 		}
 		if (theRequestPartitionId.getPartitionIds().contains(theTuple.getGoldenPartitionId())) {
