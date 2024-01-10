@@ -33,11 +33,7 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
@@ -215,7 +211,7 @@ public class RequestPartitionId implements IModelJson {
 	}
 
 	public List<Integer> getPartitionIdsWithoutDefault() {
-		return getPartitionIds().stream().filter(t -> t != null).collect(Collectors.toList());
+		return getPartitionIds().stream().filter(Objects::nonNull).collect(Collectors.toList());
 	}
 
 	@Nullable
