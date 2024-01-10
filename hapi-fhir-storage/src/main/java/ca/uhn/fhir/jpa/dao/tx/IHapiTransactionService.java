@@ -107,5 +107,9 @@ public interface IHapiTransactionService {
 		<T> T execute(Callable<T> theTask);
 
 		<T> T execute(@Nonnull TransactionCallback<T> callback);
+
+		default <T> T read(Callable<T> theCallback) {
+			return execute(theCallback);
+		}
 	}
 }
