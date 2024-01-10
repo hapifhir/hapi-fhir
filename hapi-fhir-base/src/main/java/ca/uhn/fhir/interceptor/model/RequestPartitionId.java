@@ -130,6 +130,9 @@ public class RequestPartitionId implements IModelJson {
 		if (hasPartitionNames()) {
 			b.append("names", getPartitionNames());
 		}
+		if (myAllPartitions) {
+			b.append("allPartitions", myAllPartitions);
+		}
 		return b.build();
 	}
 
