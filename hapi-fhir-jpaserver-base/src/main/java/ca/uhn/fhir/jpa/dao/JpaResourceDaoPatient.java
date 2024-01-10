@@ -46,7 +46,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Arrays;
 import java.util.Collections;
 
 public class JpaResourceDaoPatient<T extends IBaseResource> extends BaseHapiFhirResourceDao<T>
@@ -57,6 +56,8 @@ public class JpaResourceDaoPatient<T extends IBaseResource> extends BaseHapiFhir
 	@Autowired
 	private IRequestPartitionHelperSvc myPartitionHelperSvc;
 
+	// LUKETODO:  add a second method hard-coding mdmExpand to false
+	// LUKETODO;  once hapi and cdr and merged delete that new method
 	private IBundleProvider doEverythingOperation(
 			TokenOrListParam theIds,
 			IPrimitiveType<Integer> theCount,
@@ -67,6 +68,7 @@ public class JpaResourceDaoPatient<T extends IBaseResource> extends BaseHapiFhir
 			StringAndListParam theNarrative,
 			StringAndListParam theFilter,
 			StringAndListParam theTypes,
+			Boolean theMdmExpand,
 			RequestDetails theRequest) {
 		SearchParameterMap paramMap = new SearchParameterMap();
 		if (theCount != null) {
@@ -95,11 +97,8 @@ public class JpaResourceDaoPatient<T extends IBaseResource> extends BaseHapiFhir
 		paramMap.setSort(theSort);
 		paramMap.setLastUpdated(theLastUpdated);
 		if (theIds != null) {
-			if (theRequest.getParameters().containsKey("_mdm")) {
-				String[] paramVal = theRequest.getParameters().get("_mdm");
-				if (Arrays.asList(paramVal).contains("true")) {
-					theIds.getValuesAsQueryTokens().forEach(param -> param.setMdmExpand(true));
-				}
+			if (theMdmExpand) {
+				theIds.getValuesAsQueryTokens().forEach(param -> param.setMdmExpand(true));
 			}
 			paramMap.add("_id", theIds);
 		}
@@ -161,6 +160,7 @@ public class JpaResourceDaoPatient<T extends IBaseResource> extends BaseHapiFhir
 				theQueryParams.getNarrative(),
 				theQueryParams.getFilter(),
 				theQueryParams.getTypes(),
+				theQueryParams.getMdmExpand(),
 				theRequestDetails);
 	}
 
@@ -181,6 +181,7 @@ public class JpaResourceDaoPatient<T extends IBaseResource> extends BaseHapiFhir
 				theQueryParams.getNarrative(),
 				theQueryParams.getFilter(),
 				theQueryParams.getTypes(),
+				theQueryParams.getMdmExpand(),
 				theRequestDetails);
 	}
 }
