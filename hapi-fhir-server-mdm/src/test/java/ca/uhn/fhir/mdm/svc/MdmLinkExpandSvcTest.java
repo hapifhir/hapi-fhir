@@ -91,7 +91,6 @@ class MdmLinkExpandSvcTest {
 	@MethodSource("partitions")
 	void expandMdmBySourceResourcePid(RequestPartitionId theRequestPartitionId) {
 		final JpaPid jpaPid = JpaPid.fromId(123L);
-		// LUKETODO:  WTF:  Generics?
 		when(myIMdmLinkDao.expandPidsBySourcePidAndMatchResult(jpaPid, MdmMatchResultEnum.MATCH)).thenReturn(List.of(
 			JPA_PID_MDM_PID_TUPLE_1,
 			JPA_PID_MDM_PID_TUPLE_1,

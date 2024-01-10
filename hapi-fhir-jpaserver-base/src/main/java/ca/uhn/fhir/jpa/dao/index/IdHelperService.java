@@ -214,7 +214,6 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 
 		Map<String, JpaPid> retVals = new HashMap<>();
 		for (String id : theIds) {
-			ourLog.info("5498: IdHelperService id to resolve: {}", id);
 			JpaPid retVal;
 			if (!idRequiresForcedId(id)) {
 				// is already a PID
@@ -224,11 +223,6 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 				// is a forced id
 				// we must resolve!
 				if (myStorageSettings.isDeleteEnabled()) {
-					// LUKETODO:  if we use the OLD interceptor code, we get 1327, 1328, 1329, so, Patient tenant A,
-					// tenant B, and GOLDEN
-					// LUKETODO:  if we use the NEW interceptor code, we get 1327, 1329, so, Patient tenant A, and
-					// GOLDEN
-					// LUKETODO:  in both cases, we fail on ID 1329, the GOLDEN patient
 					retVal = resolveResourceIdentity(theRequestPartitionId, theResourceType, id, theExcludeDeleted)
 							.getPersistentId();
 					retVals.put(id, retVal);
@@ -563,13 +557,6 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 								requestPartitionId.getPartitionIdsWithoutDefault(),
 								theExcludeDeleted);
 					} else {
-						// LUKETODO:  this query returns NOTHING
-						/*
-						SELECT t.RES_TYPE, t.RES_ID, t.FHIR_ID, t.RES_DELETED_AT
-						FROM HFJ_RESOURCE t
-						WHERE t.RES_TYPE = 'Patient' AND t.FHIR_ID IN ( 1329 ) AND
-							t.PARTITION_ID IN ( 123 );
-						*/
 						views = myResourceTableDao.findAndResolveByForcedIdWithNoTypeInPartition(
 								nextResourceType, nextIds, requestPartitionId.getPartitionIds(), theExcludeDeleted);
 					}

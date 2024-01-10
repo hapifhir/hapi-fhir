@@ -164,8 +164,6 @@ public class MdmLinkExpandSvc implements IMdmLinkExpandSvc {
 			RequestPartitionId theRequestPartitionId,
 			IResourcePersistentId<?> theInitialPid,
 			List<MdmPidTuple<?>> theGoldenPidSourcePidTuples) {
-		// LUKETODO:  should conditional logic be here?
-		// LUKETODO:  filter out golden partition ID vs. request partition ID
 		final Set<IResourcePersistentId> flattenedPids = theGoldenPidSourcePidTuples.stream()
 				.map(tuple -> flattenTuple(theRequestPartitionId, tuple))
 				.flatMap(Collection::stream)

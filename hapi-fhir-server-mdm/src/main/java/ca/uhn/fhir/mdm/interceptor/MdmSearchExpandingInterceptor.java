@@ -68,7 +68,6 @@ public class MdmSearchExpandingInterceptor {
 	@Hook(Pointcut.STORAGE_PRESEARCH_REGISTERED)
 	public void hook(RequestDetails theRequestDetails, SearchParameterMap theSearchParameterMap) {
 		if (myStorageSettings.isAllowMdmExpansion()) {
-			// LUKETODO:  is this right?  should we really be passing null?
 			final RequestDetails requestDetailsToUse =
 					theRequestDetails == null ? new SystemRequestDetails() : theRequestDetails;
 			final RequestPartitionId requestPartitionId =

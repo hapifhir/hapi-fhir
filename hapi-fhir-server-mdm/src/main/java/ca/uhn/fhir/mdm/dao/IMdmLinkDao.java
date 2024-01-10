@@ -110,40 +110,4 @@ public interface IMdmLinkDao<P extends IResourcePersistentId, M extends IMdmLink
 	default List<MdmLinkWithRevision<M>> getHistoryForIds(MdmHistorySearchParameters theMdmHistorySearchParameters) {
 		throw new UnsupportedOperationException(Msg.code(2299) + "not yet implemented");
 	}
-
-	// LUKETODO:  javadoc
-	default List<MdmPidTuple<P>> expandPidsBySourcePidAndMatchResultInPartitionNull(
-			P theSourcePid, MdmMatchResultEnum theMdmMatchResultEnum) {
-		throw new UnsupportedOperationException("Method not supported on platform");
-	}
-
-	// LUKETODO:  javadoc
-	default List<MdmPidTuple<P>> expandPidsBySourcePidAndMatchResultInPartitionIdsOrNullPartition(
-			List<Integer> thePartitionIdsWithoutDefault, P theSourcePid, MdmMatchResultEnum theMdmMatchResultEnum) {
-		throw new UnsupportedOperationException("Method not supported on platform");
-	}
-
-	// LUKETODO:  javadoc
-	default List<MdmPidTuple<P>> expandPidsBySourcePidAndMatchResultInPartitionIds(
-			List<Integer> thePartitionIds, P theSourceResourcePid, MdmMatchResultEnum theMdmMatchResultEnum) {
-		throw new UnsupportedOperationException("Method not supported on platform");
-	}
-
-	// LUKETODO:  javadoc
-	default List<MdmPidTuple<P>> expandPidsByGoldenPidAndMatchResultInPartitionNull(
-			P theGoldenResourcePid, MdmMatchResultEnum mdmMatchResultEnum) {
-		throw new UnsupportedOperationException("Method not supported on platform");
-	}
-
-	// LUKETODO:  javadoc
-	default List<MdmPidTuple<P>> expandPidsByGoldenResourcePidAndMatchResultInPartitionIdsOrNullPartition(
-			List<Integer> partitionIdsWithoutDefault, P theGoldenResourcePid, MdmMatchResultEnum mdmMatchResultEnum) {
-		throw new UnsupportedOperationException("Method not supported on platform");
-	}
-
-	// LUKETODO:  javadoc
-	default List<MdmPidTuple<P>> expandPidsByGoldenResourcePidAndMatchResultInPartitionIds(
-			List<Integer> partitionIds, P theGoldenResourcePid, MdmMatchResultEnum mdmMatchResultEnum) {
-		throw new UnsupportedOperationException("Method not supported on platform");
-	}
 }

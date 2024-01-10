@@ -23,15 +23,14 @@ import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import jakarta.annotation.Nullable;
 
 public class MdmPidTuple<T extends IResourcePersistentId> {
-	// LUKETODO: add the source partition ID and the golden partition ID
 	private final T myGoldenPid;
 	private final T mySourcePid;
 
 	@Nullable
-	private Integer myGoldenPartitionId;
+	private final Integer myGoldenPartitionId;
 
 	@Nullable
-	private Integer mySourcePartitionId;
+	private final Integer mySourcePartitionId;
 
 	private MdmPidTuple(
 			T theGoldenPid,

@@ -62,7 +62,7 @@ public final class PatientEverythingParameters {
 					"Filter the resources to return only resources matching the given _type filter (note that this filter is applied only to results which link to the given patient, not to the patient itself or to supporting resources linked to by the matched resources)")
 	private StringAndListParam myTypes;
 
-	@Description(shortDefinition = "TODO:  proper description")
+	@Description(shortDefinition = "If set, trigger an MDM expansion of identifiers corresponding to the resources.")
 	private Boolean myMdmExpand;
 
 	public IPrimitiveType<Integer> getCount() {
@@ -101,10 +101,6 @@ public final class PatientEverythingParameters {
 		return myMdmExpand;
 	}
 
-	public void setMdmExpand(Boolean myMdmExpand) {
-		this.myMdmExpand = myMdmExpand;
-	}
-
 	public void setCount(IPrimitiveType<Integer> theCount) {
 		this.myCount = theCount;
 	}
@@ -135,5 +131,9 @@ public final class PatientEverythingParameters {
 
 	public void setTypes(StringAndListParam theTypes) {
 		this.myTypes = theTypes;
+	}
+
+	public void setMdmExpand(Boolean myMdmExpand) {
+		this.myMdmExpand = myMdmExpand;
 	}
 }

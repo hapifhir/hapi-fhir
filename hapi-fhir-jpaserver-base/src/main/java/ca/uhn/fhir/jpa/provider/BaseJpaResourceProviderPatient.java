@@ -115,11 +115,7 @@ public abstract class BaseJpaResourceProviderPatient<T extends IBaseResource> ex
 			@Description(
 							shortDefinition =
 									"Filter the resources to return only resources matching the given _type filter (note that this filter is applied only to results which link to the given patient, not to the patient itself or to supporting resources linked to by the matched resources)")
-					@OperationParam(
-							name = "_mdm", // LUKETODO:  constant
-							min = 0,
-							max = 1,
-							typeName = "boolean")
+					@OperationParam(name = Constants.PARAM_MDM, min = 0, max = 1, typeName = "boolean")
 					IPrimitiveType<Boolean> theMdmExpand,
 			@Sort SortSpec theSortSpec,
 			RequestDetails theRequestDetails) {
@@ -135,8 +131,7 @@ public abstract class BaseJpaResourceProviderPatient<T extends IBaseResource> ex
 			everythingParams.setNarrative(toStringAndList(theNarrative));
 			everythingParams.setFilter(toStringAndList(theFilter));
 			everythingParams.setTypes(toStringAndList(theTypes));
-			everythingParams.setMdmExpand(
-					theMdmExpand == null ? Boolean.FALSE : theMdmExpand.getValue()); // LUKETODO:  check for null
+			everythingParams.setMdmExpand(resolveNullValue(theMdmExpand));
 
 			return ((IFhirResourceDaoPatient<?>) getDao())
 					.patientInstanceEverything(theServletRequest, theRequestDetails, everythingParams, theId);
@@ -271,5 +266,9 @@ public abstract class BaseJpaResourceProviderPatient<T extends IBaseResource> ex
 			return null;
 		}
 		return retVal;
+	}
+
+	private Boolean resolveNullValue(IPrimitiveType<Boolean> theMdmExpand) {
+		return theMdmExpand == null ? Boolean.FALSE : theMdmExpand.getValue();
 	}
 }

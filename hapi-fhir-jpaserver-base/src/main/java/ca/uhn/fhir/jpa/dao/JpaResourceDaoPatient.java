@@ -56,8 +56,8 @@ public class JpaResourceDaoPatient<T extends IBaseResource> extends BaseHapiFhir
 	@Autowired
 	private IRequestPartitionHelperSvc myPartitionHelperSvc;
 
-	// LUKETODO:  add a second method hard-coding mdmExpand to false
-	// LUKETODO;  once hapi and cdr and merged delete that new method
+	// LUKETODO:  how to handle Mongo?
+
 	private IBundleProvider doEverythingOperation(
 			TokenOrListParam theIds,
 			IPrimitiveType<Integer> theCount,
