@@ -898,7 +898,7 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 		}
 
 		if (!theContainedResource) {
-			setContainedResources(getContext().newTerser().containResources(theResource));
+			containResourcesInReferences(theResource);
 		}
 
 		RuntimeResourceDefinition resDef = getContext().getResourceDefinition(theResource);
