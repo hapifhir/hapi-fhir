@@ -20,6 +20,7 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.hl7.fhir.instance.model.api.IAnyResource;
+import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
@@ -30,6 +31,7 @@ import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.MolecularSequence;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.Type;
@@ -55,6 +57,7 @@ public class OperationGenericServer2R4Test {
 	private static final String TEST_OPERATION_NAME = "operation-with-nested-resources";
 	private static final String REQUESTED_PATIENT_ID = "requested-patient-id";
 	private static final String REQUESTED_CONSENT_ID = "requested-consent-id";
+	private static final String REQUESTED_SUBJECT_ID = "requested-consent-id";
 	public static final String EXPORT_PARAM_NAME = "export";
 	public static final String MATCH_PARAM_NAME = "match";
 	public static final String SERVER_ID_PARAM_NAME = "serverId";
@@ -65,6 +68,8 @@ public class OperationGenericServer2R4Test {
 	private static final String MATCH_SUB_PARAM_NAME = "match-sub-param-name";
 	private static final String MATCH_SUB_PARAM_VALUE = "match-sub-param-value";
 	private static final String SERVER_ID_PARAM_VALUE = "server-id-param-value";
+	public static final String SUBJECT_PARAM_NAME = "subject";
+	public static final String SUBJECT_PARAM_VALUE = "Patient/subject-patient-id";
 	private static IdType ourLastId;
 	private static Object ourLastParam1;
 	private static Object ourLastParam2;
@@ -73,6 +78,7 @@ public class OperationGenericServer2R4Test {
 	private static Parameters ourExportParameters;
 	private static Parameters ourMatchParameters;
 	private static String ourServerId;
+	private static Reference ourSubject;
 
 	@RegisterExtension
 	public RestfulServerExtension ourServer = new RestfulServerExtension(ourCtx)
@@ -167,12 +173,14 @@ public class OperationGenericServer2R4Test {
 			public Parameters testOperation(
 				 @OperationParam(name = EXPORT_PARAM_NAME, typeName = "Parameters") IAnyResource theExportParameters,
 				 @OperationParam(name = MATCH_PARAM_NAME, typeName = "Parameters") IAnyResource theMatchParameters,
-				 @OperationParam(name = SERVER_ID_PARAM_NAME, typeName = "string") IPrimitiveType<String> theServerId
+				 @OperationParam(name = SERVER_ID_PARAM_NAME, typeName = "string") IPrimitiveType<String> theServerId,
+				 @OperationParam(name = SUBJECT_PARAM_NAME, typeName = "reference") IBaseReference theSubject
 			) {
 
 				ourExportParameters = (Parameters) theExportParameters;
 				ourMatchParameters = (Parameters) theMatchParameters;
 				ourServerId = theServerId.getValueAsString();
+				ourSubject = (Reference) theSubject;
 
 				Patient requestExportPatient = (Patient)ourExportParameters.getParameter(PATIENT_SUB_PARAM_NAME).getResource();
 				Consent requestMatchConsent = (Consent) ourExportParameters.getParameter(CONSENT_SUB_PARAM_NAME).getResource();
@@ -180,6 +188,7 @@ public class OperationGenericServer2R4Test {
 				Parameters retVal = new Parameters();
 				retVal.addParameter().setName(REQUESTED_PATIENT_ID).setValue(new StringType(requestExportPatient.getId()));
 				retVal.addParameter().setName(REQUESTED_CONSENT_ID).setValue(new StringType(requestMatchConsent.getId()));
+				retVal.addParameter().setName(REQUESTED_SUBJECT_ID).setValue(new StringType(ourSubject.getReference()));
 				return retVal;
 			}
 
@@ -203,6 +212,7 @@ public class OperationGenericServer2R4Test {
 		topParameters.addParameter().setName(EXPORT_PARAM_NAME).setResource(exportParameters);
 		topParameters.addParameter().setName(MATCH_PARAM_NAME).setResource(matchParameters);
 		topParameters.addParameter().setName(SERVER_ID_PARAM_NAME).setValue(new StringType(SERVER_ID_PARAM_VALUE));
+		topParameters.addParameter().setName(SUBJECT_PARAM_NAME).setValue(new Reference(SUBJECT_PARAM_VALUE));
 
 		String requestString = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(topParameters);
 		ourLog.info("REQUEST: {}", requestString);
@@ -224,6 +234,9 @@ public class OperationGenericServer2R4Test {
 			Parameters.ParametersParameterComponent consentParameter = responseParameters.getParameter().get(1);
 			assertEquals(REQUESTED_CONSENT_ID, consentParameter.getName());
 			assertEquals("Consent/" + EXPORTED_CONSENT_ID, consentParameter.getValue().primitiveValue());
+			Parameters.ParametersParameterComponent subjectParameter = responseParameters.getParameter().get(2);
+			assertEquals(REQUESTED_SUBJECT_ID, subjectParameter.getName());
+			assertEquals(SUBJECT_PARAM_VALUE, subjectParameter.getValue().primitiveValue());
 
 			// test captured statics
 
@@ -232,8 +245,9 @@ public class OperationGenericServer2R4Test {
 			Consent capturedConsentSubParam = (Consent) ourExportParameters.getParameter(CONSENT_SUB_PARAM_NAME).getResource();
 			assertEquals("Consent/" + EXPORTED_CONSENT_ID, capturedConsentSubParam.getId());
 			assertEquals(MATCH_SUB_PARAM_VALUE, ourMatchParameters.getParameter(MATCH_SUB_PARAM_NAME).getValue().primitiveValue());
+			assertEquals(SERVER_ID_PARAM_VALUE, ourServerId);
+			assertEquals(SUBJECT_PARAM_VALUE, ourSubject.getReference());
 		}
-
 	}
 
 	@Test
