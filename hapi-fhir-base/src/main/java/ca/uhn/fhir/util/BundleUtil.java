@@ -153,7 +153,42 @@ public class BundleUtil {
 		return getLinkUrlOfType(theContext, theBundle, theLinkRelation, false);
 	}
 
+	/**
+	 * Returns a collection of Pairs, one for each entry in the bundle. Each pair will contain
+	 * the values of Bundle.entry.fullUrl, and Bundle.entry.resource respectively. Nulls
+	 * are possible in either or both values in the Pair.
+	 *
+	 * @since 7.0.0
+	 */
 	@SuppressWarnings("unchecked")
+	public static List<Pair<String, IBaseResource>> getBundleEntryFullUrlsAndResources(
+			FhirContext theContext, IBaseBundle theBundle) {
+		RuntimeResourceDefinition def = theContext.getResourceDefinition(theBundle);
+		BaseRuntimeChildDefinition entryChild = def.getChildByName("entry");
+		List<IBase> entries = entryChild.getAccessor().getValues(theBundle);
+
+		BaseRuntimeElementCompositeDefinition<?> entryChildElem =
+				(BaseRuntimeElementCompositeDefinition<?>) entryChild.getChildByName("entry");
+		BaseRuntimeChildDefinition resourceChild = entryChildElem.getChildByName("resource");
+
+		BaseRuntimeChildDefinition urlChild = entryChildElem.getChildByName("fullUrl");
+
+		List<Pair<String, IBaseResource>> retVal = new ArrayList<>(entries.size());
+		for (IBase nextEntry : entries) {
+
+			String fullUrl = urlChild.getAccessor()
+					.getFirstValueOrNull(nextEntry)
+					.map(t -> (((IPrimitiveType<?>) t).getValueAsString()))
+					.orElse(null);
+			IBaseResource resource = (IBaseResource)
+					resourceChild.getAccessor().getFirstValueOrNull(nextEntry).orElse(null);
+
+			retVal.add(Pair.of(fullUrl, resource));
+		}
+
+		return retVal;
+	}
+
 	public static List<Pair<String, IBaseResource>> getBundleEntryUrlsAndResources(
 			FhirContext theContext, IBaseBundle theBundle) {
 		RuntimeResourceDefinition def = theContext.getResourceDefinition(theBundle);
@@ -173,19 +208,15 @@ public class BundleUtil {
 		List<Pair<String, IBaseResource>> retVal = new ArrayList<>(entries.size());
 		for (IBase nextEntry : entries) {
 
-			String url = null;
-			IBaseResource resource = null;
+			String url = requestChild
+					.getAccessor()
+					.getFirstValueOrNull(nextEntry)
+					.flatMap(e -> urlChild.getAccessor().getFirstValueOrNull(e))
+					.map(t -> ((IPrimitiveType<?>) t).getValueAsString())
+					.orElse(null);
 
-			for (IBase nextEntryValue : requestChild.getAccessor().getValues(nextEntry)) {
-				for (IBase nextUrlValue : urlChild.getAccessor().getValues(nextEntryValue)) {
-					url = ((IPrimitiveType<String>) nextUrlValue).getValue();
-				}
-			}
-
-			// Should return 0..1 only
-			for (IBase nextValue : resourceChild.getAccessor().getValues(nextEntry)) {
-				resource = (IBaseResource) nextValue;
-			}
+			IBaseResource resource = (IBaseResource)
+					resourceChild.getAccessor().getFirstValueOrNull(nextEntry).orElse(null);
 
 			retVal.add(Pair.of(url, resource));
 		}

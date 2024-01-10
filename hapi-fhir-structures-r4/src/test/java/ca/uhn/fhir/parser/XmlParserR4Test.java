@@ -1,8 +1,11 @@
 package ca.uhn.fhir.parser;
 
+import static ca.uhn.fhir.parser.JsonParserR4Test.createBundleWithCrossReferenceFullUrlsAndNoIds;
+import static ca.uhn.fhir.parser.JsonParserR4Test.createBundleWithCrossReferenceFullUrlsAndNoIds_NestedInParameters;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.stringContainsInOrder;
+import static org.hamcrest.core.IsNot.not;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -303,6 +306,57 @@ public class XmlParserR4Test extends BaseTest {
 		assertEquals(parameters, parameteresAsString);
 	}
 
+
+	@Test
+	public void testEncodeBundleWithCrossReferenceFullUrlsAndNoIds() {
+		Bundle bundle = createBundleWithCrossReferenceFullUrlsAndNoIds();
+
+		String output = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(bundle);
+		ourLog.info(output);
+
+		assertThat(output, not(containsString("<contained")));
+		assertThat(output, not(containsString("<id")));
+		assertThat(output, stringContainsInOrder(
+			 "<fullUrl value=\"urn:uuid:9e9187c1-db6d-4b6f-adc6-976153c65ed7\"/>",
+			 "<Patient xmlns=\"http://hl7.org/fhir\">",
+			 "<fullUrl value=\"urn:uuid:71d7ab79-a001-41dc-9a8e-b3e478ce1cbb\"/>",
+			 "<Observation xmlns=\"http://hl7.org/fhir\">",
+			 "<reference value=\"urn:uuid:9e9187c1-db6d-4b6f-adc6-976153c65ed7\"/>"
+		));
+
+	}
+
+	@Test
+	public void testEncodeBundleWithCrossReferenceFullUrlsAndNoIds_NestedInParameters() {
+		Parameters parameters = createBundleWithCrossReferenceFullUrlsAndNoIds_NestedInParameters();
+
+		String output = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(parameters);
+		ourLog.info(output);
+
+		assertThat(output, not(containsString("\"contained\"")));
+		assertThat(output, not(containsString("\"id\"")));
+		assertThat(output, stringContainsInOrder(
+			 "<Parameters xmlns=\"http://hl7.org/fhir\">",
+			 "<fullUrl value=\"urn:uuid:9e9187c1-db6d-4b6f-adc6-976153c65ed7\"/>",
+			 "<Patient xmlns=\"http://hl7.org/fhir\">",
+			 "<fullUrl value=\"urn:uuid:71d7ab79-a001-41dc-9a8e-b3e478ce1cbb\"/>",
+			 "<Observation xmlns=\"http://hl7.org/fhir\">",
+			 "<reference value=\"urn:uuid:9e9187c1-db6d-4b6f-adc6-976153c65ed7\"/>"
+		));
+
+	}
+
+	@Test
+	public void testParseBundleWithCrossReferenceFullUrlsAndNoIds() {
+		Bundle bundle = createBundleWithCrossReferenceFullUrlsAndNoIds();
+		String encoded = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(bundle);
+
+		Bundle parsedBundle = ourCtx.newXmlParser().parseResource(Bundle.class, encoded);
+		assertEquals("urn:uuid:9e9187c1-db6d-4b6f-adc6-976153c65ed7", parsedBundle.getEntry().get(0).getFullUrl());
+		assertEquals("urn:uuid:9e9187c1-db6d-4b6f-adc6-976153c65ed7", parsedBundle.getEntry().get(0).getResource().getId());
+		assertEquals("urn:uuid:71d7ab79-a001-41dc-9a8e-b3e478ce1cbb", parsedBundle.getEntry().get(1).getFullUrl());
+		assertEquals("urn:uuid:71d7ab79-a001-41dc-9a8e-b3e478ce1cbb", parsedBundle.getEntry().get(1).getResource().getId());
+	}
 
 
 }
