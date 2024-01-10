@@ -97,7 +97,7 @@ public class JpaResourceDaoPatient<T extends IBaseResource> extends BaseHapiFhir
 		paramMap.setSort(theSort);
 		paramMap.setLastUpdated(theLastUpdated);
 		if (theIds != null) {
-			if (theMdmExpand) {
+			if (theMdmExpand != null && theMdmExpand) {
 				theIds.getValuesAsQueryTokens().forEach(param -> param.setMdmExpand(true));
 			}
 			paramMap.add("_id", theIds);
