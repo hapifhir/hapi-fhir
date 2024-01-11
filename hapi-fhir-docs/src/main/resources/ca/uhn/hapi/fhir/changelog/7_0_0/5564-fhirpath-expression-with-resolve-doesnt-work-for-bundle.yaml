@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 5564
+title: "Previously, FHIRPath expression evaluation when using the `_fhirpath` parameter would not work on chained 
+use of 'resolve()'. This was most notable when using `_fhirpath` with FHIR Documents (i.e. 'Bundle' of type 'document' 
+where 'entry[0]' is a 'Composition'). This has now been fixed."
