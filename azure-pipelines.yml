@@ -8,9 +8,6 @@ variables:
 
 trigger: none
 
-pool:
-   vmImage: ubuntu-latest
-
 stages:
    -  stage:
       displayName: "module-tests"
