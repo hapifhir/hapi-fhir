@@ -144,21 +144,6 @@ public class MdmLinkExpandSvc implements IMdmLinkExpandSvc {
 		return expandMdmByGoldenResourcePid(theRequestPartitionId, pidOrThrowException);
 	}
 
-	//	@Nonnull
-	//	public Set<String> flattenPidTuplesToSet(
-	//		RequestPartitionId theRequestPartitionId,
-	//		IResourcePersistentId<?> theInitialPid,
-	//		List<MdmPidTuple<?>> theGoldenPidSourcePidTuples) {
-	//		Set<IResourcePersistentId> flattenedPids = new HashSet<>();
-	//		theGoldenPidSourcePidTuples.forEach(tuple -> {
-	//			flattenedPids.add(tuple.getSourcePid());
-	//			flattenedPids.add(tuple.getGoldenPid());
-	//		});
-	//		Set<String> resourceIds = myIdHelperService.translatePidsToFhirResourceIds(flattenedPids);
-	//		ourLog.debug("Pid {} has been expanded to [{}]", theInitialPid, String.join(",", resourceIds));
-	//		return resourceIds;
-	//	}
-
 	@Nonnull
 	public Set<String> flattenPidTuplesToSet(
 			RequestPartitionId theRequestPartitionId,
