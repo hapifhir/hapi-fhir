@@ -407,7 +407,17 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 		myStorageSettings.setDeleteEnabled(false);
 		myStorageSettings.setAutoVersionReferenceAtPaths("Observation.subject");
 
-		createAndUpdatePatient("PATIENT");
+		{
+			// Create patient
+			Patient patient = new Patient();
+			patient.setId("PATIENT");
+			patient.setActive(true);
+			myPatientDao.update(patient).getId();
+
+			// Update patient to make a second version
+			patient.setActive(false);
+			myPatientDao.update(patient);
+		}
 
 		BundleBuilder builder = new BundleBuilder(myFhirContext);
 
@@ -506,9 +516,7 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 		// create MessageHeader
 		MessageHeader messageHeader = new MessageHeader();
 		// add extension to MessageHeader.meta
-		Extension autoVersionExtension = new Extension(HapiExtensions.EXTENSION_AUTO_VERSION_REFERENCES_AT_PATH_LIST);
-		autoVersionExtension.addExtension(EXTENSION_AUTO_VERSION_REFERENCES_AT_PATH, new StringType("focus"));
-		messageHeader.getMeta().setExtension(List.of(autoVersionExtension));
+		messageHeader.getMeta().addExtension(EXTENSION_AUTO_VERSION_REFERENCES_AT_PATH, new StringType("focus"));
 		// add references
 		messageHeader.addFocus().setReference(patient.getIdElement().toVersionless().getValue());
 		messageHeader.addFocus().setReference(encounter.getId());

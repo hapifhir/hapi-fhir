@@ -157,6 +157,7 @@ import org.hl7.fhir.r4.model.Media;
 import org.hl7.fhir.r4.model.Medication;
 import org.hl7.fhir.r4.model.MedicationAdministration;
 import org.hl7.fhir.r4.model.MedicationRequest;
+import org.hl7.fhir.r4.model.MessageHeader;
 import org.hl7.fhir.r4.model.Meta;
 import org.hl7.fhir.r4.model.MolecularSequence;
 import org.hl7.fhir.r4.model.NamingSystem;
@@ -432,6 +433,9 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 	@Autowired
 	@Qualifier("myExplanationOfBenefitDaoR4")
 	protected IFhirResourceDao<ExplanationOfBenefit> myExplanationOfBenefitDao;
+	@Autowired
+	@Qualifier("myMessageHeaderDaoR4")
+	protected IFhirResourceDao<MessageHeader> myMessageHeaderDao;
 	@Autowired
 	protected IResourceTableDao myResourceTableDao;
 	@Autowired

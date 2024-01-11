@@ -58,7 +58,9 @@ import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.rest.server.util.ResourceSearchParams;
 import ca.uhn.fhir.util.BundleUtil;
+import ca.uhn.fhir.util.ExtensionUtil;
 import ca.uhn.fhir.util.FhirTerser;
+import ca.uhn.fhir.util.HapiExtensions;
 import ca.uhn.fhir.util.IMetaTagSorter;
 import ca.uhn.fhir.util.OperationOutcomeUtil;
 import ca.uhn.fhir.util.ResourceReferenceInfo;
@@ -86,6 +88,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -695,24 +699,56 @@ public abstract class BaseStorageDao {
 	@Nonnull
 	public static Set<IBaseReference> extractReferencesToAutoVersion(
 			FhirContext theFhirContext, StorageSettings theStorageSettings, IBaseResource theResource) {
-		Map<IBaseReference, Object> references = Collections.emptyMap();
+		Set<IBaseReference> referencesToAutoVersionFromConfig =
+				getReferencesToAutoVersionFromConfig(theFhirContext, theStorageSettings, theResource);
+
+		Set<IBaseReference> referencesToAutoVersionFromExtensions =
+				getReferencesToAutoVersionFromExtension(theFhirContext, theResource);
+
+		return Stream.concat(referencesToAutoVersionFromConfig.stream(), referencesToAutoVersionFromExtensions.stream())
+				.collect(Collectors.toMap(ref -> ref, ref -> ref, (oldRef, newRef) -> oldRef, IdentityHashMap::new))
+				.keySet();
+	}
+
+	@Nonnull
+	private static Set<IBaseReference> getReferencesToAutoVersionFromExtension(
+			FhirContext theFhirContext, IBaseResource theResource) {
+		List<String> autoVersionReferencesAtPathFromExtensions = ExtensionUtil.getExtensionPrimitiveValues(
+				theResource.getMeta(), HapiExtensions.EXTENSION_AUTO_VERSION_REFERENCES_AT_PATH);
+
+		if (!autoVersionReferencesAtPathFromExtensions.isEmpty()) {
+			String resourceName = theFhirContext.getResourceType(theResource);
+			return autoVersionReferencesAtPathFromExtensions.stream()
+					.map(path -> String.format("%s.%s", resourceName, path))
+					.map(fullPath -> theFhirContext.newTerser().getValues(theResource, fullPath, IBaseReference.class))
+					.flatMap(Collection::stream)
+					.filter(reference -> !reference.getReferenceElement().hasVersionIdPart())
+					.collect(Collectors.toMap(ref -> ref, ref -> ref, (oldRef, newRef) -> oldRef, IdentityHashMap::new))
+					.keySet();
+		}
+		return Collections.emptySet();
+	}
+
+	@Nonnull
+	private static Set<IBaseReference> getReferencesToAutoVersionFromConfig(
+			FhirContext theFhirContext, StorageSettings theStorageSettings, IBaseResource theResource) {
 		if (!theStorageSettings.getAutoVersionReferenceAtPaths().isEmpty()) {
 			String resourceName = theFhirContext.getResourceType(theResource);
-			for (String nextPath : theStorageSettings.getAutoVersionReferenceAtPathsByResourceType(resourceName)) {
-				List<IBaseReference> nextReferences =
-						theFhirContext.newTerser().getValues(theResource, nextPath, IBaseReference.class);
-				for (IBaseReference next : nextReferences) {
-					if (next.getReferenceElement().hasVersionIdPart()) {
-						continue;
-					}
-					if (references.isEmpty()) {
-						references = new IdentityHashMap<>();
-					}
-					references.put(next, null);
-				}
-			}
+			Set<String> autoVersionReferencesPaths =
+					theStorageSettings.getAutoVersionReferenceAtPathsByResourceType(resourceName);
+			return getReferencesWithoutVersionId(autoVersionReferencesPaths, theFhirContext, theResource);
 		}
-		return references.keySet();
+		return Collections.emptySet();
+	}
+
+	private static Set<IBaseReference> getReferencesWithoutVersionId(
+			Set<String> autoVersionReferencesPaths, FhirContext theFhirContext, IBaseResource theResource) {
+		return autoVersionReferencesPaths.stream()
+				.map(fullPath -> theFhirContext.newTerser().getValues(theResource, fullPath, IBaseReference.class))
+				.flatMap(Collection::stream)
+				.filter(reference -> !reference.getReferenceElement().hasVersionIdPart())
+				.collect(Collectors.toMap(ref -> ref, ref -> ref, (oldRef, newRef) -> oldRef, IdentityHashMap::new))
+				.keySet();
 	}
 
 	public static void clearRequestAsProcessingSubRequest(RequestDetails theRequestDetails) {
