@@ -42,9 +42,8 @@ import ca.uhn.fhir.parser.path.EncodeContextPath;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.BundleUtil;
-import ca.uhn.fhir.util.ExtensionUtil;
 import ca.uhn.fhir.util.FhirTerser;
-import ca.uhn.fhir.util.HapiExtensions;
+import ca.uhn.fhir.util.MetaUtil;
 import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.base.Charsets;
 import jakarta.annotation.Nullable;
@@ -616,14 +615,11 @@ public abstract class BaseParser implements IParser {
 	private boolean isStripVersionsFromReferences(
 			CompositeChildElement theCompositeChildElement, IBaseResource theResource) {
 
-		Set<String> autoVersionReferencesAtPathFromExtensions = ExtensionUtil.getExtensionPrimitiveValues(
-						theResource.getMeta(), HapiExtensions.EXTENSION_AUTO_VERSION_REFERENCES_AT_PATH)
-				.stream()
-				.map(path -> String.format("%s.%s", myContext.getResourceType(theResource), path))
-				.collect(Collectors.toSet());
+		Set<String> autoVersionReferencesAtPathExtensions =
+				MetaUtil.getAutoVersionReferencesAtPath(theResource.getMeta(), myContext.getResourceType(theResource));
 
-		if (!autoVersionReferencesAtPathFromExtensions.isEmpty()
-				&& theCompositeChildElement.anyPathMatches(autoVersionReferencesAtPathFromExtensions)) {
+		if (!autoVersionReferencesAtPathExtensions.isEmpty()
+				&& theCompositeChildElement.anyPathMatches(autoVersionReferencesAtPathExtensions)) {
 			return false;
 		}
 

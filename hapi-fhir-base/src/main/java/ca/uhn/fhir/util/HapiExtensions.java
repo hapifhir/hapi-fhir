@@ -163,11 +163,14 @@ public class HapiExtensions {
 	public static final String EXTENSION_SEARCHPARAM_UPLIFT_REFCHAIN =
 			"https://smilecdr.com/fhir/ns/StructureDefinition/searchparameter-uplift-refchain";
 
-	public static final String EXTENSION_AUTO_VERSION_REFERENCES_AT_PATH_LIST =
-			"https://smilecdr.com/fhir/ns/StructureDefinition/auto-version-references-at-path-list";
-
+	/**
+	 * This extension is used to enable auto version references at path for resource instances.
+	 * This extension should be of type <code>string</code> and should be
+	 * placed on the <code>Resource.meta</code> element.
+	 * It is allowed to add multiple extensions with different paths.
+	 */
 	public static final String EXTENSION_AUTO_VERSION_REFERENCES_AT_PATH =
-			"https://smilecdr.com/fhir/ns/StructureDefinition/auto-version-references-at-path";
+			"http://hapifhir.io/fhir/StructureDefinition/auto-version-references-at-path";
 
 	/**
 	 * This extension is used for "uplifted refchains" on search parameters. See the

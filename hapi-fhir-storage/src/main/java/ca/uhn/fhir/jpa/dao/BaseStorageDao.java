@@ -58,10 +58,9 @@ import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.rest.server.util.ResourceSearchParams;
 import ca.uhn.fhir.util.BundleUtil;
-import ca.uhn.fhir.util.ExtensionUtil;
 import ca.uhn.fhir.util.FhirTerser;
-import ca.uhn.fhir.util.HapiExtensions;
 import ca.uhn.fhir.util.IMetaTagSorter;
+import ca.uhn.fhir.util.MetaUtil;
 import ca.uhn.fhir.util.OperationOutcomeUtil;
 import ca.uhn.fhir.util.ResourceReferenceInfo;
 import ca.uhn.fhir.util.StopWatch;
@@ -713,18 +712,12 @@ public abstract class BaseStorageDao {
 	@Nonnull
 	private static Set<IBaseReference> getReferencesToAutoVersionFromExtension(
 			FhirContext theFhirContext, IBaseResource theResource) {
-		List<String> autoVersionReferencesAtPathFromExtensions = ExtensionUtil.getExtensionPrimitiveValues(
-				theResource.getMeta(), HapiExtensions.EXTENSION_AUTO_VERSION_REFERENCES_AT_PATH);
+		String resourceType = theFhirContext.getResourceType(theResource);
+		Set<String> autoVersionReferencesAtPaths =
+				MetaUtil.getAutoVersionReferencesAtPath(theResource.getMeta(), resourceType);
 
-		if (!autoVersionReferencesAtPathFromExtensions.isEmpty()) {
-			String resourceName = theFhirContext.getResourceType(theResource);
-			return autoVersionReferencesAtPathFromExtensions.stream()
-					.map(path -> String.format("%s.%s", resourceName, path))
-					.map(fullPath -> theFhirContext.newTerser().getValues(theResource, fullPath, IBaseReference.class))
-					.flatMap(Collection::stream)
-					.filter(reference -> !reference.getReferenceElement().hasVersionIdPart())
-					.collect(Collectors.toMap(ref -> ref, ref -> ref, (oldRef, newRef) -> oldRef, IdentityHashMap::new))
-					.keySet();
+		if (!autoVersionReferencesAtPaths.isEmpty()) {
+			return getReferencesWithoutVersionId(autoVersionReferencesAtPaths, theFhirContext, theResource);
 		}
 		return Collections.emptySet();
 	}
