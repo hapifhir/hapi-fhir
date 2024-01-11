@@ -56,8 +56,6 @@ public class JpaResourceDaoPatient<T extends IBaseResource> extends BaseHapiFhir
 	@Autowired
 	private IRequestPartitionHelperSvc myPartitionHelperSvc;
 
-	// LUKETODO:  how to handle Mongo?
-
 	private IBundleProvider doEverythingOperation(
 			TokenOrListParam theIds,
 			IPrimitiveType<Integer> theCount,
