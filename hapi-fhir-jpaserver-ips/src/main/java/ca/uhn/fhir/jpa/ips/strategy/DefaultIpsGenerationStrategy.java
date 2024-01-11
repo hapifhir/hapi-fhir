@@ -42,9 +42,10 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
+import static ca.uhn.fhir.jpa.ips.api.SectionRegistry.SECTION_SYSTEM_LOINC;
 import static ca.uhn.fhir.jpa.term.api.ITermLoaderSvc.LOINC_URI;
 
-@SuppressWarnings({"EnhancedSwitchMigration", "HttpUrlsUsage"})
+@SuppressWarnings({"HttpUrlsUsage"})
 public class DefaultIpsGenerationStrategy implements IIpsGenerationStrategy {
 
 	public static final String DEFAULT_IPS_NARRATIVES_PROPERTIES =
@@ -55,7 +56,17 @@ public class DefaultIpsGenerationStrategy implements IIpsGenerationStrategy {
 	 * Constructor
 	 */
 	public DefaultIpsGenerationStrategy() {
-		setSectionRegistry(new SectionRegistry());
+		this(new SectionRegistry());
+	}
+
+	/**
+	 * Constructor
+	 *
+	 * @param theSectionRegistry The section registry to use for this strategy
+	 * @since 7.0.0
+	 */
+	public DefaultIpsGenerationStrategy(SectionRegistry theSectionRegistry) {
+		setSectionRegistry(theSectionRegistry);
 	}
 
 	@Override
@@ -106,20 +117,35 @@ public class DefaultIpsGenerationStrategy implements IIpsGenerationStrategy {
 	}
 
 	@Override
+	public boolean shouldPerformRepositorySearch(IpsContext.IpsSectionContext theSectionContext) {
+		// By default, perform a repository search for all sections in the repository
+		return true;
+	}
+
+	@Nullable
+	@Override
+	public List<IBaseResource> fetchResourcesForSectionManually(IpsContext theIpsContext, IpsContext.IpsSectionContext theSectionContext) {
+		return null;
+	}
+
+	@Override
 	public void massageResourceSearch(
 			IpsContext.IpsSectionContext theIpsSectionContext, SearchParameterMap theSearchParameterMap) {
-		switch (theIpsSectionContext.getSection()) {
-			case ALLERGY_INTOLERANCE:
-			case PROBLEM_LIST:
-			case PROCEDURES:
-			case MEDICAL_DEVICES:
-			case ILLNESS_HISTORY:
-			case FUNCTIONAL_STATUS:
+		if (!SectionRegistry.SECTION_SYSTEM_LOINC.equals(theIpsSectionContext.getSection().getSectionSystem())) {
+			return;
+		}
+		switch (theIpsSectionContext.getSection().getSectionCode()) {
+			case SectionRegistry.SECTION_CODE_ALLERGY_INTOLERANCE:
+			case SectionRegistry.SECTION_CODE_PROBLEM_LIST:
+			case SectionRegistry.SECTION_CODE_PROCEDURES:
+			case SectionRegistry.SECTION_CODE_MEDICAL_DEVICES:
+			case SectionRegistry.SECTION_CODE_ILLNESS_HISTORY:
+			case SectionRegistry.SECTION_CODE_FUNCTIONAL_STATUS:
 				return;
-			case IMMUNIZATIONS:
+			case SectionRegistry.SECTION_CODE_IMMUNIZATIONS:
 				theSearchParameterMap.setSort(new SortSpec(Immunization.SP_DATE).setOrder(SortOrderEnum.DESC));
 				return;
-			case VITAL_SIGNS:
+			case SectionRegistry.SECTION_CODE_VITAL_SIGNS:
 				if (theIpsSectionContext.getResourceType().equals(ResourceType.Observation.name())) {
 					theSearchParameterMap.add(
 							Observation.SP_CATEGORY,
@@ -130,7 +156,7 @@ public class DefaultIpsGenerationStrategy implements IIpsGenerationStrategy {
 					return;
 				}
 				break;
-			case SOCIAL_HISTORY:
+			case SectionRegistry.SECTION_CODE_SOCIAL_HISTORY:
 				if (theIpsSectionContext.getResourceType().equals(ResourceType.Observation.name())) {
 					theSearchParameterMap.add(
 							Observation.SP_CATEGORY,
@@ -141,7 +167,7 @@ public class DefaultIpsGenerationStrategy implements IIpsGenerationStrategy {
 					return;
 				}
 				break;
-			case DIAGNOSTIC_RESULTS:
+			case SectionRegistry.SECTION_CODE_DIAGNOSTIC_RESULTS:
 				if (theIpsSectionContext.getResourceType().equals(ResourceType.DiagnosticReport.name())) {
 					return;
 				} else if (theIpsSectionContext.getResourceType().equals(ResourceType.Observation.name())) {
@@ -154,7 +180,7 @@ public class DefaultIpsGenerationStrategy implements IIpsGenerationStrategy {
 					return;
 				}
 				break;
-			case PREGNANCY:
+			case SectionRegistry.SECTION_CODE_PREGNANCY:
 				if (theIpsSectionContext.getResourceType().equals(ResourceType.Observation.name())) {
 					theSearchParameterMap.add(
 							Observation.SP_CODE,
@@ -172,7 +198,7 @@ public class DefaultIpsGenerationStrategy implements IIpsGenerationStrategy {
 					return;
 				}
 				break;
-			case MEDICATION_SUMMARY:
+			case SectionRegistry.SECTION_CODE_MEDICATION_SUMMARY:
 				if (theIpsSectionContext.getResourceType().equals(ResourceType.MedicationStatement.name())) {
 					theSearchParameterMap.add(
 							MedicationStatement.SP_STATUS,
@@ -238,7 +264,7 @@ public class DefaultIpsGenerationStrategy implements IIpsGenerationStrategy {
 					return;
 				}
 				break;
-			case PLAN_OF_CARE:
+			case SectionRegistry.SECTION_CODE_PLAN_OF_CARE:
 				if (theIpsSectionContext.getResourceType().equals(ResourceType.CarePlan.name())) {
 					theSearchParameterMap.add(
 							CarePlan.SP_STATUS,
@@ -255,7 +281,7 @@ public class DefaultIpsGenerationStrategy implements IIpsGenerationStrategy {
 					return;
 				}
 				break;
-			case ADVANCE_DIRECTIVES:
+			case SectionRegistry.SECTION_CODE_ADVANCE_DIRECTIVES:
 				if (theIpsSectionContext.getResourceType().equals(ResourceType.Consent.name())) {
 					theSearchParameterMap.add(
 							Consent.SP_STATUS,
@@ -274,11 +300,14 @@ public class DefaultIpsGenerationStrategy implements IIpsGenerationStrategy {
 						+ theIpsSectionContext.getResourceType();
 	}
 
-	@Nonnull
+	@Nullable
 	@Override
 	public Set<Include> provideResourceSearchIncludes(IpsContext.IpsSectionContext theIpsSectionContext) {
-		switch (theIpsSectionContext.getSection()) {
-			case MEDICATION_SUMMARY:
+		if (!SECTION_SYSTEM_LOINC.equals(theIpsSectionContext.getSection().getSectionSystem())) {
+			return null;
+		}
+		switch (theIpsSectionContext.getSection().getSectionCode()) {
+			case SectionRegistry.SECTION_CODE_MEDICATION_SUMMARY:
 				if (ResourceType.MedicationStatement.name().equals(theIpsSectionContext.getResourceType())) {
 					return Sets.newHashSet(MedicationStatement.INCLUDE_MEDICATION);
 				}
@@ -292,42 +321,43 @@ public class DefaultIpsGenerationStrategy implements IIpsGenerationStrategy {
 					return Sets.newHashSet(MedicationDispense.INCLUDE_MEDICATION);
 				}
 				break;
-			case MEDICAL_DEVICES:
+			case SectionRegistry.SECTION_CODE_MEDICAL_DEVICES:
 				if (ResourceType.DeviceUseStatement.name().equals(theIpsSectionContext.getResourceType())) {
 					return Sets.newHashSet(DeviceUseStatement.INCLUDE_DEVICE);
 				}
 				break;
-			case IMMUNIZATIONS:
+			case SectionRegistry.SECTION_CODE_IMMUNIZATIONS:
 				if (ResourceType.Immunization.name().equals(theIpsSectionContext.getResourceType())) {
 					return Sets.newHashSet(Immunization.INCLUDE_MANUFACTURER);
 				}
 				break;
-			case ALLERGY_INTOLERANCE:
-			case PROBLEM_LIST:
-			case PROCEDURES:
-			case DIAGNOSTIC_RESULTS:
-			case VITAL_SIGNS:
-			case ILLNESS_HISTORY:
-			case PREGNANCY:
-			case SOCIAL_HISTORY:
-			case FUNCTIONAL_STATUS:
-			case PLAN_OF_CARE:
-			case ADVANCE_DIRECTIVES:
+			case SectionRegistry.SECTION_CODE_ALLERGY_INTOLERANCE:
+			case SectionRegistry.SECTION_CODE_PROBLEM_LIST:
+			case SectionRegistry.SECTION_CODE_PROCEDURES:
+			case SectionRegistry.SECTION_CODE_DIAGNOSTIC_RESULTS:
+			case SectionRegistry.SECTION_CODE_VITAL_SIGNS:
+			case SectionRegistry.SECTION_CODE_ILLNESS_HISTORY:
+			case SectionRegistry.SECTION_CODE_PREGNANCY:
+			case SectionRegistry.SECTION_CODE_SOCIAL_HISTORY:
+			case SectionRegistry.SECTION_CODE_FUNCTIONAL_STATUS:
+			case SectionRegistry.SECTION_CODE_PLAN_OF_CARE:
+			case SectionRegistry.SECTION_CODE_ADVANCE_DIRECTIVES:
 				break;
 		}
 		return Collections.emptySet();
 	}
 
-	@SuppressWarnings("EnhancedSwitchMigration")
 	@Override
 	public boolean shouldInclude(IpsContext.IpsSectionContext theIpsSectionContext, IBaseResource theCandidate) {
-
-		switch (theIpsSectionContext.getSection()) {
-			case MEDICATION_SUMMARY:
-			case PLAN_OF_CARE:
-			case ADVANCE_DIRECTIVES:
+		if (!SECTION_SYSTEM_LOINC.equals(theIpsSectionContext.getSection().getSectionSystem())) {
+			return true;
+		}
+		switch (theIpsSectionContext.getSection().getSectionCode()) {
+			case SectionRegistry.SECTION_CODE_MEDICATION_SUMMARY:
+			case SectionRegistry.SECTION_CODE_PLAN_OF_CARE:
+			case SectionRegistry.SECTION_CODE_ADVANCE_DIRECTIVES:
 				return true;
-			case ALLERGY_INTOLERANCE:
+			case SectionRegistry.SECTION_CODE_ALLERGY_INTOLERANCE:
 				if (theIpsSectionContext.getResourceType().equals(ResourceType.AllergyIntolerance.name())) {
 					AllergyIntolerance allergyIntolerance = (AllergyIntolerance) theCandidate;
 					return !allergyIntolerance
@@ -347,7 +377,7 @@ public class DefaultIpsGenerationStrategy implements IIpsGenerationStrategy {
 											"entered-in-error");
 				}
 				break;
-			case PROBLEM_LIST:
+			case SectionRegistry.SECTION_CODE_PROBLEM_LIST:
 				if (theIpsSectionContext.getResourceType().equals(ResourceType.Condition.name())) {
 					Condition prob = (Condition) theCandidate;
 					return !prob.getClinicalStatus()
@@ -360,26 +390,26 @@ public class DefaultIpsGenerationStrategy implements IIpsGenerationStrategy {
 											"entered-in-error");
 				}
 				break;
-			case IMMUNIZATIONS:
+			case SectionRegistry.SECTION_CODE_IMMUNIZATIONS:
 				if (theIpsSectionContext.getResourceType().equals(ResourceType.Immunization.name())) {
 					Immunization immunization = (Immunization) theCandidate;
 					return immunization.getStatus() != Immunization.ImmunizationStatus.ENTEREDINERROR;
 				}
 				break;
-			case PROCEDURES:
+			case SectionRegistry.SECTION_CODE_PROCEDURES:
 				if (theIpsSectionContext.getResourceType().equals(ResourceType.Procedure.name())) {
 					Procedure proc = (Procedure) theCandidate;
 					return proc.getStatus() != Procedure.ProcedureStatus.ENTEREDINERROR
 							&& proc.getStatus() != Procedure.ProcedureStatus.NOTDONE;
 				}
 				break;
-			case MEDICAL_DEVICES:
+			case SectionRegistry.SECTION_CODE_MEDICAL_DEVICES:
 				if (theIpsSectionContext.getResourceType().equals(ResourceType.DeviceUseStatement.name())) {
 					DeviceUseStatement deviceUseStatement = (DeviceUseStatement) theCandidate;
 					return deviceUseStatement.getStatus() != DeviceUseStatement.DeviceUseStatementStatus.ENTEREDINERROR;
 				}
 				return true;
-			case DIAGNOSTIC_RESULTS:
+			case SectionRegistry.SECTION_CODE_DIAGNOSTIC_RESULTS:
 				if (theIpsSectionContext.getResourceType().equals(ResourceType.DiagnosticReport.name())) {
 					return true;
 				}
@@ -389,14 +419,14 @@ public class DefaultIpsGenerationStrategy implements IIpsGenerationStrategy {
 					return (observation.getStatus() != Observation.ObservationStatus.PRELIMINARY);
 				}
 				break;
-			case VITAL_SIGNS:
+			case SectionRegistry.SECTION_CODE_VITAL_SIGNS:
 				if (theIpsSectionContext.getResourceType().equals(ResourceType.Observation.name())) {
 					// code filtering not yet applied
 					Observation observation = (Observation) theCandidate;
 					return (observation.getStatus() != Observation.ObservationStatus.PRELIMINARY);
 				}
 				break;
-			case ILLNESS_HISTORY:
+			case SectionRegistry.SECTION_CODE_ILLNESS_HISTORY:
 				if (theIpsSectionContext.getResourceType().equals(ResourceType.Condition.name())) {
 					Condition prob = (Condition) theCandidate;
 					if (prob.getVerificationStatus()
@@ -417,21 +447,21 @@ public class DefaultIpsGenerationStrategy implements IIpsGenerationStrategy {
 					}
 				}
 				break;
-			case PREGNANCY:
+			case SectionRegistry.SECTION_CODE_PREGNANCY:
 				if (theIpsSectionContext.getResourceType().equals(ResourceType.Observation.name())) {
 					// code filtering not yet applied
 					Observation observation = (Observation) theCandidate;
 					return (observation.getStatus() != Observation.ObservationStatus.PRELIMINARY);
 				}
 				break;
-			case SOCIAL_HISTORY:
+			case SectionRegistry.SECTION_CODE_SOCIAL_HISTORY:
 				if (theIpsSectionContext.getResourceType().equals(ResourceType.Observation.name())) {
 					// code filtering not yet applied
 					Observation observation = (Observation) theCandidate;
 					return (observation.getStatus() != Observation.ObservationStatus.PRELIMINARY);
 				}
 				break;
-			case FUNCTIONAL_STATUS:
+			case SectionRegistry.SECTION_CODE_FUNCTIONAL_STATUS:
 				if (theIpsSectionContext.getResourceType().equals(ResourceType.ClinicalImpression.name())) {
 					ClinicalImpression clinicalImpression = (ClinicalImpression) theCandidate;
 					return clinicalImpression.getStatus() != ClinicalImpression.ClinicalImpressionStatus.INPROGRESS

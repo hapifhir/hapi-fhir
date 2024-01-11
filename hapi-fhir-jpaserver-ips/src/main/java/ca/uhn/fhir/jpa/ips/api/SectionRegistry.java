@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.jpa.ips.api;
 
+import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
 import jakarta.annotation.Nullable;
 import jakarta.annotation.PostConstruct;
 import org.apache.commons.lang3.Validate;
@@ -56,8 +57,23 @@ import java.util.function.Consumer;
  */
 public class SectionRegistry {
 
+	public static final String SECTION_CODE_ALLERGY_INTOLERANCE = "48765-2";
+	public static final String SECTION_CODE_MEDICATION_SUMMARY = "10160-0";
+	public static final String SECTION_CODE_PROBLEM_LIST = "11450-4";
+	public static final String SECTION_CODE_IMMUNIZATIONS = "11369-6";
+	public static final String SECTION_CODE_PROCEDURES = "47519-4";
+	public static final String SECTION_CODE_MEDICAL_DEVICES = "46264-8";
+	public static final String SECTION_CODE_DIAGNOSTIC_RESULTS = "30954-2";
+	public static final String SECTION_CODE_VITAL_SIGNS = "8716-3";
+	public static final String SECTION_CODE_PREGNANCY = "10162-6";
+	public static final String SECTION_CODE_SOCIAL_HISTORY = "29762-2";
+	public static final String SECTION_CODE_ILLNESS_HISTORY = "11348-0";
+	public static final String SECTION_CODE_FUNCTIONAL_STATUS = "47420-5";
+	public static final String SECTION_CODE_PLAN_OF_CARE = "18776-5";
+	public static final String SECTION_CODE_ADVANCE_DIRECTIVES = "42348-3";
+	public static final String SECTION_SYSTEM_LOINC = ITermLoaderSvc.LOINC_URI;
 	private final ArrayList<Section> mySections = new ArrayList<>();
-	private List<Consumer<SectionBuilder>> myGlobalCustomizers = new ArrayList<>();
+	private final List<Consumer<SectionBuilder>> myGlobalCustomizers = new ArrayList<>();
 
 	/**
 	 * Constructor
@@ -102,168 +118,183 @@ public class SectionRegistry {
 	}
 
 	protected void addSectionAllergyIntolerance() {
-		addSection(IpsSectionEnum.ALLERGY_INTOLERANCE)
-				.withTitle("Allergies and Intolerances")
-				.withSectionCode("48765-2")
-				.withSectionDisplay("Allergies and adverse reactions Document")
-				.withResourceTypes(ResourceType.AllergyIntolerance.name())
-				.withProfile(
-						"https://hl7.org/fhir/uv/ips/StructureDefinition-Composition-uv-ips-definitions.html#Composition.section:sectionAllergies")
-				.withNoInfoGenerator(new AllergyIntoleranceNoInfoR4Generator())
-				.build();
+		addSection()
+			.withTitle("Allergies and Intolerances")
+			.withSectionSystem(SECTION_SYSTEM_LOINC)
+			.withSectionSystem(SECTION_SYSTEM_LOINC)
+			.withSectionCode(SECTION_CODE_ALLERGY_INTOLERANCE)
+			.withSectionDisplay("Allergies and adverse reactions Document")
+			.withResourceTypes(ResourceType.AllergyIntolerance.name())
+			.withProfile(
+				"https://hl7.org/fhir/uv/ips/StructureDefinition-Composition-uv-ips-definitions.html#Composition.section:sectionAllergies")
+			.withNoInfoGenerator(new AllergyIntoleranceNoInfoR4Generator())
+			.build();
 	}
 
 	protected void addSectionMedicationSummary() {
-		addSection(IpsSectionEnum.MEDICATION_SUMMARY)
-				.withTitle("Medication List")
-				.withSectionCode("10160-0")
-				.withSectionDisplay("History of Medication use Narrative")
-				.withResourceTypes(
-						ResourceType.MedicationStatement.name(),
-						ResourceType.MedicationRequest.name(),
-						ResourceType.MedicationAdministration.name(),
-						ResourceType.MedicationDispense.name())
-				.withProfile(
-						"https://hl7.org/fhir/uv/ips/StructureDefinition-Composition-uv-ips-definitions.html#Composition.section:sectionMedications")
-				.withNoInfoGenerator(new MedicationNoInfoR4Generator())
-				.build();
+		addSection()
+			.withTitle("Medication List")
+			.withSectionSystem(SECTION_SYSTEM_LOINC)
+			.withSectionCode(SECTION_CODE_MEDICATION_SUMMARY)
+			.withSectionDisplay("History of Medication use Narrative")
+			.withResourceTypes(
+				ResourceType.MedicationStatement.name(),
+				ResourceType.MedicationRequest.name(),
+				ResourceType.MedicationAdministration.name(),
+				ResourceType.MedicationDispense.name())
+			.withProfile(
+				"https://hl7.org/fhir/uv/ips/StructureDefinition-Composition-uv-ips-definitions.html#Composition.section:sectionMedications")
+			.withNoInfoGenerator(new MedicationNoInfoR4Generator())
+			.build();
 	}
 
 	protected void addSectionProblemList() {
-		addSection(IpsSectionEnum.PROBLEM_LIST)
-				.withTitle("Problem List")
-				.withSectionCode("11450-4")
-				.withSectionDisplay("Problem list - Reported")
-				.withResourceTypes(ResourceType.Condition.name())
-				.withProfile(
-						"https://hl7.org/fhir/uv/ips/StructureDefinition-Composition-uv-ips-definitions.html#Composition.section:sectionProblems")
-				.withNoInfoGenerator(new ProblemNoInfoR4Generator())
-				.build();
+		addSection()
+			.withTitle("Problem List")
+			.withSectionSystem(SECTION_SYSTEM_LOINC)
+			.withSectionCode(SECTION_CODE_PROBLEM_LIST)
+			.withSectionDisplay("Problem list - Reported")
+			.withResourceTypes(ResourceType.Condition.name())
+			.withProfile(
+				"https://hl7.org/fhir/uv/ips/StructureDefinition-Composition-uv-ips-definitions.html#Composition.section:sectionProblems")
+			.withNoInfoGenerator(new ProblemNoInfoR4Generator())
+			.build();
 	}
 
 	protected void addSectionImmunizations() {
-		addSection(IpsSectionEnum.IMMUNIZATIONS)
-				.withTitle("History of Immunizations")
-				.withSectionCode("11369-6")
-				.withSectionDisplay("History of Immunization Narrative")
-				.withResourceTypes(ResourceType.Immunization.name())
-				.withProfile(
-						"https://hl7.org/fhir/uv/ips/StructureDefinition-Composition-uv-ips-definitions.html#Composition.section:sectionImmunizations")
-				.build();
+		addSection()
+			.withTitle("History of Immunizations")
+			.withSectionSystem(SECTION_SYSTEM_LOINC)
+			.withSectionCode(SECTION_CODE_IMMUNIZATIONS)
+			.withSectionDisplay("History of Immunization Narrative")
+			.withResourceTypes(ResourceType.Immunization.name())
+			.withProfile(
+				"https://hl7.org/fhir/uv/ips/StructureDefinition-Composition-uv-ips-definitions.html#Composition.section:sectionImmunizations")
+			.build();
 	}
 
 	protected void addSectionProcedures() {
-		addSection(IpsSectionEnum.PROCEDURES)
-				.withTitle("History of Procedures")
-				.withSectionCode("47519-4")
-				.withSectionDisplay("History of Procedures Document")
-				.withResourceTypes(ResourceType.Procedure.name())
-				.withProfile(
-						"https://hl7.org/fhir/uv/ips/StructureDefinition-Composition-uv-ips-definitions.html#Composition.section:sectionProceduresHx")
-				.build();
+		addSection()
+			.withTitle("History of Procedures")
+			.withSectionSystem(SECTION_SYSTEM_LOINC)
+			.withSectionCode(SECTION_CODE_PROCEDURES)
+			.withSectionDisplay("History of Procedures Document")
+			.withResourceTypes(ResourceType.Procedure.name())
+			.withProfile(
+				"https://hl7.org/fhir/uv/ips/StructureDefinition-Composition-uv-ips-definitions.html#Composition.section:sectionProceduresHx")
+			.build();
 	}
 
 	protected void addSectionMedicalDevices() {
-		addSection(IpsSectionEnum.MEDICAL_DEVICES)
-				.withTitle("Medical Devices")
-				.withSectionCode("46264-8")
-				.withSectionDisplay("History of medical device use")
-				.withResourceTypes(ResourceType.DeviceUseStatement.name())
-				.withProfile(
-						"https://hl7.org/fhir/uv/ips/StructureDefinition-Composition-uv-ips-definitions.html#Composition.section:sectionMedicalDevices")
-				.build();
+		addSection()
+			.withTitle("Medical Devices")
+			.withSectionSystem(SECTION_SYSTEM_LOINC)
+			.withSectionCode(SECTION_CODE_MEDICAL_DEVICES)
+			.withSectionDisplay("History of medical device use")
+			.withResourceTypes(ResourceType.DeviceUseStatement.name())
+			.withProfile(
+				"https://hl7.org/fhir/uv/ips/StructureDefinition-Composition-uv-ips-definitions.html#Composition.section:sectionMedicalDevices")
+			.build();
 	}
 
 	protected void addSectionDiagnosticResults() {
-		addSection(IpsSectionEnum.DIAGNOSTIC_RESULTS)
-				.withTitle("Diagnostic Results")
-				.withSectionCode("30954-2")
-				.withSectionDisplay("Relevant diagnostic tests/laboratory data Narrative")
-				.withResourceTypes(ResourceType.DiagnosticReport.name(), ResourceType.Observation.name())
-				.withProfile(
-						"https://hl7.org/fhir/uv/ips/StructureDefinition-Composition-uv-ips-definitions.html#Composition.section:sectionResults")
-				.build();
+		addSection()
+			.withTitle("Diagnostic Results")
+			.withSectionSystem(SECTION_SYSTEM_LOINC)
+			.withSectionCode(SECTION_CODE_DIAGNOSTIC_RESULTS)
+			.withSectionDisplay("Relevant diagnostic tests/laboratory data Narrative")
+			.withResourceTypes(ResourceType.DiagnosticReport.name(), ResourceType.Observation.name())
+			.withProfile(
+				"https://hl7.org/fhir/uv/ips/StructureDefinition-Composition-uv-ips-definitions.html#Composition.section:sectionResults")
+			.build();
 	}
 
 	protected void addSectionVitalSigns() {
-		addSection(IpsSectionEnum.VITAL_SIGNS)
-				.withTitle("Vital Signs")
-				.withSectionCode("8716-3")
-				.withSectionDisplay("Vital signs")
-				.withResourceTypes(ResourceType.Observation.name())
-				.withProfile(
-						"https://hl7.org/fhir/uv/ips/StructureDefinition-Composition-uv-ips-definitions.html#Composition.section:sectionVitalSigns")
-				.build();
+		addSection()
+			.withTitle("Vital Signs")
+			.withSectionSystem(SECTION_SYSTEM_LOINC)
+			.withSectionCode(SECTION_CODE_VITAL_SIGNS)
+			.withSectionDisplay("Vital signs")
+			.withResourceTypes(ResourceType.Observation.name())
+			.withProfile(
+				"https://hl7.org/fhir/uv/ips/StructureDefinition-Composition-uv-ips-definitions.html#Composition.section:sectionVitalSigns")
+			.build();
 	}
 
 	protected void addSectionPregnancy() {
-		addSection(IpsSectionEnum.PREGNANCY)
-				.withTitle("Pregnancy Information")
-				.withSectionCode("10162-6")
-				.withSectionDisplay("History of pregnancies Narrative")
-				.withResourceTypes(ResourceType.Observation.name())
-				.withProfile(
-						"https://hl7.org/fhir/uv/ips/StructureDefinition-Composition-uv-ips-definitions.html#Composition.section:sectionPregnancyHx")
-				.build();
+		addSection()
+			.withTitle("Pregnancy Information")
+			.withSectionSystem(SECTION_SYSTEM_LOINC)
+			.withSectionCode(SECTION_CODE_PREGNANCY)
+			.withSectionDisplay("History of pregnancies Narrative")
+			.withResourceTypes(ResourceType.Observation.name())
+			.withProfile(
+				"https://hl7.org/fhir/uv/ips/StructureDefinition-Composition-uv-ips-definitions.html#Composition.section:sectionPregnancyHx")
+			.build();
 	}
 
 	protected void addSectionSocialHistory() {
-		addSection(IpsSectionEnum.SOCIAL_HISTORY)
-				.withTitle("Social History")
-				.withSectionCode("29762-2")
-				.withSectionDisplay("Social history Narrative")
-				.withResourceTypes(ResourceType.Observation.name())
-				.withProfile(
-						"https://hl7.org/fhir/uv/ips/StructureDefinition-Composition-uv-ips-definitions.html#Composition.section:sectionSocialHistory")
-				.build();
+		addSection()
+			.withTitle("Social History")
+			.withSectionSystem(SECTION_SYSTEM_LOINC)
+			.withSectionCode(SECTION_CODE_SOCIAL_HISTORY)
+			.withSectionDisplay("Social history Narrative")
+			.withResourceTypes(ResourceType.Observation.name())
+			.withProfile(
+				"https://hl7.org/fhir/uv/ips/StructureDefinition-Composition-uv-ips-definitions.html#Composition.section:sectionSocialHistory")
+			.build();
 	}
 
 	protected void addSectionIllnessHistory() {
-		addSection(IpsSectionEnum.ILLNESS_HISTORY)
-				.withTitle("History of Past Illness")
-				.withSectionCode("11348-0")
-				.withSectionDisplay("History of Past illness Narrative")
-				.withResourceTypes(ResourceType.Condition.name())
-				.withProfile(
-						"https://hl7.org/fhir/uv/ips/StructureDefinition-Composition-uv-ips-definitions.html#Composition.section:sectionPastIllnessHx")
-				.build();
+		addSection()
+			.withTitle("History of Past Illness")
+			.withSectionSystem(SECTION_SYSTEM_LOINC)
+			.withSectionCode(SECTION_CODE_ILLNESS_HISTORY)
+			.withSectionDisplay("History of Past illness Narrative")
+			.withResourceTypes(ResourceType.Condition.name())
+			.withProfile(
+				"https://hl7.org/fhir/uv/ips/StructureDefinition-Composition-uv-ips-definitions.html#Composition.section:sectionPastIllnessHx")
+			.build();
 	}
 
 	protected void addSectionFunctionalStatus() {
-		addSection(IpsSectionEnum.FUNCTIONAL_STATUS)
-				.withTitle("Functional Status")
-				.withSectionCode("47420-5")
-				.withSectionDisplay("Functional status assessment note")
-				.withResourceTypes(ResourceType.ClinicalImpression.name())
-				.withProfile(
-						"https://hl7.org/fhir/uv/ips/StructureDefinition-Composition-uv-ips-definitions.html#Composition.section:sectionFunctionalStatus")
-				.build();
+		addSection()
+			.withTitle("Functional Status")
+			.withSectionSystem(SECTION_SYSTEM_LOINC)
+			.withSectionCode(SECTION_CODE_FUNCTIONAL_STATUS)
+			.withSectionDisplay("Functional status assessment note")
+			.withResourceTypes(ResourceType.ClinicalImpression.name())
+			.withProfile(
+				"https://hl7.org/fhir/uv/ips/StructureDefinition-Composition-uv-ips-definitions.html#Composition.section:sectionFunctionalStatus")
+			.build();
 	}
 
 	protected void addSectionPlanOfCare() {
-		addSection(IpsSectionEnum.PLAN_OF_CARE)
-				.withTitle("Plan of Care")
-				.withSectionCode("18776-5")
-				.withSectionDisplay("Plan of care note")
-				.withResourceTypes(ResourceType.CarePlan.name())
-				.withProfile(
-						"https://hl7.org/fhir/uv/ips/StructureDefinition-Composition-uv-ips-definitions.html#Composition.section:sectionPlanOfCare")
-				.build();
+		addSection()
+			.withTitle("Plan of Care")
+			.withSectionSystem(SECTION_SYSTEM_LOINC)
+			.withSectionCode(SECTION_CODE_PLAN_OF_CARE)
+			.withSectionDisplay("Plan of care note")
+			.withResourceTypes(ResourceType.CarePlan.name())
+			.withProfile(
+				"https://hl7.org/fhir/uv/ips/StructureDefinition-Composition-uv-ips-definitions.html#Composition.section:sectionPlanOfCare")
+			.build();
 	}
 
 	protected void addSectionAdvanceDirectives() {
-		addSection(IpsSectionEnum.ADVANCE_DIRECTIVES)
-				.withTitle("Advance Directives")
-				.withSectionCode("42348-3")
-				.withSectionDisplay("Advance directives")
-				.withResourceTypes(ResourceType.Consent.name())
-				.withProfile(
-						"https://hl7.org/fhir/uv/ips/StructureDefinition-Composition-uv-ips-definitions.html#Composition.section:sectionAdvanceDirectives")
-				.build();
+		addSection()
+			.withTitle("Advance Directives")
+			.withSectionSystem(SECTION_SYSTEM_LOINC)
+			.withSectionCode(SECTION_CODE_ADVANCE_DIRECTIVES)
+			.withSectionDisplay("Advance directives")
+			.withResourceTypes(ResourceType.Consent.name())
+			.withProfile(
+				"https://hl7.org/fhir/uv/ips/StructureDefinition-Composition-uv-ips-definitions.html#Composition.section:sectionAdvanceDirectives")
+			.build();
 	}
 
-	private SectionBuilder addSection(IpsSectionEnum theSectionEnum) {
-		return new SectionBuilder(theSectionEnum);
+	private SectionBuilder addSection() {
+		return new SectionBuilder();
 	}
 
 	public SectionRegistry addGlobalCustomizer(Consumer<SectionBuilder> theGlobalCustomizer) {
@@ -277,11 +308,12 @@ public class SectionRegistry {
 		return Collections.unmodifiableList(mySections);
 	}
 
-	public Section getSection(IpsSectionEnum theSectionEnum) {
+	public Section getSection(String theSectionSystem, String theSectionCode) {
 		return getSections().stream()
-				.filter(t -> t.getSectionEnum() == theSectionEnum)
-				.findFirst()
-				.orElseThrow(() -> new IllegalArgumentException("No section for type: " + theSectionEnum));
+			.filter(t -> t.getSectionSystem().equals(theSectionSystem))
+			.filter(t -> t.getSectionCode().equals(theSectionCode))
+			.findFirst()
+			.orElseThrow(() -> new IllegalArgumentException("No section for system[" + theSectionSystem + "] and code[" + theSectionCode + "]"));
 	}
 
 	public interface INoInfoGenerator {
@@ -295,21 +327,27 @@ public class SectionRegistry {
 
 	public class SectionBuilder {
 
-		private final IpsSectionEnum mySectionEnum;
 		private String myTitle;
+		private String mySectionSystem;
 		private String mySectionCode;
 		private String mySectionDisplay;
 		private List<String> myResourceTypes;
 		private String myProfile;
 		private INoInfoGenerator myNoInfoGenerator;
 
-		public SectionBuilder(IpsSectionEnum theSectionEnum) {
-			mySectionEnum = theSectionEnum;
+		public SectionBuilder() {
+			super();
 		}
 
 		public SectionBuilder withTitle(String theTitle) {
 			Validate.notBlank(theTitle);
 			myTitle = theTitle;
+			return this;
+		}
+
+		public SectionBuilder withSectionSystem(String theSectionSystem) {
+			Validate.notBlank(theSectionSystem);
+			mySectionSystem = theSectionSystem;
 			return this;
 		}
 
@@ -343,16 +381,21 @@ public class SectionRegistry {
 		}
 
 		public void build() {
+			Validate.notBlank(mySectionSystem, "No section system has been defined for this section");
+			Validate.notBlank(mySectionCode, "No section code has been defined for this section");
+			Validate.notBlank(mySectionDisplay, "No section display has been defined for this section");
+
 			myGlobalCustomizers.forEach(t -> t.accept(this));
 			mySections.add(new Section(
-					mySectionEnum,
-					myTitle,
-					mySectionCode,
-					mySectionDisplay,
-					myResourceTypes,
-					myProfile,
-					myNoInfoGenerator));
+				myTitle,
+				mySectionSystem,
+				mySectionCode,
+				mySectionDisplay,
+				myResourceTypes,
+				myProfile,
+				myNoInfoGenerator));
 		}
+
 	}
 
 	private static class AllergyIntoleranceNoInfoR4Generator implements INoInfoGenerator {
@@ -360,15 +403,15 @@ public class SectionRegistry {
 		public IBaseResource generate(IIdType theSubjectId) {
 			AllergyIntolerance allergy = new AllergyIntolerance();
 			allergy.setCode(new CodeableConcept()
-							.addCoding(new Coding()
-									.setCode("no-allergy-info")
-									.setSystem("http://hl7.org/fhir/uv/ips/CodeSystem/absent-unknown-uv-ips")
-									.setDisplay("No information about allergies")))
-					.setPatient(new Reference(theSubjectId))
-					.setClinicalStatus(new CodeableConcept()
-							.addCoding(new Coding()
-									.setCode("active")
-									.setSystem("http://terminology.hl7.org/CodeSystem/allergyintolerance-clinical")));
+					.addCoding(new Coding()
+						.setCode("no-allergy-info")
+						.setSystem("http://hl7.org/fhir/uv/ips/CodeSystem/absent-unknown-uv-ips")
+						.setDisplay("No information about allergies")))
+				.setPatient(new Reference(theSubjectId))
+				.setClinicalStatus(new CodeableConcept()
+					.addCoding(new Coding()
+						.setCode("active")
+						.setSystem("http://terminology.hl7.org/CodeSystem/allergyintolerance-clinical")));
 			return allergy;
 		}
 	}
@@ -379,13 +422,13 @@ public class SectionRegistry {
 			MedicationStatement medication = new MedicationStatement();
 			// setMedicationCodeableConcept is not available
 			medication
-					.setMedication(new CodeableConcept()
-							.addCoding(new Coding()
-									.setCode("no-medication-info")
-									.setSystem("http://hl7.org/fhir/uv/ips/CodeSystem/absent-unknown-uv-ips")
-									.setDisplay("No information about medications")))
-					.setSubject(new Reference(theSubjectId))
-					.setStatus(MedicationStatement.MedicationStatementStatus.UNKNOWN);
+				.setMedication(new CodeableConcept()
+					.addCoding(new Coding()
+						.setCode("no-medication-info")
+						.setSystem("http://hl7.org/fhir/uv/ips/CodeSystem/absent-unknown-uv-ips")
+						.setDisplay("No information about medications")))
+				.setSubject(new Reference(theSubjectId))
+				.setStatus(MedicationStatement.MedicationStatementStatus.UNKNOWN);
 			// .setEffective(new
 			// Period().addExtension().setUrl("http://hl7.org/fhir/StructureDefinition/data-absent-reason").setValue((new Coding().setCode("not-applicable"))))
 			return medication;
@@ -397,23 +440,22 @@ public class SectionRegistry {
 		public IBaseResource generate(IIdType theSubjectId) {
 			Condition condition = new Condition();
 			condition
-					.setCode(new CodeableConcept()
-							.addCoding(new Coding()
-									.setCode("no-problem-info")
-									.setSystem("http://hl7.org/fhir/uv/ips/CodeSystem/absent-unknown-uv-ips")
-									.setDisplay("No information about problems")))
-					.setSubject(new Reference(theSubjectId))
-					.setClinicalStatus(new CodeableConcept()
-							.addCoding(new Coding()
-									.setCode("active")
-									.setSystem("http://terminology.hl7.org/CodeSystem/condition-clinical")));
+				.setCode(new CodeableConcept()
+					.addCoding(new Coding()
+						.setCode("no-problem-info")
+						.setSystem("http://hl7.org/fhir/uv/ips/CodeSystem/absent-unknown-uv-ips")
+						.setDisplay("No information about problems")))
+				.setSubject(new Reference(theSubjectId))
+				.setClinicalStatus(new CodeableConcept()
+					.addCoding(new Coding()
+						.setCode("active")
+						.setSystem("http://terminology.hl7.org/CodeSystem/condition-clinical")));
 			return condition;
 		}
 	}
 
 	public static class Section {
 
-		private final IpsSectionEnum mySectionEnum;
 		private final String myTitle;
 		private final String mySectionCode;
 		private final String mySectionDisplay;
@@ -421,19 +463,21 @@ public class SectionRegistry {
 		private final String myProfile;
 		private final INoInfoGenerator myNoInfoGenerator;
 
+		private final String mySectionSystem;
+
 		public Section(
-				IpsSectionEnum theSectionEnum,
-				String theTitle,
-				String theSectionCode,
-				String theSectionDisplay,
-				List<String> theResourceTypes,
-				String theProfile,
-				INoInfoGenerator theNoInfoGenerator) {
-			mySectionEnum = theSectionEnum;
+			String theTitle,
+			String theSectionSystem,
+			String theSectionCode,
+			String theSectionDisplay,
+			List<String> theResourceTypes,
+			String theProfile,
+			INoInfoGenerator theNoInfoGenerator) {
 			myTitle = theTitle;
+			mySectionSystem = theSectionSystem;
 			mySectionCode = theSectionCode;
 			mySectionDisplay = theSectionDisplay;
-			myResourceTypes = Collections.unmodifiableList(new ArrayList<>(theResourceTypes));
+			myResourceTypes = List.copyOf(theResourceTypes);
 			myProfile = theProfile;
 			myNoInfoGenerator = theNoInfoGenerator;
 		}
@@ -451,12 +495,12 @@ public class SectionRegistry {
 			return myProfile;
 		}
 
-		public IpsSectionEnum getSectionEnum() {
-			return mySectionEnum;
-		}
-
 		public String getTitle() {
 			return myTitle;
+		}
+
+		public String getSectionSystem() {
+			return mySectionSystem;
 		}
 
 		public String getSectionCode() {

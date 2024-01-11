@@ -3,7 +3,6 @@ package ca.uhn.fhir.jpa.ips.generator;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
-import ca.uhn.fhir.jpa.ips.api.IpsSectionEnum;
 import ca.uhn.fhir.jpa.ips.api.SectionRegistry;
 import ca.uhn.fhir.jpa.ips.strategy.DefaultIpsGenerationStrategy;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
@@ -49,11 +48,6 @@ import org.hl7.fhir.r4.model.Procedure;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.StringType;
-import org.htmlunit.html.DomElement;
-import org.htmlunit.html.DomNodeList;
-import org.htmlunit.html.HtmlPage;
-import org.htmlunit.html.HtmlTable;
-import org.htmlunit.html.HtmlTableRow;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -195,7 +189,7 @@ public class IpsGeneratorSvcImplTest {
 
 		// Verify
 		Composition compositions = (Composition) outcome.getEntry().get(0).getResource();
-		Composition.SectionComponent section = findSection(compositions, IpsSectionEnum.ALLERGY_INTOLERANCE);
+		Composition.SectionComponent section = findSection(compositions, SectionRegistry.SECTION_CODE_ALLERGY_INTOLERANCE);
 
 		HtmlPage narrativeHtml = HtmlUtil.parseAsHtml(section.getText().getDivAsString());
 		ourLog.info("Narrative:\n{}", narrativeHtml.asXml());
@@ -230,7 +224,7 @@ public class IpsGeneratorSvcImplTest {
 
 		// Verify
 		Composition compositions = (Composition) outcome.getEntry().get(0).getResource();
-		Composition.SectionComponent section = findSection(compositions, IpsSectionEnum.ALLERGY_INTOLERANCE);
+		Composition.SectionComponent section = findSection(compositions, SectionRegistry.SECTION_CODE_ALLERGY_INTOLERANCE);
 
 		HtmlPage narrativeHtml = HtmlUtil.parseAsHtml(section.getText().getDivAsString());
 		ourLog.info("Narrative:\n{}", narrativeHtml.asXml());
@@ -266,14 +260,14 @@ public class IpsGeneratorSvcImplTest {
 
 		// Verify
 		Composition compositions = (Composition) outcome.getEntry().get(0).getResource();
-		Composition.SectionComponent section = findSection(compositions, IpsSectionEnum.MEDICATION_SUMMARY);
+		Composition.SectionComponent section = findSection(compositions, SectionRegistry.SECTION_CODE_MEDICATION_SUMMARY);
 
 		HtmlPage narrativeHtml = HtmlUtil.parseAsHtml(section.getText().getDivAsString());
 		ourLog.info("Narrative:\n{}", narrativeHtml.asXml());
 
 		DomNodeList<DomElement> tables = narrativeHtml.getElementsByTagName("table");
-		assertEquals(2, tables.size());
-		HtmlTable table = (HtmlTable) tables.get(1);
+		assertEquals(1, tables.size());
+		HtmlTable table = (HtmlTable) tables.get(0);
 		HtmlTableRow row = table.getBodies().get(0).getRows().get(0);
 		assertEquals("Tylenol", row.getCell(0).asNormalizedText());
 		assertEquals("Active", row.getCell(1).asNormalizedText());
@@ -302,13 +296,13 @@ public class IpsGeneratorSvcImplTest {
 
 		// Verify
 		Composition compositions = (Composition) outcome.getEntry().get(0).getResource();
-		Composition.SectionComponent section = findSection(compositions, IpsSectionEnum.MEDICATION_SUMMARY);
+		Composition.SectionComponent section = findSection(compositions, SectionRegistry.SECTION_CODE_MEDICATION_SUMMARY);
 
 		HtmlPage narrativeHtml = HtmlUtil.parseAsHtml(section.getText().getDivAsString());
 		ourLog.info("Narrative:\n{}", narrativeHtml.asXml());
 
 		DomNodeList<DomElement> tables = narrativeHtml.getElementsByTagName("table");
-		assertEquals(2, tables.size());
+		assertEquals(1, tables.size());
 		HtmlTable table = (HtmlTable) tables.get(0);
 		HtmlTableRow row = table.getBodies().get(0).getRows().get(0);
 		assertEquals("", row.getCell(0).asNormalizedText());
@@ -318,14 +312,13 @@ public class IpsGeneratorSvcImplTest {
 	}
 
 	@Nonnull
-	private Composition.SectionComponent findSection(Composition compositions, IpsSectionEnum sectionEnum) {
-		Composition.SectionComponent section = compositions
+	private Composition.SectionComponent findSection(Composition compositions, String theSectionCode) {
+        return compositions
 			.getSection()
 			.stream()
-			.filter(t -> t.getTitle().equals(myStrategy.getSectionRegistry().getSection(sectionEnum).getTitle()))
+			.filter(t -> t.getTitle().equals(myStrategy.getSectionRegistry().getSection(SectionRegistry.SECTION_SYSTEM_LOINC, theSectionCode).getTitle()))
 			.findFirst()
 			.orElseThrow();
-		return section;
 	}
 
 	@Test
@@ -400,14 +393,53 @@ public class IpsGeneratorSvcImplTest {
 
 		// Verify narrative - should have 2 rows (one for each primary MedicationStatement)
 		Composition compositions = (Composition) outcome.getEntry().get(0).getResource();
-		Composition.SectionComponent section = findSection(compositions, IpsSectionEnum.MEDICATION_SUMMARY);
+		Composition.SectionComponent section = findSection(compositions, SectionRegistry.SECTION_CODE_MEDICATION_SUMMARY);
 
 		HtmlPage narrativeHtml = HtmlUtil.parseAsHtml(section.getText().getDivAsString());
 		ourLog.info("Narrative:\n{}", narrativeHtml.asXml());
 
 		DomNodeList<DomElement> tables = narrativeHtml.getElementsByTagName("table");
-		assertEquals(2, tables.size());
-		HtmlTable table = (HtmlTable) tables.get(1);
+		assertEquals(1, tables.size());
+		HtmlTable table = (HtmlTable) tables.get(0);
+		assertEquals(2, table.getBodies().get(0).getRows().size());
+	}
+
+	/**
+	 * If there is no contents in one of the 2 medication summary tables it should be
+	 * omitted
+	 */
+	@Test
+	public void testMedicationSummary_OmitMedicationRequestTable() throws IOException {
+		myStrategy.setSectionRegistry(new SectionRegistry().addGlobalCustomizer(t -> t.withNoInfoGenerator(null)));
+
+		// Setup Patient
+		registerPatientDaoWithRead();
+
+		// Setup Medication + MedicationStatement
+		Medication medication = createSecondaryMedication(MEDICATION_ID);
+		MedicationStatement medicationStatement = createPrimaryMedicationStatement(MEDICATION_ID, MEDICATION_STATEMENT_ID);
+		medicationStatement.addDerivedFrom().setReference(MEDICATION_STATEMENT_ID2);
+		MedicationStatement medicationStatement2 = createPrimaryMedicationStatement(MEDICATION_ID, MEDICATION_STATEMENT_ID2);
+		ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.put(medicationStatement2, BundleEntrySearchModeEnum.INCLUDE);
+		MedicationStatement medicationStatement3 = createPrimaryMedicationStatement(MEDICATION_ID, MEDICATION_STATEMENT_ID2);
+		IFhirResourceDao<MedicationStatement> medicationStatementDao = registerResourceDaoWithNoData(MedicationStatement.class);
+		when(medicationStatementDao.search(any(), any())).thenReturn(new SimpleBundleProvider(Lists.newArrayList(medicationStatement, medication, medicationStatement2, medicationStatement3)));
+
+		registerRemainingResourceDaos();
+
+		// Test
+		Bundle outcome = (Bundle) mySvc.generateIps(new SystemRequestDetails(), new IdType(PATIENT_ID));
+
+		// Verify narrative - should have 2 rows (one for each primary MedicationStatement)
+		Composition compositions = (Composition) outcome.getEntry().get(0).getResource();
+		Composition.SectionComponent section = findSection(compositions, SectionRegistry.SECTION_CODE_MEDICATION_SUMMARY);
+
+		HtmlPage narrativeHtml = HtmlUtil.parseAsHtml(section.getText().getDivAsString());
+		ourLog.info("Narrative:\n{}", narrativeHtml.asXml());
+
+		DomNodeList<DomElement> tables = narrativeHtml.getElementsByTagName("table");
+		assertEquals(1, tables.size());
+		HtmlTable table = (HtmlTable) tables.get(0);
 		assertEquals(2, table.getBodies().get(0).getRows().size());
 	}
 
@@ -440,7 +472,7 @@ public class IpsGeneratorSvcImplTest {
 
 		// Verify
 		Composition compositions = (Composition) outcome.getEntry().get(0).getResource();
-		Composition.SectionComponent section = findSection(compositions, IpsSectionEnum.MEDICAL_DEVICES);
+		Composition.SectionComponent section = findSection(compositions, SectionRegistry.SECTION_CODE_MEDICAL_DEVICES);
 
 		HtmlPage narrativeHtml = HtmlUtil.parseAsHtml(section.getText().getDivAsString());
 		ourLog.info("Narrative:\n{}", narrativeHtml.asXml());
@@ -487,7 +519,7 @@ public class IpsGeneratorSvcImplTest {
 
 		// Verify
 		Composition compositions = (Composition) outcome.getEntry().get(0).getResource();
-		Composition.SectionComponent section = findSection(compositions, IpsSectionEnum.IMMUNIZATIONS);
+		Composition.SectionComponent section = findSection(compositions, SectionRegistry.SECTION_CODE_IMMUNIZATIONS);
 
 		HtmlPage narrativeHtml = HtmlUtil.parseAsHtml(section.getText().getDivAsString());
 		ourLog.info("Narrative:\n{}", narrativeHtml.asXml());
@@ -569,10 +601,10 @@ public class IpsGeneratorSvcImplTest {
 		ourLog.info("Resource: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
 		verify(conditionDao, times(2)).search(any(), any());
 		Composition composition = (Composition) outcome.getEntry().get(0).getResource();
-		Composition.SectionComponent problemListSection = findSection(composition, IpsSectionEnum.PROBLEM_LIST);
+		Composition.SectionComponent problemListSection = findSection(composition, SectionRegistry.SECTION_CODE_PROBLEM_LIST);
 		assertEquals(addedCondition.getId(), problemListSection.getEntry().get(0).getReference());
 		assertEquals(1, problemListSection.getEntry().size());
-		Composition.SectionComponent illnessHistorySection = findSection(composition, IpsSectionEnum.ILLNESS_HISTORY);
+		Composition.SectionComponent illnessHistorySection = findSection(composition, SectionRegistry.SECTION_CODE_ILLNESS_HISTORY);
 		assertEquals(addedCondition2.getId(), illnessHistorySection.getEntry().get(0).getReference());
 		assertEquals(1, illnessHistorySection.getEntry().size());
 	}
@@ -674,19 +706,19 @@ public class IpsGeneratorSvcImplTest {
 	}
 
 	@Nonnull
-	private static Medication createSecondaryMedication(String medicationId) {
+	private static Medication createSecondaryMedication(String theMedicationId) {
 		Medication medication = new Medication();
-		medication.setId(new IdType(medicationId));
+		medication.setId(new IdType(theMedicationId));
 		medication.getCode().addCoding().setDisplay("Tylenol");
 		ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.put(medication, BundleEntrySearchModeEnum.INCLUDE);
 		return medication;
 	}
 
 	@Nonnull
-	private static MedicationStatement createPrimaryMedicationStatement(String medicationId, String medicationStatementId) {
+	private static MedicationStatement createPrimaryMedicationStatement(String theMedicationId, String medicationStatementId) {
 		MedicationStatement medicationStatement = new MedicationStatement();
 		medicationStatement.setId(medicationStatementId);
-		medicationStatement.setMedication(new Reference(medicationId));
+		medicationStatement.setMedication(new Reference(theMedicationId));
 		medicationStatement.setStatus(MedicationStatement.MedicationStatementStatus.ACTIVE);
 		medicationStatement.getDosageFirstRep().getRoute().addCoding().setDisplay("Oral");
 		medicationStatement.getDosageFirstRep().setText("DAW");

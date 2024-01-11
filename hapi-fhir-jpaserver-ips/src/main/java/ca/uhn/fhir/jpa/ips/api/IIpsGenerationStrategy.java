@@ -98,11 +98,54 @@ public interface IIpsGenerationStrategy {
 	IIdType massageResourceId(@Nullable IpsContext theIpsContext, @Nonnull IBaseResource theResource);
 
 	/**
+	 * For each section and resource type combination defined in the
+	 * {@link #getSectionRegistry() Section Registry}, this method will be invoked in order
+	 * to determine whether a repository search for data should be performed. If this
+	 * method returns <code>true</code>, a repository search will be performed for the
+	 * given section context. If you wish to perform a manual fetch using
+	 * {@link #fetchResourcesForSectionManually(IpsContext, IpsContext.IpsSectionContext)} you may
+	 * choose to return <code>false</code>. Note that
+	 * {@link #fetchResourcesForSectionManually(IpsContext, IpsContext.IpsSectionContext)} will still
+	 * be called after the repository search even if this method returns <code>true</code>,
+	 * so it should ignore any calls it does not wish to return data for.
+	 *
+	 * @param theSectionContext The section context, containing the section name and resource type.
+	 * @since 7.0.0
+	 */
+	boolean shouldPerformRepositorySearch(IpsContext.IpsSectionContext theSectionContext);
+
+	/**
+	 * This method will be called once for each section context (section and resource type combination),
+	 * and can be used to fetch resources to include in the given IPS section. This method can
+	 * be used if you wish to fetch resources for a given section from a source other than
+	 * the repository. This could mean fetching resources using a FHIR REST client to an
+	 * external server, or could even mean fetching data directly from a database using JDBC
+	 * or similar.
+	 * <p>
+	 * Note that {@link #shouldInclude(IpsContext.IpsSectionContext, IBaseResource)} will be called
+	 * once for each resource returned by this method.
+	 * </p>
+	 *
+	 * @param theIpsContext     The IPS context, containing the identity of the patient whose IPS is being generated.
+	 * @param theSectionContext The section context, containing the section name and resource type.
+	 * @return Returns a list of resources, or <code>null</code>.
+	 * @see #shouldPerformRepositorySearch(IpsContext.IpsSectionContext)
+	 * @see #shouldInclude(IpsContext.IpsSectionContext, IBaseResource)
+	 * @since 7.0.0
+	 */
+	@Nullable
+	List<IBaseResource> fetchResourcesForSectionManually(IpsContext theIpsContext, IpsContext.IpsSectionContext theSectionContext);
+
+	/**
 	 * This method can manipulate the {@link SearchParameterMap} that will
 	 * be used to find candidate resources for the given IPS section. The map will already have
 	 * a subject/patient parameter added to it. The map provided in {@literal theSearchParameterMap}
 	 * will contain a subject/patient reference, but no other parameters. This method can add other
 	 * parameters.
+	 * <p>
+	 * This method will only be called if {@link #shouldPerformRepositorySearch(IpsContext.IpsSectionContext)}
+	 * returns <code>true</code> for a given section context (i.e. for a given section name and resource type).
+	 * </p>
 	 * <p>
 	 * For example, for a Vital Signs section, the implementation might add a parameter indicating
 	 * the parameter <code>category=vital-signs</code>.
@@ -112,7 +155,7 @@ public interface IIpsGenerationStrategy {
 	 * @param theSearchParameterMap The map to manipulate.
 	 */
 	void massageResourceSearch(
-			IpsContext.IpsSectionContext theIpsSectionContext, SearchParameterMap theSearchParameterMap);
+		IpsContext.IpsSectionContext theIpsSectionContext, SearchParameterMap theSearchParameterMap);
 
 	/**
 	 * Return a set of Include directives to be added to the resource search
@@ -120,16 +163,27 @@ public interface IIpsGenerationStrategy {
 	 * be added to the same {@link SearchParameterMap} provided to
 	 * {@link #massageResourceSearch(IpsContext.IpsSectionContext, SearchParameterMap)}.
 	 * This is a separate method in order to make subclassing easier.
+	 * <p>
+	 * This method will only be called if {@link #shouldPerformRepositorySearch(IpsContext.IpsSectionContext)}
+	 * returns <code>true</code> for a given section context (i.e. for a given section name and resource type).
+	 * </p>
 	 *
-	 * @param theIpsSectionContext  The context, which indicates the IPS section and the resource type
-	 *                              being searched for.
+	 * @param theIpsSectionContext The context, which indicates the IPS section and the resource type
+	 *                             being searched for.
+	 * @return Returns a set of <code>_include</code> values to include on the repository
+	 * search for a given section context, or <code>null</code>.
 	 */
-	@Nonnull
+	@Nullable
 	Set<Include> provideResourceSearchIncludes(IpsContext.IpsSectionContext theIpsSectionContext);
 
 	/**
 	 * This method will be called for each found resource candidate for inclusion in the
 	 * IPS document. The strategy can decide whether to include it or not.
+	 * <p>
+	 * This method is called once for every resource that is being considered for inclusion
+	 * in an IPS section, whether it came from a repository search or a manual fetch.
+	 * </p>
 	 */
 	boolean shouldInclude(IpsContext.IpsSectionContext theIpsSectionContext, IBaseResource theCandidate);
+
 }
