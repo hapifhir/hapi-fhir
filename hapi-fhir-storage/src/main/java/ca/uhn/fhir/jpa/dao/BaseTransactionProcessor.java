@@ -1725,7 +1725,7 @@ public abstract class BaseTransactionProcessor {
 						replaceResourceReference(nextId, resourceReference, theTransactionDetails);
 					}
 
-					// if resource reference is not in transaction but exists in the DB, resolving its version
+					// if referenced resource is not in transaction but exists in the DB, resolving its version
 					IResourcePersistentId persistedReferenceId = resourceVersionMap.getResourcePersistentId(nextId);
 					if (outcome == null && persistedReferenceId != null && persistedReferenceId.getVersion() != null) {
 						IIdType newReferenceId = nextId.withVersion(

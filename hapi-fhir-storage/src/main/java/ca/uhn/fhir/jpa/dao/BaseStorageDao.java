@@ -59,6 +59,7 @@ import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.rest.server.util.ResourceSearchParams;
 import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.FhirTerser;
+import ca.uhn.fhir.util.HapiExtensions;
 import ca.uhn.fhir.util.IMetaTagSorter;
 import ca.uhn.fhir.util.MetaUtil;
 import ca.uhn.fhir.util.OperationOutcomeUtil;
@@ -693,7 +694,10 @@ public abstract class BaseStorageDao {
 	}
 
 	/**
-	 * @see StorageSettings#getAutoVersionReferenceAtPaths()
+	 * Extracts a list of references that should be auto-versioned.
+	 *
+	 * @return A set of references that should be versioned according to both storage settings
+	 * 		   and auto-version reference extensions, or it may also be empty.
 	 */
 	@Nonnull
 	public static Set<IBaseReference> extractReferencesToAutoVersion(
@@ -709,6 +713,11 @@ public abstract class BaseStorageDao {
 				.keySet();
 	}
 
+	/**
+	 * Extracts a list of references that should be auto-versioned according to
+	 * <code>auto-version-references-at-path</code> extensions.
+	 * @see HapiExtensions#EXTENSION_AUTO_VERSION_REFERENCES_AT_PATH
+	 */
 	@Nonnull
 	private static Set<IBaseReference> getReferencesToAutoVersionFromExtension(
 			FhirContext theFhirContext, IBaseResource theResource) {
@@ -722,6 +731,10 @@ public abstract class BaseStorageDao {
 		return Collections.emptySet();
 	}
 
+	/**
+	 * Extracts a list of references that should be auto-versioned according to storage configuration.
+	 * @see StorageSettings#getAutoVersionReferenceAtPaths()
+	 */
 	@Nonnull
 	private static Set<IBaseReference> getReferencesToAutoVersionFromConfig(
 			FhirContext theFhirContext, StorageSettings theStorageSettings, IBaseResource theResource) {
