@@ -124,14 +124,16 @@ public class DefaultIpsGenerationStrategy implements IIpsGenerationStrategy {
 
 	@Nullable
 	@Override
-	public List<IBaseResource> fetchResourcesForSectionManually(IpsContext theIpsContext, IpsContext.IpsSectionContext theSectionContext) {
+	public List<IBaseResource> fetchResourcesForSectionManually(
+			IpsContext theIpsContext, IpsContext.IpsSectionContext theSectionContext) {
 		return null;
 	}
 
 	@Override
 	public void massageResourceSearch(
 			IpsContext.IpsSectionContext theIpsSectionContext, SearchParameterMap theSearchParameterMap) {
-		if (!SectionRegistry.SECTION_SYSTEM_LOINC.equals(theIpsSectionContext.getSection().getSectionSystem())) {
+		if (!SectionRegistry.SECTION_SYSTEM_LOINC.equals(
+				theIpsSectionContext.getSection().getSectionSystem())) {
 			return;
 		}
 		switch (theIpsSectionContext.getSection().getSectionCode()) {

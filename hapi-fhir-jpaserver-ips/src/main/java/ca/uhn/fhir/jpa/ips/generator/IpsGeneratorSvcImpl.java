@@ -70,7 +70,6 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import static ca.uhn.fhir.jpa.term.api.ITermLoaderSvc.LOINC_URI;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class IpsGeneratorSvcImpl implements IIpsGeneratorSvc {
@@ -131,8 +130,7 @@ public class IpsGeneratorSvcImpl implements IIpsGeneratorSvc {
 		massageResourceId(context, author);
 
 		CompositionBuilder compositionBuilder = createComposition(thePatient, context, author);
-		determineInclusions(
-				theRequestDetails, context, compositionBuilder, globalResourcesToInclude);
+		determineInclusions(theRequestDetails, context, compositionBuilder, globalResourcesToInclude);
 
 		IBaseResource composition = compositionBuilder.getComposition();
 
@@ -172,11 +170,7 @@ public class IpsGeneratorSvcImpl implements IIpsGeneratorSvc {
 		SectionRegistry sectionRegistry = myGenerationStrategy.getSectionRegistry();
 		for (SectionRegistry.Section nextSection : sectionRegistry.getSections()) {
 			determineInclusionsForSection(
-					theRequestDetails,
-					theIpsContext,
-					theCompositionBuilder,
-					theGlobalResourcesToInclude,
-					nextSection);
+					theRequestDetails, theIpsContext, theCompositionBuilder, theGlobalResourcesToInclude, nextSection);
 		}
 	}
 
@@ -189,15 +183,26 @@ public class IpsGeneratorSvcImpl implements IIpsGeneratorSvc {
 		ResourceInclusionCollection sectionResourceCollectionToPopulate = new ResourceInclusionCollection();
 		for (String nextResourceType : theSection.getResourceTypes()) {
 			IpsContext.IpsSectionContext ipsSectionContext =
-				theIpsContext.newSectionContext(theSection, nextResourceType);
+					theIpsContext.newSectionContext(theSection, nextResourceType);
 
 			if (myGenerationStrategy.shouldPerformRepositorySearch(ipsSectionContext)) {
-				fetchSectionResourcesFromRepository(theRequestDetails, theIpsContext, theGlobalResourceCollectionToPopulate, sectionResourceCollectionToPopulate, ipsSectionContext);
+				fetchSectionResourcesFromRepository(
+						theRequestDetails,
+						theIpsContext,
+						theGlobalResourceCollectionToPopulate,
+						sectionResourceCollectionToPopulate,
+						ipsSectionContext);
 			}
 
-			List<IBaseResource> manualResources = myGenerationStrategy.fetchResourcesForSectionManually(theIpsContext, ipsSectionContext);
+			List<IBaseResource> manualResources =
+					myGenerationStrategy.fetchResourcesForSectionManually(theIpsContext, ipsSectionContext);
 			if (manualResources != null) {
-				addResourcesToIpsContents(theIpsContext, ipsSectionContext, manualResources, theGlobalResourceCollectionToPopulate, sectionResourceCollectionToPopulate);
+				addResourcesToIpsContents(
+						theIpsContext,
+						ipsSectionContext,
+						manualResources,
+						theGlobalResourceCollectionToPopulate,
+						sectionResourceCollectionToPopulate);
 			}
 		}
 
@@ -250,10 +255,19 @@ public class IpsGeneratorSvcImpl implements IIpsGeneratorSvc {
 			return;
 		}
 
-		addSection(theSection, theCompositionBuilder, sectionResourceCollectionToPopulate, theGlobalResourceCollectionToPopulate);
+		addSection(
+				theSection,
+				theCompositionBuilder,
+				sectionResourceCollectionToPopulate,
+				theGlobalResourceCollectionToPopulate);
 	}
 
-	private void fetchSectionResourcesFromRepository(RequestDetails theRequestDetails, IpsContext theIpsContext, ResourceInclusionCollection theGlobalResourceCollectionToPopulate, ResourceInclusionCollection theSectionResourceCollectionToPopulate, IpsContext.IpsSectionContext theIpsSectionContext) {
+	private void fetchSectionResourcesFromRepository(
+			RequestDetails theRequestDetails,
+			IpsContext theIpsContext,
+			ResourceInclusionCollection theGlobalResourceCollectionToPopulate,
+			ResourceInclusionCollection theSectionResourceCollectionToPopulate,
+			IpsContext.IpsSectionContext theIpsSectionContext) {
 		SearchParameterMap searchParameterMap = new SearchParameterMap();
 		String subjectSp = determinePatientCompartmentSearchParameterName(theIpsSectionContext.getResourceType());
 		searchParameterMap.add(subjectSp, new ReferenceParam(theIpsContext.getSubjectId()));
@@ -275,7 +289,12 @@ public class IpsGeneratorSvcImpl implements IIpsGeneratorSvc {
 				break;
 			}
 
-			addResourcesToIpsContents(theIpsContext, theIpsSectionContext, resources, theGlobalResourceCollectionToPopulate, theSectionResourceCollectionToPopulate);
+			addResourcesToIpsContents(
+					theIpsContext,
+					theIpsSectionContext,
+					resources,
+					theGlobalResourceCollectionToPopulate,
+					theSectionResourceCollectionToPopulate);
 		}
 	}
 
@@ -287,11 +306,16 @@ public class IpsGeneratorSvcImpl implements IIpsGeneratorSvc {
 	 * @param theIpsSectionContext The section context, which contains details about the current section being generated.
 	 * @param theCandidateResources The resources that have been fetched for inclusion in the IPS bundle
 	 */
-	private void addResourcesToIpsContents(IpsContext theIpsContext, IpsContext.IpsSectionContext theIpsSectionContext, List<IBaseResource> theCandidateResources, ResourceInclusionCollection theGlobalResourcesCollectionToPopulate, ResourceInclusionCollection theSectionResourceCollectionToPopulate) {
+	private void addResourcesToIpsContents(
+			IpsContext theIpsContext,
+			IpsContext.IpsSectionContext theIpsSectionContext,
+			List<IBaseResource> theCandidateResources,
+			ResourceInclusionCollection theGlobalResourcesCollectionToPopulate,
+			ResourceInclusionCollection theSectionResourceCollectionToPopulate) {
 		for (IBaseResource nextCandidate : theCandidateResources) {
 
-			boolean candidateIsSearchInclude = ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.get(nextCandidate)
-					== BundleEntrySearchModeEnum.INCLUDE;
+			boolean candidateIsSearchInclude =
+					ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.get(nextCandidate) == BundleEntrySearchModeEnum.INCLUDE;
 			boolean addResourceToBundle;
 			if (candidateIsSearchInclude) {
 				addResourceToBundle = true;
@@ -301,10 +325,8 @@ public class IpsGeneratorSvcImpl implements IIpsGeneratorSvc {
 
 			if (addResourceToBundle) {
 
-				String originalResourceId = nextCandidate
-						.getIdElement()
-						.toUnqualifiedVersionless()
-						.getValue();
+				String originalResourceId =
+						nextCandidate.getIdElement().toUnqualifiedVersionless().getValue();
 
 				// Check if we already have this resource included so that we don't
 				// include it twice
@@ -319,7 +341,8 @@ public class IpsGeneratorSvcImpl implements IIpsGeneratorSvc {
 					}
 
 					nextCandidate = previouslyExistingResource;
-					theSectionResourceCollectionToPopulate.addResourceIfNotAlreadyPresent(nextCandidate, originalResourceId);
+					theSectionResourceCollectionToPopulate.addResourceIfNotAlreadyPresent(
+							nextCandidate, originalResourceId);
 				} else if (theGlobalResourcesCollectionToPopulate.hasResourceWithReplacementId(originalResourceId)) {
 					if (!candidateIsSearchInclude) {
 						theSectionResourceCollectionToPopulate.addResourceIfNotAlreadyPresent(
@@ -349,7 +372,8 @@ public class IpsGeneratorSvcImpl implements IIpsGeneratorSvc {
 		CompositionBuilder.SectionBuilder sectionBuilder = theCompositionBuilder.addSection();
 
 		sectionBuilder.setTitle(theSection.getTitle());
-		sectionBuilder.addCodeCoding(theSection.getSectionSystem(), theSection.getSectionCode(), theSection.getSectionDisplay());
+		sectionBuilder.addCodeCoding(
+				theSection.getSectionSystem(), theSection.getSectionCode(), theSection.getSectionDisplay());
 
 		for (IBaseResource next : theResourcesToInclude.getResources()) {
 			if (ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.get(next) == BundleEntrySearchModeEnum.INCLUDE) {

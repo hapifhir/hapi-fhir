@@ -68,7 +68,10 @@ public class IpsContext {
 		private final String myResourceType;
 
 		private IpsSectionContext(
-				IBaseResource theSubject, IIdType theSubjectId, SectionRegistry.Section theSection, String theResourceType) {
+				IBaseResource theSubject,
+				IIdType theSubjectId,
+				SectionRegistry.Section theSection,
+				String theResourceType) {
 			super(theSubject, theSubjectId);
 			mySection = theSection;
 			myResourceType = theResourceType;

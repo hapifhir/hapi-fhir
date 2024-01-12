@@ -134,7 +134,8 @@ public interface IIpsGenerationStrategy {
 	 * @since 7.0.0
 	 */
 	@Nullable
-	List<IBaseResource> fetchResourcesForSectionManually(IpsContext theIpsContext, IpsContext.IpsSectionContext theSectionContext);
+	List<IBaseResource> fetchResourcesForSectionManually(
+			IpsContext theIpsContext, IpsContext.IpsSectionContext theSectionContext);
 
 	/**
 	 * This method can manipulate the {@link SearchParameterMap} that will
@@ -155,7 +156,7 @@ public interface IIpsGenerationStrategy {
 	 * @param theSearchParameterMap The map to manipulate.
 	 */
 	void massageResourceSearch(
-		IpsContext.IpsSectionContext theIpsSectionContext, SearchParameterMap theSearchParameterMap);
+			IpsContext.IpsSectionContext theIpsSectionContext, SearchParameterMap theSearchParameterMap);
 
 	/**
 	 * Return a set of Include directives to be added to the resource search
@@ -185,5 +186,4 @@ public interface IIpsGenerationStrategy {
 	 * </p>
 	 */
 	boolean shouldInclude(IpsContext.IpsSectionContext theIpsSectionContext, IBaseResource theCandidate);
-
 }
