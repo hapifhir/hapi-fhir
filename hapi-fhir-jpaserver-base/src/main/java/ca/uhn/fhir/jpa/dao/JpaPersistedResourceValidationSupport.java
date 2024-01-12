@@ -31,6 +31,7 @@ import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.SortOrderEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.UriParam;
@@ -172,7 +173,7 @@ public class JpaPersistedResourceValidationSupport implements IValidationSupport
 		}
 		IBundleProvider search = myDaoRegistry
 				.getResourceDao("StructureDefinition")
-				.search(new SearchParameterMap().setLoadSynchronousUpTo(1000));
+				.search(new SearchParameterMap().setLoadSynchronousUpTo(1000), new SystemRequestDetails());
 		return (List<T>) search.getResources(0, 1000);
 	}
 

@@ -25,6 +25,7 @@ import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.PatchTypeEnum;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -36,6 +37,7 @@ import ca.uhn.fhir.util.bundle.ModifiableBundleEntry;
 import ca.uhn.fhir.util.bundle.SearchBundleEntryParts;
 import com.google.common.collect.Sets;
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.tuple.Pair;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBinary;
@@ -56,6 +58,7 @@ import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
+import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.hl7.fhir.instance.model.api.IBaseBundle.LINK_PREV;
 
@@ -150,7 +153,42 @@ public class BundleUtil {
 		return getLinkUrlOfType(theContext, theBundle, theLinkRelation, false);
 	}
 
+	/**
+	 * Returns a collection of Pairs, one for each entry in the bundle. Each pair will contain
+	 * the values of Bundle.entry.fullUrl, and Bundle.entry.resource respectively. Nulls
+	 * are possible in either or both values in the Pair.
+	 *
+	 * @since 7.0.0
+	 */
 	@SuppressWarnings("unchecked")
+	public static List<Pair<String, IBaseResource>> getBundleEntryFullUrlsAndResources(
+			FhirContext theContext, IBaseBundle theBundle) {
+		RuntimeResourceDefinition def = theContext.getResourceDefinition(theBundle);
+		BaseRuntimeChildDefinition entryChild = def.getChildByName("entry");
+		List<IBase> entries = entryChild.getAccessor().getValues(theBundle);
+
+		BaseRuntimeElementCompositeDefinition<?> entryChildElem =
+				(BaseRuntimeElementCompositeDefinition<?>) entryChild.getChildByName("entry");
+		BaseRuntimeChildDefinition resourceChild = entryChildElem.getChildByName("resource");
+
+		BaseRuntimeChildDefinition urlChild = entryChildElem.getChildByName("fullUrl");
+
+		List<Pair<String, IBaseResource>> retVal = new ArrayList<>(entries.size());
+		for (IBase nextEntry : entries) {
+
+			String fullUrl = urlChild.getAccessor()
+					.getFirstValueOrNull(nextEntry)
+					.map(t -> (((IPrimitiveType<?>) t).getValueAsString()))
+					.orElse(null);
+			IBaseResource resource = (IBaseResource)
+					resourceChild.getAccessor().getFirstValueOrNull(nextEntry).orElse(null);
+
+			retVal.add(Pair.of(fullUrl, resource));
+		}
+
+		return retVal;
+	}
+
 	public static List<Pair<String, IBaseResource>> getBundleEntryUrlsAndResources(
 			FhirContext theContext, IBaseBundle theBundle) {
 		RuntimeResourceDefinition def = theContext.getResourceDefinition(theBundle);
@@ -170,19 +208,15 @@ public class BundleUtil {
 		List<Pair<String, IBaseResource>> retVal = new ArrayList<>(entries.size());
 		for (IBase nextEntry : entries) {
 
-			String url = null;
-			IBaseResource resource = null;
+			String url = requestChild
+					.getAccessor()
+					.getFirstValueOrNull(nextEntry)
+					.flatMap(e -> urlChild.getAccessor().getFirstValueOrNull(e))
+					.map(t -> ((IPrimitiveType<?>) t).getValueAsString())
+					.orElse(null);
 
-			for (IBase nextEntryValue : requestChild.getAccessor().getValues(nextEntry)) {
-				for (IBase nextUrlValue : urlChild.getAccessor().getValues(nextEntryValue)) {
-					url = ((IPrimitiveType<String>) nextUrlValue).getValue();
-				}
-			}
-
-			// Should return 0..1 only
-			for (IBase nextValue : resourceChild.getAccessor().getValues(nextEntry)) {
-				resource = (IBaseResource) nextValue;
-			}
+			IBaseResource resource = (IBaseResource)
+					resourceChild.getAccessor().getFirstValueOrNull(nextEntry).orElse(null);
 
 			retVal.add(Pair.of(url, resource));
 		}
@@ -640,6 +674,41 @@ public class BundleUtil {
 			}
 		}
 		return retVal;
+	}
+
+	public static IBase getReferenceInBundle(
+			@Nonnull FhirContext theFhirContext, @Nonnull String theUrl, @Nullable Object theAppContext) {
+		if (!(theAppContext instanceof IBaseBundle) || isBlank(theUrl) || theUrl.startsWith("#")) {
+			return null;
+		}
+
+		/*
+		 * If this is a reference that is a UUID, we must be looking for local references within a Bundle
+		 */
+		IBaseBundle bundle = (IBaseBundle) theAppContext;
+
+		final boolean isPlaceholderReference = theUrl.startsWith("urn:");
+		final String unqualifiedVersionlessReference =
+				new IdDt(theUrl).toUnqualifiedVersionless().getValue();
+
+		for (BundleEntryParts next : BundleUtil.toListOfEntries(theFhirContext, bundle)) {
+			IBaseResource nextResource = next.getResource();
+			if (nextResource == null) {
+				continue;
+			}
+			if (isPlaceholderReference) {
+				if (theUrl.equals(next.getUrl())
+						|| theUrl.equals(nextResource.getIdElement().getValue())) {
+					return nextResource;
+				}
+			} else {
+				if (unqualifiedVersionlessReference.equals(
+						nextResource.getIdElement().toUnqualifiedVersionless().getValue())) {
+					return nextResource;
+				}
+			}
+		}
+		return null;
 	}
 
 	/**
