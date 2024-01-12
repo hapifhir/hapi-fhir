@@ -122,7 +122,7 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 		protected List<Extension> messageHeaderAutoVersionExtension = Collections.emptyList();
 
 		@Test
-		public void testCreateAndUpdateVersionedReferencesInTransaction_VersionedReferenceToUpsertWithNop() {
+		public void testCreateAndUpdateVersionedReferencesInTransaction_VersionedReferenceToUpsertWithNoOp() {
 			// We'll submit the same bundle twice. It has an UPSERT (with no changes
 			// the second time) on a Patient, and a CREATE on an ExplanationOfBenefit
 			// referencing that Patient.
@@ -163,7 +163,7 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 		}
 
 		@Test
-		public void testCreateAndUpdateVersionedReferencesInTransaction_VersionedReferenceToVersionedReferenceToUpsertWithNop() {
+		public void testCreateAndUpdateVersionedReferencesInTransaction_VersionedReferenceToVersionedReferenceToUpsertWithNoOp() {
 			// We'll submit the same bundle twice. It has an UPSERT (with no changes
 			// the second time) on a Patient, and a CREATE on an ExplanationOfBenefit
 			// referencing that Patient.
@@ -346,7 +346,7 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 
 
 		@Test
-		public void testInsertVersionedReferenceAtPath_InTransaction_TargetConditionalCreatedNop() {
+		public void testInsertVersionedReferenceAtPath_InTransaction_TargetConditionalCreatedNoOp() {
 			{
 				// Create patient
 				createAndUpdatePatient(IdType.newRandomUuid().getId());
@@ -487,7 +487,7 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 
 		@Test
 		@DisplayName("Bundle transaction with AutoVersionReferenceAtPath on and with existing Patient resource should create")
-		public void bundleTransaction_autoreferenceAtPathWithPreexistingPatientReference_shouldCreate() {
+		public void bundleTransaction_autoVersionReferenceAtPathWithPreexistingPatientReference_shouldCreate() {
 			String patientId = "Patient/RED";
 			IIdType idType = new IdDt(patientId);
 
