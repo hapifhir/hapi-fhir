@@ -169,7 +169,7 @@ You can also configure HAPI to not strip versions only on certain fields. This i
 
 # Automatically Versioned References
 
-It is possible to configure HAPI to automatically version references for desired resource instances by proving `auto-version-references-at-path` extension in `Resource.meta` element:
+It is possible to configure HAPI to automatically version references for desired resource instances by providing the `auto-version-references-at-path` extension in the `Resource.meta` element:
 
 ```json
 "meta": {
@@ -184,4 +184,4 @@ It is possible to configure HAPI to automatically version references for desired
 
 It is allowed to add multiple extensions with different paths. When a resource is stored, any references found at the specified paths will have the current version of the target appended, if a version is not already present.
 
-Parser will not strip versions from references at paths provided by `auto-version-references-at-path` extension.
+Parser will not strip versions from references at paths provided by the `auto-version-references-at-path` extension.
