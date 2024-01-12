@@ -7,7 +7,7 @@ import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.mdm.dao.IMdmLinkDao;
 import ca.uhn.fhir.mdm.model.MdmPidTuple;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
-import org.apache.commons.collections4.CollectionUtils;
+import jakarta.annotation.Nonnull;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -21,14 +21,12 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -61,34 +59,34 @@ class MdmLinkExpandSvcTest {
 
 	void beforeEachExpand() {
 		final Answer<Set<String>> answer = invocation -> {
-            final Set<IResourcePersistentId<?>> param = invocation.getArgument(0);
-            return param.stream()
-                .filter(JpaPid.class::isInstance)
-                .map(JpaPid.class::cast)
-                .map(pid -> Long.toString(pid.getId()))
-                .collect(Collectors.toUnmodifiableSet());
-        };
+			final Set<IResourcePersistentId<?>> param = invocation.getArgument(0);
+			return param.stream()
+				.filter(JpaPid.class::isInstance)
+				.map(JpaPid.class::cast)
+				.map(pid -> Long.toString(pid.getId()))
+				.collect(Collectors.toUnmodifiableSet());
+		};
 
 		when(myIdHelperService.translatePidsToFhirResourceIds(any()))
 			.thenAnswer(answer);
 	}
 
-	private static Stream<Arguments> partitions() {
+	private static Stream<Arguments> partitionsAndExpectedPids() {
 		return Stream.of(
-			Arguments.of(RequestPartitionId.allPartitions()),
-			Arguments.of(RequestPartitionId.defaultPartition()),
-			Arguments.of(RequestPartitionId.fromPartitionIds(List.of(PARTITION_A))),
-			Arguments.of(RequestPartitionId.fromPartitionIds(List.of(PARTITION_B))),
-			Arguments.of(RequestPartitionId.fromPartitionIds(List.of(PARTITION_GOLDEN))),
-			Arguments.of(RequestPartitionId.fromPartitionIds(List.of(PARTITION_A, PARTITION_B))),
-			Arguments.of(RequestPartitionId.fromPartitionIds(Arrays.asList(PARTITION_A, PARTITION_B, null))),
-			Arguments.of(RequestPartitionId.fromPartitionIds(Arrays.asList(PARTITION_A, PARTITION_B, PARTITION_GOLDEN, null)))
+			Arguments.of(RequestPartitionId.allPartitions(), ALL_PIDS),
+			Arguments.of(RequestPartitionId.defaultPartition(), Collections.singleton(JPA_PID_PARTITION_DEFAULT)),
+			Arguments.of(RequestPartitionId.fromPartitionIds(List.of(PARTITION_A)), Set.of(JPA_PID_PARTITION_A_1, JPA_PID_PARTITION_A_2)),
+			Arguments.of(RequestPartitionId.fromPartitionIds(List.of(PARTITION_B)), Collections.singleton(JPA_PID_PARTITION_B)),
+			Arguments.of(RequestPartitionId.fromPartitionIds(List.of(PARTITION_GOLDEN)), Collections.singleton(JPA_PID_PARTITION_GOLDEN)),
+			Arguments.of(RequestPartitionId.fromPartitionIds(List.of(PARTITION_A, PARTITION_B)), Set.of(JPA_PID_PARTITION_A_1, JPA_PID_PARTITION_A_2, JPA_PID_PARTITION_B)),
+			Arguments.of(RequestPartitionId.fromPartitionIds(Arrays.asList(PARTITION_A, PARTITION_B, null)), Set.of(JPA_PID_PARTITION_A_1, JPA_PID_PARTITION_A_2, JPA_PID_PARTITION_B, JPA_PID_PARTITION_DEFAULT)),
+			Arguments.of(RequestPartitionId.fromPartitionIds(Arrays.asList(PARTITION_A, PARTITION_B, PARTITION_GOLDEN, null)), ALL_PIDS)
 		);
 	}
 
 	@ParameterizedTest
-	@MethodSource("partitions")
-	void expandMdmBySourceResourcePid(RequestPartitionId theRequestPartitionId) {
+	@MethodSource("partitionsAndExpectedPids")
+	void expandMdmBySourceResourcePid(RequestPartitionId theRequestPartitionId, Set<JpaPid> theExpectedJpaPids) {
 		beforeEachExpand();
 
 		final JpaPid jpaPid = JpaPid.fromId(123L);
@@ -113,67 +111,21 @@ class MdmLinkExpandSvcTest {
 		);
 
 		final Set<String> resolvedPids = mySubject.expandMdmBySourceResourcePid(theRequestPartitionId, jpaPid);
-		ourLog.info("resolvedPids: {}", resolvedPids);
 
-		if (theRequestPartitionId.isAllPartitions() || Arrays.asList(PARTITION_A, PARTITION_B, PARTITION_GOLDEN, null).equals(theRequestPartitionId.getPartitionIds())) {
-			ourLog.info("isAllPartitions");
-			final Set<String> collect = ALL_PIDS.stream().map(JpaPid::getId).map(pid -> Long.toString(pid)).collect(Collectors.toUnmodifiableSet());
-			assertTrue(CollectionUtils.isEqualCollection(collect, resolvedPids), String.format("expected: %s, actual: %s", ALL_PIDS, resolvedPids));
-		} else if (theRequestPartitionId.isDefaultPartition()) {
-			ourLog.info("isDefaultPartition");
-			assertEquals(mapToStringPids(JPA_PID_PARTITION_DEFAULT), resolvedPids);
-		} else if (hasOnlyPartition(PARTITION_A, theRequestPartitionId)) {
-			ourLog.info("PARTITION_A");
-			assertEquals(mapToStringPids(JPA_PID_PARTITION_A_1, JPA_PID_PARTITION_A_2), resolvedPids);
-		} else if (hasOnlyPartition(PARTITION_B, theRequestPartitionId)) {
-			ourLog.info("PARTITION_B");
-			assertEquals(mapToStringPids(JPA_PID_PARTITION_B), resolvedPids);
-		} else if (hasOnlyPartition(PARTITION_GOLDEN, theRequestPartitionId)) {
-			ourLog.info("PARTITION_GOLDEN");
-			assertEquals(mapToStringPids(JPA_PID_PARTITION_GOLDEN), resolvedPids);
-		} else if (Set.of(PARTITION_A, PARTITION_B).equals(new HashSet<>(theRequestPartitionId.getPartitionIds()))) {
-			ourLog.info("PARTITION_A, PARTITION_B");
-			assertEquals(mapToStringPids(JPA_PID_PARTITION_A_1, JPA_PID_PARTITION_A_2, JPA_PID_PARTITION_B), resolvedPids);
-		} else if (Arrays.asList(PARTITION_A, PARTITION_B, null).equals(theRequestPartitionId.getPartitionIds())) {
-			ourLog.info("PARTITION_A, PARTITION_B, null");
-			assertEquals(mapToStringPids(JPA_PID_PARTITION_A_1, JPA_PID_PARTITION_A_2, JPA_PID_PARTITION_B, JPA_PID_PARTITION_DEFAULT), resolvedPids);
-		}
+		assertEquals(toPidStrings(theExpectedJpaPids), resolvedPids, String.format("expected: %s, actual: %s", theExpectedJpaPids, resolvedPids));
 	}
 
 	@ParameterizedTest
-	@MethodSource("partitions")
-	void expandMdmByGoldenResourcePid(RequestPartitionId theRequestPartitionId) {
+	@MethodSource("partitionsAndExpectedPids")
+	void expandMdmByGoldenResourcePid(RequestPartitionId theRequestPartitionId, Set<JpaPid> theExpectedJpaPids) {
 		beforeEachExpand();
 
 		when(myIMdmLinkDao.expandPidsByGoldenResourcePidAndMatchResult(any(), any()))
 			.thenReturn(List.of(JPA_PID_MDM_PID_TUPLE_1, JPA_PID_MDM_PID_TUPLE_2, JPA_PID_MDM_PID_TUPLE_3, JPA_PID_MDM_PID_TUPLE_4));
 		final JpaPid jpaPid = JpaPid.fromId(123L);
 		final Set<String> resolvedPids = mySubject.expandMdmByGoldenResourcePid(theRequestPartitionId, jpaPid);
-		ourLog.info("resolvedPids: {}", resolvedPids);
 
-		if (theRequestPartitionId.isAllPartitions() || Arrays.asList(PARTITION_A, PARTITION_B, PARTITION_GOLDEN, null).equals(theRequestPartitionId.getPartitionIds())) {
-			ourLog.info("isAllPartitions");
-			final Set<String> collect = ALL_PIDS.stream().map(JpaPid::getId).map(pid -> Long.toString(pid)).collect(Collectors.toUnmodifiableSet());
-			assertTrue(CollectionUtils.isEqualCollection(collect, resolvedPids), String.format("expected: %s, actual: %s", ALL_PIDS, resolvedPids));
-		} else if (theRequestPartitionId.isDefaultPartition()) {
-			ourLog.info("isDefaultPartition");
-			assertEquals(mapToStringPids(JPA_PID_PARTITION_DEFAULT), resolvedPids);
-		} else if (hasOnlyPartition(PARTITION_A, theRequestPartitionId)) {
-			ourLog.info("PARTITION_A");
-			assertEquals(mapToStringPids(JPA_PID_PARTITION_A_1, JPA_PID_PARTITION_A_2), resolvedPids);
-		} else if (hasOnlyPartition(PARTITION_B, theRequestPartitionId)) {
-			ourLog.info("PARTITION_B");
-			assertEquals(mapToStringPids(JPA_PID_PARTITION_B), resolvedPids);
-		} else if (hasOnlyPartition(PARTITION_GOLDEN, theRequestPartitionId)) {
-			ourLog.info("PARTITION_GOLDEN");
-			assertEquals(mapToStringPids(JPA_PID_PARTITION_GOLDEN), resolvedPids);
-		} else if (Set.of(PARTITION_A, PARTITION_B).equals(new HashSet<>(theRequestPartitionId.getPartitionIds()))) {
-			ourLog.info("PARTITION_A, PARTITION_B");
-			assertEquals(mapToStringPids(JPA_PID_PARTITION_A_1, JPA_PID_PARTITION_A_2, JPA_PID_PARTITION_B), resolvedPids);
-		} else if (Arrays.asList(PARTITION_A, PARTITION_B, null).equals(theRequestPartitionId.getPartitionIds())) {
-			ourLog.info("PARTITION_A, PARTITION_B, null");
-			assertEquals(mapToStringPids(JPA_PID_PARTITION_A_1, JPA_PID_PARTITION_A_2, JPA_PID_PARTITION_B, JPA_PID_PARTITION_DEFAULT), resolvedPids);
-		}
+		assertEquals(toPidStrings(theExpectedJpaPids), resolvedPids, String.format("expected: %s, actual: %s", theExpectedJpaPids, resolvedPids));
 	}
 
 	private static Stream<Arguments> partitionsAndTuples() {
@@ -219,14 +171,8 @@ class MdmLinkExpandSvcTest {
 		assertEquals(theExpectedResourceIds, MdmLinkExpandSvc.flattenTuple(theRequestPartitionId, theTuple));
 	}
 
-	private static boolean hasOnlyPartition(Integer thePartition, RequestPartitionId theRequestPartitionId) {
-		return Set.of(thePartition).equals(new HashSet<>(theRequestPartitionId.getPartitionIds()));
-	}
-
-	private static Set<String> mapToStringPids(JpaPid... theJpaPids) {
-		return Arrays.stream(theJpaPids)
-			.map(JpaPid::getId)
-			.map(pid -> Long.toString(pid))
-			.collect(Collectors.toUnmodifiableSet());
+	@Nonnull
+	private Set<String> toPidStrings(Set<JpaPid> theTheExpectedJpaPids) {
+		return theTheExpectedJpaPids.stream().map(JpaPid::getId).map(id -> Long.toString(id)).collect(Collectors.toUnmodifiableSet());
 	}
 }
