@@ -12,16 +12,12 @@ import ca.uhn.fhir.jpa.api.model.BulkExportJobResults;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
-import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
-import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
 import ca.uhn.fhir.rest.client.apache.ResourceEntity;
-import ca.uhn.fhir.rest.param.StringParam;
-import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.test.utilities.HttpClientExtension;
@@ -95,6 +91,7 @@ import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
@@ -407,6 +404,72 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 		options.setOutputFormat(Constants.CT_FHIR_NDJSON);
 
 		verifyBulkExportResults(options, List.of("Patient/P1", obsId, encId), List.of("Patient/P2", obsId2, encId2, obsId3));
+	}
+
+	@Test
+	public void testBulkExportParametersPersistExtraData() {
+		// setup
+		myStorageSettings.setIndexMissingFields(JpaStorageSettings.IndexEnabledEnum.ENABLED);
+		List<String> ids = new ArrayList<>();
+
+		// create some resources
+		Patient patient = new Patient();
+		patient.setId("P1");
+		patient.setActive(true);
+		myClient.update().resource(patient).execute();
+		ids.add("Patient/P1");
+
+		Observation observation;
+		for (int i = 0; i < 5; i++) {
+			observation = new Observation();
+			observation.setSubject(new Reference().setReference("Patient/P1"));
+			observation.setStatus(Observation.ObservationStatus.PRELIMINARY);
+			String obsId = myClient.create().resource(observation).execute().getId().toUnqualifiedVersionless().getValue();
+			ids.add(obsId);
+		}
+
+		Encounter encounter = new Encounter();
+		encounter.setSubject(new Reference().setReference("Patient/P1"));
+		encounter.setStatus(Encounter.EncounterStatus.INPROGRESS);
+		String encId = myClient.create().resource(encounter).execute().getId().toUnqualifiedVersionless().getValue();
+		ids.add(encId);
+
+		// set the export options
+		BulkExportJobParameters options = new BulkExportJobParameters();
+		options.setResourceTypes(Sets.newHashSet("Patient", "Observation", "Encounter"));
+		options.setPatientIds(Set.of("Patient/P1"));
+		options.setFilters(new HashSet<>());
+		options.setExportStyle(BulkExportJobParameters.ExportStyle.PATIENT);
+		options.setOutputFormat(Constants.CT_FHIR_NDJSON);
+
+		String key = "counter";
+		String value = "value_";
+		options.setUserData(key, value);
+
+		List<String> valueSet = new ArrayList<>();
+		Object interceptor = new Object() {
+			@Hook(Pointcut.STORAGE_BULK_EXPORT_RESOURCE_INCLUSION)
+			public void onExpandResources(IBaseResource theBaseResource, BulkExportJobParameters theParams) {
+				// this will be called once per every resource
+				String value = (String) theParams.getUserData().get(key);
+				valueSet.add(value + theBaseResource.getIdElement().toUnqualifiedVersionless().getValue());
+			}
+		};
+		myInterceptorRegistry.registerInterceptor(interceptor);
+
+		try {
+			verifyBulkExportResults(options, ids, new ArrayList<>());
+
+			assertFalse(valueSet.isEmpty());
+			assertEquals(ids.size(), valueSet.size());
+			for (String id : valueSet) {
+				// should start with our value from the key-value pairs
+				assertTrue(id.startsWith(value));
+				assertTrue(ids.contains(id.substring(value.length())));
+			}
+		} finally {
+			myInterceptorRegistry.unregisterInterceptor(interceptor);
+		}
 	}
 
 	@Test
