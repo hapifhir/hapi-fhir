@@ -8,7 +8,6 @@ import ca.uhn.fhir.mdm.dao.IMdmLinkDao;
 import ca.uhn.fhir.mdm.model.MdmPidTuple;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import org.apache.commons.collections4.CollectionUtils;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -21,6 +20,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -43,12 +43,12 @@ class MdmLinkExpandSvcTest {
 	private static final JpaPid JPA_PID_PARTITION_B = JpaPid.fromId(456L);
 	private static final JpaPid JPA_PID_PARTITION_A_2 = JpaPid.fromId(789L);
 	private static final JpaPid JPA_PID_PARTITION_DEFAULT = JpaPid.fromId(111L);
-	private static final JpaPid JPA_PID_GOLDEN = JpaPid.fromId(999L);
-	private static final Set<JpaPid> ALL_PIDS = Set.of(JPA_PID_PARTITION_A_1, JPA_PID_PARTITION_B, JPA_PID_PARTITION_A_2, JPA_PID_GOLDEN, JPA_PID_PARTITION_DEFAULT);
-	private static final MdmPidTuple<JpaPid> JPA_PID_MDM_PID_TUPLE_1 = MdmPidTuple.fromGoldenAndSourceAndPartitionIds(JPA_PID_GOLDEN, JPA_PID_PARTITION_A_1, PARTITION_GOLDEN, PARTITION_A);
-	private static final MdmPidTuple<JpaPid> JPA_PID_MDM_PID_TUPLE_2 = MdmPidTuple.fromGoldenAndSourceAndPartitionIds(JPA_PID_GOLDEN, JPA_PID_PARTITION_B, PARTITION_GOLDEN, PARTITION_B);
-	private static final MdmPidTuple<JpaPid> JPA_PID_MDM_PID_TUPLE_3 = MdmPidTuple.fromGoldenAndSourceAndPartitionIds(JPA_PID_GOLDEN, JPA_PID_PARTITION_A_2, PARTITION_GOLDEN, PARTITION_A);
-	private static final MdmPidTuple<JpaPid> JPA_PID_MDM_PID_TUPLE_4 = MdmPidTuple.fromGoldenAndSourceAndPartitionIds(JPA_PID_GOLDEN, JPA_PID_PARTITION_DEFAULT, PARTITION_GOLDEN, null);
+	private static final JpaPid JPA_PID_PARTITION_GOLDEN = JpaPid.fromId(999L);
+	private static final Set<JpaPid> ALL_PIDS = Set.of(JPA_PID_PARTITION_A_1, JPA_PID_PARTITION_B, JPA_PID_PARTITION_A_2, JPA_PID_PARTITION_GOLDEN, JPA_PID_PARTITION_DEFAULT);
+	private static final MdmPidTuple<JpaPid> JPA_PID_MDM_PID_TUPLE_1 = MdmPidTuple.fromGoldenAndSourceAndPartitionIds(JPA_PID_PARTITION_GOLDEN, PARTITION_GOLDEN, JPA_PID_PARTITION_A_1, PARTITION_A);
+	private static final MdmPidTuple<JpaPid> JPA_PID_MDM_PID_TUPLE_2 = MdmPidTuple.fromGoldenAndSourceAndPartitionIds(JPA_PID_PARTITION_GOLDEN, PARTITION_GOLDEN, JPA_PID_PARTITION_B, PARTITION_B);
+	private static final MdmPidTuple<JpaPid> JPA_PID_MDM_PID_TUPLE_3 = MdmPidTuple.fromGoldenAndSourceAndPartitionIds(JPA_PID_PARTITION_GOLDEN, PARTITION_GOLDEN, JPA_PID_PARTITION_A_2, PARTITION_A);
+	private static final MdmPidTuple<JpaPid> JPA_PID_MDM_PID_TUPLE_4 = MdmPidTuple.fromGoldenAndSourceAndPartitionIds(JPA_PID_PARTITION_GOLDEN, PARTITION_GOLDEN, JPA_PID_PARTITION_DEFAULT, null);
 
 	@Mock
 	private IMdmLinkDao<JpaPid,?> myIMdmLinkDao;
@@ -57,10 +57,9 @@ class MdmLinkExpandSvcTest {
 	private IIdHelperService<?> myIdHelperService;
 
 	@InjectMocks
-	private MdmLinkExpandSvc myMdmLinkExpandSvc;
+	private MdmLinkExpandSvc mySubject;
 
-	@BeforeEach
-	void beforeEach() {
+	void beforeEachExpand() {
 		final Answer<Set<String>> answer = invocation -> {
             final Set<IResourcePersistentId<?>> param = invocation.getArgument(0);
             return param.stream()
@@ -90,6 +89,8 @@ class MdmLinkExpandSvcTest {
 	@ParameterizedTest
 	@MethodSource("partitions")
 	void expandMdmBySourceResourcePid(RequestPartitionId theRequestPartitionId) {
+		beforeEachExpand();
+
 		final JpaPid jpaPid = JpaPid.fromId(123L);
 		when(myIMdmLinkDao.expandPidsBySourcePidAndMatchResult(jpaPid, MdmMatchResultEnum.MATCH)).thenReturn(List.of(
 			JPA_PID_MDM_PID_TUPLE_1,
@@ -111,7 +112,7 @@ class MdmLinkExpandSvcTest {
 			JPA_PID_MDM_PID_TUPLE_4)
 		);
 
-		final Set<String> resolvedPids = myMdmLinkExpandSvc.expandMdmBySourceResourcePid(theRequestPartitionId, jpaPid);
+		final Set<String> resolvedPids = mySubject.expandMdmBySourceResourcePid(theRequestPartitionId, jpaPid);
 		ourLog.info("resolvedPids: {}", resolvedPids);
 
 		if (theRequestPartitionId.isAllPartitions() || Arrays.asList(PARTITION_A, PARTITION_B, PARTITION_GOLDEN, null).equals(theRequestPartitionId.getPartitionIds())) {
@@ -129,7 +130,7 @@ class MdmLinkExpandSvcTest {
 			assertEquals(mapToStringPids(JPA_PID_PARTITION_B), resolvedPids);
 		} else if (hasOnlyPartition(PARTITION_GOLDEN, theRequestPartitionId)) {
 			ourLog.info("PARTITION_GOLDEN");
-			assertEquals(mapToStringPids(JPA_PID_GOLDEN), resolvedPids);
+			assertEquals(mapToStringPids(JPA_PID_PARTITION_GOLDEN), resolvedPids);
 		} else if (Set.of(PARTITION_A, PARTITION_B).equals(new HashSet<>(theRequestPartitionId.getPartitionIds()))) {
 			ourLog.info("PARTITION_A, PARTITION_B");
 			assertEquals(mapToStringPids(JPA_PID_PARTITION_A_1, JPA_PID_PARTITION_A_2, JPA_PID_PARTITION_B), resolvedPids);
@@ -142,10 +143,12 @@ class MdmLinkExpandSvcTest {
 	@ParameterizedTest
 	@MethodSource("partitions")
 	void expandMdmByGoldenResourcePid(RequestPartitionId theRequestPartitionId) {
+		beforeEachExpand();
+
 		when(myIMdmLinkDao.expandPidsByGoldenResourcePidAndMatchResult(any(), any()))
 			.thenReturn(List.of(JPA_PID_MDM_PID_TUPLE_1, JPA_PID_MDM_PID_TUPLE_2, JPA_PID_MDM_PID_TUPLE_3, JPA_PID_MDM_PID_TUPLE_4));
 		final JpaPid jpaPid = JpaPid.fromId(123L);
-		final Set<String> resolvedPids = myMdmLinkExpandSvc.expandMdmByGoldenResourcePid(theRequestPartitionId, jpaPid);
+		final Set<String> resolvedPids = mySubject.expandMdmByGoldenResourcePid(theRequestPartitionId, jpaPid);
 		ourLog.info("resolvedPids: {}", resolvedPids);
 
 		if (theRequestPartitionId.isAllPartitions() || Arrays.asList(PARTITION_A, PARTITION_B, PARTITION_GOLDEN, null).equals(theRequestPartitionId.getPartitionIds())) {
@@ -163,7 +166,7 @@ class MdmLinkExpandSvcTest {
 			assertEquals(mapToStringPids(JPA_PID_PARTITION_B), resolvedPids);
 		} else if (hasOnlyPartition(PARTITION_GOLDEN, theRequestPartitionId)) {
 			ourLog.info("PARTITION_GOLDEN");
-			assertEquals(mapToStringPids(JPA_PID_GOLDEN), resolvedPids);
+			assertEquals(mapToStringPids(JPA_PID_PARTITION_GOLDEN), resolvedPids);
 		} else if (Set.of(PARTITION_A, PARTITION_B).equals(new HashSet<>(theRequestPartitionId.getPartitionIds()))) {
 			ourLog.info("PARTITION_A, PARTITION_B");
 			assertEquals(mapToStringPids(JPA_PID_PARTITION_A_1, JPA_PID_PARTITION_A_2, JPA_PID_PARTITION_B), resolvedPids);
@@ -171,6 +174,49 @@ class MdmLinkExpandSvcTest {
 			ourLog.info("PARTITION_A, PARTITION_B, null");
 			assertEquals(mapToStringPids(JPA_PID_PARTITION_A_1, JPA_PID_PARTITION_A_2, JPA_PID_PARTITION_B, JPA_PID_PARTITION_DEFAULT), resolvedPids);
 		}
+	}
+
+	private static Stream<Arguments> partitionsAndTuples() {
+		return Stream.of(
+			Arguments.of(RequestPartitionId.allPartitions(), JPA_PID_MDM_PID_TUPLE_1, Set.of(JPA_PID_PARTITION_GOLDEN, JPA_PID_PARTITION_A_1)),
+			Arguments.of(RequestPartitionId.defaultPartition(), JPA_PID_MDM_PID_TUPLE_1, Collections.emptySet()),
+			Arguments.of(RequestPartitionId.fromPartitionIds(List.of(PARTITION_A)), JPA_PID_MDM_PID_TUPLE_1, Collections.singleton(JPA_PID_PARTITION_A_1)),
+			Arguments.of(RequestPartitionId.fromPartitionIds(List.of(PARTITION_B)), JPA_PID_MDM_PID_TUPLE_1, Collections.emptySet()),
+			Arguments.of(RequestPartitionId.fromPartitionIds(List.of(PARTITION_GOLDEN)), JPA_PID_MDM_PID_TUPLE_1, Collections.singleton(JPA_PID_PARTITION_GOLDEN)),
+			Arguments.of(RequestPartitionId.fromPartitionIds(List.of(PARTITION_A, PARTITION_B)), JPA_PID_MDM_PID_TUPLE_1, Collections.singleton(JPA_PID_PARTITION_A_1)),
+			Arguments.of(RequestPartitionId.fromPartitionIds(Arrays.asList(PARTITION_A, PARTITION_B, null)), JPA_PID_MDM_PID_TUPLE_1, Collections.singleton(JPA_PID_PARTITION_A_1)),
+			Arguments.of(RequestPartitionId.fromPartitionIds(Arrays.asList(PARTITION_A, PARTITION_B, PARTITION_GOLDEN, null)), JPA_PID_MDM_PID_TUPLE_1, Set.of(JPA_PID_PARTITION_GOLDEN, JPA_PID_PARTITION_A_1)),
+			Arguments.of(RequestPartitionId.allPartitions(), JPA_PID_MDM_PID_TUPLE_2, Set.of(JPA_PID_PARTITION_GOLDEN, JPA_PID_PARTITION_B)),
+			Arguments.of(RequestPartitionId.defaultPartition(), JPA_PID_MDM_PID_TUPLE_2, Collections.emptySet()),
+			Arguments.of(RequestPartitionId.fromPartitionIds(List.of(PARTITION_A)), JPA_PID_MDM_PID_TUPLE_2, Collections.emptySet()),
+			Arguments.of(RequestPartitionId.fromPartitionIds(List.of(PARTITION_B)), JPA_PID_MDM_PID_TUPLE_2, Collections.singleton(JPA_PID_PARTITION_B)),
+			Arguments.of(RequestPartitionId.fromPartitionIds(List.of(PARTITION_GOLDEN)), JPA_PID_MDM_PID_TUPLE_2, Collections.singleton(JPA_PID_PARTITION_GOLDEN)),
+			Arguments.of(RequestPartitionId.fromPartitionIds(List.of(PARTITION_A, PARTITION_B)), JPA_PID_MDM_PID_TUPLE_2, Collections.singleton(JPA_PID_PARTITION_B)),
+			Arguments.of(RequestPartitionId.fromPartitionIds(Arrays.asList(PARTITION_A, PARTITION_B, null)), JPA_PID_MDM_PID_TUPLE_2, Collections.singleton(JPA_PID_PARTITION_B)),
+			Arguments.of(RequestPartitionId.fromPartitionIds(Arrays.asList(PARTITION_A, PARTITION_B, PARTITION_GOLDEN, null)), JPA_PID_MDM_PID_TUPLE_2, Set.of(JPA_PID_PARTITION_GOLDEN, JPA_PID_PARTITION_B)),
+			Arguments.of(RequestPartitionId.allPartitions(), JPA_PID_MDM_PID_TUPLE_3, Set.of(JPA_PID_PARTITION_GOLDEN, JPA_PID_PARTITION_A_2)),
+			Arguments.of(RequestPartitionId.defaultPartition(), JPA_PID_MDM_PID_TUPLE_3, Collections.emptySet()),
+			Arguments.of(RequestPartitionId.fromPartitionIds(List.of(PARTITION_A)), JPA_PID_MDM_PID_TUPLE_3, Collections.singleton(JPA_PID_PARTITION_A_2)),
+			Arguments.of(RequestPartitionId.fromPartitionIds(List.of(PARTITION_B)), JPA_PID_MDM_PID_TUPLE_3, Collections.emptySet()),
+			Arguments.of(RequestPartitionId.fromPartitionIds(List.of(PARTITION_GOLDEN)), JPA_PID_MDM_PID_TUPLE_3, Collections.singleton(JPA_PID_PARTITION_GOLDEN)),
+			Arguments.of(RequestPartitionId.fromPartitionIds(List.of(PARTITION_A, PARTITION_B)), JPA_PID_MDM_PID_TUPLE_3, Collections.singleton(JPA_PID_PARTITION_A_2)),
+			Arguments.of(RequestPartitionId.fromPartitionIds(Arrays.asList(PARTITION_A, PARTITION_B, null)), JPA_PID_MDM_PID_TUPLE_3, Collections.singleton(JPA_PID_PARTITION_A_2)),
+			Arguments.of(RequestPartitionId.fromPartitionIds(Arrays.asList(PARTITION_A, PARTITION_B, PARTITION_GOLDEN, null)), JPA_PID_MDM_PID_TUPLE_3, Set.of(JPA_PID_PARTITION_GOLDEN, JPA_PID_PARTITION_A_2)),
+			Arguments.of(RequestPartitionId.allPartitions(), JPA_PID_MDM_PID_TUPLE_4, Set.of(JPA_PID_PARTITION_GOLDEN, JPA_PID_PARTITION_DEFAULT)),
+			Arguments.of(RequestPartitionId.defaultPartition(), JPA_PID_MDM_PID_TUPLE_4, Collections.singleton(JPA_PID_PARTITION_DEFAULT)),
+			Arguments.of(RequestPartitionId.fromPartitionIds(List.of(PARTITION_A)), JPA_PID_MDM_PID_TUPLE_4, Collections.emptySet()),
+			Arguments.of(RequestPartitionId.fromPartitionIds(List.of(PARTITION_B)), JPA_PID_MDM_PID_TUPLE_4, Collections.emptySet()),
+			Arguments.of(RequestPartitionId.fromPartitionIds(List.of(PARTITION_GOLDEN)), JPA_PID_MDM_PID_TUPLE_4, Collections.singleton(JPA_PID_PARTITION_GOLDEN)),
+			Arguments.of(RequestPartitionId.fromPartitionIds(List.of(PARTITION_A, PARTITION_B)), JPA_PID_MDM_PID_TUPLE_4, Collections.emptySet()),
+			Arguments.of(RequestPartitionId.fromPartitionIds(Arrays.asList(PARTITION_A, PARTITION_B, null)), JPA_PID_MDM_PID_TUPLE_4, Collections.singleton(JPA_PID_PARTITION_DEFAULT)),
+			Arguments.of(RequestPartitionId.fromPartitionIds(Arrays.asList(PARTITION_A, PARTITION_B, PARTITION_GOLDEN, null)), JPA_PID_MDM_PID_TUPLE_4, Set.of(JPA_PID_PARTITION_DEFAULT, JPA_PID_PARTITION_GOLDEN))
+		);
+	}
+
+	@ParameterizedTest
+	@MethodSource("partitionsAndTuples")
+	void flattenTuple(RequestPartitionId theRequestPartitionId, MdmPidTuple<JpaPid> theTuple, Set<JpaPid> theExpectedResourceIds) {
+		assertEquals(theExpectedResourceIds, MdmLinkExpandSvc.flattenTuple(theRequestPartitionId, theTuple));
 	}
 
 	private static boolean hasOnlyPartition(Integer thePartition, RequestPartitionId theRequestPartitionId) {

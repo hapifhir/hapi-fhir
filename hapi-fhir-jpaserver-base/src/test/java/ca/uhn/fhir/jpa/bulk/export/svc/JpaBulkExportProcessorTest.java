@@ -176,8 +176,7 @@ public class JpaBulkExportProcessorTest {
 	}
 
 	private MdmPidTuple<JpaPid> createTuple(long theGroupId, long theGoldenId) {
-		// LUKETODO:
-		return MdmPidTuple.fromGoldenAndSourceAndPartitionIds(JpaPid.fromId(theGoldenId), JpaPid.fromId(theGroupId), null, null);
+		return MdmPidTuple.fromGoldenAndSourceAndPartitionIds(JpaPid.fromId(theGoldenId), null, JpaPid.fromId(theGroupId), null);
 	}
 
 	@ParameterizedTest

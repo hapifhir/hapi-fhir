@@ -64,7 +64,7 @@ public final class PatientEverythingParameters {
 
 	@Description(
 			shortDefinition = "If set to true, trigger an MDM expansion of identifiers corresponding to the resources.")
-	private Boolean myMdmExpand;
+	private boolean myMdmExpand = false;
 
 	public IPrimitiveType<Integer> getCount() {
 		return myCount;
@@ -98,8 +98,8 @@ public final class PatientEverythingParameters {
 		return myTypes;
 	}
 
-	public Boolean getMdmExpand() {
-		return myMdmExpand == null ? Boolean.FALSE : myMdmExpand;
+	public boolean getMdmExpand() {
+		return myMdmExpand;
 	}
 
 	public void setCount(IPrimitiveType<Integer> theCount) {

@@ -159,21 +159,18 @@ public class MdmLinkExpandSvc implements IMdmLinkExpandSvc {
 	}
 
 	@Nonnull
-	private Set<IResourcePersistentId> flattenTuple(RequestPartitionId theRequestPartitionId, MdmPidTuple<?> theTuple) {
-		if (theRequestPartitionId.isAllPartitions()) {
-			return Set.of(theTuple.getSourcePid(), theTuple.getGoldenPid());
-		}
-		if (theRequestPartitionId.getPartitionIds().contains(theTuple.getGoldenPartitionId())
-				&& theRequestPartitionId.getPartitionIds().contains(theTuple.getSourcePartitionId())) {
-			return Set.of(theTuple.getSourcePid(), theTuple.getGoldenPid());
-		}
-		if (theRequestPartitionId.getPartitionIds().contains(theTuple.getGoldenPartitionId())) {
+	static Set<IResourcePersistentId> flattenTuple(RequestPartitionId theRequestPartitionId, MdmPidTuple<?> theTuple) {
+		if (theRequestPartitionId.isPartitionCovered(theTuple.getGoldenPartitionId())) {
+			if (theRequestPartitionId.isPartitionCovered(theTuple.getSourcePartitionId())) {
+				return Set.of(theTuple.getSourcePid(), theTuple.getGoldenPid());
+			}
 			return Set.of(theTuple.getGoldenPid());
 		}
 
-		if (theRequestPartitionId.getPartitionIds().contains(theTuple.getSourcePartitionId())) {
+		if (theRequestPartitionId.isPartitionCovered(theTuple.getSourcePartitionId())) {
 			return Set.of(theTuple.getSourcePid());
 		}
+
 		return Collections.emptySet();
 	}
 }

@@ -66,7 +66,7 @@ public class JpaResourceDaoPatient<T extends IBaseResource> extends BaseHapiFhir
 			StringAndListParam theNarrative,
 			StringAndListParam theFilter,
 			StringAndListParam theTypes,
-			Boolean theMdmExpand,
+			boolean theMdmExpand,
 			RequestDetails theRequest) {
 		SearchParameterMap paramMap = new SearchParameterMap();
 		if (theCount != null) {
@@ -95,7 +95,7 @@ public class JpaResourceDaoPatient<T extends IBaseResource> extends BaseHapiFhir
 		paramMap.setSort(theSort);
 		paramMap.setLastUpdated(theLastUpdated);
 		if (theIds != null) {
-			if (theMdmExpand != null && theMdmExpand) {
+			if (theMdmExpand) {
 				theIds.getValuesAsQueryTokens().forEach(param -> param.setMdmExpand(true));
 			}
 			paramMap.add("_id", theIds);

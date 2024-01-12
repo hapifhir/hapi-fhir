@@ -274,7 +274,7 @@ public abstract class BaseJpaResourceProviderPatient<T extends IBaseResource> ex
 		return retVal;
 	}
 
-	private Boolean resolveNullValue(IPrimitiveType<Boolean> theMdmExpand) {
+	private boolean resolveNullValue(IPrimitiveType<Boolean> theMdmExpand) {
 		return theMdmExpand == null ? Boolean.FALSE : theMdmExpand.getValue();
 	}
 }

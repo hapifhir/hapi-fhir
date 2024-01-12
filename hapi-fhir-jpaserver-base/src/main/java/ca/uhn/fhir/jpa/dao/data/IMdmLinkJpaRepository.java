@@ -85,9 +85,9 @@ public interface IMdmLinkJpaRepository
 
 		Long getSourcePid();
 
-		Integer getSourcePartitionId();
-
 		Integer getGoldenPartitionId();
+
+		Integer getSourcePartitionId();
 	}
 
 	@Query(
