@@ -64,3 +64,21 @@ To enable detailed logging of client requests and responses (what URL is being r
 
 To enable detailed logging of server requests and responses, an interceptor may be added to the server which logs each transaction. See [Logging Interceptor](/docs/interceptors/built_in_server_interceptors.html#logging_interceptor) for more information.
 
+# Hibernate SQL Log Filtering
+
+Hibernate logs SQL statements from a single class, which makes hard to obtain SQL logs only for a specific feature, as logging includes all background processes.
+
+Hibernate SQL log filtering feature allows you to filter Hibernate SQL logging by adding filters in a  `hibernate-sql-log-filters.txt` file and adding it to the classpath.
+
+Hibernate SQL log filtering and its filter-refreshing task activate when `org.hibernate.SQL` logging is set to `debug` level or higher, and deactivate when logging is set to `info` level or lower. 
+
+The feature doesn't affect performance in any way while inactive, also shutting down background filter-refreshing process. It can affect performance when active, so the feature is intended only as a  debugging tool.  
+
+The filter lines must start with one of: 
+1. `stack: ` to filter log entries produced by code which stack trace has a line which starts with filter string, 
+2. `sw: ` to filter log entries which start with filter string, or
+3. `frag: ` to filter log entries which contain filter string 
+
+A sample file is provided with filter lines commented out. These filter lines, once uncommented, filter out most background processes logging. 
+
+
