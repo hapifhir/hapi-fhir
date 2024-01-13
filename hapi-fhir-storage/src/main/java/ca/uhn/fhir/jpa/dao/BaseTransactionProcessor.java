@@ -58,6 +58,7 @@ import ca.uhn.fhir.rest.api.PreferReturnEnum;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.DeferredInterceptorBroadcasts;
+import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.param.ParameterUtil;
 import ca.uhn.fhir.rest.server.RestfulServerUtils;
@@ -1680,13 +1681,10 @@ public abstract class BaseTransactionProcessor {
 				if (newId != null) {
 					ourLog.debug(" * Replacing resource ref {} with {}", nextId, newId);
 
-					addRollbackReferenceRestore(theTransactionDetails, resourceReference);
 					if (theReferencesToAutoVersion.contains(resourceReference)) {
-						resourceReference.setReference(newId.getValue());
-						resourceReference.setResource(null);
+						replaceResourceReference(newId, resourceReference, theTransactionDetails);
 					} else {
-						resourceReference.setReference(newId.toVersionless().getValue());
-						resourceReference.setResource(null);
+						replaceResourceReference(newId.toVersionless(), resourceReference, theTransactionDetails);
 					}
 				}
 			} else if (nextId.getValue().startsWith("urn:")) {
@@ -1724,9 +1722,15 @@ public abstract class BaseTransactionProcessor {
 					DaoMethodOutcome outcome = theIdToPersistedOutcome.get(nextId);
 
 					if (outcome != null && !outcome.isNop() && !Boolean.TRUE.equals(outcome.getCreated())) {
-						addRollbackReferenceRestore(theTransactionDetails, resourceReference);
-						resourceReference.setReference(nextId.getValue());
-						resourceReference.setResource(null);
+						replaceResourceReference(nextId, resourceReference, theTransactionDetails);
+					}
+
+					// if referenced resource is not in transaction but exists in the DB, resolving its version
+					IResourcePersistentId persistedReferenceId = resourceVersionMap.getResourcePersistentId(nextId);
+					if (outcome == null && persistedReferenceId != null && persistedReferenceId.getVersion() != null) {
+						IIdType newReferenceId = nextId.withVersion(
+								persistedReferenceId.getVersion().toString());
+						replaceResourceReference(newReferenceId, resourceReference, theTransactionDetails);
 					}
 				}
 			}
@@ -1812,6 +1816,13 @@ public abstract class BaseTransactionProcessor {
 				myVersionAdapter.setResponseOutcome(responseEntry, theDaoMethodOutcome.getOperationOutcome());
 			}
 		}
+	}
+
+	private void replaceResourceReference(
+			IIdType theReferenceId, IBaseReference theResourceReference, TransactionDetails theTransactionDetails) {
+		addRollbackReferenceRestore(theTransactionDetails, theResourceReference);
+		theResourceReference.setReference(theReferenceId.getValue());
+		theResourceReference.setResource(null);
 	}
 
 	private void addRollbackReferenceRestore(

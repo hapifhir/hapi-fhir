@@ -35,6 +35,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -143,5 +145,13 @@ public class MetaUtil {
 			sourceChild.getMutator().setValue(theMeta, sourceElement);
 		}
 		sourceElement.setValueAsString(theValue);
+	}
+
+	public static Set<String> getAutoVersionReferencesAtPath(IBaseMetaType theMeta, String theResourceType) {
+		return ExtensionUtil.getExtensionPrimitiveValues(
+						theMeta, HapiExtensions.EXTENSION_AUTO_VERSION_REFERENCES_AT_PATH)
+				.stream()
+				.map(path -> String.format("%s.%s", theResourceType, path))
+				.collect(Collectors.toSet());
 	}
 }
