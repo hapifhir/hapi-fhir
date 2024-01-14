@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.logging;
 
+import ca.uhn.fhir.i18n.Msg;
 import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -106,7 +107,7 @@ public class SqlLoggerFilteringUtil {
 
 			} catch (Exception theE) {
 				ourLog.error("Hibernate SQL log filters not refreshed. Exception: {} \n{}", theE, theE.getStackTrace());
-				throw new RuntimeException(theE);
+				throw new RuntimeException(Msg.code(2478) + theE);
 			} finally {
 				myRefreshDoneLatch.countDown();
 			}

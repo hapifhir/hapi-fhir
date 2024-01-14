@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.logging;
 
+import ca.uhn.fhir.i18n.Msg;
 import com.google.common.annotations.VisibleForTesting;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,7 +51,7 @@ public class SqlLoggerStackTraceFilter extends BaseSqlLoggerFilterImpl implement
 			ourLog.debug(
 					"cdrClassesInStack: {}",
 					cdrClassesInStack.stream().map(String::valueOf).collect(Collectors.joining("\n", "\n", "")));
-			throw new RuntimeException(theE);
+			throw new RuntimeException(Msg.code(2479) + theE);
 		}
 
 		return matched;
