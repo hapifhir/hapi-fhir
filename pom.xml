@@ -1000,9 +1000,9 @@
 		<maven.compiler.source>11</maven.compiler.source>
 		<maven.compiler.target>11</maven.compiler.target>
 		<maven.compiler.release>11</maven.compiler.release>
-		<maven.compiler.testSource>17</maven.compiler.testSource>
-		<maven.compiler.testTarget>17</maven.compiler.testTarget>
-		<maven.compiler.testRelease>17</maven.compiler.testRelease>
+		<maven.compiler.testSource>21</maven.compiler.testSource>
+		<maven.compiler.testTarget>21</maven.compiler.testTarget>
+		<maven.compiler.testRelease>21</maven.compiler.testRelease>
 		<maven_checkstyle_version>3.3.1</maven_checkstyle_version>
 
 		<!-- Jacoco -->
@@ -2639,10 +2639,10 @@
 									<version>3.5.4</version>
 								</requireMavenVersion>
 								<requireJavaVersion>
-									<version>17</version>
+									<version>21</version>
 									<message>
 										HAPI FHIR is targeting JDK 11 for published binaries,
-										but we require JDK 17 to build and test this library.
+										but we require JDK 21 to build and test this library.
 									</message>
 								</requireJavaVersion>
 							</rules>
@@ -3167,8 +3167,8 @@
 							<source>17</source>
 							<target>17</target>
 							<release>17</release>
-							<testSource>17</testSource>
-							<testTarget>17</testTarget>
+							<testSource>21</testSource>
+							<testTarget>21</testTarget>
 						</configuration>
 					</plugin>
 				</plugins>
