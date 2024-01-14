@@ -3,6 +3,7 @@ package org.hl7.fhir.r5.validation;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.context.support.LookupCodeRequest;
+import ca.uhn.fhir.fhirpath.BaseValidationTestWithInlineMocks;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import org.hl7.fhir.common.hapi.validation.support.RemoteTerminologyServiceValidationSupport;
 import org.junit.jupiter.api.Assertions;
@@ -10,7 +11,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
-public class RemoteTerminologyServiceValidationSupportR5Test {
+public class RemoteTerminologyServiceValidationSupportR5Test extends BaseValidationTestWithInlineMocks {
 	private static final String ANY_NONBLANK_VALUE = "anything";
 	private static final FhirContext ourCtx = FhirContext.forR5Cached();
 	@RegisterExtension

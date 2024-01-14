@@ -1,6 +1,7 @@
 package ca.uhn.fhir.rest.server;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.fhirpath.BaseValidationTestWithInlineMocks;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.api.annotation.Description;
@@ -70,7 +71,6 @@ import org.hl7.fhir.r4.model.DiagnosticReport;
 import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.Enumerations.PublicationStatus;
 import org.hl7.fhir.r4.model.Extension;
-import org.hl7.fhir.r4.model.Group;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.OperationDefinition;
@@ -85,6 +85,8 @@ import org.junit.jupiter.api.Test;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
+import org.mockito.quality.Strictness;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -112,8 +114,9 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.withSettings;
 
-public class ServerCapabilityStatementProviderR4Test {
+public class ServerCapabilityStatementProviderR4Test extends BaseValidationTestWithInlineMocks {
 
 	public static final String PATIENT_SUB = "PatientSub";
 	public static final String PATIENT_SUB_SUB = "PatientSubSub";
@@ -143,7 +146,7 @@ public class ServerCapabilityStatementProviderR4Test {
 	}
 
 	private HttpServletRequest createHttpServletRequest() {
-		HttpServletRequest req = mock(HttpServletRequest.class);
+		HttpServletRequest req = mock(HttpServletRequest.class, withSettings().strictness(Strictness.LENIENT));
 		when(req.getRequestURI()).thenReturn("/FhirStorm/fhir/Patient/_search");
 		when(req.getServletPath()).thenReturn("/fhir");
 		when(req.getRequestURL()).thenReturn(new StringBuffer().append("http://fhirstorm.dyndns.org:8080/FhirStorm/fhir/Patient/_search"));

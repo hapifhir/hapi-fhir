@@ -4,10 +4,12 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
+import ca.uhn.fhir.fhirpath.BaseValidationTestWithInlineMocks;
 import ca.uhn.fhir.i18n.HapiLocalizer;
 import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
 import org.hl7.fhir.r5.model.Resource;
 import org.junit.jupiter.api.Test;
+import org.mockito.quality.Strictness;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -15,8 +17,9 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.withSettings;
 
-public class VersionSpecificWorkerContextWrapperTest {
+public class VersionSpecificWorkerContextWrapperTest extends BaseValidationTestWithInlineMocks {
 
 	final byte[] EXPECTED_BINARY_CONTENT_1 = "dummyBinaryContent1".getBytes();
 	final byte[] EXPECTED_BINARY_CONTENT_2 = "dummyBinaryContent2".getBytes();
@@ -88,7 +91,7 @@ public class VersionSpecificWorkerContextWrapperTest {
 	private static IValidationSupport mockValidationSupport() {
 		IValidationSupport mockValidationSupport;
 		mockValidationSupport = mock(IValidationSupport.class);
-		FhirContext mockFhirContext = mock(FhirContext.class);
+		FhirContext mockFhirContext = mock(FhirContext.class, withSettings().strictness(Strictness.LENIENT));
 		when(mockFhirContext.getLocalizer()).thenReturn(new HapiLocalizer());
 		when(mockFhirContext.getVersion()).thenReturn(FhirVersionEnum.R4.getVersionImplementation());
 		when(mockValidationSupport.getFhirContext()).thenReturn(mockFhirContext);

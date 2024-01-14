@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.dao.index;
+package ca.uhn.fhir.jpa.cache;
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
@@ -6,6 +6,7 @@ import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.cache.ResourcePersistentIdMap;
 import ca.uhn.fhir.jpa.cache.ResourceVersionSvcDaoImpl;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
+import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.ForcedId;
@@ -14,6 +15,7 @@ import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -51,6 +53,11 @@ public class ResourceVersionSvcTest {
 	// TODO KHS move the methods that use this out to a separate test class
 	@InjectMocks
 	private ResourceVersionSvcDaoImpl myResourceVersionSvc;
+
+	@BeforeEach
+	public void before() {
+		myResourceVersionSvc.myIdHelperService = myIdHelperService;
+	}
 
 	/**
 	 * Gets a ResourceTable record for getResourceVersionsForPid
