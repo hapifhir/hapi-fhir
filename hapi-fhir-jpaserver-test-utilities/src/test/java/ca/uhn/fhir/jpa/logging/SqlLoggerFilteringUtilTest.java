@@ -48,6 +48,7 @@ class SqlLoggerFilteringUtilTest {
 		LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
 		myTestLogger = loggerContext.getLogger(SqlLoggerFilteringUtil.class);
 		myHibernateLogger = loggerContext.getLogger("org.hibernate.SQL");
+		myHibernateLogger.setLevel(Level.INFO);
 	}
 
 	@Nested
@@ -116,13 +117,12 @@ class SqlLoggerFilteringUtilTest {
 
 		@Test
 		void testRefreshIsStoppedWhenDebugLogIsStopped() {
-			myHibernateLogger.setLevel(Level.DEBUG);
-
 			// refresh executor is stopped until mustLog is invoked
 
 			assertExecutorState(false);
 
 			// refresh executor starts once mustLog is called with logger in DEBUG mode
+			myHibernateLogger.setLevel(Level.DEBUG);
 
 			mySpiedUtil.allowLog("sql statement");
 			assertExecutorState(true);
