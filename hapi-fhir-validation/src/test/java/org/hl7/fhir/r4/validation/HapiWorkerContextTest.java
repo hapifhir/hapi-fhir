@@ -1,8 +1,8 @@
 package org.hl7.fhir.r4.validation;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.fhirpath.BaseValidationTestWithInlineMocks;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
-import ca.uhn.fhir.test.BaseTest;
 import com.google.common.base.Charsets;
 import org.apache.commons.lang.Validate;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
@@ -30,7 +30,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class HapiWorkerContextTest extends BaseTest {
+public class HapiWorkerContextTest extends BaseValidationTestWithInlineMocks {
 	FhirContext myCtx = FhirContext.forR4();
 
 	@Test

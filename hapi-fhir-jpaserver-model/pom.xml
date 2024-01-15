@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-deployable-pom</artifactId>
-		<version>6.11.8-SNAPSHOT</version>
+		<version>6.11.10-SNAPSHOT</version>
 
 		<relativePath>../hapi-deployable-pom/pom.xml</relativePath>
 	</parent>
@@ -86,7 +86,7 @@
 		</dependency>
 		<dependency>
 			<groupId>org.hibernate.search</groupId>
-			<artifactId>hibernate-search-mapper-orm-orm6</artifactId>
+			<artifactId>hibernate-search-mapper-orm</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.hibernate.search</groupId>

@@ -166,3 +166,22 @@ You can also configure HAPI to not strip versions only on certain fields. This i
 ```java
 {{snippet:classpath:/ca/uhn/hapi/fhir/docs/Parser.java|disableStripVersionsField}}
 ``` 
+
+# Automatically Versioned References
+
+It is possible to configure HAPI to automatically version references for desired resource instances by providing the `auto-version-references-at-path` extension in the `Resource.meta` element:
+
+```json
+"meta": {
+   "extension":[
+      {
+         "url":"http://hapifhir.io/fhir/StructureDefinition/auto-version-references-at-path",
+         "valueString":"focus"
+      }
+   ]
+}
+```
+
+It is allowed to add multiple extensions with different paths. When a resource is stored, any references found at the specified paths will have the current version of the target appended, if a version is not already present.
+
+Parser will not strip versions from references at paths provided by the `auto-version-references-at-path` extension.
