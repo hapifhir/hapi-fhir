@@ -8,6 +8,7 @@ import ca.uhn.fhir.mdm.dao.IMdmLinkDao;
 import ca.uhn.fhir.mdm.model.MdmPidTuple;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import jakarta.annotation.Nonnull;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -56,6 +57,13 @@ class MdmLinkExpandSvcTest {
 
 	@InjectMocks
 	private MdmLinkExpandSvc mySubject;
+
+	@BeforeEach
+	public void beforeEach() {
+		mySubject.myMdmLinkDao = myIMdmLinkDao;
+		mySubject.myIdHelperService = myIdHelperService;
+	}
+
 
 	void beforeEachExpand() {
 		final Answer<Set<String>> answer = invocation -> {
