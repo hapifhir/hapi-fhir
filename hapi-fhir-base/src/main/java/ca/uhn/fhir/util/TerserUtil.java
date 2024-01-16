@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -349,6 +349,29 @@ public final class TerserUtil {
 				theFrom,
 				theTo,
 				theFhirContext.getResourceDefinition(theFrom).getChildByName(theFieldName));
+	}
+
+	/**
+	 * Clears the specified field on the resource provided by the FHIRPath.  If more than one value matches
+	 * the FHIRPath, all values will be cleared.
+	 *
+	 * @param theFhirContext
+	 * @param theResource
+	 * @param theFhirPath
+	 */
+	public static void clearFieldByFhirPath(FhirContext theFhirContext, IBaseResource theResource, String theFhirPath) {
+
+		if (theFhirPath.contains(".")) {
+			String parentPath = theFhirPath.substring(0, theFhirPath.lastIndexOf("."));
+			String fieldName = theFhirPath.substring(theFhirPath.lastIndexOf(".") + 1);
+			FhirTerser terser = theFhirContext.newTerser();
+			List<IBase> parents = terser.getValues(theResource, parentPath);
+			for (IBase parent : parents) {
+				clearField(theFhirContext, fieldName, parent);
+			}
+		} else {
+			clearField(theFhirContext, theResource, theFhirPath);
+		}
 	}
 
 	/**
