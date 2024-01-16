@@ -158,7 +158,8 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 			String theResourceId,
 			boolean theExcludeDeleted)
 			throws ResourceNotFoundException {
-		assert myDontCheckActiveTransactionForUnitTest || TransactionSynchronizationManager.isSynchronizationActive();
+		assert myDontCheckActiveTransactionForUnitTest || TransactionSynchronizationManager.isSynchronizationActive()
+				: "no transaction active";
 
 		if (theResourceId.contains("/")) {
 			theResourceId = theResourceId.substring(theResourceId.indexOf("/") + 1);
@@ -543,6 +544,7 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 				Collection<Object[]> views;
 				assert isNotBlank(nextResourceType);
 
+				// wipmb megasub these dao calls need to loop or we need to replicated all ids to default
 				if (requestPartitionId.isAllPartitions()) {
 					views = myResourceTableDao.findAndResolveByForcedIdWithNoType(
 							nextResourceType, nextIds, theExcludeDeleted);

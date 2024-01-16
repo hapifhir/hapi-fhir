@@ -1533,7 +1533,6 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		validateResourceTypeAndThrowInvalidRequestException(theId);
 		TransactionDetails transactionDetails = new TransactionDetails();
 
-		// wipmb get a stream of RPIs, and call for each.  First one wins.
 		RequestPartitionId requestPartitionId = myRequestPartitionHelperService.determineReadPartitionForRequestForRead(
 				theRequest, myResourceName, theId);
 

@@ -159,9 +159,10 @@ public class SubscriptionActivatingSubscriber implements MessageHandler {
 					SubscriptionConstants.ACTIVE_STATUS);
 			SubscriptionUtil.setStatus(myFhirContext, subscription, SubscriptionConstants.ACTIVE_STATUS);
 
-			// wipmb MegaSearch - can we push this into myRequestPartitionHelperService.determineCreatePartitionForRequest()?
+			// wipmb MegaSearch - can we push this into
+			// myRequestPartitionHelperService.determineCreatePartitionForRequest()?
 			RequestPartitionId partitionId =
-				(RequestPartitionId) subscription.getUserData(Constants.RESOURCE_PARTITION_ID);
+					(RequestPartitionId) subscription.getUserData(Constants.RESOURCE_PARTITION_ID);
 			subscriptionDao.update(subscription, new SystemRequestDetails().setRequestPartitionId(partitionId));
 			return true;
 		} catch (final UnprocessableEntityException | ResourceGoneException e) {

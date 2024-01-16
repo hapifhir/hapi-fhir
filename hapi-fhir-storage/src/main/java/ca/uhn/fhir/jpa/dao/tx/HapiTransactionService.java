@@ -537,8 +537,7 @@ public class HapiTransactionService implements IHapiTransactionService {
 			if (myRequestPartitionId != null) {
 				requestPartitionId = myRequestPartitionId;
 			} else if (myRequestDetails != null) {
-				requestPartitionId = myRequestPartitionHelperSvc.determineGenericPartitionForRequest(
-						myRequestDetails);
+				requestPartitionId = myRequestPartitionHelperSvc.determineGenericPartitionForRequest(myRequestDetails);
 			} else {
 				requestPartitionId = null;
 			}
