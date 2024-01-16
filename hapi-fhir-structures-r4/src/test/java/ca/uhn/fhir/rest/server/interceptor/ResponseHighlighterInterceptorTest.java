@@ -43,6 +43,7 @@ import org.hl7.fhir.r4.model.Composition;
 import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Identifier;
+import org.hl7.fhir.r4.model.Narrative;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Parameters;
@@ -274,10 +275,19 @@ public class ResponseHighlighterInterceptorTest {
 		bundle.setType(Bundle.BundleType.DOCUMENT);
 		Composition composition = new Composition();
 		composition.getText().setDivAsString("<div>HELLO</div>");
+
+		// Add sections with title and narrative (should be includee)
+		composition.addSection().setTitle("Section 1").getText().setDivAsString("<div>HELLO 2</div>");
+		composition.addSection().setTitle("Section 2").getText().setDivAsString("<div>HELLO 3</div>");
+
+		// Add sections with no title or no narrative (should not be included)
+		composition.addSection().setTitle("Section 3").getText().setDivAsString("");
+		composition.addSection().setTitle("").getText().setDivAsString("<div>HELLO 5</div>");
+
 		bundle.addEntry().setResource(composition);
 
 		String outcome = ourInterceptor.extractNarrativeHtml(newRequest(), bundle);
-		assertEquals("<div xmlns=\"http://www.w3.org/1999/xhtml\">HELLO</div>", outcome);
+		assertEquals("<div xmlns=\"http://www.w3.org/1999/xhtml\"><div>HELLO</div><h1>Section 1</h1><div>HELLO 2</div><h1>Section 2</h1><div>HELLO 3</div></div>", outcome);
 	}
 
 	@Test
