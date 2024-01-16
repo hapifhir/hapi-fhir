@@ -52,12 +52,8 @@ import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import org.apache.commons.collections4.ListUtils;
 import org.apache.lucene.search.BooleanQuery;
-import org.hibernate.search.engine.search.predicate.dsl.PredicateFinalStep;
-import org.hibernate.search.engine.search.predicate.dsl.SearchPredicateFactory;
-import org.hibernate.search.engine.search.query.SearchQuery;
-import org.hibernate.search.mapper.orm.Search;
+import org.apache.lucene.search.IndexSearcher;
 import org.hibernate.search.mapper.orm.common.EntityReference;
-import org.hibernate.search.mapper.orm.session.SearchSession;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.ValueSet;
@@ -72,7 +68,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.test.util.AopTestUtils;
-import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -80,7 +75,6 @@ import jakarta.persistence.EntityManager;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -1944,7 +1938,7 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 
 		@Test
 		public void testShouldNotFindAny() {
-			List<EntityReference> hits = search(allCodesNotIncludingSearched);
+			List<String> hits = search(allCodesNotIncludingSearched);
 			assertNotNull(hits);
 			assertTrue(hits.isEmpty());
 		}
@@ -1952,12 +1946,12 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 
 		@Test
 		public void testHitsInFirstSublist() {
-			int insertIndex = BooleanQuery.getMaxClauseCount() / 2;
+			int insertIndex = IndexSearcher.getMaxClauseCount() / 2;
 
 			// insert existing codes into list of codes searched
 			allCodesNotIncludingSearched.addAll(insertIndex, existingCodes);
 
-			List<EntityReference> hits = search(allCodesNotIncludingSearched);
+			List<String> hits = search(allCodesNotIncludingSearched);
 			assertEquals(existingCodes.size(), hits.size());
 		}
 
@@ -1967,7 +1961,7 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 			// insert existing codes into list of codes searched
 			allCodesNotIncludingSearched.addAll(allCodesNotIncludingSearched.size(), existingCodes);
 
-			List<EntityReference> hits = search(allCodesNotIncludingSearched);
+			List<String> hits = search(allCodesNotIncludingSearched);
 
 			assertEquals(existingCodes.size(), hits.size());
 		}
@@ -1986,42 +1980,20 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 			// insert last partition of existing codes into last sublist of searched codes
 			allCodesNotIncludingSearched.addAll(allCodesNotIncludingSearched.size(), partitionedExistingCodes.get(1));
 
-			List<EntityReference> hits = search(allCodesNotIncludingSearched);
+			List<String> hits = search(allCodesNotIncludingSearched);
 			assertEquals(existingCodes.size(), hits.size());
 		}
 
-		private List<EntityReference> search(List<String> theSearchedCodes) {
-			return runInTransaction(() -> {
-				TermCodeSystemVersion termCsVersion = myTermCodeSystemVersionDao.findCurrentVersionForCodeSystemResourcePid(termCsId);
-				Long termCsvPid = termCsVersion.getPid();
-
-				SearchSession searchSession = Search.session(myEntityManager);
-				SearchPredicateFactory predicate = searchSession.scope(TermConcept.class).predicate();
-
-				Optional<PredicateFinalStep> lastStepOpt = ReflectionTestUtils.invokeMethod(
-					new TermReadSvcImpl(), "buildExpansionPredicate", theSearchedCodes, predicate);
-
-				assertNotNull(lastStepOpt);
-				assertTrue(lastStepOpt.isPresent());
-
-				PredicateFinalStep step = predicate.bool(b -> {
-					b.must(predicate.match().field("myCodeSystemVersionPid").matching(termCsvPid));
-					b.must(lastStepOpt.get());
-				});
-
-				int maxResultsPerBatch = 800;
-
-				SearchQuery<EntityReference> termConceptsQuery = searchSession
-					.search(TermConcept.class)
-					.selectEntityReference()
-					.where(f -> step)
-					.toQuery();
-
-				ourLog.trace("About to query: {}", termConceptsQuery.queryString());
-
-				return termConceptsQuery.fetchHits(0, maxResultsPerBatch);
-			});
-
+		private List<String> search(List<String> theSearchedCodes) {
+			// Include
+			ValueSet vs = new ValueSet();
+			ValueSet.ConceptSetComponent include = vs.getCompose().addInclude();
+			include.setSystem(LOINC_URI);
+			for (var next : theSearchedCodes) {
+				include.addConcept().setCode(next);
+			}
+			ValueSet outcome = myTermSvc.expandValueSet(null, vs);
+			return toCodesContains(outcome.getExpansion().getContains());
 		}
 
 	}

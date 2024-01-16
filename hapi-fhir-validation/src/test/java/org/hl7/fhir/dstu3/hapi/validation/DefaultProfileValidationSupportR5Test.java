@@ -2,6 +2,7 @@ package org.hl7.fhir.dstu3.hapi.validation;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
+import ca.uhn.fhir.fhirpath.BaseValidationTestWithInlineMocks;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r5.model.StructureDefinition;
 import org.junit.jupiter.api.Test;
@@ -11,7 +12,7 @@ import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class DefaultProfileValidationSupportR5Test {
+public class DefaultProfileValidationSupportR5Test extends BaseValidationTestWithInlineMocks {
 
 	private static FhirContext ourCtx = FhirContext.forR5Cached();
 	private DefaultProfileValidationSupport mySvc = new DefaultProfileValidationSupport(ourCtx);

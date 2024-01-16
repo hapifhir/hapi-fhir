@@ -6,6 +6,7 @@ import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.batch2.model.StatusEnum;
+import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.model.BulkExportJobResults;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
@@ -107,6 +108,8 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 	private IBatch2JobInstanceRepository myJobInstanceRepository;
 	@Autowired
 	private IBatch2WorkChunkRepository myWorkChunkRepository;
+	@Autowired
+	private IInterceptorService myInterceptorService;
 
 	@BeforeEach
 	public void beforeEach() {
@@ -557,8 +560,8 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 
 			RequestDetails details = new SystemRequestDetails();
 			List<String> patientIds = new ArrayList<>();
-			for(int i = 0; i < numPatients; i++){
-				String id = "p-"+i;
+			for (int i = 0; i < numPatients; i++) {
+				String id = "p-" + i;
 				Patient patient = new Patient();
 				patient.setId(id);
 				myPatientDao.update(patient, details);
@@ -594,7 +597,7 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 			List<String> binaryUrls = results.getResourceTypeToBinaryIds().get("Patient");
 
 			IParser jsonParser = myFhirContext.newJsonParser();
-			for(String url : binaryUrls){
+			for (String url : binaryUrls) {
 				Binary binary = myClient.read().resource(Binary.class).withUrl(url).execute();
 				assertEquals(Constants.CT_FHIR_NDJSON, binary.getContentType());
 				String resourceContents = new String(binary.getContent(), Constants.CHARSET_UTF8);

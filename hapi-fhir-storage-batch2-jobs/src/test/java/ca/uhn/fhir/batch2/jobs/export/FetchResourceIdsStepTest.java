@@ -65,6 +65,7 @@ public class FetchResourceIdsStepTest {
 	@BeforeEach
 	public void init() {
 		ourLog.addAppender(myAppender);
+		myFirstStep.setBulkExportProcessorForUnitTest(myBulkExportProcessor);
 	}
 
 	@AfterEach

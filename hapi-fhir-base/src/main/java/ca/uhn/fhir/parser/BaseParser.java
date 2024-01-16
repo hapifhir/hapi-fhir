@@ -43,6 +43,7 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.FhirTerser;
+import ca.uhn.fhir.util.MetaUtil;
 import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.base.Charsets;
 import jakarta.annotation.Nullable;
@@ -217,7 +218,8 @@ public abstract class BaseParser implements IParser {
 				});
 	}
 
-	private String determineReferenceText(IBaseReference theRef, CompositeChildElement theCompositeChildElement) {
+	private String determineReferenceText(
+			IBaseReference theRef, CompositeChildElement theCompositeChildElement, IBaseResource theResource) {
 		IIdType ref = theRef.getReferenceElement();
 		if (isBlank(ref.getIdPart())) {
 			String reference = ref.getValue();
@@ -241,7 +243,7 @@ public abstract class BaseParser implements IParser {
 											.getResourceDefinition(theRef.getResource())
 											.getName());
 								}
-								if (isStripVersionsFromReferences(theCompositeChildElement)) {
+								if (isStripVersionsFromReferences(theCompositeChildElement, theResource)) {
 									reference = refId.toVersionless().getValue();
 								} else {
 									reference = refId.getValue();
@@ -258,12 +260,12 @@ public abstract class BaseParser implements IParser {
 					myContext.getResourceDefinition(theRef.getResource()).getName());
 		}
 		if (isNotBlank(myServerBaseUrl) && StringUtils.equals(myServerBaseUrl, ref.getBaseUrl())) {
-			if (isStripVersionsFromReferences(theCompositeChildElement)) {
+			if (isStripVersionsFromReferences(theCompositeChildElement, theResource)) {
 				return ref.toUnqualifiedVersionless().getValue();
 			}
 			return ref.toUnqualified().getValue();
 		}
-		if (isStripVersionsFromReferences(theCompositeChildElement)) {
+		if (isStripVersionsFromReferences(theCompositeChildElement, theResource)) {
 			return ref.toVersionless().getValue();
 		}
 		return ref.getValue();
@@ -604,7 +606,17 @@ public abstract class BaseParser implements IParser {
 		return myContext.getParserOptions().isOverrideResourceIdWithBundleEntryFullUrl();
 	}
 
-	private boolean isStripVersionsFromReferences(CompositeChildElement theCompositeChildElement) {
+	private boolean isStripVersionsFromReferences(
+			CompositeChildElement theCompositeChildElement, IBaseResource theResource) {
+
+		Set<String> autoVersionReferencesAtPathExtensions =
+				MetaUtil.getAutoVersionReferencesAtPath(theResource.getMeta(), myContext.getResourceType(theResource));
+
+		if (!autoVersionReferencesAtPathExtensions.isEmpty()
+				&& theCompositeChildElement.anyPathMatches(autoVersionReferencesAtPathExtensions)) {
+			return false;
+		}
+
 		Boolean stripVersionsFromReferences = myStripVersionsFromReferences;
 		if (stripVersionsFromReferences != null) {
 			return stripVersionsFromReferences;
@@ -811,7 +823,7 @@ public abstract class BaseParser implements IParser {
 			 */
 			if (next instanceof IBaseReference) {
 				IBaseReference nextRef = (IBaseReference) next;
-				String refText = determineReferenceText(nextRef, theCompositeChildElement);
+				String refText = determineReferenceText(nextRef, theCompositeChildElement, theResource);
 				if (!StringUtils.equals(refText, nextRef.getReferenceElement().getValue())) {
 
 					if (retVal == theValues) {

@@ -33,6 +33,7 @@ import ca.uhn.fhir.jpa.bulk.export.api.IBulkExportProcessor;
 import ca.uhn.fhir.jpa.bulk.export.model.ExportPIDIteratorParameters;
 import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
+import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.Nonnull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -158,5 +159,10 @@ public class FetchResourceIdsStep implements IFirstJobStepWorker<BulkExportJobPa
 		idList.setResourceType(theResourceType);
 
 		theDataSink.accept(idList);
+	}
+
+	@VisibleForTesting
+	public void setBulkExportProcessorForUnitTest(IBulkExportProcessor theBulkExportProcessor) {
+		myBulkExportProcessor = theBulkExportProcessor;
 	}
 }
