@@ -101,6 +101,10 @@ public class RequestPartitionId implements IModelJson {
 		return myAllPartitions;
 	}
 
+	public boolean isPartitionCovered(Integer thePartitionId) {
+		return isAllPartitions() || getPartitionIds().contains(thePartitionId);
+	}
+
 	@Nullable
 	public LocalDate getPartitionDate() {
 		return myPartitionDate;

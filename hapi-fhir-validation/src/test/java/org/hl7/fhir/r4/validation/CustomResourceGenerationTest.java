@@ -1,10 +1,10 @@
 package org.hl7.fhir.r4.validation;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.test.BaseTest;
+import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
+import ca.uhn.fhir.fhirpath.BaseValidationTestWithInlineMocks;
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ValidationResult;
-import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.PrePopulatedValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
 import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
@@ -17,7 +17,7 @@ import java.io.IOException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class CustomResourceGenerationTest extends BaseTest {
+public class CustomResourceGenerationTest extends BaseValidationTestWithInlineMocks {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(CustomResourceGenerationTest.class);
 	private FhirContext myCtx = FhirContext.forR4();

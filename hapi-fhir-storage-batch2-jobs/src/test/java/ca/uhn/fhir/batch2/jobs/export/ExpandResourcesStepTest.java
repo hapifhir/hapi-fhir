@@ -27,6 +27,7 @@ import ca.uhn.fhir.rest.server.SimpleBundleProvider;
 import ca.uhn.fhir.rest.server.interceptor.ResponseTerminologyTranslationSvc;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Patient;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -81,6 +82,11 @@ public class ExpandResourcesStepTest {
 
 	@InjectMocks
 	private ExpandResourcesStep mySecondStep;
+
+	@BeforeEach
+	public void init() {
+		mySecondStep.setIdHelperServiceForUnitTest(myIdHelperService);
+	}
 
 	private BulkExportJobParameters createParameters(boolean thePartitioned) {
 		BulkExportJobParameters parameters = new BulkExportJobParameters();

@@ -27,7 +27,6 @@ import org.hl7.fhir.r4.model.DocumentReference;
 import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.HumanName;
-import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Medication;
 import org.hl7.fhir.r4.model.MedicationDispense;
@@ -37,13 +36,13 @@ import org.hl7.fhir.r4.model.Meta;
 import org.hl7.fhir.r4.model.Narrative;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Organization;
+import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.PrimitiveType;
 import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.QuestionnaireResponse;
 import org.hl7.fhir.r4.model.Reference;
-import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.Type;
 import org.hl7.fhir.utilities.xhtml.XhtmlNode;
@@ -54,6 +53,7 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
@@ -1200,6 +1200,87 @@ public class JsonParserR4Test extends BaseTest {
 		assertEquals(expected, actual);
 	}
 
+	@Test
+	public void testEncodeBundleWithCrossReferenceFullUrlsAndNoIds() {
+		Bundle bundle = createBundleWithCrossReferenceFullUrlsAndNoIds();
+
+		String output = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle);
+		ourLog.info(output);
+
+		assertThat(output, not(containsString("\"contained\"")));
+		assertThat(output, not(containsString("\"id\"")));
+		assertThat(output, stringContainsInOrder(
+			 "\"fullUrl\": \"urn:uuid:9e9187c1-db6d-4b6f-adc6-976153c65ed7\",",
+			 "\"resourceType\": \"Patient\"",
+			 "\"fullUrl\": \"urn:uuid:71d7ab79-a001-41dc-9a8e-b3e478ce1cbb\"",
+			 "\"resourceType\": \"Observation\"",
+			 "\"reference\": \"urn:uuid:9e9187c1-db6d-4b6f-adc6-976153c65ed7\""
+		));
+
+	}
+
+	@Test
+	public void testEncodeBundleWithCrossReferenceFullUrlsAndNoIds_NestedInParameters() {
+		Parameters parameters = createBundleWithCrossReferenceFullUrlsAndNoIds_NestedInParameters();
+
+		String output = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(parameters);
+		ourLog.info(output);
+
+		assertThat(output, not(containsString("\"contained\"")));
+		assertThat(output, not(containsString("\"id\"")));
+		assertThat(output, stringContainsInOrder(
+			 "\"resourceType\": \"Parameters\"",
+			 "\"name\": \"resource\"",
+			 "\"fullUrl\": \"urn:uuid:9e9187c1-db6d-4b6f-adc6-976153c65ed7\",",
+			 "\"resourceType\": \"Patient\"",
+			 "\"fullUrl\": \"urn:uuid:71d7ab79-a001-41dc-9a8e-b3e478ce1cbb\"",
+			 "\"resourceType\": \"Observation\"",
+			 "\"reference\": \"urn:uuid:9e9187c1-db6d-4b6f-adc6-976153c65ed7\""
+		));
+
+	}
+
+	@Test
+	public void testParseBundleWithCrossReferenceFullUrlsAndNoIds() {
+		Bundle bundle = createBundleWithCrossReferenceFullUrlsAndNoIds();
+		String encoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle);
+
+		Bundle parsedBundle = ourCtx.newJsonParser().parseResource(Bundle.class, encoded);
+		assertEquals("urn:uuid:9e9187c1-db6d-4b6f-adc6-976153c65ed7", parsedBundle.getEntry().get(0).getFullUrl());
+		assertEquals("urn:uuid:9e9187c1-db6d-4b6f-adc6-976153c65ed7", parsedBundle.getEntry().get(0).getResource().getId());
+		assertEquals("urn:uuid:71d7ab79-a001-41dc-9a8e-b3e478ce1cbb", parsedBundle.getEntry().get(1).getFullUrl());
+		assertEquals("urn:uuid:71d7ab79-a001-41dc-9a8e-b3e478ce1cbb", parsedBundle.getEntry().get(1).getResource().getId());
+	}
+
+	@Nonnull
+	public static Bundle createBundleWithCrossReferenceFullUrlsAndNoIds() {
+		Bundle bundle = new Bundle();
+
+		Patient patient = new Patient();
+		patient.setActive(true);
+		bundle
+			 .addEntry()
+			 .setResource(patient)
+			 .setFullUrl("urn:uuid:9e9187c1-db6d-4b6f-adc6-976153c65ed7");
+
+		Observation observation = new Observation();
+		observation.getSubject().setReference("urn:uuid:9e9187c1-db6d-4b6f-adc6-976153c65ed7").setResource(patient);
+		bundle
+			 .addEntry()
+			 .setResource(observation)
+			 .setFullUrl("urn:uuid:71d7ab79-a001-41dc-9a8e-b3e478ce1cbb");
+		return bundle;
+	}
+
+	@Nonnull
+	public static Parameters createBundleWithCrossReferenceFullUrlsAndNoIds_NestedInParameters() {
+		Parameters retVal = new Parameters();
+		retVal
+			 .addParameter()
+			 .setName("resource")
+			 .setResource(createBundleWithCrossReferenceFullUrlsAndNoIds());
+		return retVal;
+	}
 
 	@Test
 	public void testPreCommentsToFhirComments() {

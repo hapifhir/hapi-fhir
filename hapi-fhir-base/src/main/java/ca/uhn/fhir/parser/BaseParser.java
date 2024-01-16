@@ -43,12 +43,14 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.FhirTerser;
+import ca.uhn.fhir.util.MetaUtil;
 import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.base.Charsets;
 import jakarta.annotation.Nullable;
 import org.apache.commons.io.output.StringBuilderWriter;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang3.tuple.Pair;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
@@ -82,6 +84,7 @@ import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.startsWith;
 
 @SuppressWarnings("WeakerAccess")
 public abstract class BaseParser implements IParser {
@@ -215,7 +218,8 @@ public abstract class BaseParser implements IParser {
 				});
 	}
 
-	private String determineReferenceText(IBaseReference theRef, CompositeChildElement theCompositeChildElement) {
+	private String determineReferenceText(
+			IBaseReference theRef, CompositeChildElement theCompositeChildElement, IBaseResource theResource) {
 		IIdType ref = theRef.getReferenceElement();
 		if (isBlank(ref.getIdPart())) {
 			String reference = ref.getValue();
@@ -239,7 +243,7 @@ public abstract class BaseParser implements IParser {
 											.getResourceDefinition(theRef.getResource())
 											.getName());
 								}
-								if (isStripVersionsFromReferences(theCompositeChildElement)) {
+								if (isStripVersionsFromReferences(theCompositeChildElement, theResource)) {
 									reference = refId.toVersionless().getValue();
 								} else {
 									reference = refId.getValue();
@@ -256,12 +260,12 @@ public abstract class BaseParser implements IParser {
 					myContext.getResourceDefinition(theRef.getResource()).getName());
 		}
 		if (isNotBlank(myServerBaseUrl) && StringUtils.equals(myServerBaseUrl, ref.getBaseUrl())) {
-			if (isStripVersionsFromReferences(theCompositeChildElement)) {
+			if (isStripVersionsFromReferences(theCompositeChildElement, theResource)) {
 				return ref.toUnqualifiedVersionless().getValue();
 			}
 			return ref.toUnqualified().getValue();
 		}
-		if (isStripVersionsFromReferences(theCompositeChildElement)) {
+		if (isStripVersionsFromReferences(theCompositeChildElement, theResource)) {
 			return ref.toVersionless().getValue();
 		}
 		return ref.getValue();
@@ -328,11 +332,7 @@ public abstract class BaseParser implements IParser {
 		Validate.notNull(theWriter, "theWriter can not be null");
 		Validate.notNull(theEncodeContext, "theEncodeContext can not be null");
 
-		if (myContext.getVersion().getVersion() == FhirVersionEnum.R4B
-				&& theResource.getStructureFhirVersionEnum() == FhirVersionEnum.R5) {
-			// TODO: remove once we've bumped the core lib version
-		} else if (theResource.getStructureFhirVersionEnum()
-				!= myContext.getVersion().getVersion()) {
+		if (theResource.getStructureFhirVersionEnum() != myContext.getVersion().getVersion()) {
 			throw new IllegalArgumentException(Msg.code(1829) + "This parser is for FHIR version "
 					+ myContext.getVersion().getVersion() + " - Can not encode a structure for version "
 					+ theResource.getStructureFhirVersionEnum());
@@ -442,10 +442,6 @@ public abstract class BaseParser implements IParser {
 
 	FhirTerser.ContainedResources getContainedResources() {
 		return myContainedResources;
-	}
-
-	void setContainedResources(FhirTerser.ContainedResources theContainedResources) {
-		myContainedResources = theContainedResources;
 	}
 
 	@Override
@@ -610,7 +606,17 @@ public abstract class BaseParser implements IParser {
 		return myContext.getParserOptions().isOverrideResourceIdWithBundleEntryFullUrl();
 	}
 
-	private boolean isStripVersionsFromReferences(CompositeChildElement theCompositeChildElement) {
+	private boolean isStripVersionsFromReferences(
+			CompositeChildElement theCompositeChildElement, IBaseResource theResource) {
+
+		Set<String> autoVersionReferencesAtPathExtensions =
+				MetaUtil.getAutoVersionReferencesAtPath(theResource.getMeta(), myContext.getResourceType(theResource));
+
+		if (!autoVersionReferencesAtPathExtensions.isEmpty()
+				&& theCompositeChildElement.anyPathMatches(autoVersionReferencesAtPathExtensions)) {
+			return false;
+		}
+
 		Boolean stripVersionsFromReferences = myStripVersionsFromReferences;
 		if (stripVersionsFromReferences != null) {
 			return stripVersionsFromReferences;
@@ -817,7 +823,7 @@ public abstract class BaseParser implements IParser {
 			 */
 			if (next instanceof IBaseReference) {
 				IBaseReference nextRef = (IBaseReference) next;
-				String refText = determineReferenceText(nextRef, theCompositeChildElement);
+				String refText = determineReferenceText(nextRef, theCompositeChildElement, theResource);
 				if (!StringUtils.equals(refText, nextRef.getReferenceElement().getValue())) {
 
 					if (retVal == theValues) {
@@ -1008,6 +1014,32 @@ public abstract class BaseParser implements IParser {
 	protected boolean isFhirVersionLessThanOrEqualTo(FhirVersionEnum theFhirVersionEnum) {
 		final FhirVersionEnum apiFhirVersion = myContext.getVersion().getVersion();
 		return theFhirVersionEnum == apiFhirVersion || apiFhirVersion.isOlderThan(theFhirVersionEnum);
+	}
+
+	protected void containResourcesInReferences(IBaseResource theResource) {
+
+		/*
+		 * If a UUID is present in Bundle.entry.fullUrl but no value is present
+		 * in Bundle.entry.resource.id, the resource has a discrete identity which
+		 * should be copied into the resource ID. It will not be serialized in
+		 * Resource.id because it's a placeholder/UUID value, but its presence there
+		 * informs the serializer that we don't need to contain this resource.
+		 */
+		if (theResource instanceof IBaseBundle) {
+			List<Pair<String, IBaseResource>> entries =
+					BundleUtil.getBundleEntryFullUrlsAndResources(getContext(), (IBaseBundle) theResource);
+			for (Pair<String, IBaseResource> nextEntry : entries) {
+				String fullUrl = nextEntry.getKey();
+				IBaseResource resource = nextEntry.getValue();
+				if (startsWith(fullUrl, "urn:")) {
+					if (resource != null && resource.getIdElement().getValue() == null) {
+						resource.getIdElement().setValue(fullUrl);
+					}
+				}
+			}
+		}
+
+		myContainedResources = getContext().newTerser().containResources(theResource);
 	}
 
 	class ChildNameAndDef {

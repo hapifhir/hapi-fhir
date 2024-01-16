@@ -105,7 +105,7 @@ public final class HapiSystemProperties {
 	}
 
 	/**
-	 * This property is used to ensure unit test behaviour is deterministic.  It is also used to add extra logging for unit tests.
+	 * This property is used to ensure unit test behaviour is deterministic.
 	 */
 	public static void enableUnitTestMode() {
 		System.setProperty(UNIT_TEST_MODE, Boolean.TRUE.toString());

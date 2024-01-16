@@ -191,7 +191,7 @@ public class RDFParser extends BaseParser {
 		}
 
 		if (!containedResource) {
-			setContainedResources(getContext().newTerser().containResources(resource));
+			containResourcesInReferences(resource);
 		}
 
 		if (!(resource instanceof IAnyResource)) {
@@ -238,7 +238,9 @@ public class RDFParser extends BaseParser {
 					rdfModel.createProperty(FHIR_NS + NODE_ROLE), rdfModel.createProperty(FHIR_NS + TREE_ROOT));
 		}
 
-		if (resourceId != null && resourceId.getIdPart() != null) {
+		if (resourceId != null
+				&& resourceId.getIdPart() != null
+				&& !resourceId.getValue().startsWith("urn:")) {
 			parentResource.addProperty(
 					rdfModel.createProperty(FHIR_NS + RESOURCE_ID),
 					createFhirValueBlankNode(rdfModel, resourceId.getIdPart()));
