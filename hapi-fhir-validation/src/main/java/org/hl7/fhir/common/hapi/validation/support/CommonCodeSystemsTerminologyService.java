@@ -378,7 +378,7 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 			try {
 				jsonNode = new ObjectMapper().readTree(input);
 			} catch (JsonProcessingException e) {
-				throw new ConfigurationException(Msg.code(2480) + e);
+				throw new ConfigurationException(Msg.code(2482) + e);
 			}
 
 			for (JsonNode mediaTypeNode : jsonNode) {

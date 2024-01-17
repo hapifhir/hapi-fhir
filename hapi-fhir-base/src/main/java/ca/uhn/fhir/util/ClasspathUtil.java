@@ -178,7 +178,7 @@ public class ClasspathUtil {
 		List<String> filenames = new ArrayList<>();
 		try (InputStream in = ClasspathUtil.class.getResourceAsStream(theDirectory)) {
 			if (in == null) {
-				throw new InternalErrorException(Msg.code(1758) + "Unable to find directory: " + theDirectory);
+				throw new InternalErrorException(Msg.code(2480) + "Unable to find directory: " + theDirectory);
 			}
 			try (BufferedReader br = new BufferedReader(new InputStreamReader(in))) {
 				String fileName;
@@ -187,7 +187,7 @@ public class ClasspathUtil {
 				}
 			}
 		} catch (IOException e) {
-			throw new InternalErrorException(Msg.code(2479) + e.getMessage());
+			throw new InternalErrorException(Msg.code(2481) + e.getMessage());
 		}
 		return filenames;
 	}
