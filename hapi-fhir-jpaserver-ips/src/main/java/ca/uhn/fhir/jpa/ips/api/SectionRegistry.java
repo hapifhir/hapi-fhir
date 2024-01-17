@@ -293,7 +293,7 @@ public class SectionRegistry {
 				.build();
 	}
 
-	private SectionBuilder addSection() {
+	protected SectionBuilder addSection() {
 		return new SectionBuilder();
 	}
 

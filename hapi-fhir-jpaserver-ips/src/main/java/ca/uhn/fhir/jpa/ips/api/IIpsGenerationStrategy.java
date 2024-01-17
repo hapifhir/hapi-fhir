@@ -128,7 +128,7 @@ public interface IIpsGenerationStrategy {
 	 *
 	 * @param theIpsContext     The IPS context, containing the identity of the patient whose IPS is being generated.
 	 * @param theSectionContext The section context, containing the section name and resource type.
-	 * @return Returns a list of resources, or <code>null</code>.
+	 * @return Returns a list of resources to add to the given section, or <code>null</code>.
 	 * @see #shouldPerformRepositorySearch(IpsContext.IpsSectionContext)
 	 * @see #shouldInclude(IpsContext.IpsSectionContext, IBaseResource)
 	 * @since 7.0.0

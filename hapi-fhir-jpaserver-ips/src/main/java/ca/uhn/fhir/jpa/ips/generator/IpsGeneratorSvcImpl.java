@@ -55,6 +55,7 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Composition;
+import org.hl7.fhir.r4.model.Coverage;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.InstantType;
 import org.hl7.fhir.r4.model.Patient;
@@ -420,11 +421,14 @@ public class IpsGeneratorSvcImpl implements IIpsGeneratorSvc {
 		Set<String> searchParams = resourceDef.getSearchParamsForCompartmentName("Patient").stream()
 				.map(RuntimeSearchParam::getName)
 				.collect(Collectors.toSet());
-		// Prefer "patient", then "subject" then anything else
+		// A few we prefer
 		if (searchParams.contains(Observation.SP_PATIENT)) {
 			return Observation.SP_PATIENT;
 		}
 		if (searchParams.contains(Observation.SP_SUBJECT)) {
+			return Observation.SP_SUBJECT;
+		}
+		if (searchParams.contains(Coverage.SP_BENEFICIARY)) {
 			return Observation.SP_SUBJECT;
 		}
 		return searchParams.iterator().next();
