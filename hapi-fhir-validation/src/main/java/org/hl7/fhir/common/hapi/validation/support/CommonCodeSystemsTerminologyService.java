@@ -68,8 +68,8 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 	public static final String UCUM_CODESYSTEM_URL = "http://unitsofmeasure.org";
 	public static final String UCUM_VALUESET_URL = "http://hl7.org/fhir/ValueSet/ucum-units";
 	public static final String ALL_LANGUAGES_VALUESET_URL = "http://hl7.org/fhir/ValueSet/all-languages";
-	public static final String USPS_CODESYSTEM_URL = "https://www.usps.com/";
-	public static final String USPS_VALUESET_URL = "http://hl7.org/fhir/us/core/ValueSet/us-core-usps-state";
+	private static final String USPS_CODESYSTEM_URL = "https://www.usps.com/";
+	private static final String USPS_VALUESET_URL = "http://hl7.org/fhir/us/core/ValueSet/us-core-usps-state";
 	private static final Logger ourLog = LoggerFactory.getLogger(CommonCodeSystemsTerminologyService.class);
 	private static final Map<String, String> USPS_CODES = Collections.unmodifiableMap(buildUspsCodes());
 	private static final Map<String, String> ISO_4217_CODES = Collections.unmodifiableMap(buildIso4217Codes());
@@ -250,10 +250,6 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 				break;
 			case COUNTRIES_CODESYSTEM_URL:
 				map = ISO_3166_CODES;
-				if (!map.containsKey(code)) {
-					map = new HashMap<>(map);
-					map.put(code, code);
-				}
 				break;
 			case CURRENCIES_CODESYSTEM_URL:
 				map = ISO_4217_CODES;
@@ -371,7 +367,7 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 	}
 
 	private static Map<String, String> buildMimetypeCodes() {
-		ourLog.info("Loading the IANA mimetypes into CodeSystem " + MIMETYPES_CODESYSTEM_URL);
+		ourLog.info("Loading the IANA mimetypes from system " + MIMETYPES_CODESYSTEM_URL);
 
 		final String configPath = "/org/hl7/fhir/common/hapi/validation/support/mimetype/";
 		final Map<String, String> mediaTypeMap = new HashMap<>();
@@ -400,7 +396,7 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 		}
 		mediaTypeMap.put(Constants.CT_TEXT, "txt");
 
-		ourLog.info("Loaded {} mimetypes", mediaTypeMap.size());
+		ourLog.info("Loaded {} mimetypes ", mediaTypeMap.size());
 
 		return mediaTypeMap;
 	}
