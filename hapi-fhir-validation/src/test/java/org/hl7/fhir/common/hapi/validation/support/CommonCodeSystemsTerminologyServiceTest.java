@@ -250,7 +250,7 @@ public class CommonCodeSystemsTerminologyServiceTest {
 	public void testFetchCodeSystem_withMimeType_returnsResult() {
 		CodeSystem cs = (CodeSystem) mySvc.fetchCodeSystem(MIMETYPES_CODESYSTEM_URL);
 		assertNotNull(cs);
-		assertEquals(2085, cs.getConcept().size());
+		assertEquals(2088, cs.getConcept().size());
 	}
 
 	@ParameterizedTest
