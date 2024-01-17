@@ -31,6 +31,8 @@ import ca.uhn.fhir.rest.api.server.IPreResourceAccessDetails;
 import ca.uhn.fhir.rest.api.server.IPreResourceShowDetails;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.ResponseDetails;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
+import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -497,6 +499,37 @@ public class ConsentInterceptor {
 		}
 	}
 
+	protected RequestDetails getRequestDetailsForCurrentExportOperation(
+			BulkExportJobParameters theParameters, IBaseResource theBaseResource) {
+		// bulk exports are system operations
+		SystemRequestDetails details = new SystemRequestDetails();
+		return details;
+	}
+
+	@Hook(value = Pointcut.STORAGE_BULK_EXPORT_RESOURCE_INCLUSION)
+	public boolean shouldBulkExportIncludeResource(BulkExportJobParameters theParameters, IBaseResource theResource) {
+		RequestDetails requestDetails = getRequestDetailsForCurrentExportOperation(theParameters, theResource);
+
+		for (IConsentService next : myConsentService) {
+			ConsentOutcome nextOutcome = next.willSeeResource(requestDetails, theResource, myContextConsentServices);
+
+			ConsentOperationStatusEnum status = nextOutcome.getStatus();
+			switch (status) {
+				case AUTHORIZED:
+				case PROCEED:
+					// go to the next
+					break;
+				case REJECT:
+					// if any consent service rejects,
+					// reject the resource
+					return false;
+			}
+		}
+
+		// default is to include the resource
+		return true;
+	}
+
 	private boolean isRequestAuthorized(RequestDetails theRequestDetails) {
 		boolean retVal = false;
 		if (theRequestDetails != null) {
@@ -515,11 +548,11 @@ public class ConsentInterceptor {
 	}
 
 	private boolean isMetaOperation(RequestDetails theRequestDetails) {
-		return OPERATION_META.equals(theRequestDetails.getOperation());
+		return theRequestDetails != null && OPERATION_META.equals(theRequestDetails.getOperation());
 	}
 
 	private boolean isMetadataPath(RequestDetails theRequestDetails) {
-		return URL_TOKEN_METADATA.equals(theRequestDetails.getRequestPath());
+		return theRequestDetails != null && URL_TOKEN_METADATA.equals(theRequestDetails.getRequestPath());
 	}
 
 	private void validateParameter(Map<String, String[]> theParameterMap) {

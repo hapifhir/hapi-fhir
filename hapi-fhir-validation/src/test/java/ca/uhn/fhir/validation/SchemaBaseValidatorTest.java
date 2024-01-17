@@ -1,6 +1,7 @@
 package ca.uhn.fhir.validation;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.fhirpath.BaseValidationTestWithInlineMocks;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.junit.jupiter.api.Test;
 
@@ -11,7 +12,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.fail;
 
-public class SchemaBaseValidatorTest {
+public class SchemaBaseValidatorTest extends BaseValidationTestWithInlineMocks {
 
 	@Test
 	public void testLoadXmlSuccess() {

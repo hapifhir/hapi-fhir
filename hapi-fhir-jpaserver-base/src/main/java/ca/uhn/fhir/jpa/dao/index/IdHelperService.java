@@ -59,6 +59,8 @@ import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.IdType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
@@ -98,6 +100,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  */
 @Service
 public class IdHelperService implements IIdHelperService<JpaPid> {
+	private static final Logger ourLog = LoggerFactory.getLogger(IdHelperService.class);
 	public static final Predicate[] EMPTY_PREDICATE_ARRAY = new Predicate[0];
 	public static final String RESOURCE_PID = "RESOURCE_PID";
 
@@ -210,9 +213,6 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 		Validate.isTrue(!theIds.isEmpty(), "theIds must not be empty");
 
 		Map<String, JpaPid> retVals = new HashMap<>();
-		RequestPartitionId partitionId = myPartitionSettings.isAllowUnqualifiedCrossPartitionReference()
-				? RequestPartitionId.allPartitions()
-				: theRequestPartitionId;
 		for (String id : theIds) {
 			JpaPid retVal;
 			if (!idRequiresForcedId(id)) {
@@ -223,17 +223,18 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 				// is a forced id
 				// we must resolve!
 				if (myStorageSettings.isDeleteEnabled()) {
-					retVal = resolveResourceIdentity(partitionId, theResourceType, id, theExcludeDeleted)
+					retVal = resolveResourceIdentity(theRequestPartitionId, theResourceType, id, theExcludeDeleted)
 							.getPersistentId();
 					retVals.put(id, retVal);
 				} else {
 					// fetch from cache... adding to cache if not available
-					String key = toForcedIdToPidKey(partitionId, theResourceType, id);
+					String key = toForcedIdToPidKey(theRequestPartitionId, theResourceType, id);
 					retVal = myMemoryCacheService.getThenPutAfterCommit(
 							MemoryCacheService.CacheEnum.FORCED_ID_TO_PID, key, t -> {
 								List<IIdType> ids = Collections.singletonList(new IdType(theResourceType, id));
 								// fetches from cache using a function that checks cache first...
-								List<JpaPid> resolvedIds = resolveResourcePersistentIdsWithCache(partitionId, ids);
+								List<JpaPid> resolvedIds =
+										resolveResourcePersistentIdsWithCache(theRequestPartitionId, ids);
 								if (resolvedIds.isEmpty()) {
 									throw new ResourceNotFoundException(Msg.code(1100) + ids.get(0));
 								}
@@ -581,7 +582,7 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 		return retVal;
 	}
 
-	RequestPartitionId replaceDefault(RequestPartitionId theRequestPartitionId) {
+	public RequestPartitionId replaceDefault(RequestPartitionId theRequestPartitionId) {
 		if (myPartitionSettings.getDefaultPartitionId() != null) {
 			if (!theRequestPartitionId.isAllPartitions() && theRequestPartitionId.hasDefaultPartitionId()) {
 				List<Integer> partitionIds = theRequestPartitionId.getPartitionIds().stream()
@@ -711,7 +712,7 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 	}
 
 	@VisibleForTesting
-	void setPartitionSettingsForUnitTest(PartitionSettings thePartitionSettings) {
+	public void setPartitionSettingsForUnitTest(PartitionSettings thePartitionSettings) {
 		myPartitionSettings = thePartitionSettings;
 	}
 

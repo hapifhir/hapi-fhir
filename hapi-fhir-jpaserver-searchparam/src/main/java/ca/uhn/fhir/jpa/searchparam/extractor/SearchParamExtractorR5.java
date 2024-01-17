@@ -25,6 +25,7 @@ import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.sl.cache.Cache;
 import ca.uhn.fhir.sl.cache.CacheFactory;
+import ca.uhn.fhir.util.BundleUtil;
 import jakarta.annotation.PostConstruct;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.exceptions.PathEngineException;
@@ -136,7 +137,7 @@ public class SearchParamExtractorR5 extends BaseSearchParamExtractor implements 
 
 		@Override
 		public Base resolveReference(Object appContext, String theUrl, Base refContext) throws FHIRException {
-			Base retVal = resolveResourceInBundleWithPlaceholderId(appContext, theUrl);
+			Base retVal = (Base) BundleUtil.getReferenceInBundle(getContext(), theUrl, appContext);
 			if (retVal != null) {
 				return retVal;
 			}
