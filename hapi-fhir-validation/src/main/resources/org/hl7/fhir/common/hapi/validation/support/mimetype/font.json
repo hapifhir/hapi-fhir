@@ -1,0 +1,32 @@
+[
+ {
+   "Name": "collection",
+   "Template": "font/collection",
+   "Reference": "[RFC8081]"
+ },
+ {
+   "Name": "otf",
+   "Template": "font/otf",
+   "Reference": "[RFC8081]"
+ },
+ {
+   "Name": "sfnt",
+   "Template": "font/sfnt",
+   "Reference": "[RFC8081]"
+ },
+ {
+   "Name": "ttf",
+   "Template": "font/ttf",
+   "Reference": "[RFC8081]"
+ },
+ {
+   "Name": "woff",
+   "Template": "font/woff",
+   "Reference": "[RFC8081]"
+ },
+ {
+   "Name": "woff2",
+   "Template": "font/woff2",
+   "Reference": "[RFC8081]"
+ }
+]

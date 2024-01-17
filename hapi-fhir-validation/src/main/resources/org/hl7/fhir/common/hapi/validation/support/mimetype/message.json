@@ -1,0 +1,128 @@
+[
+ {
+   "Name": "bhttp",
+   "Template": "message/bhttp",
+   "Reference": "[RFC9292]"
+ },
+ {
+   "Name": "CPIM",
+   "Template": "message/CPIM",
+   "Reference": "[RFC3862]"
+ },
+ {
+   "Name": "delivery-status",
+   "Template": "message/delivery-status",
+   "Reference": "[RFC1894]"
+ },
+ {
+   "Name": "disposition-notification",
+   "Template": "message/disposition-notification",
+   "Reference": "[RFC8098]"
+ },
+ {
+   "Name": "example",
+   "Template": "message/example",
+   "Reference": "[RFC4735]"
+ },
+ {
+   "Name": "external-body",
+   "Template": "",
+   "Reference": "[RFC2045][RFC2046]"
+ },
+ {
+   "Name": "feedback-report",
+   "Template": "message/feedback-report",
+   "Reference": "[RFC5965]"
+ },
+ {
+   "Name": "global",
+   "Template": "message/global",
+   "Reference": "[RFC6532]"
+ },
+ {
+   "Name": "global-delivery-status",
+   "Template": "message/global-delivery-status",
+   "Reference": "[RFC6533]"
+ },
+ {
+   "Name": "global-disposition-notification",
+   "Template": "message/global-disposition-notification",
+   "Reference": "[RFC6533]"
+ },
+ {
+   "Name": "global-headers",
+   "Template": "message/global-headers",
+   "Reference": "[RFC6533]"
+ },
+ {
+   "Name": "http",
+   "Template": "message/http",
+   "Reference": "[RFC9112]"
+ },
+ {
+   "Name": "imdn+xml",
+   "Template": "message/imdn+xml",
+   "Reference": "[RFC5438]"
+ },
+ {
+   "Name": "mls",
+   "Template": "message/mls",
+   "Reference": "[RFC9420]"
+ },
+ {
+   "Name": "news (OBSOLETED by [RFC5537])",
+   "Template": "message/news",
+   "Reference": "[RFC5537][Henry_Spencer]"
+ },
+ {
+   "Name": "ohttp-req",
+   "Template": "message/ohttp-req",
+   "Reference": "[RFC9458]"
+ },
+ {
+   "Name": "ohttp-res",
+   "Template": "message/ohttp-res",
+   "Reference": "[RFC9458]"
+ },
+ {
+   "Name": "partial",
+   "Template": "",
+   "Reference": "[RFC2045][RFC2046]"
+ },
+ {
+   "Name": "rfc822",
+   "Template": "",
+   "Reference": "[RFC2045][RFC2046]"
+ },
+ {
+   "Name": "s-http (OBSOLETE)",
+   "Template": "message/s-http",
+   "Reference": "[RFC2660][status-change-http-experiments-to-historic]"
+ },
+ {
+   "Name": "sip",
+   "Template": "message/sip",
+   "Reference": "[RFC3261]"
+ },
+ {
+   "Name": "sipfrag",
+   "Template": "message/sipfrag",
+   "Reference": "[RFC3420]"
+ },
+ {
+   "Name": "tracking-status",
+   "Template": "message/tracking-status",
+   "Reference": "[RFC3886]"
+ },
+ {
+   "Name": "vnd.si.simp (OBSOLETED by request)",
+   "Template": "message/vnd.si.simp",
+   "Reference": "[Nicholas_Parks_Young]"
+ },
+ {
+   "Name": "vnd.wfa.wsc",
+   "Template": "message/vnd.wfa.wsc",
+   "Reference": "[Mick_Conley]"
+ }
+]
+
