@@ -63,18 +63,18 @@ public class InMemoryTerminologyServerValidationSupportTest {
 		String valueSetUrl = "http://hl7.org/fhir/ValueSet/mimetypes";
 
 		// ValidateCode
-		outcome = myChain.validateCode(valCtx, options, null, "txt", null, valueSetUrl);
+		outcome = myChain.validateCode(valCtx, options, null, "xml", null, valueSetUrl);
 		assertTrue(outcome.isOk());
 		assertEquals("Code was validated against in-memory expansion of ValueSet: http://hl7.org/fhir/ValueSet/mimetypes", outcome.getSourceDetails());
-		assertEquals("txt", outcome.getCode());
+		assertEquals("xml", outcome.getCode());
 
 		// ValidateCodeInValueSet
 		IBaseResource valueSet = myChain.fetchValueSet(valueSetUrl);
 		assertNotNull(valueSet);
-		outcome = myChain.validateCodeInValueSet(valCtx, options, null, "txt", null, valueSet);
+		outcome = myChain.validateCodeInValueSet(valCtx, options, null, "xml", null, valueSet);
 		assertTrue(outcome.isOk());
 		assertEquals("Code was validated against in-memory expansion of ValueSet: http://hl7.org/fhir/ValueSet/mimetypes", outcome.getSourceDetails());
-		assertEquals("txt", outcome.getCode());
+		assertEquals("xml", outcome.getCode());
 	}
 
 	@Test
