@@ -370,8 +370,8 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 
 	/**
 	 * Search results matching theParams.
+	 * The Stream MUST be called within a transaction because the stream wraps an open query ResultSet.
 	 * The Stream MUST be closed to avoid leaking resources.
-	 * If called within a transaction, the Stream will fail if passed outside the tx boundary.
 	 * @param theParams the search
 	 * @param theRequest for partition target info
 	 * @return a Stream that MUST only be used within the calling transaction.

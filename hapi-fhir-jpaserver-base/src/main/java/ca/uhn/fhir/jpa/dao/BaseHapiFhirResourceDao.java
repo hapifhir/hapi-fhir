@@ -2074,9 +2074,8 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			SearchParameterMap theParams,
 			RequestDetails theRequest,
 			@Nullable IBaseResource theConditionalOperationTargetOrNull) {
-		// fixme Is this safe?
-		//		// the Stream is useless outside the bound connection time, so require our caller to have a session.
-		//		HapiTransactionService.requireTransaction();
+		// the Stream is useless outside the bound connection time, so require our caller to have a session.
+		HapiTransactionService.requireTransaction();
 
 		RequestPartitionId requestPartitionId =
 				myRequestPartitionHelperService.determineReadPartitionForRequestForSearchType(
@@ -2087,12 +2086,10 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		String uuid = UUID.randomUUID().toString();
 
 		SearchRuntimeDetails searchRuntimeDetails = new SearchRuntimeDetails(theRequest, uuid);
-		return myTransactionService.withRequest(theRequest).search(() -> {
-			IResultIterator<PID> iter =
-					builder.createQuery(theParams, searchRuntimeDetails, theRequest, requestPartitionId);
-			// Adapt IResultIterator to stream, and connect the close handler.
-			return Streams.stream(iter).onClose(() -> IOUtils.closeQuietly(iter));
-		});
+		IResultIterator<PID> iter =
+				builder.createQuery(theParams, searchRuntimeDetails, theRequest, requestPartitionId);
+		// Adapt IResultIterator to stream, and connect the close handler.
+		return Streams.stream(iter).onClose(() -> IOUtils.closeQuietly(iter));
 	}
 
 	protected <MT extends IBaseMetaType> MT toMetaDt(Class<MT> theType, Collection<TagDefinition> tagDefinitions) {

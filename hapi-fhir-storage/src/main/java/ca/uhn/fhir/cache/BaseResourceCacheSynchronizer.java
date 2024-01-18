@@ -48,7 +48,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.Semaphore;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public abstract class BaseResourceCacheSynchronizer implements IResourceChangeListener {
 	private static final Logger ourLog = LoggerFactory.getLogger(BaseResourceCacheSynchronizer.class);
@@ -68,11 +67,11 @@ public abstract class BaseResourceCacheSynchronizer implements IResourceChangeLi
 	private final Semaphore mySyncResourcesSemaphore = new Semaphore(1);
 	private final Object mySyncResourcesLock = new Object();
 
-	BaseResourceCacheSynchronizer(String theResourceName) {
+	protected BaseResourceCacheSynchronizer(String theResourceName) {
 		myResourceName = theResourceName;
 	}
 
-	BaseResourceCacheSynchronizer(
+	protected BaseResourceCacheSynchronizer(
 			String theResourceName,
 			IResourceChangeListenerRegistry theResourceChangeListenerRegistry,
 			DaoRegistry theDaoRegistry) {
@@ -150,27 +149,22 @@ public abstract class BaseResourceCacheSynchronizer implements IResourceChangeLi
 		synchronized (mySyncResourcesLock) {
 			ourLog.debug("Starting sync {}s", myResourceName);
 
-			List<IBaseResource> resourceList = searchForStream().collect(Collectors.toList());
+			IBundleProvider resourceBundleList = getResourceDao().search(mySearchParameterMap, mySystemRequestDetails);
+
+			Integer resourceCount = resourceBundleList.size();
+			assert resourceCount != null;
+			if (resourceCount >= SubscriptionConstants.MAX_SUBSCRIPTION_RESULTS) {
+				ourLog.error(
+						"Currently over {} {}s.  Some {}s have not been loaded.",
+						SubscriptionConstants.MAX_SUBSCRIPTION_RESULTS,
+						myResourceName,
+						myResourceName);
+			}
+
+			List<IBaseResource> resourceList = resourceBundleList.getResources(0, resourceCount);
+
 			return syncResourcesIntoCache(resourceList);
 		}
-	}
-
-	private Stream<IBaseResource> searchForStream() {
-		// wipmb megascale - create a search for resource.
-		IBundleProvider resourceBundleList = getResourceDao().search(mySearchParameterMap, mySystemRequestDetails);
-
-		Integer resourceCount = resourceBundleList.size();
-		assert resourceCount != null;
-		if (resourceCount >= SubscriptionConstants.MAX_SUBSCRIPTION_RESULTS) {
-			ourLog.error(
-					"Currently over {} {}s.  Some {}s have not been loaded.",
-					SubscriptionConstants.MAX_SUBSCRIPTION_RESULTS,
-					myResourceName,
-					myResourceName);
-		}
-
-		List<IBaseResource> resourceList = resourceBundleList.getResources(0, resourceCount);
-		return resourceList.stream();
 	}
 
 	protected abstract int syncResourcesIntoCache(List<IBaseResource> resourceList);

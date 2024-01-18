@@ -60,6 +60,10 @@ public class SubscriptionLoader extends BaseResourceCacheSynchronizer {
 		super("Subscription");
 	}
 
+	public int doSyncSubscriptionsForUnitTest() {
+		return super.doSyncResourcessForUnitTest();
+	}
+
 	@Override
 	@Nonnull
 	protected SearchParameterMap getSearchParameterMap() {

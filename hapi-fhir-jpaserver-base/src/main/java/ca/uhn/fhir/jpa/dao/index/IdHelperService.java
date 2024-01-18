@@ -544,7 +544,6 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 				Collection<Object[]> views;
 				assert isNotBlank(nextResourceType);
 
-				// wipmb megasub these dao calls need to loop or we need to replicated all ids to default
 				if (requestPartitionId.isAllPartitions()) {
 					views = myResourceTableDao.findAndResolveByForcedIdWithNoType(
 							nextResourceType, nextIds, theExcludeDeleted);
