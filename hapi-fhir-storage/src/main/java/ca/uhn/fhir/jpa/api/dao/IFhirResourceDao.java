@@ -384,6 +384,11 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 		return iResourcePersistentIds.stream();
 	}
 
+	default <PID extends IResourcePersistentId<?>> Stream<PID> searchForIdStream(
+			SearchParameterMap theParams, RequestDetails theRequest) {
+		return searchForIdStream(theParams, theRequest, null);
+	}
+
 	/**
 	 * Takes a map of incoming raw search parameters and translates/parses them into
 	 * appropriate {@link IQueryParameterType} instances of the appropriate type
