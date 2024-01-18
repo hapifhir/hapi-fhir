@@ -26,6 +26,7 @@ import ca.uhn.fhir.model.dstu2.valueset.ResourceTypeEnum;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
@@ -45,6 +46,7 @@ public class SubscriptionTriggeringProvider implements IResourceProvider {
 
 	@Operation(name = JpaConstants.OPERATION_TRIGGER_SUBSCRIPTION)
 	public IBaseParameters triggerSubscription(
+			ca.uhn.fhir.rest.api.server.RequestDetails theRequestDetails,
 			@OperationParam(
 							name = ProviderConstants.SUBSCRIPTION_TRIGGERING_PARAM_RESOURCE_ID,
 							min = 0,
@@ -57,11 +59,12 @@ public class SubscriptionTriggeringProvider implements IResourceProvider {
 							max = OperationParam.MAX_UNLIMITED,
 							typeName = "string")
 					List<IPrimitiveType<String>> theSearchUrls) {
-		return mySubscriptionTriggeringSvc.triggerSubscription(theResourceIds, theSearchUrls, null);
+		return mySubscriptionTriggeringSvc.triggerSubscription(theResourceIds, theSearchUrls, null, theRequestDetails);
 	}
 
 	@Operation(name = JpaConstants.OPERATION_TRIGGER_SUBSCRIPTION)
 	public IBaseParameters triggerSubscription(
+			ca.uhn.fhir.rest.api.server.RequestDetails theRequestDetails,
 			@IdParam IIdType theSubscriptionId,
 			@OperationParam(
 							name = ProviderConstants.SUBSCRIPTION_TRIGGERING_PARAM_RESOURCE_ID,
@@ -75,7 +78,7 @@ public class SubscriptionTriggeringProvider implements IResourceProvider {
 							max = OperationParam.MAX_UNLIMITED,
 							typeName = "string")
 					List<IPrimitiveType<String>> theSearchUrls) {
-		return mySubscriptionTriggeringSvc.triggerSubscription(theResourceIds, theSearchUrls, theSubscriptionId);
+		return mySubscriptionTriggeringSvc.triggerSubscription(theResourceIds, theSearchUrls, theSubscriptionId, theRequestDetails);
 	}
 
 	@Override

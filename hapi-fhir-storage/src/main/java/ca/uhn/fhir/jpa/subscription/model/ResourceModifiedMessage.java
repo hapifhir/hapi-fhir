@@ -60,6 +60,12 @@ public class ResourceModifiedMessage extends BaseResourceModifiedMessage {
 	}
 
 	public ResourceModifiedMessage(
+		FhirContext theFhirContext, IBaseResource theResource, OperationTypeEnum theOperationType, RequestPartitionId theRequestPartitionId) {
+		super(theFhirContext, theResource, theOperationType);
+		setPartitionId(theRequestPartitionId);
+	}
+
+	public ResourceModifiedMessage(
 			FhirContext theFhirContext,
 			IBaseResource theNewResource,
 			OperationTypeEnum theOperationType,
