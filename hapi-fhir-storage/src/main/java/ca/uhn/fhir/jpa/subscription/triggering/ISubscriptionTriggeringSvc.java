@@ -41,10 +41,9 @@ public interface ISubscriptionTriggeringSvc {
 	 * This implementation uses a SystemRequestDetails for All Partitions, as the previous behaviour did.
 	 */
 	IBaseParameters triggerSubscription(
-		@Nullable List<IPrimitiveType<String>> theResourceIds,
-		@Nullable List<IPrimitiveType<String>> theSearchUrls,
-		@Nullable IIdType theSubscriptionId
-		);
+			@Nullable List<IPrimitiveType<String>> theResourceIds,
+			@Nullable List<IPrimitiveType<String>> theSearchUrls,
+			@Nullable IIdType theSubscriptionId);
 
 	void runDeliveryPass();
 }
