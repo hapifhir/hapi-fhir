@@ -101,6 +101,4 @@ public class PartitionEntity {
 
 		return RequestPartitionId.forPartitionIdsAndNames(names, ids, null);
 	}
-
-
 }
