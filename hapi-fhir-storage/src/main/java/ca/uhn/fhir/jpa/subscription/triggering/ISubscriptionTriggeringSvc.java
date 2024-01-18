@@ -35,5 +35,16 @@ public interface ISubscriptionTriggeringSvc {
 			@Nullable IIdType theSubscriptionId,
 			RequestDetails theRequestDetails);
 
+	@Deprecated(forRemoval = true)
+	/**
+	 * Use {@link ISubscriptionTriggeringSvc#triggerSubscription(List, List, IIdType, RequestDetails)} instead.
+	 * This implementation uses a SystemRequestDetails for All Partitions, as the previous behaviour did.
+	 */
+	IBaseParameters triggerSubscription(
+		@Nullable List<IPrimitiveType<String>> theResourceIds,
+		@Nullable List<IPrimitiveType<String>> theSearchUrls,
+		@Nullable IIdType theSubscriptionId
+		);
+
 	void runDeliveryPass();
 }

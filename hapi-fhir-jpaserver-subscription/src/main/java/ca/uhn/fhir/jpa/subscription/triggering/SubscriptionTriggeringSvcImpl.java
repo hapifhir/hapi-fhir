@@ -220,6 +220,12 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 	}
 
 	@Override
+	public IBaseParameters triggerSubscription(@Nullable List<IPrimitiveType<String>> theResourceIds, @Nullable List<IPrimitiveType<String>> theSearchUrls, @Nullable IIdType theSubscriptionId) {
+		return triggerSubscription(theResourceIds, theSearchUrls, theSubscriptionId, SystemRequestDetails.newSystemRequestAllPartitions());
+
+	}
+
+	@Override
 	public void runDeliveryPass() {
 
 		synchronized (myActiveJobs) {
