@@ -30,9 +30,10 @@ import java.util.List;
 public interface ISubscriptionTriggeringSvc {
 
 	IBaseParameters triggerSubscription(
-		@Nullable List<IPrimitiveType<String>> theResourceIds,
-		@Nullable List<IPrimitiveType<String>> theSearchUrls,
-		@Nullable IIdType theSubscriptionId, RequestDetails theRequestDetails);
+			@Nullable List<IPrimitiveType<String>> theResourceIds,
+			@Nullable List<IPrimitiveType<String>> theSearchUrls,
+			@Nullable IIdType theSubscriptionId,
+			RequestDetails theRequestDetails);
 
 	void runDeliveryPass();
 }

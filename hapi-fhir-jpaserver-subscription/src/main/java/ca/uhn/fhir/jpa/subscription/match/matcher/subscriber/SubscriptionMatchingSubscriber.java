@@ -155,7 +155,6 @@ public class SubscriptionMatchingSubscriber implements MessageHandler {
 		CanonicalSubscription subscription = theActiveSubscription.getSubscription();
 		if (subscription != null
 				&& theMsg.getPartitionId() != null
-
 				&& theMsg.getPartitionId().hasPartitionIds()
 				&& !subscription.getCrossPartitionEnabled()
 				&& !theMsg.getPartitionId().hasPartitionId(subscription.getRequestPartitionId())) {
