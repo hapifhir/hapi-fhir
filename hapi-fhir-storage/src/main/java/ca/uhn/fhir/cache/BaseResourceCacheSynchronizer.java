@@ -29,7 +29,6 @@ import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.retry.Retrier;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
-import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.subscription.SubscriptionConstants;
 import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.Nonnull;
@@ -49,15 +48,13 @@ import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.Semaphore;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public abstract class BaseResourceCacheSynchronizer implements IResourceChangeListener {
 	private static final Logger ourLog = LoggerFactory.getLogger(BaseResourceCacheSynchronizer.class);
 	public static final int MAX_RETRIES = 60; // 60 * 5 seconds = 5 minutes
 	public static final long REFRESH_INTERVAL = DateUtils.MILLIS_PER_MINUTE;
 	private final String myResourceName;
-
-	@Autowired
-	protected ISearchParamRegistry mySearchParamRegistry;
 
 	@Autowired
 	private IResourceChangeListenerRegistry myResourceChangeListenerRegistry;
@@ -71,8 +68,17 @@ public abstract class BaseResourceCacheSynchronizer implements IResourceChangeLi
 	private final Semaphore mySyncResourcesSemaphore = new Semaphore(1);
 	private final Object mySyncResourcesLock = new Object();
 
-	public BaseResourceCacheSynchronizer(String theResourceName) {
+	BaseResourceCacheSynchronizer(String theResourceName) {
 		myResourceName = theResourceName;
+	}
+
+	BaseResourceCacheSynchronizer(
+			String theResourceName,
+			IResourceChangeListenerRegistry theResourceChangeListenerRegistry,
+			DaoRegistry theDaoRegistry) {
+		myResourceName = theResourceName;
+		myDaoRegistry = theDaoRegistry;
+		myResourceChangeListenerRegistry = theResourceChangeListenerRegistry;
 	}
 
 	@PostConstruct
@@ -144,22 +150,27 @@ public abstract class BaseResourceCacheSynchronizer implements IResourceChangeLi
 		synchronized (mySyncResourcesLock) {
 			ourLog.debug("Starting sync {}s", myResourceName);
 
-			IBundleProvider resourceBundleList = getResourceDao().search(mySearchParameterMap, mySystemRequestDetails);
-
-			Integer resourceCount = resourceBundleList.size();
-			assert resourceCount != null;
-			if (resourceCount >= SubscriptionConstants.MAX_SUBSCRIPTION_RESULTS) {
-				ourLog.error(
-						"Currently over {} {}s.  Some {}s have not been loaded.",
-						SubscriptionConstants.MAX_SUBSCRIPTION_RESULTS,
-						myResourceName,
-						myResourceName);
-			}
-
-			List<IBaseResource> resourceList = resourceBundleList.getResources(0, resourceCount);
-
+			List<IBaseResource> resourceList = searchForStream().collect(Collectors.toList());
 			return syncResourcesIntoCache(resourceList);
 		}
+	}
+
+	private Stream<IBaseResource> searchForStream() {
+		// wipmb megascale - create a search for resource.
+		IBundleProvider resourceBundleList = getResourceDao().search(mySearchParameterMap, mySystemRequestDetails);
+
+		Integer resourceCount = resourceBundleList.size();
+		assert resourceCount != null;
+		if (resourceCount >= SubscriptionConstants.MAX_SUBSCRIPTION_RESULTS) {
+			ourLog.error(
+					"Currently over {} {}s.  Some {}s have not been loaded.",
+					SubscriptionConstants.MAX_SUBSCRIPTION_RESULTS,
+					myResourceName,
+					myResourceName);
+		}
+
+		List<IBaseResource> resourceList = resourceBundleList.getResources(0, resourceCount);
+		return resourceList.stream();
 	}
 
 	protected abstract int syncResourcesIntoCache(List<IBaseResource> resourceList);
