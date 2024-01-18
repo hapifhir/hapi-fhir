@@ -92,8 +92,8 @@ public class SubscriptionActivatingSubscriber implements MessageHandler {
 			case UPDATE:
 				if (payload.getPayload(myFhirContext) == null) {
 					Optional<ResourceModifiedMessage> inflatedMsg =
-						myResourceModifiedMessagePersistenceSvc.inflatePersistedResourceModifiedMessageOrNull(
-							payload);
+							myResourceModifiedMessagePersistenceSvc.inflatePersistedResourceModifiedMessageOrNull(
+									payload);
 					if (inflatedMsg.isEmpty()) {
 						return;
 					}
@@ -120,11 +120,11 @@ public class SubscriptionActivatingSubscriber implements MessageHandler {
 		// Grab the value for "Subscription.channel.type" so we can see if this
 		// subscriber applies.
 		CanonicalSubscriptionChannelType subscriptionChannelType =
-			mySubscriptionCanonicalizer.getChannelType(theSubscription);
+				mySubscriptionCanonicalizer.getChannelType(theSubscription);
 
 		// Only activate supported subscriptions
 		if (subscriptionChannelType == null
-			|| !myStorageSettings.getSupportedSubscriptionTypes().contains(subscriptionChannelType.toCanonical())) {
+				|| !myStorageSettings.getSupportedSubscriptionTypes().contains(subscriptionChannelType.toCanonical())) {
 			return false;
 		}
 
@@ -147,14 +147,14 @@ public class SubscriptionActivatingSubscriber implements MessageHandler {
 			// read can throw ResourceGoneException
 			// if this happens, we will treat this as a failure to activate
 			subscription =
-				subscriptionDao.read(theSubscription.getIdElement(), SystemRequestDetails.forAllPartitions());
+					subscriptionDao.read(theSubscription.getIdElement(), SystemRequestDetails.forAllPartitions());
 			subscription.setId(subscription.getIdElement().toVersionless());
 
 			ourLog.info(
-				"Activating subscription {} from status {} to {}",
-				subscription.getIdElement().toUnqualified().getValue(),
-				SubscriptionConstants.REQUESTED_STATUS,
-				SubscriptionConstants.ACTIVE_STATUS);
+					"Activating subscription {} from status {} to {}",
+					subscription.getIdElement().toUnqualified().getValue(),
+					SubscriptionConstants.REQUESTED_STATUS,
+					SubscriptionConstants.ACTIVE_STATUS);
 			SubscriptionUtil.setStatus(myFhirContext, subscription, SubscriptionConstants.ACTIVE_STATUS);
 			subscriptionDao.update(subscription, srd);
 			return true;
@@ -171,7 +171,7 @@ public class SubscriptionActivatingSubscriber implements MessageHandler {
 
 	public boolean isChannelTypeSupported(IBaseResource theSubscription) {
 		Subscription.SubscriptionChannelType channelType =
-			mySubscriptionCanonicalizer.getChannelType(theSubscription).toCanonical();
+				mySubscriptionCanonicalizer.getChannelType(theSubscription).toCanonical();
 		return myStorageSettings.getSupportedSubscriptionTypes().contains(channelType);
 	}
 }
