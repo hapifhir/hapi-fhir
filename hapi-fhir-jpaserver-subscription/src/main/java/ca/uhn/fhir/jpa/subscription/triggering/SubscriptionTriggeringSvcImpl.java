@@ -190,7 +190,8 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 
 		SubscriptionTriggeringJobDetails jobDetails = new SubscriptionTriggeringJobDetails();
 		jobDetails.setJobId(UUID.randomUUID().toString());
-		jobDetails.setRequestPartitionId(requestPartitionId == null ? RequestPartitionId.allPartitions() : requestPartitionId);
+		jobDetails.setRequestPartitionId(
+				requestPartitionId == null ? RequestPartitionId.allPartitions() : requestPartitionId);
 		jobDetails.setRemainingResourceIds(
 				resourceIds.stream().map(IPrimitiveType::getValue).collect(Collectors.toList()));
 		jobDetails.setRemainingSearchUrls(
