@@ -47,8 +47,8 @@ steps:
 
   # 3. Import keys into gpg
   - bash: |
-      sudo apt update
-      sudo apt install -y gpg
+      apt update
+      apt install -y gpg
       gpg --import --no-tty --batch --yes $(Agent.TempDirectory)/public.key
       gpg --import --no-tty --batch --yes $(Agent.TempDirectory)/private.key
       gpg --list-keys --keyid-format LONG
