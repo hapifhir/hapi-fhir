@@ -12,6 +12,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -44,6 +45,7 @@ public class ReindexStepTest {
 		ReindexJobParameters reindexJobParameters = new ReindexJobParameters();
 		reindexJobParameters.setRequestPartitionId(RequestPartitionId.fromPartitionId(expectedPartitionId));
 		when(myHapiTransactionService.withRequest(any())).thenCallRealMethod();
+		when(myHapiTransactionService.buildExecutionBuilder(any())).thenCallRealMethod();
 
 		// when
 		myReindexStep.doReindex(data, myDataSink, "index-id", "chunk-id", reindexJobParameters);

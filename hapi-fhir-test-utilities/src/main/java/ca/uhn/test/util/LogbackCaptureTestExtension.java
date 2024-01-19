@@ -83,7 +83,11 @@ public class LogbackCaptureTestExtension implements BeforeEachCallback, AfterEac
 		this((Logger) LoggerFactory.getLogger(theLoggerName), theLevel);
 	}
 
-	/**
+    public LogbackCaptureTestExtension(Class<?> theClass) {
+		this(theClass.getName());
+    }
+
+    /**
 	 * Returns a copy to avoid concurrent modification errors.
 	 * @return A copy of the log events so far.
 	 */
