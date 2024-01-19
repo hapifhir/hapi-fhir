@@ -225,6 +225,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	@Autowired
 	private IFhirSystemDao<?, ?> mySystemDao;
 
+	@Nullable
 	public static <T extends IBaseResource> T invokeStoragePreShowResources(
 			IInterceptorBroadcaster theInterceptorBroadcaster, RequestDetails theRequest, T retVal) {
 		if (CompositeInterceptorBroadcaster.hasHooks(
@@ -1569,6 +1570,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		return retVal;
 	}
 
+	@Nullable
 	private T invokeStoragePreShowResources(RequestDetails theRequest, T retVal) {
 		retVal = invokeStoragePreShowResources(myInterceptorBroadcaster, theRequest, retVal);
 		return retVal;
@@ -2115,7 +2117,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 	@Override
 	public List<T> searchForResources(SearchParameterMap theParams, RequestDetails theRequest) {
-		return searchForTransformedIds(theParams, theRequest, this::idsToResource);
+		return searchForTransformedIds(theParams, theRequest, this::pidsToResource);
 	}
 
 	@Override
@@ -2153,7 +2155,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	 * Fetch the resources in chunks and apply PreAccess/PreShow interceptors.
 	 */
 	@Nonnull
-	private Stream<T> idsToResource(RequestDetails theRequest, Stream<JpaPid> pidStream) {
+	private Stream<T> pidsToResource(RequestDetails theRequest, Stream<JpaPid> pidStream) {
 		ISearchBuilder<JpaPid> searchBuilder =
 				mySearchBuilderFactory.newSearchBuilder(this, getResourceName(), getResourceType());
 		@SuppressWarnings("unchecked")
@@ -2163,8 +2165,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		// apply interceptors
 		return resourceStream
 				.flatMap(resource -> invokeStoragePreAccessResources(theRequest, resource).stream())
-				.map(resource -> invokeStoragePreShowResources(theRequest, resource))
-				.filter(Objects::nonNull);
+				.flatMap(resource -> Optional.ofNullable(invokeStoragePreShowResources(theRequest, resource)).stream());
 	}
 
 	/**
