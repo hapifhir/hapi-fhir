@@ -29,7 +29,6 @@ import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.retry.Retrier;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
-import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.subscription.SubscriptionConstants;
 import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.Nonnull;
@@ -57,9 +56,6 @@ public abstract class BaseResourceCacheSynchronizer implements IResourceChangeLi
 	private final String myResourceName;
 
 	@Autowired
-	protected ISearchParamRegistry mySearchParamRegistry;
-
-	@Autowired
 	private IResourceChangeListenerRegistry myResourceChangeListenerRegistry;
 
 	@Autowired
@@ -71,8 +67,17 @@ public abstract class BaseResourceCacheSynchronizer implements IResourceChangeLi
 	private final Semaphore mySyncResourcesSemaphore = new Semaphore(1);
 	private final Object mySyncResourcesLock = new Object();
 
-	public BaseResourceCacheSynchronizer(String theResourceName) {
+	protected BaseResourceCacheSynchronizer(String theResourceName) {
 		myResourceName = theResourceName;
+	}
+
+	protected BaseResourceCacheSynchronizer(
+			String theResourceName,
+			IResourceChangeListenerRegistry theResourceChangeListenerRegistry,
+			DaoRegistry theDaoRegistry) {
+		myResourceName = theResourceName;
+		myDaoRegistry = theDaoRegistry;
+		myResourceChangeListenerRegistry = theResourceChangeListenerRegistry;
 	}
 
 	@PostConstruct

@@ -374,7 +374,7 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 	 * The Stream MUST be closed to avoid leaking resources.
 	 * @param theParams the search
 	 * @param theRequest for partition target info
-	 * @return a Stream than MUST only be used within the calling transaction.
+	 * @return a Stream that MUST only be used within the calling transaction.
 	 */
 	default <PID extends IResourcePersistentId<?>> Stream<PID> searchForIdStream(
 			SearchParameterMap theParams,
@@ -382,6 +382,11 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 			@Nullable IBaseResource theConditionalOperationTargetOrNull) {
 		List<PID> iResourcePersistentIds = searchForIds(theParams, theRequest);
 		return iResourcePersistentIds.stream();
+	}
+
+	default <PID extends IResourcePersistentId<?>> Stream<PID> searchForIdStream(
+			SearchParameterMap theParams, RequestDetails theRequest) {
+		return searchForIdStream(theParams, theRequest, null);
 	}
 
 	/**

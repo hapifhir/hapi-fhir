@@ -38,6 +38,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
@@ -134,6 +135,9 @@ public class RequestPartitionId implements IModelJson {
 		if (hasPartitionNames()) {
 			b.append("names", getPartitionNames());
 		}
+		if (myAllPartitions) {
+			b.append("allPartitions", myAllPartitions);
+		}
 		return b.build();
 	}
 
@@ -216,7 +220,7 @@ public class RequestPartitionId implements IModelJson {
 	}
 
 	public List<Integer> getPartitionIdsWithoutDefault() {
-		return getPartitionIds().stream().filter(t -> t != null).collect(Collectors.toList());
+		return getPartitionIds().stream().filter(Objects::nonNull).collect(Collectors.toList());
 	}
 
 	@Nullable
