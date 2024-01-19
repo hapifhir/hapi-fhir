@@ -101,8 +101,7 @@ public class ResourceVersionSvcDaoImpl implements IResourceVersionSvc {
 		}
 
 		for (List<IIdType> nextIds : resourceTypeToIds.values()) {
-			ResourcePersistentIdMap idAndPID =
-					getIdsOfExistingResources(theRequestPartitionId, nextIds);
+			ResourcePersistentIdMap idAndPID = getIdsOfExistingResources(theRequestPartitionId, nextIds);
 			idToPID.putAll(idAndPID);
 		}
 
