@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 5606
+jira: SMILE-7678
+title: "Fixed an issue where executing $trigger-subscription with a search URL criteria on a partitioned Subscription resource would result in the failure to deliver the affected resources. This issue has now been resolved."
