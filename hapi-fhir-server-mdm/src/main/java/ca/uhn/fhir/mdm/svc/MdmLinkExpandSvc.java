@@ -48,10 +48,10 @@ public class MdmLinkExpandSvc implements IMdmLinkExpandSvc {
 	private static final Logger ourLog = Logs.getMdmTroubleshootingLog();
 
 	@Autowired
-	private IMdmLinkDao myMdmLinkDao;
+	IMdmLinkDao myMdmLinkDao;
 
 	@Autowired
-	private IIdHelperService myIdHelperService;
+	IIdHelperService myIdHelperService;
 
 	public MdmLinkExpandSvc() {}
 
