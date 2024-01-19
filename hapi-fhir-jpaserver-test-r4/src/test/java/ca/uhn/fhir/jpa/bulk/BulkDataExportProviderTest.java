@@ -805,7 +805,7 @@ public class BulkDataExportProviderTest {
 	}
 
 	@ParameterizedTest
-	@ValueSource(strings = {"onType", "onInstance"})
+	@ValueSource(strings = {"/Patient/" + ProviderConstants.OPERATION_EXPORT, "/Patient/p1/" + ProviderConstants.OPERATION_EXPORT})
 	public void testInitiateBulkExportOnPatient_noTypeParam_addsTypeBeforeBulkExport(String mode) throws IOException {
 		// when
 		when(myJobCoordinator.startInstance(isNotNull(), any()))
@@ -815,13 +815,7 @@ public class BulkDataExportProviderTest {
 		input.addParameter(JpaConstants.PARAM_EXPORT_OUTPUT_FORMAT, new StringType(Constants.CT_FHIR_NDJSON));
 
 		// call
-		HttpPost post;
-
-		if ("onType".equals(mode)) {
-			post = new HttpPost(myServer.getBaseUrl() + "/Patient/" + ProviderConstants.OPERATION_EXPORT);
-		} else {
-			post = new HttpPost(myServer.getBaseUrl() + "/Patient/p1/" + ProviderConstants.OPERATION_EXPORT);
-		}
+		HttpPost post = new HttpPost(myServer.getBaseUrl() + mode);
 		post.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
 		post.setEntity(new ResourceEntity(myCtx, input));
 		ourLog.info("Request: {}", post);
