@@ -276,8 +276,6 @@ public class SearchTask implements Callable<Void> {
 	}
 
 	public void saveSearch() {
-		// wipmb MegaScale search - cross-shard search probably needs to live on default partition.
-		//  Do we need to save that to restart the query after prefetch?
 		myTxService
 				.withRequest(myRequest)
 				.withRequestPartitionId(myRequestPartitionId)
@@ -289,7 +287,6 @@ public class SearchTask implements Callable<Void> {
 	private void saveUnsynced(final IResultIterator theResultIter) {
 		myTxService
 				.withRequest(myRequest)
-				// wipmb MegaScale search - cross-shard search probably needs to live on default partition.
 				.withRequestPartitionId(myRequestPartitionId)
 				.execute(() -> {
 					if (mySearch.getId() == null) {
@@ -304,7 +301,7 @@ public class SearchTask implements Callable<Void> {
 					// the user has a chance to know that they were in the results
 					if (mySearchRuntimeDetails.getRequestDetails() != null && !unsyncedPids.isEmpty()) {
 						JpaPreResourceAccessDetails accessDetails =
-								new JpaPreResourceAccessDetails(unsyncedPids, () -> newSearchBuilder());
+								new JpaPreResourceAccessDetails(unsyncedPids, this::newSearchBuilder);
 						HookParams params = new HookParams()
 								.add(IPreResourceAccessDetails.class, accessDetails)
 								.add(RequestDetails.class, mySearchRuntimeDetails.getRequestDetails())
@@ -449,7 +446,7 @@ public class SearchTask implements Callable<Void> {
 			myTxService
 					.withRequest(myRequest)
 					.withRequestPartitionId(myRequestPartitionId)
-					.execute(() -> doSearch());
+					.execute(this::doSearch);
 
 			mySearchRuntimeDetails.setSearchStatus(mySearch.getStatus());
 			if (mySearch.getStatus() == SearchStatusEnum.FINISHED) {
