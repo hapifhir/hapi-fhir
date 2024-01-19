@@ -29,6 +29,7 @@ import ca.uhn.fhir.rest.server.tenant.UrlBaseTenantIdentificationStrategy;
 import ca.uhn.fhir.test.utilities.HttpClientExtension;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.JsonUtil;
+import ca.uhn.fhir.util.SearchParameterUtil;
 import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
@@ -49,6 +50,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -60,13 +62,16 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Stream;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.arrayContainingInAnyOrder;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.containsString;
@@ -799,8 +804,9 @@ public class BulkDataExportProviderTest {
 		assertThat(bp.getFilters(), containsInAnyOrder("Patient?gender=male", "Patient?gender=female"));
 	}
 
-	@Test
-	public void testInitiateBulkExportOnPatient_noTypeParam_addsTypeBeforeBulkExport() throws IOException {
+	@ParameterizedTest
+	@ValueSource(strings = {"/Patient/" + ProviderConstants.OPERATION_EXPORT, "/Patient/p1/" + ProviderConstants.OPERATION_EXPORT})
+	public void testInitiateBulkExportOnPatient_noTypeParam_addsTypeBeforeBulkExport(String mode) throws IOException {
 		// when
 		when(myJobCoordinator.startInstance(isNotNull(), any()))
 			.thenReturn(createJobStartResponse());
@@ -809,7 +815,7 @@ public class BulkDataExportProviderTest {
 		input.addParameter(JpaConstants.PARAM_EXPORT_OUTPUT_FORMAT, new StringType(Constants.CT_FHIR_NDJSON));
 
 		// call
-		HttpPost post = new HttpPost(myServer.getBaseUrl() + "/Patient/" + ProviderConstants.OPERATION_EXPORT);
+		HttpPost post = new HttpPost(myServer.getBaseUrl() + mode);
 		post.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
 		post.setEntity(new ResourceEntity(myCtx, input));
 		ourLog.info("Request: {}", post);
@@ -820,9 +826,12 @@ public class BulkDataExportProviderTest {
 			assertEquals(myServer.getBaseUrl() + "/$export-poll-status?_jobId=" + A_JOB_ID, response.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue());
 		}
 
+		// verify
+		Set<String> expectedResourceTypes = new HashSet<>(SearchParameterUtil.getAllResourceTypesThatAreInPatientCompartment(myCtx));
+		expectedResourceTypes.add("Device");
 		BulkExportJobParameters bp = verifyJobStartAndReturnParameters();
 		assertEquals(Constants.CT_FHIR_NDJSON, bp.getOutputFormat());
-		assertThat(bp.getResourceTypes(), containsInAnyOrder("Patient"));
+		assertThat(bp.getResourceTypes(), containsInAnyOrder(expectedResourceTypes.toArray()));
 	}
 
 	@Test
