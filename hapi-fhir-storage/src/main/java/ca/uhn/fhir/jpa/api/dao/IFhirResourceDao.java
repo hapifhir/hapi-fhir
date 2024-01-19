@@ -54,6 +54,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -370,6 +371,8 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 
 	/**
 	 * Search results matching theParams.
+	 * This call does not currently invoke any interceptors, so should only be used for infrastructure that
+	 * will not need to participate in the consent services, or caching.
 	 * The Stream MUST be closed to avoid leaking resources.
 	 * If called within a transaction, the Stream will fail if passed outside the tx boundary.
 	 * @param theParams the search
@@ -384,9 +387,30 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 		return iResourcePersistentIds.stream();
 	}
 
-	default <PID extends IResourcePersistentId<?>> Stream<PID> searchForIdStream(
-			SearchParameterMap theParams, RequestDetails theRequest) {
-		return searchForIdStream(theParams, theRequest, null);
+	/**
+	 * Return all search results matching theParams.
+	 * Will load all resources into ram, so not appropriate for large data sets.
+	 * This call invokes both preaccess and preshow interceptors.
+	 * @param theParams the search
+	 * @param theRequest for partition target info
+	 */
+	default List<T> searchForResources(SearchParameterMap theParams, RequestDetails theRequest) {
+		IBundleProvider provider = search(theParams, theRequest);
+		//noinspection unchecked
+		return (List<T>) provider.getAllResources();
+	}
+
+	/**
+	 * Return the FHIR Ids matching theParams.
+	 * This call does not currently invoke any interceptors, so should only be used for infrastructure that
+	 * will not need to participate in the consent services, or caching.
+	 * @param theParams the search
+	 * @param theRequest for partition target info
+	 */
+	default List<IIdType> searchForResourceIds(SearchParameterMap theParams, RequestDetails theRequest) {
+		return searchForResources(theParams, theRequest).stream()
+				.map(IBaseResource::getIdElement)
+				.collect(Collectors.toList());
 	}
 
 	/**

@@ -26,6 +26,7 @@ import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.subscription.SubscriptionConstants;
+import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -58,6 +59,11 @@ public class SubscriptionLoader extends BaseResourceCacheSynchronizer {
 	 */
 	public SubscriptionLoader() {
 		super("Subscription");
+	}
+
+	@VisibleForTesting
+	public int doSyncSubscriptionsForUnitTest() {
+		return super.doSyncResourcesForUnitTest();
 	}
 
 	@Override
@@ -115,7 +121,7 @@ public class SubscriptionLoader extends BaseResourceCacheSynchronizer {
 	}
 
 	/**
-	 * @param theSubscription
+	 * Check status of theSubscription and update to "active" if needed.
 	 * @return true if activated
 	 */
 	private boolean activateSubscriptionIfRequested(IBaseResource theSubscription) {
@@ -158,8 +164,8 @@ public class SubscriptionLoader extends BaseResourceCacheSynchronizer {
 			error = "";
 		}
 		ourLog.error(
-				"Subscription {} could not be activated."
-						+ " This will not prevent startup, but it could lead to undesirable outcomes! {}",
+				"Subscription {} could not be activated. "
+						+ "This will not prevent startup, but it could lead to undesirable outcomes! {}",
 				theSubscription.getIdElement().getIdPart(),
 				(StringUtils.isBlank(error) ? "" : "Error: " + error));
 	}

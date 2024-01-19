@@ -30,6 +30,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionOperations;
 
+import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.stream.Stream;
 
@@ -114,6 +115,10 @@ public interface IHapiTransactionService {
 		}
 
 		default <T> Stream<T> search(Callable<Stream<T>> theCallback) {
+			return execute(theCallback);
+		}
+
+		default <T> List<T> searchList(Callable<List<T>> theCallback) {
 			return execute(theCallback);
 		}
 	}

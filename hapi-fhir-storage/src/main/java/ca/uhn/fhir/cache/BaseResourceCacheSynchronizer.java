@@ -27,9 +27,7 @@ import ca.uhn.fhir.jpa.cache.IResourceChangeListenerCache;
 import ca.uhn.fhir.jpa.cache.IResourceChangeListenerRegistry;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.retry.Retrier;
-import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
-import ca.uhn.fhir.subscription.SubscriptionConstants;
 import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.PostConstruct;
@@ -48,7 +46,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.Semaphore;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public abstract class BaseResourceCacheSynchronizer implements IResourceChangeListener {
 	private static final Logger ourLog = LoggerFactory.getLogger(BaseResourceCacheSynchronizer.class);
@@ -128,7 +125,7 @@ public abstract class BaseResourceCacheSynchronizer implements IResourceChangeLi
 	}
 
 	@VisibleForTesting
-	public int doSyncResourcessForUnitTest() {
+	public int doSyncResourcesForUnitTest() {
 		// Two passes for delete flag to take effect
 		int first = doSyncResourcesWithRetry();
 		int second = doSyncResourcesWithRetry();
@@ -142,6 +139,7 @@ public abstract class BaseResourceCacheSynchronizer implements IResourceChangeLi
 		return syncResourceRetrier.runWithRetry();
 	}
 
+	@SuppressWarnings("unchecked")
 	private int doSyncResources() {
 		if (isStopping()) {
 			return 0;
@@ -150,27 +148,10 @@ public abstract class BaseResourceCacheSynchronizer implements IResourceChangeLi
 		synchronized (mySyncResourcesLock) {
 			ourLog.debug("Starting sync {}s", myResourceName);
 
-			List<IBaseResource> resourceList = searchForStream().collect(Collectors.toList());
+			List<IBaseResource> resourceList = (List<IBaseResource>)
+					getResourceDao().searchForResources(mySearchParameterMap, mySystemRequestDetails);
 			return syncResourcesIntoCache(resourceList);
 		}
-	}
-
-	private Stream<IBaseResource> searchForStream() {
-		// wipmb megascale - create a search for resource.
-		IBundleProvider resourceBundleList = getResourceDao().search(mySearchParameterMap, mySystemRequestDetails);
-
-		Integer resourceCount = resourceBundleList.size();
-		assert resourceCount != null;
-		if (resourceCount >= SubscriptionConstants.MAX_SUBSCRIPTION_RESULTS) {
-			ourLog.error(
-					"Currently over {} {}s.  Some {}s have not been loaded.",
-					SubscriptionConstants.MAX_SUBSCRIPTION_RESULTS,
-					myResourceName,
-					myResourceName);
-		}
-
-		List<IBaseResource> resourceList = resourceBundleList.getResources(0, resourceCount);
-		return resourceList.stream();
 	}
 
 	protected abstract int syncResourcesIntoCache(List<IBaseResource> resourceList);
