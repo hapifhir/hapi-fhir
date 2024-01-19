@@ -26,8 +26,6 @@ variables:
 
 container:
     image: smilecdr/hapi-build:latest
-    localImage: true
-
 
 #container: maven:3.9-amazoncorretto-21
 steps:
