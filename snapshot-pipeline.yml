@@ -27,7 +27,6 @@ variables:
 container:
     image: smilecdr/hapi-build:latest
 
-#container: maven:3.9-amazoncorretto-21
 steps:
 
   # We need a valid signing key to sign our builds for deployment to sonatype. We have uploaded
