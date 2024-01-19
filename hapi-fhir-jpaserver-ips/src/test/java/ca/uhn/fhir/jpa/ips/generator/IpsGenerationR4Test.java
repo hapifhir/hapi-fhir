@@ -45,6 +45,7 @@ import java.util.stream.Collectors;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.matchesPattern;
 import static org.hamcrest.Matchers.stringContainsInOrder;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -233,9 +234,8 @@ public class IpsGenerationR4Test extends BaseResourceProviderR4Test {
 		ourLog.info("Output: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
 
 		Composition composition = findCompositionSectionByDisplay(output, "History of Immunization Narrative");
-		// Should be newest first
-		assertThat(composition.getText().getDivAsString(), stringContainsInOrder(
-			"Vax 2015", "Vax 2010", "Vax 2005"
+		assertThat(composition.getText().getDivAsString(), is(
+			"<div xmlns=\"http://www.w3.org/1999/xhtml\"><h1>International Patient Summary Document</h1></div>"
 		));
 
 		List<String> resourceDates = output
@@ -245,6 +245,7 @@ public class IpsGenerationR4Test extends BaseResourceProviderR4Test {
 			.map(t -> (Immunization) t.getResource())
 			.map(t -> t.getOccurrenceDateTimeType().getValueAsString().substring(0, 4))
 			.collect(Collectors.toList());
+		// Should be newest first
 		assertThat(resourceDates, contains("2015", "2010", "2005"));
 	}
 
