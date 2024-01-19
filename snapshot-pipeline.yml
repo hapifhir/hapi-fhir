@@ -25,8 +25,7 @@ variables:
 - group: SONATYPE_VARIABLE_GROUP
 
 container:
-    image: maven:3.9-eclipse-temurin-21
-    options: -u 0
+    image: maven:3.9-eclipse-temurin-21-jammy
 
 
 #container: maven:3.9-amazoncorretto-21
