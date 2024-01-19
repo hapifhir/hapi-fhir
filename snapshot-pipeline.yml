@@ -52,6 +52,7 @@ steps:
 
   # 3. Import keys into gpg
   - bash: |
+      su - 
       apt-get update
       apt-get install -y gpg
       gpg --import --no-tty --batch --yes $(Agent.TempDirectory)/public.key
