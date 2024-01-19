@@ -68,11 +68,11 @@ public abstract class BaseResourceCacheSynchronizer implements IResourceChangeLi
 	private final Semaphore mySyncResourcesSemaphore = new Semaphore(1);
 	private final Object mySyncResourcesLock = new Object();
 
-	BaseResourceCacheSynchronizer(String theResourceName) {
+	protected BaseResourceCacheSynchronizer(String theResourceName) {
 		myResourceName = theResourceName;
 	}
 
-	BaseResourceCacheSynchronizer(
+	protected BaseResourceCacheSynchronizer(
 			String theResourceName,
 			IResourceChangeListenerRegistry theResourceChangeListenerRegistry,
 			DaoRegistry theDaoRegistry) {

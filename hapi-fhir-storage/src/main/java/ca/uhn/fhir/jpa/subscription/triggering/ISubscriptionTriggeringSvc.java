@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.jpa.subscription.triggering;
 
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import jakarta.annotation.Nullable;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -28,6 +29,17 @@ import java.util.List;
 
 public interface ISubscriptionTriggeringSvc {
 
+	IBaseParameters triggerSubscription(
+			@Nullable List<IPrimitiveType<String>> theResourceIds,
+			@Nullable List<IPrimitiveType<String>> theSearchUrls,
+			@Nullable IIdType theSubscriptionId,
+			RequestDetails theRequestDetails);
+
+	@Deprecated(forRemoval = true)
+	/**
+	 * Use {@link ISubscriptionTriggeringSvc#triggerSubscription(List, List, IIdType, RequestDetails)} instead.
+	 * This implementation uses a SystemRequestDetails for All Partitions, as the previous behaviour did.
+	 */
 	IBaseParameters triggerSubscription(
 			@Nullable List<IPrimitiveType<String>> theResourceIds,
 			@Nullable List<IPrimitiveType<String>> theSearchUrls,

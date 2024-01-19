@@ -35,18 +35,21 @@ import ca.uhn.fhir.jpa.model.sched.HapiJob;
 import ca.uhn.fhir.jpa.model.sched.IHasScheduledJobs;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
+import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.subscription.match.matcher.matching.IResourceModifiedConsumer;
+import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionCanonicalizer;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
-import ca.uhn.fhir.model.dstu2.valueset.ResourceTypeEnum;
 import ca.uhn.fhir.rest.api.CacheControlDirective;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.util.ParametersUtil;
 import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.UrlUtil;
@@ -123,33 +126,46 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 	private ISearchSvc mySearchService;
 
 	@Autowired
+	IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
+
+	@Autowired
 	private SearchBuilderFactory mySearchBuilderFactory;
+
+	@Autowired
+	private SubscriptionCanonicalizer mySubscriptionCanonicalizer;
 
 	@Override
 	public IBaseParameters triggerSubscription(
 			@Nullable List<IPrimitiveType<String>> theResourceIds,
 			@Nullable List<IPrimitiveType<String>> theSearchUrls,
-			@Nullable IIdType theSubscriptionId) {
+			@Nullable IIdType theSubscriptionId,
+			RequestDetails theRequestDetails) {
 
 		if (myStorageSettings.getSupportedSubscriptionTypes().isEmpty()) {
 			throw new PreconditionFailedException(Msg.code(22) + "Subscription processing not active on this server");
 		}
 
-		// Throw a 404 if the subscription doesn't exist
+		RequestPartitionId requestPartitionId;
+
+		// Throw a 404 if the subscription doesn't exist, otherwise determine its partition.
 		if (theSubscriptionId != null) {
 			IFhirResourceDao<?> subscriptionDao = myDaoRegistry.getSubscriptionDao();
-			IIdType subscriptionId = theSubscriptionId;
-			if (!subscriptionId.hasResourceType()) {
-				subscriptionId = subscriptionId.withResourceType(ResourceTypeEnum.SUBSCRIPTION.getCode());
+			IBaseResource subscription = subscriptionDao.read(theSubscriptionId, theRequestDetails);
+			if (mySubscriptionCanonicalizer.canonicalize(subscription).getCrossPartitionEnabled()) {
+				requestPartitionId = RequestPartitionId.allPartitions();
+			} else {
+				// Otherwise, trust the partition passed in via tenant/interceptor.
+				requestPartitionId = myRequestPartitionHelperSvc.determineGenericPartitionForRequest(theRequestDetails);
 			}
-			subscriptionDao.read(subscriptionId, SystemRequestDetails.forAllPartitions());
+		} else {
+			// If we have no specific subscription, allow standard partition selection
+			requestPartitionId = myRequestPartitionHelperSvc.determineGenericPartitionForRequest(theRequestDetails);
 		}
 
 		List<IPrimitiveType<String>> resourceIds = defaultIfNull(theResourceIds, Collections.emptyList());
 		List<IPrimitiveType<String>> searchUrls = defaultIfNull(theSearchUrls, Collections.emptyList());
-
 		// Make sure we have at least one resource ID or search URL
-		if (resourceIds.size() == 0 && searchUrls.size() == 0) {
+		if (resourceIds.isEmpty() && searchUrls.isEmpty()) {
 			throw new InvalidRequestException(Msg.code(23) + "No resource IDs or search URLs specified for triggering");
 		}
 
@@ -174,6 +190,8 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 
 		SubscriptionTriggeringJobDetails jobDetails = new SubscriptionTriggeringJobDetails();
 		jobDetails.setJobId(UUID.randomUUID().toString());
+		jobDetails.setRequestPartitionId(
+				requestPartitionId == null ? RequestPartitionId.allPartitions() : requestPartitionId);
 		jobDetails.setRemainingResourceIds(
 				resourceIds.stream().map(IPrimitiveType::getValue).collect(Collectors.toList()));
 		jobDetails.setRemainingSearchUrls(
@@ -200,6 +218,15 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 		value.setValueAsString("Subscription triggering job submitted as JOB ID: " + jobDetails.myJobId);
 		ParametersUtil.addParameterToParameters(myFhirContext, retVal, "information", value);
 		return retVal;
+	}
+
+	@Override
+	public IBaseParameters triggerSubscription(
+			@Nullable List<IPrimitiveType<String>> theResourceIds,
+			@Nullable List<IPrimitiveType<String>> theSearchUrls,
+			@Nullable IIdType theSubscriptionId) {
+		return triggerSubscription(
+				theResourceIds, theSearchUrls, theSubscriptionId, SystemRequestDetails.newSystemRequestAllPartitions());
 	}
 
 	@Override
@@ -246,7 +273,7 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 		while (!theJobDetails.getRemainingResourceIds().isEmpty() && totalSubmitted.get() < myMaxSubmitPerPass) {
 			totalSubmitted.incrementAndGet();
 			String nextResourceId = theJobDetails.getRemainingResourceIds().remove(0);
-			submitResource(theJobDetails.getSubscriptionId(), nextResourceId);
+			submitResource(theJobDetails.getSubscriptionId(), theJobDetails.getRequestPartitionId(), nextResourceId);
 		}
 
 		// Make sure these all succeeded in submitting
@@ -271,20 +298,18 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 			IFhirResourceDao<?> callingDao = myDaoRegistry.getResourceDao(resourceType);
 
 			ourLog.info("Triggering job[{}] is starting a search for {}", theJobDetails.getJobId(), nextSearchUrl);
-
 			search = mySearchCoordinatorSvc.registerSearch(
 					callingDao,
 					params,
 					resourceType,
 					new CacheControlDirective(),
 					null,
-					RequestPartitionId.allPartitions());
+					theJobDetails.getRequestPartitionId());
 
 			if (isNull(search.getUuid())) {
 				// we don't have a search uuid i.e. we're setting up for synchronous processing
 				theJobDetails.setCurrentSearchUrl(nextSearchUrl);
 				theJobDetails.setCurrentOffset(params.getOffset());
-
 			} else {
 				// populate properties for asynchronous path
 				theJobDetails.setCurrentSearchUuid(search.getUuid());
@@ -332,16 +357,22 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 		}
 
 		ourLog.info(
-				"Triggering job[{}] search {} requesting resources {} - {}",
+				"Triggering job[{}] search {} requesting resources {} - {} from partition {}",
 				theJobDetails.getJobId(),
 				theJobDetails.getCurrentSearchUuid(),
 				fromIndex,
-				toIndex);
+				toIndex,
+				theJobDetails.getRequestPartitionId());
 
 		List<? extends IResourcePersistentId<?>> allResourceIds;
-		RequestPartitionId requestPartitionId = RequestPartitionId.allPartitions();
-		allResourceIds = mySearchCoordinatorSvc.getResources(
-				theJobDetails.getCurrentSearchUuid(), fromIndex, toIndex, null, requestPartitionId);
+		RequestPartitionId requestPartitionId = theJobDetails.getRequestPartitionId();
+		try {
+			allResourceIds = mySearchCoordinatorSvc.getResources(
+					theJobDetails.getCurrentSearchUuid(), fromIndex, toIndex, null, requestPartitionId);
+		} catch (ResourceGoneException e) {
+			ourLog.trace("Search has expired, submission is done.");
+			allResourceIds = new ArrayList<>();
+		}
 
 		ourLog.info("Triggering job[{}] delivering {} resources", theJobDetails.getJobId(), allResourceIds.size());
 		AtomicInteger highestIndexSubmitted = new AtomicInteger(theJobDetails.getCurrentSearchLastUploadedIndex());
@@ -362,7 +393,8 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 				});
 
 				for (IBaseResource nextResource : listToPopulate) {
-					submitResource(theJobDetails.getSubscriptionId(), nextResource);
+					submitResource(
+							theJobDetails.getSubscriptionId(), theJobDetails.getRequestPartitionId(), nextResource);
 					totalSubmitted.incrementAndGet();
 					highestIndexSubmitted.incrementAndGet();
 				}
@@ -403,10 +435,11 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 		String searchUrl = theJobDetails.getCurrentSearchUrl();
 
 		ourLog.info(
-				"Triggered job [{}] - Starting synchronous processing at offset {} and index {}",
+				"Triggered job [{}] - Starting synchronous processing at offset {} and index {} on partition {}",
 				theJobDetails.getJobId(),
 				theJobDetails.getCurrentOffset(),
-				fromIndex);
+				fromIndex,
+				theJobDetails.getRequestPartitionId());
 
 		int submittableCount = myMaxSubmitPerPass - totalSubmitted.get();
 		int toIndex = fromIndex + submittableCount;
@@ -418,7 +451,11 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 			}
 
 			// we already have data from the initial step so process as much as we can.
-			ourLog.info("Triggered job[{}] will process up to {} resources", theJobDetails.getJobId(), toIndex);
+			ourLog.info(
+					"Triggered job[{}] will process up to {} resources from partition {}",
+					theJobDetails.getJobId(),
+					toIndex,
+					theJobDetails.getRequestPartitionId());
 			allCurrentResources = search.getResources(0, toIndex);
 
 		} else {
@@ -439,7 +476,7 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 					toIndex,
 					offset);
 
-			search = mySearchService.executeQuery(resourceDef.getName(), params, RequestPartitionId.allPartitions());
+			search = mySearchService.executeQuery(resourceDef.getName(), params, theJobDetails.getRequestPartitionId());
 			allCurrentResources = search.getResources(0, submittableCount);
 		}
 
@@ -447,8 +484,8 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 		AtomicInteger highestIndexSubmitted = new AtomicInteger(theJobDetails.getCurrentSearchLastUploadedIndex());
 
 		for (IBaseResource nextResource : allCurrentResources) {
-			Future<?> future =
-					myExecutorService.submit(() -> submitResource(theJobDetails.getSubscriptionId(), nextResource));
+			Future<?> future = myExecutorService.submit(() -> submitResource(
+					theJobDetails.getSubscriptionId(), theJobDetails.getRequestPartitionId(), nextResource));
 			futures.add(future);
 			totalSubmitted.incrementAndGet();
 			highestIndexSubmitted.incrementAndGet();
@@ -502,15 +539,17 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 		return false;
 	}
 
-	private void submitResource(String theSubscriptionId, String theResourceIdToTrigger) {
+	private void submitResource(
+			String theSubscriptionId, RequestPartitionId theRequestPartitionId, String theResourceIdToTrigger) {
 		org.hl7.fhir.r4.model.IdType resourceId = new org.hl7.fhir.r4.model.IdType(theResourceIdToTrigger);
 		IFhirResourceDao dao = myDaoRegistry.getResourceDao(resourceId.getResourceType());
 		IBaseResource resourceToTrigger = dao.read(resourceId, SystemRequestDetails.forAllPartitions());
 
-		submitResource(theSubscriptionId, resourceToTrigger);
+		submitResource(theSubscriptionId, theRequestPartitionId, resourceToTrigger);
 	}
 
-	private void submitResource(String theSubscriptionId, IBaseResource theResourceToTrigger) {
+	private void submitResource(
+			String theSubscriptionId, RequestPartitionId theRequestPartitionId, IBaseResource theResourceToTrigger) {
 
 		ourLog.info(
 				"Submitting resource {} to subscription {}",
@@ -518,7 +557,10 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 				theSubscriptionId);
 
 		ResourceModifiedMessage msg = new ResourceModifiedMessage(
-				myFhirContext, theResourceToTrigger, ResourceModifiedMessage.OperationTypeEnum.UPDATE);
+				myFhirContext,
+				theResourceToTrigger,
+				ResourceModifiedMessage.OperationTypeEnum.MANUALLY_TRIGGERED,
+				theRequestPartitionId);
 		msg.setSubscriptionId(theSubscriptionId);
 
 		for (int i = 0; ; i++) {
@@ -629,6 +671,8 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 		private int myCurrentSearchLastUploadedIndex;
 		private int myCurrentOffset;
 
+		private RequestPartitionId myRequestPartitionId;
+
 		Integer getCurrentSearchCount() {
 			return myCurrentSearchCount;
 		}
@@ -711,6 +755,14 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 
 		public void setCurrentOffset(Integer theCurrentOffset) {
 			myCurrentOffset = ObjectUtils.defaultIfNull(theCurrentOffset, 0);
+		}
+
+		public void setRequestPartitionId(RequestPartitionId theRequestPartitionId) {
+			myRequestPartitionId = theRequestPartitionId;
+		}
+
+		public RequestPartitionId getRequestPartitionId() {
+			return myRequestPartitionId;
 		}
 	}
 }
