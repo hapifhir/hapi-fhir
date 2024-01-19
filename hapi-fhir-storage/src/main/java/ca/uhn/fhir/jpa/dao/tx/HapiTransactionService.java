@@ -104,12 +104,16 @@ public class HapiTransactionService implements IHapiTransactionService {
 
 	@Override
 	public IExecutionBuilder withRequest(@Nullable RequestDetails theRequestDetails) {
-		return new ExecutionBuilder(theRequestDetails);
+		return buildExecutionBuilder(theRequestDetails);
 	}
 
 	@Override
 	public IExecutionBuilder withSystemRequest() {
-		return new ExecutionBuilder(null);
+		return buildExecutionBuilder(null);
+	}
+
+	protected IExecutionBuilder buildExecutionBuilder(@Nullable RequestDetails theRequestDetails) {
+		return new ExecutionBuilder(theRequestDetails);
 	}
 
 	/**
@@ -236,15 +240,7 @@ public class HapiTransactionService implements IHapiTransactionService {
 
 	@Nullable
 	protected <T> T doExecute(ExecutionBuilder theExecutionBuilder, TransactionCallback<T> theCallback) {
-		final RequestPartitionId requestPartitionId;
-		if (theExecutionBuilder.myRequestPartitionId != null) {
-			requestPartitionId = theExecutionBuilder.myRequestPartitionId;
-		} else if (theExecutionBuilder.myRequestDetails != null) {
-			requestPartitionId = myRequestPartitionHelperSvc.determineGenericPartitionForRequest(
-					theExecutionBuilder.myRequestDetails);
-		} else {
-			requestPartitionId = null;
-		}
+		final RequestPartitionId requestPartitionId = theExecutionBuilder.getEffectiveRequestPartitionId();
 		RequestPartitionId previousRequestPartitionId = null;
 		if (requestPartitionId != null) {
 			previousRequestPartitionId = ourRequestPartitionThreadLocal.get();
@@ -443,7 +439,8 @@ public class HapiTransactionService implements IHapiTransactionService {
 		}
 	}
 
-	protected class ExecutionBuilder implements IExecutionBuilder, TransactionOperations {
+	// wipmb is Clone ok, or do we want an explicit copy constructor?
+	protected class ExecutionBuilder implements IExecutionBuilder, TransactionOperations, Cloneable {
 
 		private final RequestDetails myRequestDetails;
 		private Isolation myIsolation;
@@ -451,7 +448,7 @@ public class HapiTransactionService implements IHapiTransactionService {
 		private boolean myReadOnly;
 		private TransactionDetails myTransactionDetails;
 		private Runnable myOnRollback;
-		private RequestPartitionId myRequestPartitionId;
+		protected RequestPartitionId myRequestPartitionId;
 
 		protected ExecutionBuilder(RequestDetails theRequestDetails) {
 			myRequestDetails = theRequestDetails;
@@ -532,6 +529,19 @@ public class HapiTransactionService implements IHapiTransactionService {
 
 		public Propagation getPropagation() {
 			return myPropagation;
+		}
+
+		@Nullable
+		protected RequestPartitionId getEffectiveRequestPartitionId() {
+			final RequestPartitionId requestPartitionId;
+			if (myRequestPartitionId != null) {
+				requestPartitionId = myRequestPartitionId;
+			} else if (myRequestDetails != null) {
+				requestPartitionId = myRequestPartitionHelperSvc.determineGenericPartitionForRequest(myRequestDetails);
+			} else {
+				requestPartitionId = null;
+			}
+			return requestPartitionId;
 		}
 	}
 
