@@ -39,9 +39,9 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
 /**
- * This test include tests for two classes SqlStatementFilteringLogger and  SqlLoggerFilteringUtil, because the later
- * uses threading in a way that these tests would collide with each other if run in parallel, as it could be the case
- * if set in different classes. They are separated by top level nested class names.
+ * This test includes tests for two classes SqlStatementFilteringLogger and  SqlLoggerFilteringUtil, because the later
+ * uses threading in a way that would make these tests would collide with each other if run in parallel, as it could be
+ * the case if set in different classes. They are separated by top level nested class names.
  */
 @ExtendWith(MockitoExtension.class)
 public class SqlLoggerFilteringAndUtilTest {
