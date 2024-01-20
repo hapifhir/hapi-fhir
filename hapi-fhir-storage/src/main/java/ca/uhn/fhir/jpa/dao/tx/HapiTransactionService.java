@@ -439,7 +439,6 @@ public class HapiTransactionService implements IHapiTransactionService {
 		}
 	}
 
-	// wipmb is Clone ok, or do we want an explicit copy constructor?
 	protected class ExecutionBuilder implements IExecutionBuilder, TransactionOperations, Cloneable {
 
 		private final RequestDetails myRequestDetails;

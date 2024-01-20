@@ -26,7 +26,6 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.Collections;
 import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -108,11 +107,9 @@ public class SubscriptionLoaderTest {
 		when(myDaoRegistry.getResourceDao("Subscription"))
 			.thenReturn(mySubscriptionDao);
 		when(myDaoRegistry.isResourceTypeSupported("Subscription"))
-			.thenReturn(true);
-		when(mySubscriptionDao.search(any(SearchParameterMap.class), any(SystemRequestDetails.class)))
-			.thenReturn(getSubscriptionList(
-				Collections.singletonList(subscription)
-			));
+				.thenReturn(true);
+		when(mySubscriptionDao.searchForResources(any(SearchParameterMap.class), any(SystemRequestDetails.class)))
+			.thenReturn(List.of(subscription));
 
 		when(mySubscriptionActivatingInterceptor.activateSubscriptionIfRequired(any(IBaseResource.class)))
 			.thenReturn(false);
@@ -127,7 +124,7 @@ public class SubscriptionLoaderTest {
 
 		// verify
 		verify(mySubscriptionDao)
-			.search(any(SearchParameterMap.class), any(SystemRequestDetails.class));
+			.searchForResources(any(SearchParameterMap.class), any(SystemRequestDetails.class));
 
 		String expected = "Subscription "
 			+ subscription.getIdElement().getIdPart()
