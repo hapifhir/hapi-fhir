@@ -93,7 +93,15 @@ The following table lists vocabulary that is validated by this module:
             </td>
             <td>
                 Codes are not validated, but are instead assumed to be correct. Improved validation should be
-                added in the future, please get in touch if you would like to help.
+                added in the future, please get in touch if you would like to help. 
+                <br/>
+                The ValueSet will be automatically expanded with a list of built-in mimetype codes which are loaded from the 
+                <a href="https://www.iana.org/assignments/media-types/media-types.xml">Internet Assigned Numbers Authority (IANA)"</a>
+                <br/>
+                If you wish to include additional mimetypes, create a new csv file with the new values and save it to  
+                <a href="https://github.com/hapifhir/hapi-fhir/tree/master/hapi-fhir-validation/src/main/resources/org/hl7/fhir/common/hapi/validation/support/mimetype/">mimetype location</a>.
+                The format required is the same as the IANA standard. The `Name` and `Template` column will be required in this order. 
+                `Name` corresponds to `Display` and template corresponds to `Code`.
             </td>
         </tr>
         <tr>

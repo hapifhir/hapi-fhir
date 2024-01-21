@@ -1,0 +1,7 @@
+Name,Template,Reference
+collection,font/collection,[RFC8081]
+otf,font/otf,[RFC8081]
+sfnt,font/sfnt,[RFC8081]
+ttf,font/ttf,[RFC8081]
+woff,font/woff,[RFC8081]
+woff2,font/woff2,[RFC8081]

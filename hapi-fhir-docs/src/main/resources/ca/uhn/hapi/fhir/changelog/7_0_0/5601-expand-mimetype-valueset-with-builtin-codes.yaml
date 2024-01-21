@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 5601
+title: "Previously, expanding the [mimetype ValueSet](https://hl7.org/fhir/valueset-mimetypes.html) 
+would fail with `ExpansionCouldNotBeCompletedInternallyException`. This problem has been addressed by loading a list of built-in codes from 
+[Internet Assigned Numbers Authority (IANA)](https://www.iana.org/assignments/media-types/media-types.xml) into the `CommonCodeSystemsTerminologyService`."

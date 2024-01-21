@@ -74,7 +74,7 @@ public class JpaStorageSettings extends StorageSettings {
 					Bundle.BundleType.DOCUMENT.toCode(),
 					Bundle.BundleType.MESSAGE.toCode())));
 	// update setter javadoc if default changes
-	public static final int DEFAULT_MAX_EXPANSION_SIZE = 1000;
+	public static final int DEFAULT_MAX_EXPANSION_SIZE = 3000;
 	public static final HistoryCountModeEnum DEFAULT_HISTORY_COUNT_MODE =
 			HistoryCountModeEnum.CACHED_ONLY_WITHOUT_OFFSET;
 	/**

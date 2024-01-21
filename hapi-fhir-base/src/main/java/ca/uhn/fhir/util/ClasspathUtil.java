@@ -174,7 +174,7 @@ public class ClasspathUtil {
 	 * @param theDirectory the directory in the classpath to lookup
 	 * @return the list of files containing relative path and file name
 	 */
-	public static List<String> getFilesFromDirectory(String theDirectory) {
+	public static List<String> getFilesNamesFromDirectory(String theDirectory) {
 		List<String> filenames = new ArrayList<>();
 		try (InputStream in = ClasspathUtil.class.getResourceAsStream(theDirectory)) {
 			if (in == null) {
@@ -183,7 +183,7 @@ public class ClasspathUtil {
 			try (BufferedReader br = new BufferedReader(new InputStreamReader(in))) {
 				String fileName;
 				while ((fileName = br.readLine()) != null) {
-					filenames.add(theDirectory + "/" + fileName);
+					filenames.add(fileName);
 				}
 			}
 		} catch (IOException e) {

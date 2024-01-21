@@ -2,7 +2,6 @@ package org.hl7.fhir.common.hapi.validation.support;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
-import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport.CodeValidationResult;
 import ca.uhn.fhir.context.support.IValidationSupport.LookupCodeResult;
 import ca.uhn.fhir.context.support.LookupCodeRequest;
@@ -17,6 +16,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+
+import java.util.Map;
 
 import static org.hl7.fhir.common.hapi.validation.support.CommonCodeSystemsTerminologyService.MIMETYPES_CODESYSTEM_URL;
 import static org.hl7.fhir.common.hapi.validation.support.CommonCodeSystemsTerminologyService.MIMETYPES_VALUESET_URL;
@@ -247,15 +248,32 @@ public class CommonCodeSystemsTerminologyServiceTest {
 	}
 
 	@Test
-	public void testFetchCodeSystem_withMimeType_returnsResult() {
-		CodeSystem cs = (CodeSystem) mySvc.fetchCodeSystem(MIMETYPES_CODESYSTEM_URL);
-		assertNotNull(cs);
-		assertEquals(2088, cs.getConcept().size());
+	public void testGetMimetypesFromFile_withValidFormat_returnsResult() {
+		Map<String, String> mimetypeMap = CommonCodeSystemsTerminologyService.getMimetypesFromFile("/org/hl7/fhir/common/hapi/validation/support/mimetype-test/test-valid.csv");
+		assertFalse(mimetypeMap.isEmpty());
+		assertEquals(3, mimetypeMap.size());
 	}
 
 	@ParameterizedTest
-	@ValueSource(strings = { EncodingEnum.JSON_PLAIN_STRING, Constants.CT_FHIR_JSON_NEW, Constants.CT_FHIR_JSON, Constants.CT_TEXT })
-	public void testValidateCode_withMimetypeKnown_returnValidResult(String code) {
+	@ValueSource(strings = {
+		"/org/hl7/fhir/common/hapi/validation/support/mimetype-test/test-invalid.json",
+		"/org/hl7/fhir/common/hapi/validation/support/mimetype-test/test-invalid.csv"
+	})
+	public void testGetMimetypesFromFile_withInvalidFormat_resultsEmpty(String theConfigFile) {
+		Map<String, String> mimetypeMap = CommonCodeSystemsTerminologyService.getMimetypesFromFile(theConfigFile);
+		assertTrue(mimetypeMap.isEmpty());
+	}
+
+	@Test
+	public void testFetchCodeSystem_withMimeType_returnsResult() {
+		CodeSystem cs = (CodeSystem) mySvc.fetchCodeSystem(MIMETYPES_CODESYSTEM_URL);
+		assertNotNull(cs);
+		assertEquals(2086, cs.getConcept().size());
+	}
+
+	@ParameterizedTest
+	@ValueSource(strings = { EncodingEnum.JSON_PLAIN_STRING, Constants.CT_FHIR_JSON_NEW, Constants.CT_FHIR_JSON })
+	public void testValidateCode_withValueSetWithMimetypeKnown_returnValidResult(String code) {
 		// test
 		CodeValidationResult result = mySvc.validateCode(newSupport(), newOptions(), MIMETYPES_CODESYSTEM_URL, code, null, MIMETYPES_VALUESET_URL);
 
@@ -268,43 +286,70 @@ public class CommonCodeSystemsTerminologyServiceTest {
 		assertNotNull(result.getDisplay());
 	}
 
-	@Test
-	public void testValidateCode_withMimetypeUnknown_returnInvalidResult() {
-		// setup
-		final String system = MIMETYPES_CODESYSTEM_URL;
-		final String code = "someCode";
-
+	@ParameterizedTest
+	@ValueSource(strings = { EncodingEnum.JSON_PLAIN_STRING, Constants.CT_FHIR_JSON_NEW, Constants.CT_FHIR_JSON })
+	public void testValidateCode_withInferSystem_returnValidResult(String code) {
 		// test
-		CodeValidationResult result = mySvc.validateCode(newSupport(), newOptions(), system, code, null, null);
+		CodeValidationResult result = mySvc.validateCode(newSupport(), newOptions().setInferSystem(true), null, code, null, MIMETYPES_VALUESET_URL);
 
 		// verify
 		assertNotNull(result);
-		assertFalse(result.isOk());
-		assertNull(result.getDisplay());
-		assertEquals(IValidationSupport.IssueSeverity.ERROR, result.getSeverity());
-		assertEquals(mySvc.getErrorMessage("invalidCodeInSystem", system, code), result.getMessage());
-	}
-
-
-	@Test
-	public void testValidateCode_withMimetypeUnknown_returnUnknownResult() {
-		// setup
-		final String system = MIMETYPES_CODESYSTEM_URL;
-		final String code = "someCode";
-
-		// test
-		CodeValidationResult result = mySvc.validateCode(newSupport(), newOptions(), system, code, null, MIMETYPES_VALUESET_URL);
-
-		// verify
-		assertNotNull(result);
-		assertFalse(result.isOk());
-		assertNull(result.getDisplay());
-		assertEquals(IValidationSupport.IssueSeverity.ERROR, result.getSeverity());
-		assertEquals(mySvc.getErrorMessage("unknownCodeSystem", system, code), result.getMessage());
+		assertEquals(code, result.getCode());
+		assertTrue(result.isOk());
+		assertNull(result.getSeverity());
+		assertNull(result.getMessage());
+		assertNotNull(result.getDisplay());
 	}
 
 	@ParameterizedTest
-	@ValueSource(strings = { EncodingEnum.JSON_PLAIN_STRING, Constants.FORMAT_TURTLE, Constants.CT_FHIR_JSON_NEW, Constants.CT_FHIR_JSON, Constants.CT_TEXT })
+	@ValueSource(strings = { EncodingEnum.JSON_PLAIN_STRING, Constants.CT_FHIR_JSON_NEW, Constants.CT_FHIR_JSON })
+	public void testValidateCode_withoutValueSetWithMimetypeKnown_returnValidResult(String code) {
+		// test
+		CodeValidationResult result = mySvc.validateCode(newSupport(), newOptions(), MIMETYPES_CODESYSTEM_URL, code, null, null);
+
+		// verify
+		assertNotNull(result);
+		assertEquals(code, result.getCode());
+		assertTrue(result.isOk());
+		assertNull(result.getSeverity());
+		assertNull(result.getMessage());
+		assertNotNull(result.getDisplay());
+	}
+
+	@Test
+	public void testValidateCode_withValueSetWithMimetypeUnknown_returnValidResult() {
+		// setup
+		final String code = "someCode";
+		final String display = "displayValue";
+
+		// test
+		CodeValidationResult result = mySvc.validateCode(newSupport(), newOptions(), MIMETYPES_CODESYSTEM_URL, code, display, MIMETYPES_VALUESET_URL);
+
+		// verify
+		assertNotNull(result);
+		assertEquals(code, result.getCode());
+		assertTrue(result.isOk());
+		assertEquals(display, result.getDisplay());
+	}
+
+	@Test
+	public void testValidateCode_withoutValueSetWithMimetypeUnknown_returnValidResult() {
+		// setup
+		final String code = "someCode";
+		final String display = "displayValue";
+
+		// test
+		CodeValidationResult result = mySvc.validateCode(newSupport(), newOptions(), MIMETYPES_CODESYSTEM_URL, code, display, null);
+
+		// verify
+		assertNotNull(result);
+		assertEquals(code, result.getCode());
+		assertTrue(result.isOk());
+		assertNull(result.getDisplay());
+	}
+
+	@ParameterizedTest
+	@ValueSource(strings = { EncodingEnum.JSON_PLAIN_STRING, Constants.FORMAT_TURTLE, Constants.CT_FHIR_JSON_NEW, Constants.CT_FHIR_JSON })
 	public void testLookupCode_withMimetype_returnFoundResult(String code) {
 		// setup
 		final String system = MIMETYPES_CODESYSTEM_URL;
@@ -333,9 +378,8 @@ public class CommonCodeSystemsTerminologyServiceTest {
 		assertNotNull(result);
 		assertEquals(system, result.getSearchedForSystem());
 		assertEquals(code, result.getSearchedForCode());
-		assertFalse(result.isFound());
+		assertTrue(result.isFound());
 		assertNull(result.getCodeDisplay());
-		assertEquals(mySvc.getErrorMessage("invalidCodeInSystem", system, code), result.getErrorMessage());
 	}
 
 	private ValidationSupportContext newSupport() {
