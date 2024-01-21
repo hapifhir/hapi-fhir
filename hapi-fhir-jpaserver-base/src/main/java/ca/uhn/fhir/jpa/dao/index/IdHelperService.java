@@ -158,7 +158,8 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 			String theResourceId,
 			boolean theExcludeDeleted)
 			throws ResourceNotFoundException {
-		assert myDontCheckActiveTransactionForUnitTest || TransactionSynchronizationManager.isSynchronizationActive();
+		assert myDontCheckActiveTransactionForUnitTest || TransactionSynchronizationManager.isSynchronizationActive()
+				: "no transaction active";
 
 		if (theResourceId.contains("/")) {
 			theResourceId = theResourceId.substring(theResourceId.indexOf("/") + 1);
@@ -582,7 +583,7 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 		return retVal;
 	}
 
-	RequestPartitionId replaceDefault(RequestPartitionId theRequestPartitionId) {
+	public RequestPartitionId replaceDefault(RequestPartitionId theRequestPartitionId) {
 		if (myPartitionSettings.getDefaultPartitionId() != null) {
 			if (!theRequestPartitionId.isAllPartitions() && theRequestPartitionId.hasDefaultPartitionId()) {
 				List<Integer> partitionIds = theRequestPartitionId.getPartitionIds().stream()
@@ -712,7 +713,7 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 	}
 
 	@VisibleForTesting
-	void setPartitionSettingsForUnitTest(PartitionSettings thePartitionSettings) {
+	public void setPartitionSettingsForUnitTest(PartitionSettings thePartitionSettings) {
 		myPartitionSettings = thePartitionSettings;
 	}
 

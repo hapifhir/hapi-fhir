@@ -23,13 +23,13 @@ import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender;
+import jakarta.annotation.Nonnull;
 import org.hamcrest.Matcher;
 import org.junit.jupiter.api.extension.AfterEachCallback;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.slf4j.LoggerFactory;
 
-import jakarta.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
@@ -37,7 +37,6 @@ import java.util.stream.Collectors;
 
 /**
  * Test helper to collect logback lines.
- *
  * The empty constructor will capture all log events, or you can name a log root to limit the noise.
  */
 public class LogbackCaptureTestExtension implements BeforeEachCallback, AfterEachCallback {
@@ -83,7 +82,11 @@ public class LogbackCaptureTestExtension implements BeforeEachCallback, AfterEac
 		this((Logger) LoggerFactory.getLogger(theLoggerName), theLevel);
 	}
 
-	/**
+    public LogbackCaptureTestExtension(Class<?> theClass) {
+		this(theClass.getName());
+    }
+
+    /**
 	 * Returns a copy to avoid concurrent modification errors.
 	 * @return A copy of the log events so far.
 	 */

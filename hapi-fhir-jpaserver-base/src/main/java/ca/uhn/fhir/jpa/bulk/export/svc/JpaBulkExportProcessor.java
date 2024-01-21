@@ -111,7 +111,7 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 
 	@SuppressWarnings("rawtypes")
 	@Autowired
-	private IMdmLinkDao myMdmLinkDao;
+	protected IMdmLinkDao myMdmLinkDao;
 
 	@Autowired
 	private MdmExpansionCacheSvc myMdmExpansionCacheSvc;

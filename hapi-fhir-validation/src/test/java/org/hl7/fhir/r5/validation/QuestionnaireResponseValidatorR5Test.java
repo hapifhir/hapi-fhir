@@ -17,12 +17,12 @@ import org.hl7.fhir.r5.hapi.ctx.HapiWorkerContext;
 import org.hl7.fhir.r5.model.Attachment;
 import org.hl7.fhir.r5.model.BooleanType;
 import org.hl7.fhir.r5.model.CodeSystem;
-import org.hl7.fhir.r5.model.Enumerations.CodeSystemContentMode;
 import org.hl7.fhir.r5.model.Coding;
 import org.hl7.fhir.r5.model.DataType;
 import org.hl7.fhir.r5.model.DateTimeType;
 import org.hl7.fhir.r5.model.DateType;
 import org.hl7.fhir.r5.model.DecimalType;
+import org.hl7.fhir.r5.model.Enumerations.CodeSystemContentMode;
 import org.hl7.fhir.r5.model.IntegerType;
 import org.hl7.fhir.r5.model.MarkdownType;
 import org.hl7.fhir.r5.model.Narrative;
@@ -42,6 +42,7 @@ import org.hl7.fhir.utilities.xhtml.XhtmlNode;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.quality.Strictness;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -60,8 +61,9 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.withSettings;
 
-public class QuestionnaireResponseValidatorR5Test {
+public class QuestionnaireResponseValidatorR5Test  {
 	public static final String ID_ICC_QUESTIONNAIRE_SETUP = "http://example.com/Questionnaire/profile";
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(QuestionnaireResponseValidatorR5Test.class);
 	private static final String CODE_ICC_SCHOOLTYPE_PT = "PT";
@@ -76,7 +78,7 @@ public class QuestionnaireResponseValidatorR5Test {
 
 	@BeforeEach
 	public void before() {
-		myValSupport = mock(IValidationSupport.class);
+		myValSupport = mock(IValidationSupport.class, withSettings().strictness(Strictness.LENIENT));
 		when(myValSupport.getFhirContext()).thenReturn(ourCtx);
 
 		myWorkerCtx = new HapiWorkerContext(ourCtx, myValSupport);

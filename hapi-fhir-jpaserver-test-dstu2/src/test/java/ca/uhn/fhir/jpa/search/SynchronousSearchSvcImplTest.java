@@ -38,6 +38,7 @@ public class SynchronousSearchSvcImplTest extends BaseSearchSvc {
 	@BeforeEach
 	public void before() {
 		mySynchronousSearchSvc.setContext(ourCtx);
+		mySynchronousSearchSvc.mySearchBuilderFactory = mySearchBuilderFactory;
 	}
 
 	@Test

@@ -30,6 +30,7 @@ import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
@@ -177,15 +178,18 @@ public class ExtensionUtil {
 	 * pulls out any extensions that have the given theExtensionUrl and a primitive value type,
 	 * and returns a list of the string version of the extension values.
 	 */
-	public static List<String> getExtensionPrimitiveValues(IBaseHasExtensions theBase, String theExtensionUrl) {
-		List<String> values = theBase.getExtension().stream()
-				.filter(t -> theExtensionUrl.equals(t.getUrl()))
-				.filter(t -> t.getValue() instanceof IPrimitiveType<?>)
-				.map(t -> (IPrimitiveType<?>) t.getValue())
-				.map(IPrimitiveType::getValueAsString)
-				.filter(StringUtils::isNotBlank)
-				.collect(Collectors.toList());
-		return values;
+	public static List<String> getExtensionPrimitiveValues(IBase theBase, String theExtensionUrl) {
+		if (theBase instanceof IBaseHasExtensions) {
+			return ((IBaseHasExtensions) theBase)
+					.getExtension().stream()
+							.filter(t -> theExtensionUrl.equals(t.getUrl()))
+							.filter(t -> t.getValue() instanceof IPrimitiveType<?>)
+							.map(t -> (IPrimitiveType<?>) t.getValue())
+							.map(IPrimitiveType::getValueAsString)
+							.filter(StringUtils::isNotBlank)
+							.collect(Collectors.toList());
+		}
+		return Collections.emptyList();
 	}
 
 	/**

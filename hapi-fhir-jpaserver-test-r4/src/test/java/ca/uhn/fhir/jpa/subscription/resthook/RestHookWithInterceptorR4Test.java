@@ -21,7 +21,11 @@ import org.hl7.fhir.r4.model.Subscription;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentMatchers;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.event.Level;
@@ -50,6 +54,7 @@ import static org.mockito.Mockito.mock;
 /**
  * Test the rest-hook subscriptions
  */
+@ExtendWith(MockitoExtension.class)
 public class RestHookWithInterceptorR4Test extends BaseSubscriptionsR4Test {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(RestHookWithInterceptorR4Test.class);
@@ -60,6 +65,9 @@ public class RestHookWithInterceptorR4Test extends BaseSubscriptionsR4Test {
 	private static boolean ourHitAfterRestHookDelivery;
 	private static boolean ourNextAddHeader;
 	private static final FhirContext ourCtx = FhirContext.forR4Cached();
+
+	@Mock(strictness = Mock.Strictness.STRICT_STUBS)
+	Logger loggerMock;
 
 	@Autowired
 	StoppableSubscriptionDeliveringRestHookSubscriber myStoppableSubscriptionDeliveringRestHookSubscriber;
@@ -223,14 +231,13 @@ public class RestHookWithInterceptorR4Test extends BaseSubscriptionsR4Test {
 	@Test
 	public void testDebugLoggingInterceptor() throws Exception {
 		List<String> messages = new ArrayList<>();
-		Logger loggerMock = mock(Logger.class);
 		doAnswer(t -> {
 			Object msg = t.getArguments()[0];
 			Object[] args = Arrays.copyOfRange(t.getArguments(), 1, t.getArguments().length);
 			String formattedMessage = MessageFormatter.arrayFormat((String) msg, args).getMessage();
 			messages.add(formattedMessage);
 			return null;
-		}).when(loggerMock).debug(any(), ArgumentMatchers.<Object[]>any());
+		}).when(loggerMock).debug(any(), any(Object[].class));
 
 		SubscriptionDebugLogInterceptor interceptor = new SubscriptionDebugLogInterceptor();
 		myInterceptorRegistry.registerInterceptor(interceptor);

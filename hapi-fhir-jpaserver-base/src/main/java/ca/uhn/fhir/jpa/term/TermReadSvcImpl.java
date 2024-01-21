@@ -98,14 +98,13 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.NonUniqueResultException;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.PersistenceContextType;
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.time.DateUtils;
 import org.apache.lucene.index.Term;
-import org.apache.lucene.search.BooleanQuery;
+import org.apache.lucene.search.IndexSearcher;
 import org.hibernate.CacheMode;
 import org.hibernate.search.engine.search.predicate.dsl.BooleanPredicateClausesStep;
 import org.hibernate.search.engine.search.predicate.dsl.PredicateFinalStep;
@@ -175,6 +174,7 @@ import java.util.StringTokenizer;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.jpa.entity.TermConceptPropertyBinder.CONCEPT_PROPERTY_PREFIX_NAME;
@@ -1135,77 +1135,90 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 		}
 		int chunkSize = chunkSizeOpt.get();
 
-		SearchProperties searchProps = buildSearchScroll(
+		/*
+		 * Turn the filter into one or more Hibernate Search queries. Ideally we want it
+		 * to be handled by a single query, but Lucene/ES don't like it when we exceed
+		 * 1024 different terms in a single query. So if we have that many terms (which
+		 * can happen if a ValueSet has a lot of explicitly enumerated codes that it's
+		 * including) we split this into multiple searches. The method below builds these
+		 * searches lazily, returning a Supplier that creates and executes the search
+		 * when it's actually time to.
+		 */
+		SearchProperties searchProps = buildSearchScrolls(
 				theTermCodeSystemVersion,
 				theExpansionFilter,
 				theSystem,
 				theIncludeOrExclude,
 				chunkSize,
 				includeOrExcludeVersion);
-
 		int accumulatedBatchesSoFar = 0;
-		try (SearchScroll<EntityReference> scroll = searchProps.getSearchScroll()) {
+		for (var next : searchProps.getSearchScroll()) {
+			try (SearchScroll<EntityReference> scroll = next.get()) {
 
-			ourLog.debug(
-					"Beginning batch expansion for {} with max results per batch: {}",
-					(theAdd ? "inclusion" : "exclusion"),
-					chunkSize);
-			for (SearchScrollResult<EntityReference> chunk = scroll.next(); chunk.hasHits(); chunk = scroll.next()) {
-				int countForBatch = 0;
+				ourLog.debug(
+						"Beginning batch expansion for {} with max results per batch: {}",
+						(theAdd ? "inclusion" : "exclusion"),
+						chunkSize);
+				for (SearchScrollResult<EntityReference> chunk = scroll.next();
+						chunk.hasHits();
+						chunk = scroll.next()) {
+					int countForBatch = 0;
 
-				List<Long> pids = chunk.hits().stream().map(t -> (Long) t.id()).collect(Collectors.toList());
+					List<Long> pids =
+							chunk.hits().stream().map(t -> (Long) t.id()).collect(Collectors.toList());
 
-				List<TermConcept> termConcepts = myTermConceptDao.fetchConceptsAndDesignationsByPid(pids);
+					List<TermConcept> termConcepts = myTermConceptDao.fetchConceptsAndDesignationsByPid(pids);
 
-				// If the include section had multiple codes, return the codes in the same order
-				termConcepts = sortTermConcepts(searchProps, termConcepts);
+					// If the include section had multiple codes, return the codes in the same order
+					termConcepts = sortTermConcepts(searchProps, termConcepts);
 
-				//	 int firstResult = theQueryIndex * maxResultsPerBatch;// TODO GGG HS we lose the ability to check the
-				// index of the first result, so just best-guessing it here.
-				Optional<PredicateFinalStep> expansionStepOpt = searchProps.getExpansionStepOpt();
-				int delta = 0;
-				for (TermConcept concept : termConcepts) {
-					count++;
-					countForBatch++;
-					if (theAdd && expansionStepOpt.isPresent()) {
-						ValueSet.ConceptReferenceComponent theIncludeConcept =
-								getMatchedConceptIncludedInValueSet(theIncludeOrExclude, concept);
-						if (theIncludeConcept != null && isNotBlank(theIncludeConcept.getDisplay())) {
-							concept.setDisplay(theIncludeConcept.getDisplay());
+					//	 int firstResult = theQueryIndex * maxResultsPerBatch;
+					// TODO GGG HS we lose the ability to check the
+					// index of the first result, so just best-guessing it here.
+					int delta = 0;
+					for (TermConcept concept : termConcepts) {
+						count++;
+						countForBatch++;
+						if (theAdd && searchProps.hasIncludeOrExcludeCodes()) {
+							ValueSet.ConceptReferenceComponent theIncludeConcept =
+									getMatchedConceptIncludedInValueSet(theIncludeOrExclude, concept);
+							if (theIncludeConcept != null && isNotBlank(theIncludeConcept.getDisplay())) {
+								concept.setDisplay(theIncludeConcept.getDisplay());
+							}
+						}
+						boolean added = addCodeIfNotAlreadyAdded(
+								theExpansionOptions,
+								theValueSetCodeAccumulator,
+								theAddedCodes,
+								concept,
+								theAdd,
+								includeOrExcludeVersion);
+						if (added) {
+							delta++;
 						}
 					}
-					boolean added = addCodeIfNotAlreadyAdded(
-							theExpansionOptions,
-							theValueSetCodeAccumulator,
-							theAddedCodes,
-							concept,
-							theAdd,
-							includeOrExcludeVersion);
-					if (added) {
-						delta++;
-					}
+
+					ourLog.debug(
+							"Batch expansion scroll for {} with offset {} produced {} results in {}ms",
+							(theAdd ? "inclusion" : "exclusion"),
+							accumulatedBatchesSoFar,
+							chunk.hits().size(),
+							chunk.took().toMillis());
+
+					theValueSetCodeAccumulator.incrementOrDecrementTotalConcepts(theAdd, delta);
+					accumulatedBatchesSoFar += countForBatch;
+
+					// keep session bounded
+					myEntityManager.flush();
+					myEntityManager.clear();
 				}
 
 				ourLog.debug(
-						"Batch expansion scroll for {} with offset {} produced {} results in {}ms",
+						"Expansion for {} produced {} results in {}ms",
 						(theAdd ? "inclusion" : "exclusion"),
-						accumulatedBatchesSoFar,
-						chunk.hits().size(),
-						chunk.took().toMillis());
-
-				theValueSetCodeAccumulator.incrementOrDecrementTotalConcepts(theAdd, delta);
-				accumulatedBatchesSoFar += countForBatch;
-
-				// keep session bounded
-				myEntityManager.flush();
-				myEntityManager.clear();
+						count,
+						fullOperationSw.getMillis());
 			}
-
-			ourLog.debug(
-					"Expansion for {} produced {} results in {}ms",
-					(theAdd ? "inclusion" : "exclusion"),
-					count,
-					fullOperationSw.getMillis());
 		}
 	}
 
@@ -1243,7 +1256,7 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 		return maxResultsPerBatch > 0 ? Optional.of(maxResultsPerBatch) : Optional.empty();
 	}
 
-	private SearchProperties buildSearchScroll(
+	private SearchProperties buildSearchScrolls(
 			TermCodeSystemVersion theTermCodeSystemVersion,
 			ExpansionFilter theExpansionFilter,
 			String theSystem,
@@ -1255,54 +1268,68 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 		SearchPredicateFactory predicate =
 				searchSession.scope(TermConcept.class).predicate();
 
-		// Build the top-level expansion on filters.
-		PredicateFinalStep step = predicate.bool(b -> {
-			b.must(predicate.match().field("myCodeSystemVersionPid").matching(theTermCodeSystemVersion.getPid()));
-
-			if (theExpansionFilter.hasCode()) {
-				b.must(predicate.match().field("myCode").matching(theExpansionFilter.getCode()));
-			}
-
-			String codeSystemUrlAndVersion = buildCodeSystemUrlAndVersion(theSystem, theIncludeOrExcludeVersion);
-			for (ValueSet.ConceptSetFilterComponent nextFilter : theIncludeOrExclude.getFilter()) {
-				handleFilter(codeSystemUrlAndVersion, predicate, b, nextFilter);
-			}
-			for (ValueSet.ConceptSetFilterComponent nextFilter : theExpansionFilter.getFilters()) {
-				handleFilter(codeSystemUrlAndVersion, predicate, b, nextFilter);
-			}
-		});
-
-		SearchProperties returnProps = new SearchProperties();
-
-		List<String> codes = theIncludeOrExclude.getConcept().stream()
+		List<String> allCodes = theIncludeOrExclude.getConcept().stream()
 				.filter(Objects::nonNull)
 				.map(ValueSet.ConceptReferenceComponent::getCode)
 				.filter(StringUtils::isNotBlank)
 				.collect(Collectors.toList());
-		returnProps.setIncludeOrExcludeCodes(codes);
-
-		Optional<PredicateFinalStep> expansionStepOpt = buildExpansionPredicate(codes, predicate);
-		final PredicateFinalStep finishedQuery =
-				expansionStepOpt.isPresent() ? predicate.bool().must(step).must(expansionStepOpt.get()) : step;
-		returnProps.setExpansionStepOpt(expansionStepOpt);
+		SearchProperties returnProps = new SearchProperties();
+		returnProps.setIncludeOrExcludeCodes(allCodes);
 
 		/*
-		 * DM 2019-08-21 - Processing slows after any ValueSets with many codes explicitly identified. This might
-		 * be due to the dark arts that is memory management. Will monitor but not do anything about this right now.
+		 * Lucene/ES can't typically handle more than 1024 clauses per search, so if
+		 * we have more than that number (e.g. because of a ValueSet that explicitly
+		 * includes thousands of codes), we break this up into multiple searches.
 		 */
+		List<List<String>> partitionedCodes = ListUtils.partition(allCodes, IndexSearcher.getMaxClauseCount() - 10);
+		if (partitionedCodes.isEmpty()) {
+			partitionedCodes = List.of(List.of());
+		}
 
-		// BooleanQuery.setMaxClauseCount(SearchBuilder.getMaximumPageSize());
-		// TODO GGG HS looks like we can't set max clause count, but it can be set server side.
-		// BooleanQuery.setMaxClauseCount(10000);
-		// JM 22-02-15 - Hopefully increasing maxClauseCount should be not needed anymore
+		for (List<String> nextCodePartition : partitionedCodes) {
+			Supplier<SearchScroll<EntityReference>> nextScroll = () -> {
+				// Build the top-level expansion on filters.
+				PredicateFinalStep step = predicate.bool(b -> {
+					b.must(predicate
+							.match()
+							.field("myCodeSystemVersionPid")
+							.matching(theTermCodeSystemVersion.getPid()));
 
-		SearchQuery<EntityReference> termConceptsQuery = searchSession
-				.search(TermConcept.class)
-				.selectEntityReference()
-				.where(f -> finishedQuery)
-				.toQuery();
+					if (theExpansionFilter.hasCode()) {
+						b.must(predicate.match().field("myCode").matching(theExpansionFilter.getCode()));
+					}
 
-		returnProps.setSearchScroll(termConceptsQuery.scroll(theScrollChunkSize));
+					String codeSystemUrlAndVersion =
+							buildCodeSystemUrlAndVersion(theSystem, theIncludeOrExcludeVersion);
+					for (ValueSet.ConceptSetFilterComponent nextFilter : theIncludeOrExclude.getFilter()) {
+						handleFilter(codeSystemUrlAndVersion, predicate, b, nextFilter);
+					}
+					for (ValueSet.ConceptSetFilterComponent nextFilter : theExpansionFilter.getFilters()) {
+						handleFilter(codeSystemUrlAndVersion, predicate, b, nextFilter);
+					}
+				});
+
+				// Add a selector on any explicitly enumerated codes in the VS component
+				final PredicateFinalStep finishedQuery;
+				if (nextCodePartition.isEmpty()) {
+					finishedQuery = step;
+				} else {
+					PredicateFinalStep expansionStep = buildExpansionPredicate(nextCodePartition, predicate);
+					finishedQuery = predicate.bool().must(step).must(expansionStep);
+				}
+
+				SearchQuery<EntityReference> termConceptsQuery = searchSession
+						.search(TermConcept.class)
+						.selectEntityReference()
+						.where(f -> finishedQuery)
+						.toQuery();
+
+				return termConceptsQuery.scroll(theScrollChunkSize);
+			};
+
+			returnProps.addSearchScroll(nextScroll);
+		}
+
 		return returnProps;
 	}
 
@@ -1317,29 +1344,9 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 	/**
 	 * Helper method which builds a predicate for the expansion
 	 */
-	private Optional<PredicateFinalStep> buildExpansionPredicate(
-			List<String> theCodes, SearchPredicateFactory thePredicate) {
-		if (CollectionUtils.isEmpty(theCodes)) {
-			return Optional.empty();
-		}
-
-		if (theCodes.size() < BooleanQuery.getMaxClauseCount()) {
-			return Optional.of(thePredicate.simpleQueryString().field("myCode").matching(String.join(" | ", theCodes)));
-		}
-
-		// Number of codes is larger than maxClauseCount, so we split the query in several clauses
-
-		// partition codes in lists of BooleanQuery.getMaxClauseCount() size
-		List<List<String>> listOfLists = ListUtils.partition(theCodes, BooleanQuery.getMaxClauseCount());
-
-		PredicateFinalStep step = thePredicate.bool(b -> {
-			b.minimumShouldMatchNumber(1);
-			for (List<String> codeList : listOfLists) {
-				b.should(p -> p.simpleQueryString().field("myCode").matching(String.join(" | ", codeList)));
-			}
-		});
-
-		return Optional.of(step);
+	private PredicateFinalStep buildExpansionPredicate(List<String> theCodes, SearchPredicateFactory thePredicate) {
+		assert !theCodes.isEmpty();
+		return thePredicate.simpleQueryString().field("myCode").matching(String.join(" | ", theCodes));
 	}
 
 	private String buildCodeSystemUrlAndVersion(String theSystem, String theIncludeOrExcludeVersion) {
@@ -3150,24 +3157,15 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 	 * Properties returned from method buildSearchScroll
 	 */
 	private static final class SearchProperties {
-		private SearchScroll<EntityReference> mySearchScroll;
-		private Optional<PredicateFinalStep> myExpansionStepOpt;
+		private List<Supplier<SearchScroll<EntityReference>>> mySearchScroll = new ArrayList<>();
 		private List<String> myIncludeOrExcludeCodes;
 
-		public SearchScroll<EntityReference> getSearchScroll() {
+		public List<Supplier<SearchScroll<EntityReference>>> getSearchScroll() {
 			return mySearchScroll;
 		}
 
-		public void setSearchScroll(SearchScroll<EntityReference> theSearchScroll) {
-			mySearchScroll = theSearchScroll;
-		}
-
-		public Optional<PredicateFinalStep> getExpansionStepOpt() {
-			return myExpansionStepOpt;
-		}
-
-		public void setExpansionStepOpt(Optional<PredicateFinalStep> theExpansionStepOpt) {
-			myExpansionStepOpt = theExpansionStepOpt;
+		public void addSearchScroll(Supplier<SearchScroll<EntityReference>> theSearchScrollSupplier) {
+			mySearchScroll.add(theSearchScrollSupplier);
 		}
 
 		public List<String> getIncludeOrExcludeCodes() {
@@ -3176,6 +3174,10 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 
 		public void setIncludeOrExcludeCodes(List<String> theIncludeOrExcludeCodes) {
 			myIncludeOrExcludeCodes = theIncludeOrExcludeCodes;
+		}
+
+		public boolean hasIncludeOrExcludeCodes() {
+			return !myIncludeOrExcludeCodes.isEmpty();
 		}
 	}
 

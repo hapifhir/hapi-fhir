@@ -1,6 +1,7 @@
 package org.hl7.fhir.r5.utils;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.fhirpath.BaseValidationTestWithInlineMocks;
 import ca.uhn.fhir.util.TestUtil;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r5.hapi.ctx.HapiWorkerContext;
@@ -27,7 +28,7 @@ import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-public class GraphQLEngineR5Test {
+public class GraphQLEngineR5Test extends BaseValidationTestWithInlineMocks {
 	private static final FhirContext ourCtx = FhirContext.forR5Cached();
 	private static final HapiWorkerContext ourWorkerCtx = new HapiWorkerContext(ourCtx, ourCtx.getValidationSupport());
 	private org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(GraphQLEngineR5Test.class);

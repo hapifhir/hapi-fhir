@@ -2,6 +2,7 @@ package org.hl7.fhir.dstu3.hapi.validation;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
+import ca.uhn.fhir.fhirpath.BaseValidationTestWithInlineMocks;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
@@ -24,11 +25,23 @@ import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.hl7.fhir.dstu3.conformance.ProfileUtilities;
 import org.hl7.fhir.dstu3.context.IWorkerContext;
 import org.hl7.fhir.dstu3.hapi.ctx.HapiWorkerContext;
-import org.hl7.fhir.dstu3.model.*;
+import org.hl7.fhir.dstu3.model.CareTeam;
+import org.hl7.fhir.dstu3.model.CodeableConcept;
+import org.hl7.fhir.dstu3.model.Coding;
+import org.hl7.fhir.dstu3.model.Condition;
 import org.hl7.fhir.dstu3.model.Condition.ConditionClinicalStatus;
 import org.hl7.fhir.dstu3.model.Condition.ConditionVerificationStatus;
+import org.hl7.fhir.dstu3.model.Consent;
+import org.hl7.fhir.dstu3.model.DateType;
+import org.hl7.fhir.dstu3.model.EligibilityResponse;
 import org.hl7.fhir.dstu3.model.EligibilityResponse.BenefitComponent;
 import org.hl7.fhir.dstu3.model.Narrative.NarrativeStatus;
+import org.hl7.fhir.dstu3.model.OperationOutcome;
+import org.hl7.fhir.dstu3.model.Patient;
+import org.hl7.fhir.dstu3.model.Questionnaire;
+import org.hl7.fhir.dstu3.model.Reference;
+import org.hl7.fhir.dstu3.model.StringType;
+import org.hl7.fhir.dstu3.model.StructureDefinition;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.utilities.validation.ValidationMessage;
 import org.junit.jupiter.api.AfterAll;
@@ -49,7 +62,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
-public class ResourceValidatorDstu3Test {
+public class ResourceValidatorDstu3Test extends BaseValidationTestWithInlineMocks {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResourceValidatorDstu3Test.class);
 	private static FhirContext ourCtx = FhirContext.forDstu3();

@@ -123,6 +123,7 @@ public class ExpandResourceAndWriteBinaryStepTest {
 	@BeforeEach
 	public void init() {
 		ourLog.addAppender(myAppender);
+		myFinalStep.setIdHelperServiceForUnitTest(myIdHelperService);
 	}
 
 	@AfterEach

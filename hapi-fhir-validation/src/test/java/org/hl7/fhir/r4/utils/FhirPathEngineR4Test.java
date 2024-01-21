@@ -1,6 +1,7 @@
 package org.hl7.fhir.r4.utils;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.fhirpath.BaseValidationTestWithInlineMocks;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.util.TestUtil;
 import org.hl7.fhir.dstu3.utils.FhirPathEngineTest;
@@ -30,7 +31,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class FhirPathEngineR4Test {
+public class FhirPathEngineR4Test extends BaseValidationTestWithInlineMocks {
 
 	private static final FhirContext ourCtx = FhirContext.forR4Cached();
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirPathEngineTest.class);

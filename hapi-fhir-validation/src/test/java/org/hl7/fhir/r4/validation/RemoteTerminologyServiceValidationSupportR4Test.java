@@ -5,6 +5,7 @@ import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.TranslateConceptResult;
 import ca.uhn.fhir.context.support.TranslateConceptResults;
+import ca.uhn.fhir.fhirpath.BaseValidationTestWithInlineMocks;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.parser.IJsonLikeParser;
 import ca.uhn.fhir.rest.annotation.IdParam;
@@ -58,7 +59,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class RemoteTerminologyServiceValidationSupportR4Test {
+public class RemoteTerminologyServiceValidationSupportR4Test extends BaseValidationTestWithInlineMocks {
 	private static final String DISPLAY = "DISPLAY";
 	private static final String CODE_SYSTEM = "CODE_SYS";
 	private static final String CODE_SYSTEM_NAME = "Code System";

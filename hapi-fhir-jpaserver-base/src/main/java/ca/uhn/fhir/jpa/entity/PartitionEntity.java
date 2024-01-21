@@ -26,6 +26,9 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 @Table(
 		name = "HFJ_PARTITION",
@@ -81,5 +84,21 @@ public class PartitionEntity {
 
 	public RequestPartitionId toRequestPartitionId() {
 		return RequestPartitionId.fromPartitionIdAndName(getId(), getName());
+	}
+
+	/**
+	 * Build a RequestPartitionId from the ids and names in the entities.
+	 * @param thePartitions the entities to use for ids and names
+	 * @return a single RequestPartitionId covering all the entities
+	 */
+	public static RequestPartitionId buildRequestPartitionId(List<PartitionEntity> thePartitions) {
+		List<Integer> ids = new ArrayList<>(thePartitions.size());
+		List<String> names = new ArrayList<>(thePartitions.size());
+		for (PartitionEntity nextPartition : thePartitions) {
+			ids.add(nextPartition.getId());
+			names.add(nextPartition.getName());
+		}
+
+		return RequestPartitionId.forPartitionIdsAndNames(names, ids, null);
 	}
 }

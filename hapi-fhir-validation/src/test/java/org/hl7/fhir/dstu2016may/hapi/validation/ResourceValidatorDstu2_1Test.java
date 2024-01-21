@@ -1,6 +1,7 @@
 package org.hl7.fhir.dstu2016may.hapi.validation;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.fhirpath.BaseValidationTestWithInlineMocks;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.parser.IParser;
@@ -34,7 +35,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
-public class ResourceValidatorDstu2_1Test {
+public class ResourceValidatorDstu2_1Test extends BaseValidationTestWithInlineMocks {
 
 	private static FhirContext ourCtx = FhirContext.forDstu2_1();
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResourceValidatorDstu2_1Test.class);

@@ -27,10 +27,7 @@ import ca.uhn.fhir.jpa.cache.IResourceChangeListenerCache;
 import ca.uhn.fhir.jpa.cache.IResourceChangeListenerRegistry;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.retry.Retrier;
-import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
-import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
-import ca.uhn.fhir.subscription.SubscriptionConstants;
 import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.PostConstruct;
@@ -57,9 +54,6 @@ public abstract class BaseResourceCacheSynchronizer implements IResourceChangeLi
 	private final String myResourceName;
 
 	@Autowired
-	protected ISearchParamRegistry mySearchParamRegistry;
-
-	@Autowired
 	private IResourceChangeListenerRegistry myResourceChangeListenerRegistry;
 
 	@Autowired
@@ -71,8 +65,17 @@ public abstract class BaseResourceCacheSynchronizer implements IResourceChangeLi
 	private final Semaphore mySyncResourcesSemaphore = new Semaphore(1);
 	private final Object mySyncResourcesLock = new Object();
 
-	public BaseResourceCacheSynchronizer(String theResourceName) {
+	protected BaseResourceCacheSynchronizer(String theResourceName) {
 		myResourceName = theResourceName;
+	}
+
+	protected BaseResourceCacheSynchronizer(
+			String theResourceName,
+			IResourceChangeListenerRegistry theResourceChangeListenerRegistry,
+			DaoRegistry theDaoRegistry) {
+		myResourceName = theResourceName;
+		myDaoRegistry = theDaoRegistry;
+		myResourceChangeListenerRegistry = theResourceChangeListenerRegistry;
 	}
 
 	@PostConstruct
@@ -122,7 +125,7 @@ public abstract class BaseResourceCacheSynchronizer implements IResourceChangeLi
 	}
 
 	@VisibleForTesting
-	public int doSyncResourcessForUnitTest() {
+	public int doSyncResourcesForUnitTest() {
 		// Two passes for delete flag to take effect
 		int first = doSyncResourcesWithRetry();
 		int second = doSyncResourcesWithRetry();
@@ -136,6 +139,7 @@ public abstract class BaseResourceCacheSynchronizer implements IResourceChangeLi
 		return syncResourceRetrier.runWithRetry();
 	}
 
+	@SuppressWarnings("unchecked")
 	private int doSyncResources() {
 		if (isStopping()) {
 			return 0;
@@ -144,20 +148,8 @@ public abstract class BaseResourceCacheSynchronizer implements IResourceChangeLi
 		synchronized (mySyncResourcesLock) {
 			ourLog.debug("Starting sync {}s", myResourceName);
 
-			IBundleProvider resourceBundleList = getResourceDao().search(mySearchParameterMap, mySystemRequestDetails);
-
-			Integer resourceCount = resourceBundleList.size();
-			assert resourceCount != null;
-			if (resourceCount >= SubscriptionConstants.MAX_SUBSCRIPTION_RESULTS) {
-				ourLog.error(
-						"Currently over {} {}s.  Some {}s have not been loaded.",
-						SubscriptionConstants.MAX_SUBSCRIPTION_RESULTS,
-						myResourceName,
-						myResourceName);
-			}
-
-			List<IBaseResource> resourceList = resourceBundleList.getResources(0, resourceCount);
-
+			List<IBaseResource> resourceList = (List<IBaseResource>)
+					getResourceDao().searchForResources(mySearchParameterMap, mySystemRequestDetails);
 			return syncResourcesIntoCache(resourceList);
 		}
 	}
