@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.ips.generator;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.ips.api.IpsContext;
 import ca.uhn.fhir.jpa.ips.api.SectionRegistry;
 import ca.uhn.fhir.jpa.ips.strategy.DefaultIpsGenerationStrategy;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
@@ -14,6 +15,7 @@ import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.SimpleBundleProvider;
 import ca.uhn.fhir.test.utilities.HtmlUtil;
 import ca.uhn.fhir.util.ClasspathUtil;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.htmlunit.html.DomElement;
 import org.htmlunit.html.DomNodeList;
 import org.htmlunit.html.HtmlPage;
@@ -56,6 +58,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import jakarta.annotation.Nonnull;
+
+import javax.annotation.Nullable;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.Date;
@@ -114,7 +118,12 @@ public class IpsGeneratorSvcImplTest {
 	public void beforeEach() {
 		myDaoRegistry.setResourceDaos(Collections.emptyList());
 
-		myStrategy = new DefaultIpsGenerationStrategy();
+		myStrategy = new DefaultIpsGenerationStrategy(){
+			@Override
+			public IIdType massageResourceId(@Nullable IpsContext theIpsContext, @javax.annotation.Nonnull IBaseResource theResource) {
+				return IdType.newRandomUuid();
+			}
+		};
 		mySvc = new IpsGeneratorSvcImpl(myFhirContext, myStrategy, myDaoRegistry);
 	}
 

@@ -85,7 +85,13 @@ public interface IIpsGenerationStrategy {
 	/**
 	 * This method is used to determine the resource ID to assign to a resource that
 	 * will be added to the IPS document Bundle. Implementations will probably either
-	 * return the resource ID as-is, or generate a placeholder UUID to replace it with.
+	 * return <code>null</code> to leave the resource ID as-is, or generate a
+	 * placeholder UUID to replace it with.
+	 * <p>
+	 * If you want to replace the native resource ID with a placeholder so as not
+	 * to leake the server-generated IDs, the recommended way is to
+	 * return <code>IdType.newRandomUuid()</code>
+	 * </p>
 	 *
 	 * @param theIpsContext The associated context for the specific IPS document being
 	 *                      generated. Note that this will be <code>null</code> when
@@ -93,8 +99,10 @@ public interface IIpsGenerationStrategy {
 	 *                      be populated for all subsequent calls for a given IPS
 	 *                      document generation.
 	 * @param theResource   The resource to massage the resource ID for
-	 * @return An ID to assign to the resource
+	 * @return An ID to assign to the resource, or <code>null</code> to leave the existing ID intact,
+	 * meaning that the server-assigned IDs will be used in the bundle.
 	 */
+	@Nullable
 	IIdType massageResourceId(@Nullable IpsContext theIpsContext, @Nonnull IBaseResource theResource);
 
 	/**

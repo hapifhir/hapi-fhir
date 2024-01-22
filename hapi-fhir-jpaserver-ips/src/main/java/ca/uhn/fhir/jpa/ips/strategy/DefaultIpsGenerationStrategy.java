@@ -113,7 +113,7 @@ public class DefaultIpsGenerationStrategy implements IIpsGenerationStrategy {
 
 	@Override
 	public IIdType massageResourceId(@Nullable IpsContext theIpsContext, @Nonnull IBaseResource theResource) {
-		return IdType.newRandomUuid();
+		return null;
 	}
 
 	@Override

@@ -74,6 +74,7 @@ public class SectionRegistry {
 	public static final String SECTION_SYSTEM_LOINC = ITermLoaderSvc.LOINC_URI;
 	private final ArrayList<Section> mySections = new ArrayList<>();
 	private final List<Consumer<SectionBuilder>> myGlobalCustomizers = new ArrayList<>();
+	private final List<SectionBuilder> mySectionBuilders = new ArrayList<>();
 
 	/**
 	 * Constructor
@@ -90,6 +91,7 @@ public class SectionRegistry {
 	public final void initialize() {
 		Validate.isTrue(mySections.isEmpty(), "Sections are already initialized");
 		addSections();
+		mySectionBuilders.forEach(SectionBuilder::done);
 	}
 
 	public boolean isInitialized() {
@@ -127,8 +129,7 @@ public class SectionRegistry {
 				.withResourceTypes(ResourceType.AllergyIntolerance.name())
 				.withProfile(
 						"https://hl7.org/fhir/uv/ips/StructureDefinition-Composition-uv-ips-definitions.html#Composition.section:sectionAllergies")
-				.withNoInfoGenerator(new AllergyIntoleranceNoInfoR4Generator())
-				.build();
+				.withNoInfoGenerator(new AllergyIntoleranceNoInfoR4Generator());
 	}
 
 	protected void addSectionMedicationSummary() {
@@ -144,8 +145,7 @@ public class SectionRegistry {
 						ResourceType.MedicationDispense.name())
 				.withProfile(
 						"https://hl7.org/fhir/uv/ips/StructureDefinition-Composition-uv-ips-definitions.html#Composition.section:sectionMedications")
-				.withNoInfoGenerator(new MedicationNoInfoR4Generator())
-				.build();
+				.withNoInfoGenerator(new MedicationNoInfoR4Generator());
 	}
 
 	protected void addSectionProblemList() {
@@ -157,8 +157,7 @@ public class SectionRegistry {
 				.withResourceTypes(ResourceType.Condition.name())
 				.withProfile(
 						"https://hl7.org/fhir/uv/ips/StructureDefinition-Composition-uv-ips-definitions.html#Composition.section:sectionProblems")
-				.withNoInfoGenerator(new ProblemNoInfoR4Generator())
-				.build();
+				.withNoInfoGenerator(new ProblemNoInfoR4Generator());
 	}
 
 	protected void addSectionImmunizations() {
@@ -169,8 +168,7 @@ public class SectionRegistry {
 				.withSectionDisplay("History of Immunization Narrative")
 				.withResourceTypes(ResourceType.Immunization.name())
 				.withProfile(
-						"https://hl7.org/fhir/uv/ips/StructureDefinition-Composition-uv-ips-definitions.html#Composition.section:sectionImmunizations")
-				.build();
+						"https://hl7.org/fhir/uv/ips/StructureDefinition-Composition-uv-ips-definitions.html#Composition.section:sectionImmunizations");
 	}
 
 	protected void addSectionProcedures() {
@@ -181,8 +179,7 @@ public class SectionRegistry {
 				.withSectionDisplay("History of Procedures Document")
 				.withResourceTypes(ResourceType.Procedure.name())
 				.withProfile(
-						"https://hl7.org/fhir/uv/ips/StructureDefinition-Composition-uv-ips-definitions.html#Composition.section:sectionProceduresHx")
-				.build();
+						"https://hl7.org/fhir/uv/ips/StructureDefinition-Composition-uv-ips-definitions.html#Composition.section:sectionProceduresHx");
 	}
 
 	protected void addSectionMedicalDevices() {
@@ -193,8 +190,7 @@ public class SectionRegistry {
 				.withSectionDisplay("History of medical device use")
 				.withResourceTypes(ResourceType.DeviceUseStatement.name())
 				.withProfile(
-						"https://hl7.org/fhir/uv/ips/StructureDefinition-Composition-uv-ips-definitions.html#Composition.section:sectionMedicalDevices")
-				.build();
+						"https://hl7.org/fhir/uv/ips/StructureDefinition-Composition-uv-ips-definitions.html#Composition.section:sectionMedicalDevices");
 	}
 
 	protected void addSectionDiagnosticResults() {
@@ -205,8 +201,7 @@ public class SectionRegistry {
 				.withSectionDisplay("Relevant diagnostic tests/laboratory data Narrative")
 				.withResourceTypes(ResourceType.DiagnosticReport.name(), ResourceType.Observation.name())
 				.withProfile(
-						"https://hl7.org/fhir/uv/ips/StructureDefinition-Composition-uv-ips-definitions.html#Composition.section:sectionResults")
-				.build();
+						"https://hl7.org/fhir/uv/ips/StructureDefinition-Composition-uv-ips-definitions.html#Composition.section:sectionResults");
 	}
 
 	protected void addSectionVitalSigns() {
@@ -217,8 +212,7 @@ public class SectionRegistry {
 				.withSectionDisplay("Vital signs")
 				.withResourceTypes(ResourceType.Observation.name())
 				.withProfile(
-						"https://hl7.org/fhir/uv/ips/StructureDefinition-Composition-uv-ips-definitions.html#Composition.section:sectionVitalSigns")
-				.build();
+						"https://hl7.org/fhir/uv/ips/StructureDefinition-Composition-uv-ips-definitions.html#Composition.section:sectionVitalSigns");
 	}
 
 	protected void addSectionPregnancy() {
@@ -229,8 +223,7 @@ public class SectionRegistry {
 				.withSectionDisplay("History of pregnancies Narrative")
 				.withResourceTypes(ResourceType.Observation.name())
 				.withProfile(
-						"https://hl7.org/fhir/uv/ips/StructureDefinition-Composition-uv-ips-definitions.html#Composition.section:sectionPregnancyHx")
-				.build();
+						"https://hl7.org/fhir/uv/ips/StructureDefinition-Composition-uv-ips-definitions.html#Composition.section:sectionPregnancyHx");
 	}
 
 	protected void addSectionSocialHistory() {
@@ -241,8 +234,7 @@ public class SectionRegistry {
 				.withSectionDisplay("Social history Narrative")
 				.withResourceTypes(ResourceType.Observation.name())
 				.withProfile(
-						"https://hl7.org/fhir/uv/ips/StructureDefinition-Composition-uv-ips-definitions.html#Composition.section:sectionSocialHistory")
-				.build();
+						"https://hl7.org/fhir/uv/ips/StructureDefinition-Composition-uv-ips-definitions.html#Composition.section:sectionSocialHistory");
 	}
 
 	protected void addSectionIllnessHistory() {
@@ -253,8 +245,7 @@ public class SectionRegistry {
 				.withSectionDisplay("History of Past illness Narrative")
 				.withResourceTypes(ResourceType.Condition.name())
 				.withProfile(
-						"https://hl7.org/fhir/uv/ips/StructureDefinition-Composition-uv-ips-definitions.html#Composition.section:sectionPastIllnessHx")
-				.build();
+						"https://hl7.org/fhir/uv/ips/StructureDefinition-Composition-uv-ips-definitions.html#Composition.section:sectionPastIllnessHx");
 	}
 
 	protected void addSectionFunctionalStatus() {
@@ -265,8 +256,7 @@ public class SectionRegistry {
 				.withSectionDisplay("Functional status assessment note")
 				.withResourceTypes(ResourceType.ClinicalImpression.name())
 				.withProfile(
-						"https://hl7.org/fhir/uv/ips/StructureDefinition-Composition-uv-ips-definitions.html#Composition.section:sectionFunctionalStatus")
-				.build();
+						"https://hl7.org/fhir/uv/ips/StructureDefinition-Composition-uv-ips-definitions.html#Composition.section:sectionFunctionalStatus");
 	}
 
 	protected void addSectionPlanOfCare() {
@@ -277,8 +267,7 @@ public class SectionRegistry {
 				.withSectionDisplay("Plan of care note")
 				.withResourceTypes(ResourceType.CarePlan.name())
 				.withProfile(
-						"https://hl7.org/fhir/uv/ips/StructureDefinition-Composition-uv-ips-definitions.html#Composition.section:sectionPlanOfCare")
-				.build();
+						"https://hl7.org/fhir/uv/ips/StructureDefinition-Composition-uv-ips-definitions.html#Composition.section:sectionPlanOfCare");
 	}
 
 	protected void addSectionAdvanceDirectives() {
@@ -289,12 +278,13 @@ public class SectionRegistry {
 				.withSectionDisplay("Advance directives")
 				.withResourceTypes(ResourceType.Consent.name())
 				.withProfile(
-						"https://hl7.org/fhir/uv/ips/StructureDefinition-Composition-uv-ips-definitions.html#Composition.section:sectionAdvanceDirectives")
-				.build();
+						"https://hl7.org/fhir/uv/ips/StructureDefinition-Composition-uv-ips-definitions.html#Composition.section:sectionAdvanceDirectives");
 	}
 
 	protected SectionBuilder addSection() {
-		return new SectionBuilder();
+		SectionBuilder retVal = new SectionBuilder();
+		mySectionBuilders.add(retVal);
+		return retVal;
 	}
 
 	public SectionRegistry addGlobalCustomizer(Consumer<SectionBuilder> theGlobalCustomizer) {
@@ -376,12 +366,13 @@ public class SectionRegistry {
 			return this;
 		}
 
+		@SuppressWarnings("UnusedReturnValue")
 		public SectionBuilder withNoInfoGenerator(INoInfoGenerator theNoInfoGenerator) {
 			myNoInfoGenerator = theNoInfoGenerator;
 			return this;
 		}
 
-		public void build() {
+		private void done() {
 			Validate.notBlank(mySectionSystem, "No section system has been defined for this section");
 			Validate.notBlank(mySectionCode, "No section code has been defined for this section");
 			Validate.notBlank(mySectionDisplay, "No section display has been defined for this section");

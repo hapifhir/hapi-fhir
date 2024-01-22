@@ -98,8 +98,8 @@ public class IpsGenerationR4Test extends BaseResourceProviderR4Test {
 		// Verify
 		validateDocument(output);
 		assertEquals(117, output.getEntry().size());
-		String patientId = findFirstEntryResource(output, Patient.class, 1).getId();
-		assertThat(patientId, matchesPattern("urn:uuid:.*"));
+		String patientId = findFirstEntryResource(output, Patient.class, 1).getIdElement().toVersionless().getValue();
+		assertEquals("Patient/f15d2419-fbff-464a-826d-0afe8f095771", patientId);
 		MedicationStatement medicationStatement = findFirstEntryResource(output, MedicationStatement.class, 2);
 		assertEquals(patientId, medicationStatement.getSubject().getReference());
 		assertNull(medicationStatement.getInformationSource().getReference());
@@ -185,8 +185,8 @@ public class IpsGenerationR4Test extends BaseResourceProviderR4Test {
 		// Verify
 		validateDocument(output);
 		assertEquals(7, output.getEntry().size());
-		String patientId = findFirstEntryResource(output, Patient.class, 1).getId();
-		assertThat(patientId, matchesPattern("urn:uuid:.*"));
+		String patientId = findFirstEntryResource(output, Patient.class, 1).getIdElement().toVersionless().getValue();
+		assertEquals("Patient/5342998", patientId);
 		assertEquals(patientId, findEntryResource(output, Condition.class, 0, 2).getSubject().getReference());
 		assertEquals(patientId, findEntryResource(output, Condition.class, 1, 2).getSubject().getReference());
 
@@ -280,17 +280,6 @@ public class IpsGenerationR4Test extends BaseResourceProviderR4Test {
 		validator.registerValidatorModule(instanceValidator);
 		ValidationResult validation = validator.validateWithResult(theOutcome);
 		assertTrue(validation.isSuccessful(), () -> myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(validation.toOperationOutcome()));
-
-		// Make sure that all refs have been replaced with UUIDs
-		List<ResourceReferenceInfo> references = myFhirContext.newTerser().getAllResourceReferences(theOutcome);
-		for (IBaseResource next : myFhirContext.newTerser().getAllEmbeddedResources(theOutcome, true)) {
-			references.addAll(myFhirContext.newTerser().getAllResourceReferences(next));
-		}
-		for (ResourceReferenceInfo next : references) {
-			if (!next.getResourceReference().getReferenceElement().getValue().startsWith("urn:uuid:")) {
-				fail(next.getName());
-			}
-		}
 	}
 
 	@Configuration

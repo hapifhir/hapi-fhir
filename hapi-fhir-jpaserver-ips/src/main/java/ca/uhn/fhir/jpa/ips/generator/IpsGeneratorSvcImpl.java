@@ -46,6 +46,7 @@ import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
+import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
@@ -198,6 +199,14 @@ public class IpsGeneratorSvcImpl implements IIpsGeneratorSvc {
 			List<IBaseResource> manualResources =
 					myGenerationStrategy.fetchResourcesForSectionManually(theIpsContext, ipsSectionContext);
 			if (manualResources != null) {
+				for (IBaseResource next : manualResources) {
+					Validate.isTrue(
+							next.getIdElement().hasIdPart(),
+							"fetchResourcesForSectionManually() returned resource(s) with no ID populated");
+					if (ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.get(next) == null) {
+						ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.put(next, BundleEntrySearchModeEnum.MATCH);
+					}
+				}
 				addResourcesToIpsContents(
 						theIpsContext,
 						ipsSectionContext,
@@ -351,7 +360,9 @@ public class IpsGeneratorSvcImpl implements IIpsGeneratorSvc {
 					}
 				} else {
 					IIdType id = myGenerationStrategy.massageResourceId(theIpsContext, nextCandidate);
-					nextCandidate.setId(id);
+					if (id != null) {
+						nextCandidate.setId(id);
+					}
 					theGlobalResourcesCollectionToPopulate.addResourceIfNotAlreadyPresent(
 							nextCandidate, originalResourceId);
 					if (!candidateIsSearchInclude) {
@@ -436,7 +447,9 @@ public class IpsGeneratorSvcImpl implements IIpsGeneratorSvc {
 
 	private void massageResourceId(IpsContext theIpsContext, IBaseResource theResource) {
 		IIdType id = myGenerationStrategy.massageResourceId(theIpsContext, theResource);
-		theResource.setId(id);
+		if (id != null) {
+			theResource.setId(id);
+		}
 	}
 
 	private String createSectionNarrative(
