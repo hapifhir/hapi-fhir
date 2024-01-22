@@ -235,7 +235,8 @@ public class RuleBuilder implements IAuthRuleBuilder {
 					RequestPartitionId partitionId =
 							(RequestPartitionId) theResource.getUserData(Constants.RESOURCE_PARTITION_ID);
 					if (partitionId != null) {
-						if (partitionId.hasDefaultPartitionId() && myTenantIds.contains(ProviderConstants.DEFAULT_PARTITION_NAME)) {
+						if (partitionId.hasDefaultPartitionId()
+								&& myTenantIds.contains(ProviderConstants.DEFAULT_PARTITION_NAME)) {
 							return myOutcome;
 						}
 
