@@ -44,7 +44,7 @@ public class ResourceVersionMap {
 
 	private ResourceVersionMap() {}
 
-	public static ResourceVersionMap fromResourceTableEntities(List<? extends IBasePersistedResource> theEntities) {
+	public static ResourceVersionMap fromResourceTableEntities(List<? extends IBasePersistedResource<?>> theEntities) {
 		ResourceVersionMap retval = new ResourceVersionMap();
 		theEntities.forEach(entity -> retval.add(entity.getIdDt()));
 		return retval;
@@ -58,6 +58,12 @@ public class ResourceVersionMap {
 
 	public static ResourceVersionMap empty() {
 		return new ResourceVersionMap();
+	}
+
+	public static ResourceVersionMap fromIdsWithVersions(List<IIdType> theFhirIds) {
+		ResourceVersionMap retval = new ResourceVersionMap();
+		theFhirIds.forEach(retval::add);
+		return retval;
 	}
 
 	private void add(IIdType theId) {
