@@ -174,36 +174,20 @@ public class ClasspathUtil {
 	 * @param theDirectory the directory in the classpath to lookup
 	 * @return the list of files containing relative path and file name
 	 */
-<<<<<<< HEAD
 	public static List<String> getFilesNamesFromDirectory(String theDirectory) {
 		List<String> filenames = new ArrayList<>();
 		try (InputStream in = ClasspathUtil.class.getResourceAsStream(theDirectory)) {
 			if (in == null) {
 				throw new InternalErrorException(Msg.code(2480) + "Unable to find directory: " + theDirectory);
-=======
-	public static List<String> getFilesFromDirectory(String theDirectory) {
-		List<String> filenames = new ArrayList<>();
-		try (InputStream in = ClasspathUtil.class.getResourceAsStream(theDirectory)) {
-			if (in == null) {
-				throw new InternalErrorException(Msg.code(1758) + "Unable to find directory: " + theDirectory);
->>>>>>> e2667e6b28d (Add support for mimetype codes from system urn:ietf:bcp:13)
 			}
 			try (BufferedReader br = new BufferedReader(new InputStreamReader(in))) {
 				String fileName;
 				while ((fileName = br.readLine()) != null) {
-<<<<<<< HEAD
 					filenames.add(fileName);
 				}
 			}
 		} catch (IOException e) {
 			throw new InternalErrorException(Msg.code(2481) + e.getMessage());
-=======
-					filenames.add(theDirectory + "/" + fileName);
-				}
-			}
-		} catch (IOException e) {
-			throw new InternalErrorException(Msg.code(2479) + e.getMessage());
->>>>>>> e2667e6b28d (Add support for mimetype codes from system urn:ietf:bcp:13)
 		}
 		return filenames;
 	}
