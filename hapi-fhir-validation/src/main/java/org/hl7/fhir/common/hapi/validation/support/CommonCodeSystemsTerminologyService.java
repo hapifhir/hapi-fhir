@@ -43,6 +43,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
+import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -67,13 +68,13 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 	public static final String UCUM_CODESYSTEM_URL = "http://unitsofmeasure.org";
 	public static final String UCUM_VALUESET_URL = "http://hl7.org/fhir/ValueSet/ucum-units";
 	public static final String ALL_LANGUAGES_VALUESET_URL = "http://hl7.org/fhir/ValueSet/all-languages";
-	private static final String USPS_CODESYSTEM_URL = "https://www.usps.com/";
-	private static final String USPS_VALUESET_URL = "http://hl7.org/fhir/us/core/ValueSet/us-core-usps-state";
+	public static final String USPS_CODESYSTEM_URL = "https://www.usps.com/";
+	public static final String USPS_VALUESET_URL = "http://hl7.org/fhir/us/core/ValueSet/us-core-usps-state";
 	private static final Logger ourLog = LoggerFactory.getLogger(CommonCodeSystemsTerminologyService.class);
 	private static final Map<String, String> USPS_CODES = Collections.unmodifiableMap(buildUspsCodes());
 	private static final Map<String, String> ISO_4217_CODES = Collections.unmodifiableMap(buildIso4217Codes());
 	private static final Map<String, String> ISO_3166_CODES = Collections.unmodifiableMap(buildIso3166Codes());
-	private static final Map<String, String> MIMETYPE_CODES = Collections.unmodifiableMap(buildMimetypeCodes());
+	private static final Map<String, String> BCP_13_CODES = Collections.unmodifiableMap(buildBCP13Codes());
 	private final FhirContext myFhirContext;
 	private final VersionCanonicalizer myVersionCanonicalizer;
 	private volatile org.hl7.fhir.r5.model.ValueSet myLanguagesVs;
@@ -149,7 +150,7 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 			case ALL_LANGUAGES_VALUESET_URL:
 				return validateLanguageCode(theCode, valueSet);
 			case MIMETYPES_VALUESET_URL:
-				return getValidateCodeResultOk(theCode, defaultString(MIMETYPE_CODES.get(theCode), theDisplay));
+				return getValidateCodeResultOk(theCode, defaultIfBlank(BCP_13_CODES.get(theCode), theDisplay));
 			case UCUM_VALUESET_URL: {
 				return validateLookupCode(theValidationSupportContext, theCode, system);
 			}
@@ -252,7 +253,7 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 		} else {
 			// If we get here it means we know the CodeSystem but the code was bad
 			retVal.setFound(false);
-			String invalidCodeMessage = getErrorMessage("invalidCodeInSystem", system, code);
+			String invalidCodeMessage = getErrorMessage("invalidCodeInSystem", code, system);
 			retVal.setErrorMessage(invalidCodeMessage);
 		}
 
@@ -386,11 +387,11 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 		mimeRetVal.setSearchedForSystem(MIMETYPES_CODESYSTEM_URL);
 		mimeRetVal.setFound(true);
 		// Set the display when the code is a standard code
-		mimeRetVal.setCodeDisplay(MIMETYPE_CODES.get(theCode));
+		mimeRetVal.setCodeDisplay(BCP_13_CODES.get(theCode));
 		return mimeRetVal;
 	}
 
-	private static Map<String, String> buildMimetypeCodes() {
+	private static Map<String, String> buildBCP13Codes() {
 		ourLog.info("Loading the IANA mimetypes from system " + MIMETYPES_CODESYSTEM_URL);
 
 		final String configPath = "/org/hl7/fhir/common/hapi/validation/support/mimetype/";
@@ -449,24 +450,20 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 
 	@Nonnull
 	private LookupCodeResult lookupUcumCode(String theCode) {
-		InputStream input = ClasspathUtil.loadResourceAsStream("/ucum-essence.xml");
-		String outcome;
 		LookupCodeResult retVal = new LookupCodeResult();
 		retVal.setSearchedForCode(theCode);
 		retVal.setSearchedForSystem(UCUM_CODESYSTEM_URL);
 
-		try {
+		try (InputStream input = ClasspathUtil.loadResourceAsStream("/ucum-essence.xml")) {
 			UcumEssenceService svc = new UcumEssenceService(input);
-			outcome = svc.analyse(theCode);
+			String outcome = svc.analyse(theCode);
 			if (outcome != null) {
 				retVal.setFound(true);
 				retVal.setCodeDisplay(outcome);
 			}
-		} catch (UcumException e) {
+		} catch (UcumException | IOException e) {
 			ourLog.debug("Failed parse UCUM code: {}", theCode, e);
 			retVal.setErrorMessage(e.getMessage());
-		} finally {
-			ClasspathUtil.close(input);
 		}
 		return retVal;
 	}
@@ -486,7 +483,7 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 				map = USPS_CODES;
 				break;
 			case MIMETYPES_CODESYSTEM_URL:
-				map = MIMETYPE_CODES;
+				map = BCP_13_CODES;
 				break;
 			default:
 				return null;
