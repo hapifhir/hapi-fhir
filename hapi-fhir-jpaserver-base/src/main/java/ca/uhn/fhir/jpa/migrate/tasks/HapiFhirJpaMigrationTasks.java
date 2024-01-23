@@ -185,8 +185,9 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 									"HFJ_SPIDX_STRING".toLowerCase(),
 									"SP_VALUE_NORMALIZED".toLowerCase()),
 							"Column HFJ_SPIDX_STRING.SP_VALUE_NORMALIZED already has a collation of 'C' so doing nothing")
-
-					.onlyIf("SELECT EXISTS(select 1 from pg_indexes where indexname='idx_sp_string_hash_nrm_pattern_ops')", "Index idx_sp_string_hash_nrm_pattern_ops already exists");
+					.onlyIf(
+							"SELECT EXISTS(select 1 from pg_indexes where indexname='idx_sp_string_hash_nrm_pattern_ops')",
+							"Index idx_sp_string_hash_nrm_pattern_ops already exists");
 
 			version.executeRawSql(
 							"20231212.2",
@@ -198,8 +199,9 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 									"HFJ_SPIDX_URI".toLowerCase(),
 									"SP_URI".toLowerCase()),
 							"Column HFJ_SPIDX_STRING.SP_VALUE_NORMALIZED already has a collation of 'C' so doing nothing")
-				.onlyIf("SELECT EXISTS(select 1 from pg_indexes where indexname='idx_sp_uri_hash_identity_pattern_ops')", "Index idx_sp_uri_hash_identity_pattern_ops already exists.");
-
+					.onlyIf(
+							"SELECT EXISTS(select 1 from pg_indexes where indexname='idx_sp_uri_hash_identity_pattern_ops')",
+							"Index idx_sp_uri_hash_identity_pattern_ops already exists.");
 		}
 
 		// This fix was bad for MSSQL, it has been set to do nothing.
