@@ -45,6 +45,7 @@ import java.util.Optional;
 
 import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
 import static org.apache.commons.lang3.StringUtils.defaultString;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /**
@@ -124,10 +125,10 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 		String valueSet = defaultString(theValueSetUrl);
 		String system = defaultString(theCodeSystem);
 
-		if (!valueSet.isBlank()) {
+		if (!isBlank(valueSet)) {
 			final String expectSystem = getCodeSystemForValueSet(valueSet);
-			if (!system.isBlank() && !system.equals(expectSystem)) {
-				return getValidateCodeResultInError("mismatchCodeSystem", theCodeSystem, valueSet);
+			if (!isBlank(expectSystem) && !expectSystem.equals(system)) {
+				return getValidateCodeResultInError("mismatchCodeSystem", system, valueSet);
 			}
 			system = expectSystem;
 		}
@@ -156,7 +157,7 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 			}
 		}
 
-		if (valueSet.isBlank()) {
+		if (isBlank(valueSet)) {
 			return validateLookupCode(theValidationSupportContext, theCode, system);
 		}
 

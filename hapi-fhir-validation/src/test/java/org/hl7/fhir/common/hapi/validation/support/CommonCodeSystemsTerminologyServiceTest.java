@@ -428,6 +428,20 @@ public class CommonCodeSystemsTerminologyServiceTest extends BaseValidationTestW
 		assertNotNull(result.getDisplay());
 	}
 
+	@Test
+	public void testValidateCode_withMimetypesValueSetWithMismatchSystem_returnsInvalid() {
+		final String system = "someSystem";
+		final String valueSet = MIMETYPES_VALUESET_URL;
+		// test
+		CodeValidationResult result = mySvc.validateCode(newSupport(), newOptions(), system, system, null, valueSet);
+
+		// verify
+		assertNotNull(result);
+		assertFalse(result.isOk());
+		assertEquals(IssueSeverity.ERROR, result.getSeverity());
+		assertEquals("Inappropriate CodeSystem URL \"" + system + "\" for ValueSet: " + valueSet, result.getMessage());
+	}
+
 	@ParameterizedTest
 	@ValueSource(strings = { EncodingEnum.JSON_PLAIN_STRING, Constants.CT_FHIR_JSON_NEW, Constants.CT_FHIR_JSON })
 	public void testValidateCode_withMimetypesWithStandardCode_returnsValid(String code) {
