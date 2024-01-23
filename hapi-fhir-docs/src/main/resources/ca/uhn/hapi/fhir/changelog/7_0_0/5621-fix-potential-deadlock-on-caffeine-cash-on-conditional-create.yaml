@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 5621
+title: "Previously, a fhir endpoint could end up in a deadlock when creating a resource with contitional create. 
+The issue has been fixed."

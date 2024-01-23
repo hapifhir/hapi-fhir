@@ -478,19 +478,15 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 	@Override
 	public Optional<String> translatePidIdToForcedIdWithCache(JpaPid theId) {
 		// do getIfPresent and then put to avoid doing I/O inside the cache.
-		Optional<String> forcedId = myMemoryCacheService.getIfPresent(
-			MemoryCacheService.CacheEnum.PID_TO_FORCED_ID,
-			theId.getId());
+		Optional<String> forcedId =
+				myMemoryCacheService.getIfPresent(MemoryCacheService.CacheEnum.PID_TO_FORCED_ID, theId.getId());
 
 		if (forcedId == null) {
 			// This is only called when we know the resource exists.
 			// So this optional is only empty when there is no hfj_forced_id table
 			// note: this is obsolete with the new fhir_id column, and will go away.
 			forcedId = myResourceTableDao.findById(theId.getId()).map(ResourceTable::asTypedFhirResourceId);
-			myMemoryCacheService.put(
-				MemoryCacheService.CacheEnum.PID_TO_FORCED_ID,
-				theId.getId(),
-				forcedId);
+			myMemoryCacheService.put(MemoryCacheService.CacheEnum.PID_TO_FORCED_ID, theId.getId(), forcedId);
 		}
 
 		return forcedId;
