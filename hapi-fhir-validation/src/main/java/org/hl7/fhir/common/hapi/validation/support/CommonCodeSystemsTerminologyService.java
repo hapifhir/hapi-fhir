@@ -127,7 +127,7 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 
 		if (!isBlank(valueSet)) {
 			final String expectSystem = getCodeSystemForValueSet(valueSet);
-			if (!isBlank(expectSystem) && !expectSystem.equals(system)) {
+			if (!isBlank(system) && !system.equals(expectSystem)) {
 				return getValidateCodeResultInError("mismatchCodeSystem", system, valueSet);
 			}
 			system = expectSystem;
