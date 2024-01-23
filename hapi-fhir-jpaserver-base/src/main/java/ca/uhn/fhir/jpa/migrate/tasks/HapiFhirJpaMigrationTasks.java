@@ -24,6 +24,7 @@ import ca.uhn.fhir.jpa.entity.BulkExportJobEntity;
 import ca.uhn.fhir.jpa.entity.BulkImportJobEntity;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
+import ca.uhn.fhir.jpa.migrate.JdbcUtils;
 import ca.uhn.fhir.jpa.migrate.taskdef.ArbitrarySqlTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.CalculateHashesTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.CalculateOrdinalDatesTask;
@@ -186,9 +187,8 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 									"SP_VALUE_NORMALIZED".toLowerCase()),
 							"Column HFJ_SPIDX_STRING.SP_VALUE_NORMALIZED already has a collation of 'C' so doing nothing")
 					.onlyIf(
-							"SELECT EXISTS(select 1 from pg_indexes where indexname='idx_sp_string_hash_nrm_pattern_ops')",
+							"SELECT NOT EXISTS(select 1 from pg_indexes where indexname='idx_sp_string_hash_nrm_pattern_ops')",
 							"Index idx_sp_string_hash_nrm_pattern_ops already exists");
-
 			version.executeRawSql(
 							"20231212.2",
 							"CREATE UNIQUE INDEX idx_sp_uri_hash_identity_pattern_ops ON public.hfj_spidx_uri USING btree (hash_identity, sp_uri varchar_pattern_ops, res_id, partition_id)")
@@ -200,7 +200,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 									"SP_URI".toLowerCase()),
 							"Column HFJ_SPIDX_STRING.SP_VALUE_NORMALIZED already has a collation of 'C' so doing nothing")
 					.onlyIf(
-							"SELECT EXISTS(select 1 from pg_indexes where indexname='idx_sp_uri_hash_identity_pattern_ops')",
+							"SELECT NOT EXISTS(select 1 from pg_indexes where indexname='idx_sp_uri_hash_identity_pattern_ops')",
 							"Index idx_sp_uri_hash_identity_pattern_ops already exists.");
 		}
 

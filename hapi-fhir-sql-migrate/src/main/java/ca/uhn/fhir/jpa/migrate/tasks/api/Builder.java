@@ -610,6 +610,7 @@ public class Builder {
 			return this;
 		}
 
+
 		public BuilderCompleteTask runEvenDuringSchemaInitialization() {
 			myTask.setRunDuringSchemaInitialization(true);
 			return this;
