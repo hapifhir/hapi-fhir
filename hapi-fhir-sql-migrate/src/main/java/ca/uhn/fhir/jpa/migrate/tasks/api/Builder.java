@@ -597,7 +597,7 @@ public class Builder {
 								"Only SELECT statements (including CTEs) are allowed here.  Please check your SQL: [%s]",
 								theSql));
 			}
-			ourLog.info("SQL to evaluate: {}", theSql);
+			ourLog.debug("SQL to evaluate: {}", theSql);
 
 			myTask.addPrecondition(new ExecuteTaskPrecondition(
 					() -> {
