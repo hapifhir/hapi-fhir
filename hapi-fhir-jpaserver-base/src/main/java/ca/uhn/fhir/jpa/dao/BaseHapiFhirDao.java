@@ -1453,9 +1453,8 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 				return historyEntity;
 			}
 
-			// LUKETODO:  oracle
-			if (! myHibernatePropertiesProvider.isOracleDialect()) {
-
+			// LUKETODO:  figure out how to test all of this
+			if (!myHibernatePropertiesProvider.isOracleDialect()) {
 				populateEncodedResource(encodedResource, encodedResourceString, null, ResourceEncodingEnum.JSON);
 			} else {
 				populateEncodedResource(encodedResource, null, resourceBinary, encoding);

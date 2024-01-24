@@ -1711,7 +1711,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			byte[] resourceBytes = historyEntity.getResource();
 			if (resourceBytes != null) {
 				String resourceText = decodeResource(resourceBytes, historyEntity.getEncoding());
-				if (! myHibernatePropertiesProvider.isOracleDialect()) {
+				if (!myHibernatePropertiesProvider.isOracleDialect()) {
 					ourLog.debug(
 							"Storing text of resource {} version {} as inline VARCHAR",
 							entity.getResourceId(),

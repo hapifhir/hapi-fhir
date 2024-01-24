@@ -649,7 +649,13 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 				.getMessage(TermReadSvcImpl.class, "valueSetExpandedUsingPreExpansion", expansionTimestamp);
 		theAccumulator.addMessage(msg);
 		expandConcepts(
-				theExpansionOptions, theAccumulator, termValueSet, theFilter, theAdd, theAddedCodes, myHibernatePropertiesProvider.isOracleDialect());
+				theExpansionOptions,
+				theAccumulator,
+				termValueSet,
+				theFilter,
+				theAdd,
+				theAddedCodes,
+				myHibernatePropertiesProvider.isOracleDialect());
 	}
 
 	@Nonnull
