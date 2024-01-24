@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 9999
+title: "Previously, migrations from 2023-02 or earlier would fail to update HFJ_RES_VER.RES_TEXT_VC to CLOB.
+        This has been fixed."

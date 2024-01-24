@@ -136,6 +136,7 @@ public class ModifyColumnTask extends BaseTableColumnTypeTask {
 				String oracleNullableStmt = !alreadyCorrectNullable ? notNull : "";
 				sql = "alter table " + getTableName() + " modify ( " + getColumnName() + " " + type + oracleNullableStmt
 						+ " )";
+				ourLog.info("5586: ORACLE ALTER TABLE: {}", sql);
 				break;
 			case MSSQL_2012:
 				sql = "alter table " + getTableName() + " alter column " + getColumnName() + " " + type + notNull;
