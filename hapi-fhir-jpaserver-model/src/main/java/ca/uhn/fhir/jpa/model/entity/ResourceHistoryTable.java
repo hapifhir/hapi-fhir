@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Model
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,14 +25,13 @@ import ca.uhn.fhir.rest.api.Constants;
 import jakarta.persistence.*;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
-import org.hibernate.Length;
+import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.OptimisticLock;
+import org.hibernate.type.SqlTypes;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
-
-import static org.apache.commons.lang3.StringUtils.defaultString;
 
 @Entity
 @Table(
@@ -58,6 +57,7 @@ public class ResourceHistoryTable extends BaseHasResource implements Serializabl
 	public static final int ENCODING_COL_LENGTH = 5;
 
 	public static final String HFJ_RES_VER = "HFJ_RES_VER";
+	public static final int RES_TEXT_VC_MAX_LENGTH = 4000;
 	private static final long serialVersionUID = 1L;
 
 	@Id
@@ -86,15 +86,14 @@ public class ResourceHistoryTable extends BaseHasResource implements Serializabl
 	@OneToMany(mappedBy = "myResourceHistory", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
 	private Collection<ResourceHistoryTag> myTags;
 
-	/**
-	 * Note: No setter for this field because it's only a legacy way of storing data now.
-	 */
 	@Column(name = "RES_TEXT", length = Integer.MAX_VALUE - 1, nullable = true)
 	@Lob()
 	@OptimisticLock(excluded = true)
 	private byte[] myResource;
 
-	@Column(name = "RES_TEXT_VC", nullable = true, length = Length.LONG32)
+	// LUKETODO:  do we need to rollback to @Column(name = "RES_TEXT_VC", nullable = true, length = Length.LONG32)?
+	@Column(name = "RES_TEXT_VC", length = RES_TEXT_VC_MAX_LENGTH, nullable = true)
+	@JdbcTypeCode(SqlTypes.LONG32VARCHAR)
 	@OptimisticLock(excluded = true)
 	private String myResourceTextVc;
 
@@ -155,8 +154,7 @@ public class ResourceHistoryTable extends BaseHasResource implements Serializabl
 	}
 
 	public void setResourceTextVc(String theResourceTextVc) {
-		myResource = null;
-		myResourceTextVc = defaultString(theResourceTextVc);
+		myResourceTextVc = theResourceTextVc;
 	}
 
 	public ResourceHistoryProvenanceEntity getProvenance() {
@@ -210,6 +208,10 @@ public class ResourceHistoryTable extends BaseHasResource implements Serializabl
 
 	public byte[] getResource() {
 		return myResource;
+	}
+
+	public void setResource(byte[] theResource) {
+		myResource = theResource;
 	}
 
 	@Override
