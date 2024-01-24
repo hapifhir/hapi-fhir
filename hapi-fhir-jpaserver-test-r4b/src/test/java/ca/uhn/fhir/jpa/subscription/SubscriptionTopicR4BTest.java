@@ -78,7 +78,7 @@ public class SubscriptionTopicR4BTest extends BaseSubscriptionsR4BTest {
 	public void testCreate() throws Exception {
 		// WIP SR4B test update, delete, etc
 		createEncounterSubscriptionTopic(SubscriptionTopic.InteractionTrigger.CREATE);
-		mySubscriptionTopicLoader.doSyncResourcessForUnitTest();
+		mySubscriptionTopicLoader.doSyncResourcesForUnitTest();
 		waitForRegisteredSubscriptionTopicCount();
 
 		Subscription subscription = createTopicSubscription();
@@ -105,7 +105,7 @@ public class SubscriptionTopicR4BTest extends BaseSubscriptionsR4BTest {
 	public void testUpdate() throws Exception {
 		// WIP SR4B test update, delete, etc
 		createEncounterSubscriptionTopic(SubscriptionTopic.InteractionTrigger.CREATE, SubscriptionTopic.InteractionTrigger.UPDATE);
-		mySubscriptionTopicLoader.doSyncResourcessForUnitTest();
+		mySubscriptionTopicLoader.doSyncResourcesForUnitTest();
 		waitForRegisteredSubscriptionTopicCount();
 
 		Subscription subscription = createTopicSubscription();
@@ -168,7 +168,7 @@ public class SubscriptionTopicR4BTest extends BaseSubscriptionsR4BTest {
 		if (size == 1) {
 			return true;
 		}
-		mySubscriptionTopicLoader.doSyncResourcessForUnitTest();
+		mySubscriptionTopicLoader.doSyncResourcesForUnitTest();
 		return mySubscriptionTopicRegistry.size() == 1;
 	}
 
