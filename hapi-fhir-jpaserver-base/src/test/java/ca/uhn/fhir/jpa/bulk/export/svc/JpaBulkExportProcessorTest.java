@@ -35,6 +35,7 @@ import org.hl7.fhir.r4.model.Group;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Patient;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -151,6 +152,12 @@ public class JpaBulkExportProcessorTest {
 
 	@InjectMocks
 	private JpaBulkExportProcessor myProcessor;
+
+	@BeforeEach
+	public void init() {
+		myProcessor.mySearchBuilderFactory = mySearchBuilderFactory;
+		myProcessor.myMdmLinkDao = myMdmLinkDao;
+	}
 
 	private ExportPIDIteratorParameters createExportParameters(BulkExportJobParameters.ExportStyle theExportStyle) {
 		ExportPIDIteratorParameters parameters = new ExportPIDIteratorParameters();

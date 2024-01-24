@@ -5,6 +5,7 @@ import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
+import ca.uhn.fhir.fhirpath.BaseValidationTestWithInlineMocks;
 import ca.uhn.fhir.test.utilities.LoggingExtension;
 import ca.uhn.fhir.util.ClasspathUtil;
 import ca.uhn.fhir.util.TestUtil;
@@ -64,11 +65,11 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.mockito.invocation.InvocationOnMock;
+import org.mockito.quality.Strictness;
 import org.mockito.stubbing.Answer;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -98,8 +99,9 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.withSettings;
 
-public class FhirInstanceValidatorDstu3Test {
+public class FhirInstanceValidatorDstu3Test extends BaseValidationTestWithInlineMocks {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirInstanceValidatorDstu3Test.class);
 	private static FhirContext ourCtx = FhirContext.forDstu3Cached();
@@ -129,7 +131,7 @@ public class FhirInstanceValidatorDstu3Test {
 		myVal.setValidateAgainstStandardSchema(false);
 		myVal.setValidateAgainstStandardSchematron(false);
 
-		IValidationSupport mockSupport = mock(IValidationSupport.class);
+		IValidationSupport mockSupport = mock(IValidationSupport.class, withSettings().strictness(Strictness.LENIENT));
 		when(mockSupport.getFhirContext()).thenReturn(ourCtx);
 		myValidationSupport = new CachingValidationSupport(new ValidationSupportChain(
 			mockSupport,
@@ -290,10 +292,6 @@ public class FhirInstanceValidatorDstu3Test {
 
 	private Object defaultString(Integer theLocationLine) {
 		return theLocationLine != null ? theLocationLine.toString() : "";
-	}
-
-	private String loadResource(String theFileName) throws IOException {
-		return IOUtils.toString(FhirInstanceValidatorDstu3Test.class.getResourceAsStream(theFileName), Charsets.UTF_8);
 	}
 
 	private <T extends IBaseResource> T loadResource(String theFilename, Class<T> theType) throws IOException {

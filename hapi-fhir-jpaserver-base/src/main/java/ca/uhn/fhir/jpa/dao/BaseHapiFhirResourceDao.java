@@ -65,11 +65,13 @@ import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.search.PersistedJpaBundleProvider;
 import ca.uhn.fhir.jpa.search.PersistedJpaBundleProviderFactory;
 import ca.uhn.fhir.jpa.search.ResourceSearchUrlSvc;
+import ca.uhn.fhir.jpa.search.builder.SearchBuilder;
 import ca.uhn.fhir.jpa.search.cache.SearchCacheStatusEnum;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.ResourceSearch;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
+import ca.uhn.fhir.jpa.util.QueryChunker;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.api.StorageResponseCodeEnum;
 import ca.uhn.fhir.model.dstu2.resource.BaseResource;
@@ -117,7 +119,6 @@ import ca.uhn.fhir.validation.IValidatorModule;
 import ca.uhn.fhir.validation.ValidationOptions;
 import ca.uhn.fhir.validation.ValidationResult;
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.Streams;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import jakarta.annotation.PostConstruct;
@@ -125,7 +126,6 @@ import jakarta.persistence.LockModeType;
 import jakarta.persistence.NoResultException;
 import jakarta.persistence.TypedQuery;
 import jakarta.servlet.http.HttpServletResponse;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseMetaType;
@@ -156,6 +156,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.Callable;
+import java.util.function.BiFunction;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -224,6 +225,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	@Autowired
 	private IFhirSystemDao<?, ?> mySystemDao;
 
+	@Nullable
 	public static <T extends IBaseResource> T invokeStoragePreShowResources(
 			IInterceptorBroadcaster theInterceptorBroadcaster, RequestDetails theRequest, T retVal) {
 		if (CompositeInterceptorBroadcaster.hasHooks(
@@ -1540,7 +1542,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				.withRequest(theRequest)
 				.withTransactionDetails(transactionDetails)
 				.withRequestPartitionId(requestPartitionId)
-				.execute(() -> doReadInTransaction(theId, theRequest, theDeletedOk, requestPartitionId));
+				.read(() -> doReadInTransaction(theId, theRequest, theDeletedOk, requestPartitionId));
 	}
 
 	private T doReadInTransaction(
@@ -1568,6 +1570,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		return retVal;
 	}
 
+	@Nullable
 	private T invokeStoragePreShowResources(RequestDetails theRequest, T retVal) {
 		retVal = invokeStoragePreShowResources(myInterceptorBroadcaster, theRequest, retVal);
 		return retVal;
@@ -1575,6 +1578,23 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 	private void invokeStoragePreAccessResources(IIdType theId, RequestDetails theRequest, T theResource) {
 		invokeStoragePreAccessResources(myInterceptorBroadcaster, theRequest, theId, theResource);
+	}
+
+	private Optional<T> invokeStoragePreAccessResources(RequestDetails theRequest, T theResource) {
+		if (CompositeInterceptorBroadcaster.hasHooks(
+				Pointcut.STORAGE_PREACCESS_RESOURCES, myInterceptorBroadcaster, theRequest)) {
+			SimplePreResourceAccessDetails accessDetails = new SimplePreResourceAccessDetails(theResource);
+			HookParams params = new HookParams()
+					.add(IPreResourceAccessDetails.class, accessDetails)
+					.add(RequestDetails.class, theRequest)
+					.addIfMatchesType(ServletRequestDetails.class, theRequest);
+			CompositeInterceptorBroadcaster.doCallHooks(
+					myInterceptorBroadcaster, theRequest, Pointcut.STORAGE_PREACCESS_RESOURCES, params);
+			if (accessDetails.isDontReturnResourceAtIndex(0)) {
+				return Optional.empty();
+			}
+		}
+		return Optional.of(theResource);
 	}
 
 	@Override
@@ -2043,12 +2063,12 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				.withRequest(theRequest)
 				.withTransactionDetails(transactionDetails)
 				.withRequestPartitionId(requestPartitionId)
-				.execute(() -> {
+				.searchList(() -> {
 					if (isNull(theParams.getLoadSynchronousUpTo())) {
 						theParams.setLoadSynchronousUpTo(myStorageSettings.getInternalSynchronousSearchSize());
 					}
 
-					ISearchBuilder<?> builder =
+					ISearchBuilder<JpaPid> builder =
 							mySearchBuilderFactory.newSearchBuilder(this, getResourceName(), getResourceType());
 
 					List<JpaPid> ids = new ArrayList<>();
@@ -2074,6 +2094,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			SearchParameterMap theParams,
 			RequestDetails theRequest,
 			@Nullable IBaseResource theConditionalOperationTargetOrNull) {
+
 		// the Stream is useless outside the bound connection time, so require our caller to have a session.
 		HapiTransactionService.requireTransaction();
 
@@ -2081,15 +2102,83 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				myRequestPartitionHelperService.determineReadPartitionForRequestForSearchType(
 						theRequest, myResourceName, theParams, theConditionalOperationTargetOrNull);
 
-		ISearchBuilder<?> builder = mySearchBuilderFactory.newSearchBuilder(this, getResourceName(), getResourceType());
+		ISearchBuilder<JpaPid> builder =
+				mySearchBuilderFactory.newSearchBuilder(this, getResourceName(), getResourceType());
 
 		String uuid = UUID.randomUUID().toString();
 
 		SearchRuntimeDetails searchRuntimeDetails = new SearchRuntimeDetails(theRequest, uuid);
-		IResultIterator<PID> iter =
-				builder.createQuery(theParams, searchRuntimeDetails, theRequest, requestPartitionId);
-		// Adapt IResultIterator to stream, and connect the close handler.
-		return Streams.stream(iter).onClose(() -> IOUtils.closeQuietly(iter));
+		//noinspection unchecked
+		return (Stream<PID>) myTransactionService
+				.withRequest(theRequest)
+				.search(() ->
+						builder.createQueryStream(theParams, searchRuntimeDetails, theRequest, requestPartitionId));
+	}
+
+	@Override
+	public List<T> searchForResources(SearchParameterMap theParams, RequestDetails theRequest) {
+		return searchForTransformedIds(theParams, theRequest, this::pidsToResource);
+	}
+
+	@Override
+	public List<IIdType> searchForResourceIds(SearchParameterMap theParams, RequestDetails theRequest) {
+		return searchForTransformedIds(theParams, theRequest, this::pidsToIds);
+	}
+
+	private <V> List<V> searchForTransformedIds(
+			SearchParameterMap theParams,
+			RequestDetails theRequest,
+			BiFunction<RequestDetails, Stream<JpaPid>, Stream<V>> transform) {
+		RequestPartitionId requestPartitionId =
+				myRequestPartitionHelperService.determineReadPartitionForRequestForSearchType(
+						theRequest, myResourceName, theParams, null);
+
+		String uuid = UUID.randomUUID().toString();
+
+		SearchRuntimeDetails searchRuntimeDetails = new SearchRuntimeDetails(theRequest, uuid);
+		return myTransactionService
+				.withRequest(theRequest)
+				.withPropagation(Propagation.REQUIRED)
+				.searchList(() -> {
+					ISearchBuilder<JpaPid> builder =
+							mySearchBuilderFactory.newSearchBuilder(this, getResourceName(), getResourceType());
+					Stream<JpaPid> pidStream =
+							builder.createQueryStream(theParams, searchRuntimeDetails, theRequest, requestPartitionId);
+
+					Stream<V> transformedStream = transform.apply(theRequest, pidStream);
+
+					return transformedStream.collect(Collectors.toList());
+				});
+	}
+
+	/**
+	 * Fetch the resources in chunks and apply PreAccess/PreShow interceptors.
+	 */
+	@Nonnull
+	private Stream<T> pidsToResource(RequestDetails theRequest, Stream<JpaPid> pidStream) {
+		ISearchBuilder<JpaPid> searchBuilder =
+				mySearchBuilderFactory.newSearchBuilder(this, getResourceName(), getResourceType());
+		@SuppressWarnings("unchecked")
+		Stream<T> resourceStream = (Stream<T>) new QueryChunker<>()
+				.chunk(pidStream, SearchBuilder.getMaximumPageSize())
+				.flatMap(pidChunk -> searchBuilder.loadResourcesByPid(pidChunk, theRequest).stream());
+		// apply interceptors
+		return resourceStream
+				.flatMap(resource -> invokeStoragePreAccessResources(theRequest, resource).stream())
+				.flatMap(resource -> Optional.ofNullable(invokeStoragePreShowResources(theRequest, resource)).stream());
+	}
+
+	/**
+	 * get the Ids from the ResourceTable entities in chunks.
+	 */
+	@Nonnull
+	private Stream<IIdType> pidsToIds(RequestDetails theRequestDetails, Stream<JpaPid> thePidStream) {
+		Stream<Long> longStream = thePidStream.map(JpaPid::getId);
+
+		return new QueryChunker<>()
+				.chunk(longStream, SearchBuilder.getMaximumPageSize())
+				.flatMap(ids -> myResourceTableDao.findAllById(ids).stream())
+				.map(ResourceTable::getIdDt);
 	}
 
 	protected <MT extends IBaseMetaType> MT toMetaDt(Class<MT> theType, Collection<TagDefinition> tagDefinitions) {

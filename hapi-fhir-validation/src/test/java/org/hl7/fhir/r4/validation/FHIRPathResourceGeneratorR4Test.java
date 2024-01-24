@@ -3,6 +3,7 @@ package org.hl7.fhir.r4.validation;
 import java.util.HashMap;
 import java.util.Map;
 
+import ca.uhn.fhir.fhirpath.BaseValidationTestWithInlineMocks;
 import org.hl7.fhir.common.hapi.validation.validator.FHIRPathResourceGeneratorR4;
 import org.hl7.fhir.r4.model.Address;
 import org.hl7.fhir.r4.model.HumanName;
@@ -16,7 +17,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class FHIRPathResourceGeneratorR4Test {
+public class FHIRPathResourceGeneratorR4Test extends BaseValidationTestWithInlineMocks {
     
     public Map<String, String> createFhirMapping() {
         Map<String, String> mapping = new HashMap<>();

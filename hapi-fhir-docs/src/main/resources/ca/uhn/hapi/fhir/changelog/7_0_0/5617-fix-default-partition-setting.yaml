@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 5617
+title: "Resource UserData RESOURCE_PARTITION_ID was incorrectly being set to null for the default partition.  
+This has been corrected to use RequestPartitionId.defaultPartition()"

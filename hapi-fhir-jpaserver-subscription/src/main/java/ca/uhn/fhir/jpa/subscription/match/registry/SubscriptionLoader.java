@@ -24,7 +24,9 @@ import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.subscription.match.matcher.subscriber.SubscriptionActivatingSubscriber;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.subscription.SubscriptionConstants;
+import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -49,6 +51,9 @@ public class SubscriptionLoader extends BaseResourceCacheSynchronizer {
 	@Autowired
 	private SubscriptionCanonicalizer mySubscriptionCanonicalizer;
 
+	@Autowired
+	protected ISearchParamRegistry mySearchParamRegistry;
+
 	/**
 	 * Constructor
 	 */
@@ -56,8 +61,9 @@ public class SubscriptionLoader extends BaseResourceCacheSynchronizer {
 		super("Subscription");
 	}
 
+	@VisibleForTesting
 	public int doSyncSubscriptionsForUnitTest() {
-		return super.doSyncResourcessForUnitTest();
+		return super.doSyncResourcesForUnitTest();
 	}
 
 	@Override
@@ -115,7 +121,7 @@ public class SubscriptionLoader extends BaseResourceCacheSynchronizer {
 	}
 
 	/**
-	 * @param theSubscription
+	 * Check status of theSubscription and update to "active" if needed.
 	 * @return true if activated
 	 */
 	private boolean activateSubscriptionIfRequested(IBaseResource theSubscription) {
@@ -157,11 +163,11 @@ public class SubscriptionLoader extends BaseResourceCacheSynchronizer {
 		} else {
 			error = "";
 		}
-		ourLog.error("Subscription "
-				+ theSubscription.getIdElement().getIdPart()
-				+ " could not be activated."
-				+ " This will not prevent startup, but it could lead to undesirable outcomes! "
-				+ (StringUtils.isBlank(error) ? "" : "Error: " + error));
+		ourLog.error(
+				"Subscription {} could not be activated. "
+						+ "This will not prevent startup, but it could lead to undesirable outcomes! {}",
+				theSubscription.getIdElement().getIdPart(),
+				(StringUtils.isBlank(error) ? "" : "Error: " + error));
 	}
 
 	public void syncSubscriptions() {
