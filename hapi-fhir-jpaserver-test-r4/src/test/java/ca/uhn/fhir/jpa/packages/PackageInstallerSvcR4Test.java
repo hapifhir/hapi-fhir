@@ -24,15 +24,11 @@ import ca.uhn.fhir.rest.param.UriParam;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.interceptor.partition.RequestTenantPartitionInterceptor;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
-import ca.uhn.fhir.test.utilities.JettyUtil;
 import ca.uhn.fhir.test.utilities.ProxyUtil;
 import ca.uhn.fhir.test.utilities.server.HttpServletExtension;
 import ca.uhn.fhir.util.ClasspathUtil;
 import ca.uhn.fhir.util.JsonUtil;
 import ca.uhn.fhir.validation.ValidationResult;
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.ee10.servlet.ServletHandler;
-import org.eclipse.jetty.ee10.servlet.ServletHolder;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Enumerations;
@@ -82,9 +78,9 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @TestMethodOrder(MethodOrderer.MethodName.class)
-public class NpmR4Test extends BaseJpaR4Test {
+public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 
-	private static final Logger ourLog = LoggerFactory.getLogger(NpmR4Test.class);
+	private static final Logger ourLog = LoggerFactory.getLogger(PackageInstallerSvcR4Test.class);
 	@Autowired
 	@Qualifier("myImplementationGuideDaoR4")
 	protected IFhirResourceDao<ImplementationGuide> myImplementationGuideDao;
@@ -159,6 +155,21 @@ public class NpmR4Test extends BaseJpaR4Test {
 			}
 		});
 
+		myPackageInstallerSvc.install(spec);
+	}
+
+	@Disabled("This test was added to validate IG installation scenario for OH")
+	@Test
+	public void testInstallOntarioHealthIG() {
+		JpaPackageCache jpaPackageCache = ProxyUtil.getSingletonTarget(myPackageCacheManager, JpaPackageCache.class);
+		jpaPackageCache.getPackageServers().clear();
+		jpaPackageCache.addPackageServer(new PackageServer("https://packages.fhir.org"));
+
+		PackageInstallationSpec spec = new PackageInstallationSpec()
+				.setName("accdr.fhir.ig.pkg")
+				.setVersion("0.9.0-alpha")
+				.setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL)
+				.setFetchDependencies(true);
 		myPackageInstallerSvc.install(spec);
 	}
 
