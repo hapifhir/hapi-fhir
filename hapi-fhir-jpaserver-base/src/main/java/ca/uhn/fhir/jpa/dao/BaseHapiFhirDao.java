@@ -686,7 +686,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 					HashFunction sha256 = Hashing.sha256();
 					HashCode hashCode;
 					String encodedResource = encodeResource(theResource, encoding, excludeElements, myContext);
-					// LUKETODO:  adjust this conditional logic for the new requirements
 					if (myHibernatePropertiesProvider.isOracleDialect()) {
 						resourceText = null;
 						resourceBinary = getResourceBinary(encoding, encodedResource);
@@ -1454,8 +1453,9 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 				return historyEntity;
 			}
 
-			if (getStorageSettings().getInlineResourceTextBelowSize() > 0
-					&& encodedResourceString.length() < getStorageSettings().getInlineResourceTextBelowSize()) {
+			// LUKETODO:  oracle
+			if (! myHibernatePropertiesProvider.isOracleDialect()) {
+
 				populateEncodedResource(encodedResource, encodedResourceString, null, ResourceEncodingEnum.JSON);
 			} else {
 				populateEncodedResource(encodedResource, null, resourceBinary, encoding);
