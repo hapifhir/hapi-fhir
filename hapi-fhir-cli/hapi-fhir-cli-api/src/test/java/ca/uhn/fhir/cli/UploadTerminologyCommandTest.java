@@ -388,7 +388,6 @@ public class UploadTerminologyCommandTest {
 			},
 			"-t", theIncludeTls, myBaseRestServerHelper
 		));
-		UploadTerminologyCommand uploadTerminologyCommand = new UploadTerminologyCommand();
 
 		verify(myTermLoaderSvc, times(1)).loadCustom(any(), myDescriptorListCaptor.capture(), any());
 
