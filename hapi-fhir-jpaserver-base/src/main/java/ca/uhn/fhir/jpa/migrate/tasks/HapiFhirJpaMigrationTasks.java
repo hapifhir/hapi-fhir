@@ -184,8 +184,10 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 									QUERY_FOR_COLUMN_COLLATION_TEMPLATE,
 									"HFJ_SPIDX_STRING".toLowerCase(),
 									"SP_VALUE_NORMALIZED".toLowerCase()),
-							"Column HFJ_SPIDX_STRING.SP_VALUE_NORMALIZED already has a collation of 'C' so doing nothing");
-
+							"Column HFJ_SPIDX_STRING.SP_VALUE_NORMALIZED already has a collation of 'C' so doing nothing")
+					.onlyIf(
+							"SELECT NOT EXISTS(select 1 from pg_indexes where indexname='idx_sp_string_hash_nrm_pattern_ops')",
+							"Index idx_sp_string_hash_nrm_pattern_ops already exists");
 			version.executeRawSql(
 							"20231212.2",
 							"CREATE UNIQUE INDEX idx_sp_uri_hash_identity_pattern_ops ON public.hfj_spidx_uri USING btree (hash_identity, sp_uri varchar_pattern_ops, res_id, partition_id)")
@@ -195,7 +197,10 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 									QUERY_FOR_COLUMN_COLLATION_TEMPLATE,
 									"HFJ_SPIDX_URI".toLowerCase(),
 									"SP_URI".toLowerCase()),
-							"Column HFJ_SPIDX_STRING.SP_VALUE_NORMALIZED already has a collation of 'C' so doing nothing");
+							"Column HFJ_SPIDX_STRING.SP_VALUE_NORMALIZED already has a collation of 'C' so doing nothing")
+					.onlyIf(
+							"SELECT NOT EXISTS(select 1 from pg_indexes where indexname='idx_sp_uri_hash_identity_pattern_ops')",
+							"Index idx_sp_uri_hash_identity_pattern_ops already exists.");
 		}
 
 		// This fix was bad for MSSQL, it has been set to do nothing.
