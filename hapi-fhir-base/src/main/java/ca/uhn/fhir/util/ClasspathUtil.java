@@ -31,14 +31,11 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.function.Function;
 import java.util.zip.GZIPInputStream;
 
@@ -153,7 +150,7 @@ public class ClasspathUtil {
 	}
 
 	public static Function<InputStream, InputStream> withBom() {
-		return BOMInputStream::new;
+		return t -> new BOMInputStream(t);
 	}
 
 	public static byte[] loadResourceAsByteArray(String theClasspath) {
@@ -165,30 +162,5 @@ public class ClasspathUtil {
 		} finally {
 			close(stream);
 		}
-	}
-
-	/**
-	 * Returns the list of files in a directory which resides in the classpath.
-	 * Please note that the returned paths will be relative.
-	 * This method can be used with other methods in this class to load multiple resource files.
-	 * @param theDirectory the directory in the classpath to lookup
-	 * @return the list of files containing relative path and file name
-	 */
-	public static List<String> getFilesNamesFromDirectory(String theDirectory) {
-		List<String> filenames = new ArrayList<>();
-		try (InputStream in = ClasspathUtil.class.getResourceAsStream(theDirectory)) {
-			if (in == null) {
-				throw new InternalErrorException(Msg.code(2480) + "Unable to find directory: " + theDirectory);
-			}
-			try (BufferedReader br = new BufferedReader(new InputStreamReader(in))) {
-				String fileName;
-				while ((fileName = br.readLine()) != null) {
-					filenames.add(fileName);
-				}
-			}
-		} catch (IOException e) {
-			throw new InternalErrorException(Msg.code(2481) + e.getMessage());
-		}
-		return filenames;
 	}
 }

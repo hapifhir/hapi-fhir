@@ -4,7 +4,6 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.parser.IParser;
-import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
 import ca.uhn.fhir.validation.SingleValidationMessage;
@@ -154,7 +153,7 @@ public class QuestionnaireResponseValidatorR5Test  {
 		answerValues[9] = new UriType("http://example.com");
 		answerValues[10] = new Coding().setSystem("http://codesystems.com/system").setCode("code0");
 		answerValues[11] = new Coding().setSystem("http://codesystems.com/system").setCode("code0");
-		answerValues[12] = new Attachment().setData("some data".getBytes()).setContentType(Constants.CT_OCTET_STREAM);
+		answerValues[12] = new Attachment().setData("some data".getBytes()).setContentType("txt");
 		answerValues[13] = new Reference("http://example.com/Questionnaire/q1");
 		answerValues[14] = new Quantity(42);
 

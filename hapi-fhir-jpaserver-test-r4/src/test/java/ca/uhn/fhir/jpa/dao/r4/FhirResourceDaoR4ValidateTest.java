@@ -20,7 +20,6 @@ import ca.uhn.fhir.jpa.validation.JpaValidationSupportChain;
 import ca.uhn.fhir.jpa.validation.ValidationSettings;
 import ca.uhn.fhir.parser.LenientErrorHandler;
 import ca.uhn.fhir.parser.StrictErrorHandler;
-import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.ValidationModeEnum;
@@ -387,7 +386,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		String encoded;
 
 		Binary binary = new Binary();
-		binary.setContentType(Constants.CT_OCTET_STREAM);
+		binary.setContentType("application/text");
 		binary.setContent("hello".getBytes(StandardCharsets.UTF_8));
 
 		// Valid code
@@ -407,7 +406,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		String encoded;
 
 		Binary binary = new Binary();
-		binary.setContentType(Constants.CT_OCTET_STREAM);
+		binary.setContentType("application/text");
 		binary.setContent("hello".getBytes(StandardCharsets.UTF_8));
 
 		// Valid code

@@ -20,8 +20,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
-import java.util.Map;
-
 import static org.hl7.fhir.common.hapi.validation.support.CommonCodeSystemsTerminologyService.ALL_LANGUAGES_VALUESET_URL;
 import static org.hl7.fhir.common.hapi.validation.support.CommonCodeSystemsTerminologyService.CURRENCIES_CODESYSTEM_URL;
 import static org.hl7.fhir.common.hapi.validation.support.CommonCodeSystemsTerminologyService.CURRENCIES_VALUESET_URL;
@@ -375,27 +373,10 @@ public class CommonCodeSystemsTerminologyServiceTest extends BaseValidationTestW
 	}
 
 	@Test
-	public void testGetMimetypesFromFile_withValidFormat_returnsOk() {
-		Map<String, String> mimetypeMap = CommonCodeSystemsTerminologyService.getMimetypesFromFile("/org/hl7/fhir/common/hapi/validation/support/mimetype-test/test-valid.csv");
-		assertFalse(mimetypeMap.isEmpty());
-		assertEquals(3, mimetypeMap.size());
-	}
-
-	@ParameterizedTest
-	@ValueSource(strings = {
-		"/org/hl7/fhir/common/hapi/validation/support/mimetype-test/test-invalid.json",
-		"/org/hl7/fhir/common/hapi/validation/support/mimetype-test/test-invalid.csv"
-	})
-	public void testGetMimetypesFromFile_withInvalidFormat_returnsEmpty(String theConfigFile) {
-		Map<String, String> mimetypeMap = CommonCodeSystemsTerminologyService.getMimetypesFromFile(theConfigFile);
-		assertTrue(mimetypeMap.isEmpty());
-	}
-
-	@Test
 	public void testFetchCodeSystem_withMimeType_returnsOk() {
 		CodeSystem cs = (CodeSystem) mySvc.fetchCodeSystem(MIMETYPES_CODESYSTEM_URL);
 		assertNotNull(cs);
-		assertEquals(2086, cs.getConcept().size());
+		assertEquals(0, cs.getConcept().size());
 	}
 
 	@ParameterizedTest
@@ -410,7 +391,6 @@ public class CommonCodeSystemsTerminologyServiceTest extends BaseValidationTestW
 		assertTrue(result.isOk());
 		assertNull(result.getSeverity());
 		assertNull(result.getMessage());
-		assertNotNull(result.getDisplay());
 	}
 
 	@ParameterizedTest
@@ -425,7 +405,6 @@ public class CommonCodeSystemsTerminologyServiceTest extends BaseValidationTestW
 		assertTrue(result.isOk());
 		assertNull(result.getSeverity());
 		assertNull(result.getMessage());
-		assertNotNull(result.getDisplay());
 	}
 
 	@Test
@@ -454,7 +433,6 @@ public class CommonCodeSystemsTerminologyServiceTest extends BaseValidationTestW
 		assertTrue(result.isOk());
 		assertNull(result.getSeverity());
 		assertNull(result.getMessage());
-		assertNotNull(result.getDisplay());
 	}
 
 	@Test
@@ -486,7 +464,6 @@ public class CommonCodeSystemsTerminologyServiceTest extends BaseValidationTestW
 		assertNotNull(result);
 		assertEquals(code, result.getCode());
 		assertTrue(result.isOk());
-		assertNull(result.getDisplay());
 	}
 
 	@ParameterizedTest
@@ -503,7 +480,6 @@ public class CommonCodeSystemsTerminologyServiceTest extends BaseValidationTestW
 		assertEquals(system, result.getSearchedForSystem());
 		assertEquals(code, result.getSearchedForCode());
 		assertTrue(result.isFound());
-		assertNotNull(result.getCodeDisplay());
 	}
 
 	@Test

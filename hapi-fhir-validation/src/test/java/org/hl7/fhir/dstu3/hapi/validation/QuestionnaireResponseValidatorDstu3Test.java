@@ -5,7 +5,6 @@ import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.fhirpath.BaseValidationTestWithInlineMocks;
 import ca.uhn.fhir.parser.IParser;
-import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
@@ -161,7 +160,7 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		answerValues[10] = new Coding().setSystem("http://codesystems.com/system").setCode("code0");
 		answerValues[11] = new Coding().setSystem("http://codesystems.com/system").setCode("code0");
 		answerValues[12] = new StringType("some value");
-		answerValues[13] = new Attachment().setData("some data".getBytes()).setContentType(Constants.CT_OCTET_STREAM);
+		answerValues[13] = new Attachment().setData("some data".getBytes()).setContentType("txt");
 		answerValues[14] = new Reference(QUESTIONNAIRE_URL);
 		answerValues[15] = new Quantity(42);
 

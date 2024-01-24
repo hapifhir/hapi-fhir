@@ -8,7 +8,6 @@ import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.LookupCodeRequest;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.util.ClasspathUtil;
 import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -18,7 +17,6 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.Validate;
 import org.fhir.ucum.UcumEssenceService;
 import org.fhir.ucum.UcumException;
 import org.hl7.fhir.convertors.advisors.impl.BaseAdvisor_30_40;
@@ -32,7 +30,6 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r5.model.Resource;
 import org.hl7.fhir.r5.model.ValueSet.ConceptReferenceComponent;
-import org.hl7.fhir.utilities.CSVReader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,9 +38,9 @@ import java.io.InputStream;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
-import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -75,7 +72,6 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 	private static final Map<String, String> USPS_CODES = Collections.unmodifiableMap(buildUspsCodes());
 	private static final Map<String, String> ISO_4217_CODES = Collections.unmodifiableMap(buildIso4217Codes());
 	private static final Map<String, String> ISO_3166_CODES = Collections.unmodifiableMap(buildIso3166Codes());
-	private static final Map<String, String> BCP_13_CODES = Collections.unmodifiableMap(buildBCP13Codes());
 	private final FhirContext myFhirContext;
 	private final VersionCanonicalizer myVersionCanonicalizer;
 	private volatile org.hl7.fhir.r5.model.ValueSet myLanguagesVs;
@@ -86,10 +82,9 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 	 * Constructor
 	 */
 	public CommonCodeSystemsTerminologyService(FhirContext theFhirContext) {
-		Validate.notNull(theFhirContext);
-
 		myFhirContext = theFhirContext;
 		myVersionCanonicalizer = new VersionCanonicalizer(theFhirContext);
+		Objects.requireNonNull(theFhirContext);
 	}
 
 	@Override
@@ -151,7 +146,8 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 			case ALL_LANGUAGES_VALUESET_URL:
 				return validateLanguageCode(theCode, valueSet);
 			case MIMETYPES_VALUESET_URL:
-				return getValidateCodeResultOk(theCode, defaultIfBlank(BCP_13_CODES.get(theCode), theDisplay));
+				// This is a pretty naive implementation - Should be enhanced in future
+				return getValidateCodeResultOk(theCode, theDisplay);
 			case UCUM_VALUESET_URL: {
 				return validateLookupCode(theValidationSupportContext, theCode, system);
 			}
@@ -382,71 +378,11 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 	@Nonnull
 	private LookupCodeResult lookupMimetypeCode(String theCode) {
 		// This is a pretty naive implementation - Should be enhanced in future
-		// Support lookup of arbitrary codes since the system supports an infinite number of codes
 		LookupCodeResult mimeRetVal = new LookupCodeResult();
 		mimeRetVal.setSearchedForCode(theCode);
 		mimeRetVal.setSearchedForSystem(MIMETYPES_CODESYSTEM_URL);
 		mimeRetVal.setFound(true);
-		// Set the display when the code is a standard code
-		mimeRetVal.setCodeDisplay(BCP_13_CODES.get(theCode));
 		return mimeRetVal;
-	}
-
-	private static Map<String, String> buildBCP13Codes() {
-		ourLog.info("Loading the IANA mimetypes from system " + MIMETYPES_CODESYSTEM_URL);
-
-		final String configPath = "/org/hl7/fhir/common/hapi/validation/support/mimetype/";
-		final Map<String, String> mimetypeMap = new HashMap<>();
-
-		ClasspathUtil.getFilesNamesFromDirectory(configPath).stream()
-				.map(fileName -> configPath + fileName)
-				.forEach(configFile -> mimetypeMap.putAll(getMimetypesFromFile(configFile)));
-
-		ourLog.info(
-				"Including additional mimetypes supported by HAPI FHIR server from " + EncodingEnum.class.getName());
-		for (EncodingEnum encodingEnum : EncodingEnum.values()) {
-			mimetypeMap.put(encodingEnum.getFormatContentType(), encodingEnum.getFormatContentType());
-			mimetypeMap.put(encodingEnum.getResourceContentType(), encodingEnum.getFormatContentType());
-			mimetypeMap.put(encodingEnum.getResourceContentTypeNonLegacy(), encodingEnum.getFormatContentType());
-		}
-
-		ourLog.info("Loaded {} built-in mimetypes for system {}", mimetypeMap.size(), MIMETYPES_CODESYSTEM_URL);
-
-		return mimetypeMap;
-	}
-
-	protected static Map<String, String> getMimetypesFromFile(final String theConfigFile) {
-		final String nameColumnName = "Name";
-		final String templateColumnName = "Template";
-
-		if (!theConfigFile.endsWith(".csv")) {
-			ourLog.warn("Skipping mimetype config file {} as mimetypes are loaded from CSV files.", theConfigFile);
-			return Collections.emptyMap();
-		}
-
-		final Map<String, String> mimetypeMap = new HashMap<>();
-
-		try (final InputStream inputStream = ClasspathUtil.loadResourceAsStream(theConfigFile)) {
-			CSVReader csvReader = new CSVReader(inputStream);
-			csvReader.readHeaders();
-			while (csvReader.line()) {
-				if (!csvReader.has(nameColumnName) || !csvReader.has(templateColumnName)) {
-					ourLog.info(
-							"Skipping line in mimetype config file {} as it does not have the expected format including columns {} and {}.",
-							theConfigFile,
-							nameColumnName,
-							templateColumnName);
-					continue;
-				}
-				String template = csvReader.cell(templateColumnName);
-				String name = csvReader.cell(nameColumnName);
-				mimetypeMap.put(template, name);
-			}
-		} catch (IOException e) {
-			throw new ConfigurationException(Msg.code(2482) + e);
-		}
-
-		return mimetypeMap;
 	}
 
 	@Nonnull
@@ -472,7 +408,7 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 	@Override
 	public IBaseResource fetchCodeSystem(String theSystem) {
 
-		Map<String, String> map;
+		final Map<String, String> map;
 		switch (defaultString(theSystem)) {
 			case COUNTRIES_CODESYSTEM_URL:
 				map = ISO_3166_CODES;
@@ -484,7 +420,7 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 				map = USPS_CODES;
 				break;
 			case MIMETYPES_CODESYSTEM_URL:
-				map = BCP_13_CODES;
+				map = Collections.emptyMap();
 				break;
 			default:
 				return null;
@@ -519,7 +455,7 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 				break;
 		}
 
-		Validate.notNull(normalized);
+		Objects.requireNonNull(normalized);
 
 		return normalized;
 	}
