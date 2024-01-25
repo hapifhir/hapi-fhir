@@ -1922,6 +1922,11 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		myJpaStorageResourceParser = theJpaStorageResourceParser;
 	}
 
+	@VisibleForTesting
+	public void setHibernatePropertiesProvider(HibernatePropertiesProvider theHibernatePropertiesProvider) {
+		myHibernatePropertiesProvider = theHibernatePropertiesProvider;
+	}
+
 	private class AddTagDefinitionToCacheAfterCommitSynchronization implements TransactionSynchronization {
 
 		private final TagDefinition myTagDefinition;
