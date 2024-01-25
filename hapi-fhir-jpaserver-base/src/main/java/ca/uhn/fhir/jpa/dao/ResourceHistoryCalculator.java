@@ -30,7 +30,8 @@ public class ResourceHistoryCalculator {
 		myIsOracleDialect = theIsOracleDialect;
 	}
 
-	ResourceHistoryState calculate(IBaseResource theResource, ResourceEncodingEnum theEncoding, List<String> theExcludeElements) {
+	ResourceHistoryState calculate(
+			IBaseResource theResource, ResourceEncodingEnum theEncoding, List<String> theExcludeElements) {
 		final String encodedResource = encodeResource(theResource, theEncoding, theExcludeElements);
 		final byte[] resourceBinary;
 		final String resourceText;
@@ -69,9 +70,9 @@ public class ResourceHistoryCalculator {
 	}
 
 	boolean calculateIsChanged(
-		ResourceHistoryTable theCurrentHistoryVersion,
-		@Nullable byte[] theResourceBinary,
-		@Nullable String resourceText) {
+			ResourceHistoryTable theCurrentHistoryVersion,
+			@Nullable byte[] theResourceBinary,
+			@Nullable String resourceText) {
 		if (myIsOracleDialect) {
 			return !Arrays.equals(theCurrentHistoryVersion.getResource(), theResourceBinary);
 		}
@@ -92,9 +93,7 @@ public class ResourceHistoryCalculator {
 	}
 
 	String encodeResource(
-			IBaseResource theResource,
-			ResourceEncodingEnum theEncoding,
-			List<String> theExcludeElements) {
+			IBaseResource theResource, ResourceEncodingEnum theEncoding, List<String> theExcludeElements) {
 		final IParser parser = theEncoding.newParser(myFhirContext);
 		parser.setDontEncodeElements(theExcludeElements);
 		return parser.encodeResourceToString(theResource);
@@ -110,17 +109,17 @@ public class ResourceHistoryCalculator {
 	@Nonnull
 	static byte[] getResourceBinary(ResourceEncodingEnum theEncoding, String theEncodedResource) {
 		return switch (theEncoding) {
-            case JSON -> theEncodedResource.getBytes(StandardCharsets.UTF_8);
-            case JSONC -> GZipUtil.compress(theEncodedResource);
-            default -> new byte[0];
-        };
+			case JSON -> theEncodedResource.getBytes(StandardCharsets.UTF_8);
+			case JSONC -> GZipUtil.compress(theEncodedResource);
+			default -> new byte[0];
+		};
 	}
 
 	private void populateEncodedResourceInner(
-		EncodedResource encodedResource,
-		String encodedResourceString,
-		byte[] theResourceBinary,
-		ResourceEncodingEnum theEncoding) {
+			EncodedResource encodedResource,
+			String encodedResourceString,
+			byte[] theResourceBinary,
+			ResourceEncodingEnum theEncoding) {
 		encodedResource.setResourceText(encodedResourceString);
 		encodedResource.setResourceBinary(theResourceBinary);
 		encodedResource.setEncoding(theEncoding);

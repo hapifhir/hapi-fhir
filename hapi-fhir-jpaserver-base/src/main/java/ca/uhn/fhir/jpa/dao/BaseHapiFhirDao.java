@@ -37,7 +37,6 @@ import ca.uhn.fhir.jpa.api.dao.IJpaDao;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
-import ca.uhn.fhir.jpa.config.HibernatePropertiesProvider;
 import ca.uhn.fhir.jpa.dao.data.IForcedIdDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceHistoryTableDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceLinkDao;
@@ -86,7 +85,6 @@ import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.model.base.composite.BaseCodingDt;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.parser.DataFormatException;
-import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.InterceptorInvocationTimingEnum;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
@@ -106,8 +104,6 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Charsets;
 import com.google.common.collect.Sets;
 import com.google.common.hash.HashCode;
-import com.google.common.hash.HashFunction;
-import com.google.common.hash.Hashing;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import jakarta.annotation.PostConstruct;
@@ -1416,9 +1412,11 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 			ResourceEncodingEnum encoding = myStorageSettings.getResourceEncoding();
 			List<String> excludeElements = new ArrayList<>(8);
 			getExcludedElements(historyEntity.getResourceType(), excludeElements, theResource.getMeta());
-			String encodedResourceString = myResourceHistoryCalculator.encodeResource(theResource, encoding, excludeElements);
+			String encodedResourceString =
+					myResourceHistoryCalculator.encodeResource(theResource, encoding, excludeElements);
 			byte[] resourceBinary = ResourceHistoryCalculator.getResourceBinary(encoding, encodedResourceString);
-			final boolean changed = myResourceHistoryCalculator.calculateIsChanged(historyEntity, resourceBinary, encodedResourceString);
+			final boolean changed = myResourceHistoryCalculator.calculateIsChanged(
+					historyEntity, resourceBinary, encodedResourceString);
 
 			historyEntity.setUpdated(theTransactionDetails.getTransactionDate());
 
@@ -1430,7 +1428,8 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 				return historyEntity;
 			}
 
-			myResourceHistoryCalculator.populateEncodedResource( encodedResource, encodedResourceString, resourceBinary, encoding);
+			myResourceHistoryCalculator.populateEncodedResource(
+					encodedResource, encodedResourceString, resourceBinary, encoding);
 		}
 		/*
 		 * Save the resource itself to the resourceHistoryTable
