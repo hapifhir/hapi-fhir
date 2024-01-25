@@ -25,6 +25,7 @@ import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import com.google.common.collect.Lists;
 import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.Validate;
@@ -234,6 +235,11 @@ public class RuleBuilder implements IAuthRuleBuilder {
 					RequestPartitionId partitionId =
 							(RequestPartitionId) theResource.getUserData(Constants.RESOURCE_PARTITION_ID);
 					if (partitionId != null) {
+						if (partitionId.hasDefaultPartitionId()
+								&& myTenantIds.contains(ProviderConstants.DEFAULT_PARTITION_NAME)) {
+							return myOutcome;
+						}
+
 						String partitionNameOrNull = partitionId.getFirstPartitionNameOrNull();
 						if (partitionNameOrNull == null || !myTenantIds.contains(partitionNameOrNull)) {
 							return !myOutcome;
