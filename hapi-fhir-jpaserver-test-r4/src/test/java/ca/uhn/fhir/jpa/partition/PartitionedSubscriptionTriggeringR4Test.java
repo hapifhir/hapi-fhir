@@ -13,11 +13,18 @@ import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.subscription.BaseSubscriptionsR4Test;
 import ca.uhn.fhir.jpa.subscription.resthook.RestHookTestR4Test;
 import ca.uhn.fhir.jpa.subscription.triggering.ISubscriptionTriggeringSvc;
+import ca.uhn.fhir.jpa.subscription.triggering.SubscriptionTriggeringSvcImpl;
 import ca.uhn.fhir.jpa.test.util.StoppableSubscriptionDeliveringRestHookSubscriber;
+import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
+import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import ca.uhn.fhir.util.HapiExtensions;
+import jakarta.servlet.ServletException;
 import org.awaitility.core.ConditionTimeoutException;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
@@ -30,12 +37,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import jakarta.servlet.ServletException;
 import java.time.LocalDate;
 import java.time.Month;
 import java.util.ArrayList;
+import java.util.List;
 
+import static org.awaitility.Awaitility.await;
 import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -49,7 +59,9 @@ public class PartitionedSubscriptionTriggeringR4Test extends BaseSubscriptionsR4
 	private ISubscriptionTriggeringSvc mySubscriptionTriggeringSvc;
 
 	static final String PARTITION_1 = "PART-1";
+	public static final RequestPartitionId REQ_PART_1 = RequestPartitionId.fromPartitionNames(PARTITION_1);
 	static final String PARTITION_2 = "PART-2";
+	public static final RequestPartitionId REQ_PART_2 = RequestPartitionId.fromPartitionNames(PARTITION_2);
 
 	protected MyReadWriteInterceptor myPartitionInterceptor;
 	protected LocalDate myPartitionDate;
@@ -60,6 +72,7 @@ public class PartitionedSubscriptionTriggeringR4Test extends BaseSubscriptionsR4
 
 	@BeforeEach
 	public void beforeEach() throws ServletException {
+		myStorageSettings.setCrossPartitionSubscriptionEnabled(true);
 		myPartitionSettings.setPartitioningEnabled(true);
 		myPartitionSettings.setIncludePartitionInSearchHashes(new PartitionSettings().isIncludePartitionInSearchHashes());
 
@@ -73,13 +86,12 @@ public class PartitionedSubscriptionTriggeringR4Test extends BaseSubscriptionsR4
 		myPartitionId2 = 2;
 
 		myPartitionInterceptor = new MyReadWriteInterceptor();
-		myPartitionInterceptor.setResultPartitionId(RequestPartitionId.fromPartitionNames(PARTITION_1));
+		myPartitionInterceptor.setRequestPartitionId(REQ_PART_1);
 
 		mySrdInterceptorService.registerInterceptor(myPartitionInterceptor);
 
 		myPartitionConfigSvc.createPartition(new PartitionEntity().setId(1).setName(PARTITION_1), null);
 		myPartitionConfigSvc.createPartition(new PartitionEntity().setId(2).setName(PARTITION_2), null);
-
 		myStorageSettings.setIndexMissingFields(JpaStorageSettings.IndexEnabledEnum.ENABLED);
 	}
 
@@ -90,6 +102,7 @@ public class PartitionedSubscriptionTriggeringR4Test extends BaseSubscriptionsR4
 		myStoppableSubscriptionDeliveringRestHookSubscriber.unPause();
 		myStorageSettings.setTriggerSubscriptionsForNonVersioningChanges(new JpaStorageSettings().isTriggerSubscriptionsForNonVersioningChanges());
 
+		myStorageSettings.setCrossPartitionSubscriptionEnabled(false);
 		myPartitionSettings.setPartitioningEnabled(false);
 		myPartitionSettings.setUnnamedPartitionMode(false);
 
@@ -100,6 +113,10 @@ public class PartitionedSubscriptionTriggeringR4Test extends BaseSubscriptionsR4
 		myStorageSettings.setAllowMultipleDelete(new JpaStorageSettings().isAllowMultipleDelete());
 
 		mySrdInterceptorService.unregisterInterceptorsIf(t -> t instanceof BasePartitioningR4Test.MyReadWriteInterceptor);
+		await().until(() -> {
+			mySubscriptionTriggeringSvc.runDeliveryPass();
+			return ((SubscriptionTriggeringSvcImpl)mySubscriptionTriggeringSvc).getActiveJobCount() == 0;
+		});
 
 		super.afterUnregisterRestHookListener();
 	}
@@ -160,6 +177,72 @@ public class PartitionedSubscriptionTriggeringR4Test extends BaseSubscriptionsR4
 		}
 	}
 
+
+	@Test
+	public void testManualTriggeredSubscriptionDoesNotCheckOutsideOfPartition() throws Exception {
+		String payload = "application/fhir+json";
+		String code = "1000000050";
+		String criteria1 = "Observation?code=SNOMED-CT|" + code + "&_format=xml";
+
+		//Given: We store a resource in partition 2
+		myPartitionInterceptor.setRequestPartitionId(REQ_PART_2);
+		IIdType observationIdPartitionTwo = myDaoRegistry.getResourceDao("Observation").create(createBaseObservation(code, "SNOMED-CT"), mySrd).getId();
+
+		//Given: We store a similar resource in partition 1
+		myPartitionInterceptor.setRequestPartitionId(REQ_PART_1);
+		IIdType observationIdPartitionOne = myDaoRegistry.getResourceDao("Observation").create(createBaseObservation(code, "SNOMED-CT"), mySrd).getId();
+
+		//Given: We create a subscrioption on Partition 1
+		IIdType subscriptionId= myDaoRegistry.getResourceDao("Subscription").create(newSubscription(criteria1, payload), mySrd).getId();
+		waitForActivatedSubscriptionCount(1);
+
+		ArrayList<IPrimitiveType<String>> searchUrlList = new ArrayList<>();
+		searchUrlList.add(new StringDt("Observation?"));
+
+		Parameters resultParameters = (Parameters) mySubscriptionTriggeringSvc.triggerSubscription(null, searchUrlList, subscriptionId, mySrd);
+		mySubscriptionTriggeringSvc.runDeliveryPass();
+
+		waitForQueueToDrain();
+		List<Observation> resourceUpdates = BaseSubscriptionsR4Test.ourObservationProvider.getResourceUpdates();
+		assertThat(resourceUpdates.size(), is(equalTo(1)));
+		assertThat(resourceUpdates.get(0).getId(), is(equalTo(observationIdPartitionOne.toString())));
+
+		String responseValue = resultParameters.getParameter().get(0).getValue().primitiveValue();
+		assertThat(responseValue, containsString("Subscription triggering job submitted as JOB ID"));
+	}
+
+	@Test
+	public void testManualTriggeredSubscriptionWithCrossPartitionChecksBothPartitions() throws Exception {
+		String payload = "application/fhir+json";
+		String code = "1000000050";
+		String criteria1 = "Observation?code=SNOMED-CT|" + code + "&_format=xml";
+
+		//Given: We store a resource in partition 2
+		myPartitionInterceptor.setRequestPartitionId(REQ_PART_2);
+		myDaoRegistry.getResourceDao("Observation").create(createBaseObservation(code, "SNOMED-CT"), mySrd).getId();
+
+		//Given: We store a similar resource in partition 1
+		myPartitionInterceptor.setRequestPartitionId(REQ_PART_1);
+		myDaoRegistry.getResourceDao("Observation").create(createBaseObservation(code, "SNOMED-CT"), mySrd).getId();
+
+		//Given: We create a subscription on Partition 1
+		Subscription theResource = newSubscription(criteria1, payload);
+		theResource.addExtension(HapiExtensions.EXTENSION_SUBSCRIPTION_CROSS_PARTITION, new BooleanType(Boolean.TRUE));
+		myPartitionInterceptor.setRequestPartitionId(RequestPartitionId.defaultPartition());
+		IIdType subscriptionId= myDaoRegistry.getResourceDao("Subscription").create(theResource, mySrd).getId();
+		waitForActivatedSubscriptionCount(1);
+
+		ArrayList<IPrimitiveType<String>> searchUrlList = new ArrayList<>();
+		searchUrlList.add(new StringDt("Observation?"));
+
+		myPartitionInterceptor.setRequestPartitionId(RequestPartitionId.defaultPartition());
+		mySubscriptionTriggeringSvc.triggerSubscription(null, searchUrlList, subscriptionId, mySrd);
+		mySubscriptionTriggeringSvc.runDeliveryPass();
+
+		waitForQueueToDrain();
+		List<Observation> resourceUpdates = BaseSubscriptionsR4Test.ourObservationProvider.getResourceUpdates();
+		assertThat(resourceUpdates.size(), is(equalTo(2)));
+	}
 	@Test
 	public void testManualTriggeredSubscriptionInPartition() throws Exception {
 		String payload = "application/fhir+json";
@@ -184,10 +267,11 @@ public class PartitionedSubscriptionTriggeringR4Test extends BaseSubscriptionsR4
 		resourceIdList.add(observation.getIdElement());
 
 
-		Parameters resultParameters = (Parameters) mySubscriptionTriggeringSvc.triggerSubscription(resourceIdList, null, subscription.getIdElement());
+		Parameters resultParameters = (Parameters) mySubscriptionTriggeringSvc.triggerSubscription(resourceIdList, null, subscription.getIdElement(), mySrd);
+		mySubscriptionTriggeringSvc.runDeliveryPass();
 
 		waitForQueueToDrain();
-		Assertions.assertEquals(0, BaseSubscriptionsR4Test.ourObservationProvider.getCountCreate());
+		Assertions.assertEquals(1, BaseSubscriptionsR4Test.ourObservationProvider.getCountUpdate());
 
 		String responseValue = resultParameters.getParameter().get(0).getValue().primitiveValue();
 		assertThat(responseValue, containsString("Subscription triggering job submitted as JOB ID"));
@@ -197,22 +281,27 @@ public class PartitionedSubscriptionTriggeringR4Test extends BaseSubscriptionsR4
 	public static class MyReadWriteInterceptor {
 		private RequestPartitionId myReadPartitionId;
 
-		public void setResultPartitionId(RequestPartitionId theRequestPartitionId) {
+		public void setRequestPartitionId(RequestPartitionId theRequestPartitionId) {
 			myReadPartitionId = theRequestPartitionId;
 		}
 
 		@Hook(Pointcut.STORAGE_PARTITION_IDENTIFY_READ)
-		public RequestPartitionId read() {
+		public RequestPartitionId read(ServletRequestDetails theSrd) {
 			RequestPartitionId retVal = myReadPartitionId;
 			ourLog.info("Returning partition for read: {}", retVal);
 			return retVal;
 		}
 
 		@Hook(Pointcut.STORAGE_PARTITION_IDENTIFY_CREATE)
-		public RequestPartitionId create() {
+		public RequestPartitionId create(ServletRequestDetails theSrd) {
 			RequestPartitionId retVal = myReadPartitionId;
 			ourLog.info("Returning partition for write: {}", retVal);
 			return retVal;
+		}
+
+		@Hook(Pointcut.STORAGE_PARTITION_IDENTIFY_ANY)
+		public RequestPartitionId any() {
+			return myReadPartitionId;
 		}
 	}
 }

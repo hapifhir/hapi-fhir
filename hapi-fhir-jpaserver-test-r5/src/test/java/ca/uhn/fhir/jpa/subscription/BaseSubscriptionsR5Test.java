@@ -283,7 +283,7 @@ public abstract class BaseSubscriptionsR5Test extends BaseResourceProviderR5Test
 		if (size == theTarget) {
 			return true;
 		}
-		mySubscriptionTopicLoader.doSyncResourcessForUnitTest();
+		mySubscriptionTopicLoader.doSyncResourcesForUnitTest();
 		return mySubscriptionTopicRegistry.size() == theTarget;
 	}
 

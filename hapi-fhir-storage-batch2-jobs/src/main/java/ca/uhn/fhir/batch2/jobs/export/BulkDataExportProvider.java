@@ -647,8 +647,8 @@ public class BulkDataExportProvider {
 			List<IPrimitiveType<String>> theTypePostFetchFilterUrl) {
 		IPrimitiveType<String> type = theType;
 		if (type == null) {
-			// Type is optional, but the job requires it
-			type = new StringDt("Patient");
+			// set type to all patient compartment resources if it is null
+			type = new StringDt(String.join(",", getPatientCompartmentResources()));
 		}
 		BulkExportJobParameters BulkExportJobParameters = buildBulkExportJobParameters(
 				theOutputFormat,
@@ -673,9 +673,14 @@ public class BulkDataExportProvider {
 			IPrimitiveType<String> theExportIdentifier,
 			IIdType thePatientId,
 			List<IPrimitiveType<String>> theTypePostFetchFilterUrl) {
+		IPrimitiveType<String> type = theType;
+		if (type == null) {
+			// set type to all patient compartment resources if it is null
+			type = new StringDt(String.join(",", getPatientCompartmentResources()));
+		}
 		BulkExportJobParameters BulkExportJobParameters = buildBulkExportJobParameters(
 				theOutputFormat,
-				theType,
+				type,
 				theSince,
 				theTypeFilter,
 				theExportIdentifier,

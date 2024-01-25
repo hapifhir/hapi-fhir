@@ -28,6 +28,7 @@ import com.google.common.annotations.VisibleForTesting;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r5.model.Enumeration;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
@@ -60,8 +61,14 @@ public class JpaResourceDaoSearchParameter<T extends IBaseResource> extends Base
 				TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
 					@Override
 					public void afterCommit() {
-						myCacheReloadTriggered.set(false);
-						mySearchParamRegistry.forceRefresh();
+						myTransactionService
+								.withSystemRequest()
+								.withPropagation(Propagation.NOT_SUPPORTED)
+								.execute(() -> {
+									// do this outside any current tx.
+									myCacheReloadTriggered.set(false);
+									mySearchParamRegistry.forceRefresh();
+								});
 					}
 				});
 			}
