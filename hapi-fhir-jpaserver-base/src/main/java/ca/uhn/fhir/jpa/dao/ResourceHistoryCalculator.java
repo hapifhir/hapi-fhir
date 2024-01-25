@@ -108,11 +108,14 @@ public class ResourceHistoryCalculator {
 	 */
 	@Nonnull
 	static byte[] getResourceBinary(ResourceEncodingEnum theEncoding, String theEncodedResource) {
-		return switch (theEncoding) {
-			case JSON -> theEncodedResource.getBytes(StandardCharsets.UTF_8);
-			case JSONC -> GZipUtil.compress(theEncodedResource);
-			default -> new byte[0];
-		};
+		switch (theEncoding) {
+			case JSON:
+				return theEncodedResource.getBytes(StandardCharsets.UTF_8);
+			case JSONC:
+				return GZipUtil.compress(theEncodedResource);
+			default:
+				return new byte[0];
+		}
 	}
 
 	private void populateEncodedResourceInner(

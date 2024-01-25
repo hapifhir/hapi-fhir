@@ -7,6 +7,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.Month;
 import java.time.ZoneId;
@@ -66,6 +67,16 @@ class ResourceHistoryCalculatorTest {
 	@MethodSource("arguments")
 	void populateEnccodedResource(boolean theIsOracle, ResourceEncodingEnum theResourceEncoding) {
 		final EncodedResource encodedResource = new EncodedResource();
+		final byte[] resourceBinary = "something".getBytes(StandardCharsets.UTF_8);
+
+		getCalculator(theIsOracle)
+			.populateEncodedResource(encodedResource, null, resourceBinary, null);
+
+		if (theIsOracle) {
+			assertNotNull(encodedResource.getResourceBinary());
+		} else {
+			assertNull(encodedResource.getResourceBinary());
+		}
 	}
 
 	private ResourceHistoryCalculator getCalculator(boolean theIsOracle) {
