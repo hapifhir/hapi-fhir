@@ -690,10 +690,10 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 					final ResourceHistoryState calculate =
 							myResourceHistoryCalculator.calculate(theResource, encoding, excludeElements);
 
-					resourceText = calculate.myResourceText();
-					resourceBinary = calculate.myResourceBinary();
-					encoding = calculate.myEncoding(); // This may be a no-op
-					hashCode = calculate.myHashCode();
+					resourceText = calculate.getResourceText();
+					resourceBinary = calculate.getResourceBinary();
+					encoding = calculate.getEncoding(); // This may be a no-op
+					hashCode = calculate.getHashCode();
 
 					String hashSha256 = hashCode.toString();
 					if (!hashSha256.equals(theEntity.getHashSha256())) {
