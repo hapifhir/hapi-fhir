@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 5626
+title: "Previously, an exception could be thrown by the container when executing a contextClosedEvent on the
+ Scheduler Service.  This issue has been fixed."
