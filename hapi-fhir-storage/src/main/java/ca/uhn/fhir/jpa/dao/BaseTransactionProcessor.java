@@ -88,7 +88,6 @@ import com.google.common.collect.ListMultimap;
 import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
-import org.apache.commons.lang3.tuple.Pair;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBase;
@@ -119,7 +118,6 @@ import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
@@ -1808,22 +1806,13 @@ public abstract class BaseTransactionProcessor {
 
 			theDaoMethodOutcome.setId(newId);
 
-			updateIdSubstitutionsTargets(theIdSubstitutions, newId);
+			theIdSubstitutions.updateTargets(newId);
 
 			if (theDaoMethodOutcome.getOperationOutcome() != null) {
 				IBase responseEntry = entriesToProcess.getResponseBundleEntryWithVersionlessComparison(newId);
 				myVersionAdapter.setResponseOutcome(responseEntry, theDaoMethodOutcome.getOperationOutcome());
 			}
 		}
-	}
-
-	private void updateIdSubstitutionsTargets(IdSubstitutionMap theIdSubstitutions, IIdType theNewId) {
-		String newUnqualifiedVersionLessId = theNewId.toUnqualifiedVersionless().getValue();
-		theIdSubstitutions.entrySet().stream()
-				.map(Pair::getValue)
-				.filter(targetId ->
-						Objects.equals(targetId.toUnqualifiedVersionless().getValue(), newUnqualifiedVersionLessId))
-				.forEach(targetId -> targetId.setValue(theNewId.getValue()));
 	}
 
 	private void replaceResourceReference(
