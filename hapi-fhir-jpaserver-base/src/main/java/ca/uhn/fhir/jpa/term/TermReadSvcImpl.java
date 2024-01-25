@@ -670,7 +670,6 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 		return expansionTimestamp;
 	}
 
-	// LUKETODO:  move this to HibernatePropertiesProvider
 	private void expandConcepts(
 			ValueSetExpansionOptions theExpansionOptions,
 			IValueSetConceptAccumulator theAccumulator,

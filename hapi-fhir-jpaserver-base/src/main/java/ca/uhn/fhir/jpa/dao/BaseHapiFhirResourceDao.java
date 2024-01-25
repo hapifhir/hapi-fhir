@@ -1711,7 +1711,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			byte[] resourceBytes = historyEntity.getResource();
 			if (resourceBytes != null) {
 				String resourceText = decodeResource(resourceBytes, historyEntity.getEncoding());
-				if (myResourceHistoryCalculator.calculatedIsChangedOther(entity, historyEntity, resourceText)) {
+				if (myResourceHistoryCalculator.conditionallyAlterHistoryEntity(entity, historyEntity, resourceText)) {
 					changed = true;
 				}
 			}

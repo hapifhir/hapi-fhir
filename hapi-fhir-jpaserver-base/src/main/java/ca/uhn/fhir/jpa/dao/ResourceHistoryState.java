@@ -3,12 +3,16 @@ package ca.uhn.fhir.jpa.dao;
 import ca.uhn.fhir.jpa.model.entity.ResourceEncodingEnum;
 import com.google.common.hash.HashCode;
 import jakarta.annotation.Nullable;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 import java.util.StringJoiner;
 
-// LUKETODO:  javadoc
+/**
+ * POJO to contain the results of {@link ResourceHistoryCalculator#calculateResourceHistoryState(IBaseResource, ResourceEncodingEnum, List)}
+ */
 public class ResourceHistoryState {
 	@Nullable
 	private final String myResourceText;

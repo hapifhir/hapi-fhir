@@ -17,7 +17,11 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
 
-// LUKETODO:  javadoc
+/**
+ * Responsible for various resource history-centric and {@link FhirContext} aware operations called by
+ * {@link BaseHapiFhirDao} or {@link BaseHapiFhirResourceDao} that require knowledge of whether an Oracle database is
+ * being used.
+ */
 public class ResourceHistoryCalculator {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResourceHistoryCalculator.class);
 	private static final HashFunction SHA_256 = Hashing.sha256();
@@ -30,7 +34,7 @@ public class ResourceHistoryCalculator {
 		myIsOracleDialect = theIsOracleDialect;
 	}
 
-	ResourceHistoryState calculate(
+	ResourceHistoryState calculateResourceHistoryState(
 			IBaseResource theResource, ResourceEncodingEnum theEncoding, List<String> theExcludeElements) {
 		final String encodedResource = encodeResource(theResource, theEncoding, theExcludeElements);
 		final byte[] resourceBinary;
@@ -53,7 +57,7 @@ public class ResourceHistoryCalculator {
 		return new ResourceHistoryState(resourceText, resourceBinary, encoding, hashCode);
 	}
 
-	boolean calculatedIsChangedOther(
+	boolean conditionallyAlterHistoryEntity(
 			ResourceTable theEntity, ResourceHistoryTable theHistoryEntity, String theResourceText) {
 		if (!myIsOracleDialect) {
 			ourLog.debug(
@@ -69,7 +73,7 @@ public class ResourceHistoryCalculator {
 		return false;
 	}
 
-	boolean calculateIsChanged(
+	boolean isResourceHistoryChanged(
 			ResourceHistoryTable theCurrentHistoryVersion,
 			@Nullable byte[] theResourceBinary,
 			@Nullable String resourceText) {
@@ -78,18 +82,6 @@ public class ResourceHistoryCalculator {
 		}
 
 		return !StringUtils.equals(theCurrentHistoryVersion.getResourceTextVc(), resourceText);
-	}
-
-	void populateEncodedResource(
-			EncodedResource theEncodedResource,
-			String theEncodedResourceString,
-			@Nullable byte[] theResourceBinary,
-			ResourceEncodingEnum theEncoding) {
-		if (myIsOracleDialect) {
-			populateEncodedResourceInner(theEncodedResource, null, theResourceBinary, theEncoding);
-		} else {
-			populateEncodedResourceInner(theEncodedResource, theEncodedResourceString, null, ResourceEncodingEnum.JSON);
-		}
 	}
 
 	String encodeResource(
@@ -115,6 +107,18 @@ public class ResourceHistoryCalculator {
 				return GZipUtil.compress(theEncodedResource);
 			default:
 				return new byte[0];
+		}
+	}
+
+	void populateEncodedResource(
+		EncodedResource theEncodedResource,
+		String theEncodedResourceString,
+		@Nullable byte[] theResourceBinary,
+		ResourceEncodingEnum theEncoding) {
+		if (myIsOracleDialect) {
+			populateEncodedResourceInner(theEncodedResource, null, theResourceBinary, theEncoding);
+		} else {
+			populateEncodedResourceInner(theEncodedResource, theEncodedResourceString, null, ResourceEncodingEnum.JSON);
 		}
 	}
 

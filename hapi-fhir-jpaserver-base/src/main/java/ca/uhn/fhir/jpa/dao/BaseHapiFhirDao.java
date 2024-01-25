@@ -688,7 +688,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 					ourLog.info("5586:  PRE encoding: {}", encoding);
 
 					final ResourceHistoryState calculate =
-							myResourceHistoryCalculator.calculate(theResource, encoding, excludeElements);
+							myResourceHistoryCalculator.calculateResourceHistoryState(theResource, encoding, excludeElements);
 
 					resourceText = calculate.getResourceText();
 					resourceBinary = calculate.getResourceBinary();
@@ -754,7 +754,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 				if (currentHistoryVersion == null || !currentHistoryVersion.hasResource()) {
 					changed = true;
 				} else {
-					changed = myResourceHistoryCalculator.calculateIsChanged(
+					changed = myResourceHistoryCalculator.isResourceHistoryChanged(
 							currentHistoryVersion, resourceBinary, resourceText);
 				}
 			}
@@ -1415,7 +1415,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 			String encodedResourceString =
 					myResourceHistoryCalculator.encodeResource(theResource, encoding, excludeElements);
 			byte[] resourceBinary = ResourceHistoryCalculator.getResourceBinary(encoding, encodedResourceString);
-			final boolean changed = myResourceHistoryCalculator.calculateIsChanged(
+			final boolean changed = myResourceHistoryCalculator.isResourceHistoryChanged(
 					historyEntity, resourceBinary, encodedResourceString);
 
 			historyEntity.setUpdated(theTransactionDetails.getTransactionDate());
