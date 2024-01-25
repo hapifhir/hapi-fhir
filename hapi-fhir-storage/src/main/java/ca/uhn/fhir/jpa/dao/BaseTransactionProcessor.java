@@ -1808,18 +1808,22 @@ public abstract class BaseTransactionProcessor {
 
 			theDaoMethodOutcome.setId(newId);
 
-			theIdSubstitutions.entrySet().stream()
-					.map(Pair::getValue)
-					.filter(targetId -> Objects.equals(
-							newId.toUnqualifiedVersionless().getValue(),
-							targetId.toUnqualifiedVersionless().getValue()))
-					.forEach(targetId -> targetId.setValue(newId.getValue()));
+			updateIdSubstitutionsTargets(theIdSubstitutions, newId);
 
 			if (theDaoMethodOutcome.getOperationOutcome() != null) {
 				IBase responseEntry = entriesToProcess.getResponseBundleEntryWithVersionlessComparison(newId);
 				myVersionAdapter.setResponseOutcome(responseEntry, theDaoMethodOutcome.getOperationOutcome());
 			}
 		}
+	}
+
+	private void updateIdSubstitutionsTargets(IdSubstitutionMap theIdSubstitutions, IIdType theNewId) {
+		String newUnqualifiedVersionLessId = theNewId.toUnqualifiedVersionless().getValue();
+		theIdSubstitutions.entrySet().stream()
+				.map(Pair::getValue)
+				.filter(targetId ->
+						Objects.equals(targetId.toUnqualifiedVersionless().getValue(), newUnqualifiedVersionLessId))
+				.forEach(targetId -> targetId.setValue(theNewId.getValue()));
 	}
 
 	private void replaceResourceReference(
