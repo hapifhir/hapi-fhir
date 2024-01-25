@@ -682,18 +682,13 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 
 					theEntity.setFhirVersion(myContext.getVersion().getVersion());
 
-					final HashCode hashCode;
-
-					ourLog.info("5586:  PRE excludedElements: {}", excludeElements);
-					ourLog.info("5586:  PRE encoding: {}", encoding);
-
 					final ResourceHistoryState calculate = myResourceHistoryCalculator.calculateResourceHistoryState(
 							theResource, encoding, excludeElements);
 
 					resourceText = calculate.getResourceText();
 					resourceBinary = calculate.getResourceBinary();
 					encoding = calculate.getEncoding(); // This may be a no-op
-					hashCode = calculate.getHashCode();
+					final HashCode hashCode = calculate.getHashCode();
 
 					String hashSha256 = hashCode.toString();
 					if (!hashSha256.equals(theEntity.getHashSha256())) {
