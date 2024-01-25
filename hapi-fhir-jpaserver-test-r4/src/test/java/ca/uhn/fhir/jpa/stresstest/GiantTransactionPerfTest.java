@@ -17,6 +17,7 @@ import ca.uhn.fhir.jpa.cache.ResourceChangeListenerCacheRefresherImpl;
 import ca.uhn.fhir.jpa.cache.ResourceChangeListenerRegistryImpl;
 import ca.uhn.fhir.jpa.cache.ResourcePersistentIdMap;
 import ca.uhn.fhir.jpa.cache.ResourceVersionMap;
+import ca.uhn.fhir.jpa.config.HibernatePropertiesProvider;
 import ca.uhn.fhir.jpa.dao.IJpaStorageResourceParser;
 import ca.uhn.fhir.jpa.dao.JpaResourceDao;
 import ca.uhn.fhir.jpa.dao.TransactionProcessor;
@@ -148,6 +149,9 @@ public class GiantTransactionPerfTest {
 	private IIdHelperService myIdHelperService;
 	@Mock
 	private IJpaStorageResourceParser myJpaStorageResourceParser;
+	// LUKETODO:  change to calculator once this is integrated
+	@Mock
+	private HibernatePropertiesProvider myHibernatePropertiesProvider;
 	private IMetaTagSorter myMetaTagSorter;
 
 	@AfterEach
@@ -271,6 +275,7 @@ public class GiantTransactionPerfTest {
 		myEobDao.setJpaStorageResourceParserForUnitTest(myJpaStorageResourceParser);
 		myEobDao.setExternallyStoredResourceServiceRegistryForUnitTest(new ExternallyStoredResourceServiceRegistry());
 		myEobDao.setMyMetaTagSorter(myMetaTagSorter);
+		myEobDao.setHibernatePropertiesProvider(myHibernatePropertiesProvider);
 		myEobDao.start();
 
 		myDaoRegistry.setResourceDaos(Lists.newArrayList(myEobDao));

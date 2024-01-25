@@ -59,7 +59,6 @@ import static ca.uhn.fhir.rest.api.Constants.UUID_LENGTH;
 
 @SuppressWarnings({"SqlNoDataSourceInspection", "SpellCheckingInspection", "java:S1192"})
 public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(HapiFhirJpaMigrationTasks.class);
 
 	// H2, Derby, MariaDB, and MySql automatically add indexes to foreign keys
 	public static final DriverTypeEnum[] NON_AUTOMATIC_FK_INDEX_PLATFORMS =
@@ -209,39 +208,6 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 
 		// This fix will work for MSSQL or Oracle.
 		version.addTask(new ForceIdMigrationFixTask(version.getRelease(), "20231222.1"));
-
-		//		{
-		//			// LUKETODO:  this works but the column ends up at the end of the table
-		//			// LUKETODO: start
-		//			ourLog.info("5586: ALTER TABLE HFJ_RES_VER ADD (RES_TEXT_VC_TMP CLOB)");
-		//
-		//			version.executeRawSql(
-		//					"20240124.01",
-		//					"ALTER TABLE HFJ_RES_VER ADD (RES_TEXT_VC_TMP CLOB)")
-		//				.onlyAppliesToPlatforms(DriverTypeEnum.ORACLE_12C);
-		//
-		//			ourLog.info("5586: UPDATE HFJ_RES_VER SET RES_TEXT_VC_TMP = RES_TEXT_VC");
-		//
-		//			version.executeRawSql(
-		//					"20240124.02",
-		//					"UPDATE HFJ_RES_VER SET RES_TEXT_VC_TMP = RES_TEXT_VC")
-		//				.onlyAppliesToPlatforms(DriverTypeEnum.ORACLE_12C);
-		//
-		//			ourLog.info("5586: ALTER TABLE HFJ_RES_VER DROP COLUMN RES_TEXT_VC");
-		//
-		//			version.executeRawSql(
-		//					"20240124.03",
-		//					"ALTER TABLE HFJ_RES_VER DROP COLUMN RES_TEXT_VC")
-		//				.onlyAppliesToPlatforms(DriverTypeEnum.ORACLE_12C);
-		//
-		//			ourLog.info("5586: ALTER TABLE HFJ_RES_VER RENAME COLUMN RES_TEXT_VC_TMP TO RES_TEXT_VC");
-		//
-		//			version.executeRawSql(
-		//					"20240124.04",
-		//					"ALTER TABLE HFJ_RES_VER RENAME COLUMN RES_TEXT_VC_TMP TO RES_TEXT_VC")
-		//				.onlyAppliesToPlatforms(DriverTypeEnum.ORACLE_12C);
-		//			// LUKETODO: end
-		//		}
 	}
 
 	protected void init680() {
