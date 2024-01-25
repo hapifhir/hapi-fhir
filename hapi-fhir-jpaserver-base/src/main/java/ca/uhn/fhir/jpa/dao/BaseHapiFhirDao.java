@@ -697,6 +697,11 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 						hashCode = sha256.hashUnencodedChars(encodedResource);
 					}
 
+					ourLog.info("5586:  resourceText: {}", resourceText);
+					ourLog.info("5586:  resourceBinary: {}", resourceBinary);
+					ourLog.info("5586:  encoding: {}", encoding);
+					ourLog.info("5586:  hashCode: {}", hashCode);
+
 					String hashSha256 = hashCode.toString();
 					if (!hashSha256.equals(theEntity.getHashSha256())) {
 						changed = true;
