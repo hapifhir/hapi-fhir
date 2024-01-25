@@ -111,10 +111,10 @@ public class ResourceHistoryCalculator {
 	}
 
 	void populateEncodedResource(
-		EncodedResource theEncodedResource,
-		String theEncodedResourceString,
-		@Nullable byte[] theResourceBinary,
-		ResourceEncodingEnum theEncoding) {
+			EncodedResource theEncodedResource,
+			String theEncodedResourceString,
+			@Nullable byte[] theResourceBinary,
+			ResourceEncodingEnum theEncoding) {
 		if (myIsOracleDialect) {
 			populateEncodedResourceInner(theEncodedResource, null, theResourceBinary, theEncoding);
 		} else {

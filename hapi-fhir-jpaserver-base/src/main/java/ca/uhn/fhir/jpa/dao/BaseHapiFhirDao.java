@@ -687,8 +687,8 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 					ourLog.info("5586:  PRE excludedElements: {}", excludeElements);
 					ourLog.info("5586:  PRE encoding: {}", encoding);
 
-					final ResourceHistoryState calculate =
-							myResourceHistoryCalculator.calculateResourceHistoryState(theResource, encoding, excludeElements);
+					final ResourceHistoryState calculate = myResourceHistoryCalculator.calculateResourceHistoryState(
+							theResource, encoding, excludeElements);
 
 					resourceText = calculate.getResourceText();
 					resourceBinary = calculate.getResourceBinary();
