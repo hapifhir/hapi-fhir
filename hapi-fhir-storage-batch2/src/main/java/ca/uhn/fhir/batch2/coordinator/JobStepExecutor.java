@@ -75,9 +75,10 @@ public class JobStepExecutor<PT extends IModelJson, IT extends IModelJson, OT ex
 			return;
 		}
 
-		if (stepExecutorOutput.getDataSink().firstStepProducedNothing()) {
+		if (stepExecutorOutput.getDataSink().firstStepProducedNothing() && !lastStepIsReduction()) {
 			ourLog.info(
-					"First step of job myInstance {} produced no work chunks, marking as completed and setting end date",
+					"First step of job myInstance {} produced no work chunks and last step is not a reduction, "
+							+ "marking as completed and setting end date",
 					myInstanceId);
 			myJobPersistence.updateInstance(myInstance.getInstanceId(), instance -> {
 				instance.setEndTime(new Date());
@@ -90,6 +91,11 @@ public class JobStepExecutor<PT extends IModelJson, IT extends IModelJson, OT ex
 		if (myInstance.isFastTracking()) {
 			handleFastTracking(stepExecutorOutput.getDataSink());
 		}
+	}
+
+	private boolean lastStepIsReduction() {
+		int stepCount = myDefinition.getSteps().size();
+		return stepCount >= 1 && myDefinition.getSteps().get(stepCount - 1).isReductionStep();
 	}
 
 	private void handleFastTracking(BaseDataSink<PT, IT, OT> theDataSink) {
