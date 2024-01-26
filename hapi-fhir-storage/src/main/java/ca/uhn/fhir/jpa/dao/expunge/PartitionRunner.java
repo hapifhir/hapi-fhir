@@ -186,7 +186,7 @@ public class PartitionRunner {
 		};
 		return new ThreadPoolExecutor(
 				threadCount,
-				MAX_POOL_SIZE,
+				threadCount,
 				0L,
 				TimeUnit.MILLISECONDS,
 				executorQueue,
