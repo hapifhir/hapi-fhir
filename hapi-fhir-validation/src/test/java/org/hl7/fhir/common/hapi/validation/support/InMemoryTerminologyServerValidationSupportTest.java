@@ -180,7 +180,7 @@ public class InMemoryTerminologyServerValidationSupportTest extends BaseValidati
 	})
 	public void testValidateCode_customMimetypeVSCodeNotInVS_returnsError(String theCodeSystem) {
 		final String code = "someRandomCode";
-		final String codeToValidate = "someRandomCode";
+		final String codeToValidate = "otherCode";
 
 		ValueSet vs = new ValueSet();
 		vs.setId("mimetype");
