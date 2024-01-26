@@ -627,6 +627,9 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		version.executeRawSqls("20230402.1", Map.of(DriverTypeEnum.POSTGRES_9_4, postgresTuningStatements));
 
 		// Use an unlimited length text column for RES_TEXT_VC
+		// N.B. This will FAIL SILENTLY on Oracle due to the fact that Oracle does not support an ALTER TABLE from
+		// VARCHAR to
+		// CLOB.  Because of failureAllowed() this won't halt the migration
 		version.onTable("HFJ_RES_VER")
 				.modifyColumn("20230421.1", "RES_TEXT_VC")
 				.nullable()
