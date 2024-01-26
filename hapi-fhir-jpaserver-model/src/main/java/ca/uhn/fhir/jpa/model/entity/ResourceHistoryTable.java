@@ -56,7 +56,6 @@ public class ResourceHistoryTable extends BaseHasResource implements Serializabl
 	public static final int ENCODING_COL_LENGTH = 5;
 
 	public static final String HFJ_RES_VER = "HFJ_RES_VER";
-	public static final int RES_TEXT_VC_MAX_LENGTH = 4000;
 	private static final long serialVersionUID = 1L;
 
 	@Id

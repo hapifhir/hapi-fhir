@@ -68,6 +68,14 @@ class ResourceHistoryCalculatorTest {
 		);
 	}
 
+	/**
+	 * The purpose of this test is to ensure that the conditional logic to pre-calculate resource history text or binaries
+	 * is respected.
+	 * If this is for Oracle, the resource text will be driven off a binary with a given encoding with the
+	 * resource text effectively ignored.
+	 * If this is not Oracle, it will be driven off a JSON encoded text field with
+	 * the binary effectively ignored.
+	 */
 	@ParameterizedTest
 	@MethodSource("calculateResourceHistoryStateArguments")
 	void calculateResourceHistoryState(FhirContext theFhirContext, boolean theIsOracle, ResourceEncodingEnum theResourceEncoding, List<String> theExcludedElements) {
@@ -77,15 +85,15 @@ class ResourceHistoryCalculatorTest {
 		final ResourceHistoryState result = calculator.calculateResourceHistoryState(patient, theResourceEncoding, theExcludedElements);
 
 		if (theIsOracle) {
-			assertNotNull(result.getResourceBinary());
-			assertNull(result.getResourceText());
-			assertEquals(theResourceEncoding, result.getEncoding());
-			assertEquals(SHA_256.hashBytes(result.getResourceBinary()), result.getHashCode());
+			assertNotNull(result.getResourceBinary()); // On Oracle: We use the resource binary to serve up the resource content
+			assertNull(result.getResourceText()); // On Oracle: We do NOT use the resource text to serve up the resource content
+			assertEquals(theResourceEncoding, result.getEncoding()); // On Oracle, the resource encoding is what we used to encode the binary
+			assertEquals(SHA_256.hashBytes(result.getResourceBinary()), result.getHashCode()); // On Oracle, the SHA 256 hash is of the binary
 		} else {
-			assertNull(result.getResourceBinary());
-			assertNotNull(result.getResourceText());
-			assertEquals(ResourceEncodingEnum.JSON, result.getEncoding());
-			final HashCode expectedHashCode = SHA_256.hashUnencodedChars(calculator.encodeResource(patient, theResourceEncoding, theExcludedElements));
+			assertNull(result.getResourceBinary()); // Non-Oracle: We do NOT use the resource binary to serve up the resource content
+			assertNotNull(result.getResourceText()); // Non-Oracle: We use the resource text to serve up the resource content
+			assertEquals(ResourceEncodingEnum.JSON, result.getEncoding()); // Non-Oracle, since we didn't encode a binary this is always JSON.
+			final HashCode expectedHashCode = SHA_256.hashUnencodedChars(calculator.encodeResource(patient, theResourceEncoding, theExcludedElements)); // Non-Oracle, the SHA 256 hash is of the parsed resource object
 			assertEquals(expectedHashCode, result.getHashCode());
 		}
 	}
@@ -114,7 +122,7 @@ class ResourceHistoryCalculatorTest {
 
 	@ParameterizedTest
 	@MethodSource("conditionallyAlterHistoryEntityArguments")
-	void conditionallyAlterHistoryEntity(boolean theIsOracle, ResourceEncodingEnum theResourceEncoding, String theResourceText) {
+	void conditionallyAlterHistoryEntity_usesVarcharForOracle(boolean theIsOracle, ResourceEncodingEnum theResourceEncoding, String theResourceText) {
 		final ResourceTable resourceTable = new ResourceTable();
 		resourceTable.setId(123L);
 
@@ -163,7 +171,7 @@ class ResourceHistoryCalculatorTest {
 
 	@ParameterizedTest
 	@MethodSource("encodeResourceArguments")
-	void encodeResource(FhirContext theFhirContext, ResourceEncodingEnum theResourceEncoding, List<String> theExcludedElements) {
+	void encodeResource_ensureFhirVersionSpecificAndIntendedElementsExcluded(FhirContext theFhirContext, ResourceEncodingEnum theResourceEncoding, List<String> theExcludedElements) {
 		final IBaseResource patient = getPatient(theFhirContext);
 		final String encodedResource = getCalculator(theFhirContext, true).encodeResource(patient, theResourceEncoding, theExcludedElements);
 

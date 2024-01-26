@@ -682,6 +682,8 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 
 					theEntity.setFhirVersion(myContext.getVersion().getVersion());
 
+					// TODO:  LD: Once 2024-02 it out the door we should consider further refactoring here to move
+					// more of this logic within the calculator and eliminate more local variables
 					final ResourceHistoryState calculate = myResourceHistoryCalculator.calculateResourceHistoryState(
 							theResource, encoding, excludeElements);
 
@@ -749,6 +751,8 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 				if (currentHistoryVersion == null || !currentHistoryVersion.hasResource()) {
 					changed = true;
 				} else {
+					// TODO:  LD: Once 2024-02 it out the door we should consider further refactoring here to move
+					// more of this logic within the calculator and eliminate more local variables
 					changed = myResourceHistoryCalculator.isResourceHistoryChanged(
 							currentHistoryVersion, resourceBinary, resourceText);
 				}
