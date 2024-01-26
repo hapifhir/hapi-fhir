@@ -1,5 +1,0 @@
----
-type: add
-issue: 5610
-title: "Before message broker always used `JacksonMessageConverter`. A configuration option was added to allow not to use
-    it, so other converters can be selected depending on the message type."
