@@ -1,22 +1,31 @@
 package ca.uhn.fhir.jpa.auth;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.interceptor.auth.AuthorizationInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.auth.FhirQueryRuleTester;
 import ca.uhn.fhir.rest.server.interceptor.auth.IAuthRule;
 import ca.uhn.fhir.rest.server.interceptor.auth.IAuthorizationSearchParamMatcher;
+import ca.uhn.fhir.rest.server.interceptor.auth.IRuleApplier;
 import ca.uhn.fhir.rest.server.interceptor.auth.PolicyEnum;
 import ca.uhn.fhir.rest.server.interceptor.auth.RuleBuilder;
 import ca.uhn.fhir.test.utilities.ITestDataBuilder;
+import ca.uhn.fhir.util.BundleBuilder;
 import ca.uhn.test.util.LogbackCaptureTestExtension;
 import ch.qos.logback.classic.Level;
+import jakarta.annotation.Nullable;
 import org.hamcrest.MatcherAssert;
+import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r4.model.CodeType;
+import org.hl7.fhir.r4.model.Parameters;
+import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -25,7 +34,6 @@ import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoSettings;
 
-import jakarta.annotation.Nullable;
 import java.util.HashSet;
 
 import static ca.uhn.fhir.rest.server.interceptor.auth.IAuthorizationSearchParamMatcher.MatchResult.buildMatched;
@@ -37,12 +45,26 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
 // TODO: Is there a better home for this test? It can't live in hapi-fhir-server since we need a real FhirContext for the compartment checks.
 @MockitoSettings
 class FhirQueryRuleImplTest implements ITestDataBuilder {
 
+	private static final String OPERATION = "operation";
+	private static final String TYPE = "type";
+	private static final String PATH = "path";
+	private static final String VALUE = "value";
+	private static final String REPLACE = "replace";
+	private static final String PATIENT_BIRTH_DATE = "Patient.birthDate";
+	private static final String BUNDLE = "Bundle";
 	final private TestRuleApplier myMockRuleApplier = new TestRuleApplier() {
 		@Override
 		public @Nullable IAuthorizationSearchParamMatcher getSearchParamMatcher() {
@@ -59,7 +81,7 @@ class FhirQueryRuleImplTest implements ITestDataBuilder {
 	private IBaseResource myObservation;
 	@Mock
 	private RequestDetails myRequestDetails;
-	private final FhirContext myFhirContext = FhirContext.forR4Cached();
+	private final FhirContext myFhirContext = spy(FhirContext.forR4Cached());
 	@Mock
 	private IAuthorizationSearchParamMatcher myMatcher;
 
@@ -251,8 +273,99 @@ class FhirQueryRuleImplTest implements ITestDataBuilder {
 
 	}
 
+	@Nested
+	public class TransactionBundle {
+		@Mock
+		private IRuleApplier myMockRuleApplier;
+
+		@BeforeEach
+		void beforeEach() {
+			withPatientWithNameAndId();
+
+			myRule = new RuleBuilder()
+				.allow()
+				.transaction()
+				.withAnyOperation()
+				.andApplyNormalRules()
+				.build()
+				.get(0);
+		}
+
+		@Test
+		void testTransactionBundleUpdateWithParameters() {
+			final Parameters parameters = buildParameters();
+
+			try {
+				applyRule(getBundle(false, parameters));
+				fail("Expected an InvalidRequestException");
+			} catch (InvalidRequestException exception) {
+				assertEquals("HAPI-0339: Can not handle transaction with nested resource of type Parameters", exception.getMessage());
+			}
+		}
+
+		@Test
+		void testTransactionBundleWithNestedBundle() {
+			final Parameters parameters = buildParameters();
+
+			final IBaseBundle bundle = getBundle(true, parameters);
+
+			// There's no better way to "put a Bundle inside a Bundle" with the BundleBuilder
+			final RuntimeResourceDefinition mockRuntimeResourceDefinition  = mock(RuntimeResourceDefinition.class);
+			when(mockRuntimeResourceDefinition.getName()).thenReturn(BUNDLE);
+			doReturn(mockRuntimeResourceDefinition).when(myFhirContext).getResourceDefinition(parameters);
+
+			try {
+				applyRule(bundle);
+				fail("Expected an InvalidRequestException");
+			} catch (InvalidRequestException exception) {
+				assertEquals("HAPI-0339: Can not handle transaction with nested resource of type Bundle", exception.getMessage());
+			}
+		}
+
+		@Test
+		void testTransactionBundlePatchWithParameters() {
+			final Parameters parameters = buildParameters();
+
+			when(myMockRuleApplier.applyRulesAndReturnDecision(eq(RestOperationTypeEnum.PATCH), eq(myRequestDetails), eq(parameters), isNull(), isNull(), isNull()))
+				.thenReturn(new AuthorizationInterceptor.Verdict(PolicyEnum.ALLOW, null));
+
+			final AuthorizationInterceptor.Verdict verdict = applyRule(getBundle(true, parameters));
+
+			assertThat(verdict.getDecision(), equalTo(PolicyEnum.ALLOW));
+		}
+
+		private AuthorizationInterceptor.Verdict applyRule(IBaseBundle theBundle) {
+			return myRule.applyRule(RestOperationTypeEnum.TRANSACTION, myRequestDetails, theBundle, myPatientId, myPatient, myMockRuleApplier, new HashSet<>(), null);
+		}
+
+		private IBaseBundle getBundle(boolean isPatch, @Nullable Parameters theParameters) {
+			final BundleBuilder bundleBuilder = new BundleBuilder(myFhirContext);
+			final Parameters parameters = theParameters == null ? buildParameters() : theParameters;
+
+			if (isPatch) {
+				bundleBuilder.addTransactionFhirPatchEntry(parameters);
+			} else {
+				bundleBuilder.addTransactionUpdateEntry(parameters);
+			}
+
+			return bundleBuilder.getBundle();
+		}
+
+		private Parameters buildParameters() {
+			final Parameters patch = new Parameters();
+
+			final Parameters.ParametersParameterComponent op = patch.addParameter().setName(OPERATION);
+			op.addPart().setName(TYPE).setValue(new CodeType(REPLACE));
+			op.addPart().setName(PATH).setValue(new CodeType(PATIENT_BIRTH_DATE));
+			op.addPart().setName(VALUE).setValue(new StringType("1912-04-14"));
+
+			return patch;
+		}
+	}
+
+
 	private void stubMatcherCall(String expectedQuery, IBaseResource theTargetResource, IAuthorizationSearchParamMatcher.MatchResult theStubResult) {
-		when(myMatcher.match(ArgumentMatchers.eq(expectedQuery), ArgumentMatchers.same(theTargetResource)))
+		when(myMatcher.match(eq(expectedQuery), ArgumentMatchers.same(theTargetResource)))
 			.thenReturn(theStubResult);
 	}
 
