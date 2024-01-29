@@ -55,7 +55,6 @@ public class InMemoryTerminologyServerValidationSupportTest extends BaseValidati
 			CommonCodeSystemsTerminologyService.MIMETYPES_VALUESET_URL,
 			CommonCodeSystemsTerminologyService.CURRENCIES_VALUESET_URL,
 			CommonCodeSystemsTerminologyService.LANGUAGES_VALUESET_URL
-			// TODO:  other types cannot be expanded just yet, check if they need to be implemented
 	})
 	public void testExpandValueSet_commonVS_expandOk(String theValueSet) {
 		ValueSet vs = (ValueSet) myChain.fetchValueSet(theValueSet);
@@ -77,7 +76,6 @@ public class InMemoryTerminologyServerValidationSupportTest extends BaseValidati
 			CommonCodeSystemsTerminologyService.MIMETYPES_CODESYSTEM_URL,
 			CommonCodeSystemsTerminologyService.COUNTRIES_CODESYSTEM_URL,
 			CommonCodeSystemsTerminologyService.CURRENCIES_CODESYSTEM_URL
-			// TODO: other types cannot be expanded just yet, check if they need to be implemented
 	})
 	public void testExpandValueSet_customVSBasedOnCommonCS_expandOk(String theCodeSystem) {
 		ValueSet vs = new ValueSet();
@@ -142,8 +140,7 @@ public class InMemoryTerminologyServerValidationSupportTest extends BaseValidati
 
 	@Test
 	public void testValidateCode_customMimetypeVSCodeInVS_returnsOk() {
-		// TODO: other types of common code systems don't work just yet, refactoring is needed to make them work
-		String codeSystem = CommonCodeSystemsTerminologyService.MIMETYPES_CODESYSTEM_URL;
+		String codeSystem = CommonCodeSystemsTerminologyService.COUNTRIES_CODESYSTEM_URL;
 
 		final String code = "someRandomCode";
 		final String display = "Display " + code;
@@ -165,9 +162,6 @@ public class InMemoryTerminologyServerValidationSupportTest extends BaseValidati
 		assertNotNull(outcome);
 		assertTrue(outcome.isOk());
 		assertEquals(code, outcome.getCode());
-
-		// TODO: this doesn't work yet the code, requires refactoring in the expansion logic
-		// assertEquals(display, outcome.getDisplay());
 	}
 
 	@ParameterizedTest
