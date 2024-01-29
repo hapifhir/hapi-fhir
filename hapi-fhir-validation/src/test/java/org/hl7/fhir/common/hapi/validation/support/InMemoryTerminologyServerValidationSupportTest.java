@@ -140,7 +140,7 @@ public class InMemoryTerminologyServerValidationSupportTest extends BaseValidati
 
 	@Test
 	public void testValidateCode_customMimetypeVSCodeInVS_returnsOk() {
-		String codeSystem = CommonCodeSystemsTerminologyService.COUNTRIES_CODESYSTEM_URL;
+		String codeSystem = CommonCodeSystemsTerminologyService.MIMETYPES_CODESYSTEM_URL;
 
 		final String code = "someRandomCode";
 		final String display = "Display " + code;
