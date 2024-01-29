@@ -166,5 +166,4 @@ public class ReductionStepDataSinkTest {
 			fail("Unexpected exception", anyOtherEx);
 		}
 	}
-
 }
