@@ -771,7 +771,7 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 				 */
 				if (nextPart.getResource() != null) {
 					RuntimeResourceDefinition resourceDef = ctx.getResourceDefinition(nextPart.getResource());
-					if ("Parameters".equals(resourceDef.getName()) || "Bundle".equals(resourceDef.getName())) {
+					if (/*"Parameters".equals(resourceDef.getName()) ||*/ "Bundle".equals(resourceDef.getName())) {
 						throw new InvalidRequestException(Msg.code(339)
 								+ "Can not handle transaction with nested resource of type " + resourceDef.getName());
 					}
