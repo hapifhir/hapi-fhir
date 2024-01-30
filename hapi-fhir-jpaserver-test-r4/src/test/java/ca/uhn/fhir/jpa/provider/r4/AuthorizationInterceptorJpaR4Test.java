@@ -1541,6 +1541,20 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 	}
 
 	@Test
+	public void testSearchBundles_withPermissionToViewOneBundle_onlyAllowsViewingOneBundle(){
+		Bundle bundle1 = createMessageHeaderBundle(createPatient("John", "Smith"));
+		Bundle bundle2 = createMessageHeaderBundle(createPatient("Jane", "Doe"));
+
+		myServer.getRestfulServer().getInterceptorService().registerInterceptor(
+			new ReadInCompartmentAuthorizationInterceptor("Bundle", bundle1.getIdElement())
+		);
+
+		assertSearchContainsResources("/Bundle?_id=" + bundle1.getIdPart(), bundle1);
+		assertSearchFailsWith403Forbidden("/Bundle?_id=" + bundle2.getIdPart());
+		assertSearchFailsWith403Forbidden("/Bundle");
+	}
+
+	@Test
 	public void testSearchPatients_withPermissionToSearchAllBundles_returns403Forbidden(){
 		myServer.getRestfulServer().registerInterceptor(myReadAllBundleInterceptor);
 
@@ -1563,14 +1577,9 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 		Patient patient1 = createPatient("John", "Smith");
 		Patient patient2 = createPatient("Jane", "Doe");
 
-		myServer.getRestfulServer().getInterceptorService().registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
-			@Override
-			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
-				return new RuleBuilder()
-					.allow().read().allResources().inCompartment("Patient", patient1.getIdElement()).andThen()
-					.build();
-			}
-		});
+		myServer.getRestfulServer().getInterceptorService().registerInterceptor(
+			new ReadInCompartmentAuthorizationInterceptor("Patient", patient1.getIdElement())
+		);
 
 		assertSearchContainsResources("/Patient?_id=" + patient1.getIdPart(), patient1);
 		assertSearchFailsWith403Forbidden("/Patient?_id=" + patient2.getIdPart());
@@ -1657,6 +1666,25 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 		public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
 			return new RuleBuilder()
 				.allow().read().resourcesOfType(myResourceType).withAnyId().andThen()
+				.build();
+		}
+	}
+
+	static class ReadInCompartmentAuthorizationInterceptor extends AuthorizationInterceptor {
+
+		private final String myResourceType;
+		private final IIdType myId;
+
+		public ReadInCompartmentAuthorizationInterceptor(String theResourceType, IIdType theId){
+			super(PolicyEnum.DENY);
+			myResourceType = theResourceType;
+			myId = theId;
+		}
+
+		@Override
+		public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
+			return new RuleBuilder()
+				.allow().read().allResources().inCompartment(myResourceType, myId).andThen()
 				.build();
 		}
 	}
