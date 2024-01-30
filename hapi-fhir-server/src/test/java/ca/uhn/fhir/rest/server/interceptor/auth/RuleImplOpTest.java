@@ -1,14 +1,8 @@
 package ca.uhn.fhir.rest.server.interceptor.auth;
 
-import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
-import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
-import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
-import org.hl7.fhir.instance.model.api.IBaseMetaType;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -98,15 +92,5 @@ public class RuleImplOpTest {
 		assertFalse(aRuleOp.matches(RuleOpEnum.WRITE, AppliesTypeEnum.ALL_RESOURCES, Collections.emptyList(), Collections.emptySet(), CLASSIFIER_TYPE, "Patient"));
 		assertFalse(aRuleOp.matches(RuleOpEnum.READ, AppliesTypeEnum.TYPES, Collections.emptyList(), Collections.emptySet(), CLASSIFIER_TYPE, "Patient"));
 		assertFalse(aRuleOp.matches(RuleOpEnum.READ, AppliesTypeEnum.ALL_RESOURCES, Collections.emptyList(), Collections.emptySet(), CLASSIFIER_TYPE, "Observation"));
-	}
-
-	@Test
-	void testTransactionBundleWithParameters() {
-		final RuleImplOp ruleOp = new RuleImplOp("transactionBundlePatch");
-		ruleOp.setOp(RuleOpEnum.TRANSACTION);
-
-		final IBaseResource mockResouce = Mockito.mock(IBaseResource.class);
-
-//		ruleOp.applyRule(RestOperationTypeEnum.TRANSACTION, new SystemRequestDetails(), mockResouce, null, null, null, null);
 	}
 }
