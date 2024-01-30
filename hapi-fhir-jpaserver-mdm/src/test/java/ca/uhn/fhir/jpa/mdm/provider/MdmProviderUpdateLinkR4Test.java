@@ -52,10 +52,10 @@ public class MdmProviderUpdateLinkR4Test extends BaseLinkR4Test {
 	@Test
 	public void testUpdateLinkNoMatch() {
 		assertLinkCount(1);
-		myMdmProvider.updateLink(mySourcePatientId, myPatientId, NO_MATCH_RESULT, myRequestDetails);
+		myMdmProvider.updateLink(myGoldenPatientId, myPatientId, NO_MATCH_RESULT, myRequestDetails);
 		assertLinkCount(2);
 
-		List<MdmLink> links = (List<MdmLink>) getPatientLinks();
+		List<MdmLink> links = (List<MdmLink>) getPatientLinks(myPatient);
 		assertEquals(MdmLinkSourceEnum.MANUAL, links.get(0).getLinkSource());
 		assertEquals(MdmMatchResultEnum.NO_MATCH, links.get(0).getMatchResult());
 		assertEquals(MdmLinkSourceEnum.AUTO, links.get(1).getLinkSource());
@@ -66,10 +66,10 @@ public class MdmProviderUpdateLinkR4Test extends BaseLinkR4Test {
 	@Test
 	public void testUpdateLinkMatch() {
 		assertLinkCount(1);
-		myMdmProvider.updateLink(mySourcePatientId, myPatientId, MATCH_RESULT, myRequestDetails);
+		myMdmProvider.updateLink(myGoldenPatientId, myPatientId, MATCH_RESULT, myRequestDetails);
 		assertLinkCount(1);
 
-		List<MdmLink> links = (List<MdmLink>) getPatientLinks();
+		List<MdmLink> links = (List<MdmLink>) getPatientLinks(myPatient);
 		assertEquals(MdmLinkSourceEnum.MANUAL, links.get(0).getLinkSource());
 		assertEquals(MdmMatchResultEnum.MATCH, links.get(0).getMatchResult());
 	}
@@ -122,12 +122,12 @@ public class MdmProviderUpdateLinkR4Test extends BaseLinkR4Test {
 
 	@Test
 	public void testUpdateLinkTwiceFailsDueToWrongVersion() {
-		myMdmProvider.updateLink(mySourcePatientId, myPatientId, MATCH_RESULT, myRequestDetails);
+		myMdmProvider.updateLink(myGoldenPatientId, myPatientId, MATCH_RESULT, myRequestDetails);
 
 		materiallyChangeGoldenPatient();
 
 		try {
-			myMdmProvider.updateLink(mySourcePatientId, myPatientId, NO_MATCH_RESULT, myRequestDetails);
+			myMdmProvider.updateLink(myGoldenPatientId, myPatientId, NO_MATCH_RESULT, myRequestDetails);
 			fail();
 		} catch (ResourceVersionConflictException e) {
 			assertThat(e.getMessage(), matchesPattern(Msg.code(1501) + "Requested resource Patient/\\d+/_history/1 is not the latest version.  Latest version is Patient/\\d+/_history/2"));
@@ -135,21 +135,21 @@ public class MdmProviderUpdateLinkR4Test extends BaseLinkR4Test {
 	}
 
 	private void materiallyChangeGoldenPatient() {
-		Patient materiallyChangedSourcePatientThatShouldTriggerVersionChange = (Patient) mySourcePatient;
+		Patient materiallyChangedSourcePatientThatShouldTriggerVersionChange = (Patient) myGoldenPatient;
 		materiallyChangedSourcePatientThatShouldTriggerVersionChange.getNameFirstRep().setFamily("NEW LAST NAME");
 		myPatientDao.update(materiallyChangedSourcePatientThatShouldTriggerVersionChange);
 	}
 
 	@Test
 	public void testUpdateLinkTwiceDoesNotThrowValidationErrorWhenNoVersionIsProvided() {
-		myMdmProvider.updateLink(mySourcePatientId, myPatientId, MATCH_RESULT, myRequestDetails);
+		myMdmProvider.updateLink(myGoldenPatientId, myPatientId, MATCH_RESULT, myRequestDetails);
 		Patient patient = (Patient) myMdmProvider.updateLink(myVersionlessGodlenResourceId, myPatientId, NO_MATCH_RESULT, myRequestDetails);
 		assertNotNull(patient); // if this wasn't allowed - a validation exception would be thrown
 	}
 
 	@Test
 	public void testUnlinkLink_usingOutOfDateResourceId_throwsResourceVersionConflict() {
-		IBaseResource resultantPatient = myMdmProvider.updateLink(mySourcePatientId, myPatientId, NO_MATCH_RESULT, myRequestDetails);
+		IBaseResource resultantPatient = myMdmProvider.updateLink(myGoldenPatientId, myPatientId, NO_MATCH_RESULT, myRequestDetails);
 
 		/*
 		 * updatating a link to NO_MATCH reruns survivorship rules
@@ -160,7 +160,7 @@ public class MdmProviderUpdateLinkR4Test extends BaseLinkR4Test {
 		 */
 
 		try {
-			myMdmProvider.updateLink(mySourcePatientId, myPatientId, MATCH_RESULT, myRequestDetails);
+			myMdmProvider.updateLink(myGoldenPatientId, myPatientId, MATCH_RESULT, myRequestDetails);
 			fail();
 		} catch (ResourceVersionConflictException e) {
 			assertThat(e.getMessage(), matchesPattern(Msg.code(1501) + "Requested resource Patient/\\d+/_history/1 is not the latest version.  Latest version is Patient/\\d+/_history/2"));
@@ -170,7 +170,7 @@ public class MdmProviderUpdateLinkR4Test extends BaseLinkR4Test {
 	@Test
 	public void testUpdateIllegalResultForPossibleMatch() {
 		try {
-			myMdmProvider.updateLink(mySourcePatientId, myPatientId, POSSIBLE_MATCH_RESULT, myRequestDetails);
+			myMdmProvider.updateLink(myGoldenPatientId, myPatientId, POSSIBLE_MATCH_RESULT, myRequestDetails);
 			fail();
 		} catch (InvalidRequestException e) {
 			assertEquals(Msg.code(1495) + "$mdm-update-link illegal matchResult value 'POSSIBLE_MATCH'.  Must be NO_MATCH or MATCH", e.getMessage());
@@ -180,7 +180,7 @@ public class MdmProviderUpdateLinkR4Test extends BaseLinkR4Test {
 	@Test
 	public void testUpdateIllegalResultPD() {
 		try {
-			myMdmProvider.updateLink(mySourcePatientId, myPatientId, POSSIBLE_DUPLICATE_RESULT, myRequestDetails);
+			myMdmProvider.updateLink(myGoldenPatientId, myPatientId, POSSIBLE_DUPLICATE_RESULT, myRequestDetails);
 			fail();
 		} catch (InvalidRequestException e) {
 			assertEquals(Msg.code(1495) + "$mdm-update-link illegal matchResult value 'POSSIBLE_DUPLICATE'.  Must be NO_MATCH or MATCH", e.getMessage());
@@ -210,7 +210,7 @@ public class MdmProviderUpdateLinkR4Test extends BaseLinkR4Test {
 	@Test
 	public void testAttemptingToModifyANonExistentLinkFails() {
 		try {
-			myMdmProvider.updateLink(mySourcePatientId, mySourcePatientId, NO_MATCH_RESULT, myRequestDetails);
+			myMdmProvider.updateLink(myGoldenPatientId, myGoldenPatientId, NO_MATCH_RESULT, myRequestDetails);
 			fail();
 		} catch (InvalidRequestException e) {
 			assertThat(e.getMessage(), startsWith(Msg.code(738) + "No link"));
@@ -235,7 +235,7 @@ public class MdmProviderUpdateLinkR4Test extends BaseLinkR4Test {
 		patient.getMeta().addTag().setSystem(MdmConstants.SYSTEM_MDM_MANAGED).setCode(MdmConstants.CODE_NO_MDM_MANAGED);
 		createPatient(patient);
 		try {
-			myMdmProvider.updateLink(mySourcePatientId, new StringType(patient.getIdElement().getValue()), NO_MATCH_RESULT, myRequestDetails);
+			myMdmProvider.updateLink(myGoldenPatientId, new StringType(patient.getIdElement().getValue()), NO_MATCH_RESULT, myRequestDetails);
 			fail();
 		} catch (InvalidRequestException e) {
 			assertEquals(Msg.code(744) + myMessageHelper.getMessageForUnsupportedSourceResource(), e.getMessage());

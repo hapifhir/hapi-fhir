@@ -27,10 +27,10 @@ public abstract class BaseLinkR4Test extends BaseProviderR4Test {
 	protected static final StringType POSSIBLE_DUPLICATE_RESULT = new StringType(MdmMatchResultEnum.POSSIBLE_DUPLICATE.name());
 
 	protected Patient myPatient;
-	protected IAnyResource mySourcePatient;
+	protected IAnyResource myGoldenPatient;
 	protected MdmLink myLink;
 	protected StringType myPatientId;
-	protected StringType mySourcePatientId;
+	protected StringType myGoldenPatientId;
 	protected StringType myVersionlessGodlenResourceId;
 
 	@Override
@@ -41,9 +41,9 @@ public abstract class BaseLinkR4Test extends BaseProviderR4Test {
 		myPatient = createPatientAndUpdateLinks(buildPaulPatient());
 		myPatientId = new StringType(myPatient.getIdElement().getValue());
 
-		mySourcePatient = getGoldenResourceFromTargetResource(myPatient);
-		mySourcePatientId = new StringType(mySourcePatient.getIdElement().getValue());
-		myVersionlessGodlenResourceId = new StringType(mySourcePatient.getIdElement().toVersionless().getValue());
+		myGoldenPatient = getGoldenResourceFromTargetResource(myPatient);
+		myGoldenPatientId = new StringType(myGoldenPatient.getIdElement().getValue());
+		myVersionlessGodlenResourceId = new StringType(myGoldenPatient.getIdElement().toVersionless().getValue());
 
 		myLink = (MdmLink) getOnlyPatientLink();
 		// Tests require our initial link to be a POSSIBLE_MATCH
@@ -69,8 +69,8 @@ public abstract class BaseLinkR4Test extends BaseProviderR4Test {
 	}
 
 	@Nonnull
-	protected List<? extends IMdmLink> getPatientLinks() {
-		return myMdmLinkDaoSvc.findMdmLinksBySourceResource(myPatient);
+	protected List<? extends IMdmLink> getPatientLinks(Patient thePatient) {
+		return myMdmLinkDaoSvc.findMdmLinksBySourceResource(thePatient);
 	}
 
 	protected List<MdmLinkWithRevision<MdmLink>> getHistoricalLinks(List<String> theGoldenResourceIds, List<String> theResourceIds) {

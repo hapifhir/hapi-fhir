@@ -1,6 +1,5 @@
 package ca.uhn.fhir.jpa.mdm.provider;
 
-import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.mdm.api.MdmConstants;
@@ -33,7 +32,6 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.slf4j.LoggerFactory;
 
-import jakarta.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -42,6 +40,7 @@ import java.util.regex.Pattern;
 import static ca.uhn.fhir.mdm.api.MdmMatchOutcome.POSSIBLE_MATCH;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
@@ -73,10 +72,24 @@ public class MdmProviderClearLinkR4Test extends BaseLinkR4Test {
 		setMdmRuleJson("mdm/nickname-mdm-rules.json");
 	}
 
+
+	private void createTestPatientsWithUniqueNamesAndUpdateLinks(int theNumberOfPatientsToCreate) {
+		String idTemplate = "UNIQUE_%d";
+		String namePrefix = "Uniquename";
+		MdmTransactionContext context = createContextForCreate("Patient");
+		for (int i = 0; i < theNumberOfPatientsToCreate; i++) {
+			String name = namePrefix + i;
+			Patient patient = buildPatientWithNameAndId(name, String.format(idTemplate, i));
+			myPatientDao.create(patient, myRequestDetails);
+			myMdmMatchLinkSvc.updateMdmLinksForMdmSource(patient, context);
+		}
+	}
+
 	@Test
 	public void test_MDMClear_usesBatchSize() {
 		int batchSize = 5;
 		int total = 100;
+
 		String idTemplate = "RED_%d";
 		String name = "Yui";
 		MdmTransactionContext context = createContextForCreate("Patient");
@@ -85,10 +98,10 @@ public class MdmProviderClearLinkR4Test extends BaseLinkR4Test {
 				name += i;
 			}
 			Patient patient = buildPatientWithNameAndId(name, String.format(idTemplate, i));
-			DaoMethodOutcome result = myPatientDao.create(patient, myRequestDetails);
-
+			myPatientDao.create(patient, myRequestDetails);
 			myMdmMatchLinkSvc.updateMdmLinksForMdmSource(patient, context);
 		}
+
 		// + 2 because the before() method in the base class
 		// adds some resources with links; we don't need these, but
 		// we'll account for them
@@ -114,7 +127,8 @@ public class MdmProviderClearLinkR4Test extends BaseLinkR4Test {
 			myBatch2JobHelper.awaitJobCompletion(BatchHelperR4.jobIdFromBatch2Parameters(result));
 
 			// verify
-			assertNoLinksExist();
+			assertLinkCount(0);
+			assertNoGoldenPatientsExist();
 
 			// the trace log we're inspecting is in MdmClearStep
 			// "Deleted {} of {} golden resources in {}"
@@ -175,13 +189,50 @@ public class MdmProviderClearLinkR4Test extends BaseLinkR4Test {
 	public void testClearAllLinks() {
 		assertLinkCount(2);
 		clearMdmLinks();
-		assertNoLinksExist();
-		assertNoHistoricalLinksExist(List.of(myPractitionerGoldenResourceId.getValueAsString(), mySourcePatientId.getValueAsString()), new ArrayList<>());
+		assertNoLinksExistForResources(List.of(myPatient, myPractitioner));
+		assertLinkCount(0);
+		assertNoHistoricalLinksExist(List.of(myPractitionerGoldenResourceId.getValueAsString(), myGoldenPatientId.getValueAsString()), new ArrayList<>());
+	}
+
+	/**
+	 * I noticed before the following PR https://github.com/hapifhir/hapi-fhir/pull/5444
+	 * mdm-clear was clearing only 10k golden resources at most even if there was more than 10k
+	 * golden resources to clear in the system. The reason was GoldenResourceSearchSvcImp was using searchForIds
+	 * function. When a loadSynchronousUpTo parameter is not provided searchForIds loads only 10k resources, which is
+	 * the default for internalSynchronizationSearchSize in jpa configuration. As this parameter isn't provided to
+	 * the searchForIds by GoldenResourceSearchSvcImp, only 10k golden resources were being cleared.
+	 * With the mentioned MR, GoldenResourceSearchSvcImp was changed to use the new searchForIdStream function
+	 * and that fixed this issue.
+	 *
+	 * I added this test to not regress on this issue again in the future even though the new code path
+	 * is different and doesn't seem to rely on  internalSynchronizationSearchSize and hence doesn't have the same
+	 * problem.
+	 */
+	@Test
+	public void testClearsAllMdmData_RegardlessOfTheSizeOfInternalSynchronousSearchSize() {
+
+		// setting the internal synchronous search size to something small for test purposes
+		// and remembering its original value, which is restored at the end of the test
+		int originalSynchronousSearchSize = myStorageSettings.getInternalSynchronousSearchSize();
+		myStorageSettings.setInternalSynchronousSearchSize(3);
+		try {
+			createTestPatientsWithUniqueNamesAndUpdateLinks(20);
+			assertThat(getAllGoldenPatients().size(), greaterThan(20));
+
+			clearMdmLinks();
+
+			assertNoGoldenPatientsExist();
+			assertLinkCount(0);
+		}
+		finally {
+			//restore the original config
+			myStorageSettings.setInternalSynchronousSearchSize(originalSynchronousSearchSize);
+		}
 	}
 
 	@Test
 	public void testClearAllLinks_deletesRedirectedGoldenResources() {
-		createPatientAndUpdateLinks(buildJanePatient());
+		Patient patient = createPatientAndUpdateLinks(buildJanePatient());
 		assertLinkCount(3);
 
 		List<IBaseResource> allGoldenPatients = getAllGoldenPatients();
@@ -202,7 +253,8 @@ public class MdmProviderClearLinkR4Test extends BaseLinkR4Test {
 
 		assertLinkCount(4);
 		clearMdmLinks();
-		assertNoLinksExist();
+		assertNoLinksExistForResources(List.of(patient, myPatient));
+		assertLinkCount(0);
 
 		try {
 			myPatientDao.read(redirectedGoldenPatientId, myRequestDetails);
@@ -213,36 +265,32 @@ public class MdmProviderClearLinkR4Test extends BaseLinkR4Test {
 		}
 	}
 
-	private void assertNoLinksExist() {
-		assertNoPatientLinksExist();
-		assertNoPractitionerLinksExist();
-	}
-
 	private void assertNoGoldenPatientsExist() {
 		assertThat(getAllGoldenPatients(), hasSize(0));
-	}
-
-	private void assertNoPatientLinksExist() {
-		assertThat(getPatientLinks(), hasSize(0));
 	}
 
 	private void assertNoHistoricalLinksExist(List<String> theGoldenResourceIds, List<String> theResourceIds) {
 		assertThat(getHistoricalLinks(theGoldenResourceIds, theResourceIds), hasSize(0));
 	}
 
-	private void assertNoPractitionerLinksExist() {
-		assertThat(getPractitionerLinks(), hasSize(0));
+	private void assertNoLinksExistForResources(List<? extends IBaseResource> theResources) {
+		for (IBaseResource resource : theResources) {
+			List<MdmLink> links = (List<MdmLink>) myMdmLinkDaoSvc.findMdmLinksBySourceResource(resource);
+			assertThat(links, hasSize(0));
+		}
 	}
 
 	@Test
 	public void testClearPatientLinks() {
 		assertLinkCount(2);
-		Patient read = myPatientDao.read(new IdDt(mySourcePatientId.getValueAsString()).toVersionless());
+		Patient read = myPatientDao.read(new IdDt(myGoldenPatientId.getValueAsString()).toVersionless());
 		assertThat(read, is(notNullValue()));
 		clearMdmLinks("Patient");
-		assertNoPatientLinksExist();
+		assertNoLinksExistForResources(List.of(myPatient));
+		//practitioner link should still remain
+		assertLinkCount(1);
 		try {
-			myPatientDao.read(new IdDt(mySourcePatientId.getValueAsString()).toVersionless());
+			myPatientDao.read(new IdDt(myGoldenPatientId.getValueAsString()).toVersionless());
 			fail();
 		} catch (ResourceNotFoundException e) {
 			// Expected exception
@@ -251,33 +299,33 @@ public class MdmProviderClearLinkR4Test extends BaseLinkR4Test {
 	}
 	@Test
 	public void testGoldenResourceWithMultipleHistoricalVersionsCanBeDeleted() {
-		createPatientAndUpdateLinks(buildJanePatient());
-		createPatientAndUpdateLinks(buildJanePatient());
-		createPatientAndUpdateLinks(buildJanePatient());
-		createPatientAndUpdateLinks(buildJanePatient());
-		Patient patientAndUpdateLinks = createPatientAndUpdateLinks(buildJanePatient());
-		IAnyResource goldenResource = getGoldenResourceFromTargetResource(patientAndUpdateLinks);
+		Patient p1 = createPatientAndUpdateLinks(buildJanePatient());
+		Patient p2 = createPatientAndUpdateLinks(buildJanePatient());
+		Patient p3 = createPatientAndUpdateLinks(buildJanePatient());
+		Patient p4 = createPatientAndUpdateLinks(buildJanePatient());
+		Patient p5 = createPatientAndUpdateLinks(buildJanePatient());
+		IAnyResource goldenResource = getGoldenResourceFromTargetResource(p5);
 		assertThat(goldenResource, is(notNullValue()));
 		clearMdmLinks();
-		assertNoPatientLinksExist();
-		goldenResource = getGoldenResourceFromTargetResource(patientAndUpdateLinks);
+		assertNoLinksExistForResources(List.of(p1, p2, p3, p4, p5));
+		goldenResource = getGoldenResourceFromTargetResource(p5);
 		assertThat(goldenResource, is(nullValue()));
 	}
 
 	@Test
 	public void testGoldenResourceWithLinksToOtherGoldenResourcesCanBeDeleted() {
-		createPatientAndUpdateLinks(buildJanePatient());
-		Patient patientAndUpdateLinks1 = createPatientAndUpdateLinks(buildJanePatient());
-		Patient patientAndUpdateLinks = createPatientAndUpdateLinks(buildPaulPatient());
+		Patient p1 = createPatientAndUpdateLinks(buildJanePatient());
+		Patient p2 = createPatientAndUpdateLinks(buildJanePatient());
+		Patient p3 = createPatientAndUpdateLinks(buildPaulPatient());
 
-		IAnyResource goldenResourceFromTarget = getGoldenResourceFromTargetResource(patientAndUpdateLinks);
-		IAnyResource goldenResourceFromTarget2 = getGoldenResourceFromTargetResource(patientAndUpdateLinks1);
+		IAnyResource goldenResourceFromTarget = getGoldenResourceFromTargetResource(p3);
+		IAnyResource goldenResourceFromTarget2 = getGoldenResourceFromTargetResource(p2);
 		linkGoldenResources(goldenResourceFromTarget, goldenResourceFromTarget2);
 
 		//SUT
 		clearMdmLinks();
 
-		assertNoPatientLinksExist();
+		assertNoLinksExistForResources(List.of(p1,p2,p3));
 		IBundleProvider search = myPatientDao.search(buildGoldenResourceParameterMap());
 		assertThat(search.size(), is(equalTo(0)));
 	}
@@ -305,7 +353,7 @@ public class MdmProviderClearLinkR4Test extends BaseLinkR4Test {
 //	2022-07-17 19:57:37.330 [main] INFO  c.u.f.m.r.config.MdmRuleValidator [MdmRuleValidator.java:253] Validating system URI http://company.io/fhir/NamingSystem/custom-eid-system
 //	2022-07-17 19:57:37.335 [main] INFO  c.u.f.j.s.r.ResourceReindexingSvcImpl [ResourceReindexingSvcImpl.java:235] Cancelling and purging all resource reindexing jobs
 
-	//	@Test
+	@Test
 	public void testGoldenResourceWithCircularReferenceCanBeCleared() {
 		Patient patientAndUpdateLinks = createPatientAndUpdateLinks(buildPaulPatient());
 		Patient patientAndUpdateLinks1 = createPatientAndUpdateLinks(buildJanePatient());
@@ -325,7 +373,7 @@ public class MdmProviderClearLinkR4Test extends BaseLinkR4Test {
 
 		printLinks();
 
-		assertNoPatientLinksExist();
+		assertNoLinksExistForResources(List.of(patientAndUpdateLinks, patientAndUpdateLinks1, patientAndUpdateLinks2));
 		IBundleProvider search = myPatientDao.search(buildGoldenResourceParameterMap());
 		assertThat(search.size(), is(equalTo(0)));
 
@@ -344,7 +392,9 @@ public class MdmProviderClearLinkR4Test extends BaseLinkR4Test {
 		Practitioner read = myPractitionerDao.read(new IdDt(myPractitionerGoldenResourceId.getValueAsString()).toVersionless());
 		assertThat(read, is(notNullValue()));
 		clearMdmLinks("Practitioner");
-		assertNoPractitionerLinksExist();
+		assertNoLinksExistForResources(List.of(myPractitioner));
+		//patient link should still remain
+		assertLinkCount(1);
 		try {
 			myPractitionerDao.read(new IdDt(myPractitionerGoldenResourceId.getValueAsString()).toVersionless());
 			fail();
@@ -362,8 +412,5 @@ public class MdmProviderClearLinkR4Test extends BaseLinkR4Test {
 		}
 	}
 
-	@Nonnull
-	protected List<MdmLink> getPractitionerLinks() {
-		return (List<MdmLink>) myMdmLinkDaoSvc.findMdmLinksBySourceResource(myPractitioner);
-	}
+
 }

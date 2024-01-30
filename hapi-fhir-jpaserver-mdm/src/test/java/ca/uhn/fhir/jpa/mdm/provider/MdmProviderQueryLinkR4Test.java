@@ -92,12 +92,12 @@ public class MdmProviderQueryLinkR4Test extends BaseLinkR4Test {
 
 	@Test
 	public void testQueryLinkOneMatch() {
-		Parameters result = (Parameters) myMdmProvider.queryLinks(mySourcePatientId, myPatientId, null, null, new UnsignedIntType(0), new UnsignedIntType(10), new StringType(), myRequestDetails, null);
+		Parameters result = (Parameters) myMdmProvider.queryLinks(myGoldenPatientId, myPatientId, null, null, new UnsignedIntType(0), new UnsignedIntType(10), new StringType(), myRequestDetails, null);
 		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(result));
 		List<Parameters.ParametersParameterComponent> list = getParametersByName(result, "link");
 		assertThat(list, hasSize(1));
 		List<Parameters.ParametersParameterComponent> part = list.get(0).getPart();
-		assertMdmLink(MDM_LINK_PROPERTY_COUNT, part, mySourcePatientId.getValue(), myPatientId.getValue(), MdmMatchResultEnum.POSSIBLE_MATCH, "false", "true", "1");
+		assertMdmLink(MDM_LINK_PROPERTY_COUNT, part, myGoldenPatientId.getValue(), myPatientId.getValue(), MdmMatchResultEnum.POSSIBLE_MATCH, "false", "true", "1");
 	}
 
 	@Test
@@ -107,7 +107,7 @@ public class MdmProviderQueryLinkR4Test extends BaseLinkR4Test {
 		List<Parameters.ParametersParameterComponent> list = getParametersByName(result, "link");
 		assertThat("All resources with Patient type found", list, hasSize(3));
 		List<Parameters.ParametersParameterComponent> part = list.get(0).getPart();
-		assertMdmLink(MDM_LINK_PROPERTY_COUNT, part, mySourcePatientId.getValue(), myPatientId.getValue(), MdmMatchResultEnum.POSSIBLE_MATCH, "false", "true", "1");
+		assertMdmLink(MDM_LINK_PROPERTY_COUNT, part, myGoldenPatientId.getValue(), myPatientId.getValue(), MdmMatchResultEnum.POSSIBLE_MATCH, "false", "true", "1");
 	}
 
 
