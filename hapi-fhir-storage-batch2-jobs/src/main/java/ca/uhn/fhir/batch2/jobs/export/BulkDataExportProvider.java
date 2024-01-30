@@ -502,6 +502,9 @@ public class BulkDataExportProvider {
 
 						String serverBase = getServerBase(theRequestDetails);
 
+						// an output is required, even if empty, according to HL7 FHIR IG
+						bulkResponseDocument.getOutput();
+
 						for (Map.Entry<String, List<String>> entrySet :
 								results.getResourceTypeToBinaryIds().entrySet()) {
 							String resourceType = entrySet.getKey();
