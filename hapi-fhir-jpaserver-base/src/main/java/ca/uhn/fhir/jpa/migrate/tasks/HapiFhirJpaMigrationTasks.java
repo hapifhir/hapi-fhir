@@ -133,10 +133,12 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		mdmLinkTable
 				.addIndex("20230911.1", "IDX_EMPI_TGT_MR_LS")
 				.unique(false)
+				.online(true)
 				.withColumns("TARGET_TYPE", "MATCH_RESULT", "LINK_SOURCE");
 		mdmLinkTable
 				.addIndex("20230911.2", "IDX_EMPi_TGT_MR_SCore")
 				.unique(false)
+				.online(true)
 				.withColumns("TARGET_TYPE", "MATCH_RESULT", "SCORE");
 
 		// Move forced_id constraints to hfj_resource and the new fhir_id column
@@ -166,7 +168,11 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 				.withColumns("RES_TYPE", "FHIR_ID");
 
 		// For resolving references that don't supply the type.
-		hfjResource.addIndex("20231027.3", "IDX_RES_FHIR_ID").unique(false).withColumns("FHIR_ID");
+		hfjResource
+				.addIndex("20231027.3", "IDX_RES_FHIR_ID")
+				.unique(false)
+				.online(true)
+				.withColumns("FHIR_ID");
 
 		Builder.BuilderWithTableName batch2JobInstanceTable = version.onTable("BT2_JOB_INSTANCE");
 
@@ -177,7 +183,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		{
 			version.executeRawSql(
 							"20231212.1",
-							"CREATE INDEX idx_sp_string_hash_nrm_pattern_ops ON public.hfj_spidx_string USING btree (hash_norm_prefix, sp_value_normalized varchar_pattern_ops, res_id, partition_id)")
+							"CREATE INDEX CONCURRENTLY idx_sp_string_hash_nrm_pattern_ops ON public.hfj_spidx_string USING btree (hash_norm_prefix, sp_value_normalized varchar_pattern_ops, res_id, partition_id)")
 					.onlyAppliesToPlatforms(DriverTypeEnum.POSTGRES_9_4)
 					.onlyIf(
 							String.format(
