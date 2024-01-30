@@ -83,7 +83,7 @@ public class AuthorizationInterceptor implements IRuleApplier {
 	private static final AtomicInteger ourInstanceCount = new AtomicInteger(0);
 	private static final Logger ourLog = LoggerFactory.getLogger(AuthorizationInterceptor.class);
 	private static final Set<BundleTypeEnum> STANDALONE_BUNDLE_RESOURCE_TYPES =
-		Set.of(BundleTypeEnum.DOCUMENT, BundleTypeEnum.COLLECTION, BundleTypeEnum.MESSAGE);
+			Set.of(BundleTypeEnum.DOCUMENT, BundleTypeEnum.COLLECTION, BundleTypeEnum.MESSAGE);
 
 	private final int myInstanceIndex = ourInstanceCount.incrementAndGet();
 	private final String myRequestSeenResourcesKey =
@@ -578,7 +578,7 @@ public class AuthorizationInterceptor implements IRuleApplier {
 	}
 
 	public static List<IBaseResource> toListOfResourcesAndExcludeContainer(
-		IBaseResource theResponseObject, FhirContext fhirContext) {
+			IBaseResource theResponseObject, FhirContext fhirContext) {
 		if (theResponseObject == null) {
 			return Collections.emptyList();
 		}
@@ -616,7 +616,8 @@ public class AuthorizationInterceptor implements IRuleApplier {
 
 		IBaseBundle bundle = (IBaseBundle) theResource;
 		BundleTypeEnum bundleType = BundleUtil.getBundleTypeEnum(theFhirContext, bundle);
-		boolean isStandaloneBundleResource = bundleType != null && STANDALONE_BUNDLE_RESOURCE_TYPES.contains(bundleType);
+		boolean isStandaloneBundleResource =
+				bundleType != null && STANDALONE_BUNDLE_RESOURCE_TYPES.contains(bundleType);
 		return !isStandaloneBundleResource;
 	}
 

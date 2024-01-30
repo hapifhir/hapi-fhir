@@ -238,7 +238,7 @@ public class BundleUtil {
 
 	public static BundleTypeEnum getBundleTypeEnum(FhirContext theContext, IBaseBundle theBundle) {
 		String bundleTypeCode = BundleUtil.getBundleType(theContext, theBundle);
-		if (isBlank(bundleTypeCode)){
+		if (isBlank(bundleTypeCode)) {
 			return null;
 		}
 		return BundleTypeEnum.forCode(bundleTypeCode);
