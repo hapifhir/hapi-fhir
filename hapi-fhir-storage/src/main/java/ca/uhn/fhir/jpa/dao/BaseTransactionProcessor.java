@@ -2254,7 +2254,10 @@ public abstract class BaseTransactionProcessor {
 	 */
 	public static String performIdSubstitutionsInMatchUrl(IdSubstitutionMap theIdSubstitutions, String theMatchUrl) {
 		// LUKETODO:  this is where the matchUrl gets processed rightly and wrongly
-		ourLog.info("5587: performIdSubstitutionsInMatchUrl: theIdSubstitutions: {}, theMatchUrl: {}", theIdSubstitutions.entrySet(), theMatchUrl);
+		ourLog.info(
+				"5587: performIdSubstitutionsInMatchUrl: theIdSubstitutions: {}, theMatchUrl: {}",
+				theIdSubstitutions.entrySet(),
+				theMatchUrl);
 		String matchUrl = theMatchUrl;
 		if (isNotBlank(matchUrl) && !theIdSubstitutions.isEmpty()) {
 
