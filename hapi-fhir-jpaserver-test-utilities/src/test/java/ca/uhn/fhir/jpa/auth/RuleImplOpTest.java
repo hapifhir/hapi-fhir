@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.auth;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.interceptor.auth.AuthorizationInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.auth.IAuthRule;
@@ -12,22 +13,20 @@ import ca.uhn.fhir.rest.server.interceptor.auth.RuleBuilder;
 import ca.uhn.fhir.util.BundleBuilder;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.r4.model.CodeType;
+import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Parameters;
+import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.StringType;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoSettings;
 
 import java.util.HashSet;
+import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
-import static org.mockito.Mockito.when;
 
-@MockitoSettings
 public class RuleImplOpTest {
 	private static final String OPERATION = "operation";
 	private static final String TYPE = "type";
@@ -41,28 +40,27 @@ public class RuleImplOpTest {
 	private static final String ERROR_PARAMETERS = String.format(ERROR_TEMPLATE, "Parameters");
 	private static final String ERROR_BUNDLE = String.format(ERROR_TEMPLATE, "Bundle");
 
-	private IBaseBundle myInnerBundle;
-	private final IAuthRule myRule = new RuleBuilder()
+	private static final String REQUEST_RULELIST = AuthorizationInterceptor.class.getName() + "_1_RULELIST";
+	private final Patient myPatient = buildPatient();
+
+	private final List<IAuthRule> myRules = new RuleBuilder()
 		.allow()
 		.transaction()
 		.withAnyOperation()
 		.andApplyNormalRules()
-		.build()
-		.get(0);
+		.andThen()
+		.allow()
+		.write()
+		.allResources()
+		.withAnyId()
+		.build();
+
+	private final IAuthRule myRule = myRules.get(0);
 	private final FhirContext myFhirContext = FhirContext.forR4Cached();
+	private final IBaseBundle myInnerBundle = buildInnerBundler(myFhirContext);
 
-	@Mock
-	private RequestDetails myRequestDetails;
+	private final RequestDetails mySystemRequestDetails = buildSystemRequestDetails(myFhirContext, myRules);
 	private final IRuleApplier myRuleApplier = new AuthorizationInterceptor();
-
-	@BeforeEach
-	void beforeEach() {
-		when(myRequestDetails.getFhirContext()).thenReturn(myFhirContext);
-
-		final BundleBuilder innerBundleBuilder = new BundleBuilder(myFhirContext);
-		innerBundleBuilder.setType(DOCUMENT);
-		myInnerBundle = innerBundleBuilder.getBundle();
-	}
 
 	@Test
 	void testTransactionBundleUpdateWithParameters() {
@@ -93,16 +91,15 @@ public class RuleImplOpTest {
 	@Test
 	void testTransactionBundlePatchWithParameters() {
 		final BundleBuilder bundleBuilder = new BundleBuilder(myFhirContext);
-		bundleBuilder.addTransactionFhirPatchEntry(PARAMETERS);
+		bundleBuilder.addTransactionFhirPatchEntry(myPatient.getIdElement(), PARAMETERS);
 
 		final AuthorizationInterceptor.Verdict verdict = applyRule(bundleBuilder.getBundle());
 
-		// The important thing is that no InvalidRequestException is thrown
-		assertThat(verdict.getDecision(), equalTo(PolicyEnum.DENY));
+		assertThat(verdict.getDecision(), equalTo(PolicyEnum.ALLOW));
 	}
 
 	private AuthorizationInterceptor.Verdict applyRule(IBaseBundle theBundle) {
-		return myRule.applyRule(RestOperationTypeEnum.TRANSACTION, myRequestDetails, theBundle, null, myInnerBundle, myRuleApplier, new HashSet<>(), null);
+		return myRule.applyRule(RestOperationTypeEnum.TRANSACTION, mySystemRequestDetails, theBundle, myPatient.getIdElement(), myPatient, myRuleApplier, new HashSet<>(), null);
 	}
 
 	private static Parameters buildParameters() {
@@ -114,5 +111,25 @@ public class RuleImplOpTest {
 		op.addPart().setName(VALUE).setValue(new StringType("1912-04-14"));
 
 		return patch;
+	}
+
+	private static RequestDetails buildSystemRequestDetails(FhirContext theFhirContext, List<IAuthRule> theRules) {
+        final SystemRequestDetails systemRequestDetails = new SystemRequestDetails();
+		systemRequestDetails.setFhirContext(theFhirContext);
+		systemRequestDetails.getUserData().put(REQUEST_RULELIST, theRules);
+
+		return systemRequestDetails;
+	}
+
+	private static Patient buildPatient() {
+		final Patient patient = new Patient();
+		patient.setId(new IdType("Patient", "1"));
+		return patient;
+	}
+
+	private static IBaseBundle buildInnerBundler(FhirContext theFhirContext) {
+		final BundleBuilder innerBundleBuilder = new BundleBuilder(theFhirContext);
+		innerBundleBuilder.setType(DOCUMENT);
+		return innerBundleBuilder.getBundle();
 	}
 }
