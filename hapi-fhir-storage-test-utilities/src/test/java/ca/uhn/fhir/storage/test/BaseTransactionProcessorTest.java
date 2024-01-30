@@ -110,4 +110,22 @@ public class BaseTransactionProcessorTest {
 		assertTrue(matchResult, "Failed to find a Regex match using Url '" + matchUrl + "'");
 	}
 
+
+	@Test
+	void test1() {
+		final IdSubstitutionMap idSubstitutions = new IdSubstitutionMap();
+		idSubstitutions.put(new IdType("Task/urn:uuid:59cda086-4763-4ef0-8e36-8c90058686ea"), new IdType("Task/1/history/1"));
+		idSubstitutions.put(new IdType("urn:uuid:59cda086-4763-4ef0-8e36-8c90058686ea"), new IdType("Task/1/_history/1"));
+		final String outcome = BaseTransactionProcessor.performIdSubstitutionsInMatchUrl(idSubstitutions, "identifier=http://tempuri.org|2&based-on=urn:uuid:59cda086-4763-4ef0-8e36-8c90058686ea");
+		assertEquals("?identifier=http://tempuri.org|2&based-on=Task/1", outcome);
+	}
+
+	@Test
+	void test2() {
+		final IdSubstitutionMap idSubstitutions = new IdSubstitutionMap();
+		idSubstitutions.put(new IdType("Task/urn:uuid:59cda086-4763-4ef0-8e36-8c90058686ea"), new IdType("Task/1/history/1"));
+		idSubstitutions.put(new IdType("urn:uuid:59cda086-4763-4ef0-8e36-8c90058686ea"), new IdType("Task/1/_history/1"));
+		final String outcome = BaseTransactionProcessor.performIdSubstitutionsInMatchUrl(idSubstitutions, "?identifier=http://tempuri.org|2&based-on=urn:uuid:59cda086-4763-4ef0-8e36-8c90058686ea");
+		assertEquals("?identifier=http://tempuri.org|2&based-on=Task/1", outcome);
+	}
 }

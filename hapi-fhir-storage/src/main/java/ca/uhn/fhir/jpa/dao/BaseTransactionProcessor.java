@@ -1083,7 +1083,9 @@ public abstract class BaseTransactionProcessor {
 
 						DaoMethodOutcome outcome;
 						String matchUrl = myVersionAdapter.getEntryRequestIfNoneExist(nextReqEntry);
+						ourLog.info("5587: matchUrl first pass: [{}]", matchUrl);
 						matchUrl = performIdSubstitutionsInMatchUrl(theIdSubstitutions, matchUrl);
+						ourLog.info("5587: matchUrl second pass: [{}]", matchUrl);
 						// create individual resource
 						outcome = resourceDao.create(res, matchUrl, false, theRequest, theTransactionDetails);
 						setConditionalUrlToBeValidatedLater(conditionalUrlToIdMap, matchUrl, outcome.getId());
@@ -2251,10 +2253,13 @@ public abstract class BaseTransactionProcessor {
 	 * @return
 	 */
 	public static String performIdSubstitutionsInMatchUrl(IdSubstitutionMap theIdSubstitutions, String theMatchUrl) {
+		// LUKETODO:  this is where the matchUrl gets processed rightly and wrongly
+		ourLog.info("5587: performIdSubstitutionsInMatchUrl: theIdSubstitutions: {}, theMatchUrl: {}", theIdSubstitutions.entrySet(), theMatchUrl);
 		String matchUrl = theMatchUrl;
 		if (isNotBlank(matchUrl) && !theIdSubstitutions.isEmpty()) {
 
 			int startIdx = matchUrl.indexOf('?');
+			// LUKETODO:  this is what stops the non '?' case from working
 			while (startIdx != -1) {
 
 				int endIdx = matchUrl.indexOf('&', startIdx + 1);
