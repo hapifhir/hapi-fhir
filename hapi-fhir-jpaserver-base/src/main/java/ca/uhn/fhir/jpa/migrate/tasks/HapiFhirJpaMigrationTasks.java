@@ -184,6 +184,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			version.executeRawSql(
 							"20231212.1",
 							"CREATE INDEX CONCURRENTLY idx_sp_string_hash_nrm_pattern_ops ON public.hfj_spidx_string USING btree (hash_norm_prefix, sp_value_normalized varchar_pattern_ops, res_id, partition_id)")
+					.setTransactional(false)
 					.onlyAppliesToPlatforms(DriverTypeEnum.POSTGRES_9_4)
 					.onlyIf(
 							String.format(
@@ -196,7 +197,8 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 							"Index idx_sp_string_hash_nrm_pattern_ops already exists");
 			version.executeRawSql(
 							"20231212.2",
-							"CREATE UNIQUE INDEX idx_sp_uri_hash_identity_pattern_ops ON public.hfj_spidx_uri USING btree (hash_identity, sp_uri varchar_pattern_ops, res_id, partition_id)")
+							"CREATE UNIQUE INDEX CONCURRENTLY idx_sp_uri_hash_identity_pattern_ops ON public.hfj_spidx_uri USING btree (hash_identity, sp_uri varchar_pattern_ops, res_id, partition_id)")
+					.setTransactional(false)
 					.onlyAppliesToPlatforms(DriverTypeEnum.POSTGRES_9_4)
 					.onlyIf(
 							String.format(
