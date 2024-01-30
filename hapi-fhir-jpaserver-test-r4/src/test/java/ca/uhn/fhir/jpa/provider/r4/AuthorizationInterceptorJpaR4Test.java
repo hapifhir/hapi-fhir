@@ -1,7 +1,6 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.batch2.jobs.export.BulkDataExportProvider;
 import ca.uhn.fhir.jpa.delete.ThreadSafeResourceDeleterSvc;
 import ca.uhn.fhir.jpa.interceptor.CascadingDeleteInterceptor;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
@@ -37,11 +36,13 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.Composition;
 import org.hl7.fhir.r4.model.Condition;
 import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Identifier;
+import org.hl7.fhir.r4.model.MessageHeader;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Observation.ObservationStatus;
 import org.hl7.fhir.r4.model.Organization;
@@ -49,6 +50,7 @@ import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.jupiter.api.AfterEach;
@@ -69,6 +71,7 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.startsWith;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Test {
@@ -79,6 +82,8 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 	private SearchParamMatcher mySearchParamMatcher;
 	@Autowired
 	private ThreadSafeResourceDeleterSvc myThreadSafeResourceDeleterSvc;
+	private AuthorizationInterceptor myReadAllBundleInterceptor;
+	private AuthorizationInterceptor myReadAllPatientInterceptor;
 
 	@BeforeEach
 	@Override
@@ -87,7 +92,8 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 		myStorageSettings.setAllowMultipleDelete(true);
 		myStorageSettings.setExpungeEnabled(true);
 		myStorageSettings.setDeleteExpungeEnabled(true);
-		myServer.getRestfulServer().registerInterceptor(new BulkDataExportProvider());
+		myReadAllBundleInterceptor = new ReadAllAuthorizationInterceptor("Bundle");
+		myReadAllPatientInterceptor = new ReadAllAuthorizationInterceptor("Patient");
 	}
 
 	@Override
@@ -1505,5 +1511,153 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 			// expected
 		}
 
+	}
+
+	@Test
+	public void testSearchBundles_withPermissionToSearchAllBundles_doesNotReturn403ForbiddenForDocumentBundles(){
+		myServer.getRestfulServer().registerInterceptor(myReadAllBundleInterceptor);
+
+		Bundle bundle1 = createDocumentBundle(createPatient("John", "Smith"));
+		Bundle bundle2 = createDocumentBundle(createPatient("Jane", "Doe"));
+		assertSearchContainsResources("/Bundle", bundle1, bundle2);
+	}
+
+	@Test
+	public void testSearchBundles_withPermissionToSearchAllBundles_doesNotReturn403ForbiddenForCollectionBundles(){
+		myServer.getRestfulServer().registerInterceptor(myReadAllBundleInterceptor);
+
+		Bundle bundle1 = createCollectionBundle(createPatient("John", "Smith"));
+		Bundle bundle2 = createCollectionBundle(createPatient("Jane", "Doe"));
+		assertSearchContainsResources("/Bundle", bundle1, bundle2);
+	}
+
+	@Test
+	public void testSearchBundles_withPermissionToSearchAllBundles_doesNotReturn403ForbiddenForMessageBundles(){
+		myServer.getRestfulServer().registerInterceptor(myReadAllBundleInterceptor);
+
+		Bundle bundle1 = createMessageHeaderBundle(createPatient("John", "Smith"));
+		Bundle bundle2 = createMessageHeaderBundle(createPatient("Jane", "Doe"));
+		assertSearchContainsResources("/Bundle", bundle1, bundle2);
+	}
+
+	@Test
+	public void testSearchPatients_withPermissionToSearchAllBundles_returns403Forbidden(){
+		myServer.getRestfulServer().registerInterceptor(myReadAllBundleInterceptor);
+
+		createPatient("John", "Smith");
+		createPatient("Jane", "Doe");
+		assertSearchFailsWith403Forbidden("/Patient");
+	}
+
+	@Test
+	public void testSearchPatients_withPermissionToSearchAllPatients_returnsAllPatients(){
+		myServer.getRestfulServer().registerInterceptor(myReadAllPatientInterceptor);
+
+		Patient patient1 = createPatient("John", "Smith");
+		Patient patient2 = createPatient("Jane", "Doe");
+		assertSearchContainsResources("/Patient", patient1, patient2);
+	}
+
+	@Test
+	public void testSearchPatients_withPermissionToViewOnePatient_onlyAllowsViewingOnePatient(){
+		Patient patient1 = createPatient("John", "Smith");
+		Patient patient2 = createPatient("Jane", "Doe");
+
+		myServer.getRestfulServer().getInterceptorService().registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
+			@Override
+			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
+				return new RuleBuilder()
+					.allow().read().allResources().inCompartment("Patient", patient1.getIdElement()).andThen()
+					.build();
+			}
+		});
+
+		assertSearchContainsResources("/Patient?_id=" + patient1.getIdPart(), patient1);
+		assertSearchFailsWith403Forbidden("/Patient?_id=" + patient2.getIdPart());
+		assertSearchFailsWith403Forbidden("/Patient");
+	}
+
+	private Patient createPatient(String theFirstName, String theLastName){
+		Patient patient = new Patient();
+		patient.addName().addGiven(theFirstName).setFamily(theLastName);
+		return (Patient) myPatientDao.create(patient, mySrd).getResource();
+	}
+
+	private Bundle createDocumentBundle(Patient thePatient){
+		Composition composition = new Composition();
+		composition.setType(new CodeableConcept().addCoding(new Coding().setSystem("http://example.org").setCode("some-type")));
+		composition.getSubject().setReference(thePatient.getIdElement().getValue());
+
+		Bundle bundle = new Bundle();
+		bundle.setType(Bundle.BundleType.DOCUMENT);
+		bundle.addEntry().setResource(composition);
+		bundle.addEntry().setResource(thePatient);
+		return (Bundle) myBundleDao.create(bundle, mySrd).getResource();
+	}
+
+	private Bundle createCollectionBundle(Patient thePatient) {
+		Bundle bundle = new Bundle();
+		bundle.setType(Bundle.BundleType.COLLECTION);
+		bundle.addEntry().setResource(thePatient);
+		return (Bundle) myBundleDao.create(bundle, mySrd).getResource();
+	}
+
+	private Bundle createMessageHeaderBundle(Patient thePatient) {
+		Bundle bundle = new Bundle();
+		bundle.setType(Bundle.BundleType.MESSAGE);
+
+		MessageHeader messageHeader = new MessageHeader();
+		Coding event = new Coding().setSystem("http://acme.com").setCode("some-event");
+		messageHeader.setEvent(event);
+		messageHeader.getFocusFirstRep().setReference(thePatient.getIdElement().getValue());
+		bundle.addEntry().setResource(messageHeader);
+		bundle.addEntry().setResource(thePatient);
+
+		return (Bundle) myBundleDao.create(bundle, mySrd).getResource();
+	}
+
+	private void assertSearchContainsResources(String theUrl, Resource... theExpectedResources){
+		List<String> expectedIds = Arrays.stream(theExpectedResources).toList().stream()
+			.map(resource -> resource.getIdPart())
+			.toList();
+
+		Bundle searchResult = myClient
+			.search()
+			.byUrl(theUrl)
+			.returnBundle(Bundle.class)
+			.execute();
+
+		List<String> actualIds = searchResult.getEntry().stream()
+			.map(entry -> entry.getResource().getIdPart())
+			.toList();
+
+		assertEquals(expectedIds.size(), actualIds.size());
+		assertTrue(expectedIds.containsAll(actualIds));
+	}
+
+	private void assertSearchFailsWith403Forbidden(String theUrl){
+		try {
+			myClient.search().byUrl(theUrl).execute();
+			fail();
+		} catch (Exception e){
+			assertTrue(e.getMessage().contains("HTTP 403 Forbidden"));
+		}
+	}
+
+	static class ReadAllAuthorizationInterceptor extends AuthorizationInterceptor {
+
+		private final String myResourceType;
+
+		public ReadAllAuthorizationInterceptor(String theResourceType){
+			super(PolicyEnum.DENY);
+			myResourceType = theResourceType;
+		}
+
+		@Override
+		public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
+			return new RuleBuilder()
+				.allow().read().resourcesOfType(myResourceType).withAnyId().andThen()
+				.build();
+		}
 	}
 }
