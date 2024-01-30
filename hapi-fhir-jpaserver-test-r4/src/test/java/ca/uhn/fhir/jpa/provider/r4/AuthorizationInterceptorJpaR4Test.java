@@ -1586,6 +1586,30 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 		assertSearchFailsWith403Forbidden("/Patient");
 	}
 
+	@Test
+	public void testToListOfResourcesAndExcludeContainer_withSearchSetContainingDocumentBundles_onlyRecursesOneLevelDeep() {
+		Bundle bundle1 = createDocumentBundle(createPatient("John", "Smith"));
+		Bundle bundle2 = createDocumentBundle(createPatient("John", "Smith"));
+		Bundle searchSet = createSearchSet(bundle1, bundle2);
+
+		List<IBaseResource> resources = AuthorizationInterceptor.toListOfResourcesAndExcludeContainer(searchSet, myFhirContext);
+		assertEquals(2, resources.size());
+		assertTrue(resources.contains(bundle1));
+		assertTrue(resources.contains(bundle2));
+	}
+
+	@Test
+	public void testToListOfResourcesAndExcludeContainer_withSearchSetContainingPatients_returnsPatients() {
+		Patient patient1 = createPatient("John", "Smith");
+		Patient patient2 = createPatient("Jane", "Doe");
+		Bundle searchSet = createSearchSet(patient1, patient2);
+
+		List<IBaseResource> resources = AuthorizationInterceptor.toListOfResourcesAndExcludeContainer(searchSet, myFhirContext);
+		assertEquals(2, resources.size());
+		assertTrue(resources.contains(patient1));
+		assertTrue(resources.contains(patient2));
+	}
+
 	private Patient createPatient(String theFirstName, String theLastName){
 		Patient patient = new Patient();
 		patient.addName().addGiven(theFirstName).setFamily(theLastName);
@@ -1651,6 +1675,13 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 		} catch (Exception e){
 			assertTrue(e.getMessage().contains("HTTP 403 Forbidden"));
 		}
+	}
+
+	private Bundle createSearchSet(Resource... theResources){
+		Bundle bundle = new Bundle();
+		bundle.setType(Bundle.BundleType.SEARCHSET);
+		Arrays.stream(theResources).forEach(resource -> bundle.addEntry().setResource(resource));
+		return bundle;
 	}
 
 	static class ReadAllAuthorizationInterceptor extends AuthorizationInterceptor {

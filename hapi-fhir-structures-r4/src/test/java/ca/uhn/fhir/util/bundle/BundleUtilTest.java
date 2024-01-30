@@ -3,10 +3,12 @@ package ca.uhn.fhir.util.bundle;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.valueset.BundleEntrySearchModeEnum;
+import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.BundleBuilder;
 import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.TestUtil;
+import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -25,8 +27,9 @@ import org.hl7.fhir.r4.model.UriType;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
-import jakarta.annotation.Nonnull;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
@@ -553,6 +556,37 @@ public class BundleUtilTest {
 		final IBaseResource actual = BundleUtil.getResourceByReferenceAndResourceType(ourCtx, bundle, reference);
 		// validate
 		assertNull(actual);
+	}
+
+	@ParameterizedTest
+	@CsvSource({
+		 // Actual BundleType            Expected BundleTypeEnum
+		 "TRANSACTION,                   TRANSACTION",
+		 "DOCUMENT,                      DOCUMENT",
+		 "MESSAGE,                       MESSAGE",
+		 "BATCHRESPONSE,                 BATCH_RESPONSE",
+		 "TRANSACTIONRESPONSE,           TRANSACTION_RESPONSE",
+		 "HISTORY,                       HISTORY",
+		 "SEARCHSET,                     SEARCHSET",
+		 "COLLECTION,                    COLLECTION"
+	})
+	public void testGetBundleTypeEnum_withKnownBundleTypes_returnsCorrectBundleTypeEnum(Bundle.BundleType theBundleType, BundleTypeEnum theExpectedBundleTypeEnum){
+		Bundle bundle = new Bundle();
+		bundle.setType(theBundleType);
+		assertEquals(theExpectedBundleTypeEnum, BundleUtil.getBundleTypeEnum(ourCtx, bundle));
+	}
+
+	@Test
+	public void testGetBundleTypeEnum_withNullBundleType_returnsNull(){
+		Bundle bundle = new Bundle();
+		bundle.setType(Bundle.BundleType.NULL);
+		assertNull(BundleUtil.getBundleTypeEnum(ourCtx, bundle));
+	}
+
+	@Test
+	public void testGetBundleTypeEnum_withNoBundleType_returnsNull(){
+		Bundle bundle = new Bundle();
+		assertNull(BundleUtil.getBundleTypeEnum(ourCtx, bundle));
 	}
 
 	@Nonnull

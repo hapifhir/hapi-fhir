@@ -25,12 +25,14 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.IPreResourceShowDetails;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
 import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
 import ca.uhn.fhir.rest.server.interceptor.consent.ConsentInterceptor;
+import ca.uhn.fhir.util.BundleUtil;
 import com.google.common.collect.Lists;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
@@ -80,6 +82,9 @@ public class AuthorizationInterceptor implements IRuleApplier {
 			AuthorizationInterceptor.class.getName() + "_BulkDataExportOptions";
 	private static final AtomicInteger ourInstanceCount = new AtomicInteger(0);
 	private static final Logger ourLog = LoggerFactory.getLogger(AuthorizationInterceptor.class);
+	private static final Set<BundleTypeEnum> STANDALONE_BUNDLE_RESOURCE_TYPES =
+		Set.of(BundleTypeEnum.DOCUMENT, BundleTypeEnum.COLLECTION, BundleTypeEnum.MESSAGE);
+
 	private final int myInstanceIndex = ourInstanceCount.incrementAndGet();
 	private final String myRequestSeenResourcesKey =
 			AuthorizationInterceptor.class.getName() + "_" + myInstanceIndex + "_SEENRESOURCES";
@@ -572,8 +577,8 @@ public class AuthorizationInterceptor implements IRuleApplier {
 		OUT,
 	}
 
-	static List<IBaseResource> toListOfResourcesAndExcludeContainer(
-			IBaseResource theResponseObject, FhirContext fhirContext) {
+	public static List<IBaseResource> toListOfResourcesAndExcludeContainer(
+		IBaseResource theResponseObject, FhirContext fhirContext) {
 		if (theResponseObject == null) {
 			return Collections.emptyList();
 		}
@@ -581,7 +586,7 @@ public class AuthorizationInterceptor implements IRuleApplier {
 		List<IBaseResource> retVal;
 
 		boolean isContainer = false;
-		if (theResponseObject instanceof IBaseBundle) {
+		if (isContainerBundle(fhirContext, theResponseObject)) {
 			isContainer = true;
 		} else if (theResponseObject instanceof IBaseParameters) {
 			isContainer = true;
@@ -602,6 +607,17 @@ public class AuthorizationInterceptor implements IRuleApplier {
 		retVal.removeIf(t -> t instanceof IBaseOperationOutcome);
 
 		return retVal;
+	}
+
+	static boolean isContainerBundle(FhirContext theFhirContext, IBaseResource theResource) {
+		if (!(theResource instanceof IBaseBundle)) {
+			return false;
+		}
+
+		IBaseBundle bundle = (IBaseBundle) theResource;
+		BundleTypeEnum bundleType = BundleUtil.getBundleTypeEnum(theFhirContext, bundle);
+		boolean isStandaloneBundleResource = bundleType != null && STANDALONE_BUNDLE_RESOURCE_TYPES.contains(bundleType);
+		return !isStandaloneBundleResource;
 	}
 
 	public static class Verdict {
