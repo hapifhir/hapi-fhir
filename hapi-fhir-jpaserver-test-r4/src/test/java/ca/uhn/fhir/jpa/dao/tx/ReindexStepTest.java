@@ -44,6 +44,7 @@ public class ReindexStepTest {
 		ReindexJobParameters reindexJobParameters = new ReindexJobParameters();
 		reindexJobParameters.setRequestPartitionId(RequestPartitionId.fromPartitionId(expectedPartitionId));
 		when(myHapiTransactionService.withRequest(any())).thenCallRealMethod();
+		when(myHapiTransactionService.buildExecutionBuilder(any())).thenCallRealMethod();
 
 		// when
 		myReindexStep.doReindex(data, myDataSink, "index-id", "chunk-id", reindexJobParameters);

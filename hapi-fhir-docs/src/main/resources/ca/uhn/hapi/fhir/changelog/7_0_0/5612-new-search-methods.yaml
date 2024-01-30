@@ -1,0 +1,4 @@
+---
+type: change
+issue: 5612
+title: "The resource dao interface now supports searching for IIdType or full resources."

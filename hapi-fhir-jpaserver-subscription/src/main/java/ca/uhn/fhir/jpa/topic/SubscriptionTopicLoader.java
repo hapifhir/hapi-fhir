@@ -25,6 +25,7 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.subscription.SubscriptionConstants;
 import ca.uhn.fhir.util.Logs;
 import jakarta.annotation.Nonnull;
@@ -46,6 +47,9 @@ public class SubscriptionTopicLoader extends BaseResourceCacheSynchronizer {
 
 	@Autowired
 	private SubscriptionTopicRegistry mySubscriptionTopicRegistry;
+
+	@Autowired
+	protected ISearchParamRegistry mySearchParamRegistry;
 
 	/**
 	 * Constructor

@@ -301,7 +301,7 @@ public class SearchTask implements Callable<Void> {
 					// the user has a chance to know that they were in the results
 					if (mySearchRuntimeDetails.getRequestDetails() != null && !unsyncedPids.isEmpty()) {
 						JpaPreResourceAccessDetails accessDetails =
-								new JpaPreResourceAccessDetails(unsyncedPids, () -> newSearchBuilder());
+								new JpaPreResourceAccessDetails(unsyncedPids, this::newSearchBuilder);
 						HookParams params = new HookParams()
 								.add(IPreResourceAccessDetails.class, accessDetails)
 								.add(RequestDetails.class, mySearchRuntimeDetails.getRequestDetails())
@@ -446,7 +446,7 @@ public class SearchTask implements Callable<Void> {
 			myTxService
 					.withRequest(myRequest)
 					.withRequestPartitionId(myRequestPartitionId)
-					.execute(() -> doSearch());
+					.execute(this::doSearch);
 
 			mySearchRuntimeDetails.setSearchStatus(mySearch.getStatus());
 			if (mySearch.getStatus() == SearchStatusEnum.FINISHED) {

@@ -30,7 +30,9 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionOperations;
 
+import java.util.List;
 import java.util.concurrent.Callable;
+import java.util.stream.Stream;
 
 /**
  * This class is used to execute code within the context of a database transaction,
@@ -107,5 +109,27 @@ public interface IHapiTransactionService {
 		<T> T execute(Callable<T> theTask);
 
 		<T> T execute(@Nonnull TransactionCallback<T> callback);
+
+		/**
+		 * Read query path.
+		 */
+		default <T> T read(Callable<T> theCallback) {
+			return execute(theCallback);
+		}
+
+		/**
+		 * Search for open Stream.
+		 * The Stream may not be readable outside an outermost transaction.
+		 */
+		default <T> Stream<T> search(Callable<Stream<T>> theCallback) {
+			return execute(theCallback);
+		}
+
+		/**
+		 * Search for concrete List.
+		 */
+		default <T> List<T> searchList(Callable<List<T>> theCallback) {
+			return execute(theCallback);
+		}
 	}
 }

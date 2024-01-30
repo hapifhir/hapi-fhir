@@ -263,7 +263,7 @@ public class JpaConstants {
 	/**
 	 * The name of the default partition
 	 */
-	public static final String DEFAULT_PARTITION_NAME = "DEFAULT";
+	public static final String DEFAULT_PARTITION_NAME = ProviderConstants.DEFAULT_PARTITION_NAME;
 
 	/**
 	 * The name of the collection of all partitions
