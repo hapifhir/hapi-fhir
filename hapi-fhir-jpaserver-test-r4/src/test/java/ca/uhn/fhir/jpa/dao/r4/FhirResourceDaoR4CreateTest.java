@@ -48,6 +48,7 @@ import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.SampledData;
 import org.hl7.fhir.r4.model.SearchParameter;
 import org.hl7.fhir.r4.model.StructureDefinition;
+import org.hl7.fhir.r4.model.Task;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -1224,4 +1225,127 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		assertEquals(1, ids.size());
 	}
 
+	/*
+	{
+  "resourceType": "Bundle",
+  "type": "transaction",
+  "entry": [
+    {
+      "fullUrl": "urn:uuid:59cda086-4763-4ef0-8e36-8c90058686ea",
+      "resource": {
+        "resourceType": "Task",
+        "identifier": [
+          {
+            "system": "http://tempuri.org",
+            "value": "1"
+          }
+        ],
+        "status": "draft",
+        "intent": "unknown"
+      },
+      "request": {
+        "method": "POST",
+        "url": "Task",
+        "ifNoneExist": "identifier=http://tempuri.org|1"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Task",
+        "identifier": [
+          {
+            "system": "http://tempuri.org",
+            "value": "2"
+          }
+        ],
+        "basedOn": {
+          "reference": "urn:uuid:59cda086-4763-4ef0-8e36-8c90058686ea"
+        },
+        "status": "draft",
+        "intent": "unknown"
+      },
+      "request": {
+        "method": "POST",
+        "url": "Task",
+        "ifNoneExist": "identifier=http://tempuri.org|2&based-on=urn:uuid:59cda086-4763-4ef0-8e36-8c90058686ea"
+      }
+    }
+  ]
+}
+	 */
+	@Test
+	public void testConditionalCreateSomethingSomething() {
+		final BundleBuilder bundleBuilder = new BundleBuilder(myFhirContext);
+
+		final Task taskUpstream = new Task();
+		taskUpstream.addIdentifier()
+			.setSystem("http://tempuri.org")
+			.setValue("1");
+		taskUpstream
+			.setStatus(Task.TaskStatus.DRAFT)
+			.setIntent(Task.TaskIntent.UNKNOWN);
+
+		bundleBuilder.addTransactionCreateEntry(taskUpstream, "urn:uuid:59cda086-4763-4ef0-8e36-8c90058686ea")
+			.conditional("identifier=http://tempuri.org|1");
+
+		final Task taskDownstream = new Task();
+		taskDownstream.addIdentifier()
+			.setSystem("http://tempuri.org")
+			.setValue("2");
+		taskDownstream
+			.setStatus(Task.TaskStatus.DRAFT)
+			.setIntent(Task.TaskIntent.UNKNOWN);
+		taskDownstream.addBasedOn()
+			.setReference("urn:uuid:59cda086-4763-4ef0-8e36-8c90058686ea");
+
+		bundleBuilder.addTransactionCreateEntry(taskDownstream)
+			.conditional("identifier=http://tempuri.org|2&based-on=urn:uuid:59cda086-4763-4ef0-8e36-8c90058686ea");
+
+		final String bundleJson = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundleBuilder.getBundle());
+
+		ourLog.info("bundleJson: {}", bundleJson);
+
+		final Bundle result = mySystemDao.transaction(new SystemRequestDetails(), (Bundle) bundleBuilder.getBundle());
+
+		// LUKETODO:  better assertions
+		assertEquals(List.of("201 Created", "201 Created"), result.getEntry().stream().map(Bundle.BundleEntryComponent::getResponse).map(Bundle.BundleEntryResponseComponent::getStatus).toList());
+	}
+
+	@Test
+	public void testConditionalCreateSomethingSomethingOther() {
+		final BundleBuilder bundleBuilder = new BundleBuilder(myFhirContext);
+
+		final Task taskUpstream = new Task();
+		taskUpstream.addIdentifier()
+			.setSystem("http://tempuri.org")
+			.setValue("1");
+		taskUpstream
+			.setStatus(Task.TaskStatus.DRAFT)
+			.setIntent(Task.TaskIntent.UNKNOWN);
+
+		bundleBuilder.addTransactionCreateEntry(taskUpstream, "urn:uuid:59cda086-4763-4ef0-8e36-8c90058686ea")
+			.conditional("identifier=http://tempuri.org|1");
+
+		final Task taskDownstream = new Task();
+		taskDownstream.addIdentifier()
+			.setSystem("http://tempuri.org")
+			.setValue("2");
+		taskDownstream
+			.setStatus(Task.TaskStatus.DRAFT)
+			.setIntent(Task.TaskIntent.UNKNOWN);
+		taskDownstream.addBasedOn()
+			.setReference("urn:uuid:59cda086-4763-4ef0-8e36-8c90058686ea");
+
+		bundleBuilder.addTransactionCreateEntry(taskDownstream)
+			.conditional("?identifier=http://tempuri.org|2&based-on=urn:uuid:59cda086-4763-4ef0-8e36-8c90058686ea");
+
+		final String bundleJson = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundleBuilder.getBundle());
+
+		ourLog.info("bundleJson: {}", bundleJson);
+
+		final Bundle result = mySystemDao.transaction(new SystemRequestDetails(), (Bundle) bundleBuilder.getBundle());
+
+		// LUKETODO:  better assertions
+		assertEquals(List.of("201 Created", "201 Created"), result.getEntry().stream().map(Bundle.BundleEntryComponent::getResponse).map(Bundle.BundleEntryResponseComponent::getStatus).toList());
+	}
 }

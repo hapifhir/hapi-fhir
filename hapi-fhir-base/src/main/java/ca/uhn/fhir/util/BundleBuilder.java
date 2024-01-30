@@ -251,10 +251,16 @@ public class BundleBuilder {
 	 * @param theResource The resource to create
 	 */
 	public CreateBuilder addTransactionCreateEntry(IBaseResource theResource) {
+		return addTransactionCreateEntry(theResource, null);
+	}
+
+	// LUKETODO:  javadoc
+	public CreateBuilder addTransactionCreateEntry(IBaseResource theResource, @Nullable String theFullUrl) {
 		setBundleField("type", "transaction");
 
-		IBase request =
-				addEntryAndReturnRequest(theResource, theResource.getIdElement().getValue());
+		IBase request = addEntryAndReturnRequest(
+				theResource,
+				theFullUrl != null ? theFullUrl : theResource.getIdElement().getValue());
 
 		String resourceType = myContext.getResourceType(theResource);
 
