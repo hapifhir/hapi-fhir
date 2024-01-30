@@ -20,7 +20,6 @@ import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.exceptions.TerminologyServiceException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r5.context.IContextResourceLoader;
-import org.hl7.fhir.r5.context.ILoggingService;
 import org.hl7.fhir.r5.context.IWorkerContext;
 import org.hl7.fhir.r5.context.IWorkerContextManager;
 import org.hl7.fhir.r5.model.CodeSystem;
@@ -603,12 +602,12 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 	}
 
 	@Override
-	public ILoggingService getLogger() {
+	public org.hl7.fhir.r5.context.ILoggingService getLogger() {
 		return null;
 	}
 
 	@Override
-	public void setLogger(ILoggingService logger) {
+	public void setLogger(org.hl7.fhir.r5.context.ILoggingService logger) {
 		throw new UnsupportedOperationException(Msg.code(687));
 	}
 

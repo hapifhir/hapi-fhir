@@ -897,7 +897,7 @@
 	</licenses>
 
 	<properties>
-		<fhir_core_version>6.2.6</fhir_core_version>
+		<fhir_core_version>6.2.6.1</fhir_core_version>
 		<spotless_version>2.41.1</spotless_version>
 		<surefire_jvm_args>-Dfile.encoding=UTF-8 -Xmx2048m</surefire_jvm_args>
 
@@ -993,7 +993,7 @@
 		<ucum_version>1.0.8</ucum_version>
 
 		<!-- CQL Support -->
-		<clinical-reasoning.version>3.0.0-PRE14</clinical-reasoning.version>
+		<clinical-reasoning.version>3.0.0-PRE15</clinical-reasoning.version>
 
 		<!-- Site properties -->
 		<fontawesomeVersion>5.4.1</fontawesomeVersion>
