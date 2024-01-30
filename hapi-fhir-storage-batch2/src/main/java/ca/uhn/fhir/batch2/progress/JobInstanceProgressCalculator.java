@@ -112,8 +112,7 @@ public class JobInstanceProgressCalculator {
 	private boolean lastStepIsReduction(String theInstanceId) {
 		JobInstance jobInstance = getJobInstance(theInstanceId);
 		JobDefinition<IModelJson> jobDefinition = myJobDefinitionRegistry.getJobDefinitionOrThrowException(jobInstance);
-		int stepCount = jobDefinition.getSteps().size();
-		return stepCount >= 1 && jobDefinition.getSteps().get(stepCount - 1).isReductionStep();
+		return jobDefinition.isLastStepReduction();
 	}
 
 	private JobInstance getJobInstance(String theInstanceId) {
