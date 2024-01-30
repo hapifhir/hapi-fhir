@@ -42,7 +42,13 @@ public class RuleImplOpTest {
 	private static final String ERROR_BUNDLE = String.format(ERROR_TEMPLATE, "Bundle");
 
 	private IBaseBundle myInnerBundle;
-	private IAuthRule myRule;
+	private final IAuthRule myRule = new RuleBuilder()
+		.allow()
+		.transaction()
+		.withAnyOperation()
+		.andApplyNormalRules()
+		.build()
+		.get(0);
 	private final FhirContext myFhirContext = FhirContext.forR4Cached();
 
 	@Mock
@@ -56,14 +62,6 @@ public class RuleImplOpTest {
 		final BundleBuilder innerBundleBuilder = new BundleBuilder(myFhirContext);
 		innerBundleBuilder.setType(DOCUMENT);
 		myInnerBundle = innerBundleBuilder.getBundle();
-
-		myRule = new RuleBuilder()
-			.allow()
-			.transaction()
-			.withAnyOperation()
-			.andApplyNormalRules()
-			.build()
-			.get(0);
 	}
 
 	@Test
