@@ -614,6 +614,11 @@ public class Builder {
 			myTask.setRunDuringSchemaInitialization(true);
 			return this;
 		}
+
+		public BuilderCompleteTask setTransactional(boolean theFlag) {
+			myTask.setTransactional(theFlag);
+			return this;
+		}
 	}
 
 	public class BuilderAddTableRawSql {
