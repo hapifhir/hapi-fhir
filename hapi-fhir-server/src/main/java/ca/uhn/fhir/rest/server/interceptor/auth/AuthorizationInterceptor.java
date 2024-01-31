@@ -619,13 +619,15 @@ public class AuthorizationInterceptor implements IRuleApplier {
 	 * this scenario we want to apply permissions to the Bundle itself and not the resources inside if
 	 * the Bundle is of type document, collection, or message.
 	 */
-	public static boolean shouldExamineBundleChildResources(RequestDetails theRequestDetails, FhirContext theFhirContext, IBaseBundle theBundle) {
+	public static boolean shouldExamineBundleChildResources(
+			RequestDetails theRequestDetails, FhirContext theFhirContext, IBaseBundle theBundle) {
 		boolean isBundleRequest = theRequestDetails != null && BUNDLE.equals(theRequestDetails.getResourceName());
 		if (!isBundleRequest) {
 			return true;
 		}
 		BundleTypeEnum bundleType = BundleUtil.getBundleTypeEnum(theFhirContext, theBundle);
-		boolean isStandaloneBundleResource = bundleType != null && STANDALONE_BUNDLE_RESOURCE_TYPES.contains(bundleType);
+		boolean isStandaloneBundleResource =
+				bundleType != null && STANDALONE_BUNDLE_RESOURCE_TYPES.contains(bundleType);
 		return !isStandaloneBundleResource;
 	}
 
