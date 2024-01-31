@@ -254,7 +254,13 @@ public class BundleBuilder {
 		return addTransactionCreateEntry(theResource, null);
 	}
 
-	// LUKETODO:  javadoc
+	/**
+	 * Adds an entry containing an create (POST) request.
+	 * Also sets the Bundle.type value to "transaction" if it is not already set.
+	 *
+	 * @param theResource The resource to create
+	 * @param theFullUrl The fullUrl to attach to the entry.  If null, will default to the resource ID.
+	 */
 	public CreateBuilder addTransactionCreateEntry(IBaseResource theResource, @Nullable String theFullUrl) {
 		setBundleField("type", "transaction");
 
