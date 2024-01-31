@@ -13,6 +13,7 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.client.interceptor.SimpleRequestHeaderInterceptor;
 import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
 import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
@@ -56,6 +57,8 @@ import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -70,6 +73,7 @@ import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.startsWith;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -1592,7 +1596,10 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 		Bundle bundle2 = createDocumentBundle(createPatient("John", "Smith"));
 		Bundle searchSet = createSearchSet(bundle1, bundle2);
 
-		List<IBaseResource> resources = AuthorizationInterceptor.toListOfResourcesAndExcludeContainer(searchSet, myFhirContext);
+		RequestDetails requestDetails = new SystemRequestDetails();
+		requestDetails.setResourceName("Bundle");
+
+		List<IBaseResource> resources = AuthorizationInterceptor.toListOfResourcesAndExcludeContainer(requestDetails, searchSet, myFhirContext);
 		assertEquals(2, resources.size());
 		assertTrue(resources.contains(bundle1));
 		assertTrue(resources.contains(bundle2));
@@ -1604,10 +1611,46 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 		Patient patient2 = createPatient("Jane", "Doe");
 		Bundle searchSet = createSearchSet(patient1, patient2);
 
-		List<IBaseResource> resources = AuthorizationInterceptor.toListOfResourcesAndExcludeContainer(searchSet, myFhirContext);
+		RequestDetails requestDetails = new SystemRequestDetails();
+		requestDetails.setResourceName("Patient");
+
+		List<IBaseResource> resources = AuthorizationInterceptor.toListOfResourcesAndExcludeContainer(requestDetails, searchSet, myFhirContext);
 		assertEquals(2, resources.size());
 		assertTrue(resources.contains(patient1));
 		assertTrue(resources.contains(patient2));
+	}
+
+	@ParameterizedTest
+	@EnumSource(value = Bundle.BundleType.class, names = {"DOCUMENT", "COLLECTION", "MESSAGE"})
+	public void testShouldExamineBundleResources_withBundleRequestAndStandAloneBundleType_returnsFalse(Bundle.BundleType theBundleType){
+		RequestDetails requestDetails = new SystemRequestDetails();
+		requestDetails.setResourceName("Bundle");
+		Bundle bundle = new Bundle();
+		bundle.setType(theBundleType);
+
+		assertFalse(AuthorizationInterceptor.shouldExamineBundleChildResources(requestDetails, myFhirContext, bundle));
+	}
+
+	@ParameterizedTest
+	@EnumSource(value = Bundle.BundleType.class, names = {"DOCUMENT", "COLLECTION", "MESSAGE"}, mode= EnumSource.Mode.EXCLUDE)
+	public void testShouldExamineBundleResources_withBundleRequestAndNonStandAloneBundleType_returnsTrue(Bundle.BundleType theBundleType){
+		RequestDetails requestDetails = new SystemRequestDetails();
+		requestDetails.setResourceName("Bundle");
+		Bundle bundle = new Bundle();
+		bundle.setType(theBundleType);
+
+		assertTrue(AuthorizationInterceptor.shouldExamineBundleChildResources(requestDetails, myFhirContext, bundle));
+	}
+
+	@ParameterizedTest
+	@EnumSource(value = Bundle.BundleType.class)
+	public void testShouldExamineBundleResources_withNonBundleRequests_returnsTrue(Bundle.BundleType theBundleType){
+		RequestDetails requestDetails = new SystemRequestDetails();
+		requestDetails.setResourceName("Patient");
+		Bundle bundle = new Bundle();
+		bundle.setType(theBundleType);
+
+		assertTrue(AuthorizationInterceptor.shouldExamineBundleChildResources(requestDetails, myFhirContext, bundle));
 	}
 
 	private Patient createPatient(String theFirstName, String theLastName){

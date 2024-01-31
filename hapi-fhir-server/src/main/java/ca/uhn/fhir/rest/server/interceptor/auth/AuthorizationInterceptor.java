@@ -80,6 +80,7 @@ public class AuthorizationInterceptor implements IRuleApplier {
 
 	public static final String REQUEST_ATTRIBUTE_BULK_DATA_EXPORT_OPTIONS =
 			AuthorizationInterceptor.class.getName() + "_BulkDataExportOptions";
+	public static final String BUNDLE = "Bundle";
 	private static final AtomicInteger ourInstanceCount = new AtomicInteger(0);
 	private static final Logger ourLog = LoggerFactory.getLogger(AuthorizationInterceptor.class);
 	private static final Set<BundleTypeEnum> STANDALONE_BUNDLE_RESOURCE_TYPES =
@@ -530,7 +531,7 @@ public class AuthorizationInterceptor implements IRuleApplier {
 			case EXTENDED_OPERATION_TYPE:
 			case EXTENDED_OPERATION_INSTANCE: {
 				if (theResponseObject != null) {
-					resources = toListOfResourcesAndExcludeContainer(theResponseObject, fhirContext);
+					resources = toListOfResourcesAndExcludeContainer(theRequestDetails, theResponseObject, fhirContext);
 				}
 				break;
 			}
@@ -578,21 +579,22 @@ public class AuthorizationInterceptor implements IRuleApplier {
 	}
 
 	public static List<IBaseResource> toListOfResourcesAndExcludeContainer(
-			IBaseResource theResponseObject, FhirContext fhirContext) {
+			RequestDetails theRequestDetails, IBaseResource theResponseObject, FhirContext fhirContext) {
 		if (theResponseObject == null) {
 			return Collections.emptyList();
 		}
 
 		List<IBaseResource> retVal;
 
-		boolean isContainer = false;
-		if (isContainerBundle(fhirContext, theResponseObject)) {
-			isContainer = true;
+		boolean shouldExamineChildResources = false;
+		if (theResponseObject instanceof IBaseBundle) {
+			IBaseBundle bundle = (IBaseBundle) theResponseObject;
+			shouldExamineChildResources = shouldExamineBundleChildResources(theRequestDetails, fhirContext, bundle);
 		} else if (theResponseObject instanceof IBaseParameters) {
-			isContainer = true;
+			shouldExamineChildResources = true;
 		}
 
-		if (!isContainer) {
+		if (!shouldExamineChildResources) {
 			return Collections.singletonList(theResponseObject);
 		}
 
@@ -609,15 +611,21 @@ public class AuthorizationInterceptor implements IRuleApplier {
 		return retVal;
 	}
 
-	static boolean isContainerBundle(FhirContext theFhirContext, IBaseResource theResource) {
-		if (!(theResource instanceof IBaseBundle)) {
-			return false;
+	/**
+	 * This method determines if the given Bundle should have permissions applied to the resources inside or
+	 * to the Bundle itself.
+	 *
+	 * This distinction is important in Bundle requests where a user has permissions to view all Bundles. In
+	 * this scenario we want to apply permissions to the Bundle itself and not the resources inside if
+	 * the Bundle is of type document, collection, or message.
+	 */
+	public static boolean shouldExamineBundleChildResources(RequestDetails theRequestDetails, FhirContext theFhirContext, IBaseBundle theBundle) {
+		boolean isBundleRequest = theRequestDetails != null && BUNDLE.equals(theRequestDetails.getResourceName());
+		if (!isBundleRequest) {
+			return true;
 		}
-
-		IBaseBundle bundle = (IBaseBundle) theResource;
-		BundleTypeEnum bundleType = BundleUtil.getBundleTypeEnum(theFhirContext, bundle);
-		boolean isStandaloneBundleResource =
-				bundleType != null && STANDALONE_BUNDLE_RESOURCE_TYPES.contains(bundleType);
+		BundleTypeEnum bundleType = BundleUtil.getBundleTypeEnum(theFhirContext, theBundle);
+		boolean isStandaloneBundleResource = bundleType != null && STANDALONE_BUNDLE_RESOURCE_TYPES.contains(bundleType);
 		return !isStandaloneBundleResource;
 	}
 
