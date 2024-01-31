@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
+import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.model.entity.NormalizedQuantitySearchLevel;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
@@ -29,6 +30,7 @@ import ca.uhn.fhir.util.ClasspathUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.exparity.hamcrest.date.DateMatchers;
+import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
@@ -39,6 +41,7 @@ import org.hl7.fhir.r4.model.DecimalType;
 import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.InstantType;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Organization;
@@ -50,6 +53,7 @@ import org.hl7.fhir.r4.model.SearchParameter;
 import org.hl7.fhir.r4.model.StructureDefinition;
 import org.hl7.fhir.r4.model.Task;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -63,6 +67,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -80,6 +85,7 @@ import static org.hamcrest.Matchers.matchesPattern;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -1227,47 +1233,116 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		assertEquals(1, ids.size());
 	}
 
-	@ParameterizedTest
-	@ValueSource(booleans = {true, false})
-	public void testConditionalCreateDependsOnFirstEntryExisting(boolean theHasQuestionMark) {
-		final BundleBuilder bundleBuilder = new BundleBuilder(myFhirContext);
+	@Nested
+	class ConditionalCreates {
+		private static final String SYSTEM = "http://tempuri.org";
+		private static final String VALUE_1 = "1";
+		private static final String VALUE_2 = "2";
 
-		final Task taskUpstream = new Task();
-		taskUpstream.addIdentifier()
-			.setSystem("http://tempuri.org")
-			.setValue("1");
-		taskUpstream
+		private final Task myTask1 = new Task()
 			.setStatus(Task.TaskStatus.DRAFT)
-			.setIntent(Task.TaskIntent.UNKNOWN);
+			.setIntent(Task.TaskIntent.UNKNOWN)
+			.addIdentifier(new Identifier()
+				.setSystem(SYSTEM)
+				.setValue(VALUE_1));
 
-		bundleBuilder.addTransactionCreateEntry(taskUpstream, "urn:uuid:59cda086-4763-4ef0-8e36-8c90058686ea")
-			.conditional("identifier=http://tempuri.org|1");
-
-		final Task taskDownstream = new Task();
-		taskDownstream.addIdentifier()
-			.setSystem("http://tempuri.org")
-			.setValue("2");
-		taskDownstream
+		private final Task myTask2 = new Task()
 			.setStatus(Task.TaskStatus.DRAFT)
-			.setIntent(Task.TaskIntent.UNKNOWN);
-		taskDownstream.addBasedOn()
-			.setReference("urn:uuid:59cda086-4763-4ef0-8e36-8c90058686ea");
+			.setIntent(Task.TaskIntent.UNKNOWN)
+			.addIdentifier(new Identifier()
+				.setSystem(SYSTEM)
+				.setValue(VALUE_2))
+			.addBasedOn(new Reference().setReference("urn:uuid:59cda086-4763-4ef0-8e36-8c90058686ea"));
 
-		final String secondEntryConditionalTemplate = "%sidentifier=http://tempuri.org|2&based-on=urn:uuid:59cda086-4763-4ef0-8e36-8c90058686ea";
-		final String secondMatchUrl = String.format(secondEntryConditionalTemplate, theHasQuestionMark ? "?" : "");
+		@ParameterizedTest
+		@ValueSource(booleans = {true, false})
+		public void testConditionalCreateDependsOnPOSTedResource(boolean theHasQuestionMark) {
+			final IFhirResourceDao<Task> taskDao = getTaskDao();
+			taskDao.create(myTask1, new SystemRequestDetails());
 
-		ourLog.info("5587: secondMatchUrl: {}", secondMatchUrl);
+			final List<Task> allTasksPreBundle = searchAllTasks();
+			assertEquals(1, allTasksPreBundle.size());
+			final Task taskPreBundle = allTasksPreBundle.get(0);
+			assertEquals(VALUE_1, taskPreBundle.getIdentifier().get(0).getValue());
+			assertEquals(SYSTEM, taskPreBundle.getIdentifier().get(0).getSystem());
 
-		bundleBuilder.addTransactionCreateEntry(taskDownstream)
-			.conditional(secondMatchUrl);
+			final BundleBuilder bundleBuilder = new BundleBuilder(myFhirContext);
 
-		final String bundleJson = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundleBuilder.getBundle());
+			final String entryConditionalTemplate = "%sidentifier=http://tempuri.org|1";
+			final String matchUrl = String.format(entryConditionalTemplate, theHasQuestionMark ? "?" : "");
 
-//		ourLog.info("bundleJson: {}", bundleJson);
+			bundleBuilder.addTransactionCreateEntry(myTask2)
+				.conditional(matchUrl);
 
-		final Bundle result = mySystemDao.transaction(new SystemRequestDetails(), (Bundle) bundleBuilder.getBundle());
+			final List<Bundle.BundleEntryComponent> responseEntries = sendBundleAndGetResponse(bundleBuilder.getBundle());
 
-		// LUKETODO:  better assertions
-		assertEquals(List.of("201 Created", "201 Created"), result.getEntry().stream().map(Bundle.BundleEntryComponent::getResponse).map(Bundle.BundleEntryResponseComponent::getStatus).toList());
+			assertEquals(1, responseEntries.size());
+
+			final Bundle.BundleEntryComponent bundleEntry = responseEntries.get(0);
+
+			assertEquals("200 OK", bundleEntry.getResponse().getStatus());
+
+			final List<Task> allTasksPostBundle = searchAllTasks();
+			assertEquals(1, allTasksPostBundle.size());
+			final Task taskPostBundle = allTasksPostBundle.get(0);
+			assertEquals(VALUE_1, taskPostBundle.getIdentifier().get(0).getValue());
+			assertEquals(SYSTEM, taskPostBundle.getIdentifier().get(0).getSystem());
+		}
+
+		@ParameterizedTest
+		@ValueSource(booleans = {true, false})
+		public void testConditionalCreateDependsOnFirstEntryExisting(boolean theHasQuestionMark) {
+			final BundleBuilder bundleBuilder = new BundleBuilder(myFhirContext);
+
+			bundleBuilder.addTransactionCreateEntry(myTask1, "urn:uuid:59cda086-4763-4ef0-8e36-8c90058686ea")
+				.conditional("identifier=http://tempuri.org|1");
+
+			final String secondEntryConditionalTemplate = "%sidentifier=http://tempuri.org|2&based-on=urn:uuid:59cda086-4763-4ef0-8e36-8c90058686ea";
+			final String secondMatchUrl = String.format(secondEntryConditionalTemplate, theHasQuestionMark ? "?" : "");
+
+			bundleBuilder.addTransactionCreateEntry(myTask2)
+				.conditional(secondMatchUrl);
+
+			final IBaseBundle requestBundle = bundleBuilder.getBundle();
+			assertTrue(requestBundle instanceof Bundle);
+
+			final List<Bundle.BundleEntryComponent> responseEntries = sendBundleAndGetResponse(requestBundle);
+
+			assertEquals(2, responseEntries.size());
+			assertEquals(Set.of("201 Created"), responseEntries.stream().map(Bundle.BundleEntryComponent::getResponse).map(Bundle.BundleEntryResponseComponent::getStatus).collect(Collectors.toUnmodifiableSet()));
+
+			final List<Task> allTasksPostBundle = searchAllTasks();
+			assertEquals(2, allTasksPostBundle.size());
+			final Task taskPostBundle1 = allTasksPostBundle.get(0);
+			assertEquals(VALUE_1, taskPostBundle1.getIdentifier().get(0).getValue());
+			assertEquals(SYSTEM, taskPostBundle1.getIdentifier().get(0).getSystem());
+			final Task taskPostBundle2 = allTasksPostBundle.get(1);
+			assertEquals(VALUE_2, taskPostBundle2.getIdentifier().get(0).getValue());
+			assertEquals(SYSTEM, taskPostBundle2.getIdentifier().get(0).getSystem());
+
+			final List<Reference> task2BasedOn = taskPostBundle2.getBasedOn();
+			assertEquals(1, task2BasedOn.size());
+			final Reference task2BasedOnReference = task2BasedOn.get(0);
+			assertEquals(taskPostBundle1.getIdElement().toUnqualifiedVersionless().asStringValue(), task2BasedOnReference.getReference());
+		}
+	}
+
+	private List<Bundle.BundleEntryComponent> sendBundleAndGetResponse(IBaseBundle theRequestBundle) {
+		assertTrue(theRequestBundle instanceof Bundle);
+
+		return mySystemDao.transaction(new SystemRequestDetails(), (Bundle)theRequestBundle).getEntry();
+	}
+
+	private List<Task> searchAllTasks() {
+		return unsafeCast(getTaskDao().search(SearchParameterMap.newSynchronous(), new SystemRequestDetails()).getAllResources());
+	}
+
+	private IFhirResourceDao<Task> getTaskDao() {
+		return unsafeCast(myDaoRegistry.getResourceDao("Task"));
+	}
+
+	@SuppressWarnings("unchecked")
+	private static <T> T unsafeCast(Object theObject) {
+		return (T)theObject;
 	}
 }
