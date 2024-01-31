@@ -111,17 +111,19 @@ public class BaseTransactionProcessorTest {
 	}
 
 
+	// LUKETODO:  delete or rename
 	@Test
-	void test1() {
+	void noQuestionMark() {
 		final IdSubstitutionMap idSubstitutions = new IdSubstitutionMap();
 		idSubstitutions.put(new IdType("Task/urn:uuid:59cda086-4763-4ef0-8e36-8c90058686ea"), new IdType("Task/1/history/1"));
 		idSubstitutions.put(new IdType("urn:uuid:59cda086-4763-4ef0-8e36-8c90058686ea"), new IdType("Task/1/_history/1"));
 		final String outcome = BaseTransactionProcessor.performIdSubstitutionsInMatchUrl(idSubstitutions, "identifier=http://tempuri.org|2&based-on=urn:uuid:59cda086-4763-4ef0-8e36-8c90058686ea");
-		assertEquals("?identifier=http://tempuri.org|2&based-on=Task/1", outcome);
+		assertEquals("identifier=http://tempuri.org|2&based-on=Task/1", outcome);
 	}
 
+	// LUKETODO:  delete or rename
 	@Test
-	void test2() {
+	void yesQuestionMark() {
 		final IdSubstitutionMap idSubstitutions = new IdSubstitutionMap();
 		idSubstitutions.put(new IdType("Task/urn:uuid:59cda086-4763-4ef0-8e36-8c90058686ea"), new IdType("Task/1/history/1"));
 		idSubstitutions.put(new IdType("urn:uuid:59cda086-4763-4ef0-8e36-8c90058686ea"), new IdType("Task/1/_history/1"));

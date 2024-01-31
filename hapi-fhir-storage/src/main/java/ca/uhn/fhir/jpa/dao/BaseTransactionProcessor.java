@@ -2261,6 +2261,10 @@ public abstract class BaseTransactionProcessor {
 		String matchUrl = theMatchUrl;
 		if (isNotBlank(matchUrl) && !theIdSubstitutions.isEmpty()) {
 
+			if (!matchUrl.startsWith("?")) {
+				return performIdSubstitutionsInMatchUrlWithQuestionMark(theIdSubstitutions, theMatchUrl);
+			}
+
 			int startIdx = matchUrl.indexOf('?');
 			// LUKETODO:  this is what stops the non '?' case from working
 			while (startIdx != -1) {
@@ -2312,6 +2316,61 @@ public abstract class BaseTransactionProcessor {
 
 				startIdx = matchUrl.indexOf('&', searchFrom);
 			}
+		}
+		return matchUrl;
+	}
+
+	private static String performIdSubstitutionsInMatchUrlWithQuestionMark(
+			IdSubstitutionMap theIdSubstitutions, String theMatchUrl) {
+		String matchUrl = theMatchUrl;
+		int startIdx = 0;
+		// LUKETODO:  this is what stops the non '?' case from working
+		while (startIdx != -1) {
+
+			int endIdx = matchUrl.indexOf('&', startIdx + 1);
+			if (endIdx == -1) {
+				endIdx = matchUrl.length();
+			}
+
+			int equalsIdx = matchUrl.indexOf('=', startIdx + 1);
+
+			int searchFrom;
+			if (equalsIdx == -1) {
+				searchFrom = matchUrl.length();
+			} else if (equalsIdx >= endIdx) {
+				// First equals we found is from a subsequent parameter
+				searchFrom = matchUrl.length();
+			} else {
+				String paramValue = matchUrl.substring(equalsIdx + 1, endIdx);
+				boolean isUrn = isUrn(paramValue);
+				boolean isUrnEscaped = !isUrn && isUrnEscaped(paramValue);
+				if (isUrn || isUrnEscaped) {
+					if (isUrnEscaped) {
+						paramValue = UrlUtil.unescape(paramValue);
+					}
+					IIdType replacement = theIdSubstitutions.getForSource(paramValue);
+					if (replacement != null) {
+						String replacementValue;
+						if (replacement.hasVersionIdPart()) {
+							replacementValue = replacement.toVersionless().getValue();
+						} else {
+							replacementValue = replacement.getValue();
+						}
+						matchUrl = matchUrl.substring(0, equalsIdx + 1) + replacementValue + matchUrl.substring(endIdx);
+						searchFrom = equalsIdx + 1 + replacementValue.length();
+					} else {
+						searchFrom = endIdx;
+					}
+				} else {
+					searchFrom = endIdx;
+				}
+			}
+
+			if (searchFrom >= matchUrl.length()) {
+				break;
+			}
+
+			startIdx = matchUrl.indexOf('&', searchFrom);
 		}
 		return matchUrl;
 	}
