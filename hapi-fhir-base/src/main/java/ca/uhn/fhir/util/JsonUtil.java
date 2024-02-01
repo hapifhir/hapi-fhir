@@ -98,7 +98,7 @@ public class JsonUtil {
 		try {
 			return ourMapperIncludeSensitive.writeValueAsString(theInput);
 		} catch (JsonProcessingException e) {
-			throw new InvalidRequestException(Msg.code(1741) + "Failed to encode " + theInput.getClass(), e);
+			throw new InvalidRequestException(Msg.code(2487) + "Failed to encode " + theInput.getClass(), e);
 		}
 	}
 
