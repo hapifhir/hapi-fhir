@@ -38,7 +38,8 @@ import java.util.List;
  * This class is the parameters model object for starting a
  * bulk import job.
  */
-@JsonFilter(IModelJson.SENSITIVE_DATA_FILTER_NAME)//TODO GGG eventually consider pushing this up once we have more experience using it.
+@JsonFilter(IModelJson.SENSITIVE_DATA_FILTER_NAME) // TODO GGG eventually consider pushing this up once we have more
+// experience using it.
 public class BulkImportJobParameters implements IModelJson {
 
 	@JsonProperty(value = "ndJsonUrls", required = true)

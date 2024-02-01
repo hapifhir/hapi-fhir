@@ -60,6 +60,7 @@ public class BulkImportFileServlet extends HttpServlet {
 	private String myBasicAuth;
 
 	public BulkImportFileServlet() {}
+
 	public BulkImportFileServlet(String theBasicAuthUsername, String theBasicAuthPassword) {
 		setBasicAuth(theBasicAuthUsername, theBasicAuthPassword);
 	}
