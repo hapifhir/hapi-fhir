@@ -59,6 +59,11 @@ public class BulkImportFileServlet extends HttpServlet {
 
 	private String myBasicAuth;
 
+	public BulkImportFileServlet() {}
+	public BulkImportFileServlet(String theBasicAuthUsername, String theBasicAuthPassword) {
+		setBasicAuth(theBasicAuthUsername, theBasicAuthPassword);
+	}
+
 	public void setBasicAuth(String username, String password) {
 		String auth = username + ":" + password;
 		String encodedAuth = Base64.getEncoder().encodeToString(auth.getBytes());
