@@ -7,8 +7,8 @@ import java.lang.annotation.Target;
 
 /**
  * Annotation to mark a field as sensitive, indicating that it should not
- * be displayed or serialized.
+ * be displayed or serialized by jackson.
  */
-@Retention(RetentionPolicy.RUNTIME) // Make this annotation available at runtime.
-@Target(ElementType.FIELD) // This annotation can only be applied to fields.
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.FIELD)
 public @interface SensitiveNoDisplay {}

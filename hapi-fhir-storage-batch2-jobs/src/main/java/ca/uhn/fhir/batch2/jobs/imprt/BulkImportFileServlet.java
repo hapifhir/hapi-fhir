@@ -57,16 +57,11 @@ public class BulkImportFileServlet extends HttpServlet {
 
 	public static final String DEFAULT_HEADER_CONTENT_TYPE = CT_FHIR_NDJSON + CHARSET_UTF8_CTSUFFIX;
 
-	private String myBasicAuth; // Local variable to hold the Base64 encoded auth string
+	private String myBasicAuth;
 
 	public void setBasicAuth(String username, String password) {
-		// Concatenate username and password with a colon
 		String auth = username + ":" + password;
-
-		// Encode in Base64
 		String encodedAuth = Base64.getEncoder().encodeToString(auth.getBytes());
-
-		// Prefix with "Basic " to comply with the Basic Auth standard
 		myBasicAuth = "Basic " + encodedAuth;
 	}
 
