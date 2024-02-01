@@ -47,7 +47,7 @@ public class BulkImportJobParameters implements IModelJson {
 	@JsonProperty(value = "httpBasicCredentials", required = false)
 	@Nullable
 	@SensitiveNoDisplay
-	private String httpBasicCredentials;
+	private String myHttpBasicCredentials;
 
 	@JsonProperty(value = "maxBatchResourceCount", required = false)
 	@Min(1)
@@ -66,11 +66,11 @@ public class BulkImportJobParameters implements IModelJson {
 	}
 
 	public String getHttpBasicCredentials() {
-		return httpBasicCredentials;
+		return myHttpBasicCredentials;
 	}
 
 	public BulkImportJobParameters setHttpBasicCredentials(String theHttpBasicCredentials) {
-		httpBasicCredentials = theHttpBasicCredentials;
+		myHttpBasicCredentials = theHttpBasicCredentials;
 		return this;
 	}
 

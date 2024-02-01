@@ -31,7 +31,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.ser.FilterProvider;
-import com.fasterxml.jackson.databind.ser.PropertyFilter;
 import com.fasterxml.jackson.databind.ser.PropertyWriter;
 import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
 import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
@@ -40,7 +39,6 @@ import jakarta.annotation.Nonnull;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
-import java.lang.reflect.Field;
 import java.util.List;
 
 public class JsonUtil {
@@ -124,6 +122,7 @@ public class JsonUtil {
 			throw new InternalErrorException(Msg.code(2061) + e);
 		}
 	}
+
 	public FilterProvider getSensitiveDataFilterProvider() {
 		return SENSITIVE_DATA_FILTER_PROVIDER;
 	}
