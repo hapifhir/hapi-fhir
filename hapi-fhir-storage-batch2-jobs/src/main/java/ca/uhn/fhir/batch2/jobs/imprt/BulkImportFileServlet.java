@@ -70,7 +70,8 @@ public class BulkImportFileServlet extends HttpServlet {
 		myBasicAuth = "Basic " + encodedAuth;
 	}
 
-	public void checkBasicAuthAndMaybeThrow403(HttpServletRequest request, HttpServletResponse response) throws IOException {
+	public void checkBasicAuthAndMaybeThrow403(HttpServletRequest request, HttpServletResponse response)
+			throws IOException {
 		// Check if the myBasicAuth variable is set, ignore if not.
 		if (myBasicAuth == null || myBasicAuth.isEmpty()) {
 			return;
