@@ -37,6 +37,7 @@ import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
 import jakarta.annotation.Nonnull;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.util.List;
@@ -88,6 +89,12 @@ public class JsonUtil {
 	 */
 	public static <T> List<T> deserializeList(@Nonnull String theInput, @Nonnull Class<T> theType) throws IOException {
 		return ourMapperPrettyPrint.readerForListOf(theType).readValue(theInput);
+	}
+	/**
+	 * Parse JSON
+	 */
+	public static <T> T deserialize(@Nonnull InputStream theInput, @Nonnull Class<T> theType) throws IOException {
+		return ourMapperPrettyPrint.readerFor(theType).readValue(theInput);
 	}
 
 	/**
