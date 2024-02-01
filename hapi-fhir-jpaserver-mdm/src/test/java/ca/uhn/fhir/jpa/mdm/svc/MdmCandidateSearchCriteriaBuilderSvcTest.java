@@ -97,4 +97,17 @@ public class MdmCandidateSearchCriteriaBuilderSvcTest extends BaseMdmR4Test {
 		assertThat(result.isPresent(), is(true));
 		assertThat(result.get(), is(equalTo("Patient?active=true")));
 	}
+
+	@Test
+	public void testNoSearchIfASearchParamIsMissing() {
+		Patient patient = new Patient();
+		HumanName humanName = patient.addName();
+		humanName.addGiven("Jose");
+		humanName.addGiven("Martin");
+		MdmResourceSearchParamJson searchParamJson = new MdmResourceSearchParamJson();
+		searchParamJson.addSearchParam("given");
+		searchParamJson.addSearchParam("family");
+		Optional<String> result = myMdmCandidateSearchCriteriaBuilderSvc.buildResourceQueryString("Patient", patient, Collections.emptyList(), searchParamJson);
+		assertFalse(result.isPresent());
+	}
 }
