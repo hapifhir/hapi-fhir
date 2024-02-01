@@ -44,7 +44,7 @@ public class BulkImportJobParameters implements IModelJson {
 	@NotNull(message = "At least one NDJSON URL must be provided")
 	private List<@Pattern(regexp = "^http[s]?://.*", message = "Must be a valid URL") String> myNdJsonUrls;
 
-	@JsonProperty(value = "httpBasicCredentials",  required = false)
+	@JsonProperty(value = "httpBasicCredentials", required = false)
 	@Nullable
 	@SensitiveNoDisplay
 	private String httpBasicCredentials;

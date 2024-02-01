@@ -49,8 +49,10 @@ public class JsonUtil {
 
 	public static final SimpleBeanPropertyFilter SIMPLE_BEAN_PROPERTY_FILTER = new SensitiveDataFilter();
 
-	public static final SimpleFilterProvider SENSITIVE_DATA_FILTER_PROVIDER = new SimpleFilterProvider().addFilter(IModelJson.SENSITIVE_DATA_FILTER_NAME, SIMPLE_BEAN_PROPERTY_FILTER);
-	public static final SimpleFilterProvider SHOW_ALL_DATA_FILTER_PROVIDER = new SimpleFilterProvider().addFilter(IModelJson.SENSITIVE_DATA_FILTER_NAME, SimpleBeanPropertyFilter.serializeAll());
+	public static final SimpleFilterProvider SENSITIVE_DATA_FILTER_PROVIDER =
+			new SimpleFilterProvider().addFilter(IModelJson.SENSITIVE_DATA_FILTER_NAME, SIMPLE_BEAN_PROPERTY_FILTER);
+	public static final SimpleFilterProvider SHOW_ALL_DATA_FILTER_PROVIDER = new SimpleFilterProvider()
+			.addFilter(IModelJson.SENSITIVE_DATA_FILTER_NAME, SimpleBeanPropertyFilter.serializeAll());
 
 	static {
 		ourMapperPrettyPrint = new ObjectMapper();
@@ -87,6 +89,7 @@ public class JsonUtil {
 	public static <T> List<T> deserializeList(@Nonnull String theInput, @Nonnull Class<T> theType) throws IOException {
 		return ourMapperPrettyPrint.readerForListOf(theType).readValue(theInput);
 	}
+
 	public static String serializeForBatchJob(@Nonnull IModelJson theInput) {
 		try {
 			return ourMapperForBatchJobStorage.writeValueAsString(theInput);
@@ -147,7 +150,8 @@ public class JsonUtil {
 		}
 
 		@Override
-		public void serializeAsField(Object pojo, JsonGenerator gen, SerializerProvider provider, PropertyWriter writer) throws Exception {
+		public void serializeAsField(Object pojo, JsonGenerator gen, SerializerProvider provider, PropertyWriter writer)
+				throws Exception {
 			if (include(writer)) {
 				// Check if field is annotated with SensitiveNoDisplay
 				if (!isFieldSensitive(writer.getName(), pojo)) {

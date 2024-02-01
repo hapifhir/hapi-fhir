@@ -16,7 +16,8 @@ public class SensitiveDataFilter extends SimpleBeanPropertyFilter {
 	}
 
 	@Override
-	public void serializeAsField(Object pojo, JsonGenerator gen, SerializerProvider provider, PropertyWriter writer) throws Exception {
+	public void serializeAsField(Object pojo, JsonGenerator gen, SerializerProvider provider, PropertyWriter writer)
+			throws Exception {
 		if (include(writer)) {
 			// Check if field is annotated with SensitiveNoDisplay
 			if (!isFieldSensitive(writer.getName(), pojo)) {
