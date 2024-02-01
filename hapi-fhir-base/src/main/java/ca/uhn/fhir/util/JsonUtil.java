@@ -90,7 +90,11 @@ public class JsonUtil {
 		return ourMapperPrettyPrint.readerForListOf(theType).readValue(theInput);
 	}
 
-	public static String serializeForBatchJob(@Nonnull IModelJson theInput) {
+	/**
+	 * Includes fields which are annotated with {@link SensitiveNoDisplay}. Currently only meant to be used for serialization
+	 * for batch job parameters.
+	 */
+	public static String serializeWithSensitiveData(@Nonnull IModelJson theInput) {
 		try {
 			return ourMapperIncludeSensitive.writeValueAsString(theInput);
 		} catch (JsonProcessingException e) {
