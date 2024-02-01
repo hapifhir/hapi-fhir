@@ -20,6 +20,7 @@
 package ca.uhn.fhir.model.api;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonFilter;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -29,4 +30,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 		getterVisibility = JsonAutoDetect.Visibility.NONE,
 		isGetterVisibility = JsonAutoDetect.Visibility.NONE,
 		setterVisibility = JsonAutoDetect.Visibility.NONE)
-public interface IModelJson {}
+@JsonFilter(IModelJson.SENSITIVE_DATA_FILTER_NAME)
+public interface IModelJson {
+	public final String SENSITIVE_DATA_FILTER_NAME = "sensitiveDataFilter";
+}

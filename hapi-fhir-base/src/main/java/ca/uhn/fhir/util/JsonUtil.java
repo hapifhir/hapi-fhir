@@ -21,32 +21,52 @@ package ca.uhn.fhir.util;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.IModelJson;
+import ca.uhn.fhir.model.api.annotation.SensitiveNoDisplay;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.databind.ser.PropertyWriter;
+import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
+import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
 import jakarta.annotation.Nonnull;
 
 import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.lang.reflect.Field;
 import java.util.List;
 
 public class JsonUtil {
 
 	private static final ObjectMapper ourMapperPrettyPrint;
 	private static final ObjectMapper ourMapperNonPrettyPrint;
+	private static final ObjectMapper ourMapperForBatchJobStorage;
+
+	public static final SimpleBeanPropertyFilter SIMPLE_BEAN_PROPERTY_FILTER = new SensitiveDataFilter();
+
+	public static final SimpleFilterProvider SENSITIVE_DATA_FILTER_PROVIDER = new SimpleFilterProvider().addFilter(IModelJson.SENSITIVE_DATA_FILTER_NAME, SIMPLE_BEAN_PROPERTY_FILTER);
+	public static final SimpleFilterProvider SHOW_ALL_DATA_FILTER_PROVIDER = new SimpleFilterProvider().addFilter(IModelJson.SENSITIVE_DATA_FILTER_NAME, SimpleBeanPropertyFilter.serializeAll());
 
 	static {
 		ourMapperPrettyPrint = new ObjectMapper();
 		ourMapperPrettyPrint.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+		ourMapperPrettyPrint.setFilterProvider(SENSITIVE_DATA_FILTER_PROVIDER);
 		ourMapperPrettyPrint.enable(SerializationFeature.INDENT_OUTPUT);
 
 		ourMapperNonPrettyPrint = new ObjectMapper();
 		ourMapperNonPrettyPrint.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+		ourMapperNonPrettyPrint.setFilterProvider(SENSITIVE_DATA_FILTER_PROVIDER);
 		ourMapperNonPrettyPrint.disable(SerializationFeature.INDENT_OUTPUT);
+
+		ourMapperForBatchJobStorage = new ObjectMapper();
+		ourMapperForBatchJobStorage.setFilterProvider(SHOW_ALL_DATA_FILTER_PROVIDER);
+		ourMapperForBatchJobStorage.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+		ourMapperForBatchJobStorage.disable(SerializationFeature.INDENT_OUTPUT);
 	}
 
 	/**
@@ -66,6 +86,13 @@ public class JsonUtil {
 	 */
 	public static <T> List<T> deserializeList(@Nonnull String theInput, @Nonnull Class<T> theType) throws IOException {
 		return ourMapperPrettyPrint.readerForListOf(theType).readValue(theInput);
+	}
+	public static String serializeForBatchJob(@Nonnull IModelJson theInput) {
+		try {
+			return ourMapperForBatchJobStorage.writeValueAsString(theInput);
+		} catch (JsonProcessingException e) {
+			throw new InvalidRequestException(Msg.code(1741) + "Failed to encode " + theInput.getClass(), e);
+		}
 	}
 
 	/**
@@ -109,6 +136,34 @@ public class JsonUtil {
 			return ourMapperNonPrettyPrint.writeValueAsString(theJson);
 		} catch (JsonProcessingException e) {
 			throw new InvalidRequestException(Msg.code(1741) + "Failed to encode " + theJson.getClass(), e);
+		}
+	}
+
+	public static class SensitiveDataFilter extends SimpleBeanPropertyFilter {
+
+		@Override
+		protected boolean include(PropertyWriter writer) {
+			return true; // Default include all except explicitly checked and excluded
+		}
+
+		@Override
+		public void serializeAsField(Object pojo, JsonGenerator gen, SerializerProvider provider, PropertyWriter writer) throws Exception {
+			if (include(writer)) {
+				// Check if field is annotated with SensitiveNoDisplay
+				if (!isFieldSensitive(writer.getName(), pojo)) {
+					super.serializeAsField(pojo, gen, provider, writer);
+				} // else do not serialize the field
+			}
+		}
+
+		private boolean isFieldSensitive(String fieldName, Object pojo) {
+			try {
+				Field field = pojo.getClass().getDeclaredField(fieldName);
+				return field.isAnnotationPresent(SensitiveNoDisplay.class);
+			} catch (NoSuchFieldException e) {
+				// Field not found, consider it not sensitive
+				return false;
+			}
 		}
 	}
 }

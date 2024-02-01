@@ -21,6 +21,7 @@ package ca.uhn.fhir.batch2.jobs.imprt;
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.model.api.IModelJson;
+import ca.uhn.fhir.model.api.annotation.SensitiveNoDisplay;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.Min;
@@ -43,9 +44,10 @@ public class BulkImportJobParameters implements IModelJson {
 	@NotNull(message = "At least one NDJSON URL must be provided")
 	private List<@Pattern(regexp = "^http[s]?://.*", message = "Must be a valid URL") String> myNdJsonUrls;
 
-	@JsonProperty(value = "httpBasicCredentials", access = JsonProperty.Access.WRITE_ONLY, required = false)
+	@JsonProperty(value = "httpBasicCredentials",  required = false)
 	@Nullable
-	private String myHttpBasicCredentials;
+	@SensitiveNoDisplay
+	private String httpBasicCredentials;
 
 	@JsonProperty(value = "maxBatchResourceCount", required = false)
 	@Min(1)
@@ -64,11 +66,11 @@ public class BulkImportJobParameters implements IModelJson {
 	}
 
 	public String getHttpBasicCredentials() {
-		return myHttpBasicCredentials;
+		return httpBasicCredentials;
 	}
 
 	public BulkImportJobParameters setHttpBasicCredentials(String theHttpBasicCredentials) {
-		myHttpBasicCredentials = theHttpBasicCredentials;
+		httpBasicCredentials = theHttpBasicCredentials;
 		return this;
 	}
 
