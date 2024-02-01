@@ -83,7 +83,7 @@ public class JobInstanceStartRequest implements IModelJson {
 	}
 
 	public JobInstanceStartRequest setParameters(IModelJson theParameters) {
-		myParameters = JsonUtil.serializeOrInvalidRequest(theParameters);
+		myParameters = JsonUtil.serializeForBatchJob(theParameters);
 		return this;
 	}
 
