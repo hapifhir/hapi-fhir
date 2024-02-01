@@ -7,8 +7,8 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class JsonUtilTest {
 	@Test
-	public void test_batch_serialize_filter() {
-		BulkImportJobParameters
+	public void testSensitiveNoDisplayAnnotationIsHiddenFromBasicSerialization() {
+
 	}
 
 }

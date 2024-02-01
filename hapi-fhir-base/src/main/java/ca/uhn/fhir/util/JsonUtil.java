@@ -30,6 +30,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.databind.ser.FilterProvider;
+import com.fasterxml.jackson.databind.ser.PropertyFilter;
 import com.fasterxml.jackson.databind.ser.PropertyWriter;
 import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
 import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
@@ -45,7 +47,7 @@ public class JsonUtil {
 
 	private static final ObjectMapper ourMapperPrettyPrint;
 	private static final ObjectMapper ourMapperNonPrettyPrint;
-	private static final ObjectMapper ourMapperForBatchJobStorage;
+	private static final ObjectMapper ourMapperIncludeSensitive;
 
 	public static final SimpleBeanPropertyFilter SIMPLE_BEAN_PROPERTY_FILTER = new SensitiveDataFilter();
 
@@ -65,10 +67,10 @@ public class JsonUtil {
 		ourMapperNonPrettyPrint.setFilterProvider(SENSITIVE_DATA_FILTER_PROVIDER);
 		ourMapperNonPrettyPrint.disable(SerializationFeature.INDENT_OUTPUT);
 
-		ourMapperForBatchJobStorage = new ObjectMapper();
-		ourMapperForBatchJobStorage.setFilterProvider(SHOW_ALL_DATA_FILTER_PROVIDER);
-		ourMapperForBatchJobStorage.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-		ourMapperForBatchJobStorage.disable(SerializationFeature.INDENT_OUTPUT);
+		ourMapperIncludeSensitive = new ObjectMapper();
+		ourMapperIncludeSensitive.setFilterProvider(SHOW_ALL_DATA_FILTER_PROVIDER);
+		ourMapperIncludeSensitive.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+		ourMapperIncludeSensitive.disable(SerializationFeature.INDENT_OUTPUT);
 	}
 
 	/**
@@ -92,7 +94,7 @@ public class JsonUtil {
 
 	public static String serializeForBatchJob(@Nonnull IModelJson theInput) {
 		try {
-			return ourMapperForBatchJobStorage.writeValueAsString(theInput);
+			return ourMapperIncludeSensitive.writeValueAsString(theInput);
 		} catch (JsonProcessingException e) {
 			throw new InvalidRequestException(Msg.code(1741) + "Failed to encode " + theInput.getClass(), e);
 		}
@@ -122,6 +124,9 @@ public class JsonUtil {
 			throw new InternalErrorException(Msg.code(2061) + e);
 		}
 	}
+	public FilterProvider getSensitiveDataFilterProvider() {
+		return SENSITIVE_DATA_FILTER_PROVIDER;
+	}
 
 	/**
 	 * Encode JSON
@@ -142,7 +147,7 @@ public class JsonUtil {
 		}
 	}
 
-	public static class SensitiveDataFilter extends SimpleBeanPropertyFilter {
+	private static class SensitiveDataFilter extends SimpleBeanPropertyFilter {
 
 		@Override
 		protected boolean include(PropertyWriter writer) {
@@ -153,21 +158,14 @@ public class JsonUtil {
 		public void serializeAsField(Object pojo, JsonGenerator gen, SerializerProvider provider, PropertyWriter writer)
 				throws Exception {
 			if (include(writer)) {
-				// Check if field is annotated with SensitiveNoDisplay
-				if (!isFieldSensitive(writer.getName(), pojo)) {
+				if (!isFieldSensitive(writer)) {
 					super.serializeAsField(pojo, gen, provider, writer);
-				} // else do not serialize the field
+				}
 			}
 		}
 
-		private boolean isFieldSensitive(String fieldName, Object pojo) {
-			try {
-				Field field = pojo.getClass().getDeclaredField(fieldName);
-				return field.isAnnotationPresent(SensitiveNoDisplay.class);
-			} catch (NoSuchFieldException e) {
-				// Field not found, consider it not sensitive
-				return false;
-			}
+		private boolean isFieldSensitive(PropertyWriter writer) {
+			return writer.getAnnotation(SensitiveNoDisplay.class) != null;
 		}
 	}
 }
