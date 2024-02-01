@@ -1693,7 +1693,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 	}
 
 	private void assertSearchContainsResources(String theUrl, Resource... theExpectedResources){
-		List<String> expectedIds = Arrays.stream(theExpectedResources).toList().stream()
+		List<String> expectedIds = Arrays.stream(theExpectedResources)
 			.map(resource -> resource.getIdPart())
 			.toList();
 
