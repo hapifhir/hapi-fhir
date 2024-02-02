@@ -813,17 +813,17 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 
 	@Override
 	public <T extends Resource> T findTxResource(Class<T> class_, String canonical, Resource sourceOfReference) {
-		throw new UnsupportedOperationException(Msg.code(650));
+		throw new UnsupportedOperationException(Msg.code(1488));
 	}
 
 	@Override
 	public <T extends Resource> T findTxResource(Class<T> class_, String canonical) {
-		throw new UnsupportedOperationException(Msg.code(650));
+		throw new UnsupportedOperationException(Msg.code(2489));
 	}
 
 	@Override
 	public <T extends Resource> T findTxResource(Class<T> class_, String canonical, String version) {
-		throw new UnsupportedOperationException(Msg.code(650));
+		throw new UnsupportedOperationException(Msg.code(2490));
 	}
 
 	public static ConceptValidationOptions convertConceptValidationOptions(ValidationOptions theOptions) {
