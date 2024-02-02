@@ -76,6 +76,9 @@ public class BundleUtil {
 	public static final String DIFFERENT_LINK_ERROR_MSG =
 			"Mismatching 'previous' and 'prev' links exist. 'previous' " + "is: '$PREVIOUS' and 'prev' is: '$PREV'.";
 
+	public static final Set<BundleTypeEnum> STANDALONE_BUNDLE_RESOURCE_TYPES =
+					Set.of(BundleTypeEnum.DOCUMENT, BundleTypeEnum.COLLECTION, BundleTypeEnum.MESSAGE);
+
 	/**
 	 * @return Returns <code>null</code> if the link isn't found or has no value
 	 */
@@ -243,6 +246,12 @@ public class BundleUtil {
 		}
 		return BundleTypeEnum.forCode(bundleTypeCode);
 	}
+
+	public static boolean isStandaloneBundleResource(FhirContext theContext, IBaseBundle theBundle) {
+		BundleTypeEnum bundleType = BundleUtil.getBundleTypeEnum(theContext, theBundle);
+		return bundleType != null && STANDALONE_BUNDLE_RESOURCE_TYPES.contains(bundleType);
+	}
+
 
 	public static void setBundleType(FhirContext theContext, IBaseBundle theBundle, String theType) {
 		RuntimeResourceDefinition def = theContext.getResourceDefinition(theBundle);

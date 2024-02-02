@@ -771,12 +771,13 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 				 * nested operations and nested transactions. We block them by default. At some point
 				 * it would be nice to be more nuanced here.
 				 */
-				if (nextPart.getResource() != null) {
+				IBaseResource nextResource = nextPart.getResource();
+				if (nextResource != null) {
 					RuntimeResourceDefinition resourceDef = ctx.getResourceDefinition(nextPart.getResource());
 
 					// TODO:  LD:  We should pursue a more ideal fix after the release to inspect the bundle more deeply
 					// to ensure that it's a valid request
-					if (shouldRejectBundleEntry(resourceDef, operation)) {
+					if (shouldRejectBundleEntry(ctx, resourceDef, operation, nextResource)) {
 						throw new InvalidRequestException(Msg.code(339)
 								+ "Can not handle transaction with nested resource of type " + resourceDef.getName());
 					}
@@ -844,18 +845,28 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 	 * Ascertain whether this transaction request contains a nested operations or nested transactions.
 	 * This is done carefully because a bundle can contain a nested PATCH with Parameters, which is supported but
 	 * a non-PATCH nested Parameters resource may be problematic.
-	 *
+	 * @param theFhirContext The {@link FhirContext} associated with the transaction
 	 * @param theResourceDef The {@link RuntimeResourceDefinition} associated with this bundle entry
-	 * @param theOperation The {@link RestOperationTypeEnum} associated with this bundle entry
+	 * @param theOperation   The {@link RestOperationTypeEnum} associated with this bundle entry
+	 * @param theResource    The {@link IBaseResource} associated with this bundle entry
 	 * @return true if we should reject this reject
 	 */
 	private boolean shouldRejectBundleEntry(
-			RuntimeResourceDefinition theResourceDef, RestOperationTypeEnum theOperation) {
+		FhirContext theFhirContext, RuntimeResourceDefinition theResourceDef, RestOperationTypeEnum theOperation, IBaseResource theResource) {
 		final boolean isResourceParameters = PARAMETERS.equals(theResourceDef.getName());
-		final boolean isResourceBundle = BUNDLE.equals(theResourceDef.getName());
 		final boolean isOperationPatch = theOperation == RestOperationTypeEnum.PATCH;
+		final boolean shouldRejectBundleResource = shouldRejectBundleResource(theFhirContext, theResource);
 
-		return (isResourceParameters && !isOperationPatch) || isResourceBundle;
+		return (isResourceParameters && !isOperationPatch) || shouldRejectBundleResource;
+	}
+
+	private boolean shouldRejectBundleResource(FhirContext theFhirContext, IBaseResource theResource){
+		if (!(theResource instanceof IBaseBundle)){
+			return false;
+		}
+
+		IBaseBundle bundle = (IBaseBundle) theResource;
+		return !BundleUtil.isStandaloneBundleResource(theFhirContext, bundle);
 	}
 
 	private void setTargetFromResourceId(RequestDetails theRequestDetails, FhirContext ctx, RuleTarget target) {

@@ -83,8 +83,6 @@ public class AuthorizationInterceptor implements IRuleApplier {
 	public static final String BUNDLE = "Bundle";
 	private static final AtomicInteger ourInstanceCount = new AtomicInteger(0);
 	private static final Logger ourLog = LoggerFactory.getLogger(AuthorizationInterceptor.class);
-	private static final Set<BundleTypeEnum> STANDALONE_BUNDLE_RESOURCE_TYPES =
-			Set.of(BundleTypeEnum.DOCUMENT, BundleTypeEnum.COLLECTION, BundleTypeEnum.MESSAGE);
 
 	private final int myInstanceIndex = ourInstanceCount.incrementAndGet();
 	private final String myRequestSeenResourcesKey =
@@ -625,10 +623,7 @@ public class AuthorizationInterceptor implements IRuleApplier {
 		if (!isBundleRequest) {
 			return true;
 		}
-		BundleTypeEnum bundleType = BundleUtil.getBundleTypeEnum(theFhirContext, theBundle);
-		boolean isStandaloneBundleResource =
-				bundleType != null && STANDALONE_BUNDLE_RESOURCE_TYPES.contains(bundleType);
-		return !isStandaloneBundleResource;
+		return !BundleUtil.isStandaloneBundleResource(theFhirContext, theBundle);
 	}
 
 	public static class Verdict {
