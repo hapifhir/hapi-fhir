@@ -24,6 +24,7 @@ import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.model.primitive.CodeDt;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.ICompositeType;
@@ -41,8 +42,8 @@ public class AttachmentUtil {
 		return getOrCreateChild(theContext, theAttachment, "data", "base64Binary");
 	}
 
-	public static IPrimitiveType<String> getOrCreateContentType(FhirContext theContext, ICompositeType theAttachment) {
-		return getOrCreateChild(theContext, theAttachment, "contentType", "string");
+	public static IPrimitiveType<CodeDt> getOrCreateContentType(FhirContext theContext, ICompositeType theAttachment) {
+		return getOrCreateChild(theContext, theAttachment, "contentType", "code");
 	}
 
 	public static IPrimitiveType<String> getOrCreateUrl(FhirContext theContext, ICompositeType theAttachment) {

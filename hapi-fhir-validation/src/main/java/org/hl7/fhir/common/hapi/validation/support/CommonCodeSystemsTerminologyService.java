@@ -29,6 +29,7 @@ import org.hl7.fhir.convertors.factory.VersionConvertorFactory_43_50;
 import org.hl7.fhir.dstu2.model.ValueSet;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.CodeSystem;
+import org.hl7.fhir.r4.model.CodeSystem.CodeSystemContentMode;
 import org.hl7.fhir.r5.model.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -428,21 +429,27 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 
 	@Override
 	public IBaseResource fetchCodeSystem(String theSystem) {
-
+		final CodeSystemContentMode content;
 		Map<String, String> map;
 		switch (defaultString(theSystem)) {
 			case COUNTRIES_CODESYSTEM_URL:
 				map = ISO_3166_CODES;
+				content = CodeSystemContentMode.COMPLETE;
 				break;
 			case CURRENCIES_CODESYSTEM_URL:
 				map = ISO_4217_CODES;
+				content = CodeSystemContentMode.COMPLETE;
+				break;
+			case MIMETYPES_CODESYSTEM_URL:
+				map = Collections.emptyMap();
+				content = CodeSystemContentMode.NOTPRESENT;
 				break;
 			default:
 				return null;
 		}
 
 		CodeSystem retVal = new CodeSystem();
-		retVal.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+		retVal.setContent(content);
 		retVal.setUrl(theSystem);
 		for (Map.Entry<String, String> nextEntry : map.entrySet()) {
 			retVal.addConcept().setCode(nextEntry.getKey()).setDisplay(nextEntry.getValue());

@@ -32,8 +32,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import static org.apache.commons.lang3.StringUtils.defaultString;
-
 @Entity
 @Table(
 		name = ResourceHistoryTable.HFJ_RES_VER,
@@ -86,15 +84,12 @@ public class ResourceHistoryTable extends BaseHasResource implements Serializabl
 	@OneToMany(mappedBy = "myResourceHistory", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
 	private Collection<ResourceHistoryTag> myTags;
 
-	/**
-	 * Note: No setter for this field because it's only a legacy way of storing data now.
-	 */
 	@Column(name = "RES_TEXT", length = Integer.MAX_VALUE - 1, nullable = true)
 	@Lob()
 	@OptimisticLock(excluded = true)
 	private byte[] myResource;
 
-	@Column(name = "RES_TEXT_VC", nullable = true, length = Length.LONG32)
+	@Column(name = "RES_TEXT_VC", length = Length.LONG32, nullable = true)
 	@OptimisticLock(excluded = true)
 	private String myResourceTextVc;
 
@@ -155,8 +150,7 @@ public class ResourceHistoryTable extends BaseHasResource implements Serializabl
 	}
 
 	public void setResourceTextVc(String theResourceTextVc) {
-		myResource = null;
-		myResourceTextVc = defaultString(theResourceTextVc);
+		myResourceTextVc = theResourceTextVc;
 	}
 
 	public ResourceHistoryProvenanceEntity getProvenance() {
@@ -210,6 +204,10 @@ public class ResourceHistoryTable extends BaseHasResource implements Serializabl
 
 	public byte[] getResource() {
 		return myResource;
+	}
+
+	public void setResource(byte[] theResource) {
+		myResource = theResource;
 	}
 
 	@Override
