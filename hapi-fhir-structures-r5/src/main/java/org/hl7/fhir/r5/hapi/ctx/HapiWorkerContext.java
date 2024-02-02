@@ -284,6 +284,10 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 	}
 
 	@Override
+	public void setExpansionParameters(Parameters expParameters) {
+		setExpansionProfile(expParameters);
+	}
+
 	public void setExpansionProfile(Parameters theExpParameters) {
 		myExpansionProfile = theExpParameters;
 	}
@@ -615,5 +619,20 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 	@Override
 	public Set<String> urlsForOid(boolean codeSystem, String oid) {
 		throw new UnsupportedOperationException(Msg.code(2473));
+	}
+
+	@Override
+	public <T extends Resource> T findTxResource(Class<T> class_, String canonical, Resource sourceOfReference) {
+		throw new UnsupportedOperationException(Msg.code(2461));
+	}
+
+	@Override
+	public <T extends Resource> T findTxResource(Class<T> class_, String canonical) {
+		throw new UnsupportedOperationException(Msg.code(2461));
+	}
+
+	@Override
+	public <T extends Resource> T findTxResource(Class<T> class_, String canonical, String version) {
+		throw new UnsupportedOperationException(Msg.code(2461));
 	}
 }
