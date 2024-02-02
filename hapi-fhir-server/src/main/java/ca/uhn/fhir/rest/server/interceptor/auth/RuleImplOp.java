@@ -852,7 +852,10 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 	 * @return true if we should reject this reject
 	 */
 	private boolean shouldRejectBundleEntry(
-		FhirContext theFhirContext, RuntimeResourceDefinition theResourceDef, RestOperationTypeEnum theOperation, IBaseResource theResource) {
+			FhirContext theFhirContext,
+			RuntimeResourceDefinition theResourceDef,
+			RestOperationTypeEnum theOperation,
+			IBaseResource theResource) {
 		final boolean isResourceParameters = PARAMETERS.equals(theResourceDef.getName());
 		final boolean isOperationPatch = theOperation == RestOperationTypeEnum.PATCH;
 		final boolean shouldRejectBundleResource = shouldRejectBundleResource(theFhirContext, theResource);
@@ -860,8 +863,8 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 		return (isResourceParameters && !isOperationPatch) || shouldRejectBundleResource;
 	}
 
-	private boolean shouldRejectBundleResource(FhirContext theFhirContext, IBaseResource theResource){
-		if (!(theResource instanceof IBaseBundle)){
+	private boolean shouldRejectBundleResource(FhirContext theFhirContext, IBaseResource theResource) {
+		if (!(theResource instanceof IBaseBundle)) {
 			return false;
 		}
 
