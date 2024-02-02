@@ -52,21 +52,16 @@ public class CommonCodeSystemsTerminologyServiceTest extends BaseValidationTestW
 	@ParameterizedTest
 	@CsvSource({"Cel, (degree Celsius)", "kg/m2, (kilogram) / (meter ^ 2)"})
 	public void testLookupCode_withUnitsOfMeasureWithKnownCode_returnsFound(final String theCode, final String theDisplay) {
-		LookupCodeResult outcome = mySvc.lookupCode(newSupport(), new LookupCodeRequest(UCUM_CODESYSTEM_URL, theCode));
-		assertNotNull(outcome);
-		assertTrue(outcome.isFound());
-		assertEquals(theCode, outcome.getSearchedForCode());
-		assertEquals(theDisplay, outcome.getCodeDisplay());
+		final String system = UCUM_CODESYSTEM_URL;
+		LookupCodeResult outcome = mySvc.lookupCode(newSupport(), new LookupCodeRequest(system, theCode));
+		lookupCodeResultOk(outcome, theCode, system, theDisplay);
 	}
 
 	@Test
 	public void testLookupCode_withUnitsOfMeasureWithUnknownCode_returnsNotFound() {
 		final String code = "someCode";
 		LookupCodeResult outcome = mySvc.lookupCode(newSupport(), new LookupCodeRequest(UCUM_CODESYSTEM_URL, code));
-		assertNotNull(outcome);
-		assertFalse(outcome.isFound());
-		assertEquals(code, outcome.getSearchedForCode());
-		assertEquals("Error processing unit '" + code +"': The unit '" + code + "' is unknown' at position 0", outcome.getErrorMessage());
+		lookupCodeResultError(outcome, code, "Error processing unit '" + code +"': The unit '" + code + "' is unknown' at position 0");
 	}
 
 	@Test
@@ -78,134 +73,99 @@ public class CommonCodeSystemsTerminologyServiceTest extends BaseValidationTestW
 	@ParameterizedTest
 	@CsvSource({"SGN, Sign languages", "sgn, Sign languages", "EN-US, English United States", "en-us, English United States"})
 	public void testLookupCode_withLanguageOnlyWithKnownCode_returnsFound(final String theCode, final String theDisplay) {
-		LookupCodeResult outcome = mySvc.lookupCode(newSupport(), new LookupCodeRequest(CommonCodeSystemsTerminologyService.LANGUAGES_CODESYSTEM_URL, theCode, null, null));
-		assertNotNull(outcome);
-		assertTrue(outcome.isFound());
-		assertEquals(theCode, outcome.getSearchedForCode());
-		assertEquals(theDisplay, outcome.getCodeDisplay());
+		final String system = LANGUAGES_CODESYSTEM_URL;
+		LookupCodeResult outcome = mySvc.lookupCode(newSupport(), new LookupCodeRequest(system, theCode, null, null));
+		lookupCodeResultOk(outcome, theCode, system, theDisplay);
 	}
 
 	@Test
 	public void testValidateCode_withUnitsOfMeasureWithKnownCode_returnsValid() {
 		final String code = "mg";
-		CodeValidationResult outcome = mySvc.validateCode(newSupport(), newOptions(), UCUM_CODESYSTEM_URL, code, null, UCUM_VALUESET_URL);
-		assertNotNull(outcome);
-		assertTrue(outcome.isOk());
-		assertEquals(code, outcome.getCode());
-		assertEquals("(milligram)", outcome.getDisplay());
+		CodeValidationResult result = mySvc.validateCode(newSupport(), newOptions(), UCUM_CODESYSTEM_URL, code, null, UCUM_VALUESET_URL);
+		validateCodeResultOk(result, code, "(milligram)");
 	}
 
 	@Test
 	public void testValidateCodeInValueSet_withUnitsOfMeasureWithKnownCode_returnsValid() {
 		final ValueSet vs = new ValueSet().setUrl(UCUM_VALUESET_URL);
 		final String code = "mg";
-		CodeValidationResult outcome = mySvc.validateCodeInValueSet(newSupport(), newOptions(), UCUM_CODESYSTEM_URL, code, null, vs);
-		assertNotNull(outcome);
-		assertTrue(outcome.isOk());
-		assertEquals(code, outcome.getCode());
-		assertEquals("(milligram)", outcome.getDisplay());
+		CodeValidationResult result = mySvc.validateCodeInValueSet(newSupport(), newOptions(), UCUM_CODESYSTEM_URL, code, null, vs);
+		validateCodeResultOk(result, code, "(milligram)");
 	}
 
 	@Test
 	public void testValidateCodeInValueSet_withUnitsOfMeasureWithInferSystem_returnsValid() {
 		final ValueSet vs = new ValueSet().setUrl(UCUM_VALUESET_URL);
 		final String code = "mg";
-		CodeValidationResult outcome = mySvc.validateCodeInValueSet(newSupport(), newOptions().setInferSystem(true), null, code, null, vs);
-		assertNotNull(outcome);
-		assertTrue(outcome.isOk());
-		assertEquals(code, outcome.getCode());
-		assertEquals("(milligram)", outcome.getDisplay());
+		CodeValidationResult result = mySvc.validateCodeInValueSet(newSupport(), newOptions().setInferSystem(true), null, code, null, vs);
+		validateCodeResultOk(result, code, "(milligram)");
 	}
 
 	@Test
 	public void testValidateCodeInValueSet_withUnitsOfMeasureWithUnknownCode_returnsInvalid() {
 		final String code = "FOO";
 		final ValueSet vs = new ValueSet().setUrl(UCUM_VALUESET_URL);
-		CodeValidationResult outcome = mySvc.validateCodeInValueSet(newSupport(), newOptions(), UCUM_CODESYSTEM_URL, code, null, vs);
-		assertNotNull(outcome);
-		assertFalse(outcome.isOk());
-		assertEquals(IssueSeverity.ERROR, outcome.getSeverity());
-		assertEquals("Error processing unit '" + code +"': The unit '" + code + "' is unknown' at position 0", outcome.getMessage());
+		CodeValidationResult result = mySvc.validateCodeInValueSet(newSupport(), newOptions(), UCUM_CODESYSTEM_URL, code, null, vs);
+		validateCodeResultError(result, "Error processing unit '" + code +"': The unit '" + code + "' is unknown' at position 0");
 	}
 
 	@ParameterizedTest
 	@CsvSource({"en-CA, English Canada", "en-US, English United States"})
 	public void testValidateLookupCode_withLanguagesWithKnownCode_returnsValid(final String theCode, final String theDisplay) {
-		CodeValidationResult outcome = mySvc.validateLookupCode(newSupport(), theCode, LANGUAGES_CODESYSTEM_URL);
-		assertNotNull(outcome);
-		assertTrue(outcome.isOk());
-		assertEquals(theCode, outcome.getCode());
-		assertEquals(theDisplay, outcome.getDisplay());
+		CodeValidationResult result = mySvc.validateCodeUsingSystemLookup(newSupport(), theCode, LANGUAGES_CODESYSTEM_URL);
+		validateCodeResultOk(result, theCode, theDisplay);
 	}
 
 	@ParameterizedTest
 	@CsvSource({"en-CA, English (Canada)", "en-US, English (United States)"})
 	public void testValidateCode_withLanguagesWithKnownCode_returnsValid(final String theCode, final String theDisplay) {
-		CodeValidationResult outcome = mySvc.validateCode(newSupport(), newOptions(), LANGUAGES_CODESYSTEM_URL, theCode, null, LANGUAGES_VALUESET_URL);
-		assertNotNull(outcome);
-		assertTrue(outcome.isOk());
-		assertEquals(theCode, outcome.getCode());
-		assertEquals(theDisplay, outcome.getDisplay());
+		CodeValidationResult result = mySvc.validateCode(newSupport(), newOptions(), LANGUAGES_CODESYSTEM_URL, theCode, null, LANGUAGES_VALUESET_URL);
+		validateCodeResultOk(result, theCode, theDisplay);
 	}
 
 	@Test
 	public void testValidateCode_withLanguagesWithUnknownCode_returnsInvalid() {
 		final String code = "FOO";
-		CodeValidationResult outcome = mySvc.validateCode(newSupport(), newOptions(), LANGUAGES_CODESYSTEM_URL, code, null, LANGUAGES_VALUESET_URL);
-		assertNotNull(outcome);
-		assertFalse(outcome.isOk());
-		assertEquals(IssueSeverity.ERROR, outcome.getSeverity());
-		assertEquals("Code \""+ code +"\" is not in valueset: " + LANGUAGES_VALUESET_URL, outcome.getMessage());
+		CodeValidationResult result = mySvc.validateCode(newSupport(), newOptions(), LANGUAGES_CODESYSTEM_URL, code, null, LANGUAGES_VALUESET_URL);
+		validateCodeResultError(result, "Code \""+ code +"\" is not in valueset: " + LANGUAGES_VALUESET_URL);
 	}
 
 	@Test
 	public void testValidateCode_withLanguagesWithIncorrectSystem_returnsInvalid() {
 		final String system = "FOO";
-		CodeValidationResult outcome = mySvc.validateCode(newSupport(), newOptions(), system, "en-US", null, LANGUAGES_VALUESET_URL);
-		assertNotNull(outcome);
-		assertFalse(outcome.isOk());
-		assertEquals(IssueSeverity.ERROR, outcome.getSeverity());
-		assertEquals("Inappropriate CodeSystem URL \"" + system + "\" for ValueSet: " + LANGUAGES_VALUESET_URL, outcome.getMessage());
+		CodeValidationResult result = mySvc.validateCode(newSupport(), newOptions(), system, "en-US", null, LANGUAGES_VALUESET_URL);
+		validateCodeResultError(result, "Inappropriate CodeSystem URL \"" + system + "\" for ValueSet: " + LANGUAGES_VALUESET_URL);
 	}
 
 	@ParameterizedTest
 	@CsvSource({"en-CA, English Canada", "en-US, English United States"})
 	public void testValidateCode_withAllLanguagesWithKnownCode_returnsValid(final String theCode, final String theDisplay) {
-		CodeValidationResult outcome = mySvc.validateCode(newSupport(), newOptions(), LANGUAGES_CODESYSTEM_URL, theCode, null, ALL_LANGUAGES_VALUESET_URL);
-		assertNotNull(outcome);
-		assertTrue(outcome.isOk());
-		assertEquals(theCode, outcome.getCode());
-		assertEquals(theDisplay, outcome.getDisplay());
+		CodeValidationResult result = mySvc.validateCode(newSupport(), newOptions(), LANGUAGES_CODESYSTEM_URL, theCode, null, ALL_LANGUAGES_VALUESET_URL);
+		validateCodeResultOk(result, theCode, theDisplay);
 	}
 
 
 	@Test
 	public void testValidateCode_withAllLanguagesWithUnknownCode_returnsInvalid() {
 		final String code = "FOO";
-		CodeValidationResult outcome = mySvc.validateCode(newSupport(), newOptions(), LANGUAGES_CODESYSTEM_URL, code, null, ALL_LANGUAGES_VALUESET_URL);
-		assertNotNull(outcome);
-		assertFalse(outcome.isOk());
-		assertEquals(IssueSeverity.ERROR, outcome.getSeverity());
-		assertEquals("Code \"" + code + "\" is not in valueset: " + ALL_LANGUAGES_VALUESET_URL, outcome.getMessage());
+		CodeValidationResult result = mySvc.validateCode(newSupport(), newOptions(), LANGUAGES_CODESYSTEM_URL, code, null, ALL_LANGUAGES_VALUESET_URL);
+		validateCodeResultError(result, "Code \"" + code + "\" is not in valueset: " + ALL_LANGUAGES_VALUESET_URL);
 	}
 
 	@Test
 	public void testValidateCode_withAllLanguagesWithIncorrectSystem_returnsInvalid() {
 		final String system = "FOO";
-		CodeValidationResult outcome = mySvc.validateCode(newSupport(), newOptions(), system, "en-US", null, ALL_LANGUAGES_VALUESET_URL);
-		assertNotNull(outcome);
-		assertFalse(outcome.isOk());
-		assertEquals(IssueSeverity.ERROR, outcome.getSeverity());
-		assertEquals("Inappropriate CodeSystem URL \"" + system + "\" for ValueSet: " + ALL_LANGUAGES_VALUESET_URL, outcome.getMessage());
+		final String valueSet = ALL_LANGUAGES_VALUESET_URL;
+		CodeValidationResult result = mySvc.validateCode(newSupport(), newOptions(), system, "en-US", null, valueSet);
+		validateCodeResultError(result, "Inappropriate CodeSystem URL \"" + system + "\" for ValueSet: " + valueSet);
 	}
 
 	@ParameterizedTest
 	@CsvSource({"nl, Dutch", "nl-NL, Dutch Netherlands"})
-	public void testLookupCode_withLanguagesWithKnownLanguageOnlyCode_returnsCode(final String theCode, final String theDisplay) {
-		LookupCodeResult nl = mySvc.lookupCode(newSupport(), new LookupCodeRequest(LANGUAGES_CODESYSTEM_URL, theCode));
-		assertTrue(nl != null && nl.isFound());
-		assertEquals(theCode, nl.getSearchedForCode());
-		assertEquals(theDisplay, nl.getCodeDisplay());
+	public void testLookupCode_withLanguagesWithKnownLanguageOnlyCode_returnsFound(final String theCode, final String theDisplay) {
+		final String system = LANGUAGES_CODESYSTEM_URL;
+		LookupCodeResult result = mySvc.lookupCode(newSupport(), new LookupCodeRequest(system, theCode));
+		lookupCodeResultOk(result, theCode, system, theDisplay);
 	}
 
 	@Test
@@ -241,105 +201,77 @@ public class CommonCodeSystemsTerminologyServiceTest extends BaseValidationTestW
 	@ParameterizedTest
 	@CsvSource({"WA, Washington", "PR, Puerto Rico"})
 	public void testValidateCode_withUSPostalWithKnownCode_returnsValid(final String theCode, final String theDisplay) {
-		CodeValidationResult outcome = mySvc.validateCode(newSupport(), newOptions(), USPS_CODESYSTEM_URL, theCode, null, null);
-		assertNotNull(outcome);
-		assertTrue(outcome.isOk());
-		assertEquals(theCode, outcome.getCode());
-		assertEquals(theDisplay, outcome.getDisplay());
+		CodeValidationResult result = mySvc.validateCode(newSupport(), newOptions(), USPS_CODESYSTEM_URL, theCode, null, null);
+		validateCodeResultOk(result, theCode, theDisplay);
 	}
 
 	@ParameterizedTest
 	@CsvSource({"WA, Washington", "PR, Puerto Rico"})
 	public void testValidateCode_withUSPostalValueSetWithKnownCode_returnsValid(final String theCode, final String theDisplay) {
-		CodeValidationResult outcome = mySvc.validateCode(newSupport(), newOptions(), USPS_CODESYSTEM_URL, theCode, null, USPS_VALUESET_URL);
-		assertNotNull(outcome);
-		assertTrue(outcome.isOk());
-		assertEquals(theCode, outcome.getCode());
-		assertEquals(theDisplay, outcome.getDisplay());
+		CodeValidationResult result = mySvc.validateCode(newSupport(), newOptions(), USPS_CODESYSTEM_URL, theCode, null, USPS_VALUESET_URL);
+		validateCodeResultOk(result, theCode, theDisplay);
 	}
 
 	@Test
 	public void testValidateCode_withUSPostalValueSetWithUnknownCode_returnsInvalid() {
 		final String system = USPS_CODESYSTEM_URL;
 		final String code = "FOO";
-		CodeValidationResult outcome = mySvc.validateCode(newSupport(), newOptions(), system, code, null, USPS_VALUESET_URL);
-		assertNotNull(outcome);
-		assertFalse(outcome.isOk());
-		assertEquals(IssueSeverity.ERROR, outcome.getSeverity());
-		assertEquals("Unknown code \"" + system + "#" + code + "\"", outcome.getMessage());
+		CodeValidationResult result = mySvc.validateCode(newSupport(), newOptions(), system, code, null, USPS_VALUESET_URL);
+		validateCodeResultError(result, "Unknown code \"" + system + "#" + code + "\"");
 	}
 
 	@ParameterizedTest
 	@CsvSource({"WA, Washington", "PR, Puerto Rico"})
 	public void testLookupCode_withUSPostalWithKnownCode_returnsValid(final String theCode, final String theDisplay) {
-		LookupCodeResult outcome = mySvc.lookupCode(newSupport(), new LookupCodeRequest(USPS_CODESYSTEM_URL, theCode));
-		assertNotNull(outcome);
-		assertTrue(outcome.isFound());
-		assertEquals(theCode, outcome.getSearchedForCode());
-		assertEquals(theDisplay, outcome.getCodeDisplay());
+		final String system = USPS_CODESYSTEM_URL;
+		LookupCodeResult result = mySvc.lookupCode(newSupport(), new LookupCodeRequest(system, theCode));
+		lookupCodeResultOk(result, theCode, system, theDisplay);
 	}
 
 	@Test
 	public void testLookupCode_withUSPostalWithUnknownCode_returnsNotFound() {
 		final String system = USPS_CODESYSTEM_URL;
-		final String code = "FOO";
-		LookupCodeResult outcome = mySvc.lookupCode(newSupport(), new LookupCodeRequest(system, code));
-		assertNotNull(outcome);
-		assertFalse(outcome.isFound());
-		assertEquals(code, outcome.getSearchedForCode());
-		assertEquals("Code " + code + " is not valid for system: " + system, outcome.getErrorMessage());
+		final String code = "invalidUSPS";
+		LookupCodeResult result = mySvc.lookupCode(newSupport(), new LookupCodeRequest(system, code));
+		lookupCodeResultError(result, code, "Code " + code + " is not valid for system: " + system);
 	}
 
 	@ParameterizedTest
 	@CsvSource({"USD, United States dollar", "CAD, Canadian dollar", "EUR, Euro"})
 	public void testValidateCode_withCurrenciesWithKnownCode_returnsValid(final String theCode, final String theDisplay) {
-		CodeValidationResult outcome = mySvc.validateCode(newSupport(), newOptions(), CURRENCIES_CODESYSTEM_URL, theCode, null, null);
-		assertNotNull(outcome);
-		assertTrue(outcome.isOk());
-		assertEquals(theCode, outcome.getCode());
-		assertEquals(theDisplay, outcome.getDisplay());
+		CodeValidationResult result = mySvc.validateCode(newSupport(), newOptions(), CURRENCIES_CODESYSTEM_URL, theCode, null, null);
+		validateCodeResultOk(result, theCode, theDisplay);
 	}
 
 	@ParameterizedTest
 	@CsvSource({"USD, United States dollar", "CAD, Canadian dollar", "EUR, Euro"})
 	public void testValidateCode_withCurrenciesValueSetWithKnownCode_returnsValid(final String theCode, final String theDisplay) {
-		CodeValidationResult outcome = mySvc.validateCode(newSupport(), newOptions(), CURRENCIES_CODESYSTEM_URL, theCode, null, CURRENCIES_VALUESET_URL);
-		assertNotNull(outcome);
-		assertTrue(outcome.isOk());
-		assertEquals(theCode, outcome.getCode());
-		assertEquals(theDisplay, outcome.getDisplay());
+		CodeValidationResult result = mySvc.validateCode(newSupport(), newOptions(), CURRENCIES_CODESYSTEM_URL, theCode, null, CURRENCIES_VALUESET_URL);
+		validateCodeResultOk(result, theCode, theDisplay);
 	}
 
 	@Test
 	public void testValidateCode_withCurrenciesValueSetWithUnknownCode_returnsInvalid() {
 		final String system = CURRENCIES_CODESYSTEM_URL;
-		final String code = "FOO";
-		CodeValidationResult outcome = mySvc.validateCode(newSupport(), newOptions(), system, code, null, CURRENCIES_VALUESET_URL);
-		assertNotNull(outcome);
-		assertFalse(outcome.isOk());
-		assertEquals(IssueSeverity.ERROR, outcome.getSeverity());
-		assertEquals("Unknown code \"" + system + "#" + code + "\"", outcome.getMessage());
+		final String code = "invalidCurrency";
+		CodeValidationResult result = mySvc.validateCode(newSupport(), newOptions(), system, code, null, CURRENCIES_VALUESET_URL);
+		validateCodeResultError(result, "Unknown code \"" + system + "#" + code + "\"");
 	}
 
 	@ParameterizedTest
 	@CsvSource({"USD, United States dollar", "CAD, Canadian dollar", "EUR, Euro"})
 	public void testLookupCode_withCurrenciesWithKnownCode_returnsValid(final String theCode, final String theDisplay) {
-		LookupCodeResult outcome = mySvc.lookupCode(newSupport(), new LookupCodeRequest(CURRENCIES_CODESYSTEM_URL, theCode));
-		assertNotNull(outcome);
-		assertTrue(outcome.isFound());
-		assertEquals(theCode, outcome.getSearchedForCode());
-		assertEquals(theDisplay, outcome.getCodeDisplay());
+		final String system = CURRENCIES_CODESYSTEM_URL;
+		LookupCodeResult result = mySvc.lookupCode(newSupport(), new LookupCodeRequest(system, theCode));
+		lookupCodeResultOk(result, theCode, system, theDisplay);
 	}
 
 	@Test
 	public void testLookupCode_withCurrenciesWithUnknownCode_returnsNotFound() {
 		final String system = CURRENCIES_CODESYSTEM_URL;
 		final String code = "FOO";
-		LookupCodeResult outcome = mySvc.lookupCode(newSupport(), new LookupCodeRequest(system, code));
-		assertNotNull(outcome);
-		assertFalse(outcome.isFound());
-		assertEquals(code, outcome.getSearchedForCode());
-		assertEquals("Code " + code + " is not valid for system: " + system, outcome.getErrorMessage());
+		LookupCodeResult result = mySvc.lookupCode(newSupport(), new LookupCodeRequest(system, code));
+		lookupCodeResultError(result, code, "Code " + code + " is not valid for system: " + system);
 	}
 
 	@Test
@@ -373,123 +305,99 @@ public class CommonCodeSystemsTerminologyServiceTest extends BaseValidationTestW
 
 	@ParameterizedTest
 	@ValueSource(strings = { EncodingEnum.JSON_PLAIN_STRING, Constants.CT_FHIR_JSON_NEW, Constants.CT_FHIR_JSON })
-	public void testValidateCode_withMimetypesValueSetWithStandardCode_returnsValid(String code) {
-		// test
-		CodeValidationResult result = mySvc.validateCode(newSupport(), newOptions(), MIMETYPES_CODESYSTEM_URL, code, null, MIMETYPES_VALUESET_URL);
-
-		// verify
-		assertNotNull(result);
-		assertEquals(code, result.getCode());
-		assertTrue(result.isOk());
-		assertNull(result.getSeverity());
-		assertNull(result.getMessage());
+	public void testValidateCode_withMimetypesValueSetWithStandardCode_returnsValid(String theCode) {
+		CodeValidationResult result = mySvc.validateCode(newSupport(), newOptions(), MIMETYPES_CODESYSTEM_URL, theCode, null, MIMETYPES_VALUESET_URL);
+		validateCodeResultOk(result, theCode, null);
 	}
 
 	@ParameterizedTest
 	@ValueSource(strings = { EncodingEnum.JSON_PLAIN_STRING, Constants.CT_FHIR_JSON_NEW, Constants.CT_FHIR_JSON })
-	public void testValidateCode_withMimetypesValueSetWithInferSystemWithStandardCode_returnsValid(String code) {
-		// test
-		CodeValidationResult result = mySvc.validateCode(newSupport(), newOptions().setInferSystem(true), null, code, null, MIMETYPES_VALUESET_URL);
-
-		// verify
-		assertNotNull(result);
-		assertEquals(code, result.getCode());
-		assertTrue(result.isOk());
-		assertNull(result.getSeverity());
-		assertNull(result.getMessage());
+	public void testValidateCode_withMimetypesValueSetWithInferSystemWithStandardCode_returnsValid(String theCode) {
+		CodeValidationResult result = mySvc.validateCode(newSupport(), newOptions().setInferSystem(true), null, theCode, null, MIMETYPES_VALUESET_URL);
+		validateCodeResultOk(result, theCode, null);
 	}
 
 	@Test
 	public void testValidateCode_withMimetypesValueSetWithMismatchSystem_returnsInvalid() {
 		final String system = "someSystem";
 		final String valueSet = MIMETYPES_VALUESET_URL;
-		// test
 		CodeValidationResult result = mySvc.validateCode(newSupport(), newOptions(), system, system, null, valueSet);
-
-		// verify
-		assertNotNull(result);
-		assertFalse(result.isOk());
-		assertEquals(IssueSeverity.ERROR, result.getSeverity());
-		assertEquals("Inappropriate CodeSystem URL \"" + system + "\" for ValueSet: " + valueSet, result.getMessage());
+		validateCodeResultError(result, "Inappropriate CodeSystem URL \"" + system + "\" for ValueSet: " + valueSet);
 	}
 
 	@ParameterizedTest
 	@ValueSource(strings = { EncodingEnum.JSON_PLAIN_STRING, Constants.CT_FHIR_JSON_NEW, Constants.CT_FHIR_JSON })
-	public void testValidateCode_withMimetypesWithStandardCode_returnsValid(String code) {
-		// test
-		CodeValidationResult result = mySvc.validateCode(newSupport(), newOptions(), MIMETYPES_CODESYSTEM_URL, code, null, null);
-
-		// verify
-		assertNotNull(result);
-		assertEquals(code, result.getCode());
-		assertTrue(result.isOk());
-		assertNull(result.getSeverity());
-		assertNull(result.getMessage());
+	public void testValidateCode_withMimetypesWithStandardCode_returnsValid(String theCode) {
+		CodeValidationResult result = mySvc.validateCode(newSupport(), newOptions(), MIMETYPES_CODESYSTEM_URL, theCode, null, null);
+		validateCodeResultOk(result, theCode, null);
 	}
 
 	@Test
 	public void testValidateCode_withMimetypeValueSetWithArbitraryCode_returnsValid() {
-		// setup
 		final String code = "someCode";
 		final String display = "displayValue";
-
-		// test
 		CodeValidationResult result = mySvc.validateCode(newSupport(), newOptions(), MIMETYPES_CODESYSTEM_URL, code, display, MIMETYPES_VALUESET_URL);
-
-		// verify
-		assertNotNull(result);
-		assertEquals(code, result.getCode());
-		assertTrue(result.isOk());
-		assertEquals(display, result.getDisplay());
+		validateCodeResultOk(result, code, display);
 	}
 
 	@Test
 	public void testValidateCode_withMimetypesWithArbitraryCode_returnsValid() {
-		// setup
 		final String code = "someCode";
 		final String display = "displayValue";
-
-		// test
 		CodeValidationResult result = mySvc.validateCode(newSupport(), newOptions(), MIMETYPES_CODESYSTEM_URL, code, display, null);
+		validateCodeResultOk(result, code, null);
 
-		// verify
-		assertNotNull(result);
-		assertEquals(code, result.getCode());
-		assertTrue(result.isOk());
+		// the display null in result bug is reported here:  https://github.com/hapifhir/hapi-fhir/issues/5643
 	}
 
 	@ParameterizedTest
 	@ValueSource(strings = { EncodingEnum.JSON_PLAIN_STRING, Constants.FORMAT_TURTLE, Constants.CT_FHIR_JSON_NEW, Constants.CT_FHIR_JSON })
 	public void testLookupCode_withMimetypesWithStandardCode_returnFound(String code) {
-		// setup
 		final String system = MIMETYPES_CODESYSTEM_URL;
-
-		// test
 		LookupCodeResult result = mySvc.lookupCode(newSupport(), new LookupCodeRequest(system, code));
-
-		// verify
-		assertNotNull(result);
-		assertEquals(system, result.getSearchedForSystem());
-		assertEquals(code, result.getSearchedForCode());
-		assertTrue(result.isFound());
+		lookupCodeResultOk(result, code, system, null);
 	}
 
 	@Test
 	public void testLookupCode_withMimetypesWithArbitraryCode_returnsFound() {
-		// setup
 		final String system = MIMETYPES_CODESYSTEM_URL;
 		final String code = "someCode";
-
-		// test
 		LookupCodeResult result = mySvc.lookupCode(newSupport(), new LookupCodeRequest(system, code));
-
-		// verify
-		assertNotNull(result);
-		assertEquals(system, result.getSearchedForSystem());
-		assertEquals(code, result.getSearchedForCode());
-		assertTrue(result.isFound());
-		assertNull(result.getCodeDisplay());
+		lookupCodeResultOk(result, code, system, null);
 	}
+
+	private void validateCodeResultOk(final CodeValidationResult theResult, final String theCode, final String theDisplay) {
+		assertNotNull(theResult);
+		assertTrue(theResult.isOk());
+		assertEquals(theCode, theResult.getCode());
+		assertEquals(theDisplay, theResult.getDisplay());
+		assertNull(theResult.getSeverity());
+		assertNull(theResult.getMessage());
+	}
+
+	private void validateCodeResultError(final CodeValidationResult theResult, final String theError) {
+		assertNotNull(theResult);
+		assertFalse(theResult.isOk());
+		assertEquals(IssueSeverity.ERROR, theResult.getSeverity());
+		assertEquals(theError, theResult.getMessage());
+	}
+
+	private void lookupCodeResultOk(final LookupCodeResult theResult, final String theCode, final String theSystem, final String theDisplay) {
+		assertNotNull(theResult);
+		assertEquals(theSystem, theResult.getSearchedForSystem());
+		assertEquals(theCode, theResult.getSearchedForCode());
+		assertTrue(theResult.isFound());
+		assertEquals(theDisplay, theResult.getCodeDisplay());
+	}
+
+	private void lookupCodeResultError(final LookupCodeResult theResult, final String theCode, final String theMessage) {
+		assertNotNull(theResult);
+		assertEquals(theCode, theResult.getSearchedForCode());
+		assertFalse(theResult.isFound());
+		assertEquals(theMessage, theResult.getErrorMessage());
+		assertNull(theResult.getCodeDisplay());
+	}
+
 
 	private ValidationSupportContext newSupport() {
 		return new ValidationSupportContext(myCtx.getValidationSupport());

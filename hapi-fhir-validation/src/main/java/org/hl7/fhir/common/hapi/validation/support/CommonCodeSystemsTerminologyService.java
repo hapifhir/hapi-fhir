@@ -82,9 +82,9 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 	 * Constructor
 	 */
 	public CommonCodeSystemsTerminologyService(FhirContext theFhirContext) {
+		Objects.requireNonNull(theFhirContext);
 		myFhirContext = theFhirContext;
 		myVersionCanonicalizer = new VersionCanonicalizer(theFhirContext);
-		Objects.requireNonNull(theFhirContext);
 	}
 
 	@Override
@@ -130,17 +130,9 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 
 		switch (valueSet) {
 			case USPS_VALUESET_URL:
-				if (USPS_CODES.containsKey(theCode)) {
-					return getValidateCodeResultOk(theCode, USPS_CODES.get(theCode));
-				} else {
-					return getValidateCodeResultInError("unknownCodeInSystem", system, theCode);
-				}
+				return validateCodeUsingCodeMap(theCode, system, USPS_CODES);
 			case CURRENCIES_VALUESET_URL:
-				if (ISO_4217_CODES.containsKey(theCode)) {
-					return getValidateCodeResultOk(theCode, ISO_4217_CODES.get(theCode));
-				} else {
-					return getValidateCodeResultInError("unknownCodeInSystem", system, theCode);
-				}
+				return validateCodeUsingCodeMap(theCode, system, ISO_4217_CODES);
 			case LANGUAGES_VALUESET_URL:
 				return validateLanguageCodeInValueSet(theValidationSupportContext, theCode);
 			case ALL_LANGUAGES_VALUESET_URL:
@@ -149,12 +141,12 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 				// This is a pretty naive implementation - Should be enhanced in future
 				return getValidateCodeResultOk(theCode, theDisplay);
 			case UCUM_VALUESET_URL: {
-				return validateLookupCode(theValidationSupportContext, theCode, system);
+				return validateCodeUsingSystemLookup(theValidationSupportContext, theCode, system);
 			}
 		}
 
 		if (isBlank(valueSet)) {
-			return validateLookupCode(theValidationSupportContext, theCode, system);
+			return validateCodeUsingSystemLookup(theValidationSupportContext, theCode, system);
 		}
 
 		return null;
@@ -184,8 +176,8 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 	}
 
 	protected CodeValidationResult getValidateCodeResultInError(
-			final String errorCode, final String param0, final String param1) {
-		String message = myFhirContext.getLocalizer().getMessage(getClass(), errorCode, param0, param1);
+			final String errorCode, final String theFirstParam, final String theSecondParam) {
+		String message = getErrorMessage(errorCode, theFirstParam, theSecondParam);
 		return getValidateCodeResultError(message);
 	}
 
@@ -193,12 +185,21 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 		return new CodeValidationResult().setCode(theCode).setDisplay(theDisplay);
 	}
 
-	protected CodeValidationResult getValidateCodeResultError(final String message) {
-		return new CodeValidationResult().setSeverity(IssueSeverity.ERROR).setMessage(message);
+	protected CodeValidationResult getValidateCodeResultError(final String theMessage) {
+		return new CodeValidationResult().setSeverity(IssueSeverity.ERROR).setMessage(theMessage);
+	}
+
+	private CodeValidationResult validateCodeUsingCodeMap(
+			final String theCode, final String theSystem, final Map<String, String> theCodeMap) {
+		if (theCodeMap.containsKey(theCode)) {
+			return getValidateCodeResultOk(theCode, theCodeMap.get(theCode));
+		} else {
+			return getValidateCodeResultInError("unknownCodeInSystem", theSystem, theCode);
+		}
 	}
 
 	@Nullable
-	public CodeValidationResult validateLookupCode(
+	public CodeValidationResult validateCodeUsingSystemLookup(
 			final ValidationSupportContext theValidationSupportContext, final String theCode, final String theSystem) {
 		LookupCodeResult result = lookupCode(theValidationSupportContext, new LookupCodeRequest(theSystem, theCode));
 		if (result == null) {
@@ -1353,7 +1354,7 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 		return codes;
 	}
 
-	protected String getErrorMessage(String errorCode, String param0, String param1) {
-		return myFhirContext.getLocalizer().getMessage(getClass(), errorCode, param0, param1);
+	protected String getErrorMessage(String errorCode, String theFirstParam, String theSecondParam) {
+		return myFhirContext.getLocalizer().getMessage(getClass(), errorCode, theFirstParam, theSecondParam);
 	}
 }
