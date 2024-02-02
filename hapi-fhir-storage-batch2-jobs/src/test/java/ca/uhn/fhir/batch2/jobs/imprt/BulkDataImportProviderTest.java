@@ -154,7 +154,7 @@ public class BulkDataImportProviderTest {
 
 		JobInstanceStartRequest startRequest = myStartRequestCaptor.getValue();
 		ourLog.info("Parameters: {}", startRequest.getParameters());
-		assertTrue(startRequest.getParameters().startsWith("{\"ndJsonUrls\":[\"http://example.com/Patient\",\"http://example.com/Observation\"],\"maxBatchResourceCount\":500"));
+		assertTrue(startRequest.getParameters().startsWith("{\"ndJsonUrls\":[\"http://example.com/Patient\",\"http://example.com/Observation\"],\"httpBasicCredentials\":\"admin:password\",\"maxBatchResourceCount\":500,\"partitionId\":{\"allPartitions\":false"));
 	}
 
 	@Test
