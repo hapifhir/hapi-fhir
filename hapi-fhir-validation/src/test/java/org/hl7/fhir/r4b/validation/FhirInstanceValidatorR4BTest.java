@@ -1417,13 +1417,13 @@ public class FhirInstanceValidatorR4BTest extends BaseValidationTestWithInlineMo
 		IValidationPolicyAdvisor policyAdvisor = mock(IValidationPolicyAdvisor.class);
 
 		when(policyAdvisor.policyForReference(any(), any(), any(), any())).thenReturn(ReferenceValidationPolicy.CHECK_TYPE_IF_EXISTS);
-		when(policyAdvisor.policyForContained(any(), any(), any(), any(), any(), any(), any())).thenReturn(ContainedReferenceValidationPolicy.CHECK_TYPE);
+		when(policyAdvisor.policyForContained(any(), any(), any(), any(), any(), any(), any(), any(), any())).thenReturn(ContainedReferenceValidationPolicy.CHECK_TYPE);
 		myInstanceVal.setValidatorResourceFetcher(resourceFetcher);
 		myInstanceVal.setValidatorPolicyAdvisor(policyAdvisor);
 		myFhirValidator.validateWithResult(encoded);
 
 		verify(resourceFetcher, times(12)).resolveURL(any(), any(), anyString(), anyString(), anyString(), anyBoolean());
-		verify(policyAdvisor, times(12)).policyForContained(any(), any(), any(), any(), any(), any(), any());
+		verify(policyAdvisor, times(12)).policyForContained(any(), any(), any(), any(), any(), any(), any(), any(), any());
 	}
 
 	@Test

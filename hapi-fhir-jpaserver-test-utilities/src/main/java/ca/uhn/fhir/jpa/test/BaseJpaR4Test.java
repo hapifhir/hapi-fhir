@@ -210,6 +210,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 import jakarta.persistence.EntityManager;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -963,12 +964,39 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 		}
 
 		@Override
-		public CodedContentValidationPolicy policyForCodedContent(IResourceValidator iResourceValidator, Object o, String s, ElementDefinition elementDefinition, org.hl7.fhir.r5.model.StructureDefinition structureDefinition, BindingKind bindingKind, org.hl7.fhir.r5.model.ValueSet valueSet, List<String> list) {
-			return CodedContentValidationPolicy.CODE;
+		public EnumSet<ResourceValidationAction> policyForResource(IResourceValidator validator, Object appContext,
+																   org.hl7.fhir.r5.model.StructureDefinition type, String path) {
+			return EnumSet.allOf(ResourceValidationAction.class);
 		}
 
 		@Override
-		public ContainedReferenceValidationPolicy policyForContained(IResourceValidator validator, Object appContext, String containerType, String containerId, Element.SpecialElement containingResourceType, String path, String url) {
+		public EnumSet<ElementValidationAction> policyForElement(IResourceValidator validator, Object appContext,
+																 org.hl7.fhir.r5.model.StructureDefinition structure, ElementDefinition element, String path) {
+			return EnumSet.allOf(ElementValidationAction.class);
+		}
+		@Override
+		public EnumSet<CodedContentValidationAction> policyForCodedContent(IResourceValidator validator,
+																		   Object appContext,
+																		   String stackPath,
+																		   ElementDefinition definition,
+																		   org.hl7.fhir.r5.model.StructureDefinition structure,
+																		   BindingKind kind,
+																		   AdditionalBindingPurpose purpose,
+																		   org.hl7.fhir.r5.model.ValueSet valueSet,
+																		   List<String> systems) {
+			return EnumSet.allOf(CodedContentValidationAction.class);
+		}
+
+		@Override
+		public ContainedReferenceValidationPolicy policyForContained(IResourceValidator validator,
+																	 Object appContext,
+																	 org.hl7.fhir.r5.model.StructureDefinition structure,
+																	 ElementDefinition element,
+																	 String containerType,
+																	 String containerId,
+																	 Element.SpecialElement containingResourceType,
+																	 String path,
+																	 String url) {
 			return ContainedReferenceValidationPolicy.CHECK_VALID;
 		}
 	}
