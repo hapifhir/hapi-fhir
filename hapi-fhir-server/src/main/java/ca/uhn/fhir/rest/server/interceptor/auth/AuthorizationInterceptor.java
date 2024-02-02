@@ -25,12 +25,14 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.IPreResourceShowDetails;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
 import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
 import ca.uhn.fhir.rest.server.interceptor.consent.ConsentInterceptor;
+import ca.uhn.fhir.util.BundleUtil;
 import com.google.common.collect.Lists;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
@@ -78,8 +80,12 @@ public class AuthorizationInterceptor implements IRuleApplier {
 
 	public static final String REQUEST_ATTRIBUTE_BULK_DATA_EXPORT_OPTIONS =
 			AuthorizationInterceptor.class.getName() + "_BulkDataExportOptions";
+	public static final String BUNDLE = "Bundle";
 	private static final AtomicInteger ourInstanceCount = new AtomicInteger(0);
 	private static final Logger ourLog = LoggerFactory.getLogger(AuthorizationInterceptor.class);
+	private static final Set<BundleTypeEnum> STANDALONE_BUNDLE_RESOURCE_TYPES =
+			Set.of(BundleTypeEnum.DOCUMENT, BundleTypeEnum.COLLECTION, BundleTypeEnum.MESSAGE);
+
 	private final int myInstanceIndex = ourInstanceCount.incrementAndGet();
 	private final String myRequestSeenResourcesKey =
 			AuthorizationInterceptor.class.getName() + "_" + myInstanceIndex + "_SEENRESOURCES";
@@ -525,7 +531,7 @@ public class AuthorizationInterceptor implements IRuleApplier {
 			case EXTENDED_OPERATION_TYPE:
 			case EXTENDED_OPERATION_INSTANCE: {
 				if (theResponseObject != null) {
-					resources = toListOfResourcesAndExcludeContainer(theResponseObject, fhirContext);
+					resources = toListOfResourcesAndExcludeContainer(theRequestDetails, theResponseObject, fhirContext);
 				}
 				break;
 			}
@@ -572,22 +578,23 @@ public class AuthorizationInterceptor implements IRuleApplier {
 		OUT,
 	}
 
-	static List<IBaseResource> toListOfResourcesAndExcludeContainer(
-			IBaseResource theResponseObject, FhirContext fhirContext) {
+	public static List<IBaseResource> toListOfResourcesAndExcludeContainer(
+			RequestDetails theRequestDetails, IBaseResource theResponseObject, FhirContext fhirContext) {
 		if (theResponseObject == null) {
 			return Collections.emptyList();
 		}
 
 		List<IBaseResource> retVal;
 
-		boolean isContainer = false;
+		boolean shouldExamineChildResources = false;
 		if (theResponseObject instanceof IBaseBundle) {
-			isContainer = true;
+			IBaseBundle bundle = (IBaseBundle) theResponseObject;
+			shouldExamineChildResources = shouldExamineBundleChildResources(theRequestDetails, fhirContext, bundle);
 		} else if (theResponseObject instanceof IBaseParameters) {
-			isContainer = true;
+			shouldExamineChildResources = true;
 		}
 
-		if (!isContainer) {
+		if (!shouldExamineChildResources) {
 			return Collections.singletonList(theResponseObject);
 		}
 
@@ -602,6 +609,26 @@ public class AuthorizationInterceptor implements IRuleApplier {
 		retVal.removeIf(t -> t instanceof IBaseOperationOutcome);
 
 		return retVal;
+	}
+
+	/**
+	 * This method determines if the given Bundle should have permissions applied to the resources inside or
+	 * to the Bundle itself.
+	 *
+	 * This distinction is important in Bundle requests where a user has permissions to view all Bundles. In
+	 * this scenario we want to apply permissions to the Bundle itself and not the resources inside if
+	 * the Bundle is of type document, collection, or message.
+	 */
+	public static boolean shouldExamineBundleChildResources(
+			RequestDetails theRequestDetails, FhirContext theFhirContext, IBaseBundle theBundle) {
+		boolean isBundleRequest = theRequestDetails != null && BUNDLE.equals(theRequestDetails.getResourceName());
+		if (!isBundleRequest) {
+			return true;
+		}
+		BundleTypeEnum bundleType = BundleUtil.getBundleTypeEnum(theFhirContext, theBundle);
+		boolean isStandaloneBundleResource =
+				bundleType != null && STANDALONE_BUNDLE_RESOURCE_TYPES.contains(bundleType);
+		return !isStandaloneBundleResource;
 	}
 
 	public static class Verdict {
