@@ -223,7 +223,6 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 		setExpansionProfile(expParameters);
 	}
 
-
 	public void setExpansionProfile(org.hl7.fhir.r5.model.Parameters expParameters) {
 		myExpansionProfile = expParameters;
 	}
