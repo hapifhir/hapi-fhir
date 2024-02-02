@@ -23,6 +23,13 @@
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>org.hl7.fhir.convertors</artifactId>
 			<version>${fhir_core_version}</version>
+			<exclusions>
+				<!-- Exclude JDBC since it appears entirely unused, and has a CVE -->
+				<exclusion>
+					<groupId>org.xerial</groupId>
+					<artifactId>sqlite-jdbc</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 
 		<!-- Server -->
