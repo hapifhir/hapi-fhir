@@ -5,6 +5,7 @@ import ca.uhn.fhir.jpa.delete.ThreadSafeResourceDeleterSvc;
 import ca.uhn.fhir.jpa.interceptor.CascadingDeleteInterceptor;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.matcher.AuthorizationSearchParamMatcher;
 import ca.uhn.fhir.jpa.searchparam.matcher.SearchParamMatcher;
 import ca.uhn.fhir.jpa.term.TermTestUtil;
@@ -24,6 +25,7 @@ import ca.uhn.fhir.rest.server.interceptor.auth.IAuthRuleTester;
 import ca.uhn.fhir.rest.server.interceptor.auth.PolicyEnum;
 import ca.uhn.fhir.rest.server.interceptor.auth.RuleBuilder;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
+import ca.uhn.fhir.util.BundleBuilder;
 import ca.uhn.fhir.util.UrlUtil;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -32,6 +34,7 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
+import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
@@ -1651,6 +1654,39 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 		bundle.setType(theBundleType);
 
 		assertTrue(AuthorizationInterceptor.shouldExamineBundleChildResources(requestDetails, myFhirContext, bundle));
+	}
+
+	@Test
+	public void testPermissionsToPostTransactionWithCollectionBundles_successfullyPostsTransactions(){
+		BundleBuilder builder = new BundleBuilder(myFhirContext);
+		builder.setType("collection");
+		IBaseBundle collection = builder.getBundle();
+
+		builder = new BundleBuilder(myFhirContext);
+		builder.addTransactionCreateEntry(collection);
+		IBaseBundle transaction = builder.getBundle();
+
+		myServer.getRestfulServer().registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
+			@Override
+			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
+				return new RuleBuilder()
+					.allow().transaction().withAnyOperation().andApplyNormalRules().andThen()
+					.allow().write().allResources().withAnyId().andThen()
+					.build();
+			}
+		});
+
+		myClient
+			.transaction()
+			.withBundle(transaction)
+			.execute();
+
+		List<IBaseResource> savedBundles = myBundleDao.search(SearchParameterMap.newSynchronous(), mySrd).getAllResources();
+		assertEquals(1, savedBundles.size());
+
+		Bundle savedCollection = (Bundle) savedBundles.get(0);
+		assertEquals(Bundle.BundleType.COLLECTION, savedCollection.getType());
+		assertTrue(savedCollection.getEntry().isEmpty());
 	}
 
 	private Patient createPatient(String theFirstName, String theLastName){
