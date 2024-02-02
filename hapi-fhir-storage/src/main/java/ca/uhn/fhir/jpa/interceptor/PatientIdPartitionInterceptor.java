@@ -33,21 +33,21 @@ import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
 import ca.uhn.fhir.jpa.util.ResourceCompartmentUtil;
 import ca.uhn.fhir.model.api.IQueryParameterType;
-import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
+import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.IdType;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
-import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /**
@@ -117,14 +117,15 @@ public class PatientIdPartitionInterceptor {
 	@Hook(Pointcut.STORAGE_PARTITION_IDENTIFY_READ)
 	public RequestPartitionId identifyForRead(
 			ReadPartitionIdRequestDetails theReadDetails, RequestDetails theRequestDetails) {
-		if (isBlank(theReadDetails.getResourceType())) {
-			return provideNonCompartmentMemberTypeResponse(null);
-		}
-		RuntimeResourceDefinition resourceDef = myFhirContext.getResourceDefinition(theReadDetails.getResourceType());
-		List<RuntimeSearchParam> compartmentSps =
-				ResourceCompartmentUtil.getPatientCompartmentSearchParams(resourceDef);
-		if (compartmentSps.isEmpty()) {
-			return provideNonCompartmentMemberTypeResponse(null);
+
+		List<RuntimeSearchParam> compartmentSps = Collections.emptyList();
+		if (!isEmpty(theReadDetails.getResourceType())) {
+			RuntimeResourceDefinition resourceDef =
+					myFhirContext.getResourceDefinition(theReadDetails.getResourceType());
+			compartmentSps = ResourceCompartmentUtil.getPatientCompartmentSearchParams(resourceDef);
+			if (compartmentSps.isEmpty()) {
+				return provideNonCompartmentMemberTypeResponse(null);
+			}
 		}
 
 		//noinspection EnumSwitchStatementWhichMissesCases
@@ -158,9 +159,18 @@ public class PatientIdPartitionInterceptor {
 				}
 
 				break;
-
+			case EXTENDED_OPERATION_SERVER:
+				String extendedOp = theReadDetails.getExtendedOperationName();
+				if (ProviderConstants.OPERATION_EXPORT.equals(extendedOp)) {
+					return provideNonPatientSpecificQueryResponse(theReadDetails);
+				}
+				break;
 			default:
 				// nothing
+		}
+
+		if (isEmpty(theReadDetails.getResourceType())) {
+			return provideNonCompartmentMemberTypeResponse(null);
 		}
 
 		// If we couldn't identify a patient ID by the URL, let's try using the
@@ -170,15 +180,6 @@ public class PatientIdPartitionInterceptor {
 		}
 
 		return provideNonPatientSpecificQueryResponse(theReadDetails);
-	}
-
-	@Nonnull
-	private List<RuntimeSearchParam> getCompartmentSearchParams(RuntimeResourceDefinition resourceDef) {
-		return resourceDef.getSearchParams().stream()
-				.filter(param -> param.getParamType() == RestSearchParameterTypeEnum.REFERENCE)
-				.filter(param -> param.getProvidesMembershipInCompartments() != null
-						&& param.getProvidesMembershipInCompartments().contains("Patient"))
-				.collect(Collectors.toList());
 	}
 
 	private List<String> getResourceIdList(
