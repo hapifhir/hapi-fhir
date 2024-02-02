@@ -158,21 +158,6 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 		myPackageInstallerSvc.install(spec);
 	}
 
-	@Disabled("This test was added to validate IG installation scenario for OH")
-	@Test
-	public void testInstallOntarioHealthIG() {
-		JpaPackageCache jpaPackageCache = ProxyUtil.getSingletonTarget(myPackageCacheManager, JpaPackageCache.class);
-		jpaPackageCache.getPackageServers().clear();
-		jpaPackageCache.addPackageServer(new PackageServer("https://packages.fhir.org"));
-
-		PackageInstallationSpec spec = new PackageInstallationSpec()
-				.setName("accdr.fhir.ig.pkg")
-				.setVersion("0.9.0-alpha")
-				.setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL)
-				.setFetchDependencies(true);
-		myPackageInstallerSvc.install(spec);
-	}
-
 	@Test
 	public void testValidationCache_whenInstallingIG_isRefreshed() {
 		Patient patient = new Patient();
