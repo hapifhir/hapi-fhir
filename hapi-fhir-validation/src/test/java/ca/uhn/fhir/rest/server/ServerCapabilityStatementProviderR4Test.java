@@ -144,7 +144,6 @@ public class ServerCapabilityStatementProviderR4Test extends BaseValidationTestW
 	public void before() {
 		myValidator = myCtx.newValidator();
 		FhirInstanceValidator fhirInstanceValidator = new FhirInstanceValidator(myCtx);
-		//fhirInstanceValidator.setBestPracticeWarningLevel(BestPracticeWarningLevel.Ignore);
 		myValidator.registerValidatorModule(fhirInstanceValidator);
 	}
 
