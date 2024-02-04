@@ -10,6 +10,7 @@ import ca.uhn.fhir.jpa.searchparam.matcher.AuthorizationSearchParamMatcher;
 import ca.uhn.fhir.jpa.searchparam.matcher.SearchParamMatcher;
 import ca.uhn.fhir.jpa.term.TermTestUtil;
 import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
@@ -26,6 +27,7 @@ import ca.uhn.fhir.rest.server.interceptor.auth.PolicyEnum;
 import ca.uhn.fhir.rest.server.interceptor.auth.RuleBuilder;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.util.BundleBuilder;
+import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.UrlUtil;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -60,7 +62,11 @@ import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.ArgumentsProvider;
+import org.junit.jupiter.params.provider.ArgumentsSource;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -69,7 +75,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Stream;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
@@ -91,6 +100,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 	private ThreadSafeResourceDeleterSvc myThreadSafeResourceDeleterSvc;
 	private AuthorizationInterceptor myReadAllBundleInterceptor;
 	private AuthorizationInterceptor myReadAllPatientInterceptor;
+	private AuthorizationInterceptor myWriteResourcesInTransactionAuthorizationInterceptor;
 
 	@BeforeEach
 	@Override
@@ -101,6 +111,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 		myStorageSettings.setDeleteExpungeEnabled(true);
 		myReadAllBundleInterceptor = new ReadAllAuthorizationInterceptor("Bundle");
 		myReadAllPatientInterceptor = new ReadAllAuthorizationInterceptor("Patient");
+		myWriteResourcesInTransactionAuthorizationInterceptor = new WriteResourcesInTransactionAuthorizationInterceptor();
 	}
 
 	@Override
@@ -1656,25 +1667,17 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 		assertTrue(AuthorizationInterceptor.shouldExamineBundleChildResources(requestDetails, myFhirContext, bundle));
 	}
 
-	@Test
-	public void testPermissionsToPostTransactionWithCollectionBundles_successfullyPostsTransactions(){
-		BundleBuilder builder = new BundleBuilder(myFhirContext);
-		builder.setType("collection");
-		IBaseBundle collection = builder.getBundle();
+	@ParameterizedTest
+	@ArgumentsSource(StandaloneBundleTypesArgumentsProvider.class)
+	public void testPermissionsToPostTransactionWithStandaloneBundles_successfullyPostsTransactions(BundleTypeEnum theStandaloneBundleType){
+		Bundle nestedBundle = new Bundle();
+		BundleUtil.setBundleType(myFhirContext, nestedBundle, theStandaloneBundleType.getCode());
 
-		builder = new BundleBuilder(myFhirContext);
-		builder.addTransactionCreateEntry(collection);
+		BundleBuilder builder = new BundleBuilder(myFhirContext);
+		builder.addTransactionCreateEntry(nestedBundle);
 		IBaseBundle transaction = builder.getBundle();
 
-		myServer.getRestfulServer().registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
-			@Override
-			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
-				return new RuleBuilder()
-					.allow().transaction().withAnyOperation().andApplyNormalRules().andThen()
-					.allow().write().allResources().withAnyId().andThen()
-					.build();
-			}
-		});
+		myServer.getRestfulServer().registerInterceptor(myWriteResourcesInTransactionAuthorizationInterceptor);
 
 		myClient
 			.transaction()
@@ -1684,9 +1687,35 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 		List<IBaseResource> savedBundles = myBundleDao.search(SearchParameterMap.newSynchronous(), mySrd).getAllResources();
 		assertEquals(1, savedBundles.size());
 
-		Bundle savedCollection = (Bundle) savedBundles.get(0);
-		assertEquals(Bundle.BundleType.COLLECTION, savedCollection.getType());
-		assertTrue(savedCollection.getEntry().isEmpty());
+		Bundle savedNestedBundle = (Bundle) savedBundles.get(0);
+		assertEquals(theStandaloneBundleType, BundleUtil.getBundleTypeEnum(myFhirContext, savedNestedBundle));
+		assertTrue(savedNestedBundle.getEntry().isEmpty());
+	}
+
+	@ParameterizedTest
+	@ArgumentsSource(NonStandaloneBundleTypesArgumentsProvider.class)
+	public void testPermissionsToPostTransactionWithNonStandaloneBundles_transactionsFails(BundleTypeEnum theStandaloneBundleType){
+		Bundle nestedBundle = new Bundle();
+		BundleUtil.setBundleType(myFhirContext, nestedBundle, theStandaloneBundleType.getCode());
+
+		BundleBuilder builder = new BundleBuilder(myFhirContext);
+		builder.addTransactionCreateEntry(nestedBundle);
+		IBaseBundle transaction = builder.getBundle();
+
+		myServer.getRestfulServer().registerInterceptor(myWriteResourcesInTransactionAuthorizationInterceptor);
+
+		try {
+			myClient
+				.transaction()
+				.withBundle(transaction)
+				.execute();
+			fail();
+		} catch (Exception e) {
+			assertTrue(e.getMessage().contains("HTTP 400 Bad Request"));
+		}
+
+		List<IBaseResource> savedBundles = myBundleDao.search(SearchParameterMap.newSynchronous(), mySrd).getAllResources();
+		assertTrue(savedBundles.isEmpty());
 	}
 
 	private Patient createPatient(String theFirstName, String theLastName){
@@ -1796,6 +1825,43 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 			return new RuleBuilder()
 				.allow().read().allResources().inCompartment(myResourceType, myId).andThen()
 				.build();
+		}
+	}
+
+	static class WriteResourcesInTransactionAuthorizationInterceptor extends AuthorizationInterceptor {
+
+		public WriteResourcesInTransactionAuthorizationInterceptor(){
+			super(PolicyEnum.DENY);
+		}
+
+		@Override
+		public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
+			return new RuleBuilder()
+				.allow().transaction().withAnyOperation().andApplyNormalRules().andThen()
+				.allow().write().allResources().withAnyId().andThen()
+				.build();
+		}
+	}
+
+	static class StandaloneBundleTypesArgumentsProvider implements ArgumentsProvider {
+		@Override
+		public Stream<? extends Arguments> provideArguments(ExtensionContext extensionContext) {
+			Set<Arguments> arguments = new HashSet<>();
+			BundleUtil.STANDALONE_BUNDLE_RESOURCE_TYPES.forEach(type -> arguments.add(Arguments.of(type)));
+			return arguments.stream();
+		}
+	}
+
+	static class NonStandaloneBundleTypesArgumentsProvider implements ArgumentsProvider {
+		@Override
+		public Stream<? extends Arguments> provideArguments(ExtensionContext extensionContext) {
+			Set<Arguments> arguments = new HashSet<>();
+
+			Arrays.stream(BundleTypeEnum.values())
+				.filter(type -> !BundleUtil.STANDALONE_BUNDLE_RESOURCE_TYPES.contains(type))
+				.forEach(type -> arguments.add(Arguments.of(type)));
+
+			return arguments.stream();
 		}
 	}
 }
