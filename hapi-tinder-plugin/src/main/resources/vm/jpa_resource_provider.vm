@@ -69,6 +69,10 @@ public class ${className}ResourceProvider extends
 			@OptionalParam(name=ca.uhn.fhir.rest.api.Constants.PARAM_PROFILE)
 			UriAndListParam theSearchForProfile,
 
+			@Description(shortDefinition="Search the contents of the resource's data using a list")
+			@OptionalParam(name= Constants.PARAM_LIST)
+			StringAndListParam theList,
+
 			@Description(shortDefinition="Search for resources which have the given source value (Resource.meta.source)")
 			@OptionalParam(name=ca.uhn.fhir.rest.api.Constants.PARAM_SOURCE)
 			UriAndListParam theSearchForSource,
