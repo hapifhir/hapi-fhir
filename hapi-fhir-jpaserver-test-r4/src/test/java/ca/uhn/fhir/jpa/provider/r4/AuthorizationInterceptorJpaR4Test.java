@@ -1898,7 +1898,11 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 		@Override
 		public Stream<? extends Arguments> provideArguments(ExtensionContext extensionContext) {
 			Set<Arguments> arguments = new HashSet<>();
-			BundleUtil.STANDALONE_BUNDLE_RESOURCE_TYPES.forEach(type -> arguments.add(Arguments.of(type)));
+
+			Arrays.stream(BundleTypeEnum.values())
+				.filter(type -> BundleUtil.isStandaloneBundleType(type))
+				.forEach(type -> arguments.add(Arguments.of(type)));
+
 			return arguments.stream();
 		}
 	}
@@ -1909,7 +1913,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 			Set<Arguments> arguments = new HashSet<>();
 
 			Arrays.stream(BundleTypeEnum.values())
-				.filter(type -> !BundleUtil.STANDALONE_BUNDLE_RESOURCE_TYPES.contains(type))
+				.filter(type -> !BundleUtil.isStandaloneBundleType(type))
 				.forEach(type -> arguments.add(Arguments.of(type)));
 
 			return arguments.stream();
