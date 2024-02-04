@@ -447,6 +447,14 @@ public class BundleBuilder {
 	}
 
 	/**
+	 * Adds an entry for a Message bundle type
+	 */
+	public void addMessageEntry(IBaseResource theResource) {
+		setType("message");
+		addEntryAndReturnRequest(theResource, theResource.getIdElement().getValue());
+	}
+
+	/**
 	 * Creates new entry and adds it to the bundle
 	 *
 	 * @return Returns the new entry.

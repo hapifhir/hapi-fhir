@@ -74,6 +74,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.sql.Date;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -1669,7 +1670,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 
 	@ParameterizedTest
 	@ArgumentsSource(StandaloneBundleTypesArgumentsProvider.class)
-	public void testPermissionsToPostTransactionWithStandaloneBundles_successfullyPostsTransactions(BundleTypeEnum theStandaloneBundleType){
+	public void testPermissionsToPostTransaction_withStandaloneBundles_successfullyPostsTransactions(BundleTypeEnum theStandaloneBundleType){
 		Bundle nestedBundle = new Bundle();
 		BundleUtil.setBundleType(myFhirContext, nestedBundle, theStandaloneBundleType.getCode());
 
@@ -1694,7 +1695,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 
 	@ParameterizedTest
 	@ArgumentsSource(NonStandaloneBundleTypesArgumentsProvider.class)
-	public void testPermissionsToPostTransactionWithNonStandaloneBundles_transactionsFails(BundleTypeEnum theStandaloneBundleType){
+	public void testPermissionsToPostTransaction_withNonStandaloneBundles_transactionsFails(BundleTypeEnum theStandaloneBundleType){
 		Bundle nestedBundle = new Bundle();
 		BundleUtil.setBundleType(myFhirContext, nestedBundle, theStandaloneBundleType.getCode());
 
@@ -1716,6 +1717,56 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 
 		List<IBaseResource> savedBundles = myBundleDao.search(SearchParameterMap.newSynchronous(), mySrd).getAllResources();
 		assertTrue(savedBundles.isEmpty());
+	}
+
+	@ParameterizedTest
+	@ArgumentsSource(StandaloneBundleTypesArgumentsProvider.class)
+	public void testPermissionsToPostTransactions_withStandaloneBundles_onlyProcessesTransactionsOneLevelDeep(BundleTypeEnum theStandaloneBundleType){
+		// second level transaction
+		BundleBuilder builder = new BundleBuilder(myFhirContext);
+		Patient patient = new Patient();
+		patient.setBirthDate(Date.valueOf("2000-01-01"));
+		builder.addTransactionCreateEntry(patient);
+		IBaseBundle secondLevelTransaction = builder.getBundle();
+
+		// first level standalone Bundle
+		builder = new BundleBuilder(myFhirContext);
+		switch (theStandaloneBundleType) {
+			case COLLECTION -> builder.addCollectionEntry(secondLevelTransaction);
+			case DOCUMENT -> builder.addDocumentEntry(secondLevelTransaction);
+			case MESSAGE -> builder.addMessageEntry(secondLevelTransaction);
+			default -> throw new RuntimeException();
+		}
+		IBaseBundle firstLevelStandaloneBundle = builder.getBundle();
+
+		// parent transaction
+		builder = new BundleBuilder(myFhirContext);
+		builder.addTransactionCreateEntry(firstLevelStandaloneBundle);
+		IBaseBundle parentTransaction = builder.getBundle();
+
+		myServer.getRestfulServer().registerInterceptor(myWriteResourcesInTransactionAuthorizationInterceptor);
+
+		myClient
+			.transaction()
+			.withBundle(parentTransaction)
+			.execute();
+
+		// verify first level standalone Bundle was saved
+		List<IBaseResource> allBundles = myBundleDao.search(SearchParameterMap.newSynchronous(), mySrd).getAllResources();
+		assertEquals(1, allBundles.size());
+		Bundle savedStandaloneBundle = (Bundle) allBundles.get(0);
+		assertEquals(theStandaloneBundleType, BundleUtil.getBundleTypeEnum(myFhirContext, savedStandaloneBundle));
+
+		// verify contents of first level standalone Bundle
+		assertEquals(1, savedStandaloneBundle.getEntry().size());
+		Bundle savedSecondLevelTransaction = (Bundle) savedStandaloneBundle.getEntry().get(0).getResource();
+		assertEquals(Bundle.BundleType.TRANSACTION, savedSecondLevelTransaction.getType());
+		assertEquals(1, savedSecondLevelTransaction.getEntry().size());
+		Patient patientSavedInsideBundle = (Patient) savedSecondLevelTransaction.getEntry().get(0).getResource();
+		assertEquals(patient.getBirthDate(), patientSavedInsideBundle.getBirthDate());
+
+		// verify second level Patient transaction did NOT execute
+		assertTrue(myPatientDao.search(SearchParameterMap.newSynchronous(), mySrd).isEmpty());
 	}
 
 	private Patient createPatient(String theFirstName, String theLastName){
