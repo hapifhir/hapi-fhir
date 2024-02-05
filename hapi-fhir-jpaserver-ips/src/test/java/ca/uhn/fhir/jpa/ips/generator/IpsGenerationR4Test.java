@@ -7,14 +7,17 @@ import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.ips.api.IIpsGenerationStrategy;
+import ca.uhn.fhir.jpa.ips.jpa.DefaultJpaIpsGenerationStrategy;
 import ca.uhn.fhir.jpa.ips.provider.IpsOperationProvider;
-import ca.uhn.fhir.jpa.ips.strategy.DefaultIpsGenerationStrategy;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.util.ClasspathUtil;
-import ca.uhn.fhir.util.ResourceReferenceInfo;
 import ca.uhn.fhir.validation.FhirValidator;
+import ca.uhn.fhir.validation.ResultSeverityEnum;
+import ca.uhn.fhir.validation.SingleValidationMessage;
 import ca.uhn.fhir.validation.ValidationResult;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
 import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -38,19 +41,17 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
 
-import jakarta.annotation.Nonnull;
-import jakarta.annotation.Nullable;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.matchesPattern;
 import static org.hamcrest.Matchers.stringContainsInOrder;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * This test uses a complete R4 JPA server as a backend and wires the
@@ -98,7 +99,7 @@ public class IpsGenerationR4Test extends BaseResourceProviderR4Test {
 		// Verify
 		validateDocument(output);
 		assertEquals(117, output.getEntry().size());
-		String patientId = findFirstEntryResource(output, Patient.class, 1).getIdElement().toVersionless().getValue();
+		String patientId = findFirstEntryResource(output, Patient.class, 1).getIdElement().toUnqualifiedVersionless().getValue();
 		assertEquals("Patient/f15d2419-fbff-464a-826d-0afe8f095771", patientId);
 		MedicationStatement medicationStatement = findFirstEntryResource(output, MedicationStatement.class, 2);
 		assertEquals(patientId, medicationStatement.getSubject().getReference());
@@ -185,7 +186,7 @@ public class IpsGenerationR4Test extends BaseResourceProviderR4Test {
 		// Verify
 		validateDocument(output);
 		assertEquals(7, output.getEntry().size());
-		String patientId = findFirstEntryResource(output, Patient.class, 1).getIdElement().toVersionless().getValue();
+		String patientId = findFirstEntryResource(output, Patient.class, 1).getIdElement().toUnqualifiedVersionless().getValue();
 		assertEquals("Patient/5342998", patientId);
 		assertEquals(patientId, findEntryResource(output, Condition.class, 0, 2).getSubject().getReference());
 		assertEquals(patientId, findEntryResource(output, Condition.class, 1, 2).getSubject().getReference());
@@ -279,7 +280,9 @@ public class IpsGenerationR4Test extends BaseResourceProviderR4Test {
 		instanceValidator.setValidationSupport(new ValidationSupportChain(new IpsTerminologySvc(), myFhirContext.getValidationSupport()));
 		validator.registerValidatorModule(instanceValidator);
 		ValidationResult validation = validator.validateWithResult(theOutcome);
-		assertTrue(validation.isSuccessful(), () -> myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(validation.toOperationOutcome()));
+
+		Optional<SingleValidationMessage> failure = validation.getMessages().stream().filter(t -> t.getSeverity().ordinal() >= ResultSeverityEnum.ERROR.ordinal()).findFirst();
+		assertFalse(failure.isPresent(), () -> myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(validation.toOperationOutcome()));
 	}
 
 	@Configuration
@@ -287,12 +290,12 @@ public class IpsGenerationR4Test extends BaseResourceProviderR4Test {
 
 		@Bean
 		public IIpsGenerationStrategy ipsGenerationStrategy() {
-			return new DefaultIpsGenerationStrategy();
+			return new DefaultJpaIpsGenerationStrategy();
 		}
 
 		@Bean
 		public IIpsGeneratorSvc ipsGeneratorSvc(FhirContext theFhirContext, IIpsGenerationStrategy theGenerationStrategy, DaoRegistry theDaoRegistry) {
-			return new IpsGeneratorSvcImpl(theFhirContext, theGenerationStrategy, theDaoRegistry);
+			return new IpsGeneratorSvcImpl(theFhirContext, theGenerationStrategy);
 		}
 
 		@Bean
@@ -303,7 +306,6 @@ public class IpsGenerationR4Test extends BaseResourceProviderR4Test {
 
 	}
 
-	@SuppressWarnings("unchecked")
 	private static <T extends IBaseResource> T findFirstEntryResource(Bundle theBundle, Class<T> theType, int theExpectedCount) {
 		return findEntryResource(theBundle, theType, 0, theExpectedCount);
 	}

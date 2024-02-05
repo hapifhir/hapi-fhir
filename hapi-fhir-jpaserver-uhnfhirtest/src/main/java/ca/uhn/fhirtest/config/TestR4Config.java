@@ -9,8 +9,9 @@ import ca.uhn.fhir.jpa.config.util.HapiEntityManagerFactoryUtil;
 import ca.uhn.fhir.jpa.ips.api.IIpsGenerationStrategy;
 import ca.uhn.fhir.jpa.ips.generator.IIpsGeneratorSvc;
 import ca.uhn.fhir.jpa.ips.generator.IpsGeneratorSvcImpl;
+import ca.uhn.fhir.jpa.ips.jpa.DefaultJpaIpsGenerationStrategy;
 import ca.uhn.fhir.jpa.ips.provider.IpsOperationProvider;
-import ca.uhn.fhir.jpa.ips.strategy.DefaultIpsGenerationStrategy;
+import ca.uhn.fhir.jpa.ips.strategy.BaseIpsGenerationStrategy;
 import ca.uhn.fhir.jpa.model.dialect.HapiFhirH2Dialect;
 import ca.uhn.fhir.jpa.model.dialect.HapiFhirPostgres94Dialect;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
@@ -200,7 +201,7 @@ public class TestR4Config {
 
 	@Bean
 	public IIpsGenerationStrategy ipsGenerationStrategy() {
-		return new DefaultIpsGenerationStrategy();
+		return new DefaultJpaIpsGenerationStrategy();
 	}
 
 	@Bean

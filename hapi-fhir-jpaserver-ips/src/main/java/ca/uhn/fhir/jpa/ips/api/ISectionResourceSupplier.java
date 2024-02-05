@@ -1,0 +1,86 @@
+package ca.uhn.fhir.jpa.ips.api;
+
+import ca.uhn.fhir.rest.api.server.RequestDetails;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.thymeleaf.util.Validate;
+
+import java.util.List;
+
+/**
+ * This interface is invoked for each section of the IPS, and fetches/returns the
+ * resources which will be included in the IPS document for that section. This
+ * might be by performing a search in a local repository, but could also be
+ * done by calling a remote repository, performing a calculation, making
+ * JDBC database calls directly, etc.
+ *
+ * @since 7.2.0
+ */
+public interface ISectionResourceSupplier {
+
+	/**
+	 * This method will be called once for each section context (section and resource type combination),
+	 * and will be used to supply the resources to include in the given IPS section. This method can
+	 * be used if you wish to fetch resources for a given section from a source other than
+	 * the repository. This could mean fetching resources using a FHIR REST client to an
+	 * external server, or could even mean fetching data directly from a database using JDBC
+	 * or similar.
+	 *
+	 * @param theIpsContext     The IPS context, containing the identity of the patient whose IPS is being generated.
+	 * @param theSectionContext The section context, containing the section name and resource type.
+	 * @param theRequestDetails The RequestDetails object associated with the HTTP request associated with this generation.
+	 * @return Returns a list of resources to add to the given section, or <code>null</code>.
+	 */
+	@Nullable
+	List<ResourceEntry> fetchResourcesForSection(IpsContext theIpsContext, IpsSectionContext theSectionContext, RequestDetails theRequestDetails);
+
+	enum InclusionTypeEnum {
+
+		/**
+		 * The resource should be included in the document bundle and linked to
+		 * from the Composition via the <code>Composition.section.entry</code>
+		 * reference.
+		 */
+		PRIMARY_RESOURCE,
+
+		/**
+		 * The resource should be included in the document bundle, but not directly
+		 * linked from the composition. This typically means that it is referenced
+		 * by at least one primary resource.
+		 */
+		SECONDARY_RESOURCE,
+
+		/**
+		 * Do not include this resource in the document
+		 */
+		EXCLUDE
+
+	}
+
+	class ResourceEntry {
+
+		private final IBaseResource myResource;
+
+		private final InclusionTypeEnum myInclusionType;
+
+		public ResourceEntry(@Nonnull IBaseResource theResource, @Nonnull InclusionTypeEnum theInclusionType) {
+			Validate.notNull(theResource, "theResource must not be null");
+			Validate.notNull(theInclusionType, "theInclusionType must not be null");
+			myResource = theResource;
+			myInclusionType = theInclusionType;
+		}
+
+		public IBaseResource getResource() {
+			return myResource;
+		}
+
+		public InclusionTypeEnum getInclusionType() {
+			return myInclusionType;
+		}
+
+
+	}
+
+}
+

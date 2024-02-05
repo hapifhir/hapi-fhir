@@ -58,31 +58,8 @@ public class IpsContext {
 		return mySubjectId;
 	}
 
-	public IpsSectionContext newSectionContext(SectionRegistry.Section theSection, String theResourceType) {
+	public IpsSectionContext newSectionContext(Section theSection, String theResourceType) {
 		return new IpsSectionContext(mySubject, mySubjectId, theSection, theResourceType);
 	}
 
-	public static class IpsSectionContext extends IpsContext {
-
-		private final SectionRegistry.Section mySection;
-		private final String myResourceType;
-
-		private IpsSectionContext(
-				IBaseResource theSubject,
-				IIdType theSubjectId,
-				SectionRegistry.Section theSection,
-				String theResourceType) {
-			super(theSubject, theSubjectId);
-			mySection = theSection;
-			myResourceType = theResourceType;
-		}
-
-		public String getResourceType() {
-			return myResourceType;
-		}
-
-		public SectionRegistry.Section getSection() {
-			return mySection;
-		}
-	}
 }

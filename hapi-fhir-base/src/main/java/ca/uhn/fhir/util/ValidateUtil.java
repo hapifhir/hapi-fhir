@@ -82,6 +82,13 @@ public class ValidateUtil {
 		}
 	}
 
+	public static void isTrueOrThrowResourceNotFound(boolean theSuccess, String theMessage, Object... theValues) {
+		if (!theSuccess) {
+			// FIXME: new code
+			throw new InvalidRequestException(Msg.code(1769) + String.format(theMessage, theValues));
+		}
+	}
+
 	public static void exactlyOneNotNullOrThrowInvalidRequestException(Object[] theObjects, String theMessage) {
 		int count = 0;
 		for (Object next : theObjects) {
