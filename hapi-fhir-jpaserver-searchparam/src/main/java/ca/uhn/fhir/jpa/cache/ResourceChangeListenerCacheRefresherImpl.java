@@ -25,7 +25,7 @@ import ca.uhn.fhir.jpa.model.sched.IHasScheduledJobs;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
 import com.google.common.annotations.VisibleForTesting;
-import jakarta.annotation.Nullable;
+import jakarta.transaction.Transactional;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.quartz.JobExecutionContext;
@@ -36,10 +36,6 @@ import org.springframework.context.event.ContextClosedEvent;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.TransactionDefinition;
-import org.springframework.transaction.support.TransactionCallback;
-import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -69,9 +65,6 @@ public class ResourceChangeListenerCacheRefresherImpl
 
 	@Autowired
 	private ResourceChangeListenerRegistryImpl myResourceChangeListenerRegistry;
-
-	@Autowired
-	private PlatformTransactionManager myPlatformTransactionManager;
 
 	private boolean myStopping = false;
 
@@ -141,6 +134,9 @@ public class ResourceChangeListenerCacheRefresherImpl
 	}
 
 	@Override
+	// Suspend any current transaction while we sync with the db.
+	// This avoids lock conflicts while reading the resource versions.
+	@Transactional(Transactional.TxType.NOT_SUPPORTED)
 	public ResourceChangeResult refreshCacheAndNotifyListener(IResourceChangeListenerCache theCache) {
 		ResourceChangeResult retVal = new ResourceChangeResult();
 
@@ -153,23 +149,12 @@ public class ResourceChangeListenerCacheRefresherImpl
 			return retVal;
 		}
 
-		ResourceVersionMap newResourceVersionMap = callWithSuspendedTx(status -> myResourceVersionSvc.getVersionMap(
-				RequestPartitionId.allPartitions(), theCache.getResourceName(), theCache.getSearchParameterMap()));
+		ResourceVersionMap newResourceVersionMap =
+			myResourceVersionSvc.getVersionMap(RequestPartitionId.allPartitions(), theCache.getResourceName(), theCache.getSearchParameterMap());
 
 		retVal = retVal.plus(notifyListener(theCache, newResourceVersionMap));
 
 		return retVal;
-	}
-
-	/**
-	 * suspend any current transaction while we sync with the db.
-	 * This avoids lock conflicts while reading the resource versions.
-	 */
-	@Nullable
-	private <T> T callWithSuspendedTx(TransactionCallback<T> theCallback) {
-		TransactionTemplate transactionTemplate = new TransactionTemplate(myPlatformTransactionManager);
-		transactionTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_NOT_SUPPORTED);
-		return transactionTemplate.execute(theCallback);
 	}
 
 	/**
