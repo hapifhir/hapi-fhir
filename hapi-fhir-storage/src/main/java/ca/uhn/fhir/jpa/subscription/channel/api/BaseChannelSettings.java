@@ -51,6 +51,4 @@ public abstract class BaseChannelSettings implements IChannelSettings {
 	public ChannelRetryConfiguration getRetryConfigurationParameters() {
 		return myRetryConfigurationParameters;
 	}
-
-
 }
