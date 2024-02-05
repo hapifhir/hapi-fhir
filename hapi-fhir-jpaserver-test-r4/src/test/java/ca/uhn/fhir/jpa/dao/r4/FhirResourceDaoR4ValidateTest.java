@@ -1610,7 +1610,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		assertEquals(15, ((IntegerType)oo.getIssue().get(0).getExtensionByUrl("http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line").getValue()).getValue());
 		assertEquals(4, ((IntegerType)oo.getIssue().get(0).getExtensionByUrl("http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col").getValue()).getValue());
 		assertEquals("Terminology_PassThrough_TX_Message", ((StringType)oo.getIssue().get(0).getExtensionByUrl("http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id").getValue()).getValue());
-		assertEquals("Error processing unit 'MG/DL': The unit 'DL' is unknown' at position 3 for 'http://unitsofmeasure.org#MG/DL'", oo.getIssue().get(0).getDiagnostics());
+		assertEquals("Error processing unit 'MG/DL': The unit 'DL' is unknown' at position 3 (for 'http://unitsofmeasure.org#MG/DL')", oo.getIssue().get(0).getDiagnostics());
 		assertEquals(OperationOutcome.IssueType.PROCESSING, oo.getIssue().get(0).getCode());
 		assertEquals(OperationOutcome.IssueSeverity.ERROR, oo.getIssue().get(0).getSeverity());
 		assertEquals(2, oo.getIssue().get(0).getLocation().size());
