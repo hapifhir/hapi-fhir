@@ -52,12 +52,5 @@ public abstract class BaseChannelSettings implements IChannelSettings {
 		return myRetryConfigurationParameters;
 	}
 
-	@Override
-	public boolean isUseJacksonMessageConverter() {
-		return myUseJacksonMessageConverter;
-	}
 
-	public void setUseJacksonMessageConverter(boolean theUseJacksonMessageConverter) {
-		myUseJacksonMessageConverter = theUseJacksonMessageConverter;
-	}
 }
