@@ -185,6 +185,20 @@ public class XmlParserR4Test extends BaseTest {
 		assertEquals("12345", getPatientIdValue(bundle, 1));
 	}
 
+	@Test
+	public void testParseResource_withDecimalElementHasLeadingPlus_resourceParsedCorrectly() throws Exception {
+		// setup
+		URL url = Resources.getResource("observation-decimal-element-with-leading-plus.xml");
+		String text = Resources.toString(url, Charsets.UTF_8);
+
+		// execute
+		Observation observation = ourCtx.newXmlParser().parseResource(Observation.class, text);
+
+		// verify
+		assertEquals("-3.0", observation.getReferenceRange().get(0).getLow().getValueElement().getValueAsString());
+		assertEquals("3.0", observation.getReferenceRange().get(0).getHigh().getValueElement().getValueAsString());
+	}
+
 	private String getPatientIdValue(Bundle input, int entry) {
 		final DocumentReference documentReference = (DocumentReference)input.getEntry().get(entry).getResource();
 		final Patient patient = (Patient) documentReference.getSubject().getResource();
