@@ -392,7 +392,7 @@ public class QueryStack {
 						mySqlBuilder.addSortCoordsNear(coordsPredicateBuilder, latitudeValue, longitudeValue, theAscending);
 					} else {
 						String msg = myFhirContext.getLocalizer().getMessageSanitized(QueryStack.class, "cantSortOnCoordParamWithoutValues", theParamName);
-						throw new InvalidRequestException(Msg.code(2307) + msg);
+						throw new InvalidRequestException(Msg.code(2494) + msg);
 					}
 					return;
 				}
