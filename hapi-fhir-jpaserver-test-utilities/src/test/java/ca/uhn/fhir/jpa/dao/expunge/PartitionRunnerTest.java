@@ -18,7 +18,8 @@ import java.util.Set;
 import java.util.function.Consumer;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.isOneOf;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.oneOf;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
@@ -98,10 +99,10 @@ public class PartitionRunnerTest {
 		getPartitionRunner(5).runInPartitionedThreads(resourceIds, partitionConsumer);
 		List<HookParams> calls = myLatch.awaitExpected();
 		PartitionCall partitionCall1 = (PartitionCall) PointcutLatch.getLatchInvocationParameter(calls, 0);
-		assertThat(partitionCall1.threadName, isOneOf(TEST_THREADNAME_1, TEST_THREADNAME_2));
+		assertThat(partitionCall1.threadName, is(oneOf(TEST_THREADNAME_1, TEST_THREADNAME_2)));
 		assertEquals(5, partitionCall1.size);
 		PartitionCall partitionCall2 = (PartitionCall) PointcutLatch.getLatchInvocationParameter(calls, 1);
-		assertThat(partitionCall2.threadName, isOneOf(TEST_THREADNAME_1, TEST_THREADNAME_2));
+		assertThat(partitionCall2.threadName, is(oneOf(TEST_THREADNAME_1, TEST_THREADNAME_2)));
 		assertEquals(5, partitionCall2.size);
 		assertNotEquals(partitionCall1.threadName, partitionCall2.threadName);
 	}
@@ -119,12 +120,36 @@ public class PartitionRunnerTest {
 		getPartitionRunner(5).runInPartitionedThreads(resourceIds, partitionConsumer);
 		List<HookParams> calls = myLatch.awaitExpected();
 		PartitionCall partitionCall1 = (PartitionCall) PointcutLatch.getLatchInvocationParameter(calls, 0);
-		assertThat(partitionCall1.threadName, isOneOf(TEST_THREADNAME_1, TEST_THREADNAME_2));
+		assertThat(partitionCall1.threadName, is(oneOf(TEST_THREADNAME_1, TEST_THREADNAME_2)));
 		assertEquals(true, nums.remove(partitionCall1.size));
 		PartitionCall partitionCall2 = (PartitionCall) PointcutLatch.getLatchInvocationParameter(calls, 1);
-		assertThat(partitionCall2.threadName, isOneOf(TEST_THREADNAME_1, TEST_THREADNAME_2));
+		assertThat(partitionCall2.threadName, is(oneOf(TEST_THREADNAME_1, TEST_THREADNAME_2)));
 		assertEquals(true, nums.remove(partitionCall2.size));
 		assertNotEquals(partitionCall1.threadName, partitionCall2.threadName);
+	}
+
+
+
+	/**
+	 * See #5636 $expunge operation ignoring ExpungeThreadCount setting in certain cases
+	 */
+	@Test
+	public void testExpunge_withTasksSizeBiggerThanExecutorQueue_usesConfiguredNumberOfThreads() throws InterruptedException {
+		// setup
+		List<IResourcePersistentId> resourceIds = buildPidList(2500);
+		Consumer<List<IResourcePersistentId>> partitionConsumer = buildPartitionConsumer(myLatch);
+		// with batch size = 2 we expect 2500/2 runnableTasks to be created
+		myLatch.setExpectedCount(1250);
+
+		// execute
+		getPartitionRunner(2, 2).runInPartitionedThreads(resourceIds, partitionConsumer);
+		List<HookParams> calls = myLatch.awaitExpected();
+
+		// validate - only two threads should be used for execution
+		for (int i = 0; i < 1250; i++) {
+			PartitionCall partitionCall = (PartitionCall) PointcutLatch.getLatchInvocationParameter(calls, i);
+			assertThat(partitionCall.threadName, is(oneOf(TEST_THREADNAME_1, TEST_THREADNAME_2)));
+		}
 	}
 
 	@Test

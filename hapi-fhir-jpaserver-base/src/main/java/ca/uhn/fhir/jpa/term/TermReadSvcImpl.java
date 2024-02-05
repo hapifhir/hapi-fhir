@@ -649,7 +649,13 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 				.getMessage(TermReadSvcImpl.class, "valueSetExpandedUsingPreExpansion", expansionTimestamp);
 		theAccumulator.addMessage(msg);
 		expandConcepts(
-				theExpansionOptions, theAccumulator, termValueSet, theFilter, theAdd, theAddedCodes, isOracleDialect());
+				theExpansionOptions,
+				theAccumulator,
+				termValueSet,
+				theFilter,
+				theAdd,
+				theAddedCodes,
+				myHibernatePropertiesProvider.isOracleDialect());
 	}
 
 	@Nonnull
@@ -662,10 +668,6 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 					+ timeElapsed + " ago)";
 		}
 		return expansionTimestamp;
-	}
-
-	private boolean isOracleDialect() {
-		return myHibernatePropertiesProvider.getDialect() instanceof org.hibernate.dialect.OracleDialect;
 	}
 
 	private void expandConcepts(

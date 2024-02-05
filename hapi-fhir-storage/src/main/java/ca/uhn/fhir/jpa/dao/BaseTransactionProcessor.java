@@ -1806,10 +1806,7 @@ public abstract class BaseTransactionProcessor {
 
 			theDaoMethodOutcome.setId(newId);
 
-			IIdType target = theIdSubstitutions.getForSource(newId);
-			if (target != null) {
-				target.setValue(newId.getValue());
-			}
+			theIdSubstitutions.updateTargets(newId);
 
 			if (theDaoMethodOutcome.getOperationOutcome() != null) {
 				IBase responseEntry = entriesToProcess.getResponseBundleEntryWithVersionlessComparison(newId);
@@ -2256,8 +2253,7 @@ public abstract class BaseTransactionProcessor {
 	public static String performIdSubstitutionsInMatchUrl(IdSubstitutionMap theIdSubstitutions, String theMatchUrl) {
 		String matchUrl = theMatchUrl;
 		if (isNotBlank(matchUrl) && !theIdSubstitutions.isEmpty()) {
-
-			int startIdx = matchUrl.indexOf('?');
+			int startIdx = 0;
 			while (startIdx != -1) {
 
 				int endIdx = matchUrl.indexOf('&', startIdx + 1);
