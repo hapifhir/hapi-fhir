@@ -19,12 +19,13 @@
  */
 package ca.uhn.fhir.jpa.cache;
 
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.model.sched.HapiJob;
 import ca.uhn.fhir.jpa.model.sched.IHasScheduledJobs;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
-import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import com.google.common.annotations.VisibleForTesting;
+import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.quartz.JobExecutionContext;
@@ -35,6 +36,10 @@ import org.springframework.context.event.ContextClosedEvent;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionDefinition;
+import org.springframework.transaction.support.TransactionCallback;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -57,13 +62,16 @@ public class ResourceChangeListenerCacheRefresherImpl
 	/**
 	 * All cache entries are checked at this interval to see if they need to be refreshed
 	 */
-	static long LOCAL_REFRESH_INTERVAL_MS = 10 * DateUtils.MILLIS_PER_SECOND;
+	static final long LOCAL_REFRESH_INTERVAL_MS = 10 * DateUtils.MILLIS_PER_SECOND;
 
 	@Autowired
 	private IResourceVersionSvc myResourceVersionSvc;
 
 	@Autowired
 	private ResourceChangeListenerRegistryImpl myResourceChangeListenerRegistry;
+
+	@Autowired
+	private PlatformTransactionManager myPlatformTransactionManager;
 
 	private boolean myStopping = false;
 
@@ -135,6 +143,7 @@ public class ResourceChangeListenerCacheRefresherImpl
 	@Override
 	public ResourceChangeResult refreshCacheAndNotifyListener(IResourceChangeListenerCache theCache) {
 		ResourceChangeResult retVal = new ResourceChangeResult();
+
 		if (isStopping()) {
 			ourLog.info("Context is stopping, aborting cache refresh");
 			return retVal;
@@ -143,18 +152,30 @@ public class ResourceChangeListenerCacheRefresherImpl
 			ourLog.warn("Requesting cache refresh for unregistered listener {}.  Aborting.", theCache);
 			return retVal;
 		}
-		SearchParameterMap searchParamMap = theCache.getSearchParameterMap();
-		ResourceVersionMap newResourceVersionMap =
-				myResourceVersionSvc.getVersionMap(theCache.getResourceName(), searchParamMap);
+
+		ResourceVersionMap newResourceVersionMap = callWithSuspendedTx(status -> myResourceVersionSvc.getVersionMap(
+				RequestPartitionId.allPartitions(), theCache.getResourceName(), theCache.getSearchParameterMap()));
+
 		retVal = retVal.plus(notifyListener(theCache, newResourceVersionMap));
 
 		return retVal;
 	}
 
 	/**
+	 * suspend any current transaction while we sync with the db.
+	 * This avoids lock conflicts while reading the resource versions.
+	 */
+	@Nullable
+	private <T> T callWithSuspendedTx(TransactionCallback<T> theCallback) {
+		TransactionTemplate transactionTemplate = new TransactionTemplate(myPlatformTransactionManager);
+		transactionTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_NOT_SUPPORTED);
+		return transactionTemplate.execute(theCallback);
+	}
+
+	/**
 	 * Notify a listener with all matching resources if it hasn't been initialized yet, otherwise only notify it if
 	 * any resources have changed
-	 * @param theCache
+	 * @param theCache the target
 	 * @param theNewResourceVersionMap the measured new resources
 	 * @return the list of created, updated and deleted ids
 	 */
