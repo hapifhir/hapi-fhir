@@ -50,5 +50,4 @@ public interface IResourceChangeListenerCacheRefresher {
 
 	@EventListener(ContextClosedEvent.class)
 	public void shutdown();
-
 }
