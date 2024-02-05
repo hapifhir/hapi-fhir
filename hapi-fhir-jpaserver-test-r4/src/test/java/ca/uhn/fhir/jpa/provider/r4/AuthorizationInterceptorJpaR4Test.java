@@ -1672,10 +1672,11 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 	@ArgumentsSource(StandaloneBundleTypesArgumentsProvider.class)
 	public void testPermissionsToPostTransaction_withStandaloneBundles_successfullyPostsTransactions(BundleTypeEnum theStandaloneBundleType){
 		Bundle nestedBundle = new Bundle();
+		nestedBundle.setId("some-bundle");
 		BundleUtil.setBundleType(myFhirContext, nestedBundle, theStandaloneBundleType.getCode());
 
 		BundleBuilder builder = new BundleBuilder(myFhirContext);
-		builder.addTransactionCreateEntry(nestedBundle);
+		builder.addTransactionUpdateEntry(nestedBundle);
 		IBaseBundle transaction = builder.getBundle();
 
 		myServer.getRestfulServer().registerInterceptor(myWriteResourcesInTransactionAuthorizationInterceptor);
@@ -1690,7 +1691,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 
 		Bundle savedNestedBundle = (Bundle) savedBundles.get(0);
 		assertEquals(theStandaloneBundleType, BundleUtil.getBundleTypeEnum(myFhirContext, savedNestedBundle));
-		assertTrue(savedNestedBundle.getEntry().isEmpty());
+		assertEquals(nestedBundle.getIdPart(), savedNestedBundle.getIdPart());
 	}
 
 	@ParameterizedTest
@@ -1723,9 +1724,9 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 	@ArgumentsSource(StandaloneBundleTypesArgumentsProvider.class)
 	public void testPermissionsToPostTransactions_withStandaloneBundles_onlyProcessesTransactionsOneLevelDeep(BundleTypeEnum theStandaloneBundleType){
 		// second level transaction
-		BundleBuilder builder = new BundleBuilder(myFhirContext);
 		Patient patient = new Patient();
-		patient.setBirthDate(Date.valueOf("2000-01-01"));
+		patient.setId("some-patient");
+		BundleBuilder builder = new BundleBuilder(myFhirContext);
 		builder.addTransactionCreateEntry(patient);
 		IBaseBundle secondLevelTransaction = builder.getBundle();
 
@@ -1763,7 +1764,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 		assertEquals(Bundle.BundleType.TRANSACTION, savedSecondLevelTransaction.getType());
 		assertEquals(1, savedSecondLevelTransaction.getEntry().size());
 		Patient patientSavedInsideBundle = (Patient) savedSecondLevelTransaction.getEntry().get(0).getResource();
-		assertEquals(patient.getBirthDate(), patientSavedInsideBundle.getBirthDate());
+		assertEquals(patient.getIdPart(), patientSavedInsideBundle.getIdPart());
 
 		// verify second level Patient transaction did NOT execute
 		assertTrue(myPatientDao.search(SearchParameterMap.newSynchronous(), mySrd).isEmpty());
@@ -1900,7 +1901,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 			Set<Arguments> arguments = new HashSet<>();
 
 			Arrays.stream(BundleTypeEnum.values())
-				.filter(type -> BundleUtil.isStandaloneBundleType(type))
+				.filter(BundleUtil::isStandaloneBundleType)
 				.forEach(type -> arguments.add(Arguments.of(type)));
 
 			return arguments.stream();

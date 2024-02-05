@@ -249,7 +249,7 @@ public class BundleUtil {
 
 	public static boolean isStandaloneBundleResource(FhirContext theContext, IBaseBundle theBundle) {
 		BundleTypeEnum bundleType = BundleUtil.getBundleTypeEnum(theContext, theBundle);
-		return bundleType != null && STANDALONE_BUNDLE_RESOURCE_TYPES.contains(bundleType);
+		return bundleType != null && isStandaloneBundleType(bundleType);
 	}
 
 	public static boolean isStandaloneBundleType(BundleTypeEnum theBundleType) {
