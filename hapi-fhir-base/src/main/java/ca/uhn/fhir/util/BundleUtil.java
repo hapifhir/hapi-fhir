@@ -252,7 +252,7 @@ public class BundleUtil {
 		return bundleType != null && STANDALONE_BUNDLE_RESOURCE_TYPES.contains(bundleType);
 	}
 
-	public static boolean isStandaloneBundleType(BundleTypeEnum theBundleType){
+	public static boolean isStandaloneBundleType(BundleTypeEnum theBundleType) {
 		return STANDALONE_BUNDLE_RESOURCE_TYPES.contains(theBundleType);
 	}
 
