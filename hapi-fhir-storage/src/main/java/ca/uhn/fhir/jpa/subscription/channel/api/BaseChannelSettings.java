@@ -26,6 +26,9 @@ public abstract class BaseChannelSettings implements IChannelSettings {
 
 	private ChannelRetryConfiguration myRetryConfigurationParameters;
 
+	// init true to match previous behaviour
+	private boolean myUseJacksonMessageConverter = true;
+
 	/**
 	 * Default true.  Used by IChannelNamer to decide how to qualify the channel name.
 	 */
