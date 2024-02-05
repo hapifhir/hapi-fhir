@@ -21,6 +21,7 @@ package ca.uhn.fhir.util;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -84,8 +85,7 @@ public class ValidateUtil {
 
 	public static void isTrueOrThrowResourceNotFound(boolean theSuccess, String theMessage, Object... theValues) {
 		if (!theSuccess) {
-			// FIXME: new code
-			throw new InvalidRequestException(Msg.code(1769) + String.format(theMessage, theValues));
+			throw new ResourceNotFoundException(Msg.code(2494) + String.format(theMessage, theValues));
 		}
 	}
 

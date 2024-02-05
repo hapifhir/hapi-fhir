@@ -32,8 +32,7 @@ public class ValidateUtilTest {
 			ValidateUtil.isTrueOrThrowResourceNotFound(false, "The message");
 			fail();
 		} catch (ResourceNotFoundException e) {
-			// FIXME: new code
-			assertEquals(Msg.code(1769) + "The message", e.getMessage());
+			assertEquals(Msg.code(2494) + "The message", e.getMessage());
 		}
 	}
 
