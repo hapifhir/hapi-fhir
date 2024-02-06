@@ -7,6 +7,7 @@ import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.test.utilities.ProxyUtil;
 import ca.uhn.test.concurrency.IPointcutLatch;
 import ca.uhn.test.concurrency.PointcutLatch;
 import org.apache.commons.lang3.time.DateUtils;
@@ -18,6 +19,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.aop.framework.AopProxyUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
@@ -36,7 +38,7 @@ public class ResourceChangeListenerRegistryImplIT extends BaseJpaR4Test {
 	@Autowired
 	ResourceChangeListenerRegistryImpl myResourceChangeListenerRegistry;
 	@Autowired
-	ResourceChangeListenerCacheRefresherImpl myResourceChangeListenerCacheRefresher;
+	IResourceChangeListenerCacheRefresher myResourceChangeListenerCacheRefresher;
 
 	private final static String RESOURCE_NAME = "Patient";
 	private TestCallback myMaleTestCallback = new TestCallback("MALE");
@@ -132,7 +134,9 @@ public class ResourceChangeListenerRegistryImplIT extends BaseJpaR4Test {
 
 	private IdDt createPatientAndRefreshCache(Patient thePatient, TestCallback theTestCallback, long theExpectedCount) throws InterruptedException {
 		IIdType retval = myPatientDao.create(thePatient).getId();
-		ResourceChangeResult result = myResourceChangeListenerCacheRefresher.forceRefreshAllCachesForUnitTest();
+		// unwrap the proxy to get our test method.
+        ResourceChangeResult result = ProxyUtil.getSingletonTarget(myResourceChangeListenerCacheRefresher, ResourceChangeListenerCacheRefresherImpl.class)
+			.forceRefreshAllCachesForUnitTest();
 		assertResult(result, theExpectedCount, 0, 0);
 		return new IdDt(retval);
 	}

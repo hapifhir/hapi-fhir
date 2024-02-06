@@ -101,7 +101,7 @@ public class SearchParamRegistryImplTest {
 	@BeforeEach
 	public void before() {
 		myAnswerCount = 0;
-		when(myResourceVersionSvc.getVersionMap(anyString(), any())).thenReturn(ourResourceVersionMap);
+		when(myResourceVersionSvc.getVersionMap(any(), anyString(), any())).thenReturn(ourResourceVersionMap);
 		when(mySearchParamProvider.search(any())).thenReturn(new SimpleBundleProvider());
 
 		// Our first refresh adds our test searchparams to the registry
@@ -223,15 +223,15 @@ public class SearchParamRegistryImplTest {
 	}
 
 	private void assertDbCalled() {
-		verify(myResourceVersionSvc, times(1)).getVersionMap(anyString(), any());
+		verify(myResourceVersionSvc, times(1)).getVersionMap(any(),anyString(), any());
 		reset(myResourceVersionSvc);
-		when(myResourceVersionSvc.getVersionMap(anyString(), any())).thenReturn(ourResourceVersionMap);
+		when(myResourceVersionSvc.getVersionMap(any(),anyString(), any())).thenReturn(ourResourceVersionMap);
 	}
 
 	private void assertDbNotCalled() {
-		verify(myResourceVersionSvc, never()).getVersionMap(anyString(), any());
+		verify(myResourceVersionSvc, never()).getVersionMap(any(),anyString(), any());
 		reset(myResourceVersionSvc);
-		when(myResourceVersionSvc.getVersionMap(anyString(), any())).thenReturn(ourResourceVersionMap);
+		when(myResourceVersionSvc.getVersionMap(any(),anyString(), any())).thenReturn(ourResourceVersionMap);
 	}
 
 	@Test
@@ -255,7 +255,7 @@ public class SearchParamRegistryImplTest {
 	@Test
 	public void testGetActiveSearchParamsRetries() {
 		AtomicBoolean retried = new AtomicBoolean(false);
-		when(myResourceVersionSvc.getVersionMap(anyString(), any())).thenAnswer(t -> {
+		when(myResourceVersionSvc.getVersionMap(any(),anyString(), any())).thenAnswer(t -> {
 			if (myAnswerCount == 0) {
 				myAnswerCount++;
 				retried.set(true);
@@ -310,7 +310,7 @@ public class SearchParamRegistryImplTest {
 		ArrayList<ResourceTable> newEntities = new ArrayList<>(ourEntities);
 		newEntities.add(createEntity(99, 1));
 		ResourceVersionMap newResourceVersionMap = ResourceVersionMap.fromResourceTableEntities(newEntities);
-		when(myResourceVersionSvc.getVersionMap(anyString(), any())).thenReturn(newResourceVersionMap);
+		when(myResourceVersionSvc.getVersionMap(any(),anyString(), any())).thenReturn(newResourceVersionMap);
 		when(mySearchParamProvider.search(any())).thenReturn(new SimpleBundleProvider(sp));
 
 		mySearchParamRegistry.forceRefresh();
@@ -332,7 +332,7 @@ public class SearchParamRegistryImplTest {
 
 	private void resetMock(Enumerations.PublicationStatus theStatus, List<ResourceTable> theNewEntities) {
 		ResourceVersionMap resourceVersionMap = ResourceVersionMap.fromResourceTableEntities(theNewEntities);
-		when(myResourceVersionSvc.getVersionMap(anyString(), any())).thenReturn(resourceVersionMap);
+		when(myResourceVersionSvc.getVersionMap(any(),anyString(), any())).thenReturn(resourceVersionMap);
 
 		// When we ask for the new entity, return our foo search parameter
 		when(mySearchParamProvider.search(any())).thenReturn(new SimpleBundleProvider(buildSearchParameter(theStatus)));

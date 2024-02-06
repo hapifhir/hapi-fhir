@@ -80,7 +80,7 @@ class ResourceChangeListenerCacheRefresherImplTest {
 		ResourceChangeListenerCache cache = new ResourceChangeListenerCache(PATIENT_RESOURCE_NAME, listener, ourMap, TEST_REFRESH_INTERVAL_MS);
 		myResourceChangeListenerCacheRefresher.refreshCacheAndNotifyListener(cache);
 
-		verify(myResourceVersionSvc, times(0)).getVersionMap(any(), any());
+		verify(myResourceVersionSvc, times(0)).getVersionMap(any(),any(), any());
 	}
 
 }
