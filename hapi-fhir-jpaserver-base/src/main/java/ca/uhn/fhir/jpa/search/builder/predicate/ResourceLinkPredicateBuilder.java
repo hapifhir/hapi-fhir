@@ -720,7 +720,10 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder im
 		String msg = getFhirContext()
 				.getLocalizer()
 				.getMessage(
-						ResourceLinkPredicateBuilder.class, "invalidTargetTypeForReference", theTypeValue, searchParamName);
+						ResourceLinkPredicateBuilder.class,
+						"invalidTargetTypeForReference",
+						theTypeValue,
+						searchParamName);
 		return new InvalidRequestException(Msg.code(2495) + msg);
 	}
 

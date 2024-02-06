@@ -1592,7 +1592,7 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 		ResourceSearch search = myMatchUrlService.getResourceSearch(theUrl);
 		SearchParameterMap map = search.getSearchParameterMap();
 		map.setLoadSynchronous(true);
-		IBundleProvider result = theObservationDao.search(map, mySrd);
+		IBundleProvider result = theObservationDao.search(map);
 		return result.getAllResourceIds();
 	}
 
