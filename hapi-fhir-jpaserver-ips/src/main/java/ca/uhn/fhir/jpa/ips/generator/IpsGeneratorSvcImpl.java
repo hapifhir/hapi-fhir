@@ -59,11 +59,12 @@ import java.util.Map;
 import java.util.UUID;
 
 import static java.util.Objects.requireNonNull;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class IpsGeneratorSvcImpl implements IIpsGeneratorSvc {
 
-	private final IIpsGenerationStrategy myGenerationStrategy;
+	private final List<IIpsGenerationStrategy> myGenerationStrategies;
 	private final FhirContext myFhirContext;
 
 	/**
@@ -71,55 +72,73 @@ public class IpsGeneratorSvcImpl implements IIpsGeneratorSvc {
 	 */
 	public IpsGeneratorSvcImpl(
 		FhirContext theFhirContext, IIpsGenerationStrategy theGenerationStrategy) {
-		myGenerationStrategy = theGenerationStrategy;
+		this(theFhirContext, List.of(theGenerationStrategy));
+	}
+
+	public IpsGeneratorSvcImpl(FhirContext theFhirContext, List<IIpsGenerationStrategy> theIpsGenerationStrategies) {
+		myGenerationStrategies = theIpsGenerationStrategies;
 		myFhirContext = theFhirContext;
 
-		myGenerationStrategy.initialize();
+		myGenerationStrategies.forEach(IIpsGenerationStrategy::initialize);
 	}
 
+	/**
+	 * Generate an IPS using a patient ID
+	 */
 	@Override
-	public IBaseBundle generateIps(RequestDetails theRequestDetails, IIdType thePatientId) {
-		IBaseResource patient = myGenerationStrategy.fetchPatient(thePatientId, theRequestDetails);
-
-		return generateIpsForPatient(theRequestDetails, patient);
+	public IBaseBundle generateIps(RequestDetails theRequestDetails, IIdType thePatientId, String theProfile) {
+		IIpsGenerationStrategy strategy = selectGenerationStrategy(theProfile);
+		IBaseResource patient = strategy.fetchPatient(thePatientId, theRequestDetails);
+		return generateIpsForPatient(strategy, theRequestDetails, patient);
 	}
 
+	/**
+	 * Generate an IPS using a patient identifier
+	 */
 	@Override
-	public IBaseBundle generateIps(RequestDetails theRequestDetails, TokenParam thePatientIdentifier) {
-		IBaseResource patient = myGenerationStrategy.fetchPatient(thePatientIdentifier, theRequestDetails);
-
-		return generateIpsForPatient(theRequestDetails, patient);
+	public IBaseBundle generateIps(RequestDetails theRequestDetails, TokenParam thePatientIdentifier, String theProfile) {
+		IIpsGenerationStrategy strategy = selectGenerationStrategy(theProfile);
+		IBaseResource patient = strategy.fetchPatient(thePatientIdentifier, theRequestDetails);
+		return generateIpsForPatient(strategy, theRequestDetails, patient);
 	}
 
-	private IBaseBundle generateIpsForPatient(RequestDetails theRequestDetails, IBaseResource thePatient) {
+	IIpsGenerationStrategy selectGenerationStrategy(@Nullable String theRequestedProfile) {
+		return myGenerationStrategies
+			.stream()
+			.filter(t -> isBlank(theRequestedProfile) || theRequestedProfile.equals(t.getBundleProfile()))
+			.findFirst()
+			.orElse(myGenerationStrategies.get(0));
+	}
+
+	private IBaseBundle generateIpsForPatient(IIpsGenerationStrategy theStrategy, RequestDetails theRequestDetails, IBaseResource thePatient) {
 		IIdType originalSubjectId = myFhirContext
 			.getVersion()
 			.newIdType()
 			.setValue(thePatient.getIdElement().getValue())
 			.toUnqualifiedVersionless();
-		massageResourceId(theRequestDetails, null, thePatient);
+		massageResourceId(theStrategy, theRequestDetails, null, thePatient);
 		IpsContext context = new IpsContext(thePatient, originalSubjectId);
 
 		ResourceInclusionCollection globalResourcesToInclude = new ResourceInclusionCollection();
 		globalResourcesToInclude.addResourceIfNotAlreadyPresent(thePatient, originalSubjectId.getValue());
 
-		IBaseResource author = myGenerationStrategy.createAuthor();
-		massageResourceId(theRequestDetails, context, author);
+		IBaseResource author = theStrategy.createAuthor();
+		massageResourceId(theStrategy, theRequestDetails, context, author);
 
-		CompositionBuilder compositionBuilder = createComposition(thePatient, context, author);
-		determineInclusions(theRequestDetails, context, compositionBuilder, globalResourcesToInclude);
+		CompositionBuilder compositionBuilder = createComposition(theStrategy, thePatient, context, author);
+		determineInclusions(theStrategy, theRequestDetails, context, compositionBuilder, globalResourcesToInclude);
 
 		IBaseResource composition = compositionBuilder.getComposition();
 
 		// Create the narrative for the Composition itself
-		CustomThymeleafNarrativeGenerator generator = newNarrativeGenerator(globalResourcesToInclude);
+		CustomThymeleafNarrativeGenerator generator = newNarrativeGenerator(theStrategy, globalResourcesToInclude);
 		generator.populateResourceNarrative(myFhirContext, composition);
 
-		return createCompositionDocument(author, composition, globalResourcesToInclude);
+		return createDocumentBundleForComposition(theStrategy, author, composition, globalResourcesToInclude);
 	}
 
-	private IBaseBundle createCompositionDocument(
-		IBaseResource author, IBaseResource composition, ResourceInclusionCollection theResourcesToInclude) {
+	private IBaseBundle createDocumentBundleForComposition(
+		IIpsGenerationStrategy theStrategy, IBaseResource author, IBaseResource composition, ResourceInclusionCollection theResourcesToInclude) {
 		BundleBuilder bundleBuilder = new BundleBuilder(myFhirContext);
 		bundleBuilder.setType(Bundle.BundleType.DOCUMENT.toCode());
 		bundleBuilder.setIdentifier("urn:ietf:rfc:4122", UUID.randomUUID().toString());
@@ -138,32 +157,30 @@ public class IpsGeneratorSvcImpl implements IIpsGeneratorSvc {
 
 		IBaseBundle retVal = bundleBuilder.getBundle();
 
-		retVal.getMeta().addProfile(myGenerationStrategy.getBundleProfile());
-
-		myGenerationStrategy.postManipulateIpsBundle(retVal);
+		theStrategy.postManipulateIpsBundle(retVal);
 
 		return retVal;
 	}
 
 	private void determineInclusions(
-		RequestDetails theRequestDetails,
+		IIpsGenerationStrategy theStrategy, RequestDetails theRequestDetails,
 		IpsContext theIpsContext,
 		CompositionBuilder theCompositionBuilder,
 		ResourceInclusionCollection theGlobalResourcesToInclude) {
-		for (Section nextSection : myGenerationStrategy.getSections()) {
+		for (Section nextSection : theStrategy.getSections()) {
 			determineInclusionsForSection(
-				theRequestDetails, theIpsContext, theCompositionBuilder, theGlobalResourcesToInclude, nextSection);
+				theStrategy, theRequestDetails, theIpsContext, theCompositionBuilder, theGlobalResourcesToInclude, nextSection);
 		}
 	}
 
 	private void determineInclusionsForSection(
-		RequestDetails theRequestDetails,
+		IIpsGenerationStrategy theStrategy, RequestDetails theRequestDetails,
 		IpsContext theIpsContext,
 		CompositionBuilder theCompositionBuilder,
 		ResourceInclusionCollection theGlobalResourceCollectionToPopulate,
 		Section theSection) {
 		ResourceInclusionCollection sectionResourceCollectionToPopulate = new ResourceInclusionCollection();
-		ISectionResourceSupplier resourceSupplier = myGenerationStrategy.getSectionResourceSupplier(theSection);
+		ISectionResourceSupplier resourceSupplier = theStrategy.getSectionResourceSupplier(theSection);
 
 		for (String nextResourceType : theSection.getResourceTypes()) {
 			IpsSectionContext ipsSectionContext = theIpsContext.newSectionContext(theSection, nextResourceType);
@@ -176,6 +193,7 @@ public class IpsGeneratorSvcImpl implements IIpsGeneratorSvc {
 						"fetchResourcesForSection(..) returned resource(s) with no ID populated");
 				}
 				addResourcesToIpsContents(
+					theStrategy,
 					theRequestDetails,
 					theIpsContext,
 					resources,
@@ -234,6 +252,7 @@ public class IpsGeneratorSvcImpl implements IIpsGeneratorSvc {
 		}
 
 		addSection(
+			theStrategy,
 			theSection,
 			theCompositionBuilder,
 			sectionResourceCollectionToPopulate,
@@ -244,11 +263,12 @@ public class IpsGeneratorSvcImpl implements IIpsGeneratorSvc {
 	 * Given a collection of resources that have been fetched, analyze them and add them as appropriate
 	 * to the collection that will be included in a given IPS section context.
 	 *
+	 * @param theStrategy           The generation strategy
 	 * @param theIpsContext         The overall IPS generation context for this IPS.
 	 * @param theCandidateResources The resources that have been fetched for inclusion in the IPS bundle
 	 */
 	private void addResourcesToIpsContents(
-		RequestDetails theRequestDetails,
+		IIpsGenerationStrategy theStrategy, RequestDetails theRequestDetails,
 		IpsContext theIpsContext,
 		List<ISectionResourceSupplier.ResourceEntry> theCandidateResources,
 		ResourceInclusionCollection theGlobalResourcesCollectionToPopulate,
@@ -258,16 +278,16 @@ public class IpsGeneratorSvcImpl implements IIpsGeneratorSvc {
 
 			boolean primaryResource;
 			switch (nextCandidateEntry.getInclusionType()) {
-                case PRIMARY_RESOURCE:
+				case PRIMARY_RESOURCE:
 					primaryResource = true;
 					break;
-                case SECONDARY_RESOURCE:
+				case SECONDARY_RESOURCE:
 					primaryResource = false;
-                    break;
+					break;
 				default:
-                case EXCLUDE:
-                   continue;
-            }
+				case EXCLUDE:
+					continue;
+			}
 
 			String originalResourceId =
 				nextCandidate.getIdElement().toUnqualifiedVersionless().getValue();
@@ -277,13 +297,6 @@ public class IpsGeneratorSvcImpl implements IIpsGeneratorSvc {
 			IBaseResource previouslyExistingResource =
 				theGlobalResourcesCollectionToPopulate.getResourceByOriginalId(originalResourceId);
 			if (previouslyExistingResource != null) {
-				BundleEntrySearchModeEnum candidateSearchEntryMode =
-					ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.get(nextCandidate);
-				if (candidateSearchEntryMode == BundleEntrySearchModeEnum.MATCH) {
-					ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.put(
-						previouslyExistingResource, BundleEntrySearchModeEnum.MATCH);
-				}
-
 				nextCandidate = previouslyExistingResource;
 				theSectionResourceCollectionToPopulate.addResourceIfNotAlreadyPresent(
 					nextCandidate, originalResourceId);
@@ -293,7 +306,7 @@ public class IpsGeneratorSvcImpl implements IIpsGeneratorSvc {
 						nextCandidate, originalResourceId);
 				}
 			} else {
-				massageResourceId(theRequestDetails, theIpsContext, nextCandidate);
+				massageResourceId(theStrategy, theRequestDetails, theIpsContext, nextCandidate);
 				theGlobalResourcesCollectionToPopulate.addResourceIfNotAlreadyPresent(
 					nextCandidate, originalResourceId);
 				if (primaryResource) {
@@ -306,7 +319,7 @@ public class IpsGeneratorSvcImpl implements IIpsGeneratorSvc {
 
 	@SuppressWarnings("unchecked")
 	private void addSection(
-		Section theSection,
+		IIpsGenerationStrategy theStrategy, Section theSection,
 		CompositionBuilder theCompositionBuilder,
 		ResourceInclusionCollection theResourcesToInclude,
 		ResourceInclusionCollection theGlobalResourcesToInclude) {
@@ -338,11 +351,11 @@ public class IpsGeneratorSvcImpl implements IIpsGeneratorSvc {
 			sectionBuilder.addEntry(next.getIdElement());
 		}
 
-		String narrative = createSectionNarrative(theSection, theResourcesToInclude, theGlobalResourcesToInclude);
+		String narrative = createSectionNarrative(theStrategy, theSection, theResourcesToInclude, theGlobalResourcesToInclude);
 		sectionBuilder.setText("generated", narrative);
 	}
 
-	private CompositionBuilder createComposition(IBaseResource thePatient, IpsContext context, IBaseResource author) {
+	private CompositionBuilder createComposition(IIpsGenerationStrategy theStrategy, IBaseResource thePatient, IpsContext context, IBaseResource author) {
 		CompositionBuilder compositionBuilder = new CompositionBuilder(myFhirContext);
 		compositionBuilder.setId(IdType.newRandomUuid());
 
@@ -350,33 +363,33 @@ public class IpsGeneratorSvcImpl implements IIpsGeneratorSvc {
 		compositionBuilder.setSubject(thePatient.getIdElement().toUnqualifiedVersionless());
 		compositionBuilder.addTypeCoding("http://loinc.org", "60591-5", "Patient Summary Document");
 		compositionBuilder.setDate(InstantType.now());
-		compositionBuilder.setTitle(myGenerationStrategy.createTitle(context));
-		compositionBuilder.setConfidentiality(myGenerationStrategy.createConfidentiality(context));
+		compositionBuilder.setTitle(theStrategy.createTitle(context));
+		compositionBuilder.setConfidentiality(theStrategy.createConfidentiality(context));
 		compositionBuilder.addAuthor(author.getIdElement());
 
 		return compositionBuilder;
 	}
 
-	private void massageResourceId(RequestDetails theRequestDetails, IpsContext theIpsContext, IBaseResource theResource) {
-        String base = theRequestDetails.getFhirServerBase();
+	private void massageResourceId(IIpsGenerationStrategy theStrategy, RequestDetails theRequestDetails, IpsContext theIpsContext, IBaseResource theResource) {
+		String base = theRequestDetails.getFhirServerBase();
 
-        IIdType id = theResource.getIdElement();
+		IIdType id = theResource.getIdElement();
 		if (!id.hasBaseUrl() && id.hasResourceType() && id.hasIdPart()) {
 			id = id.withServerBase(base, id.getResourceType());
 			theResource.setId(id);
 		}
 
-        id = myGenerationStrategy.massageResourceId(theIpsContext, theResource);
-        if (id != null) {
-            theResource.setId(id);
-        }
-    }
+		id = theStrategy.massageResourceId(theIpsContext, theResource);
+		if (id != null) {
+			theResource.setId(id);
+		}
+	}
 
 	private String createSectionNarrative(
-		Section theSection,
+		IIpsGenerationStrategy theStrategy, Section theSection,
 		ResourceInclusionCollection theResources,
 		ResourceInclusionCollection theGlobalResourceCollection) {
-		CustomThymeleafNarrativeGenerator generator = newNarrativeGenerator(theGlobalResourceCollection);
+		CustomThymeleafNarrativeGenerator generator = newNarrativeGenerator(theStrategy, theGlobalResourceCollection);
 
 		Bundle bundle = new Bundle();
 		for (IBaseResource resource : theResources.getResources()) {
@@ -394,8 +407,8 @@ public class IpsGeneratorSvcImpl implements IIpsGeneratorSvc {
 
 	@Nonnull
 	private CustomThymeleafNarrativeGenerator newNarrativeGenerator(
-		ResourceInclusionCollection theGlobalResourceCollection) {
-		List<String> narrativePropertyFiles = myGenerationStrategy.getNarrativePropertyFiles();
+		IIpsGenerationStrategy theStrategy, ResourceInclusionCollection theGlobalResourceCollection) {
+		List<String> narrativePropertyFiles = theStrategy.getNarrativePropertyFiles();
 		CustomThymeleafNarrativeGenerator generator = new CustomThymeleafNarrativeGenerator(narrativePropertyFiles);
 		generator.setFhirPathEvaluationContext(new IFhirPathEvaluationContext() {
 			@Override

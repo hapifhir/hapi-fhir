@@ -253,8 +253,7 @@ public class BundleBuilder {
 	public CreateBuilder addTransactionCreateEntry(IBaseResource theResource) {
 		setBundleField("type", "transaction");
 
-		IBase request =
-				addEntryAndReturnRequest(theResource);
+		IBase request = addEntryAndReturnRequest(theResource);
 
 		String resourceType = myContext.getResourceType(theResource);
 

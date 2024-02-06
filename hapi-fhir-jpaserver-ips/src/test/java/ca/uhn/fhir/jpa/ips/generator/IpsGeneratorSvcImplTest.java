@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.ips.generator;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.ips.api.IIpsGenerationStrategy;
 import ca.uhn.fhir.jpa.ips.api.IpsContext;
 import ca.uhn.fhir.jpa.ips.api.Section;
 import ca.uhn.fhir.jpa.ips.jpa.DefaultJpaIpsGenerationStrategy;
@@ -64,6 +65,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.jpa.ips.generator.IpsGenerationR4Test.findEntryResource;
@@ -73,6 +75,7 @@ import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.startsWith;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -123,7 +126,7 @@ public class IpsGeneratorSvcImplTest {
 		initializeGenerationStrategy(List.of());
 	}
 
-	private void initializeGenerationStrategy(List<Consumer<Section.SectionBuilder>> theGlobalSectionCustomizers) {
+	private void initializeGenerationStrategy(List<Function<Section, Section>> theGlobalSectionCustomizers) {
 		myStrategy = new DefaultJpaIpsGenerationStrategy() {
 			@Override
 			public IIdType massageResourceId(@Nullable IpsContext theIpsContext, @javax.annotation.Nonnull IBaseResource theResource) {
@@ -134,7 +137,11 @@ public class IpsGeneratorSvcImplTest {
 		myStrategy.setFhirContext(myFhirContext);
 		myStrategy.setDaoRegistry(myDaoRegistry);
 
-		theGlobalSectionCustomizers.forEach(t -> myStrategy.addGlobalSectionCustomizer(t));
+		if (theGlobalSectionCustomizers != null) {
+			for (var next : theGlobalSectionCustomizers) {
+				myStrategy.addGlobalSectionCustomizer(next);
+			}
+		}
 		mySvc = new IpsGeneratorSvcImpl(myFhirContext, myStrategy);
 	}
 
@@ -145,7 +152,7 @@ public class IpsGeneratorSvcImplTest {
 		registerResourceDaosForSmallPatientSet();
 
 		// Test
-		Bundle outcome = (Bundle) mySvc.generateIps(new SystemRequestDetails(), new TokenParam("http://foo", "bar"));
+		Bundle outcome = (Bundle) mySvc.generateIps(new SystemRequestDetails(), new TokenParam("http://foo", "bar"), null);
 
 		// Verify
 		ourLog.info("Generated IPS:\n{}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
@@ -207,7 +214,7 @@ public class IpsGeneratorSvcImplTest {
 		registerRemainingResourceDaos();
 
 		// Test
-		Bundle outcome = (Bundle) mySvc.generateIps(new SystemRequestDetails(), new IdType(PATIENT_ID));
+		Bundle outcome = (Bundle) mySvc.generateIps(new SystemRequestDetails(), new IdType(PATIENT_ID), null);
 
 		// Verify
 		Composition compositions = (Composition) outcome.getEntry().get(0).getResource();
@@ -243,7 +250,7 @@ public class IpsGeneratorSvcImplTest {
 		registerRemainingResourceDaos();
 
 		// Test
-		Bundle outcome = (Bundle) mySvc.generateIps(new SystemRequestDetails(), new IdType(PATIENT_ID));
+		Bundle outcome = (Bundle) mySvc.generateIps(new SystemRequestDetails(), new IdType(PATIENT_ID), null);
 
 		// Verify
 		Composition compositions = (Composition) outcome.getEntry().get(0).getResource();
@@ -271,7 +278,7 @@ public class IpsGeneratorSvcImplTest {
 		registerRemainingResourceDaos();
 
 		// Test
-		Bundle outcome = (Bundle) mySvc.generateIps(new SystemRequestDetails(), new IdType(PATIENT_ID));
+		Bundle outcome = (Bundle) mySvc.generateIps(new SystemRequestDetails(), new IdType(PATIENT_ID), null);
 
 		// Verify Bundle Contents
 		List<String> contentResourceTypes = toEntryResourceTypeStrings(outcome);
@@ -317,7 +324,7 @@ public class IpsGeneratorSvcImplTest {
 		registerRemainingResourceDaos();
 
 		// Test
-		Bundle outcome = (Bundle) mySvc.generateIps(new SystemRequestDetails(), new IdType(PATIENT_ID));
+		Bundle outcome = (Bundle) mySvc.generateIps(new SystemRequestDetails(), new IdType(PATIENT_ID), null);
 
 		// Verify
 		Composition compositions = (Composition) outcome.getEntry().get(0).getResource();
@@ -340,7 +347,7 @@ public class IpsGeneratorSvcImplTest {
 	public void testMedicationSummary_DuplicateSecondaryResources() {
 		// Setup Patient
 		initializeGenerationStrategy(
-			List.of(t->t.withNoInfoGenerator(null))
+			List.of(t->Section.newBuilder(t).withNoInfoGenerator(null).build())
 		);
 		registerPatientDaoWithRead();
 
@@ -355,7 +362,7 @@ public class IpsGeneratorSvcImplTest {
 		registerRemainingResourceDaos();
 
 		// Test
-		Bundle outcome = (Bundle) mySvc.generateIps(new SystemRequestDetails(), new IdType(PATIENT_ID));
+		Bundle outcome = (Bundle) mySvc.generateIps(new SystemRequestDetails(), new IdType(PATIENT_ID), null);
 
 		// Verify Bundle Contents
 		List<String> contentResourceTypes = toEntryResourceTypeStrings(outcome);
@@ -378,7 +385,7 @@ public class IpsGeneratorSvcImplTest {
 	public void testMedicationSummary_ResourceAppearsAsSecondaryThenPrimary() throws IOException {
 		// Setup Patient
 		initializeGenerationStrategy(
-			List.of(t->t.withNoInfoGenerator(null))
+			List.of(t->Section.newBuilder(t).withNoInfoGenerator(null).build())
 		);
 		registerPatientDaoWithRead();
 
@@ -395,7 +402,7 @@ public class IpsGeneratorSvcImplTest {
 		registerRemainingResourceDaos();
 
 		// Test
-		Bundle outcome = (Bundle) mySvc.generateIps(new SystemRequestDetails(), new IdType(PATIENT_ID));
+		Bundle outcome = (Bundle) mySvc.generateIps(new SystemRequestDetails(), new IdType(PATIENT_ID), null);
 
 		// Verify Bundle Contents
 		List<String> contentResourceTypes = toEntryResourceTypeStrings(outcome);
@@ -429,7 +436,7 @@ public class IpsGeneratorSvcImplTest {
 	public void testMedicationSummary_OmitMedicationRequestTable() throws IOException {
 		// Setup Patient
 		initializeGenerationStrategy(
-			List.of(t->t.withNoInfoGenerator(null))
+			List.of(t->Section.newBuilder(t).withNoInfoGenerator(null).build())
 		);
 		registerPatientDaoWithRead();
 
@@ -446,7 +453,7 @@ public class IpsGeneratorSvcImplTest {
 		registerRemainingResourceDaos();
 
 		// Test
-		Bundle outcome = (Bundle) mySvc.generateIps(new SystemRequestDetails(), new IdType(PATIENT_ID));
+		Bundle outcome = (Bundle) mySvc.generateIps(new SystemRequestDetails(), new IdType(PATIENT_ID), null);
 
 		// Verify narrative - should have 2 rows (one for each primary MedicationStatement)
 		Composition compositions = (Composition) outcome.getEntry().get(0).getResource();
@@ -487,7 +494,7 @@ public class IpsGeneratorSvcImplTest {
 		registerRemainingResourceDaos();
 
 		// Test
-		Bundle outcome = (Bundle) mySvc.generateIps(new SystemRequestDetails(), new IdType(PATIENT_ID));
+		Bundle outcome = (Bundle) mySvc.generateIps(new SystemRequestDetails(), new IdType(PATIENT_ID), null);
 
 		// Verify
 		Composition compositions = (Composition) outcome.getEntry().get(0).getResource();
@@ -535,7 +542,7 @@ public class IpsGeneratorSvcImplTest {
 		registerRemainingResourceDaos();
 
 		// Test
-		Bundle outcome = (Bundle) mySvc.generateIps(new SystemRequestDetails(), new IdType(PATIENT_ID));
+		Bundle outcome = (Bundle) mySvc.generateIps(new SystemRequestDetails(), new IdType(PATIENT_ID), null);
 
 		// Verify
 		Composition compositions = (Composition) outcome.getEntry().get(0).getResource();
@@ -598,7 +605,7 @@ public class IpsGeneratorSvcImplTest {
 		registerRemainingResourceDaos();
 
 		// Test
-		Bundle outcome = (Bundle) mySvc.generateIps(new SystemRequestDetails(), new IdType(PATIENT_ID));
+		Bundle outcome = (Bundle) mySvc.generateIps(new SystemRequestDetails(), new IdType(PATIENT_ID), null);
 		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
 
 		// Verify cross-references
@@ -659,7 +666,7 @@ public class IpsGeneratorSvcImplTest {
 		registerRemainingResourceDaos();
 
 		// Test
-		Bundle outcome = (Bundle) mySvc.generateIps(new SystemRequestDetails(), new IdType(PATIENT_ID));
+		Bundle outcome = (Bundle) mySvc.generateIps(new SystemRequestDetails(), new IdType(PATIENT_ID), null);
 
 		List<String> resources = outcome
 			.getEntry()
@@ -669,6 +676,20 @@ public class IpsGeneratorSvcImplTest {
 		assertThat(resources.toString(), resources, contains(
 			"Composition", "Patient", "AllergyIntolerance", "MedicationStatement", "Condition", "Organization"
 		));
+	}
+
+	@Test
+	public void testSelectGenerator() {
+		IIpsGenerationStrategy strategy1 = mock(IIpsGenerationStrategy.class);
+		when(strategy1.getBundleProfile()).thenReturn("http://1");
+		IIpsGenerationStrategy strategy2 = mock(IIpsGenerationStrategy.class);
+		when(strategy2.getBundleProfile()).thenReturn("http://2");
+		IpsGeneratorSvcImpl svc = new IpsGeneratorSvcImpl(myFhirContext, List.of(strategy1, strategy2));
+
+		assertSame(strategy1, svc.selectGenerationStrategy("http://1"));
+		assertSame(strategy1, svc.selectGenerationStrategy(null));
+		assertSame(strategy1, svc.selectGenerationStrategy("http://foo"));
+		assertSame(strategy2, svc.selectGenerationStrategy("http://2"));
 	}
 
 	@Nonnull

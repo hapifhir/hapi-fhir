@@ -282,7 +282,7 @@ public class IpsGenerationR4Test extends BaseResourceProviderR4Test {
 		ValidationResult validation = validator.validateWithResult(theOutcome);
 
 		Optional<SingleValidationMessage> failure = validation.getMessages().stream().filter(t -> t.getSeverity().ordinal() >= ResultSeverityEnum.ERROR.ordinal()).findFirst();
-		assertFalse(failure.isPresent(), () -> myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(validation.toOperationOutcome()));
+		assertFalse(failure.isPresent(), () -> failure.get().toString());
 	}
 
 	@Configuration
