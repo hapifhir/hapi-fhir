@@ -55,6 +55,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 public class SearchParamValidatingInterceptor {
 
 	public static final String SEARCH_PARAM = "SearchParameter";
+	public static final String SKIP_VALIDATION = SearchParamValidatingInterceptor.class.getName() + ".SKIP_VALIDATION";
 
 	private FhirContext myFhirContext;
 
@@ -77,6 +78,12 @@ public class SearchParamValidatingInterceptor {
 
 	public void validateSearchParamOnCreate(IBaseResource theResource, RequestDetails theRequestDetails) {
 		if (isNotSearchParameterResource(theResource)) {
+			return;
+		}
+
+		// avoid a loop when loading our hard-coded core FhirContext SearchParameters
+		boolean isStartup = (Boolean) theRequestDetails.getUserData().getOrDefault(SKIP_VALIDATION, false);
+		if (isStartup) {
 			return;
 		}
 		RuntimeSearchParam runtimeSearchParam = mySearchParameterCanonicalizer.canonicalizeSearchParameter(theResource);
