@@ -158,8 +158,8 @@ public class DuplicateIndexR5Test extends BaseJpaR5Test {
 		runInTransaction(()->{
 			assertEquals(5, myResourceTableDao.count());
 			ResourceTable table = myResourceTableDao.findAll().stream().filter(t1 -> t1.getResourceType().equals("Patient")).findFirst().orElseThrow();
-			assertEquals(1, table.getmyParamsComboTokensNonUnique().size());
-			ResourceIndexedComboTokenNonUnique param = table.getmyParamsComboTokensNonUnique().iterator().next();
+			assertEquals(1, table.getParamsComboTokensNonUnique().size());
+			ResourceIndexedComboTokenNonUnique param = table.getParamsComboTokensNonUnique().iterator().next();
 
 			// Create a dupe
 			ResourceIndexedComboTokenNonUnique dupe0 = new ResourceIndexedComboTokenNonUnique();

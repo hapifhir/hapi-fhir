@@ -137,7 +137,7 @@ public final class ResourceIndexedSearchParams {
 			myComboStringUniques.addAll(theEntity.getParamsComboStringUnique());
 		}
 		if (theEntity.isParamsComboTokensNonUniquePresent()) {
-			myComboTokenNonUnique.addAll(theEntity.getmyParamsComboTokensNonUnique());
+			myComboTokenNonUnique.addAll(theEntity.getParamsComboTokensNonUnique());
 		}
 	}
 

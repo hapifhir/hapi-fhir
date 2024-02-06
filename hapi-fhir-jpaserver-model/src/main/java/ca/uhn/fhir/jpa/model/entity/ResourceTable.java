@@ -519,7 +519,7 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 		return myParamsComboStringUnique;
 	}
 
-	public Collection<ResourceIndexedComboTokenNonUnique> getmyParamsComboTokensNonUnique() {
+	public Collection<ResourceIndexedComboTokenNonUnique> getParamsComboTokensNonUnique() {
 		if (myParamsComboTokensNonUnique == null) {
 			myParamsComboTokensNonUnique = new ArrayList<>();
 		}
