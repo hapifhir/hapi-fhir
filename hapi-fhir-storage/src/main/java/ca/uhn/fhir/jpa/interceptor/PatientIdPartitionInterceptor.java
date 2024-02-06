@@ -161,7 +161,8 @@ public class PatientIdPartitionInterceptor {
 				break;
 			case EXTENDED_OPERATION_SERVER:
 				String extendedOp = theReadDetails.getExtendedOperationName();
-				if (ProviderConstants.OPERATION_EXPORT.equals(extendedOp)) {
+				if (ProviderConstants.OPERATION_EXPORT.equals(extendedOp)
+						|| ProviderConstants.OPERATION_EXPORT_POLL_STATUS.equals(extendedOp)) {
 					return provideNonPatientSpecificQueryResponse(theReadDetails);
 				}
 				break;
