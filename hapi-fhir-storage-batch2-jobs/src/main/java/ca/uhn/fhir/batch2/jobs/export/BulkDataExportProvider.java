@@ -29,6 +29,7 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
@@ -185,9 +186,12 @@ public class BulkDataExportProvider {
 			theOptions.setResourceTypes(resourceTypes);
 		}
 
+		ReadPartitionIdRequestDetails theDetails =
+				ReadPartitionIdRequestDetails.forOperation(null, null, ProviderConstants.OPERATION_EXPORT);
+
 		// Determine and validate partition permissions (if needed).
 		RequestPartitionId partitionId =
-				myRequestPartitionHelperService.determineReadPartitionForRequest(theRequestDetails, null);
+				myRequestPartitionHelperService.determineReadPartitionForRequest(theRequestDetails, theDetails);
 		myRequestPartitionHelperService.validateHasPartitionPermissions(theRequestDetails, "Binary", partitionId);
 		theOptions.setPartitionId(partitionId);
 
@@ -501,6 +505,9 @@ public class BulkDataExportProvider {
 						bulkResponseDocument.setRequest(results.getOriginalRequestUrl());
 
 						String serverBase = getServerBase(theRequestDetails);
+
+						// an output is required, even if empty, according to HL7 FHIR IG
+						bulkResponseDocument.getOutput();
 
 						for (Map.Entry<String, List<String>> entrySet :
 								results.getResourceTypeToBinaryIds().entrySet()) {

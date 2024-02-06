@@ -1710,17 +1710,11 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		if (historyEntity.getEncoding() == ResourceEncodingEnum.JSONC
 				|| historyEntity.getEncoding() == ResourceEncodingEnum.JSON) {
 			byte[] resourceBytes = historyEntity.getResource();
-
-			// Always migrate data out of the bytes column
 			if (resourceBytes != null) {
 				String resourceText = decodeResource(resourceBytes, historyEntity.getEncoding());
-				ourLog.debug(
-						"Storing text of resource {} version {} as inline VARCHAR",
-						entity.getResourceId(),
-						historyEntity.getVersion());
-				historyEntity.setResourceTextVc(resourceText);
-				historyEntity.setEncoding(ResourceEncodingEnum.JSON);
-				changed = true;
+				if (myResourceHistoryCalculator.conditionallyAlterHistoryEntity(entity, historyEntity, resourceText)) {
+					changed = true;
+				}
 			}
 		}
 		if (isBlank(historyEntity.getSourceUri()) && isBlank(historyEntity.getRequestId())) {

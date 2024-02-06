@@ -189,6 +189,7 @@ public class CommonCodeSystemsTerminologyServiceTest extends BaseValidationTestW
 		org.hl7.fhir.r5.model.CodeSystem cs = (org.hl7.fhir.r5.model.CodeSystem) svc.fetchCodeSystem(CommonCodeSystemsTerminologyService.COUNTRIES_CODESYSTEM_URL);
 		assertNotNull(cs);
 		assertEquals(498, cs.getConcept().size());
+		assertEquals(Enumerations.CodeSystemContentMode.COMPLETE, cs.getContent());
 	}
 
 	@Test
@@ -301,6 +302,8 @@ public class CommonCodeSystemsTerminologyServiceTest extends BaseValidationTestW
 	public void testFetchCodeSystem_withMimeType_returnsOk() {
 		CodeSystem cs = (CodeSystem) mySvc.fetchCodeSystem(MIMETYPES_CODESYSTEM_URL);
 		assertNull(cs);
+		assertTrue(cs.getConcept().isEmpty());
+		assertEquals(CodeSystemContentMode.NOTPRESENT, cs.getContent());
 	}
 
 	@ParameterizedTest

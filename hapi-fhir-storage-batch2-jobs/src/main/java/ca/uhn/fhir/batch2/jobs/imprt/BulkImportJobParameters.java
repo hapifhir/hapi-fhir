@@ -21,6 +21,8 @@ package ca.uhn.fhir.batch2.jobs.imprt;
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.model.api.IModelJson;
+import ca.uhn.fhir.model.api.annotation.SensitiveNoDisplay;
+import com.fasterxml.jackson.annotation.JsonFilter;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.Min;
@@ -36,6 +38,8 @@ import java.util.List;
  * This class is the parameters model object for starting a
  * bulk import job.
  */
+@JsonFilter(IModelJson.SENSITIVE_DATA_FILTER_NAME) // TODO GGG eventually consider pushing this up once we have more
+// experience using it.
 public class BulkImportJobParameters implements IModelJson {
 
 	@JsonProperty(value = "ndJsonUrls", required = true)
@@ -43,8 +47,9 @@ public class BulkImportJobParameters implements IModelJson {
 	@NotNull(message = "At least one NDJSON URL must be provided")
 	private List<@Pattern(regexp = "^http[s]?://.*", message = "Must be a valid URL") String> myNdJsonUrls;
 
-	@JsonProperty(value = "httpBasicCredentials", access = JsonProperty.Access.WRITE_ONLY, required = false)
+	@JsonProperty(value = "httpBasicCredentials", required = false)
 	@Nullable
+	@SensitiveNoDisplay
 	private String myHttpBasicCredentials;
 
 	@JsonProperty(value = "maxBatchResourceCount", required = false)
