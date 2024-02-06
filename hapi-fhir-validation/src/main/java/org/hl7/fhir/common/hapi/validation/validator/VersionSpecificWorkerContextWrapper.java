@@ -821,7 +821,11 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 
 	@Override
 	public <T extends Resource> T findTxResource(Class<T> class_, String canonical) {
-		throw new UnsupportedOperationException(Msg.code(2489));
+		if (canonical == null) {
+			return null;
+		}
+
+		return fetchResource(class_, canonical);
 	}
 
 	@Override
