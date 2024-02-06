@@ -11,10 +11,9 @@ import ca.uhn.fhir.parser.json.JsonLikeStructure;
 import ca.uhn.fhir.parser.json.jackson.JacksonStructure;
 import ca.uhn.fhir.parser.view.ExtPatient;
 import ca.uhn.fhir.util.AttachmentUtil;
+import ca.uhn.fhir.util.ClasspathUtil;
 import ca.uhn.fhir.util.ParametersUtil;
 import ca.uhn.fhir.util.TestUtil;
-import com.google.common.base.Charsets;
-import com.google.common.io.Resources;
 import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -96,10 +95,9 @@ public class JsonLikeParserTest {
 	 * Reproduces: https://github.com/hapifhir/hapi-fhir/issues/5667
 	 */
 	@Test
-	public void testJsonLikeParser_resourceHasDecimalElementWithLeadingPlus_isParsedCorrectly() throws IOException {
+	public void testJsonLikeParser_resourceHasDecimalElementWithLeadingPlus_isParsedCorrectly() {
 		// setup
-		URL url = Resources.getResource("observation-decimal-element-with-leading-plus.json");
-		String text = Resources.toString(url, Charsets.UTF_8);
+		String text = ClasspathUtil.loadResource("observation-decimal-element-with-leading-plus.json");
 		IJsonLikeParser jsonLikeParser = (IJsonLikeParser) ourCtx.newJsonParser();
 
 		// execute

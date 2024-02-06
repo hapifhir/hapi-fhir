@@ -13,6 +13,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import java.io.IOException;
 import java.net.URL;
 
+import ca.uhn.fhir.util.ClasspathUtil;
 import org.hl7.fhir.r4.model.Appointment;
 import org.hl7.fhir.r4.model.AuditEvent;
 import org.hl7.fhir.r4.model.Bundle;
@@ -186,10 +187,9 @@ public class XmlParserR4Test extends BaseTest {
 	}
 
 	@Test
-	public void testParseResource_withDecimalElementHasLeadingPlus_resourceParsedCorrectly() throws Exception {
+	public void testParseResource_withDecimalElementHasLeadingPlus_resourceParsedCorrectly() {
 		// setup
-		URL url = Resources.getResource("observation-decimal-element-with-leading-plus.xml");
-		String text = Resources.toString(url, Charsets.UTF_8);
+		String text = ClasspathUtil.loadResource("observation-decimal-element-with-leading-plus.xml");
 
 		// execute
 		Observation observation = ourCtx.newXmlParser().parseResource(Observation.class, text);
