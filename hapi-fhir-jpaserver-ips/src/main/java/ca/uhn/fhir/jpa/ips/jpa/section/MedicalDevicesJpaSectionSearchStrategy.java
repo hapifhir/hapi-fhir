@@ -29,7 +29,8 @@ import org.hl7.fhir.r4.model.ResourceType;
 public class MedicalDevicesJpaSectionSearchStrategy extends JpaSectionSearchStrategy {
 
 	@Override
-	public void massageResourceSearch(IpsSectionContext theIpsSectionContext, SearchParameterMap theSearchParameterMap) {
+	public void massageResourceSearch(
+			IpsSectionContext theIpsSectionContext, SearchParameterMap theSearchParameterMap) {
 		if (ResourceType.DeviceUseStatement.name().equals(theIpsSectionContext.getResourceType())) {
 			theSearchParameterMap.addInclude(DeviceUseStatement.INCLUDE_DEVICE);
 		}

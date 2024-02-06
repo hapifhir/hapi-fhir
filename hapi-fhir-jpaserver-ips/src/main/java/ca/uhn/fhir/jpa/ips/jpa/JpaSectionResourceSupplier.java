@@ -39,11 +39,11 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Coverage;
 import org.thymeleaf.util.Validate;
 
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+import javax.annotation.Nullable;
 
 public class JpaSectionResourceSupplier implements ISectionResourceSupplier {
 	public static final int CHUNK_SIZE = 10;
@@ -52,7 +52,10 @@ public class JpaSectionResourceSupplier implements ISectionResourceSupplier {
 	private final DaoRegistry myDaoRegistry;
 	private final FhirContext myFhirContext;
 
-	public JpaSectionResourceSupplier(@Nonnull IJpaSectionSearchStrategy theSectionSearchStrategy, @Nonnull DaoRegistry theDaoRegistry, @Nonnull FhirContext theFhirContext) {
+	public JpaSectionResourceSupplier(
+			@Nonnull IJpaSectionSearchStrategy theSectionSearchStrategy,
+			@Nonnull DaoRegistry theDaoRegistry,
+			@Nonnull FhirContext theFhirContext) {
 		Validate.notNull(theSectionSearchStrategy, "theSectionSearchStrategy must not be null");
 		Validate.notNull(theDaoRegistry, "theDaoRegistry must not be null");
 		Validate.notNull(theFhirContext, "theFhirContext must not be null");
@@ -63,7 +66,8 @@ public class JpaSectionResourceSupplier implements ISectionResourceSupplier {
 
 	@Nullable
 	@Override
-	public List<ResourceEntry> fetchResourcesForSection(IpsContext theIpsContext, IpsSectionContext theIpsSectionContext, RequestDetails theRequestDetails) {
+	public List<ResourceEntry> fetchResourcesForSection(
+			IpsContext theIpsContext, IpsSectionContext theIpsSectionContext, RequestDetails theRequestDetails) {
 		SearchParameterMap searchParameterMap = new SearchParameterMap();
 
 		String subjectSp = determinePatientCompartmentSearchParameterName(theIpsSectionContext.getResourceType());
@@ -87,7 +91,10 @@ public class JpaSectionResourceSupplier implements ISectionResourceSupplier {
 					if (retVal == null) {
 						retVal = new ArrayList<>();
 					}
-					InclusionTypeEnum inclusionType = ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.get(next) == BundleEntrySearchModeEnum.INCLUDE ? InclusionTypeEnum.SECONDARY_RESOURCE : InclusionTypeEnum.PRIMARY_RESOURCE;
+					InclusionTypeEnum inclusionType =
+							ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.get(next) == BundleEntrySearchModeEnum.INCLUDE
+									? InclusionTypeEnum.SECONDARY_RESOURCE
+									: InclusionTypeEnum.PRIMARY_RESOURCE;
 					retVal.add(new ResourceEntry(next, inclusionType));
 				}
 			}
@@ -99,8 +106,8 @@ public class JpaSectionResourceSupplier implements ISectionResourceSupplier {
 	private String determinePatientCompartmentSearchParameterName(String theResourceType) {
 		RuntimeResourceDefinition resourceDef = myFhirContext.getResourceDefinition(theResourceType);
 		Set<String> searchParams = resourceDef.getSearchParamsForCompartmentName("Patient").stream()
-			.map(RuntimeSearchParam::getName)
-			.collect(Collectors.toSet());
+				.map(RuntimeSearchParam::getName)
+				.collect(Collectors.toSet());
 		// A few we prefer
 		if (searchParams.contains(Observation.SP_PATIENT)) {
 			return Observation.SP_PATIENT;
@@ -113,5 +120,4 @@ public class JpaSectionResourceSupplier implements ISectionResourceSupplier {
 		}
 		return searchParams.iterator().next();
 	}
-
 }

@@ -27,11 +27,7 @@ public class IpsSectionContext extends IpsContext {
 	private final Section mySection;
 	private final String myResourceType;
 
-	IpsSectionContext(
-		IBaseResource theSubject,
-		IIdType theSubjectId,
-		Section theSection,
-		String theResourceType) {
+	IpsSectionContext(IBaseResource theSubject, IIdType theSubjectId, Section theSection, String theResourceType) {
 		super(theSubject, theSubjectId);
 		mySection = theSection;
 		myResourceType = theResourceType;

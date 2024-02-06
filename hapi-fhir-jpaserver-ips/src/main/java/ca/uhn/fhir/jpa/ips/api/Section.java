@@ -42,13 +42,13 @@ public class Section {
 	private final String mySectionSystem;
 
 	private Section(
-		String theTitle,
-		String theSectionSystem,
-		String theSectionCode,
-		String theSectionDisplay,
-		List<String> theResourceTypes,
-		String theProfile,
-		INoInfoGenerator theNoInfoGenerator) {
+			String theTitle,
+			String theSectionSystem,
+			String theSectionCode,
+			String theSectionDisplay,
+			List<String> theResourceTypes,
+			String theProfile,
+			INoInfoGenerator theNoInfoGenerator) {
 		myTitle = theTitle;
 		mySectionSystem = theSectionSystem;
 		mySectionCode = theSectionCode;
@@ -113,16 +113,14 @@ public class Section {
 	 */
 	public static SectionBuilder newBuilder(Section theSection) {
 		return new SectionBuilder(
-			theSection.myTitle,
-			theSection.mySectionSystem,
-			theSection.mySectionCode,
-			theSection.mySectionDisplay,
-			theSection.myProfile,
-			theSection.myNoInfoGenerator,
-			theSection.myResourceTypes
-		);
+				theSection.myTitle,
+				theSection.mySectionSystem,
+				theSection.mySectionCode,
+				theSection.mySectionDisplay,
+				theSection.myProfile,
+				theSection.myNoInfoGenerator,
+				theSection.myResourceTypes);
 	}
-
 
 	public static class SectionBuilder {
 
@@ -138,7 +136,14 @@ public class Section {
 			super();
 		}
 
-		public SectionBuilder(String theTitle, String theSectionSystem, String theSectionCode, String theSectionDisplay, String theProfile, INoInfoGenerator theNoInfoGenerator, List<String> theResourceTypes) {
+		public SectionBuilder(
+				String theTitle,
+				String theSectionSystem,
+				String theSectionCode,
+				String theSectionDisplay,
+				String theProfile,
+				INoInfoGenerator theNoInfoGenerator,
+				List<String> theResourceTypes) {
 			myTitle = theTitle;
 			mySectionSystem = theSectionSystem;
 			mySectionCode = theSectionCode;
@@ -202,14 +207,13 @@ public class Section {
 			Validate.notBlank(mySectionDisplay, "No section display has been defined for this section");
 
 			return new Section(
-				myTitle,
-				mySectionSystem,
-				mySectionCode,
-				mySectionDisplay,
-				myResourceTypes,
-				myProfile,
-				myNoInfoGenerator);
+					myTitle,
+					mySectionSystem,
+					mySectionCode,
+					mySectionDisplay,
+					myResourceTypes,
+					myProfile,
+					myNoInfoGenerator);
 		}
 	}
-
 }

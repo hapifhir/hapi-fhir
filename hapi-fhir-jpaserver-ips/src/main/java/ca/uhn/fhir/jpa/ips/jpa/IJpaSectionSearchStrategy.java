@@ -48,7 +48,7 @@ public interface IJpaSectionSearchStrategy {
 	 * @param theSearchParameterMap The map to manipulate.
 	 */
 	default void massageResourceSearch(
-		IpsSectionContext theIpsSectionContext, SearchParameterMap theSearchParameterMap) {
+			IpsSectionContext theIpsSectionContext, SearchParameterMap theSearchParameterMap) {
 		// no action taken by default
 	}
 
@@ -64,6 +64,4 @@ public interface IJpaSectionSearchStrategy {
 	default boolean shouldInclude(IpsSectionContext theIpsSectionContext, IBaseResource theCandidate) {
 		return true;
 	}
-
-
 }

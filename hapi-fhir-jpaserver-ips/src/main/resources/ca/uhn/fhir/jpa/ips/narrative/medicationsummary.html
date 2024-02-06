@@ -37,17 +37,17 @@ Date: MedicationStatement.effectiveDateTime || MedicationStatement.effectivePeri
 						<th:block
 							th:with="extension=${entry.getResource().getExtensionByUrl('http://hl7.org/fhir/StructureDefinition/narrativeLink').getValue().getValue()}">
 							<tr th:id="${#strings.arraySplit(extension, '#')[1]}">
-								<td th:insert="IpsUtilityFragments :: renderMedication (medicationType=*{getMedication()})">
+								<td th:insert="~{IpsUtilityFragments :: renderMedication (medicationType=*{getMedication()})}">
 									Medication
 								</td>
 								<td th:text="*{getStatus().getDisplay()}">Status</td>
-								<td th:insert="IpsUtilityFragments :: concatDosageRoute (list=*{getDosageInstruction()})">
+								<td th:insert="~{IpsUtilityFragments :: concatDosageRoute (list=*{getDosageInstruction()})}">
 									Route
 								</td>
-								<td th:insert="IpsUtilityFragments :: concat (list=*{getDosageInstruction()},attr='text')">
+								<td th:insert="~{IpsUtilityFragments :: concat (list=*{getDosageInstruction()},attr='text')}">
 									Sig
 								</td>
-								<td th:insert="IpsUtilityFragments :: concat (list=*{getNote()},attr='text')">Comments</td>
+								<td th:insert="~{IpsUtilityFragments :: concat (list=*{getNote()},attr='text')}">Comments</td>
 								<td th:text="*{getAuthoredOnElement().getValue()}">Authored Date</td>
 							</tr>
 						</th:block>
@@ -76,13 +76,13 @@ Date: MedicationStatement.effectiveDateTime || MedicationStatement.effectivePeri
 					<th:block
 						th:with="extension=${entry.getResource().getExtensionByUrl('http://hl7.org/fhir/StructureDefinition/narrativeLink').getValue().getValue()}">
 						<tr th:id="${#strings.arraySplit(extension, '#')[1]}">
-							<td th:insert="IpsUtilityFragments :: renderMedication (medicationType=*{getMedication()})">
+							<td th:insert="~{IpsUtilityFragments :: renderMedication (medicationType=*{getMedication()})}">
 								Medication
 							</td>
 							<td th:text="*{getStatus().getDisplay()}">Status</td>
-							<td th:insert="IpsUtilityFragments :: concatDosageRoute (list=*{getDosage()})">Route</td>
-							<td th:insert="IpsUtilityFragments :: concat (list=*{getDosage()},attr='text')">Sig</td>
-							<td th:insert="IpsUtilityFragments :: renderEffective (effective=*{getEffective()})">Date</td>
+							<td th:insert="~{IpsUtilityFragments :: concatDosageRoute (list=*{getDosage()})}">Route</td>
+							<td th:insert="~{IpsUtilityFragments :: concat (list=*{getDosage()},attr='text')}">Sig</td>
+							<td th:insert="~{IpsUtilityFragments :: renderEffective (effective=*{getEffective()})}">Date</td>
 						</tr>
 					</th:block>
 				</th:block>

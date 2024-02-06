@@ -32,16 +32,16 @@ public class ProblemNoInfoR4Generator implements INoInfoGenerator {
 	public IBaseResource generate(IIdType theSubjectId) {
 		Condition condition = new Condition();
 		condition
-			.setCode(new CodeableConcept()
-				.addCoding(new Coding()
-					.setCode("no-problem-info")
-					.setSystem("http://hl7.org/fhir/uv/ips/CodeSystem/absent-unknown-uv-ips")
-					.setDisplay("No information about problems")))
-			.setSubject(new Reference(theSubjectId))
-			.setClinicalStatus(new CodeableConcept()
-				.addCoding(new Coding()
-					.setCode("active")
-					.setSystem("http://terminology.hl7.org/CodeSystem/condition-clinical")));
+				.setCode(new CodeableConcept()
+						.addCoding(new Coding()
+								.setCode("no-problem-info")
+								.setSystem("http://hl7.org/fhir/uv/ips/CodeSystem/absent-unknown-uv-ips")
+								.setDisplay("No information about problems")))
+				.setSubject(new Reference(theSubjectId))
+				.setClinicalStatus(new CodeableConcept()
+						.addCoding(new Coding()
+								.setCode("active")
+								.setSystem("http://terminology.hl7.org/CodeSystem/condition-clinical")));
 		return condition;
 	}
 }

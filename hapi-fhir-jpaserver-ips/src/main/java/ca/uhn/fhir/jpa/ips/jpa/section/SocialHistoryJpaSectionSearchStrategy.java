@@ -31,14 +31,14 @@ import org.hl7.fhir.r4.model.ResourceType;
 public class SocialHistoryJpaSectionSearchStrategy extends JpaSectionSearchStrategy {
 
 	@Override
-	public void massageResourceSearch(IpsSectionContext theIpsSectionContext, SearchParameterMap theSearchParameterMap) {
+	public void massageResourceSearch(
+			IpsSectionContext theIpsSectionContext, SearchParameterMap theSearchParameterMap) {
 		if (theIpsSectionContext.getResourceType().equals(ResourceType.Observation.name())) {
 			theSearchParameterMap.add(
-				Observation.SP_CATEGORY,
-				new TokenOrListParam()
-					.addOr(new TokenParam(
-						"http://terminology.hl7.org/CodeSystem/observation-category",
-						"social-history")));
+					Observation.SP_CATEGORY,
+					new TokenOrListParam()
+							.addOr(new TokenParam(
+									"http://terminology.hl7.org/CodeSystem/observation-category", "social-history")));
 		}
 	}
 

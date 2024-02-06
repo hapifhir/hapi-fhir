@@ -35,20 +35,20 @@ Date: DiagnosticReport.effectiveDateTime || DiagnosticReport.effectivePeriod.sta
 						<th:block
 							th:with="extension=${entry.getResource().getExtensionByUrl('http://hl7.org/fhir/StructureDefinition/narrativeLink').getValue().getValue()}">
 							<tr th:id="${#strings.arraySplit(extension, '#')[1]}">
-								<td th:insert="IpsUtilityFragments :: codeableConcept (cc=*{getCode()},attr='display')">Code
+								<td th:insert="~{IpsUtilityFragments :: codeableConcept (cc=*{getCode()},attr='display')}">Code
 								</td>
-								<td th:insert="IpsUtilityFragments :: renderValue (value=*{getValue()})">Result</td>
-								<td th:insert="IpsUtilityFragments :: renderValueUnit (value=*{getValue()})">Unit</td>
+								<td th:insert="~{IpsUtilityFragments :: renderValue (value=*{getValue()})}">Result</td>
+								<td th:insert="~{IpsUtilityFragments :: renderValueUnit (value=*{getValue()})}">Unit</td>
 								<td
-									th:insert="IpsUtilityFragments :: firstFromCodeableConceptList (list=*{getInterpretation()})">
+									th:insert="~{IpsUtilityFragments :: firstFromCodeableConceptList (list=*{getInterpretation()})}">
 									Interpretation
 								</td>
-								<td th:insert="IpsUtilityFragments :: concatReferenceRange (list=*{getReferenceRange()})">
+								<td th:insert="~{IpsUtilityFragments :: concatReferenceRange (list=*{getReferenceRange()})}">
 									Reference
 									Range
 								</td>
-								<td th:insert="IpsUtilityFragments :: concat (list=*{getNote()},attr='text')">Comments</td>
-								<td th:insert="IpsUtilityFragments :: renderEffective (effective=*{getEffective()})">Date</td>
+								<td th:insert="~{IpsUtilityFragments :: concat (list=*{getNote()},attr='text')}">Comments</td>
+								<td th:insert="~{IpsUtilityFragments :: renderEffective (effective=*{getEffective()})}">Date</td>
 							</tr>
 						</th:block>
 					</th:block>
@@ -74,9 +74,9 @@ Date: DiagnosticReport.effectiveDateTime || DiagnosticReport.effectivePeriod.sta
 						<th:block
 							th:with="extension=${entry.getResource().getExtensionByUrl('http://hl7.org/fhir/StructureDefinition/narrativeLink').getValue().getValue()}">
 							<tr th:id="${#strings.arraySplit(extension, '#')[1]}">
-								<td th:insert="IpsUtilityFragments :: codeableConcept (cc=*{getCode()},attr='display')">Device
+								<td th:insert="~{IpsUtilityFragments :: codeableConcept (cc=*{getCode()},attr='display')}">Device
 								</td>
-								<td th:insert="IpsUtilityFragments :: renderEffective (effective=*{getEffective()})">Date</td>
+								<td th:insert="~{IpsUtilityFragments :: renderEffective (effective=*{getEffective()})}">Date</td>
 							</tr>
 						</th:block>
 					</th:block>

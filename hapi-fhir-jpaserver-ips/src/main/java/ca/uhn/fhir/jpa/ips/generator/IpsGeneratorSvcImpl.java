@@ -26,8 +26,6 @@ import ca.uhn.fhir.jpa.ips.api.ISectionResourceSupplier;
 import ca.uhn.fhir.jpa.ips.api.IpsContext;
 import ca.uhn.fhir.jpa.ips.api.IpsSectionContext;
 import ca.uhn.fhir.jpa.ips.api.Section;
-import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
-import ca.uhn.fhir.model.valueset.BundleEntrySearchModeEnum;
 import ca.uhn.fhir.narrative.CustomThymeleafNarrativeGenerator;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.TokenParam;
@@ -64,14 +62,14 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class IpsGeneratorSvcImpl implements IIpsGeneratorSvc {
 
+	public static final String RESOURCE_ENTRY_INCLUSION_TYPE = "RESOURCE_ENTRY_INCLUSION_TYPE";
 	private final List<IIpsGenerationStrategy> myGenerationStrategies;
 	private final FhirContext myFhirContext;
 
 	/**
 	 * Constructor
 	 */
-	public IpsGeneratorSvcImpl(
-		FhirContext theFhirContext, IIpsGenerationStrategy theGenerationStrategy) {
+	public IpsGeneratorSvcImpl(FhirContext theFhirContext, IIpsGenerationStrategy theGenerationStrategy) {
 		this(theFhirContext, List.of(theGenerationStrategy));
 	}
 
@@ -96,26 +94,27 @@ public class IpsGeneratorSvcImpl implements IIpsGeneratorSvc {
 	 * Generate an IPS using a patient identifier
 	 */
 	@Override
-	public IBaseBundle generateIps(RequestDetails theRequestDetails, TokenParam thePatientIdentifier, String theProfile) {
+	public IBaseBundle generateIps(
+			RequestDetails theRequestDetails, TokenParam thePatientIdentifier, String theProfile) {
 		IIpsGenerationStrategy strategy = selectGenerationStrategy(theProfile);
 		IBaseResource patient = strategy.fetchPatient(thePatientIdentifier, theRequestDetails);
 		return generateIpsForPatient(strategy, theRequestDetails, patient);
 	}
 
 	IIpsGenerationStrategy selectGenerationStrategy(@Nullable String theRequestedProfile) {
-		return myGenerationStrategies
-			.stream()
-			.filter(t -> isBlank(theRequestedProfile) || theRequestedProfile.equals(t.getBundleProfile()))
-			.findFirst()
-			.orElse(myGenerationStrategies.get(0));
+		return myGenerationStrategies.stream()
+				.filter(t -> isBlank(theRequestedProfile) || theRequestedProfile.equals(t.getBundleProfile()))
+				.findFirst()
+				.orElse(myGenerationStrategies.get(0));
 	}
 
-	private IBaseBundle generateIpsForPatient(IIpsGenerationStrategy theStrategy, RequestDetails theRequestDetails, IBaseResource thePatient) {
+	private IBaseBundle generateIpsForPatient(
+			IIpsGenerationStrategy theStrategy, RequestDetails theRequestDetails, IBaseResource thePatient) {
 		IIdType originalSubjectId = myFhirContext
-			.getVersion()
-			.newIdType()
-			.setValue(thePatient.getIdElement().getValue())
-			.toUnqualifiedVersionless();
+				.getVersion()
+				.newIdType()
+				.setValue(thePatient.getIdElement().getValue())
+				.toUnqualifiedVersionless();
 		massageResourceId(theStrategy, theRequestDetails, null, thePatient);
 		IpsContext context = new IpsContext(thePatient, originalSubjectId);
 
@@ -138,7 +137,10 @@ public class IpsGeneratorSvcImpl implements IIpsGeneratorSvc {
 	}
 
 	private IBaseBundle createDocumentBundleForComposition(
-		IIpsGenerationStrategy theStrategy, IBaseResource author, IBaseResource composition, ResourceInclusionCollection theResourcesToInclude) {
+			IIpsGenerationStrategy theStrategy,
+			IBaseResource author,
+			IBaseResource composition,
+			ResourceInclusionCollection theResourcesToInclude) {
 		BundleBuilder bundleBuilder = new BundleBuilder(myFhirContext);
 		bundleBuilder.setType(Bundle.BundleType.DOCUMENT.toCode());
 		bundleBuilder.setIdentifier("urn:ietf:rfc:4122", UUID.randomUUID().toString());
@@ -163,42 +165,52 @@ public class IpsGeneratorSvcImpl implements IIpsGeneratorSvc {
 	}
 
 	private void determineInclusions(
-		IIpsGenerationStrategy theStrategy, RequestDetails theRequestDetails,
-		IpsContext theIpsContext,
-		CompositionBuilder theCompositionBuilder,
-		ResourceInclusionCollection theGlobalResourcesToInclude) {
+			IIpsGenerationStrategy theStrategy,
+			RequestDetails theRequestDetails,
+			IpsContext theIpsContext,
+			CompositionBuilder theCompositionBuilder,
+			ResourceInclusionCollection theGlobalResourcesToInclude) {
 		for (Section nextSection : theStrategy.getSections()) {
 			determineInclusionsForSection(
-				theStrategy, theRequestDetails, theIpsContext, theCompositionBuilder, theGlobalResourcesToInclude, nextSection);
+					theStrategy,
+					theRequestDetails,
+					theIpsContext,
+					theCompositionBuilder,
+					theGlobalResourcesToInclude,
+					nextSection);
 		}
 	}
 
 	private void determineInclusionsForSection(
-		IIpsGenerationStrategy theStrategy, RequestDetails theRequestDetails,
-		IpsContext theIpsContext,
-		CompositionBuilder theCompositionBuilder,
-		ResourceInclusionCollection theGlobalResourceCollectionToPopulate,
-		Section theSection) {
+			IIpsGenerationStrategy theStrategy,
+			RequestDetails theRequestDetails,
+			IpsContext theIpsContext,
+			CompositionBuilder theCompositionBuilder,
+			ResourceInclusionCollection theGlobalResourceCollectionToPopulate,
+			Section theSection) {
 		ResourceInclusionCollection sectionResourceCollectionToPopulate = new ResourceInclusionCollection();
 		ISectionResourceSupplier resourceSupplier = theStrategy.getSectionResourceSupplier(theSection);
 
 		for (String nextResourceType : theSection.getResourceTypes()) {
 			IpsSectionContext ipsSectionContext = theIpsContext.newSectionContext(theSection, nextResourceType);
 
-			List<ISectionResourceSupplier.ResourceEntry> resources = resourceSupplier.fetchResourcesForSection(theIpsContext, ipsSectionContext, theRequestDetails);
+			List<ISectionResourceSupplier.ResourceEntry> resources =
+					resourceSupplier.fetchResourcesForSection(theIpsContext, ipsSectionContext, theRequestDetails);
 			if (resources != null) {
 				for (ISectionResourceSupplier.ResourceEntry nextEntry : resources) {
 					IBaseResource resource = nextEntry.getResource();
-					Validate.isTrue(resource.getIdElement().hasIdPart(),
-						"fetchResourcesForSection(..) returned resource(s) with no ID populated");
+					Validate.isTrue(
+							resource.getIdElement().hasIdPart(),
+							"fetchResourcesForSection(..) returned resource(s) with no ID populated");
+					resource.setUserData(RESOURCE_ENTRY_INCLUSION_TYPE, nextEntry.getInclusionType());
 				}
 				addResourcesToIpsContents(
-					theStrategy,
-					theRequestDetails,
-					theIpsContext,
-					resources,
-					theGlobalResourceCollectionToPopulate,
-					sectionResourceCollectionToPopulate);
+						theStrategy,
+						theRequestDetails,
+						theIpsContext,
+						resources,
+						theGlobalResourceCollectionToPopulate,
+						sectionResourceCollectionToPopulate);
 			}
 		}
 
@@ -208,10 +220,11 @@ public class IpsGeneratorSvcImpl implements IIpsGeneratorSvc {
 			if (noInfoResource.getIdElement().isEmpty()) {
 				noInfoResource.setId(id);
 			}
-			ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.put(noInfoResource, BundleEntrySearchModeEnum.MATCH);
+			noInfoResource.setUserData(
+					RESOURCE_ENTRY_INCLUSION_TYPE, ISectionResourceSupplier.InclusionTypeEnum.PRIMARY_RESOURCE);
 			theGlobalResourceCollectionToPopulate.addResourceIfNotAlreadyPresent(
-				noInfoResource,
-				noInfoResource.getIdElement().toUnqualifiedVersionless().getValue());
+					noInfoResource,
+					noInfoResource.getIdElement().toUnqualifiedVersionless().getValue());
 			sectionResourceCollectionToPopulate.addResourceIfNotAlreadyPresent(noInfoResource, id);
 		}
 
@@ -225,13 +238,13 @@ public class IpsGeneratorSvcImpl implements IIpsGeneratorSvc {
 			List<ResourceReferenceInfo> references = myFhirContext.newTerser().getAllResourceReferences(nextResource);
 			for (ResourceReferenceInfo nextReference : references) {
 				String existingReference = nextReference
-					.getResourceReference()
-					.getReferenceElement()
-					.getValue();
+						.getResourceReference()
+						.getReferenceElement()
+						.getValue();
 				if (isNotBlank(existingReference)) {
 					existingReference = new IdType(existingReference)
-						.toUnqualifiedVersionless()
-						.getValue();
+							.toUnqualifiedVersionless()
+							.getValue();
 					String replacement = theGlobalResourceCollectionToPopulate.getIdSubstitution(existingReference);
 					if (isNotBlank(replacement)) {
 						if (!replacement.equals(existingReference)) {
@@ -252,11 +265,11 @@ public class IpsGeneratorSvcImpl implements IIpsGeneratorSvc {
 		}
 
 		addSection(
-			theStrategy,
-			theSection,
-			theCompositionBuilder,
-			sectionResourceCollectionToPopulate,
-			theGlobalResourceCollectionToPopulate);
+				theStrategy,
+				theSection,
+				theCompositionBuilder,
+				sectionResourceCollectionToPopulate,
+				theGlobalResourceCollectionToPopulate);
 	}
 
 	/**
@@ -268,11 +281,12 @@ public class IpsGeneratorSvcImpl implements IIpsGeneratorSvc {
 	 * @param theCandidateResources The resources that have been fetched for inclusion in the IPS bundle
 	 */
 	private void addResourcesToIpsContents(
-		IIpsGenerationStrategy theStrategy, RequestDetails theRequestDetails,
-		IpsContext theIpsContext,
-		List<ISectionResourceSupplier.ResourceEntry> theCandidateResources,
-		ResourceInclusionCollection theGlobalResourcesCollectionToPopulate,
-		ResourceInclusionCollection theSectionResourceCollectionToPopulate) {
+			IIpsGenerationStrategy theStrategy,
+			RequestDetails theRequestDetails,
+			IpsContext theIpsContext,
+			List<ISectionResourceSupplier.ResourceEntry> theCandidateResources,
+			ResourceInclusionCollection theGlobalResourcesCollectionToPopulate,
+			ResourceInclusionCollection theSectionResourceCollectionToPopulate) {
 		for (ISectionResourceSupplier.ResourceEntry nextCandidateEntry : theCandidateResources) {
 			IBaseResource nextCandidate = nextCandidateEntry.getResource();
 
@@ -290,28 +304,38 @@ public class IpsGeneratorSvcImpl implements IIpsGeneratorSvc {
 			}
 
 			String originalResourceId =
-				nextCandidate.getIdElement().toUnqualifiedVersionless().getValue();
+					nextCandidate.getIdElement().toUnqualifiedVersionless().getValue();
 
 			// Check if we already have this resource included so that we don't
 			// include it twice
 			IBaseResource previouslyExistingResource =
-				theGlobalResourcesCollectionToPopulate.getResourceByOriginalId(originalResourceId);
+					theGlobalResourcesCollectionToPopulate.getResourceByOriginalId(originalResourceId);
 			if (previouslyExistingResource != null) {
+				ISectionResourceSupplier.InclusionTypeEnum inclusionType = (ISectionResourceSupplier.InclusionTypeEnum)
+						previouslyExistingResource.getUserData(RESOURCE_ENTRY_INCLUSION_TYPE);
+				if (inclusionType != ISectionResourceSupplier.InclusionTypeEnum.PRIMARY_RESOURCE) {
+					if (primaryResource) {
+						previouslyExistingResource.setUserData(
+								RESOURCE_ENTRY_INCLUSION_TYPE,
+								ISectionResourceSupplier.InclusionTypeEnum.PRIMARY_RESOURCE);
+					}
+				}
+
 				nextCandidate = previouslyExistingResource;
 				theSectionResourceCollectionToPopulate.addResourceIfNotAlreadyPresent(
-					nextCandidate, originalResourceId);
+						nextCandidate, originalResourceId);
 			} else if (theGlobalResourcesCollectionToPopulate.hasResourceWithReplacementId(originalResourceId)) {
 				if (primaryResource) {
 					theSectionResourceCollectionToPopulate.addResourceIfNotAlreadyPresent(
-						nextCandidate, originalResourceId);
+							nextCandidate, originalResourceId);
 				}
 			} else {
 				massageResourceId(theStrategy, theRequestDetails, theIpsContext, nextCandidate);
 				theGlobalResourcesCollectionToPopulate.addResourceIfNotAlreadyPresent(
-					nextCandidate, originalResourceId);
+						nextCandidate, originalResourceId);
 				if (primaryResource) {
 					theSectionResourceCollectionToPopulate.addResourceIfNotAlreadyPresent(
-						nextCandidate, originalResourceId);
+							nextCandidate, originalResourceId);
 				}
 			}
 		}
@@ -319,43 +343,48 @@ public class IpsGeneratorSvcImpl implements IIpsGeneratorSvc {
 
 	@SuppressWarnings("unchecked")
 	private void addSection(
-		IIpsGenerationStrategy theStrategy, Section theSection,
-		CompositionBuilder theCompositionBuilder,
-		ResourceInclusionCollection theResourcesToInclude,
-		ResourceInclusionCollection theGlobalResourcesToInclude) {
+			IIpsGenerationStrategy theStrategy,
+			Section theSection,
+			CompositionBuilder theCompositionBuilder,
+			ResourceInclusionCollection theResourcesToInclude,
+			ResourceInclusionCollection theGlobalResourcesToInclude) {
 
 		CompositionBuilder.SectionBuilder sectionBuilder = theCompositionBuilder.addSection();
 
 		sectionBuilder.setTitle(theSection.getTitle());
 		sectionBuilder.addCodeCoding(
-			theSection.getSectionSystem(), theSection.getSectionCode(), theSection.getSectionDisplay());
+				theSection.getSectionSystem(), theSection.getSectionCode(), theSection.getSectionDisplay());
 
 		for (IBaseResource next : theResourcesToInclude.getResources()) {
-			if (ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.get(next) == BundleEntrySearchModeEnum.INCLUDE) {
+			ISectionResourceSupplier.InclusionTypeEnum inclusionType =
+					(ISectionResourceSupplier.InclusionTypeEnum) next.getUserData(RESOURCE_ENTRY_INCLUSION_TYPE);
+			if (inclusionType != ISectionResourceSupplier.InclusionTypeEnum.PRIMARY_RESOURCE) {
 				continue;
 			}
 
 			IBaseExtension<?, ?> narrativeLink = ((IBaseHasExtensions) next).addExtension();
 			narrativeLink.setUrl("http://hl7.org/fhir/StructureDefinition/narrativeLink");
 			String narrativeLinkValue =
-				theCompositionBuilder.getComposition().getIdElement().getValue()
-					+ "#"
-					+ myFhirContext.getResourceType(next)
-					+ "-"
-					+ next.getIdElement().getValue();
+					theCompositionBuilder.getComposition().getIdElement().getValue()
+							+ "#"
+							+ myFhirContext.getResourceType(next)
+							+ "-"
+							+ next.getIdElement().getValue();
 			IPrimitiveType<String> narrativeLinkUri = (IPrimitiveType<String>)
-				requireNonNull(myFhirContext.getElementDefinition("url")).newInstance();
+					requireNonNull(myFhirContext.getElementDefinition("url")).newInstance();
 			narrativeLinkUri.setValueAsString(narrativeLinkValue);
 			narrativeLink.setValue(narrativeLinkUri);
 
 			sectionBuilder.addEntry(next.getIdElement());
 		}
 
-		String narrative = createSectionNarrative(theStrategy, theSection, theResourcesToInclude, theGlobalResourcesToInclude);
+		String narrative =
+				createSectionNarrative(theStrategy, theSection, theResourcesToInclude, theGlobalResourcesToInclude);
 		sectionBuilder.setText("generated", narrative);
 	}
 
-	private CompositionBuilder createComposition(IIpsGenerationStrategy theStrategy, IBaseResource thePatient, IpsContext context, IBaseResource author) {
+	private CompositionBuilder createComposition(
+			IIpsGenerationStrategy theStrategy, IBaseResource thePatient, IpsContext context, IBaseResource author) {
 		CompositionBuilder compositionBuilder = new CompositionBuilder(myFhirContext);
 		compositionBuilder.setId(IdType.newRandomUuid());
 
@@ -370,7 +399,11 @@ public class IpsGeneratorSvcImpl implements IIpsGeneratorSvc {
 		return compositionBuilder;
 	}
 
-	private void massageResourceId(IIpsGenerationStrategy theStrategy, RequestDetails theRequestDetails, IpsContext theIpsContext, IBaseResource theResource) {
+	private void massageResourceId(
+			IIpsGenerationStrategy theStrategy,
+			RequestDetails theRequestDetails,
+			IpsContext theIpsContext,
+			IBaseResource theResource) {
 		String base = theRequestDetails.getFhirServerBase();
 
 		IIdType id = theResource.getIdElement();
@@ -386,15 +419,17 @@ public class IpsGeneratorSvcImpl implements IIpsGeneratorSvc {
 	}
 
 	private String createSectionNarrative(
-		IIpsGenerationStrategy theStrategy, Section theSection,
-		ResourceInclusionCollection theResources,
-		ResourceInclusionCollection theGlobalResourceCollection) {
+			IIpsGenerationStrategy theStrategy,
+			Section theSection,
+			ResourceInclusionCollection theResources,
+			ResourceInclusionCollection theGlobalResourceCollection) {
 		CustomThymeleafNarrativeGenerator generator = newNarrativeGenerator(theStrategy, theGlobalResourceCollection);
 
 		Bundle bundle = new Bundle();
 		for (IBaseResource resource : theResources.getResources()) {
-			BundleEntrySearchModeEnum searchMode = ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.get(resource);
-			if (searchMode == BundleEntrySearchModeEnum.MATCH) {
+			ISectionResourceSupplier.InclusionTypeEnum inclusionType =
+					(ISectionResourceSupplier.InclusionTypeEnum) resource.getUserData(RESOURCE_ENTRY_INCLUSION_TYPE);
+			if (inclusionType == ISectionResourceSupplier.InclusionTypeEnum.PRIMARY_RESOURCE) {
 				bundle.addEntry().setResource((Resource) resource);
 			}
 		}
@@ -407,7 +442,7 @@ public class IpsGeneratorSvcImpl implements IIpsGeneratorSvc {
 
 	@Nonnull
 	private CustomThymeleafNarrativeGenerator newNarrativeGenerator(
-		IIpsGenerationStrategy theStrategy, ResourceInclusionCollection theGlobalResourceCollection) {
+			IIpsGenerationStrategy theStrategy, ResourceInclusionCollection theGlobalResourceCollection) {
 		List<String> narrativePropertyFiles = theStrategy.getNarrativePropertyFiles();
 		CustomThymeleafNarrativeGenerator generator = new CustomThymeleafNarrativeGenerator(narrativePropertyFiles);
 		generator.setFhirPathEvaluationContext(new IFhirPathEvaluationContext() {
@@ -434,10 +469,10 @@ public class IpsGeneratorSvcImpl implements IIpsGeneratorSvc {
 		 */
 		public void addResourceIfNotAlreadyPresent(IBaseResource theResource, String theOriginalResourceId) {
 			assert theOriginalResourceId.matches("([A-Z][a-z]([A-Za-z]+)/[a-zA-Z0-9._-]+)|(urn:uuid:[0-9a-z-]+)")
-				: "Not an unqualified versionless ID: " + theOriginalResourceId;
+					: "Not an unqualified versionless ID: " + theOriginalResourceId;
 
 			String resourceId =
-				theResource.getIdElement().toUnqualifiedVersionless().getValue();
+					theResource.getIdElement().toUnqualifiedVersionless().getValue();
 			if (myIdToResource.containsKey(resourceId)) {
 				return;
 			}

@@ -56,14 +56,15 @@ public class IpsOperationProvider {
 	 * <a href="http://build.fhir.org/ig/HL7/fhir-ips/OperationDefinition-summary.html>http://build.fhir.org/ig/HL7/fhir-ips/OperationDefinition-summary.html</a>
 	 */
 	@Operation(
-		name = JpaConstants.OPERATION_SUMMARY,
-		idempotent = true,
-		bundleType = BundleTypeEnum.DOCUMENT,
-		typeName = "Patient",
-		canonicalUrl = JpaConstants.SUMMARY_OPERATION_URL)
-	public IBaseBundle patientInstanceSummary(@IdParam IIdType thePatientId,
-											  @OperationParam(name = "profile", min = 0, typeName = "uri") IPrimitiveType<String> theProfile,
-											  RequestDetails theRequestDetails) {
+			name = JpaConstants.OPERATION_SUMMARY,
+			idempotent = true,
+			bundleType = BundleTypeEnum.DOCUMENT,
+			typeName = "Patient",
+			canonicalUrl = JpaConstants.SUMMARY_OPERATION_URL)
+	public IBaseBundle patientInstanceSummary(
+			@IdParam IIdType thePatientId,
+			@OperationParam(name = "profile", min = 0, typeName = "uri") IPrimitiveType<String> theProfile,
+			RequestDetails theRequestDetails) {
 		String profile = theProfile != null ? theProfile.getValueAsString() : null;
 		return myIpsGeneratorSvc.generateIps(theRequestDetails, thePatientId, profile);
 	}
@@ -75,19 +76,19 @@ public class IpsOperationProvider {
 	 * <a href="http://build.fhir.org/ig/HL7/fhir-ips/OperationDefinition-summary.html>http://build.fhir.org/ig/HL7/fhir-ips/OperationDefinition-summary.html</a>
 	 */
 	@Operation(
-		name = JpaConstants.OPERATION_SUMMARY,
-		idempotent = true,
-		bundleType = BundleTypeEnum.DOCUMENT,
-		typeName = "Patient",
-		canonicalUrl = JpaConstants.SUMMARY_OPERATION_URL)
+			name = JpaConstants.OPERATION_SUMMARY,
+			idempotent = true,
+			bundleType = BundleTypeEnum.DOCUMENT,
+			typeName = "Patient",
+			canonicalUrl = JpaConstants.SUMMARY_OPERATION_URL)
 	public IBaseBundle patientTypeSummary(
-		@OperationParam(name = "profile", min = 0, typeName = "uri") IPrimitiveType<String> theProfile,
-		@Description(
-			shortDefinition =
-				"When the logical id of the patient is not used, servers MAY choose to support patient selection based on provided identifier")
-		@OperationParam(name = "identifier", min = 1, max = 1, typeName = "Identifier")
-		IBase thePatientIdentifier,
-		RequestDetails theRequestDetails) {
+			@OperationParam(name = "profile", min = 0, typeName = "uri") IPrimitiveType<String> theProfile,
+			@Description(
+							shortDefinition =
+									"When the logical id of the patient is not used, servers MAY choose to support patient selection based on provided identifier")
+					@OperationParam(name = "identifier", min = 1, max = 1, typeName = "Identifier")
+					IBase thePatientIdentifier,
+			RequestDetails theRequestDetails) {
 		String profile = theProfile != null ? theProfile.getValueAsString() : null;
 
 		ValidateUtil.isTrueOrThrowInvalidRequest(thePatientIdentifier != null, "No ID or identifier supplied");

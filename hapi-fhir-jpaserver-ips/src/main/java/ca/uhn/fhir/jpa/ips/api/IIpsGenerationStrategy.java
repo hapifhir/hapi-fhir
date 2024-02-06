@@ -70,7 +70,6 @@ public interface IIpsGenerationStrategy {
 	@Nonnull
 	ISectionResourceSupplier getSectionResourceSupplier(@Nonnull Section theSection);
 
-
 	/**
 	 * Provides a list of configuration property files for the IPS narrative generator.
 	 * <p>
@@ -147,7 +146,6 @@ public interface IIpsGenerationStrategy {
 	@Nonnull
 	IBaseResource fetchPatient(TokenParam thePatientIdentifier, RequestDetails theRequestDetails);
 
-
 	/**
 	 * This method is called once for each generated IPS document, after all other processing is complete. It can
 	 * be used by the strategy to make direct manipulations prior to returning the document.
@@ -155,6 +153,4 @@ public interface IIpsGenerationStrategy {
 	default void postManipulateIpsBundle(IBaseBundle theBundle) {
 		// nothing
 	}
-
-
 }

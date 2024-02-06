@@ -31,7 +31,8 @@ import org.hl7.fhir.r4.model.ResourceType;
 public class ImmunizationsJpaSectionSearchStrategy extends JpaSectionSearchStrategy {
 
 	@Override
-	public void massageResourceSearch(IpsSectionContext theIpsSectionContext, SearchParameterMap theSearchParameterMap) {
+	public void massageResourceSearch(
+			IpsSectionContext theIpsSectionContext, SearchParameterMap theSearchParameterMap) {
 		if (ResourceType.Immunization.name().equals(theIpsSectionContext.getResourceType())) {
 			theSearchParameterMap.setSort(new SortSpec(Immunization.SP_DATE).setOrder(SortOrderEnum.DESC));
 			theSearchParameterMap.addInclude(Immunization.INCLUDE_MANUFACTURER);

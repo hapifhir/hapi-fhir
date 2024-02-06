@@ -33,16 +33,16 @@ public class DiagnosticResultsJpaSectionSearchStrategy extends JpaSectionSearchS
 
 	@SuppressWarnings("StatementWithEmptyBody")
 	@Override
-	public void massageResourceSearch(IpsSectionContext theIpsSectionContext, SearchParameterMap theSearchParameterMap) {
+	public void massageResourceSearch(
+			IpsSectionContext theIpsSectionContext, SearchParameterMap theSearchParameterMap) {
 		if (theIpsSectionContext.getResourceType().equals(ResourceType.DiagnosticReport.name())) {
 			// nothing currently
 		} else if (theIpsSectionContext.getResourceType().equals(ResourceType.Observation.name())) {
 			theSearchParameterMap.add(
-				Observation.SP_CATEGORY,
-				new TokenOrListParam()
-					.addOr(new TokenParam(
-						"http://terminology.hl7.org/CodeSystem/observation-category",
-						"laboratory")));
+					Observation.SP_CATEGORY,
+					new TokenOrListParam()
+							.addOr(new TokenParam(
+									"http://terminology.hl7.org/CodeSystem/observation-category", "laboratory")));
 		}
 	}
 
@@ -51,17 +51,17 @@ public class DiagnosticResultsJpaSectionSearchStrategy extends JpaSectionSearchS
 	public boolean shouldInclude(IpsSectionContext theIpsSectionContext, IBaseResource theCandidate) {
 		if (theCandidate instanceof DiagnosticReport) {
 			DiagnosticReport diagnosticReport = (DiagnosticReport) theCandidate;
-			if (diagnosticReport.getStatus() == DiagnosticReport.DiagnosticReportStatus.CANCELLED ||
-				diagnosticReport.getStatus() == DiagnosticReport.DiagnosticReportStatus.ENTEREDINERROR ||
-				diagnosticReport.getStatus() == DiagnosticReport.DiagnosticReportStatus.PRELIMINARY) {
+			if (diagnosticReport.getStatus() == DiagnosticReport.DiagnosticReportStatus.CANCELLED
+					|| diagnosticReport.getStatus() == DiagnosticReport.DiagnosticReportStatus.ENTEREDINERROR
+					|| diagnosticReport.getStatus() == DiagnosticReport.DiagnosticReportStatus.PRELIMINARY) {
 				return false;
 			}
 		} else if (theCandidate instanceof Observation) {
 			// code filtering not yet applied
 			Observation observation = (Observation) theCandidate;
-			if (observation.getStatus() == Observation.ObservationStatus.CANCELLED ||
-				observation.getStatus() == Observation.ObservationStatus.ENTEREDINERROR ||
-				observation.getStatus() == Observation.ObservationStatus.PRELIMINARY) {
+			if (observation.getStatus() == Observation.ObservationStatus.CANCELLED
+					|| observation.getStatus() == Observation.ObservationStatus.ENTEREDINERROR
+					|| observation.getStatus() == Observation.ObservationStatus.PRELIMINARY) {
 				return false;
 			}
 		}

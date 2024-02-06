@@ -31,20 +31,16 @@ public class AllergyIntoleranceJpaSectionSearchStrategy extends JpaSectionSearch
 		if (theCandidate instanceof AllergyIntolerance) {
 			AllergyIntolerance allergyIntolerance = (AllergyIntolerance) theCandidate;
 			if (allergyIntolerance
-				.getClinicalStatus()
-				.hasCoding(
-					"http://terminology.hl7.org/CodeSystem/allergyintolerance-clinical",
-					"inactive") ||
-				allergyIntolerance
-					.getClinicalStatus()
-					.hasCoding(
-						"http://terminology.hl7.org/CodeSystem/allergyintolerance-clinical",
-						"resolved") ||
-				allergyIntolerance
-					.getVerificationStatus()
-					.hasCoding(
-						"http://terminology.hl7.org/CodeSystem/allergyintolerance-verification",
-						"entered-in-error")) {
+							.getClinicalStatus()
+							.hasCoding("http://terminology.hl7.org/CodeSystem/allergyintolerance-clinical", "inactive")
+					|| allergyIntolerance
+							.getClinicalStatus()
+							.hasCoding("http://terminology.hl7.org/CodeSystem/allergyintolerance-clinical", "resolved")
+					|| allergyIntolerance
+							.getVerificationStatus()
+							.hasCoding(
+									"http://terminology.hl7.org/CodeSystem/allergyintolerance-verification",
+									"entered-in-error")) {
 				return false;
 			}
 		}

@@ -33,15 +33,16 @@ public class MedicationNoInfoR4Generator implements INoInfoGenerator {
 		MedicationStatement medication = new MedicationStatement();
 		// setMedicationCodeableConcept is not available
 		medication
-			.setMedication(new CodeableConcept()
-				.addCoding(new Coding()
-					.setCode("no-medication-info")
-					.setSystem("http://hl7.org/fhir/uv/ips/CodeSystem/absent-unknown-uv-ips")
-					.setDisplay("No information about medications")))
-			.setSubject(new Reference(theSubjectId))
-			.setStatus(MedicationStatement.MedicationStatementStatus.UNKNOWN);
+				.setMedication(new CodeableConcept()
+						.addCoding(new Coding()
+								.setCode("no-medication-info")
+								.setSystem("http://hl7.org/fhir/uv/ips/CodeSystem/absent-unknown-uv-ips")
+								.setDisplay("No information about medications")))
+				.setSubject(new Reference(theSubjectId))
+				.setStatus(MedicationStatement.MedicationStatementStatus.UNKNOWN);
 		// .setEffective(new
-		// Period().addExtension().setUrl("http://hl7.org/fhir/StructureDefinition/data-absent-reason").setValue((new Coding().setCode("not-applicable"))))
+		// Period().addExtension().setUrl("http://hl7.org/fhir/StructureDefinition/data-absent-reason").setValue((new
+		// Coding().setCode("not-applicable"))))
 		return medication;
 	}
 }

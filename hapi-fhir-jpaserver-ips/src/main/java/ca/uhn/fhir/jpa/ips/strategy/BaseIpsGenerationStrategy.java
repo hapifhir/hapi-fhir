@@ -42,7 +42,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-
 @SuppressWarnings({"HttpUrlsUsage"})
 public abstract class BaseIpsGenerationStrategy implements IIpsGenerationStrategy {
 
@@ -86,7 +85,9 @@ public abstract class BaseIpsGenerationStrategy implements IIpsGenerationStrateg
 	public void addSection(Section theSection, ISectionResourceSupplier theSectionResourceSupplier) {
 		Validate.notNull(theSection, "theSection must not be null");
 		Validate.notNull(theSectionResourceSupplier, "theSectionResourceSupplier must not be null");
-		Validate.isTrue(!mySectionToResourceSupplier.containsKey(theSection), "A section with the given profile already exists");
+		Validate.isTrue(
+				!mySectionToResourceSupplier.containsKey(theSection),
+				"A section with the given profile already exists");
 
 		mySections.add(theSection);
 		mySectionToResourceSupplier.put(theSection, theSectionResourceSupplier);
@@ -126,5 +127,4 @@ public abstract class BaseIpsGenerationStrategy implements IIpsGenerationStrateg
 	public IIdType massageResourceId(@Nullable IpsContext theIpsContext, @Nonnull IBaseResource theResource) {
 		return null;
 	}
-
 }

@@ -30,15 +30,14 @@ import org.hl7.fhir.r4.model.ResourceType;
 public class AdvanceDirectivesJpaSectionSearchStrategy extends JpaSectionSearchStrategy {
 
 	@Override
-	public void massageResourceSearch(IpsSectionContext theIpsSectionContext, SearchParameterMap theSearchParameterMap) {
+	public void massageResourceSearch(
+			IpsSectionContext theIpsSectionContext, SearchParameterMap theSearchParameterMap) {
 		if (ResourceType.Consent.name().equals(theIpsSectionContext.getResourceType())) {
 			theSearchParameterMap.add(
-				Consent.SP_STATUS,
-				new TokenOrListParam()
-					.addOr(new TokenParam(
-						Consent.ConsentState.ACTIVE.getSystem(),
-						Consent.ConsentState.ACTIVE.toCode())));
+					Consent.SP_STATUS,
+					new TokenOrListParam()
+							.addOr(new TokenParam(
+									Consent.ConsentState.ACTIVE.getSystem(), Consent.ConsentState.ACTIVE.toCode())));
 		}
 	}
-
 }

@@ -32,15 +32,15 @@ public class AllergyIntoleranceNoInfoR4Generator implements INoInfoGenerator {
 	public IBaseResource generate(IIdType theSubjectId) {
 		AllergyIntolerance allergy = new AllergyIntolerance();
 		allergy.setCode(new CodeableConcept()
-				.addCoding(new Coding()
-					.setCode("no-allergy-info")
-					.setSystem("http://hl7.org/fhir/uv/ips/CodeSystem/absent-unknown-uv-ips")
-					.setDisplay("No information about allergies")))
-			.setPatient(new Reference(theSubjectId))
-			.setClinicalStatus(new CodeableConcept()
-				.addCoding(new Coding()
-					.setCode("active")
-					.setSystem("http://terminology.hl7.org/CodeSystem/allergyintolerance-clinical")));
+						.addCoding(new Coding()
+								.setCode("no-allergy-info")
+								.setSystem("http://hl7.org/fhir/uv/ips/CodeSystem/absent-unknown-uv-ips")
+								.setDisplay("No information about allergies")))
+				.setPatient(new Reference(theSubjectId))
+				.setClinicalStatus(new CodeableConcept()
+						.addCoding(new Coding()
+								.setCode("active")
+								.setSystem("http://terminology.hl7.org/CodeSystem/allergyintolerance-clinical")));
 		return allergy;
 	}
 }

@@ -33,8 +33,18 @@ import java.util.List;
  * might be by performing a search in a local repository, but could also be
  * done by calling a remote repository, performing a calculation, making
  * JDBC database calls directly, etc.
+ * <p>
+ * Note that you only need to implement this interface directly if you want to
+ * provide manual logic for gathering and preparing resources to include in
+ * an IPS document. If your resources can be collected by querying a JPS
+ * repository, you can use {@link ca.uhn.fhir.jpa.ips.jpa.JpaSectionResourceSupplier}
+ * as the implementation of this interface, and
+ * {@link ca.uhn.fhir.jpa.ips.jpa.IJpaSectionSearchStrategy} becomes the class
+ * that is used to define your searches.
+ * </p>
  *
  * @since 7.2.0
+ * @see ca.uhn.fhir.jpa.ips.jpa.JpaSectionResourceSupplier
  */
 public interface ISectionResourceSupplier {
 
@@ -52,8 +62,14 @@ public interface ISectionResourceSupplier {
 	 * @return Returns a list of resources to add to the given section, or <code>null</code>.
 	 */
 	@Nullable
-	List<ResourceEntry> fetchResourcesForSection(IpsContext theIpsContext, IpsSectionContext theSectionContext, RequestDetails theRequestDetails);
+	List<ResourceEntry> fetchResourcesForSection(
+			IpsContext theIpsContext, IpsSectionContext theSectionContext, RequestDetails theRequestDetails);
 
+	/**
+	 * This enum specifies how an individual {@link ResourceEntry resource entry} that
+	 * is returned by {@link #fetchResourcesForSection(IpsContext, IpsSectionContext, RequestDetails)}
+	 * should be included in the resulting IPS document bundle.
+	 */
 	enum InclusionTypeEnum {
 
 		/**
@@ -74,15 +90,23 @@ public interface ISectionResourceSupplier {
 		 * Do not include this resource in the document
 		 */
 		EXCLUDE
-
 	}
 
+	/**
+	 * This class is the return type for {@link #fetchResourcesForSection(IpsContext, IpsSectionContext, RequestDetails)}.
+	 */
 	class ResourceEntry {
 
 		private final IBaseResource myResource;
 
 		private final InclusionTypeEnum myInclusionType;
 
+		/**
+		 * Constructor
+		 *
+		 * @param theResource The resource to include (must not be null)
+		 * @param theInclusionType The inclusion type (must not be null)
+		 */
 		public ResourceEntry(@Nonnull IBaseResource theResource, @Nonnull InclusionTypeEnum theInclusionType) {
 			Validate.notNull(theResource, "theResource must not be null");
 			Validate.notNull(theInclusionType, "theInclusionType must not be null");
@@ -97,9 +121,5 @@ public interface ISectionResourceSupplier {
 		public InclusionTypeEnum getInclusionType() {
 			return myInclusionType;
 		}
-
-
 	}
-
 }
-

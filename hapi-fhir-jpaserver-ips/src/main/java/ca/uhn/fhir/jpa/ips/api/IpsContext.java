@@ -61,5 +61,4 @@ public class IpsContext {
 	public IpsSectionContext newSectionContext(Section theSection, String theResourceType) {
 		return new IpsSectionContext(mySubject, mySubjectId, theSection, theResourceType);
 	}
-
 }
