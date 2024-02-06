@@ -19,7 +19,6 @@
  */
 package ca.uhn.fhir.jpa.cache;
 
-import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.model.sched.HapiJob;
 import ca.uhn.fhir.jpa.model.sched.IHasScheduledJobs;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
@@ -149,7 +148,8 @@ public class ResourceChangeListenerCacheRefresherImpl
 			return retVal;
 		}
 
-		ResourceVersionMap newResourceVersionMap = myResourceVersionSvc.getVersionMap(theCache.getResourceName(), theCache.getSearchParameterMap());
+		ResourceVersionMap newResourceVersionMap =
+				myResourceVersionSvc.getVersionMap(theCache.getResourceName(), theCache.getSearchParameterMap());
 
 		retVal = retVal.plus(notifyListener(theCache, newResourceVersionMap));
 
