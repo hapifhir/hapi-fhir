@@ -1485,7 +1485,7 @@ public class FhirInstanceValidatorR4Test extends BaseValidationTestWithInlineMoc
 		output = myFhirValidator.validateWithResult(input);
 		all = logResultsAndReturnNonInformationalOnes(output);
 		assertEquals(2, all.size());
-		assertThat(all.get(0).getMessage(), containsString("The unit 'Heck' is unknown' at position 0 for 'http://unitsofmeasure.org#Heck'"));
+		assertThat(all.get(0).getMessage(), containsString("Error processing unit 'Heck': The unit 'Heck' is unknown' at position 0 (for 'http://unitsofmeasure.org#Heck')"));
 		assertThat(all.get(1).getMessage(), containsString("The value provided ('Heck') was not found in the value set 'Body Temperature Units'"));
 
 	}
@@ -1705,7 +1705,7 @@ public class FhirInstanceValidatorR4Test extends BaseValidationTestWithInlineMoc
 		OperationOutcome oo = (OperationOutcome) result.toOperationOutcome();
 		ourLog.info(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
 
-		assertEquals("Error processing unit 'MG/DL': The unit 'DL' is unknown' at position 3 for 'http://unitsofmeasure.org#MG/DL'", result.getMessages().get(0).getMessage());
+		assertEquals("Error processing unit 'MG/DL': The unit 'DL' is unknown' at position 3 (for 'http://unitsofmeasure.org#MG/DL')", result.getMessages().get(0).getMessage());
 		assertEquals(ResultSeverityEnum.ERROR, result.getMessages().get(0).getSeverity());
 		assertEquals(15, result.getMessages().get(0).getLocationLine());
 		assertEquals(4, result.getMessages().get(0).getLocationCol());
@@ -1715,7 +1715,7 @@ public class FhirInstanceValidatorR4Test extends BaseValidationTestWithInlineMoc
 		assertEquals(15, ((IntegerType) oo.getIssue().get(0).getExtensionByUrl("http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line").getValue()).getValue());
 		assertEquals(4, ((IntegerType) oo.getIssue().get(0).getExtensionByUrl("http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col").getValue()).getValue());
 		assertEquals("Terminology_PassThrough_TX_Message", ((StringType) oo.getIssue().get(0).getExtensionByUrl("http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id").getValue()).getValue());
-		assertEquals("Error processing unit 'MG/DL': The unit 'DL' is unknown' at position 3 for 'http://unitsofmeasure.org#MG/DL'", oo.getIssue().get(0).getDiagnostics());
+		assertEquals("Error processing unit 'MG/DL': The unit 'DL' is unknown' at position 3 (for 'http://unitsofmeasure.org#MG/DL')", oo.getIssue().get(0).getDiagnostics());
 		assertEquals(OperationOutcome.IssueType.PROCESSING, oo.getIssue().get(0).getCode());
 		assertEquals(OperationOutcome.IssueSeverity.ERROR, oo.getIssue().get(0).getSeverity());
 		assertEquals(2, oo.getIssue().get(0).getLocation().size());
@@ -1746,7 +1746,7 @@ public class FhirInstanceValidatorR4Test extends BaseValidationTestWithInlineMoc
 		OperationOutcome oo = (OperationOutcome) result.toOperationOutcome();
 		ourLog.info(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
 
-		assertEquals("Unknown code 'urn:iso:std:iso:4217#blah' for 'urn:iso:std:iso:4217#blah'", result.getMessages().get(0).getMessage());
+		assertEquals("Unknown code 'urn:iso:std:iso:4217#blah' (for 'urn:iso:std:iso:4217#blah')", result.getMessages().get(0).getMessage());
 		assertEquals(ResultSeverityEnum.ERROR, result.getMessages().get(0).getSeverity());
 		assertEquals(22, result.getMessages().get(0).getLocationLine());
 		assertEquals(4, result.getMessages().get(0).getLocationCol());
@@ -1756,7 +1756,7 @@ public class FhirInstanceValidatorR4Test extends BaseValidationTestWithInlineMoc
 		assertEquals(22, ((IntegerType) oo.getIssue().get(0).getExtensionByUrl("http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line").getValue()).getValue());
 		assertEquals(4, ((IntegerType) oo.getIssue().get(0).getExtensionByUrl("http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col").getValue()).getValue());
 		assertEquals("Terminology_PassThrough_TX_Message", ((StringType) oo.getIssue().get(0).getExtensionByUrl("http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id").getValue()).getValue());
-		assertEquals("Unknown code 'urn:iso:std:iso:4217#blah' for 'urn:iso:std:iso:4217#blah'", oo.getIssue().get(0).getDiagnostics());
+		assertEquals("Unknown code 'urn:iso:std:iso:4217#blah' (for 'urn:iso:std:iso:4217#blah')", oo.getIssue().get(0).getDiagnostics());
 		assertEquals(OperationOutcome.IssueType.PROCESSING, oo.getIssue().get(0).getCode());
 		assertEquals(OperationOutcome.IssueSeverity.ERROR, oo.getIssue().get(0).getSeverity());
 		assertEquals(2, oo.getIssue().get(0).getLocation().size());
