@@ -44,7 +44,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.HashSet;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -83,11 +82,10 @@ public class SearchParamValidatingInterceptor {
 		}
 
 		// avoid a loop when loading our hard-coded core FhirContext SearchParameters
-		if (theRequestDetails != null) {
-			boolean isStartup = (Boolean) theRequestDetails.getUserData().getOrDefault(SKIP_VALIDATION, false);
-			if (isStartup) {
-				return;
-			}
+		boolean isStartup = theRequestDetails != null
+				&& Boolean.TRUE == theRequestDetails.getUserData().get(SKIP_VALIDATION);
+		if (isStartup) {
+			return;
 		}
 
 		RuntimeSearchParam runtimeSearchParam = mySearchParameterCanonicalizer.canonicalizeSearchParameter(theResource);
