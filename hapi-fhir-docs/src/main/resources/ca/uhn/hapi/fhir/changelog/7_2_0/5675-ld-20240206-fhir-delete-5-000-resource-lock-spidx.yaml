@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 5675
+title: "DELETE on a large number of resources, cancelling, then triggering another DELETE resulted in a HAPI-0550.
+        This has been fixed."

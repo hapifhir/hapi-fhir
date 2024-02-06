@@ -1,8 +1,21 @@
 package ca.uhn.fhir.jpa.dao;
 
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.dao.expunge.ExpungeService;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedComboStringUnique;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamCoords;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamDate;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamNumber;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamQuantity;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamQuantityNormalized;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamUri;
+import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.entity.TagDefinition;
 import ca.uhn.fhir.jpa.model.entity.TagTypeEnum;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.util.AsyncUtil;
 import ca.uhn.fhir.util.MetaUtil;
@@ -21,6 +34,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.Spy;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.stubbing.Answer;
@@ -40,6 +54,8 @@ import jakarta.persistence.criteria.Path;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
@@ -49,6 +65,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -59,7 +76,9 @@ import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -105,6 +124,15 @@ public class BaseHapiFhirDaoTest {
 
 	@Mock
 	private PlatformTransactionManager myTransactionManager;
+
+	@Mock
+	private ExpungeService myExpungeService;
+
+	@Spy
+	private FhirContext myFhirContext = FhirContext.forR4Cached();
+
+	@Mock
+	IJpaStorageResourceParser myJpaStorageResourceParser;
 
 	@InjectMocks
 	private TestDao myTestDao;
@@ -398,5 +426,46 @@ public class BaseHapiFhirDaoTest {
 		assertEquals("abc", MetaUtil.cleanProvenanceSourceUriOrEmpty("abc#"));
 		assertEquals("abc", MetaUtil.cleanProvenanceSourceUriOrEmpty("abc#def"));
 		assertEquals("abc", MetaUtil.cleanProvenanceSourceUriOrEmpty("abc#def#ghi"));
+	}
+
+	@Test
+	public void updateEntityRemoveSpIndexes() {
+		final ResourceTable entity = new ResourceTable();
+		entity.setDeleted(new Date());
+		entity.setVersionForUnitTest(1);
+
+		final List<ResourceIndexedComboStringUnique> mockResourceIndexedSearchParamCombos  = mockAndAdd(entity.getParamsComboStringUnique(), ResourceIndexedComboStringUnique.class, 2);
+		final List<ResourceIndexedSearchParamCoords> mockResourceIndexedSearchParamCoordses  = mockAndAdd(entity.getParamsCoords(), ResourceIndexedSearchParamCoords.class, 3);
+		final List<ResourceIndexedSearchParamDate> mockResourceIndexedSearchParamDates  = mockAndAdd(entity.getParamsDate(), ResourceIndexedSearchParamDate.class, 4);
+		final List<ResourceIndexedSearchParamNumber> mockResourceIndexedSearchParamNumbers  = mockAndAdd(entity.getParamsNumber(), ResourceIndexedSearchParamNumber.class, 5);
+		final List<ResourceIndexedSearchParamQuantity> mockResourceIndexedSearchParamQuantities  = mockAndAdd(entity.getParamsQuantity(), ResourceIndexedSearchParamQuantity.class, 6);
+		final List<ResourceIndexedSearchParamQuantityNormalized> mockResourceIndexedSearchParamQuantitiesNormalized  = mockAndAdd(entity.getParamsQuantityNormalized(), ResourceIndexedSearchParamQuantityNormalized.class, 7);
+		final List<ResourceIndexedSearchParamString> mockResourceIndexedSearchParamStrings  = mockAndAdd(entity.getParamsString(), ResourceIndexedSearchParamString.class, 8);
+		final List<ResourceIndexedSearchParamToken> mockResourceIndexedSearchParamTokens  = mockAndAdd(entity.getParamsToken(), ResourceIndexedSearchParamToken.class, 9);
+		final List<ResourceIndexedSearchParamUri> mockResourceIndexedSearchParamUris  = mockAndAdd(entity.getParamsUri(), ResourceIndexedSearchParamUri.class, 10);
+
+		myTestDao.updateEntity(new SystemRequestDetails(), new Patient(), entity, new Date(), true, false, new TransactionDetails(), false, false);
+
+		mockResourceIndexedSearchParamCombos.forEach(mock -> verify(myEntityManager, times(1)).remove(mock));
+		mockResourceIndexedSearchParamCoordses.forEach(mock -> verify(myEntityManager, times(1)).remove(mock));
+		mockResourceIndexedSearchParamDates.forEach(mock -> verify(myEntityManager, times(1)).remove(mock));
+		mockResourceIndexedSearchParamNumbers.forEach(mock -> verify(myEntityManager, times(1)).remove(mock));
+		mockResourceIndexedSearchParamQuantities.forEach(mock -> verify(myEntityManager, times(1)).remove(mock));
+		mockResourceIndexedSearchParamQuantitiesNormalized.forEach(mock -> verify(myEntityManager, times(1)).remove(mock));
+		mockResourceIndexedSearchParamStrings.forEach(mock -> verify(myEntityManager, times(1)).remove(mock));
+		mockResourceIndexedSearchParamTokens.forEach(mock -> verify(myEntityManager, times(1)).remove(mock));
+		mockResourceIndexedSearchParamUris.forEach(mock -> verify(myEntityManager, times(1)).remove(mock));
+
+		verifyNoInteractions(myExpungeService);
+	}
+
+	private static <T> List<T> mockAndAdd(Collection<T> theCollection, Class<T> theMockedClass, int theNumAdds) {
+		return IntStream.range(0, theNumAdds)
+			.mapToObj(num -> {
+				final T mock = mock(theMockedClass);
+				theCollection.add(mock);
+				return mock;
+			})
+			.toList();
 	}
 }

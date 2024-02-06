@@ -1245,7 +1245,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		 */
 		if (thePerformIndexing) {
 			if (newParams == null) {
-				myExpungeService.deleteAllSearchParams(JpaPid.fromId(entity.getId()));
+				removeSearchParams(entity);
 				entity.clearAllParamsPopulated();
 			} else {
 
@@ -1286,6 +1286,18 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		}
 
 		return entity;
+	}
+
+	private void removeSearchParams(ResourceTable theEntity) {
+		theEntity.getParamsComboStringUnique().forEach(myEntityManager::remove);
+		theEntity.getParamsCoords().forEach(myEntityManager::remove);
+		theEntity.getParamsDate().forEach(myEntityManager::remove);
+		theEntity.getParamsNumber().forEach(myEntityManager::remove);
+		theEntity.getParamsQuantity().forEach(myEntityManager::remove);
+		theEntity.getParamsQuantityNormalized().forEach(myEntityManager::remove);
+		theEntity.getParamsString().forEach(myEntityManager::remove);
+		theEntity.getParamsToken().forEach(myEntityManager::remove);
+		theEntity.getParamsUri().forEach(myEntityManager::remove);
 	}
 
 	/**

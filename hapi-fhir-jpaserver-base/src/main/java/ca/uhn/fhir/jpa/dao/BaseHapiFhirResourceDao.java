@@ -852,12 +852,15 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			return deleteExpunge(theUrl, theRequest);
 		}
 
-		return myTransactionService.execute(theRequest, transactionDetails, tx -> {
-			DeleteConflictList deleteConflicts = new DeleteConflictList();
-			DeleteMethodOutcome outcome = deleteByUrl(theUrl, deleteConflicts, theRequest, transactionDetails);
-			DeleteConflictUtil.validateDeleteConflictsEmptyOrThrowException(getContext(), deleteConflicts);
-			return outcome;
-		});
+		return myTransactionService
+				.withRequest(theRequest)
+				.withTransactionDetails(transactionDetails)
+				.execute(tx -> {
+					DeleteConflictList deleteConflicts = new DeleteConflictList();
+					DeleteMethodOutcome outcome = deleteByUrl(theUrl, deleteConflicts, theRequest, transactionDetails);
+					DeleteConflictUtil.validateDeleteConflictsEmptyOrThrowException(getContext(), deleteConflicts);
+					return outcome;
+				});
 	}
 
 	/**
@@ -872,10 +875,10 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			@Nonnull TransactionDetails theTransactionDetails) {
 		validateDeleteEnabled();
 
-		return myTransactionService.execute(
-				theRequestDetails,
-				theTransactionDetails,
-				tx -> doDeleteByUrl(theUrl, deleteConflicts, theTransactionDetails, theRequestDetails));
+		return myTransactionService
+				.withRequest(theRequestDetails)
+				.withTransactionDetails(theTransactionDetails)
+				.execute(tx -> doDeleteByUrl(theUrl, deleteConflicts, theTransactionDetails, theRequestDetails));
 	}
 
 	@Nonnull
