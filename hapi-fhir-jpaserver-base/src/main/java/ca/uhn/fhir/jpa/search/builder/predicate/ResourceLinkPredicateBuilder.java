@@ -190,8 +190,6 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder im
 
 				if (isBlank(ref.getChain())) {
 
-					validateResourceTypeInReference(ref);
-
 					/*
 					 * Handle non-chained search, e.g. Patient?organization=Organization/123
 					 */
@@ -206,6 +204,7 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder im
 							targetQualifiedUrls.add(dt.getValue());
 						}
 					} else {
+						validateResourceTypeInReferenceParam(ref);
 						targetIds.add(dt);
 					}
 
@@ -258,7 +257,7 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder im
 		}
 	}
 
-	private void validateResourceTypeInReference(final ReferenceParam theReferenceParam) {
+	private void validateResourceTypeInReferenceParam(final ReferenceParam theReferenceParam) {
 		if (!theReferenceParam.hasResourceType()) {
 			return;
 		}
@@ -378,11 +377,7 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder im
 
 			String typeValue = theReferenceParam.getValue();
 
-			try {
-				getFhirContext().getResourceDefinition(typeValue).getImplementingClass();
-			} catch (DataFormatException e) {
-				throw newInvalidResourceTypeException(typeValue);
-			}
+			validateResourceTypeInReferenceParam(theReferenceParam);
 			if (!resourceTypes.contains(typeValue)) {
 				throw newInvalidTargetTypeForReferenceException(theResourceName, theParamName, typeValue);
 			}
@@ -570,7 +565,6 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder im
 			}
 
 		} else {
-
 			try {
 				RuntimeResourceDefinition resDef =
 						getFhirContext().getResourceDefinition(theReferenceParam.getResourceType());
