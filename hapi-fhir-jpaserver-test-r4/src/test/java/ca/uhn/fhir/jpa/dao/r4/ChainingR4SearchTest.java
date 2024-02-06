@@ -41,7 +41,6 @@ import java.util.List;
 import static org.apache.commons.lang3.StringUtils.countMatches;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.in;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -1593,7 +1592,7 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 		ResourceSearch search = myMatchUrlService.getResourceSearch(theUrl);
 		SearchParameterMap map = search.getSearchParameterMap();
 		map.setLoadSynchronous(true);
-		IBundleProvider result = theObservationDao.search(map);
+		IBundleProvider result = theObservationDao.search(map, mySrd);
 		return result.getAllResourceIds();
 	}
 

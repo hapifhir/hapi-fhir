@@ -190,6 +190,8 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder im
 
 				if (isBlank(ref.getChain())) {
 
+					validateResourceTypeInReference(ref);
+
 					/*
 					 * Handle non-chained search, e.g. Patient?organization=Organization/123
 					 */
@@ -253,6 +255,20 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder im
 		} else {
 			Condition retVal = createPredicateReference(inverse, pathsToMatch, targetPidList, targetQualifiedUrls);
 			return combineWithRequestPartitionIdPredicate(getRequestPartitionId(), retVal);
+		}
+	}
+
+	private void validateResourceTypeInReference(final ReferenceParam theReferenceParam) {
+		if (!theReferenceParam.hasResourceType()) {
+			return;
+		}
+
+		String referenceResourceType = theReferenceParam.getResourceType();
+
+		try {
+			getFhirContext().getResourceDefinition(referenceResourceType);
+		} catch (DataFormatException e) {
+			throw newInvalidResourceTypeException(referenceResourceType);
 		}
 	}
 
@@ -368,7 +384,7 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder im
 				throw newInvalidResourceTypeException(typeValue);
 			}
 			if (!resourceTypes.contains(typeValue)) {
-				throw newInvalidTargetTypeForChainException(theResourceName, theParamName, typeValue);
+				throw newInvalidTargetTypeForReferenceException(theResourceName, theParamName, typeValue);
 			}
 
 			Condition condition = BinaryCondition.equalTo(
@@ -698,14 +714,14 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder im
 	}
 
 	@Nonnull
-	private InvalidRequestException newInvalidTargetTypeForChainException(
+	private InvalidRequestException newInvalidTargetTypeForReferenceException(
 			String theResourceName, String theParamName, String theTypeValue) {
 		String searchParamName = theResourceName + ":" + theParamName;
 		String msg = getFhirContext()
 				.getLocalizer()
 				.getMessage(
-						ResourceLinkPredicateBuilder.class, "invalidTargetTypeForChain", theTypeValue, searchParamName);
-		return new InvalidRequestException(msg);
+						ResourceLinkPredicateBuilder.class, "invalidTargetTypeForReference", theTypeValue, searchParamName);
+		return new InvalidRequestException(Msg.code(2495) + msg);
 	}
 
 	@Nonnull
