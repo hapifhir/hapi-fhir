@@ -148,10 +148,9 @@ public class ResourceChangeListenerCacheRefresherImpl
 			ourLog.warn("Requesting cache refresh for unregistered listener {}.  Aborting.", theCache);
 			return retVal;
 		}
-
-		SearchParameterMap searchParameterMap = theCache.getSearchParameterMap();
+		SearchParameterMap searchParamMap = theCache.getSearchParameterMap();
 		ResourceVersionMap newResourceVersionMap =
-				myResourceVersionSvc.getVersionMap(theCache.getResourceName(), searchParameterMap);
+				myResourceVersionSvc.getVersionMap(theCache.getResourceName(), searchParamMap);
 
 		retVal = retVal.plus(notifyListener(theCache, newResourceVersionMap));
 
