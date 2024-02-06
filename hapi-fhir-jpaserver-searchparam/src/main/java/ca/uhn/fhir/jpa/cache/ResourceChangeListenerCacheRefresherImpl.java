@@ -23,6 +23,7 @@ import ca.uhn.fhir.jpa.model.sched.HapiJob;
 import ca.uhn.fhir.jpa.model.sched.IHasScheduledJobs;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import com.google.common.annotations.VisibleForTesting;
 import jakarta.transaction.Transactional;
 import org.apache.commons.lang3.time.DateUtils;
@@ -148,8 +149,9 @@ public class ResourceChangeListenerCacheRefresherImpl
 			return retVal;
 		}
 
+		SearchParameterMap searchParameterMap = theCache.getSearchParameterMap();
 		ResourceVersionMap newResourceVersionMap =
-				myResourceVersionSvc.getVersionMap(theCache.getResourceName(), theCache.getSearchParameterMap());
+				myResourceVersionSvc.getVersionMap(theCache.getResourceName(), searchParameterMap);
 
 		retVal = retVal.plus(notifyListener(theCache, newResourceVersionMap));
 
