@@ -14,6 +14,7 @@ import ca.uhn.fhir.rest.api.EncodingEnum;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.ValueSet;
+import org.hl7.fhir.r5.model.Enumerations;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -303,7 +304,7 @@ public class CommonCodeSystemsTerminologyServiceTest extends BaseValidationTestW
 		CodeSystem cs = (CodeSystem) mySvc.fetchCodeSystem(MIMETYPES_CODESYSTEM_URL);
 		assertNull(cs);
 		assertTrue(cs.getConcept().isEmpty());
-		assertEquals(CodeSystemContentMode.NOTPRESENT, cs.getContent());
+		assertEquals(CodeSystem.CodeSystemContentMode.NOTPRESENT, cs.getContent());
 	}
 
 	@ParameterizedTest
