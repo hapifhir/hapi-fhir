@@ -816,7 +816,7 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 		if (canonical == null) {
 			return null;
 		}
-        return fetchResource(class_, canonical, sourceOfReference);
+		return fetchResource(class_, canonical, sourceOfReference);
 	}
 
 	@Override
