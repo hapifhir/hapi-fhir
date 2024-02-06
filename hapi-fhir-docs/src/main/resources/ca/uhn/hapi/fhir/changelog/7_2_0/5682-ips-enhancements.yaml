@@ -1,6 +1,6 @@
 ---
 type: add
-issue: FIXME
+issue: 5682
 title: "Several enhancements have been made to the International Patient Summary generator based on
   feedback from implementers:
   <ul>
