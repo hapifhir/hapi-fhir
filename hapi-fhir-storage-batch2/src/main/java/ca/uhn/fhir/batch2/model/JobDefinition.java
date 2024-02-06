@@ -145,6 +145,11 @@ public class JobDefinition<PT extends IModelJson> {
 		return myGatedExecution;
 	}
 
+	public boolean isLastStepReduction() {
+		int stepCount = getSteps().size();
+		return stepCount >= 1 && getSteps().get(stepCount - 1).isReductionStep();
+	}
+
 	public int getStepIndex(String theStepId) {
 		int retVal = myStepIds.indexOf(theStepId);
 		Validate.isTrue(retVal != -1);
@@ -304,9 +309,9 @@ public class JobDefinition<PT extends IModelJson> {
 				throw new ConfigurationException(Msg.code(2106)
 						+ String.format("Job Definition %s has a reducer step but is not gated", myJobDefinitionId));
 			}
-			mySteps.add(new JobDefinitionReductionStep<PT, NIT, OT>(
+			mySteps.add(new JobDefinitionReductionStep<>(
 					theStepId, theStepDescription, theStepWorker, myNextInputType, theOutputType));
-			return new Builder<PT, OT>(
+			return new Builder<>(
 					mySteps,
 					myJobDefinitionId,
 					myJobDefinitionVersion,

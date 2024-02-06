@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 5649
+title: "Change database upgrade script to avoid holding locks while adding indices."
