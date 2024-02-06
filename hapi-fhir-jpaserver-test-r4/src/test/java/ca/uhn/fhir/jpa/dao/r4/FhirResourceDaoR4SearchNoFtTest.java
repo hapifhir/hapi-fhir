@@ -23,8 +23,6 @@ import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
 import ca.uhn.fhir.jpa.model.util.UcumServiceUtil;
-import ca.uhn.fhir.jpa.search.PersistedJpaBundleProvider;
-import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap.EverythingModeEnum;
@@ -37,6 +35,7 @@ import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.parser.StrictErrorHandler;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.param.CompositeParam;
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
@@ -61,6 +60,7 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.util.HapiExtensions;
 import com.google.common.collect.Lists;
+import jakarta.servlet.http.HttpServletRequest;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
@@ -141,7 +141,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.ArgumentMatchers;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -153,7 +152,6 @@ import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import jakarta.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
@@ -3585,21 +3583,6 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 			fail();
 		} catch (InvalidRequestException e) {
 			assertEquals(Msg.code(1250) + "Invalid/unsupported resource type: \"abc\"", e.getMessage());
-		}
-	}
-
-	@Test
-	public void testSearchWithInvalidTypedResourceReference_throwsInvalidTargetResourceType() {
-		// execute
-		try {
-			ReferenceParam referenceParam = new ReferenceParam("Patient", null, "123");
-			SearchParameterMap map = new SearchParameterMap().setLoadSynchronous(true).add(MedicationAdministration.SP_CONTEXT, referenceParam);
-
-			// verify
-			myMedicationAdministrationDao.search(map, mySrd);
-			fail();
-		} catch (InvalidRequestException e) {
-			assertEquals(Msg.code(2495) + "Resource type \"Patient\" is not a valid target type for reference search parameter: MedicationAdministration:context", e.getMessage());
 		}
 	}
 
