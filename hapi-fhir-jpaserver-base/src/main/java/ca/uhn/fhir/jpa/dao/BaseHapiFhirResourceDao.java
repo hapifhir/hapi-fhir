@@ -151,6 +151,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -1985,8 +1986,11 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 	private void translateListSearchParams(SearchParameterMap theParams) {
 
+		Set<Map.Entry<String, List<List<IQueryParameterType>>>> entryHashSet = new HashSet<>(theParams.entrySet());
+
 		// Translate _list=42 to _has=List:item:_id=42
-		for (String key : theParams.keySet()) {
+		for (Map.Entry<String, List<List<IQueryParameterType>>> stringListEntry : entryHashSet) {
+			String key = stringListEntry.getKey();
 			if (Constants.PARAM_LIST.equals((key))) {
 				List<List<IQueryParameterType>> andOrValues = theParams.get(key);
 				theParams.remove(key);
