@@ -110,6 +110,9 @@ public class JpaStorageSettings extends StorageSettings {
 	private static final Integer DEFAULT_INTERNAL_SYNCHRONOUS_SEARCH_SIZE = 10000;
 
 	private static final boolean DEFAULT_PREVENT_INVALIDATING_CONDITIONAL_MATCH_CRITERIA = false;
+	// LUKETODO  think about this:
+//	private static final long DEFAULT_REST_DELETE_RESOURCE_ID_THRESHOLD = 3000;
+	private static final long DEFAULT_REST_DELETE_RESOURCE_ID_THRESHOLD = 6000;
 
 	/**
 	 * Do not change default of {@code 0}!
@@ -343,6 +346,10 @@ public class JpaStorageSettings extends StorageSettings {
 	 */
 	private boolean myPreventInvalidatingConditionalMatchCriteria =
 			DEFAULT_PREVENT_INVALIDATING_CONDITIONAL_MATCH_CRITERIA;
+
+
+	// LUKETODO:  javadoc
+	private long myRestDeleteResourceIdThreshold = DEFAULT_REST_DELETE_RESOURCE_ID_THRESHOLD;
 
 	/**
 	 * Constructor
@@ -2425,6 +2432,14 @@ public class JpaStorageSettings extends StorageSettings {
 
 	public boolean isPreventInvalidatingConditionalMatchCriteria() {
 		return myPreventInvalidatingConditionalMatchCriteria;
+	}
+
+	public long getRestDeleteResourceIdThreshold() {
+		return myRestDeleteResourceIdThreshold;
+	}
+
+	public void setRestDeleteResourceIdThreshold(long theRestDeleteResourceIdThreshold) {
+		myRestDeleteResourceIdThreshold = theRestDeleteResourceIdThreshold;
 	}
 
 	public enum StoreMetaSourceInformationEnum {

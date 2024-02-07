@@ -32,7 +32,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 
 /**
  * This service ensures uniqueness of resources during create or create-on-update by storing the resource searchUrl.
@@ -75,6 +77,14 @@ public class ResourceSearchUrlSvc {
 	 */
 	public void deleteByResId(long theResId) {
 		myResourceSearchUrlDao.deleteByResId(theResId);
+	}
+
+	public void deleteByResIds(Collection<Long> theResIds) {
+		myResourceSearchUrlDao.deleteByResIds(theResIds);
+	}
+
+	public List<ResourceSearchUrlEntity> findByResourceId(long theResId) {
+		return myResourceSearchUrlDao.finaAllByResourceId(theResId);
 	}
 
 	/**

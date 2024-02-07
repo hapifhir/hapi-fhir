@@ -119,6 +119,8 @@ import ca.uhn.fhir.validation.IValidatorModule;
 import ca.uhn.fhir.validation.ValidationOptions;
 import ca.uhn.fhir.validation.ValidationResult;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.Iterators;
+import com.google.common.collect.UnmodifiableIterator;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import jakarta.annotation.PostConstruct;
@@ -812,7 +814,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		preDelete(resourceToDelete, entity, theRequestDetails);
 
-		ResourceTable savedEntity = updateEntityForDelete(theRequestDetails, theTransactionDetails, entity);
+		ResourceTable savedEntity = updateEntityForDelete(theRequestDetails, theTransactionDetails, entity, true);
 		resourceToDelete.setId(entity.getIdDt());
 
 		// Notify JPA interceptors
@@ -905,6 +907,14 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 										theUrl,
 										resourceIds.size()));
 			}
+			final long threshold = getStorageSettings().getRestDeleteResourceIdThreshold();
+			if (resourceIds.size() > threshold) {
+				throw new PreconditionFailedException(Msg.code(9999)
+						+ getContext()
+								.getLocalizer()
+								.getMessageSanitized(
+										BaseStorageDao.class, "deleteThresholdExceeded", theUrl, threshold));
+			}
 		}
 
 		return deletePidList(theUrl, resourceIds, deleteConflicts, theRequestDetails, theTransactionDetails);
@@ -942,6 +952,33 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				theResourceIds.stream().map(t -> (IResourcePersistentId<?>) t).collect(Collectors.toList());
 		mySystemDao.preFetchResources(resolvedIds, false);
 
+		/*
+		partition(jsonStream, chunkSize).forEach(idBatch -> {
+			totalIdsFound.addAndGet(idBatch.size());
+			chunkCount.getAndIncrement();
+			submitWorkChunk(idBatch, searchResult.getRequestPartitionId(), theDataSink);
+		});
+		 */
+
+		//		myResourceSearchUrlSvc.deleteByResId();
+		//		myExpungeService.deleteAllSearchParams(JpaPid.fromId(entity.getId()));
+
+		final UnmodifiableIterator<List<P>> partition = Iterators.partition(theResourceIds.iterator(), 1000);
+
+		while (partition.hasNext()) {
+			final List<P> next = partition.next();
+			final List<Long> nextBatch = next
+				.stream()
+				.filter(JpaPid.class::isInstance)
+				.map(JpaPid.class::cast)
+				.map(JpaPid::getId)
+				.collect(Collectors.toList());
+
+			myResourceSearchUrlSvc.deleteByResIds(nextBatch);
+
+			next.forEach(myId -> myExpungeService.deleteAllSearchParams(myId));
+		}
+
 		for (P pid : theResourceIds) {
 			JpaPid jpaPid = (JpaPid) pid;
 
@@ -959,6 +996,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 					.add(TransactionDetails.class, transactionDetails);
 			doCallHooks(transactionDetails, theRequestDetails, Pointcut.STORAGE_PRESTORAGE_RESOURCE_DELETED, hooks);
 
+			// LUKETODO:  document that we should optimize this but don't do it
 			myDeleteConflictService.validateOkToDelete(
 					theDeleteConflicts, entity, false, theRequestDetails, transactionDetails);
 
@@ -966,7 +1004,8 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 			preDelete(resourceToDelete, entity, theRequestDetails);
 
-			updateEntityForDelete(theRequestDetails, transactionDetails, entity);
+			updateEntityForDelete(theRequestDetails, transactionDetails, entity, false);
+			//			updateEntityForDelete(theRequestDetails, transactionDetails, entity, true);
 			resourceToDelete.setId(entity.getIdDt());
 
 			// Notify JPA interceptors
@@ -1024,10 +1063,19 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	}
 
 	protected ResourceTable updateEntityForDelete(
-			RequestDetails theRequest, TransactionDetails theTransactionDetails, ResourceTable theEntity) {
-		myResourceSearchUrlSvc.deleteByResId(theEntity.getId());
+			RequestDetails theRequest,
+			TransactionDetails theTransactionDetails,
+			ResourceTable theEntity,
+			boolean thePerformIndexing) {
+		// This is the OLD code >>> EXECUTES IMMEDIATELY
+				myResourceSearchUrlSvc.deleteByResId(theEntity.getId());
+		// This is Luke's NEW code:
+		myResourceSearchUrlSvc
+				.findByResourceId(theEntity.getId()) // >>>> SELECT SQL is run IMMEDIATELY
+				.forEach(myEntityManager::remove); // >>>> DELETE SQL is run only AFTER COMMIT
 		Date updateTime = new Date();
-		return updateEntity(theRequest, null, theEntity, updateTime, true, true, theTransactionDetails, false, true);
+		return updateEntity(
+				theRequest, null, theEntity, updateTime, thePerformIndexing, true, theTransactionDetails, false, true);
 	}
 
 	private void validateDeleteEnabled() {

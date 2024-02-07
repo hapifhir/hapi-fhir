@@ -446,7 +446,7 @@ public class BaseHapiFhirDaoTest {
 
 		myTestDao.updateEntity(new SystemRequestDetails(), new Patient(), entity, new Date(), true, false, new TransactionDetails(), false, false);
 
-		mockResourceIndexedSearchParamCombos.forEach(mock -> verify(myEntityManager, times(1)).remove(mock));
+		mockResourceIndexedSearchParamCombos.forEach(mock -> verify(myEntityManager, times(2)).remove(mock));
 		mockResourceIndexedSearchParamCoordses.forEach(mock -> verify(myEntityManager, times(1)).remove(mock));
 		mockResourceIndexedSearchParamDates.forEach(mock -> verify(myEntityManager, times(1)).remove(mock));
 		mockResourceIndexedSearchParamNumbers.forEach(mock -> verify(myEntityManager, times(1)).remove(mock));
