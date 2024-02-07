@@ -6,26 +6,37 @@ import ca.uhn.fhir.batch2.jobs.parameters.UrlPartitioner;
 import ca.uhn.fhir.batch2.jobs.reindex.ReindexJobParameters;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
+import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.api.model.DeleteConflictList;
+import ca.uhn.fhir.jpa.api.model.DeleteMethodOutcome;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
+import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
+import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
+import ca.uhn.fhir.jpa.delete.DeleteConflictService;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.ForcedId;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
+import ca.uhn.fhir.jpa.search.ResourceSearchUrlSvc;
+import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
+import ca.uhn.fhir.jpa.searchparam.ResourceSearch;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.svc.MockHapiTransactionService;
-import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import com.google.common.collect.Lists;
+import jakarta.persistence.EntityManager;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Patient;
@@ -37,24 +48,33 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.stubbing.Answer;
 import org.springframework.context.ApplicationContext;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.support.TransactionCallback;
 
-import jakarta.persistence.EntityManager;
+import java.util.Collections;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.isNotNull;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -77,6 +97,9 @@ class BaseHapiFhirResourceDaoTest {
 	private IJobCoordinator myJobCoordinator;
 
 	@Mock
+	private IJpaStorageResourceParser myJpaStorageResourceParser;
+
+	@Mock
 	private UrlPartitioner myUrlPartitioner;
 
 	@Mock
@@ -91,6 +114,23 @@ class BaseHapiFhirResourceDaoTest {
 	@Mock
 	private ISearchBuilder<JpaPid> myISearchBuilder;
 
+	@Mock
+	private MatchUrlService myMatchUrlService;
+	@Mock
+	private MatchResourceUrlService<JpaPid> myMatchResourceUrlService;
+
+	@Mock
+	private HapiTransactionService myTransactionService;
+
+	@Mock
+	private DeleteConflictService myDeleteConflictService;
+
+	@Mock
+	private IFhirSystemDao<?, ?> mySystemDao;
+
+	@Mock
+	private ResourceSearchUrlSvc myResourceSearchUrlSvc;
+
 	@Captor
 	private ArgumentCaptor<SearchParameterMap> mySearchParameterMapCaptor;
 
@@ -100,6 +140,8 @@ class BaseHapiFhirResourceDaoTest {
 	@InjectMocks
 	private TestResourceDao mySvc;
 
+	private TestResourceDao mySpiedSvc;
+
 	@BeforeEach
 	public void init() {
 		// set our context
@@ -108,6 +150,7 @@ class BaseHapiFhirResourceDaoTest {
 		// the individual tests will have to start
 		// by calling setup themselves
 		mySvc.setContext(myFhirContext);
+		mySpiedSvc = spy(mySvc);
 	}
 
 	/**
@@ -198,7 +241,7 @@ class BaseHapiFhirResourceDaoTest {
 		)).thenReturn(jpaPid);
 		when(myEntityManager.find(
 			any(Class.class),
-			Mockito.anyLong()
+			anyLong()
 		)).thenReturn(entity);
 		// we don't stub myConfig.getResourceClientIdStrategy()
 		// because even a null return isn't ANY...
@@ -285,6 +328,76 @@ class BaseHapiFhirResourceDaoTest {
 		return Stream.of(
 			Arguments.of(new SearchParameterMap().setLoadSynchronousUpTo(1000), 1000),
 			Arguments.of(new SearchParameterMap(), 5000)
+		);
+	}
+
+	@ParameterizedTest
+	@MethodSource("thresholdsAndResourceIds")
+	void deleteByUrlConsiderThreshold(long theThreshold, Set<Long> theResourceIds) {
+		final String url = "Patient?_lastUpdated=gt2024-01-01";
+		final RequestDetails request = new SystemRequestDetails();
+
+		when(myStorageSettings.isDeleteEnabled()).thenReturn(true);
+		when(myMatchUrlService.getResourceSearch(url))
+			.thenReturn(new ResourceSearch(mock(RuntimeResourceDefinition.class), SearchParameterMap.newSynchronous(), RequestPartitionId.allPartitions()));
+
+		// mocks for transaction handling:
+		final IHapiTransactionService.IExecutionBuilder mockExecutionBuilder = mock(IHapiTransactionService.IExecutionBuilder.class);
+		when(mockExecutionBuilder.withTransactionDetails(any(TransactionDetails.class))).thenReturn(mockExecutionBuilder);
+		when(myTransactionService.withRequest(request)).thenReturn(mockExecutionBuilder);
+		final Answer<DeleteMethodOutcome> answer = theInvocationOnMock -> {
+            final TransactionCallback<DeleteMethodOutcome> arg = theInvocationOnMock.getArgument(0);
+            return arg.doInTransaction(mock(TransactionStatus.class));
+        };
+		when(mockExecutionBuilder.execute(ArgumentMatchers.<TransactionCallback<DeleteMethodOutcome>>any()))
+			.thenAnswer(answer);
+
+		if (theResourceIds.size() > 1) {
+			when(myStorageSettings.isAllowMultipleDelete()).thenReturn(true);
+			when(myStorageSettings.getRestDeleteByUrlResourceIdThreshold()).thenReturn(theThreshold);
+		}
+
+        if (theResourceIds.size() <= 1 || theResourceIds.size() <= theThreshold) {
+            doReturn(new DeleteMethodOutcome()).when(mySpiedSvc).deletePidList(any(), any(), any(), any(), any());
+        }
+
+        final Set<JpaPid> expectedResourceIds = theResourceIds.stream().map(JpaPid::fromId).collect(Collectors.toUnmodifiableSet());
+
+		when(myMatchResourceUrlService.search(any(), any(), any(), any())).thenReturn(expectedResourceIds);
+
+		if (expectedResourceIds.size() > 1 && expectedResourceIds.size() > theThreshold) {
+			try {
+				mySpiedSvc.deleteByUrl(url, request);
+				fail();
+			} catch (PreconditionFailedException exception) {
+				assertEquals(String.format("HAPI-2496: Failed to DELETE resources with match URL \"Patient?_lastUpdated=gt2024-01-01\" because the resolved number of resources: %s exceeds the threshold of %s", expectedResourceIds.size(), theThreshold), exception.getMessage());
+			}
+		} else {
+			final DeleteMethodOutcome deleteMethodOutcome = mySpiedSvc.deleteByUrl(url, request);
+			assertNotNull(deleteMethodOutcome);
+		}
+	}
+
+	static Stream<Arguments> thresholdsAndResourceIds() {
+		return Stream.of(
+			Arguments.of(0, Collections.emptySet()),
+			Arguments.of(1, Collections.emptySet()),
+			Arguments.of(2, Collections.emptySet()),
+			Arguments.of(3, Collections.emptySet()),
+			Arguments.of(4, Collections.emptySet()),
+			Arguments.of(5, Collections.emptySet()),
+			Arguments.of(0, Set.of(1L)),
+			Arguments.of(1, Set.of(1L)),
+			Arguments.of(2, Set.of(1L)),
+			Arguments.of(3, Set.of(1L)),
+			Arguments.of(4, Set.of(1L)),
+			Arguments.of(5, Set.of(1L)),
+			Arguments.of(0, Set.of(1L,2L,3L)),
+			Arguments.of(1, Set.of(1L,2L,3L)),
+			Arguments.of(2, Set.of(1L,2L,3L)),
+			Arguments.of(3, Set.of(1L,2L,3L)),
+			Arguments.of(4, Set.of(1L,2L,3L)),
+			Arguments.of(5, Set.of(1L,2L,3L))
 		);
 	}
 
