@@ -321,7 +321,9 @@ public abstract class QuantitySearchParameterTestCases implements ITestDataBuild
 				{
 					String theUrl = "/Observation?component-value-quantity=107&component-value-quantity=260";
 					List<String> resourceIds = myTestDaoSearch.searchForIds(theUrl);
-					assertThat(resourceIds).as("when same component with qtys 107 and 260").isEmpty();
+					assertThat(resourceIds)
+							.as("when same component with qtys 107 and 260")
+							.isEmpty();
 				}
 
 				// andAndOrClauses
@@ -336,7 +338,9 @@ public abstract class QuantitySearchParameterTestCases implements ITestDataBuild
 				{
 					String theUrl = "/Observation?component-value-quantity=50,70&component-value-quantity=260";
 					List<String> resourceIds = myTestDaoSearch.searchForIds(theUrl);
-					assertThat(resourceIds).as("when same component with qtys 50,70 and 260").isEmpty();
+					assertThat(resourceIds)
+							.as("when same component with qtys 50,70 and 260")
+							.isEmpty();
 				}
 
 				// multipleAndsWithMultipleOrsEach
@@ -351,7 +355,9 @@ public abstract class QuantitySearchParameterTestCases implements ITestDataBuild
 				{
 					String theUrl = "/Observation?component-value-quantity=50,60&component-value-quantity=250,260";
 					List<String> resourceIds = myTestDaoSearch.searchForIds(theUrl);
-					assertThat(resourceIds).as("when same component with qtys 50,60 and 250,260").isEmpty();
+					assertThat(resourceIds)
+							.as("when same component with qtys 50,60 and 250,260")
+							.isEmpty();
 				}
 			}
 		}

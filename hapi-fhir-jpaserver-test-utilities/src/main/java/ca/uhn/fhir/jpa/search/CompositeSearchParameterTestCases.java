@@ -107,7 +107,9 @@ public abstract class CompositeSearchParameterTestCases implements ITestDataBuil
 						withQuantityAtPath("valueQuantity", 100, null, "mmHg")));
 
 		List<String> ids = myTestDaoSearch.searchForIds("Observation?component-code-value-quantity=8480-6$100");
-		assertThat(ids).as("Search for the value from one component, but the code from the other, so it shouldn't match").isEmpty();
+		assertThat(ids)
+				.as("Search for the value from one component, but the code from the other, so it shouldn't match")
+				.isEmpty();
 	}
 
 	@Test
@@ -139,7 +141,9 @@ public abstract class CompositeSearchParameterTestCases implements ITestDataBuil
 						withCodingAt("valueCodeableConcept.coding", SYSTEM_LOINC_ORG, "another-code")));
 
 		List<String> ids = myTestDaoSearch.searchForIds("Observation?component-code-value-concept=8480-6$another-code");
-		assertThat(ids).as("Search for the value from one component, but the code from the other, so it shouldn't match").isEmpty();
+		assertThat(ids)
+				.as("Search for the value from one component, but the code from the other, so it shouldn't match")
+				.isEmpty();
 	}
 
 	@Test
