@@ -8,7 +8,6 @@ import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
 import ca.uhn.fhir.jpa.searchparam.extractor.SearchParamExtractorR5;
 import ca.uhn.fhir.rest.server.util.FhirContextSearchParamRegistry;
 import org.hl7.fhir.r5.model.Appointment;
-import org.hl7.fhir.r5.model.Enumerations;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;

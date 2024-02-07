@@ -26,7 +26,6 @@ import org.hl7.fhir.r4b.model.SearchParameter;
 import org.hl7.fhir.r4b.model.StringType;
 import org.hl7.fhir.r4b.model.Subscription;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;

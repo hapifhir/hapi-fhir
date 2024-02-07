@@ -1,6 +1,6 @@
 package ca.uhn.fhir.model.dstu2.valueset;
 
-import ca.uhn.fhir.model.api.*;
+import ca.uhn.fhir.model.api.IValueSetEnumBinder;
 
 import java.util.HashMap;
 import java.util.Map;

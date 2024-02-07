@@ -3,7 +3,6 @@ package ca.uhn.fhir.rest.server.interceptor.validation.address;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.interceptor.validation.address.impl.LoquateAddressValidator;
-import org.checkerframework.checker.units.qual.A;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.r4.model.Address;
 import org.hl7.fhir.r4.model.Extension;
@@ -16,7 +15,6 @@ import org.mockito.Mockito;
 
 import jakarta.annotation.Nonnull;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Properties;
 
 import static ca.uhn.fhir.rest.server.interceptor.validation.address.AddressValidatingInterceptor.ADDRESS_VALIDATION_DISABLED_HEADER;
@@ -33,7 +31,6 @@ import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;

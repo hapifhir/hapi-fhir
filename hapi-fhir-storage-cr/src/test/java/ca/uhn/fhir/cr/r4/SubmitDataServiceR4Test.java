@@ -1,7 +1,6 @@
 package ca.uhn.fhir.cr.r4;
 
 
-import ca.uhn.fhir.cr.common.IRepositoryFactory;
 import ca.uhn.fhir.cr.repo.HapiFhirRepository;
 
 

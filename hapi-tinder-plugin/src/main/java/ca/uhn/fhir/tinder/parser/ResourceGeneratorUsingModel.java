@@ -11,7 +11,9 @@ import org.apache.maven.plugin.MojoFailureException;
 
 import java.io.File;
 import java.util.stream.Collectors;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 public class ResourceGeneratorUsingModel extends BaseStructureParser {
 

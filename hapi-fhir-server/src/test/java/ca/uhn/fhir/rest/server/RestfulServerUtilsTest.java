@@ -27,7 +27,6 @@ import java.util.stream.Stream;
 import static ca.uhn.fhir.rest.api.RequestTypeEnum.GET;
 import static ca.uhn.fhir.rest.api.RequestTypeEnum.POST;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
-import static org.apache.http.util.TextUtils.isBlank;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;

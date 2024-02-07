@@ -3,10 +3,8 @@ package ca.uhn.fhir.parser;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
 

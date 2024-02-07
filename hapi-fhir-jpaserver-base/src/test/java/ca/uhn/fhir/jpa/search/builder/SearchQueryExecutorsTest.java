@@ -1,7 +1,5 @@
 package ca.uhn.fhir.jpa.search.builder;
 
-import com.google.common.collect.Streams;
-import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
@@ -12,7 +10,6 @@ import java.util.stream.StreamSupport;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
-import static org.junit.jupiter.api.Assertions.*;
 
 class SearchQueryExecutorsTest {
 

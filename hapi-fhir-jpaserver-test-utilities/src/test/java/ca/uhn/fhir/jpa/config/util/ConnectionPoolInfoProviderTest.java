@@ -1,6 +1,5 @@
 package ca.uhn.fhir.jpa.config.util;
 
-import ca.uhn.fhir.jpa.config.r4.JpaR4Config;
 import net.ttddyy.dsproxy.support.ProxyDataSource;
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.junit.jupiter.api.BeforeEach;

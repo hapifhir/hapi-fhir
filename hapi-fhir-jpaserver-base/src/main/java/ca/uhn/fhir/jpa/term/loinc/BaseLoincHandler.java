@@ -34,7 +34,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
-import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.*;
+import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_CODESYSTEM_VERSION;
 import static org.apache.commons.lang3.StringUtils.*;
 
 public abstract class BaseLoincHandler implements IZipContentsHandlerCsv {

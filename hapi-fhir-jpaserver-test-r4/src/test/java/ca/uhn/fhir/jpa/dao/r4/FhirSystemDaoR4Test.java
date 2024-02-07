@@ -93,7 +93,6 @@ import org.springframework.transaction.support.TransactionTemplate;
 import jakarta.annotation.Nonnull;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;

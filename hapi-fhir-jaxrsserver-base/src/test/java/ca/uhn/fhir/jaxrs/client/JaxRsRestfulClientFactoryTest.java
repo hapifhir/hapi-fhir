@@ -13,7 +13,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.net.ssl.SSLException;
-import javax.net.ssl.SSLHandshakeException;
 import jakarta.ws.rs.client.Client;
 import jakarta.ws.rs.core.Response;
 import java.util.ArrayList;

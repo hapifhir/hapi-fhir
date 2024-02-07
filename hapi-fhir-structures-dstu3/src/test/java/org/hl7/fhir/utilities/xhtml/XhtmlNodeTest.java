@@ -1,6 +1,6 @@
 package org.hl7.fhir.utilities.xhtml;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
 

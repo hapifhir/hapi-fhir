@@ -53,7 +53,6 @@ import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import org.apache.commons.collections4.ListUtils;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.IndexSearcher;
-import org.hibernate.search.mapper.orm.common.EntityReference;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.ValueSet;

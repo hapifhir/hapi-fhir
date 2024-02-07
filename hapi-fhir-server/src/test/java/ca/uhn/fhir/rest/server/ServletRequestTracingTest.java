@@ -3,7 +3,6 @@ package ca.uhn.fhir.rest.server;
 import ca.uhn.fhir.rest.api.Constants;
 import org.junit.jupiter.api.Test;
 import org.springframework.mock.web.MockHttpServletRequest;
-import org.springframework.mock.web.MockHttpServletResponse;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.blankString;
