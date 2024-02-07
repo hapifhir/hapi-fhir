@@ -30,10 +30,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
-import static org.hamcrest.CoreMatchers.containsString;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -123,13 +121,13 @@ public class InterceptorThrowingExceptionR4Test {
 		status = ourClient.execute(httpGet);
 		response = extractResponseAndClose(status);
 		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertThat(response, containsString("FAM"));
+		assertThat(response).contains("FAM");
 		assertTrue(ourHitMethod);
 
 		await().until(() -> hit.size() == 3);
 
 		ourLog.info("Hit: {}", hit);
-		assertThat("Hits: " + hit.toString(), hit, contains(1, 2, 3));
+		assertThat(hit).as("Hits: " + hit.toString()).containsExactly(1, 2, 3);
 
 	}
 

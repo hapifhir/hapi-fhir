@@ -17,8 +17,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 import java.util.List;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class FhirResourceDaoR4BSearchNoFtTest extends BaseJpaR4BTest {
@@ -78,9 +77,7 @@ public class FhirResourceDaoR4BSearchNoFtTest extends BaseJpaR4BTest {
 				.filter(t -> t.getParamName().contains("."))
 				.map(t -> t.getParamName() + " " + t.getSystem() + "|" + t.getValue())
 				.toList();
-			assertThat(params.toString(), params, containsInAnyOrder(
-				"composition.patient.identifier http://foo|bar"
-			));
+			assertThat(params).as(params.toString()).containsExactlyInAnyOrder("composition.patient.identifier http://foo|bar");
 		});
 
 		// Test 2

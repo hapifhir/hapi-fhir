@@ -26,9 +26,7 @@ import jakarta.annotation.Nonnull;
 import java.util.Set;
 import java.util.TreeSet;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.containsString;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class InteractionBlockingInterceptorTest implements ITestDataBuilder {
@@ -60,17 +58,7 @@ public class InteractionBlockingInterceptorTest implements ITestDataBuilder {
 
 		// Verify CapabilityStatement
 		Set<String> supportedOps = fetchCapabilityInteractions();
-		assertThat(supportedOps.toString(), supportedOps, containsInAnyOrder(
-			"Observation:create",
-			"Observation:read",
-			"Observation:vread",
-			"OperationDefinition:read",
-			"Patient:read",
-			"Patient:vread",
-			"Patient:search-type",
-			"Patient:history-instance",
-			"Patient:history-type"
-		));
+		assertThat(supportedOps).as(supportedOps.toString()).containsExactlyInAnyOrder("Observation:create", "Observation:read", "Observation:vread", "OperationDefinition:read", "Patient:read", "Patient:vread", "Patient:search-type", "Patient:history-instance", "Patient:history-type");
 
 		// Verify Server
 		verifyCreateObservationOk();
@@ -94,12 +82,7 @@ public class InteractionBlockingInterceptorTest implements ITestDataBuilder {
 
 		// Verify CapabilityStatement
 		Set<String> supportedOps = fetchCapabilityInteractions();
-		assertThat(supportedOps.toString(), supportedOps, containsInAnyOrder(
-			"OperationDefinition:read",
-			"Patient:$instance-op",
-			"Patient:$type-op",
-			"server:$server-op"
-		));
+		assertThat(supportedOps).as(supportedOps.toString()).containsExactlyInAnyOrder("OperationDefinition:read", "Patient:$instance-op", "Patient:$type-op", "server:$server-op");
 
 		// Verify Server
 		verifyCreateObservationFails();
@@ -111,7 +94,7 @@ public class InteractionBlockingInterceptorTest implements ITestDataBuilder {
 			myServer.getFhirClient().read().resource("Encounter").withId("E0").execute();
 			fail();
 		} catch (ResourceNotFoundException e) {
-			assertThat(e.getMessage(), containsString("Unknown resource type"));
+			assertThat(e.getMessage()).contains("Unknown resource type");
 		}
 	}
 
@@ -137,7 +120,7 @@ public class InteractionBlockingInterceptorTest implements ITestDataBuilder {
 			myServer.getFhirClient().create().resource(new Observation()).execute();
 			fail();
 		} catch (ResourceNotFoundException e) {
-			assertThat(e.getMessage(), containsString("Unknown resource type"));
+			assertThat(e.getMessage()).contains("Unknown resource type");
 		}
 	}
 

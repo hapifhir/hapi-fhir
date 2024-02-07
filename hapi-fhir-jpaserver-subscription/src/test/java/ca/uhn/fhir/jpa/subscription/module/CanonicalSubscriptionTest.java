@@ -21,7 +21,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -42,9 +42,9 @@ public class CanonicalSubscriptionTest {
 
 		s = serializeAndDeserialize(s);
 
-		assertThat(s.getChannelExtension("key1"), Matchers.equalTo("VALUE1"));
-		assertThat(s.getChannelExtension("key2"), Matchers.equalTo("VALUE2a"));
-		assertThat(s.getChannelExtension("key3"), Matchers.nullValue());
+		assertThat(s.getChannelExtension("key1")).isEqualTo("VALUE1");
+		assertThat(s.getChannelExtension("key2")).isEqualTo("VALUE2a");
+		assertThat(s.getChannelExtension("key3")).isNull();
 	}
 
 	@Test
@@ -59,9 +59,9 @@ public class CanonicalSubscriptionTest {
 
 		s = serializeAndDeserialize(s);
 
-		assertThat(s.getChannelExtensions("key1"), Matchers.contains("VALUE1"));
-		assertThat(s.getChannelExtensions("key2"), Matchers.contains("VALUE2a", "VALUE2b"));
-		assertThat(s.getChannelExtensions("key3"), Matchers.empty());
+		assertThat(s.getChannelExtensions("key1")).containsExactly("VALUE1");
+		assertThat(s.getChannelExtensions("key2")).containsExactly("VALUE2a", "VALUE2b");
+		assertThat(s.getChannelExtensions("key3")).isEmpty();
 	}
 
 	@Test

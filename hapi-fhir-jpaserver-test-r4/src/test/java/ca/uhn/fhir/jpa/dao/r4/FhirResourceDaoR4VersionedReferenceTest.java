@@ -48,10 +48,7 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.util.HapiExtensions.EXTENSION_AUTO_VERSION_REFERENCES_AT_PATH;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.matchesPattern;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -147,7 +144,7 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 			Bundle outcome1 = mySystemDao.transaction(new SystemRequestDetails(), supplier.get());
 			assertEquals("Patient/A/_history/1", outcome1.getEntry().get(0).getResponse().getLocation());
 			String eobId1 = outcome1.getEntry().get(1).getResponse().getLocation();
-			assertThat(eobId1, matchesPattern("ExplanationOfBenefit/[0-9]+/_history/1"));
+			assertThat(eobId1).matches("ExplanationOfBenefit/[0-9]+/_history/1");
 
 			ExplanationOfBenefit eob1 = myExplanationOfBenefitDao.read(new IdType(eobId1), new SystemRequestDetails());
 			assertEquals("Patient/A/_history/1", eob1.getPatient().getReference());
@@ -156,7 +153,7 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 			Bundle outcome2 = mySystemDao.transaction(new SystemRequestDetails(), supplier.get());
 			assertEquals("Patient/A/_history/1", outcome2.getEntry().get(0).getResponse().getLocation());
 			String eobId2 = outcome2.getEntry().get(1).getResponse().getLocation();
-			assertThat(eobId2, matchesPattern("ExplanationOfBenefit/[0-9]+/_history/1"));
+			assertThat(eobId2).matches("ExplanationOfBenefit/[0-9]+/_history/1");
 
 			ExplanationOfBenefit eob2 = myExplanationOfBenefitDao.read(new IdType(eobId2), new SystemRequestDetails());
 			assertEquals("Patient/A/_history/1", eob2.getPatient().getReference());
@@ -196,7 +193,7 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 			assertEquals("Organization/O/_history/1", outcome1.getEntry().get(0).getResponse().getLocation());
 			assertEquals("Patient/A/_history/1", outcome1.getEntry().get(1).getResponse().getLocation());
 			String eobId1 = outcome1.getEntry().get(2).getResponse().getLocation();
-			assertThat(eobId1, matchesPattern("ExplanationOfBenefit/[0-9]+/_history/1"));
+			assertThat(eobId1).matches("ExplanationOfBenefit/[0-9]+/_history/1");
 
 			ExplanationOfBenefit eob1 = myExplanationOfBenefitDao.read(new IdType(eobId1), new SystemRequestDetails());
 			assertEquals("Patient/A/_history/1", eob1.getPatient().getReference());
@@ -209,7 +206,7 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 			String patientId = outcome2.getEntry().get(1).getResponse().getLocation();
 			assertEquals("Patient/A/_history/2", patientId);
 			String eobId2 = outcome2.getEntry().get(2).getResponse().getLocation();
-			assertThat(eobId2, matchesPattern("ExplanationOfBenefit/[0-9]+/_history/1"));
+			assertThat(eobId2).matches("ExplanationOfBenefit/[0-9]+/_history/1");
 
 			Patient patient = myPatientDao.read(new IdType("Patient/A"), new SystemRequestDetails());
 			assertEquals(patientId, patient.getId());
@@ -251,7 +248,7 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 			assertEquals("Organization/O/_history/1", outcome1.getEntry().get(0).getResponse().getLocation());
 			assertEquals("Patient/A/_history/1", outcome1.getEntry().get(1).getResponse().getLocation());
 			String eobId1 = outcome1.getEntry().get(2).getResponse().getLocation();
-			assertThat(eobId1, matchesPattern("ExplanationOfBenefit/[0-9]+/_history/1"));
+			assertThat(eobId1).matches("ExplanationOfBenefit/[0-9]+/_history/1");
 
 			ExplanationOfBenefit eob1 = myExplanationOfBenefitDao.read(new IdType(eobId1), new SystemRequestDetails());
 			assertEquals("Patient/A/_history/1", eob1.getPatient().getReference());
@@ -262,7 +259,7 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 			String patientId = outcome2.getEntry().get(1).getResponse().getLocation();
 			assertEquals("Patient/A/_history/2", patientId);
 			String eobId2 = outcome2.getEntry().get(2).getResponse().getLocation();
-			assertThat(eobId2, matchesPattern("ExplanationOfBenefit/[0-9]+/_history/1"));
+			assertThat(eobId2).matches("ExplanationOfBenefit/[0-9]+/_history/1");
 
 			Patient patient = myPatientDao.read(new IdType("Patient/A"), new SystemRequestDetails());
 			assertEquals(patientId, patient.getId());
@@ -495,11 +492,11 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 			Patient patient = new Patient();
 			patient.setId(patientId);
 			DaoMethodOutcome outcome = myPatientDao.update(patient);
-			assertThat(outcome.getResource().getIdElement().getValue(), is(equalTo(patientId + "/_history/1")));
+			assertThat(outcome.getResource().getIdElement().getValue()).isEqualTo(patientId + "/_history/1");
 
 			Patient returned = myPatientDao.read(idType);
 			Assertions.assertNotNull(returned);
-			assertThat(returned.getId(), is(equalTo(patientId + "/_history/1")));
+			assertThat(returned.getId()).isEqualTo(patientId + "/_history/1");
 
 			// update to change version
 			patient.setActive(true);
@@ -952,7 +949,7 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 		DaoMethodOutcome update = myObservationDao.create(obs);
 		Observation resource = (Observation)update.getResource();
 		String versionedPatientReference = resource.getSubject().getReference();
-		assertThat(versionedPatientReference, is(equalTo("Patient/ABC")));
+		assertThat(versionedPatientReference).isEqualTo("Patient/ABC");
 
 		Patient p = myPatientDao.read(new IdDt("Patient/ABC"));
 		Assertions.assertNotNull(p);
@@ -966,7 +963,7 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 		resource = (Observation)update.getResource();
 		versionedPatientReference = resource.getSubject().getReference();
 
-		assertThat(versionedPatientReference, is(equalTo("Patient/RED/_history/1")));
+		assertThat(versionedPatientReference).isEqualTo("Patient/RED/_history/1");
 	}
 
 	@Test

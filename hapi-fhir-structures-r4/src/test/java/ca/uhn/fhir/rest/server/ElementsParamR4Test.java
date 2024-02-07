@@ -36,10 +36,9 @@ import java.util.Collection;
 import java.util.Set;
 import java.util.function.Consumer;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ElementsParamR4Test {
@@ -161,12 +160,12 @@ public class ElementsParamR4Test {
 			Patient.class,
 			patient -> {
 				String responseContent = ourCtx.newXmlParser().encodeResourceToString(patient);
-				assertThat(responseContent, not(containsString("<Bundle")));
+				assertThat(responseContent).doesNotContain("<Bundle");
 				assertThat(responseContent, (containsString("<Patient")));
-				assertThat(responseContent, not(containsString("<div>THE DIV</div>")));
+				assertThat(responseContent).doesNotContain("<div>THE DIV</div>");
 				assertThat(responseContent, (containsString("family")));
 				assertThat(responseContent, (containsString("maritalStatus")));
-				assertThat(ourLastElements, containsInAnyOrder("name", "maritalStatus"));
+				assertThat(ourLastElements).containsExactlyInAnyOrder("name", "maritalStatus");
 			}
 		);
 	}
@@ -178,10 +177,10 @@ public class ElementsParamR4Test {
 			Patient.class,
 			patient -> {
 				String responseContent = ourCtx.newXmlParser().encodeResourceToString(patient);
-				assertThat(responseContent, not(containsString("<div>THE DIV</div>")));
+				assertThat(responseContent).doesNotContain("<div>THE DIV</div>");
 				assertThat(responseContent, (containsString("family")));
-				assertThat(responseContent, not(containsString("maritalStatus")));
-				assertThat(ourLastElements, containsInAnyOrder("name"));
+				assertThat(responseContent).doesNotContain("maritalStatus");
+				assertThat(ourLastElements).containsExactlyInAnyOrder("name");
 			}
 		);
 	}
@@ -193,11 +192,11 @@ public class ElementsParamR4Test {
 			bundle -> {
 				assertEquals("1", bundle.getTotalElement().getValueAsString());
 				String responseContent = ourCtx.newXmlParser().encodeResourceToString(bundle.getEntry().get(0).getResource());
-				assertThat(responseContent, containsString("<Patient"));
-				assertThat(responseContent, not(containsString("THE DIV")));
-				assertThat(responseContent, containsString("family"));
-				assertThat(responseContent, containsString("maritalStatus"));
-				assertThat(ourLastElements, containsInAnyOrder("name", "maritalStatus"));
+				assertThat(responseContent).contains("<Patient");
+				assertThat(responseContent).doesNotContain("THE DIV");
+				assertThat(responseContent).contains("family");
+				assertThat(responseContent).contains("maritalStatus");
+				assertThat(ourLastElements).containsExactlyInAnyOrder("name", "maritalStatus");
 			}
 		);
 	}
@@ -209,10 +208,10 @@ public class ElementsParamR4Test {
 			bundle -> {
 				assertEquals("1", bundle.getTotalElement().getValueAsString());
 				String responseContent = ourCtx.newXmlParser().encodeResourceToString(bundle.getEntry().get(0).getResource());
-				assertThat(responseContent, containsString("THE DIV"));
-				assertThat(responseContent, not(containsString("family")));
-				assertThat(responseContent, not(containsString("maritalStatus")));
-				assertThat(ourLastElements, containsInAnyOrder("text"));
+				assertThat(responseContent).contains("THE DIV");
+				assertThat(responseContent).doesNotContain("family");
+				assertThat(responseContent).doesNotContain("maritalStatus");
+				assertThat(ourLastElements).containsExactlyInAnyOrder("text");
 			}
 		);
 	}

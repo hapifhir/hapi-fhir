@@ -52,8 +52,7 @@ import java.util.Properties;
 import java.util.Set;
 
 import static ca.uhn.fhir.jpa.model.util.JpaConstants.OPERATION_EVERYTHING;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -151,7 +150,7 @@ public abstract class BaseDatabaseVerificationIT extends BaseJpaTest implements 
 			values.addAll(toUnqualifiedVersionlessIdValues(outcome));
 		}
 
-        assertThat(values.toString(), values, containsInAnyOrder(expectedIds.toArray(new String[0])));
+		assertThat(values).as(values.toString()).containsExactlyInAnyOrder(expectedIds.toArray(new String[0]));
     }
 
 

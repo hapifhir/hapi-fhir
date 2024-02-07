@@ -28,8 +28,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-import static org.hamcrest.CoreMatchers.containsString;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -88,7 +87,7 @@ public class ResourceProviderR4BundleTest extends BaseResourceProviderR4Test {
 			myClient.operation().onServer().named(JpaConstants.OPERATION_PROCESS_MESSAGE).withParameters(parameters).execute();
 			fail();
 		} catch (NotImplementedOperationException e) {
-			assertThat(e.getMessage(), containsString("This operation is not yet implemented on this server"));
+			assertThat(e.getMessage()).contains("This operation is not yet implemented on this server");
 		}
 
 	}
@@ -190,9 +189,9 @@ public class ResourceProviderR4BundleTest extends BaseResourceProviderR4Test {
 		
 		// patient 1
 		assertEquals(ids.get(0), bundleEntries.get(0).getResource().getIdElement().toUnqualifiedVersionless().getValueAsString());
-		
+
 		// patient 10 - error outcomes
-	    assertThat(((OperationOutcome)bundleEntries.get(1).getResponse().getOutcome()).getIssueFirstRep().getDiagnostics(), containsString("Patient/1000"));
+			assertThat(((OperationOutcome) bundleEntries.get(1).getResponse().getOutcome()).getIssueFirstRep().getDiagnostics()).contains("Patient/1000");
 
 		// patient 2
 		assertEquals(ids.get(1), bundleEntries.get(2).getResource().getIdElement().toUnqualifiedVersionless().getValueAsString());
@@ -201,13 +200,13 @@ public class ResourceProviderR4BundleTest extends BaseResourceProviderR4Test {
 		assertEquals(ids.get(2), bundleEntries.get(3).getResource().getIdElement().toUnqualifiedVersionless().getValueAsString());
 
 		// patient 20 - error outcomes
-	    assertThat(((OperationOutcome)bundleEntries.get(4).getResponse().getOutcome()).getIssueFirstRep().getDiagnostics(), containsString("Patient/2000"));
+			assertThat(((OperationOutcome) bundleEntries.get(4).getResponse().getOutcome()).getIssueFirstRep().getDiagnostics()).contains("Patient/2000");
 
 		// patient 4
 		assertEquals(ids.get(3), bundleEntries.get(5).getResource().getIdElement().toUnqualifiedVersionless().getValueAsString());
 
 		// patient 30 - error outcomes
-	    assertThat(((OperationOutcome)bundleEntries.get(6).getResponse().getOutcome()).getIssueFirstRep().getDiagnostics(), containsString("Patient/3000"));
+			assertThat(((OperationOutcome) bundleEntries.get(6).getResponse().getOutcome()).getIssueFirstRep().getDiagnostics()).contains("Patient/3000");
 
 		// patient 5
 		assertEquals(ids.get(4), bundleEntries.get(7).getResource().getIdElement().toUnqualifiedVersionless().getValueAsString());
@@ -260,9 +259,9 @@ public class ResourceProviderR4BundleTest extends BaseResourceProviderR4Test {
 		
 		// patient 1
 		assertEquals(ids.get(0), bundleEntries.get(0).getResource().getIdElement().toUnqualifiedVersionless().getValueAsString());
-		
+
 		// patient create
-	    assertThat(bundleEntries.get(1).getResponse().getStatus(), containsString("201"));
+			assertThat(bundleEntries.get(1).getResponse().getStatus()).contains("201");
 
 		// patient 2
 		assertEquals(ids.get(1), bundleEntries.get(2).getResource().getIdElement().toUnqualifiedVersionless().getValueAsString());
@@ -271,7 +270,7 @@ public class ResourceProviderR4BundleTest extends BaseResourceProviderR4Test {
 		assertEquals(ids.get(2), bundleEntries.get(3).getResource().getIdElement().toUnqualifiedVersionless().getValueAsString());
 
 		// condition create
-	    assertThat(bundleEntries.get(4).getResponse().getStatus(), containsString("201"));
+			assertThat(bundleEntries.get(4).getResponse().getStatus()).contains("201");
 
 		// patient 4
 		assertEquals(ids.get(3), bundleEntries.get(5).getResource().getIdElement().toUnqualifiedVersionless().getValueAsString());

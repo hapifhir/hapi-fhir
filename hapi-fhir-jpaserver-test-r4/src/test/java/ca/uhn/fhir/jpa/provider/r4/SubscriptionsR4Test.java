@@ -21,8 +21,7 @@ import org.junit.jupiter.api.Test;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -70,7 +69,7 @@ public class SubscriptionsR4Test extends BaseResourceProviderR4Test {
 			myClient.create().resource(subs).execute();
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertThat(e.getMessage(), containsString("Subscription.status must be populated on this server"));
+			assertThat(e.getMessage()).contains("Subscription.status must be populated on this server");
 		}
 
 		subs.setId("ABC");
@@ -78,7 +77,7 @@ public class SubscriptionsR4Test extends BaseResourceProviderR4Test {
 			myClient.update().resource(subs).execute();
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertThat(e.getMessage(), containsString("Subscription.status must be populated on this server"));
+			assertThat(e.getMessage()).contains("Subscription.status must be populated on this server");
 		}
 
 		subs.setStatus(SubscriptionStatus.REQUESTED);
@@ -136,7 +135,7 @@ public class SubscriptionsR4Test extends BaseResourceProviderR4Test {
 			myClient.update().resource(subs).execute();
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertThat(e.getMessage(), containsString("Subscription.status must be populated on this server"));
+			assertThat(e.getMessage()).contains("Subscription.status must be populated on this server");
 		}
 
 		subs.setStatus(SubscriptionStatus.OFF);
@@ -167,7 +166,7 @@ public class SubscriptionsR4Test extends BaseResourceProviderR4Test {
 			myClient.update().resource(subs).execute();
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertThat(e.getMessage(), containsString("Subscription.status must be populated on this server"));
+			assertThat(e.getMessage()).contains("Subscription.status must be populated on this server");
 		}
 
 		subs.setStatus(SubscriptionStatus.OFF);

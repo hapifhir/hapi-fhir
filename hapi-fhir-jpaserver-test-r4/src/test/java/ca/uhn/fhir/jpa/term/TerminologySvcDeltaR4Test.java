@@ -33,9 +33,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.leftPad;
-import static org.hamcrest.CoreMatchers.containsString;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.matchesPattern;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -187,7 +185,7 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 		runInTransaction(() -> {
 			TermConcept concept = myTermSvc.findCode("http://foo/cs", "ChildAA").orElseThrow(() -> new IllegalStateException());
 			assertEquals(2, concept.getParents().size());
-			assertThat(concept.getParentPidsAsString(), matchesPattern("^[0-9]+ [0-9]+$"));
+			assertThat(concept.getParentPidsAsString()).matches("^[0-9]+ [0-9]+$");
 		});
 
 	}
@@ -271,7 +269,7 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 			myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd("http://foo", new CustomTerminologySet());
 			fail();
 		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage(), containsString("can not apply a delta - wrong content mode"));
+			assertThat(e.getMessage()).contains("can not apply a delta - wrong content mode");
 		}
 
 	}
@@ -594,7 +592,7 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 		try {
 			myTermCodeSystemStorageSvc.applyDeltaCodeSystemsRemove("http://foo/cs", delta);
 		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage(), containsString("Unknown code system: http://foo"));
+			assertThat(e.getMessage()).contains("Unknown code system: http://foo");
 		}
 
 	}

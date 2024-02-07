@@ -23,9 +23,7 @@ import org.slf4j.LoggerFactory;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.hamcrest.CoreMatchers.containsString;
-import static org.hamcrest.CoreMatchers.startsWith;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -253,9 +251,9 @@ public class InMemoryTerminologyServerValidationSupportTest extends BaseValidati
 		assertEquals("28571000087109", outcome.getCode());
 		assertEquals("MODERNA COVID-19 mRNA-1273", outcome.getDisplay());
 		assertEquals("0.17", outcome.getCodeSystemVersion());
-		assertThat(outcome.getMessage(), containsString("Concept Display \"BLAH\" does not match expected \"MODERNA COVID-19 mRNA-1273\""));
+		assertThat(outcome.getMessage()).contains("Concept Display \"BLAH\" does not match expected \"MODERNA COVID-19 mRNA-1273\"");
 		assertEquals("warning", outcome.getSeverityCode());
-		assertThat(outcome.getSourceDetails(), startsWith("Code was validated against in-memory expansion"));
+		assertThat(outcome.getSourceDetails()).startsWith("Code was validated against in-memory expansion");
 
 		// Validate code - good code, good display
 		codeSystemUrl = "http://snomed.info/sct";

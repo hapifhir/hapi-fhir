@@ -44,9 +44,7 @@ import java.util.Map;
 import java.util.Set;
 
 import static ca.uhn.fhir.test.utilities.SearchTestUtil.toUnqualifiedVersionlessIdValues;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.containsString;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -156,7 +154,7 @@ public class SearchNarrowingWithConsentAndAuthInterceptorTest {
 
 		assertEquals(1, myObservationProvider.getRequestParams().size());
 		assertTrue(myObservationProvider.getRequestParams().get(0).isEmpty(), myObservationProvider.getRequestParams().toString());
-		assertThat(toUnqualifiedVersionlessIdValues(response), contains("Observation/O0"));
+		assertThat(toUnqualifiedVersionlessIdValues(response)).containsExactly("Observation/O0");
 
 	}
 
@@ -203,7 +201,7 @@ public class SearchNarrowingWithConsentAndAuthInterceptorTest {
 
 		assertEquals(1, myObservationProvider.getRequestParams().size());
 		assertTrue(myObservationProvider.getRequestParams().get(0).isEmpty(), myObservationProvider.getRequestParams().toString());
-		assertThat(toUnqualifiedVersionlessIdValues(response), contains("Observation/O0"));
+		assertThat(toUnqualifiedVersionlessIdValues(response)).containsExactly("Observation/O0");
 
 	}
 
@@ -250,7 +248,7 @@ public class SearchNarrowingWithConsentAndAuthInterceptorTest {
 
 		assertEquals(1, myObservationProvider.getRequestParams().size());
 		assertTrue(myObservationProvider.getRequestParams().get(0).isEmpty(), myObservationProvider.getRequestParams().toString());
-		assertThat(toUnqualifiedVersionlessIdValues(response), contains("Observation/O1"));
+		assertThat(toUnqualifiedVersionlessIdValues(response)).containsExactly("Observation/O1");
 
 	}
 
@@ -298,7 +296,7 @@ public class SearchNarrowingWithConsentAndAuthInterceptorTest {
 
 		assertEquals(1, myObservationProvider.getRequestParams().size());
 		assertTrue(myObservationProvider.getRequestParams().get(0).isEmpty(), myObservationProvider.getRequestParams().toString());
-		assertThat(toUnqualifiedVersionlessIdValues(response), contains("Observation/O1"));
+		assertThat(toUnqualifiedVersionlessIdValues(response)).containsExactly("Observation/O1");
 
 	}
 
@@ -351,7 +349,7 @@ public class SearchNarrowingWithConsentAndAuthInterceptorTest {
 
 		// Verify
 
-		assertThat(toUnqualifiedVersionlessIdValues(response), contains("Patient/P0", "Observation/O0"));
+		assertThat(toUnqualifiedVersionlessIdValues(response)).containsExactly("Patient/P0", "Observation/O0");
 
 	}
 
@@ -405,7 +403,7 @@ public class SearchNarrowingWithConsentAndAuthInterceptorTest {
 
 		// Verify
 
-		assertThat(toUnqualifiedVersionlessIdValues(response), contains("Patient/P0", "Observation/O0"));
+		assertThat(toUnqualifiedVersionlessIdValues(response)).containsExactly("Patient/P0", "Observation/O0");
 
 	}
 
@@ -460,7 +458,7 @@ public class SearchNarrowingWithConsentAndAuthInterceptorTest {
 		} catch (ForbiddenOperationException e) {
 
 			// Verify
-			assertThat(e.getMessage(), containsString("Access denied by"));
+			assertThat(e.getMessage()).contains("Access denied by");
 
 		}
 

@@ -48,8 +48,7 @@ import java.io.IOException;
 import java.util.List;
 
 import static ca.uhn.fhir.util.HapiExtensions.EXT_VALUESET_EXPANSION_MESSAGE;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -244,9 +243,7 @@ public class FhirResourceDaoR4SearchWithHSearchDisabledTest extends BaseJpaTest 
 		// Non Pre-Expanded
 		ValueSet outcome = myValueSetDao.expand(vs, new ValueSetExpansionOptions());
 		assertEquals("ValueSet \"ValueSet.url[http://vs]\" has not yet been pre-expanded. Performing in-memory expansion without parameters. Current status: NOT_EXPANDED | The ValueSet is waiting to be picked up and pre-expanded by a scheduled task.", outcome.getMeta().getExtensionString(EXT_VALUESET_EXPANSION_MESSAGE));
-		assertThat(myValueSetTestUtil.toCodes(outcome).toString(), myValueSetTestUtil.toCodes(outcome), contains(
-			"code5", "code4", "code3", "code2", "code1"
-		));
+		assertThat(myValueSetTestUtil.toCodes(outcome)).as(myValueSetTestUtil.toCodes(outcome).toString()).containsExactly("code5", "code4", "code3", "code2", "code1");
 
 
 	}

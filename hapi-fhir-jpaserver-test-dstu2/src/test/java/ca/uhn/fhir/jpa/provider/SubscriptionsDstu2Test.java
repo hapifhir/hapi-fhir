@@ -20,8 +20,7 @@ import org.junit.jupiter.api.Test;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -63,7 +62,7 @@ public class SubscriptionsDstu2Test extends BaseResourceProviderDstu2Test {
 			myClient.create().resource(subs).execute();
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertThat(e.getMessage(), containsString("Subscription.status must be populated on this server"));
+			assertThat(e.getMessage()).contains("Subscription.status must be populated on this server");
 		}
 
 		subs.setId("ABC");
@@ -71,7 +70,7 @@ public class SubscriptionsDstu2Test extends BaseResourceProviderDstu2Test {
 			myClient.update().resource(subs).execute();
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertThat(e.getMessage(), containsString("Subscription.status must be populated on this server"));
+			assertThat(e.getMessage()).contains("Subscription.status must be populated on this server");
 		}
 
 		subs.setStatus(SubscriptionStatusEnum.REQUESTED);
@@ -114,7 +113,7 @@ public class SubscriptionsDstu2Test extends BaseResourceProviderDstu2Test {
 			myClient.create().resource(subs).execute();
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertThat(e.getMessage(), containsString("Unknown SubscriptionStatus code 'aaaaa'"));
+			assertThat(e.getMessage()).contains("Unknown SubscriptionStatus code 'aaaaa'");
 		}
 	}
 
@@ -143,7 +142,7 @@ public class SubscriptionsDstu2Test extends BaseResourceProviderDstu2Test {
 			myClient.update().resource(subs).execute();
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertThat(e.getMessage(), containsString("Subscription.status must be populated on this server"));
+			assertThat(e.getMessage()).contains("Subscription.status must be populated on this server");
 		}
 
 		subs.setStatus(SubscriptionStatusEnum.OFF);
@@ -172,7 +171,7 @@ public class SubscriptionsDstu2Test extends BaseResourceProviderDstu2Test {
 			myClient.update().resource(subs).execute();
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertThat(e.getMessage(), containsString("Subscription.status must be populated on this server"));
+			assertThat(e.getMessage()).contains("Subscription.status must be populated on this server");
 		}
 
 		subs.setStatus(SubscriptionStatusEnum.OFF);

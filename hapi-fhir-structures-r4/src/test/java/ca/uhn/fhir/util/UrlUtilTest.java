@@ -12,9 +12,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 import java.util.List;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.hasSize;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -119,26 +117,22 @@ public class UrlUtilTest {
 	@Test
 	public void testTranslateMatchUrl_UrlWithSpaces() {
 		// %20 is an encoded space character
-		assertThat(UrlUtil.translateMatchUrl("Observation?names=homer%20simpson"),
-			containsInAnyOrder(new BasicNameValuePair("names", "homer simpson")));
+		assertThat(UrlUtil.translateMatchUrl("Observation?names=homer%20simpson")).containsExactlyInAnyOrder(new BasicNameValuePair("names", "homer simpson"));
 
 		// + is also an encoded space character
-		assertThat(UrlUtil.translateMatchUrl("Observation?names=homer+simpson"),
-			containsInAnyOrder(new BasicNameValuePair("names", "homer simpson")));
+		assertThat(UrlUtil.translateMatchUrl("Observation?names=homer+simpson")).containsExactlyInAnyOrder(new BasicNameValuePair("names", "homer simpson"));
 	}
 
 	@Test
 	public void testTranslateMatchUrl_UrlWithPlusSign() {
 		// %2B is an encoded plus sign
-		assertThat(UrlUtil.translateMatchUrl("Observation?names=homer%2Bsimpson"),
-			containsInAnyOrder(new BasicNameValuePair("names", "homer+simpson")));
+		assertThat(UrlUtil.translateMatchUrl("Observation?names=homer%2Bsimpson")).containsExactlyInAnyOrder(new BasicNameValuePair("names", "homer+simpson"));
 	}
 
 	@Test
 	public void testTranslateMatchUrl_UrlWithPipe() {
 		// Real space
-		assertThat(UrlUtil.translateMatchUrl("Observation?names=homer|simpson"),
-			containsInAnyOrder(new BasicNameValuePair("names", "homer|simpson")));
+		assertThat(UrlUtil.translateMatchUrl("Observation?names=homer|simpson")).containsExactlyInAnyOrder(new BasicNameValuePair("names", "homer|simpson"));
 	}
 
 	@ParameterizedTest
@@ -177,24 +171,22 @@ public class UrlUtilTest {
 	@Test
 	public void testGetAboveUriCandidates_returnsUriList() {
 		List<String> candidates = UrlUtil.getAboveUriCandidates("http://host/v1/v2/v3/v4");
-		assertThat(candidates, hasSize(5));
-		assertThat(candidates, containsInAnyOrder("http://host/v1/v2/v3/v4", "http://host/v1/v2/v3",
-			"http://host/v1/v2", "http://host/v1", "http://host"));
+		assertThat(candidates).hasSize(5);
+		assertThat(candidates).containsExactlyInAnyOrder("http://host/v1/v2/v3/v4", "http://host/v1/v2/v3", "http://host/v1/v2", "http://host/v1", "http://host");
 	}
 
 	@Test
 	public void testGetAboveUriCandidates_withHostOnly_returnsHostUri() {
 		List<String> candidates = UrlUtil.getAboveUriCandidates("http://host");
-		assertThat(candidates, hasSize(1));
-		assertThat(candidates, containsInAnyOrder("http://host"));
+		assertThat(candidates).hasSize(1);
+		assertThat(candidates).containsExactlyInAnyOrder("http://host");
 	}
 
 	@Test
 	public void testGetAboveUriCandidates_withFullUri_returnsUriList() {
 		List<String> candidates = UrlUtil.getAboveUriCandidates("https://host.com:8080/path1/path2?name=name#name");
-		assertThat(candidates, hasSize(3));
-		assertThat(candidates, containsInAnyOrder("https://host.com:8080/path1/path2?name=name#name",
-			"https://host.com:8080/path1", "https://host.com:8080"));
+		assertThat(candidates).hasSize(3);
+		assertThat(candidates).containsExactlyInAnyOrder("https://host.com:8080/path1/path2?name=name#name", "https://host.com:8080/path1", "https://host.com:8080");
 	}
 
 	@ParameterizedTest

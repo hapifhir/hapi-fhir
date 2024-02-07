@@ -61,6 +61,7 @@ import java.io.StringReader;
 import java.util.Arrays;
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.not;
@@ -180,12 +181,12 @@ public class JsonParserHl7OrgDstu2Test {
     String encoded = ourCtx.newJsonParser().setPrettyPrint(true).setSuppressNarratives(true).encodeResourceToString(patient);
     ourLog.info(encoded);
 
-    assertThat(encoded, containsString("Patient"));
+		assertThat(encoded).contains("Patient");
     assertThat(encoded, stringContainsInOrder(Constants.TAG_SUBSETTED_SYSTEM_DSTU3, Constants.TAG_SUBSETTED_CODE));
-    assertThat(encoded, not(containsString("text")));
-    assertThat(encoded, not(containsString("THE DIV")));
-    assertThat(encoded, containsString("family"));
-    assertThat(encoded, containsString("maritalStatus"));
+		assertThat(encoded).doesNotContain("text");
+		assertThat(encoded).doesNotContain("THE DIV");
+		assertThat(encoded).contains("family");
+		assertThat(encoded).contains("maritalStatus");
   }
 
   @Test
@@ -232,9 +233,9 @@ public class JsonParserHl7OrgDstu2Test {
         org.hamcrest.Matchers.stringContainsInOrder("{\"resourceType\":\"Patient\",", "\"extension\":[{\"url\":\"http://example.com/extensions#someext\",\"valueDateTime\":\"2011-01-02T11:13:15\"}",
             "{\"url\":\"http://example.com#parent\",\"extension\":[{\"url\":\"http://example.com#child\",\"valueString\":\"value1\"},{\"url\":\"http://example.com#child\",\"valueString\":\"value2\"}]}"));
     assertThat(enc, org.hamcrest.Matchers.stringContainsInOrder("\"modifierExtension\":[" + "{" + "\"url\":\"http://example.com/extensions#modext\"," + "\"valueDate\":\"1995-01-02\"" + "}" + "],"));
-    assertThat(enc, containsString("\"_given\":[" + "{" + "\"extension\":[" + "{" + "\"url\":\"http://examples.com#givenext\"," + "\"valueString\":\"given\"" + "}" + "]" + "}," + "{"
-        + "\"extension\":[" + "{" + "\"url\":\"http://examples.com#givenext_parent\"," + "\"extension\":[" + "{"
-        + "\"url\":\"http://examples.com#givenext_child\"," + "\"valueString\":\"CHILD\"" + "}" + "]" + "}" + "]" + "}"));
+		assertThat(enc).contains("\"_given\":[" + "{" + "\"extension\":[" + "{" + "\"url\":\"http://examples.com#givenext\"," + "\"valueString\":\"given\"" + "}" + "]" + "}," + "{"
+			+ "\"extension\":[" + "{" + "\"url\":\"http://examples.com#givenext_parent\"," + "\"extension\":[" + "{"
+			+ "\"url\":\"http://examples.com#givenext_child\"," + "\"valueString\":\"CHILD\"" + "}" + "]" + "}" + "]" + "}");
 
     /*
      * Now parse this back
@@ -342,7 +343,7 @@ public class JsonParserHl7OrgDstu2Test {
 
 		b.getEntry().remove(2);
 		bundleString = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(b);
-		assertThat(bundleString, not(containsString("deleted")));
+		assertThat(bundleString).doesNotContain("deleted");
 
 	}
 
@@ -482,12 +483,12 @@ public class JsonParserHl7OrgDstu2Test {
 		String encoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(b);
 		ourLog.info(encoded);
 		assertThat(encoded, stringContainsInOrder(Arrays.asList("\"contained\"", "resourceType\": \"Organization", "id\": \"1\"")));
-		assertThat(encoded, containsString("reference\": \"#1\""));
+		assertThat(encoded).contains("reference\": \"#1\"");
 		
 		encoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient);
 		ourLog.info(encoded);
 		assertThat(encoded, stringContainsInOrder(Arrays.asList("\"contained\"", "resourceType\": \"Organization", "id\": \"1\"")));
-		assertThat(encoded, containsString("reference\": \"#1\""));
+		assertThat(encoded).contains("reference\": \"#1\"");
 	}
 
 	@Test
@@ -669,7 +670,7 @@ public class JsonParserHl7OrgDstu2Test {
 		valueSet.addUseContext().addExtension().setUrl("http://foo").setValue( new StringType("AAA"));
 
 		String encoded = ourCtx.newJsonParser().encodeResourceToString(valueSet);
-		assertThat(encoded, containsString("\"useContext\":[{\"extension\":[{\"url\":\"http://foo\",\"valueString\":\"AAA\"}]}"));
+		assertThat(encoded).contains("\"useContext\":[{\"extension\":[{\"url\":\"http://foo\",\"valueString\":\"AAA\"}]}");
 
 	}
 	
@@ -706,8 +707,8 @@ public class JsonParserHl7OrgDstu2Test {
 		
 		String enc = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(list);
 		ourLog.info(enc);
-		
-		assertThat(enc, containsString("\"id\": \"1\""));
+
+		assertThat(enc).contains("\"id\": \"1\"");
 		
 		List_ parsed = ourCtx.newJsonParser().parseResource(List_.class,enc);
 		assertEquals(Patient.class, parsed.getEntry().get(0).getItem().getResource().getClass());
@@ -746,7 +747,7 @@ public class JsonParserHl7OrgDstu2Test {
 		str = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(b);
 		ourLog.info(str);
 		// Backslashes need to be escaped because they are in a JSON value
-		assertThat(str, containsString(">hello<"));
+		assertThat(str).contains(">hello<");
 
 	}	
 	
@@ -766,13 +767,13 @@ public class JsonParserHl7OrgDstu2Test {
 		
 		String encoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(b);
 		ourLog.info(encoded);
-		assertThat(encoded, not(containsString("contained")));
-		assertThat(encoded, containsString("\"reference\": \"Organization/65546\""));
+		assertThat(encoded).doesNotContain("contained");
+		assertThat(encoded).contains("\"reference\": \"Organization/65546\"");
 		
 		encoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient);
 		ourLog.info(encoded);
-		assertThat(encoded, not(containsString("contained")));
-		assertThat(encoded, containsString("\"reference\": \"Organization/65546\""));
+		assertThat(encoded).doesNotContain("contained");
+		assertThat(encoded).contains("\"reference\": \"Organization/65546\"");
 	}
 	
 	
@@ -810,13 +811,13 @@ public class JsonParserHl7OrgDstu2Test {
 
 		String encoded = ourCtx.newJsonParser().setPrettyPrint(true).setSummaryMode(true).encodeResourceToString(patient);
 		ourLog.info(encoded);
-		
-		assertThat(encoded, containsString("Patient"));
+
+		assertThat(encoded).contains("Patient");
 		assertThat(encoded, stringContainsInOrder("\"tag\"", 
 				"\"system\": \"" + Constants.TAG_SUBSETTED_SYSTEM_DSTU3 + "\",", "\"code\": \"" + Constants.TAG_SUBSETTED_CODE+"\","));
-		assertThat(encoded, not(containsString("THE DIV")));
-		assertThat(encoded, containsString("family"));
-		assertThat(encoded, not(containsString("maritalStatus")));
+		assertThat(encoded).doesNotContain("THE DIV");
+		assertThat(encoded).contains("family");
+		assertThat(encoded).doesNotContain("maritalStatus");
 	}
 
 	@Test
@@ -831,14 +832,14 @@ public class JsonParserHl7OrgDstu2Test {
 		
 		String encoded = ourCtx.newJsonParser().setPrettyPrint(true).setSummaryMode(true).encodeResourceToString(patient);
 		ourLog.info(encoded);
-		
-		assertThat(encoded, containsString("Patient"));
+
+		assertThat(encoded).contains("Patient");
 		assertThat(encoded, stringContainsInOrder("\"tag\"", 
 				"\"system\": \"foo\",", "\"code\": \"bar\"",
 				"\"system\": \"" + Constants.TAG_SUBSETTED_SYSTEM_DSTU3 + "\",", "\"code\": \"" + Constants.TAG_SUBSETTED_CODE+"\","));
-		assertThat(encoded, not(containsString("THE DIV")));
-		assertThat(encoded, containsString("family"));
-		assertThat(encoded, not(containsString("maritalStatus")));
+		assertThat(encoded).doesNotContain("THE DIV");
+		assertThat(encoded).contains("family");
+		assertThat(encoded).doesNotContain("maritalStatus");
 	}
 
 	@Test
@@ -920,26 +921,26 @@ public class JsonParserHl7OrgDstu2Test {
 		String enc = ourCtx.newJsonParser().encodeResourceToString(patient);
 		ourLog.info(enc);
 		//@formatter:off
-		assertThat(enc, containsString(("{\n" + 
-				"    \"resourceType\":\"Patient\",\n" + 
-				"    \"name\":[\n" + 
-				"        {\n" + 
-				"            \"family\":[\n" + 
-				"                \"Shmoe\"\n" + 
-				"            ],\n" + 
-				"            \"_family\":[\n" + 
-				"                {\n" + 
-				"                    \"extension\":[\n" + 
-				"                        {\n" + 
-				"                            \"url\":\"http://examples.com#givenext\",\n" + 
-				"                            \"valueString\":\"Hello\"\n" + 
-				"                        }\n" + 
-				"                    ]\n" + 
-				"                }\n" + 
-				"            ]\n" + 
-				"        }\n" + 
-				"    ]\n" + 
-				"}").replace("\n", "").replaceAll(" +", "")));
+		assertThat(enc).contains(("{\n" +
+			"    \"resourceType\":\"Patient\",\n" +
+			"    \"name\":[\n" +
+			"        {\n" +
+			"            \"family\":[\n" +
+			"                \"Shmoe\"\n" +
+			"            ],\n" +
+			"            \"_family\":[\n" +
+			"                {\n" +
+			"                    \"extension\":[\n" +
+			"                        {\n" +
+			"                            \"url\":\"http://examples.com#givenext\",\n" +
+			"                            \"valueString\":\"Hello\"\n" +
+			"                        }\n" +
+			"                    ]\n" +
+			"                }\n" +
+			"            ]\n" +
+			"        }\n" +
+			"    ]\n" +
+			"}").replace("\n", "").replaceAll(" +", ""));
 		//@formatter:on
 
     Patient parsed = ourCtx.newJsonParser().parseResource(Patient.class, new StringReader(enc));
@@ -993,59 +994,59 @@ public class JsonParserHl7OrgDstu2Test {
     ourLog.info(output);
 
     String enc = ourCtx.newJsonParser().encodeResourceToString(patient);
-    //@formatter:off
-		assertThat(enc, containsString(("{" + 
-				"\"resourceType\":\"Patient\"," + 
-				"    \"extension\":[" + 
-				"        {" + 
-				"            \"url\":\"http://example.com/extensions#someext\"," + 
-				"            \"valueDateTime\":\"2011-01-02T11:13:15\"" + 
-				"        }," + 
-				"        {" + 
-				"            \"url\":\"http://example.com#parent\"," + 
-				"            \"extension\":[" + 
-				"                {" + 
-				"                    \"url\":\"http://example.com#child\"," + 
-				"                    \"valueString\":\"value1\"" + 
-				"                }," + 
-				"                {" + 
-				"                    \"url\":\"http://example.com#child\"," + 
-				"                    \"valueString\":\"value1\"" + 
-				"                }" + 
-				"            ]" + 
-				"        }" + 
-				"    ]").replace(" ", "")));
+		//@formatter:off
+		assertThat(enc).contains(("{" +
+			"\"resourceType\":\"Patient\"," +
+			"    \"extension\":[" +
+			"        {" +
+			"            \"url\":\"http://example.com/extensions#someext\"," +
+			"            \"valueDateTime\":\"2011-01-02T11:13:15\"" +
+			"        }," +
+			"        {" +
+			"            \"url\":\"http://example.com#parent\"," +
+			"            \"extension\":[" +
+			"                {" +
+			"                    \"url\":\"http://example.com#child\"," +
+			"                    \"valueString\":\"value1\"" +
+			"                }," +
+			"                {" +
+			"                    \"url\":\"http://example.com#child\"," +
+			"                    \"valueString\":\"value1\"" +
+			"                }" +
+			"            ]" +
+			"        }" +
+			"    ]").replace(" ", ""));
 		//@formatter:on
 
-    //@formatter:off
-		assertThat(enc, containsString((
-				"            \"given\":[" + 
-				"                \"Joe\"," + 
-				"                \"Shmoe\"" + 
-				"            ]," + 
-				"            \"_given\":[" + 
-				"                {" + 
-				"                    \"extension\":[" + 
-				"                        {" + 
-				"                            \"url\":\"http://examples.com#givenext\"," + 
-				"                            \"valueString\":\"given\"" + 
-				"                        }" + 
-				"                    ]" + 
-				"                }," + 
-				"                {" + 
-				"                    \"extension\":[" + 
-				"                        {" + 
-				"                            \"url\":\"http://examples.com#givenext_parent\"," + 
-				"                            \"extension\":[" + 
-				"                                {" + 
-				"                                    \"url\":\"http://examples.com#givenext_child\"," + 
-				"                                    \"valueString\":\"CHILD\"" + 
-				"                                }" + 
-				"                            ]" + 
-				"                        }" + 
-				"                    ]" + 
-				"                }" + 
-				"").replace(" ", "")));
+		//@formatter:off
+		assertThat(enc).contains((
+			"            \"given\":[" +
+				"                \"Joe\"," +
+				"                \"Shmoe\"" +
+				"            ]," +
+				"            \"_given\":[" +
+				"                {" +
+				"                    \"extension\":[" +
+				"                        {" +
+				"                            \"url\":\"http://examples.com#givenext\"," +
+				"                            \"valueString\":\"given\"" +
+				"                        }" +
+				"                    ]" +
+				"                }," +
+				"                {" +
+				"                    \"extension\":[" +
+				"                        {" +
+				"                            \"url\":\"http://examples.com#givenext_parent\"," +
+				"                            \"extension\":[" +
+				"                                {" +
+				"                                    \"url\":\"http://examples.com#givenext_child\"," +
+				"                                    \"valueString\":\"CHILD\"" +
+				"                                }" +
+				"                            ]" +
+				"                        }" +
+				"                    ]" +
+				"                }" +
+				"").replace(" ", ""));
 		//@formatter:on
   }
 

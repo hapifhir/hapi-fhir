@@ -21,7 +21,7 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.Optional;
 
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -61,7 +61,7 @@ public class CrDstu3MeasureOperationProviderIT extends BaseCrDstu3TestServer {
 				BigDecimal decimalExpected = mrgcExpected.getMeasureScore();
 				BigDecimal decimalActual = mrgcActual.getMeasureScore();
 
-				assertThat(errorLocator, decimalActual, Matchers.comparesEqualTo(decimalExpected));
+				assertThat(decimalActual).as(errorLocator).isEqualByComparingTo(decimalExpected);
 			}
 		}
 	}

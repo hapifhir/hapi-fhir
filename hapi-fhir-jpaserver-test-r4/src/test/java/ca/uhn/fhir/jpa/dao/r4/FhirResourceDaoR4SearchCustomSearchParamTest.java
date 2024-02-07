@@ -72,16 +72,10 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.countMatches;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.hasItems;
-import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
-import static org.hamcrest.Matchers.startsWith;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -349,7 +343,7 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 		map.setLoadSynchronous(true);
 		map.add("foo", new ReferenceParam(encId));
 		IBundleProvider results = myBundleDao.search(map);
-		assertThat(toUnqualifiedVersionlessIdValues(results), hasItems(bundleId));
+		assertThat(toUnqualifiedVersionlessIdValues(results)).contains(bundleId);
 
 	}
 
@@ -370,7 +364,7 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 			mySearchParameterDao.create(fooSp, mySrd);
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertThat(e.getMessage(), containsString("The token : is not expected here"));
+			assertThat(e.getMessage()).contains("The token : is not expected here");
 		}
 
 	}
@@ -517,7 +511,7 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 		List<String> ids = toUnqualifiedVersionlessIdValues(outcome);
 		ourLog.info("IDS: " + ids);
 		myCaptureQueriesListener.logSelectQueries();
-		assertThat(ids, Matchers.contains(pid.getValue()));
+		assertThat(ids).containsExactly(pid.getValue());
 	}
 
 
@@ -614,7 +608,7 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 		map.addInclude(new Include("Patient:attending", true));
 		results = myAppointmentDao.search(map);
 		foundResources = toUnqualifiedVersionlessIdValues(results);
-		assertThat(foundResources, containsInAnyOrder(appId.getValue(), p2id.getValue(), p1id.getValue()));
+		assertThat(foundResources).containsExactlyInAnyOrder(appId.getValue(), p2id.getValue(), p1id.getValue());
 
 	}
 
@@ -687,13 +681,13 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 		myGroupDao.create(g);
 
 		runInTransaction(() -> {
-			assertThat(myResourceLinkDao.findAll(), empty());
+			assertThat(myResourceLinkDao.findAll()).isEmpty();
 			List<ResourceIndexedSearchParamToken> tokens = myResourceIndexedSearchParamTokenDao
 				.findAll()
 				.stream()
 				.filter(object -> !(!object.getResourceType().equals("Group") || object.isMissing()))
 				.collect(Collectors.toList());
-			assertThat(tokens, empty());
+			assertThat(tokens).isEmpty();
 		});
 	}
 
@@ -732,7 +726,7 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 		map.setLoadSynchronous(true);
 		map.add("reason", new ReferenceParam(conditionId));
 		List<String> results = toUnqualifiedVersionlessIdValues(myMedicationRequestDao.search(map));
-		assertThat(results.toString(), results, contains(mrId));
+		assertThat(results).as(results.toString()).containsExactly(mrId);
 	}
 
 	/**
@@ -764,7 +758,7 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 		map.setLoadSynchronous(true);
 		map.add("reason", new TokenParam("foo", "bar"));
 		List<String> results = toUnqualifiedVersionlessIdValues(myMedicationRequestDao.search(map));
-		assertThat(results, contains(mrId));
+		assertThat(results).containsExactly(mrId);
 	}
 
 	@Test
@@ -780,7 +774,7 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 			mySearchParameterDao.create(threadIdSp, mySrd);
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertThat(e.getMessage(), startsWith(Msg.code(1121) + "Invalid FHIRPath format for SearchParameter.expression \"Communication.payload[1].contentAttachment is not null\""));
+			assertThat(e.getMessage()).startsWith(Msg.code(1121) + "Invalid FHIRPath format for SearchParameter.expression \"Communication.payload[1].contentAttachment is not null\"");
 		}
 	}
 
@@ -817,14 +811,14 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 		map.add("sibling", new ReferenceParam(p1id.getValue()));
 		results = myPatientDao.search(map);
 		foundResources = toUnqualifiedVersionlessIdValues(results);
-		assertThat(foundResources, empty());
+		assertThat(foundResources).isEmpty();
 
 		// Search by chain
 		map = new SearchParameterMap();
 		map.add("sibling", new ReferenceParam("name", "P1"));
 		results = myPatientDao.search(map);
 		foundResources = toUnqualifiedVersionlessIdValues(results);
-		assertThat(foundResources, empty());
+		assertThat(foundResources).isEmpty();
 
 	}
 
@@ -867,14 +861,14 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 		map.add(sp.getCode(), new ReferenceParam(p1id.getValue()));
 		results = myDiagnosticReportDao.search(map);
 		foundResources = toUnqualifiedVersionlessIdValues(results);
-		assertThat(foundResources, containsInAnyOrder(dr1id.getValue()));
+		assertThat(foundResources).containsExactlyInAnyOrder(dr1id.getValue());
 
 		// Find both
 		map = new SearchParameterMap();
 		map.add(sp.getCode(), new ReferenceOrListParam().addOr(new ReferenceParam(p1id.getValue())).addOr(new ReferenceParam(p2id.getValue())));
 		results = myDiagnosticReportDao.search(map);
 		foundResources = toUnqualifiedVersionlessIdValues(results);
-		assertThat(foundResources, containsInAnyOrder(dr1id.getValue(), dr2id.getValue()));
+		assertThat(foundResources).containsExactlyInAnyOrder(dr1id.getValue(), dr2id.getValue());
 
 	}
 
@@ -915,21 +909,21 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 		map.add("sibling", new ReferenceParam(p1id.getValue()));
 		results = myPatientDao.search(map);
 		foundResources = toUnqualifiedVersionlessIdValues(results);
-		assertThat(foundResources, contains(p2id.getValue()));
+		assertThat(foundResources).containsExactly(p2id.getValue());
 
 		// Search by chain
 		map = new SearchParameterMap();
 		map.add("sibling", new ReferenceParam("name", "P1"));
 		results = myPatientDao.search(map);
 		foundResources = toUnqualifiedVersionlessIdValues(results);
-		assertThat(foundResources, contains(p2id.getValue()));
+		assertThat(foundResources).containsExactly(p2id.getValue());
 
 		// Search by two level chain
 		map = new SearchParameterMap();
 		map.add("patient", new ReferenceParam("sibling.name", "P1"));
 		results = myAppointmentDao.search(map);
 		foundResources = toUnqualifiedVersionlessIdValues(results);
-		assertThat(foundResources, containsInAnyOrder(appid.getValue()));
+		assertThat(foundResources).containsExactlyInAnyOrder(appid.getValue());
 
 	}
 
@@ -971,12 +965,12 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 		myCaptureQueriesListener.clear();
 		results = myPatientDao.search(map);
 		foundResources = toUnqualifiedVersionlessIdValues(results);
-		assertThat(foundResources, contains(p2id.getValue()));
+		assertThat(foundResources).containsExactly(p2id.getValue());
 		sql = myCaptureQueriesListener.logSelectQueriesForCurrentThread(0);
-		assertThat(sql, countMatches(sql, "JOIN"), equalTo(0));
-		assertThat(sql, countMatches(sql, "SELECT"), equalTo(1));
-		assertThat(sql, countMatches(sql, "t0.SRC_PATH = 'Patient.extension('http://acme.org/sibling')'"), equalTo(1));
-		assertThat(sql, countMatches(sql, "t0.TARGET_RESOURCE_ID = '"), equalTo(1));
+		assertThat(countMatches(sql, "JOIN")).as(sql).isEqualTo(0);
+		assertThat(countMatches(sql, "SELECT")).as(sql).isEqualTo(1);
+		assertThat(countMatches(sql, "t0.SRC_PATH = 'Patient.extension('http://acme.org/sibling')'")).as(sql).isEqualTo(1);
+		assertThat(countMatches(sql, "t0.TARGET_RESOURCE_ID = '")).as(sql).isEqualTo(1);
 
 		// Search by chain
 		map = SearchParameterMap.newSynchronous();
@@ -984,12 +978,12 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 		myCaptureQueriesListener.clear();
 		results = myPatientDao.search(map);
 		foundResources = toUnqualifiedVersionlessIdValues(results);
-		assertThat(foundResources, contains(p2id.getValue()));
+		assertThat(foundResources).containsExactly(p2id.getValue());
 		sql = myCaptureQueriesListener.logSelectQueriesForCurrentThread(0);
-		assertThat(sql, countMatches(sql, "JOIN"), equalTo(1));
-		assertThat(sql, countMatches(sql, "SRC_PATH = 'Patient.extension('http://acme.org/sibling')'"), equalTo(1));
-		assertThat(sql, countMatches(sql, "HASH_NORM_PREFIX = '"), equalTo(39));
-		assertThat(sql, countMatches(sql, "SP_VALUE_NORMALIZED LIKE "), equalTo(39));
+		assertThat(countMatches(sql, "JOIN")).as(sql).isEqualTo(1);
+		assertThat(countMatches(sql, "SRC_PATH = 'Patient.extension('http://acme.org/sibling')'")).as(sql).isEqualTo(1);
+		assertThat(countMatches(sql, "HASH_NORM_PREFIX = '")).as(sql).isEqualTo(39);
+		assertThat(countMatches(sql, "SP_VALUE_NORMALIZED LIKE ")).as(sql).isEqualTo(39);
 
 		// Search by two level chain
 		map = SearchParameterMap.newSynchronous();
@@ -997,12 +991,12 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 		myCaptureQueriesListener.clear();
 		results = myAppointmentDao.search(map);
 		foundResources = toUnqualifiedVersionlessIdValues(results);
-		assertThat(foundResources, containsInAnyOrder(appid.getValue()));
+		assertThat(foundResources).containsExactlyInAnyOrder(appid.getValue());
 		sql = myCaptureQueriesListener.logSelectQueriesForCurrentThread(0);
-		assertThat(sql, countMatches(sql, "JOIN"), equalTo(2));
-		assertThat(sql, countMatches(sql, "SRC_PATH = 'Appointment.participant.actor.where(resolve() is Patient)'"), equalTo(1));
-		assertThat(sql, countMatches(sql, "SRC_PATH = 'Patient.extension('http://acme.org/sibling')'"), equalTo(1));
-		assertThat(sql, countMatches(sql, "SP_VALUE_NORMALIZED LIKE 'P1%'"), equalTo(39));
+		assertThat(countMatches(sql, "JOIN")).as(sql).isEqualTo(2);
+		assertThat(countMatches(sql, "SRC_PATH = 'Appointment.participant.actor.where(resolve() is Patient)'")).as(sql).isEqualTo(1);
+		assertThat(countMatches(sql, "SRC_PATH = 'Patient.extension('http://acme.org/sibling')'")).as(sql).isEqualTo(1);
+		assertThat(countMatches(sql, "SP_VALUE_NORMALIZED LIKE 'P1%'")).as(sql).isEqualTo(39);
 
 	}
 
@@ -1035,7 +1029,7 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 		map.add("eyecolour", new TokenParam(null, "blue"));
 		IBundleProvider results = myPatientDao.search(map);
 		List<String> foundResources = toUnqualifiedVersionlessIdValues(results);
-		assertThat(foundResources, contains(p1id.getValue()));
+		assertThat(foundResources).containsExactly(p1id.getValue());
 
 	}
 
@@ -1074,7 +1068,7 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 		map.add("foobar", new TokenParam("foo", "bar"));
 		results = myPatientDao.search(map);
 		foundResources = toUnqualifiedVersionlessIdValues(results);
-		assertThat(foundResources, contains(p2id.getValue()));
+		assertThat(foundResources).containsExactly(p2id.getValue());
 	}
 
 	@Test
@@ -1112,7 +1106,7 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 		map.add("foobar", new TokenParam("foo", "bar"));
 		results = myPatientDao.search(map);
 		foundResources = toUnqualifiedVersionlessIdValues(results);
-		assertThat(foundResources, contains(p2id.getValue()));
+		assertThat(foundResources).containsExactly(p2id.getValue());
 	}
 
 	@Test
@@ -1154,7 +1148,7 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 		map.add("foobar", new DateParam("2012-01-02"));
 		results = myPatientDao.search(map);
 		foundResources = toUnqualifiedVersionlessIdValues(results);
-		assertThat(foundResources, contains(p2id.getValue()));
+		assertThat(foundResources).containsExactly(p2id.getValue());
 	}
 
 	@Test
@@ -1209,7 +1203,7 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 		map.add("foobar", new NumberParam("2.1"));
 		results = myPatientDao.search(map);
 		foundResources = toUnqualifiedVersionlessIdValues(results);
-		assertThat(foundResources, contains(p2id.getValue()));
+		assertThat(foundResources).containsExactly(p2id.getValue());
 	}
 
 	@Test
@@ -1246,7 +1240,7 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 		map.add("foobar", new NumberParam("5"));
 		results = myPatientDao.search(map);
 		foundResources = toUnqualifiedVersionlessIdValues(results);
-		assertThat(foundResources, contains(p2id.getValue()));
+		assertThat(foundResources).containsExactly(p2id.getValue());
 	}
 
 	@Test
@@ -1289,7 +1283,7 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 		map.add("foobar", new ReferenceParam(aptId.getValue()));
 		results = myPatientDao.search(map);
 		foundResources = toUnqualifiedVersionlessIdValues(results);
-		assertThat(foundResources, contains(p2id.getValue()));
+		assertThat(foundResources).containsExactly(p2id.getValue());
 	}
 
 	@Test
@@ -1331,7 +1325,7 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 		map.add("foobar", new ReferenceParam(aptId.getValue()));
 		results = myPatientDao.search(map);
 		foundResources = toUnqualifiedVersionlessIdValues(results);
-		assertThat(foundResources, contains(p2id.getValue()));
+		assertThat(foundResources).containsExactly(p2id.getValue());
 	}
 
 	@Test
@@ -1374,7 +1368,7 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 		map.add("foobar", new ReferenceParam(aptId.getValue()));
 		results = myPatientDao.search(map);
 		foundResources = toUnqualifiedVersionlessIdValues(results);
-		assertThat(foundResources, empty());
+		assertThat(foundResources).isEmpty();
 	}
 
 	@Test
@@ -1415,7 +1409,7 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 		map.add("foobar", new StringParam("hello"));
 		results = myPatientDao.search(map);
 		foundResources = toUnqualifiedVersionlessIdValues(results);
-		assertThat(foundResources, contains(p2id.getValue()));
+		assertThat(foundResources).containsExactly(p2id.getValue());
 	}
 
 	@Test
@@ -1451,14 +1445,14 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 		map.add("foo", new StringParam("bar"));
 		results = myPatientDao.search(map);
 		foundResources = toUnqualifiedVersionlessIdValues(results);
-		assertThat(foundResources, contains(patId.getValue()));
+		assertThat(foundResources).containsExactly(patId.getValue());
 
 		// Non match
 		map = new SearchParameterMap();
 		map.add("foo", new StringParam("zzz"));
 		results = myPatientDao.search(map);
 		foundResources = toUnqualifiedVersionlessIdValues(results);
-		assertThat(foundResources, empty());
+		assertThat(foundResources).isEmpty();
 
 	}
 
@@ -1496,14 +1490,14 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 		map.add("foo", new StringParam("bar"));
 		results = myPatientDao.search(map);
 		foundResources = toUnqualifiedVersionlessIdValues(results);
-		assertThat(foundResources, contains(patId.getValue()));
+		assertThat(foundResources).containsExactly(patId.getValue());
 
 		// Non match
 		map = new SearchParameterMap();
 		map.add("foo", new StringParam("zzz"));
 		results = myPatientDao.search(map);
 		foundResources = toUnqualifiedVersionlessIdValues(results);
-		assertThat(foundResources, empty());
+		assertThat(foundResources).isEmpty();
 
 	}
 
@@ -1548,7 +1542,7 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 		IBundleProvider outcome = myObservationDao.search(params);
 		List<String> ids = toUnqualifiedVersionlessIdValues(outcome);
 		ourLog.info("IDS: " + ids);
-		assertThat(ids, contains("Observation/O1"));
+		assertThat(ids).containsExactly("Observation/O1");
 	}
 
 	@Test
@@ -1583,14 +1577,14 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 		map.add("foo", new TokenParam(null, "male"));
 		results = myPatientDao.search(map);
 		foundResources = toUnqualifiedVersionlessIdValues(results);
-		assertThat(foundResources, contains(patId.getValue()));
+		assertThat(foundResources).containsExactly(patId.getValue());
 
 		// Try with normal gender SP
 		map = new SearchParameterMap();
 		map.add("gender", new TokenParam(null, "male"));
 		results = myPatientDao.search(map);
 		foundResources = toUnqualifiedVersionlessIdValues(results);
-		assertThat(foundResources, contains(patId.getValue()));
+		assertThat(foundResources).containsExactly(patId.getValue());
 
 		// Retire the param
 		fooSp.setId(spId);
@@ -1663,7 +1657,7 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 		searchParameterMap.setLoadSynchronous(true);
 		searchParameterMap.add("random-extension", new ReferenceParam("Practitioner/P123"));
 		IBundleProvider search = myPractitionerRoleDao.search(searchParameterMap);
-		assertThat(search.size(), is(equalTo(1)));
+		assertThat(search.size()).isEqualTo(1);
 
 	}
 
@@ -1709,7 +1703,7 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 		map.add("gender", new TokenParam(null, "male"));
 		results = myPatientDao.search(map);
 		foundResources = toUnqualifiedVersionlessIdValues(results);
-		assertThat(foundResources, contains(patId.getValue()));
+		assertThat(foundResources).containsExactly(patId.getValue());
 
 	}
 
@@ -1766,7 +1760,7 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 			verify(interceptor, times(1)).invoke(any(), paramsCaptor.capture());
 
 			StorageProcessingMessage msg = paramsCaptor.getValue().get(StorageProcessingMessage.class);
-			assertThat(msg.getMessage(), containsString("ignoring this parameter"));
+			assertThat(msg.getMessage()).contains("ignoring this parameter");
 
 		} finally {
 			myInterceptorRegistry.unregisterInterceptor(interceptor);

@@ -60,8 +60,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -492,7 +491,7 @@ public class FhirTerserR4Test {
 		FhirTerser t = myCtx.newTerser();
 		List<StringType> strings = t.getAllPopulatedChildElementsOfType(p, StringType.class);
 
-		assertThat(toStrings(strings), containsInAnyOrder("PATIENT", "ORGANIZATION"));
+		assertThat(toStrings(strings)).containsExactlyInAnyOrder("PATIENT", "ORGANIZATION");
 
 	}
 
@@ -509,7 +508,7 @@ public class FhirTerserR4Test {
 		List<StringType> strings = t.getAllPopulatedChildElementsOfType(b, StringType.class);
 
 		assertEquals(1, strings.size());
-		assertThat(toStrings(strings), containsInAnyOrder("BUNDLE"));
+		assertThat(toStrings(strings)).containsExactlyInAnyOrder("BUNDLE");
 
 	}
 
@@ -530,7 +529,7 @@ public class FhirTerserR4Test {
 
 		// validate
 		assertEquals(6, references.size());
-		assertThat(toResourceIds(references), containsInAnyOrder("Observation/1", "Observation/2", "Location/3", "Practitioner/4", "Organization/5", "DocumentReference/6"));
+		assertThat(toResourceIds(references)).containsExactlyInAnyOrder("Observation/1", "Observation/2", "Location/3", "Practitioner/4", "Organization/5", "DocumentReference/6");
 	}
 
 	@Test
@@ -550,7 +549,7 @@ public class FhirTerserR4Test {
 
 		// validate
 		assertEquals(4, references.size());
-		assertThat(toResourceIds(references), containsInAnyOrder("Location/3", "Practitioner/4", "Organization/5", "DocumentReference/6"));
+		assertThat(toResourceIds(references)).containsExactlyInAnyOrder("Location/3", "Practitioner/4", "Organization/5", "DocumentReference/6");
 	}
 
 	private List<String> toResourceIds(List<ResourceReferenceInfo> references) {
@@ -662,13 +661,11 @@ public class FhirTerserR4Test {
 
 		// Not recursive
 		resources = t.getAllEmbeddedResources(outerBundle, false);
-		assertThat(toUnqualifiedVersionlessIdValues(resources).toString(), resources,
-			Matchers.containsInAnyOrder(innerBundle1, innerBundle2, innerPatient1));
+		assertThat(resources).as(toUnqualifiedVersionlessIdValues(resources).toString()).containsExactlyInAnyOrder(innerBundle1, innerBundle2, innerPatient1);
 
 		// Recursive
 		resources = t.getAllEmbeddedResources(outerBundle, true);
-		assertThat(toUnqualifiedVersionlessIdValues(resources).toString(), resources,
-			Matchers.containsInAnyOrder(innerBundle1, innerBundle1innerPatient1, innerBundle2, innerBundle2innerPatient1, innerPatient1));
+		assertThat(resources).as(toUnqualifiedVersionlessIdValues(resources).toString()).containsExactlyInAnyOrder(innerBundle1, innerBundle1innerPatient1, innerBundle2, innerBundle2innerPatient1, innerPatient1);
 	}
 
 	@Test
@@ -687,8 +684,7 @@ public class FhirTerserR4Test {
 		Collection<IBaseResource> resources;
 
 		resources = t.getAllEmbeddedResources(patient, false);
-		assertThat(toUnqualifiedVersionlessIdValues(resources).toString(), resources,
-			containsInAnyOrder(practitioner1));
+		assertThat(resources).as(toUnqualifiedVersionlessIdValues(resources).toString()).containsExactlyInAnyOrder(practitioner1);
 
 	}
 
@@ -1345,7 +1341,7 @@ public class FhirTerserR4Test {
 				}
 			}
 		});
-		assertThat(strings, Matchers.contains("http://foo"));
+		assertThat(strings).containsExactly("http://foo");
 
 		strings.clear();
 		myCtx.newTerser().visit(vs, new IModelVisitor2() {
@@ -1362,7 +1358,7 @@ public class FhirTerserR4Test {
 				return true;
 			}
 		});
-		assertThat(strings, Matchers.contains("http://foo"));
+		assertThat(strings).containsExactly("http://foo");
 	}
 
 
@@ -1412,7 +1408,7 @@ public class FhirTerserR4Test {
 			allStrings.add(next.getValue());
 		}
 
-		assertThat(allStrings, containsInAnyOrder("Line1", "Line2", "Line3"));
+		assertThat(allStrings).containsExactlyInAnyOrder("Line1", "Line2", "Line3");
 
 	}
 

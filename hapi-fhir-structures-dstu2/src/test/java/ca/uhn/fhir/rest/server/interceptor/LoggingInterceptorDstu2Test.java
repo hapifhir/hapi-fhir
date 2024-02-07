@@ -46,9 +46,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.matchesPattern;
-import static org.hamcrest.Matchers.startsWith;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
@@ -201,7 +200,7 @@ public class LoggingInterceptorDstu2Test {
 
 		ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
 		verify(logger, timeout(1000).times(1)).info(captor.capture());
-		assertThat(captor.getValue(), startsWith("read - "));
+		assertThat(captor.getValue()).startsWith("read - ");
 		Integer.parseInt(captor.getValue().substring("read - ".length()));
 	}
 
@@ -225,7 +224,7 @@ public class LoggingInterceptorDstu2Test {
 
 		ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
 		verify(logger, timeout(1000).times(1)).info(captor.capture());
-		assertThat(captor.getValue(), matchesPattern("[1-9][0-9]{1,3}"));
+		assertThat(captor.getValue()).matches("[1-9][0-9]{1,3}");
 	}
 
 	@Test

@@ -14,10 +14,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.util.Collections;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -39,7 +36,7 @@ public class MdmRulesJsonR4Test extends BaseMdmRulesR4Test {
 		try {
 			JsonUtil.serialize(rules);
 		} catch (NullPointerException e) {
-			assertThat(e.getMessage(), containsString("version may not be blank"));
+			assertThat(e.getMessage()).contains("version may not be blank");
 		}
 	}
 
@@ -82,13 +79,13 @@ public class MdmRulesJsonR4Test extends BaseMdmRulesR4Test {
 		myRules = buildOldStyleEidRules();
 
 		String eidSystem = myRules.getEnterpriseEIDSystemForResourceType("Patient");
-		assertThat(eidSystem, is(equalTo(PATIENT_EID_FOR_TEST)));
+		assertThat(eidSystem).isEqualTo(PATIENT_EID_FOR_TEST);
 
 		eidSystem = myRules.getEnterpriseEIDSystemForResourceType("Practitioner");
-		assertThat(eidSystem, is(equalTo(PATIENT_EID_FOR_TEST)));
+		assertThat(eidSystem).isEqualTo(PATIENT_EID_FOR_TEST);
 
 		eidSystem = myRules.getEnterpriseEIDSystemForResourceType("Medication");
-		assertThat(eidSystem, is(equalTo(PATIENT_EID_FOR_TEST)));
+		assertThat(eidSystem).isEqualTo(PATIENT_EID_FOR_TEST);
 	}
 
 	@Override

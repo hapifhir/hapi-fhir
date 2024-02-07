@@ -56,9 +56,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static ca.uhn.fhir.util.TestUtil.sleepAtLeast;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
-import static org.hamcrest.CoreMatchers.containsString;
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -157,8 +156,8 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 		try {
 			mySvc.registerSearch(myCallingDao, params, "Patient", new CacheControlDirective(), null, RequestPartitionId.allPartitions());
 		} catch (InternalErrorException e) {
-			assertThat(e.getMessage(), containsString("FAILED"));
-			assertThat(e.getMessage(), containsString("at ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImplTest"));
+			assertThat(e.getMessage()).contains("FAILED");
+			assertThat(e.getMessage()).contains("at ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImplTest");
 		}
 
 	}
@@ -256,7 +255,7 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 			mySvc.getResources("1234-5678", 0, 100, null, null);
 			fail();
 		} catch (InternalErrorException e) {
-			assertThat(e.getMessage(), containsString("Request timed out"));
+			assertThat(e.getMessage()).contains("Request timed out");
 		}
 	}
 

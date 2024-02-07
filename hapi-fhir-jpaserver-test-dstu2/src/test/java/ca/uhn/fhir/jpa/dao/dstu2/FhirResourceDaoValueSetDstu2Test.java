@@ -18,8 +18,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.io.IOException;
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.stringContainsInOrder;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -210,7 +210,7 @@ public class FhirResourceDaoValueSetDstu2Test extends BaseJpaDstu2Test {
 		ourLog.info(resp);
 
 		List<String> codes = ResourceProviderDstu2ValueSetTest.toCodes(expanded);
-		assertThat(codes, contains("11378-7", "8450-9"));
+		assertThat(codes).containsExactly("11378-7", "8450-9");
 	}
 
 	@Test
@@ -221,7 +221,7 @@ public class FhirResourceDaoValueSetDstu2Test extends BaseJpaDstu2Test {
 		ourLog.info(resp);
 
 		List<String> codes = ResourceProviderDstu2ValueSetTest.toCodes(expanded);
-		assertThat(codes, contains("11378-7", "8450-9"));
+		assertThat(codes).containsExactly("11378-7", "8450-9");
 	}
 
 }

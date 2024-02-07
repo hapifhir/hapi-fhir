@@ -32,11 +32,9 @@ import static ca.uhn.fhir.rest.server.interceptor.auth.IAuthorizationSearchParam
 import static ca.uhn.fhir.rest.server.interceptor.auth.IAuthorizationSearchParamMatcher.MatchResult.buildUnmatched;
 import static ca.uhn.fhir.rest.server.interceptor.auth.IAuthorizationSearchParamMatcher.MatchResult.buildUnsupported;
 import static ca.uhn.test.util.LogbackCaptureTestExtension.eventWithLevelAndMessageContains;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasItem;
-import static org.hamcrest.Matchers.notNullValue;
-import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.Mockito.when;
 
 // TODO: Is there a better home for this test? It can't live in hapi-fhir-server since we need a real FhirContext for the compartment checks.
@@ -90,8 +88,8 @@ class FhirQueryRuleImplTest implements ITestDataBuilder {
 			AuthorizationInterceptor.Verdict verdict = applyRuleToResource(myPatient);
 
 			// then
-			assertThat(verdict, notNullValue());
-			assertThat(verdict.getDecision(), equalTo(PolicyEnum.ALLOW));
+			assertThat(verdict).isNotNull();
+			assertThat(verdict.getDecision()).isEqualTo(PolicyEnum.ALLOW);
 		}
 
 		@Test
@@ -112,8 +110,8 @@ class FhirQueryRuleImplTest implements ITestDataBuilder {
 			AuthorizationInterceptor.Verdict verdict = applyRuleToResource(myPatient);
 
 			// then
-			assertThat(verdict, notNullValue());
-			assertThat(verdict.getDecision(), equalTo(PolicyEnum.ALLOW));
+			assertThat(verdict).isNotNull();
+			assertThat(verdict.getDecision()).isEqualTo(PolicyEnum.ALLOW);
 		}
 
 		@Test
@@ -129,7 +127,7 @@ class FhirQueryRuleImplTest implements ITestDataBuilder {
 			AuthorizationInterceptor.Verdict verdict = applyRuleToResource(myPatient);
 
 			// then
-			assertThat(verdict, nullValue());
+			assertThat(verdict).isNull();
 		}
 
 		@Test
@@ -146,7 +144,7 @@ class FhirQueryRuleImplTest implements ITestDataBuilder {
 			AuthorizationInterceptor.Verdict verdict = applyRuleToResource(myObservation);
 
 			// then
-			assertThat(verdict, nullValue());
+			assertThat(verdict).isNull();
 		}
 
 		@Test
@@ -165,7 +163,7 @@ class FhirQueryRuleImplTest implements ITestDataBuilder {
 			AuthorizationInterceptor.Verdict verdict = applyRuleToResource(myObservation);
 
 			// then
-			assertThat(verdict, nullValue());
+			assertThat(verdict).isNull();
 		}
 
 		@Test
@@ -184,7 +182,7 @@ class FhirQueryRuleImplTest implements ITestDataBuilder {
 			AuthorizationInterceptor.Verdict verdict = applyRuleToResource(myObservation);
 
 			// then
-			assertThat(verdict, nullValue());
+			assertThat(verdict).isNull();
 		}
 
 		@Test
@@ -202,8 +200,8 @@ class FhirQueryRuleImplTest implements ITestDataBuilder {
 			AuthorizationInterceptor.Verdict verdict = applyRuleToResource(myObservation);
 
 			// then
-			assertThat(verdict, notNullValue());
-			assertThat(verdict.getDecision(), equalTo(PolicyEnum.DENY));
+			assertThat(verdict).isNotNull();
+			assertThat(verdict.getDecision()).isEqualTo(PolicyEnum.DENY);
 		}
 
 
@@ -224,8 +222,8 @@ class FhirQueryRuleImplTest implements ITestDataBuilder {
 			AuthorizationInterceptor.Verdict verdict = applyRuleToResource(myPatient);
 
 			// then
-			assertThat(verdict, notNullValue());
-			assertThat(verdict.getDecision(), equalTo(PolicyEnum.ALLOW));
+			assertThat(verdict).isNotNull();
+			assertThat(verdict.getDecision()).isEqualTo(PolicyEnum.ALLOW);
 		}
 
 
@@ -246,7 +244,7 @@ class FhirQueryRuleImplTest implements ITestDataBuilder {
 			AuthorizationInterceptor.Verdict verdict = applyRuleToResource(myPatient);
 
 			// then
-			assertThat(verdict, nullValue());
+			assertThat(verdict).isNull();
 		}
 
 	}
@@ -274,7 +272,7 @@ class FhirQueryRuleImplTest implements ITestDataBuilder {
 			AuthorizationInterceptor.Verdict verdict = applyRuleToResource(myPatient);
 
 			// then
-			assertThat(verdict, nullValue());
+			assertThat(verdict).isNull();
 			MatcherAssert.assertThat(myLogCapture.getLogEvents(),
 				hasItem(eventWithLevelAndMessageContains(Level.WARN, "unsupported chain XXX")));
 		}
@@ -290,7 +288,7 @@ class FhirQueryRuleImplTest implements ITestDataBuilder {
 			AuthorizationInterceptor.Verdict verdict = applyRuleToResource(myPatient);
 
 			// then
-			assertThat(verdict.getDecision(), equalTo(PolicyEnum.DENY));
+			assertThat(verdict.getDecision()).isEqualTo(PolicyEnum.DENY);
 			MatcherAssert.assertThat(myLogCapture.getLogEvents(),
 				hasItem(eventWithLevelAndMessageContains(Level.WARN, "unsupported chain XXX")));
 		}
@@ -310,7 +308,7 @@ class FhirQueryRuleImplTest implements ITestDataBuilder {
 			AuthorizationInterceptor.Verdict verdict = applyRuleToResource(myPatient);
 
 			// then
-			assertThat(verdict, nullValue());
+			assertThat(verdict).isNull();
 			MatcherAssert.assertThat(myLogCapture.getLogEvents(),
 				hasItem(eventWithLevelAndMessageContains(Level.WARN, "No matcher provided")));
 		}

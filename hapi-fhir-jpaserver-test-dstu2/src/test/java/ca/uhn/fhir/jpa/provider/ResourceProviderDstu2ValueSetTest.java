@@ -21,8 +21,8 @@ import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.stringContainsInOrder;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -247,7 +247,7 @@ public class ResourceProviderDstu2ValueSetTest extends BaseResourceProviderDstu2
 			"<display value=\"Systolic blood pressure at First encounter\"/>"));
 
 		List<String> codes = toCodes(expanded);
-		assertThat(codes, contains("11378-7", "8450-9"));
+		assertThat(codes).containsExactly("11378-7", "8450-9");
 	}
 
 	@Test
@@ -267,7 +267,7 @@ public class ResourceProviderDstu2ValueSetTest extends BaseResourceProviderDstu2
 		ourLog.info(resp);
 
 		List<String> codes = toCodes(expanded);
-		assertThat(codes, contains("11378-7", "8450-9"));
+		assertThat(codes).containsExactly("11378-7", "8450-9");
 
 	}
 

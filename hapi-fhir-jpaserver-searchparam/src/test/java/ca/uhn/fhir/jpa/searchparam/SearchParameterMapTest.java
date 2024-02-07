@@ -21,10 +21,7 @@ import java.util.List;
 
 import static ca.uhn.fhir.jpa.searchparam.SearchParameterMap.compare;
 import static ca.uhn.fhir.rest.param.TokenParamModifier.TEXT;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.nullValue;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.hasSize;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class SearchParameterMapTest {
@@ -82,12 +79,12 @@ class SearchParameterMapTest {
 		map.add("code", qualifiedTokenParam);
 		map.add("code", unqualifiedTokenParam);
 		List<List<IQueryParameterType>> andList = map.removeByNameAndModifier("code", TEXT);
-		assertThat(andList, hasSize(1));
+		assertThat(andList).hasSize(1);
 		List<IQueryParameterType> orList = andList.get(0);
-		assertThat(orList, hasSize(2));
+		assertThat(orList).hasSize(2);
 
 		List<List<IQueryParameterType>> unqualifiedAnds = map.get("code");
-		assertThat(unqualifiedAnds, hasSize(1));
+		assertThat(unqualifiedAnds).hasSize(1);
 
 
 	}
@@ -105,12 +102,12 @@ class SearchParameterMapTest {
 		map.add("code", unqualifiedTokenParam);
 		map.add("code", qualifiedTokenParam);
 		List<List<IQueryParameterType>> andList = map.removeByNameAndModifier("code", (String) null);
-		assertThat(andList, hasSize(1));
+		assertThat(andList).hasSize(1);
 		List<IQueryParameterType> orList = andList.get(0);
-		assertThat(orList, hasSize(2));
+		assertThat(orList).hasSize(2);
 
 		List<List<IQueryParameterType>> qualifiedAnds = map.get("code");
-		assertThat(qualifiedAnds, hasSize(1));
+		assertThat(qualifiedAnds).hasSize(1);
 	}
 
 	@Test
@@ -123,12 +120,12 @@ class SearchParameterMapTest {
 
 		map.add("code", qualifiedTokenParam);
 		List<List<IQueryParameterType>> andList = map.removeByNameAndModifier("code", TEXT);
-		assertThat(andList, hasSize(1));
+		assertThat(andList).hasSize(1);
 		List<IQueryParameterType> orList = andList.get(0);
-		assertThat(orList, hasSize(2));
+		assertThat(orList).hasSize(2);
 
 		List<List<IQueryParameterType>> unqualifiedAnds = map.remove("code");
-		assertThat(unqualifiedAnds, is(nullValue()));
+		assertThat(unqualifiedAnds).isNull();
 	}
 
 	@Test

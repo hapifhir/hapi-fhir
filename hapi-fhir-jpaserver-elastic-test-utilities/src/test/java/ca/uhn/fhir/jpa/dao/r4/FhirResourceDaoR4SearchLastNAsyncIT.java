@@ -25,8 +25,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.matchesPattern;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
 
@@ -137,7 +136,7 @@ public class FhirResourceDaoR4SearchLastNAsyncIT extends BaseR4SearchLastN {
 			firstQueryPattern.append(",'[0-9]+'");
 		}
 		firstQueryPattern.append("\\).*");
-		assertThat(queries.get(4), matchesPattern(firstQueryPattern.toString()));
+		assertThat(queries.get(4)).matches(firstQueryPattern.toString());
 
 		// the second chunked query should be padded with "-1".
 		StringBuilder secondQueryPattern = new StringBuilder(".*RES_ID in \\('[0-9]+'");
@@ -148,7 +147,7 @@ public class FhirResourceDaoR4SearchLastNAsyncIT extends BaseR4SearchLastN {
 			secondQueryPattern.append(",'-1'");
 		}
 		secondQueryPattern.append("\\).*");
-		assertThat(queries.get(5), matchesPattern(secondQueryPattern.toString()));
+		assertThat(queries.get(5)).matches(secondQueryPattern.toString());
 
 	}
 

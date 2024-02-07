@@ -33,9 +33,7 @@ import java.io.StringReader;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.is;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -74,7 +72,7 @@ public class ClientServerValidationDstu2Test {
 	@Test
 	public void testClientUsesInterceptors() throws Exception {
 		String appropriateFhirVersion = "1.0.2";
-		assertThat(appropriateFhirVersion, is(FhirVersionEnum.DSTU2.getFhirVersionString()));
+		assertThat(appropriateFhirVersion).isEqualTo(FhirVersionEnum.DSTU2.getFhirVersionString());
 		Conformance conf = new Conformance();
 		conf.setFhirVersion(appropriateFhirVersion);
 		final String confResource = myCtx.newXmlParser().encodeResourceToString(conf);
@@ -118,7 +116,7 @@ public class ClientServerValidationDstu2Test {
 	@Test
 	public void testForceConformanceCheck() throws Exception {
 		String appropriateFhirVersion = "1.0.2";
-		assertThat(appropriateFhirVersion, is(FhirVersionEnum.DSTU2.getFhirVersionString()));
+		assertThat(appropriateFhirVersion).isEqualTo(FhirVersionEnum.DSTU2.getFhirVersionString());
 		Conformance conf = new Conformance();
 		conf.setFhirVersion(appropriateFhirVersion);
 		final String confResource = myCtx.newXmlParser().encodeResourceToString(conf);
@@ -230,7 +228,7 @@ public class ClientServerValidationDstu2Test {
 	@Test
 	public void testServerReturnsAppropriateVersionForDstu2() throws Exception {
 		String appropriateFhirVersion = "1.0.2";
-		assertThat(appropriateFhirVersion, is(FhirVersionEnum.DSTU2.getFhirVersionString()));
+		assertThat(appropriateFhirVersion).isEqualTo(FhirVersionEnum.DSTU2.getFhirVersionString());
 		Conformance conf = new Conformance();
 		conf.setFhirVersion(appropriateFhirVersion);
 		final String confResource = myCtx.newXmlParser().encodeResourceToString(conf);
@@ -270,7 +268,7 @@ public class ClientServerValidationDstu2Test {
 	@Test
 	public void testServerReturnsWrongVersionForDstu2() throws Exception {
 		String wrongFhirVersion = FhirVersionEnum.DSTU3.getFhirVersionString();
-		assertThat(wrongFhirVersion, is(FhirVersionEnum.DSTU3.getFhirVersionString())); // asserting that what we assume to be the DSTU3 FHIR version is still correct
+		assertThat(wrongFhirVersion).isEqualTo(FhirVersionEnum.DSTU3.getFhirVersionString()); // asserting that what we assume to be the DSTU3 FHIR version is still correct
 		Conformance conf = new Conformance();
 		conf.setFhirVersion(wrongFhirVersion);
 		String msg = myCtx.newXmlParser().encodeResourceToString(conf);
@@ -292,7 +290,7 @@ public class ClientServerValidationDstu2Test {
 			String want = "The server at base URL \"http://foo/metadata\" returned a conformance statement indicating that it supports FHIR version \"" + wrongFhirVersion + "\" which corresponds to DSTU3, but this client is configured to use DSTU2 (via the FhirContext)";
 			ourLog.info(out);
 			ourLog.info(want);
-			assertThat(out, containsString(want));
+			assertThat(out).contains(want);
 		}
 	}
 

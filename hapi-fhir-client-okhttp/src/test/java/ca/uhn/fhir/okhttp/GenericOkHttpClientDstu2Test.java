@@ -50,13 +50,10 @@ import java.io.IOException;
 import java.util.Date;
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.either;
-import static org.hamcrest.Matchers.emptyString;
 import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.equalToIgnoringCase;
-import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -151,17 +148,17 @@ public class GenericOkHttpClientDstu2Test {
 		client.fetchConformance().ofType(Conformance.class).execute();
 		assertEquals(ourServer.getBaseUrl() + "/fhir/metadata", MY_SERVLET.ourRequestUri);
 		assertEquals(1, MY_SERVLET.ourRequestHeaders.get("Accept").size());
-		assertThat(MY_SERVLET.ourRequestHeaders.get("Accept").get(0).getValue(), containsString(Constants.HEADER_ACCEPT_VALUE_XML_OR_JSON_LEGACY));
+		assertThat(MY_SERVLET.ourRequestHeaders.get("Accept").get(0).getValue()).contains(Constants.HEADER_ACCEPT_VALUE_XML_OR_JSON_LEGACY);
 
 		client.fetchConformance().ofType(Conformance.class).encodedJson().execute();
 		assertEquals(ourServer.getBaseUrl() + "/fhir/metadata?_format=json", MY_SERVLET.ourRequestUri);
 		assertEquals(1, MY_SERVLET.ourRequestHeaders.get("Accept").size());
-		assertThat(MY_SERVLET.ourRequestHeaders.get("Accept").get(0).getValue(), containsString(Constants.CT_FHIR_JSON));
+		assertThat(MY_SERVLET.ourRequestHeaders.get("Accept").get(0).getValue()).contains(Constants.CT_FHIR_JSON);
 
 		client.fetchConformance().ofType(Conformance.class).encodedXml().execute();
 		assertEquals(ourServer.getBaseUrl() + "/fhir/metadata?_format=xml", MY_SERVLET.ourRequestUri);
 		assertEquals(1, MY_SERVLET.ourRequestHeaders.get("Accept").size());
-		assertThat(MY_SERVLET.ourRequestHeaders.get("Accept").get(0).getValue(), containsString(Constants.CT_FHIR_XML));
+		assertThat(MY_SERVLET.ourRequestHeaders.get("Accept").get(0).getValue()).contains(Constants.CT_FHIR_XML);
 	}
 
 	@Test
@@ -184,14 +181,14 @@ public class GenericOkHttpClientDstu2Test {
 		assertEquals("FAMILY", resp.getName().get(0).getFamily().get(0).getValue());
 		assertEquals(ourServer.getBaseUrl() + "/fhir/metadata", MY_SERVLET.ourRequestUriAll.get(0));
 		assertEquals(1, MY_SERVLET.ourRequestHeadersAll.get(0).get("Accept").size());
-		assertThat(MY_SERVLET.ourRequestHeadersAll.get(0).get("Accept").get(0).getValue(), containsString(Constants.HEADER_ACCEPT_VALUE_XML_OR_JSON_LEGACY));
-		assertThat(MY_SERVLET.ourRequestHeadersAll.get(0).get("Accept").get(0).getValue(), containsString(Constants.CT_FHIR_XML));
-		assertThat(MY_SERVLET.ourRequestHeadersAll.get(0).get("Accept").get(0).getValue(), containsString(Constants.CT_FHIR_JSON));
+		assertThat(MY_SERVLET.ourRequestHeadersAll.get(0).get("Accept").get(0).getValue()).contains(Constants.HEADER_ACCEPT_VALUE_XML_OR_JSON_LEGACY);
+		assertThat(MY_SERVLET.ourRequestHeadersAll.get(0).get("Accept").get(0).getValue()).contains(Constants.CT_FHIR_XML);
+		assertThat(MY_SERVLET.ourRequestHeadersAll.get(0).get("Accept").get(0).getValue()).contains(Constants.CT_FHIR_JSON);
 		assertEquals(ourServer.getBaseUrl() + "/fhir/Patient/123", MY_SERVLET.ourRequestUriAll.get(1));
 		assertEquals(1, MY_SERVLET.ourRequestHeadersAll.get(1).get("Accept").size());
-		assertThat(MY_SERVLET.ourRequestHeadersAll.get(1).get("Accept").get(0).getValue(), containsString(Constants.HEADER_ACCEPT_VALUE_XML_OR_JSON_LEGACY));
-		assertThat(MY_SERVLET.ourRequestHeadersAll.get(1).get("Accept").get(0).getValue(), containsString(Constants.CT_FHIR_XML));
-		assertThat(MY_SERVLET.ourRequestHeadersAll.get(1).get("Accept").get(0).getValue(), containsString(Constants.CT_FHIR_JSON));
+		assertThat(MY_SERVLET.ourRequestHeadersAll.get(1).get("Accept").get(0).getValue()).contains(Constants.HEADER_ACCEPT_VALUE_XML_OR_JSON_LEGACY);
+		assertThat(MY_SERVLET.ourRequestHeadersAll.get(1).get("Accept").get(0).getValue()).contains(Constants.CT_FHIR_XML);
+		assertThat(MY_SERVLET.ourRequestHeadersAll.get(1).get("Accept").get(0).getValue()).contains(Constants.CT_FHIR_JSON);
 	}
 
 	@Test
@@ -215,12 +212,12 @@ public class GenericOkHttpClientDstu2Test {
 		assertEquals("FAMILY", resp.getName().get(0).getFamily().get(0).getValue());
 		assertEquals(ourServer.getBaseUrl() + "/fhir/metadata?_format=json", MY_SERVLET.ourRequestUriAll.get(0));
 		assertEquals(1, MY_SERVLET.ourRequestHeadersAll.get(0).get("Accept").size());
-		assertThat(MY_SERVLET.ourRequestHeadersAll.get(0).get("Accept").get(0).getValue(), containsString(Constants.CT_FHIR_JSON));
-		assertThat(MY_SERVLET.ourRequestHeadersAll.get(0).get("Accept").get(0).getValue(), not(containsString(Constants.CT_FHIR_XML)));
+		assertThat(MY_SERVLET.ourRequestHeadersAll.get(0).get("Accept").get(0).getValue()).contains(Constants.CT_FHIR_JSON);
+		assertThat(MY_SERVLET.ourRequestHeadersAll.get(0).get("Accept").get(0).getValue()).doesNotContain(Constants.CT_FHIR_XML);
 		assertEquals(ourServer.getBaseUrl() + "/fhir/Patient/123?_format=json", MY_SERVLET.ourRequestUriAll.get(1));
 		assertEquals(1, MY_SERVLET.ourRequestHeadersAll.get(1).get("Accept").size());
-		assertThat(MY_SERVLET.ourRequestHeadersAll.get(1).get("Accept").get(0).getValue(), containsString(Constants.CT_FHIR_JSON));
-		assertThat(MY_SERVLET.ourRequestHeadersAll.get(1).get("Accept").get(0).getValue(), not(containsString(Constants.CT_FHIR_XML)));
+		assertThat(MY_SERVLET.ourRequestHeadersAll.get(1).get("Accept").get(0).getValue()).contains(Constants.CT_FHIR_JSON);
+		assertThat(MY_SERVLET.ourRequestHeadersAll.get(1).get("Accept").get(0).getValue()).doesNotContain(Constants.CT_FHIR_XML);
 	}
 
 	@Test
@@ -256,7 +253,7 @@ public class GenericOkHttpClientDstu2Test {
 
 		assertEquals(1, MY_SERVLET.ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE).size());
 		assertContentTypeEquals(EncodingEnum.XML.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8);
-		assertThat(MY_SERVLET.ourRequestBodyString, containsString("<family value=\"FOOFAMILY\"/>"));
+		assertThat(MY_SERVLET.ourRequestBodyString).contains("<family value=\"FOOFAMILY\"/>");
 		assertEquals(ourServer.getBaseUrl() + "/fhir/Patient", MY_SERVLET.ourRequestUri);
 		assertEquals("POST", MY_SERVLET.ourRequestMethod);
 
@@ -266,8 +263,8 @@ public class GenericOkHttpClientDstu2Test {
 		assertEquals(1, MY_SERVLET.ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE).size());
 		assertContentTypeEquals(EncodingEnum.XML.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8);
 		String body = MY_SERVLET.ourRequestBodyString;
-		assertThat(body, containsString("<family value=\"FOOFAMILY\"/>"));
-		assertThat(body, not(containsString("123")));
+		assertThat(body).contains("<family value=\"FOOFAMILY\"/>");
+		assertThat(body).doesNotContain("123");
 		assertEquals(ourServer.getBaseUrl() + "/fhir/Patient", MY_SERVLET.ourRequestUri);
 		assertEquals("POST", MY_SERVLET.ourRequestMethod);
 	}
@@ -285,7 +282,7 @@ public class GenericOkHttpClientDstu2Test {
 		assertEquals(1, MY_SERVLET.ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE).size());
 		String expectedContentTypeHeader = EncodingEnum.XML.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8;
 		assertContentTypeEquals(expectedContentTypeHeader);
-		assertThat(MY_SERVLET.ourRequestBodyString, containsString("<family value=\"FOOFAMILY\"/>"));
+		assertThat(MY_SERVLET.ourRequestBodyString).contains("<family value=\"FOOFAMILY\"/>");
 		assertEquals(ourServer.getBaseUrl() + "/fhir/Patient", MY_SERVLET.ourRequestUri);
 		assertEquals(ourServer.getBaseUrl() + "/fhir/Patient?name=foo", MY_SERVLET.ourRequestFirstHeaders.get(Constants.HEADER_IF_NONE_EXIST).getValue());
 		assertEquals("POST", MY_SERVLET.ourRequestMethod);
@@ -293,7 +290,7 @@ public class GenericOkHttpClientDstu2Test {
 		client.create().resource(p).conditionalByUrl("Patient?name=http://foo|bar").encodedXml().execute();
 		assertEquals(1, MY_SERVLET.ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE).size());
 		assertContentTypeEquals(expectedContentTypeHeader);
-		assertThat(MY_SERVLET.ourRequestBodyString, containsString("<family value=\"FOOFAMILY\"/>"));
+		assertThat(MY_SERVLET.ourRequestBodyString).contains("<family value=\"FOOFAMILY\"/>");
 		assertEquals(ourServer.getBaseUrl() + "/fhir/Patient", MY_SERVLET.ourRequestUri);
 		assertEquals(ourServer.getBaseUrl() + "/fhir/Patient?name=http%3A//foo%7Cbar", MY_SERVLET.ourRequestFirstHeaders.get(Constants.HEADER_IF_NONE_EXIST).getValue());
 		assertEquals("POST", MY_SERVLET.ourRequestMethod);
@@ -301,7 +298,7 @@ public class GenericOkHttpClientDstu2Test {
 		client.create().resource(p).conditional().where(Patient.NAME.matches().value("foo")).encodedXml().execute();
 		assertEquals(1, MY_SERVLET.ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE).size());
 		assertContentTypeEquals(expectedContentTypeHeader);
-		assertThat(MY_SERVLET.ourRequestBodyString, containsString("<family value=\"FOOFAMILY\"/>"));
+		assertThat(MY_SERVLET.ourRequestBodyString).contains("<family value=\"FOOFAMILY\"/>");
 		assertEquals(ourServer.getBaseUrl() + "/fhir/Patient", MY_SERVLET.ourRequestUri);
 		assertEquals(ourServer.getBaseUrl() + "/fhir/Patient?name=foo", MY_SERVLET.ourRequestFirstHeaders.get(Constants.HEADER_IF_NONE_EXIST).getValue());
 		assertEquals("POST", MY_SERVLET.ourRequestMethod);
@@ -310,7 +307,7 @@ public class GenericOkHttpClientDstu2Test {
 	private void assertContentTypeEquals(String expectedContentTypeHeader) {
 		// charsets are case-insensitive according to the HTTP spec (e.g. utf-8 == UTF-8):
 		// https://tools.ietf.org/html/rfc2616#section-3.4
-		assertThat(getActualContentTypeHeader(), equalToIgnoringCase(expectedContentTypeHeader));
+		assertThat(getActualContentTypeHeader()).isEqualToIgnoringCase(expectedContentTypeHeader);
 	}
 
 	@Test
@@ -462,7 +459,7 @@ public class GenericOkHttpClientDstu2Test {
 			.since(new InstantDt("2001-01-02T11:22:33Z").getValue())
 			.execute();
 
-		assertThat(MY_SERVLET.ourRequestUri, containsString("_since=2001-01"));
+		assertThat(MY_SERVLET.ourRequestUri).contains("_since=2001-01");
 		assertEquals(1, response.getEntry().size());
 	}
 
@@ -1056,7 +1053,7 @@ public class GenericOkHttpClientDstu2Test {
 		try {
 			client.loadPage().next(sourceBundle).execute();
 		} catch (IllegalArgumentException e) {
-			assertThat(e.getMessage(), containsString("Can not perform paging operation because no link was found in Bundle with relation \"next\""));
+			assertThat(e.getMessage()).contains("Can not perform paging operation because no link was found in Bundle with relation \"next\"");
 		}
 	}
 
@@ -1200,7 +1197,7 @@ public class GenericOkHttpClientDstu2Test {
 				.execute();
 			fail();
 		} catch (InvalidResponseException e) {
-			assertThat(e.getMessage(), containsString("String does not appear to be valid"));
+			assertThat(e.getMessage()).contains("String does not appear to be valid");
 		}
 
 	}
@@ -1381,7 +1378,7 @@ public class GenericOkHttpClientDstu2Test {
 
 		assertEquals("application/x-www-form-urlencoded", MY_SERVLET.ourRequestContentType.replace(";char", "; char").toLowerCase());
 		assertEquals(Constants.HEADER_ACCEPT_VALUE_XML_OR_JSON_LEGACY, MY_SERVLET.ourRequestFirstHeaders.get("Accept").getValue());
-		assertThat(MY_SERVLET.ourRequestFirstHeaders.get("User-Agent").getValue(), not(emptyString()));
+		assertThat(MY_SERVLET.ourRequestFirstHeaders.get("User-Agent").getValue()).isNotEmpty();
 	}
 
 	@Test
@@ -1402,9 +1399,9 @@ public class GenericOkHttpClientDstu2Test {
 			.returnBundle(Bundle.class)
 			.execute();
 
-		assertThat(MY_SERVLET.ourRequestUri, containsString(ourServer.getBaseUrl() + "/fhir/Patient/_search?"));
-		assertThat(MY_SERVLET.ourRequestUri, containsString("_elements=identifier%2Cname"));
-		assertThat(MY_SERVLET.ourRequestUri, not(containsString("_format=json")));
+		assertThat(MY_SERVLET.ourRequestUri).contains(ourServer.getBaseUrl() + "/fhir/Patient/_search?");
+		assertThat(MY_SERVLET.ourRequestUri).contains("_elements=identifier%2Cname");
+		assertThat(MY_SERVLET.ourRequestUri).doesNotContain("_format=json");
 
 		// assertThat(MY_SERVLET.ourRequestUri,
 		// either(equalTo(ourServer.getBaseUrl() + "/fhir/Patient?name=james&_elements=name%2Cidentifier")).or(equalTo(ourServer.getBaseUrl() +
@@ -1525,7 +1522,7 @@ public class GenericOkHttpClientDstu2Test {
 			.execute();
 
 		assertEquals(ourServer.getBaseUrl() + "/fhir/", MY_SERVLET.ourRequestUri);
-		assertThat(response, containsString("\"Bundle\""));
+		assertThat(response).contains("\"Bundle\"");
 		assertContentTypeEquals("application/json+fhir; charset=UTF-8");
 
 		response = client.transaction()
@@ -1584,35 +1581,35 @@ public class GenericOkHttpClientDstu2Test {
 		client.update().resource(p).conditionalByUrl("Patient?name=foo").encodedXml().execute();
 		assertEquals(1, MY_SERVLET.ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE).size());
 		assertContentTypeEquals(EncodingEnum.XML.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8);
-		assertThat(MY_SERVLET.ourRequestBodyString, containsString("<family value=\"FOOFAMILY\"/>"));
+		assertThat(MY_SERVLET.ourRequestBodyString).contains("<family value=\"FOOFAMILY\"/>");
 		assertEquals("PUT", MY_SERVLET.ourRequestMethod);
 		assertEquals(ourServer.getBaseUrl() + "/fhir/Patient?name=foo", MY_SERVLET.ourRequestUri);
 
 		client.update().resource(p).conditionalByUrl("Patient?name=http://foo|bar").encodedXml().execute();
 		assertEquals(1, MY_SERVLET.ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE).size());
 		assertContentTypeEquals(EncodingEnum.XML.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8);
-		assertThat(MY_SERVLET.ourRequestBodyString, containsString("<family value=\"FOOFAMILY\"/>"));
+		assertThat(MY_SERVLET.ourRequestBodyString).contains("<family value=\"FOOFAMILY\"/>");
 		assertEquals("PUT", MY_SERVLET.ourRequestMethod);
 		assertEquals(ourServer.getBaseUrl() + "/fhir/Patient?name=http%3A//foo%7Cbar", MY_SERVLET.ourRequestUri);
 
 		client.update().resource(ourCtx.newXmlParser().encodeResourceToString(p)).conditionalByUrl("Patient?name=foo").encodedXml().execute();
 		assertEquals(1, MY_SERVLET.ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE).size());
 		assertContentTypeEquals(EncodingEnum.XML.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8);
-		assertThat(MY_SERVLET.ourRequestBodyString, containsString("<family value=\"FOOFAMILY\"/>"));
+		assertThat(MY_SERVLET.ourRequestBodyString).contains("<family value=\"FOOFAMILY\"/>");
 		assertEquals("PUT", MY_SERVLET.ourRequestMethod);
 		assertEquals(ourServer.getBaseUrl() + "/fhir/Patient?name=foo", MY_SERVLET.ourRequestUri);
 
 		client.update().resource(p).conditional().where(Patient.NAME.matches().value("foo")).and(Patient.ADDRESS.matches().value("AAA|BBB")).encodedXml().execute();
 		assertEquals(1, MY_SERVLET.ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE).size());
 		assertContentTypeEquals(EncodingEnum.XML.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8);
-		assertThat(MY_SERVLET.ourRequestBodyString, containsString("<family value=\"FOOFAMILY\"/>"));
+		assertThat(MY_SERVLET.ourRequestBodyString).contains("<family value=\"FOOFAMILY\"/>");
 		assertEquals("PUT", MY_SERVLET.ourRequestMethod);
 		assertEquals(ourServer.getBaseUrl() + "/fhir/Patient?name=foo&address=AAA%5C%7CBBB", MY_SERVLET.ourRequestUri);
 
 		client.update().resource(ourCtx.newXmlParser().encodeResourceToString(p)).conditional().where(Patient.NAME.matches().value("foo")).and(Patient.ADDRESS.matches().value("AAA|BBB")).encodedXml().execute();
 		assertEquals(1, MY_SERVLET.ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE).size());
 		assertContentTypeEquals(EncodingEnum.XML.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8);
-		assertThat(MY_SERVLET.ourRequestBodyString, containsString("<family value=\"FOOFAMILY\"/>"));
+		assertThat(MY_SERVLET.ourRequestBodyString).contains("<family value=\"FOOFAMILY\"/>");
 		assertEquals("PUT", MY_SERVLET.ourRequestMethod);
 		assertEquals(ourServer.getBaseUrl() + "/fhir/Patient?name=foo&address=AAA%5C%7CBBB", MY_SERVLET.ourRequestUri);
 	}
@@ -1635,15 +1632,15 @@ public class GenericOkHttpClientDstu2Test {
 		assertEquals(1, MY_SERVLET.ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE).size());
 
 		String expectedContentTypeHeader = EncodingEnum.XML.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8;
-		assertThat(getActualContentTypeHeader(), equalToIgnoringCase(expectedContentTypeHeader));
-		assertThat(MY_SERVLET.ourRequestBodyString, containsString("<family value=\"FOOFAMILY\"/>"));
+		assertThat(getActualContentTypeHeader()).isEqualToIgnoringCase(expectedContentTypeHeader);
+		assertThat(MY_SERVLET.ourRequestBodyString).contains("<family value=\"FOOFAMILY\"/>");
 		assertEquals(ourServer.getBaseUrl() + "/fhir/Patient/123?_format=xml", MY_SERVLET.ourRequestUri);
 		assertEquals("PUT", MY_SERVLET.ourRequestMethod);
 
 		client.update("123", p);
 		assertEquals(1, MY_SERVLET.ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE).size());
-		assertThat(getActualContentTypeHeader(), equalToIgnoringCase(expectedContentTypeHeader));
-		assertThat(MY_SERVLET.ourRequestBodyString, containsString("<family value=\"FOOFAMILY\"/>"));
+		assertThat(getActualContentTypeHeader()).isEqualToIgnoringCase(expectedContentTypeHeader);
+		assertThat(MY_SERVLET.ourRequestBodyString).contains("<family value=\"FOOFAMILY\"/>");
 		assertEquals(ourServer.getBaseUrl() + "/fhir/Patient/123?_format=xml", MY_SERVLET.ourRequestUri);
 		assertEquals("PUT", MY_SERVLET.ourRequestMethod);
 	}
@@ -1732,7 +1729,7 @@ public class GenericOkHttpClientDstu2Test {
 		response = client.validate().resource(ourCtx.newJsonParser().encodeResourceToString(p)).prettyPrint().execute();
 		assertEquals(ourServer.getBaseUrl() + "/fhir/Patient/$validate?_pretty=true", MY_SERVLET.ourRequestUri);
 		assertEquals("POST", MY_SERVLET.ourRequestMethod);
-		assertThat(MY_SERVLET.ourRequestBodyString, containsString("\"resourceType\": \"Parameters\",\n"));
+		assertThat(MY_SERVLET.ourRequestBodyString).contains("\"resourceType\": \"Parameters\",\n");
 		assertNotNull(response.getOperationOutcome());
 		assertEquals("FOOBAR", toOo(response.getOperationOutcome()).getIssueFirstRep().getDiagnosticsElement().getValue());
 	}

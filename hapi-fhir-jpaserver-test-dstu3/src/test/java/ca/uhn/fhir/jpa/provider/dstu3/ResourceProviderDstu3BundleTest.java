@@ -14,8 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import static org.hamcrest.CoreMatchers.containsString;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -38,7 +37,7 @@ public class ResourceProviderDstu3BundleTest extends BaseResourceProviderDstu3Te
 			myClient.operation().onServer().named(JpaConstants.OPERATION_PROCESS_MESSAGE).withParameters(parameters).execute();
 			fail();
 		} catch (NotImplementedOperationException e) {
-			assertThat(e.getMessage(), containsString("This operation is not yet implemented on this server"));
+			assertThat(e.getMessage()).contains("This operation is not yet implemented on this server");
 		}
 	}
 

@@ -43,9 +43,9 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.emptyOrNullString;
-import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -225,13 +225,13 @@ public class BulkDataErrorAbuseTest extends BaseResourceProviderR4Test {
 		ourLog.debug("Export job {} exported resources {}", theInstanceId, foundIds);
 
 		for (String containedString : theContainedList) {
-			assertThat("export has expected ids", foundIds, hasItem(containedString));
+			assertThat(foundIds).as("export has expected ids").contains(containedString);
 		}
 		for (String excludedString : theExcludedList) {
 			assertThat("export doesn't have expected ids", foundIds, not(hasItem(excludedString)));
 		}
 
-		assertThat(jobInfo.getCombinedRecordsProcessed(), equalTo(2));
+		assertThat(jobInfo.getCombinedRecordsProcessed()).isEqualTo(2);
 
 		ourLog.info("Job {} ok", theInstanceId);
 	}

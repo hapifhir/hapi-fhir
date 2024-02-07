@@ -41,8 +41,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.jpa.dao.DaoTestUtils.logAllInterceptors;
-import static org.hamcrest.CoreMatchers.containsString;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -322,7 +321,7 @@ public class RestHookTestDstu2Test extends BaseResourceProviderDstu2Test {
 			myClient.create().resource(subscription).execute();
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertThat(e.getMessage(), containsString("Can not process submitted Subscription - Subscription.status must be populated on this server"));
+			assertThat(e.getMessage()).contains("Can not process submitted Subscription - Subscription.status must be populated on this server");
 		}
 	}
 

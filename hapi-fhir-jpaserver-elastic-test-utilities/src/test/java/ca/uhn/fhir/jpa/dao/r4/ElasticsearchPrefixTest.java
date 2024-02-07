@@ -17,8 +17,7 @@ import org.testcontainers.elasticsearch.ElasticsearchContainer;
 import java.io.IOException;
 import java.util.stream.Collectors;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.annotation.DirtiesContext.ClassMode.AFTER_CLASS;
 
 @RequiresDocker
@@ -46,8 +45,8 @@ public class ElasticsearchPrefixTest {
 		String catIndexes = indicesResponse.valueBody().stream().map(IndicesRecord::index).collect(Collectors.joining(","));
 
 		//Then
-		assertThat(catIndexes, containsString(ELASTIC_PREFIX + "-resourcetable-000001"));
-		assertThat(catIndexes, containsString(ELASTIC_PREFIX + "-termconcept-000001"));
+		assertThat(catIndexes).contains(ELASTIC_PREFIX + "-resourcetable-000001");
+		assertThat(catIndexes).contains(ELASTIC_PREFIX + "-termconcept-000001");
 
 	}
 

@@ -33,11 +33,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.instanceOf;
-import static org.hamcrest.Matchers.is;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
@@ -120,9 +116,9 @@ public class PartitionManagementProviderTest {
 		verifyNoMoreInteractions(myPartitionConfigSvc);
 		PartitionEntity value = entityCaptor.getValue();
 
-		assertThat(value.getName(), is(equalTo("PARTITION-123")));
-		assertThat(value.getId(), is(instanceOf(Integer.class)));
-		assertThat(value.getDescription(), is(equalTo("a description")));
+		assertThat(value.getName()).isEqualTo("PARTITION-123");
+		assertThat(value.getId()).isInstanceOf(Integer.class);
+		assertThat(value.getDescription()).isEqualTo("a description");
 	}
 
 	@Nonnull
@@ -310,21 +306,21 @@ public class PartitionManagementProviderTest {
 		verifyNoMoreInteractions(myPartitionConfigSvc);
 
 		List<Parameters.ParametersParameterComponent> list = getParametersByName(response, "partition");
-		assertThat(list, hasSize(2));
+		assertThat(list).hasSize(2);
 		List<Parameters.ParametersParameterComponent> part = list.get(0).getPart();
-		assertThat(part.get(0).getName(), is(ProviderConstants.PARTITION_MANAGEMENT_PARTITION_ID));
+		assertThat(part.get(0).getName()).isEqualTo(ProviderConstants.PARTITION_MANAGEMENT_PARTITION_ID);
 		assertEquals(1, ((IntegerType) part.get(0).getValue()).getValue().intValue());
-		assertThat(part.get(1).getName(), is(ProviderConstants.PARTITION_MANAGEMENT_PARTITION_NAME));
+		assertThat(part.get(1).getName()).isEqualTo(ProviderConstants.PARTITION_MANAGEMENT_PARTITION_NAME);
 		assertEquals("PARTITION-1", part.get(1).getValue().toString());
-		assertThat(part.get(2).getName(), is(ProviderConstants.PARTITION_MANAGEMENT_PARTITION_DESC));
+		assertThat(part.get(2).getName()).isEqualTo(ProviderConstants.PARTITION_MANAGEMENT_PARTITION_DESC);
 		assertEquals("a description1", part.get(2).getValue().toString());
 
 		part = list.get(1).getPart();
-		assertThat(part.get(0).getName(), is(ProviderConstants.PARTITION_MANAGEMENT_PARTITION_ID));
+		assertThat(part.get(0).getName()).isEqualTo(ProviderConstants.PARTITION_MANAGEMENT_PARTITION_ID);
 		assertEquals(2, ((IntegerType) part.get(0).getValue()).getValue().intValue());
-		assertThat(part.get(1).getName(), is(ProviderConstants.PARTITION_MANAGEMENT_PARTITION_NAME));
+		assertThat(part.get(1).getName()).isEqualTo(ProviderConstants.PARTITION_MANAGEMENT_PARTITION_NAME);
 		assertEquals("PARTITION-2", part.get(1).getValue().toString());
-		assertThat(part.get(2).getName(), is(ProviderConstants.PARTITION_MANAGEMENT_PARTITION_DESC));
+		assertThat(part.get(2).getName()).isEqualTo(ProviderConstants.PARTITION_MANAGEMENT_PARTITION_DESC);
 		assertEquals("a description2", part.get(2).getValue().toString());
 	}
 

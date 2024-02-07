@@ -41,9 +41,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.storage.interceptor.balp.BalpConstants.*;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -143,7 +141,7 @@ public class BalpAuditCaptureInterceptorTest implements ITestDataBuilder {
 			.filter(t -> t.getRole().getCode().equals(CS_OBJECT_ROLE_4_DOMAIN_RESOURCE))
 			.map(t -> t.getWhat().getReference())
 			.toList();
-		assertThat(Arrays.asList(theResourceIds).toString(), systemObjects, containsInAnyOrder(theResourceIds));
+		assertThat(systemObjects).as(Arrays.asList(theResourceIds).toString()).containsExactlyInAnyOrder(theResourceIds);
 	}
 
 	private static void assertHasPatientEntities(AuditEvent theAuditEvent, String... theResourceIds) {
@@ -157,7 +155,7 @@ public class BalpAuditCaptureInterceptorTest implements ITestDataBuilder {
 			.map(t -> t.getWhat().getReference())
 			.map(t -> new IdType(t).toUnqualified().getValue())
 			.toList();
-		assertThat(patients.toString(), patients, containsInAnyOrder(theResourceIds));
+		assertThat(patients).as(patients.toString()).containsExactlyInAnyOrder(theResourceIds);
 	}
 
 	@BeforeAll
@@ -813,12 +811,12 @@ public class BalpAuditCaptureInterceptorTest implements ITestDataBuilder {
 
 	private void assertQuery(AuditEvent theAuditEvent, String theQuery) {
 		List<String> queries = getQueries(theAuditEvent);
-		assertThat(queries, contains(theQuery));
+		assertThat(queries).containsExactly(theQuery);
 	}
 
 	private void assertQueryDescription(AuditEvent theAuditEvent, String theQuery) {
 		List<String> queries = getDescriptions(theAuditEvent);
-		assertThat(queries, contains(theQuery));
+		assertThat(queries).containsExactly(theQuery);
 	}
 
 	private void assertHasProfile(AuditEvent theAuditEvent, BalpProfileEnum theProfile) {
@@ -828,7 +826,7 @@ public class BalpAuditCaptureInterceptorTest implements ITestDataBuilder {
 			.stream()
 			.map(PrimitiveType::asStringValue)
 			.toList();
-		assertThat(profiles, contains(theProfile.getProfileUrl()));
+		assertThat(profiles).containsExactly(theProfile.getProfileUrl());
 	}
 
 	@Override

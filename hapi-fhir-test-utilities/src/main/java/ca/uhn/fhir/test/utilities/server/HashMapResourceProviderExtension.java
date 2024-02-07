@@ -33,10 +33,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 
 public class HashMapResourceProviderExtension<T extends IBaseResource> extends HashMapResourceProvider<T> implements BeforeEachCallback, AfterEachCallback {
 
@@ -96,17 +95,17 @@ public class HashMapResourceProviderExtension<T extends IBaseResource> extends H
 	}
 
 	public void waitForUpdateCount(long theCount) {
-		assertThat(theCount, greaterThanOrEqualTo(getCountUpdate()));
+		assertThat(theCount).isGreaterThanOrEqualTo(getCountUpdate());
 		await().until(this::getCountUpdate, equalTo(theCount));
 	}
 
 	public void waitForCreateCount(long theCount) {
-		assertThat(theCount, greaterThanOrEqualTo(getCountCreate()));
+		assertThat(theCount).isGreaterThanOrEqualTo(getCountCreate());
 		await().until(this::getCountCreate, equalTo(theCount));
 	}
 
 	public void waitForDeleteCount(long theCount) {
-		assertThat(theCount, greaterThanOrEqualTo(getCountDelete()));
+		assertThat(theCount).isGreaterThanOrEqualTo(getCountDelete());
 		await().until(this::getCountDelete, equalTo(theCount));
 	}
 

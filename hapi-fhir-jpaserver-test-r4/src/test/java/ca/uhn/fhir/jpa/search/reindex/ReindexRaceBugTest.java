@@ -31,7 +31,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.function.BiFunction;
 
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -159,7 +159,7 @@ class ReindexRaceBugTest extends BaseJpaR4Test {
 		// In a running server, we expect UserRequestRetryVersionConflictsInterceptor to cause a retry inside the ReindexStep
 		// But here in the test, we have not configured any retry logic.
 		ExecutionException e = assertThrows(ExecutionException.class, backgroundResult::get, "Optimistic locking detects the DELETE and rolls back");
-		assertThat("Hapi maps conflict exception type", e.getCause(), Matchers.instanceOf(ResourceVersionConflictException.class));
+		assertThat(e.getCause()).as("Hapi maps conflict exception type").isInstanceOf(ResourceVersionConflictException.class);
 	}
 
 	void assertResourceDeleted(IIdType observationId) {

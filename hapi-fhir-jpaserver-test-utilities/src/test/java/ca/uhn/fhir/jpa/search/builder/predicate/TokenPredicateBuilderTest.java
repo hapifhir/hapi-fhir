@@ -28,8 +28,7 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
 
@@ -83,7 +82,7 @@ public class TokenPredicateBuilderTest {
 		// verify
 		List<ILoggingEvent> logList = myListAppender.list;
 		assertEquals(2, logList.size());
-		assertThat(logList.get(0).getFormattedMessage(), containsString(theLongSystem));
-		assertThat(logList.get(1).getFormattedMessage(), containsString(theLongValue));
+		assertThat(logList.get(0).getFormattedMessage()).contains(theLongSystem);
+		assertThat(logList.get(1).getFormattedMessage()).contains(theLongValue);
 	}
 }

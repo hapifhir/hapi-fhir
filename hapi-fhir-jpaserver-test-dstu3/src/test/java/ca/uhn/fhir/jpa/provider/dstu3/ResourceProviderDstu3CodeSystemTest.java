@@ -29,8 +29,7 @@ import java.io.IOException;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.batch2.jobs.termcodesystem.TermCodeSystemJobConfig.TERM_CODE_SYSTEM_DELETE_JOB_NAME;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -369,7 +368,7 @@ public class ResourceProviderDstu3CodeSystemTest extends BaseResourceProviderDst
 			.map(t -> ((IPrimitiveType<String>) t.getValue()).getValue())
 			.findFirst()
 			.orElseThrow(IllegalArgumentException::new);
-		assertThat(message, containsString("Terminology service was unable to provide validation for https://url#1"));
+		assertThat(message).contains("Terminology service was unable to provide validation for https://url#1");
 	}
 
 }

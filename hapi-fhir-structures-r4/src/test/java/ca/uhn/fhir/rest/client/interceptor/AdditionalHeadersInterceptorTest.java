@@ -30,7 +30,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -99,9 +99,9 @@ public class AdditionalHeadersInterceptorTest {
 		HttpGet get = (HttpGet) capt.getValue();
 		assertEquals("http://foo/Patient", get.getURI().toString());
 
-		assertThat(Arrays.stream(get.getHeaders("X-0")).map(Object::toString).collect(Collectors.toList()), Matchers.contains("X-0: X-0-VAL"));
-		assertThat(Arrays.stream(get.getHeaders("X-1")).map(Object::toString).collect(Collectors.toList()), Matchers.contains("X-1: X-1-VAL"));
-		assertThat(Arrays.stream(get.getHeaders("X-2")).map(Object::toString).collect(Collectors.toList()), Matchers.contains("X-2: X-2-VAL1", "X-2: X-2-VAL2"));
+		assertThat(Arrays.stream(get.getHeaders("X-0")).map(Object::toString).collect(Collectors.toList())).containsExactly("X-0: X-0-VAL");
+		assertThat(Arrays.stream(get.getHeaders("X-1")).map(Object::toString).collect(Collectors.toList())).containsExactly("X-1: X-1-VAL");
+		assertThat(Arrays.stream(get.getHeaders("X-2")).map(Object::toString).collect(Collectors.toList())).containsExactly("X-2: X-2-VAL1", "X-2: X-2-VAL2");
 	}
 
 	private String createBundle() {

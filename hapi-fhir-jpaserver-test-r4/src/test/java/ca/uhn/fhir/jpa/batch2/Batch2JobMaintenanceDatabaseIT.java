@@ -47,9 +47,7 @@ import java.util.Optional;
 
 import static ca.uhn.fhir.batch2.config.BaseBatch2Config.CHANNEL_NAME;
 import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.hasSize;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -437,7 +435,7 @@ chunk3, LAST, QUEUED
 	}
 
 	private void assertInstanceCount(int size) {
-		assertThat(myJobPersistence.fetchInstancesByJobDefinitionId(JOB_DEF_ID, 100, 0), hasSize(size));
+		assertThat(myJobPersistence.fetchInstancesByJobDefinitionId(JOB_DEF_ID, 100, 0)).hasSize(size);
 	}
 
 
@@ -514,7 +512,7 @@ chunk3, LAST, QUEUED
 		}
 
 		public void assertNotifications() {
-			assertThat(myChannelInterceptor.getReceivedChunkIds(), containsInAnyOrder(myExpectedChunkIdNotifications.toArray()));
+			assertThat(myChannelInterceptor.getReceivedChunkIds()).containsExactlyInAnyOrder(myExpectedChunkIdNotifications.toArray());
 		}
 	}
 

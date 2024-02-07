@@ -12,8 +12,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class MigrationTaskSkipperTest {
 	public static final String RELEASE = "4.1.0";
@@ -105,7 +104,7 @@ public class MigrationTaskSkipperTest {
 	private void assertSkipped(List<BaseTask> theTasks, Integer... theVersions) {
 		Set<String> expectedVersions = integersToVersions(theVersions).collect(Collectors.toSet());
 		Set<String> taskVersions = theTasks.stream().filter(BaseTask::isDoNothing).map(BaseTask::getMigrationVersion).collect(Collectors.toSet());
-		assertThat(taskVersions, equalTo(expectedVersions));
+		assertThat(taskVersions).isEqualTo(expectedVersions);
 	}
 
 	@Nonnull

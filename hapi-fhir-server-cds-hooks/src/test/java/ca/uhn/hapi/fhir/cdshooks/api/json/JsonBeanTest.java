@@ -7,8 +7,8 @@ import org.reflections.Reflections;
 
 import java.util.Set;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.hasItem;
 
 public class JsonBeanTest {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(JsonBeanTest.class);
@@ -20,7 +20,7 @@ public class JsonBeanTest {
 		Set<Class<? extends IModelJson>> allJsonClasses =
 			reflections.getSubTypesOf(IModelJson.class);
 
-		assertThat(allJsonClasses, hasItem(CdsServiceJson.class));
+		assertThat(allJsonClasses).contains(CdsServiceJson.class);
 		for (Class<? extends IModelJson> item : allJsonClasses) {
 			assertThat(item, HasGetterOrSetterForAllJsonFields.hasGetterOrSetterForAllJsonFields());
 		}

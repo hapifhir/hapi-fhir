@@ -20,9 +20,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.matchesPattern;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
 
@@ -60,7 +58,7 @@ public class FhirResourceDaoDstu3SourceTest extends BaseJpaDstu3Test {
 		params.setLoadSynchronous(true);
 		params.add(Constants.PARAM_SOURCE, new TokenParam("urn:source:0"));
 		IBundleProvider result = myPatientDao.search(params);
-		assertThat(toUnqualifiedVersionlessIdValues(result), containsInAnyOrder(pt0id.getValue()));
+		assertThat(toUnqualifiedVersionlessIdValues(result)).containsExactlyInAnyOrder(pt0id.getValue());
 		pt0 = (Patient) result.getResources(0, 1).get(0);
 		assertEquals("urn:source:0#a_request_id", pt0.getMeta().getExtensionString(HapiExtensions.EXT_META_SOURCE));
 
@@ -69,14 +67,14 @@ public class FhirResourceDaoDstu3SourceTest extends BaseJpaDstu3Test {
 		params.setLoadSynchronous(true);
 		params.add(Constants.PARAM_SOURCE, new TokenParam("#a_request_id"));
 		result = myPatientDao.search(params);
-		assertThat(toUnqualifiedVersionlessIdValues(result), containsInAnyOrder(pt0id.getValue(), pt1id.getValue()));
+		assertThat(toUnqualifiedVersionlessIdValues(result)).containsExactlyInAnyOrder(pt0id.getValue(), pt1id.getValue());
 
 		// Search by source URI and request ID
 		params = new SearchParameterMap();
 		params.setLoadSynchronous(true);
 		params.add(Constants.PARAM_SOURCE, new TokenParam("urn:source:0#a_request_id"));
 		result = myPatientDao.search(params);
-		assertThat(toUnqualifiedVersionlessIdValues(result), containsInAnyOrder(pt0id.getValue()));
+		assertThat(toUnqualifiedVersionlessIdValues(result)).containsExactlyInAnyOrder(pt0id.getValue());
 
 	}
 
@@ -108,7 +106,7 @@ public class FhirResourceDaoDstu3SourceTest extends BaseJpaDstu3Test {
 			.addOr(new TokenParam("urn:source:0"))
 			.addOr(new TokenParam("urn:source:1")));
 		IBundleProvider result = myPatientDao.search(params);
-		assertThat(toUnqualifiedVersionlessIdValues(result), containsInAnyOrder(pt0id.getValue(), pt1id.getValue()));
+		assertThat(toUnqualifiedVersionlessIdValues(result)).containsExactlyInAnyOrder(pt0id.getValue(), pt1id.getValue());
 
 	}
 
@@ -138,7 +136,7 @@ public class FhirResourceDaoDstu3SourceTest extends BaseJpaDstu3Test {
 		params.add(Constants.PARAM_SOURCE, new TokenAndListParam()
 			.addAnd(new TokenParam("urn:source:0"), new TokenParam("@a_request_id")));
 		IBundleProvider result = myPatientDao.search(params);
-		assertThat(toUnqualifiedVersionlessIdValues(result), containsInAnyOrder(pt0id.getValue()));
+		assertThat(toUnqualifiedVersionlessIdValues(result)).containsExactlyInAnyOrder(pt0id.getValue());
 
 	}
 
@@ -158,7 +156,7 @@ public class FhirResourceDaoDstu3SourceTest extends BaseJpaDstu3Test {
 		params.add(Constants.PARAM_SOURCE, new TokenAndListParam()
 			.addAnd(new TokenParam("urn:source:0"), new TokenParam("#" + requestId)));
 		IBundleProvider result = myPatientDao.search(params);
-		assertThat(toUnqualifiedVersionlessIdValues(result), containsInAnyOrder(pt0id.getValue()));
+		assertThat(toUnqualifiedVersionlessIdValues(result)).containsExactlyInAnyOrder(pt0id.getValue());
 
 	}
 
@@ -206,7 +204,7 @@ public class FhirResourceDaoDstu3SourceTest extends BaseJpaDstu3Test {
 		SearchParameterMap params = new SearchParameterMap();
 		params.setLoadSynchronous(true);
 		IBundleProvider result = myPatientDao.search(params);
-		assertThat(toUnqualifiedVersionlessIdValues(result), containsInAnyOrder(pt0id.getValue()));
+		assertThat(toUnqualifiedVersionlessIdValues(result)).containsExactlyInAnyOrder(pt0id.getValue());
 
 		// Search with source param
 		 params = new SearchParameterMap();
@@ -221,8 +219,7 @@ public class FhirResourceDaoDstu3SourceTest extends BaseJpaDstu3Test {
 	}
 
 	public static void assertConflictException(String theResourceType, ResourceVersionConflictException e) {
-		assertThat(e.getMessage(), matchesPattern(
-			"Unable to delete [a-zA-Z]+/[0-9]+ because at least one resource has a reference to this resource. First reference found was resource " + theResourceType + "/[0-9]+ in path [a-zA-Z]+.[a-zA-Z]+"));
+		assertThat(e.getMessage()).matches("Unable to delete [a-zA-Z]+/[0-9]+ because at least one resource has a reference to this resource. First reference found was resource " + theResourceType + "/[0-9]+ in path [a-zA-Z]+.[a-zA-Z]+");
 
 	}
 

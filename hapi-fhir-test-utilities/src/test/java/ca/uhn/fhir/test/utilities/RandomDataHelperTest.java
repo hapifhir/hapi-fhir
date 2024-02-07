@@ -6,11 +6,10 @@ import org.junit.jupiter.api.Test;
 import java.util.Date;
 import java.util.UUID;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.blankOrNullString;
-import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.not;
-import static org.hamcrest.Matchers.notNullValue;
 
 class RandomDataHelperTest {
 
@@ -30,11 +29,11 @@ class RandomDataHelperTest {
 		RandomDataHelper.fillFieldsRandomly(object);
 
 		assertThat(object.myString, not(blankOrNullString()));
-		assertThat(object.myInt, not(equalTo(0)));
-		assertThat(object.myBoxedLong, notNullValue());
-		assertThat(object.myDate, notNullValue());
-		assertThat(object.myUUID, notNullValue());
-		assertThat(object.myEnum, notNullValue());
+		assertThat(object.myInt).isNotEqualTo(0);
+		assertThat(object.myBoxedLong).isNotNull();
+		assertThat(object.myDate).isNotNull();
+		assertThat(object.myUUID).isNotNull();
+		assertThat(object.myEnum).isNotNull();
 	}
 
 }

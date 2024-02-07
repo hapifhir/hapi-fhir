@@ -21,9 +21,7 @@ import java.io.IOException;
 import java.sql.Blob;
 import java.sql.SQLException;
 
-import static org.hamcrest.CoreMatchers.containsString;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.matchesPattern;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -63,7 +61,7 @@ public class DatabaseBlobBinaryStorageSvcImplTest extends BaseJpaR4Test {
 
 		myCaptureQueriesListener.clear();
 
-		assertThat(outcome.getBlobId(), matchesPattern("^[a-zA-Z0-9]{100}$"));
+		assertThat(outcome.getBlobId()).matches("^[a-zA-Z0-9]{100}$");
 		assertEquals(16, outcome.getBytes());
 
 		/*
@@ -213,7 +211,7 @@ public class DatabaseBlobBinaryStorageSvcImplTest extends BaseJpaR4Test {
 			svc.copyBlobToOutputStream(new ByteArrayOutputStream(), (mockInput));
 			fail();
 		} catch (IOException e) {
-			assertThat(e.getMessage(), containsString("FOO"));
+			assertThat(e.getMessage()).contains("FOO");
 		}
 	}
 
@@ -230,7 +228,7 @@ public class DatabaseBlobBinaryStorageSvcImplTest extends BaseJpaR4Test {
 			svc.copyBlobToByteArray(mockInput);
 			fail();
 		} catch (IOException e) {
-			assertThat(e.getMessage(), containsString("FOO"));
+			assertThat(e.getMessage()).contains("FOO");
 		}
 	}
 

@@ -33,8 +33,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.io.IOException;
 import java.util.List;
 
-import static org.hamcrest.CoreMatchers.containsString;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -173,7 +172,7 @@ public class CascadingDeleteInterceptorTest extends BaseResourceProviderR4Test {
 			myPatientDao.delete(myPatientId);
 			fail();
 		} catch (ResourceVersionConflictException e) {
-			assertThat(e.getMessage(), containsString("because at least one resource has a reference to this resource"));
+			assertThat(e.getMessage()).contains("because at least one resource has a reference to this resource");
 		} finally {
 			myInterceptorRegistry.unregisterInterceptor(myDeleteInterceptor);
 		}
@@ -191,7 +190,7 @@ public class CascadingDeleteInterceptorTest extends BaseResourceProviderR4Test {
 		} catch (ResourceVersionConflictException e) {
 			String output = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(e.getOperationOutcome());
 			ourLog.info(output);
-			assertThat(output, containsString("Note that cascading deletes are not active for this request. You can enable cascading deletes"));
+			assertThat(output).contains("Note that cascading deletes are not active for this request. You can enable cascading deletes");
 		}
 	}
 
@@ -211,7 +210,7 @@ public class CascadingDeleteInterceptorTest extends BaseResourceProviderR4Test {
 			assertEquals(200, response.getStatusLine().getStatusCode());
 			String deleteResponse = IOUtils.toString(response.getEntity().getContent(), Charsets.UTF_8);
 			ourLog.info("Response: {}", deleteResponse);
-			assertThat(deleteResponse, containsString("Cascaded delete to "));
+			assertThat(deleteResponse).contains("Cascaded delete to ");
 		}
 
 		try {
@@ -242,7 +241,7 @@ public class CascadingDeleteInterceptorTest extends BaseResourceProviderR4Test {
 				String deleteResponse = IOUtils.toString(response.getEntity().getContent(), Charsets.UTF_8);
 				assertEquals(200, response.getStatusLine().getStatusCode(), deleteResponse);
 				ourLog.info("Response: {}", deleteResponse);
-				assertThat(deleteResponse, containsString("Cascaded delete to "));
+				assertThat(deleteResponse).contains("Cascaded delete to ");
 			}
 
 			try {
@@ -281,7 +280,7 @@ public class CascadingDeleteInterceptorTest extends BaseResourceProviderR4Test {
 			String deleteResponse = IOUtils.toString(response.getEntity().getContent(), Charsets.UTF_8);
 			assertEquals(200, response.getStatusLine().getStatusCode(), deleteResponse);
 			ourLog.info("Response: {}", deleteResponse);
-			assertThat(deleteResponse, containsString("Cascaded delete to "));
+			assertThat(deleteResponse).contains("Cascaded delete to ");
 		}
 
 		try {
@@ -317,7 +316,7 @@ public class CascadingDeleteInterceptorTest extends BaseResourceProviderR4Test {
 			assertEquals(200, response.getStatusLine().getStatusCode());
 			String deleteResponse = IOUtils.toString(response.getEntity().getContent(), Charsets.UTF_8);
 			ourLog.info("Response: {}", deleteResponse);
-			assertThat(deleteResponse, containsString("Cascaded delete to "));
+			assertThat(deleteResponse).contains("Cascaded delete to ");
 		}
 
 		try {

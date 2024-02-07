@@ -54,12 +54,9 @@ import java.util.concurrent.TimeUnit;
 
 import static java.util.Arrays.asList;
 import static org.apache.commons.lang3.time.DateUtils.MILLIS_PER_SECOND;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.startsWith;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -198,7 +195,7 @@ public class ResourceProviderInterceptorR4Test extends BaseResourceProviderR4Tes
 			ourLog.info("Response was: {}", resp);
 			assertEquals(201, response.getStatusLine().getStatusCode());
 			String newIdString = response.getFirstHeader(Constants.HEADER_LOCATION_LC).getValue();
-			assertThat(newIdString, startsWith(myServerBase + "/Patient/"));
+			assertThat(newIdString).startsWith(myServerBase + "/Patient/");
 		}
 
 		verify(interceptor, timeout(10 * MILLIS_PER_SECOND).times(1)).invoke(eq(Pointcut.SERVER_INCOMING_REQUEST_PRE_HANDLED), myParamsCaptor.capture());
@@ -299,7 +296,7 @@ public class ResourceProviderInterceptorR4Test extends BaseResourceProviderR4Tes
 			ourLog.info("Response was: {}", resp);
 			assertEquals(201, response.getStatusLine().getStatusCode());
 			String newIdString = response.getFirstHeader(Constants.HEADER_LOCATION_LC).getValue();
-			assertThat(newIdString, startsWith(myServerBase + "/Patient/"));
+			assertThat(newIdString).startsWith(myServerBase + "/Patient/");
 		}
 
 		verify(interceptor, timeout(10 * MILLIS_PER_SECOND).times(1)).invoke(eq(Pointcut.SERVER_INCOMING_REQUEST_PRE_HANDLED), myParamsCaptor.capture());
@@ -420,7 +417,7 @@ public class ResourceProviderInterceptorR4Test extends BaseResourceProviderR4Tes
 				.returnBundle(Bundle.class)
 				.execute();
 			List<String> ids = toUnqualifiedVersionlessIdValues(bundle);
-			assertThat(ids, containsInAnyOrder("Observation/o1", "Observation/o2"));
+			assertThat(ids).containsExactlyInAnyOrder("Observation/o1", "Observation/o2");
 
 		} finally {
 			myServer.getRestfulServer().unregisterInterceptor(interceptor);
@@ -461,7 +458,7 @@ public class ResourceProviderInterceptorR4Test extends BaseResourceProviderR4Tes
 			fail();
 		}catch (UnprocessableEntityException e){
 			// all is good
-			assertThat(e.getMessage(), containsString("2196"));
+			assertThat(e.getMessage()).contains("2196");
 		}
 	}
 
@@ -538,7 +535,7 @@ public class ResourceProviderInterceptorR4Test extends BaseResourceProviderR4Tes
 			fail();
 		} catch (UnprocessableEntityException e){
 			// this is good
-			assertThat(e.getMessage(), containsString("2196"));
+			assertThat(e.getMessage()).contains("2196");
 		}
 
 	}

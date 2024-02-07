@@ -41,8 +41,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class IncludeDstu2Test {
@@ -268,7 +267,7 @@ public class IncludeDstu2Test {
 		Set<String> values = new HashSet<String>();
 		values.add(p.getName().get(0).getFamilyFirstRep().getValue());
 		values.add(p.getName().get(1).getFamilyFirstRep().getValue());
-		assertThat(values, containsInAnyOrder("foo", "bar"));
+		assertThat(values).containsExactlyInAnyOrder("foo", "bar");
 
 	}
 

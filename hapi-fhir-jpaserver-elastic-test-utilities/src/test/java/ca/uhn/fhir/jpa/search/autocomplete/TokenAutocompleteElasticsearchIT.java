@@ -42,10 +42,9 @@ import jakarta.persistence.EntityManager;
 import java.util.List;
 import java.util.Objects;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 
 @ExtendWith(SpringExtension.class)
@@ -143,13 +142,13 @@ public class TokenAutocompleteElasticsearchIT extends BaseJpaTest {
 		long hits = codes.stream()
 			.filter(c -> matchingSystemAndCode(mean_blood_pressure).matches(c))
 			.count();
-		assertThat("multiple matches returns single hit", hits, is(1L));
+		assertThat(hits).as("multiple matches returns single hit").isEqualTo(1L);
 
 		codes = autocompleteSearch("Observation", "code", "text", "nuclear");
-		assertThat("doesn't find nuclear", codes, is(empty()));
+		assertThat(codes).as("doesn't find nuclear").isEmpty();
 
 		codes = autocompleteSearch("Observation", "code", "text", null);
-		assertThat("empty filter finds some", codes, is(not(empty())));
+		assertThat("empty filter finds some", codes, not(empty()));
 		assertThat("empty finds most common first", codes.get(0), matchingSystemAndCode(gram_positive_culture));
 		assertThat("empty finds most common first", codes.get(1), matchingSystemAndCode(mean_blood_pressure));
 
@@ -160,7 +159,7 @@ public class TokenAutocompleteElasticsearchIT extends BaseJpaTest {
 		assertThat("matches by code prefix", codes, Matchers.hasItem(matchingSystemAndCode(gram_positive_culture)));
 
 		codes = autocompleteSearch("Observation", "code", null, null);
-		assertThat("null finds everything", codes, hasSize(13));
+		assertThat(codes).as("null finds everything").hasSize(13);
 
 	}
 
@@ -175,7 +174,7 @@ public class TokenAutocompleteElasticsearchIT extends BaseJpaTest {
 		createObservationWithCode(mean_blood_pressure);
 
 		List<TokenAutocompleteHit> codes = autocompleteSearch("Observation", "code", null, null);
-		assertThat("null finds all three codes", codes, hasSize(3));
+		assertThat(codes).as("null finds all three codes").hasSize(3);
 
 		codes = autocompleteSearch("Observation", "code", null, "789");
 		assertThat("token prefix finds the matching code", codes, Matchers.hasItem(matchingSystemAndCode(erythrocyte_by_volume)));

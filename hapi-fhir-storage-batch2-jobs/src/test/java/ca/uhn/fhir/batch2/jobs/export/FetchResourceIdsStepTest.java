@@ -35,7 +35,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -45,7 +45,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.hamcrest.Matchers.containsString;
 
 @ExtendWith(MockitoExtension.class)
 public class FetchResourceIdsStepTest {
@@ -161,13 +160,12 @@ public class FetchResourceIdsStepTest {
 		ArgumentCaptor<ILoggingEvent> logCaptor = ArgumentCaptor.forClass(ILoggingEvent.class);
 		verify(myAppender, atLeastOnce()).doAppend(logCaptor.capture());
 		List<ILoggingEvent> events = logCaptor.getAllValues();
-		assertThat(events.get(0).getMessage(), containsString("Fetching resource IDs for bulk export job instance"));
-		assertThat(events.get(1).getMessage(), containsString("Running FetchResource"));
-		assertThat(events.get(2).getMessage(), containsString("Running FetchResource"));
-		assertThat(events.get(3).getFormattedMessage(), containsString("Submitted "
+		assertThat(events.get(0).getMessage()).contains("Fetching resource IDs for bulk export job instance");
+		assertThat(events.get(1).getMessage()).contains("Running FetchResource");
+		assertThat(events.get(2).getMessage()).contains("Running FetchResource");
+		assertThat(events.get(3).getFormattedMessage()).contains("Submitted "
 			+ parameters.getResourceTypes().size()
-			+ " groups of ids for processing"
-		));
+			+ " groups of ids for processing");
 
 		ArgumentCaptor<ExportPIDIteratorParameters> mapppedParamsCaptor = ArgumentCaptor.forClass(ExportPIDIteratorParameters.class);
 		verify(myBulkExportProcessor, times(2)).getResourcePidIterator(mapppedParamsCaptor.capture());

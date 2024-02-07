@@ -32,11 +32,9 @@ import org.slf4j.LoggerFactory;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInRelativeOrder;
-import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -87,11 +85,11 @@ public class FhirResourceDaoR4SearchMissingTest extends BaseJpaR4Test {
 		myOrganizationDao.create(org, mySrd).getId().toUnqualifiedVersionless();
 
 		runInTransaction(() -> {
-			assertThat(mySearchParamPresentDao.findAll(), empty());
-			assertThat(myResourceIndexedSearchParamStringDao.findAll(), empty());
-			assertThat(myResourceIndexedSearchParamDateDao.findAll(), empty());
-			assertThat(myResourceIndexedSearchParamTokenDao.findAll(), hasSize(1));
-			assertThat(myResourceIndexedSearchParamQuantityDao.findAll(), empty());
+			assertThat(mySearchParamPresentDao.findAll()).isEmpty();
+			assertThat(myResourceIndexedSearchParamStringDao.findAll()).isEmpty();
+			assertThat(myResourceIndexedSearchParamDateDao.findAll()).isEmpty();
+			assertThat(myResourceIndexedSearchParamTokenDao.findAll()).hasSize(1);
+			assertThat(myResourceIndexedSearchParamQuantityDao.findAll()).isEmpty();
 		});
 
 	}
@@ -106,11 +104,11 @@ public class FhirResourceDaoR4SearchMissingTest extends BaseJpaR4Test {
 		myOrganizationDao.create(org, mySrd).getId().toUnqualifiedVersionless();
 
 		runInTransaction(() -> {
-			assertThat(mySearchParamPresentDao.findAll(), empty());
-			assertThat(myResourceIndexedSearchParamStringDao.findAll(), empty());
-			assertThat(myResourceIndexedSearchParamDateDao.findAll(), empty());
-			assertThat(myResourceIndexedSearchParamTokenDao.findAll(), hasSize(1));
-			assertThat(myResourceIndexedSearchParamQuantityDao.findAll(), empty());
+			assertThat(mySearchParamPresentDao.findAll()).isEmpty();
+			assertThat(myResourceIndexedSearchParamStringDao.findAll()).isEmpty();
+			assertThat(myResourceIndexedSearchParamDateDao.findAll()).isEmpty();
+			assertThat(myResourceIndexedSearchParamTokenDao.findAll()).hasSize(1);
+			assertThat(myResourceIndexedSearchParamQuantityDao.findAll()).isEmpty();
 		});
 
 	}
@@ -125,11 +123,11 @@ public class FhirResourceDaoR4SearchMissingTest extends BaseJpaR4Test {
 		myOrganizationDao.create(org, mySrd).getId().toUnqualifiedVersionless();
 
 		runInTransaction(() -> {
-			assertThat(mySearchParamPresentDao.findAll(), empty());
-			assertThat(myResourceIndexedSearchParamStringDao.findAll(), empty());
-			assertThat(myResourceIndexedSearchParamDateDao.findAll(), empty());
-			assertThat(myResourceIndexedSearchParamTokenDao.findAll(), hasSize(1));
-			assertThat(myResourceIndexedSearchParamQuantityDao.findAll(), empty());
+			assertThat(mySearchParamPresentDao.findAll()).isEmpty();
+			assertThat(myResourceIndexedSearchParamStringDao.findAll()).isEmpty();
+			assertThat(myResourceIndexedSearchParamDateDao.findAll()).isEmpty();
+			assertThat(myResourceIndexedSearchParamTokenDao.findAll()).hasSize(1);
+			assertThat(myResourceIndexedSearchParamQuantityDao.findAll()).isEmpty();
 		});
 
 	}
@@ -176,24 +174,24 @@ public class FhirResourceDaoR4SearchMissingTest extends BaseJpaR4Test {
 		map = new SearchParameterMap();
 		map.add(Organization.SP_NAME, new StringParam().setMissing(true));
 		ids = toUnqualifiedVersionlessIds(myOrganizationDao.search(map));
-		assertThat(ids, contains(oid1));
+		assertThat(ids).containsExactly(oid1);
 
 		ourLog.info("Starting Search 2");
 
 		map = new SearchParameterMap();
 		map.add(Task.SP_REQUESTER, new ReferenceParam("Organization", "name:missing", "true"));
 		ids = toUnqualifiedVersionlessIds(myTaskDao.search(map));
-		assertThat(ids, contains(tid1)); // NOT tid2
+		assertThat(ids).containsExactly(tid1); // NOT tid2
 
 		map = new SearchParameterMap();
 		map.add(Task.SP_REQUESTER, new ReferenceParam("Organization", "name:missing", "false"));
 		ids = toUnqualifiedVersionlessIds(myTaskDao.search(map));
-		assertThat(ids, contains(tid3));
+		assertThat(ids).containsExactly(tid3);
 
 		map = new SearchParameterMap();
 		map.add(Patient.SP_ORGANIZATION, new ReferenceParam("Organization", "name:missing", "true"));
 		ids = toUnqualifiedVersionlessIds(myPatientDao.search(map));
-		assertThat(ids, empty());
+		assertThat(ids).isEmpty();
 
 	}
 
@@ -287,7 +285,7 @@ public class FhirResourceDaoR4SearchMissingTest extends BaseJpaR4Test {
 		IBundleProvider results = myMedicationRequestDao.search(map);
 		List<String> ids = toUnqualifiedVersionlessIdValues(results);
 
-		assertThat(ids, contains(id2.getValue()));
+		assertThat(ids).containsExactly(id2.getValue());
 
 	}
 

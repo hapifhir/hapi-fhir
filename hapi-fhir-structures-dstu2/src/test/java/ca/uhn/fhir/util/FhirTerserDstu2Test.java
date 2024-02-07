@@ -30,9 +30,7 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.List;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.containsString;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -75,7 +73,7 @@ public class FhirTerserDstu2Test {
 		assertEquals(true, clonedPatient.getActive().booleanValue());
 		string = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(clonedPatient);
 		ourLog.info("Encoded: {}", string);
-		assertThat(string, containsString("\"contained\""));
+		assertThat(string).contains("\"contained\"");
 	}
 
 
@@ -200,7 +198,7 @@ public class FhirTerserDstu2Test {
 		List<StringDt> strings = t.getAllPopulatedChildElementsOfType(p, StringDt.class);
 
 		assertEquals(2, strings.size());
-		assertThat(strings, containsInAnyOrder(new StringDt("PATIENT"), new StringDt("ORGANIZATION")));
+		assertThat(strings).containsExactlyInAnyOrder(new StringDt("PATIENT"), new StringDt("ORGANIZATION"));
 
 	}
 
@@ -217,7 +215,7 @@ public class FhirTerserDstu2Test {
 		List<StringDt> strings = t.getAllPopulatedChildElementsOfType(b, StringDt.class);
 
 		assertEquals(1, strings.size());
-		assertThat(strings, containsInAnyOrder(new StringDt("BUNDLE")));
+		assertThat(strings).containsExactlyInAnyOrder(new StringDt("BUNDLE"));
 
 	}
 

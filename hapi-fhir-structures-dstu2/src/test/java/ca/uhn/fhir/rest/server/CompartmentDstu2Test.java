@@ -24,9 +24,7 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.startsWith;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
@@ -71,7 +69,7 @@ public class CompartmentDstu2Test {
 		assertEquals("read", ourLastMethod);
 		assertEquals("Patient", ourLastId.getResourceType());
 		assertEquals("123", ourLastId.getIdPart());
-		assertThat(responseContent, startsWith("<Patient"));
+		assertThat(responseContent).startsWith("<Patient");
 	}
 
 	@Test
@@ -84,8 +82,8 @@ public class CompartmentDstu2Test {
 		assertEquals("searchEncounterCompartment", ourLastMethod);
 		assertEquals("Patient", ourLastId.getResourceType());
 		assertEquals("123", ourLastId.getIdPart());
-		assertThat(responseContent, startsWith("<Bundle"));
-		assertThat(responseContent, containsString("<Encounter"));
+		assertThat(responseContent).startsWith("<Bundle");
+		assertThat(responseContent).contains("<Encounter");
 	}
 
 	@Test
@@ -98,8 +96,8 @@ public class CompartmentDstu2Test {
 		assertEquals("searchObservationCompartment", ourLastMethod);
 		assertEquals("Patient", ourLastId.getResourceType());
 		assertEquals("123", ourLastId.getIdPart());
-		assertThat(responseContent, startsWith("<Bundle"));
-		assertThat(responseContent, containsString("<Observation"));
+		assertThat(responseContent).startsWith("<Bundle");
+		assertThat(responseContent).contains("<Observation");
 	}
 
 	public static class TempPatientResourceProvider implements IResourceProvider {

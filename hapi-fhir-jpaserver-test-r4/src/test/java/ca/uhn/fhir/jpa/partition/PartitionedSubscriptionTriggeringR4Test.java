@@ -42,11 +42,8 @@ import java.time.Month;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
-import static org.hamcrest.CoreMatchers.containsString;
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class PartitionedSubscriptionTriggeringR4Test extends BaseSubscriptionsR4Test  {
@@ -204,11 +201,11 @@ public class PartitionedSubscriptionTriggeringR4Test extends BaseSubscriptionsR4
 
 		waitForQueueToDrain();
 		List<Observation> resourceUpdates = BaseSubscriptionsR4Test.ourObservationProvider.getResourceUpdates();
-		assertThat(resourceUpdates.size(), is(equalTo(1)));
-		assertThat(resourceUpdates.get(0).getId(), is(equalTo(observationIdPartitionOne.toString())));
+		assertThat(resourceUpdates.size()).isEqualTo(1);
+		assertThat(resourceUpdates.get(0).getId()).isEqualTo(observationIdPartitionOne.toString());
 
 		String responseValue = resultParameters.getParameter().get(0).getValue().primitiveValue();
-		assertThat(responseValue, containsString("Subscription triggering job submitted as JOB ID"));
+		assertThat(responseValue).contains("Subscription triggering job submitted as JOB ID");
 	}
 
 	@Test
@@ -241,7 +238,7 @@ public class PartitionedSubscriptionTriggeringR4Test extends BaseSubscriptionsR4
 
 		waitForQueueToDrain();
 		List<Observation> resourceUpdates = BaseSubscriptionsR4Test.ourObservationProvider.getResourceUpdates();
-		assertThat(resourceUpdates.size(), is(equalTo(2)));
+		assertThat(resourceUpdates.size()).isEqualTo(2);
 	}
 	@Test
 	public void testManualTriggeredSubscriptionInPartition() throws Exception {
@@ -274,7 +271,7 @@ public class PartitionedSubscriptionTriggeringR4Test extends BaseSubscriptionsR4
 		Assertions.assertEquals(1, BaseSubscriptionsR4Test.ourObservationProvider.getCountUpdate());
 
 		String responseValue = resultParameters.getParameter().get(0).getValue().primitiveValue();
-		assertThat(responseValue, containsString("Subscription triggering job submitted as JOB ID"));
+		assertThat(responseValue).contains("Subscription triggering job submitted as JOB ID");
 	}
 
 	@Interceptor

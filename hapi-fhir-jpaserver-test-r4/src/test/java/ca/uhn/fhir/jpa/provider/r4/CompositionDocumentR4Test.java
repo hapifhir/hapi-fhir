@@ -33,11 +33,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.hasItem;
-import static org.hamcrest.Matchers.hasItems;
-import static org.hamcrest.Matchers.is;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -129,10 +125,10 @@ public class CompositionDocumentR4Test extends BaseResourceProviderR4Test {
 		Bundle bundle = fetchBundle(theUrl, EncodingEnum.JSON);
 		//Ensure each entry has a URL.
 
-		assertThat(bundle.getType(), is(equalTo(Bundle.BundleType.DOCUMENT)));
+		assertThat(bundle.getType()).isEqualTo(Bundle.BundleType.DOCUMENT);
 		bundle.getEntry().stream()
 				.forEach(entry -> {
-					assertThat(entry.getFullUrl(), is(equalTo(entry.getResource().getIdElement().toVersionless().toString())));
+			assertThat(entry.getFullUrl()).isEqualTo(entry.getResource().getIdElement().toVersionless().toString());
 				});
 		assertNull(bundle.getLink("next"));
 
@@ -142,12 +138,12 @@ public class CompositionDocumentR4Test extends BaseResourceProviderR4Test {
 		}
 
 		ourLog.info("Found IDs: {}", actual);
-		assertThat(actual, hasItem(compId));
-		assertThat(actual, hasItem(patId));
-		assertThat(actual, hasItem(orgId));
-		assertThat(actual, hasItem(encId));
-		assertThat(actual, hasItem(listId));
-		assertThat(actual, hasItems(myObsIds.toArray(new String[0])));
+		assertThat(actual).contains(compId);
+		assertThat(actual).contains(patId);
+		assertThat(actual).contains(orgId);
+		assertThat(actual).contains(encId);
+		assertThat(actual).contains(listId);
+		assertThat(actual).contains(myObsIds.toArray(new String[0]));
 	}
 
 	@Test
@@ -180,8 +176,8 @@ public class CompositionDocumentR4Test extends BaseResourceProviderR4Test {
 
 			ourLog.info("Returned classes: {}", returnedClasses);
 
-			assertThat(returnedClasses, hasItem("Composition"));
-			assertThat(returnedClasses, hasItem("Organization"));
+			assertThat(returnedClasses).contains("Composition");
+			assertThat(returnedClasses).contains("Organization");
 
 		} finally {
 

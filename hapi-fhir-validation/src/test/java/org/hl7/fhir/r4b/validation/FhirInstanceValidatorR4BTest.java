@@ -90,13 +90,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.greaterThan;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.lessThan;
-import static org.hamcrest.Matchers.not;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -143,7 +137,7 @@ public class FhirInstanceValidatorR4BTest extends BaseValidationTestWithInlineMo
 
 		ValidationResult output = myFhirValidator.validateWithResult(resource);
 		List<SingleValidationMessage> nonInfo = logResultsAndReturnNonInformationalOnes(output);
-		assertThat(nonInfo, hasSize(2));
+		assertThat(nonInfo).hasSize(2);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -377,7 +371,7 @@ public class FhirInstanceValidatorR4BTest extends BaseValidationTestWithInlineMo
 		ValidationResult result = val.validateWithResult(input);
 		List<SingleValidationMessage> all = logResultsAndReturnAll(result);
 		assertFalse(result.isSuccessful());
-		assertThat(all.get(0).getMessage(), containsString("All FHIR elements must have a @value or children"));
+		assertThat(all.get(0).getMessage()).contains("All FHIR elements must have a @value or children");
 	}
 
 	/**
@@ -493,7 +487,7 @@ public class FhirInstanceValidatorR4BTest extends BaseValidationTestWithInlineMo
 		result = val.validateWithResult(input);
 		all = logResultsAndReturnAll(result);
 		assertTrue(result.isSuccessful());
-		assertThat(all, empty());
+		assertThat(all).isEmpty();
 
 		// With BPs enabled
 		val = ourCtx.newValidator();
@@ -607,7 +601,7 @@ public class FhirInstanceValidatorR4BTest extends BaseValidationTestWithInlineMo
 		Period period = new Period();
 		period.setStartElement(new DateTimeType("2000-01-01T00:00:01+05:00"));
 		period.setEndElement(new DateTimeType("2000-01-01T00:00:00+04:00"));
-		assertThat(period.getStart().getTime(), lessThan(period.getEnd().getTime()));
+		assertThat(period.getStart().getTime()).isLessThan(period.getEnd().getTime());
 		procedure.setPerformed(period);
 
 		FhirValidator val = ourCtx.newValidator();
@@ -634,7 +628,7 @@ public class FhirInstanceValidatorR4BTest extends BaseValidationTestWithInlineMo
 
 		ValidationResult results = myFhirValidator.validateWithResult(p);
 		List<SingleValidationMessage> outcome = logResultsAndReturnNonInformationalOnes(results);
-		assertThat(outcome, empty());
+		assertThat(outcome).isEmpty();
 
 	}
 
@@ -646,7 +640,7 @@ public class FhirInstanceValidatorR4BTest extends BaseValidationTestWithInlineMo
 		String input = IOUtils.toString(FhirInstanceValidator.class.getResourceAsStream("/bug872-ext-with-hl7-url.json"), Charsets.UTF_8);
 		ValidationResult output = myFhirValidator.validateWithResult(input);
 		List<SingleValidationMessage> nonInfo = logResultsAndReturnNonInformationalOnes(output);
-		assertThat(nonInfo, empty());
+		assertThat(nonInfo).isEmpty();
 	}
 
 	@Test
@@ -662,7 +656,7 @@ public class FhirInstanceValidatorR4BTest extends BaseValidationTestWithInlineMo
 		ValidationResult output = myFhirValidator.validateWithResult(input);
 		List<SingleValidationMessage> errors = logResultsAndReturnAll(output);
 		assertEquals(2, errors.size());
-		assertThat(errors.get(0).getMessage(), containsString("None of the codings provided are in the value set 'LOINC Diagnostic Report Codes'"));
+		assertThat(errors.get(0).getMessage()).contains("None of the codings provided are in the value set 'LOINC Diagnostic Report Codes'");
 		assertEquals("Base64 encoded values SHOULD not contain any whitespace (per RFC 4648). Note that non-validating readers are encouraged to accept whitespace anyway", errors.get(1).getMessage());
 	}
 
@@ -731,7 +725,7 @@ public class FhirInstanceValidatorR4BTest extends BaseValidationTestWithInlineMo
 				.filter(t -> t.getSeverity() != ResultSeverityEnum.INFORMATION)
 				.collect(Collectors.toList());
 
-			assertThat("Failed to validate " + i.getFullUrl() + " - " + errors, errors, empty());
+			assertThat(errors).as("Failed to validate " + i.getFullUrl() + " - " + errors).isEmpty();
 		}
 
 		ourLog.info("Validated the following:\n{}", ids);
@@ -743,7 +737,7 @@ public class FhirInstanceValidatorR4BTest extends BaseValidationTestWithInlineMo
 
 		ValidationResult output = myFhirValidator.validateWithResult(vsContents);
 		logResultsAndReturnNonInformationalOnes(output);
-		assertThat(output.getMessages().toString(), containsString("Bundle.type: minimum required = 1, but only found 0"));
+		assertThat(output.getMessages().toString()).contains("Bundle.type: minimum required = 1, but only found 0");
 	}
 
 	/**
@@ -760,7 +754,7 @@ public class FhirInstanceValidatorR4BTest extends BaseValidationTestWithInlineMo
 
 		ValidationResult output = myFhirValidator.validateWithResult(patient);
 		logResultsAndReturnNonInformationalOnes(output);
-		assertThat(output.getMessages().toString(), containsString("The JSON property 'name' is a duplicate and will be ignored"));
+		assertThat(output.getMessages().toString()).contains("The JSON property 'name' is a duplicate and will be ignored");
 	}
 
 	@Test
@@ -788,7 +782,7 @@ public class FhirInstanceValidatorR4BTest extends BaseValidationTestWithInlineMo
 
 		ValidationResult output = myFhirValidator.validateWithResult(inputString);
 		List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
-		assertThat(errors, empty());
+		assertThat(errors).isEmpty();
 
 	}
 
@@ -840,7 +834,7 @@ public class FhirInstanceValidatorR4BTest extends BaseValidationTestWithInlineMo
 		// Should fail
 		output = val.validateWithResult(input);
 		all = logResultsAndReturnErrorOnes(output);
-		assertThat(all.toString(), containsString("definition allows for the types [string] but found type code"));
+		assertThat(all.toString()).contains("definition allows for the types [string] but found type code");
 
 	}
 
@@ -852,7 +846,7 @@ public class FhirInstanceValidatorR4BTest extends BaseValidationTestWithInlineMo
 		ValidationResult output = myFhirValidator.validateWithResult(input);
 		logResultsAndReturnAll(output);
 
-		assertThat(output.getMessages().toString(), containsString("Items not of type group should not have items - Item with linkId 5.1 of type BOOLEAN has 1 item(s)"));
+		assertThat(output.getMessages().toString()).contains("Items not of type group should not have items - Item with linkId 5.1 of type BOOLEAN has 1 item(s)");
 	}
 
 	@Test
@@ -1029,8 +1023,8 @@ public class FhirInstanceValidatorR4BTest extends BaseValidationTestWithInlineMo
 		ValidationResult output = myFhirValidator.validateWithResult(input);
 		List<SingleValidationMessage> messages = logResultsAndReturnNonInformationalOnes(output);
 		assertEquals(4, messages.size(), output.toString());
-		assertThat(messages.get(0).getMessage(), containsString("Element must have some content"));
-		assertThat(messages.get(2).getMessage(), containsString("Primitive types must have a value or must have child extensions"));
+		assertThat(messages.get(0).getMessage()).contains("Element must have some content");
+		assertThat(messages.get(2).getMessage()).contains("Primitive types must have a value or must have child extensions");
 	}
 
 	@Test
@@ -1078,7 +1072,7 @@ public class FhirInstanceValidatorR4BTest extends BaseValidationTestWithInlineMo
 
 		ValidationResult output = myFhirValidator.validateWithResult(p);
 		List<SingleValidationMessage> nonInfo = logResultsAndReturnNonInformationalOnes(output);
-		assertThat(nonInfo, empty());
+		assertThat(nonInfo).isEmpty();
 	}
 
 	/**
@@ -1093,7 +1087,7 @@ public class FhirInstanceValidatorR4BTest extends BaseValidationTestWithInlineMo
 
 		ValidationResult output = myFhirValidator.validateWithResult(p);
 		List<SingleValidationMessage> nonInfo = logResultsAndReturnNonInformationalOnes(output);
-		assertThat(nonInfo, empty());
+		assertThat(nonInfo).isEmpty();
 	}
 
 	@Test
@@ -1133,9 +1127,9 @@ public class FhirInstanceValidatorR4BTest extends BaseValidationTestWithInlineMo
 		ValidationResult output = myFhirValidator.validateWithResult(input);
 		List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
 
-		assertThat(errors.toString(), containsString("Observation.subject: minimum required = 1, but only found 0"));
-		assertThat(errors.toString(), containsString("Observation.encounter: max allowed = 0, but found 1"));
-		assertThat(errors.toString(), containsString("Observation.device: minimum required = 1, but only found 0"));
+		assertThat(errors.toString()).contains("Observation.subject: minimum required = 1, but only found 0");
+		assertThat(errors.toString()).contains("Observation.encounter: max allowed = 0, but found 1");
+		assertThat(errors.toString()).contains("Observation.device: minimum required = 1, but only found 0");
 	}
 
 	@Test
@@ -1168,8 +1162,8 @@ public class FhirInstanceValidatorR4BTest extends BaseValidationTestWithInlineMo
 		input.setValue(new StringType("AAA"));
 
 		ValidationResult output = myFhirValidator.validateWithResult(input);
-		assertThat(output.getMessages().size(), greaterThan(0));
-		assertThat(output.getMessages().get(0).getMessage(), containsString("Observation.status: minimum required = 1, but only found 0"));
+		assertThat(output.getMessages().size()).isGreaterThan(0);
+		assertThat(output.getMessages().get(0).getMessage()).contains("Observation.status: minimum required = 1, but only found 0");
 
 	}
 
@@ -1266,7 +1260,7 @@ public class FhirInstanceValidatorR4BTest extends BaseValidationTestWithInlineMo
 
 		ValidationResult output = myFhirValidator.validateWithResult(input);
 		List<SingleValidationMessage> errors = logResultsAndReturnAll(output);
-		assertThat(errors.toString(), errors.size(), greaterThan(0));
+		assertThat(errors.size()).as(errors.toString()).isGreaterThan(0);
 		assertEquals("Unknown code for 'http://acme.org#9988877'", errors.get(0).getMessage());
 
 	}
@@ -1335,7 +1329,7 @@ public class FhirInstanceValidatorR4BTest extends BaseValidationTestWithInlineMo
 		List<SingleValidationMessage> all = logResultsAndReturnAll(output);
 		assertEquals(1, all.size());
 		assertEquals("Patient.identifier[0].type", all.get(0).getLocationString());
-		assertThat(all.get(0).getMessage(), containsString("None of the codings provided are in the value set 'IdentifierType'"));
+		assertThat(all.get(0).getMessage()).contains("None of the codings provided are in the value set 'IdentifierType'");
 		assertEquals(ResultSeverityEnum.WARNING, all.get(0).getSeverity());
 
 	}
@@ -1348,15 +1342,15 @@ public class FhirInstanceValidatorR4BTest extends BaseValidationTestWithInlineMo
 		Observation input = loadResource(ourCtx, Observation.class, "/r4/observation-with-body-temp-ucum.json");
 		ValidationResult output = myFhirValidator.validateWithResult(input);
 		List<SingleValidationMessage> all = logResultsAndReturnNonInformationalOnes(output);
-		assertThat(all, empty());
+		assertThat(all).isEmpty();
 
 		// Change the unit to something not supported
 		input.getValueQuantity().setCode("Heck");
 		output = myFhirValidator.validateWithResult(input);
 		all = logResultsAndReturnNonInformationalOnes(output);
 		assertEquals(2, all.size());
-		assertThat(all.get(0).getMessage(), containsString("The unit 'Heck' is unknown' at position 0 for 'http://unitsofmeasure.org#Heck'"));
-		assertThat(all.get(1).getMessage(), containsString("The value provided ('Heck') is not in the value set 'Body Temperature Units'"));
+		assertThat(all.get(0).getMessage()).contains("The unit 'Heck' is unknown' at position 0 for 'http://unitsofmeasure.org#Heck'");
+		assertThat(all.get(1).getMessage()).contains("The value provided ('Heck') is not in the value set 'Body Temperature Units'");
 
 	}
 
@@ -1372,7 +1366,7 @@ public class FhirInstanceValidatorR4BTest extends BaseValidationTestWithInlineMo
 		ValidationResult output = myFhirValidator.validateWithResult(o);
 		List<SingleValidationMessage> valMessages = logResultsAndReturnAll(output);
 		for (SingleValidationMessage msg : valMessages) {
-			assertThat(msg.getMessage(), not(containsString("have a performer")));
+			assertThat(msg.getMessage()).doesNotContain("have a performer");
 		}
 	}
 
@@ -1459,7 +1453,7 @@ public class FhirInstanceValidatorR4BTest extends BaseValidationTestWithInlineMo
 		ValidationResult output = myFhirValidator.validateWithResult(input);
 		List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
 		assertEquals(1, errors.size(), errors.toString());
-		assertThat(errors.get(0).getMessage(), containsString("The value provided ('BLAH') is not in the value set 'CurrencyCode' (http://hl7.org/fhir/ValueSet/currencies|4.3.0), and a code is required from this value set  (error message = Unknown code 'BLAH' for in-memory expansion of ValueSet 'http://hl7.org/fhir/ValueSet/currencies')"));
+		assertThat(errors.get(0).getMessage()).contains("The value provided ('BLAH') is not in the value set 'CurrencyCode' (http://hl7.org/fhir/ValueSet/currencies|4.3.0), and a code is required from this value set  (error message = Unknown code 'BLAH' for in-memory expansion of ValueSet 'http://hl7.org/fhir/ValueSet/currencies')");
 
 
 	}
@@ -1498,7 +1492,7 @@ public class FhirInstanceValidatorR4BTest extends BaseValidationTestWithInlineMo
 		ValidationResult output = myFhirValidator.validateWithResult(allergy);
 		List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
 		assertEquals(0, errors.size(), errors.toString());
-		assertThat(errors.get(0).getMessage(), containsString("The value provided ('BLAH') is not in the value set http://hl7.org/fhir/ValueSet/currencies"));
+		assertThat(errors.get(0).getMessage()).contains("The value provided ('BLAH') is not in the value set http://hl7.org/fhir/ValueSet/currencies");
 
 	}
 
@@ -1514,7 +1508,7 @@ public class FhirInstanceValidatorR4BTest extends BaseValidationTestWithInlineMo
 
 		// We deliberately create an invalid bundle to confirm we are indeed running multithreaded
 		Bundle bundle = buildBundle(entriesCount, false);
-		assertThat(bundle.getEntry(), hasSize(entriesCount));
+		assertThat(bundle.getEntry()).hasSize(entriesCount);
 
 		try {
 			// RED-GREEN set ConcurrentBundleValidation to false to see the test fail
@@ -1532,7 +1526,7 @@ public class FhirInstanceValidatorR4BTest extends BaseValidationTestWithInlineMo
 			assertTrue(output.getMessages().stream().anyMatch(message -> message.getLocationString().contains("Bundle.entry[1].resource.ofType(Patient)")));
 			// validate
 			List<SingleValidationMessage> all = logResultsAndReturnErrorOnes(output);
-			assertThat(output.getMessages(), hasSize(entriesCount * 2));
+			assertThat(output.getMessages()).hasSize(entriesCount * 2);
 			// This assert proves that we did a multi-threaded validation since the outer bundle fails validation
 			// due to lack of unique fullUrl values on the entries.  If you setConcurrentBundleValidation(false)
 			// above this test will fail.

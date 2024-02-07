@@ -97,11 +97,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.not;
-import static org.hamcrest.Matchers.startsWith;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -223,7 +219,7 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 		try {
 			String response = IOUtils.toString(http.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(response);
-			assertThat(response, not(containsString("_format")));
+			assertThat(response).doesNotContain("_format");
 			assertEquals(200, http.getStatusLine().getStatusCode());
 
 			Bundle responseBundle = ourCtx.newXmlParser().parseResource(Bundle.class, response);
@@ -256,7 +252,7 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 		try {
 			String response = IOUtils.toString(http.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(response);
-			assertThat(response, containsString("_format=json"));
+			assertThat(response).contains("_format=json");
 			assertEquals(200, http.getStatusLine().getStatusCode());
 		} finally {
 			http.close();
@@ -341,7 +337,7 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 		HttpGet get = new HttpGet(ourServerBase);
 //		get.addHeader("Accept", "application/xml, text/html");
 		CloseableHttpResponse http = ourHttpClient.execute(get);
-		assertThat(http.getFirstHeader("Content-Type").getValue(), containsString("application/fhir+json"));
+		assertThat(http.getFirstHeader("Content-Type").getValue()).contains("application/fhir+json");
 	}
 
 	@Test
@@ -489,7 +485,7 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 			String encoded = IOUtils.toString(resp.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(encoded);
 
-			assertThat(encoded, containsString("transaction-response"));
+			assertThat(encoded).contains("transaction-response");
 
 			Bundle response = myFhirContext.newXmlParser().parseResource(Bundle.class, encoded);
 			assertEquals(3, response.getEntry().size());
@@ -753,8 +749,8 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 		assertEquals("self", respSub.getLink().get(0).getRelation());
 		assertEquals(ourServerBase + "/Patient", respSub.getLink().get(0).getUrl());
 		assertEquals("next", respSub.getLink().get(1).getRelation());
-		assertThat(respSub.getLink().get(1).getUrl(), containsString("/fhir/context?_getpages"));
-		assertThat(respSub.getEntry().get(0).getFullUrl(), startsWith(ourServerBase + "/Patient/"));
+		assertThat(respSub.getLink().get(1).getUrl()).contains("/fhir/context?_getpages");
+		assertThat(respSub.getEntry().get(0).getFullUrl()).startsWith(ourServerBase + "/Patient/");
 		assertEquals(Patient.class, respSub.getEntry().get(0).getResource().getClass());
 	}
 
@@ -771,7 +767,7 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 			myClient.transaction().withBundle(bundle).prettyPrint().execute();
 			fail();
 		} catch (InvalidRequestException e) {
-			assertThat(e.toString(), containsString("missing or invalid HTTP Verb"));
+			assertThat(e.toString()).contains("missing or invalid HTTP Verb");
 		}
 	}
 
@@ -826,7 +822,7 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 			String encoded = IOUtils.toString(resp.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(encoded);
 
-			assertThat(encoded, containsString("transaction-response"));
+			assertThat(encoded).contains("transaction-response");
 		} finally {
 			IOUtils.closeQuietly(resp.getEntity().getContent());
 		}
@@ -859,7 +855,7 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 				ourLog.info(encoded);
 
 				//@formatter:off
-				assertThat(encoded, containsString("Questionnaire/54127-6/_history/"));
+				assertThat(encoded).contains("Questionnaire/54127-6/_history/");
 				//@formatter:on
 
 				for (Header next : resp.getHeaders(RequestValidatingInterceptor.DEFAULT_RESPONSE_HEADER_NAME)) {
@@ -979,12 +975,12 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 		// validate
 		Bundle obsBundle = getAllResourcesOfType("Observation");
 		List<Observation> observations = BundleUtil.toListOfResourcesOfType(myFhirContext, obsBundle, Observation.class);
-		assertThat(observations, hasSize(1));
+		assertThat(observations).hasSize(1);
 		assertEquals(oKeepId, observations.get(0).getIdElement());
 
 		Bundle diagBundle = getAllResourcesOfType("DiagnosticReport");
 		List<DiagnosticReport> diags = BundleUtil.toListOfResourcesOfType(myFhirContext, diagBundle, DiagnosticReport.class);
-		assertThat(diags, hasSize(1));
+		assertThat(diags).hasSize(1);
 		assertEquals(dKeepId, diags.get(0).getIdElement());
 	}
 

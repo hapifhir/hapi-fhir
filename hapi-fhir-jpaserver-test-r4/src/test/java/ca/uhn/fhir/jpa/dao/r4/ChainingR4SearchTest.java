@@ -39,8 +39,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.apache.commons.lang3.StringUtils.countMatches;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -91,7 +90,7 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 
 		RuntimeSearchParam sp = mySearchParamRegistry.getActiveSearchParam("Bundle", "message");
 		assertEquals("Bundle.entry[0].resource", sp.getPath());
-		assertThat(sp.getBase(), contains("Bundle"));
+		assertThat(sp.getBase()).containsExactly("Bundle");
 		assertEquals(RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE, sp.getStatus());
 
 		// Test
@@ -136,7 +135,7 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 
 		// validate
 		assertEquals(1L, oids.size());
-		assertThat(oids, contains(oid1.getIdPart()));
+		assertThat(oids).containsExactly(oid1.getIdPart());
 	}
 
 	@Test
@@ -170,7 +169,7 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 
 		// validate
 		assertEquals(1L, oids.size());
-		assertThat(oids, contains(oid1.getIdPart()));
+		assertThat(oids).containsExactly(oid1.getIdPart());
 	}
 
 	@Test
@@ -214,7 +213,7 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 
 		// validate
 		assertEquals(1L, oids.size());
-		assertThat(oids, contains(oid1.getIdPart()));
+		assertThat(oids).containsExactly(oid1.getIdPart());
 	}
 
 	@Test
@@ -261,7 +260,7 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 
 		// validate
 		assertEquals(2L, oids.size());
-		assertThat(oids, contains(oid1.getIdPart(), oid2.getIdPart()));
+		assertThat(oids).containsExactly(oid1.getIdPart(), oid2.getIdPart());
 	}
 
 	@Test
@@ -309,7 +308,7 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 
 		// validate
 		assertEquals(2L, oids.size());
-		assertThat(oids, contains(oid1.getIdPart(), oid2.getIdPart()));
+		assertThat(oids).containsExactly(oid1.getIdPart(), oid2.getIdPart());
 	}
 
 	@Test
@@ -350,7 +349,7 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 
 		// validate
 		assertEquals(1L, oids.size());
-		assertThat(oids, contains(oid1.getIdPart()));
+		assertThat(oids).containsExactly(oid1.getIdPart());
 	}
 
 	@Test
@@ -430,7 +429,7 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 
 		// validate
 		assertEquals(1L, oids.size());
-		assertThat(oids, contains(oid1.getIdPart()));
+		assertThat(oids).containsExactly(oid1.getIdPart());
 	}
 
 	@Test
@@ -472,7 +471,7 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 
 		// validate
 		assertEquals(1L, oids.size());
-		assertThat(oids, contains(oid1.getIdPart()));
+		assertThat(oids).containsExactly(oid1.getIdPart());
 	}
 
 	@Test
@@ -514,7 +513,7 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 
 		// validate
 		assertEquals(1L, oids.size());
-		assertThat(oids, contains(oid1.getIdPart()));
+		assertThat(oids).containsExactly(oid1.getIdPart());
 	}
 
 	@Test
@@ -554,7 +553,7 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 
 		// validate
 		assertEquals(1L, oids.size());
-		assertThat(oids, contains(oid1.getIdPart()));
+		assertThat(oids).containsExactly(oid1.getIdPart());
 	}
 
 	@Test
@@ -606,7 +605,7 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 
 		// validate
 		assertEquals(1L, oids.size());
-		assertThat(oids, contains(oid1.getIdPart()));
+		assertThat(oids).containsExactly(oid1.getIdPart());
 	}
 
 	@Test
@@ -660,7 +659,7 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 
 		// validate
 		assertEquals(1L, oids.size());
-		assertThat(oids, contains(oid1.getIdPart()));
+		assertThat(oids).containsExactly(oid1.getIdPart());
 	}
 
 	@Test
@@ -701,7 +700,7 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 
 		// validate
 		assertEquals(1L, oids.size());
-		assertThat(oids, contains(oid1.getIdPart()));
+		assertThat(oids).containsExactly(oid1.getIdPart());
 	}
 
 	@Test
@@ -746,7 +745,7 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 
 		// validate
 		assertEquals(1L, oids.size());
-		assertThat(oids, contains(oid1.getIdPart()));
+		assertThat(oids).containsExactly(oid1.getIdPart());
 	}
 
 	@Test
@@ -787,7 +786,7 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 
 		// validate
 		assertEquals(1L, oids.size());
-		assertThat(oids, contains(oid1.getIdPart()));
+		assertThat(oids).containsExactly(oid1.getIdPart());
 	}
 
 	@Test
@@ -831,7 +830,7 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 
 		// validate
 		assertEquals(1L, oids.size());
-		assertThat(oids, contains(oid1.getIdPart()));
+		assertThat(oids).containsExactly(oid1.getIdPart());
 	}
 
 	@Test
@@ -914,7 +913,7 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 
 		// validate
 		assertEquals(1L, oids.size());
-		assertThat(oids, contains(oid1.getIdPart()));
+		assertThat(oids).containsExactly(oid1.getIdPart());
 	}
 
 	@Test
@@ -964,7 +963,7 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 
 		// validate
 		assertEquals(1L, oids.size());
-		assertThat(oids, contains(oid1.getIdPart()));
+		assertThat(oids).containsExactly(oid1.getIdPart());
 	}
 
 	@Test
@@ -1020,7 +1019,7 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 
 		// validate
 		assertEquals(1L, oids.size());
-		assertThat(oids, contains(oid1.getIdPart()));
+		assertThat(oids).containsExactly(oid1.getIdPart());
 	}
 
 	@Test
@@ -1074,7 +1073,7 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 
 		// validate
 		assertEquals(1L, oids.size());
-		assertThat(oids, contains(oid1.getIdPart()));
+		assertThat(oids).containsExactly(oid1.getIdPart());
 	}
 
 	@Test
@@ -1132,7 +1131,7 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 
 		// validate
 		assertEquals(1L, oids.size());
-		assertThat(oids, contains(oid1.getIdPart()));
+		assertThat(oids).containsExactly(oid1.getIdPart());
 	}
 
 	@Test
@@ -1194,7 +1193,7 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 
 		// validate
 		assertEquals(1L, oids.size());
-		assertThat(oids, contains(oid1.getIdPart()));
+		assertThat(oids).containsExactly(oid1.getIdPart());
 	}
 
 	@Test
@@ -1239,7 +1238,7 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 
 		// validate
 		assertEquals(1L, oids.size());
-		assertThat(oids, contains(oid1.getIdPart()));
+		assertThat(oids).containsExactly(oid1.getIdPart());
 	}
 
 	@Test
@@ -1284,7 +1283,7 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 
 		// validate
 		assertEquals(1L, oids.size());
-		assertThat(oids, contains(oid1.getIdPart()));
+		assertThat(oids).containsExactly(oid1.getIdPart());
 	}
 
 	@Test
@@ -1329,7 +1328,7 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 
 		// validate
 		assertEquals(1L, oids.size());
-		assertThat(oids, contains(oid1.getIdPart()));
+		assertThat(oids).containsExactly(oid1.getIdPart());
 	}
 
 	@Test
@@ -1380,7 +1379,7 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 
 		// validate
 		assertEquals(1L, oids.size());
-		assertThat(oids, contains(oid1.getIdPart()));
+		assertThat(oids).containsExactly(oid1.getIdPart());
 	}
 
 	@Test
@@ -1426,7 +1425,7 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 
 		// validate
 		assertEquals(1L, oids.size());
-		assertThat(oids, contains(oid1.getIdPart()));
+		assertThat(oids).containsExactly(oid1.getIdPart());
 	}
 
 	@Test
@@ -1471,7 +1470,7 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 
 		// validate
 		assertEquals(1L, oids.size());
-		assertThat(oids, contains(oid1.getIdPart()));
+		assertThat(oids).containsExactly(oid1.getIdPart());
 	}
 
 	@Test
@@ -1520,7 +1519,7 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 
 		// validate
 		assertEquals(1L, oids.size());
-		assertThat(oids, contains(oid1.getIdPart()));
+		assertThat(oids).containsExactly(oid1.getIdPart());
 	}
 
 	@Test

@@ -18,8 +18,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -112,7 +111,7 @@ public class ExpungeHookTest extends BaseJpaDstu3Test {
 			myPatientDao.read(theId);
 			fail();
 		} catch (ResourceNotFoundException e) {
-			assertThat(e.getMessage(), containsString("is not known"));
+			assertThat(e.getMessage()).contains("is not known");
 		}
 	}
 

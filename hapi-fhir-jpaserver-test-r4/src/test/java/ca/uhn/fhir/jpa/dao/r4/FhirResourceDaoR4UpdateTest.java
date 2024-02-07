@@ -54,13 +54,7 @@ import java.util.Set;
 import java.util.TimeZone;
 import java.util.UUID;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.endsWith;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.matchesPattern;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -104,7 +98,7 @@ public class FhirResourceDaoR4UpdateTest extends BaseJpaR4Test {
 			});
 			fail();
 		} catch (ResourceVersionConflictException e) {
-			assertThat(e.getMessage(), containsString("It can also happen when a request disables the Upsert Existence Check."));
+			assertThat(e.getMessage()).contains("It can also happen when a request disables the Upsert Existence Check.");
 		}
 	}
 
@@ -211,8 +205,7 @@ public class FhirResourceDaoR4UpdateTest extends BaseJpaR4Test {
 				InvalidRequestException thrown = assertThrows(InvalidRequestException.class,
 					() -> myPatientDao.update(p2,
 						"Patient?identifier=http://kookaburra.text/id|kookaburra2", mySrd));
-				assertThat(thrown.getMessage(), endsWith(
-					"Failed to process conditional create. The supplied resource did not satisfy the conditional URL."));
+				assertThat(thrown.getMessage()).endsWith("Failed to process conditional create. The supplied resource did not satisfy the conditional URL.");
 			}
 
 			@Test
@@ -226,8 +219,7 @@ public class FhirResourceDaoR4UpdateTest extends BaseJpaR4Test {
 				InvalidRequestException thrown = assertThrows(InvalidRequestException.class,
 					() -> myPatientDao.update(p2,
 						"Patient?identifier=http://kookaburra.text/id|kookaburra2", mySrd));
-				assertThat(thrown.getMessage(), endsWith(
-					"Failed to process conditional create. The supplied resource did not satisfy the conditional URL."));
+				assertThat(thrown.getMessage()).endsWith("Failed to process conditional create. The supplied resource did not satisfy the conditional URL.");
 			}
 
 		}
@@ -258,8 +250,7 @@ public class FhirResourceDaoR4UpdateTest extends BaseJpaR4Test {
 				InvalidRequestException thrown = assertThrows(InvalidRequestException.class,
 					() -> myPatientDao.update(p2,
 						"Patient?identifier=http://kookaburra.text/id|kookaburra1", mySrd));
-				assertThat(thrown.getMessage(), endsWith(
-					"Failed to process conditional update. The supplied resource did not satisfy the conditional URL."));
+				assertThat(thrown.getMessage()).endsWith("Failed to process conditional update. The supplied resource did not satisfy the conditional URL.");
 			}
 		}
 	}
@@ -554,21 +545,21 @@ public class FhirResourceDaoR4UpdateTest extends BaseJpaR4Test {
 		p.setActive(true);
 		p.setId("Patient/A");
 		String id = myPatientDao.update(p, mySrd).getId().getValue();
-		assertThat(id, endsWith("Patient/A/_history/1"));
+		assertThat(id).endsWith("Patient/A/_history/1");
 
 		// Second time should not result in an update
 		p = new Patient();
 		p.setActive(true);
 		p.setId("Patient/A");
 		id = myPatientDao.update(p, mySrd).getId().getValue();
-		assertThat(id, endsWith("Patient/A/_history/1"));
+		assertThat(id).endsWith("Patient/A/_history/1");
 
 		// And third time should not result in an update
 		p = new Patient();
 		p.setActive(true);
 		p.setId("Patient/A");
 		id = myPatientDao.update(p, mySrd).getId().getValue();
-		assertThat(id, endsWith("Patient/A/_history/1"));
+		assertThat(id).endsWith("Patient/A/_history/1");
 
 		myPatientDao.read(new IdType("Patient/A"), mySrd);
 		myPatientDao.read(new IdType("Patient/A/_history/1"), mySrd);
@@ -590,7 +581,7 @@ public class FhirResourceDaoR4UpdateTest extends BaseJpaR4Test {
 		p.setActive(false);
 		p.setId("Patient/A");
 		id = myPatientDao.update(p, mySrd).getId().getValue();
-		assertThat(id, endsWith("Patient/A/_history/2"));
+		assertThat(id).endsWith("Patient/A/_history/2");
 
 	}
 
@@ -678,7 +669,7 @@ public class FhirResourceDaoR4UpdateTest extends BaseJpaR4Test {
 		p = myPatientDao.read(id.toVersionless(), mySrd);
 		assertEquals(id.toVersionless(), p.getIdElement().toVersionless());
 		assertNotEquals(id, p.getIdElement());
-		assertThat(p.getIdElement().toString(), endsWith("/_history/2"));
+		assertThat(p.getIdElement().toString()).endsWith("/_history/2");
 
 	}
 
@@ -712,7 +703,7 @@ public class FhirResourceDaoR4UpdateTest extends BaseJpaR4Test {
 		p = myPatientDao.read(id.toVersionless(), mySrd);
 		assertEquals(id.toVersionless(), p.getIdElement().toVersionless());
 		assertNotEquals(id, p.getIdElement());
-		assertThat(p.getIdElement().toString(), endsWith("/_history/2"));
+		assertThat(p.getIdElement().toString()).endsWith("/_history/2");
 
 	}
 
@@ -746,7 +737,7 @@ public class FhirResourceDaoR4UpdateTest extends BaseJpaR4Test {
 		try {
 			myPatientDao.update(p, matchUrl, mySrd);
 		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage(), containsString("2279"));
+			assertThat(e.getMessage()).contains("2279");
 		}
 	}
 
@@ -757,14 +748,14 @@ public class FhirResourceDaoR4UpdateTest extends BaseJpaR4Test {
 		Observation obs = new Observation();
 		obs.addIdentifier().setValue(identifierCode);
 		myObservationDao.create(obs, matchUrl, new SystemRequestDetails());
-		assertThat(myResourceSearchUrlDao.findAll(), hasSize(1));
+		assertThat(myResourceSearchUrlDao.findAll()).hasSize(1);
 
 		// when
 		obs.setStatus(Observation.ObservationStatus.CORRECTED);
 		myObservationDao.update(obs, mySrd);
 
 		// then
-		assertThat(myResourceSearchUrlDao.findAll(), hasSize(0));
+		assertThat(myResourceSearchUrlDao.findAll()).hasSize(0);
 
 	}
 
@@ -809,7 +800,7 @@ public class FhirResourceDaoR4UpdateTest extends BaseJpaR4Test {
 			p = myPatientDao.read(id.toVersionless(), mySrd);
 			assertEquals(id.toVersionless(), p.getIdElement().toVersionless());
 			assertNotEquals(id, p.getIdElement());
-			assertThat(p.getIdElement().toString(), endsWith("/_history/2"));
+			assertThat(p.getIdElement().toString()).endsWith("/_history/2");
 		} finally {
 			TimeZone.setDefault(def);
 		}
@@ -873,7 +864,7 @@ public class FhirResourceDaoR4UpdateTest extends BaseJpaR4Test {
 
 		List<JpaPid> ids = myPatientDao.searchForIds(new SearchParameterMap(Patient.SP_GIVEN, new StringParam("testUpdateMaintainsSearchParamsDstu2AAA")), null);
 		assertEquals(1, ids.size());
-		assertThat(JpaPid.toLongList(ids), contains(p1id.getIdPartAsLong()));
+		assertThat(JpaPid.toLongList(ids)).containsExactly(p1id.getIdPartAsLong());
 
 		// Update the name
 		p1.getName().get(0).getGiven().get(0).setValue("testUpdateMaintainsSearchParamsDstu2BBB");
@@ -931,13 +922,13 @@ public class FhirResourceDaoR4UpdateTest extends BaseJpaR4Test {
 			for (Coding next : tagList) {
 				secListValues.add(next.getSystemElement().getValue() + "|" + next.getCodeElement().getValue());
 			}
-			assertThat(secListValues, containsInAnyOrder("tag_scheme1|tag_term1", "tag_scheme2|tag_term2"));
+			assertThat(secListValues).containsExactlyInAnyOrder("tag_scheme1|tag_term1", "tag_scheme2|tag_term2");
 			List<Coding> secList = p1.getMeta().getSecurity();
 			secListValues = new HashSet<>();
 			for (Coding next : secList) {
 				secListValues.add(next.getSystemElement().getValue() + "|" + next.getCodeElement().getValue());
 			}
-			assertThat(secListValues, containsInAnyOrder("sec_scheme1|sec_term1", "sec_scheme2|sec_term2"));
+			assertThat(secListValues).containsExactlyInAnyOrder("sec_scheme1|sec_term1", "sec_scheme2|sec_term2");
 			List<CanonicalType> profileList = p1.getMeta().getProfile();
 			assertEquals(1, profileList.size());
 			assertEquals("http://foo2", profileList.get(0).getValueAsString()); // no foo1
@@ -1028,7 +1019,7 @@ public class FhirResourceDaoR4UpdateTest extends BaseJpaR4Test {
 			myPatientDao.update(p, mySrd);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage(), containsString("Can not create resource with ID[9999999999999999], no resource with this ID exists and clients may only"));
+			assertThat(e.getMessage()).contains("Can not create resource with ID[9999999999999999], no resource with this ID exists and clients may only");
 		}
 	}
 
@@ -1211,7 +1202,7 @@ public class FhirResourceDaoR4UpdateTest extends BaseJpaR4Test {
 			myPatientDao.update(p, mySrd);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage(), containsString("clients may only assign IDs which contain at least one non-numeric"));
+			assertThat(e.getMessage()).contains("clients may only assign IDs which contain at least one non-numeric");
 		}
 	}
 
@@ -1243,7 +1234,7 @@ public class FhirResourceDaoR4UpdateTest extends BaseJpaR4Test {
 			myPatientDao.update(p, mySrd);
 			fail();
 		} catch (ResourceNotFoundException e) {
-			assertThat(e.getMessage(), matchesPattern(Msg.code(959) + "No resource exists on this server resource with ID.*, and client-assigned IDs are not enabled."));
+			assertThat(e.getMessage()).matches(Msg.code(959) + "No resource exists on this server resource with ID.*, and client-assigned IDs are not enabled.");
 		}
 
 	}
@@ -1339,14 +1330,14 @@ public class FhirResourceDaoR4UpdateTest extends BaseJpaR4Test {
 		p.setActive(true);
 		BundleBuilder bb = new BundleBuilder(myFhirContext);
 		bb.addTransactionUpdateEntry(p);
-		assertThat(mySystemDao.transaction(mySrd, bb.getBundleTyped()).getEntryFirstRep().getResponse().getLocation(), endsWith("/_history/1"));
+		assertThat(mySystemDao.transaction(mySrd, bb.getBundleTyped()).getEntryFirstRep().getResponse().getLocation()).endsWith("/_history/1");
 
 		p = new Patient();
 		p.setId("Patient/A");
 		p.setActive(true);
 		bb = new BundleBuilder(myFhirContext);
 		bb.addTransactionUpdateEntry(p);
-		assertThat(mySystemDao.transaction(mySrd, bb.getBundleTyped()).getEntryFirstRep().getResponse().getLocation(), endsWith("/_history/2"));
+		assertThat(mySystemDao.transaction(mySrd, bb.getBundleTyped()).getEntryFirstRep().getResponse().getLocation()).endsWith("/_history/2");
 
 		p = myPatientDao.read(new IdType("Patient/A"), mySrd);
 		assertTrue(p.getActive());

@@ -9,11 +9,11 @@ import java.util.List;
 
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.isJson;
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 
 class TokenAutocompleteAggregationTest {
@@ -143,7 +143,7 @@ class TokenAutocompleteAggregationTest {
 
 			List<TokenAutocompleteHit> hits = myAutocompleteAggregation.extractResults(parsedResult);
 
-			assertThat(hits, is(not(empty())));
+			assertThat(hits, not(empty()));
 			assertThat(hits, (hasSize(2)));
 		}
 
@@ -157,8 +157,8 @@ class TokenAutocompleteAggregationTest {
 				.getAsJsonObject();
 
 			TokenAutocompleteHit entry = myAutocompleteAggregation.bucketToEntry(bucket);
-			assertThat(entry.mySystemCode, equalTo("http://loinc.org|59460-6"));
-			assertThat(entry.myDisplayText, equalTo("Fall risk total [Morse Fall Scale]"));
+			assertThat(entry.mySystemCode).isEqualTo("http://loinc.org|59460-6");
+			assertThat(entry.myDisplayText).isEqualTo("Fall risk total [Morse Fall Scale]");
 
 		}
 

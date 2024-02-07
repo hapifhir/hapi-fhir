@@ -23,9 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.IntStream;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.containsString;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -88,8 +86,8 @@ public class ExpandResourcesStepJpaTest extends BaseJpaR4Test {
 		verify(mySink, times(1)).accept(myWorkChunkCaptor.capture());
 		ExpandedResourcesList expandedResourceList = myWorkChunkCaptor.getValue();
 		assertEquals(10, expandedResourceList.getStringifiedResources().size());
-		assertThat(expandedResourceList.getStringifiedResources().get(0), containsString("{\"system\":\"http://static\",\"version\":\"1\",\"code\":\"tag\",\"userSelected\":true}"));
-		assertThat(expandedResourceList.getStringifiedResources().get(1), containsString("{\"system\":\"http://static\",\"version\":\"1\",\"code\":\"tag\",\"userSelected\":true}"));
+		assertThat(expandedResourceList.getStringifiedResources().get(0)).contains("{\"system\":\"http://static\",\"version\":\"1\",\"code\":\"tag\",\"userSelected\":true}");
+		assertThat(expandedResourceList.getStringifiedResources().get(1)).contains("{\"system\":\"http://static\",\"version\":\"1\",\"code\":\"tag\",\"userSelected\":true}");
 
 		// Verify query counts
 		assertEquals(theExpectedSelectQueries, myCaptureQueriesListener.countSelectQueries());
@@ -148,7 +146,7 @@ public class ExpandResourcesStepJpaTest extends BaseJpaR4Test {
 			.stream()
 			.map(t -> myFhirContext.newJsonParser().parseResource(t).getIdElement().getIdPartAsLong())
 			.toList();
-		assertThat(resourceIds.toString(), resourceIds, containsInAnyOrder(matchingIds.toArray(new Long[0])));
+		assertThat(resourceIds).as(resourceIds.toString()).containsExactlyInAnyOrder(matchingIds.toArray(new Long[0]));
 
 	}
 
@@ -190,7 +188,7 @@ public class ExpandResourcesStepJpaTest extends BaseJpaR4Test {
 			.stream()
 			.map(t -> myFhirContext.newJsonParser().parseResource(t).getIdElement().getIdPartAsLong())
 			.toList();
-		assertThat(resourceIds.toString(), resourceIds, containsInAnyOrder(allIds.toArray(new Long[0])));
+		assertThat(resourceIds).as(resourceIds.toString()).containsExactlyInAnyOrder(allIds.toArray(new Long[0]));
 
 	}
 

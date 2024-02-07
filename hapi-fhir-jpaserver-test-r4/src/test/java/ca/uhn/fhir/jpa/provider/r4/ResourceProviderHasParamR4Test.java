@@ -31,8 +31,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
@@ -113,7 +112,7 @@ public class ResourceProviderHasParamR4Test extends BaseResourceProviderR4Test {
 		
 		String uri = myServerBase + "/Patient?_has:Observation:subject:identifier=" + UrlUtil.escapeUrlParam("urn:system|FOO");
 		List<String> ids = searchAndReturnUnqualifiedVersionlessIdValues(uri);
-		assertThat(ids, contains(pid0.getValue()));
+		assertThat(ids).containsExactly(pid0.getValue());
 	}
 
 	@Test
@@ -167,7 +166,7 @@ public class ResourceProviderHasParamR4Test extends BaseResourceProviderR4Test {
 		ourLog.info("uri = " + uri);
 		
 		List<String> ids = searchAndReturnUnqualifiedVersionlessIdValues(uri);
-		assertThat(ids, contains(pid0.getValue()));
+		assertThat(ids).containsExactly(pid0.getValue());
 	}
 	
 	@Test
@@ -224,7 +223,7 @@ public class ResourceProviderHasParamR4Test extends BaseResourceProviderR4Test {
 		ourLog.info("uri = " + uri);
 		
 		List<String> ids = searchAndReturnUnqualifiedVersionlessIdValues(uri);
-		assertThat(ids, contains(pid0.getValue()));
+		assertThat(ids).containsExactly(pid0.getValue());
 	}
 	
 	@Test
@@ -271,7 +270,7 @@ public class ResourceProviderHasParamR4Test extends BaseResourceProviderR4Test {
 		String uri = myServerBase + "/Patient?_has:Observation:subject:code-value-quantity=http://" + UrlUtil.escapeUrlParam("loinc.org|2345-7$gt180");
 		ourLog.info("uri = " + uri);
 		List<String> ids = searchAndReturnUnqualifiedVersionlessIdValues(uri);
-		assertThat(ids, contains(pid0.getValue()));
+		assertThat(ids).containsExactly(pid0.getValue());
 	}
 
 	@Test
@@ -319,7 +318,7 @@ public class ResourceProviderHasParamR4Test extends BaseResourceProviderR4Test {
 		String uri = myServerBase + "/Patient?_has:Observation:subject:code-value-date=http://" + UrlUtil.escapeUrlParam("loinc.org|2345-7$gt2019");
 		ourLog.info("uri = " + uri);
 		List<String> ids = searchAndReturnUnqualifiedVersionlessIdValues(uri);
-		assertThat(ids, contains(pid0.getValue()));
+		assertThat(ids).containsExactly(pid0.getValue());
 	}
 
 	@Test
@@ -375,7 +374,7 @@ public class ResourceProviderHasParamR4Test extends BaseResourceProviderR4Test {
 		String uri = myServerBase + "/Patient?_has:Observation:subject:combo-code-value-quantity=http://" + UrlUtil.escapeUrlParam("loinc.org|2345-8$200");
 		ourLog.info("uri = " + uri);
 		List<String> ids = searchAndReturnUnqualifiedVersionlessIdValues(uri);
-		assertThat(ids, contains(pid0.getValue()));
+		assertThat(ids).containsExactly(pid0.getValue());
 	}
 
 	@Test
@@ -531,7 +530,7 @@ public class ResourceProviderHasParamR4Test extends BaseResourceProviderR4Test {
 		
 		ourLog.info("uri = " + uri);
 		List<String> ids = searchAndReturnUnqualifiedVersionlessIdValues(uri);
-		assertThat(ids, contains(pid0.getValue()));
+		assertThat(ids).containsExactly(pid0.getValue());
 	}
 	
 	@Test
@@ -592,8 +591,8 @@ public class ResourceProviderHasParamR4Test extends BaseResourceProviderR4Test {
 		
 		ourLog.info("uri = " + uri);
 		List<String> ids = searchAndReturnUnqualifiedVersionlessIdValues(uri);
-				
-		assertThat(ids, contains(pid0.getValue()));
+
+		assertThat(ids).containsExactly(pid0.getValue());
 	}
 
 	@Test

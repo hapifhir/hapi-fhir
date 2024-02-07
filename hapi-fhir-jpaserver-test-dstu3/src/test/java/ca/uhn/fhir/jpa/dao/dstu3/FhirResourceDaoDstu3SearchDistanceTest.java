@@ -14,9 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.is;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -44,7 +42,7 @@ public class FhirResourceDaoDstu3SearchDistanceTest extends BaseJpaDstu3Test {
 			myFhirContext.getResourceDefinition("Location"));
 
 		List<String> ids = toUnqualifiedVersionlessIdValues(myLocationDao.search(map));
-		assertThat(ids, contains(locId));
+		assertThat(ids).containsExactly(locId);
 	}
 
 	@Test
@@ -64,7 +62,7 @@ public class FhirResourceDaoDstu3SearchDistanceTest extends BaseJpaDstu3Test {
 			myFhirContext.getResourceDefinition("Location"));
 
 		List<String> ids = toUnqualifiedVersionlessIdValues(myLocationDao.search(map));
-		assertThat(ids, contains(locId));
+		assertThat(ids).containsExactly(locId);
 	}
 
 
@@ -89,7 +87,7 @@ public class FhirResourceDaoDstu3SearchDistanceTest extends BaseJpaDstu3Test {
 					Location.SP_NEAR_DISTANCE + "=" + bigEnoughDistance + "|http://unitsofmeasure.org|km", myFhirContext.getResourceDefinition("Location"));
 
 			List<String> ids = toUnqualifiedVersionlessIdValues(myLocationDao.search(map));
-			assertThat(ids, contains(locId));
+			assertThat(ids).containsExactly(locId);
 		}
 		{ // Outside the box
 			double tooSmallDistance = CoordCalculatorTestUtil.DISTANCE_KM_CHIN_TO_UHN / 2;
@@ -101,7 +99,7 @@ public class FhirResourceDaoDstu3SearchDistanceTest extends BaseJpaDstu3Test {
 					Location.SP_NEAR_DISTANCE + "=" + tooSmallDistance + "|http://unitsofmeasure.org|km", myFhirContext.getResourceDefinition("Location"));
 
 			List<String> ids = toUnqualifiedVersionlessIdValues(myLocationDao.search(map));
-			assertThat(ids.size(), is(0));
+			assertThat(ids.size()).isEqualTo(0);
 		}
 
 	}

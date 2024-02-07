@@ -67,14 +67,8 @@ import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 
 import static java.time.temporal.ChronoUnit.SECONDS;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.matchesPattern;
-import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -138,7 +132,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 				.map(ResourceLink::getSourcePath)
 				.sorted()
 				.collect(Collectors.toList());
-			assertThat(paths.toString(), paths, contains("Observation.subject", "Observation.subject.where(resolve() is Patient)"));
+			assertThat(paths).as(paths.toString()).containsExactly("Observation.subject", "Observation.subject.where(resolve() is Patient)");
 		});
 
 		myCaptureQueriesListener.clear();
@@ -414,10 +408,10 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 
 		assertTrue(outcome.getCreated());
 		ResourceSearchUrlEntity searchUrlEntity = myResourceSearchUrlDao.findAll().get(0);
-		assertThat(searchUrlEntity, is(notNullValue()) );
-		assertThat(searchUrlEntity.getResourcePid(), equalTo(expectedResId));
+		assertThat(searchUrlEntity).isNotNull();
+		assertThat(searchUrlEntity.getResourcePid()).isEqualTo(expectedResId);
 		assertThat(searchUrlEntity.getCreatedTime(), DateMatchers.within(1, SECONDS, new Date()));
-		assertThat(searchUrlEntity.getSearchUrl(), equalTo(expectedNormalizedMatchUrl));
+		assertThat(searchUrlEntity.getSearchUrl()).isEqualTo(expectedNormalizedMatchUrl);
 
 	}
 
@@ -430,22 +424,22 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		SearchParameterMap map = new SearchParameterMap();
 		map.setLoadSynchronous(true);
 		map.add(Patient.SP_FAMILY, new StringParam("김"));
-		assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(map)), contains(id));
+		assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(map))).containsExactly(id);
 
 		map = new SearchParameterMap();
 		map.setLoadSynchronous(true);
 		map.add(Patient.SP_GIVEN, new StringParam("준"));
-		assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(map)), contains(id));
+		assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(map))).containsExactly(id);
 
 		map = new SearchParameterMap();
 		map.setLoadSynchronous(true);
 		map.add(Patient.SP_GIVEN, new StringParam("준수"));
-		assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(map)), contains(id));
+		assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(map))).containsExactly(id);
 
 		map = new SearchParameterMap();
 		map.setLoadSynchronous(true);
 		map.add(Patient.SP_GIVEN, new StringParam("수")); // rightmost character only
-		assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(map)), empty());
+		assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(map))).isEmpty();
 	}
 
 	@Test
@@ -456,7 +450,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		p.addName().setFamily("FAM");
 		IIdType id = myPatientDao.create(p).getId().toUnqualified();
 
-		assertThat(id.getIdPart(), matchesPattern("[a-z0-9]{8}-.*"));
+		assertThat(id.getIdPart()).matches("[a-z0-9]{8}-.*");
 
 		p = myPatientDao.read(id);
 		assertEquals("FAM", p.getNameFirstRep().getFamily());
@@ -472,7 +466,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		p.addName().setFamily("FAM");
 		IIdType id = myPatientDao.create(p).getId().toUnqualified();
 
-		assertThat(id.getIdPart(), matchesPattern("[a-z0-9]{8}-.*"));
+		assertThat(id.getIdPart()).matches("[a-z0-9]{8}-.*");
 
 		p = myPatientDao.read(id);
 		assertEquals("FAM", p.getNameFirstRep().getFamily());
@@ -708,8 +702,8 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 
 		ourLog.debug(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(output));
 
-		assertThat(output.getEntry().get(0).getResponse().getLocation(), matchesPattern("Organization/[a-z0-9]{8}-.*"));
-		assertThat(output.getEntry().get(1).getResponse().getLocation(), matchesPattern("Patient/[a-z0-9]{8}-.*"));
+		assertThat(output.getEntry().get(0).getResponse().getLocation()).matches("Organization/[a-z0-9]{8}-.*");
+		assertThat(output.getEntry().get(1).getResponse().getLocation()).matches("Patient/[a-z0-9]{8}-.*");
 
 
 	}
@@ -725,7 +719,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 
 		String encoded = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(p);
 		ourLog.info("Input: {}", encoded);
-		assertThat(encoded, containsString("#1"));
+		assertThat(encoded).contains("#1");
 
 		IIdType id = myPatientDao.create(p).getId().toUnqualifiedVersionless();
 
@@ -733,7 +727,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 
 		encoded = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(p);
 		ourLog.info("Output: {}", encoded);
-		assertThat(encoded, containsString("#1"));
+		assertThat(encoded).contains("#1");
 
 		Organization org = (Organization) p.getManagingOrganization().getResource();
 		assertEquals("#1", org.getId());
@@ -849,8 +843,8 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		);
 		ids = toUnqualifiedVersionlessIdValues(myObservationDao.search(map));
 		searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
-		assertThat(searchSql, containsString("HFJ_SPIDX_QUANTITY_NRML t0"));
-		assertThat(searchSql, containsString("t0.SP_VALUE = '1.2E-9'"));
+		assertThat(searchSql).contains("HFJ_SPIDX_QUANTITY_NRML t0");
+		assertThat(searchSql).contains("t0.SP_VALUE = '1.2E-9'");
 		assertEquals(1, ids.size());
 
 		// Try with non-normalized value
@@ -862,8 +856,8 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		);
 		ids = toUnqualifiedVersionlessIdValues(myObservationDao.search(map));
 		searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
-		assertThat(searchSql, containsString("HFJ_SPIDX_QUANTITY_NRML t0"));
-		assertThat(searchSql, containsString("t0.SP_VALUE = '1.2E-9'"));
+		assertThat(searchSql).contains("HFJ_SPIDX_QUANTITY_NRML t0");
+		assertThat(searchSql).contains("t0.SP_VALUE = '1.2E-9'");
 		assertEquals(1, ids.size());
 
 		// Try with no units value
@@ -873,8 +867,8 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		);
 		ids = toUnqualifiedVersionlessIdValues(myObservationDao.search(map));
 		searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
-		assertThat(searchSql, containsString("HFJ_SPIDX_QUANTITY t0"));
-		assertThat(searchSql, containsString("t0.SP_VALUE = '0.0000012'"));
+		assertThat(searchSql).contains("HFJ_SPIDX_QUANTITY t0");
+		assertThat(searchSql).contains("t0.SP_VALUE = '0.0000012'");
 		assertEquals(1, ids.size());
 	}
 
@@ -1010,8 +1004,8 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		);
 		ids = toUnqualifiedVersionlessIdValues(myObservationDao.search(map));
 		String searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
-		assertThat(searchSql, containsString("HFJ_SPIDX_QUANTITY t0"));
-		assertThat(searchSql, containsString("t0.SP_VALUE = '95.7412345'"));
+		assertThat(searchSql).contains("HFJ_SPIDX_QUANTITY t0");
+		assertThat(searchSql).contains("t0.SP_VALUE = '95.7412345'");
 		assertEquals(1, ids.size());
 
 	}
@@ -1065,8 +1059,8 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		);
 		ids = toUnqualifiedVersionlessIdValues(myObservationDao.search(map));
 		searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
-		assertThat(searchSql, containsString("HFJ_SPIDX_QUANTITY t0"));
-		assertThat(searchSql, containsString("t0.SP_VALUE = '1.2E-9'"));
+		assertThat(searchSql).contains("HFJ_SPIDX_QUANTITY t0");
+		assertThat(searchSql).contains("t0.SP_VALUE = '1.2E-9'");
 		assertEquals(0, ids.size());
 
 		// Try with non-normalized value
@@ -1078,8 +1072,8 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		);
 		ids = toUnqualifiedVersionlessIdValues(myObservationDao.search(map));
 		searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
-		assertThat(searchSql, containsString("HFJ_SPIDX_QUANTITY t0"));
-		assertThat(searchSql, containsString("t0.SP_VALUE = '0.0000012'"));
+		assertThat(searchSql).contains("HFJ_SPIDX_QUANTITY t0");
+		assertThat(searchSql).contains("t0.SP_VALUE = '0.0000012'");
 		assertEquals(1, ids.size());
 
 		// Try with no units value
@@ -1089,8 +1083,8 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		);
 		ids = toUnqualifiedVersionlessIdValues(myObservationDao.search(map));
 		searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
-		assertThat(searchSql, containsString("HFJ_SPIDX_QUANTITY t0"));
-		assertThat(searchSql, containsString("t0.SP_VALUE = '0.0000012'"));
+		assertThat(searchSql).contains("HFJ_SPIDX_QUANTITY t0");
+		assertThat(searchSql).contains("t0.SP_VALUE = '0.0000012'");
 		assertEquals(1, ids.size());
 	}
 
@@ -1195,8 +1189,8 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		);
 		ids = toUnqualifiedVersionlessIdValues(myObservationDao.search(map));
 		searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
-		assertThat(searchSql, containsString("HFJ_SPIDX_QUANTITY t0"));
-		assertThat(searchSql, containsString("t0.SP_VALUE = '1.2E-9'"));
+		assertThat(searchSql).contains("HFJ_SPIDX_QUANTITY t0");
+		assertThat(searchSql).contains("t0.SP_VALUE = '1.2E-9'");
 		assertEquals(0, ids.size());
 
 		// Try with non-normalized value
@@ -1208,8 +1202,8 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		);
 		ids = toUnqualifiedVersionlessIdValues(myObservationDao.search(map));
 		searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
-		assertThat(searchSql, containsString("HFJ_SPIDX_QUANTITY t0"));
-		assertThat(searchSql, containsString("t0.SP_VALUE = '0.0000012'"));
+		assertThat(searchSql).contains("HFJ_SPIDX_QUANTITY t0");
+		assertThat(searchSql).contains("t0.SP_VALUE = '0.0000012'");
 		assertEquals(1, ids.size());
 
 		// Try with no units value
@@ -1219,8 +1213,8 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		);
 		ids = toUnqualifiedVersionlessIdValues(myObservationDao.search(map));
 		searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
-		assertThat(searchSql, containsString("HFJ_SPIDX_QUANTITY t0"));
-		assertThat(searchSql, containsString("t0.SP_VALUE = '0.0000012'"));
+		assertThat(searchSql).contains("HFJ_SPIDX_QUANTITY t0");
+		assertThat(searchSql).contains("t0.SP_VALUE = '0.0000012'");
 		assertEquals(1, ids.size());
 	}
 

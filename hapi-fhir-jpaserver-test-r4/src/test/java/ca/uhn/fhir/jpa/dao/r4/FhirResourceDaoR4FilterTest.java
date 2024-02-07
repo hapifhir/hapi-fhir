@@ -40,9 +40,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.empty;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -99,13 +97,13 @@ public class FhirResourceDaoR4FilterTest extends BaseJpaR4Test {
 		map.setLoadSynchronous(true);
 		map.add(Constants.PARAM_FILTER, new StringParam("name eq smith"));
 		found = toUnqualifiedVersionlessIdValues(myPatientDao.search(map));
-		assertThat(found, containsInAnyOrder(id1));
+		assertThat(found).containsExactlyInAnyOrder(id1);
 
 		map = new SearchParameterMap();
 		map.setLoadSynchronous(true);
 		map.add(Constants.PARAM_FILTER, new StringParam("(name eq smith) or (name eq jones)"));
 		found = toUnqualifiedVersionlessIdValues(myPatientDao.search(map));
-		assertThat(found, containsInAnyOrder(id1, id2));
+		assertThat(found).containsExactlyInAnyOrder(id1, id2);
 
 	}
 
@@ -129,13 +127,13 @@ public class FhirResourceDaoR4FilterTest extends BaseJpaR4Test {
 		map.setLoadSynchronous(true);
 		map.add(Constants.PARAM_FILTER, new StringParam("name eq smi"));
 		found = toUnqualifiedVersionlessIdValues(myPatientDao.search(map));
-		assertThat(found, empty());
+		assertThat(found).isEmpty();
 
 		map = new SearchParameterMap();
 		map.setLoadSynchronous(true);
 		map.add(Constants.PARAM_FILTER, new StringParam("name eq smith"));
 		found = toUnqualifiedVersionlessIdValues(myPatientDao.search(map));
-		assertThat(found, containsInAnyOrder(id1));
+		assertThat(found).containsExactlyInAnyOrder(id1);
 
 	}
 
@@ -172,19 +170,19 @@ public class FhirResourceDaoR4FilterTest extends BaseJpaR4Test {
 		map.setLoadSynchronous(true);
 		map.add(Constants.PARAM_FILTER, new StringParam("subject eq " + ptId.getValue()));
 		found = toUnqualifiedVersionlessIdValues(myCarePlanDao.search(map));
-		assertThat(found, containsInAnyOrder(cpId));
+		assertThat(found).containsExactlyInAnyOrder(cpId);
 
 		map = new SearchParameterMap();
 		map.setLoadSynchronous(true);
 		map.add(Constants.PARAM_FILTER, new StringParam("subject eq " + ptId.getIdPart()));
 		found = toUnqualifiedVersionlessIdValues(myCarePlanDao.search(map));
-		assertThat(found, containsInAnyOrder(cpId));
+		assertThat(found).containsExactlyInAnyOrder(cpId);
 
 		map = new SearchParameterMap();
 		map.setLoadSynchronous(true);
 		map.add(Constants.PARAM_FILTER, new StringParam("(subject eq " + ptId.getIdPart() + ") or (performer eq " + ptId2.getValue() + ")"));
 		found = toUnqualifiedVersionlessIdValues(myCarePlanDao.search(map));
-		assertThat(found, containsInAnyOrder(cpId, cpId2));
+		assertThat(found).containsExactlyInAnyOrder(cpId, cpId2);
 
 	}
 
@@ -216,7 +214,7 @@ public class FhirResourceDaoR4FilterTest extends BaseJpaR4Test {
 		myCaptureQueriesListener.clear();
 		found = toUnqualifiedVersionlessIdValues(myPatientDao.search(map));
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread(0);
-		assertThat(found, containsInAnyOrder(ptId));
+		assertThat(found).containsExactlyInAnyOrder(ptId);
 
 	}
 
@@ -255,25 +253,25 @@ public class FhirResourceDaoR4FilterTest extends BaseJpaR4Test {
 		myCaptureQueriesListener.clear();
 		found = toUnqualifiedVersionlessIdValues(myEncounterDao.search(map));
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread(0);
-		assertThat(found, empty());
+		assertThat(found).isEmpty();
 
 		map = new SearchParameterMap();
 		map.setLoadSynchronous(true);
 		map.add(Constants.PARAM_FILTER, new StringParam(String.format("status eq inactive or _id eq %s", idVal)));
 		found = toUnqualifiedVersionlessIdValues(myEncounterDao.search(map));
-		assertThat(found, empty());
+		assertThat(found).isEmpty();
 
 		map = new SearchParameterMap();
 		map.setLoadSynchronous(true);
 		map.add(Constants.PARAM_FILTER, new StringParam(String.format("status eq inactive or _id eq Patient/FOO")));
 		found = toUnqualifiedVersionlessIdValues(myEncounterDao.search(map));
-		assertThat(found, empty());
+		assertThat(found).isEmpty();
 
 		map = new SearchParameterMap();
 		map.setLoadSynchronous(true);
 		map.add(Constants.PARAM_FILTER, new StringParam(String.format("_id eq %s", idVal)));
 		found = toUnqualifiedVersionlessIdValues(myEncounterDao.search(map));
-		assertThat(found, empty());
+		assertThat(found).isEmpty();
 
 	}
 
@@ -297,29 +295,29 @@ public class FhirResourceDaoR4FilterTest extends BaseJpaR4Test {
 		map.setLoadSynchronous(true);
 		map.add(Constants.PARAM_FILTER, new StringParam("family ne smith"));
 		found = toUnqualifiedVersionlessIdValues(myPatientDao.search(map));
-		assertThat(found, containsInAnyOrder(id2));
-		assertThat(found, containsInAnyOrder(Matchers.not(id1)));
+		assertThat(found).containsExactlyInAnyOrder(id2);
+		assertThat(found).containsExactlyInAnyOrder(Matchers.not(id1));
 
 		map = new SearchParameterMap();
 		map.setLoadSynchronous(true);
 		map.add(Constants.PARAM_FILTER, new StringParam("family ne jones"));
 		found = toUnqualifiedVersionlessIdValues(myPatientDao.search(map));
-		assertThat(found, containsInAnyOrder(id1));
-		assertThat(found, containsInAnyOrder(Matchers.not(id2)));
+		assertThat(found).containsExactlyInAnyOrder(id1);
+		assertThat(found).containsExactlyInAnyOrder(Matchers.not(id2));
 
 		map = new SearchParameterMap();
 		map.setLoadSynchronous(true);
 		map.add(Constants.PARAM_FILTER, new StringParam("given ne john"));
 		found = toUnqualifiedVersionlessIdValues(myPatientDao.search(map));
-		assertThat(found, containsInAnyOrder(id2));
-		assertThat(found, containsInAnyOrder(Matchers.not(id1)));
+		assertThat(found).containsExactlyInAnyOrder(id2);
+		assertThat(found).containsExactlyInAnyOrder(Matchers.not(id1));
 
 		map = new SearchParameterMap();
 		map.setLoadSynchronous(true);
 		map.add(Constants.PARAM_FILTER, new StringParam("given ne frank"));
 		found = toUnqualifiedVersionlessIdValues(myPatientDao.search(map));
-		assertThat(found, containsInAnyOrder(id1));
-		assertThat(found, containsInAnyOrder(Matchers.not(id2)));
+		assertThat(found).containsExactlyInAnyOrder(id1);
+		assertThat(found).containsExactlyInAnyOrder(Matchers.not(id2));
 
 	}
 
@@ -354,13 +352,13 @@ public class FhirResourceDaoR4FilterTest extends BaseJpaR4Test {
 		myCaptureQueriesListener.clear();
 		found = toUnqualifiedVersionlessIdValues(myCarePlanDao.search(map));
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread(0);
-		assertThat(found, containsInAnyOrder(cpId2));
+		assertThat(found).containsExactlyInAnyOrder(cpId2);
 
 		map = new SearchParameterMap();
 		map.setLoadSynchronous(true);
 		map.add(Constants.PARAM_FILTER, new StringParam("(subject ne " + ptId.getIdPart() + ") and (performer ne " + ptId2.getValue() + ")"));
 		found = toUnqualifiedVersionlessIdValues(myCarePlanDao.search(map));
-		assertThat(found, empty());
+		assertThat(found).isEmpty();
 
 	}
 
@@ -385,25 +383,25 @@ public class FhirResourceDaoR4FilterTest extends BaseJpaR4Test {
 		map.setLoadSynchronous(true);
 		map.add(Constants.PARAM_FILTER, new StringParam("name co smi"));
 		found = toUnqualifiedVersionlessIdValues(myPatientDao.search(map));
-		assertThat(found, containsInAnyOrder(id1));
+		assertThat(found).containsExactlyInAnyOrder(id1);
 
 		map = new SearchParameterMap();
 		map.setLoadSynchronous(true);
 		map.add(Constants.PARAM_FILTER, new StringParam("name co smith"));
 		found = toUnqualifiedVersionlessIdValues(myPatientDao.search(map));
-		assertThat(found, containsInAnyOrder(id1));
+		assertThat(found).containsExactlyInAnyOrder(id1);
 
 		map = new SearchParameterMap();
 		map.setLoadSynchronous(true);
 		map.add(Constants.PARAM_FILTER, new StringParam("given co frank"));
 		found = toUnqualifiedVersionlessIdValues(myPatientDao.search(map));
-		assertThat(found, containsInAnyOrder(id2));
+		assertThat(found).containsExactlyInAnyOrder(id2);
 
 		map = new SearchParameterMap();
 		map.setLoadSynchronous(true);
 		map.add(Constants.PARAM_FILTER, new StringParam("family co jones"));
 		found = toUnqualifiedVersionlessIdValues(myPatientDao.search(map));
-		assertThat(found, containsInAnyOrder(id2));
+		assertThat(found).containsExactlyInAnyOrder(id2);
 
 	}
 
@@ -427,19 +425,19 @@ public class FhirResourceDaoR4FilterTest extends BaseJpaR4Test {
 		map.setLoadSynchronous(true);
 		map.add(Constants.PARAM_FILTER, new StringParam("name sw smi"));
 		found = toUnqualifiedVersionlessIdValues(myPatientDao.search(map));
-		assertThat(found, containsInAnyOrder(id1));
+		assertThat(found).containsExactlyInAnyOrder(id1);
 
 		map = new SearchParameterMap();
 		map.setLoadSynchronous(true);
 		map.add(Constants.PARAM_FILTER, new StringParam("name sw mi"));
 		found = toUnqualifiedVersionlessIdValues(myPatientDao.search(map));
-		assertThat(found, empty());
+		assertThat(found).isEmpty();
 
 		map = new SearchParameterMap();
 		map.setLoadSynchronous(true);
 		map.add(Constants.PARAM_FILTER, new StringParam("given sw fr"));
 		found = toUnqualifiedVersionlessIdValues(myPatientDao.search(map));
-		assertThat(found, containsInAnyOrder(id2));
+		assertThat(found).containsExactlyInAnyOrder(id2);
 
 	}
 
@@ -463,19 +461,19 @@ public class FhirResourceDaoR4FilterTest extends BaseJpaR4Test {
 		map.setLoadSynchronous(true);
 		map.add(Constants.PARAM_FILTER, new StringParam("family ew ith"));
 		found = toUnqualifiedVersionlessIdValues(myPatientDao.search(map));
-		assertThat(found, containsInAnyOrder(id1));
+		assertThat(found).containsExactlyInAnyOrder(id1);
 
 		map = new SearchParameterMap();
 		map.setLoadSynchronous(true);
 		map.add(Constants.PARAM_FILTER, new StringParam("name ew it"));
 		found = toUnqualifiedVersionlessIdValues(myPatientDao.search(map));
-		assertThat(found, empty());
+		assertThat(found).isEmpty();
 
 		map = new SearchParameterMap();
 		map.setLoadSynchronous(true);
 		map.add(Constants.PARAM_FILTER, new StringParam("given ew nk"));
 		found = toUnqualifiedVersionlessIdValues(myPatientDao.search(map));
-		assertThat(found, containsInAnyOrder(id2));
+		assertThat(found).containsExactlyInAnyOrder(id2);
 
 	}
 
@@ -499,19 +497,19 @@ public class FhirResourceDaoR4FilterTest extends BaseJpaR4Test {
 		map.setLoadSynchronous(true);
 		map.add(Constants.PARAM_FILTER, new StringParam("family gt jones"));
 		found = toUnqualifiedVersionlessIdValues(myPatientDao.search(map));
-		assertThat(found, containsInAnyOrder(id1));
+		assertThat(found).containsExactlyInAnyOrder(id1);
 
 		map = new SearchParameterMap();
 		map.setLoadSynchronous(true);
 		map.add(Constants.PARAM_FILTER, new StringParam("family gt arthur"));
 		found = toUnqualifiedVersionlessIdValues(myPatientDao.search(map));
-		assertThat(found, containsInAnyOrder(id1, id2));
+		assertThat(found).containsExactlyInAnyOrder(id1, id2);
 
 		map = new SearchParameterMap();
 		map.setLoadSynchronous(true);
 		map.add(Constants.PARAM_FILTER, new StringParam("given gt john"));
 		found = toUnqualifiedVersionlessIdValues(myPatientDao.search(map));
-		assertThat(found, empty());
+		assertThat(found).isEmpty();
 
 	}
 
@@ -535,19 +533,19 @@ public class FhirResourceDaoR4FilterTest extends BaseJpaR4Test {
 		map.setLoadSynchronous(true);
 		map.add(Constants.PARAM_FILTER, new StringParam("family lt smith"));
 		found = toUnqualifiedVersionlessIdValues(myPatientDao.search(map));
-		assertThat(found, containsInAnyOrder(id2));
+		assertThat(found).containsExactlyInAnyOrder(id2);
 
 		map = new SearchParameterMap();
 		map.setLoadSynchronous(true);
 		map.add(Constants.PARAM_FILTER, new StringParam("family lt walker"));
 		found = toUnqualifiedVersionlessIdValues(myPatientDao.search(map));
-		assertThat(found, containsInAnyOrder(id1, id2));
+		assertThat(found).containsExactlyInAnyOrder(id1, id2);
 
 		map = new SearchParameterMap();
 		map.setLoadSynchronous(true);
 		map.add(Constants.PARAM_FILTER, new StringParam("given lt frank"));
 		found = toUnqualifiedVersionlessIdValues(myPatientDao.search(map));
-		assertThat(found, empty());
+		assertThat(found).isEmpty();
 
 	}
 
@@ -573,25 +571,25 @@ public class FhirResourceDaoR4FilterTest extends BaseJpaR4Test {
 		myCaptureQueriesListener.clear();
 		found = toUnqualifiedVersionlessIdValues(myPatientDao.search(map));
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread(0);
-		assertThat(found, containsInAnyOrder(id1, id2));
+		assertThat(found).containsExactlyInAnyOrder(id1, id2);
 
 		map = new SearchParameterMap();
 		map.setLoadSynchronous(true);
 		map.add(Constants.PARAM_FILTER, new StringParam("family ge justin"));
 		found = toUnqualifiedVersionlessIdValues(myPatientDao.search(map));
-		assertThat(found, containsInAnyOrder(id1));
+		assertThat(found).containsExactlyInAnyOrder(id1);
 
 		map = new SearchParameterMap();
 		map.setLoadSynchronous(true);
 		map.add(Constants.PARAM_FILTER, new StringParam("family ge arthur"));
 		found = toUnqualifiedVersionlessIdValues(myPatientDao.search(map));
-		assertThat(found, containsInAnyOrder(id1, id2));
+		assertThat(found).containsExactlyInAnyOrder(id1, id2);
 
 		map = new SearchParameterMap();
 		map.setLoadSynchronous(true);
 		map.add(Constants.PARAM_FILTER, new StringParam("given ge jon"));
 		found = toUnqualifiedVersionlessIdValues(myPatientDao.search(map));
-		assertThat(found, empty());
+		assertThat(found).isEmpty();
 
 	}
 
@@ -615,19 +613,19 @@ public class FhirResourceDaoR4FilterTest extends BaseJpaR4Test {
 		map.setLoadSynchronous(true);
 		map.add(Constants.PARAM_FILTER, new StringParam("family le smith"));
 		found = toUnqualifiedVersionlessIdValues(myPatientDao.search(map));
-		assertThat(found, containsInAnyOrder(id1, id2));
+		assertThat(found).containsExactlyInAnyOrder(id1, id2);
 
 		map = new SearchParameterMap();
 		map.setLoadSynchronous(true);
 		map.add(Constants.PARAM_FILTER, new StringParam("family le jones"));
 		found = toUnqualifiedVersionlessIdValues(myPatientDao.search(map));
-		assertThat(found, containsInAnyOrder(id2));
+		assertThat(found).containsExactlyInAnyOrder(id2);
 
 		map = new SearchParameterMap();
 		map.setLoadSynchronous(true);
 		map.add(Constants.PARAM_FILTER, new StringParam("family le jackson"));
 		found = toUnqualifiedVersionlessIdValues(myPatientDao.search(map));
-		assertThat(found, empty());
+		assertThat(found).isEmpty();
 
 	}
 
@@ -647,7 +645,7 @@ public class FhirResourceDaoR4FilterTest extends BaseJpaR4Test {
 		map.setLoadSynchronous(true);
 		map.add(Constants.PARAM_FILTER, new StringParam("birthdate eq 1955-01-01"));
 		found = toUnqualifiedVersionlessIdValues(myPatientDao.search(map));
-		assertThat(found, containsInAnyOrder(id1));
+		assertThat(found).containsExactlyInAnyOrder(id1);
 
 	}
 
@@ -667,13 +665,13 @@ public class FhirResourceDaoR4FilterTest extends BaseJpaR4Test {
 		map.setLoadSynchronous(true);
 		map.add(Constants.PARAM_FILTER, new StringParam("birthdate ne 1955-01-01"));
 		found = toUnqualifiedVersionlessIdValues(myPatientDao.search(map));
-		assertThat(found, empty());
+		assertThat(found).isEmpty();
 
 		map = new SearchParameterMap();
 		map.setLoadSynchronous(true);
 		map.add(Constants.PARAM_FILTER, new StringParam("birthdate ne 1995-01-01"));
 		found = toUnqualifiedVersionlessIdValues(myPatientDao.search(map));
-		assertThat(found, containsInAnyOrder(id1));
+		assertThat(found).containsExactlyInAnyOrder(id1);
 
 	}
 
@@ -693,7 +691,7 @@ public class FhirResourceDaoR4FilterTest extends BaseJpaR4Test {
 		map.setLoadSynchronous(true);
 		map.add(Constants.PARAM_FILTER, new StringParam("birthdate gt 1954-12-31"));
 		found = toUnqualifiedVersionlessIdValues(myPatientDao.search(map));
-		assertThat(found, containsInAnyOrder(id1));
+		assertThat(found).containsExactlyInAnyOrder(id1);
 
 		map = new SearchParameterMap();
 		map.setLoadSynchronous(true);
@@ -701,7 +699,7 @@ public class FhirResourceDaoR4FilterTest extends BaseJpaR4Test {
 		myCaptureQueriesListener.clear();
 		found = toUnqualifiedVersionlessIdValues(myPatientDao.search(map));
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread(0);
-		assertThat(found, empty());
+		assertThat(found).isEmpty();
 
 	}
 
@@ -723,13 +721,13 @@ public class FhirResourceDaoR4FilterTest extends BaseJpaR4Test {
 		myCaptureQueriesListener.clear();
 		found = toUnqualifiedVersionlessIdValues(myPatientDao.search(map));
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread(0);
-		assertThat(found, containsInAnyOrder(id1));
+		assertThat(found).containsExactlyInAnyOrder(id1);
 
 		map = new SearchParameterMap();
 		map.setLoadSynchronous(true);
 		map.add(Constants.PARAM_FILTER, new StringParam("birthdate lt 1955-01-01"));
 		found = toUnqualifiedVersionlessIdValues(myPatientDao.search(map));
-		assertThat(found, empty());
+		assertThat(found).isEmpty();
 
 	}
 
@@ -749,19 +747,19 @@ public class FhirResourceDaoR4FilterTest extends BaseJpaR4Test {
 		map.setLoadSynchronous(true);
 		map.add(Constants.PARAM_FILTER, new StringParam("birthdate ge 1955-01-01"));
 		found = toUnqualifiedVersionlessIdValues(myPatientDao.search(map));
-		assertThat(found, containsInAnyOrder(id1));
+		assertThat(found).containsExactlyInAnyOrder(id1);
 
 		map = new SearchParameterMap();
 		map.setLoadSynchronous(true);
 		map.add(Constants.PARAM_FILTER, new StringParam("birthdate ge 1954-12-31"));
 		found = toUnqualifiedVersionlessIdValues(myPatientDao.search(map));
-		assertThat(found, containsInAnyOrder(id1));
+		assertThat(found).containsExactlyInAnyOrder(id1);
 
 		map = new SearchParameterMap();
 		map.setLoadSynchronous(true);
 		map.add(Constants.PARAM_FILTER, new StringParam("birthdate ge 1955-01-02"));
 		found = toUnqualifiedVersionlessIdValues(myPatientDao.search(map));
-		assertThat(found, empty());
+		assertThat(found).isEmpty();
 
 	}
 
@@ -781,19 +779,19 @@ public class FhirResourceDaoR4FilterTest extends BaseJpaR4Test {
 		map.setLoadSynchronous(true);
 		map.add(Constants.PARAM_FILTER, new StringParam("birthdate le 1955-01-01"));
 		found = toUnqualifiedVersionlessIdValues(myPatientDao.search(map));
-		assertThat(found, containsInAnyOrder(id1));
+		assertThat(found).containsExactlyInAnyOrder(id1);
 
 		map = new SearchParameterMap();
 		map.setLoadSynchronous(true);
 		map.add(Constants.PARAM_FILTER, new StringParam("birthdate le 1954-12-31"));
 		found = toUnqualifiedVersionlessIdValues(myPatientDao.search(map));
-		assertThat(found, empty());
+		assertThat(found).isEmpty();
 
 		map = new SearchParameterMap();
 		map.setLoadSynchronous(true);
 		map.add(Constants.PARAM_FILTER, new StringParam("birthdate le 1955-01-02"));
 		found = toUnqualifiedVersionlessIdValues(myPatientDao.search(map));
-		assertThat(found, containsInAnyOrder(id1));
+		assertThat(found).containsExactlyInAnyOrder(id1);
 
 	}
 
@@ -822,19 +820,19 @@ public class FhirResourceDaoR4FilterTest extends BaseJpaR4Test {
 		map.setLoadSynchronous(true);
 		map.add(Constants.PARAM_FILTER, new StringParam("probability eq 0.25"));
 		found = toUnqualifiedVersionlessIdValues(myRiskAssessmentDao.search(map));
-		assertThat(found, containsInAnyOrder(raId1));
+		assertThat(found).containsExactlyInAnyOrder(raId1);
 
 		map = new SearchParameterMap();
 		map.setLoadSynchronous(true);
 		map.add(Constants.PARAM_FILTER, new StringParam("probability eq 0.3"));
 		found = toUnqualifiedVersionlessIdValues(myRiskAssessmentDao.search(map));
-		assertThat(found, containsInAnyOrder(raId2));
+		assertThat(found).containsExactlyInAnyOrder(raId2);
 
 		map = new SearchParameterMap();
 		map.setLoadSynchronous(true);
 		map.add(Constants.PARAM_FILTER, new StringParam("probability eq 0.1"));
 		found = toUnqualifiedVersionlessIdValues(myRiskAssessmentDao.search(map));
-		assertThat(found, empty());
+		assertThat(found).isEmpty();
 
 	}
 
@@ -863,19 +861,19 @@ public class FhirResourceDaoR4FilterTest extends BaseJpaR4Test {
 		map.setLoadSynchronous(true);
 		map.add(Constants.PARAM_FILTER, new StringParam("probability ne 0.25"));
 		found = toUnqualifiedVersionlessIdValues(myRiskAssessmentDao.search(map));
-		assertThat(found, containsInAnyOrder(raId2));
+		assertThat(found).containsExactlyInAnyOrder(raId2);
 
 		map = new SearchParameterMap();
 		map.setLoadSynchronous(true);
 		map.add(Constants.PARAM_FILTER, new StringParam("probability ne 0.3"));
 		found = toUnqualifiedVersionlessIdValues(myRiskAssessmentDao.search(map));
-		assertThat(found, containsInAnyOrder(raId1));
+		assertThat(found).containsExactlyInAnyOrder(raId1);
 
 		map = new SearchParameterMap();
 		map.setLoadSynchronous(true);
 		map.add(Constants.PARAM_FILTER, new StringParam("probability ne 0.1"));
 		found = toUnqualifiedVersionlessIdValues(myRiskAssessmentDao.search(map));
-		assertThat(found, containsInAnyOrder(raId1, raId2));
+		assertThat(found).containsExactlyInAnyOrder(raId1, raId2);
 
 	}
 
@@ -904,13 +902,13 @@ public class FhirResourceDaoR4FilterTest extends BaseJpaR4Test {
 		map.setLoadSynchronous(true);
 		map.add(Constants.PARAM_FILTER, new StringParam("probability gt 0.25"));
 		found = toUnqualifiedVersionlessIdValues(myRiskAssessmentDao.search(map));
-		assertThat(found, containsInAnyOrder(raId2));
+		assertThat(found).containsExactlyInAnyOrder(raId2);
 
 		map = new SearchParameterMap();
 		map.setLoadSynchronous(true);
 		map.add(Constants.PARAM_FILTER, new StringParam("probability gt 0.3"));
 		found = toUnqualifiedVersionlessIdValues(myRiskAssessmentDao.search(map));
-		assertThat(found, empty());
+		assertThat(found).isEmpty();
 
 	}
 
@@ -939,13 +937,13 @@ public class FhirResourceDaoR4FilterTest extends BaseJpaR4Test {
 		map.setLoadSynchronous(true);
 		map.add(Constants.PARAM_FILTER, new StringParam("probability lt 0.3"));
 		found = toUnqualifiedVersionlessIdValues(myRiskAssessmentDao.search(map));
-		assertThat(found, containsInAnyOrder(raId1));
+		assertThat(found).containsExactlyInAnyOrder(raId1);
 
 		map = new SearchParameterMap();
 		map.setLoadSynchronous(true);
 		map.add(Constants.PARAM_FILTER, new StringParam("probability lt 0.25"));
 		found = toUnqualifiedVersionlessIdValues(myRiskAssessmentDao.search(map));
-		assertThat(found, empty());
+		assertThat(found).isEmpty();
 
 	}
 
@@ -974,13 +972,13 @@ public class FhirResourceDaoR4FilterTest extends BaseJpaR4Test {
 		map.setLoadSynchronous(true);
 		map.add(Constants.PARAM_FILTER, new StringParam("probability ge 0.25"));
 		found = toUnqualifiedVersionlessIdValues(myRiskAssessmentDao.search(map));
-		assertThat(found, containsInAnyOrder(raId1, raId2));
+		assertThat(found).containsExactlyInAnyOrder(raId1, raId2);
 
 		map = new SearchParameterMap();
 		map.setLoadSynchronous(true);
 		map.add(Constants.PARAM_FILTER, new StringParam("probability ge 0.3"));
 		found = toUnqualifiedVersionlessIdValues(myRiskAssessmentDao.search(map));
-		assertThat(found, containsInAnyOrder(raId2));
+		assertThat(found).containsExactlyInAnyOrder(raId2);
 
 	}
 
@@ -1009,13 +1007,13 @@ public class FhirResourceDaoR4FilterTest extends BaseJpaR4Test {
 		map.setLoadSynchronous(true);
 		map.add(Constants.PARAM_FILTER, new StringParam("probability le 0.25"));
 		found = toUnqualifiedVersionlessIdValues(myRiskAssessmentDao.search(map));
-		assertThat(found, containsInAnyOrder(raId1));
+		assertThat(found).containsExactlyInAnyOrder(raId1);
 
 		map = new SearchParameterMap();
 		map.setLoadSynchronous(true);
 		map.add(Constants.PARAM_FILTER, new StringParam("probability le 0.3"));
 		found = toUnqualifiedVersionlessIdValues(myRiskAssessmentDao.search(map));
-		assertThat(found, containsInAnyOrder(raId1, raId2));
+		assertThat(found).containsExactlyInAnyOrder(raId1, raId2);
 
 	}
 
@@ -1033,15 +1031,15 @@ public class FhirResourceDaoR4FilterTest extends BaseJpaR4Test {
 		IBundleProvider result;
 		result = myValueSetDao.search(SearchParameterMap.newSynchronous().add(Constants.PARAM_FILTER,
 			new StringParam("url eq http://hl7.org/foo/baz")));
-		assertThat(toUnqualifiedVersionlessIds(result), containsInAnyOrder(vsId1));
+		assertThat(toUnqualifiedVersionlessIds(result)).containsExactlyInAnyOrder(vsId1);
 
 		result = myValueSetDao.search(SearchParameterMap.newSynchronous().add(Constants.PARAM_FILTER,
 			new StringParam("url eq http://hl7.org/foo/bar")));
-		assertThat(toUnqualifiedVersionlessIds(result), containsInAnyOrder(vsId2));
+		assertThat(toUnqualifiedVersionlessIds(result)).containsExactlyInAnyOrder(vsId2);
 
 		result = myValueSetDao.search(SearchParameterMap.newSynchronous().add(Constants.PARAM_FILTER,
 			new StringParam("url eq http://hl7.org/foo/bar/bar")));
-		assertThat(toUnqualifiedVersionlessIds(result), empty());
+		assertThat(toUnqualifiedVersionlessIds(result)).isEmpty();
 
 	}
 
@@ -1059,15 +1057,15 @@ public class FhirResourceDaoR4FilterTest extends BaseJpaR4Test {
 		IBundleProvider result;
 		result = myValueSetDao.search(SearchParameterMap.newSynchronous().add(Constants.PARAM_FILTER,
 			new StringParam("url ne http://hl7.org/foo/baz")));
-		assertThat(toUnqualifiedVersionlessIds(result), containsInAnyOrder(vsId2));
+		assertThat(toUnqualifiedVersionlessIds(result)).containsExactlyInAnyOrder(vsId2);
 
 		result = myValueSetDao.search(SearchParameterMap.newSynchronous().add(Constants.PARAM_FILTER,
 			new StringParam("url ne http://hl7.org/foo/bar")));
-		assertThat(toUnqualifiedVersionlessIds(result), containsInAnyOrder(vsId1));
+		assertThat(toUnqualifiedVersionlessIds(result)).containsExactlyInAnyOrder(vsId1);
 
 		result = myValueSetDao.search(SearchParameterMap.newSynchronous().add(Constants.PARAM_FILTER,
 			new StringParam("url ne http://hl7.org/foo/baz and url ne http://hl7.org/foo/bar")));
-		assertThat(toUnqualifiedVersionlessIds(result), empty());
+		assertThat(toUnqualifiedVersionlessIds(result)).isEmpty();
 
 	}
 
@@ -1085,15 +1083,15 @@ public class FhirResourceDaoR4FilterTest extends BaseJpaR4Test {
 		IBundleProvider result;
 		result = myValueSetDao.search(SearchParameterMap.newSynchronous().add(Constants.PARAM_FILTER,
 			new StringParam("url co http://hl7.org/foo")));
-		assertThat(toUnqualifiedVersionlessIds(result), containsInAnyOrder(vsId1, vsId2));
+		assertThat(toUnqualifiedVersionlessIds(result)).containsExactlyInAnyOrder(vsId1, vsId2);
 
 		result = myValueSetDao.search(SearchParameterMap.newSynchronous().add(Constants.PARAM_FILTER,
 			new StringParam("url co baz")));
-		assertThat(toUnqualifiedVersionlessIds(result), containsInAnyOrder(vsId1));
+		assertThat(toUnqualifiedVersionlessIds(result)).containsExactlyInAnyOrder(vsId1);
 
 		result = myValueSetDao.search(SearchParameterMap.newSynchronous().add(Constants.PARAM_FILTER,
 			new StringParam("url co http://hl7.org/foo/bat")));
-		assertThat(toUnqualifiedVersionlessIds(result), empty());
+		assertThat(toUnqualifiedVersionlessIds(result)).isEmpty();
 
 	}
 
@@ -1111,15 +1109,15 @@ public class FhirResourceDaoR4FilterTest extends BaseJpaR4Test {
 		IBundleProvider result;
 		result = myValueSetDao.search(SearchParameterMap.newSynchronous().add(Constants.PARAM_FILTER,
 			new StringParam("url gt http://hl7.org/foo")));
-		assertThat(toUnqualifiedVersionlessIds(result), containsInAnyOrder(vsId1, vsId2));
+		assertThat(toUnqualifiedVersionlessIds(result)).containsExactlyInAnyOrder(vsId1, vsId2);
 
 		result = myValueSetDao.search(SearchParameterMap.newSynchronous().add(Constants.PARAM_FILTER,
 			new StringParam("url gt http://hl7.org/foo/bar")));
-		assertThat(toUnqualifiedVersionlessIds(result), containsInAnyOrder(vsId1));
+		assertThat(toUnqualifiedVersionlessIds(result)).containsExactlyInAnyOrder(vsId1);
 
 		result = myValueSetDao.search(SearchParameterMap.newSynchronous().add(Constants.PARAM_FILTER,
 			new StringParam("url gt http://hl7.org/foo/baza")));
-		assertThat(toUnqualifiedVersionlessIds(result), empty());
+		assertThat(toUnqualifiedVersionlessIds(result)).isEmpty();
 
 	}
 
@@ -1137,15 +1135,15 @@ public class FhirResourceDaoR4FilterTest extends BaseJpaR4Test {
 		IBundleProvider result;
 		result = myValueSetDao.search(SearchParameterMap.newSynchronous().add(Constants.PARAM_FILTER,
 			new StringParam("url lt http://hl7.org/foo")));
-		assertThat(toUnqualifiedVersionlessIds(result), empty());
+		assertThat(toUnqualifiedVersionlessIds(result)).isEmpty();
 
 		result = myValueSetDao.search(SearchParameterMap.newSynchronous().add(Constants.PARAM_FILTER,
 			new StringParam("url lt http://hl7.org/foo/baz")));
-		assertThat(toUnqualifiedVersionlessIds(result), containsInAnyOrder(vsId2));
+		assertThat(toUnqualifiedVersionlessIds(result)).containsExactlyInAnyOrder(vsId2);
 
 		result = myValueSetDao.search(SearchParameterMap.newSynchronous().add(Constants.PARAM_FILTER,
 			new StringParam("url lt http://hl7.org/foo/bara")));
-		assertThat(toUnqualifiedVersionlessIds(result), containsInAnyOrder(vsId2));
+		assertThat(toUnqualifiedVersionlessIds(result)).containsExactlyInAnyOrder(vsId2);
 
 	}
 
@@ -1163,11 +1161,11 @@ public class FhirResourceDaoR4FilterTest extends BaseJpaR4Test {
 		IBundleProvider result;
 		result = myValueSetDao.search(SearchParameterMap.newSynchronous().add(Constants.PARAM_FILTER,
 			new StringParam("url ge http://hl7.org/foo/bar")));
-		assertThat(toUnqualifiedVersionlessIds(result), containsInAnyOrder(vsId1, vsId2));
+		assertThat(toUnqualifiedVersionlessIds(result)).containsExactlyInAnyOrder(vsId1, vsId2);
 
 		result = myValueSetDao.search(SearchParameterMap.newSynchronous().add(Constants.PARAM_FILTER,
 			new StringParam("url ge http://hl7.org/foo/baza")));
-		assertThat(toUnqualifiedVersionlessIds(result), empty());
+		assertThat(toUnqualifiedVersionlessIds(result)).isEmpty();
 
 	}
 
@@ -1185,15 +1183,15 @@ public class FhirResourceDaoR4FilterTest extends BaseJpaR4Test {
 		IBundleProvider result;
 		result = myValueSetDao.search(SearchParameterMap.newSynchronous().add(Constants.PARAM_FILTER,
 			new StringParam("url le http://hl7.org/foo/baz")));
-		assertThat(toUnqualifiedVersionlessIds(result), containsInAnyOrder(vsId1, vsId2));
+		assertThat(toUnqualifiedVersionlessIds(result)).containsExactlyInAnyOrder(vsId1, vsId2);
 
 		result = myValueSetDao.search(SearchParameterMap.newSynchronous().add(Constants.PARAM_FILTER,
 			new StringParam("url le http://hl7.org/foo/bar")));
-		assertThat(toUnqualifiedVersionlessIds(result), containsInAnyOrder(vsId2));
+		assertThat(toUnqualifiedVersionlessIds(result)).containsExactlyInAnyOrder(vsId2);
 
 		result = myValueSetDao.search(SearchParameterMap.newSynchronous().add(Constants.PARAM_FILTER,
 			new StringParam("url lt http://hl7.org/foo/baza")));
-		assertThat(toUnqualifiedVersionlessIds(result), containsInAnyOrder(vsId1, vsId2));
+		assertThat(toUnqualifiedVersionlessIds(result)).containsExactlyInAnyOrder(vsId1, vsId2);
 
 	}
 
@@ -1211,11 +1209,11 @@ public class FhirResourceDaoR4FilterTest extends BaseJpaR4Test {
 		IBundleProvider result;
 		result = myValueSetDao.search(SearchParameterMap.newSynchronous().add(Constants.PARAM_FILTER,
 			new StringParam("url sw http://hl7.org")));
-		assertThat(toUnqualifiedVersionlessIds(result), containsInAnyOrder(vsId1, vsId2));
+		assertThat(toUnqualifiedVersionlessIds(result)).containsExactlyInAnyOrder(vsId1, vsId2);
 
 		result = myValueSetDao.search(SearchParameterMap.newSynchronous().add(Constants.PARAM_FILTER,
 			new StringParam("url sw hl7.org/foo/bar")));
-		assertThat(toUnqualifiedVersionlessIds(result), empty());
+		assertThat(toUnqualifiedVersionlessIds(result)).isEmpty();
 
 	}
 
@@ -1233,11 +1231,11 @@ public class FhirResourceDaoR4FilterTest extends BaseJpaR4Test {
 		IBundleProvider result;
 		result = myValueSetDao.search(SearchParameterMap.newSynchronous().add(Constants.PARAM_FILTER,
 			new StringParam("url ew baz")));
-		assertThat(toUnqualifiedVersionlessIds(result), containsInAnyOrder(vsId1));
+		assertThat(toUnqualifiedVersionlessIds(result)).containsExactlyInAnyOrder(vsId1);
 
 		result = myValueSetDao.search(SearchParameterMap.newSynchronous().add(Constants.PARAM_FILTER,
 			new StringParam("url ew ba")));
-		assertThat(toUnqualifiedVersionlessIds(result), empty());
+		assertThat(toUnqualifiedVersionlessIds(result)).isEmpty();
 
 	}
 

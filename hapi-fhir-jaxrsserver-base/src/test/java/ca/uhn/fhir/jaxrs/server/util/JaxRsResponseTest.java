@@ -1,8 +1,8 @@
 package ca.uhn.fhir.jaxrs.server.util;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
@@ -123,8 +123,8 @@ public class JaxRsResponseTest {
 		binary.setContent(new byte[] { 1 });
 		final Response result = (Response) RestfulServerUtils.streamResponseAsResource(request.getServer(), binary, theSummaryMode, 200, false, false, this.request);
 
-		assertThat(result.getHeaders().get("Authorization"), Matchers.contains("Basic", "Bearer"));
-		assertThat(result.getHeaders().get("Cache-Control"), Matchers.contains("no-cache, no-store"));
+		assertThat(result.getHeaders().get("Authorization")).containsExactly("Basic", "Bearer");
+		assertThat(result.getHeaders().get("Cache-Control")).containsExactly("no-cache, no-store");
 	}
 
 	private Patient createPatient() {

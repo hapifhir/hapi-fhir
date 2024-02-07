@@ -23,8 +23,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.lessThan;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class FhirResourceDaoDstu3SearchSqlTest extends BaseJpaDstu3Test {
@@ -89,7 +88,7 @@ public class FhirResourceDaoDstu3SearchSqlTest extends BaseJpaDstu3Test {
 				String sql = next.getSql(false, false);
 				int paramCount = StringUtils.countMatches(sql, "?");
 				ourLog.info("SQL has {} params", paramCount);
-				assertThat("SQL has >1000 params: " + sql, paramCount, lessThan(1000));
+				assertThat(paramCount).as("SQL has >1000 params: " + sql).isLessThan(1000);
 				if (sql.contains("HASH_VALUE IN")) {
 					sql = next.getSql(true, false);
 					ourLog.info("SQL: {}", sql);

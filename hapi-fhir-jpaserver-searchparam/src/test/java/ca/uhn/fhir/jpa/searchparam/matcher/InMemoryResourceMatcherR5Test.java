@@ -40,8 +40,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.Date;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -170,7 +169,7 @@ public class InMemoryResourceMatcherR5Test {
 		searchParams.myUriParams.add(extractSourceUriParam(myObservation));
 
 		InMemoryMatchResult resultInsidePeriod = myInMemoryResourceMatcher.match(theSearchCriteria, myObservation, searchParams, newRequest());
-		assertThat(resultInsidePeriod.matched(), is(theShouldMatch));
+		assertThat(resultInsidePeriod.matched()).isEqualTo(theShouldMatch);
 	}
 
 	@Test

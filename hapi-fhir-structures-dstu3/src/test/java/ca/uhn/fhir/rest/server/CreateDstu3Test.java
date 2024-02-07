@@ -35,9 +35,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.stringContainsInOrder;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -121,8 +120,8 @@ public class CreateDstu3Test {
 
 		assertEquals(400, status.getStatusLine().getStatusCode());
 
-		assertThat(responseContent, containsString("<OperationOutcome xmlns=\"http://hl7.org/fhir\"><issue><severity value=\"error\"/><code value=\"processing\"/><diagnostics value=\""));
-		assertThat(responseContent, containsString("Failed to parse request body as XML resource. Error was: " + Msg.code(1852) +  "com.ctc.wstx.exc.WstxUnexpectedCharException: Unexpected character 'F'"));
+		assertThat(responseContent).contains("<OperationOutcome xmlns=\"http://hl7.org/fhir\"><issue><severity value=\"error\"/><code value=\"processing\"/><diagnostics value=\"");
+		assertThat(responseContent).contains("Failed to parse request body as XML resource. Error was: " + Msg.code(1852) + "com.ctc.wstx.exc.WstxUnexpectedCharException: Unexpected character 'F'");
 
 	}
 
@@ -140,8 +139,8 @@ public class CreateDstu3Test {
 
 		assertEquals(400, status.getStatusLine().getStatusCode());
 
-		assertThat(responseContent, containsString("<OperationOutcome xmlns=\"http://hl7.org/fhir\"><issue><severity value=\"error\"/><code value=\"processing\"/><diagnostics value=\""));
-		assertThat(responseContent, containsString("Failed to parse request body as XML resource."));
+		assertThat(responseContent).contains("<OperationOutcome xmlns=\"http://hl7.org/fhir\"><issue><severity value=\"error\"/><code value=\"processing\"/><diagnostics value=\"");
+		assertThat(responseContent).contains("Failed to parse request body as XML resource.");
 
 	}
 
@@ -159,8 +158,8 @@ public class CreateDstu3Test {
 
 		assertEquals(400, status.getStatusLine().getStatusCode());
 
-		assertThat(responseContent, containsString("<OperationOutcome xmlns=\"http://hl7.org/fhir\"><issue><severity value=\"error\"/><code value=\"processing\"/><diagnostics value=\""));
-		assertThat(responseContent, containsString("Failed to parse request body as XML resource."));
+		assertThat(responseContent).contains("<OperationOutcome xmlns=\"http://hl7.org/fhir\"><issue><severity value=\"error\"/><code value=\"processing\"/><diagnostics value=\"");
+		assertThat(responseContent).contains("Failed to parse request body as XML resource.");
 
 	}
 
@@ -178,7 +177,7 @@ public class CreateDstu3Test {
 
 		assertEquals(400, status.getStatusLine().getStatusCode());
 
-		assertThat(responseContent, containsString("Failed to parse request body as JSON resource."));
+		assertThat(responseContent).contains("Failed to parse request body as JSON resource.");
 
 	}
 
@@ -208,7 +207,7 @@ public class CreateDstu3Test {
 			"</Patient>"));
 		//@formatter:on
 
-		assertThat(responseContent, not(containsString("http://hl7.org/fhir/")));
+		assertThat(responseContent).doesNotContain("http://hl7.org/fhir/");
 	}
 
 	@AfterAll

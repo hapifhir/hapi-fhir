@@ -44,10 +44,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
@@ -105,7 +104,7 @@ public class InterceptorUserDataMapDstu2Test {
 		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
 
 			String response = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
-			assertThat(response, containsString("\"id\":\"1\""));
+			assertThat(response).contains("\"id\":\"1\"");
 		await().until(() -> myMapCheckMethods, contains("incomingRequestPostProcessed", "incomingRequestPreHandled", "outgoingResponse", "processingCompletedNormally", "processingCompleted"));
 	}
 

@@ -103,7 +103,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -290,8 +290,8 @@ public class GiantTransactionPerfTest {
 
 		ourLog.info("Merges:\n * " + myEntityManager.myMergeCount.stream().map(t->t.toString()).collect(Collectors.joining("\n * ")));
 
-		assertThat(myEntityManager.myPersistCount.stream().map(t -> t.getClass().getSimpleName()).collect(Collectors.toList()), Matchers.contains("ResourceTable"));
-		assertThat(myEntityManager.myMergeCount.stream().map(t -> t.getClass().getSimpleName()).collect(Collectors.toList()), Matchers.containsInAnyOrder("ResourceTable", "ResourceIndexedSearchParamToken", "ResourceIndexedSearchParamToken"));
+		assertThat(myEntityManager.myPersistCount.stream().map(t -> t.getClass().getSimpleName()).collect(Collectors.toList())).containsExactly("ResourceTable");
+		assertThat(myEntityManager.myMergeCount.stream().map(t -> t.getClass().getSimpleName()).collect(Collectors.toList())).containsExactlyInAnyOrder("ResourceTable", "ResourceIndexedSearchParamToken", "ResourceIndexedSearchParamToken");
 		assertEquals(1, myEntityManager.myFlushCount);
 		assertEquals(1, myResourceVersionSvc.myGetVersionMap);
 		assertEquals(1, myResourceHistoryTableDao.mySaveCount);
@@ -326,8 +326,8 @@ public class GiantTransactionPerfTest {
 			myEntityManager.clearCounts();
 		}
 
-		assertThat(myEntityManager.myPersistCount.stream().map(t -> t.getClass().getSimpleName()).collect(Collectors.toList()), Matchers.contains("ResourceTable"));
-		assertThat(myEntityManager.myMergeCount.stream().map(t -> t.getClass().getSimpleName()).collect(Collectors.toList()), Matchers.containsInAnyOrder("ResourceTable", "ResourceIndexedSearchParamToken", "ResourceIndexedSearchParamToken"));
+		assertThat(myEntityManager.myPersistCount.stream().map(t -> t.getClass().getSimpleName()).collect(Collectors.toList())).containsExactly("ResourceTable");
+		assertThat(myEntityManager.myMergeCount.stream().map(t -> t.getClass().getSimpleName()).collect(Collectors.toList())).containsExactlyInAnyOrder("ResourceTable", "ResourceIndexedSearchParamToken", "ResourceIndexedSearchParamToken");
 		assertEquals(1, myEntityManager.myFlushCount);
 		assertEquals(1, myResourceVersionSvc.myGetVersionMap);
 		assertEquals(1, myResourceHistoryTableDao.mySaveCount);

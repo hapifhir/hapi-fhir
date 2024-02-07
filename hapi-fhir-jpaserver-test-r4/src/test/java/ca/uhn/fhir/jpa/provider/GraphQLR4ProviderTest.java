@@ -38,8 +38,7 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.startsWith;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class GraphQLR4ProviderTest {
@@ -76,7 +75,7 @@ public class GraphQLR4ProviderTest {
 				"    \"given\":[\"GivenOnly1\",\"GivenOnly2\"]\n" +
 				"  }]\n" +
 				"}" + GraphQLProviderTestUtil.DATA_SUFFIX), TestUtil.stripWhitespace(responseContent));
-			assertThat(status.getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue(), startsWith("application/json"));
+			assertThat(status.getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue()).startsWith("application/json");
 		}
 
 	}
@@ -96,7 +95,7 @@ public class GraphQLR4ProviderTest {
 				"    \"family\":\"FAMILY\"\n" +
 				"  }]\n" +
 				"}" + GraphQLProviderTestUtil.DATA_SUFFIX), TestUtil.stripWhitespace(responseContent));
-			assertThat(status.getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue(), startsWith("application/json"));
+			assertThat(status.getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue()).startsWith("application/json");
 		}
 
 	}
@@ -120,7 +119,7 @@ public class GraphQLR4ProviderTest {
 				"    }]\n" +
 				"  }\n" +
 				"}" + GraphQLProviderTestUtil.DATA_SUFFIX), TestUtil.stripWhitespace(responseContent));
-			assertThat(status.getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue(), startsWith("application/json"));
+			assertThat(status.getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue()).startsWith("application/json");
 		}
 
 	}
@@ -149,7 +148,7 @@ public class GraphQLR4ProviderTest {
 				"    }]\n" +
 				"  }]\n" +
 				"}" + GraphQLProviderTestUtil.DATA_SUFFIX), TestUtil.stripWhitespace(responseContent));
-			assertThat(status.getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue(), startsWith("application/json"));
+			assertThat(status.getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue()).startsWith("application/json");
 
 		}
 
@@ -177,7 +176,7 @@ public class GraphQLR4ProviderTest {
 				"    }]\n" +
 				"  }]\n" +
 				"}" + GraphQLProviderTestUtil.DATA_SUFFIX), TestUtil.stripWhitespace(responseContent));
-			assertThat(status.getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue(), startsWith("application/json"));
+			assertThat(status.getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue()).startsWith("application/json");
 		}
 
 	}

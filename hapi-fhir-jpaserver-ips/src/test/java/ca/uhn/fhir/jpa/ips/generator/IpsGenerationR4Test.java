@@ -43,9 +43,8 @@ import jakarta.annotation.Nullable;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.matchesPattern;
 import static org.hamcrest.Matchers.stringContainsInOrder;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -99,13 +98,13 @@ public class IpsGenerationR4Test extends BaseResourceProviderR4Test {
 		validateDocument(output);
 		assertEquals(117, output.getEntry().size());
 		String patientId = findFirstEntryResource(output, Patient.class, 1).getId();
-		assertThat(patientId, matchesPattern("urn:uuid:.*"));
+		assertThat(patientId).matches("urn:uuid:.*");
 		MedicationStatement medicationStatement = findFirstEntryResource(output, MedicationStatement.class, 2);
 		assertEquals(patientId, medicationStatement.getSubject().getReference());
 		assertNull(medicationStatement.getInformationSource().getReference());
 
 		List<String> sectionTitles = extractSectionTitles(output);
-		assertThat(sectionTitles.toString(), sectionTitles, contains("Allergies and Intolerances", "Medication List", "Problem List", "History of Immunizations", "Diagnostic Results"));
+		assertThat(sectionTitles).as(sectionTitles.toString()).containsExactly("Allergies and Intolerances", "Medication List", "Problem List", "History of Immunizations", "Diagnostic Results");
 	}
 
 	@Test
@@ -186,12 +185,12 @@ public class IpsGenerationR4Test extends BaseResourceProviderR4Test {
 		validateDocument(output);
 		assertEquals(7, output.getEntry().size());
 		String patientId = findFirstEntryResource(output, Patient.class, 1).getId();
-		assertThat(patientId, matchesPattern("urn:uuid:.*"));
+		assertThat(patientId).matches("urn:uuid:.*");
 		assertEquals(patientId, findEntryResource(output, Condition.class, 0, 2).getSubject().getReference());
 		assertEquals(patientId, findEntryResource(output, Condition.class, 1, 2).getSubject().getReference());
 
 		List<String> sectionTitles = extractSectionTitles(output);
-		assertThat(sectionTitles.toString(), sectionTitles, contains("Allergies and Intolerances", "Medication List", "Problem List"));
+		assertThat(sectionTitles).as(sectionTitles.toString()).containsExactly("Allergies and Intolerances", "Medication List", "Problem List");
 	}
 
 	/**
@@ -245,7 +244,7 @@ public class IpsGenerationR4Test extends BaseResourceProviderR4Test {
 			.map(t -> (Immunization) t.getResource())
 			.map(t -> t.getOccurrenceDateTimeType().getValueAsString().substring(0, 4))
 			.collect(Collectors.toList());
-		assertThat(resourceDates, contains("2015", "2010", "2005"));
+		assertThat(resourceDates).containsExactly("2015", "2010", "2005");
 	}
 
 

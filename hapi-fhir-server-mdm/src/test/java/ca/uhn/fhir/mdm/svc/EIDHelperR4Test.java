@@ -19,10 +19,7 @@ import java.util.HashSet;
 import java.util.List;
 
 import static ca.uhn.fhir.mdm.api.MdmConstants.HAPI_ENTERPRISE_IDENTIFIER_SYSTEM;
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.nullValue;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
 
@@ -65,10 +62,10 @@ public class EIDHelperR4Test extends BaseR4Test {
 
 		List<CanonicalEID> externalEid = myEidHelper.getHapiEid(patient);
 
-		assertThat(externalEid.isEmpty(), is(false));
-		assertThat(externalEid.get(0).getValue(), is(equalTo("simpletest")));
-		assertThat(externalEid.get(0).getSystem(), is(equalTo(HAPI_ENTERPRISE_IDENTIFIER_SYSTEM)));
-		assertThat(externalEid.get(0).getUse(), is(equalTo("secondary")));
+		assertThat(externalEid.isEmpty()).isEqualTo(false);
+		assertThat(externalEid.get(0).getValue()).isEqualTo("simpletest");
+		assertThat(externalEid.get(0).getSystem()).isEqualTo(HAPI_ENTERPRISE_IDENTIFIER_SYSTEM);
+		assertThat(externalEid.get(0).getUse()).isEqualTo("secondary");
 	}
 
 	@Test
@@ -82,9 +79,9 @@ public class EIDHelperR4Test extends BaseR4Test {
 
 		List<CanonicalEID> externalEid = myEidHelper.getExternalEid(patient);
 
-		assertThat(externalEid.isEmpty(), is(false));
-		assertThat(externalEid.get(0).getValue(), is(equalTo(uniqueID)));
-		assertThat(externalEid.get(0).getSystem(), is(equalTo(EXTERNAL_ID_SYSTEM_FOR_TEST)));
+		assertThat(externalEid.isEmpty()).isEqualTo(false);
+		assertThat(externalEid.get(0).getValue()).isEqualTo(uniqueID);
+		assertThat(externalEid.get(0).getSystem()).isEqualTo(EXTERNAL_ID_SYSTEM_FOR_TEST);
 	}
 
 	@Test
@@ -92,8 +89,8 @@ public class EIDHelperR4Test extends BaseR4Test {
 
 		CanonicalEID internalEid = myEidHelper.createHapiEid();
 
-		assertThat(internalEid.getSystem(), is(equalTo(HAPI_ENTERPRISE_IDENTIFIER_SYSTEM)));
-		assertThat(internalEid.getValue().length(), is(equalTo(36)));
-		assertThat(internalEid.getUse(), is(nullValue()));
+		assertThat(internalEid.getSystem()).isEqualTo(HAPI_ENTERPRISE_IDENTIFIER_SYSTEM);
+		assertThat(internalEid.getValue().length()).isEqualTo(36);
+		assertThat(internalEid.getUse()).isNull();
 	}
 }

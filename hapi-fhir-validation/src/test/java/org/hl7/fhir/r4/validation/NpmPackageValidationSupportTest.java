@@ -21,8 +21,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.util.Map;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 
 public class NpmPackageValidationSupportTest extends BaseValidationTestWithInlineMocks {
@@ -68,7 +67,7 @@ public class NpmPackageValidationSupportTest extends BaseValidationTestWithInlin
 
 		String outcomeSerialized = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome.toOperationOutcome());
 		ourLog.info(outcomeSerialized);
-		assertThat(outcomeSerialized, containsString("Patient.identifier:nhsNumber.value: minimum required = 1, but only found 0"));
+		assertThat(outcomeSerialized).contains("Patient.identifier:nhsNumber.value: minimum required = 1, but only found 0");
 
 	}
 

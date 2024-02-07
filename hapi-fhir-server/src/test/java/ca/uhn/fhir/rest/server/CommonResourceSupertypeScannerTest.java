@@ -10,8 +10,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class CommonResourceSupertypeScannerTest {
 
@@ -20,16 +19,16 @@ public class CommonResourceSupertypeScannerTest {
   @Test
   public void testBaseClass() {
     scanner.register(DemoPatient.class);
-    
-    assertThat(scanner.getLowestCommonSuperclass().get(), is(DemoPatient.class));
+
+		assertThat(scanner.getLowestCommonSuperclass().get()).isEqualTo(DemoPatient.class);
   }
   
   @Test
   public void testSubtype() {
     scanner.register(DemoPatient.class);
     scanner.register(DemoPatientTripleSub.class);
-    
-    assertThat(scanner.getLowestCommonSuperclass().get(), is(DemoPatient.class));
+
+		assertThat(scanner.getLowestCommonSuperclass().get()).isEqualTo(DemoPatient.class);
   }
   
   @Test
@@ -38,28 +37,28 @@ public class CommonResourceSupertypeScannerTest {
     scanner.register(DemoPatientSubSub.class);
     scanner.register(DemoPatientSubSubTwo.class);
     scanner.register(DemoPatientTripleSub.class);
-    
-    assertThat(scanner.getLowestCommonSuperclass().get(), is(DemoPatientSub.class));
+
+		assertThat(scanner.getLowestCommonSuperclass().get()).isEqualTo(DemoPatientSub.class);
   }
   
   @Test
   public void testSupertypeNotRegistered() {
     scanner.register(DemoPatientTripleSub.class);
     scanner.register(DemoPatientSubSubTwo.class);
-    
-    assertThat(scanner.getLowestCommonSuperclass().get(), is(DemoPatientSub.class));
+
+		assertThat(scanner.getLowestCommonSuperclass().get()).isEqualTo(DemoPatientSub.class);
   }
   
   @Test
   public void testOnlySubtype() {
     scanner.register(DemoPatientTripleSub.class);
-    
-    assertThat(scanner.getLowestCommonSuperclass().get(), is(DemoPatientTripleSub.class));
+
+		assertThat(scanner.getLowestCommonSuperclass().get()).isEqualTo(DemoPatientTripleSub.class);
   }
   
   @Test
   public void testEmpty() {
-    assertThat(scanner.getLowestCommonSuperclass().isPresent(), is(false));
+		assertThat(scanner.getLowestCommonSuperclass().isPresent()).isEqualTo(false);
   }
   
   @ResourceDef(name = "Patient")

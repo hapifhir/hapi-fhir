@@ -79,10 +79,7 @@ import java.util.stream.IntStream;
 
 import static ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc.MAKE_LOADING_VERSION_CURRENT;
 import static ca.uhn.fhir.jpa.term.api.ITermLoaderSvc.LOINC_URI;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.empty;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hl7.fhir.common.hapi.validation.support.ValidationConstants.LOINC_LOW;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -459,7 +456,7 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 				.setValue("3rdParty"); // mixed case
 			outcome = myTermSvc.expandValueSet(null, vs);
 			codes = toCodesContains(outcome.getExpansion().getContains());
-			assertThat(codes, containsInAnyOrder("50015-7", "43343-3", "43343-4"));
+			assertThat(codes).containsExactlyInAnyOrder("50015-7", "43343-3", "43343-4");
 
 			// Include
 			vs = new ValueSet();
@@ -476,7 +473,7 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 				.setValue("3rdparty");  // lowercase
 			outcome = myTermSvc.expandValueSet(null, vs);
 			codes = toCodesContains(outcome.getExpansion().getContains());
-			assertThat(codes, containsInAnyOrder("50015-7", "43343-3", "43343-4"));
+			assertThat(codes).containsExactlyInAnyOrder("50015-7", "43343-3", "43343-4");
 		}
 
 		@Test
@@ -503,7 +500,7 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 				.setValue("LOINC");
 			outcome = myTermSvc.expandValueSet(null, vs);
 			codes = toCodesContains(outcome.getExpansion().getContains());
-			assertThat(codes, containsInAnyOrder("47239-9"));
+			assertThat(codes).containsExactlyInAnyOrder("47239-9");
 
 			// Include
 			vs = new ValueSet();
@@ -520,7 +517,7 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 				.setValue(LOINC_LOW);
 			outcome = myTermSvc.expandValueSet(null, vs);
 			codes = toCodesContains(outcome.getExpansion().getContains());
-			assertThat(codes, containsInAnyOrder("47239-9"));
+			assertThat(codes).containsExactlyInAnyOrder("47239-9");
 		}
 
 		@Test
@@ -543,7 +540,7 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 				.setValue("3rdParty");
 			outcome = myTermSvc.expandValueSet(null, vs);
 			codes = toCodesContains(outcome.getExpansion().getContains());
-			assertThat(codes, containsInAnyOrder("47239-9"));
+			assertThat(codes).containsExactlyInAnyOrder("47239-9");
 
 			// Include
 			vs = new ValueSet();
@@ -556,7 +553,7 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 				.setValue("3rdparty");
 			outcome = myTermSvc.expandValueSet(null, vs);
 			codes = toCodesContains(outcome.getExpansion().getContains());
-			assertThat(codes, containsInAnyOrder("47239-9"));
+			assertThat(codes).containsExactlyInAnyOrder("47239-9");
 		}
 
 		@Test
@@ -579,7 +576,7 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 				.setValue("LOINC");
 			outcome = myTermSvc.expandValueSet(null, vs);
 			codes = toCodesContains(outcome.getExpansion().getContains());
-			assertThat(codes, containsInAnyOrder("50015-7", "43343-3", "43343-4"));
+			assertThat(codes).containsExactlyInAnyOrder("50015-7", "43343-3", "43343-4");
 
 			// Include
 			vs = new ValueSet();
@@ -592,7 +589,7 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 				.setValue(LOINC_LOW);
 			outcome = myTermSvc.expandValueSet(null, vs);
 			codes = toCodesContains(outcome.getExpansion().getContains());
-			assertThat(codes, containsInAnyOrder("50015-7", "43343-3", "43343-4"));
+			assertThat(codes).containsExactlyInAnyOrder("50015-7", "43343-3", "43343-4");
 		}
 
 		@Test
@@ -697,7 +694,7 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 				.setValue("50015-7");
 			outcome = myTermSvc.expandValueSet(null, vs);
 			codes = toCodesContains(outcome.getExpansion().getContains());
-			assertThat(codes, containsInAnyOrder("50015-7"));
+			assertThat(codes).containsExactlyInAnyOrder("50015-7");
 
 			// Include
 			vs = new ValueSet();
@@ -714,7 +711,7 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 				.setValue("43343-3");
 			outcome = myTermSvc.expandValueSet(null, vs);
 			codes = toCodesContains(outcome.getExpansion().getContains());
-			assertThat(codes, containsInAnyOrder("50015-7", "43343-3"));
+			assertThat(codes).containsExactlyInAnyOrder("50015-7", "43343-3");
 
 			// Include
 			vs = new ValueSet();
@@ -731,7 +728,7 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 				.setValue("43343-4");
 			outcome = myTermSvc.expandValueSet(null, vs);
 			codes = toCodesContains(outcome.getExpansion().getContains());
-			assertThat(codes, containsInAnyOrder("50015-7", "43343-3", "43343-4", "47239-9"));
+			assertThat(codes).containsExactlyInAnyOrder("50015-7", "43343-3", "43343-4", "47239-9");
 
 			// Include
 			vs = new ValueSet();
@@ -748,7 +745,7 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 				.setValue("47239-9");
 			outcome = myTermSvc.expandValueSet(null, vs);
 			codes = toCodesContains(outcome.getExpansion().getContains());
-			assertThat(codes, containsInAnyOrder("50015-7", "43343-3", "43343-4", "47239-9"));
+			assertThat(codes).containsExactlyInAnyOrder("50015-7", "43343-3", "43343-4", "47239-9");
 		}
 
 		@Test
@@ -775,7 +772,7 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 				.setValue("50015-7,43343-3,43343-4,47239-9");
 			outcome = myTermSvc.expandValueSet(null, vs);
 			codes = toCodesContains(outcome.getExpansion().getContains());
-			assertThat(codes, containsInAnyOrder("50015-7"));
+			assertThat(codes).containsExactlyInAnyOrder("50015-7");
 		}
 
 		@Test
@@ -798,7 +795,7 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 				.setValue("50015-7");
 			outcome = myTermSvc.expandValueSet(null, vs);
 			codes = toCodesContains(outcome.getExpansion().getContains());
-			assertThat(codes, containsInAnyOrder("43343-3", "43343-4", "47239-9"));
+			assertThat(codes).containsExactlyInAnyOrder("43343-3", "43343-4", "47239-9");
 
 			// Include
 			vs = new ValueSet();
@@ -811,7 +808,7 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 				.setValue("43343-3");
 			outcome = myTermSvc.expandValueSet(null, vs);
 			codes = toCodesContains(outcome.getExpansion().getContains());
-			assertThat(codes, containsInAnyOrder("43343-4", "47239-9"));
+			assertThat(codes).containsExactlyInAnyOrder("43343-4", "47239-9");
 
 			// Include
 			vs = new ValueSet();
@@ -858,7 +855,7 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 				.setValue("50015-7,43343-3,43343-4,47239-9");
 			outcome = myTermSvc.expandValueSet(null, vs);
 			codes = toCodesContains(outcome.getExpansion().getContains());
-			assertThat(codes, containsInAnyOrder("43343-3", "43343-4", "47239-9"));
+			assertThat(codes).containsExactlyInAnyOrder("43343-3", "43343-4", "47239-9");
 		}
 
 		@Test
@@ -938,7 +935,7 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 				.setValue("50015-7");
 			outcome = myTermSvc.expandValueSet(null, vs);
 			codes = toCodesContains(outcome.getExpansion().getContains());
-			assertThat(codes, containsInAnyOrder("50015-7", "43343-3", "43343-4", "47239-9"));
+			assertThat(codes).containsExactlyInAnyOrder("50015-7", "43343-3", "43343-4", "47239-9");
 
 			// Include
 			vs = new ValueSet();
@@ -955,7 +952,7 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 				.setValue("43343-3");
 			outcome = myTermSvc.expandValueSet(null, vs);
 			codes = toCodesContains(outcome.getExpansion().getContains());
-			assertThat(codes, containsInAnyOrder("43343-3", "43343-4", "47239-9"));
+			assertThat(codes).containsExactlyInAnyOrder("43343-3", "43343-4", "47239-9");
 
 			// Include
 			vs = new ValueSet();
@@ -972,7 +969,7 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 				.setValue("43343-4");
 			outcome = myTermSvc.expandValueSet(null, vs);
 			codes = toCodesContains(outcome.getExpansion().getContains());
-			assertThat(codes, containsInAnyOrder("50015-7", "43343-4", "47239-9"));
+			assertThat(codes).containsExactlyInAnyOrder("50015-7", "43343-4", "47239-9");
 
 			// Include
 			vs = new ValueSet();
@@ -989,7 +986,7 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 				.setValue("47239-9");
 			outcome = myTermSvc.expandValueSet(null, vs);
 			codes = toCodesContains(outcome.getExpansion().getContains());
-			assertThat(codes, containsInAnyOrder("50015-7", "43343-4", "47239-9"));
+			assertThat(codes).containsExactlyInAnyOrder("50015-7", "43343-4", "47239-9");
 		}
 
 		@Test
@@ -1016,7 +1013,7 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 				.setValue("50015-7,43343-3,43343-4,47239-9");
 			outcome = myTermSvc.expandValueSet(null, vs);
 			codes = toCodesContains(outcome.getExpansion().getContains());
-			assertThat(codes, containsInAnyOrder("43343-4", "47239-9"));
+			assertThat(codes).containsExactlyInAnyOrder("43343-4", "47239-9");
 		}
 
 		@Test
@@ -1051,7 +1048,7 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 				.setValue("43343-3");
 			outcome = myTermSvc.expandValueSet(null, vs);
 			codes = toCodesContains(outcome.getExpansion().getContains());
-			assertThat(codes, containsInAnyOrder("50015-7"));
+			assertThat(codes).containsExactlyInAnyOrder("50015-7");
 
 			// Include
 			vs = new ValueSet();
@@ -1064,7 +1061,7 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 				.setValue("43343-4");
 			outcome = myTermSvc.expandValueSet(null, vs);
 			codes = toCodesContains(outcome.getExpansion().getContains());
-			assertThat(codes, containsInAnyOrder("43343-3"));
+			assertThat(codes).containsExactlyInAnyOrder("43343-3");
 
 			// Include
 			vs = new ValueSet();
@@ -1077,7 +1074,7 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 				.setValue("47239-9");
 			outcome = myTermSvc.expandValueSet(null, vs);
 			codes = toCodesContains(outcome.getExpansion().getContains());
-			assertThat(codes, containsInAnyOrder("43343-3"));
+			assertThat(codes).containsExactlyInAnyOrder("43343-3");
 		}
 
 		@Test
@@ -1100,7 +1097,7 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 				.setValue("50015-7,43343-3,43343-4,47239-9");
 			outcome = myTermSvc.expandValueSet(null, vs);
 			codes = toCodesContains(outcome.getExpansion().getContains());
-			assertThat(codes, containsInAnyOrder("50015-7", "43343-3"));
+			assertThat(codes).containsExactlyInAnyOrder("50015-7", "43343-3");
 		}
 
 		@Test
@@ -1180,7 +1177,7 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 				.setValue("50015-7");
 			outcome = myTermSvc.expandValueSet(null, vs);
 			codes = toCodesContains(outcome.getExpansion().getContains());
-			assertThat(codes, containsInAnyOrder("50015-7", "43343-3", "43343-4", "47239-9"));
+			assertThat(codes).containsExactlyInAnyOrder("50015-7", "43343-3", "43343-4", "47239-9");
 
 			// Include
 			vs = new ValueSet();
@@ -1197,7 +1194,7 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 				.setValue("43343-3");
 			outcome = myTermSvc.expandValueSet(null, vs);
 			codes = toCodesContains(outcome.getExpansion().getContains());
-			assertThat(codes, containsInAnyOrder("43343-3", "43343-4", "47239-9"));
+			assertThat(codes).containsExactlyInAnyOrder("43343-3", "43343-4", "47239-9");
 
 			// Include
 			vs = new ValueSet();
@@ -1214,7 +1211,7 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 				.setValue("43343-4");
 			outcome = myTermSvc.expandValueSet(null, vs);
 			codes = toCodesContains(outcome.getExpansion().getContains());
-			assertThat(codes, containsInAnyOrder("43343-4", "47239-9"));
+			assertThat(codes).containsExactlyInAnyOrder("43343-4", "47239-9");
 
 			// Include
 			vs = new ValueSet();
@@ -1231,7 +1228,7 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 				.setValue("47239-9");
 			outcome = myTermSvc.expandValueSet(null, vs);
 			codes = toCodesContains(outcome.getExpansion().getContains());
-			assertThat(codes, containsInAnyOrder("43343-4", "47239-9"));
+			assertThat(codes).containsExactlyInAnyOrder("43343-4", "47239-9");
 		}
 
 		@Test
@@ -1259,7 +1256,7 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 			outcome = myTermSvc.expandValueSet(null, vs);
 			codes = toCodesContains(outcome.getExpansion().getContains());
 
-			assertThat(codes.toString(), codes, containsInAnyOrder("43343-4", "47239-9"));
+			assertThat(codes).as(codes.toString()).containsExactlyInAnyOrder("43343-4", "47239-9");
 		}
 
 		@Test
@@ -1294,7 +1291,7 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 				.setValue("43343-3");
 			outcome = myTermSvc.expandValueSet(null, vs);
 			codes = toCodesContains(outcome.getExpansion().getContains());
-			assertThat(codes, containsInAnyOrder("50015-7"));
+			assertThat(codes).containsExactlyInAnyOrder("50015-7");
 
 			// Include
 			vs = new ValueSet();
@@ -1307,7 +1304,7 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 				.setValue("43343-4");
 			outcome = myTermSvc.expandValueSet(null, vs);
 			codes = toCodesContains(outcome.getExpansion().getContains());
-			assertThat(codes, containsInAnyOrder("50015-7", "43343-3"));
+			assertThat(codes).containsExactlyInAnyOrder("50015-7", "43343-3");
 
 			// Include
 			vs = new ValueSet();
@@ -1320,7 +1317,7 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 				.setValue("47239-9");
 			outcome = myTermSvc.expandValueSet(null, vs);
 			codes = toCodesContains(outcome.getExpansion().getContains());
-			assertThat(codes, containsInAnyOrder("50015-7", "43343-3"));
+			assertThat(codes).containsExactlyInAnyOrder("50015-7", "43343-3");
 		}
 
 		@Test
@@ -1343,7 +1340,7 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 				.setValue("50015-7,43343-3,43343-4,47239-9");
 			outcome = myTermSvc.expandValueSet(null, vs);
 			codes = toCodesContains(outcome.getExpansion().getContains());
-			assertThat(codes, containsInAnyOrder("50015-7", "43343-3"));
+			assertThat(codes).containsExactlyInAnyOrder("50015-7", "43343-3");
 		}
 
 		@Test
@@ -1423,7 +1420,7 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 				.setValue("50015-7");
 			outcome = myTermSvc.expandValueSet(null, vs);
 			codes = toCodesContains(outcome.getExpansion().getContains());
-			assertThat(codes, containsInAnyOrder("50015-7", "43343-4", "47239-9"));
+			assertThat(codes).containsExactlyInAnyOrder("50015-7", "43343-4", "47239-9");
 
 			// Include
 			vs = new ValueSet();
@@ -1440,7 +1437,7 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 				.setValue("43343-3");
 			outcome = myTermSvc.expandValueSet(null, vs);
 			codes = toCodesContains(outcome.getExpansion().getContains());
-			assertThat(codes, containsInAnyOrder("50015-7", "43343-3"));
+			assertThat(codes).containsExactlyInAnyOrder("50015-7", "43343-3");
 
 			// Include
 			vs = new ValueSet();
@@ -1457,7 +1454,7 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 				.setValue("43343-4");
 			outcome = myTermSvc.expandValueSet(null, vs);
 			codes = toCodesContains(outcome.getExpansion().getContains());
-			assertThat(codes, containsInAnyOrder("50015-7", "43343-3", "43343-4", "47239-9"));
+			assertThat(codes).containsExactlyInAnyOrder("50015-7", "43343-3", "43343-4", "47239-9");
 
 			// Include
 			vs = new ValueSet();
@@ -1474,7 +1471,7 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 				.setValue("47239-9");
 			outcome = myTermSvc.expandValueSet(null, vs);
 			codes = toCodesContains(outcome.getExpansion().getContains());
-			assertThat(codes, containsInAnyOrder("50015-7", "43343-3", "43343-4", "47239-9"));
+			assertThat(codes).containsExactlyInAnyOrder("50015-7", "43343-3", "43343-4", "47239-9");
 		}
 
 		@Test
@@ -1501,7 +1498,7 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 				.setValue("50015-7,43343-3,43343-4,47239-9");
 			outcome = myTermSvc.expandValueSet(null, vs);
 			codes = toCodesContains(outcome.getExpansion().getContains());
-			assertThat(codes, containsInAnyOrder("50015-7"));
+			assertThat(codes).containsExactlyInAnyOrder("50015-7");
 		}
 
 		@Test
@@ -1524,7 +1521,7 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 				.setValue("50015-7");
 			outcome = myTermSvc.expandValueSet(null, vs);
 			codes = toCodesContains(outcome.getExpansion().getContains());
-			assertThat(codes, containsInAnyOrder("43343-3"));
+			assertThat(codes).containsExactlyInAnyOrder("43343-3");
 
 			// Include
 			vs = new ValueSet();
@@ -1537,7 +1534,7 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 				.setValue("43343-3");
 			outcome = myTermSvc.expandValueSet(null, vs);
 			codes = toCodesContains(outcome.getExpansion().getContains());
-			assertThat(codes, containsInAnyOrder("43343-4", "47239-9"));
+			assertThat(codes).containsExactlyInAnyOrder("43343-4", "47239-9");
 
 			// Include
 			vs = new ValueSet();
@@ -1584,7 +1581,7 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 				.setValue("50015-7,43343-3,43343-4,47239-9");
 			outcome = myTermSvc.expandValueSet(null, vs);
 			codes = toCodesContains(outcome.getExpansion().getContains());
-			assertThat(codes, containsInAnyOrder("43343-3", "43343-4", "47239-9"));
+			assertThat(codes).containsExactlyInAnyOrder("43343-3", "43343-4", "47239-9");
 		}
 
 		@Test
@@ -1662,7 +1659,7 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 				myTermSvc.expandValueSet(null, vs);
 				fail();
 			} catch (InternalErrorException e) {
-				assertThat(e.getMessage(), containsString(Msg.code(832) + "Expansion of ValueSet produced too many codes (maximum 50) - Operation aborted!"));
+				assertThat(e.getMessage()).contains(Msg.code(832) + "Expansion of ValueSet produced too many codes (maximum 50) - Operation aborted!");
 			}
 
 			// Increase the max so it won't exceed
@@ -1715,7 +1712,7 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 				.setValue("valueAAA");
 			outcome = myTermSvc.expandValueSet(null, vs);
 			codes = toCodesContains(outcome.getExpansion().getContains());
-			assertThat(codes, containsInAnyOrder("childAAA"));
+			assertThat(codes).containsExactlyInAnyOrder("childAAA");
 
 			// Property matches several codes
 			vs = new ValueSet();
@@ -1728,7 +1725,7 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 				.setValue("foo");
 			outcome = myTermSvc.expandValueSet(null, vs);
 			codes = toCodesContains(outcome.getExpansion().getContains());
-			assertThat(codes, containsInAnyOrder("childAAA", "childAAB"));
+			assertThat(codes).containsExactlyInAnyOrder("childAAA", "childAAB");
 
 			// Property matches no codes
 			vs = new ValueSet();
@@ -1741,7 +1738,7 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 				.setValue("valueAAA");
 			outcome = myTermSvc.expandValueSet(null, vs);
 			codes = toCodesContains(outcome.getExpansion().getContains());
-			assertThat(codes, empty());
+			assertThat(codes).isEmpty();
 		}
 
 
@@ -1769,7 +1766,7 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 				.setValue(".*\\^Donor$");
 			outcome = myTermSvc.expandValueSet(null, vs);
 			codes = toCodesContains(outcome.getExpansion().getContains());
-			assertThat(codes, containsInAnyOrder("43343-3", "43343-4", "47239-9"));
+			assertThat(codes).containsExactlyInAnyOrder("43343-3", "43343-4", "47239-9");
 		}
 
 		@Test
@@ -1796,7 +1793,7 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 				.setValue("12345-1|12345-2");
 			outcome = myTermSvc.expandValueSet(null, vs);
 			codes = toCodesContains(outcome.getExpansion().getContains());
-			assertThat(codes, containsInAnyOrder("50015-7", "47239-9"));
+			assertThat(codes).containsExactlyInAnyOrder("50015-7", "47239-9");
 		}
 
 		@Test
@@ -1819,7 +1816,7 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 				.setValue(".*\\^Donor$");  // <------ block diff is here
 			outcome = myTermSvc.expandValueSet(null, vs);
 			codes = toCodesContains(outcome.getExpansion().getContains());
-			assertThat(codes, containsInAnyOrder("50015-7"));
+			assertThat(codes).containsExactlyInAnyOrder("50015-7");
 
 			// Include
 			vs = new ValueSet();
@@ -1832,7 +1829,7 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 				.setValue("\\^Donor$");  // <------ block diff is here
 			outcome = myTermSvc.expandValueSet(null, vs);
 			codes = toCodesContains(outcome.getExpansion().getContains());
-			assertThat(codes, containsInAnyOrder("50015-7"));
+			assertThat(codes).containsExactlyInAnyOrder("50015-7");
 
 			// Include
 			vs = new ValueSet();
@@ -1845,7 +1842,7 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 				.setValue("\\^Dono$");  // <------ block diff is here
 			outcome = myTermSvc.expandValueSet(null, vs);
 			codes = toCodesContains(outcome.getExpansion().getContains());
-			assertThat(codes, empty());
+			assertThat(codes).isEmpty();
 
 			// Include
 			vs = new ValueSet();
@@ -1858,7 +1855,7 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 				.setValue("^Donor$");  // <------ block diff is here
 			outcome = myTermSvc.expandValueSet(null, vs);
 			codes = toCodesContains(outcome.getExpansion().getContains());
-			assertThat(codes, empty());
+			assertThat(codes).isEmpty();
 
 			// Include
 			vs = new ValueSet();
@@ -1871,7 +1868,7 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 				.setValue("\\^Dono");  // <------ block diff is here
 			outcome = myTermSvc.expandValueSet(null, vs);
 			codes = toCodesContains(outcome.getExpansion().getContains());
-			assertThat(codes, containsInAnyOrder("50015-7"));
+			assertThat(codes).containsExactlyInAnyOrder("50015-7");
 
 			// Include
 			vs = new ValueSet();
@@ -1884,7 +1881,7 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 				.setValue("^Ser$");   // <------ block diff is here
 			outcome = myTermSvc.expandValueSet(null, vs);
 			codes = toCodesContains(outcome.getExpansion().getContains());
-			assertThat(codes, containsInAnyOrder("43343-3", "43343-4"));
+			assertThat(codes).containsExactlyInAnyOrder("43343-3", "43343-4");
 
 		}
 
@@ -1910,7 +1907,7 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 				.setValue("^[No ]*IG exists$");
 			outcome = myTermSvc.expandValueSet(null, vs);
 			codes = toCodesContains(outcome.getExpansion().getContains());
-			assertThat(codes, containsInAnyOrder("childAAC", "childAAD"));
+			assertThat(codes).containsExactlyInAnyOrder("childAAC", "childAAD");
 
 		}
 

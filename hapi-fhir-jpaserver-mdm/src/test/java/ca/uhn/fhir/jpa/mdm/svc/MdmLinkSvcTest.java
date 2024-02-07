@@ -26,9 +26,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -141,7 +139,7 @@ public class MdmLinkSvcTest extends BaseMdmR4Test {
 			myMdmLinkSvc.updateLink(goldenPatient, patient, MdmMatchOutcome.NEW_GOLDEN_RESOURCE_MATCH, MdmLinkSourceEnum.AUTO, null);
 			fail();
 		} catch (InternalErrorException e) {
-			assertThat(e.getMessage(), is(equalTo(Msg.code(760) + "MDM system is not allowed to modify links on manually created links")));
+			assertThat(e.getMessage()).isEqualTo(Msg.code(760) + "MDM system is not allowed to modify links on manually created links");
 		}
 	}
 
@@ -155,7 +153,7 @@ public class MdmLinkSvcTest extends BaseMdmR4Test {
 			myMdmLinkSvc.updateLink(goldenPatient, patient, MdmMatchOutcome.NO_MATCH, MdmLinkSourceEnum.AUTO, createContextForUpdate("Patient"));
 			fail();
 		} catch (InternalErrorException e) {
-			assertThat(e.getMessage(), is(equalTo(Msg.code(761) + "MDM system is not allowed to automatically NO_MATCH a resource")));
+			assertThat(e.getMessage()).isEqualTo(Msg.code(761) + "MDM system is not allowed to automatically NO_MATCH a resource");
 		}
 	}
 
@@ -184,7 +182,7 @@ public class MdmLinkSvcTest extends BaseMdmR4Test {
 			.stream().map(p -> p.getIdElement().toVersionless().getIdPart())
 			.collect(Collectors.toList());
 
-		assertThat(actual, Matchers.containsInAnyOrder(expected.toArray()));
+		assertThat(actual).containsExactlyInAnyOrder(expected.toArray());
 	}
 
 	@Test

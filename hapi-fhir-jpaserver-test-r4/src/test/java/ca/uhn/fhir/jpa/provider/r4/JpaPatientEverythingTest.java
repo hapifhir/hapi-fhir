@@ -100,8 +100,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.hasItem;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
@@ -190,8 +189,8 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
         String accountId = myClient.create().resource(account).execute().getId().toUnqualifiedVersionless().getValue();
 
         Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
-        assertThat(actual, hasItem(referenceToPatient.getReference()));
-        assertThat(actual, hasItem(accountId));
+			assertThat(actual).contains(referenceToPatient.getReference());
+			assertThat(actual).contains(accountId);
     }
 
     @Test
@@ -204,8 +203,8 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
         String adverseEventId = myClient.create().resource(adverseEvent).execute().getId().toUnqualifiedVersionless().getValue();
 
         Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
-        assertThat(actual, hasItem(referenceToPatient.getReference()));
-        assertThat(actual, hasItem(adverseEventId));
+			assertThat(actual).contains(referenceToPatient.getReference());
+			assertThat(actual).contains(adverseEventId);
     }
 
 
@@ -219,8 +218,8 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
         String allergyIntoleranceId = myClient.create().resource(allergyIntolerance).execute().getId().toUnqualifiedVersionless().getValue();
 
         Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
-        assertThat(actual, hasItem(referenceToPatient.getReference()));
-        assertThat(actual, hasItem(allergyIntoleranceId));
+			assertThat(actual).contains(referenceToPatient.getReference());
+			assertThat(actual).contains(allergyIntoleranceId);
     }
 
     @Test
@@ -233,8 +232,8 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
         String allergyIntoleranceId = myClient.create().resource(allergyIntolerance).execute().getId().toUnqualifiedVersionless().getValue();
 
         Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
-        assertThat(actual, hasItem(referenceToPatient.getReference()));
-        assertThat(actual, hasItem(allergyIntoleranceId));
+			assertThat(actual).contains(referenceToPatient.getReference());
+			assertThat(actual).contains(allergyIntoleranceId);
     }
 
     @Test
@@ -247,8 +246,8 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
         String allergyIntoleranceId = myClient.create().resource(allergyIntolerance).execute().getId().toUnqualifiedVersionless().getValue();
 
         Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
-        assertThat(actual, hasItem(referenceToPatient.getReference()));
-        assertThat(actual, hasItem(allergyIntoleranceId));
+			assertThat(actual).contains(referenceToPatient.getReference());
+			assertThat(actual).contains(allergyIntoleranceId);
     }
 
     @Test
@@ -263,8 +262,8 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
         String appointmentId = myClient.create().resource(appointment).execute().getId().toUnqualifiedVersionless().getValue();
 
         Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
-        assertThat(actual, hasItem(referenceToPatient.getReference()));
-        assertThat(actual, hasItem(appointmentId));
+			assertThat(actual).contains(referenceToPatient.getReference());
+			assertThat(actual).contains(appointmentId);
     }
 
     @Test
@@ -277,8 +276,8 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
         String appointmentResponseId = myClient.create().resource(appointmentResponse).execute().getId().toUnqualifiedVersionless().getValue();
 
         Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
-        assertThat(actual, hasItem(referenceToPatient.getReference()));
-        assertThat(actual, hasItem(appointmentResponseId));
+			assertThat(actual).contains(referenceToPatient.getReference());
+			assertThat(actual).contains(appointmentResponseId);
     }
 
     @Test
@@ -293,8 +292,8 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
         String auditEventId = myClient.create().resource(auditEvent).execute().getId().toUnqualifiedVersionless().getValue();
 
         Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
-        assertThat(actual, hasItem(referenceToPatient.getReference()));
-        assertThat(actual, hasItem(auditEventId));
+			assertThat(actual).contains(referenceToPatient.getReference());
+			assertThat(actual).contains(auditEventId);
     }
 
     @Test
@@ -309,8 +308,8 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
         String auditEventId = myClient.create().resource(auditEvent).execute().getId().toUnqualifiedVersionless().getValue();
 
         Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
-        assertThat(actual, hasItem(referenceToPatient.getReference()));
-        assertThat(actual, hasItem(auditEventId));
+			assertThat(actual).contains(referenceToPatient.getReference());
+			assertThat(actual).contains(auditEventId);
     }
 
     @Test
@@ -323,8 +322,8 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
         String basicId = myClient.create().resource(basic).execute().getId().toUnqualifiedVersionless().getValue();
 
         Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
-        assertThat(actual, hasItem(referenceToPatient.getReference()));
-        assertThat(actual, hasItem(basicId));
+			assertThat(actual).contains(referenceToPatient.getReference());
+			assertThat(actual).contains(basicId);
     }
 
     @Test
@@ -337,8 +336,8 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
         String basicId = myClient.create().resource(basic).execute().getId().toUnqualifiedVersionless().getValue();
 
         Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
-        assertThat(actual, hasItem(referenceToPatient.getReference()));
-        assertThat(actual, hasItem(basicId));
+			assertThat(actual).contains(referenceToPatient.getReference());
+			assertThat(actual).contains(basicId);
     }
 
     @Test
@@ -351,8 +350,8 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
         String bodyStructureId = myClient.create().resource(bodyStructure).execute().getId().toUnqualifiedVersionless().getValue();
 
         Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
-        assertThat(actual, hasItem(referenceToPatient.getReference()));
-        assertThat(actual, hasItem(bodyStructureId));
+			assertThat(actual).contains(referenceToPatient.getReference());
+			assertThat(actual).contains(bodyStructureId);
     }
 
     @Test
@@ -365,8 +364,8 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
         String carePlanId = myClient.create().resource(carePlan).execute().getId().toUnqualifiedVersionless().getValue();
 
         Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
-        assertThat(actual, hasItem(referenceToPatient.getReference()));
-        assertThat(actual, hasItem(carePlanId));
+			assertThat(actual).contains(referenceToPatient.getReference());
+			assertThat(actual).contains(carePlanId);
     }
 
     @Test
@@ -379,8 +378,8 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
         String careTeamId = myClient.create().resource(careTeam).execute().getId().toUnqualifiedVersionless().getValue();
 
         Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
-        assertThat(actual, hasItem(referenceToPatient.getReference()));
-        assertThat(actual, hasItem(careTeamId));
+			assertThat(actual).contains(referenceToPatient.getReference());
+			assertThat(actual).contains(careTeamId);
     }
 
     @Test
@@ -395,8 +394,8 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
         String careTeamId = myClient.create().resource(careTeam).execute().getId().toUnqualifiedVersionless().getValue();
 
         Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
-        assertThat(actual, hasItem(referenceToPatient.getReference()));
-        assertThat(actual, hasItem(careTeamId));
+			assertThat(actual).contains(referenceToPatient.getReference());
+			assertThat(actual).contains(careTeamId);
     }
 
     @Test
@@ -409,8 +408,8 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
         String chargeItemId = myClient.create().resource(chargeItem).execute().getId().toUnqualifiedVersionless().getValue();
 
         Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
-        assertThat(actual, hasItem(referenceToPatient.getReference()));
-        assertThat(actual, hasItem(chargeItemId));
+			assertThat(actual).contains(referenceToPatient.getReference());
+			assertThat(actual).contains(chargeItemId);
     }
 
     @Test
@@ -425,8 +424,8 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
         String chargeItemId = myClient.create().resource(chargeItem).execute().getId().toUnqualifiedVersionless().getValue();
 
         Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
-        assertThat(actual, hasItem(referenceToPatient.getReference()));
-        assertThat(actual, hasItem(chargeItemId));
+			assertThat(actual).contains(referenceToPatient.getReference());
+			assertThat(actual).contains(chargeItemId);
     }
 
     @Test
@@ -439,8 +438,8 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
         String chargeItemId = myClient.create().resource(chargeItem).execute().getId().toUnqualifiedVersionless().getValue();
 
         Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
-        assertThat(actual, hasItem(referenceToPatient.getReference()));
-        assertThat(actual, hasItem(chargeItemId));
+			assertThat(actual).contains(referenceToPatient.getReference());
+			assertThat(actual).contains(chargeItemId);
     }
 
     @Test
@@ -453,8 +452,8 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
         String claimId = myClient.create().resource(claim).execute().getId().toUnqualifiedVersionless().getValue();
 
         Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
-        assertThat(actual, hasItem(referenceToPatient.getReference()));
-        assertThat(actual, hasItem(claimId));
+			assertThat(actual).contains(referenceToPatient.getReference());
+			assertThat(actual).contains(claimId);
     }
 
 
@@ -470,8 +469,8 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
         String claimId = myClient.create().resource(claim).execute().getId().toUnqualifiedVersionless().getValue();
 
         Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
-        assertThat(actual, hasItem(referenceToPatient.getReference()));
-        assertThat(actual, hasItem(claimId));
+			assertThat(actual).contains(referenceToPatient.getReference());
+			assertThat(actual).contains(claimId);
     }
 
 
@@ -485,8 +484,8 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
         String claimResponseId = myClient.create().resource(claimResponse).execute().getId().toUnqualifiedVersionless().getValue();
 
         Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
-        assertThat(actual, hasItem(referenceToPatient.getReference()));
-        assertThat(actual, hasItem(claimResponseId));
+			assertThat(actual).contains(referenceToPatient.getReference());
+			assertThat(actual).contains(claimResponseId);
     }
 
 
@@ -500,8 +499,8 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
         String clinicalImpressionId = myClient.create().resource(clinicalImpression).execute().getId().toUnqualifiedVersionless().getValue();
 
         Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
-        assertThat(actual, hasItem(referenceToPatient.getReference()));
-        assertThat(actual, hasItem(clinicalImpressionId));
+			assertThat(actual).contains(referenceToPatient.getReference());
+			assertThat(actual).contains(clinicalImpressionId);
     }
 
     @Test
@@ -514,8 +513,8 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
         String communicationId = myClient.create().resource(communication).execute().getId().toUnqualifiedVersionless().getValue();
 
         Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
-        assertThat(actual, hasItem(referenceToPatient.getReference()));
-        assertThat(actual, hasItem(communicationId));
+			assertThat(actual).contains(referenceToPatient.getReference());
+			assertThat(actual).contains(communicationId);
     }
 
     @Test
@@ -528,8 +527,8 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
         String communicationId = myClient.create().resource(communication).execute().getId().toUnqualifiedVersionless().getValue();
 
         Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
-        assertThat(actual, hasItem(referenceToPatient.getReference()));
-        assertThat(actual, hasItem(communicationId));
+			assertThat(actual).contains(referenceToPatient.getReference());
+			assertThat(actual).contains(communicationId);
     }
 
     @Test
@@ -542,8 +541,8 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
         String communicationId = myClient.create().resource(communication).execute().getId().toUnqualifiedVersionless().getValue();
 
         Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
-        assertThat(actual, hasItem(referenceToPatient.getReference()));
-        assertThat(actual, hasItem(communicationId));
+			assertThat(actual).contains(referenceToPatient.getReference());
+			assertThat(actual).contains(communicationId);
     }
 
     @Test
@@ -556,8 +555,8 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
         String CommunicationRequestId = myClient.create().resource(CommunicationRequest).execute().getId().toUnqualifiedVersionless().getValue();
 
         Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
-        assertThat(actual, hasItem(referenceToPatient.getReference()));
-        assertThat(actual, hasItem(CommunicationRequestId));
+			assertThat(actual).contains(referenceToPatient.getReference());
+			assertThat(actual).contains(CommunicationRequestId);
     }
 
     @Test
@@ -570,8 +569,8 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
         String CommunicationRequestId = myClient.create().resource(CommunicationRequest).execute().getId().toUnqualifiedVersionless().getValue();
 
         Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
-        assertThat(actual, hasItem(referenceToPatient.getReference()));
-        assertThat(actual, hasItem(CommunicationRequestId));
+			assertThat(actual).contains(referenceToPatient.getReference());
+			assertThat(actual).contains(CommunicationRequestId);
     }
 
     @Test
@@ -584,8 +583,8 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
         String CommunicationRequestId = myClient.create().resource(CommunicationRequest).execute().getId().toUnqualifiedVersionless().getValue();
 
         Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
-        assertThat(actual, hasItem(referenceToPatient.getReference()));
-        assertThat(actual, hasItem(CommunicationRequestId));
+			assertThat(actual).contains(referenceToPatient.getReference());
+			assertThat(actual).contains(CommunicationRequestId);
     }
 
     @Test
@@ -598,8 +597,8 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
         String CommunicationRequestId = myClient.create().resource(CommunicationRequest).execute().getId().toUnqualifiedVersionless().getValue();
 
         Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
-        assertThat(actual, hasItem(referenceToPatient.getReference()));
-        assertThat(actual, hasItem(CommunicationRequestId));
+			assertThat(actual).contains(referenceToPatient.getReference());
+			assertThat(actual).contains(CommunicationRequestId);
     }
 
 
@@ -613,8 +612,8 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
         String compositionId = myClient.create().resource(composition).execute().getId().toUnqualifiedVersionless().getValue();
 
         Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
-        assertThat(actual, hasItem(referenceToPatient.getReference()));
-        assertThat(actual, hasItem(compositionId));
+			assertThat(actual).contains(referenceToPatient.getReference());
+			assertThat(actual).contains(compositionId);
     }
 
     @Test
@@ -627,8 +626,8 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
         String compositionId = myClient.create().resource(composition).execute().getId().toUnqualifiedVersionless().getValue();
 
         Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
-        assertThat(actual, hasItem(referenceToPatient.getReference()));
-        assertThat(actual, hasItem(compositionId));
+			assertThat(actual).contains(referenceToPatient.getReference());
+			assertThat(actual).contains(compositionId);
     }
 
     @Test
@@ -643,8 +642,8 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
         String compositionId = myClient.create().resource(composition).execute().getId().toUnqualifiedVersionless().getValue();
 
         Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
-        assertThat(actual, hasItem(referenceToPatient.getReference()));
-        assertThat(actual, hasItem(compositionId));
+			assertThat(actual).contains(referenceToPatient.getReference());
+			assertThat(actual).contains(compositionId);
     }
 
     @Test
@@ -657,8 +656,8 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
         String conditionId = myClient.create().resource(condition).execute().getId().toUnqualifiedVersionless().getValue();
 
         Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
-        assertThat(actual, hasItem(referenceToPatient.getReference()));
-        assertThat(actual, hasItem(conditionId));
+			assertThat(actual).contains(referenceToPatient.getReference());
+			assertThat(actual).contains(conditionId);
     }
 
     @Test
@@ -671,8 +670,8 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
         String conditionId = myClient.create().resource(condition).execute().getId().toUnqualifiedVersionless().getValue();
 
         Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
-        assertThat(actual, hasItem(referenceToPatient.getReference()));
-        assertThat(actual, hasItem(conditionId));
+			assertThat(actual).contains(referenceToPatient.getReference());
+			assertThat(actual).contains(conditionId);
     }
 
     @Test
@@ -685,8 +684,8 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
         String consentId = myClient.create().resource(consent).execute().getId().toUnqualifiedVersionless().getValue();
 
         Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
-        assertThat(actual, hasItem(referenceToPatient.getReference()));
-        assertThat(actual, hasItem(consentId));
+			assertThat(actual).contains(referenceToPatient.getReference());
+			assertThat(actual).contains(consentId);
     }
 
     @Test
@@ -703,8 +702,8 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
         String consentId = myClient.create().resource(consent).execute().getId().toUnqualifiedVersionless().getValue();
 
         Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
-        assertThat(actual, hasItem(referenceToPatient.getReference()));
-        assertThat(actual, hasItem(consentId));
+			assertThat(actual).contains(referenceToPatient.getReference());
+			assertThat(actual).contains(consentId);
     }
 
     @Test
@@ -717,8 +716,8 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
         String coverageId = myClient.create().resource(coverage).execute().getId().toUnqualifiedVersionless().getValue();
 
         Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
-        assertThat(actual, hasItem(referenceToPatient.getReference()));
-        assertThat(actual, hasItem(coverageId));
+			assertThat(actual).contains(referenceToPatient.getReference());
+			assertThat(actual).contains(coverageId);
     }
 
 
@@ -732,8 +731,8 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
         String coverageId = myClient.create().resource(coverage).execute().getId().toUnqualifiedVersionless().getValue();
 
         Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
-        assertThat(actual, hasItem(referenceToPatient.getReference()));
-        assertThat(actual, hasItem(coverageId));
+			assertThat(actual).contains(referenceToPatient.getReference());
+			assertThat(actual).contains(coverageId);
     }
 
 
@@ -747,8 +746,8 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
         String coverageId = myClient.create().resource(coverage).execute().getId().toUnqualifiedVersionless().getValue();
 
         Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
-        assertThat(actual, hasItem(referenceToPatient.getReference()));
-        assertThat(actual, hasItem(coverageId));
+			assertThat(actual).contains(referenceToPatient.getReference());
+			assertThat(actual).contains(coverageId);
     }
 
     @Test
@@ -761,8 +760,8 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
         String coverageId = myClient.create().resource(coverage).execute().getId().toUnqualifiedVersionless().getValue();
 
         Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
-        assertThat(actual, hasItem(referenceToPatient.getReference()));
-        assertThat(actual, hasItem(coverageId));
+			assertThat(actual).contains(referenceToPatient.getReference());
+			assertThat(actual).contains(coverageId);
     }
 
     @Test
@@ -775,8 +774,8 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
         String coverageEligibilityRequestId = myClient.create().resource(coverageEligibilityRequest).execute().getId().toUnqualifiedVersionless().getValue();
 
         Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
-        assertThat(actual, hasItem(referenceToPatient.getReference()));
-        assertThat(actual, hasItem(coverageEligibilityRequestId));
+			assertThat(actual).contains(referenceToPatient.getReference());
+			assertThat(actual).contains(coverageEligibilityRequestId);
     }
 
     @Test
@@ -789,8 +788,8 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
         String coverageEligibilityResponseId = myClient.create().resource(coverageEligibilityResponse).execute().getId().toUnqualifiedVersionless().getValue();
 
         Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
-        assertThat(actual, hasItem(referenceToPatient.getReference()));
-        assertThat(actual, hasItem(coverageEligibilityResponseId));
+			assertThat(actual).contains(referenceToPatient.getReference());
+			assertThat(actual).contains(coverageEligibilityResponseId);
     }
 
     @Test
@@ -803,8 +802,8 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
         String detectedIssueId = myClient.create().resource(detectedIssue).execute().getId().toUnqualifiedVersionless().getValue();
 
         Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
-        assertThat(actual, hasItem(referenceToPatient.getReference()));
-        assertThat(actual, hasItem(detectedIssueId));
+			assertThat(actual).contains(referenceToPatient.getReference());
+			assertThat(actual).contains(detectedIssueId);
     }
 
     @Test
@@ -817,8 +816,8 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
         String deviceId = myClient.create().resource(device).execute().getId().toUnqualifiedVersionless().getValue();
 
         Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
-        assertThat(actual, hasItem(referenceToPatient.getReference()));
-        assertThat(actual, hasItem(deviceId));
+			assertThat(actual).contains(referenceToPatient.getReference());
+			assertThat(actual).contains(deviceId);
     }
 
     @Test
@@ -831,8 +830,8 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
         String deviceRequestId = myClient.create().resource(deviceRequest).execute().getId().toUnqualifiedVersionless().getValue();
 
         Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
-        assertThat(actual, hasItem(referenceToPatient.getReference()));
-        assertThat(actual, hasItem(deviceRequestId));
+			assertThat(actual).contains(referenceToPatient.getReference());
+			assertThat(actual).contains(deviceRequestId);
     }
 
     @Test
@@ -845,8 +844,8 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
         String deviceRequestId = myClient.create().resource(deviceRequest).execute().getId().toUnqualifiedVersionless().getValue();
 
         Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
-        assertThat(actual, hasItem(referenceToPatient.getReference()));
-        assertThat(actual, hasItem(deviceRequestId));
+			assertThat(actual).contains(referenceToPatient.getReference());
+			assertThat(actual).contains(deviceRequestId);
     }
 
     @Test
@@ -859,8 +858,8 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
         String deviceUseStatementId = myClient.create().resource(deviceUseStatement).execute().getId().toUnqualifiedVersionless().getValue();
 
         Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
-        assertThat(actual, hasItem(referenceToPatient.getReference()));
-        assertThat(actual, hasItem(deviceUseStatementId));
+			assertThat(actual).contains(referenceToPatient.getReference());
+			assertThat(actual).contains(deviceUseStatementId);
     }
 
     @Test
@@ -873,8 +872,8 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
         String diagnosticReportId = myClient.create().resource(diagnosticReport).execute().getId().toUnqualifiedVersionless().getValue();
 
         Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
-        assertThat(actual, hasItem(referenceToPatient.getReference()));
-        assertThat(actual, hasItem(diagnosticReportId));
+			assertThat(actual).contains(referenceToPatient.getReference());
+			assertThat(actual).contains(diagnosticReportId);
     }
 
     @Test
@@ -887,8 +886,8 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
         String documentManifestId = myClient.create().resource(documentManifest).execute().getId().toUnqualifiedVersionless().getValue();
 
         Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
-        assertThat(actual, hasItem(referenceToPatient.getReference()));
-        assertThat(actual, hasItem(documentManifestId));
+			assertThat(actual).contains(referenceToPatient.getReference());
+			assertThat(actual).contains(documentManifestId);
     }
 
     @Test
@@ -901,8 +900,8 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
         String documentManifestId = myClient.create().resource(documentManifest).execute().getId().toUnqualifiedVersionless().getValue();
 
         Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
-        assertThat(actual, hasItem(referenceToPatient.getReference()));
-        assertThat(actual, hasItem(documentManifestId));
+			assertThat(actual).contains(referenceToPatient.getReference());
+			assertThat(actual).contains(documentManifestId);
     }
 
     @Test
@@ -915,8 +914,8 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
         String documentManifestId = myClient.create().resource(documentManifest).execute().getId().toUnqualifiedVersionless().getValue();
 
         Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
-        assertThat(actual, hasItem(referenceToPatient.getReference()));
-        assertThat(actual, hasItem(documentManifestId));
+			assertThat(actual).contains(referenceToPatient.getReference());
+			assertThat(actual).contains(documentManifestId);
     }
 
     @Test
@@ -929,8 +928,8 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
         String documentReferenceId = myClient.create().resource(documentReference).execute().getId().toUnqualifiedVersionless().getValue();
 
         Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
-        assertThat(actual, hasItem(referenceToPatient.getReference()));
-        assertThat(actual, hasItem(documentReferenceId));
+			assertThat(actual).contains(referenceToPatient.getReference());
+			assertThat(actual).contains(documentReferenceId);
     }
 
     @Test
@@ -943,8 +942,8 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
         String documentReferenceId = myClient.create().resource(documentReference).execute().getId().toUnqualifiedVersionless().getValue();
 
         Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
-        assertThat(actual, hasItem(referenceToPatient.getReference()));
-        assertThat(actual, hasItem(documentReferenceId));
+			assertThat(actual).contains(referenceToPatient.getReference());
+			assertThat(actual).contains(documentReferenceId);
     }
 
     @Test
@@ -957,8 +956,8 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
         String encounterId = myClient.create().resource(encounter).execute().getId().toUnqualifiedVersionless().getValue();
 
         Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
-        assertThat(actual, hasItem(referenceToPatient.getReference()));
-        assertThat(actual, hasItem(encounterId));
+			assertThat(actual).contains(referenceToPatient.getReference());
+			assertThat(actual).contains(encounterId);
     }
 
     @Test
@@ -971,8 +970,8 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
         String enrollmentRequestId = myClient.create().resource(enrollmentRequest).execute().getId().toUnqualifiedVersionless().getValue();
 
         Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
-        assertThat(actual, hasItem(referenceToPatient.getReference()));
-        assertThat(actual, hasItem(enrollmentRequestId));
+			assertThat(actual).contains(referenceToPatient.getReference());
+			assertThat(actual).contains(enrollmentRequestId);
     }
 
     @Test
@@ -985,8 +984,8 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
         String episodeOfCareId = myClient.create().resource(episodeOfCare).execute().getId().toUnqualifiedVersionless().getValue();
 
         Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
-        assertThat(actual, hasItem(referenceToPatient.getReference()));
-        assertThat(actual, hasItem(episodeOfCareId));
+			assertThat(actual).contains(referenceToPatient.getReference());
+			assertThat(actual).contains(episodeOfCareId);
     }
 
     @Test
@@ -999,8 +998,8 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
         String explanationOfBenefitId = myClient.create().resource(explanationOfBenefit).execute().getId().toUnqualifiedVersionless().getValue();
 
         Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
-        assertThat(actual, hasItem(referenceToPatient.getReference()));
-        assertThat(actual, hasItem(explanationOfBenefitId));
+			assertThat(actual).contains(referenceToPatient.getReference());
+			assertThat(actual).contains(explanationOfBenefitId);
     }
 
     @Test
@@ -1015,8 +1014,8 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
         String explanationOfBenefitId = myClient.create().resource(explanationOfBenefit).execute().getId().toUnqualifiedVersionless().getValue();
 
         Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
-        assertThat(actual, hasItem(referenceToPatient.getReference()));
-        assertThat(actual, hasItem(explanationOfBenefitId));
+			assertThat(actual).contains(referenceToPatient.getReference());
+			assertThat(actual).contains(explanationOfBenefitId);
     }
 
     @Test
@@ -1029,8 +1028,8 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
         String familyMemberHistoryId = myClient.create().resource(familyMemberHistory).execute().getId().toUnqualifiedVersionless().getValue();
 
         Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
-        assertThat(actual, hasItem(referenceToPatient.getReference()));
-        assertThat(actual, hasItem(familyMemberHistoryId));
+			assertThat(actual).contains(referenceToPatient.getReference());
+			assertThat(actual).contains(familyMemberHistoryId);
     }
 
     @Test
@@ -1043,8 +1042,8 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
         String flagId = myClient.create().resource(flag).execute().getId().toUnqualifiedVersionless().getValue();
 
         Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
-        assertThat(actual, hasItem(referenceToPatient.getReference()));
-        assertThat(actual, hasItem(flagId));
+			assertThat(actual).contains(referenceToPatient.getReference());
+			assertThat(actual).contains(flagId);
     }
 
     @Test
@@ -1057,8 +1056,8 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
         String goalId = myClient.create().resource(goal).execute().getId().toUnqualifiedVersionless().getValue();
 
         Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
-        assertThat(actual, hasItem(referenceToPatient.getReference()));
-        assertThat(actual, hasItem(goalId));
+			assertThat(actual).contains(referenceToPatient.getReference());
+			assertThat(actual).contains(goalId);
     }
 
     @Test
@@ -1073,8 +1072,8 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
         String groupId = myClient.create().resource(group).execute().getId().toUnqualifiedVersionless().getValue();
 
         Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
-        assertThat(actual, hasItem(referenceToPatient.getReference()));
-        assertThat(actual, hasItem(groupId));
+			assertThat(actual).contains(referenceToPatient.getReference());
+			assertThat(actual).contains(groupId);
     }
 
     @Test
@@ -1087,8 +1086,8 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
         String imagingStudyId = myClient.create().resource(imagingStudy).execute().getId().toUnqualifiedVersionless().getValue();
 
         Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
-        assertThat(actual, hasItem(referenceToPatient.getReference()));
-        assertThat(actual, hasItem(imagingStudyId));
+			assertThat(actual).contains(referenceToPatient.getReference());
+			assertThat(actual).contains(imagingStudyId);
     }
 
     @Test
@@ -1101,8 +1100,8 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
         String immunizationId = myClient.create().resource(immunization).execute().getId().toUnqualifiedVersionless().getValue();
 
         Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
-        assertThat(actual, hasItem(referenceToPatient.getReference()));
-        assertThat(actual, hasItem(immunizationId));
+			assertThat(actual).contains(referenceToPatient.getReference());
+			assertThat(actual).contains(immunizationId);
     }
 
     @Test
@@ -1115,8 +1114,8 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
         String immunizationEvaluationId = myClient.create().resource(immunizationEvaluation).execute().getId().toUnqualifiedVersionless().getValue();
 
         Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
-        assertThat(actual, hasItem(referenceToPatient.getReference()));
-        assertThat(actual, hasItem(immunizationEvaluationId));
+			assertThat(actual).contains(referenceToPatient.getReference());
+			assertThat(actual).contains(immunizationEvaluationId);
     }
 
     @Test
@@ -1129,8 +1128,8 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
         String immunizationRecommendationId = myClient.create().resource(immunizationRecommendation).execute().getId().toUnqualifiedVersionless().getValue();
 
         Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
-        assertThat(actual, hasItem(referenceToPatient.getReference()));
-        assertThat(actual, hasItem(immunizationRecommendationId));
+			assertThat(actual).contains(referenceToPatient.getReference());
+			assertThat(actual).contains(immunizationRecommendationId);
     }
 
     @Test
@@ -1143,8 +1142,8 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
         String invoiceId = myClient.create().resource(invoice).execute().getId().toUnqualifiedVersionless().getValue();
 
         Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
-        assertThat(actual, hasItem(referenceToPatient.getReference()));
-        assertThat(actual, hasItem(invoiceId));
+			assertThat(actual).contains(referenceToPatient.getReference());
+			assertThat(actual).contains(invoiceId);
     }
 
     @Test
@@ -1157,8 +1156,8 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
         String invoiceId = myClient.create().resource(invoice).execute().getId().toUnqualifiedVersionless().getValue();
 
         Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
-        assertThat(actual, hasItem(referenceToPatient.getReference()));
-        assertThat(actual, hasItem(invoiceId));
+			assertThat(actual).contains(referenceToPatient.getReference());
+			assertThat(actual).contains(invoiceId);
     }
 
 
@@ -1172,8 +1171,8 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
         String listResourceId = myClient.create().resource(listResource).execute().getId().toUnqualifiedVersionless().getValue();
 
         Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
-        assertThat(actual, hasItem(referenceToPatient.getReference()));
-        assertThat(actual, hasItem(listResourceId));
+			assertThat(actual).contains(referenceToPatient.getReference());
+			assertThat(actual).contains(listResourceId);
     }
 
     @Test
@@ -1186,8 +1185,8 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
         String listResourceId = myClient.create().resource(listResource).execute().getId().toUnqualifiedVersionless().getValue();
 
         Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
-        assertThat(actual, hasItem(referenceToPatient.getReference()));
-        assertThat(actual, hasItem(listResourceId));
+			assertThat(actual).contains(referenceToPatient.getReference());
+			assertThat(actual).contains(listResourceId);
     }
 
     @Test
@@ -1200,8 +1199,8 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
         String measureReportId = myClient.create().resource(measureReport).execute().getId().toUnqualifiedVersionless().getValue();
 
         Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
-        assertThat(actual, hasItem(referenceToPatient.getReference()));
-        assertThat(actual, hasItem(measureReportId));
+			assertThat(actual).contains(referenceToPatient.getReference());
+			assertThat(actual).contains(measureReportId);
     }
 
     @Test
@@ -1214,8 +1213,8 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
         String mediaId = myClient.create().resource(media).execute().getId().toUnqualifiedVersionless().getValue();
 
         Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
-        assertThat(actual, hasItem(referenceToPatient.getReference()));
-        assertThat(actual, hasItem(mediaId));
+			assertThat(actual).contains(referenceToPatient.getReference());
+			assertThat(actual).contains(mediaId);
     }
 
     @Test
@@ -1228,8 +1227,8 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
         String medicationAdministrationId = myClient.create().resource(medicationAdministration).execute().getId().toUnqualifiedVersionless().getValue();
 
         Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
-        assertThat(actual, hasItem(referenceToPatient.getReference()));
-        assertThat(actual, hasItem(medicationAdministrationId));
+			assertThat(actual).contains(referenceToPatient.getReference());
+			assertThat(actual).contains(medicationAdministrationId);
     }
 
     @Test
@@ -1242,8 +1241,8 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
         String medicationDispenseId = myClient.create().resource(medicationDispense).execute().getId().toUnqualifiedVersionless().getValue();
 
         Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
-        assertThat(actual, hasItem(referenceToPatient.getReference()));
-        assertThat(actual, hasItem(medicationDispenseId));
+			assertThat(actual).contains(referenceToPatient.getReference());
+			assertThat(actual).contains(medicationDispenseId);
     }
 
     @Test
@@ -1258,8 +1257,8 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
         String medicationDispenseId = myClient.create().resource(medicationDispense).execute().getId().toUnqualifiedVersionless().getValue();
 
         Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
-        assertThat(actual, hasItem(referenceToPatient.getReference()));
-        assertThat(actual, hasItem(medicationDispenseId));
+			assertThat(actual).contains(referenceToPatient.getReference());
+			assertThat(actual).contains(medicationDispenseId);
     }
 
     @Test
@@ -1272,8 +1271,8 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
         String medicationDispenseId = myClient.create().resource(medicationDispense).execute().getId().toUnqualifiedVersionless().getValue();
 
         Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
-        assertThat(actual, hasItem(referenceToPatient.getReference()));
-        assertThat(actual, hasItem(medicationDispenseId));
+			assertThat(actual).contains(referenceToPatient.getReference());
+			assertThat(actual).contains(medicationDispenseId);
     }
 
     @Test
@@ -1286,8 +1285,8 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
         String medicationDispenseId = myClient.create().resource(medicationDispense).execute().getId().toUnqualifiedVersionless().getValue();
 
         Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
-        assertThat(actual, hasItem(referenceToPatient.getReference()));
-        assertThat(actual, hasItem(medicationDispenseId));
+			assertThat(actual).contains(referenceToPatient.getReference());
+			assertThat(actual).contains(medicationDispenseId);
     }
 
     @Test
@@ -1300,8 +1299,8 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
         String medicationDispenseId = myClient.create().resource(medicationDispense).execute().getId().toUnqualifiedVersionless().getValue();
 
         Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
-        assertThat(actual, hasItem(referenceToPatient.getReference()));
-        assertThat(actual, hasItem(medicationDispenseId));
+			assertThat(actual).contains(referenceToPatient.getReference());
+			assertThat(actual).contains(medicationDispenseId);
     }
 
     @Test
@@ -1314,8 +1313,8 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
         String medicationStatementId = myClient.create().resource(medicationStatement).execute().getId().toUnqualifiedVersionless().getValue();
 
         Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
-        assertThat(actual, hasItem(referenceToPatient.getReference()));
-        assertThat(actual, hasItem(medicationStatementId));
+			assertThat(actual).contains(referenceToPatient.getReference());
+			assertThat(actual).contains(medicationStatementId);
     }
 
     @Test
@@ -1328,8 +1327,8 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
         String medicationStatementId = myClient.create().resource(medicationStatement).execute().getId().toUnqualifiedVersionless().getValue();
 
         Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
-        assertThat(actual, hasItem(referenceToPatient.getReference()));
-        assertThat(actual, hasItem(medicationStatementId));
+			assertThat(actual).contains(referenceToPatient.getReference());
+			assertThat(actual).contains(medicationStatementId);
     }
 
     @Test
@@ -1342,8 +1341,8 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
         String molecularSequenceId = myClient.create().resource(molecularSequence).execute().getId().toUnqualifiedVersionless().getValue();
 
         Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
-        assertThat(actual, hasItem(referenceToPatient.getReference()));
-        assertThat(actual, hasItem(molecularSequenceId));
+			assertThat(actual).contains(referenceToPatient.getReference());
+			assertThat(actual).contains(molecularSequenceId);
     }
 
     @Test
@@ -1356,8 +1355,8 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
         String nutritionOrderId = myClient.create().resource(nutritionOrder).execute().getId().toUnqualifiedVersionless().getValue();
 
         Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
-        assertThat(actual, hasItem(referenceToPatient.getReference()));
-        assertThat(actual, hasItem(nutritionOrderId));
+			assertThat(actual).contains(referenceToPatient.getReference());
+			assertThat(actual).contains(nutritionOrderId);
     }
 
     @Test
@@ -1370,8 +1369,8 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
         String observationId = myClient.create().resource(observation).execute().getId().toUnqualifiedVersionless().getValue();
 
         Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
-        assertThat(actual, hasItem(referenceToPatient.getReference()));
-        assertThat(actual, hasItem(observationId));
+			assertThat(actual).contains(referenceToPatient.getReference());
+			assertThat(actual).contains(observationId);
     }
 
     @Test
@@ -1387,8 +1386,8 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
         String patientId = myClient.create().resource(patient).execute().getId().toUnqualifiedVersionless().getValue();
 
         Set<String> actual = getActualEverythingResultIds(patientId);
-        assertThat(actual, hasItem(patientId));
-        assertThat(actual, hasItem(organizationId));
+			assertThat(actual).contains(patientId);
+			assertThat(actual).contains(organizationId);
     }
 
     @Test
@@ -1404,8 +1403,8 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
         String patientId = myClient.create().resource(patient).execute().getId().toUnqualifiedVersionless().getValue();
 
         Set<String> actual = getActualEverythingResultIds(patientId);
-        assertThat(actual, hasItem(patientId));
-        assertThat(actual, hasItem(organizationId));
+			assertThat(actual).contains(patientId);
+			assertThat(actual).contains(organizationId);
     }
 
     @Test
@@ -1420,8 +1419,8 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
         String otherPatientId = myClient.create().resource(otherPatient).execute().getId().toUnqualifiedVersionless().getValue();
 
         Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
-        assertThat(actual, hasItem(referenceToPatient.getReference()));
-        assertThat(actual, hasItem(otherPatientId));
+			assertThat(actual).contains(referenceToPatient.getReference());
+			assertThat(actual).contains(otherPatientId);
     }
 
     @Test
@@ -1436,8 +1435,8 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
         String personId = myClient.create().resource(person).execute().getId().toUnqualifiedVersionless().getValue();
 
         Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
-        assertThat(actual, hasItem(referenceToPatient.getReference()));
-        assertThat(actual, hasItem(personId));
+			assertThat(actual).contains(referenceToPatient.getReference());
+			assertThat(actual).contains(personId);
     }
 
     @Test
@@ -1453,8 +1452,8 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
         String patientId = myClient.create().resource(patient).execute().getId().toUnqualifiedVersionless().getValue();
 
         Set<String> actual = getActualEverythingResultIds(patientId);
-        assertThat(actual, hasItem(patientId));
-        assertThat(actual, hasItem(practitionerId));
+			assertThat(actual).contains(patientId);
+			assertThat(actual).contains(practitionerId);
     }
 
     @Test
@@ -1467,8 +1466,8 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
         String procedureId = myClient.create().resource(procedure).execute().getId().toUnqualifiedVersionless().getValue();
 
         Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
-        assertThat(actual, hasItem(referenceToPatient.getReference()));
-        assertThat(actual, hasItem(procedureId));
+			assertThat(actual).contains(referenceToPatient.getReference());
+			assertThat(actual).contains(procedureId);
     }
 
     @Test
@@ -1483,8 +1482,8 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
         String procedureId = myClient.create().resource(provenance).execute().getId().toUnqualifiedVersionless().getValue();
 
         Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
-        assertThat(actual, hasItem(referenceToPatient.getReference()));
-        assertThat(actual, hasItem(procedureId));
+			assertThat(actual).contains(referenceToPatient.getReference());
+			assertThat(actual).contains(procedureId);
     }
 
     @Test
@@ -1499,8 +1498,8 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
         String procedureId = myClient.create().resource(provenance).execute().getId().toUnqualifiedVersionless().getValue();
 
         Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
-        assertThat(actual, hasItem(referenceToPatient.getReference()));
-        assertThat(actual, hasItem(procedureId));
+			assertThat(actual).contains(referenceToPatient.getReference());
+			assertThat(actual).contains(procedureId);
     }
 
     @Test
@@ -1513,8 +1512,8 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
         String relatedPersonId = myClient.create().resource(relatedPerson).execute().getId().toUnqualifiedVersionless().getValue();
 
         Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
-        assertThat(actual, hasItem(referenceToPatient.getReference()));
-        assertThat(actual, hasItem(relatedPersonId));
+			assertThat(actual).contains(referenceToPatient.getReference());
+			assertThat(actual).contains(relatedPersonId);
     }
 
     @Test
@@ -1527,8 +1526,8 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
         String requestGroupId = myClient.create().resource(requestGroup).execute().getId().toUnqualifiedVersionless().getValue();
 
         Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
-        assertThat(actual, hasItem(referenceToPatient.getReference()));
-        assertThat(actual, hasItem(requestGroupId));
+			assertThat(actual).contains(referenceToPatient.getReference());
+			assertThat(actual).contains(requestGroupId);
     }
 
     @Test
@@ -1541,8 +1540,8 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
         String researchSubjectId = myClient.create().resource(researchSubject).execute().getId().toUnqualifiedVersionless().getValue();
 
         Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
-        assertThat(actual, hasItem(referenceToPatient.getReference()));
-        assertThat(actual, hasItem(researchSubjectId));
+			assertThat(actual).contains(referenceToPatient.getReference());
+			assertThat(actual).contains(researchSubjectId);
     }
 
     @Test
@@ -1555,8 +1554,8 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
         String riskAssessmentId = myClient.create().resource(riskAssessment).execute().getId().toUnqualifiedVersionless().getValue();
 
         Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
-        assertThat(actual, hasItem(referenceToPatient.getReference()));
-        assertThat(actual, hasItem(riskAssessmentId));
+			assertThat(actual).contains(referenceToPatient.getReference());
+			assertThat(actual).contains(riskAssessmentId);
     }
 
     @Test
@@ -1569,8 +1568,8 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
         String scheduleId = myClient.create().resource(schedule).execute().getId().toUnqualifiedVersionless().getValue();
 
         Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
-        assertThat(actual, hasItem(referenceToPatient.getReference()));
-        assertThat(actual, hasItem(scheduleId));
+			assertThat(actual).contains(referenceToPatient.getReference());
+			assertThat(actual).contains(scheduleId);
     }
 
     @Test
@@ -1583,8 +1582,8 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
         String serviceRequestId = myClient.create().resource(serviceRequest).execute().getId().toUnqualifiedVersionless().getValue();
 
         Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
-        assertThat(actual, hasItem(referenceToPatient.getReference()));
-        assertThat(actual, hasItem(serviceRequestId));
+			assertThat(actual).contains(referenceToPatient.getReference());
+			assertThat(actual).contains(serviceRequestId);
     }
 
     @Test
@@ -1597,8 +1596,8 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
         String serviceRequestId = myClient.create().resource(serviceRequest).execute().getId().toUnqualifiedVersionless().getValue();
 
         Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
-        assertThat(actual, hasItem(referenceToPatient.getReference()));
-        assertThat(actual, hasItem(serviceRequestId));
+			assertThat(actual).contains(referenceToPatient.getReference());
+			assertThat(actual).contains(serviceRequestId);
     }
 
     @Test
@@ -1611,8 +1610,8 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
         String serviceRequestId = myClient.create().resource(serviceRequest).execute().getId().toUnqualifiedVersionless().getValue();
 
         Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
-        assertThat(actual, hasItem(referenceToPatient.getReference()));
-        assertThat(actual, hasItem(serviceRequestId));
+			assertThat(actual).contains(referenceToPatient.getReference());
+			assertThat(actual).contains(serviceRequestId);
     }
 
     @Test
@@ -1625,8 +1624,8 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
         String specimenId = myClient.create().resource(specimen).execute().getId().toUnqualifiedVersionless().getValue();
 
         Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
-        assertThat(actual, hasItem(referenceToPatient.getReference()));
-        assertThat(actual, hasItem(specimenId));
+			assertThat(actual).contains(referenceToPatient.getReference());
+			assertThat(actual).contains(specimenId);
     }
 
     @Test
@@ -1639,8 +1638,8 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
         String supplyDeliveryId = myClient.create().resource(supplyDelivery).execute().getId().toUnqualifiedVersionless().getValue();
 
         Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
-        assertThat(actual, hasItem(referenceToPatient.getReference()));
-        assertThat(actual, hasItem(supplyDeliveryId));
+			assertThat(actual).contains(referenceToPatient.getReference());
+			assertThat(actual).contains(supplyDeliveryId);
     }
 
     @Test
@@ -1653,8 +1652,8 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
         String supplyRequestId = myClient.create().resource(supplyRequest).execute().getId().toUnqualifiedVersionless().getValue();
 
         Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
-        assertThat(actual, hasItem(referenceToPatient.getReference()));
-        assertThat(actual, hasItem(supplyRequestId));
+			assertThat(actual).contains(referenceToPatient.getReference());
+			assertThat(actual).contains(supplyRequestId);
     }
 
     @Test
@@ -1667,8 +1666,8 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
         String supplyRequestId = myClient.create().resource(supplyRequest).execute().getId().toUnqualifiedVersionless().getValue();
 
         Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
-        assertThat(actual, hasItem(referenceToPatient.getReference()));
-        assertThat(actual, hasItem(supplyRequestId));
+			assertThat(actual).contains(referenceToPatient.getReference());
+			assertThat(actual).contains(supplyRequestId);
     }
 
     @Test
@@ -1681,8 +1680,8 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
         String visionPrescriptionID = myClient.create().resource(visionPrescription).execute().getId().toUnqualifiedVersionless().getValue();
 
         Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
-        assertThat(actual, hasItem(referenceToPatient.getReference()));
-        assertThat(actual, hasItem(visionPrescriptionID));
+			assertThat(actual).contains(referenceToPatient.getReference());
+			assertThat(actual).contains(visionPrescriptionID);
     }
 
     @Test
@@ -1701,9 +1700,9 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
         String medicationAdministrationId = myClient.create().resource(medicationAdministration).execute().getId().toUnqualifiedVersionless().getValue();
 
         Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
-        assertThat(actual, hasItem(referenceToPatient.getReference()));
-        assertThat(actual, hasItem(medicationId));
-        assertThat(actual, hasItem(medicationAdministrationId));
+			assertThat(actual).contains(referenceToPatient.getReference());
+			assertThat(actual).contains(medicationId);
+			assertThat(actual).contains(medicationAdministrationId);
     }
 
     @Test

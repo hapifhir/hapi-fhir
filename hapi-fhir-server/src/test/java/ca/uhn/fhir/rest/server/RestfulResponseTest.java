@@ -4,7 +4,7 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
 
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.CALLS_REAL_METHODS;
 import static org.mockito.Mockito.mock;
@@ -26,7 +26,7 @@ public class RestfulResponseTest {
 		restfulResponse.addHeader("Cache-Control", "no-cache, no-store");
 
 		assertEquals(2, restfulResponse.getHeaders().size());
-		assertThat(restfulResponse.getHeaders().get("Authorization"), Matchers.contains("Basic", "Bearer"));
-		assertThat(restfulResponse.getHeaders().get("Cache-Control"), Matchers.contains("no-cache, no-store"));
+		assertThat(restfulResponse.getHeaders().get("Authorization")).containsExactly("Basic", "Bearer");
+		assertThat(restfulResponse.getHeaders().get("Cache-Control")).containsExactly("no-cache, no-store");
 	}
 }

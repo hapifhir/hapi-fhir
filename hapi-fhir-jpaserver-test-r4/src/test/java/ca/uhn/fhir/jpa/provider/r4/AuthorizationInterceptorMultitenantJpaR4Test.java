@@ -20,9 +20,9 @@ import org.slf4j.LoggerFactory;
 import java.util.List;
 import java.util.Optional;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.blankOrNullString;
-import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -205,7 +205,7 @@ public class AuthorizationInterceptorMultitenantJpaR4Test extends BaseMultitenan
 			.count(3)
 			.execute();
 		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).setEncodeElements(Sets.newHashSet("Bundle.link")).encodeResourceToString(bundle));
-		assertThat(toUnqualifiedVersionlessIds(bundle).toString(), toUnqualifiedVersionlessIds(bundle), contains(observationIds.get(0), observationIds.get(1), observationIds.get(2), patientIdA));
+		assertThat(toUnqualifiedVersionlessIds(bundle)).as(toUnqualifiedVersionlessIds(bundle).toString()).containsExactly(observationIds.get(0), observationIds.get(1), observationIds.get(2), patientIdA);
 
 		// Fetch the next 3
 		bundle = myClient
@@ -213,7 +213,7 @@ public class AuthorizationInterceptorMultitenantJpaR4Test extends BaseMultitenan
 			.next(bundle)
 			.execute();
 		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).setEncodeElements(Sets.newHashSet("Bundle.link")).encodeResourceToString(bundle));
-		assertThat(toUnqualifiedVersionlessIds(bundle).toString(), toUnqualifiedVersionlessIds(bundle), contains(observationIds.get(3), observationIds.get(4), observationIds.get(5), patientIdA));
+		assertThat(toUnqualifiedVersionlessIds(bundle)).as(toUnqualifiedVersionlessIds(bundle).toString()).containsExactly(observationIds.get(3), observationIds.get(4), observationIds.get(5), patientIdA);
 
 		// Fetch the next 3 - This should fail as the last observation has a cross-partition reference
 		try {

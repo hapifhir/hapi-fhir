@@ -36,8 +36,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.rest.api.Constants.PARAM_TAG;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.empty;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -124,9 +123,9 @@ public class FhirResourceDaoR4MetaTest extends BaseJpaR4Test {
 		myPatientDao.metaDeleteOperation(id, meta, mySrd);
 
 		patient = myPatientDao.read(id, mySrd);
-		assertThat(patient.getMeta().getProfile(), empty());
-		assertThat(patient.getMeta().getTag(), empty());
-		assertThat(patient.getMeta().getSecurity(), empty());
+		assertThat(patient.getMeta().getProfile()).isEmpty();
+		assertThat(patient.getMeta().getTag()).isEmpty();
+		assertThat(patient.getMeta().getSecurity()).isEmpty();
 	}
 
 	@Test

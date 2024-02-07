@@ -52,13 +52,10 @@ import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.jpa.dao.BaseHapiFhirDao.INDEX_STATUS_INDEXED;
 import static ca.uhn.fhir.jpa.dao.BaseHapiFhirDao.INDEX_STATUS_INDEXING_FAILED;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.either;
-import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.stringContainsInOrder;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -413,9 +410,9 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 			"IDX_STRING = 'Patient?identifier=urn%7C111'",
 			"HASH_SYS_AND_VALUE = '-3122824860083758210'"
 		));
-		assertThat(unformattedSql, not(containsString(("RES_DELETED_AT"))));
-		assertThat(unformattedSql, not(containsString(("RES_TYPE"))));
-		assertThat(toUnqualifiedVersionlessIdValues(outcome), containsInAnyOrder(id1));
+		assertThat(unformattedSql).doesNotContain(("RES_DELETED_AT"));
+		assertThat(unformattedSql).doesNotContain(("RES_TYPE"));
+		assertThat(toUnqualifiedVersionlessIdValues(outcome)).containsExactlyInAnyOrder(id1);
 
 		// Two OR values on the same resource - Currently composite SPs don't work for this
 		myCaptureQueriesListener.clear();
@@ -427,12 +424,12 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 		);
 		outcome = myPatientDao.search(sp);
 		myCaptureQueriesListener.logFirstSelectQueryForCurrentThread();
-		assertThat(toUnqualifiedVersionlessIdValues(outcome), containsInAnyOrder(id1));
+		assertThat(toUnqualifiedVersionlessIdValues(outcome)).containsExactlyInAnyOrder(id1);
 		unformattedSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false);
-		assertThat(unformattedSql, containsString("HASH_SYS_AND_VALUE IN ('4101160957635429999','-3122824860083758210')"));
-		assertThat(unformattedSql, not(containsString(("IDX_STRING"))));
-		assertThat(unformattedSql, not(containsString(("RES_DELETED_AT"))));
-		assertThat(unformattedSql, not(containsString(("RES_TYPE"))));
+		assertThat(unformattedSql).contains("HASH_SYS_AND_VALUE IN ('4101160957635429999','-3122824860083758210')");
+		assertThat(unformattedSql).doesNotContain(("IDX_STRING"));
+		assertThat(unformattedSql).doesNotContain(("RES_DELETED_AT"));
+		assertThat(unformattedSql).doesNotContain(("RES_TYPE"));
 
 		// Not matching the composite SP at all
 		myCaptureQueriesListener.clear();
@@ -444,11 +441,11 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 		);
 		outcome = myPatientDao.search(sp);
 		myCaptureQueriesListener.logFirstSelectQueryForCurrentThread();
-		assertThat(toUnqualifiedVersionlessIdValues(outcome), containsInAnyOrder(id1, id2));
+		assertThat(toUnqualifiedVersionlessIdValues(outcome)).containsExactlyInAnyOrder(id1, id2);
 		unformattedSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false);
-		assertThat(unformattedSql, not(containsString(("IDX_STRING"))));
-		assertThat(unformattedSql, not(containsString(("RES_DELETED_AT"))));
-		assertThat(unformattedSql, not(containsString(("RES_TYPE"))));
+		assertThat(unformattedSql).doesNotContain(("IDX_STRING"));
+		assertThat(unformattedSql).doesNotContain(("RES_DELETED_AT"));
+		assertThat(unformattedSql).doesNotContain(("RES_TYPE"));
 
 	}
 
@@ -544,14 +541,14 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 		map.add("performer", new ReferenceParam(practId.getValue()));
 		IBundleProvider outcome = myServiceRequestDao.search(map);
 		myCaptureQueriesListener.logFirstSelectQueryForCurrentThread();
-		assertThat(toUnqualifiedVersionlessIdValues(outcome), containsInAnyOrder(srId));
+		assertThat(toUnqualifiedVersionlessIdValues(outcome)).containsExactlyInAnyOrder(srId);
 		unformattedSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false);
 		assertThat(unformattedSql, stringContainsInOrder(
 			"IDX_STRING = 'ServiceRequest?identifier=sys%7C111&patient=Patient%2F" + ptId.getIdPart() + "&performer=Practitioner%2F" + practId.getIdPart() + "'",
 			"HASH_SYS_AND_VALUE = '6795110643554413877'"
 		));
-		assertThat(unformattedSql, not(containsString(("RES_DELETED_AT"))));
-		assertThat(unformattedSql, not(containsString(("RES_TYPE"))));
+		assertThat(unformattedSql).doesNotContain(("RES_DELETED_AT"));
+		assertThat(unformattedSql).doesNotContain(("RES_TYPE"));
 
 		// Don't use qualified references
 		myCaptureQueriesListener.clear();
@@ -566,14 +563,14 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 		map.add("performer", new ReferenceParam(practId.getIdPart()));
 		outcome = myServiceRequestDao.search(map);
 		myCaptureQueriesListener.logFirstSelectQueryForCurrentThread();
-		assertThat(toUnqualifiedVersionlessIdValues(outcome), containsInAnyOrder(srId));
+		assertThat(toUnqualifiedVersionlessIdValues(outcome)).containsExactlyInAnyOrder(srId);
 		unformattedSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false);
 		assertThat(unformattedSql, stringContainsInOrder(
 			"SRC_PATH = 'ServiceRequest.subject.where(resolve() is Patient)'",
 			"SRC_PATH = 'ServiceRequest.performer'"
 		));
-		assertThat(unformattedSql, not(containsString(("RES_DELETED_AT"))));
-		assertThat(unformattedSql, not(containsString(("RES_TYPE"))));
+		assertThat(unformattedSql).doesNotContain(("RES_DELETED_AT"));
+		assertThat(unformattedSql).doesNotContain(("RES_TYPE"));
 
 	}
 
@@ -767,7 +764,7 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 			myPatientDao.create(pt1).getId().toUnqualifiedVersionless();
 			fail();
 		} catch (ResourceVersionConflictException e) {
-			assertThat(e.getMessage(), containsString("new unique index created by SearchParameter/patient-gender-birthdate"));
+			assertThat(e.getMessage()).contains("new unique index created by SearchParameter/patient-gender-birthdate");
 		}
 	}
 
@@ -1086,10 +1083,10 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 		params.add("birthdate", new DateParam("2011-01-01"));
 		IBundleProvider results = myPatientDao.search(params, mySrd);
 		myCaptureQueriesListener.logFirstSelectQueryForCurrentThread();
-		assertThat(toUnqualifiedVersionlessIdValues(results), containsInAnyOrder(id1.getValue()));
+		assertThat(toUnqualifiedVersionlessIdValues(results)).containsExactlyInAnyOrder(id1.getValue());
 
 		logCapturedMessages();
-		assertThat(myMessages.toString(), containsString("Using UNIQUE index for query for search: Patient?birthdate=2011-01-01&gender=http%3A%2F%2Fhl7.org%2Ffhir%2Fadministrative-gender%7Cmale"));
+		assertThat(myMessages.toString()).contains("Using UNIQUE index for query for search: Patient?birthdate=2011-01-01&gender=http%3A%2F%2Fhl7.org%2Ffhir%2Fadministrative-gender%7Cmale");
 		myMessages.clear();
 
 	}
@@ -1115,9 +1112,9 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 		params.add("birthdate", new DateParam("2011-01-01"));
 		IBundleProvider results = myPatientDao.search(params, mySrd);
 		String searchId = results.getUuid();
-		assertThat(toUnqualifiedVersionlessIdValues(results), containsInAnyOrder(id1));
+		assertThat(toUnqualifiedVersionlessIdValues(results)).containsExactlyInAnyOrder(id1);
 		logCapturedMessages();
-		assertThat(myMessages.toString(), containsString("Using UNIQUE index for query for search: Patient?birthdate=2011-01-01&gender=http%3A%2F%2Fhl7.org%2Ffhir%2Fadministrative-gender%7Cmale"));
+		assertThat(myMessages.toString()).contains("Using UNIQUE index for query for search: Patient?birthdate=2011-01-01&gender=http%3A%2F%2Fhl7.org%2Ffhir%2Fadministrative-gender%7Cmale");
 		myMessages.clear();
 
 		// Other order
@@ -1127,11 +1124,11 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 		params.add("gender", new TokenParam("http://hl7.org/fhir/administrative-gender", "male"));
 		results = myPatientDao.search(params, mySrd);
 		assertEquals(searchId, results.getUuid());
-		assertThat(toUnqualifiedVersionlessIdValues(results), containsInAnyOrder(id1));
+		assertThat(toUnqualifiedVersionlessIdValues(results)).containsExactlyInAnyOrder(id1);
 		// Because we just reuse the last search
 		logCapturedMessages();
-		assertThat(myMessages.toString(), containsString("REUSING"));
-		assertThat(myMessages.toString(), not(containsString("Using unique index")));
+		assertThat(myMessages.toString()).contains("REUSING");
+		assertThat(myMessages.toString()).doesNotContain("Using unique index");
 		myMessages.clear();
 
 		myMessages.clear();
@@ -1139,19 +1136,19 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 		params.add("gender", new TokenParam("http://hl7.org/fhir/administrative-gender", "male"));
 		params.add("birthdate", new DateParam("2011-01-03"));
 		results = myPatientDao.search(params, mySrd);
-		assertThat(toUnqualifiedVersionlessIdValues(results), empty());
+		assertThat(toUnqualifiedVersionlessIdValues(results)).isEmpty();
 		logCapturedMessages();
-		assertThat(myMessages.toString(), containsString("Using UNIQUE index for query for search: Patient?birthdate=2011-01-03&gender=http%3A%2F%2Fhl7.org%2Ffhir%2Fadministrative-gender%7Cmale"));
+		assertThat(myMessages.toString()).contains("Using UNIQUE index for query for search: Patient?birthdate=2011-01-03&gender=http%3A%2F%2Fhl7.org%2Ffhir%2Fadministrative-gender%7Cmale");
 		myMessages.clear();
 
 		myMessages.clear();
 		params = new SearchParameterMap();
 		params.add("birthdate", new DateParam("2011-01-03"));
 		results = myPatientDao.search(params, mySrd);
-		assertThat(toUnqualifiedVersionlessIdValues(results), empty());
+		assertThat(toUnqualifiedVersionlessIdValues(results)).isEmpty();
 		// STANDARD QUERY
 		logCapturedMessages();
-		assertThat(myMessages.toString(), not(containsString("unique index")));
+		assertThat(myMessages.toString()).doesNotContain("unique index");
 		myMessages.clear();
 
 	}
@@ -1223,7 +1220,7 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 		IIdType id1 = myPatientDao.update(pt1, "Patient?name=FAMILY1&organization:Organization=ORG", mySrd).getId().toUnqualifiedVersionless();
 
 		logCapturedMessages();
-		assertThat(myMessages.toString(), containsString("Using UNIQUE index for query for search: Patient?name=FAMILY1&organization=Organization%2FORG"));
+		assertThat(myMessages.toString()).contains("Using UNIQUE index for query for search: Patient?name=FAMILY1&organization=Organization%2FORG");
 		myMessages.clear();
 
 		runInTransaction(() -> {
@@ -1242,7 +1239,7 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 		IIdType id2 = myPatientDao.update(pt1, "Patient?name=FAMILY1&organization:Organization=ORG", mySrd).getId().toUnqualifiedVersionless();
 
 		logCapturedMessages();
-		assertThat(myMessages.toString(), containsString("Using UNIQUE index for query for search: Patient?name=FAMILY1&organization=Organization%2FORG"));
+		assertThat(myMessages.toString()).contains("Using UNIQUE index for query for search: Patient?name=FAMILY1&organization=Organization%2FORG");
 		myMessages.clear();
 		runInTransaction(() -> {
 			List<ResourceIndexedComboStringUnique> uniques = myResourceIndexedCompositeStringUniqueDao.findAll();
@@ -1545,7 +1542,7 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 			myPatientDao.create(pt1).getId().toUnqualifiedVersionless();
 			fail();
 		} catch (ResourceVersionConflictException e) {
-			assertThat(e.getMessage(), containsString("new unique index created by SearchParameter/patient-gender-birthdate"));
+			assertThat(e.getMessage()).contains("new unique index created by SearchParameter/patient-gender-birthdate");
 		}
 
 		Patient pt2 = new Patient();
@@ -1560,7 +1557,7 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 			myPatientDao.update(pt2);
 			fail();
 		} catch (ResourceVersionConflictException e) {
-			assertThat(e.getMessage(), containsString("new unique index created by SearchParameter/patient-gender-birthdate"));
+			assertThat(e.getMessage()).contains("new unique index created by SearchParameter/patient-gender-birthdate");
 		}
 
 	}
@@ -1597,10 +1594,10 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 		params.add("birthdate", new DateParam("2011-01-01"));
 		IBundleProvider results = myPatientDao.search(params, mySrd);
 		String searchId = results.getUuid();
-		assertThat(toUnqualifiedVersionlessIdValues(results), containsInAnyOrder(id2.getValue()));
+		assertThat(toUnqualifiedVersionlessIdValues(results)).containsExactlyInAnyOrder(id2.getValue());
 
 		logCapturedMessages();
-		assertThat(myMessages.toString(), containsString("Using UNIQUE index for query for search: Patient?birthdate=2011-01-01&gender=http%3A%2F%2Fhl7.org%2Ffhir%2Fadministrative-gender%7Cmale"));
+		assertThat(myMessages.toString()).contains("Using UNIQUE index for query for search: Patient?birthdate=2011-01-01&gender=http%3A%2F%2Fhl7.org%2Ffhir%2Fadministrative-gender%7Cmale");
 		myMessages.clear();
 
 	}

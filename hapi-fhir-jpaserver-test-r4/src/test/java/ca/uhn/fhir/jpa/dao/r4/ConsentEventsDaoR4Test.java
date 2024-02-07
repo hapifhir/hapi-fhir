@@ -37,8 +37,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.leftPad;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.greaterThan;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -434,7 +433,7 @@ public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 
 			IPreResourceAccessDetails accessDetails = theArgs.get(IPreResourceAccessDetails.class);
 
-			assertThat(accessDetails.size(), greaterThan(0));
+			assertThat(accessDetails.size()).isGreaterThan(0);
 
 			List<String> currentPassIds = new ArrayList<>();
 			for (int i = 0; i < accessDetails.size(); i++) {

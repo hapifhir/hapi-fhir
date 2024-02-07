@@ -42,11 +42,9 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInRelativeOrder;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.greaterThan;
-import static org.hamcrest.Matchers.startsWith;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
@@ -98,7 +96,7 @@ public class OperationServerDstu3Test {
 		ourLog.debug(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(p));
 		
 		List<CapabilityStatementRestOperationComponent> ops = p.getRest().get(0).getOperation();
-		assertThat(ops.size(), greaterThan(1));
+		assertThat(ops.size()).isGreaterThan(1);
 
 		List<String> opNames = toOpNames(ops);
 		assertThat(opNames, containsInRelativeOrder("OP_TYPE"));
@@ -165,7 +163,7 @@ public class OperationServerDstu3Test {
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
 		assertEquals("instance $everything", ourLastMethod);
-		assertThat(response, startsWith("<Bundle"));
+		assertThat(response).startsWith("<Bundle");
 		assertEquals("Patient/123", ourLastId.toUnqualifiedVersionless().getValue());
 		
 	}
@@ -194,7 +192,7 @@ public class OperationServerDstu3Test {
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
 		assertEquals("instance $everything", ourLastMethod);
-		assertThat(response, startsWith("<Bundle"));
+		assertThat(response).startsWith("<Bundle");
 		assertEquals("Patient/123", ourLastId.toUnqualifiedVersionless().getValue());
 
 	}
@@ -209,7 +207,7 @@ public class OperationServerDstu3Test {
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
 		assertEquals("POST", status.getFirstHeader(Constants.HEADER_ALLOW).getValue());
-		assertThat(response, containsString("HTTP Method GET is not allowed"));
+		assertThat(response).contains("HTTP Method GET is not allowed");
 	}
 
 	@Test
@@ -223,7 +221,7 @@ public class OperationServerDstu3Test {
 		CloseableHttpResponse status = ourClient.execute(httpPost);
 		try {
 			String response = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
-			assertThat(response, containsString("Request has parameter PARAM1 of type IntegerType but method expects type StringType"));
+			assertThat(response).contains("Request has parameter PARAM1 of type IntegerType but method expects type StringType");
 			ourLog.info(response);
 		} finally {
 			IOUtils.closeQuietly(status);
@@ -426,7 +424,7 @@ public class OperationServerDstu3Test {
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
 		assertEquals("POST", status.getFirstHeader(Constants.HEADER_ALLOW).getValue());
-		assertThat(response, containsString("Can not invoke operation $OP_TYPE using HTTP GET because parameter PARAM2 is not a primitive datatype"));
+		assertThat(response).contains("Can not invoke operation $OP_TYPE using HTTP GET because parameter PARAM2 is not a primitive datatype");
 	}
 
 	
@@ -527,7 +525,7 @@ public class OperationServerDstu3Test {
 		ourLog.info(status.getStatusLine().toString());
 		ourLog.info(response);
 
-		assertThat(response, containsString("Request has parameter PARAM1 of type IntegerType but method expects type StringType"));
+		assertThat(response).contains("Request has parameter PARAM1 of type IntegerType but method expects type StringType");
 	}
 
 	@Test

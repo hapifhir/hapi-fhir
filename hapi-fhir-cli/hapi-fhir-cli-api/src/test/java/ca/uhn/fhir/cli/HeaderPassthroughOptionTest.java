@@ -27,8 +27,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static org.hamcrest.CoreMatchers.hasItems;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -95,7 +94,7 @@ public class HeaderPassthroughOptionTest {
 		assertTrue(allHeaders.containsKey(headerKey1));
 		assertEquals(1, allHeaders.get(headerKey1).size());
 
-		assertThat(allHeaders.get(headerKey1), hasItems(headerValue1));
+		assertThat(allHeaders.get(headerKey1)).contains(headerValue1);
 	}
 
 	@Test
@@ -159,11 +158,11 @@ public class HeaderPassthroughOptionTest {
 
 		assertTrue(allHeaders.containsKey(headerKey1));
 		assertEquals(1, allHeaders.get(headerKey1).size());
-		assertThat(allHeaders.get(headerKey1), hasItems(headerValue1));
+		assertThat(allHeaders.get(headerKey1)).contains(headerValue1);
 
 		assertTrue(allHeaders.containsKey(headerKey2));
 		assertEquals(1, allHeaders.get(headerKey2).size());
-		assertThat(allHeaders.get(headerKey2), hasItems(headerValue2));
+		assertThat(allHeaders.get(headerKey2)).contains(headerValue2);
 	}
 
 	private static void writeConceptAndHierarchyFiles(int theFilenameCounter) throws IOException {

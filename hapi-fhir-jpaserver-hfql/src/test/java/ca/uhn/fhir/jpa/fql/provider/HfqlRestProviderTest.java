@@ -34,8 +34,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import static ca.uhn.fhir.jpa.fql.jdbc.HfqlRestClientTest.createFakeStatement;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.startsWith;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.notNull;
@@ -104,7 +103,7 @@ public class HfqlRestProviderTest {
 				""".replace("THE-VERSION", VersionUtil.getVersion());
 			assertEquals(expected.trim(), outcome.trim());
 			assertEquals(200, response.getStatusLine().getStatusCode());
-			assertThat(response.getEntity().getContentType().getValue(), startsWith("text/csv;"));
+			assertThat(response.getEntity().getContentType().getValue()).startsWith("text/csv;");
 
 			verify(myFqlExecutor, times(1)).executeInitialSearch(myStatementCaptor.capture(), myLimitCaptor.capture(), notNull());
 			assertEquals(select, myStatementCaptor.getValue());
@@ -147,7 +146,7 @@ public class HfqlRestProviderTest {
 				""".replace("THE-VERSION", VersionUtil.getVersion());
 			assertEquals(expected.trim(), outcome.trim());
 			assertEquals(200, response.getStatusLine().getStatusCode());
-			assertThat(response.getEntity().getContentType().getValue(), startsWith("text/csv;"));
+			assertThat(response.getEntity().getContentType().getValue()).startsWith("text/csv;");
 
 			verify(myFqlExecutor, times(1)).executeContinuation(any(), myStatementCaptor.capture(), myOffsetCaptor.capture(), myLimitCaptor.capture(), notNull());
 			assertEquals(continuation, myStatementCaptor.getValue());
@@ -190,7 +189,7 @@ public class HfqlRestProviderTest {
 				""".replace("THE-VERSION", VersionUtil.getVersion());
 			assertEquals(expected.trim(), outcome.trim());
 			assertEquals(200, response.getStatusLine().getStatusCode());
-			assertThat(response.getEntity().getContentType().getValue(), startsWith("text/csv;"));
+			assertThat(response.getEntity().getContentType().getValue()).startsWith("text/csv;");
 		}
 
 	}
@@ -231,7 +230,7 @@ public class HfqlRestProviderTest {
 				""".replace("THE-VERSION", VersionUtil.getVersion());
 			assertEquals(expected.trim(), outcome.trim());
 			assertEquals(200, response.getStatusLine().getStatusCode());
-			assertThat(response.getEntity().getContentType().getValue(), startsWith("text/csv;"));
+			assertThat(response.getEntity().getContentType().getValue()).startsWith("text/csv;");
 		}
 
 	}

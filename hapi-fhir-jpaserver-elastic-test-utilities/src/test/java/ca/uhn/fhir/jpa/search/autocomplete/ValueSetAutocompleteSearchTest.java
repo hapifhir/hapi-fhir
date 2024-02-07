@@ -6,11 +6,7 @@ import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.not;
-import static org.hamcrest.Matchers.nullValue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 class ValueSetAutocompleteSearchTest {
 	FhirContext myFhirContext = FhirContext.forR4();
@@ -28,10 +24,10 @@ class ValueSetAutocompleteSearchTest {
 
 			makeCoding(entry);
 
-			assertThat(myCoding, is(not(nullValue())));
-			assertThat(myCoding.getSystem(), equalTo("http://loinc.org"));
-			assertThat(myCoding.getCode(), equalTo("4544-3"));
-			assertThat(myCoding.getDisplay(), equalTo("Hematocrit [Volume Fraction] of Blood by Automated count"));
+			assertThat(myCoding).isNotNull();
+			assertThat(myCoding.getSystem()).isEqualTo("http://loinc.org");
+			assertThat(myCoding.getCode()).isEqualTo("4544-3");
+			assertThat(myCoding.getDisplay()).isEqualTo("Hematocrit [Volume Fraction] of Blood by Automated count");
 		}
 
 		@Test
@@ -40,10 +36,10 @@ class ValueSetAutocompleteSearchTest {
 
 			makeCoding(entry);
 
-			assertThat(myCoding, is(not(nullValue())));
-			assertThat(myCoding.getSystem(), is(nullValue()));
-			assertThat(myCoding.getCode(), equalTo("some_code"));
-			assertThat(myCoding.getDisplay(), equalTo("Some text"));
+			assertThat(myCoding).isNotNull();
+			assertThat(myCoding.getSystem()).isNull();
+			assertThat(myCoding.getCode()).isEqualTo("some_code");
+			assertThat(myCoding.getDisplay()).isEqualTo("Some text");
 		}
 
 		@Test
@@ -52,10 +48,10 @@ class ValueSetAutocompleteSearchTest {
 
 			makeCoding(entry);
 
-			assertThat(myCoding, is(not(nullValue())));
-			assertThat(myCoding.getSystem(), is(nullValue()));
-			assertThat(myCoding.getCode(), equalTo("some_code"));
-			assertThat(myCoding.getDisplay(), is(nullValue()));
+			assertThat(myCoding).isNotNull();
+			assertThat(myCoding.getSystem()).isNull();
+			assertThat(myCoding.getCode()).isEqualTo("some_code");
+			assertThat(myCoding.getDisplay()).isNull();
 
 		}
 

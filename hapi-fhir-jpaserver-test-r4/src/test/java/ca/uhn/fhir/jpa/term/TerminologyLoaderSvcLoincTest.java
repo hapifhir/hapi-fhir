@@ -46,9 +46,7 @@ import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_PART_LI
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_PART_LINK_FILE_PRIMARY_DEFAULT;
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_PART_LINK_FILE_SUPPLEMENTARY_DEFAULT;
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_UPLOAD_PROPERTIES_FILE;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.containsString;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hl7.fhir.common.hapi.validation.support.ValidationConstants.LOINC_ALL_VALUESET_ID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -205,7 +203,7 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 
 		// LOINC code with answer
 		code = concepts.get("61438-8");
-		assertThat(code.getStringProperties("answer-list"), contains("LL1000-0"));
+		assertThat(code.getStringProperties("answer-list")).containsExactly("LL1000-0");
 
 		// LOINC code with 3rd party copyright
 		code = concepts.get("47239-9");
@@ -224,7 +222,7 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 
 		// Answer list code with link to answers-for
 		code = concepts.get("LL1000-0");
-		assertThat(code.getStringProperties("answers-for"), contains("61438-8"));
+		assertThat(code.getStringProperties("answers-for")).containsExactly("61438-8");
 
 		// AnswerList valueSet
 		vs = valueSets.get("LL1001-8");
@@ -638,9 +636,9 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 			mySvc.loadLoinc(myFiles.getFiles(), mySrd);
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertThat(e.getMessage(), containsString("Could not find the following mandatory files in input:"));
-			assertThat(e.getMessage(), containsString("Loinc.csv"));
-			assertThat(e.getMessage(), containsString("MultiAxialHierarchy.csv"));
+			assertThat(e.getMessage()).contains("Could not find the following mandatory files in input:");
+			assertThat(e.getMessage()).contains("Loinc.csv");
+			assertThat(e.getMessage()).contains("MultiAxialHierarchy.csv");
 		}
 	}
 

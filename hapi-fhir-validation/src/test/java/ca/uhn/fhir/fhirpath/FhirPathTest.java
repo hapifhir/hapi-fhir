@@ -16,9 +16,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.endsWith;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class FhirPathTest extends BaseValidationTestWithInlineMocks {
@@ -62,7 +60,7 @@ public class FhirPathTest extends BaseValidationTestWithInlineMocks {
 		try {
 			fp.evaluate(p, "Patient....nameFOO", HumanName.class);
 		} catch (FhirPathExecutionException e) {
-			assertThat(e.getMessage(), containsString("termination at unexpected token"));
+			assertThat(e.getMessage()).contains("termination at unexpected token");
 		}
 	}
 
@@ -78,8 +76,7 @@ public class FhirPathTest extends BaseValidationTestWithInlineMocks {
 			fp.evaluate(p, "Patient.name", stringType);
 		} catch (FhirPathExecutionException e) {
 			String expected = "FhirPath expression returned unexpected type HumanName - Expected " + stringType.getName();
-			assertThat(e.getMessage(),
-				endsWith(expected));
+			assertThat(e.getMessage()).endsWith(expected);
 		}
 	}
 

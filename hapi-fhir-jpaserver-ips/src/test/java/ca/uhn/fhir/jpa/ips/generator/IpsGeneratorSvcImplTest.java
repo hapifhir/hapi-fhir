@@ -64,11 +64,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.jpa.ips.generator.IpsGenerationR4Test.findEntryResource;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.not;
-import static org.hamcrest.Matchers.startsWith;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
@@ -131,8 +127,7 @@ public class IpsGeneratorSvcImplTest {
 		ourLog.info("Generated IPS:\n{}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
 
 		List<String> contentResourceTypes = toEntryResourceTypeStrings(outcome);
-		assertThat(contentResourceTypes.toString(), contentResourceTypes,
-			contains("Composition", "Patient", "AllergyIntolerance", "MedicationStatement", "MedicationStatement", "MedicationStatement", "Condition", "Condition", "Condition", "Organization"));
+		assertThat(contentResourceTypes).as(contentResourceTypes.toString()).containsExactly("Composition", "Patient", "AllergyIntolerance", "MedicationStatement", "MedicationStatement", "MedicationStatement", "Condition", "Condition", "Condition", "Organization");
 
 		Composition composition = (Composition) outcome.getEntry().get(0).getResource();
 		Composition.SectionComponent section;
@@ -140,20 +135,18 @@ public class IpsGeneratorSvcImplTest {
 		// Allergy and Intolerances has no content
 		section = composition.getSection().get(0);
 		assertEquals("Allergies and Intolerances", section.getTitle());
-		assertThat(section.getText().getDivAsString(),
-			containsString("No information about allergies"));
+		assertThat(section.getText().getDivAsString()).contains("No information about allergies");
 
 		// Medication Summary has a resource
 		section = composition.getSection().get(1);
 		assertEquals("Medication List", section.getTitle());
-		assertThat(section.getText().getDivAsString(),
-			containsString("Oral use"));
+		assertThat(section.getText().getDivAsString()).contains("Oral use");
 
 		// Composition itself should also have a narrative
 		String compositionNarrative = composition.getText().getDivAsString();
 		ourLog.info("Composition narrative: {}", compositionNarrative);
-		assertThat(compositionNarrative, containsString("Allergies and Intolerances"));
-		assertThat(compositionNarrative, not(containsString("Pregnancy")));
+		assertThat(compositionNarrative).contains("Allergies and Intolerances");
+		assertThat(compositionNarrative).doesNotContain("Pregnancy");
 
 	}
 
@@ -252,11 +245,10 @@ public class IpsGeneratorSvcImplTest {
 
 		// Verify Bundle Contents
 		List<String> contentResourceTypes = toEntryResourceTypeStrings(outcome);
-		assertThat(contentResourceTypes.toString(), contentResourceTypes,
-			contains("Composition", "Patient", "AllergyIntolerance", "MedicationStatement", "Medication", "Condition", "Organization"));
+		assertThat(contentResourceTypes).as(contentResourceTypes.toString()).containsExactly("Composition", "Patient", "AllergyIntolerance", "MedicationStatement", "Medication", "Condition", "Organization");
 		MedicationStatement actualMedicationStatement = (MedicationStatement) outcome.getEntry().get(3).getResource();
 		Medication actualMedication = (Medication) outcome.getEntry().get(4).getResource();
-		assertThat(actualMedication.getId(), startsWith("urn:uuid:"));
+		assertThat(actualMedication.getId()).startsWith("urn:uuid:");
 		assertEquals(actualMedication.getId(), actualMedicationStatement.getMedicationReference().getReference());
 
 		// Verify
@@ -274,7 +266,7 @@ public class IpsGeneratorSvcImplTest {
 		assertEquals("Active", row.getCell(1).asNormalizedText());
 		assertEquals("Oral", row.getCell(2).asNormalizedText());
 		assertEquals("DAW", row.getCell(3).asNormalizedText());
-		assertThat(row.getCell(4).asNormalizedText(), containsString("2023"));
+		assertThat(row.getCell(4).asNormalizedText()).contains("2023");
 	}
 
 	@Test
@@ -345,14 +337,7 @@ public class IpsGeneratorSvcImplTest {
 
 		// Verify Bundle Contents
 		List<String> contentResourceTypes = toEntryResourceTypeStrings(outcome);
-		assertThat(contentResourceTypes.toString(), contentResourceTypes,
-			contains(
-				"Composition",
-				"Patient",
-				"MedicationStatement",
-				"Medication",
-				"MedicationStatement",
-				"Organization"));
+		assertThat(contentResourceTypes).as(contentResourceTypes.toString()).containsExactly("Composition", "Patient", "MedicationStatement", "Medication", "MedicationStatement", "Organization");
 
 	}
 
@@ -384,14 +369,7 @@ public class IpsGeneratorSvcImplTest {
 
 		// Verify Bundle Contents
 		List<String> contentResourceTypes = toEntryResourceTypeStrings(outcome);
-		assertThat(contentResourceTypes.toString(), contentResourceTypes,
-			contains(
-				"Composition",
-				"Patient",
-				"MedicationStatement",
-				"Medication",
-				"MedicationStatement",
-				"Organization"));
+		assertThat(contentResourceTypes).as(contentResourceTypes.toString()).containsExactly("Composition", "Patient", "MedicationStatement", "Medication", "MedicationStatement", "Organization");
 
 		// Verify narrative - should have 2 rows (one for each primary MedicationStatement)
 		Composition compositions = (Composition) outcome.getEntry().get(0).getResource();
@@ -497,7 +475,7 @@ public class IpsGeneratorSvcImplTest {
 		assertEquals("Pfizer Inc", row.getCell(3).asNormalizedText());
 		assertEquals("35", row.getCell(4).asNormalizedText());
 		assertEquals("Hello World", row.getCell(5).asNormalizedText());
-		assertThat(row.getCell(6).asNormalizedText(), containsString("2023"));
+		assertThat(row.getCell(6).asNormalizedText()).contains("2023");
 	}
 
 	@Test
@@ -545,15 +523,15 @@ public class IpsGeneratorSvcImplTest {
 
 		// Verify cross-references
 		Patient addedPatient = findEntryResource(outcome, Patient.class, 0, 1);
-		assertThat(addedPatient.getId(), startsWith("urn:uuid:"));
+		assertThat(addedPatient.getId()).startsWith("urn:uuid:");
 		Condition addedCondition = findEntryResource(outcome, Condition.class, 0, 2);
-		assertThat(addedCondition.getId(), startsWith("urn:uuid:"));
+		assertThat(addedCondition.getId()).startsWith("urn:uuid:");
 		Condition addedCondition2 = findEntryResource(outcome, Condition.class, 1, 2);
-		assertThat(addedCondition2.getId(), startsWith("urn:uuid:"));
+		assertThat(addedCondition2.getId()).startsWith("urn:uuid:");
 		Encounter addedEncounter = findEntryResource(outcome, Encounter.class, 0, 1);
-		assertThat(addedEncounter.getId(), startsWith("urn:uuid:"));
+		assertThat(addedEncounter.getId()).startsWith("urn:uuid:");
 		MedicationStatement addedMedicationStatement = findEntryResource(outcome, MedicationStatement.class, 0, 1);
-		assertThat(addedMedicationStatement.getId(), startsWith("urn:uuid:"));
+		assertThat(addedMedicationStatement.getId()).startsWith("urn:uuid:");
 		assertEquals("no-medication-info", addedMedicationStatement.getMedicationCodeableConcept().getCodingFirstRep().getCode());
 		assertEquals(addedPatient.getId(), addedCondition.getSubject().getReference());
 		assertEquals(addedEncounter.getId(), addedCondition.getEncounter().getReference());
@@ -607,9 +585,7 @@ public class IpsGeneratorSvcImplTest {
 			.stream()
 			.map(t -> t.getResource().getResourceType().name())
 			.collect(Collectors.toList());
-		assertThat(resources.toString(), resources, contains(
-			"Composition", "Patient", "AllergyIntolerance", "MedicationStatement", "Condition", "Organization"
-		));
+		assertThat(resources).as(resources.toString()).containsExactly("Composition", "Patient", "AllergyIntolerance", "MedicationStatement", "Condition", "Organization");
 	}
 
 	private void registerPatientDaoWithRead() {

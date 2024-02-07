@@ -29,9 +29,8 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Date;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class DefaultThymeleafNarrativeGeneratorDstu2Test {
@@ -79,7 +78,7 @@ public class DefaultThymeleafNarrativeGeneratorDstu2Test {
 		myGen.populateResourceNarrative(myCtx, value);
 		String output = value.getText().getDiv().getValueAsString();
 		ourLog.info(output);
-		assertThat(output, not(containsString("narrative")));
+		assertThat(output).doesNotContain("narrative");
 
 	}
 
@@ -103,7 +102,7 @@ public class DefaultThymeleafNarrativeGeneratorDstu2Test {
 
 		ourLog.info(output);
 
-		assertThat(output, containsString("<td>YThis is a warning</td>"));
+		assertThat(output).contains("<td>YThis is a warning</td>");
 	}
 
 	@Test
@@ -176,7 +175,7 @@ public class DefaultThymeleafNarrativeGeneratorDstu2Test {
 
 		myGen.populateResourceNarrative(myCtx, med);
 		String output = med.getText().getDiv().getValueAsString();
-		assertThat(output, containsString("ciproflaxin"));
+		assertThat(output).contains("ciproflaxin");
 
 	}
 

@@ -49,9 +49,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.hasSize;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -256,7 +254,7 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 		String instanceId = mySvc.storeNewInstance(instance);
 
 		List<JobInstance> foundInstances = mySvc.fetchInstancesByJobDefinitionId(JOB_DEFINITION_ID, 10, 0);
-		assertThat(foundInstances, hasSize(1));
+		assertThat(foundInstances).hasSize(1);
 		assertEquals(instanceId, foundInstances.get(0).getInstanceId());
 	}
 
@@ -269,7 +267,7 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 		statuses.add(StatusEnum.QUEUED);
 		statuses.add(StatusEnum.COMPLETED);
 		List<JobInstance> foundInstances = mySvc.fetchInstancesByJobDefinitionIdAndStatus(JOB_DEFINITION_ID, statuses, 10, 0);
-		assertThat(foundInstances, hasSize(1));
+		assertThat(foundInstances).hasSize(1);
 		assertEquals(instanceId, foundInstances.get(0).getInstanceId());
 	}
 
@@ -281,7 +279,7 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 		// Test
 		request.setJobStatus("");
 		Page<JobInstance> foundInstances = mySvc.fetchJobInstances(request);
-		assertThat(foundInstances.getTotalElements(), equalTo(2L));
+		assertThat(foundInstances.getTotalElements()).isEqualTo(2L);
 	}
 
 	@Test
@@ -292,7 +290,7 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 		// Test
 		request.setJobStatus("COMPLETED");
 		Page<JobInstance> foundInstances = mySvc.fetchJobInstances(request);
-		assertThat(foundInstances.getTotalElements(), equalTo(1L));
+		assertThat(foundInstances.getTotalElements()).isEqualTo(1L);
 	}
 
 	private JobInstanceFetchRequest createFetchRequest() {

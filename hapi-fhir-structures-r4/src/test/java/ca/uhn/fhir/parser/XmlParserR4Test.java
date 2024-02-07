@@ -2,6 +2,7 @@ package ca.uhn.fhir.parser;
 
 import static ca.uhn.fhir.parser.JsonParserR4Test.createBundleWithCrossReferenceFullUrlsAndNoIds;
 import static ca.uhn.fhir.parser.JsonParserR4Test.createBundleWithCrossReferenceFullUrlsAndNoIds_NestedInParameters;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.stringContainsInOrder;
@@ -198,8 +199,8 @@ public class XmlParserR4Test extends BaseTest {
 	public void testNarrativeLangAttributePreserved() throws IOException {
 		Observation obs = loadResource(ourCtx, Observation.class, "/resource-with-lang-in-narrative.xml");
 		String encoded = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(obs);
-		assertThat(encoded, containsString("xmlns=\"http://www.w3.org/1999/xhtml\""));
-		assertThat(encoded, containsString("lang=\"en-US\""));
+		assertThat(encoded).contains("xmlns=\"http://www.w3.org/1999/xhtml\"");
+		assertThat(encoded).contains("lang=\"en-US\"");
 		ourLog.info(encoded);
 	}
 

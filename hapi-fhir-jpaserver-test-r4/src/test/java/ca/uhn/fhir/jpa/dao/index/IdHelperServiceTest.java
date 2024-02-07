@@ -27,8 +27,7 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.hasSize;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
@@ -187,7 +186,7 @@ public class IdHelperServiceTest {
 			.thenReturn(resourcePersistentId3);
 		Map<String, JpaPid> result = myHelperService.resolveResourcePersistentIds(partitionId, resourceType, ids)
 			.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue()));
-		assertThat(result.keySet(), hasSize(3));
+		assertThat(result.keySet()).hasSize(3);
 		assertEquals(1L, result.get("A").getId());
 		assertEquals(2L, result.get("B").getId());
 		assertEquals(3L, result.get("C").getId());

@@ -50,11 +50,11 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.TimeUnit;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.emptyOrNullString;
 import static org.hamcrest.Matchers.not;
-import static org.hamcrest.Matchers.startsWith;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -191,7 +191,7 @@ public class SystemProviderDstu2Test extends BaseJpaDstu2Test {
 		try {
 			String response = IOUtils.toString(http.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(response);
-			assertThat(response, not(containsString("_format")));
+			assertThat(response).doesNotContain("_format");
 			assertEquals(200, http.getStatusLine().getStatusCode());
 
 			Bundle responseBundle = ourCtx.newXmlParser().parseResource(Bundle.class, response);
@@ -381,8 +381,8 @@ public class SystemProviderDstu2Test extends BaseJpaDstu2Test {
 		assertEquals("self", respSub.getLink().get(0).getRelation());
 		assertEquals(ourServerBase + "/Patient", respSub.getLink().get(0).getUrl());
 		assertEquals("next", respSub.getLink().get(1).getRelation());
-		assertThat(respSub.getLink().get(1).getUrl(), containsString("/fhir/context?_getpages"));
-		assertThat(respSub.getEntry().get(0).getFullUrl(), startsWith(ourServerBase + "/Patient/"));
+		assertThat(respSub.getLink().get(1).getUrl()).contains("/fhir/context?_getpages");
+		assertThat(respSub.getEntry().get(0).getFullUrl()).startsWith(ourServerBase + "/Patient/");
 		assertEquals(Patient.class, respSub.getEntry().get(0).getResource().getClass());
 	}
 

@@ -63,10 +63,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.startsWith;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -759,7 +756,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 		try {
 			assertEquals(201, response.getStatusLine().getStatusCode());
 			String newIdString = response.getFirstHeader(Constants.HEADER_LOCATION_LC).getValue();
-			assertThat(newIdString, startsWith(myServerBase + "/Patient/"));
+			assertThat(newIdString).startsWith(myServerBase + "/Patient/");
 			id = new IdType(newIdString);
 		} finally {
 			response.close();
@@ -776,7 +773,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 		try {
 			assertEquals(201, response.getStatusLine().getStatusCode());
 			String newIdString = response.getFirstHeader(Constants.HEADER_LOCATION_LC).getValue();
-			assertThat(newIdString, startsWith(myServerBase + "/Patient/"));
+			assertThat(newIdString).startsWith(myServerBase + "/Patient/");
 			id2 = new IdType(newIdString);
 		} finally {
 			response.close();
@@ -916,7 +913,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 		try (CloseableHttpResponse response = ourHttpClient.execute(httpGet)) {
 			String resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			assertEquals(200, response.getStatusLine().getStatusCode());
-			assertThat(resp, containsString("MY_FAMILY"));
+			assertThat(resp).contains("MY_FAMILY");
 		}
 
 		httpGet = new HttpGet(myServerBase + "/Patient/B/$graphql?query=" + UrlUtil.escapeUrlParam(query));
@@ -1170,7 +1167,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 				.execute();
 			fail();
 		} catch (ForbiddenOperationException e) {
-			assertThat(e.getMessage(), containsString("Access denied by default policy"));
+			assertThat(e.getMessage()).contains("Access denied by default policy");
 		}
 	}
 
@@ -1397,7 +1394,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 				Bundle result = myClient.search().byUrl(url).returnBundle(Bundle.class).execute();
 				fail();
 			} catch (ForbiddenOperationException e) {
-				assertThat(e.getMessage(), startsWith("HTTP 403 Forbidden: " + Msg.code(333) + "Access denied by rule"));
+				assertThat(e.getMessage()).startsWith("HTTP 403 Forbidden: " + Msg.code(333) + "Access denied by rule");
 			}
 		}
 
@@ -1478,7 +1475,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 
 		// search runs without 403.
 		Bundle bundle = myClient.search().byUrl("/Observation?code=foo").returnBundle(Bundle.class).execute();
-		assertThat(bundle.getEntry(), hasSize(1));
+		assertThat(bundle.getEntry()).hasSize(1);
 	}
 
 	@Test

@@ -28,7 +28,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.stream.Collectors;
 
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -78,8 +78,8 @@ public class QuestionnaireValidatorR4Test extends BaseValidationTestWithInlineMo
 
 			ValidationResult errors = myVal.validateWithResult(q);
 			ourLog.info(errors.toString());
-			assertThat(errors.isSuccessful(), Matchers.is(true));
-			assertThat(errors.getMessages().stream().filter(t -> t.getSeverity().ordinal() > ResultSeverityEnum.INFORMATION.ordinal()).collect(Collectors.toList()), Matchers.empty());
+			assertThat(errors.isSuccessful()).isEqualTo(true);
+			assertThat(errors.getMessages().stream().filter(t -> t.getSeverity().ordinal() > ResultSeverityEnum.INFORMATION.ordinal()).collect(Collectors.toList())).isEmpty();
 		}
 	}
 
@@ -99,8 +99,8 @@ public class QuestionnaireValidatorR4Test extends BaseValidationTestWithInlineMo
 
 			ValidationResult errors = myVal.validateWithResult(q);
 			ourLog.info(errors.toString());
-			assertThat(errors.isSuccessful(), Matchers.is(true));
-			assertThat(errors.getMessages(), Matchers.empty());
+			assertThat(errors.isSuccessful()).isEqualTo(true);
+			assertThat(errors.getMessages()).isEmpty();
 		}
 	}
 
@@ -118,17 +118,17 @@ public class QuestionnaireValidatorR4Test extends BaseValidationTestWithInlineMo
 		ValidationResult errors = myVal.validateWithResult(q);
 
 		ourLog.info(errors.toString());
-		assertThat(errors.isSuccessful(), Matchers.is(true));
-		assertThat(errors.getMessages(), Matchers.hasSize(1));
+		assertThat(errors.isSuccessful()).isEqualTo(true);
+		assertThat(errors.getMessages()).hasSize(1);
 		assertEquals(errors.getMessages().get(0).getSeverity(), ResultSeverityEnum.INFORMATION);
-		assertThat(errors.getMessages().get(0).getMessage(), Matchers.startsWith("Unknown extension " + extensionUrl));
+		assertThat(errors.getMessages().get(0).getMessage()).startsWith("Unknown extension " + extensionUrl);
 
 		myInstanceVal.setCustomExtensionDomains(extensionUrl);
 		errors = myVal.validateWithResult(q);
 
 		ourLog.info(errors.toString());
-		assertThat(errors.isSuccessful(), Matchers.is(true));
-		assertThat(errors.getMessages(), Matchers.empty());
+		assertThat(errors.isSuccessful()).isEqualTo(true);
+		assertThat(errors.getMessages()).isEmpty();
 	}
 
 	private Questionnaire minimalValidQuestionnaire() {

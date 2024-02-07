@@ -28,8 +28,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.matchesPattern;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
 
@@ -100,16 +99,16 @@ public class FhirResourceDaoR4SearchLastNIT extends BaseR4SearchLastN {
 		StringBuilder firstQueryPattern = new StringBuilder(".*RES_ID IN \\('[0-9]+'");
         firstQueryPattern.append(",'[0-9]+'".repeat(49));
 		firstQueryPattern.append("\\).*");
-		assertThat(queries.get(0).toUpperCase().replaceAll(" , ", ","), matchesPattern(firstQueryPattern.toString()));
-		assertThat(queries.get(2).toUpperCase().replaceAll(" , ", ","), matchesPattern(firstQueryPattern.toString()));
+		assertThat(queries.get(0).toUpperCase().replaceAll(" , ", ",")).matches(firstQueryPattern.toString());
+		assertThat(queries.get(2).toUpperCase().replaceAll(" , ", ",")).matches(firstQueryPattern.toString());
 
 		// the second and fourth chunked queries should be padded with "-1".
 		StringBuilder secondQueryPattern = new StringBuilder(".*RES_ID IN \\('[0-9]+'");
         secondQueryPattern.append(",'[0-9]+'".repeat(24));
         secondQueryPattern.append(",'-1'".repeat(25));
 		secondQueryPattern.append("\\).*");
-		assertThat(queries.get(1).toUpperCase().replaceAll(" , ", ","), matchesPattern(secondQueryPattern.toString()));
-		assertThat(queries.get(3).toUpperCase().replaceAll(" , ", ","), matchesPattern(secondQueryPattern.toString()));
+		assertThat(queries.get(1).toUpperCase().replaceAll(" , ", ",")).matches(secondQueryPattern.toString());
+		assertThat(queries.get(3).toUpperCase().replaceAll(" , ", ",")).matches(secondQueryPattern.toString());
 
 	}
 

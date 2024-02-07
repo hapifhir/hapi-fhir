@@ -22,9 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.hasSize;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
@@ -61,9 +59,9 @@ public class IncludeAndRevincludeParameterTest {
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
-		
-		assertThat(ourIncludes, hasSize(0));
-		assertThat(ourReverseIncludes, hasSize(0));
+
+		assertThat(ourIncludes).hasSize(0);
+		assertThat(ourReverseIncludes).hasSize(0);
 	}
 	
 	@Test
@@ -73,11 +71,11 @@ public class IncludeAndRevincludeParameterTest {
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
-		
-		assertThat(ourIncludes, hasSize(2));
-		assertThat(ourReverseIncludes, hasSize(2));
-		assertThat(ourIncludes, containsInAnyOrder(new Include("A.a"), new Include("B.b")));
-		assertThat(ourReverseIncludes, containsInAnyOrder(new Include("C.c"), new Include("D.d")));
+
+		assertThat(ourIncludes).hasSize(2);
+		assertThat(ourReverseIncludes).hasSize(2);
+		assertThat(ourIncludes).containsExactlyInAnyOrder(new Include("A.a"), new Include("B.b"));
+		assertThat(ourReverseIncludes).containsExactlyInAnyOrder(new Include("C.c"), new Include("D.d"));
 	}
 
 

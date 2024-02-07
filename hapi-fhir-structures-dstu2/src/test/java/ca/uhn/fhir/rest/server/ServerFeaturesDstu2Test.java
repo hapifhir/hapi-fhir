@@ -23,8 +23,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
@@ -53,7 +52,7 @@ public class ServerFeaturesDstu2Test {
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertThat(responseContent, containsString("<Conformance"));
+		assertThat(responseContent).contains("<Conformance");
 
 		/*
 		 * Now with a leading /
@@ -65,7 +64,7 @@ public class ServerFeaturesDstu2Test {
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertThat(responseContent, containsString("<Conformance"));
+		assertThat(responseContent).contains("<Conformance");
 
 	}
 
@@ -120,7 +119,7 @@ public class ServerFeaturesDstu2Test {
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertThat(responseContent, containsString("resourceType\":\"Conformance"));
+		assertThat(responseContent).contains("resourceType\":\"Conformance");
 	}
 
 	@Test
@@ -132,7 +131,7 @@ public class ServerFeaturesDstu2Test {
 		ourLog.info(status.toString());
 		
 		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertThat(status.getFirstHeader("x-powered-by").getValue(), containsString("HAPI"));
+		assertThat(status.getFirstHeader("x-powered-by").getValue()).contains("HAPI");
 	}
 
 	@Test
@@ -142,7 +141,7 @@ public class ServerFeaturesDstu2Test {
 		String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 		IOUtils.closeQuietly(status.getEntity().getContent());
 		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertThat(responseContent, containsString("PRP1"));
+		assertThat(responseContent).contains("PRP1");
 
 		Collection<IResourceProvider> originalProviders = new ArrayList<>(ourServer.getRestfulServer().getResourceProviders());
 		DummyPatientResourceProvider2 newProvider = new DummyPatientResourceProvider2();
@@ -159,7 +158,7 @@ public class ServerFeaturesDstu2Test {
 			responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			IOUtils.closeQuietly(status.getEntity().getContent());
 			assertEquals(200, status.getStatusLine().getStatusCode());
-			assertThat(responseContent, containsString("PRP2"));
+			assertThat(responseContent).contains("PRP2");
 
 		} finally {
 

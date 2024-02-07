@@ -43,10 +43,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.not;
-import static org.hamcrest.Matchers.nullValue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class SystemProviderTransactionSearchR4Test extends BaseJpaR4Test {
@@ -166,7 +163,7 @@ public class SystemProviderTransactionSearchR4Test extends BaseJpaR4Test {
 		assertEquals(5, respBundle.getEntry().size());
 		assertEquals(null, respBundle.getLink("next"));
 		List<String> actualIds = toIds(respBundle);
-		assertThat(actualIds, contains(ids.subList(0, 5).toArray(new String[0])));
+		assertThat(actualIds).containsExactly(ids.subList(0, 5).toArray(new String[0]));
 	}
 
 	@Test
@@ -188,14 +185,14 @@ public class SystemProviderTransactionSearchR4Test extends BaseJpaR4Test {
 		Bundle respBundle = (Bundle) output.getEntry().get(0).getResource();
 		assertEquals(5, respBundle.getEntry().size());
 		List<String> actualIds = toIds(respBundle);
-		assertThat(actualIds, contains(ids.subList(0, 5).toArray(new String[0])));
+		assertThat(actualIds).containsExactly(ids.subList(0, 5).toArray(new String[0]));
 
 		String nextPageLink = respBundle.getLink("next").getUrl();
 		output = ourClient.loadPage().byUrl(nextPageLink).andReturnBundle(Bundle.class).execute();
 		respBundle = output;
 		assertEquals(5, respBundle.getEntry().size());
 		actualIds = toIds(respBundle);
-		assertThat(actualIds, contains(ids.subList(5, 10).toArray(new String[0])));
+		assertThat(actualIds).containsExactly(ids.subList(5, 10).toArray(new String[0]));
 	}
 
 	/**
@@ -223,9 +220,9 @@ public class SystemProviderTransactionSearchR4Test extends BaseJpaR4Test {
 		for (int i = 0; i < 30; i++) {
 			Bundle respBundle = (Bundle) output.getEntry().get(i).getResource();
 			assertEquals(5, respBundle.getEntry().size());
-			assertThat(respBundle.getLink("next").getUrl(), not(nullValue()));
+			assertThat(respBundle.getLink("next").getUrl()).isNotNull();
 			List<String> actualIds = toIds(respBundle);
-			assertThat(actualIds, contains(ids.subList(0, 5).toArray(new String[0])));
+			assertThat(actualIds).containsExactly(ids.subList(0, 5).toArray(new String[0]));
 		}
 	}
 
@@ -313,7 +310,7 @@ public class SystemProviderTransactionSearchR4Test extends BaseJpaR4Test {
 		assertEquals(5, respBundle.getEntry().size());
 		assertEquals(null, respBundle.getLink("next"));
 		List<String> actualIds = toIds(respBundle);
-		assertThat(actualIds, contains(ids.subList(0, 5).toArray(new String[0])));
+		assertThat(actualIds).containsExactly(ids.subList(0, 5).toArray(new String[0]));
 	}
 
 	@Test
@@ -335,14 +332,14 @@ public class SystemProviderTransactionSearchR4Test extends BaseJpaR4Test {
 		Bundle respBundle = (Bundle) output.getEntry().get(0).getResource();
 		assertEquals(5, respBundle.getEntry().size());
 		List<String> actualIds = toIds(respBundle);
-		assertThat(actualIds, contains(ids.subList(0, 5).toArray(new String[0])));
+		assertThat(actualIds).containsExactly(ids.subList(0, 5).toArray(new String[0]));
 
 		String nextPageLink = respBundle.getLink("next").getUrl();
 		output = ourClient.loadPage().byUrl(nextPageLink).andReturnBundle(Bundle.class).execute();
 		respBundle = output;
 		assertEquals(5, respBundle.getEntry().size());
 		actualIds = toIds(respBundle);
-		assertThat(actualIds, contains(ids.subList(5, 10).toArray(new String[0])));
+		assertThat(actualIds).containsExactly(ids.subList(5, 10).toArray(new String[0]));
 	}
 
 	/**
@@ -370,9 +367,9 @@ public class SystemProviderTransactionSearchR4Test extends BaseJpaR4Test {
 		for (int i = 0; i < 30; i++) {
 			Bundle respBundle = (Bundle) output.getEntry().get(i).getResource();
 			assertEquals(5, respBundle.getEntry().size());
-			assertThat(respBundle.getLink("next").getUrl(), not(nullValue()));
+			assertThat(respBundle.getLink("next").getUrl()).isNotNull();
 			List<String> actualIds = toIds(respBundle);
-			assertThat(actualIds, contains(ids.subList(0, 5).toArray(new String[0])));
+			assertThat(actualIds).containsExactly(ids.subList(0, 5).toArray(new String[0]));
 		}
 	}
 

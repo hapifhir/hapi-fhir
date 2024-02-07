@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Stream;
 
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class StreamUtilTest {
@@ -56,7 +56,7 @@ class StreamUtilTest {
 		StreamUtil.partition(baseStream, 2).close();
 
 		// then
-	    assertThat("partition closed underlying stream", closed.get());
+			assertThat(closed.get()).as("partition closed underlying stream").isTrue();
 	}
 
 

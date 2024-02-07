@@ -58,8 +58,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Stream;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -178,8 +177,8 @@ public class BulkDataImportProviderTest {
 
 			assertEquals(400, response.getStatusLine().getStatusCode());
 			assertEquals("application/fhir+json;charset=utf-8", response.getEntity().getContentType().getValue());
-			assertThat(resp, containsString("\"resourceType\": \"OperationOutcome\""));
-			assertThat(resp, containsString("HAPI-0513: Must request async processing for $import"));
+			assertThat(resp).contains("\"resourceType\": \"OperationOutcome\"");
+			assertThat(resp).contains("HAPI-0513: Must request async processing for $import");
 		}
 
 	}
@@ -207,7 +206,7 @@ public class BulkDataImportProviderTest {
 			// Verify
 
 			assertEquals(400, response.getStatusLine().getStatusCode());
-			assertThat(resp, containsString("HAPI-1769: No URLs specified"));
+			assertThat(resp).contains("HAPI-1769: No URLs specified");
 		}
 
 	}
@@ -256,7 +255,7 @@ public class BulkDataImportProviderTest {
 			assertEquals(202, response.getStatusLine().getStatusCode());
 			assertEquals("Accepted", response.getStatusLine().getReasonPhrase());
 			assertEquals("120", response.getFirstHeader(Constants.HEADER_RETRY_AFTER).getValue());
-			assertThat(response.getFirstHeader(Constants.HEADER_X_PROGRESS).getValue(), containsString("Job was created at "));
+			assertThat(response.getFirstHeader(Constants.HEADER_X_PROGRESS).getValue()).contains("Job was created at ");
 		}
 	}
 
@@ -279,7 +278,7 @@ public class BulkDataImportProviderTest {
 			assertEquals(202, response.getStatusLine().getStatusCode());
 			assertEquals("Accepted", response.getStatusLine().getReasonPhrase());
 			assertEquals("120", response.getFirstHeader(Constants.HEADER_RETRY_AFTER).getValue());
-			assertThat(response.getFirstHeader(Constants.HEADER_X_PROGRESS).getValue(), containsString("Job was created at 2022-01"));
+			assertThat(response.getFirstHeader(Constants.HEADER_X_PROGRESS).getValue()).contains("Job was created at 2022-01");
 		}
 	}
 
@@ -311,7 +310,7 @@ public class BulkDataImportProviderTest {
 
 			assertEquals(200, response.getStatusLine().getStatusCode());
 			assertEquals("OK", response.getStatusLine().getReasonPhrase());
-			assertThat(response.getEntity().getContentType().getValue(), containsString(Constants.CT_FHIR_JSON));
+			assertThat(response.getEntity().getContentType().getValue()).contains(Constants.CT_FHIR_JSON);
 		}
 	}
 
@@ -337,7 +336,7 @@ public class BulkDataImportProviderTest {
 			assertEquals("Server Error", response.getStatusLine().getReasonPhrase());
 			String responseContent = IOUtils.toString(response.getEntity().getContent(), Charsets.UTF_8);
 			ourLog.info("Response content: {}", responseContent);
-			assertThat(responseContent, containsString("\"diagnostics\": \"Job is in FAILED state with 123 error count. Last error: It failed.\""));
+			assertThat(responseContent).contains("\"diagnostics\": \"Job is in FAILED state with 123 error count. Last error: It failed.\"");
 		}
 	}
 

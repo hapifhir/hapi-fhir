@@ -36,9 +36,8 @@ import java.util.List;
 import java.util.Set;
 
 import static ca.uhn.fhir.jpa.model.util.UcumServiceUtil.UCUM_CODESYSTEM_URL;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.not;
@@ -322,7 +321,7 @@ public abstract class QuantitySearchParameterTestCases implements ITestDataBuild
 				{
 					String theUrl = "/Observation?component-value-quantity=107&component-value-quantity=260";
 					List<String> resourceIds = myTestDaoSearch.searchForIds(theUrl);
-					assertThat("when same component with qtys 107 and 260", resourceIds, empty());
+					assertThat(resourceIds).as("when same component with qtys 107 and 260").isEmpty();
 				}
 
 				// andAndOrClauses
@@ -337,7 +336,7 @@ public abstract class QuantitySearchParameterTestCases implements ITestDataBuild
 				{
 					String theUrl = "/Observation?component-value-quantity=50,70&component-value-quantity=260";
 					List<String> resourceIds = myTestDaoSearch.searchForIds(theUrl);
-					assertThat("when same component with qtys 50,70 and 260", resourceIds, empty());
+					assertThat(resourceIds).as("when same component with qtys 50,70 and 260").isEmpty();
 				}
 
 				// multipleAndsWithMultipleOrsEach
@@ -352,7 +351,7 @@ public abstract class QuantitySearchParameterTestCases implements ITestDataBuild
 				{
 					String theUrl = "/Observation?component-value-quantity=50,60&component-value-quantity=250,260";
 					List<String> resourceIds = myTestDaoSearch.searchForIds(theUrl);
-					assertThat("when same component with qtys 50,60 and 250,260", resourceIds, empty());
+					assertThat(resourceIds).as("when same component with qtys 50,60 and 250,260").isEmpty();
 				}
 			}
 		}
@@ -367,7 +366,7 @@ public abstract class QuantitySearchParameterTestCases implements ITestDataBuild
 				String idAlpha5 = withObservationWithValueQuantity(0.5).getIdPart();
 
 				List<String> allIds = myTestDaoSearch.searchForIds("/Observation?_sort=value-quantity");
-				assertThat(allIds, contains(idAlpha2, idAlpha5, idAlpha7));
+				assertThat(allIds).containsExactly(idAlpha2, idAlpha5, idAlpha7);
 			}
 		}
 
@@ -664,7 +663,7 @@ public abstract class QuantitySearchParameterTestCases implements ITestDataBuild
 
 				// this search is not freetext because there is no freetext-known parameter name
 				List<String> allIds = myTestDaoSearch.searchForIds("/Observation?_sort=value-quantity");
-				assertThat(allIds, contains(idAlpha2, idAlpha1, idAlpha3));
+				assertThat(allIds).containsExactly(idAlpha2, idAlpha1, idAlpha3);
 			}
 		}
 	}

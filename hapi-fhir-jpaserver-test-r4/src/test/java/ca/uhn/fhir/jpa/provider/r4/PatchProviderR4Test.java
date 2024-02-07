@@ -33,8 +33,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
 
-import static org.hamcrest.CoreMatchers.containsString;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -175,7 +174,7 @@ public class PatchProviderR4Test extends BaseResourceProviderR4Test {
 		try (CloseableHttpResponse response = ourHttpClient.execute(post)) {
 			assertEquals(200, response.getStatusLine().getStatusCode());
 			String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
-			assertThat(responseString, containsString("\"resourceType\":\"Bundle\""));
+			assertThat(responseString).contains("\"resourceType\":\"Bundle\"");
 		}
 
 		Patient newPt = myClient.read().resource(Patient.class).withId(pid1.getIdPart()).execute();
@@ -375,7 +374,7 @@ public class PatchProviderR4Test extends BaseResourceProviderR4Test {
 			assertEquals(200, response.getStatusLine().getStatusCode());
 			String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info("Response:\n{}", responseString);
-			assertThat(responseString, containsString("\"derivedFrom\":[{\"reference\":\"Media/465eb73a-bce3-423a-b86e-5d0d267638f4\"}]"));
+			assertThat(responseString).contains("\"derivedFrom\":[{\"reference\":\"Media/465eb73a-bce3-423a-b86e-5d0d267638f4\"}]");
 		}
 
 	}
@@ -399,8 +398,8 @@ public class PatchProviderR4Test extends BaseResourceProviderR4Test {
 		try (CloseableHttpResponse response = ourHttpClient.execute(patch)) {
 			assertEquals(200, response.getStatusLine().getStatusCode());
 			String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
-			assertThat(responseString, containsString("<OperationOutcome"));
-			assertThat(responseString, containsString("INFORMATION"));
+			assertThat(responseString).contains("<OperationOutcome");
+			assertThat(responseString).contains("INFORMATION");
 		}
 
 		Patient newPt = myClient.read().resource(Patient.class).withId(pid1.getIdPart()).execute();
@@ -441,7 +440,7 @@ public class PatchProviderR4Test extends BaseResourceProviderR4Test {
 		try (CloseableHttpResponse response = ourHttpClient.execute(post)) {
 			assertEquals(200, response.getStatusLine().getStatusCode());
 			String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
-			assertThat(responseString, containsString("\"resourceType\":\"Bundle\""));
+			assertThat(responseString).contains("\"resourceType\":\"Bundle\"");
 		}
 
 		Patient newPt = myClient.read().resource(Patient.class).withId(pid1.getIdPart()).execute();
@@ -469,8 +468,8 @@ public class PatchProviderR4Test extends BaseResourceProviderR4Test {
 		try (CloseableHttpResponse response = ourHttpClient.execute(patch)) {
 			assertEquals(200, response.getStatusLine().getStatusCode());
 			String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
-			assertThat(responseString, containsString("<OperationOutcome"));
-			assertThat(responseString, containsString("INFORMATION"));
+			assertThat(responseString).contains("<OperationOutcome");
+			assertThat(responseString).contains("INFORMATION");
 		}
 
 		Patient newPt = myClient.read().resource(Patient.class).withId(pid1.getIdPart()).execute();
@@ -497,8 +496,8 @@ public class PatchProviderR4Test extends BaseResourceProviderR4Test {
 		try (CloseableHttpResponse response = ourHttpClient.execute(patch)) {
 			assertEquals(404, response.getStatusLine().getStatusCode());
 			String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
-			assertThat(responseString, containsString("<OperationOutcome"));
-			assertThat(responseString, containsString("Invalid match URL &quot;Patient?_id=" + pid1.getIdPart() + "FOO&quot; - No resources match this search"));
+			assertThat(responseString).contains("<OperationOutcome");
+			assertThat(responseString).contains("Invalid match URL &quot;Patient?_id=" + pid1.getIdPart() + "FOO&quot; - No resources match this search");
 		}
 
 		Patient newPt = myClient.read().resource(Patient.class).withId(pid1.getIdPart()).execute();
@@ -530,8 +529,8 @@ public class PatchProviderR4Test extends BaseResourceProviderR4Test {
 		try (CloseableHttpResponse response = ourHttpClient.execute(patch)) {
 			assertEquals(412, response.getStatusLine().getStatusCode());
 			String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
-			assertThat(responseString, containsString("<OperationOutcome"));
-			assertThat(responseString, containsString("Failed to PATCH resource with match URL &quot;Patient?active=true&quot; because this search matched 2 resources"));
+			assertThat(responseString).contains("<OperationOutcome");
+			assertThat(responseString).contains("Failed to PATCH resource with match URL &quot;Patient?active=true&quot; because this search matched 2 resources");
 		}
 
 	}
@@ -566,8 +565,8 @@ public class PatchProviderR4Test extends BaseResourceProviderR4Test {
 
 		try (CloseableHttpResponse response = ourHttpClient.execute(patch)) {
 			String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
-			assertThat(responseString, containsString("<OperationOutcome"));
-			assertThat(responseString, containsString("was expecting double-quote to start field name"));
+			assertThat(responseString).contains("<OperationOutcome");
+			assertThat(responseString).contains("was expecting double-quote to start field name");
 			assertEquals(400, response.getStatusLine().getStatusCode());
 		}
 
@@ -592,8 +591,8 @@ public class PatchProviderR4Test extends BaseResourceProviderR4Test {
 		try (CloseableHttpResponse response = ourHttpClient.execute(patch)) {
 			assertEquals(409, response.getStatusLine().getStatusCode());
 			String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
-			assertThat(responseString, containsString("<OperationOutcome"));
-			assertThat(responseString, containsString("<diagnostics value=\"" + Msg.code(550) + Msg.code(974) + "Version 9 is not the most recent version of this resource, unable to apply patch\"/>"));
+			assertThat(responseString).contains("<OperationOutcome");
+			assertThat(responseString).contains("<diagnostics value=\"" + Msg.code(550) + Msg.code(974) + "Version 9 is not the most recent version of this resource, unable to apply patch\"/>");
 		}
 
 		Patient newPt = myClient.read().resource(Patient.class).withId(pid1.getIdPart()).execute();
@@ -621,8 +620,8 @@ public class PatchProviderR4Test extends BaseResourceProviderR4Test {
 		try (CloseableHttpResponse response = ourHttpClient.execute(patch)) {
 			assertEquals(200, response.getStatusLine().getStatusCode());
 			String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
-			assertThat(responseString, containsString("<OperationOutcome"));
-			assertThat(responseString, containsString("INFORMATION"));
+			assertThat(responseString).contains("<OperationOutcome");
+			assertThat(responseString).contains("INFORMATION");
 		}
 
 		Patient newPt = myClient.read().resource(Patient.class).withId(pid1.getIdPart()).execute();
@@ -650,8 +649,8 @@ public class PatchProviderR4Test extends BaseResourceProviderR4Test {
 		try (CloseableHttpResponse response = ourHttpClient.execute(patch)) {
 			assertEquals(200, response.getStatusLine().getStatusCode());
 			String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
-			assertThat(responseString, containsString("<OperationOutcome"));
-			assertThat(responseString, containsString("INFORMATION"));
+			assertThat(responseString).contains("<OperationOutcome");
+			assertThat(responseString).contains("INFORMATION");
 		}
 
 		Patient newPt = myClient.read().resource(Patient.class).withId(pid1.getIdPart()).execute();
@@ -693,7 +692,7 @@ public class PatchProviderR4Test extends BaseResourceProviderR4Test {
 		try (CloseableHttpResponse response = ourHttpClient.execute(post)) {
 			assertEquals(200, response.getStatusLine().getStatusCode());
 			String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
-			assertThat(responseString, containsString("\"resourceType\":\"Bundle\""));
+			assertThat(responseString).contains("\"resourceType\":\"Bundle\"");
 		}
 
 		Patient newPt = myClient.read().resource(Patient.class).withId(pid1.getIdPart()).execute();
@@ -732,7 +731,7 @@ public class PatchProviderR4Test extends BaseResourceProviderR4Test {
 		try (CloseableHttpResponse response = ourHttpClient.execute(post)) {
 			assertEquals(400, response.getStatusLine().getStatusCode());
 			String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
-			assertThat(responseString, containsString("Missing or invalid content type for PATCH operation"));
+			assertThat(responseString).contains("Missing or invalid content type for PATCH operation");
 		}
 
 		Patient newPt = myClient.read().resource(Patient.class).withId(pid1.getIdPart()).execute();
@@ -770,7 +769,7 @@ public class PatchProviderR4Test extends BaseResourceProviderR4Test {
 		try (CloseableHttpResponse response = ourHttpClient.execute(post)) {
 			assertEquals(400, response.getStatusLine().getStatusCode());
 			String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
-			assertThat(responseString, containsString("Unable to determine PATCH body from request"));
+			assertThat(responseString).contains("Unable to determine PATCH body from request");
 		}
 
 		Patient newPt = myClient.read().resource(Patient.class).withId(pid1.getIdPart()).execute();
@@ -809,7 +808,7 @@ public class PatchProviderR4Test extends BaseResourceProviderR4Test {
 		try (CloseableHttpResponse response = ourHttpClient.execute(post)) {
 			assertEquals(400, response.getStatusLine().getStatusCode());
 			String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
-			assertThat(responseString, containsString("Invalid Content-Type for PATCH operation: application/octet-stream"));
+			assertThat(responseString).contains("Invalid Content-Type for PATCH operation: application/octet-stream");
 		}
 
 		Patient newPt = myClient.read().resource(Patient.class).withId(pid1.getIdPart()).execute();
@@ -847,7 +846,7 @@ public class PatchProviderR4Test extends BaseResourceProviderR4Test {
 		try (CloseableHttpResponse response = ourHttpClient.execute(post)) {
 			assertEquals(400, response.getStatusLine().getStatusCode());
 			String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
-			assertThat(responseString, containsString("Binary PATCH detected with FHIR content type. FHIR Patch should use Parameters resource."));
+			assertThat(responseString).contains("Binary PATCH detected with FHIR content type. FHIR Patch should use Parameters resource.");
 		}
 
 		Patient newPt = myClient.read().resource(Patient.class).withId(pid1.getIdPart()).execute();

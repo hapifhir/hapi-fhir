@@ -19,9 +19,8 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class LinkedBlockingChannelFactoryTest {
@@ -60,7 +59,7 @@ class LinkedBlockingChannelFactoryTest {
 		// The first send was dequeued but our handler won't deliver it until we unblock it
 		await().until(() -> producer.getQueueSizeForUnitTest() == 2);
 		// no messages received yet
-		assertThat(myReceivedPayloads, hasSize(0));
+		assertThat(myReceivedPayloads).hasSize(0);
 
 		// Unblock the first latch so message handling is allowed to proceed
 		finishProcessingMessage(0);
@@ -69,7 +68,7 @@ class LinkedBlockingChannelFactoryTest {
 		await().until(() -> producer.getQueueSizeForUnitTest() == 1);
 
 		// and we should now have received 1 message
-		assertThat(myReceivedPayloads, hasSize(1));
+		assertThat(myReceivedPayloads).hasSize(1);
 		assertEquals(TEST_PAYLOAD, myReceivedPayloads.get(0));
 
 		// Unblock the second latch so message handling is allowed to proceed
@@ -79,7 +78,7 @@ class LinkedBlockingChannelFactoryTest {
 		await().until(() -> producer.getQueueSizeForUnitTest() == 0);
 
 		// and we should now have received 2 messages
-		assertThat(myReceivedPayloads, hasSize(2));
+		assertThat(myReceivedPayloads).hasSize(2);
 		assertEquals(TEST_PAYLOAD, myReceivedPayloads.get(1));
 	}
 

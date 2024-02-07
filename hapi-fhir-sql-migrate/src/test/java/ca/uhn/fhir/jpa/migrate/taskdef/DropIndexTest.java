@@ -13,10 +13,9 @@ import java.util.List;
 import java.util.function.Supplier;
 
 import static java.util.Arrays.asList;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.not;
 
 public class DropIndexTest extends BaseTest {
@@ -39,7 +38,7 @@ public class DropIndexTest extends BaseTest {
 
 		getMigrator().migrate();
 
-		assertThat(JdbcUtils.getIndexNames(getConnectionProperties(), "SOMETABLE"), contains("IDX_DIFINDEX"));
+		assertThat(JdbcUtils.getIndexNames(getConnectionProperties(), "SOMETABLE")).containsExactly("IDX_DIFINDEX");
 	}
 
 	@ParameterizedTest(name = "{index}: {0}")
@@ -58,7 +57,7 @@ public class DropIndexTest extends BaseTest {
 
 		getMigrator().migrate();
 
-		assertThat(JdbcUtils.getIndexNames(getConnectionProperties(), "SOMETABLE"), contains("IDX_DIFINDEX"));
+		assertThat(JdbcUtils.getIndexNames(getConnectionProperties(), "SOMETABLE")).containsExactly("IDX_DIFINDEX");
 	}
 
 
@@ -79,7 +78,7 @@ public class DropIndexTest extends BaseTest {
 
 		getMigrator().migrate();
 
-		assertThat(JdbcUtils.getIndexNames(getConnectionProperties(), "SOMETABLE"), contains("IDX_DIFINDEX"));
+		assertThat(JdbcUtils.getIndexNames(getConnectionProperties(), "SOMETABLE")).containsExactly("IDX_DIFINDEX");
 	}
 
 	@ParameterizedTest(name = "{index}: {0}")
@@ -98,7 +97,7 @@ public class DropIndexTest extends BaseTest {
 
 		getMigrator().migrate();
 
-		assertThat(JdbcUtils.getIndexNames(getConnectionProperties(), "SOMETABLE"), contains("IDX_DIFINDEX"));
+		assertThat(JdbcUtils.getIndexNames(getConnectionProperties(), "SOMETABLE")).containsExactly("IDX_DIFINDEX");
 	}
 
 	@ParameterizedTest(name = "{index}: {0}")
@@ -117,7 +116,7 @@ public class DropIndexTest extends BaseTest {
 
 		assertThat(JdbcUtils.getIndexNames(getConnectionProperties(), "SOMETABLE"), not(empty()));
 		getMigrator().migrate();
-		assertThat(JdbcUtils.getIndexNames(getConnectionProperties(), "SOMETABLE"), empty());
+		assertThat(JdbcUtils.getIndexNames(getConnectionProperties(), "SOMETABLE")).isEmpty();
 	}
 
 	@Nested
@@ -140,27 +139,27 @@ public class DropIndexTest extends BaseTest {
 			switch (theDriver) {
 				case MYSQL_5_7:
 				case MARIADB_10_1:
-					assertThat(mySql, equalTo(asList("alter table SOMETABLE drop index `IDX_ANINDEX`")));
+					assertThat(mySql).isEqualTo(asList("alter table SOMETABLE drop index `IDX_ANINDEX`"));
 					break;
 				case H2_EMBEDDED:
-					assertThat(mySql, equalTo(asList("drop index IDX_ANINDEX")));
+					assertThat(mySql).isEqualTo(asList("drop index IDX_ANINDEX"));
 					break;
 				case DERBY_EMBEDDED:
-					assertThat(mySql, equalTo(asList("alter table SOMETABLE drop constraint IDX_ANINDEX")));
+					assertThat(mySql).isEqualTo(asList("alter table SOMETABLE drop constraint IDX_ANINDEX"));
 					break;
 				case ORACLE_12C:
-					assertThat(mySql, equalTo(asList("drop index IDX_ANINDEX")));
+					assertThat(mySql).isEqualTo(asList("drop index IDX_ANINDEX"));
 					break;
 				case MSSQL_2012:
-					assertThat(mySql, equalTo(asList("drop index IDX_ANINDEX on SOMETABLE")));
+					assertThat(mySql).isEqualTo(asList("drop index IDX_ANINDEX on SOMETABLE"));
 					break;
 				case POSTGRES_9_4:
-					assertThat(mySql, equalTo(asList(
+					assertThat(mySql).isEqualTo(asList(
 						"alter table SOMETABLE drop constraint if exists IDX_ANINDEX cascade",
-						"drop index if exists IDX_ANINDEX cascade")));
+						"drop index if exists IDX_ANINDEX cascade"));
 					break;
 				case COCKROACHDB_21_1:
-					assertThat(mySql, equalTo(asList("drop index if exists SOMETABLE@IDX_ANINDEX cascade")));
+					assertThat(mySql).isEqualTo(asList("drop index if exists SOMETABLE@IDX_ANINDEX cascade"));
 					break;
 			}
 		}
@@ -173,25 +172,25 @@ public class DropIndexTest extends BaseTest {
 			switch (theDriver) {
 				case MYSQL_5_7:
 				case MARIADB_10_1:
-					assertThat(mySql, equalTo(asList("alter table SOMETABLE drop index IDX_ANINDEX")));
+					assertThat(mySql).isEqualTo(asList("alter table SOMETABLE drop index IDX_ANINDEX"));
 					break;
 				case H2_EMBEDDED:
-					assertThat(mySql, equalTo(asList("drop index IDX_ANINDEX")));
+					assertThat(mySql).isEqualTo(asList("drop index IDX_ANINDEX"));
 					break;
 				case DERBY_EMBEDDED:
-					assertThat(mySql, equalTo(asList("drop index IDX_ANINDEX")));
+					assertThat(mySql).isEqualTo(asList("drop index IDX_ANINDEX"));
 					break;
 				case ORACLE_12C:
-					assertThat(mySql, equalTo(asList("drop index IDX_ANINDEX")));
+					assertThat(mySql).isEqualTo(asList("drop index IDX_ANINDEX"));
 					break;
 				case MSSQL_2012:
-					assertThat(mySql, equalTo(asList("drop index SOMETABLE.IDX_ANINDEX")));
+					assertThat(mySql).isEqualTo(asList("drop index SOMETABLE.IDX_ANINDEX"));
 					break;
 				case POSTGRES_9_4:
-					assertThat(mySql, equalTo(asList("drop index IDX_ANINDEX")));
+					assertThat(mySql).isEqualTo(asList("drop index IDX_ANINDEX"));
 					break;
 				case COCKROACHDB_21_1:
-					assertThat(mySql, equalTo(asList("drop index SOMETABLE@IDX_ANINDEX")));
+					assertThat(mySql).isEqualTo(asList("drop index SOMETABLE@IDX_ANINDEX"));
 					break;
 			}
 		}
@@ -205,27 +204,27 @@ public class DropIndexTest extends BaseTest {
 			switch (theDriver) {
 				case MYSQL_5_7:
 				case MARIADB_10_1:
-					assertThat(mySql, equalTo(asList("alter table SOMETABLE drop index `IDX_ANINDEX`")));
+					assertThat(mySql).isEqualTo(asList("alter table SOMETABLE drop index `IDX_ANINDEX`"));
 					break;
 				case H2_EMBEDDED:
-					assertThat(mySql, equalTo(asList("drop index IDX_ANINDEX")));
+					assertThat(mySql).isEqualTo(asList("drop index IDX_ANINDEX"));
 					break;
 				case DERBY_EMBEDDED:
-					assertThat(mySql, equalTo(asList("alter table SOMETABLE drop constraint IDX_ANINDEX")));
+					assertThat(mySql).isEqualTo(asList("alter table SOMETABLE drop constraint IDX_ANINDEX"));
 					break;
 				case ORACLE_12C:
-					assertThat(mySql, equalTo(asList("drop index IDX_ANINDEX ONLINE")));
+					assertThat(mySql).isEqualTo(asList("drop index IDX_ANINDEX ONLINE"));
 					break;
 				case MSSQL_2012:
-					assertThat(mySql, equalTo(asList("drop index IDX_ANINDEX on SOMETABLE WITH (ONLINE = ON)")));
+					assertThat(mySql).isEqualTo(asList("drop index IDX_ANINDEX on SOMETABLE WITH (ONLINE = ON)"));
 					break;
 				case POSTGRES_9_4:
-					assertThat(mySql, equalTo(asList(
+					assertThat(mySql).isEqualTo(asList(
 						"alter table SOMETABLE drop constraint if exists IDX_ANINDEX cascade",
-						"drop index CONCURRENTLY if exists IDX_ANINDEX cascade")));
+						"drop index CONCURRENTLY if exists IDX_ANINDEX cascade"));
 					break;
 				case COCKROACHDB_21_1:
-					assertThat(mySql, equalTo(asList("drop index if exists SOMETABLE@IDX_ANINDEX cascade")));
+					assertThat(mySql).isEqualTo(asList("drop index if exists SOMETABLE@IDX_ANINDEX cascade"));
 					break;
 			}
 		}
@@ -239,25 +238,25 @@ public class DropIndexTest extends BaseTest {
 			switch (theDriver) {
 				case MYSQL_5_7:
 				case MARIADB_10_1:
-					assertThat(mySql, equalTo(asList("alter table SOMETABLE drop index IDX_ANINDEX")));
+					assertThat(mySql).isEqualTo(asList("alter table SOMETABLE drop index IDX_ANINDEX"));
 					break;
 				case H2_EMBEDDED:
-					assertThat(mySql, equalTo(asList("drop index IDX_ANINDEX")));
+					assertThat(mySql).isEqualTo(asList("drop index IDX_ANINDEX"));
 					break;
 				case DERBY_EMBEDDED:
-					assertThat(mySql, equalTo(asList("drop index IDX_ANINDEX")));
+					assertThat(mySql).isEqualTo(asList("drop index IDX_ANINDEX"));
 					break;
 				case ORACLE_12C:
-					assertThat(mySql, equalTo(asList("drop index IDX_ANINDEX ONLINE")));
+					assertThat(mySql).isEqualTo(asList("drop index IDX_ANINDEX ONLINE"));
 					break;
 				case MSSQL_2012:
-					assertThat(mySql, equalTo(asList("drop index SOMETABLE.IDX_ANINDEX")));
+					assertThat(mySql).isEqualTo(asList("drop index SOMETABLE.IDX_ANINDEX"));
 					break;
 				case POSTGRES_9_4:
-					assertThat(mySql, equalTo(asList("drop index CONCURRENTLY IDX_ANINDEX")));
+					assertThat(mySql).isEqualTo(asList("drop index CONCURRENTLY IDX_ANINDEX"));
 					break;
 				case COCKROACHDB_21_1:
-					assertThat(mySql, equalTo(asList("drop index SOMETABLE@IDX_ANINDEX")));
+					assertThat(mySql).isEqualTo(asList("drop index SOMETABLE@IDX_ANINDEX"));
 					break;
 			}
 		}

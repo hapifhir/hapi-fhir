@@ -26,10 +26,7 @@ import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.util.ClasspathUtil.loadResourceAsByteArray;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.hasItem;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -80,7 +77,7 @@ public class IgInstallerDstu3Test extends BaseJpaDstu3Test {
 			igInstaller.install(new PackageInstallationSpec().setName("erroneous-ig").setVersion("1.0.2").setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL).setPackageContents(bytes));
 			fail();
 		} catch (ImplementationGuideInstallationException e) {
-			assertThat(e.getMessage(), containsString("Could not load NPM package erroneous-ig#1.0.2"));
+			assertThat(e.getMessage()).contains("Could not load NPM package erroneous-ig#1.0.2");
 		}
 	}
 
@@ -106,7 +103,7 @@ public class IgInstallerDstu3Test extends BaseJpaDstu3Test {
 			.addDependencyExclude("hl7\\.fhir\\.[a-zA-Z0-9]+\\.core");
 		PackageInstallOutcomeJson outcome = igInstaller.install(spec);
 		ourLog.info("Install messages:\n * {}", outcome.getMessage().stream().collect(Collectors.joining("\n * ")));
-		assertThat(outcome.getMessage(), hasItem("Indexing StructureDefinition Resource[package/vl-QuestionnaireProvisioningTask.json] with URL: http://nictiz.nl/fhir/StructureDefinition/vl-QuestionnaireProvisioningTask|1.0.1"));
+		assertThat(outcome.getMessage()).contains("Indexing StructureDefinition Resource[package/vl-QuestionnaireProvisioningTask.json] with URL: http://nictiz.nl/fhir/StructureDefinition/vl-QuestionnaireProvisioningTask|1.0.1");
 
 		runInTransaction(() -> {
 			assertTrue(myPackageVersionDao.findByPackageIdAndVersion("nictiz.fhir.nl.stu3.questionnaires", "1.0.2").isPresent());
@@ -210,7 +207,7 @@ public class IgInstallerDstu3Test extends BaseJpaDstu3Test {
 			ensureNoCreatesOrUpdates(() -> igInstaller.install(installationSpec));
 			fail();
 		} catch (RuntimeException e) {
-			assertThat(e.getMessage(), is(containsString("Not allowed!")));
+			assertThat(e.getMessage()).contains("Not allowed!");
 		}
 
 		installationSpec.setReloadExisting(false);

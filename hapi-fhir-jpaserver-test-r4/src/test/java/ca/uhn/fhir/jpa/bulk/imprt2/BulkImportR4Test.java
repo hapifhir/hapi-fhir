@@ -37,10 +37,10 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.blankOrNullString;
-import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.not;
@@ -120,7 +120,7 @@ public class BulkImportR4Test extends BaseJpaR4Test {
 			assertNotNull(instance.getStartTime());
 			assertNotNull(instance.getEndTime());
 			assertEquals(200, instance.getCombinedRecordsProcessed());
-			assertThat(instance.getCombinedRecordsProcessedPerSecond(), greaterThan(5.0));
+			assertThat(instance.getCombinedRecordsProcessedPerSecond()).isGreaterThan(5.0);
 		});
 	}
 
@@ -195,11 +195,11 @@ public class BulkImportR4Test extends BaseJpaR4Test {
 			runInTransaction(() -> {
 				JobInstance instance = myJobCoordinator.getInstance(instanceId);
 				ourLog.info("Instance details:\n{}", JsonUtil.serialize(instance, true));
-				assertThat(storageDescription, instance.getErrorCount(), greaterThan(0));
+				assertThat(instance.getErrorCount()).as(storageDescription).isGreaterThan(0);
 				assertNotNull(instance.getCreateTime());
 				assertNotNull(instance.getStartTime());
 				assertNull(instance.getEndTime());
-				assertThat(instance.getErrorMessage(), containsString("This is an exception"));
+				assertThat(instance.getErrorMessage()).contains("This is an exception");
 			});
 
 		} finally {
@@ -249,7 +249,7 @@ public class BulkImportR4Test extends BaseJpaR4Test {
 		assertNotNull(instance.getCreateTime());
 		assertNotNull(instance.getStartTime());
 		assertNotNull(instance.getEndTime());
-		assertThat(instance.getErrorMessage(), containsString("Unknown resource name \"Foo\""));
+		assertThat(instance.getErrorMessage()).contains("Unknown resource name \"Foo\"");
 	}
 
 
@@ -292,7 +292,7 @@ public class BulkImportR4Test extends BaseJpaR4Test {
 				assertNotNull(instance.getCreateTime());
 				assertNotNull(instance.getStartTime());
 				assertNotNull(instance.getEndTime());
-				assertThat(instance.getErrorMessage(), containsString("Received HTTP 404 from URL: http://"));
+				assertThat(instance.getErrorMessage()).contains("Received HTTP 404 from URL: http://");
 			});
 
 		} finally {

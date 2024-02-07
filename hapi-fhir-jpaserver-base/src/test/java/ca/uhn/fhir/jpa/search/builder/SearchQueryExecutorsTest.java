@@ -8,8 +8,7 @@ import java.util.Spliterators;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
+import static org.assertj.core.api.Assertions.assertThat;
 
 class SearchQueryExecutorsTest {
 
@@ -19,7 +18,7 @@ class SearchQueryExecutorsTest {
 
 		ISearchQueryExecutor queryExecutor = SearchQueryExecutors.from(listWithValues);
 
-		assertThat(drain(queryExecutor), contains(1L,2L,3L,4L,5L));
+		assertThat(drain(queryExecutor)).containsExactly(1L, 2L, 3L, 4L, 5L);
 	}
 
 	@Test
@@ -30,7 +29,7 @@ class SearchQueryExecutorsTest {
 
 		ISearchQueryExecutor queryExecutor = SearchQueryExecutors.limited(target, 3);
 
-		assertThat(drain(queryExecutor), contains(1L,2L,3L));
+		assertThat(drain(queryExecutor)).containsExactly(1L, 2L, 3L);
 	}
 
 	@Test
@@ -41,7 +40,7 @@ class SearchQueryExecutorsTest {
 
 		ISearchQueryExecutor queryExecutor = SearchQueryExecutors.limited(target, 5);
 
-		assertThat(drain(queryExecutor), contains(1L,2L,3L));
+		assertThat(drain(queryExecutor)).containsExactly(1L, 2L, 3L);
 	}
 
 

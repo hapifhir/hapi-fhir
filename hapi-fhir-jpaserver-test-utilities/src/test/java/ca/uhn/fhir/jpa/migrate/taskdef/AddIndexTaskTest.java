@@ -19,9 +19,7 @@ import java.sql.SQLException;
 import java.util.Collections;
 import java.util.List;
 
-import static org.hamcrest.CoreMatchers.containsString;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.hasSize;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -60,8 +58,8 @@ class AddIndexTaskTest {
 		task.execute();
 
 		List<ILoggingEvent> events = myLogCapture.getLogEvents();
-		assertThat(events, hasSize(1));
+		assertThat(events).hasSize(1);
 		LoggingEvent event = (LoggingEvent) events.get(0);
-		assertThat(event.getFormattedMessage(), containsString("ORA-01408: such column list already indexed"));
+		assertThat(event.getFormattedMessage()).contains("ORA-01408: such column list already indexed");
 	}
 }

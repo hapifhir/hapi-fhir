@@ -25,8 +25,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Set;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.hasSize;
+import static org.assertj.core.api.Assertions.assertThat;
 
 class ExtendedHSearchIndexExtractorTest implements ITestDataBuilder.WithSupport {
 	FhirContext myFhirContext = FhirContext.forR4Cached();
@@ -59,7 +58,7 @@ class ExtendedHSearchIndexExtractorTest implements ITestDataBuilder.WithSupport 
 
 		// validate
 		Set<CompositeSearchIndexData> spIndexData = indexData.getSearchParamComposites().get("component-code-value-concept");
-		assertThat(spIndexData, hasSize(1));
+		assertThat(spIndexData).hasSize(1);
 	}
 
 	@Test
@@ -82,9 +81,9 @@ class ExtendedHSearchIndexExtractorTest implements ITestDataBuilder.WithSupport 
 
 		// validate
 		Set<DateSearchIndexData> dIndexData = indexData.getDateIndexData().get("Date");
-		assertThat(dIndexData, hasSize(0));
+		assertThat(dIndexData).hasSize(0);
 		Set<QuantitySearchIndexData> qIndexData = indexData.getQuantityIndexData().get("Quantity");
-		assertThat(qIndexData, hasSize(0));
+		assertThat(qIndexData).hasSize(0);
 
 	}
 

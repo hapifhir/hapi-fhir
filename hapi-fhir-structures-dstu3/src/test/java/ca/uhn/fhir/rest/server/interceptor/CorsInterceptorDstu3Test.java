@@ -49,8 +49,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
@@ -119,7 +118,7 @@ public class CorsInterceptorDstu3Test {
 	@Test
 	public void testDefaultConfig() {
 		CorsInterceptor def = new CorsInterceptor();
-		assertThat(def.getConfig().getAllowedOrigins(), contains("*"));
+		assertThat(def.getConfig().getAllowedOrigins()).containsExactly("*");
 	}
 
 	@Test

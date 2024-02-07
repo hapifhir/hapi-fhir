@@ -32,10 +32,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 
 public class TransactionCapturingProviderExtension<T extends IBaseBundle> implements BeforeEachCallback, AfterEachCallback {
 
@@ -62,7 +61,7 @@ public class TransactionCapturingProviderExtension<T extends IBaseBundle> implem
 	}
 
 	public void waitForTransactionCount(int theCount) {
-		assertThat(theCount, greaterThanOrEqualTo(myProvider.size()));
+		assertThat(theCount).isGreaterThanOrEqualTo(myProvider.size());
 		await().until(()->myProvider.size(), equalTo(theCount));
 	}
 

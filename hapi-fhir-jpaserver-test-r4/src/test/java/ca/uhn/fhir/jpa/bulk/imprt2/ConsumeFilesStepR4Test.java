@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.either;
@@ -230,7 +231,7 @@ public class ConsumeFilesStepR4Test extends BasePartitioningR4Test {
 		} catch (JobExecutionFailedException e) {
 
 			// Validate
-			assertThat(e.getMessage(), containsString("no resource with this ID exists and clients may only assign IDs"));
+			assertThat(e.getMessage()).contains("no resource with this ID exists and clients may only assign IDs");
 
 		}
 

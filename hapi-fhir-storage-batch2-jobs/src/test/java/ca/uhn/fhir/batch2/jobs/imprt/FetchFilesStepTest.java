@@ -24,8 +24,7 @@ import static ca.uhn.fhir.rest.api.Constants.CT_FHIR_JSON_NEW;
 import static ca.uhn.fhir.rest.api.Constants.CT_FHIR_NDJSON;
 import static ca.uhn.fhir.rest.api.Constants.CT_JSON;
 import static ca.uhn.fhir.rest.api.Constants.CT_TEXT;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.hasItem;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -70,7 +69,7 @@ public class FetchFilesStepTest {
 		assertEquals(1, myHttpServletExtension.getRequestHeaders().size());
 
 		String expectedAuthHeader = "Authorization: Basic " + Base64Utils.encodeToString("admin:password".getBytes(StandardCharsets.UTF_8));
-		assertThat(myHttpServletExtension.toString(), myHttpServletExtension.getRequestHeaders().get(0), hasItem(expectedAuthHeader));
+		assertThat(myHttpServletExtension.getRequestHeaders().get(0)).as(myHttpServletExtension.toString()).contains(expectedAuthHeader);
 	}
 
 	@Test

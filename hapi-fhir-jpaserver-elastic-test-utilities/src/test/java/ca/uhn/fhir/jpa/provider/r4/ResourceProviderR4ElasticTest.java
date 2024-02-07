@@ -39,11 +39,10 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.IntStream;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasItem;
-import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
-import static org.hamcrest.Matchers.nullValue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -94,7 +93,7 @@ public class ResourceProviderR4ElasticTest extends BaseResourceProviderR4Test {
 			String text = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			ValueSet valueSet = myFhirContext.newXmlParser().parseResource(ValueSet.class, text);
 			ourLog.info("testAutocompleteDirectionExisting {}", text);
-			assertThat(valueSet, is(not(nullValue())));
+			assertThat(valueSet).isNotNull();
 			List<ValueSet.ValueSetExpansionContainsComponent> expansions = valueSet.getExpansion().getContains();
 			assertThat(expansions, hasItem(valueSetExpansionMatching(mean_blood_pressure)));
 			assertThat(expansions, not(hasItem(valueSetExpansionMatching(blood_count))));

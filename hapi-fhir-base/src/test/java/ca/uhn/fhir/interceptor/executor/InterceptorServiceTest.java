@@ -19,9 +19,7 @@ import org.junit.jupiter.api.Test;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.hamcrest.CoreMatchers.containsString;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class InterceptorServiceTest {
@@ -255,7 +253,7 @@ public class InterceptorServiceTest {
 			assertTrue(outcome);
 		}
 
-		assertThat(myInvocations, contains("MyTestInterceptorOne.testRb", "MyTestInterceptorTwo.testRb"));
+		assertThat(myInvocations).containsExactly("MyTestInterceptorOne.testRb", "MyTestInterceptorTwo.testRb");
 		assertSame("A", interceptor0.myLastString0);
 		assertSame("A", interceptor1.myLastString0);
 		assertSame("B", interceptor1.myLastString1);
@@ -275,7 +273,7 @@ public class InterceptorServiceTest {
 			assertTrue(outcome);
 		}
 
-		assertThat(myInvocations, contains("MyTestAnonymousInterceptorOne.testRb", "MyTestAnonymousInterceptorTwo.testRb"));
+		assertThat(myInvocations).containsExactly("MyTestAnonymousInterceptorOne.testRb", "MyTestAnonymousInterceptorTwo.testRb");
 		assertSame("A", interceptor0.myLastString0);
 		assertSame("A", interceptor1.myLastString0);
 		assertSame("B", interceptor1.myLastString1);
@@ -293,7 +291,7 @@ public class InterceptorServiceTest {
 		boolean outcome = svc.callHooks(Pointcut.TEST_RB, new HookParams("A", "B"));
 		assertTrue(outcome);
 
-		assertThat(myInvocations, contains("MyTestInterceptorOne.testRb", "MyTestInterceptorTwo.testRb"));
+		assertThat(myInvocations).containsExactly("MyTestInterceptorOne.testRb", "MyTestInterceptorTwo.testRb");
 		assertSame("A", interceptor0.myLastString0);
 		assertSame("A", interceptor1.myLastString0);
 		assertSame("B", interceptor1.myLastString1);
@@ -313,7 +311,7 @@ public class InterceptorServiceTest {
 		boolean outcome = svc.callHooks(Pointcut.TEST_RB, new HookParams("A", "B"));
 		assertFalse(outcome);
 
-		assertThat(myInvocations, contains("MyTestInterceptorOne.testRb"));
+		assertThat(myInvocations).containsExactly("MyTestInterceptorOne.testRb");
 		assertSame("A", interceptor0.myLastString0);
 		assertSame(null, interceptor1.myLastString0);
 		assertSame(null, interceptor1.myLastString1);
@@ -440,7 +438,7 @@ public class InterceptorServiceTest {
 			svc.callHooks(Pointcut.TEST_RB, params);
 			fail();
 		} catch (IllegalArgumentException e) {
-			assertThat(e.getMessage(), containsString("Invalid params for pointcut " + Pointcut.TEST_RB + " - Wanted java.lang.String,java.lang.String but found "));
+			assertThat(e.getMessage()).contains("Invalid params for pointcut " + Pointcut.TEST_RB + " - Wanted java.lang.String,java.lang.String but found ");
 		}
 	}
 

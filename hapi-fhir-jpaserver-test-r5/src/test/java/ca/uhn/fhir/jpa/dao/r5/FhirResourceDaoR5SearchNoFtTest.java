@@ -39,9 +39,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -196,7 +194,7 @@ public class FhirResourceDaoR5SearchNoFtTest extends BaseJpaR5Test {
 
         SearchParameterMap map = SearchParameterMap.newSynchronous(ClinicalUseDefinition.SP_CONTRAINDICATION_REFERENCE, new ReferenceParam(obsId));
         List<String> outcome = toUnqualifiedVersionlessIdValues(myClinicalUseDefinitionDao.search(map, mySrd));
-        assertThat(outcome, Matchers.contains(id));
+			assertThat(outcome).containsExactly(id);
 
     }
 
@@ -220,7 +218,7 @@ public class FhirResourceDaoR5SearchNoFtTest extends BaseJpaR5Test {
 
         SearchParameterMap map = SearchParameterMap.newSynchronous(ClinicalUseDefinition.SP_CONTRAINDICATION, new TokenParam("http://foo", "bar"));
         List<String> outcome = toUnqualifiedVersionlessIdValues(myClinicalUseDefinitionDao.search(map, mySrd));
-        assertThat(outcome, Matchers.contains(id));
+			assertThat(outcome).containsExactly(id);
 
     }
 
@@ -240,8 +238,8 @@ public class FhirResourceDaoR5SearchNoFtTest extends BaseJpaR5Test {
                 .newSynchronous(Patient.SP_ADDRESS, new StringParam("DISTRICT123"));
         IBundleProvider outcome = myPatientDao.search(params, mySrd);
 
-        // Verify
-        assertThat(toUnqualifiedVersionlessIdValues(outcome), Matchers.contains(id));
+			// Verify
+			assertThat(toUnqualifiedVersionlessIdValues(outcome)).containsExactly(id);
 
     }
 
@@ -301,9 +299,7 @@ public class FhirResourceDaoR5SearchNoFtTest extends BaseJpaR5Test {
                     .filter(t -> t.getParamName().contains("."))
                     .map(t -> t.getParamName() + " " + t.getSystem() + "|" + t.getValue())
                     .toList();
-            assertThat(params.toString(), params, containsInAnyOrder(
-                    "composition.patient.identifier http://foo|bar"
-            ));
+					assertThat(params).as(params.toString()).containsExactlyInAnyOrder("composition.patient.identifier http://foo|bar");
         });
 
         // Test 2
@@ -366,7 +362,7 @@ public class FhirResourceDaoR5SearchNoFtTest extends BaseJpaR5Test {
 
         SearchParameterMap params = SearchParameterMap.newSynchronous();
         params.add(Constants.PARAM_LANGUAGE, new TokenParam("en"));
-        assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(params, mySrd)), contains("Observation/A"));
+			assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(params, mySrd))).containsExactly("Observation/A");
     }
 
 }

@@ -69,10 +69,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.not;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -210,7 +207,7 @@ public class ServerConformanceProviderDstu2Test {
 		ourLog.info(conf);
 
 		conf = ourCtx.newXmlParser().setPrettyPrint(false).encodeResourceToString(conformance);
-		assertThat(conf, containsString("<interaction><code value=\"" + TypeRestfulInteractionEnum.HISTORY_INSTANCE.getCode() + "\"/></interaction>"));
+		assertThat(conf).contains("<interaction><code value=\"" + TypeRestfulInteractionEnum.HISTORY_INSTANCE.getCode() + "\"/></interaction>");
 	}
 
 
@@ -242,9 +239,9 @@ public class ServerConformanceProviderDstu2Test {
 		String conf = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance);
 		ourLog.info(conf);
 
-		assertThat(conf, containsString("<documentation value=\"The patient's identifier\"/>"));
-		assertThat(conf, containsString("<documentation value=\"The patient's name\"/>"));
-		assertThat(conf, containsString("<type value=\"token\"/>"));
+		assertThat(conf).contains("<documentation value=\"The patient's identifier\"/>");
+		assertThat(conf).contains("<documentation value=\"The patient's name\"/>");
+		assertThat(conf).contains("<type value=\"token\"/>");
 	}
 
 	@Test
@@ -290,10 +287,10 @@ public class ServerConformanceProviderDstu2Test {
 
 		assertEquals(2, conformance.getRest().get(0).getOperation().size());
 		List<String> operationNames = toOperationNames(conformance.getRest().get(0).getOperation());
-		assertThat(operationNames, containsInAnyOrder("someOp", "validate"));
+		assertThat(operationNames).containsExactlyInAnyOrder("someOp", "validate");
 
 		List<String> operationIdParts = toOperationIdParts(conformance.getRest().get(0).getOperation());
-		assertThat(operationIdParts, containsInAnyOrder("EncounterPatient-i-someOp", "EncounterPatient-i-validate"));
+		assertThat(operationIdParts).containsExactlyInAnyOrder("EncounterPatient-i-someOp", "EncounterPatient-i-validate");
 
 		{
 			OperationDefinition opDef = sc.readOperationDefinition(new IdDt("OperationDefinition/EncounterPatient-i-someOp"), createRequestDetails(rs));
@@ -303,7 +300,7 @@ public class ServerConformanceProviderDstu2Test {
 			assertEquals("someOp", opDef.getCode());
 			assertEquals(true, opDef.getInstance());
 			assertEquals(false, opDef.getSystem());
-			assertThat(types, containsInAnyOrder("Patient", "Encounter"));
+			assertThat(types).containsExactlyInAnyOrder("Patient", "Encounter");
 			assertEquals(2, opDef.getParameter().size());
 			assertEquals("someOpParam1", opDef.getParameter().get(0).getName());
 			assertEquals("date", opDef.getParameter().get(0).getType());
@@ -327,8 +324,8 @@ public class ServerConformanceProviderDstu2Test {
 		String conf = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance);
 		ourLog.info("AAAAAA" + conf);
 
-		assertThat(conf, containsString("<documentation value=\"The patient's identifier (MRN or other card number)\"/>"));
-		assertThat(conf, containsString("<type value=\"token\"/>"));
+		assertThat(conf).contains("<documentation value=\"The patient's identifier (MRN or other card number)\"/>");
+		assertThat(conf).contains("<type value=\"token\"/>");
 
 	}
 
@@ -420,8 +417,8 @@ public class ServerConformanceProviderDstu2Test {
 		ourLog.info(conf);
 
 		conf = ourCtx.newXmlParser().setPrettyPrint(false).encodeResourceToString(conformance);
-		assertThat(conf, containsString("<interaction><code value=\"vread\"/></interaction>"));
-		assertThat(conf, containsString("<interaction><code value=\"read\"/></interaction>"));
+		assertThat(conf).contains("<interaction><code value=\"vread\"/></interaction>");
+		assertThat(conf).contains("<interaction><code value=\"read\"/></interaction>");
 	}
 
 	@Test
@@ -440,8 +437,8 @@ public class ServerConformanceProviderDstu2Test {
 		ourLog.info(conf);
 
 		conf = ourCtx.newXmlParser().setPrettyPrint(false).encodeResourceToString(conformance);
-		assertThat(conf, not(containsString("<interaction><code value=\"vread\"/></interaction>")));
-		assertThat(conf, containsString("<interaction><code value=\"read\"/></interaction>"));
+		assertThat(conf).doesNotContain("<interaction><code value=\"vread\"/></interaction>");
+		assertThat(conf).contains("<interaction><code value=\"read\"/></interaction>");
 	}
 
 	@Test
@@ -476,8 +473,8 @@ public class ServerConformanceProviderDstu2Test {
 		String conf = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance);
 		ourLog.info(conf);
 
-		assertThat(conf, containsString("<documentation value=\"The patient's identifier (MRN or other card number)\"/>"));
-		assertThat(conf, containsString("<type value=\"token\"/>"));
+		assertThat(conf).contains("<documentation value=\"The patient's identifier (MRN or other card number)\"/>");
+		assertThat(conf).contains("<type value=\"token\"/>");
 
 	}
 
@@ -609,7 +606,7 @@ public class ServerConformanceProviderDstu2Test {
 		ourLog.info(conf);
 
 		conf = ourCtx.newXmlParser().setPrettyPrint(false).encodeResourceToString(conformance);
-		assertThat(conf, containsString("<interaction><code value=\"" + SystemRestfulInteractionEnum.HISTORY_SYSTEM.getCode() + "\"/></interaction>"));
+		assertThat(conf).contains("<interaction><code value=\"" + SystemRestfulInteractionEnum.HISTORY_SYSTEM.getCode() + "\"/></interaction>");
 	}
 
 	@Test
@@ -628,7 +625,7 @@ public class ServerConformanceProviderDstu2Test {
 		ourLog.info(conf);
 
 		conf = ourCtx.newXmlParser().setPrettyPrint(false).encodeResourceToString(conformance);
-		assertThat(conf, containsString("<interaction><code value=\"" + TypeRestfulInteractionEnum.HISTORY_TYPE.getCode() + "\"/></interaction>"));
+		assertThat(conf).contains("<interaction><code value=\"" + TypeRestfulInteractionEnum.HISTORY_TYPE.getCode() + "\"/></interaction>");
 	}
 
 	@Test

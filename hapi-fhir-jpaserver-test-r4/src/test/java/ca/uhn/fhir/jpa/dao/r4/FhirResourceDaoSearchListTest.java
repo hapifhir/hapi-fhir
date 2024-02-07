@@ -19,8 +19,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.rest.api.Constants.PARAM_HAS;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.hasSize;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class FhirResourceDaoSearchListTest extends BaseJpaR4Test {
@@ -56,10 +55,10 @@ public class FhirResourceDaoSearchListTest extends BaseJpaR4Test {
 		SearchParameterMap map = myMatchUrlService.translateMatchUrl(theQueryString, myFhirContext.getResourceDefinition("List"));
 		IBundleProvider bundle = myPatientDao.search(map);
 		List<IBaseResource> resources = bundle.getResources(0, theExpectedPatientIds.length);
-		assertThat(resources, hasSize(theExpectedPatientIds.length));
+		assertThat(resources).hasSize(theExpectedPatientIds.length);
 
 		Set<IIdType> ids = resources.stream().map(IBaseResource::getIdElement).collect(Collectors.toSet());
-		assertThat(ids, hasSize(theExpectedPatientIds.length));
+		assertThat(ids).hasSize(theExpectedPatientIds.length);
 
 		for(IIdType patientId: theExpectedPatientIds) {
 			assertTrue(ids.contains(patientId));
@@ -113,7 +112,7 @@ public class FhirResourceDaoSearchListTest extends BaseJpaR4Test {
 		map.add(PARAM_HAS, new HasParam("List", "item", "_id", listIdString));
 		IBundleProvider bundle = myPatientDao.search(map);
 		List<IBaseResource> resources = bundle.getResources(0, 2);
-		assertThat(resources, hasSize(2));
+		assertThat(resources).hasSize(2);
 	}
 
 	private IIdType[] createPatients(int theNumberOfPatientsToCreate) {

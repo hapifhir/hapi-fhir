@@ -35,8 +35,8 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class DefaultThymeleafNarrativeGeneratorDstu3Test {
@@ -163,7 +163,7 @@ public class DefaultThymeleafNarrativeGeneratorDstu3Test {
 
 		ourLog.info(output);
 
-		assertThat(output, containsString("<td>YThis is a warning</td>"));
+		assertThat(output).contains("<td>YThis is a warning</td>");
 	}
 
 	@Test
@@ -296,7 +296,7 @@ public class DefaultThymeleafNarrativeGeneratorDstu3Test {
 		myGen.populateResourceNarrative(myCtx, med);
 
 		String output = med.getText().getDiv().getValueAsString();
-		assertThat(output, containsString("ciproflaxin"));
+		assertThat(output).contains("ciproflaxin");
 
 	}
 

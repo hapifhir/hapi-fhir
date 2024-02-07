@@ -26,10 +26,7 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.List;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
 
@@ -65,8 +62,8 @@ public class DeleteExpungeProviderTest {
 		HttpPost post = new HttpPost(myServer.getBaseUrl() + "/" + ProviderConstants.OPERATION_DELETE_EXPUNGE);
 		try(CloseableHttpResponse execute = myClient.execute(post)) {
 			String body = IOUtils.toString(execute.getEntity().getContent(), Charset.defaultCharset());
-			assertThat(execute.getStatusLine().getStatusCode(), is(equalTo(400)));
-			assertThat(body, is(containsString("At least one `url` parameter to $delete-expunge must be provided.")));
+			assertThat(execute.getStatusLine().getStatusCode()).isEqualTo(400);
+			assertThat(body).contains("At least one `url` parameter to $delete-expunge must be provided.");
 		}
 	}
 

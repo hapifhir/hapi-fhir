@@ -47,12 +47,7 @@ import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
-import static org.hamcrest.CoreMatchers.containsString;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.greaterThan;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.matchesPattern;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
@@ -166,7 +161,7 @@ public class UploadTerminologyCommandTest {
 		List<ITermLoaderSvc.FileDescriptor> listOfDescriptors = myDescriptorListCaptor.getValue();
 		assertEquals(1, listOfDescriptors.size());
 		assertEquals("file:/files.zip", listOfDescriptors.get(0).getFilename());
-		assertThat(IOUtils.toByteArray(listOfDescriptors.get(0).getInputStream()).length, greaterThan(100));
+		assertThat(IOUtils.toByteArray(listOfDescriptors.get(0).getInputStream()).length).isGreaterThan(100);
 	}
 
 	@ParameterizedTest
@@ -207,7 +202,7 @@ public class UploadTerminologyCommandTest {
 		assertEquals(2, listOfDescriptors.size());
 		assertEquals("concepts.csv", listOfDescriptors.get(0).getFilename());
 		String uploadFile = IOUtils.toString(listOfDescriptors.get(0).getInputStream(), Charsets.UTF_8);
-		assertThat(uploadFile, uploadFile, containsString("\"CODE\",\"Display\""));
+		assertThat(uploadFile).as(uploadFile).contains("\"CODE\",\"Display\"");
 	}
 
 	@ParameterizedTest
@@ -242,7 +237,7 @@ public class UploadTerminologyCommandTest {
 			));
 			fail();
 		} catch (Error e) {
-			assertThat(e.toString(), containsString("HTTP 400 Bad Request: " + Msg.code(362) + "Request has parameter codeSystem of type Patient but method expects type CodeSystem"));
+			assertThat(e.toString()).contains("HTTP 400 Bad Request: " + Msg.code(362) + "Request has parameter codeSystem of type Patient but method expects type CodeSystem");
 		}
 	}
 
@@ -267,7 +262,7 @@ public class UploadTerminologyCommandTest {
 
 			fail();
 		} catch (Error e) {
-			assertThat(e.toString(), containsString("Don't know how to handle file:"));
+			assertThat(e.toString()).contains("Don't know how to handle file:");
 		}
 	}
 
@@ -277,15 +272,15 @@ public class UploadTerminologyCommandTest {
 		UploadTerminologyCommand uploadTerminologyCommand = new UploadTerminologyCommand();
 		uploadTerminologyCommand.setTransferSizeLimitHuman("1GB");
 		long bytes = uploadTerminologyCommand.getTransferSizeLimit();
-		assertThat(bytes, is(equalTo(1024L * 1024L * 1024L)));
+		assertThat(bytes).isEqualTo(1024L * 1024L * 1024L);
 
 		uploadTerminologyCommand.setTransferSizeLimitHuman("500KB");
 		bytes = uploadTerminologyCommand.getTransferSizeLimit();
-		assertThat(bytes, is(equalTo(1024L * 500L)));
+		assertThat(bytes).isEqualTo(1024L * 500L);
 
 		uploadTerminologyCommand.setTransferSizeLimitHuman("10MB");
 		bytes = uploadTerminologyCommand.getTransferSizeLimit();
-		assertThat(bytes, is(equalTo(1024L * 1024L * 10L)));
+		assertThat(bytes).isEqualTo(1024L * 1024L * 10L);
 	}
 
 	@ParameterizedTest
@@ -310,8 +305,8 @@ public class UploadTerminologyCommandTest {
 
 		List<ITermLoaderSvc.FileDescriptor> listOfDescriptors = myDescriptorListCaptor.getValue();
 		assertEquals(1, listOfDescriptors.size());
-		assertThat(listOfDescriptors.get(0).getFilename(), matchesPattern("^file:.*temp.*\\.zip$"));
-		assertThat(IOUtils.toByteArray(listOfDescriptors.get(0).getInputStream()).length, greaterThan(100));
+		assertThat(listOfDescriptors.get(0).getFilename()).matches("^file:.*temp.*\\.zip$");
+		assertThat(IOUtils.toByteArray(listOfDescriptors.get(0).getInputStream()).length).isGreaterThan(100);
 	}
 
 	@ParameterizedTest
@@ -331,7 +326,7 @@ public class UploadTerminologyCommandTest {
 			));
 			fail();
 		} catch (Error e) {
-			assertThat(e.toString().replace('\\', '/'), Matchers.containsString("FileNotFoundException: target/concepts.csv/foo.csv"));
+			assertThat(e.toString().replace('\\', '/')).contains("FileNotFoundException: target/concepts.csv/foo.csv");
 		}
 	}
 
@@ -363,7 +358,7 @@ public class UploadTerminologyCommandTest {
 		List<ITermLoaderSvc.FileDescriptor> listOfDescriptors = myDescriptorListCaptor.getValue();
 		assertEquals(1, listOfDescriptors.size());
 		assertEquals("file:/files.zip", listOfDescriptors.get(0).getFilename());
-		assertThat(IOUtils.toByteArray(listOfDescriptors.get(0).getInputStream()).length, greaterThan(100));
+		assertThat(IOUtils.toByteArray(listOfDescriptors.get(0).getInputStream()).length).isGreaterThan(100);
 	}
 
 	@ParameterizedTest
@@ -394,7 +389,7 @@ public class UploadTerminologyCommandTest {
 		List<ITermLoaderSvc.FileDescriptor> listOfDescriptors = myDescriptorListCaptor.getValue();
 		assertEquals(1, listOfDescriptors.size());
 		assertEquals("file:/files.zip", listOfDescriptors.get(0).getFilename());
-		assertThat(IOUtils.toByteArray(listOfDescriptors.get(0).getInputStream()).length, greaterThan(100));
+		assertThat(IOUtils.toByteArray(listOfDescriptors.get(0).getInputStream()).length).isGreaterThan(100);
 	}
 
 	@ParameterizedTest
@@ -427,8 +422,8 @@ public class UploadTerminologyCommandTest {
 
 		List<ITermLoaderSvc.FileDescriptor> listOfDescriptors = myDescriptorListCaptor.getValue();
 		assertEquals(1, listOfDescriptors.size());
-		assertThat(listOfDescriptors.get(0).getFilename(), matchesPattern(".*\\.zip$"));
-		assertThat(IOUtils.toByteArray(listOfDescriptors.get(0).getInputStream()).length, greaterThan(100));
+		assertThat(listOfDescriptors.get(0).getFilename()).matches(".*\\.zip$");
+		assertThat(IOUtils.toByteArray(listOfDescriptors.get(0).getInputStream()).length).isGreaterThan(100);
 	}
 
 	@ParameterizedTest
@@ -460,8 +455,8 @@ public class UploadTerminologyCommandTest {
 
 		List<ITermLoaderSvc.FileDescriptor> listOfDescriptors = myDescriptorListCaptor.getValue();
 		assertEquals(1, listOfDescriptors.size());
-		assertThat(listOfDescriptors.get(0).getFilename(), matchesPattern(".*\\.zip$"));
-		assertThat(IOUtils.toByteArray(listOfDescriptors.get(0).getInputStream()).length, greaterThan(100));
+		assertThat(listOfDescriptors.get(0).getFilename()).matches(".*\\.zip$");
+		assertThat(IOUtils.toByteArray(listOfDescriptors.get(0).getInputStream()).length).isGreaterThan(100);
 	}
 
 	@ParameterizedTest
@@ -502,8 +497,8 @@ public class UploadTerminologyCommandTest {
 
 		List<ITermLoaderSvc.FileDescriptor> listOfDescriptors = myDescriptorListCaptor.getValue();
 		assertEquals(1, listOfDescriptors.size());
-		assertThat(listOfDescriptors.get(0).getFilename(), matchesPattern("^file:.*files.*\\.zip$"));
-		assertThat(IOUtils.toByteArray(listOfDescriptors.get(0).getInputStream()).length, greaterThan(100));
+		assertThat(listOfDescriptors.get(0).getFilename()).matches("^file:.*files.*\\.zip$");
+		assertThat(IOUtils.toByteArray(listOfDescriptors.get(0).getInputStream()).length).isGreaterThan(100);
 	}
 
 	private RequestValidatingInterceptor createRequestValidatingInterceptor(){

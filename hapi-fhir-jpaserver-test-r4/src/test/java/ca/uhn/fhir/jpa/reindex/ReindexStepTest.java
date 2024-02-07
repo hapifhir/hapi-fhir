@@ -23,8 +23,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import static ca.uhn.fhir.jpa.dao.BaseHapiFhirDao.INDEX_STATUS_INDEXED;
 import static ca.uhn.fhir.jpa.dao.BaseHapiFhirDao.INDEX_STATUS_INDEXING_FAILED;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -251,7 +250,7 @@ public class ReindexStepTest extends BaseJpaR4Test {
 		verify(myDataSink, times(1)).recoveredError(myErrorCaptor.capture());
 		String message = myErrorCaptor.getValue();
 		message = message.replace("Observation.subject.where(resolve() is Patient)", "Observation.subject"); // depending on whether subject or patient gets indexed first
-		assertThat(message, containsString("HAPI-0928: Failed to parse database resource"));
+		assertThat(message).contains("HAPI-0928: Failed to parse database resource");
 
 		runInTransaction(() -> {
 			ResourceTable table = myResourceTableDao.findById(idPatientToInvalidate).orElseThrow();

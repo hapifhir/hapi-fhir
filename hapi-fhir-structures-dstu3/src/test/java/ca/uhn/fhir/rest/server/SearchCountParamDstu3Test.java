@@ -23,9 +23,8 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.stringContainsInOrder;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -93,7 +92,7 @@ public class SearchCountParamDstu3Test {
 				"<Bundle",
 				"<total value=\"99\"/>",
 				"</Bundle>"));
-			assertThat(responseContent, not(containsString("entry")));
+			assertThat(responseContent).doesNotContain("entry");
 
 		}
 

@@ -12,8 +12,7 @@ import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class NarrativeTemplateManifestTest {
@@ -30,9 +29,9 @@ public class NarrativeTemplateManifestTest {
 			Collections.emptyList());
 		ourLog.info("Templates: {}", template);
 		assertEquals(3, template.size());
-		assertThat(template.get(0).getTemplateText(), containsString("template3"));
-		assertThat(template.get(1).getTemplateText(), containsString("template2"));
-		assertThat(template.get(2).getTemplateText(), containsString("template1"));
+		assertThat(template.get(0).getTemplateText()).contains("template3");
+		assertThat(template.get(1).getTemplateText()).contains("template2");
+		assertThat(template.get(2).getTemplateText()).contains("template1");
 	}
 
 	@Test
@@ -44,7 +43,7 @@ public class NarrativeTemplateManifestTest {
 			"Bundle",
 			Lists.newArrayList("http://profile1"));
 		assertEquals(1, template.size());
-		assertThat(template.get(0).getTemplateText(), containsString("template1"));
+		assertThat(template.get(0).getTemplateText()).contains("template1");
 	}
 
 	@Test
@@ -70,8 +69,8 @@ public class NarrativeTemplateManifestTest {
 			"Bundle",
 			Lists.newArrayList("http://profile1"));
 		assertEquals(2, template.size());
-		assertThat(template.get(0).getTemplateText(), containsString("template2-1"));
-		assertThat(template.get(1).getTemplateText(), containsString("template1"));
+		assertThat(template.get(0).getTemplateText()).contains("template2-1");
+		assertThat(template.get(1).getTemplateText()).contains("template1");
 	}
 
 
@@ -85,7 +84,7 @@ public class NarrativeTemplateManifestTest {
 			EnumSet.of(TemplateTypeEnum.THYMELEAF),
 			"Foo");
 		assertEquals(1, template.size());
-		assertThat(template.get(0).getTemplateText(), containsString("template1"));
+		assertThat(template.get(0).getTemplateText()).contains("template1");
 	}
 
 }

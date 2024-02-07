@@ -42,8 +42,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import java.util.List;
 import java.util.stream.Stream;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.empty;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Test cases for composite search parameters.
@@ -108,10 +107,7 @@ public abstract class CompositeSearchParameterTestCases implements ITestDataBuil
 						withQuantityAtPath("valueQuantity", 100, null, "mmHg")));
 
 		List<String> ids = myTestDaoSearch.searchForIds("Observation?component-code-value-quantity=8480-6$100");
-		assertThat(
-				"Search for the value from one component, but the code from the other, so it shouldn't match",
-				ids,
-				empty());
+		assertThat(ids).as("Search for the value from one component, but the code from the other, so it shouldn't match").isEmpty();
 	}
 
 	@Test
@@ -143,10 +139,7 @@ public abstract class CompositeSearchParameterTestCases implements ITestDataBuil
 						withCodingAt("valueCodeableConcept.coding", SYSTEM_LOINC_ORG, "another-code")));
 
 		List<String> ids = myTestDaoSearch.searchForIds("Observation?component-code-value-concept=8480-6$another-code");
-		assertThat(
-				"Search for the value from one component, but the code from the other, so it shouldn't match",
-				ids,
-				empty());
+		assertThat(ids).as("Search for the value from one component, but the code from the other, so it shouldn't match").isEmpty();
 	}
 
 	@Test

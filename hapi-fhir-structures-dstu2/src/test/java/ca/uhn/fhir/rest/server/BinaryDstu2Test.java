@@ -33,8 +33,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.List;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.startsWith;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -73,7 +72,7 @@ public class BinaryDstu2Test {
 			ourLog.info(responseContent);
 
 			assertEquals(200, response.getStatusLine().getStatusCode());
-			assertThat(response.getFirstHeader("content-type").getValue(), startsWith(Constants.CT_FHIR_XML + ";"));
+			assertThat(response.getFirstHeader("content-type").getValue()).startsWith(Constants.CT_FHIR_XML + ";");
 
 			Binary bin = ourCtx.newXmlParser().parseResource(Binary.class, responseContent);
 			assertEquals("foo", bin.getContentType());
@@ -91,7 +90,7 @@ public class BinaryDstu2Test {
 			ourLog.info(responseContent);
 
 			assertEquals(200, response.getStatusLine().getStatusCode());
-			assertThat(response.getFirstHeader("content-type").getValue(), startsWith(Constants.CT_FHIR_JSON + ";"));
+			assertThat(response.getFirstHeader("content-type").getValue()).startsWith(Constants.CT_FHIR_JSON + ";");
 
 			Binary bin = ourCtx.newJsonParser().parseResource(Binary.class, responseContent);
 			assertEquals("foo", bin.getContentType());

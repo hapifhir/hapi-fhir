@@ -20,8 +20,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Date;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.hasSize;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -290,18 +289,18 @@ class TerserUtilTest {
 
 		p1.addName().addGiven("Joe");
 		p1.getNameFirstRep().addGiven("George");
-		assertThat(p1.getName(), hasSize(1));
-		assertThat(p1.getName().get(0).getGiven(), hasSize(2));
+		assertThat(p1.getName()).hasSize(1);
+		assertThat(p1.getName().get(0).getGiven()).hasSize(2);
 
 		p2.addName().addGiven("Jeff");
 		p2.getNameFirstRep().addGiven("George");
-		assertThat(p2.getName(), hasSize(1));
-		assertThat(p2.getName().get(0).getGiven(), hasSize(2));
+		assertThat(p2.getName()).hasSize(1);
+		assertThat(p2.getName().get(0).getGiven()).hasSize(2);
 
 		TerserUtil.mergeAllFields(ourFhirContext, p1, p2);
-		assertThat(p2.getName(), hasSize(2));
-		assertThat(p2.getName().get(0).getGiven(), hasSize(2));
-		assertThat(p2.getName().get(1).getGiven(), hasSize(2));
+		assertThat(p2.getName()).hasSize(2);
+		assertThat(p2.getName().get(0).getGiven()).hasSize(2);
+		assertThat(p2.getName().get(1).getGiven()).hasSize(2);
 	}
 
 	@Test
@@ -407,19 +406,19 @@ class TerserUtilTest {
 		p1.addName().addGiven("Jim");
 		p1.getNameFirstRep().addGiven("George");
 
-		assertThat(p1.getName(), hasSize(1));
-		assertThat(p1.getName().get(0).getGiven(), hasSize(2));
+		assertThat(p1.getName()).hasSize(1);
+		assertThat(p1.getName().get(0).getGiven()).hasSize(2);
 
 		p2.addName().addGiven("Jim");
 		p2.getNameFirstRep().addGiven("George");
 
-		assertThat(p2.getName(), hasSize(1));
-		assertThat(p2.getName().get(0).getGiven(), hasSize(2));
+		assertThat(p2.getName()).hasSize(1);
+		assertThat(p2.getName().get(0).getGiven()).hasSize(2);
 
 		TerserUtil.mergeAllFields(ourFhirContext, p1, p2);
 
-		assertThat(p2.getName(), hasSize(1));
-		assertThat(p2.getName().get(0).getGiven(), hasSize(2));
+		assertThat(p2.getName()).hasSize(1);
+		assertThat(p2.getName().get(0).getGiven()).hasSize(2);
 	}
 
 

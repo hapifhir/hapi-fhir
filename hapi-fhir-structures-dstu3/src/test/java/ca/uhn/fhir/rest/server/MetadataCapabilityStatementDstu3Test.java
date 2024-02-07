@@ -30,8 +30,8 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.stringContainsInOrder;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -71,7 +71,7 @@ public class MetadataCapabilityStatementDstu3Test {
 			output = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			assertEquals(200, status.getStatusLine().getStatusCode());
 			ourLog.info(output);
-			assertThat(output, containsString("<CapabilityStatement"));
+			assertThat(output).contains("<CapabilityStatement");
 			assertThat(output, stringContainsInOrder("<meta>", "SUBSETTED", "</meta>"));
 		} finally {
 			IOUtils.closeQuietly(status.getEntity().getContent());
@@ -87,9 +87,9 @@ public class MetadataCapabilityStatementDstu3Test {
 		try {
 			output = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			assertEquals(200, status.getStatusLine().getStatusCode());
-			assertThat(output, containsString("<CapabilityStatement"));
-			assertThat(status.getFirstHeader("X-Powered-By").getValue(), containsString("HAPI FHIR " + VersionUtil.getVersion()));
-			assertThat(status.getFirstHeader("X-Powered-By").getValue(), containsString("REST Server (FHIR Server; FHIR " + ourCtx.getVersion().getVersion().getFhirVersionString() + "/" + ourCtx.getVersion().getVersion().name() + ")"));
+			assertThat(output).contains("<CapabilityStatement");
+			assertThat(status.getFirstHeader("X-Powered-By").getValue()).contains("HAPI FHIR " + VersionUtil.getVersion());
+			assertThat(status.getFirstHeader("X-Powered-By").getValue()).contains("REST Server (FHIR Server; FHIR " + ourCtx.getVersion().getVersion().getFhirVersionString() + "/" + ourCtx.getVersion().getVersion().name() + ")");
 		} finally {
 			IOUtils.closeQuietly(status.getEntity().getContent());
 		}
@@ -169,7 +169,7 @@ public class MetadataCapabilityStatementDstu3Test {
 			output = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			assertEquals(200, status.getStatusLine().getStatusCode());
 			ourLog.info(output);
-			assertThat(output, containsString("<CapabilityStatement"));
+			assertThat(output).contains("<CapabilityStatement");
 			assertThat(output, stringContainsInOrder("<meta>", "SUBSETTED", "</meta>"));
 			assertThat(output, not(stringContainsInOrder("searchParam")));
 		} finally {
@@ -183,7 +183,7 @@ public class MetadataCapabilityStatementDstu3Test {
 			output = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			assertEquals(200, status.getStatusLine().getStatusCode());
 			ourLog.info(output);
-			assertThat(output, containsString("<CapabilityStatement"));
+			assertThat(output).contains("<CapabilityStatement");
 			assertThat(output, not(stringContainsInOrder("<meta>", "SUBSETTED", "</meta>")));
 			assertThat(output, stringContainsInOrder("searchParam"));
 		} finally {

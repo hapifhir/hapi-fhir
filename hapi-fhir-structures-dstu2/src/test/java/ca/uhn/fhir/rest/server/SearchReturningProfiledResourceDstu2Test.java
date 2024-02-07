@@ -33,9 +33,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.not;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class SearchReturningProfiledResourceDstu2Test {
@@ -98,9 +96,9 @@ public class SearchReturningProfiledResourceDstu2Test {
 		IOUtils.closeQuietly(status.getEntity().getContent());
 		ourLog.info(responseContent);
 
-		assertThat(responseContent, not(containsString("html")));
-		assertThat(responseContent, containsString("<profile value=\"http://foo\"/>"));
-		assertThat(responseContent, containsString("<profile value=\"http://ahr.copa.inso.tuwien.ac.at/StructureDefinition/Patient\"/>"));
+		assertThat(responseContent).doesNotContain("html");
+		assertThat(responseContent).contains("<profile value=\"http://foo\"/>");
+		assertThat(responseContent).contains("<profile value=\"http://ahr.copa.inso.tuwien.ac.at/StructureDefinition/Patient\"/>");
 
 	}
 
@@ -112,9 +110,9 @@ public class SearchReturningProfiledResourceDstu2Test {
 		IOUtils.closeQuietly(status.getEntity().getContent());
 		ourLog.info(responseContent);
 
-		assertThat(responseContent, containsString("html"));
-		assertThat(responseContent, containsString("http://foo"));
-		assertThat(responseContent, containsString("http://ahr.copa.inso.tuwien.ac.at/StructureDefinition/Patient"));
+		assertThat(responseContent).contains("html");
+		assertThat(responseContent).contains("http://foo");
+		assertThat(responseContent).contains("http://ahr.copa.inso.tuwien.ac.at/StructureDefinition/Patient");
 
 	}
 

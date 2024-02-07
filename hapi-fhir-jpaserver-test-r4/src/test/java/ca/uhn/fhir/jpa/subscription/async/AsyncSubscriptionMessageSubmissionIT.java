@@ -26,10 +26,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.test.context.ContextConfiguration;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.is;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
 @ContextConfiguration(classes = {AsyncSubscriptionMessageSubmissionIT.SpringConfig.class})
@@ -102,13 +99,13 @@ public class AsyncSubscriptionMessageSubmissionIT extends BaseSubscriptionsR4Tes
 		Observation observation = (Observation) fetchSingleResourceFromSubscriptionTerminalEndpoint();
 		Coding coding = observation.getCode().getCodingFirstRep();
 
-		assertThat(coding.getCode(), equalTo(aCode));
-		assertThat(coding.getSystem(), equalTo(aSystem));
+		assertThat(coding.getCode()).isEqualTo(aCode);
+		assertThat(coding.getSystem()).isEqualTo(aSystem);
 
 	}
 
 	private void assertCountOfResourcesNeedingSubmission(int theExpectedCount) {
-		assertThat(myResourceModifiedMessagePersistenceSvc.findAllOrderedByCreatedTime(), hasSize(theExpectedCount));
+		assertThat(myResourceModifiedMessagePersistenceSvc.findAllOrderedByCreatedTime()).hasSize(theExpectedCount);
 	}
 
 	private Subscription createAndSubmitSubscriptionWithCriteria(String theCriteria) {
@@ -132,7 +129,7 @@ public class AsyncSubscriptionMessageSubmissionIT extends BaseSubscriptionsR4Tes
 
 
 	private IBaseResource fetchSingleResourceFromSubscriptionTerminalEndpoint() {
-		assertThat(myQueueConsumerHandler.getMessages().size(), is(equalTo(1)));
+		assertThat(myQueueConsumerHandler.getMessages().size()).isEqualTo(1);
 		ResourceModifiedJsonMessage resourceModifiedJsonMessage = myQueueConsumerHandler.getMessages().get(0);
 		ResourceModifiedMessage payload = resourceModifiedJsonMessage.getPayload();
 		String payloadString = payload.getPayloadString();
@@ -142,7 +139,7 @@ public class AsyncSubscriptionMessageSubmissionIT extends BaseSubscriptionsR4Tes
 	}
 
 	private void assertCountOfResourcesReceivedAtSubscriptionTerminalEndpoint(int expectedCount) {
-		assertThat(myQueueConsumerHandler.getMessages(), hasSize(expectedCount));
+		assertThat(myQueueConsumerHandler.getMessages()).hasSize(expectedCount);
 	}
 
 	@Configuration

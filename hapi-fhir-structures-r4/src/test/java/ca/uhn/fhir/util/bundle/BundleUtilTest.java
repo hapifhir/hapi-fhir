@@ -32,12 +32,7 @@ import java.util.List;
 import java.util.function.Consumer;
 
 import static ca.uhn.fhir.util.BundleUtil.DIFFERENT_LINK_ERROR_MSG;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.notNullValue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hl7.fhir.r4.model.Bundle.HTTPVerb.DELETE;
 import static org.hl7.fhir.r4.model.Bundle.HTTPVerb.GET;
 import static org.hl7.fhir.r4.model.Bundle.HTTPVerb.POST;
@@ -253,7 +248,7 @@ public class BundleUtilTest {
 
 		BundleUtil.sortEntriesIntoProcessingOrder(ourCtx, b);
 
-		assertThat(b.getEntry(), hasSize(4));
+		assertThat(b.getEntry()).hasSize(4);
 
 		int observationIndex = getIndexOfEntryWithId("Observation/O1", b);
 		int patientIndex = getIndexOfEntryWithId("Patient/P1", b);
@@ -351,21 +346,21 @@ public class BundleUtilTest {
 
 		BundleUtil.sortEntriesIntoProcessingOrder(ourCtx, b);
 
-		assertThat(b.getEntry(), hasSize(7));
+		assertThat(b.getEntry()).hasSize(7);
 
 		List<Bundle.BundleEntryComponent> entry = b.getEntry();
 
 		// DELETEs first
-		assertThat(entry.get(0).getRequest().getMethod(), is(equalTo(DELETE)));
-		assertThat(entry.get(1).getRequest().getMethod(), is(equalTo(DELETE)));
+		assertThat(entry.get(0).getRequest().getMethod()).isEqualTo(DELETE);
+		assertThat(entry.get(1).getRequest().getMethod()).isEqualTo(DELETE);
 		// Then POSTs
-		assertThat(entry.get(2).getRequest().getMethod(), is(equalTo(POST)));
-		assertThat(entry.get(3).getRequest().getMethod(), is(equalTo(POST)));
-		assertThat(entry.get(4).getRequest().getMethod(), is(equalTo(POST)));
+		assertThat(entry.get(2).getRequest().getMethod()).isEqualTo(POST);
+		assertThat(entry.get(3).getRequest().getMethod()).isEqualTo(POST);
+		assertThat(entry.get(4).getRequest().getMethod()).isEqualTo(POST);
 		// Then PUTs
-		assertThat(entry.get(5).getRequest().getMethod(), is(equalTo(PUT)));
+		assertThat(entry.get(5).getRequest().getMethod()).isEqualTo(PUT);
 		// Then GETs
-		assertThat(entry.get(6).getRequest().getMethod(), is(equalTo(GET)));
+		assertThat(entry.get(6).getRequest().getMethod()).isEqualTo(GET);
 	}
 
 	@Test
@@ -453,13 +448,13 @@ public class BundleUtilTest {
 		List<SearchBundleEntryParts> searchBundleEntryParts = BundleUtil.getSearchBundleEntryParts(ourCtx, bundle);
 
 		//Then
-		assertThat(searchBundleEntryParts, hasSize(2));
-		assertThat(searchBundleEntryParts.get(0).getSearchMode(), is(equalTo(BundleEntrySearchModeEnum.MATCH)));
-		assertThat(searchBundleEntryParts.get(0).getFullUrl(), is(containsString("Patient/pata")));
-		assertThat(searchBundleEntryParts.get(0).getResource(), is(notNullValue()));
-		assertThat(searchBundleEntryParts.get(1).getSearchMode(), is(equalTo(BundleEntrySearchModeEnum.INCLUDE)));
-		assertThat(searchBundleEntryParts.get(1).getFullUrl(), is(containsString("Condition/")));
-		assertThat(searchBundleEntryParts.get(1).getResource(), is(notNullValue()));
+		assertThat(searchBundleEntryParts).hasSize(2);
+		assertThat(searchBundleEntryParts.get(0).getSearchMode()).isEqualTo(BundleEntrySearchModeEnum.MATCH);
+		assertThat(searchBundleEntryParts.get(0).getFullUrl()).contains("Patient/pata");
+		assertThat(searchBundleEntryParts.get(0).getResource()).isNotNull();
+		assertThat(searchBundleEntryParts.get(1).getSearchMode()).isEqualTo(BundleEntrySearchModeEnum.INCLUDE);
+		assertThat(searchBundleEntryParts.get(1).getFullUrl()).contains("Condition/");
+		assertThat(searchBundleEntryParts.get(1).getResource()).isNotNull();
 	}
 
 	@Test
@@ -497,7 +492,7 @@ public class BundleUtilTest {
 
 		BundleUtil.sortEntriesIntoProcessingOrder(ourCtx, b);
 
-		assertThat(b.getEntry(), hasSize(4));
+		assertThat(b.getEntry()).hasSize(4);
 
 		int observationIndex = getIndexOfEntryWithId("Observation/O1", b);
 		int patientIndex = getIndexOfEntryWithId("Patient/P1", b);
@@ -512,11 +507,11 @@ public class BundleUtilTest {
 		Patient pat1 = new Patient();
 		pat1.setId("Patient/P1");
 		IBase bundleEntry = BundleUtil.createNewBundleEntryWithSingleField(ourCtx,"resource", pat1);
-		assertThat(((Bundle.BundleEntryComponent)bundleEntry).getResource().getIdElement().getValue(), is(equalTo(pat1.getId())));
+		assertThat(((Bundle.BundleEntryComponent) bundleEntry).getResource().getIdElement().getValue()).isEqualTo(pat1.getId());
 
 		UriType testUri = new UriType("http://foo");
 		bundleEntry = BundleUtil.createNewBundleEntryWithSingleField(ourCtx,"fullUrl", testUri);
-		assertThat(((Bundle.BundleEntryComponent)bundleEntry).getFullUrl(), is(equalTo(testUri.getValue())));
+		assertThat(((Bundle.BundleEntryComponent) bundleEntry).getFullUrl()).isEqualTo(testUri.getValue());
 	}
 
 	private int getIndexOfEntryWithId(String theResourceId, Bundle theBundle) {

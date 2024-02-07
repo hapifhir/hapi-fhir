@@ -26,9 +26,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.not;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
@@ -155,7 +153,7 @@ public class PagingUsingNamedPagesR4Test {
 		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(responseContent);
-			assertThat(responseContent, not(containsString("FOO\"")));
+			assertThat(responseContent).doesNotContain("FOO\"");
 			assertEquals(410, status.getStatusLine().getStatusCode());
 		}
 
@@ -164,7 +162,7 @@ public class PagingUsingNamedPagesR4Test {
 		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(responseContent);
-			assertThat(responseContent, not(containsString("FOO\"")));
+			assertThat(responseContent).doesNotContain("FOO\"");
 			assertEquals(410, status.getStatusLine().getStatusCode());
 		}
 
@@ -183,7 +181,7 @@ public class PagingUsingNamedPagesR4Test {
 		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(responseContent);
-			assertThat(responseContent, not(containsString("FOO\"")));
+			assertThat(responseContent).doesNotContain("FOO\"");
 			assertEquals(200, status.getStatusLine().getStatusCode());
 			EncodingEnum ct = EncodingEnum.forContentType(status.getEntity().getContentType().getValue().replaceAll(";.*", "").trim());
 			assert ct != null;

@@ -27,10 +27,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.emptyOrNullString;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
@@ -77,7 +74,7 @@ public class PreferTest {
 		ourLog.info("Response was:\n{}", responseContent);
 
 		assertEquals(Constants.STATUS_HTTP_201_CREATED, status.getStatusLine().getStatusCode());
-		assertThat(responseContent, is(emptyOrNullString()));
+		assertThat(responseContent).isNullOrEmpty();
 		// assertThat(status.getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue(), not(containsString("fhir")));
 		assertNull(status.getFirstHeader(Constants.HEADER_CONTENT_TYPE));
 		assertEquals(ourServer.getBaseUrl() + "/Patient/001/_history/002", status.getFirstHeader("location").getValue());
@@ -107,7 +104,7 @@ public class PreferTest {
 		ourLog.info("Response was:\n{}", responseContent);
 
 		assertEquals(Constants.STATUS_HTTP_201_CREATED, status.getStatusLine().getStatusCode());
-		assertThat(responseContent, containsString("DIAG"));
+		assertThat(responseContent).contains("DIAG");
 		assertEquals("application/xml+fhir;charset=utf-8", status.getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue().toLowerCase().replace(" ", ""));
 		assertEquals(ourServer.getBaseUrl() + "/Patient/001/_history/002", status.getFirstHeader("location").getValue());
 		assertEquals(ourServer.getBaseUrl() + "/Patient/001/_history/002", status.getFirstHeader("content-location").getValue());
@@ -132,7 +129,7 @@ public class PreferTest {
 		ourLog.info("Response was:\n{}", responseContent);
 
 		assertEquals(Constants.STATUS_HTTP_201_CREATED, status.getStatusLine().getStatusCode());
-		assertThat(status.getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue(), containsString(Constants.CT_FHIR_XML));
+		assertThat(status.getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue()).contains(Constants.CT_FHIR_XML);
 		assertEquals("<Patient xmlns=\"http://hl7.org/fhir\"><id value=\"001\"/><meta><versionId value=\"002\"/></meta><identifier><value value=\"002\"/></identifier></Patient>", responseContent);
 		assertEquals(ourServer.getBaseUrl() + "/Patient/001/_history/002", status.getFirstHeader("location").getValue());
 		assertEquals(ourServer.getBaseUrl() + "/Patient/001/_history/002", status.getFirstHeader("content-location").getValue());

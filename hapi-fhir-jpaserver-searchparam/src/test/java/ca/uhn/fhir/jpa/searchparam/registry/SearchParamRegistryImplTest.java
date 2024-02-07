@@ -41,9 +41,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.is;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -236,7 +234,7 @@ public class SearchParamRegistryImplTest {
 
 	@Test
 	public void testGetActiveUniqueSearchParams_Empty() {
-		assertThat(mySearchParamRegistry.getActiveComboSearchParams("Patient"), is(empty()));
+		assertThat(mySearchParamRegistry.getActiveComboSearchParams("Patient")).isEmpty();
 	}
 
 	@Test

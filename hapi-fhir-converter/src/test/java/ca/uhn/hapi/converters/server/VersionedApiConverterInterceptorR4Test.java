@@ -22,8 +22,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.hamcrest.CoreMatchers.containsString;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class VersionedApiConverterInterceptorR4Test {
 
@@ -46,7 +45,7 @@ public class VersionedApiConverterInterceptorR4Test {
 		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(responseContent);
-			assertThat(responseContent, containsString("\"family\": \"FAMILY\""));
+			assertThat(responseContent).contains("\"family\": \"FAMILY\"");
 		}
 	}
 
@@ -57,7 +56,7 @@ public class VersionedApiConverterInterceptorR4Test {
 		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(responseContent);
-			assertThat(responseContent, containsString("\"family\": ["));
+			assertThat(responseContent).contains("\"family\": [");
 		}
 	}
 
@@ -67,7 +66,7 @@ public class VersionedApiConverterInterceptorR4Test {
 		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(responseContent);
-			assertThat(responseContent, containsString("\"family\": ["));
+			assertThat(responseContent).contains("\"family\": [");
 		}
 	}
 

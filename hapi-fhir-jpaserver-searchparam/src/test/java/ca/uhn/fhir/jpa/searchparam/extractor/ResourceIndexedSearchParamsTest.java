@@ -12,10 +12,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.empty;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class ResourceIndexedSearchParamsTest {
@@ -90,19 +88,19 @@ public class ResourceIndexedSearchParamsTest {
 			Lists.newArrayList("name=SMITH", "name=JOHN")
 		);
 		values = ResourceIndexedSearchParams.extractCompositeStringUniquesValueChains("Patient", partsChoices);
-		assertThat(values.toString(), values, containsInAnyOrder("Patient?gender=male&name=JOHN", "Patient?gender=male&name=SMITH"));
+		assertThat(values).as(values.toString()).containsExactlyInAnyOrder("Patient?gender=male&name=JOHN", "Patient?gender=male&name=SMITH");
 
 		partsChoices = Lists.newArrayList(
 			Lists.newArrayList("gender=male", ""),
 			Lists.newArrayList("name=SMITH", "name=JOHN", "")
 		);
 		values = ResourceIndexedSearchParams.extractCompositeStringUniquesValueChains("Patient", partsChoices);
-		assertThat(values.toString(), values, containsInAnyOrder("Patient?gender=male&name=JOHN", "Patient?gender=male&name=SMITH"));
+		assertThat(values).as(values.toString()).containsExactlyInAnyOrder("Patient?gender=male&name=JOHN", "Patient?gender=male&name=SMITH");
 
 		partsChoices = Lists.newArrayList(
 		);
 		values = ResourceIndexedSearchParams.extractCompositeStringUniquesValueChains("Patient", partsChoices);
-		assertThat(values.toString(), values, empty());
+		assertThat(values).as(values.toString()).isEmpty();
 	}
 
 }

@@ -8,10 +8,8 @@ import org.junit.jupiter.api.Test;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.greaterThan;
-import static org.hamcrest.Matchers.lessThan;
-import static org.hamcrest.Matchers.matchesPattern;
 import static org.hamcrest.Matchers.oneOf;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -197,29 +195,29 @@ public class StopWatchTest {
 		long millis = sw.getMillisPerOperation(numOperations);
 		ourLog.info("{} operations in {}ms = {}ms / operation", numOperations, minutes * DateUtils.MILLIS_PER_MINUTE, millis);
 
-		assertThat(millis, Matchers.lessThan(62000L));
-		assertThat(millis, Matchers.greaterThan(58000L));
+		assertThat(millis).isLessThan(62000L);
+		assertThat(millis).isGreaterThan(58000L);
 	}
 
 	@Test
 	public void testOperationThroughput30Ops1Min() {
 		double throughput = calculateThroughput(1, 30);
-		assertThat(throughput, greaterThan(29.0));
-		assertThat(throughput, lessThan(31.0));
+		assertThat(throughput).isGreaterThan(29.0);
+		assertThat(throughput).isLessThan(31.0);
 	}
 
 	@Test
 	public void testOperationThroughput60Ops1Min() {
 		double throughput = calculateThroughput(1, 60);
-		assertThat(throughput, greaterThan(59.0));
-		assertThat(throughput, lessThan(61.0));
+		assertThat(throughput).isGreaterThan(59.0);
+		assertThat(throughput).isLessThan(61.0);
 	}
 
 	@Test
 	public void testOperationThroughput60Ops4Min() {
 		double throughput = calculateThroughput(4, 60);
-		assertThat(throughput, greaterThan(14.0));
-		assertThat(throughput, lessThan(16.0));
+		assertThat(throughput).isGreaterThan(14.0);
+		assertThat(throughput).isLessThan(16.0);
 	}
 
 	@Test
@@ -227,7 +225,7 @@ public class StopWatchTest {
 		StopWatch sw = new StopWatch();
 		Thread.sleep(500);
 		sw.restart();
-		assertThat(sw.getMillis(), lessThan(100L));
+		assertThat(sw.getMillis()).isLessThan(100L);
 	}
 
 	@Test
@@ -236,9 +234,9 @@ public class StopWatchTest {
 
 		Thread.sleep(100);
 
-		assertThat(sw.getMillis(new Date()), greaterThan(10L));
-		assertThat(sw.getMillis(), greaterThan(10L));
-		assertThat(sw.getStartedDate().getTime(), lessThan(System.currentTimeMillis()));
+		assertThat(sw.getMillis(new Date())).isGreaterThan(10L);
+		assertThat(sw.getMillis()).isGreaterThan(10L);
+		assertThat(sw.getStartedDate().getTime()).isLessThan(System.currentTimeMillis());
 	}
 
 	@Test
@@ -247,9 +245,9 @@ public class StopWatchTest {
 
 		Thread.sleep(100);
 
-		assertThat(sw.getMillis(new Date()), greaterThan(10L));
-		assertThat(sw.getMillis(), greaterThan(10L));
-		assertThat(sw.getStartedDate().getTime(), lessThan(System.currentTimeMillis()));
+		assertThat(sw.getMillis(new Date())).isGreaterThan(10L);
+		assertThat(sw.getMillis()).isGreaterThan(10L);
+		assertThat(sw.getStartedDate().getTime()).isLessThan(System.currentTimeMillis());
 	}
 
 	@Test
@@ -260,7 +258,7 @@ public class StopWatchTest {
 
 		String string = sw.toString();
 		ourLog.info(string);
-		assertThat(string, matchesPattern("^[0-9]{3,4}ms$"));
+		assertThat(string).matches("^[0-9]{3,4}ms$");
 	}
 
 

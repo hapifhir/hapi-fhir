@@ -23,8 +23,7 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ServerWithResponseHighlightingInterceptorExceptionTest {
@@ -49,7 +48,7 @@ public class ServerWithResponseHighlightingInterceptorExceptionTest {
 		ourLog.info(responseContent);
 
 		assertEquals(400, status.getStatusLine().getStatusCode());
-		assertThat(responseContent, containsString("<diagnostics value=\"AAABBB\"/>"));
+		assertThat(responseContent).contains("<diagnostics value=\"AAABBB\"/>");
 	}
 
 
@@ -62,7 +61,7 @@ public class ServerWithResponseHighlightingInterceptorExceptionTest {
 		ourLog.info(responseContent);
 
 		assertEquals(500, status.getStatusLine().getStatusCode());
-		assertThat(responseContent, containsString("<diagnostics value=\""+ Msg.code(389) +"Failed to call access method: java.lang.Error: AAABBB\"/>"));
+		assertThat(responseContent).contains("<diagnostics value=\"" + Msg.code(389) + "Failed to call access method: java.lang.Error: AAABBB\"/>");
 	}
 
 	@AfterAll

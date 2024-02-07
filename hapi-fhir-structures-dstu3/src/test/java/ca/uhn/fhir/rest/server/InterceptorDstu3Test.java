@@ -49,7 +49,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static org.hamcrest.CoreMatchers.containsString;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.CoreMatchers.either;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -152,7 +152,7 @@ public class InterceptorDstu3Test {
 			HttpGet get = new HttpGet(ourServer.getBaseUrl() + "/Patient/1");
 			try (CloseableHttpResponse status = ourClient.execute(get)) {
 				String response = IOUtils.toString(status.getEntity().getContent(), Constants.CHARSET_UTF8);
-				assertThat(response, containsString("NAME1"));
+				assertThat(response).contains("NAME1");
 				assertEquals(202, status.getStatusLine().getStatusCode());
 				assertEquals("Accepted", status.getStatusLine().getReasonPhrase());
 			}

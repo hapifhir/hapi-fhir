@@ -25,8 +25,8 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.equalToCompressingWhiteSpace;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
@@ -114,7 +114,7 @@ class SerializationTest {
 		CdsServiceRequestJson cdsServiceRequestJson = ourObjectMapper.readValue(myRequestJson, CdsServiceRequestJson.class);
 		assertEquals(HOOK_NAME, cdsServiceRequestJson.getHook());
 
-		assertThat(cdsServiceRequestJson.getPrefetchKeys(), contains(PATIENT_KEY, DAUGHTER_KEY, PARENT_KEY));
+		assertThat(cdsServiceRequestJson.getPrefetchKeys()).containsExactly(PATIENT_KEY, DAUGHTER_KEY, PARENT_KEY);
 		Patient patient = (Patient) cdsServiceRequestJson.getPrefetch(PATIENT_KEY);
 		assertEquals(FAMILY, patient.getNameFirstRep().getFamily());
 
@@ -126,7 +126,7 @@ class SerializationTest {
 
 		assertEquals(CONTEXT_PATIENT_VALUE, cdsServiceRequestJson.getContext().getString(CONTEXT_PATIENT_KEY));
 		List<String> selections = cdsServiceRequestJson.getContext().getArray(CONTEXT_SELECTIONS_KEY);
-		assertThat(selections, contains(CONTEXT_SELECTIONS_VALUE1, CONTEXT_SELECTIONS_VALUE2));
+		assertThat(selections).containsExactly(CONTEXT_SELECTIONS_VALUE1, CONTEXT_SELECTIONS_VALUE2);
 		cdsServiceRequestJson.getContext().getResource(CONTEXT_DRAFT_ORDERS_KEY);
 	}
 

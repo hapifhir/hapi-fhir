@@ -63,12 +63,9 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.util.HapiExtensions.EXT_VALUESET_EXPANSION_MESSAGE;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.containsStringIgnoringCase;
-import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.stringContainsInOrder;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -237,19 +234,19 @@ public class ResourceProviderR4ValueSetNoVerCSNoVerTest extends BaseResourceProv
 
 		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
-		assertThat(resp, containsString("<ValueSet xmlns=\"http://hl7.org/fhir\">"));
-		assertThat(resp, containsString("<expansion>"));
-		assertThat(resp, containsString("<contains>"));
-		assertThat(resp, containsString("<system value=\"http://acme.org\"/>"));
-		assertThat(resp, containsString("<code value=\"8450-9\"/>"));
-		assertThat(resp, containsString("<display value=\"Systolic blood pressure--expiration\"/>"));
-		assertThat(resp, containsString("</contains>"));
-		assertThat(resp, containsString("<contains>"));
-		assertThat(resp, containsString("<system value=\"http://acme.org\"/>"));
-		assertThat(resp, containsString("<code value=\"11378-7\"/>"));
-		assertThat(resp, containsString("<display value=\"Systolic blood pressure at First encounter\"/>"));
-		assertThat(resp, containsString("</contains>"));
-		assertThat(resp, containsString("</expansion>"));
+		assertThat(resp).contains("<ValueSet xmlns=\"http://hl7.org/fhir\">");
+		assertThat(resp).contains("<expansion>");
+		assertThat(resp).contains("<contains>");
+		assertThat(resp).contains("<system value=\"http://acme.org\"/>");
+		assertThat(resp).contains("<code value=\"8450-9\"/>");
+		assertThat(resp).contains("<display value=\"Systolic blood pressure--expiration\"/>");
+		assertThat(resp).contains("</contains>");
+		assertThat(resp).contains("<contains>");
+		assertThat(resp).contains("<system value=\"http://acme.org\"/>");
+		assertThat(resp).contains("<code value=\"11378-7\"/>");
+		assertThat(resp).contains("<display value=\"Systolic blood pressure at First encounter\"/>");
+		assertThat(resp).contains("</contains>");
+		assertThat(resp).contains("</expansion>");
 
 	}
 
@@ -275,19 +272,19 @@ public class ResourceProviderR4ValueSetNoVerCSNoVerTest extends BaseResourceProv
 
 		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
-		assertThat(resp, containsString("<ValueSet xmlns=\"http://hl7.org/fhir\">"));
-		assertThat(resp, containsString("<expansion>"));
-		assertThat(resp, containsString("<contains>"));
-		assertThat(resp, containsString("<system value=\"http://acme.org\"/>"));
-		assertThat(resp, containsString("<code value=\"8450-9\"/>"));
-		assertThat(resp, containsString("<display value=\"Systolic blood pressure--expiration\"/>"));
-		assertThat(resp, containsString("</contains>"));
-		assertThat(resp, containsString("<contains>"));
-		assertThat(resp, containsString("<system value=\"http://acme.org\"/>"));
-		assertThat(resp, containsString("<code value=\"11378-7\"/>"));
-		assertThat(resp, containsString("<display value=\"Systolic blood pressure at First encounter\"/>"));
-		assertThat(resp, containsString("</contains>"));
-		assertThat(resp, containsString("</expansion>"));
+		assertThat(resp).contains("<ValueSet xmlns=\"http://hl7.org/fhir\">");
+		assertThat(resp).contains("<expansion>");
+		assertThat(resp).contains("<contains>");
+		assertThat(resp).contains("<system value=\"http://acme.org\"/>");
+		assertThat(resp).contains("<code value=\"8450-9\"/>");
+		assertThat(resp).contains("<display value=\"Systolic blood pressure--expiration\"/>");
+		assertThat(resp).contains("</contains>");
+		assertThat(resp).contains("<contains>");
+		assertThat(resp).contains("<system value=\"http://acme.org\"/>");
+		assertThat(resp).contains("<code value=\"11378-7\"/>");
+		assertThat(resp).contains("<display value=\"Systolic blood pressure at First encounter\"/>");
+		assertThat(resp).contains("</contains>");
+		assertThat(resp).contains("</expansion>");
 
 	}
 
@@ -305,8 +302,8 @@ public class ResourceProviderR4ValueSetNoVerCSNoVerTest extends BaseResourceProv
 
 		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
-		assertThat(resp, containsString("<display value=\"Systolic blood pressure at First encounter\"/>"));
-		assertThat(resp, not(containsString("\"Foo Code\"")));
+		assertThat(resp).contains("<display value=\"Systolic blood pressure at First encounter\"/>");
+		assertThat(resp).doesNotContain("\"Foo Code\"");
 
 	}
 
@@ -333,8 +330,8 @@ public class ResourceProviderR4ValueSetNoVerCSNoVerTest extends BaseResourceProv
 
 		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
-		assertThat(resp, containsString("<display value=\"Systolic blood pressure at First encounter\"/>"));
-		assertThat(resp, not(containsString("\"Foo Code\"")));
+		assertThat(resp).contains("<display value=\"Systolic blood pressure at First encounter\"/>");
+		assertThat(resp).doesNotContain("\"Foo Code\"");
 	}
 
 
@@ -361,8 +358,8 @@ public class ResourceProviderR4ValueSetNoVerCSNoVerTest extends BaseResourceProv
 
 		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
-		assertThat(resp, containsString("<display value=\"Systolic blood pressure at First encounter\"/>"));
-		assertThat(resp, not(containsString("\"Foo Code\"")));
+		assertThat(resp).contains("<display value=\"Systolic blood pressure at First encounter\"/>");
+		assertThat(resp).doesNotContain("\"Foo Code\"");
 	}
 
 	@Test
@@ -386,8 +383,8 @@ public class ResourceProviderR4ValueSetNoVerCSNoVerTest extends BaseResourceProv
 
 		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
-		assertThat(resp, not(containsString("<display value=\"Systolic blood pressure at First encounter\"/>")));
-		assertThat(resp, not(containsString("\"Foo Code\"")));
+		assertThat(resp).doesNotContain("<display value=\"Systolic blood pressure at First encounter\"/>");
+		assertThat(resp).doesNotContain("\"Foo Code\"");
 	}
 
 
@@ -560,7 +557,7 @@ public class ResourceProviderR4ValueSetNoVerCSNoVerTest extends BaseResourceProv
 		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
 
-		assertThat(resp, is(containsStringIgnoringCase("<code value=\"M\"/>")));
+		assertThat(resp).containsIgnoringCase("<code value=\"M\"/>");
 	}
 
 	@Test
@@ -580,9 +577,9 @@ public class ResourceProviderR4ValueSetNoVerCSNoVerTest extends BaseResourceProv
 		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
 
-		assertThat(resp, containsStringIgnoringCase("<code value=\"childAAA\"/>"));
-		assertThat(resp, containsStringIgnoringCase("<code value=\"childAAB\"/>"));
-		assertThat(resp, not(containsStringIgnoringCase("<code value=\"ParentA\"/>")));
+		assertThat(resp).containsIgnoringCase("<code value=\"childAAA\"/>");
+		assertThat(resp).containsIgnoringCase("<code value=\"childAAB\"/>");
+		assertThat(resp).doesNotContainIgnoringCase("<code value=\"ParentA\"/>");
 
 	}
 
@@ -671,7 +668,7 @@ public class ResourceProviderR4ValueSetNoVerCSNoVerTest extends BaseResourceProv
 		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
 
-		assertThat(resp, containsStringIgnoringCase("<code value=\"M\"/>"));
+		assertThat(resp).containsIgnoringCase("<code value=\"M\"/>");
 	}
 
 	@Test
@@ -690,9 +687,9 @@ public class ResourceProviderR4ValueSetNoVerCSNoVerTest extends BaseResourceProv
 		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
 
-		assertThat(resp, containsStringIgnoringCase("<code value=\"childAAA\"/>"));
-		assertThat(resp, containsStringIgnoringCase("<code value=\"childAAB\"/>"));
-		assertThat(resp, not(containsStringIgnoringCase("<code value=\"ParentA\"/>")));
+		assertThat(resp).containsIgnoringCase("<code value=\"childAAA\"/>");
+		assertThat(resp).containsIgnoringCase("<code value=\"childAAB\"/>");
+		assertThat(resp).doesNotContainIgnoringCase("<code value=\"ParentA\"/>");
 
 	}
 
@@ -710,8 +707,8 @@ public class ResourceProviderR4ValueSetNoVerCSNoVerTest extends BaseResourceProv
 		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
 
-		assertThat(resp, containsStringIgnoringCase("<system value=\"http://hl7.org/fhir/CodeSystem/medication-status\"/>"));
-		assertThat(resp, containsStringIgnoringCase("<code value=\"active\"/>"));
+		assertThat(resp).containsIgnoringCase("<system value=\"http://hl7.org/fhir/CodeSystem/medication-status\"/>");
+		assertThat(resp).containsIgnoringCase("<code value=\"active\"/>");
 	}
 
 	@Test
@@ -730,9 +727,9 @@ public class ResourceProviderR4ValueSetNoVerCSNoVerTest extends BaseResourceProv
 		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
 
-		assertThat(resp, containsStringIgnoringCase("<code value=\"childAAA\"/>"));
-		assertThat(resp, containsStringIgnoringCase("<code value=\"childAAB\"/>"));
-		assertThat(resp, not(containsStringIgnoringCase("<code value=\"ParentA\"/>")));
+		assertThat(resp).containsIgnoringCase("<code value=\"childAAA\"/>");
+		assertThat(resp).containsIgnoringCase("<code value=\"childAAB\"/>");
+		assertThat(resp).doesNotContainIgnoringCase("<code value=\"ParentA\"/>");
 
 	}
 
@@ -822,7 +819,7 @@ public class ResourceProviderR4ValueSetNoVerCSNoVerTest extends BaseResourceProv
 			ourLog.info(resp.toString());
 
 			assertEquals(400, resp.getStatusLine().getStatusCode());
-			assertThat(respString, containsString("Unknown FilterOperator code 'n'"));
+			assertThat(respString).contains("Unknown FilterOperator code 'n'");
 
 		}
 	}
@@ -1074,7 +1071,7 @@ public class ResourceProviderR4ValueSetNoVerCSNoVerTest extends BaseResourceProv
 			.returnResourceType(ValueSet.class)
 			.execute();
 		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(expansion));
-		assertThat(toDirectCodes(expansion.getExpansion().getContains()), containsInAnyOrder("A", "AA", "AB", "AAA"));
+		assertThat(toDirectCodes(expansion.getExpansion().getContains())).containsExactlyInAnyOrder("A", "AA", "AB", "AAA");
 		assertEquals(14, myCaptureQueriesListener.getSelectQueries().size(), ()->myCaptureQueriesListener.logSelectQueries().stream().map(t->t.getSql(true, false)).collect(Collectors.joining("\n * ")));
 		assertEquals("ValueSet \"ValueSet.url[http://example.com/my_value_set]\" has not yet been pre-expanded. Performing in-memory expansion without parameters. Current status: NOT_EXPANDED | The ValueSet is waiting to be picked up and pre-expanded by a scheduled task.", expansion.getMeta().getExtensionString(EXT_VALUESET_EXPANSION_MESSAGE));
 
@@ -1089,9 +1086,9 @@ public class ResourceProviderR4ValueSetNoVerCSNoVerTest extends BaseResourceProv
 			.returnResourceType(ValueSet.class)
 			.execute();
 		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(expansion));
-		assertThat(toDirectCodes(expansion.getExpansion().getContains()), containsInAnyOrder("A"));
-		assertThat(toDirectCodes(expansion.getExpansion().getContains().get(0).getContains()), containsInAnyOrder("AA", "AB"));
-		assertThat(toDirectCodes(expansion.getExpansion().getContains().get(0).getContains().stream().filter(t -> t.getCode().equals("AA")).findFirst().orElseThrow(() -> new IllegalArgumentException()).getContains()), containsInAnyOrder("AAA"));
+		assertThat(toDirectCodes(expansion.getExpansion().getContains())).containsExactlyInAnyOrder("A");
+		assertThat(toDirectCodes(expansion.getExpansion().getContains().get(0).getContains())).containsExactlyInAnyOrder("AA", "AB");
+		assertThat(toDirectCodes(expansion.getExpansion().getContains().get(0).getContains().stream().filter(t -> t.getCode().equals("AA")).findFirst().orElseThrow(() -> new IllegalArgumentException()).getContains())).containsExactlyInAnyOrder("AAA");
 		assertEquals(15, myCaptureQueriesListener.getSelectQueries().size());
 
 	}
@@ -1114,7 +1111,7 @@ public class ResourceProviderR4ValueSetNoVerCSNoVerTest extends BaseResourceProv
 			.returnResourceType(ValueSet.class)
 			.execute();
 		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(expansion));
-		assertThat(toDirectCodes(expansion.getExpansion().getContains()), containsInAnyOrder("A", "AA", "AB", "AAA"));
+		assertThat(toDirectCodes(expansion.getExpansion().getContains())).containsExactlyInAnyOrder("A", "AA", "AB", "AAA");
 		assertEquals(10, myCaptureQueriesListener.getSelectQueries().size(), ()->myCaptureQueriesListener.logSelectQueries().stream().map(t->t.getSql(true, false)).collect(Collectors.joining("\n * ")));
 		assertEquals("ValueSet with URL \"Unidentified ValueSet\" was expanded using an in-memory expansion", expansion.getMeta().getExtensionString(EXT_VALUESET_EXPANSION_MESSAGE));
 
@@ -1129,9 +1126,9 @@ public class ResourceProviderR4ValueSetNoVerCSNoVerTest extends BaseResourceProv
 			.returnResourceType(ValueSet.class)
 			.execute();
 		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(expansion));
-		assertThat(toDirectCodes(expansion.getExpansion().getContains()), containsInAnyOrder("A"));
-		assertThat(toDirectCodes(expansion.getExpansion().getContains().get(0).getContains()), containsInAnyOrder("AA", "AB"));
-		assertThat(toDirectCodes(expansion.getExpansion().getContains().get(0).getContains().stream().filter(t -> t.getCode().equals("AA")).findFirst().orElseThrow(() -> new IllegalArgumentException()).getContains()), containsInAnyOrder("AAA"));
+		assertThat(toDirectCodes(expansion.getExpansion().getContains())).containsExactlyInAnyOrder("A");
+		assertThat(toDirectCodes(expansion.getExpansion().getContains().get(0).getContains())).containsExactlyInAnyOrder("AA", "AB");
+		assertThat(toDirectCodes(expansion.getExpansion().getContains().get(0).getContains().stream().filter(t -> t.getCode().equals("AA")).findFirst().orElseThrow(() -> new IllegalArgumentException()).getContains())).containsExactlyInAnyOrder("AAA");
 		assertEquals(13, myCaptureQueriesListener.getSelectQueries().size());
 
 	}
@@ -1168,9 +1165,9 @@ public class ResourceProviderR4ValueSetNoVerCSNoVerTest extends BaseResourceProv
 			.returnResourceType(ValueSet.class)
 			.execute();
 		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(expansion));
-		assertThat(toDirectCodes(expansion.getExpansion().getContains()), containsInAnyOrder("A", "AA", "AB", "AAA"));
+		assertThat(toDirectCodes(expansion.getExpansion().getContains())).containsExactlyInAnyOrder("A", "AA", "AB", "AAA");
 		assertEquals(0, myCaptureQueriesListener.getSelectQueries().size());
-		assertThat(expansion.getMeta().getExtensionString(EXT_VALUESET_EXPANSION_MESSAGE), containsString("ValueSet was expanded using an expansion that was pre-calculated"));
+		assertThat(expansion.getMeta().getExtensionString(EXT_VALUESET_EXPANSION_MESSAGE)).contains("ValueSet was expanded using an expansion that was pre-calculated");
 
 		// Hierarchical (shouldn't reuse cache)
 		myCaptureQueriesListener.clear();
@@ -1183,9 +1180,9 @@ public class ResourceProviderR4ValueSetNoVerCSNoVerTest extends BaseResourceProv
 			.returnResourceType(ValueSet.class)
 			.execute();
 		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(expansion));
-		assertThat(toDirectCodes(expansion.getExpansion().getContains()), containsInAnyOrder("A"));
-		assertThat(toDirectCodes(expansion.getExpansion().getContains().get(0).getContains()), containsInAnyOrder("AA", "AB"));
-		assertThat(toDirectCodes(expansion.getExpansion().getContains().get(0).getContains().stream().filter(t -> t.getCode().equals("AA")).findFirst().orElseThrow(() -> new IllegalArgumentException()).getContains()), containsInAnyOrder("AAA"));
+		assertThat(toDirectCodes(expansion.getExpansion().getContains())).containsExactlyInAnyOrder("A");
+		assertThat(toDirectCodes(expansion.getExpansion().getContains().get(0).getContains())).containsExactlyInAnyOrder("AA", "AB");
+		assertThat(toDirectCodes(expansion.getExpansion().getContains().get(0).getContains().stream().filter(t -> t.getCode().equals("AA")).findFirst().orElseThrow(() -> new IllegalArgumentException()).getContains())).containsExactlyInAnyOrder("AAA");
 		assertEquals(3, myCaptureQueriesListener.getSelectQueries().size());
 
 	}

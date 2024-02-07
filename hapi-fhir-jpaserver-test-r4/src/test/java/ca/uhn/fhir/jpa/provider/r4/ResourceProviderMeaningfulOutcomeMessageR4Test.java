@@ -20,6 +20,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.matchesPattern;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -246,8 +247,7 @@ public class ResourceProviderMeaningfulOutcomeMessageR4Test extends BaseResource
 			.execute();
 		ourLog.debug("Create {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
 		OperationOutcome oo = (OperationOutcome) output.getEntry().get(0).getResponse().getOutcome();
-		assertThat(oo.getIssueFirstRep().getDiagnostics(),
-			matchesPattern("Successfully conditionally created resource \".*\". No existing resources matched URL \"Patient\\?active=true\". Took [0-9]+ms."));
+		assertThat(oo.getIssueFirstRep().getDiagnostics()).matches("Successfully conditionally created resource \".*\". No existing resources matched URL \"Patient\\?active=true\". Took [0-9]+ms.");
 		assertEquals(StorageResponseCodeEnum.SUCCESSFUL_CREATE_NO_CONDITIONAL_MATCH.name(), oo.getIssueFirstRep().getDetails().getCodingFirstRep().getCode());
 		assertEquals(StorageResponseCodeEnum.SYSTEM, oo.getIssueFirstRep().getDetails().getCodingFirstRep().getSystem());
 

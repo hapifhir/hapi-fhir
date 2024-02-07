@@ -35,13 +35,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.in;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.notNullValue;
-import static org.hamcrest.Matchers.nullValue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -55,18 +49,18 @@ public class MdmLinkDaoSvcTest extends BaseMdmR4Test {
 	@Test
 	public void testCreate() {
 		MdmLink mdmLink = createResourcesAndBuildTestMDMLink();
-		assertThat(mdmLink.getCreated(), is(nullValue()));
-		assertThat(mdmLink.getUpdated(), is(nullValue()));
+		assertThat(mdmLink.getCreated()).isNull();
+		assertThat(mdmLink.getUpdated()).isNull();
 		myMdmLinkDaoSvc.save(mdmLink);
-		assertThat(mdmLink.getCreated(), is(notNullValue()));
-		assertThat(mdmLink.getUpdated(), is(notNullValue()));
+		assertThat(mdmLink.getCreated()).isNotNull();
+		assertThat(mdmLink.getUpdated()).isNotNull();
 		assertTrue(mdmLink.getUpdated().getTime() - mdmLink.getCreated().getTime() < 1000);
 	}
 
 	@Test
 	public void testUpdate() {
 		MdmLink createdLink = myMdmLinkDaoSvc.save(createResourcesAndBuildTestMDMLink());
-		assertThat(createdLink.getLinkSource(), is(MdmLinkSourceEnum.MANUAL));
+		assertThat(createdLink.getLinkSource()).isEqualTo(MdmLinkSourceEnum.MANUAL);
 		TestUtil.sleepOneClick();
 		createdLink.setLinkSource(MdmLinkSourceEnum.AUTO);
 		MdmLink updatedLink = myMdmLinkDaoSvc.save(createdLink);
@@ -102,12 +96,12 @@ public class MdmLinkDaoSvcTest extends BaseMdmR4Test {
 		//SUT
 		List<MdmPidTuple<JpaPid>> lists = runInTransaction(() -> myMdmLinkDao.expandPidsBySourcePidAndMatchResult(JpaPid.fromId(mdmLinks.get(0).getSourcePid()), MdmMatchResultEnum.MATCH));
 
-		assertThat(lists, hasSize(10));
+		assertThat(lists).hasSize(10);
 
 		lists.stream()
 			.forEach(tuple -> {
-					assertThat(tuple.getGoldenPid().getId(), is(equalTo(myIdHelperService.getPidOrThrowException(golden).getId())));
-					assertThat(tuple.getSourcePid().getId(), is(in(expectedExpandedPids)));
+			assertThat(tuple.getGoldenPid().getId()).isEqualTo(myIdHelperService.getPidOrThrowException(golden).getId());
+			assertThat(tuple.getSourcePid().getId()).isIn(expectedExpandedPids);
 				});
 	}
 

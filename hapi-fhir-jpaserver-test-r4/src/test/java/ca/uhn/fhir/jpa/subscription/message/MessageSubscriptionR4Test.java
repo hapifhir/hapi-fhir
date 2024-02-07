@@ -46,11 +46,8 @@ import java.util.stream.Stream;
 import static ca.uhn.fhir.jpa.model.util.JpaConstants.HEADER_META_SNAPSHOT_MODE;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.instanceOf;
-import static org.hamcrest.Matchers.is;
 import static org.hamcrest.core.IsEqual.equalTo;
 
 /**
@@ -129,16 +126,16 @@ public class MessageSubscriptionR4Test extends BaseSubscriptionsR4Test {
 
 		//Quick validation source stored.
 		Observation readObs = myObservationDao.read(obs.getIdElement().toUnqualifiedVersionless());
-		assertThat(readObs.getMeta().getSource(), is(equalTo(theExpectedSourceValue)));
+		assertThat(readObs.getMeta().getSource(), equalTo(theExpectedSourceValue));
 
 		// Should see 1 subscription notification
 		waitForQueueToDrain();
 
 		//Should receive at our queue receiver
 		IBaseResource resource = fetchSingleResourceFromSubscriptionTerminalEndpoint();
-		assertThat(resource, instanceOf(Observation.class));
+		assertThat(resource).isInstanceOf(Observation.class);
 		Observation receivedObs = (Observation) resource;
-		assertThat(receivedObs.getMeta().getSource(), is(equalTo(theExpectedSourceValue)));
+		assertThat(receivedObs.getMeta().getSource(), equalTo(theExpectedSourceValue));
 	}
 
 
@@ -174,7 +171,7 @@ public class MessageSubscriptionR4Test extends BaseSubscriptionsR4Test {
 		waitForQueueToDrain();
 
 		Patient receivedPatient = fetchSingleResourceFromSubscriptionTerminalEndpoint();
-		assertThat(receivedPatient.getMeta().getTag(), hasSize(theTagsForCreate.size()));
+		assertThat(receivedPatient.getMeta().getTag()).hasSize(theTagsForCreate.size());
 
 		patient = new Patient();
 		patient.setId(id);
@@ -192,7 +189,7 @@ public class MessageSubscriptionR4Test extends BaseSubscriptionsR4Test {
 		ourLog.info(getFhirContext().newJsonParser().setPrettyPrint(true).encodeResourceToString(receivedPatient));
 
 		List<String> receivedTagList = toSimpleTagList(receivedPatient.getMeta().getTag());
-		assertThat(receivedTagList, containsInAnyOrder(theExpectedTags.toArray()));
+		assertThat(receivedTagList).containsExactlyInAnyOrder(theExpectedTags.toArray());
 
 	}
 
@@ -233,8 +230,8 @@ public class MessageSubscriptionR4Test extends BaseSubscriptionsR4Test {
 		boolean wasDeleted = transactionTemplate.execute(tx -> myResourceModifiedMessagePersistenceSvc.deleteByPK(persistedResourceModifiedMessage.getPersistedResourceModifiedMessagePk()));
 
 		// then
-		assertThat(wasDeleted, is(Boolean.TRUE));
-		assertThat(myResourceModifiedMessagePersistenceSvc.findAllOrderedByCreatedTime(), hasSize(0));
+		assertThat(wasDeleted).isEqualTo(Boolean.TRUE);
+		assertThat(myResourceModifiedMessagePersistenceSvc.findAllOrderedByCreatedTime()).hasSize(0);
 	}
 
 	@Test
@@ -249,7 +246,7 @@ public class MessageSubscriptionR4Test extends BaseSubscriptionsR4Test {
 		boolean wasDeleted = transactionTemplate.execute(tx -> myResourceModifiedMessagePersistenceSvc.deleteByPK(nonExistentResourceWithPk));
 
 		// then
-		assertThat(wasDeleted, is(Boolean.FALSE));
+		assertThat(wasDeleted).isEqualTo(Boolean.FALSE);
 	}
 
 	@Test
@@ -331,7 +328,7 @@ public class MessageSubscriptionR4Test extends BaseSubscriptionsR4Test {
 	}
 
 	private <T> T fetchSingleResourceFromSubscriptionTerminalEndpoint() {
-		assertThat(handler.getMessages().size(), is(equalTo(1)));
+		assertThat(handler.getMessages().size(), equalTo(1));
 		ResourceModifiedJsonMessage resourceModifiedJsonMessage = handler.getMessages().get(0);
 		ResourceModifiedMessage payload = resourceModifiedJsonMessage.getPayload();
 		String payloadString = payload.getPayloadString();
@@ -353,7 +350,7 @@ public class MessageSubscriptionR4Test extends BaseSubscriptionsR4Test {
 	}
 
 	private static void assertOnPksAndOrder(List<IPersistedResourceModifiedMessage> theFetchedResourceModifiedMessageList, List<IPersistedResourceModifiedMessage> theCompareToList ){
-		assertThat(theFetchedResourceModifiedMessageList, hasSize(theCompareToList.size()));
+		assertThat(theFetchedResourceModifiedMessageList).hasSize(theCompareToList.size());
 
 		List<IPersistedResourceModifiedMessagePK> fetchedPks = theFetchedResourceModifiedMessageList
 			.stream()

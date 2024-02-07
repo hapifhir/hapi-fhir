@@ -16,8 +16,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import jakarta.persistence.PersistenceException;
 import java.sql.SQLException;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -33,31 +32,31 @@ public class HapiFhirHibernateJpaDialectTest {
 	@Test
 	public void testConvertHibernateAccessException() {
 		DataAccessException outcome = mySvc.convertHibernateAccessException(new ConstraintViolationException("this is a message", new SQLException("reason"), "IDX_FOO"));
-		assertThat(outcome.getMessage(), containsString("this is a message"));
+		assertThat(outcome.getMessage()).contains("this is a message");
 
 		try {
 			mySvc.convertHibernateAccessException(new ConstraintViolationException("this is a message", new SQLException("reason"), ResourceTable.IDX_RES_TYPE_FHIR_ID));
 			fail();
 		} catch (ResourceVersionConflictException e) {
-			assertThat(e.getMessage(), containsString("The operation has failed with a client-assigned ID constraint failure"));
+			assertThat(e.getMessage()).contains("The operation has failed with a client-assigned ID constraint failure");
 		}
 
 		try {
 			outcome = mySvc.convertHibernateAccessException(new StaleStateException("this is a message"));
 			fail();
 		} catch (ResourceVersionConflictException e) {
-			assertThat(e.getMessage(), containsString("The operation has failed with a version constraint failure"));
+			assertThat(e.getMessage()).contains("The operation has failed with a version constraint failure");
 		}
 
 		try {
 			mySvc.convertHibernateAccessException(new ConstraintViolationException("this is a message", new SQLException("reason"), ResourceSearchUrlEntity.RES_SEARCH_URL_COLUMN_NAME));
 			fail();
 		} catch (DataIntegrityViolationException e) {
-			assertThat(e.getMessage(), containsString(ResourceSearchUrlEntity.RES_SEARCH_URL_COLUMN_NAME));
+			assertThat(e.getMessage()).contains(ResourceSearchUrlEntity.RES_SEARCH_URL_COLUMN_NAME);
 		}
 
 		outcome = mySvc.convertHibernateAccessException(new HibernateException("this is a message"));
-		assertThat(outcome.getMessage(), containsString("this is a message"));
+		assertThat(outcome.getMessage()).contains("this is a message");
 
 	}
 
@@ -71,7 +70,7 @@ public class HapiFhirHibernateJpaDialectTest {
 			mySvc.translate(exception, "a message");
 			fail();
 		} catch (ResourceVersionConflictException e) {
-			assertThat(e.getMessage(), containsString("The operation has failed with a client-assigned ID constraint failure"));
+			assertThat(e.getMessage()).contains("The operation has failed with a client-assigned ID constraint failure");
 		}
 
 	}

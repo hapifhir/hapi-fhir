@@ -16,8 +16,7 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 import java.util.Set;
 
-import static org.hamcrest.CoreMatchers.containsString;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -52,7 +51,7 @@ public class ServerMethodSelectionR4Test extends BaseR4ServerTest {
 				.execute();
 			fail();
 		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage(), containsString("this server does not know how to handle GET operation[Patient] with parameters [[_include, name]]"));
+			assertThat(e.getMessage()).contains("this server does not know how to handle GET operation[Patient] with parameters [[_include, name]]");
 		}
 	}
 
@@ -115,7 +114,7 @@ public class ServerMethodSelectionR4Test extends BaseR4ServerTest {
 				.execute();
 			fail();
 		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage(), containsString("this server does not know how to handle GET operation[Patient] with parameters [[_revinclude, name]]"));
+			assertThat(e.getMessage()).contains("this server does not know how to handle GET operation[Patient] with parameters [[_revinclude, name]]");
 		}
 	}
 

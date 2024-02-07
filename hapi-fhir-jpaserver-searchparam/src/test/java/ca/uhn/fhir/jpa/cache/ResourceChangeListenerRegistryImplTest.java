@@ -26,9 +26,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.hasSize;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -130,13 +128,13 @@ class ResourceChangeListenerRegistryImplTest {
 		assertEquals(3, myResourceChangeListenerRegistry.size());
 
 		List<ResourceChangeListenerCache> entries = Lists.newArrayList(myResourceChangeListenerRegistry.iterator());
-		assertThat(entries, hasSize(3));
+		assertThat(entries).hasSize(3);
 
 		List<IResourceChangeListener> listeners = entries.stream().map(ResourceChangeListenerCache::getResourceChangeListener).collect(Collectors.toList());
-		assertThat(listeners, contains(listener1, listener1, listener2));
+		assertThat(listeners).containsExactly(listener1, listener1, listener2);
 
 		List<String> resourceNames = entries.stream().map(IResourceChangeListenerCache::getResourceName).collect(Collectors.toList());
-		assertThat(resourceNames, contains(PATIENT_RESOURCE_NAME, OBSERVATION_RESOURCE_NAME, PATIENT_RESOURCE_NAME));
+		assertThat(resourceNames).containsExactly(PATIENT_RESOURCE_NAME, OBSERVATION_RESOURCE_NAME, PATIENT_RESOURCE_NAME);
 
 		IResourceChangeListenerCache firstcache = entries.iterator().next();
 		// We made a copy

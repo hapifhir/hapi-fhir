@@ -8,7 +8,7 @@ import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.Test;
 
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
@@ -64,7 +64,11 @@ public class FhirResourceDaoR4UpdateTagSnapshotTest extends BaseJpaR4Test {
 		assertEquals(true, p.getActive());
 		assertEquals(2, p.getMeta().getTag().size());
 		assertEquals("urn:foo", p.getMeta().getTag().get(0).getSystem());
-		assertThat(p.getMeta().getTag().get(0).getCode(), Matchers.anyOf(Matchers.equalTo("bar"), Matchers.equalTo("bar2")));
+		assertThat(p.getMeta().getTag().get(0).getCode())
+			.satisfiesAnyOf(
+				arg -> assertThat(arg).isEqualTo("bar"),
+				arg -> assertThat(arg).isEqualTo("bar2")
+			);
 	}
 	@Test
 	public void testUpdateWithFewerTagsWithHeader() {

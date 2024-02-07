@@ -58,9 +58,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
-import static org.hamcrest.CoreMatchers.containsString;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.not;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -170,7 +168,7 @@ public class ConsentInterceptorTest {
 			assertEquals(400, status.getStatusLine().getStatusCode());
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 			ourLog.info("Response: {}", responseContent);
-			assertThat(responseContent, containsString(Msg.code(2037) + "_total=accurate is not permitted on this server"));
+			assertThat(responseContent).contains(Msg.code(2037) + "_total=accurate is not permitted on this server");
 		}
 
 		when(myConsentSvc.startOperation(any(), any())).thenReturn(ConsentOutcome.PROCEED);
@@ -181,7 +179,7 @@ public class ConsentInterceptorTest {
 			assertEquals(200, status.getStatusLine().getStatusCode());
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 			ourLog.info("Response: {}", responseContent);
-			assertThat(responseContent, not(containsString("\"total\"")));
+			assertThat(responseContent).doesNotContain("\"total\"");
 		}
 
 		httpGet = new HttpGet("http://localhost:" + myPort + "/Patient?_total=none");
@@ -189,7 +187,7 @@ public class ConsentInterceptorTest {
 			assertEquals(200, status.getStatusLine().getStatusCode());
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 			ourLog.info("Response: {}", responseContent);
-			assertThat(responseContent, not(containsString("\"total\"")));
+			assertThat(responseContent).doesNotContain("\"total\"");
 		}
 	}
 
@@ -216,7 +214,7 @@ public class ConsentInterceptorTest {
 			assertEquals(400, status.getStatusLine().getStatusCode());
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 			ourLog.info("Response: {}", responseContent);
-			assertThat(responseContent, containsString(Msg.code(2038) + "_summary=count is not permitted on this server"));
+			assertThat(responseContent).contains(Msg.code(2038) + "_summary=count is not permitted on this server");
 		}
 
 		when(myConsentSvc.startOperation(any(), any())).thenReturn(ConsentOutcome.PROCEED);
@@ -227,7 +225,7 @@ public class ConsentInterceptorTest {
 			assertEquals(200, status.getStatusLine().getStatusCode());
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 			ourLog.info("Response: {}", responseContent);
-			assertThat(responseContent, not(containsString("\"total\"")));
+			assertThat(responseContent).doesNotContain("\"total\"");
 		}
 
 		when(myConsentSvc.startOperation(any(), any())).thenReturn(ConsentOutcome.AUTHORIZED);
@@ -236,7 +234,7 @@ public class ConsentInterceptorTest {
 			assertEquals(200, status.getStatusLine().getStatusCode());
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 			ourLog.info("Response: {}", responseContent);
-			assertThat(responseContent, containsString("\"total\""));
+			assertThat(responseContent).contains("\"total\"");
 		}
 
 	}
@@ -279,7 +277,7 @@ public class ConsentInterceptorTest {
 			assertEquals(200, status.getStatusLine().getStatusCode());
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 			ourLog.info("Response: {}", responseContent);
-			assertThat(responseContent, containsString("PTA"));
+			assertThat(responseContent).contains("PTA");
 		}
 
 		verify(myConsentSvc, timeout(2000).times(1)).startOperation(any(), any());
@@ -307,7 +305,7 @@ public class ConsentInterceptorTest {
 			assertEquals(200, status.getStatusLine().getStatusCode());
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 			ourLog.info("Response: {}", responseContent);
-			assertThat(responseContent, containsString("PTA"));
+			assertThat(responseContent).contains("PTA");
 		}
 
 		verify(myConsentSvc, timeout(2000).times(1)).startOperation(any(), any());
@@ -339,7 +337,7 @@ public class ConsentInterceptorTest {
 			assertEquals(200, status.getStatusLine().getStatusCode());
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 			ourLog.info("Response: {}", responseContent);
-			assertThat(responseContent, containsString("A DIAG"));
+			assertThat(responseContent).contains("A DIAG");
 		}
 
 		verify(myConsentSvc, timeout(10000).times(1)).startOperation(any(), any());
@@ -616,7 +614,7 @@ public class ConsentInterceptorTest {
 			assertEquals(200, status.getStatusLine().getStatusCode());
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 			ourLog.info("Response: {}", responseContent);
-			assertThat(responseContent, not(containsString("\"entry\"")));
+			assertThat(responseContent).doesNotContain("\"entry\"");
 		}
 
 		verify(myConsentSvc, timeout(2000).times(1)).startOperation(any(), any());

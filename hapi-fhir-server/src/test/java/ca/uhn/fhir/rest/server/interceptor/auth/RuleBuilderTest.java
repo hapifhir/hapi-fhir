@@ -7,9 +7,8 @@ import org.junit.jupiter.api.Test;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.hamcrest.Matchers.contains;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 
@@ -34,21 +33,11 @@ public class RuleBuilderTest {
 
 		assertEquals(RuleImplOp.class, list.get(0).getClass());
 		RuleImplOp allowRead = (RuleImplOp) list.get(0);
-		assertThat(allowRead.getAppliesToInstances(), contains(
-			new IdDt("Patient/READ-1"),
-			new IdDt("Patient/READ-2"),
-			new IdDt("Patient/READ-3"),
-			new IdDt("Patient/READ-4")
-		));
+		assertThat(allowRead.getAppliesToInstances()).containsExactly(new IdDt("Patient/READ-1"), new IdDt("Patient/READ-2"), new IdDt("Patient/READ-3"), new IdDt("Patient/READ-4"));
 
 		assertEquals(RuleImplOp.class, list.get(1).getClass());
 		RuleImplOp allowWrite = (RuleImplOp) list.get(1);
-		assertThat(allowWrite.getAppliesToInstances(), contains(
-			new IdDt("Patient/WRITE-1"),
-			new IdDt("Patient/WRITE-2"),
-			new IdDt("Patient/WRITE-3"),
-			new IdDt("Patient/WRITE-4")
-		));
+		assertThat(allowWrite.getAppliesToInstances()).containsExactly(new IdDt("Patient/WRITE-1"), new IdDt("Patient/WRITE-2"), new IdDt("Patient/WRITE-3"), new IdDt("Patient/WRITE-4"));
 	}
 
 	@Test

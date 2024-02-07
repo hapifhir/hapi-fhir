@@ -16,9 +16,7 @@ import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.is;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class AddTableByColumnTaskTest extends BaseTest {
 
@@ -31,7 +29,7 @@ public class AddTableByColumnTaskTest extends BaseTest {
 		getMigrator().addTasks(migrator.getTaskList(VersionEnum.V3_3_0, VersionEnum.V3_6_0));
 		getMigrator().migrate();
 
-		assertThat(JdbcUtils.getTableNames(getConnectionProperties()), containsInAnyOrder("FOO_TABLE", "TGT_TABLE"));
+		assertThat(JdbcUtils.getTableNames(getConnectionProperties())).containsExactlyInAnyOrder("FOO_TABLE", "TGT_TABLE");
 		Set<String> indexes = JdbcUtils.getIndexNames(getConnectionProperties(), "FOO_TABLE")
 			.stream()
 			.filter(s -> !s.startsWith("FK_REF_INDEX_"))
@@ -43,7 +41,7 @@ public class AddTableByColumnTaskTest extends BaseTest {
 			indexes.removeIf(t -> t.startsWith("SQL"));
 		}
 
-		assertThat(indexes.toString(), indexes, containsInAnyOrder("IDX_BONJOUR"));
+		assertThat(indexes).as(indexes.toString()).containsExactlyInAnyOrder("IDX_BONJOUR");
 	}
 
 	@Test
@@ -65,7 +63,7 @@ public class AddTableByColumnTaskTest extends BaseTest {
 		addTableByColumnTask.addAddColumnTask(buildAddColumnTask(driverType, columnType, tableName, columnName1, true, 20, Collections.emptySet()));
 
 		final String actualCreateTableSql = addTableByColumnTask.generateSQLCreateScript();
-		assertThat("CREATE TABLE table_3_columns ( z_column varchar(10), id varchar(25)  not null, a_column varchar(20),  PRIMARY KEY (id) )", is(actualCreateTableSql));;
+		assertThat("CREATE TABLE table_3_columns ( z_column varchar(10), id varchar(25)  not null, a_column varchar(20),  PRIMARY KEY (id) )").isEqualTo(actualCreateTableSql);;
 	}
 
 	@Test
@@ -88,7 +86,7 @@ public class AddTableByColumnTaskTest extends BaseTest {
 		addTableByColumnTask.addAddColumnTask(buildAddColumnTask(driverType, columnType, tableName, columnName1, true, 20, Collections.singleton(override)));
 
 		final String actualCreateTableSql = addTableByColumnTask.generateSQLCreateScript();
-		assertThat("CREATE TABLE table_3_columns ( z_column nvarchar(10), id nvarchar(25)  not null, a_column nvarchar(20),  PRIMARY KEY (id) )", is(actualCreateTableSql));;
+		assertThat("CREATE TABLE table_3_columns ( z_column nvarchar(10), id nvarchar(25)  not null, a_column nvarchar(20),  PRIMARY KEY (id) )").isEqualTo(actualCreateTableSql);;
 	}
 
 	@Test
@@ -120,7 +118,7 @@ public class AddTableByColumnTaskTest extends BaseTest {
 		addTableByColumnTask.addAddColumnTask(buildAddColumnTask(driverType, columnType, tableName, columnNameId, false, 25, Collections.singleton(override)));
 
 		final String actualCreateTableSql = addTableByColumnTask.generateSQLCreateScript();
-		assertThat("CREATE TABLE table_4_columns ( id nvarchar(25)  not null, a_column nvarchar(20), b_column nvarchar(15)  not null, z_column nvarchar(10),  PRIMARY KEY (id) )", is(actualCreateTableSql));;
+		assertThat("CREATE TABLE table_4_columns ( id nvarchar(25)  not null, a_column nvarchar(20), b_column nvarchar(15)  not null, z_column nvarchar(10),  PRIMARY KEY (id) )").isEqualTo(actualCreateTableSql);;
 	}
 
 	private static AddColumnTask buildAddColumnTask(DriverTypeEnum theDriverTypeEnum, ColumnTypeEnum theColumnTypeEnum, String theTableName, String theColumnName, boolean theNullable, int theColumnLength, Set<ColumnDriverMappingOverride> theColumnDriverMappingOverrides) {

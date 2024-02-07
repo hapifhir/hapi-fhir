@@ -17,8 +17,7 @@ import java.io.InputStreamReader;
 import java.util.Collection;
 import java.util.List;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.empty;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -72,7 +71,7 @@ public class ChangelogFilesTest {
 			// this one is optional
 			fieldNames.remove("jira");
 
-			assertThat("Invalid element in " + next + ": " + fieldNames, fieldNames, empty());
+			assertThat(fieldNames).as("Invalid element in " + next + ": " + fieldNames).isEmpty();
 
 			if (haveIssue) {
 				String issue = tree.get("issue").asText();

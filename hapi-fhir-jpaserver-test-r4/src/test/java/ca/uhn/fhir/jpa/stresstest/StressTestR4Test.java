@@ -64,10 +64,8 @@ import java.util.concurrent.Future;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.leftPad;
-import static org.hamcrest.CoreMatchers.containsString;
-import static org.hamcrest.CoreMatchers.equalTo;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -447,7 +445,7 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 					myClient.transaction().withBundle(input).execute();
 					return null;
 				} catch (ResourceVersionConflictException e) {
-					assertThat(e.toString(), containsString("Error flushing transaction with resource types: [Patient] - The operation has failed with a client-assigned ID constraint failure"));
+					assertThat(e.toString()).contains("Error flushing transaction with resource types: [Patient] - The operation has failed with a client-assigned ID constraint failure");
 					return e.toString();
 				}
 			};
@@ -468,8 +466,8 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 
 		ourLog.info("Results: {}", results);
 		assertThat(results, not(Matchers.empty()));
-		assertThat(results.get(0), containsString("HTTP 409 Conflict"));
-		assertThat(results.get(0), containsString("Error flushing transaction with resource types: [Patient]"));
+		assertThat(results.get(0)).contains("HTTP 409 Conflict");
+		assertThat(results.get(0)).contains("Error flushing transaction with resource types: [Patient]");
 	}
 
 	@Test
@@ -499,7 +497,7 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 					myClient.transaction().withBundle(input).execute();
 					return null;
 				} catch (ResourceVersionConflictException e) {
-					assertThat(e.toString(), containsString("Error flushing transaction with resource types: [Patient] - The operation has failed with a version constraint failure. This generally means that two clients/threads were trying to update the same resource at the same time, and this request was chosen as the failing request."));
+					assertThat(e.toString()).contains("Error flushing transaction with resource types: [Patient] - The operation has failed with a version constraint failure. This generally means that two clients/threads were trying to update the same resource at the same time, and this request was chosen as the failing request.");
 					return e.toString();
 				}
 			};
@@ -520,8 +518,8 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 
 		ourLog.info("Results: {}", results);
 		assertThat(results, not(Matchers.empty()));
-		assertThat(results.get(0), containsString("HTTP 409 Conflict"));
-		assertThat(results.get(0), containsString("Error flushing transaction with resource types: [Patient]"));
+		assertThat(results.get(0)).contains("HTTP 409 Conflict");
+		assertThat(results.get(0)).contains("Error flushing transaction with resource types: [Patient]");
 	}
 
 	/**
@@ -610,7 +608,7 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 		int deleteCount = myCaptureQueriesListener.getDeleteQueries().size();
 
 		myCaptureQueriesListener.logDeleteQueries();
-		assertThat(deleteCount, is(equalTo(59)));
+		assertThat(deleteCount).isEqualTo(59);
 	}
 
 	@Disabled("Stress test")
@@ -652,7 +650,7 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 		int deleteCount = myCaptureQueriesListener.getDeleteQueries().size();
 
 		myCaptureQueriesListener.logDeleteQueries();
-		assertThat(deleteCount, is(equalTo(30)));
+		assertThat(deleteCount).isEqualTo(30);
 	}
 
 	private void validateNoErrors(List<BaseTask> tasks) {

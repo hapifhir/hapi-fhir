@@ -50,11 +50,8 @@ import java.util.concurrent.TimeUnit;
 
 import static ca.uhn.fhir.rest.api.Constants.CT_FHIR_JSON_NEW;
 import static ca.uhn.fhir.util.HapiExtensions.EX_SEND_DELETE_MESSAGES;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.hasItem;
-import static org.hamcrest.Matchers.matchesPattern;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -226,7 +223,7 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 
 		ourObservationProvider.waitForUpdateCount(1);
 
-		assertThat(ourObservationProvider.getStoredResources().get(0).getSubject().getReference(), matchesPattern("Patient/[0-9]+"));
+		assertThat(ourObservationProvider.getStoredResources().get(0).getSubject().getReference()).matches("Patient/[0-9]+");
 	}
 
 	@Test
@@ -1095,8 +1092,8 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		assertEquals(0, ourObservationProvider.getCountCreate());
 		ourObservationProvider.waitForUpdateCount(1);
 		assertEquals(CT_FHIR_JSON_NEW, ourRestfulServer.getRequestContentTypes().get(0));
-		assertThat(ourRestfulServer.getRequestHeaders().get(0), hasItem("X-Foo: FOO"));
-		assertThat(ourRestfulServer.getRequestHeaders().get(0), hasItem("X-Bar: BAR"));
+		assertThat(ourRestfulServer.getRequestHeaders().get(0)).contains("X-Foo: FOO");
+		assertThat(ourRestfulServer.getRequestHeaders().get(0)).contains("X-Bar: BAR");
 	}
 
 	@Test
@@ -1207,7 +1204,7 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 			myClient.create().resource(subscription).execute();
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertThat(e.getMessage(), containsString("Can not process submitted Subscription - Subscription.status must be populated on this server"));
+			assertThat(e.getMessage()).contains("Can not process submitted Subscription - Subscription.status must be populated on this server");
 		}
 	}
 

@@ -14,9 +14,7 @@ import java.util.TimeZone;
 import static ca.uhn.fhir.rest.param.ParamPrefixEnum.EQUAL;
 import static ca.uhn.fhir.rest.param.ParamPrefixEnum.NOT_EQUAL;
 import static java.util.concurrent.TimeUnit.SECONDS;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.endsWith;
-import static org.hamcrest.Matchers.startsWith;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -147,8 +145,8 @@ public class DateParamTest {
 		InstantDt dt = new InstantDt(new Date(param.getValue().getTime()));
 		dt.setTimeZone(TimeZone.getTimeZone("America/Toronto"));
 		ourLog.debug("POST: " + dt.getValue());
-		assertThat(dt.getValueAsString(), startsWith("2016-06-09T"));
-		assertThat(dt.getValueAsString(), endsWith("8:00.000-04:00"));
+		assertThat(dt.getValueAsString()).startsWith("2016-06-09T");
+		assertThat(dt.getValueAsString()).endsWith("8:00.000-04:00");
 	}
 
 	@Test

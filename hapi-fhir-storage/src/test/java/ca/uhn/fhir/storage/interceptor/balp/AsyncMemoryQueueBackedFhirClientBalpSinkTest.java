@@ -21,11 +21,9 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.lessThan;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class AsyncMemoryQueueBackedFhirClientBalpSinkTest {
@@ -80,7 +78,7 @@ public class AsyncMemoryQueueBackedFhirClientBalpSinkTest {
 				.stream()
 				.map(t -> t.getEntity().get(0).getReference().getReference())
 				.toList();
-			assertThat(whats, containsInAnyOrder("Patient/123", "Patient/456"));
+			assertThat(whats).containsExactlyInAnyOrder("Patient/123", "Patient/456");
 		} finally {
 			sink.stop();
 		}
@@ -112,13 +110,13 @@ public class AsyncMemoryQueueBackedFhirClientBalpSinkTest {
 
 			// Validate
 			myAuditEventProvider.waitForCreateCount(2);
-			assertThat(counter.get(), lessThan(1));
+			assertThat(counter.get()).isLessThan(1);
 			List<String> whats = myAuditEventProvider
 				.getStoredResources()
 				.stream()
 				.map(t -> t.getEntity().get(0).getReference().getReference())
 				.toList();
-			assertThat(whats.toString(), whats, containsInAnyOrder("Patient/123", "Patient/456"));
+			assertThat(whats).as(whats.toString()).containsExactlyInAnyOrder("Patient/123", "Patient/456");
 		} finally {
 			sink.stop();
 		}

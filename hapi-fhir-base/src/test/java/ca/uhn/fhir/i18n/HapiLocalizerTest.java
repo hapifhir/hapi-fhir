@@ -4,9 +4,9 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Set;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.matchesPattern;
 import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -37,7 +37,7 @@ public class HapiLocalizerTest {
 	public void testGetVersion() {
 		HapiLocalizer svc = new HapiLocalizer();
 		String version = svc.getMessage("hapi.version");
-		assertThat(version, matchesPattern("[0-9]+.*"));
+		assertThat(version).matches("[0-9]+.*");
 	}
 	
 }

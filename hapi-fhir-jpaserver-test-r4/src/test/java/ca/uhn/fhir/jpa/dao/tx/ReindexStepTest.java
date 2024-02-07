@@ -14,7 +14,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.hamcrest.CoreMatchers.equalTo;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.IsNull.notNullValue;
 import static org.mockito.ArgumentMatchers.any;
@@ -60,6 +60,6 @@ public class ReindexStepTest {
 		RequestPartitionId methodArgumentRequestPartitionId = methodArgumentExceptionBuilder.getRequestPartitionIdForTesting();
 
 		assertThat(methodArgumentRequestPartitionId, notNullValue());
-		assertThat(methodArgumentRequestPartitionId.getFirstPartitionIdOrNull(), equalTo(theExpectedPartitionId));
+		assertThat(methodArgumentRequestPartitionId.getFirstPartitionIdOrNull()).isEqualTo(theExpectedPartitionId);
 	}
 }

@@ -7,9 +7,7 @@ import org.junit.jupiter.params.provider.EnumSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.endsWith;
-import static org.hamcrest.Matchers.startsWith;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class PhoneticEncoderTest {
@@ -30,8 +28,8 @@ public class PhoneticEncoderTest {
 		if (thePhoneticEncoderEnum == PhoneticEncoderEnum.NUMERIC) {
 			assertEquals(NUMBER + SUITE, encoded);
 		} else {
-			assertThat(encoded, startsWith(NUMBER + " "));
-			assertThat(encoded, endsWith(" " + SUITE));
+			assertThat(encoded).startsWith(NUMBER + " ");
+			assertThat(encoded).endsWith(" " + SUITE);
 		}
 	}
 }

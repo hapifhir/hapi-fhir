@@ -23,8 +23,7 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 import java.util.Map;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
 
@@ -109,7 +108,7 @@ class DeleteExpungeDaoTest extends BaseJpaR4Test {
 		JobInstance job = myBatch2JobHelper.awaitJobFailure(jobId);
 
 		// Validate
-		assertThat(job.getErrorMessage(), containsString("Unable to delete"));
+		assertThat(job.getErrorMessage()).contains("Unable to delete");
 		assertNotGone(p1);
 		assertNotGone(o1);
 		assertNotGone(o1b);
@@ -135,7 +134,7 @@ class DeleteExpungeDaoTest extends BaseJpaR4Test {
 
 		// validate
 		assertEquals(StatusEnum.ERRORED, job.getStatus());
-		assertThat(job.getErrorMessage(), containsString("DELETE with _expunge=true failed.  Unable to delete " + organizationId.toVersionless() + " because " + patientId.toVersionless() + " refers to it via the path Patient.managingOrganization"));
+		assertThat(job.getErrorMessage()).contains("DELETE with _expunge=true failed.  Unable to delete " + organizationId.toVersionless() + " because " + patientId.toVersionless() + " refers to it via the path Patient.managingOrganization");
 	}
 
 	private String jobExecutionIdFromOutcome(DeleteMethodOutcome theResult) {
@@ -170,7 +169,7 @@ class DeleteExpungeDaoTest extends BaseJpaR4Test {
 
 		// validate
 		assertEquals(StatusEnum.ERRORED, job.getStatus());
-		assertThat(job.getErrorMessage(), containsString("DELETE with _expunge=true failed.  Unable to delete "));
+		assertThat(job.getErrorMessage()).contains("DELETE with _expunge=true failed.  Unable to delete ");
 	}
 
 	@Test

@@ -63,9 +63,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
@@ -224,13 +223,13 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 		FhirContext fhirContext = FhirContext.forDstu3Cached();
 		runInTransaction(() -> {
 			IBaseResource asset = myPackageCacheManager.loadPackageAssetByUrl(FhirVersionEnum.DSTU3, "http://nictiz.nl/fhir/StructureDefinition/vl-QuestionnaireResponse");
-			assertThat(fhirContext.newJsonParser().encodeResourceToString(asset), containsString("\"url\":\"http://nictiz.nl/fhir/StructureDefinition/vl-QuestionnaireResponse\",\"version\":\"1.0.1\""));
+			assertThat(fhirContext.newJsonParser().encodeResourceToString(asset)).contains("\"url\":\"http://nictiz.nl/fhir/StructureDefinition/vl-QuestionnaireResponse\",\"version\":\"1.0.1\"");
 		});
 
 		// Fetch resource by URL with version
 		runInTransaction(() -> {
 			IBaseResource asset = myPackageCacheManager.loadPackageAssetByUrl(FhirVersionEnum.DSTU3, "http://nictiz.nl/fhir/StructureDefinition/vl-QuestionnaireResponse|1.0.1");
-			assertThat(fhirContext.newJsonParser().encodeResourceToString(asset), containsString("\"url\":\"http://nictiz.nl/fhir/StructureDefinition/vl-QuestionnaireResponse\",\"version\":\"1.0.1\""));
+			assertThat(fhirContext.newJsonParser().encodeResourceToString(asset)).contains("\"url\":\"http://nictiz.nl/fhir/StructureDefinition/vl-QuestionnaireResponse\",\"version\":\"1.0.1\"");
 		});
 
 		// This was saved but is the wrong version of FHIR for this server
@@ -289,13 +288,13 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 		// Fetch resource by URL
 		runInTransaction(() -> {
 			IBaseResource asset = myPackageCacheManager.loadPackageAssetByUrl(FhirVersionEnum.R4, "http://hl7.org/fhir/uv/shorthand/ImplementationGuide/hl7.fhir.uv.shorthand");
-			assertThat(myFhirContext.newJsonParser().encodeResourceToString(asset), containsString("\"url\":\"http://hl7.org/fhir/uv/shorthand/ImplementationGuide/hl7.fhir.uv.shorthand\",\"version\":\"0.12.0\""));
+			assertThat(myFhirContext.newJsonParser().encodeResourceToString(asset)).contains("\"url\":\"http://hl7.org/fhir/uv/shorthand/ImplementationGuide/hl7.fhir.uv.shorthand\",\"version\":\"0.12.0\"");
 		});
 
 		// Fetch resource by URL with version
 		runInTransaction(() -> {
 			IBaseResource asset = myPackageCacheManager.loadPackageAssetByUrl(FhirVersionEnum.R4, "http://hl7.org/fhir/uv/shorthand/ImplementationGuide/hl7.fhir.uv.shorthand|0.12.0");
-			assertThat(myFhirContext.newJsonParser().encodeResourceToString(asset), containsString("\"url\":\"http://hl7.org/fhir/uv/shorthand/ImplementationGuide/hl7.fhir.uv.shorthand\",\"version\":\"0.12.0\""));
+			assertThat(myFhirContext.newJsonParser().encodeResourceToString(asset)).contains("\"url\":\"http://hl7.org/fhir/uv/shorthand/ImplementationGuide/hl7.fhir.uv.shorthand\",\"version\":\"0.12.0\"");
 		});
 
 		// Search for the installed resource
@@ -359,13 +358,13 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 		// Fetch resource by URL
 		runInTransaction(() -> {
 			IBaseResource asset = myPackageCacheManager.loadPackageAssetByUrl(FhirVersionEnum.R4, "http://hl7.org/fhir/uv/shorthand/ImplementationGuide/hl7.fhir.uv.shorthand");
-			assertThat(myFhirContext.newJsonParser().encodeResourceToString(asset), containsString("\"url\":\"http://hl7.org/fhir/uv/shorthand/ImplementationGuide/hl7.fhir.uv.shorthand\",\"version\":\"0.12.0\""));
+			assertThat(myFhirContext.newJsonParser().encodeResourceToString(asset)).contains("\"url\":\"http://hl7.org/fhir/uv/shorthand/ImplementationGuide/hl7.fhir.uv.shorthand\",\"version\":\"0.12.0\"");
 		});
 
 		// Fetch resource by URL with version
 		runInTransaction(() -> {
 			IBaseResource asset = myPackageCacheManager.loadPackageAssetByUrl(FhirVersionEnum.R4, "http://hl7.org/fhir/uv/shorthand/ImplementationGuide/hl7.fhir.uv.shorthand|0.12.0");
-			assertThat(myFhirContext.newJsonParser().encodeResourceToString(asset), containsString("\"url\":\"http://hl7.org/fhir/uv/shorthand/ImplementationGuide/hl7.fhir.uv.shorthand\",\"version\":\"0.12.0\""));
+			assertThat(myFhirContext.newJsonParser().encodeResourceToString(asset)).contains("\"url\":\"http://hl7.org/fhir/uv/shorthand/ImplementationGuide/hl7.fhir.uv.shorthand\",\"version\":\"0.12.0\"");
 		});
 
 		// Search for the installed resource
@@ -503,7 +502,7 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 			PackageInstallOutcomeJson outcome = myPackageInstallerSvc.install(spec);
 			fail(outcome.toString());
 		} catch (ImplementationGuideInstallationException theE) {
-			assertThat(theE.getMessage(), containsString("Resources in a package must have a url or identifier to be loaded by the package installer."));
+			assertThat(theE.getMessage()).contains("Resources in a package must have a url or identifier to be loaded by the package installer.");
 		}
 	}
 
@@ -638,7 +637,7 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 
 			assertEquals("0.12.0", metadata.getDistTags().getLatest());
 
-			assertThat(metadata.getVersions().keySet(), contains("0.12.0", "0.11.1"));
+			assertThat(metadata.getVersions().keySet()).containsExactly("0.12.0", "0.11.1");
 
 			NpmPackageMetadataJson.Version version0120 = metadata.getVersions().get("0.12.0");
 			assertEquals(3001, version0120.getBytes());
@@ -658,8 +657,8 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 		spec = new PackageInstallationSpec().setName("hl7.fhir.uv.shorthand").setVersion("0.12.0").setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_ONLY);
 		PackageInstallOutcomeJson outcome = myPackageInstallerSvc.install(spec);
 		ourLog.info("Install messages:\n * {}", outcome.getMessage().stream().collect(Collectors.joining("\n * ")));
-		assertThat(outcome.getMessage(), hasItem("Marking package hl7.fhir.uv.shorthand#0.12.0 as current version"));
-		assertThat(outcome.getMessage(), hasItem("Indexing CodeSystem Resource[package/CodeSystem-shorthand-code-system.json] with URL: http://hl7.org/fhir/uv/shorthand/CodeSystem/shorthand-code-system|0.12.0"));
+		assertThat(outcome.getMessage()).contains("Marking package hl7.fhir.uv.shorthand#0.12.0 as current version");
+		assertThat(outcome.getMessage()).contains("Indexing CodeSystem Resource[package/CodeSystem-shorthand-code-system.json] with URL: http://hl7.org/fhir/uv/shorthand/CodeSystem/shorthand-code-system|0.12.0");
 
 		spec = new PackageInstallationSpec().setName("hl7.fhir.uv.shorthand").setVersion("0.11.1").setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_ONLY);
 		outcome = myPackageInstallerSvc.install(spec);

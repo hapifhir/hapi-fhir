@@ -34,8 +34,8 @@ import org.springframework.transaction.PlatformTransactionManager;
 
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.not;
@@ -110,7 +110,7 @@ public class FhirResourceDaoR4StandardQueriesNoFTTest extends BaseJpaTest {
 
 			// then
 			if (theExpectMatchFlag) {
-				assertThat(theDescription, foundIds, hasItem(id.getIdPart()));
+				assertThat(foundIds).as(theDescription).contains(id.getIdPart());
 			} else {
 				assertThat(theDescription, foundIds, not(hasItem(id.getIdPart())));
 			}
@@ -126,7 +126,7 @@ public class FhirResourceDaoR4StandardQueriesNoFTTest extends BaseJpaTest {
 			List<String> foundIds = myTestDaoSearch.searchForIds("Patient?family=flint&given:exact=Fred");
 
 			// then
-			assertThat(foundIds, hasItem(id.getIdPart()));		    // then
+			assertThat(foundIds).contains(id.getIdPart());		    // then
 		}
 
 		@Test
@@ -141,7 +141,7 @@ public class FhirResourceDaoR4StandardQueriesNoFTTest extends BaseJpaTest {
 			List<String> foundIds = myTestDaoSearch.searchForIds("Patient?_sort=family,given");
 
 			// then
-			assertThat(foundIds, contains(idFred, idWilma, idCoolFred, idPolka, idBarney));		    // then
+			assertThat(foundIds).containsExactly(idFred, idWilma, idCoolFred, idPolka, idBarney);		    // then
 		}
 
 
@@ -159,7 +159,7 @@ public class FhirResourceDaoR4StandardQueriesNoFTTest extends BaseJpaTest {
 			List<String> foundIds = myTestDaoSearch.searchForIds("Patient?birthdate=lt1960&_sort=family,given");
 
 			// then
-			assertThat(foundIds, contains(idFred, idWilma, idBarney));		    // then
+			assertThat(foundIds).containsExactly(idFred, idWilma, idBarney);		    // then
 		}
 
 	}
@@ -263,10 +263,10 @@ public class FhirResourceDaoR4StandardQueriesNoFTTest extends BaseJpaTest {
 					String idExM = withObservation(myDataBuilder.withObservationCode("http://example.org", "MValue")).getIdPart();
 
 					List<String> allIds = myTestDaoSearch.searchForIds("/Observation?_sort=code");
-					assertThat(allIds, contains(idAlphaA, idAlphaM, idAlphaZ, idExA, idExD, idExM));
+					assertThat(allIds).containsExactly(idAlphaA, idAlphaM, idAlphaZ, idExA, idExD, idExM);
 
 					allIds = myTestDaoSearch.searchForIds("/Observation?_sort=code&code=http://example.org|");
-					assertThat(allIds, contains(idExA, idExD, idExM));
+					assertThat(allIds).containsExactly(idExA, idExD, idExM);
 				}
 			}
 		}
@@ -375,7 +375,7 @@ public class FhirResourceDaoR4StandardQueriesNoFTTest extends BaseJpaTest {
 				String idAlpha5 = withRiskAssessmentWithProbabilty(0.5).getIdPart();
 
 				List<String> allIds = myTestDaoSearch.searchForIds("/RiskAssessment?_sort=probability");
-				assertThat(allIds, contains(idAlpha2, idAlpha5, idAlpha7));
+				assertThat(allIds).containsExactly(idAlpha2, idAlpha5, idAlpha7);
 			}
 
 		}
@@ -498,7 +498,7 @@ public class FhirResourceDaoR4StandardQueriesNoFTTest extends BaseJpaTest {
 				String idAlpha5 = withObservationWithValueQuantity(0.5).getIdPart();
 
 				List<String> allIds = myTestDaoSearch.searchForIds("/Observation?_sort=value-quantity");
-				assertThat(allIds, contains(idAlpha2, idAlpha5, idAlpha7));
+				assertThat(allIds).containsExactly(idAlpha2, idAlpha5, idAlpha7);
 			}
 		}
 

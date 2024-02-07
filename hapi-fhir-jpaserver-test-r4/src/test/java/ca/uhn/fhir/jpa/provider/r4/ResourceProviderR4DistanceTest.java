@@ -18,9 +18,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 import java.util.List;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.containsString;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -172,11 +170,7 @@ public class ResourceProviderR4DistanceTest extends BaseResourceProviderR4Test {
 			.returnBundle(Bundle.class)
 			.execute();
 		List<String> ids = toUnqualifiedVersionlessIdValues(actual);
-		assertThat(ids.toString(), ids, contains(
-			"Location/toronto",
-			"Location/belleville",
-			"Location/kingston"
-		));
+		assertThat(ids).as(ids.toString()).containsExactly("Location/toronto", "Location/belleville", "Location/kingston");
 	}
 
 	@ParameterizedTest
@@ -209,17 +203,9 @@ public class ResourceProviderR4DistanceTest extends BaseResourceProviderR4Test {
 		List<String> ids = toUnqualifiedVersionlessIdValues(actual);
 		myCaptureQueriesListener.logSelectQueries();
 		if (theAscending) {
-			assertThat(ids.toString(), ids, contains(
-				"Location/toronto",
-				"Location/belleville",
-				"Location/kingston"
-			));
+			assertThat(ids).as(ids.toString()).containsExactly("Location/toronto", "Location/belleville", "Location/kingston");
 		} else {
-			assertThat(ids.toString(), ids, contains(
-				"Location/kingston",
-				"Location/belleville",
-				"Location/toronto"
-			));
+			assertThat(ids).as(ids.toString()).containsExactly("Location/kingston", "Location/belleville", "Location/toronto");
 		}
 
 	}
@@ -264,11 +250,7 @@ public class ResourceProviderR4DistanceTest extends BaseResourceProviderR4Test {
 			.execute();
 		List<String> ids = toUnqualifiedVersionlessIdValues(actual);
 		myCaptureQueriesListener.logSelectQueries();
-		assertThat(ids.toString(), ids, contains(
-			"Location/toronto",
-			"Location/belleville",
-			"Location/kingston"
-		));
+		assertThat(ids).as(ids.toString()).containsExactly("Location/toronto", "Location/belleville", "Location/kingston");
 	}
 
 	@Test
@@ -282,7 +264,7 @@ public class ResourceProviderR4DistanceTest extends BaseResourceProviderR4Test {
 				.execute();
 			fail();
 		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage(), containsString("Can not sort on coordinate parameter \"near\" unless this parameter is also specified as a search parameter"));
+			assertThat(e.getMessage()).contains("Can not sort on coordinate parameter \"near\" unless this parameter is also specified as a search parameter");
 		}
 
 	}
@@ -309,7 +291,7 @@ public class ResourceProviderR4DistanceTest extends BaseResourceProviderR4Test {
 				.execute();
 			fail();
 		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage(), containsString("Can not sort on coordinate parameter \"near\" unless this parameter is also specified"));
+			assertThat(e.getMessage()).contains("Can not sort on coordinate parameter \"near\" unless this parameter is also specified");
 		}
 	}
 
@@ -341,7 +323,7 @@ public class ResourceProviderR4DistanceTest extends BaseResourceProviderR4Test {
 				.execute();
 			fail();
 		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage(), containsString(theExpectedErrorMessageContains));
+			assertThat(e.getMessage()).contains(theExpectedErrorMessageContains);
 		}
 	}
 

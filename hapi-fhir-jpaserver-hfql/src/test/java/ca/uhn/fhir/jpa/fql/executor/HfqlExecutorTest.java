@@ -29,11 +29,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static ca.uhn.fhir.jpa.fql.util.HfqlConstants.ORDER_AND_GROUP_LIMIT;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.CoreMatchers.hasItem;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -63,17 +61,15 @@ public class HfqlExecutorTest extends BaseHfqlExecutorTest {
 		IHfqlExecutionResult result = myHfqlExecutor.executeContinuation(statement, searchId, 3, 100, mySrd);
 
 		// Verify
-		assertThat(result.getStatement().toSelectedColumnAliases(), contains(
-			"name[0].given[1]", "name[0].family"
-		));
+		assertThat(result.getStatement().toSelectedColumnAliases()).containsExactly("name[0].given[1]", "name[0].family");
 		assertTrue(result.hasNext());
 		IHfqlExecutionResult.Row nextRow = result.getNextRow();
 		assertEquals(3, nextRow.getRowOffset());
-		assertThat(nextRow.getRowValues(), contains("Marie", "Simpson"));
+		assertThat(nextRow.getRowValues()).containsExactly("Marie", "Simpson");
 		assertTrue(result.hasNext());
 		nextRow = result.getNextRow();
 		assertEquals(4, nextRow.getRowOffset());
-		assertThat(nextRow.getRowValues(), contains("Evelyn", "Simpson"));
+		assertThat(nextRow.getRowValues()).containsExactly("Evelyn", "Simpson");
 		assertFalse(result.hasNext());
 
 	}
@@ -106,13 +102,11 @@ public class HfqlExecutorTest extends BaseHfqlExecutorTest {
 
 		// Verify
 		IHfqlExecutionResult.Row nextRow;
-		assertThat(result.getStatement().toSelectedColumnAliases(), contains(
-			"versionId", "family"
-		));
+		assertThat(result.getStatement().toSelectedColumnAliases()).containsExactly("versionId", "family");
 		for (int i = 4999; i >= 0; i--) {
 			assertTrue(result.hasNext());
 			nextRow = result.getNextRow();
-			assertThat(nextRow.getRowValues().toString(), nextRow.getRowValues(), contains(String.valueOf(i), "PT" + i));
+			assertThat(nextRow.getRowValues()).as(nextRow.getRowValues().toString()).containsExactly(String.valueOf(i), "PT" + i);
 		}
 	}
 
@@ -156,13 +150,13 @@ public class HfqlExecutorTest extends BaseHfqlExecutorTest {
 		IHfqlExecutionResult.Row nextRow;
 		assertTrue(result.hasNext());
 		nextRow = result.getNextRow();
-		assertThat(nextRow.getRowValues().toString(), nextRow.getRowValues(), contains("PT0", "2023-01-01"));
+		assertThat(nextRow.getRowValues()).as(nextRow.getRowValues().toString()).containsExactly("PT0", "2023-01-01");
 		assertTrue(result.hasNext());
 		nextRow = result.getNextRow();
-		assertThat(nextRow.getRowValues().toString(), nextRow.getRowValues(), contains("PT1", "2022-01-01"));
+		assertThat(nextRow.getRowValues()).as(nextRow.getRowValues().toString()).containsExactly("PT1", "2022-01-01");
 		assertTrue(result.hasNext());
 		nextRow = result.getNextRow();
-		assertThat(nextRow.getRowValues().toString(), nextRow.getRowValues(), contains("PT2", ""));
+		assertThat(nextRow.getRowValues()).as(nextRow.getRowValues().toString()).containsExactly("PT2", "");
 		assertFalse(result.hasNext());
 	}
 
@@ -181,30 +175,16 @@ public class HfqlExecutorTest extends BaseHfqlExecutorTest {
 
 		IHfqlExecutionResult.Row nextRow;
 		IHfqlExecutionResult result = myHfqlExecutor.executeInitialSearch(statement, null, mySrd);
-		assertThat(result.getStatement().toSelectedColumnAliases(), contains(
-			"name[0].given[1]", "name[0].family", "name", "name.given"
-		));
-		assertThat(result.getStatement().toSelectedColumnDataTypes(), contains(
-			HfqlDataTypeEnum.STRING, HfqlDataTypeEnum.STRING, HfqlDataTypeEnum.JSON, HfqlDataTypeEnum.JSON
-		));
+		assertThat(result.getStatement().toSelectedColumnAliases()).containsExactly("name[0].given[1]", "name[0].family", "name", "name.given");
+		assertThat(result.getStatement().toSelectedColumnDataTypes()).containsExactly(HfqlDataTypeEnum.STRING, HfqlDataTypeEnum.STRING, HfqlDataTypeEnum.JSON, HfqlDataTypeEnum.JSON);
 		assertTrue(result.hasNext());
 		nextRow = result.getNextRow();
 		assertEquals(0, nextRow.getRowOffset());
-		assertThat(nextRow.getRowValues(), contains(
-			"Jay",
-			"Simpson",
-			"[{\"family\":\"Simpson\",\"given\":[\"Homer\",\"Jay\"]}]",
-			"[\"Homer\", \"Jay\"]"
-		));
+		assertThat(nextRow.getRowValues()).containsExactly("Jay", "Simpson", "[{\"family\":\"Simpson\",\"given\":[\"Homer\",\"Jay\"]}]", "[\"Homer\", \"Jay\"]");
 		assertTrue(result.hasNext());
 		nextRow = result.getNextRow();
 		assertEquals(2, nextRow.getRowOffset());
-		assertThat(nextRow.getRowValues(), contains(
-			"El Barto",
-			"Simpson",
-			"[{\"family\":\"Simpson\",\"given\":[\"Bart\",\"El Barto\"]}]",
-			"[\"Bart\", \"El Barto\"]"
-		));
+		assertThat(nextRow.getRowValues()).containsExactly("El Barto", "Simpson", "[{\"family\":\"Simpson\",\"given\":[\"Bart\",\"El Barto\"]}]", "[\"Bart\", \"El Barto\"]");
 		assertTrue(result.hasNext());
 
 		verify(patientDao, times(1)).search(mySearchParameterMapCaptor.capture(), any());
@@ -257,9 +237,7 @@ public class HfqlExecutorTest extends BaseHfqlExecutorTest {
 			""";
 
 		IHfqlExecutionResult result = myHfqlExecutor.executeInitialSearch(statement, null, mySrd);
-		assertThat(result.getStatement().toSelectedColumnAliases().toString(), result.getStatement().toSelectedColumnAliases(), hasItems(
-			"id", "active", "address", "birthDate"
-		));
+		assertThat(result.getStatement().toSelectedColumnAliases()).as(result.getStatement().toSelectedColumnAliases().toString()).contains("id", "active", "address", "birthDate");
 		assertThat(result.getStatement().toSelectedColumnAliases().toString(), result.getStatement().toSelectedColumnAliases(), not(hasItem(
 			"extension"
 		)));
@@ -278,15 +256,15 @@ public class HfqlExecutorTest extends BaseHfqlExecutorTest {
 
 		IHfqlExecutionResult result = myHfqlExecutor.executeInitialSearch(statement, null, mySrd);
 		assertTrue(result.hasNext());
-		assertThat(result.getNextRow().getRowValues(), contains("Homer"));
+		assertThat(result.getNextRow().getRowValues()).containsExactly("Homer");
 		assertTrue(result.hasNext());
-		assertThat(result.getNextRow().getRowValues(), contains("Homer"));
+		assertThat(result.getNextRow().getRowValues()).containsExactly("Homer");
 		assertTrue(result.hasNext());
-		assertThat(result.getNextRow().getRowValues(), contains("Ned"));
+		assertThat(result.getNextRow().getRowValues()).containsExactly("Ned");
 		assertTrue(result.hasNext());
-		assertThat(result.getNextRow().getRowValues(), contains("Ned"));
+		assertThat(result.getNextRow().getRowValues()).containsExactly("Ned");
 		assertTrue(result.hasNext());
-		assertThat(result.getNextRow().getRowValues(), contains("Bart"));
+		assertThat(result.getNextRow().getRowValues()).containsExactly("Bart");
 		assertFalse(result.hasNext());
 	}
 
@@ -304,18 +282,11 @@ public class HfqlExecutorTest extends BaseHfqlExecutorTest {
 			""";
 
 		IHfqlExecutionResult result = myHfqlExecutor.executeInitialSearch(statement, null, mySrd);
-		assertThat(result.getStatement().toSelectedColumnAliases().toString(), result.getStatement().toSelectedColumnAliases(), hasItems(
-			"name"
-		));
-		assertThat(result.getStatement().toSelectedColumnDataTypes().toString(), result.getStatement().toSelectedColumnDataTypes(), hasItems(
-			HfqlDataTypeEnum.JSON
-		));
+		assertThat(result.getStatement().toSelectedColumnAliases()).as(result.getStatement().toSelectedColumnAliases().toString()).contains("name");
+		assertThat(result.getStatement().toSelectedColumnDataTypes()).as(result.getStatement().toSelectedColumnDataTypes().toString()).contains(HfqlDataTypeEnum.JSON);
 
 		List<List<Object>> rowValues = readAllRowValues(result);
-		assertThat(rowValues.toString(), rowValues, containsInAnyOrder(
-			Lists.newArrayList("[{\"family\":\"Simpson\",\"given\":[\"Homer\",\"Jay\"]}]"),
-			Lists.newArrayList("[{\"family\":\"Flanders\",\"given\":[\"Ned\"]}]")
-		));
+		assertThat(rowValues).as(rowValues.toString()).containsExactlyInAnyOrder(Lists.newArrayList("[{\"family\":\"Simpson\",\"given\":[\"Homer\",\"Jay\"]}]"), Lists.newArrayList("[{\"family\":\"Flanders\",\"given\":[\"Ned\"]}]"));
 	}
 
 	@Test
@@ -329,26 +300,11 @@ public class HfqlExecutorTest extends BaseHfqlExecutorTest {
 			""";
 
 		IHfqlExecutionResult result = myHfqlExecutor.executeInitialSearch(statement, null, mySrd);
-		assertThat(result.getStatement().toSelectedColumnAliases().toString(), result.getStatement().toSelectedColumnAliases(), hasItems(
-			"name.family", "name.given", "count(*)"
-		));
-		assertThat(result.getStatement().toSelectedColumnDataTypes().toString(), result.getStatement().toSelectedColumnDataTypes(), hasItems(
-			// TODO: It'd make more sense if we used STRING instead of JSON here
-			HfqlDataTypeEnum.JSON, HfqlDataTypeEnum.JSON, HfqlDataTypeEnum.INTEGER
-		));
+		assertThat(result.getStatement().toSelectedColumnAliases()).as(result.getStatement().toSelectedColumnAliases().toString()).contains("name.family", "name.given", "count(*)");
+		assertThat(result.getStatement().toSelectedColumnDataTypes()).as(result.getStatement().toSelectedColumnDataTypes().toString()).contains(HfqlDataTypeEnum.JSON, HfqlDataTypeEnum.JSON, HfqlDataTypeEnum.INTEGER);
 
 		List<List<Object>> rowValues = readAllRowValues(result);
-		assertThat(rowValues.toString(), rowValues, containsInAnyOrder(
-			Lists.newArrayList("Flanders", "Ned", 2),
-			Lists.newArrayList("Simpson", "Jay", 2),
-			Lists.newArrayList("Simpson", "Marie", 1),
-			Lists.newArrayList("Simpson", "Evelyn", 1),
-			Lists.newArrayList("Simpson", "Homer", 2),
-			Lists.newArrayList("Simpson", "Lisa", 1),
-			Lists.newArrayList("Simpson", "Bart", 1),
-			Lists.newArrayList("Simpson", "El Barto", 1),
-			Lists.newArrayList("Simpson", "Maggie", 1)
-		));
+		assertThat(rowValues).as(rowValues.toString()).containsExactlyInAnyOrder(Lists.newArrayList("Flanders", "Ned", 2), Lists.newArrayList("Simpson", "Jay", 2), Lists.newArrayList("Simpson", "Marie", 1), Lists.newArrayList("Simpson", "Evelyn", 1), Lists.newArrayList("Simpson", "Homer", 2), Lists.newArrayList("Simpson", "Lisa", 1), Lists.newArrayList("Simpson", "Bart", 1), Lists.newArrayList("Simpson", "El Barto", 1), Lists.newArrayList("Simpson", "Maggie", 1));
 	}
 
 	@Test
@@ -390,17 +346,11 @@ public class HfqlExecutorTest extends BaseHfqlExecutorTest {
 			""";
 
 		IHfqlExecutionResult result = myHfqlExecutor.executeInitialSearch(statement, null, mySrd);
-		assertThat(result.getStatement().toSelectedColumnAliases().toString(), result.getStatement().toSelectedColumnAliases(), hasItems(
-			"count(*)", "count(name.family)"
-		));
-		assertThat(result.getStatement().toSelectedColumnDataTypes().toString(), result.getStatement().toSelectedColumnDataTypes(), hasItems(
-			HfqlDataTypeEnum.INTEGER, HfqlDataTypeEnum.INTEGER
-		));
+		assertThat(result.getStatement().toSelectedColumnAliases()).as(result.getStatement().toSelectedColumnAliases().toString()).contains("count(*)", "count(name.family)");
+		assertThat(result.getStatement().toSelectedColumnDataTypes()).as(result.getStatement().toSelectedColumnDataTypes().toString()).contains(HfqlDataTypeEnum.INTEGER, HfqlDataTypeEnum.INTEGER);
 
 		List<List<Object>> rowValues = readAllRowValues(result);
-		assertThat(rowValues.toString(), rowValues, contains(
-			Lists.newArrayList(3, 2)
-		));
+		assertThat(rowValues).as(rowValues.toString()).containsExactly(Lists.newArrayList(3, 2));
 	}
 
 	@Test
@@ -415,25 +365,11 @@ public class HfqlExecutorTest extends BaseHfqlExecutorTest {
 			""";
 
 		IHfqlExecutionResult result = myHfqlExecutor.executeInitialSearch(statement, null, mySrd);
-		assertThat(result.getStatement().toSelectedColumnAliases().toString(), result.getStatement().toSelectedColumnAliases(), hasItems(
-			"name[0].family", "name[0].given", "count(*)"
-		));
-		assertThat(result.getStatement().toSelectedColumnDataTypes().toString(), result.getStatement().toSelectedColumnDataTypes(), hasItems(
-			HfqlDataTypeEnum.STRING, HfqlDataTypeEnum.STRING, HfqlDataTypeEnum.INTEGER
-		));
+		assertThat(result.getStatement().toSelectedColumnAliases()).as(result.getStatement().toSelectedColumnAliases().toString()).contains("name[0].family", "name[0].given", "count(*)");
+		assertThat(result.getStatement().toSelectedColumnDataTypes()).as(result.getStatement().toSelectedColumnDataTypes().toString()).contains(HfqlDataTypeEnum.STRING, HfqlDataTypeEnum.STRING, HfqlDataTypeEnum.INTEGER);
 
 		List<List<Object>> rowValues = readAllRowValues(result);
-		assertThat(rowValues.toString(), rowValues, contains(
-			Lists.newArrayList("Flanders", "Ned", 2),
-			Lists.newArrayList("Simpson", "Homer", 2),
-			Lists.newArrayList("Simpson", "Jay", 2),
-			Lists.newArrayList("Simpson", "Bart", 1),
-			Lists.newArrayList("Simpson", "El Barto", 1),
-			Lists.newArrayList("Simpson", "Evelyn", 1),
-			Lists.newArrayList("Simpson", "Lisa", 1),
-			Lists.newArrayList("Simpson", "Maggie", 1),
-			Lists.newArrayList("Simpson", "Marie", 1)
-		));
+		assertThat(rowValues).as(rowValues.toString()).containsExactly(Lists.newArrayList("Flanders", "Ned", 2), Lists.newArrayList("Simpson", "Homer", 2), Lists.newArrayList("Simpson", "Jay", 2), Lists.newArrayList("Simpson", "Bart", 1), Lists.newArrayList("Simpson", "El Barto", 1), Lists.newArrayList("Simpson", "Evelyn", 1), Lists.newArrayList("Simpson", "Lisa", 1), Lists.newArrayList("Simpson", "Maggie", 1), Lists.newArrayList("Simpson", "Marie", 1));
 	}
 
 	@Test
@@ -451,19 +387,11 @@ public class HfqlExecutorTest extends BaseHfqlExecutorTest {
 			""";
 
 		IHfqlExecutionResult result = myHfqlExecutor.executeInitialSearch(statement, null, mySrd);
-		assertThat(result.getStatement().toSelectedColumnAliases().toString(), result.getStatement().toSelectedColumnAliases(), hasItems(
-			"name[0].family", "name[0].given[0]"
-		));
-		assertThat(result.getStatement().toSelectedColumnDataTypes().toString(), result.getStatement().toSelectedColumnDataTypes(), hasItems(
-			HfqlDataTypeEnum.STRING, HfqlDataTypeEnum.STRING
-		));
+		assertThat(result.getStatement().toSelectedColumnAliases()).as(result.getStatement().toSelectedColumnAliases().toString()).contains("name[0].family", "name[0].given[0]");
+		assertThat(result.getStatement().toSelectedColumnDataTypes()).as(result.getStatement().toSelectedColumnDataTypes().toString()).contains(HfqlDataTypeEnum.STRING, HfqlDataTypeEnum.STRING);
 
 		List<List<Object>> rowValues = readAllRowValues(result);
-		assertThat(rowValues.toString(), rowValues, contains(
-			Lists.newArrayList("Simpson", "Lisa"),
-			Lists.newArrayList("Simpson", "Homer"),
-			Lists.newArrayList(null, null)
-		));
+		assertThat(rowValues).as(rowValues.toString()).containsExactly(Lists.newArrayList("Simpson", "Lisa"), Lists.newArrayList("Simpson", "Homer"), Lists.newArrayList(null, null));
 	}
 
 	@Test
@@ -481,19 +409,11 @@ public class HfqlExecutorTest extends BaseHfqlExecutorTest {
 			""";
 
 		IHfqlExecutionResult result = myHfqlExecutor.executeInitialSearch(statement, null, mySrd);
-		assertThat(result.getStatement().toSelectedColumnAliases().toString(), result.getStatement().toSelectedColumnAliases(), hasItems(
-			"name[0].family", "name[0].given[0]", "birthDate"
-		));
-		assertThat(result.getStatement().toSelectedColumnDataTypes().toString(), result.getStatement().toSelectedColumnDataTypes(), hasItems(
-			HfqlDataTypeEnum.STRING, HfqlDataTypeEnum.STRING, HfqlDataTypeEnum.DATE
-		));
+		assertThat(result.getStatement().toSelectedColumnAliases()).as(result.getStatement().toSelectedColumnAliases().toString()).contains("name[0].family", "name[0].given[0]", "birthDate");
+		assertThat(result.getStatement().toSelectedColumnDataTypes()).as(result.getStatement().toSelectedColumnDataTypes().toString()).contains(HfqlDataTypeEnum.STRING, HfqlDataTypeEnum.STRING, HfqlDataTypeEnum.DATE);
 
 		List<List<Object>> rowValues = readAllRowValues(result);
-		assertThat(rowValues.toString(), rowValues, contains(
-			Lists.newArrayList("Simpson", "Lisa", "1990-01-01"),
-			Lists.newArrayList("Simpson", "Homer", "1950-01-01"),
-			Lists.newArrayList(null, null, null)
-		));
+		assertThat(rowValues).as(rowValues.toString()).containsExactly(Lists.newArrayList("Simpson", "Lisa", "1990-01-01"), Lists.newArrayList("Simpson", "Homer", "1950-01-01"), Lists.newArrayList(null, null, null));
 	}
 
 	@Test
@@ -511,19 +431,11 @@ public class HfqlExecutorTest extends BaseHfqlExecutorTest {
 			""";
 
 		IHfqlExecutionResult result = myHfqlExecutor.executeInitialSearch(statement, null, mySrd);
-		assertThat(result.getStatement().toSelectedColumnAliases().toString(), result.getStatement().toSelectedColumnAliases(), hasItems(
-			"name[0].family", "name[0].given[0]", "active"
-		));
-		assertThat(result.getStatement().toSelectedColumnDataTypes().toString(), result.getStatement().toSelectedColumnDataTypes(), hasItems(
-			HfqlDataTypeEnum.STRING, HfqlDataTypeEnum.STRING, HfqlDataTypeEnum.BOOLEAN
-		));
+		assertThat(result.getStatement().toSelectedColumnAliases()).as(result.getStatement().toSelectedColumnAliases().toString()).contains("name[0].family", "name[0].given[0]", "active");
+		assertThat(result.getStatement().toSelectedColumnDataTypes()).as(result.getStatement().toSelectedColumnDataTypes().toString()).contains(HfqlDataTypeEnum.STRING, HfqlDataTypeEnum.STRING, HfqlDataTypeEnum.BOOLEAN);
 
 		List<List<Object>> rowValues = readAllRowValues(result);
-		assertThat(rowValues.toString(), rowValues, contains(
-			Lists.newArrayList("Simpson", "Lisa", "false"),
-			Lists.newArrayList("Simpson", "Homer", "true"),
-			Lists.newArrayList("Flanders", "Ned", "true")
-		));
+		assertThat(rowValues).as(rowValues.toString()).containsExactly(Lists.newArrayList("Simpson", "Lisa", "false"), Lists.newArrayList("Simpson", "Homer", "true"), Lists.newArrayList("Flanders", "Ned", "true"));
 	}
 
 	@Test
@@ -539,20 +451,11 @@ public class HfqlExecutorTest extends BaseHfqlExecutorTest {
 			""";
 
 		IHfqlExecutionResult result = myHfqlExecutor.executeInitialSearch(statement, null, mySrd);
-		assertThat(result.getStatement().toSelectedColumnAliases().toString(), result.getStatement().toSelectedColumnAliases(), hasItems(
-			"name[0].family", "name[0].given[0]", "count(*)", "count(name[0].family)"
-		));
-		assertThat(result.getStatement().toSelectedColumnDataTypes().toString(), result.getStatement().toSelectedColumnDataTypes(), hasItems(
-			HfqlDataTypeEnum.STRING, HfqlDataTypeEnum.STRING, HfqlDataTypeEnum.INTEGER, HfqlDataTypeEnum.INTEGER
-		));
+		assertThat(result.getStatement().toSelectedColumnAliases()).as(result.getStatement().toSelectedColumnAliases().toString()).contains("name[0].family", "name[0].given[0]", "count(*)", "count(name[0].family)");
+		assertThat(result.getStatement().toSelectedColumnDataTypes()).as(result.getStatement().toSelectedColumnDataTypes().toString()).contains(HfqlDataTypeEnum.STRING, HfqlDataTypeEnum.STRING, HfqlDataTypeEnum.INTEGER, HfqlDataTypeEnum.INTEGER);
 
 		List<List<Object>> rowValues = readAllRowValues(result);
-		assertThat(rowValues.toString(), rowValues, containsInAnyOrder(
-			Lists.newArrayList(null, "Homer", 1, 0),
-			Lists.newArrayList("Simpson", "Homer", 1, 1),
-			Lists.newArrayList("Simpson", null, 1, 1),
-			Lists.newArrayList(null, null, 1, 0)
-		));
+		assertThat(rowValues).as(rowValues.toString()).containsExactlyInAnyOrder(Lists.newArrayList(null, "Homer", 1, 0), Lists.newArrayList("Simpson", "Homer", 1, 1), Lists.newArrayList("Simpson", null, 1, 1), Lists.newArrayList(null, null, 1, 0));
 	}
 
 	@Test
@@ -567,17 +470,11 @@ public class HfqlExecutorTest extends BaseHfqlExecutorTest {
 			""";
 
 		IHfqlExecutionResult result = myHfqlExecutor.executeInitialSearch(statement, null, mySrd);
-		assertThat(result.getStatement().toSelectedColumnAliases().toString(), result.getStatement().toSelectedColumnAliases(), hasItems(
-			"count(*)", "count(name.family)"
-		));
-		assertThat(result.getStatement().toSelectedColumnDataTypes().toString(), result.getStatement().toSelectedColumnDataTypes(), hasItems(
-			HfqlDataTypeEnum.INTEGER, HfqlDataTypeEnum.INTEGER
-		));
+		assertThat(result.getStatement().toSelectedColumnAliases()).as(result.getStatement().toSelectedColumnAliases().toString()).contains("count(*)", "count(name.family)");
+		assertThat(result.getStatement().toSelectedColumnDataTypes()).as(result.getStatement().toSelectedColumnDataTypes().toString()).contains(HfqlDataTypeEnum.INTEGER, HfqlDataTypeEnum.INTEGER);
 
 		List<List<Object>> rowValues = readAllRowValues(result);
-		assertThat(rowValues.toString(), rowValues, containsInAnyOrder(
-			Lists.newArrayList(4, 2)
-		));
+		assertThat(rowValues).as(rowValues.toString()).containsExactlyInAnyOrder(Lists.newArrayList(4, 2));
 	}
 
 	@Test
@@ -593,9 +490,7 @@ public class HfqlExecutorTest extends BaseHfqlExecutorTest {
 
 		IHfqlExecutionResult.Row nextRow;
 		IHfqlExecutionResult result = myHfqlExecutor.executeInitialSearch(statement, null, mySrd);
-		assertThat(result.getStatement().toSelectedColumnAliases().toString(), result.getStatement().toSelectedColumnAliases(), hasItems(
-			"name[0].given[0]", "identifier.where(system = 'http://system' ).first().value"
-		));
+		assertThat(result.getStatement().toSelectedColumnAliases()).as(result.getStatement().toSelectedColumnAliases().toString()).contains("name[0].given[0]", "identifier.where(system = 'http://system' ).first().value");
 		nextRow = result.getNextRow();
 
 		assertEquals("Homer", nextRow.getRowValues().get(0));
@@ -615,9 +510,7 @@ public class HfqlExecutorTest extends BaseHfqlExecutorTest {
 
 		IHfqlExecutionResult.Row nextRow;
 		IHfqlExecutionResult result = myHfqlExecutor.executeInitialSearch(statement, null, mySrd);
-		assertThat(result.getStatement().toSelectedColumnAliases().toString(), result.getStatement().toSelectedColumnAliases(), hasItems(
-			"name[0].given[0]", "identifier[0].value"
-		));
+		assertThat(result.getStatement().toSelectedColumnAliases()).as(result.getStatement().toSelectedColumnAliases().toString()).contains("name[0].given[0]", "identifier[0].value");
 		nextRow = result.getNextRow();
 
 		assertEquals("Homer", nextRow.getRowValues().get(0));
@@ -650,13 +543,9 @@ public class HfqlExecutorTest extends BaseHfqlExecutorTest {
 
 		IHfqlExecutionResult.Row nextRow;
 		IHfqlExecutionResult result = myHfqlExecutor.executeInitialSearch(statement, null, mySrd);
-		assertThat(result.getStatement().toSelectedColumnAliases().toString(), result.getStatement().toSelectedColumnAliases(), hasItems(
-			"COL1", "COL2", "identifier[0].system + '|' + identifier[0].value"
-		));
+		assertThat(result.getStatement().toSelectedColumnAliases()).as(result.getStatement().toSelectedColumnAliases().toString()).contains("COL1", "COL2", "identifier[0].system + '|' + identifier[0].value");
 		nextRow = result.getNextRow();
-		assertThat(nextRow.getRowValues().toString(), nextRow.getRowValues(), contains(
-			""
-		));
+		assertThat(nextRow.getRowValues()).as(nextRow.getRowValues().toString()).containsExactly("");
 		assertFalse(result.hasNext());
 	}
 
@@ -682,21 +571,13 @@ public class HfqlExecutorTest extends BaseHfqlExecutorTest {
 
 		IHfqlExecutionResult.Row nextRow;
 		IHfqlExecutionResult result = myHfqlExecutor.executeInitialSearch(statement, null, mySrd);
-		assertThat(result.getStatement().toSelectedColumnAliases().toString(), result.getStatement().toSelectedColumnAliases(), hasItems(
-			"id"
-		));
-		assertThat(result.getStatement().toSelectedColumnDataTypes().toString(), result.getStatement().toSelectedColumnDataTypes(), hasItems(
-			HfqlDataTypeEnum.STRING
-		));
+		assertThat(result.getStatement().toSelectedColumnAliases()).as(result.getStatement().toSelectedColumnAliases().toString()).contains("id");
+		assertThat(result.getStatement().toSelectedColumnDataTypes()).as(result.getStatement().toSelectedColumnDataTypes().toString()).contains(HfqlDataTypeEnum.STRING);
 
 		nextRow = result.getNextRow();
-		assertThat(nextRow.getRowValues().toString(), nextRow.getRowValues(), contains(
-			"1"
-		));
+		assertThat(nextRow.getRowValues()).as(nextRow.getRowValues().toString()).containsExactly("1");
 		nextRow = result.getNextRow();
-		assertThat(nextRow.getRowValues().toString(), nextRow.getRowValues(), contains(
-			"3"
-		));
+		assertThat(nextRow.getRowValues()).as(nextRow.getRowValues().toString()).containsExactly("3");
 		assertFalse(result.hasNext());
 
 		verify(observationDao, times(1)).search(mySearchParameterMapCaptor.capture(), any());
@@ -720,11 +601,11 @@ public class HfqlExecutorTest extends BaseHfqlExecutorTest {
 
 		assertTrue(result.hasNext());
 		row = result.getNextRow();
-		assertThat(row.getRowValues().toString(), row.getRowValues(), contains("Homer"));
+		assertThat(row.getRowValues()).as(row.getRowValues().toString()).containsExactly("Homer");
 
 		assertTrue(result.hasNext());
 		row = result.getNextRow();
-		assertThat(row.getRowValues().toString(), row.getRowValues(), contains("Bart"));
+		assertThat(row.getRowValues()).as(row.getRowValues().toString()).containsExactly("Bart");
 
 		assertFalse(result.hasNext());
 	}
@@ -744,16 +625,10 @@ public class HfqlExecutorTest extends BaseHfqlExecutorTest {
 
 		IHfqlExecutionResult.Row nextRow;
 		IHfqlExecutionResult result = myHfqlExecutor.executeInitialSearch(statement, null, mySrd);
-		assertThat(result.getStatement().toSelectedColumnAliases().toString(), result.getStatement().toSelectedColumnAliases(), hasItems(
-			"FullName"
-		));
-		assertThat(result.getStatement().toSelectedColumnDataTypes().toString(), result.getStatement().toSelectedColumnDataTypes(), hasItems(
-			HfqlDataTypeEnum.STRING
-		));
+		assertThat(result.getStatement().toSelectedColumnAliases()).as(result.getStatement().toSelectedColumnAliases().toString()).contains("FullName");
+		assertThat(result.getStatement().toSelectedColumnDataTypes()).as(result.getStatement().toSelectedColumnDataTypes().toString()).contains(HfqlDataTypeEnum.STRING);
 		nextRow = result.getNextRow();
-		assertThat(nextRow.getRowValues().toString(), nextRow.getRowValues(), contains(
-			"Homer Simpson"
-		));
+		assertThat(nextRow.getRowValues()).as(nextRow.getRowValues().toString()).containsExactly("Homer Simpson");
 		assertFalse(result.hasNext());
 	}
 
@@ -781,17 +656,11 @@ public class HfqlExecutorTest extends BaseHfqlExecutorTest {
 
 		IHfqlExecutionResult.Row nextRow;
 		IHfqlExecutionResult result = myHfqlExecutor.executeInitialSearch(statement, null, mySrd);
-		assertThat(result.getStatement().toSelectedColumnAliases().toString(), result.getStatement().toSelectedColumnAliases(), hasItems(
-			"id", "value.ofType(Quantity).value", "value.ofType(Quantity).system", "value.ofType(Quantity).code"
-		));
-		assertThat(result.getStatement().toSelectedColumnDataTypes().toString(), result.getStatement().toSelectedColumnDataTypes(), hasItems(
-			HfqlDataTypeEnum.STRING, HfqlDataTypeEnum.DECIMAL, HfqlDataTypeEnum.STRING, HfqlDataTypeEnum.STRING
-		));
+		assertThat(result.getStatement().toSelectedColumnAliases()).as(result.getStatement().toSelectedColumnAliases().toString()).contains("id", "value.ofType(Quantity).value", "value.ofType(Quantity).system", "value.ofType(Quantity).code");
+		assertThat(result.getStatement().toSelectedColumnDataTypes()).as(result.getStatement().toSelectedColumnDataTypes().toString()).contains(HfqlDataTypeEnum.STRING, HfqlDataTypeEnum.DECIMAL, HfqlDataTypeEnum.STRING, HfqlDataTypeEnum.STRING);
 
 		nextRow = result.getNextRow();
-		assertThat(nextRow.getRowValues().toString(), nextRow.getRowValues(), contains(
-			"3", "101", "http://unitsofmeasure.org", "kg"
-		));
+		assertThat(nextRow.getRowValues()).as(nextRow.getRowValues().toString()).containsExactly("3", "101", "http://unitsofmeasure.org", "kg");
 	}
 
 	@Test
@@ -806,13 +675,11 @@ public class HfqlExecutorTest extends BaseHfqlExecutorTest {
 			""";
 
 		IHfqlExecutionResult result = myHfqlExecutor.executeInitialSearch(statement, null, mySrd);
-		assertThat(result.getStatement().toSelectedColumnAliases(), contains(
-			"Given", "Family"
-		));
+		assertThat(result.getStatement().toSelectedColumnAliases()).containsExactly("Given", "Family");
 		assertTrue(result.hasNext());
 		IHfqlExecutionResult.Row nextRow = result.getNextRow();
 		assertEquals(2, nextRow.getRowOffset());
-		assertThat(nextRow.getRowValues(), contains("El Barto", "Simpson"));
+		assertThat(nextRow.getRowValues()).containsExactly("El Barto", "Simpson");
 		assertFalse(result.hasNext());
 
 	}
@@ -829,13 +696,11 @@ public class HfqlExecutorTest extends BaseHfqlExecutorTest {
 			""";
 
 		IHfqlExecutionResult result = myHfqlExecutor.executeInitialSearch(statement, null, mySrd);
-		assertThat(result.getStatement().toSelectedColumnAliases(), contains(
-			"Given", "Family"
-		));
+		assertThat(result.getStatement().toSelectedColumnAliases()).containsExactly("Given", "Family");
 		assertTrue(result.hasNext());
 		IHfqlExecutionResult.Row row = result.getNextRow();
 		assertEquals(0, row.getRowOffset());
-		assertThat(row.getRowValues(), contains("Jay", "Simpson"));
+		assertThat(row.getRowValues()).containsExactly("Jay", "Simpson");
 		assertFalse(result.hasNext());
 
 	}
@@ -891,7 +756,7 @@ public class HfqlExecutorTest extends BaseHfqlExecutorTest {
 		assertTrue(result.hasNext());
 		IHfqlExecutionResult.Row nextRow = result.getNextRow();
 		assertEquals(IHfqlExecutionResult.ROW_OFFSET_ERROR, nextRow.getRowOffset());
-		assertThat(nextRow.getRowValues(), contains(expected));
+		assertThat(nextRow.getRowValues()).containsExactly(expected);
 	}
 
 	@Test
@@ -914,8 +779,8 @@ public class HfqlExecutorTest extends BaseHfqlExecutorTest {
 
 		IHfqlExecutionResult result = myHfqlExecutor.executeInitialSearch(statement, null, mySrd);
 
-		assertThat(result.getStatement().toSelectedColumnAliases(), contains("id", "meta.versionId", "value.ofType(Quantity).value"));
-		assertThat(result.getStatement().toSelectedColumnDataTypes(), contains(HfqlDataTypeEnum.STRING, HfqlDataTypeEnum.LONGINT, HfqlDataTypeEnum.DECIMAL));
+		assertThat(result.getStatement().toSelectedColumnAliases()).containsExactly("id", "meta.versionId", "value.ofType(Quantity).value");
+		assertThat(result.getStatement().toSelectedColumnDataTypes()).containsExactly(HfqlDataTypeEnum.STRING, HfqlDataTypeEnum.LONGINT, HfqlDataTypeEnum.DECIMAL);
 		assertTrue(result.hasNext());
 		List<Object> nextRow = result.getNextRow().getRowValues();
 		assertEquals("123", nextRow.get(0));
@@ -993,8 +858,8 @@ public class HfqlExecutorTest extends BaseHfqlExecutorTest {
 
 		IHfqlExecutionResult result = myHfqlExecutor.executeInitialSearch(statement, null, mySrd);
 
-		assertThat(result.getStatement().toSelectedColumnAliases(), contains("name.given"));
-		assertThat(result.getStatement().toSelectedColumnDataTypes(), contains(HfqlDataTypeEnum.JSON));
+		assertThat(result.getStatement().toSelectedColumnAliases()).containsExactly("name.given");
+		assertThat(result.getStatement().toSelectedColumnDataTypes()).containsExactly(HfqlDataTypeEnum.JSON);
 		assertTrue(result.hasNext());
 		List<Object> nextRow = result.getNextRow().getRowValues();
 		assertEquals("[\"1\\\"2\", \"1\\\\,2\"]", nextRow.get(0));
@@ -1016,8 +881,8 @@ public class HfqlExecutorTest extends BaseHfqlExecutorTest {
 
 		IHfqlExecutionResult result = myHfqlExecutor.executeInitialSearch(statement, null, mySrd);
 
-		assertThat(result.getStatement().toSelectedColumnAliases(), contains("name[0].given[0]", "foo"));
-		assertThat(result.getStatement().toSelectedColumnDataTypes(), contains(HfqlDataTypeEnum.STRING, HfqlDataTypeEnum.STRING));
+		assertThat(result.getStatement().toSelectedColumnAliases()).containsExactly("name[0].given[0]", "foo");
+		assertThat(result.getStatement().toSelectedColumnDataTypes()).containsExactly(HfqlDataTypeEnum.STRING, HfqlDataTypeEnum.STRING);
 		assertTrue(result.hasNext());
 		List<Object> nextRow = result.getNextRow().getRowValues();
 		assertEquals("Homer", nextRow.get(0));

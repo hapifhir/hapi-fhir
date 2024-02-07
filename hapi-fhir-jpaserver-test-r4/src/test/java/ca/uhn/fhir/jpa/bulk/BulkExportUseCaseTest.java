@@ -78,14 +78,10 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -146,22 +142,22 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 				ourLog.info(responseContent);
 
 				BulkExportResponseJson result = JsonUtil.deserialize(responseContent, BulkExportResponseJson.class);
-				assertThat(result.getRequest(), is(equalTo(expectedOriginalUrl)));
-				assertThat(result.getOutput(), is(not(empty())));
+				assertThat(result.getRequest()).isEqualTo(expectedOriginalUrl);
+				assertThat(result.getOutput(), not(empty()));
 				String binary_url = result.getOutput().get(0).getUrl();
 				Binary binaryResource = myClient.read().resource(Binary.class).withUrl(binary_url).execute();
 
 				List<Extension> extension = binaryResource.getMeta().getExtension();
-				assertThat(extension, hasSize(3));
+				assertThat(extension).hasSize(3);
 
-				assertThat(extension.get(0).getUrl(), is(equalTo(JpaConstants.BULK_META_EXTENSION_EXPORT_IDENTIFIER)));
-				assertThat(extension.get(0).getValue().toString(), is(equalTo("im-an-export-identifier")));
+				assertThat(extension.get(0).getUrl()).isEqualTo(JpaConstants.BULK_META_EXTENSION_EXPORT_IDENTIFIER);
+				assertThat(extension.get(0).getValue().toString()).isEqualTo("im-an-export-identifier");
 
-				assertThat(extension.get(1).getUrl(), is(equalTo(JpaConstants.BULK_META_EXTENSION_JOB_ID)));
-				assertThat(extension.get(1).getValue().toString(), is(equalTo(jobId)));
+				assertThat(extension.get(1).getUrl()).isEqualTo(JpaConstants.BULK_META_EXTENSION_JOB_ID);
+				assertThat(extension.get(1).getValue().toString()).isEqualTo(jobId);
 
-				assertThat(extension.get(2).getUrl(), is(equalTo(JpaConstants.BULK_META_EXTENSION_RESOURCE_TYPE)));
-				assertThat(extension.get(2).getValue().toString(), is(equalTo("Patient")));
+				assertThat(extension.get(2).getUrl()).isEqualTo(JpaConstants.BULK_META_EXTENSION_RESOURCE_TYPE);
+				assertThat(extension.get(2).getValue().toString()).isEqualTo("Patient");
 			}
 		}
 
@@ -182,7 +178,7 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 			String secondJobId = getJobIdFromPollingLocation(secondPollingLocation);
 
 			//Then the job id should be different
-			assertThat(secondJobId, not(equalTo(jobId)));
+			assertThat(secondJobId).isNotEqualTo(jobId);
 
 
 			myBatch2JobHelper.awaitJobCompletion(secondJobId);
@@ -210,13 +206,13 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 				ourLog.info(responseContent);
 
 				BulkExportResponseJson result = JsonUtil.deserialize(responseContent, BulkExportResponseJson.class);
-				assertThat(result.getRequest(), is(equalTo(expectedOriginalUrl)));
-				assertThat(result.getRequiresAccessToken(), is(equalTo(true)));
-				assertThat(result.getTransactionTime(), is(notNullValue()));
-				assertThat(result.getOutput(), is(not(empty())));
+				assertThat(result.getRequest()).isEqualTo(expectedOriginalUrl);
+				assertThat(result.getRequiresAccessToken()).isEqualTo(true);
+				assertThat(result.getTransactionTime()).isNotNull();
+				assertThat(result.getOutput(), not(empty()));
 
 				//We assert specifically on content as the deserialized version will "helpfully" fill in missing fields.
-				assertThat(responseContent, containsString("\"error\" : [ ]"));
+				assertThat(responseContent).contains("\"error\" : [ ]");
 			}
 		}
 
@@ -255,13 +251,13 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 				ourLog.info(responseContent);
 
 				BulkExportResponseJson result = JsonUtil.deserialize(responseContent, BulkExportResponseJson.class);
-				assertThat(result.getRequest(), is(equalTo(expectedOriginalUrl)));
-				assertThat(result.getRequiresAccessToken(), is(equalTo(true)));
-				assertThat(result.getTransactionTime(), is(notNullValue()));
-				assertThat(result.getOutput(), is(not(empty())));
+				assertThat(result.getRequest()).isEqualTo(expectedOriginalUrl);
+				assertThat(result.getRequiresAccessToken()).isEqualTo(true);
+				assertThat(result.getTransactionTime()).isNotNull();
+				assertThat(result.getOutput(), not(empty()));
 
 				//We assert specifically on content as the deserialized version will "helpfully" fill in missing fields.
-				assertThat(responseContent, containsString("\"error\" : [ ]"));
+				assertThat(responseContent).contains("\"error\" : [ ]");
 			}
 		}
 
@@ -295,16 +291,16 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 			try (CloseableHttpResponse status = ourHttpClient.execute(statusGet)) {
 				String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 				BulkExportResponseJson result = JsonUtil.deserialize(responseContent, BulkExportResponseJson.class);
-				assertThat(result.getRequest(), is(equalTo(expectedOriginalUrl)));
-				assertThat(result.getRequiresAccessToken(), is(equalTo(true)));
-				assertThat(result.getTransactionTime(), is(notNullValue()));
+				assertThat(result.getRequest()).isEqualTo(expectedOriginalUrl);
+				assertThat(result.getRequiresAccessToken()).isEqualTo(true);
+				assertThat(result.getTransactionTime()).isNotNull();
 				assertEquals(result.getOutput().size(), 3);
 				assertEquals(1, result.getOutput().stream().filter(o -> o.getType().equals("Patient")).collect(Collectors.toList()).size());
 				assertEquals(1, result.getOutput().stream().filter(o -> o.getType().equals("Observation")).collect(Collectors.toList()).size());
 				assertEquals(1, result.getOutput().stream().filter(o -> o.getType().equals("Encounter")).collect(Collectors.toList()).size());
 
 				//We assert specifically on content as the deserialized version will "helpfully" fill in missing fields.
-				assertThat(responseContent, containsString("\"error\" : [ ]"));
+				assertThat(responseContent).contains("\"error\" : [ ]");
 			}
 		}
 
@@ -334,15 +330,15 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 			try (CloseableHttpResponse status = ourHttpClient.execute(statusGet)) {
 				String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 				BulkExportResponseJson result = JsonUtil.deserialize(responseContent, BulkExportResponseJson.class);
-				assertThat(result.getRequest(), is(equalTo(expectedOriginalUrl)));
-				assertThat(result.getRequiresAccessToken(), is(equalTo(true)));
-				assertThat(result.getTransactionTime(), is(notNullValue()));
+				assertThat(result.getRequest()).isEqualTo(expectedOriginalUrl);
+				assertThat(result.getRequiresAccessToken()).isEqualTo(true);
+				assertThat(result.getTransactionTime()).isNotNull();
 				assertEquals(result.getOutput().size(), 1);
 				assertEquals(1, result.getOutput().stream().filter(o -> o.getType().equals("Patient")).collect(Collectors.toList()).size());
 				assertEquals(0, result.getOutput().stream().filter(o -> o.getType().equals("Binary")).collect(Collectors.toList()).size());
 
 				//We assert specifically on content as the deserialized version will "helpfully" fill in missing fields.
-				assertThat(responseContent, containsString("\"error\" : [ ]"));
+				assertThat(responseContent).contains("\"error\" : [ ]");
 			}
 		}
 
@@ -383,7 +379,7 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 			HashSet<String> types = Sets.newHashSet("Patient");
 			BulkExportJobResults bulkExportJobResults = startSystemBulkExportJobAndAwaitCompletion(types, new HashSet<String>());
 			Map<String, List<String>> resourceTypeToBinaryIds = bulkExportJobResults.getResourceTypeToBinaryIds();
-			assertThat(resourceTypeToBinaryIds.get("Patient"), hasSize(1));
+			assertThat(resourceTypeToBinaryIds.get("Patient")).hasSize(1);
 			String patientBinaryId = resourceTypeToBinaryIds.get("Patient").get(0);
 			String replace = patientBinaryId.replace("_history/1", "");
 
@@ -428,10 +424,10 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 					String response = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 					logContentTypeAndResponse(headers, response);
 
-					assertThat(headers[0].getValue(), containsString(Constants.CT_FHIR_JSON));
-					assertThat(response, is(not(containsString("\n"))));
+					assertThat(headers[0].getValue()).contains(Constants.CT_FHIR_JSON);
+					assertThat(response).doesNotContain("\n");
 					Binary binary = myFhirContext.newJsonParser().parseResource(Binary.class, response);
-					assertThat(binary.getIdElement().getValue(), is(equalTo(patientBinaryId)));
+					assertThat(binary.getIdElement().getValue()).isEqualTo(patientBinaryId);
 				}
 			}
 		}
@@ -500,10 +496,10 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 		}
 
 		private void validateNdJsonResponse(Header[] headers, String response, int theExpectedCount) {
-			assertThat(headers[0].getValue(), containsString(Constants.CT_FHIR_NDJSON));
-			assertThat(response, is(containsString("\n")));
+			assertThat(headers[0].getValue()).contains(Constants.CT_FHIR_NDJSON);
+			assertThat(response).contains("\n");
 			Bundle bundle = myFhirContext.newNDJsonParser().parseResource(Bundle.class, response);
-			assertThat(bundle.getEntry(), hasSize(theExpectedCount));
+			assertThat(bundle.getEntry()).hasSize(theExpectedCount);
 		}
 	}
 
@@ -544,12 +540,12 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 			HashSet<String> types = Sets.newHashSet("Patient", "Observation");
 			BulkExportJobResults bulkExportJobResults = startPatientBulkExportJobAndAwaitResults(types, new HashSet<String>(), "ha");
 			Map<String, List<IBaseResource>> typeToResources = convertJobResultsToResources(bulkExportJobResults);
-			assertThat(typeToResources.get("Patient"), hasSize(1));
-			assertThat(typeToResources.get("Observation"), hasSize(1));
+			assertThat(typeToResources.get("Patient")).hasSize(1);
+			assertThat(typeToResources.get("Observation")).hasSize(1);
 
 			Map<String, String> typeToContents = convertJobResultsToStringContents(bulkExportJobResults);
-			assertThat(typeToContents.get("Observation"), containsString("obs-included"));
-			assertThat(typeToContents.get("Observation"), not(containsString("obs-excluded")));
+			assertThat(typeToContents.get("Observation")).contains("obs-included");
+			assertThat(typeToContents.get("Observation")).doesNotContain("obs-excluded");
 		}
 
 		@Test
@@ -644,11 +640,11 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 			BulkExportJobResults bulkExportJobResults = startGroupBulkExportJobAndAwaitCompletion(resourceTypes, new HashSet<>(), "G");
 			Map<String, List<IBaseResource>> firstMap = convertJobResultsToResources(bulkExportJobResults);
 
-			assertThat(firstMap.keySet(), hasSize(4));
-			assertThat(firstMap.get("Group"), hasSize(1));
-			assertThat(firstMap.get("Patient"), hasSize(1));
-			assertThat(firstMap.get("Practitioner"), hasSize(1));
-			assertThat(firstMap.get("Organization"), hasSize(1));
+			assertThat(firstMap.keySet()).hasSize(4);
+			assertThat(firstMap.get("Group")).hasSize(1);
+			assertThat(firstMap.get("Patient")).hasSize(1);
+			assertThat(firstMap.get("Practitioner")).hasSize(1);
+			assertThat(firstMap.get("Organization")).hasSize(1);
 		}
 
 		@Test
@@ -680,10 +676,10 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 			HashSet<String> resourceTypes = Sets.newHashSet("Group", "Patient", "Observation");
 			BulkExportJobResults bulkExportJobResults = startGroupBulkExportJobAndAwaitCompletion(resourceTypes, new HashSet<>(), "G");
 			Map<String, List<IBaseResource>> firstMap = convertJobResultsToResources(bulkExportJobResults);
-			assertThat(firstMap.keySet(), hasSize(3));
-			assertThat(firstMap.get("Group"), hasSize(1));
-			assertThat(firstMap.get("Patient"), hasSize(600));
-			assertThat(firstMap.get("Observation"), hasSize(600));
+			assertThat(firstMap.keySet()).hasSize(3);
+			assertThat(firstMap.get("Group")).hasSize(1);
+			assertThat(firstMap.get("Patient")).hasSize(600);
+			assertThat(firstMap.get("Observation")).hasSize(600);
 		}
 
 		@Test
@@ -716,8 +712,8 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 			HashSet<String> resourceTypes = Sets.newHashSet("Group", "Patient");
 			BulkExportJobResults bulkExportJobResults = startGroupBulkExportJobAndAwaitCompletion(resourceTypes, new HashSet<>(), "G1");
 			Map<String, List<IBaseResource>> firstMap = convertJobResultsToResources(bulkExportJobResults);
-			assertThat(firstMap.get("Patient"), hasSize(1));
-			assertThat(firstMap.get("Group"), hasSize(1));
+			assertThat(firstMap.get("Patient")).hasSize(1);
+			assertThat(firstMap.get("Group")).hasSize(1);
 		}
 
 		@Test
@@ -747,14 +743,14 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 			HashSet<String> resourceTypes = Sets.newHashSet("Observation", "Patient");
 			BulkExportJobResults bulkExportJobResults = startGroupBulkExportJobAndAwaitCompletion(resourceTypes, new HashSet<>(), "G2");
 			Map<String, List<IBaseResource>> firstMap = convertJobResultsToResources(bulkExportJobResults);
-			assertThat(firstMap.get("Patient"), hasSize(1));
-			assertThat(firstMap.get("Observation"), hasSize(1));
+			assertThat(firstMap.get("Patient")).hasSize(1);
+			assertThat(firstMap.get("Observation")).hasSize(1);
 
 			HashSet<String> otherResourceTypes = Sets.newHashSet("Coverage", "Patient");
 			BulkExportJobResults altBulkExportResults = startGroupBulkExportJobAndAwaitCompletion(otherResourceTypes, new HashSet<>(), "G2");
 			Map<String, List<IBaseResource>> secondMap = convertJobResultsToResources(altBulkExportResults);
-			assertThat(secondMap.get("Patient"), hasSize(1));
-			assertThat(secondMap.get("Coverage"), hasSize(1));
+			assertThat(secondMap.get("Patient")).hasSize(1);
+			assertThat(secondMap.get("Coverage")).hasSize(1);
 
 			runInTransaction(() -> {
 				List<Batch2JobInstanceEntity> instances = myJobInstanceRepository.findAll();
@@ -888,20 +884,20 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 			BulkExportJobResults bulkExportJobResults = startGroupBulkExportJobAndAwaitCompletion(resourceTypes, new HashSet<>(), "G1");
 
 			Map<String, List<IBaseResource>> typeToResources = convertJobResultsToResources(bulkExportJobResults);
-			assertThat(typeToResources.get("Patient"), hasSize(2));
-			assertThat(typeToResources.get("Group"), hasSize(1));
-			assertThat(typeToResources.get("Observation"), hasSize(2));
-			assertThat(typeToResources.get("Encounter"), hasSize(2));
+			assertThat(typeToResources.get("Patient")).hasSize(2);
+			assertThat(typeToResources.get("Group")).hasSize(1);
+			assertThat(typeToResources.get("Observation")).hasSize(2);
+			assertThat(typeToResources.get("Encounter")).hasSize(2);
 
 			Map<String, String> typeToContents = convertJobResultsToStringContents(bulkExportJobResults);
-			assertThat(typeToContents.get("Patient"), containsString("A1"));
-			assertThat(typeToContents.get("Patient"), containsString("A2"));
+			assertThat(typeToContents.get("Patient")).contains("A1");
+			assertThat(typeToContents.get("Patient")).contains("A2");
 
-			assertThat(typeToContents.get("Observation"), containsString("obs-a1"));
-			assertThat(typeToContents.get("Observation"), containsString("obs-a2"));
+			assertThat(typeToContents.get("Observation")).contains("obs-a1");
+			assertThat(typeToContents.get("Observation")).contains("obs-a2");
 
-			assertThat(typeToContents.get("Encounter"), containsString("enc-a1"));
-			assertThat(typeToContents.get("Encounter"), containsString("enc-a2"));
+			assertThat(typeToContents.get("Encounter")).contains("enc-a1");
+			assertThat(typeToContents.get("Encounter")).contains("enc-a2");
 
 		}
 
@@ -941,15 +937,15 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 			BulkExportJobResults bulkExportJobResults = startGroupBulkExportJobAndAwaitCompletion(resourceTypes, new HashSet<>(), "G2");
 
 			Map<String, List<IBaseResource>> typeToResources = convertJobResultsToResources(bulkExportJobResults);
-			assertThat(typeToResources.get("Patient"), hasSize(1));
-			assertThat(typeToResources.get("Observation"), hasSize(1));
+			assertThat(typeToResources.get("Patient")).hasSize(1);
+			assertThat(typeToResources.get("Observation")).hasSize(1);
 
 			Map<String, String> typeToContents = convertJobResultsToStringContents(bulkExportJobResults);
-			assertThat(typeToContents.get("Patient"), containsString("PING1"));
-			assertThat(typeToContents.get("Patient"), not(containsString("POG2")));
+			assertThat(typeToContents.get("Patient")).contains("PING1");
+			assertThat(typeToContents.get("Patient")).doesNotContain("POG2");
 
-			assertThat(typeToContents.get("Observation"), containsString("obs-included"));
-			assertThat(typeToContents.get("Observation"), not(containsString("obs-excluded")));
+			assertThat(typeToContents.get("Observation")).contains("obs-included");
+			assertThat(typeToContents.get("Observation")).doesNotContain("obs-excluded");
 		}
 
 		@Test
@@ -1099,7 +1095,7 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 			assertFalse(stringListMap.containsKey("Organization"), String.join(",", stringListMap.keySet()));
 			assertFalse(stringListMap.containsKey("Patient"), String.join(",", stringListMap.keySet()));
 			assertTrue(stringListMap.containsKey("Encounter"), String.join(",", stringListMap.keySet()));
-			assertThat(stringListMap.get("Encounter"), hasSize(2));
+			assertThat(stringListMap.get("Encounter")).hasSize(2);
 		}
 
 		@Test
@@ -1125,12 +1121,12 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 			BulkExportJobResults results = startGroupBulkExportJobAndAwaitCompletion(resourceTypes, filters, groupId);
 
 			Map<String, List<IBaseResource>> stringListMap = convertJobResultsToResources(results);
-			assertThat(stringListMap.get("Observation"), hasSize(1));
-			assertThat(stringListMap.get("Patient"), hasSize(1));
+			assertThat(stringListMap.get("Observation")).hasSize(1);
+			assertThat(stringListMap.get("Patient")).hasSize(1);
 
 			Map<String, String> typeToContents = convertJobResultsToStringContents(results);
-			assertThat(typeToContents.get("Observation"), not(containsString("obs-male")));
-			assertThat(typeToContents.get("Observation"), containsString("obs-female"));
+			assertThat(typeToContents.get("Observation")).doesNotContain("obs-male");
+			assertThat(typeToContents.get("Observation")).contains("obs-female");
 		}
 
 		@Test
@@ -1179,11 +1175,11 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 			HashSet<String> filters = Sets.newHashSet();
 			BulkExportJobResults results = startGroupBulkExportJobAndAwaitCompletion(new HashSet<>(), filters, "G");
 			Map<String, List<IBaseResource>> typeToResource = convertJobResultsToResources(results);
-			assertThat(typeToResource.keySet(), hasSize(4));
-			assertThat(typeToResource.get("Group"), hasSize(1));
-			assertThat(typeToResource.get("Observation"), hasSize(2));
-			assertThat(typeToResource.get("Coverage"), hasSize(2));
-			assertThat(typeToResource.get("Patient"), hasSize(2));
+			assertThat(typeToResource.keySet()).hasSize(4);
+			assertThat(typeToResource.get("Group")).hasSize(1);
+			assertThat(typeToResource.get("Observation")).hasSize(2);
+			assertThat(typeToResource.get("Coverage")).hasSize(2);
+			assertThat(typeToResource.get("Patient")).hasSize(2);
 		}
 
 		@Test
@@ -1211,11 +1207,11 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 			BulkExportJobResults bulkExportJobResults = startGroupBulkExportJobAndAwaitCompletion(resourceTypes, new HashSet<>(), "G2");
 
 			Map<String, List<IBaseResource>> typeToResources = convertJobResultsToResources(bulkExportJobResults);
-			assertThat(typeToResources.get("Patient"), hasSize(1));
+			assertThat(typeToResources.get("Patient")).hasSize(1);
 
 			Map<String, String> typeToContents = convertJobResultsToStringContents(bulkExportJobResults);
-			assertThat(typeToContents.get("Patient"), containsString("PING1"));
-			assertThat(typeToContents.get("Patient"), not(containsString("POG2")));
+			assertThat(typeToContents.get("Patient")).contains("PING1");
+			assertThat(typeToContents.get("Patient")).doesNotContain("POG2");
 		}
 
 		@Test
@@ -1253,12 +1249,12 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 			BulkExportJobResults bulkExportJobResults = startGroupBulkExportJobAndAwaitCompletion(resourceTypes, new HashSet<>(), "G2");
 
 			Map<String, List<IBaseResource>> typeToResources = convertJobResultsToResources(bulkExportJobResults);
-			assertThat(typeToResources.get("Observation"), hasSize(1));
-			assertThat(typeToResources.get("Coverage"), hasSize(1));
+			assertThat(typeToResources.get("Observation")).hasSize(1);
+			assertThat(typeToResources.get("Coverage")).hasSize(1);
 
 			Map<String, String> typeToContents = convertJobResultsToStringContents(bulkExportJobResults);
-			assertThat(typeToContents.get("Observation"), containsString("obs-included"));
-			assertThat(typeToContents.get("Coverage"), containsString("coverage-included"));
+			assertThat(typeToContents.get("Observation")).contains("obs-included");
+			assertThat(typeToContents.get("Coverage")).contains("coverage-included");
 		}
 
 		@Test
@@ -1298,12 +1294,12 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 			BulkExportJobResults bulkExportJobResults = startGroupBulkExportJobAndAwaitCompletion(Sets.newHashSet("Observation"), new HashSet<>(), "G2");
 
 			Map<String, List<IBaseResource>> typeToResources = convertJobResultsToResources(bulkExportJobResults);
-			assertThat(typeToResources.get("Observation"), hasSize(1000));
+			assertThat(typeToResources.get("Observation")).hasSize(1000);
 
 			Map<String, String> typeToContents = convertJobResultsToStringContents(bulkExportJobResults);
-			assertThat(typeToContents.get("Observation"), not(containsString("not-included")));
-			assertThat(typeToContents.get("Observation"), containsString("obs-included-0"));
-			assertThat(typeToContents.get("Observation"), containsString("obs-included-999"));
+			assertThat(typeToContents.get("Observation")).doesNotContain("not-included");
+			assertThat(typeToContents.get("Observation")).contains("obs-included-0");
+			assertThat(typeToContents.get("Observation")).contains("obs-included-999");
 		}
 
 		@Nested
@@ -1344,11 +1340,11 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 				BulkExportJobResults bulkExportJobResults = startGroupBulkExportJobAndAwaitCompletion(resourceTypes, new HashSet<>(), "G2");
 
 				Map<String, List<IBaseResource>> typeToResources = convertJobResultsToResources(bulkExportJobResults);
-				assertThat(typeToResources.get("Patient"), hasSize(1));
+				assertThat(typeToResources.get("Patient")).hasSize(1);
 
 				Map<String, String> typeToContents = convertJobResultsToStringContents(bulkExportJobResults);
-				assertThat(typeToContents.get("Patient"), containsString("PING1"));
-				assertThat(typeToContents.get("Patient"), not(containsString("POG2")));
+				assertThat(typeToContents.get("Patient")).contains("PING1");
+				assertThat(typeToContents.get("Patient")).doesNotContain("POG2");
 			}
 		}
 
@@ -1545,11 +1541,11 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 				String contents = new String(binary.getContent(), Constants.CHARSET_UTF8);
 				ourLog.info("Next contents for type {} :\n{}", binary.getResourceType(), contents);
 				for (String containedString : theContainedList) {
-					assertThat(contents, Matchers.containsString(containedString));
+					assertThat(contents).contains(containedString);
 
 				}
 				for (String excludedString : theExcludedList) {
-					assertThat(contents, not(Matchers.containsString(excludedString)));
+					assertThat(contents).doesNotContain(excludedString);
 				}
 			}
 		}

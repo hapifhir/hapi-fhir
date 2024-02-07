@@ -12,8 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.hasSize;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class NicknameSearchR4Test extends BaseResourceProviderR4Test {
@@ -52,7 +51,7 @@ public class NicknameSearchR4Test extends BaseResourceProviderR4Test {
 			.execute();
 
 		List<Patient> resources = BundleUtil.toListOfResourcesOfType(myFhirContext,result, Patient.class);
-		assertThat(resources, hasSize(1));
+		assertThat(resources).hasSize(1);
 		assertEquals("ken", resources.get(0).getNameFirstRep().getGivenAsSingleString());
 	}
 }

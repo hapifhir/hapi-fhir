@@ -57,11 +57,8 @@ import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.jpa.term.TermTestUtil.URL_MY_CODE_SYSTEM;
 import static ca.uhn.fhir.jpa.term.TermTestUtil.URL_MY_VALUE_SET;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.containsStringIgnoringCase;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.stringContainsInOrder;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -243,19 +240,19 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 
 		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
-		assertThat(resp, containsString("<ValueSet xmlns=\"http://hl7.org/fhir\">"));
-		assertThat(resp, containsString("<expansion>"));
-		assertThat(resp, containsString("<contains>"));
-		assertThat(resp, containsString("<system value=\"http://acme.org\"/>"));
-		assertThat(resp, containsString("<code value=\"8450-9\"/>"));
-		assertThat(resp, containsString("<display value=\"Systolic blood pressure--expiration\"/>"));
-		assertThat(resp, containsString("</contains>"));
-		assertThat(resp, containsString("<contains>"));
-		assertThat(resp, containsString("<system value=\"http://acme.org\"/>"));
-		assertThat(resp, containsString("<code value=\"11378-7\"/>"));
-		assertThat(resp, containsString("<display value=\"Systolic blood pressure at First encounter\"/>"));
-		assertThat(resp, containsString("</contains>"));
-		assertThat(resp, containsString("</expansion>"));
+		assertThat(resp).contains("<ValueSet xmlns=\"http://hl7.org/fhir\">");
+		assertThat(resp).contains("<expansion>");
+		assertThat(resp).contains("<contains>");
+		assertThat(resp).contains("<system value=\"http://acme.org\"/>");
+		assertThat(resp).contains("<code value=\"8450-9\"/>");
+		assertThat(resp).contains("<display value=\"Systolic blood pressure--expiration\"/>");
+		assertThat(resp).contains("</contains>");
+		assertThat(resp).contains("<contains>");
+		assertThat(resp).contains("<system value=\"http://acme.org\"/>");
+		assertThat(resp).contains("<code value=\"11378-7\"/>");
+		assertThat(resp).contains("<display value=\"Systolic blood pressure at First encounter\"/>");
+		assertThat(resp).contains("</contains>");
+		assertThat(resp).contains("</expansion>");
 
 	}
 
@@ -276,19 +273,19 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 
 		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
-		assertThat(resp, containsString("<ValueSet xmlns=\"http://hl7.org/fhir\">"));
-		assertThat(resp, containsString("<expansion>"));
-		assertThat(resp, containsString("<contains>"));
-		assertThat(resp, containsString("<system value=\"http://acme.org\"/>"));
-		assertThat(resp, containsString("<code value=\"8450-9\"/>"));
-		assertThat(resp, containsString("<display value=\"Systolic blood pressure--expiration\"/>"));
-		assertThat(resp, containsString("</contains>"));
-		assertThat(resp, containsString("<contains>"));
-		assertThat(resp, containsString("<system value=\"http://acme.org\"/>"));
-		assertThat(resp, containsString("<code value=\"11378-7\"/>"));
-		assertThat(resp, containsString("<display value=\"Systolic blood pressure at First encounter\"/>"));
-		assertThat(resp, containsString("</contains>"));
-		assertThat(resp, containsString("</expansion>"));
+		assertThat(resp).contains("<ValueSet xmlns=\"http://hl7.org/fhir\">");
+		assertThat(resp).contains("<expansion>");
+		assertThat(resp).contains("<contains>");
+		assertThat(resp).contains("<system value=\"http://acme.org\"/>");
+		assertThat(resp).contains("<code value=\"8450-9\"/>");
+		assertThat(resp).contains("<display value=\"Systolic blood pressure--expiration\"/>");
+		assertThat(resp).contains("</contains>");
+		assertThat(resp).contains("<contains>");
+		assertThat(resp).contains("<system value=\"http://acme.org\"/>");
+		assertThat(resp).contains("<code value=\"11378-7\"/>");
+		assertThat(resp).contains("<display value=\"Systolic blood pressure at First encounter\"/>");
+		assertThat(resp).contains("</contains>");
+		assertThat(resp).contains("</expansion>");
 
 	}
 
@@ -321,7 +318,7 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 		assertEquals(23, expanded.getExpansion().getContains().size());
 
 
-		assertThat(toCodes(expanded), is(equalTo(expandedConceptsByValueSetUrl.subList(1,24))));
+		assertThat(toCodes(expanded)).isEqualTo(expandedConceptsByValueSetUrl.subList(1, 24));
 	}
 
 	@Nonnull
@@ -354,7 +351,7 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 		assertEquals("count", expanded.getExpansion().getParameter().get(1).getName());
 		assertEquals(1, expanded.getExpansion().getParameter().get(1).getValueIntegerType().getValue().intValue());
 		assertEquals(1, expanded.getExpansion().getContains().size());
-		assertThat(toCodes(expanded), is(equalTo(expandedConcepts.subList(0,1))));
+		assertThat(toCodes(expanded)).isEqualTo(expandedConcepts.subList(0, 1));
 
 	}
 
@@ -387,7 +384,7 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 		assertEquals(1, expanded.getExpansion().getParameter().get(1).getValueIntegerType().getValue().intValue());
 		assertEquals(1, expanded.getExpansion().getContains().size());
 
-		assertThat(toCodes(expanded), is(equalTo(expandedConcepts.subList(1,2))));
+		assertThat(toCodes(expanded)).isEqualTo(expandedConcepts.subList(1, 2));
 	}
 
 	@Test
@@ -404,8 +401,8 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 
 		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
-		assertThat(resp, containsString("<display value=\"Systolic blood pressure at First encounter\"/>"));
-		assertThat(resp, not(containsString("\"Foo Code\"")));
+		assertThat(resp).contains("<display value=\"Systolic blood pressure at First encounter\"/>");
+		assertThat(resp).doesNotContain("\"Foo Code\"");
 
 	}
 
@@ -426,8 +423,8 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 
 		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
-		assertThat(resp, containsString("<display value=\"Systolic blood pressure at First encounter\"/>"));
-		assertThat(resp, not(containsString("\"Foo Code\"")));
+		assertThat(resp).contains("<display value=\"Systolic blood pressure at First encounter\"/>");
+		assertThat(resp).doesNotContain("\"Foo Code\"");
 
 	}
 
@@ -540,7 +537,7 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 		assertEquals("count", expanded.getExpansion().getParameter().get(1).getName());
 		assertEquals(1000, expanded.getExpansion().getParameter().get(1).getValueIntegerType().getValue().intValue());
 		assertEquals(23, expanded.getExpansion().getContains().size());
-		assertThat(toCodes(expanded), is(equalTo(expandedConcepts.subList(1,24))));
+		assertThat(toCodes(expanded)).isEqualTo(expandedConcepts.subList(1, 24));
 	}
 
 	@Test
@@ -570,7 +567,7 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 		assertEquals("count", expanded.getExpansion().getParameter().get(1).getName());
 		assertEquals(1, expanded.getExpansion().getParameter().get(1).getValueIntegerType().getValue().intValue());
 		assertEquals(1, expanded.getExpansion().getContains().size());
-		assertThat(toCodes(expanded), is(equalTo(expandedConcepts.subList(0,1))));
+		assertThat(toCodes(expanded)).isEqualTo(expandedConcepts.subList(0, 1));
 	}
 
 	@Test
@@ -602,7 +599,7 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 		assertEquals("count", expanded.getExpansion().getParameter().get(1).getName());
 		assertEquals(1, expanded.getExpansion().getParameter().get(1).getValueIntegerType().getValue().intValue());
 		assertEquals(1, expanded.getExpansion().getContains().size());
-		assertThat(toCodes(expanded), is(equalTo(expandedConcepts.subList(1,2))));
+		assertThat(toCodes(expanded)).isEqualTo(expandedConcepts.subList(1, 2));
 
 	}
 
@@ -702,7 +699,7 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 		assertEquals("count", expanded.getExpansion().getParameter().get(1).getName());
 		assertEquals(1000, expanded.getExpansion().getParameter().get(1).getValueIntegerType().getValue().intValue());
 		assertEquals(23, expanded.getExpansion().getContains().size());
-		assertThat(toCodes(expanded), is(equalTo(expandedConcepts.subList(1,24))));
+		assertThat(toCodes(expanded)).isEqualTo(expandedConcepts.subList(1, 24));
 
 	}
 
@@ -735,7 +732,7 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 		assertEquals("count", expanded.getExpansion().getParameter().get(1).getName());
 		assertEquals(1, expanded.getExpansion().getParameter().get(1).getValueIntegerType().getValue().intValue());
 		assertEquals(1, expanded.getExpansion().getContains().size());
-		assertThat(toCodes(expanded), is(equalTo(expandedConcepts.subList(0,1))));
+		assertThat(toCodes(expanded)).isEqualTo(expandedConcepts.subList(0, 1));
 
 	}
 
@@ -769,7 +766,7 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 		assertEquals("count", expanded.getExpansion().getParameter().get(1).getName());
 		assertEquals(1, expanded.getExpansion().getParameter().get(1).getValueIntegerType().getValue().intValue());
 		assertEquals(1, expanded.getExpansion().getContains().size());
-		assertThat(toCodes(expanded), is(equalTo(expandedConcepts.subList(1,2))));
+		assertThat(toCodes(expanded)).isEqualTo(expandedConcepts.subList(1, 2));
 	}
 
 	@Test
@@ -788,7 +785,7 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
 
-		assertThat(resp, containsStringIgnoringCase("<code value=\"M\"/>"));
+		assertThat(resp).containsIgnoringCase("<code value=\"M\"/>");
 	}
 
 	@Test
@@ -808,9 +805,9 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
 
-		assertThat(resp, containsStringIgnoringCase("<code value=\"childAAA\"/>"));
-		assertThat(resp, containsStringIgnoringCase("<code value=\"childAAB\"/>"));
-		assertThat(resp, not(containsStringIgnoringCase("<code value=\"ParentA\"/>")));
+		assertThat(resp).containsIgnoringCase("<code value=\"childAAA\"/>");
+		assertThat(resp).containsIgnoringCase("<code value=\"childAAB\"/>");
+		assertThat(resp).doesNotContainIgnoringCase("<code value=\"ParentA\"/>");
 
 	}
 
@@ -899,7 +896,7 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
 
-		assertThat(resp, containsStringIgnoringCase("<code value=\"M\"/>"));
+		assertThat(resp).containsIgnoringCase("<code value=\"M\"/>");
 	}
 
 	@Test
@@ -918,9 +915,9 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
 
-		assertThat(resp, containsStringIgnoringCase("<code value=\"childAAA\"/>"));
-		assertThat(resp, containsStringIgnoringCase("<code value=\"childAAB\"/>"));
-		assertThat(resp, not(containsStringIgnoringCase("<code value=\"ParentA\"/>")));
+		assertThat(resp).containsIgnoringCase("<code value=\"childAAA\"/>");
+		assertThat(resp).containsIgnoringCase("<code value=\"childAAB\"/>");
+		assertThat(resp).doesNotContainIgnoringCase("<code value=\"ParentA\"/>");
 
 	}
 
@@ -940,9 +937,9 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
 
-		assertThat(resp, containsStringIgnoringCase("<code value=\"childAAA\"/>"));
-		assertThat(resp, containsStringIgnoringCase("<code value=\"childAAB\"/>"));
-		assertThat(resp, not(containsStringIgnoringCase("<code value=\"ParentA\"/>")));
+		assertThat(resp).containsIgnoringCase("<code value=\"childAAA\"/>");
+		assertThat(resp).containsIgnoringCase("<code value=\"childAAB\"/>");
+		assertThat(resp).doesNotContainIgnoringCase("<code value=\"ParentA\"/>");
 
 	}
 
@@ -1015,7 +1012,7 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 			ourLog.info(resp.toString());
 
 			assertEquals(400, resp.getStatusLine().getStatusCode());
-			assertThat(respString, containsString("Unknown FilterOperator code 'n'"));
+			assertThat(respString).contains("Unknown FilterOperator code 'n'");
 
 		}
 	}
@@ -1288,7 +1285,7 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 		try (CloseableHttpResponse status = ourHttpClient.execute(expandGet)) {
 			String response = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 			ourLog.info("Response: {}", response);
-			assertThat(response, containsString("<display value=\"Child AA\"/>"));
+			assertThat(response).contains("<display value=\"Child AA\"/>");
 		}
 
 		HttpGet validateCodeGet = new HttpGet(myServerBase + "/ValueSet/" + vsId.getIdPart() + "/$validate-code?system=http://mycs&code=ChildAA&_pretty=true");

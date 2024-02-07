@@ -17,9 +17,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.hasSize;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class JobInstanceRepositoryTest extends BaseJpaR4Test {
 
@@ -38,27 +36,27 @@ public class JobInstanceRepositoryTest extends BaseJpaR4Test {
 	public void testSearchByJobParamsAndStatuses_SingleStatus() {
 		Set<StatusEnum> statuses = Set.of(StatusEnum.IN_PROGRESS);
 		List<Batch2JobInstanceEntity> instancesByJobIdParamsAndStatus = runInTransaction(()->myJobInstanceRepository.findInstancesByJobIdParamsAndStatus(JOB_DEFINITION_ID, PARAMS, statuses, PageRequest.of(0, 10)));
-		assertThat(instancesByJobIdParamsAndStatus, hasSize(1));
+		assertThat(instancesByJobIdParamsAndStatus).hasSize(1);
 	}
 
 	@Test
 	public void testSearchByJobParamsAndStatuses_MultiStatus() {
 		Set<StatusEnum> statuses = Set.of(StatusEnum.IN_PROGRESS, StatusEnum.COMPLETED);
 		List<Batch2JobInstanceEntity> instances = runInTransaction(()->myJobInstanceRepository.findInstancesByJobIdParamsAndStatus(JOB_DEFINITION_ID, PARAMS, statuses, PageRequest.of(0, 10)));
-		assertThat(instances, hasSize(2));
+		assertThat(instances).hasSize(2);
 	}
 
 	@Test
 	public void testSearchByJobParamsWithoutStatuses() {
 		List<Batch2JobInstanceEntity> instances = runInTransaction(()->myJobInstanceRepository.findInstancesByJobIdAndParams(JOB_DEFINITION_ID, PARAMS, PageRequest.of(0, 10)));
-		assertThat(instances, hasSize(4));
+		assertThat(instances).hasSize(4);
 	}
 
 	@Test
 	public void testServiceLogicIsCorrectWhenNoStatusesAreUsed() {
 		FetchJobInstancesRequest request = new FetchJobInstancesRequest(JOB_DEFINITION_ID, PARAMS);
 		List<JobInstance> jobInstances = myJobPersistenceSvc.fetchInstances(request, 0, 1000);
-		assertThat(jobInstances, hasSize(4));
+		assertThat(jobInstances).hasSize(4);
 	}
 
 	@Test
@@ -70,17 +68,17 @@ public class JobInstanceRepositoryTest extends BaseJpaR4Test {
 		List<JobInstance> jobInstances = myJobPersistenceSvc.fetchInstances(request, 0, 1000);
 
 		//Then
-		assertThat(jobInstances, hasSize(2));
+		assertThat(jobInstances).hasSize(2);
 	}
 
 	@Test
 	public void testPersistInitiatingUsernameAndClientId() {
 		Set<StatusEnum> statuses = Set.of(StatusEnum.IN_PROGRESS);
 		List<Batch2JobInstanceEntity> instancesByJobIdParamsAndStatus = runInTransaction(()->myJobInstanceRepository.findInstancesByJobIdParamsAndStatus(JOB_DEFINITION_ID, PARAMS, statuses, PageRequest.of(0, 10)));
-		assertThat(instancesByJobIdParamsAndStatus, hasSize(1));
+		assertThat(instancesByJobIdParamsAndStatus).hasSize(1);
 		Batch2JobInstanceEntity batch2JobInstanceEntity = instancesByJobIdParamsAndStatus.get(0);
-		assertThat(TRIGGERING_USER_NAME, equalTo(batch2JobInstanceEntity.getTriggeringUsername()));
-		assertThat(TRIGGERING_CLIENT_ID, equalTo(batch2JobInstanceEntity.getTriggeringClientId()));
+		assertThat(TRIGGERING_USER_NAME).isEqualTo(batch2JobInstanceEntity.getTriggeringUsername());
+		assertThat(TRIGGERING_CLIENT_ID).isEqualTo(batch2JobInstanceEntity.getTriggeringClientId());
 	}
 
 	@BeforeEach

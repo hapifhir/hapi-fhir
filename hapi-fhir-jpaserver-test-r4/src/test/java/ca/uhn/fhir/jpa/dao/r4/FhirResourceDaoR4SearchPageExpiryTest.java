@@ -34,9 +34,8 @@ import java.util.Date;
 import java.util.concurrent.atomic.AtomicLong;
 
 import static ca.uhn.fhir.jpa.search.cache.DatabaseSearchCacheSvcImpl.SEARCH_CLEANUP_JOB_INTERVAL_MILLIS;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -101,7 +100,7 @@ public class FhirResourceDaoR4SearchPageExpiryTest extends BaseJpaR4Test {
 			SearchParameterMap params = new SearchParameterMap();
 			params.add(Patient.SP_FAMILY, new StringParam("EXPIRE"));
 			final IBundleProvider bundleProvider = myPatientDao.search(params);
-			assertThat(toUnqualifiedVersionlessIds(bundleProvider), containsInAnyOrder(pid1, pid2));
+			assertThat(toUnqualifiedVersionlessIds(bundleProvider)).containsExactlyInAnyOrder(pid1, pid2);
 			searchUuid1 = bundleProvider.getUuid();
 			Validate.notBlank(searchUuid1);
 		}
@@ -111,7 +110,7 @@ public class FhirResourceDaoR4SearchPageExpiryTest extends BaseJpaR4Test {
 			SearchParameterMap params = new SearchParameterMap();
 			params.add(Patient.SP_FAMILY, new StringParam("EXPIRE"));
 			final IBundleProvider bundleProvider = myPatientDao.search(params);
-			assertThat(toUnqualifiedVersionlessIds(bundleProvider), containsInAnyOrder(pid1, pid2));
+			assertThat(toUnqualifiedVersionlessIds(bundleProvider)).containsExactlyInAnyOrder(pid1, pid2);
 			searchUuid2 = bundleProvider.getUuid();
 			Validate.notBlank(searchUuid2);
 		}
@@ -126,7 +125,7 @@ public class FhirResourceDaoR4SearchPageExpiryTest extends BaseJpaR4Test {
 			SearchParameterMap params = new SearchParameterMap();
 			params.add(Patient.SP_FAMILY, new StringParam("EXPIRE"));
 			final IBundleProvider bundleProvider = myPatientDao.search(params);
-			assertThat(toUnqualifiedVersionlessIds(bundleProvider), containsInAnyOrder(pid1, pid2));
+			assertThat(toUnqualifiedVersionlessIds(bundleProvider)).containsExactlyInAnyOrder(pid1, pid2);
 			searchUuid3 = bundleProvider.getUuid();
 			Validate.notBlank(searchUuid3);
 		}
@@ -205,7 +204,7 @@ public class FhirResourceDaoR4SearchPageExpiryTest extends BaseJpaR4Test {
 		params = new SearchParameterMap();
 		params.add(Patient.SP_FAMILY, new StringParam("EXPIRE"));
 		final IBundleProvider bundleProvider = myPatientDao.search(params);
-		assertThat(toUnqualifiedVersionlessIds(bundleProvider), containsInAnyOrder(pid1, pid2));
+		assertThat(toUnqualifiedVersionlessIds(bundleProvider)).containsExactlyInAnyOrder(pid1, pid2);
 
 		waitForSearchToSave(bundleProvider.getUuid());
 		final AtomicLong start = new AtomicLong();
@@ -274,7 +273,7 @@ public class FhirResourceDaoR4SearchPageExpiryTest extends BaseJpaR4Test {
 			SearchParameterMap params = new SearchParameterMap();
 			params.add(Patient.SP_FAMILY, new StringParam("EXPIRE"));
 			final IBundleProvider bundleProvider = myPatientDao.search(params);
-			assertThat(toUnqualifiedVersionlessIds(bundleProvider), containsInAnyOrder(pid1, pid2));
+			assertThat(toUnqualifiedVersionlessIds(bundleProvider)).containsExactlyInAnyOrder(pid1, pid2);
 			searchUuid1 = bundleProvider.getUuid();
 			Validate.notBlank(searchUuid1);
 		}
@@ -286,7 +285,7 @@ public class FhirResourceDaoR4SearchPageExpiryTest extends BaseJpaR4Test {
 			SearchParameterMap params = new SearchParameterMap();
 			params.add(Patient.SP_FAMILY, new StringParam("EXPIRE"));
 			final IBundleProvider bundleProvider = myPatientDao.search(params);
-			assertThat(toUnqualifiedVersionlessIds(bundleProvider), containsInAnyOrder(pid1, pid2));
+			assertThat(toUnqualifiedVersionlessIds(bundleProvider)).containsExactlyInAnyOrder(pid1, pid2);
 			searchUuid2 = bundleProvider.getUuid();
 			Validate.notBlank(searchUuid2);
 		}
@@ -302,7 +301,7 @@ public class FhirResourceDaoR4SearchPageExpiryTest extends BaseJpaR4Test {
 			SearchParameterMap params = new SearchParameterMap();
 			params.add(Patient.SP_FAMILY, new StringParam("EXPIRE"));
 			final IBundleProvider bundleProvider = myPatientDao.search(params);
-			assertThat(toUnqualifiedVersionlessIds(bundleProvider), containsInAnyOrder(pid1, pid2));
+			assertThat(toUnqualifiedVersionlessIds(bundleProvider)).containsExactlyInAnyOrder(pid1, pid2);
 			searchUuid3 = bundleProvider.getUuid();
 			Validate.notBlank(searchUuid3);
 		}

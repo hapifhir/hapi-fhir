@@ -9,8 +9,7 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.hasSize;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -40,7 +39,7 @@ class ExpungeEverythingServiceTest extends BaseJpaR4Test {
 
 		// Validate
 
-		assertThat(myPartitionLookupSvc.listPartitions(), hasSize(0));
+		assertThat(myPartitionLookupSvc.listPartitions()).hasSize(0);
 		try {
 			myPartitionLookupSvc.getPartitionById(123);
 			fail();

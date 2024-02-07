@@ -24,8 +24,8 @@ import java.util.GregorianCalendar;
 import java.util.Locale;
 import java.util.TimeZone;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.either;
 import static org.hamcrest.Matchers.endsWith;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -249,13 +249,13 @@ public class BaseDateTimeDtDstu2Test {
 			new DateDt("2001-01-02T11:13:33");
 			fail();
 		} catch (DataFormatException e) {
-			assertThat(e.getMessage(), containsString("precision"));
+			assertThat(e.getMessage()).contains("precision");
 		}
 		try {
 			new InstantDt("2001-01-02");
 			fail();
 		} catch (DataFormatException e) {
-			assertThat(e.getMessage(), containsString("precision"));
+			assertThat(e.getMessage()).contains("precision");
 		}
 	}
 
@@ -303,7 +303,7 @@ public class BaseDateTimeDtDstu2Test {
 		assertEquals(TemporalPrecisionEnum.SECOND, c.getDateRecordedElement().getPrecision());
 
 		String encoded = ourCtx.newXmlParser().encodeResourceToString(c);
-		assertThat(encoded, Matchers.containsString("value=\"2001-01-02T11:13:33\""));
+		assertThat(encoded).contains("value=\"2001-01-02T11:13:33\"");
 
 		c = ourCtx.newXmlParser().parseResource(Condition.class, encoded);
 
@@ -314,7 +314,7 @@ public class BaseDateTimeDtDstu2Test {
 		String outcomeStr = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome.toOperationOutcome());
 		ourLog.info(outcomeStr);
 
-		assertThat(outcomeStr, containsString("date-primitive"));
+		assertThat(outcomeStr).contains("date-primitive");
 	}
 
 	@Test
@@ -751,7 +751,7 @@ public class BaseDateTimeDtDstu2Test {
 		Patient patient = new Patient();
 		patient.setBirthDate(cal.getTime(), TemporalPrecisionEnum.DAY);
 		String out = ourCtx.newXmlParser().encodeResourceToString(patient);
-		assertThat(out, containsString("<birthDate value=\"2012-01-02\"/>"));
+		assertThat(out).contains("<birthDate value=\"2012-01-02\"/>");
 	}
 
 	/**
@@ -803,8 +803,8 @@ public class BaseDateTimeDtDstu2Test {
 		DateTimeDt dt = new DateTimeDt("2012-01-05T12:00:00-08:00");
 		String human = dt.toHumanDisplay();
 		ourLog.info(human);
-		assertThat(human, containsString("2012"));
-		assertThat(human, containsString("12"));
+		assertThat(human).contains("2012");
+		assertThat(human).contains("12");
 	}
 
 	private void validateMillisPartial(String input, int expected) {
@@ -821,7 +821,7 @@ public class BaseDateTimeDtDstu2Test {
 			dt.setValueAsString(input);
 			fail();
 		} catch (ca.uhn.fhir.parser.DataFormatException e) {
-			assertThat(e.getMessage(), containsString("Invalid date/time format: \"" + input + "\""));
+			assertThat(e.getMessage()).contains("Invalid date/time format: \"" + input + "\"");
 		}
 	}
 

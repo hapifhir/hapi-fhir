@@ -70,9 +70,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.startsWith;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -190,7 +188,7 @@ public class GenericClientDstu3Test {
 		idx++;
 
 		OperationOutcome oo = (OperationOutcome) outcome.getOperationOutcome();
-		assertThat(oo.getText().getDivAsString(), containsString("OK!"));
+		assertThat(oo.getText().getDivAsString()).contains("OK!");
 	}
 
 	@Test
@@ -228,7 +226,7 @@ public class GenericClientDstu3Test {
 		idx++;
 
 		OperationOutcome oo = (OperationOutcome) outcome.getOperationOutcome();
-		assertThat(oo.getText().getDivAsString(), containsString("OK!"));
+		assertThat(oo.getText().getDivAsString()).contains("OK!");
 	}
 
 	@Test
@@ -297,7 +295,7 @@ public class GenericClientDstu3Test {
 		idx++;
 
 		OperationOutcome oo = (OperationOutcome) outcome.getOperationOutcome();
-		assertThat(oo.getText().getDivAsString(), containsString("OK!"));
+		assertThat(oo.getText().getDivAsString()).contains("OK!");
 	}
 
 	@Test
@@ -336,7 +334,7 @@ public class GenericClientDstu3Test {
 		idx++;
 
 		OperationOutcome oo = (OperationOutcome) outcome.getOperationOutcome();
-		assertThat(oo.getText().getDivAsString(), containsString("OK!"));
+		assertThat(oo.getText().getDivAsString()).contains("OK!");
 	}
 
 	@Test
@@ -375,7 +373,7 @@ public class GenericClientDstu3Test {
 		idx++;
 
 		OperationOutcome oo = (OperationOutcome) outcome.getOperationOutcome();
-		assertThat(oo.getText().getDivAsString(), containsString("OK!"));
+		assertThat(oo.getText().getDivAsString()).contains("OK!");
 	}
 
 	@Test
@@ -413,7 +411,7 @@ public class GenericClientDstu3Test {
 		idx++;
 
 		OperationOutcome oo = (OperationOutcome) outcome.getOperationOutcome();
-		assertThat(oo.getText().getDivAsString(), containsString("OK!"));
+		assertThat(oo.getText().getDivAsString()).contains("OK!");
 	}
 
 	@Test
@@ -539,7 +537,7 @@ public class GenericClientDstu3Test {
 			client.read().resource(Patient.class).withId("1").execute();
 			fail();
 		} catch (FhirClientConnectionException e) {
-			assertThat(e.getMessage(), containsString("java.io.IOException"));
+			assertThat(e.getMessage()).contains("java.io.IOException");
 		}
 	}
 
@@ -1295,7 +1293,7 @@ public class GenericClientDstu3Test {
 				.returnBundle(Bundle.class)
 				.execute();
 
-		assertThat(capt.getAllValues().get(idx).getURI().toString(), startsWith("http://example.com/fhir/Patient?birthdate=gt2"));
+		assertThat(capt.getAllValues().get(idx).getURI().toString()).startsWith("http://example.com/fhir/Patient?birthdate=gt2");
 		dateString = UrlUtil.unescape(capt.getAllValues().get(idx).getURI().toString()).substring(44);
 		ourLog.info(dateString);
 		assertEquals(TemporalPrecisionEnum.SECOND, new DateTimeDt(dateString).getPrecision());
@@ -1700,7 +1698,7 @@ public class GenericClientDstu3Test {
 		assertEquals("application/fhir+json;charset=utf-8", capt.getAllValues().get(0).getHeaders("Content-Type")[0].getValue().toLowerCase().replace(" ", ""));
 		assertEquals(Constants.HEADER_ACCEPT_VALUE_JSON_NON_LEGACY, capt.getAllValues().get(0).getHeaders("Accept")[0].getValue());
 		String body = extractBodyAsString(capt);
-		assertThat(body, containsString("\"id\":\"111\""));
+		assertThat(body).contains("\"id\":\"111\"");
 	}
 
 	@Test

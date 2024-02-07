@@ -27,8 +27,7 @@ import org.mockito.stubbing.Answer;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -254,7 +253,7 @@ public class FhirResourceDaoR4InterceptorTest extends BaseJpaR4Test {
 		DeleteMethodOutcome outcome = myPatientDao.deleteByUrl("Patient?name=PATIENT", mySrd);
 		String oo = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(outcome.getOperationOutcome());
 		ourLog.info(oo);
-		assertThat(oo, containsString("deleted 2 resource(s)"));
+		assertThat(oo).contains("deleted 2 resource(s)");
 
 		verify(interceptor, times(2)).resourceDeleted(any(), any());
 		verify(interceptor, times(2)).resourceCreated(any(), any());
@@ -370,7 +369,7 @@ public class FhirResourceDaoR4InterceptorTest extends BaseJpaR4Test {
 
 		String oo = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(resp);
 		ourLog.info(oo);
-		assertThat(oo, containsString("deleted 2 resource(s)"));
+		assertThat(oo).contains("deleted 2 resource(s)");
 
 		verify(interceptor, times(2)).resourceDeleted(any(), any());
 		verify(interceptor, times(2)).resourceCreated(any(), any());

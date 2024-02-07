@@ -24,6 +24,7 @@ import static ca.uhn.test.concurrency.LockstepEnumPhaserTest.Stages.FINISHED;
 import static ca.uhn.test.concurrency.LockstepEnumPhaserTest.Stages.ONE;
 import static ca.uhn.test.concurrency.LockstepEnumPhaserTest.Stages.THREE;
 import static ca.uhn.test.concurrency.LockstepEnumPhaserTest.Stages.TWO;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -96,7 +97,7 @@ class LockstepEnumPhaserTest {
 		assertEquals(1, result1.get());
 		assertEquals(1, result2.get());
 		assertThat("progress is ordered", myProgressEvents, OrderMatchers.softOrdered(myProgressStageComparator));
-		assertThat("all progress logged", myProgressEvents, Matchers.hasSize(6));
+		assertThat(myProgressEvents).as("all progress logged").hasSize(6);
 	}
 
 	private void recordProgress(int threadId) {
@@ -162,7 +163,7 @@ class LockstepEnumPhaserTest {
 		assertEquals(3, result3.get());
 
 		assertThat("progress is ordered", myProgressEvents, OrderMatchers.softOrdered(myProgressStageComparator));
-		assertThat("all progress logged", myProgressEvents, Matchers.hasSize(8));
+		assertThat(myProgressEvents).as("all progress logged").hasSize(8);
 
 	}
 
@@ -228,7 +229,7 @@ class LockstepEnumPhaserTest {
 		assertEquals(3, result3.get());
 
 		assertThat("progress is ordered", myProgressEvents, OrderMatchers.softOrdered(myProgressStageComparator));
-		assertThat("all progress logged", myProgressEvents, Matchers.hasSize(2*3 + 2));
+		assertThat(myProgressEvents).as("all progress logged").hasSize(2 * 3 + 2);
 
 	}
 

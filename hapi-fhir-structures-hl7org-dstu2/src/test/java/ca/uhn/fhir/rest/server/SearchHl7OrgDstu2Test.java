@@ -22,10 +22,8 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import jakarta.annotation.Nonnull;
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.matchesPattern;
-import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.stringContainsInOrder;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -54,7 +52,7 @@ public class SearchHl7OrgDstu2Test {
     IOUtils.closeQuietly(status.getEntity().getContent());
     ourLog.info(responseContent);
 
-    assertThat(responseContent, not(containsString("text")));
+		assertThat(responseContent).doesNotContain("text");
 
     assertEquals(200, status.getStatusLine().getStatusCode());
     Patient patient = (Patient) ourCtx.newXmlParser().parseResource(Bundle.class, responseContent).getEntry().get(0).getResource();
@@ -71,7 +69,7 @@ public class SearchHl7OrgDstu2Test {
     IOUtils.closeQuietly(status.getEntity().getContent());
     ourLog.info(responseContent);
 
-    assertThat(responseContent, not(containsString("text")));
+		assertThat(responseContent).doesNotContain("text");
 
     assertEquals(200, status.getStatusLine().getStatusCode());
     Patient patient = (Patient) ourCtx.newJsonParser().parseResource(Bundle.class, responseContent).getEntry().get(0).getResource();
@@ -89,7 +87,7 @@ public class SearchHl7OrgDstu2Test {
     ourLog.info(responseContent);
 
     assertEquals(200, status.getStatusLine().getStatusCode());
-    assertThat(responseContent, matchesPattern(".*id value..[0-9a-f-]+\\\".*"));
+		assertThat(responseContent).matches(".*id value..[0-9a-f-]+\\\".*");
   }
 
   @Test

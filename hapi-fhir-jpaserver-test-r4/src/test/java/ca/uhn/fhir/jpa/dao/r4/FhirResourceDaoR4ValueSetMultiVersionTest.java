@@ -7,7 +7,6 @@ import ca.uhn.fhir.jpa.entity.TermValueSet;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.util.ValueSetTestUtil;
-import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.ValueSet;
@@ -21,6 +20,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -249,7 +249,7 @@ public class FhirResourceDaoR4ValueSetMultiVersionTest extends BaseJpaR4Test {
 		include.addConcept().setCode("A");
 
 		ValueSet expansion = myValueSetDao.expand(vs, null);
-		MatcherAssert.assertThat(myValueSetTestUtil.toCodes(expansion), Matchers.contains("A"));
+		assertThat(myValueSetTestUtil.toCodes(expansion)).containsExactly("A");
 
 	}
 

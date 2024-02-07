@@ -54,11 +54,7 @@ import java.util.List;
 import java.util.Set;
 
 import static ca.uhn.fhir.util.UrlUtil.escapeUrlParam;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.startsWith;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -126,7 +122,7 @@ public class SearchSearchServerR4Test {
     IOUtils.closeQuietly(status.getEntity().getContent());
     ourLog.info(responseContent);
     assertNotEquals(400, status.getStatusLine().getStatusCode());
-    assertThat(responseContent, containsString("Search ID &quot;AAA&quot; does not exist and may have expired"));
+		assertThat(responseContent).contains("Search ID &quot;AAA&quot; does not exist and may have expired");
   }
 
   @Test
@@ -214,7 +210,7 @@ public class SearchSearchServerR4Test {
 
     String linkNext = bundle.getLink("next").getUrl();
     ourLog.info(linkNext);
-    assertThat(linkNext, startsWith("https://blah.com/base?_getpages="));
+		assertThat(linkNext).startsWith("https://blah.com/base?_getpages=");
 
     /*
      * Load the second page
@@ -311,8 +307,7 @@ public class SearchSearchServerR4Test {
     IOUtils.closeQuietly(status.getEntity().getContent());
     ourLog.info(responseContent);
     assertEquals(400, status.getStatusLine().getStatusCode());
-    assertThat(responseContent, containsString(
-        "<diagnostics value=\""+ Msg.code(446) + "Incorrect Content-Type header value of &quot;application/x-www-form-urlencoded; charset=UTF-8&quot; was provided in the request. A FHIR Content-Type is required for &quot;CREATE&quot; operation\"/>"));
+		assertThat(responseContent).contains("<diagnostics value=\"" + Msg.code(446) + "Incorrect Content-Type header value of &quot;application/x-www-form-urlencoded; charset=UTF-8&quot; was provided in the request. A FHIR Content-Type is required for &quot;CREATE&quot; operation\"/>");
   }
 
   /**
@@ -331,7 +326,7 @@ public class SearchSearchServerR4Test {
     IOUtils.closeQuietly(status.getEntity().getContent());
     ourLog.info(responseContent);
     assertEquals(400, status.getStatusLine().getStatusCode());
-    assertThat(responseContent, containsString("<diagnostics value=\""+ Msg.code(448) + "No Content-Type header was provided in the request. This is required for &quot;CREATE&quot; operation\"/>"));
+		assertThat(responseContent).contains("<diagnostics value=\"" + Msg.code(448) + "No Content-Type header was provided in the request. This is required for &quot;CREATE&quot; operation\"/>");
   }
 
   /**
@@ -376,7 +371,7 @@ public class SearchSearchServerR4Test {
 
     Patient p = BundleUtil.toListOfResourcesOfType(ourCtx, bundle, Patient.class).get(0);
     assertEquals("fooCompartment", p.getIdentifierFirstRep().getValue());
-    assertThat(bundle.getEntry().get(0).getResource().getIdElement().getValue(), containsString("Patient/123"));
+		assertThat(bundle.getEntry().get(0).getResource().getIdElement().getValue()).contains("Patient/123");
   }
 
   @Test
@@ -409,7 +404,7 @@ public class SearchSearchServerR4Test {
     assertEquals(200, status.getStatusLine().getStatusCode());
 
     assertEquals(2, ourLastIncludes.size());
-    assertThat(ourLastIncludes, containsInAnyOrder(new Include("foo", false), new Include("bar", true)));
+		assertThat(ourLastIncludes).containsExactlyInAnyOrder(new Include("foo", false), new Include("bar", true));
   }
 
   @Test
@@ -422,7 +417,7 @@ public class SearchSearchServerR4Test {
     assertEquals(200, status.getStatusLine().getStatusCode());
 
     assertEquals(2, ourLastIncludes.size());
-    assertThat(ourLastIncludes, containsInAnyOrder(new Include("foo", false), new Include("bar", true)));
+		assertThat(ourLastIncludes).containsExactlyInAnyOrder(new Include("foo", false), new Include("bar", true));
   }
 
   @Test
@@ -434,7 +429,7 @@ public class SearchSearchServerR4Test {
     IOUtils.closeQuietly(status.getEntity().getContent());
     assertEquals(200, status.getStatusLine().getStatusCode());
 
-    assertThat(ourLastIncludes, empty());
+		assertThat(ourLastIncludes).isEmpty();
   }
 
   @Test

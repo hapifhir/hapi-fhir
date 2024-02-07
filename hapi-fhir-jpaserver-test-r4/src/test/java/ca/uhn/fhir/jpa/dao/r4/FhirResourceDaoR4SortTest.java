@@ -23,9 +23,7 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SuppressWarnings({"unchecked", "deprecation"})
@@ -89,12 +87,12 @@ public class FhirResourceDaoR4SortTest extends BaseJpaR4Test {
 		map = new SearchParameterMap();
 		map.setSort(new SortSpec("_id", SortOrderEnum.ASC));
 		ids = toUnqualifiedVersionlessIdValues(myPatientDao.search(map));
-		assertThat(ids, contains(id1, id2, "Patient/AA", "Patient/AB"));
+		assertThat(ids).containsExactly(id1, id2, "Patient/AA", "Patient/AB");
 
 		map = new SearchParameterMap();
 		map.setSort(new SortSpec("_id", SortOrderEnum.DESC));
 		ids = toUnqualifiedVersionlessIdValues(myPatientDao.search(map));
-		assertThat(ids, contains("Patient/AB", "Patient/AA", id2, id1));
+		assertThat(ids).containsExactly("Patient/AB", "Patient/AA", id2, id1);
 	}
 
 	@Test
@@ -142,7 +140,7 @@ public class FhirResourceDaoR4SortTest extends BaseJpaR4Test {
 		map = new SearchParameterMap();
 		map.setSort(new SortSpec("_lastUpdated", SortOrderEnum.ASC));
 		ids = toUnqualifiedVersionlessIdValues(myPatientDao.search(map));
-		assertThat(ids, contains(id1, id2, "Patient/AB", "Patient/AA"));
+		assertThat(ids).containsExactly(id1, id2, "Patient/AB", "Patient/AA");
 
 	}
 
@@ -184,33 +182,33 @@ public class FhirResourceDaoR4SortTest extends BaseJpaR4Test {
 		map = new SearchParameterMap();
 		map.setSort(new SortSpec("family", SortOrderEnum.ASC).setChain(new SortSpec("given", SortOrderEnum.ASC)));
 		ids = toUnqualifiedVersionlessIdValues(myPatientDao.search(map));
-		assertThat(ids, contains("Patient/AA", "Patient/AB", "Patient/BA", "Patient/BB"));
+		assertThat(ids).containsExactly("Patient/AA", "Patient/AB", "Patient/BA", "Patient/BB");
 
 		// Same SP as sort
 		map = new SearchParameterMap();
 		map.add(Patient.SP_ACTIVE, new TokenParam(null, "true"));
 		map.setSort(new SortSpec("family", SortOrderEnum.ASC).setChain(new SortSpec("given", SortOrderEnum.ASC)));
 		ids = toUnqualifiedVersionlessIdValues(myPatientDao.search(map));
-		assertThat(ids, contains("Patient/AA", "Patient/AB", "Patient/BA", "Patient/BB"));
+		assertThat(ids).containsExactly("Patient/AA", "Patient/AB", "Patient/BA", "Patient/BB");
 
 		// Different SP from sort
 		map = new SearchParameterMap();
 		map.add(Patient.SP_GENDER, new TokenParam(null, "male"));
 		map.setSort(new SortSpec("family", SortOrderEnum.ASC).setChain(new SortSpec("given", SortOrderEnum.ASC)));
 		ids = toUnqualifiedVersionlessIdValues(myPatientDao.search(map));
-		assertThat(ids, contains("Patient/AA", "Patient/AB", "Patient/BA", "Patient/BB"));
+		assertThat(ids).containsExactly("Patient/AA", "Patient/AB", "Patient/BA", "Patient/BB");
 
 		map = new SearchParameterMap();
 		map.setSort(new SortSpec("gender").setChain(new SortSpec("family", SortOrderEnum.ASC).setChain(new SortSpec("given", SortOrderEnum.ASC))));
 		ids = toUnqualifiedVersionlessIdValues(myPatientDao.search(map));
 		ourLog.info("IDS: {}", ids);
-		assertThat(ids, contains("Patient/AA", "Patient/AB", "Patient/BA", "Patient/BB"));
+		assertThat(ids).containsExactly("Patient/AA", "Patient/AB", "Patient/BA", "Patient/BB");
 
 		map = new SearchParameterMap();
 		map.add(Patient.SP_ACTIVE, new TokenParam(null, "true"));
 		map.setSort(new SortSpec("family", SortOrderEnum.ASC).setChain(new SortSpec("given", SortOrderEnum.ASC)));
 		ids = toUnqualifiedVersionlessIdValues(myPatientDao.search(map));
-		assertThat(ids, contains("Patient/AA", "Patient/AB", "Patient/BA", "Patient/BB"));
+		assertThat(ids).containsExactly("Patient/AA", "Patient/AB", "Patient/BA", "Patient/BB");
 	}
 
 	@SuppressWarnings("unused")
@@ -257,7 +255,7 @@ public class FhirResourceDaoR4SortTest extends BaseJpaR4Test {
 		map.setSort(new SortSpec(Patient.SP_FAMILY, SortOrderEnum.ASC).setChain(new SortSpec(Patient.SP_GIVEN, SortOrderEnum.ASC)));
 		ids = toUnqualifiedVersionlessIds(myPatientDao.search(map));
 		ourLog.info("** Got IDs: {}", ids);
-		assertThat(ids.toString(), ids, contains(pid2, pid4, pid5, pid3, pid1));
+		assertThat(ids).as(ids.toString()).containsExactly(pid2, pid4, pid5, pid3, pid1);
 		assertEquals(5, ids.size());
 
 	}
@@ -309,19 +307,19 @@ public class FhirResourceDaoR4SortTest extends BaseJpaR4Test {
 		map.setSort(new SortSpec("gender"));
 		ids = toUnqualifiedVersionlessIdValues(myPatientDao.search(map));
 		ourLog.info("IDS: {}", ids);
-		assertThat(ids, containsInAnyOrder("Patient/AA", "Patient/AB", "Patient/BA", "Patient/BB", "Patient/CA"));
+		assertThat(ids).containsExactlyInAnyOrder("Patient/AA", "Patient/AB", "Patient/BA", "Patient/BB", "Patient/CA");
 
 		map = new SearchParameterMap();
 		map.setSort(new SortSpec("gender").setChain(new SortSpec("family", SortOrderEnum.ASC).setChain(new SortSpec("given", SortOrderEnum.ASC))));
 		ids = toUnqualifiedVersionlessIdValues(myPatientDao.search(map));
 		ourLog.info("IDS: {}", ids);
-		assertThat(ids, contains("Patient/AA", "Patient/AB", "Patient/BA", "Patient/BB", "Patient/CA"));
+		assertThat(ids).containsExactly("Patient/AA", "Patient/AB", "Patient/BA", "Patient/BB", "Patient/CA");
 
 		map = new SearchParameterMap();
 		map.add(Patient.SP_ACTIVE, new TokenParam(null, "true"));
 		map.setSort(new SortSpec("family", SortOrderEnum.ASC).setChain(new SortSpec("given", SortOrderEnum.ASC)));
 		ids = toUnqualifiedVersionlessIdValues(myPatientDao.search(map));
-		assertThat(ids, contains("Patient/AA", "Patient/AB", "Patient/BA", "Patient/BB"));
+		assertThat(ids).containsExactly("Patient/AA", "Patient/AB", "Patient/BA", "Patient/BB");
 	}
 
 	@Test
@@ -360,7 +358,7 @@ public class FhirResourceDaoR4SortTest extends BaseJpaR4Test {
 		ids = toUnqualifiedVersionlessIdValues(myObservationDao.search(map));
 		ourLog.info("IDS: {}", ids);
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
-		assertThat(ids.toString(), ids, contains("Observation/OBS2", "Observation/OBS1"));
+		assertThat(ids).as(ids.toString()).containsExactly("Observation/OBS2", "Observation/OBS1");
 
 	}
 

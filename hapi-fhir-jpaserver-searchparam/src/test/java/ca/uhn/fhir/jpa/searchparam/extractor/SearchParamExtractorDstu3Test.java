@@ -47,10 +47,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class SearchParamExtractorDstu3Test {
@@ -120,15 +117,15 @@ public class SearchParamExtractorDstu3Test {
 		String threeSegmentPath = "Patient.telecom.where(system='phone' or system='email') | Patient.telecom.where(system='email') or Patient.telecom.where(system='mail' | system='phone')";
 
 		String[] expressions = extractor.split(threeSegmentPath);
-		assertThat(expressions.length, is(equalTo(3)));
-		assertThat(expressions[0], containsString("Patient.telecom.where(system='phone' or system='email')"));
-		assertThat(expressions[1], containsString("Patient.telecom.where(system='email')"));
-		assertThat(expressions[2], containsString("Patient.telecom.where(system='mail' | system='phone')"));
+		assertThat(expressions.length).isEqualTo(3);
+		assertThat(expressions[0]).contains("Patient.telecom.where(system='phone' or system='email')");
+		assertThat(expressions[1]).contains("Patient.telecom.where(system='email')");
+		assertThat(expressions[2]).contains("Patient.telecom.where(system='mail' | system='phone')");
 
 		String zeroPathSplit = "Patient.telecom.where(system='phone' or system='email')";
 		String[] singularExpression = extractor.split(zeroPathSplit);
-		assertThat(singularExpression.length, is(equalTo(1)));
-		assertThat(singularExpression[0], containsString("Patient.telecom.where(system='phone' or system='email')"));
+		assertThat(singularExpression.length).isEqualTo(1);
+		assertThat(singularExpression[0]).contains("Patient.telecom.where(system='phone' or system='email')");
 	}
 
 	@Test
@@ -194,37 +191,37 @@ public class SearchParamExtractorDstu3Test {
 			searchParamRegistry.addSearchParam(new RuntimeSearchParam(null, null, "foo", "foo", "Patient", RestSearchParameterTypeEnum.STRING, Sets.newHashSet(), Sets.newHashSet(), RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE, null, null, base));
 			Patient resource = new Patient();
 			ISearchParamExtractor.SearchParamSet<ResourceIndexedSearchParamString> outcome = extractor.extractSearchParamStrings(resource);
-			assertThat(outcome.getWarnings(), Matchers.contains("Search param [Patient]#foo is unable to index value of type Patient as a STRING at path: Patient"));
+			assertThat(outcome.getWarnings()).containsExactly("Search param [Patient]#foo is unable to index value of type Patient as a STRING at path: Patient");
 		}
 		{
 			searchParamRegistry.addSearchParam(new RuntimeSearchParam(null, null, "foo", "foo", "Patient", RestSearchParameterTypeEnum.TOKEN, Sets.newHashSet(), Sets.newHashSet(), RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE, null, null, base));
 			Patient resource = new Patient();
 			ISearchParamExtractor.SearchParamSet<BaseResourceIndexedSearchParam> outcome = extractor.extractSearchParamTokens(resource);
-			assertThat(outcome.getWarnings(), Matchers.contains("Search param [Patient]#foo is unable to index value of type Patient as a TOKEN at path: Patient"));
+			assertThat(outcome.getWarnings()).containsExactly("Search param [Patient]#foo is unable to index value of type Patient as a TOKEN at path: Patient");
 		}
 		{
 			searchParamRegistry.addSearchParam(new RuntimeSearchParam(null, null, "foo", "foo", "Patient", RestSearchParameterTypeEnum.QUANTITY, Sets.newHashSet(), Sets.newHashSet(), RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE, null, null, base));
 			Patient resource = new Patient();
 			ISearchParamExtractor.SearchParamSet<ResourceIndexedSearchParamQuantity> outcome = extractor.extractSearchParamQuantity(resource);
-			assertThat(outcome.getWarnings(), Matchers.contains("Search param [Patient]#foo is unable to index value of type Patient as a QUANTITY at path: Patient"));
+			assertThat(outcome.getWarnings()).containsExactly("Search param [Patient]#foo is unable to index value of type Patient as a QUANTITY at path: Patient");
 		}
 		{
 			searchParamRegistry.addSearchParam(new RuntimeSearchParam(null, null, "foo", "foo", "Patient", RestSearchParameterTypeEnum.DATE, Sets.newHashSet(), Sets.newHashSet(), RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE, null, null, base));
 			Patient resource = new Patient();
 			ISearchParamExtractor.SearchParamSet<ResourceIndexedSearchParamDate> outcome = extractor.extractSearchParamDates(resource);
-			assertThat(outcome.getWarnings(), Matchers.contains("Search param [Patient]#foo is unable to index value of type Patient as a DATE at path: Patient"));
+			assertThat(outcome.getWarnings()).containsExactly("Search param [Patient]#foo is unable to index value of type Patient as a DATE at path: Patient");
 		}
 		{
 			searchParamRegistry.addSearchParam(new RuntimeSearchParam(null, null, "foo", "foo", "Patient", RestSearchParameterTypeEnum.NUMBER, Sets.newHashSet(), Sets.newHashSet(), RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE, null, null, base));
 			Patient resource = new Patient();
 			ISearchParamExtractor.SearchParamSet<ResourceIndexedSearchParamNumber> outcome = extractor.extractSearchParamNumber(resource);
-			assertThat(outcome.getWarnings(), Matchers.contains("Search param [Patient]#foo is unable to index value of type Patient as a NUMBER at path: Patient"));
+			assertThat(outcome.getWarnings()).containsExactly("Search param [Patient]#foo is unable to index value of type Patient as a NUMBER at path: Patient");
 		}
 		{
 			searchParamRegistry.addSearchParam(new RuntimeSearchParam(null, null, "foo", "foo", "Patient", RestSearchParameterTypeEnum.URI, Sets.newHashSet(), Sets.newHashSet(), RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE, null, null, base));
 			Patient resource = new Patient();
 			ISearchParamExtractor.SearchParamSet<ResourceIndexedSearchParamUri> outcome = extractor.extractSearchParamUri(resource);
-			assertThat(outcome.getWarnings(), Matchers.contains("Search param [Patient]#foo is unable to index value of type Patient as a URI at path: Patient"));
+			assertThat(outcome.getWarnings()).containsExactly("Search param [Patient]#foo is unable to index value of type Patient as a URI at path: Patient");
 		}
 	}
 

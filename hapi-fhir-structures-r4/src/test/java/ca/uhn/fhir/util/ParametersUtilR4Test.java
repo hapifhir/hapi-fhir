@@ -13,9 +13,7 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.is;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -52,7 +50,7 @@ public class ParametersUtilR4Test {
 			.setValue(new StringType("VALUE4"));
 
 		List<String> values = ParametersUtil.getNamedParameterValuesAsString(FhirContext.forR4(), p, "foo");
-		assertThat(values, Matchers.contains("VALUE1", "VALUE2"));
+		assertThat(values).containsExactly("VALUE1", "VALUE2");
 	}
 
 	@Test
@@ -75,10 +73,10 @@ public class ParametersUtilR4Test {
 			ParametersUtil.addPartString(ourFhirContext, resultPart, "personId", TEST_PERSON_ID);
 		}
 		List<String> values = ParametersUtil.getNamedParameterPartAsString(ourFhirContext, parameters, "link", "personId");
-		assertThat(values, hasSize(3));
-		assertThat(values.get(0), is(TEST_PERSON_ID));
-		assertThat(values.get(1), is(TEST_PERSON_ID));
-		assertThat(values.get(2), is(TEST_PERSON_ID));
+		assertThat(values).hasSize(3);
+		assertThat(values.get(0)).isEqualTo(TEST_PERSON_ID);
+		assertThat(values.get(1)).isEqualTo(TEST_PERSON_ID);
+		assertThat(values.get(2)).isEqualTo(TEST_PERSON_ID);
 	}
 
 	@Test

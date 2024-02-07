@@ -10,8 +10,7 @@ import org.hl7.fhir.dstu3.model.StringType;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
@@ -192,8 +191,8 @@ public class ElementWithExtensionDstu3Test {
 
 		IParser parser = ctx.newXmlParser();
 		String encoded = parser.encodeResourceToString(p);
-		assertThat(encoded, containsString("http://foo"));
-		assertThat(encoded, containsString("FOO"));
+		assertThat(encoded).contains("http://foo");
+		assertThat(encoded).contains("FOO");
 
 		p = (Patient) parser.parseResource(encoded);
 		assertEquals("Patient/123", p.getId());
@@ -213,8 +212,8 @@ public class ElementWithExtensionDstu3Test {
 
 		IParser parser = ctx.newJsonParser();
 		String encoded = parser.encodeResourceToString(p);
-		assertThat(encoded, containsString("http://foo"));
-		assertThat(encoded, containsString("FOO"));
+		assertThat(encoded).contains("http://foo");
+		assertThat(encoded).contains("FOO");
 
 		p = (Patient) parser.parseResource(encoded);
 		assertEquals("Patient/123", p.getId());

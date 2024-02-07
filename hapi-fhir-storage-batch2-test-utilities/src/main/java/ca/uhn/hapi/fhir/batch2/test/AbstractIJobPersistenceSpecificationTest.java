@@ -59,12 +59,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.Callable;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.emptyString;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -309,8 +305,8 @@ public abstract class AbstractIJobPersistenceSpecificationTest {
 					chunk = freshFetchWorkChunk(myChunkId);
 					assertEquals(WorkChunkStatusEnum.FAILED, chunk.getStatus());
 					assertEquals(4, chunk.getErrorCount());
-					assertThat("Error message contains last error", chunk.getErrorMessage(), containsString(ERROR_MESSAGE_C));
-					assertThat("Error message contains error count and complaint", chunk.getErrorMessage(), containsString("many errors: 4"));
+					assertThat(chunk.getErrorMessage()).as("Error message contains last error").contains(ERROR_MESSAGE_C);
+					assertThat(chunk.getErrorMessage()).as("Error message contains error count and complaint").contains("many errors: 4");
 				}
 			}
 		}
@@ -484,15 +480,15 @@ public abstract class AbstractIJobPersistenceSpecificationTest {
 			// then
 			ourLog.info("job and chunk created {}", createResult);
 			assertNotNull(createResult);
-			assertThat(createResult.jobInstanceId, not(emptyString()));
-			assertThat(createResult.workChunkId, not(emptyString()));
+			assertThat(createResult.jobInstanceId).isNotEmpty();
+			assertThat(createResult.workChunkId).isNotEmpty();
 
 			JobInstance jobInstance = freshFetchJobInstance(createResult.jobInstanceId);
-			assertThat(jobInstance.getStatus(), equalTo(StatusEnum.QUEUED));
-			assertThat(jobInstance.getParameters(), equalTo("{}"));
+			assertThat(jobInstance.getStatus()).isEqualTo(StatusEnum.QUEUED);
+			assertThat(jobInstance.getParameters()).isEqualTo("{}");
 
 			WorkChunk firstChunk = freshFetchWorkChunk(createResult.workChunkId);
-			assertThat(firstChunk.getStatus(), equalTo(WorkChunkStatusEnum.QUEUED));
+			assertThat(firstChunk.getStatus()).isEqualTo(WorkChunkStatusEnum.QUEUED);
 			assertNull(firstChunk.getData(), "First chunk data is null - only uses parameters");
 		}
 
@@ -509,7 +505,7 @@ public abstract class AbstractIJobPersistenceSpecificationTest {
 
 		    // then
 			JobInstance jobInstance = freshFetchJobInstance(createResult.jobInstanceId);
-			assertThat(jobInstance.getStatus(), equalTo(StatusEnum.IN_PROGRESS));
+			assertThat(jobInstance.getStatus()).isEqualTo(StatusEnum.IN_PROGRESS);
 		}
 
 		
@@ -540,7 +536,7 @@ public abstract class AbstractIJobPersistenceSpecificationTest {
 			JobInstance freshInstance1 = mySvc.fetchInstance(instanceId1).orElseThrow();
 			if (theState.isCancellable()) {
 				assertEquals(StatusEnum.CANCELLED, freshInstance1.getStatus(), "cancel request processed");
-				assertThat(freshInstance1.getErrorMessage(), containsString("Job instance cancelled"));
+				assertThat(freshInstance1.getErrorMessage()).contains("Job instance cancelled");
 			} else {
 				assertEquals(theState, freshInstance1.getStatus(), "cancel request ignored - state unchanged");
 				assertNull(freshInstance1.getErrorMessage(), "no error message");

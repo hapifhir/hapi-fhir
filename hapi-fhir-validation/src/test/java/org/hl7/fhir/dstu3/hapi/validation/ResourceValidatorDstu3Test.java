@@ -54,8 +54,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.stringContainsInOrder;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -162,7 +162,7 @@ public class ResourceValidatorDstu3Test extends BaseValidationTestWithInlineMock
 		String resultString = parser.setPrettyPrint(true).encodeResourceToString(result.toOperationOutcome());
 		ourLog.info(resultString);
 
-		assertThat(resultString, containsString("No issues detected during validation"));
+		assertThat(resultString).contains("No issues detected during validation");
 
 	}
 
@@ -179,7 +179,7 @@ public class ResourceValidatorDstu3Test extends BaseValidationTestWithInlineMock
 		ValidationResult output = val.validateWithResult(p);
 		List<SingleValidationMessage> all = logResultsAndReturnNonInformationalOnes(output);
 
-		assertThat(output.getMessages().get(0).getMessage(), containsString("None of the codings provided are in the value set 'Marital Status Codes'"));
+		assertThat(output.getMessages().get(0).getMessage()).contains("None of the codings provided are in the value set 'Marital Status Codes'");
 		assertEquals(ResultSeverityEnum.WARNING, output.getMessages().get(0).getSeverity());
 	}
 
@@ -286,7 +286,7 @@ public class ResourceValidatorDstu3Test extends BaseValidationTestWithInlineMock
 		String encoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(operationOutcome);
 		ourLog.info(encoded);
 
-		assertThat(encoded, containsString("Error parsing JSON: the primitive value must be a string"));
+		assertThat(encoded).contains("Error parsing JSON: the primitive value must be a string");
 
 	}
 
@@ -392,7 +392,7 @@ public class ResourceValidatorDstu3Test extends BaseValidationTestWithInlineMock
 
 		assertTrue(result.isSuccessful());
 
-		assertThat(ooencoded, containsString("Unknown extension http://foo"));
+		assertThat(ooencoded).contains("Unknown extension http://foo");
 	}
 
 	/**
@@ -438,8 +438,8 @@ public class ResourceValidatorDstu3Test extends BaseValidationTestWithInlineMock
 
 		assertTrue(result.isSuccessful());
 
-		assertThat(messageString, containsString("valueReference"));
-		assertThat(messageString, not(containsString("valueResource")));
+		assertThat(messageString).contains("valueReference");
+		assertThat(messageString).doesNotContain("valueResource");
 	}
 
 	/**
@@ -472,8 +472,8 @@ public class ResourceValidatorDstu3Test extends BaseValidationTestWithInlineMock
 			"extension",
 			"meta"
 		)));
-		assertThat(messageString, containsString("url=\"http://ahr.copa.inso.tuwien.ac.at/StructureDefinition/Patient#animal-colorSecondary\""));
-		assertThat(messageString, containsString("url=\"http://foo.com/example\""));
+		assertThat(messageString).contains("url=\"http://ahr.copa.inso.tuwien.ac.at/StructureDefinition/Patient#animal-colorSecondary\"");
+		assertThat(messageString).contains("url=\"http://foo.com/example\"");
 		//@formatter:on
 
 		FhirValidator val = ourCtx.newValidator();
@@ -489,8 +489,8 @@ public class ResourceValidatorDstu3Test extends BaseValidationTestWithInlineMock
 
 		assertTrue(result.isSuccessful());
 
-		assertThat(messageString, containsString("valueReference"));
-		assertThat(messageString, not(containsString("valueResource")));
+		assertThat(messageString).contains("valueReference");
+		assertThat(messageString).doesNotContain("valueResource");
 	}
 
 	@AfterAll

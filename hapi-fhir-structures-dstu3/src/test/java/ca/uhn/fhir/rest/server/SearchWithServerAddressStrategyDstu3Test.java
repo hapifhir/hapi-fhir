@@ -19,8 +19,7 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class SearchWithServerAddressStrategyDstu3Test {
@@ -48,8 +47,8 @@ public class SearchWithServerAddressStrategyDstu3Test {
 		IOUtils.closeQuietly(status.getEntity().getContent());
 		ourLog.info(responseContent);
 		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertThat(responseContent, containsString("<given value=\"FAMILY\""));
-		assertThat(responseContent, containsString("<fullUrl value=\"" + ourServer.getBaseUrl() + "/Patient/1\"/>"));
+		assertThat(responseContent).contains("<given value=\"FAMILY\"");
+		assertThat(responseContent).contains("<fullUrl value=\"" + ourServer.getBaseUrl() + "/Patient/1\"/>");
 	}
 
 	@Test
@@ -62,8 +61,8 @@ public class SearchWithServerAddressStrategyDstu3Test {
 		IOUtils.closeQuietly(status.getEntity().getContent());
 		ourLog.info(responseContent);
 		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertThat(responseContent, containsString("<given value=\"FAMILY\""));
-		assertThat(responseContent, containsString("<fullUrl value=\"" + ourServer.getBaseUrl() + "/Patient/1\"/>"));
+		assertThat(responseContent).contains("<given value=\"FAMILY\"");
+		assertThat(responseContent).contains("<fullUrl value=\"" + ourServer.getBaseUrl() + "/Patient/1\"/>");
 		
 		ourServer.setServerAddressStrategy(new ApacheProxyAddressStrategy(false));
 		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient");
@@ -73,8 +72,8 @@ public class SearchWithServerAddressStrategyDstu3Test {
 		IOUtils.closeQuietly(status.getEntity().getContent());
 		ourLog.info(responseContent);
 		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertThat(responseContent, containsString("<given value=\"FAMILY\""));
-		assertThat(responseContent, containsString("<fullUrl value=\"http://foo.com/Patient/1\"/>"));
+		assertThat(responseContent).contains("<given value=\"FAMILY\"");
+		assertThat(responseContent).contains("<fullUrl value=\"http://foo.com/Patient/1\"/>");
 
 		ourServer.setServerAddressStrategy(ApacheProxyAddressStrategy.forHttps());
 		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient");
@@ -84,8 +83,8 @@ public class SearchWithServerAddressStrategyDstu3Test {
 		IOUtils.closeQuietly(status.getEntity().getContent());
 		ourLog.info(responseContent);
 		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertThat(responseContent, containsString("<given value=\"FAMILY\""));
-		assertThat(responseContent, containsString("<fullUrl value=\"https://foo.com/Patient/1\"/>"));
+		assertThat(responseContent).contains("<given value=\"FAMILY\"");
+		assertThat(responseContent).contains("<fullUrl value=\"https://foo.com/Patient/1\"/>");
 
 		ourServer.setServerAddressStrategy(new ApacheProxyAddressStrategy(false));
 		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient");
@@ -96,8 +95,8 @@ public class SearchWithServerAddressStrategyDstu3Test {
 		IOUtils.closeQuietly(status.getEntity().getContent());
 		ourLog.info(responseContent);
 		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertThat(responseContent, containsString("<given value=\"FAMILY\""));
-		assertThat(responseContent, containsString("<fullUrl value=\"https://foo.com/Patient/1\"/>"));
+		assertThat(responseContent).contains("<given value=\"FAMILY\"");
+		assertThat(responseContent).contains("<fullUrl value=\"https://foo.com/Patient/1\"/>");
 
 	}
 
@@ -111,8 +110,8 @@ public class SearchWithServerAddressStrategyDstu3Test {
 		IOUtils.closeQuietly(status.getEntity().getContent());
 		ourLog.info(responseContent);
 		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertThat(responseContent, containsString("<given value=\"FAMILY\""));
-		assertThat(responseContent, containsString("<fullUrl value=\"http://example.com/fhir/base/Patient/1\"/>"));
+		assertThat(responseContent).contains("<given value=\"FAMILY\"");
+		assertThat(responseContent).contains("<fullUrl value=\"http://example.com/fhir/base/Patient/1\"/>");
 	}
 
 	

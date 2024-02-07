@@ -10,9 +10,7 @@ import java.sql.SQLException;
 import java.util.Set;
 import java.util.function.Supplier;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.hasSize;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -34,7 +32,7 @@ public class RenameColumnTaskTest extends BaseTest {
 
 		getMigrator().migrate();
 
-		assertThat(JdbcUtils.getColumnNames(getConnectionProperties(), "SOMETABLE"), containsInAnyOrder("PID", "TEXTCOL"));
+		assertThat(JdbcUtils.getColumnNames(getConnectionProperties(), "SOMETABLE")).containsExactlyInAnyOrder("PID", "TEXTCOL");
 	}
 
 	@ParameterizedTest(name = "{index}: {0}")
@@ -50,9 +48,9 @@ public class RenameColumnTaskTest extends BaseTest {
 		executeSql("create table CHILD (PID bigint not null, PARENTREF bigint)");
 		executeSql("alter table CHILD add constraint FK_MOM foreign key (PARENTREF) references PARENT(PID)");
 
-		assertThat(JdbcUtils.getForeignKeys(getConnectionProperties(), "PARENT", "CHILD"), hasSize(1));
+		assertThat(JdbcUtils.getForeignKeys(getConnectionProperties(), "PARENT", "CHILD")).hasSize(1);
 
-		assertThat(JdbcUtils.getForeignKeysForColumn(getConnectionProperties(), "PARENTREF", "CHILD"), containsInAnyOrder("FK_MOM"));
+		assertThat(JdbcUtils.getForeignKeysForColumn(getConnectionProperties(), "PARENTREF", "CHILD")).containsExactlyInAnyOrder("FK_MOM");
 
 		RenameColumnTask task = new RenameColumnTask("1", "1");
 		task.setTableName("CHILD");
@@ -63,11 +61,11 @@ public class RenameColumnTaskTest extends BaseTest {
 
 		getMigrator().migrate();
 
-		assertThat(JdbcUtils.getForeignKeys(getConnectionProperties(), "PARENT", "CHILD"), hasSize(1));
+		assertThat(JdbcUtils.getForeignKeys(getConnectionProperties(), "PARENT", "CHILD")).hasSize(1);
 
-		assertThat(JdbcUtils.getColumnNames(getConnectionProperties(), "CHILD"), containsInAnyOrder("PID", "PARENTREF"));
+		assertThat(JdbcUtils.getColumnNames(getConnectionProperties(), "CHILD")).containsExactlyInAnyOrder("PID", "PARENTREF");
 
-		assertThat(JdbcUtils.getForeignKeysForColumn(getConnectionProperties(), "PARENTREF", "CHILD"), containsInAnyOrder("FK_MOM"));
+		assertThat(JdbcUtils.getForeignKeysForColumn(getConnectionProperties(), "PARENTREF", "CHILD")).containsExactlyInAnyOrder("FK_MOM");
 	}
 
 	@ParameterizedTest(name = "{index}: {0}")
@@ -96,7 +94,7 @@ public class RenameColumnTaskTest extends BaseTest {
 		getMigrator().migrate();
 
 		Set<String> columnNames = JdbcUtils.getColumnNames(getConnectionProperties(), "SOMETABLE");
-		assertThat(columnNames.toString(), columnNames, containsInAnyOrder("PID", "TEXTCOL"));
+		assertThat(columnNames).as(columnNames.toString()).containsExactlyInAnyOrder("PID", "TEXTCOL");
 	}
 
 	@ParameterizedTest(name = "{index}: {0}")
@@ -114,11 +112,11 @@ public class RenameColumnTaskTest extends BaseTest {
 		executeSql("alter table CHILD add constraint FK_MOM foreign key (PARENTREF) references PARENT(PARENTID)");
 		executeSql("alter table CHILD add constraint FK_NOK foreign key (NOKREF) references RELATION(RELATIONID)");
 
-		assertThat(JdbcUtils.getForeignKeys(getConnectionProperties(), "PARENT", "CHILD"), hasSize(1));
-		assertThat(JdbcUtils.getForeignKeys(getConnectionProperties(), "RELATION", "CHILD"), hasSize(1));
+		assertThat(JdbcUtils.getForeignKeys(getConnectionProperties(), "PARENT", "CHILD")).hasSize(1);
+		assertThat(JdbcUtils.getForeignKeys(getConnectionProperties(), "RELATION", "CHILD")).hasSize(1);
 
-		assertThat(JdbcUtils.getForeignKeysForColumn(getConnectionProperties(), "PARENTREF", "CHILD"), containsInAnyOrder("FK_MOM"));
-		assertThat(JdbcUtils.getForeignKeysForColumn(getConnectionProperties(), "NOKREF", "CHILD"), containsInAnyOrder("FK_NOK"));
+		assertThat(JdbcUtils.getForeignKeysForColumn(getConnectionProperties(), "PARENTREF", "CHILD")).containsExactlyInAnyOrder("FK_MOM");
+		assertThat(JdbcUtils.getForeignKeysForColumn(getConnectionProperties(), "NOKREF", "CHILD")).containsExactlyInAnyOrder("FK_NOK");
 
 		RenameColumnTask task = new RenameColumnTask("1", "1");
 		task.setTableName("CHILD");
@@ -130,12 +128,12 @@ public class RenameColumnTaskTest extends BaseTest {
 
 		getMigrator().migrate();
 
-		assertThat(JdbcUtils.getForeignKeys(getConnectionProperties(), "RELATION", "CHILD"), hasSize(0));
-		assertThat(JdbcUtils.getForeignKeys(getConnectionProperties(), "PARENT", "CHILD"), hasSize(1));
+		assertThat(JdbcUtils.getForeignKeys(getConnectionProperties(), "RELATION", "CHILD")).hasSize(0);
+		assertThat(JdbcUtils.getForeignKeys(getConnectionProperties(), "PARENT", "CHILD")).hasSize(1);
 
-		assertThat(JdbcUtils.getColumnNames(getConnectionProperties(), "CHILD"), containsInAnyOrder("PID", "NOKREF"));
+		assertThat(JdbcUtils.getColumnNames(getConnectionProperties(), "CHILD")).containsExactlyInAnyOrder("PID", "NOKREF");
 
-		assertThat(JdbcUtils.getForeignKeysForColumn(getConnectionProperties(), "NOKREF", "CHILD"), containsInAnyOrder("FK_MOM"));
+		assertThat(JdbcUtils.getForeignKeysForColumn(getConnectionProperties(), "NOKREF", "CHILD")).containsExactlyInAnyOrder("FK_MOM");
 
 	}
 
@@ -188,7 +186,7 @@ public class RenameColumnTaskTest extends BaseTest {
 
 		getMigrator().migrate();
 
-		assertThat(JdbcUtils.getColumnNames(getConnectionProperties(), "SOMETABLE"), containsInAnyOrder("PID", "TEXTCOL"));
+		assertThat(JdbcUtils.getColumnNames(getConnectionProperties(), "SOMETABLE")).containsExactlyInAnyOrder("PID", "TEXTCOL");
 	}
 
 	@ParameterizedTest(name = "{index}: {0}")
@@ -204,9 +202,9 @@ public class RenameColumnTaskTest extends BaseTest {
 		executeSql("create table CHILD (PID bigint not null, PARENTREF bigint)");
 		executeSql("alter table CHILD add constraint FK_MOM foreign key (PARENTREF) references PARENT(PARENTID)");
 
-		assertThat(JdbcUtils.getForeignKeys(getConnectionProperties(), "PARENT", "CHILD"), hasSize(1));
+		assertThat(JdbcUtils.getForeignKeys(getConnectionProperties(), "PARENT", "CHILD")).hasSize(1);
 
-		assertThat(JdbcUtils.getForeignKeysForColumn(getConnectionProperties(), "PARENTREF", "CHILD"), containsInAnyOrder("FK_MOM"));
+		assertThat(JdbcUtils.getForeignKeysForColumn(getConnectionProperties(), "PARENTREF", "CHILD")).containsExactlyInAnyOrder("FK_MOM");
 
 		RenameColumnTask task = new RenameColumnTask("1", "1");
 		task.setTableName("CHILD");
@@ -217,11 +215,11 @@ public class RenameColumnTaskTest extends BaseTest {
 
 		getMigrator().migrate();
 
-		assertThat(JdbcUtils.getForeignKeys(getConnectionProperties(), "PARENT", "CHILD"), hasSize(1));
+		assertThat(JdbcUtils.getForeignKeys(getConnectionProperties(), "PARENT", "CHILD")).hasSize(1);
 
-		assertThat(JdbcUtils.getColumnNames(getConnectionProperties(), "CHILD"), containsInAnyOrder("PID", "MOMREF"));
+		assertThat(JdbcUtils.getColumnNames(getConnectionProperties(), "CHILD")).containsExactlyInAnyOrder("PID", "MOMREF");
 
-		assertThat(JdbcUtils.getForeignKeysForColumn(getConnectionProperties(), "MOMREF", "CHILD"), containsInAnyOrder("FK_MOM"));
+		assertThat(JdbcUtils.getForeignKeysForColumn(getConnectionProperties(), "MOMREF", "CHILD")).containsExactlyInAnyOrder("FK_MOM");
 
 	}
 

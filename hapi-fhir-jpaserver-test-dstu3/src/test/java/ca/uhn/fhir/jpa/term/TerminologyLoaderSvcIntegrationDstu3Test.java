@@ -27,10 +27,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -84,7 +82,7 @@ public class TerminologyLoaderSvcIntegrationDstu3Test extends BaseJpaDstu3Test {
 		Set<String> codes = toExpandedCodes(expanded);
 		ourLog.debug(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded));
 		ourLog.info("Codes: {}", codes);
-		assertThat(codes, containsInAnyOrder("10013-1"));
+		assertThat(codes).containsExactlyInAnyOrder("10013-1");
 
 		// Search by display name
 		input = new ValueSet();
@@ -99,7 +97,7 @@ public class TerminologyLoaderSvcIntegrationDstu3Test extends BaseJpaDstu3Test {
 		expanded = myValueSetDao.expand(input, null);
 		codes = toExpandedCodes(expanded);
 		ourLog.debug(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded));
-		assertThat(codes, containsInAnyOrder("10013-1"));
+		assertThat(codes).containsExactlyInAnyOrder("10013-1");
 
 		// Search by something that doesn't match
 		input = new ValueSet();
@@ -114,7 +112,7 @@ public class TerminologyLoaderSvcIntegrationDstu3Test extends BaseJpaDstu3Test {
 		expanded = myValueSetDao.expand(input, null);
 		codes = toExpandedCodes(expanded);
 		ourLog.debug(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded));
-		assertThat(codes, empty());
+		assertThat(codes).isEmpty();
 	}
 
 	@Test
@@ -147,7 +145,7 @@ public class TerminologyLoaderSvcIntegrationDstu3Test extends BaseJpaDstu3Test {
 		Set<String> codes = toExpandedCodes(expanded);
 		ourLog.debug(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded));
 		ourLog.info("Codes: {}", codes);
-		assertThat(codes, containsInAnyOrder("10013-1"));
+		assertThat(codes).containsExactlyInAnyOrder("10013-1");
 	}
 
 	@Test

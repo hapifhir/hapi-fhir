@@ -47,7 +47,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
 import static ca.uhn.fhir.jpa.dao.r4.PartitioningSqlR4Test.assertLocalDateFromDbMatches;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -222,7 +222,7 @@ public class PartitioningInterceptorR4Test extends BaseJpaR4SystemTest {
 			map.setLoadSynchronous(true);
 			IBundleProvider results = myPatientDao.search(map);
 			List<IIdType> ids = toUnqualifiedVersionlessIds(results);
-			assertThat(ids, Matchers.contains(patientIdNull, patientId1, patientId2));
+			assertThat(ids).containsExactly(patientIdNull, patientId1, patientId2);
 
 			String searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
 			ourLog.info("Search SQL:\n{}", searchSql);
@@ -257,7 +257,7 @@ public class PartitioningInterceptorR4Test extends BaseJpaR4SystemTest {
 			myCaptureQueriesListener.clear();
 			IBundleProvider results = myPatientDao.search(map, mySrd);
 			List<IIdType> ids = toUnqualifiedVersionlessIds(results);
-			assertThat(ids, Matchers.contains(patientId1));
+			assertThat(ids).containsExactly(patientId1);
 
 			String searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
 			ourLog.info("Search SQL:\n{}", searchSql);

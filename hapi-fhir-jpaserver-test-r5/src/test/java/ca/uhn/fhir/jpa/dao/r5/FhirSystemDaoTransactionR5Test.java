@@ -24,9 +24,7 @@ import java.io.IOException;
 import java.util.UUID;
 
 import static org.apache.commons.lang3.StringUtils.countMatches;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.endsWith;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -472,7 +470,7 @@ public class FhirSystemDaoTransactionR5Test extends BaseJpaR5Test {
 		outcome = mySystemDao.transaction(mySrd, createBundleWithConditionalDeleteAndConditionalUpdateOnSameResource(myFhirContext));
 		assertEquals(null, outcome.getEntry().get(0).getResponse().getLocation());
 		assertEquals("204 No Content", outcome.getEntry().get(0).getResponse().getStatus());
-		assertThat(outcome.getEntry().get(1).getResponse().getLocation(), endsWith("_history/1"));
+		assertThat(outcome.getEntry().get(1).getResponse().getLocation()).endsWith("_history/1");
 		assertEquals("201 Created", outcome.getEntry().get(1).getResponse().getStatus());
 
 		IdType resourceId = new IdType(outcome.getEntry().get(1).getResponse().getLocation()).toUnqualifiedVersionless();
@@ -489,7 +487,7 @@ public class FhirSystemDaoTransactionR5Test extends BaseJpaR5Test {
 		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
 		assertEquals(null, outcome.getEntry().get(0).getResponse().getLocation());
 		assertEquals("204 No Content", outcome.getEntry().get(0).getResponse().getStatus());
-		assertThat(outcome.getEntry().get(1).getResponse().getLocation(), endsWith("_history/2"));
+		assertThat(outcome.getEntry().get(1).getResponse().getLocation()).endsWith("_history/2");
 		assertEquals("201 Created", outcome.getEntry().get(1).getResponse().getStatus());
 
 		logAllResources();
@@ -506,7 +504,7 @@ public class FhirSystemDaoTransactionR5Test extends BaseJpaR5Test {
 		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
 		assertEquals(null, outcome.getEntry().get(0).getResponse().getLocation());
 		assertEquals("204 No Content", outcome.getEntry().get(0).getResponse().getStatus());
-		assertThat(outcome.getEntry().get(1).getResponse().getLocation(), endsWith("_history/3"));
+		assertThat(outcome.getEntry().get(1).getResponse().getLocation()).endsWith("_history/3");
 		assertEquals("201 Created", outcome.getEntry().get(1).getResponse().getStatus());
 
 		actual = myPatientDao.read(resourceId, mySrd);
@@ -543,7 +541,7 @@ public class FhirSystemDaoTransactionR5Test extends BaseJpaR5Test {
 		} catch (PreconditionFailedException e) {
 
 			// Verify
-			assertThat(e.getMessage(), containsString("Multiple resources match this search"));
+			assertThat(e.getMessage()).contains("Multiple resources match this search");
 
 		}
 	}
@@ -562,7 +560,7 @@ public class FhirSystemDaoTransactionR5Test extends BaseJpaR5Test {
 		outcome = mySystemDao.transaction(mySrd, createBundleWithConditionalDeleteAndConditionalCreateOnSameResource(myFhirContext));
 		assertEquals(null, outcome.getEntry().get(0).getResponse().getLocation());
 		assertEquals("204 No Content", outcome.getEntry().get(0).getResponse().getStatus());
-		assertThat(outcome.getEntry().get(1).getResponse().getLocation(), endsWith("_history/1"));
+		assertThat(outcome.getEntry().get(1).getResponse().getLocation()).endsWith("_history/1");
 		assertEquals("201 Created", outcome.getEntry().get(1).getResponse().getStatus());
 
 		IdType resourceId = new IdType(outcome.getEntry().get(1).getResponse().getLocation()).toUnqualifiedVersionless();
@@ -579,7 +577,7 @@ public class FhirSystemDaoTransactionR5Test extends BaseJpaR5Test {
 		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
 		assertEquals(null, outcome.getEntry().get(0).getResponse().getLocation());
 		assertEquals("204 No Content", outcome.getEntry().get(0).getResponse().getStatus());
-		assertThat(outcome.getEntry().get(1).getResponse().getLocation(), endsWith("_history/1"));
+		assertThat(outcome.getEntry().get(1).getResponse().getLocation()).endsWith("_history/1");
 		assertEquals("201 Created", outcome.getEntry().get(1).getResponse().getStatus());
 
 		logAllResources();
@@ -598,7 +596,7 @@ public class FhirSystemDaoTransactionR5Test extends BaseJpaR5Test {
 		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
 		assertEquals(null, outcome.getEntry().get(0).getResponse().getLocation());
 		assertEquals("204 No Content", outcome.getEntry().get(0).getResponse().getStatus());
-		assertThat(outcome.getEntry().get(1).getResponse().getLocation(), endsWith("_history/1"));
+		assertThat(outcome.getEntry().get(1).getResponse().getLocation()).endsWith("_history/1");
 		assertEquals("201 Created", outcome.getEntry().get(1).getResponse().getStatus());
 
 		IdType resourceId3 = new IdType(outcome.getEntry().get(1).getResponse().getLocation()).toUnqualifiedVersionless();

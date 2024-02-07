@@ -25,8 +25,7 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 
 import java.io.IOException;
 
-import static org.hamcrest.CoreMatchers.containsString;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -71,7 +70,7 @@ public class ServeMediaResourceRawInterceptorTest {
 		try (CloseableHttpResponse response = ourClient.execute(get)) {
 			assertEquals("application/fhir+json;charset=utf-8", response.getEntity().getContentType().getValue());
 			String contents = IOUtils.toString(response.getEntity().getContent(), Charsets.UTF_8);
-			assertThat(contents, containsString("\"resourceType\""));
+			assertThat(contents).contains("\"resourceType\"");
 		}
 	}
 

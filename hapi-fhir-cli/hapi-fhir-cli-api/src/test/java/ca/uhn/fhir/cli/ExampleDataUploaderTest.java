@@ -19,8 +19,7 @@ import java.io.File;
 import java.util.List;
 import java.util.Map;
 
-import static org.hamcrest.CoreMatchers.hasItems;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -73,7 +72,7 @@ class ExampleDataUploaderTest {
 		assertTrue(allHeaders.containsKey(headerKey));
 		assertEquals(1, allHeaders.get(headerKey).size());
 
-		assertThat(allHeaders.get(headerKey), hasItems(headerValue));
+		assertThat(allHeaders.get(headerKey)).contains(headerValue);
 
 		assertEquals(1, myRestServerR4Helper.getTransactions().size());
 		Bundle bundle = myRestServerR4Helper.getTransactions().get(0);

@@ -31,8 +31,7 @@ import org.springframework.transaction.support.SimpleTransactionStatus;
 
 import java.util.List;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -92,7 +91,7 @@ public class ResourceModifiedSubmitterSvcTest {
 
 		// then
 		ChannelProducerSettings capturedChannelProducerSettings = getCapturedChannelProducerSettings();
-		assertThat(capturedChannelProducerSettings.isQualifyChannelName(), is(expectedResult));
+		assertThat(capturedChannelProducerSettings.isQualifyChannelName()).isEqualTo(expectedResult);
 
 	}
 
@@ -107,8 +106,8 @@ public class ResourceModifiedSubmitterSvcTest {
 		boolean wasProcessed = myResourceModifiedSubmitterSvc.submitPersisedResourceModifiedMessage(new ResourceModifiedEntity());
 
 		// then
-		assertThat(wasProcessed, is(Boolean.TRUE));
-		assertThat(myCapturingTransactionStatus.isRollbackOnly(), is(Boolean.FALSE));
+		assertThat(wasProcessed).isEqualTo(Boolean.TRUE);
+		assertThat(myCapturingTransactionStatus.isRollbackOnly()).isEqualTo(Boolean.FALSE);
 		verify(myChannelProducer, times(1)).send(any());
 	}
 
@@ -208,8 +207,8 @@ public class ResourceModifiedSubmitterSvcTest {
 		boolean wasProcessed = myResourceModifiedSubmitterSvc.submitPersisedResourceModifiedMessage(new ResourceModifiedEntity());
 
 		// then
-		assertThat(wasProcessed, is(Boolean.TRUE));
-		assertThat(myCapturingTransactionStatus.isRollbackOnly(), is(Boolean.FALSE));
+		assertThat(wasProcessed).isEqualTo(Boolean.TRUE);
+		assertThat(myCapturingTransactionStatus.isRollbackOnly()).isEqualTo(Boolean.FALSE);
 		// we do not send a message which was already sent
 		verify(myChannelProducer, times(0)).send(any());
 
@@ -228,8 +227,8 @@ public class ResourceModifiedSubmitterSvcTest {
 		boolean wasProcessed = myResourceModifiedSubmitterSvc.submitPersisedResourceModifiedMessage(new ResourceModifiedEntity());
 
 		// then
-		assertThat(wasProcessed, is(Boolean.FALSE));
-		assertThat(myCapturingTransactionStatus.isRollbackOnly(), is(Boolean.TRUE));
+		assertThat(wasProcessed).isEqualTo(Boolean.FALSE);
+		assertThat(myCapturingTransactionStatus.isRollbackOnly()).isEqualTo(Boolean.TRUE);
 
 	}
 

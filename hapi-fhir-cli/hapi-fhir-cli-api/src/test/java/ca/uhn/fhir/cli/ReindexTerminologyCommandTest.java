@@ -22,7 +22,7 @@ import java.util.function.Consumer;
 
 import static ca.uhn.fhir.jpa.provider.BaseJpaSystemProvider.RESP_PARAM_SUCCESS;
 import static ca.uhn.test.util.LogbackCaptureTestExtension.eventWithMessageContains;
-import static org.hamcrest.CoreMatchers.containsString;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasItem;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -92,7 +92,7 @@ class ReindexTerminologyCommandTest {
 			App.main(args);
 			fail();
 		} catch (Error e) {
-			assertThat(e.getMessage(), containsString("Missing required option: v"));
+			assertThat(e.getMessage()).contains("Missing required option: v");
 		}
 	}
 
@@ -114,7 +114,7 @@ class ReindexTerminologyCommandTest {
 			));
 			fail();
 		} catch (Error e) {
-			assertThat(e.getMessage(), containsString("Missing required option: t"));
+			assertThat(e.getMessage()).contains("Missing required option: t");
 		}
 	}
 

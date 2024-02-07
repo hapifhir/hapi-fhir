@@ -22,7 +22,6 @@ package ca.uhn.fhir.test.utilities;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.both;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
-import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.lessThanOrEqualTo;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
@@ -64,7 +63,7 @@ public class RangeTestHelper {
 	}
 
 	public static void checkWithinBounds(double theLowerBound, double theUpperBound, double theValue) {
-		assertThat(theValue, is(both(greaterThanOrEqualTo(theLowerBound)).and(lessThanOrEqualTo(theUpperBound))));
+		assertThat(theValue, both(greaterThanOrEqualTo(theLowerBound)).and(lessThanOrEqualTo(theUpperBound)));
 	}
 
 	public static void checkWithinBounds(String theLowerBound, String theUpperBound, String theValue) {

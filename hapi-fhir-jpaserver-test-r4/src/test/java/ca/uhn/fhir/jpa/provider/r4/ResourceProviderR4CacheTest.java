@@ -23,11 +23,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Date;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.blankOrNullString;
-import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.greaterThan;
-import static org.hamcrest.Matchers.lessThan;
 import static org.hamcrest.core.IsNot.not;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -77,7 +75,7 @@ public class ResourceProviderR4CacheTest extends BaseResourceProviderR4Test {
 			.execute();
 		assertEquals(1, results.getEntry().size());
 		runInTransaction(()->assertEquals(0, mySearchEntityDao.count()));
-		assertThat(myCapturingInterceptor.getLastResponse().getHeaders(Constants.HEADER_X_CACHE), empty());
+		assertThat(myCapturingInterceptor.getLastResponse().getHeaders(Constants.HEADER_X_CACHE)).isEmpty();
 
 		Patient pt2 = new Patient();
 		pt2.addName().setFamily("FAM");
@@ -92,7 +90,7 @@ public class ResourceProviderR4CacheTest extends BaseResourceProviderR4Test {
 			.execute();
 		assertEquals(2, results.getEntry().size());
 		runInTransaction(()->assertEquals(0, mySearchEntityDao.count()));
-		assertThat(myCapturingInterceptor.getLastResponse().getHeaders(Constants.HEADER_X_CACHE), empty());
+		assertThat(myCapturingInterceptor.getLastResponse().getHeaders(Constants.HEADER_X_CACHE)).isEmpty();
 
 	}
 
@@ -114,7 +112,7 @@ public class ResourceProviderR4CacheTest extends BaseResourceProviderR4Test {
 			.execute();
 		assertEquals(5, results.getEntry().size());
 		runInTransaction(()->assertEquals(0, mySearchEntityDao.count()));
-		assertThat(myCapturingInterceptor.getLastResponse().getHeaders(Constants.HEADER_X_CACHE), empty());
+		assertThat(myCapturingInterceptor.getLastResponse().getHeaders(Constants.HEADER_X_CACHE)).isEmpty();
 
 	}
 
@@ -145,7 +143,7 @@ public class ResourceProviderR4CacheTest extends BaseResourceProviderR4Test {
 		Bundle results = myClient.search().forResource("Patient").where(Patient.FAMILY.matches().value("FAM")).returnBundle(Bundle.class).execute();
 		assertEquals(1, results.getEntry().size());
 		runInTransaction(() -> assertEquals(1, mySearchEntityDao.count()));
-		assertThat(myCapturingInterceptor.getLastResponse().getHeaders(Constants.HEADER_X_CACHE), empty());
+		assertThat(myCapturingInterceptor.getLastResponse().getHeaders(Constants.HEADER_X_CACHE)).isEmpty();
 
 		Patient pt2 = new Patient();
 		pt2.addName().setFamily("FAM");
@@ -160,7 +158,7 @@ public class ResourceProviderR4CacheTest extends BaseResourceProviderR4Test {
 			.execute();
 		assertEquals(2, results.getEntry().size());
 		runInTransaction(() -> assertEquals(2, mySearchEntityDao.count()));
-		assertThat(myCapturingInterceptor.getLastResponse().getHeaders(Constants.HEADER_X_CACHE), empty());
+		assertThat(myCapturingInterceptor.getLastResponse().getHeaders(Constants.HEADER_X_CACHE)).isEmpty();
 
 	}
 
@@ -181,10 +179,10 @@ public class ResourceProviderR4CacheTest extends BaseResourceProviderR4Test {
 
 		assertEquals(1, results1.getEntry().size());
 		runInTransaction(() -> assertEquals(1, mySearchEntityDao.count()));
-		assertThat(myCapturingInterceptor.getLastResponse().getHeaders(Constants.HEADER_X_CACHE), empty());
+		assertThat(myCapturingInterceptor.getLastResponse().getHeaders(Constants.HEADER_X_CACHE)).isEmpty();
 		Date results1Date = TestUtil.getTimestamp(results1).getValue();
-		assertThat(results1Date, greaterThan(beforeFirst));
-		assertThat(results1Date, lessThan(new Date()));
+		assertThat(results1Date).isGreaterThan(beforeFirst);
+		assertThat(results1Date).isLessThan(new Date());
 		assertThat(results1.getId(), not(blankOrNullString()));
 
 		Patient pt2 = new Patient();

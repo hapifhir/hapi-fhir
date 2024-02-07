@@ -66,10 +66,9 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.stringContainsInOrder;
 import static org.hamcrest.core.IsNot.not;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -108,7 +107,7 @@ public class JsonParserR4Test extends BaseTest {
 			"}\n";
 		IBaseResource iBaseResource = ourCtx.newJsonParser().parseResource(binaryPayload);
 		String resourceType = iBaseResource.getIdElement().getResourceType();
-		assertThat(resourceType, is(equalTo("Binary")));
+		assertThat(resourceType).isEqualTo("Binary");
 
 		//Test a domain resource.
 		String observationPayload = "{\n" +
@@ -117,7 +116,7 @@ public class JsonParserR4Test extends BaseTest {
 			"}\n";
 		IBaseResource obs = ourCtx.newJsonParser().parseResource(observationPayload);
 		resourceType = obs.getIdElement().getResourceType();
-		assertThat(resourceType, is(equalTo("Observation")));
+		assertThat(resourceType).isEqualTo("Observation");
 	}
 
 	@Test
@@ -158,7 +157,7 @@ public class JsonParserR4Test extends BaseTest {
 
 		String encoded = ourCtx.newJsonParser().encodeResourceToString(parsed);
 		ourLog.info(encoded);
-		assertThat(encoded, containsString("\"div\":\"" + expected.replace("\"", "\\\"") + "\""));
+		assertThat(encoded).contains("\"div\":\"" + expected.replace("\"", "\\\"") + "\"");
 	}
 
 	@Test
@@ -227,7 +226,7 @@ public class JsonParserR4Test extends BaseTest {
 		String output = ctx.newJsonParser().setPrettyPrint(true).encodeResourceToString(qr);
 		ourLog.info(output);
 
-		assertThat(output, containsString("\"Questionnaire/123/_history/456\""));
+		assertThat(output).contains("\"Questionnaire/123/_history/456\"");
 	}
 
 	@Test
@@ -240,7 +239,7 @@ public class JsonParserR4Test extends BaseTest {
 		String output = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(qr);
 		ourLog.info(output);
 
-		assertThat(output, containsString("\n  \"resourceType\""));
+		assertThat(output).contains("\n  \"resourceType\"");
 	}
 
 	/**
@@ -489,7 +488,7 @@ public class JsonParserR4Test extends BaseTest {
 		IParser parser = ourCtx.newJsonParser();
 		String output = parser.encodeResourceToString(p);
 		ourLog.info("Output: {}", output);
-		assertThat(output, containsString("ROOT_VALUE"));
+		assertThat(output).contains("ROOT_VALUE");
 
 		// Strict error handler
 		try {
@@ -550,10 +549,10 @@ public class JsonParserR4Test extends BaseTest {
 		IParser parser = ourCtx.newJsonParser().setParserErrorHandler(errorHandler);
 		String output = parser.encodeResourceToString(p);
 		ourLog.info("Output: {}", output);
-		assertThat(output, containsString("http://root"));
-		assertThat(output, containsString("ROOT_VALUE"));
-		assertThat(output, containsString("http://child"));
-		assertThat(output, containsString("CHILD_VALUE"));
+		assertThat(output).contains("http://root");
+		assertThat(output).contains("ROOT_VALUE");
+		assertThat(output).contains("http://child");
+		assertThat(output).contains("CHILD_VALUE");
 		assertEquals(false, errorHandler.isErrorOnInvalidExtension());
 		assertEquals(false, errorHandler.isErrorOnInvalidValue());
 	}
@@ -649,11 +648,11 @@ public class JsonParserR4Test extends BaseTest {
 		String encoded = parser.encodeResourceToString(b);
 		ourLog.info(encoded);
 
-		assertThat(encoded, containsString("BUNDLEID"));
-		assertThat(encoded, containsString("http://FOO"));
-		assertThat(encoded, containsString("PATIENTID"));
-		assertThat(encoded, containsString("http://BAR"));
-		assertThat(encoded, containsString("GIVEN"));
+		assertThat(encoded).contains("BUNDLEID");
+		assertThat(encoded).contains("http://FOO");
+		assertThat(encoded).contains("PATIENTID");
+		assertThat(encoded).contains("http://BAR");
+		assertThat(encoded).contains("GIVEN");
 
 		b = parser.parseResource(Bundle.class, encoded);
 
@@ -680,7 +679,7 @@ public class JsonParserR4Test extends BaseTest {
 		assertThat(encoded, not(containsString("http://FOO")));
 		assertThat(encoded, (containsString("PATIENTID")));
 		assertThat(encoded, (containsString("http://BAR")));
-		assertThat(encoded, containsString("GIVEN"));
+		assertThat(encoded).contains("GIVEN");
 
 		b = parser.parseResource(Bundle.class, encoded);
 
@@ -706,7 +705,7 @@ public class JsonParserR4Test extends BaseTest {
 		assertThat(encoded, not(containsString("http://FOO")));
 		assertThat(encoded, not(containsString("PATIENTID")));
 		assertThat(encoded, not(containsString("http://BAR")));
-		assertThat(encoded, containsString("GIVEN"));
+		assertThat(encoded).contains("GIVEN");
 
 		b = parser.parseResource(Bundle.class, encoded);
 
@@ -726,7 +725,7 @@ public class JsonParserR4Test extends BaseTest {
 		p.addName().setFamily(longString);
 		String encoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(p);
 
-		assertThat(encoded, containsString(longString));
+		assertThat(encoded).contains(longString);
 	}
 
 	@Test
@@ -767,8 +766,8 @@ public class JsonParserR4Test extends BaseTest {
 		Patient parsed = jsonParser.parseResource(Patient.class, input);
 
 		ourLog.info(jsonParser.setPrettyPrint(true).encodeResourceToString(parsed));
-		assertThat(xmlParser.encodeResourceToString(parsed), containsString("Underweight"));
-		assertThat(jsonParser.encodeResourceToString(parsed), containsString("Underweight"));
+		assertThat(xmlParser.encodeResourceToString(parsed)).contains("Underweight");
+		assertThat(jsonParser.encodeResourceToString(parsed)).contains("Underweight");
 
 	}
 
@@ -1299,7 +1298,7 @@ public class JsonParserR4Test extends BaseTest {
 		patient.getName().add(humanName2);
 
 		final String patientString = ourCtx.newJsonParser().encodeResourceToString(patient);
-		assertThat(patientString, is(not(containsString("fhir_comment"))));
+		assertThat(patientString, not(containsString("fhir_comment")));
 	}
 
 	@DatatypeDef(

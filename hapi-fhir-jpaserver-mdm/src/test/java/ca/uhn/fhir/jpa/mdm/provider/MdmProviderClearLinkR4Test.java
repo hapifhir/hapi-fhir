@@ -40,12 +40,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static ca.uhn.fhir.mdm.api.MdmMatchOutcome.POSSIBLE_MATCH;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.notNullValue;
-import static org.hamcrest.Matchers.nullValue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -185,7 +180,7 @@ public class MdmProviderClearLinkR4Test extends BaseLinkR4Test {
 		assertLinkCount(3);
 
 		List<IBaseResource> allGoldenPatients = getAllGoldenPatients();
-		assertThat(allGoldenPatients, hasSize(2));
+		assertThat(allGoldenPatients).hasSize(2);
 
 		IIdType redirectedGoldenPatientId = allGoldenPatients.get(0).getIdElement().toVersionless();
 		IIdType goldenPatientId = allGoldenPatients.get(1).getIdElement().toVersionless();
@@ -219,26 +214,26 @@ public class MdmProviderClearLinkR4Test extends BaseLinkR4Test {
 	}
 
 	private void assertNoGoldenPatientsExist() {
-		assertThat(getAllGoldenPatients(), hasSize(0));
+		assertThat(getAllGoldenPatients()).hasSize(0);
 	}
 
 	private void assertNoPatientLinksExist() {
-		assertThat(getPatientLinks(), hasSize(0));
+		assertThat(getPatientLinks()).hasSize(0);
 	}
 
 	private void assertNoHistoricalLinksExist(List<String> theGoldenResourceIds, List<String> theResourceIds) {
-		assertThat(getHistoricalLinks(theGoldenResourceIds, theResourceIds), hasSize(0));
+		assertThat(getHistoricalLinks(theGoldenResourceIds, theResourceIds)).hasSize(0);
 	}
 
 	private void assertNoPractitionerLinksExist() {
-		assertThat(getPractitionerLinks(), hasSize(0));
+		assertThat(getPractitionerLinks()).hasSize(0);
 	}
 
 	@Test
 	public void testClearPatientLinks() {
 		assertLinkCount(2);
 		Patient read = myPatientDao.read(new IdDt(mySourcePatientId.getValueAsString()).toVersionless());
-		assertThat(read, is(notNullValue()));
+		assertThat(read).isNotNull();
 		clearMdmLinks("Patient");
 		assertNoPatientLinksExist();
 		try {
@@ -257,11 +252,11 @@ public class MdmProviderClearLinkR4Test extends BaseLinkR4Test {
 		createPatientAndUpdateLinks(buildJanePatient());
 		Patient patientAndUpdateLinks = createPatientAndUpdateLinks(buildJanePatient());
 		IAnyResource goldenResource = getGoldenResourceFromTargetResource(patientAndUpdateLinks);
-		assertThat(goldenResource, is(notNullValue()));
+		assertThat(goldenResource).isNotNull();
 		clearMdmLinks();
 		assertNoPatientLinksExist();
 		goldenResource = getGoldenResourceFromTargetResource(patientAndUpdateLinks);
-		assertThat(goldenResource, is(nullValue()));
+		assertThat(goldenResource).isNull();
 	}
 
 	@Test
@@ -279,7 +274,7 @@ public class MdmProviderClearLinkR4Test extends BaseLinkR4Test {
 
 		assertNoPatientLinksExist();
 		IBundleProvider search = myPatientDao.search(buildGoldenResourceParameterMap());
-		assertThat(search.size(), is(equalTo(0)));
+		assertThat(search.size()).isEqualTo(0);
 	}
 
 	/**
@@ -327,7 +322,7 @@ public class MdmProviderClearLinkR4Test extends BaseLinkR4Test {
 
 		assertNoPatientLinksExist();
 		IBundleProvider search = myPatientDao.search(buildGoldenResourceParameterMap());
-		assertThat(search.size(), is(equalTo(0)));
+		assertThat(search.size()).isEqualTo(0);
 
 	}
 
@@ -342,7 +337,7 @@ public class MdmProviderClearLinkR4Test extends BaseLinkR4Test {
 	public void testClearPractitionerLinks() {
 		assertLinkCount(2);
 		Practitioner read = myPractitionerDao.read(new IdDt(myPractitionerGoldenResourceId.getValueAsString()).toVersionless());
-		assertThat(read, is(notNullValue()));
+		assertThat(read).isNotNull();
 		clearMdmLinks("Practitioner");
 		assertNoPractitionerLinksExist();
 		try {
@@ -358,7 +353,7 @@ public class MdmProviderClearLinkR4Test extends BaseLinkR4Test {
 			myMdmProvider.clearMdmLinks(getResourceNames("Observation"), null, myRequestDetails);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage(), is(equalTo("HAPI-1500: $mdm-clear does not support resource type: Observation")));
+			assertThat(e.getMessage()).isEqualTo("HAPI-1500: $mdm-clear does not support resource type: Observation");
 		}
 	}
 

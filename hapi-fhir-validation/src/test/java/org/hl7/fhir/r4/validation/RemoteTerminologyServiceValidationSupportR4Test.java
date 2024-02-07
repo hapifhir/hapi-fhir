@@ -51,8 +51,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.lessThan;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -101,7 +100,7 @@ public class RemoteTerminologyServiceValidationSupportR4Test extends BaseValidat
 
 	@AfterEach
 	public void after() {
-		assertThat(myValueSetProvider.myInvocationCount, lessThan(2));
+		assertThat(myValueSetProvider.myInvocationCount).isLessThan(2);
 	}
 
 	@Test

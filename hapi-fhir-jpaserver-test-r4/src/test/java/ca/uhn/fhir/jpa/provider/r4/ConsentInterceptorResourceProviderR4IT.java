@@ -68,16 +68,13 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.leftPad;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
-import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasItem;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.blankOrNullString;
-import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.matchesPattern;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -139,7 +136,7 @@ public class ConsentInterceptorResourceProviderR4IT extends BaseResourceProvider
 		}
 
 		Bundle execute = (Bundle) myClient.transaction().withBundle(builder.getBundle()).execute();
-		assertThat(execute.getEntry().size(), is(equalTo(20)));
+		assertThat(execute.getEntry().size()).isEqualTo(20);
 
 		myInterceptorRegistry.unregisterInterceptor(myBinaryStorageInterceptor);
 	}
@@ -162,7 +159,7 @@ public class ConsentInterceptorResourceProviderR4IT extends BaseResourceProvider
 			.execute();
 		List<IBaseResource> resources = BundleUtil.toListOfResources(myFhirContext, result);
 		List<String> returnedIdValues = toUnqualifiedVersionlessIdValues(resources);
-		assertThat(returnedIdValues, hasSize(15));
+		assertThat(returnedIdValues).hasSize(15);
 		assertEquals(myObservationIdsEvenOnly.subList(0, 15), returnedIdValues);
 
 		// Fetch the next page
@@ -172,7 +169,7 @@ public class ConsentInterceptorResourceProviderR4IT extends BaseResourceProvider
 			.execute();
 		resources = BundleUtil.toListOfResources(myFhirContext, result);
 		returnedIdValues = toUnqualifiedVersionlessIdValues(resources);
-		assertThat(returnedIdValues, hasSize(10));
+		assertThat(returnedIdValues).hasSize(10);
 		assertEquals(myObservationIdsEvenOnly.subList(15, 25), returnedIdValues);
 	}
 
@@ -239,7 +236,7 @@ public class ConsentInterceptorResourceProviderR4IT extends BaseResourceProvider
 
 	private static void assertResponseIsNotFromCache(String theContext, IHttpResponse lastResponse) {
 		List<String> cacheOutcome= lastResponse.getHeaders(Constants.HEADER_X_CACHE);
-		assertThat(theContext + " - No cache response headers", cacheOutcome, empty());
+		assertThat(cacheOutcome).as(theContext + " - No cache response headers").isEmpty();
 	}
 
 	private static void assertResponseIsFromCache(String theContext, IHttpResponse lastResponse) {
@@ -380,7 +377,7 @@ public class ConsentInterceptorResourceProviderR4IT extends BaseResourceProvider
 		post.setEntity(toEntity(patient));
 		try (CloseableHttpResponse status = ourHttpClient.execute(post)) {
 			String id = status.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue();
-			assertThat(id, matchesPattern("^.*/Patient/[0-9]+/_history/[0-9]+$"));
+			assertThat(id).matches("^.*/Patient/[0-9]+/_history/[0-9]+$");
 			assertEquals(201, status.getStatusLine().getStatusCode());
 			String responseString = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 			assertThat(responseString, blankOrNullString());
@@ -394,12 +391,12 @@ public class ConsentInterceptorResourceProviderR4IT extends BaseResourceProvider
 		post.setEntity(toEntity(patient));
 		try (CloseableHttpResponse status = ourHttpClient.execute(post)) {
 			String id = status.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue();
-			assertThat(id, matchesPattern("^.*/Patient/[0-9]+/_history/[0-9]+$"));
+			assertThat(id).matches("^.*/Patient/[0-9]+/_history/[0-9]+$");
 			assertEquals(201, status.getStatusLine().getStatusCode());
 			assertNotNull(status.getEntity());
 			String responseString = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 			assertThat(responseString, not(blankOrNullString()));
-			assertThat(status.getEntity().getContentType().getValue().toLowerCase(), matchesPattern(".*json.*"));
+			assertThat(status.getEntity().getContentType().getValue().toLowerCase()).matches(".*json.*");
 		}
 
 	}
@@ -427,7 +424,7 @@ public class ConsentInterceptorResourceProviderR4IT extends BaseResourceProvider
 		put.setEntity(toEntity(patient));
 		try (CloseableHttpResponse status = ourHttpClient.execute(put)) {
 			String idVal = status.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue();
-			assertThat(idVal, matchesPattern("^.*/Patient/[0-9]+/_history/[0-9]+$"));
+			assertThat(idVal).matches("^.*/Patient/[0-9]+/_history/[0-9]+$");
 			assertEquals(200, status.getStatusLine().getStatusCode());
 			String responseString = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 			assertThat(responseString, blankOrNullString());
@@ -445,12 +442,12 @@ public class ConsentInterceptorResourceProviderR4IT extends BaseResourceProvider
 		put.setEntity(toEntity(patient));
 		try (CloseableHttpResponse status = ourHttpClient.execute(put)) {
 			String idVal = status.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue();
-			assertThat(idVal, matchesPattern("^.*/Patient/[0-9]+/_history/[0-9]+$"));
+			assertThat(idVal).matches("^.*/Patient/[0-9]+/_history/[0-9]+$");
 			assertEquals(200, status.getStatusLine().getStatusCode());
 			assertNotNull(status.getEntity());
 			String responseString = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 			assertThat(responseString, not(blankOrNullString()));
-			assertThat(status.getEntity().getContentType().getValue().toLowerCase(), matchesPattern(".*json.*"));
+			assertThat(status.getEntity().getContentType().getValue().toLowerCase()).matches(".*json.*");
 		}
 
 	}
@@ -500,9 +497,9 @@ public class ConsentInterceptorResourceProviderR4IT extends BaseResourceProvider
 			String responseString = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 			ourLog.info("Response: {}", responseString);
 			assertEquals(200, status.getStatusLine().getStatusCode());
-			assertThat(responseString, containsString("\"family\":\"PATIENT_FAMILY\""));
-			assertThat(responseString, containsString("\"given\":[\"PATIENT_GIVEN1\",\"PATIENT_GIVEN2\"]"));
-			assertThat(responseString, containsString("\"name\":\"ORG_NAME\""));
+			assertThat(responseString).contains("\"family\":\"PATIENT_FAMILY\"");
+			assertThat(responseString).contains("\"given\":[\"PATIENT_GIVEN1\",\"PATIENT_GIVEN2\"]");
+			assertThat(responseString).contains("\"name\":\"ORG_NAME\"");
 		}
 
 	}
@@ -530,12 +527,12 @@ public class ConsentInterceptorResourceProviderR4IT extends BaseResourceProvider
 			String responseString = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 			ourLog.info("Response: {}", responseString);
 			assertEquals(404, status.getStatusLine().getStatusCode());
-			assertThat(responseString, not(containsString("\"family\":\"PATIENT_FAMILY\"")));
-			assertThat(responseString, not(containsString("\"given\":[\"PATIENT_GIVEN1\",\"PATIENT_GIVEN2\"]")));
-			assertThat(responseString, not(containsString("\"name\":\"ORG_NAME\"")));
+			assertThat(responseString).doesNotContain("\"family\":\"PATIENT_FAMILY\"");
+			assertThat(responseString).doesNotContain("\"given\":[\"PATIENT_GIVEN1\",\"PATIENT_GIVEN2\"]");
+			assertThat(responseString).doesNotContain("\"name\":\"ORG_NAME\"");
 
 			OperationOutcome oo = myFhirContext.newJsonParser().parseResource(OperationOutcome.class, responseString);
-			assertThat(oo.getIssueFirstRep().getDiagnostics(), matchesPattern(Msg.code(1147) + "Unable to execute GraphQL Expression: HTTP 404 " + Msg.code(1995) + "Resource Patient/[0-9]+ is not known"));
+			assertThat(oo.getIssueFirstRep().getDiagnostics()).matches(Msg.code(1147) + "Unable to execute GraphQL Expression: HTTP 404 " + Msg.code(1995) + "Resource Patient/[0-9]+ is not known");
 		}
 
 	}
@@ -570,12 +567,12 @@ public class ConsentInterceptorResourceProviderR4IT extends BaseResourceProvider
 			String responseString = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 			ourLog.info("Response: {}", responseString);
 			assertEquals(404, status.getStatusLine().getStatusCode());
-			assertThat(responseString, not(containsString("\"family\":\"PATIENT_FAMILY\"")));
-			assertThat(responseString, not(containsString("\"given\":[\"PATIENT_GIVEN1\",\"PATIENT_GIVEN2\"]")));
-			assertThat(responseString, not(containsString("\"name\":\"ORG_NAME\"")));
+			assertThat(responseString).doesNotContain("\"family\":\"PATIENT_FAMILY\"");
+			assertThat(responseString).doesNotContain("\"given\":[\"PATIENT_GIVEN1\",\"PATIENT_GIVEN2\"]");
+			assertThat(responseString).doesNotContain("\"name\":\"ORG_NAME\"");
 
 			OperationOutcome oo = myFhirContext.newJsonParser().parseResource(OperationOutcome.class, responseString);
-			assertThat(oo.getIssueFirstRep().getDiagnostics(), matchesPattern(Msg.code(1147) + "Unable to execute GraphQL Expression: HTTP 404 " + Msg.code(1995) + "Resource Organization/[0-9]+ is not known"));
+			assertThat(oo.getIssueFirstRep().getDiagnostics()).matches(Msg.code(1147) + "Unable to execute GraphQL Expression: HTTP 404 " + Msg.code(1995) + "Resource Organization/[0-9]+ is not known");
 		}
 
 	}
@@ -693,7 +690,7 @@ public class ConsentInterceptorResourceProviderR4IT extends BaseResourceProvider
 			myClient.search().forResource(Patient.class).where(new StringClientParam("INVALID_PARAM").matchesExactly().value("value")).returnBundle(Bundle.class).execute();
 			fail();
 		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage(), containsString("INVALID_PARAM"));
+			assertThat(e.getMessage()).contains("INVALID_PARAM");
 		}
 	}
 
@@ -728,10 +725,10 @@ public class ConsentInterceptorResourceProviderR4IT extends BaseResourceProvider
 			String responseString = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 			ourLog.info("Response: {}", responseString);
 			assertEquals(200, status.getStatusLine().getStatusCode());
-			assertThat(responseString, containsString("\"family\":\"PATIENT_FAMILY\""));
-			assertThat(responseString, containsString("\"given\":[\"PATIENT_GIVEN1\",\"PATIENT_GIVEN2\"]"));
-			assertThat(responseString, not(containsString("\"name\":\"ORG_NAME\"")));
-			assertThat(responseString, containsString("\"system\":\"ORG_SYSTEM\""));
+			assertThat(responseString).contains("\"family\":\"PATIENT_FAMILY\"");
+			assertThat(responseString).contains("\"given\":[\"PATIENT_GIVEN1\",\"PATIENT_GIVEN2\"]");
+			assertThat(responseString).doesNotContain("\"name\":\"ORG_NAME\"");
+			assertThat(responseString).contains("\"system\":\"ORG_SYSTEM\"");
 		}
 
 	}
@@ -746,11 +743,11 @@ public class ConsentInterceptorResourceProviderR4IT extends BaseResourceProvider
 
 		// when
 		Bundle results = myClient.search().forResource(Observation.class).count(10).returnBundle(Bundle.class).execute();
-		assertThat(results.getEntry(), hasSize(0));
+		assertThat(results.getEntry()).hasSize(0);
 
 		// then
 		String nextUrl = BundleUtil.getLinkUrlOfType(myFhirContext, results, "next");
-		assertThat(nextUrl, containsString("_getpagesoffset=10"));
+		assertThat(nextUrl).contains("_getpagesoffset=10");
 
 	}
 
@@ -768,7 +765,7 @@ public class ConsentInterceptorResourceProviderR4IT extends BaseResourceProvider
 
 		// then
 		String previous = BundleUtil.getLinkUrlOfType(myFhirContext, nextResults, "previous");
-		assertThat(previous, containsString("_getpagesoffset=0"));
+		assertThat(previous).contains("_getpagesoffset=0");
 
 	}
 

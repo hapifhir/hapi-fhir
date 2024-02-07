@@ -60,10 +60,8 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 import static ca.uhn.fhir.util.HapiExtensions.EX_SEND_DELETE_MESSAGES;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -222,7 +220,7 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 		try {
 			createSubscription(databaseCriteria, null, ourNotificationListenerServer);
 		} catch (UnprocessableEntityException e) {
-			assertThat(e.getMessage(), is(containsString("HAPI-2367: This server is configured to only allow in-memory subscriptions.")));
+			assertThat(e.getMessage()).contains("HAPI-2367: This server is configured to only allow in-memory subscriptions.");
 		}
 		myStorageSettings.setOnlyAllowInMemorySubscriptions(false);
 	}
@@ -652,7 +650,7 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 			myClient.create().resource(subscription).execute();
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertThat(e.getMessage(), containsString("Can not process submitted Subscription - Subscription.status must be populated on this server"));
+			assertThat(e.getMessage()).contains("Can not process submitted Subscription - Subscription.status must be populated on this server");
 		}
 	}
 

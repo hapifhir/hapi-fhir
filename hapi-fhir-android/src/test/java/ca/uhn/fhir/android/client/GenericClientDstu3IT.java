@@ -37,8 +37,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
 
-import static org.hamcrest.CoreMatchers.startsWith;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -126,7 +125,7 @@ public class GenericClientDstu3IT {
 		Request request = capt.getAllValues().get(0);
 		ourLog.info(request.headers().toString());
 
-		assertThat(request.url().toString(), startsWith("http://example.com/fhir/Binary"));
+		assertThat(request.url().toString()).startsWith("http://example.com/fhir/Binary");
 		validateUserAgent(capt);
 
 		assertEquals(Constants.CT_FHIR_JSON_NEW + ";charset=utf-8", request.body().contentType().toString().toLowerCase().replace(" ", ""));

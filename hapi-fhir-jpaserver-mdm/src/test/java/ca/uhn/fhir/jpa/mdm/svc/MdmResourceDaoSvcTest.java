@@ -24,8 +24,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -58,7 +57,7 @@ public class MdmResourceDaoSvcTest extends BaseMdmR4Test {
 
 		Optional<IAnyResource> foundGoldenResource = myResourceDaoSvc.searchGoldenResourceByEID(TEST_EID, "Patient");
 		assertTrue(foundGoldenResource.isPresent());
-		assertThat(foundGoldenResource.get().getIdElement().toUnqualifiedVersionless().getValue(), is(goodSourcePatient.getIdElement().toUnqualifiedVersionless().getValue()));
+		assertThat(foundGoldenResource.get().getIdElement().toUnqualifiedVersionless().getValue()).isEqualTo(goodSourcePatient.getIdElement().toUnqualifiedVersionless().getValue());
 	}
 
 	@Test
@@ -71,7 +70,7 @@ public class MdmResourceDaoSvcTest extends BaseMdmR4Test {
 
 		Optional<IAnyResource> foundSourcePatient = myResourceDaoSvc.searchGoldenResourceByEID(TEST_EID, "Patient");
 		assertTrue(foundSourcePatient.isPresent());
-		assertThat(foundSourcePatient.get().getIdElement().toUnqualifiedVersionless().getValue(), is(goodSourcePatient.getIdElement().toUnqualifiedVersionless().getValue()));
+		assertThat(foundSourcePatient.get().getIdElement().toUnqualifiedVersionless().getValue()).isEqualTo(goodSourcePatient.getIdElement().toUnqualifiedVersionless().getValue());
 	}
 
 	@Test
@@ -87,7 +86,7 @@ public class MdmResourceDaoSvcTest extends BaseMdmR4Test {
 
 		Optional<IAnyResource> foundSourcePatient = myResourceDaoSvc.searchGoldenResourceByEID(TEST_EID, "Patient", requestPartitionId);
 		assertTrue(foundSourcePatient.isPresent());
-		assertThat(foundSourcePatient.get().getIdElement().toUnqualifiedVersionless().getValue(), is(goodSourcePatient.getIdElement().toUnqualifiedVersionless().getValue()));
+		assertThat(foundSourcePatient.get().getIdElement().toUnqualifiedVersionless().getValue()).isEqualTo(goodSourcePatient.getIdElement().toUnqualifiedVersionless().getValue());
 	}
 
 	@Test

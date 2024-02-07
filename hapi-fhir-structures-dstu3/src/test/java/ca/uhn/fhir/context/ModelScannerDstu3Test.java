@@ -32,8 +32,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -190,12 +189,12 @@ public class ModelScannerDstu3Test {
 		Collection<Class<? extends IBase>> resourceTypes = new ArrayList<>();
 		resourceTypes.add(Patient.class);
 		ModelScanner scanner = new ModelScanner(ctx, version, definitions, resourceTypes);
-		assertThat(resourceTypes, contains(Patient.class));
+		assertThat(resourceTypes).containsExactly(Patient.class);
 
 		// Extra scans don't do anything
 		scanner.scan(Patient.class);
 		scanner.scan(Patient.class);
-		assertThat(resourceTypes, contains(Patient.class));
+		assertThat(resourceTypes).containsExactly(Patient.class);
 	}
 
 	@Test

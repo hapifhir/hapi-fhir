@@ -50,15 +50,13 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static java.util.Comparator.comparing;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasProperty;
-import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.not;
-import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
@@ -98,7 +96,7 @@ public class SearchParamExtractorR4Test implements ITestDataBuilder {
 		SearchParamExtractorR4 extractor = new SearchParamExtractorR4(new StorageSettings(), new PartitionSettings(), ourCtx, mySearchParamRegistry);
 		ISearchParamExtractor.SearchParamSet<ResourceIndexedSearchParamString> stringSearchParams = extractor.extractSearchParamStrings(patient);
 		List<String> nameValues = stringSearchParams.stream().filter(param -> "name".equals(param.getParamName())).map(ResourceIndexedSearchParamString::getValueExact).collect(Collectors.toList());
-		assertThat(nameValues, containsInAnyOrder("Jimmy", "Jones", "King Jimmy Jones the Great", "King", "the Great"));
+		assertThat(nameValues).containsExactlyInAnyOrder("Jimmy", "Jones", "King Jimmy Jones the Great", "King", "the Great");
 	}
 
 	@Test
@@ -374,13 +372,7 @@ public class SearchParamExtractorR4Test implements ITestDataBuilder {
 		list.forEach(t->t.calculateHashes());
 		ourLog.info("Found tokens:\n * {}", list.stream().map(t->t.toString()).collect(Collectors.joining("\n * ")));
 
-		assertThat(list, containsInAnyOrder(
-			new ResourceIndexedSearchParamToken(new PartitionSettings(), "Patient", "deceased", null, "false"),
-			new ResourceIndexedSearchParamToken(new PartitionSettings(), "Patient", "identifier", "http://foo1", "bar1"),
-			new ResourceIndexedSearchParamToken(new PartitionSettings(), "Patient", "identifier", "http://foo2", "bar2"),
-			new ResourceIndexedSearchParamToken(new PartitionSettings(), "Patient", "identifier:of-type", "http://terminology.hl7.org/CodeSystem/v2-0203", "MR|bar1"),
-			new ResourceIndexedSearchParamToken(new PartitionSettings(), "Patient", "identifier:of-type", "http://terminology.hl7.org/CodeSystem/v2-0203", "MR|bar2")
-		));
+		assertThat(list).containsExactlyInAnyOrder(new ResourceIndexedSearchParamToken(new PartitionSettings(), "Patient", "deceased", null, "false"), new ResourceIndexedSearchParamToken(new PartitionSettings(), "Patient", "identifier", "http://foo1", "bar1"), new ResourceIndexedSearchParamToken(new PartitionSettings(), "Patient", "identifier", "http://foo2", "bar2"), new ResourceIndexedSearchParamToken(new PartitionSettings(), "Patient", "identifier:of-type", "http://terminology.hl7.org/CodeSystem/v2-0203", "MR|bar1"), new ResourceIndexedSearchParamToken(new PartitionSettings(), "Patient", "identifier:of-type", "http://terminology.hl7.org/CodeSystem/v2-0203", "MR|bar2"));
 
 	}
 
@@ -466,7 +458,7 @@ public class SearchParamExtractorR4Test implements ITestDataBuilder {
 			List<ResourceIndexedSearchParamComposite> components = c.stream()
 				.filter(idx -> idx.getSearchParamName().equals("component-code-value-concept"))
 				.collect(Collectors.toList());
-			assertThat("one components per element", components, hasSize(3));
+			assertThat(components).as("one components per element").hasSize(3);
 
 		}
 
@@ -483,20 +475,20 @@ public class SearchParamExtractorR4Test implements ITestDataBuilder {
 			List<ResourceIndexedSearchParamComposite> components = c.stream()
 				.filter(idx -> idx.getSearchParamName().equals("component-code-value-concept"))
 				.toList();
-			assertThat(components, hasSize(1));
+			assertThat(components).hasSize(1);
 			ResourceIndexedSearchParamComposite componentCodeValueConcept = components.get(0);
 
 			// component-code-value-concept is two token params - component-code and component-value-concept
 			List<ResourceIndexedSearchParamComposite.Component> indexedComponentsOfElement = componentCodeValueConcept.getComponents();
-			assertThat("component-code-value-concept has two sub-params", indexedComponentsOfElement, hasSize(2));
+			assertThat(indexedComponentsOfElement).as("component-code-value-concept has two sub-params").hasSize(2);
 
 			final ResourceIndexedSearchParamComposite.Component component0 = indexedComponentsOfElement.get(0);
-			assertThat(component0.getSearchParamName(), equalTo("component-code"));
-			assertThat(component0.getSearchParameterType(), equalTo(RestSearchParameterTypeEnum.TOKEN));
+			assertThat(component0.getSearchParamName()).isEqualTo("component-code");
+			assertThat(component0.getSearchParameterType()).isEqualTo(RestSearchParameterTypeEnum.TOKEN);
 
 			final ResourceIndexedSearchParamComposite.Component component1 = indexedComponentsOfElement.get(1);
-			assertThat(component1.getSearchParamName(), equalTo("component-value-concept"));
-			assertThat(component1.getSearchParameterType(), equalTo(RestSearchParameterTypeEnum.TOKEN));
+			assertThat(component1.getSearchParamName()).isEqualTo("component-value-concept");
+			assertThat(component1.getSearchParameterType()).isEqualTo(RestSearchParameterTypeEnum.TOKEN);
 		}
 
 		@Test
@@ -512,31 +504,31 @@ public class SearchParamExtractorR4Test implements ITestDataBuilder {
 			List<ResourceIndexedSearchParamComposite> components = c.stream()
 				.filter(idx -> idx.getSearchParamName().equals("component-code-value-concept"))
 				.toList();
-			assertThat(components, hasSize(1));
+			assertThat(components).hasSize(1);
 			ResourceIndexedSearchParamComposite spEntry = components.get(0);
 
 			// this SP has two sub-components
-			assertThat(spEntry.getComponents(), hasSize(2));
+			assertThat(spEntry.getComponents()).hasSize(2);
 
 			ResourceIndexedSearchParamComposite.Component indexComponent0 = spEntry.getComponents().get(0);
-			assertThat(indexComponent0.getSearchParamName(), notNullValue());
-			assertThat(indexComponent0.getSearchParamName(), equalTo("component-code"));
-			assertThat(indexComponent0.getSearchParameterType(), equalTo(RestSearchParameterTypeEnum.TOKEN));
-			assertThat(indexComponent0.getParamIndexValues(), hasSize(2));
+			assertThat(indexComponent0.getSearchParamName()).isNotNull();
+			assertThat(indexComponent0.getSearchParamName()).isEqualTo("component-code");
+			assertThat(indexComponent0.getSearchParameterType()).isEqualTo(RestSearchParameterTypeEnum.TOKEN);
+			assertThat(indexComponent0.getParamIndexValues()).hasSize(2);
 			// token indexes both the token, and the display text
 			ResourceIndexedSearchParamToken tokenIdx0 = (ResourceIndexedSearchParamToken) indexComponent0.getParamIndexValues().stream()
 				.filter(i -> i instanceof ResourceIndexedSearchParamToken)
 				.findFirst().orElseThrow();
-			assertThat(tokenIdx0.getParamName(), equalTo("component-code"));
-			assertThat(tokenIdx0.getResourceType(), equalTo("Observation"));
-			assertThat(tokenIdx0.getValue(), equalTo("code_token"));
+			assertThat(tokenIdx0.getParamName()).isEqualTo("component-code");
+			assertThat(tokenIdx0.getResourceType()).isEqualTo("Observation");
+			assertThat(tokenIdx0.getValue()).isEqualTo("code_token");
 
 			ResourceIndexedSearchParamString tokenDisplayIdx0 = (ResourceIndexedSearchParamString) indexComponent0.getParamIndexValues().stream()
 				.filter(i -> i instanceof ResourceIndexedSearchParamString)
 				.findFirst().orElseThrow();
-			assertThat(tokenDisplayIdx0.getParamName(), equalTo("component-code"));
-			assertThat(tokenDisplayIdx0.getResourceType(), equalTo("Observation"));
-			assertThat(tokenDisplayIdx0.getValueExact(), equalTo("display value"));
+			assertThat(tokenDisplayIdx0.getParamName()).isEqualTo("component-code");
+			assertThat(tokenDisplayIdx0.getResourceType()).isEqualTo("Observation");
+			assertThat(tokenDisplayIdx0.getValueExact()).isEqualTo("display value");
 		}
 	}
 

@@ -60,10 +60,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.function.Consumer;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.CoreMatchers.not;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.empty;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -88,7 +86,7 @@ public class OpenApiInterceptorTest {
 			String url = "http://localhost:" + myServer.getPort() + "/fhir/swagger-ui/";
 			String resp = fetchSwaggerUi(url);
 			List<String> buttonTexts = parsePageButtonTexts(resp, url);
-			assertThat(buttonTexts.toString(), buttonTexts, Matchers.contains("All", "System Level Operations", "Patient 2", "OperationDefinition 1", "Observation 0"));
+			assertThat(buttonTexts).as(buttonTexts.toString()).containsExactly("All", "System Level Operations", "Patient 2", "OperationDefinition 1", "Observation 0");
 		}
 
 		@Test
@@ -99,7 +97,7 @@ public class OpenApiInterceptorTest {
 			String url = "http://localhost:" + myServer.getPort() + "/fhir/swagger-ui/";
 			String resp = fetchSwaggerUi(url);
 			List<String> buttonTexts = parsePageButtonTexts(resp, url);
-			assertThat(buttonTexts.toString(), buttonTexts, Matchers.contains("All", "System Level Operations", "OperationDefinition 1", "Observation", "Patient"));
+			assertThat(buttonTexts).as(buttonTexts.toString()).containsExactly("All", "System Level Operations", "OperationDefinition 1", "Observation", "Patient");
 		}
 
 
@@ -260,7 +258,7 @@ public class OpenApiInterceptorTest {
 				ourLog.info("Response: {}", response);
 				ourLog.info("Response: {}", responseString);
 				assertEquals(200, response.getStatusLine().getStatusCode());
-				assertThat(responseString, containsString("<title>Swagger UI</title>"));
+				assertThat(responseString).contains("<title>Swagger UI</title>");
 			}
 
 			get = new HttpGet("http://localhost:" + myServer.getPort() + "/fhir/?foo=foo");
@@ -284,8 +282,8 @@ public class OpenApiInterceptorTest {
 
 			String url = "http://localhost:" + myServer.getPort() + "/fhir/swagger-ui/";
 			String resp = fetchSwaggerUi(url);
-			assertThat(resp, resp, containsString("<p>This server is copyright <strong>Example Org</strong> 2021</p>"));
-			assertThat(resp, resp, not(containsString("swagger-ui-custom.css")));
+			assertThat(resp).as(resp).contains("<p>This server is copyright <strong>Example Org</strong> 2021</p>");
+			assertThat(resp).as(resp).doesNotContain("swagger-ui-custom.css");
 		}
 
 		@Test
@@ -295,7 +293,7 @@ public class OpenApiInterceptorTest {
 
 			String url = "http://localhost:" + myServer.getPort() + "/fhir/swagger-ui/";
 			String resp = fetchSwaggerUi(url);
-			assertThat(resp, resp, not(containsString("img id=\"banner_img\"")));
+			assertThat(resp).as(resp).doesNotContain("img id=\"banner_img\"");
 		}
 
 		@Test
@@ -309,7 +307,7 @@ public class OpenApiInterceptorTest {
 			// Fetch Swagger UI HTML
 			String url = "http://localhost:" + myServer.getPort() + "/fhir/swagger-ui/";
 			String resp = fetchSwaggerUi(url);
-			assertThat(resp, resp, containsString("<link rel=\"stylesheet\" type=\"text/css\" href=\"./swagger-ui-custom.css\"/>"));
+			assertThat(resp).as(resp).contains("<link rel=\"stylesheet\" type=\"text/css\" href=\"./swagger-ui-custom.css\"/>");
 
 			// Fetch Custom CSS
 			url = "http://localhost:" + myServer.getPort() + "/fhir/swagger-ui/swagger-ui-custom.css";
@@ -342,7 +340,7 @@ public class OpenApiInterceptorTest {
 			String url = "http://localhost:" + myServer.getPort() + "/fhir/swagger-ui/";
 			String resp = fetchSwaggerUi(url);
 			List<String> buttonTexts = parsePageButtonTexts(resp, url);
-			assertThat(buttonTexts.toString(), buttonTexts, empty());
+			assertThat(buttonTexts).as(buttonTexts.toString()).isEmpty();
 		}
 
 		@Test

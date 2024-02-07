@@ -12,8 +12,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SuppressWarnings("unchecked")
@@ -42,7 +41,7 @@ public class PartitioningSearchCacheR4Test extends BasePartitioningR4Test {
 			assertEquals(0, StringUtils.countMatches(searchSql, "PARTITION_ID"), searchSql);
 
 			List<IIdType> ids = toUnqualifiedVersionlessIds(outcome);
-			assertThat(ids, containsInAnyOrder(patientId11, patientId12));
+			assertThat(ids).containsExactlyInAnyOrder(patientId11, patientId12);
 		}
 
 		// Try from a different partition
@@ -59,7 +58,7 @@ public class PartitioningSearchCacheR4Test extends BasePartitioningR4Test {
 			assertEquals(0, StringUtils.countMatches(searchSql, "PARTITION_ID"), searchSql);
 
 			List<IIdType> ids = toUnqualifiedVersionlessIds(outcome);
-			assertThat(ids, containsInAnyOrder(patientId21, patientId22));
+			assertThat(ids).containsExactlyInAnyOrder(patientId21, patientId22);
 		}
 
 		// Try from the first partition, should be a cache hit this time
@@ -76,7 +75,7 @@ public class PartitioningSearchCacheR4Test extends BasePartitioningR4Test {
 			assertEquals(0, StringUtils.countMatches(searchSql, "PARTITION_ID"), searchSql);
 
 			List<IIdType> ids = toUnqualifiedVersionlessIds(outcome);
-			assertThat(ids, containsInAnyOrder(patientId21, patientId22));
+			assertThat(ids).containsExactlyInAnyOrder(patientId21, patientId22);
 		}
 
 	}
@@ -103,7 +102,7 @@ public class PartitioningSearchCacheR4Test extends BasePartitioningR4Test {
 			assertEquals(0, StringUtils.countMatches(searchSql, "PARTITION_ID"), searchSql);
 
 			List<IIdType> ids = toUnqualifiedVersionlessIds(outcome);
-			assertThat(ids, containsInAnyOrder(patientId11, patientId12, patientIdNull1, patientIdNull2));
+			assertThat(ids).containsExactlyInAnyOrder(patientId11, patientId12, patientIdNull1, patientIdNull2);
 		}
 
 		// Try from a different partition
@@ -120,7 +119,7 @@ public class PartitioningSearchCacheR4Test extends BasePartitioningR4Test {
 			assertEquals(0, StringUtils.countMatches(searchSql, "PARTITION_ID"), searchSql);
 
 			List<IIdType> ids = toUnqualifiedVersionlessIds(outcome);
-			assertThat(ids, containsInAnyOrder(patientId11, patientId12, patientId21, patientId22));
+			assertThat(ids).containsExactlyInAnyOrder(patientId11, patientId12, patientId21, patientId22);
 		}
 
 		// Try from the first partition, should be a cache hit this time
@@ -137,7 +136,7 @@ public class PartitioningSearchCacheR4Test extends BasePartitioningR4Test {
 			assertEquals(0, StringUtils.countMatches(searchSql, "PARTITION_ID"), searchSql);
 
 			List<IIdType> ids = toUnqualifiedVersionlessIds(outcome);
-			assertThat(ids, containsInAnyOrder(patientId11, patientId12, patientIdNull1, patientIdNull2));
+			assertThat(ids).containsExactlyInAnyOrder(patientId11, patientId12, patientIdNull1, patientIdNull2);
 		}
 
 	}

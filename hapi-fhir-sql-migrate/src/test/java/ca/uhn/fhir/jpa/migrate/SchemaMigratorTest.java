@@ -19,10 +19,7 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.function.Supplier;
 
-import static org.hamcrest.CoreMatchers.startsWith;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.endsWith;
-import static org.hamcrest.Matchers.hasSize;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -41,8 +38,8 @@ public class SchemaMigratorTest extends BaseTest {
 			schemaMigrator.validate();
 			fail();
 		} catch (ConfigurationException e) {
-			assertThat(e.getMessage(), startsWith(Msg.code(27) + "The database schema for "));
-			assertThat(e.getMessage(), endsWith(" is out of date.  Current database schema version is unknown.  Schema version required by application is 1.1.  Please run the database migrator."));
+			assertThat(e.getMessage()).startsWith(Msg.code(27) + "The database schema for ");
+			assertThat(e.getMessage()).endsWith(" is out of date.  Current database schema version is unknown.  Schema version required by application is 1.1.  Please run the database migrator.");
 		}
 
 		schemaMigrator.migrate();
@@ -67,7 +64,7 @@ public class SchemaMigratorTest extends BaseTest {
 			assertEquals(1, failedResult.failedTasks.size());
 			assertEquals(0, failedResult.executedStatements.size());
 
-			assertThat(myHapiMigrationDao.findAll(), hasSize(1));
+			assertThat(myHapiMigrationDao.findAll()).hasSize(1);
 		}
 		schemaMigrator = createTableMigrator();
 
@@ -78,7 +75,7 @@ public class SchemaMigratorTest extends BaseTest {
 		assertEquals(1, result.executedStatements.size());
 
 		List<HapiMigrationEntity> entities = myHapiMigrationDao.findAll();
-		assertThat(entities, hasSize(2));
+		assertThat(entities).hasSize(2);
 		assertEquals(1, entities.get(0).getPid());
 		assertEquals(false, entities.get(0).getSuccess());
 		assertEquals(2, entities.get(1).getPid());
@@ -115,7 +112,7 @@ public class SchemaMigratorTest extends BaseTest {
 
 		DriverTypeEnum.ConnectionProperties connectionProperties = super.getDriverType().newConnectionProperties(getDataSource().getUrl(), getDataSource().getUsername(), getDataSource().getPassword());
 		Set<String> tableNames = JdbcUtils.getTableNames(connectionProperties);
-		assertThat(tableNames, Matchers.containsInAnyOrder("SOMETABLE_A", "SOMETABLE_C"));
+		assertThat(tableNames).containsExactlyInAnyOrder("SOMETABLE_A", "SOMETABLE_C");
 	}
 
 	@Nonnull

@@ -30,8 +30,7 @@ import jakarta.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.hasSize;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -128,7 +127,7 @@ class JobDataSinkTest {
 		assertEquals(LAST_STEP_ID, batchWorkChunk.targetStepId);
 		assertNotNull(batchWorkChunk.serializedData);
 		Step1Output stepOutput = JsonUtil.deserialize(batchWorkChunk.serializedData, Step1Output.class);
-		assertThat(stepOutput.getPids(), hasSize(PID_COUNT));
+		assertThat(stepOutput.getPids()).hasSize(PID_COUNT);
 	}
 
 	private static class Step1Output implements IModelJson {

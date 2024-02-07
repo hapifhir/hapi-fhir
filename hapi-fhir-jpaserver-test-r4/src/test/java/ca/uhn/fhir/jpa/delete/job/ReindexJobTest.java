@@ -36,10 +36,9 @@ import java.util.Date;
 import java.util.List;
 import java.util.stream.Stream;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.blankOrNullString;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -291,7 +290,7 @@ public class ReindexJobTest extends BaseJpaR4Test {
 
 		assertEquals(2, myObservationDao.search(SearchParameterMap.newSynchronous(), mySrd).size());
 		// The search param value is on the observation, but it hasn't been indexed yet
-		assertThat(myReindexTestHelper.getAlleleObservationIds(), hasSize(0));
+		assertThat(myReindexTestHelper.getAlleleObservationIds()).hasSize(0);
 
 		// Only reindex one of them
 		ReindexJobParameters parameters = new ReindexJobParameters();
@@ -309,7 +308,7 @@ public class ReindexJobTest extends BaseJpaR4Test {
 
 		// Now one of them should be indexed
 		List<String> alleleObservationIds = myReindexTestHelper.getAlleleObservationIds();
-		assertThat(alleleObservationIds, hasSize(1));
+		assertThat(alleleObservationIds).hasSize(1);
 		assertEquals(obsFinalId.getIdPart(), alleleObservationIds.get(0));
 
 		myStorageSettings.setMarkResourcesForReindexingUponSearchParameterChange(reindexPropertyCache);
@@ -321,7 +320,7 @@ public class ReindexJobTest extends BaseJpaR4Test {
 
 		runInTransaction(() -> {
 			int entriesInSpIndexTokenTable = myResourceIndexedSearchParamTokenDao.countForResourceId(obsId.getIdPartAsLong());
-			assertThat(entriesInSpIndexTokenTable, equalTo(1));
+			assertThat(entriesInSpIndexTokenTable).isEqualTo(1);
 
 			// simulate resource deletion
 			ResourceTable resource = myResourceTableDao.findById(obsId.getIdPartAsLong()).orElseThrow();
@@ -346,7 +345,7 @@ public class ReindexJobTest extends BaseJpaR4Test {
 		// then
 		runInTransaction(() -> {
 			int entriesInSpIndexTokenTablePostReindexing = myResourceIndexedSearchParamTokenDao.countForResourceId(obsId.getIdPartAsLong());
-			assertThat(entriesInSpIndexTokenTablePostReindexing, equalTo(0));
+			assertThat(entriesInSpIndexTokenTablePostReindexing).isEqualTo(0);
 		});
 	}
 
@@ -365,7 +364,7 @@ public class ReindexJobTest extends BaseJpaR4Test {
 
 		assertEquals(50, myObservationDao.search(SearchParameterMap.newSynchronous(), mySrd).size());
 		// The search param value is on the observation, but it hasn't been indexed yet
-		assertThat(myReindexTestHelper.getAlleleObservationIds(), hasSize(0));
+		assertThat(myReindexTestHelper.getAlleleObservationIds()).hasSize(0);
 
 		// execute
 		JobInstanceStartRequest startRequest = new JobInstanceStartRequest();
@@ -377,7 +376,7 @@ public class ReindexJobTest extends BaseJpaR4Test {
 		// validate
 		assertEquals(50, myObservationDao.search(SearchParameterMap.newSynchronous(), mySrd).size());
 		// Now all of them should be indexed
-		assertThat(myReindexTestHelper.getAlleleObservationIds(), hasSize(50));
+		assertThat(myReindexTestHelper.getAlleleObservationIds()).hasSize(50);
 	}
 
 	@Test

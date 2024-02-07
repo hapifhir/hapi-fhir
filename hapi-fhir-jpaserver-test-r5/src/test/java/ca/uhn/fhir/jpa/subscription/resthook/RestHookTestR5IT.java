@@ -9,7 +9,6 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.HapiExtensions;
-import org.hamcrest.MatcherAssert;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -39,10 +38,8 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.matchesPattern;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -183,7 +180,7 @@ public class RestHookTestR5IT extends BaseSubscriptionsR5Test {
 
 		Observation receivedObs = assertBundleAndGetObservation(subscription, sentObservation, 1L);
 
-		MatcherAssert.assertThat(receivedObs.getSubject().getReference(), matchesPattern("Patient/[0-9]+"));
+		assertThat(receivedObs.getSubject().getReference()).matches("Patient/[0-9]+");
 	}
 
 	@Test
@@ -756,7 +753,7 @@ public class RestHookTestR5IT extends BaseSubscriptionsR5Test {
 			createSubscriptionTopic(subscriptionTopic);
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertThat(e.getMessage(), containsString("Can not process submitted SubscriptionTopic - SubscriptionTopic.status must be populated on this server"));
+			assertThat(e.getMessage()).contains("Can not process submitted SubscriptionTopic - SubscriptionTopic.status must be populated on this server");
 		}
 	}
 

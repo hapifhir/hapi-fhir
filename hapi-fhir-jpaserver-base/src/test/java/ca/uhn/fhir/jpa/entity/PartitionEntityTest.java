@@ -5,9 +5,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.notNullValue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 class PartitionEntityTest {
 
@@ -23,9 +21,9 @@ class PartitionEntityTest {
 		RequestPartitionId requestPartitionId = PartitionEntity.buildRequestPartitionId(entities);
 
 		// then
-	    assertThat(requestPartitionId, notNullValue());
-	    assertThat(requestPartitionId.getPartitionIds(), equalTo(List.of(1,2)));
-	    assertThat(requestPartitionId.getPartitionNames(), equalTo(List.of("p1","p2")));
+			assertThat(requestPartitionId).isNotNull();
+		assertThat(requestPartitionId.getPartitionIds()).isEqualTo(List.of(1, 2));
+		assertThat(requestPartitionId.getPartitionNames()).isEqualTo(List.of("p1", "p2"));
 	}
 
 }

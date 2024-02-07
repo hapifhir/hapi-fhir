@@ -37,8 +37,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.stringContainsInOrder;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -119,7 +119,7 @@ public class ResourceValidatorDstu2Test {
 		assertFalse(result.isSuccessful());
 		String encoded = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(result.getOperationOutcome());
 		ourLog.info(encoded);
-		assertThat(encoded, containsString("tim-1:"));
+		assertThat(encoded).contains("tim-1:");
 
 	}
 
@@ -149,7 +149,7 @@ public class ResourceValidatorDstu2Test {
 		assertFalse(validationResult.isSuccessful());
 
 		String encoded = logOperationOutcome(validationResult);
-		assertThat(encoded, containsString("tim-1:"));
+		assertThat(encoded).contains("tim-1:");
 	}
 
 	@Test
@@ -215,7 +215,7 @@ public class ResourceValidatorDstu2Test {
 		OperationOutcome operationOutcome = (OperationOutcome) result.getOperationOutcome();
 		ourLog.debug(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(operationOutcome));
 		assertEquals(1, operationOutcome.getIssue().size());
-		assertThat(operationOutcome.getIssueFirstRep().getDetailsElement().getValue(), containsString("cvc-complex-type"));
+		assertThat(operationOutcome.getIssueFirstRep().getDetailsElement().getValue()).contains("cvc-complex-type");
 	}
 
 	@Test
@@ -236,7 +236,7 @@ public class ResourceValidatorDstu2Test {
 		OperationOutcome operationOutcome = (OperationOutcome) validationResult.toOperationOutcome();
 		ourLog.debug(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(operationOutcome));
 		assertEquals(1, operationOutcome.getIssue().size());
-		assertThat(operationOutcome.getIssueFirstRep().getDiagnostics(), containsString("cpt-2:"));
+		assertThat(operationOutcome.getIssueFirstRep().getDiagnostics()).contains("cpt-2:");
 
 		p.getTelecomFirstRep().setSystem(ContactPointSystemEnum.EMAIL);
 		validationResult = val.validateWithResult(p);
@@ -279,7 +279,7 @@ public class ResourceValidatorDstu2Test {
 
 		assertTrue(result.isSuccessful());
 
-		assertThat(messageString, containsString("No issues"));
+		assertThat(messageString).contains("No issues");
 
 	}
 
@@ -326,8 +326,8 @@ public class ResourceValidatorDstu2Test {
 
 		assertTrue(result.isSuccessful());
 
-		assertThat(messageString, containsString("valueReference"));
-		assertThat(messageString, not(containsString("valueResource")));
+		assertThat(messageString).contains("valueReference");
+		assertThat(messageString).doesNotContain("valueResource");
 	}
 
 	/**
@@ -361,8 +361,8 @@ public class ResourceValidatorDstu2Test {
 			"extension",
 			"meta"
 		)));
-		assertThat(messageString, containsString("url=\"http://ahr.copa.inso.tuwien.ac.at/StructureDefinition/Patient#animal-colorSecondary\""));
-		assertThat(messageString, containsString("url=\"http://foo.com/example\""));
+		assertThat(messageString).contains("url=\"http://ahr.copa.inso.tuwien.ac.at/StructureDefinition/Patient#animal-colorSecondary\"");
+		assertThat(messageString).contains("url=\"http://foo.com/example\"");
 		//@formatter:on
 
 		FhirValidator val = ourCtx.newValidator();
@@ -375,8 +375,8 @@ public class ResourceValidatorDstu2Test {
 
 		assertTrue(result.isSuccessful());
 
-		assertThat(messageString, containsString("valueReference"));
-		assertThat(messageString, not(containsString("valueResource")));
+		assertThat(messageString).contains("valueReference");
+		assertThat(messageString).doesNotContain("valueResource");
 	}
 
 	@AfterAll

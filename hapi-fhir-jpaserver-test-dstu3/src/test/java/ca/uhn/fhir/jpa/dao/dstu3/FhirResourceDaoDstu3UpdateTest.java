@@ -31,12 +31,7 @@ import java.util.Set;
 import java.util.TimeZone;
 import java.util.UUID;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.endsWith;
-import static org.hamcrest.Matchers.not;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -274,7 +269,7 @@ public class FhirResourceDaoDstu3UpdateTest extends BaseJpaDstu3Test {
 		p.setActive(true);
 		p.setId("Patient/A");
 		String id = myPatientDao.update(p).getId().getValue();
-		assertThat(id, endsWith("Patient/A/_history/1"));
+		assertThat(id).endsWith("Patient/A/_history/1");
 		assertEquals("1", myPatientDao.read(new IdType("Patient/A")).getIdElement().getVersionIdPart());
 
 		// Second time should not result in an update
@@ -282,7 +277,7 @@ public class FhirResourceDaoDstu3UpdateTest extends BaseJpaDstu3Test {
 		p.setActive(true);
 		p.setId("Patient/A");
 		id = myPatientDao.update(p).getId().getValue();
-		assertThat(id, endsWith("Patient/A/_history/1"));
+		assertThat(id).endsWith("Patient/A/_history/1");
 		assertEquals("1", myPatientDao.read(new IdType("Patient/A")).getIdElement().getVersionIdPart());
 
 		// And third time should not result in an update
@@ -290,7 +285,7 @@ public class FhirResourceDaoDstu3UpdateTest extends BaseJpaDstu3Test {
 		p.setActive(true);
 		p.setId("Patient/A");
 		id = myPatientDao.update(p).getId().getValue();
-		assertThat(id, endsWith("Patient/A/_history/1"));
+		assertThat(id).endsWith("Patient/A/_history/1");
 		assertEquals("1", myPatientDao.read(new IdType("Patient/A")).getIdElement().getVersionIdPart());
 
 		myPatientDao.read(new IdType("Patient/A"));
@@ -313,7 +308,7 @@ public class FhirResourceDaoDstu3UpdateTest extends BaseJpaDstu3Test {
 		p.setActive(false);
 		p.setId("Patient/A");
 		id = myPatientDao.update(p).getId().getValue();
-		assertThat(id, endsWith("Patient/A/_history/2"));
+		assertThat(id).endsWith("Patient/A/_history/2");
 
 	}
 
@@ -336,10 +331,10 @@ public class FhirResourceDaoDstu3UpdateTest extends BaseJpaDstu3Test {
 		myPatientDao.update(p, "Patient?identifier=urn%3Asystem%7C" + methodName, mySrd);
 
 		p = myPatientDao.read(id.toVersionless(), mySrd);
-		assertThat(p.getIdElement().toVersionless().toString(), not(containsString("test")));
+		assertThat(p.getIdElement().toVersionless().toString()).doesNotContain("test");
 		assertEquals(id.toVersionless(), p.getIdElement().toVersionless());
 		assertNotEquals(id, p.getIdElement());
-		assertThat(p.getIdElement().toString(), endsWith("/_history/2"));
+		assertThat(p.getIdElement().toString()).endsWith("/_history/2");
 
 	}
 
@@ -372,10 +367,10 @@ public class FhirResourceDaoDstu3UpdateTest extends BaseJpaDstu3Test {
 		myPatientDao.update(p, matchUrl, mySrd);
 
 		p = myPatientDao.read(id.toVersionless(), mySrd);
-		assertThat(p.getIdElement().toVersionless().toString(), not(containsString("test")));
+		assertThat(p.getIdElement().toVersionless().toString()).doesNotContain("test");
 		assertEquals(id.toVersionless(), p.getIdElement().toVersionless());
 		assertNotEquals(id, p.getIdElement());
-		assertThat(p.getIdElement().toString(), endsWith("/_history/2"));
+		assertThat(p.getIdElement().toString()).endsWith("/_history/2");
 
 	}
 
@@ -408,10 +403,10 @@ public class FhirResourceDaoDstu3UpdateTest extends BaseJpaDstu3Test {
 			myPatientDao.update(p, "Patient?_lastUpdated=gt" + start.getValueAsString(), mySrd);
 
 			p = myPatientDao.read(id.toVersionless(), mySrd);
-			assertThat(p.getIdElement().toVersionless().toString(), not(containsString("test")));
+			assertThat(p.getIdElement().toVersionless().toString()).doesNotContain("test");
 			assertEquals(id.toVersionless(), p.getIdElement().toVersionless());
 			assertNotEquals(id, p.getIdElement());
-			assertThat(p.getIdElement().toString(), endsWith("/_history/2"));
+			assertThat(p.getIdElement().toString()).endsWith("/_history/2");
 		} finally {
 			TimeZone.setDefault(def);
 		}
@@ -475,7 +470,7 @@ public class FhirResourceDaoDstu3UpdateTest extends BaseJpaDstu3Test {
 
 		List<JpaPid> ids = myPatientDao.searchForIds(new SearchParameterMap(Patient.SP_GIVEN, new StringParam("testUpdateMaintainsSearchParamsDstu2AAA")), null);
 		assertEquals(1, ids.size());
-		assertThat(JpaPid.toLongList(ids), contains(p1id.getIdPartAsLong()));
+		assertThat(JpaPid.toLongList(ids)).containsExactly(p1id.getIdPartAsLong());
 
 		// Update the name
 		p1.getName().get(0).getGiven().get(0).setValue("testUpdateMaintainsSearchParamsDstu2BBB");
@@ -533,13 +528,13 @@ public class FhirResourceDaoDstu3UpdateTest extends BaseJpaDstu3Test {
 			for (Coding next : tagList) {
 				secListValues.add(next.getSystemElement().getValue() + "|" + next.getCodeElement().getValue());
 			}
-			assertThat(secListValues, containsInAnyOrder("tag_scheme1|tag_term1", "tag_scheme2|tag_term2"));
+			assertThat(secListValues).containsExactlyInAnyOrder("tag_scheme1|tag_term1", "tag_scheme2|tag_term2");
 			List<Coding> secList = p1.getMeta().getSecurity();
 			secListValues = new HashSet<>();
 			for (Coding next : secList) {
 				secListValues.add(next.getSystemElement().getValue() + "|" + next.getCodeElement().getValue());
 			}
-			assertThat(secListValues, containsInAnyOrder("sec_scheme1|sec_term1", "sec_scheme2|sec_term2"));
+			assertThat(secListValues).containsExactlyInAnyOrder("sec_scheme1|sec_term1", "sec_scheme2|sec_term2");
 			List<UriType> profileList = p1.getMeta().getProfile();
 			assertEquals(1, profileList.size());
 			assertEquals("http://foo2", profileList.get(0).getValueAsString()); // no foo1
@@ -630,7 +625,7 @@ public class FhirResourceDaoDstu3UpdateTest extends BaseJpaDstu3Test {
 			myPatientDao.update(p, mySrd);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage(), containsString("Can not create resource with ID[9999999999999999], no resource with this ID exists and clients may only"));
+			assertThat(e.getMessage()).contains("Can not create resource with ID[9999999999999999], no resource with this ID exists and clients may only");
 		}
 	}
 
@@ -813,7 +808,7 @@ public class FhirResourceDaoDstu3UpdateTest extends BaseJpaDstu3Test {
 			myPatientDao.update(p, mySrd);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage(), containsString("clients may only assign IDs which contain at least one non-numeric"));
+			assertThat(e.getMessage()).contains("clients may only assign IDs which contain at least one non-numeric");
 		}
 	}
 

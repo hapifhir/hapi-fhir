@@ -44,9 +44,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.containsString;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -248,7 +246,7 @@ public class ResourceProviderCustomSearchParamDstu3Test extends BaseResourceProv
 			ourLog.info(resp);
 			assertEquals(200, response.getStatusLine().getStatusCode());
 
-			assertThat(resp, containsString("<fullUrl value=\"http://localhost:" + myPort + "/fhir/context/Practitioner/"));
+			assertThat(resp).contains("<fullUrl value=\"http://localhost:" + myPort + "/fhir/context/Practitioner/");
 		} finally {
 			IOUtils.closeQuietly(response);
 		}
@@ -296,7 +294,7 @@ public class ResourceProviderCustomSearchParamDstu3Test extends BaseResourceProv
 		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
 
 		List<String> foundResources = toUnqualifiedVersionlessIdValues(bundle);
-		assertThat(foundResources, contains(p1id.getValue()));
+		assertThat(foundResources).containsExactly(p1id.getValue());
 
 	}
 
@@ -340,7 +338,7 @@ public class ResourceProviderCustomSearchParamDstu3Test extends BaseResourceProv
 				.returnBundle(Bundle.class)
 				.execute();
 		foundResources = toUnqualifiedVersionlessIdValues(result);
-		assertThat(foundResources, contains(obsId1.getValue()));
+		assertThat(foundResources).containsExactly(obsId1.getValue());
 
 	}
 
@@ -381,7 +379,7 @@ public class ResourceProviderCustomSearchParamDstu3Test extends BaseResourceProv
 				.execute();
 
 		foundResources = toUnqualifiedVersionlessIdValues(result);
-		assertThat(foundResources, contains(patId.getValue()));
+		assertThat(foundResources).containsExactly(patId.getValue());
 
 	}
 

@@ -52,7 +52,7 @@ import java.util.stream.Collectors;
 import static ca.uhn.fhir.util.UrlUtil.escapeUrlParam;
 import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -279,7 +279,7 @@ public class SearchNarrowingInterceptorTest {
 		assertNull(ourLastCodeParam);
 		assertNull(ourLastSubjectParam);
 		assertNull(ourLastPerformerParam);
-		assertThat(toStrings(ourLastPatientParam), Matchers.contains("Patient/123,Patient/456"));
+		assertThat(toStrings(ourLastPatientParam)).containsExactly("Patient/123,Patient/456");
 	}
 
 	@Test
@@ -338,7 +338,7 @@ public class SearchNarrowingInterceptorTest {
 
 		assertEquals("Patient.search", ourLastHitMethod);
 		assertNull(ourLastNameParam);
-		assertThat(toStrings(ourLastIdParam), Matchers.contains("Patient/123,Patient/456"));
+		assertThat(toStrings(ourLastIdParam)).containsExactly("Patient/123,Patient/456");
 	}
 
 	@Test
@@ -354,7 +354,7 @@ public class SearchNarrowingInterceptorTest {
 
 		assertEquals("Patient.search", ourLastHitMethod);
 		assertNull(ourLastNameParam);
-		assertThat(toStrings(ourLastIdParam), Matchers.contains("Patient/123"));
+		assertThat(toStrings(ourLastIdParam)).containsExactly("Patient/123");
 	}
 
 	@Test
@@ -374,7 +374,7 @@ public class SearchNarrowingInterceptorTest {
 		assertNull(ourLastCodeParam);
 		assertNull(ourLastSubjectParam);
 		assertNull(ourLastPerformerParam);
-		assertThat(toStrings(ourLastPatientParam), Matchers.contains("Patient/456", "Patient/456"));
+		assertThat(toStrings(ourLastPatientParam)).containsExactly("Patient/456", "Patient/456");
 	}
 
 	@Test
@@ -394,7 +394,7 @@ public class SearchNarrowingInterceptorTest {
 		assertNull(ourLastCodeParam);
 		assertNull(ourLastSubjectParam);
 		assertNull(ourLastPerformerParam);
-		assertThat(toStrings(ourLastPatientParam), Matchers.contains("456", "456"));
+		assertThat(toStrings(ourLastPatientParam)).containsExactly("456", "456");
 	}
 
 	@Test
@@ -412,7 +412,7 @@ public class SearchNarrowingInterceptorTest {
 		assertEquals("Observation.search", ourLastHitMethod);
 		assertNull(ourLastIdParam);
 		assertNull(ourLastCodeParam);
-		assertThat(toStrings(ourLastSubjectParam), Matchers.contains("Patient/456", "Patient/456"));
+		assertThat(toStrings(ourLastSubjectParam)).containsExactly("Patient/456", "Patient/456");
 		assertNull(ourLastPerformerParam);
 		assertNull(ourLastPatientParam);
 	}
@@ -535,7 +535,7 @@ public class SearchNarrowingInterceptorTest {
 		assertNull(ourLastSubjectParam);
 		assertNull(ourLastPerformerParam);
 		assertNull(ourLastPatientParam);
-		assertThat(toStrings(ourLastIdParam), Matchers.contains("Patient/123,Patient/456"));
+		assertThat(toStrings(ourLastIdParam)).containsExactly("Patient/123,Patient/456");
 	}
 
 	private List<String> toStrings(BaseAndListParam<? extends IQueryParameterOr<?>> theParams) {

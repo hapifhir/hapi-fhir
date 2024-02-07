@@ -106,18 +106,10 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.emptyString;
 import static org.hamcrest.Matchers.endsWith;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.greaterThan;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.matchesPattern;
-import static org.hamcrest.Matchers.not;
-import static org.hamcrest.Matchers.startsWith;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -371,7 +363,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		assertEquals(2, response.getEntry().size());
 
 		assertEquals("201 Created", response.getEntry().get(0).getResponse().getStatus());
-		assertThat(response.getEntry().get(0).getResponse().getLocation(), matchesPattern(".*Patient/[0-9]+.*"));
+		assertThat(response.getEntry().get(0).getResponse().getLocation()).matches(".*Patient/[0-9]+.*");
 		assertEquals("404 Not Found", response.getEntry().get(1).getResponse().getStatus());
 
 		OperationOutcome oo = (OperationOutcome) response.getEntry().get(1).getResponse().getOutcome();
@@ -405,13 +397,13 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		assertEquals(2, response.getEntry().size());
 
 		assertEquals("201 Created", response.getEntry().get(0).getResponse().getStatus());
-		assertThat(response.getEntry().get(0).getResponse().getLocation(), matchesPattern(".*Patient/[0-9]+.*"));
+		assertThat(response.getEntry().get(0).getResponse().getLocation()).matches(".*Patient/[0-9]+.*");
 		assertEquals("400 Bad Request", response.getEntry().get(1).getResponse().getStatus());
 
 		OperationOutcome oo = (OperationOutcome) response.getEntry().get(1).getResponse().getOutcome();
 		ourLog.debug(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(oo));
 		assertEquals(IssueSeverity.ERROR, oo.getIssue().get(0).getSeverity());
-		assertThat(oo.getIssue().get(0).getDiagnostics(), containsString("Unknown search parameter"));
+		assertThat(oo.getIssue().get(0).getDiagnostics()).contains("Unknown search parameter");
 	}
 
 	@Test
@@ -527,7 +519,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 			.setMethod(HTTPVerb.PUT)
 			.setUrl("Patient/A");
 		Bundle resp = mySystemDao.transaction(mySrd, bundle);
-		assertThat(resp.getEntry().get(0).getResponse().getLocation(), endsWith("Patient/A/_history/1"));
+		assertThat(resp.getEntry().get(0).getResponse().getLocation()).endsWith("Patient/A/_history/1");
 
 		// Second time should not result in an update
 		p = new Patient();
@@ -542,7 +534,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 			.setMethod(HTTPVerb.PUT)
 			.setUrl("Patient/A");
 		resp = mySystemDao.transaction(mySrd, bundle);
-		assertThat(resp.getEntry().get(0).getResponse().getLocation(), endsWith("Patient/A/_history/1"));
+		assertThat(resp.getEntry().get(0).getResponse().getLocation()).endsWith("Patient/A/_history/1");
 
 		// And third time should not result in an update
 		p = new Patient();
@@ -557,7 +549,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 			.setMethod(HTTPVerb.PUT)
 			.setUrl("Patient/A");
 		resp = mySystemDao.transaction(mySrd, bundle);
-		assertThat(resp.getEntry().get(0).getResponse().getLocation(), endsWith("Patient/A/_history/1"));
+		assertThat(resp.getEntry().get(0).getResponse().getLocation()).endsWith("Patient/A/_history/1");
 
 		myPatientDao.read(new IdType("Patient/A"));
 		myPatientDao.read(new IdType("Patient/A/_history/1"));
@@ -743,7 +735,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 			i = myEntityManager
 				.createQuery("SELECT count(s) FROM ResourceIndexedSearchParamString s WHERE s.myHashIdentity = 0", Long.class)
 				.getSingleResult();
-			assertThat(i, greaterThan(1L));
+			assertThat(i).isGreaterThan(1L);
 
 		});
 
@@ -888,7 +880,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 
 		// Bundle.entry[0] is create response
 		assertEquals("201 Created", resp.getEntry().get(0).getResponse().getStatus());
-		assertThat(resp.getEntry().get(0).getResponse().getLocation(), startsWith("Patient/"));
+		assertThat(resp.getEntry().get(0).getResponse().getLocation()).startsWith("Patient/");
 
 		// Bundle.entry[1] is failed read response
 		Resource oo = resp.getEntry().get(1).getResponse().getOutcome();
@@ -906,7 +898,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 
 		// Check GET
 		respEntry = resp.getEntry().get(1).getResponse();
-		assertThat(respEntry.getStatus(), startsWith("404"));
+		assertThat(respEntry.getStatus()).startsWith("404");
 
 	}
 
@@ -922,9 +914,9 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 
 		Bundle outcome = mySystemDao.transaction(mySrd, (Bundle) bb.getBundle());
 		assertEquals("201 Created", outcome.getEntry().get(0).getResponse().getStatus());
-		assertThat(outcome.getEntry().get(0).getResponse().getLocation(), matchesPattern(".*Patient/[0-9]+/_history/1"));
+		assertThat(outcome.getEntry().get(0).getResponse().getLocation()).matches(".*Patient/[0-9]+/_history/1");
 		assertEquals("201 Created", outcome.getEntry().get(1).getResponse().getStatus());
-		assertThat(outcome.getEntry().get(1).getResponse().getLocation(), matchesPattern(".*Observation/[0-9]+/_history/1"));
+		assertThat(outcome.getEntry().get(1).getResponse().getLocation()).matches(".*Observation/[0-9]+/_history/1");
 
 		// Take 2
 
@@ -938,9 +930,9 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 
 		outcome = mySystemDao.transaction(mySrd, (Bundle) bb.getBundle());
 		assertEquals("200 OK", outcome.getEntry().get(0).getResponse().getStatus());
-		assertThat(outcome.getEntry().get(0).getResponse().getLocation(), matchesPattern(".*Patient/[0-9]+/_history/1"));
+		assertThat(outcome.getEntry().get(0).getResponse().getLocation()).matches(".*Patient/[0-9]+/_history/1");
 		assertEquals("200 OK", outcome.getEntry().get(1).getResponse().getStatus());
-		assertThat(outcome.getEntry().get(1).getResponse().getLocation(), matchesPattern(".*Observation/[0-9]+/_history/1"));
+		assertThat(outcome.getEntry().get(1).getResponse().getLocation()).matches(".*Observation/[0-9]+/_history/1");
 
 	}
 
@@ -957,9 +949,9 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 
 		Bundle outcome = mySystemDao.transaction(mySrd, (Bundle) bb.getBundle());
 		assertEquals("201 Created", outcome.getEntry().get(0).getResponse().getStatus());
-		assertThat(outcome.getEntry().get(0).getResponse().getLocation(), matchesPattern(".*Patient/[0-9]+/_history/1"));
+		assertThat(outcome.getEntry().get(0).getResponse().getLocation()).matches(".*Patient/[0-9]+/_history/1");
 		assertEquals("201 Created", outcome.getEntry().get(1).getResponse().getStatus());
-		assertThat(outcome.getEntry().get(1).getResponse().getLocation(), matchesPattern(".*Observation/[0-9]+/_history/1"));
+		assertThat(outcome.getEntry().get(1).getResponse().getLocation()).matches(".*Observation/[0-9]+/_history/1");
 
 		// Take 2
 
@@ -973,9 +965,9 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 
 		outcome = mySystemDao.transaction(mySrd, (Bundle) bb.getBundle());
 		assertEquals("200 OK", outcome.getEntry().get(0).getResponse().getStatus());
-		assertThat(outcome.getEntry().get(0).getResponse().getLocation(), matchesPattern(".*Patient/[0-9]+/_history/1"));
+		assertThat(outcome.getEntry().get(0).getResponse().getLocation()).matches(".*Patient/[0-9]+/_history/1");
 		assertEquals("200 OK", outcome.getEntry().get(1).getResponse().getStatus());
-		assertThat(outcome.getEntry().get(1).getResponse().getLocation(), matchesPattern(".*Observation/[0-9]+/_history/1"));
+		assertThat(outcome.getEntry().get(1).getResponse().getLocation()).matches(".*Observation/[0-9]+/_history/1");
 
 	}
 
@@ -1008,8 +1000,8 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		assertEquals("200 OK", outcome2.getEntry().get(0).getResponse().getStatus());
 		assertEquals("200 OK", outcome2.getEntry().get(1).getResponse().getStatus());
 
-		assertThat(outcome.getEntry().get(0).getResponse().getLocation(), endsWith("/_history/1"));
-		assertThat(outcome.getEntry().get(1).getResponse().getLocation(), endsWith("/_history/1"));
+		assertThat(outcome.getEntry().get(0).getResponse().getLocation()).endsWith("/_history/1");
+		assertThat(outcome.getEntry().get(1).getResponse().getLocation()).endsWith("/_history/1");
 		assertEquals(outcome.getEntry().get(0).getResponse().getLocation(), outcome2.getEntry().get(0).getResponse().getLocation());
 		assertEquals(outcome.getEntry().get(1).getResponse().getLocation(), outcome2.getEntry().get(1).getResponse().getLocation());
 
@@ -1046,7 +1038,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		IdType taskId = new IdType(outcome.getEntry().get(0).getResponse().getLocation());
 		Task task = myTaskDao.read(taskId, mySrd);
 
-		assertThat(task.getBasedOn().get(0).getReference(), matchesPattern("Patient/[0-9]+"));
+		assertThat(task.getBasedOn().get(0).getReference()).matches("Patient/[0-9]+");
 	}
 
 	@Test
@@ -1065,7 +1057,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		IdType taskId = new IdType(outcome.getEntry().get(0).getResponse().getLocation());
 		Task task = myTaskDao.read(taskId, mySrd);
 
-		assertThat(task.getBasedOn().get(0).getReference(), matchesPattern("Patient/[0-9]+"));
+		assertThat(task.getBasedOn().get(0).getReference()).matches("Patient/[0-9]+");
 	}
 
 	@Test
@@ -1083,7 +1075,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 
 		IdType communicationId = new IdType(outcome.getEntry().get(1).getResponse().getLocation());
 		Communication communication = myCommunicationDao.read(communicationId, mySrd);
-		assertThat(communication.getSubject().getReference(), matchesPattern("Patient/[0-9]+"));
+		assertThat(communication.getSubject().getReference()).matches("Patient/[0-9]+");
 
 		ourLog.debug("Outcome: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(communication));
 
@@ -1258,9 +1250,9 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		System.out.println(s);
 		Bundle outcome = mySystemDao.transaction(null, transactionBundle);
 		String patientLocation = outcome.getEntry().get(0).getResponse().getLocation();
-		assertThat(patientLocation, matchesPattern("Patient/[a-z0-9-]+/_history/1"));
+		assertThat(patientLocation).matches("Patient/[a-z0-9-]+/_history/1");
 		String observationLocation = outcome.getEntry().get(1).getResponse().getLocation();
-		assertThat(observationLocation, matchesPattern("Observation/[a-z0-9-]+/_history/1"));
+		assertThat(observationLocation).matches("Observation/[a-z0-9-]+/_history/1");
 	}
 
 	@Test
@@ -1289,7 +1281,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 			mySystemDao.transaction(null, transactionBundle);
 			fail();
 		} catch (PreconditionFailedException e) {
-			assertThat(e.getMessage(), is(equalTo(Msg.code(539) + "Invalid conditional URL \"Patient?identifier=http://example.com/mrns|" + conditionalUrlIdentifierValue + "\". The given resource is not matched by this URL.")));
+			assertThat(e.getMessage()).isEqualTo(Msg.code(539) + "Invalid conditional URL \"Patient?identifier=http://example.com/mrns|" + conditionalUrlIdentifierValue + "\". The given resource is not matched by this URL.");
 		}
 	}
 
@@ -1316,8 +1308,8 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 
 		BundleEntryComponent respEntry = resp.getEntry().get(0);
 		assertEquals(Constants.STATUS_HTTP_201_CREATED + " Created", respEntry.getResponse().getStatus());
-		assertThat(respEntry.getResponse().getLocation(), containsString("Observation/"));
-		assertThat(respEntry.getResponse().getLocation(), endsWith("/_history/1"));
+		assertThat(respEntry.getResponse().getLocation()).contains("Observation/");
+		assertThat(respEntry.getResponse().getLocation()).endsWith("/_history/1");
 		assertEquals("1", respEntry.getResponse().getEtag());
 
 		o = myObservationDao.read(new IdType(respEntry.getResponse().getLocationElement()), mySrd);
@@ -1352,7 +1344,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 			mySystemDao.transaction(mySrd, request);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage(), containsString("Transaction bundle contains multiple resources with ID: Patient/ABC"));
+			assertThat(e.getMessage()).contains("Transaction bundle contains multiple resources with ID: Patient/ABC");
 		}
 	}
 
@@ -1380,8 +1372,8 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 
 		BundleEntryComponent respEntry = resp.getEntry().get(0);
 		assertEquals(Constants.STATUS_HTTP_201_CREATED + " Created", respEntry.getResponse().getStatus());
-		assertThat(respEntry.getResponse().getLocation(), containsString("Observation/"));
-		assertThat(respEntry.getResponse().getLocation(), endsWith("/_history/1"));
+		assertThat(respEntry.getResponse().getLocation()).contains("Observation/");
+		assertThat(respEntry.getResponse().getLocation()).endsWith("/_history/1");
 		assertEquals("1", respEntry.getResponse().getEtag());
 
 		o = myObservationDao.read(new IdType(respEntry.getResponse().getLocationElement()), mySrd);
@@ -1402,8 +1394,8 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 
 		BundleEntryComponent respEntry = resp.getEntry().get(0);
 		assertEquals(Constants.STATUS_HTTP_201_CREATED + " Created", respEntry.getResponse().getStatus());
-		assertThat(respEntry.getResponse().getLocation(), containsString("Observation/"));
-		assertThat(respEntry.getResponse().getLocation(), endsWith("/_history/1"));
+		assertThat(respEntry.getResponse().getLocation()).contains("Observation/");
+		assertThat(respEntry.getResponse().getLocation()).endsWith("/_history/1");
 		assertEquals("1", respEntry.getResponse().getEtag());
 
 		/*
@@ -1419,8 +1411,8 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 
 		respEntry = resp.getEntry().get(0);
 		assertEquals(Constants.STATUS_HTTP_200_OK + " OK", respEntry.getResponse().getStatus());
-		assertThat(respEntry.getResponse().getLocation(), containsString("Observation/"));
-		assertThat(respEntry.getResponse().getLocation(), endsWith("/_history/1"));
+		assertThat(respEntry.getResponse().getLocation()).contains("Observation/");
+		assertThat(respEntry.getResponse().getLocation()).endsWith("/_history/1");
 		assertEquals("1", respEntry.getResponse().getEtag());
 
 		/*
@@ -1436,8 +1428,8 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 
 		respEntry = resp.getEntry().get(0);
 		assertEquals(Constants.STATUS_HTTP_200_OK + " OK", respEntry.getResponse().getStatus());
-		assertThat(respEntry.getResponse().getLocation(), containsString("Observation/"));
-		assertThat(respEntry.getResponse().getLocation(), endsWith("/_history/1"));
+		assertThat(respEntry.getResponse().getLocation()).contains("Observation/");
+		assertThat(respEntry.getResponse().getLocation()).endsWith("/_history/1");
 		assertEquals("1", respEntry.getResponse().getEtag());
 
 	}
@@ -1475,8 +1467,8 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 
 			BundleEntryComponent respEntry = resp.getEntry().get(0);
 			assertEquals(Constants.STATUS_HTTP_201_CREATED + " Created", respEntry.getResponse().getStatus());
-			assertThat(respEntry.getResponse().getLocation(), containsString("Observation/"));
-			assertThat(respEntry.getResponse().getLocation(), endsWith("/_history/1"));
+			assertThat(respEntry.getResponse().getLocation()).contains("Observation/");
+			assertThat(respEntry.getResponse().getLocation()).endsWith("/_history/1");
 			assertEquals("1", respEntry.getResponse().getEtag());
 
 			o = myObservationDao.read(new IdType(respEntry.getResponse().getLocationElement()), mySrd);
@@ -1673,7 +1665,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 			.stream()
 			.map(t -> new IdType(t.getResponse().getLocation()).getResourceType())
 			.collect(Collectors.toList());
-		assertThat(responseTypes.toString(), responseTypes, contains("Practitioner", "Observation", "Observation"));
+		assertThat(responseTypes).as(responseTypes.toString()).containsExactly("Practitioner", "Observation", "Observation");
 	}
 
 
@@ -1733,7 +1725,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 			.stream()
 			.map(t -> new IdType(t.getResponse().getLocation()).getResourceType())
 			.collect(Collectors.toList());
-		assertThat(responseTypes.toString(), responseTypes, contains("Practitioner", "Observation", "Observation"));
+		assertThat(responseTypes).as(responseTypes.toString()).containsExactly("Practitioner", "Observation", "Observation");
 	}
 
 	@Test
@@ -1774,7 +1766,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 			.stream()
 			.map(t -> new IdType(t.getResponse().getLocation()).getResourceType())
 			.collect(Collectors.toList());
-		assertThat(responseTypes.toString(), responseTypes, contains("Practitioner", "Observation"));
+		assertThat(responseTypes).as(responseTypes.toString()).containsExactly("Practitioner", "Observation");
 	}
 
 	@Test
@@ -1809,7 +1801,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 			.stream()
 			.map(t -> new IdType(t.getResponse().getLocation()).getResourceType())
 			.collect(Collectors.toList());
-		assertThat(responseTypes.toString(), responseTypes, contains("Practitioner", "Observation"));
+		assertThat(responseTypes).as(responseTypes.toString()).containsExactly("Practitioner", "Observation");
 	}
 
 	@Test
@@ -1866,7 +1858,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 			.stream()
 			.map(t -> new IdType(t.getResponse().getLocation()).getResourceType())
 			.collect(Collectors.toList());
-		assertThat(responseTypes.toString(), responseTypes, contains("Practitioner", "Observation", "Observation"));
+		assertThat(responseTypes).as(responseTypes.toString()).containsExactly("Practitioner", "Observation", "Observation");
 	}
 
 	@Test
@@ -1958,13 +1950,13 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 
 		BundleEntryComponent respEntry = resp.getEntry().get(0);
 		assertEquals(Constants.STATUS_HTTP_200_OK + " OK", respEntry.getResponse().getStatus());
-		assertThat(respEntry.getResponse().getLocation(), endsWith("Patient/" + id.getIdPart() + "/_history/1"));
+		assertThat(respEntry.getResponse().getLocation()).endsWith("Patient/" + id.getIdPart() + "/_history/1");
 		assertEquals("1", respEntry.getResponse().getEtag());
 
 		respEntry = resp.getEntry().get(1);
 		assertEquals(Constants.STATUS_HTTP_201_CREATED + " Created", respEntry.getResponse().getStatus());
-		assertThat(respEntry.getResponse().getLocation(), containsString("Observation/"));
-		assertThat(respEntry.getResponse().getLocation(), endsWith("/_history/1"));
+		assertThat(respEntry.getResponse().getLocation()).contains("Observation/");
+		assertThat(respEntry.getResponse().getLocation()).endsWith("/_history/1");
 		assertEquals("1", respEntry.getResponse().getEtag());
 
 		o = myObservationDao.read(new IdType(respEntry.getResponse().getLocationElement()), mySrd);
@@ -2003,7 +1995,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 			mySystemDao.transaction(mySrd, request);
 			fail();
 		} catch (PreconditionFailedException e) {
-			assertThat(e.getMessage(), containsString("Multiple resources match this search"));
+			assertThat(e.getMessage()).contains("Multiple resources match this search");
 		}
 	}
 
@@ -2038,7 +2030,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 			mySystemDao.transaction(mySrd, request);
 			fail();
 		} catch (PreconditionFailedException e) {
-			assertThat(e.getMessage(), containsString("Multiple resources match this search"));
+			assertThat(e.getMessage()).contains("Multiple resources match this search");
 		}
 	}
 
@@ -2065,15 +2057,15 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		BundleEntryComponent respEntry = resp.getEntry().get(0);
 		assertEquals(Constants.STATUS_HTTP_201_CREATED + " Created", respEntry.getResponse().getStatus());
 		String patientId = respEntry.getResponse().getLocation();
-		assertThat(patientId, not(endsWith("Patient/" + methodName + "/_history/1")));
+		assertThat(patientId).doesNotEndWith("Patient/" + methodName + "/_history/1");
 		assertThat(patientId, (endsWith("/_history/1")));
 		assertThat(patientId, (containsString("Patient/")));
 		assertEquals("1", respEntry.getResponse().getEtag());
 
 		respEntry = resp.getEntry().get(1);
 		assertEquals(Constants.STATUS_HTTP_201_CREATED + " Created", respEntry.getResponse().getStatus());
-		assertThat(respEntry.getResponse().getLocation(), containsString("Observation/"));
-		assertThat(respEntry.getResponse().getLocation(), endsWith("/_history/1"));
+		assertThat(respEntry.getResponse().getLocation()).contains("Observation/");
+		assertThat(respEntry.getResponse().getLocation()).endsWith("/_history/1");
 		assertEquals("1", respEntry.getResponse().getEtag());
 
 		o = myObservationDao.read(new IdType(respEntry.getResponse().getLocationElement()), mySrd);
@@ -2096,7 +2088,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		BundleEntryComponent respEntry = resp.getEntry().get(0);
 		assertEquals(Constants.STATUS_HTTP_201_CREATED + " Created", respEntry.getResponse().getStatus());
 		String patientId = respEntry.getResponse().getLocation();
-		assertThat(patientId, not(containsString("test")));
+		assertThat(patientId).doesNotContain("test");
 
 	}
 
@@ -2125,7 +2117,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		assertEquals(2, response.getEntry().size());
 
 		assertEquals("201 Created", response.getEntry().get(0).getResponse().getStatus());
-		assertThat(response.getEntry().get(0).getResponse().getLocation(), matchesPattern(".*Patient/[0-9]+.*"));
+		assertThat(response.getEntry().get(0).getResponse().getLocation()).matches(".*Patient/[0-9]+.*");
 		assertEquals("404 Not Found", response.getEntry().get(1).getResponse().getStatus());
 
 		OperationOutcome oo = (OperationOutcome) response.getEntry().get(1).getResponse().getOutcome();
@@ -2159,13 +2151,13 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		assertEquals(2, response.getEntry().size());
 
 		assertEquals("201 Created", response.getEntry().get(0).getResponse().getStatus());
-		assertThat(response.getEntry().get(0).getResponse().getLocation(), matchesPattern(".*Patient/[0-9]+.*"));
+		assertThat(response.getEntry().get(0).getResponse().getLocation()).matches(".*Patient/[0-9]+.*");
 		assertEquals("400 Bad Request", response.getEntry().get(1).getResponse().getStatus());
 
 		OperationOutcome oo = (OperationOutcome) response.getEntry().get(1).getResponse().getOutcome();
 		ourLog.debug(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(oo));
 		assertEquals(IssueSeverity.ERROR, oo.getIssue().get(0).getSeverity());
-		assertThat(oo.getIssue().get(0).getDiagnostics(), containsString("Unknown search parameter"));
+		assertThat(oo.getIssue().get(0).getDiagnostics()).contains("Unknown search parameter");
 	}
 
 	@Test
@@ -2262,7 +2254,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 			mySystemDao.transaction(mySrd, request);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage(), containsString("Resource Organization/9999999999999999 not found, specified in path: Patient.managingOrganization"));
+			assertThat(e.getMessage()).contains("Resource Organization/9999999999999999 not found, specified in path: Patient.managingOrganization");
 		}
 	}
 
@@ -2281,7 +2273,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 			mySystemDao.transaction(mySrd, request);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage(), containsString("Resource Organization/" + methodName + " not found, specified in path: Patient.managingOrganization"));
+			assertThat(e.getMessage()).contains("Resource Organization/" + methodName + " not found, specified in path: Patient.managingOrganization");
 		}
 	}
 
@@ -2563,7 +2555,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 			mySystemDao.transaction(mySrd, request);
 			fail();
 		} catch (PreconditionFailedException e) {
-			assertThat(e.getMessage(), containsString("resource with match URL \"Patient?"));
+			assertThat(e.getMessage()).contains("resource with match URL \"Patient?");
 		}
 	}
 
@@ -2694,7 +2686,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		map.setLoadSynchronous(true);
 		map.add(Patient.SP_IDENTIFIER, new TokenParam("foo", "bar"));
 		search = myPatientDao.search(map);
-		assertThat(toUnqualifiedVersionlessIdValues(search), contains(createdPatientId.toUnqualifiedVersionless().getValue()));
+		assertThat(toUnqualifiedVersionlessIdValues(search)).containsExactly(createdPatientId.toUnqualifiedVersionless().getValue());
 		pat = (Patient) search.getResources(0, 1).get(0);
 		assertEquals("foo", pat.getIdentifierFirstRep().getSystem());
 		// Observation
@@ -2702,7 +2694,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		map.setLoadSynchronous(true);
 		map.add(Observation.SP_IDENTIFIER, new TokenParam("foo", "dog"));
 		search = myObservationDao.search(map);
-		assertThat(toUnqualifiedVersionlessIdValues(search), contains(createdObservationId.toUnqualifiedVersionless().getValue()));
+		assertThat(toUnqualifiedVersionlessIdValues(search)).containsExactly(createdObservationId.toUnqualifiedVersionless().getValue());
 		obs = (Observation) search.getResources(0, 1).get(0);
 		assertEquals("foo", obs.getIdentifierFirstRep().getSystem());
 		assertEquals(createdPatientId.toUnqualifiedVersionless().getValue(), obs.getSubject().getReference());
@@ -2759,7 +2751,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		map.setLoadSynchronous(true);
 		map.add(Patient.SP_IDENTIFIER, new TokenParam("foo", "bar"));
 		search = myPatientDao.search(map);
-		assertThat(toUnqualifiedVersionlessIdValues(search), contains(createdPatientId.toUnqualifiedVersionless().getValue()));
+		assertThat(toUnqualifiedVersionlessIdValues(search)).containsExactly(createdPatientId.toUnqualifiedVersionless().getValue());
 		pat = (Patient) search.getResources(0, 1).get(0);
 		assertEquals("foo", pat.getIdentifierFirstRep().getSystem());
 		// Observation
@@ -2767,7 +2759,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		map.setLoadSynchronous(true);
 		map.add(Observation.SP_IDENTIFIER, new TokenParam("foo", "dog"));
 		search = myObservationDao.search(map);
-		assertThat(toUnqualifiedVersionlessIdValues(search), contains(createdObservationId.toUnqualifiedVersionless().getValue()));
+		assertThat(toUnqualifiedVersionlessIdValues(search)).containsExactly(createdObservationId.toUnqualifiedVersionless().getValue());
 		obs = (Observation) search.getResources(0, 1).get(0);
 		assertEquals("foo", obs.getIdentifierFirstRep().getSystem());
 		assertEquals(createdPatientId.toUnqualifiedVersionless().getValue(), obs.getSubject().getReference());
@@ -2825,7 +2817,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		map.setLoadSynchronous(true);
 		map.add(Patient.SP_IDENTIFIER, new TokenParam("foo", "bar"));
 		search = myPatientDao.search(map);
-		assertThat(toUnqualifiedVersionlessIdValues(search), contains(createdPatientId.toUnqualifiedVersionless().getValue()));
+		assertThat(toUnqualifiedVersionlessIdValues(search)).containsExactly(createdPatientId.toUnqualifiedVersionless().getValue());
 		pat = (Patient) search.getResources(0, 1).get(0);
 		assertEquals("foo", pat.getIdentifierFirstRep().getSystem());
 		// Observation
@@ -2833,7 +2825,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		map.setLoadSynchronous(true);
 		map.add(Observation.SP_IDENTIFIER, new TokenParam("foo", "dog"));
 		search = myObservationDao.search(map);
-		assertThat(toUnqualifiedVersionlessIdValues(search), contains(createdObservationId.toUnqualifiedVersionless().getValue()));
+		assertThat(toUnqualifiedVersionlessIdValues(search)).containsExactly(createdObservationId.toUnqualifiedVersionless().getValue());
 		obs = (Observation) search.getResources(0, 1).get(0);
 		assertEquals("foo", obs.getIdentifierFirstRep().getSystem());
 		assertEquals(createdPatientId.toUnqualifiedVersionless().getValue(), obs.getSubject().getReference());
@@ -2901,9 +2893,9 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 
 		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(resp));
 
-		assertThat(resp.getEntry().get(0).getResponse().getLocation(), startsWith("Patient/a555-44-4444/_history/"));
-		assertThat(resp.getEntry().get(1).getResponse().getLocation(), startsWith("Patient/temp6789/_history/"));
-		assertThat(resp.getEntry().get(2).getResponse().getLocation(), startsWith("Organization/GHH/_history/"));
+		assertThat(resp.getEntry().get(0).getResponse().getLocation()).startsWith("Patient/a555-44-4444/_history/");
+		assertThat(resp.getEntry().get(1).getResponse().getLocation()).startsWith("Patient/temp6789/_history/");
+		assertThat(resp.getEntry().get(2).getResponse().getLocation()).startsWith("Organization/GHH/_history/");
 
 		Patient p = myPatientDao.read(new IdType("Patient/a555-44-4444/_history/1"), mySrd);
 		assertEquals("Patient/temp6789", p.getLink().get(0).getOther().getReference());
@@ -2917,7 +2909,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 
 		ourLog.debug(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(response));
 		assertEquals("201 Created", response.getEntry().get(0).getResponse().getStatus());
-		assertThat(response.getEntry().get(0).getResponse().getLocation(), matchesPattern("Practitioner/[0-9]+/_history/1"));
+		assertThat(response.getEntry().get(0).getResponse().getLocation()).matches("Practitioner/[0-9]+/_history/1");
 
 		/*
 		 * Now a second time
@@ -2928,7 +2920,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 
 		ourLog.debug(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(response));
 		assertEquals("200 OK", response.getEntry().get(0).getResponse().getStatus());
-		assertThat(response.getEntry().get(0).getResponse().getLocation(), matchesPattern("Practitioner/[0-9]+/_history/1"));
+		assertThat(response.getEntry().get(0).getResponse().getLocation()).matches("Practitioner/[0-9]+/_history/1");
 
 	}
 
@@ -3015,15 +3007,15 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		assertEquals("200 OK", resp.getEntry().get(0).getResponse().getStatus());
 		if (pass == 0) {
 			assertEquals("201 Created", resp.getEntry().get(1).getResponse().getStatus());
-			assertThat(resp.getEntry().get(1).getResponse().getLocation(), startsWith("Observation/"));
-			assertThat(resp.getEntry().get(1).getResponse().getLocation(), endsWith("_history/1"));
+			assertThat(resp.getEntry().get(1).getResponse().getLocation()).startsWith("Observation/");
+			assertThat(resp.getEntry().get(1).getResponse().getLocation()).endsWith("_history/1");
 		} else {
 			assertEquals("200 OK", resp.getEntry().get(1).getResponse().getStatus());
-			assertThat(resp.getEntry().get(1).getResponse().getLocation(), startsWith("Observation/"));
-			assertThat(resp.getEntry().get(1).getResponse().getLocation(), endsWith("_history/2"));
+			assertThat(resp.getEntry().get(1).getResponse().getLocation()).startsWith("Observation/");
+			assertThat(resp.getEntry().get(1).getResponse().getLocation()).endsWith("_history/2");
 		}
 		assertEquals("201 Created", resp.getEntry().get(2).getResponse().getStatus());
-		assertThat(resp.getEntry().get(2).getResponse().getLocation(), startsWith("Patient/"));
+		assertThat(resp.getEntry().get(2).getResponse().getLocation()).startsWith("Patient/");
 		if (pass == 0) {
 			assertEquals("204 No Content", resp.getEntry().get(3).getResponse().getStatus());
 		} else {
@@ -3034,7 +3026,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		Bundle respGetBundle = (Bundle) resp.getEntry().get(0).getResource();
 		assertEquals(1, respGetBundle.getEntry().size());
 		assertEquals("testTransactionOrdering" + pass, ((Patient) respGetBundle.getEntry().get(0).getResource()).getName().get(0).getFamily());
-		assertThat(respGetBundle.getLink("self").getUrl(), endsWith("/Patient?identifier=testTransactionOrdering"));
+		assertThat(respGetBundle.getLink("self").getUrl()).endsWith("/Patient?identifier=testTransactionOrdering");
 	}
 
 	@Test
@@ -3155,7 +3147,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		Bundle list = toBundleR4(history);
 		assertEquals(1, list.getEntry().size());
 		Observation o = find(list, Observation.class, 0);
-		assertThat(o.getSubject().getReference(), matchesPattern("Patient/[0-9]+"));
+		assertThat(o.getSubject().getReference()).matches("Patient/[0-9]+");
 
 		b = createTransactionBundleForTestTransactionWithRefsToConditionalCreate();
 		mySystemDao.transaction(mySrd, b);
@@ -3164,7 +3156,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		list = toBundleR4(history);
 		assertEquals(1, list.getEntry().size());
 		o = find(list, Observation.class, 0);
-		assertThat(o.getSubject().getReference(), matchesPattern("Patient/[0-9]+"));
+		assertThat(o.getSubject().getReference()).matches("Patient/[0-9]+");
 
 	}
 
@@ -3351,7 +3343,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 			mySystemDao.transaction(mySrd, request);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage(), Matchers.matchesPattern(Msg.code(541) + "Unable to satisfy placeholder ID urn:uuid:[0-9a-z-]+ found in element named 'managingOrganization' within resource of type: Patient"));
+			assertThat(e.getMessage()).matches(Msg.code(541) + "Unable to satisfy placeholder ID urn:uuid:[0-9a-z-]+ found in element named 'managingOrganization' within resource of type: Patient");
 		}
 	}
 
@@ -3381,7 +3373,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		BundleEntryComponent nextEntry = resp.getEntry().get(0);
 		assertEquals(Bundle.class, nextEntry.getResource().getClass());
 		Bundle respBundle = (Bundle) nextEntry.getResource();
-		assertThat(respBundle.getTotal(), greaterThan(0));
+		assertThat(respBundle.getTotal()).isGreaterThan(0);
 
 		// Invalid _count
 
@@ -3398,7 +3390,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		request = new Bundle();
 		request.addEntry().getRequest().setMethod(HTTPVerb.GET).setUrl("Patient?" + Constants.PARAM_COUNT + "=");
 		respBundle = mySystemDao.transaction(mySrd, request);
-		assertThat(respBundle.getEntry().size(), greaterThan(0));
+		assertThat(respBundle.getEntry().size()).isGreaterThan(0);
 	}
 
 	@Test
@@ -3444,14 +3436,14 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 
 		BundleEntryComponent nextEntry = resp.getEntry().get(0);
 		assertEquals("200 OK", nextEntry.getResponse().getStatus());
-		assertThat(nextEntry.getResponse().getLocation(), not(containsString("test")));
+		assertThat(nextEntry.getResponse().getLocation()).doesNotContain("test");
 		assertEquals(id.toVersionless(), p.getIdElement().toVersionless());
 		assertNotEquals(id, p.getId());
-		assertThat(p.getId(), endsWith("/_history/2"));
+		assertThat(p.getId()).endsWith("/_history/2");
 
 		nextEntry = resp.getEntry().get(0);
 		assertEquals(Constants.STATUS_HTTP_200_OK + " OK", nextEntry.getResponse().getStatus());
-		assertThat(nextEntry.getResponse().getLocation(), not(emptyString()));
+		assertThat(nextEntry.getResponse().getLocation()).isNotEmpty();
 
 		nextEntry = resp.getEntry().get(1);
 		o = myObservationDao.read(new IdType(nextEntry.getResponse().getLocation()), mySrd);
@@ -3485,14 +3477,14 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 
 		BundleEntryComponent nextEntry = resp.getEntry().get(0);
 		assertEquals("200 OK", nextEntry.getResponse().getStatus());
-		assertThat(nextEntry.getResponse().getLocation(), not(containsString("test")));
+		assertThat(nextEntry.getResponse().getLocation()).doesNotContain("test");
 		assertEquals(id.toVersionless(), p.getIdElement().toVersionless());
 		assertNotEquals(id, p.getId());
-		assertThat(p.getId(), endsWith("/_history/2"));
+		assertThat(p.getId()).endsWith("/_history/2");
 
 		nextEntry = resp.getEntry().get(0);
 		assertEquals(Constants.STATUS_HTTP_200_OK + " OK", nextEntry.getResponse().getStatus());
-		assertThat(nextEntry.getResponse().getLocation(), not(emptyString()));
+		assertThat(nextEntry.getResponse().getLocation()).isNotEmpty();
 
 		nextEntry = resp.getEntry().get(1);
 		o = myObservationDao.read(new IdType(nextEntry.getResponse().getLocation()), mySrd);
@@ -3520,7 +3512,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 			mySystemDao.transaction(mySrd, request);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage(), containsString("2279"));
+			assertThat(e.getMessage()).contains("2279");
 		}
 
 	}
@@ -3555,7 +3547,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 			mySystemDao.transaction(mySrd, request);
 			fail();
 		} catch (PreconditionFailedException e) {
-			assertThat(e.getMessage(), containsString("Multiple resources match this search"));
+			assertThat(e.getMessage()).contains("Multiple resources match this search");
 		}
 	}
 
@@ -3582,7 +3574,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		assertEquals(Constants.STATUS_HTTP_201_CREATED + " Created", nextEntry.getResponse().getStatus());
 		IdType patientId = new IdType(nextEntry.getResponse().getLocation());
 
-		assertThat(patientId.getValue(), endsWith("/_history/1"));
+		assertThat(patientId.getValue()).endsWith("/_history/1");
 
 		nextEntry = resp.getEntry().get(1);
 		o = myObservationDao.read(new IdType(nextEntry.getResponse().getLocation()), mySrd);
@@ -3617,10 +3609,10 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		assertEquals(Constants.STATUS_HTTP_201_CREATED + " Created", nextEntry.getResponse().getStatus());
 		IdType patientId = new IdType(nextEntry.getResponse().getLocation());
 
-		assertThat(nextEntry.getResponse().getLocation(), containsString(methodName));
+		assertThat(nextEntry.getResponse().getLocation()).contains(methodName);
 		assertNotEquals(id.toVersionless(), patientId.toVersionless());
 
-		assertThat(patientId.getValue(), endsWith("/_history/1"));
+		assertThat(patientId.getValue()).endsWith("/_history/1");
 
 		nextEntry = resp.getEntry().get(1);
 		o = myObservationDao.read(new IdType(nextEntry.getResponse().getLocation()), mySrd);
@@ -3658,7 +3650,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 
 		assertThat(nextEntry.getResponse().getLocation(), (containsString("test")));
 		assertEquals(id.toVersionless(), new IdType(nextEntry.getResponse().getLocation()).toVersionless());
-		assertThat(nextEntry.getResponse().getLocation(), endsWith("/_history/2"));
+		assertThat(nextEntry.getResponse().getLocation()).endsWith("/_history/2");
 		assertNotEquals(id, new IdType(nextEntry.getResponse().getLocation()));
 
 		nextEntry = resp.getEntry().get(1);
@@ -3715,11 +3707,11 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 			mySystemDao.transaction(mySrd, input);
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertThat(e.getMessage(), containsString("Resource type 'Practicioner' is not valid for this path"));
+			assertThat(e.getMessage()).contains("Resource type 'Practicioner' is not valid for this path");
 		}
 
-		runInTransaction(() -> assertThat(myResourceTableDao.findAll(), empty()));
-		runInTransaction(() -> assertThat(myResourceIndexedSearchParamStringDao.findAll(), empty()));
+		runInTransaction(() -> assertThat(myResourceTableDao.findAll()).isEmpty());
+		runInTransaction(() -> assertThat(myResourceIndexedSearchParamStringDao.findAll()).isEmpty());
 
 	}
 
@@ -3741,9 +3733,9 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 
 		encoded = myFhirContext.newJsonParser().setPrettyPrint(false).encodeResourceToString(resp);
 		//@formatter:off
-		assertThat(encoded, containsString("\"response\":{" +
+		assertThat(encoded).contains("\"response\":{" +
 			"\"status\":\"201 Created\"," +
-			"\"location\":\"Questionnaire/54127-6/_history/1\","));
+			"\"location\":\"Questionnaire/54127-6/_history/1\",");
 		//@formatter:on
 
 		/*
@@ -3757,9 +3749,9 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 
 		encoded = myFhirContext.newJsonParser().setPrettyPrint(false).encodeResourceToString(resp);
 		//@formatter:off
-		assertThat(encoded, containsString("\"response\":{" +
+		assertThat(encoded).contains("\"response\":{" +
 			"\"status\":\"200 OK\"," +
-			"\"location\":\"Questionnaire/54127-6/_history/2\","));
+			"\"location\":\"Questionnaire/54127-6/_history/2\",");
 		//@formatter:on
 
 	}
@@ -4061,7 +4053,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 			.setIfNoneExist("Patient?active=false");
 
 		resp = mySystemDao.transaction(mySrd, b);
-		assertThat(new IdType(resp.getEntry().get(0).getResponse().getLocation()).toUnqualified().getValue(), matchesPattern("Patient/[0-9]+/_history/1"));
+		assertThat(new IdType(resp.getEntry().get(0).getResponse().getLocation()).toUnqualified().getValue()).matches("Patient/[0-9]+/_history/1");
 
 
 	}
@@ -4385,7 +4377,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		runInTransaction(()->{
 			List<ResourceTable> all = myResourceTableDao.findAll();
 			List<String> storedTypes = all.stream().map(ResourceTable::getResourceType).sorted().toList();
-			assertThat(storedTypes, empty());
+			assertThat(storedTypes).isEmpty();
 		});
 
 
@@ -4418,7 +4410,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		runInTransaction(()->{
 			List<ResourceTable> all = myResourceTableDao.findAll();
 			List<String> storedTypes = all.stream().map(ResourceTable::getResourceType).sorted().toList();
-			assertThat("Resources:\n * " + all.stream().map(t->t.toString()).collect(Collectors.joining("\n * ")), storedTypes, contains(theExpectedCreatedResourceTypes.split("\\|")));
+			assertThat(storedTypes).as("Resources:\n * " + all.stream().map(t -> t.toString()).collect(Collectors.joining("\n * "))).containsExactly(theExpectedCreatedResourceTypes.split("\\|"));
 		});
 	}
 
@@ -4633,7 +4625,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		ourLog.debug(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(resp));
 
 		String patientId = new IdType(resp.getEntry().get(0).getResponse().getLocation()).toUnqualifiedVersionless().getValue();
-		assertThat(patientId, startsWith("Patient/"));
+		assertThat(patientId).startsWith("Patient/");
 
 		SearchParameterMap params = new SearchParameterMap();
 		params.setLoadSynchronous(true);
@@ -4713,7 +4705,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		ourLog.debug(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(resp));
 
 		String patientId = new IdType(resp.getEntry().get(0).getResponse().getLocation()).toUnqualifiedVersionless().getValue();
-		assertThat(patientId, startsWith("Patient/"));
+		assertThat(patientId).startsWith("Patient/");
 
 		SearchParameterMap params = new SearchParameterMap();
 		params.setLoadSynchronous(true);
@@ -4755,8 +4747,8 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 
 		o1 = myObservationDao.read(new IdType(resp.getEntry().get(1).getResponse().getLocation()), mySrd);
 		o2 = myObservationDao.read(new IdType(resp.getEntry().get(2).getResponse().getLocation()), mySrd);
-		assertThat(o1.getSubject().getReferenceElement().getValue(), endsWith("Patient/" + p1.getIdElement().getIdPart()));
-		assertThat(o2.getSubject().getReferenceElement().getValue(), endsWith("Patient/" + p1.getIdElement().getIdPart()));
+		assertThat(o1.getSubject().getReferenceElement().getValue()).endsWith("Patient/" + p1.getIdElement().getIdPart());
+		assertThat(o2.getSubject().getReferenceElement().getValue()).endsWith("Patient/" + p1.getIdElement().getIdPart());
 
 	}
 
@@ -4898,8 +4890,8 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 
 		o1 = myObservationDao.read(new IdType(resp.getEntry().get(1).getResponse().getLocation()), mySrd);
 		o2 = myObservationDao.read(new IdType(resp.getEntry().get(2).getResponse().getLocation()), mySrd);
-		assertThat(o1.getSubject().getReferenceElement().getValue(), endsWith("Patient/" + p1.getIdElement().getIdPart()));
-		assertThat(o2.getSubject().getReferenceElement().getValue(), endsWith("Patient/" + p1.getIdElement().getIdPart()));
+		assertThat(o1.getSubject().getReferenceElement().getValue()).endsWith("Patient/" + p1.getIdElement().getIdPart());
+		assertThat(o2.getSubject().getReferenceElement().getValue()).endsWith("Patient/" + p1.getIdElement().getIdPart());
 
 	}
 

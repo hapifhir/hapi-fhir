@@ -39,10 +39,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.jpa.term.api.ITermLoaderSvc.LOINC_URI;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.empty;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hl7.fhir.common.hapi.validation.support.ValidationConstants.LOINC_LOW;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -237,7 +234,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			myCodeSystemDao.create(codeSystem, mySrd).getId().toUnqualified();
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertThat(e.getMessage(), containsString("Can not create multiple CodeSystem resources with CodeSystem.url \"http://example.com/my_code_system\" and CodeSystem.version \"SYSTEM VERSION\", already have one with resource ID: CodeSystem/"));
+			assertThat(e.getMessage()).contains("Can not create multiple CodeSystem resources with CodeSystem.url \"http://example.com/my_code_system\" and CodeSystem.version \"SYSTEM VERSION\", already have one with resource ID: CodeSystem/");
 		}
 
 	}
@@ -264,7 +261,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 		ValueSet outcome = myTermSvc.expandValueSet(null, vs);
 
 		List<String> codes = toCodesContains(outcome.getExpansion().getContains());
-		assertThat(codes, containsInAnyOrder("childAAB"));
+		assertThat(codes).containsExactlyInAnyOrder("childAAB");
 
 		ValueSet.ValueSetExpansionContainsComponent concept = outcome.getExpansion().getContains().get(0);
 		assertEquals("childAAB", concept.getCode());
@@ -297,7 +294,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			.setValue("valueAAA");
 		outcome = myTermSvc.expandValueSet(null, vs);
 		codes = toCodesContains(outcome.getExpansion().getContains());
-		assertThat(codes, containsInAnyOrder("childAAA"));
+		assertThat(codes).containsExactlyInAnyOrder("childAAA");
 
 		// Property matches several codes
 		vs = new ValueSet();
@@ -310,7 +307,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			.setValue("foo");
 		outcome = myTermSvc.expandValueSet(null, vs);
 		codes = toCodesContains(outcome.getExpansion().getContains());
-		assertThat(codes, containsInAnyOrder("childAAA", "childAAB"));
+		assertThat(codes).containsExactlyInAnyOrder("childAAA", "childAAB");
 
 		// Property matches no codes
 		vs = new ValueSet();
@@ -323,7 +320,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			.setValue("valueAAA");
 		outcome = myTermSvc.expandValueSet(null, vs);
 		codes = toCodesContains(outcome.getExpansion().getContains());
-		assertThat(codes, empty());
+		assertThat(codes).isEmpty();
 	}
 
 	@Test
@@ -350,7 +347,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			.setValue("3rdParty"); // mixed case
 		outcome = myTermSvc.expandValueSet(null, vs);
 		codes = toCodesContains(outcome.getExpansion().getContains());
-		assertThat(codes, containsInAnyOrder("50015-7", "43343-3", "43343-4"));
+		assertThat(codes).containsExactlyInAnyOrder("50015-7", "43343-3", "43343-4");
 
 		// Include
 		vs = new ValueSet();
@@ -367,7 +364,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			.setValue("3rdparty");  // lowercase
 		outcome = myTermSvc.expandValueSet(null, vs);
 		codes = toCodesContains(outcome.getExpansion().getContains());
-		assertThat(codes, containsInAnyOrder("50015-7", "43343-3", "43343-4"));
+		assertThat(codes).containsExactlyInAnyOrder("50015-7", "43343-3", "43343-4");
 	}
 
 	@Test
@@ -394,7 +391,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			.setValue("LOINC");
 		outcome = myTermSvc.expandValueSet(null, vs);
 		codes = toCodesContains(outcome.getExpansion().getContains());
-		assertThat(codes, containsInAnyOrder("47239-9"));
+		assertThat(codes).containsExactlyInAnyOrder("47239-9");
 
 		// Include
 		vs = new ValueSet();
@@ -411,7 +408,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			.setValue(LOINC_LOW);
 		outcome = myTermSvc.expandValueSet(null, vs);
 		codes = toCodesContains(outcome.getExpansion().getContains());
-		assertThat(codes, containsInAnyOrder("47239-9"));
+		assertThat(codes).containsExactlyInAnyOrder("47239-9");
 	}
 
 	@Test
@@ -434,7 +431,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			.setValue("3rdParty");
 		outcome = myTermSvc.expandValueSet(null, vs);
 		codes = toCodesContains(outcome.getExpansion().getContains());
-		assertThat(codes, containsInAnyOrder("47239-9"));
+		assertThat(codes).containsExactlyInAnyOrder("47239-9");
 
 		// Include
 		vs = new ValueSet();
@@ -447,7 +444,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			.setValue("3rdparty");
 		outcome = myTermSvc.expandValueSet(null, vs);
 		codes = toCodesContains(outcome.getExpansion().getContains());
-		assertThat(codes, containsInAnyOrder("47239-9"));
+		assertThat(codes).containsExactlyInAnyOrder("47239-9");
 	}
 
 	@Test
@@ -470,7 +467,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			.setValue("LOINC");
 		outcome = myTermSvc.expandValueSet(null, vs);
 		codes = toCodesContains(outcome.getExpansion().getContains());
-		assertThat(codes, containsInAnyOrder("50015-7", "43343-3", "43343-4"));
+		assertThat(codes).containsExactlyInAnyOrder("50015-7", "43343-3", "43343-4");
 
 		// Include
 		vs = new ValueSet();
@@ -483,7 +480,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			.setValue(LOINC_LOW);
 		outcome = myTermSvc.expandValueSet(null, vs);
 		codes = toCodesContains(outcome.getExpansion().getContains());
-		assertThat(codes, containsInAnyOrder("50015-7", "43343-3", "43343-4"));
+		assertThat(codes).containsExactlyInAnyOrder("50015-7", "43343-3", "43343-4");
 	}
 
 	@Test
@@ -588,7 +585,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			.setValue("50015-7");
 		outcome = myTermSvc.expandValueSet(null, vs);
 		codes = toCodesContains(outcome.getExpansion().getContains());
-		assertThat(codes, containsInAnyOrder("50015-7"));
+		assertThat(codes).containsExactlyInAnyOrder("50015-7");
 
 		// Include
 		vs = new ValueSet();
@@ -605,7 +602,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			.setValue("43343-3");
 		outcome = myTermSvc.expandValueSet(null, vs);
 		codes = toCodesContains(outcome.getExpansion().getContains());
-		assertThat(codes, containsInAnyOrder("50015-7", "43343-3"));
+		assertThat(codes).containsExactlyInAnyOrder("50015-7", "43343-3");
 
 		// Include
 		vs = new ValueSet();
@@ -622,7 +619,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			.setValue("43343-4");
 		outcome = myTermSvc.expandValueSet(null, vs);
 		codes = toCodesContains(outcome.getExpansion().getContains());
-		assertThat(codes, containsInAnyOrder("50015-7", "43343-3", "43343-4", "47239-9"));
+		assertThat(codes).containsExactlyInAnyOrder("50015-7", "43343-3", "43343-4", "47239-9");
 
 		// Include
 		vs = new ValueSet();
@@ -639,7 +636,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			.setValue("47239-9");
 		outcome = myTermSvc.expandValueSet(null, vs);
 		codes = toCodesContains(outcome.getExpansion().getContains());
-		assertThat(codes, containsInAnyOrder("50015-7", "43343-3", "43343-4", "47239-9"));
+		assertThat(codes).containsExactlyInAnyOrder("50015-7", "43343-3", "43343-4", "47239-9");
 	}
 
 	@Test
@@ -666,7 +663,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			.setValue("50015-7,43343-3,43343-4,47239-9");
 		outcome = myTermSvc.expandValueSet(null, vs);
 		codes = toCodesContains(outcome.getExpansion().getContains());
-		assertThat(codes, containsInAnyOrder("50015-7"));
+		assertThat(codes).containsExactlyInAnyOrder("50015-7");
 	}
 
 	@Test
@@ -689,7 +686,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			.setValue("50015-7");
 		outcome = myTermSvc.expandValueSet(null, vs);
 		codes = toCodesContains(outcome.getExpansion().getContains());
-		assertThat(codes, containsInAnyOrder("43343-3", "43343-4", "47239-9"));
+		assertThat(codes).containsExactlyInAnyOrder("43343-3", "43343-4", "47239-9");
 
 		// Include
 		vs = new ValueSet();
@@ -702,7 +699,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			.setValue("43343-3");
 		outcome = myTermSvc.expandValueSet(null, vs);
 		codes = toCodesContains(outcome.getExpansion().getContains());
-		assertThat(codes, containsInAnyOrder("43343-4", "47239-9"));
+		assertThat(codes).containsExactlyInAnyOrder("43343-4", "47239-9");
 
 		// Include
 		vs = new ValueSet();
@@ -749,7 +746,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			.setValue("50015-7,43343-3,43343-4,47239-9");
 		outcome = myTermSvc.expandValueSet(null, vs);
 		codes = toCodesContains(outcome.getExpansion().getContains());
-		assertThat(codes, containsInAnyOrder("43343-3", "43343-4", "47239-9"));
+		assertThat(codes).containsExactlyInAnyOrder("43343-3", "43343-4", "47239-9");
 	}
 
 	@Test
@@ -829,7 +826,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			.setValue("50015-7");
 		outcome = myTermSvc.expandValueSet(null, vs);
 		codes = toCodesContains(outcome.getExpansion().getContains());
-		assertThat(codes, containsInAnyOrder("50015-7", "43343-3", "43343-4", "47239-9"));
+		assertThat(codes).containsExactlyInAnyOrder("50015-7", "43343-3", "43343-4", "47239-9");
 
 		// Include
 		vs = new ValueSet();
@@ -846,7 +843,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			.setValue("43343-3");
 		outcome = myTermSvc.expandValueSet(null, vs);
 		codes = toCodesContains(outcome.getExpansion().getContains());
-		assertThat(codes, containsInAnyOrder("43343-3", "43343-4", "47239-9"));
+		assertThat(codes).containsExactlyInAnyOrder("43343-3", "43343-4", "47239-9");
 
 		// Include
 		vs = new ValueSet();
@@ -863,7 +860,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			.setValue("43343-4");
 		outcome = myTermSvc.expandValueSet(null, vs);
 		codes = toCodesContains(outcome.getExpansion().getContains());
-		assertThat(codes, containsInAnyOrder("50015-7", "43343-4", "47239-9"));
+		assertThat(codes).containsExactlyInAnyOrder("50015-7", "43343-4", "47239-9");
 
 		// Include
 		vs = new ValueSet();
@@ -880,7 +877,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			.setValue("47239-9");
 		outcome = myTermSvc.expandValueSet(null, vs);
 		codes = toCodesContains(outcome.getExpansion().getContains());
-		assertThat(codes, containsInAnyOrder("50015-7", "43343-4", "47239-9"));
+		assertThat(codes).containsExactlyInAnyOrder("50015-7", "43343-4", "47239-9");
 	}
 
 	@Test
@@ -907,7 +904,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			.setValue("50015-7,43343-3,43343-4,47239-9");
 		outcome = myTermSvc.expandValueSet(null, vs);
 		codes = toCodesContains(outcome.getExpansion().getContains());
-		assertThat(codes, containsInAnyOrder("43343-4", "47239-9"));
+		assertThat(codes).containsExactlyInAnyOrder("43343-4", "47239-9");
 	}
 
 	@Test
@@ -942,7 +939,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			.setValue("43343-3");
 		outcome = myTermSvc.expandValueSet(null, vs);
 		codes = toCodesContains(outcome.getExpansion().getContains());
-		assertThat(codes, containsInAnyOrder("50015-7"));
+		assertThat(codes).containsExactlyInAnyOrder("50015-7");
 
 		// Include
 		vs = new ValueSet();
@@ -955,7 +952,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			.setValue("43343-4");
 		outcome = myTermSvc.expandValueSet(null, vs);
 		codes = toCodesContains(outcome.getExpansion().getContains());
-		assertThat(codes, containsInAnyOrder("43343-3"));
+		assertThat(codes).containsExactlyInAnyOrder("43343-3");
 
 		// Include
 		vs = new ValueSet();
@@ -968,7 +965,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			.setValue("47239-9");
 		outcome = myTermSvc.expandValueSet(null, vs);
 		codes = toCodesContains(outcome.getExpansion().getContains());
-		assertThat(codes, containsInAnyOrder("43343-3"));
+		assertThat(codes).containsExactlyInAnyOrder("43343-3");
 	}
 
 	@Test
@@ -991,7 +988,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			.setValue("50015-7,43343-3,43343-4,47239-9");
 		outcome = myTermSvc.expandValueSet(null, vs);
 		codes = toCodesContains(outcome.getExpansion().getContains());
-		assertThat(codes, containsInAnyOrder("50015-7", "43343-3"));
+		assertThat(codes).containsExactlyInAnyOrder("50015-7", "43343-3");
 	}
 
 	@Test
@@ -1071,7 +1068,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			.setValue("50015-7");
 		outcome = myTermSvc.expandValueSet(null, vs);
 		codes = toCodesContains(outcome.getExpansion().getContains());
-		assertThat(codes, containsInAnyOrder("50015-7", "43343-3", "43343-4", "47239-9"));
+		assertThat(codes).containsExactlyInAnyOrder("50015-7", "43343-3", "43343-4", "47239-9");
 
 		// Include
 		vs = new ValueSet();
@@ -1088,7 +1085,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			.setValue("43343-3");
 		outcome = myTermSvc.expandValueSet(null, vs);
 		codes = toCodesContains(outcome.getExpansion().getContains());
-		assertThat(codes, containsInAnyOrder("43343-3", "43343-4", "47239-9"));
+		assertThat(codes).containsExactlyInAnyOrder("43343-3", "43343-4", "47239-9");
 
 		// Include
 		vs = new ValueSet();
@@ -1105,7 +1102,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			.setValue("43343-4");
 		outcome = myTermSvc.expandValueSet(null, vs);
 		codes = toCodesContains(outcome.getExpansion().getContains());
-		assertThat(codes, containsInAnyOrder("43343-4", "47239-9"));
+		assertThat(codes).containsExactlyInAnyOrder("43343-4", "47239-9");
 
 		// Include
 		vs = new ValueSet();
@@ -1122,7 +1119,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			.setValue("47239-9");
 		outcome = myTermSvc.expandValueSet(null, vs);
 		codes = toCodesContains(outcome.getExpansion().getContains());
-		assertThat(codes, containsInAnyOrder("43343-4", "47239-9"));
+		assertThat(codes).containsExactlyInAnyOrder("43343-4", "47239-9");
 	}
 
 	@Test
@@ -1150,7 +1147,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 		outcome = myTermSvc.expandValueSet(null, vs);
 		codes = toCodesContains(outcome.getExpansion().getContains());
 
-		assertThat(codes.toString(), codes, containsInAnyOrder("43343-4", "47239-9"));
+		assertThat(codes).as(codes.toString()).containsExactlyInAnyOrder("43343-4", "47239-9");
 	}
 
 	@Test
@@ -1185,7 +1182,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			.setValue("43343-3");
 		outcome = myTermSvc.expandValueSet(null, vs);
 		codes = toCodesContains(outcome.getExpansion().getContains());
-		assertThat(codes, containsInAnyOrder("50015-7"));
+		assertThat(codes).containsExactlyInAnyOrder("50015-7");
 
 		// Include
 		vs = new ValueSet();
@@ -1198,7 +1195,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			.setValue("43343-4");
 		outcome = myTermSvc.expandValueSet(null, vs);
 		codes = toCodesContains(outcome.getExpansion().getContains());
-		assertThat(codes, containsInAnyOrder("50015-7", "43343-3"));
+		assertThat(codes).containsExactlyInAnyOrder("50015-7", "43343-3");
 
 		// Include
 		vs = new ValueSet();
@@ -1211,7 +1208,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			.setValue("47239-9");
 		outcome = myTermSvc.expandValueSet(null, vs);
 		codes = toCodesContains(outcome.getExpansion().getContains());
-		assertThat(codes, containsInAnyOrder("50015-7", "43343-3"));
+		assertThat(codes).containsExactlyInAnyOrder("50015-7", "43343-3");
 	}
 
 	@Test
@@ -1234,7 +1231,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			.setValue("50015-7,43343-3,43343-4,47239-9");
 		outcome = myTermSvc.expandValueSet(null, vs);
 		codes = toCodesContains(outcome.getExpansion().getContains());
-		assertThat(codes, containsInAnyOrder("50015-7", "43343-3"));
+		assertThat(codes).containsExactlyInAnyOrder("50015-7", "43343-3");
 	}
 
 	@Test
@@ -1314,7 +1311,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			.setValue("50015-7");
 		outcome = myTermSvc.expandValueSet(null, vs);
 		codes = toCodesContains(outcome.getExpansion().getContains());
-		assertThat(codes, containsInAnyOrder("50015-7", "43343-4", "47239-9"));
+		assertThat(codes).containsExactlyInAnyOrder("50015-7", "43343-4", "47239-9");
 
 		// Include
 		vs = new ValueSet();
@@ -1331,7 +1328,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			.setValue("43343-3");
 		outcome = myTermSvc.expandValueSet(null, vs);
 		codes = toCodesContains(outcome.getExpansion().getContains());
-		assertThat(codes, containsInAnyOrder("50015-7", "43343-3"));
+		assertThat(codes).containsExactlyInAnyOrder("50015-7", "43343-3");
 
 		// Include
 		vs = new ValueSet();
@@ -1348,7 +1345,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			.setValue("43343-4");
 		outcome = myTermSvc.expandValueSet(null, vs);
 		codes = toCodesContains(outcome.getExpansion().getContains());
-		assertThat(codes, containsInAnyOrder("50015-7", "43343-3", "43343-4", "47239-9"));
+		assertThat(codes).containsExactlyInAnyOrder("50015-7", "43343-3", "43343-4", "47239-9");
 
 		// Include
 		vs = new ValueSet();
@@ -1365,7 +1362,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			.setValue("47239-9");
 		outcome = myTermSvc.expandValueSet(null, vs);
 		codes = toCodesContains(outcome.getExpansion().getContains());
-		assertThat(codes, containsInAnyOrder("50015-7", "43343-3", "43343-4", "47239-9"));
+		assertThat(codes).containsExactlyInAnyOrder("50015-7", "43343-3", "43343-4", "47239-9");
 	}
 
 	@Test
@@ -1392,7 +1389,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			.setValue("50015-7,43343-3,43343-4,47239-9");
 		outcome = myTermSvc.expandValueSet(null, vs);
 		codes = toCodesContains(outcome.getExpansion().getContains());
-		assertThat(codes, containsInAnyOrder("50015-7"));
+		assertThat(codes).containsExactlyInAnyOrder("50015-7");
 	}
 
 	@Test
@@ -1415,7 +1412,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			.setValue("50015-7");
 		outcome = myTermSvc.expandValueSet(null, vs);
 		codes = toCodesContains(outcome.getExpansion().getContains());
-		assertThat(codes, containsInAnyOrder("43343-3"));
+		assertThat(codes).containsExactlyInAnyOrder("43343-3");
 
 		// Include
 		vs = new ValueSet();
@@ -1428,7 +1425,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			.setValue("43343-3");
 		outcome = myTermSvc.expandValueSet(null, vs);
 		codes = toCodesContains(outcome.getExpansion().getContains());
-		assertThat(codes, containsInAnyOrder("43343-4", "47239-9"));
+		assertThat(codes).containsExactlyInAnyOrder("43343-4", "47239-9");
 
 		// Include
 		vs = new ValueSet();
@@ -1475,7 +1472,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			.setValue("50015-7,43343-3,43343-4,47239-9");
 		outcome = myTermSvc.expandValueSet(null, vs);
 		codes = toCodesContains(outcome.getExpansion().getContains());
-		assertThat(codes, containsInAnyOrder("43343-3", "43343-4", "47239-9"));
+		assertThat(codes).containsExactlyInAnyOrder("43343-3", "43343-4", "47239-9");
 	}
 
 	@Test
@@ -1555,7 +1552,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			.setValue(".*\\^Donor$");
 		outcome = myTermSvc.expandValueSet(null, vs);
 		codes = toCodesContains(outcome.getExpansion().getContains());
-		assertThat(codes, containsInAnyOrder("43343-3", "43343-4", "47239-9"));
+		assertThat(codes).containsExactlyInAnyOrder("43343-3", "43343-4", "47239-9");
 	}
 
 	@Test
@@ -1582,7 +1579,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			.setValue("12345-1|12345-2");
 		outcome = myTermSvc.expandValueSet(null, vs);
 		codes = toCodesContains(outcome.getExpansion().getContains());
-		assertThat(codes, containsInAnyOrder("50015-7", "47239-9"));
+		assertThat(codes).containsExactlyInAnyOrder("50015-7", "47239-9");
 	}
 
 	@Test
@@ -1605,7 +1602,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			.setValue(".*\\^Donor$");
 		outcome = myTermSvc.expandValueSet(null, vs);
 		codes = toCodesContains(outcome.getExpansion().getContains());
-		assertThat(codes, containsInAnyOrder("50015-7"));
+		assertThat(codes).containsExactlyInAnyOrder("50015-7");
 
 		// Include
 		vs = new ValueSet();
@@ -1618,7 +1615,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			.setValue("\\^Donor$");
 		outcome = myTermSvc.expandValueSet(null, vs);
 		codes = toCodesContains(outcome.getExpansion().getContains());
-		assertThat(codes, containsInAnyOrder("50015-7"));
+		assertThat(codes).containsExactlyInAnyOrder("50015-7");
 
 		// Include
 		vs = new ValueSet();
@@ -1631,7 +1628,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			.setValue("\\^Dono$");
 		outcome = myTermSvc.expandValueSet(null, vs);
 		codes = toCodesContains(outcome.getExpansion().getContains());
-		assertThat(codes, empty());
+		assertThat(codes).isEmpty();
 
 		// Include
 		vs = new ValueSet();
@@ -1644,7 +1641,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			.setValue("^Donor$");
 		outcome = myTermSvc.expandValueSet(null, vs);
 		codes = toCodesContains(outcome.getExpansion().getContains());
-		assertThat(codes, empty());
+		assertThat(codes).isEmpty();
 
 		// Include
 		vs = new ValueSet();
@@ -1657,7 +1654,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			.setValue("\\^Dono");
 		outcome = myTermSvc.expandValueSet(null, vs);
 		codes = toCodesContains(outcome.getExpansion().getContains());
-		assertThat(codes, containsInAnyOrder("50015-7"));
+		assertThat(codes).containsExactlyInAnyOrder("50015-7");
 
 		// Include
 		vs = new ValueSet();
@@ -1670,7 +1667,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			.setValue("^Ser$");
 		outcome = myTermSvc.expandValueSet(null, vs);
 		codes = toCodesContains(outcome.getExpansion().getContains());
-		assertThat(codes, containsInAnyOrder("43343-3", "43343-4"));
+		assertThat(codes).containsExactlyInAnyOrder("43343-3", "43343-4");
 
 	}
 
@@ -1686,7 +1683,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 		ValueSet outcome = myTermSvc.expandValueSet(null, vs);
 
 		codes = toCodesContains(outcome.getExpansion().getContains());
-		assertThat(codes, containsInAnyOrder("ParentWithNoChildrenA", "ParentWithNoChildrenB", "ParentWithNoChildrenC", "ParentA", "childAAA", "childAAB", "childAA", "childAB", "ParentB"));
+		assertThat(codes).containsExactlyInAnyOrder("ParentWithNoChildrenA", "ParentWithNoChildrenB", "ParentWithNoChildrenC", "ParentA", "childAAA", "childAAB", "childAA", "childAB", "ParentB");
 	}
 
 	@Test
@@ -1698,26 +1695,26 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 
 		concepts = myTermSvc.findCodesAbove(id.getIdPartAsLong(), id.getVersionIdPartAsLong(), "childAA");
 		codes = toCodes(concepts);
-		assertThat(codes, containsInAnyOrder("ParentA", "childAA"));
+		assertThat(codes).containsExactlyInAnyOrder("ParentA", "childAA");
 
 		concepts = myTermSvc.findCodesAbove(id.getIdPartAsLong(), id.getVersionIdPartAsLong(), "childAAB");
 		codes = toCodes(concepts);
-		assertThat(codes, containsInAnyOrder("ParentA", "childAA", "childAAB"));
+		assertThat(codes).containsExactlyInAnyOrder("ParentA", "childAA", "childAAB");
 
 		// Try an unknown code
 		concepts = myTermSvc.findCodesAbove(id.getIdPartAsLong(), id.getVersionIdPartAsLong(), "FOO_BAD_CODE");
 		codes = toCodes(concepts);
-		assertThat(codes, empty());
+		assertThat(codes).isEmpty();
 	}
 
 	@Test
 	public void testFindCodesAboveAndBelowUnknown() {
 		createCodeSystem();
 
-		assertThat(myTermSvc.findCodesBelow("http://foo", "code"), empty());
-		assertThat(myTermSvc.findCodesBelow(CS_URL, "code"), empty());
-		assertThat(myTermSvc.findCodesAbove("http://foo", "code"), empty());
-		assertThat(myTermSvc.findCodesAbove(CS_URL, "code"), empty());
+		assertThat(myTermSvc.findCodesBelow("http://foo", "code")).isEmpty();
+		assertThat(myTermSvc.findCodesBelow(CS_URL, "code")).isEmpty();
+		assertThat(myTermSvc.findCodesAbove("http://foo", "code")).isEmpty();
+		assertThat(myTermSvc.findCodesAbove(CS_URL, "code")).isEmpty();
 	}
 
 	@Test
@@ -1727,21 +1724,21 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 
 		concepts = myTermSvc.findCodesAbove("http://hl7.org/fhir/allergy-clinical-status", "active");
 		codes = toCodes(concepts);
-		assertThat(codes, containsInAnyOrder("active"));
+		assertThat(codes).containsExactlyInAnyOrder("active");
 
 		concepts = myTermSvc.findCodesAbove("http://hl7.org/fhir/allergy-clinical-status", "resolved");
 		codes = toCodes(concepts);
-		assertThat(codes, containsInAnyOrder("inactive", "resolved"));
+		assertThat(codes).containsExactlyInAnyOrder("inactive", "resolved");
 
 		// Unknown code
 		concepts = myTermSvc.findCodesAbove("http://hl7.org/fhir/allergy-clinical-status", "FOO");
 		codes = toCodes(concepts);
-		assertThat(codes, empty());
+		assertThat(codes).isEmpty();
 
 		// Unknown system
 		concepts = myTermSvc.findCodesAbove("http://hl7.org/fhir/allergy-clinical-status2222", "active");
 		codes = toCodes(concepts);
-		assertThat(codes, empty());
+		assertThat(codes).isEmpty();
 	}
 
 	@Test
@@ -1753,16 +1750,16 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 
 		concepts = myTermSvc.findCodesBelow(id.getIdPartAsLong(), id.getVersionIdPartAsLong(), "ParentA");
 		codes = toCodes(concepts);
-		assertThat(codes, containsInAnyOrder("ParentA", "childAA", "childAAA", "childAAB", "childAB"));
+		assertThat(codes).containsExactlyInAnyOrder("ParentA", "childAA", "childAAA", "childAAB", "childAB");
 
 		concepts = myTermSvc.findCodesBelow(id.getIdPartAsLong(), id.getVersionIdPartAsLong(), "childAA");
 		codes = toCodes(concepts);
-		assertThat(codes, containsInAnyOrder("childAA", "childAAA", "childAAB"));
+		assertThat(codes).containsExactlyInAnyOrder("childAA", "childAAA", "childAAB");
 
 		// Try an unknown code
 		concepts = myTermSvc.findCodesBelow(id.getIdPartAsLong(), id.getVersionIdPartAsLong(), "FOO_BAD_CODE");
 		codes = toCodes(concepts);
-		assertThat(codes, empty());
+		assertThat(codes).isEmpty();
 
 	}
 
@@ -1773,21 +1770,21 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 
 		concepts = myTermSvc.findCodesBelow("http://hl7.org/fhir/allergy-clinical-status", "inactive");
 		codes = toCodes(concepts);
-		assertThat(codes, containsInAnyOrder("inactive", "resolved"));
+		assertThat(codes).containsExactlyInAnyOrder("inactive", "resolved");
 
 		concepts = myTermSvc.findCodesBelow("http://hl7.org/fhir/allergy-clinical-status", "resolved");
 		codes = toCodes(concepts);
-		assertThat(codes, containsInAnyOrder("resolved"));
+		assertThat(codes).containsExactlyInAnyOrder("resolved");
 
 		// Unknown code
 		concepts = myTermSvc.findCodesBelow("http://hl7.org/fhir/allergy-clinical-status", "FOO");
 		codes = toCodes(concepts);
-		assertThat(codes, empty());
+		assertThat(codes).isEmpty();
 
 		// Unknown system
 		concepts = myTermSvc.findCodesBelow("http://hl7.org/fhir/allergy-clinical-status2222", "active");
 		codes = toCodes(concepts);
-		assertThat(codes, empty());
+		assertThat(codes).isEmpty();
 	}
 
 	@Test
@@ -1803,7 +1800,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 		ValueSet outcome = myTermSvc.expandValueSet(null, vs);
 
 		codes = toCodesContains(outcome.getExpansion().getContains());
-		assertThat(codes, containsInAnyOrder("childAAB"));
+		assertThat(codes).containsExactlyInAnyOrder("childAAB");
 
 		ValueSet.ValueSetExpansionContainsComponent concept = outcome.getExpansion().getContains().get(0);
 		assertEquals("childAAB", concept.getCode());

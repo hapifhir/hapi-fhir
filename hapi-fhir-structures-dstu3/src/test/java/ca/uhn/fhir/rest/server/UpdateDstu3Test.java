@@ -28,8 +28,8 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 
 import java.nio.charset.StandardCharsets;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsNot.not;
 import static org.hamcrest.text.IsEmptyString.emptyString;
@@ -176,7 +176,7 @@ public class UpdateDstu3Test {
 		ourLog.info("Response was:\n{}", responseContent);
 
 		assertEquals(400, status.getStatusLine().getStatusCode());
-		assertThat(responseContent, containsString("Resource body ID of &quot;3&quot; does not match"));
+		assertThat(responseContent).contains("Resource body ID of &quot;3&quot; does not match");
 	}
 
 	public static class PatientProvider implements IResourceProvider {

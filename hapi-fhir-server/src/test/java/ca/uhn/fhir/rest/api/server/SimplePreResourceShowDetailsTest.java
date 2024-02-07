@@ -8,8 +8,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -55,11 +54,11 @@ public class SimplePreResourceShowDetailsTest {
 	@Test
 	public void testGetResources() {
 		SimplePreResourceShowDetails details = new SimplePreResourceShowDetails(List.of(myResource1, myResource2));
-		assertThat(details.getAllResources(), contains(myResource1, myResource2));
+		assertThat(details.getAllResources()).containsExactly(myResource1, myResource2);
 
 		details.setResource(0, null);
 
-		assertThat(details.getAllResources(), contains(myResource2));
+		assertThat(details.getAllResources()).containsExactly(myResource2);
 	}
 
 }

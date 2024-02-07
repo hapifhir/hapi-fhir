@@ -23,8 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class SearchWithIncludesDstu3Test {
@@ -50,14 +49,14 @@ public class SearchWithIncludesDstu3Test {
 		IOUtils.closeQuietly(status.getEntity().getContent());
 		ourLog.info(responseContent);
 		assertEquals(200, status.getStatusLine().getStatusCode());
-		
+
 		// Response should include both the patient, and the organization that was referred to
 		// by a linked resource
 		
-		assertThat(responseContent, containsString("<name value=\"child\"/>"));
-		assertThat(responseContent, containsString("<name value=\"parent\"/>"));
-		assertThat(responseContent, containsString("<name value=\"grandparent\"/>"));
-		assertThat(responseContent, containsString("<mode value=\"include\"/>"));
+		assertThat(responseContent).contains("<name value=\"child\"/>");
+		assertThat(responseContent).contains("<name value=\"parent\"/>");
+		assertThat(responseContent).contains("<name value=\"grandparent\"/>");
+		assertThat(responseContent).contains("<mode value=\"include\"/>");
 		
 	}
 

@@ -30,9 +30,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.hasSize;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -122,7 +120,7 @@ public class ReindexProviderTest {
 
 		verify(myJobCoordinator, times(1)).startInstance(isNotNull(), myStartRequestCaptor.capture());
 		ReindexJobParameters params = myStartRequestCaptor.getValue().getParameters(ReindexJobParameters.class);
-		assertThat(params.getPartitionedUrls(), hasSize(1));
+		assertThat(params.getPartitionedUrls()).hasSize(1);
 		assertEquals(url, params.getPartitionedUrls().get(0).getUrl());
 		// Default values
 		assertEquals(ReindexParameters.ReindexSearchParametersEnum.ALL, params.getReindexSearchParameters());
@@ -158,7 +156,7 @@ public class ReindexProviderTest {
 
 		verify(myJobCoordinator, times(1)).startInstance(isNotNull(), myStartRequestCaptor.capture());
 		ReindexJobParameters params = myStartRequestCaptor.getValue().getParameters(ReindexJobParameters.class);
-		assertThat(params.getPartitionedUrls(), empty());
+		assertThat(params.getPartitionedUrls()).isEmpty();
 		// Non-default values
 		assertEquals(ReindexParameters.ReindexSearchParametersEnum.NONE, params.getReindexSearchParameters());
 		assertFalse(params.getOptimisticLock());

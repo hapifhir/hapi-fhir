@@ -32,11 +32,9 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.hasItem;
-import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -147,7 +145,7 @@ public class PatientEverythingR4Test extends BaseResourceProviderR4Test {
 		for (BundleEntryComponent nextEntry : bundle.getEntry()) {
 			actual.add(nextEntry.getResource().getIdElement().toUnqualifiedVersionless().getValue());
 		}
-		assertThat(actual, containsInAnyOrder(patientId, observationId));
+		assertThat(actual).containsExactlyInAnyOrder(patientId, observationId);
 
 		// Synchronous call
 		HttpGet get = new HttpGet(myServerBase + "/" + patientId + "/$everything?_format=json&_count=100");
@@ -161,7 +159,7 @@ public class PatientEverythingR4Test extends BaseResourceProviderR4Test {
 		for (BundleEntryComponent nextEntry : bundle.getEntry()) {
 			actual.add(nextEntry.getResource().getIdElement().toUnqualifiedVersionless().getValue());
 		}
-		assertThat(actual, containsInAnyOrder(patientId, observationId));
+		assertThat(actual).containsExactlyInAnyOrder(patientId, observationId);
 	}
 
 
@@ -182,12 +180,12 @@ public class PatientEverythingR4Test extends BaseResourceProviderR4Test {
 
 		ourLog.info("Found IDs: {}", actual);
 
-		assertThat(actual, hasItem(patId));
-		assertThat(actual, hasItem(encId1));
-		assertThat(actual, hasItem(encId2));
-		assertThat(actual, hasItem(orgId));
-		assertThat(actual, hasItem(taskId));
-		assertThat(actual, hasItems(myObsIds.toArray(new String[0])));
+		assertThat(actual).contains(patId);
+		assertThat(actual).contains(encId1);
+		assertThat(actual).contains(encId2);
+		assertThat(actual).contains(orgId);
+		assertThat(actual).contains(taskId);
+		assertThat(actual).contains(myObsIds.toArray(new String[0]));
 		assertThat(actual, not(hasItem(myWrongPatId)));
 		assertThat(actual, not(hasItem(myWrongEnc1)));
 	}
@@ -210,11 +208,11 @@ public class PatientEverythingR4Test extends BaseResourceProviderR4Test {
 
 		ourLog.info("Found IDs: {}", actual);
 
-		assertThat(actual, hasItem(patId));
-		assertThat(actual, hasItem(encId1));
-		assertThat(actual, hasItem(encId2));
-		assertThat(actual, hasItem(orgId));
-		assertThat(actual, hasItems(myObsIds.toArray(new String[0])));
+		assertThat(actual).contains(patId);
+		assertThat(actual).contains(encId1);
+		assertThat(actual).contains(encId2);
+		assertThat(actual).contains(orgId);
+		assertThat(actual).contains(myObsIds.toArray(new String[0]));
 		assertThat(actual, not(hasItem(myWrongPatId)));
 		assertThat(actual, not(hasItem(myWrongEnc1)));
 	}
@@ -228,11 +226,11 @@ public class PatientEverythingR4Test extends BaseResourceProviderR4Test {
 		Bundle bundle = fetchBundle(myServerBase + "/" + patId + "/$everything?_format=json&_count=1", EncodingEnum.JSON);
 
 		assertNotNull(bundle.getLink("next").getUrl());
-		assertThat(bundle.getLink("next").getUrl(), containsString("_format=json"));
+		assertThat(bundle.getLink("next").getUrl()).contains("_format=json");
 		bundle = fetchBundle(bundle.getLink("next").getUrl(), EncodingEnum.JSON);
 
 		assertNotNull(bundle.getLink("next").getUrl());
-		assertThat(bundle.getLink("next").getUrl(), containsString("_format=json"));
+		assertThat(bundle.getLink("next").getUrl()).contains("_format=json");
 		fetchBundle(bundle.getLink("next").getUrl(), EncodingEnum.JSON);
 	}
 
@@ -246,12 +244,12 @@ public class PatientEverythingR4Test extends BaseResourceProviderR4Test {
 
 		assertNotNull(bundle.getLink("next").getUrl());
 		ourLog.info("Next link: {}", bundle.getLink("next").getUrl());
-		assertThat(bundle.getLink("next").getUrl(), containsString("_format=xml"));
+		assertThat(bundle.getLink("next").getUrl()).contains("_format=xml");
 		bundle = fetchBundle(bundle.getLink("next").getUrl(), EncodingEnum.XML);
 
 		assertNotNull(bundle.getLink("next").getUrl());
 		ourLog.info("Next link: {}", bundle.getLink("next").getUrl());
-		assertThat(bundle.getLink("next").getUrl(), containsString("_format=xml"));
+		assertThat(bundle.getLink("next").getUrl()).contains("_format=xml");
 		fetchBundle(bundle.getLink("next").getUrl(), EncodingEnum.XML);
 	}
 

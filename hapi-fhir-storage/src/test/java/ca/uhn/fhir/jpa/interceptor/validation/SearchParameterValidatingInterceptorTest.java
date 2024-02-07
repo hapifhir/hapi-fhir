@@ -31,8 +31,7 @@ import java.util.stream.Collectors;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
@@ -101,7 +100,7 @@ public class SearchParameterValidatingInterceptorTest {
 			mySearchParamValidatingInterceptor.resourcePreCreate(newSearchParam, myRequestDetails);
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertThat(e.getMessage(), containsString("2196"));
+			assertThat(e.getMessage()).contains("2196");
 		}
 
 	}
@@ -115,7 +114,7 @@ public class SearchParameterValidatingInterceptorTest {
 			mySearchParamValidatingInterceptor.resourcePreCreate(sp, myRequestDetails);
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertThat(e.getMessage(), containsString("2284"));
+			assertThat(e.getMessage()).contains("2284");
 		}
 
 	}
@@ -129,7 +128,7 @@ public class SearchParameterValidatingInterceptorTest {
 			mySearchParamValidatingInterceptor.resourcePreCreate(sp, myRequestDetails);
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertThat(e.getMessage(), containsString("2283"));
+			assertThat(e.getMessage()).contains("2283");
 		}
 
 	}

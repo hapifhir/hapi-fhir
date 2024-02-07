@@ -7,8 +7,8 @@ import org.junit.jupiter.params.provider.MethodSource;
 import java.sql.SQLException;
 import java.util.function.Supplier;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 
 public class DropForeignKeyTaskTest extends BaseTest {
@@ -33,7 +33,7 @@ public class DropForeignKeyTaskTest extends BaseTest {
 
 		getMigrator().migrate();
 
-		assertThat(JdbcUtils.getForeignKeys(getConnectionProperties(), "PARENT", "CHILD"), empty());
+		assertThat(JdbcUtils.getForeignKeys(getConnectionProperties(), "PARENT", "CHILD")).isEmpty();
 
 		// Make sure additional calls don't crash
 		getMigrator().migrate();

@@ -53,9 +53,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
-import static org.hamcrest.CoreMatchers.containsString;
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -193,7 +192,7 @@ public class SubscriptionTriggeringDstu3Test extends BaseResourceProviderDstu3Te
 			.execute();
 
 		String responseValue = response.getParameter().get(0).getValue().primitiveValue();
-		assertThat(responseValue, containsString("Subscription triggering job submitted as JOB ID"));
+		assertThat(responseValue).contains("Subscription triggering job submitted as JOB ID");
 
 		waitForQueueToDrain();
 
@@ -243,7 +242,7 @@ public class SubscriptionTriggeringDstu3Test extends BaseResourceProviderDstu3Te
 			.andParameter(ProviderConstants.SUBSCRIPTION_TRIGGERING_PARAM_RESOURCE_ID, new UriType("Observation/O2"))
 			.execute();
 		String responseValue = response.getParameter().get(0).getValue().primitiveValue();
-		assertThat(responseValue, containsString("Subscription triggering job submitted as JOB ID"));
+		assertThat(responseValue).contains("Subscription triggering job submitted as JOB ID");
 
 		response = myClient
 			.operation()
@@ -252,7 +251,7 @@ public class SubscriptionTriggeringDstu3Test extends BaseResourceProviderDstu3Te
 			.withParameter(Parameters.class, ProviderConstants.SUBSCRIPTION_TRIGGERING_PARAM_SEARCH_URL, new StringType("Patient?"))
 			.execute();
 		responseValue = response.getParameter().get(0).getValue().primitiveValue();
-		assertThat(responseValue, containsString("Subscription triggering job submitted as JOB ID"));
+		assertThat(responseValue).contains("Subscription triggering job submitted as JOB ID");
 
 		mySubscriptionTriggeringSvc.runDeliveryPass();
 		waitForSize(33, ourUpdatedObservations);
@@ -286,7 +285,7 @@ public class SubscriptionTriggeringDstu3Test extends BaseResourceProviderDstu3Te
 			.andParameter(ProviderConstants.SUBSCRIPTION_TRIGGERING_PARAM_SEARCH_URL, new StringType("Patient?_id=P2"))
 			.execute();
 		String responseValue = response.getParameter().get(0).getValue().primitiveValue();
-		assertThat(responseValue, containsString("Subscription triggering job submitted as JOB ID"));
+		assertThat(responseValue).contains("Subscription triggering job submitted as JOB ID");
 
 		mySubscriptionTriggeringSvc.runDeliveryPass();
 		mySubscriptionTriggeringSvc.runDeliveryPass();
@@ -324,7 +323,7 @@ public class SubscriptionTriggeringDstu3Test extends BaseResourceProviderDstu3Te
 			.withParameter(Parameters.class, ProviderConstants.SUBSCRIPTION_TRIGGERING_PARAM_SEARCH_URL, new StringType("Patient?_id=P0,P1,P2"))
 			.execute();
 		String responseValue = response.getParameter().get(0).getValue().primitiveValue();
-		assertThat(responseValue, containsString("Subscription triggering job submitted as JOB ID"));
+		assertThat(responseValue).contains("Subscription triggering job submitted as JOB ID");
 
 		mySubscriptionTriggeringSvc.runDeliveryPass();
 		mySubscriptionTriggeringSvc.runDeliveryPass();
@@ -370,7 +369,7 @@ public class SubscriptionTriggeringDstu3Test extends BaseResourceProviderDstu3Te
 			.withParameter(Parameters.class, ProviderConstants.SUBSCRIPTION_TRIGGERING_PARAM_SEARCH_URL, new StringType("Observation?_count=10"))
 			.execute();
 		String responseValue = response.getParameter().get(0).getValue().primitiveValue();
-		assertThat(responseValue, containsString("Subscription triggering job submitted as JOB ID"));
+		assertThat(responseValue).contains("Subscription triggering job submitted as JOB ID");
 
 		response = myClient
 			.operation()
@@ -379,7 +378,7 @@ public class SubscriptionTriggeringDstu3Test extends BaseResourceProviderDstu3Te
 			.withParameter(Parameters.class, ProviderConstants.SUBSCRIPTION_TRIGGERING_PARAM_SEARCH_URL, new StringType("Patient?_count=16"))
 			.execute();
 		responseValue = response.getParameter().get(0).getValue().primitiveValue();
-		assertThat(responseValue, containsString("Subscription triggering job submitted as JOB ID"));
+		assertThat(responseValue).contains("Subscription triggering job submitted as JOB ID");
 
 		mySubscriptionTriggeringSvc.runDeliveryPass();
 		mySubscriptionTriggeringSvc.runDeliveryPass();
@@ -437,7 +436,7 @@ public class SubscriptionTriggeringDstu3Test extends BaseResourceProviderDstu3Te
 			.withParameter(Parameters.class, ProviderConstants.SUBSCRIPTION_TRIGGERING_PARAM_SEARCH_URL, new StringType("Observation?"))
 			.execute();
 		String responseValue = response.getParameter().get(0).getValue().primitiveValue();
-		assertThat(responseValue, containsString("Subscription triggering job submitted as JOB ID"));
+		assertThat(responseValue).contains("Subscription triggering job submitted as JOB ID");
 
 		mySubscriptionTriggeringSvc.runDeliveryPass();
 
@@ -475,7 +474,7 @@ public class SubscriptionTriggeringDstu3Test extends BaseResourceProviderDstu3Te
 			.execute();
 
 		String responseValue = response.getParameter().get(0).getValue().primitiveValue();
-		assertThat(responseValue, containsString("Subscription triggering job submitted as JOB ID"));
+		assertThat(responseValue).contains("Subscription triggering job submitted as JOB ID");
 
 		waitForQueueToDrain();
 		mySubscriptionTriggeringSvc.runDeliveryPass();

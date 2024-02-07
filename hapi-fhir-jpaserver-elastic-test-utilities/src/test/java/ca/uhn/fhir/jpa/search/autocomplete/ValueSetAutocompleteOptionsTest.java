@@ -15,12 +15,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Optional;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.not;
-import static org.hamcrest.Matchers.nullValue;
-import static org.hamcrest.Matchers.startsWith;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @DisplayName("ValueSetAutocompleteOptions validation and parsing")
@@ -48,9 +43,9 @@ class ValueSetAutocompleteOptionsTest {
 
 		parseOptions();
 
-		assertThat(myOptionsResult, is(not(nullValue())));
-		assertThat(myOptionsResult.getResourceType(), is(nullValue()));
-		assertThat(myOptionsResult.getSearchParamCode(), equalTo("code"));
+		assertThat(myOptionsResult).isNotNull();
+		assertThat(myOptionsResult.getResourceType()).isNull();
+		assertThat(myOptionsResult.getSearchParamCode()).isEqualTo("code");
 	}
 
 	@Test
@@ -59,10 +54,10 @@ class ValueSetAutocompleteOptionsTest {
 
 		parseOptions();
 
-		assertThat(myOptionsResult, is(not(nullValue())));
-		assertThat(myOptionsResult.getResourceType(), equalTo("Observation"));
-		assertThat(myOptionsResult.getSearchParamCode(), equalTo("code"));
-		assertThat(myOptionsResult.getSearchParamModifier(), is(nullValue()));
+		assertThat(myOptionsResult).isNotNull();
+		assertThat(myOptionsResult.getResourceType()).isEqualTo("Observation");
+		assertThat(myOptionsResult.getSearchParamCode()).isEqualTo("code");
+		assertThat(myOptionsResult.getSearchParamModifier()).isNull();
 	}
 
 	@Test
@@ -71,10 +66,10 @@ class ValueSetAutocompleteOptionsTest {
 
 		parseOptions();
 
-		assertThat(myOptionsResult, is(not(nullValue())));
-		assertThat(myOptionsResult.getResourceType(), equalTo("Observation"));
-		assertThat(myOptionsResult.getSearchParamCode(), equalTo("code"));
-		assertThat(myOptionsResult.getSearchParamModifier(), equalTo("text"));
+		assertThat(myOptionsResult).isNotNull();
+		assertThat(myOptionsResult.getResourceType()).isEqualTo("Observation");
+		assertThat(myOptionsResult.getSearchParamCode()).isEqualTo("code");
+		assertThat(myOptionsResult.getSearchParamModifier()).isEqualTo("text");
 	}
 
 	@Test
@@ -84,8 +79,8 @@ class ValueSetAutocompleteOptionsTest {
 
 		parseOptions();
 
-		assertThat(myOptionsResult, is(not(nullValue())));
-		assertThat(myOptionsResult.getFilter(), equalTo("blood"));
+		assertThat(myOptionsResult).isNotNull();
+		assertThat(myOptionsResult.getFilter()).isEqualTo("blood");
 	}
 
 	@Test
@@ -95,8 +90,8 @@ class ValueSetAutocompleteOptionsTest {
 
 		parseOptions();
 
-		assertThat(myOptionsResult, is(not(nullValue())));
-		assertThat(myOptionsResult.getFilter(), equalTo(""));
+		assertThat(myOptionsResult).isNotNull();
+		assertThat(myOptionsResult.getFilter()).isEqualTo("");
 	}
 
 	@Test
@@ -105,7 +100,7 @@ class ValueSetAutocompleteOptionsTest {
 
 		parseOptions();
 
-		assertThat(myOptionsResult.getCount(), is(equalTo(Optional.empty())));
+		assertThat(myOptionsResult.getCount()).isEqualTo(Optional.empty());
 	}
 
 	@Test
@@ -115,8 +110,8 @@ class ValueSetAutocompleteOptionsTest {
 
 		parseOptions();
 
-		assertThat(myOptionsResult, is(not(nullValue())));
-		assertThat(myOptionsResult.getCount(), equalTo(Optional.of(50)));
+		assertThat(myOptionsResult).isNotNull();
+		assertThat(myOptionsResult.getCount()).isEqualTo(Optional.of(50));
 	}
 
 	@Nested
@@ -178,7 +173,7 @@ class ValueSetAutocompleteOptionsTest {
 
 		private void assertParseThrowsInvalidRequestWithErrorCode(int theErrorCode) {
 			InvalidRequestException e = assertThrows(InvalidRequestException.class, ValueSetAutocompleteOptionsTest.this::parseOptions);
-			assertThat(e.getMessage(), startsWith(Msg.code(theErrorCode)));
+			assertThat(e.getMessage()).startsWith(Msg.code(theErrorCode));
 		}
 
 	}

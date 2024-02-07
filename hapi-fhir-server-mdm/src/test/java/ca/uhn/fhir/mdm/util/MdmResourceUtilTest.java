@@ -10,9 +10,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -28,7 +26,7 @@ class MdmResourceUtilTest {
 
 		boolean hasGoldenRecordTag = MdmResourceUtil.hasGoldenRecordSystemTag(organization);
 
-		assertThat(hasGoldenRecordTag, is(equalTo(false)));
+		assertThat(hasGoldenRecordTag).isEqualTo(false);
 	}
 
 	@Test

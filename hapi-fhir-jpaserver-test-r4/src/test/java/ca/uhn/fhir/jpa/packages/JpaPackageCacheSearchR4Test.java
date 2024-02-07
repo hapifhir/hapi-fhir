@@ -17,7 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.io.IOException;
 import java.util.stream.Collectors;
 
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class JpaPackageCacheSearchR4Test extends BaseJpaR4Test {
@@ -70,12 +70,12 @@ public class JpaPackageCacheSearchR4Test extends BaseJpaR4Test {
 		assertEquals("Describes FHIR Shorthand (FSH), a domain-specific language (DSL) for defining the content of FHIR Implementation Guides (IG). (built Wed, Apr 1, 2020 17:24+0000+00:00)", search.getObjects().get(0).getPackage().getDescription());
 		assertEquals("0.12.0", search.getObjects().get(0).getPackage().getVersion());
 		assertEquals(3115, search.getObjects().get(0).getPackage().getBytes());
-		assertThat(search.getObjects().get(0).getPackage().getFhirVersion().toString(), search.getObjects().get(0).getPackage().getFhirVersion(), Matchers.contains("4.0.1"));
+		assertThat(search.getObjects().get(0).getPackage().getFhirVersion()).as(search.getObjects().get(0).getPackage().getFhirVersion().toString()).containsExactly("4.0.1");
 
 		assertEquals("nictiz.fhir.nl.stu3.questionnaires", search.getObjects().get(1).getPackage().getName());
 		assertEquals("Nictiz NL package of FHIR STU3 conformance resources for MedMij information standard Questionnaires. Includes dependency on Zib2017 and SDC.\\n\\nHCIMs: https://zibs.nl/wiki/HCIM_Release_2017(EN)", search.getObjects().get(1).getPackage().getDescription());
 		assertEquals("1.0.2", search.getObjects().get(1).getPackage().getVersion());
-		assertThat(search.getObjects().get(1).getPackage().getFhirVersion().toString(), search.getObjects().get(0).getPackage().getFhirVersion(), Matchers.contains("4.0.1"));
+		assertThat(search.getObjects().get(0).getPackage().getFhirVersion()).as(search.getObjects().get(1).getPackage().getFhirVersion().toString()).containsExactly("4.0.1");
 
 	}
 
@@ -125,7 +125,7 @@ public class JpaPackageCacheSearchR4Test extends BaseJpaR4Test {
 		assertEquals("hl7.fhir.uv.shorthand", search.getObjects().get(0).getPackage().getName());
 		assertEquals("0.12.0", search.getObjects().get(0).getPackage().getVersion());
 		assertEquals("Describes FHIR Shorthand (FSH), a domain-specific language (DSL) for defining the content of FHIR Implementation Guides (IG). (built Wed, Apr 1, 2020 17:24+0000+00:00)", search.getObjects().get(0).getPackage().getDescription());
-		assertThat(search.getObjects().get(0).getPackage().getFhirVersion(), Matchers.contains("4.0.1"));
+		assertThat(search.getObjects().get(0).getPackage().getFhirVersion()).containsExactly("4.0.1");
 
 		// Non Matching URL
 		searchSpec = new PackageSearchSpec();
@@ -230,7 +230,7 @@ public class JpaPackageCacheSearchR4Test extends BaseJpaR4Test {
 		assertEquals("hl7.fhir.uv.shorthand", search.getObjects().get(0).getPackage().getName());
 		assertEquals("0.12.0", search.getObjects().get(0).getPackage().getVersion());
 		assertEquals("Describes FHIR Shorthand (FSH), a domain-specific language (DSL) for defining the content of FHIR Implementation Guides (IG). (built Wed, Apr 1, 2020 17:24+0000+00:00)", search.getObjects().get(0).getPackage().getDescription());
-		assertThat(search.getObjects().get(0).getPackage().getFhirVersion(), Matchers.contains("4.0.1"));
+		assertThat(search.getObjects().get(0).getPackage().getFhirVersion()).containsExactly("4.0.1");
 
 		// Non Matching URL
 		searchSpec = new PackageSearchSpec();

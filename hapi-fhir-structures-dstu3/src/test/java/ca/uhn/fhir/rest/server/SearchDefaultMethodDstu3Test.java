@@ -25,8 +25,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.oneOf;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -87,8 +87,8 @@ public class SearchDefaultMethodDstu3Test {
 			ourLog.info(responseContent);
 			assertEquals(200, status.getStatusLine().getStatusCode());
 
-			assertThat(ourLastParam1.getValuesAsQueryTokens(), hasSize(1));
-			assertThat(ourLastParam1.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens(), hasSize(1));
+			assertThat(ourLastParam1.getValuesAsQueryTokens()).hasSize(1);
+			assertThat(ourLastParam1.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()).hasSize(1);
 			assertEquals("val1", ourLastParam1.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue());
 			assertEquals(null, ourLastParam2);
 			assertEquals(null, ourLastAdditionalParams);
@@ -108,12 +108,12 @@ public class SearchDefaultMethodDstu3Test {
 			ourLog.info(responseContent);
 			assertEquals(200, status.getStatusLine().getStatusCode());
 
-			assertThat(ourLastParam1.getValuesAsQueryTokens(), hasSize(1));
-			assertThat(ourLastParam1.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens(), hasSize(1));
+			assertThat(ourLastParam1.getValuesAsQueryTokens()).hasSize(1);
+			assertThat(ourLastParam1.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()).hasSize(1);
 			assertEquals("val1", ourLastParam1.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue());
 
-			assertThat(ourLastParam2.getValuesAsQueryTokens(), hasSize(1));
-			assertThat(ourLastParam2.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens(), hasSize(1));
+			assertThat(ourLastParam2.getValuesAsQueryTokens()).hasSize(1);
+			assertThat(ourLastParam2.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()).hasSize(1);
 			assertEquals("val2", ourLastParam2.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue());
 
 			assertEquals(null, ourLastAdditionalParams);
@@ -135,12 +135,12 @@ public class SearchDefaultMethodDstu3Test {
 
 			assertEquals("search03", ourLastMethod);
 
-			assertThat(ourLastParam1.getValuesAsQueryTokens(), hasSize(1));
-			assertThat(ourLastParam1.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens(), hasSize(1));
+			assertThat(ourLastParam1.getValuesAsQueryTokens()).hasSize(1);
+			assertThat(ourLastParam1.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()).hasSize(1);
 			assertEquals("val1", ourLastParam1.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue());
 
-			assertThat(ourLastParam2.getValuesAsQueryTokens(), hasSize(1));
-			assertThat(ourLastParam2.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens(), hasSize(1));
+			assertThat(ourLastParam2.getValuesAsQueryTokens()).hasSize(1);
+			assertThat(ourLastParam2.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()).hasSize(1);
 			assertEquals("val2", ourLastParam2.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue());
 
 			ourLog.info(ourLastAdditionalParams.toString());
@@ -164,12 +164,12 @@ public class SearchDefaultMethodDstu3Test {
 
 			assertEquals("search03", ourLastMethod);
 
-			assertThat(ourLastParam1.getValuesAsQueryTokens(), hasSize(1));
-			assertThat(ourLastParam1.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens(), hasSize(1));
+			assertThat(ourLastParam1.getValuesAsQueryTokens()).hasSize(1);
+			assertThat(ourLastParam1.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()).hasSize(1);
 			assertEquals("val1", ourLastParam1.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue());
 
-			assertThat(ourLastParam2.toString(), ourLastParam2.getValuesAsQueryTokens(), hasSize(2));
-			assertThat(ourLastParam2.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens(), hasSize(1));
+			assertThat(ourLastParam2.getValuesAsQueryTokens()).as(ourLastParam2.toString()).hasSize(2);
+			assertThat(ourLastParam2.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()).hasSize(1);
 			assertEquals("val2", ourLastParam2.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue());
 			assertEquals("val2e", ourLastParam2.getValuesAsQueryTokens().get(1).getValuesAsQueryTokens().get(0).getValue());
 

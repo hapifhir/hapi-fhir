@@ -14,8 +14,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
-import static org.hamcrest.CoreMatchers.containsString;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
@@ -69,7 +68,7 @@ public class SearchWithInterceptorR4Test extends BaseJpaR4Test {
 			String query = list.get(0).getSql(true, false);
 			ourLog.info("Query: {}", query);
 
-			assertThat(query, containsString("HASH_SYS_AND_VALUE = '3788488238034018567'"));
+			assertThat(query).contains("HASH_SYS_AND_VALUE = '3788488238034018567'");
 
 		} finally {
 			myInterceptorRegistry.unregisterInterceptor(interceptor);

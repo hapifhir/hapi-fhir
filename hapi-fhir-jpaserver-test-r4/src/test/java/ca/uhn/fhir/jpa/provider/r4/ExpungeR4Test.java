@@ -66,12 +66,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static ca.uhn.fhir.batch2.jobs.termcodesystem.TermCodeSystemJobConfig.TERM_CODE_SYSTEM_DELETE_JOB_NAME;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.not;
-import static org.hamcrest.Matchers.startsWith;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -384,9 +383,9 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 			.setExpungeDeletedResources(true)
 			.setExpungeOldVersions(true), null);
 
-		runInTransaction(() -> assertThat(myResourceTableDao.findAll(), empty()));
-		runInTransaction(() -> assertThat(myResourceHistoryTableDao.findAll(), empty()));
-		runInTransaction(() -> assertThat(myForcedIdDao.findAll(), empty()));
+		runInTransaction(() -> assertThat(myResourceTableDao.findAll()).isEmpty());
+		runInTransaction(() -> assertThat(myResourceHistoryTableDao.findAll()).isEmpty());
+		runInTransaction(() -> assertThat(myForcedIdDao.findAll()).isEmpty());
 
 	}
 
@@ -422,9 +421,9 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 		assertEquals(0, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
 		assertEquals(9, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
 
-		runInTransaction(() -> assertThat(myResourceTableDao.findAll(), empty()));
-		runInTransaction(() -> assertThat(myResourceHistoryTableDao.findAll(), empty()));
-		runInTransaction(() -> assertThat(myForcedIdDao.findAll(), empty()));
+		runInTransaction(() -> assertThat(myResourceTableDao.findAll()).isEmpty());
+		runInTransaction(() -> assertThat(myResourceHistoryTableDao.findAll()).isEmpty());
+		runInTransaction(() -> assertThat(myForcedIdDao.findAll()).isEmpty());
 
 	}
 
@@ -746,9 +745,9 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 		myObservationDao.expunge(new ExpungeOptions()
 			.setExpungeDeletedResources(true)
 			.setExpungeOldVersions(true), null);
-		runInTransaction(() -> assertThat(myResourceTableDao.findAll(), empty()));
-		runInTransaction(() -> assertThat(myResourceHistoryTableDao.findAll(), empty()));
-		runInTransaction(() -> assertThat(myForcedIdDao.findAll(), empty()));
+		runInTransaction(() -> assertThat(myResourceTableDao.findAll()).isEmpty());
+		runInTransaction(() -> assertThat(myResourceHistoryTableDao.findAll()).isEmpty());
+		runInTransaction(() -> assertThat(myForcedIdDao.findAll()).isEmpty());
 
 		// Create again with the same forced ID
 		p = new Patient();
@@ -785,9 +784,9 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 		myObservationDao.expunge(new ExpungeOptions()
 			.setExpungeDeletedResources(true)
 			.setExpungeOldVersions(true), null);
-		runInTransaction(() -> assertThat(myResourceTableDao.findAll(), empty()));
-		runInTransaction(() -> assertThat(myResourceHistoryTableDao.findAll(), empty()));
-		runInTransaction(() -> assertThat(myForcedIdDao.findAll(), empty()));
+		runInTransaction(() -> assertThat(myResourceTableDao.findAll()).isEmpty());
+		runInTransaction(() -> assertThat(myResourceHistoryTableDao.findAll()).isEmpty());
+		runInTransaction(() -> assertThat(myForcedIdDao.findAll()).isEmpty());
 
 	}
 
@@ -923,8 +922,7 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 			fail();
 		} catch (PreconditionFailedException preconditionFailedException){
 			// verify
-			assertThat(preconditionFailedException.getMessage(), startsWith(
-				"HAPI-2415: The resource could not be expunged. It is likely due to unfinished asynchronous deletions, please try again later"));
+			assertThat(preconditionFailedException.getMessage()).startsWith("HAPI-2415: The resource could not be expunged. It is likely due to unfinished asynchronous deletions, please try again later");
 		}
 
 		myBatch2JobHelper.awaitAllJobsOfJobDefinitionIdToComplete(TERM_CODE_SYSTEM_DELETE_JOB_NAME);
@@ -973,7 +971,7 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 		}
 
 		assertStillThere(patientId);
-		assertThat(exception.getMessage(), containsString("$expunge is not enabled on this server"));
+		assertThat(exception.getMessage()).contains("$expunge is not enabled on this server");
 	}
 
 	private List<Patient> createPatientsWithForcedIds(int theNumPatients) {
@@ -1010,9 +1008,9 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 	private void verifyOneVersionCodeSystemChildrenExpunged() {
 		List<TermCodeSystemVersion> myOneVersionCodeSystemVersions = myTermCodeSystemVersionDao.findByCodeSystemResourcePid(myOneVersionCodeSystemId.getIdPartAsLong());
 		assertEquals(0, myOneVersionCodeSystemVersions.size());
-		assertThat(myTermConceptDesignationDao.findAll(), empty());
-		assertThat(myTermConceptPropertyDao.findAll(), empty());
-		assertThat(myTermConceptParentChildLinkDao.findAll(), empty());
+		assertThat(myTermConceptDesignationDao.findAll()).isEmpty();
+		assertThat(myTermConceptPropertyDao.findAll()).isEmpty();
+		assertThat(myTermConceptParentChildLinkDao.findAll()).isEmpty();
 		List<TermConcept> existingCodeSystemConcepts = myTermConceptDao.findAll();
 		for (TermConcept tc : existingCodeSystemConcepts) {
 			if (tc.getCode().charAt(0) == 'C' || tc.getCode().charAt(0) == 'D') {
@@ -1053,13 +1051,13 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 	}
 
 	private void verifyCodeSystemsAndChildrenExpunged() {
-		assertThat(myTermCodeSystemVersionDao.findAll(), empty());
-		assertThat(myTermConceptDesignationDao.findAll(), empty());
-		assertThat(myTermConceptPropertyDao.findAll(), empty());
-		assertThat(myTermConceptParentChildLinkDao.findAll(), empty());
-		assertThat(myTermConceptDao.findAll(), empty());
-		assertThat(myResourceTableDao.findAll(), empty());
-		assertThat(myResourceHistoryTableDao.findAll(), empty());
-		assertThat(myForcedIdDao.findAll(), empty());
+		assertThat(myTermCodeSystemVersionDao.findAll()).isEmpty();
+		assertThat(myTermConceptDesignationDao.findAll()).isEmpty();
+		assertThat(myTermConceptPropertyDao.findAll()).isEmpty();
+		assertThat(myTermConceptParentChildLinkDao.findAll()).isEmpty();
+		assertThat(myTermConceptDao.findAll()).isEmpty();
+		assertThat(myResourceTableDao.findAll()).isEmpty();
+		assertThat(myResourceHistoryTableDao.findAll()).isEmpty();
+		assertThat(myForcedIdDao.findAll()).isEmpty();
 	}
 }

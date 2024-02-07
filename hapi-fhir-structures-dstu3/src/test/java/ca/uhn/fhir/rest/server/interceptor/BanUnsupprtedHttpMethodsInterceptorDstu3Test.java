@@ -27,8 +27,7 @@ import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class BanUnsupprtedHttpMethodsInterceptorDstu3Test {
@@ -65,8 +64,8 @@ public class BanUnsupprtedHttpMethodsInterceptorDstu3Test {
 		assertEquals(null, status.getEntity());	
  		ourLog.info(status.toString());	
 			
-		assertEquals(404, status.getStatusLine().getStatusCode());	
-		assertThat(status.getFirstHeader("x-powered-by").getValue(), containsString("HAPI"));	
+		assertEquals(404, status.getStatusLine().getStatusCode());
+		assertThat(status.getFirstHeader("x-powered-by").getValue()).contains("HAPI");	
 	}
 	
 	@Test	
@@ -76,8 +75,8 @@ public class BanUnsupprtedHttpMethodsInterceptorDstu3Test {
 		assertEquals(null, status.getEntity());	
  		ourLog.info(status.toString());	
 			
-		assertEquals(200, status.getStatusLine().getStatusCode());	
-		assertThat(status.getFirstHeader("x-powered-by").getValue(), containsString("HAPI"));	
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertThat(status.getFirstHeader("x-powered-by").getValue()).contains("HAPI");	
 	}
 	
 	@Test

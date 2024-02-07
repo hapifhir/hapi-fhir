@@ -27,10 +27,7 @@ import org.springframework.test.context.ContextConfiguration;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.hasSize;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
@@ -110,9 +107,9 @@ public class FhirResourceDaoDstu3PhoneticSearchNoFtTest extends BaseJpaDstu3Test
 
 		List<ResourceIndexedSearchParamString> stringParams = myResourceIndexedSearchParamStringDao.findAll();
 
-		assertThat(stringParams, hasSize(7));
+		assertThat(stringParams).hasSize(7);
 		List<String> stringParamNames = stringParams.stream().map(ResourceIndexedSearchParamString::getParamName).collect(Collectors.toList());
-		assertThat(stringParamNames, containsInAnyOrder(Patient.SP_NAME, Patient.SP_GIVEN, Patient.SP_PHONETIC, NAME_SOUNDEX_SP, Patient.SP_ADDRESS, ADDRESS_LINE_SOUNDEX_SP, PHONE_NUMBER_SP));
+		assertThat(stringParamNames).containsExactlyInAnyOrder(Patient.SP_NAME, Patient.SP_GIVEN, Patient.SP_PHONETIC, NAME_SOUNDEX_SP, Patient.SP_ADDRESS, ADDRESS_LINE_SOUNDEX_SP, PHONE_NUMBER_SP);
 
 		assertSearchMatch(pId, Patient.SP_PHONETIC, GALE);
 		assertSearchMatch(pId, Patient.SP_PHONETIC, GAIL);
@@ -159,14 +156,14 @@ public class FhirResourceDaoDstu3PhoneticSearchNoFtTest extends BaseJpaDstu3Test
 		SearchParameterMap map;
 		map = new SearchParameterMap();
 		map.add(theSp, new StringParam(theValue));
-		assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(map)), contains(toValues(thePId1)));
+		assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(map))).containsExactly(toValues(thePId1));
 	}
 
 	private void assertNoMatch(String theSp, String theValue) {
 		SearchParameterMap map;
 		map = new SearchParameterMap();
 		map.add(theSp, new StringParam(theValue));
-		assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(map)), hasSize(0));
+		assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(map))).hasSize(0);
 	}
 
 	private void createPhoneticSearchParameter(String theCode, PhoneticEncoderEnum theEncoder, String theFhirPath) {

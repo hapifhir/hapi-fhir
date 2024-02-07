@@ -90,11 +90,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.either;
 import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -269,8 +268,8 @@ public class ClientR4Test {
 		Bundle requestBundle = ourCtx.newJsonParser().parseResource(Bundle.class, requestBody);
 
 		assertEquals("123", requestBundle.getEntry().get(0).getResource().getIdElement().getIdPart());
-		assertThat(requestBody, containsString("\"id\":\"123\""));
-		assertThat(requestBody, not(containsString("\"id\":\"ABC\"")));
+		assertThat(requestBody).contains("\"id\":\"123\"");
+		assertThat(requestBody).doesNotContain("\"id\":\"ABC\"");
 	}
 
 	/**
@@ -506,14 +505,14 @@ public class ClientR4Test {
 		expectedDateString = expectedDateString.replace(":", "%3A").replace("+", "%2B");
 
 		client.getHistoryPatientInstance(new IdType("111"), new InstantType("2012-01-02T12:01:02"), new IntegerType(12));
-		assertThat(capt.getAllValues().get(0).getURI().toString(), containsString("http://foo/Patient/111/_history?"));
-		assertThat(capt.getAllValues().get(0).getURI().toString(), containsString("_since=" + expectedDateString.replaceAll("\\..*", "")));
-		assertThat(capt.getAllValues().get(0).getURI().toString(), containsString("_count=12"));
+		assertThat(capt.getAllValues().get(0).getURI().toString()).contains("http://foo/Patient/111/_history?");
+		assertThat(capt.getAllValues().get(0).getURI().toString()).contains("_since=" + expectedDateString.replaceAll("\\..*", ""));
+		assertThat(capt.getAllValues().get(0).getURI().toString()).contains("_count=12");
 
 		client.getHistoryPatientInstance(new IdType("111"), new InstantType("2012-01-02T12:01:02").getValue(), new IntegerType(12).getValue());
-		assertThat(capt.getAllValues().get(1).getURI().toString(), containsString("http://foo/Patient/111/_history?"));
-		assertThat(capt.getAllValues().get(1).getURI().toString(), containsString("_since=" + expectedDateString));
-		assertThat(capt.getAllValues().get(1).getURI().toString(), containsString("_count=12"));
+		assertThat(capt.getAllValues().get(1).getURI().toString()).contains("http://foo/Patient/111/_history?");
+		assertThat(capt.getAllValues().get(1).getURI().toString()).contains("_since=" + expectedDateString);
+		assertThat(capt.getAllValues().get(1).getURI().toString()).contains("_count=12");
 
 		client.getHistoryPatientInstance(new IdType("111"), null, new IntegerType(12));
 		assertEquals("http://foo/Patient/111/_history?_count=12", capt.getAllValues().get(2).getURI().toString());
@@ -543,7 +542,7 @@ public class ClientR4Test {
 			client.read(new IdType("8"));
 			fail();
 		} catch (UnsupportedOperationException e) {
-			assertThat(e.getMessage(), containsString("annotation"));
+			assertThat(e.getMessage()).contains("annotation");
 		}
 
 	}
@@ -609,8 +608,8 @@ public class ClientR4Test {
 			client.getPatientById(new IdType("111"));
 			fail();
 		} catch (InternalErrorException e) {
-			assertThat(e.getMessage(), containsString("INTERNAL"));
-			assertThat(e.getResponseBody(), containsString("Internal Failure"));
+			assertThat(e.getMessage()).contains("INTERNAL");
+			assertThat(e.getResponseBody()).contains("Internal Failure");
 		}
 
 	}
@@ -713,7 +712,7 @@ public class ClientR4Test {
 			client.getPatientByCompartmentAndDob(new IdType(""), new DateParam(ParamPrefixEnum.GREATERTHAN_OR_EQUALS, "2011-01-02"));
 			fail();
 		} catch (InvalidRequestException e) {
-			assertThat(e.toString(), containsString("null or empty for compartment"));
+			assertThat(e.toString()).contains("null or empty for compartment");
 		}
 
 	}
@@ -978,7 +977,7 @@ public class ClientR4Test {
 		StringOrListParam orListParam4 = new StringOrListParam().addOr(new StringParam("E|E", true));
 		client.findPatient(andListParam.addAnd(orListParam1).addAnd(orListParam2).addAnd(orListParam3).addAnd(orListParam4));
 
-		assertThat(capt.getValue().getURI().toString(), containsString("%3A"));
+		assertThat(capt.getValue().getURI().toString()).contains("%3A");
 		assertEquals("http://foo/Patient?param=NE\\,NE,NE\\,NE&param=NE\\\\NE&param:exact=E\\$E&param:exact=E\\|E", UrlUtil.unescape(capt.getValue().getURI().toString()));
 
 	}

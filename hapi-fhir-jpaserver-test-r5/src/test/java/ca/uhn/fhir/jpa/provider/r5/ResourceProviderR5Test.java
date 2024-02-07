@@ -41,9 +41,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.hasItem;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -104,7 +103,7 @@ public class ResourceProviderR5Test extends BaseResourceProviderR5Test {
 			.returnBundle(Bundle.class)
 			.execute();
 		List<String> ids = output.getEntry().stream().map(t -> t.getResource().getIdElement().toUnqualifiedVersionless().getValue()).collect(Collectors.toList());
-		assertThat(ids, containsInAnyOrder(pt1id));
+		assertThat(ids).containsExactlyInAnyOrder(pt1id);
 
 		output = myClient
 			.search()
@@ -113,7 +112,7 @@ public class ResourceProviderR5Test extends BaseResourceProviderR5Test {
 			.returnBundle(Bundle.class)
 			.execute();
 		ids = output.getEntry().stream().map(t -> t.getResource().getIdElement().toUnqualifiedVersionless().getValue()).collect(Collectors.toList());
-		assertThat(ids, containsInAnyOrder(pt1id));
+		assertThat(ids).containsExactlyInAnyOrder(pt1id);
 
 	}
 
@@ -203,7 +202,7 @@ public class ResourceProviderR5Test extends BaseResourceProviderR5Test {
 			myClient.loadPage().next(response0).execute();
 		} catch (NotImplementedOperationException e) {
 			assertEquals(501, e.getStatusCode());
-			assertThat(e.getMessage(), containsString("Some Failure Message"));
+			assertThat(e.getMessage()).contains("Some Failure Message");
 		}
 
 	}
@@ -248,7 +247,7 @@ public class ResourceProviderR5Test extends BaseResourceProviderR5Test {
 			.returnBundle(Bundle.class)
 			.execute();
 		List<IIdType> ids = output.getEntry().stream().map(t -> t.getResource().getIdElement().toUnqualified()).collect(Collectors.toList());
-		assertThat(ids, containsInAnyOrder(oid));
+		assertThat(ids).containsExactlyInAnyOrder(oid);
 	}
 
 
@@ -397,7 +396,7 @@ public class ResourceProviderR5Test extends BaseResourceProviderR5Test {
 		assertEquals(Bundle.BundleType.SEARCHSET, b.getType());
 		List<IIdType> ids = toUnqualifiedVersionlessIds(b);
 
-		assertThat(ids, containsInAnyOrder(p1Id, c1Id, obs1Id));
+		assertThat(ids).containsExactlyInAnyOrder(p1Id, c1Id, obs1Id);
 		assertThat(ids, Matchers.not(hasItem(o1Id)));
 		assertThat(ids, Matchers.not(hasItem(m1Id)));
 	}
@@ -428,7 +427,7 @@ public class ResourceProviderR5Test extends BaseResourceProviderR5Test {
 		assertEquals(Bundle.BundleType.SEARCHSET, b.getType());
 		List<IIdType> ids = toUnqualifiedVersionlessIds(b);
 
-		assertThat(ids, containsInAnyOrder(p1Id, c1Id, obs1Id));
+		assertThat(ids).containsExactlyInAnyOrder(p1Id, c1Id, obs1Id);
 		assertThat(ids, Matchers.not(hasItem(o1Id)));
 		assertThat(ids, Matchers.not(hasItem(m1Id)));
 	}
@@ -467,7 +466,7 @@ public class ResourceProviderR5Test extends BaseResourceProviderR5Test {
 		assertEquals(Bundle.BundleType.SEARCHSET, b.getType());
 		List<IIdType> ids = toUnqualifiedVersionlessIds(b);
 
-		assertThat(ids, containsInAnyOrder(p1Id, c1Id, obs1Id));
+		assertThat(ids).containsExactlyInAnyOrder(p1Id, c1Id, obs1Id);
 		assertThat(ids, Matchers.not(hasItem(o1Id)));
 		assertThat(ids, Matchers.not(hasItem(m1Id)));
 		assertThat(ids, Matchers.not(hasItem(p2Id)));

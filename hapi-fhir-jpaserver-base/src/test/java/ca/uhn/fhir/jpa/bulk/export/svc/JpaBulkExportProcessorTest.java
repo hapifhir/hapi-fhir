@@ -59,8 +59,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -268,7 +267,7 @@ public class JpaBulkExportProcessorTest {
 			myProcessor.getResourcePidIterator(parameters);
 			fail();
 		} catch (InternalErrorException ex) {
-			assertThat(ex.getMessage(), containsString("You attempted to start a Patient Bulk Export,"));
+			assertThat(ex.getMessage()).contains("You attempted to start a Patient Bulk Export,");
 		}
 	}
 

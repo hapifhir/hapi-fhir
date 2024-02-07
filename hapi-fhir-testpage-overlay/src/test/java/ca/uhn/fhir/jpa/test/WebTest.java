@@ -57,8 +57,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.List;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
@@ -187,7 +186,7 @@ public class WebTest {
 			.orElseThrow()
 			.click();
 
-		assertThat(summaryPage.asNormalizedText(), containsString("Result Narrative\t\nHELLO WORLD DOCUMENT"));
+		assertThat(summaryPage.asNormalizedText()).contains("Result Narrative\t\nHELLO WORLD DOCUMENT");
 	}
 
 	@Test
@@ -208,7 +207,7 @@ public class WebTest {
 			.orElseThrow()
 			.click();
 
-		assertThat(summaryPage.asNormalizedText(), containsString("\"diagnostics\": \"VALIDATION FAILURE\""));
+		assertThat(summaryPage.asNormalizedText()).contains("\"diagnostics\": \"VALIDATION FAILURE\"");
 	}
 
 	@Test
@@ -228,7 +227,7 @@ public class WebTest {
 			.orElseThrow()
 			.click();
 
-		assertThat(diffPage.asNormalizedText(), containsString("\"resourceType\": \"Parameters\""));
+		assertThat(diffPage.asNormalizedText()).contains("\"resourceType\": \"Parameters\"");
 	}
 
 
@@ -257,7 +256,7 @@ public class WebTest {
 
 		HtmlTable table = (HtmlTable) resultsPage.getElementById("resultsTable");
 		ourLog.info(table.asXml());
-		assertThat(table.asNormalizedText(), containsString("Simpson"));
+		assertThat(table.asNormalizedText()).contains("Simpson");
 	}
 
 

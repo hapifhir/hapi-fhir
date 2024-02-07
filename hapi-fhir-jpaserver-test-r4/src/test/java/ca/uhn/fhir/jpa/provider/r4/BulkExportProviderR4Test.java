@@ -7,8 +7,7 @@ import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.Test;
 
 import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_EXPORT;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class BulkExportProviderR4Test extends BaseResourceProviderR4Test {
@@ -25,7 +24,7 @@ public class BulkExportProviderR4Test extends BaseResourceProviderR4Test {
 				.execute(),
 			"$export of missing Group throws 404");
 
-		assertThat(e.getStatusCode(), equalTo(404));
+		assertThat(e.getStatusCode()).isEqualTo(404);
 	}
 
 	@Test
@@ -41,7 +40,7 @@ public class BulkExportProviderR4Test extends BaseResourceProviderR4Test {
 				.execute(),
 			"$export of missing Patient throws 404");
 
-		assertThat(e.getStatusCode(), equalTo(404));
+		assertThat(e.getStatusCode()).isEqualTo(404);
 	}
 
 
@@ -58,6 +57,6 @@ public class BulkExportProviderR4Test extends BaseResourceProviderR4Test {
 				.execute(),
 			"Patient/$export with missing patient throws 404");
 
-		assertThat(e.getStatusCode(), equalTo(404));
+		assertThat(e.getStatusCode()).isEqualTo(404);
 	}
 }

@@ -17,10 +17,7 @@ import static ca.uhn.fhir.rest.param.ParamPrefixEnum.GREATERTHAN;
 import static ca.uhn.fhir.rest.param.ParamPrefixEnum.GREATERTHAN_OR_EQUALS;
 import static ca.uhn.fhir.rest.param.ParamPrefixEnum.LESSTHAN;
 import static ca.uhn.fhir.rest.param.ParamPrefixEnum.LESSTHAN_OR_EQUALS;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.notNullValue;
-import static org.hamcrest.Matchers.nullValue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 class DateRangeUtilTest {
 
@@ -123,11 +120,11 @@ class DateRangeUtilTest {
 		DateRangeParam result = DateRangeUtil.narrowDateRange(c.range, c.narrowStart, c.narrowEnd);
 
 		if (c.resultStart == null && c.resultEnd == null) {
-			assertThat(result, nullValue());
+			assertThat(result).isNull();
 		} else {
-			assertThat(result, notNullValue());
-			assertThat("range start", result.getLowerBound(), equalTo(c.resultStart));
-			assertThat("range end", result.getUpperBound(), equalTo(c.resultEnd));
+			assertThat(result).isNotNull();
+			assertThat(result.getLowerBound()).as("range start").isEqualTo(c.resultStart);
+			assertThat(result.getUpperBound()).as("range end").isEqualTo(c.resultEnd);
 		}
 	}
 

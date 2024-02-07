@@ -40,8 +40,7 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
-import static org.hamcrest.CoreMatchers.containsString;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -272,7 +271,7 @@ public class OperationGenericServer2R4Test {
 			fail();
 		} catch (ConfigurationException e) {
 			ConfigurationException ce = (ConfigurationException) e.getCause();
-			assertThat(ce.getMessage(), containsString(Msg.code(405) + "Non assignable parameter typeName=\"code\" specified on method public org.hl7.fhir.r4.model.Parameters ca.uhn.fhir.rest.server.OperationGenericServer2R4Test"));
+			assertThat(ce.getMessage()).contains(Msg.code(405) + "Non assignable parameter typeName=\"code\" specified on method public org.hl7.fhir.r4.model.Parameters ca.uhn.fhir.rest.server.OperationGenericServer2R4Test");
 		}
 	}
 

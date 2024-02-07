@@ -39,9 +39,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.hasItem;
-import static org.hamcrest.Matchers.matchesPattern;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -141,7 +139,7 @@ public class RestHookWithInterceptorR4Test extends BaseSubscriptionsR4Test {
 		assertEquals(Constants.CT_FHIR_JSON_NEW, ourRestfulServer.getRequestContentTypes().get(0));
 		assertTrue(ourHitBeforeRestHookDelivery);
 		assertTrue(ourHitAfterRestHookDelivery);
-		assertThat(ourRestfulServer.getRequestHeaders().get(0), hasItem("X-Foo: Bar"));
+		assertThat(ourRestfulServer.getRequestHeaders().get(0)).contains("X-Foo: Bar");
 	}
 
 	@Test
@@ -278,7 +276,7 @@ public class RestHookWithInterceptorR4Test extends BaseSubscriptionsR4Test {
 
 			ourLog.info("Messages:\n  " + messages.stream().collect(Collectors.joining("\n  ")));
 
-			assertThat(messages.get(messages.size() - 1), matchesPattern("Finished delivery of resource Observation.*"));
+			assertThat(messages.get(messages.size() - 1)).matches("Finished delivery of resource Observation.*");
 
 		} finally {
 			myInterceptorRegistry.unregisterInterceptor(interceptor);

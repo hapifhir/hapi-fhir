@@ -31,10 +31,9 @@ import java.util.List;
 import java.util.Set;
 
 import static ca.uhn.fhir.context.FhirVersionEnum.R4;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.not;
-import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.Matchers.stringContainsInOrder;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -222,15 +221,15 @@ public class CustomTypeR4Test {
 	@Test
 	public void testAccessEmptyMetaLists() {
 		Patient p = new Patient();
-		assertThat(p.getMeta().getProfile(), empty());
-		assertThat(p.getMeta().getFormatCommentsPost(), empty());
-		assertThat(p.getMeta().getFormatCommentsPre(), empty());
-		assertThat(p.getMeta().getLastUpdated(), nullValue());
-		assertThat(p.getMeta().getSecurity(), empty());
-		assertThat(p.getMeta().getSecurity("foo", "bar"), nullValue());
-		assertThat(p.getMeta().getTag(), empty());
-		assertThat(p.getMeta().getTag("foo", "bar"), nullValue());
-		assertThat(p.getMeta().getVersionId(), nullValue());
+		assertThat(p.getMeta().getProfile()).isEmpty();
+		assertThat(p.getMeta().getFormatCommentsPost()).isEmpty();
+		assertThat(p.getMeta().getFormatCommentsPre()).isEmpty();
+		assertThat(p.getMeta().getLastUpdated()).isNull();
+		assertThat(p.getMeta().getSecurity()).isEmpty();
+		assertThat(p.getMeta().getSecurity("foo", "bar")).isNull();
+		assertThat(p.getMeta().getTag()).isEmpty();
+		assertThat(p.getMeta().getTag("foo", "bar")).isNull();
+		assertThat(p.getMeta().getVersionId()).isNull();
 
 	}
 

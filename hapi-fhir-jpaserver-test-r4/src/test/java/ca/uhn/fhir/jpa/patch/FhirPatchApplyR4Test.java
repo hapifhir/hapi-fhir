@@ -31,10 +31,7 @@ import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import java.util.stream.Collectors;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.is;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -432,11 +429,11 @@ public class FhirPatchApplyR4Test {
 		ourLog.debug("Outcome:\n{}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient));
 
 		//Then: New identifier is added, and does not overwrite.
-		assertThat(patient.getIdentifier(), hasSize(2));
-		assertThat(patient.getIdentifier().get(0).getSystem(), is(equalTo("first-system")));
-		assertThat(patient.getIdentifier().get(0).getValue(), is(equalTo("first-value")));
-		assertThat(patient.getIdentifier().get(1).getSystem(), is(equalTo("second-system")));
-		assertThat(patient.getIdentifier().get(1).getValue(), is(equalTo("second-value")));
+		assertThat(patient.getIdentifier()).hasSize(2);
+		assertThat(patient.getIdentifier().get(0).getSystem()).isEqualTo("first-system");
+		assertThat(patient.getIdentifier().get(0).getValue()).isEqualTo("first-value");
+		assertThat(patient.getIdentifier().get(1).getSystem()).isEqualTo("second-system");
+		assertThat(patient.getIdentifier().get(1).getValue()).isEqualTo("second-value");
 	}
 
 	@Test
@@ -454,9 +451,9 @@ public class FhirPatchApplyR4Test {
 		ourLog.debug("Outcome:\n{}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient));
 
 		//Then: it applies the new identifier correctly.
-		assertThat(patient.getIdentifier(), hasSize(1));
-		assertThat(patient.getIdentifier().get(0).getSystem(), is(equalTo("third-system")));
-		assertThat(patient.getIdentifier().get(0).getValue(), is(equalTo("third-value")));
+		assertThat(patient.getIdentifier()).hasSize(1);
+		assertThat(patient.getIdentifier().get(0).getSystem()).isEqualTo("third-system");
+		assertThat(patient.getIdentifier().get(0).getValue()).isEqualTo("third-value");
 	}
 	@Test
 	public void testReplaceToHighCardinalityFieldRemovesAllAndSetsValue() {
@@ -475,9 +472,9 @@ public class FhirPatchApplyR4Test {
 		ourLog.debug("Outcome:\n{}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient));
 
 		//Then: it applies the new identifier correctly.
-		assertThat(patient.getIdentifier(), hasSize(1));
-		assertThat(patient.getIdentifier().get(0).getSystem(), is(equalTo("third-system")));
-		assertThat(patient.getIdentifier().get(0).getValue(), is(equalTo("third-value")));
+		assertThat(patient.getIdentifier()).hasSize(1);
+		assertThat(patient.getIdentifier().get(0).getSystem()).isEqualTo("third-system");
+		assertThat(patient.getIdentifier().get(0).getValue()).isEqualTo("third-value");
 	}
 
 	//TODO: https://github.com/hapifhir/hapi-fhir/issues/3796
@@ -524,9 +521,9 @@ public class FhirPatchApplyR4Test {
 		ourLog.debug("Outcome:\n{}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient));
 
 		//Then: it adds the new extension correctly.
-		assertThat(patient.getExtension(), hasSize(1));
-		assertThat(patient.getExtension().get(0).getUrl(), is(equalTo("http://foo/fhir/extension/foo")));
-		assertThat(patient.getExtension().get(0).getValueAsPrimitive().getValueAsString(), is(equalTo("foo")));
+		assertThat(patient.getExtension()).hasSize(1);
+		assertThat(patient.getExtension().get(0).getUrl()).isEqualTo("http://foo/fhir/extension/foo");
+		assertThat(patient.getExtension().get(0).getValueAsPrimitive().getValueAsString()).isEqualTo("foo");
 	}
 
 	private Parameters.ParametersParameterComponent createPatchAddOperation(String thePath, String theName, Type theValue) {

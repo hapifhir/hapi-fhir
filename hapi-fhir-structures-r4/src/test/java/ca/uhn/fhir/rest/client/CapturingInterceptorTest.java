@@ -19,8 +19,7 @@ import org.junit.jupiter.api.Test;
 import java.io.IOException;
 import java.nio.charset.Charset;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -89,7 +88,7 @@ public class CapturingInterceptorTest {
 		IHttpResponse actualResponse = interceptor.getLastResponse();
 
 		assertEquals(expectedResponse, actualResponse);
-		assertThat("Some content", equalTo(IOUtils.toString(actualResponse.createReader())));
+		assertThat("Some content").isEqualTo(IOUtils.toString(actualResponse.createReader()));
 		verify(expectedResponse).bufferEntity();
 
 		//A second call should not throw an exception (InpuStreamEntity is not repeatable)
@@ -139,7 +138,7 @@ public class CapturingInterceptorTest {
 		IHttpResponse actualResponse = interceptor.getLastResponse();
 
 		assertEquals(expectedResponse, actualResponse);
-		assertThat("Some content", equalTo(IOUtils.toString(actualResponse.createReader())));
+		assertThat("Some content").isEqualTo(IOUtils.toString(actualResponse.createReader()));
 		verify(expectedResponse, times(0)).bufferEntity();
 
 		//A second call should not throw an exception (StringEntity is repeatable)

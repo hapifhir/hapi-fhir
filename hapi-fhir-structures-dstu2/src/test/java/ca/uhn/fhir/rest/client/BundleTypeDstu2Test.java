@@ -31,7 +31,7 @@ import java.io.StringReader;
 import java.nio.charset.Charset;
 import java.util.Arrays;
 
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -85,7 +85,7 @@ public class BundleTypeDstu2Test {
 		IOUtils.closeQuietly(post.getEntity().getContent());
 		ourLog.info(body);
 
-		assertThat(body, Matchers.containsString("<type value=\"" + BundleTypeEnum.TRANSACTION.getCode()));
+		assertThat(body).contains("<type value=\"" + BundleTypeEnum.TRANSACTION.getCode());
 	}
 	
 	

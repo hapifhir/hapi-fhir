@@ -38,9 +38,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.containsString;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -68,7 +66,7 @@ public class IncludeTest {
 			String responseContent = IOUtils.toString(status.getEntity().getContent());
 
 			ourLog.info(responseContent);
-			assertThat(responseContent, containsString("Invalid _include parameter value"));
+			assertThat(responseContent).contains("Invalid _include parameter value");
 		}
 	}
 
@@ -272,7 +270,7 @@ public class IncludeTest {
 			Set<String> values = new HashSet<String>();
 			values.add(p.getName().get(0).getFamily());
 			values.add(p.getName().get(1).getFamily());
-			assertThat(values, containsInAnyOrder("foo-false", "bar-false"));
+			assertThat(values).containsExactlyInAnyOrder("foo-false", "bar-false");
 
 		}
 	}

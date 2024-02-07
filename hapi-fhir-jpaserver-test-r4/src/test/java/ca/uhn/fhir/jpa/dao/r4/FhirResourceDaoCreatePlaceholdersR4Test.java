@@ -37,11 +37,7 @@ import org.junit.jupiter.api.Test;
 import java.util.HashSet;
 import java.util.List;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.startsWith;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.is;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -74,7 +70,7 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 			myObservationDao.create(o, mySrd);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage(), startsWith(Msg.code(1094) + "Resource Patient/FOO not found, specified in path: Observation.subject"));
+			assertThat(e.getMessage()).startsWith(Msg.code(1094) + "Resource Patient/FOO not found, specified in path: Observation.subject");
 		}
 	}
 
@@ -109,7 +105,7 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 		SearchParameterMap params = new SearchParameterMap();
 		params.add(Task.SP_PART_OF, new ReferenceParam("Task/AAA"));
 		List<String> found = toUnqualifiedVersionlessIdValues(myTaskDao.search(params));
-		assertThat(found, contains(id.getValue()));
+		assertThat(found).containsExactly(id.getValue());
 	}
 
 	@Test
@@ -126,7 +122,7 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 		Exception ex = Assertions.assertThrows(InvalidRequestException.class, () -> {
 			myObservationDao.update(o, mySrd);
 		});
-		assertThat(ex.getMessage(), startsWith(Msg.code(1094) + "Resource Patient/FOO not found, specified in path: Observation.subject"));
+		assertThat(ex.getMessage()).startsWith(Msg.code(1094) + "Resource Patient/FOO not found, specified in path: Observation.subject");
 	}
 
 	@Test
@@ -306,8 +302,8 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 		assertEquals(1, placeholderPat.getIdentifier().size());
 		List<Identifier> identifiers = placeholderPat.getIdentifier();
 		Identifier identifier = identifiers.get(0);
-		assertThat(identifier.getSystem(), is(equalTo("http://foo")));
-		assertThat(identifier.getValue(), is(equalTo("123")));
+		assertThat(identifier.getSystem()).isEqualTo("http://foo");
+		assertThat(identifier.getValue()).isEqualTo("123");
 	}
 
 
@@ -351,8 +347,8 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 		assertEquals(1, placeholderPat.getIdentifier().size());
 		List<Identifier> identifiers = placeholderPat.getIdentifier();
 		Identifier identifier = identifiers.get(0);
-		assertThat(identifier.getSystem(), is(equalTo("http://foo")));
-		assertThat(identifier.getValue(), is(equalTo("123")));
+		assertThat(identifier.getSystem()).isEqualTo("http://foo");
+		assertThat(identifier.getValue()).isEqualTo("123");
 	}
 
 
@@ -397,8 +393,8 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 		assertEquals(1, placeholderPat.getIdentifier().size());
 		List<Identifier> identifiers = placeholderPat.getIdentifier();
 		Identifier identifier = identifiers.get(0);
-		assertThat(identifier.getSystem(), is(equalTo("http://bar")));
-		assertThat(identifier.getValue(), is(equalTo("321")));
+		assertThat(identifier.getSystem()).isEqualTo("http://bar");
+		assertThat(identifier.getValue()).isEqualTo("321");
 
 
 	}
@@ -441,8 +437,8 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 		assertEquals(1, placeholderPat.getIdentifier().size());
 		final List<Identifier> identifiers = placeholderPat.getIdentifier();
 		Identifier identifier = identifiers.get(0);
-		assertThat(identifier.getSystem(), is(equalTo(system)));
-		assertThat(identifier.getValue(), is(equalTo(value)));
+		assertThat(identifier.getSystem()).isEqualTo(system);
+		assertThat(identifier.getValue()).isEqualTo(value);
 	}
 
 	@Test
@@ -517,12 +513,12 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 		List<Identifier> identifiers = placeholderPat.getIdentifier();
 
 		//inline match-url identifier
-		assertThat(identifiers.get(1).getSystem(), is(equalTo("http://foo")));
-		assertThat(identifiers.get(1).getValue(), is(equalTo("123")));
+		assertThat(identifiers.get(1).getSystem()).isEqualTo("http://foo");
+		assertThat(identifiers.get(1).getValue()).isEqualTo("123");
 
 		//subject identifier
-		assertThat(identifiers.get(0).getSystem(), is(equalTo(system)));
-		assertThat(identifiers.get(0).getValue(), is(equalTo(value)));
+		assertThat(identifiers.get(0).getSystem()).isEqualTo(system);
+		assertThat(identifiers.get(0).getValue()).isEqualTo(value);
 
 
 		// Conditionally update a Patient with the same identifier

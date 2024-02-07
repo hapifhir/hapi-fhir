@@ -80,8 +80,7 @@ import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_UNIVERS
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_UPLOAD_PROPERTIES_FILE;
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_XML_FILE;
 import static java.util.stream.Collectors.joining;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hl7.fhir.common.hapi.validation.support.ValidationConstants.LOINC_ALL_VALUESET_ID;
 import static org.hl7.fhir.common.hapi.validation.support.ValidationConstants.LOINC_LOW;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -437,12 +436,11 @@ public class TerminologySvcImplCurrentVersionR4Test extends BaseJpaR4Test {
 			.map(r -> r.getIdElement().getIdPart())
 			.collect(Collectors.toList());
 
-		assertThat(resultUnqualifiedIds, containsInAnyOrder(resultUnqualifiedIds.toArray()));
+		assertThat(resultUnqualifiedIds).containsExactlyInAnyOrder(resultUnqualifiedIds.toArray());
 
 		Set<String> theExpectedIdVersionsPlusNull = Sets.newHashSet(theExpectedIdVersions);
 		theExpectedIdVersionsPlusNull.add(null);
-		assertThat(theExpectedIdVersionsPlusNull, containsInAnyOrder(
-			theValueSets.stream().map(r -> ((ValueSet) r).getVersion()).toArray()));
+		assertThat(theExpectedIdVersionsPlusNull).containsExactlyInAnyOrder(theValueSets.stream().map(r -> ((ValueSet) r).getVersion()).toArray());
 
 	}
 

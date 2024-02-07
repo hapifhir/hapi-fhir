@@ -8,8 +8,7 @@ import org.junit.jupiter.api.Test;
 import java.util.Calendar;
 import java.util.TimeZone;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class DateTypeTest {
@@ -23,9 +22,9 @@ public class DateTypeTest {
 	@Test
 	public void testDateType() {
 		DateType birthDate = new DateType(1974, 11, 25);
-		assertThat(birthDate.getYear(), is(1974));
-		assertThat(birthDate.getMonth(), is(11));
-		assertThat(birthDate.getDay(), is(25));
+		assertThat(birthDate.getYear()).isEqualTo(1974);
+		assertThat(birthDate.getMonth()).isEqualTo(11);
+		assertThat(birthDate.getDay()).isEqualTo(25);
 	}
 
 	@SuppressWarnings("unused")
