@@ -302,7 +302,6 @@ public class CommonCodeSystemsTerminologyServiceTest extends BaseValidationTestW
 	@Test
 	public void testFetchCodeSystem_withMimeType_returnsOk() {
 		CodeSystem cs = (CodeSystem) mySvc.fetchCodeSystem(MIMETYPES_CODESYSTEM_URL);
-		assertNull(cs);
 		assertTrue(cs.getConcept().isEmpty());
 		assertEquals(CodeSystem.CodeSystemContentMode.NOTPRESENT, cs.getContent());
 	}
