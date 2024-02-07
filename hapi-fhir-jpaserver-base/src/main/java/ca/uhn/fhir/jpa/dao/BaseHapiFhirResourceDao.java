@@ -905,6 +905,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 										theUrl,
 										resourceIds.size()));
 			}
+			// TODO: LD: There is a still a bug on slow deletes:  https://github.com/hapifhir/hapi-fhir/issues/5675
 			final long threshold = getStorageSettings().getRestDeleteByUrlResourceIdThreshold();
 			if (resourceIds.size() > threshold) {
 				throw new PreconditionFailedException(Msg.code(2496)
