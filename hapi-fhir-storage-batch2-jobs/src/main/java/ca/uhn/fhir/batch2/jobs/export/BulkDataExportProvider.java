@@ -471,8 +471,10 @@ public class BulkDataExportProvider {
 		BulkExportJobParameters parameters = info.getParameters(BulkExportJobParameters.class);
 		if (parameters.getPartitionId() != null) {
 			// Determine and validate permissions for partition (if needed)
+			ReadPartitionIdRequestDetails theDetails = ReadPartitionIdRequestDetails.forOperation(
+					null, null, ProviderConstants.OPERATION_EXPORT_POLL_STATUS);
 			RequestPartitionId partitionId =
-					myRequestPartitionHelperService.determineReadPartitionForRequest(theRequestDetails, null);
+					myRequestPartitionHelperService.determineReadPartitionForRequest(theRequestDetails, theDetails);
 			myRequestPartitionHelperService.validateHasPartitionPermissions(theRequestDetails, "Binary", partitionId);
 			if (!parameters.getPartitionId().equals(partitionId)) {
 				throw new InvalidRequestException(
