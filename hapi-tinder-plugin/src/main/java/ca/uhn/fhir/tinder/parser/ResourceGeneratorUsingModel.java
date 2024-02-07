@@ -10,10 +10,10 @@ import org.apache.commons.lang.WordUtils;
 import org.apache.maven.plugin.MojoFailureException;
 
 import java.io.File;
-import java.util.stream.Collectors;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class ResourceGeneratorUsingModel extends BaseStructureParser {
 
