@@ -1377,6 +1377,7 @@
             "id": "group-1",
             "population": [
               {
+					  "id": "initial-population",
                 "code": {
                   "coding": [
                     {
@@ -1392,6 +1393,7 @@
                 }
               },
               {
+					  "id": "denominator",
                 "code": {
                   "coding": [
                     {
@@ -1407,6 +1409,7 @@
                 }
               },
               {
+					  "id": "numerator",
                 "code": {
                   "coding": [
                     {
