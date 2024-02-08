@@ -16,9 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class PreviousVersionReaderPartitionedTest extends BaseJpaR5Test {
 	PreviousVersionReader<Patient> mySvc;
@@ -51,15 +49,15 @@ public class PreviousVersionReaderPartitionedTest extends BaseJpaR5Test {
 		Patient patient = createMale();
 		patient.setGender(Enumerations.AdministrativeGender.FEMALE);
 		myPatientDao.update(patient, mySrd);
-		assertEquals(Enumerations.AdministrativeGender.FEMALE, myPatientDao.read(patient.getIdElement(), mySrd).getGenderElement().getValue());
+		assertThat(myPatientDao.read(patient.getIdElement(), mySrd).getGenderElement().getValue()).isEqualTo(Enumerations.AdministrativeGender.FEMALE);
 
 		// execute
 		Optional<Patient> oPreviousPatient = mySvc.readPreviousVersion(patient);
 
 		// verify
-		assertTrue(oPreviousPatient.isPresent());
+		assertThat(oPreviousPatient.isPresent()).isTrue();
 		Patient previousPatient = oPreviousPatient.get();
-		assertEquals(Enumerations.AdministrativeGender.MALE, previousPatient.getGenderElement().getValue());
+		assertThat(previousPatient.getGenderElement().getValue()).isEqualTo(Enumerations.AdministrativeGender.MALE);
 	}
 
 	private Patient createMale() {
@@ -77,7 +75,7 @@ public class PreviousVersionReaderPartitionedTest extends BaseJpaR5Test {
 		Optional<Patient> oPreviousPatient = mySvc.readPreviousVersion(patient);
 
 		// verify
-		assertFalse(oPreviousPatient.isPresent());
+		assertThat(oPreviousPatient.isPresent()).isFalse();
 	}
 
 	@Test
@@ -93,9 +91,9 @@ public class PreviousVersionReaderPartitionedTest extends BaseJpaR5Test {
 		Optional<Patient> oPreviousPatient = mySvc.readPreviousVersion(currentDeletedVersion);
 
 		// verify
-		assertTrue(oPreviousPatient.isPresent());
+		assertThat(oPreviousPatient.isPresent()).isTrue();
 		Patient previousPatient = oPreviousPatient.get();
-		assertEquals(Enumerations.AdministrativeGender.MALE, previousPatient.getGenderElement().getValue());
+		assertThat(previousPatient.getGenderElement().getValue()).isEqualTo(Enumerations.AdministrativeGender.MALE);
 	}
 
 	@Test
@@ -105,7 +103,7 @@ public class PreviousVersionReaderPartitionedTest extends BaseJpaR5Test {
 
 		// execute
 		Optional<Patient> oDeletedPatient = mySvc.readPreviousVersion(latestUndeletedVersion);
-		assertFalse(oDeletedPatient.isPresent());
+		assertThat(oDeletedPatient.isPresent()).isFalse();
 	}
 
 	@Test
@@ -117,30 +115,30 @@ public class PreviousVersionReaderPartitionedTest extends BaseJpaR5Test {
 		Optional<Patient> oPreviousPatient = mySvc.readPreviousVersion(latestUndeletedVersion, true);
 
 		// verify
-		assertTrue(oPreviousPatient.isPresent());
+		assertThat(oPreviousPatient.isPresent()).isTrue();
 		Patient previousPatient = oPreviousPatient.get();
-		assertTrue(previousPatient.isDeleted());
+		assertThat(previousPatient.isDeleted()).isTrue();
 	}
 
 	@NotNull
 	private Patient setupPreviousDeletedResource() {
 		Patient patient = createMale();
-		assertEquals(1L, patient.getIdElement().getVersionIdPartAsLong());
+		assertThat(patient.getIdElement().getVersionIdPartAsLong()).isEqualTo(1L);
 		IdType patientId = patient.getIdElement().toVersionless();
 		myPatientDao.delete(patientId, mySrd);
 
 		Patient currentDeletedVersion = myPatientDao.read(patientId, mySrd, true);
-		assertEquals(2L, currentDeletedVersion.getIdElement().getVersionIdPartAsLong());
+		assertThat(currentDeletedVersion.getIdElement().getVersionIdPartAsLong()).isEqualTo(2L);
 
 		currentDeletedVersion.setGender(Enumerations.AdministrativeGender.FEMALE);
 		currentDeletedVersion.setId(currentDeletedVersion.getIdElement().toVersionless());
 		myPatientDao.update(currentDeletedVersion, mySrd);
 
 		Patient latestUndeletedVersion = myPatientDao.read(patientId, mySrd);
-		assertEquals(3L, latestUndeletedVersion.getIdElement().getVersionIdPartAsLong());
+		assertThat(latestUndeletedVersion.getIdElement().getVersionIdPartAsLong()).isEqualTo(3L);
 
-		assertFalse(latestUndeletedVersion.isDeleted());
-		assertEquals(Enumerations.AdministrativeGender.FEMALE, latestUndeletedVersion.getGenderElement().getValue());
+		assertThat(latestUndeletedVersion.isDeleted()).isFalse();
+		assertThat(latestUndeletedVersion.getGenderElement().getValue()).isEqualTo(Enumerations.AdministrativeGender.FEMALE);
 		return latestUndeletedVersion;
 	}
 

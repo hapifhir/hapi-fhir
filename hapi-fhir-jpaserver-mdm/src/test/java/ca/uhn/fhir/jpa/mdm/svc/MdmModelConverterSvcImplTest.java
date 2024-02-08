@@ -16,7 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -49,7 +49,7 @@ public class MdmModelConverterSvcImplTest extends BaseMdmR4Test {
 
 		ourLog.info("actualMdmLinkJson: {}", actualMdmLinkJson);
 
-		assertEquals(getExepctedMdmLinkJson(mdmLink.getGoldenResourcePersistenceId().getId(), mdmLink.getSourcePersistenceId().getId(), MdmMatchResultEnum.MATCH, MdmLinkSourceEnum.MANUAL, version, createTime, updateTime, isLinkCreatedResource, scoreRounded), actualMdmLinkJson);
+		assertThat(actualMdmLinkJson).isEqualTo(getExepctedMdmLinkJson(mdmLink.getGoldenResourcePersistenceId().getId(), mdmLink.getSourcePersistenceId().getId(), MdmMatchResultEnum.MATCH, MdmLinkSourceEnum.MANUAL, version, createTime, updateTime, isLinkCreatedResource, scoreRounded));
 	}
 
 	@Test
@@ -84,15 +84,15 @@ public class MdmModelConverterSvcImplTest extends BaseMdmR4Test {
 	private void assertMdmLinkRevisionsEqual(MdmLinkWithRevisionJson theExpectedMdmLinkWithRevisionJson, MdmLinkWithRevisionJson theActualMdmLinkWithRevisionJson) {
 		final MdmLinkJson expectedMdmLink = theExpectedMdmLinkWithRevisionJson.getMdmLink();
 		final MdmLinkJson actualMdmLink = theActualMdmLinkWithRevisionJson.getMdmLink();
-		assertEquals(expectedMdmLink.getGoldenResourceId(), actualMdmLink.getGoldenResourceId());
-		assertEquals(expectedMdmLink.getSourceId(), actualMdmLink.getSourceId());
-		assertEquals(expectedMdmLink.getMatchResult(), actualMdmLink.getMatchResult());
-		assertEquals(expectedMdmLink.getLinkSource(), actualMdmLink.getLinkSource());
-		assertEquals(expectedMdmLink.getScore(), actualMdmLink.getScore());
-		assertEquals(expectedMdmLink.getVector(), actualMdmLink.getVector());
+		assertThat(actualMdmLink.getGoldenResourceId()).isEqualTo(expectedMdmLink.getGoldenResourceId());
+		assertThat(actualMdmLink.getSourceId()).isEqualTo(expectedMdmLink.getSourceId());
+		assertThat(actualMdmLink.getMatchResult()).isEqualTo(expectedMdmLink.getMatchResult());
+		assertThat(actualMdmLink.getLinkSource()).isEqualTo(expectedMdmLink.getLinkSource());
+		assertThat(actualMdmLink.getScore()).isEqualTo(expectedMdmLink.getScore());
+		assertThat(actualMdmLink.getVector()).isEqualTo(expectedMdmLink.getVector());
 
-		assertEquals(theExpectedMdmLinkWithRevisionJson.getRevisionNumber(), theActualMdmLinkWithRevisionJson.getRevisionNumber());
-		assertEquals(theExpectedMdmLinkWithRevisionJson.getRevisionTimestamp(), theActualMdmLinkWithRevisionJson.getRevisionTimestamp());
+		assertThat(theActualMdmLinkWithRevisionJson.getRevisionNumber()).isEqualTo(theExpectedMdmLinkWithRevisionJson.getRevisionNumber());
+		assertThat(theActualMdmLinkWithRevisionJson.getRevisionTimestamp()).isEqualTo(theExpectedMdmLinkWithRevisionJson.getRevisionTimestamp());
 	}
 
 	private MdmLinkJson getExepctedMdmLinkJson(Long theGoldenPatientId, Long theSourceId, MdmMatchResultEnum theMdmMatchResultEnum, MdmLinkSourceEnum theMdmLinkSourceEnum, String version, Date theCreateTime, Date theUpdateTime, boolean theLinkCreatedNewResource, double theScore) {

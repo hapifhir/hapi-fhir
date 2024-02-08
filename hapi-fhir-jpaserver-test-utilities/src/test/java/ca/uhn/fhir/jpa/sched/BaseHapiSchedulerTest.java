@@ -4,8 +4,8 @@ import ca.uhn.fhir.i18n.Msg;
 import org.junit.jupiter.api.Test;
 import org.quartz.SchedulerException;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 public class BaseHapiSchedulerTest {
 
@@ -15,9 +15,9 @@ public class BaseHapiSchedulerTest {
 		};
 		try {
 			sched.init();
-			fail();
+			fail("");
 		} catch (SchedulerException e) {
-			assertEquals(Msg.code(1633) + "java.lang.NullPointerException: No instance name supplied", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo(Msg.code(1633) + "java.lang.NullPointerException: No instance name supplied");
 		}
 	}
 

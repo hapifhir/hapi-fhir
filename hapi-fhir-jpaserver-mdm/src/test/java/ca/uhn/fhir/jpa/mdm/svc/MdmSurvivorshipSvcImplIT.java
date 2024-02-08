@@ -7,10 +7,7 @@ import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 class MdmSurvivorshipSvcImplIT extends BaseMdmR4Test {
 
@@ -24,14 +21,14 @@ class MdmSurvivorshipSvcImplIT extends BaseMdmR4Test {
 
 		myMdmSurvivorshipService.applySurvivorshipRulesToGoldenResource(p1, p2, new MdmTransactionContext(MdmTransactionContext.OperationType.CREATE_RESOURCE));
 
-		assertFalse(p2.hasIdElement());
-		assertTrue(p2.getIdentifier().isEmpty());
-		assertTrue(p2.getMeta().isEmpty());
+		assertThat(p2.hasIdElement()).isFalse();
+		assertThat(p2.getIdentifier().isEmpty()).isTrue();
+		assertThat(p2.getMeta().isEmpty()).isTrue();
 
-		assertTrue(p1.getNameFirstRep().equalsDeep(p2.getNameFirstRep()));
-		assertNull(p2.getBirthDate());
-		assertEquals(p1.getTelecom().size(), p2.getTelecom().size());
-		assertTrue(p2.getTelecomFirstRep().equalsDeep(p1.getTelecomFirstRep()));
+		assertThat(p1.getNameFirstRep().equalsDeep(p2.getNameFirstRep())).isTrue();
+		assertThat(p2.getBirthDate()).isNull();
+		assertThat(p2.getTelecom().size()).isEqualTo(p1.getTelecom().size());
+		assertThat(p2.getTelecomFirstRep().equalsDeep(p1.getTelecomFirstRep())).isTrue();
 	}
 
 	@Test
@@ -43,16 +40,16 @@ class MdmSurvivorshipSvcImplIT extends BaseMdmR4Test {
 
 		myMdmSurvivorshipService.applySurvivorshipRulesToGoldenResource(p1, p2, new MdmTransactionContext(MdmTransactionContext.OperationType.MERGE_GOLDEN_RESOURCES));
 
-		assertFalse(p2.hasIdElement());
-		assertFalse(p2.getIdentifier().isEmpty());
-		assertTrue(p2.getMeta().isEmpty());
+		assertThat(p2.hasIdElement()).isFalse();
+		assertThat(p2.getIdentifier().isEmpty()).isFalse();
+		assertThat(p2.getMeta().isEmpty()).isTrue();
 
-		assertEquals(2, p2.getName().size());
-		assertEquals(p2Name, p2.getName().get(0).getNameAsSingleString());
-		assertEquals(p1Name, p2.getName().get(1).getNameAsSingleString());
-		assertNull(p2.getBirthDate());
+		assertThat(p2.getName().size()).isEqualTo(2);
+		assertThat(p2.getName().get(0).getNameAsSingleString()).isEqualTo(p2Name);
+		assertThat(p2.getName().get(1).getNameAsSingleString()).isEqualTo(p1Name);
+		assertThat(p2.getBirthDate()).isNull();
 
-		assertEquals(p1.getTelecom().size(), p1.getTelecom().size());
-		assertTrue(p2.getTelecomFirstRep().equalsDeep(p1.getTelecomFirstRep()));
+		assertThat(p1.getTelecom().size()).isEqualTo(p1.getTelecom().size());
+		assertThat(p2.getTelecomFirstRep().equalsDeep(p1.getTelecomFirstRep())).isTrue();
 	}
 }

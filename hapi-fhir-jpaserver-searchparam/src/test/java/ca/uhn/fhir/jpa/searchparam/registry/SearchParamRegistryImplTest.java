@@ -42,7 +42,6 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
@@ -104,9 +103,9 @@ public class SearchParamRegistryImplTest {
 
 		// Our first refresh adds our test searchparams to the registry
 		assertResult(mySearchParamRegistry.refreshCacheIfNecessary(), TEST_SEARCH_PARAMS, 0, 0);
-		assertEquals(TEST_SEARCH_PARAMS, myResourceChangeListenerRegistry.getResourceVersionCacheSizeForUnitTest());
+		assertThat(myResourceChangeListenerRegistry.getResourceVersionCacheSizeForUnitTest()).isEqualTo(TEST_SEARCH_PARAMS);
 		assertDbCalled();
-		assertEquals(ourBuiltInSearchParams.size(), mySearchParamRegistry.getActiveSearchParams().size());
+		assertThat(mySearchParamRegistry.getActiveSearchParams().size()).isEqualTo(ourBuiltInSearchParams.size());
 		assertPatientSearchParamSize(ourBuiltinPatientSearchParamCount);
 	}
 
@@ -119,7 +118,7 @@ public class SearchParamRegistryImplTest {
 
 	@Test
 	void handleInit() {
-		assertEquals(31, mySearchParamRegistry.getActiveSearchParams("Patient").size());
+		assertThat(mySearchParamRegistry.getActiveSearchParams("Patient").size()).isEqualTo(31);
 
 		IdDt idBad = new IdDt("SearchParameter/bad");
 		when(mySearchParamProvider.read(idBad)).thenThrow(new ResourceNotFoundException("id bad"));
@@ -132,7 +131,7 @@ public class SearchParamRegistryImplTest {
 		idList.add(idBad);
 		idList.add(idGood);
 		mySearchParamRegistry.handleInit(idList);
-		assertEquals(32, mySearchParamRegistry.getActiveSearchParams("Patient").size());
+		assertThat(mySearchParamRegistry.getActiveSearchParams("Patient").size()).isEqualTo(32);
 	}
 
 	@Test
@@ -146,14 +145,14 @@ public class SearchParamRegistryImplTest {
 	public void testRefreshCacheIfNecessary() {
 		// Second refresh does not call the database
 		assertEmptyResult(mySearchParamRegistry.refreshCacheIfNecessary());
-		assertEquals(TEST_SEARCH_PARAMS, myResourceChangeListenerRegistry.getResourceVersionCacheSizeForUnitTest());
+		assertThat(myResourceChangeListenerRegistry.getResourceVersionCacheSizeForUnitTest()).isEqualTo(TEST_SEARCH_PARAMS);
 		assertDbNotCalled();
 		assertPatientSearchParamSize(ourBuiltinPatientSearchParamCount);
 
 		// Requesting a refresh calls the database and adds nothing
 		mySearchParamRegistry.requestRefresh();
 		assertEmptyResult(mySearchParamRegistry.refreshCacheIfNecessary());
-		assertEquals(TEST_SEARCH_PARAMS, myResourceChangeListenerRegistry.getResourceVersionCacheSizeForUnitTest());
+		assertThat(myResourceChangeListenerRegistry.getResourceVersionCacheSizeForUnitTest()).isEqualTo(TEST_SEARCH_PARAMS);
 		assertDbCalled();
 		assertPatientSearchParamSize(ourBuiltinPatientSearchParamCount);
 
@@ -161,7 +160,7 @@ public class SearchParamRegistryImplTest {
 		resetDatabaseToOrigSearchParamsPlusNewOneWithStatus(Enumerations.PublicationStatus.ACTIVE);
 		mySearchParamRegistry.requestRefresh();
 		assertResult(mySearchParamRegistry.refreshCacheIfNecessary(), 1, 0, 0);
-		assertEquals(TEST_SEARCH_PARAMS + 1, myResourceChangeListenerRegistry.getResourceVersionCacheSizeForUnitTest());
+		assertThat(myResourceChangeListenerRegistry.getResourceVersionCacheSizeForUnitTest()).isEqualTo(TEST_SEARCH_PARAMS + 1);
 		assertDbCalled();
 		assertPatientSearchParamSize(ourBuiltinPatientSearchParamCount + 1);
 
@@ -170,7 +169,7 @@ public class SearchParamRegistryImplTest {
 		resetDatabaseToOrigSearchParamsPlusNewOneWithStatus(Enumerations.PublicationStatus.ACTIVE);
 		mySearchParamRegistry.requestRefresh();
 		assertResult(mySearchParamRegistry.refreshCacheIfNecessary(), 1, 0, 1);
-		assertEquals(TEST_SEARCH_PARAMS + 1, myResourceChangeListenerRegistry.getResourceVersionCacheSizeForUnitTest());
+		assertThat(myResourceChangeListenerRegistry.getResourceVersionCacheSizeForUnitTest()).isEqualTo(TEST_SEARCH_PARAMS + 1);
 		assertDbCalled();
 		assertPatientSearchParamSize(ourBuiltinPatientSearchParamCount + 1);
 
@@ -178,7 +177,7 @@ public class SearchParamRegistryImplTest {
 		// removes the ACTIVE one and adds the new one because this is a mock test
 		resetDatabaseToOrigSearchParamsPlusNewOneWithStatus(Enumerations.PublicationStatus.DRAFT);
 		mySearchParamRegistry.requestRefresh();
-		assertEquals(TEST_SEARCH_PARAMS + 1, myResourceChangeListenerRegistry.getResourceVersionCacheSizeForUnitTest());
+		assertThat(myResourceChangeListenerRegistry.getResourceVersionCacheSizeForUnitTest()).isEqualTo(TEST_SEARCH_PARAMS + 1);
 		assertResult(mySearchParamRegistry.refreshCacheIfNecessary(), 1, 0, 1);
 		assertDbCalled();
 		// the new one does not appear in our patient search params because it's DRAFT
@@ -191,7 +190,7 @@ public class SearchParamRegistryImplTest {
 		List<ResourceTable> newEntities = resetDatabaseToOrigSearchParamsPlusNewOneWithStatus(Enumerations.PublicationStatus.ACTIVE);
 		mySearchParamRegistry.requestRefresh();
 		assertResult(mySearchParamRegistry.refreshCacheIfNecessary(), 1, 0, 0);
-		assertEquals(TEST_SEARCH_PARAMS + 1, myResourceChangeListenerRegistry.getResourceVersionCacheSizeForUnitTest());
+		assertThat(myResourceChangeListenerRegistry.getResourceVersionCacheSizeForUnitTest()).isEqualTo(TEST_SEARCH_PARAMS + 1);
 		assertDbCalled();
 		assertPatientSearchParamSize(ourBuiltinPatientSearchParamCount + 1);
 
@@ -201,19 +200,19 @@ public class SearchParamRegistryImplTest {
 		resetMock(Enumerations.PublicationStatus.ACTIVE, newEntities);
 		mySearchParamRegistry.requestRefresh();
 		assertResult(mySearchParamRegistry.refreshCacheIfNecessary(), 0, 1, 0);
-		assertEquals(TEST_SEARCH_PARAMS + 1, myResourceChangeListenerRegistry.getResourceVersionCacheSizeForUnitTest());
+		assertThat(myResourceChangeListenerRegistry.getResourceVersionCacheSizeForUnitTest()).isEqualTo(TEST_SEARCH_PARAMS + 1);
 		assertDbCalled();
 		assertPatientSearchParamSize(ourBuiltinPatientSearchParamCount + 1);
 	}
 
 	private void assertPatientSearchParamSize(int theExpectedSize) {
-		assertEquals(theExpectedSize, mySearchParamRegistry.getActiveSearchParams("Patient").size());
+		assertThat(mySearchParamRegistry.getActiveSearchParams("Patient").size()).isEqualTo(theExpectedSize);
 	}
 
 	private void assertResult(ResourceChangeResult theResult, long theExpectedAdded, long theExpectedUpdated, long theExpectedRemoved) {
-		assertEquals(theExpectedAdded, theResult.created, "added results");
-		assertEquals(theExpectedUpdated, theResult.updated, "updated results");
-		assertEquals(theExpectedRemoved, theResult.deleted, "removed results");
+		assertThat(theResult.created).as("added results").isEqualTo(theExpectedAdded);
+		assertThat(theResult.updated).as("updated results").isEqualTo(theExpectedUpdated);
+		assertThat(theResult.deleted).as("removed results").isEqualTo(theExpectedRemoved);
 	}
 
 	private void assertEmptyResult(ResourceChangeResult theResult) {
@@ -240,14 +239,14 @@ public class SearchParamRegistryImplTest {
 	@Test
 	public void testGetActiveSearchParamByUrl_whenSPExists_returnsActiveSp() {
 		RuntimeSearchParam patientLanguageSp = mySearchParamRegistry.getActiveSearchParamByUrl("SearchParameter/Patient-language");
-		assertNotNull(patientLanguageSp);
-		assertEquals(patientLanguageSp.getId().getIdPart(), "Patient-language");
+		assertThat(patientLanguageSp).isNotNull();
+		assertThat("Patient-language").isEqualTo(patientLanguageSp.getId().getIdPart());
 	}
 
 	@Test
 	public void testGetActiveSearchParamByUrl_whenSPNotExist_returnsNull() {
 		RuntimeSearchParam nonExistingSp = mySearchParamRegistry.getActiveSearchParamByUrl("SearchParameter/nonExistingSp");
-		assertNull(nonExistingSp);
+		assertThat(nonExistingSp).isNull();
 	}
 
 	@Test
@@ -263,11 +262,11 @@ public class SearchParamRegistryImplTest {
 			return ourResourceVersionMap;
 		});
 
-		assertFalse(retried.get());
+		assertThat(retried.get()).isFalse();
 		mySearchParamRegistry.forceRefresh();
 		ResourceSearchParams activeSearchParams = mySearchParamRegistry.getActiveSearchParams("Patient");
-		assertTrue(retried.get());
-		assertEquals(ourBuiltInSearchParams.getSearchParamMap("Patient").size(), activeSearchParams.size());
+		assertThat(retried.get()).isTrue();
+		assertThat(activeSearchParams.size()).isEqualTo(ourBuiltInSearchParams.getSearchParamMap("Patient").size());
 	}
 
 	@Test
@@ -281,11 +280,11 @@ public class SearchParamRegistryImplTest {
 		ResourceSearchParams activeSearchParams = mySearchParamRegistry.getActiveSearchParams("Patient");
 
 		RuntimeSearchParam converted = activeSearchParams.get("foo");
-		assertNotNull(converted);
+		assertThat(converted).isNotNull();
 
-		assertEquals(1, converted.getExtensions("http://foo").size());
+		assertThat(converted.getExtensions("http://foo").size()).isEqualTo(1);
 		IPrimitiveType<?> value = (IPrimitiveType<?>) converted.getExtensions("http://foo").get(0).getValue();
-		assertEquals("FOO", value.getValueAsString());
+		assertThat(value.getValueAsString()).isEqualTo("FOO");
 	}
 
 	@Test
@@ -314,10 +313,10 @@ public class SearchParamRegistryImplTest {
 		mySearchParamRegistry.forceRefresh();
 
 		RuntimeSearchParam canonicalSp = mySearchParamRegistry.getRuntimeSearchParam("Encounter", "subject");
-		assertEquals("Modified Subject", canonicalSp.getDescription());
-		assertTrue(canonicalSp.hasUpliftRefchain("name1"));
-		assertFalse(canonicalSp.hasUpliftRefchain("name99"));
-		assertEquals(Sets.newHashSet("name1", "name2"), canonicalSp.getUpliftRefchainCodes());
+		assertThat(canonicalSp.getDescription()).isEqualTo("Modified Subject");
+		assertThat(canonicalSp.hasUpliftRefchain("name1")).isTrue();
+		assertThat(canonicalSp.hasUpliftRefchain("name99")).isFalse();
+		assertThat(canonicalSp.getUpliftRefchainCodes()).isEqualTo(Sets.newHashSet("name1", "name2"));
 	}
 
 	private List<ResourceTable> resetDatabaseToOrigSearchParamsPlusNewOneWithStatus(Enumerations.PublicationStatus theStatus) {

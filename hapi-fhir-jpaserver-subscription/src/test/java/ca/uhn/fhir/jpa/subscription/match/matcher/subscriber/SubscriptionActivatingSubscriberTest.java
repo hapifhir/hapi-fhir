@@ -19,7 +19,6 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Subscription;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -33,6 +32,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 @ExtendWith(MockitoExtension.class)
 public class SubscriptionActivatingSubscriberTest {
@@ -106,18 +107,18 @@ public class SubscriptionActivatingSubscriberTest {
 		boolean isActivated = mySubscriptionActivatingSubscriber.activateSubscriptionIfRequired(subscription);
 
 		// verify
-		Assertions.assertFalse(isActivated);
+		assertThat(isActivated).isFalse();
 		ArgumentCaptor<IBaseResource> captor = ArgumentCaptor.forClass(IBaseResource.class);
 		Mockito.verify(dao).update(captor.capture(), Mockito.any(SystemRequestDetails.class));
 		IBaseResource savedResource = captor.getValue();
-		Assertions.assertTrue(savedResource instanceof Subscription);
-		Assertions.assertEquals(Subscription.SubscriptionStatus.ERROR, ((Subscription)savedResource).getStatus());
+		assertThat(savedResource instanceof Subscription).isTrue();
+		assertThat(((Subscription) savedResource).getStatus()).isEqualTo(Subscription.SubscriptionStatus.ERROR);
 
 		ArgumentCaptor<ILoggingEvent> appenderCaptor = ArgumentCaptor.forClass(ILoggingEvent.class);
 		Mockito.verify(myAppender, Mockito.times(totalInfoLogs))
 			.doAppend(appenderCaptor.capture());
 		List<ILoggingEvent> events = appenderCaptor.getAllValues();
-		Assertions.assertEquals(totalInfoLogs, events.size());
-		Assertions.assertTrue(events.get(0).getMessage().contains(exceptionMsg));
+		assertThat(events.size()).isEqualTo(totalInfoLogs);
+		assertThat(events.get(0).getMessage().contains(exceptionMsg)).isTrue();
 	}
 }

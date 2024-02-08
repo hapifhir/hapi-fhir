@@ -40,9 +40,9 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.IntStream;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.exparity.hamcrest.date.DateMatchers.within;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -97,7 +97,7 @@ public class BulkDataExportJobSchedulingHelperImplTest {
 		verify(myJpaJobPersistence, never()).deleteInstanceAndChunks(anyString());
 
 		final Date cutoffDate = myCutoffCaptor.getValue();
-		assertEquals(DateUtils.truncate(computeDateFromConfig(expectedRetentionHours), Calendar.SECOND), DateUtils.truncate(cutoffDate, Calendar.SECOND));
+		assertThat(DateUtils.truncate(cutoffDate, Calendar.SECOND)).isEqualTo(DateUtils.truncate(computeDateFromConfig(expectedRetentionHours), Calendar.SECOND));
 	}
 
 	@Test

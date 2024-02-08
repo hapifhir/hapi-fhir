@@ -11,8 +11,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.spy;
@@ -47,7 +47,7 @@ class CdsPrefetchFhirClientSvcTest {
 		cdsServiceRequestJson.setFhirServer("http://localhost:8000");
 
 		IBaseResource srq = myCdsPrefetchFhirClientSvc.resourceFromUrl(cdsServiceRequestJson, "ServiceRequest?_id=1234");
-		assertNotNull(srq);
+		assertThat(srq).isNotNull();
 		verify(myMockClient.search(), times(1)).byUrl("ServiceRequest?_id=1234");
 	}
 
@@ -56,7 +56,7 @@ class CdsPrefetchFhirClientSvcTest {
 		CdsServiceRequestJson cdsServiceRequestJson = new CdsServiceRequestJson();
 		cdsServiceRequestJson.setFhirServer("http://localhost:8000");
 		IBaseResource srq = myCdsPrefetchFhirClientSvc.resourceFromUrl(cdsServiceRequestJson, "ServiceRequest?_id=1234&_include=ServiceRequest:performer&_include=ServiceRequest:requester");
-		assertNotNull(srq);
+		assertThat(srq).isNotNull();
 		verify(myMockClient.search(), times(1)).byUrl("ServiceRequest?_id=1234&_include=ServiceRequest:performer&_include=ServiceRequest:requester");
 	}
 
@@ -69,7 +69,7 @@ class CdsPrefetchFhirClientSvcTest {
 		cdsServiceRequestJson.setServiceRequestAuthorizationJson(cdsServiceRequestAuthorizationJson);
 
 		IBaseResource srq = myCdsPrefetchFhirClientSvc.resourceFromUrl(cdsServiceRequestJson, "ServiceRequest/1234");
-		assertNotNull(srq);
+		assertThat(srq).isNotNull();
 		verify(cdsServiceRequestAuthorizationJson, times(2)).getAccessToken();
 		verify(myMockClient.read().resource("ServiceRequest"), times(1)).withId("1234");
 	}
@@ -80,7 +80,7 @@ class CdsPrefetchFhirClientSvcTest {
 		cdsServiceRequestJson.setFhirServer("http://localhost:8000");
 
 		IBaseResource srq = myCdsPrefetchFhirClientSvc.resourceFromUrl(cdsServiceRequestJson, "ServiceRequest/1234");
-		assertNotNull(srq);
+		assertThat(srq).isNotNull();
 		verify(myMockClient.read().resource("ServiceRequest"), times(1)).withId("1234");
 	}
 
@@ -93,7 +93,7 @@ class CdsPrefetchFhirClientSvcTest {
 			IBaseResource srq = myCdsPrefetchFhirClientSvc.resourceFromUrl(cdsServiceRequestJson, "1234");
 			fail("should throw, no resource present");
 		} catch (InvalidRequestException e) {
-			assertEquals("HAPI-2384: Unable to translate url 1234 into a resource or a bundle.", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo("HAPI-2384: Unable to translate url 1234 into a resource or a bundle.");
 		}
 	}
 
@@ -106,7 +106,7 @@ class CdsPrefetchFhirClientSvcTest {
 			IBaseResource srq = myCdsPrefetchFhirClientSvc.resourceFromUrl(cdsServiceRequestJson, "/1234");
 			fail("should throw, no resource present");
 		} catch (InvalidRequestException e) {
-			assertEquals("HAPI-2383: Failed to resolve /1234. Url does not start with a resource type.", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo("HAPI-2383: Failed to resolve /1234. Url does not start with a resource type.");
 		}
 	}
 }

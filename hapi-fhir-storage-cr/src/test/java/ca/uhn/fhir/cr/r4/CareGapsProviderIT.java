@@ -12,8 +12,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * End-to-end test for care gaps functionality
@@ -94,7 +93,7 @@ class CareGapsProviderIT extends BaseCrR4TestServer
 	}
 
 	private void assertForGaps(Parameters theResult) {
-		assertNotNull(theResult);
+		assertThat(theResult).isNotNull();
 		var dataBundle = (Bundle) theResult.getParameter().get(0).getResource();
 		var detectedIssue = dataBundle.getEntry()
 			.stream()
@@ -105,7 +104,7 @@ class CareGapsProviderIT extends BaseCrR4TestServer
 		Optional<Coding> coding = codeableConcept.getCoding()
 			.stream()
 			.filter(code -> "open-gap".equalsIgnoreCase(code.getCode()) || "closed-gap".equalsIgnoreCase(code.getCode())).findFirst();
-		assertTrue(!coding.isEmpty());
+		assertThat(!coding.isEmpty()).isTrue();
 	}
 
 }

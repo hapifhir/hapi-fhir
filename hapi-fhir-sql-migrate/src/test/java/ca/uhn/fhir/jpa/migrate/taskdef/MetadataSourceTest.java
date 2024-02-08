@@ -10,7 +10,7 @@ import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.springframework.jdbc.core.JdbcTemplate;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @MockitoSettings(strictness = Strictness.LENIENT)
 class MetadataSourceTest {
@@ -43,7 +43,7 @@ class MetadataSourceTest {
 		Mockito.when(myConnectionProperties.newJdbcTemplate()).thenReturn(myJdbcTemplate);
 		Mockito.when(myJdbcTemplate.queryForObject(Mockito.any(), Mockito.eq(String.class))).thenReturn(Strings.nullToEmpty(theEdition));
 
-		assertEquals(theSupportedFlag, myMetadataSource.isOnlineIndexSupported(myConnectionProperties));
+		assertThat(myMetadataSource.isOnlineIndexSupported(myConnectionProperties)).isEqualTo(theSupportedFlag);
 	}
 
 }

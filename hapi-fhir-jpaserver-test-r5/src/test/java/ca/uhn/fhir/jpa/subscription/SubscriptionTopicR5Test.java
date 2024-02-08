@@ -16,15 +16,14 @@ import org.slf4j.Logger;
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class SubscriptionTopicR5Test extends BaseSubscriptionsR5Test {
 	private static final Logger ourLog = Logs.getSubscriptionTopicLog();
 
 	@Test
 	public void testSubscriptionTopicRegistryBean() {
-		assertNotNull(mySubscriptionTopicRegistry);
+		assertThat(mySubscriptionTopicRegistry).isNotNull();
 	}
 
 	@Test
@@ -38,7 +37,7 @@ public class SubscriptionTopicR5Test extends BaseSubscriptionsR5Test {
 
 		waitForActivatedSubscriptionCount(1);
 
-		assertEquals(0, getSystemProviderCount());
+		assertThat(getSystemProviderCount()).isEqualTo(0);
 
 		// execute
 		Encounter badSentEncounter = sendEncounterWithStatus(Enumerations.EncounterStatus.COMPLETED, false);
@@ -47,14 +46,14 @@ public class SubscriptionTopicR5Test extends BaseSubscriptionsR5Test {
 		// verify
 		Bundle receivedBundle = getLastSystemProviderBundle();
 		List<IBaseResource> resources = BundleUtil.toListOfResources(myFhirCtx, receivedBundle);
-		assertEquals(2, resources.size());
+		assertThat(resources.size()).isEqualTo(2);
 
 		SubscriptionStatus ss = (SubscriptionStatus) resources.get(0);
 		validateSubscriptionStatus(subscription, goodSentEncounter, ss, 1L);
 
 		Encounter encounter = (Encounter) resources.get(1);
-		assertEquals(Enumerations.EncounterStatus.COMPLETED, encounter.getStatus());
-		assertEquals(goodSentEncounter.getIdElement(), encounter.getIdElement());
+		assertThat(encounter.getStatus()).isEqualTo(Enumerations.EncounterStatus.COMPLETED);
+		assertThat(encounter.getIdElement()).isEqualTo(goodSentEncounter.getIdElement());
 	}
 
 	private Subscription createTopicSubscription(String... theFilters) throws InterruptedException {

@@ -18,7 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyCollection;
 import static org.mockito.Mockito.when;
 
@@ -44,19 +44,19 @@ public class ResourceLinkPredicateBuilderTest {
 	public void createEverythingPredicate_withListOfPids_returnsInPredicate() {
         when(myResourceLinkPredicateBuilder.generatePlaceholders(anyCollection())).thenReturn(List.of(PLACEHOLDER_BASE+"1", PLACEHOLDER_BASE+"2"));
 		Condition condition = myResourceLinkPredicateBuilder.createEverythingPredicate("Patient", new ArrayList<>(), 1l, 2l);
-        assertEquals(InCondition.class, condition.getClass());
+		assertThat(condition.getClass()).isEqualTo(InCondition.class);
 	}
 
 	@Test
 	public void createEverythingPredicate_withSinglePid_returnsInCondition() {
         when(myResourceLinkPredicateBuilder.generatePlaceholders(anyCollection())).thenReturn(List.of(PLACEHOLDER_BASE+"1"));
 		Condition condition = myResourceLinkPredicateBuilder.createEverythingPredicate("Patient", new ArrayList<>(), 1l);
-        assertEquals(BinaryCondition.class, condition.getClass());
+		assertThat(condition.getClass()).isEqualTo(BinaryCondition.class);
 	}
 
 	@Test
 	public void createEverythingPredicate_withNoPids_returnsBinaryCondition() {
         Condition condition = myResourceLinkPredicateBuilder.createEverythingPredicate("Patient", new ArrayList<>(), new Long[0]);
-        assertEquals(BinaryCondition.class, condition.getClass());
+		assertThat(condition.getClass()).isEqualTo(BinaryCondition.class);
 	}
 }

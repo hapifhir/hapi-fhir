@@ -26,9 +26,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.times;
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -120,7 +118,7 @@ public class MdmMatchLinkSvcSurvivorshipTest extends BaseMdmR4Test {
 		}
 
 		Optional<MdmLink> linkop = myMdmLinkDaoSvc.findMdmLinkBySource(r);
-		assertTrue(linkop.isPresent());
+		assertThat(linkop.isPresent()).isTrue();
 		MdmLink link = linkop.get();
 		JpaPid gpid = link.getGoldenResourcePersistenceId();
 
@@ -128,10 +126,10 @@ public class MdmMatchLinkSvcSurvivorshipTest extends BaseMdmR4Test {
 
 		// we should have a link for each resource all linked
 		// to the same golden resource
-		assertEquals(resourceCount, myMdmLinkDaoSvc.findMdmLinksByGoldenResource(golden).size());
-		assertEquals(1, golden.getAddress().size());
-		assertEquals(1, golden.getTelecom().size());
-		assertEquals(r.getTelecom().get(0).getValue(), golden.getTelecom().get(0).getValue());
+		assertThat(myMdmLinkDaoSvc.findMdmLinksByGoldenResource(golden).size()).isEqualTo(resourceCount);
+		assertThat(golden.getAddress().size()).isEqualTo(1);
+		assertThat(golden.getTelecom().size()).isEqualTo(1);
+		assertThat(golden.getTelecom().get(0).getValue()).isEqualTo(r.getTelecom().get(0).getValue());
 
 		// test
 		// unmatch final link
@@ -145,8 +143,8 @@ public class MdmMatchLinkSvcSurvivorshipTest extends BaseMdmR4Test {
 		golden = (Patient) myMdmLinkUpdaterSvc.updateLink(params);
 
 		// verify
-		assertTrue(golden.getTelecom() == null || golden.getTelecom().isEmpty());
-		assertNull(golden.getBirthDate());
+		assertThat(golden.getTelecom() == null || golden.getTelecom().isEmpty()).isTrue();
+		assertThat(golden.getBirthDate()).isNull();
 	}
 
 	private void verifySurvivorshipCalled(int theNumberOfTimes) {

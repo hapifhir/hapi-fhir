@@ -20,8 +20,8 @@ import org.springframework.transaction.annotation.Propagation;
 
 import java.util.concurrent.atomic.AtomicReference;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
 
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = {
@@ -106,10 +106,10 @@ public class JpaHapiTransactionServiceTest extends BaseJpaTest {
 	}
 
 	void assertNotFound(IFhirResourceDao<?> theDao, IIdType id) {
-		assertThrows(ResourceNotFoundException.class, ()-> theDao.read(id, myRequestDetails));
+		assertThatExceptionOfType(ResourceNotFoundException.class).isThrownBy(() -> theDao.read(id, myRequestDetails));
 	}
 
 	void assertFound(IFhirResourceDao<?> theDao, IIdType theId) {
-		assertNotNull(theDao.read(theId, myRequestDetails));
+		assertThat(theDao.read(theId, myRequestDetails)).isNotNull();
 	}
 }

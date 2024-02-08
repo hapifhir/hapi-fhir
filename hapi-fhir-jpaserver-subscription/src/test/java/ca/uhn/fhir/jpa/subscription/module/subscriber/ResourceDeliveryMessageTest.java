@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class ResourceDeliveryMessageTest {
 
@@ -18,9 +18,9 @@ public class ResourceDeliveryMessageTest {
 		String encoded = new ObjectMapper().writeValueAsString(msg);
 
 		msg = new ObjectMapper().readValue(encoded, ResourceDeliveryMessage.class);
-		assertEquals("bar", msg.getAttribute("foo1").get());
-		assertEquals("baz", msg.getAttribute("foo2").get());
-		assertEquals(false, msg.getAttribute("foo3").isPresent());
+		assertThat(msg.getAttribute("foo1").get()).isEqualTo("bar");
+		assertThat(msg.getAttribute("foo2").get()).isEqualTo("baz");
+		assertThat(msg.getAttribute("foo3").isPresent()).isEqualTo(false);
 	}
 
 }

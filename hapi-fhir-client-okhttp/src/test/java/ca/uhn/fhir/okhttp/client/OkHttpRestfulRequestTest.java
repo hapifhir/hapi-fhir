@@ -3,7 +3,7 @@ package ca.uhn.fhir.okhttp.client;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class OkHttpRestfulRequestTest {
 
@@ -13,7 +13,7 @@ public class OkHttpRestfulRequestTest {
 		OkHttpRestfulClientFactory clientFactory = new OkHttpRestfulClientFactory();
 
 		OkHttpRestfulRequest okHttpRestfulRequest = new OkHttpRestfulRequest(clientFactory.getNativeClient(), theUrl, RequestTypeEnum.GET, null);
-		assertEquals("GET https://example.com/fhir/meta", okHttpRestfulRequest.toString());
+		assertThat(okHttpRestfulRequest.toString()).isEqualTo("GET https://example.com/fhir/meta");
 	}
 
 	@Test
@@ -22,6 +22,6 @@ public class OkHttpRestfulRequestTest {
 		OkHttpRestfulClientFactory clientFactory = new OkHttpRestfulClientFactory();
 
 		OkHttpRestfulRequest okHttpRestfulRequest = new OkHttpRestfulRequest(clientFactory.getNativeClient(), theUrl, RequestTypeEnum.POST, null);
-		assertEquals("POST https://another.example.com/fhir/Task", okHttpRestfulRequest.toString());
+		assertThat(okHttpRestfulRequest.toString()).isEqualTo("POST https://another.example.com/fhir/Task");
 	}
 }

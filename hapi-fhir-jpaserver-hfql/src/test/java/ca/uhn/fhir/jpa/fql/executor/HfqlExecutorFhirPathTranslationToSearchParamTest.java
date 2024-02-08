@@ -11,8 +11,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -53,12 +52,12 @@ public class HfqlExecutorFhirPathTranslationToSearchParamTest extends BaseHfqlEx
 		verify(patientDao, times(1)).search(mySearchParameterMapCaptor.capture(), any());
 		SearchParameterMap map = mySearchParameterMapCaptor.getValue();
 		if (theShouldConvert) {
-			assertEquals(1, map.get("_id").size());
-			assertEquals(1, map.get("_id").get(0).size());
-			assertNull(((TokenParam) map.get("_id").get(0).get(0)).getSystem());
-			assertEquals("ABC123", ((TokenParam) map.get("_id").get(0).get(0)).getValue());
+			assertThat(map.get("_id").size()).isEqualTo(1);
+			assertThat(map.get("_id").get(0).size()).isEqualTo(1);
+			assertThat(((TokenParam) map.get("_id").get(0).get(0)).getSystem()).isNull();
+			assertThat(((TokenParam) map.get("_id").get(0).get(0)).getValue()).isEqualTo("ABC123");
 		} else {
-			assertNull(map.get("_id"));
+			assertThat(map.get("_id")).isNull();
 		}
 	}
 
@@ -91,10 +90,10 @@ public class HfqlExecutorFhirPathTranslationToSearchParamTest extends BaseHfqlEx
 
 		verify(patientDao, times(1)).search(mySearchParameterMapCaptor.capture(), any());
 		SearchParameterMap map = mySearchParameterMapCaptor.getValue();
-		assertEquals(1, map.get("_lastUpdated").size());
-		assertEquals(1, map.get("_lastUpdated").get(0).size());
-		assertEquals(theExpectedParamValue, ((DateParam) map.get("_lastUpdated").get(0).get(0)).getValueAsString());
-		assertEquals(theExpectedParamPrefix, ((DateParam) map.get("_lastUpdated").get(0).get(0)).getPrefix());
+		assertThat(map.get("_lastUpdated").size()).isEqualTo(1);
+		assertThat(map.get("_lastUpdated").get(0).size()).isEqualTo(1);
+		assertThat(((DateParam) map.get("_lastUpdated").get(0).get(0)).getValueAsString()).isEqualTo(theExpectedParamValue);
+		assertThat(((DateParam) map.get("_lastUpdated").get(0).get(0)).getPrefix()).isEqualTo(theExpectedParamPrefix);
 	}
 
 

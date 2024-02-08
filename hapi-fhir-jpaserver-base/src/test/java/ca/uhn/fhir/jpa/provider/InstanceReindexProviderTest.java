@@ -21,7 +21,6 @@ import java.util.Set;
 
 import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_REINDEX_DRYRUN;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -56,7 +55,7 @@ public class InstanceReindexProviderTest {
 			.withNoParameters(Parameters.class)
 			.useHttpGet()
 			.execute();
-		assertEquals("foo", outcome.getParameter().get(0).getName());
+		assertThat(outcome.getParameter().get(0).getName()).isEqualTo("foo");
 	}
 
 	@Test
@@ -73,7 +72,7 @@ public class InstanceReindexProviderTest {
 			.withParameter(Parameters.class, "code", new CodeType("blah"))
 			.useHttpGet()
 			.execute();
-		assertEquals("foo", outcome.getParameter().get(0).getName());
+		assertThat(outcome.getParameter().get(0).getName()).isEqualTo("foo");
 
 		verify(myDryRunService, times(1)).reindexDryRun(any(), any(), myCodeCaptor.capture());
 

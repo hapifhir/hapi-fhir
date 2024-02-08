@@ -9,7 +9,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasItem;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class StatusEnumTest {
 	@Test
@@ -71,7 +70,7 @@ class StatusEnumTest {
 		"FINALIZE, ERRORED, true",
 	})
 	public void testStateTransition(StatusEnum origStatus, StatusEnum newStatus, boolean expected) {
-		assertEquals(expected, StatusEnum.isLegalStateTransition(origStatus, newStatus));
+		assertThat(StatusEnum.isLegalStateTransition(origStatus, newStatus)).isEqualTo(expected);
 		if (expected) {
 			assertThat(StatusEnum.ourFromStates.get(newStatus)).contains(origStatus);
 			assertThat(StatusEnum.ourToStates.get(origStatus)).contains(newStatus);
@@ -84,11 +83,11 @@ class StatusEnumTest {
 	@ParameterizedTest
 	@EnumSource(StatusEnum.class)
 	public void testCancellableStates(StatusEnum theState) {
-		assertEquals(StatusEnum.ourFromStates.get(StatusEnum.CANCELLED).contains(theState), theState.isCancellable());
+		assertThat(theState.isCancellable()).isEqualTo(StatusEnum.ourFromStates.get(StatusEnum.CANCELLED).contains(theState));
 	}
 
 	@Test
 	public void testEnumSize() {
-		assertEquals(7, StatusEnum.values().length, "Update testStateTransition() with new cases");
+		assertThat(StatusEnum.values().length).as("Update testStateTransition() with new cases").isEqualTo(7);
 	}
 }

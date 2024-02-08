@@ -3,8 +3,7 @@ package ca.uhn.fhir.jpa.model.entity;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class ResourceIndexedSearchParamTokenTest {
 
@@ -15,9 +14,9 @@ public class ResourceIndexedSearchParamTokenTest {
 		token.calculateHashes();
 
 		// Make sure our hashing function gives consistent results
-		assertEquals(-8558989679010582575L, token.getHashSystem().longValue());
-		assertEquals(-8644532105141886455L, token.getHashSystemAndValue().longValue());
-		assertEquals(-1970227166134682431L, token.getHashValue().longValue());
+		assertThat(token.getHashSystem().longValue()).isEqualTo(-8558989679010582575L);
+		assertThat(token.getHashSystemAndValue().longValue()).isEqualTo(-8644532105141886455L);
+		assertThat(token.getHashValue().longValue()).isEqualTo(-1970227166134682431L);
 	}
 
 	@Test
@@ -27,9 +26,9 @@ public class ResourceIndexedSearchParamTokenTest {
 		token.calculateHashes();
 
 		// Make sure our hashing function gives consistent results
-		assertEquals(-8558989679010582575L, token.getHashSystem().longValue());
-		assertEquals(-8644532105141886455L, token.getHashSystemAndValue().longValue());
-		assertEquals(-1970227166134682431L, token.getHashValue().longValue());
+		assertThat(token.getHashSystem().longValue()).isEqualTo(-8558989679010582575L);
+		assertThat(token.getHashSystemAndValue().longValue()).isEqualTo(-8644532105141886455L);
+		assertThat(token.getHashValue().longValue()).isEqualTo(-1970227166134682431L);
 	}
 
 	@Test
@@ -42,10 +41,10 @@ public class ResourceIndexedSearchParamTokenTest {
 			.setValue("AAA");
 		val2.setPartitionSettings(new PartitionSettings());
 		val2.calculateHashes();
-		assertEquals(val1, val1);
-		assertEquals(val1, val2);
-		assertNotEquals(val1, null);
-		assertNotEquals(val1, "");
+		assertThat(val1).isEqualTo(val1);
+		assertThat(val2).isEqualTo(val1);
+		assertThat(null).isNotEqualTo(val1);
+		assertThat("").isNotEqualTo(val1);
 	}
 
 }

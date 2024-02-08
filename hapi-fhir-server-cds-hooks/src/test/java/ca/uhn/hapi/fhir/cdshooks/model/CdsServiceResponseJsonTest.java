@@ -14,7 +14,7 @@ import ca.uhn.hapi.fhir.cdshooks.module.CdsHooksObjectMapperFactory;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 class CdsServiceResponseJsonTest {
 	@Test
@@ -29,6 +29,6 @@ class CdsServiceResponseJsonTest {
 		// execute
 		final String actual = objectMapper.writeValueAsString(cdsServiceResponseJson);
 		// validate
-		assertEquals(expected, actual);
+		assertThat(actual).isEqualTo(expected);
 	}
 }

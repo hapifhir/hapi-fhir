@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class SubscriptionStrategyEvaluatorTest extends BaseSubscriptionDstu3Test {
@@ -37,18 +37,18 @@ public class SubscriptionStrategyEvaluatorTest extends BaseSubscriptionDstu3Test
 
 		try {
 			mySubscriptionStrategyEvaluator.determineStrategy("Observation?codeee=SNOMED-CT|123&_format=xml");
-			fail();
+			fail("");
 		} catch (InvalidRequestException e) {
 			assertThat(e.getMessage()).contains("Resource type Observation does not have a parameter with name: codeee");
 		}
 	}
 
 	private void assertDatabase(String theCriteria) {
-		assertEquals(SubscriptionMatchingStrategy.DATABASE, mySubscriptionStrategyEvaluator.determineStrategy(theCriteria));
+		assertThat(mySubscriptionStrategyEvaluator.determineStrategy(theCriteria)).isEqualTo(SubscriptionMatchingStrategy.DATABASE);
 	}
 
 	private void assertInMemory(String theCriteria) {
-		assertEquals(SubscriptionMatchingStrategy.IN_MEMORY, mySubscriptionStrategyEvaluator.determineStrategy(theCriteria));
+		assertThat(mySubscriptionStrategyEvaluator.determineStrategy(theCriteria)).isEqualTo(SubscriptionMatchingStrategy.IN_MEMORY);
 	}
 }
 

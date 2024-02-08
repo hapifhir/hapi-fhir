@@ -28,7 +28,7 @@ import static ca.uhn.fhir.mdm.api.MdmConstants.CODE_GOLDEN_RECORD;
 import static ca.uhn.fhir.mdm.api.MdmConstants.CODE_HAPI_MDM_MANAGED;
 import static ca.uhn.fhir.mdm.api.MdmConstants.SYSTEM_GOLDEN_RECORD_STATUS;
 import static ca.uhn.fhir.mdm.api.MdmConstants.SYSTEM_MDM_MANAGED;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @Disabled("Keeping as a sandbox to be used whenever we need a lot of MdmLinks in DB for performance testing")
 @ContextConfiguration(classes = {MdmLinkSlowDeletionSandboxIT.TestDataSource.class})
@@ -51,7 +51,7 @@ public class MdmLinkSlowDeletionSandboxIT  extends BaseJpaR4Test {
 
 		long totalLinks = myMdmLinkDao.count();
 		ourLog.info("Total links in DB: {}", totalLinks);
-		assertTrue(totalLinks > 0);
+		assertThat(totalLinks > 0).isTrue();
 	}
 	
 

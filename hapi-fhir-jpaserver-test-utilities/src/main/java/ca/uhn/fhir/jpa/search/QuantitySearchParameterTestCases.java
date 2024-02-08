@@ -41,9 +41,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.not;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public abstract class QuantitySearchParameterTestCases implements ITestDataBuilder.WithSupport {
 
@@ -81,8 +79,8 @@ public abstract class QuantitySearchParameterTestCases implements ITestDataBuild
 						DataFormatException.class,
 						() -> myTestDaoSearch.searchForIds("/Observation?value-quantity=" + invalidQtyParam));
 
-				assertTrue(thrown.getMessage().startsWith("HAPI-1940: Invalid"));
-				assertTrue(thrown.getMessage().contains(invalidQtyParam));
+				assertThat(thrown.getMessage().startsWith("HAPI-1940: Invalid")).isTrue();
+				assertThat(thrown.getMessage().contains(invalidQtyParam)).isTrue();
 			}
 
 			@Test
@@ -91,7 +89,7 @@ public abstract class QuantitySearchParameterTestCases implements ITestDataBuild
 						DataFormatException.class,
 						() -> myTestDaoSearch.searchForIds("/Observation?value-quantity=st5.35"));
 
-				assertEquals("HAPI-1941: Invalid prefix: \"st\"", thrown.getMessage());
+				assertThat(thrown.getMessage()).isEqualTo("HAPI-1941: Invalid prefix: \"st\"");
 			}
 
 			@Test
@@ -700,6 +698,6 @@ public abstract class QuantitySearchParameterTestCases implements ITestDataBuild
 
 	private void assertFindIds(String theMessage, Collection<String> theResourceIds, String theUrl) {
 		List<String> resourceIds = myTestDaoSearch.searchForIds(theUrl);
-		assertEquals(theResourceIds, new HashSet<>(resourceIds), theMessage);
+		assertThat(new HashSet<>(resourceIds)).as(theMessage).isEqualTo(theResourceIds);
 	}
 }

@@ -22,9 +22,6 @@ import java.util.List;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(MockitoExtension.class)
 @TestPropertySource(properties = {
@@ -53,7 +50,7 @@ class MdmGoldenResourceFindingSvcIT extends BaseMdmR4Test {
 		// the NO_MATCH golden resource should not be a candidate
 		CandidateList candidateList = myMdmGoldenResourceFindingSvc.findGoldenResourceCandidates(
 			createFindGoldenResourceCandidateParams(jane));
-		assertEquals(0, candidateList.size());
+		assertThat(candidateList.size()).isEqualTo(0);
 	}
 
 	@Test
@@ -138,10 +135,10 @@ class MdmGoldenResourceFindingSvcIT extends BaseMdmR4Test {
 			createFindGoldenResourceCandidateParams(candidate));
 
 		// verify
-		assertNotNull(candidateList);
+		assertThat(candidateList).isNotNull();
 		Set<Long> ids = new HashSet<>();
 		for (MatchedGoldenResourceCandidate c : candidateList.getCandidates()) {
-			assertTrue(ids.add((Long) c.getCandidateGoldenResourcePid().getId()));
+			assertThat(ids.add((Long) c.getCandidateGoldenResourcePid().getId())).isTrue();
 		}
 	}
 

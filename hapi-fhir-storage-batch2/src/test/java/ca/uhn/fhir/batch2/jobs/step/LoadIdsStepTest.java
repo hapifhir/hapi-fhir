@@ -27,7 +27,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.times;
@@ -81,10 +81,10 @@ public class LoadIdsStepTest {
 		for (int i = 0; i < expectedLoops ; i++) {
 			String expected = createIdChunk(i * 500, (i * 500) + 500).toString();
 			String actual = allCapturedValues.get(i).toString();
-			assertEquals(expected, actual);
+			assertThat(actual).isEqualTo(expected);
 		}
 		final ResourceIdListWorkChunkJson expectedIdChunk = createIdChunk(19500, 20000);
-		assertEquals(expectedIdChunk.toString(), allCapturedValues.get(expectedLoops -1).toString());
+		assertThat(allCapturedValues.get(expectedLoops - 1).toString()).isEqualTo(expectedIdChunk.toString());
 	}
 
 	@Nonnull

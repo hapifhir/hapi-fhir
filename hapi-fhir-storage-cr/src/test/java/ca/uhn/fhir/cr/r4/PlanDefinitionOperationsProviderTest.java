@@ -5,8 +5,7 @@ import org.hl7.fhir.r4.model.*;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class PlanDefinitionOperationsProviderTest extends BaseCrR4TestServer {
 	@Autowired
@@ -28,12 +27,11 @@ public class PlanDefinitionOperationsProviderTest extends BaseCrR4TestServer {
 			null, null, null,
 			requestDetails);
 
-		assertNotNull(result);
-		assertEquals("Sleep Study",
-			((Questionnaire) result.getContained().get(1))
+		assertThat(result).isNotNull();
+		assertThat(((Questionnaire) result.getContained().get(1))
 				.getItem().get(0)
 				.getItem().get(0)
-				.getText());
+				.getText()).isEqualTo("Sleep Study");
 
 		var resultR5 = (Bundle) myPlanDefinitionApplyProvider.applyR5(planDefinitionID, null, null, patientID,
 			null, null, null, null, null,
@@ -41,11 +39,10 @@ public class PlanDefinitionOperationsProviderTest extends BaseCrR4TestServer {
 			null, null, null,
 			requestDetails);
 
-		assertNotNull(resultR5);
-		assertEquals("Sleep Study",
-			((Questionnaire) resultR5.getEntry().get(1)
+		assertThat(resultR5).isNotNull();
+		assertThat(((Questionnaire) resultR5.getEntry().get(1)
 				.getResource()).getItem().get(0)
 				.getItem().get(0)
-				.getText());
+				.getText()).isEqualTo("Sleep Study");
 	}
 }

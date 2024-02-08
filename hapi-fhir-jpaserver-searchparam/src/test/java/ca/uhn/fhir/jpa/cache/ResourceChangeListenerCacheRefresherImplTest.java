@@ -15,8 +15,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.Collections;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -54,9 +53,9 @@ class ResourceChangeListenerCacheRefresherImplTest {
 		IResourceChangeListener listener = mock(IResourceChangeListener.class);
 		ResourceChangeListenerCache cache = new ResourceChangeListenerCache(PATIENT_RESOURCE_NAME, listener, ourMap, TEST_REFRESH_INTERVAL_MS);
 		ResourceVersionMap newResourceVersionMap = ResourceVersionMap.fromResourceTableEntities(Collections.emptyList());
-		assertFalse(cache.isInitialized());
+		assertThat(cache.isInitialized()).isFalse();
 		myResourceChangeListenerCacheRefresher.notifyListener(cache, newResourceVersionMap);
-		assertTrue(cache.isInitialized());
+		assertThat(cache.isInitialized()).isTrue();
 		verify(listener, times(1)).handleInit(any());
 	}
 
@@ -66,9 +65,9 @@ class ResourceChangeListenerCacheRefresherImplTest {
 		ResourceChangeListenerCache cache = new ResourceChangeListenerCache(PATIENT_RESOURCE_NAME, listener, ourMap, TEST_REFRESH_INTERVAL_MS);
 		ResourceVersionMap newResourceVersionMap = ResourceVersionMap.fromResourceTableEntities(Collections.emptyList());
 		cache.setInitialized(true);
-		assertTrue(cache.isInitialized());
+		assertThat(cache.isInitialized()).isTrue();
 		myResourceChangeListenerCacheRefresher.notifyListener(cache, newResourceVersionMap);
-		assertTrue(cache.isInitialized());
+		assertThat(cache.isInitialized()).isTrue();
 		verifyNoInteractions(listener);
 	}
 

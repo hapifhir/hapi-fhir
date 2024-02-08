@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 class NicknameInterceptorTest {
 
@@ -28,7 +28,7 @@ class NicknameInterceptorTest {
 
 		// verify
 		String newSearch = sp.toNormalizedQueryString(null);
-		assertEquals("?name=ken,kendrick,kenneth,kenny", newSearch);
+		assertThat(newSearch).isEqualTo("?name=ken,kendrick,kenneth,kenny");
 	}
 
 	@Test
@@ -44,7 +44,7 @@ class NicknameInterceptorTest {
 
 		// verify
 		String newSearch = sp.toNormalizedQueryString(null);
-		assertEquals("?name=ken,kendall,kendrick,kendrik,kenna,kenneth,kenny,kent,mckenna,meaka", newSearch);
+		assertThat(newSearch).isEqualTo("?name=ken,kendall,kendrick,kendrik,kenna,kenneth,kenny,kent,mckenna,meaka");
 	}
 
 	@Test
@@ -60,6 +60,6 @@ class NicknameInterceptorTest {
 
 		// verify
 		String newSearch = sp.toNormalizedQueryString(null);
-		assertEquals("?name=x%20%C3%A6%20a-12", newSearch);
+		assertThat(newSearch).isEqualTo("?name=x%20%C3%A6%20a-12");
 	}
 }

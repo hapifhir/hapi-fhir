@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.within;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SuppressWarnings({"SqlDialectInspection"})
@@ -61,7 +62,7 @@ public class InstanceReindexServiceImplR5Test extends BaseJpaR5Test {
 		ourLog.info("Output:{}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
 
 		List<Parameters.ParametersParameterComponent> sections = outcome.getParameters("MissingIndexes");
-		assertEquals(1, sections.size());
+		assertThat(sections.size()).isEqualTo(1);
 
 		List<String> indexInstances = sections
 			.get(0)
@@ -86,7 +87,7 @@ public class InstanceReindexServiceImplR5Test extends BaseJpaR5Test {
 		ourLog.info("Output:{}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
 
 		Parameters.ParametersParameterComponent index = findSingleIndex(outcome, "Patient?family=SIMPSON%5C%7C&given=HOMER", "NonUniqueIndexes");
-		assertEquals("NO_CHANGE", getPartValue("Action", index));
+		assertThat(getPartValue("Action", index)).isEqualTo("NO_CHANGE");
 	}
 
 	@Test
@@ -99,7 +100,7 @@ public class InstanceReindexServiceImplR5Test extends BaseJpaR5Test {
 		ourLog.info("Output:{}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
 
 		Parameters.ParametersParameterComponent index = findIndexes(outcome, "Patient?family=Simpson%5C%7C&given=Homer", 1, "UniqueIndexes").get(0);
-		assertEquals("NO_CHANGE", getPartValue("Action", index));
+		assertThat(getPartValue("Action", index)).isEqualTo("NO_CHANGE");
 	}
 
 	@Test
@@ -112,9 +113,9 @@ public class InstanceReindexServiceImplR5Test extends BaseJpaR5Test {
 		ourLog.info("Output:{}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
 
 		Parameters.ParametersParameterComponent index = findSingleIndex(outcome, ResearchStudy.SP_RECRUITMENT_TARGET, "NumberIndexes");
-		assertEquals("NO_CHANGE", getPartValue("Action", index));
-		assertEquals("Number", getPartValue("Type", index));
-		assertEquals("3", getPartValue("Value", index));
+		assertThat(getPartValue("Action", index)).isEqualTo("NO_CHANGE");
+		assertThat(getPartValue("Type", index)).isEqualTo("Number");
+		assertThat(getPartValue("Value", index)).isEqualTo("3");
 	}
 
 	@Test
@@ -127,11 +128,11 @@ public class InstanceReindexServiceImplR5Test extends BaseJpaR5Test {
 		ourLog.info("Output:{}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
 
 		Parameters.ParametersParameterComponent index = findSingleIndex(outcome, "value-quantity", "QuantityIndexes");
-		assertEquals("NO_CHANGE", getPartValue("Action", index));
-		assertEquals("Quantity", getPartValue("Type", index));
-		assertEquals("http://unitsofmeasure.org", getPartValue("System", index));
-		assertEquals("kg", getPartValue("Units", index));
-		assertEquals(1.2d, getPartValueDecimal(index), 0.001d);
+		assertThat(getPartValue("Action", index)).isEqualTo("NO_CHANGE");
+		assertThat(getPartValue("Type", index)).isEqualTo("Quantity");
+		assertThat(getPartValue("System", index)).isEqualTo("http://unitsofmeasure.org");
+		assertThat(getPartValue("Units", index)).isEqualTo("kg");
+		assertThat(getPartValueDecimal(index)).isCloseTo(1.2d, within(0.001d));
 	}
 
 	@Test
@@ -146,18 +147,18 @@ public class InstanceReindexServiceImplR5Test extends BaseJpaR5Test {
 		Parameters.ParametersParameterComponent index;
 
 		index = findIndexes(outcome, "value-quantity", 2, "QuantityIndexes").get(0);
-		assertEquals("NO_CHANGE", getPartValue("Action", index));
-		assertEquals("Quantity", getPartValue("Type", index));
-		assertEquals("http://unitsofmeasure.org", getPartValue("System", index));
-		assertEquals("mg", getPartValue("Units", index));
-		assertEquals(1.2d, getPartValueDecimal(index), 0.001d);
+		assertThat(getPartValue("Action", index)).isEqualTo("NO_CHANGE");
+		assertThat(getPartValue("Type", index)).isEqualTo("Quantity");
+		assertThat(getPartValue("System", index)).isEqualTo("http://unitsofmeasure.org");
+		assertThat(getPartValue("Units", index)).isEqualTo("mg");
+		assertThat(getPartValueDecimal(index)).isCloseTo(1.2d, within(0.001d));
 
 		index = findIndexes(outcome, "value-quantity", 2, "QuantityIndexes").get(1);
-		assertEquals("NO_CHANGE", getPartValue("Action", index));
-		assertEquals("QuantityNormalized", getPartValue("Type", index));
-		assertEquals("http://unitsofmeasure.org", getPartValue("System", index));
-		assertEquals("g", getPartValue("Units", index));
-		assertEquals(0.0012d, getPartValueDecimal(index), 0.001d);
+		assertThat(getPartValue("Action", index)).isEqualTo("NO_CHANGE");
+		assertThat(getPartValue("Type", index)).isEqualTo("QuantityNormalized");
+		assertThat(getPartValue("System", index)).isEqualTo("http://unitsofmeasure.org");
+		assertThat(getPartValue("Units", index)).isEqualTo("g");
+		assertThat(getPartValueDecimal(index)).isCloseTo(0.0012d, within(0.001d));
 	}
 
 	@Test
@@ -169,9 +170,9 @@ public class InstanceReindexServiceImplR5Test extends BaseJpaR5Test {
 		ourLog.info("Output:{}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
 
 		Parameters.ParametersParameterComponent index = findSingleIndex(outcome, "Observation.subject", "ResourceLinks");
-		assertEquals("NO_CHANGE", getPartValue("Action", index));
-		assertEquals("Reference", getPartValue("Type", index));
-		assertEquals("Patient/A", getPartValue("TargetId", index));
+		assertThat(getPartValue("Action", index)).isEqualTo("NO_CHANGE");
+		assertThat(getPartValue("Type", index)).isEqualTo("Reference");
+		assertThat(getPartValue("TargetId", index)).isEqualTo("Patient/A");
 	}
 
 	@Test
@@ -191,14 +192,14 @@ public class InstanceReindexServiceImplR5Test extends BaseJpaR5Test {
 		List<Parameters.ParametersParameterComponent> indexes = findIndexes(outcome, "Observation.subject", 2, "ResourceLinks");
 		Parameters.ParametersParameterComponent index;
 		index = indexes.get(0);
-		assertEquals("ADD", getPartValue("Action", index));
-		assertEquals("Reference", getPartValue("Type", index));
-		assertEquals("Patient/A", getPartValue("TargetId", index));
+		assertThat(getPartValue("Action", index)).isEqualTo("ADD");
+		assertThat(getPartValue("Type", index)).isEqualTo("Reference");
+		assertThat(getPartValue("TargetId", index)).isEqualTo("Patient/A");
 		index = indexes.get(1);
-		assertEquals("REMOVE", getPartValue("Action", index));
-		assertEquals("Reference", getPartValue("Type", index));
-		assertEquals("http://foo", getPartValue("TargetUrl", index));
-		assertEquals("1", getPartValue("TargetVersion", index));
+		assertThat(getPartValue("Action", index)).isEqualTo("REMOVE");
+		assertThat(getPartValue("Type", index)).isEqualTo("Reference");
+		assertThat(getPartValue("TargetUrl", index)).isEqualTo("http://foo");
+		assertThat(getPartValue("TargetVersion", index)).isEqualTo("1");
 	}
 
 	@Test
@@ -209,10 +210,10 @@ public class InstanceReindexServiceImplR5Test extends BaseJpaR5Test {
 		ourLog.info("Output:{}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
 
 		Parameters.ParametersParameterComponent index = findSingleIndex(outcome, "family", "StringIndexes");
-		assertEquals("NO_CHANGE", getPartValue("Action", index));
-		assertEquals("String", getPartValue("Type", index));
-		assertEquals("SMITH", getPartValue("ValueNormalized", index));
-		assertEquals("Smith", getPartValue("ValueExact", index));
+		assertThat(getPartValue("Action", index)).isEqualTo("NO_CHANGE");
+		assertThat(getPartValue("Type", index)).isEqualTo("String");
+		assertThat(getPartValue("ValueNormalized", index)).isEqualTo("SMITH");
+		assertThat(getPartValue("ValueExact", index)).isEqualTo("Smith");
 	}
 
 	@Test
@@ -223,10 +224,10 @@ public class InstanceReindexServiceImplR5Test extends BaseJpaR5Test {
 		ourLog.info("Output:{}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
 
 		Parameters.ParametersParameterComponent index = findSingleIndex(outcome, "family", "StringIndexes");
-		assertEquals("UNKNOWN", getPartValue("Action", index));
-		assertEquals("String", getPartValue("Type", index));
-		assertEquals("SIMPSON", getPartValue("ValueNormalized", index));
-		assertEquals("Simpson", getPartValue("ValueExact", index));
+		assertThat(getPartValue("Action", index)).isEqualTo("UNKNOWN");
+		assertThat(getPartValue("Type", index)).isEqualTo("String");
+		assertThat(getPartValue("ValueNormalized", index)).isEqualTo("SIMPSON");
+		assertThat(getPartValue("ValueExact", index)).isEqualTo("Simpson");
 
 		findIndexes(outcome, "family", 1, "StringIndexes");
 		findIndexes(outcome, "given", 0, "StringIndexes");
@@ -240,10 +241,10 @@ public class InstanceReindexServiceImplR5Test extends BaseJpaR5Test {
 		ourLog.info("Output:{}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
 
 		Parameters.ParametersParameterComponent index = findSingleIndex(outcome, "identifier", "TokenIndexes");
-		assertEquals("NO_CHANGE", getPartValue("Action", index));
-		assertEquals("Token", getPartValue("Type", index));
-		assertEquals("http://identifiers", getPartValue("System", index));
-		assertEquals("123", getPartValue("Value", index));
+		assertThat(getPartValue("Action", index)).isEqualTo("NO_CHANGE");
+		assertThat(getPartValue("Type", index)).isEqualTo("Token");
+		assertThat(getPartValue("System", index)).isEqualTo("http://identifiers");
+		assertThat(getPartValue("Value", index)).isEqualTo("123");
 	}
 
 	@Test
@@ -254,9 +255,9 @@ public class InstanceReindexServiceImplR5Test extends BaseJpaR5Test {
 		ourLog.info("Output:{}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
 
 		Parameters.ParametersParameterComponent index = findSingleIndex(outcome, "system", "UriIndexes");
-		assertEquals("NO_CHANGE", getPartValue("Action", index));
-		assertEquals("Uri", getPartValue("Type", index));
-		assertEquals("http://foo", getPartValue("Value", index));
+		assertThat(getPartValue("Action", index)).isEqualTo("NO_CHANGE");
+		assertThat(getPartValue("Type", index)).isEqualTo("Uri");
+		assertThat(getPartValue("Value", index)).isEqualTo("http://foo");
 	}
 
 	@Test
@@ -279,18 +280,18 @@ public class InstanceReindexServiceImplR5Test extends BaseJpaR5Test {
 		mySearchParamRegistry.forceRefresh();
 
 		SearchParameterMap map = SearchParameterMap.newSynchronous("eyecolour", new StringParam("GOLD"));
-		assertEquals(0, myPatientDao.search(map, mySrd).size());
+		assertThat(myPatientDao.search(map, mySrd).size()).isEqualTo(0);
 
 		Parameters outcome = (Parameters) mySvc.reindex(mySrd, p1id);
 		ourLog.info("Output:{}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
 
 		Parameters.ParametersParameterComponent index = findSingleIndex(outcome, "eyecolour", "StringIndexes");
-		assertEquals("ADD", getPartValue("Action", index));
-		assertEquals("String", getPartValue("Type", index));
-		assertEquals("GOLD", getPartValue("ValueNormalized", index));
-		assertEquals("Gold", getPartValue("ValueExact", index));
+		assertThat(getPartValue("Action", index)).isEqualTo("ADD");
+		assertThat(getPartValue("Type", index)).isEqualTo("String");
+		assertThat(getPartValue("ValueNormalized", index)).isEqualTo("GOLD");
+		assertThat(getPartValue("ValueExact", index)).isEqualTo("Gold");
 
-		assertEquals(1, myPatientDao.search(map, mySrd).size());
+		assertThat(myPatientDao.search(map, mySrd).size()).isEqualTo(1);
 	}
 
 
@@ -345,7 +346,7 @@ public class InstanceReindexServiceImplR5Test extends BaseJpaR5Test {
 	@Nonnull
 	private static List<Parameters.ParametersParameterComponent> findIndexes(Parameters theResponse, String theParamName, int theExpectedSize, String theSectionName) {
 		List<Parameters.ParametersParameterComponent> indexes = theResponse.getParameters(theSectionName);
-		assertEquals(1, indexes.size());
+		assertThat(indexes.size()).isEqualTo(1);
 
 		List<Parameters.ParametersParameterComponent> indexInstances = indexes
 			.get(0)
@@ -354,7 +355,7 @@ public class InstanceReindexServiceImplR5Test extends BaseJpaR5Test {
 			.filter(t -> t.getName().equals(theParamName))
 			.toList();
 
-		assertEquals(theExpectedSize, indexInstances.size());
+		assertThat(indexInstances.size()).isEqualTo(theExpectedSize);
 		return indexInstances;
 	}
 

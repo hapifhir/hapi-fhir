@@ -25,8 +25,8 @@ import java.util.TreeSet;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 public class BuiltJarDstu2IT {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BuiltJarDstu2IT.class);
@@ -58,9 +58,9 @@ public class BuiltJarDstu2IT {
 
 		try {
 			ctx.newXmlParser().encodeResourceToString(p);
-			fail();
+			fail("");
 		} catch (ca.uhn.fhir.context.ConfigurationException e) {
-			assertEquals(Msg.code(1754) + "Unable to initialize StAX - XML processing is disabled",e.getMessage());
+			assertThat(e.getMessage()).isEqualTo(Msg.code(1754) + "Unable to initialize StAX - XML processing is disabled");
 		}
 	}
 
@@ -77,7 +77,7 @@ public class BuiltJarDstu2IT {
 		String str = ctx.newJsonParser().encodeResourceToString(o);
 		Observation p2 = ctx.newJsonParser().parseResource(Observation.class, str);
 
-		assertEquals("TEXT", p2.getCode().getText());
+		assertThat(p2.getCode().getText()).isEqualTo("TEXT");
 
 		QuantityDt dt = (QuantityDt) p2.getValue();
 		dt.getComparatorElement().getValueAsEnum();

@@ -22,8 +22,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashSet;
 import java.util.Set;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class ServerR5Test extends BaseResourceProviderR5Test {
@@ -38,7 +38,7 @@ public class ServerR5Test extends BaseResourceProviderR5Test {
 	public void testCapabilityStatementValidates() throws IOException {
 		HttpGet get = new HttpGet(myServerBase + "/metadata?_pretty=true&_format=json");
 		try (CloseableHttpResponse resp = ourHttpClient.execute(get)) {
-			assertEquals(200, resp.getStatusLine().getStatusCode());
+			assertThat(resp.getStatusLine().getStatusCode()).isEqualTo(200);
 			String respString = IOUtils.toString(resp.getEntity().getContent(), StandardCharsets.UTF_8);
 
 			ourLog.debug(respString);
@@ -49,7 +49,7 @@ public class ServerR5Test extends BaseResourceProviderR5Test {
 				myCapabilityStatementDao.validate(cs, null, respString, EncodingEnum.JSON, null, null, null);
 			} catch (PreconditionFailedException e) {
 				ourLog.debug(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(e.getOperationOutcome()));
-				fail();
+				fail("");
 			}
 		}
 	}
@@ -64,7 +64,7 @@ public class ServerR5Test extends BaseResourceProviderR5Test {
 		CloseableHttpResponse resp = ourHttpClient.execute(get);
 		try {
 			ourLog.info(resp.toString());
-			assertEquals(200, resp.getStatusLine().getStatusCode());
+			assertThat(resp.getStatusLine().getStatusCode()).isEqualTo(200);
 
 			String respString = IOUtils.toString(resp.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.debug(respString);
@@ -76,12 +76,12 @@ public class ServerR5Test extends BaseResourceProviderR5Test {
 				Set<String> sps = new HashSet<String>();
 				for (CapabilityStatementRestResourceSearchParamComponent nextSp : nextResource.getSearchParam()) {
 					if (sps.add(nextSp.getName()) == false) {
-						fail("Duplicate search parameter " + nextSp.getName() + " for resource " + nextResource.getType());
+						fail("", "Duplicate search parameter " + nextSp.getName() + " for resource " + nextResource.getType());
 					}
 				}
 
 				if (!sps.contains("_id")) {
-					fail("No search parameter _id for resource " + nextResource.getType());
+					fail("", "No search parameter _id for resource " + nextResource.getType());
 				}
 			}
 		} finally {
@@ -116,7 +116,7 @@ public class ServerR5Test extends BaseResourceProviderR5Test {
 			.findFirst()
 			.orElseThrow(() -> new InternalErrorException("No patient"))
 			.getExtensionByUrl(ExtensionConstants.CONF_RESOURCE_COUNT);
-		assertNull(patientCountExt);
+		assertThat(patientCountExt).isNull();
 
 		/*
 		 * Now run a background pass (the update
@@ -138,7 +138,7 @@ public class ServerR5Test extends BaseResourceProviderR5Test {
 			.findFirst()
 			.orElseThrow(() -> new InternalErrorException("No patient"))
 			.getExtensionByUrl(ExtensionConstants.CONF_RESOURCE_COUNT);
-		assertEquals("1", patientCountExt.getValueAsPrimitive().getValueAsString());
+		assertThat(patientCountExt.getValueAsPrimitive().getValueAsString()).isEqualTo("1");
 
 	}
 

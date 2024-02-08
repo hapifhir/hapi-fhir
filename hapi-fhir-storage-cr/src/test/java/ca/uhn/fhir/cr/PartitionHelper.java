@@ -13,8 +13,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-
 
 public class PartitionHelper implements BeforeEachCallback, AfterEachCallback {
 	private static final Logger ourLog = LoggerFactory.getLogger(PartitionHelper.class);
@@ -55,7 +53,7 @@ public class PartitionHelper implements BeforeEachCallback, AfterEachCallback {
 			if (theRequestDetails == null) {
 				ourLog.info("useful breakpoint :-)");
 			}
-			assertNotNull(theRequestDetails);
+			assertThat(theRequestDetails).isNotNull();
 			return RequestPartitionId.defaultPartition();
 		}
 

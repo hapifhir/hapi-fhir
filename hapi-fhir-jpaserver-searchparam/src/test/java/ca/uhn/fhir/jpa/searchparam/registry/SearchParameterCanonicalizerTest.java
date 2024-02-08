@@ -26,7 +26,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.not;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @ExtendWith(MockitoExtension.class)
 public class SearchParameterCanonicalizerTest {
@@ -144,9 +143,9 @@ public class SearchParameterCanonicalizerTest {
 		}
 
 		RuntimeSearchParam output = svc.canonicalizeSearchParameter(searchParamToCanonicalize);
-		assertEquals("chef", output.getName());
-		assertEquals(RestSearchParameterTypeEnum.REFERENCE, output.getParamType());
-		assertEquals(RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE, output.getStatus());
+		assertThat(output.getName()).isEqualTo("chef");
+		assertThat(output.getParamType()).isEqualTo(RestSearchParameterTypeEnum.REFERENCE);
+		assertThat(output.getStatus()).isEqualTo(RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE);
 		assertThat(output.getPathsSplit()).containsExactlyInAnyOrder("Meal.chef", "Observation.subject");
 		assertThat(output.getBase()).containsExactlyInAnyOrder("Meal", "Patient");
 		assertThat(output.getTargets()).containsExactly("Chef", "Observation");
@@ -182,9 +181,9 @@ public class SearchParameterCanonicalizerTest {
 		}
 
 		RuntimeSearchParam output = svc.canonicalizeSearchParameter(searchParamToCanonicalize);
-		assertEquals("chef", output.getName());
-		assertEquals(RestSearchParameterTypeEnum.REFERENCE, output.getParamType());
-		assertEquals(RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE, output.getStatus());
+		assertThat(output.getName()).isEqualTo("chef");
+		assertThat(output.getParamType()).isEqualTo(RestSearchParameterTypeEnum.REFERENCE);
+		assertThat(output.getStatus()).isEqualTo(RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE);
 		assertThat(output.getPathsSplit()).containsExactlyInAnyOrder("Meal.chef", "Observation.subject");
 		// DSTU2 Resources must only have 1 base
 		if ("Dstu2".equals(version)){

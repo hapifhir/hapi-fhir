@@ -4,9 +4,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 class InMemoryMatchResultTest {
 	InMemoryMatchResult success = InMemoryMatchResult.successfulMatch();
@@ -46,14 +44,14 @@ class InMemoryMatchResultTest {
 
 	private void assertNoMatchWithReason(InMemoryMatchResult theMerged, String theExpectedUnsupportedReason) {
 		assertNoMatch(theMerged);
-		assertEquals(theExpectedUnsupportedReason, theMerged.getUnsupportedReason());
+		assertThat(theMerged.getUnsupportedReason()).isEqualTo(theExpectedUnsupportedReason);
 	}
 
 	private void assertMatch(InMemoryMatchResult theMerged) {
-		assertTrue(theMerged.matched());
+		assertThat(theMerged.matched()).isTrue();
 	}
 	private void assertNoMatch(InMemoryMatchResult theMerged) {
-		assertFalse(theMerged.matched());
+		assertThat(theMerged.matched()).isFalse();
 	}
 }
 

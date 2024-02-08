@@ -19,11 +19,11 @@
  */
 package ca.uhn.fhir.test.utilities;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.both;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.lessThanOrEqualTo;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class RangeTestHelper {
 
@@ -67,9 +67,9 @@ public class RangeTestHelper {
 	}
 
 	public static void checkWithinBounds(String theLowerBound, String theUpperBound, String theValue) {
-		assertNotNull(theLowerBound, "theLowerBound");
-		assertNotNull(theUpperBound, "theUpperBound");
-		assertNotNull(theValue, "theValue");
+		assertThat(theLowerBound).as("theLowerBound").isNotNull();
+		assertThat(theUpperBound).as("theUpperBound").isNotNull();
+		assertThat(theValue).as("theValue").isNotNull();
 		double lowerBound = Double.parseDouble(theLowerBound);
 		double upperBound = Double.parseDouble(theUpperBound);
 		double value = Double.parseDouble(theValue);

@@ -36,11 +36,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
 
 public class MdmLinkDaoSvcTest extends BaseMdmR4Test {
 
@@ -54,7 +50,7 @@ public class MdmLinkDaoSvcTest extends BaseMdmR4Test {
 		myMdmLinkDaoSvc.save(mdmLink);
 		assertThat(mdmLink.getCreated()).isNotNull();
 		assertThat(mdmLink.getUpdated()).isNotNull();
-		assertTrue(mdmLink.getUpdated().getTime() - mdmLink.getCreated().getTime() < 1000);
+		assertThat(mdmLink.getUpdated().getTime() - mdmLink.getCreated().getTime() < 1000).isTrue();
 	}
 
 	@Test
@@ -64,15 +60,15 @@ public class MdmLinkDaoSvcTest extends BaseMdmR4Test {
 		TestUtil.sleepOneClick();
 		createdLink.setLinkSource(MdmLinkSourceEnum.AUTO);
 		MdmLink updatedLink = myMdmLinkDaoSvc.save(createdLink);
-		assertNotEquals(updatedLink.getCreated(), updatedLink.getUpdated());
+		assertThat(updatedLink.getUpdated()).isNotEqualTo(updatedLink.getCreated());
 	}
 
 	@Test
 	public void testNew() {
 		IMdmLink newLink = myMdmLinkDaoSvc.newMdmLink();
 		MdmRulesJson rules = myMdmSettings.getMdmRules();
-		assertEquals("1", rules.getVersion());
-		assertEquals(rules.getVersion(), newLink.getVersion());
+		assertThat(rules.getVersion()).isEqualTo("1");
+		assertThat(newLink.getVersion()).isEqualTo(rules.getVersion());
 	}
 
 	@Test
@@ -234,15 +230,15 @@ public class MdmLinkDaoSvcTest extends BaseMdmR4Test {
 		List<MdmLinkWithRevision<MdmLink>> actualMdmLinkRevisions = myMdmLinkDaoSvc.findMdmLinkHistory(mdmHistorySearchParameters);
 
 		// verify
-		assertEquals(1, actualMdmLinkRevisions.size());
+		assertThat(actualMdmLinkRevisions.size()).isEqualTo(1);
 		MdmLink actualMdmLink = actualMdmLinkRevisions.get(0).getMdmLink();
-		assertEquals(goldenPatientId, actualMdmLink.getGoldenResourcePersistenceId().getId().toString());
-		assertEquals(sourcePatientId, actualMdmLink.getSourcePersistenceId().getId().toString());
+		assertThat(actualMdmLink.getGoldenResourcePersistenceId().getId().toString()).isEqualTo(goldenPatientId);
+		assertThat(actualMdmLink.getSourcePersistenceId().getId().toString()).isEqualTo(sourcePatientId);
 	}
 
 	@Test
 	public void testHistoryForNoIdsOnly() {
-		assertThrows(IllegalArgumentException.class, () -> myMdmLinkDaoSvc.findMdmLinkHistory(new MdmHistorySearchParameters()));
+		assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> myMdmLinkDaoSvc.findMdmLinkHistory(new MdmHistorySearchParameters()));
 	}
 
 	@Test
@@ -267,7 +263,7 @@ public class MdmLinkDaoSvcTest extends BaseMdmR4Test {
 		List<MdmLinkWithRevision<MdmLink>> actualMdmLinkRevisions = myMdmLinkDaoSvc.findMdmLinkHistory(mdmHistorySearchParameters);
 
 		// verify
-		assertEquals(2, actualMdmLinkRevisions.size(), "Both Patient/p123 and Practitioner/p123 should be returned");
+		assertThat(actualMdmLinkRevisions.size()).as("Both Patient/p123 and Practitioner/p123 should be returned").isEqualTo(2);
 	}
 
 	@ParameterizedTest
@@ -452,9 +448,9 @@ public class MdmLinkDaoSvcTest extends BaseMdmR4Test {
 	}
 
 	private void assertMdmRevisionsEqual(List<MdmLinkWithRevision<MdmLink>> expectedMdmLinkRevisions, List<MdmLinkWithRevision<MdmLink>> actualMdmLinkRevisions) {
-		assertNotNull(actualMdmLinkRevisions);
+		assertThat(actualMdmLinkRevisions).isNotNull();
 
-		assertEquals(expectedMdmLinkRevisions.size(), actualMdmLinkRevisions.size());
+		assertThat(actualMdmLinkRevisions.size()).isEqualTo(expectedMdmLinkRevisions.size());
 
 		for (int index = 0; index < expectedMdmLinkRevisions.size(); index++) {
 			final MdmLinkWithRevision<MdmLink> expectedMdmLinkRevision = expectedMdmLinkRevisions.get(index);
@@ -465,14 +461,14 @@ public class MdmLinkDaoSvcTest extends BaseMdmR4Test {
 			final MdmLink expectedMdmLink = expectedMdmLinkRevision.getMdmLink();
 			final MdmLink actualMdmLink = actualMdmLinkRevision.getMdmLink();
 
-			assertEquals(expectedMdmLink.getMatchResult(), actualMdmLink.getMatchResult());
-			assertEquals(expectedMdmLink.getGoldenResourcePersistenceId(), actualMdmLinkRevision.getMdmLink().getGoldenResourcePersistenceId());
-			assertEquals(expectedMdmLink.getSourcePersistenceId(), actualMdmLinkRevision.getMdmLink().getSourcePersistenceId());
+			assertThat(actualMdmLink.getMatchResult()).isEqualTo(expectedMdmLink.getMatchResult());
+			assertThat(actualMdmLinkRevision.getMdmLink().getGoldenResourcePersistenceId()).isEqualTo(expectedMdmLink.getGoldenResourcePersistenceId());
+			assertThat(actualMdmLinkRevision.getMdmLink().getSourcePersistenceId()).isEqualTo(expectedMdmLink.getSourcePersistenceId());
 
-			assertEquals(expectedEnversRevision.getRevisionType(), actualEnversRevision.getRevisionType());
+			assertThat(actualEnversRevision.getRevisionType()).isEqualTo(expectedEnversRevision.getRevisionType());
 			// TODO:  LD:  when running this unit test on a pipeline, it's impossible to assert a revision number because of all the other MdmLinks
 			// created by other tests.  So for now, simply assert the revision is greater than 0
-			assertTrue(actualEnversRevision.getRevisionNumber() > 0);
+			assertThat(actualEnversRevision.getRevisionNumber() > 0).isTrue();
 		}
 	}
 

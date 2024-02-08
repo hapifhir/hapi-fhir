@@ -6,8 +6,8 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.fail;
 
 class JobWorkCursorTest extends BaseBatch2Test {
@@ -56,22 +56,22 @@ class JobWorkCursorTest extends BaseBatch2Test {
 			JobWorkCursor.fromJobDefinitionAndRequestedStepId(myDefinition, targetStepId);
 
 			// verify
-			fail();
+			fail("");
 		} catch (InternalErrorException e) {
-			assertEquals("HAPI-2042: Unknown step[" + targetStepId + "] for job definition ID[JOB_DEFINITION_ID] version[1]", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo("HAPI-2042: Unknown step[" + targetStepId + "] for job definition ID[JOB_DEFINITION_ID] version[1]");
 		}
 	}
 
 	private void assertCursor(JobWorkCursor<TestJobParameters,?,?> theCursor, boolean theExpectedIsFirstStep, boolean theExpectedIsFinalStep, String theExpectedCurrentStep, String theExpectedNextStep) {
-		assertEquals(theExpectedIsFirstStep, theCursor.isFirstStep);
-		assertEquals(theExpectedIsFinalStep, theCursor.isFinalStep());
-		assertEquals(theExpectedCurrentStep, theCursor.currentStep.getStepId());
+		assertThat(theCursor.isFirstStep).isEqualTo(theExpectedIsFirstStep);
+		assertThat(theCursor.isFinalStep()).isEqualTo(theExpectedIsFinalStep);
+		assertThat(theCursor.currentStep.getStepId()).isEqualTo(theExpectedCurrentStep);
 		if (theExpectedNextStep == null) {
-			assertNull(theCursor.nextStep);
+			assertThat(theCursor.nextStep).isNull();
 		} else {
-			assertEquals(theExpectedNextStep, theCursor.nextStep.getStepId());
+			assertThat(theCursor.nextStep.getStepId()).isEqualTo(theExpectedNextStep);
 		}
-		assertEquals(myDefinition.getJobDefinitionId(), theCursor.jobDefinition.getJobDefinitionId());
-		assertEquals(myDefinition.getJobDefinitionVersion(), theCursor.jobDefinition.getJobDefinitionVersion());
+		assertThat(theCursor.jobDefinition.getJobDefinitionId()).isEqualTo(myDefinition.getJobDefinitionId());
+		assertThat(theCursor.jobDefinition.getJobDefinitionVersion()).isEqualTo(myDefinition.getJobDefinitionVersion());
 	}
 }

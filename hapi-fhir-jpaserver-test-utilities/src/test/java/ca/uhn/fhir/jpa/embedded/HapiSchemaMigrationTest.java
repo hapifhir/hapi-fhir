@@ -28,9 +28,7 @@ import java.util.Properties;
 
 import static ca.uhn.fhir.jpa.embedded.HapiEmbeddedDatabasesExtension.FIRST_TESTED_VERSION;
 import static ca.uhn.fhir.jpa.migrate.SchemaMigrator.HAPI_FHIR_MIGRATION_TABLENAME;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 
 @RequiresDocker
@@ -132,9 +130,9 @@ public class HapiSchemaMigrationTest {
 		JdbcTemplate jdbcTemplate = new JdbcTemplate(theDataSource);
 		@SuppressWarnings("DataFlowIssue")
 		int nullCount = jdbcTemplate.queryForObject("select count(1) from hfj_resource where fhir_id is null", Integer.class);
-		assertEquals(0, nullCount, "no fhir_id should be null");
+		assertThat(nullCount).as("no fhir_id should be null").isEqualTo(0);
 		int trailingSpaceCount = jdbcTemplate.queryForObject("select count(1) from hfj_resource where fhir_id <> trim(fhir_id)", Integer.class);
-		assertEquals(0, trailingSpaceCount, "no fhir_id should contain a space");
+		assertThat(trailingSpaceCount).as("no fhir_id should contain a space").isEqualTo(0);
 	}
 
 
@@ -154,9 +152,9 @@ public class HapiSchemaMigrationTest {
 		schemaMigrator.setDriverType(DriverTypeEnum.H2_EMBEDDED);
 
 		// Test & Validate
-		assertTrue(schemaMigrator.createMigrationTableIfRequired());
-		assertFalse(schemaMigrator.createMigrationTableIfRequired());
-		assertFalse(schemaMigrator.createMigrationTableIfRequired());
+		assertThat(schemaMigrator.createMigrationTableIfRequired()).isTrue();
+		assertThat(schemaMigrator.createMigrationTableIfRequired()).isFalse();
+		assertThat(schemaMigrator.createMigrationTableIfRequired()).isFalse();
 
 	}
 

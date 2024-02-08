@@ -16,8 +16,8 @@ import org.springframework.messaging.MessagingException;
 import org.springframework.messaging.support.ChannelInterceptor;
 import org.springframework.messaging.support.GenericMessage;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.times;
@@ -58,14 +58,14 @@ public class SubscriptionChannelFactoryTest {
 
 		try {
 			channel.send(input);
-			fail();
+			fail("");
 		} catch (MessageDeliveryException e) {
-			assertTrue(e.getCause() instanceof NullPointerException);
+			assertThat(e.getCause() instanceof NullPointerException).isTrue();
 		}
 
 		verify(myInterceptor, times(1)).afterSendCompletion(any(), any(), anyBoolean(), myExceptionCaptor.capture());
 
-		assertTrue(myExceptionCaptor.getValue() instanceof NullPointerException);
+		assertThat(myExceptionCaptor.getValue() instanceof NullPointerException).isTrue();
 	}
 
 

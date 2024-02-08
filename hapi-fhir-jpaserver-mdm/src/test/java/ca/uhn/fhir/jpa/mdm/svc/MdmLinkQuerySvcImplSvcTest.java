@@ -19,7 +19,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 class MdmLinkQuerySvcImplSvcTest extends BaseMdmR4Test {
 
@@ -42,7 +42,7 @@ class MdmLinkQuerySvcImplSvcTest extends BaseMdmR4Test {
 		// Patients with blank client IDs should have been assigned sequential PID, which range we don;t know, but we want to make sure
 		// that "123a", "456a" and "789a" are in this order
 		List<String> orderedClientIdsFromLinks = patientIdsFormLinks.stream().filter(id -> id.endsWith("a")).collect(Collectors.toList());
-		assertEquals(List.of("Patient/123a", "Patient/456a", "Patient/789a"), orderedClientIdsFromLinks);
+		assertThat(orderedClientIdsFromLinks).isEqualTo(List.of("Patient/123a", "Patient/456a", "Patient/789a"));
 	}
 
 	private String createMdmLinksWithLinkedPatientsWithId(List<String> thePatientIds) {

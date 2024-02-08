@@ -17,8 +17,7 @@ import java.sql.SQLException;
 import java.sql.Types;
 import java.util.Set;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -69,7 +68,7 @@ public class JdbcUtilsTest {
 		JdbcUtils.ColumnType testColumnType = JdbcUtils.getColumnType(myConnectionProperties, "TEST_TABLE", "TEST_COLUMN");
 		ourLog.info("Column type: {}", testColumnType);
 
-		assertEquals(theExpectedColumnType, testColumnType.getColumnTypeEnum());
+		assertThat(testColumnType.getColumnTypeEnum()).isEqualTo(theExpectedColumnType);
 	}
 
 	@Test
@@ -107,9 +106,9 @@ public class JdbcUtilsTest {
 		Set<String> indexNames = JdbcUtils.getIndexNames(myConnectionProperties, "TEST_TABLE");
 
 		// verify
-		assertEquals(3, indexNames.size());
-		assertTrue(indexNames.contains("IDX_1"));
-		assertTrue(indexNames.contains("IDX_2"));
-		assertTrue(indexNames.contains("IDX_3"));
+		assertThat(indexNames.size()).isEqualTo(3);
+		assertThat(indexNames.contains("IDX_1")).isTrue();
+		assertThat(indexNames.contains("IDX_2")).isTrue();
+		assertThat(indexNames.contains("IDX_3")).isTrue();
 	}
 }

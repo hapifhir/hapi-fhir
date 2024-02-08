@@ -19,12 +19,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 import static org.hamcrest.CoreMatchers.hasItem;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.IsNot.not;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 /**
@@ -43,19 +41,19 @@ public class JaxRsRestfulClientFactoryTest extends BaseFhirVersionParameterizedT
 
 	@Test
 	public void emptyConstructorTest() {
-		assertNotNull(new JaxRsRestfulClientFactory());
+		assertThat(new JaxRsRestfulClientFactory()).isNotNull();
 	}
 
 	@Test
 	public void getDefaultNativeClientTest() {
-		assertNotNull(factory.getNativeClientClient());
+		assertThat(factory.getNativeClientClient()).isNotNull();
 	}
 
 	@Test
 	public void getNativeClientEmptyRegisteredComponentListTest() {
 		factory.register(new ArrayList<>());
 		final Client result = factory.getNativeClientClient();
-		assertNotNull(result);
+		assertThat(result).isNotNull();
 		ourLog.info("Classes: {}", result.getConfiguration().getClasses());
 		assertThat(result.getConfiguration().getClasses(), not(hasItem(ca.uhn.fhir.jaxrs.client.MyFilter.class)));
 	}
@@ -64,7 +62,7 @@ public class JaxRsRestfulClientFactoryTest extends BaseFhirVersionParameterizedT
 	public void getNativeClientRegisteredComponentListTest() {
 		factory.register(Arrays.asList(MyFilter.class, String.class));
 		final Client result = factory.getNativeClientClient();
-		assertNotNull(result);
+		assertThat(result).isNotNull();
 		ourLog.info("Classes: {}", result.getConfiguration().getClasses());
 		assertThat(result.getConfiguration().getClasses()).contains(ca.uhn.fhir.jaxrs.client.MyFilter.class);
 	}
@@ -81,10 +79,10 @@ public class JaxRsRestfulClientFactoryTest extends BaseFhirVersionParameterizedT
 			.request(MediaType.JSON_UTF_8.toString())
 			.get(Response.class);
 
-		assertEquals(200, response.getStatus());
+		assertThat(response.getStatus()).isEqualTo(200);
 		String json = response.readEntity(String.class);
 		IBaseResource bundle = fhirVersionParams.parseResource(json);
-		assertEquals(fhirVersionParams.getFhirVersion(), bundle.getStructureFhirVersionEnum());
+		assertThat(bundle.getStructureFhirVersionEnum()).isEqualTo(fhirVersionParams.getFhirVersion());
 	}
 
 	@ParameterizedTest
@@ -99,9 +97,9 @@ public class JaxRsRestfulClientFactoryTest extends BaseFhirVersionParameterizedT
 				.target(fhirVersionParams.getSecuredPatientEndpoint())
 				.request(MediaType.JSON_UTF_8.toString())
 				.get(Response.class);
-			fail();
+			fail("");
 		} catch (Exception e) {
-			assertTrue(e.getCause() instanceof SSLException);
+			assertThat(e.getCause() instanceof SSLException).isTrue();
 		}
 	}
 }

@@ -41,9 +41,6 @@ import java.time.Instant;
 import java.util.Date;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
@@ -104,19 +101,19 @@ public class InMemoryResourceMatcherR5Test {
 	public void testSupportedSource() {
 		{
 			InMemoryMatchResult result = myInMemoryResourceMatcher.match(Constants.PARAM_SOURCE + "=" + TEST_SOURCE, myObservation, mySearchParams, newRequest());
-			assertTrue(result.matched());
+			assertThat(result.matched()).isTrue();
 		}
 		{
 			InMemoryMatchResult result = myInMemoryResourceMatcher.match(Constants.PARAM_SOURCE + "=" + SOURCE_URI, myObservation, mySearchParams, newRequest());
-			assertTrue(result.matched());
+			assertThat(result.matched()).isTrue();
 		}
 		{
 			InMemoryMatchResult result = myInMemoryResourceMatcher.match(Constants.PARAM_SOURCE + "=" + REQUEST_ID, myObservation, mySearchParams, newRequest());
-			assertFalse(result.matched());
+			assertThat(result.matched()).isFalse();
 		}
 		{
 			InMemoryMatchResult result = myInMemoryResourceMatcher.match(Constants.PARAM_SOURCE + "=#" + REQUEST_ID, myObservation, mySearchParams, newRequest());
-			assertTrue(result.matched());
+			assertThat(result.matched()).isTrue();
 		}
 	}
 
@@ -129,19 +126,19 @@ public class InMemoryResourceMatcherR5Test {
 		myObservation.getMeta().getSourceElement().setValue(null);
 		{
 			InMemoryMatchResult result = myInMemoryResourceMatcher.match(Constants.PARAM_SOURCE + "=" + TEST_SOURCE, myObservation, mySearchParams, newRequest());
-			assertFalse(result.matched());
+			assertThat(result.matched()).isFalse();
 		}
 		{
 			InMemoryMatchResult result = myInMemoryResourceMatcher.match(Constants.PARAM_SOURCE + "=" + SOURCE_URI, myObservation, mySearchParams, newRequest());
-			assertFalse(result.matched());
+			assertThat(result.matched()).isFalse();
 		}
 		{
 			InMemoryMatchResult result = myInMemoryResourceMatcher.match(Constants.PARAM_SOURCE + "=" + REQUEST_ID, myObservation, mySearchParams, newRequest());
-			assertFalse(result.matched());
+			assertThat(result.matched()).isFalse();
 		}
 		{
 			InMemoryMatchResult result = myInMemoryResourceMatcher.match(Constants.PARAM_SOURCE + "=#" + REQUEST_ID, myObservation, mySearchParams, newRequest());
-			assertFalse(result.matched());
+			assertThat(result.matched()).isFalse();
 		}
 	}
 
@@ -175,20 +172,20 @@ public class InMemoryResourceMatcherR5Test {
 	@Test
 	public void testUnsupportedChained() {
 		InMemoryMatchResult result = myInMemoryResourceMatcher.match("encounter.class=FOO", myObservation, mySearchParams, newRequest());
-		assertFalse(result.supported());
-		assertEquals("Parameter: <encounter.class> Reason: Chained parameters are not supported", result.getUnsupportedReason());
+		assertThat(result.supported()).isFalse();
+		assertThat(result.getUnsupportedReason()).isEqualTo("Parameter: <encounter.class> Reason: Chained parameters are not supported");
 	}
 
 	@Test
 	public void testSupportedNot() {
 		String criteria = "code" + TokenParamModifier.NOT.getValue() + "=" + OBSERVATION_CODE + ",a_different_code";
 		InMemoryMatchResult result = myInMemoryResourceMatcher.match(criteria, myObservation, mySearchParams, newRequest());
-		assertTrue(result.supported());
-		assertFalse(result.matched(), ":not must not match any of the OR-list");
+		assertThat(result.supported()).isTrue();
+		assertThat(result.matched()).as(":not must not match any of the OR-list").isFalse();
 
 		result = myInMemoryResourceMatcher.match("code:not=a_different_code,and_another", myObservation, mySearchParams, newRequest());
-		assertTrue(result.supported());
-		assertTrue(result.matched(), ":not matches when NONE match");
+		assertThat(result.supported()).isTrue();
+		assertThat(result.matched()).as(":not matches when NONE match").isTrue();
 	}
 
 	@Test
@@ -197,8 +194,8 @@ public class InMemoryResourceMatcherR5Test {
 		when(myValidationSupport.validateCode(any(), any(), any(), any(), any(), any())).thenReturn(codeValidationResult);
 
 		InMemoryMatchResult result = myInMemoryResourceMatcher.match("code" + TokenParamModifier.IN.getValue() + "=" + OBSERVATION_CODE_VALUE_SET_URI, myObservation, mySearchParams, newRequest());
-		assertTrue(result.supported());
-		assertTrue(result.matched());
+		assertThat(result.supported()).isTrue();
+		assertThat(result.matched()).isTrue();
 
 		verify(myValidationSupport).validateCode(any(), any(), eq(OBSERVATION_CODE_SYSTEM), eq(OBSERVATION_CODE), isNull(), eq(OBSERVATION_CODE_VALUE_SET_URI));
 	}
@@ -209,8 +206,8 @@ public class InMemoryResourceMatcherR5Test {
 		when(myValidationSupport.validateCode(any(), any(), any(), any(), any(), any())).thenReturn(codeValidationResult);
 
 		InMemoryMatchResult result = myInMemoryResourceMatcher.match("code" + TokenParamModifier.IN.getValue() + "=" + OBSERVATION_CODE_VALUE_SET_URI, myObservation, mySearchParams, newRequest());
-		assertTrue(result.supported());
-		assertFalse(result.matched());
+		assertThat(result.supported()).isTrue();
+		assertThat(result.matched()).isFalse();
 
 		verify(myValidationSupport).validateCode(any(), any(), eq(OBSERVATION_CODE_SYSTEM), eq(OBSERVATION_CODE), isNull(), eq(OBSERVATION_CODE_VALUE_SET_URI));
 	}
@@ -221,8 +218,8 @@ public class InMemoryResourceMatcherR5Test {
 		when(myValidationSupport.validateCode(any(), any(), any(), any(), any(), any())).thenReturn(codeValidationResult);
 
 		InMemoryMatchResult result = myInMemoryResourceMatcher.match("code" + TokenParamModifier.NOT_IN.getValue() + "=" + OBSERVATION_CODE_VALUE_SET_URI, myObservation, mySearchParams, newRequest());
-		assertTrue(result.supported());
-		assertTrue(result.matched());
+		assertThat(result.supported()).isTrue();
+		assertThat(result.matched()).isTrue();
 
 		verify(myValidationSupport).validateCode(any(), any(), eq(OBSERVATION_CODE_SYSTEM), eq(OBSERVATION_CODE), isNull(), eq(OBSERVATION_CODE_VALUE_SET_URI));
 	}
@@ -241,8 +238,8 @@ public class InMemoryResourceMatcherR5Test {
 
 		String criteria = "code" + TokenParamModifier.NOT_IN.getValue() + "=" + OBSERVATION_CODE_VALUE_SET_URI + "," + otherValueSet;
 		InMemoryMatchResult result = myInMemoryResourceMatcher.match(criteria, myObservation, mySearchParams, newRequest());
-		assertTrue(result.supported());
-		assertFalse(result.matched(), ":not-in matches when NONE of the OR-list match");
+		assertThat(result.supported()).isTrue();
+		assertThat(result.matched()).as(":not-in matches when NONE of the OR-list match").isFalse();
 
 		verify(myValidationSupport).validateCode(any(), any(), eq(OBSERVATION_CODE_SYSTEM), eq(OBSERVATION_CODE), isNull(), eq(OBSERVATION_CODE_VALUE_SET_URI));
   }
@@ -266,8 +263,8 @@ public class InMemoryResourceMatcherR5Test {
 
 	private void testDateUnsupportedDateOp(ParamPrefixEnum theOperator) {
 		InMemoryMatchResult result = myInMemoryResourceMatcher.match("date=" + theOperator.getValue() + OBSERVATION_DATETIME, myObservation, mySearchParams, newRequest());
-		assertFalse(result.supported());
-		assertEquals("Parameter: <date> Reason: The prefix " + theOperator + " is not supported for param type DATE", result.getUnsupportedReason());
+		assertThat(result.supported()).isFalse();
+		assertThat(result.getUnsupportedReason()).isEqualTo("Parameter: <date> Reason: The prefix " + theOperator + " is not supported for param type DATE");
 	}
 
 	@Test
@@ -301,26 +298,26 @@ public class InMemoryResourceMatcherR5Test {
 		String equation = "date=" + theOperator.getValue();
 		{
 			InMemoryMatchResult result = myInMemoryResourceMatcher.match(equation + earlyDate, myObservation, mySearchParams, newRequest());
-			assertTrue(result.supported(), result.getUnsupportedReason());
-			assertEquals(result.matched(), theEarly);
+			assertThat(result.supported()).as(result.getUnsupportedReason()).isTrue();
+			assertThat(theEarly).isEqualTo(result.matched());
 		}
 		{
 			InMemoryMatchResult result = myInMemoryResourceMatcher.match(equation + observationDate, myObservation, mySearchParams, newRequest());
-			assertTrue(result.supported(), result.getUnsupportedReason());
-			assertEquals(result.matched(), theSame);
+			assertThat(result.supported()).as(result.getUnsupportedReason()).isTrue();
+			assertThat(theSame).isEqualTo(result.matched());
 		}
 		{
 			InMemoryMatchResult result = myInMemoryResourceMatcher.match(equation + lateDate, myObservation, mySearchParams, newRequest());
-			assertTrue(result.supported(), result.getUnsupportedReason());
-			assertEquals(result.matched(), theLater);
+			assertThat(result.supported()).as(result.getUnsupportedReason()).isTrue();
+			assertThat(theLater).isEqualTo(result.matched());
 		}
 	}
 
 	@Test
 	public void testNowPast() {
 		InMemoryMatchResult result = myInMemoryResourceMatcher.match("date=lt" + BaseDateTimeDt.NOW_DATE_CONSTANT, myObservation, mySearchParams, newRequest());
-		assertTrue(result.supported(), result.getUnsupportedReason());
-		assertTrue(result.matched());
+		assertThat(result.supported()).as(result.getUnsupportedReason()).isTrue();
+		assertThat(result.matched()).isTrue();
 	}
 
 	@Test
@@ -331,8 +328,8 @@ public class InMemoryResourceMatcherR5Test {
 		ResourceIndexedSearchParams searchParams = extractSearchParams(futureObservation);
 
 		InMemoryMatchResult result = myInMemoryResourceMatcher.match("date=gt" + BaseDateTimeDt.NOW_DATE_CONSTANT, futureObservation, searchParams, newRequest());
-		assertTrue(result.supported(), result.getUnsupportedReason());
-		assertTrue(result.matched());
+		assertThat(result.supported()).as(result.getUnsupportedReason()).isTrue();
+		assertThat(result.matched()).isTrue();
 	}
 
 	@Test
@@ -345,19 +342,19 @@ public class InMemoryResourceMatcherR5Test {
 		ResourceIndexedSearchParams searchParams = extractSearchParams(futureObservation);
 
 		InMemoryMatchResult result = myInMemoryResourceMatcher.match("date=gt" + BaseDateTimeDt.NOW_DATE_CONSTANT, futureObservation, searchParams, newRequest());
-		assertTrue(result.supported(), result.getUnsupportedReason());
-		assertEquals(1, searchParams.myDateParams.size());
+		assertThat(result.supported()).as(result.getUnsupportedReason()).isTrue();
+		assertThat(searchParams.myDateParams.size()).isEqualTo(1);
 		ResourceIndexedSearchParamDate searchParamDate = searchParams.myDateParams.iterator().next();
-		assertTrue(result.matched(), "Expected resource data " + futureObservation.getEffectiveDateTimeType().getValueAsString() +
-			" and resource indexed searchparam date " + searchParamDate +
-			" to be greater than " + now + " and " + nowDT.getValueAsString());
+		assertThat(result.matched()).as("Expected resource data " + futureObservation.getEffectiveDateTimeType().getValueAsString() +
+				" and resource indexed searchparam date " + searchParamDate +
+				" to be greater than " + now + " and " + nowDT.getValueAsString()).isTrue();
 	}
 
 	@Test
 	public void testTodayPast() {
 		InMemoryMatchResult result = myInMemoryResourceMatcher.match("date=lt" + BaseDateTimeDt.TODAY_DATE_CONSTANT, myObservation, mySearchParams, newRequest());
-		assertTrue(result.supported(), result.getUnsupportedReason());
-		assertTrue(result.matched());
+		assertThat(result.supported()).as(result.getUnsupportedReason()).isTrue();
+		assertThat(result.matched()).isTrue();
 	}
 
 	@Test
@@ -368,8 +365,8 @@ public class InMemoryResourceMatcherR5Test {
 		ResourceIndexedSearchParams searchParams = extractSearchParams(futureObservation);
 
 		InMemoryMatchResult result = myInMemoryResourceMatcher.match("date=gt" + BaseDateTimeDt.TODAY_DATE_CONSTANT, futureObservation, searchParams, newRequest());
-		assertTrue(result.supported(), result.getUnsupportedReason());
-		assertTrue(result.matched());
+		assertThat(result.supported()).as(result.getUnsupportedReason()).isTrue();
+		assertThat(result.matched()).isTrue();
 	}
 
 	@Test
@@ -380,8 +377,8 @@ public class InMemoryResourceMatcherR5Test {
 		ResourceIndexedSearchParams searchParams = extractSearchParams(futureObservation);
 
 		InMemoryMatchResult result = myInMemoryResourceMatcher.match("date=gt" + BaseDateTimeDt.TODAY_DATE_CONSTANT, futureObservation, searchParams, newRequest());
-		assertTrue(result.supported(), result.getUnsupportedReason());
-		assertFalse(result.matched());
+		assertThat(result.supported()).as(result.getUnsupportedReason()).isTrue();
+		assertThat(result.matched()).isFalse();
 	}
 
 	@Test
@@ -397,12 +394,12 @@ public class InMemoryResourceMatcherR5Test {
 		String search = "date=gt" + EARLY_DATE + "&date=le" + LATE_DATE;
 
 		InMemoryMatchResult resultInsidePeriod = myInMemoryResourceMatcher.match(search, insidePeriodObservation, insidePeriodSearchParams, newRequest());
-		assertTrue(resultInsidePeriod.supported(), resultInsidePeriod.getUnsupportedReason());
-		assertTrue(resultInsidePeriod.matched());
+		assertThat(resultInsidePeriod.supported()).as(resultInsidePeriod.getUnsupportedReason()).isTrue();
+		assertThat(resultInsidePeriod.matched()).isTrue();
 
 		InMemoryMatchResult resultOutsidePeriod = myInMemoryResourceMatcher.match(search, outsidePeriodObservation, outsidePeriodSearchParams, newRequest());
-		assertTrue(resultOutsidePeriod.supported(), resultOutsidePeriod.getUnsupportedReason());
-		assertFalse(resultOutsidePeriod.matched());
+		assertThat(resultOutsidePeriod.supported()).as(resultOutsidePeriod.getUnsupportedReason()).isTrue();
+		assertThat(resultOutsidePeriod.matched()).isFalse();
 	}
 
 

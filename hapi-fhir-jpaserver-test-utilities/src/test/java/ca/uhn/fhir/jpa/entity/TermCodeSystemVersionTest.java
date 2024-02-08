@@ -2,8 +2,7 @@ package ca.uhn.fhir.jpa.entity;
 
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class TermCodeSystemVersionTest {
 
@@ -12,15 +11,15 @@ public class TermCodeSystemVersionTest {
 		TermCodeSystemVersion csv1 = new TermCodeSystemVersion().setCodeSystemVersionId("1").setCodeSystemPidForUnitTest(123L);
 		TermCodeSystemVersion csv2 = new TermCodeSystemVersion().setCodeSystemVersionId("1").setCodeSystemPidForUnitTest(123L);
 		TermCodeSystemVersion csv3 = new TermCodeSystemVersion().setCodeSystemVersionId("1").setCodeSystemPidForUnitTest(124L);
-		assertEquals(csv1, csv2);
-		assertNotEquals(csv1, csv3);
-		assertNotEquals(csv1, null);
-		assertNotEquals(csv1, "");
+		assertThat(csv2).isEqualTo(csv1);
+		assertThat(csv3).isNotEqualTo(csv1);
+		assertThat(null).isNotEqualTo(csv1);
+		assertThat("").isNotEqualTo(csv1);
 	}
 
 	@Test
 	public void testHashCode() {
 		TermCodeSystemVersion csv1 = new TermCodeSystemVersion().setCodeSystemVersionId("1").setCodeSystemPidForUnitTest(123L);
-		assertEquals(25209, csv1.hashCode());
+		assertThat(csv1.hashCode()).isEqualTo(25209);
 	}
 }

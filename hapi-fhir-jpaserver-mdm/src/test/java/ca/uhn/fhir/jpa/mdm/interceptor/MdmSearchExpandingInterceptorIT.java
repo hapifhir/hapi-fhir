@@ -22,7 +22,6 @@ import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Reference;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.mockito.Mockito;
@@ -209,14 +208,14 @@ public class MdmSearchExpandingInterceptorIT extends BaseMdmR4Test {
 
 		IBundleProvider outcome = myPatientDao.search(map);
 
-		Assertions.assertNotNull(outcome);
+		assertThat(outcome).isNotNull();
 		// we know 4 cause that's how many patients are created
 		// plus one golden resource
-		Assertions.assertEquals(resourceCount + 1, outcome.size());
+		assertThat(outcome.size()).isEqualTo(resourceCount + 1);
 		List<String> resourceIds = outcome.getAllResourceIds();
 		// check the patients - first 4 ids
 		for (int i = 0; i < resourceIds.size() - 1; i++) {
-			Assertions.assertTrue(resourceIds.contains(expectedIds.get(i)));
+			assertThat(resourceIds.contains(expectedIds.get(i))).isTrue();
 		}
 	}
 
@@ -246,12 +245,12 @@ public class MdmSearchExpandingInterceptorIT extends BaseMdmR4Test {
 
 		// verify return results
 		// we expect all the linked ids to be returned too
-		Assertions.assertNotNull(outcome);
+		assertThat(outcome).isNotNull();
 		// plus 1 for the golden resource
-		Assertions.assertEquals(expectedIds.size() + 1, outcome.size());
+		assertThat(outcome.size()).isEqualTo(expectedIds.size() + 1);
 		List<String> returnedIds = outcome.getAllResourceIds();
 		for (String expected : expectedIds) {
-			Assertions.assertTrue(returnedIds.contains(expected));
+			assertThat(returnedIds.contains(expected)).isTrue();
 		}
 	}
 

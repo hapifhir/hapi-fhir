@@ -61,8 +61,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -213,22 +213,22 @@ public class ExpandResourceAndWriteBinaryStepTest {
 		RunOutcome outcome = myFinalStep.run(input, sink);
 
 		// verify
-		assertEquals(new RunOutcome(resources.size()).getRecordsProcessed(), outcome.getRecordsProcessed());
+		assertThat(outcome.getRecordsProcessed()).isEqualTo(new RunOutcome(resources.size()).getRecordsProcessed());
 
 		ArgumentCaptor<IBaseBinary> binaryCaptor = ArgumentCaptor.forClass(IBaseBinary.class);
 		ArgumentCaptor<SystemRequestDetails> binaryDaoCreateRequestDetailsCaptor = ArgumentCaptor.forClass(SystemRequestDetails.class);
 		verify(binaryDao)
 			.update(binaryCaptor.capture(), binaryDaoCreateRequestDetailsCaptor.capture());
 		String outputString = new String(binaryCaptor.getValue().getContent());
-		assertEquals(resources.size(), StringUtils.countOccurrencesOf(outputString, "\n"));
+		assertThat(StringUtils.countOccurrencesOf(outputString, "\n")).isEqualTo(resources.size());
 		if (thePartitioned) {
-			assertEquals(getPartitionId(thePartitioned), binaryDaoCreateRequestDetailsCaptor.getValue().getRequestPartitionId());
+			assertThat(binaryDaoCreateRequestDetailsCaptor.getValue().getRequestPartitionId()).isEqualTo(getPartitionId(thePartitioned));
 		}
 
 		ArgumentCaptor<BulkExportBinaryFileId> fileIdArgumentCaptor = ArgumentCaptor.forClass(BulkExportBinaryFileId.class);
 		verify(sink)
 			.accept(fileIdArgumentCaptor.capture());
-		assertEquals(binaryId.getValueAsString(), fileIdArgumentCaptor.getValue().getBinaryId());
+		assertThat(fileIdArgumentCaptor.getValue().getBinaryId()).isEqualTo(binaryId.getValueAsString());
 	}
 
 	@NotNull
@@ -292,21 +292,21 @@ public class ExpandResourceAndWriteBinaryStepTest {
 		// test
 		try {
 			myFinalStep.run(input, sink);
-			fail();
+			fail("");
 		} catch (JobExecutionFailedException ex) {
-			assertTrue(ex.getMessage().contains("Failure to process resource of type"));
+			assertThat(ex.getMessage().contains("Failure to process resource of type")).isTrue();
 		}
 
 		// verify
 		ArgumentCaptor<ILoggingEvent> logCaptor = ArgumentCaptor.forClass(ILoggingEvent.class);
 		verify(myAppender).doAppend(logCaptor.capture());
-		assertTrue(logCaptor.getValue().getFormattedMessage()
-			.contains(
-				"Failure to process resource of type "
-				+ idList.getResourceType()
-				+ " : "
-				+ testException
-			));
+		assertThat(logCaptor.getValue().getFormattedMessage()
+				.contains(
+						"Failure to process resource of type "
+								+ idList.getResourceType()
+								+ " : "
+								+ testException
+				)).isTrue();
 
 		verify(sink, never())
 			.accept(any(BulkExportBinaryFileId.class));

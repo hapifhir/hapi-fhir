@@ -26,7 +26,6 @@ import static ca.uhn.test.concurrency.LockstepEnumPhaserTest.Stages.THREE;
 import static ca.uhn.test.concurrency.LockstepEnumPhaserTest.Stages.TWO;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 // All of these should run pretty quickly - 5s should be lots.
 // But if they deadlock, they will hang forever.  Need @Timeout.
@@ -94,8 +93,8 @@ class LockstepEnumPhaserTest {
 		Future<Integer> result1 = myExecutorService.submit(schedule);
 		Future<Integer> result2 = myExecutorService.submit(schedule);
 
-		assertEquals(1, result1.get());
-		assertEquals(1, result2.get());
+		assertThat(result1.get()).isEqualTo(1);
+		assertThat(result2.get()).isEqualTo(1);
 		assertThat("progress is ordered", myProgressEvents, OrderMatchers.softOrdered(myProgressStageComparator));
 		assertThat(myProgressEvents).as("all progress logged").hasSize(6);
 	}
@@ -159,8 +158,8 @@ class LockstepEnumPhaserTest {
 		Future<Integer> result1 = myExecutorService.submit(schedule1);
 		Future<Integer> result3 = myExecutorService.submit(schedule3);
 
-		assertEquals(1, result1.get());
-		assertEquals(3, result3.get());
+		assertThat(result1.get()).isEqualTo(1);
+		assertThat(result3.get()).isEqualTo(3);
 
 		assertThat("progress is ordered", myProgressEvents, OrderMatchers.softOrdered(myProgressStageComparator));
 		assertThat(myProgressEvents).as("all progress logged").hasSize(8);
@@ -216,7 +215,7 @@ class LockstepEnumPhaserTest {
 			ourLog.info("Leaving schedule - {}", threadId);
 
 			Stages deregisterPhase = myPhaser.arriveAndDeregister();
-			assertEquals(TWO, deregisterPhase);
+			assertThat(deregisterPhase).isEqualTo(TWO);
 
 			return threadId;
 		};
@@ -224,9 +223,9 @@ class LockstepEnumPhaserTest {
 		Future<Integer> result2 = myExecutorService.submit(schedule2);
 		Future<Integer> result3 = myExecutorService.submit(schedule3);
 
-		assertEquals(1, result1.get());
-		assertEquals(2, result2.get());
-		assertEquals(3, result3.get());
+		assertThat(result1.get()).isEqualTo(1);
+		assertThat(result2.get()).isEqualTo(2);
+		assertThat(result3.get()).isEqualTo(3);
 
 		assertThat("progress is ordered", myProgressEvents, OrderMatchers.softOrdered(myProgressStageComparator));
 		assertThat(myProgressEvents).as("all progress logged").hasSize(2 * 3 + 2);

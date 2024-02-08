@@ -4,8 +4,7 @@ import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
 import jakarta.ejb.ApplicationException;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class JaxRsResponseExceptionTest {
 
@@ -13,9 +12,9 @@ public class JaxRsResponseExceptionTest {
 	public void testException() {
 		ForbiddenOperationException wrappedException = new ForbiddenOperationException("someMessage");
 		JaxRsResponseException response = new JaxRsResponseException(wrappedException);
-		assertEquals(response.getMessage(), wrappedException.getMessage());
-		assertEquals(response.getStatusCode(), wrappedException.getStatusCode());
-		assertNotNull(response.getClass().getAnnotation(ApplicationException.class));
+		assertThat(wrappedException.getMessage()).isEqualTo(response.getMessage());
+		assertThat(wrappedException.getStatusCode()).isEqualTo(response.getStatusCode());
+		assertThat(response.getClass().getAnnotation(ApplicationException.class)).isNotNull();
 	}
 
 }

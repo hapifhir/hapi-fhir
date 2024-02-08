@@ -38,7 +38,7 @@ import jakarta.annotation.Nonnull;
 import java.util.UUID;
 import java.util.function.Function;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -238,7 +238,7 @@ public class CdsHooksControllerTest {
 			.andReturn();
 		//validate
 		final String actual = result.getResponse().getContentAsString();
-		assertEquals(prettyJson(expected), prettyJson(actual));
+		assertThat(prettyJson(actual)).isEqualTo(prettyJson(expected));
 	}
 
 

@@ -33,9 +33,7 @@ import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.PlatformTransactionManager;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -92,22 +90,22 @@ public class WebsocketConnectionValidatorTest {
 
 		idType = new IdType();
 		response = myWebsocketConnectionValidator.validate(idType);
-		assertFalse(response.isValid());
-		assertEquals("Invalid bind request - No ID included: null", response.getMessage());
+		assertThat(response.isValid()).isFalse();
+		assertThat(response.getMessage()).isEqualTo("Invalid bind request - No ID included: null");
 
 		idType = new IdType(NON_EXISTENT_SUBSCRIPTION_ID);
 		response = myWebsocketConnectionValidator.validate(idType);
-		assertFalse(response.isValid());
-		assertEquals("Invalid bind request - Unknown subscription: Subscription/" + NON_EXISTENT_SUBSCRIPTION_ID, response.getMessage());
+		assertThat(response.isValid()).isFalse();
+		assertThat(response.getMessage()).isEqualTo("Invalid bind request - Unknown subscription: Subscription/" + NON_EXISTENT_SUBSCRIPTION_ID);
 
 		idType = new IdType(RESTHOOK_SUBSCRIPTION_ID);
 		response = myWebsocketConnectionValidator.validate(idType);
-		assertFalse(response.isValid());
-		assertEquals("Subscription Subscription/" + RESTHOOK_SUBSCRIPTION_ID + " is not a WEBSOCKET subscription", response.getMessage());
+		assertThat(response.isValid()).isFalse();
+		assertThat(response.getMessage()).isEqualTo("Subscription Subscription/" + RESTHOOK_SUBSCRIPTION_ID + " is not a WEBSOCKET subscription");
 
 		idType = new IdType(WEBSOCKET_SUBSCRIPTION_ID);
 		response = myWebsocketConnectionValidator.validate(idType);
-		assertTrue(response.isValid());
+		assertThat(response.isValid()).isTrue();
 	}
 
 	@Configuration

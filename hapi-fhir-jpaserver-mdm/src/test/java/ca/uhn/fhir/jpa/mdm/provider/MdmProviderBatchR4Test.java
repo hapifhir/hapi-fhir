@@ -32,11 +32,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.io.IOException;
 import java.util.stream.Stream;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.either;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -132,7 +132,7 @@ public class MdmProviderBatchR4Test extends BaseLinkR4Test {
 		clearMdmLinks();
 		try {
 			myMdmProvider.mdmBatchPractitionerInstance(new IdType("Practitioner/999"), null);
-			fail();
+			fail("");
 		} catch (ResourceNotFoundException e) {
 		}
 	}
@@ -161,7 +161,7 @@ public class MdmProviderBatchR4Test extends BaseLinkR4Test {
 		clearMdmLinks();
 		try {
 			myMdmProvider.mdmBatchPatientInstance(new IdType("Patient/999"), null);
-			fail();
+			fail("");
 		} catch (ResourceNotFoundException e) {
 		}
 	}
@@ -187,7 +187,7 @@ public class MdmProviderBatchR4Test extends BaseLinkR4Test {
 
 		try {
 			myMdmProvider.mdmBatchOnAllSourceResources(null, criteria , null, theSyncOrAsyncRequest);
-			fail();
+			fail("");
 		} catch (InvalidRequestException e) {
 
 			assertThat(e.getMessage(), either(
@@ -213,7 +213,7 @@ public class MdmProviderBatchR4Test extends BaseLinkR4Test {
 			// Then
 			assertLinkCount(1);
 			String expectedMsg = Msg.code(2362) + "Old golden resource was null while updating MDM links with new golden resource. It is likely that a $mdm-clear was performed without a $mdm-submit. Link will not be updated.";
-			assertEquals(expectedMsg, e.getMessage());
+			assertThat(e.getMessage()).isEqualTo(expectedMsg);
 		}
 	}
 

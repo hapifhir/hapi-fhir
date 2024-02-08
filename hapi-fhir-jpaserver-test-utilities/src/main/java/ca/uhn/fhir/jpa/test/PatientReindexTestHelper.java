@@ -38,7 +38,8 @@ import org.junit.jupiter.params.provider.Arguments;
 import java.util.List;
 import java.util.stream.Stream;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class PatientReindexTestHelper {
@@ -153,15 +154,15 @@ public class PatientReindexTestHelper {
 	private void validatePersistedPatients(int theExpectedNumPatients, long theExpectedVersion) {
 		RequestDetails requestDetails = new SystemRequestDetails();
 		List<IBaseResource> resources = myPatientDao.search(SearchParameterMap.newSynchronous(), requestDetails).getAllResources();
-		assertEquals(theExpectedNumPatients, resources.size());
+		assertThat(resources.size()).isEqualTo(theExpectedNumPatients);
 		for(IBaseResource resource : resources){
-			assertEquals(Patient.class, resource.getClass());
+			assertThat(resource.getClass()).isEqualTo(Patient.class);
 			Patient patient = (Patient) resource;
 			Long actualVersion = patient.getIdElement().getVersionIdPartAsLong();
 			if(theExpectedVersion != actualVersion){
 				String failureMessage = String.format("Failure for Resource [%s] with index [%s]. Expected version: %s, Actual version: %s",
 					patient.getId(), resources.indexOf(resource), theExpectedVersion, actualVersion);
-				fail(failureMessage);
+				fail("", failureMessage);
 			}
 		}
 	}
@@ -179,7 +180,7 @@ public class PatientReindexTestHelper {
 	}
 
 	private void validateReindexJob(JobInstance theJobInstance, int theRecordsProcessed) {
-		assertEquals(0, theJobInstance.getErrorCount());
-		assertEquals(theRecordsProcessed, theJobInstance.getCombinedRecordsProcessed());
+		assertThat(theJobInstance.getErrorCount()).isEqualTo(0);
+		assertThat(theJobInstance.getCombinedRecordsProcessed()).isEqualTo(theRecordsProcessed);
 	}
 }

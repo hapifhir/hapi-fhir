@@ -1,8 +1,7 @@
 package ca.uhn.fhir.cr.r4;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -39,19 +38,19 @@ public class HapiFhirRepositoryR4Test extends BaseCrR4TestServer {
 		var repository = new HapiFhirRepository(myDaoRegistry, requestDetails, myRestfulServer);
 		var result = repository
 			.create(new Patient().addName(new HumanName().setFamily("Test").addGiven("Name1")));
-		assertEquals(true, result.getCreated());
+		assertThat(result.getCreated()).isEqualTo(true);
 		var patient = (Patient) result.getResource();
-		assertEquals(1, patient.getName().size());
-		assertEquals("Test", patient.getName().get(0).getFamily());
-		assertEquals(1, patient.getName().get(0).getGiven().size());
+		assertThat(patient.getName().size()).isEqualTo(1);
+		assertThat(patient.getName().get(0).getFamily()).isEqualTo("Test");
+		assertThat(patient.getName().get(0).getGiven().size()).isEqualTo(1);
 		patient.getName().get(0).addGiven("Name2");
 		repository.update(patient);
 		var updatedPatient = repository.read(Patient.class, patient.getIdElement());
-		assertEquals(2, updatedPatient.getName().get(0).getGiven().size());
+		assertThat(updatedPatient.getName().get(0).getGiven().size()).isEqualTo(2);
 		repository.delete(Patient.class, patient.getIdElement());
 		var ex = assertThrows(Exception.class,
 			() -> repository.read(Patient.class, new IdType(patient.getIdElement().getIdPart())));
-		assertTrue(ex.getMessage().contains("Resource was deleted"));
+		assertThat(ex.getMessage().contains("Resource was deleted")).isTrue();
 	}
 
 	@Test
@@ -63,15 +62,14 @@ public class HapiFhirRepositoryR4Test extends BaseCrR4TestServer {
 		var repository = new HapiFhirRepository(myDaoRegistry, setupRequestDetails(), myRestfulServer);
 		// get all patient resources posted
 		var result = repository.search(Bundle.class, Patient.class, withCountParam(100));
-		assertEquals(expectedPatientCount, result.getTotal());
+		assertThat(result.getTotal()).isEqualTo(expectedPatientCount);
 		// count all resources in result
 		int counter = 0;
 		for (var e : result.getEntry()) {
 			counter++;
 		}
 		// verify all patient resources captured
-		assertEquals(expectedPatientCount, counter,
-			"Patient search results don't match available resources");
+		assertThat(counter).as("Patient search results don't match available resources").isEqualTo(expectedPatientCount);
 	}
 
 	@Test
@@ -81,16 +79,15 @@ public class HapiFhirRepositoryR4Test extends BaseCrR4TestServer {
 		var requestDetails = setupRequestDetails();
 		var repository = new HapiFhirRepository(myDaoRegistry, requestDetails, myRestfulServer);
 		var result = repository.search(Bundle.class, Patient.class, withCountParam(20));
-		assertEquals(20, result.getEntry().size());
+		assertThat(result.getEntry().size()).isEqualTo(20);
 		var next = result.getLink().get(1);
-		assertEquals("next", next.getRelation());
+		assertThat(next.getRelation()).isEqualTo("next");
 		var nextUrl = next.getUrl();
 		var nextResult = repository.link(Bundle.class, nextUrl);
-		assertEquals(20, nextResult.getEntry().size());
-		assertEquals(false,
-			result.getEntry().stream().map(e -> e.getResource().getIdPart()).anyMatch(
+		assertThat(nextResult.getEntry().size()).isEqualTo(20);
+		assertThat(result.getEntry().stream().map(e -> e.getResource().getIdPart()).anyMatch(
 				i -> nextResult.getEntry().stream().map(e -> e.getResource().getIdPart())
-					.collect(Collectors.toList()).contains(i)));
+						.collect(Collectors.toList()).contains(i))).isEqualTo(false);
 	}
 
 	@Test
@@ -107,8 +104,7 @@ public class HapiFhirRepositoryR4Test extends BaseCrR4TestServer {
 			counter++;
 		}
 		// verify all patient resources captured
-		assertEquals(expectedPatientCount, counter,
-			"Patient search results don't match available resources");
+		assertThat(counter).as("Patient search results don't match available resources").isEqualTo(expectedPatientCount);
 	}
 
 	@Test
@@ -125,8 +121,7 @@ public class HapiFhirRepositoryR4Test extends BaseCrR4TestServer {
 			counter++;
 		}
 		// verify all encounter resources captured
-		assertEquals(expectedEncounterCount, counter,
-			"Encounter search results don't match available resources");
+		assertThat(counter).as("Encounter search results don't match available resources").isEqualTo(expectedEncounterCount);
 	}
 
 	@Test
@@ -166,8 +161,7 @@ public class HapiFhirRepositoryR4Test extends BaseCrR4TestServer {
 			counter++;
 		}
 		// verify patient encounter was the only one found
-		assertEquals(1, counter,
-				"Encounter search results don't match available resources");
+		assertThat(counter).as("Encounter search results don't match available resources").isEqualTo(1);
 	}
 
 	@Test
@@ -184,8 +178,7 @@ public class HapiFhirRepositoryR4Test extends BaseCrR4TestServer {
 			counter++;
 		}
 		// verify all immunization resources captured
-		assertEquals(expectedEncounterCount, counter,
-			"Immunization search results don't match available resources");
+		assertThat(counter).as("Immunization search results don't match available resources").isEqualTo(expectedEncounterCount);
 	}
 
 	Map<String, List<IQueryParameterType>> withEmptySearchParams() {

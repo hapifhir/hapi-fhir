@@ -14,7 +14,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -41,7 +40,7 @@ class MdmClearJobParametersValidatorTest {
 
 		// verify
 		assertThat(result).hasSize(1);
-		assertEquals("Mdm is not enabled on this server", result.get(0));
+		assertThat(result.get(0)).isEqualTo("Mdm is not enabled on this server");
 	}
 
 	@Test
@@ -55,7 +54,7 @@ class MdmClearJobParametersValidatorTest {
 
 		// verify
 		assertThat(result).hasSize(1);
-		assertEquals("Mdm Clear Job Parameters must define at least one resource type", result.get(0));
+		assertThat(result.get(0)).isEqualTo("Mdm Clear Job Parameters must define at least one resource type");
 	}
 
 	@Test
@@ -72,8 +71,8 @@ class MdmClearJobParametersValidatorTest {
 
 		// verify
 		assertThat(result).hasSize(2);
-		assertEquals("Resource type 'Immunization' is not supported on this server.", result.get(0));
-		assertEquals("There are no mdm rules for resource type 'Immunization'", result.get(1));
+		assertThat(result.get(0)).isEqualTo("Resource type 'Immunization' is not supported on this server.");
+		assertThat(result.get(1)).isEqualTo("There are no mdm rules for resource type 'Immunization'");
 	}
 
 	@Test

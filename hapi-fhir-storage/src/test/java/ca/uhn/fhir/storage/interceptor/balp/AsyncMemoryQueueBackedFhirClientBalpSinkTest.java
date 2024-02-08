@@ -24,7 +24,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.Matchers.equalTo;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class AsyncMemoryQueueBackedFhirClientBalpSinkTest {
 
@@ -131,8 +130,8 @@ public class AsyncMemoryQueueBackedFhirClientBalpSinkTest {
 			retVal.setType(Bundle.BundleType.TRANSACTIONRESPONSE);
 
 			for (Bundle.BundleEntryComponent next : theInput.getEntry()) {
-				assertEquals(Bundle.HTTPVerb.POST, next.getRequest().getMethod());
-				assertEquals("AuditEvent", next.getRequest().getUrl());
+				assertThat(next.getRequest().getMethod()).isEqualTo(Bundle.HTTPVerb.POST);
+				assertThat(next.getRequest().getUrl()).isEqualTo("AuditEvent");
 				AuditEvent resource = (AuditEvent) next.getResource();
 				IIdType outcome = myAuditEventProvider.create(resource, theRequestDetails).getId();
 

@@ -56,9 +56,7 @@ import java.util.Collection;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.assertj.core.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
@@ -181,9 +179,9 @@ public class BaseSubscriptionDeliverySubscriberTest {
 
 		try {
 			mySubscriber.handleMessage(new ResourceDeliveryJsonMessage(payload));
-			fail();
+			fail("");
 		} catch (MessagingException e) {
-			assertEquals(Msg.code(2) + "Failure handling subscription payload for subscription: Subscription/123", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo(Msg.code(2) + "Failure handling subscription payload for subscription: Subscription/123");
 		}
 
 		verify(myGenericClient, times(1)).update();
@@ -277,12 +275,12 @@ public class BaseSubscriptionDeliverySubscriberTest {
 		assertThat(messages).hasSize(1);
 
 		ResourceModifiedMessage receivedMessage = messages.get(0).getPayload();
-		assertEquals(receivedMessage.getPayloadId(), "Bundle");
+		assertThat("Bundle").isEqualTo(receivedMessage.getPayloadId());
 
 		Bundle receivedBundle = (Bundle) receivedMessage.getPayload(myCtx);
 		assertThat(receivedBundle.getEntry()).hasSize(2);
-		assertEquals(p1.getIdElement().getValue(), receivedBundle.getEntry().get(0).getResource().getIdElement().getValue());
-		assertEquals(p2.getIdElement().getValue(), receivedBundle.getEntry().get(1).getResource().getIdElement().getValue());
+		assertThat(receivedBundle.getEntry().get(0).getResource().getIdElement().getValue()).isEqualTo(p1.getIdElement().getValue());
+		assertThat(receivedBundle.getEntry().get(1).getResource().getIdElement().getValue()).isEqualTo(p2.getIdElement().getValue());
 
 	}
 
@@ -376,7 +374,7 @@ public class BaseSubscriptionDeliverySubscriberTest {
 		ArgumentCaptor<ResourceModifiedJsonMessage> captor = ArgumentCaptor.forClass(ResourceModifiedJsonMessage.class);
 		verify(myChannelProducer).send(captor.capture());
 		final List<ResourceModifiedJsonMessage> params = captor.getAllValues();
-		assertEquals(thePartitionId, params.get(0).getPayload().getPartitionId());
+		assertThat(params.get(0).getPayload().getPartitionId()).isEqualTo(thePartitionId);
 	}
 
 	@Test
@@ -387,8 +385,8 @@ public class BaseSubscriptionDeliverySubscriberTest {
 
 		ourLog.info(jsonMessage.getPayload().getRequestPartitionId().asJson());
 
-		assertNotNull(jsonMessage.getPayload().getRequestPartitionId());
-		assertEquals(jsonMessage.getPayload().getRequestPartitionId().toJson(), RequestPartitionId.defaultPartition().toJson());
+		assertThat(jsonMessage.getPayload().getRequestPartitionId()).isNotNull();
+		assertThat(RequestPartitionId.defaultPartition().toJson()).isEqualTo(jsonMessage.getPayload().getRequestPartitionId().toJson());
 	}
 
 	@Test
@@ -410,10 +408,10 @@ public class BaseSubscriptionDeliverySubscriberTest {
 
 		try {
 			mySubscriber.handleMessage(new ResourceDeliveryJsonMessage(payload));
-			fail();
+			fail("");
 		} catch (MessagingException e) {
 			String messageExceptionAsString = e.toString();
-			assertFalse(messageExceptionAsString.contains(familyName));
+			assertThat(messageExceptionAsString.contains(familyName)).isFalse();
 		}
 	}
 

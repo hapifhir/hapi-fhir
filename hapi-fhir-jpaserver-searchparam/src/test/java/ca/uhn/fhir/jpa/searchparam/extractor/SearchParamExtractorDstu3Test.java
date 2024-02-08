@@ -48,7 +48,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.within;
 
 public class SearchParamExtractorDstu3Test {
 
@@ -64,20 +64,20 @@ public class SearchParamExtractorDstu3Test {
 		SearchParamExtractorDstu3 extractor = new SearchParamExtractorDstu3(new StorageSettings(), new PartitionSettings(), ourCtx, searchParamRegistry);
 		extractor.start();
 		Set<BaseResourceIndexedSearchParam> tokens = extractor.extractSearchParamTokens(obs);
-		assertEquals(1, tokens.size());
+		assertThat(tokens.size()).isEqualTo(1);
 		ResourceIndexedSearchParamToken token = (ResourceIndexedSearchParamToken) tokens.iterator().next();
-		assertEquals("category", token.getParamName());
-		assertEquals("SYSTEM", token.getSystem());
-		assertEquals("CODE", token.getValue());
+		assertThat(token.getParamName()).isEqualTo("category");
+		assertThat(token.getSystem()).isEqualTo("SYSTEM");
+		assertThat(token.getValue()).isEqualTo("CODE");
 	}
 
 	@Test
 	public void testNormalizedStringIsShortened() {
 		// String with character that will change it's length on normalization
 		String value = IntStream.range(1, 200).mapToObj(v -> "a").collect(Collectors.joining()) + "ئ";
-		assertEquals(value.length(), 200);
-		assertEquals(Normalizer.normalize(value, Normalizer.Form.NFD).length(), 201);
-		assertEquals(StringUtil.normalizeStringForSearchIndexing(value).length(), 201);
+		assertThat(200).isEqualTo(value.length());
+		assertThat(201).isEqualTo(Normalizer.normalize(value, Normalizer.Form.NFD).length());
+		assertThat(201).isEqualTo(StringUtil.normalizeStringForSearchIndexing(value).length());
 
 		Questionnaire questionnaire = new Questionnaire();
 		questionnaire.setDescription(value);
@@ -87,7 +87,7 @@ public class SearchParamExtractorDstu3Test {
 		SearchParamExtractorDstu3 extractor = new SearchParamExtractorDstu3(new StorageSettings(), new PartitionSettings(), ourCtx, searchParamRegistry);
 		extractor.start();
 		Set<ResourceIndexedSearchParamString> params = extractor.extractSearchParamStrings(questionnaire);
-		assertEquals(1, params.size());
+		assertThat(params.size()).isEqualTo(1);
 	}
 
 	@Test
@@ -105,9 +105,9 @@ public class SearchParamExtractorDstu3Test {
 		SearchParamExtractorDstu3 extractor = new SearchParamExtractorDstu3(new StorageSettings(), new PartitionSettings(), ourCtx, searchParamRegistry);
 		extractor.start();
 		Set<ResourceIndexedSearchParamNumber> params = extractor.extractSearchParamNumber(enc);
-		assertEquals(1, params.size());
+		assertThat(params.size()).isEqualTo(1);
 		// Normalized to days
-		assertEquals("2", params.iterator().next().getValue().toPlainString());
+		assertThat(params.iterator().next().getValue().toPlainString()).isEqualTo("2");
 	}
 
 	@Test
@@ -141,9 +141,9 @@ public class SearchParamExtractorDstu3Test {
 		SearchParamExtractorDstu3 extractor = new SearchParamExtractorDstu3(new StorageSettings(), new PartitionSettings(), ourCtx, searchParamRegistry);
 		extractor.start();
 		Set<ResourceIndexedSearchParamNumber> params = extractor.extractSearchParamNumber(enc);
-		assertEquals(1, params.size());
+		assertThat(params.size()).isEqualTo(1);
 		// Normalized to days
-		assertEquals("15", params.iterator().next().getValue().toPlainString());
+		assertThat(params.iterator().next().getValue().toPlainString()).isEqualTo("15");
 	}
 
 	@Test
@@ -173,8 +173,8 @@ public class SearchParamExtractorDstu3Test {
 		Patient resource = new Patient();
 		resource.getCommunicationFirstRep().getLanguage().getCodingFirstRep().setCode("blah");
 		Set<ResourceIndexedSearchParamString> strings = extractor.extractSearchParamStrings(resource);
-		assertEquals(1, strings.size());
-		assertEquals("BLAH", strings.iterator().next().getValueNormalized());
+		assertThat(strings.size()).isEqualTo(1);
+		assertThat(strings.iterator().next().getValueNormalized()).isEqualTo("BLAH");
 
 	}
 
@@ -238,10 +238,10 @@ public class SearchParamExtractorDstu3Test {
 		SearchParamExtractorDstu3 extractor = new SearchParamExtractorDstu3(new StorageSettings(), new PartitionSettings(), ourCtx, searchParamRegistry);
 		extractor.start();
 		ISearchParamExtractor.SearchParamSet<BaseResourceIndexedSearchParam> coords = extractor.extractSearchParamTokens(loc);
-		assertEquals(1, coords.size());
+		assertThat(coords.size()).isEqualTo(1);
 		ResourceIndexedSearchParamCoords coord = (ResourceIndexedSearchParamCoords) coords.iterator().next();
-		assertEquals(latitude, coord.getLatitude(), 0.0);
-		assertEquals(longitude, coord.getLongitude(), 0.0);
+		assertThat(coord.getLatitude()).isCloseTo(latitude, within(0.0));
+		assertThat(coord.getLongitude()).isCloseTo(longitude, within(0.0));
 	}
 
 	private static class MySearchParamRegistry implements ISearchParamRegistry, ISearchParamRegistryController {

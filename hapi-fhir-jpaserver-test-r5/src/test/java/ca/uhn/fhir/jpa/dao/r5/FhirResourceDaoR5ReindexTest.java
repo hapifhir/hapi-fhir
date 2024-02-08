@@ -46,7 +46,7 @@ public class FhirResourceDaoR5ReindexTest extends BaseJpaR5Test {
 		Parameters outcome = (Parameters) myInstanceReindexService.reindex(mySrd, id);
 		ourLog.info("Outcome: {}", myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
 		assertThat(outcome.getParameter("Narrative").getValueStringType().getValue()).contains("Reindex completed in");
-		assertEquals("REMOVE", outcome.getParameter("UriIndexes").getPartFirstRep().getPartFirstRep().getValueCodeType().getValue());
+		assertThat(outcome.getParameter("UriIndexes").getPartFirstRep().getPartFirstRep().getValueCodeType().getValue()).isEqualTo("REMOVE");
 
 		runInTransaction(() -> {
 			ResourceTable table = myResourceTableDao.findById(id.getIdPartAsLong()).orElseThrow();

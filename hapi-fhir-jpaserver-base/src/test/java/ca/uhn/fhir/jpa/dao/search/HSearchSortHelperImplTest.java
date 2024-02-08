@@ -23,7 +23,6 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -77,7 +76,7 @@ class HSearchSortHelperImplTest {
 
 		verify(mockSearchParamRegistry, times(1)).getActiveSearchParams("Observation");
 		verify(mockResourceSearchParams, times(1)).get("the-param-name");
-		assertFalse(paramType.isEmpty());
+		assertThat(paramType.isEmpty()).isFalse();
 	}
 
 	@Test
@@ -94,7 +93,7 @@ class HSearchSortHelperImplTest {
 
 		Optional<SortFinalStep> sortFieldStepOpt = tested.getSortClause(mockSearchSortFactory, sortSpec, "Observation");
 
-		assertFalse(sortFieldStepOpt.isEmpty());
+		assertThat(sortFieldStepOpt.isEmpty()).isFalse();
 		verify(mockSearchSortFactory, times(1)).composite();
 		verify(mockSearchSortFactory, times(1)).field("aaa._tag.bbb.ccc");
 		verify(mockSearchSortFactory, times(1)).field("ddd._tag.eee.fff");

@@ -18,8 +18,6 @@ import jakarta.annotation.Nonnull;
 import java.io.IOException;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
 public abstract class BaseLinkR4Test extends BaseProviderR4Test {
 	protected static final StringType NO_MATCH_RESULT = new StringType(MdmMatchResultEnum.NO_MATCH.name());
 	protected static final StringType MATCH_RESULT = new StringType(MdmMatchResultEnum.MATCH.name());
@@ -49,7 +47,7 @@ public abstract class BaseLinkR4Test extends BaseProviderR4Test {
 		// Tests require our initial link to be a POSSIBLE_MATCH
 		myLink.setMatchResult(MdmMatchResultEnum.POSSIBLE_MATCH);
 		saveLink(myLink);
-		assertEquals(MdmLinkSourceEnum.AUTO, myLink.getLinkSource());
+		assertThat(myLink.getLinkSource()).isEqualTo(MdmLinkSourceEnum.AUTO);
 		myStorageSettings.setExpungeEnabled(true);
 		myStorageSettings.setAllowMultipleDelete(true);
 		myStorageSettings.setDeleteExpungeEnabled(true);

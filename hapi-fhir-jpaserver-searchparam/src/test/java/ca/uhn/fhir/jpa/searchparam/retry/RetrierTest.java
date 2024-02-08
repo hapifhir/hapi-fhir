@@ -5,9 +5,8 @@ import org.junit.jupiter.api.Test;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 public class RetrierTest {
 
@@ -15,7 +14,7 @@ public class RetrierTest {
 	public void happyPath() {
 		Supplier<Boolean> supplier = () -> true;
 		Retrier<Boolean> retrier = new Retrier<>(supplier, 5);
-		assertTrue(retrier.runWithRetry());
+		assertThat(retrier.runWithRetry()).isTrue();
 	}
 
 	@Test
@@ -26,8 +25,8 @@ public class RetrierTest {
 			return true;
 		};
 		Retrier<Boolean> retrier = new Retrier<>(supplier, 5);
-		assertTrue(retrier.runWithRetry());
-		assertEquals(3, counter.get());
+		assertThat(retrier.runWithRetry()).isTrue();
+		assertThat(counter.get()).isEqualTo(3);
 	}
 
 	@Test
@@ -41,9 +40,9 @@ public class RetrierTest {
 
 		try {
 			retrier.runWithRetry();
-			fail();
+			fail("");
 		} catch (RetryRuntimeException e) {
-			assertEquals("test failure message", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo("test failure message");
 		}
 	}
 
@@ -57,9 +56,9 @@ public class RetrierTest {
 
 		try {
 			new Retrier<>(supplier, 0);
-			fail();
+			fail("");
 		} catch (IllegalArgumentException e) {
-			assertEquals("maxRetries must be above zero.", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo("maxRetries must be above zero.");
 		}
 	}
 
@@ -73,11 +72,11 @@ public class RetrierTest {
 
 		try {
 			new Retrier<>(supplier, -1);
-			fail();
+			fail("");
 		} catch (IllegalArgumentException e) {
-			assertEquals("maxRetries must be above zero.", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo("maxRetries must be above zero.");
 		}
-		assertEquals(0, counter.get());
+		assertThat(counter.get()).isEqualTo(0);
 	}
 
 	class RetryRuntimeException extends RuntimeException {

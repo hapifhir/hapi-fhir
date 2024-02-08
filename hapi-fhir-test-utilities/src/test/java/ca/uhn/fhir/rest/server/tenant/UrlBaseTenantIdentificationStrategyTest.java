@@ -18,9 +18,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Collections;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -59,7 +58,7 @@ public class UrlBaseTenantIdentificationStrategyTest {
 		String actual = ourTenantStrategy.massageServerBaseUrl(BASE_URL, myRequestDetails);
 
 		//then we should see /TENANT1 in the url
-		assertEquals(BASE_URL + "/TENANT1", actual);
+		assertThat(actual).isEqualTo(BASE_URL + "/TENANT1");
 	}
 
 	@Test
@@ -71,7 +70,7 @@ public class UrlBaseTenantIdentificationStrategyTest {
 		String actual = ourTenantStrategy.massageServerBaseUrl(BASE_URL, myRequestDetails);
 
 		//then nothing should happen
-		assertEquals(BASE_URL, actual);
+		assertThat(actual).isEqualTo(BASE_URL);
 	}
 
 	@CsvSource(value = {
@@ -92,7 +91,7 @@ public class UrlBaseTenantIdentificationStrategyTest {
 
 		String actual = ourTenantStrategy.resolveRelativeUrl(theInputUrl, myRequestDetails);
 
-		assertEquals(theExpectedResolvedUrl, actual, theMessage);
+		assertThat(actual).as(theMessage).isEqualTo(theExpectedResolvedUrl);
 	}
 
 	@Test
@@ -116,7 +115,7 @@ public class UrlBaseTenantIdentificationStrategyTest {
 		ourTenantStrategy.extractTenant(myUrlTokenizer, ourSystemRequestDetails);
 
 		//then we should see that it defaulted to the DEFAULT partition
-		assertEquals("DEFAULT", ourSystemRequestDetails.getTenantId());
+		assertThat(ourSystemRequestDetails.getTenantId()).isEqualTo("DEFAULT");
 	}
 
 	@Test
@@ -128,7 +127,7 @@ public class UrlBaseTenantIdentificationStrategyTest {
 		ourTenantStrategy.extractTenant(myUrlTokenizer, ourSystemRequestDetails);
 
 		//then we should see MYTENANT
-		assertEquals("MYTENANT", ourSystemRequestDetails.getTenantId());
+		assertThat(ourSystemRequestDetails.getTenantId()).isEqualTo("MYTENANT");
 	}
 
 	@Test
@@ -182,7 +181,7 @@ public class UrlBaseTenantIdentificationStrategyTest {
 
 		//then we should see an exception thrown with HAPI-0307 in it
 		verify(myHapiLocalizer, times(1)).getMessage(RestfulServer.class, "rootRequest.multitenant");
-		assertTrue(ire.getMessage().contains("HAPI-0307"));
+		assertThat(ire.getMessage().contains("HAPI-0307")).isTrue();
 	}
 
 	@Test
@@ -194,6 +193,6 @@ public class UrlBaseTenantIdentificationStrategyTest {
 		ourTenantStrategy.extractTenant(myUrlTokenizer, ourSystemRequestDetails);
 
 		//then we should see that it defaulted to the DEFAULT partition
-		assertEquals("DEFAULT", ourSystemRequestDetails.getTenantId());
+		assertThat(ourSystemRequestDetails.getTenantId()).isEqualTo("DEFAULT");
 	}
 }

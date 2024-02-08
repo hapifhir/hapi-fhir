@@ -15,8 +15,7 @@ import org.junit.jupiter.api.Test;
 
 import jakarta.annotation.Nonnull;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.assertj.core.api.Assertions.assertThat;
 
 class BaseJsonMessageTest {
 	FhirContext ourFhirContext = FhirContext.forR4Cached();
@@ -29,8 +28,8 @@ class BaseJsonMessageTest {
 		IBaseResource patient = buildPatient();
 		ResourceOperationMessage payload = new ResourceOperationMessage(ourFhirContext, patient, ResourceOperationMessage.OperationTypeEnum.CREATE);
 		message.setPayload(payload);
-		assertNull(message.getMessageKey());
-		assertEquals(RESOURCE_ID, message.getMessageKeyOrDefault());
+		assertThat(message.getMessageKey()).isNull();
+		assertThat(message.getMessageKeyOrDefault()).isEqualTo(RESOURCE_ID);
 	}
 
 	@Test
@@ -40,8 +39,8 @@ class BaseJsonMessageTest {
 		ResourceOperationMessage payload = new ResourceOperationMessage(ourFhirContext, patient, ResourceOperationMessage.OperationTypeEnum.CREATE);
 		payload.setMessageKey(MESSAGE_KEY);
 		message.setPayload(payload);
-		assertEquals(MESSAGE_KEY, message.getMessageKey());
-		assertEquals(MESSAGE_KEY, message.getMessageKeyOrDefault());
+		assertThat(message.getMessageKey()).isEqualTo(MESSAGE_KEY);
+		assertThat(message.getMessageKeyOrDefault()).isEqualTo(MESSAGE_KEY);
 	}
 
 	@Test
@@ -51,8 +50,8 @@ class BaseJsonMessageTest {
 		ResourceDeliveryMessage payload = new ResourceDeliveryMessage();
 		payload.setPayload(ourFhirContext, patient, EncodingEnum.JSON);
 		message.setPayload(payload);
-		assertNull(message.getMessageKey());
-		assertEquals(RESOURCE_ID, message.getMessageKeyOrDefault());
+		assertThat(message.getMessageKey()).isNull();
+		assertThat(message.getMessageKeyOrDefault()).isEqualTo(RESOURCE_ID);
 	}
 
 	@Test
@@ -63,8 +62,8 @@ class BaseJsonMessageTest {
 		payload.setPayload(ourFhirContext, patient, EncodingEnum.JSON);
 		payload.setMessageKey(MESSAGE_KEY);
 		message.setPayload(payload);
-		assertEquals(MESSAGE_KEY, message.getMessageKey());
-		assertEquals(MESSAGE_KEY, message.getMessageKeyOrDefault());
+		assertThat(message.getMessageKey()).isEqualTo(MESSAGE_KEY);
+		assertThat(message.getMessageKeyOrDefault()).isEqualTo(MESSAGE_KEY);
 	}
 
 	@Test
@@ -73,8 +72,8 @@ class BaseJsonMessageTest {
 		IBaseResource patient = buildPatient();
 		ResourceModifiedMessage payload = new ResourceModifiedMessage(ourFhirContext, patient, BaseResourceMessage.OperationTypeEnum.CREATE);
 		message.setPayload(payload);
-		assertNull(message.getMessageKey());
-		assertEquals(RESOURCE_ID, message.getMessageKeyOrDefault());
+		assertThat(message.getMessageKey()).isNull();
+		assertThat(message.getMessageKeyOrDefault()).isEqualTo(RESOURCE_ID);
 	}
 
 	@Test
@@ -84,8 +83,8 @@ class BaseJsonMessageTest {
 		ResourceModifiedMessage payload = new ResourceModifiedMessage(ourFhirContext, patient, BaseResourceMessage.OperationTypeEnum.CREATE);
 		payload.setMessageKey(MESSAGE_KEY);
 		message.setPayload(payload);
-		assertEquals(MESSAGE_KEY, message.getMessageKey());
-		assertEquals(MESSAGE_KEY, message.getMessageKeyOrDefault());
+		assertThat(message.getMessageKey()).isEqualTo(MESSAGE_KEY);
+		assertThat(message.getMessageKeyOrDefault()).isEqualTo(MESSAGE_KEY);
 	}
 
 	@Test
@@ -96,7 +95,7 @@ class BaseJsonMessageTest {
 		// When
 		HapiMessageHeaders headers = message.getHapiHeaders();
 		// Then
-		assertEquals(0, headers.getRetryCount());
+		assertThat(headers.getRetryCount()).isEqualTo(0);
 	}
 
 	@Test
@@ -106,7 +105,7 @@ class BaseJsonMessageTest {
 		// when
 		ResourceModifiedMessage payload = new ResourceModifiedMessage(ourFhirContext, patient, BaseResourceMessage.OperationTypeEnum.CREATE);
 		// then
-		assertNull(payload.getMessageKey());
+		assertThat(payload.getMessageKey()).isNull();
 	}
 
 	@Nonnull

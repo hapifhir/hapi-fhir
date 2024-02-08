@@ -9,10 +9,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class ActiveSubscriptionCacheTest {
 	static final String ID1 = "id1";
@@ -26,13 +22,13 @@ public class ActiveSubscriptionCacheTest {
 		ActiveSubscriptionCache activeSubscriptionCache = new ActiveSubscriptionCache();
 		ActiveSubscription activeSub1 = buildActiveSubscription(ID1);
 		activeSubscriptionCache.put(ID1, activeSub1);
-		assertFalse(activeSub1.isFlagForDeletion());
+		assertThat(activeSub1.isFlagForDeletion()).isFalse();
 		List<String> saveIds = new ArrayList<>();
 
 		List<String> idsToDelete = activeSubscriptionCache.markAllSubscriptionsNotInCollectionForDeletionAndReturnIdsToDelete(saveIds);
-		assertTrue(activeSub1.isFlagForDeletion());
-		assertNotNull(activeSubscriptionCache.get(ID1));
-		assertEquals(0, idsToDelete.size());
+		assertThat(activeSub1.isFlagForDeletion()).isTrue();
+		assertThat(activeSubscriptionCache.get(ID1)).isNotNull();
+		assertThat(idsToDelete.size()).isEqualTo(0);
 
 		idsToDelete = activeSubscriptionCache.markAllSubscriptionsNotInCollectionForDeletionAndReturnIdsToDelete(saveIds);
 		assertThat(idsToDelete).containsExactlyInAnyOrder(ID1);
@@ -51,17 +47,17 @@ public class ActiveSubscriptionCacheTest {
 		List<String> saveIds = new ArrayList<>();
 		activeSubscriptionCache.put(ID1, activeSub1);
 
-		assertFalse(activeSub1.isFlagForDeletion());
+		assertThat(activeSub1.isFlagForDeletion()).isFalse();
 
 		List<String> idsToDelete = activeSubscriptionCache.markAllSubscriptionsNotInCollectionForDeletionAndReturnIdsToDelete(saveIds);
-		assertTrue(activeSub1.isFlagForDeletion());
-		assertNotNull(activeSubscriptionCache.get(ID1));
-		assertEquals(0, idsToDelete.size());
+		assertThat(activeSub1.isFlagForDeletion()).isTrue();
+		assertThat(activeSubscriptionCache.get(ID1)).isNotNull();
+		assertThat(idsToDelete.size()).isEqualTo(0);
 
 		saveIds.add(ID1);
 		idsToDelete = activeSubscriptionCache.markAllSubscriptionsNotInCollectionForDeletionAndReturnIdsToDelete(saveIds);
-		assertFalse(activeSub1.isFlagForDeletion());
-		assertEquals(0, idsToDelete.size());
+		assertThat(activeSub1.isFlagForDeletion()).isFalse();
+		assertThat(idsToDelete.size()).isEqualTo(0);
 	}
 
 	@Test
@@ -79,8 +75,8 @@ public class ActiveSubscriptionCacheTest {
 		List<String> idsToDelete = activeSubscriptionCache.markAllSubscriptionsNotInCollectionForDeletionAndReturnIdsToDelete(saveIds);
 
 		assertThat(idsToDelete).containsExactlyInAnyOrder(ID1);
-		assertNotNull(activeSubscriptionCache.get(ID2));
-		assertTrue(activeSub2.isFlagForDeletion());
+		assertThat(activeSubscriptionCache.get(ID2)).isNotNull();
+		assertThat(activeSub2.isFlagForDeletion()).isTrue();
 	}
 
 	@Test
@@ -100,10 +96,10 @@ public class ActiveSubscriptionCacheTest {
 
 		activeSubscriptionCache.markAllSubscriptionsNotInCollectionForDeletionAndReturnIdsToDelete(saveIds);
 
-		assertNotNull(activeSubscriptionCache.get(ID1));
-		assertFalse(activeSub1.isFlagForDeletion());
-		assertNotNull(activeSubscriptionCache.get(ID2));
-		assertFalse(activeSub2.isFlagForDeletion());
+		assertThat(activeSubscriptionCache.get(ID1)).isNotNull();
+		assertThat(activeSub1.isFlagForDeletion()).isFalse();
+		assertThat(activeSubscriptionCache.get(ID2)).isNotNull();
+		assertThat(activeSub2.isFlagForDeletion()).isFalse();
 	}
 
 	@Test
@@ -117,17 +113,17 @@ public class ActiveSubscriptionCacheTest {
 		activeSubscriptionCache.put(ID2, activeSub2);
 		assertThat(activeSubscriptionCache.getTopicSubscriptionsForTopic(TEST_TOPIC_URL)).hasSize(1);
 		ActiveSubscription match = activeSubscriptionCache.getTopicSubscriptionsForTopic(TEST_TOPIC_URL).get(0);
-		assertEquals(ID2, match.getId());
+		assertThat(match.getId()).isEqualTo(ID2);
 
 		ActiveSubscription activeSub3 = buildTopicSubscription(ID3, TEST_TOPIC_URL_OTHER);
 		activeSubscriptionCache.put(ID3, activeSub3);
 		assertThat(activeSubscriptionCache.getTopicSubscriptionsForTopic(TEST_TOPIC_URL)).hasSize(1);
 		match = activeSubscriptionCache.getTopicSubscriptionsForTopic(TEST_TOPIC_URL).get(0);
-		assertEquals(ID2, match.getId());
+		assertThat(match.getId()).isEqualTo(ID2);
 
 		assertThat(activeSubscriptionCache.getTopicSubscriptionsForTopic(TEST_TOPIC_URL_OTHER)).hasSize(1);
 		match = activeSubscriptionCache.getTopicSubscriptionsForTopic(TEST_TOPIC_URL_OTHER).get(0);
-		assertEquals(ID3, match.getId());
+		assertThat(match.getId()).isEqualTo(ID3);
 	}
 
 	@NotNull

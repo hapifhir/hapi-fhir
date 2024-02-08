@@ -52,7 +52,7 @@ import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_TOP2000
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_UNIVERSAL_LAB_ORDER_VALUESET_FILE_DEFAULT;
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_UPLOAD_PROPERTIES_FILE;
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_XML_FILE;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public final class TermTestUtil {
 	public static final String URL_MY_CODE_SYSTEM = "http://example.com/my_code_system";
@@ -137,7 +137,7 @@ public final class TermTestUtil {
 				consumerNameDesignation = designation;
 			}
 		}
-		assertEquals(theConsumerName, consumerNameDesignation.getValue());
+		assertThat(consumerNameDesignation.getValue()).isEqualTo(theConsumerName);
 	}
 
 	static void verifyLinguisticVariant(
@@ -190,8 +190,8 @@ public final class TermTestUtil {
 	private static void verifyDesignation(
 			TermConceptDesignation theDesignation, String theUseSystem, String theUseCode, String theValue) {
 		if (theDesignation == null) return;
-		assertEquals(theUseSystem, theDesignation.getUseSystem());
-		assertEquals(theUseCode, theDesignation.getUseCode());
-		assertEquals(theValue, theDesignation.getValue());
+		assertThat(theDesignation.getUseSystem()).isEqualTo(theUseSystem);
+		assertThat(theDesignation.getUseCode()).isEqualTo(theUseCode);
+		assertThat(theDesignation.getValue()).isEqualTo(theValue);
 	}
 }

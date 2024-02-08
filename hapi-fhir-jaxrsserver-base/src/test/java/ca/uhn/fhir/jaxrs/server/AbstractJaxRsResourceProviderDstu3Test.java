@@ -51,10 +51,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
@@ -80,11 +78,11 @@ public class AbstractJaxRsResourceProviderDstu3Test {
 	private ArgumentCaptor<Patient> patientCaptor;
 
 	private void compareResultId(int id, IBaseResource resource) {
-		assertEquals(id, Integer.parseInt(resource.getIdElement().getIdPart()));
+		assertThat(Integer.parseInt(resource.getIdElement().getIdPart())).isEqualTo(id);
 	}
 
 	private void compareResultUrl(String url, IBaseResource resource) {
-		assertEquals(url, resource.getIdElement().getValueAsString().substring(serverBase.length() - 1));
+		assertThat(resource.getIdElement().getValueAsString().substring(serverBase.length() - 1)).isEqualTo(url);
 	}
 
 	private Patient createPatient(long id) {
@@ -153,7 +151,7 @@ public class AbstractJaxRsResourceProviderDstu3Test {
 		MethodOutcome response = client.create().resource(toCreate).conditional()
 			.where(Patient.IDENTIFIER.exactly().identifier("2")).prefer(PreferReturnEnum.REPRESENTATION).execute();
 
-		assertEquals("myIdentifier", patientCaptor.getValue().getIdentifier().get(0).getValue());
+		assertThat(patientCaptor.getValue().getIdentifier().get(0).getValue()).isEqualTo("myIdentifier");
 		IBaseResource resource = response.getResource();
 		compareResultId(1, resource);
 	}
@@ -164,7 +162,7 @@ public class AbstractJaxRsResourceProviderDstu3Test {
 	@Test
 	public void testConformance() {
 		final CapabilityStatement conf = client.fetchConformance().ofType(CapabilityStatement.class).execute();
-		assertEquals(conf.getRest().get(0).getResource().get(0).getType(), "Patient");
+		assertThat("Patient").isEqualTo(conf.getRest().get(0).getResource().get(0).getType());
 	}
 
 	@Test
@@ -180,21 +178,21 @@ public class AbstractJaxRsResourceProviderDstu3Test {
 			.execute();
 		IBaseResource resource = response.getResource();
 		compareResultId(1, resource);
-		assertEquals("myIdentifier", patientCaptor.getValue().getIdentifier().get(0).getValue());
+		assertThat(patientCaptor.getValue().getIdentifier().get(0).getValue()).isEqualTo("myIdentifier");
 	}
 
 	@Test
 	public void testDeletePatient() {
 		when(mock.delete(idCaptor.capture(), conditionalCaptor.capture())).thenReturn(new MethodOutcome());
 		final IBaseOperationOutcome results = client.delete().resourceById("Patient", "1").execute().getOperationOutcome();
-		assertEquals("1", idCaptor.getValue().getIdPart());
+		assertThat(idCaptor.getValue().getIdPart()).isEqualTo("1");
 	}
 
 	@Test
 	public void testConditionalDelete() {
 		when(mock.delete(idCaptor.capture(), conditionalCaptor.capture())).thenReturn(new MethodOutcome());
 		client.delete().resourceConditionalByType("Patient").where(Patient.IDENTIFIER.exactly().identifier("2")).execute();
-		assertEquals("Patient?identifier=2&_format=json", conditionalCaptor.getValue());
+		assertThat(conditionalCaptor.getValue()).isEqualTo("Patient?identifier=2&_format=json");
 	}
 
 	/**
@@ -215,7 +213,7 @@ public class AbstractJaxRsResourceProviderDstu3Test {
 		Parameters outParams = client.operation().onInstance(new IdType("Patient", "1")).named("$someCustomOperation")
 			.withParameters(inParams).execute();
 		//verify
-		assertEquals("outputValue", ((StringType) outParams.getParameter().get(0).getValue()).getValueAsString());
+		assertThat(((StringType) outParams.getParameter().get(0).getValue()).getValueAsString()).isEqualTo("outputValue");
 	}
 
 	@Test
@@ -240,7 +238,7 @@ public class AbstractJaxRsResourceProviderDstu3Test {
 			.execute();
 
 		// verify
-		assertEquals("outputValue", ((StringType) outParams.getParameter().get(0).getValue()).getValueAsString());
+		assertThat(((StringType) outParams.getParameter().get(0).getValue()).getValueAsString()).isEqualTo("outputValue");
 	}
 
 	@Test
@@ -249,7 +247,7 @@ public class AbstractJaxRsResourceProviderDstu3Test {
 		final Patient patient = client.read(Patient.class, "1");
 		compareResultId(1, patient);
 		compareResultUrl("/Patient/1", patient);
-		assertEquals("1", idCaptor.getValue().getIdPart());
+		assertThat(idCaptor.getValue().getIdPart()).isEqualTo("1");
 	}
 
 	/**
@@ -324,7 +322,7 @@ public class AbstractJaxRsResourceProviderDstu3Test {
 		final org.hl7.fhir.dstu3.model.Bundle results = client.search().forResource(Patient.class).count(8).returnBundle(org.hl7.fhir.dstu3.model.Bundle.class)
 			.execute();
 
-		assertEquals(results.getEntry().size(), 8);
+		assertThat(8).isEqualTo(results.getEntry().size());
 		IBaseResource resource = results.getEntry().get(0).getResource();
 		compareResultId(1, resource);
 		compareResultUrl("/Patient/1", resource);
@@ -340,7 +338,7 @@ public class AbstractJaxRsResourceProviderDstu3Test {
 		resource = nextPage.getEntry().get(0).getResource();
 		compareResultId(9, resource);
 		compareResultUrl("/Patient/9", resource);
-		assertNull(nextPage.getLink(org.hl7.fhir.dstu3.model.Bundle.LINK_NEXT));
+		assertThat(nextPage.getLink(org.hl7.fhir.dstu3.model.Bundle.LINK_NEXT)).isNull();
 	}
 
 	/**
@@ -374,7 +372,7 @@ public class AbstractJaxRsResourceProviderDstu3Test {
 	public void testUpdateById() throws Exception {
 		when(mock.update(idCaptor.capture(), patientCaptor.capture(), conditionalCaptor.capture())).thenReturn(new MethodOutcome());
 		client.update("1", createPatient(1));
-		assertEquals("1", idCaptor.getValue().getIdPart());
+		assertThat(idCaptor.getValue().getIdPart()).isEqualTo("1");
 		compareResultId(1, patientCaptor.getValue());
 	}
 
@@ -383,9 +381,9 @@ public class AbstractJaxRsResourceProviderDstu3Test {
 		when(mock.update(idCaptor.capture(), patientCaptor.capture(), conditionalCaptor.capture())).thenReturn(new MethodOutcome());
 		client.update().resource(createPatient(1)).conditional().where(Patient.IDENTIFIER.exactly().identifier("2")).execute();
 
-		assertEquals(null, patientCaptor.getValue().getIdElement().getIdPart());
-		assertEquals(null, patientCaptor.getValue().getIdElement().getVersionIdPart());
-		assertEquals("Patient?identifier=2&_format=json", conditionalCaptor.getValue());
+		assertThat(patientCaptor.getValue().getIdElement().getIdPart()).isEqualTo(null);
+		assertThat(patientCaptor.getValue().getIdElement().getVersionIdPart()).isEqualTo(null);
+		assertThat(conditionalCaptor.getValue()).isEqualTo("Patient?identifier=2&_format=json");
 	}
 
 	@SuppressWarnings("unchecked")
@@ -395,7 +393,7 @@ public class AbstractJaxRsResourceProviderDstu3Test {
 		when(mock.update(idCaptor.capture(), patientCaptor.capture(), conditionalCaptor.capture())).thenThrow(ResourceNotFoundException.class);
 		try {
 			client.update("1", createPatient(2));
-			fail();
+			fail("");
 		} catch (ResourceNotFoundException e) {
 			// good
 		}
@@ -407,8 +405,8 @@ public class AbstractJaxRsResourceProviderDstu3Test {
 		final Patient patient = client.vread(Patient.class, "1", "2");
 		compareResultId(1, patient);
 		compareResultUrl("/Patient/1", patient);
-		assertEquals("1", idCaptor.getValue().getIdPart());
-		assertEquals("2", idCaptor.getValue().getVersionIdPart());
+		assertThat(idCaptor.getValue().getIdPart()).isEqualTo("1");
+		assertThat(idCaptor.getValue().getVersionIdPart()).isEqualTo("2");
 	}
 
 	@Test
@@ -417,10 +415,10 @@ public class AbstractJaxRsResourceProviderDstu3Test {
 			JaxRsResponseException notFoundException = new JaxRsResponseException(new ResourceNotFoundException(new IdType("999955541264")));
 			when(mock.find(idCaptor.capture())).thenThrow(notFoundException);
 			client.read(Patient.class, "999955541264");
-			fail();
+			fail("");
 		} catch (final ResourceNotFoundException e) {
-			assertEquals(ResourceNotFoundException.STATUS_CODE, e.getStatusCode());
-			assertTrue(e.getMessage().contains("999955541264"));
+			assertThat(e.getStatusCode()).isEqualTo(ResourceNotFoundException.STATUS_CODE);
+			assertThat(e.getMessage().contains("999955541264")).isTrue();
 		}
 	}
 
@@ -436,7 +434,7 @@ public class AbstractJaxRsResourceProviderDstu3Test {
 
 		final MethodOutcome mO = client.validate().resource(patient).execute();
 		//verify
-		assertNotNull(mO.getOperationOutcome());
+		assertThat(mO.getOperationOutcome()).isNotNull();
 	}
 
 	class StringTypeMatcher implements ArgumentMatcher<StringType> {

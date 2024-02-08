@@ -19,10 +19,8 @@ import org.junit.jupiter.api.Test;
 import java.net.URI;
 import java.util.HashMap;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.doReturn;
@@ -58,9 +56,9 @@ public class JaxRsExceptionInterceptorTest {
 		when(context.proceed()).thenThrow(thrownException);
 		try {
 			interceptor.intercept(context);
-			fail();
+			fail("");
 		} catch (BaseServerResponseException e) {
-			assertEquals(e.getMessage(), thrownException.getMessage());
+			assertThat(thrownException.getMessage()).isEqualTo(e.getMessage());
 		}
 	}
 
@@ -73,9 +71,9 @@ public class JaxRsExceptionInterceptorTest {
 		when(context.proceed()).thenThrow(new ServletException());
 		try {
 			interceptor.intercept(context);
-			fail();
+			fail("");
 		} catch (BaseServerResponseException e) {
-			assertTrue(e.getMessage().contains("someMessage"));
+			assertThat(e.getMessage().contains("someMessage")).isTrue();
 		}
 	}
 
@@ -84,7 +82,7 @@ public class JaxRsExceptionInterceptorTest {
 		Object expected = new Object();
 		when(context.proceed()).thenReturn(expected);
 		Object result = interceptor.intercept(context);
-		assertSame(expected, result);
+		assertThat(result).isSameAs(expected);
 	}
 	
 	@Test
@@ -100,7 +98,7 @@ public class JaxRsExceptionInterceptorTest {
 		JaxRsResponseException thrownException = new JaxRsResponseException(new NotImplementedOperationException("not implemented"));
 		doThrow(new jakarta.servlet.ServletException("someMessage")).when(exceptionHandler).handleException(request, thrownException);
 		Response result = interceptor.convertExceptionIntoResponse(request, thrownException);
-		assertEquals(InternalErrorException.STATUS_CODE, result.getStatus());
+		assertThat(result.getStatus()).isEqualTo(InternalErrorException.STATUS_CODE);
 	}
 
 }

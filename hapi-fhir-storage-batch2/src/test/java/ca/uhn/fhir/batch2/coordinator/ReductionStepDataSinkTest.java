@@ -23,10 +23,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Collections;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.eq;
@@ -101,7 +100,7 @@ public class ReductionStepDataSinkTest {
 		myDataSink.accept(chunkData);
 
 		// verify
-		assertEquals(JsonUtil.serialize(stepData, false), instance.getReport());
+		assertThat(instance.getReport()).isEqualTo(JsonUtil.serialize(stepData, false));
 	}
 
 	@Test
@@ -121,8 +120,8 @@ public class ReductionStepDataSinkTest {
 
 		// test
 		myDataSink.accept(firstData);
-		assertThrows(IllegalStateException.class, ()->
-			myDataSink.accept(secondData));
+		assertThatExceptionOfType(IllegalStateException.class).isThrownBy(() ->
+				myDataSink.accept(secondData));
 
 	}
 
@@ -146,7 +145,7 @@ public class ReductionStepDataSinkTest {
 			myDataSink.accept(chunkData);
 			fail("Expected exception to be thrown");
 		} catch (JobExecutionFailedException ex) {
-			assertTrue(ex.getMessage().contains("No instance found with Id " + INSTANCE_ID));
+			assertThat(ex.getMessage().contains("No instance found with Id " + INSTANCE_ID)).isTrue();
 		} catch (Exception anyOtherEx) {
 			fail("Unexpected exception", anyOtherEx);
 		}

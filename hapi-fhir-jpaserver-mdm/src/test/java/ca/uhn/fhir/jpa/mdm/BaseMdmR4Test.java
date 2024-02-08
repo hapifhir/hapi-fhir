@@ -67,7 +67,7 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.slf4j.LoggerFactory.getLogger;
 
 @ExtendWith(SpringExtension.class)
@@ -152,7 +152,7 @@ abstract public class BaseMdmR4Test extends BaseJpaR4Test {
 	@AfterEach
 	public void after() throws IOException {
 		myMdmLinkDao.deleteAll();
-		assertEquals(0, myMdmLinkDao.count());
+		assertThat(myMdmLinkDao.count()).isEqualTo(0);
 	}
 
 	protected void saveLink(MdmLink theMdmLink) {
@@ -399,7 +399,7 @@ abstract public class BaseMdmR4Test extends BaseJpaR4Test {
 	}
 
 	protected void assertLinkCount(long theExpectedCount) {
-		assertEquals(theExpectedCount, myMdmLinkDao.count());
+		assertThat(myMdmLinkDao.count()).isEqualTo(theExpectedCount);
 	}
 
 	protected <T extends IAnyResource> T getGoldenResourceFromTargetResource(T theBaseResource) {
@@ -554,7 +554,7 @@ abstract public class BaseMdmR4Test extends BaseJpaR4Test {
 
 	protected Patient getOnlyGoldenPatient() {
 		List<IBaseResource> resources = getAllGoldenPatients();
-		assertEquals(1, resources.size());
+		assertThat(resources.size()).isEqualTo(1);
 		return (Patient) resources.get(0);
 	}
 
@@ -631,9 +631,9 @@ abstract public class BaseMdmR4Test extends BaseJpaR4Test {
 
 	private <T> void assertFields(Function<MdmLink, T> theAccessor, T... theExpectedValues) {
 		List<MdmLink> links = myMdmLinkDao.findAll();
-		assertEquals(theExpectedValues.length, links.size());
+		assertThat(links.size()).isEqualTo(theExpectedValues.length);
 		for (int i = 0; i < links.size(); ++i) {
-			assertEquals(theExpectedValues[i], theAccessor.apply(links.get(i)), "Value at index " + i + " was not equal");
+			assertThat(theAccessor.apply(links.get(i))).as("Value at index " + i + " was not equal").isEqualTo(theExpectedValues[i]);
 		}
 	}
 

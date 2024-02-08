@@ -11,8 +11,7 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 class SubscriptionTopicFilterUtilTest {
 
@@ -40,27 +39,27 @@ class SubscriptionTopicFilterUtilTest {
 		myObservation = new Observation();
 		CanonicalTopicSubscription topicSubscription = new CanonicalTopicSubscription();
 		boolean result = SubscriptionTopicFilterUtil.matchFilters(myObservation, "Observation", myFalseMatcher, topicSubscription);
-		assertTrue(result);
+		assertThat(result).isTrue();
 	}
 
 	@Test
 	void testFalseMatchOneFilter() {
 		CanonicalTopicSubscription topicSubscription = buildTopicSubscriptionWithFilter("Observation?code=123");
 		boolean result = SubscriptionTopicFilterUtil.matchFilters(myObservation, "Observation", myFalseMatcher, topicSubscription);
-		assertFalse(result);
+		assertThat(result).isFalse();
 	}
 
 	@Test
 	void testFalseMatchOneFilterTypeMismatch() {
 		CanonicalTopicSubscription topicSubscription = buildTopicSubscriptionWithFilter("Observation?code=123");
 		boolean result = SubscriptionTopicFilterUtil.matchFilters(new Encounter(), "Encounter", myFalseMatcher, topicSubscription);
-		assertTrue(result);
+		assertThat(result).isTrue();
 	}
 	@Test
 	void testFalseMatchTwoFilters() {
 		CanonicalTopicSubscription topicSubscription = buildTopicSubscriptionWithFilter("Observation?code=123", "Observation?code=456");
 		boolean result = SubscriptionTopicFilterUtil.matchFilters(myObservation, "Observation", myFalseMatcher, topicSubscription);
-		assertFalse(result);
+		assertThat(result).isFalse();
 	}
 
 	@Test
@@ -68,35 +67,35 @@ class SubscriptionTopicFilterUtilTest {
 		myObservation = new Observation();
 		CanonicalTopicSubscription topicSubscription = new CanonicalTopicSubscription();
 		boolean result = SubscriptionTopicFilterUtil.matchFilters(myObservation, "Observation", myTrueMatcher, topicSubscription);
-		assertTrue(result);
+		assertThat(result).isTrue();
 	}
 
 	@Test
 	void testTrueMatchOneFilter() {
 		CanonicalTopicSubscription topicSubscription = buildTopicSubscriptionWithFilter("Observation?code=123");
 		boolean result = SubscriptionTopicFilterUtil.matchFilters(myObservation, "Observation", myTrueMatcher, topicSubscription);
-		assertTrue(result);
+		assertThat(result).isTrue();
 	}
 
 	@Test
 	void testTrueMatchTwoFilters() {
 		CanonicalTopicSubscription topicSubscription = buildTopicSubscriptionWithFilter("Observation?code=123", "Observation?code=456");
 		boolean result = SubscriptionTopicFilterUtil.matchFilters(myObservation, "Observation", myTrueMatcher, topicSubscription);
-		assertTrue(result);
+		assertThat(result).isTrue();
 	}
 
 	@Test
 	void testTrueFalseMatchTwoFilters() {
 		CanonicalTopicSubscription topicSubscription = buildTopicSubscriptionWithFilter("Observation?code=123", "Observation?code=456");
 		boolean result = SubscriptionTopicFilterUtil.matchFilters(myObservation, "Observation", myTrueFalseMatcher, topicSubscription);
-		assertFalse(result);
+		assertThat(result).isFalse();
 	}
 
 	@Test
 	void testFalseTrueMatchTwoFilters() {
 		CanonicalTopicSubscription topicSubscription = buildTopicSubscriptionWithFilter("Observation?code=123", "Observation?code=456");
 		boolean result = SubscriptionTopicFilterUtil.matchFilters(myObservation, "Observation", myFalseTrueMatcher, topicSubscription);
-		assertFalse(result);
+		assertThat(result).isFalse();
 	}
 
 	@NotNull

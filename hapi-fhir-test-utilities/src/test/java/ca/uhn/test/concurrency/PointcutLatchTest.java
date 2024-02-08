@@ -11,9 +11,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.fail;
 
 class PointcutLatchTest {
 	private static final Logger ourLog = LoggerFactory.getLogger(PointcutLatchTest.class);
@@ -31,7 +29,7 @@ class PointcutLatchTest {
 	public void testInvokeSameThread() throws InterruptedException {
 		myPointcutLatch.setExpectedCount(1);
 		Thread thread = invoke();
-		assertEquals(thread, Thread.currentThread());
+		assertThat(Thread.currentThread()).isEqualTo(thread);
 		myPointcutLatch.awaitExpected();
 	}
 
@@ -46,7 +44,7 @@ class PointcutLatchTest {
 		myPointcutLatch.setExpectedCount(1);
 		Future<Thread> future = myExecutorService.submit(this::invoke);
 		myPointcutLatch.awaitExpected();
-		assertNotEquals(Thread.currentThread(), future.get());
+		assertThat(future.get()).isNotEqualTo(Thread.currentThread());
 	}
 
 	@Test
@@ -54,7 +52,7 @@ class PointcutLatchTest {
 		myPointcutLatch.setExpectedCount(1);
 		try {
 			myPointcutLatch.setExpectedCount(1);
-			fail();
+			fail("");
 		} catch (PointcutLatchException e) {
 			assertThat(e.getMessage()).startsWith(TEST_LATCH_NAME + ": HAPI-1480: setExpectedCount() called before previous awaitExpected() completed. Previous set stack:");
 		}
@@ -65,9 +63,9 @@ class PointcutLatchTest {
 		myPointcutLatch.setExpectedCount(1);
 		try {
 			myPointcutLatch.awaitExpectedWithTimeout(1);
-			fail();
+			fail("");
 		} catch (LatchTimedOutError e) {
-			assertEquals("HAPI-1483: test-latch-name PointcutLatch timed out waiting 1 seconds for latch to countdown from 1 to 0.  Is 1.", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo("HAPI-1483: test-latch-name PointcutLatch timed out waiting 1 seconds for latch to countdown from 1 to 0.  Is 1.");
 		}
 	}
 
@@ -75,9 +73,9 @@ class PointcutLatchTest {
 	public void testAwaitExpectedCalledBeforeExpect() throws InterruptedException {
 		try {
 			myPointcutLatch.awaitExpected();
-			fail();
+			fail("");
 		} catch (PointcutLatchException e) {
-			assertEquals(TEST_LATCH_NAME + ": awaitExpected() called before setExpected() called.", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo(TEST_LATCH_NAME + ": awaitExpected() called before setExpected() called.");
 		}
 	}
 
@@ -85,7 +83,7 @@ class PointcutLatchTest {
 	public void testInvokeCalledBeforeExpect() {
 		try {
 			invoke();
-			fail();
+			fail("");
 		} catch (PointcutLatchException e) {
 			assertThat(e.getMessage()).startsWith(TEST_LATCH_NAME + ": HAPI-1485: invoke() called outside of setExpectedCount() .. awaitExpected().  Probably got more invocations than expected or clear() was called before invoke().");
 		}
@@ -108,7 +106,7 @@ class PointcutLatchTest {
 		try {
 			invoke();
 			myPointcutLatch.awaitExpected();
-			fail();
+			fail("");
 		} catch (AssertionError e) {
 			assertThat(e.getMessage()).startsWith("HAPI-1484: test-latch-name PointcutLatch ERROR: invoke() called when countdown was zero.");
 		}

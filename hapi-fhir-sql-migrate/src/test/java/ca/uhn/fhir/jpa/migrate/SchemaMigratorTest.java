@@ -20,7 +20,7 @@ import java.util.Set;
 import java.util.function.Supplier;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class SchemaMigratorTest extends BaseTest {
@@ -36,7 +36,7 @@ public class SchemaMigratorTest extends BaseTest {
 
 		try {
 			schemaMigrator.validate();
-			fail();
+			fail("");
 		} catch (ConfigurationException e) {
 			assertThat(e.getMessage()).startsWith(Msg.code(27) + "The database schema for ");
 			assertThat(e.getMessage()).endsWith(" is out of date.  Current database schema version is unknown.  Schema version required by application is 1.1.  Please run the database migrator.");
@@ -55,31 +55,31 @@ public class SchemaMigratorTest extends BaseTest {
 		SchemaMigrator schemaMigrator = createSchemaMigrator("SOMETABLE", "create fable SOMETABLE (PID bigint not null, TEXTCOL varchar(255))", "1");
 		try {
 			schemaMigrator.migrate();
-			fail();
+			fail("");
 		} catch (HapiMigrationException e) {
-			assertEquals(org.springframework.jdbc.BadSqlGrammarException.class, e.getCause().getCause().getClass());
+			assertThat(e.getCause().getCause().getClass()).isEqualTo(org.springframework.jdbc.BadSqlGrammarException.class);
 			MigrationResult failedResult = e.getResult();
-			assertEquals(0, failedResult.changes);
-			assertEquals(0, failedResult.succeededTasks.size());
-			assertEquals(1, failedResult.failedTasks.size());
-			assertEquals(0, failedResult.executedStatements.size());
+			assertThat(failedResult.changes).isEqualTo(0);
+			assertThat(failedResult.succeededTasks.size()).isEqualTo(0);
+			assertThat(failedResult.failedTasks.size()).isEqualTo(1);
+			assertThat(failedResult.executedStatements.size()).isEqualTo(0);
 
 			assertThat(myHapiMigrationDao.findAll()).hasSize(1);
 		}
 		schemaMigrator = createTableMigrator();
 
 		MigrationResult result = schemaMigrator.migrate();
-		assertEquals(0, result.changes);
-		assertEquals(1, result.succeededTasks.size());
-		assertEquals(0, result.failedTasks.size());
-		assertEquals(1, result.executedStatements.size());
+		assertThat(result.changes).isEqualTo(0);
+		assertThat(result.succeededTasks.size()).isEqualTo(1);
+		assertThat(result.failedTasks.size()).isEqualTo(0);
+		assertThat(result.executedStatements.size()).isEqualTo(1);
 
 		List<HapiMigrationEntity> entities = myHapiMigrationDao.findAll();
 		assertThat(entities).hasSize(2);
-		assertEquals(1, entities.get(0).getPid());
-		assertEquals(false, entities.get(0).getSuccess());
-		assertEquals(2, entities.get(1).getPid());
-		assertEquals(true, entities.get(1).getSuccess());
+		assertThat(entities.get(0).getPid()).isEqualTo(1);
+		assertThat(entities.get(0).getSuccess()).isEqualTo(false);
+		assertThat(entities.get(1).getPid()).isEqualTo(2);
+		assertThat(entities.get(1).getSuccess()).isEqualTo(true);
 	}
 
 	@ParameterizedTest(name = "{index}: {0}")

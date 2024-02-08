@@ -21,9 +21,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -50,8 +49,8 @@ class ResourceCompartmentUtilTest {
 		Optional<String> oCompartment = ResourceCompartmentUtil.getResourceCompartment(
 			myResource, myCompartmentSearchParams, mySearchParamExtractor);
 
-		assertTrue(oCompartment.isPresent());
-		assertEquals("P01", oCompartment.get());
+		assertThat(oCompartment.isPresent()).isTrue();
+		assertThat(oCompartment.get()).isEqualTo("P01");
 	}
 
 	@Test
@@ -61,7 +60,7 @@ class ResourceCompartmentUtilTest {
 
 		List<RuntimeSearchParam> result = ResourceCompartmentUtil.getPatientCompartmentSearchParams(myRuntimeResourceDefinition);
 
-		assertEquals(2, result.size());
+		assertThat(result.size()).isEqualTo(2);
 	}
 
 	@Nested
@@ -74,7 +73,7 @@ class ResourceCompartmentUtilTest {
 
 			Optional<String> result = ResourceCompartmentUtil.getPatientCompartmentIdentity(myResource, myFhirContext, mySearchParamExtractor);
 
-			assertTrue(result.isEmpty());
+			assertThat(result.isEmpty()).isTrue();
 		}
 
 		@Test
@@ -88,7 +87,7 @@ class ResourceCompartmentUtilTest {
 			MethodNotAllowedException thrown = assertThrows(MethodNotAllowedException.class,
 				() -> ResourceCompartmentUtil.getPatientCompartmentIdentity(myResource, myFhirContext, mySearchParamExtractor));
 
-			assertEquals(Msg.code(2475) + "Patient resource IDs must be client-assigned in patient compartment mode", thrown.getMessage());
+			assertThat(thrown.getMessage()).isEqualTo(Msg.code(2475) + "Patient resource IDs must be client-assigned in patient compartment mode");
 		}
 
 		@Test
@@ -101,8 +100,8 @@ class ResourceCompartmentUtilTest {
 
 			Optional<String> result = ResourceCompartmentUtil.getPatientCompartmentIdentity(myResource, myFhirContext, mySearchParamExtractor);
 
-			assertTrue(result.isPresent());
-			assertEquals("Abc", result.get());
+			assertThat(result.isPresent()).isTrue();
+			assertThat(result.get()).isEqualTo("Abc");
 		}
 
 		@Test
@@ -123,8 +122,8 @@ class ResourceCompartmentUtilTest {
 				// execute
 				Optional<String> result = ResourceCompartmentUtil.getPatientCompartmentIdentity(myResource, myFhirContext, mySearchParamExtractor);
 
-				assertTrue(result.isPresent());
-				assertEquals("P01", result.get());
+			assertThat(result.isPresent()).isTrue();
+			assertThat(result.get()).isEqualTo("P01");
 //			}
 		}
 	}

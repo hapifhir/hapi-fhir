@@ -41,9 +41,7 @@ import java.util.regex.Pattern;
 
 import static ca.uhn.fhir.mdm.api.MdmMatchOutcome.POSSIBLE_MATCH;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.fail;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -148,18 +146,18 @@ public class MdmProviderClearLinkR4Test extends BaseLinkR4Test {
 						}
 
 						// we have < batch size, but it should be the total deleted still
-						assertTrue( deletedTotal < batchSize, msg);
-						assertEquals(deletedTotal, deletedCount, msg);
+						assertThat(deletedTotal < batchSize).as(msg).isTrue();
+						assertThat(deletedCount).as(msg).isEqualTo(deletedTotal);
 					} else {
 						// pointless, but...
-						assertTrue(contains);
+						assertThat(contains).isTrue();
 					}
 				}
 			}
 
 			// want to make sure we found the trace messages
 			// or what's the point
-			assertTrue(hasMsgs);
+			assertThat(hasMsgs).isTrue();
 		} finally {
 			clearStepLogger.detachAppender(appender);
 			clearStepLogger.setLevel(initialLevel);
@@ -192,8 +190,8 @@ public class MdmProviderClearLinkR4Test extends BaseLinkR4Test {
 
 		Patient redirectedGoldenPatient = myPatientDao.read(redirectedGoldenPatientId, myRequestDetails);
 		List<Coding> patientTags = redirectedGoldenPatient.getMeta().getTag();
-		assertTrue(patientTags.stream()
-			.anyMatch(tag -> tag.getCode().equals(MdmConstants.CODE_GOLDEN_RECORD_REDIRECTED)));
+		assertThat(patientTags.stream()
+			.anyMatch(tag -> tag.getCode().equals(MdmConstants.CODE_GOLDEN_RECORD_REDIRECTED))).isTrue();
 
 		assertLinkCount(4);
 		clearMdmLinks();
@@ -201,9 +199,9 @@ public class MdmProviderClearLinkR4Test extends BaseLinkR4Test {
 
 		try {
 			myPatientDao.read(redirectedGoldenPatientId, myRequestDetails);
-			fail();
+			fail("");
 		} catch (ResourceNotFoundException e) {
-			assertEquals(Constants.STATUS_HTTP_404_NOT_FOUND, e.getStatusCode());
+			assertThat(e.getStatusCode()).isEqualTo(Constants.STATUS_HTTP_404_NOT_FOUND);
 			assertNoGoldenPatientsExist();
 		}
 	}
@@ -238,7 +236,7 @@ public class MdmProviderClearLinkR4Test extends BaseLinkR4Test {
 		assertNoPatientLinksExist();
 		try {
 			myPatientDao.read(new IdDt(mySourcePatientId.getValueAsString()).toVersionless());
-			fail();
+			fail("");
 		} catch (ResourceNotFoundException e) {
 			// Expected exception
 		}
@@ -342,7 +340,7 @@ public class MdmProviderClearLinkR4Test extends BaseLinkR4Test {
 		assertNoPractitionerLinksExist();
 		try {
 			myPractitionerDao.read(new IdDt(myPractitionerGoldenResourceId.getValueAsString()).toVersionless());
-			fail();
+			fail("");
 		} catch (ResourceNotFoundException e) {
 		}
 	}
@@ -351,7 +349,7 @@ public class MdmProviderClearLinkR4Test extends BaseLinkR4Test {
 	public void testClearInvalidTargetType() {
 		try {
 			myMdmProvider.clearMdmLinks(getResourceNames("Observation"), null, myRequestDetails);
-			fail();
+			fail("");
 		} catch (InvalidRequestException e) {
 			assertThat(e.getMessage()).isEqualTo("HAPI-1500: $mdm-clear does not support resource type: Observation");
 		}

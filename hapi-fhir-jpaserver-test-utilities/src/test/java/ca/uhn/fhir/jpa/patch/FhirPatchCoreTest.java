@@ -21,8 +21,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 public class FhirPatchCoreTest extends BaseTest {
 
@@ -40,10 +40,10 @@ public class FhirPatchCoreTest extends BaseTest {
 
 			String expected = theContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(myOutput);
 			String actual = theContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(myInput);
-			assertEquals(expected, actual);
+			assertThat(actual).isEqualTo(expected);
 
 		} else {
-			fail("Unknown mode: " + myMode);
+			fail("", "Unknown mode: " + myMode);
 		}
 
 	}

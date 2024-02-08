@@ -7,7 +7,7 @@ import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class JaxRsMethodBindingsMimeTypeTest {
 
@@ -18,8 +18,8 @@ public class JaxRsMethodBindingsMimeTypeTest {
 
 	@Test
 	public void testFindMethodsFor2ProvidersWithMethods() {
-		assertEquals(AbstractDummyPatientProvider.class, new TestJaxRsDummyPatientProviderR4().getBindings().getBinding(RestOperationTypeEnum.SEARCH_TYPE, "").getMethod().getDeclaringClass());
-		assertEquals(AbstractDummyPatientProvider.class, new TestJaxRsDummyPatientProviderR4MimeType().getBindings().getBinding(RestOperationTypeEnum.SEARCH_TYPE, "").getMethod().getDeclaringClass());
+		assertThat(new TestJaxRsDummyPatientProviderR4().getBindings().getBinding(RestOperationTypeEnum.SEARCH_TYPE, "").getMethod().getDeclaringClass()).isEqualTo(AbstractDummyPatientProvider.class);
+		assertThat(new TestJaxRsDummyPatientProviderR4MimeType().getBindings().getBinding(RestOperationTypeEnum.SEARCH_TYPE, "").getMethod().getDeclaringClass()).isEqualTo(AbstractDummyPatientProvider.class);
 	}
 
 }

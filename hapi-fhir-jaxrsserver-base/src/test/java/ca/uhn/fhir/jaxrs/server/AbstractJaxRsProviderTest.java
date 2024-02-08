@@ -22,9 +22,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -54,8 +52,8 @@ public class AbstractJaxRsProviderTest {
 		when(uriInfo.getQueryParameters()).thenReturn(new MultivaluedHashMap<String, String>());
 		provider.setUriInfo(uriInfo);
 		final Response result = provider.handleException(theRequest, theException);
-		assertNotNull(result);
-		assertEquals(Constants.STATUS_HTTP_400_BAD_REQUEST, result.getStatus());
+		assertThat(result).isNotNull();
+		assertThat(result.getStatus()).isEqualTo(Constants.STATUS_HTTP_400_BAD_REQUEST);
 	}
 
 	@Test
@@ -63,13 +61,13 @@ public class AbstractJaxRsProviderTest {
 		final ResourceNotFoundException base = new ResourceNotFoundException(new IdDt(1L));
 		final JaxRsResponseException theException = new JaxRsResponseException(base);
 		final Response result = provider.handleException(theRequest, theException);
-		assertNotNull(result);
-		assertEquals(base.getStatusCode(), result.getStatus());
+		assertThat(result).isNotNull();
+		assertThat(result.getStatus()).isEqualTo(base.getStatusCode());
 	}
 
 	@Test
 	public void testHandleExceptionRuntimeException() throws IOException, URISyntaxException {
-		assertFalse(provider.withStackTrace());
+		assertThat(provider.withStackTrace()).isFalse();
 
 		final RuntimeException theException = new RuntimeException();
 		final UriInfo mockUriInfo = mock(UriInfo.class);
@@ -80,8 +78,8 @@ public class AbstractJaxRsProviderTest {
 
 		provider.setUriInfo(mockUriInfo);
 		final Response result = provider.handleException(theRequest, theException);
-		assertNotNull(result);
-		assertEquals(Constants.STATUS_HTTP_500_INTERNAL_ERROR, result.getStatus());
+		assertThat(result).isNotNull();
+		assertThat(result.getStatus()).isEqualTo(Constants.STATUS_HTTP_500_INTERNAL_ERROR);
 	}
 
 }

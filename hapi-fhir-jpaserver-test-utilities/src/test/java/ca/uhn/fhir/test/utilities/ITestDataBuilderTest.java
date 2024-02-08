@@ -14,9 +14,7 @@ import org.junit.jupiter.api.Test;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class ITestDataBuilderTest {
 	FhirContext myFhirContext = FhirContext.forR4Cached();
@@ -50,10 +48,10 @@ public class ITestDataBuilderTest {
 			myTDB.createObservation(
 				myTDB.withEffectiveDate("2020-01-01T12:34:56"));
 
-			assertEquals(1, myCreatedList.size());
+			assertThat(myCreatedList.size()).isEqualTo(1);
 			Observation o = (Observation) myCreatedList.get(0);
 
-			assertEquals("2020-01-01T12:34:56", o.getEffectiveDateTimeType().getValueAsString());
+			assertThat(o.getEffectiveDateTimeType().getValueAsString()).isEqualTo("2020-01-01T12:34:56");
 		}
 
 		@Test
@@ -64,17 +62,17 @@ public class ITestDataBuilderTest {
 				myTDB.withObservationCode("http://example.com", "a-code-value", "a code description")
 			);
 
-			assertEquals(1, myCreatedList.size());
+			assertThat(myCreatedList.size()).isEqualTo(1);
 			Observation o = (Observation) myCreatedList.get(0);
 
 			CodeableConcept codeable = o.getCode();
-			assertNotNull(codeable);
-			assertEquals(1,codeable.getCoding().size(), "has one coding");
+			assertThat(codeable).isNotNull();
+			assertThat(codeable.getCoding().size()).as("has one coding").isEqualTo(1);
 			Coding coding = codeable.getCoding().get(0);
 
-			assertEquals("http://example.com", coding.getSystem());
-			assertEquals("a-code-value", coding.getCode());
-			assertEquals("a code description", coding.getDisplay());
+			assertThat(coding.getSystem()).isEqualTo("http://example.com");
+			assertThat(coding.getCode()).isEqualTo("a-code-value");
+			assertThat(coding.getDisplay()).isEqualTo("a code description");
 
 		}
 
@@ -83,15 +81,15 @@ public class ITestDataBuilderTest {
 			myTDB.createObservation(
 				myTDB.withQuantityAtPath("valueQuantity", 200, "hulla", "bpm"));
 
-			assertEquals(1, myCreatedList.size());
+			assertThat(myCreatedList.size()).isEqualTo(1);
 			Observation o = (Observation) myCreatedList.get(0);
 
 			Quantity valueQuantity = o.getValueQuantity();
-			assertNotNull(valueQuantity);
+			assertThat(valueQuantity).isNotNull();
 
-			assertEquals(200, valueQuantity.getValue().doubleValue());
-			assertEquals("hulla", valueQuantity.getSystem());
-			assertEquals("bpm", valueQuantity.getCode());
+			assertThat(valueQuantity.getValue().doubleValue()).isEqualTo(200);
+			assertThat(valueQuantity.getSystem()).isEqualTo("hulla");
+			assertThat(valueQuantity.getCode()).isEqualTo("bpm");
 		}
 
 
@@ -110,14 +108,14 @@ public class ITestDataBuilderTest {
 					myTDB.withQuantityAtPath("valueQuantity", 1000000, "hulla", "sik"))
 			);
 
-			assertEquals(1, myCreatedList.size());
+			assertThat(myCreatedList.size()).isEqualTo(1);
 			Observation o = (Observation) myCreatedList.get(0);
 
-			assertEquals(2, o.getComponent().size());
+			assertThat(o.getComponent().size()).isEqualTo(2);
 			Observation.ObservationComponentComponent secondComponent = o.getComponent().get(1);
 
-			assertEquals("yet-another-code-value", secondComponent.getCode().getCoding().get(0).getCode());
-			assertEquals(1000000.0, secondComponent.getValueQuantity().getValue().doubleValue());
+			assertThat(secondComponent.getCode().getCoding().get(0).getCode()).isEqualTo("yet-another-code-value");
+			assertThat(secondComponent.getValueQuantity().getValue().doubleValue()).isEqualTo(1000000.0);
 		}
 
 	}
@@ -129,11 +127,11 @@ public class ITestDataBuilderTest {
 			myTDB.withGroupMember("Patient/123")
 		);
 
-		assertEquals(1, myCreatedList.size());
+		assertThat(myCreatedList.size()).isEqualTo(1);
 		Group g = (Group) myCreatedList.get(0);
-		assertEquals(1, g.getMember().size());
-		assertTrue(g.getMember().get(0).hasEntity());
-		assertEquals("Patient/123", g.getMember().get(0).getEntity().getReference());
+		assertThat(g.getMember().size()).isEqualTo(1);
+		assertThat(g.getMember().get(0).hasEntity()).isTrue();
+		assertThat(g.getMember().get(0).getEntity().getReference()).isEqualTo("Patient/123");
 	}
 
 }

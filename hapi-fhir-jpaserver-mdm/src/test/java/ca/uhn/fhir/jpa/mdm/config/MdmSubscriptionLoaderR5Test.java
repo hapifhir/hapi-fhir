@@ -24,8 +24,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Arrays;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
@@ -78,18 +77,18 @@ class MdmSubscriptionLoaderR5Test {
 		verify(mySubscriptionTopicDao).update(subscriptionTopicCaptor.capture(), any(RequestDetails.class));
 
         SubscriptionTopic subscriptionTopic = subscriptionTopicCaptor.getValue();
-		assertNotNull(subscriptionTopic);
-        assertEquals("mdm-subscription-topic", subscriptionTopic.getId());
-		assertEquals(1, subscriptionTopic.getResourceTrigger().size());
+		assertThat(subscriptionTopic).isNotNull();
+		assertThat(subscriptionTopic.getId()).isEqualTo("mdm-subscription-topic");
+		assertThat(subscriptionTopic.getResourceTrigger().size()).isEqualTo(1);
 		SubscriptionTopic.SubscriptionTopicResourceTriggerComponent triggerComponent = subscriptionTopic.getResourceTrigger().get(0);
-		assertEquals("Patient", triggerComponent.getResource());
+		assertThat(triggerComponent.getResource()).isEqualTo("Patient");
 
 		// verify Subscription
 		ArgumentCaptor<Subscription> subscriptionCaptor = ArgumentCaptor.forClass(Subscription.class);
 		verify(mySubscriptionDao).update(subscriptionCaptor.capture(), any(RequestDetails.class));
 
         Subscription subscription = subscriptionCaptor.getValue();
-		assertNotNull(subscription);
-        assertEquals("mdm-subscription", subscription.getId());
+		assertThat(subscription).isNotNull();
+		assertThat(subscription.getId()).isEqualTo("mdm-subscription");
 	}
 }

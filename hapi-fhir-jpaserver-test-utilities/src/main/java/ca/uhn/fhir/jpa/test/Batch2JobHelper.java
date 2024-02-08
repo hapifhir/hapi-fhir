@@ -38,10 +38,9 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 import static org.awaitility.Awaitility.await;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
 
 public class Batch2JobHelper {
 	private static final Logger ourLog = LoggerFactory.getLogger(Batch2JobHelper.class);
@@ -113,7 +112,7 @@ public class Batch2JobHelper {
 				.map(t -> t.getInstanceId() + " " + t.getJobDefinitionId() + "/" + t.getStatus().name())
 				.collect(Collectors.joining("\n"));
 			String currentStatus = myJobCoordinator.getInstance(theInstanceId).getStatus().name();
-			fail("Job " + theInstanceId + " still has status " + currentStatus + " - All statuses:\n" + statuses);
+			fail("", "Job " + theInstanceId + " still has status " + currentStatus + " - All statuses:\n" + statuses);
 		}
 		return myJobCoordinator.getInstance(theInstanceId);
 	}
@@ -131,7 +130,7 @@ public class Batch2JobHelper {
 				.map(t -> t.getJobDefinitionId() + "/" + t.getStatus().name())
 				.collect(Collectors.joining("\n"));
 			String currentStatus = myJobCoordinator.getInstance(theBatchJobId).getStatus().name();
-			fail("Job still has status " + currentStatus + " - All statuses:\n" + statuses);
+			fail("", "Job still has status " + currentStatus + " - All statuses:\n" + statuses);
 		}
 		return myJobCoordinator.getInstance(theBatchJobId);
 	}
@@ -167,11 +166,11 @@ public class Batch2JobHelper {
 	}
 
 	public void assertNotFastTracking(String theInstanceId) {
-		assertFalse(myJobCoordinator.getInstance(theInstanceId).isFastTracking());
+		assertThat(myJobCoordinator.getInstance(theInstanceId).isFastTracking()).isFalse();
 	}
 
 	public void assertFastTracking(String theInstanceId) {
-		assertTrue(myJobCoordinator.getInstance(theInstanceId).isFastTracking());
+		assertThat(myJobCoordinator.getInstance(theInstanceId).isFastTracking()).isTrue();
 	}
 
 	public void awaitGatedStepId(String theExpectedGatedStepId, String theInstanceId) {
@@ -210,7 +209,7 @@ public class Batch2JobHelper {
 						.append(" has status ")
 						.append(instance.getStatus());
 				}
-				fail(msg.toString());
+				fail("", msg.toString());
 			}
 		}
 	}

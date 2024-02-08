@@ -35,7 +35,7 @@ import java.util.Collections;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -67,7 +67,7 @@ public class SubscriptionValidatingInterceptorTest {
 		try {
 			Subscription badSub = new Subscription();
 			mySubscriptionValidatingInterceptor.resourcePreCreate(badSub, null, null);
-			fail();
+			fail("");
 		} catch (UnprocessableEntityException e) {
 			assertThat(e.getMessage()).isEqualTo(Msg.code(8) + "Can not process submitted Subscription - Subscription.status must be populated on this server");
 			ourLog.info("Expected exception", e);
@@ -80,7 +80,7 @@ public class SubscriptionValidatingInterceptorTest {
 			Subscription badSub = new Subscription();
 			badSub.setStatus(Enumerations.SubscriptionStatus.ACTIVE);
 			mySubscriptionValidatingInterceptor.resourcePreCreate(badSub, null, null);
-			fail();
+			fail("");
 		} catch (UnprocessableEntityException e) {
 			assertThat(e.getMessage()).isEqualTo(Msg.code(11) + "Subscription.criteria must be populated");
 		}
@@ -93,7 +93,7 @@ public class SubscriptionValidatingInterceptorTest {
 			badSub.setStatus(Enumerations.SubscriptionStatus.ACTIVE);
 			badSub.setCriteria("Patient");
 			mySubscriptionValidatingInterceptor.resourcePreCreate(badSub, null, null);
-			fail();
+			fail("");
 		} catch (UnprocessableEntityException e) {
 			assertThat(e.getMessage()).isEqualTo(Msg.code(14) + "Subscription.criteria must be in the form \"{Resource Type}?[params]\"");
 		}
@@ -106,7 +106,7 @@ public class SubscriptionValidatingInterceptorTest {
 			badSub.setStatus(Enumerations.SubscriptionStatus.ACTIVE);
 			badSub.setCriteria("Patient?");
 			mySubscriptionValidatingInterceptor.resourcePreCreate(badSub, null, null);
-			fail();
+			fail("");
 		} catch (UnprocessableEntityException e) {
 			assertThat(e.getMessage()).isEqualTo(Msg.code(20) + "Subscription.channel.type must be populated");
 		}
@@ -121,7 +121,7 @@ public class SubscriptionValidatingInterceptorTest {
 			Subscription.SubscriptionChannelComponent channel = badSub.getChannel();
 			channel.setType(Subscription.SubscriptionChannelType.MESSAGE);
 			mySubscriptionValidatingInterceptor.resourcePreCreate(badSub, null, null);
-			fail();
+			fail("");
 		} catch (UnprocessableEntityException e) {
 			assertThat(e.getMessage()).isEqualTo(Msg.code(16) + "No endpoint defined for message subscription");
 		}
@@ -138,7 +138,7 @@ public class SubscriptionValidatingInterceptorTest {
 		channel.setEndpoint("foo");
 		try {
 			mySubscriptionValidatingInterceptor.resourcePreCreate(badSub, null, null);
-			fail();
+			fail("");
 		} catch (UnprocessableEntityException e) {
 			assertThat(e.getMessage()).isEqualTo(Msg.code(17) + "Only 'channel' protocol is supported for Subscriptions with channel type 'message'");
 		}
@@ -146,7 +146,7 @@ public class SubscriptionValidatingInterceptorTest {
 		channel.setEndpoint("channel");
 		try {
 			mySubscriptionValidatingInterceptor.resourcePreCreate(badSub, null, null);
-			fail();
+			fail("");
 		} catch (UnprocessableEntityException e) {
 			assertThat(e.getMessage()).isEqualTo(Msg.code(17) + "Only 'channel' protocol is supported for Subscriptions with channel type 'message'");
 		}
@@ -154,7 +154,7 @@ public class SubscriptionValidatingInterceptorTest {
 		channel.setEndpoint("channel:");
 		try {
 			mySubscriptionValidatingInterceptor.resourcePreCreate(badSub, null, null);
-			fail();
+			fail("");
 		} catch (UnprocessableEntityException e) {
 			assertThat(e.getMessage()).isEqualTo(Msg.code(19) + "Invalid subscription endpoint uri channel:");
 		}
@@ -176,7 +176,7 @@ public class SubscriptionValidatingInterceptorTest {
 	public void testInvalidPointcut() {
 		try {
 			mySubscriptionValidatingInterceptor.validateSubmittedSubscription(createSubscription(), null, null, Pointcut.TEST_RB);
-			fail();
+			fail("");
 		} catch (UnprocessableEntityException e) {
 			assertThat(e.getMessage()).isEqualTo(Msg.code(2267) + "Expected Pointcut to be either STORAGE_PRESTORAGE_RESOURCE_CREATED or STORAGE_PRESTORAGE_RESOURCE_UPDATED but was: " + Pointcut.TEST_RB);
 		}
@@ -199,7 +199,7 @@ public class SubscriptionValidatingInterceptorTest {
 		channel.setEndpoint("channel:my-queue-name");
 		try {
 			mySubscriptionValidatingInterceptor.validateSubmittedSubscription(badSub, null, null, Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED);
-			fail();
+			fail("");
 		} catch (UnprocessableEntityException e) {
 			assertThat(e.getMessage()).isEqualTo(Msg.code(2322) + "No SubscriptionTopic exists with topic: http://topic.url");
 		}

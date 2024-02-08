@@ -22,8 +22,7 @@ import org.springframework.test.context.TestPropertySource;
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.slf4j.LoggerFactory.getLogger;
 
 @TestPropertySource(properties = {
@@ -61,7 +60,7 @@ public class MdmEventIT extends BaseMdmR4Test {
 		MdmHelperR4.OutcomeAndLogMessageWrapper outcome = myMdmHelper.updateWithLatch(patient2);
 
 		MdmLinkEvent linkChangeEvent = outcome.getMdmLinkEvent();
-		assertNotNull(linkChangeEvent);
+		assertThat(linkChangeEvent).isNotNull();
 
 		ourLog.info("Got event: {}", linkChangeEvent);
 
@@ -69,16 +68,16 @@ public class MdmEventIT extends BaseMdmR4Test {
 			.stream()
 			.filter(l -> l.getSourceId().equals(patient2.getIdElement().toVersionless().getValueAsString()) && l.getMatchResult() == MdmMatchResultEnum.POSSIBLE_MATCH)
 			.count();
-		assertEquals(2, expectTwoPossibleMatchesForPatientTwo);
+		assertThat(expectTwoPossibleMatchesForPatientTwo).isEqualTo(2);
 
 		long expectOnePossibleDuplicate = linkChangeEvent.getMdmLinks()
 			.stream()
 			.filter(l -> l.getMatchResult() == MdmMatchResultEnum.POSSIBLE_DUPLICATE)
 			.count();
-		assertEquals(1, expectOnePossibleDuplicate);
+		assertThat(expectOnePossibleDuplicate).isEqualTo(1);
 
 		List<MdmLinkJson> mdmLinkEvent = linkChangeEvent.getMdmLinks();
-		assertEquals(3, mdmLinkEvent.size());
+		assertThat(mdmLinkEvent.size()).isEqualTo(3);
 	}
 
 	@Test
@@ -87,18 +86,18 @@ public class MdmEventIT extends BaseMdmR4Test {
 		MdmHelperR4.OutcomeAndLogMessageWrapper outcome = myMdmHelper.createWithLatch(pr);
 
 		ResourceOperationMessage resourceOperationMessage = outcome.getResourceOperationMessage();
-		assertNotNull(resourceOperationMessage);
-		assertEquals(pr.getIdElement().toUnqualifiedVersionless().getValue(), resourceOperationMessage.getId());
+		assertThat(resourceOperationMessage).isNotNull();
+		assertThat(resourceOperationMessage.getId()).isEqualTo(pr.getIdElement().toUnqualifiedVersionless().getValue());
 
 		MdmLink link = getLinkByTargetId(pr);
 
 		MdmLinkEvent linkChangeEvent = outcome.getMdmLinkEvent();
-		assertNotNull(linkChangeEvent);
+		assertThat(linkChangeEvent).isNotNull();
 
-		assertEquals(1, linkChangeEvent.getMdmLinks().size());
+		assertThat(linkChangeEvent.getMdmLinks().size()).isEqualTo(1);
 		MdmLinkJson l = linkChangeEvent.getMdmLinks().get(0);
-		assertEquals(link.getGoldenResourcePid(), new IdDt(l.getGoldenResourceId()).getIdPartAsLong());
-		assertEquals(link.getSourcePid(), new IdDt(l.getSourceId()).getIdPartAsLong());
+		assertThat(new IdDt(l.getGoldenResourceId()).getIdPartAsLong()).isEqualTo(link.getGoldenResourcePid());
+		assertThat(new IdDt(l.getSourceId()).getIdPartAsLong()).isEqualTo(link.getSourcePid());
 	}
 
 	private MdmLink getLinkByTargetId(IBaseResource theResource) {
@@ -113,13 +112,13 @@ public class MdmEventIT extends BaseMdmR4Test {
 		MdmHelperR4.OutcomeAndLogMessageWrapper outcome = myMdmHelper.createWithLatch(patient1);
 
 		MdmLinkEvent linkChangeEvent = outcome.getMdmLinkEvent();
-		assertNotNull(linkChangeEvent);
-		assertEquals(1, linkChangeEvent.getMdmLinks().size());
+		assertThat(linkChangeEvent).isNotNull();
+		assertThat(linkChangeEvent.getMdmLinks().size()).isEqualTo(1);
 
 		MdmLinkJson link = linkChangeEvent.getMdmLinks().get(0);
-		assertEquals(patient1.getIdElement().toVersionless().getValueAsString(), link.getSourceId());
-		assertEquals(getLinkByTargetId(patient1).getGoldenResourcePid(), new IdDt(link.getGoldenResourceId()).getIdPartAsLong());
-		assertEquals(MdmMatchResultEnum.MATCH, link.getMatchResult());
+		assertThat(link.getSourceId()).isEqualTo(patient1.getIdElement().toVersionless().getValueAsString());
+		assertThat(new IdDt(link.getGoldenResourceId()).getIdPartAsLong()).isEqualTo(getLinkByTargetId(patient1).getGoldenResourcePid());
+		assertThat(link.getMatchResult()).isEqualTo(MdmMatchResultEnum.MATCH);
 	}
 
 }

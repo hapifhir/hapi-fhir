@@ -16,7 +16,7 @@ import java.util.stream.Stream;
 import static ca.uhn.fhir.test.utilities.TagTestUtil.toCanonicalTypeList;
 import static ca.uhn.fhir.test.utilities.TagTestUtil.createMeta;
 import static ca.uhn.fhir.test.utilities.TagTestUtil.toStringList;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Named.named;
 
 import org.hl7.fhir.r4.model.Coding;
@@ -166,7 +166,7 @@ class MetaTagSorterAlphabeticalTest {
 	public void testSortPrimitiveStringTypes(List<String> theInput, List<String> theExpected) {
 		List<CanonicalType> toBeSorted = toCanonicalTypeList(theInput);
 		myTagSorter.sortPrimitiveStrings(toBeSorted);
-		assertEquals(theExpected, toStringList(toBeSorted));
+		assertThat(toStringList(toBeSorted)).isEqualTo(theExpected);
 	}
 
 	@Test
@@ -181,7 +181,7 @@ class MetaTagSorterAlphabeticalTest {
 		List<String> expectedProfile = List.of("1", "2");
 		assertCodingsEqualAndInOrder(expectedCoding, meta.getTag());
 		assertCodingsEqualAndInOrder(expectedCoding, meta.getSecurity());
-		assertEquals(expectedProfile, toStringList(meta.getProfile()));
+		assertThat(toStringList(meta.getProfile())).isEqualTo(expectedProfile);
 	}
 
 

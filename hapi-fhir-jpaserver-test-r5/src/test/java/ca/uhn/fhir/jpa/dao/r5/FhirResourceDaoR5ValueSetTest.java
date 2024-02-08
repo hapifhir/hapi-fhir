@@ -36,14 +36,12 @@ import java.io.IOException;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.stringContainsInOrder;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
 
 public class FhirResourceDaoR5ValueSetTest extends BaseJpaR5Test {
 
@@ -86,9 +84,9 @@ public class FhirResourceDaoR5ValueSetTest extends BaseJpaR5Test {
 		CodeableConcept codeableConcept = null;
 		try {
 			myValueSetDao.validateCode(valueSetIdentifier, id, code, system, display, coding, codeableConcept, mySrd);
-			fail();
+			fail("");
 		} catch (InvalidRequestException e) {
-			assertEquals(Msg.code(901) + "Either ValueSet ID or ValueSet identifier or system and code must be provided. Unable to validate.", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo(Msg.code(901) + "Either ValueSet ID or ValueSet identifier or system and code must be provided. Unable to validate.");
 		}
 	}
 
@@ -102,8 +100,8 @@ public class FhirResourceDaoR5ValueSetTest extends BaseJpaR5Test {
 		Coding coding = null;
 		CodeableConcept codeableConcept = null;
 		IValidationSupport.CodeValidationResult result = myValueSetDao.validateCode(valueSetIdentifier, id, code, system, display, coding, codeableConcept, mySrd);
-		assertTrue(result.isOk());
-		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
+		assertThat(result.isOk()).isTrue();
+		assertThat(result.getDisplay()).isEqualTo("Systolic blood pressure at First encounter");
 	}
 
 	@Test
@@ -116,9 +114,9 @@ public class FhirResourceDaoR5ValueSetTest extends BaseJpaR5Test {
 		Coding coding = null;
 		CodeableConcept codeableConcept = null;
 		IValidationSupport.CodeValidationResult result = myValueSetDao.validateCode(valueSetIdentifier, id, code, system, display, coding, codeableConcept, mySrd);
-		assertTrue(result.isOk());
-		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
-		assertEquals("Concept Display \"Systolic blood pressure at First encounterXXXX\" does not match expected \"Systolic blood pressure at First encounter\" for in-memory expansion of ValueSet: http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2", result.getMessage());
+		assertThat(result.isOk()).isTrue();
+		assertThat(result.getDisplay()).isEqualTo("Systolic blood pressure at First encounter");
+		assertThat(result.getMessage()).isEqualTo("Concept Display \"Systolic blood pressure at First encounterXXXX\" does not match expected \"Systolic blood pressure at First encounter\" for in-memory expansion of ValueSet: http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2");
 	}
 
 	@Test
@@ -131,8 +129,8 @@ public class FhirResourceDaoR5ValueSetTest extends BaseJpaR5Test {
 		Coding coding = null;
 		CodeableConcept codeableConcept = null;
 		IValidationSupport.CodeValidationResult result = myValueSetDao.validateCode(valueSetIdentifier, id, code, system, display, coding, codeableConcept, mySrd);
-		assertTrue(result.isOk());
-		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
+		assertThat(result.isOk()).isTrue();
+		assertThat(result.getDisplay()).isEqualTo("Systolic blood pressure at First encounter");
 	}
 
 	@Test
@@ -146,8 +144,8 @@ public class FhirResourceDaoR5ValueSetTest extends BaseJpaR5Test {
 		CodeableConcept codeableConcept = new CodeableConcept();
 		codeableConcept.addCoding().setSystem("http://acme.org").setCode("11378-7");
 		IValidationSupport.CodeValidationResult result = myValueSetDao.validateCode(valueSetIdentifier, id, code, system, display, coding, codeableConcept, mySrd);
-		assertTrue(result.isOk());
-		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
+		assertThat(result.isOk()).isTrue();
+		assertThat(result.getDisplay()).isEqualTo("Systolic blood pressure at First encounter");
 	}
 
 	@Test
@@ -163,18 +161,18 @@ public class FhirResourceDaoR5ValueSetTest extends BaseJpaR5Test {
 		CodeableConcept codeableConcept = new CodeableConcept();
 		codeableConcept.addCoding().setSystem("http://acme.org").setCode("11378-7");
 		IValidationSupport.CodeValidationResult result = myValueSetDao.validateCode(valueSetIdentifier, id, code, system, display, coding, codeableConcept, mySrd);
-		assertTrue(result.isOk());
-		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
+		assertThat(result.isOk()).isTrue();
+		assertThat(result.getDisplay()).isEqualTo("Systolic blood pressure at First encounter");
 
 		myTerminologyDeferredStorageSvc.saveDeferred();
 		result = myValueSetDao.validateCode(valueSetIdentifier, id, code, system, display, coding, codeableConcept, mySrd);
-		assertTrue(result.isOk());
-		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
+		assertThat(result.isOk()).isTrue();
+		assertThat(result.getDisplay()).isEqualTo("Systolic blood pressure at First encounter");
 
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
 		result = myValueSetDao.validateCode(valueSetIdentifier, id, code, system, display, coding, codeableConcept, mySrd);
-		assertTrue(result.isOk());
-		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
+		assertThat(result.isOk()).isTrue();
+		assertThat(result.getDisplay()).isEqualTo("Systolic blood pressure at First encounter");
 	}
 
 	@Test
@@ -187,8 +185,8 @@ public class FhirResourceDaoR5ValueSetTest extends BaseJpaR5Test {
 		Coding coding = null;
 		CodeableConcept codeableConcept = null;
 		IValidationSupport.CodeValidationResult result = myValueSetDao.validateCode(valueSetIdentifier, id, code, system, display, coding, codeableConcept, mySrd);
-		assertTrue(result.isOk());
-		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
+		assertThat(result.isOk()).isTrue();
+		assertThat(result.getDisplay()).isEqualTo("Systolic blood pressure at First encounter");
 	}
 
 	@Test
@@ -203,18 +201,18 @@ public class FhirResourceDaoR5ValueSetTest extends BaseJpaR5Test {
 		Coding coding = null;
 		CodeableConcept codeableConcept = null;
 		IValidationSupport.CodeValidationResult result = myValueSetDao.validateCode(valueSetIdentifier, id, code, system, display, coding, codeableConcept, mySrd);
-		assertTrue(result.isOk());
-		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
+		assertThat(result.isOk()).isTrue();
+		assertThat(result.getDisplay()).isEqualTo("Systolic blood pressure at First encounter");
 
 		myTerminologyDeferredStorageSvc.saveDeferred();
 		result = myValueSetDao.validateCode(valueSetIdentifier, id, code, system, display, coding, codeableConcept, mySrd);
-		assertTrue(result.isOk());
-		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
+		assertThat(result.isOk()).isTrue();
+		assertThat(result.getDisplay()).isEqualTo("Systolic blood pressure at First encounter");
 
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
 		result = myValueSetDao.validateCode(valueSetIdentifier, id, code, system, display, coding, codeableConcept, mySrd);
-		assertTrue(result.isOk());
-		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
+		assertThat(result.isOk()).isTrue();
+		assertThat(result.getDisplay()).isEqualTo("Systolic blood pressure at First encounter");
 	}
 
 	@Test
@@ -263,12 +261,12 @@ public class FhirResourceDaoR5ValueSetTest extends BaseJpaR5Test {
 
 		// Create valueset
 		ValueSet vs = myValidationSupport.fetchResource(ValueSet.class, "http://hl7.org/fhir/ValueSet/address-use");
-		assertNotNull(vs);
+		assertThat(vs).isNotNull();
 		IIdType id = myValueSetDao.create(vs).getId().toUnqualifiedVersionless();
 
 		// Update valueset
 		vs.setName("Hello");
-		assertEquals("2", myValueSetDao.update(vs, mySrd).getId().getVersionIdPart());
+		assertThat(myValueSetDao.update(vs, mySrd).getId().getVersionIdPart()).isEqualTo("2");
 		runInTransaction(()->{
 			Optional<ResourceTable> resource = myResourceTableDao.findById(id.getIdPartAsLong());
 			assertTrue(resource.isPresent());
@@ -283,7 +281,7 @@ public class FhirResourceDaoR5ValueSetTest extends BaseJpaR5Test {
 		myValueSetDao.delete(id, mySrd);
 
 		// Verify it's deleted
-		assertThrows(ResourceGoneException.class, ()-> myValueSetDao.read(id, mySrd));
+		assertThatExceptionOfType(ResourceGoneException.class).isThrownBy(() -> myValueSetDao.read(id, mySrd));
 
 		// Expunge
 		myValueSetDao.expunge(id, new ExpungeOptions().setExpungeDeletedResources(true).setExpungeOldVersions(true), mySrd);
@@ -313,7 +311,7 @@ public class FhirResourceDaoR5ValueSetTest extends BaseJpaR5Test {
 
 		try {
 			myValueSetDao.expand(vs, null);
-			fail();
+			fail("");
 		} catch (InternalErrorException e) {
 			assertThat(e.getMessage()).contains(Msg.code(832) + "Expansion of ValueSet produced too many codes (maximum 50) - Operation aborted!");
 		}
@@ -345,8 +343,8 @@ public class FhirResourceDaoR5ValueSetTest extends BaseJpaR5Test {
 		ValidationSupportContext ctx = new ValidationSupportContext(myValidationSupport);
 		ConceptValidationOptions options= new ConceptValidationOptions();
 		IValidationSupport.CodeValidationResult outcome = myValidationSupport.validateCode(ctx, options, "http://cs", "CODE4", null, "http://vs");
-		assertNotNull(outcome);
-		assertTrue(outcome.isOk());
+		assertThat(outcome).isNotNull();
+		assertThat(outcome.isOk()).isTrue();
 		assertThat(outcome.getMessage()).startsWith("Code validation occurred using a ValueSet expansion that was pre-calculated at ");
 
 		// Expand valueset
@@ -370,8 +368,8 @@ public class FhirResourceDaoR5ValueSetTest extends BaseJpaR5Test {
 		IValidationSupport.CodeValidationResult result = myValueSetDao.validateCode(vsIdentifier, null, code, system, display, coding, codeableConcept, mySrd);
 
 		ourLog.info(result.getMessage());
-		assertTrue(result.isOk(), result.getMessage());
-		assertEquals("Male", result.getDisplay());
+		assertThat(result.isOk()).as(result.getMessage()).isTrue();
+		assertThat(result.getDisplay()).isEqualTo("Male");
 	}
 
 

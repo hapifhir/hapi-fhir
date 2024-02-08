@@ -23,8 +23,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -519,7 +518,7 @@ public class BlockRuleEvaluationSvcImplTest {
 			.thenReturn(blockList);
 
 		// test
-		assertEquals(expected, myRuleEvaluationSvc.isMdmMatchingBlocked((IAnyResource) patient), theTestCase.getId());
+		assertThat(myRuleEvaluationSvc.isMdmMatchingBlocked((IAnyResource) patient)).as(theTestCase.getId()).isEqualTo(expected);
 	}
 
 	@Test
@@ -531,6 +530,6 @@ public class BlockRuleEvaluationSvcImplTest {
 			.addGiven("Jane");
 
 		// test
-		assertFalse(myRuleEvaluationSvc.isMdmMatchingBlocked(patient));
+		assertThat(myRuleEvaluationSvc.isMdmMatchingBlocked(patient)).isFalse();
 	}
 }

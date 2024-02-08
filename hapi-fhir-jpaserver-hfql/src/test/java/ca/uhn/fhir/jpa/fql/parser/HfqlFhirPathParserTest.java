@@ -8,8 +8,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class HfqlFhirPathParserTest {
 
@@ -39,7 +38,7 @@ public class HfqlFhirPathParserTest {
 	void testDetermineDatatypeForPath(String theResourceType, String theFhirPath, HfqlDataTypeEnum theExpectedType) {
 		HfqlFhirPathParser svc = new HfqlFhirPathParser(FhirContext.forR4Cached());
 		HfqlDataTypeEnum actual = svc.determineDatatypeForPath(theResourceType, theFhirPath);
-		assertEquals(theExpectedType, actual);
+		assertThat(actual).isEqualTo(theExpectedType);
 	}
 
 
@@ -49,11 +48,11 @@ public class HfqlFhirPathParserTest {
 		int foundCount = 0;
 		for (BaseRuntimeElementDefinition<?> next : ctx.getElementDefinitions()) {
 			if (next instanceof RuntimePrimitiveDatatypeDefinition) {
-				assertNotNull(HfqlFhirPathParser.getHfqlDataTypeForFhirType(next.getName()), () -> "No mapping for type: " + next.getName());
+				assertThat(HfqlFhirPathParser.getHfqlDataTypeForFhirType(next.getName())).as(() -> "No mapping for type: " + next.getName()).isNotNull();
 				foundCount++;
 			}
 		}
-		assertEquals(21, foundCount);
+		assertThat(foundCount).isEqualTo(21);
 	}
 
 

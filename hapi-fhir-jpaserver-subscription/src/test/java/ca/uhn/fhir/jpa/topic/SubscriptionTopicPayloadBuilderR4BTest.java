@@ -17,11 +17,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 class SubscriptionTopicPayloadBuilderR4BTest {
 	private static final String TEST_TOPIC_URL = "test-builder-topic-url";
@@ -56,17 +52,17 @@ class SubscriptionTopicPayloadBuilderR4BTest {
 		Bundle payload = (Bundle) myStPayloadBuilder.buildPayload(List.of(myEncounter), myActiveSubscription, TEST_TOPIC_URL, RestOperationTypeEnum.DELETE);
 
 		// verify Bundle size
-		assertEquals(2, payload.getEntry().size());
+		assertThat(payload.getEntry().size()).isEqualTo(2);
 		List<Resource> resources = BundleUtil.toListOfResourcesOfType(ourFhirContext, payload, Resource.class);
-		assertEquals(1, resources.size());
+		assertThat(resources.size()).isEqualTo(1);
 
 		// verify SubscriptionStatus.notificationEvent.focus
 		verifySubscriptionStatusNotificationEvent(resources.get(0));
 
 		// verify Encounter entry
 		Bundle.BundleEntryComponent encounterEntry = payload.getEntry().get(1);
-		assertNull(encounterEntry.getResource());
-		assertNull(encounterEntry.getFullUrl());
+		assertThat(encounterEntry.getResource()).isNull();
+		assertThat(encounterEntry.getFullUrl()).isNull();
 		verifyRequestParameters(encounterEntry, org.hl7.fhir.r5.model.Bundle.HTTPVerb.DELETE.name(), "Encounter/1");
 	}
 
@@ -93,18 +89,18 @@ class SubscriptionTopicPayloadBuilderR4BTest {
 		Bundle payload = (Bundle) myStPayloadBuilder.buildPayload(List.of(myEncounter), myActiveSubscription, TEST_TOPIC_URL, restOperationType);
 
 		// verify Bundle size
-		assertEquals(2, payload.getEntry().size());
+		assertThat(payload.getEntry().size()).isEqualTo(2);
 		List<Resource> resources = BundleUtil.toListOfResourcesOfType(ourFhirContext, payload, Resource.class);
-		assertEquals(2, resources.size());
+		assertThat(resources.size()).isEqualTo(2);
 
 		// verify SubscriptionStatus.notificationEvent.focus
 		verifySubscriptionStatusNotificationEvent(resources.get(0));
 
 		// verify Encounter entry
 		Bundle.BundleEntryComponent encounterEntry = payload.getEntry().get(1);
-		assertEquals("Encounter", resources.get(1).getResourceType().name());
-		assertEquals(myEncounter, resources.get(1));
-		assertEquals(theFullUrl, encounterEntry.getFullUrl());
+		assertThat(resources.get(1).getResourceType().name()).isEqualTo("Encounter");
+		assertThat(resources.get(1)).isEqualTo(myEncounter);
+		assertThat(encounterEntry.getFullUrl()).isEqualTo(theFullUrl);
 		verifyRequestParameters(encounterEntry, theHttpMethod, theRequestUrl);
 	}
 
@@ -125,17 +121,17 @@ class SubscriptionTopicPayloadBuilderR4BTest {
 		Bundle payload = (Bundle) myStPayloadBuilder.buildPayload(List.of(myEncounter), myActiveSubscription, TEST_TOPIC_URL, restOperationType);
 
 		// verify Bundle size
-		assertEquals(2, payload.getEntry().size());
+		assertThat(payload.getEntry().size()).isEqualTo(2);
 		List<Resource> resources = BundleUtil.toListOfResourcesOfType(ourFhirContext, payload, Resource.class);
-		assertEquals(1, resources.size());
+		assertThat(resources.size()).isEqualTo(1);
 
 		// verify SubscriptionStatus.notificationEvent.focus
 		verifySubscriptionStatusNotificationEvent(resources.get(0));
 
 		// verify Encounter entry
 		Bundle.BundleEntryComponent encounterEntry = payload.getEntry().get(1);
-		assertNull(encounterEntry.getResource());
-		assertEquals(theFullUrl, encounterEntry.getFullUrl());
+		assertThat(encounterEntry.getResource()).isNull();
+		assertThat(encounterEntry.getFullUrl()).isEqualTo(theFullUrl);
 		verifyRequestParameters(encounterEntry, theHttpMethod, theRequestUrl);
 	}
 
@@ -154,31 +150,31 @@ class SubscriptionTopicPayloadBuilderR4BTest {
 		Bundle payload = (Bundle) myStPayloadBuilder.buildPayload(List.of(myEncounter), myActiveSubscription, TEST_TOPIC_URL, restOperationType);
 
 		// verify Bundle size
-		assertEquals(1, payload.getEntry().size());
+		assertThat(payload.getEntry().size()).isEqualTo(1);
 		List<Resource> resources = BundleUtil.toListOfResourcesOfType(ourFhirContext, payload, Resource.class);
-		assertEquals(1, resources.size());
+		assertThat(resources.size()).isEqualTo(1);
 
 		// verify SubscriptionStatus.notificationEvent.focus
-		assertEquals("SubscriptionStatus", resources.get(0).getResourceType().name());
-		assertEquals(1, ((SubscriptionStatus) resources.get(0)).getNotificationEvent().size());
+		assertThat(resources.get(0).getResourceType().name()).isEqualTo("SubscriptionStatus");
+		assertThat(((SubscriptionStatus) resources.get(0)).getNotificationEvent().size()).isEqualTo(1);
 		SubscriptionStatus.SubscriptionStatusNotificationEventComponent notificationEvent =
 				((SubscriptionStatus) resources.get(0)).getNotificationEventFirstRep();
-		assertFalse(notificationEvent.hasFocus());
+		assertThat(notificationEvent.hasFocus()).isFalse();
 	}
 
 	private void verifyRequestParameters(Bundle.BundleEntryComponent theEncounterEntry,
 										 String theHttpMethod, String theRequestUrl) {
-		assertNotNull(theEncounterEntry.getRequest());
-		assertEquals(theHttpMethod, theEncounterEntry.getRequest().getMethod().name());
-		assertEquals(theRequestUrl, theEncounterEntry.getRequest().getUrl());
+		assertThat(theEncounterEntry.getRequest()).isNotNull();
+		assertThat(theEncounterEntry.getRequest().getMethod().name()).isEqualTo(theHttpMethod);
+		assertThat(theEncounterEntry.getRequest().getUrl()).isEqualTo(theRequestUrl);
 	}
 
 	private void verifySubscriptionStatusNotificationEvent(Resource theResource) {
-		assertEquals("SubscriptionStatus", theResource.getResourceType().name());
-		assertEquals(1, ((SubscriptionStatus) theResource).getNotificationEvent().size());
+		assertThat(theResource.getResourceType().name()).isEqualTo("SubscriptionStatus");
+		assertThat(((SubscriptionStatus) theResource).getNotificationEvent().size()).isEqualTo(1);
 		SubscriptionStatus.SubscriptionStatusNotificationEventComponent notificationEvent =
 				((SubscriptionStatus) theResource).getNotificationEventFirstRep();
-		assertTrue(notificationEvent.hasFocus());
-		assertEquals(myEncounter.getId(), notificationEvent.getFocus().getReference());
+		assertThat(notificationEvent.hasFocus()).isTrue();
+		assertThat(notificationEvent.getFocus().getReference()).isEqualTo(myEncounter.getId());
 	}
 }

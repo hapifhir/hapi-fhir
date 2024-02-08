@@ -5,8 +5,7 @@ import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class ResourceIndexedSearchParamQuantityTest {
 
@@ -22,8 +21,8 @@ public class ResourceIndexedSearchParamQuantityTest {
 		token.calculateHashes();
 
 		// Make sure our hashing function gives consistent results
-		assertEquals(834432764963581074L, token.getHashIdentity().longValue());
-		assertEquals(-1970227166134682431L, token.getHashIdentityAndUnits().longValue());
+		assertThat(token.getHashIdentity().longValue()).isEqualTo(834432764963581074L);
+		assertThat(token.getHashIdentityAndUnits().longValue()).isEqualTo(-1970227166134682431L);
 	}
 
 
@@ -37,10 +36,10 @@ public class ResourceIndexedSearchParamQuantityTest {
 			.setValue(new BigDecimal(123));
 		val2.setPartitionSettings(new PartitionSettings());
 		val2.calculateHashes();
-		assertEquals(val1, val1);
-		assertEquals(val1, val2);
-		assertNotEquals(val1, null);
-		assertNotEquals(val1, "");
+		assertThat(val1).isEqualTo(val1);
+		assertThat(val2).isEqualTo(val1);
+		assertThat(null).isNotEqualTo(val1);
+		assertThat("").isNotEqualTo(val1);
 	}
 
 

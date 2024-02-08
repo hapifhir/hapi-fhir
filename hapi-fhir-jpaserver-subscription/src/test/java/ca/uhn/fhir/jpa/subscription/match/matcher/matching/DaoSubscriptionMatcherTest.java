@@ -26,7 +26,6 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.PlatformTransactionManager;
 
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
 import static org.mockito.Mockito.mock;
 
@@ -61,7 +60,7 @@ public class DaoSubscriptionMatcherTest {
 	 */
 	@Test
 	public void testSubmitterCanRunWithoutTransactionManager() {
-		assertNull(myTxManager);
+		assertThat(myTxManager).isNull();
 	}
 
 	@Configuration

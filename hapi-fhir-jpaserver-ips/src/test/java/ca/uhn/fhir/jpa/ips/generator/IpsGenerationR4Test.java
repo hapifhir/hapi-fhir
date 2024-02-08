@@ -44,12 +44,9 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.stringContainsInOrder;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * This test uses a complete R4 JPA server as a backend and wires the
@@ -96,12 +93,12 @@ public class IpsGenerationR4Test extends BaseResourceProviderR4Test {
 
 		// Verify
 		validateDocument(output);
-		assertEquals(117, output.getEntry().size());
+		assertThat(output.getEntry().size()).isEqualTo(117);
 		String patientId = findFirstEntryResource(output, Patient.class, 1).getId();
 		assertThat(patientId).matches("urn:uuid:.*");
 		MedicationStatement medicationStatement = findFirstEntryResource(output, MedicationStatement.class, 2);
-		assertEquals(patientId, medicationStatement.getSubject().getReference());
-		assertNull(medicationStatement.getInformationSource().getReference());
+		assertThat(medicationStatement.getSubject().getReference()).isEqualTo(patientId);
+		assertThat(medicationStatement.getInformationSource().getReference()).isNull();
 
 		List<String> sectionTitles = extractSectionTitles(output);
 		assertThat(sectionTitles).as(sectionTitles.toString()).containsExactly("Allergies and Intolerances", "Medication List", "Problem List", "History of Immunizations", "Diagnostic Results");
@@ -130,7 +127,7 @@ public class IpsGenerationR4Test extends BaseResourceProviderR4Test {
 		ourLog.info("Output: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
 
 		// Verify
-		assertEquals(74, output.getEntry().size());
+		assertThat(output.getEntry().size()).isEqualTo(74);
 	}
 
 	@Test
@@ -156,7 +153,7 @@ public class IpsGenerationR4Test extends BaseResourceProviderR4Test {
 		ourLog.info("Output: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
 
 		// Verify
-		assertEquals(80, output.getEntry().size());
+		assertThat(output.getEntry().size()).isEqualTo(80);
 	}
 
 	@Test
@@ -183,11 +180,11 @@ public class IpsGenerationR4Test extends BaseResourceProviderR4Test {
 
 		// Verify
 		validateDocument(output);
-		assertEquals(7, output.getEntry().size());
+		assertThat(output.getEntry().size()).isEqualTo(7);
 		String patientId = findFirstEntryResource(output, Patient.class, 1).getId();
 		assertThat(patientId).matches("urn:uuid:.*");
-		assertEquals(patientId, findEntryResource(output, Condition.class, 0, 2).getSubject().getReference());
-		assertEquals(patientId, findEntryResource(output, Condition.class, 1, 2).getSubject().getReference());
+		assertThat(findEntryResource(output, Condition.class, 0, 2).getSubject().getReference()).isEqualTo(patientId);
+		assertThat(findEntryResource(output, Condition.class, 1, 2).getSubject().getReference()).isEqualTo(patientId);
 
 		List<String> sectionTitles = extractSectionTitles(output);
 		assertThat(sectionTitles).as(sectionTitles.toString()).containsExactly("Allergies and Intolerances", "Medication List", "Problem List");
@@ -278,7 +275,7 @@ public class IpsGenerationR4Test extends BaseResourceProviderR4Test {
 		instanceValidator.setValidationSupport(new ValidationSupportChain(new IpsTerminologySvc(), myFhirContext.getValidationSupport()));
 		validator.registerValidatorModule(instanceValidator);
 		ValidationResult validation = validator.validateWithResult(theOutcome);
-		assertTrue(validation.isSuccessful(), () -> myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(validation.toOperationOutcome()));
+		assertThat(validation.isSuccessful()).as(() -> myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(validation.toOperationOutcome())).isTrue();
 
 		// Make sure that all refs have been replaced with UUIDs
 		List<ResourceReferenceInfo> references = myFhirContext.newTerser().getAllResourceReferences(theOutcome);
@@ -287,7 +284,7 @@ public class IpsGenerationR4Test extends BaseResourceProviderR4Test {
 		}
 		for (ResourceReferenceInfo next : references) {
 			if (!next.getResourceReference().getReferenceElement().getValue().startsWith("urn:uuid:")) {
-				fail(next.getName());
+				fail("", next.getName());
 			}
 		}
 	}
@@ -326,7 +323,7 @@ public class IpsGenerationR4Test extends BaseResourceProviderR4Test {
 			.map(Bundle.BundleEntryComponent::getResource)
 			.filter(r -> theType.isAssignableFrom(r.getClass()))
 			.toList();
-		assertEquals(theExpectedCount, resources.size());
+		assertThat(resources.size()).isEqualTo(theExpectedCount);
 		return (T) resources.get(index);
 	}
 

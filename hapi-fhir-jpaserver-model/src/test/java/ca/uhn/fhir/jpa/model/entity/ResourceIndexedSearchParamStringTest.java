@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.model.entity;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import org.junit.jupiter.api.Test;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -17,8 +18,8 @@ public class ResourceIndexedSearchParamStringTest {
 		token.calculateHashes();
 
 		// Make sure our hashing function gives consistent results
-		assertEquals(6598082761639188617L, token.getHashNormalizedPrefix().longValue());
-		assertEquals(-1970227166134682431L, token.getHashExact().longValue());
+		assertThat(token.getHashNormalizedPrefix().longValue()).isEqualTo(6598082761639188617L);
+		assertThat(token.getHashExact().longValue()).isEqualTo(-1970227166134682431L);
 	}
 
 	@Test
@@ -28,10 +29,10 @@ public class ResourceIndexedSearchParamStringTest {
 		token.calculateHashes();
 
 		// Should be the same as in testHashFunctions()
-		assertEquals(6598082761639188617L, token.getHashNormalizedPrefix().longValue());
+		assertThat(token.getHashNormalizedPrefix().longValue()).isEqualTo(6598082761639188617L);
 
 		// Should be different from testHashFunctions()
-		assertEquals(7045214018927566109L, token.getHashExact().longValue());
+		assertThat(token.getHashExact().longValue()).isEqualTo(7045214018927566109L);
 	}
 
 	@Test
@@ -83,10 +84,10 @@ public class ResourceIndexedSearchParamStringTest {
 		val2.setPartitionSettings(new PartitionSettings());
 		val2.setStorageSettings(new StorageSettings());
 		val2.calculateHashes();
-		assertEquals(val1, val1);
-		assertEquals(val1, val2);
-		assertNotEquals(val1, null);
-		assertNotEquals(val1, "");
+		assertThat(val1).isEqualTo(val1);
+		assertThat(val2).isEqualTo(val1);
+		assertThat(null).isNotEqualTo(val1);
+		assertThat("").isNotEqualTo(val1);
 	}
 
 	@Test
@@ -103,10 +104,10 @@ public class ResourceIndexedSearchParamStringTest {
 		val2.setPartitionSettings(new PartitionSettings().setIncludePartitionInSearchHashes(true));
 		val2.setStorageSettings(new StorageSettings());
 		val2.calculateHashes();
-		assertEquals(val1, val1);
-		assertEquals(val1, val2);
-		assertNotEquals(val1, null);
-		assertNotEquals(val1, "");
+		assertThat(val1).isEqualTo(val1);
+		assertThat(val2).isEqualTo(val1);
+		assertThat(null).isNotEqualTo(val1);
+		assertThat("").isNotEqualTo(val1);
 	}
 
 }

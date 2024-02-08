@@ -6,7 +6,7 @@ import org.hl7.fhir.r5.model.Subscription;
 import org.intellij.lang.annotations.Language;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class SubscriptionTopicSerializationTest {
 	FhirContext ourFhirContext = FhirContext.forR5Cached();
@@ -37,12 +37,12 @@ public class SubscriptionTopicSerializationTest {
 			""";
 
 		Subscription subscription = ourFhirContext.newJsonParser().parseResource(Subscription.class, input);
-		assertEquals("Subscription", subscription.getResourceType().name());
-		assertEquals("Encounter", subscription.getFilterByFirstRep().getResourceType());
+		assertThat(subscription.getResourceType().name()).isEqualTo("Subscription");
+		assertThat(subscription.getFilterByFirstRep().getResourceType()).isEqualTo("Encounter");
 
 		// Also test the other direction
 		String serialized = ourFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(subscription);
-		assertEquals(input.trim(), serialized);
+		assertThat(serialized).isEqualTo(input.trim());
 	}
 
 	@Test
@@ -84,11 +84,11 @@ public class SubscriptionTopicSerializationTest {
 
 		Bundle bundle = ourFhirContext.newJsonParser().parseResource(Bundle.class, input);
 		Subscription subscription = (Subscription) bundle.getEntry().get(0).getResource();
-		assertEquals("Subscription", subscription.getResourceType().name());
-		assertEquals("Encounter", subscription.getFilterByFirstRep().getResourceType());
+		assertThat(subscription.getResourceType().name()).isEqualTo("Subscription");
+		assertThat(subscription.getFilterByFirstRep().getResourceType()).isEqualTo("Encounter");
 
 		// Also test the other direction
 		String serialized = ourFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle);
-		assertEquals(input.trim(), serialized);
+		assertThat(serialized).isEqualTo(input.trim());
 	}
 }

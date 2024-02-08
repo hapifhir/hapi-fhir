@@ -50,9 +50,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -169,9 +167,9 @@ public class MdmOperationPointcutsIT extends BaseProviderR4Test {
 				@Hook(Pointcut.MDM_POST_MERGE_GOLDEN_RESOURCES)
 				void onUpdate(RequestDetails theDetails, MdmMergeEvent theEvent) {
 					called.getAndSet(true);
-					assertEquals("Patient/" + gp1.getIdPart(), theEvent.getFromResource().getId());
-					assertEquals("Patient/" + gp2.getIdPart(), theEvent.getToResource().getId());
-					assertTrue(theEvent.getFromResource().isGoldenResource() && theEvent.getToResource().isGoldenResource());
+					assertThat(theEvent.getFromResource().getId()).isEqualTo("Patient/" + gp1.getIdPart());
+					assertThat(theEvent.getToResource().getId()).isEqualTo("Patient/" + gp2.getIdPart());
+					assertThat(theEvent.getFromResource().isGoldenResource() && theEvent.getToResource().isGoldenResource()).isTrue();
 				}
 			};
 			myInterceptors.add(intereptor);
@@ -186,7 +184,7 @@ public class MdmOperationPointcutsIT extends BaseProviderR4Test {
 			);
 
 			// verify
-			assertTrue(called.get());
+			assertThat(called.get()).isTrue();
 		}
 
 		@Test
@@ -209,11 +207,11 @@ public class MdmOperationPointcutsIT extends BaseProviderR4Test {
 				@Hook(Pointcut.MDM_POST_UPDATE_LINK)
 				void onUpdate(RequestDetails theDetails, MdmLinkEvent theEvent) {
 					called.getAndSet(true);
-					assertEquals(1, theEvent.getMdmLinks().size());
+					assertThat(theEvent.getMdmLinks().size()).isEqualTo(1);
 					MdmLinkJson link = theEvent.getMdmLinks().get(0);
-					assertEquals(toSave, link.getMatchResult());
-					assertEquals("Patient/" + p1.getIdPart(), link.getSourceId());
-					assertEquals("Patient/" + gp1.getIdPart(), link.getGoldenResourceId());
+					assertThat(link.getMatchResult()).isEqualTo(toSave);
+					assertThat(link.getSourceId()).isEqualTo("Patient/" + p1.getIdPart());
+					assertThat(link.getGoldenResourceId()).isEqualTo("Patient/" + gp1.getIdPart());
 				}
 			};
 			myInterceptors.add(intereptor);
@@ -228,7 +226,7 @@ public class MdmOperationPointcutsIT extends BaseProviderR4Test {
 			);
 
 			// verify
-			assertTrue(called.get());
+			assertThat(called.get()).isTrue();
 		}
 
 		@Test
@@ -243,11 +241,11 @@ public class MdmOperationPointcutsIT extends BaseProviderR4Test {
 				@Hook(Pointcut.MDM_POST_CREATE_LINK)
 				void onCreate(RequestDetails theDetails, MdmLinkEvent theEvent) {
 					called.getAndSet(true);
-					assertEquals(1, theEvent.getMdmLinks().size());
+					assertThat(theEvent.getMdmLinks().size()).isEqualTo(1);
 					MdmLinkJson link = theEvent.getMdmLinks().get(0);
-					assertEquals(match, link.getMatchResult());
-					assertEquals("Patient/" + patient.getIdPart(), link.getSourceId());
-					assertEquals("Patient/" + golden.getIdPart(), link.getGoldenResourceId());
+					assertThat(link.getMatchResult()).isEqualTo(match);
+					assertThat(link.getSourceId()).isEqualTo("Patient/" + patient.getIdPart());
+					assertThat(link.getGoldenResourceId()).isEqualTo("Patient/" + golden.getIdPart());
 				}
 			};
 			myInterceptors.add(intereptor);
@@ -262,7 +260,7 @@ public class MdmOperationPointcutsIT extends BaseProviderR4Test {
 			);
 
 			// validation
-			assertTrue(called.get());
+			assertThat(called.get()).isTrue();
 		}
 
 		@Test
@@ -287,11 +285,11 @@ public class MdmOperationPointcutsIT extends BaseProviderR4Test {
 				void call(RequestDetails theRequestDetails, MdmLinkEvent theEvent) {
 					called.getAndSet(true);
 
-					assertEquals(1, theEvent.getMdmLinks().size());
+					assertThat(theEvent.getMdmLinks().size()).isEqualTo(1);
 					MdmLinkJson link = theEvent.getMdmLinks().get(0);
-					assertEquals("Patient/" + gp2.getIdPart(), link.getSourceId());
-					assertEquals("Patient/" + gp1.getIdPart(), link.getGoldenResourceId());
-					assertEquals(MdmMatchResultEnum.NO_MATCH, link.getMatchResult());
+					assertThat(link.getSourceId()).isEqualTo("Patient/" + gp2.getIdPart());
+					assertThat(link.getGoldenResourceId()).isEqualTo("Patient/" + gp1.getIdPart());
+					assertThat(link.getMatchResult()).isEqualTo(MdmMatchResultEnum.NO_MATCH);
 				}
 			};
 			myInterceptors.add(interceptor);
@@ -305,7 +303,7 @@ public class MdmOperationPointcutsIT extends BaseProviderR4Test {
 			);
 
 			// verify
-			assertTrue(called.get());
+			assertThat(called.get()).isTrue();
 		}
 
 		@ParameterizedTest
@@ -339,13 +337,13 @@ public class MdmOperationPointcutsIT extends BaseProviderR4Test {
 				void call(RequestDetails theRequestDetails, MdmClearEvent theEvent) {
 					called.set(true);
 
-					assertNotNull(theEvent.getResourceTypes());
+					assertThat(theEvent.getResourceTypes()).isNotNull();
 					if (isNotBlank(theResourceTypes)) {
-						assertEquals(resourceTypes.size(), theEvent.getResourceTypes().size());
+						assertThat(theEvent.getResourceTypes().size()).isEqualTo(resourceTypes.size());
 
 						for (IPrimitiveType<String> resourceName : resourceTypes) {
-							assertTrue(theEvent.getResourceTypes()
-								.contains(resourceName.getValueAsString()));
+							assertThat(theEvent.getResourceTypes()
+								.contains(resourceName.getValueAsString())).isTrue();
 						}
 					} else {
 						// null or empty resource types means all
@@ -368,7 +366,7 @@ public class MdmOperationPointcutsIT extends BaseProviderR4Test {
 			);
 
 			// verify
-			assertTrue(called.get());
+			assertThat(called.get()).isTrue();
 		}
 
 		@ParameterizedTest
@@ -401,13 +399,12 @@ public class MdmOperationPointcutsIT extends BaseProviderR4Test {
 				void call(RequestDetails theRequestDetails, MdmSubmitEvent theEvent) {
 					called.set(true);
 
-					assertEquals(asyncValue[0], theEvent.isBatchJob());
+					assertThat(theEvent.isBatchJob()).isEqualTo(asyncValue[0]);
 
 					String urlStr = String.join(", ", urls);
-					assertEquals(urls.size(), theEvent.getUrls().size(),
-						urlStr + " <-> " + String.join(", ", theEvent.getUrls()));
+					assertThat(theEvent.getUrls().size()).as(urlStr + " <-> " + String.join(", ", theEvent.getUrls())).isEqualTo(urls.size());
 					for (String url : urls) {
-						assertTrue(theEvent.getUrls().contains(url), "[" + urlStr + "] does not contain " + url + ".");
+						assertThat(theEvent.getUrls().contains(url)).as("[" + urlStr + "] does not contain " + url + ".").isTrue();
 					}
 					latch.call(1);
 				}
@@ -523,7 +520,7 @@ public class MdmOperationPointcutsIT extends BaseProviderR4Test {
 
 					// verify
 					latch.awaitExpected();
-					assertTrue(called.get());
+					assertThat(called.get()).isTrue();
 				}
 			}
 		}
@@ -574,15 +571,15 @@ public class MdmOperationPointcutsIT extends BaseProviderR4Test {
 					List<String> sids = theEvent.getSourceIds();
 
 					if (theParametersToSend == LinkHistoryParameters.SOURCE_IDS) {
-						assertTrue(gids.isEmpty());
+						assertThat(gids.isEmpty()).isTrue();
 					} else if (theParametersToSend == LinkHistoryParameters.GOLDEN_IDS) {
-						assertTrue(sids.isEmpty());
+						assertThat(sids.isEmpty()).isTrue();
 					} else {
-						assertFalse(sids.isEmpty() && gids.isEmpty());
+						assertThat(sids.isEmpty() && gids.isEmpty()).isFalse();
 					}
 
-					assertFalse(history.isEmpty());
-					assertEquals(2, history.size());
+					assertThat(history.isEmpty()).isFalse();
+					assertThat(history.size()).isEqualTo(2);
 				}
 			};
 			myInterceptors.add(interceptor);
@@ -598,8 +595,8 @@ public class MdmOperationPointcutsIT extends BaseProviderR4Test {
 			);
 
 			// verify
-			assertTrue(called.get());
-			assertFalse(retval.isEmpty());
+			assertThat(called.get()).isTrue();
+			assertThat(retval.isEmpty()).isFalse();
 		}
 
 

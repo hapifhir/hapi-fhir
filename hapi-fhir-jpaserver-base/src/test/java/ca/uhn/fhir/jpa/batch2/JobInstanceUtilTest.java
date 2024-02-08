@@ -6,7 +6,7 @@ import ca.uhn.fhir.test.utilities.RandomDataHelper;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 class JobInstanceUtilTest {
 
@@ -22,7 +22,7 @@ class JobInstanceUtilTest {
 		JobInstanceUtil.fromInstanceToEntity(instance, entity);
 		JobInstance instanceCopyBack = JobInstanceUtil.fromEntityToInstance(entity);
 
-		assertTrue(EqualsBuilder.reflectionEquals(instance, instanceCopyBack));
+		assertThat(EqualsBuilder.reflectionEquals(instance, instanceCopyBack)).isTrue();
 
 	}
 

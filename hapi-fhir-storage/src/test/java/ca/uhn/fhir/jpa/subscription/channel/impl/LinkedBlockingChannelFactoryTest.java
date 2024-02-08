@@ -21,7 +21,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class LinkedBlockingChannelFactoryTest {
 	private static final Logger ourLog = LoggerFactory.getLogger(LinkedBlockingChannelFactoryTest.class);
@@ -69,7 +68,7 @@ class LinkedBlockingChannelFactoryTest {
 
 		// and we should now have received 1 message
 		assertThat(myReceivedPayloads).hasSize(1);
-		assertEquals(TEST_PAYLOAD, myReceivedPayloads.get(0));
+		assertThat(myReceivedPayloads.get(0)).isEqualTo(TEST_PAYLOAD);
 
 		// Unblock the second latch so message handling is allowed to proceed
 		finishProcessingMessage(1);
@@ -79,7 +78,7 @@ class LinkedBlockingChannelFactoryTest {
 
 		// and we should now have received 2 messages
 		assertThat(myReceivedPayloads).hasSize(2);
-		assertEquals(TEST_PAYLOAD, myReceivedPayloads.get(1));
+		assertThat(myReceivedPayloads.get(1)).isEqualTo(TEST_PAYLOAD);
 	}
 
 	@SuppressWarnings("ResultOfMethodCallIgnored")

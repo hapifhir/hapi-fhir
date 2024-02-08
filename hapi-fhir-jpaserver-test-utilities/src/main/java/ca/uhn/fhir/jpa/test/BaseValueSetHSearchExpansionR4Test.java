@@ -80,11 +80,8 @@ import java.util.stream.IntStream;
 import static ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc.MAKE_LOADING_VERSION_CURRENT;
 import static ca.uhn.fhir.jpa.term.api.ITermLoaderSvc.LOINC_URI;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 import static org.hl7.fhir.common.hapi.validation.support.ValidationConstants.LOINC_LOW;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.anyCollection;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.nullable;
@@ -611,9 +608,9 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 
 			try {
 				myTermSvc.expandValueSet(null, vs);
-				fail();
+				fail("");
 			} catch (InvalidRequestException e) {
-				assertEquals(Msg.code(897) + "Don't know how to handle op=ISA on property copyright", e.getMessage());
+				assertThat(e.getMessage()).isEqualTo(Msg.code(897) + "Don't know how to handle op=ISA on property copyright");
 			}
 		}
 
@@ -637,9 +634,9 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 
 			try {
 				myTermSvc.expandValueSet(null, vs);
-				fail();
+				fail("");
 			} catch (InvalidRequestException e) {
-				assertEquals(Msg.code(895) + "Invalid filter, property copyright is LOINC-specific and cannot be used with system: http://example.com/my_code_system", e.getMessage());
+				assertThat(e.getMessage()).isEqualTo(Msg.code(895) + "Invalid filter, property copyright is LOINC-specific and cannot be used with system: http://example.com/my_code_system");
 			}
 
 		}
@@ -663,9 +660,9 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 
 			try {
 				myTermSvc.expandValueSet(null, vs);
-				fail();
+				fail("");
 			} catch (InvalidRequestException e) {
-				assertEquals(Msg.code(898) + "Don't know how to handle value=bogus on property copyright", e.getMessage());
+				assertThat(e.getMessage()).isEqualTo(Msg.code(898) + "Don't know how to handle value=bogus on property copyright");
 			}
 
 		}
@@ -820,7 +817,7 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 				.setOp(ValueSet.FilterOperator.EQUAL)
 				.setValue("43343-4");
 			outcome = myTermSvc.expandValueSet(null, vs);
-			assertEquals(0, outcome.getExpansion().getContains().size());
+			assertThat(outcome.getExpansion().getContains().size()).isEqualTo(0);
 
 			// Include
 			vs = new ValueSet();
@@ -832,7 +829,7 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 				.setOp(ValueSet.FilterOperator.EQUAL)
 				.setValue("47239-9");
 			outcome = myTermSvc.expandValueSet(null, vs);
-			assertEquals(0, outcome.getExpansion().getContains().size());
+			assertThat(outcome.getExpansion().getContains().size()).isEqualTo(0);
 		}
 
 		@Test
@@ -877,9 +874,9 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 
 			try {
 				myTermSvc.expandValueSet(null, vs);
-				fail();
+				fail("");
 			} catch (InvalidRequestException e) {
-				assertEquals(Msg.code(892) + "Don't know how to handle op=ISA on property ancestor", e.getMessage());
+				assertThat(e.getMessage()).isEqualTo(Msg.code(892) + "Don't know how to handle op=ISA on property ancestor");
 			}
 
 		}
@@ -904,9 +901,9 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 
 			try {
 				myTermSvc.expandValueSet(null, vs);
-				fail();
+				fail("");
 			} catch (InvalidRequestException e) {
-				assertEquals(Msg.code(895) + "Invalid filter, property ancestor is LOINC-specific and cannot be used with system: http://example.com/my_code_system", e.getMessage());
+				assertThat(e.getMessage()).isEqualTo(Msg.code(895) + "Invalid filter, property ancestor is LOINC-specific and cannot be used with system: http://example.com/my_code_system");
 			}
 
 		}
@@ -1035,7 +1032,7 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 				.setOp(ValueSet.FilterOperator.EQUAL)
 				.setValue("50015-7");
 			outcome = myTermSvc.expandValueSet(null, vs);
-			assertEquals(0, outcome.getExpansion().getContains().size());
+			assertThat(outcome.getExpansion().getContains().size()).isEqualTo(0);
 
 			// Include
 			vs = new ValueSet();
@@ -1119,9 +1116,9 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 
 			try {
 				myTermSvc.expandValueSet(null, vs);
-				fail();
+				fail("");
 			} catch (InvalidRequestException e) {
-				assertEquals(Msg.code(893) + "Don't know how to handle op=ISA on property child", e.getMessage());
+				assertThat(e.getMessage()).isEqualTo(Msg.code(893) + "Don't know how to handle op=ISA on property child");
 			}
 
 		}
@@ -1146,9 +1143,9 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 
 			try {
 				myTermSvc.expandValueSet(null, vs);
-				fail();
+				fail("");
 			} catch (InvalidRequestException e) {
-				assertEquals(Msg.code(895) + "Invalid filter, property child is LOINC-specific and cannot be used with system: http://example.com/my_code_system", e.getMessage());
+				assertThat(e.getMessage()).isEqualTo(Msg.code(895) + "Invalid filter, property child is LOINC-specific and cannot be used with system: http://example.com/my_code_system");
 			}
 
 		}
@@ -1278,7 +1275,7 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 				.setOp(ValueSet.FilterOperator.EQUAL)
 				.setValue("50015-7");
 			outcome = myTermSvc.expandValueSet(null, vs);
-			assertEquals(0, outcome.getExpansion().getContains().size());
+			assertThat(outcome.getExpansion().getContains().size()).isEqualTo(0);
 
 			// Include
 			vs = new ValueSet();
@@ -1362,9 +1359,9 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 
 			try {
 				myTermSvc.expandValueSet(null, vs);
-				fail();
+				fail("");
 			} catch (InvalidRequestException e) {
-				assertEquals(Msg.code(896) + "Don't know how to handle op=ISA on property descendant", e.getMessage());
+				assertThat(e.getMessage()).isEqualTo(Msg.code(896) + "Don't know how to handle op=ISA on property descendant");
 			}
 
 		}
@@ -1389,9 +1386,9 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 
 			try {
 				myTermSvc.expandValueSet(null, vs);
-				fail();
+				fail("");
 			} catch (InvalidRequestException e) {
-				assertEquals(Msg.code(895) + "Invalid filter, property descendant is LOINC-specific and cannot be used with system: http://example.com/my_code_system", e.getMessage());
+				assertThat(e.getMessage()).isEqualTo(Msg.code(895) + "Invalid filter, property descendant is LOINC-specific and cannot be used with system: http://example.com/my_code_system");
 			}
 
 		}
@@ -1546,7 +1543,7 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 				.setOp(ValueSet.FilterOperator.EQUAL)
 				.setValue("43343-4");
 			outcome = myTermSvc.expandValueSet(null, vs);
-			assertEquals(0, outcome.getExpansion().getContains().size());
+			assertThat(outcome.getExpansion().getContains().size()).isEqualTo(0);
 
 			// Include
 			vs = new ValueSet();
@@ -1558,7 +1555,7 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 				.setOp(ValueSet.FilterOperator.EQUAL)
 				.setValue("47239-9");
 			outcome = myTermSvc.expandValueSet(null, vs);
-			assertEquals(0, outcome.getExpansion().getContains().size());
+			assertThat(outcome.getExpansion().getContains().size()).isEqualTo(0);
 		}
 
 		@Test
@@ -1603,9 +1600,9 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 
 			try {
 				myTermSvc.expandValueSet(null, vs);
-				fail();
+				fail("");
 			} catch (InvalidRequestException e) {
-				assertEquals(Msg.code(893) + "Don't know how to handle op=ISA on property parent", e.getMessage());
+				assertThat(e.getMessage()).isEqualTo(Msg.code(893) + "Don't know how to handle op=ISA on property parent");
 			}
 
 		}
@@ -1630,9 +1627,9 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 
 			try {
 				myTermSvc.expandValueSet(null, vs);
-				fail();
+				fail("");
 			} catch (InvalidRequestException e) {
-				assertEquals(Msg.code(895) + "Invalid filter, property parent is LOINC-specific and cannot be used with system: http://example.com/my_code_system", e.getMessage());
+				assertThat(e.getMessage()).isEqualTo(Msg.code(895) + "Invalid filter, property parent is LOINC-specific and cannot be used with system: http://example.com/my_code_system");
 			}
 
 		}
@@ -1657,7 +1654,7 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 			include.setSystem(CS_URL);
 			try {
 				myTermSvc.expandValueSet(null, vs);
-				fail();
+				fail("");
 			} catch (InternalErrorException e) {
 				assertThat(e.getMessage()).contains(Msg.code(832) + "Expansion of ValueSet produced too many codes (maximum 50) - Operation aborted!");
 			}
@@ -1668,7 +1665,7 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 			include = vs.getCompose().addInclude();
 			include.setSystem(CS_URL);
 			ValueSet outcome = myTermSvc.expandValueSet(null, vs);
-			assertEquals(109, outcome.getExpansion().getContains().size());
+			assertThat(outcome.getExpansion().getContains().size()).isEqualTo(109);
 
 		}
 
@@ -1935,8 +1932,8 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 		@Test
 		public void testShouldNotFindAny() {
 			List<String> hits = search(allCodesNotIncludingSearched);
-			assertNotNull(hits);
-			assertTrue(hits.isEmpty());
+			assertThat(hits).isNotNull();
+			assertThat(hits.isEmpty()).isTrue();
 		}
 
 
@@ -1948,7 +1945,7 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 			allCodesNotIncludingSearched.addAll(insertIndex, existingCodes);
 
 			List<String> hits = search(allCodesNotIncludingSearched);
-			assertEquals(existingCodes.size(), hits.size());
+			assertThat(hits.size()).isEqualTo(existingCodes.size());
 		}
 
 
@@ -1959,7 +1956,7 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 
 			List<String> hits = search(allCodesNotIncludingSearched);
 
-			assertEquals(existingCodes.size(), hits.size());
+			assertThat(hits.size()).isEqualTo(existingCodes.size());
 		}
 
 
@@ -1968,7 +1965,7 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 			// insert half of existing codes in first sublist and half in last
 
 			List<List<String>> partitionedExistingCodes = ListUtils.partition(existingCodes, existingCodes.size() / 2);
-			assertEquals(2, partitionedExistingCodes.size());
+			assertThat(partitionedExistingCodes.size()).isEqualTo(2);
 
 			// insert first partition of existing codes into first sublist of searched codes
 			allCodesNotIncludingSearched.addAll(0, partitionedExistingCodes.get(0));
@@ -1977,7 +1974,7 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 			allCodesNotIncludingSearched.addAll(allCodesNotIncludingSearched.size(), partitionedExistingCodes.get(1));
 
 			List<String> hits = search(allCodesNotIncludingSearched);
-			assertEquals(existingCodes.size(), hits.size());
+			assertThat(hits.size()).isEqualTo(existingCodes.size());
 		}
 
 		private List<String> search(List<String> theSearchedCodes) {

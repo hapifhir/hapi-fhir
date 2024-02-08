@@ -4,9 +4,7 @@ import ca.uhn.fhir.jpa.subscription.match.registry.ActiveSubscription;
 import org.hl7.fhir.dstu3.model.Subscription;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class SubscriptionRegistryTest extends BaseSubscriptionRegistryTest {
 
@@ -17,16 +15,16 @@ public class SubscriptionRegistryTest extends BaseSubscriptionRegistryTest {
 		mySubscriptionRegistry.registerSubscriptionUnlessAlreadyRegistered(subscription);
 		assertRegistrySize(1);
 		ActiveSubscription origActiveSubscription = mySubscriptionRegistry.get(SUBSCRIPTION_ID);
-		assertEquals(ORIG_CRITERIA, origActiveSubscription.getCriteria().getCriteria());
+		assertThat(origActiveSubscription.getCriteria().getCriteria()).isEqualTo(ORIG_CRITERIA);
 
 		subscription.setCriteria(NEW_CRITERIA);
-		assertEquals(ORIG_CRITERIA, origActiveSubscription.getCriteria().getCriteria());
+		assertThat(origActiveSubscription.getCriteria().getCriteria()).isEqualTo(ORIG_CRITERIA);
 		mySubscriptionRegistry.registerSubscriptionUnlessAlreadyRegistered(subscription);
 		assertRegistrySize(1);
 		ActiveSubscription newActiveSubscription = mySubscriptionRegistry.get(SUBSCRIPTION_ID);
-		assertEquals(NEW_CRITERIA, newActiveSubscription.getCriteria().getCriteria());
+		assertThat(newActiveSubscription.getCriteria().getCriteria()).isEqualTo(NEW_CRITERIA);
 		// The same object
-		assertTrue(newActiveSubscription == origActiveSubscription);
+		assertThat(newActiveSubscription == origActiveSubscription).isTrue();
 	}
 
 	@Test
@@ -37,17 +35,17 @@ public class SubscriptionRegistryTest extends BaseSubscriptionRegistryTest {
 		assertRegistrySize(1);
 
 		ActiveSubscription origActiveSubscription = mySubscriptionRegistry.get(SUBSCRIPTION_ID);
-		assertEquals(ORIG_CRITERIA, origActiveSubscription.getCriteria().getCriteria());
+		assertThat(origActiveSubscription.getCriteria().getCriteria()).isEqualTo(ORIG_CRITERIA);
 
 		setChannel(subscription, Subscription.SubscriptionChannelType.EMAIL);
 
-		assertEquals(ORIG_CRITERIA, origActiveSubscription.getCriteria().getCriteria());
+		assertThat(origActiveSubscription.getCriteria().getCriteria()).isEqualTo(ORIG_CRITERIA);
 		mySubscriptionRegistry.registerSubscriptionUnlessAlreadyRegistered(subscription);
 		assertRegistrySize(1);
 
 		ActiveSubscription newActiveSubscription = mySubscriptionRegistry.get(SUBSCRIPTION_ID);
 		// A new object
-		assertFalse(newActiveSubscription == origActiveSubscription);
+		assertThat(newActiveSubscription == origActiveSubscription).isFalse();
 	}
 
 	@Test

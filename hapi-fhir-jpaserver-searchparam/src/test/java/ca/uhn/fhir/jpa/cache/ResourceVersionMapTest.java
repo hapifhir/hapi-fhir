@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 import java.util.Set;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 class ResourceVersionMapTest {
 
@@ -24,8 +24,8 @@ class ResourceVersionMapTest {
 		ResourceVersionMap resourceVersionMap = ResourceVersionMap.fromIdsWithVersions(ids);
 
 		// then
-	    assertEquals(Set.copyOf(ids), resourceVersionMap.getSourceIds());
-	    assertEquals(2, resourceVersionMap.get(new IdDt("Patient", "p1")));
+		assertThat(resourceVersionMap.getSourceIds()).isEqualTo(Set.copyOf(ids));
+		assertThat(resourceVersionMap.get(new IdDt("Patient", "p1"))).isEqualTo(2);
 	}
 
 }

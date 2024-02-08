@@ -37,7 +37,7 @@ import static ca.uhn.fhir.test.utilities.TagTestUtil.assertCodingsEqualAndInOrde
 import static ca.uhn.fhir.test.utilities.TagTestUtil.createMeta;
 import static ca.uhn.fhir.test.utilities.TagTestUtil.generateAllCodingPairs;
 import static ca.uhn.fhir.test.utilities.TagTestUtil.toStringList;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Contains some test case helper functions for testing the storage of meta properties: tag, security and profile
@@ -110,7 +110,7 @@ public class TagTestCasesUtil {
 		IIdType versionlessPatientId = createOutcome.getId().toVersionless();
 
 		DaoMethodOutcome updateOutcome = updatePatient(versionlessPatientId, theMetaInputOnUpdate);
-		assertEquals(theExpectNop, updateOutcome.isNop());
+		assertThat(updateOutcome.isNop()).isEqualTo(theExpectNop);
 
 		Patient patient = myPatientDao.read(versionlessPatientId, myRequestDetails);
 		verifyMeta(theExpectedMetaAfterUpdate, patient.getMeta());
@@ -133,7 +133,7 @@ public class TagTestCasesUtil {
 
 		Patient patient = myPatientDao.read(theResourceId, myRequestDetails);
 
-		assertEquals(theExpectedVersion, patient.getMeta().getVersionId());
+		assertThat(patient.getMeta().getVersionId()).isEqualTo(theExpectedVersion);
 
 		return patient;
 	}
@@ -282,7 +282,7 @@ public class TagTestCasesUtil {
 
 		IBaseResource resource = updateResourceAndVerifyMeta(metaInputOnCreate,  metaInputOnUpdate, expectedMetaAfterUpdate, false);
 		// expect the resource version to be 2, since the meta is updated
-		assertEquals("2", resource.getMeta().getVersionId());
+		assertThat(resource.getMeta().getVersionId()).isEqualTo("2");
 
 		//ensure version endpoint also returns tags sorted
 		IIdType version2Id = new IdType(String.format("%s/_history/2", resource.getIdElement().toVersionless()));
@@ -307,7 +307,7 @@ public class TagTestCasesUtil {
 	private void verifyMeta(IBaseMetaType theExpectedMeta, IBaseMetaType theActualMeta) {
 		assertCodingsEqualAndInOrder(theExpectedMeta.getTag(), theActualMeta.getTag());
 		assertCodingsEqualAndInOrder(theExpectedMeta.getSecurity(), theActualMeta.getSecurity());
-		assertEquals(toStringList(theExpectedMeta.getProfile()), toStringList(theActualMeta.getProfile()));
+		assertThat(toStringList(theActualMeta.getProfile())).isEqualTo(toStringList(theExpectedMeta.getProfile()));
 	}
 
 	public void setMetaOperationSupported(boolean theMetaOperationSupported) {

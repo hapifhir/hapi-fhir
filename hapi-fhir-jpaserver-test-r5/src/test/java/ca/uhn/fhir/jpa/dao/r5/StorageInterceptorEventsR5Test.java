@@ -19,8 +19,7 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
 @SuppressWarnings({"Duplicates"})
@@ -60,10 +59,10 @@ public class StorageInterceptorEventsR5Test extends BaseJpaR5Test {
 		// Initial search returns all
 		SearchParameterMap params = new SearchParameterMap();
 		IBundleProvider search = myPatientDao.search(params, mySrd);
-		assertTrue(search instanceof PersistedJpaBundleProvider, search.getClass().toString());
+		assertThat(search instanceof PersistedJpaBundleProvider).as(search.getClass().toString()).isTrue();
 		List<IBaseResource> found = search.getResources(0, 100);
-		assertEquals(3, found.size());
-		assertEquals(3, showedCounter.get());
+		assertThat(found.size()).isEqualTo(3);
+		assertThat(showedCounter.get()).isEqualTo(3);
 
 		// Delete and expunge one
 		myPatientDao.delete(new IdType("Patient/P1"));
@@ -73,8 +72,8 @@ public class StorageInterceptorEventsR5Test extends BaseJpaR5Test {
 		// Next search should return only the non-expunged ones
 		params = new SearchParameterMap();
 		found = myPatientDao.search(params, mySrd).getResources(0, 100);
-		assertEquals(2, found.size());
-		assertEquals(2, showedCounter.get());
+		assertThat(found.size()).isEqualTo(2);
+		assertThat(showedCounter.get()).isEqualTo(2);
 	}
 
 	@Test
@@ -104,10 +103,10 @@ public class StorageInterceptorEventsR5Test extends BaseJpaR5Test {
 		SearchParameterMap params = new SearchParameterMap();
 		params.setLoadSynchronous(true);
 		IBundleProvider search = myPatientDao.search(params, mySrd);
-		assertTrue(search instanceof SimpleBundleProvider, search.getClass().toString());
+		assertThat(search instanceof SimpleBundleProvider).as(search.getClass().toString()).isTrue();
 		List<IBaseResource> found = search.getResources(0, 100);
-		assertEquals(3, found.size());
-		assertEquals(3, showedCounter.get());
+		assertThat(found.size()).isEqualTo(3);
+		assertThat(showedCounter.get()).isEqualTo(3);
 
 		// Delete and expunge one
 		myPatientDao.delete(new IdType("Patient/P1"));
@@ -117,8 +116,8 @@ public class StorageInterceptorEventsR5Test extends BaseJpaR5Test {
 		// Next search should return only the non-expunged ones
 		params = new SearchParameterMap();
 		found = myPatientDao.search(params, mySrd).getResources(0, 100);
-		assertEquals(2, found.size());
-		assertEquals(2, showedCounter.get());
+		assertThat(found.size()).isEqualTo(2);
+		assertThat(showedCounter.get()).isEqualTo(2);
 	}
 
 	@AfterEach

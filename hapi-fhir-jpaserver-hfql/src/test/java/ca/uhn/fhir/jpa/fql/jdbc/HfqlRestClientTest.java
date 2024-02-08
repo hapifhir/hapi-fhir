@@ -39,9 +39,6 @@ import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
@@ -122,32 +119,32 @@ public class HfqlRestClientTest {
 
 		IHfqlExecutionResult result = myClient.execute(input, true, 2);
 		IHfqlExecutionResult.Row nextRow;
-		assertTrue(result.hasNext());
+		assertThat(result.hasNext()).isTrue();
 		nextRow = result.getNextRow();
-		assertEquals(0, nextRow.getRowOffset());
+		assertThat(nextRow.getRowOffset()).isEqualTo(0);
 		assertThat(nextRow.getRowValues()).containsExactly("Simpson", "Homer");
-		assertTrue(result.hasNext());
+		assertThat(result.hasNext()).isTrue();
 		nextRow = result.getNextRow();
-		assertEquals(3, nextRow.getRowOffset());
+		assertThat(nextRow.getRowOffset()).isEqualTo(3);
 		assertThat(nextRow.getRowValues()).containsExactly("Simpson", "Marge");
-		assertTrue(result.hasNext());
+		assertThat(result.hasNext()).isTrue();
 		nextRow = result.getNextRow();
-		assertEquals(5, nextRow.getRowOffset());
+		assertThat(nextRow.getRowOffset()).isEqualTo(5);
 		assertThat(nextRow.getRowValues()).containsExactly("Simpson", "Maggie");
-		assertTrue(result.hasNext());
+		assertThat(result.hasNext()).isTrue();
 		nextRow = result.getNextRow();
-		assertEquals(7, nextRow.getRowOffset());
+		assertThat(nextRow.getRowOffset()).isEqualTo(7);
 		assertThat(nextRow.getRowValues()).containsExactly("Simpson", "Lisa");
-		assertFalse(result.hasNext());
+		assertThat(result.hasNext()).isFalse();
 
 		verify(myFqlExecutor, times(1)).executeInitialSearch(myStatementCaptor.capture(), myLimitCaptor.capture(), myRequestDetailsCaptor.capture());
-		assertEquals(sql, myStatementCaptor.getValue());
+		assertThat(myStatementCaptor.getValue()).isEqualTo(sql);
 		String expectedAuthHeader = Constants.HEADER_AUTHORIZATION_VALPREFIX_BASIC + Base64Utils.encodeToString((USERNAME + ":" + PASSWORD).getBytes(StandardCharsets.UTF_8));
 
 
 		String actual = ourHeaderCaptureInterceptor.getCapturedHeaders().get(0).get(Constants.HEADER_AUTHORIZATION).get(0);
-		assertEquals(expectedAuthHeader, actual);
-		assertEquals(123, myLimitCaptor.getValue().intValue());
+		assertThat(actual).isEqualTo(expectedAuthHeader);
+		assertThat(myLimitCaptor.getValue().intValue()).isEqualTo(123);
 	}
 
 	@Nonnull

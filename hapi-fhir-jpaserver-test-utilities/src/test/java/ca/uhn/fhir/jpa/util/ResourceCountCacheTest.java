@@ -11,7 +11,7 @@ import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicLong;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -40,21 +40,21 @@ public class ResourceCountCacheTest {
 		// Cache is initialized on startup
 		ResourceCountCache cache = new ResourceCountCache(myFetcher);
 		cache.setCacheMillis(500);
-		assertEquals(null, cache.get());
+		assertThat(cache.get()).isEqualTo(null);
 
 		// Not time to update yet
 		cache.update();
-		assertEquals(Long.valueOf(1), cache.get().get("A"));
+		assertThat(cache.get().get("A")).isEqualTo(Long.valueOf(1));
 
 		// Wait a bit, still not time to update
 		ResourceCountCache.setNowForUnitTest(start + 400);
 		cache.update();
-		assertEquals(Long.valueOf(1), cache.get().get("A"));
+		assertThat(cache.get().get("A")).isEqualTo(Long.valueOf(1));
 
 		// Wait a bit more and the cache is expired
 		ResourceCountCache.setNowForUnitTest(start + 800);
 		cache.update();
-		assertEquals(Long.valueOf(2), cache.get().get("A"));
+		assertThat(cache.get().get("A")).isEqualTo(Long.valueOf(2));
 
 	}
 
@@ -71,18 +71,18 @@ public class ResourceCountCacheTest {
 		 * No matter how long we wait it should never load...
 		 */
 
-		assertEquals(null, cache.get());
+		assertThat(cache.get()).isEqualTo(null);
 
 		cache.update();
-		assertEquals(null, cache.get());
+		assertThat(cache.get()).isEqualTo(null);
 
 		ResourceCountCache.setNowForUnitTest(start + 400);
 		cache.update();
-		assertEquals(null, cache.get());
+		assertThat(cache.get()).isEqualTo(null);
 
 		ResourceCountCache.setNowForUnitTest(start + 80000);
 		cache.update();
-		assertEquals(null, cache.get());
+		assertThat(cache.get()).isEqualTo(null);
 
 	}
 

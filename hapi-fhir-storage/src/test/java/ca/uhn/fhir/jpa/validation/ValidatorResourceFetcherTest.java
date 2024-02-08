@@ -21,7 +21,6 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
@@ -60,6 +59,6 @@ public class ValidatorResourceFetcherTest extends BaseTest {
     RequestDetails r = new SystemRequestDetails();
     // test
     Element returnedResource = fetcher.fetch(v, r,"http://www.test-url-for-questionnaire.com/Questionnaire/test-id|1.0.0");
-    assertNotNull(returnedResource);
+		assertThat(returnedResource).isNotNull();
   }
 }

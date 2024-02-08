@@ -25,9 +25,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.fail;
 
 class HapiMigratorIT {
 	private static final Logger ourLog = LoggerFactory.getLogger(HapiMigratorIT.class);
@@ -42,7 +40,7 @@ class HapiMigratorIT {
 		HapiMigrator migrator = buildMigrator();
 		migrator.createMigrationTableIfRequired();
 		Integer count = myJdbcTemplate.queryForObject("SELECT COUNT(*) FROM " + MIGRATION_TABLENAME, Integer.class);
-		assertTrue(count > 0);
+		assertThat(count > 0).isTrue();
 		HapiMigrationDao migrationDao = new HapiMigrationDao(myDataSource, DriverTypeEnum.H2_EMBEDDED, MIGRATION_TABLENAME);
 		myMigrationStorageSvc = new HapiMigrationStorageSvc(migrationDao);
 
@@ -51,7 +49,7 @@ class HapiMigratorIT {
 	@AfterEach
 	void after() {
 		myJdbcTemplate.execute("DROP TABLE " + MIGRATION_TABLENAME);
-		assertEquals(0, myDataSource.getNumActive());
+		assertThat(myDataSource.getNumActive()).isEqualTo(0);
 		HapiMigrationLock.setMaxRetryAttempts(HapiMigrationLock.DEFAULT_MAX_RETRY_ATTEMPTS);
 		System.clearProperty(HapiMigrationLock.CLEAR_LOCK_TABLE_WITH_DESCRIPTION);
 	}
@@ -123,17 +121,17 @@ class HapiMigratorIT {
 		LatchMigrationTask latchMigrationTask = new LatchMigrationTask("first", "1");
 
 		HapiMigrator migrator = buildMigrator(latchMigrationTask);
-		assertEquals(0, countLockRecords());
+		assertThat(countLockRecords()).isEqualTo(0);
 
 		{
 			latchMigrationTask.setExpectedCount(1);
 			Future<MigrationResult> future = executor.submit(() -> migrator.migrate());
 			latchMigrationTask.awaitExpected();
-			assertEquals(1, countLockRecords());
+			assertThat(countLockRecords()).isEqualTo(1);
 			latchMigrationTask.release("1");
 
 			MigrationResult result = future.get();
-			assertEquals(0, countLockRecords());
+			assertThat(countLockRecords()).isEqualTo(0);
 			assertThat(result.succeededTasks).hasSize(1);
 		}
 
@@ -141,7 +139,7 @@ class HapiMigratorIT {
 			Future<MigrationResult> future = executor.submit(() -> migrator.migrate());
 
 			MigrationResult result = future.get();
-			assertEquals(0, countLockRecords());
+			assertThat(countLockRecords()).isEqualTo(0);
 			assertThat(result.succeededTasks).hasSize(0);
 		}
 
@@ -157,9 +155,9 @@ class HapiMigratorIT {
 
 		try {
 			migrator.migrate();
-			fail();
+			fail("");
 		} catch (HapiMigrationException e) {
-			assertEquals("HAPI-2153: Unable to obtain table lock - another database migration may be running.  If no other database migration is running, then the previous migration did not shut down properly and the lock record needs to be deleted manually.  The lock record is located in the TEST_MIGRATOR_TABLE table with INSTALLED_RANK = -100 and DESCRIPTION = " + description, e.getMessage());
+			assertThat(e.getMessage()).isEqualTo("HAPI-2153: Unable to obtain table lock - another database migration may be running.  If no other database migration is running, then the previous migration did not shut down properly and the lock record needs to be deleted manually.  The lock record is located in the TEST_MIGRATOR_TABLE table with INSTALLED_RANK = -100 and DESCRIPTION = " + description);
 		}
 	}
 

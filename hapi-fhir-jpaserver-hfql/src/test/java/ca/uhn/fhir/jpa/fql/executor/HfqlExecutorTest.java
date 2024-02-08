@@ -33,10 +33,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.CoreMatchers.hasItem;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.not;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
@@ -62,15 +58,15 @@ public class HfqlExecutorTest extends BaseHfqlExecutorTest {
 
 		// Verify
 		assertThat(result.getStatement().toSelectedColumnAliases()).containsExactly("name[0].given[1]", "name[0].family");
-		assertTrue(result.hasNext());
+		assertThat(result.hasNext()).isTrue();
 		IHfqlExecutionResult.Row nextRow = result.getNextRow();
-		assertEquals(3, nextRow.getRowOffset());
+		assertThat(nextRow.getRowOffset()).isEqualTo(3);
 		assertThat(nextRow.getRowValues()).containsExactly("Marie", "Simpson");
-		assertTrue(result.hasNext());
+		assertThat(result.hasNext()).isTrue();
 		nextRow = result.getNextRow();
-		assertEquals(4, nextRow.getRowOffset());
+		assertThat(nextRow.getRowOffset()).isEqualTo(4);
 		assertThat(nextRow.getRowValues()).containsExactly("Evelyn", "Simpson");
-		assertFalse(result.hasNext());
+		assertThat(result.hasNext()).isFalse();
 
 	}
 
@@ -104,7 +100,7 @@ public class HfqlExecutorTest extends BaseHfqlExecutorTest {
 		IHfqlExecutionResult.Row nextRow;
 		assertThat(result.getStatement().toSelectedColumnAliases()).containsExactly("versionId", "family");
 		for (int i = 4999; i >= 0; i--) {
-			assertTrue(result.hasNext());
+			assertThat(result.hasNext()).isTrue();
 			nextRow = result.getNextRow();
 			assertThat(nextRow.getRowValues()).as(nextRow.getRowValues().toString()).containsExactly(String.valueOf(i), "PT" + i);
 		}
@@ -148,16 +144,16 @@ public class HfqlExecutorTest extends BaseHfqlExecutorTest {
 
 		// Verify
 		IHfqlExecutionResult.Row nextRow;
-		assertTrue(result.hasNext());
+		assertThat(result.hasNext()).isTrue();
 		nextRow = result.getNextRow();
 		assertThat(nextRow.getRowValues()).as(nextRow.getRowValues().toString()).containsExactly("PT0", "2023-01-01");
-		assertTrue(result.hasNext());
+		assertThat(result.hasNext()).isTrue();
 		nextRow = result.getNextRow();
 		assertThat(nextRow.getRowValues()).as(nextRow.getRowValues().toString()).containsExactly("PT1", "2022-01-01");
-		assertTrue(result.hasNext());
+		assertThat(result.hasNext()).isTrue();
 		nextRow = result.getNextRow();
 		assertThat(nextRow.getRowValues()).as(nextRow.getRowValues().toString()).containsExactly("PT2", "");
-		assertFalse(result.hasNext());
+		assertThat(result.hasNext()).isFalse();
 	}
 
 
@@ -177,19 +173,19 @@ public class HfqlExecutorTest extends BaseHfqlExecutorTest {
 		IHfqlExecutionResult result = myHfqlExecutor.executeInitialSearch(statement, null, mySrd);
 		assertThat(result.getStatement().toSelectedColumnAliases()).containsExactly("name[0].given[1]", "name[0].family", "name", "name.given");
 		assertThat(result.getStatement().toSelectedColumnDataTypes()).containsExactly(HfqlDataTypeEnum.STRING, HfqlDataTypeEnum.STRING, HfqlDataTypeEnum.JSON, HfqlDataTypeEnum.JSON);
-		assertTrue(result.hasNext());
+		assertThat(result.hasNext()).isTrue();
 		nextRow = result.getNextRow();
-		assertEquals(0, nextRow.getRowOffset());
+		assertThat(nextRow.getRowOffset()).isEqualTo(0);
 		assertThat(nextRow.getRowValues()).containsExactly("Jay", "Simpson", "[{\"family\":\"Simpson\",\"given\":[\"Homer\",\"Jay\"]}]", "[\"Homer\", \"Jay\"]");
-		assertTrue(result.hasNext());
+		assertThat(result.hasNext()).isTrue();
 		nextRow = result.getNextRow();
-		assertEquals(2, nextRow.getRowOffset());
+		assertThat(nextRow.getRowOffset()).isEqualTo(2);
 		assertThat(nextRow.getRowValues()).containsExactly("El Barto", "Simpson", "[{\"family\":\"Simpson\",\"given\":[\"Bart\",\"El Barto\"]}]", "[\"Bart\", \"El Barto\"]");
-		assertTrue(result.hasNext());
+		assertThat(result.hasNext()).isTrue();
 
 		verify(patientDao, times(1)).search(mySearchParameterMapCaptor.capture(), any());
 		// Default count
-		assertNull(mySearchParameterMapCaptor.getValue().getCount());
+		assertThat(mySearchParameterMapCaptor.getValue().getCount()).isNull();
 	}
 
 	@Test
@@ -203,9 +199,9 @@ public class HfqlExecutorTest extends BaseHfqlExecutorTest {
 
 		IHfqlExecutionResult result = myHfqlExecutor.executeInitialSearch(statement, null, mySrd);
 		IHfqlExecutionResult.Row row = result.getNextRow();
-		assertEquals(IHfqlExecutionResult.ROW_OFFSET_ERROR, row.getRowOffset());
-		assertEquals("Failed to evaluate FHIRPath expression \"foo()\". Error: HAPI-2404: Error in ?? at 1, 1: The name foo is not a valid function name", row.getRowValues().get(0));
-		assertFalse(result.hasNext());
+		assertThat(row.getRowOffset()).isEqualTo(IHfqlExecutionResult.ROW_OFFSET_ERROR);
+		assertThat(row.getRowValues().get(0)).isEqualTo("Failed to evaluate FHIRPath expression \"foo()\". Error: HAPI-2404: Error in ?? at 1, 1: The name foo is not a valid function name");
+		assertThat(result.hasNext()).isFalse();
 	}
 
 	@Test
@@ -220,9 +216,9 @@ public class HfqlExecutorTest extends BaseHfqlExecutorTest {
 
 		IHfqlExecutionResult result = myHfqlExecutor.executeInitialSearch(statement, null, mySrd);
 		IHfqlExecutionResult.Row row = result.getNextRow();
-		assertEquals(IHfqlExecutionResult.ROW_OFFSET_ERROR, row.getRowOffset());
-		assertEquals(Msg.code(2403) + "Unable to evaluate FHIRPath expression \"meta.versionId > 1\". Error: HAPI-0255: Error evaluating FHIRPath expression: Unable to compare values of type id and integer (@char 3)", row.getRowValues().get(0));
-		assertFalse(result.hasNext());
+		assertThat(row.getRowOffset()).isEqualTo(IHfqlExecutionResult.ROW_OFFSET_ERROR);
+		assertThat(row.getRowValues().get(0)).isEqualTo(Msg.code(2403) + "Unable to evaluate FHIRPath expression \"meta.versionId > 1\". Error: HAPI-0255: Error evaluating FHIRPath expression: Unable to compare values of type id and integer (@char 3)");
+		assertThat(result.hasNext()).isFalse();
 	}
 
 	@Test
@@ -255,17 +251,17 @@ public class HfqlExecutorTest extends BaseHfqlExecutorTest {
 			""";
 
 		IHfqlExecutionResult result = myHfqlExecutor.executeInitialSearch(statement, null, mySrd);
-		assertTrue(result.hasNext());
+		assertThat(result.hasNext()).isTrue();
 		assertThat(result.getNextRow().getRowValues()).containsExactly("Homer");
-		assertTrue(result.hasNext());
+		assertThat(result.hasNext()).isTrue();
 		assertThat(result.getNextRow().getRowValues()).containsExactly("Homer");
-		assertTrue(result.hasNext());
+		assertThat(result.hasNext()).isTrue();
 		assertThat(result.getNextRow().getRowValues()).containsExactly("Ned");
-		assertTrue(result.hasNext());
+		assertThat(result.hasNext()).isTrue();
 		assertThat(result.getNextRow().getRowValues()).containsExactly("Ned");
-		assertTrue(result.hasNext());
+		assertThat(result.hasNext()).isTrue();
 		assertThat(result.getNextRow().getRowValues()).containsExactly("Bart");
-		assertFalse(result.hasNext());
+		assertThat(result.hasNext()).isFalse();
 	}
 
 	@Test
@@ -493,8 +489,8 @@ public class HfqlExecutorTest extends BaseHfqlExecutorTest {
 		assertThat(result.getStatement().toSelectedColumnAliases()).as(result.getStatement().toSelectedColumnAliases().toString()).contains("name[0].given[0]", "identifier.where(system = 'http://system' ).first().value");
 		nextRow = result.getNextRow();
 
-		assertEquals("Homer", nextRow.getRowValues().get(0));
-		assertEquals("value0", nextRow.getRowValues().get(1));
+		assertThat(nextRow.getRowValues().get(0)).isEqualTo("Homer");
+		assertThat(nextRow.getRowValues().get(1)).isEqualTo("value0");
 	}
 
 	@Test
@@ -513,9 +509,9 @@ public class HfqlExecutorTest extends BaseHfqlExecutorTest {
 		assertThat(result.getStatement().toSelectedColumnAliases()).as(result.getStatement().toSelectedColumnAliases().toString()).contains("name[0].given[0]", "identifier[0].value");
 		nextRow = result.getNextRow();
 
-		assertEquals("Homer", nextRow.getRowValues().get(0));
-		assertEquals("value0", nextRow.getRowValues().get(1));
-		assertFalse(result.hasNext());
+		assertThat(nextRow.getRowValues().get(0)).isEqualTo("Homer");
+		assertThat(nextRow.getRowValues().get(1)).isEqualTo("value0");
+		assertThat(result.hasNext()).isFalse();
 	}
 
 	/**
@@ -546,7 +542,7 @@ public class HfqlExecutorTest extends BaseHfqlExecutorTest {
 		assertThat(result.getStatement().toSelectedColumnAliases()).as(result.getStatement().toSelectedColumnAliases().toString()).contains("COL1", "COL2", "identifier[0].system + '|' + identifier[0].value");
 		nextRow = result.getNextRow();
 		assertThat(nextRow.getRowValues()).as(nextRow.getRowValues().toString()).containsExactly("");
-		assertFalse(result.hasNext());
+		assertThat(result.hasNext()).isFalse();
 	}
 
 	@Test
@@ -578,12 +574,12 @@ public class HfqlExecutorTest extends BaseHfqlExecutorTest {
 		assertThat(nextRow.getRowValues()).as(nextRow.getRowValues().toString()).containsExactly("1");
 		nextRow = result.getNextRow();
 		assertThat(nextRow.getRowValues()).as(nextRow.getRowValues().toString()).containsExactly("3");
-		assertFalse(result.hasNext());
+		assertThat(result.hasNext()).isFalse();
 
 		verify(observationDao, times(1)).search(mySearchParameterMapCaptor.capture(), any());
 		SearchParameterMap map = mySearchParameterMapCaptor.getValue();
-		assertEquals(1, map.size());
-		assertEquals("http://loinc.org|34752-6", map.get("code").get(0).get(0).getValueAsQueryToken(myCtx));
+		assertThat(map.size()).isEqualTo(1);
+		assertThat(map.get("code").get(0).get(0).getValueAsQueryToken(myCtx)).isEqualTo("http://loinc.org|34752-6");
 	}
 
 	@Test
@@ -599,15 +595,15 @@ public class HfqlExecutorTest extends BaseHfqlExecutorTest {
 		IHfqlExecutionResult.Row row;
 		IHfqlExecutionResult result = myHfqlExecutor.executeInitialSearch(statement, null, mySrd);
 
-		assertTrue(result.hasNext());
+		assertThat(result.hasNext()).isTrue();
 		row = result.getNextRow();
 		assertThat(row.getRowValues()).as(row.getRowValues().toString()).containsExactly("Homer");
 
-		assertTrue(result.hasNext());
+		assertThat(result.hasNext()).isTrue();
 		row = result.getNextRow();
 		assertThat(row.getRowValues()).as(row.getRowValues().toString()).containsExactly("Bart");
 
-		assertFalse(result.hasNext());
+		assertThat(result.hasNext()).isFalse();
 	}
 
 
@@ -629,7 +625,7 @@ public class HfqlExecutorTest extends BaseHfqlExecutorTest {
 		assertThat(result.getStatement().toSelectedColumnDataTypes()).as(result.getStatement().toSelectedColumnDataTypes().toString()).contains(HfqlDataTypeEnum.STRING);
 		nextRow = result.getNextRow();
 		assertThat(nextRow.getRowValues()).as(nextRow.getRowValues().toString()).containsExactly("Homer Simpson");
-		assertFalse(result.hasNext());
+		assertThat(result.hasNext()).isFalse();
 	}
 
 	@Test
@@ -676,11 +672,11 @@ public class HfqlExecutorTest extends BaseHfqlExecutorTest {
 
 		IHfqlExecutionResult result = myHfqlExecutor.executeInitialSearch(statement, null, mySrd);
 		assertThat(result.getStatement().toSelectedColumnAliases()).containsExactly("Given", "Family");
-		assertTrue(result.hasNext());
+		assertThat(result.hasNext()).isTrue();
 		IHfqlExecutionResult.Row nextRow = result.getNextRow();
-		assertEquals(2, nextRow.getRowOffset());
+		assertThat(nextRow.getRowOffset()).isEqualTo(2);
 		assertThat(nextRow.getRowValues()).containsExactly("El Barto", "Simpson");
-		assertFalse(result.hasNext());
+		assertThat(result.hasNext()).isFalse();
 
 	}
 
@@ -697,44 +693,44 @@ public class HfqlExecutorTest extends BaseHfqlExecutorTest {
 
 		IHfqlExecutionResult result = myHfqlExecutor.executeInitialSearch(statement, null, mySrd);
 		assertThat(result.getStatement().toSelectedColumnAliases()).containsExactly("Given", "Family");
-		assertTrue(result.hasNext());
+		assertThat(result.hasNext()).isTrue();
 		IHfqlExecutionResult.Row row = result.getNextRow();
-		assertEquals(0, row.getRowOffset());
+		assertThat(row.getRowOffset()).isEqualTo(0);
 		assertThat(row.getRowValues()).containsExactly("Jay", "Simpson");
-		assertFalse(result.hasNext());
+		assertThat(result.hasNext()).isFalse();
 
 	}
 
 	@Test
 	public void testIntrospectTables() {
 		IHfqlExecutionResult tables = myHfqlExecutor.introspectTables();
-		assertEquals("TABLE_NAME", tables.getStatement().toSelectedColumnAliases().get(2));
-		assertTrue(tables.hasNext());
-		assertEquals("Account", tables.getNextRow().getRowValues().get(2));
+		assertThat(tables.getStatement().toSelectedColumnAliases().get(2)).isEqualTo("TABLE_NAME");
+		assertThat(tables.hasNext()).isTrue();
+		assertThat(tables.getNextRow().getRowValues().get(2)).isEqualTo("Account");
 	}
 
 	@Test
 	public void testIntrospectColumns_NoSelector() {
 		IHfqlExecutionResult tables = myHfqlExecutor.introspectColumns(null, null);
-		assertEquals("TABLE_NAME", tables.getStatement().toSelectedColumnAliases().get(2), tables.getStatement().toSelectedColumnAliases().toString());
-		assertEquals("COLUMN_NAME", tables.getStatement().toSelectedColumnAliases().get(3), tables.getStatement().toSelectedColumnAliases().toString());
-		assertEquals("DATA_TYPE", tables.getStatement().toSelectedColumnAliases().get(4), tables.getStatement().toSelectedColumnAliases().toString());
-		assertTrue(tables.hasNext());
-		assertEquals("Account", tables.getNextRow().getRowValues().get(2));
-		assertEquals("coverage", tables.getNextRow().getRowValues().get(3));
-		assertEquals(Types.VARCHAR, tables.getNextRow().getRowValues().get(4));
+		assertThat(tables.getStatement().toSelectedColumnAliases().get(2)).as(tables.getStatement().toSelectedColumnAliases().toString()).isEqualTo("TABLE_NAME");
+		assertThat(tables.getStatement().toSelectedColumnAliases().get(3)).as(tables.getStatement().toSelectedColumnAliases().toString()).isEqualTo("COLUMN_NAME");
+		assertThat(tables.getStatement().toSelectedColumnAliases().get(4)).as(tables.getStatement().toSelectedColumnAliases().toString()).isEqualTo("DATA_TYPE");
+		assertThat(tables.hasNext()).isTrue();
+		assertThat(tables.getNextRow().getRowValues().get(2)).isEqualTo("Account");
+		assertThat(tables.getNextRow().getRowValues().get(3)).isEqualTo("coverage");
+		assertThat(tables.getNextRow().getRowValues().get(4)).isEqualTo(Types.VARCHAR);
 	}
 
 	@Test
 	public void testIntrospectColumns_TableSelector() {
 		IHfqlExecutionResult tables = myHfqlExecutor.introspectColumns("Patient", null);
-		assertEquals("TABLE_NAME", tables.getStatement().toSelectedColumnAliases().get(2), tables.getStatement().toSelectedColumnAliases().toString());
-		assertEquals("COLUMN_NAME", tables.getStatement().toSelectedColumnAliases().get(3), tables.getStatement().toSelectedColumnAliases().toString());
-		assertEquals("DATA_TYPE", tables.getStatement().toSelectedColumnAliases().get(4), tables.getStatement().toSelectedColumnAliases().toString());
-		assertTrue(tables.hasNext());
-		assertEquals("Patient", tables.getNextRow().getRowValues().get(2));
-		assertEquals("address", tables.getNextRow().getRowValues().get(3));
-		assertEquals(Types.VARCHAR, tables.getNextRow().getRowValues().get(4));
+		assertThat(tables.getStatement().toSelectedColumnAliases().get(2)).as(tables.getStatement().toSelectedColumnAliases().toString()).isEqualTo("TABLE_NAME");
+		assertThat(tables.getStatement().toSelectedColumnAliases().get(3)).as(tables.getStatement().toSelectedColumnAliases().toString()).isEqualTo("COLUMN_NAME");
+		assertThat(tables.getStatement().toSelectedColumnAliases().get(4)).as(tables.getStatement().toSelectedColumnAliases().toString()).isEqualTo("DATA_TYPE");
+		assertThat(tables.hasNext()).isTrue();
+		assertThat(tables.getNextRow().getRowValues().get(2)).isEqualTo("Patient");
+		assertThat(tables.getNextRow().getRowValues().get(3)).isEqualTo("address");
+		assertThat(tables.getNextRow().getRowValues().get(4)).isEqualTo(Types.VARCHAR);
 	}
 
 	@ValueSource(strings = {
@@ -753,9 +749,9 @@ public class HfqlExecutorTest extends BaseHfqlExecutorTest {
 	}
 
 	private static void assertErrorMessage(IHfqlExecutionResult result, String expected) {
-		assertTrue(result.hasNext());
+		assertThat(result.hasNext()).isTrue();
 		IHfqlExecutionResult.Row nextRow = result.getNextRow();
-		assertEquals(IHfqlExecutionResult.ROW_OFFSET_ERROR, nextRow.getRowOffset());
+		assertThat(nextRow.getRowOffset()).isEqualTo(IHfqlExecutionResult.ROW_OFFSET_ERROR);
 		assertThat(nextRow.getRowValues()).containsExactly(expected);
 	}
 
@@ -781,20 +777,20 @@ public class HfqlExecutorTest extends BaseHfqlExecutorTest {
 
 		assertThat(result.getStatement().toSelectedColumnAliases()).containsExactly("id", "meta.versionId", "value.ofType(Quantity).value");
 		assertThat(result.getStatement().toSelectedColumnDataTypes()).containsExactly(HfqlDataTypeEnum.STRING, HfqlDataTypeEnum.LONGINT, HfqlDataTypeEnum.DECIMAL);
-		assertTrue(result.hasNext());
+		assertThat(result.hasNext()).isTrue();
 		List<Object> nextRow = result.getNextRow().getRowValues();
-		assertEquals("123", nextRow.get(0));
-		assertEquals("5", nextRow.get(1));
-		assertEquals("500.1", nextRow.get(2));
+		assertThat(nextRow.get(0)).isEqualTo("123");
+		assertThat(nextRow.get(1)).isEqualTo("5");
+		assertThat(nextRow.get(2)).isEqualTo("500.1");
 
 		verify(patientDao, times(1)).search(mySearchParameterMapCaptor.capture(), any());
 		SearchParameterMap map = mySearchParameterMapCaptor.getValue();
-		assertEquals(1, map.get("_id").size());
-		assertEquals(2, map.get("_id").get(0).size());
-		assertNull(((TokenParam) map.get("_id").get(0).get(0)).getSystem());
-		assertEquals("123", ((TokenParam) map.get("_id").get(0).get(0)).getValue());
-		assertNull(((TokenParam) map.get("_id").get(0).get(1)).getSystem());
-		assertEquals("Patient/456", ((TokenParam) map.get("_id").get(0).get(1)).getValue());
+		assertThat(map.get("_id").size()).isEqualTo(1);
+		assertThat(map.get("_id").get(0).size()).isEqualTo(2);
+		assertThat(((TokenParam) map.get("_id").get(0).get(0)).getSystem()).isNull();
+		assertThat(((TokenParam) map.get("_id").get(0).get(0)).getValue()).isEqualTo("123");
+		assertThat(((TokenParam) map.get("_id").get(0).get(1)).getSystem()).isNull();
+		assertThat(((TokenParam) map.get("_id").get(0).get(1)).getValue()).isEqualTo("Patient/456");
 	}
 
 	@Test
@@ -810,18 +806,18 @@ public class HfqlExecutorTest extends BaseHfqlExecutorTest {
 
 		IHfqlExecutionResult result = myHfqlExecutor.executeInitialSearch(statement, null, mySrd);
 
-		assertTrue(result.hasNext());
+		assertThat(result.hasNext()).isTrue();
 		List<Object> nextRow = result.getNextRow().getRowValues();
-		assertEquals("HOMER0", nextRow.get(0));
+		assertThat(nextRow.get(0)).isEqualTo("HOMER0");
 
 		verify(patientDao, times(1)).search(mySearchParameterMapCaptor.capture(), any());
 		SearchParameterMap map = mySearchParameterMapCaptor.getValue();
-		assertEquals(1, map.get("_id").size());
-		assertEquals(2, map.get("_id").get(0).size());
-		assertNull(((TokenParam) map.get("_id").get(0).get(0)).getSystem());
-		assertEquals("HOMER0", ((TokenParam) map.get("_id").get(0).get(0)).getValue());
-		assertNull(((TokenParam) map.get("_id").get(0).get(1)).getSystem());
-		assertEquals("HOMER1", ((TokenParam) map.get("_id").get(0).get(1)).getValue());
+		assertThat(map.get("_id").size()).isEqualTo(1);
+		assertThat(map.get("_id").get(0).size()).isEqualTo(2);
+		assertThat(((TokenParam) map.get("_id").get(0).get(0)).getSystem()).isNull();
+		assertThat(((TokenParam) map.get("_id").get(0).get(0)).getValue()).isEqualTo("HOMER0");
+		assertThat(((TokenParam) map.get("_id").get(0).get(1)).getSystem()).isNull();
+		assertThat(((TokenParam) map.get("_id").get(0).get(1)).getValue()).isEqualTo("HOMER1");
 	}
 
 
@@ -836,8 +832,8 @@ public class HfqlExecutorTest extends BaseHfqlExecutorTest {
 			""";
 
 		IHfqlExecutionResult outcome = myHfqlExecutor.executeInitialSearch(statement, null, mySrd);
-		assertTrue(outcome.hasNext());
-		assertEquals("Homer", outcome.getNextRow().getRowValues().get(0));
+		assertThat(outcome.hasNext()).isTrue();
+		assertThat(outcome.getNextRow().getRowValues().get(0)).isEqualTo("Homer");
 
 	}
 
@@ -860,9 +856,9 @@ public class HfqlExecutorTest extends BaseHfqlExecutorTest {
 
 		assertThat(result.getStatement().toSelectedColumnAliases()).containsExactly("name.given");
 		assertThat(result.getStatement().toSelectedColumnDataTypes()).containsExactly(HfqlDataTypeEnum.JSON);
-		assertTrue(result.hasNext());
+		assertThat(result.hasNext()).isTrue();
 		List<Object> nextRow = result.getNextRow().getRowValues();
-		assertEquals("[\"1\\\"2\", \"1\\\\,2\"]", nextRow.get(0));
+		assertThat(nextRow.get(0)).isEqualTo("[\"1\\\"2\", \"1\\\\,2\"]");
 
 	}
 
@@ -883,10 +879,10 @@ public class HfqlExecutorTest extends BaseHfqlExecutorTest {
 
 		assertThat(result.getStatement().toSelectedColumnAliases()).containsExactly("name[0].given[0]", "foo");
 		assertThat(result.getStatement().toSelectedColumnDataTypes()).containsExactly(HfqlDataTypeEnum.STRING, HfqlDataTypeEnum.STRING);
-		assertTrue(result.hasNext());
+		assertThat(result.hasNext()).isTrue();
 		List<Object> nextRow = result.getNextRow().getRowValues();
-		assertEquals("Homer", nextRow.get(0));
-		assertNull(nextRow.get(1));
+		assertThat(nextRow.get(0)).isEqualTo("Homer");
+		assertThat(nextRow.get(1)).isNull();
 	}
 
 	@Test
@@ -904,12 +900,12 @@ public class HfqlExecutorTest extends BaseHfqlExecutorTest {
 
 		verify(patientDao, times(1)).search(mySearchParameterMapCaptor.capture(), any());
 		SearchParameterMap map = mySearchParameterMapCaptor.getValue();
-		assertEquals(1, map.get("_lastUpdated").size());
-		assertEquals(2, map.get("_lastUpdated").get(0).size());
-		assertEquals(ParamPrefixEnum.LESSTHAN, ((DateParam) map.get("_lastUpdated").get(0).get(0)).getPrefix());
-		assertEquals("2021", ((DateParam) map.get("_lastUpdated").get(0).get(0)).getValueAsString());
-		assertEquals(ParamPrefixEnum.GREATERTHAN, ((DateParam) map.get("_lastUpdated").get(0).get(1)).getPrefix());
-		assertEquals("2023", ((DateParam) map.get("_lastUpdated").get(0).get(1)).getValueAsString());
+		assertThat(map.get("_lastUpdated").size()).isEqualTo(1);
+		assertThat(map.get("_lastUpdated").get(0).size()).isEqualTo(2);
+		assertThat(((DateParam) map.get("_lastUpdated").get(0).get(0)).getPrefix()).isEqualTo(ParamPrefixEnum.LESSTHAN);
+		assertThat(((DateParam) map.get("_lastUpdated").get(0).get(0)).getValueAsString()).isEqualTo("2021");
+		assertThat(((DateParam) map.get("_lastUpdated").get(0).get(1)).getPrefix()).isEqualTo(ParamPrefixEnum.GREATERTHAN);
+		assertThat(((DateParam) map.get("_lastUpdated").get(0).get(1)).getValueAsString()).isEqualTo("2023");
 	}
 
 	@Test
@@ -927,10 +923,10 @@ public class HfqlExecutorTest extends BaseHfqlExecutorTest {
 
 		verify(patientDao, times(1)).search(mySearchParameterMapCaptor.capture(), any());
 		SearchParameterMap map = mySearchParameterMapCaptor.getValue();
-		assertEquals(1, map.get("active").size());
-		assertEquals(1, map.get("active").get(0).size());
-		assertNull(((TokenParam) map.get("active").get(0).get(0)).getSystem());
-		assertEquals("true", ((TokenParam) map.get("active").get(0).get(0)).getValue());
+		assertThat(map.get("active").size()).isEqualTo(1);
+		assertThat(map.get("active").get(0).size()).isEqualTo(1);
+		assertThat(((TokenParam) map.get("active").get(0).get(0)).getSystem()).isNull();
+		assertThat(((TokenParam) map.get("active").get(0).get(0)).getValue()).isEqualTo("true");
 	}
 
 	@Test
@@ -948,12 +944,12 @@ public class HfqlExecutorTest extends BaseHfqlExecutorTest {
 
 		verify(observationDao, times(1)).search(mySearchParameterMapCaptor.capture(), any());
 		SearchParameterMap map = mySearchParameterMapCaptor.getValue();
-		assertEquals(1, map.get("value-quantity").size());
-		assertEquals(1, map.get("value-quantity").get(0).size());
-		assertEquals("500", ((QuantityParam) map.get("value-quantity").get(0).get(0)).getValue().toString());
-		assertEquals(ParamPrefixEnum.LESSTHAN, ((QuantityParam) map.get("value-quantity").get(0).get(0)).getPrefix());
-		assertEquals("http://unitsofmeasure.org", ((QuantityParam) map.get("value-quantity").get(0).get(0)).getSystem());
-		assertEquals("kg", ((QuantityParam) map.get("value-quantity").get(0).get(0)).getUnits());
+		assertThat(map.get("value-quantity").size()).isEqualTo(1);
+		assertThat(map.get("value-quantity").get(0).size()).isEqualTo(1);
+		assertThat(((QuantityParam) map.get("value-quantity").get(0).get(0)).getValue().toString()).isEqualTo("500");
+		assertThat(((QuantityParam) map.get("value-quantity").get(0).get(0)).getPrefix()).isEqualTo(ParamPrefixEnum.LESSTHAN);
+		assertThat(((QuantityParam) map.get("value-quantity").get(0).get(0)).getSystem()).isEqualTo("http://unitsofmeasure.org");
+		assertThat(((QuantityParam) map.get("value-quantity").get(0).get(0)).getUnits()).isEqualTo("kg");
 	}
 
 	@Test
@@ -971,9 +967,9 @@ public class HfqlExecutorTest extends BaseHfqlExecutorTest {
 
 		verify(patientDao, times(1)).search(mySearchParameterMapCaptor.capture(), any());
 		SearchParameterMap map = mySearchParameterMapCaptor.getValue();
-		assertEquals(1, map.get("name").size());
-		assertEquals(1, map.get("name").get(0).size());
-		assertEquals("abc", ((StringParam) map.get("name").get(0).get(0)).getValue());
+		assertThat(map.get("name").size()).isEqualTo(1);
+		assertThat(map.get("name").get(0).size()).isEqualTo(1);
+		assertThat(((StringParam) map.get("name").get(0).get(0)).getValue()).isEqualTo("abc");
 	}
 
 	@Test
@@ -991,10 +987,10 @@ public class HfqlExecutorTest extends BaseHfqlExecutorTest {
 
 		verify(patientDao, times(1)).search(mySearchParameterMapCaptor.capture(), any());
 		SearchParameterMap map = mySearchParameterMapCaptor.getValue();
-		assertEquals(1, map.get("name").size());
-		assertEquals(1, map.get("name").get(0).size());
-		assertEquals("abc", ((StringParam) map.get("name").get(0).get(0)).getValue());
-		assertTrue(((StringParam) map.get("name").get(0).get(0)).isExact());
+		assertThat(map.get("name").size()).isEqualTo(1);
+		assertThat(map.get("name").get(0).size()).isEqualTo(1);
+		assertThat(((StringParam) map.get("name").get(0).get(0)).getValue()).isEqualTo("abc");
+		assertThat(((StringParam) map.get("name").get(0).get(0)).isExact()).isTrue();
 	}
 
 	@Test
@@ -1015,12 +1011,12 @@ public class HfqlExecutorTest extends BaseHfqlExecutorTest {
 
 		verify(patientDao, times(1)).search(mySearchParameterMapCaptor.capture(), any());
 		SearchParameterMap map = mySearchParameterMapCaptor.getValue();
-		assertEquals(2, map.get("name").size());
-		assertEquals(2, map.get("name").get(0).size());
-		assertEquals("A", ((StringParam) map.get("name").get(0).get(0)).getValue());
-		assertEquals("B,B", ((StringParam) map.get("name").get(0).get(1)).getValue());
-		assertEquals("C", ((StringParam) map.get("name").get(1).get(0)).getValue());
-		assertEquals("D", ((StringParam) map.get("name").get(1).get(1)).getValue());
+		assertThat(map.get("name").size()).isEqualTo(2);
+		assertThat(map.get("name").get(0).size()).isEqualTo(2);
+		assertThat(((StringParam) map.get("name").get(0).get(0)).getValue()).isEqualTo("A");
+		assertThat(((StringParam) map.get("name").get(0).get(1)).getValue()).isEqualTo("B,B");
+		assertThat(((StringParam) map.get("name").get(1).get(0)).getValue()).isEqualTo("C");
+		assertThat(((StringParam) map.get("name").get(1).get(1)).getValue()).isEqualTo("D");
 	}
 
 	@Test

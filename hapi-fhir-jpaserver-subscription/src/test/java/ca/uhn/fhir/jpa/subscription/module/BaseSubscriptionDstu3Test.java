@@ -12,9 +12,9 @@ import org.springframework.test.context.ContextConfiguration;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 import static org.awaitility.Awaitility.await;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
 
 @ContextConfiguration(classes = {TestSubscriptionDstu3Config.class})
 public abstract class BaseSubscriptionDstu3Test extends BaseSubscriptionTest {
@@ -47,7 +47,7 @@ public abstract class BaseSubscriptionDstu3Test extends BaseSubscriptionTest {
 					return t.toString();
 				})
 				.collect(Collectors.joining(", "));
-			fail("Size " + theList.size() + " is != target " + theTarget + " - Got: " + describeResults);
+			fail("", "Size " + theList.size() + " is != target " + theTarget + " - Got: " + describeResults);
 		}
 	}
 
@@ -77,7 +77,7 @@ public abstract class BaseSubscriptionDstu3Test extends BaseSubscriptionTest {
 	}
 
 	protected void assertRegistrySize(int theSubscriptionRegistrySize, int theSubscriptionChannelRegistrySize) {
-		assertEquals(theSubscriptionRegistrySize, mySubscriptionRegistry.size());
-		assertEquals(theSubscriptionChannelRegistrySize, mySubscriptionChannelRegistry.size());
+		assertThat(mySubscriptionRegistry.size()).isEqualTo(theSubscriptionRegistrySize);
+		assertThat(mySubscriptionChannelRegistry.size()).isEqualTo(theSubscriptionChannelRegistrySize);
 	}
 }

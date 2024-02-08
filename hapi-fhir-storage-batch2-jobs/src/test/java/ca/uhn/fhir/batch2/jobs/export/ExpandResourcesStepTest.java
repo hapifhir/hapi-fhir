@@ -45,8 +45,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
@@ -163,7 +162,7 @@ public class ExpandResourcesStepTest {
 		RunOutcome outcome = mySecondStep.run(input, sink);
 
 		// verify
-		assertEquals(RunOutcome.SUCCESS, outcome);
+		assertThat(outcome).isEqualTo(RunOutcome.SUCCESS);
 
 
 		// data sink
@@ -171,18 +170,18 @@ public class ExpandResourcesStepTest {
 		verify(sink)
 			.accept(expandedCaptor.capture());
 		ExpandedResourcesList expandedResources = expandedCaptor.getValue();
-		assertEquals(resources.size(), expandedResources.getStringifiedResources().size());
+		assertThat(expandedResources.getStringifiedResources().size()).isEqualTo(resources.size());
 		// we'll only verify a single element
 		// but we want to make sure it's as compact as possible
 		String stringifiedElement = expandedResources.getStringifiedResources().get(0);
-		assertFalse(stringifiedElement.contains("\t"));
-		assertFalse(stringifiedElement.contains("\n"));
-		assertFalse(stringifiedElement.contains(" "));
+		assertThat(stringifiedElement.contains("\t")).isFalse();
+		assertThat(stringifiedElement.contains("\n")).isFalse();
+		assertThat(stringifiedElement.contains(" ")).isFalse();
 
 		// Patient Search
 		ArgumentCaptor<SystemRequestDetails> patientSearchCaptor = ArgumentCaptor.forClass(SystemRequestDetails.class);
 		verify(patientDao).search(any(), patientSearchCaptor.capture());
-		assertEquals(input.getParameters().getPartitionId(), patientSearchCaptor.getValue().getRequestPartitionId());
+		assertThat(patientSearchCaptor.getValue().getRequestPartitionId()).isEqualTo(input.getParameters().getPartitionId());
 
 	}
 }

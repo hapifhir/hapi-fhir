@@ -63,7 +63,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static ca.uhn.fhir.jpa.test.config.TestR5Config.SELECT_QUERY_INCLUSION_CRITERIA_EXCLUDING_SEQUENCE_QUERIES;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.fail;
 
 @Configuration
 @Import({
@@ -129,7 +129,7 @@ public class TestR4Config {
 					ourLog.error("Exceeded maximum wait for connection (" + ourMaxThreads + " max)", e);
 					ourLog.info("Have {} outstanding - {} borrowed {} returned", (myBorrowedConnectionCount.get() - myReturnedConnectionCount.get()), myBorrowedConnectionCount.get(), myReturnedConnectionCount.get());
 					logGetConnectionStackTrace();
-					fail("Exceeded maximum wait for connection (" + ourMaxThreads + " max): " + e);
+					fail("", "Exceeded maximum wait for connection (" + ourMaxThreads + " max): " + e);
 					retVal = null;
 				}
 

@@ -53,8 +53,7 @@ import java.util.Set;
 
 import static ca.uhn.fhir.jpa.model.util.JpaConstants.OPERATION_EVERYTHING;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
 
 @ExtendWith(SpringExtension.class)
 @EnableJpaRepositories(repositoryFactoryBeanClass = EnversRevisionRepositoryFactoryBean.class)
@@ -111,7 +110,7 @@ public abstract class BaseDatabaseVerificationIT extends BaseJpaTest implements 
 		IIdType id = myPatientDao.create(patient, new SystemRequestDetails()).getId();
 
 		Patient actual = myPatientDao.read(id, new SystemRequestDetails());
-		assertEquals(name, actual.getName().get(0).getFamily());
+		assertThat(actual.getName().get(0).getFamily()).isEqualTo(name);
 	}
 
 
@@ -123,7 +122,7 @@ public abstract class BaseDatabaseVerificationIT extends BaseJpaTest implements 
 
 		myPatientDao.delete(id, new SystemRequestDetails());
 
-		assertThrows(ResourceGoneException.class, () -> myPatientDao.read(id, new SystemRequestDetails()));
+		assertThatExceptionOfType(ResourceGoneException.class).isThrownBy(() -> myPatientDao.read(id, new SystemRequestDetails()));
 	}
 
 

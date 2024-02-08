@@ -16,13 +16,12 @@ import jakarta.persistence.EntityManager;
 import java.math.BigDecimal;
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @ExtendWith(MockitoExtension.class)
 public class DaoSearchParamSynchronizerTest {
@@ -68,8 +67,8 @@ public class DaoSearchParamSynchronizerTest {
 	void synchronizeSearchParamsNumberOnlyValuesDifferent() {
 		final AddRemoveCount addRemoveCount = subject.synchronizeSearchParamsToDatabase(theParams, theEntity, existingParams);
 
-		assertEquals(0, addRemoveCount.getRemoveCount());
-		assertEquals(1, addRemoveCount.getAddCount());
+		assertThat(addRemoveCount.getRemoveCount()).isEqualTo(0);
+		assertThat(addRemoveCount.getAddCount()).isEqualTo(1);
 
 		verify(entityManager, never()).remove(any(BaseResourceIndex.class));
 		verify(entityManager, times(1)).merge(THE_SEARCH_PARAM_NUMBER);

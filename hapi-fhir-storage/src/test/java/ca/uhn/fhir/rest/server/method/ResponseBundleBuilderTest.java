@@ -38,8 +38,6 @@ import static ca.uhn.fhir.rest.api.Constants.LINK_SELF;
 import static java.lang.Math.max;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hl7.fhir.r4.model.Bundle.BundleType.SEARCHSET;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.when;
@@ -105,7 +103,7 @@ class ResponseBundleBuilderTest {
 
 			// verify
 		} catch (NullPointerException e) {
-			assertEquals("IBundleProvider returned a non-null offset, but did not return a non-null page size", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo("IBundleProvider returned a non-null offset, but did not return a non-null page size");
 		}
 	}
 
@@ -123,7 +121,7 @@ class ResponseBundleBuilderTest {
 
 			// verify
 		} catch (InternalErrorException e) {
-			assertEquals("HAPI-0435: Server method returned resource of type[Patient] with no ID specified (IResource#setId(IdDt) must be called)", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo("HAPI-0435: Server method returned resource of type[Patient] with no ID specified (IResource#setId(IdDt) must be called)");
 		}
 	}
 
@@ -187,8 +185,8 @@ class ResponseBundleBuilderTest {
 
 		// verify
 		// no next link
-		assertEquals(1, bundle.getLink().size());
-		assertEquals(DEFAULT_PAGE_SIZE, bundle.getEntry().size());
+		assertThat(bundle.getLink().size()).isEqualTo(1);
+		assertThat(bundle.getEntry().size()).isEqualTo(DEFAULT_PAGE_SIZE);
 	}
 
 	@ParameterizedTest
@@ -326,12 +324,12 @@ class ResponseBundleBuilderTest {
 		assertSelfLink(bundle);
 
 		Bundle.BundleLinkComponent nextLink = bundle.getLink().get(1);
-		assertEquals(LINK_NEXT, nextLink.getRelation());
-		assertEquals(TEST_SERVER_BASE + "?_getpages=" + SEARCH_ID + "&_pageId=" + nextPageId + "&_bundletype=" + SEARCHSET.toCode(), nextLink.getUrl());
+		assertThat(nextLink.getRelation()).isEqualTo(LINK_NEXT);
+		assertThat(nextLink.getUrl()).isEqualTo(TEST_SERVER_BASE + "?_getpages=" + SEARCH_ID + "&_pageId=" + nextPageId + "&_bundletype=" + SEARCHSET.toCode());
 
 		Bundle.BundleLinkComponent prevLink = bundle.getLink().get(2);
-		assertEquals(LINK_PREVIOUS, prevLink.getRelation());
-		assertEquals(TEST_SERVER_BASE + "?_getpages=" + SEARCH_ID + "&_pageId=" + prevPageId + "&_bundletype=" + SEARCHSET.toCode(), prevLink.getUrl());
+		assertThat(prevLink.getRelation()).isEqualTo(LINK_PREVIOUS);
+		assertThat(prevLink.getUrl()).isEqualTo(TEST_SERVER_BASE + "?_getpages=" + SEARCH_ID + "&_pageId=" + prevPageId + "&_bundletype=" + SEARCHSET.toCode());
 	}
 
 	@Test
@@ -424,22 +422,22 @@ class ResponseBundleBuilderTest {
 		assertSelfLink(bundle);
 
 		Bundle.BundleLinkComponent nextLink = bundle.getLink().get(1);
-		assertEquals(LINK_PREVIOUS, nextLink.getRelation());
+		assertThat(nextLink.getRelation()).isEqualTo(LINK_PREVIOUS);
 		int prevOffset = NEAR_END_NO_NEXT_REQUEST_OFFSET - DEFAULT_PAGE_SIZE;
-		assertEquals(TEST_SERVER_BASE + "?_getpages=" + SEARCH_ID + "&_getpagesoffset=" + prevOffset + "&_count=" + ResponseBundleBuilderTest.DEFAULT_PAGE_SIZE + "&_bundletype=" + SEARCHSET.toCode(), nextLink.getUrl());
+		assertThat(nextLink.getUrl()).isEqualTo(TEST_SERVER_BASE + "?_getpages=" + SEARCH_ID + "&_getpagesoffset=" + prevOffset + "&_count=" + ResponseBundleBuilderTest.DEFAULT_PAGE_SIZE + "&_bundletype=" + SEARCHSET.toCode());
 	}
 
 
 	private static void assertNextLinkOffset(Bundle theBundle, Integer theOffset, Integer theCount) {
 		Bundle.BundleLinkComponent nextLink = theBundle.getLink().get(1);
-		assertEquals(LINK_NEXT, nextLink.getRelation());
-		assertEquals(TEST_SERVER_BASE + "?_getpages=" + SEARCH_ID + "&_getpagesoffset=" + theOffset + "&_count=" + theCount + "&_bundletype=" + SEARCHSET.toCode(), nextLink.getUrl());
+		assertThat(nextLink.getRelation()).isEqualTo(LINK_NEXT);
+		assertThat(nextLink.getUrl()).isEqualTo(TEST_SERVER_BASE + "?_getpages=" + SEARCH_ID + "&_getpagesoffset=" + theOffset + "&_count=" + theCount + "&_bundletype=" + SEARCHSET.toCode());
 	}
 
 	private static void assertPrevLinkOffset(Bundle theBundle) {
 		Bundle.BundleLinkComponent nextLink = theBundle.getLink().get(2);
-		assertEquals(LINK_PREVIOUS, nextLink.getRelation());
-		assertEquals(TEST_SERVER_BASE + "?_getpages=" + SEARCH_ID + "&_getpagesoffset=" + 0 + "&_count=" + ResponseBundleBuilderTest.DEFAULT_PAGE_SIZE + "&_bundletype=" + SEARCHSET.toCode(), nextLink.getUrl());
+		assertThat(nextLink.getRelation()).isEqualTo(LINK_PREVIOUS);
+		assertThat(nextLink.getUrl()).isEqualTo(TEST_SERVER_BASE + "?_getpages=" + SEARCH_ID + "&_getpagesoffset=" + 0 + "&_count=" + ResponseBundleBuilderTest.DEFAULT_PAGE_SIZE + "&_bundletype=" + SEARCHSET.toCode());
 	}
 	private static void assertNextLink(Bundle theBundle, int theCount) {
 		assertNextLink(theBundle, theCount, theCount);
@@ -447,20 +445,20 @@ class ResponseBundleBuilderTest {
 
 	private static void assertNextLink(Bundle theBundle, int theCount, int theOffset) {
 		Bundle.BundleLinkComponent link = theBundle.getLink().get(1);
-		assertEquals(LINK_NEXT, link.getRelation());
-		assertEquals(TEST_SERVER_BASE + "/" + TEST_REQUEST_PATH + "?_count=" + theCount + "&_offset=" + theOffset, link.getUrl());
+		assertThat(link.getRelation()).isEqualTo(LINK_NEXT);
+		assertThat(link.getUrl()).isEqualTo(TEST_SERVER_BASE + "/" + TEST_REQUEST_PATH + "?_count=" + theCount + "&_offset=" + theOffset);
 	}
 
 	private static void assertPrevLink(Bundle theBundle, int theOffset) {
 		Bundle.BundleLinkComponent link = theBundle.getLink().get(2);
-		assertEquals(LINK_PREVIOUS, link.getRelation());
-		assertEquals(TEST_SERVER_BASE + "/" + TEST_REQUEST_PATH + "?_count=" + ResponseBundleBuilderTest.CURRENT_PAGE_SIZE + "&_offset=" + theOffset, link.getUrl());
+		assertThat(link.getRelation()).isEqualTo(LINK_PREVIOUS);
+		assertThat(link.getUrl()).isEqualTo(TEST_SERVER_BASE + "/" + TEST_REQUEST_PATH + "?_count=" + ResponseBundleBuilderTest.CURRENT_PAGE_SIZE + "&_offset=" + theOffset);
 	}
 
 	private static void assertSelfLink(Bundle bundle) {
 		Bundle.BundleLinkComponent link = bundle.getLinkFirstRep();
-		assertEquals(LINK_SELF, link.getRelation());
-		assertEquals(TEST_LINK_SELF, link.getUrl());
+		assertThat(link.getRelation()).isEqualTo(LINK_SELF);
+		assertThat(link.getUrl()).isEqualTo(TEST_LINK_SELF);
 	}
 
 	private List<IBaseResource> buildPatientList() {
@@ -524,16 +522,16 @@ class ResponseBundleBuilderTest {
 
 	private static void verifyBundle(Bundle theBundle, Integer theExpectedTotal, int theExpectedEntryCount, String theFirstId, String theLastId) {
 		ourLog.trace(ourFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(theBundle));
-		assertFalse(theBundle.isEmpty());
-		assertEquals(SEARCHSET, theBundle.getType());
-		assertEquals(theExpectedTotal, theBundle.getTotalElement().getValue());
+		assertThat(theBundle.isEmpty()).isFalse();
+		assertThat(theBundle.getType()).isEqualTo(SEARCHSET);
+		assertThat(theBundle.getTotalElement().getValue()).isEqualTo(theExpectedTotal);
 		List<Bundle.BundleEntryComponent> entries = theBundle.getEntry();
-		assertEquals(theExpectedEntryCount, entries.size());
+		assertThat(entries.size()).isEqualTo(theExpectedEntryCount);
 		if (theFirstId != null) {
-			assertEquals(theFirstId, entries.get(0).getResource().getId());
+			assertThat(entries.get(0).getResource().getId()).isEqualTo(theFirstId);
 		}
 		if (theLastId != null) {
-			assertEquals(theLastId, entries.get(theExpectedEntryCount - 1).getResource().getId());
+			assertThat(entries.get(theExpectedEntryCount - 1).getResource().getId()).isEqualTo(theLastId);
 		}
 	}
 

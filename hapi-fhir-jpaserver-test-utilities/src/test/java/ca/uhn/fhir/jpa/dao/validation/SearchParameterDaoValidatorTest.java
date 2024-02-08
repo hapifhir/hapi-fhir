@@ -27,6 +27,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.stream.Stream;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 import static org.hl7.fhir.r5.model.Enumerations.PublicationStatus.ACTIVE;
 import static org.hl7.fhir.r5.model.Enumerations.SearchParamType.COMPOSITE;
 import static org.hl7.fhir.r5.model.Enumerations.SearchParamType.DATE;
@@ -38,8 +40,6 @@ import static org.hl7.fhir.r5.model.Enumerations.SearchParamType.TOKEN;
 import static org.hl7.fhir.r5.model.Enumerations.SearchParamType.URI;
 import static org.hl7.fhir.r5.model.Enumerations.VersionIndependentResourceTypesAll.OBSERVATION;
 import static org.hl7.fhir.r5.model.Enumerations.VersionIndependentResourceTypesAll.PATIENT;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
 
@@ -124,10 +124,10 @@ public class SearchParameterDaoValidatorTest {
 
         try {
             mySvc.validate(sp);
-            fail();
+			fail("");
         } catch (UnprocessableEntityException ex) {
-            assertTrue(ex.getMessage().startsWith("HAPI-2347: "));
-            assertTrue(ex.getMessage().contains("Invalid component search parameter type: REFERENCE in component.definition: http://example.org/SearchParameter/observation-patient"));
+			assertThat(ex.getMessage().startsWith("HAPI-2347: ")).isTrue();
+			assertThat(ex.getMessage().contains("Invalid component search parameter type: REFERENCE in component.definition: http://example.org/SearchParameter/observation-patient")).isTrue();
         }
     }
 
@@ -164,10 +164,10 @@ public class SearchParameterDaoValidatorTest {
 
         try {
             mySvc.validate(sp);
-            fail();
+			fail("");
         } catch (UnprocessableEntityException ex) {
-            assertTrue(ex.getMessage().startsWith("HAPI-2347: "));
-            assertTrue(ex.getMessage().contains("Invalid component search parameter type: URI in component.definition: http://example.org/SearchParameter/component-value-canonical"));
+			assertThat(ex.getMessage().startsWith("HAPI-2347: ")).isTrue();
+			assertThat(ex.getMessage().contains("Invalid component search parameter type: URI in component.definition: http://example.org/SearchParameter/component-value-canonical")).isTrue();
         }
     }
 

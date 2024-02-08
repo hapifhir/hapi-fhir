@@ -47,7 +47,7 @@ import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.mdm.provider.MdmProviderDstu3Plus.DEFAULT_PAGE_SIZE;
 import static ca.uhn.fhir.mdm.provider.MdmProviderDstu3Plus.MAX_PAGE_SIZE;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
@@ -108,7 +108,7 @@ public class MdmControllerSvcImplTest extends BaseLinkR4Test {
 		MdmLink link = (MdmLink) myMdmLinkDaoSvc.findMdmLinkBySource(patient).get();
 		link.setMatchResult(MdmMatchResultEnum.POSSIBLE_MATCH);
 		saveLink(link);
-		assertEquals(MdmLinkSourceEnum.AUTO, link.getLinkSource());
+		assertThat(link.getLinkSource()).isEqualTo(MdmLinkSourceEnum.AUTO);
 		assertLinkCount(2);
 
 		MdmPageRequest pageRequest = new MdmPageRequest((Integer) null, null, DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE);
@@ -119,9 +119,9 @@ public class MdmControllerSvcImplTest extends BaseLinkR4Test {
 			new MdmTransactionContext(MdmTransactionContext.OperationType.QUERY_LINKS),
 			new SystemRequestDetails().setRequestPartitionId(RequestPartitionId.fromPartitionId(1)));
 
-		assertEquals(resultPage.getContent().size(), 1);
+		assertThat(1).isEqualTo(resultPage.getContent().size());
 
-		assertEquals(resultPage.getContent().get(0).getSourceId(), patient.getIdElement().getResourceType() + "/" + patient.getIdElement().getIdPart());
+		assertThat(patient.getIdElement().getResourceType() + "/" + patient.getIdElement().getIdPart()).isEqualTo(resultPage.getContent().get(0).getSourceId());
 
 		Mockito.verify(myRequestPartitionHelperSvc, Mockito.atLeastOnce()).validateHasPartitionPermissions(any(), eq("Patient"), argThat(new PartitionIdMatcher(requestPartitionId)));
 	}
@@ -139,7 +139,7 @@ public class MdmControllerSvcImplTest extends BaseLinkR4Test {
 		MdmLink link = (MdmLink) myMdmLinkDaoSvc.findMdmLinkBySource(patient).get();
 		link.setMatchResult(MdmMatchResultEnum.POSSIBLE_DUPLICATE);
 		saveLink(link);
-		assertEquals(MdmLinkSourceEnum.AUTO, link.getLinkSource());
+		assertThat(link.getLinkSource()).isEqualTo(MdmLinkSourceEnum.AUTO);
 		assertLinkCount(2);
 
 		runInTransaction(()->{
@@ -152,8 +152,8 @@ public class MdmControllerSvcImplTest extends BaseLinkR4Test {
 			new SystemRequestDetails().setRequestPartitionId(RequestPartitionId.fromPartitionId(1)), null);
 		myCaptureQueriesListener.logSelectQueries();
 
-		assertEquals(1, resultPage.getContent().size());
-		assertEquals(patient.getIdElement().getResourceType() + "/" + patient.getIdElement().getIdPart(), resultPage.getContent().get(0).getSourceId());
+		assertThat(resultPage.getContent().size()).isEqualTo(1);
+		assertThat(resultPage.getContent().get(0).getSourceId()).isEqualTo(patient.getIdElement().getResourceType() + "/" + patient.getIdElement().getIdPart());
 
 		Mockito.verify(myRequestPartitionHelperSvc, Mockito.atLeastOnce()).validateHasPartitionPermissions(any(), eq("Patient"), argThat(new PartitionIdMatcher(requestPartitionId)));
 	}

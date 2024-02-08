@@ -22,9 +22,7 @@ import ca.uhn.fhir.rest.param.UriAndListParam;
 import ca.uhn.fhir.rest.param.UriOrListParam;
 import ca.uhn.fhir.rest.param.UriParam;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 class SearchConverterTest {
 	private SearchConverter myFixture;
@@ -37,13 +35,13 @@ class SearchConverterTest {
 	@Test
 	void isSearchParameterShouldReturnTrue() {
 		boolean result = myFixture.isSearchResultParameter("_elements");
-		assertTrue(result);
+		assertThat(result).isTrue();
 	}
 
 	@Test
 	void isSearchParameterShouldReturnFalse() {
 		boolean result = myFixture.isSearchResultParameter("_id");
-		assertFalse(result);
+		assertThat(result).isFalse();
 	}
 
 	@Test
@@ -52,10 +50,10 @@ class SearchConverterTest {
 		boolean numberOrList = myFixture.isOrList(new NumberOrListParam());
 		boolean specialOrList = myFixture.isOrList(new SpecialOrListParam());
 		boolean tokenOrList = myFixture.isOrList(new TokenOrListParam());
-		assertTrue(uriOrList);
-		assertTrue(numberOrList);
-		assertTrue(specialOrList);
-		assertTrue(tokenOrList);
+		assertThat(uriOrList).isTrue();
+		assertThat(numberOrList).isTrue();
+		assertThat(specialOrList).isTrue();
+		assertThat(tokenOrList).isTrue();
 	}
 
 	@Test
@@ -64,22 +62,22 @@ class SearchConverterTest {
 		boolean numberAndList = myFixture.isAndList(new NumberAndListParam());
 		boolean specialAndList = myFixture.isAndList(new SpecialAndListParam());
 		boolean tokenAndList = myFixture.isAndList(new TokenAndListParam());
-		assertTrue(uriAndList);
-		assertTrue(numberAndList);
-		assertTrue(specialAndList);
-		assertTrue(tokenAndList);
+		assertThat(uriAndList).isTrue();
+		assertThat(numberAndList).isTrue();
+		assertThat(specialAndList).isTrue();
+		assertThat(tokenAndList).isTrue();
 	}
 
 	@Test
 	void isOrListShouldReturnFalse() {
 		boolean uriAndList = myFixture.isOrList(new UriAndListParam());
-		assertFalse(uriAndList);
+		assertThat(uriAndList).isFalse();
 	}
 
 	@Test
 	void isAndListShouldReturnFalse() {
 		boolean uriAndList = myFixture.isAndList(new UriOrListParam());
-		assertFalse(uriAndList);
+		assertThat(uriAndList).isFalse();
 	}
 
 	@Test
@@ -89,7 +87,7 @@ class SearchConverterTest {
 		myFixture.setParameterTypeValue(theKey, theValue);
 		String result = myFixture.searchParameterMap.toNormalizedQueryString(withFhirContext());
 		String expected = "?theOrKey=theSecondValue,theValue";
-		assertEquals(expected, result);
+		assertThat(result).isEqualTo(expected);
 	}
 
 	@Test
@@ -100,7 +98,7 @@ class SearchConverterTest {
 		String result = myFixture.searchParameterMap.toNormalizedQueryString(withFhirContext());
 		String expected =
 				"?theAndKey=theSecondValue,theValue&theAndKey=theSecondValueAgain,theValueAgain";
-		assertEquals(expected, result);
+		assertThat(result).isEqualTo(expected);
 	}
 
 	@Test
@@ -110,14 +108,14 @@ class SearchConverterTest {
 		String theKey = "theKey";
 		myFixture.setParameterTypeValue(theKey, theValue);
 		String result = myFixture.searchParameterMap.toNormalizedQueryString(withFhirContext());
-		assertEquals(expected, result);
+		assertThat(result).isEqualTo(expected);
 	}
 
 	@Test
 	void separateParameterTypesShouldSeparateSearchAndResultParams() {
 		myFixture.separateParameterTypes(withParamList());
-		assertEquals(2, myFixture.separatedSearchParameters.size());
-		assertEquals(3, myFixture.separatedResultParameters.size());
+		assertThat(myFixture.separatedSearchParameters.size()).isEqualTo(2);
+		assertThat(myFixture.separatedResultParameters.size()).isEqualTo(3);
 	}
 
 	@Test
@@ -125,9 +123,9 @@ class SearchConverterTest {
 		Map<String, String[]> expected = withParamListAsStrings();
 		myFixture.convertToStringMap(withParamList(), withFhirContext());
 		Map<String, String[]> result = myFixture.resultParameters;
-		assertEquals(result.keySet(), expected.keySet());
-		assertTrue(result.entrySet().stream()
-				.allMatch(e -> Arrays.equals(e.getValue(), expected.get(e.getKey()))));
+		assertThat(expected.keySet()).isEqualTo(result.keySet());
+		assertThat(result.entrySet().stream()
+				.allMatch(e -> Arrays.equals(e.getValue(),expected.get(e.getKey())))).isTrue();
 	}
 
 	Map<String, List<IQueryParameterType>> withParamList() {

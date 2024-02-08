@@ -13,11 +13,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 import javax.sql.DataSource;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @ExtendWith(MockitoExtension.class)
 class ConnectionPoolInfoProviderTest {
@@ -43,15 +39,15 @@ class ConnectionPoolInfoProviderTest {
 		@Test
 		void testGetMaxWaitMillis() {
 			Optional<Long> resOpt = tested.getMaxWaitMillis();
-			assertTrue(resOpt.isPresent());
-			assertEquals(MAX_WAIT_MILLIS, resOpt.get());
+			assertThat(resOpt.isPresent()).isTrue();
+			assertThat(resOpt.get()).isEqualTo(MAX_WAIT_MILLIS);
 		}
 
 		@Test
 		void testGetMaxConnectionSize() {
 			Optional<Integer> resOpt = tested.getTotalConnectionSize();
-			assertTrue(resOpt.isPresent());
-			assertEquals(MAX_CONNECTIONS_TOTAL, resOpt.get());
+			assertThat(resOpt.isPresent()).isTrue();
+			assertThat(resOpt.get()).isEqualTo(MAX_CONNECTIONS_TOTAL);
 		}
 
 	}
@@ -71,19 +67,19 @@ class ConnectionPoolInfoProviderTest {
 		@Test
 		void testGetMaxWaitMillis() {
 			Optional<Long> resOpt = tested.getMaxWaitMillis();
-			assertFalse(resOpt.isPresent());
+			assertThat(resOpt.isPresent()).isFalse();
 		}
 
 		@Test
 		void testGetMaxConnectionSize() {
 			Optional<Integer> resOpt = tested.getTotalConnectionSize();
-			assertFalse(resOpt.isPresent());
+			assertThat(resOpt.isPresent()).isFalse();
 		}
 
 		@Test
 		void testGetActiveConnections() {
 			Optional<Integer> resOpt = tested.getActiveConnections();
-			assertFalse(resOpt.isPresent());
+			assertThat(resOpt.isPresent()).isFalse();
 		}
 
 	}
@@ -102,8 +98,8 @@ class ConnectionPoolInfoProviderTest {
 			IConnectionPoolInfoProvider instantiatedProvider =
 				(IConnectionPoolInfoProvider) ReflectionTestUtils.getField(provider, "myProvider");
 
-			assertNotNull(instantiatedProvider);
-			assertTrue(instantiatedProvider.getClass().isAssignableFrom(BasicDataSourceConnectionPoolInfoProvider.class));
+			assertThat(instantiatedProvider).isNotNull();
+			assertThat(instantiatedProvider.getClass().isAssignableFrom(BasicDataSourceConnectionPoolInfoProvider.class)).isTrue();
 		}
 
 		@Test
@@ -115,8 +111,8 @@ class ConnectionPoolInfoProviderTest {
 
 			IConnectionPoolInfoProvider instantiatedProvider =
 				(IConnectionPoolInfoProvider) ReflectionTestUtils.getField(provider, "myProvider");
-			assertNotNull(instantiatedProvider);
-			assertTrue(instantiatedProvider.getClass().isAssignableFrom(BasicDataSourceConnectionPoolInfoProvider.class));
+			assertThat(instantiatedProvider).isNotNull();
+			assertThat(instantiatedProvider.getClass().isAssignableFrom(BasicDataSourceConnectionPoolInfoProvider.class)).isTrue();
 		}
 
 		@Test
@@ -126,7 +122,7 @@ class ConnectionPoolInfoProviderTest {
 			IConnectionPoolInfoProvider provider = new ConnectionPoolInfoProvider(proxyDs);
 			IConnectionPoolInfoProvider instantiatedProvider =
 				(IConnectionPoolInfoProvider) ReflectionTestUtils.getField(provider, "myProvider");
-			assertNull(instantiatedProvider);
+			assertThat(instantiatedProvider).isNull();
 		}
 
 		@Test
@@ -135,7 +131,7 @@ class ConnectionPoolInfoProviderTest {
 
 			IConnectionPoolInfoProvider instantiatedProvider =
 				(IConnectionPoolInfoProvider) ReflectionTestUtils.getField(provider, "myProvider");
-			assertNull(instantiatedProvider);
+			assertThat(instantiatedProvider).isNull();
 		}
 
 	}

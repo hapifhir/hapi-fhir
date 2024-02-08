@@ -14,7 +14,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class Icd10LoaderTest {
 
@@ -26,21 +26,21 @@ public class Icd10LoaderTest {
 		Icd10Loader loader = new Icd10Loader(codeSystem, codeSystemVersion);
 		loader.load(reader);
 
-		assertEquals("ICD-10-EN", codeSystem.getTitle());
-		assertEquals("International Statistical Classification of Diseases and Related Health Problems 10th Revision", codeSystem.getDescription());
-		assertEquals("2022-tree-expanded", codeSystemVersion.getCodeSystemVersionId());
+		assertThat(codeSystem.getTitle()).isEqualTo("ICD-10-EN");
+		assertThat(codeSystem.getDescription()).isEqualTo("International Statistical Classification of Diseases and Related Health Problems 10th Revision");
+		assertThat(codeSystemVersion.getCodeSystemVersionId()).isEqualTo("2022-tree-expanded");
 
 		List<TermConcept> rootConcepts = new ArrayList<>(codeSystemVersion.getConcepts());
-		assertEquals(2, rootConcepts.size());
+		assertThat(rootConcepts.size()).isEqualTo(2);
 		TermConcept chapterA = rootConcepts.get(0);
-		assertEquals("A", chapterA.getCode());
-		assertEquals("Fruit", chapterA.getDisplay());
+		assertThat(chapterA.getCode()).isEqualTo("A");
+		assertThat(chapterA.getDisplay()).isEqualTo("Fruit");
 		Collection<TermConceptProperty> properties = chapterA.getProperties();
-		assertEquals(2, properties.size());
-		assertEquals("Include fruit", chapterA.getStringProperty("inclusion"));
-		assertEquals("Things that are not fruit", chapterA.getStringProperty("exclusion"));
+		assertThat(properties.size()).isEqualTo(2);
+		assertThat(chapterA.getStringProperty("inclusion")).isEqualTo("Include fruit");
+		assertThat(chapterA.getStringProperty("exclusion")).isEqualTo("Things that are not fruit");
 
-		assertEquals("""
+		assertThat(toTree(rootConcepts)).isEqualTo("""
 						A "Fruit"
 						-A1-A3 "A1 to A3 type fruit"
 						--A1 "Apples"
@@ -50,7 +50,7 @@ public class Icd10LoaderTest {
 						-B1-B2 "A group of trees"
 						--B1 "Oak trees"
 						--B2 "Ash trees"
-                  """, toTree(rootConcepts));
+                  """);
 	}
 
 	private String toTree(List<TermConcept> concepts) {

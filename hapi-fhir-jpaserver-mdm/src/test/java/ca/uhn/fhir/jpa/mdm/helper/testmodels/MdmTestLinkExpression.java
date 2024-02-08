@@ -1,6 +1,6 @@
 package ca.uhn.fhir.jpa.mdm.helper.testmodels;
 
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.fail;
 
 public class MdmTestLinkExpression {
 
@@ -27,9 +27,7 @@ public class MdmTestLinkExpression {
 		String[] state = theStateString.split(",");
 		if (state.length != 4) {
 			// we're using this exclusively in test area
-			fail(
-				String.format("%s must contain 4 arguments; found %d", theStateString, state.length)
-			);
+			fail("", String.format("%s must contain 4 arguments; found %d", theStateString, state.length));
 		}
 
 		return state;

@@ -3,8 +3,7 @@ package ca.uhn.fhir.jpa.model.entity;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class ResourceIndexedSearchParamUriTest {
 
@@ -15,7 +14,7 @@ public class ResourceIndexedSearchParamUriTest {
 		token.calculateHashes();
 
 		// Make sure our hashing function gives consistent results
-		assertEquals(-6132951326739875838L, token.getHashUri().longValue());
+		assertThat(token.getHashUri().longValue()).isEqualTo(-6132951326739875838L);
 	}
 
 	@Test
@@ -28,10 +27,10 @@ public class ResourceIndexedSearchParamUriTest {
 			.setUri("http://foo");
 		val2.setPartitionSettings(new PartitionSettings());
 		val2.calculateHashes();
-		assertEquals(val1, val1);
-		assertEquals(val1, val2);
-		assertNotEquals(val1, null);
-		assertNotEquals(val1, "");
+		assertThat(val1).isEqualTo(val1);
+		assertThat(val2).isEqualTo(val1);
+		assertThat(null).isNotEqualTo(val1);
+		assertThat("").isNotEqualTo(val1);
 	}
 
 

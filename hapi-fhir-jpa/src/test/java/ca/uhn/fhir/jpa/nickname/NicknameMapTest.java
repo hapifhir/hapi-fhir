@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.io.StringReader;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class NicknameMapTest {
 	@Test
@@ -22,7 +21,7 @@ kent,ken,kenny,kendrick
 			""";
 		NicknameMap map = new NicknameMap();
 		map.load(new StringReader(testData));
-		assertEquals(7, map.size());
+		assertThat(map.size()).isEqualTo(7);
 		assertThat(map.getNicknamesFromFormalName("kenneth")).containsExactlyInAnyOrder("ken", "kenny", "kendrick");
 		assertThat(map.getFormalNamesFromNickname("ken")).containsExactlyInAnyOrder("kendall", "kendrick", "kendrik", "kenneth", "kenny", "kent");
 	}

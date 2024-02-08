@@ -6,8 +6,7 @@ import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class ResourceIndexedSearchParamNumberTest {
 	private static final String GRITTSCORE = "grittscore";
@@ -27,21 +26,21 @@ public class ResourceIndexedSearchParamNumberTest {
 
 	@Test
 	void notEqual() {
-		assertNotEquals(PARAM_VALUE_10_FIRST, PARAM_VALUE_12_FIRST);
-		assertNotEquals(PARAM_VALUE_12_FIRST, PARAM_VALUE_10_FIRST);
-		assertNotEquals(PARAM_VALUE_10_FIRST.hashCode(), PARAM_VALUE_12_FIRST.hashCode());
+		assertThat(PARAM_VALUE_12_FIRST).isNotEqualTo(PARAM_VALUE_10_FIRST);
+		assertThat(PARAM_VALUE_10_FIRST).isNotEqualTo(PARAM_VALUE_12_FIRST);
+		assertThat(PARAM_VALUE_12_FIRST.hashCode()).isNotEqualTo(PARAM_VALUE_10_FIRST.hashCode());
 	}
 
 	@Test
 	void equalByReference() {
-		assertEquals(PARAM_VALUE_10_FIRST, PARAM_VALUE_10_FIRST);
-		assertEquals(PARAM_VALUE_10_FIRST.hashCode(), PARAM_VALUE_10_FIRST.hashCode());
+		assertThat(PARAM_VALUE_10_FIRST).isEqualTo(PARAM_VALUE_10_FIRST);
+		assertThat(PARAM_VALUE_10_FIRST.hashCode()).isEqualTo(PARAM_VALUE_10_FIRST.hashCode());
 	}
 
 	@Test
 	void equalByContract() {
-		assertEquals(PARAM_VALUE_10_FIRST, PARAM_VALUE_10_SECOND);
-		assertEquals(PARAM_VALUE_10_SECOND, PARAM_VALUE_10_FIRST);
-		assertEquals(PARAM_VALUE_10_FIRST.hashCode(), PARAM_VALUE_10_SECOND.hashCode());
+		assertThat(PARAM_VALUE_10_SECOND).isEqualTo(PARAM_VALUE_10_FIRST);
+		assertThat(PARAM_VALUE_10_FIRST).isEqualTo(PARAM_VALUE_10_SECOND);
+		assertThat(PARAM_VALUE_10_SECOND.hashCode()).isEqualTo(PARAM_VALUE_10_FIRST.hashCode());
 	}
 }

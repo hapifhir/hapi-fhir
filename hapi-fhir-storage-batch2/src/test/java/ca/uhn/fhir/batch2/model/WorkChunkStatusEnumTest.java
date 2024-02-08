@@ -9,17 +9,15 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.CoreMatchers.hasItem;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class WorkChunkStatusEnumTest {
 	@ParameterizedTest
 	@EnumSource(WorkChunkStatusEnum.class)
 	void allStatesExceptCOMPLETEDareIncomplete(WorkChunkStatusEnum theEnum) {
 		if (theEnum == WorkChunkStatusEnum.COMPLETED) {
-			assertFalse(theEnum.isIncomplete());
+			assertThat(theEnum.isIncomplete()).isFalse();
 		} else {
-			assertTrue(theEnum.isIncomplete());
+			assertThat(theEnum.isIncomplete()).isTrue();
 		}
 	}
 

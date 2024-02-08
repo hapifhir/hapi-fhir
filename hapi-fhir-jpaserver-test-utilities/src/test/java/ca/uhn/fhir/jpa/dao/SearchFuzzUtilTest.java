@@ -10,7 +10,6 @@ import java.math.BigDecimal;
 import java.math.MathContext;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class SearchFuzzUtilTest {
 	private static final Logger ourLog = LoggerFactory.getLogger(SearchFuzzUtilTest.class);
@@ -20,7 +19,7 @@ public class SearchFuzzUtilTest {
 		BigDecimal in = new BigDecimal("200");
 		BigDecimal out = SearchFuzzUtil.calculateFuzzAmount(ParamPrefixEnum.EQUAL, in);
 		ourLog.info(out.toPlainString());
-		assertEquals("0.5", out.toPlainString());
+		assertThat(out.toPlainString()).isEqualTo("0.5");
 	}
 
 	@Test
@@ -28,7 +27,7 @@ public class SearchFuzzUtilTest {
 		BigDecimal in = new BigDecimal("200.");
 		BigDecimal out = SearchFuzzUtil.calculateFuzzAmount(ParamPrefixEnum.EQUAL, in);
 		ourLog.info(out.toPlainString());
-		assertEquals("0.5", out.toPlainString());
+		assertThat(out.toPlainString()).isEqualTo("0.5");
 	}
 
 	@Test

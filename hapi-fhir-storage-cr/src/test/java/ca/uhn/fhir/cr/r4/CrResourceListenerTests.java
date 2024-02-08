@@ -12,9 +12,7 @@ import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @ExtendWith(SpringExtension.class)
 public class CrResourceListenerTests extends BaseCrR4TestServer {
@@ -41,7 +39,7 @@ public class CrResourceListenerTests extends BaseCrR4TestServer {
 			.returnResourceType(MeasureReport.class)
 			.execute();
 
-		assertNotNull(report);
+		assertThat(report).isNotNull();
 
 		return report;
 	}
@@ -49,7 +47,7 @@ public class CrResourceListenerTests extends BaseCrR4TestServer {
 	@Test
 	void testCodeCacheInvalidation() throws InterruptedException {
 
-		assertTrue(myResourceChangeListenerRegistry.getWatchedResourceNames().contains("ValueSet"));
+		assertThat(myResourceChangeListenerRegistry.getWatchedResourceNames().contains("ValueSet")).isTrue();
 
 		loadBundle("ColorectalCancerScreeningsFHIR-bundle.json");
 		runEvaluateMeasure("2019-01-01", "2019-12-31", "Patient/numer-EXM130", "ColorectalCancerScreeningsFHIR", "Individual", null);
@@ -58,7 +56,7 @@ public class CrResourceListenerTests extends BaseCrR4TestServer {
 		myResourceChangeListenerCacheRefresher.refreshExpiredCachesAndNotifyListeners();
 
 		//cached valueSets
-		assertEquals(7, myEvaluationSettings.getValueSetCache().size());
+		assertThat(myEvaluationSettings.getValueSetCache().size()).isEqualTo(7);
 
 		//remove valueset from server
 		var id = new IdType("ValueSet/2.16.840.1.113883.3.464.1003.101.12.1001");
@@ -68,13 +66,13 @@ public class CrResourceListenerTests extends BaseCrR4TestServer {
 		myResourceChangeListenerCacheRefresher.refreshExpiredCachesAndNotifyListeners();
 
 		//_ALL_ valuesets should be removed from cache
-		assertEquals(0, myEvaluationSettings.getValueSetCache().size());
+		assertThat(myEvaluationSettings.getValueSetCache().size()).isEqualTo(0);
 	}
 
 	@Test
 	void testElmCacheInvalidation() throws InterruptedException {
 
-		assertTrue(myResourceChangeListenerRegistry.getWatchedResourceNames().contains("Library"));
+		assertThat(myResourceChangeListenerRegistry.getWatchedResourceNames().contains("Library")).isTrue();
 
 		loadBundle("ColorectalCancerScreeningsFHIR-bundle.json");
 		// evaluate-measure adds library to repository cache
@@ -84,7 +82,7 @@ public class CrResourceListenerTests extends BaseCrR4TestServer {
 		myResourceChangeListenerCacheRefresher.refreshExpiredCachesAndNotifyListeners();
 
 		//cached libraries
-		assertEquals(7, myEvaluationSettings.getLibraryCache().size());
+		assertThat(myEvaluationSettings.getLibraryCache().size()).isEqualTo(7);
 
 		//remove Library from server
 		var id = new IdType("Library/ColorectalCancerScreeningsFHIR");
@@ -94,20 +92,20 @@ public class CrResourceListenerTests extends BaseCrR4TestServer {
 		myResourceChangeListenerCacheRefresher.refreshExpiredCachesAndNotifyListeners();
 
 		//_ALL_ Libraries should be removed from cache
-		assertEquals(0, myEvaluationSettings.getLibraryCache().size());
+		assertThat(myEvaluationSettings.getLibraryCache().size()).isEqualTo(0);
 	}
 
 	@Test
 	void testAddNewVersionOfSameLibrary() throws InterruptedException {
 
-		assertTrue(myResourceChangeListenerRegistry.getWatchedResourceNames().contains("Library"));
+		assertThat(myResourceChangeListenerRegistry.getWatchedResourceNames().contains("Library")).isTrue();
 		// load measure bundle with measure library version
 		loadBundle("ColorectalCancerScreeningsFHIR-bundle.json");
 		// evaluate-measure adds library to repository cache
 		runEvaluateMeasure("2019-01-01", "2019-12-31", "Patient/numer-EXM130", "ColorectalCancerScreeningsFHIR", "Individual", null);
 
 		//cached libraries from bundle
-		assertEquals(7, myEvaluationSettings.getLibraryCache().size());
+		assertThat(myEvaluationSettings.getLibraryCache().size()).isEqualTo(7);
 
 		// manually refresh cache
 		myResourceChangeListenerCacheRefresher.refreshExpiredCachesAndNotifyListeners();
@@ -119,20 +117,20 @@ public class CrResourceListenerTests extends BaseCrR4TestServer {
 		myResourceChangeListenerCacheRefresher.refreshExpiredCachesAndNotifyListeners();
 
 		//cache should be invalidated for matching library name and version
-		assertEquals(6, myEvaluationSettings.getLibraryCache().size());
+		assertThat(myEvaluationSettings.getLibraryCache().size()).isEqualTo(6);
 	}
 
 	@Test
 	void testNewVersionLibraryAdd() throws InterruptedException {
 
-		assertTrue(myResourceChangeListenerRegistry.getWatchedResourceNames().contains("Library"));
+		assertThat(myResourceChangeListenerRegistry.getWatchedResourceNames().contains("Library")).isTrue();
 		// load measure bundle with measure library version
 		loadBundle("ColorectalCancerScreeningsFHIR-bundle.json");
 		// evaluate-measure adds library to repository cache
 		runEvaluateMeasure("2019-01-01", "2019-12-31", "Patient/numer-EXM130", "ColorectalCancerScreeningsFHIR", "Individual", null);
 
 		//cached libraries from bundle
-		assertEquals(7, myEvaluationSettings.getLibraryCache().size());
+		assertThat(myEvaluationSettings.getLibraryCache().size()).isEqualTo(7);
 
 		// manually refresh cache
 		myResourceChangeListenerCacheRefresher.refreshExpiredCachesAndNotifyListeners();
@@ -144,20 +142,20 @@ public class CrResourceListenerTests extends BaseCrR4TestServer {
 		myResourceChangeListenerCacheRefresher.refreshExpiredCachesAndNotifyListeners();
 
 		//cache should not be invalidated because name and version don't have a match in cache
-		assertEquals(7, myEvaluationSettings.getLibraryCache().size());
+		assertThat(myEvaluationSettings.getLibraryCache().size()).isEqualTo(7);
 	}
 
 	@Test
 	void testNewVersionValueSetAdd() throws InterruptedException {
 
-		assertTrue(myResourceChangeListenerRegistry.getWatchedResourceNames().contains("ValueSet"));
+		assertThat(myResourceChangeListenerRegistry.getWatchedResourceNames().contains("ValueSet")).isTrue();
 		// load measure bundle with measure library version
 		loadBundle("ColorectalCancerScreeningsFHIR-bundle.json");
 		// evaluate-measure adds valueset to repository cache
 		runEvaluateMeasure("2019-01-01", "2019-12-31", "Patient/numer-EXM130", "ColorectalCancerScreeningsFHIR", "Individual", null);
 
 		//cached valueset from bundle
-		assertEquals(8, myEvaluationSettings.getValueSetCache().size());
+		assertThat(myEvaluationSettings.getValueSetCache().size()).isEqualTo(8);
 
 		// manually refresh cache
 		myResourceChangeListenerCacheRefresher.refreshExpiredCachesAndNotifyListeners();
@@ -169,7 +167,7 @@ public class CrResourceListenerTests extends BaseCrR4TestServer {
 		myResourceChangeListenerCacheRefresher.refreshExpiredCachesAndNotifyListeners();
 
 		//cache should be invalidated for valueset url and removed
-		assertEquals(7, myEvaluationSettings.getValueSetCache().size());
+		assertThat(myEvaluationSettings.getValueSetCache().size()).isEqualTo(7);
 	}
 
 }

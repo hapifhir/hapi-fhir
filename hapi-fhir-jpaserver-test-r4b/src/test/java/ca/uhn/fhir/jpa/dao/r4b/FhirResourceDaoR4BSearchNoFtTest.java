@@ -18,7 +18,6 @@ import org.junit.jupiter.params.provider.ValueSource;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class FhirResourceDaoR4BSearchNoFtTest extends BaseJpaR4BTest {
 
@@ -86,12 +85,12 @@ public class FhirResourceDaoR4BSearchNoFtTest extends BaseJpaR4BTest {
 		SearchParameterMap map = SearchParameterMap
 			.newSynchronous("composition.patient.identifier", new TokenParam("http://foo", "bar"));
 		outcome = myBundleDao.search(map, mySrd);
-		assertEquals(1, outcome.size());
+		assertThat(outcome.size()).isEqualTo(1);
 
 		map = SearchParameterMap
 			.newSynchronous("composition", new ReferenceParam("patient.identifier", "http://foo|bar"));
 		outcome = myBundleDao.search(map, mySrd);
-		assertEquals(1, outcome.size());
+		assertThat(outcome.size()).isEqualTo(1);
 	}
 
 }

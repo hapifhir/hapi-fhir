@@ -24,8 +24,7 @@ import java.util.Map;
 import static ca.uhn.fhir.jpa.term.loinc.LoincCodingPropertiesHandler.ASK_AT_ORDER_ENTRY_PROP_NAME;
 import static ca.uhn.fhir.jpa.term.loinc.LoincCodingPropertiesHandler.ASSOCIATED_OBSERVATIONS_PROP_NAME;
 import static ca.uhn.fhir.jpa.term.loinc.LoincCodingPropertiesHandler.LOINC_NUM;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
@@ -130,10 +129,10 @@ class LoincCodingPropertiesHandlerTest {
 
 			// JUnit assertions
 			List<ILoggingEvent> logsList = testListAppender.list;
-			assertEquals(1, logsList.size());
-			assertEquals(Level.ERROR, logsList.get(0).getLevel());
-			assertTrue(logsList.get(0).getFormattedMessage().startsWith("Couldn't find TermConcept for code: 'ref-code-02'"));
-			assertTrue(logsList.get(0).getFormattedMessage().contains(thePropName));
+			assertThat(logsList.size()).isEqualTo(1);
+			assertThat(logsList.get(0).getLevel()).isEqualTo(Level.ERROR);
+			assertThat(logsList.get(0).getFormattedMessage().startsWith("Couldn't find TermConcept for code: 'ref-code-02'")).isTrue();
+			assertThat(logsList.get(0).getFormattedMessage().contains(thePropName)).isTrue();
 
 		} finally {
 			testLogger.detachAppender(testListAppender);

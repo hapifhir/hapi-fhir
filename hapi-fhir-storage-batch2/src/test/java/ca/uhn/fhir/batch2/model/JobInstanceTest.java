@@ -4,7 +4,7 @@ import ca.uhn.fhir.test.utilities.RandomDataHelper;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 class JobInstanceTest {
 
@@ -17,8 +17,8 @@ class JobInstanceTest {
 		// when
 		JobInstance copy = new JobInstance(instance);
 
-	    // then
-		assertTrue(EqualsBuilder.reflectionEquals(instance, copy));
+		// then
+		assertThat(EqualsBuilder.reflectionEquals(instance, copy)).isTrue();
 	}
 	
 }

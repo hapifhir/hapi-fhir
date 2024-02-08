@@ -25,7 +25,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -78,7 +79,7 @@ public class IdHelperServiceTest {
 		when(myStorageSettings.isDeleteEnabled()).thenReturn(true);
 
 		final ResourceNotFoundException resourceNotFoundException = assertThrows(ResourceNotFoundException.class, () -> subject.resolveResourcePersistentIds(requestPartitionId, resourceType, ids, theExcludeDeleted));
-		assertEquals("HAPI-2001: Resource Patient/123 is not known", resourceNotFoundException.getMessage());
+		assertThat(resourceNotFoundException.getMessage()).isEqualTo("HAPI-2001: Resource Patient/123 is not known");
     }
 
     @Test
@@ -101,8 +102,8 @@ public class IdHelperServiceTest {
 		Map<String, JpaPid> actualIds = subject.resolveResourcePersistentIds(requestPartitionId, resourceType, ids, theExcludeDeleted);
 
 		//verifyResult
-		assertFalse(actualIds.isEmpty());
-		assertNull(actualIds.get(ids.get(0)));
+		assertThat(actualIds.isEmpty()).isFalse();
+		assertThat(actualIds.get(ids.get(0))).isNull();
     }
 
     private Root<ResourceTable> getMockedFrom() {

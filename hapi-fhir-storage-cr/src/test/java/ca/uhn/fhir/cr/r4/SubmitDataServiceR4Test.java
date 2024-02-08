@@ -15,8 +15,6 @@ import org.opencds.cqf.fhir.utility.search.Searches;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 public class SubmitDataServiceR4Test extends BaseCrR4TestServer {
 
 	@Autowired
@@ -52,7 +50,7 @@ public class SubmitDataServiceR4Test extends BaseCrR4TestServer {
 			}
 		}
 		//found submitted MeasureReport!
-		assertNotNull(report);
+		assertThat(report).isNotNull();
 
 		var resultOb = repository.search(Bundle.class, Observation.class, Searches.ALL);
 		var obSize = resultOb.getEntry().size();
@@ -67,7 +65,7 @@ public class SubmitDataServiceR4Test extends BaseCrR4TestServer {
 			}
 		}
 		//found submitted Observation!
-		assertNotNull(observation);
+		assertThat(observation).isNotNull();
 
 	}
 }

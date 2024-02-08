@@ -8,7 +8,6 @@ import org.junit.jupiter.api.Test;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class HapiMigrationDaoIT extends BaseMigrationTest {
 
@@ -23,7 +22,7 @@ class HapiMigrationDaoIT extends BaseMigrationTest {
 		HapiMigrationEntity record1 = buildEntity("DESC1", "1.1");
 
 		boolean result1 = ourHapiMigrationDao.save(record1);
-		assertTrue(result1);
+		assertThat(result1).isTrue();
 		{
 			Set<MigrationVersion> all = ourHapiMigrationDao.fetchSuccessfulMigrationVersions();
 			assertThat(all).hasSize(1);
@@ -31,7 +30,7 @@ class HapiMigrationDaoIT extends BaseMigrationTest {
 		HapiMigrationEntity record2 = buildEntity("DESC2", "1.2");
 
 		boolean result2 = ourHapiMigrationDao.save(record2);
-		assertTrue(result2);
+		assertThat(result2).isTrue();
 		{
 			Set<MigrationVersion> all = ourHapiMigrationDao.fetchSuccessfulMigrationVersions();
 			assertThat(all).hasSize(2);

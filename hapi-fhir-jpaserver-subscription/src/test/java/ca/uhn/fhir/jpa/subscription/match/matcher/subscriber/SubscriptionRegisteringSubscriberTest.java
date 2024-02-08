@@ -33,8 +33,7 @@ import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
@@ -80,7 +79,7 @@ public class SubscriptionRegisteringSubscriberTest {
 		ResourceOperationJsonMessage message = new ResourceOperationJsonMessage();
 		mySubscriptionRegisteringSubscriber.handleMessage(message);
 		String expectedMessage = String.format("Received message of unexpected type on matching channel: %s", message);
-		assertTrue(output.getOut().contains(expectedMessage));
+		assertThat(output.getOut().contains(expectedMessage)).isTrue();
 	}
 
 	@Test
@@ -145,8 +144,8 @@ public class SubscriptionRegisteringSubscriberTest {
 		SystemRequestDetails details = (SystemRequestDetails)requestDetailsCaptor.getValue();
 
 		// ensure partitions with list of names containing null use the default partition
-		assertNull(details.getRequestPartitionId().getPartitionNames());
-		assertNull(details.getRequestPartitionId().getFirstPartitionIdOrNull());
+		assertThat(details.getRequestPartitionId().getPartitionNames()).isNull();
+		assertThat(details.getRequestPartitionId().getFirstPartitionIdOrNull()).isNull();
 		verify(mySubscriptionRegistry, never()).unregisterSubscriptionIfRegistered(any());
 		verify(mySubscriptionRegistry, times(1)).registerSubscriptionUnlessAlreadyRegistered(any());
 	}
@@ -166,8 +165,8 @@ public class SubscriptionRegisteringSubscriberTest {
 		SystemRequestDetails details = (SystemRequestDetails)requestDetailsCaptor.getValue();
 
 		// ensure partitions that are null use the default partition
-		assertNull(details.getRequestPartitionId().getPartitionNames());
-		assertNull(details.getRequestPartitionId().getFirstPartitionIdOrNull());
+		assertThat(details.getRequestPartitionId().getPartitionNames()).isNull();
+		assertThat(details.getRequestPartitionId().getFirstPartitionIdOrNull()).isNull();
 		verify(mySubscriptionRegistry, never()).unregisterSubscriptionIfRegistered(any());
 		verify(mySubscriptionRegistry, times(1)).registerSubscriptionUnlessAlreadyRegistered(any());
 	}

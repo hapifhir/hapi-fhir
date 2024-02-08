@@ -59,8 +59,6 @@ import java.util.UUID;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNotNull;
@@ -142,18 +140,18 @@ public class BulkDataImportProviderTest {
 
 			// Verify
 
-			assertEquals(202, response.getStatusLine().getStatusCode());
+			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(202);
 
 			OperationOutcome oo = myCtx.newJsonParser().parseResource(OperationOutcome.class, resp);
-			assertEquals("Bulk import job has been submitted with ID: " + jobId, oo.getIssue().get(0).getDiagnostics());
-			assertEquals("Use the following URL to poll for job status: " + requestUrl + "$import-poll-status?_jobId=" + jobId, oo.getIssue().get(1).getDiagnostics());
+			assertThat(oo.getIssue().get(0).getDiagnostics()).isEqualTo("Bulk import job has been submitted with ID: " + jobId);
+			assertThat(oo.getIssue().get(1).getDiagnostics()).isEqualTo("Use the following URL to poll for job status: " + requestUrl + "$import-poll-status?_jobId=" + jobId);
 		}
 
 		verify(myJobCoordinator, times(1)).startInstance(isNotNull(), myStartRequestCaptor.capture());
 
 		JobInstanceStartRequest startRequest = myStartRequestCaptor.getValue();
 		ourLog.info("Parameters: {}", startRequest.getParameters());
-		assertTrue(startRequest.getParameters().startsWith("{\"ndJsonUrls\":[\"http://example.com/Patient\",\"http://example.com/Observation\"],\"maxBatchResourceCount\":500"));
+		assertThat(startRequest.getParameters().startsWith("{\"ndJsonUrls\":[\"http://example.com/Patient\",\"http://example.com/Observation\"],\"maxBatchResourceCount\":500")).isTrue();
 	}
 
 	@Test
@@ -175,8 +173,8 @@ public class BulkDataImportProviderTest {
 
 			// Verify
 
-			assertEquals(400, response.getStatusLine().getStatusCode());
-			assertEquals("application/fhir+json;charset=utf-8", response.getEntity().getContentType().getValue());
+			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(400);
+			assertThat(response.getEntity().getContentType().getValue()).isEqualTo("application/fhir+json;charset=utf-8");
 			assertThat(resp).contains("\"resourceType\": \"OperationOutcome\"");
 			assertThat(resp).contains("HAPI-0513: Must request async processing for $import");
 		}
@@ -205,7 +203,7 @@ public class BulkDataImportProviderTest {
 
 			// Verify
 
-			assertEquals(400, response.getStatusLine().getStatusCode());
+			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(400);
 			assertThat(resp).contains("HAPI-1769: No URLs specified");
 		}
 
@@ -252,9 +250,9 @@ public class BulkDataImportProviderTest {
 		try (CloseableHttpResponse response = myClient.execute(get)) {
 			ourLog.info("Response: {}", response.toString());
 
-			assertEquals(202, response.getStatusLine().getStatusCode());
-			assertEquals("Accepted", response.getStatusLine().getReasonPhrase());
-			assertEquals("120", response.getFirstHeader(Constants.HEADER_RETRY_AFTER).getValue());
+			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(202);
+			assertThat(response.getStatusLine().getReasonPhrase()).isEqualTo("Accepted");
+			assertThat(response.getFirstHeader(Constants.HEADER_RETRY_AFTER).getValue()).isEqualTo("120");
 			assertThat(response.getFirstHeader(Constants.HEADER_X_PROGRESS).getValue()).contains("Job was created at ");
 		}
 	}
@@ -275,9 +273,9 @@ public class BulkDataImportProviderTest {
 		try (CloseableHttpResponse response = myClient.execute(get)) {
 			ourLog.info("Response: {}", response.toString());
 
-			assertEquals(202, response.getStatusLine().getStatusCode());
-			assertEquals("Accepted", response.getStatusLine().getReasonPhrase());
-			assertEquals("120", response.getFirstHeader(Constants.HEADER_RETRY_AFTER).getValue());
+			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(202);
+			assertThat(response.getStatusLine().getReasonPhrase()).isEqualTo("Accepted");
+			assertThat(response.getFirstHeader(Constants.HEADER_RETRY_AFTER).getValue()).isEqualTo("120");
 			assertThat(response.getFirstHeader(Constants.HEADER_X_PROGRESS).getValue()).contains("Job was created at 2022-01");
 		}
 	}
@@ -308,8 +306,8 @@ public class BulkDataImportProviderTest {
 		try (CloseableHttpResponse response = myClient.execute(get)) {
 			ourLog.info("Response: {}", response.toString());
 
-			assertEquals(200, response.getStatusLine().getStatusCode());
-			assertEquals("OK", response.getStatusLine().getReasonPhrase());
+			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(200);
+			assertThat(response.getStatusLine().getReasonPhrase()).isEqualTo("OK");
 			assertThat(response.getEntity().getContentType().getValue()).contains(Constants.CT_FHIR_JSON);
 		}
 	}
@@ -332,8 +330,8 @@ public class BulkDataImportProviderTest {
 		try (CloseableHttpResponse response = myClient.execute(get)) {
 			ourLog.info("Response: {}", response.toString());
 
-			assertEquals(500, response.getStatusLine().getStatusCode());
-			assertEquals("Server Error", response.getStatusLine().getReasonPhrase());
+			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(500);
+			assertThat(response.getStatusLine().getReasonPhrase()).isEqualTo("Server Error");
 			String responseContent = IOUtils.toString(response.getEntity().getContent(), Charsets.UTF_8);
 			ourLog.info("Response content: {}", responseContent);
 			assertThat(responseContent).contains("\"diagnostics\": \"Job is in FAILED state with 123 error count. Last error: It failed.\"");
@@ -360,8 +358,8 @@ public class BulkDataImportProviderTest {
 			ourLog.info(resp);
 
 			// Verify
-			assertEquals(403, response.getStatusLine().getStatusCode());
-			assertEquals("Forbidden", response.getStatusLine().getReasonPhrase());
+			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(403);
+			assertThat(response.getStatusLine().getReasonPhrase()).isEqualTo("Forbidden");
 		}
 
 	}
@@ -389,8 +387,8 @@ public class BulkDataImportProviderTest {
 			ourLog.info("Response: {}", response.toString());
 
 			// Verify
-			assertEquals(403, response.getStatusLine().getStatusCode());
-			assertEquals("Forbidden", response.getStatusLine().getReasonPhrase());
+			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(403);
+			assertThat(response.getStatusLine().getReasonPhrase()).isEqualTo("Forbidden");
 		}
 
 	}

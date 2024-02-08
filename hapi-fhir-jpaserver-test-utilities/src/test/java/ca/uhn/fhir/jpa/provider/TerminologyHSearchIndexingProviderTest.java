@@ -19,10 +19,8 @@ import org.springframework.test.util.ReflectionTestUtils;
 import java.util.Optional;
 
 import static ca.uhn.fhir.jpa.provider.BaseJpaSystemProvider.RESP_PARAM_SUCCESS;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
 
@@ -48,13 +46,13 @@ public class TerminologyHSearchIndexingProviderTest {
 
 		IBaseParameters retVal = testedProvider.reindexTerminology(myRequestDetails);
 
-		assertNotNull(retVal);
+		assertThat(retVal).isNotNull();
 		Optional<String> successValueOpt = ParametersUtil.getNamedParameterValueAsString(myContext, retVal, RESP_PARAM_SUCCESS);
-		assertTrue(successValueOpt.isPresent());
-		assertEquals("false", successValueOpt.get());
+		assertThat(successValueOpt.isPresent()).isTrue();
+		assertThat(successValueOpt.get()).isEqualTo("false");
 		Optional<String> msgOpt = ParametersUtil.getNamedParameterValueAsString(myContext, retVal, "message");
-		assertTrue(msgOpt.isPresent());
-		assertEquals("Freetext service is not configured. Operation didn't run.", msgOpt.get());
+		assertThat(msgOpt.isPresent()).isTrue();
+		assertThat(msgOpt.get()).isEqualTo("Freetext service is not configured. Operation didn't run.");
 	}
 
 
@@ -64,13 +62,13 @@ public class TerminologyHSearchIndexingProviderTest {
 
 		IBaseParameters retVal = testedProvider.reindexTerminology(myRequestDetails);
 
-		assertNotNull(retVal);
+		assertThat(retVal).isNotNull();
 		Optional<String> successValueOpt = ParametersUtil.getNamedParameterValueAsString(myContext, retVal, RESP_PARAM_SUCCESS);
-		assertTrue(successValueOpt.isPresent());
-		assertEquals("false", successValueOpt.get());
+		assertThat(successValueOpt.isPresent()).isTrue();
+		assertThat(successValueOpt.get()).isEqualTo("false");
 		Optional<String> msgOpt = ParametersUtil.getNamedParameterValueAsString(myContext, retVal, "message");
-		assertTrue(msgOpt.isPresent());
-		assertEquals("Operation was cancelled because other terminology background tasks are currently running. Try again in a few minutes.", msgOpt.get());
+		assertThat(msgOpt.isPresent()).isTrue();
+		assertThat(msgOpt.get()).isEqualTo("Operation was cancelled because other terminology background tasks are currently running. Try again in a few minutes.");
 	}
 
 
@@ -80,10 +78,10 @@ public class TerminologyHSearchIndexingProviderTest {
 
 		IBaseParameters retVal = testedProvider.reindexTerminology(myRequestDetails);
 
-		assertNotNull(retVal);
+		assertThat(retVal).isNotNull();
 		Optional<String> successValueOpt = ParametersUtil.getNamedParameterValueAsString(myContext, retVal, RESP_PARAM_SUCCESS);
-		assertTrue(successValueOpt.isPresent());
-		assertEquals("true", successValueOpt.get());
+		assertThat(successValueOpt.isPresent()).isTrue();
+		assertThat(successValueOpt.get()).isEqualTo("true");
 	}
 
 
@@ -95,8 +93,8 @@ public class TerminologyHSearchIndexingProviderTest {
 		InternalErrorException thrown = assertThrows(InternalErrorException.class,
 			() -> testedProvider.reindexTerminology(myRequestDetails));
 
-		assertTrue(thrown.getMessage().startsWith(Msg.code(2072) + "Re-creating terminology freetext indexes " +
-			"failed with exception: " + exceptionMsg));
+		assertThat(thrown.getMessage().startsWith(Msg.code(2072) + "Re-creating terminology freetext indexes " +
+			"failed with exception: " + exceptionMsg)).isTrue();
 	}
 
 

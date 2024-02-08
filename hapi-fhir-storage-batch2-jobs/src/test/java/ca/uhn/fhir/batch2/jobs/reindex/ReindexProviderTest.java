@@ -31,9 +31,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.isNotNull;
@@ -116,16 +113,16 @@ public class ReindexProviderTest {
 
 		ourLog.debug(myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(response));
 		StringType jobId = (StringType) response.getParameterValue(ProviderConstants.OPERATION_REINDEX_RESPONSE_JOB_ID);
-		assertEquals(TEST_JOB_ID, jobId.getValue());
+		assertThat(jobId.getValue()).isEqualTo(TEST_JOB_ID);
 
 		verify(myJobCoordinator, times(1)).startInstance(isNotNull(), myStartRequestCaptor.capture());
 		ReindexJobParameters params = myStartRequestCaptor.getValue().getParameters(ReindexJobParameters.class);
 		assertThat(params.getPartitionedUrls()).hasSize(1);
-		assertEquals(url, params.getPartitionedUrls().get(0).getUrl());
+		assertThat(params.getPartitionedUrls().get(0).getUrl()).isEqualTo(url);
 		// Default values
-		assertEquals(ReindexParameters.ReindexSearchParametersEnum.ALL, params.getReindexSearchParameters());
-		assertTrue(params.getOptimisticLock());
-		assertEquals(ReindexParameters.OptimizeStorageModeEnum.NONE, params.getOptimizeStorage());
+		assertThat(params.getReindexSearchParameters()).isEqualTo(ReindexParameters.ReindexSearchParametersEnum.ALL);
+		assertThat(params.getOptimisticLock()).isTrue();
+		assertThat(params.getOptimizeStorage()).isEqualTo(ReindexParameters.OptimizeStorageModeEnum.NONE);
 	}
 
 	@Test
@@ -152,15 +149,15 @@ public class ReindexProviderTest {
 
 		ourLog.debug(myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(response));
 		StringType jobId = (StringType) response.getParameterValue(ProviderConstants.OPERATION_REINDEX_RESPONSE_JOB_ID);
-		assertEquals(TEST_JOB_ID, jobId.getValue());
+		assertThat(jobId.getValue()).isEqualTo(TEST_JOB_ID);
 
 		verify(myJobCoordinator, times(1)).startInstance(isNotNull(), myStartRequestCaptor.capture());
 		ReindexJobParameters params = myStartRequestCaptor.getValue().getParameters(ReindexJobParameters.class);
 		assertThat(params.getPartitionedUrls()).isEmpty();
 		// Non-default values
-		assertEquals(ReindexParameters.ReindexSearchParametersEnum.NONE, params.getReindexSearchParameters());
-		assertFalse(params.getOptimisticLock());
-		assertEquals(ReindexParameters.OptimizeStorageModeEnum.CURRENT_VERSION, params.getOptimizeStorage());
+		assertThat(params.getReindexSearchParameters()).isEqualTo(ReindexParameters.ReindexSearchParametersEnum.NONE);
+		assertThat(params.getOptimisticLock()).isFalse();
+		assertThat(params.getOptimizeStorage()).isEqualTo(ReindexParameters.OptimizeStorageModeEnum.CURRENT_VERSION);
 
 	}
 }

@@ -11,7 +11,7 @@ import java.sql.SQLException;
 import java.util.function.Supplier;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class AddColumnTest extends BaseTest {
@@ -52,7 +52,7 @@ public class AddColumnTest extends BaseTest {
 		getMigrator().migrate();
 
 		JdbcUtils.ColumnType type = JdbcUtils.getColumnType(getConnectionProperties(), "SOMETABLE", "newcolint");
-		assertEquals(ColumnTypeEnum.INT, type.getColumnTypeEnum());
+		assertThat(type.getColumnTypeEnum()).isEqualTo(ColumnTypeEnum.INT);
 	}
 
 	@ParameterizedTest(name = "{index}: {0}")
@@ -89,7 +89,7 @@ public class AddColumnTest extends BaseTest {
 		getMigrator().addTasks(tasks.getTaskList(VersionEnum.V0_1, VersionEnum.V4_0_0));
 		try {
 			getMigrator().migrate();
-			fail();
+			fail("");
 		} catch (HapiMigrationException e) {
 			assertThat(e.getMessage()).startsWith("HAPI-0047: Failure executing task \"Add column FOO_COLUMN on table FOO_TABLE\", aborting! Cause: ca.uhn.fhir.jpa.migrate.HapiMigrationException: HAPI-0061: Failed during task 4.0.0.2001.01: ");
 		}

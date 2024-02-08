@@ -47,9 +47,7 @@ import static ca.uhn.fhir.mdm.api.MdmConstants.CODE_HAPI_MDM_MANAGED;
 import static ca.uhn.fhir.mdm.api.MdmConstants.SYSTEM_GOLDEN_RECORD_STATUS;
 import static ca.uhn.fhir.mdm.api.MdmConstants.SYSTEM_MDM_MANAGED;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -114,14 +112,14 @@ public class MdmStorageInterceptorIT extends BaseMdmR4Test {
 
 		// Then
 		List<IBaseResource> resources = myPatientDao.search(new SearchParameterMap(), SystemRequestDetails.forAllPartitions()).getAllResources();
-		assertTrue(resources.isEmpty());
+		assertThat(resources.isEmpty()).isTrue();
 		assertLinkCount(0);
 
 		try {
 			myPatientDao.read(goldenPatient.getIdElement().toVersionless());
-			fail();
+			fail("");
 		} catch (ResourceNotFoundException e) {
-			assertEquals(Constants.STATUS_HTTP_404_NOT_FOUND, e.getStatusCode());
+			assertThat(e.getStatusCode()).isEqualTo(Constants.STATUS_HTTP_404_NOT_FOUND);
 		}
 	}
 
@@ -142,7 +140,7 @@ public class MdmStorageInterceptorIT extends BaseMdmR4Test {
 
 		// Then
 		List<IBaseResource> resources = myPatientDao.search(new SearchParameterMap(), SystemRequestDetails.forAllPartitions()).getAllResources();
-		assertEquals(2, resources.size());
+		assertThat(resources.size()).isEqualTo(2);
 
 		assertLinksMatchResult(MdmMatchResultEnum.MATCH);
 	}
@@ -175,7 +173,7 @@ public class MdmStorageInterceptorIT extends BaseMdmR4Test {
 
 		// Then
 		List<IBaseResource> resources = myPatientDao.search(new SearchParameterMap(), SystemRequestDetails.forAllPartitions()).getAllResources();
-		assertEquals(3, resources.size());
+		assertThat(resources.size()).isEqualTo(3);
 
 		assertLinksMatchResult(MdmMatchResultEnum.MATCH, MdmMatchResultEnum.POSSIBLE_MATCH);
 	}
@@ -216,7 +214,7 @@ public class MdmStorageInterceptorIT extends BaseMdmR4Test {
 		   Paul 3 POSSIBLE_MATCH to GR2 --> KEPT
 		   GR1 POSSIBLE_DUPLICATE GR2 --> DELETED */
 		List<IBaseResource> resources = myPatientDao.search(new SearchParameterMap(), SystemRequestDetails.forAllPartitions()).getAllResources();
-		assertEquals(3, resources.size());
+		assertThat(resources.size()).isEqualTo(3);
 
 		assertLinksMatchResult(MdmMatchResultEnum.MATCH, MdmMatchResultEnum.POSSIBLE_MATCH);
 	}
@@ -258,7 +256,7 @@ public class MdmStorageInterceptorIT extends BaseMdmR4Test {
 		   Paul 3 POSSIBLE_MATCH to GR2 --> KEPT
 		   GR1 POSSIBLE_DUPLICATE GR2 --> DELETED */
 		List<IBaseResource> resources = myPatientDao.search(new SearchParameterMap(), SystemRequestDetails.forAllPartitions()).getAllResources();
-		assertEquals(3, resources.size());
+		assertThat(resources.size()).isEqualTo(3);
 
 		assertLinksMatchResult(MdmMatchResultEnum.MATCH, MdmMatchResultEnum.POSSIBLE_MATCH);
 	}
@@ -278,7 +276,7 @@ public class MdmStorageInterceptorIT extends BaseMdmR4Test {
 		// Then
 		try {
 			myPatientDao.read(goldenPatient.getIdElement().toVersionless());
-			fail();
+			fail("");
 		} catch (ResourceGoneException e) {
 			assertLinkCount(0);
 		} finally {
@@ -300,7 +298,7 @@ public class MdmStorageInterceptorIT extends BaseMdmR4Test {
 		patient.getMeta().addTag(SYSTEM_MDM_MANAGED, CODE_HAPI_MDM_MANAGED, "User is managed by MDM");
 		try {
 			myMdmHelper.doCreateResource(patient, true);
-			fail();
+			fail("");
 		} catch (ForbiddenOperationException e) {
 			assertThat(e.getMessage()).startsWith("HAPI-0765: Cannot create or modify Resources that are managed by MDM.");
 		}
@@ -311,7 +309,7 @@ public class MdmStorageInterceptorIT extends BaseMdmR4Test {
 		Patient patient = myMdmHelper.buildGoldenPatient();
 		try {
 			myMdmHelper.doCreateResource(patient, true);
-			fail();
+			fail("");
 		} catch (ForbiddenOperationException e) {
 			assertThat(e.getMessage()).startsWith("HAPI-0765: Cannot create or modify Resources that are managed by MDM.");
 		}
@@ -323,7 +321,7 @@ public class MdmStorageInterceptorIT extends BaseMdmR4Test {
 		medication.getMeta().addTag(SYSTEM_GOLDEN_RECORD_STATUS, CODE_GOLDEN_RECORD_REDIRECTED, "Golden Record");
 		try {
 			myMdmHelper.doCreateResource(medication, true);
-			fail();
+			fail("");
 		} catch (ForbiddenOperationException e) {
 			assertThat(e.getMessage()).startsWith("HAPI-0765: Cannot create or modify Resources that are managed by MDM.");
 		}
@@ -351,7 +349,7 @@ public class MdmStorageInterceptorIT extends BaseMdmR4Test {
 		organization.getMeta().addTag(SYSTEM_MDM_MANAGED, CODE_HAPI_MDM_MANAGED, "User is managed by MDM");
 		try {
 			myMdmHelper.doCreateResource(organization, true);
-			fail();
+			fail("");
 		} catch (ForbiddenOperationException e) {
 			assertThat(e.getMessage()).startsWith("HAPI-0765: Cannot create or modify Resources that are managed by MDM.");
 		}
@@ -365,9 +363,9 @@ public class MdmStorageInterceptorIT extends BaseMdmR4Test {
 		organization.getMeta().addTag(SYSTEM_MDM_MANAGED, CODE_HAPI_MDM_MANAGED, "User is managed by MDM");
 		try {
 			myMdmHelper.doUpdateResource(organization, true);
-			fail();
+			fail("");
 		} catch (ForbiddenOperationException e) {
-			assertEquals("HAPI-0764: The HAPI-MDM tag on a resource may not be changed once created.", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo("HAPI-0764: The HAPI-MDM tag on a resource may not be changed once created.");
 		}
 	}
 
@@ -390,15 +388,15 @@ public class MdmStorageInterceptorIT extends BaseMdmR4Test {
 		// GoldenResource created manually.
 		Patient patient = new Patient();
 		DaoMethodOutcome daoMethodOutcome = myMdmHelper.doCreateResource(patient, true);
-		assertNotNull(daoMethodOutcome.getId());
+		assertThat(daoMethodOutcome.getId()).isNotNull();
 
 		//Updating that patient to set them as MDM managed is not allowed.
 		patient.getMeta().addTag(SYSTEM_MDM_MANAGED, CODE_HAPI_MDM_MANAGED, "User is managed by MDM");
 		try {
 			myMdmHelper.doUpdateResource(patient, true);
-			fail();
+			fail("");
 		} catch (ForbiddenOperationException e) {
-			assertEquals("HAPI-0764: The HAPI-MDM tag on a resource may not be changed once created.", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo("HAPI-0764: The HAPI-MDM tag on a resource may not be changed once created.");
 		}
 	}
 
@@ -417,7 +415,7 @@ public class MdmStorageInterceptorIT extends BaseMdmR4Test {
 		goldenResourcePatient.setGender(Enumerations.AdministrativeGender.MALE);
 		try {
 			myMdmHelper.doUpdateResource(goldenResourcePatient, true);
-			fail();
+			fail("");
 		} catch (ForbiddenOperationException e) {
 			assertThat(e.getMessage()).startsWith("HAPI-0765: Cannot create or modify Resources that are managed by MDM.");
 		}
@@ -465,7 +463,7 @@ public class MdmStorageInterceptorIT extends BaseMdmR4Test {
 		jane = addExternalEID(jane, "some_new_eid");
 		try {
 			myMdmHelper.doUpdateResource(jane, true);
-			fail();
+			fail("");
 		} catch (ForbiddenOperationException e) {
 			assertThat(e.getMessage()).isEqualTo("HAPI-0763: While running with EID updates disabled, EIDs may not be updated on source resources");
 		}
@@ -480,7 +478,7 @@ public class MdmStorageInterceptorIT extends BaseMdmR4Test {
 		addExternalEID(patient, "456");
 		try {
 			myMdmHelper.doCreateResource(patient, true);
-			fail();
+			fail("");
 		} catch (ForbiddenOperationException e) {
 			assertThat(e.getMessage()).isEqualTo("HAPI-0766: While running with multiple EIDs disabled, source resources may have at most one EID.");
 		}

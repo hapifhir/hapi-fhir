@@ -40,9 +40,7 @@ import static ca.uhn.fhir.batch2.coordinator.WorkChunkProcessorTest.createWorkCh
 import static ca.uhn.fhir.batch2.coordinator.WorkChunkProcessorTest.getTestJobInstance;
 import static ca.uhn.fhir.batch2.model.StatusEnum.ERRORED;
 import static ca.uhn.fhir.batch2.model.StatusEnum.IN_PROGRESS;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -103,7 +101,7 @@ public class ReductionStepExecutorServiceImplTest {
 		ReductionStepChunkProcessingResponse result = mySvc.executeReductionStep(INSTANCE_ID, workCursor);
 
 		// verification
-		assertFalse(result.isSuccessful());
+		assertThat(result.isSuccessful()).isFalse();
 		ArgumentCaptor<List> submittedListIds = ArgumentCaptor.forClass(List.class);
 		ArgumentCaptor<WorkChunkStatusEnum> statusCaptor = ArgumentCaptor.forClass(WorkChunkStatusEnum.class);
 		verify(myJobPersistence, times(chunkIds.size()))
@@ -113,18 +111,18 @@ public class ReductionStepExecutorServiceImplTest {
 				statusCaptor.capture(),
 				any()
 			);
-		assertEquals(2, submittedListIds.getAllValues().size());
+		assertThat(submittedListIds.getAllValues().size()).isEqualTo(2);
 		List<String> list1 = submittedListIds.getAllValues().get(0);
 		List<String> list2 = submittedListIds.getAllValues().get(1);
-		assertTrue(list1.contains(chunkIds.get(0)));
-		assertTrue(list2.contains(chunkIds.get(1)));
+		assertThat(list1.contains(chunkIds.get(0))).isTrue();
+		assertThat(list2.contains(chunkIds.get(1))).isTrue();
 
 		// assumes the order of which is called first
 		// successes, then failures
-		assertEquals(2, statusCaptor.getAllValues().size());
+		assertThat(statusCaptor.getAllValues().size()).isEqualTo(2);
 		List<WorkChunkStatusEnum> statuses = statusCaptor.getAllValues();
-		assertEquals(WorkChunkStatusEnum.COMPLETED, statuses.get(0));
-		assertEquals(WorkChunkStatusEnum.FAILED, statuses.get(1));
+		assertThat(statuses.get(0)).isEqualTo(WorkChunkStatusEnum.COMPLETED);
+		assertThat(statuses.get(1)).isEqualTo(WorkChunkStatusEnum.FAILED);
 	}
 
 
@@ -161,19 +159,19 @@ public class ReductionStepExecutorServiceImplTest {
 		verify(myReductionStepWorker, times(chunks.size()))
 			.consume(chunkCaptor.capture());
 		List<ChunkExecutionDetails> chunksSubmitted = chunkCaptor.getAllValues();
-		assertEquals(chunks.size(), chunksSubmitted.size());
+		assertThat(chunksSubmitted.size()).isEqualTo(chunks.size());
 		for (ChunkExecutionDetails submitted : chunksSubmitted) {
-			assertTrue(chunkIds.contains(submitted.getChunkId()));
+			assertThat(chunkIds.contains(submitted.getChunkId())).isTrue();
 		}
 
-		assertTrue(result.isSuccessful());
+		assertThat(result.isSuccessful()).isTrue();
 		ArgumentCaptor<List<String>> chunkIdCaptor = ArgumentCaptor.forClass(List.class);
 		verify(myJobPersistence).markWorkChunksWithStatusAndWipeData(eq(INSTANCE_ID),
 			chunkIdCaptor.capture(), eq(WorkChunkStatusEnum.COMPLETED), eq(null));
 		List<String> capturedIds = chunkIdCaptor.getValue();
-		assertEquals(chunkIds.size(), capturedIds.size());
+		assertThat(capturedIds.size()).isEqualTo(chunkIds.size());
 		for (String chunkId : chunkIds) {
-			assertTrue(capturedIds.contains(chunkId));
+			assertThat(capturedIds.contains(chunkId)).isTrue();
 		}
 
 	}
@@ -203,7 +201,7 @@ public class ReductionStepExecutorServiceImplTest {
 		ReductionStepChunkProcessingResponse result = mySvc.executeReductionStep(INSTANCE_ID, workCursor);
 
 		// verify
-		assertFalse(result.isSuccessful());
+		assertThat(result.isSuccessful()).isFalse();
 		ArgumentCaptor<String> chunkIdCaptor = ArgumentCaptor.forClass(String.class);
 		ArgumentCaptor<String> errorCaptor = ArgumentCaptor.forClass(String.class);
 		verify(myJobPersistence, times(chunkIds.size()))
@@ -214,8 +212,8 @@ public class ReductionStepExecutorServiceImplTest {
 			String cId = chunkIdsCaptured.get(i);
 			String error = errorsCaptured.get(i);
 
-			assertTrue(chunkIds.contains(cId));
-			assertTrue(error.contains("Reduction step failed to execute chunk reduction for chunk"));
+			assertThat(chunkIds.contains(cId)).isTrue();
+			assertThat(error.contains("Reduction step failed to execute chunk reduction for chunk")).isTrue();
 		}
 		verify(myJobPersistence, never())
 			.markWorkChunksWithStatusAndWipeData(anyString(), anyList(), any(), anyString());

@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 
 import static ca.uhn.fhir.test.utilities.CustomMatchersUtil.assertDoesNotContainAnyOf;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
 
 class CustomMatchersUtilTest {
 	private List<String> data = List.of("A", "B", "C");
@@ -17,14 +17,14 @@ class CustomMatchersUtilTest {
 
 	@Test
 	public void testAssertDoesNotContainAllOf_withItemsInData() {
-		assertThrows(AssertionError.class, () -> {
+		assertThatExceptionOfType(AssertionError.class).isThrownBy(() -> {
 			assertDoesNotContainAnyOf(data, List.of("A", "B"));
 		});
 	}
 
 	@Test
 	public void testAssertDoesNotContainAllOf_withSomeItemsInData() {
-		assertThrows(AssertionError.class, () -> {
+		assertThatExceptionOfType(AssertionError.class).isThrownBy(() -> {
 			assertDoesNotContainAnyOf(data, List.of("A", "E"));
 		});
 	}

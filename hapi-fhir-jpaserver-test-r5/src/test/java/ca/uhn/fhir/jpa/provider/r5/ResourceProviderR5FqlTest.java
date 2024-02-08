@@ -14,7 +14,6 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ResourceProviderR5FqlTest extends BaseResourceProviderR5Test {
 
@@ -43,7 +42,7 @@ public class ResourceProviderR5FqlTest extends BaseResourceProviderR5Test {
 		try (CloseableHttpResponse response = ourHttpClient.execute(fetch)) {
 
 			// Verify
-			assertEquals(200, response.getStatusLine().getStatusCode());
+			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(200);
 			String outcome = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			assertThat(outcome).contains("0,Simpson0,Homer");
 			assertThat(outcome).contains("1,Simpson1,Homer");

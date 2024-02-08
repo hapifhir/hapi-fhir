@@ -31,9 +31,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @Service
 public class MdmLinkHelper {
@@ -179,17 +177,15 @@ public class MdmLinkHelper {
 		int totalExpectedLinks = expectedOutputStates.size();
 		int totalActualLinks = theState.getActualOutcomeLinks().entries().size();
 
-		assertEquals(totalExpectedLinks, totalActualLinks,
-			String.format("Invalid number of links. Expected %d, Actual %d.",
-				totalExpectedLinks, totalActualLinks)
-		);
+		assertThat(totalActualLinks).as(String.format("Invalid number of links. Expected %d, Actual %d.",
+			totalExpectedLinks, totalActualLinks)).isEqualTo(totalExpectedLinks);
 
 		for (MdmTestLinkExpression stateExpression : expectedOutputStates) {
 			ourLog.info(stateExpression.getLinkExpression());
 
 			Patient leftSideResource = theState.getParameter(stateExpression.getLeftSideResourceIdentifier());
 			Collection<MdmLink> links = theState.getActualOutcomeLinks().get(leftSideResource);
-			assertFalse(links.isEmpty(), String.format("No links found, but expected state: %s", stateExpression));
+			assertThat(links.isEmpty()).as(String.format("No links found, but expected state: %s", stateExpression)).isFalse();
 
 			MdmLinkSourceEnum matchSourceType = MdmLinkSourceEnum.valueOf(stateExpression.getMdmLinkSource());
 			MdmMatchResultEnum matchResultType = MdmMatchResultEnum.valueOf(stateExpression.getMdmMatchResult());
@@ -208,7 +204,7 @@ public class MdmLinkHelper {
 				}
 			}
 
-			assertTrue(foundLink, String.format("State: %s - not found", stateExpression.getLinkExpression()));
+			assertThat(foundLink).as(String.format("State: %s - not found", stateExpression.getLinkExpression())).isTrue();
 		}
 	}
 

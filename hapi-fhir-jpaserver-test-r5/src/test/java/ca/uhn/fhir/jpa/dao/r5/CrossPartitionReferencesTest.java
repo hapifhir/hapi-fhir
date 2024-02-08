@@ -111,15 +111,15 @@ public class CrossPartitionReferencesTest extends BaseJpaR5Test {
 
 		// Verify
 		myCaptureQueriesListener.logSelectQueries();
-		assertEquals(1, myCaptureQueriesListener.countCommits());
-		assertEquals(0, myCaptureQueriesListener.countRollbacks());
+		assertThat(myCaptureQueriesListener.countCommits()).isEqualTo(1);
+		assertThat(myCaptureQueriesListener.countRollbacks()).isEqualTo(0);
 
 		SearchParameterMap params = SearchParameterMap
 			.newSynchronous(Constants.PARAM_ID, new TokenParam(patient2Id.getValue()))
 			.addInclude(Patient.INCLUDE_LINK);
 		IBundleProvider search = myPatientDao.search(params, mySrd);
 		assertThat(toUnqualifiedVersionlessIdValues(search)).containsExactly(patient2Id.getValue(), patient1Id.getValue());
-		assertEquals(2, search.getAllResources().size());
+		assertThat(search.getAllResources().size()).isEqualTo(2);
 		search.getAllResources().forEach(p -> assertTrue(((Patient) p).getActive()));
 	}
 
@@ -146,7 +146,7 @@ public class CrossPartitionReferencesTest extends BaseJpaR5Test {
 
 		// Verify
 		assertThat(toUnqualifiedVersionlessIdValues(search)).containsExactly(patient2Id.getValue(), patient1Id.getValue());
-		assertEquals(2, search.getAllResources().size());
+		assertThat(search.getAllResources().size()).isEqualTo(2);
 		search.getAllResources().forEach(p -> assertTrue(((Patient) p).getActive()));
 	}
 
@@ -174,8 +174,8 @@ public class CrossPartitionReferencesTest extends BaseJpaR5Test {
 		IIdType observationId = myObservationDao.create(o, mySrd).getId().toUnqualifiedVersionless();
 
 		// Verify
-		assertEquals(2, myCaptureQueriesListener.countCommits());
-		assertEquals(0, myCaptureQueriesListener.countRollbacks());
+		assertThat(myCaptureQueriesListener.countCommits()).isEqualTo(2);
+		assertThat(myCaptureQueriesListener.countRollbacks()).isEqualTo(0);
 
 		runInTransaction(() -> {
 			ResourceTable resourceTable = myResourceTableDao.findById(observationId.getIdPartAsLong()).orElseThrow();
@@ -184,8 +184,8 @@ public class CrossPartitionReferencesTest extends BaseJpaR5Test {
 
 		verify(myCrossPartitionReferencesDetectedInterceptor, times(1)).handle(eq(Pointcut.JPA_RESOLVE_CROSS_PARTITION_REFERENCE), myCrossPartitionReferenceDetailsCaptor.capture());
 		CrossPartitionReferenceDetails referenceDetails = myCrossPartitionReferenceDetailsCaptor.getValue();
-		assertEquals(PARTITION_OBSERVATION, referenceDetails.getSourceResourcePartitionId());
-		assertEquals(patientId.getValue(), referenceDetails.getPathAndRef().getRef().getReferenceElement().getValue());
+		assertThat(referenceDetails.getSourceResourcePartitionId()).isEqualTo(PARTITION_OBSERVATION);
+		assertThat(referenceDetails.getPathAndRef().getRef().getReferenceElement().getValue()).isEqualTo(patientId.getValue());
 	}
 
 	private void initializeCrossReferencesInterceptor() {

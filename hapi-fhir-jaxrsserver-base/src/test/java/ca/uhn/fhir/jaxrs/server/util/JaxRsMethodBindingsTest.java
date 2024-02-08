@@ -21,10 +21,9 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
 
 public class JaxRsMethodBindingsTest {
 
@@ -35,7 +34,7 @@ public class JaxRsMethodBindingsTest {
 
 	@Test
 	public void testFindMethodsForProviderNotDefinedMappingMethods() {
-		assertThrows(NotImplementedOperationException.class, () -> {
+		assertThatExceptionOfType(NotImplementedOperationException.class).isThrownBy(() -> {
 			new TestJaxRsDummyPatientProvider().getBindings().getBinding(RestOperationTypeEnum.UPDATE, "");
 		});
 	}
@@ -49,7 +48,7 @@ public class JaxRsMethodBindingsTest {
 			}
 		}
 		new TestFindPatientProvider();
-		assertEquals(TestFindPatientProvider.class, new TestFindPatientProvider().getBindings().getBinding(RestOperationTypeEnum.SEARCH_TYPE, "").getMethod().getDeclaringClass());
+		assertThat(new TestFindPatientProvider().getBindings().getBinding(RestOperationTypeEnum.SEARCH_TYPE, "").getMethod().getDeclaringClass()).isEqualTo(__P__.<error><java.lang.Class<ca.uhn.fhir.jaxrs.server.util.JaxRsMethodBindingsTest.1TestFindPatientProvider>>/*__p1__*/p();
 	}
 
 	@Test
@@ -66,8 +65,8 @@ public class JaxRsMethodBindingsTest {
 				return null;
 			}
 		}
-		assertEquals(TestFindPatientProvider.class, new TestFindPatientProvider().getBindings().getBinding(RestOperationTypeEnum.SEARCH_TYPE, "").getMethod().getDeclaringClass());
-		assertEquals(TestUpdatePatientProvider.class, new TestUpdatePatientProvider().getBindings().getBinding(RestOperationTypeEnum.UPDATE, "").getMethod().getDeclaringClass());
+		assertThat(new TestFindPatientProvider().getBindings().getBinding(RestOperationTypeEnum.SEARCH_TYPE, "").getMethod().getDeclaringClass()).isEqualTo(__P__.<error><java.lang.Class<ca.uhn.fhir.jaxrs.server.util.JaxRsMethodBindingsTest.2TestFindPatientProvider>>/*__p1__*/p();
+		assertThat(new TestUpdatePatientProvider().getBindings().getBinding(RestOperationTypeEnum.UPDATE, "").getMethod().getDeclaringClass()).isEqualTo(__P__.<error><java.lang.Class<ca.uhn.fhir.jaxrs.server.util.JaxRsMethodBindingsTest.1TestUpdatePatientProvider>>/*__p1__*/p();
 	}
 
 	@Test
@@ -85,10 +84,10 @@ public class JaxRsMethodBindingsTest {
 		}
 		try {
 			new TestDoubleSearchProvider();
-			fail();
+			fail("");
 		} catch (IllegalArgumentException e) {
-			assertTrue(e.getMessage().contains("search1"));
-			assertTrue(e.getMessage().contains("search2"));
+			assertThat(e.getMessage().contains("search1")).isTrue();
+			assertThat(e.getMessage().contains("search2")).isTrue();
 		}
 	}
 
@@ -116,13 +115,13 @@ public class JaxRsMethodBindingsTest {
 			}
 		}
 		JaxRsMethodBindings bindings = new TestFindPatientProvider().getBindings();
-		assertEquals("search", bindings.getBinding(RestOperationTypeEnum.SEARCH_TYPE, "").getMethod().getName());
-		assertEquals("update", bindings.getBinding(RestOperationTypeEnum.UPDATE, "").getMethod().getName());
-		assertEquals("firstMethod", bindings.getBinding(RestOperationTypeEnum.EXTENDED_OPERATION_TYPE, "$firstMethod").getMethod().getName());
-		assertEquals("secondMethod", bindings.getBinding(RestOperationTypeEnum.EXTENDED_OPERATION_TYPE, "$secondMethod").getMethod().getName());
+		assertThat(bindings.getBinding(RestOperationTypeEnum.SEARCH_TYPE, "").getMethod().getName()).isEqualTo("search");
+		assertThat(bindings.getBinding(RestOperationTypeEnum.UPDATE, "").getMethod().getName()).isEqualTo("update");
+		assertThat(bindings.getBinding(RestOperationTypeEnum.EXTENDED_OPERATION_TYPE, "$firstMethod").getMethod().getName()).isEqualTo("firstMethod");
+		assertThat(bindings.getBinding(RestOperationTypeEnum.EXTENDED_OPERATION_TYPE, "$secondMethod").getMethod().getName()).isEqualTo("secondMethod");
 		try {
 			bindings.getBinding(RestOperationTypeEnum.EXTENDED_OPERATION_TYPE, "$thirdMethod");
-			fail();
+			fail("");
 		} catch (NotImplementedOperationException e) {
 		}
 	}

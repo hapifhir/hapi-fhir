@@ -46,9 +46,8 @@ import java.util.Arrays;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -139,9 +138,9 @@ public class JobCoordinatorImplTest extends BaseBatch2Test {
 
 		verify(myStep1Worker, times(1)).run(myStep1ExecutionDetailsCaptor.capture(), any());
 		TestJobParameters params = myStep1ExecutionDetailsCaptor.getValue().getParameters();
-		assertEquals(PARAM_1_VALUE, params.getParam1());
-		assertEquals(PARAM_2_VALUE, params.getParam2());
-		assertEquals(PASSWORD_VALUE, params.getPassword());
+		assertThat(params.getParam1()).isEqualTo(PARAM_1_VALUE);
+		assertThat(params.getParam2()).isEqualTo(PARAM_2_VALUE);
+		assertThat(params.getPassword()).isEqualTo(PASSWORD_VALUE);
 
 		verify(myJobInstancePersister, times(1)).onWorkChunkCompletion(new WorkChunkCompletionEvent(CHUNK_ID, 50, 0));
 		verify(myBatchJobSender, times(2)).sendWorkChannelMessage(any());
@@ -186,17 +185,15 @@ public class JobCoordinatorImplTest extends BaseBatch2Test {
 		Batch2JobStartResponse startResponse = mySvc.startInstance(startRequest);
 
 		// verify
-		assertEquals(inProgressInstanceId, startResponse.getInstanceId()); // make sure it's the completed one
-		assertTrue(startResponse.isUsesCachedResult());
+		assertThat(startResponse.getInstanceId()).isEqualTo(inProgressInstanceId); // make sure it's the completed one
+		assertThat(startResponse.isUsesCachedResult()).isTrue();
 		ArgumentCaptor<FetchJobInstancesRequest> requestArgumentCaptor = ArgumentCaptor.forClass(FetchJobInstancesRequest.class);
 		verify(myJobInstancePersister)
 			.fetchInstances(requestArgumentCaptor.capture(), anyInt(), anyInt());
 		FetchJobInstancesRequest req = requestArgumentCaptor.getValue();
-		assertEquals(2, req.getStatuses().size());
-		assertTrue(
-			req.getStatuses().contains(StatusEnum.IN_PROGRESS)
-				&& req.getStatuses().contains(StatusEnum.QUEUED)
-		);
+		assertThat(req.getStatuses().size()).isEqualTo(2);
+		assertThat(req.getStatuses().contains(StatusEnum.IN_PROGRESS)
+				&& req.getStatuses().contains(StatusEnum.QUEUED)).isTrue();
 	}
 
 	@Test
@@ -223,9 +220,9 @@ public class JobCoordinatorImplTest extends BaseBatch2Test {
 
 		verify(myStep1Worker, times(1)).run(myStep1ExecutionDetailsCaptor.capture(), any());
 		TestJobParameters params = myStep1ExecutionDetailsCaptor.getValue().getParameters();
-		assertEquals(PARAM_1_VALUE, params.getParam1());
-		assertEquals(PARAM_2_VALUE, params.getParam2());
-		assertEquals(PASSWORD_VALUE, params.getPassword());
+		assertThat(params.getParam1()).isEqualTo(PARAM_1_VALUE);
+		assertThat(params.getParam2()).isEqualTo(PARAM_2_VALUE);
+		assertThat(params.getPassword()).isEqualTo(PASSWORD_VALUE);
 
 		verify(myJobInstancePersister, times(1)).onWorkChunkCompletion(new WorkChunkCompletionEvent(CHUNK_ID, 50, 0));
 		verify(myBatchJobSender, times(0)).sendWorkChannelMessage(any());
@@ -250,9 +247,9 @@ public class JobCoordinatorImplTest extends BaseBatch2Test {
 
 		verify(myStep2Worker, times(1)).run(myStep2ExecutionDetailsCaptor.capture(), any());
 		TestJobParameters params = myStep2ExecutionDetailsCaptor.getValue().getParameters();
-		assertEquals(PARAM_1_VALUE, params.getParam1());
-		assertEquals(PARAM_2_VALUE, params.getParam2());
-		assertEquals(PASSWORD_VALUE, params.getPassword());
+		assertThat(params.getParam1()).isEqualTo(PARAM_1_VALUE);
+		assertThat(params.getParam2()).isEqualTo(PARAM_2_VALUE);
+		assertThat(params.getPassword()).isEqualTo(PASSWORD_VALUE);
 
 		verify(myJobInstancePersister, times(1)).onWorkChunkCompletion(new WorkChunkCompletionEvent(CHUNK_ID, 50, 0));
 	}
@@ -282,15 +279,15 @@ public class JobCoordinatorImplTest extends BaseBatch2Test {
 
 		verify(myStep2Worker, times(2)).run(myStep2ExecutionDetailsCaptor.capture(), any());
 		TestJobParameters params = myStep2ExecutionDetailsCaptor.getAllValues().get(0).getParameters();
-		assertEquals(PARAM_1_VALUE, params.getParam1());
-		assertEquals(PARAM_2_VALUE, params.getParam2());
-		assertEquals(PASSWORD_VALUE, params.getPassword());
+		assertThat(params.getParam1()).isEqualTo(PARAM_1_VALUE);
+		assertThat(params.getParam2()).isEqualTo(PARAM_2_VALUE);
+		assertThat(params.getPassword()).isEqualTo(PASSWORD_VALUE);
 
 		ArgumentCaptor<WorkChunkErrorEvent> parametersArgumentCaptor = ArgumentCaptor.forClass(WorkChunkErrorEvent.class);
 		verify(myJobInstancePersister, times(1)).onWorkChunkError(parametersArgumentCaptor.capture());
 		WorkChunkErrorEvent capturedParams = parametersArgumentCaptor.getValue();
-		assertEquals(CHUNK_ID, capturedParams.getChunkId());
-		assertEquals("This is an error message", capturedParams.getErrorMsg());
+		assertThat(capturedParams.getChunkId()).isEqualTo(CHUNK_ID);
+		assertThat(capturedParams.getErrorMsg()).isEqualTo("This is an error message");
 
 		verify(myJobInstancePersister, times(1)).onWorkChunkCompletion(new WorkChunkCompletionEvent(CHUNK_ID, 0, 0));
 
@@ -320,9 +317,9 @@ public class JobCoordinatorImplTest extends BaseBatch2Test {
 
 		verify(myStep2Worker, times(1)).run(myStep2ExecutionDetailsCaptor.capture(), any());
 		TestJobParameters params = myStep2ExecutionDetailsCaptor.getValue().getParameters();
-		assertEquals(PARAM_1_VALUE, params.getParam1());
-		assertEquals(PARAM_2_VALUE, params.getParam2());
-		assertEquals(PASSWORD_VALUE, params.getPassword());
+		assertThat(params.getParam1()).isEqualTo(PARAM_1_VALUE);
+		assertThat(params.getParam2()).isEqualTo(PARAM_2_VALUE);
+		assertThat(params.getPassword()).isEqualTo(PASSWORD_VALUE);
 
 		verify(myJobInstancePersister, times(1)).onWorkChunkCompletion(eq(new WorkChunkCompletionEvent(CHUNK_ID, 50, 2)));
 	}
@@ -346,9 +343,9 @@ public class JobCoordinatorImplTest extends BaseBatch2Test {
 
 		verify(myStep3Worker, times(1)).run(myStep3ExecutionDetailsCaptor.capture(), any());
 		TestJobParameters params = myStep3ExecutionDetailsCaptor.getValue().getParameters();
-		assertEquals(PARAM_1_VALUE, params.getParam1());
-		assertEquals(PARAM_2_VALUE, params.getParam2());
-		assertEquals(PASSWORD_VALUE, params.getPassword());
+		assertThat(params.getParam1()).isEqualTo(PARAM_1_VALUE);
+		assertThat(params.getParam2()).isEqualTo(PARAM_2_VALUE);
+		assertThat(params.getPassword()).isEqualTo(PASSWORD_VALUE);
 
 		verify(myJobInstancePersister, times(1)).onWorkChunkCompletion(new WorkChunkCompletionEvent(CHUNK_ID, 50, 0));
 	}
@@ -392,11 +389,11 @@ public class JobCoordinatorImplTest extends BaseBatch2Test {
 
 		try {
 			myWorkChannelReceiver.send(new JobWorkNotificationJsonMessage(createWorkNotification(STEP_2)));
-			fail();
+			fail("");
 		} catch (MessageDeliveryException e) {
 
 			// Verify
-			assertEquals(exceptionMessage, e.getMostSpecificCause().getMessage());
+			assertThat(e.getMostSpecificCause().getMessage()).isEqualTo(exceptionMessage);
 		}
 
 	}
@@ -473,14 +470,14 @@ public class JobCoordinatorImplTest extends BaseBatch2Test {
 
 		verify(myJobInstancePersister, times(1))
 			.onCreateWithFirstChunk(myJobDefinitionCaptor.capture(), myParametersJsonCaptor.capture());
-		assertSame(jobDefinition, myJobDefinitionCaptor.getValue());
-		assertEquals(startRequest.getParameters(), myParametersJsonCaptor.getValue());
+		assertThat(myJobDefinitionCaptor.getValue()).isSameAs(jobDefinition);
+		assertThat(myParametersJsonCaptor.getValue()).isEqualTo(startRequest.getParameters());
 
 		verify(myBatchJobSender, times(1)).sendWorkChannelMessage(myJobWorkNotificationCaptor.capture());
-		assertEquals(CHUNK_ID, myJobWorkNotificationCaptor.getAllValues().get(0).getChunkId());
-		assertEquals(JOB_DEFINITION_ID, myJobWorkNotificationCaptor.getAllValues().get(0).getJobDefinitionId());
-		assertEquals(1, myJobWorkNotificationCaptor.getAllValues().get(0).getJobDefinitionVersion());
-		assertEquals(STEP_1, myJobWorkNotificationCaptor.getAllValues().get(0).getTargetStepId());
+		assertThat(myJobWorkNotificationCaptor.getAllValues().get(0).getChunkId()).isEqualTo(CHUNK_ID);
+		assertThat(myJobWorkNotificationCaptor.getAllValues().get(0).getJobDefinitionId()).isEqualTo(JOB_DEFINITION_ID);
+		assertThat(myJobWorkNotificationCaptor.getAllValues().get(0).getJobDefinitionVersion()).isEqualTo(1);
+		assertThat(myJobWorkNotificationCaptor.getAllValues().get(0).getTargetStepId()).isEqualTo(STEP_1);
 
 		verifyNoMoreInteractions(myJobInstancePersister);
 		verifyNoMoreInteractions(myStep1Worker);
@@ -503,7 +500,7 @@ public class JobCoordinatorImplTest extends BaseBatch2Test {
 
 		try {
 			mySvc.startInstance(startRequest);
-			fail();
+			fail("");
 		} catch (InvalidRequestException e) {
 
 			// Verify
@@ -511,7 +508,7 @@ public class JobCoordinatorImplTest extends BaseBatch2Test {
 				HAPI-2039: Failed to validate parameters for job of type JOB_DEFINITION_ID:\s
 				 * myParam1 - must not be blank
 				 * myParam2 - length must be between 5 and 100""";
-			assertEquals(expected, e.getMessage());
+			assertThat(e.getMessage()).isEqualTo(expected);
 
 		}
 	}
@@ -538,7 +535,7 @@ public class JobCoordinatorImplTest extends BaseBatch2Test {
 
 		try {
 			mySvc.startInstance(startRequest);
-			fail();
+			fail("");
 		} catch (InvalidRequestException e) {
 
 			// Verify
@@ -547,7 +544,7 @@ public class JobCoordinatorImplTest extends BaseBatch2Test {
 				 * myParam2 - length must be between 5 and 100
 				 * Bad Parameter Value
 				 * Bad Parameter Value 2""";
-			assertEquals(expected, e.getMessage());
+			assertThat(e.getMessage()).isEqualTo(expected);
 
 		}
 	}

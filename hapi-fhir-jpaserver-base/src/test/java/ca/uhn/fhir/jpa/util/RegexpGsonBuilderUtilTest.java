@@ -7,10 +7,8 @@ import com.google.gson.stream.MalformedJsonException;
 import org.junit.jupiter.api.Test;
 
 import static ca.uhn.fhir.jpa.entity.TermConceptPropertyBinder.CONCEPT_PROPERTY_PREFIX_NAME;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class RegexpGsonBuilderUtilTest {
 
@@ -25,8 +23,8 @@ class RegexpGsonBuilderUtilTest {
 		String propertyValue = "propAAA";
 		String expectedGson = "{\"regexp\":{\"P:" + PROP_NAME + "\":{\"value\":\"" + propertyValue + "\"}}}";
 
-		assertEquals(expectedGson, RegexpGsonBuilderUtil.toGson(
-			CONCEPT_PROPERTY_PREFIX_NAME + PROP_NAME, propertyValue).toString());
+		assertThat(RegexpGsonBuilderUtil.toGson(
+				CONCEPT_PROPERTY_PREFIX_NAME + PROP_NAME, propertyValue).toString()).isEqualTo(expectedGson);
 	}
 
 	/**
@@ -40,7 +38,7 @@ class RegexpGsonBuilderUtilTest {
 		String workingRegexQuery = "{'regexp':{'P:SYSTEM':{'value':'" + workingRegex + "'}}}";
 
 		JsonObject jsonObj = new Gson().fromJson(workingRegexQuery, JsonObject.class);
-		assertFalse(jsonObj.isJsonNull());
+		assertThat(jsonObj.isJsonNull()).isFalse();
 
 		// same json structure fails with some valid regex strings
 		String failingRegexQuery = "{'regexp':{'P:SYSTEM':{'value':'" + GSON_FAILING_REGEX + "'}}}";
@@ -49,7 +47,7 @@ class RegexpGsonBuilderUtilTest {
 			JsonSyntaxException.class,
 			() -> new Gson().fromJson(failingRegexQuery, JsonObject.class));
 
-		assertTrue(thrown.getCause() instanceof MalformedJsonException);
+		assertThat(thrown.getCause() instanceof MalformedJsonException).isTrue();
 	}
 
 

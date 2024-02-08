@@ -10,8 +10,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @ExtendWith(MockitoExtension.class)
 public class ReindexJobParametersValidatorTest {
@@ -28,8 +27,8 @@ public class ReindexJobParametersValidatorTest {
 		List<String> errors = runTestWithUrl("Patient," + theWhiteSpaceChar + "Practitioner");
 
 		// verify
-		assertFalse(errors.isEmpty());
-		assertTrue(errors.get(0).contains("Invalid URL. URL cannot contain spaces"));
+		assertThat(errors.isEmpty()).isFalse();
+		assertThat(errors.get(0).contains("Invalid URL. URL cannot contain spaces")).isTrue();
 	}
 
 	private List<String> runTestWithUrl(String theUrl) {

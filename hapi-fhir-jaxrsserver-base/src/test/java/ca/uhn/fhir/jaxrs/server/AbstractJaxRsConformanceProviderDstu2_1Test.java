@@ -17,8 +17,7 @@ import java.net.URI;
 import java.util.Arrays;
 import java.util.concurrent.ConcurrentHashMap;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -66,9 +65,9 @@ public class AbstractJaxRsConformanceProviderDstu2_1Test {
 		providers.put(AbstractJaxRsConformanceProvider.class, provider);
 		providers.put(TestJaxRsMockPatientRestProviderDstu2_1.class, new TestJaxRsMockPatientRestProviderDstu2_1());
 		Response response = createConformanceProvider(providers).conformance();
-		assertEquals(Constants.STATUS_HTTP_200_OK, response.getStatus());
-		assertTrue(response.getEntity().toString().contains("\"type\": \"Patient\""));
-		assertTrue(response.getEntity().toString().contains("\"someCustomOperation"));
+		assertThat(response.getStatus()).isEqualTo(Constants.STATUS_HTTP_200_OK);
+		assertThat(response.getEntity().toString().contains("\"type\": \"Patient\"")).isTrue();
+		assertThat(response.getEntity().toString().contains("\"someCustomOperation")).isTrue();
 		System.out.println(response);
 		System.out.println(response.getEntity());
 	}
@@ -79,10 +78,10 @@ public class AbstractJaxRsConformanceProviderDstu2_1Test {
 		providers.put(AbstractJaxRsConformanceProvider.class, provider);
 		providers.put(TestJaxRsMockPatientRestProviderDstu2_1.class, new TestJaxRsMockPatientRestProviderDstu2_1());
 		Response response = createConformanceProvider(providers).conformance();
-		assertEquals(Constants.STATUS_HTTP_200_OK, response.getStatus());
+		assertThat(response.getStatus()).isEqualTo(Constants.STATUS_HTTP_200_OK);
 		System.out.println(response.getEntity());
-		assertTrue(response.getEntity().toString().contains(" <type value=\"Patient\"/>"));
-		assertTrue(response.getEntity().toString().contains("\"someCustomOperation"));
+		assertThat(response.getEntity().toString().contains(" <type value=\"Patient\"/>")).isTrue();
+		assertThat(response.getEntity().toString().contains("\"someCustomOperation")).isTrue();
 		System.out.println(response.getEntity());
 	}
 

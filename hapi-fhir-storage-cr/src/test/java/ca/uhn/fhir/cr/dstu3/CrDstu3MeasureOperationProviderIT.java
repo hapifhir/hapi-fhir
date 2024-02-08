@@ -10,7 +10,6 @@ import org.hl7.fhir.dstu3.model.MeasureReport;
 import org.hl7.fhir.dstu3.model.MeasureReport.MeasureReportGroupComponent;
 import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.dstu3.model.StringType;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,8 +23,6 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
 
 @ContextConfiguration(classes = {TestCrDstu3Config.class})
 public class CrDstu3MeasureOperationProviderIT extends BaseCrDstu3TestServer {
@@ -41,8 +38,8 @@ public class CrDstu3MeasureOperationProviderIT extends BaseCrDstu3TestServer {
 		String errorLocator = String.format("Measure: %s, Subject: %s", expected.getMeasure().getReference(),
 			expected.getPatient().getReference());
 
-		assertEquals(expected.hasGroup(), actual.hasGroup(), errorLocator);
-		assertEquals(expected.getGroup().size(), actual.getGroup().size(), errorLocator);
+		assertThat(actual.hasGroup()).as(errorLocator).isEqualTo(expected.hasGroup());
+		assertThat(actual.getGroup().size()).as(errorLocator).isEqualTo(expected.getGroup().size());
 
 		for (MeasureReportGroupComponent mrgcExpected : expected.getGroup()) {
 			Optional<MeasureReportGroupComponent> mrgcActualOptional = actual.getGroup().stream()
@@ -55,7 +52,7 @@ public class CrDstu3MeasureOperationProviderIT extends BaseCrDstu3TestServer {
 			MeasureReportGroupComponent mrgcActual = mrgcActualOptional.get();
 
 			if (mrgcExpected.getMeasureScore() == null) {
-				assertNull(mrgcActual.getMeasureScore(), errorLocator);
+				assertThat(mrgcActual.getMeasureScore()).as(errorLocator).isNull();
 			} else {
 				assertNotNull(errorLocator, mrgcActual.getMeasureScore());
 				BigDecimal decimalExpected = mrgcExpected.getMeasureScore();
@@ -124,6 +121,6 @@ public class CrDstu3MeasureOperationProviderIT extends BaseCrDstu3TestServer {
 		var additionalData = readResource(Bundle.class, "Exm105FhirR3MeasureAdditionalData.json");
 		var actual = getActual("2019-01-01", "2019-12-01", "Patient/denom-EXM105-FHIR3", "Measure/measure-EXM105-FHIR3-8.0.000", "individual", additionalData);
 
-		Assertions.assertNotNull(actual);
+		assertThat(actual).isNotNull();
 	}
 }

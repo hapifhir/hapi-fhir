@@ -22,10 +22,9 @@ import jakarta.annotation.Nonnull;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
 public class FhirResourceDaoR5HistoryDisabledTest extends BaseJpaR5Test {
@@ -60,20 +59,20 @@ public class FhirResourceDaoR5HistoryDisabledTest extends BaseJpaR5Test {
 
 		// Verify
 		runInTransaction(() -> assertEquals(1, myResourceHistoryTableDao.count()));
-		assertEquals("2", id2.getVersionIdPart());
+		assertThat(id2.getVersionIdPart()).isEqualTo("2");
 		assertDoesNotThrow(() -> myPatientDao.read(id2, mySrd));
 		assertDoesNotThrow(() -> myPatientDao.read(id2.toUnqualifiedVersionless(), mySrd));
-		assertThrows(ResourceNotFoundException.class, () -> myPatientDao.read(id2.withVersion("1"), mySrd));
+		assertThatExceptionOfType(ResourceNotFoundException.class).isThrownBy(() -> myPatientDao.read(id2.withVersion("1"), mySrd));
 
 		p = myPatientDao.read(id2.toUnqualifiedVersionless(), mySrd);
-        assertFalse(p.getActive());
-		assertEquals("2", p.getIdElement().getVersionIdPart());
-		assertEquals("2", p.getMeta().getVersionId());
+		assertThat(p.getActive()).isFalse();
+		assertThat(p.getIdElement().getVersionIdPart()).isEqualTo("2");
+		assertThat(p.getMeta().getVersionId()).isEqualTo("2");
 
 		p = myPatientDao.read(id2.withVersion("2"), mySrd);
-		assertFalse(p.getActive());
-		assertEquals("2", p.getIdElement().getVersionIdPart());
-		assertEquals("2", p.getMeta().getVersionId());
+		assertThat(p.getActive()).isFalse();
+		assertThat(p.getIdElement().getVersionIdPart()).isEqualTo("2");
+		assertThat(p.getMeta().getVersionId()).isEqualTo("2");
 	}
 
 
@@ -92,20 +91,20 @@ public class FhirResourceDaoR5HistoryDisabledTest extends BaseJpaR5Test {
 
         // Verify
         runInTransaction(() -> assertEquals(1, myResourceHistoryTableDao.count()));
-        assertEquals("2", id2.getVersionIdPart());
+		assertThat(id2.getVersionIdPart()).isEqualTo("2");
         assertDoesNotThrow(() -> myPatientDao.read(id2, mySrd));
         assertDoesNotThrow(() -> myPatientDao.read(id2.toUnqualifiedVersionless(), mySrd));
-        assertThrows(ResourceNotFoundException.class, () -> myPatientDao.read(id2.withVersion("1"), mySrd));
+		assertThatExceptionOfType(ResourceNotFoundException.class).isThrownBy(() -> myPatientDao.read(id2.withVersion("1"), mySrd));
 
         p = myPatientDao.read(id2.toUnqualifiedVersionless(), mySrd);
-        assertEquals("foo", p.getIdentifier().get(0).getValue());
-        assertEquals("2", p.getIdElement().getVersionIdPart());
-        assertEquals("2", p.getMeta().getVersionId());
+		assertThat(p.getIdentifier().get(0).getValue()).isEqualTo("foo");
+		assertThat(p.getIdElement().getVersionIdPart()).isEqualTo("2");
+		assertThat(p.getMeta().getVersionId()).isEqualTo("2");
 
         p = myPatientDao.read(id2.withVersion("2"), mySrd);
-        assertEquals("foo", p.getIdentifier().get(0).getValue());
-        assertEquals("2", p.getIdElement().getVersionIdPart());
-        assertEquals("2", p.getMeta().getVersionId());
+		assertThat(p.getIdentifier().get(0).getValue()).isEqualTo("foo");
+		assertThat(p.getIdElement().getVersionIdPart()).isEqualTo("2");
+		assertThat(p.getMeta().getVersionId()).isEqualTo("2");
     }
 
 	@Test
@@ -126,20 +125,20 @@ public class FhirResourceDaoR5HistoryDisabledTest extends BaseJpaR5Test {
 
         // Verify
         runInTransaction(() -> assertEquals(1, myResourceHistoryTableDao.count()));
-        assertEquals("2", id2.getVersionIdPart());
+		assertThat(id2.getVersionIdPart()).isEqualTo("2");
         assertDoesNotThrow(() -> myPatientDao.read(id2, mySrd));
         assertDoesNotThrow(() -> myPatientDao.read(id2.toUnqualifiedVersionless(), mySrd));
-        assertThrows(ResourceNotFoundException.class, () -> myPatientDao.read(id2.withVersion("1"), mySrd));
+		assertThatExceptionOfType(ResourceNotFoundException.class).isThrownBy(() -> myPatientDao.read(id2.withVersion("1"), mySrd));
 
         p = myPatientDao.read(id2.toUnqualifiedVersionless(), mySrd);
-        assertEquals("foo", p.getIdentifier().get(0).getValue());
-        assertEquals("2", p.getIdElement().getVersionIdPart());
-        assertEquals("2", p.getMeta().getVersionId());
+		assertThat(p.getIdentifier().get(0).getValue()).isEqualTo("foo");
+		assertThat(p.getIdElement().getVersionIdPart()).isEqualTo("2");
+		assertThat(p.getMeta().getVersionId()).isEqualTo("2");
 
         p = myPatientDao.read(id2.withVersion("2"), mySrd);
-        assertEquals("foo", p.getIdentifier().get(0).getValue());
-        assertEquals("2", p.getIdElement().getVersionIdPart());
-        assertEquals("2", p.getMeta().getVersionId());
+		assertThat(p.getIdentifier().get(0).getValue()).isEqualTo("foo");
+		assertThat(p.getIdElement().getVersionIdPart()).isEqualTo("2");
+		assertThat(p.getMeta().getVersionId()).isEqualTo("2");
     }
 
     @Test
@@ -158,20 +157,20 @@ public class FhirResourceDaoR5HistoryDisabledTest extends BaseJpaR5Test {
 
         // Verify
         runInTransaction(() -> assertEquals(1, myResourceHistoryTableDao.count()));
-        assertEquals("2", id2.getVersionIdPart());
+		assertThat(id2.getVersionIdPart()).isEqualTo("2");
         assertDoesNotThrow(() -> myPatientDao.read(id2, mySrd));
         assertDoesNotThrow(() -> myPatientDao.read(id2.toUnqualifiedVersionless(), mySrd));
-        assertThrows(ResourceNotFoundException.class, () -> myPatientDao.read(id2.withVersion("1"), mySrd));
+		assertThatExceptionOfType(ResourceNotFoundException.class).isThrownBy(() -> myPatientDao.read(id2.withVersion("1"), mySrd));
 
         p = myPatientDao.read(id2.toUnqualifiedVersionless(), mySrd);
-        assertEquals("foo", p.getIdentifier().get(0).getValue());
-        assertEquals("2", p.getIdElement().getVersionIdPart());
-        assertEquals("2", p.getMeta().getVersionId());
+		assertThat(p.getIdentifier().get(0).getValue()).isEqualTo("foo");
+		assertThat(p.getIdElement().getVersionIdPart()).isEqualTo("2");
+		assertThat(p.getMeta().getVersionId()).isEqualTo("2");
 
         p = myPatientDao.read(id2.withVersion("2"), mySrd);
-        assertEquals("foo", p.getIdentifier().get(0).getValue());
-        assertEquals("2", p.getIdElement().getVersionIdPart());
-        assertEquals("2", p.getMeta().getVersionId());
+		assertThat(p.getIdentifier().get(0).getValue()).isEqualTo("foo");
+		assertThat(p.getIdElement().getVersionIdPart()).isEqualTo("2");
+		assertThat(p.getMeta().getVersionId()).isEqualTo("2");
     }
 
     @Test
@@ -319,9 +318,9 @@ public class FhirResourceDaoR5HistoryDisabledTest extends BaseJpaR5Test {
 		DaoMethodOutcome outcome = myPatientDao.update(p, mySrd);
 
 		// Verify
-		assertEquals("source-2#request-id-2", ((Patient)outcome.getResource()).getMeta().getSource());
+		assertThat(((Patient) outcome.getResource()).getMeta().getSource()).isEqualTo("source-2#request-id-2");
 		p = myPatientDao.read(outcome.getId(), mySrd);
-		assertEquals("source-2#request-id-2", p.getMeta().getSource());
+		assertThat(p.getMeta().getSource()).isEqualTo("source-2#request-id-2");
 		runInTransaction(()-> assertEquals(1, myResourceHistoryProvenanceDao.count()));
 	}
 

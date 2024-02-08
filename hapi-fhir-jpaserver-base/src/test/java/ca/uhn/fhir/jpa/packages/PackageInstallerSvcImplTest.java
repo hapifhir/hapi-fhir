@@ -51,7 +51,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
@@ -161,12 +161,12 @@ public class PackageInstallerSvcImplTest {
 			if (theTheMeetsOtherFilterCriteria) {
 				when(myStorageSettings.isValidateResourceStatusForPackageUpload()).thenReturn(true);
 			}
-			assertEquals(theTheMeetsOtherFilterCriteria && theMeetsStatusFilterCriteria, mySvc.validForUpload(theResource));
+			assertThat(mySvc.validForUpload(theResource)).isEqualTo(theTheMeetsOtherFilterCriteria && theMeetsStatusFilterCriteria);
 
 			if (theTheMeetsOtherFilterCriteria) {
 				when(myStorageSettings.isValidateResourceStatusForPackageUpload()).thenReturn(false);
 			}
-			assertEquals(theTheMeetsOtherFilterCriteria, mySvc.validForUpload(theResource));
+			assertThat(mySvc.validForUpload(theResource)).isEqualTo(theTheMeetsOtherFilterCriteria);
 		}
 	}
 
@@ -195,11 +195,11 @@ public class PackageInstallerSvcImplTest {
 		// Verify
 		verify(myCodeSystemDao, times(1)).search(mySearchParameterMapCaptor.capture(), any());
 		SearchParameterMap map = mySearchParameterMapCaptor.getValue();
-		assertEquals("?url=http%3A%2F%2Fmy-code-system", map.toNormalizedQueryString(myCtx));
+		assertThat(map.toNormalizedQueryString(myCtx)).isEqualTo("?url=http%3A%2F%2Fmy-code-system");
 
 		verify(myCodeSystemDao, times(1)).update(myCodeSystemCaptor.capture(), any(RequestDetails.class));
 		CodeSystem codeSystem = myCodeSystemCaptor.getValue();
-		assertEquals("existingcs", codeSystem.getIdPart());
+		assertThat(codeSystem.getIdPart()).isEqualTo("existingcs");
 	}
 
 	public enum InstallType {
@@ -243,18 +243,18 @@ public class PackageInstallerSvcImplTest {
 		Iterator<SearchParameter> iteratorSP = mySearchParameterCaptor.getAllValues().iterator();
 		if (theInstallType == InstallType.UPDATE_WITH_EXISTING) {
 			SearchParameter capturedSP = iteratorSP.next();
-			assertEquals(theExistingId, capturedSP.getIdPart());
+			assertThat(capturedSP.getIdPart()).isEqualTo(theExistingId);
 			List<String> expectedBase = new ArrayList<>(theExistingBase);
 			expectedBase.removeAll(theInstallBase);
-			assertEquals(expectedBase, capturedSP.getBase().stream().map(CodeType::getCode).toList());
+			assertThat(capturedSP.getBase().stream().map(CodeType::getCode).toList()).isEqualTo(expectedBase);
 		}
 		SearchParameter capturedSP = iteratorSP.next();
 		if (theInstallType == InstallType.UPDATE_OVERRIDE) {
-			assertEquals(theExistingId, capturedSP.getIdPart());
+			assertThat(capturedSP.getIdPart()).isEqualTo(theExistingId);
 		} else {
-			assertEquals(theInstallId, capturedSP.getIdPart());
+			assertThat(capturedSP.getIdPart()).isEqualTo(theInstallId);
 		}
-		assertEquals(theInstallBase, capturedSP.getBase().stream().map(CodeType::getCode).toList());
+		assertThat(capturedSP.getBase().stream().map(CodeType::getCode).toList()).isEqualTo(theInstallBase);
 	}
 
 	private PackageInstallationSpec setupResourceInPackage(IBaseResource myExistingResource, IBaseResource myInstallResource,

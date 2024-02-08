@@ -12,7 +12,7 @@ import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class CrDiscoveryServiceR4Test extends BaseCrTest {
 	@Test
@@ -38,7 +38,7 @@ public class CrDiscoveryServiceR4Test extends BaseCrTest {
 			"    \"item5\" : \"Observation?subject=Patient/{{context.patientId}}&code=http://example.org/sdh/dtr/aslp/CodeSystem/aslp-codes|ASLP.A1.DE19\"\n" +
 			"  }\n" +
 			"}";
-		assertEquals(expected, actual);
+		assertThat(actual).isEqualTo(expected);
 	}
 
 }

@@ -25,10 +25,6 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class MdmResourceDaoSvcTest extends BaseMdmR4Test {
 	private static final String TEST_EID = "TEST_EID";
@@ -56,7 +52,7 @@ public class MdmResourceDaoSvcTest extends BaseMdmR4Test {
 		myPatientDao.update(badSourcePatient);
 
 		Optional<IAnyResource> foundGoldenResource = myResourceDaoSvc.searchGoldenResourceByEID(TEST_EID, "Patient");
-		assertTrue(foundGoldenResource.isPresent());
+		assertThat(foundGoldenResource.isPresent()).isTrue();
 		assertThat(foundGoldenResource.get().getIdElement().toUnqualifiedVersionless().getValue()).isEqualTo(goodSourcePatient.getIdElement().toUnqualifiedVersionless().getValue());
 	}
 
@@ -69,7 +65,7 @@ public class MdmResourceDaoSvcTest extends BaseMdmR4Test {
 		myPatientDao.update(badSourcePatient);
 
 		Optional<IAnyResource> foundSourcePatient = myResourceDaoSvc.searchGoldenResourceByEID(TEST_EID, "Patient");
-		assertTrue(foundSourcePatient.isPresent());
+		assertThat(foundSourcePatient.isPresent()).isTrue();
 		assertThat(foundSourcePatient.get().getIdElement().toUnqualifiedVersionless().getValue()).isEqualTo(goodSourcePatient.getIdElement().toUnqualifiedVersionless().getValue());
 	}
 
@@ -85,7 +81,7 @@ public class MdmResourceDaoSvcTest extends BaseMdmR4Test {
 		myPatientDao.update(goodSourcePatient, systemRequestDetails);
 
 		Optional<IAnyResource> foundSourcePatient = myResourceDaoSvc.searchGoldenResourceByEID(TEST_EID, "Patient", requestPartitionId);
-		assertTrue(foundSourcePatient.isPresent());
+		assertThat(foundSourcePatient.isPresent()).isTrue();
 		assertThat(foundSourcePatient.get().getIdElement().toUnqualifiedVersionless().getValue()).isEqualTo(goodSourcePatient.getIdElement().toUnqualifiedVersionless().getValue());
 	}
 
@@ -127,16 +123,16 @@ public class MdmResourceDaoSvcTest extends BaseMdmR4Test {
 			result = myPatientDao.search(map, new SystemRequestDetails());
 
 			// verify
-			assertNotNull(result);
-			assertFalse(result.isEmpty());
+			assertThat(result).isNotNull();
+			assertThat(result.isEmpty()).isFalse();
 			List<IBaseResource> resources = result.getAllResources();
-			assertEquals(resourceCount, resources.size());
+			assertThat(resources.size()).isEqualTo(resourceCount);
 			int count = 0;
 			for (IBaseResource resource : resources) {
 				String id = idPrefaces[count++];
-				assertTrue(resource instanceof Patient);
+				assertThat(resource instanceof Patient).isTrue();
 				Patient patient = (Patient) resource;
-				assertTrue(patient.getId().contains(id));
+				assertThat(patient.getId().contains(id)).isTrue();
 			}
 
 			// ensure single id works too
@@ -146,12 +142,12 @@ public class MdmResourceDaoSvcTest extends BaseMdmR4Test {
 			result = myPatientDao.search(map, new SystemRequestDetails());
 
 			// verify 2
-			assertNotNull(result);
+			assertThat(result).isNotNull();
 			resources = result.getAllResources();
-			assertEquals(1, resources.size());
-			assertTrue(result.getAllResources().get(0) instanceof Patient);
+			assertThat(resources.size()).isEqualTo(1);
+			assertThat(result.getAllResources().get(0) instanceof Patient).isTrue();
 			Patient patient = (Patient) result.getAllResources().get(0);
-			assertTrue(patient.getId().contains(firstId.getValue()));
+			assertThat(patient.getId().contains(firstId.getValue())).isTrue();
 		} finally {
 			myInterceptorRegistry.unregisterInterceptor(interceptor);
 		}
@@ -171,6 +167,6 @@ public class MdmResourceDaoSvcTest extends BaseMdmR4Test {
 		myPatientDao.update(goodSourcePatient, systemRequestDetails);
 
 		Optional<IAnyResource> foundSourcePatient = myResourceDaoSvc.searchGoldenResourceByEID(TEST_EID, "Patient", requestPartitionId2);
-		assertFalse(foundSourcePatient.isPresent());
+		assertThat(foundSourcePatient.isPresent()).isFalse();
 	}
 }

@@ -25,9 +25,7 @@ import java.util.concurrent.TimeoutException;
 import java.util.function.Predicate;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.fail;
 
 class MemoryCacheServiceTest {
 	private static final Logger ourLog = LoggerFactory.getLogger(MemoryCacheServiceTest.class);
@@ -217,7 +215,7 @@ class MemoryCacheServiceTest {
 				try {
 					return future.get(60, TimeUnit.SECONDS);
 				} catch (TimeoutException e) {
-					fail(theMessage);
+					fail("", theMessage);
 					return null;
 				}
 			}
@@ -227,11 +225,11 @@ class MemoryCacheServiceTest {
 			}
 
 			void assertDone() {
-				assertTrue(future.isDone());
+				assertThat(future.isDone()).isTrue();
 			}
 
 			void assertNotDone() {
-				assertFalse(future.isDone(), "job " + myValue + " not done");
+				assertThat(future.isDone()).as("job " + myValue + " not done").isFalse();
 			}
 		}
 	}

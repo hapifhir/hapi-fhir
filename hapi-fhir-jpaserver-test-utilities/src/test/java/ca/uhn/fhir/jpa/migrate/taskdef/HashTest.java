@@ -9,6 +9,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
@@ -18,7 +19,7 @@ public class HashTest {
 	public void testHash() {
 		AddColumnTask task1 = buildTask();
 		AddColumnTask task2 = buildTask();
-		assertEquals(task1.hashCode(), task2.hashCode());
+		assertThat(task2.hashCode()).isEqualTo(task1.hashCode());
 	}
 
 	private AddColumnTask buildTask() {

@@ -22,8 +22,6 @@ import java.util.HashMap;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class CanonicalSubscriptionTest {
 	private static final Logger ourLog = LoggerFactory.getLogger(CanonicalSubscriptionTest.class);
@@ -68,8 +66,8 @@ public class CanonicalSubscriptionTest {
 	public void testCanonicalSubscriptionRetainsMetaTags() throws IOException {
 		SubscriptionCanonicalizer canonicalizer = new SubscriptionCanonicalizer(FhirContext.forR4());
 		CanonicalSubscription sub1 = canonicalizer.canonicalize(makeMdmSubscription());
-		assertTrue(sub1.getTags().keySet().contains(TAG_SYSTEM));
-		assertEquals(sub1.getTags().get(TAG_SYSTEM), TAG_VALUE);
+		assertThat(sub1.getTags().keySet().contains(TAG_SYSTEM)).isTrue();
+		assertThat(TAG_VALUE).isEqualTo(sub1.getTags().get(TAG_SYSTEM));
    }
 
 	@Test
@@ -77,7 +75,7 @@ public class CanonicalSubscriptionTest {
 		SubscriptionCanonicalizer canonicalizer = new SubscriptionCanonicalizer(FhirContext.forR4());
 		CanonicalSubscription sub1 = canonicalizer.canonicalize(makeEmailSubscription());
 		CanonicalSubscription sub2 = canonicalizer.canonicalize(makeEmailSubscription());
-		assertTrue(sub1.equals(sub2));
+		assertThat(sub1.equals(sub2)).isTrue();
 	}
 
 	@Test
@@ -87,7 +85,7 @@ public class CanonicalSubscriptionTest {
 		subscription.addExtension(HapiExtensions.EXTENSION_SUBSCRIPTION_CROSS_PARTITION, new BooleanType().setValue(true));
 		CanonicalSubscription canonicalSubscription = canonicalizer.canonicalize(subscription);
 
-		assertEquals(canonicalSubscription.getCrossPartitionEnabled(), true);
+		assertThat(true).isEqualTo(canonicalSubscription.getCrossPartitionEnabled());
 	}
 
 	@Test
@@ -99,7 +97,7 @@ public class CanonicalSubscriptionTest {
 
 		System.out.print(canonicalSubscription);
 
-		assertEquals(canonicalSubscription.getCrossPartitionEnabled(), false);
+		assertThat(false).isEqualTo(canonicalSubscription.getCrossPartitionEnabled());
 	}
 
 	@Test
@@ -111,7 +109,7 @@ public class CanonicalSubscriptionTest {
 
 		System.out.print(canonicalSubscription);
 
-		assertEquals(canonicalSubscription.getCrossPartitionEnabled(), false);
+		assertThat(false).isEqualTo(canonicalSubscription.getCrossPartitionEnabled());
 	}
 
 	@Test
@@ -122,7 +120,7 @@ public class CanonicalSubscriptionTest {
 
 		CanonicalSubscription payload = resourceDeliveryMessage.getPayload().getSubscription();
 
-		assertEquals(payload.getCrossPartitionEnabled(), false);
+		assertThat(false).isEqualTo(payload.getCrossPartitionEnabled());
 	}
 
 	private Subscription makeEmailSubscription() {

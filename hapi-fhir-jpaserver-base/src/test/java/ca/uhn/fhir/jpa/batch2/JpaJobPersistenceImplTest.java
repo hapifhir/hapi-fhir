@@ -25,9 +25,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
@@ -56,8 +54,8 @@ class JpaJobPersistenceImplTest {
 		JobOperationResultJson result = mySvc.cancelInstance(TEST_INSTANCE_ID);
 
 		// validate
-		assertTrue(result.getSuccess());
-		assertEquals("Job instance <test-instance-id> successfully cancelled.", result.getMessage());
+		assertThat(result.getSuccess()).isTrue();
+		assertThat(result.getMessage()).isEqualTo("Job instance <test-instance-id> successfully cancelled.");
 	}
 
 	@Test
@@ -70,8 +68,8 @@ class JpaJobPersistenceImplTest {
 		JobOperationResultJson result = mySvc.cancelInstance(TEST_INSTANCE_ID);
 
 		// validate
-		assertFalse(result.getSuccess());
-		assertEquals("Job instance <test-instance-id> not found.", result.getMessage());
+		assertThat(result.getSuccess()).isFalse();
+		assertThat(result.getMessage()).isEqualTo("Job instance <test-instance-id> not found.");
 	}
 
 	@Test
@@ -84,8 +82,8 @@ class JpaJobPersistenceImplTest {
 		JobOperationResultJson result = mySvc.cancelInstance(TEST_INSTANCE_ID);
 
 		// validate
-		assertFalse(result.getSuccess());
-		assertEquals("Job instance <test-instance-id> was already cancelled.  Nothing to do.", result.getMessage());
+		assertThat(result.getSuccess()).isFalse();
+		assertThat(result.getMessage()).isEqualTo("Job instance <test-instance-id> was already cancelled.  Nothing to do.");
 	}
 
 	@Test
@@ -138,9 +136,9 @@ class JpaJobPersistenceImplTest {
 		List<JobInstance> retInstances = mySvc.fetchInstances(req, pageStart, pageSize);
 
 		// verify
-		assertEquals(instances.size(), retInstances.size());
-		assertEquals(instances.get(0).getId(),  retInstances.get(0).getInstanceId());
-		assertEquals(instances.get(1).getId(),  retInstances.get(1).getInstanceId());
+		assertThat(retInstances.size()).isEqualTo(instances.size());
+		assertThat(retInstances.get(0).getInstanceId()).isEqualTo(instances.get(0).getId());
+		assertThat(retInstances.get(1).getInstanceId()).isEqualTo(instances.get(1).getId());
 
 		ArgumentCaptor<Pageable> pageableCaptor = ArgumentCaptor.forClass(Pageable.class);
 		verify(myJobInstanceRepository)
@@ -151,8 +149,8 @@ class JpaJobPersistenceImplTest {
 			);
 
 		Pageable pageable = pageableCaptor.getValue();
-		assertEquals(pageStart, pageable.getPageNumber());
-		assertEquals(pageSize, pageable.getPageSize());
+		assertThat(pageable.getPageNumber()).isEqualTo(pageStart);
+		assertThat(pageable.getPageSize()).isEqualTo(pageSize);
 	}
 
 	@Test
@@ -169,8 +167,8 @@ class JpaJobPersistenceImplTest {
 		Optional<JobInstance> retInstance = mySvc.fetchInstance(entity.getId());
 
 		// verify
-		assertTrue(retInstance.isPresent());
-		assertEquals(instance.getInstanceId(), retInstance.get().getInstanceId());
+		assertThat(retInstance.isPresent()).isTrue();
+		assertThat(retInstance.get().getInstanceId()).isEqualTo(instance.getInstanceId());
 	}
 
 	private JobInstance createJobInstanceFromEntity(Batch2JobInstanceEntity theEntity) {

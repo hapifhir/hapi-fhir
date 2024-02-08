@@ -11,7 +11,6 @@ import ca.uhn.fhir.rest.param.QuantityParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.sql.Date;
@@ -22,7 +21,6 @@ import java.util.List;
 import static ca.uhn.fhir.jpa.searchparam.SearchParameterMap.compare;
 import static ca.uhn.fhir.rest.param.TokenParamModifier.TEXT;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class SearchParameterMapTest {
 	static FhirContext ourFhirContext = FhirContext.forR4Cached();
@@ -33,28 +31,28 @@ class SearchParameterMapTest {
 		DateRangeParam dateRangeParam = new DateRangeParam();
 		dateRangeParam.setLowerBound("2021-05-31");
 		map.setLastUpdated(dateRangeParam);
-		assertEquals("?_lastUpdated=ge2021-05-31", map.toNormalizedQueryString(ourFhirContext));
+		assertThat(map.toNormalizedQueryString(ourFhirContext)).isEqualTo("?_lastUpdated=ge2021-05-31");
 	}
 
 	@Test
 	void toNormalizedQueryString_IncludeNormal() {
 		SearchParameterMap map = new SearchParameterMap();
 		map.addInclude(new Include("Patient:name"));
-		assertEquals("?_include=Patient:name", map.toNormalizedQueryString(ourFhirContext));
+		assertThat(map.toNormalizedQueryString(ourFhirContext)).isEqualTo("?_include=Patient:name");
 	}
 
 	@Test
 	void toNormalizedQueryString_IncludeStar() {
 		SearchParameterMap map = new SearchParameterMap();
 		map.addInclude(new Include("*"));
-		assertEquals("?_include=*", map.toNormalizedQueryString(ourFhirContext));
+		assertThat(map.toNormalizedQueryString(ourFhirContext)).isEqualTo("?_include=*");
 	}
 
 	@Test
 	void toNormalizedQueryString_IncludeTypedStar() {
 		SearchParameterMap map = new SearchParameterMap();
 		map.addInclude(new Include("Patient:*"));
-		assertEquals("?_include=Patient:*", map.toNormalizedQueryString(ourFhirContext));
+		assertThat(map.toNormalizedQueryString(ourFhirContext)).isEqualTo("?_include=Patient:*");
 	}
 
 	@Test
@@ -63,7 +61,7 @@ class SearchParameterMapTest {
 		DateRangeParam dateRangeParam = new DateRangeParam();
 		dateRangeParam.setUpperBound("2021-05-31");
 		map.setLastUpdated(dateRangeParam);
-		assertEquals("?_lastUpdated=le2021-05-31", map.toNormalizedQueryString(ourFhirContext));
+		assertThat(map.toNormalizedQueryString(ourFhirContext)).isEqualTo("?_lastUpdated=le2021-05-31");
 	}
 
 	@Test
@@ -155,31 +153,29 @@ class SearchParameterMapTest {
 		SearchParameterMap copy = orig.clone();
 
 		// verify that they are not the same
-		Assertions.assertNotEquals(orig, copy);
+		assertThat(copy).isNotEqualTo(orig);
 
 		// ... but that they are equal
-		Assertions.assertEquals(orig.toNormalizedQueryString(null),
-			copy.toNormalizedQueryString(null));
-		Assertions.assertEquals(orig.getOffset(), copy.getOffset());
-		Assertions.assertEquals(orig.getLoadSynchronousUpTo(), copy.getLoadSynchronousUpTo());
-		Assertions.assertEquals(orig.isLoadSynchronous(), copy.isLoadSynchronous());
-		Assertions.assertEquals(orig.getNearDistanceParam(), copy.getNearDistanceParam());
-		Assertions.assertEquals(orig.getCount(), copy.getCount());
-		Assertions.assertEquals(orig.getLastNMax(), copy.getLastNMax());
-		Assertions.assertEquals(orig.isLastN(), copy.isLastN());
-		Assertions.assertEquals(orig.isDeleteExpunge(), copy.isDeleteExpunge());
-		Assertions.assertEquals(orig.getIncludes(), copy.getIncludes());
-		Assertions.assertEquals(orig.getSearchTotalMode(), copy.getSearchTotalMode());
-		Assertions.assertEquals(orig.getLastUpdated(), copy.getLastUpdated());
-		Assertions.assertEquals(orig.getSearchContainedMode(), copy.getSearchContainedMode());
-		Assertions.assertEquals(orig.getEverythingMode(), copy.getEverythingMode());
-		Assertions.assertEquals(orig.getSort(), copy.getSort());
-		Assertions.assertEquals(orig.get("something"), copy.get("something"));
+		assertThat(copy.toNormalizedQueryString(null)).isEqualTo(orig.toNormalizedQueryString(null));
+		assertThat(copy.getOffset()).isEqualTo(orig.getOffset());
+		assertThat(copy.getLoadSynchronousUpTo()).isEqualTo(orig.getLoadSynchronousUpTo());
+		assertThat(copy.isLoadSynchronous()).isEqualTo(orig.isLoadSynchronous());
+		assertThat(copy.getNearDistanceParam()).isEqualTo(orig.getNearDistanceParam());
+		assertThat(copy.getCount()).isEqualTo(orig.getCount());
+		assertThat(copy.getLastNMax()).isEqualTo(orig.getLastNMax());
+		assertThat(copy.isLastN()).isEqualTo(orig.isLastN());
+		assertThat(copy.isDeleteExpunge()).isEqualTo(orig.isDeleteExpunge());
+		assertThat(copy.getIncludes()).isEqualTo(orig.getIncludes());
+		assertThat(copy.getSearchTotalMode()).isEqualTo(orig.getSearchTotalMode());
+		assertThat(copy.getLastUpdated()).isEqualTo(orig.getLastUpdated());
+		assertThat(copy.getSearchContainedMode()).isEqualTo(orig.getSearchContainedMode());
+		assertThat(copy.getEverythingMode()).isEqualTo(orig.getEverythingMode());
+		assertThat(copy.getSort()).isEqualTo(orig.getSort());
+		assertThat(copy.get("something")).isEqualTo(orig.get("something"));
 
 		// verify changing one does not change the other
 		orig.setOffset(100);
-		Assertions.assertNotEquals(orig.toNormalizedQueryString(null),
-			copy.toNormalizedQueryString(null));
+		assertThat(copy.toNormalizedQueryString(null)).isNotEqualTo(orig.toNormalizedQueryString(null));
 	}
 
 	@Test
@@ -194,10 +190,10 @@ class SearchParameterMapTest {
 		SearchParameterMap clone = orig.clone();
 
 		// verify
-		Assertions.assertEquals(orig.size(), clone.size());
-		Assertions.assertEquals(orig.get("string"), clone.get("string"));
-		Assertions.assertEquals(orig.get("datetime"), clone.get("datetime"));
-		Assertions.assertEquals(orig.get("int"), clone.get("int"));
+		assertThat(clone.size()).isEqualTo(orig.size());
+		assertThat(clone.get("string")).isEqualTo(orig.get("string"));
+		assertThat(clone.get("datetime")).isEqualTo(orig.get("datetime"));
+		assertThat(clone.get("int")).isEqualTo(orig.get("int"));
 	}
 
 
@@ -205,23 +201,23 @@ class SearchParameterMapTest {
 	public void testCompareParameters() {
 
 		// Missing
-		assertEquals(0, compare(ourFhirContext, new StringParam().setMissing(true), new StringParam().setMissing(true)));
-		assertEquals(-1, compare(ourFhirContext, new StringParam("A"), new StringParam().setMissing(true)));
-		assertEquals(1, compare(ourFhirContext, new StringParam().setMissing(true), new StringParam("A")));
+		assertThat(compare(ourFhirContext, new StringParam().setMissing(true), new StringParam().setMissing(true))).isEqualTo(0);
+		assertThat(compare(ourFhirContext, new StringParam("A"), new StringParam().setMissing(true))).isEqualTo(-1);
+		assertThat(compare(ourFhirContext, new StringParam().setMissing(true), new StringParam("A"))).isEqualTo(1);
 
 		// Qualifier
-		assertEquals(0, compare(ourFhirContext, new StringParam("A").setContains(true), new StringParam("A").setContains(true)));
-		assertEquals(1, compare(ourFhirContext, new StringParam("A").setContains(true), new StringParam("A")));
-		assertEquals(-1, compare(ourFhirContext, new StringParam("A"), new StringParam("A").setContains(true)));
+		assertThat(compare(ourFhirContext, new StringParam("A").setContains(true), new StringParam("A").setContains(true))).isEqualTo(0);
+		assertThat(compare(ourFhirContext, new StringParam("A").setContains(true), new StringParam("A"))).isEqualTo(1);
+		assertThat(compare(ourFhirContext, new StringParam("A"), new StringParam("A").setContains(true))).isEqualTo(-1);
 
 		// Value
-		assertEquals(0, compare(ourFhirContext, new StringParam("A"), new StringParam("A")));
-		assertEquals(-1, compare(ourFhirContext, new StringParam("A"), new StringParam("B")));
-		assertEquals(1, compare(ourFhirContext, new StringParam("B"), new StringParam("A")));
+		assertThat(compare(ourFhirContext, new StringParam("A"), new StringParam("A"))).isEqualTo(0);
+		assertThat(compare(ourFhirContext, new StringParam("A"), new StringParam("B"))).isEqualTo(-1);
+		assertThat(compare(ourFhirContext, new StringParam("B"), new StringParam("A"))).isEqualTo(1);
 
 		// Value + Comparator (value should have no effect if comparator is changed)
-		assertEquals(1, compare(ourFhirContext, new StringParam("B").setContains(true), new StringParam("A")));
-		assertEquals(1, compare(ourFhirContext, new StringParam("A").setContains(true), new StringParam("B")));
+		assertThat(compare(ourFhirContext, new StringParam("B").setContains(true), new StringParam("A"))).isEqualTo(1);
+		assertThat(compare(ourFhirContext, new StringParam("A").setContains(true), new StringParam("B"))).isEqualTo(1);
 
 	}
 

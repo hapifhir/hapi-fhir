@@ -21,10 +21,6 @@ import org.junit.jupiter.params.provider.ValueSource;
 import static ca.uhn.fhir.rest.api.Constants.CT_FHIR_JSON_NEW;
 import static ca.uhn.fhir.util.HapiExtensions.EX_SEND_DELETE_MESSAGES;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class SubscriptionCanonicalizerTest {
 
@@ -38,7 +34,7 @@ class SubscriptionCanonicalizerTest {
 
 		CanonicalSubscription canonicalSubscription = testedSC.canonicalize(subscription);
 
-		assertFalse(canonicalSubscription.getSendDeleteMessages());
+		assertThat(canonicalSubscription.getSendDeleteMessages()).isFalse();
 	}
 
 	@Test
@@ -49,7 +45,7 @@ class SubscriptionCanonicalizerTest {
 
 		CanonicalSubscription canonicalSubscription = testedSC.canonicalize(subscription);
 
-		assertEquals("baz", canonicalSubscription.getTags().get("http://foo"));
+		assertThat(canonicalSubscription.getTags().get("http://foo")).isEqualTo("baz");
 	}
 
 	@Test
@@ -65,7 +61,7 @@ class SubscriptionCanonicalizerTest {
 		CanonicalSubscription canonicalSubscription = testedSC.canonicalize(subscription);
 
 		// verify
-		assertTrue(canonicalSubscription.getSendDeleteMessages());
+		assertThat(canonicalSubscription.getSendDeleteMessages()).isTrue();
 	}
 
 	@Test
@@ -82,7 +78,7 @@ class SubscriptionCanonicalizerTest {
 		CanonicalSubscription canonicalize = dstu2Canonicalizer.canonicalize(dstu2Sub);
 
 		// verify
-		assertTrue(canonicalize.getSendDeleteMessages());
+		assertThat(canonicalize.getSendDeleteMessages()).isTrue();
 	}
 
 	private org.hl7.fhir.r5.model.Subscription buildR5Subscription(org.hl7.fhir.r5.model.Subscription.SubscriptionPayloadContent thePayloadContent) {
@@ -116,29 +112,29 @@ class SubscriptionCanonicalizerTest {
 		CanonicalSubscription canonical = r5Canonicalizer.canonicalize(subscription);
 
 		// verify
-		assertEquals(Subscription.SubscriptionStatus.ACTIVE, canonical.getStatus());
-		assertEquals(CT_FHIR_JSON_NEW, canonical.getContentType());
-		assertEquals(payloadContent, canonical.getContent());
-		assertEquals("http://foo", canonical.getEndpointUrl());
-		assertEquals(SubscriptionTestDataHelper.TEST_TOPIC, canonical.getTopic());
-		assertEquals(CanonicalSubscriptionChannelType.RESTHOOK, canonical.getChannelType());
+		assertThat(canonical.getStatus()).isEqualTo(Subscription.SubscriptionStatus.ACTIVE);
+		assertThat(canonical.getContentType()).isEqualTo(CT_FHIR_JSON_NEW);
+		assertThat(canonical.getContent()).isEqualTo(payloadContent);
+		assertThat(canonical.getEndpointUrl()).isEqualTo("http://foo");
+		assertThat(canonical.getTopic()).isEqualTo(SubscriptionTestDataHelper.TEST_TOPIC);
+		assertThat(canonical.getChannelType()).isEqualTo(CanonicalSubscriptionChannelType.RESTHOOK);
 		assertThat(canonical.getFilters()).hasSize(2);
 
 		CanonicalTopicSubscriptionFilter filter1 = canonical.getFilters().get(0);
-		assertEquals("Observation", filter1.getResourceType());
-		assertEquals("param1", filter1.getFilterParameter());
-		assertEquals(Enumerations.SearchComparator.EQ, filter1.getComparator());
-		assertEquals(Enumerations.SearchModifierCode.EXACT, filter1.getModifier());
-		assertEquals("value1", filter1.getValue());
+		assertThat(filter1.getResourceType()).isEqualTo("Observation");
+		assertThat(filter1.getFilterParameter()).isEqualTo("param1");
+		assertThat(filter1.getComparator()).isEqualTo(Enumerations.SearchComparator.EQ);
+		assertThat(filter1.getModifier()).isEqualTo(Enumerations.SearchModifierCode.EXACT);
+		assertThat(filter1.getValue()).isEqualTo("value1");
 
 		CanonicalTopicSubscriptionFilter filter2 = canonical.getFilters().get(1);
-		assertEquals("CarePlan", filter2.getResourceType());
-		assertEquals("param2", filter2.getFilterParameter());
-		assertEquals(Enumerations.SearchComparator.EQ, filter2.getComparator());
-		assertEquals(Enumerations.SearchModifierCode.EXACT, filter2.getModifier());
-		assertEquals("value2", filter2.getValue());
-		assertEquals(123, canonical.getHeartbeatPeriod());
-		assertEquals(456, canonical.getMaxCount());
+		assertThat(filter2.getResourceType()).isEqualTo("CarePlan");
+		assertThat(filter2.getFilterParameter()).isEqualTo("param2");
+		assertThat(filter2.getComparator()).isEqualTo(Enumerations.SearchComparator.EQ);
+		assertThat(filter2.getModifier()).isEqualTo(Enumerations.SearchModifierCode.EXACT);
+		assertThat(filter2.getValue()).isEqualTo("value2");
+		assertThat(canonical.getHeartbeatPeriod()).isEqualTo(123);
+		assertThat(canonical.getMaxCount()).isEqualTo(456);
 	}
 
 	@ParameterizedTest
@@ -154,7 +150,7 @@ class SubscriptionCanonicalizerTest {
 		CanonicalSubscription canonical = r4bCanonicalizer.canonicalize(subscription);
 
 		// verify
-		assertEquals(Subscription.SubscriptionStatus.ACTIVE, canonical.getStatus());
+		assertThat(canonical.getStatus()).isEqualTo(Subscription.SubscriptionStatus.ACTIVE);
 		verifyStandardSubscriptionParameters(canonical);
 		verifyChannelParameters(canonical, thePayloadContent);
 	}
@@ -204,48 +200,48 @@ class SubscriptionCanonicalizerTest {
 
 		// Standard R4 stuff
 		verifyStandardSubscriptionParameters(canonical);
-		assertEquals(Subscription.SubscriptionStatus.ACTIVE, canonical.getStatus());
+		assertThat(canonical.getStatus()).isEqualTo(Subscription.SubscriptionStatus.ACTIVE);
 		verifyChannelParameters(canonical, thePayloadContent);
 
 		assertThat(canonical.getFilters()).hasSize(2);
 
 		CanonicalTopicSubscriptionFilter filter1 = canonical.getFilters().get(0);
-		assertEquals("Encounter", filter1.getResourceType());
-		assertEquals("patient", filter1.getFilterParameter());
-		assertEquals(Enumerations.SearchComparator.EQ, filter1.getComparator());
-		assertNull(filter1.getModifier());
-		assertEquals("Patient/123", filter1.getValue());
+		assertThat(filter1.getResourceType()).isEqualTo("Encounter");
+		assertThat(filter1.getFilterParameter()).isEqualTo("patient");
+		assertThat(filter1.getComparator()).isEqualTo(Enumerations.SearchComparator.EQ);
+		assertThat(filter1.getModifier()).isNull();
+		assertThat(filter1.getValue()).isEqualTo("Patient/123");
 
 		CanonicalTopicSubscriptionFilter filter2 = canonical.getFilters().get(1);
-		assertEquals("Encounter", filter2.getResourceType());
-		assertEquals("status", filter2.getFilterParameter());
-		assertEquals(Enumerations.SearchComparator.EQ, filter2.getComparator());
-		assertNull(filter2.getModifier());
-		assertEquals("finished", filter2.getValue());
+		assertThat(filter2.getResourceType()).isEqualTo("Encounter");
+		assertThat(filter2.getFilterParameter()).isEqualTo("status");
+		assertThat(filter2.getComparator()).isEqualTo(Enumerations.SearchComparator.EQ);
+		assertThat(filter2.getModifier()).isNull();
+		assertThat(filter2.getValue()).isEqualTo("finished");
 
-		assertEquals(86400, canonical.getHeartbeatPeriod());
-		assertEquals(60, canonical.getTimeout());
-		assertEquals(20, canonical.getMaxCount());
+		assertThat(canonical.getHeartbeatPeriod()).isEqualTo(86400);
+		assertThat(canonical.getTimeout()).isEqualTo(60);
+		assertThat(canonical.getMaxCount()).isEqualTo(20);
 	}
 
 	private void verifyChannelParameters(CanonicalSubscription theCanonicalSubscriptions, String thePayloadContent) {
 		assertThat(theCanonicalSubscriptions.getHeaders()).hasSize(2);
-		assertEquals(SubscriptionTestDataHelper.TEST_HEADER1, theCanonicalSubscriptions.getHeaders().get(0));
-		assertEquals(SubscriptionTestDataHelper.TEST_HEADER2, theCanonicalSubscriptions.getHeaders().get(1));
+		assertThat(theCanonicalSubscriptions.getHeaders().get(0)).isEqualTo(SubscriptionTestDataHelper.TEST_HEADER1);
+		assertThat(theCanonicalSubscriptions.getHeaders().get(1)).isEqualTo(SubscriptionTestDataHelper.TEST_HEADER2);
 
-		assertEquals(CT_FHIR_JSON_NEW, theCanonicalSubscriptions.getContentType());
-		assertEquals(thePayloadContent, theCanonicalSubscriptions.getContent().toCode());
-		assertEquals(SubscriptionTestDataHelper.TEST_ENDPOINT, theCanonicalSubscriptions.getEndpointUrl());
-		assertEquals(SubscriptionTestDataHelper.TEST_TOPIC, theCanonicalSubscriptions.getTopic());
-		assertEquals(CanonicalSubscriptionChannelType.RESTHOOK, theCanonicalSubscriptions.getChannelType());
+		assertThat(theCanonicalSubscriptions.getContentType()).isEqualTo(CT_FHIR_JSON_NEW);
+		assertThat(theCanonicalSubscriptions.getContent().toCode()).isEqualTo(thePayloadContent);
+		assertThat(theCanonicalSubscriptions.getEndpointUrl()).isEqualTo(SubscriptionTestDataHelper.TEST_ENDPOINT);
+		assertThat(theCanonicalSubscriptions.getTopic()).isEqualTo(SubscriptionTestDataHelper.TEST_TOPIC);
+		assertThat(theCanonicalSubscriptions.getChannelType()).isEqualTo(CanonicalSubscriptionChannelType.RESTHOOK);
 	}
 
 	private void verifyStandardSubscriptionParameters(CanonicalSubscription theCanonicalSubscription) {
-		assertEquals(2, theCanonicalSubscription.getTags().size());
-		assertEquals("b", theCanonicalSubscription.getTags().get("http://a"));
-		assertEquals("e", theCanonicalSubscription.getTags().get("http://d"));
-		assertEquals("testId", theCanonicalSubscription.getIdPart());
-		assertEquals("testId", theCanonicalSubscription.getIdElementString());
+		assertThat(theCanonicalSubscription.getTags().size()).isEqualTo(2);
+		assertThat(theCanonicalSubscription.getTags().get("http://a")).isEqualTo("b");
+		assertThat(theCanonicalSubscription.getTags().get("http://d")).isEqualTo("e");
+		assertThat(theCanonicalSubscription.getIdPart()).isEqualTo("testId");
+		assertThat(theCanonicalSubscription.getIdElementString()).isEqualTo("testId");
 	}
 
 	@NotNull

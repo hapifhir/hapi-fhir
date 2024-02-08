@@ -14,10 +14,8 @@ import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 class BinarySecurityContextInterceptorTest {
 
@@ -45,8 +43,8 @@ class BinarySecurityContextInterceptorTest {
 			.withId("A")
 			.withAdditionalHeader(HeaderBasedBinarySecurityContextInterceptor.X_SECURITY_CONTEXT_ALLOWED_IDENTIFIER, "http://foo|bar")
 			.execute();
-		assertEquals("A", actual.getIdElement().getIdPart());
-		assertEquals("http://foo", actual.getSecurityContext().getIdentifier().getSystem());
+		assertThat(actual.getIdElement().getIdPart()).isEqualTo("A");
+		assertThat(actual.getSecurityContext().getIdentifier().getSystem()).isEqualTo("http://foo");
 	}
 
 	@Test
@@ -54,7 +52,7 @@ class BinarySecurityContextInterceptorTest {
 		storeBinaryWithSecurityContextIdentifier();
 
 		IBundleProvider results = ourBinaryProvider.searchAll(new SystemRequestDetails());
-		assertEquals(1, results.sizeOrThrowNpe());
+		assertThat(results.sizeOrThrowNpe()).isEqualTo(1);
 	}
 
 	@Test
@@ -68,9 +66,9 @@ class BinarySecurityContextInterceptorTest {
 				.resource(Binary.class)
 				.withId("A")
 				.execute();
-			fail();
+			fail("");
 		} catch (ForbiddenOperationException e) {
-			assertEquals("HTTP 403 Forbidden: HAPI-2369: Security context not permitted", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo("HTTP 403 Forbidden: HAPI-2369: Security context not permitted");
 		}
 	}
 
@@ -84,8 +82,8 @@ class BinarySecurityContextInterceptorTest {
 			.resource(Binary.class)
 			.withId("A")
 			.execute();
-		assertEquals("A", actual.getIdElement().getIdPart());
-		assertNull(actual.getSecurityContext().getIdentifier().getSystem());
+		assertThat(actual.getIdElement().getIdPart()).isEqualTo("A");
+		assertThat(actual.getSecurityContext().getIdentifier().getSystem()).isNull();
 	}
 
 	@Test
@@ -101,8 +99,8 @@ class BinarySecurityContextInterceptorTest {
 			.resource(Patient.class)
 			.withId("A")
 			.execute();
-		assertEquals("A", actual.getIdElement().getIdPart());
-		assertTrue(actual.getActive());
+		assertThat(actual.getIdElement().getIdPart()).isEqualTo("A");
+		assertThat(actual.getActive()).isTrue();
 	}
 
 
@@ -123,7 +121,7 @@ class BinarySecurityContextInterceptorTest {
 			.resource(newBinary)
 			.withAdditionalHeader(HeaderBasedBinarySecurityContextInterceptor.X_SECURITY_CONTEXT_ALLOWED_IDENTIFIER, "http://foo|bar")
 			.execute();
-		assertEquals(2L, outcome.getId().getVersionIdPartAsLong());
+		assertThat(outcome.getId().getVersionIdPartAsLong()).isEqualTo(2L);
 	}
 
 	@Test
@@ -140,9 +138,9 @@ class BinarySecurityContextInterceptorTest {
 				.update()
 				.resource(newBinary)
 				.execute();
-			fail();
+			fail("");
 		} catch (ForbiddenOperationException e) {
-			assertEquals("HTTP 403 Forbidden: HAPI-2369: Security context not permitted", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo("HTTP 403 Forbidden: HAPI-2369: Security context not permitted");
 		}
 	}
 

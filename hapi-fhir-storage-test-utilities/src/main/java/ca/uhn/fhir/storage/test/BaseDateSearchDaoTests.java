@@ -41,7 +41,7 @@ import java.util.Set;
 import java.util.TimeZone;
 import java.util.stream.Collectors;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Run the tests defined in {@link DateSearchTestCase} in a DAO test as a @Nested suite.
@@ -119,7 +119,7 @@ public abstract class BaseDateSearchDaoTests {
 			"Expected " + theQuery + " to " +
 				(theExpectedMatch ? "" : "not ") + "match " + theResourceDate +
 				" (" + theFileName + ":" + theLineNumber + ")"; // wrap this in () so tools recognize the line reference.
-		assertEquals(theExpectedMatch, matched, message);
+		assertThat(matched).as(message).isEqualTo(theExpectedMatch);
 	}
 
 

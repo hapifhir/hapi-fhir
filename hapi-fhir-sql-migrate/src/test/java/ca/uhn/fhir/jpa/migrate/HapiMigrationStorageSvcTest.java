@@ -16,9 +16,7 @@ import java.util.Set;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.fail;
 
 class HapiMigrationStorageSvcTest extends BaseMigrationTest {
 	private static final String RELEASE = "V5_5_0";
@@ -39,38 +37,38 @@ class HapiMigrationStorageSvcTest extends BaseMigrationTest {
 		taskList.add(dropTableTask);
 
 		MigrationTaskList notAppliedYet = ourHapiMigrationStorageSvc.diff(taskList);
-		assertEquals(2, notAppliedYet.size());
+		assertThat(notAppliedYet.size()).isEqualTo(2);
 		List<BaseTask> notAppliedTasks = new ArrayList<>();
 		notAppliedYet.forEach(notAppliedTasks::add);
 
-		assertEquals(RELEASE_VERSION_PREFIX + FAILED_VERSION, notAppliedTasks.get(0).getMigrationVersion());
-		assertEquals(RELEASE_VERSION_PREFIX + version, notAppliedTasks.get(1).getMigrationVersion());
+		assertThat(notAppliedTasks.get(0).getMigrationVersion()).isEqualTo(RELEASE_VERSION_PREFIX + FAILED_VERSION);
+		assertThat(notAppliedTasks.get(1).getMigrationVersion()).isEqualTo(RELEASE_VERSION_PREFIX + version);
 	}
 
 	@Test
 	void getLatestAppliedVersion_empty_unknown() {
 		String latest = ourHapiMigrationStorageSvc.getLatestAppliedVersion();
-		assertEquals(HapiMigrationStorageSvc.UNKNOWN_VERSION, latest);
+		assertThat(latest).isEqualTo(HapiMigrationStorageSvc.UNKNOWN_VERSION);
 	}
 
 	@Test
 	void getLatestAppliedVersion_full_last() {
 		String latest = ourHapiMigrationStorageSvc.getLatestAppliedVersion();
-		assertEquals(HapiMigrationStorageSvc.UNKNOWN_VERSION, latest);
+		assertThat(latest).isEqualTo(HapiMigrationStorageSvc.UNKNOWN_VERSION);
 
 		createTasks();
 		String newLatest = ourHapiMigrationStorageSvc.getLatestAppliedVersion();
-		assertEquals(RELEASE_VERSION_PREFIX + LAST_SUCCEEDED_VERSION, newLatest);
+		assertThat(newLatest).isEqualTo(RELEASE_VERSION_PREFIX + LAST_SUCCEEDED_VERSION);
 	}
 
 	@Test
 	void insert_delete() {
 		String description = UUID.randomUUID().toString();
 		int initialCount = countRecords();
-		assertTrue(ourHapiMigrationStorageSvc.insertLockRecord(description));
-		assertEquals(initialCount + 1, countRecords());
+		assertThat(ourHapiMigrationStorageSvc.insertLockRecord(description)).isTrue();
+		assertThat(countRecords()).isEqualTo(initialCount + 1);
 		ourHapiMigrationStorageSvc.deleteLockRecord(description);
-		assertEquals(initialCount, countRecords());
+		assertThat(countRecords()).isEqualTo(initialCount);
 	}
 
 	@Test
@@ -78,12 +76,12 @@ class HapiMigrationStorageSvcTest extends BaseMigrationTest {
 		String otherLock = UUID.randomUUID().toString();
 		String thisLock = UUID.randomUUID().toString();
 		ourHapiMigrationStorageSvc.verifyNoOtherLocksPresent(thisLock);
-		assertTrue(ourHapiMigrationStorageSvc.insertLockRecord(otherLock));
+		assertThat(ourHapiMigrationStorageSvc.insertLockRecord(otherLock)).isTrue();
 		try {
 			ourHapiMigrationStorageSvc.verifyNoOtherLocksPresent(thisLock);
-			fail();
+			fail("");
 		} catch (HapiMigrationException e) {
-			assertEquals("HAPI-2152: Internal error: on unlocking, a competing lock was found", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo("HAPI-2152: Internal error: on unlocking, a competing lock was found");
 		}
 	}
 
@@ -94,7 +92,7 @@ class HapiMigrationStorageSvcTest extends BaseMigrationTest {
 
 	void createTasks() {
 		MigrationTaskList taskList = buildTasks();
-		assertEquals(7, taskList.size());
+		assertThat(taskList.size()).isEqualTo(7);
 
 		taskList.forEach(task -> {
 			HapiMigrationEntity entity = HapiMigrationEntity.fromBaseTask(task);

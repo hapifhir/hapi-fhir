@@ -12,8 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -36,8 +35,8 @@ public class JpaSearchParamCacheTest {
 		setActiveComboSearchParams(RESOURCE_TYPE, List.of(unique1, unique2, nonUnique1, nonUnique2));
 
 		List<RuntimeSearchParam> result = myJpaSearchParamCache.getActiveComboSearchParams(RESOURCE_TYPE);
-		assertEquals(4, result.size());
-		assertTrue(result.containsAll(List.of(unique1, unique2, nonUnique1, nonUnique2)));
+		assertThat(result.size()).isEqualTo(4);
+		assertThat(result.containsAll(List.of(unique1, unique2, nonUnique1, nonUnique2))).isTrue();
 	}
 
 	@Test
@@ -48,8 +47,8 @@ public class JpaSearchParamCacheTest {
 		setActiveComboSearchParams(RESOURCE_TYPE, List.of(unique1, unique2, nonUnique));
 
 		List<RuntimeSearchParam> result = myJpaSearchParamCache.getActiveComboSearchParams(RESOURCE_TYPE, ComboSearchParamType.UNIQUE);
-		assertEquals(2, result.size());
-		assertTrue(result.containsAll(List.of(unique1, unique2)));
+		assertThat(result.size()).isEqualTo(2);
+		assertThat(result.containsAll(List.of(unique1, unique2))).isTrue();
 	}
 
 	@Test
@@ -60,8 +59,8 @@ public class JpaSearchParamCacheTest {
 		setActiveComboSearchParams(RESOURCE_TYPE, List.of(nonUnique1, nonUnique2, unique));
 
 		List<RuntimeSearchParam> result = myJpaSearchParamCache.getActiveComboSearchParams(RESOURCE_TYPE, ComboSearchParamType.NON_UNIQUE);
-		assertEquals(2, result.size());
-		assertTrue(result.containsAll(List.of(nonUnique1, nonUnique2)));
+		assertThat(result.size()).isEqualTo(2);
+		assertThat(result.containsAll(List.of(nonUnique1, nonUnique2))).isTrue();
 	}
 
 	@Test
@@ -75,8 +74,8 @@ public class JpaSearchParamCacheTest {
 		setActiveComboSearchParams(RESOURCE_TYPE, List.of(sp1, sp2));
 
 		Optional<RuntimeSearchParam> found = myJpaSearchParamCache.getActiveComboSearchParamById(RESOURCE_TYPE, id1);
-		assertTrue(found.isPresent());
-		assertEquals(id1, found.get().getId());
+		assertThat(found.isPresent()).isTrue();
+		assertThat(found.get().getId()).isEqualTo(id1);
 	}
 
 	@Test
@@ -89,7 +88,7 @@ public class JpaSearchParamCacheTest {
 		setActiveComboSearchParams(RESOURCE_TYPE, List.of(sp1));
 
 		Optional<RuntimeSearchParam> found = myJpaSearchParamCache.getActiveComboSearchParamById(RESOURCE_TYPE, id2);
-		assertTrue(found.isEmpty());
+		assertThat(found.isEmpty()).isTrue();
 	}
 
 	private RuntimeSearchParam createSearchParam(ComboSearchParamType theType){

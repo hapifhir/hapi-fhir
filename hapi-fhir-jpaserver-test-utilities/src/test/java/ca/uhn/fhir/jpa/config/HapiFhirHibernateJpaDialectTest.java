@@ -17,8 +17,7 @@ import jakarta.persistence.PersistenceException;
 import java.sql.SQLException;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.fail;
 
 public class HapiFhirHibernateJpaDialectTest {
 
@@ -36,21 +35,21 @@ public class HapiFhirHibernateJpaDialectTest {
 
 		try {
 			mySvc.convertHibernateAccessException(new ConstraintViolationException("this is a message", new SQLException("reason"), ResourceTable.IDX_RES_TYPE_FHIR_ID));
-			fail();
+			fail("");
 		} catch (ResourceVersionConflictException e) {
 			assertThat(e.getMessage()).contains("The operation has failed with a client-assigned ID constraint failure");
 		}
 
 		try {
 			outcome = mySvc.convertHibernateAccessException(new StaleStateException("this is a message"));
-			fail();
+			fail("");
 		} catch (ResourceVersionConflictException e) {
 			assertThat(e.getMessage()).contains("The operation has failed with a version constraint failure");
 		}
 
 		try {
 			mySvc.convertHibernateAccessException(new ConstraintViolationException("this is a message", new SQLException("reason"), ResourceSearchUrlEntity.RES_SEARCH_URL_COLUMN_NAME));
-			fail();
+			fail("");
 		} catch (DataIntegrityViolationException e) {
 			assertThat(e.getMessage()).contains(ResourceSearchUrlEntity.RES_SEARCH_URL_COLUMN_NAME);
 		}
@@ -63,12 +62,12 @@ public class HapiFhirHibernateJpaDialectTest {
 	@Test
 	public void testTranslate() {
 		RuntimeException outcome = mySvc.translate(new PersistentObjectException("FOO"), "message");
-		assertEquals("FOO", outcome.getMessage());
+		assertThat(outcome.getMessage()).isEqualTo("FOO");
 
 		try {
 			PersistenceException exception = new PersistenceException("a message", new ConstraintViolationException("this is a message", new SQLException("reason"), ResourceTable.IDX_RES_TYPE_FHIR_ID));
 			mySvc.translate(exception, "a message");
-			fail();
+			fail("");
 		} catch (ResourceVersionConflictException e) {
 			assertThat(e.getMessage()).contains("The operation has failed with a client-assigned ID constraint failure");
 		}

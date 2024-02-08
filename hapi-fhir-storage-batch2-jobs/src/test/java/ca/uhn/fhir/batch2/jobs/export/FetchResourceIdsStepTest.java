@@ -36,8 +36,7 @@ import java.util.Date;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.atLeastOnce;
@@ -134,26 +133,26 @@ public class FetchResourceIdsStepTest {
 		RunOutcome outcome = myFirstStep.run(input, sink);
 
 		// verify
-		assertEquals(RunOutcome.SUCCESS, outcome);
+		assertThat(outcome).isEqualTo(RunOutcome.SUCCESS);
 		ArgumentCaptor<ResourceIdList> resultCaptor = ArgumentCaptor.forClass(ResourceIdList.class);
 		verify(sink, times(parameters.getResourceTypes().size()))
 			.accept(resultCaptor.capture());
 
 		List<ResourceIdList> results = resultCaptor.getAllValues();
-		assertEquals(parameters.getResourceTypes().size(), results.size());
+		assertThat(results.size()).isEqualTo(parameters.getResourceTypes().size());
 		for (ResourceIdList idList: results) {
 			String resourceType = idList.getResourceType();
-			assertTrue(parameters.getResourceTypes().contains(resourceType));
+			assertThat(parameters.getResourceTypes().contains(resourceType)).isTrue();
 
 			if (resourceType.equals("Patient")) {
-				assertEquals(patientIds.size(), idList.getIds().size());
+				assertThat(idList.getIds().size()).isEqualTo(patientIds.size());
 			}
 			else if (resourceType.equals("Observation")) {
-				assertEquals(observationIds.size(), idList.getIds().size());
+				assertThat(idList.getIds().size()).isEqualTo(observationIds.size());
 			}
 			else {
 				// we shouldn't have others
-				fail();
+				fail("");
 			}
 		}
 
@@ -170,8 +169,8 @@ public class FetchResourceIdsStepTest {
 		ArgumentCaptor<ExportPIDIteratorParameters> mapppedParamsCaptor = ArgumentCaptor.forClass(ExportPIDIteratorParameters.class);
 		verify(myBulkExportProcessor, times(2)).getResourcePidIterator(mapppedParamsCaptor.capture());
 		List<ExportPIDIteratorParameters> capturedParameters = mapppedParamsCaptor.getAllValues();
-		assertEquals(parameters.getPartitionId(), capturedParameters.get(0).getPartitionIdOrAllPartitions());
-		assertEquals(parameters.getPartitionId(), capturedParameters.get(1).getPartitionIdOrAllPartitions());
+		assertThat(capturedParameters.get(0).getPartitionIdOrAllPartitions()).isEqualTo(parameters.getPartitionId());
+		assertThat(capturedParameters.get(1).getPartitionIdOrAllPartitions()).isEqualTo(parameters.getPartitionId());
 	}
 
 	@Test
@@ -205,7 +204,7 @@ public class FetchResourceIdsStepTest {
 
 		// verify
 		ArgumentCaptor<ResourceIdList> captor = ArgumentCaptor.forClass(ResourceIdList.class);
-		assertEquals(RunOutcome.SUCCESS, outcome);
+		assertThat(outcome).isEqualTo(RunOutcome.SUCCESS);
 
 		verify(sink, times(2))
 			.accept(captor.capture());
@@ -221,7 +220,7 @@ public class FetchResourceIdsStepTest {
 					break;
 				}
 			}
-			assertTrue(found);
+			assertThat(found).isTrue();
 			found = false;
 		}
 	}

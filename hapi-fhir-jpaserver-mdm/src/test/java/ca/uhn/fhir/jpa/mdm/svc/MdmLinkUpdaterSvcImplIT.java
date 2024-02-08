@@ -25,10 +25,8 @@ import java.nio.file.Paths;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class MdmLinkUpdaterSvcImplIT extends BaseMdmR4Test {
 
@@ -77,7 +75,7 @@ class MdmLinkUpdaterSvcImplIT extends BaseMdmR4Test {
 			() -> myMdmLinkUpdaterSvc.updateLink(params));
 
 		String expectedExceptionMessage = Msg.code(2218) + myMessageHelper.getMessageForAlreadyAcceptedLink(goldenA, patientC);
-		assertEquals(expectedExceptionMessage, thrown.getMessage());
+		assertThat(thrown.getMessage()).isEqualTo(expectedExceptionMessage);
 	}
 
 	@Test
@@ -129,9 +127,9 @@ class MdmLinkUpdaterSvcImplIT extends BaseMdmR4Test {
 
 	private Patient getGoldenFor(Patient thePatient) {
 		Optional<? extends IMdmLink> patientALink = myMdmLinkDaoSvc.findMdmLinkBySource(thePatient);
-		assertTrue(patientALink.isPresent());
+		assertThat(patientALink.isPresent()).isTrue();
 		Patient golden = (Patient) myMdmResourceDaoSvc.readGoldenResourceByPid(patientALink.get().getGoldenResourcePersistenceId(), "Patient");
-		assertNotNull(golden);
+		assertThat(golden).isNotNull();
 		return golden;
 	}
 

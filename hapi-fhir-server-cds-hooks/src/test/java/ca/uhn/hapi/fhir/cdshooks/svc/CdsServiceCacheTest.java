@@ -18,11 +18,9 @@ import jakarta.annotation.Nonnull;
 import java.util.function.Function;
 
 import static ca.uhn.test.util.LogbackCaptureTestExtension.eventWithLevelAndMessageContains;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(MockitoExtension.class)
 class CdsServiceCacheTest {
@@ -41,13 +39,13 @@ class CdsServiceCacheTest {
 		// execute
 		myFixture.registerDynamicService(TEST_KEY, serviceFunction, cdsServiceJson, true, MODULE_ID);
 		// validate
-		assertEquals(1, myFixture.myServiceMap.size());
+		assertThat(myFixture.myServiceMap.size()).isEqualTo(1);
 		final CdsDynamicPrefetchableServiceMethod cdsMethod = (CdsDynamicPrefetchableServiceMethod) myFixture.myServiceMap.get(TEST_KEY);
-		assertEquals(serviceFunction, cdsMethod.getFunction());
-		assertEquals(cdsServiceJson, cdsMethod.getCdsServiceJson());
-		assertTrue(cdsMethod.isAllowAutoFhirClientPrefetch());
-		assertEquals(1, myFixture.myCdsServiceJson.getServices().size());
-		assertEquals(cdsServiceJson, myFixture.myCdsServiceJson.getServices().get(0));
+		assertThat(cdsMethod.getFunction()).isEqualTo(serviceFunction);
+		assertThat(cdsMethod.getCdsServiceJson()).isEqualTo(cdsServiceJson);
+		assertThat(cdsMethod.isAllowAutoFhirClientPrefetch()).isTrue();
+		assertThat(myFixture.myCdsServiceJson.getServices().size()).isEqualTo(1);
+		assertThat(myFixture.myCdsServiceJson.getServices().get(0)).isEqualTo(cdsServiceJson);
 	}
 
 	@Test
@@ -62,13 +60,13 @@ class CdsServiceCacheTest {
 		myFixture.registerDynamicService(TEST_KEY, serviceFunction, cdsServiceJson, true, MODULE_ID);
 		myFixture.registerDynamicService(TEST_KEY, serviceFunction2, cdsServiceJson2, false, MODULE_ID);
 		// validate
-		assertEquals(1, myFixture.myServiceMap.size());
+		assertThat(myFixture.myServiceMap.size()).isEqualTo(1);
 		final CdsDynamicPrefetchableServiceMethod cdsMethod = (CdsDynamicPrefetchableServiceMethod) myFixture.myServiceMap.get(TEST_KEY);
-		assertEquals(serviceFunction, cdsMethod.getFunction());
-		assertEquals(cdsServiceJson, cdsMethod.getCdsServiceJson());
-		assertTrue(cdsMethod.isAllowAutoFhirClientPrefetch());
-		assertEquals(1, myFixture.myCdsServiceJson.getServices().size());
-		assertEquals(cdsServiceJson, myFixture.myCdsServiceJson.getServices().get(0));
+		assertThat(cdsMethod.getFunction()).isEqualTo(serviceFunction);
+		assertThat(cdsMethod.getCdsServiceJson()).isEqualTo(cdsServiceJson);
+		assertThat(cdsMethod.isAllowAutoFhirClientPrefetch()).isTrue();
+		assertThat(myFixture.myCdsServiceJson.getServices().size()).isEqualTo(1);
+		assertThat(myFixture.myCdsServiceJson.getServices().get(0)).isEqualTo(cdsServiceJson);
 		assertThat(myLogCapture.getLogEvents(), contains(eventWithLevelAndMessageContains(Level.ERROR, expectedLogMessage)));
 	}
 
@@ -81,11 +79,11 @@ class CdsServiceCacheTest {
 		// execute
 		final CdsDynamicPrefetchableServiceMethod cdsMethod = (CdsDynamicPrefetchableServiceMethod) myFixture.unregisterServiceMethod(TEST_KEY, MODULE_ID);
 		// validate
-		assertTrue(myFixture.myServiceMap.isEmpty());
-		assertEquals(serviceFunction, cdsMethod.getFunction());
-		assertEquals(cdsServiceJson, cdsMethod.getCdsServiceJson());
-		assertTrue(cdsMethod.isAllowAutoFhirClientPrefetch());
-		assertTrue(myFixture.myCdsServiceJson.getServices().isEmpty());
+		assertThat(myFixture.myServiceMap.isEmpty()).isTrue();
+		assertThat(cdsMethod.getFunction()).isEqualTo(serviceFunction);
+		assertThat(cdsMethod.getCdsServiceJson()).isEqualTo(cdsServiceJson);
+		assertThat(cdsMethod.isAllowAutoFhirClientPrefetch()).isTrue();
+		assertThat(myFixture.myCdsServiceJson.getServices().isEmpty()).isTrue();
 	}
 
 	@Test
@@ -95,7 +93,7 @@ class CdsServiceCacheTest {
 		// execute
 		final ICdsMethod actual = myFixture.unregisterServiceMethod(TEST_KEY, MODULE_ID);
 		// validate
-		assertNull(actual);
+		assertThat(actual).isNull();
 		assertThat(myLogCapture.getLogEvents(), contains(eventWithLevelAndMessageContains(Level.ERROR, expectedLogMessage)));
 	}
 

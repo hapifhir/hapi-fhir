@@ -17,8 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class MdmProviderCrossPartitionR4Test extends BaseProviderR4Test{
 	@Autowired
@@ -54,7 +53,7 @@ public class MdmProviderCrossPartitionR4Test extends BaseProviderR4Test{
 		createPatientOnPartition(buildJanePatient(), RequestPartitionId.fromPartitionId(1));
 
 		Bundle result = (Bundle) myMdmProvider.match(buildJanePatient(), new SystemRequestDetails().setRequestPartitionId(RequestPartitionId.fromPartitionId(2)));
-		assertEquals(1, result.getEntry().size());
+		assertThat(result.getEntry().size()).isEqualTo(1);
 	}
 
 	@Test
@@ -63,7 +62,7 @@ public class MdmProviderCrossPartitionR4Test extends BaseProviderR4Test{
 		createPatientOnPartition(buildJanePatient(), RequestPartitionId.fromPartitionId(1));
 
 		Bundle result = (Bundle) myMdmProvider.match(buildJanePatient(), new SystemRequestDetails().setRequestPartitionId(RequestPartitionId.fromPartitionId(2)));
-		assertEquals(0, result.getEntry().size());
+		assertThat(result.getEntry().size()).isEqualTo(0);
 	}
 
 	@Test
@@ -82,8 +81,8 @@ public class MdmProviderCrossPartitionR4Test extends BaseProviderR4Test{
 		requestDetails.setTenantId(PARTITION_GOLDEN_RESOURCE);
 		IBundleProvider searchResult = myPatientDao.search(new SearchParameterMap(), requestDetails);
 
-		assertEquals(searchResult.getAllResources().size(), 1);
+		assertThat(1).isEqualTo(searchResult.getAllResources().size());
 
-		assertTrue(MdmResourceUtil.isGoldenRecord(searchResult.getAllResources().get(0)));
+		assertThat(MdmResourceUtil.isGoldenRecord(searchResult.getAllResources().get(0))).isTrue();
 	}
 }

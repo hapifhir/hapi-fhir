@@ -3,13 +3,13 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class RenameColumnTaskDbSpecificTest {
 
 	@Test
 	public void testBuildSqlStatementForMySql() {
-		assertEquals("ALTER TABLE SOMETABLE CHANGE COLUMN `myTextCol` `TEXTCOL` integer null", createRenameColumnSql(DriverTypeEnum.MYSQL_5_7));
+		assertThat(createRenameColumnSql(DriverTypeEnum.MYSQL_5_7)).isEqualTo("ALTER TABLE SOMETABLE CHANGE COLUMN `myTextCol` `TEXTCOL` integer null");
 	}
 
 	private String createRenameColumnSql(DriverTypeEnum theDriverTypeEnum) {
@@ -23,32 +23,32 @@ public class RenameColumnTaskDbSpecificTest {
 
 	@Test
 	public void testBuildSqlStatementForDerby() {
-		assertEquals("RENAME COLUMN SOMETABLE.myTextCol TO TEXTCOL", createRenameColumnSql(DriverTypeEnum.DERBY_EMBEDDED));
+		assertThat(createRenameColumnSql(DriverTypeEnum.DERBY_EMBEDDED)).isEqualTo("RENAME COLUMN SOMETABLE.myTextCol TO TEXTCOL");
 	}
 
 	@Test
 	public void testBuildSqlStatementForMariaDB() {
-		assertEquals("ALTER TABLE SOMETABLE CHANGE COLUMN `myTextCol` `TEXTCOL` integer null", createRenameColumnSql(DriverTypeEnum.MARIADB_10_1));
+		assertThat(createRenameColumnSql(DriverTypeEnum.MARIADB_10_1)).isEqualTo("ALTER TABLE SOMETABLE CHANGE COLUMN `myTextCol` `TEXTCOL` integer null");
 	}
 
 	@Test
 	public void testBuildSqlStatementForPostgres() {
-		assertEquals("ALTER TABLE SOMETABLE RENAME COLUMN myTextCol TO TEXTCOL", createRenameColumnSql(DriverTypeEnum.POSTGRES_9_4));
+		assertThat(createRenameColumnSql(DriverTypeEnum.POSTGRES_9_4)).isEqualTo("ALTER TABLE SOMETABLE RENAME COLUMN myTextCol TO TEXTCOL");
 	}
 
 	@Test
 	public void testBuildSqlStatementForMsSql() {
-		assertEquals("sp_rename 'SOMETABLE.myTextCol', 'TEXTCOL', 'COLUMN'", createRenameColumnSql(DriverTypeEnum.MSSQL_2012));
+		assertThat(createRenameColumnSql(DriverTypeEnum.MSSQL_2012)).isEqualTo("sp_rename 'SOMETABLE.myTextCol', 'TEXTCOL', 'COLUMN'");
 	}
 
 	@Test
 	public void testBuildSqlStatementForOracle() {
-		assertEquals("ALTER TABLE SOMETABLE RENAME COLUMN myTextCol TO TEXTCOL", createRenameColumnSql(DriverTypeEnum.ORACLE_12C));
+		assertThat(createRenameColumnSql(DriverTypeEnum.ORACLE_12C)).isEqualTo("ALTER TABLE SOMETABLE RENAME COLUMN myTextCol TO TEXTCOL");
 	}
 
 	@Test
 	public void testBuildSqlStatementForH2() {
-		assertEquals("ALTER TABLE SOMETABLE ALTER COLUMN myTextCol RENAME TO TEXTCOL", createRenameColumnSql(DriverTypeEnum.H2_EMBEDDED));
+		assertThat(createRenameColumnSql(DriverTypeEnum.H2_EMBEDDED)).isEqualTo("ALTER TABLE SOMETABLE ALTER COLUMN myTextCol RENAME TO TEXTCOL");
 	}
 
 }

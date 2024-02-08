@@ -149,11 +149,9 @@ import java.util.stream.Stream;
 
 import static ca.uhn.fhir.util.TestUtil.doRandomizeLocaleAndTimezone;
 import static java.util.stream.Collectors.joining;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 import static org.awaitility.Awaitility.await;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
@@ -285,7 +283,7 @@ public abstract class BaseJpaTest extends BaseTest {
 					return t.toString();
 				})
 				.collect(Collectors.joining(", "));
-			fail("Size " + theList.size() + " is != target " + theTarget + " - Got: " + describeResults);
+			fail("", "Size " + theList.size() + " is != target " + theTarget + " - Got: " + describeResults);
 		}
 	}
 
@@ -312,12 +310,12 @@ public abstract class BaseJpaTest extends BaseTest {
 			} catch (Exception e) {
 				if (count >= 3) {
 					ourLog.error("Failed during expunge", e);
-					fail(e.toString());
+					fail("", e.toString());
 				} else {
 					try {
 						Thread.sleep(1000);
 					} catch (InterruptedException e2) {
-						fail(e2.toString());
+						fail("", e2.toString());
 					}
 				}
 			}
@@ -397,7 +395,7 @@ public abstract class BaseJpaTest extends BaseTest {
 			if (currentSession != null) {
 				currentSession.doWork(connection -> isReadOnly.set(connection.isReadOnly()));
 
-				assertFalse(isReadOnly.get());
+				assertThat(isReadOnly.get()).isFalse();
 			}
 		}
 	}
@@ -801,11 +799,11 @@ public abstract class BaseJpaTest extends BaseTest {
 		Optional<TermValueSetConcept> first = stream.findFirst();
 		if (!first.isPresent()) {
 			String failureMessage = String.format("Expanded ValueSet %s did not contain concept [%s|%s|%s] with [%d] designations", theValueSet.getId(), theSystem, theCode, theDisplay, theDesignationCount);
-			fail(failureMessage);
+			fail("", failureMessage);
 			return null;
 		} else {
 			TermValueSetConcept termValueSetConcept = first.get();
-			assertEquals(termValueSetConcept.getOrder(), theValueSet.getConcepts().indexOf(termValueSetConcept));
+			assertThat(theValueSet.getConcepts().indexOf(termValueSetConcept)).isEqualTo(termValueSetConcept.getOrder());
 			return termValueSetConcept;
 		}
 	}
@@ -831,7 +829,7 @@ public abstract class BaseJpaTest extends BaseTest {
 		Optional<TermValueSetConceptDesignation> first = stream.findFirst();
 		if (!first.isPresent()) {
 			String failureMessage = String.format("Concept %s did not contain designation [%s|%s|%s|%s|%s] ", theConcept, theLanguage, theUseSystem, theUseCode, theUseDisplay, theDesignationValue);
-			fail(failureMessage);
+			fail("", failureMessage);
 			return null;
 		} else {
 			return first.get();
@@ -859,7 +857,7 @@ public abstract class BaseJpaTest extends BaseTest {
 	protected void assertGone(IIdType theId) {
 		IFhirResourceDao dao = myDaoRegistry.getResourceDao(theId.getResourceType());
 		IBaseResource result = dao.read(theId, mySrd, true);
-		assertTrue(result.isDeleted());
+		assertThat(result.isDeleted()).isTrue();
 	}
 
 	/**
@@ -867,7 +865,7 @@ public abstract class BaseJpaTest extends BaseTest {
 	 */
 	protected void assertNotGone(IIdType theId) {
 		IFhirResourceDao dao = myDaoRegistry.getResourceDao(theId.getResourceType());
-		assertNotNull(dao.read(theId, mySrd));
+		assertThat(dao.read(theId, mySrd)).isNotNull();
 	}
 
 	/**
@@ -879,7 +877,7 @@ public abstract class BaseJpaTest extends BaseTest {
 		IFhirResourceDao dao = myDaoRegistry.getResourceDao(theId.getResourceType());
 		try {
 			dao.read(theId, mySrd);
-			fail();
+			fail("");
 		} catch (ResourceNotFoundException e) {
 			// good
 		}

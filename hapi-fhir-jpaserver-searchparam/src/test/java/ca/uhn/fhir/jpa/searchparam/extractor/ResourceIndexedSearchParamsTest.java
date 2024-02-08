@@ -13,8 +13,6 @@ import java.util.List;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class ResourceIndexedSearchParamsTest {
 
@@ -39,7 +37,7 @@ public class ResourceIndexedSearchParamsTest {
 
 		ReferenceParam referenceParam = getReferenceParam(STRING_ID);
 		boolean result = myParams.matchResourceLinks(myStorageSettings, "Patient", "organization", referenceParam, "organization");
-		assertFalse(result);
+		assertThat(result).isFalse();
 	}
 
 	@Test
@@ -49,7 +47,7 @@ public class ResourceIndexedSearchParamsTest {
 
 		ReferenceParam referenceParam = getReferenceParam(STRING_ID);
 		boolean result = myParams.matchResourceLinks(myStorageSettings, "Patient", "organization", referenceParam, "organization");
-		assertTrue(result);
+		assertThat(result).isTrue();
 	}
 
 	@Test
@@ -59,7 +57,7 @@ public class ResourceIndexedSearchParamsTest {
 
 		ReferenceParam referenceParam = getReferenceParam(LONG_ID);
 		boolean result = myParams.matchResourceLinks(myStorageSettings, "Patient", "organization", referenceParam, "organization");
-		assertFalse(result);
+		assertThat(result).isFalse();
 	}
 
 	@Test
@@ -69,7 +67,7 @@ public class ResourceIndexedSearchParamsTest {
 
 		ReferenceParam referenceParam = getReferenceParam(LONG_ID);
 		boolean result = myParams.matchResourceLinks(myStorageSettings, "Patient", "organization", referenceParam, "organization");
-		assertTrue(result);
+		assertThat(result).isTrue();
 	}
 
 	private ReferenceParam getReferenceParam(String theId) {

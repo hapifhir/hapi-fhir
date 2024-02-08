@@ -12,10 +12,9 @@ import org.junit.jupiter.params.provider.MethodSource;
 import jakarta.annotation.Nonnull;
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.blankOrNullString;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
 
 class CodingSpyTest {
 
@@ -33,7 +32,7 @@ class CodingSpyTest {
 
 		Boolean result = new CodingSpy().getBooleanObject(theObject);
 
-		assertEquals(theValue, result);
+		assertThat(result).isEqualTo(theValue);
 	}
 
 	@Test
@@ -42,7 +41,7 @@ class CodingSpyTest {
 
 		Boolean result = new CodingSpy().getBooleanObject(value);
 
-		assertNull(result);
+		assertThat(result).isNull();
 	}
 
 	static List<Arguments> getCases() {

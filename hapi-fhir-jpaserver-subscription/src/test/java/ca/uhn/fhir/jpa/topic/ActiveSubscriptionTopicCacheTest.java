@@ -6,7 +6,6 @@ import org.junit.jupiter.api.Test;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ActiveSubscriptionTopicCacheTest {
 	@Test
@@ -16,8 +15,8 @@ public class ActiveSubscriptionTopicCacheTest {
 		topic1.setId("1");
 		cache.add(topic1);
 		assertThat(cache.getAll()).hasSize(1);
-		assertEquals(1, cache.size());
-		assertEquals("1", cache.getAll().iterator().next().getId());
+		assertThat(cache.size()).isEqualTo(1);
+		assertThat(cache.getAll().iterator().next().getId()).isEqualTo("1");
 
 		SubscriptionTopic topic2 = new SubscriptionTopic();
 		topic2.setId("2");
@@ -27,11 +26,11 @@ public class ActiveSubscriptionTopicCacheTest {
 		topic3.setId("3");
 		cache.add(topic3);
 
-		assertEquals(3, cache.size());
+		assertThat(cache.size()).isEqualTo(3);
 
 		Set<String> idsToKeep = Set.of("1", "3");
 		int removed = cache.removeIdsNotInCollection(idsToKeep);
-		assertEquals(1, removed);
-		assertEquals(2, cache.size());
+		assertThat(removed).isEqualTo(1);
+		assertThat(cache.size()).isEqualTo(2);
 	}
 }

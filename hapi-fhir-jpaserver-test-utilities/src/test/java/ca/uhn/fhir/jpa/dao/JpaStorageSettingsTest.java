@@ -8,8 +8,8 @@ import org.junit.jupiter.api.Test;
 import java.util.HashSet;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 public class JpaStorageSettingsTest {
 
@@ -23,23 +23,23 @@ public class JpaStorageSettingsTest {
 	public void testInvalidLogicalPattern() {
 		try {
 			new JpaStorageSettings().setTreatBaseUrlsAsLocal(new HashSet<>(List.of("http://*foo")));
-			fail();
+			fail("");
 		} catch (IllegalArgumentException e) {
-			assertEquals(Msg.code(1525) + "Base URL wildcard character (*) can only appear at the end of the string: http://*foo", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo(Msg.code(1525) + "Base URL wildcard character (*) can only appear at the end of the string: http://*foo");
 		}
 		try {
 			new JpaStorageSettings().setTreatBaseUrlsAsLocal(new HashSet<>(List.of("http://foo**")));
-			fail();
+			fail("");
 		} catch (IllegalArgumentException e) {
-			assertEquals(Msg.code(1525) + "Base URL wildcard character (*) can only appear at the end of the string: http://foo**", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo(Msg.code(1525) + "Base URL wildcard character (*) can only appear at the end of the string: http://foo**");
 		}
 	}
 
 	@Test
 	public void testDisableStatusBasedReindexUsingSystemProperty() {
-		assertEquals(false, new JpaStorageSettings().isStatusBasedReindexingDisabled());
+		assertThat(new JpaStorageSettings().isStatusBasedReindexingDisabled()).isEqualTo(false);
 		HapiSystemProperties.disableStatusBasedReindex();
-		assertEquals(true, new JpaStorageSettings().isStatusBasedReindexingDisabled());
+		assertThat(new JpaStorageSettings().isStatusBasedReindexingDisabled()).isEqualTo(true);
 		HapiSystemProperties.enableStatusBasedReindex();
 	}
 

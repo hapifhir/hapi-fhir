@@ -23,10 +23,10 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
 
 public class MdmCandidateSearchSvcIT extends BaseMdmR4Test {
 
@@ -61,7 +61,7 @@ public class MdmCandidateSearchSvcIT extends BaseMdmR4Test {
 		Patient newJane = buildJanePatient();
 
 		Collection<IAnyResource> result = myMdmCandidateSearchSvc.findCandidates("Patient", newJane, RequestPartitionId.allPartitions());
-		assertEquals(1, result.size());
+		assertThat(result.size()).isEqualTo(1);
 	}
 
 	@Test
@@ -77,9 +77,9 @@ public class MdmCandidateSearchSvcIT extends BaseMdmR4Test {
 			SearchParameterMap map = myMatchUrlService.getResourceSearch("Practitioner?given:nickname=Bill&family=Shatner").getSearchParameterMap();
 			map.setLoadSynchronous(true);
 			IBundleProvider result = myPractitionerDao.search(map);
-			assertEquals(1, result.size());
+			assertThat(result.size()).isEqualTo(1);
 			Practitioner first = (Practitioner) result.getResources(0, 1).get(0);
-			assertEquals("William", first.getNameFirstRep().getGivenAsSingleString());
+			assertThat(first.getNameFirstRep().getGivenAsSingleString()).isEqualTo("William");
 		}
 
 		{
@@ -88,7 +88,7 @@ public class MdmCandidateSearchSvcIT extends BaseMdmR4Test {
 			nick.getNameFirstRep().addGiven("Bill");
 			nick.getNameFirstRep().setFamily("Shatner");
 			Collection<IAnyResource> result = myMdmCandidateSearchSvc.findCandidates("Practitioner", nick, RequestPartitionId.allPartitions());
-			assertEquals(1, result.size());
+			assertThat(result.size()).isEqualTo(1);
 		}
 
 		{
@@ -97,7 +97,7 @@ public class MdmCandidateSearchSvcIT extends BaseMdmR4Test {
 			noMatch.getNameFirstRep().addGiven("Bob");
 			noMatch.getNameFirstRep().setFamily("Shatner");
 			Collection<IAnyResource> result = myMdmCandidateSearchSvc.findCandidates("Practitioner", noMatch, RequestPartitionId.allPartitions());
-			assertEquals(0, result.size());
+			assertThat(result.size()).isEqualTo(0);
 		}
 	}
 
@@ -112,7 +112,7 @@ public class MdmCandidateSearchSvcIT extends BaseMdmR4Test {
 		Patient newJane = buildJaneWithBirthday(today);
 
 		Collection<IAnyResource> result = myMdmCandidateSearchSvc.findCandidates("Patient", newJane, RequestPartitionId.allPartitions());
-		assertEquals(1, result.size());
+		assertThat(result.size()).isEqualTo(1);
 	}
 
 	@Test
@@ -140,16 +140,16 @@ public class MdmCandidateSearchSvcIT extends BaseMdmR4Test {
 		Patient newJane = buildJanePatient();
 
 		createActivePatient();
-		assertEquals(1, runInTransaction(() -> myMdmCandidateSearchSvc.findCandidates("Patient", newJane, RequestPartitionId.allPartitions()).size()));
+		assertThat(runInTransaction(() -> myMdmCandidateSearchSvc.findCandidates("Patient", newJane, RequestPartitionId.allPartitions()).size())).isEqualTo(1);
 		createActivePatient();
-		assertEquals(2, runInTransaction(() -> myMdmCandidateSearchSvc.findCandidates("Patient", newJane, RequestPartitionId.allPartitions()).size()));
+		assertThat(runInTransaction(() -> myMdmCandidateSearchSvc.findCandidates("Patient", newJane, RequestPartitionId.allPartitions()).size())).isEqualTo(2);
 
 		try {
 			createActivePatient();
 			myMdmCandidateSearchSvc.findCandidates("Patient", newJane, RequestPartitionId.allPartitions());
-			fail();
+			fail("");
 		} catch (TooManyCandidatesException e) {
-			assertEquals("HAPI-0762: More than 3 candidate matches found for Patient?identifier=http%3A%2F%2Fa.tv%2F%7CID.JANE.123&active=true.  Aborting mdm matching. Updating the candidate search parameters is strongly recommended for better performance of MDM.", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo("HAPI-0762: More than 3 candidate matches found for Patient?identifier=http%3A%2F%2Fa.tv%2F%7CID.JANE.123&active=true.  Aborting mdm matching. Updating the candidate search parameters is strongly recommended for better performance of MDM.");
 		}
 	}
 

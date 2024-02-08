@@ -16,8 +16,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -43,7 +42,7 @@ class SearchParameterHelperTest {
 
 		Optional<SearchParameterMap> result = myTestedHelper.buildSearchParameterMapFromCanonical(mockedSearchParam);
 
-		assertTrue(result.isEmpty());
+		assertThat(result.isEmpty()).isTrue();
 	}
 
 	@Test
@@ -57,22 +56,22 @@ class SearchParameterHelperTest {
 
 		Optional<SearchParameterMap> result = myTestedHelper.buildSearchParameterMapFromCanonical(mockedSearchParam);
 
-		assertTrue(result.isPresent());
+		assertThat(result.isPresent()).isTrue();
 		SearchParameterMap spMap = result.get();
-		assertEquals(2, spMap.size());
+		assertThat(spMap.size()).isEqualTo(2);
 
 		List<List<IQueryParameterType>> codeParam = spMap.get("code");
-		assertEquals(1, codeParam.size());
-		assertEquals(1, codeParam.get(0).size());
-		assertTrue(codeParam.get(0).get(0) instanceof TokenParam);
+		assertThat(codeParam.size()).isEqualTo(1);
+		assertThat(codeParam.get(0).size()).isEqualTo(1);
+		assertThat(codeParam.get(0).get(0) instanceof TokenParam).isTrue();
 		TokenParam codeTokenParam = (TokenParam) codeParam.get(0).get(0);
-		assertEquals(codeParamValue, codeTokenParam.getValue());
+		assertThat(codeTokenParam.getValue()).isEqualTo(codeParamValue);
 
 		List<List<IQueryParameterType>> baseParam = spMap.get("base");
-		assertEquals(1, baseParam.size());
-		assertEquals(1, baseParam.get(0).size());
-		assertTrue(baseParam.get(0).get(0) instanceof TokenParam);
+		assertThat(baseParam.size()).isEqualTo(1);
+		assertThat(baseParam.get(0).size()).isEqualTo(1);
+		assertThat(baseParam.get(0).get(0) instanceof TokenParam).isTrue();
 		TokenParam baseTokenParam = (TokenParam) baseParam.get(0).get(0);
-		assertEquals(baseParamValue, baseTokenParam.getValue());
+		assertThat(baseTokenParam.getValue()).isEqualTo(baseParamValue);
 	}
 }

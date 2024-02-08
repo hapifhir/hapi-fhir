@@ -15,9 +15,9 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -70,7 +70,7 @@ public class ExternallyStoredResourceR5Test extends BaseJpaR5Test {
 
 		// Test
 		Patient fetchedPatient = myPatientDao.read(id, mySrd);
-		assertTrue(fetchedPatient.getActive());
+		assertThat(fetchedPatient.getActive()).isTrue();
 
 	}
 

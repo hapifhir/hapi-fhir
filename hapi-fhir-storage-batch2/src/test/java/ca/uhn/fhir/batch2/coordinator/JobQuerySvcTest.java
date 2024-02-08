@@ -13,8 +13,7 @@ import org.slf4j.LoggerFactory;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.when;
@@ -49,9 +48,9 @@ class JobQuerySvcTest extends BaseBatch2Test {
 		JobInstance outcome = mySvc.fetchInstance(INSTANCE_ID);
 		ourLog.info("Job instance: {}", outcome);
 		ourLog.info("Parameters: {}", outcome.getParameters());
-		assertEquals(PARAM_1_VALUE, outcome.getParameters(TestJobParameters.class).getParam1());
-		assertEquals(PARAM_2_VALUE, outcome.getParameters(TestJobParameters.class).getParam2());
-		assertNull(outcome.getParameters(TestJobParameters.class).getPassword());
+		assertThat(outcome.getParameters(TestJobParameters.class).getParam1()).isEqualTo(PARAM_1_VALUE);
+		assertThat(outcome.getParameters(TestJobParameters.class).getParam2()).isEqualTo(PARAM_2_VALUE);
+		assertThat(outcome.getParameters(TestJobParameters.class).getPassword()).isNull();
 
 	}
 
@@ -70,7 +69,7 @@ class JobQuerySvcTest extends BaseBatch2Test {
 
 		// Verify
 
-		assertEquals(1, outcome.size());
+		assertThat(outcome.size()).isEqualTo(1);
 
 	}
 

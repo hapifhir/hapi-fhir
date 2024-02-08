@@ -30,8 +30,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import static ca.uhn.fhir.jpa.searchparam.matcher.InMemoryResourceMatcherR5Test.newRequest;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -90,16 +89,16 @@ public class InMemoryResourceMatcherConfigurationR5Test {
 	 */
 	public void testUnsupportedIn() {
 		InMemoryMatchResult result = myInMemoryResourceMatcher.match("code" + TokenParamModifier.IN.getValue() + "=" + OBSERVATION_CODE_VALUE_SET_URI, myObservation, mySearchParams, newRequest());
-		assertFalse(result.supported());
-		assertEquals("Parameter: <code:in> Reason: Qualified parameter not supported", result.getUnsupportedReason());
+		assertThat(result.supported()).isFalse();
+		assertThat(result.getUnsupportedReason()).isEqualTo("Parameter: <code:in> Reason: Qualified parameter not supported");
 	}
 
 	@Test
 	@Order(3)
 	public void testUnsupportedNotIn() {
 		InMemoryMatchResult result = myInMemoryResourceMatcher.match("code" + TokenParamModifier.NOT_IN.getValue() + "=" + OBSERVATION_CODE_VALUE_SET_URI, myObservation, mySearchParams, newRequest());
-		assertFalse(result.supported());
-		assertEquals("Parameter: <code:not-in> Reason: Qualified parameter not supported", result.getUnsupportedReason());
+		assertThat(result.supported()).isFalse();
+		assertThat(result.getUnsupportedReason()).isEqualTo("Parameter: <code:not-in> Reason: Qualified parameter not supported");
 	}
 
 	private ResourceIndexedSearchParams extractSearchParams(Observation theObservation) {

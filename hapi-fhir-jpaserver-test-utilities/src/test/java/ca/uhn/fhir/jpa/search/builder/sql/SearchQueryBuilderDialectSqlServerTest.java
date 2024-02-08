@@ -10,8 +10,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import jakarta.annotation.Nonnull;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -25,10 +24,10 @@ public class SearchQueryBuilderDialectSqlServerTest extends BaseSearchQueryBuild
 
 		String sql = generatedSql.getSql();
 		sql = massageSql(sql);
-		assertTrue(sql.endsWith("ORDER BY -t1.SP_VALUE_LOW DESC offset 0 rows fetch first ? rows only"), sql);
+		assertThat(sql.endsWith("ORDER BY -t1.SP_VALUE_LOW DESC offset 0 rows fetch first ? rows only")).as(sql).isTrue();
 
-		assertEquals(3, StringUtils.countMatches(sql, "?"));
-		assertEquals(3, generatedSql.getBindVariables().size());
+		assertThat(StringUtils.countMatches(sql, "?")).isEqualTo(3);
+		assertThat(generatedSql.getBindVariables().size()).isEqualTo(3);
 	}
 
 	@Nonnull
@@ -47,10 +46,10 @@ public class SearchQueryBuilderDialectSqlServerTest extends BaseSearchQueryBuild
 
 		String sql = generatedSql.getSql();
 		sql = massageSql(sql);
-		assertTrue(sql.endsWith("order by @@version offset ? rows fetch next ? rows only"), sql);
+		assertThat(sql.endsWith("order by @@version offset ? rows fetch next ? rows only")).as(sql).isTrue();
 
-		assertEquals(3, StringUtils.countMatches(sql, "?"));
-		assertEquals(3, generatedSql.getBindVariables().size());
+		assertThat(StringUtils.countMatches(sql, "?")).isEqualTo(3);
+		assertThat(generatedSql.getBindVariables().size()).isEqualTo(3);
 	}
 
 	@Test
@@ -63,10 +62,10 @@ public class SearchQueryBuilderDialectSqlServerTest extends BaseSearchQueryBuild
 
 		String sql = generatedSql.getSql();
 		sql = massageSql(sql);
-		assertTrue(sql.endsWith("order by @@version offset 0 rows fetch first ? rows only"), sql);
+		assertThat(sql.endsWith("order by @@version offset 0 rows fetch first ? rows only")).as(sql).isTrue();
 
-		assertEquals(2, StringUtils.countMatches(sql, "?"));
-		assertEquals(2, generatedSql.getBindVariables().size());
+		assertThat(StringUtils.countMatches(sql, "?")).isEqualTo(2);
+		assertThat(generatedSql.getBindVariables().size()).isEqualTo(2);
 	}
 
 	@Nonnull

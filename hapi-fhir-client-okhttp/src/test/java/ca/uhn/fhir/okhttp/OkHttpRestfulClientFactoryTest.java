@@ -17,10 +17,8 @@ import org.junit.jupiter.params.provider.MethodSource;
 import javax.net.ssl.SSLHandshakeException;
 import java.util.concurrent.TimeUnit;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class OkHttpRestfulClientFactoryTest extends BaseFhirVersionParameterizedTest {
@@ -36,14 +34,14 @@ public class OkHttpRestfulClientFactoryTest extends BaseFhirVersionParameterized
 	public void testGetNativeClient_noClientSet_returnsADefault() throws Exception {
 		Call.Factory actualNativeClient = clientFactory.getNativeClient();
 
-		assertNotNull(actualNativeClient);
+		assertThat(actualNativeClient).isNotNull();
 	}
 
 	@Test
 	public void testGetNativeClient_noProxySet_defaultHasNoProxySet() throws Exception {
 		OkHttpClient actualNativeClient = (OkHttpClient) clientFactory.getNativeClient();
 
-		assertEquals(null, actualNativeClient.proxy());
+		assertThat(actualNativeClient.proxy()).isEqualTo(null);
 	}
 
 	@Test
@@ -52,22 +50,22 @@ public class OkHttpRestfulClientFactoryTest extends BaseFhirVersionParameterized
 
 		clientFactory.setHttpClient(okHttpClient);
 
-		assertSame(okHttpClient, clientFactory.getNativeClient());
+		assertThat(clientFactory.getNativeClient()).isSameAs(okHttpClient);
 	}
 
 	@Test
 	public void testSocketTimeout() {
 		clientFactory.setSocketTimeout(1515);
 
-		assertEquals(1515, ((OkHttpClient) clientFactory.getNativeClient()).readTimeoutMillis());
-		assertEquals(1515, ((OkHttpClient) clientFactory.getNativeClient()).writeTimeoutMillis());
+		assertThat(((OkHttpClient) clientFactory.getNativeClient()).readTimeoutMillis()).isEqualTo(1515);
+		assertThat(((OkHttpClient) clientFactory.getNativeClient()).writeTimeoutMillis()).isEqualTo(1515);
 	}
 
 	@Test
 	public void testConnectTimeout() {
 		clientFactory.setConnectTimeout(1516);
 
-		assertEquals(1516, ((OkHttpClient) clientFactory.getNativeClient()).connectTimeoutMillis());
+		assertThat(((OkHttpClient) clientFactory.getNativeClient()).connectTimeoutMillis()).isEqualTo(1516);
 	}
 
 	@ParameterizedTest
@@ -82,10 +80,10 @@ public class OkHttpRestfulClientFactoryTest extends BaseFhirVersionParameterized
 			.build();
 
 		Response response = client.newCall(request).execute();
-		assertEquals(200, response.code());
+		assertThat(response.code()).isEqualTo(200);
 		String json = response.body().string();
 		IBaseResource bundle = fhirVersionParams.getFhirContext().newJsonParser().parseResource(json);
-		assertEquals(fhirVersionParams.getFhirVersion(), bundle.getStructureFhirVersionEnum());
+		assertThat(bundle.getStructureFhirVersionEnum()).isEqualTo(fhirVersionParams.getFhirVersion());
 	}
 
 	@ParameterizedTest
@@ -100,9 +98,9 @@ public class OkHttpRestfulClientFactoryTest extends BaseFhirVersionParameterized
 				.url(fhirVersionParams.getSecuredPatientEndpoint())
 				.build();
 			unauthenticatedClient.newCall(request).execute();
-			fail();
+			fail("");
 		} catch (Exception e) {
-			assertEquals(SSLHandshakeException.class, e.getClass());
+			assertThat(e.getClass()).isEqualTo(SSLHandshakeException.class);
 		}
 	}
 
@@ -114,7 +112,7 @@ public class OkHttpRestfulClientFactoryTest extends BaseFhirVersionParameterized
 		FhirContext context = fhirVersionParams.getFhirContext();
 		context.setRestfulClientFactory(new OkHttpRestfulClientFactory(context));
 		IBaseResource bundle = context.newRestfulGenericClient(base).search().forResource("Patient").execute();
-		assertEquals(theFhirVersion, bundle.getStructureFhirVersionEnum());
+		assertThat(bundle.getStructureFhirVersionEnum()).isEqualTo(theFhirVersion);
 	}
 
 	@ParameterizedTest
@@ -126,10 +124,10 @@ public class OkHttpRestfulClientFactoryTest extends BaseFhirVersionParameterized
 		context.setRestfulClientFactory(new OkHttpRestfulClientFactory(context));
 		try {
 			context.newRestfulGenericClient(secureBase).search().forResource("Patient").execute();
-			fail();
+			fail("");
 		} catch (Exception e) {
-			assertTrue(e.getMessage().contains("HAPI-1357: Failed to retrieve the server metadata statement during client initialization"));
-			assertEquals(SSLHandshakeException.class, e.getCause().getCause().getClass());
+			assertThat(e.getMessage().contains("HAPI-1357: Failed to retrieve the server metadata statement during client initialization")).isTrue();
+			assertThat(e.getCause().getCause().getClass()).isEqualTo(SSLHandshakeException.class);
 		}
 	}
 }

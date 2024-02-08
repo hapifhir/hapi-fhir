@@ -37,9 +37,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.HashSet;
 import java.util.Set;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class InMemorySubscriptionMatcherR3Test extends BaseSubscriptionDstu3Test {
 	@Autowired
@@ -50,16 +48,16 @@ public class InMemorySubscriptionMatcherR3Test extends BaseSubscriptionDstu3Test
     StorageSettings myStorageSettings;
 
 	private void assertUnsupported(IBaseResource resource, String criteria) {
-		assertFalse(mySearchParamMatcher.match(criteria, resource, null).supported());
-		assertEquals(SubscriptionMatchingStrategy.DATABASE, mySubscriptionStrategyEvaluator.determineStrategy(criteria));
+		assertThat(mySearchParamMatcher.match(criteria, resource, null).supported()).isFalse();
+		assertThat(mySubscriptionStrategyEvaluator.determineStrategy(criteria)).isEqualTo(SubscriptionMatchingStrategy.DATABASE);
 	}
 
 	private void assertMatched(IBaseResource resource, String criteria) {
 		InMemoryMatchResult result = mySearchParamMatcher.match(criteria, resource, null);
 
-		assertTrue(result.supported());
-		assertTrue(result.matched());
-		assertEquals(SubscriptionMatchingStrategy.IN_MEMORY, mySubscriptionStrategyEvaluator.determineStrategy(criteria));
+		assertThat(result.supported()).isTrue();
+		assertThat(result.matched()).isTrue();
+		assertThat(mySubscriptionStrategyEvaluator.determineStrategy(criteria)).isEqualTo(SubscriptionMatchingStrategy.IN_MEMORY);
 	}
 
 	private void assertNotMatched(IBaseResource resource, String criteria) {
@@ -69,10 +67,10 @@ public class InMemorySubscriptionMatcherR3Test extends BaseSubscriptionDstu3Test
 	private void assertNotMatched(IBaseResource resource, String criteria, SubscriptionMatchingStrategy theSubscriptionMatchingStrategy) {
 		InMemoryMatchResult result = mySearchParamMatcher.match(criteria, resource, null);
 
-		assertTrue(result.supported());
-		assertFalse(result.matched());
+		assertThat(result.supported()).isTrue();
+		assertThat(result.matched()).isFalse();
 
-		assertEquals(theSubscriptionMatchingStrategy, mySubscriptionStrategyEvaluator.determineStrategy(criteria));
+		assertThat(mySubscriptionStrategyEvaluator.determineStrategy(criteria)).isEqualTo(theSubscriptionMatchingStrategy);
 	}
 
 	@AfterEach

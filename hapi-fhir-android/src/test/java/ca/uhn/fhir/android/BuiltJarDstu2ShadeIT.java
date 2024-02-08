@@ -21,7 +21,7 @@ import java.util.TreeSet;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class BuiltJarDstu2ShadeIT {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BuiltJarDstu2ShadeIT.class);
@@ -37,7 +37,7 @@ public class BuiltJarDstu2ShadeIT {
 		String str = ctx.newXmlParser().encodeResourceToString(p);
 		Patient p2 = ctx.newXmlParser().parseResource(Patient.class, str);
 
-		assertEquals("system", p2.getIdentifierFirstRep().getSystemElement().getValueAsString());
+		assertThat(p2.getIdentifierFirstRep().getSystemElement().getValueAsString()).isEqualTo("system");
 	}
 
 	@Test
@@ -53,7 +53,7 @@ public class BuiltJarDstu2ShadeIT {
 		String str = ctx.newJsonParser().encodeResourceToString(o);
 		Observation p2 = ctx.newJsonParser().parseResource(Observation.class, str);
 
-		assertEquals("TEXT", p2.getCode().getText());
+		assertThat(p2.getCode().getText()).isEqualTo("TEXT");
 
 		QuantityDt dt = (QuantityDt) p2.getValue();
 		dt.getComparatorElement().getValueAsEnum();

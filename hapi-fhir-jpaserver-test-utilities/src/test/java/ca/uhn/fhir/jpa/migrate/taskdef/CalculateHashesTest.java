@@ -12,6 +12,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import java.util.Map;
 import java.util.function.Supplier;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class CalculateHashesTest extends BaseTest {
@@ -73,7 +74,7 @@ public class CalculateHashesTest extends BaseTest {
 			JdbcTemplate jdbcTemplate = getConnectionProperties().newJdbcTemplate();
 			return jdbcTemplate.queryForObject("SELECT count(*) FROM HFJ_SPIDX_TOKEN WHERE HASH_VALUE IS NULL", Long.class);
 		});
-		assertEquals(777L, count.longValue());
+		assertThat(count.longValue()).isEqualTo(777L);
 
 		CalculateHashesTask task = new CalculateHashesTask(VersionEnum.V3_5_0, "1");
 		task.setTableName("HFJ_SPIDX_TOKEN");
@@ -91,6 +92,6 @@ public class CalculateHashesTest extends BaseTest {
 			JdbcTemplate jdbcTemplate = getConnectionProperties().newJdbcTemplate();
 			return jdbcTemplate.queryForObject("SELECT count(*) FROM HFJ_SPIDX_TOKEN WHERE HASH_VALUE IS NULL", Long.class);
 		});
-		assertEquals(0L, count.longValue());
+		assertThat(count.longValue()).isEqualTo(0L);
 	}
 }

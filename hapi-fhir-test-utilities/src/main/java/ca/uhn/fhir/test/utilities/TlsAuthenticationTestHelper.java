@@ -36,7 +36,7 @@ import java.util.Arrays;
 import java.util.Optional;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class TlsAuthenticationTestHelper implements AfterEachCallback {
 
@@ -63,7 +63,7 @@ public class TlsAuthenticationTestHelper implements AfterEachCallback {
 	@Override
 	public void afterEach(ExtensionContext theExtensionContext) throws Exception {
 		if(myTempFile != null && myTempFile.exists()){
-			assertTrue(myTempFile.delete());
+			assertThat(myTempFile.delete()).isTrue();
 			myTempFile = null;
 		}
 	}

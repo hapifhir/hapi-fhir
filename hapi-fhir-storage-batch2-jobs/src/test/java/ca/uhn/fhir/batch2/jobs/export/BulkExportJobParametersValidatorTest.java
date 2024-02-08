@@ -14,10 +14,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
@@ -55,8 +52,8 @@ public class BulkExportJobParametersValidatorTest {
 		List<String> result = myValidator.validate(null, parameters);
 
 		// verify
-		assertNotNull(result);
-		assertTrue(result.isEmpty());
+		assertThat(result).isNotNull();
+		assertThat(result.isEmpty()).isTrue();
 	}
 
 
@@ -71,9 +68,9 @@ public class BulkExportJobParametersValidatorTest {
 		List<String> errors = myValidator.validate(null, parameters);
 
 		// verify
-		assertNotNull(errors);
-		assertEquals(1, errors.size());
-		assertEquals(errors.get(0), "Export ID does not conform to the current blob storage implementation's limitations.");
+		assertThat(errors).isNotNull();
+		assertThat(errors.size()).isEqualTo(1);
+		assertThat("Export ID does not conform to the current blob storage implementation's limitations.").isEqualTo(errors.get(0));
 	}
 
 	@Test
@@ -88,8 +85,8 @@ public class BulkExportJobParametersValidatorTest {
 		List<String> errors = myValidator.validate(null, parameters);
 
 		// verify
-		assertNotNull(errors);
-		assertEquals(0, errors.size());
+		assertThat(errors).isNotNull();
+		assertThat(errors.size()).isEqualTo(0);
 	}
 	@Test
 	public void validate_validParametersForPatient_returnsEmptyList() {
@@ -105,8 +102,8 @@ public class BulkExportJobParametersValidatorTest {
 		List<String> result = myValidator.validate(null, parameters);
 
 		// verify
-		assertNotNull(result);
-		assertTrue(result.isEmpty());
+		assertThat(result).isNotNull();
+		assertThat(result.isEmpty()).isTrue();
 	}
 
 	@Test
@@ -121,9 +118,9 @@ public class BulkExportJobParametersValidatorTest {
 		List<String> result = myValidator.validate(null, parameters);
 
 		// verify
-		assertNotNull(result);
-		assertFalse(result.isEmpty());
-		assertTrue(result.get(0).contains("Resource type " + resourceType + " is not a supported resource type"));
+		assertThat(result).isNotNull();
+		assertThat(result.isEmpty()).isFalse();
+		assertThat(result.get(0).contains("Resource type " + resourceType + " is not a supported resource type")).isTrue();
 	}
 
 	@Test
@@ -142,8 +139,8 @@ public class BulkExportJobParametersValidatorTest {
 		List<String> result = myValidator.validate(null, parameters);
 
 		// verify
-		assertNotNull(result);
-		assertTrue(result.isEmpty());
+		assertThat(result).isNotNull();
+		assertThat(result.isEmpty()).isTrue();
 	}
 
 	@Test
@@ -156,9 +153,9 @@ public class BulkExportJobParametersValidatorTest {
 		List<String> result = myValidator.validate(null, parameters);
 
 		// verify
-		assertNotNull(result);
-		assertFalse(result.isEmpty());
-		assertTrue(result.contains("Group export requires a group id, but none provided."));
+		assertThat(result).isNotNull();
+		assertThat(result.isEmpty()).isFalse();
+		assertThat(result.contains("Group export requires a group id, but none provided.")).isTrue();
 	}
 
 	@Test
@@ -171,8 +168,8 @@ public class BulkExportJobParametersValidatorTest {
 		List<String> results = myValidator.validate(null, parameters);
 
 		// verify
-		assertNotNull(results);
-		assertEquals(0, results.size());
+		assertThat(results).isNotNull();
+		assertThat(results.size()).isEqualTo(0);
 	}
 
 	@Test
@@ -187,9 +184,9 @@ public class BulkExportJobParametersValidatorTest {
 		List<String> errors = myValidator.validate(null, parameters);
 
 		// validate
-		assertNotNull(errors);
-		assertFalse(errors.isEmpty());
-		assertTrue(errors.contains("Bulk export of Binary resources is forbidden"));
+		assertThat(errors).isNotNull();
+		assertThat(errors.isEmpty()).isFalse();
+		assertThat(errors.contains("Bulk export of Binary resources is forbidden")).isTrue();
 	}
 
 	@Test
@@ -203,8 +200,8 @@ public class BulkExportJobParametersValidatorTest {
 		List<String> errors = myValidator.validate(null, parameters);
 
 		// validate
-		assertNotNull(errors);
-		assertFalse(errors.isEmpty());
-		assertTrue(errors.contains("The only allowed format for Bulk Export is currently " + Constants.CT_FHIR_NDJSON));
+		assertThat(errors).isNotNull();
+		assertThat(errors.isEmpty()).isFalse();
+		assertThat(errors.contains("The only allowed format for Bulk Export is currently " + Constants.CT_FHIR_NDJSON)).isTrue();
 	}
 }

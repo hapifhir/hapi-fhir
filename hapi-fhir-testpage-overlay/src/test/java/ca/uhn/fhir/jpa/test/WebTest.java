@@ -58,7 +58,6 @@ import java.net.URL;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -138,10 +137,10 @@ public class WebTest {
 		HtmlPage searchResultPage = searchButton.click();
 		HtmlTable controlsTable = searchResultPage.getHtmlElementById("resultControlsTable");
 		List<HtmlTableRow> controlRows = controlsTable.getBodies().get(0).getRows();
-		assertEquals(5, controlRows.size());
-		assertEquals("Read Update $summary $validate", controlRows.get(0).getCell(0).asNormalizedText());
-		assertEquals("Patient/A0/_history/1", controlRows.get(0).getCell(1).asNormalizedText());
-		assertEquals("Patient/A4/_history/1", controlRows.get(4).getCell(1).asNormalizedText());
+		assertThat(controlRows.size()).isEqualTo(5);
+		assertThat(controlRows.get(0).getCell(0).asNormalizedText()).isEqualTo("Read Update $summary $validate");
+		assertThat(controlRows.get(0).getCell(1).asNormalizedText()).isEqualTo("Patient/A0/_history/1");
+		assertThat(controlRows.get(4).getCell(1).asNormalizedText()).isEqualTo("Patient/A4/_history/1");
 	}
 
 	@Test
@@ -162,10 +161,10 @@ public class WebTest {
 		HtmlPage searchResultPage = historyButton.click();
 		HtmlTable controlsTable = searchResultPage.getHtmlElementById("resultControlsTable");
 		List<HtmlTableRow> controlRows = controlsTable.getBodies().get(0).getRows();
-		assertEquals(5, controlRows.size());
+		assertThat(controlRows.size()).isEqualTo(5);
 		ourLog.info(controlRows.get(0).asXml());
-		assertEquals("Patient/A4/_history/1", controlRows.get(0).getCell(1).asNormalizedText());
-		assertEquals("Patient/A0/_history/1", controlRows.get(4).getCell(1).asNormalizedText());
+		assertThat(controlRows.get(0).getCell(1).asNormalizedText()).isEqualTo("Patient/A4/_history/1");
+		assertThat(controlRows.get(4).getCell(1).asNormalizedText()).isEqualTo("Patient/A0/_history/1");
 	}
 
 	@Test
@@ -238,7 +237,7 @@ public class WebTest {
 		// Navigate to HFQL page
 		HtmlAnchor hfqlNavButton = page.getHtmlElementById("leftHfql");
 		HtmlPage hfqlPage = hfqlNavButton.click();
-		assertEquals("HFQL/SQL - HAPI FHIR", hfqlPage.getTitleText());
+		assertThat(hfqlPage.getTitleText()).isEqualTo("HFQL/SQL - HAPI FHIR");
 
 		// Prepare response
 		List<String> columnNames = List.of("Family", "Given");

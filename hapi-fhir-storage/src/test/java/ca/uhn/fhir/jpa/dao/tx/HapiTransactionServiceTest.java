@@ -31,7 +31,7 @@ import java.sql.SQLException;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.mockito.ArgumentMatchers.anyBoolean;
@@ -116,7 +116,7 @@ class HapiTransactionServiceTest {
 			myHapiTransactionService.doExecute((HapiTransactionService.ExecutionBuilder) executionBuilder, transactionCallback);
 		});
 
-		assertEquals(theExpectedNumberOfCallsToTransactionCallback, numberOfCalls.get());
+		assertThat(numberOfCalls.get()).isEqualTo(theExpectedNumberOfCallsToTransactionCallback);
 		verify(mySleepUtilMock, times(theExpectedNumberOfCallsToTransactionCallback - 1))
 			.sleepAtLeast(anyLong(), anyBoolean());
 		return theExceptionThrownByDoExecute;
@@ -160,7 +160,7 @@ class HapiTransactionServiceTest {
 	void testDoExecute_WhenRetryEnabled_DoesNotRetryOnNonRetriableException() {
 		RuntimeException nonRetriableException = new RuntimeException("should not be retried");
 		Exception exceptionThrown = testRetriesOnException(nonRetriableException, true, 10, 1);
-		assertEquals(nonRetriableException, exceptionThrown);
+		assertThat(exceptionThrown).isEqualTo(nonRetriableException);
 		verifyNoInteractions(myInterceptorBroadcasterMock);
 	}
 
@@ -187,7 +187,7 @@ class HapiTransactionServiceTest {
 
 		myHapiTransactionService.doExecute((HapiTransactionService.ExecutionBuilder) executionBuilder, transactionCallback);
 
-		assertEquals(3, numberOfCalls.get());
+		assertThat(numberOfCalls.get()).isEqualTo(3);
 		verify(mySleepUtilMock, times(2))
 			.sleepAtLeast(anyLong(), anyBoolean());
 	}

@@ -8,8 +8,7 @@ import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class ResourceModifiedTest {
 	private FhirContext myFhirContext = FhirContext.forR4();
@@ -20,12 +19,12 @@ public class ResourceModifiedTest {
 		org.setName("testOrgName");
 		org.setId("Organization/testOrgId");
 		ResourceModifiedMessage msg = new ResourceModifiedMessage(myFhirContext, org, ResourceModifiedMessage.OperationTypeEnum.CREATE);
-		assertEquals(org.getIdElement(), msg.getPayloadId(myFhirContext));
-		assertEquals(ResourceModifiedMessage.OperationTypeEnum.CREATE, msg.getOperationType());
+		assertThat(msg.getPayloadId(myFhirContext)).isEqualTo(org.getIdElement());
+		assertThat(msg.getOperationType()).isEqualTo(ResourceModifiedMessage.OperationTypeEnum.CREATE);
 		Organization decodedOrg = (Organization) msg.getNewPayload(myFhirContext);
-		assertEquals(org.getId(), decodedOrg.getId());
-		assertEquals(org.getName(), decodedOrg.getName());
-		assertEquals(msg.getPartitionId().toJson(), RequestPartitionId.defaultPartition().toJson());
+		assertThat(decodedOrg.getId()).isEqualTo(org.getId());
+		assertThat(decodedOrg.getName()).isEqualTo(org.getName());
+		assertThat(RequestPartitionId.defaultPartition().toJson()).isEqualTo(msg.getPartitionId().toJson());
 	}
 
 	@Test
@@ -34,12 +33,12 @@ public class ResourceModifiedTest {
 		org.setName("testOrgName");
 		org.setId("Organization/testOrgId");
 		ResourceModifiedMessage msg = new ResourceModifiedMessage(myFhirContext, org, ResourceModifiedMessage.OperationTypeEnum.UPDATE);
-		assertEquals(org.getIdElement(), msg.getPayloadId(myFhirContext));
-		assertEquals(ResourceModifiedMessage.OperationTypeEnum.UPDATE, msg.getOperationType());
+		assertThat(msg.getPayloadId(myFhirContext)).isEqualTo(org.getIdElement());
+		assertThat(msg.getOperationType()).isEqualTo(ResourceModifiedMessage.OperationTypeEnum.UPDATE);
 		Organization decodedOrg = (Organization) msg.getNewPayload(myFhirContext);
-		assertEquals(org.getId(), decodedOrg.getId());
-		assertEquals(org.getName(), decodedOrg.getName());
-		assertEquals(msg.getPartitionId().toJson(), RequestPartitionId.defaultPartition().toJson());
+		assertThat(decodedOrg.getId()).isEqualTo(org.getId());
+		assertThat(decodedOrg.getName()).isEqualTo(org.getName());
+		assertThat(RequestPartitionId.defaultPartition().toJson()).isEqualTo(msg.getPartitionId().toJson());
 	}
 
 	@Test
@@ -48,10 +47,10 @@ public class ResourceModifiedTest {
 		org.setName("testOrgName");
 		org.setId("testOrgId");
 		ResourceModifiedMessage msg = new ResourceModifiedMessage(myFhirContext, org, ResourceModifiedMessage.OperationTypeEnum.DELETE);
-		assertEquals("Organization/testOrgId", msg.getPayloadId(myFhirContext).getValue());
-		assertEquals(ResourceModifiedMessage.OperationTypeEnum.DELETE, msg.getOperationType());
-		assertNotNull(msg.getNewPayload(myFhirContext));
-		assertEquals(msg.getPartitionId().toJson(), RequestPartitionId.defaultPartition().toJson());
+		assertThat(msg.getPayloadId(myFhirContext).getValue()).isEqualTo("Organization/testOrgId");
+		assertThat(msg.getOperationType()).isEqualTo(ResourceModifiedMessage.OperationTypeEnum.DELETE);
+		assertThat(msg.getNewPayload(myFhirContext)).isNotNull();
+		assertThat(RequestPartitionId.defaultPartition().toJson()).isEqualTo(msg.getPartitionId().toJson());
 	}
 
 	@Test
@@ -62,8 +61,8 @@ public class ResourceModifiedTest {
 		ResourceModifiedMessage msg = new ResourceModifiedMessage(myFhirContext, org, ResourceModifiedMessage.OperationTypeEnum.CREATE);
 		msg.setPartitionId(RequestPartitionId.fromPartitionId(123, LocalDate.of(2020, 1, 1)));
 
-		assertEquals(msg.getPartitionId().getPartitionIds().size(), 1);
-		assertEquals(msg.getPartitionId().getPartitionIds().get(0), 123);
+		assertThat(1).isEqualTo(msg.getPartitionId().getPartitionIds().size());
+		assertThat(123).isEqualTo(msg.getPartitionId().getPartitionIds().get(0));
 	}
 
 }

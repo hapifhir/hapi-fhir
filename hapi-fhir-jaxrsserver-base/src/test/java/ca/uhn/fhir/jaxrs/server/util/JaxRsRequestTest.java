@@ -15,7 +15,8 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.Arrays;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
 import static org.mockito.Mockito.*;
 
 public class JaxRsRequestTest {
@@ -39,55 +40,55 @@ public class JaxRsRequestTest {
 		String headerKey = "key";
 		String headerValue = "location_value";
 		String headerValue2 = "location_value_2";
-		assertTrue(StringUtils.isBlank(details.getHeader(headerKey)));
+		assertThat(StringUtils.isBlank(details.getHeader(headerKey))).isTrue();
 		queryParameters.add(headerKey, headerValue);
-		assertEquals(headerValue, details.getHeader(headerKey));
-		assertEquals(Arrays.asList(headerValue), details.getHeaders(headerKey));
+		assertThat(details.getHeader(headerKey)).isEqualTo(headerValue);
+		assertThat(details.getHeaders(headerKey)).isEqualTo(Arrays.asList(headerValue));
 		
 		queryParameters.add(headerKey, headerValue2);
-		assertEquals(headerValue, details.getHeader(headerKey));
-		assertEquals(Arrays.asList(headerValue, headerValue2), details.getHeaders(headerKey));
+		assertThat(details.getHeader(headerKey)).isEqualTo(headerValue);
+		assertThat(details.getHeaders(headerKey)).isEqualTo(Arrays.asList(headerValue, headerValue2));
 	}
 	
 	@Test
 	public void testGetByteStreamRequestContents() {
-		assertEquals(RESOURCE_STRING, new String(details.getByteStreamRequestContents()));
+		assertThat(new String(details.getByteStreamRequestContents())).isEqualTo(RESOURCE_STRING);
 	}
 	
 	@Test
 	public void testServerBaseForRequest() {
-		assertEquals(BASEURI, new String(details.getServerBaseForRequest()));
+		assertThat(new String(details.getServerBaseForRequest())).isEqualTo(BASEURI);
 	}
 	
 	@Test
 	public void testGetResponse() {
 		JaxRsResponse response = (JaxRsResponse) details.getResponse();
-		assertEquals(details, response.getRequestDetails());
-		assertTrue(response == details.getResponse());
+		assertThat(response.getRequestDetails()).isEqualTo(details);
+		assertThat(response == details.getResponse()).isTrue();
 	}
 
 	@Test
 	public void testGetReader() throws IOException {
-		assertThrows(UnsupportedOperationException.class,()->{
+		assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(() -> {
 			details.getReader();
 		});
 	}
 
 	@Test
 	public void testGetInputStream() {
-		assertThrows(UnsupportedOperationException.class, ()->{
+		assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(() -> {
 			details.getInputStream();
 		});
 	}
 
 	@Test
 	public void testGetServerBaseForRequest() {
-		assertEquals(JaxRsRequestTest.BASEURI, details.getFhirServerBase());
+		assertThat(details.getFhirServerBase()).isEqualTo(JaxRsRequestTest.BASEURI);
 	}
 
 	@Test
 	public void testGetServer() {
-		assertEquals(this.provider, details.getServer());
+		assertThat(details.getServer()).isEqualTo(this.provider);
 	}
 
 	public JaxRsRequest createRequestDetails() throws URISyntaxException {

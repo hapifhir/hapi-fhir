@@ -8,7 +8,7 @@ import org.hl7.fhir.r4.model.MedicationRequest;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class ActivityDefinitionOperationsProviderTest extends BaseCrR4TestServer {
 
@@ -39,8 +39,8 @@ public class ActivityDefinitionOperationsProviderTest extends BaseCrR4TestServer
 			null,
 			null,
 			requestDetails);
-		assertTrue(result instanceof MedicationRequest);
+		assertThat(result instanceof MedicationRequest).isTrue();
 		MedicationRequest request = (MedicationRequest) result;
-		assertTrue(request.getDoNotPerform());
+		assertThat(request.getDoNotPerform()).isTrue();
 	}
 }

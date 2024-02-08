@@ -8,10 +8,7 @@ import java.sql.Timestamp;
 import java.util.Calendar;
 import java.util.Date;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class ResourceIndexedSearchParamDateTest {
 
@@ -42,9 +39,9 @@ public class ResourceIndexedSearchParamDateTest {
 		ResourceIndexedSearchParamDate param = new ResourceIndexedSearchParamDate(new PartitionSettings(), "Patient", "SomeResource", null, null, null, null, "SomeValue");
 		ResourceIndexedSearchParamDate param2 = new ResourceIndexedSearchParamDate(new PartitionSettings(), "Patient", "SomeResource", null, null, null, null, "SomeValue");
 
-		assertTrue(param.equals(param2));
-		assertTrue(param2.equals(param));
-		assertEquals(param.hashCode(), param2.hashCode());
+		assertThat(param.equals(param2)).isTrue();
+		assertThat(param2.equals(param)).isTrue();
+		assertThat(param2.hashCode()).isEqualTo(param.hashCode());
 	}
 
 	@Test
@@ -52,9 +49,9 @@ public class ResourceIndexedSearchParamDateTest {
 		ResourceIndexedSearchParamDate param = new ResourceIndexedSearchParamDate(new PartitionSettings(), "Patient", "SomeResource", date1A, null, date2A, null, "SomeValue");
 		ResourceIndexedSearchParamDate param2 = new ResourceIndexedSearchParamDate(new PartitionSettings(), "Patient", "SomeResource", date1B, null, date2B, null, "SomeValue");
 
-		assertTrue(param.equals(param2));
-		assertTrue(param2.equals(param));
-		assertEquals(param.hashCode(), param2.hashCode());
+		assertThat(param.equals(param2)).isTrue();
+		assertThat(param2.equals(param)).isTrue();
+		assertThat(param2.hashCode()).isEqualTo(param.hashCode());
 	}
 
 	@Test
@@ -62,9 +59,9 @@ public class ResourceIndexedSearchParamDateTest {
 		ResourceIndexedSearchParamDate param = new ResourceIndexedSearchParamDate(new PartitionSettings(), "Patient", "SomeResource", timestamp1A, null, timestamp2A, null, "SomeValue");
 		ResourceIndexedSearchParamDate param2 = new ResourceIndexedSearchParamDate(new PartitionSettings(), "Patient", "SomeResource", timestamp1B, null, timestamp2B, null, "SomeValue");
 
-		assertTrue(param.equals(param2));
-		assertTrue(param2.equals(param));
-		assertEquals(param.hashCode(), param2.hashCode());
+		assertThat(param.equals(param2)).isTrue();
+		assertThat(param2.equals(param)).isTrue();
+		assertThat(param2.hashCode()).isEqualTo(param.hashCode());
 	}
 
 	// Scenario that occurs when updating a resource with a date search parameter. One date will be a java.util.Date, the
@@ -74,9 +71,9 @@ public class ResourceIndexedSearchParamDateTest {
 		ResourceIndexedSearchParamDate param = new ResourceIndexedSearchParamDate(new PartitionSettings(), "Patient", "SomeResource", date1A, null, date2A, null, "SomeValue");
 		ResourceIndexedSearchParamDate param2 = new ResourceIndexedSearchParamDate(new PartitionSettings(), "Patient", "SomeResource", timestamp1A, null, timestamp2A, null, "SomeValue");
 
-		assertTrue(param.equals(param2));
-		assertTrue(param2.equals(param));
-		assertEquals(param.hashCode(), param2.hashCode());
+		assertThat(param.equals(param2)).isTrue();
+		assertThat(param2.equals(param)).isTrue();
+		assertThat(param2.hashCode()).isEqualTo(param.hashCode());
 	}
 
 	@Test
@@ -84,9 +81,9 @@ public class ResourceIndexedSearchParamDateTest {
 		ResourceIndexedSearchParamDate param = new ResourceIndexedSearchParamDate(new PartitionSettings(), "Patient", "SomeResource", date1A, null, date2A, null, "SomeValue");
 		ResourceIndexedSearchParamDate param2 = new ResourceIndexedSearchParamDate(new PartitionSettings(), "Patient", "SomeResource", date2A, null, date1A, null, "SomeValue");
 
-		assertFalse(param.equals(param2));
-		assertFalse(param2.equals(param));
-		assertNotEquals(param.hashCode(), param2.hashCode());
+		assertThat(param.equals(param2)).isFalse();
+		assertThat(param2.equals(param)).isFalse();
+		assertThat(param2.hashCode()).isNotEqualTo(param.hashCode());
 	}
 
 	@Test
@@ -94,9 +91,9 @@ public class ResourceIndexedSearchParamDateTest {
 		ResourceIndexedSearchParamDate param = new ResourceIndexedSearchParamDate(new PartitionSettings(), "Patient", "SomeResource", date1A, null, date2A, null, "SomeValue");
 		ResourceIndexedSearchParamDate param2 = new ResourceIndexedSearchParamDate(new PartitionSettings(), "Patient", "SomeResource", null, null, null, null, "SomeValue");
 
-		assertFalse(param.equals(param2));
-		assertFalse(param2.equals(param));
-		assertNotEquals(param.hashCode(), param2.hashCode());
+		assertThat(param.equals(param2)).isFalse();
+		assertThat(param2.equals(param)).isFalse();
+		assertThat(param2.hashCode()).isNotEqualTo(param.hashCode());
 	}
 
 	@Test
@@ -104,9 +101,9 @@ public class ResourceIndexedSearchParamDateTest {
 		ResourceIndexedSearchParamDate param = new ResourceIndexedSearchParamDate(new PartitionSettings(), "Patient", "SomeResource", timestamp1A, null, timestamp2A, null, "SomeValue");
 		ResourceIndexedSearchParamDate param2 = new ResourceIndexedSearchParamDate(new PartitionSettings(), "Patient", "SomeResource", timestamp2A, null, timestamp1A, null, "SomeValue");
 
-		assertFalse(param.equals(param2));
-		assertFalse(param2.equals(param));
-		assertNotEquals(param.hashCode(), param2.hashCode());
+		assertThat(param.equals(param2)).isFalse();
+		assertThat(param2.equals(param)).isFalse();
+		assertThat(param2.hashCode()).isNotEqualTo(param.hashCode());
 	}
 
 	@Test
@@ -114,9 +111,9 @@ public class ResourceIndexedSearchParamDateTest {
 		ResourceIndexedSearchParamDate param = new ResourceIndexedSearchParamDate(new PartitionSettings(), "Patient", "SomeResource", date1A, null, date2A, null, "SomeValue");
 		ResourceIndexedSearchParamDate param2 = new ResourceIndexedSearchParamDate(new PartitionSettings(), "Patient", "SomeResource", timestamp2A, null, timestamp1A, null, "SomeValue");
 
-		assertFalse(param.equals(param2));
-		assertFalse(param2.equals(param));
-		assertNotEquals(param.hashCode(), param2.hashCode());
+		assertThat(param.equals(param2)).isFalse();
+		assertThat(param2.equals(param)).isFalse();
+		assertThat(param2.hashCode()).isNotEqualTo(param.hashCode());
 	}
 
 
@@ -132,9 +129,9 @@ public class ResourceIndexedSearchParamDateTest {
 			.setValueLow(new Date(111111111L));
 		val2.setPartitionSettings(new PartitionSettings());
 		val2.calculateHashes();
-		assertEquals(val1, val1);
-		assertEquals(val1, val2);
-		assertNotEquals(val1, null);
-		assertNotEquals(val1, "");
+		assertThat(val1).isEqualTo(val1);
+		assertThat(val2).isEqualTo(val1);
+		assertThat(null).isNotEqualTo(val1);
+		assertThat("").isNotEqualTo(val1);
 	}
 }

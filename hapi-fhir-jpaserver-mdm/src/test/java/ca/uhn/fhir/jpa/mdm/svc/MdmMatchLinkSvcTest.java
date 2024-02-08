@@ -62,9 +62,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.blankOrNullString;
 import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -522,7 +520,7 @@ public class MdmMatchLinkSvcTest {
 			assertThat(patient3, possibleMatchWith(patient));
 
 			IBundleProvider bundle = myPatientDao.search(buildGoldenRecordSearchParameterMap());
-			assertEquals(1, bundle.size());
+			assertThat(bundle.size()).isEqualTo(1);
 
 			//TODO GGG MDM: Convert these asserts to checking the MPI_LINK table
 
@@ -596,20 +594,20 @@ public class MdmMatchLinkSvcTest {
 			);
 
 			// golden record now contains HAPI-generated EID and HAPI tag
-			assertTrue(MdmResourceUtil.isMdmManaged(janeGoldenResourcePatient));
-			assertFalse(myEidHelper.getHapiEid(janeGoldenResourcePatient).isEmpty());
+			assertThat(MdmResourceUtil.isMdmManaged(janeGoldenResourcePatient)).isTrue();
+			assertThat(myEidHelper.getHapiEid(janeGoldenResourcePatient).isEmpty()).isFalse();
 
 			// original checks - verifies that EIDs are assigned
 			assertThat(janePatient != janeGoldenResourcePatient).as("Resource must not be identical").isTrue();
-			assertFalse(janePatient.getIdentifier().isEmpty());
-			assertFalse(janeGoldenResourcePatient.getIdentifier().isEmpty());
+			assertThat(janePatient.getIdentifier().isEmpty()).isFalse();
+			assertThat(janeGoldenResourcePatient.getIdentifier().isEmpty()).isFalse();
 
 			CanonicalEID janeId = myEidHelper.getHapiEid(janePatient).get(0);
 			CanonicalEID janeGoldenResourceId = myEidHelper.getHapiEid(janeGoldenResourcePatient).get(0);
 
 			// source and target EIDs must match, as target EID should be reset to the newly created EID
-			assertEquals(janeId.getValue(), janeGoldenResourceId.getValue());
-			assertEquals(janeId.getSystem(), janeGoldenResourceId.getSystem());
+			assertThat(janeGoldenResourceId.getValue()).isEqualTo(janeId.getValue());
+			assertThat(janeGoldenResourceId.getSystem()).isEqualTo(janeId.getSystem());
 		}
 
 		//Case #1
@@ -789,7 +787,7 @@ public class MdmMatchLinkSvcTest {
 
 			// Ensure both links are POSSIBLE_MATCH and both have a score value
 			List<? extends IMdmLink> janetPatientLinks = runInTransaction(() -> myMdmLinkDaoSvc.findMdmLinksBySourceResource(incomingJanePatient));
-			assertEquals(2, janetPatientLinks.size());
+			assertThat(janetPatientLinks.size()).isEqualTo(2);
 			janetPatientLinks.forEach(l -> {
 				assertEquals(MdmMatchResultEnum.POSSIBLE_MATCH, l.getMatchResult());
 				assertNotNull(l.getScore());
@@ -839,8 +837,8 @@ public class MdmMatchLinkSvcTest {
 
 				// our blocked name is Jane Doe... let's make sure that's the case
 				Patient blockedPatient = buildJanePatient();
-				assertEquals(blockedLastName, blockedPatient.getName().get(0).getFamily());
-				assertEquals(blockedFirstName, blockedPatient.getName().get(0).getGivenAsSingleString());
+			assertThat(blockedPatient.getName().get(0).getFamily()).isEqualTo(blockedLastName);
+			assertThat(blockedPatient.getName().get(0).getGivenAsSingleString()).isEqualTo(blockedFirstName);
 				blockedPatient = createPatient(blockedPatient);
 
 			// test
@@ -848,20 +846,20 @@ public class MdmMatchLinkSvcTest {
 
 			// verify
 			List<IBaseResource> grs = getAllGoldenPatients();
-			assertEquals(2, grs.size());
-			assertEquals(0, myMdmLinkDaoSvc.getPossibleDuplicates().size());
+			assertThat(grs.size()).isEqualTo(2);
+			assertThat(myMdmLinkDaoSvc.getPossibleDuplicates().size()).isEqualTo(0);
 
 			List<MdmLink> links = new ArrayList<>();
 			for (IBaseResource gr : grs) {
 				links.addAll(getAllMdmLinks((Patient)gr));
 			}
-			assertEquals(2, links.size());
+			assertThat(links.size()).isEqualTo(2);
 			Set<Long> ids = new HashSet<>();
 			for (MdmLink link : links) {
 				JpaPid pid = link.getSourcePersistenceId();
-				assertTrue(ids.add(pid.getId()));
+				assertThat(ids.add(pid.getId())).isTrue();
 				JpaPid gpid = link.getGoldenResourcePersistenceId();
-				assertTrue(ids.add(gpid.getId()));
+				assertThat(ids.add(gpid.getId())).isTrue();
 			}
 		}
 

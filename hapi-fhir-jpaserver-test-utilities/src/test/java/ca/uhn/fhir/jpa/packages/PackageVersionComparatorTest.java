@@ -4,8 +4,6 @@ import org.junit.jupiter.api.Test;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.thymeleaf.util.ListUtils.sort;
 
 public class PackageVersionComparatorTest {
@@ -27,11 +25,11 @@ public class PackageVersionComparatorTest {
 
 	@Test
 	public void testIsEquivalent() {
-		assertTrue(PackageVersionComparator.isEquivalent("1.2.x", "1.2.3"));
-		assertTrue(PackageVersionComparator.isEquivalent("1.2", "1.2.3"));
-		assertTrue(PackageVersionComparator.isEquivalent("1.2.3", "1.2.3"));
-		assertFalse(PackageVersionComparator.isEquivalent("1.2.4", "1.2.3"));
-		assertFalse(PackageVersionComparator.isEquivalent("1.3", "1.2.3"));
+		assertThat(PackageVersionComparator.isEquivalent("1.2.x", "1.2.3")).isTrue();
+		assertThat(PackageVersionComparator.isEquivalent("1.2", "1.2.3")).isTrue();
+		assertThat(PackageVersionComparator.isEquivalent("1.2.3", "1.2.3")).isTrue();
+		assertThat(PackageVersionComparator.isEquivalent("1.2.4", "1.2.3")).isFalse();
+		assertThat(PackageVersionComparator.isEquivalent("1.3", "1.2.3")).isFalse();
 
 	}
 

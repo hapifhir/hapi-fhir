@@ -16,7 +16,7 @@ import org.slf4j.LoggerFactory;
 import java.util.Collections;
 import java.util.Date;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class SearchParamExtractorR5Test {
 
@@ -46,6 +46,6 @@ public class SearchParamExtractorR5Test {
 		ISearchParamExtractor.SearchParamSet<ResourceIndexedSearchParamDate> dates = extractor.extractSearchParamDates(appointment);
 
 		//We find one, and the lexer doesn't explode.
-		assertEquals(1, dates.size());
+		assertThat(dates.size()).isEqualTo(1);
 	}
 }

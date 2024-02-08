@@ -14,7 +14,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import jakarta.annotation.Nonnull;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -45,14 +45,14 @@ public class SearchQueryBuilderDialectPostgresTest extends BaseSearchQueryBuilde
 		logSql(generatedSql);
 
 		String sql = generatedSql.getSql();
-		assertEquals("SELECT t0.RES_ID FROM HFJ_SPIDX_DATE t0 WHERE ((t0.HASH_IDENTITY = ?) AND ((t0.SP_VALUE_LOW_DATE_ORDINAL >= ?) AND (t0.SP_VALUE_HIGH_DATE_ORDINAL <= ?))) fetch first ? rows only", sql);
+		assertThat(sql).isEqualTo("SELECT t0.RES_ID FROM HFJ_SPIDX_DATE t0 WHERE ((t0.HASH_IDENTITY = ?) AND ((t0.SP_VALUE_LOW_DATE_ORDINAL >= ?) AND (t0.SP_VALUE_HIGH_DATE_ORDINAL <= ?))) fetch first ? rows only");
 
-		assertEquals(4, StringUtils.countMatches(sql, "?"));
-		assertEquals(4, generatedSql.getBindVariables().size());
-		assertEquals(123682819940570799L, generatedSql.getBindVariables().get(0));
-		assertEquals(20220101, generatedSql.getBindVariables().get(1));
-		assertEquals(20221231, generatedSql.getBindVariables().get(2));
-		assertEquals(500, generatedSql.getBindVariables().get(3));
+		assertThat(StringUtils.countMatches(sql, "?")).isEqualTo(4);
+		assertThat(generatedSql.getBindVariables().size()).isEqualTo(4);
+		assertThat(generatedSql.getBindVariables().get(0)).isEqualTo(123682819940570799L);
+		assertThat(generatedSql.getBindVariables().get(1)).isEqualTo(20220101);
+		assertThat(generatedSql.getBindVariables().get(2)).isEqualTo(20221231);
+		assertThat(generatedSql.getBindVariables().get(3)).isEqualTo(500);
 	}
 
 	@Nonnull

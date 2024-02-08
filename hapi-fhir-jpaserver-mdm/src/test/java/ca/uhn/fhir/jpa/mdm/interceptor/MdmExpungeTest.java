@@ -17,10 +17,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.StringContains.containsString;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
 
 public class MdmExpungeTest extends BaseMdmR4Test {
 
@@ -54,21 +54,21 @@ public class MdmExpungeTest extends BaseMdmR4Test {
 
 	@Test
 	public void testUninterceptedDeleteRemovesMdmReference() {
-		assertEquals(1, myMdmLinkDao.count());
+		assertThat(myMdmLinkDao.count()).isEqualTo(1);
 		myPatientDao.delete(myTargetEntity.getIdDt());
-		assertEquals(1, myMdmLinkDao.count());
+		assertThat(myMdmLinkDao.count()).isEqualTo(1);
 		ExpungeOptions expungeOptions = new ExpungeOptions();
 		expungeOptions.setExpungeDeletedResources(true);
 		try {
 			myPatientDao.expunge(myTargetId.toVersionless(), expungeOptions, null);
-			fail();
+			fail("");
 		} catch (PreconditionFailedException e) {
 			assertThat(e.getMessage(), containsString("ViolationException"));
 			assertThat(e.getMessage(), containsString("FK_EMPI_LINK_TARGET"));
 		}
 		myInterceptorService.registerInterceptor(myMdmStorageInterceptor);
 		myPatientDao.expunge(myTargetId.toVersionless(), expungeOptions, null);
-		assertEquals(0, myMdmLinkDao.count());
+		assertThat(myMdmLinkDao.count()).isEqualTo(0);
 	}
 
 	@AfterEach

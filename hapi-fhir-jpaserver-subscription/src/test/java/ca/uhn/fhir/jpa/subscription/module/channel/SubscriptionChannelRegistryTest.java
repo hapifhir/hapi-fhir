@@ -16,8 +16,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -46,14 +44,14 @@ public class SubscriptionChannelRegistryTest {
 
 		when(mySubscriptionDeliveryChannelFactory.newDeliverySendingChannel(any(), any())).thenReturn(mock(IChannelProducer.class));
 
-		assertNull(mySubscriptionChannelRegistry.getDeliveryReceiverChannel(TEST_CHANNEL_NAME));
+		assertThat(mySubscriptionChannelRegistry.getDeliveryReceiverChannel(TEST_CHANNEL_NAME)).isNull();
 		mySubscriptionChannelRegistry.add(activeSubscriptionA);
-		assertNotNull(mySubscriptionChannelRegistry.getDeliveryReceiverChannel(TEST_CHANNEL_NAME));
+		assertThat(mySubscriptionChannelRegistry.getDeliveryReceiverChannel(TEST_CHANNEL_NAME)).isNotNull();
 		mySubscriptionChannelRegistry.add(activeSubscriptionB);
 		mySubscriptionChannelRegistry.remove(activeSubscriptionB);
-		assertNotNull(mySubscriptionChannelRegistry.getDeliveryReceiverChannel(TEST_CHANNEL_NAME));
+		assertThat(mySubscriptionChannelRegistry.getDeliveryReceiverChannel(TEST_CHANNEL_NAME)).isNotNull();
 		mySubscriptionChannelRegistry.remove(activeSubscriptionA);
-		assertNull(mySubscriptionChannelRegistry.getDeliveryReceiverChannel(TEST_CHANNEL_NAME));
+		assertThat(mySubscriptionChannelRegistry.getDeliveryReceiverChannel(TEST_CHANNEL_NAME)).isNull();
 	}
 
 	@Configuration

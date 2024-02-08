@@ -34,11 +34,8 @@ import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -149,10 +146,10 @@ public class WorkChunkProcessorTest {
 		);
 
 		// verify
-		assertTrue(result.isSuccessful());
+		assertThat(result.isSuccessful()).isTrue();
 		verify(myJobPersistence)
 			.onWorkChunkCompletion(any(WorkChunkCompletionEvent.class));
-		assertTrue(myDataSink.myActualDataSink instanceof JobDataSink);
+		assertThat(myDataSink.myActualDataSink instanceof JobDataSink).isTrue();
 
 		if (theRecoveredErrorsForDataSink > 0) {
 			verify(myJobPersistence)
@@ -193,8 +190,8 @@ public class WorkChunkProcessorTest {
 		);
 
 		// verify
-		assertTrue(result.isSuccessful());
-		assertTrue(myDataSink.myActualDataSink instanceof FinalStepDataSink);
+		assertThat(result.isSuccessful()).isTrue();
+		assertThat(myDataSink.myActualDataSink instanceof FinalStepDataSink).isTrue();
 
 		// nevers
 		verifyNoErrors(0);
@@ -218,7 +215,7 @@ public class WorkChunkProcessorTest {
 			runExceptionThrowingTest(new RuntimeException(msg));
 			fail("Expected Exception to be thrown");
 		} catch (JobStepFailedException jobStepFailedException) {
-			assertTrue(jobStepFailedException.getMessage().contains(msg));
+			assertThat(jobStepFailedException.getMessage().contains(msg)).isTrue();
 		}
 	}
 
@@ -267,7 +264,7 @@ public class WorkChunkProcessorTest {
 				processedOutcomeSuccessfully = output.isSuccessful();
 			} catch (JobStepFailedException ex) {
 				ourLog.info("Caught error:", ex);
-				assertTrue(ex.getMessage().contains(errorMsg));
+				assertThat(ex.getMessage().contains(errorMsg)).isTrue();
 				counter++;
 			}
 			/*
@@ -278,10 +275,10 @@ public class WorkChunkProcessorTest {
 		} while (processedOutcomeSuccessfully == null && counter <= WorkChunkProcessor.MAX_CHUNK_ERROR_COUNT + 2);
 
 		// verify
-		assertNotNull(processedOutcomeSuccessfully);
+		assertThat(processedOutcomeSuccessfully).isNotNull();
 		// +1 because of the > MAX_CHUNK_ERROR_COUNT check
-		assertEquals(WorkChunkProcessor.MAX_CHUNK_ERROR_COUNT + 1, counter);
-		assertFalse(processedOutcomeSuccessfully);
+		assertThat(counter).isEqualTo(WorkChunkProcessor.MAX_CHUNK_ERROR_COUNT + 1);
+		assertThat(processedOutcomeSuccessfully).isFalse();
 	}
 
 	private void runExceptionThrowingTest(Exception theExceptionToThrow) {
@@ -307,7 +304,7 @@ public class WorkChunkProcessorTest {
 		);
 
 		// verify
-		assertFalse(output.isSuccessful());
+		assertThat(output.isSuccessful()).isFalse();
 	}
 
 	/**********************/

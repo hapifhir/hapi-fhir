@@ -9,11 +9,8 @@ import org.junit.jupiter.params.provider.EnumSource;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
 import static org.mockito.Mockito.mock;
 
 public class CandidateListTest {
@@ -44,12 +41,12 @@ public class CandidateListTest {
 
 		// verify
 		if (theStrategyEnum == CandidateStrategyEnum.ANY) {
-			assertThrows(InternalErrorException.class, () -> {
+			assertThatExceptionOfType(InternalErrorException.class).isThrownBy(() -> {
 				list.addAll(theStrategyEnum, candidatesToAdd);
 			});
 		} else {
 			list.addAll(theStrategyEnum, candidatesToAdd);
-			assertEquals(total, list.size());
+			assertThat(list.size()).isEqualTo(total);
 		}
 	}
 
@@ -64,7 +61,7 @@ public class CandidateListTest {
 		size = populateCandidateList(theStrategy, size, candidateList);
 
 		// test
-		assertEquals(size, candidateList.stream().count());
+		assertThat(candidateList.stream().count()).isEqualTo(size);
 	}
 
 	private int populateCandidateList(CandidateStrategyEnum theStrategy, int theSize, CandidateList theCandidateList) {
@@ -98,11 +95,11 @@ public class CandidateListTest {
 		}
 
 		// tests
-		assertFalse(candidate.isEmpty());
-		assertTrue(candidate.exactlyOneMatch());
-		assertEquals(1, candidate.size());
-		assertNotNull(candidate.getFirstMatch());
-		assertNotNull(candidate.getOnlyMatch());
+		assertThat(candidate.isEmpty()).isFalse();
+		assertThat(candidate.exactlyOneMatch()).isTrue();
+		assertThat(candidate.size()).isEqualTo(1);
+		assertThat(candidate.getFirstMatch()).isNotNull();
+		assertThat(candidate.getOnlyMatch()).isNotNull();
 	}
 
 	@ParameterizedTest
@@ -114,8 +111,8 @@ public class CandidateListTest {
 		int size = populateCandidateList(theStrategy, 10, candidateList);
 
 		// tests
-		assertEquals(size, candidateList.size());
+		assertThat(candidateList.size()).isEqualTo(size);
 		List<MatchedGoldenResourceCandidate> candidates = candidateList.getCandidates();
-		assertEquals(size, candidates.size());
+		assertThat(candidates.size()).isEqualTo(size);
 	}
 }

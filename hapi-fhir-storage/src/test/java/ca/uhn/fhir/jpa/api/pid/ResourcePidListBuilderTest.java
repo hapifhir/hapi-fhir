@@ -8,11 +8,7 @@ import java.util.Date;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.fail;
 
 class ResourcePidListBuilderTest {
 
@@ -42,16 +38,16 @@ class ResourcePidListBuilderTest {
 		EmptyResourcePidList emptyList = (EmptyResourcePidList) ResourcePidListBuilder.fromChunksAndDate(chunks, end);
 
 		// verify
-		assertEquals(0, emptyList.size());
-		assertTrue(emptyList.isEmpty());
+		assertThat(emptyList.size()).isEqualTo(0);
+		assertThat(emptyList.isEmpty()).isTrue();
 		assertThat(emptyList.getIds()).hasSize(0);
 		assertThat(emptyList.getTypedResourcePids()).hasSize(0);
-		assertNull(emptyList.getLastDate());
+		assertThat(emptyList.getLastDate()).isNull();
 		try {
 			emptyList.getResourceType(0);
-			fail();
+			fail("");
 		} catch (ArrayIndexOutOfBoundsException e) {
-			assertEquals("HAPI-2095: Attempting to get resource type from an empty resource pid list", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo("HAPI-2095: Attempting to get resource type from an empty resource pid list");
 			// expected exception
 		}
 	}
@@ -95,9 +91,9 @@ class ResourcePidListBuilderTest {
 		HomogeneousResourcePidList list = (HomogeneousResourcePidList) ResourcePidListBuilder.fromChunksAndDate(chunks, END);
 
 		// verify
-		assertFalse(list.isEmpty());
-		assertEquals(END, list.getLastDate());
-		assertEquals(RESOURCE_TYPE, list.getResourceType());
+		assertThat(list.isEmpty()).isFalse();
+		assertThat(list.getLastDate()).isEqualTo(END);
+		assertThat(list.getResourceType()).isEqualTo(RESOURCE_TYPE);
 		assertThat(list.getIds()).containsExactly(PID_1, PID_2, PID_3, PID_4);
 		assertThat(list.getTypedResourcePids()).containsExactly(TRP_1, TRP_2, TRP_3, TRP_4);
 	}
@@ -115,12 +111,12 @@ class ResourcePidListBuilderTest {
 		MixedResourcePidList list = (MixedResourcePidList) ResourcePidListBuilder.fromChunksAndDate(chunks, END);
 
 		// verify
-		assertFalse(list.isEmpty());
-		assertEquals(END, list.getLastDate());
-		assertEquals(RESOURCE_TYPE, list.getResourceType(0));
-		assertEquals(RESOURCE_TYPE, list.getResourceType(1));
-		assertEquals(OTHER_RESOURCE_TYPE, list.getResourceType(2));
-		assertEquals(OTHER_RESOURCE_TYPE, list.getResourceType(3));
+		assertThat(list.isEmpty()).isFalse();
+		assertThat(list.getLastDate()).isEqualTo(END);
+		assertThat(list.getResourceType(0)).isEqualTo(RESOURCE_TYPE);
+		assertThat(list.getResourceType(1)).isEqualTo(RESOURCE_TYPE);
+		assertThat(list.getResourceType(2)).isEqualTo(OTHER_RESOURCE_TYPE);
+		assertThat(list.getResourceType(3)).isEqualTo(OTHER_RESOURCE_TYPE);
 		assertThat(list.getIds()).containsExactly(PID_1, PID_2, PID_5, PID_6);
 		assertThat(list.getTypedResourcePids()).containsExactly(TRP_1, TRP_2, TRP_5, TRP_6);
 	}
@@ -136,18 +132,18 @@ class ResourcePidListBuilderTest {
 		MixedResourcePidList list = (MixedResourcePidList) ResourcePidListBuilder.fromChunksAndDate(chunks, END);
 
 		// verify
-		assertFalse(list.isEmpty());
-		assertEquals(END, list.getLastDate());
-		assertEquals(RESOURCE_TYPE, list.getResourceType(0));
-		assertEquals(OTHER_RESOURCE_TYPE, list.getResourceType(1));
+		assertThat(list.isEmpty()).isFalse();
+		assertThat(list.getLastDate()).isEqualTo(END);
+		assertThat(list.getResourceType(0)).isEqualTo(RESOURCE_TYPE);
+		assertThat(list.getResourceType(1)).isEqualTo(OTHER_RESOURCE_TYPE);
 		assertThat(list.getIds()).containsExactly(PID_1, PID_5);
 		assertThat(list.getTypedResourcePids()).containsExactly(TRP_1, TRP_5);
 	}
 
 	private void assertTwoItems(IResourcePidList list) {
-		assertFalse(list.isEmpty());
-		assertEquals(END, list.getLastDate());
-		assertEquals(RESOURCE_TYPE, list.getResourceType(0));
+		assertThat(list.isEmpty()).isFalse();
+		assertThat(list.getLastDate()).isEqualTo(END);
+		assertThat(list.getResourceType(0)).isEqualTo(RESOURCE_TYPE);
 		assertThat(list.getIds()).containsExactly(PID_1, PID_2);
 		assertThat(list.getTypedResourcePids()).containsExactly(TRP_1, TRP_2);
 	}

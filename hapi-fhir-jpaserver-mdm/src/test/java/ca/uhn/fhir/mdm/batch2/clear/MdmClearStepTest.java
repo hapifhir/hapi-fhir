@@ -24,8 +24,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import jakarta.annotation.Nonnull;
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.fail;
 
 class MdmClearStepTest extends BaseMdmR4Test {
@@ -84,14 +84,12 @@ class MdmClearStepTest extends BaseMdmR4Test {
 
 		try {
 			mdmClearGoldenResource();
-			fail();
+			fail("");
 		} catch (InvalidRequestException e) {
-			assertEquals(
-				String.format("HAPI-0822: DELETE with _expunge=true failed.  Unable to delete %s because %s refers to it via the path Patient.link.other",
-					myGoldenId,
-					husbandId
-				),
-				e.getMessage());
+			assertThat(e.getMessage()).isEqualTo(String.format("HAPI-0822: DELETE with _expunge=true failed.  Unable to delete %s because %s refers to it via the path Patient.link.other",
+				myGoldenId,
+				husbandId
+			));
 		}
 	}
 
@@ -102,7 +100,7 @@ class MdmClearStepTest extends BaseMdmR4Test {
 			assertPatientExists(myGoldenId);
 			fail("Resource cannot be found");
 		} catch (ResourceNotFoundException e) {
-			assertEquals("HAPI-2001: Resource " + myGoldenId + " is not known", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo("HAPI-2001: Resource " + myGoldenId + " is not known");
 		}
 	}
 
@@ -138,10 +136,10 @@ class MdmClearStepTest extends BaseMdmR4Test {
 	}
 
 	private void assertPatientExists(String theSourceId) {
-		assertNotNull(myPatientDao.read(new IdDt(theSourceId)));
+		assertThat(myPatientDao.read(new IdDt(theSourceId))).isNotNull();
 	}
 
 	private void assertPatientCount(int theExpectedCount) {
-		assertEquals(theExpectedCount, myPatientDao.search(SearchParameterMap.newSynchronous()).size());
+		assertThat(myPatientDao.search(SearchParameterMap.newSynchronous()).size()).isEqualTo(theExpectedCount);
 	}
 }

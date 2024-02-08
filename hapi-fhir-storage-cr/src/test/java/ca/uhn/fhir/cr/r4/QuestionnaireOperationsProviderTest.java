@@ -9,9 +9,7 @@ import org.hl7.fhir.r4.model.Parameters;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class QuestionnaireOperationsProviderTest extends BaseCrR4TestServer {
 	@Autowired
@@ -32,9 +30,9 @@ public class QuestionnaireOperationsProviderTest extends BaseCrR4TestServer {
 			null, null, null, null,
 			requestDetails);
 
-		assertNotNull(result);
-		assertEquals("Patient/" + theSubject, result.getSubject().getReference());
-		assertTrue(result.getItem().get(0).getItem().get(0).hasAnswer());
+		assertThat(result).isNotNull();
+		assertThat(result.getSubject().getReference()).isEqualTo("Patient/" + theSubject);
+		assertThat(result.getItem().get(0).getItem().get(0).hasAnswer()).isTrue();
 	}
 
 	@Test
@@ -49,8 +47,8 @@ public class QuestionnaireOperationsProviderTest extends BaseCrR4TestServer {
 			null, null, null, null,
 			requestDetails);
 
-		assertNotNull(result);
-		assertTrue(result.getItem().get(0).getItem().get(0).hasInitial());
+		assertThat(result).isNotNull();
+		assertThat(result.getItem().get(0).getItem().get(0).hasInitial()).isTrue();
 	}
 
 	@Test
@@ -61,8 +59,8 @@ public class QuestionnaireOperationsProviderTest extends BaseCrR4TestServer {
 			"http://example.org/sdh/dtr/aslp/Questionnaire/ASLPA1", "true",
 			requestDetails);
 
-		assertNotNull(result);
-		assertEquals(11, result.getEntry().size());
-		assertTrue(result.getEntry().get(0).getResource().fhirType().equals(Enumerations.FHIRAllTypes.QUESTIONNAIRE.toCode()));
+		assertThat(result).isNotNull();
+		assertThat(result.getEntry().size()).isEqualTo(11);
+		assertThat(result.getEntry().get(0).getResource().fhirType().equals(Enumerations.FHIRAllTypes.QUESTIONNAIRE.toCode())).isTrue();
 	}
 }

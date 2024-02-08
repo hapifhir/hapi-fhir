@@ -60,10 +60,7 @@ import java.util.Optional;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.AdditionalMatchers.not;
 import static org.mockito.ArgumentMatchers.any;
@@ -230,12 +227,12 @@ public class JpaBulkExportProcessorTest {
 		Iterator<JpaPid> pidIterator = myProcessor.getResourcePidIterator(parameters);
 
 		// verify
-		assertNotNull(pidIterator);
-		assertTrue(pidIterator.hasNext());
-		assertEquals(pid, pidIterator.next());
-		assertTrue(pidIterator.hasNext());
-		assertEquals(pid2, pidIterator.next());
-		assertFalse(pidIterator.hasNext());
+		assertThat(pidIterator).isNotNull();
+		assertThat(pidIterator.hasNext()).isTrue();
+		assertThat(pidIterator.next()).isEqualTo(pid);
+		assertThat(pidIterator.hasNext()).isTrue();
+		assertThat(pidIterator.next()).isEqualTo(pid2);
+		assertThat(pidIterator.hasNext()).isFalse();
 		verify(searchBuilder, times(1)).createQuery(
 			eq(map),
 			any(SearchRuntimeDetails.class),
@@ -265,7 +262,7 @@ public class JpaBulkExportProcessorTest {
 		// test
 		try {
 			myProcessor.getResourcePidIterator(parameters);
-			fail();
+			fail("");
 		} catch (InternalErrorException ex) {
 			assertThat(ex.getMessage()).contains("You attempted to start a Patient Bulk Export,");
 		}
@@ -343,22 +340,22 @@ public class JpaBulkExportProcessorTest {
 		Iterator<JpaPid> pidIterator = myProcessor.getResourcePidIterator(parameters);
 
 		// verify
-		assertNotNull(pidIterator);
+		assertThat(pidIterator).isNotNull();
 		int count = 0;
-		assertTrue(pidIterator.hasNext());
+		assertThat(pidIterator.hasNext()).isTrue();
 		while (pidIterator.hasNext()) {
 			JpaPid pid = pidIterator.next();
 			long idAsLong = pid.getId();
 			boolean existing = pids.contains(JpaPid.fromId(idAsLong));
 			if (!existing) {
-				assertTrue(theMdm);
-				assertEquals(groupGoldenPid, idAsLong);
+				assertThat(theMdm).isTrue();
+				assertThat(idAsLong).isEqualTo(groupGoldenPid);
 			} else {
 				count++;
 			}
 		}
 		int total = pids.size();
-		assertEquals(total, count);
+		assertThat(count).isEqualTo(total);
 		if (theMdm) {
 			ArgumentCaptor<SystemRequestDetails> requestDetailsCaptor = ArgumentCaptor.forClass(SystemRequestDetails.class);
 			verify(groupDao).read(eq(new IdDt(parameters.getGroupId())), requestDetailsCaptor.capture());
@@ -369,10 +366,10 @@ public class JpaBulkExportProcessorTest {
 	private void validatePartitionId(boolean thePartitioned, RequestPartitionId thePartitionId) {
 
 		if (thePartitioned) {
-			assertNotNull(thePartitionId.getPartitionNames());
-			assertEquals("Partition-A", thePartitionId.getPartitionNames().get(0));
+			assertThat(thePartitionId.getPartitionNames()).isNotNull();
+			assertThat(thePartitionId.getPartitionNames().get(0)).isEqualTo("Partition-A");
 		} else {
-			assertEquals(RequestPartitionId.allPartitions(), thePartitionId);
+			assertThat(thePartitionId).isEqualTo(RequestPartitionId.allPartitions());
 		}
 
 	}
@@ -482,15 +479,15 @@ public class JpaBulkExportProcessorTest {
 		Iterator<JpaPid> pidIterator = myProcessor.getResourcePidIterator(parameters);
 
 		// verify
-		assertNotNull(pidIterator, "PID iterator null for mdm = " + theMdm);
-		assertTrue(pidIterator.hasNext(), "PID iterator empty for mdm = " + theMdm);
+		assertThat(pidIterator).as("PID iterator null for mdm = " + theMdm).isNotNull();
+		assertThat(pidIterator.hasNext()).as("PID iterator empty for mdm = " + theMdm).isTrue();
 		ArgumentCaptor<SystemRequestDetails> groupDaoReadSystemRequestDetailsCaptor = ArgumentCaptor.forClass(SystemRequestDetails.class);
 		verify(groupDao).read(any(IIdType.class), groupDaoReadSystemRequestDetailsCaptor.capture());
 		validatePartitionId(thePartitioned, groupDaoReadSystemRequestDetailsCaptor.getValue().getRequestPartitionId());
 		ArgumentCaptor<SearchBuilderLoadIncludesParameters> searchBuilderLoadIncludesRequestDetailsCaptor = ArgumentCaptor.forClass(SearchBuilderLoadIncludesParameters.class);
 		verify(observationSearchBuilder).loadIncludes(searchBuilderLoadIncludesRequestDetailsCaptor.capture());
 		SearchBuilderLoadIncludesParameters param = searchBuilderLoadIncludesRequestDetailsCaptor.getValue();
-		assertTrue(param.getRequestDetails() instanceof SystemRequestDetails);
+		assertThat(param.getRequestDetails() instanceof SystemRequestDetails).isTrue();
 		SystemRequestDetails details = (SystemRequestDetails) param.getRequestDetails();
 		validatePartitionId(thePartitioned, details.getRequestPartitionId());
 	}
@@ -538,17 +535,15 @@ public class JpaBulkExportProcessorTest {
 		Iterator<JpaPid> iterator = myProcessor.getResourcePidIterator(parameters);
 
 		// verify
-		assertNotNull(iterator);
-		assertTrue(iterator.hasNext());
+		assertThat(iterator).isNotNull();
+		assertThat(iterator.hasNext()).isTrue();
 		int count = 0;
 		while (iterator.hasNext()) {
 			JpaPid ret = iterator.next();
-			assertTrue(
-				ret.equals(pid) || ret.equals(pid2)
-			);
+			assertThat(ret.equals(pid) || ret.equals(pid2)).isTrue();
 			count++;
 		}
-		assertEquals(2, count);
+		assertThat(count).isEqualTo(2);
 	}
 
 	@ParameterizedTest
@@ -582,10 +577,10 @@ public class JpaBulkExportProcessorTest {
 		Iterator<JpaPid> pidIterator = myProcessor.getResourcePidIterator(parameters);
 
 		// verify
-		assertNotNull(pidIterator);
-		assertTrue(pidIterator.hasNext());
-		assertEquals(pid, pidIterator.next());
-		assertFalse(pidIterator.hasNext());
+		assertThat(pidIterator).isNotNull();
+		assertThat(pidIterator.hasNext()).isTrue();
+		assertThat(pidIterator.next()).isEqualTo(pid);
+		assertThat(pidIterator.hasNext()).isFalse();
 		ArgumentCaptor<SystemRequestDetails> resourceDaoServletRequestDetailsCaptor = ArgumentCaptor.forClass(SystemRequestDetails.class);
 		verify(mockDao).read(any(IdDt.class), resourceDaoServletRequestDetailsCaptor.capture());
 		validatePartitionId(thePartitioned, resourceDaoServletRequestDetailsCaptor.getValue().getRequestPartitionId());

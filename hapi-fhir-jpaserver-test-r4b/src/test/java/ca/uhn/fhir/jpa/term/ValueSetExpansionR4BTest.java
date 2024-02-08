@@ -12,8 +12,8 @@ import org.junit.jupiter.api.Test;
 import java.io.IOException;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 public class ValueSetExpansionR4BTest extends BaseJpaR4BTest {
 
@@ -32,9 +32,9 @@ public class ValueSetExpansionR4BTest extends BaseJpaR4BTest {
 
 		// check valueSet and codeSystem versions
 		String expectedCodeSystemVersion = "4.3.0";
-		assertEquals(expectedCodeSystemVersion, taskCodeCs.getVersion());
-		assertEquals(expectedCodeSystemVersion, taskCodeVs.getVersion());
-		assertEquals(expectedCodeSystemVersion, taskCodeVs.getCompose().getInclude().get(0).getVersion());
+		assertThat(taskCodeCs.getVersion()).isEqualTo(expectedCodeSystemVersion);
+		assertThat(taskCodeVs.getVersion()).isEqualTo(expectedCodeSystemVersion);
+		assertThat(taskCodeVs.getCompose().getInclude().get(0).getVersion()).isEqualTo(expectedCodeSystemVersion);
 
 		myCodeSystemDao.create(taskCodeCs);
 		IIdType id = myValueSetDao.create(taskCodeVs).getId();
@@ -42,9 +42,9 @@ public class ValueSetExpansionR4BTest extends BaseJpaR4BTest {
 		ValueSet expandedValueSet = myValueSetDao.expand(id, new ValueSetExpansionOptions(), mySrd);
 
 		// check expansion size and include CodeSystem version
-		assertEquals(7, expandedValueSet.getExpansion().getContains().size());
-		assertEquals(1, expandedValueSet.getCompose().getInclude().size());
-		assertEquals(expectedCodeSystemVersion, expandedValueSet.getCompose().getInclude().get(0).getVersion());
+		assertThat(expandedValueSet.getExpansion().getContains().size()).isEqualTo(7);
+		assertThat(expandedValueSet.getCompose().getInclude().size()).isEqualTo(1);
+		assertThat(expandedValueSet.getCompose().getInclude().get(0).getVersion()).isEqualTo(expectedCodeSystemVersion);
 	}
 
 	private IBaseResource findResourceByFullUrlInBundle(Bundle thebundle, String theFullUrl) {
@@ -52,7 +52,7 @@ public class ValueSetExpansionR4BTest extends BaseJpaR4BTest {
 			.filter(entry -> theFullUrl.equals(entry.getFullUrl()))
 			.findFirst();
 		if (bundleEntry.isEmpty()) {
-			fail("Can't find resource: " + theFullUrl);
+			fail("", "Can't find resource: " + theFullUrl);
 		}
 		return bundleEntry.get().getResource();
 	}

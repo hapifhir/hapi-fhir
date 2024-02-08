@@ -9,7 +9,6 @@ import ca.uhn.fhir.jpa.subscription.match.registry.ActiveSubscription;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscriptionChannelType;
 import ca.uhn.fhir.jpa.subscription.model.ChannelRetryConfiguration;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -21,6 +20,7 @@ import org.springframework.messaging.MessageHandler;
 
 import java.util.Optional;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
@@ -80,8 +80,8 @@ public class SubscriptionChannelRegistryTest {
 		SubscriptionChannelWithHandlers receiverChannel = mySubscriptionChannelRegistry.getDeliveryReceiverChannel(channelName);
 		MessageChannel senderChannel = mySubscriptionChannelRegistry.getDeliverySenderChannel(channelName);
 
-		Assertions.assertEquals(producer, senderChannel);
-		Assertions.assertEquals(receiver, receiverChannel.getChannel());
+		assertThat(senderChannel).isEqualTo(producer);
+		assertThat(receiverChannel.getChannel()).isEqualTo(receiver);
 
 		// verify the creation of the sender/receiver
 		// both have retry values provided
@@ -105,8 +105,8 @@ public class SubscriptionChannelRegistryTest {
 	 * @param theRetryCount
 	 */
 	private void verifySettingsHaveRetryConfig(BaseChannelSettings theSettings, int theRetryCount) {
-		Assertions.assertNotNull(theSettings);
-		Assertions.assertNotNull(theSettings.getRetryConfigurationParameters());
-		Assertions.assertEquals(theRetryCount, theSettings.getRetryConfigurationParameters().getRetryCount());
+		assertThat(theSettings).isNotNull();
+		assertThat(theSettings.getRetryConfigurationParameters()).isNotNull();
+		assertThat(theSettings.getRetryConfigurationParameters().getRetryCount()).isEqualTo(theRetryCount);
 	}
 }

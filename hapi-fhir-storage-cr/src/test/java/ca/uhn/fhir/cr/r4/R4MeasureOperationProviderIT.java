@@ -15,9 +15,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @ExtendWith(SpringExtension.class)
 class R4MeasureOperationProviderIT extends BaseCrR4TestServer {
@@ -37,7 +35,7 @@ class R4MeasureOperationProviderIT extends BaseCrR4TestServer {
 			.returnResourceType(MeasureReport.class)
 			.execute();
 
-		assertNotNull(report);
+		assertThat(report).isNotNull();
 
 		return report;
 	}
@@ -63,10 +61,10 @@ class R4MeasureOperationProviderIT extends BaseCrR4TestServer {
 		for (MeasureReport.MeasureReportGroupPopulationComponent population : returnMeasureReport.getGroupFirstRep()
 			.getPopulation())
             switch (population.getCode().getCodingFirstRep().getCode()) {
-                case "initial-population" -> assertEquals(initialPopulationCount, population.getCount());
-                case "denominator" -> assertEquals(denominatorCount, population.getCount());
-                case "denominator-exclusion" -> assertEquals(denominatorExclusionCount, population.getCount());
-                case "numerator" -> assertEquals(numeratorCount, population.getCount());
+                case "initial-population" -> assertThat(population.getCount()).isEqualTo(initialPopulationCount);
+                case "denominator" -> assertThat(population.getCount()).isEqualTo(denominatorCount);
+                case "denominator-exclusion" -> assertThat(population.getCount()).isEqualTo(denominatorExclusionCount);
+                case "numerator" -> assertThat(population.getCount()).isEqualTo(numeratorCount);
             }
 
 		Observation enrolledDuringParticipationPeriodObs = null;
@@ -81,12 +79,11 @@ class R4MeasureOperationProviderIT extends BaseCrR4TestServer {
 			}
 		}
 
-		assertNotNull(enrolledDuringParticipationPeriodObs);
-		assertEquals(Boolean.toString(enrolledDuringParticipationPeriod).toLowerCase(),
-			enrolledDuringParticipationPeriodObs.getValueCodeableConcept().getCodingFirstRep().getCode());
+		assertThat(enrolledDuringParticipationPeriodObs).isNotNull();
+		assertThat(enrolledDuringParticipationPeriodObs.getValueCodeableConcept().getCodingFirstRep().getCode()).isEqualTo(Boolean.toString(enrolledDuringParticipationPeriod).toLowerCase());
 
-		assertNotNull(participationPeriodObs);
-		assertEquals(participationPeriod, participationPeriodObs.getValueCodeableConcept().getCodingFirstRep().getCode());
+		assertThat(participationPeriodObs).isNotNull();
+		assertThat(participationPeriodObs.getValueCodeableConcept().getCodingFirstRep().getCode()).isEqualTo(participationPeriod);
 	}
 
 	@Test
@@ -112,7 +109,7 @@ class R4MeasureOperationProviderIT extends BaseCrR4TestServer {
 		this.loadBundle("ClientNonPatientBasedMeasureBundle.json");
 
 		var measure = read(new IdType("Measure", "InitialInpatientPopulation"));
-		assertNotNull(measure);
+		assertThat(measure).isNotNull();
 
 		var returnMeasureReport = runEvaluateMeasure("2019-01-01", "2020-01-01", "Patient/97f27374-8a5c-4aa1-a26f-5a1ab03caa47", "InitialInpatientPopulation", "Individual", null);
 
@@ -125,9 +122,8 @@ class R4MeasureOperationProviderIT extends BaseCrR4TestServer {
 				&& x.getCode().getCoding().get(0).getCode().equals(populationName))
 			.findFirst();
 
-		assertTrue(population.isPresent(), String.format("Unable to locate a population with id \"%s\"", populationName));
-		assertEquals(population.get().getCount(), expectedCount,
-			String.format("expected count for population \"%s\" did not match", populationName));
+		assertThat(population.isPresent()).as(String.format("Unable to locate a population with id \"%s\"",populationName)).isTrue();
+		assertThat(expectedCount).as(String.format("expected count for population \"%s\" did not match",populationName)).isEqualTo(population.get().getCount());
 	}
 
 	@Test
@@ -153,12 +149,8 @@ class R4MeasureOperationProviderIT extends BaseCrR4TestServer {
 			.getPopulation().stream().filter(x -> x.hasCode() && x.getCode().hasCoding()
 				&& x.getCode().getCoding().get(0).getCode().equals(populationName))
 			.findFirst();
-		assertTrue(population.isPresent(), String.format("population \"%s\" not found in report", populationName));
-		assertEquals(
-			expectedCount,
-			population.get().getCount(),
-			String.format("expected count for population \"%s\" did not match", populationName)
-		);
+		assertThat(population.isPresent()).as(String.format("population \"%s\" not found in report",populationName)).isTrue();
+		assertThat(population.get().getCount()).as(String.format("expected count for population \"%s\" did not match",populationName)).isEqualTo(expectedCount);
 	}
 
 

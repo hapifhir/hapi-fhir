@@ -18,6 +18,7 @@ import org.hl7.fhir.r5.model.Patient;
 import org.hl7.fhir.r5.model.Reference;
 import org.junit.jupiter.api.Test;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class DuplicateIndexR5Test extends BaseJpaR5Test {
@@ -26,7 +27,7 @@ public class DuplicateIndexR5Test extends BaseJpaR5Test {
 	public void testDuplicateTokensClearedOnUpdate() {
 		// Setup
 		IIdType id = createPatientWithDuplicateTokens();
-		assertEquals(3, runInTransaction(()->myResourceIndexedSearchParamTokenDao.findAll().stream().filter(t->t.getParamName().equals("identifier")).count()));
+		assertThat(runInTransaction(() -> myResourceIndexedSearchParamTokenDao.findAll().stream().filter(t -> t.getParamName().equals("identifier")).count())).isEqualTo(3);
 
 		// Test
 		Patient pt = new Patient();
@@ -36,7 +37,7 @@ public class DuplicateIndexR5Test extends BaseJpaR5Test {
 
 		// Verify
 		logAllTokenIndexes();
-		assertEquals(1, runInTransaction(()->myResourceIndexedSearchParamTokenDao.findAll().stream().filter(t->t.getParamName().equals("identifier")).count()));
+		assertThat(runInTransaction(() -> myResourceIndexedSearchParamTokenDao.findAll().stream().filter(t -> t.getParamName().equals("identifier")).count())).isEqualTo(1);
 	}
 
 	@Test
@@ -49,14 +50,14 @@ public class DuplicateIndexR5Test extends BaseJpaR5Test {
 
 		// Verify
 		logAllTokenIndexes();
-		assertEquals(1, runInTransaction(()->myResourceIndexedSearchParamTokenDao.findAll().stream().filter(t->t.getParamName().equals("identifier")).count()));
+		assertThat(runInTransaction(() -> myResourceIndexedSearchParamTokenDao.findAll().stream().filter(t -> t.getParamName().equals("identifier")).count())).isEqualTo(1);
 	}
 
 	@Test
 	public void testDuplicateStringsClearedOnUpdate() {
 		// Setup
         IIdType id = createPatientWithDuplicateStrings();
-		assertEquals(3, runInTransaction(()->myResourceIndexedSearchParamStringDao.findAll().stream().filter(t->t.getParamName().equals("family")).count()));
+		assertThat(runInTransaction(() -> myResourceIndexedSearchParamStringDao.findAll().stream().filter(t -> t.getParamName().equals("family")).count())).isEqualTo(3);
 
 		// Test
 		Patient pt = new Patient();
@@ -66,28 +67,28 @@ public class DuplicateIndexR5Test extends BaseJpaR5Test {
 
 		// Verify
 		logAllTokenIndexes();
-		assertEquals(1, runInTransaction(()->myResourceIndexedSearchParamStringDao.findAll().stream().filter(t->t.getParamName().equals("family")).count()));
+		assertThat(runInTransaction(() -> myResourceIndexedSearchParamStringDao.findAll().stream().filter(t -> t.getParamName().equals("family")).count())).isEqualTo(1);
 	}
 
 	@Test
 	public void testDuplicateStringsClearedOnReindex() {
 		// Setup
 		createPatientWithDuplicateStrings();
-		assertEquals(3, runInTransaction(()->myResourceIndexedSearchParamStringDao.findAll().stream().filter(t->t.getParamName().equals("family")).count()));
+		assertThat(runInTransaction(() -> myResourceIndexedSearchParamStringDao.findAll().stream().filter(t -> t.getParamName().equals("family")).count())).isEqualTo(3);
 
 		// Test
 		reindexAllPatients();
 
 		// Verify
 		logAllTokenIndexes();
-		assertEquals(1, runInTransaction(()->myResourceIndexedSearchParamStringDao.findAll().stream().filter(t->t.getParamName().equals("family")).count()));
+		assertThat(runInTransaction(() -> myResourceIndexedSearchParamStringDao.findAll().stream().filter(t -> t.getParamName().equals("family")).count())).isEqualTo(1);
 	}
 
 	@Test
 	public void testDuplicateResourceLinksClearedOnUpdate() {
 		// Setup
         IIdType id = createPatientWithDuplicateResourceLinks();
-		assertEquals(3, runInTransaction(()->myResourceLinkDao.findAll().stream().filter(t->t.getSourcePath().equals("Patient.managingOrganization")).count()));
+		assertThat(runInTransaction(() -> myResourceLinkDao.findAll().stream().filter(t -> t.getSourcePath().equals("Patient.managingOrganization")).count())).isEqualTo(3);
 
 		// Test
 		IIdType orgId = createOrganization(withName("MY ORG 2"));
@@ -97,7 +98,7 @@ public class DuplicateIndexR5Test extends BaseJpaR5Test {
 		myPatientDao.update(pt, mySrd);
 
 		// Verify
-		assertEquals(1, runInTransaction(()->myResourceLinkDao.findAll().stream().filter(t->t.getSourcePath().equals("Patient.managingOrganization")).count()));
+		assertThat(runInTransaction(() -> myResourceLinkDao.findAll().stream().filter(t -> t.getSourcePath().equals("Patient.managingOrganization")).count())).isEqualTo(1);
 	}
 
 	@Test
@@ -109,14 +110,14 @@ public class DuplicateIndexR5Test extends BaseJpaR5Test {
 		reindexAllPatients();
 
 		// Verify
-		assertEquals(1, runInTransaction(()->myResourceLinkDao.findAll().stream().filter(t->t.getSourcePath().equals("Patient.managingOrganization")).count()));
+		assertThat(runInTransaction(() -> myResourceLinkDao.findAll().stream().filter(t -> t.getSourcePath().equals("Patient.managingOrganization")).count())).isEqualTo(1);
 	}
 
 	@Test
 	public void testDuplicateComboParamsClearedOnUpdate() {
 		// Setup
         IIdType id = createPatientWithDuplicateNonUniqueComboParams();
-		assertEquals(3, runInTransaction(()->myResourceIndexedComboTokensNonUniqueDao.count()));
+		assertThat(runInTransaction(() -> myResourceIndexedComboTokensNonUniqueDao.count())).isEqualTo(3);
 
 		// Test
 		Patient pt = new Patient();
@@ -126,20 +127,20 @@ public class DuplicateIndexR5Test extends BaseJpaR5Test {
 		myPatientDao.update(pt, mySrd);
 
 		// Verify
-		assertEquals(1, runInTransaction(()->myResourceIndexedComboTokensNonUniqueDao.count()));
+		assertThat(runInTransaction(() -> myResourceIndexedComboTokensNonUniqueDao.count())).isEqualTo(1);
 	}
 
 	@Test
 	public void testDuplicateComboParamsClearedOnReindex() {
 		// Setup
 		createPatientWithDuplicateNonUniqueComboParams();
-		assertEquals(3, runInTransaction(()->myResourceIndexedComboTokensNonUniqueDao.count()));
+		assertThat(runInTransaction(() -> myResourceIndexedComboTokensNonUniqueDao.count())).isEqualTo(3);
 
 		// Test
 		reindexAllPatients();
 
 		// Verify
-		assertEquals(1, runInTransaction(()->myResourceIndexedComboTokensNonUniqueDao.count()));
+		assertThat(runInTransaction(() -> myResourceIndexedComboTokensNonUniqueDao.count())).isEqualTo(1);
 	}
 
 	private void reindexAllPatients() {

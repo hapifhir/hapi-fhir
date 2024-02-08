@@ -27,7 +27,6 @@ import java.nio.charset.Charset;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -93,7 +92,7 @@ public class DeleteExpungeProviderTest {
 
 		// Verify
 		ourLog.debug(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(response));
-		assertEquals(TEST_JOB_ID, BatchHelperR4.jobIdFromBatch2Parameters(response));
+		assertThat(BatchHelperR4.jobIdFromBatch2Parameters(response)).isEqualTo(TEST_JOB_ID);
 
 		verify(myDeleteExpungeJobSubmitter, times(1)).submitJob(
 			eq(2401),

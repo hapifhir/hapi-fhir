@@ -18,8 +18,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.concurrent.atomic.AtomicReference;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -81,8 +80,8 @@ class JobInstanceStatusUpdaterTest {
 
 	private void assertCompleteCallbackCalled() {
 		JobCompletionDetails<TestParameters> receivedDetails = myDetails.get();
-		assertEquals(TEST_INSTANCE_ID, receivedDetails.getInstance().getInstanceId());
-		assertEquals(TEST_NAME, receivedDetails.getParameters().name);
+		assertThat(receivedDetails.getInstance().getInstanceId()).isEqualTo(TEST_INSTANCE_ID);
+		assertThat(receivedDetails.getParameters().name).isEqualTo(TEST_NAME);
 	}
 
 	private void setupCompleteCallback() {
@@ -100,7 +99,7 @@ class JobInstanceStatusUpdaterTest {
 		// execute
 		mySvc.updateInstanceStatus(myInstance, StatusEnum.ERRORED);
 
-		assertNull(myDetails.get());
+		assertThat(myDetails.get()).isNull();
 	}
 
 	@Test
@@ -125,12 +124,12 @@ class JobInstanceStatusUpdaterTest {
 
 	private void assertErrorCallbackCalled(StatusEnum expectedStatus) {
 		JobCompletionDetails<TestParameters> receivedDetails = myDetails.get();
-		assertEquals(TEST_NAME, receivedDetails.getParameters().name);
+		assertThat(receivedDetails.getParameters().name).isEqualTo(TEST_NAME);
 		IJobInstance instance = receivedDetails.getInstance();
-		assertEquals(TEST_INSTANCE_ID, instance.getInstanceId());
-		assertEquals(TEST_ERROR_MESSAGE, instance.getErrorMessage());
-		assertEquals(TEST_ERROR_COUNT, instance.getErrorCount());
-		assertEquals(expectedStatus, instance.getStatus());
+		assertThat(instance.getInstanceId()).isEqualTo(TEST_INSTANCE_ID);
+		assertThat(instance.getErrorMessage()).isEqualTo(TEST_ERROR_MESSAGE);
+		assertThat(instance.getErrorCount()).isEqualTo(TEST_ERROR_COUNT);
+		assertThat(instance.getStatus()).isEqualTo(expectedStatus);
 	}
 
 	private void setupErrorCallback() {
