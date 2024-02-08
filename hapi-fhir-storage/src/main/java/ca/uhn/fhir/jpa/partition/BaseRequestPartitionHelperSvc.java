@@ -94,46 +94,53 @@ public abstract class BaseRequestPartitionHelperSvc implements IRequestPartition
 	@Nonnull
 	@Override
 	public RequestPartitionId determineReadPartitionForRequest(
-			@Nonnull RequestDetails theRequestDetails, @Nonnull ReadPartitionIdRequestDetails theDetails) {
-
-		if (!myPartitionSettings.isPartitioningEnabled()) {
-			return RequestPartitionId.allPartitions();
-		}
-
+			@Nullable RequestDetails theRequest, ReadPartitionIdRequestDetails theDetails) {
 		RequestPartitionId requestPartitionId;
 
-		String resourceType = theDetails.getResourceType();
-		// Handle system requests
+		String resourceType = theDetails != null ? theDetails.getResourceType() : null;
+		boolean nonPartitionableResource = !isResourcePartitionable(resourceType);
+		if (myPartitionSettings.isPartitioningEnabled()) {
 
-		if (theRequestDetails instanceof SystemRequestDetails
-				&& isResourcePartitionable(theDetails.getResourceType())) {
-			SystemRequestDetails systemRequestDetails = (SystemRequestDetails) theRequestDetails;
-			if (systemRequestHasExplicitPartition(systemRequestDetails)) {
-				requestPartitionId = getSystemRequestPartitionId(systemRequestDetails, true);
-			} else {
-				requestPartitionId = RequestPartitionId.fromPartitionId(myPartitionSettings.getDefaultPartitionId());
+			RequestDetails requestDetails = theRequest;
+			// TODO GGG eventually, theRequest will not be allowed to be null here, and we will pass through
+			// SystemRequestDetails instead.
+			if (requestDetails == null) {
+				requestDetails = new SystemRequestDetails();
 			}
-		} else if (hasHooks(Pointcut.STORAGE_PARTITION_IDENTIFY_ANY, myInterceptorBroadcaster, theRequestDetails)) {
-			// Interceptor call: STORAGE_PARTITION_IDENTIFY_ANY
-			HookParams params = new HookParams()
-					.add(RequestDetails.class, theRequestDetails)
-					.addIfMatchesType(ServletRequestDetails.class, theRequestDetails);
-			requestPartitionId = (RequestPartitionId) doCallHooksAndReturnObject(
-					myInterceptorBroadcaster, theRequestDetails, Pointcut.STORAGE_PARTITION_IDENTIFY_ANY, params);
-		} else if (hasHooks(Pointcut.STORAGE_PARTITION_IDENTIFY_READ, myInterceptorBroadcaster, theRequestDetails)) {
-			// Interceptor call: STORAGE_PARTITION_IDENTIFY_READ
-			HookParams params = new HookParams()
-					.add(RequestDetails.class, theRequestDetails)
-					.addIfMatchesType(ServletRequestDetails.class, theRequestDetails)
-					.add(ReadPartitionIdRequestDetails.class, theDetails);
-			requestPartitionId = (RequestPartitionId) doCallHooksAndReturnObject(
-					myInterceptorBroadcaster, theRequestDetails, Pointcut.STORAGE_PARTITION_IDENTIFY_READ, params);
-		} else {
-			requestPartitionId = null;
+
+			// Handle system requests
+			if (requestDetails instanceof SystemRequestDetails
+					&& systemRequestHasExplicitPartition((SystemRequestDetails) requestDetails)
+					&& !nonPartitionableResource) {
+				requestPartitionId =
+						getSystemRequestPartitionId((SystemRequestDetails) requestDetails, nonPartitionableResource);
+			} else if ((requestDetails instanceof SystemRequestDetails) && nonPartitionableResource) {
+				return RequestPartitionId.fromPartitionId(myPartitionSettings.getDefaultPartitionId());
+			} else if (hasHooks(Pointcut.STORAGE_PARTITION_IDENTIFY_ANY, myInterceptorBroadcaster, requestDetails)) {
+				// Interceptor call: STORAGE_PARTITION_IDENTIFY_ANY
+				HookParams params = new HookParams()
+						.add(RequestDetails.class, requestDetails)
+						.addIfMatchesType(ServletRequestDetails.class, requestDetails);
+				requestPartitionId = (RequestPartitionId) doCallHooksAndReturnObject(
+						myInterceptorBroadcaster, requestDetails, Pointcut.STORAGE_PARTITION_IDENTIFY_ANY, params);
+			} else if (hasHooks(Pointcut.STORAGE_PARTITION_IDENTIFY_READ, myInterceptorBroadcaster, requestDetails)) {
+				// Interceptor call: STORAGE_PARTITION_IDENTIFY_READ
+				HookParams params = new HookParams()
+						.add(RequestDetails.class, requestDetails)
+						.addIfMatchesType(ServletRequestDetails.class, requestDetails)
+						.add(ReadPartitionIdRequestDetails.class, theDetails);
+				requestPartitionId = (RequestPartitionId) doCallHooksAndReturnObject(
+						myInterceptorBroadcaster, requestDetails, Pointcut.STORAGE_PARTITION_IDENTIFY_READ, params);
+			} else {
+				requestPartitionId = null;
+			}
+
+			validateRequestPartitionNotNull(requestPartitionId, Pointcut.STORAGE_PARTITION_IDENTIFY_READ);
+
+			return validateNormalizeAndNotifyHooksForRead(requestPartitionId, requestDetails, resourceType);
 		}
 
-		validateRequestPartitionNotNull(requestPartitionId, Pointcut.STORAGE_PARTITION_IDENTIFY_READ);
-		return validateNormalizeAndNotifyHooksForRead(requestPartitionId, theRequestDetails, resourceType);
+		return RequestPartitionId.allPartitions();
 	}
 
 	@Override
