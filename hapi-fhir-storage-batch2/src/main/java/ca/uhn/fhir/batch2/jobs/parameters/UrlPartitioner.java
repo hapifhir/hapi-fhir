@@ -40,8 +40,7 @@ public class UrlPartitioner {
 				myRequestPartitionHelperSvc.determineReadPartitionForRequestForSearchType(
 						theRequestDetails,
 						resourceSearch.getResourceName(),
-						resourceSearch.getSearchParameterMap(),
-						null);
+						resourceSearch.getSearchParameterMap());
 		PartitionedUrl retval = new PartitionedUrl();
 		retval.setUrl(theUrl);
 		retval.setRequestPartitionId(requestPartitionId);

@@ -59,6 +59,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -1245,7 +1246,7 @@ public class BulkDataExportProviderTest {
 
 	private class MyRequestPartitionHelperSvc extends RequestPartitionHelperSvc {
 		@Override
-		public @NotNull RequestPartitionId determineReadPartitionForRequest(RequestDetails theRequest, ReadPartitionIdRequestDetails theDetails) {
+		public @NotNull RequestPartitionId determineReadPartitionForRequest(@Nonnull RequestDetails theRequest, @Nonnull ReadPartitionIdRequestDetails theDetails) {
 			assert theRequest != null;
 			if (myPartitionName.equals(theRequest.getTenantId())) {
 				return myRequestPartitionId;

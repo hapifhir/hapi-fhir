@@ -105,8 +105,7 @@ public class JpaResourceDaoPatient<T extends IBaseResource> extends BaseHapiFhir
 			paramMap.setLoadSynchronous(true);
 		}
 
-		RequestPartitionId requestPartitionId = myPartitionHelperSvc.determineReadPartitionForRequestForSearchType(
-				theRequest, getResourceName(), paramMap, null);
+		RequestPartitionId requestPartitionId = myPartitionHelperSvc.determineReadPartitionForRequestForSearchType(theRequest, getResourceName(), paramMap);
 
 		adjustCount(theRequest, paramMap);
 

@@ -71,8 +71,7 @@ public class MdmSearchExpandingInterceptor {
 			final RequestDetails requestDetailsToUse =
 					theRequestDetails == null ? new SystemRequestDetails() : theRequestDetails;
 			final RequestPartitionId requestPartitionId =
-					myRequestPartitionHelperSvc.determineReadPartitionForRequestForSearchType(
-							requestDetailsToUse, requestDetailsToUse.getResourceName(), theSearchParameterMap, null);
+					myRequestPartitionHelperSvc.determineReadPartitionForRequestForSearchType(requestDetailsToUse, requestDetailsToUse.getResourceName(), theSearchParameterMap);
 			for (Map.Entry<String, List<List<IQueryParameterType>>> set : theSearchParameterMap.entrySet()) {
 				String paramName = set.getKey();
 				List<List<IQueryParameterType>> andList = set.getValue();

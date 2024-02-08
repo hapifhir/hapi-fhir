@@ -64,8 +64,7 @@ public class JpaResourceDaoObservation<T extends IBaseResource> extends BaseHapi
 		updateSearchParamsForLastn(theSearchParameterMap, theRequestDetails);
 
 		RequestPartitionId requestPartitionId =
-				myRequestPartitionHelperService.determineReadPartitionForRequestForSearchType(
-						theRequestDetails, getResourceName(), theSearchParameterMap, null);
+				myRequestPartitionHelperService.determineReadPartitionForRequestForSearchType(theRequestDetails, getResourceName(), theSearchParameterMap);
 		return mySearchCoordinatorSvc.registerSearch(
 				this,
 				theSearchParameterMap,
@@ -127,8 +126,7 @@ public class JpaResourceDaoObservation<T extends IBaseResource> extends BaseHapi
 		if (theSearchParameterMap.containsKey(getSubjectParamName())) {
 
 			RequestPartitionId requestPartitionId =
-					myRequestPartitionHelperService.determineReadPartitionForRequestForSearchType(
-							theRequestDetails, getResourceName(), theSearchParameterMap, null);
+					myRequestPartitionHelperService.determineReadPartitionForRequestForSearchType(theRequestDetails, getResourceName(), theSearchParameterMap);
 
 			List<List<IQueryParameterType>> patientParams = new ArrayList<>();
 			if (theSearchParameterMap.get(getPatientParamName()) != null) {

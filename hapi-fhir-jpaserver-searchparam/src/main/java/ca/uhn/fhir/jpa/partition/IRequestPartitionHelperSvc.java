@@ -34,11 +34,26 @@ public interface IRequestPartitionHelperSvc {
 
 	@Nonnull
 	RequestPartitionId determineReadPartitionForRequest(
-			@Nullable RequestDetails theRequest, ReadPartitionIdRequestDetails theDetails);
+			@Nonnull RequestDetails theRequest, @Nonnull ReadPartitionIdRequestDetails theDetails);
+
+	@Nonnull
+	default RequestPartitionId determineReadPartitionForRequestForOperation(
+			@Nullable RequestDetails theRequest, @Nonnull String theOperationName) {
+		ReadPartitionIdRequestDetails details = ReadPartitionIdRequestDetails.forServerOperation(theOperationName);
+		return determineReadPartitionForRequest(theRequest, details);
+	}
 
 	@Nonnull
 	default RequestPartitionId determineReadPartitionForRequestForRead(
-			RequestDetails theRequest, String theResourceType, @Nonnull IIdType theId) {
+		@Nonnull RequestDetails theRequest, @Nonnull IIdType theId) {
+		ReadPartitionIdRequestDetails details =
+			ReadPartitionIdRequestDetails.forRead(theId.getResourceType(), theId, theId.hasVersionIdPart());
+		return determineReadPartitionForRequest(theRequest, details);
+	}
+
+	@Nonnull
+	default RequestPartitionId determineReadPartitionForRequestForRead(
+		@Nonnull RequestDetails theRequest, @Nonnull String theResourceType, @Nonnull IIdType theId) {
 		ReadPartitionIdRequestDetails details =
 				ReadPartitionIdRequestDetails.forRead(theResourceType, theId, theId.hasVersionIdPart());
 		return determineReadPartitionForRequest(theRequest, details);
@@ -46,10 +61,28 @@ public interface IRequestPartitionHelperSvc {
 
 	@Nonnull
 	default RequestPartitionId determineReadPartitionForRequestForSearchType(
-			RequestDetails theRequest,
-			String theResourceType,
-			SearchParameterMap theParams,
-			IBaseResource theConditionalOperationTargetOrNull) {
+		@Nonnull RequestDetails theRequest,
+		@Nonnull String theResourceType) {
+		ReadPartitionIdRequestDetails details = ReadPartitionIdRequestDetails.forSearchType(
+			theResourceType, null, null);
+		return determineReadPartitionForRequest(theRequest, details);
+	}
+
+	@Nonnull
+	default RequestPartitionId determineReadPartitionForRequestForSearchType(
+		@Nonnull RequestDetails theRequest,
+		@Nonnull String theResourceType,
+		@Nonnull SearchParameterMap theParams) {
+		ReadPartitionIdRequestDetails details = ReadPartitionIdRequestDetails.forSearchType(theResourceType, theParams, null);
+		return determineReadPartitionForRequest(theRequest, details);
+	}
+
+	@Nonnull
+	default RequestPartitionId determineReadPartitionForRequestForSearchType(
+		@Nonnull RequestDetails theRequest,
+		@Nonnull String theResourceType,
+		@Nonnull SearchParameterMap theParams,
+		@Nullable IBaseResource theConditionalOperationTargetOrNull) {
 		ReadPartitionIdRequestDetails details = ReadPartitionIdRequestDetails.forSearchType(
 				theResourceType, theParams, theConditionalOperationTargetOrNull);
 		return determineReadPartitionForRequest(theRequest, details);
@@ -59,18 +92,15 @@ public interface IRequestPartitionHelperSvc {
 
 	@Nonnull
 	default RequestPartitionId determineReadPartitionForRequestForHistory(
-			RequestDetails theRequest, String theResourceType, IIdType theIdType) {
+		@Nonnull RequestDetails theRequest, String theResourceType, IIdType theIdType) {
 		ReadPartitionIdRequestDetails details = ReadPartitionIdRequestDetails.forHistory(theResourceType, theIdType);
 		return determineReadPartitionForRequest(theRequest, details);
 	}
 
-	@Nonnull
-	default void validateHasPartitionPermissions(
-			RequestDetails theRequest, String theResourceType, RequestPartitionId theRequestPartitionId) {}
+	default void validateHasPartitionPermissions(@Nonnull RequestDetails theRequest, String theResourceType, RequestPartitionId theRequestPartitionId) {}
 
 	@Nonnull
-	RequestPartitionId determineCreatePartitionForRequest(
-			@Nullable RequestDetails theRequest, @Nonnull IBaseResource theResource, @Nonnull String theResourceType);
+	RequestPartitionId determineCreatePartitionForRequest(@Nonnull RequestDetails theRequest, @Nonnull IBaseResource theResource, @Nonnull String theResourceType);
 
 	@Nonnull
 	Set<Integer> toReadPartitions(@Nonnull RequestPartitionId theRequestPartitionId);

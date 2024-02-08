@@ -33,7 +33,6 @@ import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
 import ca.uhn.fhir.jpa.util.ResourceCompartmentUtil;
 import ca.uhn.fhir.model.api.IQueryParameterType;
-import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
@@ -43,9 +42,10 @@ import org.hl7.fhir.r4.model.IdType;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -117,14 +117,14 @@ public class PatientIdPartitionInterceptor {
 	@Hook(Pointcut.STORAGE_PARTITION_IDENTIFY_READ)
 	public RequestPartitionId identifyForRead(
 			ReadPartitionIdRequestDetails theReadDetails, RequestDetails theRequestDetails) {
-		if (isBlank(theReadDetails.getResourceType())) {
-			return provideNonCompartmentMemberTypeResponse(null);
-		}
-		RuntimeResourceDefinition resourceDef = myFhirContext.getResourceDefinition(theReadDetails.getResourceType());
-		List<RuntimeSearchParam> compartmentSps =
+		List<RuntimeSearchParam> compartmentSps = null;
+		if (!isBlank(theReadDetails.getResourceType())) {
+			RuntimeResourceDefinition resourceDef = myFhirContext.getResourceDefinition(theReadDetails.getResourceType());
+			compartmentSps =
 				ResourceCompartmentUtil.getPatientCompartmentSearchParams(resourceDef);
-		if (compartmentSps.isEmpty()) {
-			return provideNonCompartmentMemberTypeResponse(null);
+			if (compartmentSps.isEmpty()) {
+				return provideNonCompartmentMemberTypeResponse(null);
+			}
 		}
 
 		//noinspection EnumSwitchStatementWhichMissesCases
@@ -139,16 +139,21 @@ public class PatientIdPartitionInterceptor {
 				break;
 			case SEARCH_TYPE:
 				SearchParameterMap params = theReadDetails.getSearchParams();
+				if (params == null || params.isEmpty()) {
+					break;
+				}
 
 				if ("Patient".equals(theReadDetails.getResourceType())) {
 					List<String> idParts = getResourceIdList(params, "_id", "Patient", false);
-
 					if (idParts.size() == 1) {
 						return provideCompartmentMemberInstanceResponse(theRequestDetails, idParts.get(0));
 					} else {
 						return RequestPartitionId.allPartitions();
 					}
 				} else {
+					if (compartmentSps == null) {
+						break;
+					}
 					for (RuntimeSearchParam nextCompartmentSp : compartmentSps) {
 						List<String> idParts = getResourceIdList(params, nextCompartmentSp.getName(), "Patient", true);
 						if (!idParts.isEmpty()) {
@@ -158,9 +163,14 @@ public class PatientIdPartitionInterceptor {
 				}
 
 				break;
-
+			case EXTENDED_OPERATION_SERVER:
+				return provideNonPatientSpecificQueryResponse(theReadDetails);
 			default:
 				// nothing
+		}
+
+		if (isBlank(theReadDetails.getResourceType())) {
+			return provideNonCompartmentMemberTypeResponse(null);
 		}
 
 		// If we couldn't identify a patient ID by the URL, let's try using the
@@ -172,42 +182,32 @@ public class PatientIdPartitionInterceptor {
 		return provideNonPatientSpecificQueryResponse(theReadDetails);
 	}
 
-	@Nonnull
-	private List<RuntimeSearchParam> getCompartmentSearchParams(RuntimeResourceDefinition resourceDef) {
-		return resourceDef.getSearchParams().stream()
-				.filter(param -> param.getParamType() == RestSearchParameterTypeEnum.REFERENCE)
-				.filter(param -> param.getProvidesMembershipInCompartments() != null
-						&& param.getProvidesMembershipInCompartments().contains("Patient"))
-				.collect(Collectors.toList());
-	}
-
 	private List<String> getResourceIdList(
 			SearchParameterMap theParams, String theParamName, String theResourceType, boolean theExpectOnlyOneBool) {
-		List<String> idParts = new ArrayList<>();
 		List<List<IQueryParameterType>> idParamAndList = theParams.get(theParamName);
-		if (idParamAndList != null) {
-			for (List<IQueryParameterType> idParamOrList : idParamAndList) {
-				for (IQueryParameterType idParam : idParamOrList) {
-					if (isNotBlank(idParam.getQueryParameterQualifier())) {
-						throw new MethodNotAllowedException(
-								Msg.code(1322) + "The parameter " + theParamName + idParam.getQueryParameterQualifier()
-										+ " is not supported in patient compartment mode");
-					}
-					if (idParam instanceof ReferenceParam) {
-						String chain = ((ReferenceParam) idParam).getChain();
-						if (chain != null) {
-							throw new MethodNotAllowedException(Msg.code(1323) + "The parameter " + theParamName + "."
-									+ chain + " is not supported in patient compartment mode");
-						}
-					}
+		if (idParamAndList == null) {
+			return Collections.emptyList();
+		}
 
-					IdType id = new IdType(idParam.getValueAsQueryToken(myFhirContext));
-					if (!id.hasResourceType() || id.getResourceType().equals(theResourceType)) {
-						idParts.add(id.getIdPart());
-					}
+		List<String> idParts = new ArrayList<>();
+		idParamAndList.stream().flatMap(Collection::stream).forEach(idParam -> {
+			if (isNotBlank(idParam.getQueryParameterQualifier())) {
+				throw new MethodNotAllowedException(
+					Msg.code(1322) + "The parameter " + theParamName + idParam.getQueryParameterQualifier()
+						+ " is not supported in patient compartment mode");
+			}
+			if (idParam instanceof ReferenceParam) {
+				String chain = ((ReferenceParam) idParam).getChain();
+				if (chain != null) {
+					throw new MethodNotAllowedException(Msg.code(1323) + "The parameter " + theParamName + "."
+						+ chain + " is not supported in patient compartment mode");
 				}
 			}
-		}
+			IdType id = new IdType(idParam.getValueAsQueryToken(myFhirContext));
+			if (!id.hasResourceType() || id.getResourceType().equals(theResourceType)) {
+				idParts.add(id.getIdPart());
+			}
+		});
 
 		if (theExpectOnlyOneBool && idParts.size() > 1) {
 			throw new MethodNotAllowedException(Msg.code(1324) + "Multiple values for parameter " + theParamName

@@ -23,7 +23,6 @@ import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.batch2.jobs.parameters.UrlPartitioner;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.ReindexParameters;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
@@ -129,10 +128,8 @@ public class ReindexProvider {
 					.forEach(params::addPartitionedUrl);
 		}
 
-		ReadPartitionIdRequestDetails details =
-				ReadPartitionIdRequestDetails.forOperation(null, null, ProviderConstants.OPERATION_REINDEX);
-		RequestPartitionId requestPartition =
-				myRequestPartitionHelperSvc.determineReadPartitionForRequest(theRequestDetails, details);
+		RequestPartitionId requestPartition = myRequestPartitionHelperSvc.determineReadPartitionForRequestForOperation(
+				theRequestDetails, ProviderConstants.OPERATION_REINDEX);
 		params.setRequestPartitionId(requestPartition);
 
 		JobInstanceStartRequest request = new JobInstanceStartRequest();
