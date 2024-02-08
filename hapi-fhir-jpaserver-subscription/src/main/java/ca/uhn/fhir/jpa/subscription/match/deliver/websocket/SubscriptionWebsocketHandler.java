@@ -41,6 +41,7 @@ import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 
 import java.io.IOException;
+import java.util.Optional;
 
 public class SubscriptionWebsocketHandler extends TextWebSocketHandler implements WebSocketHandler {
 	private static Logger ourLog = LoggerFactory.getLogger(SubscriptionWebsocketHandler.class);
@@ -119,21 +120,23 @@ public class SubscriptionWebsocketHandler extends TextWebSocketHandler implement
 			myActiveSubscription = theActiveSubscription;
 
 			SubscriptionChannelWithHandlers subscriptionChannelWithHandlers =
-					mySubscriptionChannelRegistry.getDeliveryReceiverChannel(theActiveSubscription.getChannelName());
+				mySubscriptionChannelRegistry.getDeliveryReceiverChannel(theActiveSubscription.getChannelName());
 			subscriptionChannelWithHandlers.addHandler(this);
 		}
 
 		@Override
 		public void closing() {
 			SubscriptionChannelWithHandlers subscriptionChannelWithHandlers =
-					mySubscriptionChannelRegistry.getDeliveryReceiverChannel(myActiveSubscription.getChannelName());
+				mySubscriptionChannelRegistry.getDeliveryReceiverChannel(myActiveSubscription.getChannelName());
 			subscriptionChannelWithHandlers.removeHandler(this);
 		}
 
-		private void deliver() {
+		private void deliver(String payload) {
 			try {
-				String payload = "ping " + myActiveSubscription.getId();
+				// Log it
 				ourLog.info("Sending WebSocket message: {}", payload);
+
+				// Send message
 				mySession.sendMessage(new TextMessage(payload));
 			} catch (IOException e) {
 				handleFailure(e);
@@ -145,14 +148,61 @@ public class SubscriptionWebsocketHandler extends TextWebSocketHandler implement
 			if (!(theMessage.getPayload() instanceof ResourceDeliveryMessage)) {
 				return;
 			}
+
 			try {
 				ResourceDeliveryMessage msg = (ResourceDeliveryMessage) theMessage.getPayload();
-				if (myActiveSubscription.getSubscription().equals(msg.getSubscription())) {
-					deliver();
-				}
+				handleSubscriptionPayload(msg);
 			} catch (Exception e) {
-				ourLog.error("Failure handling subscription payload", e);
-				throw new MessagingException(theMessage, Msg.code(6) + "Failure handling subscription payload", e);
+				handleException(theMessage, e);
+			}
+		}
+
+		/**
+		 * Handle the subscription payload
+		 *
+		 * @param msg The message
+		 */
+		private void handleSubscriptionPayload(ResourceDeliveryMessage msg) {
+			if (!myActiveSubscription.getSubscription().equals(msg.getSubscription())) {
+				return;
+			}
+
+			String payload = null;
+
+			if (msg.getSubscription().isTopicSubscription()) {
+				payload = getPayloadByContent(msg).orElse("ping " + myActiveSubscription.getId());
+			}
+
+			deliver(payload);
+		}
+
+		/**
+		 * Handle the exception
+		 *
+		 * @param theMessage The message
+		 * @param e          The exception
+		 */
+		private void handleException(Message<?> theMessage, Exception e) {
+			ourLog.error("Failure handling subscription payload", e);
+			throw new MessagingException(theMessage, Msg.code(6) + "Failure handling subscription payload", e);
+		}
+
+		/**
+		 * Get the payload based on the subscription content
+		 *
+		 * @param msg The message
+		 * @return The payload
+		 */
+		private Optional<String> getPayloadByContent(ResourceDeliveryMessage msg) {
+			switch (msg.getSubscription().getContent()) {
+				case IDONLY:
+					return Optional.of(msg.getPayloadId());
+				case FULLRESOURCE:
+					return Optional.of(msg.getPayloadString());
+				case EMPTY:
+				case NULL:
+				default:
+					return Optional.empty();
 			}
 		}
 
