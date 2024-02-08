@@ -156,8 +156,8 @@ public class BulkDataImportProvider {
 			}
 		}
 
-		RequestPartitionId partitionId = myRequestPartitionHelperService.determineReadPartitionForRequestForOperation(
-				theRequestDetails, JpaConstants.OPERATION_IMPORT);
+		RequestPartitionId partitionId = myRequestPartitionHelperService.determineReadPartitionForRequest(
+				theRequestDetails, null);
 		if (!partitionId.isAllPartitions()) {
 			myRequestPartitionHelperService.validateHasPartitionPermissions(theRequestDetails, "Binary", partitionId);
 			jobParameters.setPartitionId(partitionId);

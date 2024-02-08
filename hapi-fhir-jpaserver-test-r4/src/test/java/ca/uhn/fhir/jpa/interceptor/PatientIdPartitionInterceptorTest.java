@@ -2,10 +2,8 @@ package ca.uhn.fhir.jpa.interceptor;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
-import ca.uhn.fhir.jpa.dao.r4.BaseJpaR4SystemTest;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
-import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
@@ -606,18 +604,6 @@ public class PatientIdPartitionInterceptorTest extends BaseResourceProviderR4Tes
 		HttpGet get = new HttpGet(locationUrl);
 		try (CloseableHttpResponse postResponse = myServer.getHttpClient().execute(get)) {
 			ourLog.info("Response: {}", postResponse);
-			assertEquals(202, postResponse.getStatusLine().getStatusCode());
-		}
-	}
-
-	@Test
-	public void testSystemImport_withPatientIdPartitioning_success() throws IOException {
-		HttpPost post = new HttpPost(myServer.getBaseUrl() + "/" + JpaConstants.OPERATION_IMPORT);
-		post.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
-		// post.setEntity(new StringEntity("", ContentType.APPLICATION_JSON));
-
-		try (CloseableHttpResponse postResponse = myServer.getHttpClient().execute(post)){
-			ourLog.info("Response: {}",postResponse);
 			assertEquals(202, postResponse.getStatusLine().getStatusCode());
 		}
 	}

@@ -70,18 +70,10 @@ public class PatientIdPartitionInterceptor {
 	/**
 	 * Constructor
 	 */
-	public PatientIdPartitionInterceptor() {
-		super();
-	}
-
-	/**
-	 * Constructor
-	 */
 	public PatientIdPartitionInterceptor(
 			FhirContext theFhirContext,
 			ISearchParamExtractor theSearchParamExtractor,
 			PartitionSettings thePartitionSettings) {
-		this();
 		myFhirContext = theFhirContext;
 		mySearchParamExtractor = theSearchParamExtractor;
 		myPartitionSettings = thePartitionSettings;
@@ -116,7 +108,7 @@ public class PatientIdPartitionInterceptor {
 
 	@Hook(Pointcut.STORAGE_PARTITION_IDENTIFY_READ)
 	public RequestPartitionId identifyForRead(
-			ReadPartitionIdRequestDetails theReadDetails, RequestDetails theRequestDetails) {
+			@Nonnull ReadPartitionIdRequestDetails theReadDetails, RequestDetails theRequestDetails) {
 		List<RuntimeSearchParam> compartmentSps = null;
 		if (!isBlank(theReadDetails.getResourceType())) {
 			RuntimeResourceDefinition resourceDef =
