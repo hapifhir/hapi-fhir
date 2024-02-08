@@ -230,7 +230,7 @@ public class ResourceProviderDstu3ValueSetVersionedTest extends BaseResourceProv
 		ConceptSetComponent include = myLocalVs.getCompose().addInclude();
 		include.setSystem(theCodeSystemUrl);
 		include.setVersion(theValueSetVersion);
-		include.addFilter().setProperty("concept").setOp(FilterOperator.ISA).setValue("ParentA");
+		include.addFilter().setProperty("concept").setOp(FilterOperator.DESCENDENTOF).setValue("ParentA");
 		return myLocalVs;
 
 	}

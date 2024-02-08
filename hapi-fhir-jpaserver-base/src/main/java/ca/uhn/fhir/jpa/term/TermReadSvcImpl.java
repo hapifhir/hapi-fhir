@@ -649,7 +649,13 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 				.getMessage(TermReadSvcImpl.class, "valueSetExpandedUsingPreExpansion", expansionTimestamp);
 		theAccumulator.addMessage(msg);
 		expandConcepts(
-				theExpansionOptions, theAccumulator, termValueSet, theFilter, theAdd, theAddedCodes, isOracleDialect());
+				theExpansionOptions,
+				theAccumulator,
+				termValueSet,
+				theFilter,
+				theAdd,
+				theAddedCodes,
+				myHibernatePropertiesProvider.isOracleDialect());
 	}
 
 	@Nonnull
@@ -662,10 +668,6 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 					+ timeElapsed + " ago)";
 		}
 		return expansionTimestamp;
-	}
-
-	private boolean isOracleDialect() {
-		return myHibernatePropertiesProvider.getDialect() instanceof org.hibernate.dialect.OracleDialect;
 	}
 
 	private void expandConcepts(
@@ -1596,6 +1598,16 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 		TermConcept code = findCodeForFilterCriteria(theSystem, theFilter);
 
 		if (theFilter.getOp() == ValueSet.FilterOperator.ISA) {
+			ourLog.debug(
+					" * Filtering on specific code and codes with a parent of {}/{}/{}",
+					code.getId(),
+					code.getCode(),
+					code.getDisplay());
+
+			b.must(f.bool()
+					.should(f.match().field("myParentPids").matching("" + code.getId()))
+					.should(f.match().field("myId").matching(code.getId())));
+		} else if (theFilter.getOp() == ValueSet.FilterOperator.DESCENDENTOF) {
 			ourLog.debug(
 					" * Filtering on codes with a parent of {}/{}/{}", code.getId(), code.getCode(), code.getDisplay());
 
