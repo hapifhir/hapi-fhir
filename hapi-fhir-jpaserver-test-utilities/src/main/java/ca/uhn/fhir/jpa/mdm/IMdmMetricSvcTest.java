@@ -147,7 +147,8 @@ public interface IMdmMetricSvcTest {
 		// verify
 		assertThat(results).isNotNull();
 		assertThat(results.getResourceType()).isEqualTo("Patient");
-		assertThat(results.getSourceResourcesCount() + results.getGoldenResourcesCount()).isEqualTo(theParams.getExpectedResourceCount());
+		assertThat(results.getSourceResourcesCount() + results.getGoldenResourcesCount())
+				.isEqualTo(theParams.getExpectedResourceCount());
 		assertThat(results.getExcludedResources()).isEqualTo(theParams.getExpectedBlockedResourceCount());
 		assertThat(results.getGoldenResourcesCount()).isEqualTo(theParams.getExpectedGoldenResourceCount());
 	}
@@ -178,7 +179,9 @@ public interface IMdmMetricSvcTest {
 		Map<String, Long> expected = expectedMetrics.getScoreCounts();
 		assertThat(actual.size()).isEqualTo(expected.size());
 		for (String score : expected.keySet()) {
-			assertThat(actual.containsKey(score)).as(String.format("Score of %s is not in results", score)).isTrue();
+			assertThat(actual.containsKey(score))
+					.as(String.format("Score of %s is not in results", score))
+					.isTrue();
 			assertThat(actual.get(score)).as(score).isEqualTo(expected.get(score));
 		}
 	}

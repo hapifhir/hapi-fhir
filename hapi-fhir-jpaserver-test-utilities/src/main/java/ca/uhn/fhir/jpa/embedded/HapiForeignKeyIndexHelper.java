@@ -137,9 +137,11 @@ public class HapiForeignKeyIndexHelper {
 					Collection<String> whiteListColumns = ourTableToColumnsWhitelist.get(tableName);
 					boolean isWhiteListed = whiteListColumns.contains(columns);
 
-					assertThat(isWhiteListed).as(String.format(
-						"Unindexed foreign key detected! Table.column: %s.%s. Constraint: %s",
-						tableName, columns, constraint)).isTrue();
+					assertThat(isWhiteListed)
+							.as(String.format(
+									"Unindexed foreign key detected! Table.column: %s.%s. Constraint: %s",
+									tableName, columns, constraint))
+							.isTrue();
 				}
 			}
 		}
