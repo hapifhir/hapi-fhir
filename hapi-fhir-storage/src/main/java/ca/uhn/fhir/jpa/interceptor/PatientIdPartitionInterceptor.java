@@ -48,6 +48,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /**
@@ -110,7 +111,7 @@ public class PatientIdPartitionInterceptor {
 	public RequestPartitionId identifyForRead(
 			@Nonnull ReadPartitionIdRequestDetails theReadDetails, RequestDetails theRequestDetails) {
 		List<RuntimeSearchParam> compartmentSps = null;
-		if (!isBlank(theReadDetails.getResourceType())) {
+		if (!isEmpty(theReadDetails.getResourceType())) {
 			RuntimeResourceDefinition resourceDef =
 					myFhirContext.getResourceDefinition(theReadDetails.getResourceType());
 			compartmentSps = ResourceCompartmentUtil.getPatientCompartmentSearchParams(resourceDef);
