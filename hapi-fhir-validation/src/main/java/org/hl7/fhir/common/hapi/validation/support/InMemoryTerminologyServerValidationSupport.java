@@ -747,13 +747,6 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 
 	@Nullable
 	private org.hl7.fhir.r5.model.ValueSet expandValueSetR5(
-			ValidationSupportContext theValidationSupportContext, org.hl7.fhir.r5.model.ValueSet theInput)
-			throws ExpansionCouldNotBeCompletedInternallyException {
-		return expandValueSetR5(theValidationSupportContext, theInput, null, null);
-	}
-
-	@Nullable
-	private org.hl7.fhir.r5.model.ValueSet expandValueSetR5(
 			ValidationSupportContext theValidationSupportContext,
 			org.hl7.fhir.r5.model.ValueSet theInput,
 			@Nullable String theWantSystemUrlAndVersion,
@@ -909,20 +902,25 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 
 			includeOrExcludeSystemResource = codeSystemLoader.apply(loadedCodeSystemUrl);
 
-			Set<String> wantCodes;
-			if (theInclude.getConcept().isEmpty()) {
-				wantCodes = null;
+			boolean isIncludeWithDeclaredConcepts = !theInclude.getConcept().isEmpty();
+
+			final Set<String> wantCodes;
+			if (isIncludeWithDeclaredConcepts) {
+				wantCodes = theInclude.getConcept().stream()
+						.map(org.hl7.fhir.r5.model.ValueSet.ConceptReferenceComponent::getCode)
+						.collect(Collectors.toSet());
 			} else {
-				wantCodes =
-						theInclude.getConcept().stream().map(t -> t.getCode()).collect(Collectors.toSet());
+				wantCodes = null;
 			}
 
 			boolean ableToHandleCode = false;
 			String failureMessage = null;
 			FailureType failureType = FailureType.OTHER;
 
-			if (includeOrExcludeSystemResource == null
-					|| includeOrExcludeSystemResource.getContent() == Enumerations.CodeSystemContentMode.NOTPRESENT) {
+			boolean isIncludeCodeSystemIgnored = includeOrExcludeSystemResource != null
+					&& includeOrExcludeSystemResource.getContent() == Enumerations.CodeSystemContentMode.NOTPRESENT;
+
+			if (includeOrExcludeSystemResource == null || isIncludeCodeSystemIgnored) {
 
 				if (theWantCode != null) {
 					if (theValidationSupportContext
@@ -971,7 +969,7 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 							// If the ValueSet.compose.include has no individual concepts in it, and
 							// we can't find the actual referenced CodeSystem, we have no choice
 							// but to fail
-							if (!theInclude.getConcept().isEmpty()) {
+							if (isIncludeWithDeclaredConcepts) {
 								ableToHandleCode = true;
 							} else {
 								failureMessage = getFailureMessageForMissingOrUnusableCodeSystem(
@@ -998,15 +996,22 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 						}
 					}
 				} else {
-					if (isNotBlank(theInclude.getSystem())
-							&& !theInclude.getConcept().isEmpty()
-							&& theInclude.getFilter().isEmpty()
-							&& theInclude.getValueSet().isEmpty()) {
-						theInclude.getConcept().stream()
-								.map(t -> new FhirVersionIndependentConcept(
-										theInclude.getSystem(), t.getCode(), t.getDisplay(), theInclude.getVersion()))
-								.forEach(t -> nextCodeList.add(t));
-						ableToHandleCode = true;
+					boolean isIncludeFromSystem = isNotBlank(theInclude.getSystem())
+							&& theInclude.getValueSet().isEmpty();
+					boolean isIncludeWithFilter = !theInclude.getFilter().isEmpty();
+					if (isIncludeFromSystem && !isIncludeWithFilter) {
+						if (isIncludeWithDeclaredConcepts) {
+							theInclude.getConcept().stream()
+									.map(t -> new FhirVersionIndependentConcept(
+											theInclude.getSystem(),
+											t.getCode(),
+											t.getDisplay(),
+											theInclude.getVersion()))
+									.forEach(nextCodeList::add);
+							ableToHandleCode = true;
+						} else if (isIncludeCodeSystemIgnored) {
+							ableToHandleCode = true;
+						}
 					}
 
 					if (!ableToHandleCode) {

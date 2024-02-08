@@ -70,6 +70,7 @@ import com.healthmarketscience.sqlbuilder.UnaryCondition;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbColumn;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
+import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.slf4j.Logger;
@@ -204,6 +205,7 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder im
 							targetQualifiedUrls.add(dt.getValue());
 						}
 					} else {
+						validateResourceTypeInReferenceParam(ref.getResourceType());
 						targetIds.add(dt);
 					}
 
@@ -253,6 +255,18 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder im
 		} else {
 			Condition retVal = createPredicateReference(inverse, pathsToMatch, targetPidList, targetQualifiedUrls);
 			return combineWithRequestPartitionIdPredicate(getRequestPartitionId(), retVal);
+		}
+	}
+
+	private void validateResourceTypeInReferenceParam(final String theResourceType) {
+		if (StringUtils.isEmpty(theResourceType)) {
+			return;
+		}
+
+		try {
+			getFhirContext().getResourceDefinition(theResourceType);
+		} catch (DataFormatException e) {
+			throw newInvalidResourceTypeException(theResourceType);
 		}
 	}
 
@@ -362,11 +376,7 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder im
 
 			String typeValue = theReferenceParam.getValue();
 
-			try {
-				getFhirContext().getResourceDefinition(typeValue).getImplementingClass();
-			} catch (DataFormatException e) {
-				throw newInvalidResourceTypeException(typeValue);
-			}
+			validateResourceTypeInReferenceParam(typeValue);
 			if (!resourceTypes.contains(typeValue)) {
 				throw newInvalidTargetTypeForChainException(theResourceName, theParamName, typeValue);
 			}
@@ -705,7 +715,7 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder im
 				.getLocalizer()
 				.getMessage(
 						ResourceLinkPredicateBuilder.class, "invalidTargetTypeForChain", theTypeValue, searchParamName);
-		return new InvalidRequestException(msg);
+		return new InvalidRequestException(Msg.code(2495) + msg);
 	}
 
 	@Nonnull

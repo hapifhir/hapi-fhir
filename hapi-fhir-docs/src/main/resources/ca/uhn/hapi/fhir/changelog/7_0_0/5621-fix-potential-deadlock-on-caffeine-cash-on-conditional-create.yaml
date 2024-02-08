@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 5621
+title: "Fixed a deadlock in resource conditional create."

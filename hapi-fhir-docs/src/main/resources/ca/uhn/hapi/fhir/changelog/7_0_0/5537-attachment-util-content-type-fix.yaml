@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 5537
+title: "Calling the method getOrCreateContentType in AttachmentUtil on an attachment with no content type would throw exception because contentType is a code not a string. 
+This fixes the function to create an empty code as expected"
